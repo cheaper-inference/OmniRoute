@@ -49,7 +49,7 @@ Minden telepítés a specifikáció saját példányát szolgálja ki a `/openap
 
 ---
 
-## Chat completions
+## Csevegés befejezése
 
 ```bash
 POST /v1/chat/completions
@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Egyéni fejlécek
 
-| Header                   | Irány  | Leírás                                                                                                                                                                                                                                      |
-| ------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Kérés  | Állítsa `true` értékre a gyorsítótár megkerüléséhez                                                                                                                                                                                         |
-| `x-omniroute-no-memory`  | Kérés  | Állítsa `true` értékre, ha ki szeretné hagyni a memória + képességek beinjektálását ennél a kérésnél (a no-cache működését tükrözi; elkerüli a hívásonkénti token-/költségtöbbletet)                                                        |
-| `X-OmniRoute-Progress`   | Kérés  | Állítsa `true` értékre az előrehaladási események engedélyezéséhez                                                                                                                                                                          |
-| `X-Session-Id`           | Kérés  | Ragasztott munkamenetkulcs külső munkamenet-affinitáshoz                                                                                                                                                                                    |
-| `x_session_id`           | Kérés  | Az aláhúzásos változat szintén elfogadott (közvetlen HTTP)                                                                                                                                                                                  |
-| `X-OmniRoute-Session-Id` | Kérés  | A hívó által megadott munkamenet-/beszélgetéscímke (a memóriába is bekerül). Ha jelen van, változtatás nélkül kerül a `call_logs.session_tag` mezőbe munkamenetenkénti költség-hozzárendeléshez (#8249) — hiányzásakor soha nem generálódik |
-| `Idempotency-Key`        | Kérés  | Duplikációszűrési kulcs (5 másodperces időablak)                                                                                                                                                                                            |
-| `X-Request-Id`           | Kérés  | Alternatív duplikációszűrési kulcs                                                                                                                                                                                                          |
-| `x-omniroute-connection` | Kérés  | Egy modellt használó kérést egyetlen szolgáltatói kapcsolathoz (fiókhoz) köt annak azonosítója alapján — lásd: [Fiók hozzárendelése kérésenként](#account-pinning-per-request)                                                              |
-| `X-OmniRoute-Cache`      | Válasz | `HIT` vagy `MISS` (nem streamelt)                                                                                                                                                                                                           |
-| `X-OmniRoute-Idempotent` | Válasz | `true`, ha a kérés duplikációszűrése megtörtént                                                                                                                                                                                             |
-| `X-OmniRoute-Progress`   | Válasz | `enabled`, ha az előrehaladáskövetés aktív                                                                                                                                                                                                  |
-| `X-OmniRoute-Session-Id` | Válasz | Az OmniRoute által használt tényleges munkamenet-azonosító                                                                                                                                                                                  |
-| `X-OmniRoute-Request-Id` | Válasz | Kéréskorrelációs azonosító (ha ismert)                                                                                                                                                                                                      |
-| `X-OmniRoute-Version`    | Válasz | Az OmniRoute buildverziója (mindig jelen van)                                                                                                                                                                                               |
-| `X-OmniRoute-Cost-Saved` | Válasz | A gyorsítótár-találatkor elkerült költség USD-ben (csak gyorsítótár-találatok esetén)                                                                                                                                                       |
-| `X-OmniRoute-Decision`   | Válasz | Útválasztási nyomkövetés: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` a kombinált stratégia, illetve `single` nem kombinált kérés esetén) — a befejezési válaszokban mindig jelen van                                     |
+| Fejléc                   | Irány  | Leírás                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Kér    | A gyorsítótár megkerüléséhez állítsa `true` értékre                                                                                                                                                                                                                                                                                                                                                                          |
+| `x-omniroute-no-memory`  | Kér    | Állítsa `true` értékre, hogy kihagyja a memória + készségek befecskendezését ennél a kérésnél (nem tükrözi a gyorsítótárat; elkerüli a hívásonkénti token/cost többletköltséget)                                                                                                                                                                                                                                             |
+| `x-omniroute-no-log`     | Kér    | Állítsa `true` értékre, hogy kihagyja request/response hasznos adatokat a hívásnaplókból ennél a következtetési kérésnél (minden csevegés-családi útvonal: Csevegés befejezése, Válaszok, Üzenetek, Befejezések, Gemini). Az időbélyeg, a modell, az állapot, az időtartam és a tokenszám továbbra is rögzítve van. Kombinálja `x-omniroute-no-memory` és `x-omniroute-no-cache` billentyűket a teljes tartalom letiltásához |
+| `X-OmniRoute-Progress`   | Kér    | Állítsa `true` ra az előrehaladási eseményekhez                                                                                                                                                                                                                                                                                                                                                                              |
+| `X-Session-Id`           | Kér    | Ragadós munkamenetkulcs a külső munkamenet-affinitáshoz                                                                                                                                                                                                                                                                                                                                                                      |
+| `x_session_id`           | Kér    | Az aláhúzás változat is elfogadott (közvetlen HTTP)                                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Session-Id` | Kér    | A hívó által biztosított session/conversation címke (memóriát is táplál). Ha jelen van, szó szerint megmaradt `call_logs.session_tag` -ben — munkamenetenkénti költség-hozzárendeléshez (#8249)                                                                                                                                                                                                                              |
+| `Idempotency-Key`        | Kér    | Dedup kulcs (5 másodperces ablak)                                                                                                                                                                                                                                                                                                                                                                                            |
+| `X-Request-Id`           | Kér    | Alternatív dedup kulcs                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `x-omniroute-connection` | Kér    | Egymodelles kérés rögzítése egy szolgáltatói kapcsolathoz (fiókhoz) — azonosítójával, lásd: [Fiókrögzítés kérésenként](#account-pinning-per-request)                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Cache`      | Válasz | `HIT` vagy `MISS` (nem streaming)                                                                                                                                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Idempotent` | Válasz | `true`, ha deduplikált                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `X-OmniRoute-Progress`   | Válasz | `enabled` ha a haladás követése be van kapcsolva                                                                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Session-Id` | Válasz | OmniRoute által használt hatékony ID munkamenet                                                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Request-Id` | Válasz | Korrelációs azonosító kérése (ha ismert)                                                                                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Version`    | Válasz | OmniRoute build verzió (mindig jelen van)                                                                                                                                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Cost-Saved` | Válasz | USD a gyorsítótár elkerülése HIT -n (csak a gyorsítótár találatai)                                                                                                                                                                                                                                                                                                                                                           |
+| `X-OmniRoute-Decision`   | Válasz | Útválasztási nyomkövetés: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` a kombinált stratégia, vagy `single` nem kombinált kérés esetén) — mindig jelen van a befejezési válaszoknál                                                                                                                                                                                                                         |
 
-> Nginx-megjegyzés: ha aláhúzásjelet tartalmazó fejlécekre támaszkodik (például `x_session_id`), engedélyezze az `underscores_in_headers on;` beállítást.
+> Nginx megjegyzés: ha aláhúzásjelekre hagyatkozik (például `x_session_id`), engedélyezze `underscores_in_headers on;`.
 
-#### Fiók hozzárendelése kérésenként
+#### Fiók rögzítése kérésenként
 
-Ha egy szolgáltató több kapcsolattal (fiókkal vagy kulccsal) rendelkezik, az OmniRoute normál esetben
-a fiókválasztási stratégiája segítségével választ közülük. Egy kérés ehelyett egy adott kapcsolatot is
-rögzíthet az `x-omniroute-connection` fejléccel:
+Ha egy szolgáltatónak több kapcsolata van (fiókja vagy kulcsa), OmniRoute általában egyet választ a fiókválasztási stratégiája révén. Ehelyett egy kérés rögzíthet egy adott kapcsolatot a `x-omniroute-connection` fejléccel:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,26 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Hol található az azonosító?** Nyissa meg a szolgáltató oldalát az irányítópulton
-  (**Dashboard → Providers → <provider>**), majd kattintson a kapcsolat sorában található
-  `xxxxxxxx…` azonosítóchipre — ez a teljes kapcsolat-azonosítót a vágólapra másolja.
-- **Mely kérések veszik figyelembe?** Az egyetlen modellt használó kérések (`provider/model`) a
-  `/v1/chat/completions`, `/v1/messages` és `/v1/responses` végpontokon. A kombinációk figyelmen kívül
-  hagyják a fejlécet: minden kombinációs lépéshez külön rögzítsen egy fiókot a lépés saját
-  kapcsolatán keresztül.
-- **A rögzítés szigorú, nem csupán preferencia.** A rögzített kapcsolat kizárólagosan használatos. A
-  kérésen belüli hiba rögzíti a fiók lehűlési állapotát, de **nem** vált át ugyanazon szolgáltató
-  testvérfiókjára.
-- **A lehűlés és a kvóta feloldja a rögzítést.** Amíg a rögzített kapcsolat lehűl, kvótakimerülés
-  esetén vagy ha egy kvótaszabályzat blokkolja, a későbbi kérések visszatérnek a szolgáltató más
-  kapcsolataihoz, pontosan úgy, mint a nem rögzített forgalom esetében.
-- **Az ismeretlen vagy letiltott azonosítók hibát okoznak.** Ha egy azonosító nem szerepel a
-  szolgáltató aktív készletében (törölték, deaktiválták, vagy egy másik szolgáltatóhoz tartozik),
-  nem marad jogosult fiók, ezért a kérés meghiúsul ahelyett, hogy csendben máshová lenne irányítva.
+- **Hol található az azonosító.** Nyissa meg a szolgáltató oldalát az irányítópulton (** Irányítópult → Szolgáltatók → <provider>** ) és kattintson a `xxxxxxxx…` id chipre egy csatlakozási sorban — ezzel lemásolja a teljes kapcsolatazonosítót.
+- **Amely kérések tiszteletben tartják.** Egymodell kérések (`provider/model`) `/v1/chat/completions`, `/v1/messages` és `/v1/responses` esetén. A kombók figyelmen kívül hagyják a fejlécet: ehelyett kombinált lépésenként rögzítsen egy fiókot a lépés saját kapcsolatán keresztül.
+- **A gombostű szigorú, nem preferencia.** A rögzített csatlakozást kizárólagosan használják. A kérésben lévő hiba rögzíti a fiók lehűlését, de megtörténik** nem** váltson át ugyanazon szolgáltató testvérfiókjára.
+- **Lehűlés és kvóta engedje el a gombostűt.** Amíg a rögzített kapcsolat lehűl, a kvóta kimerült, vagy a kvótaszabályzat blokkolja, a későbbi kérések visszaszállnak a szolgáltató más kapcsolataihoz, pontosan úgy, mint a rögzítetlen forgalom.
+- **Az ismeretlen vagy letiltott azonosítók sikertelenek.** Az olyan azonosító, amely nem szerepel a szolgáltató aktív készletében (törölt, deaktiválva vagy másik szolgáltatóhoz tartozik), nem hagy jogosult fiókot, így a kérés sikertelen lesz, ahelyett, hogy csendesen máshová irányítana.
 
-A Claude Code egyéni fejléceket küld az `ANTHROPIC_CUSTOM_HEADERS` használatával. Adja hozzá a
-`~/.claude/settings.json` fájl `env` blokkjához, vagy egy projekt szintű
-`.claude/settings.json` fájlhoz, ha projektenként eltérő fiókot szeretne rögzíteni:
+Claude Code egyéni fejléceket küld `ANTHROPIC_CUSTOM_HEADERS` keresztül. Helyezze be a `~/.claude/settings.json` `env` blokkjába vagy egy projektszintű `.claude/settings.json` be, hogy projektenként egy másik fiókot rögzítsen:
 
 ```jsonc
 {
@@ -134,29 +120,11 @@ A Claude Code egyéni fejléceket küld az `ANTHROPIC_CUSTOM_HEADERS` használat
 }
 ```
 
-Forrás: `src/sse/handlers/chat.ts` (a fejléc beolvasása), `src/sse/services/auth.ts` és
-`src/sse/services/sessionAffinityPin.ts` (a rögzítés feloldása és a készletből hiányzó azonosító
-ellenőrzése).
+Forrás: `src/sse/handlers/chat.ts` (fejléc beolvasása), `src/sse/services/auth.ts` és `src/sse/services/sessionAffinityPin.ts` (tűk feloldása és a hiányzó-ból készlet ellenőrzése).
 
-> **Költségtelemetriai fejlécek:** a nem streamelt sikeres válaszok szintén tartalmazzák az
-> `X-OmniRoute-*` költségtelemetriai készletet — `X-OmniRoute-Response-Cost` (USD, rögzített 10
-> tizedesjeggyel; `0.0000000000` ingyenes vagy nem árazott esetben), `X-OmniRoute-Tokens-In` /
-> `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`,
-> `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` és `X-OmniRoute-Fallback-Attempts` (csak ha
->
-> > 0), továbbá `X-OmniRoute-Request-Id` és `X-OmniRoute-Version`. Ezeket a chat completions,
-> > a `/v1/responses`, a `/v1/messages` **és a média-végpontok** bocsátják ki — `/v1/embeddings`,
-> > `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`,
-> > `/v1/videos/generations`, `/v1/music/generations` és `/v1/moderations` (mindig `0` költséggel).
-> > A médiaköltséget modalitásonként számítják (képenként, másodpercenként, karakterenként,
-> > keresési egységenként), ha az árazás elérhető, ellenkező esetben `0` (hibabiztos működés).
+> **Költség telemetriai fejlécek:** a nem adatfolyamos sikerreakciók is tartalmazzák a `X-OmniRoute-*` költség-telemetriai készletet — `X-OmniRoute-Response-Cost` (USD, fix 10 tizedesjegy; `0.0000000000` > free/unpriced esetén ), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, és `X-OmniRoute-Fallback-Attempts`. és `X-OmniRoute-Request-Id` `X-OmniRoute-Version`. Ezeket a chat befejezések bocsátják ki, `/v1/responses`, `/v1/messages`,** és a média végpontjai** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` és `/v1/moderations` (mindig `0` ba kerül). A médiaköltséget a rendszer modalitásonként (képenként, másodpercenként, karakterenként, keresési egységenként) számítja ki, ha elérhető az ár, ellenkező esetben `0` (fail-open).
 
-> **A gyorsítótár-találat költségszemantikája:** szemantikus gyorsítótárbeli TALÁLAT esetén
-> (`X-OmniRoute-Cache-Hit: true`) nem történik upstream-hívás, ezért
-> az `X-OmniRoute-Response-Cost` értéke `0.0000000000` (a találat kiszolgálásának **inkrementális**
-> költsége). Az eredeti/feltételezett költséget külön az `X-OmniRoute-Cost-Saved` tartalmazza.
-> A számlázási fogyasztóknak az `X-OmniRoute-Response-Cost` értékét kell összesíteniük (a találatok
-> költsége nulla); a gyorsítótár-elemzések az `X-OmniRoute-Cost-Saved` értékét aggregálhatják.
+> **Gyorsítótár-lekérési költség szemantika:** szemantikai gyorsítótárban HIT (`X-OmniRoute-Cache-Hit: true`) nem történik upstream hívás, így `X-OmniRoute-Response-Cost` a `0.0000000000` (a** járulékos** a találat kiszolgálásának költsége). A original/would-have-been költséget külön jelentjük `X-OmniRoute-Cost-Saved` ben. A számlázó fogyasztóknak `X-OmniRoute-Response-Cost` kell összegezniük (a találatok nem kerülnek semmibe); A gyorsítótár elemzése képes összesíteni `X-OmniRoute-Cost-Saved`.
 
 ## Kizárólagos kezelt munkamenet-bérletek
 
@@ -384,6 +352,8 @@ Az elérhető szolgáltatók közé tartozik OpenAI (GPT Image 2 ), xAI (Grok Im
 
 `n` `n` képeket ad vissza `data[]`. Azok a szolgáltatók, akiknek az upstream API hívásonként egy képet ad vissza (Black Forest Labs, Stabilitás AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) `n` külön felfelé irányuló hívást kapnak, legfeljebb 4-et repülés közben. A rögzített `seed` a hívásindex (`seed`, `seed + 1`, …) eltolja, így a képek különböznek, de reprodukálhatók maradnak. `n` felső határa 10. A kérés összességében meghiúsul, ha bármelyik hívás meghiúsul. A fan-out formátumok listája a `SINGLE_IMAGE_FANOUT_FORMATS` `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT A képmodellek (`codex/gpt-image-*`) csak PNG adnak vissza: az upstream `200` PNG bájtokkal válaszol akkor is, ha `jpeg` vagy `webp` kérésre kerül. Bármely más `output_format` vel (`webp`, `jpeg`, ...) vonatkozó kérést a rendszer HTTP 400-al elutasítja, ahelyett, hogy csendben figyelmen kívül hagyná; hagyja ki vagy küldje el `png`. `output_compression` nincs továbbítva.
+
 ZenMux újrafelhasználja a meglévő API-kulcs kapcsolatot, és elfogadja `zenmux/` vagy `zm/` előtagokat:
 
 - `zenmux/openai/gpt-image-2` ZenMuxOpenAI API képeit használja. A lehetőségek közé tartozik `size`, `quality`, `n`, `output_format`, `output_compression`, `background` és `response_format`.
@@ -401,7 +371,7 @@ GET /v1/images/generations
 
 ---
 
-## Dokumentum-OCR
+## OCR dokumentum
 
 ```bash
 POST /v1/ocr
@@ -417,17 +387,15 @@ Content-Type: application/json
 }
 ```
 
-A `model` egy `provider/model` előtagon keresztül választja ki az OCR-szolgáltatót; a puszta modellazonosító (például
-`mistral-ocr-latest`) a regisztrált szolgáltatójához oldódik fel, a kihagyott `model` pedig alapértelmezés szerint a
-Mistralra (`mistral-ocr-latest`) áll be. A regisztrált szolgáltatók (`open-sse/config/ocrRegistry.ts`):
+`model` kiválasztja a OCR szolgáltatót a `provider/model` előtagon keresztül; a csupasz modellazonosító (pl. `mistral-ocr-latest`) feloldja a regisztrált szolgáltatóját, a kihagyott `model` pedig alapértelmezés szerint Mistral (`mistral-ocr-latest`). Regisztrált szolgáltatók (`open-sse/config/ocrRegistry.ts`):
 
-| Szolgáltatóazonosító          | Modellazonosító      | `model` értéke                                                  | Megjegyzések                                                                                                               |
-| ----------------------------- | -------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (vagy puszta `mistral-ocr-latest`) | Szinkron — a válasz közvetlenül az egyetlen upstream hívásból érkezik.                                                     |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                     | Aszinkron upstream (`analyze` + lekérdezés) — lásd alább.                                                                  |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                         | Szinkron, a Vertex AI `openapi/chat/completions` partner-végpontján keresztül — a hitelesítésről és az URL-ről lásd alább. |
+| Szolgáltató azonosítója       | Modell azonosító                              | `model` érték                                                    | Megjegyzések                                                                                                                                                                                                               |
+| ----------------------------- | --------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                          | `mistral/mistral-ocr-latest` (vagy csupasz `mistral-ocr-latest`) | Szinkron — a válasz közvetlenül az egyetlen upstream hívásból érkezik vissza.                                                                                                                                              |
+| `azure-document-intelligence` | `prebuilt-read`                               | `azure-document-intelligence/prebuilt-read`                      | Aszinkron upstream (`analyze` + poll) — lásd alább.                                                                                                                                                                        |
+| `vertex-deepseek-ocr`         | önállóan telepíthető (nincs beépített modell) | `vertex-deepseek-ocr/<your-deployed-model-id>`                   | Szinkron, a saját Vertex AI Model Garden DeepSeek-OCR végpontján keresztül (`openapi/chat/completions` alakú); Google 2026-10-21-én (#20423) megszüntette a kezelt `deepseek-ocr-maas`, így az azonosító 400-at ad vissza. |
 
-Mindhárom szolgáltató ugyanabban a Mistral-formátumú törzsben válaszol:
+Mindhárom szolgáltató ugyanabban a Misztrál alakú testben válaszol:
 
 ```json
 {
@@ -437,28 +405,13 @@ Mindhárom szolgáltató ugyanabban a Mistral-formátumú törzsben válaszol:
 }
 ```
 
-### Azure Document Intelligence lekérdezési folyamat
+### Az Azure Document Intelligence lekérdezési folyamata
 
-Az Azure Document Intelligence `analyze` API-ja aszinkron: a kezdeti kérés törzs helyett egy
-`Operation-Location` fejlécet ad vissza, és az eredményt le kell kérdezni. A kezelő
-(`open-sse/handlers/ocr.ts`) másodpercenként lekérdezi ezt az URL-t, legfeljebb 30 próbálkozáson keresztül, azonnal hibát jelez (nem
-folytatja a lekérdezést) nem-`ok` lekérdezési válasz vagy `"failed"` állapot esetén, és `504` választ ad vissza, ha a művelet
-a próbálkozási keret kimerülése után is fut. A végső Azure-válasz a visszaadás előtt ugyanabba a
-`pages`/`markdown` struktúrába normalizálódik, amelyet a Mistral használ, így az ügyfélkódnak nem kell
-szolgáltatóspecifikus kivételeket kezelnie.
+Az Azure Document Intelligence `analyze` API aszinkron: a kezdeti kérelem egy `Operation-Location` fejlécet ad vissza a törzs helyett, és az eredményt le kell kérni. A kezelő (`open-sse/handlers/ocr.ts`) másodpercenként URL t kérdez le legfeljebb 30 próbálkozásig, gyorsan meghiúsul (nem folytat lekérdezést) nem `ok` lekérdezési válasz vagy `"failed"` állapot esetén, és `504` ad vissza, ha a művelet a kísérleti költségvetés kimerülése után is fut. A végső Azure-válasz a Mistral által használt `pages`/`markdown` alakzatra normalizálódik, mielőtt visszaküldené a hívónak, így az ügyfélkódnak nem kell speciális kis- és nagybetűket írnia a szolgáltatótól.
 
-### A Vertex AI DeepSeek OCR hitelesítése és végpontfeloldása
+### Vertex AI DeepSeek OCR hitelesítés és végpont felbontás
 
-A `vertex-deepseek-ocr` ugyanazt a Vertex AI-hitelesítést használja, amelyet az OmniRoute már támogat
-a csevegési/képes forgalomhoz (`open-sse/executors/vertex.ts`): a kapcsolat API-kulcsa vagy egy
-Service Account JSON hitelesítő adat (amelyet a JWT-bearer folyamaton keresztül rövid élettartamú OAuth hozzáférési tokenre cserél),
-vagy egy már létrehozott OAuth hozzáférési token, amelyet változtatás nélkül használ. Az upstream végpont URL-je a Vertex általános
-`openapi/chat/completions` partner-végpontja, amelyet a kapcsolat projektjéből és régiójából állít elő — egy explicit
-`providerSpecificData.project`/`providerSpecificData.region` érték mindig elsőbbséget élvez;
-ellenkező esetben a projekt a Service Account JSON `project_id` értékéből származik, a régió pedig alapértelmezés szerint
-`us-central1`. Mindkét feloldás az `open-sse/handlers/ocr.ts`
-fájlban történik (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), és a
-`src/app/api/v1/ocr/route.ts` használja őket az `handleOcr` meghívása előtti feldolgozás során.
+`vertex-deepseek-ocr` ugyanazt a Vertex AI hitelesítést használja újra, OmniRoute már támogat chat/image forgalomhoz (`open-sse/executors/vertex.ts`): a kapcsolat API kulcsa vagy egy Service Account JSON hitelesítő adat (ezt a JWT-hordozó folyamaton keresztül egy rövid élettartamú OAuth hozzáférési jogkivonatra cserélik), vagy egy már kidolgozott OAuth hozzáférési token. A URL felfelé irányuló végpont a Vertex általános `openapi/chat/completions` partner végpontja, amely a kapcsolat projektjéből és — régiójából épül fel, egy explicit `providerSpecificData.project`/`providerSpecificData.region` mindig nyer; egyébként a projekt a JSON szolgáltatásfiók `project_id` értékéből származik, és a régió alapértelmezett értéke `us-central1`. Mindkét felbontás `open-sse/handlers/ocr.ts` -ben történik (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), amelyet `src/app/api/v1/ocr/route.ts` felhasznál, mielőtt elküldi a `handleOcr`.
 
 ---
 
@@ -716,95 +669,100 @@ Felsőbb szintű szolgáltatói szerződések: [hangeffektusok](https://elevenla
 
 ## Kompatibilitási végpontok
 
-| Metódus | Útvonal                                   | Formátum                              |
-| ------- | ----------------------------------------- | ------------------------------------- |
-| POST    | `/v1/chat/completions`                    | OpenAI                                |
-| POST    | `/v1/messages`                            | Anthropic                             |
-| POST    | `/v1/responses`                           | OpenAI Responses                      |
-| POST    | `/v1/embeddings`                          | OpenAI                                |
-| POST    | `/v1/images/generations`                  | OpenAI Images                         |
-| POST    | `/v1/images/edits`                        | OpenAI Images (szerkesztés/inpaint)   |
-| POST    | `/v1/videos/generations`                  | OpenAI-stílusú videógenerálás         |
-| POST    | `/v1/music/generations`                   | OpenAI-stílusú zenegenerálás          |
-| POST    | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
-| POST    | `/v1/audio/speech`                        | OpenAI TTS (hangtörzset ad vissza)    |
-| POST    | `/v1/rerank`                              | Cohere/Voyage-stílusú újrarangsorolás |
-| POST    | `/v1/classify`                            | Jina classify (`api.jina.ai`)         |
-| POST    | `/v1/segment`                             | Jina szegmentáló (`segment.jina.ai`)  |
-| POST    | `/v1/moderations`                         | OpenAI Moderations                    |
-| GET     | `/v1/models`                              | OpenAI                                |
-| POST    | `/v1/models/query`                        | Szűrt modellrövidlista                |
-| POST    | `/v1/messages/count_tokens`               | Anthropic                             |
-| GET     | `/v1beta/models`                          | Gemini                                |
-| POST    | `/v1beta/models/{...path}`                | Gemini generateContent                |
-| POST    | `/v1/api/chat`                            | Ollama                                |
-| GET     | `/api/v1/vscode/{token}/`                 | OpenAI-katalógus-alias                |
-| GET     | `/api/v1/vscode/{token}/models`           | OpenAI-modellek-alias                 |
-| POST    | `/api/v1/vscode/{token}/chat/completions` | Tokenizált OpenAI-alias               |
-| POST    | `/api/v1/vscode/{token}/responses`        | Tokenizált OpenAI Responses-alias     |
-| POST    | `/api/v1/vscode/{token}/api/chat`         | Tokenizált Ollama-alias               |
-| GET     | `/api/v1/vscode/{token}/api/tags`         | Tokenizált Ollama-címke-alias         |
+| Módszer | Útvonal                                   | Formátum                                 |
+| ------- | ----------------------------------------- | ---------------------------------------- |
+| POST    | `/v1/chat/completions`                    | OpenAI                                   |
+| POST    | `/v1/messages`                            | Anthropic                                |
+| POST    | `/v1/responses`                           | OpenAI válaszok                          |
+| POST    | `/v1/embeddings`                          | OpenAI                                   |
+| POST    | `/v1/images/generations`                  | OpenAI                                   |
+| POST    | `/v1/images/edits`                        | OpenAI képek (edit/inpaint)              |
+| POST    | `/v1/videos/generations`                  | OpenAI-stílusú videógenerálás            |
+| POST    | `/v1/music/generations`                   | OpenAI stílusú zenegeneráció             |
+| POST    | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                       |
+| POST    | `/v1/audio/speech`                        | OpenAI TTS (visszaadja az audio törzset) |
+| POST    | `/v1/rerank`                              | Cohere/Voyage-style rerank               |
+| POST    | `/v1/classify`                            | Jina osztályozás (`api.jina.ai`)         |
+| POST    | `/v1/segment`                             | Jina szegmentáló (`segment.jina.ai`)     |
+| POST    | `/v1/moderations`                         | OpenAI Moderációk                        |
+| POST    | `/v1/systemone`                           | System One típusú döntések               |
+| POST    | `/v1/decisions`                           | OpenAI Decisions (natív)                 |
+| GET     | `/v1/systemone/models`                    | Döntési modell katalógus                 |
+| GET     | `/v1/models`                              | OpenAI                                   |
+| POST    | `/v1/models/query`                        | Szűrt modellek listája                   |
+| POST    | `/v1/messages/count_tokens`               | Anthropic                                |
+| GET     | `/v1beta/models`                          | Gemini                                   |
+| POST    | `/v1beta/models/{...path}`                | Gemini generateContent                   |
+| POST    | `/v1/api/chat`                            | Ollama                                   |
+| GET     | `/api/v1/vscode/{token}/`                 | OpenAI katalógus alias                   |
+| GET     | `/api/v1/vscode/{token}/models`           | OpenAI modellek álneve                   |
+| POST    | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenizált álnév                  |
+| POST    | `/api/v1/vscode/{token}/responses`        | OpenAI válaszok tokenizált alias         |
+| POST    | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenizált álnév                  |
+| GET     | `/api/v1/vscode/{token}/api/tags`         | Ollama címkék tokenizált álnevet         |
 
-Minden POST-útvonal ugyanazt a struktúrát követi: `Bearer your-api-key` + Zod által validált JSON-törzs (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` stb.; lásd: `src/shared/validation/schemas.ts`). Sikertelen sémaellenőrzés esetén 4xx-es válasz érkezik.
+Minden POST útvonal ugyanazt az alakzatot követi: `Bearer your-api-key` + Zod-validált JSON törzs (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` stb., lásd `src/shared/validation/schemas.ts`). A sémahiba esetén a 4xx visszaküldésre kerül.
 
-Azoknál a klienseknél, amelyek nem tudnak `Authorization: Bearer ...` fejlécet csatolni, az OmniRoute URL-ben is elfogad API-kulcsokat a lekérdezési karakterlánccal való kompatibilitás (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) vagy az alább dokumentált dedikált `/api/v1/vscode/{token}/...` végpontok használatával.
+Azoknál az ügyfeleknél, amelyek nem tudják csatolni `Authorization: Bearer ...`, OmniRoute API kulcsokat is elfogadja a URL ben a lekérdezési karakterlánc-kompatibilitáson (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`), vagy az alább dokumentált dedikált `/api/v1/vscode/{token}/...` végpontokon keresztül.
 
 ```bash
-# Újrarangsorolás (felhőbeli registry-szolgáltató vagy OpenAI-kompatibilis szolgáltatói csomópont "<prefix>/<model>" formában)
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina classify (Foundation API hitelesítő adatok)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina szegmentáló
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina search (s.jina.ai; szolgáltatói aliasok: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderálás
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg (vagy a kért formátumú) törzset ad vissza
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# A Soniox TTS-hez nyelv és hang szükséges: a `language` alapértelmezett értéke "en"; hiányzó
-# `voice` esetén, illetve OpenAI-alapértelmezett hangnév (alloy, nova, …) megadásakor az érték "Adrian" lesz
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Képszerkesztés (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Videó-/zenegenerálás (szolgáltató-előtaggal ellátott modellazonosító)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Rerank-szolgáltatói csomópontok:** A `POST /v1/rerank` OpenAI-kompatibilis szolgáltatói csomópontokhoz is továbbítja a kérést
-> (oMLX, vLLM, Infinity, átjáró mögötti TEI, …), amelyek címe `<node-prefix>/<model>`. A loopback-
-> csomópontok (`localhost`, `127.0.0.1`, `172.16.0.0/12`) mindig használhatók, csakúgy, mint az üzemeltető által
-> az `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` változóban felsorolt állomásnevek (például egy Docker/Compose-szolgáltatás neve,
-> mint a `http://reranker:8080/v1`; ezeket közvetlenül hívja, soha nem a `HTTP(S)_PROXY` változón vagy egy
-> kapcsolat rögzített proxyján keresztül). Bármely más állomáson — például egy LAN-gépen vagy Tailscale-partneren —
-> található csomópontok csak akkor használhatók, ha az üzemeltető engedélyezi a
-> `RERANK_REMOTE_PROVIDER_NODES` funkciójelzőt, **és** a csomópont alap-URL-je megfelel a szolgáltatói kimenő URL-szabályzatnak
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> A memóriaengine rerank-lépése loopbacken keresztül hívja ezt az útvonalat, ezért ugyanez a szabály vonatkozik a
-> Memória beállításaiban megadott `rerankProviderModel` értékre is.
+> **A szolgáltatói csomópontok újrarangsorolása:** `POST /v1/rerank` OpenAI-kompatibilis szolgáltatói csomópontokhoz is irányít (oMLX, vLLM, Infinity, TEI egy átjáró mögött, …), amelyek `<node-prefix>/<model>` címmel vannak ellátva. A visszahurkolt csomópontok (`localhost`, `127.0.0.1`, `172.16.0.0/12`) mindig jogosultak, és az operátor által a `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` -ben felsorolt gazdagépnevek is (pl. Docker/Compose szolgáltatásnév, például `http://reranker:8080/v1`; ezeket közvetlenül hívják meg, soha nem `HTTP(S)_PROXY` vagy a kapcsolat rögzített proxyján keresztül). Bármilyen más — LAN box vagy Tailscale peer — csomópont csak akkor használható, ha az operátor engedélyezi a `RERANK_REMOTE_PROVIDER_NODES` funkciójelzőt** és** a csomópont alap URL átadja a szolgáltató kimenő URL házirendjét (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). A memóriamotor rerank lépése ezt az útvonalat visszacsatoláson keresztül hívja meg, így ugyanaz a szabály szabályozza `rerankProviderModel` a memóriabeállításokban.
 >
-> **Helyi kiszolgálóformák:** A csomópontot a rendszer a `<base>/v1/rerank` címen, 404 esetén pedig a `<base>/rerank` címen hívja
-> (Infinity, TEI). A felfelé irányuló kérés törzse a Cohere/OpenAI-féle (`documents`,
-> `return_documents`) és a TEI-féle (`texts`, `return_text`) elnevezéseket is tartalmazza, a
-> felfelé irányuló válasz pedig a Cohere-burkolatra normalizálódik: a TEI csupasz `[{index, score, text}]` válasza, a vékony átjáróktól érkező
-> `{results: [{index, score}]}`, valamint a Voyage-féle `{data: [...]}` mind
-> `{results: [{index, relevance_score, document?}]}` formában érkezik vissza az ügyfélhez, pontszám szerint rendezve és
-> `top_n` értékre korlátozva.
+> **Helyi szerver alakzatok:** a csomópontot `<base>/v1/rerank`, 404-en pedig `<base>/rerank` ben hívják (Infinity, TEI). Az upstream törzs tartalmazza a Cohere/OpenAI helyesírást (`documents`, `return_documents`) és a TEI helyesírást (`texts`, `return_text`), és a felfelé irányuló válasz a Cohere borítékra normalizálódik: TEI bare `[{index, score, text}]`, `{results: [{index, score}]}` from the vékony ügyfélkapu, és back Vozqn-style `{results: [{index, relevance_score, document?}]}` `{data: [...]}` pontszám szerint rendezve és `top_n`-re korlátozva.
 
-> **Szolgáltatói csomópontok felderítése:** Az OpenAI-kompatibilis szolgáltatói csomóponton található modellek a `GET /v1/models`
-> válaszában jelennek meg a csomópont-előtag alatt. Azok a sorok, amelyek nem tartalmaznak végpont-metaadatokat (ez jellemző a helyi `/v1/models` listákra),
-> öröklik a csomópont `apiType` értékét, ezért egy `embeddings` csomópont modelljei `type: "embedding"`, egy
-> `rerank` csomópont modelljei pedig `type: "rerank"` típusúak lesznek, ahelyett hogy alapértelmezés szerint chatként jelennének meg;
-> a szinkronizált vagy manuálisan hozzáadott sorokon szereplő explicit `supportedEndpoints` továbbra is elsőbbséget élvez.
+> **Szolgáltató-csomópont felfedezés:** Az OpenAI-kompatibilis szolgáltatói csomóponton lévő modellek `GET /v1/models` ban jelennek meg a csomópont előtag alatt. Azok a sorok, amelyek nem hordoznak végponti metaadatokat (jellemzően a helyi `/v1/models` listákra), öröklik a csomópont `apiType`, így a `embeddings` csomópont modelljei `type: "embedding"`, a `rerank` csomópont modelljei pedig `type: "rerank"` ahelyett, hogy alapértelmezetten csevegnének; a szinkronizált vagy manuálisan hozzáadott sorban lévő explicit `supportedEndpoints` továbbra is elsőbbséget élvez.
+
+### Gépelt határozatok
+
+A döntési modellek szöveg generálása helyett kalibrált valószínűségekkel válaszolnak a gépelt kérdésekre. Ezek soha nem chatmodellek, és a két vezetékes formátumot soha nem fordítják le egymásra:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter határozatok, Cloudflare Dolgozók AI, helyi Ollama).
+- `POST /v1/decisions` — natív OpenAI döntések `{ model, input, questions: [...] }`, `openai` kapcsolat szolgálja ki. A modell `openai/gpt-6-luna` (a csupasz `gpt-6-luna` is működik). A válaszok kérdéses sorrendben, érintetlenül érkeznek vissza.
+- `GET /v1/systemone/models` — egy katalógus mindkét típusból; minden sor elnevezi a saját `api_format` (`systemone` vagy `decisions`). `limit` / `after` oldal a végső lista. A `X-OmniRoute-Catalog-Status` fejléc `complete`, `partial` vagy `unavailable` (503) szöveget tartalmaz.
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+A `/v1/decisions` n a API kulcs modellengedélyezőlistája, a `decisions` végpont kategóriája, a költségvetés és a kapcsolati hatókör ellenőrzése a hitelesítő adatok beolvasása előtt. A hitelesítő adat a kulcs hatókörén belül tárolt `openai` kapcsolat (soha nem környezeti kulcs); a URL kapcsolati alap csak akkor érvényesül, ha egy hitelesítő adatok, lekérdezés vagy töredék nélküli `http(s)` URL, amely nem erre OmniRoute ra mutat. A hívás ugyanazon az őrzött szállításon keresztül indul, mint a `decision` auto-router ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): szolgáltató kimenő őr, nincs újrapróbálkozás, nincs átirányítás, 5 másodperces időtúllépés és 64 KB válaszkorlát (nagyobb válasz 502). A kérelmező szervek száma 4 MiB-ra korlátozódik. Minden hívás friss `Idempotency-Key` küld. A hibák csak az upstream állapotot hordozzák, soha nem a törzsét, a URL, a kulcsot vagy a promptot.
 
 ### Dedikált szolgáltatói útvonalak
 
@@ -814,7 +772,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-A szolgáltatói előtag automatikusan hozzáadódik, ha hiányzik. Az eltérő modellek `400` választ adnak.
+A szolgáltató előtagja automatikusan hozzáadódik, ha hiányzik. A nem megfelelő modellek `400` adnak vissza.
 
 ---
 

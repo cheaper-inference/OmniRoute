@@ -13,12 +13,12 @@ Agent Skills فایلهای ساختاریافتهٔ SKILL.md هستند که ب
 
 ## نمای کلی
 
-این کاتالوگ شامل **45 مهارت عامل** است (23 مورد REST API + 21 مورد CLI + 1 گردشکار پیکربندی). هر مهارت دارای موارد زیر است:
+کاتالوگ شامل** 45 مهارت عامل** (23 REST API + 21 CLI + 1 گردش کار پیکربندی). هر مهارت دارای:
 
-- یک **شناسهٔ متعارف** (`omni-auth`، `cli-serve` و غیره)
-- یک فایل **SKILL.md** در `skills/{id}/SKILL.md` با فرادادهٔ YAML (`name`، `description`) + بدنهٔ غنی Markdown
-- **نقاط پایانی REST** (مهارتهای API) یا **زیرفرمانهای CLI** (مهارتهای CLI) که از مشخصات OpenAPI و رجیستری CLI استخراج شدهاند
-- یک **نشانی خام GitHub** برای دریافت زنده: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- الف** ID متعارف** (`omni-auth`، `cli-serve`، و غیره)
+- الف**SKILL.md** فایل در `skills/{id}/SKILL.md` با جلوه YAML (`name`, `description`) + rich markdown body
+- **نقاط پایانی REST** ( مهارت های API ) یا** دستورات فرعی CLI** ( مهارت های CLI ) برگرفته از رجیستری OpenAPI spec و CLI
+- الف**GitHub خام URL** برای واکشی زنده: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## API پوشش
+## پوشش API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

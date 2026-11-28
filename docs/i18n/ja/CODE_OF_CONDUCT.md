@@ -39,15 +39,13 @@
 本行動規範は、すべてのコミュニティ空間に適用されます。また、個人が公の場でコミュニティを公式に代表する場合にも適用されます。
 コミュニティを代表する行為の例には、公式メールアドレスの使用、公式ソーシャルメディアアカウントを通じた投稿、オンラインまたはオフラインのイベントで任命された代表者として行動することなどが含まれます。
 
-## Enforcement
+## 執行
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+虐待、嫌がらせ、またはその他の容認できない行為の事例は、次のプライベート セキュリティ勧告を開くことで、執行を担当するコミュニティ リーダーに報告できます。
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+または、管理者 (diegosouza.pw@outlook.com) に電子メールを送信してください。セキュリティ上重要なインシデントについては、 [`SECURITY.md`](SECURITY.md)参照してください。すべての苦情は迅速かつ公正に検討および調査されます。
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+すべてのコミュニティのリーダーは、あらゆる事件の報告者のプライバシーと安全を尊重する義務があります。
 
 ## 執行ガイドライン
 

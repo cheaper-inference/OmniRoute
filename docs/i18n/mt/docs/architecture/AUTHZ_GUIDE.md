@@ -4,12 +4,11 @@
 
 ---
 
-> **Sors ta' verità:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Aġġornat l-aħħar:** 2026-09-22 — in-namespaces tal-iskop jindikaw MCP-SERVER.md
+> **Sors tal-verità:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute għandu pipeline ta' awtorizzazzjoni konxju mir-rotta li jikkontrolla kull talba tal-API. Il-klassifikazzjoni hija **deterministika** u **fail-closed** — kull ħaġa li ma tistax tiġi kklassifikata tispiċċa bħala `MANAGEMENT` u teħtieġ sessjoni jew token ta' grad ta' ġestjoni. Din il-paġna tispjega l-mudell għall-inġiniera li jżommu rotot jew jiddisinjaw endpoints ġodda.
+OmniRoute għandha pipeline ta' awtorizzazzjoni konxju mir-rotta li jaqbad kull talba API. Klassifikazzjoni hija** deterministiku** u** fail-closed** — kull ħaġa li ma tistax tiġi kklassifikata tispiċċa bħala `MANAGEMENT` u titlob sessjoni jew token ta 'grad ta' ġestjoni. Din il-paġna tispjega l-mudell għall-inġiniera li jżommu rotot jew jiddisinjaw endpoints ġodda.
 
-![Pipeline ta' AuthZ (3 klassijiet ta' rotta + evalwazzjoni tal-politika)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Sors: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -190,7 +189,7 @@ Kull klassi tar-rotta għandha politika fi `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — dejjem jirritorna `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — estratti Bearer, jivvalida permezz ta `validateApiKey()`. Jaqa' għal anonimu biss meta l-bandiera effettiva tal-karatteristika `REQUIRE_API_KEY` tkun diżattivata. Il-bandiera effettiva tiġi solvuta permezz ta' `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) għalhekk il-Bnadar tal-Karatteristiċi tad-Dashboard u l-varjabbli tal-ambjent jirregolaw `/api/v1/*`, `/api/v1beta/*`, u psewdonimi b'mod konsistenti; fallimenti tas-solvent ifallu magħluqa. Jippermetti talbiet għal sessjoni tad-dashboard fuq rotot API tal-klijenti (inkluż `/api/v1/models`, użat mill-katalgu tal-mudell tad-dashboard). Meta Entra ID SSO hija attivata, Bearer li strutturalment huwa token Entra (tliet segmenti base64url, `RS*` alg, `kid`) jiġi mmaniġġjat mill-fergħa SSO** qabel** `validateApiKey()` u l-verdett tiegħu huwa finali — qatt ma jaqa 'fil-mogħdija taċ-ċavetta API jew il-fergħa ta' degradazzjoni għal anonima, għalhekk qtugħ tal-fornitur tal-identità ma jistax isir aċċess miftuħ. Iċ-ċwievet API statiċi mhumiex affettwati. Ara [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — jaċċetta sessjoni tad-dashboard, talbiet interni ta' sinkronizzazzjoni tal-mudell (imqabbla ma' `/api/providers/[name]/(sync-models|models)`), jew jaqbeż kompletament jekk `isAuthRequired()` jirritorna falza. Jirritorna 403 (`AUTH_001`) meta token Bearer ikun preżenti iżda mhux validu, 401 mod ieħor. Jinforza wkoll il-livelli tal-gwardja tar-rotot (LOCAL_ONLY / ALWAYS_PROTECTED) qabel kwalunkwe fergħa ta' awtorizzazzjoni — ara [Livell tal-Gwardja tar-Rotot](../security/ROUTE_GUARD_TIERS.md). Il-mogħdijiet LOCAL_ONLY `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (illum: `/api/mcp/`) jistgħu jiġu aċċessati minn non-loopback meta ċ-ċavetta Bearer iġorr l-ambitu `manage` ; il-mogħdijiet LOCAL_ONLY l-oħra kollha jibqgħu stretta-loopback irrispettivament mill-ambitu.
+- **`managementPolicy`** (`policies/management.ts`) — jaċċetta sessjoni tad-dashboard, talbiet interni ta' sinkronizzazzjoni tal-mudell (imqabbla ma' `/api/providers/[name]/(sync-models|models)`), jew jaqbeż kompletament jekk `isAuthRequired()` jirritorna falza. Jirritorna 403 (`AUTH_001`) meta token Bearer ikun preżenti iżda mhux validu, 401 mod ieħor. Jinforza wkoll il-livelli tal-gwardja tar-rotot (LOCAL_ONLY / ALWAYS_PROTECTED) qabel kwalunkwe fergħa ta' awtorizzazzjoni — ara [Livell tal-Gwardja tar-Rotot](../security/ROUTE_GUARD_TIERS.md). Il-mogħdijiet LOCAL_ONLY `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (illum: `/api/mcp/`) jistgħu jiġu aċċessati minn non-loopback meta ċ-ċavetta Bearer iġorr l-ambitu `manage`/`admin` jew l-ambitu dejjaq `mcp:connect` (`hasMcpConnectOrManageScope`), jew b'sessjoni dashboard awtentikata; il-mogħdijiet LOCAL_ONLY l-oħra kollha jibqgħu stretta-loopback irrispettivament mill-ambitu.
 
 Poliza ta suċċess tirritorna `AuthSubject` ma `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Maniġers downstream jistgħu jaqrawha permezz ta' `assertAuth(request, "CLIENT_API")` `src/server/authz/assertAuth.ts` minflok ma jerġgħu jħaddmu l-loġika tal-awtentikazzjoni.
 
@@ -281,24 +280,24 @@ export async function POST(request: Request) {
 
 Agħżel is-sett skont il-forma, mhux skont il-konvenjenza. Rotta waħda tidħol f’`PUBLIC_API_ROUTES_EXACT` (jew f’`PUBLIC_READONLY_CORS_API_ROUTES` jekk hija GET-only); sottosiġra ġenwina biss tidħol f’`PUBLIC_API_ROUTE_PREFIXES`, u **trid tispiċċa b’`/`**. Jekk tpoġġi rotta individwali fil-lista tal-prefissi, tkun qiegħed tippubblika wkoll kull mogħdija biswitu li taqsam magħha l-karattri inizjali — inklużi rotot aħwa b’segmenti dinamiċi li jiżdiedu aktar tard (GHSA-74g9-q8f6-793h). Aġġorna t-testijiet tal-unità f’`tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` u `tests/unit/authz/classify.test.ts`.
 
-## Scopes
+## Ambiti
 
-Tliet namespaces. Kull checker jaqra biss is-strings tiegħu stess. Il-paragun, inkluż għaliex `manage` ifalli `scopeMatches` għal `read:compression` u għaliex access token ta' `read` ma jistax `PATCH /api/keys/{id}`, jinsab f'[Tliet namespaces ta' scope](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Tliet spazji tal-isem. Kull kontrollur jaqra biss il-kordi tiegħu stess. Il-ġenb ma 'ġenb, inkluż għaliex `manage` jonqos `scopeMatches` għal `read:compression` u għaliex token ta' aċċess `read` ma jistax `PATCH /api/keys/{id}`, huwa [Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API keys iġorru array ta' `scopes` (maħżun bħala JSON f'`api_keys.scopes`, ara `src/lib/db/apiKeys.ts`).
+Iċ-ċwievet API jġorru firxa `scopes` (maħżuna bħala JSON `api_keys.scopes`, ara `src/lib/db/apiKeys.ts`).
 
-### Scope tal-ġestjoni
+### Skop ta' ġestjoni
 
-- `manage` / `admin` — `hasManageScope`. Aċċess bearer għar-rotot tal-API tal-ġestjoni.
-- `mcp:connect`, `self:usage`, `self:account-quota`, u `policy:bypass-provider-quota` huma scopes addittivi ta' tqabbil eżatt. Dawn jinsabu barra `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` jiftaħ biss il-`/api/mcp/` carve-out mhux loopback.
+- `manage` / `admin` — `hasManageScope`. Aċċess tal-bearer għall-maniġment API rotot.
+- `mcp:connect`, `self:usage`, `self:account-quota`, u `policy:bypass-provider-quota` huma ambiti ta' taqbila eżatta addittivi. Joqoghdu barra `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` jiftaħ biss il- `/api/mcp/` non-loopback carve-out.
 
-### Scopes tal-għodda MCP
+### ambiti tal-għodda MCP
 
-Katalogu u regoli ta' tqabbil (string identika, jew scope mogħti li jispiċċa b'`*`): [Scopes tal-għodda MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` f'`src/shared/constants/mcpScopes.ts` huwa s-subsett oriġinali tat-tip, mhux dak il-katalogu sħiħ. L-infurzar jaħdem f'`open-sse/mcp-server/scopeEnforcement.ts` wara li `resolveCallerScopeContext()` jsolvi l-scopes mill-informazzjoni tal-awtentikazzjoni tal-MCP, il-metadata tat-talba, jew `OMNIROUTE_MCP_SCOPES`. Jibqa' mitfi sakemm `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Regoli ta' katalogu u tqabbil (sekwenza identika, jew ambitu mogħti li jispiċċa `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` `src/shared/constants/mcpScopes.ts` huwa s-subsett oriġinali ittajpjat, mhux dak il-katalgu sħiħ. L-infurzar iseħħ `open-sse/mcp-server/scopeEnforcement.ts` wara li `resolveCallerScopeContext()` isolvi l-iskopijiet minn MCP auth info, talba metadata, jew `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` jixgħelha globalment (default `false`), iżda hija dejjem infurzata għal min iċempel HTTP/SSE li ċ-ċavetta API tiegħu m'għandhiex `manage`/`admin` (ara `shouldForceScopeEnforcement()` `open-sse/mcp-server/scopeEnforcement.ts`), irrispettivament mill-bandiera.
 
-### Scopes tal-access-token
+### Ambiti tat-token tal-aċċess
 
-`read` / `write` / `admin` fuq tokens `oma_live_…`, ikklassifikati minn `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Din il-klassifikazzjoni tapplika għall-kredenzjali tal-access token biss. Ara [Awtentikazzjoni tal-Ġestjoni](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` fuq tokens `oma_live_…`, ikklassifikati minn `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Dan il-grad japplika għall-kredenzjali tat-token ta' aċċess biss. Ara [l-Awtentikazzjoni tal-Ġestjoni](../guides/MANAGEMENT-AUTH.md).
 
 ## Awth Meħtieġa Toggle
 

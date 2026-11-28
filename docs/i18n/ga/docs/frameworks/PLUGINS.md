@@ -90,18 +90,17 @@ An réad `ctx` a chuirtear ar aghaidh chuig `register(program, ctx)`:
 
 ## Fionnachtain
 
-Aimsítear breiseáin sna háiteanna seo a leanas:
+Faightear breiseán ó:
 
-1. `~/.omniroute/plugins/<name>/` — suiteálacha áitiúla an úsáideora
-2. Athróg timpeallachta `OMNIROUTE_PLUGIN_PATH` — comhadlann shaincheaptha
+1. `~/.omniroute/plugins/node_modules/<name>/` — áit a gcuireann `omniroute plugin install` pacáistí ( npm `--prefix`, ní `npm -g`)
+2. eolairí breiseán lámhchóipeáilte `~/.omniroute/plugins/<name>/` —
+3. `OMNIROUTE_PLUGIN_PATH` env var — eolaire saincheaptha
 
-Baineann an dá cheann leis an **CLI amháin**. Tá a scanóir féin agus a shárú féin,
-`OMNIROUTE_PLUGINS_DIR`, ag am rite na mbreiseán ar thaobh an fhreastalaí
-(na breiseáin marketplace/`plugin.json` a ritheann laistigh den seachfhreastalaí) — féach
-[PLUGIN_MARKETPLACE.md → Comhadlann breiseán](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Ní dhéanann socrú ceann amháin difear don cheann eile.
+Leantar eolairí simlinked (an rud a chruthaíonn npm do `plugin install ./dir`).
 
-Gabhtar earráidí luchtaithe agus priontáiltear mar rabhaidh iad — ní thuairteálann breiseán briste an CLI choíche.
+Tá an dá** CLI-amháin** . Tá a scanóir féin ag an am rite breiseán ar thaobh an fhreastalaí (na forlíontáin margadh/`plugin.json` a ritheann laistigh den seachfhreastalaí) lena sáraithe féin, `OMNIROUTE_PLUGINS_DIR` — féach [PLUGIN_MARKETPLACE.md → Eolaire breiseán](./PLUGIN_MARKETPLACE.md#plugin-directory). Ní chuireann socrú ceann amháin isteach ar an gceann eile.
+
+— earráidí lódála a ghabháil agus a phriontáil mar CLI
 
 ## Slándáil
 

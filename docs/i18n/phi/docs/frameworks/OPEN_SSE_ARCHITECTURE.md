@@ -231,27 +231,27 @@ Mga sumusuporta** 22 mga diskarte sa pagruruta** (tingnan `src/shared/constants/
 | Diskarte            | Pag-uugali                                                                                                     |
 | ------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `priority`          | Unang-target na inayos na listahan                                                                             |
-| `weighted`          | Probabilistic sa bawat target na timbang                                                                       |
+| `weighted`          | Probabilistic ayon sa bawat target na timbang                                                                  |
 | `round-robin`       | Ikot sa pamamagitan ng mga target sa pagkakasunud-sunod                                                        |
 | `context-relay`     | Ibigay ang konteksto sa mga target                                                                             |
 | `fill-first`        | Punan ang quota bago lumipat sa susunod                                                                        |
 | `p2c`               | Kapangyarihan ng dalawang pagpipilian                                                                          |
-| `random`            | Uniform random                                                                                                 |
-| `least-used`        | Piliin ang isa na may kaunting mga kamakailang gamit                                                           |
-| `cost-optimized`    | Pinaka murang malusog na target muna                                                                           |
-| `reset-aware`       | Alam ang mga window ng pag-reset ng provider                                                                   |
-| `reset-window`      | I-reset ang window-based na pagruruta                                                                          |
+| `random`            | Bagong shuffle bawat kahilingan                                                                                |
+| `least-used`        | Piliin ang isa na may pinakamakaunting naitalang kahilingan                                                    |
+| `cost-optimized`    | Pinakamababang presyo ng input ng catalog muna                                                                 |
+| `reset-aware`       | Ang natitirang quota + ay i-reset ang pagkamadalian                                                            |
+| `reset-window`      | Quota window na unang nagre-reset sa lalong madaling panahon                                                   |
 | `expiry-first`      | Gastusin ang account na ang quota ay mag-e-expire muna nang hindi nagamit                                      |
 | `headroom`          | Karamihan sa natitirang quota headroom muna                                                                    |
 | `quota-weighted`    | Laktawan ang mga naubos na account, pagkatapos ay gumuhit ayon sa natitirang quota ÷ in-flight load            |
-| `strict-random`     | Tunay na uniporme (walang kalidad na timbang)                                                                  |
+| `strict-random`     | Na-shuffle na deck: bawat target nang isang beses bago umuulit                                                 |
 | `auto`              | Gumamit ng 16-factor na pagmamarka (`autoCombo/`)                                                              |
 | `lkgp`              | Huling kilalang mabuting provider muna                                                                         |
-| `context-optimized` | Pinakamahusay para sa mga kahilingan sa mahabang konteksto                                                     |
-| `cache-optimized`   | I-pin ang bawat magagamit muli na prompt prefix sa parehong account (prompt-cache hit)                         |
+| `context-optimized` | Pinakamalaking kilalang window ng konteksto muna                                                               |
+| `cache-optimized`   | Mas gusto ang account na malamang na hawakan ang prompt prefix sa cache                                        |
 | `fusion`            | Fan out sa isang panel nang magkatulad, pagkatapos ay i-synthesize sa pamamagitan ng isang judge (`fusion.ts`) |
 | `pipeline`          | Chain steps — ang output ng bawat target ay nagpapakain sa susunod                                             |
-| `jev`               | Mag-opt-in: inamin TypeSafe Jev kung aling mga ranggo ang tumatakbo; iba ang iyong order                       |
+| `jev`               | Mag-opt-in: inamin TypeSafe Jev kung aling mga ranggo na entry ang tumatakbo; iba ang iyong order              |
 
 ### base.ts (1170 LOC)
 
@@ -278,13 +278,13 @@ Ang pag-uugaling partikular sa provider (mga header ng auth, base URL, mga heade
 
 ## Mga Serbisyo (117 modules)
 
-Ang mga serbisyo ay** nakatutok, isang layunin na mga module** na binubuo ng mga handler. Ang malalaking kategorya:
+Ang mga serbisyo ay** nakatutok, isang layunin na mga module** na nag-compose ang mga handler. Ang malalaking kategorya:
 
 ### Pagruruta at Combo
 
 - `combo.ts` — entry point para sa combo-routed na mga kahilingan
 - `services/autoCombo/` — 16-factor na pagmamarka, 8 mga diskarte sa pagruruta ng auto
-- `wildcardRouter.ts` — ay tumutugma sa mga wildcard na ruta (`gpt-*`)
+- `wildcardRouter.ts` — ay tumutugma sa mga ruta ng wildcard (`gpt-*`)
 - `modelFamilyFallback.ts` — T5 intra-family fallback
 
 ### Paglilimita sa Rate at Quota
@@ -371,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-Ang resolusyon ay dumadaan sa `ExecutorRegistry` (`executors/registry.ts`): ang bawat dalubhasang tagapagpatupad ay idineklara sa built-in na talahanayan ng `executors/index.ts` at nakarehistro sa pamamagitan ng `registerExecutor(alias, instance)` sa pag-load ng module; Kinokonsulta ng `getExecutor()` ang registry at bumabalik sa isang memoized `DefaultExecutor` para sa sinumang provider na walang espesyal na entry. Ang buong alias → executor mapping ay nailalarawan sa pamamagitan ng golden test `tests/unit/executor-map-golden.test.ts`.
+Ang resolusyon ay dumadaan sa `ExecutorRegistry` (`executors/registry.ts`): ang bawat dalubhasang tagapagpatupad ay idineklara sa built-in na talahanayan ng `executors/index.ts` at nakarehistro sa pamamagitan ng `registerExecutor(alias, instance)` sa pag-load ng module; Kinonsulta `getExecutor()` ang registry at bumabalik sa isang memoized `DefaultExecutor` para sa sinumang provider na walang espesyal na entry. Ang buong alias → executor mapping ay nailalarawan sa pamamagitan ng golden test `tests/unit/executor-map-golden.test.ts`.
 
 ---
 

@@ -42,13 +42,13 @@ obično treba preusmjeriti prije spajanja.
 Kada se izdanje usklađuje, otvara se problem markera s oznakom `release-freeze`. Da** ne zaustavlja razvoj** :
 
 - Smrznuti `release/vX.Y.Z` pripada kapetanu za oslobađanje tog broda.
-- `release/vX+1` sljedećeg ciklusa izrezana je iz smrznutog vrha tako da suradnici nastavljaju raditi na slijetanju.
+- `release/vX+1` sljedećeg ciklusa izrezana je od zamrznutog vrha tako da suradnici nastavljaju raditi na slijetanju.
 - Otvoreni PRs koji još uvijek cilja na smrznutu granu trebao bi biti** preusmjereni** na aktivnu (najvišu) `release/v*` granu.
 
 Provjerite postoji li otvoreno zamrzavanje prije nego što pretpostavite da se grana koju želite može spojiti:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mehanika spajanja (vlasnička oznaka `queue` → Mergify) dokumentirana je u [MERGE_TRAIN.md](./MERGE_TRAIN.md).

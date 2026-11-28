@@ -21,24 +21,21 @@ mestilah **telah dilog masuk**.
 ## 1. Seni bina
 
 ```
-┌─ Aplikasi OmniRoute ─────────────┐        ┌─ Sidecar codex-app-server ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ token keupayaan)             │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  mengurus sendiri OAuth OpenAI      │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-segar semula) │
-        │ dikongsi (volum compose)           └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → token keupayaan WS (kedua-duanya melekapkannya)
-  codex-appserver-home    → ~/.codex (auth.json ditulis oleh papan pemuka,
-                             dibaca oleh codex app-server milik sidecar)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidecar hanya mendengar pada rangkaian compose dalaman
-  (`ws://codex-app-server:1456`) di sebalik token keupayaan. Ia **tidak pernah**
-  diterbitkan kepada hos atau internet.
-- Codex CLI telah disertakan dalam `omniroute:base`, jadi pemasangan codex tidak
-  diperlukan pada hos atau mesin pengguna apabila anda menjalankan sidecar.
+- Sisi kereta mendengar** sahaja** pada rangkaian karang dalaman (`ws://codex-app-server:1456`) di belakang token keupayaan. Ia adalah** tidak pernah** diterbitkan kepada hos atau internet.
+- Kereta sisi menggunakan `omniroute:cli-no-docker`, dibina daripada sasaran `runner-cli-no-docker`, yang termasuk Codex CLI.
 
 ## 2. Jalankannya
 

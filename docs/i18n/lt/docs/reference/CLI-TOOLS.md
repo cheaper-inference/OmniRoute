@@ -4,8 +4,6 @@
 
 ---
 
-Paskutinį kartą atnaujinta: 2026-08-23
-
 OmniRoute integruojasi su trijų kategorijų CLI įrankiais, paskirstytais trijuose tam skirtuose prietaisų skydelio puslapiuose:
 
 | Puslapis        | Maršrutas               | Koncepcija                                                                                        | Suskaičiuoti       |
@@ -235,7 +233,7 @@ Nauji įrankiai su `configType: "custom"` turi specialius API maršrutų nustaty
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
 | `POST /api/cli-tools/qwen-settings`         | Qwen kodas (`~/.qwen/settings.json` + skirtas `.env` raktas)                   |
 
-Visuose maršrutuose klaidų atsakymui naudojamas `sanitizeErrorMessage()` (12 griežta taisyklė).
+Visuose maršrutuose klaidų atsakymui naudojamas `sanitizeErrorMessage()` (kieta taisyklė #12).
 
 ---
 

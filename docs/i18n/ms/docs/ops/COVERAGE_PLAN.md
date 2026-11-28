@@ -153,28 +153,28 @@ Tema untuk Fasa 6-7:
 
 ## Dasar ratchet
 
-Kemas kini ambang `npm run test:coverage` hanya selepas projek benar-benar melepasi pencapaian seterusnya dengan margin yang selesa.
+Kemas kini ambang `npm run test:coverage` hanya selepas projek benar-benar melebihi pencapaian seterusnya dengan penimbal yang selesa.
 
-**Gerbang semasa:** `npm run test:coverage` menguatkuasakan **60 pernyataan / 60 baris / 60 fungsi / 60 cabang** (metrik tersebut telah ditetapkan semula dalam Quality-Gates Fasa 6A.1 — garis dasar 82.58% terdahulu terlebih tinggi kerana ia mengira fail ujian dan mengecualikan `open-sse`). Perintah `test:coverage:legacy` mengekalkan metrik lama 50/50/50 untuk perbandingan sejarah.
+**Pintu semasa:** `npm run test:coverage` menguatkuasakan** 60 pernyataan / 60 baris / 60 fungsi / 60 cawangan** (metrik itu diasaskan semula dalam Quality-Gates Fase 6A.1 — garis dasar 82.58% awal telah dinaikkan kerana ia mengira fail ujian dan mengecualikan `open-sse`). Perintah `test:coverage:legacy` mengekalkan metrik 50/50/50 lama untuk perbandingan sejarah.
 
-Untuk semakan ambang ad hoc terhadap laporan terkini, gunakan:
+Untuk semakan ambang ad-hoc terhadap penggunaan laporan terkini:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Urutan ratchet yang disyorkan (susunannya ialah `pernyataan-baris / cabang / fungsi`):
+Urutan ratchet yang disyorkan (perintah ialah `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- gerbang semasa (75/70/75)
+5. 75/70/72 <-- get semasa (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Sasaran ratchet seterusnya ialah `80/75/78` setelah liputan cabang kekal melebihi 78% untuk dua pelaksanaan berturut-turut.
+Sasaran ratchet seterusnya ialah `80/75/78` apabila liputan cawangan memegang melebihi 78% untuk dua larian berturut-turut.
 
 ## Jurang yang diketahui
 

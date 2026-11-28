@@ -113,58 +113,48 @@ en gyldig miljølegitimationsoplysning, der fastslås som `env-key`, understøtt
 Godkendte nøgler uden Obsidian-konfiguration pr. nøgle beholder det globale fallback.
 De fire `obsidian_sync_*`-værktøjer beholder deres separate synkroniseringstokenadfærd.
 
-## MCP-værktøjer (22)
+## MCP værktøjer (22)
 
-Defineret i `open-sse/mcp-server/tools/obsidianTools.ts`. Tokenet/basis-URL'en bestemmes
-for hvert kald (først pr. API-nøgle, derefter globalt). Værktøjer, der tilgår OmniRoutes **synkroniseringsserver**
-(de fire `obsidian_sync_*`-værktøjer), kræver desuden det synkroniseringsautentificeringstoken, der er konfigureret
-i OmniRoute-indstillingerne.
+Defineret i `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL løses pr. opkald (pr. API-nøgle først, derefter global). Værktøjer, der rammer OmniRoute** synkroniseringsserver** (de fire `obsidian_sync_*` værktøjer) kræver desuden synkroniseringsgodkendelsestoken konfigureret i OmniRoute -indstillinger.
 
 ### Læseværktøjer (`read:obsidian`)
 
-| Værktøj                      | Beskrivelse                                                                                           |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Kontrollér, om den lokale REST API er tilgængelig og godkendt.                                        |
-| `obsidian_search_simple`     | Fuldtekstsøgning i noteindhold; returnerer uddrag med filstier.                                       |
-| `obsidian_search_structured` | Søg ved hjælp af et JSON Logic-udtryk (and/or/regex/path-filtre).                                     |
-| `obsidian_read_note`         | Læs en note via en boksrelativ sti; eventuelt en bestemt overskrift/blok/frontmatter.                 |
-| `obsidian_list_vault`        | Vis filer og mapper i boksen (træstruktur af poster).                                                 |
-| `obsidian_get_document_map`  | Hent notens overskriftsstruktur som en afbildning af overskrifter → linjenumre.                       |
-| `obsidian_get_note_metadata` | Hent frontmatter, tags, links samt tegn-/ordantal uden det fulde indhold.                             |
-| `obsidian_get_active_file`   | Hent stien og indholdet for den aktuelt aktive fil i Obsidian.                                        |
-| `obsidian_get_periodic_note` | Hent den daglige/ugentlige/månedlige periodiske note for en dato (i dag, hvis udeladt).               |
-| `obsidian_get_tags`          | Vis alle tags i boksen med deres hyppigheder.                                                         |
-| `obsidian_list_commands`     | Vis tilgængelige Obsidian-kommando-id'er (bruges med `obsidian_execute_command`).                     |
-| `obsidian_sync_status`       | Status for OmniRoute-synkroniseringsserveren: kører, boksnavn, port, oppetid, seneste synkronisering. |
-| `obsidian_sync_conflicts`    | Vis uløste synkroniseringskonflikter (sti, konfliktsti, registreringstidspunkt).                      |
+| Værktøj                      | Beskrivelse                                                                            |
+| ---------------------------- | -------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Kontroller, om den lokale REST API er tilgængelig og autentificeret.                   |
+| `obsidian_search_simple`     | Fuldtekstsøgning af noteindhold; returnerer uddrag med filstier.                       |
+| `obsidian_search_structured` | Søg ved hjælp af et JSON Logic-udtryk (and/or/regex/path -filtre).                     |
+| `obsidian_read_note`         | Læs en note efter vault-relativ sti; eventuelt en specifik heading/block/frontmatter.  |
+| `obsidian_list_vault`        | Liste filer og mapper i hvælvingen (træet med indgange).                               |
+| `obsidian_get_document_map`  | Få notens overskriftsstruktur som et kort over overskrifter → linjenumre.              |
+| `obsidian_get_note_metadata` | Få frontmatter, tags, links, char/word count uden det fulde indhold.                   |
+| `obsidian_get_active_file`   | Hent stien + indholdet af den aktuelt aktive fil i Obsidian.                           |
+| `obsidian_get_periodic_note` | Få daily/weekly/monthly periodiske note for en dato (i dag, hvis udeladt).             |
+| `obsidian_get_tags`          | Liste alle vault tags med deres frekvenser.                                            |
+| `obsidian_list_commands`     | Liste over tilgængelig Obsidian -kommando IDs (brug med `obsidian_execute_command`).   |
+| `obsidian_sync_status`       | OmniRoute sync server status: kører, vault navn, port, oppetid, sidste synkronisering. |
+| `obsidian_sync_conflicts`    | Liste uløste synkroniseringskonflikter (sti, konfliktsti, opdaget-ved).                |
 
 ### Skriveværktøjer (`write:obsidian`)
 
-| Værktøj                          | Beskrivelse                                                                                    |
-| -------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Opret eller overskriv en note med det angivne Markdown-indhold.                                |
-| `obsidian_append_note`           | Føj indhold til en note; eventuelt til en bestemt overskrift/blok.                             |
-| `obsidian_patch_note`            | Tilføj før/efter eller erstat målrettet ved en overskrift, blok eller et frontmatter-felt.     |
-| `obsidian_delete_note`           | Slet en note permanent fra boksen.                                                             |
-| `obsidian_move_note`             | Flyt eller omdøb en note i boksen.                                                             |
-| `obsidian_execute_command`       | Udfør en Obsidian-kommando via dens kommando-id.                                               |
-| `obsidian_open_file`             | Åbn en fil i Obsidian (opretter den, hvis den ikke findes).                                    |
-| `obsidian_sync_trigger`          | Udløs en øjeblikkelig tovejssynkronisering af boksen mellem computer og mobil.                 |
-| `obsidian_sync_resolve_conflict` | Løs en synkroniseringskonflikt: behold `local` (mobil), `remote` (computer) eller `keep-both`. |
+| Værktøj                          | Beskrivelse                                                                                   |
+| -------------------------------- | --------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Opret eller overskriv en note med givet Markdown-indhold.                                     |
+| `obsidian_append_note`           | Føj indhold til en note; eventuelt til en specifik heading/block.                             |
+| `obsidian_patch_note`            | Kirurgisk append/prepend/replace ved et overskrifts-, blok- eller frontmatter-felt.           |
+| `obsidian_delete_note`           | Slet permanent en note fra boksen.                                                            |
+| `obsidian_move_note`             | Flyt eller omdøb en note i boksen.                                                            |
+| `obsidian_execute_command`       | Udfør en Obsidian -kommando ved dens kommando ID.                                             |
+| `obsidian_open_file`             | Åbn en fil i Obsidian (opretter den, hvis den ikke findes).                                   |
+| `obsidian_sync_trigger`          | Udløs en øjeblikkelig tovejs desktop ↔ mobile vault-synkronisering.                           |
+| `obsidian_sync_resolve_conflict` | Løs en synkroniseringskonflikt: behold `local` (mobil), `remote` (desktop) eller `keep-both`. |
 
 > [!NOTE]
-> Mål for `obsidian_patch_note` accepterer `targetType` med værdien `heading | block | frontmatter`
-> og `operation` med værdien `append | prepend | replace` samt en valgfri
-> `createTargetIfMissing`. De fire `obsidian_sync_*`-værktøjer kommunikerer med den lokale synkroniseringsserver
-> (`http://127.0.0.1:27781` som standard) og kræver synkroniseringstokenet.
+> `obsidian_patch_note` mål accepterer `targetType` af `heading | block | frontmatter` og `operation` af `append | prepend | replace`, med en valgfri `createTargetIfMissing`. De fire `obsidian_sync_*` -værktøjer taler til den lokale synkroniseringsserver (`http://127.0.0.1:27781` som standard) og kræver synkroniseringstokenet.
 
-### Adgangsområder
+### Omfang
 
-Læseværktøjer kræver `read:obsidian`; skriveværktøjer kræver `write:obsidian`. Håndhævelsen
-er identisk med Notion — håndteret af `withScopeEnforcement()` i
-`open-sse/mcp-server/server.ts`, betinget af `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, med
-tilladte adgangsområder hentet fra `OMNIROUTE_MCP_SCOPES` eller API-nøglens adgangsområdekontekst. Se
-[MCP-SERVER.md](./MCP-SERVER.md).
+Læseværktøjer kræver `read:obsidian`; skriveværktøjer kræver `write:obsidian`. Håndhævelse er identisk med Notion — der håndteres af `withScopeEnforcement()` i `open-sse/mcp-server/server.ts`, gated på `OMNIROUTE_MCP_ENFORCE_SCOPES=true` og tvunget til for HTTP/SSE kaldere, hvis API nøgle mangler `manage`/`admin`, med tilladte scopes hentet fra `OMNIROUTE_MCP_SCOPES` eller API -nøglens scope-kontekst. Se [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Endpoints
 

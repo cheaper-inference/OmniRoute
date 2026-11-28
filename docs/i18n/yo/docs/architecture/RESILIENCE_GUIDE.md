@@ -12,54 +12,53 @@ OmniRoute ni awọn ọna isọdọtun mẹta pato ṣugbọn ti o ni ibatan. �
 
 > **Precedence Env-vs-dasibodu fun resilience toggles.** Ijade-in resilience yipada awọn irugbin lati agbegbe — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — nikan pese _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean kan duro ni `resilienceSettings` (Dashboard →** Eto → Resilience** / `PATCH /api/resilience`, ti a fipamọ sinu `key_value`) bori lori iye env: deede (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) ntọju boolean ti o fipamọ nigbakugba ti ọkan wa. Ṣiṣeto iru env var si `true` lori imuṣiṣẹ nibiti dasibodu ti fipamọ tẹlẹ `false` nitorinaa ko yipada ohunkohun — yi iyipada sinu** Eto → Resilience** (tabi ko awọn ti o ti fipamọ aaye) dipo.
 
-## 1. Circuit Breaker Olùpèsè
+## 1. Olupese Circuit Fifọ
 
-**Àyíká:** gbogbo olùpèsè (f.i., `glm`, `openai`, `anthropic`).
+**Ààlà:** gbogbo olupese (fun apẹẹrẹ, `glm`, `openai`, `anthropic`).
 
-**Ète:** dáwọ́ rírán ìrìnàjò sí olùpèsè kan tí ó ń kùnà lẹ́ẹ̀kẹẹsì ní ipele upstream/iṣẹ́.
+**Idi:** dẹkun fifiranṣẹ ijabọ si olupese ti o kuna leralera ni ipele upstream/service.
 
-**Ìmúṣẹ̀:**
+**imuse:**
 
-- Kíláàsì mọ́lẹ̀: `src/shared/utils/circuitBreaker.ts`
-- Ìsopọ̀: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API ipò: `GET /api/monitoring/health`
-- API àtúnṣètò: `POST /api/resilience/reset`
-- Àwọn akópọ̀ (wrappers): `open-sse/services/accountFallback.ts`
-- Tábìlì DB: `domain_circuit_breakers`
+- Kilasi koko: `src/shared/utils/circuitBreaker.ts`
+- Sisọ: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Ipo API: `GET /api/monitoring/health`
+- Tun API: `POST /api/resilience/reset`
+- Awọn ohun elo: `open-sse/services/accountFallback.ts`
+- DB tabili: `domain_circuit_breakers`
 
-**Àwọn ipò:**
+**Awọn ipinlẹ:**
 
-- `CLOSED` — ìrìnàjò déédéé jẹ́ gígàyọ̀
-- `DEGRADED` — ìrìnàjò ṣì jẹ́ gígàyọ̀, ṣùgbọ́n a ń tọ́pa àwọn ikùnà olùpèsè tó ti pọ̀ sí i; ó máa padà sí `CLOSED` lẹ́yìn àwọn àṣeyọrí tó tó, lórí ìdánwò ìsopọ̀ tó péye, tàbí lẹ́yìn ìdídí `OPEN` tí ó pẹ́ jù lọ fún irú ikùnà gbèyìn (iye `cooldownByKind` rẹ̀, tàbí `resetTimeout` bí kò bá sí, × `maxBackoffMultiplier`, ó kéré jù cooldown kan) láìsí ikùnà tuntun
-- `OPEN` — a ti dí olùpèsè lọ́wọ́ fún ìgbà díẹ̀; combo routing máa ń fò ó kọjá
-- `HALF_OPEN` — àkókò àtúnṣètò ti lọ; ìbéèrè ìṣàkóso (probe) jẹ́ gígàyọ̀
+- `CLOSED` — deede ijabọ laaye
+- `DEGRADED` — ijabọ ṣi gba laaye, ṣugbọn awọn ikuna olupese ti o ga ni a tọpa; pada si `CLOSED` lori awọn aṣeyọri ti o to, lori idanwo asopọ ti o wulo, tabi lẹhin idaduro `OPEN` gigun julọ fun iru ikuna ti o kẹhin (iye `cooldownByKind` rẹ, miiran `resetTimeout`, × `maxBackoffMultiplier`, o kere ju itutu kan) laisi ikuna tuntun
+- `OPEN` — olupese dina fun igba die; konbo afisona foo o
+- `HALF_OPEN` — atunto akoko ti kọja; ibere ibere laaye
 
-**Àwọn àtòlábẹ̀rẹ̀ tí a lè ṣàtúnṣe (`open-sse/config/constants.ts`, tí a fi hàn ní Dashboard → Settings → Resilience):**
+**Awọn aiyipada atunto (`open-sse/config/constants.ts`, fara han ni Dashboard → Eto → Resilience):**
 
-| Kíláàsì | Ó di DEGRADED ní | Ó ṣí OPEN ní | Àkókò àtúnṣètò |
-| ------- | ---------------- | ------------ | -------------- |
-| OAuth   | ikùnà 5          | ikùnà 8      | 60s            |
-| API-key | ikùnà 7          | ikùnà 12     | 30s            |
-| Local   | tí a yọ jáde     | ikùnà 2      | 15s            |
+| Kilasi     | Degraded ni | Ṣii ni   | Tun akoko ipari to |
+| ---------- | ----------- | -------- | ------------------ |
+| OAuth      | 5 ikuna     | 8 ikuna  | 60s                |
+| API-bọtini | 7 ikuna     | 12 ikuna | 30-orundun         |
 
-`degradationThreshold` ló ń darí àkókò tí olùpèsè yóò wọ `DEGRADED`; `failureThreshold` ló ń darí àkókò tí yóò ṣí OPEN tí a sì máa fò ó kọjá. A kò tíì fi àwọn profaili olùpèsè Local hàn lórí ojú-ìwé àwọn àtò Resilience ní báyìí.
+`degradationThreshold` n ṣakoso nigbati olupese ba wọ `DEGRADED`; `failureThreshold` ṣakoso nigbati o ṣii ati pe o fo. `PROVIDER_PROFILES.local` (awọn ikuna 2 / 15s) jẹ asọye ni `open-sse/config/constants.ts` ṣugbọn** ko ti firanṣẹ sibẹsibẹ** : `getProviderCategory()` da `oauth` tabi `apikey` nikan pada, nitorinaa awọn olupese agbegbe lo OAuth tabi profaili bọtini API.
 
-**Àwọn kóòdù trip:** àwọn ipò ipele-olùpèsè nìkan `[408, 500, 502, 503, 504]`. MÁ ṢE dá trip fún àwọn àṣìṣe ipele-àkáǹtì (ọ̀pọ̀ jù lọ 401/403/429 — àwọn yẹn jẹ́ ti cooldown tàbí lockout).
+**Awọn koodu irin ajo:** awọn ipo olupese nikan `[408, 500, 502, 503, 504]`. Ṣe irin-ajo NOT fun awọn aṣiṣe ipele-iroyin (julọ 401/403/429 — ti o jẹ ti itutu agbaiye tabi titiipa).
 
-**Ìmúpadàsẹ̀ lazy:** nígbà tí `OPEN` bá parí, `getStatus()`, `canExecute()`, `getRetryAfterMs()` máa ń ṣe àtúnjíṣe ipò náà sí `HALF_OPEN`. Àwọn ìkàwò kanna náà (àti ikùnà tó tẹ̀le) máa ń dín `DEGRADED` tí ó ti pẹ́ padà sí `CLOSED`. Kò sí ìnílò fún timer abẹ́lẹ̀.
+**Lazy recovery:** when `OPEN` expires, `getStatus()`, `canExecute()`, `getRetryAfterMs()` refresh state to `HALF_OPEN`. The same reads (and the next failure) decay a stale `DEGRADED` back to `CLOSED`. No background timer needed.
 
 ---
 
-### Provider Cooldown àgbáyé tí ó jẹ́ ìyàn (opt-in) (window gate)
+### Jade ni agbaye Cooldown Olupese (bode window)
 
-Ipele kẹrin kan, tí ó jẹ́ **ìyàn** (`PROVIDER_COOLDOWN_ENABLED`, àtòlábẹ̀rẹ̀ rẹ̀ jẹ́ **off**), ń tọ́jú ìrántí kọjá-ìbéèrè ti àwọn olùpèsè tí ń kùnà nínú `open-sse/services/providerCooldownTracker.ts`, èyí tí ìyanju àfojúsùn combo ń gbèrò lọ́wọ́, kí àwọn ìbéèrè combo tó tẹ̀le ara wọn lè dáwọ́ rínrìn padà lórí olùpèsè kan tó ṣẹ̀ṣẹ̀ kùnà. Àwọn ẹ̀yọ ipele-olùpèsè ń tẹ̀lé window gate ti `PROVIDER_PROFILES`:
+Ẹkẹrin,** jáde** Layer (`PROVIDER_COOLDOWN_ENABLED`, aiyipada** kuro** ) n tọju iranti ibeere-agbelebu ti awọn olupese ti o kuna ni `open-sse/services/providerCooldownTracker.ts`, ti o ni imọran nipasẹ ipinnu ibi-afẹde konbo nitoribẹẹ awọn ibeere konbo itẹlera da tun rin olupese ti o kan kuna. Awọn titẹ sii ipele olupese ni ọlá fun ẹnu-ọna window `PROVIDER_PROFILES` :
 
-| Profaili | dá trip lẹ́yìn (`providerFailureThreshold`) | nínú (`providerFailureWindowMs`) | ń tutù fún (`providerCooldownMs`) |
-| -------- | -----------------------------------------: | -------------------------------: | --------------------------------: |
-| OAuth    |                                       `10` |                          `15min` |                            `5min` |
-| API key  |                                       `15` |                          `30min` |                           `10min` |
+| Profaili   | awọn irin ajo lẹhin (`providerFailureThreshold`) | inu (`providerFailureWindowMs`) | dara fun (`providerCooldownMs`) |
+| ---------- | -----------------------------------------------: | ------------------------------: | ------------------------------: |
+| OAuth      |                                             `10` |                         `15min` |                          `5min` |
+| bọtini API |                                             `15` |                         `30min` |                         `10min` |
 
-Lábẹ́ ààlà náà, a **kò** ka olùpèsè náà sí ẹni tó ń tutù; àṣeyọrí kan máa ń pa window náà rẹ́. Àwọn ẹ̀yọ ipele-ìsopọ̀ (`provider:connectionId`) máa ń lo backoff exponential ti `minRetryCooldownMs → maxRetryCooldownMs` dípò èyí. Àwọn ìbófinró (overrides): `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Àbò àtúnbòwò (regression guard): `tests/unit/provider-cooldown-window-gate.test.ts`.
+Ni isalẹ ala ti olupese wa** kii ṣe** kà itutu; a aseyori clears awọn window. Awọn titẹ sii ipele-asopọ (`provider:connectionId`) tọju `minRetryCooldownMs → maxRetryCooldownMs` ti o pọju ni ẹhin dipo. Yiyọ: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Oluso ifasẹyin: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Asopọ Cooldown
 
@@ -741,6 +740,21 @@ reached”) máa ń di `quota_exhausted` nípasẹ̀ quota-text fallback
 
 ---
 
+## Nigbati OmniRoute funrararẹ ko le de ọdọ
+
+Olupese Circuit fifọ, itutu asopọ, ati titiipa awoṣe gbogbo nṣiṣẹ inu ẹnu-ọna. Ti alabara ko ba le de ẹnu-ọna, o gba aṣiṣe asopọ kan. OmniRoute ko le da ikuna yẹn duro. Onibara pinnu boya lati tun gbiyanju ati ifiranṣẹ wo lati ṣafihan.
+
+OmniRoute lọwọlọwọ pese ko si ipadasẹhin-ẹgbẹ alabara ati asọye ko si eto imulo fun rẹ. Ṣe atunto eyikeyi ipa ọna miiran ni alabara tabi ni iwaju ẹnu-ọna.
+
+- `GET /api/health` sọwedowo liveness lai ìfàṣẹsí.
+- `GET /api/health/ping` sọwedowo imurasilẹ, pẹlu boya awọn database idahun.
+- `GET /api/monitoring/health` n fun awọn olupe ti o ni idaniloju ni awotẹlẹ ilera ti o jinlẹ.
+- `omniroute launch <tool>` ṣe iwadii `/api/monitoring/health` ṣaaju ki o to bẹrẹ alabara. O le bẹrẹ ẹnu-ọna agbegbe laifọwọyi. Pẹlu `--no-start`, ẹnu-ọna ti ko le de ọdọ ni abajade `GatewayUnreachable` ati koodu ijade `69`.
+
+Lati ge asopọ alabara kan lati OmniRoute, tẹle [atunto alabara pada](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Ìwádìí Àṣìṣe
 
 - Weighted combo dáhùn `503 all_targets_cooling_down` (`Retry-After` ti ṣètò, `diagnostics.excluded` kó gbogbo target jọ pẹ̀lú `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → a ti ṣètò pool náà ó sì ti sopọ̀, resilience timer kan ni ó yọ gbogbo target kúrò; ìkìlọ̀ `[COMBO] Weighted selection: every target excluded before dispatch — …` náà darúko àwọn ìdí àti àwọn ìṣẹ́jú-àáyà tó kù. `404 no_executable_targets` láti combo kannáà túmọ̀ sí pé kò sí resilience timer kankan tó wà nínú ọ̀rọ̀ náà (kò sí ohun láti ṣe, tàbí gbogbo àkáùntì kùnà ìdánwò ìwàlààyè náà). A kọ́ ọ́ nínú `open-sse/services/combo/pinRecovery.ts` láti àwọn ìyọkúrò tí a kójọpọ̀ nínú `targetResolution.ts`.
@@ -752,94 +766,68 @@ reached”) máa ń di `quota_exhausted` nípasẹ̀ quota-text fallback
 
 ---
 
-## Ipò ìgbàṣiṣe — ìtọ́kasí kíákíá fún agent
+## Asoju-akoko ipinle — oluranlowo awọn ọna itọkasi
 
-> A gbe e kúrò gẹ́gẹ́ bó ṣe rí láti inú `AGENTS.md` → "Resilience Runtime State" (PR #12743) kí
-> ìtọ́nisọ́nà agent lè wà lábẹ́ ìwọ̀n context 40k. Ìwòye kíkéékeré tó kan agent ni ẹ̀yí jẹ́ fún
-> àwọn abala tó wà lókè; àwọn abala onínọ́ńbà ṣì dúró gẹ́gẹ́ bí ìtọ́kasí kíkún.
+> Ti gbe ọrọ-ọrọ kuro lati `AGENTS.md` → "Ipinlẹ asiko asiko Resilience" (PR #12743) nitorinaa itọsọna aṣoju duro labẹ isuna ọrọ ayika 40k. O ti wa ni awọn ti di, oluranlowo-ti nkọju si wiwo ti awọn apakan loke; awọn apakan ti o ni nọmba jẹ itọkasi ni kikun.
 
-OmniRoute ní ọ̀nà mẹ́ta fún àṣìṣe-ìgbàdíẹ̀ tó jọ ara wọn ṣùgbọ́n tó yàtọ̀. Pa àyíká wọn
-lọ́tọ̀ nígbà tí o bá ń ṣe ìwádìí àṣìṣe ìwà ìtọ́sọ́nà. Wo
-[àwòrán ìfaradà ipele mẹ́ta](../diagrams/exported/resilience-3layers.svg)
-(orísun: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-fún máàpù rírí lẹ́sẹ̀kẹsẹ̀.
+OmniRoute ni ibatan mẹta ṣugbọn awọn ọna ṣiṣe-ikuna igba diẹ pato. Jeki aaye wọn lọtọ nigbati o n ṣatunṣe ihuwasi afisona. Wo [aworan atọka resilience 3-Layer](../diagrams/exported/resilience-3layers.svg) (orisun: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) fun maapu oju-oju kan.
 
-### Circuit Breaker Olupese
+### Olupese Circuit Fifọ
 
-**Àyíká**: gbogbo olupese, f.a. `glm`, `openai`, `anthropic`.
+**Ààlà** : gbogbo olupese, fun apẹẹrẹ `glm`, `openai`, `anthropic`.
 
-**Ète**: dí ṣíṣe traffic ránṣẹ́ sí olupese tó ń kùnà lẹ́ẹ̀mejì ní ipele
-upstream/iṣẹ́, kí olupese kan ṣoṣo tí kò bàjẹ́ má di gbogbo ìbéèrè lọ́ra.
+**Idi** : dẹkun fifiranṣẹ ijabọ si olupese ti o kuna leralera ni ipele upstream/service, nitorinaa olupese kan ti ko ni ilera ko fa fifalẹ gbogbo ibeere.
 
-**Ìmúṣẹ**:
+**imuse** :
 
-- Kiláàsì mọlẹ̀: `src/shared/utils/circuitBreaker.ts`
-- Ìsopọ̀ okun ẹ̀nù-ọ̀nà chat/ìgbéṣẹ̀: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API ipò ìgbàṣiṣe: `src/app/api/monitoring/health/route.ts`
-- Àwọn wrapper àpapọ̀: `open-sse/services/accountFallback.ts`
-- Tábìlì ipò tí wọ́n pamọ́: `domain_circuit_breakers`
+- Kilasi koko: `src/shared/utils/circuitBreaker.ts`
+- Wiregbe gate/execution onirin: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Ipo asiko-akoko API: `src/app/api/monitoring/health/route.ts`
+- Pipin wrappers: `open-sse/services/accountFallback.ts`
+- Tabili ipinle ti o duro: `domain_circuit_breakers`
 
-**Àwọn ipò** (4 — `src/shared/utils/circuitBreaker.ts`):
+**Awọn ipinlẹ** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: a gba traffic deédéé láàyè.
-- `DEGRADED`: ààlà ìkìlọ̀-kákákí — àwọn àṣìṣe ti kọja ààlà ìrẹ̀lẹ̀ ṣùgbọ́n kò tíì dé
-  ààlà breaker; traffic ṣì ń rè, àwọn dashboard ń fi ìkìlọ̀ náà hàn. Ìdánwò ìsopọ̀
-  tó péye tàbí window dídákẹ́ láìsí àṣìṣe tuntun máa dá a padà sí `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` ló ní window náà).
-- `OPEN`: a dí olupese lọ́wọ́ fún ìgbà díẹ̀; àwọn olùpè máa gba èsì
-  provider-circuit-open tàbí ìtọ́sọ́nà combo á fò sí target mìíràn.
-- `HALF_OPEN`: àkókò reset timeout ti lọ kọja; gba ìbéèrè probe láàyè. Àṣeyọrí máa
-  pa breaker náà, àṣìṣe sì tún ṣí í.
+- `CLOSED`: deede ijabọ ti wa ni laaye.
+- `DEGRADED`: awọn ẹgbẹ ikilọ ni kutukutu — awọn ikuna ti rekọja iloro ibajẹ ṣugbọn kii ṣe iloro fifọ sibẹsibẹ; ijabọ ṣi nṣàn, dashboards fihan ikilọ. Idanwo asopọ to wulo tabi ferese idakẹjẹ ti ko si ikuna tuntun da pada si `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` ni ferese naa).
+- `OPEN`: olupese ti dina fun igba diẹ; awọn olupe gba idahun-ṣiṣi-ṣii olupese tabi ipa ọna konbo si ibi-afẹde miiran.
+- `HALF_OPEN`: atunto akoko ti kọja; gba ìbéèrè ibere. Aṣeyọri tilekun fifọ, ikuna ṣi lẹẹkansi.
 
-**Àwọn àtòwáábáṣe** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, tí a ń lo nípasẹ̀
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` nínú `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` nínú `src/sse/handlers/chatHelpers.ts`). Breaker
-gbogbo-olupese ń ṣiṣẹ́ lórí `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Awọn aiyipada** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, je nipasẹ `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` ni `src/sse/handlers/chatHelpers.ts`). Olupese fifọ gbogbo nṣiṣẹ lori `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profaili |             ń rẹ̀lẹ̀ ní | ń ṣí ní (`circuitBreakerThreshold`) | atúntò (`circuitBreakerReset`) |
-| -------- | --------------------: | ----------------------------------: | -----------------------------: |
-| OAuth    |                   `5` |                                 `8` |                          `60s` |
-| API key  |                   `7` |                                `12` |                          `30s` |
-| Local    | (tí a yọ̀ láti inú rẹ̀) |                                 `2` |                          `15s` |
+| Profaili   | degrades ni | ṣii ni (`circuitBreakerThreshold`) | tunto (`circuitBreakerReset`) |
+| ---------- | ----------: | ---------------------------------: | ----------------------------: |
+| OAuth      |         `5` |                                `8` |                         `60s` |
+| bọtini API |         `7` |                               `12` |                         `30s` |
 
-`PROVIDER_PROFILES` tún ṣàlàyé `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 ìṣẹ́jú) àti `providerCooldownMs` (5/10/1 ìṣẹ́jú): àwọn
-wọ̀nyí ni wọ́n ń mú **ẹ̀nù-ọ̀nà window ti Provider Cooldown gbogbogbo tó jẹ́ aṣayan
-(opt-in)** ṣiṣẹ́ (`PROVIDER_COOLDOWN_ENABLED`, ó pa gẹ́gẹ́ bí àtòwáábáṣe) — ẹ̀kọ́
-ipele-olupese nínú `open-sse/services/providerCooldownTracker.ts` máa kà sí cooling lẹ́yìn
-àṣìṣe `providerFailureThreshold` nínú `providerFailureWindowMs`, lẹ́yìn náà ó máa
-cool fún `providerCooldownMs`. Wọn KÒ ṣe ààlà breaker tó ń ṣiṣẹ́ lọ́wọ́lọ́wọ́ — má ṣe
-ṣàtúnṣe wọn pẹ̀lú retí ìwà breaker. Gbogbo àtòwáábáṣe lè bori nípasẹ̀
-àwọn env var `OMNIROUTE_PROVIDER_BREAKER_*` àti `OMNIROUTE_CIRCUIT_BREAKER_*`;
-tábìlì ìtọ́kasí tó péye fún ìgbàṣiṣe wà nínú `docs/architecture/RESILIENCE_GUIDE.md`.
+Profaili `local` kan ( awọn ikuna `2` / `15s`) tun wa ni `PROVIDER_PROFILES`, ṣugbọn kii ṣe ti firanṣẹ sinu ẹrọ fifọ: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) gba `oauth` tabi `apikey` nikan, ati `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) da ọkan ninu awọn meji wọnyi pada (awọn olupese ti ko forukọsilẹ gba `apikey`).
 
-Àwọn ipò àṣìṣe ipele-olupese nìkan ni ó yẹ kí ó mu breaker olupese ṣiṣẹ́:
+`PROVIDER_PROFILES` tun ṣalaye `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) ati `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, nibiti awọn iye agbegbe ti wa ni inert fun idi kanna bi loke: agbara wọnyi ni** ẹnu-bode window ti ijade ni agbaye Olupese Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, aiyipada ni pipa) — titẹsi ipele olupese ni `open-sse/services/providerCooldownTracker.ts` nikan ka bi itutu agbaiye lẹhin awọn ikuna `providerFailureThreshold` inu `providerFailureWindowMs`, ati lẹhinna tutu fun `providerCooldownMs`. Wọn ti wa ni NOT awọn ala fifọ ifiwe — ko tunse wọn nreti ihuwasi fifọ. Gbogbo aiyipada jẹ apọju nipasẹ awọn `OMNIROUTE_PROVIDER_BREAKER_*` ati `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; tabili itọka akoko-akoko n gbe ni `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Awọn ipo ikuna ipele olupese nikan ni o yẹ ki o fa fifọ olupese naa:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Má ṣe mu breaker gbogbo-olupese ṣiṣẹ́ fún àwọn àṣìṣe àkáùntì/kókó/awoṣe deédéé bí ọ̀pọ̀
-jùlọ irú `401`, `403`, tàbí `429`. Àwọn irú náà sábà máa ń jẹ́ ti connection cooldown tàbí
-model lockout. `403` olupese API-key gbogbogbo yẹ kí ó lè gba ìmúpadà àyàfi tí a bá
-ka á sí àṣìṣe olupese/àkáùntì terminal.
+Ma ṣe tẹ gbogbo olupese fifọ fun awọn aṣiṣe account/key/model deede bii ọpọlọpọ awọn ọran `401`, `403`, tabi awọn ọran `429`. Iyẹn nigbagbogbo jẹ ti itutu asopọ tabi titiipa awoṣe. Olupese bọtini API jeneriki `403` yẹ ki o jẹ atunṣe ayafi ti o ba jẹ ipin bi aṣiṣe provider/account ebute.
 
-Breaker náà ń lo ìmúpadàbọ̀ lẹ́ṣẹ̀ṣẹ̀ (lazy recovery), kì í ṣe àkókò-ìṣẹ́ abẹ́lẹ̀ (background timer). Nígbà tí `OPEN` bá parí, àwọn kíkà bíi `getStatus()`, `canExecute()`, àti `getRetryAfterMs()` máa ń tún ipò náà ṣe sí `HALF_OPEN`, nítorí náà àwọn dashboard àti àwọn ohun-èlò kíkọ́ àfojúsùn combo kì yíò máa yọ olùpèsè tí ìgbà rẹ̀ ti parí kúrò láé.
+Awọn fifọ nlo imularada ọlẹ, kii ṣe aago abẹlẹ. Nigbati `OPEN` ba pari, kika bii `getStatus()`, `canExecute()`, ati `getRetryAfterMs()` sọ ipinlẹ naa sọtun si `HALF_OPEN`, nitorinaa dashboards ati awọn olupilẹṣẹ oludibo konbo ma ṣe yọkuro olupese ti o ti pari lailai.
 
-### Ìdáàrà Ìsopọ̀
+### Itutu Asopọmọra
 
-**Ìwọ̀n**: ìsopọ̀/àkáǹtì/kọ́kọ́rọ́ olùpèsè kan ṣoṣo.
+**Ààlà** : ọkan olupese connection/account/key.
 
-**Ète**: láti fò kọ́kọ́rọ́/àkáǹtì kan tí kò dára fún ìgbà díẹ̀, nígbà tí àwọn ìsopọ̀ mìíràn fún olùpèsè kannáá ń tẹ̀síwájú láti ń gbé àwọn ìbéèrè jáde.
+**Idi** : fo key/account buburu kan fun igba diẹ lakoko gbigba awọn asopọ miiran fun olupese kanna lati tẹsiwaju awọn ibeere ṣiṣe.
 
-**Ìmúṣẹ̀ṣe**:
+**imuse** :
 
-- Ọ̀nà kíkọ/ìmúdójúìwọ̀n: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Ìyàn/ìṣẹ̀ àkáǹtì: `src/sse/services/auth.ts::getProviderCredentials...`
-- Ìṣirò ìdáàrà: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- Àwọn ìsòro: `src/lib/resilience/settings.ts`
+- Write/update ona: `src/sse/services/auth.ts::markAccountUnavailable()`
+- iroyin selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Iṣiro itutu: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Eto: `src/lib/resilience/settings.ts`
 
-Àwọn aya pàtàkì lórí àwọn ìsopọ̀ olùpèsè:
+Awọn aaye pataki lori awọn asopọ olupese:
 
 ```ts
 rateLimitedUntil;
@@ -850,50 +838,50 @@ errorCode;
 backoffLevel;
 ```
 
-Nígbà ìyàn àkáǹtì, a máa fò ìsopọ̀ kan nígbà tí:
+Lakoko yiyan akọọlẹ, asopọ kan ti fo lakoko:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Àwọn ìdáàrà náà jẹ́ lẹ́ṣẹ̀ṣẹ̀ pẹ̀lú: nígbà tí `rateLimitedUntil` bá ti kọjá, ìsopọ̀ náà máa di ẹlẹ́báṣepọ̀ sí i. Nígbà lílò rere, `clearAccountError()` máa pa `testStatus`, `rateLimitedUntil`, àwọn aya àṣìṣe, àti `backoffLevel` rẹ́.
+Cooldowns tun jẹ ọlẹ: nigbati `rateLimitedUntil` wa ni igba atijọ, asopọ naa di ẹtọ lẹẹkansi. Lori lilo aṣeyọri, `clearAccountError()` ko `testStatus`, `rateLimitedUntil`, awọn aaye aṣiṣe, ati `backoffLevel`.
 
-Iwà ìdáàrà ìsopọ̀ àtẹ̀ṣe:
+Iwa itutu agbaiye asopọ aiyipada:
 
-- Ìdáàrà ìpìlẹ̀ OAuth: `5s`.
-- Ìdáàrà ìpìlẹ̀ API-key: `3s`.
-- API-key `429` gbọdọ̀ fẹ́ àwọn àmì ìtọ́nisọ̀nà ìtúnjìdé láti ọ̀dọ̀ upstream (`Retry-After`, àwọn header àtúntò, tàbí ọ̀rọ̀ àtúntò tí a lè ṣàtúnjọ) nígbà tí wọ́n bá wà.
-- Àwọn ìkùnà tó tẹ̀le ara wọn tí a lè padàsì ń lo exponential backoff:
+- OAuth mimọ cooldown: `5s`.
+- API-bọtini mimọ itutu: `3s`.
+- Bọtini API `429` yẹ ki o fẹran awọn itọni atunwo oke (`Retry-After`, awọn akọle atunto, tabi ọrọ atunto atunto) nigbati o wa.
+- Awọn ikuna ti o le gba pada leralera lo ifẹhinti ipari:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Ààbò anti-thundering-herd ń dí àwọn ìkùnà tó ń ṣẹlẹ̀ lọ́jọ̀pọ̀ lórí ìsopọ̀ kannáá kí wọ́n má mú ìdáàrà gùn lẹ́ẹ̀ẹ̀kansi tàbí kí wọ́n ṣe ìfikún `backoffLevel` lẹ́mẹjì.
+Ẹṣọ agbo-ẹran-agbo-ara ṣe idilọwọ awọn ikuna nigbakanna lori asopọ kanna lati fa itutu agbaiye leralera tabi ilọpo meji `backoffLevel`.
 
-Àwọn ipò ìparí kì í ṣe ìdáàrà. `banned`, `expired` (tó máa di ìparí lẹ́yìn àwọn ìtúnjìdé N tó ní ààlà nípasẹ̀ `EXPIRED_RETRY_MAX` nìkan), àti `credits_exhausted` ni wọ́n gbéra kí wọ́n má bàá sí ní àìrílò títí tí àwọn ìfàwẹ̀hàn/ìsòro yóò fi yí padà tàbí tí olùṣàkóso kan yóò tún wọ́n ṣe. Má ṣe kọ ipò ìdáàrà ìgbà díẹ̀ sórí àwọn ipò ìparí.
+Awọn ipinlẹ ebute kii ṣe itutu agbaiye. `banned`, `expired` (eyiti o di ebute nikan lẹhin awọn igbiyanju N bounded nipasẹ `EXPIRED_RETRY_MAX`), ati `credits_exhausted` ti pinnu lati duro ko si titi di iyipada credentials/settings tabi oniṣẹ ẹrọ tunto wọn. Maṣe kọ awọn ipinlẹ ebute pada pẹlu ipo itutu agbaiye.
 
-### Ìdíwọ́ Àwòsẹ
+### Titiipa awoṣe
 
-**Ìwọ̀n**: olùpèsè + ìsopọ̀ + àwòsẹ.
+**Ààlà** : olupese + asopọ + awoṣe.
 
-**Ète**: láti yàgò fún dídáálàgbára gbogbo ìsopọ̀ kan nígbà tí àwòsẹ kan ṣoṣo nìkan ni kò sí tàbí quota ti dí í lọ́wọ́ fún ìsopọ̀ náà.
+**Idi** : yago fun piparẹ gbogbo asopọ nigbati awoṣe kan ko si tabi ni opin-ipin fun asopọ yẹn.
 
-Àwọn àpẹẹrẹ:
+Awọn apẹẹrẹ:
 
-- Àwọn olùpèsè quota àwòsẹ-kọ̀ọ̀kan tó ń dá `429` padà.
-- Àwọn olùpèsè abílé tó ń dá `404` padà fún àwòsẹ kan tó sọnù.
-- Àwọn ìkùnà àṣẹ ipò/àwòsẹ olùpèsè-kan bíi àwọn ipò Grok tí a yàn.
+- Awọn olupese ipin ipin-awoṣe ti n pada `429`.
+- Awọn olupese agbegbe ti n pada `404` fun awoṣe sonu kan.
+- Awọn ikuna igbanilaaye mode/model ti olupese-pato gẹgẹbi awọn ipo Grok ti a yan.
 
-Ìdíwọ́ àwòsẹ wà nínú `open-sse/services/accountFallback.ts` ó sì jọ̀wọ́ ìsopọ̀ kannáá láti tẹ̀síwájú láti ń sin àwọn àwòsẹ mìíràn.
+Titiipa awoṣe n gbe ni `open-sse/services/accountFallback.ts` ati jẹ ki asopọ kanna tẹsiwaju lati sin awọn awoṣe miiran.
 
-### Ìtọ́nisọ̀nà Ìwádìí Àṣìṣe
+### Itọsọna N ṣatunṣe aṣiṣe
 
-- Tí gbogbo àwọn kọ́kọ́rọ́ fún olùpèsè kan bá fò, ṣàyẹ̀wò ipò breaker olùpèsè àti `rateLimitedUntil`/`testStatus` ti ìsopọ̀ kọ̀ọ̀kan.
-- Tí olùpèsè kan bá hàn bí ẹni pé a ti yọ ọ́ kúrò láé lẹ́yìn gbòǹgàn àtúntò, ṣàyẹ̀wò bóyá kóòdù ń ka `state` rárá dípò lílò `getStatus()`/`canExecute()`.
-- Tí kọ́kọ́rọ́ olùpèsè kan bá kùnà ṣùgbọ́n àwọn mìíràn yẹ kí wọ́n ṣiṣẹ́, fẹ́ ìdáàrà ìsopọ̀ ju breaker olùpèsè lọ.
-- Tí àwòsẹ kan ṣoṣo nìkan bá kùnà, fẹ́ ìdíwọ́ àwòsẹ ju ìdáàrà ìsopọ̀ lọ.
-- Tí ipò kan bá yẹ kí ó máa mú ara ẹni padà, ó gbọdọ̀ ní àmì-àkókò ọ̀la/ìparí àkókò àtúntò àti ọ̀nà kíkà tí ń tún ipò tó ti parí ṣe. Àwọn ipò tó dúró láé nílò ìyípadà ìfàwẹ̀hàn tàbí ìtòlẹ́sẹ̀ẹsẹ̀ ọwọ́.
+- Ti gbogbo awọn bọtini fun olupese ba fo, ṣayẹwo mejeeji ipo fifọ olupese ati asopọ kọọkan `rateLimitedUntil`/`testStatus`.
+- Ti olupese ba han ni iyasọtọ patapata lẹhin window atunto, ṣayẹwo boya koodu n ka aise `state` dipo lilo `getStatus()`/`canExecute()`.
+- Ti bọtini olupese kan ba kuna ṣugbọn awọn miiran yẹ ki o ṣiṣẹ, fẹran itutu asopọ lori fifọ olupese.
+- Ti awoṣe kan ba kuna, fẹ titiipa awoṣe lori itutu asopọ.
+- Ti ipinle ba yẹ ki o gba ararẹ pada, o yẹ ki o ni akoko akoko timestamp/reset iwaju ati ọna kika ti o tun sọ ipo ipari. Awọn ipo yẹ nilo iwe-ẹri afọwọṣe tabi awọn ayipada atunto.
 
 ---
 

@@ -12,56 +12,53 @@ OmniRoute ሦስት የተለያዩ ግን ተዛማጅ የመቋቋም ዘዴ�
 
 > **ኤንቪ-ቪኤስ-ዳሽቦርድ ቀዳሚነት ለማገገም መቀየሪያዎች።** የመርጦ የመግባት የመቋቋም ችሎታ ዘርን ከአካባቢው ይቀይራል — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) ብቻ ያቀርባል. ቡሊያን በ `resilienceSettings` ውስጥ ቀጠለ (ዳሽቦርድ →** ቅንብሮች → የመቋቋም** / `PATCH /api/resilience`፣ በ `key_value` ውስጥ የተከማቸ) በ env እሴት ላይ ያሸንፋል፡ መደበኛ ማድረግ (`toBoolean`፣ `src/lib/resilience/settings/normalize.ts`) አንድ ባለበት ጊዜ የተከማቸ ቡሊያንን ያቆያል። እንደዚህ ያለ env var ወደ `true` ማዋቀር ዳሽቦርዱ አስቀድሞ `false` ያስቀመጠበት ቦታ ላይ ስለዚህ ምንም ለውጥ የለውም — መቀያየሪያውን ወደ ውስጥ ገልብጡት** ቅንብሮች → የመቋቋም** (ወይም የተከማቸ መስኩን ያጽዱ) ይልቁንስ.
 
-## 1. የአቅራቢ ሰርኪት ብሬከር (Circuit Breaker)
+## 1. አቅራቢ የወረዳ ተላላፊ
 
-**መድረክ:** ሙሉ አቅራቢ (ለምሳሌ፣ `glm`፣ `openai`፣ `anthropic`)።
+**ወሰን፡** ሙሉ አቅራቢ (ለምሳሌ፣ `glm`፣ `openai`፣ `anthropic`)።
 
-**ዓላማ:** በአፕስትሪም/አገልግሎት ደረጃ ተከታታይ ውድቀት ለሚያሳይ አቅራቢ ትራፊክ መላክን ማቆም።
+**ዓላማ፡-** በ upstream/service ደረጃ ላይ በተደጋጋሚ እየወደቀ ወደ አቅራቢው ትራፊክ መላክ ያቁሙ።
 
-**ትግበራ:**
+**ትግበራ፡**
 
-- ዋና ክላስ: `src/shared/utils/circuitBreaker.ts`
-- ግንኙነት (wiring): `src/sse/handlers/chatHelpers.ts`፣ `src/sse/handlers/chat.ts`
-- የሁኔታ API: `GET /api/monitoring/health`
-- የዳግም ማስጀመሪያ API: `POST /api/resilience/reset`
-- ማሸጊያዎች (wrappers): `open-sse/services/accountFallback.ts`
-- የዳታቤዝ ሰንጠረዥ: `domain_circuit_breakers`
+- ዋና ክፍል `src/shared/utils/circuitBreaker.ts`
+- ሽቦ: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- ሁኔታ API: `GET /api/monitoring/health`
+- እንደገና አስጀምር API: `POST /api/resilience/reset`
+- መጠቅለያዎች `open-sse/services/accountFallback.ts`
+- DB ጠረጴዛ `domain_circuit_breakers`
 
-**ሁኔታዎች:**
+**ግዛቶች፡**
 
-- `CLOSED` — መደበኛ ትራፊክ ይፈቀዳል
-- `DEGRADED` — ትራፊክ አሁንም ይፈቀዳል፣ ግን ከፍ ያሉ የአቅራቢ ውድቀቶች እየተከታተሉ ነው፤ በቂ ስኬቶች ሲገኙ፣ ትክክለኛ የግንኙነት ሙከራ ሲፈጸም፣ ወይም ለመጨረሻው የውድቀት አይነት ረጅሙ የ`OPEN` መቆያ (የ`cooldownByKind` እሴቱ፣ አለበለዚያ `resetTimeout`፣ × `maxBackoffMultiplier`፣ ቢያንስ አንድ cooldown) ያለ አዲስ ውድቀት ሲያልፍ ወደ `CLOSED` ይመለሳል
-- `OPEN` — አቅራቢው ለጊዜው ታግዷል፤ combo ማዛወሪያ ያለፍበታል
-- `HALF_OPEN` — የዳግም ማስጀመሪያ ጊዜ አልፏል፤ የመሞከሪያ (probe) ጥያቄ ይፈቀዳል
+- `CLOSED` — መደበኛ ትራፊክ ይፈቀዳል።
+- `DEGRADED` — ትራፊክ አሁንም ተፈቅዷል፣ ነገር ግን ከፍ ያለ የአገልግሎት ሰጪ አለመሳካቶች እየተከታተሉ ነው። ወደ `CLOSED` በበቂ ስኬቶች፣ በትክክለኛ የግንኙነት ሙከራ ወይም ከረጅሙ `OPEN` ቆይታ በኋላ ለመጨረሻው የብልሽት አይነት (የ `cooldownByKind` እሴቱ፣ ሌላ `resetTimeout`፣ × `maxBackoffMultiplier`፣ ቢያንስ አንድ ማቀዝቀዣ) ያለ አዲስ ውድቀት ይመለሳል።
+- `OPEN` — አቅራቢ ለጊዜው ታግዷል; ኮምቦ ማዞሪያ ይዘላል
+- `HALF_OPEN` — ዳግም ማስጀመር ጊዜ አልፏል; የፍተሻ ጥያቄ ተፈቅዷል
 
-**ሊዋቀሩ የሚችሉ ነባሪዎች (`open-sse/config/constants.ts`፣ በDashboard → Settings → Resilience ላይ የተጋለጡ):**
+**ሊዋቀሩ የሚችሉ ነባሪዎች (`open-sse/config/constants.ts`፣ በ Dashboard → Settings → Resilience ውስጥ ተጋልጧል)**
 
-| መደብ     | DEGRADED የሚሆንበት | የሚከፈትበት  | የዳግም ማስጀመሪያ ጊዜ |
-| ------- | --------------- | -------- | -------------- |
-| OAuth   | 5 ውድቀቶች         | 8 ውድቀቶች  | 60s            |
-| API-key | 7 ውድቀቶች         | 12 ውድቀቶች | 30s            |
-| Local   | የሚሰላ            | 2 ውድቀቶች  | 15s            |
+| ክፍል      | የተቀነሰ በ   | ይከፈታል።    | ጊዜው ያለፈበትን ዳግም አስጀምር |
+| -------- | --------- | --------- | -------------------- |
+| OAuth    | 5 ውድቀቶች   | 8 አለመሳካቶች | 60 ዎቹ                |
+| ኤፒአይ-ቁልፍ | 7 አለመሳካቶች | 12 ውድቀቶች  | 30 ዎቹ                |
 
-`degradationThreshold` አቅራቢው መቼ `DEGRADED` እንደሚሆን ይቆጣጠራል፤ `failureThreshold` መቼ እንደሚከፈት እና እንደሚዘለል ይቆጣጠራል። የአካባቢ (Local) አቅራቢ መገለጫዎች ገና በResilience ቅንብሮች ገጽ ላይ አልተጋለጡም።
+`degradationThreshold` አቅራቢው `DEGRADED` ሲገባ ይቆጣጠራል; `failureThreshold` ሲከፈት እና ሲዘለል ይቆጣጠራል። `PROVIDER_PROFILES.local` (2 አለመሳካቶች / 15s) በ `open-sse/config/constants.ts` ውስጥ ይገለጻል ግን** እስካሁን በገመድ አልተሰራም።** : `getProviderCategory()` የሚመለሰው `oauth` ወይም `apikey` ብቻ ነው፣ ስለዚህ የሀገር ውስጥ አቅራቢዎች OAuth ወይም API-key profile ይጠቀማሉ።
 
-**የማነቃቂያ ኮዶች (trip codes):** የአቅራቢ-ደረጃ ሁኔታዎች `[408, 500, 502, 503, 504]` ብቻ። ለመለያ-ደረጃ ስህተቶች ፈጽሞ አይነቃቁም (አብዛኛዎቹ 401/403/429 — እነዚያ ለcooldown ወይም ለlockout የሚሆኑ ናቸው)።
+**የጉዞ ኮድ:** የአቅራቢ ደረጃ ሁኔታዎች `[408, 500, 502, 503, 504]` ብቻ። ለመለያ ደረጃ ስህተቶች NOT ጉዞን ያድርጉ (አብዛኛዎቹ 401/403/429 — የማቀዝቀዝ ወይም የመቆለፊያ ናቸው)።
 
-**ዝግታ ማገገም (lazy recovery):** `OPEN` ሲያበቃ፣ `getStatus()`፣ `canExecute()`፣ `getRetryAfterMs()` ሁኔታውን ወደ `HALF_OPEN` ያድሳሉ። ተመሳሳዮቹ ንባቦች (እና ቀጣዩ ውድቀት) ጊዜው ያለፈበትን `DEGRADED` ወደ `CLOSED` እስኪመለስ ይቀንሱታል። የጀርባ ታይመር አያስፈልግም።
+**ሰነፍ ማገገም;** `OPEN` ሲያልቅ፣ `getStatus()`፣ `canExecute()`፣ `getRetryAfterMs()` አድስ ሁኔታ ወደ `HALF_OPEN`። ተመሳሳይ ንባቦች (እና ቀጣዩ ውድቀት) የቆየ `DEGRADED` ወደ `CLOSED` ይመለሳል። ምንም የጀርባ ሰዓት ቆጣሪ አያስፈልግም።
 
 ---
 
-### በፈቃደኝነት የሚጀምር አጠቃላይ የአቅራቢ Cooldown (የመስኮት በር)
+### መርጠው ይግቡ አለምአቀፍ አቅራቢ ማቀዝቀዝ (የመስኮት በር)
 
-አራተኛው፣ **በፈቃደኝነት (opt-in)** የሚጀምር ንብርብር (`PROVIDER_COOLDOWN_ENABLED`፣ ነባሪ **ጠፍቷል**) በ`open-sse/services/providerCooldownTracker.ts` ውስጥ ውድቀት ለሚያሳዩ አቅራቢዎች በጥያቄዎች መካከል የሚቆይ ትውስታ ይይዛል፣ ይህም በcombo ዒላማ መወሰን (target resolution) ላይ የሚጠነቀቅ ሲሆን፣ ተከታታይ combo ጥያቄዎች በቅርቡ የወደቀ አቅራቢን እንደገና መሄድ እንዲያቆሙ ያደርጋል። የአቅራቢ-ደረጃ ግቤቶች የ`PROVIDER_PROFILES` የመስኮት በርን ይከተላሉ:
+አራተኛ ፣** መርጦ መግባት** ንብርብር (`PROVIDER_COOLDOWN_ENABLED`፣ ነባሪ** ጠፍቷል** ) በ `open-sse/services/providerCooldownTracker.ts` ውስጥ ያልተሳኩ አቅራቢዎችን የጥያቄ አቋራጭ ማህደረ ትውስታን ይይዛል፣ በጥምረት ዒላማ አፈታት ተማክሮ ተከታታይ ጥምር ጥያቄዎች አሁን ያልተሳካውን አገልግሎት አቅራቢን እንደገና መጓዙን ያቆማሉ። የአቅራቢ ደረጃ ግቤቶች `PROVIDER_PROFILES` መስኮት በርን ያከብራሉ፡-
 
-| መገለጫ    | የሚነቃበት ገደብ (`providerFailureThreshold`) | ውስጥ (`providerFailureWindowMs`) | የሚቀዝቅዝበት ጊዜ (`providerCooldownMs`) |
-| ------- | --------------------------------------: | ------------------------------: | ---------------------------------: |
-| OAuth   |                                    `10` |                         `15min` |                             `5min` |
-| API key |                                    `15` |                         `30min` |                            `10min` |
+| መገለጫ    | ጉዞዎች በኋላ (`providerFailureThreshold`) | ውስጥ (`providerFailureWindowMs`) | ይበርዳል ለ (`providerCooldownMs`) |
+| ------- | ------------------------------------: | ------------------------------: | -----------------------------: |
+| OAuth   |                                  `10` |                         `15min` |                         `5min` |
+| API ቁልፍ |                                  `15` |                         `30min` |                        `10min` |
 
-ከገደቡ በታች አቅራቢው እየቀዘቀዘ ነው ተብሎ **አይወሰድም**፤ ስኬት መስኮቱን ያጸዳል። የግንኙነት-ደረጃ ግቤቶች (`provider:connectionId`) ይልቁንም የ`minRetryCooldownMs → maxRetryCooldownMs` ኤክስፖነንሺያል (exponential) backoff ይጠብቃሉ። ላይ-መጻፊያዎች (overrides):
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`።
-የሪግሬሽን መከላከያ (regression guard): `tests/unit/provider-cooldown-window-gate.test.ts`።
+አቅራቢው ከመነሻው በታች ነው።** አይደለም** እንደ ማቀዝቀዝ ይቆጠራል; ስኬት መስኮቱን ያጸዳል. በግንኙነት ደረጃ ግቤቶች (`provider:connectionId`) በምትኩ `minRetryCooldownMs → maxRetryCooldownMs` ከኋላ ያቆዩታል። ይሽራል `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. መመለሻ ጠባቂ `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. የግንኙነት ማቀዝቀዝ
 
@@ -621,6 +618,21 @@ connectionId)` ከ `exhaustedConnections` ፍለጋ በፊት) — ተራ የሞ
 
 ---
 
+## OmniRoute እራሱ በማይደረስበት ጊዜ
+
+የአቅራቢው ሰርኩይ ሰሪ፣ የግንኙነቶች ማቀዝቀዣ እና የሞዴል መቆለፊያ ሁሉም በበረኛው ውስጥ ይሰራሉ። ደንበኛው በመግቢያው ላይ መድረስ ካልቻለ የግንኙነት ስህተት አለበት። OmniRoute ያንን ውድቀት ሊያስተጓጉል አይችልም። ደንበኛው እንደገና ለመሞከር እና የትኛውን መልእክት ማሳየት እንዳለበት ይወስናል።
+
+OmniRoute በአሁኑ ጊዜ ከደንበኛ-ጎን መመለሻ አይሰጥም እና ለእሱ ምንም ፖሊሲ አይገልጽም። በደንበኛው ውስጥ ወይም በመግቢያው ፊት ለፊት ያለውን ማንኛውንም አማራጭ መንገድ ያዋቅሩ።
+
+- `GET /api/health` መኖርን ያለማረጋገጫ ይፈትሻል።
+- `GET /api/health/ping` ዝግጁነትን ይፈትሻል፣ የመረጃ ቋቱ ምላሽ ይሰጥ እንደሆነ ጨምሮ።
+- `GET /api/monitoring/health` ለታወቁ ደዋዮች ጥልቅ የጤና አጠቃላይ እይታ ይሰጣል።
+- `omniroute launch <tool>` ደንበኛውን ከመጀመርዎ በፊት `/api/monitoring/health` ይመረምራል። የአከባቢ መግቢያ በርን በራስ ሰር መጀመር ይችላል። በ `--no-start`፣ የማይደረስ መግቢያ በር `GatewayUnreachable` እና መውጫ ኮድ `69` ያስከትላል።
+
+ደንበኛን ከ OmniRoute ለማላቀቅ [የደንበኛ ማዋቀርን](../guides/UNINSTALL.md#revert-client-configuration) ይከተሉ።
+
+---
+
 ## ማረም (Debugging)
 
 - Weighted combo `503 all_targets_cooling_down` መልስ ይሰጣል (`Retry-After` ተቀምጧል፣ `diagnostics.excluded` እያንዳንዱን ዒላማ ከ`model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable` ጋር ይዘረዝራል) → ገንዳው (pool) ተዋቅሮ እና ተገናኝቷል፣ እያንዳንዱ ዒላማ በችናነት ቆጣሪ (resilience timer) ብቻ ነው የተከለከለው፤ የ`[COMBO] Weighted selection: every target excluded before dispatch — …` ማስጠንቀቂያው ምክንያቶችን እና የሚቀሩትን ሰከንዶች ይጠቅሳል። ከተመሳሳይ combo የሚመነጭ `404 no_executable_targets` ማለት ምንም የችናነት ቆጣሪ አልተሳተፈም ማለት ነው (ሊሠራ የሚችል ነገር የለም፣ ወይም እያንዳንዱ መለያ የተገኝነት ምርመራን (availability probe) አሳልፏል)። በ`targetResolution.ts` ውስጥ ከተሰበሰቡት ማግለሎች (exclusions) በ`open-sse/services/combo/pinRecovery.ts` ውስጥ የተገነባ ነው።
@@ -632,93 +644,68 @@ connectionId)` ከ `exhaustedConnections` ፍለጋ በፊት) — ተራ የሞ
 
 ---
 
-## የሰርቲዋይም (runtime) ሁኔታ — ለወኪል (agent) ፈጣን ማጣቀሻ
+## የአሂድ ግዛት — ወኪል ፈጣን ማጣቀሻ
 
-> ከ`AGENTS.md` → "Resilience Runtime State" በቃል በቃል ተይዟል (PR #12743) ወኪሉ
-> መመሪያ ከ40k የአውድ በጀት (context budget) በታች እንዲቆይ። የላይኞቹ
-> ክፍሎች የተቀነባበረ፣ ለወኪል የሚቀርብ እይታ ነው፤ ቁጥር ያላቸው ክፍሎች ሙሉው ማጣቀሻ ይቀጥላሉ።
+> ቃል በቃል ከ `AGENTS.md` → ተንቀሳቅሷል "Resilience Runtime State" (PR #12743) ስለዚህ የወኪሉ መመሪያ በ40k አውድ በጀት ስር ይቆያል። እሱ ከላይ ያሉት ክፍሎች የታመቀ ፣ የወኪል ፊት እይታ ነው ። የተቆጠሩት ክፍሎች ሙሉ ማጣቀሻ ሆነው ይቆያሉ.
 
-OmniRoute ሦስት የተያያዙ ግን የተለያዩ ጊዜያዊ-ውድቀት ዘዴዎች አሉት። የማዞሪያ ባህሪ ሲያርሙ
-የእያንዳንዱን መድረክ (scope) በተነጻጸረ ይያዙ። የ
-[3-ንብርብር የችናነት ንድፍ](../diagrams/exported/resilience-3layers.svg)
-ይመልከቱ (ምንጭ፡ [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-በአንድ እይታ ለማየት።
+OmniRoute ሶስት ተዛማጅ ግን የተለዩ ጊዜያዊ-የጥፋት ዘዴዎች አሉት። የማዘዋወር ባህሪን በሚያርሙበት ጊዜ ክልላቸውን ለይተው ያስቀምጡ። በጨረፍታ ካርታ ለማግኘት ባለ [3-ንብርብር የመቋቋም ዲያግራም](../diagrams/exported/resilience-3layers.svg) (ምንጭ [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) ይመልከቱ።
 
-### የአቅራቢ Circuit Breaker
+### አቅራቢ የወረዳ ተላላፊ
 
-**መድረክ**: ሙሉ አቅራቢ፣ ለምሳሌ `glm`, `openai`, `anthropic`.
+**ወሰን** ሙሉ አቅራቢ፡ ለምሳሌ `glm`, `openai`, `anthropic`.
 
-**ዓላማ**: በupstream/አገልግሎት ደረጃ ተከታታይ ውድቀቶች ለሚያሳይ አቅራቢ ትራፊክ መላክን
-ማቆም፣ አንድ ያልጤና አቅራቢ እያንዳንዱን ጥያቄ እንዳይዘገይው።
+**ዓላማ** : ትራፊክን ወደ አቅራቢው መላክ ያቁሙ በ upstream/service ደረጃ በተደጋጋሚ እየከሰመ ነው፣ ስለዚህ አንድ ጤናማ ያልሆነ አገልግሎት አቅራቢ እያንዳንዱን ጥያቄ አይቀንስም።
 
-**ትግበራ**:
+**መተግበር** :
 
-- ዋና ክፍል (class)፡ `src/shared/utils/circuitBreaker.ts`
-- የቻት በር/አፈጻጸም ገመድ (wiring)፡ `src/sse/handlers/chatHelpers.ts`፣ `src/sse/handlers/chat.ts`
-- የሰርቲዋይም ሁኔታ API፡ `src/app/api/monitoring/health/route.ts`
-- የተጋሩ መጠለያዎች (wrappers)፡ `open-sse/services/accountFallback.ts`
-- የተቀመጠ ሁኔታ ሠንጠረዥ፡ `domain_circuit_breakers`
+- ዋና ክፍል `src/shared/utils/circuitBreaker.ts`
+- የውይይት gate/execution ሽቦ `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- የአሂድ ሁኔታ API: `src/app/api/monitoring/health/route.ts`
+- የተጋሩ መጠቅለያዎች `open-sse/services/accountFallback.ts`
+- የጸና የግዛት ሰንጠረዥ `domain_circuit_breakers`
 
-**ሁኔታዎች** (4 — `src/shared/utils/circuitBreaker.ts`):
+**ግዛቶች** (4 — `src/shared/utils/circuitBreaker.ts`):
 
 - `CLOSED`: መደበኛ ትራፊክ ይፈቀዳል።
-- `DEGRADED`: ቀደም-ተብሎ ማስጠንቀቂያ ክልል — ውድቀቶች የመቀነሱን ገደብ (degradation threshold)
-  አቋርጠዋል ግን እስካሁን የbreaker ገደብ አላቋረጡም፤ ትራፊኩ አሁንም ይፈሳል፣ ዳሽቦርዶች ማስጠንቀቂያውን ያሳያሉ።
-  ተቀባይነት ያለው የግንኙነት ምርመራ ወይም አዲስ ውድቀት የሌለበት ጸጥ ያለ መስኮት ወደ `CLOSED` ይመልሰዋል
-  (`docs/architecture/RESILIENCE_GUIDE.md` መስኮቱን ያለው)።
-- `OPEN`: አቅራቢው ለጊዜው ታግዷል፤ ጠሪዎች የprovider-circuit-open ምላሽ ያገኛሉ
-  ወይም combo ማዞሪያ ወደ ሌላ ዒላማ ይዘዋወራል።
-- `HALF_OPEN`: የreset ጊዜ ማብቃት (timeout) አልፏል፤ የምርመራ ጥያቄ ይፈቀዳል። ስኬት
-  breaker-አን ይዘጋል፣ ውድቀት እንደገና ይከፍታል።
+- `DEGRADED`: የቅድሚያ ማስጠንቀቂያ ባንድ — ውድቀቶች የማሽቆልቆል ጣራውን አልፈዋል ግን ሰባሪውን ገና አላለፉም; ትራፊክ አሁንም ይፈስሳል፣ ዳሽቦርዶች ማስጠንቀቂያውን ያሳያሉ። ትክክለኛ የግንኙነት ሙከራ ወይም ጸጥ ያለ መስኮት አዲስ አለመሳካት ወደ `CLOSED` ይመልሰዋል (`docs/architecture/RESILIENCE_GUIDE.md` መስኮቱ አለው)።
+- `OPEN`: አቅራቢው ለጊዜው ታግዷል; ደዋዮች ወደ ሌላ ዒላማ አቅራቢ-የወረዳ-ክፍት ምላሽ ወይም ጥምር ማዘዋወር ያገኛሉ።
+- `HALF_OPEN`: ዳግም ማስጀመር ጊዜው አልፎበታል; የፍተሻ ጥያቄ ፍቀድ። ስኬት ሰባሪውን ይዘጋዋል, ውድቀት እንደገና ይከፍታል.
 
-**ነባሪዎች** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`፣ በ
-`src/lib/resilience/settings.ts` ውስጥ `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` በኩል ተጠቅሞ →
-በ`src/sse/handlers/chatHelpers.ts` ውስጥ `getCircuitBreaker(provider, …)`። የሙሉ-አቅራቢው
-breaker በ`circuitBreakerThreshold` / `circuitBreakerReset` ላይ ይሠራል፦
+**ነባሪዎች** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`፣ በ `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` በኩል የሚበላው በ `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` በ `src/sse/handlers/chatHelpers.ts` ውስጥ)። ሙሉ አቅራቢው በ `circuitBreakerThreshold` / `circuitBreakerReset` ላይ ይሰራል፡-
 
-| መገለጫ    | የሚቀንስበት | የሚከፍትበት (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
-| ------- | ------: | ----------------------------------: | ----------------------------: |
-| OAuth   |     `5` |                                 `8` |                         `60s` |
-| API ቁልፍ |     `7` |                                `12` |                         `30s` |
-| አካባቢያዊ  |  (የተሰራ) |                                 `2` |                         `15s` |
+| መገለጫ    | ላይ ዝቅ ያደርጋል | በ (`circuitBreakerThreshold`) ይከፈታል | ዳግም አስጀምር (`circuitBreakerReset`) |
+| ------- | ----------: | ----------------------------------: | --------------------------------: |
+| OAuth   |         `5` |                                 `8` |                             `60s` |
+| API ቁልፍ |         `7` |                                `12` |                             `30s` |
 
-`PROVIDER_PROFILES` እንዲሁም `providerFailureThreshold` (10/15/2)፣
-`providerFailureWindowMs` (15/30/5 ደቂቃ) እና `providerCooldownMs` (5/10/1 ደቂቃ) ይገልጻል፦ እነዚህ
-**የሚመረጠውን (opt-in) አጠቃላይ Provider Cooldown የመስኮት በርን** ኃይል ይሰጣሉ
-(`PROVIDER_COOLDOWN_ENABLED`፣ ነባሪ ጠፍቷል) — በ`open-sse/services/providerCooldownTracker.ts` ውስጥ ያለ የአቅራቢ-ደረጃ ግቤት
-ከ`providerFailureThreshold` ውድቀቶች በ`providerFailureWindowMs` ውስጥ በኋላ ብቻ እያቃዘ ይቆጠራል፣
-ከዚያም ለ`providerCooldownMs` ያቃዛል። እነዚህ የሕይወቱ (live) breaker ገደቦች አይደሉም — breaker ባህሪ
-ተስመምታችሁ ማስተካከል አትሞክሩ። እያንዳንዱ ነባሪ በ
-`OMNIROUTE_PROVIDER_BREAKER_*` እና `OMNIROUTE_CIRCUIT_BREAKER_*` የአካባቢ ተለዋዋጮች (env vars) መተካት ይቻላል፤
-ትክክለኛው የሰርቲዋይም ማጣቀሻ ሠንጠረዥ በ`docs/architecture/RESILIENCE_GUIDE.md` ውስጥ ነው።
+የ `local` መገለጫ (`2` አለመሳካቶች / `15s`) በ `PROVIDER_PROFILES` ውስጥም አለ፣ ነገር ግን ወደ ሰባሪው ውስጥ አልተገጠመም `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) `oauth` ወይም `apikey` ብቻ ይቀበላል፣ እና `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) ከሁለቱ አንዱን ይመልሳል (ያልተመዘገቡ አቅራቢዎች `apikey` ያገኛሉ)።
 
-የአቅራቢ breaker የሚያነሳሱት የአቅራቢ-ደረጃ የውድቀት ሁኔታዎች ብቻ መሆን አለባቸው፦
+`PROVIDER_PROFILES` ደግሞ `providerFailureThreshold` (10/15/2)፣ `providerFailureWindowMs` (15/30/5 min) እና `providerCooldownMs` (5/10/1 min) — OAuth/API key/local ይገልፃል፣ የአካባቢ እሴቶች ከላይ በተጠቀሰው ተመሳሳይ ምክንያት የማይሰሩ ናቸው፡ እነዚህ ሃይል** የመርጦ መግቢያ የአለምአቀፍ አቅራቢ ማቀዝቀዣ የመስኮት በር** (`PROVIDER_COOLDOWN_ENABLED`፣ ነባሪ ጠፍቷል) — በ `open-sse/services/providerCooldownTracker.ts` ውስጥ ያለው የአቅራቢ ደረጃ ግቤት እንደ ማቀዝቀዝ የሚቆጠረው በ `providerFailureWindowMs` ውስጥ `providerFailureThreshold` ውድቀት በኋላ ነው፣ እና ከዚያ ለ `providerCooldownMs` ይቀዘቅዛል። እነሱ NOT የቀጥታ ሰባሪው ጣራዎች — የሰሪ ባህሪን የሚጠብቁ አያስተካክላቸውም። እያንዳንዱ ነባሪ በ `OMNIROUTE_PROVIDER_BREAKER_*` እና `OMNIROUTE_CIRCUIT_BREAKER_*` env vars በኩል ሊሻር የሚችል ነው። የሩጫ ጊዜ ትክክለኛ የማጣቀሻ ሰንጠረዥ በ `docs/architecture/RESILIENCE_GUIDE.md` ውስጥ ይኖራል።
+
+የአቅራቢ ደረጃ አለመሳካት ሁኔታዎች ብቻ የአቅራቢውን ሰባሪ ሊያሰናክሉት ይገባል፡-
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-ሙሉውን የአቅራቢ breaker ለመደበኛ የመለያ/ቁልፍ/ሞዴል ስህተቶች እንደ አብዛኞቹ
-`401`, `403`, ወይም `429` አግባቦች አታንሱት። እነዚያ ብዙውን ጊዜ የግንኙነት ማቀዝቀዣ (connection cooldown)
-ወይም የሞዴል መቆለፊያ (model lockout) ናቸው። አጠቃላይ የAPI-ቁልፍ አቅራቢ `403` እስካልተመደበ እንደ ማብቃታዊ
-የአቅራቢ/መለያ ስህተት (terminal provider/account error) ድረስ ሊድን ይገባል።
+እንደ አብዛኞቹ `401`፣ `403`፣ ወይም `429` ጉዳዮች ለተለመደ account/key/model ስህተቶች ሙሉ አቅራቢውን አያሰናክሉት። እነዚያ ብዙውን ጊዜ የግንኙነት ማቀዝቀዣ ወይም የሞዴል መቆለፊያ ናቸው። አጠቃላይ የኤፒአይ-ቁልፍ አቅራቢ `403` እንደ ተርሚናል provider/account ስህተት ካልተመደበ በስተቀር መልሶ ማግኘት የሚቻል መሆን አለበት።
 
-ሰሪው ሰነፍ ማገገምን ይጠቀማል እንጂ የጀርባ ቆጣሪን አይጠቀምም። `OPEN` ሲያበቃ፣ እንደ `getStatus()`፣ `canExecute()` እና `getRetryAfterMs()` ያሉ ንባቦች ሁኔታውን ወደ `HALF_OPEN` ያድሳሉ፣ ስለዚህ ዳሽቦርዶች እና የኮምቦ እጩ ሰሪዎች ጊዜው ያለፈ አቅራቢን ለዘላለም ማግለላቸውን አይቀጥሉም።
+ሰባሪው ሰነፍ መልሶ ማግኛን ይጠቀማል እንጂ የጀርባ ሰዓት ቆጣሪን አይጠቀምም። `OPEN` ጊዜው ሲያልቅ፣እንደ `getStatus()`፣ `canExecute()` እና `getRetryAfterMs()` ያሉ ንባብ ግዛቱን ወደ `HALF_OPEN` ያድሳሉ፣ስለዚህ ዳሽቦርድ እና ጥምር እጩ ግንበኞች የአገልግሎት ጊዜው ያለፈበትን አቅራቢ ለዘለዓለም አለማካተት አይቀጥሉም።
 
-### የግንኙነት ማቀዝቀዣ
+### የግንኙነት ማቀዝቀዝ
 
-**ልክ**፡ አንድ የአቅራቢ ግንኙነት/መለያ/ቁልፍ።
+**ወሰን** አንድ አቅራቢ connection/account/key.
 
-**ዓላማ**፡ ለተመሳሳይ አቅራቢ ሌሎች ግንኙነቶች ጥያቄዎችን ማገልገላቸውን እንዲቀጥሉ በማድረግ አንድ መጥፎ ቁልፍ/መለያ ለጊዜው ማለፍ።
+**ዓላማ** ለተመሳሳይ አገልግሎት አቅራቢ ሌሎች ግንኙነቶች ጥያቄዎችን ማቅረብ እንዲቀጥሉ እየፈቀዱ ለጊዜው አንድ መጥፎ key/account ይዝለሉ።
 
-**ትግበራ**፡
+**መተግበር** :
 
-- የጽሑፍ/ዝማኔ መንገድ፡ `src/sse/services/auth.ts::markAccountUnavailable()`
-- የመለያ ምርጫ/ማጣራት፡ `src/sse/services/auth.ts::getProviderCredentials...`
-- የማቀዝቀዣ ስሌት፡ `open-sse/services/accountFallback.ts::checkFallbackError()`
-- ቅንብሮች፡ `src/lib/resilience/settings.ts`
+- Write/update መንገድ `src/sse/services/auth.ts::markAccountUnavailable()`
+- መለያ selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- የማቀዝቀዝ ስሌት `open-sse/services/accountFallback.ts::checkFallbackError()`
+- መቼቶች `src/lib/resilience/settings.ts`
 
-በአቅራቢ ግንኙነቶች ላይ አስፈላጊ መስኮች፡
+በአቅራቢዎች ግንኙነቶች ላይ አስፈላጊ መስኮች:
 
 ```ts
 rateLimitedUntil;
@@ -729,50 +716,50 @@ errorCode;
 backoffLevel;
 ```
 
-በመለያ ምርጫ ወቅት፣ ግንኙነት ሲሆን ይለፋል፡
+መለያ በሚመረጥበት ጊዜ፣ በሚከተለው ጊዜ ግንኙነት ተዘሏል፦
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-ማቀዝቀዣዎችም ሰነፍ ናቸው፡ `rateLimitedUntil` ቀደም ሲል ሲያልፍ፣ ግንኙነቱ እንደገና ተቀባይነት ያገኛል። በተሳካ አጠቃቀም ላይ፣ `clearAccountError()` `testStatus`ን፣ `rateLimitedUntil`ን፣ የስህተት መስኮችን እና `backoffLevel`ን ያጸዳል።
+Cooldowns እንዲሁ ሰነፍ ናቸው `rateLimitedUntil` ያለፈ ጊዜ ሲሆን ግንኙነቱ እንደገና ብቁ ይሆናል። በተሳካ አጠቃቀም ላይ፣ `clearAccountError()` `testStatus`፣ `rateLimitedUntil`፣ የስህተት መስኮችን እና `backoffLevel` ያጸዳል።
 
-ነባሪ የግንኙነት ማቀዝቀዣ ባህሪ፡
+ነባሪ የግንኙነት ማቀዝቀዝ ባህሪ፡
 
-- የOAuth መሠረታዊ ማቀዝቀዣ፡ `5s`።
-- የAPI-ቁልፍ መሠረታዊ ማቀዝቀዣ፡ `3s`።
-- የAPI-ቁልፍ `429` ሲኖር የupstream ዳግም ሙከራ ምክሮችን (`Retry-After`፣ የreset ራስጌዎች፣ ወይም ሊተነተን የሚችል የreset ጽሑፍ) ማስቀደም አለበት።
-- የተደጋገሙ ሊረባረቡ የሚችሉ ውድቀቶች ኤክስፖኔንሺያል ባክኦፍ ይጠቀማሉ፡
+- OAuth መሰረት ማቀዝቀዝ `5s`.
+- ኤፒአይ-ቁልፍ መሰረት ማቀዝቀዝ `3s`.
+- ኤፒአይ-ቁልፍ `429` ሲገኝ የላይ ዥረት ድጋሚ ፍንጮችን (`Retry-After`፣ ራስጌን ዳግም ማስጀመር ወይም ሊተነተን የሚችል ዳግም ማስጀመሪያ ጽሑፍ) መምረጥ አለበት።
+- ተደጋጋሚ ሊመለሱ የሚችሉ ውድቀቶች ገላጭ የኋላ ማጥፋትን ይጠቀማሉ፡-
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-የፀረ-ነጎድጓድ-መንጋ መከላከያ በአንድ ግንኙነት ላይ የሚሆኑ ተዛማጅ ውድቀቶች ማቀዝቀዣውን ደጋግመው እንዳያራዝሙ ወይም `backoffLevel`ን በድጋሚ እንዳይጨምሩ ይከለክላል።
+የጸረ-ነጎድጓድ-መንጋ ጠባቂው በተመሳሳይ ግንኙነት ላይ ያሉ ተመሳሳይ ውድቀቶችን በተደጋጋሚ የማቀዝቀዝ ወይም ድርብ መጨመር `backoffLevel` እንዳይራዘም ይከላከላል.
 
-ማብቂያ ሁኔታዎች ማቀዝቀዣዎች አይደሉም። `banned`፣ `expired` (በ`EXPIRED_RETRY_MAX` በኩል ከN ታህቲል ዳግም ሙከራዎች በኋላ ብቻ ማብቂያ የሚሆን) እና `credits_exhausted` ማረጋገጫዎች/ቅንብሮች እስኪለወጡ ወይም ኦፔሬተር እስኪያስተካክላቸው ድረስ ያለ ተቀባይነት ለመቆየት ታስበው ናቸው። ማብቂያ ሁኔታዎችን በጊዜያዊ የማቀዝቀዣ ሁኔታ አይተኩ።
+ተርሚናል ግዛቶች ማቀዝቀዣዎች አይደሉም። `banned`, `expired` (ይህም ተርሚናል የሚሆነው በ `EXPIRED_RETRY_MAX` በኩል ከ N ወሰን ጋር ከተገናኘ በኋላ ነው) እና `credits_exhausted` credentials/settings እስኪቀየር ወይም ኦፕሬተር እስኪያስተካክላቸው ድረስ እንዳይገኙ ታስቦ ነው። የተርሚናል ግዛቶችን ጊዜያዊ የማቀዝቀዝ ሁኔታን አይፃፉ።
 
 ### የሞዴል መቆለፊያ
 
-**ልክ**፡ አቅራቢ + ግንኙነት + ሞዴል።
+**ወሰን** : አቅራቢ + ግንኙነት + ሞዴል.
 
-**ዓላማ**፡ አንድ ሞዴል ብቻ ለእሱ ግንኙነት ሲጎድል ወይም በኮታ ሲገደብ አጠቃላይ ግንኙነትን ከማሰናከል መቆጠብ።
+**ዓላማ** አንድ ሞዴል ብቻ ከሌለ ወይም ለዚያ ግንኙነት በኮታ የተገደበ ከሆነ ሙሉ ግንኙነትን ከማሰናከል ይቆጠቡ።
 
-ምሳሌዎች፡
+ምሳሌዎች፡-
 
-- `429` የሚመልሱ በሞዴል-ኮታ አቅራቢዎች።
-- ለአንድ የጎደለ ሞዴል `404` የሚመልሱ አካባቢያዊ አቅራቢዎች።
-- እንደ ተመረጡ Grok ሁነታዎች ያሉ አቅራቢ-ተኮር ሁነታ/ሞዴል ፍቃድ ውድቀቶች።
+- በአንድ ሞዴል ኮታ አቅራቢዎች `429` ይመለሳሉ።
+- ለአንድ የጎደለ ሞዴል `404` የሚመልሱ የአካባቢ አቅራቢዎች።
+- እንደ የተመረጡ Grok ሁነታዎች ያሉ አቅራቢ-ተኮር mode/model ፈቃድ ውድቀቶች።
 
-የሞዴል መቆለፊያ በ`open-sse/services/accountFallback.ts` ውስጥ ይኖራል እና ተመሳሳይ ግንኙነት ሌሎች ሞዴሎችን ማገልገሉን እንዲቀጥል ያደርጋል።
+የሞዴል መቆለፊያ በ `open-sse/services/accountFallback.ts` ውስጥ ይኖራል እና ተመሳሳይ ግንኙነት ሌሎች ሞዴሎችን ማገልገል እንዲቀጥል ያስችለዋል።
 
 ### የማረም መመሪያ
 
-- ሁሉም የአቅራቢ ቁልፎች ከተለፉ፣ የአቅራቢ ሰሪ ሁኔታን እና የእያንዳንዱን ግንኙነት `rateLimitedUntil`/`testStatus` ይመርምሩ።
-- አቅራቢ ከዳግም ማስጀመሪያ መስኮት በኋላ በቋሚነት ተገልሏል የሚመስል ከሆነ፣ ኮድ `getStatus()`/`canExecute()` ከመጠቀም ይልቅ ያለ ማቀነባበርያ `state` እያነበበ መሆኑን ይመልከቱ።
-- አንድ የአቅራቢ ቁልፍ ከወደቀ ግን ሌሎች መሥራት ካለባቸው፣ የአቅራቢ ሰሪን ይልቅ የግንኙነት ማቀዝቀዣን ይምረጡ።
-- አንድ ሞዴል ብቻ ከወደቀ፣ የግንኙነት ማቀዝቀዣን ይልቅ የሞዴል መቆለፊያን ይምረጡ።
-- ሁኔታ እራሱን መጠገን ካለበት፣ የወደፊት የጊዜ ማመሳከሪያ/ዳግም ማስጀመሪያ ጊዜ ማብቂያ እና ጊዜው ያለፈ ሁኔታን የሚያድስ የንባብ መንገድ ሊኖረው ይገባል። ቋሚ ሁኔታዎች የእጅ ማረጋገጫ ወይም የውቅር ለውጦችን ይፈልጋሉ።
+- ሁሉም የአቅራቢዎች ቁልፎች ከተዘለሉ ሁለቱንም የአቅራቢዎች መግቻ ሁኔታ እና የእያንዳንዱን ግንኙነት `rateLimitedUntil`/`testStatus` ይፈትሹ።
+- ከዳግም ማስጀመሪያ መስኮቱ በኋላ አቅራቢው በቋሚነት የተገለለ ከሆነ፣ `getStatus()`/`canExecute()` ከመጠቀም ይልቅ ኮድ ጥሬ `state` እያነበ መሆኑን ያረጋግጡ።
+- አንድ የአቅራቢ ቁልፍ ካልተሳካ ነገር ግን ሌሎች መስራት ካለባቸው ከአቅራቢ ሰባሪው ይልቅ የግንኙነት ማቀዝቀዝን ይምረጡ።
+- አንድ ሞዴል ብቻ ካልተሳካ ከግንኙነት ቀዝቀዝ ይልቅ የሞዴል መቆለፊያን ይምረጡ።
+- አንድ ግዛት ራሱን ካገገመ፣የወደፊቱ timestamp/reset ጊዜ ማብቂያ እና ጊዜው ያለፈበትን ሁኔታ የሚያድስ የተነበበ መንገድ ሊኖረው ይገባል። ቋሚ ሁኔታዎች በእጅ ምስክርነት ወይም የማዋቀር ለውጦች ያስፈልጋቸዋል።
 
 ---
 

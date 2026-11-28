@@ -13,12 +13,12 @@
 
 ## Επισκόπηση
 
-Ο κατάλογος περιέχει **45 Agent Skills** (23 REST API + 21 CLI + 1 ροή εργασίας διαμόρφωσης). Κάθε skill διαθέτει:
+Ο κατάλογος περιέχει** 45 Δεξιότητες πράκτορα** (Ροή εργασιών διαμόρφωσης 23 REST API + 21 CLI + 1). Κάθε δεξιότητα έχει:
 
-- Ένα **κανονικό ID** (`omni-auth`, `cli-serve` κ.λπ.)
-- Ένα αρχείο **SKILL.md** στο `skills/{id}/SKILL.md` με YAML frontmatter (`name`, `description`) + εμπλουτισμένο σώμα markdown
-- **Τερματικά σημεία REST** (API skills) ή **υποεντολές CLI** (CLI skills) που προκύπτουν από την προδιαγραφή OpenAPI και το μητρώο CLI
-- Ένα **ακατέργαστο URL του GitHub** για δυναμική ανάκτηση: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ΕΝΑ** κανονική ID** (`omni-auth`, `cli-serve`, κ.λπ.)
+- ΕΝΑ**SKILL.md** αρχείο σε `skills/{id}/SKILL.md` με YAML frontmatter (`name`, `description`) + rich markdown body
+- **REST τελικά σημεία** ( δεξιότητες API ) ή** υποεντολές CLI** (CLI skills) που προέρχονται από το μητρώο OpenAPI spec και CLI
+- ΕΝΑ**GitHub raw URL** για ζωντανή ανάκτηση: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## API κάλυψης
+## Κάλυψη API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

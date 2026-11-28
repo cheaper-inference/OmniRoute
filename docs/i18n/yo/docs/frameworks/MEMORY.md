@@ -4,30 +4,13 @@
 
 ---
 
-> **Orísun òtítọ́:** `src/lib/memory/` àti `src/app/api/memory/`
-> **Ìmúdójúìwọ̀n tó kẹ́yìn:** 2026-06-28 — v3.8.40 (pípa-nípa-àìyàn + ìmúdójúìwọ̀n quantization int8)
+> **Orisun otitọ:** `src/lib/memory/` ati `src/app/api/memory/`
 
-OmniRoute ń pèsè ìrántí ìbánisọ̀rọ̀ tó wà pẹ́ títí, tí a dá lórí kọ́kọ́rọ́ API (àti
-id session bí ó bá yẹ). A máa ń yọ àwọn ìrántí jáde láìfọwọ́ṣe láti inú àwọn ìdáhùn LLM
-nípasẹ̀ ìbámu àpẹẹrẹ regex fẹ́ẹ́rẹ́, a sì máa ń fi wọ́n padà sínú àwọn
-ìbéèrè tó tẹ̀ lé gẹ́gẹ́ bí ìfiránṣẹ́ system àkọ́kọ́ (tàbí ìfiránṣẹ́ user àkọ́kọ́ fún àwọn olùpèsè tó
-kọ ipa system).
+OmniRoute n pese iranti ibaraẹnisọrọ ti o tẹpẹlẹ ti a tẹ nipasẹ bọtini API (ati id igba iyan). Awọn iranti jẹ jade laifọwọyi lati awọn idahun LLM nipasẹ ibaamu apẹrẹ regex iwuwo fẹẹrẹ ati itasi pada sinu awọn ibeere atẹle bi ifiranṣẹ eto oludari (tabi ifiranṣẹ olumulo akọkọ fun awọn olupese ti o kọ ipa eto naa).
 
-> **Memory wà ní PÍPA ní àìyàn (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> ti di `false` báyìí (`src/lib/memory/settings.ts`). Ṣíṣí memory máa ń fi tó
-> `maxTokens` (~2k) ti àyíká-ọ̀rọ̀ tí a gba padà sínú **gbogbo** ìbéèrè chat, èyí tí
-> a máa gba owó rẹ̀ — iye owó tí a kò retí fún àwọn fifi-sórí tuntun àti fún àwọn client tó ń ṣàkóso
-> àyíká-ọ̀rọ̀ tiwọn. Yan láti darapọ̀ ní kedere lábẹ́ **Settings → Memory** (`MemorySkillsTab`
-> máa ń ṣàfihàn ìkìlọ̀ iye owó token nígbà tí memory bá wà ní ṣíṣí).
-> Client kan lè yọ ìbéèrè kan ṣoṣo kúrò nípasẹ̀ header ìbéèrè `x-omniroute-no-memory`
-> (`true`/`1`/`yes`) — wo tábìlì header ìbéèrè nínú
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Ìbéèrè tí kò lo memory máa ń ṣètò
-> `memoryOwnerId = null`, èyí tó máa pa ìfibọ̀ **memory àti skill méjèèjì** fún
-> ìbéèrè náà (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Iranti jẹ OFF nipasẹ aiyipada (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` ni bayi `false` (`src/lib/memory/settings.ts`). Muu iranti ṣiṣẹ n ṣe abẹrẹ to `maxTokens` (~ 2k) ti ipo ti a gba pada sinu** gbogbo** ibeere iwiregbe, eyiti o jẹ idiyele — idiyele iyalẹnu fun awọn fifi sori ẹrọ tuntun ati fun awọn alabara ti o ṣakoso agbegbe tiwọn. Jade ni gbangba labẹ** Eto → Iranti** ( `MemorySkillsTab` n ṣe afihan ipe ikilọ iye owo ami-ami nigbati iranti ti ṣiṣẹ). Onibara le jade ibeere ẹyọkan jade pẹlu akọsori ibeere `x-omniroute-no-memory` (`true`/`1`/`yes`) — wo tabili akọsori ibeere ni [API_REFERENCE.md](../reference/API_REFERENCE.md). Ibeere ti ko si iranti ṣeto `memoryOwnerId = null`, eyiti o mu ṣiṣẹ** mejeeji** iranti ati abẹrẹ ọgbọn fun ibeere yẹn (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-A máa ń **pín Memory sí ìwọ̀n kọ́kọ́rọ́ API kọ̀ọ̀kan**, kì í ṣe sí ìwọ̀n user kọ̀ọ̀kan — gbogbo ìbéèrè tí a fìdí
-rẹ̀ múlẹ̀ pẹ̀lú kọ́kọ́rọ́ API kan náà máa ń pín ibi ìkójọpọ̀ memory kan náà, pẹ̀lú àṣàyàn láti tún
-pín rẹ̀ sí ìwọ̀n kékeré sí i nípasẹ̀ `sessionId`.
+Iranti jẹ** scoped fun bọtini API** , kii ṣe fun olumulo — gbogbo ibeere ti o jẹri pẹlu bọtini API kanna ṣe alabapin adagun iranti kanna, pẹlu yiyan siwaju scoping nipasẹ `sessionId`.
 
 ## Àgbékalẹ̀
 
@@ -324,27 +307,17 @@ full-precision àyàfi tí a bá mú un ṣiṣẹ́ ní kedere.
 àti pé ààlà rẹ̀ jẹ́ ọ̀kan lára `session`, `apiKey`, tàbí `global`. Ààlà àiyipada láti
 `getMemorySettings()` jẹ́ `apiKey`.
 
-## Ìyọjáde Òtítọ́ (`extraction.ts`)
+## Iyọkuro Otitọ (`extraction.ts`)
 
-Ìyọjáde náà dá lórí **regex**, kì í ṣe lórí LLM — ó ń ṣiṣẹ́ nínú process náà pẹ̀lú
-`setImmediate()` kí ó má bàa dá ìṣàn ìdáhùn dúró láéláé:
+Isediwon ni** regex-orisun** , kii ṣe — ti o da lori LLM o nṣiṣẹ ni ilana pẹlu `setImmediate()` nitorina ko ṣe dina ṣiṣan esi rara:
 
-- **Àwọn àpẹẹrẹ ààyò** → `MemoryType.FACTUAL`
-  (fún àpẹẹrẹ `Mo fẹ́ràn …`, `Mo fẹ́ràn … gan-an`, `èyí tí mo fẹ́ràn jù ni …`, `Mo kórìíra …`)
-- **Àwọn àpẹẹrẹ ìpinnu** → `MemoryType.EPISODIC`
-  (fún àpẹẹrẹ `Èmi yóò lo …`, `Mo yan …`, `Mo pinnu láti lo …`, `Èmi yóò bẹ̀rẹ̀ sí í lo …`)
-- **Àwọn àpẹẹrẹ ìṣe déédéé** → `MemoryType.FACTUAL`
-  (fún àpẹẹrẹ `Mo sábà máa ń …`, `Mo máa ń … ní gbogbo ìgbà`, `Mo ní àṣà láti …`)
+- **Awọn awoṣe ayanfẹ** → `MemoryType.FACTUAL` (fun apẹẹrẹ `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Awọn ilana ipinnu** → `MemoryType.EPISODIC` (fun apẹẹrẹ `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Awọn ilana apẹrẹ** → `MemoryType.FACTUAL` (fun apẹẹrẹ `I usually …`, `I always …`, `I tend to …`)
 
-A máa ń fọ gbogbo ohun tó bá bá mu mọ́ (`trim`, pípa àlàfo pọ̀, àti dídín in kù sí ohun tí kò ju àmì 500 lọ),
-a sì máa ń yọ àwọn àdáwòkọ kúrò nínú batch náà nípasẹ̀ `factKey(category, content)` tí kò yí padà, lẹ́yìn náà
-a máa ń fi pamọ́ nípasẹ̀ `createMemory()` pẹ̀lú metadata
-`{category, extractedAt, source: "llm_response"}`. Ọ̀rọ̀ àwọlé ní ààlà
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — tí ó bá gùn ju bẹ́ẹ̀ lọ, **ìparí** ọ̀rọ̀ náà ni
-a máa ń lò, kí àkóónú assistant tó ṣẹ̀ṣẹ̀ dé lè kópa ní gbogbo ìgbà.
+Ibaramu kọọkan jẹ mimọ (`trim`, funfunspace-collapse, capped ni 500 chars), yọkuro laarin ipele nipasẹ `factKey(category, content)` iduroṣinṣin, ati fipamọ nipasẹ `createMemory()` pẹlu metadata `{category, extractedAt, source: "llm_response"}`. Ọrọ titẹ sii wa ni 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — nigbati o gun, awọn** iru** ti ọrọ naa ni a lo nitorina akoonu oluranlọwọ to ṣẹṣẹ ṣe kopa nigbagbogbo.
 
-A ṣe àgbéjáde `extractFactsFromText(text)` fún àwọn ìdánwò, ó sì ń dá àwọn òtítọ́
-tí a ti ṣètò padà láìfi wọ́n pamọ́.
+`extractFactsFromText(text)` jẹ okeere fun awọn idanwo ati dapada awọn ododo ti a ṣeto laisi fifipamọ wọn.
 
 ## Ìgbàpadà (`retrieval.ts`)
 
@@ -692,22 +665,22 @@ MEMORY_EMBEDDING_CACHE_TTL_MS=300000               # TTL (ìṣẹ́jú 5)
 
 ---
 
-## Àwọn Àpẹẹrẹ Yíyọ Òtítọ́ Jáde (v3.8.16+)
+## Awọn Ilana Iyọkuro Otitọ (v3.8.16 +)
 
-Módùlù `extraction.ts` (`src/lib/memory/extraction.ts`) ń lo **ìbámu àpẹẹrẹ regex** láti yọ àwọn òtítọ́ tí a ṣètò kalẹ̀ jáde láti inú àwọn ìfiránṣẹ́ ìjíròrò. Lílóye àwọn àpẹẹrẹ wọ̀nyí yóò ràn ọ́ lọ́wọ́ láti ṣàtúnṣe dídára yíyọ jáde fún ọ̀nà ìlò rẹ.
+module `extraction.ts` (`src/lib/memory/extraction.ts`) nlo** regex Àpẹẹrẹ tuntun** lati jade awọn ododo ti eleto lati awọn ifiranṣẹ ibaraẹnisọrọ. Loye awọn ilana wọnyi ṣe iranlọwọ fun ọ lati ṣatunṣe didara isediwon fun ọran lilo rẹ.
 
-### Àwọn Ẹ̀ka Àpẹẹrẹ Àìyípadà
+### Aiyipada Àpẹẹrẹ Àwọn ẹka
 
-| Ẹ̀ka                 | Àpẹẹrẹ àwòṣe                                                            | Ohun tí ó ń gbà mú               |
-| ------------------- | ----------------------------------------------------------------------- | -------------------------------- |
-| PREFERENCE_PATTERNS | `"Mo fẹ́ràn <X> jù"`, `"Mo fẹ́ràn <X>"`, `"Mo kórìíra <X>"`               | Àwọn ààyò aṣàmúlò                |
-| DECISION_PATTERNS   | `"Màá lo <X>"`, `"Mo pinnu láti <X>"`, `"Mo yan <X>"`                   | Àwọn ìpinnu aṣàmúlò (episodic)   |
-| PATTERN_PATTERNS    | `"Mo sábà máa <X>"`, `"Mo máa ń <X> nígbà gbogbo"`, `"Mi ò <X> láéláé"` | Àwọn àpẹẹrẹ ìhùwàsí tí ó dúró pẹ́ |
+| Ẹka                 | Àpẹẹrẹ apẹẹrẹ                                               | Awọn gbigba                    |
+| ------------------- | ----------------------------------------------------------- | ------------------------------ |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Awọn ayanfẹ olumulo            |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Awọn ipinnu olumulo (episodic) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Awọn ilana ihuwasi igbagbogbo  |
 
-### Àwọn Àpẹẹrẹ Àwòṣe (Tí a Mú Rọrùn)
+### Awọn Ilana Apeere (Irọrun)
 
 ```ts
-// Láti inú src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -720,36 +693,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Ohun Tí A Ń Yọ Jáde
+### Ohun ti o gba jade
 
-Nígbà tí aṣàmúlò kan bá sọ pé:
+Nigbati olumulo kan sọ:
 
-> "Mo fẹ́ràn TypeScript jù. Màá lo Postgres fún iṣẹ́ yìí. Mo máa ń commit kí n tó push nígbà gbogbo. Mi ò fẹ́ràn Python."
-> Yíyọ jáde ń ṣẹ̀dá ìrántí mẹ́rin:
+> "Mo fẹran TypeScript. Emi yoo lo Postgres fun iṣẹ akanṣe yii. Mo nigbagbogbo ṣe ṣaaju ki o to titari. Emi ko fẹ Python." Iyọkuro ṣe agbejade awọn iranti 4:
 >
-> | Kókó                                 | Ẹ̀ka    | Irú      | Àkóónú                 |
-> | ------------------------------------ | ------ | -------- | ---------------------- |
-> | `preference:typescript`              | ààyò   | òtítọ́    | "TypeScript"           |
-> | `decision:postgres_for_this_project` | ìpinnu | episodic | "Postgres fún iṣẹ́ yìí" |
-> | `pattern:commit_before_pushing`      | àpẹẹrẹ | òtítọ́    | "commit kí a tó push"  |
-> | `preference:python`                  | ààyò   | òtítọ́    | "Python"               |
+> | Bọtini | Ẹka | Iru | Akoonu | | -------------------------------------- | ---------- | ----------- | ---------------- | | `preference:typescript` | | otitọ | "TypeScript" | Postgres | `decision:postgres_for_this_project` ipinnu | ipinnu | episodic | yi apẹrẹ | " `pattern:commit_before_pushing` | | | factual | "ṣe ṣaaju ki o to titari" | | `preference:python` | ààyò | otito | "Python" |
 
-### Àwọn Ààlà Yíyọ Jáde
+### Iyọkuro Awọn idiwọn
 
-Láti dènà yíyọ jáde tí kò ní ìṣàkóso, àwọn ààlà wọ̀nyí wà ní lílò:
+Lati yago fun isediwon salọ, awọn opin wọnyi lo:
 
-| Gígùn àkóónú tó kéré jù | àwọn àmì 3 |
-| Gígùn àkóónú tó pọ̀ jù | àwọn àmì 500 |
+| Min akoonu ipari | 3 eeya |
+| Ipari akoonu ti o pọju | 500 awọn ẹmu |
 
-### Ìgbà Tí Ó Yẹ Kí A Pa Yíyọ Jáde
+### Nigbati lati mu isediwon kuro
 
-Yíyọ jáde máa ń ṣiṣẹ́ fúnra rẹ̀ ní gbogbo ìgbà tí ìrántí bá wà ní ṣíṣiṣẹ́; kò sí
-bọ́tìnì yíyọ-jáde-nìkan lọ́tọ̀. Láti pa á, pa ìrántí pátápátá (`enabled: false`
-nípasẹ̀ `PUT /api/settings/memory`). Rò ó láti ṣe bẹ́ẹ̀ nígbà tí:
+Isediwon gbalaye laifọwọyi nigbakugba ti iranti ti wa ni sise; ko si lọtọ isediwon-nikan toggle. Lati paa a, mu iranti ṣiṣẹ patapata (`enabled: false` nipasẹ `PUT /api/settings/memory`). Gbero ṣiṣe bẹ nigbati:
 
-- Ìwọ bá ní ọ̀pọ̀ ìfiránṣẹ́ gan-an, tí iye owó yíyọ jáde kò sì ṣeé fojú kọ
-- Àwọn ìjíròrò rẹ bá jẹ́ ti ìgbà díẹ̀ ní pàtàkì (ìtàkurọ̀sọ, àtúnṣe àṣìṣe) tí kò ní iye fún ìgbà pípẹ́
-- Ìwọ ti ń gba àyíká ọ̀rọ̀ sílẹ̀ tẹ́lẹ̀ nípasẹ̀ àwọn plugin àkànṣe
+- O ni iwọn didun ifiranṣẹ ti o ga ati iye owo isediwon kii ṣe nkan
+- Awọn ibaraẹnisọrọ rẹ jẹ igbagbogbo (iwiregbe, ṣatunṣe aṣiṣe) laisi iye igba pipẹ
+- O ti n ya ọrọ-ọrọ tẹlẹ nipasẹ awọn afikun aṣa
 
 ---
 

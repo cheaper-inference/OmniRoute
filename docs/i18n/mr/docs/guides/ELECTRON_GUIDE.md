@@ -4,9 +4,9 @@
 
 ---
 
-> **सत्याचा स्रोत:** `electron/` कार्यक्षेत्र** शेवटचे अपडेट:** 2026-06-28 — v3.8.40
+> **सत्याचा स्रोत:** `electron/` कार्यक्षेत्र
 
-OmniRoute एक क्रॉस-प्लॅटफॉर्म डेस्कटॉप ॲप (Windows / macOS / Linux) वर तयार केले आहे**Electron 41** +** इलेक्ट्रॉन-बिल्डर 26.10** . डेस्कटॉप ॲप Next.js स्टँडअलोन सर्व्हरला चाइल्ड प्रोसेस म्हणून निर्माण करतो, त्यावर `BrowserWindow` पॉइंट करतो आणि सिस्टम ट्रे, ऑटो-अपडेटर, IPC ब्रिज आणि शून्य-कॉन्फिग गुप्त बूटस्ट्रॅप जोडतो.
+OmniRoute वर तयार केलेले क्रॉस-प्लॅटफॉर्म डेस्कटॉप ॲप (Windows / macOS / Linux) पाठवते**Electron 41** +** इलेक्ट्रॉन-बिल्डर 26.10** . डेस्कटॉप ॲप चाइल्ड प्रोसेस म्हणून Next.js स्टँडअलोन सर्व्हर तयार करतो, त्यावर `BrowserWindow` निर्देश करतो आणि सिस्टम ट्रे, ऑटो-अपडेटर, IPC ब्रिज आणि शून्य-कॉन्फिग गुप्त बूटस्ट्रॅप जोडतो.
 
 ## आर्किटेक्चर
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## स्वयं-अद्यतन
 
-GitHub प्रदाता (`diegosouzapw/OmniRoute`) सह `electron-updater` वापरते.
+GitHub प्रदाता (`cheaper-inference/OmniRoute`) सह `electron-updater` वापरते.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC: `checking`, `available`, `not-available`, `downloading` ( `percent` सह), `downloaded`, `error` द्वारे प्रस्तुतकर्त्याकडे इव्हेंट अग्रेषित केले जातात
@@ -273,7 +273,7 @@ npm run electron:build:win
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-रिलीझ GitHub Releases (`diegosouzapw/OmniRoute`) वर प्रकाशित केले जातात, जिथे `electron-updater` नवीन आवृत्त्या तपासते.
+रिलीझ GitHub Releases (`cheaper-inference/OmniRoute`) वर प्रकाशित केले जातात, जिथे `electron-updater` नवीन आवृत्त्या तपासते.
 
 ## समस्यानिवारण
 

@@ -6,19 +6,19 @@
 
 无需修改 `omniroute` 核心即可扩展其 CLI。插件遵循 `omniroute-cmd-*` 命名约定，类似于 `gh extension` 或 `kubectl plugin`。
 
-## 快速开始
+## 快速启动
 
 ```bash
-# 从 npm 安装插件
+# Install a plugin from npm
 omniroute plugin install stripe
 
-# 安装开发中的本地插件
+# Install a local plugin in development
 omniroute plugin install ./my-plugin
 
-# 列出已安装的插件
+# List installed plugins
 omniroute plugin list
 
-# 创建新插件的脚手架
+# Scaffold a new plugin
 omniroute plugin scaffold myplugin
 cd omniroute-cmd-myplugin
 omniroute plugin install .
@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | 解析后的基础 URL                                     |
 | `ctx.apiKey`                 | `string \| null` | 提供的 API 密钥（如有）                              |
 
-## 发现机制
+## 发现
 
-插件从以下位置发现：
+插件是从以下位置发现的：
 
-1. `~/.omniroute/plugins/<name>/` — 用户本地安装
-2. `OMNIROUTE_PLUGIN_PATH` 环境变量 — 自定义目录
+1. `~/.omniroute/plugins/node_modules/<name>/` — `omniroute plugin install`放置包的位置（ npm `--prefix`，而不是`npm -g`）
+2. `~/.omniroute/plugins/<name>/` —手写插件目录
+3. `OMNIROUTE_PLUGIN_PATH` env var —自定义目录
 
-二者都**仅用于 CLI**。服务端插件运行时（即在代理内部运行的 marketplace/`plugin.json`
-插件）拥有自己的扫描器及其专用覆盖变量
-`OMNIROUTE_PLUGINS_DIR`——请参阅
-[PLUGIN_MARKETPLACE.md → 插件目录](./PLUGIN_MARKETPLACE.md#plugin-directory)。
-设置其中一个不会影响另一个。
+接下来是符号链接目录（npm 为`plugin install ./dir`创建的目录）。
 
-加载错误会被捕获并以警告形式输出——损坏的插件绝不会导致 CLI 崩溃。
+两者都是**仅 CLI** 。服务器端插件运行时（在代理内部运行的 market/`plugin.json`插件）有自己的扫描仪和自己的覆盖， `OMNIROUTE_PLUGINS_DIR` —请参阅[PLUGIN_MARKETPLACE.md →插件目录](./PLUGIN_MARKETPLACE.md#plugin-directory)。设置其中一个不会影响另一个。
+
+加载错误被捕获并打印为警告—损坏的插件永远不会使CLI崩溃。
 
 ## 安全性
 

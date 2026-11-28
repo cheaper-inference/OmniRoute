@@ -4,8 +4,6 @@
 
 ---
 
-Nuashonrú is déanaí: 2026-08-23
-
 Comhtháthaíonn OmniRoute le trí chatagóir uirlisí CLI scaipthe ar thrí leathanach tiomnaithe deais:
 
 | Leathanach         | Bealach                 | Coincheap                                                                                           | Áireamh        |

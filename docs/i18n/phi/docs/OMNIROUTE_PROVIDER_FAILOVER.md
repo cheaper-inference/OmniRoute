@@ -13,11 +13,13 @@ Ang default na patakaran sa cross-provider ay nagbibigay-daan sa hanggang tatlon
 ## Kung saan ito nalalapat
 
 - **Mga combo** mabigo sa pagitan ng kanilang mga target ayon sa sariling diskarte at setting ng combo.
-- **Isang hubad na modelong id** (walang prefix `provider/` ) na inihahatid ng ilang aktibong provider, na walang combo ng eksaktong pangalan na iyon, ay unang ipinadala sa mga piniling inference ng provider. Kung nabigo ang pagtatangkang iyon sa isang paraan na hindi natuloy ang patakaran, ipapadala ang parehong kahilingan sa susunod na aktibong provider na naghahatid ng id. Ang tugon ay nagdadala ng `x-omniroute-fallback-attempts` kasama ang bilang ng mga provider na sinubukan bago ang isa na sumagot.
-  - Ang bawat kahaliling ay awtorisado nang eksakto kung paano ito kinuha ng hinuha. Ang target na hinaharangan o hindi inamin ng API key ay nilaktawan nang walang upstream na tawag, at nakukuha ng kliyente ang totoong upstream na error, hindi isang pagtanggi sa patakaran para sa isang target na hindi nito pinangalanan.
+- **Isang hubad na modelong id** (walang prefix `provider/` ) na inihahatid ng ilang aktibong provider, na walang combo ng eksaktong pangalan na iyon, ay unang ipinadala sa mga piniling inference ng provider. Kung nabigo ang pagtatangkang iyon sa paraang hindi natuloy ang patakaran, ipapadala ang parehong kahilingan sa susunod na aktibong provider na naghahatid ng id. Ang tugon ay nagdadala ng `x-omniroute-fallback-attempts` kasama ang bilang ng mga provider na sinubukan bago ang isa na sumagot.
+  - Ang bawat kahaliling ay awtorisado nang eksakto kung paano ito kinuha ng hinuha. Ang isang target na hinaharangan o hindi inamin ng API key ay nilaktawan nang walang upstream na tawag, at nakukuha ng kliyente ang totoong upstream na error, hindi isang pagtanggi sa patakaran para sa isang target na hindi nito pinangalanan.
   - Isang bigong tugon lang ang nagpapatuloy: walang nabibigo pagkatapos ng unang na-stream na byte.
   - Nalalapat lang ang emergency fallback model swap pagkatapos mabigo ang bawat provider ng hiniling na modelo.
-  - Ang isang kahilingang naka-pin sa isang koneksyon (`x-omniroute-connection`) ay nananatili dito.
-  - Ang isang prefix na id (`provider/model`) ay hindi kailanman na-rerouting sa ibang provider.
+  - Ang kahilingang naka-pin sa isang koneksyon (`x-omniroute-connection`) ay nananatili dito.
+  - Ang isang prefixed na id (`provider/model`) ay hindi kailanman inilipat sa ibang provider.
 
-Ang mga estado ng circuit ay `closed`, `open`, at `half_open`. Ang isang cooldown ay nag-iskedyul ng isang bounded probe; ang isang matagumpay na probe ay nagsasara ng circuit at ang isang nabigong probe ay nagbubukas muli nito.
+Ang mga estado ng circuit ay `closed`, `open`, at `half_open`. Nag-iskedyul ang isang cooldown ng bounded probe; ang isang matagumpay na probe ay nagsasara ng circuit at ang isang nabigong probe ay muling nagbubukas nito.
+
+Ang failover ng provider ay tumatakbo sa loob ng gateway. Tingnan [kung kailan OmniRoute mismo ay hindi maabot](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) para sa gawi ng kliyente sa panahon ng isang gateway outage.

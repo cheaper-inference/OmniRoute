@@ -4,8 +4,6 @@
 
 ---
 
-An sabunta ta ƙarshe: 2026-08-23
-
 OmniRoute yana haɗawa da nau'ikan kayan aikin CLI guda uku waɗanda aka baje a cikin shafukan dashboard ɗin sadaukarwa guda uku:
 
 | Shafi          | Hanya                   | Ra'ayi                                                                                              | Kidaya                 |

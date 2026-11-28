@@ -166,11 +166,11 @@ Za prilepljeno poverilnico Test Connection preveri obliko poverilnice in, ko ima
 
 Prepričajte se, da je `copilot-m365-web` omogočen v** Ponudniki nadzorne plošče →** . Ponudnik je lahko na nekaterih ravneh privzeto skrit.
 
-## Viri
+## Reference
 
-- Težava: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Razprava: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Izvorna koda: `src/shared/constants/providers/web-cookie.ts` (definicija ponudnika)
-- Uvoz HAR: `src/shared/utils/m365HarImport.ts`
+- Težava: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Razprava: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Vir: `src/shared/constants/providers/web-cookie.ts` (definicija ponudnika)
+- uvoz HAR : `src/shared/utils/m365HarImport.ts`
 - Polja poverilnic: `src/shared/providers/webSessionCredentials.ts`
-- Modalno okno paketa: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Modalni nivo: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

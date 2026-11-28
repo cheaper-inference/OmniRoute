@@ -4,12 +4,9 @@
 
 ---
 
-> **Pēdējoreiz atjaunināts:** 2026-08-28 — v3.8.51
-> Vienkāršota laidienu plūsma, kas automatizācijai izmanto Claude Code prasmes.
+> Racionalizēta izlaišanas plūsma, kas izmanto Claude koda prasmes automatizācijai.
 >
-> **Starp laidieniem uzturiet rindu/zaru darba kārtībā:** skatiet [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs` saime + `npm run check:release-green` + `/babysit` + iknakts izpilde). Regulāra
-> šīs darbības veikšana — un jo īpaši **pirms** šī kontrolsaraksta — nodrošina, ka laidiena PR jau sākotnēji ir darba kārtībā.
+> **Saglabājiet queue/branch zaļu starp izlaidumiem:** skatiet [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` ģimenes + `npm run check:release-green` + `/babysit` + katru nakti). Running šo periodiski — un jo īpaši** pirms tam** šis kontrolsaraksts — padara laidiena PR sākumu zaļā krāsā.
 
 ## Īsumā
 
@@ -60,7 +57,9 @@ npm-publish darbplūsma vairs nepublicē tiešu: tā sāknēt pakotnes tarbolu (
 
 **Docker Hub `latest` (nepieciešams katrai stabilai SemVer publicēšanai):** `docker-publish` darbplūsmai ir jāatzīmē** gan** `X.Y.Z` un, ja `should-promote-latest.sh` piekrīt, tas ir visaugstākais stabilais SemVer, `:latest` ar** tas pats īssavilkums** . Pēc darba: centrmezgla `latest` īssavilkums ir vienāds ar jauno SemVer īssavilkumu un `last_updated` pārvietots. Neatstājiet `:latest` vecākā būvniecībā, kamēr piezīmēs par laidienu ir runāts par labojumiem, kas pastāv tikai vietnē git. Veidot īsos pamācības izmantojiet `:latest`; GitOps ir jāturpina piespraust `X.Y.Z`. Skatiet [Docker izlaišanas kanālus](../guides/DOCKER_GUIDE.md#release-channels) un #10317.
 
-**Docker Hub organizācijas repozitorijs (`cheaperinference/omniroute`):** Docker Hub nevar pārvietot repozitoriju starp nosaukumvietām, tāpēc `diegosouzapw/omniroute` saglabā savu izvilkšanas vēsturi un katru izlaidumu, un `mirror-org-dockerhub` uzdevums `docker-publish` kopē katru izlaisto versiju (un `:latest` kad tas tiek paaugstināts) no `ghcr.io/cheaper-inference/omniroute` uz organizācijas repozitoriju. Tam nepieciešami `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` noslēpumi; bez tiem darbs paliek zaļš ar brīdinājumu "Docker Hub org spogulis izlaists", un pārējie reģistri publicē normāli. Lai tur vēlāk publicētu izlaisto versiju, palaidiet** Darbības → Spoguļot Docker attēlu uz Docker Hub org → Palaist darbplūsmu** ar `version=X.Y.Z` (un `promote_latest` augstākajai stabilajai versijai): tas kopē esošos attēlus, bez pārbūves.
+**Docker Hub organizācijas repozitorijs (`cheaperinference/omniroute`):** Docker Hub nevar pārvietot repozitoriju starp nosaukumvietām, tāpēc `diegosouzapw/omniroute` saglabā savu izvilkšanas vēsturi un katru izlaidumu, un `mirror-org-dockerhub` uzdevums `docker-publish` kopē katru izlaisto versiju (un `:latest` kad tas tiek paaugstināts) no `ghcr.io/cheaper-inference/omniroute` uz organizācijas repozitoriju. Tam nepieciešami `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` noslēpumi; bez tiem darbs paliek zaļš ar brīdinājumu "Docker Hub org spogulis izlaists", un pārējie reģistri publicē normāli. Lai vēlāk tur publicētu izlaisto versiju, palaidiet** Darbības → Spoguļot Docker attēlu uz Docker Hub org → Palaist darbplūsmu** ar `version=X.Y.Z` (un `promote_latest` augstākajai stabilajai versijai): tas kopē esošos attēlus, bez pārbūves. Šīs krātuves Docker hub pārskats ir iestatīts manuāli: API, kas to rediģē, noraida organizācijas piekļuves pilnvaras.
+
+Tā pati darbplūsma arī kopē katru laidienu uz mantoto GHCR pakotni `ghcr.io/diegosouzapw/omniroute` līdz 2027.06.30., tāpēc tai joprojām piestiprinātās instalācijas tiek atjauninātas. tā indeksam ir apraksts "pārvietots uz `ghcr.io/cheaper-inference/omniroute`". Tam nepieciešams `GHCR_LEGACY_TOKEN` noslēpums (klasisks `diegosouzapw` personiskās piekļuves marķieris ar `write:packages`); bez tā, ka darbs tiek izlaists ar brīdinājumu "Legacy GHCR spogulis izlaists".
 
 ## Ātrā kritisko labojumu plūsma (etiķete `hotfix`)
 
@@ -151,7 +150,7 @@ Pārtraucošas izmaiņas: pievienojiet `BREAKING CHANGE:` kājeni vai `!` aiz tv
 ### Dokumentācija
 
 - [ ] `npm run check:docs-sync` caurlaides (automātiska palaišana ar iepriekšēju apstiprinājumu)
-- [ ] `npm run check:docs-all` caurlaides (jumts: docs-sync + docs-counts + env-doc-sync + novecojušas versijas + doc-links)
+- [ ] `npm run check:docs-all` piespēlē. Tās konsultatīvais `check:deprecated-versions` apzīmē versijas, kas ir tieši saistītas ar OmniRoute (3.6.x un vecākas), un ignorē datumus.
 - [ ] `npm run check:env-doc-sync` iziet 0 — kods ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env līgums ir neskarts
 - [ ] `npm run check:doc-links` iziet no 0 — pēc pārstrukturēšanas nav bojātu iekšējo atzīmju atsauču
 - [ ] `docs/architecture/ARCHITECTURE.md` novērtēja storage/runtime drift
@@ -211,7 +210,7 @@ Repozitorijs izmanto trīs atšķirīgus izvades direktorijus — nekad tos nesa
 | `.build/`   | Veidot starpproduktu — `next build` izvadi (`distDir`)    | Nē (ignorēts) |
 | `dist/`     | Nosūtāms npm komplekts — ko montējis `assembleStandalone` | Nē (ignorēts) |
 
-> **Operatora piezīme:** attālais VPS attēlu direktorijs paliek `/usr/lib/node_modules/omniroute/app/`. Tikai** in-repo** uzbūves izvade pārvietota (`app/` → `dist/`). Iemaņu izvietošana rsync `dist/` saturs attālajā `app/` dir — nav nepieciešamas VPS ceļa izmaiņas.
+> **Operatora piezīme:** attālais VPS attēlu direktorijs paliek `/usr/lib/node_modules/omniroute/app/`. Tikai** repo** uzbūves izvade pārvietota (`app/` → `dist/`). Iemaņu izvietošana rsync `dist/` saturs attālajā `app/` dir — nav nepieciešamas VPS ceļa izmaiņas.
 
 **Viena korpusa plūsma:**
 
@@ -262,7 +261,7 @@ Izvērst prasmes izmantot vieglo rsync plūsmu — no `npm pack`, no `npm i -g`:
   - Pārbaudiet `/api/monitoring/health` atgriež `CLOSED` slēdžus
   - Apstipriniet MCP transports atbildi (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Pēc izlaišanas
+### Pēcizlaide
 
 - [ ] Palaist `/capture-release-evidences-cc` (Claude koda prasme)
   - Tver jaunas funkcijas WebP screenshots/recordings
@@ -399,7 +398,7 @@ Izstrādes izsitumu izpilde ir veidota, izmantojot git santehniku (nav pieskarti
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

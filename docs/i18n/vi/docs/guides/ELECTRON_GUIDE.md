@@ -4,7 +4,7 @@
 
 ---
 
-> **Nguồn của sự thật:** không gian làm việc `electron/`** Cập nhật lần cuối:** 28-06-2028 — v3.8.40
+> **Nguồn của sự thật:** không gian làm việc `electron/`
 
 OmniRoute cung cấp một ứng dụng máy tính để bàn đa nền tảng (Windows / macOS / Linux) được xây dựng trên**Electron 41** +** nhà xây dựng điện tử 26.10** . Ứng dụng dành cho máy tính để bàn tạo ra máy chủ độc lập Next.js dưới dạng một tiến trình con, trỏ `BrowserWindow` vào nó và thêm khay hệ thống, trình cập nhật tự động, cầu nối IPC và khởi động bí mật không cấu hình.
 
@@ -198,7 +198,7 @@ Môi trường quy trình được ghi lại khi ứng dụng khởi động, do
 
 ## Tự động cập nhật
 
-Sử dụng `electron-updater` với nhà cung cấp GitHub (`diegosouzapw/OmniRoute`).
+Sử dụng `electron-updater` với nhà cung cấp GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Các sự kiện được chuyển tiếp tới trình kết xuất thông qua `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (với `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ ký AppImage là tùy chọn — đặt `LINUX_GPG_KEY` nếu ký.
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Các bản phát hành được xuất bản lên GitHub Releases (`diegosouzapw/OmniRoute`), đây cũng là nơi `electron-updater` kiểm tra các phiên bản mới.
+Các bản phát hành được xuất bản lên GitHub Releases (`cheaper-inference/OmniRoute`), đây cũng là nơi `electron-updater` kiểm tra các phiên bản mới.
 
 ## Khắc phục sự cố
 

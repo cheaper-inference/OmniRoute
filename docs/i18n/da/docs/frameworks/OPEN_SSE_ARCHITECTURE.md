@@ -226,7 +226,7 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Understøtter** 22 rutestrategier** (se `src/shared/constants/routingStrategies.ts`):
+Understøtter** 22 routingstrategier** (se `src/shared/constants/routingStrategies.ts`):
 
 | Strategi            | Opførsel                                                                                 |
 | ------------------- | ---------------------------------------------------------------------------------------- |
@@ -236,22 +236,22 @@ Understøtter** 22 rutestrategier** (se `src/shared/constants/routingStrategies.
 | `context-relay`     | Udlever kontekst på tværs af mål                                                         |
 | `fill-first`        | Udfyld kvoten, før du går videre til næste                                               |
 | `p2c`               | Kraften i to valg                                                                        |
-| `random`            | Ensartet tilfældig                                                                       |
-| `least-used`        | Vælg den med færrest seneste anvendelser                                                 |
-| `cost-optimized`    | Billigste sunde mål først                                                                |
-| `reset-aware`       | Er opmærksom på udbyderens nulstillingsvinduer                                           |
-| `reset-window`      | Nulstil vinduesbaseret routing                                                           |
+| `random`            | Frisk shuffle efter anmodning                                                            |
+| `least-used`        | Vælg den med færrest registrerede anmodninger                                            |
+| `cost-optimized`    | Laveste katalog inputpris først                                                          |
+| `reset-aware`       | Resterende kvote + nulstilling haster                                                    |
+| `reset-window`      | Kvotevindue, der nulstilles hurtigst først                                               |
 | `expiry-first`      | Brug den konto, hvis kvote ville udløbe, ubrugt først                                    |
 | `headroom`          | Mest resterende kvote frihøjde først                                                     |
 | `quota-weighted`    | Spring over opbrugte konti, og træk derefter efter den resterende kvote ÷ under flyvning |
-| `strict-random`     | Virkelig ensartet (ingen kvalitetsvægtning)                                              |
+| `strict-random`     | Blandet dæk: hvert mål en gang før gentagelser                                           |
 | `auto`              | Brug 16-faktor scoring (`autoCombo/`)                                                    |
 | `lkgp`              | Sidst kendte gode udbyder først                                                          |
-| `context-optimized` | Bedst til anmodninger med lang sammenhæng                                                |
-| `cache-optimized`   | Fastgør hvert genanvendeligt promptpræfiks til den samme konto (prompt-cache-hits)       |
+| `context-optimized` | Det største kendte kontekstvindue først                                                  |
+| `cache-optimized`   | Foretrækker den konto, der sandsynligvis vil have promptpræfikset i cachen               |
 | `fusion`            | Ventilér ud til et panel parallelt, og syntetiser derefter via en dommer (`fusion.ts`)   |
 | `pipeline`          | Kædetrin — hvert måls output føder det næste                                             |
-| `jev`               | Opt-in: TypeSafe Jev indrømmer, hvilke rangerede poster, der kører; ellers din ordre     |
+| `jev`               | Opt-in: TypeSafe Jev indrømmer, hvilke rangordnede poster, der kører; ellers din ordre   |
 
 ### base.ts (1170 LOC)
 
@@ -287,7 +287,7 @@ Tjenester er** fokuserede moduler til en enkelt formål** som handlere komponere
 - `wildcardRouter.ts` — matcher jokertegn ruter (`gpt-*`)
 - `modelFamilyFallback.ts` — T5 inden for familien fallback
 
-### Satsbegrænsning og kvote
+### Satsbegrænsning & kvote
 
 - `rateLimitManager.ts` — token-bøtte pr. nøgle + udbyder
 - `usage.ts` — brugsoptagelse

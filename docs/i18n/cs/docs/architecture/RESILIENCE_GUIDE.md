@@ -12,63 +12,53 @@ OmniRoute má tři odlišné, ale související mechanismy odolnosti. Každá m�
 
 > **Přepíná přednost Env-vs-dashboard pro odolnost.** Volitelná odolnost přepíná nasazená z prostředí — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — poskytuje pouze _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean přetrvával v `resilienceSettings` (Dashboard →** Nastavení → Resilience** / `PATCH /api/resilience`, uložený v `key_value`) vítězí nad hodnotou env: normalizace (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) udržuje uloženou booleovskou hodnotu, kdykoli existuje. Nastavení takové env var na `true` v nasazení, kde je řídicí panel již uložen `false` proto nic nemění — přepněte přepínač** Nastavení → Resilience** (nebo vymažte uložené pole).
 
-## 1. Circuit breaker poskytovatele
+## 1. Jistič poskytovatele
 
-**Rozsah:** celý poskytovatel (např. `glm`, `openai`, `anthropic`).
+**Rozsah:** celého poskytovatele (např. `glm`, `openai`, `anthropic`).
 
-**Účel:** přestat posílat provoz poskytovateli, který opakovaně selhává na úrovni upstreamu/služby.
+**Účel:** zastavit odesílání provozu poskytovateli, který opakovaně selhává na úrovni upstream/service.
 
 **Implementace:**
 
 - Základní třída: `src/shared/utils/circuitBreaker.ts`
-- Zapojení: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API stavu: `GET /api/monitoring/health`
-- API pro reset: `POST /api/resilience/reset`
-- Obalové vrstvy: `open-sse/services/accountFallback.ts`
-- Databázová tabulka: `domain_circuit_breakers`
+- Elektroinstalace: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Stav API: `GET /api/monitoring/health`
+- Resetovat API: `POST /api/resilience/reset`
+- Obaly: `open-sse/services/accountFallback.ts`
+- tabulka DB : `domain_circuit_breakers`
 
-**Stavy:**
+**státy:**
 
-- `CLOSED` — normální provoz je povolen
-- `DEGRADED` — provoz je stále povolen, ale zvýšená míra selhání poskytovatele je sledována; vrací se do stavu `CLOSED` po dostatečném počtu úspěchů, po úspěšném testu připojení, nebo po uplynutí nejdelší doby podržení stavu `OPEN` pro poslední druh selhání (jeho hodnota `cooldownByKind`, jinak `resetTimeout`, × `maxBackoffMultiplier`, minimálně jeden cooldown) bez nového selhání
-- `OPEN` — poskytovatel je dočasně blokován; combo směrování jej přeskakuje
-- `HALF_OPEN` — časový limit resetu uplynul; zkušební požadavek je povolen
+- `CLOSED` — normální provoz povolen
+- provoz `DEGRADED` — je stále povolen, ale jsou sledována zvýšená selhání poskytovatele; vrátí se k `CLOSED` při dostatečném počtu úspěchů, při platném testu připojení nebo po nejdelším držení `OPEN` pro poslední druh selhání (jeho hodnota `cooldownByKind`, jinak `resetTimeout`, × `maxBackoffMultiplier`, alespoň jedno cooldown) bez nového selhání
+- poskytovatel `OPEN` — dočasně zablokován; kombinované směrování to přeskočí
+- `HALF_OPEN` — reset timeout uplynul; žádost o sondu povolena
 
-**Konfigurovatelné výchozí hodnoty (`open-sse/config/constants.ts`, zpřístupněné v Dashboard → Settings → Resilience):**
+**Konfigurovatelné výchozí hodnoty (`open-sse/config/constants.ts`, zobrazeno v nastavení řídicího panelu → → odolnost):**
 
-| Třída   | Degradace při | Otevření při | Časový limit resetu |
-| ------- | ------------- | ------------ | ------------------- |
-| OAuth   | 5 selháních   | 8 selháních  | 60 s                |
-| API-key | 7 selháních   | 12 selháních | 30 s                |
-| Local   | odvozeno      | 2 selháních  | 15 s                |
+| Třída    | Degradováno na | Otevírá v  | Resetovat časový limit |
+| -------- | -------------- | ---------- | ---------------------- |
+| OAuth    | 5 selhání      | 8 selhání  | 60. léta               |
+| API klíč | 7 selhání      | 12 selhání | 30. léta               |
 
-`degradationThreshold` řídí, kdy poskytovatel vstoupí do stavu `DEGRADED`; `failureThreshold` řídí, kdy se otevře a je přeskočen. Profily lokálních poskytovatelů zatím nejsou na stránce nastavení Resilience zpřístupněny.
+`degradationThreshold` řídí, kdy poskytovatel zadá `DEGRADED`; `failureThreshold` řídí, kdy se otevře a je přeskočeno. `PROVIDER_PROFILES.local` (2 selhání / 15 s) je definováno v `open-sse/config/constants.ts` but** ještě není zapojeno** : `getProviderCategory()` vrací pouze `oauth` nebo `apikey`, takže místní poskytovatelé používají profil OAuth nebo API-key.
 
-**Aktivační kódy:** pouze stavové kódy na úrovni poskytovatele `[408, 500, 502, 503, 504]`. NEAKTIVOVAT při chybách na úrovni účtu (většina 401/403/429 — ty spadají pod cooldown nebo lockout).
+**Cestovní kódy:** pouze stavy na úrovni poskytovatele `[408, 500, 502, 503, 504]`. Udělejte NOT trip pro chyby na úrovni účtu (většina 401/403/429 — patří do cooldownu nebo lockoutu).
 
-**Líné obnovení:** když vyprší `OPEN`, metody `getStatus()`, `canExecute()`, `getRetryAfterMs()` obnoví stav na `HALF_OPEN`. Tytéž operace čtení (a případné další selhání) převedou zastaralý stav `DEGRADED` zpět na `CLOSED`. Není potřeba žádný časovač na pozadí.
+**Líné zotavení:** když `OPEN` vyprší, `getStatus()`, `canExecute()`, `getRetryAfterMs()` obnoví stav na `HALF_OPEN`. Stejné čtení (a další selhání) rozloží zastaralý `DEGRADED` zpět na `CLOSED`. Není potřeba žádný časovač na pozadí.
 
 ---
 
-### Volitelný globální cooldown poskytovatele (okenní brána)
+### Přihlaste se do globálního Cooldown poskytovatele (window gate)
 
-Čtvrtá, **volitelná** vrstva (`PROVIDER_COOLDOWN_ENABLED`, výchozí **vypnuto**) uchovává
-paměť selhávajících poskytovatelů napříč požadavky v
-`open-sse/services/providerCooldownTracker.ts`. Využívá ji rozlišování cílů
-combo směrování, takže po sobě jdoucí combo požadavky přestanou opakovaně zkoušet
-poskytovatele, který právě selhal. Záznamy na úrovni poskytovatele respektují
-okenní bránu `PROVIDER_PROFILES`:
+čtvrtý,** přihlásit se** vrstva (`PROVIDER_COOLDOWN_ENABLED`, výchozí** vypnuto** ) uchovává paměť křížových požadavků selhávajících poskytovatelů v `open-sse/services/providerCooldownTracker.ts`, konzultována s kombinovaným cílovým rozlišením, takže po sobě jdoucí kombinované požadavky přestanou znovu procházet poskytovatelem, který právě selhal. Záznamy na úrovni poskytovatele respektují bránu okna `PROVIDER_PROFILES` :
 
-| Profil  | aktivace po (`providerFailureThreshold`) | během (`providerFailureWindowMs`) | chladnutí po (`providerCooldownMs`) |
-| ------- | ---------------------------------------: | --------------------------------: | ----------------------------------: |
-| OAuth   |                                     `10` |                           `15min` |                              `5min` |
-| API key |                                     `15` |                           `30min` |                             `10min` |
+| Profil   | cesty po (`providerFailureThreshold`) | uvnitř (`providerFailureWindowMs`) | chladí pro (`providerCooldownMs`) |
+| -------- | ------------------------------------: | ---------------------------------: | --------------------------------: |
+| OAuth    |                                  `10` |                            `15min` |                            `5min` |
+| API klíč |                                  `15` |                            `30min` |                           `10min` |
 
-Pod prahem poskytovatel **není** považován za chladnoucího; úspěch okno vymaže.
-Záznamy na úrovni připojení (`provider:connectionId`) si místo toho uchovávají
-exponenciální backoff `minRetryCooldownMs → maxRetryCooldownMs`. Přepsání:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Regresní test: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Pod prahovou hodnotou je poskytovatel** ne** považováno za chlazení; úspěch otevře okno. Záznamy na úrovni připojení (`provider:connectionId`) místo toho zachovávají exponenciální `minRetryCooldownMs → maxRetryCooldownMs` backoff. Přepíše: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regresní stráž: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Ochlazování připojení
 
@@ -740,6 +730,21 @@ vyčerpaná kvóta. Reálná omezení:
 
 ---
 
+## Když je samotná OmniRoute nedosažitelná
+
+Uvnitř brány běží jistič poskytovatele, ochlazení připojení a uzamčení modelu. Pokud klient nemůže dosáhnout brány, obdrží chybu připojení. OmniRoute nemůže toto selhání zachytit. Klient se rozhodne, zda to zkusit znovu a jakou zprávu zobrazí.
+
+OmniRoute v současné době neposkytuje žádné záložní řešení na straně klienta a nedefinuje pro něj žádné zásady. Nakonfigurujte jakoukoli alternativní trasu v klientovi nebo před bránou.
+
+- `GET /api/health` kontroluje živost bez ověření.
+- `GET /api/health/ping` kontroluje připravenost, včetně toho, zda databáze odpovídá.
+- `GET /api/monitoring/health` poskytuje ověřeným volajícím hlubší přehled o zdraví.
+- `omniroute launch <tool>` sonduje `/api/monitoring/health` před spuštěním klienta. Může automaticky spustit místní bránu. Při `--no-start` nedosažitelná brána vede k `GatewayUnreachable` a ukončovacímu kódu `69`.
+
+Chcete - li odpojit klienta od OmniRoute, postupujte podle [pokynů Obnovit konfiguraci klienta](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Ladění
 
 - Vážené combo odpovídá `503 all_targets_cooling_down` (`Retry-After` nastaveno, `diagnostics.excluded` obsahuje všechny cíle s `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → pool je nakonfigurován a připojen, každý cíl je pouze vyloučen časovačem odolnosti; varování `[COMBO] Weighted selection: every target excluded before dispatch — …` uvádí důvody a zbývající sekundy. `404 no_executable_targets` ze stejného comba znamená, že žádný časovač odolnosti nehrál roli (nic ke spuštění, nebo každý účet neprošel testem dostupnosti). Vytvořeno v `open-sse/services/combo/pinRecovery.ts` z vyloučení shromážděných v `targetResolution.ts`.
@@ -751,97 +756,68 @@ vyčerpaná kvóta. Reálná omezení:
 
 ---
 
-## Stav za běhu — rychlá reference pro agenta
+## Rychlá reference agenta — za běhu
 
-> Přesunuto beze změn z `AGENTS.md` → "Resilience Runtime State" (PR #12743), aby
-> příručka pro agenta zůstala pod kontextovým limitem 40k. Jedná se o zhuštěný pohled
-> na výše uvedené sekce určený agentovi; číslované sekce zůstávají úplnou referencí.
+> Přesunuto doslovně ze `AGENTS.md` → "Resilience Runtime State" (PR #12743), takže průvodce pro agenty zůstává pod kontextovým rozpočtem 40 000. Je to zhuštěný pohled na výše uvedené sekce z pohledu agenta; číslované části zůstávají úplným odkazem.
 
-OmniRoute má tři příbuzné, ale odlišné mechanismy pro dočasná selhání. Při ladění
-chování směrování udržujte jejich rozsah oddělený. Pro rychlý přehled viz
-[diagram 3vrstvé odolnosti](../diagrams/exported/resilience-3layers.svg)
-(zdroj: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)).
+OmniRoute má tři související, ale odlišné mechanismy dočasného selhání. Při ladění směrování udržujte jejich rozsah oddělený. Podívejte se na [3vrstvý diagram odolnosti](../diagrams/exported/resilience-3layers.svg) (zdroj: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ), kde najdete mapu na první pohled.
 
-### Circuit breaker poskytovatele
+### Jistič poskytovatele
 
-**Rozsah**: celý poskytovatel, např. `glm`, `openai`, `anthropic`.
+**Rozsah** : celý poskytovatel, např. `glm`, `openai`, `anthropic`.
 
-**Účel**: zastavit posílání provozu poskytovateli, který opakovaně selhává na úrovni
-upstreamu/služby, aby jeden nezdravý poskytovatel nezpomaloval každý požadavek.
+**Účel** : zastavit odesílání provozu poskytovateli, který opakovaně selhává na úrovni upstream/service, aby jeden nezdravý poskytovatel nezpomalil každý požadavek.
 
-**Implementace**:
+**Implementace** :
 
 - Základní třída: `src/shared/utils/circuitBreaker.ts`
-- Zapojení brány/spuštění chatu: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API stavu za běhu: `src/app/api/monitoring/health/route.ts`
-- Sdílené obálky: `open-sse/services/accountFallback.ts`
+- Chat gate/execution vedení: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Stav běhu API: `src/app/api/monitoring/health/route.ts`
+- Sdílené obaly: `open-sse/services/accountFallback.ts`
 - Tabulka trvalého stavu: `domain_circuit_breakers`
 
-**Stavy** (4 — `src/shared/utils/circuitBreaker.ts`):
+**států** (4 — `src/shared/utils/circuitBreaker.ts`):
 
 - `CLOSED`: normální provoz je povolen.
-- `DEGRADED`: pásmo včasného varování — selhání překročila práh degradace, ale ještě
-  ne práh breakeru; provoz stále teče, dashboardy zobrazují varování. Platný test
-  připojení nebo klidné okno bez nového selhání jej vrátí do `CLOSED`
-  (okno popisuje `docs/architecture/RESILIENCE_GUIDE.md`).
-- `OPEN`: poskytovatel je dočasně zablokován; volající dostanou odpověď
-  provider-circuit-open, nebo combo směrování přeskočí na jiný cíl.
-- `HALF_OPEN`: uplynul časový limit resetu; povolí se zkušební požadavek. Úspěch
-  breaker uzavře, selhání jej znovu otevře.
+- `DEGRADED`: selhání pásma včasného varování — překročila práh degradace, ale ještě ne práh jističe; provoz stále plyne, na přístrojových deskách se zobrazuje varování. Platný test připojení nebo tiché okno bez nového selhání jej vrátí na `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` má okno).
+- `OPEN`: poskytovatel je dočasně zablokován; volající obdrží odpověď poskytovatele-otevřený okruh nebo kombinované směrování přeskakuje na jiný cíl.
+- `HALF_OPEN`: vypršel časový limit resetování; povolit žádost o sondu. Úspěch zavře jistič, neúspěch ho zase otevře.
 
-**Výchozí hodnoty** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, spotřebováváno přes
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` v `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` v `src/sse/handlers/chatHelpers.ts`). Breaker celého
-poskytovatele běží na `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Výchozí** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, spotřebováno přes `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` v `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` v `src/sse/handlers/chatHelpers.ts`). Přerušovač celého poskytovatele běží na `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profil   | degraduje se při | otevře se při (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
-| -------- | ---------------: | ----------------------------------------: | ----------------------------: |
-| OAuth    |              `5` |                                       `8` |                         `60s` |
-| API klíč |              `7` |                                      `12` |                         `30s` |
-| Lokální  |       (odvozeno) |                                       `2` |                         `15s` |
+| Profil   | degraduje při | otevírá v (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
+| -------- | ------------: | ------------------------------------: | ----------------------------: |
+| OAuth    |           `5` |                                   `8` |                         `60s` |
+| API klíč |           `7` |                                  `12` |                         `30s` |
 
-`PROVIDER_PROFILES` také definuje `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) a `providerCooldownMs` (5/10/1 min): tyto pohánějí
-**okenní bránu volitelného globálního Provider Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, ve
-výchozím stavu vypnuto) — záznam na úrovni poskytovatele v
-`open-sse/services/providerCooldownTracker.ts` se počítá jako chladnoucí až po
-`providerFailureThreshold` selháních uvnitř `providerFailureWindowMs`, a poté chladne po
-dobu `providerCooldownMs`. NEJSOU to prahy živého breakeru — nenalaďujte je
-v očekávání chování breakeru. Každou výchozí hodnotu lze přepsat pomocí env proměnných
-`OMNIROUTE_PROVIDER_BREAKER_*` a `OMNIROUTE_CIRCUIT_BREAKER_*`; referenční tabulka přesná
-pro běh systému se nachází v `docs/architecture/RESILIENCE_GUIDE.md`.
+Profil `local` (`2` failure / `15s`) také existuje v `PROVIDER_PROFILES`, ale není zapojen do jističe: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) přijímá pouze `oauth` nebo `apikey` a `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) vrací jeden z těchto dvou (neregistrovaní poskytovatelé dostávají `apikey`).
 
-Pouze stavy selhání na úrovni poskytovatele by měly aktivovat breaker poskytovatele:
+`PROVIDER_PROFILES` také definuje `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) a `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, kde místní hodnoty jsou inertní ze stejného důvodu jako výše: tyto napájejí** okenní brána otevřeného globálního poskytovatele Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, výchozí vypnuto) — položka na úrovni poskytovatele v `open-sse/services/providerCooldownTracker.ts` se počítá pouze jako chlazení po selhání `providerFailureThreshold` uvnitř `providerFailureWindowMs` a poté se ochladí pro `providerCooldownMs`. Jsou to NOT prahy živého jističe — je nevylaďují tak, aby očekávali chování jističe. Každé výchozí nastavení je možné přepsat pomocí proměnných env `OMNIROUTE_PROVIDER_BREAKER_*` a `OMNIROUTE_CIRCUIT_BREAKER_*` ; referenční tabulka s přesností běhu žije v `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Pouze stavy selhání na úrovni poskytovatele by měly vypnout jistič poskytovatele:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Neaktivujte breaker celého poskytovatele pro běžné chyby účtu/klíče/modelu, jako je
-většina případů `401`, `403` nebo `429`. Ty obvykle patří do connection cooldown nebo
-model lockout. Obecné `403` poskytovatele s API klíčem by mělo být obnovitelné, pokud
-není klasifikováno jako terminální chyba poskytovatele/účtu.
+Nevypínejte jistič celého poskytovatele při běžných chybách account/key/model, jako je většina případů `401`, `403` nebo `429`. Ty obvykle patří do cooldownu připojení nebo uzamčení modelu. Obecný poskytovatel klíče API `403` by měl být obnovitelný, pokud není klasifikován jako chyba terminálu provider/account.
 
-Jistič používá línou obnovu, nikoli časovač na pozadí. Když vyprší stav `OPEN`,
-čtení jako `getStatus()`, `canExecute()` a `getRetryAfterMs()` obnoví stav na
-`HALF_OPEN`, takže nástěnky a sestavovače kandidátů na kombinace (combo)
-nevylučují poskytovatele s vypršenou platností donekonečna.
+Přerušovač používá líné zotavení, nikoli časovač na pozadí. Když vyprší platnost `OPEN`, čtení jako `getStatus()`, `canExecute()` a `getRetryAfterMs()` obnoví stav na `HALF_OPEN`, takže řídicí panely a sestavovatelé kandidátů na combo nevylučují poskytovatele, jehož platnost vypršela, navždy.
 
-### Cooldown spojení
+### Ochlazování připojení
 
-**Rozsah**: jedno spojení/účet/klíč poskytovatele.
+**Rozsah** : jeden poskytovatel connection/account/key.
 
-**Účel**: dočasně přeskočit jeden vadný klíč/účet a zároveň umožnit, aby ostatní
-spojení stejného poskytovatele dál obsluhovala požadavky.
+**Účel** : dočasně přeskočit jedno špatné key/account a zároveň umožnit dalším připojením pro stejného poskytovatele pokračovat v obsluhování požadavků.
 
-**Implementace**:
+**Implementace** :
 
-- Cesta pro zápis/aktualizaci: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Výběr/filtrování účtů: `src/sse/services/auth.ts::getProviderCredentials...`
+- cesta Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- Účet selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
 - Výpočet cooldownu: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Nastavení: `src/lib/resilience/settings.ts`
 
-Důležitá pole na spojeních poskytovatele:
+Důležitá pole připojení poskytovatele:
 
 ```ts
 rateLimitedUntil;
@@ -852,70 +828,50 @@ errorCode;
 backoffLevel;
 ```
 
-Při výběru účtu je spojení přeskakováno, pokud:
+Během výběru účtu je připojení přeskočeno, když:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Cooldowny jsou také líné: když je `rateLimitedUntil` v minulosti, spojení se opět
-stává způsobilým. Při úspěšném použití `clearAccountError()` vymaže `testStatus`,
-`rateLimitedUntil`, chybová pole a `backoffLevel`.
+Cooldowny jsou také líné: když je `rateLimitedUntil` v minulosti, připojení se znovu stává způsobilým. Při úspěšném použití `clearAccountError()` vymaže `testStatus`, `rateLimitedUntil`, chybová pole a `backoffLevel`.
 
-Výchozí chování cooldownu spojení:
+Výchozí chování ochlazování připojení:
 
-- Základní cooldown pro OAuth: `5s`.
-- Základní cooldown pro API klíč: `3s`.
-- U API klíče by se u chyby `429` měly upřednostňovat nápovědy pro opakování z upstreamu
-  (`Retry-After`, resetovací hlavičky nebo parsovatelný text resetu), pokud jsou
-  k dispozici.
-- Opakované opravitelné chyby používají exponenciální backoff:
+- základní cooldown OAuth : `5s`.
+- Cooldown základního klíče API: `3s`.
+- Klíč API `429` by měl upřednostňovat upstream tipy pro opakování (`Retry-After`, resetovat záhlaví nebo analyzovatelný resetovaný text), pokud jsou k dispozici.
+- Opakovaná obnovitelná selhání používají exponenciální úlevy:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Pojistka proti efektu thundering herd (náhlému hromadnému náporu) zabraňuje tomu, aby
-souběžná selhání na stejném spojení opakovaně prodlužovala cooldown nebo dvakrát
-inkrementovala `backoffLevel`.
+Ochrana proti hromobití chrání před opakovaným prodloužením cooldownu nebo dvojnásobným zvýšením `backoffLevel` souběžným selháním na stejném připojení.
 
-Terminální stavy nejsou cooldowny. `banned`, `expired` (který se stává terminálním až
-po N omezených opakováních prostřednictvím `EXPIRED_RETRY_MAX`) a
-`credits_exhausted` mají zůstat nedostupné, dokud se nezmění přihlašovací
-údaje/nastavení nebo je operátor neresetuje. Nepřepisujte terminální stavy přechodným
-stavem cooldownu.
+Terminálové stavy nejsou cooldowny. `banned`, `expired` (který se stane koncovým až po N omezených pokusech přes `EXPIRED_RETRY_MAX`) a `credits_exhausted` mají zůstat nedostupné, dokud se credentials/settings nezmění nebo je operátor neresetuje. Nepřepisujte stavy svorek přechodným stavem ochlazení.
 
-### Zablokování modelu
+### Uzamčení modelu
 
-**Rozsah**: poskytovatel + spojení + model.
+**Rozsah** : poskytovatel připojení + model +.
 
-**Účel**: zabránit deaktivaci celého spojení, když je pro dané spojení nedostupný
-nebo kvótově omezený pouze jeden model.
+**Účel** : vyhněte se deaktivaci celého připojení, když je pro toto připojení nedostupný pouze jeden model nebo je omezen kvótou.
 
 Příklady:
 
-- Poskytovatelé s kvótami na jednotlivé modely vracející `429`.
-- Místní poskytovatelé vracející `404` pro jeden chybějící model.
-- Selhání oprávnění režimu/modelu specifická pro poskytovatele, například vybrané
-  režimy Grok.
+- Poskytovatelé kvót pro model vracející `429`.
+- Místní poskytovatelé vracejí `404` pro jeden chybějící model.
+- Selhání oprávnění mode/model specifické pro poskytovatele, jako jsou vybrané režimy Grok.
 
-Zablokování modelu je implementováno v `open-sse/services/accountFallback.ts` a
-umožňuje, aby stejné spojení dál obsluhovalo ostatní modely.
+Uzamčení modelu žije v `open-sse/services/accountFallback.ts` a umožňuje, aby stejné připojení nadále obsluhovalo další modely.
 
-### Pokyny pro ladění
+### Návod k ladění
 
-- Pokud jsou všechny klíče poskytovatele přeskakovány, zkontrolujte jak stav jističe
-  poskytovatele, tak `rateLimitedUntil`/`testStatus` každého spojení.
-- Pokud se zdá, že je poskytovatel trvale vyloučen i po uplynutí okna resetu,
-  zkontrolujte, zda kód nečte surový `state` místo použití
-  `getStatus()`/`canExecute()`.
-- Pokud selže jeden klíč poskytovatele, ale ostatní by měly fungovat, upřednostněte
-  cooldown spojení před jističem poskytovatele.
-- Pokud selhává pouze jeden model, upřednostněte zablokování modelu před cooldownem
-  spojení.
-- Pokud se má stav sám obnovit, měl by mít časovou značku v budoucnosti/časový limit
-  resetu a cestu čtení, která obnoví vypršený stav. Trvalé stavy vyžadují ruční změnu
-  přihlašovacích údajů nebo konfigurace.
+- Pokud jsou všechny klíče pro poskytovatele přeskočeny, zkontrolujte stav přerušení poskytovatele a `rateLimitedUntil`/`testStatus` každého připojení.
+- Pokud se poskytovatel po resetovacím okně objeví trvale vyloučený, zkontrolujte, zda kód čte nezpracovaný `state` namísto použití `getStatus()`/`canExecute()`.
+- Pokud jeden klíč poskytovatele selže, ale ostatní by měly fungovat, upřednostněte ochlazení připojení před přerušením poskytovatele.
+- Pokud selže pouze jeden model, upřednostněte uzamčení modelu před ochlazením připojení.
+- Pokud by se stav měl sám obnovit, měl by mít budoucí časový limit timestamp/reset a cestu pro čtení, která obnovuje stav s vypršením platnosti. Trvalé stavy vyžadují ruční změny pověření nebo konfigurace.
 
 ---
 

@@ -11,7 +11,7 @@ Objektiv funksjonssammenligning kontra populære AI -rutere med åpen kildekode.
 | Trekk                                                  |                OmniRoute 3.8                 |     LiteLLM 1.x     | OpenRouter (SaaS) | Portnøkkel |
 | ------------------------------------------------------ | :------------------------------------------: | :-----------------: | :---------------: | :--------: |
 | **Leverandører**                                       |                   **329**                    |        ~100         |        ~50        |    ~30     |
-| **Free/no-auth katalogoppføringer**                    |                   **155**                    |         n/a         |   gjennomføring   |    n/a     |
+| **Tilbydere med gratis tilgang**                       |          **50 med gratis tilgang**           |         n/a         |   gjennomføring   |    n/a     |
 | **Selvvertskapende**                                   |                      ✅                      |         ✅          |        ❌         |  ⚠ betalt  |
 | **OAuth katalogoppføringer**                           |                    **23**                    |       delvis        |        ❌         |     ❌     |
 | **Auto-reserve-kombinasjoner**                         |              **22 strategier**               | prioriteringsbasert |    nivåbasert     |   vektet   |
@@ -38,7 +38,7 @@ Objektiv funksjonssammenligning kontra populære AI -rutere med åpen kildekode.
 
 ## Når du skal velge OmniRoute
 
-- Du selv vert og ønsker** maksimal leverandørdekning** (394 leverandører, 155 free/no-auth -katalogoppføringer)
+- Du selv vert og ønsker** maksimal leverandørdekning** (394 tilbydere, 50 med gratis tilgang)
 - Du trenger en** innebygd MCP server** (LLM verktøy, minne, ferdigheter eksponert som verktøy)
 - Du trenger**A2A -protokollen** for agent-til-agent arbeidsflyter
 - Du vil** fingeravtrykk stealth** (JA3/JA4) for å unngå deteksjon av oppstrøms CAPTCHAs
@@ -56,12 +56,12 @@ Objektiv funksjonssammenligning kontra populære AI -rutere med åpen kildekode.
 - Du er komfortabel med å betale per token med SaaS-påslag
 - Du trenger **én betalingsmetode** på tvers av alle leverandører
 
-## Når du bør velge Portkey
+## Når du skal velge Portkey
 
-- Du trenger en **kommersiell SLA** med oppetidsgarantier
-- Du foretrekker et **administrert kontrollpanel** uten ekstra driftsarbeid
-- Du trenger **funksjoner for samsvar i virksomheter** klare til bruk
+- Du trenger en** kommersielle SLA** med oppetidsgarantier
+- Du foretrekker a** administrert dashbord** uten ops overhead
+- Du trenger** bedriftsoverholdelse** funksjoner ut av esken
 
 ---
 
-_Sist oppdatert: 2026-08-02. Send inn rettelser via PR for å holde denne tabellen nøyaktig._
+_Send inn rettelser via PR for å holde denne tabellen nøyaktig._

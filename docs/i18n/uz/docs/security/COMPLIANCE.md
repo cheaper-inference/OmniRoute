@@ -4,12 +4,11 @@
 
 ---
 
-> **Haqiqiy manba:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Oxirgi yangilanish:** 2026-06-28 — v3.8.40
+> **Haqiqat manbai:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute maʼmuriy amallar, autentifikatsiya hodisalari, provayder hisob maʼlumotlarining hayotiy siklidagi oʻzgarishlar va MCP vositasi chaqiruvlarini SQLite asosidagi audit jadvallariga yozib boradi. Ushbu sahifada nimalar jurnalga yozilishi, ular qayerda saqlanishi, qancha vaqt saqlab turilishi, API kalitlari jurnalga yozilishdan qanday voz kechishi va maʼlumotlarni qanday soʻrash mumkinligi bayon etiladi.
+OmniRoute ma'muriy harakatlarni, autentifikatsiya hodisalarini, provayder hisob ma'lumotlarining hayot aylanishidagi o'zgarishlarni va SQLite tomonidan qo'llab-quvvatlangan audit jadvallariga MCP vositasi chaqiruvlarini qayd qiladi. Bu sahifada nimalar roʻyxatga olinishi, u qayerda yashashi, qancha vaqt saqlanishi, API tugmachalari qanday oʻchirib qoʻyilishi va maʼlumotlarni qanday soʻrash mumkinligi haqida maʼlumotlar berilgan.
 
-Amalga oshirish kodi `src/lib/compliance/index.ts` (T-43 — "Muvofiqlik nazorati") va `src/lib/compliance/providerAudit.ts` fayllarida joylashgan. Audit yozuvlari hech qachon istisno chiqarmaydi: har qanday nosozlik yuz berganda chaqiruv jimgina eʼtiborsiz qoldiriladi, shuning uchun audit jurnaliga yozish asosiy soʻrov oqimini buzmaydi.
+Amalga oshirish `src/lib/compliance/index.ts` (T-43 — "Muvofiqlik nazorati") va `src/lib/compliance/providerAudit.ts` da yashaydi. Audit yozuvlari hech qachon tashlanmaydi: har qanday nosozlikda qo'ng'iroq jimgina yutib yuboriladi, shuning uchun audit jurnali asosiy so'rovlar oqimini buzmaydi.
 
 ## Nimalar qayd etiladi
 
@@ -129,31 +128,33 @@ so‘rov artefaktlarini o‘chiradi.
 Standart qiymatlar `src/lib/logEnv.ts` faylida belgilangan
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## `noLog` orqali rad etish (har bir API kaliti uchun)
+## `noLog` O'chirish (har bir API kaliti uchun)
 
-API kalitlari ularning quyi oqimdagi chaqiruv trafigi jurnalga yozilmasligi uchun belgilanishi mumkin.
-Belgi `api_keys` jadvalida (`no_log INTEGER DEFAULT 0`) saqlanadi va tezkor yo‘ldagi
-qidiruvlar uchun xotiradagi to‘plamga aks ettiriladi.
+API tugmachalarini bayroqlash mumkin, shuning uchun ularning quyi oqimdagi qo'ng'iroqlar trafigini qayd etilmaydi. Bayroq `api_keys` jadvalida (`no_log INTEGER DEFAULT 0`) yashaydi va tezkor qidiruvlar uchun xotirada aks ettiriladi.
 
 ```bash
-# Jurnalga yozilmaydigan kalit yarating (boshqaruv autentifikatsiyasi talab qilinadi)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Yordamchi funksiyalar (`src/lib/compliance/index.ts`):
+Yordamchilar (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — xotiradagi yozuvni yoqish yoki o‘chirish
-- `isNoLog(apiKeyId)` — so‘rov yo‘lida tekshiriladi; mavjud bo‘lmasa, `api_keys.no_log` dan
-  30 soniyaga keshlangan o‘qishdan foydalanadi
-- `NO_LOG_API_KEY_IDS` (muhit o‘zgaruvchisi, vergul bilan ajratilgan) — ishga tushishda xotiradagi
-  to‘plamga oldindan yuklanadi; ustunni bevosita o‘zgartira olmaganingizda foydali
+- `setNoLog(apiKeyId, true|false)` — xotiradagi yozuvni almashtirish
+- `isNoLog(apiKeyId)` — so'rov yo'lida tekshirildi; `api_keys.no_log` dan 30 s keshlangan o'qishga qaytadi
+- `NO_LOG_API_KEY_IDS` (env, vergul bilan ajratilgan) yuklashda xotira to'plamiga oldindan yuklangan — ; ustunni to'g'ridan-to'g'ri almashtira olmaganingizda foydalidir
 
-Maʼmuriy audit hodisalariga (tizimga kirish, provayder o‘zgarishlari, MCP vositasi chaqiruvlari va boshqalar)
-`noLog` **taʼsir qilmaydi** — faqat har bir so‘rovga tegishli trafikni jurnalga yozish
-rad etiladi.
+Ma'muriy audit hodisalari (login, provayder o'zgarishlari, MCP asbob qo'ng'iroqlari va boshqalar).** emas** `noLog` — ta'sirida faqat har bir so'rov bo'yicha trafik jurnali o'chiriladi.
+
+### Har bir so'rov bo'yicha rad etish (`x-omniroute-no-log`)
+
+Mijoz ajratilgan kalit yaratmasdan, foydali yuk doimiyligidan tashqari, bitta xulosa so'rovini tanlashi mumkin. So'rov bo'yicha `x-omniroute-no-log: true` yuboring (`1` va `yes` ham qabul qilinadi, katta-kichik harfdan farq qiladi). Bu chat boshqaruvchisi orqali o'tadigan har bir chat-oilaviy marshrutga taalluqlidir: Chatni yakunlash, javoblar, xabarlar, tugatishlar va Gemini-mos keladigan yo'l. Qo'ng'iroqlar jurnali qatori hali ham vaqt tamg'asi, modeli, provayderi, holati, davomiyligi va tokenlar soni bilan yoziladi, lekin `request_body`, `response_body`, so'rov xulosalari va quvur liniyasi artefaktlari o'tkazib yuborilgan.
+
+Sarlavha kalit bayrog'i bilan ORed : logsiz kalit sarlavhadan qat'iy nazar jurnalsiz qoladi va sarlavha jurnalsiz kalit uchun jurnalni qayta faollashtira olmaydi. So'rov yuqoriga yo'naltirilgunga qadar sarlavha o'chiriladi.
+
+Bu sarlavha shunday** emas** Xotirani chiqarish yoki semantik keshni o'chirib qo'ying. Agar so‘rov ushbu quyi tizimlarda ham davom etmasligi kerak bo‘lsa, uning yoniga `x-omniroute-no-memory: true` va `x-omniroute-no-cache: true` yuboring.
 
 ## REST API
 

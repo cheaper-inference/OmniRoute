@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute hutolewa kama Progressive Web App inayoweza kusakinishwa kikamilifu. Unapofungua dashibodi kutoka kwenye kivinjari chochote cha simu — Android (Chrome) au iOS (Safari) — unaweza kutumia chaguo la "Ongeza kwenye Skrini ya Mwanzo" na kupata matumizi yanayofanana na programu asilia bila kuhitaji duka la programu.
+Sakinisha dashibodi OmniRoute kama Programu ya Wavuti Inayoendelea ili kuifungua kutoka skrini yako ya kwanza au eneo-kazi katika dirisha linalojitegemea. Programu iliyosakinishwa bado inahitaji muunganisho kwenye seva yako OmniRoute kwa urambazaji, data ya dashibodi na maombi ya API. Vipengee tuli vilivyohifadhiwa havitoi lango la nje ya mtandao au dashibodi ya nje ya mtandao.
 
-## PWA Ni Nini?
+## PWA ni nini?
 
-Progressive Web App hubadilisha dashibodi ya wavuti ya OmniRoute kuwa kitu kinachoonekana na kutenda kama programu asilia ya simu. Baada ya kusakinishwa, programu hiyo:
+Programu ya Wavuti inayoendelea hutumia dashibodi ya wavuti iliyo na ikoni ya programu na dirisha tofauti. Mara tu ikiwa imewekwa, OmniRoute:
 
-- Huzinduliwa kutoka kwenye skrini yako ya mwanzo ikiwa na ikoni yake
-- Hufunguka katika hali ya skrini nzima — bila upau wa anwani wa kivinjari au kiolesura cha vichupo
-- Hufanya kazi bila muunganisho wa intaneti kwa kutumia ukurasa maalumu wa muunganisho
-- Huhifadhi rasilimali tuli kwenye akiba ili zipakie kwa haraka zaidi
-- Hutumia mielekeo ya wima na mlalo
+- Inazinduliwa kutoka skrini yako ya nyumbani au eneo-kazi
+- Hufungua katika hali ya pekee, bila upau wa anwani wa kawaida wa kivinjari na vichupo
+- Akiba ya vipengee tuli vilivyochaguliwa
+- Inaauni mwelekeo wa picha na mandhari
 
-## Usakinishaji
+## Ufungaji
+
+Tumia anwani HTTPS kwa seva kwenye kifaa kingine. Wakati seva inaendeshwa kwenye kifaa sawa, `http://localhost:20128` pia inakidhi mahitaji ya usakinishaji wa kivinjari. Anwani ya wazi `http://YOUR_IP:20128` haikidhi mahitaji hayo. Menyu na vidokezo vya usakinishaji hutegemea kivinjari na mfumo wa uendeshaji. Angalia [mahitaji ya usakinishaji PWA MDN](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
 
 ### Android (Chrome)
 
-1. Fungua dashibodi ya OmniRoute katika Chrome: `http://YOUR_IP:20128`
-2. Chrome itaonyesha bango la **"Ongeza OmniRoute kwenye Skrini ya mwanzo"** kiotomatiki, au:
-   - Gusa menyu ya **⋮** (nukta tatu) → **"Ongeza kwenye Skrini ya mwanzo"** au **"Sakinisha programu"**
-3. Thibitisha ombi
-4. OmniRoute itaonekana kwenye skrini yako ya mwanzo kama programu inayojitegemea
+1. Fungua anwani yako ya OmniRoute HTTPS, au `http://localhost:20128` kwa seva kwenye simu hiyo hiyo.
+2. Fungua**⋮** menyu na uchague** Sakinisha programu** au** Ongeza kwenye Skrini ya kwanza** , ikitolewa.
+3. Thibitisha kidokezo.
+4. Fungua OmniRoute kutoka skrini ya nyumbani.
 
 ### iOS (Safari)
 
-1. Fungua dashibodi ya OmniRoute katika Safari: `http://YOUR_IP:20128`
-2. Gusa kitufe cha **Shiriki** (kisanduku chenye mshale)
-3. Sogeza chini na uguse **"Ongeza kwenye Skrini ya Mwanzo"**
-4. Ipe jina (jina chaguomsingi ni "OmniRoute") na uguse **Ongeza**
-5. OmniRoute itaonekana kwenye skrini yako ya mwanzo ikiwa na ikoni ya programu
+1. Fungua anwani yako OmniRoute HTTPS katika Safari.
+2. Gonga** Shiriki** →** Ongeza kwenye Skrini ya Nyumbani** .
+3. Thibitisha jina na uguse** Ongeza** .
+4. Fungua OmniRoute kutoka skrini ya nyumbani.
 
-### Kompyuta ya Mezani (Chrome / Edge)
+### Eneo-kazi (Chrome / Edge)
 
-1. Fungua dashibodi ya OmniRoute
-2. Bofya **ikoni ya kusakinisha** katika upau wa anwani (au ⋮ → "Sakinisha OmniRoute...")
-3. Thibitisha ombi
-4. OmniRoute itafunguka kama dirisha linalojitegemea — bila vichupo wala upau wa anwani
+1. Fungua dashibodi yako OmniRoute.
+2. Tumia ikoni ya kusakinisha ya kivinjari au** Sakinisha programu** kiingilio cha menyu, ikiwa kinatolewa.
+3. Thibitisha kidokezo cha kufungua OmniRoute katika dirisha lake.
 
 ## Vipengele
 
-### Matumizi ya Skrini Nzima
+### Dirisha la Kujitegemea
 
-Manifest imesanidiwa kwa `display: "fullscreen"`, kumaanisha kuwa programu iliyosakinishwa hutumia skrini nzima — bila kiolesura cha kivinjari wala kufunika upau wa hali. Hii huifanya dashibodi ihisi kama programu asilia.
+Dhihirisho huweka `display: "standalone"` na `start_url: "/dashboard"`. Programu iliyosakinishwa inafungua dashibodi kwenye dirisha la programu. Vidhibiti vya kivinjari na mfumo wa uendeshaji bado vinaweza kuonekana; faili ya maelezo haiombi hali ya skrini nzima.
 
-### Usaidizi wa Hali Isiyo na Muunganisho
+### Vipengee Vilivyoakibishwa na Mahitaji ya Mtandao
 
-OmniRoute inajumuisha service worker (`sw.js`) inayowezesha uhifadhi mahiri kwenye akiba:
+[Mfanyikazi wa huduma](../../public/sw.js) huhifadhi rasilimali zilizochaguliwa za asili moja:
 
-| Aina ya Rasilimali                                                                                                                                                                                                                         | Mkakati                                    | Tabia                                                                                                                             |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Gamba la Programu**                                                                                                                                                                                                                      | Akiba kwanza                               | `/`, `/offline`, manifest na ikoni huhifadhiwa mapema kwenye akiba wakati wa usakinishaji                                         |
-| **Rasilimali tuli** (CSS, JS, picha, fonti)                                                                                                                                                                                                | Mtandao kwanza, akiba kama mbadala         | Hupata nakala mpya kutoka kwenye mtandao; hutumia akiba ikiwa hakuna muunganisho                                                  |
-| **Vifurushi vya Next.js** (`/_next/`)                                                                                                                                                                                                      | Mtandao kwanza pamoja na kusasisha akiba   | Hupata kutoka kwenye mtandao na kusasisha akiba; hutoa toleo lililohifadhiwa ikiwa hakuna muunganisho                             |
-| **Maombi ya uelekezaji**                                                                                                                                                                                                                   | Hupitwa (hayazuiliwi kamwe)                | Kivinjari hudhibiti urejeaji mbadala wa HTTP/3→HTTP/2; soketi ya QUIC isiyofanya kazi haipaswi kubadilika kuwa `Response.error()` |
-| **API / njia za dashibodi** (`/api/`, `/a2a`, `/dashboard`, majina mbadala ya API ya mteja `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, pamoja na `/callback`, `/login`; hulinganishwa bila kujali herufi kubwa au ndogo) | Hupitwa (hazihifadhiwi kamwe kwenye akiba) | Daima huenda moja kwa moja kwenye seva — hazizuiliwi kamwe na service worker                                                      |
+| Ombi au mali                            | Mkakati        | Tabia                                                                                                                   |
+| --------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Rasilimali za muda wa kusakinisha       | Pre-cache      | `/`, `/manifest.webmanifest`, `/icon-512.png` na `/apple-touch-icon.png` zimehifadhiwa wakati wa ufungaji wa mfanyakazi |
+| Next.js mali tuli (`/_next/`)           | Mtandao-kwanza | Majibu yaliyofaulu yanasasisha akiba; hitilafu ya mtandao inarudi kwa jibu lililopo lililohifadhiwa                     |
+| Nyingine tuli CSS, JS, picha na fonti   | Cache-kwanza   | Jibu lililopo lililohifadhiwa linatumika tena; majibu ya mtandao yaliyofaulu yamehifadhiwa kwa kukosa                   |
+| Urambazaji wa ukurasa                   | Bypass         | Kivinjari huchukua ukurasa moja kwa moja; hakuna njia mbadala ya nje ya mtandao inayotolewa                             |
+| API, dashibodi na njia za uthibitishaji | Bypass         | Mfanyikazi hakati au kuhifadhi maombi haya                                                                              |
+| Maombi mengine yasiyo ya tuli           | Mtandao        | Hakuna ukaguzi wa akiba au uhifadhi                                                                                     |
 
-### Ukurasa wa Hali Isiyo na Muunganisho
+Njia zisizojumuishwa ni `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` na `/login`, zinazolingana kwa kutojali katika mipaka ya njia. Maombi ya asili tofauti na yasiyo ya KUPATA pia hupita mfanyakazi.
 
-Wakati mtandao haupatikani na mtumiaji anapoelekea kwenye ukurasa mpya, service worker hutoa ukurasa maalumu wa `/offline` ambao:
+### Ukurasa wa Muunganisho
 
-- Huonyesha ujumbe wazi wa **"Tatizo la Muunganisho"**
-- Huonyesha **kiashirio cha hali ya kuwa mtandaoni/nje ya mtandao** kinachosasishwa papo hapo
-- Hutoa kitufe cha **"Jaribu Kuunganisha Tena"** ili kupakia upya muunganisho unaporejea
-- Huunganisha kwenye **Ukurasa wa Hali** kwa ajili ya uchunguzi
+Ukurasa `/offline` hutoa ujumbe wa muunganisho, kiashiria online/offline, a** Jaribu tena Muunganisho** kitufe na kiunga cha ukurasa wa hali. Ni** haijahifadhiwa mapema** na mfanyakazi wa huduma anafanya** sivyo** kuelekeza upya urambazaji ulioshindwa kwake. Uwepo wake haufanyi kurasa mpya kupatikana bila seva.
 
-### Ikoni za Programu
+### Aikoni za Programu
 
-OmniRoute hutoa ikoni zilizoboreshwa kwa kila jukwaa:
+Faili ya maelezo inatangaza aikoni hizi PNG :
 
-| Faili                  | Ukubwa          | Inatumiwa Na                                        |
-| ---------------------- | --------------- | --------------------------------------------------- |
-| `icon-512.png`         | 512×512         | Ombi la usakinishaji la Android, skrini ya uzinduzi |
-| `apple-touch-icon.png` | 180×180         | Ikoni ya skrini ya mwanzo ya iOS                    |
-| `icon-192.svg`         | 192×192 (vekta) | Ikoni inayobadilika ya Android                      |
-| `apple-touch-icon.svg` | 180×180 (vekta) | Ikoni mbadala ya Apple                              |
-| `favicon.svg`          | Vekta           | Vichupo vya kivinjari                               |
-| `favicon.ico`          | Saizi nyingi    | Vivinjari vya zamani                                |
+| Faili                  | Ukubwa  | Tumia                                            |
+| ---------------------- | ------- | ------------------------------------------------ |
+| `icon-192.png`         | 192×192 | Aikoni ya jumla ya programu                      |
+| `icon-512.png`         | 512×512 | Aikoni ya jumla na inayoweza kuficha ya programu |
+| `apple-touch-icon.png` | 180×180 | Ikoni ya skrini ya nyumbani ya Apple             |
 
-### Usajili wa Kiotomatiki
+Kivinjari huchagua ikoni inayofaa kwa lengo la usakinishaji.
 
-Service worker husajiliwa kiotomatiki kupitia kijenzi cha `<PwaRegister />` katika mpangilio mkuu. Hakuna hatua ya mtumiaji inayohitajika — programu inaweza kusakinishwa mara tu kivinjari kinapotambua manifest halali na service worker.
+### Usajili otomatiki
+
+`PwaRegister` husajili mfanyakazi katika uzalishaji wakati kivinjari kinasaidia wafanyakazi wa huduma. Hali ya usanidi inabatilisha usajili wa wafanyikazi na kufuta akiba ili kuzuia vipengee vilivyochakaa kuingiliana na upakiaji upya. Vidokezo vya kusakinisha vinasalia kuwa uamuzi wa kivinjari.
 
 ## Usanifu wa Kiufundi
 
-### Manifesti ya Programu ya Wavuti (`manifest.webmanifest`)
+### Dhihirisho la Programu ya Wavuti
 
-Inazalishwa na Next.js kupitia `src/app/manifest.ts`:
+Next.js hutoa `/manifest.webmanifest` kutoka [`src/app/manifest.ts`](../../src/app/manifest.ts). Mipangilio yake kuu ni:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Mpangilio                          | Thamani                                                  |
+| ---------------------------------- | -------------------------------------------------------- |
+| `short_name`                       | `OmniRoute`                                              |
+| `start_url`                        | `/dashboard`                                             |
+| `scope`                            | `/`                                                      |
+| `display`                          | `standalone`                                             |
+| `orientation`                      | `any`                                                    |
+| Rangi ya mandharinyuma na mandhari | Paleti chaguo-msingi ya mwanga kutoka `PWA_THEME_COLORS` |
 
-### Service Worker (`public/sw.js`)
+Jina na maelezo ya faili ya maelezo ni thamani tuli katika faili hiyo chanzo. Faili ya maelezo iliyosakinishwa haifuati mpangilio wa jina la mfano au ubao amilifu katika kila ziara.
 
-Service worker ya kawaida (isiyo na utegemezi wa mfumo wowote) yenye:
+### Mfanyakazi wa Huduma
 
-- **Awamu ya usakinishaji**: Huhifadhi mapema kwenye akiba kiunzi cha programu (mzizi, ukurasa wa nje ya mtandao, manifesti na ikoni)
-- **Awamu ya uanzishaji**: Huondoa matoleo ya zamani ya akiba na kudai wateja wote
-- **Awamu ya uchotaji**: Uelekezaji mahiri kulingana na aina ya ombi (urambazaji, rasilimali tuli, API)
-- **Uwekaji matoleo wa akiba**: `omniroute-pwa-v3` — ongeza toleo hili ili kulazimisha akiba mpya wakati wa kusasisha
+[`public/sw.js`](../../public/sw.js) haina utegemezi wa mfumo wa mfanyakazi:
 
-### Metadata ya Mpangilio (`src/app/layout.tsx`)
+- **Sakinisha:** huhifadhi mapema rasilimali nne zilizoorodheshwa hapo juu na kumwezesha mfanyakazi mpya.
+- **Washa:** huondoa vizazi vya zamani vya akiba na wateja wa madai.
+- **Leta:** inatumia mikakati ya mali-tuli na uondoaji wa njia hapo juu.
+- **Uchapishaji:** jina la akiba la chanzo ni `omniroute-pwa-v3`; muundo wa uzalishaji huweka muhuri kitambulisho cha kache.
+- **Arifa:** hushughulikia matukio `push` zinazoingia na kulenga au kufungua dirisha arifa inapobofya.
 
-Mpangilio mkuu hutoa tagi zote za meta zinazohitajika kwa utiifu wa PWA:
+Vidhibiti vya matukio ya kusukuma pekee havianzishi usajili unaoendelea wa kusukuma au uwasilishaji wa seva uliosanidiwa. Usidhani kuwa arifa zimewezeshwa kwa sababu PWA imesakinishwa.
 
-- Kiungo cha `manifest` kwenda `/manifest.webmanifest`
-- `apple-web-app-capable: true` kwa modi huru ya iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` kwa Chrome ya Android
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` kwa uonyeshaji kutoka ukingo hadi ukingo
+### Metadata ya Mpangilio na Usajili
 
-### Kijenzi: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) hutoa kiungo cha maelezo, metadata inayojitegemea ya Apple, rangi za mandhari na `viewport-fit: cover`. Kichwa cha ukurasa na jina la programu ya wavuti ya Apple hutumia jina la mfano. Rangi ya mandhari ya kivinjari hai hufuata ubao; faili ya usakinishaji hutumia rangi ya mwanga chaguomsingi.
 
-Kikiwa katika `src/shared/components/PwaRegister.tsx`, kijenzi hiki cha mteja:
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) huendesha mteja na kusajili `/sw.js` na ID ya kujenga katika URL yake . Hutambua vizazi vya akiba visivyolingana na inaweza kuweka upya mfanyakazi na kupakia upya mara moja ili kurejesha usakinishaji wa zamani. Kushindwa kwa usajili hakuzuii dashibodi.
 
-1. Huendeshwa kinapopachikwa (upande wa mteja pekee)
-2. Hukagua usaidizi wa `serviceWorker` katika kivinjari
-3. Husajili `/sw.js` kimyakimya (hitilafu hupuuzwa ili kuepuka kuzuia programu)
-4. Hakionyeshi chochote (`return null`) — ni kijenzi chenye athari tu
+## Tumia na Termux (Android)
 
-## Kutumia Pamoja na Termux (Android)
+1. Anza OmniRoute katika Termux: `npx -y omniroute@latest`.
+2. Fungua Chrome kwenye simu hiyo hiyo: `http://localhost:20128`.
+3. Sakinisha PWA kupitia menyu ya usakinishaji ya kivinjari.
+4. Weka seva ya Termux ikiendelea huku ukitumia dashibodi.
 
-Unapoendesha OmniRoute kwenye Android kupitia Termux, PWA hufanya kazi kwa urahisi:
+Simu hupangisha lango na dashibodi yake. Maombi kwa watoa huduma AI wa mbali bado yanahitaji ufikiaji wa mtandao. Tazama [mwongozo wa Termux](TERMUX_GUIDE.md) kwa usanidi na mambo ya kuzingatia mchakato wa maisha ya Android.
 
-1. Anzisha OmniRoute katika Termux: `npx omniroute`
-2. Fungua Chrome kwenye simu hiyo hiyo: `http://localhost:20128`
-3. Sakinisha PWA kupitia "Ongeza kwenye Skrini ya Mwanzo"
-4. PWA huunganishwa na seva ya Termux ya ndani — kila kitu huendeshwa kwenye kifaa
+## Tumia Kutoka kwa Vifaa Vingine
 
-Mchanganyiko huu unamaanisha kuwa simu yako ya Android ni **seva** (Termux) na pia **mteja** (PWA) — lango kamili la AI linalojitegemea.
+Fungua anwani HTTPS ya seva kwenye simu, kompyuta kibao au eneo-kazi, kisha ufuate mtiririko wa usakinishaji wa kivinjari hicho. Seva lazima iendelee kufikiwa na kila kifaa. Tazama [mwongozo wa handaki](../ops/TUNNELS_GUIDE.md) kwa chaguo za ufikiaji wa mbali.
 
-## Kutumia Kutoka kwenye Vifaa Vingine
+## Kubinafsisha
 
-Sakinisha PWA kwenye kifaa chochote chenye ufikiaji wa kivinjari kwenye seva yako ya OmniRoute:
+### Jina la Mfano
 
-- **Simu/kompyuta kibao nyingine**: Nenda kwenye `http://PHONE_IP:20128` na usakinishe PWA
-- **Kompyuta mpakato**: Fungua Chrome/Edge na uisakinishe kama PWA ya eneo-kazi
-- **Televisheni mahiri yenye kivinjari**: Fikia dashibodi katika skrini nzima
-
-## Ubinafsishaji
-
-### Jina la Instansi
-
-Kichwa cha PWA huheshimu mpangilio wa **Jina la Instansi** kutoka `Dashboard → Settings`. Ukibadilisha jina la instansi yako kuwa "Lango Langu la AI", PWA iliyosakinishwa itaonyesha jina hilo.
+The** Jina la Mfano** kuweka mabadiliko metadata ya dashibodi, ikijumuisha kichwa cha ukurasa na kichwa cha programu ya wavuti ya Apple. Faili ya maelezo inayozalishwa hutumia jina tuli, kwa hivyo mpangilio huu hauhakikishi kuwa programu ambayo tayari imesakinishwa imepewa jina jipya.
 
 ### Favicon Maalum
 
-Ukipakia favicon maalum kupitia `Dashboard → Settings`, ikoni ya PWA kwenye eneo-kazi itaonyesha ikoni hiyo maalum. Ikoni za skrini ya mwanzo ya vifaa vya mkononi hutumia faili zilizotengenezwa mapema za `icon-512.png` na `apple-touch-icon.png`.
+Favicon maalum hubadilisha favicon ya kivinjari. Faili ya usakinishaji bado inatangaza faili za PNG hapo juu; kubadilisha favicon hakubadilishi aikoni hizo za skrini ya nyumbani.
 
-## Vikwazo
+## Mapungufu
 
-- **Hakuna arifa za kutumwa** — Service worker haitekelezi Push API. Badala yake, arifa hushughulikiwa na programu ya Electron.
-- **Hakuna usawazishaji wa chinichini** — Vitendo vya nje ya mtandao haviwekwi kwenye foleni ili vitekelezwe tena. PWA kimsingi ni kitazamaji cha dashibodi.
-- **Vikwazo vya iOS** — Safari kwenye iOS haitumii vipengele vyote vya PWA (kwa mfano, vidokezo vya usakinishaji ni vya kufanywa mwenyewe, na service workers za chinichini zina mipaka).
-- **Ukubwa wa kache** — Service worker huhifadhi kwenye kache rasilimali tuli pekee. Mizigo mikubwa ya majibu kutoka kwa njia za `/api/` kamwe haihifadhiwi kwenye kache.
-- **Ikoni maalum kwenye simu** — Kubadilisha favicon kwenye mipangilio hakusasishi ikoni ya skrini ya nyumbani kwenye simu (hili linahitaji kuzalisha upya ikoni za PWA).
+- **Muunganisho wa seva unahitajika:** urambazaji wa ukurasa, hali ya dashibodi na maombi ya API hayana njia mbadala ya nje ya mtandao.
+- **Hakuna usawazishaji wa usuli:** vitendo vya nje ya mtandao havijawekwa kwenye foleni ili kucheza tena.
+- **Tofauti za kivinjari:** menyu za usakinishaji, uwasilishaji wa dirisha na usaidizi wa arifa hutofautiana kulingana na jukwaa.
+- **Hakuna kache ya majibu API :** mfanyakazi hajumuishi API, dashibodi na njia za uthibitishaji.
+- **Aikoni za usakinishaji tuli:** kusasisha ikoni hizo kunahitaji kubadilisha mali iliyotangazwa; vivinjari vinaweza kuhifadhi metadata iliyosakinishwa.
 
 ## Marejeleo ya Faili
 
-| Faili                                   | Madhumuni                                                                   |
-| --------------------------------------- | --------------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Njia ya manifest ya Next.js (huzalisha `manifest.webmanifest`)              |
-| `public/sw.js`                          | Service worker yenye mantiki ya uhifadhi kwenye kache                       |
-| `src/shared/components/PwaRegister.tsx` | Kijenzi cha mteja kinachosajili service worker                              |
-| `src/app/offline/page.tsx`              | Ukurasa mbadala wa nje ya mtandao wenye kiashirio cha hali ya moja kwa moja |
-| `src/app/layout.tsx`                    | Mpangilio mkuu wenye metadata ya PWA (apple-web-app, theme-color, n.k.)     |
-| `public/icon-512.png`                   | Ikoni ya PNG ya 512×512 (Android, skrini ya uzinduzi)                       |
-| `public/apple-touch-icon.png`           | Ikoni ya PNG ya 180×180 (skrini ya nyumbani ya iOS)                         |
-| `public/icon-192.svg`                   | Ikoni ya SVG ya 192×192 (ikoni inayobadilika ya Android)                    |
-| `public/apple-touch-icon.svg`           | Ikoni ya SVG ya 180×180 (mbadala wa Apple)                                  |
+| Faili                                                                                  | Kusudi                                                                   |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Faili ya wazi ya programu ya wavuti                                      |
+| [public/sw.js](../../public/sw.js)                                                     | Akiba, vizuizi na vidhibiti vya matukio ya arifa                         |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Usajili wa uzalishaji na urejeshaji wa akiba ya zamani                   |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Ukurasa wa muunganisho, si njia mbadala ya kiotomatiki ya nje ya mtandao |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Metadata ya ukurasa na mipangilio ya kituo cha kutazama                  |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Thamani za rangi za mandhari zilizoshirikiwa                             |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 ikoni ya programu                                              |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 ikoni ya Apple                                                 |

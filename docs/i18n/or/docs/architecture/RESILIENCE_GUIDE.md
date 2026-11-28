@@ -12,54 +12,53 @@ OmniRoute ର ତିନୋଟି ପୃଥକ କିନ୍ତୁ ସମ୍ବନ
 
 > **ସ୍ଥିରତା ଟୋଗଲ୍ ପାଇଁ Env-vs-dashboard ପ୍ରାଥମିକତା \|** — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — ପରିବେଶରୁ ବିହନଯୁକ୍ତ ଅପ୍ଟ-ଇନ୍ ସ୍ଥିରତା ଟୋଗଲ୍ କେବଳ _ ଡିଫଲ୍ଟ_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) ଯୋଗାଏ \| `resilienceSettings` (ଡ୍ୟାସବୋର୍ଡ → ରେ ଏକ ବୁଲିଅନ୍ ରହିଲା \|** ସେଟିଂସମୂହ → ସ୍ଥିରତା \|** / `PATCH /api/resilience`, `key_value` ରେ ଗଚ୍ଛିତ) env ମୂଲ୍ୟ ଉପରେ ଜିତେ: ଯେତେବେଳେ ବି ବିଦ୍ୟମାନ ଥାଏ, ସାଧାରଣକରଣ (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) ସଂରକ୍ଷିତ ବୁଲିଅନ୍ ରଖେ \| ଏପରି ଏକ env var କୁ `true` କୁ ଏକ ନିୟୋଜନରେ ସେଟ କରିବା ଯେଉଁଠାରେ ଡ୍ୟାସବୋର୍ଡ `false` ପୂର୍ବରୁ ସଞ୍ଚୟ କରିସାରିଛି ତେଣୁ — ଟୋଗଲକୁ ଫ୍ଲିପ୍ କରୁଥିବା କିଛି ପରିବର୍ତ୍ତନ କରେ ନାହିଁ \|** ସେଟିଂସମୂହ → ସ୍ଥିରତା \|** (କିମ୍ବା ସଂରକ୍ଷିତ କ୍ଷେତ୍ରକୁ ସଫା କରନ୍ତୁ) ଏହା ପରିବର୍ତ୍ତେ \|
 
-## 1. ପ୍ରୋଭାଇଡର ସର୍କିଟ ବ୍ରେକର
+## 1। ପ୍ରଦାନକାରୀ ସର୍କିଟ ବ୍ରେକର୍।
 
-**ପରିସର:** ସମ୍ପୂର୍ଣ୍ଣ ପ୍ରୋଭାଇଡର (ଯେପରିକି `glm`, `openai`, `anthropic`)।
+**ପରିସର:** ସମଗ୍ର ପ୍ରଦାନକାରୀ (ଯଥା, `glm`, `openai`, `anthropic`)।
 
-**ଉଦ୍ଦେଶ୍ୟ:** ଅପଷ୍ଟ୍ରିମ/ସେବା ସ୍ତରରେ ବାରମ୍ବାର ବିଫଳ ହେଉଥିବା ପ୍ରୋଭାଇଡରକୁ ଟ୍ରାଫିକ ପଠାଇବା ବନ୍ଦ କରିବା।
+**ଉଦ୍ଦେଶ୍ୟ:** ଏକ ପ୍ରଦାନକାରୀଙ୍କୁ ଟ୍ରାଫିକ୍ ପଠାଇବା ବନ୍ଦ କର ଯାହାକି upstream/service ସ୍ତରରେ ବାରମ୍ବାର ବିଫଳ ହେଉଛି।
 
-**କାର୍ଯ୍ୟାନ୍ବୟନ:**
+**କାର୍ଯ୍ୟାନ୍ୱୟନ:**
 
-- ମୂଳ କ୍ଲାସ: `src/shared/utils/circuitBreaker.ts`
-- ୱାୟରିଂ: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- ମୂଳ ଶ୍ରେଣୀ: `src/shared/utils/circuitBreaker.ts`
+- ତାର: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
 - ସ୍ଥିତି API: `GET /api/monitoring/health`
-- ରିସେଟ API: `POST /api/resilience/reset`
-- ର୍ୟାପର: `open-sse/services/accountFallback.ts`
-- DB ଟେବୁଲ: `domain_circuit_breakers`
+- API ପୁନ et ସେଟ୍ କରନ୍ତୁ: `POST /api/resilience/reset`
+- ରାପର୍ସ: `open-sse/services/accountFallback.ts`
+- DB ସାରଣୀ: `domain_circuit_breakers`
 
-**ଅବସ୍ଥାଗୁଡ଼ିକ:**
+**ରାଜ୍ୟଗୁଡିକ:**
 
-- `CLOSED` — ସାଧାରଣ ଟ୍ରାଫିକ ଅନୁମତିପ୍ରାପ୍ତ
-- `DEGRADED` — ଟ୍ରାଫିକ ଏବେ ବି ଅନୁମତିପ୍ରାପ୍ତ, କିନ୍ତୁ ବଢୁଥିବା ପ୍ରୋଭାଇଡର ବିଫଳତାଗୁଡ଼ିକୁ ଟ୍ରାକ୍ କରାଯାଉଛି; ଯଥେଷ୍ଟ ସଫଳତା ମିଳିଲେ, ବୈଧ ସଂଯୋଗ ପରୀକ୍ଷା ହେଲେ, କିମ୍ବା ଶେଷ ବିଫଳତା ପ୍ରକାର ପାଇଁ ସବୁଠାରୁ ଦୀର୍ଘ `OPEN` ଧାରଣ ସମୟ (ଏହାର `cooldownByKind` ମୂଲ୍ୟ, ନଚେତ୍ `resetTimeout`, × `maxBackoffMultiplier`, ଅତିକମରେ ଗୋଟିଏ କୁଲଡାଉନ) ପରେ ନୂତନ ବିଫଳତା ନ ଥିଲେ `CLOSED` କୁ ଫେରିଥାଏ
-- `OPEN` — ପ୍ରୋଭାଇଡର ଅସ୍ଥାୟୀ ଭାବେ ଅବରୁଦ୍ଧ; କମ୍ବୋ ରାଉଟିଂ ଏହାକୁ ଏଡ଼ାଇ ଯାଏ
-- `HALF_OPEN` — ରିସେଟ ଟାଇମଆଉଟ ସମାପ୍ତ ହୋଇଛି; ପ୍ରୋବ ଅନୁରୋଧ ଅନୁମତିପ୍ରାପ୍ତ
+- `CLOSED` — ସାଧାରଣ ଟ୍ରାଫିକ୍ ଅନୁମତିପ୍ରାପ୍ତ।
+- `DEGRADED` — ଟ୍ରାଫିକ୍ ଏପର୍ଯ୍ୟନ୍ତ ଅନୁମତିପ୍ରାପ୍ତ, କିନ୍ତୁ ଉନ୍ନତ ପ୍ରଦାନକାରୀ ବିଫଳତା ଟ୍ରାକ୍ କରାଯାଉଛି; ଯଥେଷ୍ଟ ସଫଳତା ଉପରେ, ଏକ ବ valid ଧ ସଂଯୋଗ ପରୀକ୍ଷଣରେ, କିମ୍ବା ଶେଷ ବିଫଳତା ପାଇଁ ଦୀର୍ଘତମ `OPEN` ଧରିବା ପରେ (ଏହାର `cooldownByKind` ମୂଲ୍ୟ, ଅନ୍ୟ `resetTimeout`, × `maxBackoffMultiplier`, ଅତି କମରେ ଗୋଟିଏ କୁଲଡାଉନ୍) `CLOSED` କୁ ଫେରିଯାଏ।
+- `OPEN` — ପ୍ରଦାନକାରୀ ଅସ୍ଥାୟୀ ଭାବରେ ଅବରୋଧିତ; କମ୍ବୋ ରାଉଟିଙ୍ଗ୍ ଏହାକୁ ଛାଡିଦିଏ।
+- `HALF_OPEN` — ପୁନ res ସେଟ୍ ସମୟ ସମାପ୍ତ ହେଲା; ଅନୁସନ୍ଧାନ ଅନୁରୋଧ ଅନୁମୋଦିତ।
 
-**ବିନ୍ୟାସଯୋଗ୍ୟ ଡିଫଲ୍ଟ (`open-sse/config/constants.ts`, Dashboard → Settings → Resilience ରେ ଦୃଶ୍ୟମାନ):**
+**ବିନ୍ୟାସଯୋଗ୍ୟ ଡିଫଲ୍ଟଗୁଡିକ (`open-sse/config/constants.ts`, ଡ୍ୟାସବୋର୍ଡ → ସେଟିଂସମୂହ → ସ୍ଥିରତା ରେ ପ୍ରକାଶିତ):**
 
-| ଶ୍ରେଣୀ  | DEGRADED ହେବା | OPEN ହେବା | ରିସେଟ ଟାଇମଆଉଟ |
-| ------- | ------------- | --------- | ------------- |
-| OAuth   | 5 ବିଫଳତା      | 8 ବିଫଳତା  | 60s           |
-| API-key | 7 ବିଫଳତା      | 12 ବିଫଳତା | 30s           |
-| Local   | ଉଦ୍ଭୂତ        | 2 ବିଫଳତା  | 15s           |
+| କ୍ଲାସ୍  | ଡିଗ୍ରେଡ୍ ହୋଇଛି | ରେ ଖୋଲିବ।  | ସମୟ ସମାପ୍ତ କରନ୍ତୁ। |
+| ------- | -------------- | ---------- | ------------------ |
+| OAuth   | 5 ବିଫଳତା।      | 8 ବିଫଳତା।  | 60s                |
+| API- କି | 7 ବିଫଳତା।      | 12 ବିଫଳତା। | 30s                |
 
-`degradationThreshold` ନିୟନ୍ତ୍ରଣ କରେ ଯେ ପ୍ରୋଭାଇଡର କେବେ `DEGRADED` ରେ ପ୍ରବେଶ କରିବ; `failureThreshold` ନିୟନ୍ତ୍ରଣ କରେ ଯେ ଏହା କେବେ ଖୋଲିବ ଏବଂ ଏଡ଼ାଯିବ। ସ୍ଥାନୀୟ ପ୍ରୋଭାଇଡର ପ୍ରୋଫାଇଲଗୁଡ଼ିକ ଏପର୍ଯ୍ୟନ୍ତ Resilience ସେଟିଂସ ପୃଷ୍ଠାରେ ଉପଲବ୍ଧ ନାହିଁ।
+ଯେତେବେଳେ ଏକ ପ୍ରଦାନକାରୀ `DEGRADED` ପ୍ରବେଶ କରେ`degradationThreshold` ନିୟନ୍ତ୍ରଣ କରେ; `failureThreshold` ଯେତେବେଳେ ଖୋଲିବ ଏବଂ ଏହାକୁ ଛାଡିଦିଆଯାଏ। `PROVIDER_PROFILES.local` (2 ବିଫଳତା / 15s) `open-sse/config/constants.ts` ରେ ବ୍ୟାଖ୍ୟା କରାଯାଇଛି କିନ୍ତୁ** ଏପର୍ଯ୍ୟନ୍ତ ତାରଯୁକ୍ତ ନୁହେଁ।** : `getProviderCategory()` କେବଳ `oauth` କିମ୍ବା `apikey` ରିଟର୍ନ କରେ, ତେଣୁ ସ୍ଥାନୀୟ ପ୍ରଦାନକାରୀମାନେ OAuth କିମ୍ବା API- କି ପ୍ରୋଫାଇଲ୍ ବ୍ୟବହାର କରନ୍ତି।
 
-**ଟ୍ରିପ କୋଡ:** କେବଳ ପ୍ରୋଭାଇଡର-ସ୍ତରୀୟ ସ୍ଥିତି `[408, 500, 502, 503, 504]`। ଆକାଉଣ୍ଟ-ସ୍ତରୀୟ ତ୍ରୁଟି ପାଇଁ ଟ୍ରିପ କରନ୍ତୁ ନାହିଁ (ଅଧିକାଂଶ 401/403/429 — ସେଗୁଡ଼ିକ କୁଲଡାଉନ କିମ୍ବା ଲକଆଉଟ ଅନ୍ତର୍ଗତ)।
+**ଟ୍ରିପ୍ କୋଡ୍:** କେବଳ ପ୍ରଦାନକାରୀ ସ୍ତରର ସ୍ଥିତି `[408, 500, 502, 503, 504]`। ଖାତା ସ୍ତରୀୟ ତ୍ରୁଟି ପାଇଁ NOT ଯାତ୍ରା କରନ୍ତୁ (ଅଧିକାଂଶ 401/403/429 — ସେଗୁଡ଼ିକ କୁଲଡାଉନ୍ କିମ୍ବା ଲକଆଉଟ୍ ଅଟେ)।
 
-**ଧୀର ପୁନରୁଦ୍ଧାର:** ଯେତେବେଳେ `OPEN` ସମାପ୍ତ ହୁଏ, `getStatus()`, `canExecute()`, `getRetryAfterMs()` ଅବସ୍ଥାକୁ `HALF_OPEN` କୁ ତାଜା କରନ୍ତି। ସେହି ପଠନଗୁଡ଼ିକ (ଏବଂ ପରବର୍ତ୍ତୀ ବିଫଳତା) ପୁରୁଣା `DEGRADED` କୁ ପୁଣି `CLOSED` କୁ ଫେରାଇଥାଏ। ବ୍ୟାକଗ୍ରାଉଣ୍ଡ ଟାଇମର ଆବଶ୍ୟକ ନାହିଁ।
+**ଅଳସୁଆ ପୁନରୁଦ୍ଧାର:** ଯେତେବେଳେ `OPEN` ପୂର୍ଣ୍ଣ ହୁଏ, `getStatus()`, `canExecute()`, `getRetryAfterMs()` ସ୍ଥିତିକୁ `HALF_OPEN` କୁ ସତେଜ କରେ। ସମାନ ପ read ଼ା (ଏବଂ ପରବର୍ତ୍ତୀ ବିଫଳତା) ଏକ stale `DEGRADED` `CLOSED` କୁ ଫେରାଇଦିଏ। କ background ଣସି ପୃଷ୍ଠଭୂମି ଟାଇମର୍ ଆବଶ୍ୟକ ନାହିଁ।
 
 ---
 
-### ଅପ୍ଟ-ଇନ ଗ୍ଲୋବାଲ ପ୍ରୋଭାଇଡର କୁଲଡାଉନ (ୱିଣ୍ଡୋ ଗେଟ)
+### ଅପ୍ଟ-ଇନ୍ ଗ୍ଲୋବାଲ୍ ପ୍ରଦାନକାରୀ କୁଲଡାଉନ୍ (ୱିଣ୍ଡୋ ଗେଟ୍)
 
-ଚତୁର୍ଥ, **ଅପ୍ଟ-ଇନ** ସ୍ତର (`PROVIDER_COOLDOWN_ENABLED`, ଡିଫଲ୍ଟ **ବନ୍ଦ**) ବିଫଳ ପ୍ରୋଭାଇଡରଗୁଡ଼ିକର କ୍ରସ-ରିକ୍ୱେଷ୍ଟ ମେମୋରି `open-sse/services/providerCooldownTracker.ts` ରେ ରଖେ, ଯାହାକୁ କମ୍ବୋ ଟାର୍ଗେଟ ରିଜୋଲ୍ୟୁସନ ଦ୍ୱାରା ପରାମର୍ଶ କରାଯାଏ, ଯାହାଦ୍ୱାରା କ୍ରମାଗତ କମ୍ବୋ ଅନୁରୋଧଗୁଡ଼ିକ ହଇଁ ବିଫଳ ହୋଇଥିବା ପ୍ରୋଭାଇଡରକୁ ପୁଣି ଥରେ ଚାଲିବା ବନ୍ଦ କରନ୍ତି। ପ୍ରୋଭାଇଡର-ସ୍ତରୀୟ ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ `PROVIDER_PROFILES` ୱିଣ୍ଡୋ ଗେଟ ଅନୁସରଣ କରନ୍ତି:
+ଏକ ଚତୁର୍ଥ,** ଅପ୍ଟ-ଇନ୍** ସ୍ତର (`PROVIDER_COOLDOWN_ENABLED`, ଡିଫଲ୍ଟ।** ବନ୍ଦ** ) `open-sse/services/providerCooldownTracker.ts` ରେ ବିଫଳ ପ୍ରଦାନକାରୀମାନଙ୍କର ଏକ କ୍ରସ୍-ଅନୁରୋଧ ମେମୋରୀ ରଖେ, କମ୍ବୋ ଟାର୍ଗେଟ୍ ରେଜୋଲୁସନ ଦ୍ୱାରା ପରାମର୍ଶ କରାଯାଏ ତେଣୁ କ୍ରମାଗତ କମ୍ବୋ ଅନୁରୋଧ ଏକ ପ୍ରଦାନକାରୀଙ୍କୁ ପୁନ walking ଚାଲିବା ବନ୍ଦ କରେ ଯାହା କେବଳ ବିଫଳ ହେଲା। ପ୍ରଦାନକାରୀ ସ୍ତରର ପ୍ରବେଶଗୁଡ଼ିକ `PROVIDER_PROFILES` ୱିଣ୍ଡୋ ଗେଟ୍ କୁ ସମ୍ମାନ କରେ:
 
-| ପ୍ରୋଫାଇଲ | ପରେ ଟ୍ରିପ ହୁଏ (`providerFailureThreshold`) | ଭିତରେ (`providerFailureWindowMs`) | ପାଇଁ କୁଲ ହୁଏ (`providerCooldownMs`) |
-| -------- | -----------------------------------------: | --------------------------------: | ----------------------------------: |
-| OAuth    |                                       `10` |                           `15min` |                              `5min` |
-| API key  |                                       `15` |                           `30min` |                             `10min` |
+| ପ୍ରୋଫାଇଲ୍ | (`providerFailureThreshold`) ପରେ ଯାତ୍ରା | ଭିତରେ (`providerFailureWindowMs`) | (`providerCooldownMs`) ପାଇଁ ଥଣ୍ଡା। |
+| --------- | --------------------------------------: | --------------------------------: | ---------------------------------: |
+| OAuth     |                                    `10` |                           `15min` |                             `5min` |
+| API କି    |                                    `15` |                           `30min` |                            `10min` |
 
-ଥ୍ରେସହୋଲ୍ଡ ତଳେ ପ୍ରୋଭାଇଡରକୁ କୁଲିଂ ଭାବେ ବିବେଚନା କରାଯାଏ **ନାହିଁ**; ଗୋଟିଏ ସଫଳତା ୱିଣ୍ଡୋକୁ ଖାଲି କରିଦିଏ। ସଂଯୋଗ-ସ୍ତରୀୟ ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ (`provider:connectionId`) ଏକ୍ସପୋନେନସିଆଲ `minRetryCooldownMs → maxRetryCooldownMs` ବ୍ୟାକଅଫ ବଜାୟ ରଖନ୍ତି। ଓଭରରାଇଡ: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`। ରିଗ୍ରେସନ ଗାର୍ଡ: `tests/unit/provider-cooldown-window-gate.test.ts`।
+ପ୍ରଦାନକାରୀ ସୀମା ତଳେ।** ନୁହେଁ।** ଥଣ୍ଡା ବୋଲି ବିବେଚନା କରାଯାଏ; ଏକ ସଫଳତା ୱିଣ୍ଡୋ ସଫା କରେ। ସଂଯୋଗ ସ୍ତରୀୟ ଏଣ୍ଟ୍ରିଗୁଡିକ (`provider:connectionId`) ଏହା ପରିବର୍ତ୍ତେ ଏକ୍ସପୋନ୍ସେନାଲ୍ `minRetryCooldownMs → maxRetryCooldownMs` ବ୍ୟାକଅଫ୍ ରଖେ। ନବଲିଖନ: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}` ରେଗ୍ରେସନ୍ ଗାର୍ଡ: `tests/unit/provider-cooldown-window-gate.test.ts`
 
 ## 2। ସଂଯୋଗ କୁଲଡାଉନ୍।
 
@@ -745,6 +744,21 @@ reached") ବହନ କରୁଥିବା 429 ର body କୁ quota-text fallbac
 
 ---
 
+## ଯେତେବେଳେ OmniRoute ନିଜେ ପହଞ୍ଚେ ନାହିଁ।
+
+ପ୍ରଦାନକାରୀ ସର୍କିଟ ବ୍ରେକର୍, କନେକ୍ସନ୍ କୁଲଡାଉନ୍, ଏବଂ ମଡେଲ୍ ଲକଆଉଟ୍ ସବୁ ଗେଟୱେ ଭିତରେ ଚାଲିଥାଏ। ଯଦି କ୍ଲାଏଣ୍ଟ ଗେଟୱେରେ ପହଞ୍ଚିପାରିବ ନାହିଁ, ତେବେ ଏହା ଏକ ସଂଯୋଗ ତ୍ରୁଟି ପାଇଥାଏ। OmniRoute ସେହି ବିଫଳତାକୁ ଅଟକାଇ ପାରିବ ନାହିଁ। ପୁନ ry ଚେଷ୍ଟା କରାଯିବ ଏବଂ କେଉଁ ବାର୍ତ୍ତା ଦେଖାଇବାକୁ ଗ୍ରାହକ ସ୍ଥିର କରନ୍ତି।
+
+OmniRoute ସମ୍ପ୍ରତି କ client ଣସି କ୍ଲାଏଣ୍ଟ-ସାଇଡ୍ ଫଲବ୍ୟାକ୍ ପ୍ରଦାନ କରେ ନାହିଁ ଏବଂ ଏହା ପାଇଁ କ policy ଣସି ନୀତି ବ୍ୟାଖ୍ୟା କରେ ନାହିଁ। କ୍ଲାଏଣ୍ଟରେ କିମ୍ବା ଗେଟୱେ ସାମ୍ନାରେ ଯେକ any ଣସି ବିକଳ୍ପ ମାର୍ଗ ବିନ୍ୟାସ କରନ୍ତୁ।
+
+- `GET /api/health` ପ୍ରାମାଣିକିକରଣ ବିନା ଜୀବନ୍ତତା ଯାଞ୍ଚ କରେ।
+- `GET /api/health/ping` ଡାଟାବେସ୍ ପ୍ରତିକ୍ରିୟା କରେ କି ନାହିଁ ଅନ୍ତର୍ଭୂକ୍ତ କରି ପ୍ରସ୍ତୁତତା ଯାଞ୍ଚ କରେ।
+- `GET /api/monitoring/health` ପ୍ରାମାଣିକ କଲର୍ମାନଙ୍କୁ ଏକ ଗଭୀର ସ୍ୱାସ୍ଥ୍ୟ ସମୀକ୍ଷା ପ୍ରଦାନ କରେ।
+- `omniroute launch <tool>` କ୍ଲାଏଣ୍ଟ ଆରମ୍ଭ କରିବା ପୂର୍ବରୁ `/api/monitoring/health` ଅନୁସନ୍ଧାନ କରେ। ଏହା ସ୍ୱୟଂଚାଳିତ ଭାବରେ ଏକ ସ୍ଥାନୀୟ ଗେଟୱେ ଆରମ୍ଭ କରିପାରିବ। `--no-start` ସହିତ, ଏକ ଅପହଞ୍ଚ ଗେଟୱେ `GatewayUnreachable` ଏବଂ ପ୍ରସ୍ଥାନ କୋଡ୍ `69` ରେ ଫଳାଫଳ କରେ।
+
+OmniRoute ରୁ ଏକ କ୍ଲାଏଣ୍ଟକୁ ବିଚ୍ଛିନ୍ନ କରିବାକୁ, [କ୍ଲାଏଣ୍ଟ ବିନ୍ୟାସକରଣକୁ](../guides/UNINSTALL.md#revert-client-configuration) ଅନୁସରଣ କରନ୍ତୁ।
+
+---
+
 ## Debugging
 
 - Weighted combo `503 all_targets_cooling_down` ଉତ୍ତର ଦିଏ (`Retry-After` ସେଟ୍ ହୋଇଥାଏ, `diagnostics.excluded`ରେ `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable` ସହିତ ପ୍ରତ୍ୟେକ target ତାଲିକାଭୁକ୍ତ ହୋଇଥାଏ) → poolଟି configured ଏବଂ connected ଅଛି, କିନ୍ତୁ resilience timer ଯୋଗୁଁ ପ୍ରତ୍ୟେକ targetକୁ କେବଳ exclude କରାଯାଇଛି; `[COMBO] Weighted selection: every target excluded before dispatch — …` warningରେ କାରଣଗୁଡ଼ିକ ଏବଂ ଅବଶିଷ୍ଟ seconds ଦିଆଯାଇଥାଏ। ସେହି comboରୁ ଆସୁଥିବା `404 no_executable_targets`ର ଅର୍ଥ ହେଉଛି କୌଣସି resilience timer ସମ୍ପୃକ୍ତ ନଥିଲା (ଚଳାଇବା ପାଇଁ କିଛି ନଥିଲା, କିମ୍ବା ପ୍ରତ୍ୟେକ account availability probeରେ ବିଫଳ ହୋଇଥିଲା)। `targetResolution.ts`ରୁ ସଂଗ୍ରହ କରାଯାଇଥିବା exclusions ଆଧାରରେ `open-sse/services/combo/pinRecovery.ts`ରେ ଏହା ନିର୍ମିତ ହୋଇଛି।
@@ -756,79 +770,68 @@ reached") ବହନ କରୁଥିବା 429 ର body କୁ quota-text fallbac
 
 ---
 
-## Runtime state — agent quick reference
+## ଚାଲିବା ସମୟ — ଏଜେଣ୍ଟ ଶୀଘ୍ର ରେଫରେନ୍ସ।
 
-> `AGENTS.md` → "Resilience Runtime State" (PR #12743) ରୁ ଅବିକଳ ଭାବେ ନିଆଯାଇଛି, ଯାହାଦ୍ୱାରା agent
-> guideଟି 40k context budget ମଧ୍ୟରେ ରହିପାରିବ। ଏହା ଉପରୋକ୍ତ
-> sectionsଗୁଡ଼ିକର ସଂକ୍ଷିପ୍ତ, agent-facing ଦୃଷ୍ଟିକୋଣ; numbered sectionsଗୁଡ଼ିକ ସମ୍ପୂର୍ଣ୍ଣ reference ଭାବେ ରହିଛି।
+> `AGENTS.md` → "Resilience Runtime State" (PR #12743) ରୁ ଭର୍ବାଟିମ୍ ଘୁଞ୍ଚିଗଲା ତେଣୁ ଏଜେଣ୍ଟ ଗାଇଡ୍ 40k ପ୍ରସଙ୍ଗ ବଜେଟ୍ ଅଧୀନରେ ରହିଥାଏ। ଏହା ଉପରୋକ୍ତ ବିଭାଗଗୁଡ଼ିକର ଘନୀଭୂତ, ଏଜେଣ୍ଟ-ମୁହାଁ ଦୃଶ୍ୟ। ସଂଖ୍ୟା କିମ୍ବା ପ୍ରତୀକ ସହିତ ଅକ୍ଷର ମଧ୍ଯ ବ୍ୟବହାର କରି।
 
-OmniRouteରେ ତିନୋଟି ସମ୍ପର୍କିତ କିନ୍ତୁ ପୃଥକ temporary-failure mechanism ଅଛି। Routing behavior debug କରିବାବେଳେ ସେମାନଙ୍କର
-scopeକୁ ପୃଥକ ରଖନ୍ତୁ। ଏକ ନଜରରେ ମାନଚିତ୍ର ପାଇଁ
-[3-layer resilience diagram](../diagrams/exported/resilience-3layers.svg)
-(source: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-ଦେଖନ୍ତୁ।
+OmniRoute ର ତିନୋଟି ସମ୍ବନ୍ଧୀୟ କିନ୍ତୁ ଭିନ୍ନ ଅସ୍ଥାୟୀ-ବିଫଳତା ଯନ୍ତ୍ର ଅଛି। ରାଉଟିଙ୍ଗ ଆଚରଣ ତ୍ରୁଟି ନିବାରଣ କରିବା ସମୟରେ ସେମାନଙ୍କର ପରିସରକୁ ପୃଥକ ରଖନ୍ତୁ। ଏକ-ଦେଖୁଥିବା ମାନଚିତ୍ର ପାଇଁ [3-ସ୍ତରର ସ୍ଥିରତା ଚିତ୍ର](../diagrams/exported/resilience-3layers.svg) (ଉତ୍ସ: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) ଦେଖନ୍ତୁ।
 
-### Provider Circuit Breaker
+### ପ୍ରଦାନକାରୀ ସର୍କିଟ ବ୍ରେକର୍।
 
-**Scope**: ସମ୍ପୂର୍ଣ୍ଣ provider, ଯଥା `glm`, `openai`, `anthropic`।
+**ପରିସର** : ସମ୍ପୂର୍ଣ୍ଣ ପ୍ରଦାନକାରୀ, ଯଥା `glm`, `openai`, `anthropic`।
 
-**Purpose**: upstream/service levelରେ ବାରମ୍ବାର ବିଫଳ ହେଉଥିବା providerକୁ traffic ପଠାଇବା ବନ୍ଦ କରିବା, ଯାହାଦ୍ୱାରା ଗୋଟିଏ unhealthy provider ପ୍ରତ୍ୟେକ requestକୁ ଧୀର କରିନପାରେ।
+**ଉଦ୍ଦେଶ୍ୟ** : ଏକ ପ୍ରଦାନକାରୀଙ୍କୁ ଟ୍ରାଫିକ୍ ପଠାଇବା ବନ୍ଦ କରନ୍ତୁ ଯାହା upstream/service ସ୍ତରରେ ବାରମ୍ବାର ବିଫଳ ହେଉଛି, ତେଣୁ ଜଣେ ଅସ୍ୱାସ୍ଥ୍ୟକର ପ୍ରଦାନକାରୀ ପ୍ରତ୍ୟେକ ଅନୁରୋଧକୁ ମନ୍ଥର କରନ୍ତି ନାହିଁ।
 
-**Implementation**:
+**କାର୍ଯ୍ୟାନ୍ୱୟନ** :
 
-- Core class: `src/shared/utils/circuitBreaker.ts`
-- Chat gate/execution wiring: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Runtime status API: `src/app/api/monitoring/health/route.ts`
-- Shared wrappers: `open-sse/services/accountFallback.ts`
-- Persisted state table: `domain_circuit_breakers`
+- ମୂଳ ଶ୍ରେଣୀ: `src/shared/utils/circuitBreaker.ts`
+- ଚାଟ୍ gate/execution ତାର: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- ଚାଲିବା ସମୟ ସ୍ଥିତି API: `src/app/api/monitoring/health/route.ts`
+- ଅଂଶୀଦାର ରାପର୍ସ: `open-sse/services/accountFallback.ts`
+- ସ୍ଥାୟୀ ରାଜ୍ୟ ସାରଣୀ: `domain_circuit_breakers`
 
-**States** (4 — `src/shared/utils/circuitBreaker.ts`):
+**ରାଜ୍ୟଗୁଡିକ।** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: ସାଧାରଣ traffic ଅନୁମୋଦିତ।
-- `DEGRADED`: early-warning band — failures degradation threshold ଅତିକ୍ରମ କରିଛି କିନ୍ତୁ breaker threshold ଏପର୍ଯ୍ୟନ୍ତ ନୁହେଁ; traffic ଚାଲୁ ରହେ, dashboards warning ଦେଖାଏ। ଏକ valid connection test କିମ୍ବା କୌଣସି ନୂଆ failure ବିନା ଏକ quiet window ଏହାକୁ `CLOSED`କୁ ଫେରାଇଦିଏ
-  (`docs/architecture/RESILIENCE_GUIDE.md`ରେ window ଦିଆଯାଇଛି)।
-- `OPEN`: provider ସାମୟିକ ଭାବେ blocked; callers ଏକ provider-circuit-open response ପାଆନ୍ତି କିମ୍ବା combo routing ଅନ୍ୟ targetକୁ skip କରେ।
-- `HALF_OPEN`: reset timeout ଶେଷ ହୋଇଛି; ଏକ probe requestକୁ ଅନୁମତି ଦିଏ। ସଫଳତା breakerକୁ close କରେ, ବିଫଳତା ଏହାକୁ ପୁଣି open କରେ।
+- `CLOSED`: ସାଧାରଣ ଟ୍ରାଫିକ୍ ଅନୁମତିପ୍ରାପ୍ତ।
+- `DEGRADED`: ପ୍ରାରମ୍ଭିକ ଚେତାବନୀ ବ୍ୟାଣ୍ଡ — ବିଫଳତା ଅବନତି ସୀମା ଅତିକ୍ରମ କଲା କିନ୍ତୁ ଏପର୍ଯ୍ୟନ୍ତ ବ୍ରେକର୍ ସୀମା ନୁହେଁ; ଟ୍ରାଫିକ୍ ତଥାପି ପ୍ରବାହିତ ହେଉଛି, ଡ୍ୟାସବୋର୍ଡଗୁଡ଼ିକ ଚେତାବନୀ ଦେଖାଏ। କ valid ଣସି ନୂତନ ବିଫଳତା ସହିତ ଏକ ବ valid ଧ ସଂଯୋଗ ପରୀକ୍ଷା କିମ୍ବା ଏକ ଶାନ୍ତ ୱିଣ୍ଡୋ ଏହାକୁ `CLOSED` କୁ ଫେରାଇଥାଏ (`docs/architecture/RESILIENCE_GUIDE.md` ର ୱିଣ୍ଡୋ ଅଛି)।
+- `OPEN`: ପ୍ରଦାନକାରୀ ଅସ୍ଥାୟୀ ଭାବରେ ଅବରୋଧିତ ହୋଇଛି; କଲର୍ମାନେ ଏକ ପ୍ରଦାନକାରୀ-ସର୍କିଟ୍-ଖୋଲା ପ୍ରତିକ୍ରିୟା କିମ୍ବା ଅନ୍ୟ ଲକ୍ଷ୍ୟକୁ କମ୍ବୋ ରାଉଟିଙ୍ଗ୍ ସ୍କିପ୍ ପାଆନ୍ତି।
+- `HALF_OPEN`: ପୁନ res ସେଟ୍ ସମୟ ସମାପ୍ତ ହୋଇଛି; ଏକ ଅନୁସନ୍ଧାନ ଅନୁରୋଧକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ସଫଳତା ବ୍ରେକରକୁ ବନ୍ଦ କରେ, ବିଫଳତା ଏହାକୁ ପୁଣି ଖୋଲିଥାଏ।
 
-**Defaults** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, `src/lib/resilience/settings.ts`ରେ `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` ମାଧ୍ୟମରେ ବ୍ୟବହୃତ → `src/sse/handlers/chatHelpers.ts`ରେ `getCircuitBreaker(provider, …)`)। ସମ୍ପୂର୍ଣ୍ଣ-provider breaker `circuitBreakerThreshold` / `circuitBreakerReset` ଉପରେ ଚାଲେ:
+**Defaults** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, consumed via `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). The whole-provider breaker runs on `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profile | degrades at | opens at (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
-| ------- | ----------: | -----------------------------------: | ----------------------------: |
-| OAuth   |         `5` |                                  `8` |                         `60s` |
-| API key |         `7` |                                 `12` |                         `30s` |
-| Local   |   (derived) |                                  `2` |                         `15s` |
+| ପ୍ରୋଫାଇଲ୍ | ଅବନତି | (`circuitBreakerThreshold`) ରେ ଖୋଲିବ | ପୁନ et ସେଟ୍ (`circuitBreakerReset`) |
+| --------- | ----: | -----------------------------------: | ----------------------------------: |
+| OAuth     |   `5` |                                  `8` |                               `60s` |
+| API କି    |   `7` |                                 `12` |                               `30s` |
 
-`PROVIDER_PROFILES` `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) ଏବଂ `providerCooldownMs` (5/10/1 min) ମଧ୍ୟ ନିର୍ଦ୍ଧାରଣ କରେ: ଏଗୁଡ଼ିକ
-**opt-in global Provider Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, default
-off)ର **window gate**କୁ ଚାଳନା କରେ — `open-sse/services/providerCooldownTracker.ts`ର provider-level entry କେବଳ ସେତେବେଳେ cooling ଭାବେ ଗଣନା ହୁଏ ଯେତେବେଳେ `providerFailureWindowMs` ମଧ୍ୟରେ `providerFailureThreshold` failures ହୁଏ, ଏବଂ ତାପରେ `providerCooldownMs` ପର୍ଯ୍ୟନ୍ତ cool ହୁଏ। ଏଗୁଡ଼ିକ live breakerର thresholds ନୁହେଁ — breaker behavior ଆଶା କରି ଏଗୁଡ଼ିକୁ tune କରନ୍ତୁ ନାହିଁ। ପ୍ରତ୍ୟେକ default `OMNIROUTE_PROVIDER_BREAKER_*` ଏବଂ `OMNIROUTE_CIRCUIT_BREAKER_*` env vars ମାଧ୍ୟମରେ override କରାଯାଇପାରେ; runtime-accurate reference table `docs/architecture/RESILIENCE_GUIDE.md`ରେ ରହିଛି।
+ଏକ `local` ପ୍ରୋଫାଇଲ୍ (`2` ବିଫଳତା / `15s`) ମଧ୍ୟ `PROVIDER_PROFILES` ରେ ବିଦ୍ୟମାନ ଅଛି, କିନ୍ତୁ ଏହା ବ୍ରେକରରେ ତାରଯୁକ୍ତ ନୁହେଁ: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) କେବଳ `oauth` କିମ୍ବା `apikey` ଗ୍ରହଣ କରେ, ଏବଂ `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) ସେହି ଦୁଇଟି ମଧ୍ୟରୁ ଗୋଟିଏ (ପଞ୍ଜୀକୃତ ହୋଇନଥିବା ପ୍ରଦାନକାରୀ `apikey` ପାଆନ୍ତି)।
 
-କେବଳ provider-level failure statuses ହିଁ provider breakerକୁ trip କରିବା ଉଚିତ:
+`PROVIDER_PROFILES` `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 ମିନିଟ୍) ଏବଂ `providerCooldownMs` (5/10/1 ମିନିଟ୍) — OAuth/API key/local କୁ ମଧ୍ୟ ବ୍ୟାଖ୍ୟା କରେ, ଯେଉଁଠାରେ ସ୍ଥାନୀୟ ମୂଲ୍ୟଗୁଡ଼ିକ ଉପରୋକ୍ତ ସମାନ କାରଣ ପାଇଁ ନିଷ୍କ୍ରିୟ: ଏହି ଶକ୍ତିଗୁଡ଼ିକ** ଅପ୍ଟ-ଇନ୍ ଗ୍ଲୋବାଲ୍ ପ୍ରୋଭାଇଡର୍ କୁଲଡାଉନ୍ ର ୱିଣ୍ଡୋ ଗେଟ୍।** (`PROVIDER_COOLDOWN_ENABLED`, ଡିଫଲ୍ଟ ଅଫ୍) — `open-sse/services/providerCooldownTracker.ts` ରେ ଏକ ପ୍ରଦାନକାରୀ ସ୍ତରୀୟ ପ୍ରବେଶ କେବଳ `providerFailureWindowMs` ଭିତରେ `providerFailureThreshold` ବିଫଳତା ପରେ ଥଣ୍ଡା ବୋଲି ଗଣନା କରେ, ଏବଂ ତାପରେ `providerCooldownMs` ପାଇଁ ଥଣ୍ଡା ହୁଏ। ସେମାନେ NOT ଲାଇଭ୍ ବ୍ରେକରର ଥ୍ରେସହୋଲ୍ଡ — ସେମାନଙ୍କୁ ବ୍ରେକର୍ ଆଚରଣ ଆଶା କରୁଥିବା ଟ୍ୟୁନ୍ କରନ୍ତି ନାହିଁ। ପ୍ରତ୍ୟେକ ଡିଫଲ୍ଟ `OMNIROUTE_PROVIDER_BREAKER_*` ଏବଂ `OMNIROUTE_CIRCUIT_BREAKER_*` env vars ମାଧ୍ୟମରେ ଓଭରବ୍ରିଡ୍ ଅଟେ। ଚାଲିବା ସମୟ-ସଠିକ୍ ରେଫରେନ୍ସ ଟେବୁଲ୍ `docs/architecture/RESILIENCE_GUIDE.md` ରେ ରୁହେ।
+
+କେବଳ ପ୍ରଦାନକାରୀ ସ୍ତରର ବିଫଳତା ସ୍ଥିତି ପ୍ରଦାନକାରୀ ବ୍ରେକରକୁ ଯାତ୍ରା କରିବା ଉଚିତ:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-ସାଧାରଣ account/key/model errors, ଯଥା ଅଧିକାଂଶ
-`401`, `403`, କିମ୍ବା `429` cases ପାଇଁ ସମ୍ପୂର୍ଣ୍ଣ-provider breakerକୁ trip କରନ୍ତୁ ନାହିଁ। ସେଗୁଡ଼ିକ ସାଧାରଣତଃ
-connection cooldown କିମ୍ବା model lockoutର ଅଂଶ ହୋଇଥାଏ। ଏକ generic API-key provider `403` recoverable ହେବା ଉଚିତ, ଯେପର୍ଯ୍ୟନ୍ତ ଏହା terminal provider/account error ଭାବେ classified ହୋଇନଥାଏ।
+ଅଧିକାଂଶ `401`, `403`, କିମ୍ବା `429` କେସ୍ ପରି ସାଧାରଣ account/key/model ତ୍ରୁଟି ପାଇଁ ପୁରା-ପ୍ରଦାନକାରୀ ବ୍ରେକର୍ ଭ୍ରମଣ କରନ୍ତୁ ନାହିଁ। ସେଗୁଡ଼ିକ ସାଧାରଣତ connection ସଂଯୋଗ କୁଲଡାଉନ୍ କିମ୍ବା ମଡେଲ୍ ଲକଆଉଟ୍ ସହିତ ଜଡିତ। ଏକ ଜେନେରିକ୍ API- କି ପ୍ରଦାନକାରୀ `403` ପୁନରୁଦ୍ଧାର ହେବା ଉଚିତ ଯଦି ଏହା ଟର୍ମିନାଲ୍ provider/account ତ୍ରୁଟି ଭାବରେ ଶ୍ରେଣୀଭୁକ୍ତ ନହୁଏ।
 
-ବ୍ରେକର୍ ଲେଜି ରିକଭରି (lazy recovery) ବ୍ୟବହାର କରେ, ବ୍ୟାକଗ୍ରାଉଣ୍ଡ ଟାଇମର ନୁହେଁ। ଯେତେବେଳେ `OPEN` ସମାପ୍ତ ହୁଏ, `getStatus()`, `canExecute()`, ଏବଂ `getRetryAfterMs()` ଭଳି ରିଡ୍ଗୁଡ଼ିକ ସ୍ଥିତିକୁ `HALF_OPEN`କୁ ରିଫ୍ରେସ୍ କରନ୍ତି, ଯାହା ଫଳରେ ଡ୍ୟାସବୋର୍ଡ ଏବଂ କମ୍ବୋ କ୍ୟାଣ୍ଡିଡେଟ୍ ବିଲ୍ଡରମାନେ ସମାପ୍ତ ହୋଇଥିବା ପ୍ରୋଭାଇଡରକୁ ଚିରଦିନ ବାଦ୍ ଦେଇ ରହନ୍ତି ନାହିଁ।
+ବ୍ରେକର୍ ବ୍ୟାକଗ୍ରାଉଣ୍ଡ ଟାଇମର୍ ନୁହେଁ, ଅଳସୁଆ ପୁନରୁଦ୍ଧାର ବ୍ୟବହାର କରେ। ଯେତେବେଳେ `OPEN` ମିଆଦ ପୂର୍ଣ୍ଣ ହୁଏ, `getStatus()`, `canExecute()`, ଏବଂ `getRetryAfterMs()` ପରି ପ read ଼ା ରାଜ୍ୟକୁ `HALF_OPEN` କୁ ସତେଜ କରେ, ତେଣୁ ଡ୍ୟାସବୋର୍ଡ ଏବଂ କମ୍ବୋ ପ୍ରାର୍ଥୀ ବିଲଡରମାନେ ଏକ ମିଆଦ ପୂର୍ଣ୍ଣ ପ୍ରଦାନକାରୀଙ୍କୁ ସବୁଦିନ ପାଇଁ ବାଦ ଦିଅନ୍ତି ନାହିଁ।
 
-### କନେକସନ୍ କୁଲଡାଉନ୍
+### ସଂଯୋଗ କୁଲଡାଉନ୍।
 
-**ପରିସର**: ଗୋଟିଏ ପ୍ରୋଭାଇଡର କନେକସନ୍/ଆକାଉଣ୍ଟ/କି।
+**ପରିସର** : ଗୋଟିଏ ପ୍ରଦାନକାରୀ connection/account/key.
 
-**ଉଦ୍ଦେଶ୍ୟ**: ସମାନ ପ୍ରୋଭାଇଡରର ଅନ୍ୟ କନେକସନଗୁଡ଼ିକୁ ଅନୁରୋଧଗୁଡ଼ିକୁ ସେବା ଦେବା ଜାରି ରଖିବାକୁ ଅନୁମତି ଦେଇ ଗୋଟିଏ ଖରାପ କି/ଆକାଉଣ୍ଟକୁ ଅସ୍ଥାୟୀ ଭାବେ ଏଡ଼ାଇ ଦେବା।
+**ଉଦ୍ଦେଶ୍ୟ** : ସମାନ ପ୍ରଦାନକାରୀଙ୍କ ଅନୁରୋଧ ସେବା ଜାରି ରଖିବା ପାଇଁ ଅନ୍ୟ ସଂଯୋଗକୁ ଅନୁମତି ଦେବାବେଳେ ସାମୟିକ ଭାବରେ ଗୋଟିଏ ଖରାପ key/account ଛାଡିଦିଅ।
 
-**କାର୍ଯ୍ୟକାରିତା**:
+**କାର୍ଯ୍ୟାନ୍ୱୟନ** :
 
-- ଲେଖା/ଅଦ୍ୟତନ ପଥ: `src/sse/services/auth.ts::markAccountUnavailable()`
-- ଆକାଉଣ୍ଟ ଚୟନ/ଫିଲ୍ଟରିଂ: `src/sse/services/auth.ts::getProviderCredentials...`
+- Write/update ପଥ: `src/sse/services/auth.ts::markAccountUnavailable()`
+- ଖାତା selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
 - କୁଲଡାଉନ୍ ଗଣନା: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- ସେଟିଂସ୍: `src/lib/resilience/settings.ts`
+- ସେଟିଂସମୂହ: `src/lib/resilience/settings.ts`
 
-ପ୍ରୋଭାଇଡର କନେକସନଗୁଡ଼ିକରେ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ଫିଲ୍ଡଗୁଡ଼ିକ:
+ପ୍ରଦାନକାରୀ ସଂଯୋଗଗୁଡ଼ିକ ଉପରେ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ କ୍ଷେତ୍ର:
 
 ```ts
 rateLimitedUntil;
@@ -839,50 +842,50 @@ errorCode;
 backoffLevel;
 ```
 
-ଆକାଉଣ୍ଟ ଚୟନ ସମୟରେ, ଗୋଟିଏ କନେକସନ୍ ଏଡ଼ାଯାଏ ଯେତେବେଳେ:
+ଖାତା ଚୟନ ସମୟରେ, ଏକ ସଂଯୋଗକୁ ଏଡ଼ାଇ ଦିଆଯାଏ:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-କୁଲଡାଉନଗୁଡ଼ିକ ମଧ୍ୟ ଲେଜି ଅଟେ: ଯେତେବେଳେ `rateLimitedUntil` ଅତୀତରେ ରହେ, କନେକସନ୍ ପୁଣି ଯୋଗ୍ୟ ହୋଇଯାଏ। ସଫଳ ବ୍ୟବହାର ପରେ, `clearAccountError()` `testStatus`, `rateLimitedUntil`, ଏରର୍ ଫିଲ୍ଡଗୁଡ଼ିକୁ ଏବଂ `backoffLevel`କୁ ଖାଲି କରେ।
+କୁଲଡାଉନ୍ ମଧ୍ୟ ଅଳସୁଆ: ଯେତେବେଳେ `rateLimitedUntil` ଅତୀତରେ, ସଂଯୋଗ ପୁଣି ଯୋଗ୍ୟ ହୋଇଯାଏ। ସଫଳ ବ୍ୟବହାରରେ, `clearAccountError()` `testStatus`, `rateLimitedUntil`, ତ୍ରୁଟି କ୍ଷେତ୍ର, ଏବଂ `backoffLevel` ସଫା କରେ।
 
-ଡିଫଲ୍ଟ କନେକସନ୍ କୁଲଡାଉନ୍ ଆଚରଣ:
+ଡିଫଲ୍ଟ ସଂଯୋଗ କୁଲଡାଉନ୍ ଆଚରଣ:
 
-- OAuth ବେସ୍ କୁଲଡାଉନ୍: `5s`।
-- API-key ବେସ୍ କୁଲଡାଉନ୍: `3s`।
-- API-key `429` ଉପଲବ୍ଧ ଥିବାବେଳେ ଅପଷ୍ଟ୍ରିମ୍ ରିଟ୍ରାଏ ସୂଚନାଗୁଡ଼ିକୁ (`Retry-After`, ରିସେଟ୍ ହେଡର, କିମ୍ବା ପାର୍ସ ଯୋଗ୍ୟ ରିସେଟ୍ ଟେକ୍ସଟ) ପ୍ରାଥମିକତା ଦେବା ଉଚିତ।
-- ବାରମ୍ବାର ପୁନରୁଦ୍ଧାର ଯୋଗ୍ୟ ବିଫଳତାଗୁଡ଼ିକ ଏକ୍ସପୋନେନସିଆଲ୍ ବ୍ୟାକଅଫ୍ ବ୍ୟବହାର କରନ୍ତି:
+- OAuth ଆଧାର କୁଲଡାଉନ୍: `5s`।
+- API- କି ଆଧାର କୁଲଡାଉନ୍: `3s`।
+- ଉପଲବ୍ଧ ଥିବାବେଳେ API- କି `429` ଅପଷ୍ଟ୍ରିମ ପୁନ ry ଚେଷ୍ଟା (`Retry-After`, ପୁନ et ସେଟ୍ ହେଡର୍, କିମ୍ବା ପାର୍ସେବଲ୍ ପୁନ et ସେଟ୍ ପାଠ୍ୟ) କୁ ପସନ୍ଦ କରିବା ଉଚିତ।
+- ବାରମ୍ବାର ପୁନରୁଦ୍ଧାରଯୋଗ୍ୟ ବିଫଳତା ଏକ୍ସପୋନ୍ସନାଲ ବ୍ୟାକଅଫ୍ ବ୍ୟବହାର କରେ:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-ଆଣ୍ଟି-ଥଣ୍ଡରିଂ-ହାର୍ଡ ଗାର୍ଡ ସମାନ କନେକସନରେ ଏକାକାଳୀନ ବିଫଳତାଗୁଡ଼ିକୁ ବାରମ୍ବାର କୁଲଡାଉନ୍ ବଢ଼ାଇବାରୁ କିମ୍ବା `backoffLevel`କୁ ଦୁଇଥର ବୃଦ୍ଧି କରିବାରୁ ରୋକେ।
+ଆଣ୍ଟି-ଥଣ୍ଡର-ହେଡ୍ ଗାର୍ଡ ସମାନ ସଂଯୋଗରେ ଏକକାଳୀନ ବିଫଳତାକୁ କୁଲଡାଉନ୍ କିମ୍ବା ଦୁଇଗୁଣ ବର୍ଦ୍ଧିତ `backoffLevel` ବାରମ୍ବାର ବିସ୍ତାର କରିବାରେ ରୋକିଥାଏ।
 
-ଟର୍ମିନାଲ୍ ସ୍ଥିତିଗୁଡ଼ିକ କୁଲଡାଉନ୍ ନୁହଁନ୍ତି। `banned`, `expired` (ଯାହା `EXPIRED_RETRY_MAX` ମାଧ୍ୟମରେ N ସୀମିତ ପୁନଃପ୍ରୟାସ ପରେ ହିଁ ଟର୍ମିନାଲ୍ ହୁଏ), ଏବଂ `credits_exhausted` କ୍ରେଡେନସିଆଲ/ସେଟିଂସ୍ ପରିବର୍ତ୍ତନ ନ ହେବା ପର୍ଯ୍ୟନ୍ତ କିମ୍ବା ଜଣେ ଅପରେଟର ସେଗୁଡ଼ିକୁ ରିସେଟ୍ ନ କରିବା ପର୍ଯ୍ୟନ୍ତ ଅନୁପଲବ୍ଧ ରହିବା ଉଦ୍ଦିଷ୍ଟ। ଟର୍ମିନାଲ୍ ସ୍ଥିତିଗୁଡ଼ିକୁ କ୍ଷଣସ୍ଥାୟୀ କୁଲଡାଉନ୍ ସ୍ଥିତି ସହିତ ଓଭରରାଇଟ୍ କରନ୍ତୁ ନାହିଁ।
+Terminal states are not cooldowns. `banned`, `expired` (which becomes terminal only after N bounded retries via `EXPIRED_RETRY_MAX`), and `credits_exhausted` are intended to stay unavailable until credentials/settings change or an operator resets them. Do not overwrite terminal states with transient cooldown state.
 
-### ମଡେଲ୍ ଲକଆଉଟ୍
+### ମଡେଲ୍ ଲକ୍ଆଉଟ୍।
 
-**ପରିସର**: ପ୍ରୋଭାଇଡର + କନେକସନ୍ + ମଡେଲ୍।
+**ପରିସର** : ପ୍ରଦାନକାରୀ + ସଂଯୋଗ + ମଡେଲ୍।
 
-**ଉଦ୍ଦେଶ୍ୟ**: ଯେତେବେଳେ ସେହି କନେକସନ୍ ପାଇଁ କେବଳ ଗୋଟିଏ ମଡେଲ୍ ଅନୁପଲବ୍ଧ କିମ୍ବା କୋଟା-ସୀମିତ ଥାଏ, ସେତେବେଳେ ସମଗ୍ର କନେକସନକୁ ଅକ୍ଷମ କରିବା ଏଡ଼ାଇବା।
+**ଉଦ୍ଦେଶ୍ୟ** : ଯେତେବେଳେ କେବଳ ଗୋଟିଏ ମଡେଲ୍ ଉପଲବ୍ଧ ନଥାଏ କିମ୍ବା ସେହି ସଂଯୋଗ ପାଇଁ କୋଟା-ସୀମିତ ସେତେବେଳେ ଏକ ସଂପୂର୍ଣ୍ଣ ସଂଯୋଗକୁ ଅକ୍ଷମ କରନ୍ତୁ।
 
-ଉଦାହରଣଗୁଡ଼ିକ:
+ଉଦାହରଣଗୁଡିକ:
 
-- ପ୍ରତି-ମଡେଲ୍ କୋଟା ପ୍ରୋଭାଇଡରମାନେ `429` ଫେରାଉଥିବା।
-- ଗୋଟିଏ ହଜିଯାଇଥିବା ମଡେଲ୍ ପାଇଁ `404` ଫେରାଉଥିବା ସ୍ଥାନୀୟ ପ୍ରୋଭାଇଡର।
-- ଚୟନିତ Grok ମୋଡ୍ଗୁଡ଼ିକ ଭଳି ପ୍ରୋଭାଇଡର-ନିର୍ଦ୍ଦିଷ୍ଟ ମୋଡ୍/ମଡେଲ୍ ଅନୁମତି ବିଫଳତାଗୁଡ଼ିକ।
+- `429` ଫେରୁଥିବା ପ୍ରତି ମଡେଲ କୋଟା ପ୍ରଦାନକାରୀ।
+- ଗୋଟିଏ ନିଖୋଜ ମଡେଲ ପାଇଁ `404` ଫେରସ୍ତ କରୁଥିବା ସ୍ଥାନୀୟ ପ୍ରଦାନକାରୀ।
+- ପ୍ରଦାନକାରୀ-ନିର୍ଦ୍ଦିଷ୍ଟ mode/model ଅନୁମତି ବିଫଳତା ଯେପରିକି ମନୋନୀତ Grok ମୋଡ୍।
 
-ମଡେଲ୍ ଲକଆଉଟ୍ `open-sse/services/accountFallback.ts`ରେ ରହେ ଏବଂ ସମାନ କନେକସନକୁ ଅନ୍ୟ ମଡେଲଗୁଡ଼ିକୁ ସେବା ଦେବା ଜାରି ରଖିବାକୁ ଦେଏ।
+ମଡେଲ୍ ଲକଆଉଟ୍ `open-sse/services/accountFallback.ts` ରେ ରୁହେ ଏବଂ ସମାନ ସଂଯୋଗକୁ ଅନ୍ୟ ମଡେଲଗୁଡିକର ସେବା ଜାରି ରଖିବାକୁ ଦିଏ।
 
-### ଡିବଗିଂ ନିର୍ଦ୍ଦେଶନା
+### ତ୍ରୁଟି ନିବାରଣ ନିର୍ଦ୍ଦେଶାବଳୀ।
 
-- ଯଦି ଏକ ପ୍ରୋଭାଇଡର ପାଇଁ ସମସ୍ତ କି ଏଡ଼ାଯାଏ, ପ୍ରୋଭାଇଡର ବ୍ରେକର୍ ସ୍ଥିତି ଏବଂ ପ୍ରତ୍ୟେକ କନେକସନର `rateLimitedUntil`/`testStatus` ଉଭୟକୁ ଯାଞ୍ଚ କରନ୍ତୁ।
-- ଯଦି ରିସେଟ୍ ୱିଣ୍ଡୋ ପରେ ପ୍ରୋଭାଇଡର ସ୍ଥାୟୀ ଭାବେ ବାଦ୍ ପଡ଼ିଥିବା ଜଣାଯାଏ, କୋଡ୍ `getStatus()`/`canExecute()` ବ୍ୟବହାର କରିବା ପରିବର୍ତ୍ତେ କଞ୍ଚା `state` ପଢ଼ୁଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ।
-- ଯଦି ଗୋଟିଏ ପ୍ରୋଭାଇଡର କି ବିଫଳ ହୁଏ କିନ୍ତୁ ଅନ୍ୟମାନେ କାମ କରିବା ଉଚିତ, ତେବେ ପ୍ରୋଭାଇଡର ବ୍ରେକର୍ ପରିବର୍ତ୍ତେ କନେକସନ୍ କୁଲଡାଉନ୍କୁ ପ୍ରାଥମିକତା ଦିଅନ୍ତୁ।
-- ଯଦି କେବଳ ଗୋଟିଏ ମଡେଲ୍ ବିଫଳ ହୁଏ, ତେବେ କନେକସନ୍ କୁଲଡାଉନ୍ ପରିବର୍ତ୍ତେ ମଡେଲ୍ ଲକଆଉଟ୍କୁ ପ୍ରାଥମିକତା ଦିଅନ୍ତୁ।
-- ଯଦି ଏକ ସ୍ଥିତି ସ୍ୱୟଂ-ପୁନରୁଦ୍ଧାର ହେବା ଉଚିତ, ତେବେ ଏହାର ଏକ ଭବିଷ୍ୟତ ଟାଇମଷ୍ଟାମ୍ପ/ରିସେଟ୍ ଟାଇମଆଉଟ୍ ଏବଂ ଏକ ରିଡ୍ ପାଥ୍ ଥିବା ଉଚିତ ଯାହା ସମାପ୍ତ ସ୍ଥିତିକୁ ରିଫ୍ରେସ୍ କରେ। ସ୍ଥାୟୀ ସ୍ଥିତିଗୁଡ଼ିକ ମାନୁଆଲ୍ କ୍ରେଡେନସିଆଲ କିମ୍ବା କନଫିଗ୍ ପରିବର୍ତ୍ତନ ଆବଶ୍ୟକ କରନ୍ତି।
+- ଯଦି ଏକ ପ୍ରଦାନକାରୀ ପାଇଁ ସମସ୍ତ ଚାବି ଏଡ଼ାଇ ଦିଆଯାଏ, ତେବେ ଉଭୟ ପ୍ରଦାନକାରୀ ବ୍ରେକର୍ ସ୍ଥିତି ଏବଂ ପ୍ରତ୍ୟେକ ସଂଯୋଗର `rateLimitedUntil`/`testStatus` ଯାଞ୍ଚ କରନ୍ତୁ।
+- ପୁନ et ସେଟ୍ ୱିଣ୍ଡୋ ପରେ ଯଦି ଏକ ପ୍ରଦାନକାରୀ ସ୍ଥାୟୀ ଭାବରେ ବାଦ ପଡିଥାଏ, ତେବେ `getStatus()`/`canExecute()` ବ୍ୟବହାର କରିବା ପରିବର୍ତ୍ତେ କୋଡ୍ କଞ୍ଚା `state` ପ reading ୁଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ।
+- ଯଦି ଗୋଟିଏ ପ୍ରଦାନକାରୀ ଚାବି ବିଫଳ ହୁଏ କିନ୍ତୁ ଅନ୍ୟମାନେ କାର୍ଯ୍ୟ କରିବା ଉଚିତ୍, ପ୍ରଦାନକାରୀ ବ୍ରେକର୍ ଅପେକ୍ଷା ସଂଯୋଗ କୁଲଡାଉନ୍ ପସନ୍ଦ କରନ୍ତୁ।
+- ଯଦି କେବଳ ଗୋଟିଏ ମଡେଲ୍ ବିଫଳ ହୁଏ, ସଂଯୋଗ କୁଲଡାଉନ୍ ଅପେକ୍ଷା ମଡେଲ୍ ଲକଆଉଟ୍ ପସନ୍ଦ କରନ୍ତୁ।
+- ଯଦି କ state ଣସି ରାଜ୍ୟ ସ୍ recover ୟଂ ପୁନରୁଦ୍ଧାର ହେବା ଉଚିତ, ତେବେ ଏହାର ଭବିଷ୍ୟତର timestamp/reset ସମୟ ସମାପ୍ତି ଏବଂ ଏକ ପଠନ ପଥ ରହିବା ଉଚିତ ଯାହାକି ମିଆଦ ପୂର୍ଣ୍ଣ ଅବସ୍ଥାକୁ ସତେଜ କରେ। ସ୍ଥାୟୀ ସ୍ଥିତି ମାନୁଆଲ ପରିଚୟ କିମ୍ବା ବିନ୍ୟାସ ପରିବର୍ତ୍ତନ ଆବଶ୍ୟକ କରେ।
 
 ---
 

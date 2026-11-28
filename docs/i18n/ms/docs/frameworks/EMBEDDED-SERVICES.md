@@ -4,7 +4,7 @@
 
 ---
 
-> **Versi:** v3.8.44** Kemas kini terakhir:** 28-10-2026** Khalayak:** Jurutera menambah, menyelenggara atau menyahpepijat perkhidmatan terbenam (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versi:** v3.8.44** Khalayak:** Jurutera menambah, menyelenggara atau menyahpepijat perkhidmatan terbenam (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Perkhidmatan terbenam ialah alatan kereta sisi proses yang dipasang secara tempatan yang OmniRoute memasang, menyelia dan mendedahkan sebagai sasaran penghalaan kelas pertama. Tidak seperti pembekal luaran (yang dicapai melalui internet melalui kekunci API ), perkhidmatan terbenam dijalankan pada mesin yang sama seperti OmniRoute dan berkomunikasi melalui gelung balik.
 

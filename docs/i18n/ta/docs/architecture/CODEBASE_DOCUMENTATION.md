@@ -4,18 +4,11 @@
 
 ---
 
-> **பதிப்பு:** v3.8.51
-> **கடைசியாகப் புதுப்பிக்கப்பட்டது:** 2026-06-28
-> **இலக்கு வாசகர்கள்:** OmniRoute-க்குப் பங்களிக்கும் அல்லது அதன் மீது ஒருங்கிணைப்புகளை உருவாக்கும் பொறியாளர்கள்.
+> **பதிப்பு:** v3.8.51** பார்வையாளர்கள்:** OmniRoute க்கு பங்களிக்கும் பொறியாளர்கள் அல்லது அதன் மேல் ஒருங்கிணைப்புகளை உருவாக்குகிறார்கள்.
 >
-> உயர்நிலை கட்டமைப்பு வரைபடங்களுக்கும் ஒவ்வொரு துணைஅமைப்பின் பின்னுள்ள காரணங்களுக்கும்,
-> [ARCHITECTURE.md](./ARCHITECTURE.md)-ஐப் படிக்கவும். தனிப்பட்ட துணைஅமைப்புகள்
-> (Auto Combo, MCP server, A2A server, Skills, Memory, Cloud Agents, Resilience,
-> Compression போன்றவை) பற்றிய ஆழமான தகவல்களுக்கு, இந்த `docs/` கோப்பகத்திலுள்ள அவற்றுக்கான பிரத்யேகக் கோப்புகளைப் பார்க்கவும்.
+> உயர்-நிலை கட்டிடக்கலை வரைபடங்கள் மற்றும் ஒவ்வொரு துணை அமைப்புக்கு பின்னால் உள்ள காரணங்களுக்காக, [ARCHITECTURE.md](./ARCHITECTURE.md) படிக்கவும். தனிப்பட்ட துணை அமைப்புகளில் (ஆட்டோ காம்போ, MCP சர்வர், A2A சர்வர், திறன்கள், நினைவகம், கிளவுட் முகவர்கள், மீள்தன்மை, சுருக்கம் மற்றும் பல) ஆழமான டைவ்களுக்கு இந்த `docs/` கோப்பகத்தில் அவற்றின் பிரத்யேக கோப்புகளைப் பார்க்கவும்.
 
-இந்தக் கோப்பு, **தற்போது களஞ்சியத்தில் என்ன உள்ளது** என்பதை விவரிக்கிறது. இதன் மூலம் ஒரு புதிய பொறியாளர்
-கோப்பகக் கட்டமைப்பில் எளிதாகச் செல்லவும், இயக்கநேர அடுக்கமைப்பைப் புரிந்துகொள்ளவும், புதிய தொகுதிகளை
-உருவாக்காமல் எங்கு நிரலைச் சேர்க்க வேண்டும் என்பதை அறிந்துகொள்ளவும் முடியும்.
+இந்த கோப்பு விவரிக்கிறது** இன்று களஞ்சியத்தில் என்ன இருக்கிறது** ஒரு புதிய பொறியாளர் மரத்தில் செல்லவும், இயக்க நேர அடுக்குகளைப் புரிந்து கொள்ளவும், புதிய தொகுதிக்கூறுகளைக் கண்டுபிடிக்காமல் குறியீட்டைச் சேர்க்கும் இடத்தை அறியவும் முடியும்.
 
 ---
 
@@ -566,35 +559,14 @@ bin/
 
 ## 8. `scripts/`
 
-நோக்கத்தின் அடிப்படையில் 6 துணைக் கோப்புறைகளாக ஒழுங்கமைக்கப்பட்டுள்ளது.
+நோக்கத்தின்படி 6 துணை கோப்புறைகளாக ஒழுங்கமைக்கப்பட்டது.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, மேலும் படிக்க மட்டும் அனுமதிக்கப்பட்ட PR கண்காணிப்பு உதவிக் கருவிகளான
-  `ci-discriminate.sh` (ஒரு PR-இன் தோல்வியுற்ற சோதனைகளின் கையொப்பங்களை, ஒரு மேற்கோள் PR அல்லது base-red சிக்கலுடன் ஒப்பிட்டு, சொந்தமானவை / மரபாகப் பெறப்பட்டவை /
-  அறியப்படாதவை என வகைப்படுத்துகிறது) மற்றும் `audit-worktree.sh`
-  (அழுக்கான கோப்புகள், பாதுகாக்கப்பட்ட பகுதிகள், அகற்றப்பட்ட assert-கள், தவிர்ப்பு எண்ணிக்கைகள், எஞ்சியுள்ள
-  தற்காலிக tsconfig-கள், PR head மற்றும் உள்ளூர் HEAD இடையிலான ஒப்பீடு — ஒரு பணியாளரின் PR ஏற்கப்படுவதற்கு முன்).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, மேலும் படிக்க மட்டுமேயான PR தோல்வி-ஒரு குறிப்பு `ci-discriminate.sh` அல்லது அடிப்படை- PR பிரச்சினைக்கு எதிராக சொந்த / மரபுரிமை / தெரியாத PR சரிபார்க்கவும்) மற்றும் `audit-worktree.sh` (அழுக்கு கோப்புகள், பாதுகாக்கப்பட்ட மேற்பரப்புகள், அகற்றப்பட்ட உறுதிமொழிகள், அடக்குதல் எண்ணிக்கைகள், எஞ்சியிருக்கும் tmp tsconfigs, PR head vs உள்ளூர் HEAD — தொழிலாளி PR முன்).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` கொடிகள் பதிப்புகள் வெளிப்படையாக OmniRoute (3.6.x மற்றும் முந்தையது) க்குக் காரணம். காசோலை தேதிகளை புறக்கணிக்கிறது.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

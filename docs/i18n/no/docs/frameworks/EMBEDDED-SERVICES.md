@@ -4,7 +4,7 @@
 
 ---
 
-> **Versjon:** v3.8.44** Sist oppdatert:** 2026-10-28** Publikum:** Ingeniører legger til, vedlikeholder eller feilsøker innebygde tjenester (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versjon:** v3.8.44** Publikum:** Ingeniører legger til, vedlikeholder eller feilsøker innebygde tjenester (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Innebygde tjenester er lokalt installerte prosesssidevognverktøy som OmniRoute installerer, overvåker og eksponerer som førsteklasses rutemål. I motsetning til eksterne leverandører (som nås over internett via API -nøkler), kjører innebygde tjenester på samme maskin som OmniRoute og kommuniserer over loopback.
 
@@ -855,65 +855,44 @@ OmniRoutes standardport 20128.
 
 ---
 
-## 8. Vanlige spørsmål
+## 8. FAQ
 
-**S: Kan jeg eksponere endepunktene for de innebygde tjenestene for klienter utenfor loopback?**
+**Spørsmål: Kan jeg eksponere endepunktene for de innebygde tjenestene for klienter uten loopback?**
 
-Nei. LOCAL_ONLY-nivået er tilsiktet (ufravikelig regel nr. 17). Ruter som kan kjøre
-`npm install` eller starte `node`-prosesser, må ikke være tilgjengelige for trafikk
-utenfor loopback, fordi en lekket JWT via en tunnel (Cloudflare, Ngrok, Tailscale)
-ellers ville tillate vilkårlig oppstart av prosesser. Det finnes ikke noe unntak for
-`/api/services/` — i motsetning til `/api/mcp/` er den utelatt fra listen over
-omgåelser for administrasjonstilgang. Se `docs/security/ROUTE_GUARD_TIERS.md`.
+Nei. LOCAL_ONLY nivået er tilsiktet (hard regel #17). Ruter som kan påkalle `npm install` eller spawn `node` -prosesser må ikke kunne nås fra ikke-loopback-trafikk, fordi en lekket JWT via en tunnel (Cloudflare, Ngrok, Tailscale) ellers ville tillate vilkårlig prosess-gyting. Det er ingen utvelgelse for `/api/services/` — i motsetning til `/api/mcp/`, den er ekskludert fra omgåelseslisten for administreringsomfang. Se `docs/security/ROUTE_GUARD_TIERS.md`.
 
 ---
 
-**S: Vil 9Router og CLIProxyAPI være tilgjengelige i produksjons-/skyimplementeringer?**
+**Spørsmål: Vil 9Router og CLIProxyAPI være tilgjengelig i production/cloud distribusjoner?**
 
-Ja. Begge tjenestene følger den samme lokal-først-modellen som OmniRoute selv. De
-kjører på samme maskin og kommuniserer via loopback. «Produksjon» betyr her VPS-en
-eller den lokale serveren der OmniRoute er distribuert, ikke en ekstern skyleverandør.
+Ja. Begge tjenestene følger den samme lokale-første modellen som OmniRoute selv. De kjører på samme maskin og kommuniserer over loopback. "Produksjon" betyr her VPS eller lokale server der OmniRoute er distribuert, ikke en ekstern skyleverandør.
 
 ---
 
-**S: Hvordan feilsøker jeg prosessovervåkeren?**
+**Spørsmål: Hvordan feilsøker jeg veilederen?**
 
-1. Følg SSE-loggstrømmen: `curl -N http://localhost:20128/api/services/9router/logs`.
-2. Kontroller strukturerte logger i OmniRoutes pino-utdata, filtrert etter
-   navnerommet `service:supervisor`.
-3. Undersøk DB-raden: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
-4. Bruk `GET /api/services/9router/status` for å se gjeldende sanntidstilstand, PID,
-   helsestatus og `lastError` i ett kall.
+1. Tail the SSE log stream: `curl -N http://localhost:20128/api/services/9router/logs`.
+2. Sjekk strukturerte logger i OmniRoute pino-utgang filtrert av `service:supervisor` navneområdet.
+3. Inspiser DB raden: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
+4. Bruk `GET /api/services/9router/status` for å se gjeldende live-status, PID, helse og `lastError` i en samtale.
 
 ---
 
-**S: Prosessovervåkeren viser `health: "degraded"` eller `health: "unknown"`, men tilstanden er `"running"`. Er det et problem?**
+**Spørsmål: Veilederen viser `health: "degraded"` eller `health: "unknown"`, men tilstanden er `"running"`. Er det et problem?**
 
-`"degraded"` betyr at helsesjekken returnerte et svar som ikke var 200. `"unknown"`
-betyr at ingen sjekk er fullført ennå (kappløp med første spørring). Begge deler er
-midlertidig under oppstart. Hvis helsetilstanden forblir `"degraded"` i mer enn
-`healthIntervalMs * 3` ms etter `"running"`, kjører den innebygde tjenesten, men
-HTTP-API-et svarer ikke. Kontroller om porten er riktig i statussvaret, og om
-tjenesten faktisk lytter på den porten.
+`"degraded"` betyr at helsesonden returnerte et non-200 -svar. `"unknown"` betyr at ingen sonde er fullført ennå (løp med første avstemning). Begge er forbigående under oppstart. Hvis helse forblir `"degraded"` i mer enn `healthIntervalMs * 3` ms etter `"running"`, kjører den innebygde tjenesten, men dens HTTP API svarer ikke. Sjekk om porten er riktig i statussvaret og om tjenesten faktisk lytter på den porten.
 
 ---
 
-**S: Kan jeg endre API-nøkkelen for 9Router uten en fullstendig omstart?**
+**Spørsmål: Kan jeg endre 9Router API -nøkkelen uten en full omstart?**
 
-Nei. API-nøkkelen sendes til 9Router via en miljøvariabel når prosessen startes.
-Miljøvariabler kan ikke endres i en kjørende prosess. `POST .../rotate-key` stopper
-og starter tjenesten automatisk på nytt for å ta i bruk den nye nøkkelen.
-Nøkkelrotasjonen trer i kraft innen tjenestens `stopTimeoutMs` (standardverdi 15 s)
-pluss oppstartstiden.
+Nei. API nøkkelen sendes til 9Router via en miljøvariabel på spawn-tidspunktet. Miljøvariabler kan ikke endres i en kjørende prosess. `POST .../rotate-key` stopper automatisk og starter tjenesten på nytt for å bruke den nye nøkkelen. Nøkkelrotasjonen trer i kraft innenfor tjenestens `stopTimeoutMs` (standard 15 s) pluss dens oppstartstid.
 
 ---
 
-**S: Hva er grensen for ringbufferen, og hva skjer når den blir full?**
+**Spørsmål: Hva er ringbuffergrensen og hva skjer når den fylles?**
 
-Hver tjeneste har en egen ringbuffer på 5 MB. Når bufferen er full, fjernes de eldste
-logglinjene for å gi plass til nye. SSE-hendelsen `snapshot` returnerer de nyeste
-linjene innenfor `tail`-grensen. Logger lagres ikke på disk med mindre
-`logsBufferPath` er angitt i DB-raden.
+Hver tjeneste har en dedikert 5 MB ring buffer. Når bufferen er full, kastes de eldste logglinjene ut for å gi plass til nye. SSE `snapshot` -hendelsen returnerer de nyeste linjene innenfor `tail` grensen. Logger blir ikke bevart til disk med mindre `logsBufferPath` er satt i DB raden.
 
 ---
 

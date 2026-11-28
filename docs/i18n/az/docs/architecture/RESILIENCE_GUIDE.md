@@ -12,55 +12,53 @@ OmniRoute üç fərqli, lakin əlaqəli möhkəmlik mexanizminə malikdir. Hər 
 
 > **Dayanıqlıq keçidləri üçün Env-vs-dashboard üstünlüyü.** Mühitdən səpilən — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — yalnız _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) təmin edir. Boolean `resilienceSettings` -də davam etdi (Dashboard →** Parametrlər → Resilience** / `PATCH /api/resilience`, `key_value`-də saxlanılır) env dəyəri üzərində qalib gəlir: normallaşdırma (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) mövcud olduqda saxlanılan mantiqi saxlayır. İdarə panelinin artıq saxlanmış `false` olduğu yerləşdirmədə belə bir env var-ın `true` olaraq təyin edilməsi heç nəyi dəyişmir — keçidi çevirin** Parametrlər → Dayanıqlıq** (və ya saxlanılan sahəni təmizləyin) əvəzinə.
 
-## 1. Provayder Circuit Breaker-i
+## 1. Provayderin dövrə açarı
 
-**Əhatə dairəsi:** bütöv provayder (məs., `glm`, `openai`, `anthropic`).
+**Əhatə dairəsi:** bütün provayder (məsələn, `glm`, `openai`, `anthropic`).
 
-**Məqsəd:** yuxarı axın/xidmət səviyyəsində dəfələrlə uğursuz olan provayderə trafik göndərməyi dayandırmaq.
+**Məqsəd:** upstream/service səviyyəsində dəfələrlə uğursuz olan bir provayderə trafik göndərməyi dayandırın.
 
-**İmplementasiya:**
+**İcra:**
 
 - Əsas sinif: `src/shared/utils/circuitBreaker.ts`
-- Bağlantı (wiring): `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Status API-si: `GET /api/monitoring/health`
-- Sıfırlama API-si: `POST /api/resilience/reset`
-- Wrapper-lər: `open-sse/services/accountFallback.ts`
+- Naqillər: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Vəziyyət API: `GET /api/monitoring/health`
+- API nı sıfırlayın: `POST /api/resilience/reset`
+- Sarmalayıcılar: `open-sse/services/accountFallback.ts`
 - DB cədvəli: `domain_circuit_breakers`
 
-**Vəziyyətlər:**
+**Dövlətlər:**
 
 - `CLOSED` — normal trafikə icazə verilir
-- `DEGRADED` — trafikə hələ də icazə verilir, lakin provayderin artan uğursuzluqları izlənilir; kifayət qədər uğur, etibarlı bağlantı testi və ya son uğursuzluq növü üçün ən uzun `OPEN` saxlanma müddətindən (həmin növün `cooldownByKind` dəyəri, əks halda `resetTimeout`, × `maxBackoffMultiplier`, ən azı bir cooldown) sonra yeni uğursuzluq olmadıqda `CLOSED` vəziyyətinə qayıdır
-- `OPEN` — provayder müvəqqəti bloklanıb; combo marşrutlaşdırma onu ötürür
-- `HALF_OPEN` — sıfırlama vaxtı bitib; yoxlama (probe) sorğusuna icazə verilir
+- `DEGRADED` — trafikinə hələ də icazə verilir, lakin yüksək provayder nasazlıqları izlənilir; kifayət qədər müvəffəqiyyət, etibarlı əlaqə testində və ya sonuncu uğursuzluq növü üçün ən uzun `OPEN` gözləməsindən sonra (onun `cooldownByKind` dəyəri, başqa `resetTimeout`, × `maxBackoffMultiplier`, ən azı bir soyutma müddəti) yeni uğursuzluq olmadan `CLOSED` yə qayıdır
+- `OPEN` — provayderi müvəqqəti olaraq bloklanıb; Combo marşrutlaşdırma onu ötür
+- `HALF_OPEN` — sıfırlama vaxtı keçdi; araşdırma tələbinə icazə verilir
 
-**Konfiqurasiya edilə bilən standart dəyərlər (`open-sse/config/constants.ts`, Dashboard → Settings → Resilience bölməsində göstərilir):**
+**Konfiqurasiya edilə bilən defoltlar (`open-sse/config/constants.ts`, İdarə Paneli → Parametrlərində → Dayanıqlığında nümayiş olunur):**
 
-| Sinif   | DEGRADED həddi | Açılma həddi  | Sıfırlama vaxtı |
-| ------- | -------------- | ------------- | --------------- |
-| OAuth   | 5 uğursuzluq   | 8 uğursuzluq  | 60s             |
-| API-key | 7 uğursuzluq   | 12 uğursuzluq | 30s             |
-| Lokal   | hesablanır     | 2 uğursuzluq  | 15s             |
+| Sinif     | deqradasiyaya uğradı | Açılır        | Vaxt aşımını sıfırlayın |
+| --------- | -------------------- | ------------- | ----------------------- |
+| OAuth     | 5 uğursuzluq         | 8 uğursuzluq  | 60-lar                  |
+| API açarı | 7 uğursuzluq         | 12 uğursuzluq | 30s                     |
 
-`degradationThreshold` provayderin `DEGRADED` vəziyyətinə nə vaxt keçəcəyini idarə edir; `failureThreshold` isə onun nə vaxt açılacağını və ötürüləcəyini idarə edir. Lokal provayder profilləri hələlik Resilience parametrləri səhifəsində göstərilmir.
+`degradationThreshold` provayder `DEGRADED` daxil olduqda nəzarət edir; `failureThreshold` açıldıqda və atlandıqda nəzarət edir. `PROVIDER_PROFILES.local` (2 uğursuzluq / 15s) `open-sse/config/constants.ts` ilə müəyyən edilir, lakin** hələ simli deyil** : `getProviderCategory()` yalnız `oauth` və ya `apikey` qaytarır, buna görə də yerli provayderlər OAuth və ya API açar profilindən istifadə edirlər.
 
-**İşə düşmə kodları:** yalnız provayder səviyyəli statuslar `[408, 500, 502, 503, 504]`. Hesab səviyyəli xətalara görə işə DÜŞMƏYİN (əksər 401/403/429 — onlar cooldown və ya bloklanma (lockout) mexanizmlərinə aiddir).
+**Səyahət kodları:** yalnız provayder səviyyəli statuslar `[408, 500, 502, 503, 504]`. Hesab səviyyəli səhvlər üçün NOT səfəri edin (əksər 401/403/429 — soyutma və ya blokata aiddir).
 
-**Tənbəl bərpa (lazy recovery):** `OPEN` müddəti bitdikdə `getStatus()`, `canExecute()`, `getRetryAfterMs()` vəziyyəti `HALF_OPEN`-ə yeniləyir. Eyni oxumalar (və növbəti uğursuzluq) köhnəlmiş `DEGRADED`-i tədricən `CLOSED`-ə qaytarır. Fon taymerinə ehtiyac yoxdur.
+**Tənbəl bərpa:** `OPEN` müddəti bitdikdə, `getStatus()`, `canExecute()`, `getRetryAfterMs()` vəziyyətini `HALF_OPEN` yə yeniləyin. Eyni oxuyur (və növbəti uğursuzluq) köhnə `DEGRADED` `CLOSED`-ə qaytarır. Fon taymerinə ehtiyac yoxdur.
 
 ---
 
-### Seçimə bağlı qlobal Provider Cooldown (pəncərə qapısı)
+### Qlobal Provayderin İstifadəsi (pəncərə qapısı)
 
-Dördüncü, **seçimə bağlı** qat (`PROVIDER_COOLDOWN_ENABLED`, standart olaraq **söndürülüb**) uğursuz olan provayderlərin sorğulararası yaddaşını `open-sse/services/providerCooldownTracker.ts` faylında saxlayır; combo hədəf seçimi ona müraciət edir ki, ardıcıl combo sorğuları təzəcə uğursuz olmuş provayderi təkrar-təkrar gəzməsin. Provayder səviyyəli qeydlər `PROVIDER_PROFILES` pəncərə qapısına riayət edir:
+Dördüncü,** daxil olun** qat (`PROVIDER_COOLDOWN_ENABLED`, default** off** ) `open-sse/services/providerCooldownTracker.ts`-də uğursuz provayderlərin çarpaz sorğu yaddaşını saxlayır, birləşmiş hədəf həlli ilə məsləhətləşir, beləliklə, ardıcıl birləşmiş sorğular uğursuz olan provayderi yenidən gəzməyi dayandırır. Provayder səviyyəli girişlər `PROVIDER_PROFILES` pəncərə qapısına hörmət edir:
 
-| Profil  | işə düşmə həddi (`providerFailureThreshold`) | pəncərənin içində (`providerFailureWindowMs`) | soyuma müddəti (`providerCooldownMs`) |
-| ------- | -------------------------------------------: | --------------------------------------------: | ------------------------------------: |
-| OAuth   |                                         `10` |                                       `15min` |                                `5min` |
-| API key |                                         `15` |                                       `30min` |                               `10min` |
+| Profil    | sonra səfərlər (`providerFailureThreshold`) | içəridə (`providerFailureWindowMs`) | üçün soyuyur (`providerCooldownMs`) |
+| --------- | ------------------------------------------: | ----------------------------------: | ----------------------------------: |
+| OAuth     |                                        `10` |                             `15min` |                              `5min` |
+| API açarı |                                        `15` |                             `30min` |                             `10min` |
 
-Həddin altında provayder soyuma hesab **edilmir**; uğurlu nəticə pəncərəni təmizləyir. Bağlantı səviyyəli qeydlər (`provider:connectionId`) əvəzində eksponensial `minRetryCooldownMs → maxRetryCooldownMs` geri çəkilməsini (backoff) saxlayır. Üstələmələr: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Reqressiya mühafizəsi: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Provayder həddən aşağıdır** yox** soyutma hesab olunur; uğur pəncərəni təmizləyir. Bağlantı səviyyəli girişlər (`provider:connectionId`) əvəzinə eksponensial `minRetryCooldownMs → maxRetryCooldownMs` geri çəkilməsini saxlayır. Ləğv edilir: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Reqressiya qoruyucusu: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Bağlantının soyudulması
 
@@ -743,6 +741,21 @@ qaydaya icazə verilir.
 
 ---
 
+## OmniRoute özü əlçatmaz olduqda
+
+Provayderin dövrə açarı, əlaqənin soyudulması və modelin kilidlənməsi şlüzün içərisində işləyir. Müştəri şlüzə çata bilmirsə, əlaqə xətası alır. OmniRoute bu uğursuzluğun qarşısını ala bilməz. Müştəri yenidən cəhd edib-etməmək və hansı mesajı göstərməyə qərar verir.
+
+OmniRoute hazırda heç bir müştəri tərəfində geri dönüş təmin etmir və bunun üçün heç bir siyasət müəyyən etmir. Müştəridə və ya şlüz qarşısında istənilən alternativ marşrutu konfiqurasiya edin.
+
+- `GET /api/health` autentifikasiya olmadan canlılığı yoxlayır.
+- `GET /api/health/ping` bazanın cavab verib-verməməsi daxil olmaqla, hazırlığı yoxlayır.
+- `GET /api/monitoring/health` təsdiqlənmiş zəng edənlərə sağlamlıq haqqında daha ətraflı məlumat verir.
+- `omniroute launch <tool>` müştərini işə salmazdan əvvəl `/api/monitoring/health` yoxlayır. O, avtomatik olaraq yerli şlüzə başlaya bilər. `--no-start` ilə əlçatmaz şlüz `GatewayUnreachable` və çıxış kodu `69` ilə nəticələnir.
+
+Müştərinin OmniRoute ilə əlaqəsini kəsmək üçün [Müştərinin konfiqurasiyasını bərpa edin](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Sazlama
 
 - Çəkili kombo `503 all_targets_cooling_down` cavabı verirsə (`Retry-After` təyin olunub, `diagnostics.excluded` hər hədəfi `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable` ilə göstərir) → hovuz konfiqurasiya olunub və bağlıdır, hər hədəf sadəcə dayanıqlılıq taymeri ilə istisna edilib; `[COMBO] Weighted selection: every target excluded before dispatch — …` xəbərdarlığı səbəbləri və qalan saniyələri göstərir. Eyni kombodan gələn `404 no_executable_targets` heç bir dayanıqlılıq taymerinin iştirak etmədiyi deməkdir (icra edəcək heç nə yoxdur və ya hər hesab əlçatanlıq yoxlamasından keçməyib). `targetResolution.ts` faylında toplanan istisnalardan `open-sse/services/combo/pinRecovery.ts` faylında qurulub.
@@ -754,93 +767,68 @@ qaydaya icazə verilir.
 
 ---
 
-## Runtime vəziyyəti — agent üçün sürətli arayış
+## Runtime status — agent sürətli istinad
 
-> `AGENTS.md` → "Resilience Runtime State" bölməsindən (PR #12743) sözbəsöz köçürülüb ki,
-> agent bələdçisi 40k kontekst büdcəsi daxilində qalsın. Bu, yuxarıdakı bölmələrin
-> sıxılmış, agentə yönəlmiş görünüşüdür; nömrələnmiş bölmələr tam arayış olaraq qalır.
+> Agent bələdçisi 40k kontekst büdcəsi altında qalması üçün `AGENTS.md` → "Davamlılıq İş Zamanı Vəziyyəti"ndən (PR #12743) sözün əsl mənasında köçürüldü. Bu, yuxarıdakı bölmələrin sıxlaşdırılmış, agentə baxan görünüşüdür; nömrələnmiş bölmələr tam istinad olaraq qalır.
 
-OmniRoute-da əlaqəli, lakin fərqli üç müvəqqəti uğursuzluq mexanizmi var.
-Marşrutlaşdırma davranışını sazlayarkən onların əhatə dairələrini ayrı saxlayın.
-Bir baxışda xəritə üçün [3 qatlı dayanıqlılıq diaqramına](../diagrams/exported/resilience-3layers.svg)
-(mənbə: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-baxın.
+OmniRoute üç əlaqəli, lakin fərqli müvəqqəti uğursuzluq mexanizmi var. Marşrutlaşdırma davranışını sazlayarkən onların əhatə dairəsini ayrı saxlayın. Bir baxışda xəritə üçün [3 qatlı möhkəmlik diaqramına](../diagrams/exported/resilience-3layers.svg) (mənbə: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) baxın.
 
-### Provayder Dövrə Qırıcısı
+### Təchizatçı Circuit Breaker
 
-**Əhatə**: bütöv provayder, məs. `glm`, `openai`, `anthropic`.
+**Əhatə dairəsi** : bütün provayder, məsələn `glm`, `openai`, `anthropic`.
 
-**Məqsəd**: yuxarı axın/xidmət səviyyəsində təkrarlanan uğursuzluqlar yaşayan
-provayderə trafik göndərməyi dayandırmaq ki, sağlam olmayan bir provayder hər sorğunu ləngitməsin.
+**Məqsəd** : upstream/service səviyyəsində dəfələrlə uğursuz olan provayderə trafik göndərilməsini dayandırın, beləliklə, bir qeyri-sağlam provayder hər sorğunu yavaşlatmır.
 
-**Tətbiq**:
+**İcra** :
 
 - Əsas sinif: `src/shared/utils/circuitBreaker.ts`
-- Chat qapısı/icra bağlanması: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Runtime status API: `src/app/api/monitoring/health/route.ts`
-- Paylaşılan wrapper-lər: `open-sse/services/accountFallback.ts`
-- Saxlanılan vəziyyət cədvəli: `domain_circuit_breakers`
+- Chat gate/execution naqilləri: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- İcra vəziyyəti API: `src/app/api/monitoring/health/route.ts`
+- Paylaşılan sarğılar: `open-sse/services/accountFallback.ts`
+- Davamlı vəziyyət cədvəli: `domain_circuit_breakers`
 
-**Vəziyyətlər** (4 — `src/shared/utils/circuitBreaker.ts`):
+**dövlətlər** (4 — `src/shared/utils/circuitBreaker.ts`):
 
 - `CLOSED`: normal trafikə icazə verilir.
-- `DEGRADED`: erkən xəbərdarlıq zolağı — uğursuzluqlar degradasiya həddini keçib, amma hələ
-  qırıcı həddini yox; trafik hələ də axır, idarə panelləri xəbərdarlığı göstərir. Etibarlı
-  bağlantı testi və ya yeni uğursuzluq olmayan sakit pəncərə onu `CLOSED` vəziyyətinə qaytarır
-  (pəncərə `docs/architecture/RESILIENCE_GUIDE.md` faylında göstərilib).
-- `OPEN`: provayder müvəqqəti bloklanıb; çağıranlar provayder-dövrəsi-açıq cavabı alır
-  və ya kombo marşrutlaşdırması başqa hədəfə keçir.
-- `HALF_OPEN`: sıfırlanma müddəti bitib; sınaq sorğusuna icazə verilir. Uğur qırıcını
-  bağlayır, uğursuzluq onu yenidən açır.
+- `DEGRADED`: erkən xəbərdarlıq zolağı — uğursuzluqları deqradasiya həddini keçib, lakin hələ kəsici həddi keçməyib; trafik hələ də axır, tablosunda xəbərdarlıq göstərilir. Etibarlı əlaqə testi və ya yeni nasazlığı olmayan sakit pəncərə onu `CLOSED` yə qaytarır (`docs/architecture/RESILIENCE_GUIDE.md` pəncərəsi var).
+- `OPEN`: provayder müvəqqəti olaraq bloklanıb; zəng edənlər provayder-circuit-açıq cavab alır və ya birləşmiş marşrutlaşdırma başqa bir hədəfə keçir.
+- `HALF_OPEN`: sıfırlama vaxtı keçdi; araşdırma sorğusuna icazə verin. Uğur sındırıcını bağlayır, uğursuzluq yenidən açır.
 
-**Defolt dəyərlər** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, `src/lib/resilience/settings.ts` faylındakı
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` vasitəsilə istehlak olunur →
-`src/sse/handlers/chatHelpers.ts` faylındakı `getCircuitBreaker(provider, …)`). Bütöv-provayder
-qırıcısı `circuitBreakerThreshold` / `circuitBreakerReset` əsasında işləyir:
+**Defoltlar** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` -da `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` -da `src/sse/handlers/chatHelpers.ts` vasitəsilə istehlak olunur). Bütün provayder açarı `circuitBreakerThreshold` / `circuitBreakerReset` üzərində işləyir:
 
-| Profil    | degradasiya həddi | açılma həddi (`circuitBreakerThreshold`) | sıfırlanma (`circuitBreakerReset`) |
-| --------- | ----------------: | ---------------------------------------: | ---------------------------------: |
-| OAuth     |               `5` |                                      `8` |                              `60s` |
-| API açarı |               `7` |                                     `12` |                              `30s` |
-| Yerli     |      (törədilmiş) |                                      `2` |                              `15s` |
+| Profil    | da pisləşir | (`circuitBreakerThreshold`) da açılır | sıfırla (`circuitBreakerReset`) |
+| --------- | ----------: | ------------------------------------: | ------------------------------: |
+| OAuth     |         `5` |                                   `8` |                           `60s` |
+| API açarı |         `7` |                                  `12` |                           `30s` |
 
-`PROVIDER_PROFILES` həmçinin `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 dəq) və `providerCooldownMs` (5/10/1 dəq) təyin edir: bunlar
-**opt-in qlobal Provider Cooldown-un pəncərə qapısını** (`PROVIDER_COOLDOWN_ENABLED`, defolt olaraq
-söndürülüb) təmin edir — `open-sse/services/providerCooldownTracker.ts` faylındakı provayder səviyyəli
-qeyd yalnız `providerFailureWindowMs` daxilində `providerFailureThreshold` qədər uğursuzluqdan sonra
-soyuyur sayılır və sonra `providerCooldownMs` müddətinə soyuyur. Bunlar canlı qırıcının həddləri
-DEYİL — qırıcı davranışı gözləyərək onları tənzimləməyin. Hər bir defolt dəyər
-`OMNIROUTE_PROVIDER_BREAKER_*` və `OMNIROUTE_CIRCUIT_BREAKER_*` mühit dəyişənləri ilə üstələnə bilər;
-runtime-a dəqiq uyğun arayış cədvəli `docs/architecture/RESILIENCE_GUIDE.md` faylında yerləşir.
+`local` profili (`2` uğursuzluqları / `15s`) `PROVIDER_PROFILES`-də də mövcuddur, lakin o, kəsiciyə qoşulmayıb: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) yalnız `oauth` və ya `apikey` qəbul edir və `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) bu ikisindən birini qaytarır (qeydiyyatdan keçməmiş provayderlər `apikey` alır).
 
-Provayder qırıcısını yalnız provayder səviyyəli uğursuzluq statusları işə salmalıdır:
+`PROVIDER_PROFILES` həmçinin `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min ) və `providerCooldownMs` (5/10/1 min ) — OAuth/API key/local, burada yerli dəyərlər yuxarıda göstərilən səbəbə görə inertdir: bunlar güc** qoşulmaq üçün qlobal Provayderin Cooldown pəncərə qapısı** (`PROVIDER_COOLDOWN_ENABLED`, default off) — `open-sse/services/providerCooldownTracker.ts` -də provayder səviyyəli giriş yalnız `providerFailureWindowMs` daxilində `providerFailureThreshold` uğursuzluqlarından sonra soyutma kimi sayılır və sonra `providerCooldownMs` üçün soyuyur. Onlar NOT canlı kəsicinin eşikləri — kəsici davranışı gözləyərək onları tənzimləmir. Hər bir defolt `OMNIROUTE_PROVIDER_BREAKER_*` və `OMNIROUTE_CIRCUIT_BREAKER_*` env varları vasitəsilə ləğv edilə bilər; iş vaxtı-dəqiq istinad cədvəli `docs/architecture/RESILIENCE_GUIDE.md`-da yaşayır.
+
+Yalnız provayder səviyyəsində nasazlıq statusları provayder açarını söndürməlidir:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Çox `401`, `403` və ya `429` halları kimi normal hesab/açar/model xətaları üçün
-bütöv-provayder qırıcısını işə salmayın. Bunlar adətən bağlantı soyudulması və ya model
-kilidlənməsinə aiddir. Ümumi API açarı provayderinin `403` xətası, terminal provayder/hesab
-xətası kimi təsnif edilmədikcə, bərpa edilə bilən olmalıdır.
+Əksər `401`, `403` və ya `429` halları kimi normal account/key/model xətaları üçün bütün provayder açarını söndürməyin. Bunlar adətən əlaqənin soyudulması və ya modelin bloklanmasına aiddir. Ümumi API açarı provayderi `403` terminal provider/account xətası kimi təsnif edilmədiyi halda bərpa edilə bilən olmalıdır.
 
-Breaker fon taymeri yox, tənbəl (lazy) bərpa mexanizmi istifadə edir. `OPEN` müddəti bitdikdə, `getStatus()`, `canExecute()` və `getRetryAfterMs()` kimi oxuma əməliyyatları vəziyyəti `HALF_OPEN` olaraq yeniləyir, beləcə panel lövhələri (dashboards) və kombo namizəd qurucuları müddəti bitmiş provayderi əbədi olaraq istisna etmir.
+Qırıcı fon taymerindən deyil, tənbəl bərpadan istifadə edir. `OPEN` müddəti bitdikdə, `getStatus()`, `canExecute()` və `getRetryAfterMs()` kimi oxunuşlar vəziyyəti `HALF_OPEN` olaraq yeniləyir, beləliklə, idarə panelləri və kombinə namizəd qurucuları vaxtı keçmiş provayderi həmişəlik istisna etmirlər.
 
-### Bağlantı soyuma müddəti (Connection Cooldown)
+### Bağlantının soyudulması
 
-**Əhatə**: bir provayder bağlantısı/hesabı/açarı.
+**Əhatə dairəsi** : bir provayder connection/account/key.
 
-**Məqsəd**: eyni provayderin digər bağlantılarına sorğulara xidmət etməyə davam etməyə icazə verərkən, bir problemli açarı/hesabı müvəqqəti olaraq atlamaq.
+**Məqsəd** : eyni provayder üçün digər bağlantıların sorğulara xidmət etməyə davam etməsinə icazə verərkən müvəqqəti olaraq bir pis key/account keçin.
 
-**Tətbiq**:
+**İcra** :
 
-- Yazma/yeniləmə yolu: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Hesab seçimi/filtrasiyası: `src/sse/services/auth.ts::getProviderCredentials...`
-- Soyuma müddətinin hesablanması: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Write/update yolu: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Hesab selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Soyutma müddətinin hesablanması: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Parametrlər: `src/lib/resilience/settings.ts`
 
-Provayder bağlantılarındakı vacib sahələr:
+Provayder əlaqələrində vacib sahələr:
 
 ```ts
 rateLimitedUntil;
@@ -851,50 +839,50 @@ errorCode;
 backoffLevel;
 ```
 
-Hesab seçimi zamanı bağlantı aşağıdakı halda atlanır:
+Hesab seçimi zamanı əlaqə aşağıdakı hallarda atlanır:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Soyuma müddətləri də tənbəldir: `rateLimitedUntil` keçmişdə qaldıqda, bağlantı yenidən uyğun olur. Uğurlu istifadə zamanı `clearAccountError()` `testStatus`, `rateLimitedUntil`, xəta sahələrini və `backoffLevel`-i təmizləyir.
+Cooldowns da tənbəldir: `rateLimitedUntil` keçmişdə olduqda, əlaqə yenidən uyğun olur. Uğurlu istifadə zamanı `clearAccountError()` `testStatus`, `rateLimitedUntil`, xəta sahələrini və `backoffLevel` təmizləyir.
 
-Defolt bağlantı soyuma davranışı:
+Defolt bağlantının soyuducu davranışı:
 
-- OAuth baza soyuma müddəti: `5s`.
-- API-açarı baza soyuma müddəti: `3s`.
-- API-açarı `429` halı mövcud olduqda yuxarı axının (upstream) təkrar cəhd göstərişlərinə (`Retry-After`, sıfırlanma başlıqları və ya təhlil edilə bilən sıfırlanma mətni) üstünlük verməlidir.
-- Təkrarlanan bərpa edilə bilən uğursuzluqlar eksponensial geri çəkilmə (exponential backoff) istifadə edir:
+- OAuth əsas soyutma: `5s`.
+- API açarının soyudulması: `3s`.
+- API açarı `429` mövcud olduqda yuxarı təkrar cəhd göstərişlərinə (`Retry-After`, sıfırlama başlıqları və ya təhlil edilə bilən sıfırlama mətni) üstünlük verməlidir.
+- Təkrarlanan bərpa edilə bilən uğursuzluqlar eksponensial geriləmədən istifadə edir:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Anti-thundering-herd mühafizəsi eyni bağlantıda paralel uğursuzluqların soyuma müddətini təkrar-təkrar uzatmasının və ya `backoffLevel`-i ikiqat artırmasının qarşısını alır.
+Göy gurultusuna qarşı qoruyucu eyni əlaqədə eyni vaxtda baş verən nasazlıqların soyuma müddətini təkrar-təkrar uzatmasının və ya ikiqat artan `backoffLevel` qarşısını alır.
 
-Terminal vəziyyətlər soyuma müddəti deyil. `banned`, `expired` (yalnız `EXPIRED_RETRY_MAX` vasitəsilə N sayda məhdud təkrar cəhddən sonra terminal olur) və `credits_exhausted` vəziyyətləri kimlik məlumatları/parametrlər dəyişənə və ya operator onları sıfırlayana qədər əlçatan olmamaq üçün nəzərdə tutulub. Terminal vəziyyətləri müvəqqəti soyuma vəziyyəti ilə üstələməyin.
+Terminal vəziyyətləri soyuducu deyil. `banned`, `expired` (yalnız `EXPIRED_RETRY_MAX` vasitəsilə N məhdudlu təkrar cəhddən sonra terminal olur) və `credits_exhausted` credentials/settings dəyişənə və ya operator onları sıfırlayana qədər əlçatmaz qalması nəzərdə tutulur. Keçici soyutma vəziyyəti ilə terminal vəziyyətlərinin üzərinə yazmayın.
 
-### Model kilidlənməsi (Model Lockout)
+### Model kilidi
 
-**Əhatə**: provayder + bağlantı + model.
+**Əhatə dairəsi** : provayder + bağlantısı + modeli.
 
-**Məqsəd**: həmin bağlantı üçün yalnız bir model əlçatan olmadıqda və ya kvota ilə məhdudlaşdırıldıqda bütöv bağlantını söndürməkdən qaçınmaq.
+**Məqsəd** : yalnız bir model mövcud olmadıqda və ya bu əlaqə üçün kvota məhdud olduqda bütün əlaqəni söndürməkdən çəkinin.
 
 Nümunələr:
 
-- Hər model üzrə kvota tətbiq edən və `429` qaytaran provayderlər.
-- Çatışmayan bir model üçün `404` qaytaran lokal provayderlər.
-- Seçilmiş Grok rejimləri kimi provayderə xas rejim/model icazəsi uğursuzluqları.
+- Hər model üçün kvota təminatçıları `429` qaytarır.
+- Yerli provayderlər bir itkin model üçün `404` qaytarır.
+- Seçilmiş Grok rejimləri kimi provayderə xas mode/model icazə xətaları.
 
-Model kilidlənməsi `open-sse/services/accountFallback.ts`-də yerləşir və eyni bağlantının digər modellərə xidmət etməyə davam etməsinə imkan verir.
+Model lokavt `open-sse/services/accountFallback.ts` -da yaşayır və eyni əlaqənin digər modellərə xidmət etməyə davam etməsinə imkan verir.
 
-### Xəta ayıqlama təlimatları
+### Sazlama Bələdçisi
 
-- Bir provayderin bütün açarları atlanırsa, həm provayder breaker vəziyyətini, həm də hər bağlantının `rateLimitedUntil`/`testStatus` dəyərlərini yoxlayın.
-- Sıfırlanma pəncərəsindən sonra provayder daimi istisna olunmuş görünürsə, kodun `getStatus()`/`canExecute()` əvəzinə xam `state` oxuyub-oxumadığını yoxlayın.
-- Bir provayder açarı uğursuz olarsa, lakin digərləri işləməlidirsə, provayder breaker əvəzinə bağlantı soyuma müddətinə üstünlük verin.
-- Yalnız bir model uğursuz olarsa, bağlantı soyuma müddəti əvəzinə model kilidlənməsinə üstünlük verin.
-- Bir vəziyyət özünü bərpa etməlidirsə, gələcək vaxt möhürü/sıfırlanma taym-autu və müddəti bitmiş vəziyyəti yeniləyən oxuma yolu olmalıdır. Daimi statuslar əl ilə kimlik məlumatı və ya konfiqurasiya dəyişiklikləri tələb edir.
+- Əgər provayder üçün bütün açarlar buraxılıbsa, həm provayderin kəsici vəziyyətini, həm də hər bir əlaqənin `rateLimitedUntil`/`testStatus` yoxlayın.
+- Sıfırlama pəncərəsindən sonra provayder həmişəlik xaric edilmiş görünürsə, kodun `getStatus()`/`canExecute()` istifadə etmək əvəzinə raw `state` oxuduğunu yoxlayın.
+- Bir provayder açarı uğursuz olarsa, lakin digərləri işləməlidirsə, provayder açarı ilə müqayisədə əlaqənin soyumasına üstünlük verin.
+- Yalnız bir model uğursuz olarsa, əlaqənin soyudulması əvəzinə modelin kilidlənməsinə üstünlük verin.
+- Əgər dövlət özünü bərpa etməlidirsə, onun gələcək timestamp/reset vaxt aşımı və vaxtı keçmiş vəziyyəti yeniləyən oxuma yolu olmalıdır. Daimi statuslar əl ilə etimadnaməsini və ya konfiqurasiya dəyişikliklərini tələb edir.
 
 ---
 

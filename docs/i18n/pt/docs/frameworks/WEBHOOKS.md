@@ -4,15 +4,11 @@
 
 ---
 
-> **Fonte fidedigna:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Última atualização:** 2026-06-28 — v3.8.40
+> **Fonte da verdade:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-O OmniRoute pode acionar webhooks HTTP em eventos da plataforma. Utilize-os para integrar com o
-Slack, PagerDuty, Datadog, serviços internos de alerta ou qualquer recetor HTTP.
+OmniRoute pode disparar webhooks HTTP em eventos de plataforma. Utilize-os para integração com Slack, PagerDuty, Datadog, serviços de alerta interno ou qualquer receptor HTTP.
 
-O dispatcher assina cada entrega com HMAC-SHA256, efetua novas tentativas em caso de
-falhas transitórias, monitoriza o estado das entregas por webhook e desativa automaticamente os endpoints que
-continuam a falhar.
+O transitário assina cada entrega com HMAC-SHA256, tenta novamente em caso de falhas transitórias, acompanha a integridade da entrega por webhook e desativa automaticamente os endpoints que continuam a falhar.
 
 ## Eventos Suportados
 

@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Podržava** 22 strategije usmjeravanja** (vidi `src/shared/constants/routingStrategies.ts`):
 
-| Strategija          | Ponašanje                                                                             |
-| ------------------- | ------------------------------------------------------------------------------------- |
-| `priority`          | Naručeni popis prvog cilja                                                            |
-| `weighted`          | Vjerojatnost prema težini po meti                                                     |
-| `round-robin`       | Krećite se redom kroz ciljeve                                                         |
-| `context-relay`     | Predajte kontekst različitim ciljevima                                                |
-| `fill-first`        | Ispunite kvotu prije prelaska na sljedeći                                             |
-| `p2c`               | Moć dva izbora                                                                        |
-| `random`            | Uniforma slučajna                                                                     |
-| `least-used`        | Odaberite onu s najmanje nedavnih uporaba                                             |
-| `cost-optimized`    | Prvo najjeftiniji zdravi cilj                                                         |
-| `reset-aware`       | Svjestan prozora za resetiranje pružatelja usluga                                     |
-| `reset-window`      | Poništi usmjeravanje na temelju prozora                                               |
-| `expiry-first`      | Prvo potrošite račun čija bi kvota istekla neiskorišten                               |
-| `headroom`          | Najprije većina preostalih kvota                                                      |
-| `quota-weighted`    | Preskočite iscrpljene račune, a zatim povucite preostalu kvotu ÷ in-flight load       |
-| `strict-random`     | Uistinu ujednačeno (bez ponderiranja kvalitete)                                       |
-| `auto`              | Koristite bodovanje od 16 faktora (`autoCombo/`)                                      |
-| `lkgp`              | Prvo posljednji poznati dobar pružatelj usluga                                        |
-| `context-optimized` | Najbolje za zahtjeve dugog konteksta                                                  |
-| `cache-optimized`   | Prikvačite svaki višekratni prefiks upita na isti račun (hitovi u predmemoriju upita) |
-| `fusion`            | Paralelno proširite na panel, a zatim sintetizirajte preko suca (`fusion.ts`)         |
-| `pipeline`          | Lanac koraka — izlaz svake mete hrani sljedeću                                        |
-| `jev`               | Opt-in: TypeSafe Jev priznaje koji se rangirani unosi izvode; inače vaša narudžba     |
+| Strategija          | Ponašanje                                                                         |
+| ------------------- | --------------------------------------------------------------------------------- |
+| `priority`          | Naručeni popis prvog cilja                                                        |
+| `weighted`          | Vjerojatnost prema težini po meti                                                 |
+| `round-robin`       | Krećite se redom kroz ciljeve                                                     |
+| `context-relay`     | Predajte kontekst različitim ciljevima                                            |
+| `fill-first`        | Ispunite kvotu prije prelaska na sljedeći                                         |
+| `p2c`               | Moć dva izbora                                                                    |
+| `random`            | Svježa nasumična reprodukcija po zahtjevu                                         |
+| `least-used`        | Odaberite onaj s najmanje zabilježenih zahtjeva                                   |
+| `cost-optimized`    | Prvo najniža kataloška ulazna cijena                                              |
+| `reset-aware`       | Preostala kvota + poništi hitnost                                                 |
+| `reset-window`      | Prozor kvote koji se najprije poništava                                           |
+| `expiry-first`      | Prvo potrošite račun čija bi kvota istekla neiskorišten                           |
+| `headroom`          | Najprije većina preostalih kvota                                                  |
+| `quota-weighted`    | Preskočite iscrpljene račune, a zatim povucite preostalu kvotu ÷ in-flight load   |
+| `strict-random`     | Promiješani špil: svaka meta jednom prije ponavljanja                             |
+| `auto`              | Koristite bodovanje od 16 faktora (`autoCombo/`)                                  |
+| `lkgp`              | Prvo posljednji poznati dobar pružatelj usluga                                    |
+| `context-optimized` | Prvi najveći poznati kontekstni prozor                                            |
+| `cache-optimized`   | Dajte prednost računu koji će vjerojatno držati prefiks upita u predmemoriji      |
+| `fusion`            | Paralelno proširite na panel, a zatim sintetizirajte preko suca (`fusion.ts`)     |
+| `pipeline`          | Lanac koraka — izlaz svake mete hrani sljedeću                                    |
+| `jev`               | Opt-in: TypeSafe Jev priznaje koji se rangirani unosi izvode; inače vaša narudžba |
 
 ### base.ts (1170 LOC)
 
@@ -335,7 +335,7 @@ Usluge su** fokusirani, jednonamjenski moduli** koje rukovatelji sastavljaju. Ve
 
 ## Izvršitelji (150 modula)
 
-Uglavnom jedna datoteka po pružatelju. Sve klase izvršitelja proširuju `BaseExecutor` i nadjačavaju ono što se razlikuje; ostali moduli su pomoćnici po pružatelju (sheme alata, fetch/TTS adapteri, rukovatelji quirkovima).
+Uglavnom jedna datoteka po davatelju. Sve klase izvršitelja proširuju `BaseExecutor` i nadjačavaju ono što se razlikuje; ostali moduli su pomoćnici po pružatelju (sheme alata, fetch/TTS adapteri, rukovatelji quirkovima).
 
 ### Uobičajeni obrasci
 

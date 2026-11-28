@@ -13,12 +13,12 @@ Agent Skills sunt fișiere SKILL.md structurate care învață agenții externi,
 
 ## Prezentare generală
 
-Catalogul conține **45 de Agent Skills** (23 pentru API-ul REST + 21 pentru CLI + 1 flux de lucru pentru configurare). Fiecare skill are:
+Catalogul contine** 45 de aptitudini de agent** (23 REST API + 21 CLI + 1 flux de lucru de configurare). Fiecare abilitate are:
 
-- Un **ID canonic** (`omni-auth`, `cli-serve` etc.)
-- Un fișier **SKILL.md** în `skills/{id}/SKILL.md`, cu frontmatter YAML (`name`, `description`) + un corp markdown detaliat
-- **Endpointuri REST** (skill-uri API) sau **subcomenzi CLI** (skill-uri CLI), derivate din specificația OpenAPI și registrul CLI
-- Un **URL GitHub raw** pentru preluare în timp real: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- O** ID canonic** (`omni-auth`, `cli-serve`, etc.)
+- O**SKILL.md** fișier în `skills/{id}/SKILL.md` cu YAML frontmatter (`name`, `description`) + rich markdown body
+- **puncte finale REST** ( abilități API ) sau** subcomenzile CLI** (CLI skills ) derivat din spec. OpenAPI și registrul CLI
+- O**GitHub raw URL** pentru preluare live: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Răspunsul generatorului este un `GeneratorReport`:
 
 ---
 
-## API de acoperire
+## Acoperire API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -178,84 +178,49 @@ I-restart ang OmniRoute pagkatapos ng pag-install, saka subukang muli ang kahili
 
 ---
 
-## Mga Maling Positibong Deteksyon ng Antivirus
+## Mga Maling Positibong Antivirus
 
 <a name="antivirus-false-positives"></a>
 
-### Kina-quarantine ng Avast/AVG ang `README.md` bilang `MD:HttpRequest-inf[Susp]`
+### Avast/AVG quarantine `README.md` na may `MD:HttpRequest-inf[Susp]`
 
-**Isa itong maling positibong deteksyon. Walang nahawahan, at walang kailangang gawin.**
+**Ito ay isang maling positibo. Walang nahawahan, at walang kinakailangang aksyon.**
 
-Nagpapatakbo ang Avast at AVG ng heuristic na nagfa-flag sa mga plain-text/Markdown file na naglalaman ng maraming
-link na mukhang HTTP request. Kasama ang `README.md` ng OmniRoute sa npm package (nakalista ito
-sa `package.json` → `files`), kaya napupunta ito sa `node_modules/omniroute/README.md` kapag
-nag-global install — at naglalaman ito ng ~15 halimbawa ng `http://localhost:20128/...` (ang mga MCP
-HTTP/SSE endpoint, ang A2A `.well-known` URL, at mga snippet ng `curl`). Sapat ang dami ng mga
-link na iyon upang ma-trigger ang heuristic.
+Ang Avast at AVG ay nagpapatakbo ng heuristic na nagba-flag ng mga plain-text/Markdown file na naglalaman ng maraming link na mukhang HTTP-request. Ang mga `README.md` ng OmniRoute ay nagpapadala sa loob ng npm package (nakalista ito sa `package.json` → `files`), kaya napunta ito sa `node_modules/omniroute/README.md` sa isang global install — at naglalaman ito ~ 15 `http://localhost:20128/...` na mga halimbawa (ang MCP HTTP/SSE endpoints, ang A2A `.well-known` URL, at `curl` snippet). Ang density ng link na iyon ay sapat na upang i-trip ang heuristic.
 
-Kung kamakailan lamang ito nagsimula: hindi nagbago ang uri ng file. Lumaki ang talahanayan ng mga
-endpoint sa README (idinagdag ang MCP HTTP + SSE + A2A) at nadagdagan ang mga halimbawa ng `curl`,
-kaya lumampas ito sa threshold.
+Kung nagsimula ito kamakailan lamang: hindi nagbago ang uri ng file. Pinalaki ng README ang talahanayan ng mga endpoint nito ( idinagdag MCP HTTP + SSE + A2A ) at higit pang mga `curl` na halimbawa, na nagtulak dito na lumampas sa threshold.
 
-Ang file ay isang inert na dokumentasyong walang anumang executable na nilalaman. Maaari mo itong
-ligtas na ibalik mula sa quarantine.
+Ang file ay inert na dokumentasyon na may zero executable na nilalaman. Maaari mong ligtas na maibalik ito mula sa quarantine.
 
-**Ano ang dapat gawin:**
+**Ano ang gagawin:**
 
-1. **Ihinto ang mga notification** — ibukod ang direktoryo ng pag-install sa iyong antivirus
-   (Avast: Settings → Exceptions), at idagdag ang path ng iyong global na `node_modules` at/o ang
-   direktoryo ng data ng OmniRoute (`~/.omniroute/`).
-2. **Iulat ang maling positibong deteksyon** — <https://www.avast.com/false-positive-file-form.php>,
-   at ilakip ang na-quarantine na `README.md`. Ito ang solusyong makatutulong sa lahat, dahil
-   ang heuristic ng vendor ang labis na tumutugon sa isang text file.
+1. **Itigil ang mga notification** — ibukod ang direktoryo ng pag-install sa iyong antivirus (Avast: Mga Setting → Exceptions), idinaragdag ang iyong global `node_modules` path and/or ang OmniRoute data dir (`~/.omniroute/`).
+2. **Iulat ang maling positibo** — <https://www.avast.com/false-positive-file-form.php>, ikinakabit ang naka-quarantine na `README.md`. Ito ang pag-aayos na nakakatulong sa lahat, dahil ito ang heuristic ng vendor na labis na nagre-react sa isang text file.
 
-**Bakit hindi namin ito "inaayos" sa aming panig:** ang lahat ng halimbawa ay `http://localhost`,
-at hindi maaaring maging `https` ang localhost nang walang abalang dulot ng self-signed certificate.
-Ang pagsira sa ayos ng dokumentasyon upang makaiwas sa heuristic ng isang vendor ay makasasama sa
-bawat mambabasa para lamang tugunan ang bug ng scanner.
+**Bakit hindi namin "ayusin" ito sa aming panig:** ang mga halimbawa ay lahat `http://localhost`, at localhost ay hindi maaaring `https` nang walang self-signed-certificate friction. Masakit sa bawat mambabasa na matugunan ang isang scanner bug kapag pinagkaguluhan ang mga doc upang makaiwas sa heuristic ng isang vendor.
 
-### Tina-flag ng Kaspersky ang Desktop app bilang `PDM:Trojan.Win32.Generic`
+### Bina-flag ng Kaspersky ang Desktop app bilang `PDM:Trojan.Win32.Generic`
 
-**Isa itong maling positibong deteksyon mula sa isang behavioral heuristic. Walang nahawahan.**
-Ang prefix na `PDM:` ng Kaspersky ay nangangahulugang nagmumula ang hatol sa Proactive Defense
-Module (System Watcher) nito, na sinusuri kung ano ang _ginagawa_ ng installer sa halip na itugma
-ito sa kilalang malware. Kapag na-trigger ito, "nire-rollback" ng Kaspersky ang buong pag-install
-— binubura ang mga file na naisulat na nito — kaya nasisira o nawawala ang app.
+**Isa itong false positive mula sa isang behavioral heuristic. Walang nahawaan.** Ang prefix ng `PDM:` ng Kaspersky ay nangangahulugan na ang hatol ay nagmumula sa Proactive Defense Module nito (System Watcher), na humahatol sa kung ano ang _ginagawa_ ng installer sa halip na itugma ito laban sa kilalang malware. Kapag gumana ito, "ibabalik" ng Kaspersky ang buong pag-install — na nagde-delete ng mga file na isinulat na nito — kaya nasira o nawawala ang app.
 
-Ang mga file na tina-flag nito ay mga karaniwang bahagi ng mga idineklara at open-source na
-dependency na kasama sa desktop app, halimbawa:
+Ang mga file na ibina-flag nito ay mga bahagi ng stock ng idineklara, open-source na mga dependency na kasama ng desktop app, halimbawa:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` at
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), ang library para sa browser automation
-  na ginagamit para sa pag-login sa provider sa loob ng app at chat na sinusuportahan ng browser.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — ang naka-pin na native binding ng `wreq-js` na ginagamit para sa browser-fingerprinted HTTP sa mga
-  provider na gumagamit ng web cookie (`<arch>` ay `x64` o `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` at `workerProcessEntry.js` — [Playwright](https://playwright.dev), ang browser-automation library na ginagamit para sa in-app na pag-login ng provider at browser-backed chat.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — ang naka-pin na `wreq-js` native binding na ginagamit para sa browser-fingerprinted HTTP sa mga web-cookie provider (`<arch>` is `x64` o `arm64`).
 
-**Bakit ito nati-trigger:** ang Windows installer ay **hindi pa code-signed**, kaya walang
-reputasyon ang isang unsigned na NSIS installer at nagpapatakbo nang sukdulang agresibo ang mga
-behavioral heuristic. Kapag isinama ang bundled na native DLL at daan-daang `.js` file na isinusulat
-sa ilalim ng `%LOCALAPPDATA%\Programs\OmniRoute` (kabilang ang mga direktoryo ng package na may
-hash suffix mula sa standalone build ng Next.js), sapat na iyon upang ma-trigger ang heuristic.
-Nakaplano ang code signing; hangga't hindi pa ito naipatutupad, maaaring maulit ito sa mga bagong release.
+**Bakit ito sunog:** ang Windows installer ay** hindi pa code-sign** , kaya ang isang unsigned NSIS installer ay walang reputasyon at ang behavioral heuristics ay tumatakbo sa maximum na pagsalakay. Kasama ng naka-bundle na native DLL at daan-daang `.js` file na nakasulat sa ilalim ng `%LOCALAPPDATA%\Programs\OmniRoute` (kabilang ang mga direktoryo ng package na may suffixed na hash mula sa Next.js standalone na build), sapat na iyon upang masira ang heuristic. Ang pagpirma ng code ay pinlano; hanggang sa lumapag ito, maaaring ulitin ito ng mga bagong release.
 
-**Ano ang dapat gawin:**
+**Ano ang gagawin:**
 
-1. **I-verify muna ang iyong download** (upang matiyak na hindi binago ang file). Naglalathala ang
-   bawat release ng `latest.yml`, kung saan sinasaklaw ng field na `sha512` (base64) ang installer na
-   `OmniRoute.Setup.<version>.exe`. Sa PowerShell, mula sa folder na naglalaman ng installer:
+1. **I-verify muna ang iyong pag-download** (nagpapalabas ng isang tampered file). Ang bawat release ay nagpa-publish ng `latest.yml`, na ang `sha512` field (base64) ay sumasaklaw sa `OmniRoute.Setup.<version>.exe` installer. Sa PowerShell, mula sa folder na naglalaman ng installer:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Dapat tumugma ang output sa `latest.yml` → `sha512`. Kung hindi ito tumutugma, burahin ang file at
-   muling i-download ito mula lamang sa [pahina ng mga release sa GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Ibalik + ibukod** — ibalik mula sa quarantine ang mga item na na-rollback at magdagdag ng exclusion
-   para sa `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
-   pagkatapos ay muling mag-install.
-3. **Iulat ang maling positibong deteksyon** — <https://opentip.kaspersky.com/>. Ang mga ulat ng maling
-   positibong deteksyon na isinusumite ng mga user ay tunay na nagpapabilis sa paglalagay sa allowlist.
+   Dapat tumugma ang output `latest.yml` → `sha512`. Kung hindi, tanggalin ang file at muling i-download lamang mula sa [GitHub releases page](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Ibalik + ibukod** i-restore — ang mga rolled-back na item mula sa quarantine at magdagdag ng pagbubukod para sa `%LOCALAPPDATA%\Programs\OmniRoute` (Mga Setting ng Kaspersky → → Mga Banta at Pagbubukod), pagkatapos ay muling i-install.
+3. **Iulat ang maling positibo** — <https://opentip.kaspersky.com/>. Ang mga ulat ng FP na isinumite ng user ay tunay na nagpapabilis ng allowlisting.
 
 ---
 
@@ -867,10 +832,10 @@ Higit pang mga sintomas:
 
 ---
 
-## Hindi Pa Rin Umuusad?
+## Natigil pa rin?
 
-- **Mga Isyu sa GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Arkitektura**: Tingnan ang [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) para sa mga panloob na detalye
-- **Sanggunian ng API**: Tingnan ang [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) para sa lahat ng endpoint
-- **Dashboard ng Kalagayan**: Tingnan ang **Dashboard → Health** para sa real-time na katayuan ng system
-- **Tagasalin**: Gamitin ang **Dashboard → Translator** upang i-debug ang mga problema sa format
+- **GitHub Mga Isyu** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Arkitektura** : Tingnan [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) para sa mga panloob na detalye
+- **API Sanggunian** : Tingnan [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) para sa lahat ng mga endpoint
+- **Dashboard ng Kalusugan** : Suriin** Dashboard → Health** para sa real-time na katayuan ng system
+- **Tagasalin** : Gamitin** Tagasalin ng Dashboard →** upang i-debug ang mga isyu sa format

@@ -4,13 +4,7 @@
 
 ---
 
-> **Tõeallikas:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` ja avalikud koostajad failis `open-sse/utils/error.ts`
-> **Testid:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Viimati uuendatud:** 2026-09-02 — v3.8.51
-> **Sihtrühm:** Kõik arendajad, kes muudavad veavastuseid (HTTP-marsruudid, SSE-vood, täiturid, MCP-töötlejad).
-> **Olek:** **KOHUSTUSLIK** iga kooditee jaoks, mis tagastab kliendile veateate.
+> **Tõe allikas:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` ja avalikud ehitajad `open-sse/utils/error.ts`** Testid:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Publik:** Kõik insenerid, kes puudutavad veavastuseid (HTTP marsruudid, SSE vood, täitjad, MCP -käitlejad).** Olek:****MANDATORY** iga kooditee jaoks, mis tagastab kliendile veateate.
 
 ## Miks see olemas on
 

@@ -151,30 +151,30 @@ A 6–7. fázis témái:
 - [ ] Regressziós tesztek hozzáadása minden olyan feltárt éles hibához, amelyet a 90%-os cél elérése során javítottak
 - [ ] A CI lefedettségi küszöbének emelése csak azután, hogy a helyi kiindulási érték legalább két egymást követő futtatás során stabil maradt
 
-## Ratchet-szabályzat
+## Racsnis politika
 
-Csak akkor frissítsd az `npm run test:coverage` küszöbértékeit, ha a projekt ténylegesen, kényelmes ráhagyással meghaladja a következő mérföldkövet.
+Csak akkor frissítse `npm run test:coverage` küszöbértékeket, ha a projekt ténylegesen túllépi a következő mérföldkövet egy kényelmes pufferrel.
 
-**Jelenlegi küszöb:** az `npm run test:coverage` a következő értékeket követeli meg: **60 utasítás / 60 sor / 60 függvény / 60 elágazás** (a metrika alapértékét a Quality-Gates 6A.1 fázisában módosítottuk — a korábbi 82.58%-os alapérték túl magas volt, mert beleszámította a tesztfájlokat, az `open-sse` csomagot pedig kihagyta). A `test:coverage:legacy` parancs megőrzi a régi 50/50/50-es metrikát a korábbi eredményekkel való összehasonlításhoz.
+**Jelenlegi kapu:** `npm run test:coverage` érvényesíti** 60 utasítás / 60 sor / 60 függvény / 60 ág** (a mérőszámot a Quality-Gates Fase 6A.1 — ben alapozták át, a korábbi 82,58%-os alapvonal megemelkedett, mert számolta a tesztfájlokat és kizárta `open-sse`). A `test:coverage:legacy` parancs megőrzi a régi 50/50/50 metrikát a történeti összehasonlításhoz.
 
-A legfrissebb jelentés küszöbértékeinek eseti ellenőrzéséhez használd a következőt:
+Az ad hoc küszöbértékek legfrissebb jelentéshez viszonyított ellenőrzéséhez használja a következőket:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Ajánlott ratchet-sorrend (a sorrend: `utasítások-sorok / elágazások / függvények`):
+Javasolt racsnis sorrend (a sorrend `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- jelenlegi küszöb (75/70/75)
+5. 75/70/72 <-- aktuális kapu (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-A következő ratchet-célérték `80/75/78`, amint az elágazáslefedettség két egymást követő futtatás során 78% felett marad.
+A következő racsnis cél `80/75/78`, ha a leágazás lefedettsége 78% felett van két egymást követő futtatás során.
 
 ## Ismert hiányosság
 

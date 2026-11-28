@@ -13,7 +13,7 @@ putki perustuu rekisteriin, joten uusia kohteita voidaan lisätä olemassa olevi
 
 ---
 
-## 1. Toimintaperiaate
+## 1. Kuinka se toimii
 
 ```
 server (decrypt + validate config, reconcile cursor)
@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Ajastus** — yksi `JobRegistry`-cron-tehtävä, `log_export`, jonka oletusarvo on `0 * * * *` (tunnin välein,
-  UTC). Rekisteröidään tiedostossa `src/lib/initCloudSync.ts`; voidaan ohittaa muuttujalla `OMNIROUTE_LOG_EXPORT_CRON`.
-  Jokainen ajastuskerta käsittelee kaikkien **käytössä olevien** kohteiden odottavat tietueet peräkkäin.
-- **Kursori** — SQLiten implisiittinen `call_logs.rowid`, joka tallennetaan kohdekohtaisesti kenttään
-  `log_export_destinations.cursor_row_id`. `timestamp` ei tarkoituksella ole kursori: kutsujat
-  voivat antaa sille oman arvonsa, joten hidas pyyntö voidaan kirjoittaa myöhemmin kuin nopeampi, joka alkoi
-  myöhemmin, ja aikaleimakursori ohittaisi sen.
-- **Eräkäsittely** — `batch_size` riviä pyyntöä kohti (oletus 500), `max_rows_per_run` riviä ajokertaa kohti
-  (oletus 10000), jotta suuri jono puretaan usean ajastuskerran aikana eikä se varaa yhtä ajastuskertaa kokonaan.
-- **Toimitus** — kursori etenee vasta, kun `send()` valmistuu onnistuneesti. Epäonnistunut erä jättää
-  kursorin ennalleen, joten samoja rivejä yritetään uudelleen seuraavalla ajokerralla. Takuu on
-  vähintään kerran -toimitus ja kohdepuolen kaksoiskappaleiden poisto, ei aito täsmälleen kerran -toimitus: BigQuery käyttää kunkin
-  rivin avaimena kutsulokin tunnusta, jota se noudattaa mahdollisuuksien mukaan oman kaksoiskappaleiden poistoikkunansa sisällä.
-- **Päällekkäisyyssuoja** — cron-ajastus ja `POST .../run` voivat käynnistyä samanaikaisesti. Kohde,
-  jonka tietueita jo käsitellään, ohitetaan sen sijaan, että se käsiteltäisiin kahdesti (`skipped: true` ajon tuloksessa),
-  joten samanaikainen ajo ei voi lähettää erää uudelleen tai siirtää kursoria taaksepäin.
-- **Tyhjennyksestä palautuminen** — jos `cursor_row_id` päätyy arvon `MAX(rowid)` yläpuolelle (koko taulu
-  tyhjennettiin ja rivitunnukset alkoivat alusta), suorittaja palauttaa kursorin arvoon 0 sen sijaan, että se jäisi pysyvästi huomaamatta uusia rivejä.
+- **Ajoittaa** — yksi `JobRegistry` cron työ, `log_export`, oletuksena `0 * * * *` (tuntikohtainen, UTC). Rekisteröity `src/lib/initCloudSync.ts` ssä; ohitettava `OMNIROUTE_LOG_EXPORT_CRON`:llä. Jokainen punkki tyhjentää jokaisen** käytössä** määränpäähän peräkkäin.
+- **Cursor** — SQLite:n implisiittinen `call_logs.rowid`, säilyi kohdekohtaisesti `log_export_destinations.cursor_row_id` ssä. `timestamp` ei ole tarkoituksella kohdistin: soittajat voivat antaa oman arvonsa, joten hidas pyyntö voidaan kirjoittaa myöhemmin alkaneen nopeamman jälkeen, ja aikaleimakohdistin ohittaisi sen.
+- **Erotus** — `batch_size` riviä per pyyntö (oletus 500), `max_rows_per_run` riviä ajoa kohden (oletus 10 000), joten suuri ruuhka tyhjenee useiden rastien yli yhden eston sijaan.
+- **Toimitus** — kohdistin siirtyy eteenpäin vasta, kun `send()` on ratkaistu. Epäonnistunut erä jättää kohdistimen siihen paikkaan, missä se oli, joten samoja rivejä yritetään uudelleen seuraavassa ajossa. Takuu on vähintään kerran plus kohdepuolen päällekkäisyyden poisto, ei totta tarkalleen kerran: BigQuery avai jokaisen rivin puhelulokin tunnuksella, jota se noudattaa parhaan kykynsä mukaan omassa dedup-ikkunassaan.
+- **Päällekkäissuoja** — cron tick ja `POST .../run` voivat ampua yhdessä. Jo tyhjennettävä kohde ohitetaan sen sijaan, että tyhjennetään kahdesti (ajon tuloksessa `skipped: true` ), joten samanaikainen ajo ei voi lähettää erää uudelleen tai kirjoittaa kohdistinta taaksepäin.
+- **Tyhjennä palautus** — jos `cursor_row_id` päätyy `MAX(rowid)` yläpuolelle (koko taulukko tyhjennettiin ja rivit käynnistettiin uudelleen), juoksija kelaa takaisin 0:aan pysyvän sokeuden sijaan.
 
-### Eristetty suorittaja ja rajat
+### Eristetty juoksija ja rajat
 
-Jokainen kohdekohtainen ajo Nodessa käynnistää erillisen, lyhytikäisen käyttöjärjestelmän aliprosessin (`child_process`
-ja IPC, ei `worker_threads`). Rungon lukeminen, hyötykuorman JSON-jäsennys ja -sarjallistaminen, kohteen
-`prepare()` ja kohteen verkkoliikenne suoritetaan kaikki siellä, eivät palvelimen tapahtumasilmukassa.
-Vain asetukset ja pienet edistymisviestit kulkevat IPC:n kautta; vietyjä tietueita ei koskaan palauteta
-palvelimelle. Cron-tehtävä ja Suorita nyt -reitti säilyttävät saman julkisen tuloksen ja päällekkäisyyssuojan.
+Jokainen solmussa suoritettu kohde aloittaa erillisen, lyhytikäisen OS -lapsiprosessin (`child_process` IPC:llä, ei `worker_threads`). Runkoluku, hyötykuorma JSON parsing/serialization, kohde- `prepare()` ja kohdeverkko I/O toimivat siellä, eivät palvelimen tapahtumasilmukassa. Vain konfigurointi ja pienet edistymisviestit ylittävät IPC; viedyt tietueet eivät koskaan palaa palvelimelle. cron-työ ja Suorita nyt -reitti pitävät saman julkisen tuloksen ja päällekkäisyyden suojan.
 
-Aliprosessi avaa palvelimen määrittämän `DATA_DIR/storage.sqlite`-tiedoston vain luku -tilassa käyttäen `node:sqlite`-moduulia,
-asetuksilla `busy_timeout=5000` ja `query_only=ON`. Se ei tuo yhteistä DB-singleton-instanssia eikä suorita
-migraatioita, varmuuskopiointeja tai SQLite-päivityksiä. Puuttuvien tai vioittuneiden artefaktien kirjanpito (mukaan lukien
-vioittuneen artefaktin UPDATE) jää vain hallintapaneelin tietojen hakupolkuun. Molemmat polut käyttävät yhteistä puhdasta
-tietojen ratkaisijaa; vienti käyttää asynkronisia tiedostojärjestelmälukuja ja samaa ratkaisujärjestystä: artefakti → vanha
-sisäinen tallennus → vanha levytallennus → ei mitään. Ajo tallentaa suurimman lisätyn rivitunnuksen tilannekuvan,
-kun aliprosessi avaa lukijansa; myöhemmät lisäykset odottavat seuraavaa ajokertaa. Tämä on lisäysten
-raja, ei pitkäkestoinen SQLite-transaktio: WAL-kirjoittajat ja tarkistuspisteet voivat toimia vapaasti
-verkkoodotusten aikana. Tämä raja ei jäädytä olemassa olevien rivien päivityksiä tai poistoja.
+Lapsi avaa palvelimen ratkaistun `DATA_DIR/storage.sqlite` -vain luku -komennolla `node:sqlite`, `busy_timeout=5000` ja `query_only=ON`. Se ei tuo DB singletonia eikä suorita siirtoja, varmuuskopioita tai SQLite päivityksiä. Missing/corrupt artefaktikirjanpito (mukaan lukien vioittunut artefakti UPDATE) jää vain kojelaudan tietopolulle. Molemmilla poluilla on puhdas yksityiskohtien ratkaisu; vienti käyttää asynkronista tiedostojärjestelmän lukuja ja samaa artefaktia → legacy inline → legacy disk → none resoluutio järjestys. Ajo ottaa tilannekuvia suurimmasta lisäysrivistä, kun lapsi avaa lukijansa; myöhemmät lisäykset odottavat seuraavaa ajoa. Tämä on lisäysraja, ei pitkäikäinen SQLite tapahtuma: WAL kirjoittajat ja tarkistuspisteet pysyvät vapaina verkon odotusten aikana. Updates/deletions olemassa olevia rivejä ei ole jäädytetty tähän rajaan.
 
-Jokaisen hyväksytyn erän jälkeen aliprosessi odottaa kuittausta. Palvelin tallentaa ensin
-kursorin funktiolla `advanceLogExportCursor` ja lähettää sitten viestin `ack`; seuraava erä ei käynnisty ennen sitä.
-Lähetysvirhe, kaatuminen tai aikakatkaisu kirjataan epäonnistumiseksi siirtämättä kyseisen erän kursoria eteenpäin. Aiemmin
-kuitatut erät pysyvät vahvistettuina; enintään yksi kuittaamaton erä voidaan lähettää uudelleen.
-Onnistuminen kirjataan vasta viestin `done` ja aliprosessin normaalin päättymisen jälkeen. Virhetilanteissa aliprosessi päätetään
-signaalilla SIGTERM ja 500 ms:n jälkeen tarvittaessa signaalilla SIGKILL, ja suorittaja odottaa prosessin sulkeutumista.
+Jokaisen hyväksytyn erän jälkeen lapsi odottaa kuittausta. Palvelin säilyttää ensin kohdistimen `advanceLogExportCursor` kanssa ja lähettää sitten `ack`; seuraava erä ei ala ennen sitä. Lähetysvirhe, kaatuminen tai aikakatkaisu tallentaa epäonnistumisen ilman, että erää siirretään eteenpäin. Aiemmin tunnustetut erät pysyvät sitovina; enintään yksi kuittaamaton erä voidaan lähettää uudelleen. Menestys kirjataan vasta `done` ja puhtaan lapsen poistumisen jälkeen. Epäonnistuminen lopettaa lapsen komennolla SIGTERM, joka kasvaa arvoon SIGKILL 500 ms:n jälkeen, ja juoksija odottaa prosessin sulkemista.
 
-| Ympäristömuuttuja                             | Oletus | Tarkoitus                                    |
-| --------------------------------------------- | ------ | -------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | Kohdekohtainen kokonaisaikaraja              |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | Aliprosessin V8:n old-space-raja megatavuina |
+| Ympäristömuuttuja                             | Oletus | Tarkoitus                         |
+| --------------------------------------------- | ------ | --------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | Kohdekohtainen seinäkellorajoitus |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | Lapsi V8 vanhan tilan raja MB     |
 
-Virheellisten, ei-positiivisten tai muiden kuin kokonaislukuarvojen sijaan käytetään oletusarvoja. Keon asetus ei ole
-RSS-kokonaisraja; erittäin suuret erät voivat silti kuluttaa aliprosessin muistin loppuun ja keskeyttää ajon turvallisesti.
-Oletusarvo 1024 MB jättää liikkumavaraa oletusarvoiselle 500 rivin erälle, jossa on 512 KiB:n artefakteja ja
-rungot mukana, mukaan lukien BigQueryn tavumäärän mukaan lohkottu JSON-sarjallistaminen. Se ei tee
-10000 rivin rungot sisältävästä erästä turvallista. V8-keon muistin loppuminen kirjataan virheeksi, jonka korjausohje on selkeä: pienennä erän
-kokoa tai suurenna arvoa `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kursori pysyy viimeksi
-kuitatun erän kohdalla. Nykyaikainen artefaktien kokoraja ei koske vanhoja sisäisesti tai levylle tallennettuja runkoja.
-Ylläpitäjien on mitoitettava RSS erikseen, etenkin muistirajoitetuissa konteissa.
+Invalid/non-positive/non-integer -arvot käyttävät oletusarvoja. Keon asetus ei ole RSS n kokonaisraja; erittäin suuret erät voivat silti kuluttaa lapsen muistia ja epäonnistua ajon turvallisesti. Oletusarvo 1024 MB jättää tilaa oletusarvoiselle 500 rivin 512 KiB artefaktin erälle, joissa rungot ovat käytössä, mukaan lukien BigQuery:n tavulohkoinen JSON serialisointi. Se ei tee 10 000 rivin korieristä turvallista. V8-kasan tyhjennys tallentaa toimintahäiriön: pienennä eräkokoa tai nosta `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kohdistin pysyy viimeisen kuitatun erän kohdalla. Historialliset inline/disk rungot eivät kuulu modernin esineen korkkiin. Operaattoreiden on budjetoitava RSS erikseen, erityisesti muistirajoitteisten säiliöiden sisällä.
 
-Aliprosessi perii vain ratkaistun `DATA_DIR`-arvon, `NODE_ENV`-arvon, erikseen asetetun `TZ`-arvon (vanhojen tiedostonimien
-paikallisen ajan tulkintaa varten), `ELECTRON_RUN_AS_NODE`-arvon, jos se on asetettu, sekä seuraavat lähtevien yhteyksien asetukset:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (ja niiden pienaakkosmuodot),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Globaali Undici-dispatcher käyttää samoja pelkästään ympäristömuuttujiin perustuvia välityspalvelimen valintasääntöjä ja paikallisten isäntien
-ohitussääntöjä kuin palvelin, mukaan lukien `NO_PROXY`; se ei tuo `proxyFetch.ts`-moduulia eikä sen tietokanta- tai ominaisuuslippuja.
-Välityspalvelimen tunnistetiedot peitetään edelleen välitettävästä tulosteesta ja tallennetuista virheistä. Kohteen tunnistetiedot
-kulkevat vain yhdessä käynnistyksen IPC-viestissä, eivät koskaan argv-argumenteissa tai ympäristömuuttujissa; edelleen välitettävät tulosteet ja virheet
-varustetaan etuliitteellä ja puhdistetaan. Aliprosessin suoritusargumenteissa poistetaan käytöstä vain `ExperimentalWarning`, jotta
-Noden SQLite-varoitus ei toistu jokaisella cron-ajolla; muut varoitustyypit pysyvät näkyvissä.
+Lapsi perii vain ratkaistun `DATA_DIR`, `NODE_ENV`, eksplisiittisen `TZ` (vanha tiedostonimi paikallisaikaresoluutio), `ELECTRON_RUN_AS_NODE` kun se on olemassa, ja seuraavat lähtevät syötteet: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (ja niiden pienet kirjaimet), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Maailmanlaajuinen Undici-välittäjä jakaa palvelimen puhtaan ympäristön välityspalvelimen resoluution ja paikallisen isännän ohitussäännöt, mukaan lukien `NO_PROXY`; se ei tuo `proxyFetch.ts` :ää tai sen DB/feature -lippuja. Välityspalvelimen tunnistetiedot poistetaan edelleen lähetetyistä tulosteista ja tallennetuista virheistä. Kohteen tunnistetiedot kulkevat vain yhdessä IPC aloitusviestissä, ei koskaan argv- tai ympäristössä; output/error -lähetys on etuliite ja se on desinfioitu. Vain `ExperimentalWarning` on poistettu käytöstä lapsi exec -argumenteissa, jotta vältetään solmun SQLite varoituksen toistaminen jokaisella cron-ajolla; muut varoitustyypit jäävät näkyviin.
 
-Kohdemoduulien on oltava tuotavissa ilman Next.js- tai server-only-riippuvuuksia. Nykyinen
-BigQuery-toteutus täyttää jo tämän vaatimuksen. Käyttöoikeustunnusten välimuistit säilyvät vain aliprosessin
-ajon ajan, eivät ajojen välillä. Node on tuettu ajoympäristö (`package.json`-tiedoston engines-määritys), mutta README-tiedoston Bun-
-asennusosio ja `Dockerfile.bun` esittelevät myös tuotantokäyttöön sopivan yhteensopivuusvaihtoehdon, joka käyttää
-`bun:sqlite`-moduulia (`src/lib/db/core.ts` / sovittimet). Bunissa viennit säilyttävät siksi aiemman
-prosessin sisäisen toteutustavan ja antavat kertaluonteisen varoituksen: aliprosessin keon ja aikakatkaisun eristys ei ole käytettävissä. Käytä
-Nodea tapahtumasilmukan ja muistin loppumisen eristämiseen; Bunia ei tässä pidetä vain kehityskäyttöön tarkoitettuna.
+Kohdemoduulien on oltava tuottavissa ilman Next.js/server-only riippuvuuksia. Nykyinen BigQuery toteutus täyttää jo tämän sopimuksen. Pääsytunnusvälimuistit kestävät vain lapsijuoksua varten, eivät juoksujen yli. Node on tuettu suoritusaika (`package.json` -moottorit). Parhaimmillaan tuettu Bun yhteensopivuuspolku on olemassa (`bun:sqlite` in `src/lib/db/core.ts` / adapters ja `Dockerfile.bun`), joten vienti ei saa katketa sen alle. Alle Bun, vienti säilyttää edellisen prosessin aikana ja lähettää kertaluonteisen varoituksen: lapsi heap/timeout eristys ei ole käytettävissä. Käytä Nodea tapahtumasilmukan ja OOM eristykseen.
 
-Kun `includeBodies` on käytössä, suosi minuuttitason ajoväliä, kuten
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, sen sijaan että kerryttäisit tunnin verran vietävää sisältöä.
-Erä- ja rivirajat rajoittavat edelleen jokaista ajoa. Prosessin käynnistyskustannus syntyy jokaiselle kohteelle jokaisella ajolla;
-pieni käynnistyskustannus mahdollistaa palvelimen tapahtumasilmukan eristämisen, ei prosessorin kokonaiskäytön vähentämistä.
+Kun `includeBodies` on käytössä, valitse minuuttitason poljinnopeus, kuten `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` sen sijaan, että keräät tuntikohtaista hyötykuormaa. Erä- ja rivirajoitukset rajoittavat edelleen jokaista ajoa. Prosessin käynnistämisestä maksetaan kohdetta ja ajoa kohti; Tämä vaihtaa pienen käynnistyskustannuk- sen palvelimen tapahtumasilmukan eristämiseen, ei vähennettyä CPU kokonaiskäyttöä.
 
-### Hyötykuormat (kehotteet ja vastaukset)
+### Hyötykuormat (kehotteet ja täydennykset)
 
-Oletusarvoisesti vienti sisältää vain yhteenvetokentät, jotka näkyvät lokien **luettelossa**. Kun
-**Vie kehotteet ja vastaukset** (`includeBodies`) otetaan käyttöön, mukana lähetetään lisäksi se, mitä lokien **tietonäkymä**
-näyttää kustakin kutsusta:
+Vienti sisältää oletusarvoisesti vain yhteenvetokentät Lokit** lista** näyttää. Käynnistys** Vie kehotteet ja vastaukset** (`includeBodies`) toimittaa lisäksi mitä Lokit** yksityiskohta** ruutu näyttää jokaiselle puhelulle:
 
-| Kenttä                           | Sisältö                                                                     |
-| -------------------------------- | --------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Kutsun hyötykuormat siinä muodossa kuin hallintanäkymä ne esittää           |
-| `pipeline_route_decision`        | Reitittimen valitsema kohde ja malli                                        |
-| `pipeline_client_request`        | Raakapyyntö täsmälleen asiakkaan lähettämässä muodossa                      |
-| `pipeline_openai_request`        | Sisäiseen OpenAI-muotoon muuntamisen jälkeen                                |
-| `pipeline_provider_request`      | Palveluntarjoajalle tosiasiallisesti lähetetty pyyntö tämän omassa muodossa |
-| `pipeline_provider_response`     | Palveluntarjoajan raakavastaus                                              |
-| `pipeline_client_response`       | Kutsujalle palautettu sisältö                                               |
-| `pipeline_error`                 | Epäonnistuneen kutsun käsittelyketjutason virhetiedot                       |
-| `bodies_truncated`               | Tosi, kun jokin yllä olevista kentistä saavutti `maxBodyBytes`-rajan        |
+| Ala                              | Mitä se pitää sisällään                                                   |
+| -------------------------------- | ------------------------------------------------------------------------- |
+| `request_body` / `response_body` | Puhelut latautuvat sitä mukaa, kun kojelauta hahmontaa ne                 |
+| `pipeline_route_decision`        | Minkä kohteen ja mallin reititin valitsi                                  |
+| `pipeline_client_request`        | Raaka pyyntö juuri sellaisena kuin asiakas sen lähetti                    |
+| `pipeline_openai_request`        | Sisäiseen OpenAI -muotoon muuntamisen jälkeen                             |
+| `pipeline_provider_request`      | Kuten todellisuudessa lähetettiin ylävirtaan, palveluntarjoajan murteella |
+| `pipeline_provider_response`     | Raaka alkupään vastaus                                                    |
+| `pipeline_client_response`       | Mikä annettiin takaisin soittajalle                                       |
+| `pipeline_error`                 | Putkilinjatason virhetiedot epäonnistuneesta puhelusta                    |
+| `bodies_truncated`               | Totta, kun mikä tahansa yllä oleva kenttä osuu `maxBodyBytes`             |
 
-Tämä on kehotteiden sisältöä, joten toiminto on **oletusarvoisesti pois käytöstä** ja tarkoituksella kohdekohtainen valinta.
-Vientiin päätyy se, mitä hallintanäkymä näyttää, sillä vienti ja `getCallLogById` käyttävät samaa tietojen
-hakumenetelmää: hyötykuormista on
-jo tallennusvaiheessa puhdistettu henkilötiedot ja peitetty salaisuudet, eikä
-`noLog`-API-avaimella tehty kutsu tallenna hyötykuormaa lainkaan, joten vietävää ei ole.
+Tämä on nopeaa sisältöä, niin se on** oletuksena pois päältä** ja tarkoituksella määräpaikkakohtainen valinta. Kojelauta näyttää mitä toimitetaan, koska vienti ja `getCallLogById` jakavat yksityiskohtien erottelukyvyn: hyötykuormat on jo PII-puhdistettu ja salattu, kun niitä kirjoitetaan, ja `noLog` API -avaimella tehty puhelu ei tallenna mitään hyötykuormaa, joten ei ole mitään vietävää.
 
-Hyötykuormat luetaan rivikohtaisesti tiedostojärjestelmään tallennetusta artefaktista, joten tietojen täydentäminen tehdään vain kohteille,
-jotka ovat sitä pyytäneet. Jos artefakti puuttuu tai on vioittunut, sen yhteenveto viedään null-arvoisilla hyötykuormilla sen sijaan,
-että koko erä epäonnistuisi ja kohdistin jäisi paikalleen.
+Hyötykuormat luetaan riviä kohden tiedostojärjestelmän artefaktista, joten hydratointi suoritetaan vain kohteissa, jotka sitä pyysivät. Puuttuva tai vioittunut artefakti vie yhteenvedon nollahyötykuormilla sen sijaan, että erä epäonnistuisi ja kohdistin jää päälle.
 
-`maxBodyBytes` (oletusarvo 262144) rajoittaa kunkin kentän kokoa. Pidemmät hyötykuormat **katkaistaan sen sijaan,
-että ne jätettäisiin pois** — katkaistukin kehote kertoo yhä, ”mitä kysyttiin” — ja rivi merkitään
-`bodies_truncated`-lipulla. Suoratoistettuja lohkokohtaisia muutoksia ei viedä; koottu vastaus on
-jo kentissä `pipeline_provider_response` ja `pipeline_client_response`.
+`maxBodyBytes` (oletus 262144) on isot kirjaimet jokaiseen kenttään. Pidemmät hyötykuormat ovat** mieluummin katkaistu kuin pudonnut** — leikattu kehote vastaa edelleen "mitä kysyttiin" — ja rivi merkitään `bodies_truncated`. Suoratoistettuja kappaleittain deltaja ei viedä; koottu vastaus on jo `pipeline_provider_response` ssä ja `pipeline_client_response` ssä.
 
 ---
 

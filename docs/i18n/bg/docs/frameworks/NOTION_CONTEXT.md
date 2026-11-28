@@ -64,40 +64,29 @@ OmniRoute запазва токена и незабавно изпълнява �
 
 ## MCP инструменти (6)
 
-Дефинирани в `open-sse/mcp-server/tools/notionTools.ts`. Токенът се извлича по време на
-извикването чрез `getNotionToken()`; ако няма конфигуриран токен, инструментът връща грешка
-`"Токенът за интеграция с Notion не е конфигуриран. Задайте го в Настройки > Източници на контекст."`
+Дефинирано в `open-sse/mcp-server/tools/notionTools.ts`. Токенът се разрешава по време на повикване чрез `getNotionToken()`; ако никой не е конфигуриран, инструментът хвърля `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Инструмент                   | Обхват         | Описание                                                                                                               |
-| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Търсене на страници и бази данни чрез текстова заявка (връща заглавия, идентификатори и URL адреси). Със странициране. |
-| `notion_get_page`            | `read:notion`  | Получаване на съдържанието и метаданните на страница по нейния идентификатор.                                          |
-| `notion_list_block_children` | `read:notion`  | Изброяване на всички дъщерни блокове на блок или страница (дървото от блокове). Със странициране.                      |
-| `notion_query_database`      | `read:notion`  | Изпълнение на заявка към база данни с незадължителни `filter` + `sorts` (формат на API на Notion). Със странициране.   |
-| `notion_get_database`        | `read:notion`  | Получаване на схемата/метаданните на база данни по идентификатор.                                                      |
-| `notion_append_blocks`       | `write:notion` | Добавяне на дъщерни блокове към съществуващ блок или страница (максимум 100 блока на заявка).                          |
+| Инструмент                   | Обхват         | Описание                                                                                           |
+| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Търсете страници и бази данни по текстова заявка (връща заглавия, IDs, URLs). Пагиниран.           |
+| `notion_get_page`            | `read:notion`  | Вземете съдържание и метаданни на страница чрез нейния ID.                                         |
+| `notion_list_block_children` | `read:notion`  | Избройте всички дъщерни блокове на блок или страница (блоково дърво). Пагиниран.                   |
+| `notion_query_database`      | `read:notion`  | Изпратете запитване към база данни с опционален `filter` + `sorts` (Notion API формат). Пагиниран. |
+| `notion_get_database`        | `read:notion`  | Вземете schema/metadata на база данни от ID.                                                       |
+| `notion_append_blocks`       | `write:notion` | Добавете дъщерни блокове към съществуващ блок или страница (максимум 100 блока на заявка).         |
 
 ### Входни параметри
 
-- `notion_search` — `query` (1–500 знака), `pageSize` (1–100, по подразбиране 20),
-  `startCursor` (незадължителен).
-- `notion_get_page` — `pageId` (32-знаков шестнадесетичен низ или UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, по подразбиране 50),
-  `startCursor` (незадължителен).
-- `notion_query_database` — `databaseId`, `filter` (незадължителен, формат за филтри на Notion),
-  `sorts` (незадължителен масив), `pageSize` (1–100, по подразбиране 50), `startCursor` (незадължителен).
+- `notion_search` — `query` (1–500 знака), `pageSize` (1–100, по подразбиране 20), `startCursor` (по избор).
+- `notion_get_page` — `pageId` (32-char hex или UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, по подразбиране 50), `startCursor` (по избор).
+- `notion_query_database` — `databaseId`, `filter` (по избор, Notion филтър формат), `sorts` (по избор масив), `pageSize` (1–100, по подразбиране 50), `startCursor` (по избор).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (масив от обекти на блокове),
-  `after` (незадължителна позиция).
+- `notion_append_blocks` — `blockId`, `children` (масив от блокови обекти), `after` (незадължителна позиция).
 
 ### Обхвати
 
-Инструментите за четене изискват `read:notion`, а инструментът за запис изисква `write:notion`.
-Обхватите се налагат чрез `withScopeEnforcement()` в
-`open-sse/mcp-server/server.ts` само когато `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; разрешените
-обхвати на извикващата страна се извличат от `OMNIROUTE_MCP_SCOPES` (разделени със запетаи) или от
-контекста на обхватите на удостоверения API ключ. Вижте [MCP-SERVER.md](./MCP-SERVER.md) за
-пълния модел на обхватите.
+Инструментите за четене изискват `read:notion`, а инструментът за запис изисква `write:notion`. Обхватите се налагат от `withScopeEnforcement()` в `open-sse/mcp-server/server.ts`, когато `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, и винаги за HTTP/SSE повикващ, чийто API ключ липсва `manage`/`admin`; разрешените обхвати на повикващия идват от `OMNIROUTE_MCP_SCOPES` (разделени със запетая) или контекста на обхвата на удостоверения API ключ. Вижте [MCP-SERVER.md](./MCP-SERVER.md) за модела с пълен обхват.
 
 ## Крайни точки
 

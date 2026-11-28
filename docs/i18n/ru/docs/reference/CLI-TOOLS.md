@@ -4,8 +4,6 @@
 
 ---
 
-Последнее обновление: 23 августа 2026 г.
-
 OmniRoute интегрируется с тремя категориями инструментов CLI, распределенными по трем выделенным страницам информационной панели:
 
 | Страница       | Маршрут                 | Концепция                                                                                                | Считать           |
@@ -235,7 +233,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/grok-build-settings`   | Сборка Grok (~/.grok/config.toml, `[model.omniroute]`)                           |
 | `POST /api/cli-tools/qwen-settings`         | Код Qwen (выделенный ключ `.env` + `~/.qwen/settings.json` )                     |
 
-Все маршруты используют `sanitizeErrorMessage()` для ответов об ошибках (жесткое правило № 12).
+Все маршруты используют `sanitizeErrorMessage()` для ответов об ошибках (жесткое правило #12).
 
 ---
 

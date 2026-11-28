@@ -4,9 +4,9 @@
 
 ---
 
-> **Sors tal-verità:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Aġġornata l-aħħar:** 2026-06-28 — v3.8.40
+> **Sors tal-verità:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
-OmniRoute jaqbad l-assistent `reasoning_content` prodott minn mudelli tal-modalità ta' ħsieb u jerġa' jġibu b'mod trasparenti fuq talbiet b'ħafna dawriet meta l-fornitur upstream jeħtieġha. Dan jelimina l-iżbalji HTTP 400 li l-fornituri stretti jqajmu meta l-istorja tal-konversazzjoni ta 'klijent tkun nieqsa mir-raġunament tal-dawran ta' qabel.
+OmniRoute jaqbad l-assistent `reasoning_content` prodott minn mudelli tal-modalità ta' ħsieb u jerġa' jġibu b'mod trasparenti fuq talbiet b'ħafna dawriet meta l-fornitur upstream jeħtieġha. Dan jelimina l-iżbalji HTTP 400 li l-fornituri stretti jqajmu meta l-istorja tal-konversazzjoni tal-klijent tkun nieqsa mir-raġunament tad-dawran ta 'qabel.
 
 ## Għaliex Dan Jeżisti
 

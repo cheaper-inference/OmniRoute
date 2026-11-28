@@ -66,9 +66,9 @@ Cloud Agent 任務**不是**一般的聊天補全。它是一個持久、包含�
 沒有背景輪詢器。需要最新狀態的儀表板應以合理的時間間隔輪詢 GET
 端點。
 
-## `CloudAgentBase` 介面
+## `CloudAgentBase`接口
 
-來源：`src/lib/cloudAgent/baseAgent.ts`
+來源： `src/lib/cloudAgent/baseAgent.ts`
 
 ```typescript
 export interface AgentCredentials {
@@ -110,15 +110,15 @@ export abstract class CloudAgentBase {
     c: AgentCredentials
   ): Promise<{ name: string; url: string; branch?: string }[]>;
 
-  protected mapStatus(raw: string): CloudAgentStatus; // 啟發式地將上游字串 → 列舉
+  protected mapStatus(raw: string): CloudAgentStatus; // heuristic upstream-string → enum
   protected generateTaskId(): string; // `task_<ts>_<rand>`
   protected generateActivityId(): string; // `act_<ts>_<rand>`
 }
 ```
 
-`CodexCloudAgent.approvePlan` 會刻意擲出例外——Codex Cloud 會自動規劃，且沒有核准閘門。`CodexCloudAgent.listSources` 會回傳 `[]`。
+`CodexCloudAgent.approvePlan`故意拋出— Codex雲端自動計劃，並且沒有審核門。 `CodexCloudAgent.listSources`返回`[]`。
 
-`CursorCloudAgent` 透過 Cursor 的官方 REST API（`api.cursor.com/v0`），使用**使用者或服務帳戶 API 金鑰**來驅動 Cursor 的背景／雲端代理程式——相較於重複使用 Cursor IDE 的 OAuth 工作階段（提供者 `cursor`，並附有封鎖風險警告），這是更安全的官方替代方案。它是純 REST 轉接器（沒有 `@cursor/sdk` 原生相依性）。`approvePlan` 會擲出例外（Cursor 代理程式會自主執行）；`listSources` 會列出該金鑰可存取的儲存庫。Cursor 會回傳大寫狀態列舉（`CREATING`/`RUNNING`/`FINISHED`/`ERROR`），並將其明確對應至共用的 `CloudAgentStatus`。每組認證皆可覆寫 `baseUrl`，因此無須變更程式碼即可修正 API 版本／路徑。
+`CursorCloudAgent`透過其官方REST API (`api.cursor.com/v0`) 驅動Cursor的後台/雲端代理**使用者或服務帳戶API金鑰**—重複使用Cursor IDE的OAuth會話的更安全的第一方替代方案（提供者`cursor`，帶有禁令風險警告）。它是一個普通的REST適配器（沒有`@cursor/sdk`本機依賴項）。 `approvePlan`拋出（Cursor代理自主運作）； `listSources`列出了金鑰可存取的儲存庫。 Cursor返回UPPERCASE狀態枚舉 (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`)，明確地對應到共享`CloudAgentStatus`。 `baseUrl`是可覆蓋每個憑證的，因此無需更改程式碼即可更正API version/path 。
 
 ## 領域類型
 
@@ -321,17 +321,14 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks/<id> \
 
 ## 憑證解析
 
-`src/lib/cloudAgent/api.ts` 中的 `getCloudAgentCredentials(providerId)`：
+`src/lib/cloudAgent/api.ts`中的`getCloudAgentCredentials(providerId)` ：
 
-1. 透過 `getProviderConnections({ provider: providerId, isActive: true })` 載入作用中的提供者連線。
-2. 對每個連線，優先使用 `apiKey`（去除前後空白）；若無，則改用 `accessToken`。
-3. 傳回第一個非空白權杖，並包裝為 `{ apiKey: token }`。
-4. 若找不到可用的權杖，則傳回 `null`；API 會回應 `400`，並附上
-   `"未為雲端代理提供者設定作用中的憑證：<id>"`。
+1. 透過`getProviderConnections({ provider: providerId, isActive: true })`載入活動的提供者連線。
+2. 對於每個連接，首選`apiKey` （已修剪）。回落到`accessToken`。
+3. 返回包裝為`{ apiKey: token }`第一個非空標記。
+4. 如果沒有找到可用的令牌，則傳回`null` — API `"No active credentials configured for cloud agent provider: <id>"`回應`400` 。
 
-這表示 Cloud Agents 與一般 LLM
-提供者共用同一個 Provider Connection 資料表。若要啟用 Jules，請建立一個作用中的連線，將 `provider` 設為 `"jules"`，
-並填入 `apiKey`。
+這表示雲端代理重複使用與常規LLM提供者相同的提供者連線表。若要啟用Jules，請建立與`provider: "jules"`和填滿的`apiKey`的活動連線。
 
 ## 儀表板
 

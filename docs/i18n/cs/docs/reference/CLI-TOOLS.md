@@ -4,8 +4,6 @@
 
 ---
 
-Poslední aktualizace: 23.08.2026
-
 OmniRoute se integruje se třemi kategoriemi nástrojů CLI rozmístěnými na třech vyhrazených stránkách řídicího panelu:
 
 | Strana         | Trasa                   | Pojem                                                                               | Počítat     |

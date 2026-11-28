@@ -13,12 +13,12 @@ Agent Skills는 외부 에이전트, MCP 클라이언트 및 A2A 오케스트레
 
 ## 개요
 
-카탈로그에는 **45개의 Agent Skills**(REST API 23개 + CLI 21개 + 구성 워크플로 1개)가 포함되어 있습니다. 각 스킬에는 다음 항목이 있습니다.
+카탈로그에는 다음이 포함되어 있습니다.** 45 에이전트 스킬** (23 REST API + 21 CLI + 1 구성 워크플로). 각 스킬에는 다음이 포함됩니다.
 
-- **정식 ID**(`omni-auth`, `cli-serve` 등)
-- YAML 프런트매터(`name`, `description`)와 풍부한 마크다운 본문을 포함하는 `skills/{id}/SKILL.md`의 **SKILL.md** 파일
-- OpenAPI 명세 및 CLI 레지스트리에서 파생된 **REST 엔드포인트**(API 스킬) 또는 **CLI 하위 명령어**(CLI 스킬)
-- 실시간 가져오기를 위한 **GitHub 원시 URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- 에이** 정식 ID** (`omni-auth`, `cli-serve` 등)
+- 에이**SKILL.md** YAML 프론트매터(`name`, `description`) + 리치 마크다운 본문이 포함된 `skills/{id}/SKILL.md` 의 파일
+- **REST 엔드포인트** (API 기술) 또는**CLI 하위 명령** (CLI 기술) OpenAPI 사양 및 CLI 레지스트리에서 파생됨
+- 에이**GitHub 원시 URL** 실시간 가져오기: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -252,31 +252,31 @@ curl "${BASE}/omni-providers/SKILL.md"
 
 ---
 
-## 생성기
+## 발전기
 
-생성기는 선별된 카탈로그 + OpenAPI 명세 + CLI 레지스트리를 읽고 각 항목에 대해 `skills/{id}/SKILL.md`를 작성합니다.
+생성기는 선별된 카탈로그 + OpenAPI spec + CLI 레지스트리를 읽고 각 항목에 대해 `skills/{id}/SKILL.md` 씁니다.
 
 ```bash
-# 미리보기(드라이 런, 파일을 작성하지 않음)
+# Preview (dry run, no writes)
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":true}'
 
-# 전체 재생성
+# Full regeneration
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":false,"prune":false}'
 
-# 특정 ID 재생성
+# Regenerate specific IDs
 curl -X POST http://localhost:20128/api/agent-skills/generate \
   -H "Authorization: Bearer <admin-key>" \
   -H "Content-Type: application/json" \
   -d '{"dryRun":false,"onlyIds":["omni-providers","cli-serve"]}'
 ```
 
-생성기 응답은 `GeneratorReport`입니다.
+생성기 응답은 `GeneratorReport` 입니다.
 
 ```json
 {
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## 커버리지 API
+## 적용 API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -53,50 +53,31 @@ je Bifrost omejen na `external` (dosegljiv izključno prek `BIFROST_BASE_URL`).
 `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) klicateljem omogočajo
 filtriranje glede na dejanske zmožnosti pogona, namesto trdo kodiranih vej za posamezne identifikatorje.
 
-## Os A — vdelane storitve (stran nadzorovanih procesov)
+## Vgrajene storitve Axis A — (stran nadzorovanega procesa)
 
-- **Register nadzorovanih procesov:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (trenutno: `9router`, `cliproxy`).
-- **Lastnik življenjskega cikla:** `src/lib/services/ServiceSupervisor.ts` — `start()` zažene
-  podrejeni proces, nadaljuje po `waitForHealthy()` ter zajema stdout/stderr v krožni medpomnilnik;
-  `stop()` uporabi SIGTERM→SIGKILL; vse je serializirano z zaklepom.
-- **Unija stanj** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error` ter neodvisno
-  stanje `HealthState = healthy | unhealthy | unknown`.
-- **Zakaj ločen proces (in ne SDK znotraj procesa)?** Izolacija procesov omogoča,
-  da se namestitev/zagon/zaustavitev/zdravje/dnevniki vsakega pomožnega procesa upravljajo neodvisno,
-  hkrati pa omogoča uporabo zaščite pred zagonom zunaj povratne zanke.
-  Modeliranje adapterja znotraj procesa je načrtovano v prihodnosti — to bi izražala
-  zastavica zmogljivosti `native-hot-path`.
+- **Register nadzorovanih procesov:** `src/lib/services/bootstrap.ts` `SERVICES[]` (danes: `9router`, `cliproxy`).
+- **Lastnik življenjskega cikla:** `src/lib/services/ServiceSupervisor.ts` — `start()` sproži otroka, zapre `waitForHealthy()`, pritisne stdout/stderr na medpomnilnik obroča; `stop()` SIGTERM→SIGKILL; vse serijsko pod ključavnico.
+- **Državna unija** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error` plus ortogonalni `HealthState = healthy | unhealthy | unknown`.
+- **Zakaj ločen postopek (ne SDK v procesu)?** Izolacija procesa je tisto, zaradi česar je install/start/stop/health/logs mogoče neodvisno nadzorovati na stransko prikolico in omogoča uporabo varovalke pred drstitvijo. Modeliranje vmesnika v procesu je prihodnje delo — kjer bi bila izražena zastavica zmogljivosti `native-hot-path`.
 
-### Pogodba poti življenjskega cikla (`/api/services/<tool>/…`)
+### Pogodba o poti življenjskega cikla (`/api/services/<tool>/…`)
 
-Kode stanja so **namenoma specifične za stanje/glagol/pot** — to je pogodba in ne
-nedoslednost:
+Statusne kode so**state/verb/path-specific po zasnovi** — to je pogodba, ne nedoslednost:
 
-| Klic                              | Pogoj                                                | Stanje                                       |
-| --------------------------------- | ---------------------------------------------------- | -------------------------------------------- |
-| `POST .../start`                  | storitev je `not_installed`                          | **409** (predpogoj)                          |
-| `POST .../stop`                   | že zaustavljena                                      | **200** (idempotentna operacija brez učinka) |
-| `GET .../status`                  | v redu                                               | **200** (`live ?? row ?? "unknown"`)         |
-| `POST .../start`                  | neuspešen zagon procesa                              | **503** (prehodno)                           |
-| `GET .../status`, `.../stop`      | neobravnavana napaka                                 | **500**                                      |
-| `GET /api/services/<x>/logs`      | neznano orodje `<x>`                                 | **404** `Service '<x>' not found`            |
-| `GET .../status?reveal=key`       | manjka `X-Reveal-Confirm: yes`                       | **403** (samo 9router)                       |
-| **katera koli** `/api/services/*` | klicatelj ni iz povratne zanke/zasebnega omrežja LAN | **403 LOCAL_ONLY**                           |
+| Pokliči                          | Pogoj                             | Stanje                               |
+| -------------------------------- | --------------------------------- | ------------------------------------ |
+| `POST .../start`                 | storitev `not_installed`          | **409** (predpogoj)                  |
+| `POST .../stop`                  | že ustavljeno                     | **200** (idempotent no-op)           |
+| `GET .../status`                 | OK                                | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`                 | neuspeh drstenja                  | **503** (prehodno)                   |
+| `GET .../status`, `.../stop`     | neulovljena napaka                | **500**                              |
+| `GET /api/services/<x>/logs`     | neznano orodje `<x>`              | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`      | manjka `X-Reveal-Confirm: yes`    | **403** (samo 9router)               |
+| **katerikoli** `/api/services/*` | klicatelj ne loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-Vsa telesa napak oblikuje `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, pri čemer je `type` izpeljan iz stanja
-(`500→server_error`, `404→not_found`, `409→conflict`, sicer `invalid_request`) in je
-strojno obdelovljiv razločevalnik. Sporočila so vnaprej očiščena
-(`sanitizeErrorMessage()`, strogo pravilo št. 12).
+Vsa telesa napak so oblikovana z `createErrorResponse()` → `{ error: { message, type }, requestId }`, kjer je `type` izpeljan iz statusa (`500→server_error`, `404→not_found`, `409→conflict`, sicer `invalid_request`) in je diskriminator, ki ga strojno izvede. Sporočila so predhodno razčiščena (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**Zaščita povratne zanke** je najpogostejši vir odgovora `403`: `/api/services/` je v
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`), pravilnik
-`src/server/authz/policies/management.ts` pa zavrne vsakega klicatelja, ki ni iz
-povratne zanke ali zasebnega omrežja LAN, **še pred preverjanjem pristnosti**, saj
-te poti zaganjajo podrejene procese (strogi pravili 15 in 17). Dostop do njih prek
-javnega tunela po zasnovi vrne `403`.
+**Varovalo za povratno zanko** je najpogostejši vir `403`: `/api/services/` je v `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) in `src/server/authz/policies/management.ts` zavrne vse klicatelje brez povratne zanke / nezasebnega LAN-ja** pred avt** , ker te poti sprožijo podrejene procese (trda pravila 15 in 17). Doseči jih skozi javni tunel je `403` po zasnovi.
 
 ## Os B — zaledje usmerjanja posredovanja (stran razpošiljanja)
 

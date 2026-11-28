@@ -329,19 +329,16 @@ trả về bản xem trước đã che (`maskedApiKey`: tối đa 4 ký tự ở
 không có đối với khóa từ 8 ký tự trở xuống) và `projectId` của kết nối. Cả hai trường đều bị lược bỏ
 khỏi phản hồi đối với mọi khóa khác.
 
-## Phân giải Thông tin xác thực
+## Giải quyết thông tin xác thực
 
 `getCloudAgentCredentials(providerId)` trong `src/lib/cloudAgent/api.ts`:
 
 1. Tải các kết nối nhà cung cấp đang hoạt động thông qua `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Với mỗi kết nối, ưu tiên `apiKey` (đã loại bỏ khoảng trắng thừa). Nếu không có thì dùng `accessToken`.
-3. Trả về token không rỗng đầu tiên được bao bọc dưới dạng `{ apiKey: token }`.
-4. Trả về `null` nếu không tìm thấy token khả dụng — API phản hồi `400` với
-   `"Không có thông tin xác thực đang hoạt động nào được cấu hình cho nhà cung cấp tác tử đám mây: <id>"`.
+2. Đối với mỗi kết nối, ưu tiên `apiKey` (cắt bớt). Quay trở lại `accessToken`.
+3. Trả về mã thông báo không trống đầu tiên được gói dưới dạng `{ apiKey: token }`.
+4. Trả về `null` nếu không tìm thấy mã thông báo có thể sử dụng được — API phản hồi `400` bằng `"No active credentials configured for cloud agent provider: <id>"`.
 
-Điều này có nghĩa là Cloud Agents dùng lại cùng bảng Provider Connection như các nhà cung cấp LLM
-thông thường. Để bật Jules, hãy tạo một kết nối đang hoạt động với `provider: "jules"`
-và `apiKey` đã được điền.
+Điều này có nghĩa là Đại lý đám mây sử dụng lại bảng Kết nối nhà cung cấp giống như các nhà cung cấp LLM thông thường. Để bật Jules, hãy tạo kết nối hoạt động với `provider: "jules"` và `apiKey` được điền.
 
 ## Bảng điều khiển
 

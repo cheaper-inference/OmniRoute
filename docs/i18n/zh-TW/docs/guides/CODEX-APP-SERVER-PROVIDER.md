@@ -18,24 +18,21 @@ OmniRoute 提供使用 OpenAI Codex 的**兩種**方式：
 ## 1. 架構
 
 ```
-┌─ OmniRoute 應用程式 ─────────────┐        ┌─ codex-app-server sidecar ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  （+ 能力權杖）                   │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  自行管理 OpenAI OAuth              │
-└──────────────────────────────────┘        │  (~/.codex/auth.json，自動重新整理) │
-        │ 共用（compose 磁碟區）             └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS 能力權杖（兩者皆會掛載）
-  codex-appserver-home    → ~/.codex（auth.json 由儀表板寫入，
-                             並由 sidecar 的 codex app-server 讀取）
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- sidecar 僅監聽由能力權杖保護的內部 compose 網路
-  （`ws://codex-app-server:1456`）。它**絕不會**
-  發布至主機或網際網路。
-- Codex CLI 已內建於 `omniroute:base`，因此執行 sidecar 時，
-  不需要在主機或使用者的機器上安裝 codex。
+- 邊車傾聽**僅有的**在能力令牌後面的內部撰寫網路（`ws://codex-app-server:1456`）上。這是**絕不**發佈到主機或網際網路。
+- sidecar 使用`omniroute:cli-no-docker`，它是從`runner-cli-no-docker`目標建構的，其中包括Codex CLI。
 
 ## 2. 啟動
 

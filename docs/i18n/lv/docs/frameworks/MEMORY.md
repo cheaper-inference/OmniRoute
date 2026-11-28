@@ -4,32 +4,13 @@
 
 ---
 
-> **Patiesais avots:** `src/lib/memory/` un `src/app/api/memory/`
-> **Pēdējo reizi atjaunināts:** 2026-06-28 — v3.8.40 (pēc noklusējuma izslēgta + int8 kvantizācijas izlīdzināšana)
+> **Patiesības avots:** `src/lib/memory/` un `src/app/api/memory/`
 
-OmniRoute nodrošina pastāvīgu sarunu atmiņu, kas piesaistīta API atslēgai (un
-pēc izvēles sesijas ID). Atmiņas tiek automātiski iegūtas no LLM atbildēm,
-izmantojot vienkāršu regulāro izteiksmju paraugu meklēšanu, un atkārtoti
-ievietotas turpmākajos pieprasījumos kā sākotnējais sistēmas ziņojums (vai
-pirmais lietotāja ziņojums pakalpojumu sniedzējiem, kuri noraida sistēmas lomu).
+OmniRoute nodrošina pastāvīgu sarunu atmiņu, ko nodrošina API atslēga (un pēc izvēles sesijas ID). Atmiņas tiek automātiski iegūtas no LLM atbildēm, izmantojot vieglu regulārā izteiksmes modeļa saskaņošanu, un tiek ievadītas atpakaļ nākamajos pieprasījumos kā vadošais sistēmas ziņojums (vai pirmais lietotāja ziņojums pakalpojumu sniedzējiem, kuri noraida sistēmas lomu).
 
-> **Atmiņa pēc noklusējuma ir IZSLĒGTA (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> tagad ir `false` (`src/lib/memory/settings.ts`). Iespējojot atmiņu, **katrā**
-> tērzēšanas pieprasījumā tiek ievietots līdz `maxTokens` (~2k) izgūtā konteksta,
-> par ko tiek piemērota maksa — tas var radīt negaidītas izmaksas jaunām
-> instalācijām un klientiem, kuri paši pārvalda savu kontekstu. Iespējojiet to
-> tieši sadaļā **Settings → Memory** (`MemorySkillsTab` rāda brīdinājumu par
-> tokenu izmaksām, kad atmiņa ir iespējota). Klients var izslēgt atmiņu vienam
-> pieprasījumam ar pieprasījuma galveni `x-omniroute-no-memory`
-> (`true`/`1`/`yes`) — skatiet pieprasījumu galveņu tabulu dokumentā
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Pieprasījums bez atmiņas
-> iestata `memoryOwnerId = null`, tādējādi šim pieprasījumam atspējojot **gan**
-> atmiņas, **gan** prasmju ievietošanu
-> (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Atmiņa pēc noklusējuma ir OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` tagad ir `false` (`src/lib/memory/settings.ts`). Atmiņas iespējošana ievada līdz `maxTokens` (~ 2k) izgūtā konteksta** katru** tērzēšanas pieprasījums, par ko tiek — pārsteidzoša maksa par jaunām instalācijām un klientiem, kuri pārvalda savu kontekstu. Izvēlēties tieši zem** Iestatījumi → Memory** ( `MemorySkillsTab` parāda marķiera izmaksu brīdinājuma norādi, kad atmiņa ir iespējota). Klients var atteikties no viena pieprasījuma ar `x-omniroute-no-memory` pieprasījuma galveni (`true`/`1`/`yes`) — skatiet pieprasījuma galvenes tabulu failā [API_REFERENCE.md](../reference/API_REFERENCE.md). Pieprasījums bez atmiņas iestata `memoryOwnerId = null`, kas tiek atspējots** gan** atmiņas un prasmju injekcija šim pieprasījumam (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Atmiņa ir **nodalīta katrai API atslēgai**, nevis katram lietotājam — visi
-pieprasījumi, kas autentificēti ar vienu un to pašu API atslēgu, koplieto vienu
-atmiņas kopu, kuru pēc izvēles var papildus nodalīt pēc `sessionId`.
+Atmiņa ir** tvērums katram API taustiņam** , nevis katram lietotājam — katram pieprasījumam, kas autentificēts ar vienu un to pašu API atslēgu, tiek izmantots viens un tas pats atmiņas kopums ar papildu `sessionId` tvērumu.
 
 ## Arhitektūra
 

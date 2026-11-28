@@ -168,9 +168,9 @@ Hakikisha `copilot-m365-web` imewashwa** Dashibodi watoa →** . Mtoa huduma ana
 
 ## Marejeleo
 
-- Tatizo: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Mjadala: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Suala: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Majadiliano: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Chanzo: `src/shared/constants/providers/web-cookie.ts` (ufafanuzi wa mtoa huduma)
-- Uingizaji wa HAR: `src/shared/utils/m365HarImport.ts`
-- Sehemu za hati tambulishi: `src/shared/providers/webSessionCredentials.ts`
-- Kidirisha cha kiwango: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- HAR kuagiza: `src/shared/utils/m365HarImport.ts`
+- Sehemu za kitambulisho: `src/shared/providers/webSessionCredentials.ts`
+- Njia ya daraja: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

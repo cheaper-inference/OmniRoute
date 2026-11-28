@@ -4,9 +4,9 @@
 
 ---
 
-> **Neyin nerede yaşadığı: izlenen her üst düzey dizin ve kök dosya, tek satırlık bir amaçla.** Son güncelleme: 2026-11-13 (OmniRoute v3.8.54)
+> **Neyin nerede yaşadığı: izlenen her üst düzey dizin ve kök dosya, tek satırlık bir amaçla.**
 >
-> Kod tabanında yolunuzu bulmak için bu haritayı kullanın, ardından özel dokümanlara giden bağlantıları izleyin. Dosya sayıları yukarıdaki tarihte `git ls-files` ile ölçülmüştür. Neredeyse her sürümde değişirler, bu nedenle bunları büyüklük sıraları olarak ele alın.
+> Kod tabanında yolunuzu bulmak için bu haritayı kullanın, ardından özel dokümanlara giden bağlantıları izleyin. Dosya sayıları `git ls-files` gelir ve neredeyse her sürümde değişir. Onlara büyüklük sıraları olarak davranın.
 
 ## Üst düzey ağaç
 

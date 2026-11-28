@@ -93,52 +93,30 @@ trasowania lub wyboru modelu — zobacz osobną zgodę poniżej.
 
 ---
 
-## Synchronizacja danych wymaga OSOBNEJ zgody — gwarancja prywatności
+## Synchronizacja danych to SEPARATE opt-in — obietnica prywatności
 
-Włączenie `RADAR_ENABLED` odblokowuje tylko interfejs użytkownika. Synchronizacja kanału wymaga drugiej,
-niezależnej zgody przechowywanej w `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migracja `136_radar_cache_settings.sql`). `syncRadar()` sprawdza flagę _oraz_ zgodę
-przed wykonaniem jakiegokolwiek wywołania sieciowego:
+Włączenie `RADAR_ENABLED` odblokowuje jedynie UI. Synchronizacja kanału wymaga drugiej, niezależnej zgody zapisanej w `radar_settings.opt_in` (`src/lib/db/radar.ts`, migracja `136_radar_cache_settings.sql`). `syncRadar()` sprawdza flagę _i_ zgodę przed wykonaniem jakiegokolwiek połączenia sieciowego:
 
 ```
-Flaga wyłączona  → { status: "disabled" }   — brak wywołania sieciowego
-Brak zgody       → { status: "opt_out" }    — brak wywołania sieciowego
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Gdy obie są włączone, ścieżka synchronizacji wygląda następująco:
+Gdy oba są włączone, ścieżka synchronizacji to:
 
-1. `GET <bazowy adres URL kanału>/v1/catalog/latest` z nagłówkiem `x-omniroute-radar-schema: 2` i opcjonalnym
-   nagłówkiem `Authorization: Bearer <klucz wspierającego>` (zobacz poniżej). W przypadku braku nagłówka schematu serwery domyślnie
-   używają osobno podpisanego artefaktu przejściowego v1, dzięki czemu starsze zainstalowane klienty nadal
-   otrzymują aktualizacje.
-2. Jest to przepływ aplikacji służący wyłącznie do pobierania danych, ale nadal stanowi żądanie HTTPS. Hostowana
-   infrastruktura otrzymuje zwykłe metadane połączenia, takie jak źródłowy adres IP. Gdy skonfigurowany jest klucz wspierającego,
-   synchronizacja wysyła również ten klucz w nagłówku Bearer, aby usługa mogła określić
-   uprawnienie. W dokładnej rewizji prywatnego serwera wskazanej powyżej w granicy materiału dowodowego
-   rozliczanie żądań kanału wykorzystuje skróty kluczy, zagregowane użycie oraz zmieniany codziennie, skrócony HMAC
-   adresu IP do ręcznego przeglądu nadużyć; tabele te nie przechowują ani klucza, ani adresu IP w postaci nieprzetworzonej.
-   Dzienniki dostępu infrastruktury i zaszyfrowana skrzynka nadawcza są odrębnymi
-   granicami operacyjnymi.
-3. OmniRoute nigdy nie wysyła do usługi Radar promptów, odpowiedzi, konwersacji, danych uwierzytelniających dostawców, ruchu modeli,
-   czasu dostępności, opóźnień ani lokalnej konfiguracji dostawców.
-4. Odpowiedź jest weryfikowana, walidowana i zapisywana w lokalnej pamięci podręcznej (zobacz
-   [Model zabezpieczeń](#security-model)). Radar ma dokładnie cztery ścieżki sieciowe po stronie serwera:
-   `syncRadar()` dla katalogu, `syncRadarReferrals()` dla poleceń oraz
-   `syncRadarOffers()` / `syncRadarIntel()` dla ofert i danych Intel dostępnych wyłącznie dla wspierających.
+1. `GET <feed base URL>/v1/catalog/latest` z `x-omniroute-radar-schema: 2` i opcjonalnym nagłówkiem `Authorization: Bearer <supporter key>` (patrz poniżej). Serwery domyślnie korzystają z oddzielnie podpisanego artefaktu przejścia w wersji 1, gdy brakuje nagłówka schematu, więc starsi zainstalowani klienci nadal otrzymują aktualizacje.
+2. Jest to przepływ aplikacji przeznaczony wyłącznie do pobrania, ale nadal jest to żądanie HTTPS. Hostowana infrastruktura otrzymuje zwykłe metadane połączenia, takie jak źródłowe IP. Po skonfigurowaniu klucza pomocniczego synchronizacja wysyła również ten klucz w nagłówku nośnika, aby usługa mogła rozpoznać uprawnienie. Przy dokładnej wersji serwera prywatnego określonej w powyższej granicy dowodów, księgowanie żądań kanału wykorzystuje kluczowe skróty, zagregowane użycie i codzienną rotacyjną obciętą HMAC IP do ręcznego sprawdzania nadużyć; te tabele nie przechowują ani klucza, ani IP w surowej formie. Dzienniki dostępu do infrastruktury i skrzynka nadawcza zaszyfrowanego dostarczania stanowią odrębne granice operacyjne.
+3. OmniRoute nigdy nie wysyła monitów, odpowiedzi, rozmów, danych uwierzytelniających dostawcy, ruchu modelowego, czasu pracy, opóźnień ani konfiguracji lokalnego dostawcy do usługi Radar.
+4. Odpowiedź jest weryfikowana, sprawdzana i buforowana lokalnie (patrz [Model zabezpieczeń](#security-model) ). Radar ma dokładnie cztery ścieżki sieciowe po stronie serwera: `syncRadar()` dla katalogu, `syncRadarReferrals()` dla poleceń i `syncRadarOffers()` / `syncRadarIntel()` dla ofert tylko dla wspierających i Intel.
 
-**Klucz wspierającego** jest opcjonalnym tokenem Bearer (`radar_settings.supporter_key`),
-który pozwala usłudze kanału zdecydować, który poziom udostępnić (zobacz
-[Poziomy](#tiers-community-and-live)). Klucz ten jest:
+Kontrola katalogu odbywa się co 24 godziny. Gdy zweryfikowany kanał nadal zawiera wersję i warstwę w pamięci podręcznej, synchronizacja przechowuje ładunek w pamięci podręcznej, odnawia `fetchedAt`, a następna kontrola następuje 24 godziny później zamiast następnego taktu godzinowego.
 
-- Przechowywany **w spoczynku w formie zaszyfrowanej** przy użyciu tych samych funkcji pomocniczych AES-256-GCM `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`), które są używane dla danych uwierzytelniających dostawców.
-- Ustawiany przez `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) i
-  **nigdy nie jest zwracany w całości** — odpowiedź zawiera zamaskowaną postać (`omr_****abcd`).
-- Jego zmiana lub usunięcie atomowo unieważnia pamięci podręczne katalogu, poleceń, ofert i danych Intel. Następna
-  synchronizacja lub odczyt ustala nowe uprawnienie po stronie serwera; zapisanie klucza samo w sobie nie powoduje
-  żądania sieciowego ani nie zużywa jednorazowego klucza aktywacyjnego.
-- Wysyłany do usługi kanału jako token Bearer podczas żądania synchronizacji GET — żadne inne informacje o
-  kluczu nigdy nie opuszczają klienta.
+The** klucz zwolennika** to opcjonalny token nośnika (`radar_settings.supporter_key`), który pozwala usłudze informacyjnej decydować, który poziom ma być obsługiwany (patrz [Poziomy](#tiers-community-and-live) ). To jest:
+
+- Przechowywane** szyfrowane w stanie spoczynku** z tymi samymi pomocnikami AES-256-GCM `encrypt()`/`decrypt()` (`src/lib/db/encryption.ts`) używanymi dla poświadczeń dostawcy.
+- Ustaw przez `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) i** nigdy się nie odezwałem** — odpowiedź zwraca zamaskowaną formę (`omr_****abcd`).
+- Zmiana lub wyczyszczenie go powoduje atomowe unieważnienie katalogu, skierowań, ofert i pamięci podręcznej Intel. Następne sync/read rozwiązuje nowe zadanie po stronie serwera uprawnień; zapisanie klucza samo w sobie nie powoduje żądania sieciowego ani wykorzystania jednorazowego klucza aktywacyjnego.
+- Wysłane do usługi kanału informacyjnego jako token okaziciela podczas synchronizacji GET — nic więcej na temat klucza nigdy nie opuszcza klienta.
 
 ---
 
@@ -432,84 +410,45 @@ version, tier }` — panel wyświetla właśnie tę wartość, nigdy nieprzetwor
 
 ---
 
-## Reguły scalania nakładki podczas odczytu
+## Reguły scalania nakładek czasu odczytu
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) scala kanał z pamięci podręcznej **nad**
-statyczną bazą **podczas odczytu**, wewnątrz `getRadarCatalog()`. Tablica bazowa
-(`FREE_MODEL_BUDGETS`) nigdy nie jest modyfikowana — przy każdym wywołaniu od nowa obliczana
-jest tablica `MergedEntry[]`.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) łączy buforowany kanał** nad** statyczna linia bazowa o godz** przeczytaj czas** , wewnątrz `getRadarCatalog()`. Tablica bazowa (`FREE_MODEL_BUDGETS`) nigdy nie jest modyfikowana — `MergedEntry[]` jest obliczane na nowo przy każdym wywołaniu.
 
-Cztery reguły w kolejności pierwszeństwa:
+Cztery zasady, w kolejności pierwszeństwa:
 
-1. **Kanał nigdy nie nadpisuje lokalnego ustawienia.** Dla każdego pola: jeśli operator
-   dostosował pole wpisu (mapa `localOverrides`, indeksowana przez `provider:modelId`),
-   wartość tego konkretnego pola z kanału jest pomijana — wartość operatora ma pierwszeństwo.
-2. **`enabled: false` wyłącza wpis z podaniem pochodzenia.** Wpis kanału, który wyłącza
-   dany wpis, ustawia `enabled: false` i `disabledBy: "radar"` w scalonym wyniku,
-   dzięki czemu interfejs może wyjaśnić, _dlaczego_ wpis zmienił stan z dostępnego na wyłączony.
-3. **Wpis dodany przez użytkownika, którego nie ma w kanale, pozostaje niezmieniony.** Wpisy,
-   które istnieją tylko w bazie (lub zostały dodane lokalnie) i nie mają odpowiadającego im wpisu
-   w kanale, przechodzą bez zmian.
-4. **Wpis oznaczony nagrobkiem nigdy nie jest przywracany.** Jeśli operator jawnie usunął
-   wpis (zbiór `tombstones`), ponowne dodanie tego `provider:modelId` przez kanał w późniejszej
-   wersji nie przywraca go.
+1. **Kanał nigdy nie zastępuje lokalnego zastąpienia.** Na pole: jeśli operator dostosował pole we wpisie (mapa `localOverrides`, `provider:modelId` kluczem), wartość źródła dla tego konkretnego pola jest pomijana. — wygrywa wartość operatora.
+2. **`enabled: false` wyłącza wpis z pochodzeniem.** Wpis w kanale, który wyłącza wpis, ustawia `enabled: false` i `disabledBy: "radar"` na scalonym wyniku, więc UI może wyjaśnić _dlaczego_ wpis zmienił się z dostępnego na wyłączony.
+3. **Wpis dodany przez użytkownika, którego nie ma w kanale, pozostaje niezmieniony.** Wpisy, które istnieją tylko w scenariuszu bazowym (lub zostały dodane lokalnie) i nie mają odpowiadającego im wpisu w pliku danych, przechodzą bez zmian.
+4. **Wpis nagrobny nigdy nie jest wskrzeszany.** Jeśli operator jawnie usunął wpis (zestaw `tombstones` ), ponowne dodanie tego `provider:modelId` w późniejszej wersji kanału nie przywróci go.
 
-Edytowalne pola i nagrobki są utrwalane w
-`radar_local_model_state` (migracja `153_radar_local_model_state.sql`). Publiczny adapter bazy danych
-(`src/lib/db/radar.ts`) konwertuje te wiersze na mapę `localOverrides` i zbiór
-`tombstones` używane przez `applyFeed()`; produkcyjna funkcja `getRadarCatalog()` wczytuje ten stan
-po pomyślnym przejściu kontroli flagi, pamięci podręcznej i schematu. Operator może edytować tylko pola `displayName` i `enabled`.
-Tożsamości dostawcy/modelu, pochodzenia danych z kanału, limitu, możliwości, warunków świadczenia usług
-oraz danych konfiguracyjnych nie można zapisywać za pośrednictwem tego interfejsu.
+Edytowalne pola i nagrobki są utrwalane w `radar_local_model_state` (migracja `153_radar_local_model_state.sql`). Publiczny adapter DB (`src/lib/db/radar.ts`) konwertuje te wiersze na mapę `localOverrides` i zestaw `tombstones` używane przez `applyFeed()`; produkcyjne `getRadarCatalog()` ładuje ten stan po przejściu flagi, pamięci podręcznej i bramek schematu. Tylko `displayName` i `enabled` można edytować przez operatora. tożsamość Provider/model, pochodzenie kanału, limit, możliwości, ToS i dane konfiguracyjne nie mogą być zapisywane na tej powierzchni.
 
-Panel udostępnia cztery działania lokalne:
+Panel kontrolny udostępnia cztery działania lokalne:
 
-- **Edytuj** zmienia lokalną nazwę wyświetlaną i stan włączenia.
-- **Resetuj zmiany lokalne** czyści oba edytowalne pola bez zmiany nagrobka.
-- **Ukryj** tworzy nagrobek, dzięki czemu późniejsze aktualizacje kanału nie mogą odtworzyć wiersza.
-- **Przywróć** usuwa nagrobek; każde zapisane oddzielnie ustawienie nadal obowiązuje.
+- **Redagować** zmienia lokalną nazwę wyświetlaną i stan włączenia.
+- **Zresetuj zmiany lokalne** czyści oba pola edytowalne bez zmiany nagrobka.
+- **Ukrywać** tworzy nagrobek, więc późniejsze aktualizacje kanału nie będą mogły odtworzyć wiersza.
+- **Przywrócić** usuwa nagrobek; każde oddzielnie zapisane zastąpienie pozostaje w mocy.
 
-Wartość `enabled: false` z kanału pozostaje wyjątkiem bezpieczeństwa: ma pierwszeństwo przed nieaktualnym lokalnym
-`enabled: true`, utrzymuje scalony wpis w stanie wyłączonym i zapisuje `disabledBy: "radar"`.
+Kanał `enabled: false` pozostaje wyjątkiem pod względem bezpieczeństwa: pokonuje przestarzały lokalny `enabled: true`, blokuje scalony wpis i rejestruje `disabledBy: "radar"`.
 
-Publikacje katalogu używają `schemaVersion: 2`. `contextWindow` oraz każde z pól `tools`, `vision` i
-`thinking` są niezależnie typu `number | null` / `boolean | null`: `null` oznacza brak wiedzy, natomiast
-`false` oznacza, że oficjalne źródło dostawcy, potwierdzone zgodnie z D16, jawnie stwierdza brak danej możliwości.
-Wewnętrzne flagi rejestru/specyfikacji modeli OmniRoute nigdy nie są bezpośrednio przekształcane w fakty kanału. Klient
-nadal akceptuje migawki v1; ponieważ stary konstruktor używał `false` jako symbolu zastępczego braku danych, wartość `false` w v1 jest
-normalizowana do braku wiedzy, natomiast `true` w v1 pozostaje faktem. Nieznane wersje schematu są bezpiecznie odrzucane, a
-ostatnia prawidłowa pamięć podręczna pozostaje dostępna. Każdy model v2 z niepustą wartością kontekstu/możliwości musi zawierać
-niewymagający poświadczeń adres HTTPS w `metadataEvidenceUrls[]`; w przeciwnym razie walidacja schematu kończy się niepowodzeniem, a pamięć podręczna
-nie jest zastępowana. Tabela katalogu przedstawia wszystkie trzy stany jako `✓`, `✕` i `?`.
+Publikacje katalogowe wykorzystują `schemaVersion: 2`. `contextWindow` i każdy z `tools`, `vision` i `thinking` są niezależnie `number | null` / `boolean | null`: `null` oznacza nieznane, podczas gdy `false` oznacza, że oficjalne źródło dostawcy D16-confirmed wyraźnie mówi, że tej możliwości nie ma. Wewnętrzne flagi OmniRoute registry/model-spec nigdy nie są promowane bezpośrednio w celu podawania faktów. Klient nadal akceptuje migawki w wersji 1; ponieważ stary konstruktor używał `false` jako symbolu zastępczego nieobecności, v1 `false` jest znormalizowane do nieznanego, podczas gdy v1 `true` pozostaje oparte na faktach. Nieznane wersje schematu nie są zamykane i dostępna jest ostatnia prawidłowa pamięć podręczna. Każdy model v2 z context/capability innym niż null musi zawierać HTTPS `metadataEvidenceUrls[]` niezawierający poświadczeń; w przeciwnym razie sprawdzanie poprawności schematu nie powiedzie się i pamięć podręczna nie zostanie zastąpiona. Tabela katalogu renderuje wszystkie trzy stany jako `✓`, `✕` i `?`.
 
-### Prowadzone kombinacje i dostęp MCP
+### Kombinacje z przewodnikiem i dostęp do MCP
 
-Potwierdzone wartości `familyId` pozostają zachowane po nałożeniu warstwy podczas odczytu i są używane przez czysty
-moduł `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Rodzina jest sugerowana
-tylko wtedy, gdy co najmniej dwóch różnych dostawców ma aktywne połączenia i udostępnia dokładnie określony, wyselekcjonowany identyfikator
-modelu. Wyłączone modele, nieaktywni dostawcy, brakujące identyfikatory modeli, rodziny jednoelementowe i niejednoznaczne
-dopasowania aliasów/prefiksów są bezpiecznie odrzucane. Sugestie korzystają z istniejącej strategii `priority`, porządkując je
-najpierw według największego cyklicznego budżetu miesięcznego; interfejs tworzy je wyłącznie za pośrednictwem `POST /api/combos`.
+Potwierdzone wartości `familyId` przetrwają nakładkę czasu odczytu i sterują czystym modułem `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Rodzina jest sugerowana tylko wtedy, gdy co najmniej dwóch różnych dostawców ma aktywne połączenia i udostępnia dokładnie wybrany model ID. Wyłączone modele, nieaktywni dostawcy, brakujący model IDs, rodziny singleton i niejednoznaczne dopasowania alias/prefix nie są zamykane. Sugestie wykorzystują istniejącą strategię `priority`, zamawiając najpierw największy powtarzalny budżet miesięczny; UI tworzy je tylko poprzez `POST /api/combos`.
 
-Interfejs z przewodnikiem znajduje się pod adresem `/dashboard/radar/combos`. Odczytuje wyłącznie lokalne
-endpointy `GET /api/radar/catalog` oraz `GET /api/combos/builder/options`. Nigdy nie uruchamia synchronizacji Radar,
-nie odczytuje danych uwierzytelniających dostawcy ani nie zapisuje bezpośrednio do bazy danych kombinacji.
+UI z przewodnikiem mieszka w `/dashboard/radar/combos`. Odczytuje tylko lokalne punkty końcowe `GET /api/radar/catalog` i `GET /api/combos/builder/options`. Nigdy nie uruchamia synchronizacji radaru, nie odczytuje danych uwierzytelniających dostawcy ani nie zapisuje bezpośrednio w bazie danych combo.
 
-Klienci MCP mogą odczytywać tę samą lokalną projekcję za pomocą `omniroute_radar_catalog` (`read:radar`). Opcjonalne
-filtry `provider`, `familyId` i `enabledOnly` są stosowane po jednym lokalnym odczycie
-`GET /api/radar/catalog`. Jego zamknięty wynik zawiera metadane katalogu oraz dostawcę/model,
-nazwę wyświetlaną, `familyId`, limit, możliwości, stan włączenia, pochodzenie i `disabledBy`; adresy URL konfiguracji,
-kroki, połączenia, adresy e-mail, klucze i dane polecające nigdy nie są zwracane. To narzędzie jest
-tylko do odczytu i nigdy nie wywołuje `/api/radar/sync`.
+Klienci MCP mogą czytać tę samą projekcję lokalną za pomocą `omniroute_radar_catalog` (`read:radar`). Opcjonalne filtry `provider`, `familyId` i `enabledOnly` są oceniane po jednym lokalnym odczycie `GET /api/radar/catalog`. Jego zamknięte dane wyjściowe obejmują metadane katalogu oraz provider/model, nazwę wyświetlaną, `familyId`, limit, możliwości, stan włączenia, pochodzenie i `disabledBy`; setup URLs, kroki, połączenia, adresy e-mail, klucze i dane polecające nigdy nie są zwracane. To narzędzie jest tylko do odczytu i nigdy nie wywołuje `/api/radar/sync`. Jeśli buforowany plik danych jest starszy niż zainstalowany katalog, `meta.olderThanRelease` ma `true`, a narzędzie zwraca modele z zainstalowanego katalogu z zastosowanymi lokalnymi zastąpieniami i elementami nagrobnymi.
 
-### Znaczniki pochodzenia
+### Markery pochodzenia
 
-Każdy scalony wpis zawiera pole `origin`, które interfejs wyświetla jako odznakę:
+Każdy scalony wpis zawiera pole `origin` które UI renderuje jako plakietkę:
 
-- `"baseline"` — niezmieniony wpis ze statycznego katalogu wydania.
-- `"radar"` — co najmniej jedno pole zostało odświeżone przez źródło danych.
-- `"local"` — operator ma co najmniej jedno lokalne nadpisanie dla tego wpisu (lokalne
-  nadpisania zawsze mają pierwszeństwo przed źródłem danych zgodnie z regułą 1, niezależnie od informacji przekazywanych przez źródło).
+- `"baseline"` — nietknięte z katalogu wydań statycznych.
+- `"radar"` — jedno lub więcej pól zostało odświeżonych przez kanał.
+- `"local"` — operator ma co najmniej jedno lokalne nadpisanie tego wpisu (lokalne nadpisanie zawsze wygrywa z kanałem zgodnie z regułą 1, niezależnie od tego, co mówi kanał).
 
 ---
 

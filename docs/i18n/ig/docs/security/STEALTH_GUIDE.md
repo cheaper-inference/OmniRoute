@@ -4,11 +4,9 @@
 
 ---
 
-> **Isi mmalite nke eziokwu:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Emelitere ikpeazụ:** 2026-09-02 — v3.8.51
-> **Ndị e bu n’uche:** Ndị injinia na-elekọta njikọta nzuzo pụrụ iche maka ndị na-eweta ọrụ.
+> **Isi mmalite nke eziokwu:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Ndị na-ege ntị:** Ndị injinia na-ejigide njikọ nzuzo nke ndị na-eweta ya.
 
-OmniRoute na-ejikọta na ndị na-eweta ọrụ nke sistemụ nsọtụ ha na-achọpụta njirimara nke ndị ahịa na-abụghị nke gọọmenti kwadoro (TLS JA3/JA4, usoro nhazi nkụnye ndị isi, ọdịdị ahụ JSON, token iguzosi ike n’ezi ihe). Ibe a na-akọwa akụkụ nzuzo ndị OmniRoute na-enye na ebe e mejuputara ha.
+OmniRoute na-ejikọta ya na ndị na-enye akụkụ ya na-arụsi ọrụ ike akara mkpisiaka ndị na-abụghị ndị ahịa (TLS JA3/JA4, nhazi nkụnye eji isi mee, ọdịdị ahụ JSON, akara nkwụsi ike). Ibe a na-edekọpụta ihe nzuzo OmniRoute na-ekpughe na ebe etinyere ya.
 
 ## Ọkwa Iwu na Ụkpụrụ Omume
 
@@ -77,65 +75,68 @@ ikike n’ụzọ doro anya tupu ikwu na ọ dakọtara na browser upstream.
 
 ---
 
-## Ngwugwu Nzuzo Claude Code
+## Claude Stealth Bundle
 
-Mgbe `cliCompatMode` dị ọkụ, OmniRoute na-agbanwe nhazi arịrịọ Claude ndị na-apụ apụ ka a ghara inwe ike ịmata ọdịiche dị n’etiti ha na okporoụzọ data `claude-cli`. Modulu atọ na-arụkọ ọrụ:
+Mgbe `cliCompatMode` dị, OmniRoute na-emegharị arịrịọ Claude na-apụ apụ ka a ghara ịmata ha na okporo ụzọ `claude-cli`. Modul atọ na-arụkọ ọrụ:
 
 ### `claudeCodeFingerprint.ts`
 
-Na-agbakọ akara mkpịsị atọ `cc_version` nke etinyere n’ime nkụnye isi ịgba ụgwọ:
+Na-agbakọ akara mkpisiaka 3-char `cc_version` agbakwunyere na nkụnye ụgwọ ịgba ụgwọ:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (e dere ya ozugbo n'ime koodu; ọ dabara na klayenti gọọmentị)
-- Ntinye: mkpụrụedemede dị na ndeksi 4, 7, 20 nke ederede ozi mbụ onye ọrụ + eriri ụdị
-- Mpụta: mmalite hex nwere mkpụrụedemede atọ
+- `FINGERPRINT_SALT = "59cf53e54c78"` (hardcoded; dakọtara onye ahịa ọrụ)
+- Ntinye: chars na index 4, 7, 20 nke eriri ụdị + ozi onye ọrụ mbụ
+- Mmepụta: 3-char hex prefix
 
-### `claudeCodeCCH.ts` (Hash Ọdịnaya Klayenti)
+### `claudeCodeCCH.ts` (Hash ọdịnaya ndị ahịa)
 
-Nnyocha iguzosi ike n’ezi ihe n’akụkụ sava nke Claude Code CLI gọọmentị na-agbakọ site na Bun/Zig. OmniRoute na-eji `xxhash-wasm` megharịa ya:
+Iguzosi ike n'ezi ihe n'akụkụ nkesa lelee koodu CLI nke gọọmentị Claude na-agbakọ site na nrụgharị Bun/Zig. OmniRoute na `xxhash-wasm`:
 
-1. Hazie body ka ọ bụrụ usoro data site na iji njide ọnọdụ `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Hex obere-mkpụrụedemede nwere mkpụrụedemede ise, nke e ji efu mejupụta n’ihu
-4. Jiri token a gbakọrọ dochie `cch=00000;`
+1. Serialize ahụ na ebe nchekwa `cch=00000;`
+2. Jiri ngbanwe ederede abụọ wuo nlele hash, n'usoro a (`hashView()`):
+   - Egwuregwu `/"model":"[^"]*"/g` ọ bụla na-aghọ `"model":""` — egwuregwu ahụ na-akwụsị na mbụ `"`, ya mere, uru nwere ihe mgbapụ (`"model":"a\"b"`) na-efunahụ naanị ruo n'okwu ahụ, dị ka onye ahịa na-eme.
+   - egwuregwu `/"max_tokens":\d+,|,?"max_tokens":\d+/g` ọ bụla na-ewepụ — naanị ọnụọgụ ọnụọgụgụ, na omimi ọ bụla
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. hex obere mkpụrụedemede 5 nwere efu
+5. Jiri akara agbakọtara dochie `cch=00000;`
 
-Konstant:
+Constant:
 
-- Seed: `0x6e52736ac806831e`
+- Mkpụrụ: `0x4d659218e32a3268` (dakọtara loopback nke koodu Claude 2.1.252 na 2.1.322)
 - Ụkpụrụ: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Na-etinye Unicode **zero-width joiner** (`U+200D`) mgbe mkpụrụedemede mbụ nke aha klayenti ndị a na-ewere dị ka "mmetụta" gasịrị, ka nzacha upstream ghara iji grep chọta ha. Ndepụta okwu ndabara:
+Fanye Unicode** ihe jikọrọ ọnụ obosara efu** (`U+200D`) mgbe agwa mbụ nke aha ndị ahịa "nwere mmetụta" nke mere na nzacha elu enweghị ike grep ha. Ndepụta mkpụrụokwu ezighi ezi:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-A na-etinye ya na: ngọngọ `system`, `messages[].content` niile, yana `tools[].description` / `tools[].function.description`. Onye na-ahụ maka sistemụ nwere ike iji `setSensitiveWords()` gbanwee ya.
+Tinyere na: ngọngọ `system`, `messages[].content` niile, na `tools[].description` / `tools[].function.description`. Onye na-arụ ọrụ-nwere ike imeri site na `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — ndị na-eweta `anthropic-compatible-cc-*`
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` ndị na-eweta
 
-Maka relay Anthropic nke ndị ọzọ nke na-anabata naanị okporoụzọ data "ezigbo Claude Code":
+Maka ndị ọzọ Anthropic relays nke na-anabata naanị okporo ụzọ "ezigbo koodu Claude ":
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` na ndabara
-- Mgbanwe "Enable redact-thinking beta" nke njikọ ọ bụla na-agbakwunye `redact-thinking-2026-02-12` mgbe upstream CC Compatible chọrọ kpọmkwem iyi echiche e kpuchiri
-- Mgbanwe "Enable summarized thinking display" nke njikọ ọ bụla na-echekwa `providerSpecificData.requestDefaults.summarizeThinking` ma na-agbakwunye `display: "summarized"` na arịrịọ echiche CC Compatible ndị na-edobebeghị ụdị ngosipụta
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (ezinụlọ Opus/Sonnet 4.x)
-- Ụzọ ndabara: `/v1/messages?beta=true`
+- Njikọ nke ọ bụla "Kwado beta echiche redact" na-agbakwunye `redact-thinking-2026-02-12` mgbe CC dakọtara na mgbago elu chọrọ kpọmkwem iyi egwu echegharịrị
+- Njikọ nke ọ bụla "Kwado ngosipụta echiche nchịkọta" gbanwee `providerSpecificData.requestDefaults.summarizeThinking` wee gbakwunye `display: "summarized"` na CC Arịrịọ echiche dakọtara nke edobebeghị ụdị ngosi.
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` ( ezinụlọ Opus/Sonnet 4.x)
+- Ụzọ mbụ: `/v1/messages?beta=true`
 
-Modulu ibe ya dị n’otu ngwugwu ahụ:
+Ụmụnna modul n'otu ngwugwu:
 
-- `claudeCodeConstraints.ts` — iwu temperature + cache-control
-- `claudeCodeToolRemapper.ts` — ịgbanwe maapụ aha ngwaọrụ
-- `claudeCodeExtraRemap.ts` — nhazi payload ndị ọzọ ka ha bụrụ otu ụdị
+- `claudeCodeConstraints.ts` — okpomọkụ + iwu njikwa cache
+- `claudeCodeToolRemapper.ts` — ngwá ọrụ-aha remapping
+- `claudeCodeExtraRemap.ts` — mmezi ụgwọ ọrụ nkịtị
 
 ---
 
@@ -155,7 +156,7 @@ Mmanye nke dị n'elu agbanyere** akụkụ Google** , ọ bụghị ihe ọ b�
 
 **Ihe kpatara nke a ji adọta nchọpụta mmetọ nke ukwuu karịa iji naanị ọkwa efu:**
 
-- Emefu akpaaka na-adịgide adịgide na ọkọlọtọ akaụntụ Google dị iche karịa ọkwa hits-oke-na-nkwụsị n'efu.
+- Emefu akpaaka na-adịgide adịgide n'otu ọkọlọtọ akaụntụ Google dị iche karịa ọkwa hits-quota-na-stop.
 - Overages kredit enweghị ọnụego elu ụlọ, yabụ onye ahịa na-ahazi ezighi ezi nwere ike ịgba ọkụ n'ime narị USD n'ime nkeji wee yie ka ire ere API-igodo ma ọ bụ okporo ụzọ bot.
 - Ọtụtụ ndị ọrụ OmniRoute na-akụ kredit overage n'otu n'otu site na otu mpụta IP na-eme ka mgbama ahụ.
 
@@ -163,7 +164,7 @@ Mmanye nke dị n'elu agbanyere** akụkụ Google** , ọ bụghị ihe ọ b�
 
 1. Debe `ANTIGRAVITY_CREDITS=off` ndabara belụsọ ma onye ọrụ na-anabata nke ọma kredit akwụ ụgwọ yana ihe egwu mmanye akaụntụ. `retry` na-ebu ụzọ ziga arịrịọ nkịtị wee tinye kredit kacha otu ugboro mgbe oke ruru 429; `always` na-agbanye kredit na arịrịọ mbụ.
 2. **Gbasaa ibu n'ofe ndị na-eweta site na Auto-Combo** (`model: "auto"` ma ọ bụ `kr/glm/etc` -combo) kama imeju otu akaụntụ Antigravity.
-3. **Tọọ oke njikọ RPM kwa otu** na ibe edezi Antigravity onye na-eweta (Dashboard → Ndị na-enye → Antigravity → njikọ → ọnụego oke). 30–60 RPM bụ oke mgbachitere elu maka ijigide ya.
+3. **Tọọ oke njikọ RPM kwa otu** na ibe ndezi Antigravity onye na-eweta (Dashboard → Ndị na-enye → Antigravity → njikọ → ọnụego oke). 30–60 RPM bụ oke mgbachitere elu maka ijigide ya.
 4. **Jiri ịkparịta ụka n'igwe kwụsiri ike, nke onye ọrụ na-achịkwa** ma zere ịkekọrịta otu akaụntụ n'ofe ndị ọrụ ma ọ bụ ibu ọrụ enweghị njikọ.
 5. **Ọ bụrụ na amachibidoro ya** : mkpesa site na `support.google.com` → "Weghachite ohere Workspace/Account " na `quota_exceeded` / `service disabled` nzaghachi Google ziri ezi. Ekwenyeghị nkwa mweghachi.
 
@@ -195,7 +196,7 @@ Isi ihe emetụ aka:
 
 - `open-sse/executors/antigravity.ts` — na-agụ `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — nzere plumbing
-- Akụkọ mbụ merenụ: Mkparịta ụka [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Akụkọ mbụ merenụ: Mkparịta ụka [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

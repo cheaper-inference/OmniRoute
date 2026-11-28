@@ -236,19 +236,19 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 | `context-relay`     | 跨目标传递上下文                                           |
 | `fill-first`        | 在进入下一步之前先填满配额                                 |
 | `p2c`               | 两种选择的力量                                             |
-| `random`            | 均匀随机                                                   |
-| `least-used`        | 选择最近使用次数最少的一个                                 |
-| `cost-optimized`    | 最便宜的健康目标优先                                       |
-| `reset-aware`       | 了解提供者重置窗口                                         |
-| `reset-window`      | 重置基于窗口的路由                                         |
+| `random`            | 根据要求进行新鲜洗牌                                       |
+| `least-used`        | 选择记录请求最少的一个                                     |
+| `cost-optimized`    | 最低目录输入价格优先                                       |
+| `reset-aware`       | 剩余配额+重置紧急                                          |
+| `reset-window`      | 首先重置最快的配额窗口                                     |
 | `expiry-first`      | 先使用额度到期未使用的账户                                 |
 | `headroom`          | 最剩余的配额空间优先                                       |
 | `quota-weighted`    | 跳过耗尽的帐户，然后按剩余配额提取÷飞行负载                |
-| `strict-random`     | 真正统一（无质量加权）                                     |
+| `strict-random`     | 洗牌牌组：每个目标重复一次                                 |
 | `auto`              | 使用 16 因素评分 (`autoCombo/`)                            |
 | `lkgp`              | 最后已知的良好提供者优先                                   |
-| `context-optimized` | 最适合长上下文请求                                         |
-| `cache-optimized`   | 将每个可重复使用的提示前缀固定到同一帐户（提示缓存命中）   |
+| `context-optimized` | 首先是已知最大的上下文窗口                                 |
+| `cache-optimized`   | 首选可能在缓存中保存提示前缀的帐户                         |
 | `fusion`            | 并行扇出到面板，然后通过法官进行合成（`fusion.ts`）        |
 | `pipeline`          | 链式步骤—每个目标的输出都会馈送到下一个目标                |
 | `jev`               | 选择加入： TypeSafe Jev 承认哪些排名条目运行；否则你的订单 |
@@ -371,7 +371,7 @@ const result = await executor.execute({
 });
 ````
 
-解析通过`ExecutorRegistry` (`executors/registry.ts`)：每个专用执行器都在`executors/index.ts`的内置表中声明，并在模块加载时通过`registerExecutor(alias, instance)`注册； `getExecutor()`查阅注册表，并为没有专门条目的任何提供者回退到记忆的`DefaultExecutor` 。完整别名→执行器映射的特征是黄金测试`tests/unit/executor-map-golden.test.ts`。
+解析通过`ExecutorRegistry` (`executors/registry.ts`)：每个专用执行器都在`executors/index.ts`的内置表中声明，并在模块加载时通过`registerExecutor(alias, instance)`注册；对于没有专门条目的任何提供者， `getExecutor()`会查阅注册表并回退到记忆的`DefaultExecutor` 。完整别名→执行器映射的特征是黄金测试`tests/unit/executor-map-golden.test.ts`。
 
 ---
 

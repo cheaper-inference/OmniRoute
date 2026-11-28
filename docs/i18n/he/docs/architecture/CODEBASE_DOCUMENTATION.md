@@ -4,18 +4,11 @@
 
 ---
 
-> **גרסה:** v3.8.51
-> **עדכון אחרון:** 2026-06-28
-> **קהל יעד:** מהנדסים התורמים ל-OmniRoute או בונים אינטגרציות על גביו.
+> **גִרְסָה:** v3.8.51** קהל:** מהנדסים תורמים ל- OmniRoute או בונים עליו אינטגרציות.
 >
-> לתרשימי ארכיטקטורה ברמה גבוהה ולהסבר העומד מאחורי כל תת-מערכת, קראו את
-> [ARCHITECTURE.md](./ARCHITECTURE.md). לצלילה לעומק בתת-מערכות ספציפיות
-> (Auto Combo, שרת MCP, שרת A2A, מיומנויות, זיכרון, סוכני ענן, עמידות,
-> דחיסה וכו') עיינו בקבצים הייעודיים שלהן בתיקיית `docs/` זו.
+> עבור דיאגרמות ארכיטקטורה ברמה גבוהה וההיגיון מאחורי כל תת-מערכת, קרא [ARCHITECTURE.md](./ARCHITECTURE.md). לצלילות עמוקות בתתי מערכות בודדות (Auto Combo, שרת MCP, שרת A2A, מיומנויות, זיכרון, סוכני ענן, חוסן, דחיסה וכו') עיין בקבצים הייעודיים שלהם בספריית `docs/` זו.
 
-קובץ זה מתאר **מה קיים כיום במאגר** כדי שמהנדס חדש יוכל
-להתמצא בעץ, להבין את שכבות זמן הריצה ולדעת היכן להוסיף קוד
-מבלי להמציא מודולים חדשים.
+קובץ זה מתאר** מה שקיים היום במאגר** כך שמהנדס חדש יוכל לנווט בעץ, להבין את שכבות זמן הריצה ולדעת היכן להוסיף קוד מבלי להמציא מודולים חדשים.
 
 ---
 
@@ -566,35 +559,14 @@ bin/
 
 ## 8. `scripts/`
 
-מאורגנת ב-6 תיקיות משנה לפי ייעוד.
+מאורגן ל-6 תיקיות משנה לפי מטרה.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, וכן כלי העזר לקריאה בלבד להשגחה על PR:
-  `ci-discriminate.sh` (מסווג את חתימות הבדיקות שנכשלו ב-PR לשלו / בירושה /
-  לא ידוע, בהשוואה ל-PR ייחוס או לבעיה האדומה בבסיס) ו-`audit-worktree.sh`
-  (קבצים עם שינויים, אזורים מוגנים, בדיקות assert שהוסרו, ספירת השתקות, קובצי
-  tsconfig זמניים שנותרו, ראש ה-PR לעומת HEAD המקומי — לפני קבלת ה-PR של עובד).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, בתוספת העזרה PR בייביסיטר לקריאה בלבד `ci-discriminate.sh` (ממיין את ה- PR בחתימה לא ידועה בחתימה לא ידועה/שלה. PR או הבעיה הבסיסית-אדום) ו- `audit-worktree.sh` (קבצים מלוכלכים, משטחים מוגנים, הצהרות שהוסרו, ספירות דיכוי, שאריות tmp tsconfigs, PR head לעומת HEAD — מקומי לפני קבלת PR של עובד).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` מסמן גרסאות המיוחסות במפורש ל- OmniRoute (3.6.x ומעלה). הצ'ק מתעלם מתאריכים.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

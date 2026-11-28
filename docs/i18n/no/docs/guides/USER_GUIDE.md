@@ -246,33 +246,41 @@ Modeller: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Kombinasjoner
+## 🎨 Combos
 
-Du kan endre rekkefølgen på kombinasjonskort direkte i **Kontrollpanel → Kombinasjoner** ved å dra håndtaket på hvert kort. Rekkefølgen lagres i SQLite og gjenopprettes ved ny innlasting.
+Du kan bestille kombinasjonskort direkte inn** Dashboard → Combos** ved å dra i håndtaket på hvert kort. Bestillingen lagres i SQLite og gjenopprettes ved omlasting.
 
-### Eksempel 1: Maksimer abonnement → Rimelig reserve
+### Finn en leverandør, modell eller konto
 
-```
-Kontrollpanel → Kombinasjoner → Opprett ny
+I Opprett eller rediger kombinasjon inkluderer trinn-for-trinn-leverandør-, modell-, konto- og kombinasjonsreferansevelgeren et lokalt søkefelt. Søk etter et vist navn, identifikator, leverandøralias eller modellkilde, og klikk deretter på et resultat eller bruk piltastene og Enter. Flere søkeord må alle samsvare. Hvis du sletter søket eller trykker på Escape, blir den valgte verdien uendret.
 
-Navn: premium-coding
-Modeller:
-  1. cc/claude-opus-4-7 (Primærabonnement)
-  2. glm/glm-4.7 (Rimelig reserve, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Billigste reserveløsning, $0.3/1M)
+Det automatiske kontovalget forblir synlig mens du søker. Den valgfrie kontorestriksjonslisten har et eget filter: utvalgte kontoer utenfor de synlige resultatene forblir valgt, og tellingen inkluderer dem. Skjulte e-postfragmenter er ikke søkbare mens e-postvern er på. Legg til trinnet og lagre kombinasjonen som vanlig; å skrive et søk lagrer eller tester ikke noe.
 
-Bruk i CLI: premium-coding
-```
+Det samme lokale søket er tilgjengelig for tilkoblingstestmodeller, Custom CLI standard- og aliasmodeller, og lagrede proxy-valg. Eksisterende handlinger for lagring, bruk og test forblir atskilt.
 
-### Eksempel 2: Kun gratis (ingen kostnad)
+### Eksempel 1: Maksimer abonnement → Cheap Backup
 
 ```
-Navn: free-combo
-Modeller:
-  1. if/kimi-k2.7-code (oppført med gratis tilgang; leverandørbegrensninger kan gjelde)
-  2. kr/qwen3-coder-next (gratis reserveløsning fra Kiro)
+Dashboard → Combos → Create New
 
-Kostnad: for øyeblikket oppført som $0; vilkår og tilgjengelighet kan endres
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### Eksempel 2: Kun gratis (nullkostnad)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -432,7 +440,7 @@ Når du ikke lenger trenger OmniRoute, tilbyr vi to raske skript for en ren fjer
 ### VPS utplassering
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -514,8 +522,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -710,13 +718,13 @@ Merknader:
 
 ### Tilpassede OpenAI-kompatible leverandører
 
-Enhver gateway som snakker OpenAI API (en selvvertstjent proxy, vLLM, en tredjeparts aggregator) kan legges til som sin egen leverandørnode:
+Enhver gateway som snakker OpenAI API (en selvdrevet proxy, vLLM, en tredjeparts aggregator) kan legges til som sin egen leverandørnode:
 
 1. **Leverandører → Legg til OpenAI kompatibel** .
 2. **Navn** : en visningsetikett for noden.
 3. **Prefiks** : rutenavnet. Klienter kaller modeller som `<prefix>/<model>`, så en node med prefikset `mygw` tjener `mygw/gpt-4o-mini`. Påkrevd; det er ingen tegnbegrensning.
 4. **API Type** : endepunktfamilien gatewayen betjener (chatfullføringer, svar, innebygginger, lyd, bilder).
-5. **Base URL** : API roten, opp til og inkludert `/v1` (for eksempel `https://gateway.example.com/v1`), ikke hele `/chat/completions` banen. Gatewayer med ikke-standard stier setter dem under** Avanserte innstillinger** (chatbane, modellerbane).
+5. **Base URL** : API roten, opp til og med `/v1` (for eksempel `https://gateway.example.com/v1`), ikke hele `/chat/completions` banen. Gatewayer med ikke-standard stier setter dem under** Avanserte innstillinger** (chatbane, modellerbane).
 6. De**API nøkkel (for sjekk)** feltet tester kun tilkoblingen. Etter å ha opprettet noden, åpne den og bruk** Legg til tilkobling** for å lagre nøkkelen som forespørsler vil bruke.
 
 Noden får en intern id av formen `openai-compatible-<apiType>-<uuid>`; du trenger aldri å skrive det, prefikset er det offentlige navnet.
@@ -753,7 +761,7 @@ Disse tastene går i en tilkoblings `providerSpecificData` (for eksempel via `PU
 
 ### Kjede OmniRoute Peers
 
-En annen OmniRoute gateway kan legges til som en** Tilpasset OpenAI-kompatibel** leverandør. Bruk peerens `/v1` base URL og en dedikert, minst-privilegert API nøkkel utstedt av den peeren.
+En annen OmniRoute gateway kan legges til som en** Egendefinert OpenAI-kompatibel** leverandør. Bruk peerens `/v1` base URL og en dedikert, minst-privilegert API nøkkel utstedt av den peeren.
 
 For gjensidige eller multi-hop kjeder, aktiver opt-in loop guard på hver gateway:
 
@@ -883,8 +891,8 @@ Konfigurer via** Dashboard → Innstillinger → Ruting** . Dashbordet viser de 
 - `least-used` og `cost-optimized`
 - `auto` — score-drevet på tvers av alle kandidater
 - `lkgp` (Last Known Good Provider) — pins til den siste vellykkede leverandøren, og faller deretter tilbake til reglene
-- `context-optimized` — velger modellen med det største gratis kontekstvinduet
-- `context-relay` — lenker langkontekstmodeller for oppfølgingssvinger
+- `context-optimized` — prøver modellen med det største kjente kontekstvinduet først
+- `context-relay` — prioritert rekkefølge pluss et overleveringssammendrag når samtalen flyttes til en annen konto
 
 #### Ekstern Sticky Session Header
 
@@ -904,7 +912,7 @@ underscores_in_headers on;
 
 #### Jokertegn modellaliaser
 
-Lag jokertegnmønstre for å tilordne modellnavn på nytt:
+Lag jokertegnmønstre for å omordne modellnavn:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
@@ -932,7 +940,7 @@ Her er eksempler på mønstre for å kombinere flere leverandører og ruting mel
 
 #### 1. Coding Agent Combo: High-End Reasoning med Cost/Speed Fallback
 
-Ideell for kodingsmidler (OpenCode, Claude Code, Cursor, Cline). Ruter i utgangspunktet til grenseresonneringsmodeller, faller tilbake til raske kodingsmodeller på kvotebruk eller feil.
+Ideell for kodingsmidler (OpenCode, Claude Code, Cursor, Cline). Ruter innledningsvis til frontier resonneringsmodeller, faller tilbake til raske kodingsmodeller på kvotebruk eller feil.
 
 - **Dashbord** : Combos → Ny Combo → Navn: `agent-coding` → Strategi: `Priority`
 - **Modeller** :
@@ -1016,9 +1024,9 @@ OmniRoute implementerer motstandskraft på leverandørnivå med fem komponenter:
 
 4. **Vent på nedkjøling** — Hvis alle kandidatforbindelser allerede kjøles ned, kan OmniRoute vente på den tidligste nedkjølingen og automatisk prøve den samme klientforespørselen på nytt.
 
-5. **Rate Limit Auto-deteksjon** — Når oppstrømsleverandører returnerer eksplisitte ventevinduer, overstyrer disse hintene den lokale tilkoblingsavkjølingen når innstillingen er aktivert.
+5. **Rate Limit Auto-deteksjon** — Når oppstrømsleverandører returnerer eksplisitte ventevinduer, overstyrer disse hintene nedkjølingen av lokal tilkobling når innstillingen er aktivert.
 
-**Pro tips:** Bruk** Helse** side for å inspisere og tilbakestille live-leverandørbrytere etter et strømbrudd. Resilience-siden endrer kun konfigurasjon.
+**Pro tips:** Bruk** Helse** side for å inspisere og tilbakestille live leverandørbrytere etter et strømbrudd. Resilience-siden endrer kun konfigurasjon.
 
 ---
 
@@ -1157,9 +1165,9 @@ Konfigurer innbalansering per kombinasjon** Dashboard → Combos → Create/Edit
 | **Minst brukt**          | Ruter til modellen med færrest nylige forespørsler (bruker kombinasjonsberegninger) |
 | **Kostnadsoptimalisert** | Ruter til den billigste tilgjengelige modellen (bruker pristabell)                  |
 
-Globale kombinasjonsstandarder kan angis** Dashboard → Innstillinger → Ruting → Combo Standarder** . Tidsavbrudd for kombinasjonsmål arver gjeldende tidsavbrudd for forespørsel som standard. Bruk** Måltidsavbrudd (sekunder)** på kombinasjonsstandarder eller en individuell kombinasjon bare når en kortere grense per mål skal utløse raskere fallback.
+Globale kombinasjonsstandarder kan angis** Dashboard → Innstillinger → Ruting → Combo Standarder** . Kombinasjonstidsavbrudd arver gjeldende tidsavbrudd for forespørsel som standard. Bruk** Måltidsavbrudd (sekunder)** på kombinasjonsstandarder eller en individuell kombinasjon bare når en kortere grense per mål skal utløse raskere fallback.
 
-Kombinasjonsoptimaliseringer med null latens er opt-in. Forlate** Optimaliseringer med null latens** deaktivert for å forhindre at disse latensfunksjonene kjører mot reservemål, hopper over mål basert på TTFT historikk eller komprimerer reserveforespørsler; aktiverer den tillater konfigurert sikring, prediktive TTFT hopp og proaktiv fallback-komprimering for å bytte routing/request fidelity for lavere halelatens.
+Kombinasjonsoptimaliseringer med null latens er opt-in. Forlate** Null-latensoptimaliseringer** deaktivert for å forhindre at disse latensfunksjonene kjører mot reservemål, hopper over mål basert på TTFT historikk eller komprimerer reserveforespørsler; aktiverer den tillater konfigurert sikring, prediktive TTFT hopp og proaktiv fallback-komprimering for å bytte routing/request fidelity for lavere halelatens.
 
 Deaktiver** Begrunnelse token buffer** når oppstrømsleverandører krever strenge `max_tokens` / `maxOutputTokens` -grenser. Når den er aktivert, legger kombinasjonsruting bare til resonneringsmodellens takhøyde for modeller med en kjent utgangsgrense og lar klienttokengrensen være uendret når den sikre bufrede verdien vil overskride denne grensen. Hvis klientgrensen allerede er over et kjent tak, klemmer OmniRoute den ned til den dekselet før du sender oppstrømsforespørselen.
 
@@ -1172,7 +1180,7 @@ Tilgang via** Dashboard → Health** . Sanntids systemhelseoversikt med 6 kort:
 | Kort                  | Hva den viser                                                  |
 | --------------------- | -------------------------------------------------------------- |
 | **Systemstatus**      | Oppetid, versjon, minnebruk, datakatalog                       |
-| **Leverandørhelse**   | Global leverandør strømbryter kjøretidstilstand                |
+| **Leverandørhelse**   | Global leverandørs strømbryter kjøretidstilstand               |
 | **Satsgrenser**       | Aktive tilkoblingsnedkjølinger per konto med gjenværende tid   |
 | **Aktive lockouter**  | Aktive lockouter med modellomfang og midlertidige utelukkelser |
 | **Signaturbuffer**    | Dedupliseringsbufferstatistikk (aktive nøkler, trefffrekvens)  |
@@ -1333,32 +1341,34 @@ Se [API_REFERENCE.md](../reference/API_REFERENCE.md) for en fullstendig katalog 
 
 ## 💻 Intern CLI
 
-OmniRoute leveres med et internt CLI (`omniroute …`) for oppsett, diagnostikk og kontroll under kjøring. Dette er **adskilt fra siden «CLI-verktøy» i kontrollpanelet**, som konfigurerer tredjeparts-CLI-er (Claude Code, Cursor, Codex, Cline, …), slik at de kan kommunisere med OmniRoute.
+OmniRoute sender en intern CLI (`omniroute …`) for oppsett, diagnostikk og kjøretidskontroll. Dette er** atskilt fra siden "CLI Tools" i dashbordet** , som konfigurerer tredjeparts CLIs (Claude Code, Cursor, Codex, Cline, ...) slik at de kan snakke med OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktiv veiviser (passord, leverandører, kombinasjoner)
-omniroute setup --non-interactive  # Egnet for CI
-omniroute doctor                   # Helsediagnostikk (datamappe, database, leverandører, porter)
-omniroute providers available      # Vis støttede leverandører
-omniroute providers list           # Vis konfigurerte tilkoblinger
-omniroute providers test <id>      # Utfør en direktetest av en leverandørtilkobling
-omniroute combos list              # Vis kombinasjoner
-omniroute combos switch <name>     # Angi standardkombinasjon
-omniroute models                   # Vis tilgjengelige modeller (--json, --search)
-omniroute keys add | list | remove # Administrer API-nøkler fra terminalen
-omniroute backup                   # Opprett et øyeblikksbilde av konfigurasjon + database
-omniroute restore [<timestamp>]    # Gjenopprett fra et øyeblikksbilde
-omniroute health                   # Detaljert helsestatus (sikringsmekanismer, hurtigbuffer, minne)
-omniroute quota                    # Bruk av leverandørkvoter
-omniroute mcp status               # Status for MCP-serveren
-omniroute a2a status               # Status for A2A-serveren
-omniroute tunnel list|create|stop  # Cloudflare-/Tailscale-/ngrok-tunneler
-omniroute reset-password           # Tilbakestill administratorpassordet
-omniroute --mcp                    # Start MCP-serveren over stdio
-omniroute --port 3000              # Start serveren på en egendefinert port
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Tips: Kombiner `omniroute doctor --json` med overvåkingsverktøyet ditt for å varsle om leverandørtilkoblinger som ikke fungerer som de skal.
+Tips: par `omniroute doctor --json` med overvåkingsverktøyet ditt for å varsle om en ødelagt lokal installasjon. `doctor` tester ikke leverandørtilkoblinger; bruk `omniroute providers test <id>` for det.
 
 ---
 

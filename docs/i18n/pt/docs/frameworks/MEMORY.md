@@ -4,30 +4,13 @@
 
 ---
 
-> **Fonte fidedigna:** `src/lib/memory/` e `src/app/api/memory/`
-> **Última atualização:** 2026-06-28 — v3.8.40 (desativada por predefinição + recuperação de quantização int8)
+> **Fonte da verdade:** `src/lib/memory/` e `src/app/api/memory/`
 
-O OmniRoute fornece memória conversacional persistente associada à chave de API (e,
-opcionalmente, ao ID da sessão). As memórias são extraídas automaticamente das respostas
-do LLM através de correspondência leve de padrões com expressões regulares e reinjetadas
-nos pedidos subsequentes como uma mensagem de sistema inicial (ou como a primeira mensagem
-do utilizador para fornecedores que rejeitem a função de sistema).
+OmniRoute fornece memória conversacional persistente codificada pela chave API (e opcionalmente id de sessão). As memórias são extraídas automaticamente das respostas LLM através da correspondência leve de padrões regex e injetadas de volta nos pedidos subsequentes como uma mensagem principal do sistema (ou primeira mensagem do utilizador para os fornecedores que rejeitam a função do sistema).
 
-> **A memória está DESATIVADA por predefinição (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> é agora `false` (`src/lib/memory/settings.ts`). A ativação da memória injeta até
-> `maxTokens` (~2k) de contexto recuperado em **todos** os pedidos de conversação, o que é
-> faturado — um custo inesperado para novas instalações e para clientes que gerem o seu
-> próprio contexto. Ative-a explicitamente em **Definições → Memória** (o
-> `MemorySkillsTab` apresenta um aviso sobre o custo de tokens quando a memória está ativada).
-> Um cliente pode excluir um único pedido através do cabeçalho de pedido
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — consulte a tabela de cabeçalhos de pedido em
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Um pedido sem memória define
-> `memoryOwnerId = null`, o que desativa **tanto** a injeção de memória como a de competências
-> nesse pedido (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **A memória é OFF por defeito (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` é agora `false` (`src/lib/memory/settings.ts`). A activação da memória injecta até `maxTokens` (~ 2k) de contexto recuperado em** cada** pedido de chat, que — um custo surpreendente para novas instalações e para clientes que gerem o seu próprio contexto. Ative explicitamente em** Configurações memória →** (o `MemorySkillsTab` mostra uma chamada de aviso de custo de token quando a memória está ativada). Um cliente pode cancelar um único pedido com o cabeçalho de pedido `x-omniroute-no-memory` (`true`/`1`/`yes`) — consulte a tabela de cabeçalho de pedido em [API_REFERENCE.md](../reference/API_REFERENCE.md). Um pedido sem memória define `memoryOwnerId = null`, o que desativa** ambos** injecção de memória e habilidade para esse pedido (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-A memória tem um **âmbito por chave de API**, não por utilizador — todos os pedidos autenticados
-com a mesma chave de API partilham o mesmo conjunto de memórias, com a possibilidade de restringir
-adicionalmente o âmbito através de `sessionId`.
+A memória é** com escopo definido por chave API** , e não por utilizador — cada pedido autenticado com a mesma chave API partilha o mesmo conjunto de memória, com âmbito adicional opcional por `sessionId`.
 
 ## Arquitetura
 
@@ -333,27 +316,17 @@ A estratégia de obtenção de `MemoryConfig` é `exact`, `semantic` ou `hybrid`
 e o âmbito é `session`, `apiKey` ou `global`. O âmbito predefinido de
 `getMemorySettings()` é `apiKey`.
 
-## Extração de factos (`extraction.ts`)
+## Extracção de factos (`extraction.ts`)
 
-A extração é **baseada em expressões regulares**, não num LLM — é executada no processo com
-`setImmediate()`, para nunca bloquear o fluxo da resposta:
+A extração é** baseado em regex** , e não — baseado em LLM, é executado no processo com `setImmediate()`, pelo que nunca bloqueia o fluxo de resposta:
 
-- **Padrões de preferência** → `MemoryType.FACTUAL`
-  (por exemplo, `Prefiro …`, `Gosto muito de …`, `o meu favorito é …`, `Odeio …`)
-- **Padrões de decisão** → `MemoryType.EPISODIC`
-  (por exemplo, `Vou utilizar …`, `Escolhi …`, `Optei por …`, `Vou adotar …`)
-- **Padrões comportamentais** → `MemoryType.FACTUAL`
-  (por exemplo, `Normalmente …`, `Faço sempre …`, `Tenho tendência para …`)
+- **Padrões de preferência** → `MemoryType.FACTUAL` (eg `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Padrões de decisão** → `MemoryType.EPISODIC` (eg `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Padrões padrão** → `MemoryType.FACTUAL` (eg `I usually …`, `I always …`, `I tend to …`)
 
-Cada correspondência é sanitizada (`trim`, redução de espaços em branco, limitada a 500 caracteres),
-desduplicada dentro do lote através de uma `factKey(category, content)` estável e
-armazenada através de `createMemory()` com os metadados
-`{category, extractedAt, source: "llm_response"}`. O texto de entrada é limitado a
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — quando é mais longo, é utilizada a **parte final** do texto
-para garantir que o conteúdo mais recente do assistente é sempre considerado.
+Cada correspondência é higienizada (`trim`, whitespace-collapse, limitada a 500 caracteres), desduplicada dentro do lote através de um `factKey(category, content)` estável e armazenada via `createMemory()` com metadados `{category, extractedAt, source: "llm_response"}`. O texto de entrada está limitado a 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — quando maior, o** cauda** do texto é utilizado para que o conteúdo mais recente do assistente participe sempre.
 
-`extractFactsFromText(text)` é exportada para testes e devolve os factos estruturados
-sem os armazenar.
+`extractFactsFromText(text)` é exportado para testes e devolve os factos estruturados sem os armazenar.
 
 ## Obtenção (`retrieval.ts`)
 
@@ -533,45 +506,38 @@ metadata?}` → encapsula `createMemory()`. Aceita apenas os 4 tipos canónicos:
 
 Consulte [MCP-SERVER.md](./MCP-SERVER.md) para obter detalhes sobre o transporte e o âmbito.
 
-## Painel de controlo (Memory Studio)
+## Painel (Memory Studio)
 
-`src/app/(dashboard)/dashboard/memory/page.tsx` é agora um **Studio com 3 separadores**:
+`src/app/(dashboard)/dashboard/memory/page.tsx` é agora um** Estúdio de 3 guias** :
 
 ### Separador: Memórias
 
-- Cartão de conceito (explicação recolhível "Como funciona").
-- Lista em tempo real, pesquisa e paginação (atraso de 300 ms).
-- Filtro por tipo (`factual` / `episodic` / `procedural` / `semantic` / todos).
-- Janela modal para adicionar memória (chave, conteúdo, tipo).
-- Edição em linha (botão de lápis → `PUT /api/memory/[id]`).
-- Eliminação por linha (com caixa de diálogo de confirmação).
-- Exportação JSON da página atual; importação JSON através do seletor de ficheiros.
+- Cartão conceptual (explicativo desdobrável "Como funciona").
+- Lista, pesquisa e paginação em tempo real (debounce 300 ms).
+- Introduza filtro (`factual` / `episodic` / `procedural` / `semantic` /all).
+- Modal de adição de memória (chave, conteúdo, tipo).
+- Edição embutida (botão de lápis → `PUT /api/memory/[id]`).
+- Apagar por linha (com caixa de diálogo de confirmação).
+- exportação JSON da página atual; Importação JSON via seletor de ficheiros.
 - Cartões de estatísticas: `totalEntries`, `tokensUsed`, `hitRate`.
-- Botão "Compactar antigas" → `POST /api/memory/summarize` (uma simulação mostra primeiro
-  o número de candidatas e, em seguida, pede confirmação).
-- Um indicador verde/vermelho do estado, controlado por `GET /api/memory/health`.
+- Botão "Compactar antigo" → `POST /api/memory/summarize` (o teste mostra primeiro a contagem de candidatos e depois confirma).
+- Um ponto de saúde green/red impulsionado por `GET /api/memory/health`.
 
-### Separador: Área de testes
+### Separador: Playground
 
-- Campo de consulta + seletor de estratégia (Exata / Semântica / Híbrida) + orçamento de tokens.
-- "Simular" → `POST /api/memory/retrieve-preview` — apresenta resultados ordenados com
-  `score`, `tier`, `tokens`, `vecScore`, `ftsScore`.
-- Painel de resolução que mostra a origem dos embeddings/armazenamento vetorial utilizados e
-  se ocorreu um fallback.
+- Seletor de estratégia + de entrada de consulta (exato/semântico/híbrido) orçamento de token +.
+- "Simular" → `POST /api/memory/retrieve-preview` — mostra resultados ordenados com `score`, `tier`, `tokens`, `vecScore`, `ftsScore`.
+- Painel de resolução que mostra qual a fonte de incorporação/armazenamento de vetores que foi utilizada e se ocorreu um fallback.
 
-### Separador: Motor
+### Guia: Motor
 
-- Painel de estado do motor (indicador de palavras-chave FTS5, indicador de embeddings, indicador do armazenamento vetorial,
-  indicador do estado do Qdrant, indicador de reordenação).
+- Painel de estado do mecanismo (chip FTS5 de palavra-chave, chip de incorporação, chip de armazenamento de vetor, chip de saúde Qdrant, chip de reclassificação).
 - Botão "Reindexar agora" → `POST /api/memory/reindex`.
-- Seletor da origem dos embeddings (automática / remota / estática / transformers + opções).
-- Cartão de configuração do Qdrant (opção de ativação, anfitrião/porta/coleção/chave, teste de ligação,
-  teste de pesquisa semântica, limpeza).
-- Cartão de configuração da reordenação (opção de ativação, seletor de fornecedor/modelo).
+- Seletor de fonte de incorporação (alterna automaticamente / remoto / estático / transformadores + ).
+- placa de configuração Qdrant (activar alternância, host/port/collection/key, testar ligação, teste de pesquisa semântica, limpeza).
+- Cartão de configuração de reclassificação (activar alternância, selector provider/model ).
 
-As definições de memória e do Qdrant também se encontram em
-`/dashboard/settings → Memória e competências` (`MemorySkillsTab.tsx`) para
-a interface de definições legada/global.
+As definições de memória e Qdrant também estão em `/dashboard/settings → Memory & Skills` (`MemorySkillsTab.tsx`) para a superfície de definições legacy/global.
 
 ## Colocação em cache
 

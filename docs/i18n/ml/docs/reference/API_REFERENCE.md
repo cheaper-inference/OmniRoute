@@ -49,7 +49,7 @@ OpenAI-യുമായി പൊരുത്തപ്പെടുന്ന പ�
 
 ---
 
-## ചാറ്റ് പൂർത്തീകരണങ്ങൾ
+## ചാറ്റ് പൂർത്തിയാക്കലുകൾ
 
 ```bash
 POST /v1/chat/completions
@@ -65,33 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### ഇഷ്ടാനുസൃത ഹെഡറുകൾ
+### ഇഷ്ടാനുസൃത തലക്കെട്ടുകൾ
 
-| Header                   | Direction | Description                                                                                                                                                                                                                                    |
-| ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | അഭ്യർത്ഥന | കാഷ് ഒഴിവാക്കാൻ `true` ആയി സജ്ജമാക്കുക                                                                                                                                                                                                         |
-| `x-omniroute-no-memory`  | അഭ്യർത്ഥന | ഈ അഭ്യർത്ഥനയ്ക്കുള്ള മെമ്മറി + skills injection ഒഴിവാക്കാൻ `true` ആയി സജ്ജമാക്കുക (no-cache-നെ പ്രതിഫലിപ്പിക്കുന്നു; ഓരോ കോൾക്കുമുള്ള token/cost overhead ഒഴിവാക്കുന്നു)                                                                       |
-| `X-OmniRoute-Progress`   | അഭ്യർത്ഥന | പുരോഗതി ഇവന്റുകൾക്കായി `true` ആയി സജ്ജമാക്കുക                                                                                                                                                                                                  |
-| `X-Session-Id`           | അഭ്യർത്ഥന | ബാഹ്യ സെഷൻ affinity-യ്ക്കുള്ള sticky session key                                                                                                                                                                                               |
-| `x_session_id`           | അഭ്യർത്ഥന | Underscore variant-ും സ്വീകരിക്കുന്നു (നേരിട്ടുള്ള HTTP)                                                                                                                                                                                       |
-| `X-OmniRoute-Session-Id` | അഭ്യർത്ഥന | Caller നൽകുന്ന session/conversation tag (memory-ലേക്കും നൽകുന്നു). ഇത് ഉള്ളപ്പോൾ, ഓരോ സെഷനിലെയും ചെലവ് attribution-നായി (#8249) `call_logs.session_tag`-ലേക്ക് verbatim ആയി persist ചെയ്യുന്നു — ഇല്ലാത്തപ്പോൾ ഒരിക്കലും synthesized ചെയ്യില്ല |
-| `Idempotency-Key`        | അഭ്യർത്ഥന | Dedup key (5s window)                                                                                                                                                                                                                          |
-| `X-Request-Id`           | അഭ്യർത്ഥന | Alternative dedup key                                                                                                                                                                                                                          |
-| `x-omniroute-connection` | അഭ്യർത്ഥന | ഒരു single-model അഭ്യർത്ഥനയെ അതിന്റെ id ഉപയോഗിച്ച് ഒരു provider connection (account)-ലേക്ക് pin ചെയ്യുന്നു — [ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള Account pinning](#account-pinning-per-request) കാണുക                                                    |
-| `X-OmniRoute-Cache`      | പ്രതികരണം | `HIT` അല്ലെങ്കിൽ `MISS` (non-streaming)                                                                                                                                                                                                        |
-| `X-OmniRoute-Idempotent` | പ്രതികരണം | Deduplicate ചെയ്തിട്ടുണ്ടെങ്കിൽ `true`                                                                                                                                                                                                         |
-| `X-OmniRoute-Progress`   | പ്രതികരണം | പുരോഗതി tracking ഓണാണെങ്കിൽ `enabled`                                                                                                                                                                                                          |
-| `X-OmniRoute-Session-Id` | പ്രതികരണം | OmniRoute ഉപയോഗിച്ച effective session ID                                                                                                                                                                                                       |
-| `X-OmniRoute-Request-Id` | പ്രതികരണം | Request correlation id (അറിയാവുന്നപ്പോൾ)                                                                                                                                                                                                       |
-| `X-OmniRoute-Version`    | പ്രതികരണം | OmniRoute build version (എപ്പോഴും ഉണ്ടായിരിക്കും)                                                                                                                                                                                              |
-| `X-OmniRoute-Cost-Saved` | പ്രതികരണം | HIT-ൽ കാഷ് ഒഴിവാക്കിയ USD (cache hits-ൽ മാത്രം)                                                                                                                                                                                                |
-| `X-OmniRoute-Decision`   | പ്രതികരണം | Routing trace: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` combo strategy ആണ്, അല്ലെങ്കിൽ combo അല്ലാത്ത അഭ്യർത്ഥനയ്ക്കായി `single`) — completion responses-ൽ എപ്പോഴും ഉണ്ടായിരിക്കും                                        |
+| തലക്കെട്ട്               | ദിശ            | വിവരണം                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------ | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | അഭ്യർത്ഥിക്കുക | കാഷെ മറികടക്കാൻ `true` ആയി സജ്ജമാക്കുക                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `x-omniroute-no-memory`  | അഭ്യർത്ഥിക്കുക | ഈ അഭ്യർത്ഥനയ്ക്കായി മെമ്മറി + സ്കിൽസ് ഇൻജക്ഷൻ ഒഴിവാക്കാൻ `true` ആയി സജ്ജീകരിക്കുക (മിറർ നോ-കാഷെ; ഓരോ കോളിനും token/cost ഓവർഹെഡ് ഒഴിവാക്കുന്നു)                                                                                                                                                                                                                                                                                                           |
+| `x-omniroute-no-log`     | അഭ്യർത്ഥിക്കുക | ഈ അനുമാന അഭ്യർത്ഥനയ്ക്കായി കോൾ ലോഗുകളിൽ നിന്ന് request/response പേലോഡുകൾ ഒഴിവാക്കുന്നതിന് `true` ആയി സജ്ജീകരിക്കുക (എല്ലാ ചാറ്റ്-ഫാമിലി റൂട്ടുകളും: ചാറ്റ് പൂർത്തിയാക്കലുകൾ, പ്രതികരണങ്ങൾ, സന്ദേശങ്ങൾ, പൂർത്തിയാക്കലുകൾ, Gemini). ടൈംസ്റ്റാമ്പ്, മോഡൽ, സ്റ്റാറ്റസ്, ദൈർഘ്യം, ടോക്കൺ എണ്ണം എന്നിവ ഇപ്പോഴും രേഖപ്പെടുത്തിയിട്ടുണ്ട്. ഒരു പൂർണ്ണമായ ഉള്ളടക്കം ഒഴിവാക്കുന്നതിന് `x-omniroute-no-memory`, `x-omniroute-no-cache` എന്നിവയുമായി സംയോജിപ്പിക്കുക |
+| `X-OmniRoute-Progress`   | അഭ്യർത്ഥിക്കുക | പുരോഗതി ഇവൻ്റുകൾക്കായി `true` ആയി സജ്ജീകരിക്കുക                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `X-Session-Id`           | അഭ്യർത്ഥിക്കുക | ബാഹ്യ സെഷൻ ബന്ധത്തിനുള്ള സ്റ്റിക്കി സെഷൻ കീ                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `x_session_id`           | അഭ്യർത്ഥിക്കുക | അടിവരയിട്ട വേരിയൻ്റും അംഗീകരിച്ചു (ഡയറക്ട് HTTP)                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Session-Id` | അഭ്യർത്ഥിക്കുക | Caller-supplied session/conversation tag (also feeds memory). When present, persisted verbatim to `call_logs.session_tag` for per-session cost attribution (#8249) — never synthesized when absent                                                                                                                                                                                                                                                       |
+| `Idempotency-Key`        | അഭ്യർത്ഥിക്കുക | ഡീഡപ്പ് കീ (5 സെ വിൻഡോ)                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `X-Request-Id`           | അഭ്യർത്ഥിക്കുക | ഇതര ഡീഡപ്പ് കീ                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `x-omniroute-connection` | അഭ്യർത്ഥിക്കുക | ഒരൊറ്റ മോഡൽ അഭ്യർത്ഥന ഒരു ദാതാവിൻ്റെ കണക്ഷനിലേക്ക് (അക്കൗണ്ട്) അതിൻ്റെ ഐഡി — ഉപയോഗിച്ച് പിൻ ചെയ്യുക [, ഓരോ അഭ്യർത്ഥനയിലും അക്കൗണ്ട് പിൻ ചെയ്യൽ](#account-pinning-per-request) കാണുക                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Cache`      | പ്രതികരണം      | `HIT` അല്ലെങ്കിൽ `MISS` (സ്ട്രീമിംഗ് അല്ലാത്തത്)                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Idempotent` | പ്രതികരണം      | ഡീപ്ലിക്കേറ്റ് ചെയ്താൽ `true`                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Progress`   | പ്രതികരണം      | പുരോഗതി ട്രാക്കിംഗ് ഓണാണെങ്കിൽ `enabled`                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Session-Id` | പ്രതികരണം      | OmniRoute ഉപയോഗിക്കുന്ന ഫലപ്രദമായ സെഷൻ ID                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Request-Id` | പ്രതികരണം      | പരസ്പര ബന്ധ ഐഡി അഭ്യർത്ഥിക്കുക (അറിയുമ്പോൾ)                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Version`    | പ്രതികരണം      | OmniRoute ബിൽഡ് പതിപ്പ് (എപ്പോഴും ഉണ്ട്)                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Cost-Saved` | പ്രതികരണം      | USD ഒരു HIT ൽ ഒഴിവാക്കിയ കാഷെ (കാഷെ ഹിറ്റുകൾ മാത്രം)                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Decision`   | പ്രതികരണം      | റൂട്ടിംഗ് ട്രെയ്സ്: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` എന്നത് കോംബോ സ്ട്രാറ്റജിയാണ്, അല്ലെങ്കിൽ ഒരു നോൺ-കോംബോ അഭ്യർത്ഥനയ്ക്കുള്ള `single` ) — എപ്പോഴും പൂർത്തീകരണ പ്രതികരണങ്ങളിൽ ഉണ്ടായിരിക്കും                                                                                                                                                                                                                               |
 
-> Nginx കുറിപ്പ്: underscore headers (ഉദാഹരണത്തിന് `x_session_id`) ആശ്രയിക്കുന്നുവെങ്കിൽ, `underscores_in_headers on;` പ്രവർത്തനക്ഷമമാക്കുക.
+> Nginx കുറിപ്പ്: നിങ്ങൾ അടിവരയിടുന്ന തലക്കെട്ടുകളെ ആശ്രയിക്കുന്നുവെങ്കിൽ (ഉദാഹരണത്തിന് `x_session_id`), `underscores_in_headers on;` പ്രവർത്തനക്ഷമമാക്കുക.
 
-#### ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള Account pinning
+#### ഓരോ അഭ്യർത്ഥനയിലും അക്കൗണ്ട് പിൻ ചെയ്യുന്നു
 
-ഒരു provider-ന് നിരവധി connections (accounts അല്ലെങ്കിൽ keys) ഉള്ളപ്പോൾ, OmniRoute സാധാരണയായി അതിന്റെ account-selection strategy ഉപയോഗിച്ച് ഒന്ന് തിരഞ്ഞെടുക്കുന്നു. പകരം, `x-omniroute-connection` header ഉപയോഗിച്ച് ഒരു നിർദ്ദിഷ്ട connection-ലേക്ക് ഒരു അഭ്യർത്ഥന pin ചെയ്യാം:
+ഒരു ദാതാവിന് നിരവധി കണക്ഷനുകൾ (അക്കൗണ്ടുകൾ അല്ലെങ്കിൽ കീകൾ) ഉള്ളപ്പോൾ, OmniRoute സാധാരണയായി അതിൻ്റെ അക്കൗണ്ട്-സെലക്ഷൻ സ്ട്രാറ്റജിയിലൂടെ ഒന്ന് തിരഞ്ഞെടുക്കുന്നു. ഒരു അഭ്യർത്ഥനയ്ക്ക് പകരം `x-omniroute-connection` തലക്കെട്ടുമായി ഒരു നിർദ്ദിഷ്ട കണക്ഷൻ പിൻ ചെയ്യാൻ കഴിയും:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -101,25 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **id എവിടെ കണ്ടെത്താം.** ഡാഷ്ബോർഡിൽ provider പേജ് തുറക്കുക
-  (**Dashboard → Providers → <provider>**) കൂടാതെ ഒരു connection
-  വരിയിലെ `xxxxxxxx…` id chip ക്ലിക്ക് ചെയ്യുക — ഇത് പൂർണ്ണ connection id പകർത്തും.
-- **ഏത് requests ആണ് ഇത് മാനിക്കുന്നത്.** `/v1/chat/completions`, `/v1/messages`, `/v1/responses`
-  എന്നിവയിലെ single-model requests (`provider/model`). Combos ഈ header അവഗണിക്കും: ഓരോ combo
-  step-നും ആ step-ന്റെ സ്വന്തം connection വഴി ഒരു account pin ചെയ്യുക.
-- **ഈ pin ഒരു preference അല്ല, കർശനമായ നിയന്ത്രണമാണ്.** Pinned connection മാത്രമേ ഉപയോഗിക്കൂ. ഒരു
-  request-ിനുള്ളിലെ പരാജയം account-ന്റെ cooldown രേഖപ്പെടുത്തും, പക്ഷേ അതേ provider-ലെ
-  sibling account-ിലേക്ക് മാറില്ല.
-- **Cooldown-ഉം quota-യും pin ഒഴിവാക്കും.** Pinned connection cooldown-ലായിരിക്കുമ്പോൾ,
-  quota തീർന്നിരിക്കുമ്പോൾ, അല്ലെങ്കിൽ quota policy കാരണം blocked ആയിരിക്കുമ്പോൾ, പിന്നീട് വരുന്ന
-  requests provider-ന്റെ മറ്റ് connections-ലേക്ക് fallback ചെയ്യും — pin ചെയ്യാത്ത traffic പോലെ തന്നെ.
-- **അജ്ഞാതമോ disabled ആയതോ ആയ ids പരാജയപ്പെടും.** Provider-ന്റെ active pool-ൽ ഇല്ലാത്ത ഒരു id
-  (deleted, deactivated, അല്ലെങ്കിൽ മറ്റൊരു provider-ന്റേതായ id) eligible account ഒന്നും
-  അവശേഷിപ്പിക്കില്ല; അതിനാൽ request പരാജയപ്പെടും, നിശ്ശബ്ദമായി മറ്റൊരിടത്തേക്ക് route ചെയ്യില്ല.
+- **ഐഡി എവിടെ കണ്ടെത്തും.** ഡാഷ്ബോർഡിൽ ദാതാവിൻ്റെ പേജ് തുറക്കുക (** ഡാഷ്ബോർഡ് → ദാതാക്കൾ → <provider>** ) കൂടാതെ ഒരു കണക്ഷൻ വരിയിലെ `xxxxxxxx…` ഐഡി ചിപ്പിൽ ക്ലിക്ക് ചെയ്യുക — അത് മുഴുവൻ കണക്ഷൻ ഐഡിയും പകർത്തുന്നു.
+- **ഏത് അഭ്യർത്ഥനകൾ അതിനെ മാനിക്കുന്നു.** `/v1/chat/completions`, `/v1/messages`, `/v1/responses` എന്നിവയിലെ ഏക-മാതൃക അഭ്യർത്ഥനകൾ (`provider/model`). കോമ്പോകൾ തലക്കെട്ട് അവഗണിക്കുന്നു: പകരം ഓരോ കോംബോ ഘട്ടത്തിലും ഒരു അക്കൗണ്ട് പിൻ ചെയ്യുക.
+- **പിൻ കർശനമാണ്, മുൻഗണനയല്ല.** പിൻ ചെയ്ത കണക്ഷൻ പ്രത്യേകമായി ഉപയോഗിക്കുന്നു. അഭ്യർത്ഥനയ്ക്കുള്ളിലെ ഒരു പരാജയം അക്കൗണ്ടിൻ്റെ കൂൾഡൗൺ രേഖപ്പെടുത്തുന്നു, പക്ഷേ അത് ചെയ്യുന്നു** അല്ല** അതേ ദാതാവിൻ്റെ ഒരു സഹോദര അക്കൗണ്ടിലേക്ക് തിരിക്കുക.
+- **കൂൾഡൗണും ക്വാട്ടയും പിൻ റിലീസ് ചെയ്യുന്നു.** പിൻ ചെയ്ത കണക്ഷൻ തണുക്കുകയോ ക്വാട്ട തീരുകയോ അല്ലെങ്കിൽ ഒരു ക്വാട്ട നയം തടയുകയോ ചെയ്യുമ്പോൾ, പിന്നീടുള്ള അഭ്യർത്ഥനകൾ അൺപിൻ ചെയ്യാത്ത ട്രാഫിക് പോലെ തന്നെ ദാതാവിൻ്റെ മറ്റ് കണക്ഷനുകളിലേക്ക് തിരികെയെത്തും.
+- **അജ്ഞാത അല്ലെങ്കിൽ പ്രവർത്തനരഹിതമാക്കിയ ഐഡികൾ പരാജയപ്പെടുന്നു.** ദാതാവിൻ്റെ സജീവ പൂളിൽ ഇല്ലാത്ത ഒരു ഐഡി (ഇല്ലാതാക്കപ്പെട്ടതോ, നിർജ്ജീവമാക്കിയതോ അല്ലെങ്കിൽ മറ്റൊരു ദാതാവിൻ്റെ ഉടമസ്ഥതയിലുള്ളതോ ആയ) ഒരു യോഗ്യമായ അക്കൗണ്ട് ഉപേക്ഷിക്കുന്നില്ല, അതിനാൽ നിശ്ശബ്ദമായി മറ്റെവിടെയെങ്കിലും റൂട്ട് ചെയ്യുന്നതിനുപകരം അഭ്യർത്ഥന പരാജയപ്പെടുന്നു.
 
-Claude Code custom headers `ANTHROPIC_CUSTOM_HEADERS` വഴി അയയ്ക്കുന്നു. ഇത്
-`~/.claude/settings.json`-ന്റെ `env` block-ൽ ഇടുക, അല്ലെങ്കിൽ ഓരോ project-നും വ്യത്യസ്ത account
-pin ചെയ്യുന്നതിനായി project-level `.claude/settings.json`-ൽ ഇടുക:
+Claude കോഡ് `ANTHROPIC_CUSTOM_HEADERS` വഴി ഇഷ്ടാനുസൃത തലക്കെട്ടുകൾ അയയ്ക്കുന്നു. `~/.claude/settings.json` ൻ്റെ `env` ബ്ലോക്കിലോ ഒരു പ്രോജക്റ്റ്-ലെവൽ `.claude/settings.json` ഓരോ പ്രോജക്റ്റിലും മറ്റൊരു അക്കൗണ്ട് പിൻ ചെയ്യാൻ ഇത് ഇടുക:
 
 ```jsonc
 {
@@ -131,12 +120,11 @@ pin ചെയ്യുന്നതിനായി project-level `.claude/setting
 }
 ```
 
-ഉറവിടം: `src/sse/handlers/chat.ts` (header read), `src/sse/services/auth.ts`, കൂടാതെ
-`src/sse/services/sessionAffinityPin.ts` (pin release-ഉം pool-ൽ നിന്ന് missing ആയതിന്റെ check-ഉം).
+ഉറവിടം: `src/sse/handlers/chat.ts` (ഹെഡർ റീഡ്), `src/sse/services/auth.ts`, `src/sse/services/sessionAffinityPin.ts` (പിൻ റിലീസും മിസ്സിംഗ് ഫ്രം പൂൾ ചെക്കും).
 
-> **Cost telemetry headers:** non-streaming success responses-ലും `X-OmniRoute-*` cost-telemetry set ഉൾപ്പെടുന്നു — `X-OmniRoute-Response-Cost` (USD, fixed 10 decimals; സൗജന്യമായി ലഭിക്കുന്നതോ വില നിശ്ചയിച്ചിട്ടില്ലാത്തതോ ആണെങ്കിൽ `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, കൂടാതെ `X-OmniRoute-Fallback-Attempts` (0-ൽ കൂടുതലായിരിക്കുമ്പോൾ മാത്രം), അതോടൊപ്പം `X-OmniRoute-Request-Id`, `X-OmniRoute-Version`. ഇവ chat completions, `/v1/responses`, `/v1/messages`, **കൂടാതെ media endpoints** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/moderations` — എന്നിവയിൽ നിന്നുമാണ് പുറപ്പെടുവിക്കുന്നത് (`0` cost എപ്പോഴും). Pricing ലഭ്യമാണെങ്കിൽ media cost ഓരോ modality-ക്കും (per-image, per-second, per-character, per search-unit) കണക്കാക്കും; അല്ലാത്തപക്ഷം `0` ആയിരിക്കും (fail-open).
+> **ചെലവ് ടെലിമെട്രി തലക്കെട്ടുകൾ:** നോൺ-സ്ട്രീമിംഗ് വിജയ പ്രതികരണങ്ങൾ `X-OmniRoute-*` കോസ്റ്റ്-ടെലിമെട്രി സെറ്റ് — `X-OmniRoute-Response-Cost` (USD, നിശ്ചിത 10 ദശാംശങ്ങൾ; `0.0000000000` ന് free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, കൂടാതെ `X-OmniRoute-Fallback-Attempts` > `X-OmniRoute-Version` `X-OmniRoute-Request-Id` ചാറ്റ് പൂർത്തീകരണങ്ങൾ, `/v1/responses`, `/v1/messages`, എന്നിവയിലൂടെ ഇവ പുറത്തുവിടുന്നു** മാധ്യമങ്ങളുടെ അവസാന പോയിൻ്റുകളും** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/moderations` (എല്ലായ്പ്പോഴും വില `0`). വിലനിർണ്ണയം ലഭ്യമാകുമ്പോൾ മീഡിയാ ചെലവ് ഒരു മോഡാലിറ്റിക്ക് (ഓരോ ഇമേജിനും, ഓരോ സെക്കൻഡിനും, ഓരോ പ്രതീകത്തിനും, ഓരോ തിരയൽ യൂണിറ്റിനും) കണക്കാക്കുന്നു, അല്ലാത്തപക്ഷം `0` (ഫെയ്ൽ-ഓപ്പൺ).
 
-> **Cache-hit cost semantics:** ഒരു semantic-cache HIT-ൽ (`X-OmniRoute-Cache-Hit: true`) upstream call ഉണ്ടാകില്ല; അതിനാൽ `X-OmniRoute-Response-Cost` `0.0000000000` ആയിരിക്കും (hit നൽകുന്നതിനുള്ള **incremental** cost). യഥാർത്ഥമായി ഉണ്ടായതോ ഉണ്ടാകുമായിരുന്നതോ ആയ cost `X-OmniRoute-Cost-Saved`-ൽ പ്രത്യേകം റിപ്പോർട്ട് ചെയ്യും. Billing consumers `X-OmniRoute-Response-Cost` കൂട്ടിച്ചേർക്കണം (hits-ന് cost ഒന്നുമില്ല); cache analytics-ന് `X-OmniRoute-Cost-Saved` aggregate ചെയ്യാം.
+> **കാഷെ-ഹിറ്റ് കോസ്റ്റ് സെമാൻ്റിക്സ്:** ഒരു സെമാൻ്റിക്-കാഷെ HIT (`X-OmniRoute-Cache-Hit: true`)-ൽ അപ്സ്ട്രീം കോൾ ചെയ്യപ്പെടുന്നില്ല, അതിനാൽ `X-OmniRoute-Response-Cost` എന്നത് `0.0000000000` (ദി** വർദ്ധിച്ചുവരുന്ന** ഹിറ്റ് വിളമ്പുന്നതിനുള്ള ചെലവ്). original/would-have-been വില `X-OmniRoute-Cost-Saved` ൽ പ്രത്യേകം റിപ്പോർട്ടുചെയ്തിരിക്കുന്നു. ബില്ലിംഗ് ഉപഭോക്താക്കൾ `X-OmniRoute-Response-Cost` തുക നൽകണം (ഹിറ്റുകൾക്ക് വിലയില്ല); കാഷെ അനലിറ്റിക്സിന് `X-OmniRoute-Cost-Saved` സമാഹരിക്കാൻ കഴിയും.
 
 ## എക്സ്ക്ലൂസീവ് മാനേജ്ഡ് സെഷൻ ലീസുകൾ
 
@@ -371,13 +359,15 @@ Content-Type: application/json
 
 `n` `data[]` ൽ `n` ഇമേജുകൾ നൽകുന്നു. ഓരോ കോളിനും ഒരു ചിത്രം നൽകുന്ന അപ്സ്ട്രീം API ദാതാക്കൾക്ക് (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) `n` പ്രത്യേക അപ്സ്ട്രീം കോളുകൾ ലഭിക്കും, പരമാവധി 4 ഫ്ലൈറ്റിൽ. ഒരു നിശ്ചിത `seed` കോൾ സൂചിക (`seed`, `seed + 1`, …) വഴി ഓഫ്സെറ്റ് ചെയ്യുന്നു, അതിനാൽ ചിത്രങ്ങൾ വ്യത്യസ്തമാണെങ്കിലും പുനർനിർമ്മിക്കാവുന്നതായിരിക്കും. `n` എന്നതിൻ്റെ പരിധി 10 ആണ്. ഏതെങ്കിലും കോൾ പരാജയപ്പെടുകയാണെങ്കിൽ അഭ്യർത്ഥന മൊത്തത്തിൽ പരാജയപ്പെടും. ഫാൻ ഔട്ട് ഫോർമാറ്റുകളുടെ ലിസ്റ്റ് `open-sse/handlers/imageGeneration/fanOut.ts` ൽ `SINGLE_IMAGE_FANOUT_FORMATS` ആണ്.
 
+Codex GPT ഇമേജ് മോഡലുകൾ (`codex/gpt-image-*`) PNG മാത്രം നൽകുന്നു: `jpeg` അല്ലെങ്കിൽ `webp` ആവശ്യപ്പെടുമ്പോൾ പോലും PNG ബൈറ്റുകൾ ഉപയോഗിച്ച് അപ്സ്ട്രീം `200` ഉത്തരം നൽകുന്നു. മറ്റേതെങ്കിലും `output_format` (`webp`, `jpeg`, ...) ഉള്ള ഒരു അഭ്യർത്ഥന നിശബ്ദമായി അവഗണിക്കുന്നതിന് പകരം HTTP 400 ഉപയോഗിച്ച് നിരസിക്കുന്നു; അത് ഒഴിവാക്കുക അല്ലെങ്കിൽ `png` അയയ്ക്കുക. `output_compression` ഫോർവേഡ് ചെയ്തിട്ടില്ല.
+
 ZenMux നിലവിലുള്ള API-കീ കണക്ഷൻ വീണ്ടും ഉപയോഗിക്കുകയും `zenmux/` അല്ലെങ്കിൽ `zm/` പ്രിഫിക്സുകൾ സ്വീകരിക്കുകയും ചെയ്യുന്നു:
 
 - `zenmux/openai/gpt-image-2` ZenMux ൻ്റെ OpenAI ഇമേജുകൾ API ഉപയോഗിക്കുന്നു. ഓപ്ഷനുകളിൽ `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, `response_format` എന്നിവ ഉൾപ്പെടുന്നു.
 - `zm/meta/muse-image-1.0` പോലുള്ള മറ്റ് പ്രസാധകർ ZenMux ൻ്റെ Vertex AI `:predict` എൻഡ്പോയിൻ്റ് ഉപയോഗിക്കുന്നു. `n` മാപ്പുകൾ `sampleCount`, `aspect_ratio` മുതൽ `aspectRatio`, `image_size` (`1K`, `2K`, `4K`) `sampleImageSize`. ഒരു പിക്സൽ `size` ഒരു വീക്ഷണാനുപാതം മാത്രമേ നൽകുന്നുള്ളൂ, പിക്സൽ അളവുകൾ ഉറപ്പുനൽകുന്നില്ല. പിന്തുണയ്ക്കുന്ന അനുപാതങ്ങൾ, റെസല്യൂഷനുകൾ, എണ്ണങ്ങൾ എന്നിവ മോഡൽ അനുസരിച്ച് വ്യത്യാസപ്പെടുന്നു.
 - `zm/inclusionai/ming-image-0.1-design` അതിൻ്റേതായ അളവുകൾ തിരഞ്ഞെടുക്കുന്നു. `size`, `aspect_ratio`, `image_size` എന്നിവ ഒഴിവാക്കുക; വ്യക്തമായ മൂല്യങ്ങൾ HTTP 400 നൽകുന്നു. `output_format` ഉപയോഗിച്ച് PNG, JPEG, WebP എന്നിവ അഭ്യർത്ഥിക്കാം.
 
-ഈ സംയോജനം ടെക്സ്റ്റ്-ടു-ഇമേജ് ജനറേഷൻ പിന്തുണയ്ക്കുന്നു, റഫറൻസ്-ഇമേജ് എഡിറ്റിംഗ് അല്ല. വെർട്ടെക്സ് ഔട്ട്പുട്ട് `data[].b64_json` ആയി നോർമലൈസ് ചെയ്തു; ഇമേജ് ബൈറ്റുകൾ മാത്രം ലഭ്യമാകുമ്പോൾ `response_format: "url"` ഒരു അപ്സ്ട്രീം HTTPS URL അല്ലെങ്കിൽ ഒരു base64 ഡാറ്റ URL നൽകുന്നു. Empty/filtered ഔട്ട്പുട്ടുകൾ ശൂന്യമായ വിജയത്തിനു പകരം ഒരു പിശക് നൽകുന്നു. മോഡൽ ആക്സസ് ZenMux അക്കൗണ്ടിനെ ആശ്രയിച്ചിരിക്കുന്നു. [ZenMux ൻ്റെ വെർട്ടെക്സ് API](https://docs.zenmux.ai/api/vertexai/generate-images), [OpenAI ഇമേജുകൾ API എന്നിവ](https://docs.zenmux.ai/api/openai/generate-an-image) കാണുക.
+ഈ സംയോജനം ടെക്സ്റ്റ്-ടു-ഇമേജ് ജനറേഷൻ പിന്തുണയ്ക്കുന്നു, റഫറൻസ്-ഇമേജ് എഡിറ്റിംഗ് അല്ല. വെർട്ടെക്സ് ഔട്ട്പുട്ട് `data[].b64_json` ആയി നോർമലൈസ് ചെയ്തു; ഇമേജ് ബൈറ്റുകൾ മാത്രം ലഭ്യമാകുമ്പോൾ `response_format: "url"` ഒരു അപ്സ്ട്രീം HTTPS URL അല്ലെങ്കിൽ a base64 ഡാറ്റ URL നൽകുന്നു. Empty/filtered ഔട്ട്പുട്ടുകൾ ശൂന്യമായ വിജയത്തിനു പകരം ഒരു പിശക് നൽകുന്നു. മോഡൽ ആക്സസ് ZenMux അക്കൗണ്ടിനെ ആശ്രയിച്ചിരിക്കുന്നു. [ZenMux ൻ്റെ വെർട്ടെക്സ് API](https://docs.zenmux.ai/api/vertexai/generate-images), [OpenAI ഇമേജുകൾ API എന്നിവ](https://docs.zenmux.ai/api/openai/generate-an-image) കാണുക.
 
 Copilot ൻ്റെ ബിൽറ്റ്-ഇൻ ഇമേജ് ടൂൾ വഴി ഒരു Microsoft 365 Copilot സൈൻ-ഇൻ കണക്ഷൻ `copilot-m365-web/m365-copilot-image` നൽകുന്നു: ഓരോ ചിത്രത്തിനും ഒരു Copilot ടേൺ (`n` 1–4), `size` സ്റ്റിയറിംഗ് ഓറിയൻ്റേഷൻ മാത്രം, കൂടാതെ ഇൻലൈനിൽ മടങ്ങിയ ചിത്രങ്ങൾ (`b64_json`, അല്ലെങ്കിൽ `response_format: "url"` ന് ഒരു ഡാറ്റ URL ). [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) കാണുക.
 
@@ -388,7 +378,7 @@ GET /v1/images/generations
 
 ---
 
-## ഡോക്യുമെന്റ് OCR
+## ഡോക്യുമെൻ്റ് OCR
 
 ```bash
 POST /v1/ocr
@@ -404,18 +394,15 @@ Content-Type: application/json
 }
 ```
 
-`model` ഒരു `provider/model` പ്രിഫിക്സ് ഉപയോഗിച്ച് OCR ദാതാവിനെ തിരഞ്ഞെടുക്കുന്നു; ഒരു ബെയർ മോഡൽ ഐഡി (ഉദാ.
-`mistral-ocr-latest`) അതിന്റെ രജിസ്റ്റർ ചെയ്ത ദാതാവിലേക്ക് പരിഹരിക്കപ്പെടും, കൂടാതെ `model` ഒഴിവാക്കിയാൽ
-Mistral (`mistral-ocr-latest`) ഡിഫോൾട്ടായി ഉപയോഗിക്കും. രജിസ്റ്റർ ചെയ്ത ദാതാക്കൾ
-(`open-sse/config/ocrRegistry.ts`):
+`model` ഒരു `provider/model` പ്രിഫിക്സ് വഴി OCR ദാതാവിനെ തിരഞ്ഞെടുക്കുന്നു; ഒരു ബെയർ മോഡൽ ഐഡി (ഉദാ `mistral-ocr-latest`) അതിൻ്റെ രജിസ്റ്റർ ചെയ്ത ദാതാവിന് പരിഹരിക്കുന്നു, കൂടാതെ ഒഴിവാക്കിയ `model` സ്ഥിരസ്ഥിതിയായി Mistral (`mistral-ocr-latest`) ആയി മാറുന്നു. രജിസ്റ്റർ ചെയ്ത ദാതാക്കൾ (`open-sse/config/ocrRegistry.ts`):
 
-| ദാതാവ് ഐഡി                    | മോഡൽ ഐഡി             | `model` മൂല്യം                                                      | കുറിപ്പുകൾ                                                                                                                         |
-| ----------------------------- | -------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (അല്ലെങ്കിൽ ബെയർ `mistral-ocr-latest`) | സമകാലികം — ഒരൊറ്റ അപ്സ്ട്രീം കോളിൽ നിന്നുള്ള പ്രതികരണം നേരിട്ട് നൽകുന്നു.                                                          |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                         | അസമകാലിക അപ്സ്ട്രീം (`analyze` + poll) — താഴെ കാണുക.                                                                               |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                             | Vertex AI-യുടെ `openapi/chat/completions` പാർട്ണർ എൻഡ്പോയിന്റ് വഴി സമകാലികം — ഓതന്റിക്കേഷൻ/URL സംബന്ധിച്ച വിവരങ്ങൾക്ക് താഴെ കാണുക. |
+| ദാതാവിൻ്റെ ഐഡി                | മോഡൽ ഐഡി                                  | `model` മൂല്യം                                                       | കുറിപ്പുകൾ                                                                                                                                                                                                           |
+| ----------------------------- | ----------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                      | `mistral/mistral-ocr-latest` (അല്ലെങ്കിൽ വെറും `mistral-ocr-latest`) | സിൻക്രണസ് — ഒറ്റ അപ്സ്ട്രീം കോളിൽ നിന്ന് നേരിട്ട് പ്രതികരണം നൽകുന്നു.                                                                                                                                                |
+| `azure-document-intelligence` | `prebuilt-read`                           | `azure-document-intelligence/prebuilt-read`                          | അസിൻക്രണസ് അപ്സ്ട്രീം (`analyze` + പോൾ) — താഴെ കാണുക.                                                                                                                                                                |
+| `vertex-deepseek-ocr`         | സ്വയം വിന്യസിച്ചത് (ബിൽറ്റ്-ഇൻ മോഡൽ ഇല്ല) | `vertex-deepseek-ocr/<your-deployed-model-id>`                       | സമന്വയം, നിങ്ങളുടെ സ്വന്തം Vertex AI മോഡൽ ഗാർഡൻ DeepSeek-OCR എൻഡ്പോയിൻ്റ് (`openapi/chat/completions` ആകൃതി) വഴി; Google 2026-10-21 (#20423) ന് മാനേജ് ചെയ്ത `deepseek-ocr-maas` വിരമിച്ചു, അങ്ങനെ ഐഡി 400 നൽകുന്നു. |
 
-മൂന്ന് ദാതാക്കളും ഒരേ Mistral-ആകൃതിയിലുള്ള ബോഡി നൽകുന്നു:
+മൂന്ന് ദാതാക്കളും ഒരേ മിസ്ട്രൽ ആകൃതിയിലുള്ള ശരീരത്തിൽ പ്രതികരിക്കുന്നു:
 
 ```json
 {
@@ -425,28 +412,13 @@ Mistral (`mistral-ocr-latest`) ഡിഫോൾട്ടായി ഉപയോഗ
 }
 ```
 
-### Azure Document Intelligence പോൾ ഫ്ലോ
+### അസൂർ ഡോക്യുമെൻ്റ് ഇൻ്റലിജൻസ് വോട്ടെടുപ്പ് ഫ്ലോ
 
-Azure Document Intelligence-ന്റെ `analyze` API അസമകാലികമാണ്: പ്രാരംഭ അഭ്യർത്ഥന ഒരു ബോഡിക്ക് പകരം
-`Operation-Location` ഹെഡർ തിരികെ നൽകുന്നു, അതിനാൽ ഫലത്തിനായി പോൾ ചെയ്യണം. ഹാൻഡ്ലർ
-(`open-sse/handlers/ocr.ts`) ഓരോ സെക്കൻഡിലും പരമാവധി 30 ശ്രമങ്ങൾ വരെ ആ URL പോൾ ചെയ്യുന്നു; `ok` അല്ലാത്ത
-പോൾ പ്രതികരണത്തിലോ `"failed"` സ്റ്റാറ്റസിലോ ഉടൻ പരാജയപ്പെടുന്നു (പോൾ ചെയ്യുന്നത് തുടരില്ല), കൂടാതെ ശ്രമങ്ങളുടെ
-പരിധി കഴിഞ്ഞിട്ടും ഓപ്പറേഷൻ പ്രവർത്തിച്ചുകൊണ്ടിരിക്കുകയാണെങ്കിൽ `504` നൽകുന്നു. അന്തിമ Azure പ്രതികരണം
-കോളറിലേക്ക് നൽകുന്നതിന് മുമ്പ് Mistral ഉപയോഗിക്കുന്ന അതേ `pages`/`markdown` ആകൃതിയിലേക്ക് നോർമലൈസ് ചെയ്യുന്നു;
-അതിനാൽ ക്ലയന്റ് കോഡിന് ദാതാവിനെ പ്രത്യേകം പരിഗണിക്കേണ്ടതില്ല.
+അസൂർ ഡോക്യുമെൻ്റ് ഇൻ്റലിജൻസിൻ്റെ `analyze` API അസമന്വിതമാണ്: പ്രാരംഭ അഭ്യർത്ഥന ഒരു ബോഡിക്ക് പകരം ഒരു `Operation-Location` തലക്കെട്ട് നൽകുന്നു, ഫലം പോൾ ചെയ്യണം. 30 ശ്രമങ്ങൾ വരെ ഓരോ സെക്കൻഡിലും URL ചെയ്യുന്ന ഹാൻഡ്ലർ (`open-sse/handlers/ocr.ts`) വോട്ടെടുപ്പ്,`ok` ഇതര വോട്ടെടുപ്പ് പ്രതികരണത്തിലോ `"failed"` നിലയിലോ വേഗത്തിൽ പരാജയപ്പെടുന്നു (പോളിംഗ് നിലനിർത്തുന്നില്ല), കൂടാതെ ശ്രമ ബജറ്റ് തീർന്നതിന് ശേഷവും പ്രവർത്തനം നടക്കുന്നുണ്ടെങ്കിൽ `504` തിരികെ നൽകുന്നു. അവസാന അസുർ പ്രതികരണം വിളിക്കുന്നയാൾക്ക് തിരികെ നൽകുന്നതിന് മുമ്പ് Mistral ഉപയോഗിച്ച അതേ `pages`/`markdown` ആകൃതിയിലേക്ക് നോർമലൈസ് ചെയ്യുന്നു, അതിനാൽ ക്ലയൻ്റ് കോഡിന് ദാതാവിനെ പ്രത്യേകമായി പരിഗണിക്കേണ്ട ആവശ്യമില്ല.
 
-### Vertex AI DeepSeek OCR ഓതന്റിക്കേഷനും എൻഡ്പോയിന്റ് പരിഹാരവും
+### വെർട്ടെക്സ് AI DeepSeek OCR auth, endpoint Resolution
 
-`vertex-deepseek-ocr`, ചാറ്റ്/ഇമേജ് ട്രാഫിക്കിനായി OmniRoute ഇതിനകം പിന്തുണയ്ക്കുന്ന അതേ Vertex AI
-ഓതന്റിക്കേഷൻ വീണ്ടും ഉപയോഗിക്കുന്നു (`open-sse/executors/vertex.ts`): കണക്ഷന്റെ API key ഒന്നുകിൽ ഒരു
-Service Account JSON ക്രെഡൻഷ്യൽ (JWT-bearer ഫ്ലോ വഴി കുറച്ചുസമയം മാത്രം സാധുവായ OAuth ആക്സസ് ടോക്കണുമായി
-മാറ്റിവാങ്ങുന്നത്) ആയിരിക്കും, അല്ലെങ്കിൽ ഇതിനകം സൃഷ്ടിച്ച OAuth ആക്സസ് ടോക്കൺ അതേപടി ഉപയോഗിക്കും. അപ്സ്ട്രീം
-എൻഡ്പോയിന്റ് URL, കണക്ഷന്റെ പ്രോജക്റ്റും റീജിയനും ഉപയോഗിച്ച് നിർമ്മിക്കുന്ന Vertex-ന്റെ പൊതുവായ
-`openapi/chat/completions` പാർട്ണർ എൻഡ്പോയിന്റാണ് — വ്യക്തമായി നൽകിയ
-`providerSpecificData.project`/`providerSpecificData.region` എപ്പോഴും മുൻഗണന നേടും; അല്ലാത്തപക്ഷം പ്രോജക്റ്റ്
-Service Account JSON-ലെ `project_id`-ൽ നിന്ന് കണ്ടെത്തുകയും റീജിയൻ `us-central1` ആയി ഡിഫോൾട്ട് ചെയ്യുകയും ചെയ്യും.
-രണ്ട് പരിഹാരങ്ങളും `open-sse/handlers/ocr.ts`-ൽ (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`)
-നടക്കുന്നു; `handleOcr`-ലേക്ക് ഡിസ്പാച്ച് ചെയ്യുന്നതിന് മുമ്പ് `src/app/api/v1/ocr/route.ts` അവ ഉപയോഗിക്കുന്നു.
+chat/image ട്രാഫിക്കിനെ (`open-sse/executors/vertex.ts`) പിന്തുണയ്ക്കുന്ന അതേ Vertex AI പ്രാമാണീകരണം`vertex-deepseek-ocr` വീണ്ടും ഉപയോഗിക്കുന്നു: കണക്ഷൻ്റെ API കീ ഒന്നുകിൽ ഒരു സേവന അക്കൗണ്ട് JSON ക്രെഡൻഷ്യലാണ് (JWT-ബേറർ OmniRoute വഴിയുള്ള ഹ്രസ്വകാല OAuth ആക്സസ് ടോക്കണിനായി കൈമാറ്റം ചെയ്യപ്പെടുന്നു) അല്ലെങ്കിൽ ഇതിനകം ഉപയോഗിച്ചിട്ടുള്ള OAuth ലേക്കുള്ള ആക്സസ്സ്. അപ്സ്ട്രീം എൻഡ്പോയിൻ്റ് URL എന്നത് വെർട്ടെക്സിൻ്റെ ജനറിക് `openapi/chat/completions` പാർട്ണർ എൻഡ്പോയിൻ്റാണ്, കണക്ഷൻ്റെ പ്രോജക്റ്റിൽ നിന്നും — റീജിയണിൽ നിന്നും നിർമ്മിച്ചതാണ്, വ്യക്തമായ `providerSpecificData.project`/`providerSpecificData.region` എപ്പോഴും വിജയിക്കും; അല്ലാത്തപക്ഷം പ്രൊജക്റ്റ് JSON യുടെ `project_id` എന്ന സേവന അക്കൗണ്ടിൽ നിന്നാണ് ഉരുത്തിരിഞ്ഞത്, കൂടാതെ പ്രദേശം സ്ഥിരസ്ഥിതിയായി `us-central1` ലേയ്ക്കും. രണ്ട് റെസല്യൂഷനുകളും `open-sse/handlers/ocr.ts` ൽ സംഭവിക്കുന്നു (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), `handleOcr` ലേക്ക് അയയ്ക്കുന്നതിന് മുമ്പ് `src/app/api/v1/ocr/route.ts` ഉപയോഗിക്കുന്നു.
 
 ---
 
@@ -695,97 +667,104 @@ Upstream contracts: [sound effects](https://elevenlabs.io/docs/api-reference/tex
 
 ---
 
-## അനുയോജ്യതാ എൻഡ്പോയിന്റുകൾ
+## അനുയോജ്യത അന്തിമ പോയിൻ്റുകൾ
 
-| രീതി | പാത                                       | ഫോർമാറ്റ്                            |
-| ---- | ----------------------------------------- | ------------------------------------ |
-| POST | `/v1/chat/completions`                    | OpenAI                               |
-| POST | `/v1/messages`                            | Anthropic                            |
-| POST | `/v1/responses`                           | OpenAI Responses                     |
-| POST | `/v1/embeddings`                          | OpenAI                               |
-| POST | `/v1/images/generations`                  | OpenAI Images                        |
-| POST | `/v1/images/edits`                        | OpenAI Images (എഡിറ്റ്/ഇൻപെയിന്റ്)   |
-| POST | `/v1/videos/generations`                  | OpenAI-ശൈലിയിലുള്ള വീഡിയോ ജനറേഷൻ     |
-| POST | `/v1/music/generations`                   | OpenAI-ശൈലിയിലുള്ള സംഗീത ജനറേഷൻ      |
-| POST | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                   |
-| POST | `/v1/audio/speech`                        | OpenAI TTS (ഓഡിയോ ബോഡി നൽകുന്നു)     |
-| POST | `/v1/rerank`                              | Cohere/Voyage-ശൈലിയിലുള്ള റീറാങ്ക്   |
-| POST | `/v1/classify`                            | Jina ക്ലാസിഫൈ (`api.jina.ai`)        |
-| POST | `/v1/segment`                             | Jina സെഗ്മെന്റർ (`segment.jina.ai`)  |
-| POST | `/v1/moderations`                         | OpenAI Moderations                   |
-| GET  | `/v1/models`                              | OpenAI                               |
-| POST | `/v1/models/query`                        | ഫിൽട്ടർ ചെയ്ത മോഡൽ ഷോർട്ട്ലിസ്റ്റ്   |
-| POST | `/v1/messages/count_tokens`               | Anthropic                            |
-| GET  | `/v1beta/models`                          | Gemini                               |
-| POST | `/v1beta/models/{...path}`                | Gemini generateContent               |
-| POST | `/v1/api/chat`                            | Ollama                               |
-| GET  | `/api/v1/vscode/{token}/`                 | OpenAI കാറ്റലോഗ് അപരനാമം             |
-| GET  | `/api/v1/vscode/{token}/models`           | OpenAI മോഡൽ അപരനാമം                  |
-| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAI ടോക്കണൈസ്ഡ് അപരനാമം           |
-| POST | `/api/v1/vscode/{token}/responses`        | OpenAI Responses ടോക്കണൈസ്ഡ് അപരനാമം |
-| POST | `/api/v1/vscode/{token}/api/chat`         | Ollama ടോക്കണൈസ്ഡ് അപരനാമം           |
-| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollama ടാഗുകൾ ടോക്കണൈസ്ഡ് അപരനാമം    |
+| രീതി | പാത                                       | ഫോർമാറ്റ്                               |
+| ---- | ----------------------------------------- | --------------------------------------- |
+| POST | `/v1/chat/completions`                    | OpenAI                                  |
+| POST | `/v1/messages`                            | Anthropic                               |
+| POST | `/v1/responses`                           | OpenAI പ്രതികരണങ്ങൾ                     |
+| POST | `/v1/embeddings`                          | OpenAI                                  |
+| POST | `/v1/images/generations`                  | OpenAI ചിത്രങ്ങൾ                        |
+| POST | `/v1/images/edits`                        | OpenAI ചിത്രങ്ങൾ (edit/inpaint)         |
+| POST | `/v1/videos/generations`                  | OpenAI-രീതിയിലുള്ള വീഡിയോ ജനറേഷൻ        |
+| POST | `/v1/music/generations`                   | ഓപ്പൺഎഐ-സ്റ്റൈൽ മ്യൂസിക് ജനറേഷൻ         |
+| POST | `/v1/audio/transcriptions`                | OpenAI ഓഡിയോ (STT)                      |
+| POST | `/v1/audio/speech`                        | OpenAI TTS (ഓഡിയോ ബോഡി തിരികെ നൽകുന്നു) |
+| POST | `/v1/rerank`                              | Cohere/Voyage-style rerank              |
+| POST | `/v1/classify`                            | ജിന തരംതിരിക്കുക (`api.jina.ai`)        |
+| POST | `/v1/segment`                             | ജിന സെഗ്മെൻ്റർ (`segment.jina.ai`)      |
+| POST | `/v1/moderations`                         | OpenAI മോഡറേഷനുകൾ                       |
+| POST | `/v1/systemone`                           | സിസ്റ്റം വൺ ടൈപ്പ് ചെയ്ത തീരുമാനങ്ങൾ    |
+| POST | `/v1/decisions`                           | OpenAI തീരുമാനങ്ങൾ (നേറ്റീവ്)           |
+| GET  | `/v1/systemone/models`                    | തീരുമാന-മോഡൽ കാറ്റലോഗ്                  |
+| GET  | `/v1/models`                              | OpenAI                                  |
+| POST | `/v1/models/query`                        | ഫിൽട്ടർ ചെയ്ത മോഡൽ ഷോർട്ട്ലിസ്റ്റ്      |
+| POST | `/v1/messages/count_tokens`               | Anthropic                               |
+| GET  | `/v1beta/models`                          | Gemini                                  |
+| POST | `/v1beta/models/{...path}`                | Gemini generateContent                  |
+| POST | `/v1/api/chat`                            | Ollama                                  |
+| GET  | `/api/v1/vscode/{token}/`                 | OpenAI കാറ്റലോഗ് അപരനാമം                |
+| GET  | `/api/v1/vscode/{token}/models`           | OpenAI മോഡലുകൾ അപരനാമം                  |
+| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAI ടോക്കണൈസ്ഡ് അപരനാമം              |
+| POST | `/api/v1/vscode/{token}/responses`        | OpenAI പ്രതികരണങ്ങൾ ടോക്കണൈസ്ഡ് അപരനാമം |
+| POST | `/api/v1/vscode/{token}/api/chat`         | Ollama ടോക്കണൈസ്ഡ് അപരനാമം              |
+| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollama ടാഗുകൾ ടോക്കണൈസ്ഡ് അപരനാമം       |
 
-എല്ലാ POST റൂട്ടുകളും ഒരേ ഘടന പിന്തുടരുന്നു: `Bearer your-api-key` + Zod ഉപയോഗിച്ച് സാധുത പരിശോധിച്ച JSON ബോഡി (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` തുടങ്ങിയവ; `src/shared/validation/schemas.ts` കാണുക). സ്കീമ പരാജയപ്പെട്ടാൽ 4xx തിരികെ നൽകും.
+എല്ലാ POST റൂട്ടുകളും ഒരേ ആകൃതിയാണ് പിന്തുടരുന്നത്: `Bearer your-api-key` + Zod-സാധുതയുള്ള JSON ബോഡി (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, മുതലായവ, `src/shared/validation/schemas.ts` കാണുക). സ്കീമ പരാജയത്തിൽ 4xx തിരികെ നൽകുന്നു.
 
-`Authorization: Bearer ...` ചേർക്കാൻ കഴിയാത്ത ക്ലയന്റുകൾക്കായി, താഴെ രേഖപ്പെടുത്തിയിരിക്കുന്ന ക്വറി-സ്ട്രിംഗ് അനുയോജ്യത (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) വഴിയോ സമർപ്പിതമായ `/api/v1/vscode/{token}/...` എൻഡ്പോയിന്റുകൾ വഴിയോ URL-ൽ API കീകൾ സ്വീകരിക്കുന്നതും OmniRoute പിന്തുണയ്ക്കുന്നു.
+`Authorization: Bearer ...` അറ്റാച്ചുചെയ്യാൻ കഴിയാത്ത ക്ലയൻ്റുകൾക്കായി, OmniRoute URL ൽ API കീകൾ സ്വീകരിക്കുന്നു, ഒന്നുകിൽ ക്വറി-സ്ട്രിംഗ് കോംപാറ്റിബിലിറ്റി (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) അല്ലെങ്കിൽ താഴെ രേഖപ്പെടുത്തിയിട്ടുള്ള ഡെഡിക്കേറ്റഡ് `/api/v1/vscode/{token}/...` എൻഡ് പോയിൻ്റുകൾ വഴി.
 
 ```bash
-# റീറാങ്ക് (ക്ലൗഡ് രജിസ്ട്രി പ്രൊവൈഡർ, അല്ലെങ്കിൽ "<prefix>/<model>" എന്ന രൂപത്തിലുള്ള OpenAI-അനുയോജ്യമായ പ്രൊവൈഡർ നോഡ്)
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina ക്ലാസിഫൈ (Foundation API ക്രെഡൻഷ്യലുകൾ)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina സെഗ്മെന്റർ
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina തിരയൽ (s.jina.ai; പ്രൊവൈഡർ അപരനാമങ്ങൾ: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# മോഡറേഷനുകൾ
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg (അല്ലെങ്കിൽ അഭ്യർത്ഥിച്ച ഫോർമാറ്റ്) ബോഡി നൽകുന്നു
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS-ന് ഭാഷയും ശബ്ദവും ആവശ്യമാണ്: `language`-ന്റെ ഡിഫോൾട്ട് "en" ആണ്; ശബ്ദം
-# ഇല്ലാത്തതോ OpenAI-യുടെ സ്റ്റോക്ക് ശബ്ദനാമമായതോ (alloy, nova, …) ആണെങ്കിൽ "Adrian" ആയി മാറും
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# ഇമേജ് എഡിറ്റ് (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# വീഡിയോ / സംഗീത ജനറേഷൻ (പ്രൊവൈഡർ-പ്രിഫിക്സ് ചെയ്ത മോഡൽ ഐഡി)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **റീരാങ്ക് പ്രൊവൈഡർ നോഡുകൾ:** `POST /v1/rerank` എന്നതും `<node-prefix>/<model>` ആയി അഭിസംബോധന ചെയ്യുന്ന OpenAI-അനുയോജ്യമായ പ്രൊവൈഡർ നോഡുകളിലേക്ക് (oMLX, vLLM, Infinity, ഒരു ഗേറ്റ്വേയ്ക്കു പിന്നിലുള്ള TEI, …) റൂട്ട് ചെയ്യുന്നു. Loopback
-> നോഡുകൾ (`localhost`, `127.0.0.1`, `172.16.0.0/12`) എല്ലായ്പ്പോഴും യോഗ്യമാണ്. കൂടാതെ
-> `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`-ൽ ഓപ്പറേറ്റർ ലിസ്റ്റ് ചെയ്യുന്ന ഹോസ്റ്റ്നെയിമുകളും യോഗ്യമാണ് (ഉദാ. `http://reranker:8080/v1` പോലുള്ള
-> Docker/Compose സർവീസ് പേര്; ഇവയെ നേരിട്ട് വിളിക്കുന്നു, ഒരിക്കലും `HTTP(S)_PROXY` വഴിയോ
-> ഒരു കണക്ഷന്റെ പിൻ ചെയ്ത പ്രോക്സി വഴിയോ അല്ല). മറ്റേതെങ്കിലും
-> ഹോസ്റ്റിലുള്ള നോഡുകൾ — ഒരു LAN ബോക്സോ Tailscale പീയറോ — ഓപ്പറേറ്റർ
-> `RERANK_REMOTE_PROVIDER_NODES` ഫീച്ചർ ഫ്ലാഗ് പ്രവർത്തനക്ഷമമാക്കുകയും **നോഡിന്റെ** ബേസ് URL പ്രൊവൈഡർ
-> ഔട്ട്ബൗണ്ട് URL നയം (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) പാലിക്കുകയും
-> ചെയ്യുന്നപ്പോൾ മാത്രമേ യോഗ്യമായിരിക്കൂ. മെമ്മറി എഞ്ചിന്റെ റീരാങ്ക് ഘട്ടം ഈ റൂട്ടിനെ
-> loopback വഴി വിളിക്കുന്നു, അതിനാൽ Memory ക്രമീകരണങ്ങളിലെ `rerankProviderModel`-നും ഇതേ നിയമം ബാധകമാണ്.
+> **റീറാങ്ക് പ്രൊവൈഡർ നോഡുകൾ:** `POST /v1/rerank` OpenAI-അനുയോജ്യമായ പ്രൊവൈഡർ നോഡുകളിലേക്കും (oMLX, vLLM, ഇൻഫിനിറ്റി, TEI ഒരു ഗേറ്റ്വേയ്ക്ക് പിന്നിൽ, …) `<node-prefix>/<model>` എന്ന് അഭിസംബോധന ചെയ്യപ്പെടുന്നു. ലൂപ്പ്ബാക്ക് നോഡുകൾ (`localhost`, `127.0.0.1`, `172.16.0.0/12`) എല്ലായ്പ്പോഴും യോഗ്യമാണ്, കൂടാതെ `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` ൽ ഓപ്പറേറ്റർ ലിസ്റ്റുചെയ്തിരിക്കുന്ന ഹോസ്റ്റ് നാമങ്ങളും (ഉദാ: `http://reranker:8080/v1` പോലുള്ള ഒരു Docker/Compose സേവന നാമം; ഇവ നേരിട്ട് വിളിക്കപ്പെടുന്നു, ഒരിക്കലും `HTTP(S)_PROXY` അല്ലെങ്കിൽ ഒരു കണക്ഷൻ്റെ പിൻ ചെയ്ത പ്രോക്സി വഴിയല്ല). ഓപ്പറേറ്റർ `RERANK_REMOTE_PROVIDER_NODES` ഫീച്ചർ ഫ്ലാഗ് പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ മാത്രമേ മറ്റേതെങ്കിലും ഹോസ്റ്റ് — a LAN ബോക്സ് അല്ലെങ്കിൽ Tailscale പിയർ — നോഡുകൾ യോഗ്യമാകൂ.** ഒപ്പം** നോഡിൻ്റെ അടിസ്ഥാന URL ദാതാവിൻ്റെ ഔട്ട്ബൗണ്ട് URL നയം (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) കടന്നുപോകുന്നു. മെമ്മറി എഞ്ചിൻ്റെ റീറാങ്ക് ഘട്ടം ഈ റൂട്ടിനെ ലൂപ്പ്ബാക്ക് വഴി വിളിക്കുന്നു, അതിനാൽ മെമ്മറി ക്രമീകരണങ്ങളിൽ ഇതേ നിയമം `rerankProviderModel` നിയന്ത്രിക്കുന്നു.
 >
-> **ലോക്കൽ സെർവർ രൂപങ്ങൾ:** നോഡിനെ `<base>/v1/rerank` എന്നതിലും, 404 ലഭിച്ചാൽ `<base>/rerank` എന്നതിലും
-> (Infinity, TEI) വിളിക്കുന്നു. അപ്സ്ട്രീം ബോഡിയിൽ Cohere/OpenAI സ്പെല്ലിംഗും (`documents`,
-> `return_documents`) TEI സ്പെല്ലിംഗും (`texts`, `return_text`) ഉൾപ്പെടുന്നു. അപ്സ്ട്രീം പ്രതികരണം
-> Cohere എൻവലോപ്പിലേക്ക് നോർമലൈസ് ചെയ്യുന്നു: TEI-യുടെ വെറും `[{index, score, text}]`, തിൻ ഗേറ്റ്വേകളിൽ നിന്നുള്ള `{results: [{index, score}]}`
-> , Voyage-ശൈലിയിലുള്ള `{data: [...]}` എന്നിവയെല്ലാം ക്ലയന്റിലേക്ക്
-> `{results: [{index, relevance_score, document?}]}` ആയി മടങ്ങുന്നു; സ്കോർ അനുസരിച്ച് ക്രമീകരിച്ചും `top_n` വരെ പരിമിതപ്പെടുത്തിയുമാണ്.
+> **പ്രാദേശിക സെർവർ രൂപങ്ങൾ:** നോഡിനെ `<base>/v1/rerank` എന്നും 404-ൽ `<base>/rerank` (ഇൻഫിനിറ്റി, TEI) എന്നും വിളിക്കുന്നു. അപ്സ്ട്രീം ബോഡി Cohere/OpenAI അക്ഷരവിന്യാസവും (`documents`, `return_documents`) TEI സ്പെല്ലിംഗും (`texts`, `return_text`) വഹിക്കുന്നു, കൂടാതെ അപ്സ്ട്രീം പ്രതികരണം Cohere എൻവലപ്പിലേക്ക് നോർമലൈസ് ചെയ്തിരിക്കുന്നു: TEI ൻ്റെ വെറും `[{index, score, text}]`, `{results: [{index, score}]}` നേർത്ത ഗേറ്റ്വേകളിൽ നിന്ന് ക്ലയൻ്റിലേക്ക് തിരികെ വരുന്നു, ഒപ്പം `{results: [{index, relevance_score, document?}]}`, സ്കോർ പ്രകാരം അടുക്കി `{data: [...]}` `top_n` പരിമിതപ്പെടുത്തിയിരിക്കുന്നു.
 
-> **പ്രൊവൈഡർ-നോഡ് കണ്ടെത്തൽ:** OpenAI-അനുയോജ്യമായ പ്രൊവൈഡർ നോഡിലെ മോഡലുകൾ `GET /v1/models`-ൽ
-> നോഡ് പ്രിഫിക്സിന് കീഴിൽ പ്രത്യക്ഷപ്പെടുന്നു. എൻഡ്പോയിന്റ് മെറ്റാഡാറ്റ ഇല്ലാത്ത വരികൾ (ലോക്കൽ `/v1/models` ലിസ്റ്റിംഗുകളിൽ സാധാരണ കാണുന്നത്)
-> നോഡിന്റെ `apiType` പാരമ്പര്യമായി സ്വീകരിക്കുന്നു. അതിനാൽ ഒരു `embeddings` നോഡിലെ മോഡലുകൾ `type: "embedding"` ആയും
-> ഒരു `rerank` നോഡിലെ മോഡലുകൾ `type: "rerank"` ആയും മാറുന്നു; ഡീഫോൾട്ടായി chat ആകുന്നില്ല. സമന്വയിപ്പിച്ചതോ
-> സ്വമേധയാ ചേർത്തതോ ആയ വരിയിലെ വ്യക്തമായ `supportedEndpoints`-ന് ഇപ്പോഴും മുൻഗണനയുണ്ട്.
+> **പ്രൊവൈഡർ-നോഡ് കണ്ടെത്തൽ:** OpenAI-അനുയോജ്യമായ പ്രൊവൈഡർ നോഡിലെ മോഡലുകൾ നോഡ് പ്രിഫിക്സിന് കീഴിൽ `GET /v1/models` യിൽ ദൃശ്യമാകും. എൻഡ്പോയിൻ്റ് മെറ്റാഡാറ്റ ഇല്ലാത്ത വരികൾ (പ്രാദേശിക `/v1/models` ലിസ്റ്റിംഗുകൾക്ക് സാധാരണ) നോഡിൻ്റെ `apiType` പാരമ്പര്യമായി ലഭിക്കുന്നു, അതിനാൽ ഒരു `embeddings` നോഡിൻ്റെ മോഡലുകൾ `type: "embedding"` ആണ്, കൂടാതെ ഒരു `rerank` നോഡിൻ്റെ മോഡലുകൾ ചാറ്റിന് ഡിഫോൾട്ട് ചെയ്യുന്നതിന് പകരം `type: "rerank"` ആണ്; സമന്വയിപ്പിച്ചതോ സ്വമേധയാ ചേർത്തതോ ആയ വരിയിലെ വ്യക്തമായ `supportedEndpoints` ഇപ്പോഴും മുൻഗണന നൽകുന്നു.
 
-### സമർപ്പിത പ്രൊവൈഡർ റൂട്ടുകൾ
+### ടൈപ്പ് ചെയ്ത തീരുമാനങ്ങൾ
+
+ടൈപ്പ് ചെയ്ത ചോദ്യങ്ങൾക്ക് ടെക്സ്റ്റ് സൃഷ്ടിക്കുന്നതിന് പകരം കാലിബ്രേറ്റഡ് പ്രോബബിലിറ്റികളോടെയാണ് തീരുമാന മാതൃകകൾ ഉത്തരം നൽകുന്നത്. അവ ഒരിക്കലും ചാറ്റ് മോഡലുകളല്ല, രണ്ട് വയർ ഫോർമാറ്റുകളും ഒരിക്കലും പരസ്പരം വിവർത്തനം ചെയ്യപ്പെടുന്നില്ല:
+
+- `POST /v1/systemone` — സിസ്റ്റം One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter തീരുമാനങ്ങൾ, Cloudflare വർക്കേഴ്സ് AI, പ്രാദേശിക Ollama).
+- `POST /v1/decisions` — നേറ്റീവ് OpenAI തീരുമാനങ്ങൾ `{ model, input, questions: [...] }`, ഒരു `openai` കണക്ഷൻ നൽകുന്നു. മോഡൽ `openai/gpt-6-luna` ആണ് (ബെയർ `gpt-6-luna` യും പ്രവർത്തിക്കുന്നു). ഉത്തരങ്ങൾ ചോദ്യ ക്രമത്തിൽ തിരികെ വരുന്നു, തൊട്ടുകൂടാതെ.
+- `GET /v1/systemone/models` — രണ്ട് തരത്തിലുള്ള ഒരു കാറ്റലോഗ്; ഓരോ വരിയും അതിൻ്റെ `api_format` (`systemone` അല്ലെങ്കിൽ `decisions`) എന്ന് നാമകരണം ചെയ്യുന്നു. `limit` / `after` പേജ് അവസാന പട്ടിക. `X-OmniRoute-Catalog-Status` തലക്കെട്ട് `complete`, `partial` അല്ലെങ്കിൽ `unavailable` (503) എന്ന് വായിക്കുന്നു.
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` യിൽ API കീയുടെ മോഡൽ അനുവദനീയ പട്ടിക, `decisions` എൻഡ്പോയിൻ്റ് വിഭാഗം, ബജറ്റ്, കണക്ഷൻ സ്കോപ്പ് എന്നിവ ഏതെങ്കിലും ക്രെഡൻഷ്യൽ വായിക്കുന്നതിന് മുമ്പ് പരിശോധിക്കും. കീയുടെ പരിധിക്കുള്ളിൽ സംഭരിച്ചിരിക്കുന്ന `openai` കണക്ഷനാണ് ക്രെഡൻഷ്യൽ (ഒരിക്കലും പരിസ്ഥിതി കീ അല്ല); ഈ OmniRoute ൽ പോയിൻ്റ് ചെയ്യാത്ത ക്രെഡൻഷ്യലുകളോ അന്വേഷണമോ ശകലമോ ഇല്ലാത്ത ഒരു `http(s)` URL ആയിരിക്കുമ്പോൾ മാത്രമേ ഒരു കണക്ഷൻ ബേസ് URL ബഹുമാനിക്കപ്പെടുകയുള്ളൂ. `decision` ഓട്ടോ-റൗട്ടറിൻ്റെ ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ) അതേ സംരക്ഷിത ഗതാഗതത്തിലൂടെയാണ് കോൾ പുറപ്പെടുന്നത്: പ്രൊവൈഡർ ഔട്ട്ബൗണ്ട് ഗാർഡ്, വീണ്ടും ശ്രമിക്കില്ല, റീഡയറക്ടുകളില്ല, 5 സെക്കൻഡ് സമയപരിധി കൂടാതെ 64 KB ഉത്തരം ക്യാപ് (502 ആണ് വലിയ ഉത്തരം). അഭ്യർത്ഥന ബോഡികൾ 4 MiB ആയി പരിമിതപ്പെടുത്തിയിരിക്കുന്നു. ഓരോ കോളും ഒരു പുതിയ `Idempotency-Key` അയയ്ക്കുന്നു. പിശകുകൾ അപ്സ്ട്രീം സ്റ്റാറ്റസ് മാത്രമേ വഹിക്കുന്നുള്ളൂ, ഒരിക്കലും അതിൻ്റെ ബോഡി, URL, കീ അല്ലെങ്കിൽ പ്രോംപ്റ്റ്.
+
+### ഡെഡിക്കേറ്റഡ് പ്രൊവൈഡർ റൂട്ടുകൾ
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -793,7 +772,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-ഇല്ലെങ്കിൽ പ്രൊവൈഡർ പ്രിഫിക്സ് സ്വയമേവ ചേർക്കുന്നു. പൊരുത്തപ്പെടാത്ത മോഡലുകൾ `400` നൽകുന്നു.
+നഷ്ടപ്പെട്ടാൽ ദാതാവിൻ്റെ പ്രിഫിക്സ് സ്വയമേവ ചേർക്കും. പൊരുത്തമില്ലാത്ത മോഡലുകൾ `400` തിരികെ നൽകുന്നു.
 
 ---
 

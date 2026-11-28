@@ -240,24 +240,23 @@ curl -X POST http://localhost:20128/api/tunnels/tailscale/enable \
 | --------------- | ----------------------------------- |
 | `TAILSCALE_BIN` | `tailscale` बाइनरी पथ ओभरराइड गर्ने |
 
-## एन्डपोइन्ट सारांश
+## अन्तिम बिन्दु सारांश
 
-| एन्डपोइन्ट                            | विधि   | बडी                                 | प्रमाणीकरण |
+| अन्तिम बिन्दु                         | विधि   | शरीर                                | प्रमाण     |
 | ------------------------------------- | ------ | ----------------------------------- | ---------- |
-| `/api/tunnels/cloudflared`            | `GET`  | —                                   | management |
-| `/api/tunnels/cloudflared`            | `POST` | `{action: "enable" \| "disable"}`   | management |
-| `/api/tunnels/ngrok`                  | `GET`  | —                                   | management |
-| `/api/tunnels/ngrok`                  | `POST` | `{action, authToken?}`              | management |
-| `/api/tunnels/tailscale`              | `GET`  | —                                   | management |
-| `/api/tunnels/tailscale/check`        | `GET`  | —                                   | management |
-| `/api/tunnels/tailscale/install`      | `POST` | `{sudoPassword?}` (SSE)             | management |
-| `/api/tunnels/tailscale/start-daemon` | `POST` | `{sudoPassword?}`                   | management |
-| `/api/tunnels/tailscale/login`        | `POST` | `{hostname?}`                       | management |
-| `/api/tunnels/tailscale/enable`       | `POST` | `{sudoPassword?, hostname?, port?}` | management |
-| `/api/tunnels/tailscale/disable`      | `POST` | `{sudoPassword?}`                   | management |
+| `/api/tunnels/cloudflared`            | `GET`  | —                                   | व्यवस्थापन |
+| `/api/tunnels/cloudflared`            | `POST` | `{action: "enable" \| "disable"}`   | व्यवस्थापन |
+| `/api/tunnels/ngrok`                  | `GET`  | —                                   | व्यवस्थापन |
+| `/api/tunnels/ngrok`                  | `POST` | `{action, authToken?}`              | व्यवस्थापन |
+| `/api/tunnels/tailscale`              | `GET`  | —                                   | व्यवस्थापन |
+| `/api/tunnels/tailscale/check`        | `GET`  | —                                   | व्यवस्थापन |
+| `/api/tunnels/tailscale/install`      | `POST` | `{sudoPassword?}` (SSE)             | व्यवस्थापन |
+| `/api/tunnels/tailscale/start-daemon` | `POST` | `{sudoPassword?}`                   | व्यवस्थापन |
+| `/api/tunnels/tailscale/login`        | `POST` | `{hostname?}`                       | व्यवस्थापन |
+| `/api/tunnels/tailscale/enable`       | `POST` | `{sudoPassword?, hostname?, port?}` | व्यवस्थापन |
+| `/api/tunnels/tailscale/disable`      | `POST` | `{sudoPassword?}`                   | व्यवस्थापन |
 
-कुनै केन्द्रीय `/api/settings/tunnels` एन्डपोइन्ट छैन — प्रत्येक ब्याकएन्ड
-स्वतन्त्र छ।
+त्यहाँ कुनै केन्द्रीय `/api/settings/tunnels` अन्तिम बिन्दु — छैन प्रत्येक ब्याकइन्ड स्वतन्त्र छ।
 
 ## OAuth कलब्याकसम्बन्धी विचारहरू
 

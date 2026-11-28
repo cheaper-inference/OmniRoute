@@ -4,15 +4,11 @@
 
 ---
 
-> **Tushen gaskiya:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Sabuntawa ta ƙarshe:** 2026-06-28 — v3.8.40
+> **Tushen gaskiya:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, za, `src/app/api/webhooks/`
 
-OmniRoute na iya aika HTTP webhooks lokacin da abubuwan da suka faru a dandali suka auku. Yi amfani da su don haɗawa da
-Slack, PagerDuty, Datadog, sabis na faɗakarwa na cikin gida, ko duk wani mai karɓar HTTP.
+OmniRoute na iya kashe HTTP webhooks akan abubuwan dandali. Yi amfani da su don haɗawa tare da Slack, PagerDuty, Datadog, sabis na faɗakarwa na ciki, ko kowane mai karɓar HTTP.
 
-Mai rarrabawa yana sanya wa kowace isarwa sa hannun HMAC-SHA256, yana sake gwadawa idan an sami
-gazawa ta wucin gadi, yana bibiyar lafiyar isarwa ga kowane webhook, sannan yana kashe endpoints da
-suka ci gaba da gazawa ta atomatik.
+Mai aikawa yana sanya alamar kowane bayarwa tare da HMAC-SHA256, yana sake gwada gazawar wucin gadi, yana bin lafiyar isar da saƙon kowane gidan yanar gizo, kuma yana hana ƙarshen ƙarshen abubuwan da ke ci gaba da kasawa.
 
 ## Abubuwan Taimako
 

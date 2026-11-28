@@ -4,7 +4,7 @@
 
 ---
 
-> **Bron van waarheid:** `electron/` werkruimte** Laatst bijgewerkt:** 28-06-2026 — v3.8.40
+> **Bron van waarheid:** `electron/` werkruimte
 
 OmniRoute levert een platformonafhankelijke desktop-app (Windows / macOS / Linux) waarop is gebouwd**Electron 41** +** elektronenbouwer 26.10** . De desktop-app brengt de Next.js standalone server voort als een onderliggend proces, wijst er een `BrowserWindow` naar toe en voegt een systeemvak, auto-updater, IPC bridge en zero-config geheime bootstrap toe.
 
@@ -198,7 +198,7 @@ Instellen via `session.defaultSession.webRequest.onHeadersReceived`. Opmerkelijk
 
 ## Automatische update
 
-Gebruikt `electron-updater` met de GitHub provider (`diegosouzapw/OmniRoute`).
+Gebruikt `electron-updater` met de GitHub provider (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Gebeurtenissen doorgestuurd naar renderer via `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (met `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefacten landen in `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Releases worden gepubliceerd naar GitHub Releases (`diegosouzapw/OmniRoute`), waar `electron-updater` ook controleert op nieuwe versies.
+Releases worden gepubliceerd naar GitHub Releases (`cheaper-inference/OmniRoute`), waar `electron-updater` ook controleert op nieuwe versies.
 
 ## Problemen oplossen
 

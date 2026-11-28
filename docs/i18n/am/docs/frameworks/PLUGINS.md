@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | የተወሰነው መሠረታዊ URL                                     |
 | `ctx.apiKey`                 | `string \| null` | ከቀረበ API key                                         |
 
-## ማግኘት
+## ግኝት
 
-ፕለጊኖች ከሚከተሉት ቦታዎች ይገኛሉ፦
+ተሰኪዎች የተገኙት ከ፡-
 
-1. `~/.omniroute/plugins/<name>/` — የተጠቃሚ-አካባቢያዊ ጭነቶች
-2. `OMNIROUTE_PLUGIN_PATH` env var — ብጁ ማውጫ
+1. `~/.omniroute/plugins/node_modules/<name>/` — `omniroute plugin install` ጥቅሎችን በሚያስቀምጥበት (በ npm `--prefix`፣ `npm -g` ሳይሆን)
+2. `~/.omniroute/plugins/<name>/` — በእጅ የተገለበጡ ተሰኪ ማውጫዎች
+3. `OMNIROUTE_PLUGIN_PATH` env var — ብጁ ማውጫ
 
-ሁለቱም **ለCLI ብቻ** ናቸው። የሰርቨር-ወገን ፕለጊን runtime (በproxy ውስጥ የሚሰሩት marketplace/`plugin.json`
-ፕለጊኖች) የራሱ መቃኛ እና የራሱ override የሆነው
-`OMNIROUTE_PLUGINS_DIR` አለው —
-[PLUGIN_MARKETPLACE.md → የፕለጊን ማውጫ](./PLUGIN_MARKETPLACE.md#plugin-directory)ን ይመልከቱ።
-አንዱን ማዋቀር በሌላው ላይ ተጽዕኖ አያሳድርም።
+ተዛማጅ ማውጫዎች (npm ለ `plugin install ./dir` የሚፈጥረው) ይከተላሉ።
 
-የመጫን ስህተቶች ተይዘው እንደ ማስጠንቀቂያዎች ይታተማሉ — የተበላሸ ፕለጊን CLI-ውን ፈጽሞ አያበላሽም።
+ሁለቱም ናቸው።** CLI-ብቻ** . የአገልጋይ-ጎን ፕለጊን አሂድ ጊዜ (በፕሮክሲው ውስጥ የሚሰራው የገበያ ቦታ/`plugin.json` ፕለጊኖች) የራሱ የሆነ ስካነር አለው፣ `OMNIROUTE_PLUGINS_DIR` — [PLUGIN_MARKETPLACE.md → Plugin directory ን](./PLUGIN_MARKETPLACE.md#plugin-directory) ይመልከቱ። አንዱን ማዋቀር ሌላውን አይነካም።
+
+የመጫኛ ስህተቶች ተይዘዋል እና እንደ ማስጠንቀቂያ ታትመዋል — የተሰበረ ተሰኪ CLI በጭራሽ አይበላሽም።
 
 ## ደህንነት
 

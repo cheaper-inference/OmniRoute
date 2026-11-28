@@ -12,55 +12,53 @@ OmniRoute มีกลไกความยืดหยุ่นที่แต�
 
 > **ลำดับความสำคัญของ Env-vs-dashboard สำหรับการสลับความยืดหยุ่น** การเลือกรับความยืดหยุ่นในการสลับเริ่มต้นจากสภาพแวดล้อม — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — จัดหาเฉพาะ _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) บูลีนยังคงอยู่ใน `resilienceSettings` (Dashboard →** การตั้งค่า → ความยืดหยุ่น** / `PATCH /api/resilience`, เก็บไว้ใน `key_value`) ชนะค่า env: การทำให้เป็นมาตรฐาน (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) เก็บบูลีนที่เก็บไว้เมื่อใดก็ตามที่มีอยู่ การตั้งค่า env var เป็น `true` ในการปรับใช้ที่แดชบอร์ดบันทึก `false` ไว้แล้ว ดังนั้นจึงไม่เปลี่ยนแปลงอะไรเลย — พลิกสลับเข้า** การตั้งค่า → ความยืดหยุ่น** (หรือล้างช่องที่เก็บไว้) แทน
 
-## 1. Circuit Breaker ระดับผู้ให้บริการ
+## 1. ผู้ให้บริการเซอร์กิตเบรกเกอร์
 
-**ขอบเขต:** ผู้ให้บริการทั้งราย (เช่น `glm`, `openai`, `anthropic`)
+**ขอบเขต:** ผู้ให้บริการทั้งหมด (เช่น `glm`, `openai`, `anthropic`)
 
-**วัตถุประสงค์:** หยุดส่งทราฟฟิกไปยังผู้ให้บริการที่ล้มเหลวซ้ำ ๆ ในระดับอัปสตรีม/บริการ
+**วัตถุประสงค์:** หยุดส่งการรับส่งข้อมูลไปยังผู้ให้บริการที่ล้มเหลวซ้ำแล้วซ้ำอีกในระดับ upstream/service
 
-**ส่วนประกอบการทำงาน:**
+**การนำไปปฏิบัติ:**
 
 - คลาสหลัก: `src/shared/utils/circuitBreaker.ts`
-- จุดเชื่อมต่อ (wiring): `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API ตรวจสถานะ: `GET /api/monitoring/health`
-- API รีเซ็ต: `POST /api/resilience/reset`
-- ตัวครอบ (wrappers): `open-sse/services/accountFallback.ts`
-- ตารางฐานข้อมูล: `domain_circuit_breakers`
+- สายไฟ: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- สถานะ API: `GET /api/monitoring/health`
+- รีเซ็ต API: `POST /api/resilience/reset`
+- กระดาษห่อ: `open-sse/services/accountFallback.ts`
+- ตาราง DB : `domain_circuit_breakers`
 
-**สถานะ:**
+**รัฐ:**
 
-- `CLOSED` — อนุญาตทราฟฟิกตามปกติ
-- `DEGRADED` — ยังอนุญาตทราฟฟิกอยู่ แต่ระบบกำลังติดตามความล้มเหลวของผู้ให้บริการที่เพิ่มสูงขึ้น; จะกลับสู่ `CLOSED` เมื่อสำเร็จครบตามจำนวนที่กำหนด เมื่อการทดสอบการเชื่อมต่อผ่าน หรือเมื่อผ่านพ้นช่วงระงับ `OPEN` ที่ยาวที่สุดสำหรับความล้มเหลวชนิดล่าสุด (ค่า `cooldownByKind` ของชนิดนั้น หากไม่มีให้ใช้ `resetTimeout` × `maxBackoffMultiplier` อย่างน้อยหนึ่งรอบคูลดาวน์) โดยไม่มีความล้มเหลวใหม่เกิดขึ้น
-- `OPEN` — ผู้ให้บริการถูกบล็อกชั่วคราว; การเราต์แบบ combo จะข้ามไป
-- `HALF_OPEN` — หมดเวลารีเซ็ตแล้ว; อนุญาตให้ส่งรีเควสต์สำรวจ (probe)
+- `CLOSED` — อนุญาตการรับส่งข้อมูลปกติ
+- ยังคงอนุญาตการรับส่งข้อมูล `DEGRADED` — แต่ความล้มเหลวของผู้ให้บริการระดับสูงกำลังถูกติดตาม กลับสู่ `CLOSED` เมื่อประสบความสำเร็จเพียงพอ ในการทดสอบการเชื่อมต่อที่ถูกต้อง หรือหลังจากการระงับ `OPEN` นานที่สุดสำหรับประเภทความล้มเหลวครั้งล่าสุด (ค่า `cooldownByKind` มิฉะนั้น `resetTimeout`, × `maxBackoffMultiplier` อย่างน้อยหนึ่งคูลดาวน์) โดยไม่มีความล้มเหลวใหม่
+- ผู้ให้บริการ `OPEN` — ถูกบล็อกชั่วคราว การกำหนดเส้นทางคอมโบข้ามมัน
+- `HALF_OPEN` หมดเวลารีเซ็ต — ผ่านไป; อนุญาตให้มีการร้องขอการสอบสวน
 
-**ค่าเริ่มต้นที่ปรับแต่งได้ (`open-sse/config/constants.ts` แสดงอยู่ใน Dashboard → Settings → Resilience):**
+**ค่าเริ่มต้นที่กำหนดค่าได้ (`open-sse/config/constants.ts` เปิดเผยในแดชบอร์ด → การตั้งค่า → ความยืดหยุ่น):**
 
-| Class   | Degraded at       | Opens at         | Reset timeout |
-| ------- | ----------------- | ---------------- | ------------- |
-| OAuth   | ล้มเหลว 5 ครั้ง   | ล้มเหลว 8 ครั้ง  | 60s           |
-| API-key | ล้มเหลว 7 ครั้ง   | ล้มเหลว 12 ครั้ง | 30s           |
-| Local   | คำนวณให้อัตโนมัติ | ล้มเหลว 2 ครั้ง  | 15s           |
+| ระดับ    | เสื่อมโทรมลง ณ | เปิดที่             | รีเซ็ตการหมดเวลา |
+| -------- | -------------- | ------------------- | ---------------- |
+| OAuth    | 5 ความล้มเหลว  | ความล้มเหลว 8 ครั้ง | 60s              |
+| คีย์ API | 7 ความล้มเหลว  | 12 ความล้มเหลว      | 30s              |
 
-`degradationThreshold` ควบคุมว่าผู้ให้บริการจะเข้าสู่ `DEGRADED` เมื่อใด; `failureThreshold` ควบคุมว่าเมื่อใดจะเข้าสู่สถานะเปิด (OPEN) และถูกข้าม โปรไฟล์ผู้ให้บริการแบบ Local ยังไม่แสดงในหน้าตั้งค่า Resilience
+`degradationThreshold` ควบคุมเมื่อผู้ให้บริการเข้าสู่ `DEGRADED`; `failureThreshold` ควบคุมเมื่อเปิดและถูกข้าม `PROVIDER_PROFILES.local` (2 ความล้มเหลว / 15 วินาที) ถูกกำหนดไว้ใน `open-sse/config/constants.ts` แต่** ยังไม่ได้ต่อสาย** : `getProviderCategory()` ส่งคืนเฉพาะ `oauth` หรือ `apikey` ดังนั้นผู้ให้บริการในพื้นที่จึงใช้โปรไฟล์ OAuth หรือคีย์ API
 
-**รหัสที่ทำให้ทริป:** เฉพาะสถานะระดับผู้ให้บริการ `[408, 500, 502, 503, 504]` ห้ามทริปกับข้อผิดพลาดระดับบัญชี (401/403/429 ส่วนใหญ่ — เหล่านั้นเป็นหน้าที่ของคูลดาวน์หรือการล็อกเอาต์)
+**รหัสการเดินทาง:** `[408, 500, 502, 503, 504]` สถานะระดับผู้ให้บริการเท่านั้น ทำ NOT trip เพื่อหาข้อผิดพลาดระดับบัญชี ( 401/403/429 — ส่วนใหญ่อยู่ในคูลดาวน์หรือล็อคเอาต์)
 
-**การฟื้นตัวแบบ lazy:** เมื่อ `OPEN` หมดอายุ `getStatus()`, `canExecute()`, `getRetryAfterMs()` จะรีเฟรชสถานะเป็น `HALF_OPEN` การอ่านค่าเหล่านั้น (และความล้มเหลวครั้งถัดไป) จะทำให้ `DEGRADED` ที่ค้างเก่าค่อย ๆ กลับเป็น `CLOSED` ไม่จำเป็นต้องใช้ตัวจับเวลาพื้นหลัง
+**การกู้คืนที่ขี้เกียจ:** เมื่อ `OPEN` หมดอายุ `getStatus()`, `canExecute()`, `getRetryAfterMs()` รีเฟรชสถานะเป็น `HALF_OPEN` การอ่านแบบเดียวกัน (และความล้มเหลวครั้งถัดไป) จะสลาย `DEGRADED` เก่ากลับไปเป็น `CLOSED` ไม่จำเป็นต้องจับเวลาพื้นหลัง
 
 ---
 
-### Provider Cooldown ระดับโกลบอลแบบเลือกเปิดใช้ (window gate)
+### เลือกใช้คูลดาวน์ผู้ให้บริการส่วนกลาง (ประตูหน้าต่าง)
 
-ชั้นที่สี่ซึ่งเป็นแบบ **opt-in** (`PROVIDER_COOLDOWN_ENABLED` ค่าเริ่มต้น **ปิด**) จะเก็บหน่วยความจำข้ามรีเควสต์ของผู้ให้บริการที่ล้มเหลวไว้ใน `open-sse/services/providerCooldownTracker.ts` ซึ่งการคัดเลือกเป้าหมายของ combo จะนำมาใช้อ้างอิง เพื่อให้รีเควสต์ combo ที่ต่อเนื่องกันหยุดวนซ้ำไปยังผู้ให้บริการที่เพิ่งล้มเหลว รายการระดับผู้ให้บริการจะปฏิบัติตาม window gate ของ `PROVIDER_PROFILES`:
+หนึ่งในสี่** เลือกใช้** เลเยอร์ (`PROVIDER_COOLDOWN_ENABLED`, default** ปิด** ) เก็บหน่วยความจำคำขอข้ามของผู้ให้บริการที่ล้มเหลวใน `open-sse/services/providerCooldownTracker.ts` ปรึกษาโดยการแก้ไขเป้าหมายคอมโบ ดังนั้นคำขอคอมโบที่ต่อเนื่องกันจะหยุดการเดินผู้ให้บริการที่เพิ่งล้มเหลวอีกครั้ง รายการระดับผู้ให้บริการให้เกียรติประตูหน้าต่าง `PROVIDER_PROFILES` :
 
-| Profile | trips after (`providerFailureThreshold`) | inside (`providerFailureWindowMs`) | cools for (`providerCooldownMs`) |
-| ------- | ---------------------------------------: | ---------------------------------: | -------------------------------: |
-| OAuth   |                                     `10` |                            `15min` |                           `5min` |
-| API key |                                     `15` |                            `30min` |                          `10min` |
+| ประวัติโดยย่อ | ทริปหลัง (`providerFailureThreshold`) | ข้างใน (`providerFailureWindowMs`) | เจ๋งสำหรับ (`providerCooldownMs`) |
+| ------------- | ------------------------------------: | ---------------------------------: | --------------------------------: |
+| OAuth         |                                  `10` |                            `15min` |                            `5min` |
+| คีย์API       |                                  `15` |                            `30min` |                           `10min` |
 
-หากต่ำกว่าเกณฑ์ ผู้ให้บริการจะ **ไม่** ถูกถือว่ากำลังคูลดาวน์; ความสำเร็จหนึ่งครั้งจะล้างหน้าต่างเวลานั้น รายการระดับการเชื่อมต่อ (`provider:connectionId`) จะยังคงใช้แบ็กออฟแบบเอ็กซ์โพเนนเชียล `minRetryCooldownMs → maxRetryCooldownMs` แทน การเขียนทับค่า: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`
-การป้องกันการถดถอย (regression guard): `tests/unit/provider-cooldown-window-gate.test.ts`
+ต่ำกว่าเกณฑ์ที่ผู้ให้บริการอยู่** ไม่** ถือว่าระบายความร้อน ความสำเร็จทำให้หน้าต่างว่างเปล่า รายการระดับการเชื่อมต่อ (`provider:connectionId`) จะเก็บ `minRetryCooldownMs → maxRetryCooldownMs` backoff แบบเอ็กซ์โปเนนเชียลแทน แทนที่: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}` ตัวป้องกันการถดถอย: `tests/unit/provider-cooldown-window-gate.test.ts`
 
 ## 2. คูลดาวน์การเชื่อมต่อ
 
@@ -754,6 +752,21 @@ allowlist การจำกัดอัตราตาม IP ให้สัญ
 
 ---
 
+## เมื่อ OmniRoute ไม่สามารถเข้าถึงได้
+
+เซอร์กิตเบรกเกอร์ของผู้ให้บริการ คูลดาวน์การเชื่อมต่อ และการล็อกโมเดลทั้งหมดจะทำงานภายในเกตเวย์ หากไคลเอ็นต์ไม่สามารถเข้าถึงเกตเวย์ จะได้รับข้อผิดพลาดในการเชื่อมต่อ OmniRoute ไม่สามารถสกัดกั้นความล้มเหลวนั้นได้ ลูกค้าตัดสินใจว่าจะลองอีกครั้งหรือไม่และจะแสดงข้อความใด
+
+ปัจจุบัน OmniRoute ไม่มีทางเลือกสำรองฝั่งไคลเอ็นต์และไม่มีการกำหนดนโยบายไว้ กำหนดค่าเส้นทางอื่นในไคลเอนต์หรือด้านหน้าเกตเวย์
+
+- `GET /api/health` ตรวจสอบความมีชีวิตชีวาโดยไม่มีการรับรองความถูกต้อง
+- `GET /api/health/ping` ตรวจสอบความพร้อม รวมถึงว่าฐานข้อมูลตอบสนองหรือไม่
+- `GET /api/monitoring/health` ให้ภาพรวมด้านสุขภาพที่ลึกซึ้งยิ่งขึ้นแก่ผู้โทรที่ได้รับการรับรอง
+- `omniroute launch <tool>` ตรวจสอบ `/api/monitoring/health` ก่อนที่จะเริ่มต้นไคลเอนต์ สามารถเริ่มเกตเวย์ภายในเครื่องได้โดยอัตโนมัติ ด้วย `--no-start` เกตเวย์ที่ไม่สามารถเข้าถึงได้จะส่งผลให้เกิด `GatewayUnreachable` และโค้ดออก `69`
+
+หากต้องการยกเลิกการเชื่อมต่อไคลเอ็นต์จาก OmniRoute ให้ทำตาม [เปลี่ยนกลับการกำหนดค่าไคลเอ็นต์](../guides/UNINSTALL.md#revert-client-configuration)
+
+---
+
 ## การดีบัก
 
 - Weighted combo ตอบกลับด้วย `503 all_targets_cooling_down` (มีการตั้งค่า `Retry-After`, `diagnostics.excluded` แสดงรายการทุก target พร้อม `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → pool ได้รับการกำหนดค่าและเชื่อมต่อแล้ว เพียงแต่ทุก target ถูกแยกออกโดยตัวจับเวลา resilience; คำเตือน `[COMBO] Weighted selection: every target excluded before dispatch — …` จะระบุเหตุผลและวินาทีที่เหลือ ส่วน `404 no_executable_targets` จาก combo เดียวกันหมายความว่าไม่มีตัวจับเวลา resilience เกี่ยวข้อง (ไม่มีอะไรให้รัน หรือทุกบัญชีไม่ผ่านการตรวจสอบความพร้อมใช้งาน) สร้างขึ้นใน `open-sse/services/combo/pinRecovery.ts` จากรายการ exclusion ที่รวบรวมใน `targetResolution.ts`
@@ -765,97 +778,68 @@ allowlist การจำกัดอัตราตาม IP ให้สัญ
 
 ---
 
-## สถานะ Runtime — ข้อมูลอ้างอิงด่วนสำหรับ agent
+## ข้อมูลอ้างอิงด่วนเกี่ยวกับสถานะรันไทม์ — agent
 
-> ย้ายมาแบบตรงตัวจาก `AGENTS.md` → "Resilience Runtime State" (PR #12743) เพื่อให้
-> คู่มือ agent อยู่ภายใต้งบประมาณ context 40k นี่คือมุมมองแบบย่อที่มุ่งเน้น agent ของ
-> ส่วนต่างๆ ข้างต้น; ส่วนที่มีหมายเลขกำกับยังคงเป็นข้อมูลอ้างอิงฉบับเต็ม
+> ย้ายคำต่อคำจาก `AGENTS.md` → "Resilience Runtime State" (PR #12743) เพื่อให้คำแนะนำตัวแทนอยู่ภายใต้งบประมาณบริบท 40,000 เป็นมุมมองแบบย่อและหันหน้าเข้าหาตัวแทนของส่วนต่างๆ ข้างต้น ส่วนที่มีหมายเลขยังคงเป็นข้อมูลอ้างอิงแบบเต็ม
 
-OmniRoute มีกลไจความล้มเหลวชั่วคราวสามแบบที่เกี่ยวข้องแต่แตกต่างกัน โปรดแยก
-ขอบเขตของแต่ละกลไจออกจากกันเมื่อดีบักพฤติกรรมการกำหนดเส้นทาง ดู
-[ไดอะแกรม resilience 3 ชั้น](../diagrams/exported/resilience-3layers.svg)
-(ต้นฉบับ: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-สำหรับแผนที่ภาพรวม
+OmniRoute มีกลไกความล้มเหลวชั่วคราวที่เกี่ยวข้องกันสามประการแต่แตกต่างกันอย่างชัดเจน แยกขอบเขตออกจากกันเมื่อทำการดีบักพฤติกรรมการกำหนดเส้นทาง ดู [แผนภาพความยืดหยุ่น 3 ชั้น](../diagrams/exported/resilience-3layers.svg) (ที่มา: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) สำหรับแผนที่โดยสรุป
 
-### Provider Circuit Breaker
+### ผู้ให้บริการเซอร์กิตเบรกเกอร์
 
-**ขอบเขต**: ทั้ง provider เช่น `glm`, `openai`, `anthropic`
+**ขอบเขต** : ผู้ให้บริการทั้งหมด เช่น `glm`, `openai`, `anthropic`
 
-**วัตถุประสงค์**: หยุดส่งทราฟฟิกไปยัง provider ที่ล้มเหลวซ้ำๆ ในระดับ
-upstream/บริการ เพื่อไม่ให้ provider ที่ไม่สมบูรณ์เพียงตัวเดียวทำให้ทุกคำขอช้าลง
+**วัตถุประสงค์** : หยุดการส่งการรับส่งข้อมูลไปยังผู้ให้บริการที่ล้มเหลวซ้ำแล้วซ้ำอีกในระดับ upstream/service ดังนั้นผู้ให้บริการที่ไม่ดีรายหนึ่งจะไม่ทำให้ทุกคำขอช้าลง
 
-**การนำไปใช้งาน**:
+**การนำไปปฏิบัติ** : :
 
 - คลาสหลัก: `src/shared/utils/circuitBreaker.ts`
-- การเชื่อมต่อ gate/การทำงานของ Chat: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API สถานะ runtime: `src/app/api/monitoring/health/route.ts`
+- การเดินสายแชท gate/execution : `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- สถานะรันไทม์ API: `src/app/api/monitoring/health/route.ts`
 - Wrapper ที่ใช้ร่วมกัน: `open-sse/services/accountFallback.ts`
-- ตารางสถานะที่จัดเก็บ: `domain_circuit_breakers`
+- ตารางสถานะคงอยู่: `domain_circuit_breakers`
 
-**สถานะ** (4 — `src/shared/utils/circuitBreaker.ts`):
+**รัฐ** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: อนุญาตทราฟฟิกปกติ
-- `DEGRADED`: แถบเตือนล่วงหน้า — ความล้มเหลวข้ามเกณฑ์ degradation แต่ยังไม่ถึง
-  เกณฑ์ breaker; ทราฟฟิกยังคงไหล แดชบอร์ดแสดงคำเตือน การทดสอบการเชื่อมต่อที่ผ่าน
-  หรือช่วงเวลาที่เงียบโดยไม่มีความล้มเหลวใหม่จะทำให้กลับสู่ `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` มีรายละเอียดของช่วงเวลานี้)
-- `OPEN`: provider ถูกบล็อกชั่วคราว; ผู้เรียกจะได้รับการตอบกลับแบบ provider-circuit-open
-  หรือ combo routing จะข้ามไปยัง target อื่น
-- `HALF_OPEN`: หมดเวลารีเซ็ตแล้ว; อนุญาตคำขอตรวจสอบ หากสำเร็จจะปิด
-  breaker หากล้มเหลวจะเปิดอีกครั้ง
+- `CLOSED`: อนุญาตให้สัญจรปกติได้
+- `DEGRADED`: ความล้มเหลวของแบนด์การเตือนล่วงหน้า — ข้ามขีดจำกัดการย่อยสลาย แต่ยังไม่ถึงขีดจำกัดของเบรกเกอร์ รถยังสัญจรไปมา แผงหน้าปัดแสดงคำเตือน การทดสอบการเชื่อมต่อที่ถูกต้องหรือหน้าต่างเงียบที่ไม่มีความล้มเหลวใหม่จะส่งคืนเป็น `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` มีหน้าต่าง)
+- `OPEN`: ผู้ให้บริการถูกบล็อกชั่วคราว; ผู้โทรจะได้รับการตอบสนองการเปิดวงจรของผู้ให้บริการหรือการกำหนดเส้นทางแบบคอมโบข้ามไปยังเป้าหมายอื่น
+- `HALF_OPEN`: หมดเวลาการรีเซ็ตแล้ว อนุญาตให้มีการร้องขอการสอบสวน ความสำเร็จปิดเบรกเกอร์ ความล้มเหลวเปิดมันอีกครั้ง
 
-**ค่าเริ่มต้น** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES` ใช้งานผ่าน
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` ใน `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` ใน `src/sse/handlers/chatHelpers.ts`) breaker ระดับ
-provider ทั้งตัวทำงานบน `circuitBreakerThreshold` / `circuitBreakerReset`:
+**ค่าเริ่มต้น** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES` บริโภคผ่าน `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` ใน `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` ใน `src/sse/handlers/chatHelpers.ts`) เบรกเกอร์ผู้ให้บริการทั้งหมดทำงานบน `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| โปรไฟล์ | degrade ที่ | เปิดที่ (`circuitBreakerThreshold`) | รีเซ็ต (`circuitBreakerReset`) |
-| ------- | ----------: | ----------------------------------: | -----------------------------: |
-| OAuth   |         `5` |                                 `8` |                          `60s` |
-| API key |         `7` |                                `12` |                          `30s` |
-| Local   |  (ได้มาจาก) |                                 `2` |                          `15s` |
+| ประวัติโดยย่อ | ลดลงที่ | เปิดที่ (`circuitBreakerThreshold`) | รีเซ็ต (`circuitBreakerReset`) |
+| ------------- | ------: | ----------------------------------: | -----------------------------: |
+| OAuth         |     `5` |                                 `8` |                          `60s` |
+| คีย์API       |     `7` |                                `12` |                          `30s` |
 
-`PROVIDER_PROFILES` ยังกำหนด `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 นาที) และ `providerCooldownMs` (5/10/1 นาที): สิ่งเหล่านี้ขับเคลื่อน
-**window gate ของ Provider Cooldown ระดับ global แบบ opt-in** (`PROVIDER_COOLDOWN_ENABLED` ค่าเริ่มต้น
-ปิดอยู่) — รายการระดับ provider ใน `open-sse/services/providerCooldownTracker.ts` จะนับเป็น
-กำลัง cooldown ก็ต่อเมื่อมีความล้มเหลว `providerFailureThreshold` ครั้งภายใน `providerFailureWindowMs` แล้วจึง
-cooldown เป็นเวลา `providerCooldownMs` ค่าเหล่านี้ไม่ใช่เกณฑ์ของ breaker ที่กำลังทำงานอยู่ — อย่าปรับค่าเหล่านี้
-โดยคาดหวังพฤติกรรมของ breaker ทุกค่าเริ่มต้นสามารถแทนที่ได้ผ่าน
-ตัวแปรสภาพแวดล้อม `OMNIROUTE_PROVIDER_BREAKER_*` และ `OMNIROUTE_CIRCUIT_BREAKER_*`;
-ตารางอ้างอิงที่ถูกต้องตาม runtime อยู่ใน `docs/architecture/RESILIENCE_GUIDE.md`
+โปรไฟล์ `local` (`2` faileds / `15s`) มีอยู่ใน `PROVIDER_PROFILES` ด้วย แต่ไม่ได้ต่อสายเข้ากับเบรกเกอร์: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) ยอมรับเฉพาะ `oauth` หรือ `apikey` และ `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) ส่งคืนหนึ่งในสองตัวนั้น (ผู้ให้บริการที่ไม่ได้ลงทะเบียนจะได้รับ `apikey`)
 
-เฉพาะสถานะความล้มเหลวระดับ provider เท่านั้นที่ควรทำให้ provider breaker ทำงาน:
+`PROVIDER_PROFILES` ยังกำหนด `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) และ `providerCooldownMs` (5/10/1 min) — OAuth/API key/local โดยที่ค่าท้องถิ่นเป็นค่าเฉื่อยด้วยเหตุผลเดียวกันกับข้างต้น: พลังเหล่านี้** ประตูหน้าต่างของคูลดาวน์ผู้ให้บริการส่วนกลางที่เลือกใช้** (`PROVIDER_COOLDOWN_ENABLED` ปิดค่าเริ่มต้น) — รายการระดับผู้ให้บริการใน `open-sse/services/providerCooldownTracker.ts` จะนับเป็นการระบายความร้อนหลังจาก `providerFailureThreshold` ล้มเหลวภายใน `providerFailureWindowMs` เท่านั้น จากนั้นจะเย็นลงสำหรับ `providerCooldownMs` พวกมันคือ NOT ซึ่งเป็นเกณฑ์ของไลฟ์เบรกเกอร์ — ไม่ได้ปรับแต่งพวกมันโดยคาดหวังพฤติกรรมของเบรกเกอร์ ทุกค่าดีฟอลต์สามารถลบล้างได้ผ่าน `OMNIROUTE_PROVIDER_BREAKER_*` และ `OMNIROUTE_CIRCUIT_BREAKER_*` env vars ตารางอ้างอิงที่แม่นยำรันไทม์อาศัยอยู่ใน `docs/architecture/RESILIENCE_GUIDE.md`
+
+เฉพาะสถานะความล้มเหลวระดับผู้ให้บริการเท่านั้นที่ควรเดินทางกับเบรกเกอร์ของผู้ให้บริการ:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-อย่าทำให้ breaker ของทั้ง provider ทำงานสำหรับข้อผิดพลาดปกติระดับบัญชี/key/โมเดล เช่น กรณี
-`401`, `403` หรือ `429` ส่วนใหญ่ กรณีเหล่านั้นมักจะอยู่ในขอบเขตของ connection cooldown หรือ model
-lockout ข้อผิดพลาด `403` ของ provider แบบ API key ทั่วไปควรสามารถกู้คืนได้ เว้นแต่จะถูกจัดประเภท
-เป็นข้อผิดพลาดระดับ provider/บัญชีที่สิ้นสุดถาวร
+อย่าสะดุดเบรกเกอร์ผู้ให้บริการทั้งหมดเพื่อหาข้อผิดพลาด account/key/model ปกติ เช่น กรณีส่วนใหญ่ `401`, `403` หรือ `429` สิ่งเหล่านี้มักจะอยู่ในคูลดาวน์การเชื่อมต่อหรือการล็อคโมเดล `403` ผู้ให้บริการคีย์ API ทั่วไปควรสามารถกู้คืนได้ เว้นแต่จะถูกจัดประเภทเป็นข้อผิดพลาดเทอร์มินัล provider/account
 
-Breaker ใช้การกู้คืนแบบ lazy ไม่ได้ใช้ background timer เมื่อ `OPEN` หมดอายุ
-การอ่านค่าเช่น `getStatus()`, `canExecute()` และ `getRetryAfterMs()` จะรีเฟรชสถานะเป็น
-`HALF_OPEN` เพื่อให้แดชบอร์ดและตัวสร้าง combo candidate ไม่ตัด provider
-ที่หมดอายุแล้วออกไปตลอดกาล
+เบรกเกอร์ใช้การกู้คืนแบบ Lazy ไม่ใช่ตัวจับเวลาในเบื้องหลัง เมื่อ `OPEN` หมดอายุ การอ่าน เช่น `getStatus()`, `canExecute()` และ `getRetryAfterMs()` จะรีเฟรชสถานะเป็น `HALF_OPEN` ดังนั้นแดชบอร์ดและตัวสร้างตัวเลือกคอมโบจะไม่แยกผู้ให้บริการที่หมดอายุออกตลอดไป
 
-### คูลดาวน์ของ Connection
+### คูลดาวน์การเชื่อมต่อ
 
-**ขอบเขต**: connection/บัญชี/คีย์หนึ่งรายการของ provider
+**ขอบเขต** : ผู้ให้บริการรายหนึ่ง connection/account/key.
 
-**วัตถุประสงค์**: ข้ามคีย์/บัญชีที่มีปัญหาชั่วคราวหนึ่งรายการ โดยยังอนุญาตให้ connection
-อื่นของ provider เดียวกันยังให้บริการ request ต่อไปได้
+**วัตถุประสงค์** : ข้าม key/account ที่ไม่ดีหนึ่งรายการชั่วคราวในขณะที่อนุญาตให้การเชื่อมต่ออื่นสำหรับผู้ให้บริการรายเดียวกันให้บริการคำขอต่อไป
 
-**การ implement**:
+**การนำไปปฏิบัติ** : :
 
-- เส้นทางการเขียน/อัปเดต: `src/sse/services/auth.ts::markAccountUnavailable()`
-- การเลือก/กรองบัญชี: `src/sse/services/auth.ts::getProviderCredentials...`
+- เส้นทาง Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- บัญชี selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
 - การคำนวณคูลดาวน์: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - การตั้งค่า: `src/lib/resilience/settings.ts`
 
-ฟิลด์สำคัญบน connection ของ provider:
+ช่องสำคัญเกี่ยวกับการเชื่อมต่อของผู้ให้บริการ:
 
 ```ts
 rateLimitedUntil;
@@ -866,64 +850,50 @@ errorCode;
 backoffLevel;
 ```
 
-ในระหว่างการเลือกบัญชี connection จะถูกข้ามเมื่อ:
+ในระหว่างการเลือกบัญชี การเชื่อมต่อจะถูกข้ามในขณะที่:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-คูลดาวน์ก็เป็นแบบ lazy เช่นกัน: เมื่อ `rateLimitedUntil` ผ่านไปแล้ว connection จะกลับมา
-มีสิทธิ์ถูกเลือกอีกครั้ง เมื่อใช้งานสำเร็จ `clearAccountError()` จะล้าง `testStatus`,
-`rateLimitedUntil`, ฟิลด์ error และ `backoffLevel`
+คูลดาวน์ยังขี้เกียจ: เมื่อ `rateLimitedUntil` อยู่ในอดีต การเชื่อมต่อจะมีสิทธิ์อีกครั้ง เมื่อใช้สำเร็จ `clearAccountError()` จะล้าง `testStatus`, `rateLimitedUntil`, ฟิลด์ข้อผิดพลาด และ `backoffLevel`
 
-พฤติกรรมคูลดาวน์เริ่มต้นของ connection:
+ลักษณะการทำงานคูลดาวน์การเชื่อมต่อเริ่มต้น:
 
-- คูลดาวน์พื้นฐานของ OAuth: `5s`
-- คูลดาวน์พื้นฐานของ API-key: `3s`
-- กรณี `429` ของ API-key ควรใช้คำใบ้การ retry จาก upstream (`Retry-After`, reset headers หรือ
-  ข้อความ reset ที่ parse ได้) ก่อนเสมอเมื่อมีให้ใช้
-- ความล้มเหลวที่กู้คืนได้ซ้ำๆ จะใช้ exponential backoff:
+- คูลดาวน์พื้นฐานของ OAuth : `5s`
+- คูลดาวน์พื้นฐานของคีย์ API: `3s`
+- `429` ของคีย์ API ควรเลือกใช้คำแนะนำในการลองอัปสตรีมอีกครั้ง (`Retry-After`, ส่วนหัวรีเซ็ต หรือข้อความรีเซ็ตที่แยกวิเคราะห์ได้) เมื่อพร้อมใช้งาน
+- ความล้มเหลวที่กู้คืนได้ซ้ำๆ จะใช้การแบ็คออฟแบบเอกซ์โปเนนเชียล:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-ตัวป้องกัน anti-thundering-herd ป้องกันไม่ให้ความล้มเหลวที่เกิดพร้อมกันบน connection
-เดียวกันขยายคูลดาวน์ซ้ำหลายครั้ง หรือเพิ่ม `backoffLevel` ซ้ำสอง
+Anti-thundering-herd guard ป้องกันความล้มเหลวที่เกิดขึ้นพร้อมกันบนการเชื่อมต่อเดียวกันจากการขยายคูลดาวน์ซ้ำๆ หรือ `backoffLevel` เพิ่มขึ้นสองเท่า
 
-สถานะแบบ terminal ไม่ใช่คูลดาวน์ `banned`, `expired` (ซึ่งจะกลายเป็น terminal ก็ต่อเมื่อ
-retry แบบจำกัดจำนวนครบ N ครั้งผ่าน `EXPIRED_RETRY_MAX` แล้ว) และ `credits_exhausted`
-มีเจตนาให้คงสถานะไม่พร้อมใช้งานไว้จนกว่า credentials/การตั้งค่าจะเปลี่ยน หรือผู้ดูแลระบบ
-รีเซ็ตเอง อย่าเขียนทับสถานะ terminal ด้วยสถานะคูลดาวน์ชั่วคราว
+สถานะของเทอร์มินัลไม่ใช่คูลดาวน์ `banned`, `expired` (ซึ่งกลายเป็นเทอร์มินัลเฉพาะหลังจากที่ N พยายามลองใหม่ผ่าน `EXPIRED_RETRY_MAX`) และ `credits_exhausted` มีจุดประสงค์เพื่อให้ใช้งานไม่ได้จนกว่า credentials/settings จะเปลี่ยนหรือผู้ดำเนินการรีเซ็ต อย่าเขียนทับสถานะของเทอร์มินัลด้วยสถานะคูลดาวน์ชั่วคราว
 
-### การ Lockout โมเดล
+### การล็อกโมเดล
 
-**ขอบเขต**: provider + connection + model
+**ขอบเขต** : ผู้ให้บริการการเชื่อมต่อ + รุ่น +
 
-**วัตถุประสงค์**: หลีกเลี่ยงการปิดใช้งาน connection ทั้งหมดเมื่อมีเพียงโมเดลเดียวที่
-ไม่พร้อมใช้งานหรือถูกจำกัดโควตาสำหรับ connection นั้น
+**วัตถุประสงค์** : หลีกเลี่ยงการปิดการใช้งานการเชื่อมต่อทั้งหมดเมื่อมีเพียงรุ่นเดียวที่ไม่พร้อมใช้งานหรือถูกจำกัดโควต้าสำหรับการเชื่อมต่อนั้น
 
 ตัวอย่าง:
 
-- Provider ที่มีโควตาแยกต่อโมเดล ส่งกลับ `429`
-- Provider แบบ local ส่งกลับ `404` สำหรับโมเดลที่ไม่มีอยู่
-- ความล้มเหลวด้านสิทธิ์ของโหมด/โมเดลเฉพาะ provider เช่น โหมดของ Grok ที่เลือกไว้
+- ผู้ให้บริการโควต้าต่อรุ่นที่ส่งคืน `429`
+- ผู้ให้บริการในพื้นที่ส่งคืน `404` สำหรับโมเดลที่ขาดหายไปหนึ่งโมเดล
+- ความล้มเหลวในการอนุญาต mode/model เฉพาะผู้ให้บริการ เช่น โหมด Grok ที่เลือก
 
-Model lockout อยู่ใน `open-sse/services/accountFallback.ts` และช่วยให้ connection
-เดียวกันยังให้บริการโมเดลอื่นต่อไปได้
+การล็อกโมเดลอยู่ใน `open-sse/services/accountFallback.ts` และปล่อยให้การเชื่อมต่อเดียวกันนี้ให้บริการกับโมเดลอื่นๆ ต่อไป
 
-### คำแนะนำในการดีบัก
+### คำแนะนำการดีบัก
 
-- หากคีย์ทั้งหมดของ provider ถูกข้าม ให้ตรวจสอบทั้งสถานะของ provider breaker และ
-  `rateLimitedUntil`/`testStatus` ของแต่ละ connection
-- หาก provider ดูเหมือนถูกตัดออกอย่างถาวรหลังช่วงเวลารีเซ็ต ให้ตรวจสอบว่าโค้ดกำลัง
-  อ่าน `state` ดิบแทนที่จะใช้ `getStatus()`/`canExecute()` หรือไม่
-- หากคีย์ของ provider ตัวหนึ่งล้มเหลวแต่ตัวอื่นควรทำงานได้ ให้เลือกใช้ connection cooldown
-  มากกว่า provider breaker
-- หากมีเพียงโมเดลเดียวที่ล้มเหลว ให้เลือกใช้ model lockout มากกว่า connection cooldown
-- หากสถานะใดควรกู้คืนตัวเองได้ สถานะนั้นควรมี timestamp/reset timeout ในอนาคต และมี
-  เส้นทางการอ่านที่รีเฟรชสถานะที่หมดอายุ ส่วนสถานะถาวรจำเป็นต้องเปลี่ยน credential
-  หรือ config ด้วยตนเอง
+- หากข้ามคีย์ทั้งหมดสำหรับผู้ให้บริการ ให้ตรวจสอบสถานะเบรกเกอร์ของผู้ให้บริการและ `rateLimitedUntil`/`testStatus` ของการเชื่อมต่อแต่ละรายการ
+- หากผู้ให้บริการปรากฏว่าแยกออกอย่างถาวรหลังหน้าต่างรีเซ็ต ให้ตรวจสอบว่าโค้ดอ่าน raw `state` แทนที่จะใช้ `getStatus()`/`canExecute()` หรือไม่
+- หากรหัสผู้ให้บริการตัวใดตัวหนึ่งล้มเหลว แต่ตัวอื่นควรใช้งานได้ แนะนำให้ใช้คูลดาวน์การเชื่อมต่อมากกว่าตัวแยกผู้ให้บริการ
+- หากมีโมเดลเดียวล้มเหลว ให้เลือกการล็อกโมเดลมากกว่าคูลดาวน์การเชื่อมต่อ
+- หากสถานะควรกู้คืนตัวเอง ควรมีการหมดเวลา timestamp/reset ในอนาคตและเส้นทางการอ่านที่รีเฟรชสถานะที่หมดอายุ สถานะถาวรจำเป็นต้องมีข้อมูลประจำตัวด้วยตนเองหรือการเปลี่ยนแปลงการกำหนดค่า
 
 ---
 

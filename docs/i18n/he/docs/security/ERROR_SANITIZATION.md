@@ -4,13 +4,7 @@
 
 ---
 
-> **מקור האמת:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, והבנאים הציבוריים ב-`open-sse/utils/error.ts`
-> **בדיקות:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **עדכון אחרון:** 2026-09-02 — v3.8.51
-> **קהל יעד:** כל מהנדס שעוסק בתגובות שגיאה (נתיבי HTTP, זרמי SSE, מנגנוני ביצוע, מטפלי MCP).
-> **סטטוס:** **חובה** עבור כל נתיב קוד שמחזיר הודעת שגיאה ללקוח.
+> **מקור האמת:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, ובוני הציבור `open-sse/utils/error.ts`** מבחנים:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** קהל:** כל מהנדס הנוגע בתגובות שגיאה (מסלולי HTTP, זרמי SSE, מבצעים, מטפלי MCP ).** סטָטוּס:****MANDATORY** עבור כל נתיב קוד שמחזיר הודעת שגיאה ללקוח.
 
 ## מדוע זה קיים
 

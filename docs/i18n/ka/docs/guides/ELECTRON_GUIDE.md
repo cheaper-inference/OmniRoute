@@ -4,9 +4,9 @@
 
 ---
 
-> **სიმართლის წყარო:** `electron/` სამუშაო სივრცე** ბოლო განახლება:** 2026-06-28 — v3.8.40
+> **სიმართლის წყარო:** `electron/` სამუშაო სივრცე
 
-OmniRoute აგზავნის მრავალ პლატფორმის დესკტოპის აპლიკაციას (Windows / macOS / Linux)**Electron 41** +** ელექტრონმაშენებელი 26.10** . დესკტოპის აპი ქმნის Next.js დამოუკიდებელ სერვერს, როგორც ბავშვური პროცესი, მიუთითებს მასზე `BrowserWindow` და ამატებს სისტემის უჯრას, ავტომატურ განახლებას, IPC ხიდი და ნულოვანი კონფიგურაციის საიდუმლო ჩამტვირთველს.
+OmniRoute აგზავნის პლატფორმაზე დაფუძნებულ დესკტოპის აპლიკაციას (Windows / macOS / Linux)**Electron 41** +** ელექტრონმაშენებელი 26.10** . დესკტოპის აპი წარმოქმნის Next.js დამოუკიდებელ სერვერს, როგორც ბავშვური პროცესი, მიუთითებს `BrowserWindow` ზე და ამატებს სისტემის უჯრას, ავტომატურ განახლებას, IPC bridge-ს და ნულოვანი კონფიგურაციის საიდუმლო ჩამტვირთველს.
 
 ## არქიტექტურა
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## ავტომატური განახლება
 
-იყენებს `electron-updater` GitHub პროვაიდერთან (`diegosouzapw/OmniRoute`).
+იყენებს `electron-updater` GitHub პროვაიდერთან (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - მოვლენები გადაგზავნილი რენდერისთვის `update-status` IPC მეშვეობით: `checking`, `available`, `not-available`, `downloading` ( `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage ხელმოწერა არის სურვილისამ
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-რელიზები ქვეყნდება GitHub Releases-ში (`diegosouzapw/OmniRoute`), სადაც ასევე `electron-updater` ამოწმებს ახალ ვერსიებს.
+რელიზები ქვეყნდება GitHub Releases-ში (`cheaper-inference/OmniRoute`), სადაც ასევე `electron-updater` ამოწმებს ახალ ვერსიებს.
 
 ## პრობლემების მოგვარება
 

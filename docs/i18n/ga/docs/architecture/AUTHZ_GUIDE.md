@@ -5,11 +5,10 @@
 ---
 
 > **Foinse na fírinne:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Nuashonraithe go deireanach:** 2026-09-22 — dírithe ar MCP-SERVER.md
 
-Tá píblíne údaraithe atá feasach ar bhealaí ag OmniRoute a chuireann bac ar gach iarratas API. Tá an aicmiú **cinntitheach** agus **teip-dúnta** — críochnaíonn aon rud nach féidir a aicmiú mar `MANAGEMENT` agus éilíonn sé seisiún nó comhartha grád bainistíochta. Míníonn an leathanach seo an tsamhail d'innealtóirí a chothabhálann bealaí nó a dhearann críochphointí nua.
+Tá píblíne údaraithe feasach ar bhealaí OmniRoute a thugann geata do gach iarratas API. Tá rangú** cinntitheach** agus** teip-dúnta** — aon rud nach féidir a rangú a chríochnaíonn suas mar `MANAGEMENT` agus éilíonn seisiún nó comhartha de ghrád bainistíochta. Mínítear ar an leathanach seo an tsamhail d'innealtóirí a dhéanann cothabháil ar bhealaí nó ag dearadh críochphointí nua.
 
-![Píblíne AuthZ (3 aicme bealaigh + meastóireacht beartais)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Foinse: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -187,8 +186,8 @@ Is iad ceanntásca inmheánacha iontaofa (arna sainmhíniú in `src/server/authz
 Tá polasaí ag gach rang bealaigh i `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) Filleann — `allow({ kind: "anonymous", id: "anonymous" })` i gcónaí .
-- **`clientApiPolicy`** (`policies/clientApi.ts`) sleachta — Iompróir, bailíochtaíonn sé trí `validateApiKey()`. Ní thagann sé gan ainm ach amháin nuair atá an bhratach gné `REQUIRE_API_KEY` éifeachtach díchumasaithe. Réitítear an bhratach éifeachtach trí `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) agus mar sin rialaíonn Bratacha Gné an Deais agus athróga timpeallachta `/api/v1/*`, `/api/v1beta/*`, agus ailiasanna go comhsheasmhach; teipeanna réititheora dúnta. Ceadaíonn sé iarratais ar sheisiún deais ar bhealaí API cliant (lena n-áirítear `/api/v1/models`, a úsáideann catalóg mhúnla an deais). Nuair atá Entra ID SSO cumasaithe, láimhseálann an brainse SSO Iompróir atá ina chomhartha Entra go struchtúrach (trí dheighleog base64url, `RS*` alg, `kid`)** roimhe** `validateApiKey()` agus is é an fíorasc deiridh — ní thiteann sé riamh go dtí an cosán API-eochair nó an brainse díghrádaithe go anaithnid, mar sin ní féidir briseadh soláthraí aitheantais a bheith ina rochtain oscailte. Níl aon tionchar ar eochracha statach API. Féach [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) glacann — le seisiún deais, iarratais ar shioncronú múnla inmheánach (mar a mheaitseáiltear le `/api/providers/[name]/(sync-models|models)`), nó scipeann sé go hiomlán má fhilleann `isAuthRequired()` bréagach. Filleann sé 403 (`AUTH_001`) nuair a bhíonn comhartha Iompróra i láthair ach neamhbhailí, 401 murach é. Chomh maith leis sin cuireann sé i bhfeidhm na sraitheanna garda bealaigh (LOCAL_ONLY / ALWAYS_PROTECTED) roimh aon bhrainse údaráis — féach [Sraitheanna Garda Bealaigh](../security/ROUTE_GUARD_TIERS.md). Is féidir cosáin LOCAL_ONLY i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (lá atá inniu ann: `/api/mcp/`) a rochtain ó neamh-lúb nuair a iompraíonn an eochair Iompróir an raon feidhme `manage` ; fanann gach cosán LOCAL_ONLY eile docht-lúb beag beann ar raon feidhme.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) sleachta — Iompróir, bailíochtaíonn sé trí `validateApiKey()`. Ní thagann sé gan ainm ach amháin nuair atá an bhratach gné `REQUIRE_API_KEY` éifeachtach díchumasaithe. Réitítear an bhratach éifeachtach trí `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) agus mar sin rialaíonn Bratacha Gné an Deais agus athróga timpeallachta `/api/v1/*`, `/api/v1beta/*`, agus ailiasanna go comhsheasmhach; teipeanna réititheora dúnta. Ceadaíonn sé iarratais ar sheisiúin deais ar bhealaí API cliant (lena n-áirítear `/api/v1/models`, a úsáideann catalóg mhúnla an deais). Nuair atá Entra ID SSO cumasaithe, láimhseálann an brainse SSO Iompróir atá ina chomhartha Entra go struchtúrach (trí dheighleog base64url, `RS*` alg, `kid`)** roimhe** `validateApiKey()` agus is é an fíorasc deiridh — ní thiteann sé riamh go dtí an cosán API-eochair nó an brainse díghrádaithe go anaithnid, mar sin ní féidir briseadh soláthraí aitheantais a bheith ina rochtain oscailte. Níl aon tionchar ar eochracha statach API. Féach [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) glacann — le seisiún deais, iarratais ar shioncronú múnla inmheánach (mar a mheaitseáiltear le `/api/providers/[name]/(sync-models|models)`), nó scipeann sé go hiomlán má fhilleann `isAuthRequired()` bréagach. Filleann sé 403 (`AUTH_001`) nuair a bhíonn comhartha Iompróra i láthair ach neamhbhailí, 401 murach é. Chomh maith leis sin cuireann sé i bhfeidhm na sraitheanna garda bealaigh (LOCAL_ONLY / ALWAYS_PROTECTED) roimh aon bhrainse údaráis — féach [Sraitheanna Garda Bealaigh](../security/ROUTE_GUARD_TIERS.md). Is féidir cosáin LOCAL_ONLY i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (lá atá inniu ann: `/api/mcp/`) a rochtain ó neamh-lúb nuair a iompraíonn an eochair Iompróir an raon feidhme `manage`/`admin` nó an raon feidhme caol `mcp:connect` (`hasMcpConnectOrManageScope`), nó le seisiún fíordheimhnithe ar an deais; fanann gach cosán LOCAL_ONLY eile docht-lúb beag beann ar raon feidhme.
 
 Tugann polasaí rathúil `AuthSubject` le `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Is féidir le láimhseálaithe iartheachtacha é a léamh trí `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` in ionad loighic an údair a athrith.
 
@@ -281,35 +280,22 @@ Roghnaigh an tacar de réir crutha, ní de réir áisiúlachta. Cuirtear bealach
 
 ## Scóip
 
-Trí spásainm. Ní léann gach seiceálaí ach a shreanga féin. Tá an taobh le taobh,
-lena n-áirítear cén fáth a dteipeann ar `manage` `scopeMatches` do `read:compression` agus cén fáth nach féidir le comhartha rochtana `read` `PATCH /api/keys/{id}`, le fáil anseo:
-[Trí spásainm scóip](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Trí spás ainm. Ní léann gach seiceálaí ach a chuid teaghráin féin. Is é an taobh le taobh, lena n-áirítear cén fáth a theipeann ar `manage` `scopeMatches` do `read:compression` agus cén fáth nach féidir le comhartha rochtana `read` `PATCH /api/keys/{id}`, ná [Trí ainmspás scóip](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Bíonn eochracha API ag iompar eagar `scopes` (stóráilte mar JSON i `api_keys.scopes`, féach `src/lib/db/apiKeys.ts`).
+Iompraíonn eochracha API eagar `scopes` (stóráilte mar JSON i `api_keys.scopes`, féach `src/lib/db/apiKeys.ts`).
 
-### Scóip bhainistíochta
+### Raon feidhme bainistíochta
 
-- `manage` / `admin` — `hasManageScope`. Rochtain iompróra ar bhealaí API bainistíochta.
-- `mcp:connect`, `self:usage`, `self:account-quota`, agus
-  `policy:bypass-provider-quota` is scóip bhreise, chomhfhreagracha iad. Tá siad
-  lasmuigh de `MANAGEMENT_API_KEY_SCOPES`. Ní osclaíonn `mcp:connect` ach an
-  gearradh amach neamh-lúbchúlaithe `/api/mcp/`.
+- `manage` / `admin` — `hasManageScope`. Rochtain iompróra ar bhealaí bainistíochta API.
+- Is scóip bheacht-mheaitseála breisithe iad `mcp:connect`, `self:usage`, `self:account-quota`, agus `policy:bypass-provider-quota`. Suíonn siad lasmuigh de `MANAGEMENT_API_KEY_SCOPES`. Ní osclaíonn `mcp:connect` ach an carve-out neamh-lúb `/api/mcp/`.
 
-### Scóip uirlisí MCP
+### scóip uirlisí MCP
 
-Catalóg agus rialacha meaitseála (sreangán comhionann, nó scóip deonaithe ag críochnú le `*`):
-[Scóip uirlisí MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-Is é `MCP_SCOPE_LIST` i `src/shared/constants/mcpScopes.ts` an fochuid chlóscríofa bhunaidh,
-ní an chatalóg iomlán sin. Ritheann forfheidhmiú i
-`open-sse/mcp-server/scopeEnforcement.ts` tar éis do `resolveCallerScopeContext()`
-scóip a réiteach ó fhaisnéis fíordheimhnithe MCP, meiteashonraí iarratais, nó `OMNIROUTE_MCP_SCOPES`.
-Fanann sé múchta mura bhfuil `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Catalóg agus rialacha meaitseála (teaghrán comhionann, nó raon feidhme deonaithe a chríochnaíonn le `*`): [scopes uirlisí MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). Is `MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` an fothacar clóscríofa bunaidh, ní an chatalóg iomlán sin. Ritheann forfheidhmiú i `open-sse/mcp-server/scopeEnforcement.ts` tar éis `resolveCallerScopeContext()` scóip ó MCP auth info a réiteach, meiteashonraí a iarraidh, nó `OMNIROUTE_MCP_SCOPES`. cuireann `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ar siúl ar fud an domhain é (réamhshocraithe `false`), ach cuirtear i bhfeidhm i gcónaí é do ghlaoiteoir HTTP/SSE a bhfuil easpa `manage`/`admin` ag a eochair API (féach `shouldForceScopeEnforcement()` i `open-sse/mcp-server/scopeEnforcement.ts`), beag beann ar an mbratach.
 
 ### Scóip chomhartha rochtana
 
-`read` / `write` / `admin` ar chomharthaí `oma_live_…`, rangaithe de réir `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Ní bhaineann an rang seo ach leis an dintiúr
-comhartha rochtana. Féach [Fíordheimhniú Bainistíochta](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` ar chomharthaí `oma_live_…`, rangaithe de réir `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Ní bhaineann an céim seo ach leis an chomhartha rochtana amháin. Féach [Fíordheimhniú Bainistíochta](../guides/MANAGEMENT-AUTH.md).
 
 ## Údar ag Teastáil Scoránaigh
 

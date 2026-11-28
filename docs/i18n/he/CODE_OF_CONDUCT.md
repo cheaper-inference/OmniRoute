@@ -47,15 +47,13 @@
 פרסום באמצעות חשבון רשמי ברשתות החברתיות, או פעולה כנציג שמונה לכך
 באירוע מקוון או לא מקוון.
 
-## Enforcement
+## אַכִיפָה
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+מקרים של התנהגות פוגענית, הטרדה או בלתי מקובלת אחרת עשויים להיות מדווחים למנהיגי הקהילה האחראים על האכיפה על ידי פתיחת ייעוץ אבטחה פרטי בכתובת
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+או על ידי שליחת דוא"ל למתחזק בכתובת diegosouza.pw@outlook.com. לאירועים רגישים לאבטחה, ראה [`SECURITY.md`](SECURITY.md). כל התלונות ייבדקו ותיבדקו במהירות ובהגינות.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+כל מנהיגי הקהילה מחויבים לכבד את הפרטיות והאבטחה של הכתב בכל אירוע.
 
 ## הנחיות אכיפה
 

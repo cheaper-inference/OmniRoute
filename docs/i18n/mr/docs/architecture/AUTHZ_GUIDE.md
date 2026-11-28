@@ -5,11 +5,10 @@
 ---
 
 > **सत्याचा स्रोत:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **शेवटचे अद्यतन:** 2026-09-22 — स्कोप नेमस्पेसेस MCP-SERVER.md कडे निर्देश करतात
 
-OmniRoute मध्ये एक मार्ग-जागरूक अधिकृतता पाइपलाइन आहे जी प्रत्येक API विनंतीला गेट करते. वर्गीकरण **निश्चित** आणि **फेल-क्लोज्ड** आहे — ज्याचे वर्गीकरण केले जाऊ शकत नाही ते `MANAGEMENT` म्हणून संपते आणि त्याला सत्र किंवा व्यवस्थापन-श्रेणी टोकनची आवश्यकता असते. हे पृष्ठ मार्ग राखणाऱ्या किंवा नवीन एंडपॉइंट्स डिझाइन करणाऱ्या अभियंत्यांसाठी मॉडेल स्पष्ट करते.
+OmniRoute कडे रूट-अवेअर ऑथोरायझेशन पाइपलाइन आहे जी प्रत्येक API विनंतीला गेट करते. वर्गीकरण आहे** निर्धारवादी** आणि** अयशस्वी-बंद** — ज्याचे वर्गीकरण करता येत नाही ते `MANAGEMENT` म्हणून संपते आणि सत्र किंवा व्यवस्थापन-श्रेणी टोकनची मागणी करते. हे पृष्ठ अभियंता मार्गांची देखरेख करण्यासाठी किंवा नवीन एंडपॉइंट डिझाईन करण्यासाठी मॉडेलचे वर्णन करते.
 
-![AuthZ पाइपलाइन (3 मार्ग वर्ग + धोरण मूल्यांकन)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > स्रोत: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -199,8 +198,8 @@ Incoming request → src/proxy.ts
 प्रत्येक मार्ग वर्गाचे `src/server/authz/policies/` मध्ये धोरण आहे:
 
 - **`publicPolicy`** (`policies/public.ts`) — नेहमी `allow({ kind: "anonymous", id: "anonymous" })` परत करतो.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — बेअरर काढतो, `validateApiKey()` द्वारे प्रमाणित करतो. जेव्हा प्रभावी `REQUIRE_API_KEY` वैशिष्ट्य ध्वज अक्षम केला जातो तेव्हाच निनावीवर पडतो. प्रभावी ध्वजाचे निराकरण `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) द्वारे केले जाते म्हणून डॅशबोर्ड वैशिष्ट्य ध्वज आणि पर्यावरण व्हेरिएबल्स `/api/v1/*`, `/api/v1beta/*`, आणि उपनामे सातत्याने नियंत्रित करतात; निराकरणकर्ता अपयश अयशस्वी बंद. क्लायंट API मार्गांवर डॅशबोर्ड-सत्र विनंत्यांना अनुमती देते ( `/api/v1/models`, डॅशबोर्ड मॉडेल कॅटलॉगद्वारे वापरलेले). जेव्हा Entra ID SSO सक्षम केले जाते, तेव्हा एक वाहक जो संरचनात्मकदृष्ट्या एक Entra टोकन असतो (तीन बेस64url सेगमेंट, `RS*` alg, `kid`) SSO शाखेद्वारे हाताळला जातो.** आधी** `validateApiKey()` आणि त्याचा निर्णय अंतिम — आहे, तो कधीही API-की मार्ग किंवा डीग्रेड-टू-अनामिक शाखेत येत नाही, म्हणून ओळख-प्रदाता आउटेज ओपन ऍक्सेस होऊ शकत नाही. स्थिर API की अप्रभावित आहेत. [Entra ID SSO](../security/ENTRA_SSO.md) पहा.
-- **`managementPolicy`** (`policies/management.ts`) — डॅशबोर्ड सत्र स्वीकारते, अंतर्गत मॉडेल-सिंक विनंत्या ( `/api/providers/[name]/(sync-models|models)` विरुद्ध जुळतात), किंवा `isAuthRequired()` खोटे परत आल्यास पूर्णपणे वगळते. 403 (`AUTH_001`) परत करते जेव्हा बेअरर टोकन उपस्थित असते परंतु अवैध असते, अन्यथा 401. कोणत्याही ऑथ ब्रांच — [रूट गार्ड टियर्स](../security/ROUTE_GUARD_TIERS.md) पाहण्यापूर्वी रूट-गार्ड टियर्स (LOCAL_ONLY / ALWAYS_PROTECTED) लागू करते. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` मधील LOCAL_ONLY पथ (आज: `/api/mcp/`) नॉन-लूपबॅकमधून प्रवेश केला जाऊ शकतो जेव्हा बेअरर की `manage` स्कोप असते; इतर सर्व LOCAL_ONLY मार्ग व्याप्तीची पर्वा न करता कठोर-लूपबॅक राहतात.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — बेअरर काढतो, `validateApiKey()` द्वारे प्रमाणित करतो. जेव्हा प्रभावी `REQUIRE_API_KEY` वैशिष्ट्य ध्वज अक्षम केला जातो तेव्हाच निनावीवर पडतो. प्रभावी ध्वजाचे निराकरण `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) द्वारे केले जाते म्हणून डॅशबोर्ड वैशिष्ट्य ध्वज आणि पर्यावरण व्हेरिएबल्स `/api/v1/*`, `/api/v1beta/*`, आणि उपनामे सातत्याने नियंत्रित करतात; निराकरण अयशस्वी बंद. क्लायंट API मार्गांवर डॅशबोर्ड-सत्र विनंत्यांना अनुमती देते ( `/api/v1/models`, डॅशबोर्ड मॉडेल कॅटलॉगद्वारे वापरलेले). जेव्हा Entra ID SSO सक्षम केले जाते, तेव्हा एक वाहक जो संरचनात्मकदृष्ट्या एक Entra टोकन असतो (तीन बेस64url सेगमेंट, `RS*` alg, `kid`) SSO शाखेद्वारे हाताळला जातो.** आधी** `validateApiKey()` आणि त्याचा निर्णय अंतिम — आहे, तो कधीही API-की मार्ग किंवा डीग्रेड-टू-अनामिक शाखेत येत नाही, म्हणून ओळख-प्रदाता आउटेज ओपन ऍक्सेस होऊ शकत नाही. स्थिर API की अप्रभावित आहेत. [Entra ID SSO](../security/ENTRA_SSO.md) पहा.
+- **`managementPolicy`** (`policies/management.ts`) — डॅशबोर्ड सत्र स्वीकारते, अंतर्गत मॉडेल-सिंक विनंत्या ( `/api/providers/[name]/(sync-models|models)` विरुद्ध जुळतात), किंवा `isAuthRequired()` खोटे परत आल्यास पूर्णपणे वगळते. 403 (`AUTH_001`) परत करते जेव्हा बेअरर टोकन उपस्थित असते परंतु अवैध असते, अन्यथा 401. कोणत्याही ऑथ ब्रांच — [रूट गार्ड टियर्स](../security/ROUTE_GUARD_TIERS.md) पाहण्यापूर्वी रूट-गार्ड टियर्स (LOCAL_ONLY / ALWAYS_PROTECTED) लागू करते. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` मधील LOCAL_ONLY पथ (आज: `/api/mcp/`) नॉन-लूपबॅकमधून प्रवेश केला जाऊ शकतो जेव्हा बेअरर की `manage`/`admin` स्कोप किंवा अरुंद `mcp:connect` स्कोप (`hasMcpConnectOrManageScope`), किंवा प्रमाणीकृत डॅशबोर्ड सत्रासह असते; इतर सर्व LOCAL_ONLY मार्ग व्याप्तीची पर्वा न करता कठोर-लूपबॅक राहतात.
 
 यशस्वी पॉलिसी `AuthSubject` सह `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` परत करते. डाउनस्ट्रीम हँडलर्स ऑथ लॉजिक पुन्हा चालवण्याऐवजी `src/server/authz/assertAuth.ts` मध्ये `assertAuth(request, "CLIENT_API")` द्वारे वाचू शकतात.
 
@@ -294,35 +293,24 @@ export async function POST(request: Request) {
 
 सोयीनुसार नव्हे, तर आकारानुसार संच निवडा. एक स्वतंत्र रूट `PUBLIC_API_ROUTES_EXACT` मध्ये जातो (किंवा फक्त GET साठी `PUBLIC_READONLY_CORS_API_ROUTES` मध्ये); केवळ वास्तविक उपवृक्षच `PUBLIC_API_ROUTE_PREFIXES` मध्ये जातो आणि तो **`/` ने संपलाच पाहिजे**. उपसर्ग सूचीमध्ये एक स्वतंत्र रूट ठेवल्यास, समान सुरुवातीची अक्षरे असलेला प्रत्येक लगतचा पथही सार्वजनिक होतो — यामध्ये नंतर जोडलेली dynamic-segment भावंडेही समाविष्ट असतात (GHSA-74g9-q8f6-793h). `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` आणि `tests/unit/authz/classify.test.ts` येथील युनिट चाचण्या अद्ययावत करा.
 
-## स्कोप्स
+## व्याप्ती
 
-तीन नेमस्पेस. प्रत्येक चेकर फक्त स्वतःच्या स्ट्रिंग वाचतो. `manage` `read:compression` साठी `scopeMatches` का अयशस्वी होते आणि `read` ॲक्सेस टोकन `PATCH /api/keys/{id}` का करू शकत नाही, यासह बाजू-बाजूने तुलना
-[तीन स्कोप नेमस्पेस](../frameworks/MCP-SERVER.md#three-scope-namespaces) मध्ये दिली आहे.
+तीन नेमस्पेस. प्रत्येक तपासक फक्त त्याचे स्वतःचे स्ट्रिंग वाचतो. `manage` `read:compression` साठी `scopeMatches` का अयशस्वी होते आणि `read` ऍक्सेस टोकन `PATCH /api/keys/{id}` का करू शकत नाही यासह शेजारी-बाजूचे, [तीन स्कोप नेमस्पेसेस](../frameworks/MCP-SERVER.md#three-scope-namespaces) आहेत.
 
-API की मध्ये `scopes` ॲरे असतो (JSON म्हणून `api_keys.scopes` मध्ये संग्रहित, `src/lib/db/apiKeys.ts` पहा).
+API की `scopes` ॲरे घेऊन जातात ( `api_keys.scopes` मध्ये JSON म्हणून संग्रहित, `src/lib/db/apiKeys.ts` पहा).
 
-### व्यवस्थापन स्कोप
+### व्यवस्थापन व्याप्ती
 
-- `manage` / `admin` — `hasManageScope`. व्यवस्थापन API मार्गांवर बेअरर ॲक्सेस.
-- `mcp:connect`, `self:usage`, `self:account-quota`, आणि
-  `policy:bypass-provider-quota` हे ॲडिटिव्ह एक्झॅक्ट-मॅच स्कोप आहेत. ते
-  `MANAGEMENT_API_KEY_SCOPES` च्या बाहेर आहेत. `mcp:connect` फक्त
-  `/api/mcp/` नॉन-लूपबॅक कार्व्ह-आउट उघडतो.
+- `manage` / `admin` — `hasManageScope`. व्यवस्थापन API मार्गांवर वाहक प्रवेश.
+- `mcp:connect`, `self:usage`, `self:account-quota`, आणि `policy:bypass-provider-quota` हे ॲडिटीव्ह तंतोतंत जुळणारे स्कोप आहेत. ते `MANAGEMENT_API_KEY_SCOPES` बाहेर बसतात. `mcp:connect` फक्त `/api/mcp/` नॉन-लूपबॅक कोरीव-आउट उघडते.
 
-### MCP टूल स्कोप्स
+### MCP टूल स्कोप
 
-कॅटलॉग आणि जुळणारे नियम (सारखी स्ट्रिंग, किंवा `*` मध्ये समाप्त होणारा मंजूर स्कोप):
-[MCP टूल स्कोप्स](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`src/shared/constants/mcpScopes.ts` मधील `MCP_SCOPE_LIST` हा मूळ टाइप केलेला
-उपसंच आहे, तो पूर्ण कॅटलॉग नाही. `resolveCallerScopeContext()` MCP ऑथ माहिती, विनंती मेटाडेटा किंवा `OMNIROUTE_MCP_SCOPES` मधून स्कोप्सचे निराकरण केल्यानंतर
-`open-sse/mcp-server/scopeEnforcement.ts` मध्ये अंमलबजावणी चालते.
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` असल्याशिवाय ते बंद राहते.
+कॅटलॉग आणि जुळणारे नियम (समान स्ट्रिंग, किंवा `*` मध्ये समाप्त होणारा मंजूर स्कोप): [MCP टूल स्कोप](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` मधील `MCP_SCOPE_LIST` हा मूळ टाइप केलेला उपसंच आहे, तो पूर्ण कॅटलॉग नाही. `resolveCallerScopeContext()` MCP प्रमाणीकरण माहिती, विनंती मेटाडेटा किंवा `OMNIROUTE_MCP_SCOPES` मधील स्कोपचे निराकरण केल्यानंतर अंमलबजावणी `open-sse/mcp-server/scopeEnforcement.ts` मध्ये चालते. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` हे जागतिक स्तरावर चालू करते (डिफॉल्ट `false`), परंतु हे नेहमी HTTP/SSE कॉलरसाठी लागू केले जाते ज्याच्या API कीमध्ये `manage`/`admin` नसतो ( `open-sse/mcp-server/scopeEnforcement.ts` मध्ये `shouldForceScopeEnforcement()` पहा), ध्वजाची पर्वा न करता.
 
-### ॲक्सेस-टोकन स्कोप्स
+### प्रवेश-टोकन स्कोप
 
-`oma_live_…` टोकनवर `read` / `write` / `admin`, `scopeSatisfies` द्वारे रँक केलेले
-(`src/lib/accessTokens/scopes.ts`). ही रँक फक्त ॲक्सेस-टोकन क्रेडेंशियलला लागू होते.
-[व्यवस्थापन प्रमाणीकरण](../guides/MANAGEMENT-AUTH.md) पहा.
+`scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) द्वारे रँक केलेले, `oma_live_…` टोकन्सवर `read` / `write` / `admin`. ही रँक फक्त ऍक्सेस-टोकन क्रेडेंशियलवर लागू होते. [व्यवस्थापन प्रमाणीकरण](../guides/MANAGEMENT-AUTH.md) पहा.
 
 ## प्रमाणीकरण आवश्यक टॉगल
 

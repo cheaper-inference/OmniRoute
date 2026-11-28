@@ -120,53 +120,46 @@ davranışını korur.
 
 ## MCP araçları (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts` dosyasında tanımlanmıştır. Token/base-URL her çağrı için çözümlenir (önce API anahtarına özel olan, ardından genel olan). OmniRoute **senkronizasyon sunucusuna** erişen araçlar (dört `obsidian_sync_*` aracı) ayrıca OmniRoute ayarlarında yapılandırılmış senkronizasyon kimlik doğrulama token'ını gerektirir.
+`open-sse/mcp-server/tools/obsidianTools.ts` tanımlıdır. token/base-URL çağrı başına çözümlenir (önce API anahtarı başına, ardından genel). OmniRoute çarpan araçlar** senkronizasyon sunucusu** (dört `obsidian_sync_*` aracı) ayrıca OmniRoute ayarlarında yapılandırılmış senkronizasyon kimlik doğrulama belirtecini gerektirir.
 
-### Okuma araçları (`read:obsidian`)
+### Araçları okuma (`read:obsidian`)
 
-| Araç                         | Açıklama                                                                                                             |
+| Alet                         | Tanım                                                                                                                |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Local REST API'nin erişilebilir ve kimliği doğrulanmış olup olmadığını kontrol eder.                                 |
-| `obsidian_search_simple`     | Not içeriğinde tam metin araması yapar; dosya yollarıyla birlikte metin parçacıkları döndürür.                       |
-| `obsidian_search_structured` | Bir JSON Logic ifadesi (and/or/regex/path filtreleri) kullanarak arama yapar.                                        |
-| `obsidian_read_note`         | Bir notu kasa köküne göreli yoluyla okur; isteğe bağlı olarak belirli bir başlığı/bloğu/frontmatter alanını okur.    |
-| `obsidian_list_vault`        | Kasadaki dosya ve dizinleri listeler (girdi ağacı).                                                                  |
-| `obsidian_get_document_map`  | Notun başlık yapısını, başlıklar → satır numaraları eşlemesi olarak alır.                                            |
-| `obsidian_get_note_metadata` | Tam içerik olmadan frontmatter, etiketler, bağlantılar ve karakter/kelime sayısını alır.                             |
-| `obsidian_get_active_file`   | Obsidian'da o anda etkin olan dosyanın yolunu ve içeriğini alır.                                                     |
-| `obsidian_get_periodic_note` | Bir tarih için günlük/haftalık/aylık dönemsel notu alır (belirtilmezse bugün).                                       |
-| `obsidian_get_tags`          | Tüm kasa etiketlerini kullanım sıklıklarıyla birlikte listeler.                                                      |
-| `obsidian_list_commands`     | Kullanılabilir Obsidian komut kimliklerini listeler (`obsidian_execute_command` ile kullanılır).                     |
-| `obsidian_sync_status`       | OmniRoute senkronizasyon sunucusu durumu: çalışıyor olma durumu, kasa adı, port, çalışma süresi, son senkronizasyon. |
-| `obsidian_sync_conflicts`    | Çözülmemiş senkronizasyon çakışmalarını listeler (yol, çakışma yolu, algılanma zamanı).                              |
+| `obsidian_check_status`      | Yerel REST API erişilebilir olup olmadığını ve kimliğinin doğrulanıp doğrulanmadığını kontrol edin.                  |
+| `obsidian_search_simple`     | Not içeriğinin tam metin araması; dosya yollarıyla birlikte parçacıkları döndürür.                                   |
+| `obsidian_search_structured` | JSON Mantık ifadesini (and/or/regex/path filtreleri) kullanarak arama yapın.                                         |
+| `obsidian_read_note`         | Bir notu kasaya bağlı yola göre okuyun; isteğe bağlı olarak belirli bir heading/block/frontmatter.                   |
+| `obsidian_list_vault`        | Kasadaki dosyaları ve dizinleri listeleyin (giriş ağacı).                                                            |
+| `obsidian_get_document_map`  | Notun başlık yapısını, başlıkların → satır numaralarının haritası olarak alın.                                       |
+| `obsidian_get_note_metadata` | İçeriğin tamamı olmadan ön maddeyi, etiketleri, bağlantıları ve char/word sayısını alın.                             |
+| `obsidian_get_active_file`   | Şu anda aktif olan dosyanın + içeriğini Obsidian alın.                                                               |
+| `obsidian_get_periodic_note` | Bir tarih için daily/weekly/monthly periyodik notunu alın (eğer belirtilmemişse bugün).                              |
+| `obsidian_get_tags`          | Tüm kasa etiketlerini frekanslarıyla birlikte listeleyin.                                                            |
+| `obsidian_list_commands`     | Kullanılabilir Obsidian komutunu IDs listeleyin ( `obsidian_execute_command` ile kullanın).                          |
+| `obsidian_sync_status`       | OmniRoute senkronizasyon sunucusu durumu: çalışıyor, kasa adı, bağlantı noktası, çalışma süresi, son senkronizasyon. |
+| `obsidian_sync_conflicts`    | Çözülmemiş senkronizasyon çakışmalarını listeleyin (yol, çakışma yolu, tespit edilen yer).                           |
 
 ### Yazma araçları (`write:obsidian`)
 
-| Araç                             | Açıklama                                                                                                       |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Belirtilen Markdown içeriğiyle bir not oluşturur veya üzerine yazar.                                           |
-| `obsidian_append_note`           | Bir nota içerik ekler; isteğe bağlı olarak belirli bir başlığa/bloğa ekler.                                    |
-| `obsidian_patch_note`            | Bir başlıkta, blokta veya frontmatter alanında hassas biçimde sona ekleme/başa ekleme/değiştirme işlemi yapar. |
-| `obsidian_delete_note`           | Bir notu kasadan kalıcı olarak siler.                                                                          |
-| `obsidian_move_note`             | Bir notu kasa içinde taşır veya yeniden adlandırır.                                                            |
-| `obsidian_execute_command`       | Komut kimliğiyle bir Obsidian komutunu yürütür.                                                                |
-| `obsidian_open_file`             | Obsidian'da bir dosya açar (mevcut değilse oluşturur).                                                         |
-| `obsidian_sync_trigger`          | Anında çift yönlü masaüstü↔mobil kasa senkronizasyonu tetikler.                                                |
-| `obsidian_sync_resolve_conflict` | Bir senkronizasyon çakışmasını çözer: `local` (mobil), `remote` (masaüstü) veya `keep-both` seçeneğini korur.  |
+| Alet                             | Tanım                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `obsidian_write_note`            | Verilen Markdown içeriğiyle bir not oluşturun veya üzerine yazın.                                |
+| `obsidian_append_note`           | Bir nota içerik ekleyin; isteğe bağlı olarak belirli bir heading/block.                          |
+| `obsidian_patch_note`            | Bir başlık, blok veya ön madde alanında cerrahi olarak append/prepend/replace.                   |
+| `obsidian_delete_note`           | Kasadaki bir notu kalıcı olarak silin.                                                           |
+| `obsidian_move_note`             | Kasa içindeki bir notu taşıyın veya yeniden adlandırın.                                          |
+| `obsidian_execute_command`       | Bir Obsidian komutunu ID komutuyla yürütün.                                                      |
+| `obsidian_open_file`             | Obsidian bir dosya açın (eğer mevcut değilse onu oluşturur).                                     |
+| `obsidian_sync_trigger`          | Anında çift yönlü bir masaüstü ↔ mobil kasa senkronizasyonunu tetikleyin.                        |
+| `obsidian_sync_resolve_conflict` | Senkronizasyon çakışmasını çözün: `local` (mobil), `remote` (masaüstü) veya `keep-both` koruyun. |
 
 > [!NOTE]
-> `obsidian_patch_note` hedefleri, `heading | block | frontmatter` biçimindeki `targetType`
-> ve `append | prepend | replace` biçimindeki `operation` değerlerini, isteğe bağlı bir
-> `createTargetIfMissing` ile kabul eder. Dört `obsidian_sync_*` aracı yerel senkronizasyon
-> sunucusuyla (varsayılan olarak `http://127.0.0.1:27781`) iletişim kurar ve senkronizasyon token'ını gerektirir.
+> `obsidian_patch_note` hedefleri, isteğe bağlı bir `createTargetIfMissing` ile `heading | block | frontmatter` `targetType` ve `append | prepend | replace` `operation` kabul eder. Dört `obsidian_sync_*` aracı, yerel senkronizasyon sunucusuyla (varsayılan olarak `http://127.0.0.1:27781` ) konuşur ve senkronizasyon belirtecini gerektirir.
 
 ### Kapsamlar
 
-Okuma araçları `read:obsidian`; yazma araçları ise `write:obsidian` kapsamını gerektirir. Uygulama
-Notion ile aynıdır — `open-sse/mcp-server/server.ts` içindeki `withScopeEnforcement()`
-tarafından gerçekleştirilir, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` olduğunda etkinleştirilir ve
-izin verilen kapsamlar `OMNIROUTE_MCP_SCOPES` değişkeninden veya API anahtarının kapsam bağlamından alınır. Bkz.
-[MCP-SERVER.md](./MCP-SERVER.md).
+Okuma araçları `read:obsidian` gerektirir; yazma araçları `write:obsidian` gerektirir. Uygulama, `open-sse/mcp-server/server.ts` içinde `withScopeEnforcement()` tarafından işlenen, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` bağlanan ve API anahtarında `manage`/`admin` bulunmayan HTTP/SSE arayanlar için zorlanan Notion — ile aynıdır; izin verilen kapsamlar `OMNIROUTE_MCP_SCOPES` veya API anahtarının kapsam bağlamından alınır. Bkz [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Uç Noktalar
 

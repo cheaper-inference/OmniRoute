@@ -6,19 +6,19 @@
 
 無需修改 `omniroute` 核心即可擴充其 CLI。外掛程式遵循 `omniroute-cmd-*` 命名慣例，類似於 `gh extension` 或 `kubectl plugin`。
 
-## 快速開始
+## 快速啟動
 
 ```bash
-# 從 npm 安裝外掛程式
+# Install a plugin from npm
 omniroute plugin install stripe
 
-# 安裝開發中的本機外掛程式
+# Install a local plugin in development
 omniroute plugin install ./my-plugin
 
-# 列出已安裝的外掛程式
+# List installed plugins
 omniroute plugin list
 
-# 建立新外掛程式的基本架構
+# Scaffold a new plugin
 omniroute plugin scaffold myplugin
 cd omniroute-cmd-myplugin
 omniroute plugin install .
@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | 解析後的基礎 URL                                   |
 | `ctx.apiKey`                 | `string \| null` | 已提供的 API 金鑰                                  |
 
-## 探索
+## 發現
 
-外掛程式會從以下位置探索：
+插件是從以下位置發現的：
 
-1. `~/.omniroute/plugins/<name>/` — 使用者本機安裝
-2. `OMNIROUTE_PLUGIN_PATH` 環境變數 — 自訂目錄
+1. `~/.omniroute/plugins/node_modules/<name>/` — `omniroute plugin install`放置包的位置（ npm `--prefix`，而不是`npm -g`）
+2. `~/.omniroute/plugins/<name>/` —手寫插件目錄
+3. `OMNIROUTE_PLUGIN_PATH` env var —自訂目錄
 
-兩者皆**僅供 CLI 使用**。伺服器端外掛程式執行階段（在代理伺服器內執行的市集／`plugin.json`
-外掛程式）具有自己的掃描器及覆寫設定
-`OMNIROUTE_PLUGINS_DIR` — 請參閱
-[PLUGIN_MARKETPLACE.md → 外掛程式目錄](./PLUGIN_MARKETPLACE.md#plugin-directory)。
-設定其中一個不會影響另一個。
+接下來是符號連結目錄（npm 為`plugin install ./dir`建立的目錄）。
 
-載入錯誤會被捕捉並以警告形式顯示，因此損壞的外掛程式絕不會導致 CLI 當機。
+兩者都是**僅 CLI** 。伺服器端插件運行時（在代理內部運行的 market/`plugin.json`插件）有自己的掃描器和自己的覆蓋， `OMNIROUTE_PLUGINS_DIR` —請參閱[PLUGIN_MARKETPLACE.md →插件目錄](./PLUGIN_MARKETPLACE.md#plugin-directory)。設置其中一個不會影響另一個。
+
+載入錯誤被捕獲並列印為警告—損壞的插件永遠不會使CLI崩潰。
 
 ## 安全性
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **Orisun otitọ:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Imudojuiwọn to kẹhin:** 2026-06-28 — v3.8.40
+> **Orisun otitọ:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute ya oluranlọwọ `reasoning_content` ti a ṣe nipasẹ awọn awoṣe-ipo ero ati tun ṣe atunṣe ni gbangba lori awọn ibeere titan-pupọ nigbati olupese oke ba nilo rẹ. Eyi yọkuro awọn aṣiṣe HTTP 400 ti awọn olupese ti o muna dide nigbati itan-akọọlẹ ibaraẹnisọrọ alabara kan nsọnu ero-iṣaaju titan.
 

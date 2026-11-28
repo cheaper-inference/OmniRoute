@@ -4,11 +4,9 @@
 
 ---
 
-> **منبع حقیقت:** `open-sse/utils/tlsClient.ts`، `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`، `open-sse/config/cliFingerprints.ts`، `src/mitm/`
-> **آخرین بهروزرسانی:** 2026-09-02 — v3.8.51
-> **مخاطبان:** مهندسانی که یکپارچهسازیهای پنهانکارانه مختص ارائهدهندگان را نگهداری میکنند.
+> **منبع حقیقت:** `open-sse/utils/tlsClient.ts`، `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`، `open-sse/config/cliFingerprints.ts`، `src/mitm/`** مخاطب:** مهندسانی که ادغام های مخفی کاری خاص ارائه دهنده را حفظ می کنند.
 
-OmniRoute با ارائهدهندگانی یکپارچه میشود که سرویسهای لبه آنها فعالانه کلاینتهای غیررسمی را انگشتنگاری میکنند (TLS JA3/JA4، ترتیب هدرها، ساختار بدنه JSON و توکنهای یکپارچگی). این صفحه سطوح پنهانکاری ارائهشده توسط OmniRoute و محل پیادهسازی آنها را مستند میکند.
+OmniRoute با ارائه دهندگانی که لبه های آنها به طور فعال مشتریان غیر رسمی اثر انگشت دارند (TLS JA3/JA4، سفارش هدر، شکل بدن JSON ، نشانه های یکپارچگی) یکپارچه می شود. این صفحه سطوح مخفی OmniRoute در معرض دید قرار می دهد و مکان اجرای آنها مستند می کند.
 
 ## اطلاعیه حقوقی و اخلاقی
 
@@ -71,65 +69,68 @@ OmniRoute با ارائهدهندگانی یکپارچه میشود که سرو�
 
 ---
 
-## بسته پنهانسازی Claude Code
+## Claude Code Stealth Bundle
 
-وقتی `cliCompatMode` روشن باشد، OmniRoute درخواستهای خروجی Claude را طوری بازآرایی میکند که از ترافیک `claude-cli` قابلتشخیص نباشند. سه ماژول با یکدیگر همکاری میکنند:
+وقتی `cliCompatMode` روشن است، OmniRoute درخواستهای خروجی Claude را تغییر شکل میدهد تا از ترافیک `claude-cli` قابل تشخیص نباشند. سه ماژول با هم همکاری می کنند:
 
 ### `claudeCodeFingerprint.ts`
 
-اثر انگشت ۳ کاراکتری `cc_version` را که در هدر صورتحساب تعبیه میشود، محاسبه میکند:
+اثر انگشت 3 کاراکتری `cc_version` تعبیه شده در هدر صورتحساب را محاسبه می کند:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (بهصورت ثابت در کد؛ منطبق با کلاینت رسمی)
-- ورودیها: کاراکترهای اندیس 4، 7 و 20 از متن اولین پیام کاربر + رشته نسخه
-- خروجی: پیشوند هگزادسیمال ۳ کاراکتری
+- `FINGERPRINT_SALT = "59cf53e54c78"` (هاردکد شده؛ مطابق با مشتری رسمی)
+- ورودی ها: کاراکترها در نمایه 4، 7، 20 از اولین پیام کاربر متن رشته نسخه +
+- خروجی: پیشوند هگز 3 کاراکتری
 
-### `claudeCodeCCH.ts` (هش محتوای کلاینت)
+### `claudeCodeCCH.ts` (هش محتوای مشتری)
 
-بررسی یکپارچگی سمت سرور که CLI رسمی Claude Code آن را از طریق Bun/Zig محاسبه میکند. OmniRoute آن را با `xxhash-wasm` بازپیادهسازی میکند:
+یکپارچگی سمت سرور، کد رسمی Claude را CLI از طریق پیادهسازیهای Bun/Zig. OmniRoute با `xxhash-wasm` محاسبه میکند، بررسی کنید:
 
-1. بدنه را با جاینگهدار `cch=00000;` سریالسازی کنید
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. مقدار هگزادسیمال ۵ کاراکتری با حروف کوچک و صفرگذاری از چپ
-4. `cch=00000;` را با توکن محاسبهشده جایگزین کنید
+1. بدنه را با نگهدارنده `cch=00000;` سریال کنید
+2. نمای هش را با دو جایگزین متن ساده به این ترتیب بسازید (`hashView()`):
+   - هر تطابق `/"model":"[^"]*"/g` تبدیل به `"model":""` — می شود، مطابقت در اولین `"` متوقف می شود، بنابراین یک مقدار با یک نقل قول فرار (`"model":"a\"b"`) فقط تا آن نقل قول خالی می شود، همانطور که مشتری انجام می دهد.
+   - هر مسابقه از `/"max_tokens":\d+,|,?"max_tokens":\d+/g` حذف — فقط مقادیر عددی، در هر عمق است
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. هگز با 5 کاراکتر بدون لایه
+5. `cch=00000;` با توکن محاسبه شده جایگزین کنید
 
-ثابتها:
+ثابت ها:
 
-- بذر: `0x6e52736ac806831e`
+- Seed: `0x4d659218e32a3268` (با عکسهای لوپ بک کد 2.1.252 و 2.1.322 Claude مطابقت دارد)
 - الگو: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-پس از اولین کاراکتر نامهای کلاینت «حساس»، یک **اتصالدهنده با عرض صفر** یونیکد (`U+200D`) درج میکند تا فیلترهای بالادستی نتوانند آنها را با grep پیدا کنند. فهرست پیشفرض واژهها:
+یک یونیکد درج می کند** وصال با عرض صفر** (`U+200D`) بعد از اولین کاراکتر نام های کلاینت "حساس"، بنابراین فیلترهای بالادستی نمی توانند آنها را درک کنند. لیست کلمات پیش فرض:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-اعمال میشود به: بلوکهای `system`، تمام `messages[].content`ها و `tools[].description` / `tools[].function.description`. اپراتور میتواند آن را از طریق `setSensitiveWords()` بازنویسی کند.
+برای: بلوکهای `system` ، همه `messages[].content` و `tools[].description` / `tools[].function.description` اعمال میشود. اپراتور قابل لغو از طریق `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — ارائهدهندگان `anthropic-compatible-cc-*`
+### ارائه دهندگان `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-برای رلههای شخص ثالث Anthropic که فقط ترافیک «واقعی Claude Code» را میپذیرند:
+برای رلههای شخص ثالث Anthropic که فقط ترافیک «کد Claude واقعی» را میپذیرند:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- مقدار پیشفرض `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` است
-- کلید تغییر وضعیت «فعالسازی بتای redact-thinking» برای هر اتصال، هنگامی که یک بالادست CC Compatible مشخصاً به جریانهای تفکر ویرایششده نیاز دارد، `redact-thinking-2026-02-12` را اضافه میکند
-- کلید تغییر وضعیت «فعالسازی نمایش تفکر خلاصهشده» برای هر اتصال، `providerSpecificData.requestDefaults.summarizeThinking` را ذخیره میکند و به درخواستهای تفکر CC Compatible که از قبل حالت نمایش تعیین نکردهاند، `display: "summarized"` را اضافه میکند
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` به صورت پیش فرض
+- کلید "Enable redact-thinking beta" در هر اتصال زمانی که یک CC Compatible به طور خاص به جریان های تفکر ویرایش شده نیاز دارد، `redact-thinking-2026-02-12` اضافه می کند.
+- کلید "فعال کردن نمایش تفکر خلاصه شده" در هر اتصال، `providerSpecificData.requestDefaults.summarizeThinking` را ذخیره می کند و `display: "summarized"` را به CC اضافه می کند درخواست های تفکر سازگار که قبلاً حالت نمایش را تنظیم نکرده اند
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (خانواده Opus/Sonnet 4.x)
-- مسیر پیشفرض: `/v1/messages?beta=true`
+- مسیر پیش فرض: `/v1/messages?beta=true`
 
-ماژولهای همخانواده در همین بسته:
+ماژول های خواهر در همان بسته:
 
-- `claudeCodeConstraints.ts` — قواعد دما + کنترل کش
-- `claudeCodeToolRemapper.ts` — نگاشت مجدد نام ابزارها
-- `claudeCodeExtraRemap.ts` — نرمالسازی اضافی بار داده
+- قوانین کنترل حافظه `claudeCodeConstraints.ts` — دمای +
+- نقشه برداری مجدد نام ابزار `claudeCodeToolRemapper.ts` —
+- عادی سازی بار اضافی `claudeCodeExtraRemap.ts` —
 
 ---
 
@@ -189,7 +190,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — می خواند `process.env.ANTIGRAVITY_CREDITS`
 - لوله کشی اعتباری `src/lib/oauth/providers/antigravity.ts` —
-- گزارش اصلی حادثه: بحث [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- گزارش اصلی حادثه: بحث [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

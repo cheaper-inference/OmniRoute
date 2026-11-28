@@ -4,35 +4,37 @@
 
 ---
 
-**OmniCopilot** incorpora todos los modelos ofrecidos por OmniRoute al selector de modelos _nativo_ de GitHub Copilot Chat. Sin una segunda barra lateral ni una interfaz de chat independiente: el modo agente de Copilot, las llamadas a herramientas, los servidores MCP y las instrucciones personalizadas siguen funcionando, pero se ejecutan en el modelo que elijas.
+**OmniCopilot** agrega sus modelos y combos de chat OmniRoute al selector de modelos de chat nativo Copilot. Utilice los flujos de trabajo de agentes y chat existentes del editor, con llamada de herramientas y visión cuando lo admita el modelo seleccionado.
 
-|                               |                                                                                                                                                 |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Instalar (VS Code)**        | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Instalar (forks)**          | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Código fuente/incidencias** | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Requiere**                  | VS Code 1.104+                                                                                                                                  |
+|                           |                                                                                                                                         |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Instalar (código VS )** | [Mercado → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                    |
+| **Instalar (Abrir VSX)**  | [Abrir VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — requiere un proveedor de modelo de idioma compatible y chat APIs |
+| **Fuente / problemas**    | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                                      |
+| **Requiere**              | Código VS 1.104 + (1.122 + para usarlo sin un inicio de sesión GitHub o un plan Copilot )                                               |
+| **Lanzamiento actual**    | OmniCopilot v1.5.1 en ambas tiendas (lanzado el 24 de noviembre de 2026)                                                                |
 
-> **No se necesita una suscripción a Copilot.** Desde VS Code 1.122, un proveedor de modelos de lenguaje funciona
-> sin iniciar sesión en GitHub y sin ningún plan de Copilot. Las finalizaciones en línea y
-> las funciones basadas en embeddings quedan fuera de la API del proveedor y siguen requiriendo Copilot.
+Guardar instantánea en** 2026-11-25 (01:43 UTC)** , versión actual:** 52,081 instalaciones de Marketplace** y** 20,989 descargas de Open VSX** . Estas son métricas de tienda diferentes, no un recuento de usuarios combinado. Fuentes: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) y [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+La disponibilidad de Open VSX no establece por sí sola la compatibilidad con todos los editores que utilizan ese registro. Consulte el chat del editor y la compatibilidad con el modelo de lenguaje API.
+
+> **No se necesita suscripción Copilot para el chat BYOK en VS Code 1.122 +.** Microsoft admite chat, herramientas y MCP sin iniciar sesión en GitHub cuando se configura un proveedor. En VS Code 1.104–1.121, la extensión aún funciona, pero VS Code requiere un plan Copilot registrado. Las sugerencias en línea y las funciones basadas en incrustaciones permanecen fuera del proveedor API y aún requieren Copilot; Los administradores Copilot Business/Enterprise pueden desactivar proveedores de modelos de terceros mediante política; una bifurcación muestra los modelos solo si implementa el proveedor de chat API. El uso del proveedor ascendente aún puede generar cargos. Consulte [las notas de la versión VS Code 1.122](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) y [la guía del modelo de lenguaje](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
 ## Configuración
 
-1. **Ejecuta OmniRoute** — `npm install -g omniroute && omniroute` (panel de control en `http://localhost:20128`).
-2. **Instala la extensión** — busca "OmniRoute" en la vista de Extensiones.
-3. **Elige un modelo** — Copilot Chat → selector de modelos → **Administrar modelos…** → **OmniRoute** y, después, marca
-   los que quieras.
+1. **Ejecutar OmniRoute** — `npm install -g omniroute && omniroute` (panel de control en `http://localhost:20128`).
+2. **Instalar la extensión** — busca "OmniRoute" en la vista Extensiones.
+3. **Conectar** — mantenga el `http://localhost:20128` predeterminado o configure la clave URL y API de su servidor a través de**OmniRoute: Administrar conexión** .
+4. **Elige un modelo** — Copilot Chat → selector de modelo →** Administrar modelos…** →**OmniRoute** y luego marca lo que quieras.
 
-No hay nada que configurar cuando OmniRoute se ejecuta en el puerto predeterminado. Para una instancia remota, abre el
-**icono de OmniRoute en la barra de actividad** (o ejecuta `OmniRoute: Manage Connection`) y configura:
+Para configurar la conexión, abra el** Icono OmniRoute en la barra de actividades.** (o ejecute `OmniRoute: Manage Connection`) y configure:
 
-- **URL del servidor** — la raíz del servidor, p. ej., `http://192.168.0.15:20128`. La extensión añade
-  el sufijo `/v1`; no lo incluyas.
-- **Clave de API** — solo cuando el servidor establece `REQUIRE_API_KEY`. Se almacena en el llavero del sistema operativo mediante
-  SecretStorage de VS Code, nunca en `settings.json`.
+- **Servidor URL** — la raíz del servidor, por ejemplo `http://omniroute.example.com:20128`. El sufijo `/v1` se añade a la extensión; no lo incluyas.
+- **llave API** Se requiere — cuando la política de autenticación de inferencia del servidor lo requiere. Almacenado a través de VS Código SecretStorage, nunca en `settings.json`; Hay claves específicas del espacio de trabajo disponibles. Utilice una clave autorizada para los modelos que desea exponer.
+
+La extensión también proporciona un indicador de conexión, actualización del modelo, contexto del modelo y metadatos de precios (combinaciones incluidas), razonamiento transmitido con un** esfuerzo de pensamiento** menú en VS Code 1.120 +, un indicador de límite diario de barra de estado y panel de uso (OmniRoute 3.8.50 +), configuración CLI y una pestaña de panel opcional. El modelo seleccionado y la política del servidor determinan las capacidades que puede utilizar.
 
 ---
 
@@ -117,26 +119,25 @@ Consulte [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) y la incidencia
 
 ---
 
-## Configuración de otras herramientas desde VS Code
+## Configurando sus otras herramientas desde dentro del Código VS
 
-**`OmniRoute: Configure Coding CLI`** utiliza la CLI `omniroute` para crear perfiles listos para usar
-para Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo y Roo: las mismas configuraciones descritas en
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). La clave de API se proporciona a la CLI mediante la
-variable de entorno `OMNIROUTE_API_KEY`, nunca en la línea de comandos.
+**`OmniRoute: Configure Coding CLI`** impulsa el `omniroute` CLI para escribir perfiles listos para usar para 16 herramientas: Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes y 5dive. La extensión invoca comandos `setup-*` en la terminal integrada; Instale una versión de OmniRoute CLI que incluya el comando seleccionado. Consulte la [guía de integración CLI](CLI-INTEGRATIONS.md) para conocer los archivos y marcas que utiliza cada receta y el [registro de herramientas de la extensión](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+La clave API se entrega al CLI a través de `OMNIROUTE_API_KEY`, nunca en la línea de comando. Las recetas de configuración pueden conservar las credenciales en la configuración de la herramienta de destino. Al compartir una clave específica del espacio de trabajo con la configuración de nivel de usuario de una herramienta, la extensión solicita confirmación primero.
 
 ---
 
 ## Solución de problemas
 
-| Síntoma                                                               | Causa / solución                                                                                                                                                                                                                                                                                                                       |
-| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No hay modelos de OmniRoute en el selector                            | No se puede acceder al servidor. El punto de la barra de estado se vuelve gris; ejecute `OmniRoute: Check Connection`. La detección es silenciosa por diseño y no aporta ningún modelo en lugar de mostrar una solicitud.                                                                                                              |
-| Cada modelo aparece dos veces                                         | Está usando una versión de OmniCopilot anterior a 1.0.1; actualícela. Ahora la extensión solicita `?prefix=alias`.                                                                                                                                                                                                                     |
-| Un modelo de imagen/audio que aparecía ya no está                     | Es intencionado desde 1.0.1: nunca podía responder a una solicitud de chat.                                                                                                                                                                                                                                                            |
-| Falta el panel en la barra de actividades                             | VS Code mueve los contenedores de vistas adicionales al menú de desbordamiento **"…"** situado en la parte inferior de la barra de actividades, y los contenedores ocultos mediante clic derecho permanecen ocultos. Haga clic derecho en la barra de actividades → marque **OmniRoute**, o ábralo con `OmniRoute: Manage Connection`. |
-| El panel de control se abre en el navegador a pesar del modo `editor` | El servidor no se **compiló** con `DASHBOARD_ALLOW_EMBED=vscode` (consulte más arriba); configurarlo al iniciar una instalación precompilada no tiene ningún efecto. El mecanismo alternativo es intencionado.                                                                                                                         |
-| La lista de modelos está obsoleta tras cambiar de proveedores         | Ejecute `OmniRoute: Refresh Models` o use el enlace ↻ del panel.                                                                                                                                                                                                                                                                       |
+| Síntoma                                                           | Causa / solución                                                                                                                                                                                                                                                                                                            |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No hay modelos OmniRoute en el selector.                          | Servidor inalcanzable. El punto de la barra de estado se vuelve gris; ejecutar `OmniRoute: Check Connection`. Discovery es silencioso por diseño y no aporta modelos más que indicaciones.                                                                                                                                  |
+| Cada modelo aparece dos veces.                                    | Estás en un OmniCopilot anterior a la actualización 1.0.1 —. La extensión ahora solicita `?prefix=alias`.                                                                                                                                                                                                                   |
+| Un modelo image/audio solía figurar en la lista y ya no está.     | Intencionalmente desde 1.0.1 — nunca pudo responder una solicitud de chat.                                                                                                                                                                                                                                                  |
+| Falta el panel en la barra de actividades                         | VS Code mueve contenedores de vista adicionales al** "..."** se desborda en la parte inferior de la barra de actividades y un contenedor oculto al hacer clic con el botón derecho permanece oculto. Haga clic derecho en la marca → de la barra de actividades**OmniRoute** , o ábrelo con `OmniRoute: Manage Connection`. |
+| El panel se abre en el navegador a pesar del modo `editor`        | El servidor no estaba** construido** con `DASHBOARD_ALLOW_EMBED=vscode` (ver arriba), configurar — al inicio de una instalación prediseñadas no hace nada. El retroceso es deliberado.                                                                                                                                      |
+| La lista de modelos está obsoleta después de cambiar de proveedor | `OmniRoute: Refresh Models` o el enlace ↻ en el panel.                                                                                                                                                                                                                                                                      |
+| El panel dice _En línea (modelos bloqueados)_, selector vacío     | El servidor rechaza la clave. Guarde la clave correcta con** Guardar y probar** . Si la clave se fijó en el servidor (habilitada o se le dio acceso a los modelos), la extensión no se da cuenta por sí sola: ejecute `OmniRoute: Refresh Models` o abra el panel OmniRoute.                                                |
 
 ---
 

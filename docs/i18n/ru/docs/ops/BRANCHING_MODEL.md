@@ -48,7 +48,7 @@ flowchart LR
 Проверьте наличие открытого замораживания, прежде чем предполагать, что нужная вам ветка является объединяемой:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Механика слияния (владелец `queue` label → Mergify) документирована в [MERGE_TRAIN.md](./MERGE_TRAIN.md).

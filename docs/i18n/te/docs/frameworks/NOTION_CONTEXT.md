@@ -65,41 +65,29 @@ OmniRoute టోకెన్ను సేవ్ చేసి వెంటనే 
 
 ## MCP సాధనాలు (6)
 
-`open-sse/mcp-server/tools/notionTools.ts`లో నిర్వచించబడ్డాయి. కాల్
-సమయంలో `getNotionToken()` ద్వారా టోకెన్ పరిష్కరించబడుతుంది; ఏదీ కాన్ఫిగర్ చేయకపోతే సాధనం
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
-అనే ఎర్రర్ను విసురుతుంది.
+`open-sse/mcp-server/tools/notionTools.ts` లో నిర్వచించబడింది. టోకెన్ కాల్ సమయంలో `getNotionToken()` ద్వారా పరిష్కరించబడుతుంది; ఏదీ కాన్ఫిగర్ చేయకపోతే సాధనం `"Notion integration token not configured. Set it in Settings > Context Sources."` విసురుతుంది
 
-| సాధనం                        | స్కోప్         | వివరణ                                                                                                                  |
-| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | టెక్స్ట్ క్వెరీ ద్వారా పేజీలు మరియు డేటాబేస్లను శోధిస్తుంది (శీర్షికలు, IDలు, URLలను అందిస్తుంది). పేజినేట్ చేయబడింది. |
-| `notion_get_page`            | `read:notion`  | పేజీ ID ద్వారా దాని కంటెంట్ మరియు మెటాడేటాను పొందుతుంది.                                                               |
-| `notion_list_block_children` | `read:notion`  | బ్లాక్ లేదా పేజీలోని అన్ని చైల్డ్ బ్లాక్లను (బ్లాక్ ట్రీని) జాబితా చేస్తుంది. పేజినేట్ చేయబడింది.                      |
-| `notion_query_database`      | `read:notion`  | ఐచ్ఛిక `filter` + `sorts`తో (Notion API ఫార్మాట్) డేటాబేస్ను క్వెరీ చేస్తుంది. పేజినేట్ చేయబడింది.                     |
-| `notion_get_database`        | `read:notion`  | ID ద్వారా డేటాబేస్ స్కీమా/మెటాడేటాను పొందుతుంది.                                                                       |
-| `notion_append_blocks`       | `write:notion` | ఇప్పటికే ఉన్న బ్లాక్ లేదా పేజీకి చైల్డ్ బ్లాక్లను జోడిస్తుంది (ఒక్కో రిక్వెస్ట్కు గరిష్ఠంగా 100 బ్లాక్లు).             |
+| సాధనం                        | పరిధి          | వివరణ                                                                                                |
+| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | టెక్స్ట్ ప్రశ్న ద్వారా పేజీలు మరియు డేటాబేస్లను శోధించండి (శీర్షికలు, IDs, URLs). పేజీలు వేయబడ్డాయి. |
+| `notion_get_page`            | `read:notion`  | పేజీ యొక్క కంటెంట్ మరియు మెటాడేటాను దాని ID ద్వారా పొందండి.                                          |
+| `notion_list_block_children` | `read:notion`  | బ్లాక్ లేదా పేజీ (బ్లాక్ ట్రీ) యొక్క అన్ని బ్లాక్ పిల్లలను జాబితా చేయండి. పేజీలు వేయబడ్డాయి.         |
+| `notion_query_database`      | `read:notion`  | ఐచ్ఛిక `filter` + `sorts` (Notion API ఫార్మాట్)తో డేటాబేస్ను ప్రశ్నించండి. పేజీలు వేయబడ్డాయి.        |
+| `notion_get_database`        | `read:notion`  | ID ద్వారా డేటాబేస్ యొక్క schema/metadata పొందండి.                                                    |
+| `notion_append_blocks`       | `write:notion` | ఇప్పటికే ఉన్న బ్లాక్ లేదా పేజీకి బ్లాక్ పిల్లలను జతచేయండి (ఒక అభ్యర్థనకు గరిష్టంగా 100 బ్లాక్లు).    |
 
-### ఇన్పుట్ పారామీటర్లు
+### ఇన్పుట్ పారామితులు
 
-- `notion_search` — `query` (1–500 అక్షరాలు), `pageSize` (1–100, డిఫాల్ట్ 20),
-  `startCursor` (ఐచ్ఛికం).
-- `notion_get_page` — `pageId` (32-అక్షరాల హెక్స్ లేదా UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, డిఫాల్ట్ 50),
-  `startCursor` (ఐచ్ఛికం).
-- `notion_query_database` — `databaseId`, `filter` (ఐచ్ఛికం, Notion ఫిల్టర్ ఫార్మాట్),
-  `sorts` (ఐచ్ఛిక అర్రే), `pageSize` (1–100, డిఫాల్ట్ 50), `startCursor` (ఐచ్ఛికం).
+- `notion_search` — `query` (1–500 అక్షరాలు), `pageSize` (1–100, డిఫాల్ట్ 20), `startCursor` (ఐచ్ఛికం).
+- `notion_get_page` — `pageId` (32-char hex లేదా UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, డిఫాల్ట్ 50), `startCursor` (ఐచ్ఛికం).
+- `notion_query_database` — `databaseId`, `filter` (ఐచ్ఛికం, Notion ఫిల్టర్ ఫార్మాట్), `sorts` (ఐచ్ఛిక శ్రేణి), `pageSize` (1–100, డిఫాల్ట్ 50), `startCursor` (ఐచ్ఛికం).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (బ్లాక్ ఆబ్జెక్ట్ల అర్రే),
-  `after` (ఐచ్ఛిక స్థానం).
+- `notion_append_blocks` — `blockId`, `children` (బ్లాక్ ఆబ్జెక్ట్ల శ్రేణి), `after` (ఐచ్ఛిక స్థానం).
 
-### స్కోప్లు
+### పరిధులు
 
-రీడ్ సాధనాలకు `read:notion`, రైట్ సాధనానికి `write:notion` అవసరం.
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true`గా ఉన్నప్పుడు మాత్రమే
-`open-sse/mcp-server/server.ts`లోని `withScopeEnforcement()` ద్వారా స్కోప్లు అమలు చేయబడతాయి;
-కాలర్కు అనుమతించబడిన స్కోప్లు `OMNIROUTE_MCP_SCOPES` (కామాలతో వేరు చేసినవి) లేదా
-ప్రామాణీకరించిన API కీ స్కోప్ సందర్భం నుంచి వస్తాయి. పూర్తి స్కోప్ నమూనా కోసం
-[MCP-SERVER.md](./MCP-SERVER.md) చూడండి.
+రీడ్ టూల్స్కు `read:notion` అవసరం మరియు రైట్ టూల్కు `write:notion` అవసరం. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ఉన్నప్పుడు `open-sse/mcp-server/server.ts` లో `withScopeEnforcement()` ద్వారా స్కోప్లు అమలు చేయబడతాయి మరియు ఎల్లప్పుడూ API కీ `manage`/`admin` లేని HTTP/SSE కాలర్ కోసం; కాలర్ అనుమతించిన స్కోప్లు `OMNIROUTE_MCP_SCOPES` (కామాతో వేరు చేయబడినవి) లేదా ప్రామాణీకరించబడిన API కీ యొక్క స్కోప్ సందర్భం నుండి వస్తాయి. పూర్తి స్కోప్ మోడల్ కోసం [MCP-SERVER.md](./MCP-SERVER.md) చూడండి.
 
 ## ఎండ్పాయింట్లు
 

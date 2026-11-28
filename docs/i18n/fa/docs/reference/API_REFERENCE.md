@@ -49,7 +49,7 @@
 
 ---
 
-## تکمیلهای گفتوگو
+## تکمیل چت
 
 ```bash
 POST /v1/chat/completions
@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### هدرهای سفارشی
 
-| Header                   | Direction | Description                                                                                                                                                                                                    |
-| ------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | درخواست   | برای دور زدن کش روی `true` تنظیم کنید                                                                                                                                                                          |
-| `x-omniroute-no-memory`  | درخواست   | برای رد کردن تزریق حافظه + مهارتها برای این درخواست روی `true` تنظیم کنید (مشابه no-cache؛ از سربار توکن/هزینه در هر فراخوانی جلوگیری میکند)                                                                   |
-| `X-OmniRoute-Progress`   | درخواست   | برای رویدادهای پیشرفت روی `true` تنظیم کنید                                                                                                                                                                    |
-| `X-Session-Id`           | درخواست   | کلید نشست چسبنده برای وابستگی خارجی نشست                                                                                                                                                                       |
-| `x_session_id`           | درخواست   | گونهٔ دارای زیرخط نیز پذیرفته میشود (HTTP مستقیم)                                                                                                                                                              |
-| `X-OmniRoute-Session-Id` | درخواست   | برچسب نشست/مکالمهٔ ارائهشده توسط فراخواننده (همچنین به حافظه ارسال میشود). در صورت وجود، بدون تغییر در `call_logs.session_tag` برای تخصیص هزینهٔ هر نشست ذخیره میشود (#8249) — در صورت نبود، هرگز ایجاد نمیشود |
-| `Idempotency-Key`        | درخواست   | کلید حذف موارد تکراری (پنجرهٔ ۵ ثانیهای)                                                                                                                                                                       |
-| `X-Request-Id`           | درخواست   | کلید جایگزین حذف موارد تکراری                                                                                                                                                                                  |
-| `x-omniroute-connection` | درخواست   | یک درخواست تکمدلی را بر اساس شناسهٔ آن، به یک اتصال ارائهدهندهٔ واحد (حساب) متصل میکند — به [اتصال حساب برای هر درخواست](#account-pinning-per-request) مراجعه کنید                                             |
-| `X-OmniRoute-Cache`      | پاسخ      | `HIT` یا `MISS` (غیرجریانی)                                                                                                                                                                                    |
-| `X-OmniRoute-Idempotent` | پاسخ      | اگر موارد تکراری حذف شده باشند، `true`                                                                                                                                                                         |
-| `X-OmniRoute-Progress`   | پاسخ      | اگر رهگیری پیشرفت فعال باشد، `enabled`                                                                                                                                                                         |
-| `X-OmniRoute-Session-Id` | پاسخ      | شناسهٔ نشست مؤثر استفادهشده توسط OmniRoute                                                                                                                                                                     |
-| `X-OmniRoute-Request-Id` | پاسخ      | شناسهٔ همبستگی درخواست (در صورت معلوم بودن)                                                                                                                                                                    |
-| `X-OmniRoute-Version`    | پاسخ      | نسخهٔ ساخت OmniRoute (همیشه وجود دارد)                                                                                                                                                                         |
-| `X-OmniRoute-Cost-Saved` | پاسخ      | مقدار USD که کش در یک `HIT` صرفهجویی کرده است (فقط برای اصابتهای کش)                                                                                                                                           |
-| `X-OmniRoute-Decision`   | پاسخ      | ردگیری مسیریابی: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` راهبرد ترکیبی است، یا برای درخواست غیرترکیبی `single` است) — همیشه در پاسخهای تکمیل وجود دارد                                   |
+| سربرگ                    | جهت          | توضیحات                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | درخواست کنید | برای دور زدن حافظه پنهان روی `true` تنظیم کنید                                                                                                                                                                                                                                                                                            |
+| `x-omniroute-no-memory`  | درخواست کنید | روی `true` تنظیم کنید تا از تزریق مهارت های + حافظه برای این درخواست صرفنظر کنید (آینه بدون حافظه پنهان، اجتناب از سربار token/cost هر تماس)                                                                                                                                                                                              |
+| `x-omniroute-no-log`     | درخواست کنید | روی `true` تنظیم کنید تا بارهای request/response را از گزارش تماس برای این درخواست استنتاج حذف کنید (همه مسیرهای چت-خانواده: تکمیلهای چت، پاسخها، پیامها، تکمیلها، Gemini). مهر زمانی، مدل، وضعیت، مدت زمان و تعداد نشانهها همچنان ثبت میشوند. برای انصراف از محتوای کامل، با `x-omniroute-no-memory` و `x-omniroute-no-cache` ترکیب کنید |
+| `X-OmniRoute-Progress`   | درخواست کنید | برای رویدادهای پیشرفت روی `true` تنظیم کنید                                                                                                                                                                                                                                                                                               |
+| `X-Session-Id`           | درخواست کنید | کلید جلسه چسبنده برای میل به جلسه خارجی                                                                                                                                                                                                                                                                                                   |
+| `x_session_id`           | درخواست کنید | نوع زیر خط نیز پذیرفته شد ( HTTPمستقیم)                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Session-Id` | درخواست کنید | تگ session/conversation ارائه شده توسط تماس گیرنده (همچنین حافظه را تغذیه می کند). در صورت وجود، کلمه به `call_logs.session_tag` برای اسناد هزینه هر جلسه (#8249) ادامه یافت — هرگز در صورت عدم وجود ترکیب نشد                                                                                                                            |
+| `Idempotency-Key`        | درخواست کنید | کلید Dedup (پنجره 5s)                                                                                                                                                                                                                                                                                                                     |
+| `X-Request-Id`           | درخواست کنید | کلید حذف جایگزین                                                                                                                                                                                                                                                                                                                          |
+| `x-omniroute-connection` | درخواست کنید | پین کردن درخواست تک مدلی به یک اتصال ارائه دهنده (حساب) با شناسه — آن [پین کردن حساب در هر درخواست را](#account-pinning-per-request) ببینید                                                                                                                                                                                               |
+| `X-OmniRoute-Cache`      | پاسخ         | `HIT` یا `MISS` (غیر استریم)                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Idempotent` | پاسخ         | `true` اگر کپی شده باشد                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Progress`   | پاسخ         | `enabled` اگر ردیابی پیشرفت فعال است                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Session-Id` | پاسخ         | جلسه موثر ID استفاده شده توسط OmniRoute                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Request-Id` | پاسخ         | درخواست شناسه همبستگی (در صورت شناخته شدن)                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Version`    | پاسخ         | نسخه ساخت OmniRoute (همیشه موجود)                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Cost-Saved` | پاسخ         | USD از حافظه پنهان در HIT اجتناب شده است (فقط بازدید از حافظه پنهان)                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Decision`   | پاسخ         | ردیابی مسیریابی: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` استراتژی ترکیبی یا `single` برای درخواست غیر ترکیبی است) — همیشه در پاسخهای تکمیل وجود دارد                                                                                                                                                                |
 
-> نکتهٔ Nginx: اگر به هدرهای دارای زیرخط (برای مثال `x_session_id`) متکی هستید، `underscores_in_headers on;` را فعال کنید.
+> نکته Nginx: اگر به هدرهای زیرخط تکیه می کنید (مثلا `x_session_id`)، `underscores_in_headers on;` را فعال کنید.
 
-#### اتصال حساب برای هر درخواست
+#### پین کردن حساب در هر درخواست
 
-وقتی یک ارائهدهنده چندین اتصال (حساب یا کلید) دارد، OmniRoute معمولاً یکی از آنها را
-با استفاده از راهبرد انتخاب حساب خود برمیگزیند. در عوض، یک درخواست میتواند با هدر
-`x-omniroute-connection` به یک اتصال مشخص متصل شود:
+هنگامی که یک ارائه دهنده چندین اتصال (حساب یا کلید) دارد، OmniRoute معمولاً یکی را از طریق استراتژی انتخاب حساب خود انتخاب می کند. یک درخواست در عوض می تواند یک اتصال خاص را با هدر `x-omniroute-connection` پین کند:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,16 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **محل یافتن id.** صفحهٔ provider را در داشبورد باز کنید
-  (**Dashboard → Providers → <provider>**) و روی چیپ id یعنی `xxxxxxxx…` در یک ردیف اتصال کلیک کنید — این کار id کامل اتصال را کپی میکند.
-- **کدام درخواستها به آن احترام میگذارند.** درخواستهای تکمدلی (`provider/model`) در
-  `/v1/chat/completions`، `/v1/messages` و `/v1/responses`. ترکیبها header را نادیده میگیرند: برای هر مرحلهٔ ترکیب، حسابی را از طریق اتصال اختصاصی همان مرحله مشخص کنید.
-- **این pin سختگیرانه است، نه یک ترجیح.** اتصال pinشده بهصورت انحصاری استفاده میشود. خطایی که درون درخواست رخ دهد cooldown حساب را ثبت میکند، اما به حساب همنوع دیگری از همان provider چرخش نمیکند.
-- **Cooldown و quota، pin را آزاد میکنند.** تا زمانی که اتصال pinشده در حالت cooldown است، quota آن تمام شده یا بهدلیل سیاست quota مسدود شده است، درخواستهای بعدی به سایر اتصالهای provider بازمیگردند؛ دقیقاً مانند ترافیک بدون pin.
-- **idهای ناشناخته یا غیرفعال باعث خطا میشوند.** idای که در pool فعال provider وجود نداشته باشد (حذفشده، غیرفعالشده یا متعلق به provider دیگری باشد) هیچ حساب واجدی باقی نمیگذارد؛ بنابراین درخواست شکست میخورد و بدون اطلاعرسانی به مسیر دیگری هدایت نمیشود.
+- **شناسه را از کجا پیدا کنیم** صفحه ارائه دهنده را در داشبورد باز کنید (** ارائه دهندگان داشبورد → → <provider>** ) و روی تراشه `xxxxxxxx…` id در ردیف اتصال کلیک کنید — شناسه کامل اتصال کپی می شود.
+- **چه درخواست هایی به آن احترام می گذارد.** درخواست های تک مدل (`provider/model`) در `/v1/chat/completions`، `/v1/messages` و `/v1/responses`. ترکیبها هدر را نادیده میگیرند: به جای آن یک حساب در هر مرحله ترکیبی از طریق اتصال خود مرحله پین کنید.
+- **پین سخت است، نه یک اولویت.** اتصال پین شده به طور انحصاری استفاده می شود. خرابی در درخواست، خنک شدن حساب را ثبت میکند اما انجام میدهد** نه** چرخش به یک حساب خواهر و برادر از همان ارائه دهنده.
+- **Cooldown و quota پین را آزاد کنید.** در حالی که اتصال پین شده در حال خنک شدن است، سهمیه تمام شده یا توسط یک خط مشی سهمیه مسدود شده است، درخواستهای بعدی دقیقاً مانند ترافیک بدون پین به سایر اتصالات ارائهدهنده بازمیگردند.
+- **شناسههای ناشناخته یا غیرفعال نمیشوند.** شناسهای که در مجموعه فعال ارائهدهنده نیست (حذف شده، غیرفعال شده یا متعلق به ارائهدهنده دیگری است) هیچ حساب واجد شرایطی باقی نمیگذارد، بنابراین درخواست به جای مسیریابی بیصدا در جای دیگر با شکست مواجه میشود.
 
-Claude Code headerهای سفارشی را از طریق `ANTHROPIC_CUSTOM_HEADERS` ارسال میکند. آن را در بلوک
-`env` فایل `~/.claude/settings.json` قرار دهید، یا برای pin کردن حسابی متفاوت برای هر پروژه، در `.claude/settings.json` سطح پروژه قرار دهید:
+کد Claude هدرهای سفارشی را از طریق `ANTHROPIC_CUSTOM_HEADERS` ارسال می کند. آن را در بلوک `env` `~/.claude/settings.json` یا در `.claude/settings.json` در سطح پروژه قرار دهید تا یک حساب متفاوت در هر پروژه پین کنید:
 
 ```jsonc
 {
@@ -124,12 +120,11 @@ Claude Code headerهای سفارشی را از طریق `ANTHROPIC_CUSTOM_HEADE
 }
 ```
 
-منبع: `src/sse/handlers/chat.ts` (خواندن header)، `src/sse/services/auth.ts` و
-`src/sse/services/sessionAffinityPin.ts` (آزادسازی pin و بررسی وجود نداشتن در pool).
+منبع: `src/sse/handlers/chat.ts` (خواندن سرصفحه)، `src/sse/services/auth.ts` و `src/sse/services/sessionAffinityPin.ts` (انتشار پین و بررسی گمشده از استخر).
 
-> **Headerهای تلهمتری هزینه:** پاسخهای موفقِ غیرجریانی همچنین مجموعهٔ هزینه-تلهمتری `X-OmniRoute-*` را شامل میشوند — `X-OmniRoute-Response-Cost` (برحسب USD، با ۱۰ رقم اعشار ثابت؛ برای موارد رایگان/بدون قیمتگذاری `0.0000000000`)، `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`، `X-OmniRoute-Model`، `X-OmniRoute-Provider`، `X-OmniRoute-Latency-Ms`، `X-OmniRoute-Cache-Hit` و `X-OmniRoute-Fallback-Attempts` (فقط وقتی بزرگتر از ۰ باشد)، بهعلاوهٔ `X-OmniRoute-Request-Id` و `X-OmniRoute-Version`. این موارد توسط تکمیلهای chat، `/v1/responses`، `/v1/messages`، **و endpointهای رسانهای** ارسال میشوند — `/v1/embeddings`، `/v1/images/generations`، `/v1/audio/speech`، `/v1/audio/transcriptions`، `/v1/rerank`، `/v1/videos/generations`، `/v1/music/generations` و `/v1/moderations` (همیشه با هزینهٔ `0`). هزینهٔ رسانه بر اساس modality (بهازای هر تصویر، هر ثانیه، هر نویسه و هر واحد جستوجو) محاسبه میشود، در صورتی که قیمتگذاری در دسترس باشد؛ در غیر این صورت `0` خواهد بود (fail-open).
+> **هدرهای تله متری هزینه:** پاسخهای موفقیتآمیز غیر جریانی همچنین مجموعه هزینه-دورسنجی `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD، ثابت 10 اعشاری؛ `0.0000000000` برای free/unpriced)، `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`، `X-OmniRoute-Model`، `X-OmniRoute-Provider`، `X-OmniRoute-Latency-Ms`، `X-OmniRoute-Cache-Hit` و `X-OmniRoute-Fallback-Attempts` (فقط زمانی که > 0)، به علاوه `X-OmniRoute-Request-Id` و `X-OmniRoute-Version`. اینها توسط تکمیلهای چت، `/v1/responses`، `/v1/messages`، منتشر میشوند.** و نقطه پایانی رسانه ها** — `/v1/embeddings`، `/v1/images/generations`، `/v1/audio/speech`، `/v1/audio/transcriptions`، `/v1/rerank`، `/v1/videos/generations`، `/v1/music/generations`، و `/v1/moderations` (همیشه هزینه `0` است). وقتی قیمتگذاری در دسترس باشد، هزینه رسانه به ازای هر روش (در هر تصویر، در ثانیه، هر کاراکتر، به ازای هر واحد جستجو) محاسبه میشود، در غیر این صورت `0` (باز کردن شکست)
 
-> **معنای هزینه در cache-hit:** در یک HIT کش معنایی (`X-OmniRoute-Cache-Hit: true`) هیچ فراخوانی upstreamای انجام نمیشود؛ بنابراین `X-OmniRoute-Response-Cost` برابر با `0.0000000000` است (هزینهٔ **افزایشی** ارائهٔ hit). هزینهٔ اصلی/هزینهای که در صورت انجام درخواست ایجاد میشد، جداگانه در `X-OmniRoute-Cost-Saved` گزارش میشود. مصرفکنندگان صورتحساب باید `X-OmniRoute-Response-Cost` را جمع بزنند (hitها هزینهای ندارند)؛ تحلیلهای cache میتوانند `X-OmniRoute-Cost-Saved` را تجمیع کنند.
+> **معناشناسی هزینه ضربه به حافظه پنهان:** در حافظه پنهان معنایی HIT (`X-OmniRoute-Cache-Hit: true`) هیچ فراخوانی بالادستی انجام نمی شود، بنابراین `X-OmniRoute-Response-Cost` `0.0000000000` است (** افزایشی** هزینه سرویس ضربه). هزینه original/would-have-been به صورت جداگانه در `X-OmniRoute-Cost-Saved` گزارش می شود. مصرف کنندگان صورتحساب باید `X-OmniRoute-Response-Cost` را جمع کنند (هزینه بازدیدها هیچ هزینه ای ندارد). تجزیه و تحلیل کش می تواند `X-OmniRoute-Cost-Saved` را جمع کند.
 
 ## اجارههای انحصاری نشست مدیریتشده
 
@@ -357,6 +352,8 @@ Content-Type: application/json
 
 `n` تصاویر `n` را در `data[]` برمیگرداند. ارائهدهندگانی که API بالادست آنها یک تصویر در هر تماس برمیگرداند (آزمایشگاههای جنگل سیاه، پایداری AI، لئوناردو، ایدهگرام، هایپر، هایپربولیک، Magnific/Freepik، NVIDIA NIM، Cloudflare کارگران AI) `n` تماسهای بالادستی جداگانه، حداکثر 4 مورد در پرواز دریافت میکنند. یک `seed` ثابت با شاخص فراخوانی (`seed`، `seed + 1`، …) جبران میشود، بنابراین تصاویر متفاوت هستند اما قابل تکرار میمانند. `n` روی 10 محدود شده است. اگر هر تماسی ناموفق باشد، درخواست به طور کلی ناموفق است. فهرست فرمتهای فنآوت `SINGLE_IMAGE_FANOUT_FORMATS` در `open-sse/handlers/imageGeneration/fanOut.ts` است.
 
+مدلهای تصویر Codex GPT (`codex/gpt-image-*`) فقط PNG را برمیگردانند: بالادست `200` با بایت PNG پاسخ میدهد حتی زمانی که `jpeg` یا `webp` درخواست شود. درخواست با هر `output_format` دیگر (`webp`، `jpeg`، ...) با HTTP 400 به جای نادیده گرفتن بیصدا رد میشود. حذف یا ارسال `png`. `output_compression` ارسال نمی شود.
+
 ZenMux از اتصال کلید API موجود مجددا استفاده می کند و پیشوندهای `zenmux/` یا `zm/` را می پذیرد:
 
 - `zenmux/openai/gpt-image-2` از ZenMux's OpenAI Images API استفاده می کند. گزینه ها عبارتند از `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, `response_format`.
@@ -365,7 +362,7 @@ ZenMux از اتصال کلید API موجود مجددا استفاده می ک
 
 این ادغام از تولید متن به تصویر پشتیبانی می کند، نه ویرایش تصویر مرجع. خروجی راس به `data[].b64_json` نرمال شده است. `response_format: "url"` یک HTTPS URL بالادستی یا URL داده base64 را زمانی که فقط بایت های تصویر در دسترس باشد برمی گرداند. خروجی های Empty/filtered یک خطا را به جای موفقیت خالی برمی گرداند. دسترسی مدل به حساب ZenMux بستگی دارد. [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) و [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) ببینید.
 
-یک اتصال ورود به سیستم Microsoft 365 Copilot `copilot-m365-web/m365-copilot-image` از طریق ابزار تصویر داخلی Copilot ارائه میکند: یک چرخش Copilot در هر تصویر (`n` 1-4)، `size` فقط جهتگیری را هدایت میکند، و تصاویری که به صورت درون خطی برگردانده میشوند (`b64_json` یا یک داده URL برای `response_format: "url"`). [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) را ببینید.
+یک اتصال ورود به سیستم Microsoft 365 Copilot `copilot-m365-web/m365-copilot-image` از طریق ابزار تصویر داخلی Copilot ارائه میکند: یک چرخش Copilot در هر تصویر (`n` 1-4)، `size` فقط جهتگیری را هدایت میکند، و تصاویری که به صورت درون خطی برگردانده میشوند (`b64_json` یا یک داده URL برای `response_format: "url"`). به [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) مراجعه کنید.
 
 ```bash
 # List all image models
@@ -374,7 +371,7 @@ GET /v1/images/generations
 
 ---
 
-## OCR سند
+## سند OCR
 
 ```bash
 POST /v1/ocr
@@ -390,17 +387,15 @@ Content-Type: application/json
 }
 ```
 
-`model` ارائهدهنده OCR را از طریق پیشوند `provider/model` انتخاب میکند؛ یک شناسه مدل بدون پیشوند (برای مثال
-`mistral-ocr-latest`) به ارائهدهنده ثبتشده آن resolve میشود و اگر `model` حذف شود، مقدار پیشفرض
-Mistral (`mistral-ocr-latest`) خواهد بود. ارائهدهندگان ثبتشده (`open-sse/config/ocrRegistry.ts`):
+`model` ارائه دهنده OCR را از طریق پیشوند `provider/model` انتخاب می کند. یک شناسه مدل خالی (مثلا `mistral-ocr-latest`) به ارائهدهنده ثبتشده خود حل میشود و `model` حذفشده به صورت پیشفرض Mistral (`mistral-ocr-latest`) است. ارائه دهندگان ثبت شده (`open-sse/config/ocrRegistry.ts`):
 
-| شناسه ارائهدهنده              | شناسه مدل            | مقدار `model`                                                      | توضیحات                                                                                                              |
-| ----------------------------- | -------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (یا `mistral-ocr-latest` بدون پیشوند) | همزمان — پاسخ مستقیماً از همان فراخوانی بالادستی برگردانده میشود.                                                    |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                        | بالادستی ناهمزمان (`analyze` + poll) — در ادامه ببینید.                                                              |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                            | همزمان، از طریق نقطه پایانی شریک `openapi/chat/completions` در Vertex AI — برای احراز هویت/URL به ادامه مراجعه کنید. |
+| شناسه ارائه دهنده             | شناسه مدل                  | ارزش `model`                                                 | یادداشت ها                                                                                                                                                                                                         |
+| ----------------------------- | -------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mistral`                     | `mistral-ocr-latest`       | `mistral/mistral-ocr-latest` (یا `mistral-ocr-latest` برهنه) | — همزمان پاسخ مستقیماً از یک تماس بالادستی برگردانده می شود.                                                                                                                                                       |
+| `azure-document-intelligence` | `prebuilt-read`            | `azure-document-intelligence/prebuilt-read`                  | بالادست ناهمزمان (نظرسنجی `analyze` + ) — زیر را ببینید.                                                                                                                                                           |
+| `vertex-deepseek-ocr`         | خود مستقر (بدون مدل داخلی) | `vertex-deepseek-ocr/<your-deployed-model-id>`               | همزمان، از طریق نقطه پایانی Vertex AI Model Garden DeepSeek-OCR (شکل `openapi/chat/completions` ). Google `deepseek-ocr-maas` مدیریت شده را در 21-10-2026 (#20423) بازنشسته کرد، به طوری که id 400 را برمی گرداند. |
 
-هر سه ارائهدهنده بدنهای با شکل یکسان Mistral برمیگردانند:
+هر سه ارائه دهنده در یک بدنه میسترال شکل پاسخ می دهند:
 
 ```json
 {
@@ -410,18 +405,13 @@ Mistral (`mistral-ocr-latest`) خواهد بود. ارائهدهندگان ثب�
 }
 ```
 
-### جریان polling در Azure Document Intelligence
+### جریان نظرسنجی Azure Document Intelligence
 
-API `analyze` در Azure Document Intelligence ناهمزمان است: درخواست اولیه بهجای بدنه، یک هدر
-`Operation-Location` برمیگرداند و نتیجه باید با polling دریافت شود. handler
-(`open-sse/handlers/ocr.ts`) هر ثانیه و حداکثر تا 30 تلاش، آن URL را polling میکند؛ در صورت دریافت پاسخ polling غیر `ok` یا وضعیت `"failed"`، بلافاصله خطا میدهد (و polling را ادامه نمیدهد) و اگر پس از تمام شدن سهمیه تلاش، عملیات همچنان در حال اجرا باشد، `504` برمیگرداند. پاسخ نهایی Azure پیش از بازگردانده شدن به فراخواننده، به همان شکل `pages`/`markdown` مورد استفاده Mistral نرمالسازی میشود؛ بنابراین کد کلاینت نیازی به مدیریت ویژه ارائهدهنده ندارد.
+`analyze` API Azure Document Intelligence ناهمزمان است: درخواست اولیه به جای بدنه یک سرصفحه `Operation-Location` را برمیگرداند و نتیجه باید برای آن نظرسنجی شود. کنترل کننده (`open-sse/handlers/ocr.ts`) در هر ثانیه URL تا 30 تلاش رای گیری می کند، در پاسخ نظرسنجی غیر `ok` یا وضعیت `"failed"` سریع شکست می خورد (نظرسنجی را ادامه نمی دهد)، و اگر پس از اتمام بودجه تلاش، عملیات همچنان ادامه دارد، `504` را برمی گرداند. پاسخ نهایی Azure به همان شکل `pages`/`markdown` استفاده شده توسط Mistral قبل از بازگرداندن به تماسگیرنده عادی میشود، بنابراین کد مشتری نیازی به مورد خاص ارائهدهنده ندارد.
 
-### احراز هویت و تعیین نقطه پایانی Vertex AI DeepSeek OCR
+### Vertex AI DeepSeek OCR auth و وضوح نقطه پایانی
 
-`vertex-deepseek-ocr` از همان احراز هویت Vertex AI که OmniRoute پیشتر برای ترافیک chat/image پشتیبانی میکند استفاده مجدد میکند
-(`open-sse/executors/vertex.ts`): کلید API اتصال یا یک اعتبارنامه JSON مربوط به Service Account است (که از طریق جریان JWT-bearer با یک توکن دسترسی کوتاهمدت OAuth مبادله میشود) یا یک توکن دسترسی OAuth است که از قبل صادر شده و بدون تغییر استفاده میشود. URL نقطه پایانی بالادستی، نقطه پایانی عمومی شریک Vertex با نام `openapi/chat/completions` است که از project و region اتصال ساخته میشود — مقدار صریح `providerSpecificData.project`/`providerSpecificData.region` همیشه اولویت دارد؛ در غیر این صورت project از `project_id` موجود در JSON مربوط به Service Account استخراج میشود و region بهطور پیشفرض `us-central1` است. هر دو resolution در `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`، `resolveVertexOcrBaseUrl`) انجام میشوند و
-`src/app/api/v1/ocr/route.ts` پیش از ارسال به `handleOcr` از آنها استفاده میکند.
+`vertex-deepseek-ocr` از همان احراز هویت Vertex AI استفاده میکند OmniRoute قبلاً برای ترافیک chat/image پشتیبانی میکند (`open-sse/executors/vertex.ts`): کلید API اتصال یا اعتبار JSON حساب سرویس است (با یک نشانه دسترسی کوتاه مدت OAuth از طریق جریان حامل JWT مبادله میشود) یا یک توکن دسترسی OAuth که قبلاً ساخته شده است. نقطه پایانی بالادست URL نقطه پایانی شریک `openapi/chat/completions` عمومی Vertex است که از پروژه اتصال و منطقه — ساخته شده است و `providerSpecificData.project`/`providerSpecificData.region` آشکار همیشه برنده است. در غیر این صورت پروژه از `project_id` حساب سرویس JSON مشتق شده است و منطقه پیش فرض `us-central1` است. هر دو وضوح در `open-sse/handlers/ocr.ts` اتفاق میافتند (`resolveVertexOcrAccessToken`، `resolveVertexOcrBaseUrl`)، قبل از ارسال به `handleOcr` توسط `src/app/api/v1/ocr/route.ts` مصرف میشوند.
 
 ---
 
@@ -659,98 +649,102 @@ endpoint یکپارچه کدهای وضعیت خطا را در پوشش خطای
 
 ## نقاط پایانی سازگاری
 
-| روش  | مسیر                                      | قالب                                    |
-| ---- | ----------------------------------------- | --------------------------------------- |
-| POST | `/v1/chat/completions`                    | OpenAI                                  |
-| POST | `/v1/messages`                            | Anthropic                               |
-| POST | `/v1/responses`                           | OpenAI Responses                        |
-| POST | `/v1/embeddings`                          | OpenAI                                  |
-| POST | `/v1/images/generations`                  | OpenAI Images                           |
-| POST | `/v1/images/edits`                        | OpenAI Images (ویرایش/نقاشی داخلی)      |
-| POST | `/v1/videos/generations`                  | تولید ویدئوی سبک OpenAI                 |
-| POST | `/v1/music/generations`                   | تولید موسیقی سبک OpenAI                 |
-| POST | `/v1/audio/transcriptions`                | OpenAI Audio (تبدیل گفتار به متن)       |
-| POST | `/v1/audio/speech`                        | OpenAI TTS (بدنهٔ صوتی برمیگرداند)      |
-| POST | `/v1/rerank`                              | مرتبسازی مجدد به سبک Cohere/Voyage      |
-| POST | `/v1/classify`                            | Jina classify (`api.jina.ai`)           |
-| POST | `/v1/segment`                             | بخشبندیکنندهٔ Jina (`segment.jina.ai`)  |
-| POST | `/v1/moderations`                         | OpenAI Moderations                      |
-| GET  | `/v1/models`                              | OpenAI                                  |
-| POST | `/v1/models/query`                        | فهرست کوتاه مدلهای فیلترشده             |
-| POST | `/v1/messages/count_tokens`               | Anthropic                               |
-| GET  | `/v1beta/models`                          | Gemini                                  |
-| POST | `/v1beta/models/{...path}`                | Gemini generateContent                  |
-| POST | `/v1/api/chat`                            | Ollama                                  |
-| GET  | `/api/v1/vscode/{token}/`                 | نام مستعار کاتالوگ OpenAI               |
-| GET  | `/api/v1/vscode/{token}/models`           | نام مستعار مدلهای OpenAI                |
-| POST | `/api/v1/vscode/{token}/chat/completions` | نام مستعار توکنیزهشدهٔ OpenAI           |
-| POST | `/api/v1/vscode/{token}/responses`        | نام مستعار توکنیزهشدهٔ OpenAI Responses |
-| POST | `/api/v1/vscode/{token}/api/chat`         | نام مستعار توکنیزهشدهٔ Ollama           |
-| GET  | `/api/v1/vscode/{token}/api/tags`         | نام مستعار توکنیزهشدهٔ برچسبهای Ollama  |
+| روش  | مسیر                                      | قالب                                          |
+| ---- | ----------------------------------------- | --------------------------------------------- |
+| POST | `/v1/chat/completions`                    | OpenAI                                        |
+| POST | `/v1/messages`                            | Anthropic                                     |
+| POST | `/v1/responses`                           | پاسخ های OpenAI                               |
+| POST | `/v1/embeddings`                          | OpenAI                                        |
+| POST | `/v1/images/generations`                  | تصاویر OpenAI                                 |
+| POST | `/v1/images/edits`                        | تصاویر OpenAI (edit/inpaint)                  |
+| POST | `/v1/videos/generations`                  | تولید ویدئو به سبک OpenAI                     |
+| POST | `/v1/music/generations`                   | نسل موسیقی به سبک OpenAI                      |
+| POST | `/v1/audio/transcriptions`                | صوتی OpenAI (STT)                             |
+| POST | `/v1/audio/speech`                        | OpenAI TTS (بدنه صوتی را برمیگرداند)          |
+| POST | `/v1/rerank`                              | رنک Cohere/Voyage-style                       |
+| POST | `/v1/classify`                            | طبقه بندی جینا (`api.jina.ai`)                |
+| POST | `/v1/segment`                             | جینا قطعه ساز (`segment.jina.ai`)             |
+| POST | `/v1/moderations`                         | اعتدال OpenAI                                 |
+| POST | `/v1/systemone`                           | سیستم یک تایپ تصمیمات                         |
+| POST | `/v1/decisions`                           | تصمیمات OpenAI (بومی)                         |
+| GET  | `/v1/systemone/models`                    | کاتالوگ تصمیم-مدل                             |
+| GET  | `/v1/models`                              | OpenAI                                        |
+| POST | `/v1/models/query`                        | لیست کوتاه مدل فیلتر شده                      |
+| POST | `/v1/messages/count_tokens`               | Anthropic                                     |
+| GET  | `/v1beta/models`                          | Gemini                                        |
+| POST | `/v1beta/models/{...path}`                | Gemini generateContent                        |
+| POST | `/v1/api/chat`                            | Ollama                                        |
+| GET  | `/api/v1/vscode/{token}/`                 | نام مستعار کاتالوگ OpenAI                     |
+| GET  | `/api/v1/vscode/{token}/models`           | نام مستعار مدل های OpenAI                     |
+| POST | `/api/v1/vscode/{token}/chat/completions` | نام مستعار رمزگذاری شده OpenAI                |
+| POST | `/api/v1/vscode/{token}/responses`        | پاسخ های OpenAI با نام مستعار نشانه گذاری شده |
+| POST | `/api/v1/vscode/{token}/api/chat`         | نام مستعار رمزگذاری شده Ollama                |
+| GET  | `/api/v1/vscode/{token}/api/tags`         | تگ های Ollama با نام مستعار نشانه گذاری شده   |
 
-تمام مسیرهای POST از شکل یکسانی پیروی میکنند: `Bearer your-api-key` بههمراه بدنهٔ JSON اعتبارسنجیشده با Zod (`v1RerankSchema`، `v1ModerationSchema`، `v1AudioSpeechSchema` و غیره؛ به `src/shared/validation/schemas.ts` مراجعه کنید). در صورت شکست طرحواره، پاسخ 4xx برگردانده میشود.
+All POST routes follow the same shape: `Bearer your-api-key` + Zod-validated JSON body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, etc., see `src/shared/validation/schemas.ts`). 4xx is returned on schema failure.
 
-برای کلاینتهایی که نمیتوانند `Authorization: Bearer ...` را ضمیمه کنند، OmniRoute کلیدهای API را در URL نیز از طریق سازگاری query-string (`?token=...`، `?apiKey=...`، `?api_key=...`، `?key=...`) یا نقاط پایانی اختصاصی `/api/v1/vscode/{token}/...` که در ادامه مستند شدهاند، میپذیرد.
+برای کلاینتهایی که نمیتوانند `Authorization: Bearer ...` متصل کنند، OmniRoute کلیدهای API را در URL از طریق سازگاری با رشته جستجو (`?token=...`، `?apiKey=...`، `?api_key=...`، `?key=...`) یا نقاط پایانی اختصاصی `/api/v1/vscode/{token}/...` که در زیر مستند شدهاند، میپذیرد.
 
 ```bash
-# مرتبسازی مجدد (ارائهدهندهٔ رجیستری ابری، یا یک گرهٔ ارائهدهندهٔ سازگار با OpenAI بهصورت "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# طبقهبندی Jina (اعتبارنامههای Foundation API)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# بخشبندیکنندهٔ Jina
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# جستوجوی Jina (s.jina.ai؛ نامهای مستعار ارائهدهنده: jina-search، jina-ai، jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# نظارتها
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — بدنهٔ audio/mpeg (یا قالب درخواستشده) را برمیگرداند
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# TTS سرویس Soniox به زبان و صدا نیاز دارد: `language` بهطور پیشفرض "en" است؛ صدای مفقود
-# یا نام صدای پیشفرض OpenAI (alloy، nova، …) به "Adrian" تبدیل میشود
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# ویرایش تصویر (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# تولید ویدئو / موسیقی (شناسهٔ مدل با پیشوند ارائهدهنده)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **گرههای ارائهدهنده رتبهبندی مجدد:** `POST /v1/rerank` همچنین به گرههای ارائهدهنده سازگار با OpenAI
-> (oMLX، vLLM، Infinity، TEI پشت یک درگاه، …) با نشانی `<node-prefix>/<model>` مسیریابی میشود. گرههای
-> حلقهبازگشت (`localhost`، `127.0.0.1`، `172.16.0.0/12`) همیشه واجد شرایط هستند؛ همچنین نامهای میزبانی که
-> اپراتور در `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` فهرست میکند (برای نمونه، نام سرویسی در Docker/Compose مانند
-> `http://reranker:8080/v1`) نیز واجد شرایطاند؛ این گرهها مستقیماً فراخوانی میشوند و هرگز از طریق
-> `HTTP(S)_PROXY` یا پروکسی پینشده یک اتصال عبور نمیکنند. گرههای روی هر میزبان دیگری — یک رایانه در شبکه
-> محلی یا همتای Tailscale — فقط زمانی واجد شرایطاند که اپراتور پرچم قابلیت
-> `RERANK_REMOTE_PROVIDER_NODES` را فعال کند **و** URL پایه گره از سیاست URL خروجی ارائهدهنده
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) عبور کند.
-> موتور حافظه مرحله رتبهبندی مجدد را از طریق حلقهبازگشت به این مسیر فراخوانی میکند؛ بنابراین همین قاعده
-> برای `rerankProviderModel` در تنظیمات Memory نیز اعمال میشود.
+> **رتبه بندی مجدد گره های ارائه دهنده:** `POST /v1/rerank` همچنین به گرههای ارائهدهنده سازگار با OpenAI (oMLX، vLLM، infinity، TEI پشت دروازه، …) که با عنوان `<node-prefix>/<model>` خطاب میشوند، مسیر میکند. گرههای Loopback (`localhost`، `127.0.0.1`، `172.16.0.0/12`) همیشه واجد شرایط هستند، و همچنین نامهای میزبانی که اپراتور در `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` فهرست میکند نیز واجد شرایط هستند (مثلاً نام سرویس Docker/Compose مانند `http://reranker:8080/v1`؛ این نامها مستقیماً نامیده میشوند، هرگز از طریق `HTTP(S)_PROXY` یا پروکسی پین شده اتصال). گره ها در هر میزبان — دیگری LAN box یا Tailscale peer — فقط زمانی واجد شرایط هستند که اپراتور پرچم ویژگی `RERANK_REMOTE_PROVIDER_NODES` را فعال کند.** و** URL پایه گره خط مشی URL خروجی ارائه دهنده (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) را ارسال می کند. مرحله رتبه بندی مجدد موتور حافظه این مسیر را بر روی حلقه بک فراخوانی می کند، بنابراین همان قانون `rerankProviderModel` را در تنظیمات حافظه حاکم می کند.
 >
-> **شکلهای سرور محلی:** گره در `<base>/v1/rerank` فراخوانی میشود و در صورت دریافت 404، در `<base>/rerank`
-> (Infinity، TEI) فراخوانی میشود. بدنه بالادستی هر دو نگارش Cohere/OpenAI (`documents`,
-> `return_documents`) و نگارش TEI (`texts`, `return_text`) را شامل میشود و پاسخ بالادستی به قالب Cohere
-> نرمالسازی میشود: آرایه مستقل TEI یعنی `[{index, score, text}]`، مقدار `{results: [{index, score}]}`
-> از درگاههای نازک، و مقدار سبک Voyage یعنی `{data: [...]}` همگی برای مشتری به شکل
-> `{results: [{index, relevance_score, document?}]}` بازمیگردند، بر اساس امتیاز مرتب میشوند و به `top_n`
-> محدود میشوند.
+> **Local server shapes:** the node is called at `<base>/v1/rerank` and, on 404, at `<base>/rerank` (Infinity, TEI). The upstream body carries both the Cohere/OpenAI spelling (`documents`, `return_documents`) and the TEI spelling (`texts`, `return_text`), and the upstream response is normalized to the Cohere envelope: TEI's bare `[{index, score, text}]`, `{results: [{index, score}]}` from thin gateways, and Voyage-style `{data: [...]}` all come back to the client as `{results: [{index, relevance_score, document?}]}`, sorted by score and capped at `top_n`.
 
-> **کشف گرههای ارائهدهنده:** مدلهای یک گره ارائهدهنده سازگار با OpenAI در `GET /v1/models`
-> زیر پیشوند گره نمایش داده میشوند. ردیفهایی که هیچ فراداده نقطه پایانی ندارند (که برای فهرستهای محلی
-> معمول `/v1/models` رایج است)، `apiType` گره را به ارث میبرند؛ بنابراین مدلهای یک گره `embeddings`
-> دارای `type: "embedding"` و مدلهای یک گره `rerank` دارای `type: "rerank"` هستند، نه اینکه بهطور پیشفرض
-> از نوع chat باشند؛ وجود صریح `supportedEndpoints` در یک ردیف همگامسازیشده یا بهصورت دستی افزودهشده
-> همچنان اولویت دارد.
+> **کشف گره ارائه دهنده:** مدلهای یک گره ارائهدهنده سازگار با OpenAI در `GET /v1/models` در زیر پیشوند گره ظاهر میشوند. ردیفهایی که فاقد ابرداده نقطه پایانی هستند (معمولی برای فهرستهای `/v1/models` محلی) `apiType` گره را به ارث میبرند، بنابراین مدلهای گره `embeddings` `type: "embedding"` و مدلهای گره `rerank` به جای پیشفرض چت، `type: "rerank"` هستند. یک `supportedEndpoints` صریح در یک ردیف همگامسازی یا اضافه شده دستی همچنان اولویت دارد.
 
-### مسیرهای اختصاصی ارائهدهنده
+### تصمیمات تایپ شده
+
+مدلهای تصمیمگیری به جای تولید متن، به سؤالات تایپشده با احتمالات کالیبره شده پاسخ میدهند. آنها هرگز مدل های چت نیستند و دو قالب سیمی هرگز به یکدیگر ترجمه نمی شوند:
+
+- `POST /v1/systemone` — سیستم یک `{ model, state, questions: { <id>: … } }` (TypeSafe Jev، OpenRouter تصمیمات، Cloudflare کارگران AI، Ollama محلی).
+- `POST /v1/decisions` — بومی OpenAI تصمیمات `{ model, input, questions: [...] }`، توسط یک اتصال `openai` ارائه می شود. مدل `openai/gpt-6-luna` است ( `gpt-6-luna` برهنه هم کار می کند). پاسخ ها به ترتیب سوال، دست نخورده برمی گردند.
+- `GET /v1/systemone/models` — یک کاتالوگ از هر دو نوع; هر ردیف `api_format` خود را نامگذاری می کند (`systemone` یا `decisions`). `limit` / `after` صفحه فهرست نهایی. سرصفحه `X-OmniRoute-Catalog-Status` ، `complete`، `partial` یا `unavailable` را می خواند (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+در فهرست مجاز مدل `/v1/decisions` کلید API ، دسته نقطه پایانی `decisions` ، بودجه و محدوده اتصال قبل از خواندن هر گونه اعتبار بررسی می شود. اعتبار، اتصال `openai` ذخیره شده در محدوده کلید (هرگز یک کلید محیطی) است. یک پایه اتصال URL تنها زمانی مورد احترام قرار می گیرد که یک `http(s)` URL بدون اعتبار، پرس و جو یا قطعه ای باشد که به این OmniRoute اشاره نمی کند. تماس از طریق حمل و نقل محافظت شده مشابه روتر خودکار `decision` ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ) انجام میشود: محافظ خروجی ارائهدهنده، بدون تلاش مجدد، بدون تغییر مسیر، مهلت زمانی 5 ثانیه و سقف پاسخ 64 KB (پاسخ بزرگتر 502 است). بدنه های درخواستی به 4 MiB محدود می شوند. هر تماس یک `Idempotency-Key` جدید ارسال می کند. خطاها فقط وضعیت بالادستی را دارند، نه بدنه آن، URL، کلید یا اعلان را.
+
+### مسیرهای ارائه دهنده اختصاصی
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -758,7 +752,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-پیشوند ارائهدهنده در صورت نبود، بهطور خودکار افزوده میشود. مدلهای نامنطبق پاسخ `400` برمیگردانند.
+در صورت عدم وجود پیشوند ارائه دهنده به صورت خودکار اضافه می شود. مدل های نامتناسب `400` را برمی گرداند.
 
 ---
 

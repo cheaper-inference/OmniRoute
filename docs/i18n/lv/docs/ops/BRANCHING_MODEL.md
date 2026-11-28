@@ -41,14 +41,14 @@ pirms apvienošanas ir jāpārvirza uz citu mērķa zaru.
 
 Kad laidiens tiek saskaņots, tiek atvērta marķiera problēma ar apzīmējumu `release-freeze`. Tas** attīstība neapstājas** :
 
-- Sasaldētais `release/vX.Y.Z` pieder šī kuģa atbrīvošanas kapteinim.
+- Saldētais `release/vX.Y.Z` pieder šī kuģa atbrīvošanas kapteinim.
 - Nākamā cikla `release/vX+1` tiek nogriezts no sasalušā gala, lai veicinātāji turpinātu nosēšanās darbu.
 - Atvērtām PRs, kas joprojām ir vērstas uz sasalušu zaru, vajadzētu būt** atkārtoti** uz aktīvo (augstāko) `release/v*` atzaru.
 
 Pirms pieņemt, ka vēlamā filiāle ir apvienojama, pārbaudiet, vai nav iesaldēta:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Sapludināšanas mehānika (īpašnieks `queue` etiķete → Mergify) ir dokumentēta failā [MERGE_TRAIN.md](./MERGE_TRAIN.md).

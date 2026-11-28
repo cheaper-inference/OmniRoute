@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute wá gẹ́gẹ́ bí Progressive Web App tí a lè fi sori ẹrọ ní kíkún. Nígbà tí o bá wọ dashboard láti inú browser alágbèéká èyíkéyìí — Android (Chrome) tàbí iOS (Safari) — o lè yan **“Fi kún Ojú-ìbẹ̀rẹ̀”** kí o sì rí ìrírí bíi ti app abinibi láìní láti lo app store.
+Fi dasibodu OmniRoute sori ẹrọ bi Ohun elo Wẹẹbu Onitẹsiwaju lati ṣii lati iboju ile rẹ tabi tabili tabili ni ferese ti o duro. Ohun elo ti a fi sori ẹrọ tun nilo asopọ si olupin OmniRoute rẹ fun lilọ kiri, data dasibodu ati awọn ibeere API. Awọn ohun-ini aimi ti a fipamọ ko pese ẹnu-ọna aisinipo tabi dasibodu aisinipo kan.
 
-## Kí Ni PWA?
+## Kini PWA?
 
-Progressive Web App ń sọ dashboard wẹ́ẹ̀bù OmniRoute di ohun tí ó rí, tí ó sì ń ṣiṣẹ́ bí app alágbèéká abinibi. Ní kété tí a bá fi sí ẹrọ, ó:
+Ohun elo Wẹẹbu Onitẹsiwaju nlo dasibodu wẹẹbu pẹlu aami app ati window lọtọ. Lọgan ti fi sori ẹrọ, OmniRoute:
 
-- Máa ń bẹ̀rẹ̀ láti ojú-ìbẹ̀rẹ̀ rẹ pẹ̀lú àmì tirẹ̀
-- Máa ń ṣí ní ojú-iboju kíkún — kò sí ọ̀pá àdírẹ́sì browser tàbí UI taabu
-- Máa ń ṣiṣẹ́ láìsí ìsopọ̀ pẹ̀lú ojú-ìwé ìsopọ̀ pàtó kan
-- Máa ń fi àwọn ohun èlò static pamọ́ sínú cache fún ìrùsókè yíyára
-- Ṣe àtìlẹ́yìn fún ìṣàfihàn portrait àti landscape
+- Awọn ifilọlẹ lati iboju ile rẹ tabi tabili tabili
+- Ṣii ni ipo adaduro, laisi ọpa adirẹsi aṣawakiri ati awọn taabu deede
+- Awọn caches ti a ti yan aimi dukia
+- Ṣe atilẹyin aworan ati awọn iṣalaye ala-ilẹ
 
-## Fífi Sori Ẹrọ
+## Fifi sori ẹrọ
+
+Lo adirẹsi HTTPS kan fun olupin lori ẹrọ miiran. Nigbati olupin ba ṣiṣẹ lori ẹrọ kanna, `http://localhost:20128` tun pade awọn ibeere fifi sori ẹrọ aṣawakiri. Adirẹsi `http://YOUR_IP:20128` ti o rọrun ko ni ibamu pẹlu awọn ibeere wọnyẹn. Awọn akojọ aṣayan fifi sori ẹrọ ati awọn ibere da lori ẹrọ aṣawakiri ati ẹrọ ṣiṣe. Wo [awọn ibeere fifi sori MDN's PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
 
 ### Android (Chrome)
 
-1. Ṣí dashboard OmniRoute nínú Chrome: `http://YOUR_IP:20128`
-2. Chrome yóò fi àsìá **“Fi OmniRoute kún Ojú-ìbẹ̀rẹ̀”** hàn láìfọwọ́ṣe, tàbí:
-   - Tẹ àkójọ **⋮** (àmì mẹ́ta) → **“Fi kún Ojú-ìbẹ̀rẹ̀”** tàbí **“Fi app sori ẹrọ”**
-3. Fìdí ìbéèrè náà múlẹ̀
-4. OmniRoute yóò hàn lórí ojú-ìbẹ̀rẹ̀ rẹ gẹ́gẹ́ bí app olómìnira
+1. Ṣii adirẹsi OmniRoute HTTPS rẹ, tabi `http://localhost:20128` fun olupin lori foonu kanna.
+2. Ṣii awọn**⋮** akojọ ki o si yan** Fi sori ẹrọ app** tabi** Fi si Iboju ile** , ti o ba funni.
+3. Jẹrisi itọka naa.
+4. Ṣii OmniRoute lati iboju ile.
 
 ### iOS (Safari)
 
-1. Ṣí dashboard OmniRoute nínú Safari: `http://YOUR_IP:20128`
-2. Tẹ bọ́tìnì **Pín** (àpótí tí ó ní ọfà)
-3. Yí lọ sísàlẹ̀ kí o sì tẹ **“Fi kún Ojú-ìbẹ̀rẹ̀”**
-4. Fún un ní orúkọ (orúkọ àìyípadà ni “OmniRoute”) kí o sì tẹ **Fi kún**
-5. OmniRoute yóò hàn lórí ojú-ìbẹ̀rẹ̀ rẹ pẹ̀lú àmì app náà
+1. Ṣii adirẹsi OmniRoute HTTPS rẹ ni Safari.
+2. Fọwọ ba** Pin** →** Fi si Iboju ile** .
+3. Jẹrisi orukọ naa ki o tẹ ni kia kia** Fi kun** .
+4. Ṣii OmniRoute lati iboju ile.
 
-### Kọ̀ǹpútà (Chrome / Edge)
+### Ojú-iṣẹ (Chrome / Edge)
 
-1. Ṣí dashboard OmniRoute
-2. Tẹ **àmì fífi sori ẹrọ** nínú ọ̀pá àdírẹ́sì (tàbí ⋮ → “Fi OmniRoute sori ẹrọ...”)
-3. Fìdí ìbéèrè náà múlẹ̀
-4. OmniRoute yóò ṣí gẹ́gẹ́ bí fèrèsé olómìnira — kò sí taabu, kò sì sí ọ̀pá àdírẹ́sì
+1. Ṣii dasibodu OmniRoute rẹ.
+2. Lo aami fifi sori ẹrọ aṣawakiri tabi awọn** Fi sori ẹrọ app** titẹsi akojọ aṣayan, ti o ba funni.
+3. Jẹrisi itọka lati ṣii OmniRoute ni ferese tirẹ.
 
-## Àwọn Ẹ̀yà
+## Awọn ẹya ara ẹrọ
 
-### Ìrírí Ojú-iboju Kíkún
+### Ferese Iduroṣinṣin
 
-A ti ṣètò manifest náà pẹ̀lú `display: "fullscreen"`, èyí túmọ̀ sí pé app tí a fi sori ẹrọ máa ń lo gbogbo ojú-iboju — kò sí àwọn ohun èlò browser, kò sì sí ìkọjá lórí ọ̀pá ipò. Èyí ń mú kí dashboard náà ní ìmọ̀lára bí ohun abinibi gidi.
+Ifihan naa ṣeto `display: "standalone"` ati `start_url: "/dashboard"`. Ohun elo ti a fi sori ẹrọ ṣii dasibodu ni window app kan. Awọn iṣakoso ẹrọ aṣawakiri ati ẹrọ ṣi le han; farahan ko beere ipo iboju kikun.
 
-### Àtìlẹ́yìn Láìsí Ìsopọ̀
+### Awọn ohun-ini ti a fipamọ ati Awọn ibeere Nẹtiwọọki
 
-OmniRoute ní service worker (`sw.js`) tí ó ń pèsè ìfipamọ́ cache ọlọ́gbọ́n:
+[Osise iṣẹ](../../public/sw.js) naa ṣafipamọ awọn orisun orisun kanna ti a yan:
 
-| Irú Ohun Èlò                                                                                                                                                                                                                | Ìlànà                             | Ìhùwàsí                                                                                             |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **App Shell**                                                                                                                                                                                                               | Cache-first                       | `/`, `/offline`, manifest, àti àwọn àmì ni a ti fi sínú cache ṣáájú nígbà fífi sori ẹrọ             |
-| **Àwọn ohun èlò static** (CSS, JS, àwòrán, font)                                                                                                                                                                            | Network-first with cache fallback | Ó máa ń gba èyí tuntun láti network; ó máa ń padà sí cache bí kò bá sí ìsopọ̀                        |
-| **Àwọn bundle Next.js** (`/_next/`)                                                                                                                                                                                         | Network-first with cache update   | Ó máa ń gba láti network, ó sì máa ń ṣe àfikún sí cache; ó máa ń lo ẹ̀dà inú cache bí kò bá sí ìsopọ̀ |
-| **Àwọn ìbéèrè ìlọ kiri**                                                                                                                                                                                                    | Kọjá rẹ̀ (a kì í dá sí i láé)      | Browser ló ń ṣàkóso ìpadàsẹ́yìn HTTP/3→HTTP/2; socket QUIC tí kò ṣiṣẹ́ kò gbọdọ̀ di `Response.error()` |
-| **Àwọn route API / dashboard** (`/api/`, `/a2a`, `/dashboard`, àwọn alias client-API `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, pẹ̀lú `/callback`, `/login`; a ń bá wọn mu láìka ńlá tàbí kékeré lẹ́tà sí) | Kọjá rẹ̀ (a kì í fi sínú cache)    | Ó máa ń lọ tààrà sí server ní gbogbo ìgbà — service worker kì í dá sí i láé                         |
+| Ibere tabi dukia                                | Ilana           | Iwa                                                                                                                 |
+| ----------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Fi sori ẹrọ-akoko oro                           | Kaṣe iṣaaju     | `/`, `/manifest.webmanifest`, `/icon-512.png` ati `/apple-touch-icon.png` ti wa ni ipamọ lakoko fifi sori ẹrọ oṣiṣẹ |
+| awọn ohun-ini aimi Next.js (`/_next/`)          | Nẹtiwọọki-akọkọ | Awọn idahun aṣeyọri ṣe imudojuiwọn kaṣe naa; aṣiṣe nẹtiwọọki kan ṣubu pada si esi ti a fipamọ tẹlẹ                  |
+| CSS aimi miiran, JS, awọn aworan ati awọn nkọwe | Kaṣe-akọkọ      | Idahun cache ti o wa tẹlẹ jẹ tun lo; awọn idahun nẹtiwọọki aṣeyọri ti wa ni ipamọ lori miss                         |
+| Lilọ kiri oju-iwe                               | Fori            | Aṣàwákiri gba oju-iwe naa taara; ko si aisinipo fallback wa ni yoo wa                                               |
+| API, dasibodu ati awọn ipa ọna ìfàṣẹsí          | Fori            | Osise naa ko da tabi pa awọn ibeere wọnyi mọ                                                                        |
+| Awọn ibeere miiran ti kii ṣe aimi               | Nẹtiwọọki       | Ko si wiwa kaṣe tabi ibi ipamọ                                                                                      |
 
-### Ojú-ìwé Láìsí Ìsopọ̀
+Awọn ipa-ọna ti a yọkuro jẹ `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` ati `/login`, ti o baamu ọran-aibikita ni awọn aala ọna. Ipilẹṣẹ agbelebu ati awọn ibeere ti kii ṣe GET tun fori oṣiṣẹ naa.
 
-Nígbà tí network kò bá sí, tí olumulo sì lọ sí ojú-ìwé tuntun, service worker máa ń fi ojú-ìwé `/offline` pàtó hàn, èyí tí:
+### Asopọmọra Page
 
-- Ń fi ìfiránṣẹ́ **“Ìṣòro Ìsopọ̀”** tí ó ṣe kedere hàn
-- Ń fi **àmì ipò ìsopọ̀/wíwà láìsí ìsopọ̀** alààyè hàn, tí ó máa ń ṣe àfikún ní àkókò gidi
-- Ń pèsè bọ́tìnì **“Tún Ìsopọ̀ Gbìyànjú”** láti tún ojú-ìwé náà rù nígbà tí ìsopọ̀ bá padà
-- Ń sopọ̀ mọ́ **Ojú-ìwé Ipò** fún ṣíṣe àyẹ̀wò ìṣòro
+Oju-iwe `/offline` n pese ifiranṣẹ isopọmọ, atọka online/offline, a** Tun gbiyanju Asopọmọra** bọtini ati ọna asopọ si oju-iwe ipo. O jẹ** ko kọkọ-cached** ati oṣiṣẹ iṣẹ ṣe** kii ṣe** àtúnjúwe awọn lilọ kiri ti o kuna si rẹ. Wiwa rẹ ko jẹ ki awọn oju-iwe tuntun wa laisi olupin naa.
 
-### Àwọn Àmì App
+### Awọn aami App
 
-OmniRoute ń pèsè àwọn àmì tí a ṣe àtúnṣe fún platform kọ̀ọ̀kan:
+Ifihan naa n polowo awọn aami PNG wọnyi:
 
-| Fáìlì                  | Ìwọ̀n             | Ibi Tí A Ti Ń Lò Ó                      |
-| ---------------------- | ---------------- | --------------------------------------- |
-| `icon-512.png`         | 512×512          | Ìbéèrè fífi sori Android, splash screen |
-| `apple-touch-icon.png` | 180×180          | Àmì ojú-ìbẹ̀rẹ̀ iOS                       |
-| `icon-192.svg`         | 192×192 (vector) | Àmì adaptive Android                    |
-| `apple-touch-icon.svg` | 180×180 (vector) | Àṣàyàn ìpadà Apple                      |
-| `favicon.svg`          | Vector           | Àwọn taabu browser                      |
-| `favicon.ico`          | Ọ̀pọ̀ ìwọ̀n         | Àwọn browser àtijọ́                      |
+| Faili                  | Iwọn    | Lo                                   |
+| ---------------------- | ------- | ------------------------------------ |
+| `icon-192.png`         | 192×192 | Gbogbogbo app icon                   |
+| `icon-512.png`         | 512×512 | Gbogbogbo ati ki o maskable app icon |
+| `apple-touch-icon.png` | 180×180 | Aami iboju ile Apple                 |
 
-### Ìforúkọsílẹ̀ Láìfọwọ́ṣe
+Ẹrọ aṣawakiri naa yan aami ti o yẹ fun ibi-afẹde fifi sori ẹrọ.
 
-A máa ń forúkọ service worker náà sílẹ̀ láìfọwọ́ṣe nípasẹ̀ component `<PwaRegister />` nínú root layout. Kò sí ohun tí olumulo nílò láti ṣe — app náà máa ṣeé fi sori ẹrọ ní kété tí browser bá ṣàwárí manifest àti service worker tó péye.
+### Iforukọsilẹ aifọwọyi
 
-## Àgbékalẹ̀ Ìmọ̀-ẹ̀rọ
+`PwaRegister` forukọsilẹ oṣiṣẹ ni iṣelọpọ nigbati ẹrọ aṣawakiri ṣe atilẹyin awọn oṣiṣẹ iṣẹ. Ipo idagbasoke ko forukọsilẹ awọn oṣiṣẹ ati ko awọn caches kuro lati yago fun awọn ohun-ini ti ko duro ni kikọlu pẹlu atungbejade gbona. Awọn fifi sori ẹrọ yoo jẹ ipinnu ẹrọ aṣawakiri kan.
 
-### Manifest Ohun Èlò Wẹ́ẹ̀bù (`manifest.webmanifest`)
+## Imọ Architecture
 
-Next.js ló ń ṣẹ̀dá rẹ̀ nípasẹ̀ `src/app/manifest.ts`:
+### Ifihan ohun elo wẹẹbu
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+Next.js ṣe ipilẹṣẹ `/manifest.webmanifest` lati [`src/app/manifest.ts`](../../src/app/manifest.ts). Awọn eto bọtini rẹ ni:
 
-### Service Worker (`public/sw.js`)
+| Eto                           | Iye                                         |
+| ----------------------------- | ------------------------------------------- |
+| `short_name`                  | `OmniRoute`                                 |
+| `start_url`                   | `/dashboard`                                |
+| `scope`                       | `/`                                         |
+| `display`                     | `standalone`                                |
+| `orientation`                 | `any`                                       |
+| Background ati akori awọn awọ | Paleti ina aiyipada lati `PWA_THEME_COLORS` |
 
-Service worker vanilla kan (tí kò ní ìgbẹ́kẹ̀lé lórí framework) pẹ̀lú:
+Orukọ ifihan ati apejuwe jẹ awọn iye aimi ninu faili orisun yẹn. Ifihan ti a fi sii ko tẹle eto apẹẹrẹ-orukọ tabi paleti ti nṣiṣe lọwọ ni gbogbo ibewo.
 
-- **Ìpele ìfiṣètò**: Ó kọ́kọ́ fi app shell pamọ́ sínú cache (root, ojú-ewé offline, manifest, àwọn icon)
-- **Ìpele ìmúṣiṣẹ́**: Ó nu àwọn ẹ̀yà cache àtijọ́ kúrò, ó sì gba ìṣàkóso gbogbo client
-- **Ìpele ìgbàjáde**: Ìtọ́sọ́nà ọlọ́gbọ́n tó dá lórí irú request (navigation, static asset, API)
-- **Ìṣàkóso ẹ̀yà cache**: `omniroute-pwa-v3` — mú iye yìí pọ̀ sí i láti fipá mú cache tuntun nígbà ìmúdójúìwọ̀n
+### Osise Iṣẹ
 
-### Metadata Àgbékalẹ̀ (`src/app/layout.tsx`)
+[`public/sw.js`](../../public/sw.js) ko ni igbẹkẹle ilana ilana oṣiṣẹ iṣẹ:
 
-Àgbékalẹ̀ root ń pèsè gbogbo meta tag tí a nílò fún ìbámu PWA:
+- **Fi sori ẹrọ:** ṣaju awọn ohun elo mẹrin ti a ṣe akojọ rẹ tẹlẹ ati mu oṣiṣẹ tuntun ṣiṣẹ.
+- **Mu ṣiṣẹ:** yọ agbalagba kaṣe iran ati nperare ibara.
+- **Mu:** nlo awọn ilana dukia-aimi ati awọn imukuro ipa ọna loke.
+- **Ẹya:** orukọ kaṣe orisun jẹ `omniroute-pwa-v3`; gbóògì Kọ ontẹ kaṣe idanimo.
+- **Awọn iwifunni:** mu awọn iṣẹlẹ `push` ti nwọle ati idojukọ tabi ṣii window nigbati ifitonileti ba tẹ.
 
-- Link `manifest` sí `/manifest.webmanifest`
-- `apple-web-app-capable: true` fún mode standalone lórí iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` fún Chrome lórí Android
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` fún rendering láti etí kan dé etí kejì
+Titari awọn oluṣakoso iṣẹlẹ nikan ko ṣe iṣeto ṣiṣe alabapin titari ti nṣiṣe lọwọ tabi ifijiṣẹ olupin tunto. Maṣe ro pe awọn iwifunni ti ṣiṣẹ lasan nitori PWA ti fi sii.
 
-### Component: `PwaRegister`
+### Metadata Ìfilélẹ ati Iforukọsilẹ
 
-Ó wà ní `src/shared/components/PwaRegister.tsx`; client component yìí:
+[`src/app/layout.tsx`](../../src/app/layout.tsx) n pese ọna asopọ ifihan, Apple standalone metadata, awọn awọ akori ati `viewport-fit: cover`. Akọle oju-iwe ati akọle oju opo wẹẹbu Apple lo orukọ apẹẹrẹ. Awọ akori aṣawakiri laaye tẹle paleti; iṣafihan fifi sori ẹrọ nlo awọ ina aiyipada.
 
-1. Ń ṣiṣẹ́ nígbà mount (ní ẹ̀gbẹ́ client nìkan)
-2. Ń ṣàyẹ̀wò bóyá browser ṣe ń ṣàtìlẹ́yìn fún `serviceWorker`
-3. Ń forúkọsílẹ̀ `/sw.js` láìfi ìfitónilétí hàn (a kọ etí sí àwọn error kí wọ́n má bàa dí app náà lọ́wọ́)
-4. Kò render ohunkóhun (`return null`) — component tó jẹ́ fún side effect nìkan ni
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) nṣiṣẹ lori onibara ati forukọsilẹ `/sw.js` pẹlu ID kọ ninu URL rẹ. O ṣe awari awọn iran kaṣe ti ko baamu ati pe o le tun oṣiṣẹ naa tunto ki o tun gbejade lẹẹkan lati bọsipọ lati fifi sori ẹrọ agbalagba. Ikuna iforukọsilẹ ko ṣe dina awọn dasibodu naa.
 
-## Lílò Pẹ̀lú Termux (Android)
+## Lo Pẹlu Termux (Android)
 
-Nígbà tí OmniRoute bá ń ṣiṣẹ́ lórí Android nípasẹ̀ Termux, PWA náà ń ṣiṣẹ́ láìsí ìṣòro:
+1. Bẹrẹ OmniRoute ni Termux: `npx -y omniroute@latest`.
+2. Ṣii Chrome lori foonu kanna: `http://localhost:20128`.
+3. Fi PWA sori ẹrọ nipasẹ akojọ aṣayan fifi sori ẹrọ aṣawakiri naa.
+4. Jeki olupin Termux ṣiṣẹ lakoko lilo dasibodu naa.
 
-1. Bẹ̀rẹ̀ OmniRoute nínú Termux: `npx omniroute`
-2. Ṣí Chrome lórí fóònù kan náà: `http://localhost:20128`
-3. Fi PWA náà sori ẹrọ nípasẹ̀ “Fikún sí Ojú-ìbẹ̀rẹ̀”
-4. PWA náà yóò sopọ̀ mọ́ server Termux agbègbè — gbogbo nǹkan ń ṣiṣẹ́ lórí ẹrọ náà
+Foonu naa gbalejo mejeeji ẹnu-ọna ati dasibodu rẹ. Awọn ibeere si awọn olupese AI latọna jijin tun nilo iraye si nẹtiwọọki. Wo [itọsọna Termux](TERMUX_GUIDE.md) fun iṣeto ati awọn ero igbesi aye Android.
 
-Àpapọ̀ yìí túmọ̀ sí pé fóònù Android rẹ jẹ́ **server** (Termux) àti **client** (PWA) lẹ́ẹ̀kan náà — gateway AI tó pé tí kò nílò ètò òde.
+## Lo Lati Awọn ẹrọ miiran
 
-## Lílò Láti Orí Àwọn Ẹrọ Mìíràn
+Ṣii adirẹsi HTTPS olupin naa lori foonu kan, tabulẹti tabi tabili tabili, lẹhinna tẹle ṣiṣan fifi sori ẹrọ aṣawakiri yẹn. Olupin gbọdọ wa ni wiwa lati ọdọ ẹrọ kọọkan. Wo [itọsọna oju eefin](../ops/TUNNELS_GUIDE.md) fun awọn aṣayan iraye si latọna jijin.
 
-Fi PWA náà sori ẹrọ èyíkéyìí tí browser rẹ̀ lè ráyè wọlé sí server OmniRoute rẹ:
+## Isọdi
 
-- **Fóònù/tabulẹti mìíràn**: Lọ sí `http://PHONE_IP:20128`, kí o sì fi PWA náà sori ẹrọ
-- **Laptop**: Ṣí Chrome/Edge, kí o sì fi í sori ẹrọ gẹ́gẹ́ bí PWA desktop
-- **Smart TV tó ní browser**: Wọ dashboard náà ní fullscreen
+### Orukọ apẹẹrẹ
 
-## Ìṣètò Àdáni
+Awọn** Orukọ apẹẹrẹ** eto awọn ayipada metadata dasibodu, pẹlu akọle oju-iwe ati akọle ohun elo wẹẹbu Apple. Afihan ti ipilẹṣẹ nlo orukọ aimi, nitorinaa eto yii ko ṣe iṣeduro pe ohun elo ti a fi sii tẹlẹ ti wa ni lorukọmii.
 
-### Orúkọ Instance
+### Aṣa Favicon
 
-Àkọlé PWA náà ń tẹ̀lé ètò **Orúkọ Instance** láti `Dashboard → Settings`. Tí o bá tún orúkọ instance rẹ sọ di “Gateway AI Mi”, PWA tí a fi sori ẹrọ yóò fi orúkọ yẹn hàn.
+Favicon aṣa kan yipada favicon ẹrọ aṣawakiri. Ifihan fifi sori ẹrọ tun ṣe ipolowo awọn faili PNG loke; yiyipada favicon ko rọpo awọn aami iboju ile wọnyẹn.
 
-### Favicon Àdáni
+## Awọn idiwọn
 
-Tí o bá upload favicon àdáni nípasẹ̀ `Dashboard → Settings`, icon PWA lórí desktop yóò fi icon àdáni náà hàn. Àwọn icon ojú-ìbẹ̀rẹ̀ lórí mobile ń lo àwọn fáìlì `icon-512.png` àti `apple-touch-icon.png` tí a ti kọ́ sílẹ̀ tẹ́lẹ̀.
+- **Asopọ olupin nilo:** lilọ kiri oju-iwe, ipo dasibodu ati awọn ibeere API ko ni isọdọtun offline.
+- **Ko si amuṣiṣẹpọ abẹlẹ:** Awọn iṣe aisinipo ko ni ila fun atunṣe.
+- **Awọn iyatọ aṣawakiri:** awọn akojọ aṣayan fifi sori ẹrọ, igbejade window ati atilẹyin iwifunni yatọ nipasẹ pẹpẹ.
+- **Ko si kaṣe idahun API :** Osise naa yọkuro API, dasibodu ati awọn ipa ọna ijẹrisi.
+- **Awọn aami fifi sori ẹrọ aiduro:** mimu dojuiwọn awọn aami naa nilo iyipada awọn ohun-ini ipolowo; awọn aṣawakiri le ṣe idaduro metadata ti a fi sii.
 
-## Àwọn Ààlà
+## Itọkasi Awọn faili
 
-- **Kò sí àwọn ìfitónilétí push** — Service worker náà kò ṣe àgbékalẹ̀ Push API. Electron app ló ń bójú tó àwọn ìfitónilétí dípò rẹ̀.
-- **Kò sí ìṣiṣẹ́pọ̀ lẹ́yìn** — A kì í to àwọn ìgbésẹ̀ aisinipo sí ìlà fún ṣíṣe wọn lẹ́ẹ̀kan sí i. PWA náà jẹ́ ohun èlò ìwo dashboard ní pàtàkì.
-- **Àwọn ìkálọ́wọ́kò iOS** — Safari lórí iOS kò ṣe àtìlẹ́yìn fún gbogbo àwọn ẹ̀ya PWA (fún àpẹẹrẹ, a gbọ́dọ̀ ṣe àwọn ìtọ́nisọ́nà ìfiṣàgbékalẹ̀ pẹ̀lú ọwọ́, àwọn service worker abẹ́lẹ̀ sì ní ààlà).
-- **Ìwọ̀n cache** — Service worker náà ń fi àwọn static asset nìkan pamọ́ sínú cache. A kì í fi àwọn response payload ńlá láti àwọn ipa ọ̀nà `/api/` pamọ́ sínú cache láé.
-- **Àwọn icon àkànṣe lórí ẹ̀rọ alágbèéká** — Yíyí favicon padà nínú àwọn ààtò kò ṣe ìmúdójúìwọ̀n icon ojú-ìbẹ̀rẹ̀ lórí ẹ̀rọ alágbèéká (èyí nílò ṣíṣẹ̀dá àwọn icon PWA náà padà).
-
-## Ìtọ́kasí Àwọn Fáìlì
-
-| Fáìlì                                   | Ète                                                                  |
-| --------------------------------------- | -------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Ipa ọ̀nà manifest Next.js (ń ṣe ìṣẹ̀dá `manifest.webmanifest`)         |
-| `public/sw.js`                          | Service worker pẹ̀lú ọgbọ́n cache                                      |
-| `src/shared/components/PwaRegister.tsx` | Component client tí ń forúkọ service worker náà sílẹ̀                 |
-| `src/app/offline/page.tsx`              | Ojú ìwé àfidípò aisinipo pẹ̀lú àmì ipò alààyè                         |
-| `src/app/layout.tsx`                    | Layout gbòǹgbò pẹ̀lú metadata PWA (apple-web-app, theme-color, abbl.) |
-| `public/icon-512.png`                   | Icon PNG 512×512 (Android, splash screen)                            |
-| `public/apple-touch-icon.png`           | Icon PNG 180×180 (ojú-ìbẹ̀rẹ̀ iOS)                                     |
-| `public/icon-192.svg`                   | Icon SVG 192×192 (Android adaptive)                                  |
-| `public/apple-touch-icon.svg`           | Icon SVG 180×180 (àfidípò Apple)                                     |
+| Faili                                                                                  | Idi                                                     |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Ti ipilẹṣẹ ohun elo oju opo wẹẹbu farahan               |
+| [public/sw.js](../../public/sw.js)                                                     | Caching, awọn imukuro ati awọn oluṣakoso iṣẹlẹ iwifunni |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Iforukọsilẹ iṣelọpọ ati imupadabọ kaṣe-isiro            |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Oju-iwe Asopọmọra, kii ṣe idapada aisinipo aifọwọyi     |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Awọn metadata oju-iwe ati awọn eto wiwo                 |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Pipin akori-awọ iye                                     |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 app aami                                      |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple aami                                    |

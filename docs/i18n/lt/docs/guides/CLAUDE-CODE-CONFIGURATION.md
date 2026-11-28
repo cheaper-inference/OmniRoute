@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) ir OpenCode (`x-opencode-session`) atpažį
 
 Darbinis katalogas įvairiose mašinose skiriasi, todėl ta pati saugykla gali būti rodoma skirtingais keliais. Vietoj to aiškiai siųskite projektą: Claude kodas prie kiekvienos modelio užklausos prideda visas `ANTHROPIC_CUSTOM_HEADERS` nurodytas antraštes, o OmniRoute nuskaito dvi iš jų:
 
-| Antraštė                   | Vertė                                                                              |
-| -------------------------- | ---------------------------------------------------------------------------------- |
-| `x-omniroute-project`      | Projekto pavadinimas, pvz., `omniroute`                                            |
-| `x-omniroute-project-repo` | Normalizuotas nuotolinio valdymo pultas, pvz., `github.com/diegosouzapw/OmniRoute` |
+| Antraštė                   | Vertė                                                                                   |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Projekto pavadinimas, pvz., `omniroute`                                                 |
+| `x-omniroute-project-repo` | Normalizuotas nuotolinio valdymo pultas, pvz., `github.com/cheaper-inference/OmniRoute` |
 
 Abu skaitomi tik priskyrimui; jie niekada nepersiunčiami ankstesniam tiekėjui.
 
@@ -96,7 +96,7 @@ x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed` išraiška pašalina visus kredencialus, užklausos eilutę ir fragmentą, įterptą į nuotolinį URL, o antraštės jau yra `ANTHROPIC_CUSTOM_HEADERS`. IDE plėtiniai paleidžia Claude kodą be jūsų apvalkalo, todėl jų seansai grįžta į darbo katalogą.
+Išraiška `sed` pašalina visus kredencialus, užklausos eilutę ir fragmentą, įterptą į nuotolinį URL, o antraštės jau yra `ANTHROPIC_CUSTOM_HEADERS`. IDE plėtiniai paleidžia Claude kodą be jūsų apvalkalo, todėl jų seansai grįžta į darbo katalogą.
 
 ---
 
@@ -272,28 +272,20 @@ papildomų parinkčių nereikia. Konkrečiam paleidimui šį nustatymą galite p
 
 ## Trikčių šalinimas
 
-**Claude Code nepaiso šliuzo** — įsitikinkite, kad `ANTHROPIC_BASE_URL` **neturi
-`/v1`**, ir iš naujo paleiskite `claude` (aplinkos kintamieji nuskaitomi vieną kartą paleidimo metu). `omniroute launch`
-tuo pasirūpina už jus.
+**Claude kodas nepaiso vartų** — patvirtinti, `ANTHROPIC_BASE_URL` turi** ne `/v1`** ir iš naujo paleiskite `claude` (env skaitomas vieną kartą paleidžiant). `omniroute launch` tai padarys už jus.
 
-**`/model` parinkiklis tuščias / jame nėra šliuzo modelių** — reikia Claude Code
-v2.1.219+ ir `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Parinkiklyje rodomi tik `claude*` /
-`anthropic*` modelių ID; norėdami priverstinai naudoti bet kurį kitą modelį, nustatykite
-`ANTHROPIC_MODEL=<id>` (būtent taip veikia profiliai).
+**`/model` rinkiklis tuščias / trūksta šliuzų modelių** — reikia Claude kodo v2.1.219 + ir `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Rinkiklyje rodomas tik `claude*` / `anthropic*` modelis IDs ; priversti bet kurį kitą modelį naudoti `ANTHROPIC_MODEL=<id>` (tai daro profiliai).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code visada siunčia modelių ID **be prefikso**
-(pvz., `claude-opus-4-8`), todėl, kai prijungti ir Claude Code (`cc/…`), ir
-Claude (`claude/…`) teikėjai, ID be prefikso atitinka du maršrutus, o
-OmniRoute atsisako spėti. Tai galima išspręsti dviem būdais: nurodykite ID su prefiksu naudodami
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` arba įjunkite **Teikti pirmenybę Claude Code
-Claude modeliams be prefikso** — šį jungiklį rasite Claude teikėjo puslapyje; taip pat galite nustatyti
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (pagal numatytąsias nuostatas išjungta;
-žr. [Aplinka](../reference/ENVIRONMENT.md)) — tuomet ID be prefikso `claude-*`
-bus nukreipiami į Claude Code. Aiškiai nurodyti teikėjo prefiksai visada turi pirmenybę.
+**`400 Ambiguous model 'claude-…'`** — Claude kodas visada siunčiamas** be prefikso** modelis IDs (pvz., `claude-opus-4-8`), taigi, kai yra prijungti ir Claude Code (`cc/…`), ir Claude (`claude/…`) teikėjai, plikas ID atitinka du maršrutus ir OmniRoute atsisako spėti. Pataisykite bet kuriuo būdu: prisegkite ID su priešdėliu su `ANTHROPIC_MODEL=cc/claude-opus-4-8` arba įgalinkite** Pirmenybę teikite Claude kodui Claude modeliams be priešdėlio** — perjungiklį Claude teikėjo puslapyje arba `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (numatytasis išjungtas; žr. [Aplinka](../reference/ENVIRONMENT.md) ) — kuris nukreipia plikas `claude-*` IDs į Claude kodą. Aiškūs teikėjo priešdėliai visada laimi.
 
-**Autentifikavimo klaidos** — profilyje nėra prieigos rakto. Naudokite `omniroute launch --profile`
-(jis įterpia prieigos raktą) arba eksportuokite `ANTHROPIC_AUTH_TOKEN`.
+**„automatinis režimas... ši sesija netinkama“ (už klasifikatoriaus užklausas mokama sąskaita)** — automatiniu režimu Claude kodas prašo serverio peržiūrėti veiksmus jo paties modelio užklausose ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Tam reikia, kad `anthropic-beta` reikšmė `dangerous-tool-use-2026-09-03` ir `safeguards` kūno laukas pasiektų Anthropic kaip porą, o `safeguard_results` ir prieš srovę įrankio naudojimo IDs grįžtų nepakitę. OmniRoute tai daro, kai užklausa nukreipiama į vietinį `claude` teikėją arba į `anthropic-compatible-*` mazgą, perduodama srautiniu būdu arba ne (regresijos apsauga: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Kiti tikslai negali grąžinti peržiūros, todėl Claude kodas grįžta prie savo klasifikatoriaus užklausų ir rodo pranešimą:
 
-**Profiliai nėra izoliuoti** — kiekvienas profilis turi atskirą `CLAUDE_CONFIG_DIR`;
-seanso viduje patikrinkite, ar `echo $CLAUDE_CONFIG_DIR` nurodo
-`~/.claude/profiles/<name>`.
+- ne antropinio paslaugų teikėjo modelis arba derinys, kuris patenka į vieną;
+- su Claude Code suderinamas perdavimo mazgas (`anthropic-compatible-cc-*`), kuris atkuria užklausos korpusą ir neperduoda `safeguards`;
+- senesnė OmniRoute, kuri yra ankstesnė nei leidžiama beta versija, arba Claude kodo versija, esanti žemiau ta, kurią Anthropic puslapyje pateikia šliuzo seansams.
+
+Paleiskite `/status` Claude Kode: the** Automatinio režimo serveris** eilutėje skaitoma `Enabled` kol serverio peržiūra yra aktyvi. Ar už šias užklausas atsiskaitoma, sprendžia Anthropic, o ne OmniRoute.
+
+**Auth klaidos** — profilyje nėra žetono. Naudokite `omniroute launch --profile` (įveda jį) arba eksportuokite `ANTHROPIC_AUTH_TOKEN`.
+
+**Profiliai neišskiria** — kiekvienas profilis yra atskiras `CLAUDE_CONFIG_DIR`; patikrinkite `echo $CLAUDE_CONFIG_DIR` seanso taškuose `~/.claude/profiles/<name>`.

@@ -4,11 +4,9 @@
 
 ---
 
-> **የእውነት ዋና ምንጭ:** `open-sse/utils/tlsClient.ts`፣ `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`፣ `open-sse/config/cliFingerprints.ts`፣ `src/mitm/`
-> **መጨረሻ የተዘመነበት:** 2026-09-02 — v3.8.51
-> **ታዳሚዎች:** ለአቅራቢ-ተኮር ስውር ውህደቶች ጥገና የሚያደርጉ መሐንዲሶች።
+> **የእውነት ምንጭ፡-** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** ታዳሚዎች፡-** አቅራቢ-ተኮር የድብቅ ውህደቶችን የሚጠብቁ መሐንዲሶች።
 
-OmniRoute ኦፊሴላዊ ያልሆኑ ደንበኞችን በንቃት የሚለዩ የጠርዝ ሥርዓቶች ካሏቸው አቅራቢዎች ጋር ይዋሃዳል (TLS JA3/JA4፣ የራስጌ ቅደም ተከተል፣ የJSON አካል ቅርጽ፣ የታማኝነት ቶከኖች)። ይህ ገጽ OmniRoute የሚያቀርባቸውን የስውርነት ገጽታዎችና የተተገበሩባቸውን ቦታዎች ይመዘግባል።
+OmniRoute ከአገልግሎት አቅራቢዎች ጋር ይዋሃዳል ጠርዞቻቸው በይፋዊ ያልሆኑ ደንበኞች (TLS JA3/JA4፣ ራስጌ ማዘዝ ፣ JSON የሰውነት ቅርፅ ፣ የታማኝነት ምልክቶች)። ይህ ገጽ OmniRoute የሚያጋልጣቸውን እና የት እንደሚተገበሩ የድብቅ ገጽታዎችን ይመዘግባል።
 
 ## ሕጋዊ እና ሥነ-ምግባራዊ ማስታወቂያ
 
@@ -78,65 +76,68 @@ OmniRoute ኦፊሴላዊ ያልሆኑ ደንበኞችን በንቃት የሚለ
 
 ---
 
-## Claude Code ስውር ጥቅል
+## Claude ኮድ ስውር ቅርቅብ
 
-`cliCompatMode` ሲበራ፣ OmniRoute ወደ ውጭ የሚላኩ Claude ጥያቄዎችን ከ`claude-cli` ትራፊክ ለመለየት እንዳይቻል አድርጎ መልካቸውን ይቀይራል። ሦስት ሞጁሎች በትብብር ይሠራሉ፦
+`cliCompatMode` ሲበራ OmniRoute የወጪ Claude ጥያቄዎችን ይቀይራል ስለዚህ ከ `claude-cli` ትራፊክ አይለዩም። ሶስት ሞጁሎች ይተባበራሉ:
 
 ### `claudeCodeFingerprint.ts`
 
-በክፍያ ራስጌው ውስጥ የተካተተውን ባለ 3-ቁምፊ `cc_version` አሻራ ያሰላል፦
+በሂሳብ አከፋፈል ራስጌ ውስጥ የተካተተውን ባለ 3-ቻር `cc_version` አሻራ ያሰላል፡-
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (በቀጥታ በኮድ ውስጥ የተቀመጠ፤ ከይፋዊው ደንበኛ ጋር ይዛመዳል)
-- ግብዓቶች፦ በመጀመሪያው የተጠቃሚ መልዕክት ጽሑፍ ውስጥ በመረጃ ጠቋሚ 4፣ 7 እና 20 ያሉ ቁምፊዎች + የስሪት ሕብረቁምፊ
-- ውጤት፦ ባለ 3-ቁምፊ ሄክስ ቅድመ ቅጥያ
+- `FINGERPRINT_SALT = "59cf53e54c78"` (ሃርድ ኮድ የተደረገ፣ ከኦፊሴላዊ ደንበኛ ጋር ይዛመዳል)
+- ግብዓቶች፡ ቻርች በመረጃ ጠቋሚ 4፣ 7፣ 20 የመጀመሪያው የተጠቃሚ መልእክት የጽሑፍ + ሥሪት ሕብረቁምፊ
+- ውፅዓት፡ 3-char hex ቅድመ ቅጥያ
 
 ### `claudeCodeCCH.ts` (የደንበኛ ይዘት ሃሽ)
 
-ይፋዊው Claude Code CLI በBun/Zig በኩል የሚያሰላው የአገልጋይ-ወገን የውሂብ ትክክለኛነት ፍተሻ። OmniRoute ይህን በ`xxhash-wasm` እንደገና ተግባራዊ ያደርገዋል፦
+የአገልጋይ ጎን ታማኝነት ይፋዊውን Claude ኮድ CLI በ Bun/Zig. OmniRoute reimplements ከ `xxhash-wasm` ጋር ያሰላል
 
-1. የጥያቄ አካሉን በ`cch=00000;` ቦታ ያዥ ወደ ተከታታይ መረጃ ይቀይሩ
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. በዜሮ የተሞላ ባለ 5-ቁምፊ ንዑስ ፊደል ሄክስ
-4. `cch=00000;`ን በተሰላው ቶከን ይተኩ
+1. አካልን በ `cch=00000;` ቦታ ያዥ ተከታታይ ያድርጉት
+2. በዚህ ቅደም ተከተል (`hashView()`) የሐሽ እይታን በሁለት ግልጽ ጽሑፍ መተኪያዎች ይገንቡ።
+   - እያንዳንዱ `/"model":"[^"]*"/g` ግጥሚያ `"model":""` — ይሆናል ግጥሚያው የሚቆመው በመጀመሪያ `"` ነው፣ ስለዚህ ያመለጠው ጥቅስ (`"model":"a\"b"`) ያለው እሴት ደንበኛው እንደሚያደርገው እስከዚያ ጥቅስ ድረስ ባዶ ይሆናል።
+   - እያንዳንዱ `/"max_tokens":\d+,|,?"max_tokens":\d+/g` ግጥሚያ በየትኛውም ጥልቀት — የቁጥር እሴቶች ብቻ ይወገዳል
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. ዜሮ-የተሸፈነ ባለ 5-ቻር ንዑስ ሆክስ
+5. በተሰላው ማስመሰያ `cch=00000;` ይተኩ
 
-ቋሚዎች፦
+ቋሚዎች፡
 
-- ዘር፦ `0x6e52736ac806831e`
-- ስርዓተ ጥለት፦ `/\bcch=([0-9a-f]{5});/`
+- ዘር `0x4d659218e32a3268` (የ Claude ኮድ 2.1.252 እና 2.1.322 የloopback ቅጂዎችን ይዛመዳል)
+- ስርዓተ-ጥለት `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-ወደ ላይ ያሉ ማጣሪያዎች በgrep እንዳያገኟቸው፣ “ስሱ” ከሆኑ የደንበኛ ስሞች የመጀመሪያ ቁምፊ በኋላ የUnicode **ዜሮ-ስፋት አገናኝ** (`U+200D`) ያስገባል። ነባሪ የቃላት ዝርዝር፦
+ዩኒኮድ ያስገባል።** ዜሮ-ስፋት መጋጠሚያ** (`U+200D`) ከ "sensitive" የደንበኛ ስሞች የመጀመሪያ ቁምፊ በኋላ የላይኛው ተፋሰስ ማጣሪያዎች እነሱን grep ማድረግ አይችሉም። ነባሪ የቃላት ዝርዝር፡-
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-በእነዚህ ላይ ይተገበራል፦ `system` ብሎኮች፣ ሁሉም `messages[].content`፣ እና `tools[].description` / `tools[].function.description`። ኦፕሬተሩ በ`setSensitiveWords()` ሊቀይረው ይችላል።
+ተተግብሯል `system` ብሎኮች፣ ሁሉም `messages[].content` እና `tools[].description` / `tools[].function.description`. ኦፕሬተር-በ `setSensitiveWords()` በኩል ሊታለፍ የሚችል።
 
 ### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` አቅራቢዎች
 
-“እውነተኛ Claude Code” ትራፊክን ብቻ ለሚቀበሉ የሦስተኛ ወገን Anthropic ማስተላለፊያዎች፦
+"እውነተኛ Claude ኮድ" ትራፊክን ብቻ ለሚቀበሉ የሶስተኛ ወገን Anthropic ቅብብሎሽ፡-
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- በነባሪ `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- የCC Compatible ወደላይ አገልግሎት የተደበቁ የአስተሳሰብ ዥረቶችን በተለይ ሲፈልግ፣ የእያንዳንዱ ግንኙነት “የredact-thinking ቤታን አንቃ” መቀያየሪያ `redact-thinking-2026-02-12`ን ይጨምራል
-- የእያንዳንዱ ግንኙነት “የተጠቃለለ የአስተሳሰብ ማሳያን አንቃ” መቀያየሪያ `providerSpecificData.requestDefaults.summarizeThinking`ን ያከማቻል፣ እና አስቀድሞ የማሳያ ሁነታ ባልተወሰነላቸው የCC Compatible የአስተሳሰብ ጥያቄዎች ላይ `display: "summarized"`ን ይጨምራል
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (የOpus/Sonnet 4.x ቤተሰብ)
-- ነባሪ ዱካ፦ `/v1/messages?beta=true`
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` በነባሪ
+- የየአንድ-ግንኙነት "ዳግም-አስተሳሰብ ቤታ አንቃ" መቀያየር `redact-thinking-2026-02-12` ይጨምራል CC ተኳሃኝ የሆነ የላይኛው ዥረት በተለይ የተቀየረ የአስተሳሰብ ዥረቶችን ሲፈልግ
+- "የተጠቃለለ የአስተሳሰብ ማሳያን አንቃ" የሚለው ግንኙነት `providerSpecificData.requestDefaults.summarizeThinking` ያከማቻል እና `display: "summarized"` ወደ CC ያክላል የማሳያ ሁነታን ያላዘጋጁ ተኳሃኝ የአስተሳሰብ ጥያቄዎች
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x ቤተሰብ)
+- ነባሪ መንገድ `/v1/messages?beta=true`
 
-በተመሳሳይ ጥቅል ውስጥ ያሉ ተዛማጅ ሞጁሎች፦
+እህት ሞጁሎች በተመሳሳይ ጥቅል ውስጥ፡-
 
-- `claudeCodeConstraints.ts` — የtemperature + cache-control ደንቦች
-- `claudeCodeToolRemapper.ts` — የመሣሪያ ስም ዳግም ማዛመድ
-- `claudeCodeExtraRemap.ts` — ተጨማሪ የpayload ማስተካከያ
+- `claudeCodeConstraints.ts` — የሙቀት + መሸጎጫ-ቁጥጥር ደንቦች
+- `claudeCodeToolRemapper.ts` — መሳሪያ-ስም ማረም
+- `claudeCodeExtraRemap.ts` — ተጨማሪ ክፍያን መደበኛ ማድረግ
 
 ---
 
@@ -150,14 +151,14 @@ Antigravity ጠይቋል የደዋይ ጽሑፍ ባይት-ባይት እንዲቆ
 
 ### ⚠️ ስጋት `ANTIGRAVITY_CREDITS=always` (የመለያ የተከለከለ ትኩስ ቦታ)
 
-`ANTIGRAVITY_CREDITS=always` (በ `open-sse/executors/antigravity.ts` የሚበላ) መንገዶች** እያንዳንዱ** የ Google ነፃ ደረጃ የኮታ በር ነገሮችን ከመፍቀድ ይልቅ በ Antigravity AI ክሬዲት Overages (የተከፈለ Google ክሬዲት) ይጠይቁ። ይህ እንደ ባህሪ ተመዝግቧል፣ ግን ነው።** የምናየው ብቸኛው በጣም የተለመደው የ ToS ጥሰት ሪፖርት** — multiple Google Ultra መለያዎች በ `403 / "service disabled for ToS violation" / insufficient_quota` ለጥቂት ሰዓታት ከሮጡ በኋላ በ `=always` ታግደዋል።
+`ANTIGRAVITY_CREDITS=always` (በ `open-sse/executors/antigravity.ts` የሚበላ) መንገዶች** እያንዳንዱ** Antigravity AI ክሬዲት Overages (የሚከፈልባቸው Google ክሬዲት) በ Google ነፃ-ደረጃ የኮታ በር ነገሮችን ከመፍቀድ ይልቅ ይጠይቁ። ይህ እንደ ባህሪ ተመዝግቧል፣ ግን ነው።** የምናየው ብቸኛው በጣም የተለመደው የ ToS ጥሰት ሪፖርት** — multiple Google Ultra መለያዎች በ `403 / "service disabled for ToS violation" / insufficient_quota` ለጥቂት ሰዓታት ከሄዱ በኋላ በ `=always` ታግደዋል።
 
-ወደላይ ያለው ማስፈጸሚያ በርቷል።**Google ጎን** , OmniRoute ምንም ነገር መከላከል አይችልም. የ env var ስም እና አሁን ያሉት ሰነዶች ለመገልበጥ ደህንነቱ የተጠበቀ ኖብ እንዲመስል ያደርጉታል; አይደለም.
+ወደላይ ያለው ማስፈጸሚያ በርቷል።**Google ጎን** , OmniRoute ምንም ነገር መከላከል አይችልም. የ env var ስም እና አሁን ያሉት ሰነዶች ለመገልበጥ አስተማማኝ ኖብ እንዲመስል ያደርጉታል; አይደለም.
 
 **ይህ ለምንድነው ከነጻ-ደረጃ-ብቻ አጠቃቀም ይልቅ አላግባብ መጠቀምን ፈልጎ ማግኘትን ይበልጥ ጨካኝ ያደርገዋል፡**
 
 - ቀጣይነት ያለው አውቶማቲክ ወጪ በአንድ Google መለያ ባንዲራዎች ላይ ከነጻ-ደረጃ ሂት-ኮታ-እና-ማቆሚያዎች በተለየ።
-- የክሬዲት ኦቨርጅኖች ምንም የጣራ ጣሪያ የላቸውም፣ ስለዚህ የተሳሳተ ውቅረት ያለው ደንበኛ በደቂቃ ውስጥ በብዙ መቶ USD ውስጥ ሊቃጠል እና የኤፒአይ-ቁልፍ ዳግም ሽያጭ ወይም የቦት ትራፊክ ሊመስል ይችላል።
+- የክሬዲት ኦቨርጅኖች ምንም የጣራ ጣሪያ የላቸውም፣ ስለዚህ በተሳሳተ መንገድ የተዋቀረ ደንበኛ በደቂቃዎች ውስጥ በብዙ መቶ USD ሊቃጠል እና የኤፒአይ-ቁልፍ ዳግም ሽያጭ ወይም የቦት ትራፊክ ሊመስል ይችላል።
 - በርካታ OmniRoute ተጠቃሚዎች ከተመሳሳይ ውጫዊ IP በትይዩ ከመጠን ያለፈ ክሬዲቶችን ሲመቱ ምልክቱን ያዋህዳል።
 
 **የሚመከር አቀማመጥ፡-**
@@ -166,7 +167,7 @@ Antigravity ጠይቋል የደዋይ ጽሑፍ ባይት-ባይት እንዲቆ
 2. **በራስ-ኮምቦ በኩል ጭነት በአቅራቢዎች ላይ ያሰራጩ** (`model: "auto"` ወይም `kr/glm/etc` -combo) ነጠላ Antigravity መለያ ከማሟላት ይልቅ።
 3. **በግንኙነት RPM ገደቦችን ያቀናብሩ** በ Antigravity አቅራቢው አርትዕ ገጽ (ዳሽቦርድ → አቅራቢዎች → Antigravity → ግንኙነት → ተመን ገደብ)። 30–60 RPM ለዘለቄታው ጥቅም ላይ ሊውል የሚችል ከፍተኛ ገደብ ነው።
 4. **የተረጋጋ፣ በዋኝ ቁጥጥር የሚደረግበት የላይኛው አውታረ መረብ ተጠቀም** እና በማይዛመዱ ተጠቃሚዎች ወይም የስራ ጫናዎች ላይ አንድ መለያ ከማጋራት ይቆጠቡ።
-5. **ከተከለከለ** ይግባኝ በ `support.google.com` → " Workspace/Account መዳረሻን እነበረበት መልስ" በትክክለኛው `quota_exceeded` / `service disabled` ምላሽ አካል Google ተልኳል። መልሶ ማቋቋም ዋስትና የለውም።
+5. **ከታገደ** ይግባኝ በ `support.google.com` → " Workspace/Account መዳረሻን እነበረበት መልስ" በትክክለኛው `quota_exceeded` / `service disabled` ምላሽ አካል Google ተልኳል። መልሶ ማቋቋም ዋስትና የለውም።
 
 የአካባቢ ማመሳከሪያ ሂሳቡን ይመዘግባል እና የእያንዳንዱን የክሬዲት ሁነታ አንድምታ ያሳልፋል።
 
@@ -196,7 +197,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — ምስክርነት የቧንቧ
-- ዋናው የክስተት ዘገባ፡ የውይይት [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- ዋናው የክስተት ዘገባ፡ የውይይት [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

@@ -4,10 +4,9 @@
 
 ---
 
-> **Til brugere**: Leder du efter en enkel vejledning? Se [vejledningen til gratisniveauer](../getting-started/FREE-TIERS-GUIDE.md) for trinvise instruktioner i, hvordan du får gratis AI.
+> **For brugere** : Leder du efter en simpel guide? Se [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) for trin-for-trin instruktioner om at få gratis AI.
 
-> **Senest undersøgt:** 2026-06-17 — webresearch for hver udbyder (officiel dokumentation + nyheder fra de seneste 7 dage, gennemgang med 50 agenter og kontradiktorisk verificering), hvor alle kvoter for gratisniveauer og brugsvilkår blev opdateret. **Delvis genkontrol 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — se den daterede bemærkning nedenfor).
-> **Autoritativ kilde (katalog):** `open-sse/config/freeModelCatalog.ts` (budgetter pr. model, dubletter fjernet på puljeniveau). Tallene for tokenbudgetter nedenfor stammer fra aktuel webresearch og er en **tilnærmelse** — se [Metode og forbehold](#methodology--caveats).
+> **Sidst revideret:** 2026-11-23. Hver række med en kvote, hvert pensioneret tilbud og hver kortport blev genåbnet mod udbyderens egen side den dag (`config/quality/free-catalog-evidence.json`). Tidligere gennemløb: 2026-06-17-undersøgelsen pr. udbyder og den delvise re-audit 2026-09-02.** Sandhedens kilde (katalog):** `open-sse/config/freeModelCatalog.ts` (per-MODEL budgetter, pulje-dedupederet). Token-budgettallene nedenfor kommer fra live webresearch og er en** tilnærmelse** — se [Metode og forbehold](#methodology--caveats).
 
 ## TL;DR — hvor meget fri slutning samler OmniRoute egentlig?
 
@@ -15,49 +14,138 @@ Disse tal beskriver separate tredjepartskonti og berettigelsesbetingelser på tv
 
 **Tjekket 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) tilbyder en engangskredit på 5 USD, der kræver en betalingsmetode, og som udløber efter 30 dage. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) udgiver project/model/tier -hastighedsgrænser; den forbliver uden for den kvantificerede månedlige overskrift.
 
-| Metrisk                                           | Poletter / måned      | Mening                                                                                                                                                                                                                                                                  |
-| ------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dokumenteret tilbagevendende bevilling (fast)** | **~ 1.62B**           | Frit lag** pools** (per-model katalog), hver delt pulje tælles** engang** . Livekilden bag `/api/free-tier/summary` og dashboardets Free-Tier Budget-side.** Brug dette nummer.**                                                                                       |
-| **+ første måned med tilmeldingskreditter**       | **~ 2.22B**           | Konstant + engangs-tilmeldingskredit (Z.AI 20M, DeepSeek 5M, …), deduperet pr. konto.** Kun første måned** — gentager sig ikke.                                                                                                                                         |
-| **+ permanent gratis, ingen offentliggjort cap**  | _ikke-kvantificerbar_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — reel tilbagevendende adgang, rate/concurrency-limited,** ingen token cap at tælle** . Opført, aldrig summeret (at tælle dem ved `RPM×24/7` er inflationen, vi afviser).          |
-| **+ boost til oplåsning af indskud**              | **+~ 24M**            | En enkelt gang** 10 USD** OpenRouter top-up hæver sin gratis pulje fra 50 → 1000 req/day. Rapporteres separat, så det aldrig puster det konstante tal op.                                                                                                               |
-| **+ bag et regionalt identitetstjek**             | **+~ 6M**             | `modelscope` (Alibaba Cloud binding + fastland-Kina verifikation med rigtige navn). Ægte tilbagevendende kvote, eksponeret som `gatedRecurringTokens` / `gatedProviders` og på dashboardet. Aldrig opsummeret i overskriften: +~ 6M bag regional identitetsbekræftelse. |
-| Teoretisk loft (alle takstgrænser, 24/7)          | ~ 10B                 | Summen af hver udbydertakstgrænse ekstrapoleret til non-stop brug.** Ikke en garanti** — ikke overskrift dette.                                                                                                                                                         |
+| Metrisk                                           | Poletter / måned      | Mening                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dokumenteret tilbagevendende bevilling (fast)** | **~ 90M**             | Frit lag** pools** (per-model katalog), hver delt pulje tælles** engang** . Livekilden bag `/api/free-tier/summary` og dashboardets Free-Tier Budget-side.** Brug dette nummer.**                                                                                      |
+| **+ første måned med tilmeldingskreditter**       | **~ 153M**            | Konstant + engangstilmeldingskredit (Z.AI 20M, DeepSeek 5M, …), deduperet pr. konto.** Kun første måned** — gentager sig ikke.                                                                                                                                         |
+| **+ permanent gratis, ingen offentliggjort cap**  | _ikke-kvantificerbar_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — reel tilbagevendende adgang, rate/concurrency-limited,** ingen token cap at tælle** . Opført, aldrig summeret (at tælle dem ved `RPM×24/7` er inflationen, vi afviser).         |
+| **+ boost til oplåsning af indskud**              | **+~ 24M**            | En enkelt gang** 10 USD** OpenRouter top-up hæver sin gratis pulje fra 50 → 1000 req/day. Rapporteres separat, så det aldrig puster det konstante tal op.                                                                                                              |
+| **+ bag et regionalt identitetstjek**             | **+~ 6M**             | `modelscope` (Alibaba Cloud binding + fastland-Kina verifikation af rigtige navn). Ægte tilbagevendende kvote, eksponeret som `gatedRecurringTokens` / `gatedProviders` og på dashboardet. Aldrig opsummeret i overskriften: +~ 6M bag regional identitetsbekræftelse. |
 
-**Ærlig overskrift:** _OmniRoute-aggregater**~ 1.62B dokumenterede gratis tokens pr. måned** (op til ~ 2,22B i din første måned med tilmeldingskreditter) på tværs af 26 free-tier-puljer — plus en lang hale af permanent-frie, no-cap-udbydere — og RTK + Caveman-komprimering (15-95 % token-besparelse) strækker det yderligere._
+**Ærlig overskrift:** _OmniRoute kataloger**~ 90M gratis tokens** en måned, som du rent faktisk kan bruge (op til ~ 153 mio. i din første måned med tilmeldingskreditter), fra 12 puljer med en offentliggjort kvote, plus en lang hale af permanent-frie, no-cap udbydere. RTK + Caveman-komprimering (15–95 % token-besparelse) strækker det yderligere._
 
-> **Hvorfor dette faldt fra den tidligere ~ 1.94B.** Opdateringen 2026-06-17 er en ærlighedskorrektion, ikke et tab: `gemini` er nu pulje-dedupet (blev oppustet ved at tælle hver Flash-variant separat, 462M → 60M), `cloudflare-ai` korrigeret til dens reelle 10k-Neurons/day (122M → 30M), `doubao` -reklassificeret som en kreditering og én kredit-nedskrivning), lag fjernet (`chutes`/`phind`/`kluster` udgået). Delvist opvejet af `llm7` (korrekt 5M/day → 150M) og nye gratis udbydere (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Historiske noter. Nedenstående figurer beskriver kataloget på det tidspunkt; de er ikke dagens tal._
 >
-> **Yderligere korrigeret til ~ 1.37B i v3.8.42:** `longcat` blev omklassificeret fra en 150M/mo tilbagevendende bevilling til en engangskredit på 10 mio. efter at dens gratis forhåndsvisning sluttede. Samme ærlighedsregel — ingen udbyder blev droppet ved en fejl.
+> **Hvorfor dette faldt fra de tidligere 1,94 mia.** Opdateringen 2026-06-17 er en ærlighedskorrektion, ikke et tab: `gemini` er nu pulje-dedupet (blev oppustet ved at tælle hver Flash-variant separat, 462M → 60M), `cloudflare-ai` korrigeret til dens reelle 10k-Neurons/day (122M → 30M), `doubao` -reklassificeret som en kreditering og én kredit-nedskrivning), lag fjernet (`chutes`/`phind`/`kluster` udgået). Delvist opvejet af `llm7` (korrekt 5M/day → 150M) og nye gratis udbydere (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Opdateret 2026-08-26 efter udtræden af Felo Web:** Felo Web er udelukket, mens dens GPL-afledte provenance/licensing forbliver på HOLD; kilden rapporterede om 38 poolnøgler på det tidspunkt. Puljeantallet er live og CI-gated (`check:docs-counts` mislykkes i opbygningen, hvis tallene over afviger fra `computeFreeModelTotals()`).
+> **Yderligere korrigeret til 1,37 milliarder i v3.8.42:** `longcat` blev omklassificeret fra en 150M/mo tilbagevendende bevilling til en engangskredit på 10 mio. tilmelding, efter at dens gratis forhåndsvisning sluttede. Samme ærlighedsregel — ingen udbyder blev droppet ved en fejl.
 >
-> **Revideret 2026-09-02 mod udbydernes egne sider** (kilder: `// evidence:` kommentarerne ud for hver re-revideret post i `open-sse/config/freeModelCatalog.data.ts`): `gemini` og `ollama-cloud` offentliggør ikke længere et symbolsk tal (Google fjernede den gratis tabel pr. model 2025-12-23; Ollama gratis plan er "begynderbrugskreditter") og er nu opført som** uden låg** , aldrig summeret (− 80M); `groq` er fem** pr model** 200K-TPD caps (6M hver, + 15M) med tre pensionerede IDs droppede; `nara` er en 7M/day spand (+ 60M, 210M). `mistral`'s 1B er kun synlig i kontokonsollen — se _Bevisklasser_ under Metode.
+> **Opdateret 2026-08-26 efter udtræden af Felo Web:** Felo Web er udelukket, mens dens GPL-afledte provenance/licensing forbliver på HOLD; kilden rapporterede om 38 poolnøgler på det tidspunkt.
+>
+> **Revideret 2026-09-02 mod udbydernes egne sider** (kilder: `// evidence:` kommentarerne ud for hver re-revideret post i `open-sse/config/freeModelCatalog.data.ts`): `gemini` og `ollama-cloud` offentliggør ikke længere et symbolsk tal (Google fjernede den gratis tabel pr. model 2025-12-23; Ollama gratis plan er "begynderbrugskreditter") og er nu opført som** uden låg** , aldrig summeret (− 80M); `groq` er fem** pr model** 200K-TPD caps (6M hver, + 15M) med tre pensionerede IDs droppede; `nara` er en 7M/day spand (+ 60M, 210M). `mistral` 1B er kun synlig i kontokonsollen — se _Bevisklasser_ under Metodologi.
 >
 > **Opdateret 2026-11-09 (#19334):** `ollama-cloud` blev fjernet fra det gratis katalog, efter at Ollama afsluttede sit gratis niveau og overførte alle cloud-modeller til pay-as-you-go.
 >
 > **Rettet 2026-09-03 (#11773):** `cerebras` blev omklassificeret fra en 30M/mo tilbagevendende bevilling (gammel 1M tokens/day prøveversion uden kort) til en engangskredit på $5, der kræver en betalingsmetode. Samme ærlighedsregel som LongCat.
 >
-> **Plus xKiro (2026-09-03):** den nye `xkiro-free` pulje (150M/mo) tilføjer en 35. tilbagevendende puljenøgle. Felo Web forbliver udelukket, mens dens GPL-afledte provenance/licensing forbliver på HOLD. Det melder kilden nu** 26 tilbagevendende poolnøgler** og**~ 1.62B stabil** — det levende, CI-gatede nummer (`check:docs-counts` mislykkes bygningen, hvis dette driver fra `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** den nye `xkiro-free` pulje (150M/mo) tilføjer en 35. tilbagevendende puljenøgle. Felo Web forbliver udelukket, mens dens GPL-afledte provenance/licensing forbliver på HOLD. På det tidspunkt rapporterede kilden om 34 puljenøgler og 1,62 milliarder tokens om måneden (stabilt).
 
-Største** dokumenteret** bidragydere: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (fem per-model caps), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` er udelukket — dens 10M LongCat-2.0-bevilling er en engangs, KYC-styret tilmeldingskredit, ikke et tilbagevendende månedligt budget.)
+Største** dokumenteret** bidragydere til det reelle tal i dag: `groq` 24M (4 caps pr. model), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` er udelukket, — dets 10M LongCat-2.0-tilskud er en engangs, KYC-styret tilmeldingskredit, ikke et tilbagevendende månedligt budget.)
 
-> ⚠️ Det teoretiske loft (~ 10B) er oppustet af udbydere med kun satsgrænser med** ingen offentliggjort token cap** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`), hvis tal ville være `RPM/TPM × 24/7 × 30d` — et teoretisk maksimum, som ingen enkelt konto vil opretholde. Det er de** udelukket** fra det forsvarlige tal (vises i stedet for i rækken "permanent fri, ingen kasket"). Dette er den samme inflation, som gør konkurrenternes multi-milliard-påstande upålidelige.
+## Rettelse, november 2026
+
+Indtil denne udgivelse sagde denne side og README 1,62 milliarder gratis tokens om måneden. Det var forkert. Fire puljer havde 93 % af det, og alle fire var skiftet hos udbyderen, mens vores katalog forblev det samme. Det reelle tal i dag er ~ 90M gratis tokens om måneden. Tabellen sætter, hvad der er ændret hos hver udbyder, ud for det, vi fejlede.
+
+| Hvad ændrede sig hos udbyderen (dato, kilde)                                                                                | Hvad tog vi galt (hvad, siden hvornår)                                                                               |
+| --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Mistral: den gratis tilstand inkluderer ikke længere API adgang (docs.mistral.ai, læst den 2026-11-18)                      | Vi blev ved med at tælle 1 milliard tokens om måneden fra en konsollæsning af 2026-09-02 og tjekkede det aldrig igen |
+| Nara: Gratis-planen viser ingen modeller (udbyderens `router.bynara.id/api/plans`, læst 2026-11-18)                         | Vi talte 210 millioner tokens om måneden                                                                             |
+| xKiro: 500.000 tokens om dagen pr. konto (xkiro.com, læst 2026-11-18)                                                       | 30 model IDs, der ikke længere eksisterer, blev i kataloget                                                          |
+| LLM7: grænsesiden er væk, og ingen officiel side udgiver en gratis kvote (2026-11-23)                                       | Vi talte 150 millioner tokens om måneden uden dateret bevis                                                          |
+| Groq: en model i den gratis pulje blev pensioneret (2026-09-14)                                                             | Poolen beholdt sin gamle størrelse                                                                                   |
+| AgentRouter: Udbyderen angiver en daglig check-in kredit på $25 og $50 mere for invitationstilmeldinger (læs på 2026-11-23) | Vi har angivet en tilmeldingskredit på $200                                                                          |
+| Predibase: produktet sluttede                                                                                               | Vi talte stadig dens tilmeldingskredit i den første måned                                                            |
+| (ingen)                                                                                                                     | 16 udbydere beholdt gratistilbudsflaget efter deres tilbud sluttede                                                  |
+| (ingen)                                                                                                                     | README lovede en re-audit hver anden uge. Den sidste før dette var 2026-09-02                                        |
+| (ingen)                                                                                                                     | Dokumentkontrollen tillod en drift på 0,05B og kunne ikke læse tal i millioner                                       |
+
+Sammenlægning af én kvote pr. række puster ethvert katalog op, vores inkluderet. Derfor bærer den rækkesummerede figur sit mærke, og den rigtige sidder lige under den.
+
+## Hvad tæller
+
+En række tæller mod de frie tal, når alt dette gælder:
+
+- Kvoten går igen og offentliggøres på udbyderens egen side med dateret bevis ved siden af rækken i kataloget.
+- Én konto pr. udbyder. Intet, der kræver en betaling, et kort, et depositum eller en identitetskontrol (KYC). En kvote, der skal bruge et telefonnummer, Telegram eller Discord for at tilmelde sig, er angivet adskilt som "med social sign-up", aldrig i det rigtige tal.
+- Ingen udbyder har markeret `tos: "avoid"`, og kun udbyderens officielle API.
+- Engangs-tilmeldingskreditter tæller kun i tallet for den første måned, og kun når der ikke bliver bedt om et kort. Et engangsindskud, der hæver en kvote, er et separat boost. Kampagner tæller aldrig med i det reelle tal.
+- Søge-, tale- og medieudbydere holder sig uden for tællingerne efter adgangstype og ude af hvert tokental. De får deres egne tællinger, i deres egne enheder (resultater, karakterer, billeder), på denne side, når en gentælling tilføjer dem; de føjes aldrig til hinanden eller omdannes til tokens.
+
+Hvad hver offentlig tælling betyder:
+
+- **Udbydere med gratis adgang** (50 i dag: 43 med en API nøgle, 6 uden nøgle, 1 via en værktøjskonto): udbydere med mindst én katalogrække, der giver gratis adgang, efter hvordan du når den.
+- **Katalogrækker med fri adgang** (214 i dag): en række pr. udbyder og model.
+- **Puljer med en offentliggjort kvote** (12 i dag): de delte kvoter bag det reelle tal, hver talt én gang.
+- **Særskilte gratis modeller** (185 i dag): rækkerne grupperet efter model ID.
+- **Markeret med et gratis tilbud** (140 + i dag): hver udbyder, hvis registreringspost indeholder `hasFree`, inklusive søge-, tale- og medieudbydere, prøveversioner og tilmeldingskreditter.
+
+Hver optælling er katalogiseret, ikke testet pr. opkald: den siger, hvad kataloget viser, ikke at hver rute svarer lige nu.
+
+## Hvordan vi tæller
+
+Tre tal kommer fra samme katalog, revideret 2026-11-23:
+
+- **Den rigtige figur, ~ 90M gratis tokens om måneden.** Hver delt kvote tælles én gang, så fem modeller bag én dagpenge er én dagpenge. Dette er hvad en konto hos hver udbyder faktisk kan bruge. Med engangs-tilmeldingskreditter, ~ 153M i din første måned.
+- **Den store figur, ~ 11.3B summeret række for række** , afsluttede tilbud inkluderet. Sådan tæller andre kataloger. Næsten det hele er historie: 98,6 % fra tilbud, der ikke længere eksisterer. Vi udskriver det kun med dens etiket og med den rigtige figur ved siden af.
+- **Live-kataloget, ~ 159M opsummeret pr. live-række** : den samme række-for-række-sum uden de afsluttede tilbud.
+
+Række-for-række-metoden (`row-sum-v1`) følger fire regler:
+
+1. Hver listet række tilføjes, som den er, uden at de rækker, der deler én pulje, flettes sammen.
+2. Kun kvoter offentliggjort i tokens tilføjes. En kvote offentliggjort i anmodninger, kreditter eller neuroner tæller som nul (`FREE_QUOTA_UNIT` in `open-sse/config/freeModelCatalog.ts`).
+3. Tilmeldingskreditter, indbetalingsboost og deaktiverede rækker (`enabled: false`) udelades.
+4. Det store tal tilføjer hovedbogen over afsluttede tilbud (`open-sse/config/freeModelCatalog.retired.data.ts`) ved den sidste kvote for hver række på listen. Kun rækker er trukket tilbage, siden `RETIRED_LEDGER_SINCE` kom ind i den, og hver række falder ud 12 måneder efter den sluttede.
+
+Hvis række-for-række-måden at tælle holder op med at være almindelig, eller vedligeholderen beslutter det, forlader den store figur hver side, og kun den rigtige figur forbliver.
+
+## Fjernet / ingen gratis tier
+
+Udbydere, hvis gratis tilbud sluttede eller ikke kunne bekræftes. De forbliver i registreringsdatabasen hos `hasFree: false` (eller er trukket tilbage fra det gratis katalog) og tæller aldrig med i nogen gratis figur. Dette er ikke listen over udbydere fjernet fra OmniRoute på anmodning (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Udbyder                  | Siden      | Hvorfor                                                                                | Kilde                                       |
+| ------------------------ | ---------- | -------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `mistral`                | 2026-11-23 | Den gratis tilstand inkluderer ikke længere API adgang                                 | docs.mistral.ai (brugsgrænser)              |
+| `nara`                   | 2026-11-23 | Den gratis plan viser ingen modeller                                                   | `router.bynara.id/api/plans`                |
+| `llm7`                   | 2026-11-23 | Ingen officiel side udgiver en gratis kvote                                            | udbyders websted                            |
+| `navy`                   | 2026-11-23 | Ingen gratis kvote kunne bekræftes på de officielle sider                              | api.navy                                    |
+| `bluesminds`             | 2026-11-23 | Brug kræver kredit købt hos udbyderen                                                  | `api.bluesminds.com/api/status`             |
+| `arcee-ai`               | 2026-11-23 | Kun betalt pris                                                                        | docs.arcee.ai (priser)                      |
+| `huggingface`            | 2026-11-23 | Gratis konti skal købe kreditter eller opgradere til PRO                               | huggingface.co (Inference Providers-priser) |
+| `huggingchat`            | 2026-11-23 | Hugging Face inferens kræver købte kreditter eller PRO                                 | huggingface.co (Inference Providers-priser) |
+| `ainative`               | 2026-11-23 | Hobbyist-planen betales efter en 3-dages prøveperiode                                  | udbyders prisside                           |
+| `stepfun`                | 2026-11-23 | Kun betaling pr. brug-pris                                                             | udbyders prisside                           |
+| `predibase`              | 2026-11-23 | Produkt udgået                                                                         | predibase.com                               |
+| `poolside`               | 2026-10-31 | Direkte inferens lukkes ned                                                            | platform.poolside.ai                        |
+| `amazon-q`               | 2026-05-15 | Ingen nye Free Tier-tilmeldinger                                                       | udbyder side                                |
+| `chat-oripe`             | 2026-11-23 | API værten svarer HTTP 530                                                             | API vært                                    |
+| `naga-ai`                | 2026-11-23 | Duplikat af Naga.ac-udbyderen                                                          | api.naga.ac                                 |
+| `dxnt`                   | 2026-11-23 | Tilmeldingsbonussen findes, men ingen model accepterer den                             | dxnt.com                                    |
+| `ollama-cloud`           | 2026-11-09 | Cloud-modeller betales pr. token eller er dækket af betalte planer                     | ollama.com (#19334)                         |
+| `chutes`                 | 2026-03    | Gratis niveau sluttede                                                                 | udbyder side                                |
+| `phind`                  | 2026-01    | Firma lukket                                                                           | udbyder side                                |
+| `kluster`                | 2026-06-09 | Solnedgang (flyttet til MITO)                                                          | udbyder side                                |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo gratis tilbagekaldt; Nemotron-kampagne sluttede 2026-06 (genbekræftet 2026-06-18) | udbyder side                                |
+| `aimlapi`                | 2026-06-18 | Gratis niveau sat på pause                                                             | udbyder side                                |
+| `yi`                     | 2026-06-18 | Yi-Light pensioneret, pay-as-you-go                                                    | udbyder side                                |
+| `featherless-ai`         | 2026-06    | Ingen nuværende gratis tier                                                            | udbyder side                                |
+| `chipotle`               | 2026-09-15 | Chat-widgetten bagved svarer 404 på hver rute (#13131, #4037)                          | amelia.chipotle.com                         |
+
+`iflytek` / `sparkdesk` forbliver opført med en ToS-advarselsnote: Spark Lite er gratis, men ToS begrænser proxy- og relæbrug.
 
 ---
 
-## 2026-06-17-opdatering — hvad har ændret sig siden 2026-06-05
+## 2026-06-17 opdater — hvad ændret sig siden 2026-06-05
 
-Et web-research-pass med 50 agenter (officielle docs + nyheder fra de sidste 7 dage, adversarisk verificeret) har opdateret hele kataloget. Højdepunkter:
+Et 50-agent web-research pass (officielle docs + last-7-days news, modstridende bekræftet) opdaterede hele kataloget. Højdepunkter:
 
-- **Fjernet / intet gratisniveau (2026):** `chutes` (gratisniveau ophørte 2026-03), `phind` (virksomheden lukkede 2026-01), `kluster` (udfaset 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo gratis tilbagekaldt 2026-05-24, Nemotron-kampagne sluttede 2026-06 — genverificeret 2026-06-18), `aimlapi` (gratisniveau sat på pause — genverificeret 2026-06-18), `yi` (Yi-Light udfaset, pay-as-you-go — genverificeret 2026-06-18), `featherless-ai` (intet aktuelt gratisniveau), `chipotle` (Chipotles "Pepper AI" — den reverse-engineerede `amelia.chipotle.com` Amelia-chat-widget, som udbyderen kommunikerede med, returnerer nu 404 på alle ruter, inklusive roden; nedlagt/flyttet backend, bekræftet 2026-09-15 — fuldstændig fjernet fra kataloget, #13131/#4037). `iflytek` / `sparkdesk` forbliver opført, men har en ToS-advarsel (Spark Lite er gratis; ToS begrænser proxy-/relay-brug).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` lukkede 2026-06-01, og `2.5 Pro` forlod gratisniveauet (2026-04); gratisniveauet er nu **kun Flash-familien** (2.5/3/3.1/3.5 Flash + Gemma). Kataloget **samler** nu Flash-familien (tallet var oppustet, fordi hver variant blev talt separat: 462M → 60M).
-- **Korrigerede tal:** `cloudflare-ai` 122M → **30M** (reelle 10k Neurons/dag), `doubao` omklassificeret som engangskredit ved tilmelding (ikke tilbagevendende), `llm7` 4M → **150M** (dokumenteret 5M tokens/dag), `together` "-Free"-endpoints udfaset → $25 tilmeldingskredit også fjernet (kræver minimumskøb på $5, ingen gratis prøveperiode), `longcat` Preview afsluttet + Flash-modeller udfaset → kun **LongCat-2.0**, omklassificeret som engangskredit ved tilmelding på **10M** tokens (KYC-begrænset, ikke tilbagevendende).
-- **Poolside direkte inferens ophører (verificeret 2026-10-20):** Den [officielle platform](https://platform.poolside.ai/) annoncerer nedlukning den **2026-10-31** og henviser brugerne til at downloade modellerne fra Hugging Face til selv-hosting. Den direkte `poolside`-udbyder bærer denne advarsel. Det håndkuraterede gratis katalog har ingen direkte Poolside-poster; dets poster med Poolside-navne tilhører `kilo-gateway`. Denne annoncering fastslår ikke tilgængeligheden af modeller leveret af Kilo, Cline, NVIDIA eller andre gateways, så disse opførelser udfases ikke på det grundlag.
-- **Nye gratis udbydere opdaget:** ⭐ **Kilo Code** (`kilo-gateway` — roterende "Auto Free"-sæt: NVIDIA Nemotron 3-familien, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 roterende gratis kodningsmodeller, opdateret 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash permanent gratis + 20M tilmeldingsbonus) og `arcee-ai` Trinity Large Preview.
-- **Nye ærlige niveauer** (se Metodologi): en _permanent-gratis-men-ubegrænset_-kategori (reel tilbagevendende adgang, ingen token-grænse at tælle) og et _depositum-oplåsnings-boost_ (OpenRouter $10 → +24M/md.) — begge vist **separat**, så de aldrig oppuster hovedtallet.
+- **Fjernet / intet gratis niveau:** flyttet til [sin egen afdeling](#removed--no-free-tier).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` lukkede 2026-06-01 og `2.5 Pro` forlod det frie niveau (2026-04); gratis niveau er nu** Kun Flash-familie** (2.5/3/3.1/3.5 Flash + Gemma). Kataloget nu** pools** Flash-familien (blev oppustet ved at tælle hver variant separat: 462M → 60M).
+- **Rettede tal:** `cloudflare-ai` 122M →** 30 mio** (ægte 10k-Neurons/day), `doubao` omklassificeret som en engangs tilmeldingskredit (ikke tilbagevendende), `llm7` 4M →** 150 mio** (dokumenteret 5M tokens/day), `together` "-Gratis" slutpunkter afbrudt → $25 tilmeldingskredit blev også fjernet (kræver minimumskøb på $5, ingen gratis prøveperiode), `longcat` Forhåndsvisning afsluttet + Flash-modeller pensioneret →**LongCat-2,0** kun omklassificeret som engangs** 10 mio**-token tilmeldingskredit (KYC-gated, ikke tilbagevendende).
+- **Direkte slutning ved poolen (verificeret 2026-10-20):** den [officielle platform](https://platform.poolside.ai/) annoncerer nedlukning på** 2026-10-31** og instruerer brugerne til at downloade sine modeller fra Hugging Face til selv-hosting. Den direkte `poolside` udbyder bærer denne advarsel. Det håndkurerede gratis katalog har ingen direkte poolside-indgange; dens Poolside-navngivne poster tilhører `kilo-gateway`. Denne meddelelse fastslår ikke tilgængeligheden af modeller, der betjenes af Kilo, Cline, NVIDIA eller andre gateways, så disse fortegnelser trækkes ikke tilbage på dette grundlag.
+- **Nye gratis udbydere opdaget:** ⭐** Kilo kode** (`kilo-gateway` — roterende "Auto Free" sæt: NVIDIA Nemotron 3 familie, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — 10 roterende gratis kodningsmodeller, opdateret 2026-10-20), ⭐** Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash permanent gratis + 20M tilmeldingsbonus), og `arcee-ai` Trinity Large Preview.
+- **Nye ærlige niveauer** (se Metode): en _permanent-gratis-men-ubegrænset_-kategori (rigtig tilbagevendende adgang, ingen token-loft at tælle) og et _indskudslås-boost_ (OpenRouter $10 → +24M/mo), begge dukkede op** separat** så de puster aldrig overskriften op.
 
-> Den detaljerede tabel pr. udbyder længere nede er **2026-06-05-øjebliksbilledet**; ændringerne ovenfor har forrang. Den levende, kanoniske kilde er kataloget pr. model `open-sse/config/freeModelCatalog.ts`.
+> Den detaljerede tabel for hver udbyder længere nede er** 2026-06-05 øjebliksbillede** ; deltaerne ovenfor afløser det. Den levende, kanoniske kilde er kataloget per model `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -113,26 +201,26 @@ opdelingen bevares med vilje.
 
 ## Metode og forbehold
 
-- Tal er** øvre grænseoverslag** fra hver udbyders dokumenterede free-tier-grænser pr** 2026-06-17** , indsamlet af webresearch. Gratis niveauer ændrer sig konstant — genbekræft, før du stoler på en figur.
+- Tal er** øvre grænseoverslag** fra hver udbyders dokumenterede free-tier-grænser, sidst kontrolleret** 2026-11-23** for hver række med en kvote. Gratis niveauer ændrer sig konstant — genbekræft, før du stoler på en figur.
 - **Hvad en post egentlig står inde for.** Ingen post har en konfidensvurdering pr. række, og API tjener —. To kendsgerninger er forskellige, fordi de er kureret i hånden snarere end udledt: 44 tilmeldinger har et uafhængigt dokumenteret hårdt stop (39 af dem er xKiro rækkerne, som alle deler én dagpenge), og 22 tilmeldinger har en oplysning om hurtig træning. `hardStopGuaranteed` er kun indstillet, når udbyderens egne vilkår siger, at overskridelse af den gratis godtgørelse afviser anmodningen i stedet for stille begynder at fakturere dig, med kilden i en kommentar ved siden af posten; den er aldrig standard til `true`, og en post, som ingen har bekræftet, forbliver deaktiveret. Så et manglende hard-stop flag betyder "ikke etableret", ikke "kendt til at fakturere dig".**STRICT -tilstand** (opt-in `freeAccessPolicy=strict` routing guard) stoler kun på poster, der bærer flaget; hvert andet gratis lag er udelukket som `no-hard-stop` (se `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Når vagten filtrerer en pulje, rapporterer den operatør-synlige log både ekskluderingsantallet og dets `no-hard-stop` andel.
 - `estMonthlyFreeTokens` = kun tilbagevendende månedlige tokens.** Engangstilmeldingskreditter gentager sig ikke** og tæller som 0. Udgåede niveauer er også 0.
 - Daglig token cap → `monthly = daily × 30`. Kun RPD dokumenteret → `RPD × ~800 output tokens × 30`. Kun RPM/TPM (ingen daglig grænse) →** uden låg** (se nedenfor).
-- **Gratis adgang, men ingen offentliggjort token cap** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `nvidia`): disse er rate/concurrency-limited. Vi klassificerer dem `recurring-uncapped` og** summer dem aldrig** — multiplicering af `RPM × 24/7 × 30d` ville producere et fantasiloft (den inflation vi afviser). NVIDIA's API er kun prøvebrug; se dens ToS advarsel nedenfor.
+- **Gratis adgang, men ingen offentliggjort token cap** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `nvidia`): disse er rate/concurrency-limited. Vi klassificerer dem `recurring-uncapped` og** opsummer dem aldrig** — multiplicering af `RPM × 24/7 × 30d` ville producere et fantasiloft (den inflation vi afviser). NVIDIA's API er kun prøvebrug; se dens ToS advarsel nedenfor.
 - **Boost til oplåsning af indskud:** en engangs lille top-up, der permanent hæver en gratis kvote (OpenRouter: $10 → 1000 req/day ≈ +24M/mo). Indberettet som et særskilt tal, holdt ude af den faste overskrift.
 - **Støtteberettigede kvoter** (`eligibilityGate: "regional-identity"`): en reel tilbagevendende kvote, der først åbner efter en regionsbundet identitetskontrol (fastland-Kinas rigtige navnebekræftelse i dag). Tælles med den samme pulje-dedupe-regel til en separat figur (`gatedRecurringTokens`), aldrig i den faste overskrift. Regimet (`freeType`) er uændret, så routing er uændret.
 - **Bevisklasser.** Reglen: et nummer i kataloget citerer sin kilde i en `// evidence:` -kommentar ved siden af posten — `public-page` (en udbyderside, som alle kan læse), `api-public` (et uautentificeret slutpunkt for udbyderen, f.eks. NaraRouter offentlige plans-endepunkt på router.bynara.id), eller `console-verified <date> por <who>` (figuren er kun synlig inde i en kommentar, der optager siden, og der står offentligt på siden, og hvem der har vist den offentligt). Staten i dag: de fem blokke, der blev re-revideret den 2026-09-02, bærer det (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); poster, der går forud for genrevisionen 2026-09-02, arver den tidligere forskning, indtil de bliver rørt; enhver** ny eller ændret** nummer uden beviskommentar er en fejl. I dag er det kun `mistral`, der er konsolverificeret.
 
 ---
 
-## Hvorfor vores tal er mindre end andre aggregatorers
+## Hvorfor vores antal er mindre end andre aggregators
 
-De fleste tal for "gratis tokens pr. måned" på dette område er summen af mærkater pr. model. Det er vores bevidst ikke:
+De fleste "gratis tokens pr. måned"-tal i dette rum er summer af etiketter pr. model. Vores er ikke med vilje:
 
-- **Hver fælles pulje tælles én gang.** Mistrals gratis abonnement har én kvote på 1B/måned pr. organisation; at anføre den under fem modeller gør den ikke til 5B. Sammenlagt pr. model ville vores eget katalog vise **~7.4B** (genberegnet 2026-09-03; dette tal kontrolleres ikke af CI — mål det igen, hver gang kataloget ændres) — overskriften siger **~1.47B**, fordi det er, hvad én konto hos hver udbyder faktisk kan bruge.
-- **Daglige lofter omregnes, rater gør ikke.** Et dokumenteret loft for tokens/dag bliver til `× 30`; et dokumenteret loft for anmodninger/dag bliver til `RPD × ~800 tokens × 30`; en udbyder, der kun offentliggør anmodninger pr. minut, har **intet** månedligt tal og angives som _uden loft_, og medregnes aldrig. At gange en ratebegrænsning med 24/7 er den oppustning, vi afviser.
-- **Kvoter, der kræver en regional identitetskontrol, vises separat** (`+~6M behind regional identity verification`), fordi de fleste læsere ikke kan bruge dem.
-- **Tilmeldingskreditter gælder kun den første måned** og angives som et separat tal; de blandes aldrig sammen med det løbende tal.
-- **Tallet håndhæves af CI.** `npm run check:docs-counts` genberegner totalerne ud fra kataloget og lader bygget fejle, når denne fil, README-filen eller budgetkortet afviger fra dem.
+- **Hver fælles pulje tælles én gang.** Fem modeller bag én godtgørelse er én godtgørelse, ikke fem. Læsningen række for række af det samme katalog, og hvorfor vi udskriver det, er på [How we count](#how-we-count).
+- **Daglige lofter er konverteret, satser er ikke.** En dokumenteret tokens/day cap bliver `× 30`; en dokumenteret requests/day cap bliver `RPD × ~800 tokens × 30`; en udbyder, der kun udgiver anmodninger pr. minut har** ingen** månedligt tal og er angivet som _uncapped_, aldrig summeret. At gange en satsgrænse med 24/7 er den inflation, vi nægter.
+- **Kvoter bag en regional identitetskontrol er vist adskilt** (`+~6M behind regional identity verification`), fordi de fleste læsere ikke kan bruge dem.
+- **Tilmeldingskreditter er kun den første måned** og rapporteret som en anden figur, aldrig blandet ind i det konstante tal.
+- **Hvad lægetjekket gør.** `npm run check:docs-counts` (frigivelsestilstand) genberegner det virkelige tal, det første måneds tal og de to række-for-række-summer fra kataloget og mislykkes, når README, denne side eller Free Tiers Guide udskriver en anden værdi eller udskriver den store figur uden dens etiket og den rigtige. Budgetkortet er gentrukket fra de samme fakta ved udgivelsen.
 
 ---
 
@@ -241,74 +329,74 @@ De fleste tal for "gratis tokens pr. måned" på dette område er summen af mær
 
 ---
 
-## Frit niveau pr. udbyder (Bytez/Nous kontrolleret 2026-10-15; re-revideret rækker 2026-09-02; andre 2026-06-17)
+## Frit niveau pr. udbyder (katalog revideret 2026-11-23)
 
-> Gendannet fra kataloget pr. model (`open-sse/config/freeModelCatalog.ts`), pool-dedupet. Sorteret efter tilbagevendende konstant tokens/mo. `uncapped*` = permanent gratis, men ingen publiceret token cap (rate/concurrency-limited) — reel adgang,** ikke** opsummeret i overskriften. `—` = kredit-kun / nøglefri / ikke token-kvantificerbar.
+> Vedligeholdt i hånden fra kataloget pr. model (`open-sse/config/freeModelCatalog.data.ts`); sidst tjekket 2026-11-23. Sorteret efter de reelle månedlige tokens for hver pulje (hver delt pulje tælles én gang). `uncapped*` = permanent gratis, men ingen offentliggjort token cap (rate/concurrency-limited): reel adgang,** ikke** opsummeret i den rigtige figur. `not counted` = en tilbagevendende kvote, som den rigtige figur udelader (`avoid`, eller bag et regionalt identitetstjek). Udbydere, hvis tilbud sluttede, er i [Fjernet/ingen gratis niveau](#removed--no-free-tier). `—` = kredit-kun / nøglefri / ikke token-kvantificerbar.
 
-| Udbyder          | Gratis type       | Stabil tokens/mo | Første måneds kredit | ToS          | Modeller |
-| ---------------- | ----------------- | ---------------- | -------------------- | ------------ | -------- |
-| `mistral`        | tilbagevendende   | ~ 1.00B          | —                    | forsigtighed | 5        |
-| `nara`           | tilbagevendende   | ~ 210M           | —                    | forsigtighed | 8        |
-| `llm7`           | tilbagevendende   | ~ 150M           | —                    | forsigtighed | 4        |
-| `xkiro`          | tilbagevendende   | ~ 150M           | —                    | forsigtighed | 39       |
-| `longcat`        | én gang           | —                | 10 mio               | forsigtighed | 1        |
-| `cerebras`       | én gang           | —                | $5 kredit            | forsigtighed | 2        |
-| `cloudflare-ai`  | tilbagevendende   | ~ 30M            | —                    | forsigtighed | 9        |
-| `groq`           | tilbagevendende   | ~ 30M            | —                    | forsigtighed | 5        |
-| `api-airforce`   | tilbagevendende   | ~ 24M            | —                    | forsigtighed | 7        |
-| `bluesminds`     | tilbagevendende   | ~ 7M             | —                    | tvetydig     | 22       |
-| `sambanova`      | tilbagevendende   | ~ 6M             | —                    | forsigtighed | 5        |
-| `arcee-ai`       | tilbagevendende   | ~ 5M             | —                    | forsigtighed | 1        |
-| `bazaarlink`     | tilbagevendende   | ~ 4M             | —                    | forsigtighed | 32       |
-| `openrouter`     | tilbagevendende   | ~ 1M             | —                    | forsigtighed | 1        |
-| `cohere`         | tilbagevendende   | ~ 800K           | —                    | forsigtighed | 6        |
-| `huggingchat`    | tilbagevendende   | ~ 500K           | —                    | forsigtighed | 4        |
-| `morph`          | tilbagevendende   | ~ 400K           | —                    | ok           | 2        |
-| `huggingface`    | tilbagevendende   | ~ 200K           | —                    | forsigtighed | 6        |
-| `kiro`           | tilbagevendende   | ~ 25K            | —                    | undgå        | 12       |
-| `glm-cn`         | uden låg          | uden låg\*       | ~ 20M                | ok           | 4        |
-| `baidu`          | uden låg          | uden låg\*       | —                    | forsigtighed | 1        |
-| `gemini`         | uden låg          | uden låg\*       | —                    | forsigtighed | 4        |
-| `kilo-gateway`   | uden låg          | uden låg\*       | —                    | forsigtighed | 7        |
-| `opencode-zen`   | uden låg          | uden låg\*       | —                    | forsigtighed | 10       |
-| `tencent`        | uden låg          | uden låg\*       | —                    | forsigtighed | 1        |
-| `vertex`         | tilmeldingskredit | —                | ~ 300M               | forsigtighed | 10       |
-| `agentrouter`    | tilmeldingskredit | —                | ~ 200M               | forsigtighed | 4        |
-| `predibase`      | tilmeldingskredit | —                | ~ 25M                | forsigtighed | 1        |
-| `doubao`         | tilmeldingskredit | —                | ~ 15M                | tvetydig     | 1        |
-| `ai21`           | tilmeldingskredit | —                | ~ 10M                | undgå        | 2        |
-| `deepseek`       | tilmeldingskredit | —                | ~ 5M                 | ok           | 2        |
-| `hyperbolic`     | tilmeldingskredit | —                | ~ 5M                 | ok           | 8        |
-| `nscale`         | tilmeldingskredit | —                | ~ 5M                 | forsigtighed | 6        |
-| `bytez`          | kredit (rek.)     | —                | ukendt               | tvetydig     | 1        |
-| `deepinfra`      | tilmeldingskredit | —                | ~ 1M                 | forsigtighed | 22       |
-| `fireworks`      | tilmeldingskredit | —                | ~ 1M                 | undgå        | 10       |
-| `nebius`         | tilmeldingskredit | —                | ~ 1M                 | forsigtighed | 1        |
-| `qoder`          | tilmeldingskredit | —                | ~ 1M                 | forsigtighed | 14       |
-| `scaleway`       | tilmeldingskredit | —                | ~ 1M                 | ok           | 6        |
-| `novita`         | tilmeldingskredit | —                | ~ 500K               | forsigtighed | 1        |
-| `agy`            | nøglefri          | —                | —                    | undgå        | 16       |
-| `baichuan`       | nøglefri          | —                | —                    | tvetydig     | 1        |
-| `blackbox`       | nøglefri          | —                | —                    | undgå        | 6        |
-| `coze`           | nøglefri          | —                | —                    | undgå        | 1        |
-| `duckduckgo-web` | nøglefri          | —                | —                    | undgå        | 6        |
-| `freemodel-dev`  | nøglefri          | —                | —                    | ukendt       | 4        |
-| `friendliai`     | nøglefri          | —                | —                    | undgå        | 2        |
-| `iflytek`        | nøglefri          | —                | —                    | undgå        | 1        |
-| `inference-net`  | nøglefri          | —                | —                    | forsigtighed | 3        |
-| `liquid`         | nøglefri          | —                | —                    | ukendt       | 1        |
-| `monsterapi`     | nøglefri          | —                | —                    | tvetydig     | 1        |
-| `muse-spark-web` | nøglefri          | —                | —                    | undgå        | 3        |
-| `nlpcloud`       | nøglefri          | —                | —                    | undgå        | 1        |
-| `nvidia`         | uden låg          | uden låg\*       | —                    | forsigtighed | 3        |
-| `pollinations`   | nøglefri          | —                | —                    | forsigtighed | 31       |
-| `publicai`       | nøglefri          | —                | —                    | forsigtighed | 3        |
-| `reka`           | nøglefri          | —                | —                    | forsigtighed | 2        |
-| `sensenova`      | nøglefri          | —                | —                    | forsigtighed | 1        |
-| `sparkdesk`      | nøglefri          | —                | —                    | forsigtighed | 1        |
-| `stepfun`        | nøglefri          | —                | —                    | ok           | 1        |
-| `t3-web`         | nøglefri          | —                | —                    | undgå        | 23       |
-| `uncloseai`      | nøglefri          | —                | —                    | forsigtighed | 3        |
+| Udbyder          | Gratis type       | Rigtig tokens/mo                | Første måneds kredit | ToS          | Modeller |
+| ---------------- | ----------------- | ------------------------------- | -------------------- | ------------ | -------- |
+| `api-airforce`   | tilbagevendende   | ~ 24M                           | —                    | forsigtighed | 5        |
+| `groq`           | tilbagevendende   | ~ 24M (4 hætter pr. model)      | —                    | forsigtighed | 4        |
+| `cloudflare-ai`  | tilbagevendende   | ~ 23M                           | —                    | forsigtighed | 8        |
+| `xkiro`          | tilbagevendende   | ~ 15M                           | —                    | forsigtighed | 9        |
+| `bazaarlink`     | tilbagevendende   | ~ 1,4M                          | —                    | forsigtighed | 1        |
+| `openrouter`     | tilbagevendende   | ~ 1,2M                          | —                    | forsigtighed | 1        |
+| `cohere`         | tilbagevendende   | ~ 800K                          | —                    | forsigtighed | 6        |
+| `sambanova`      | tilbagevendende   | ~ 480K                          | —                    | forsigtighed | 2        |
+| `morph`          | tilbagevendende   | ~ 160K                          | —                    | ok           | 2        |
+| `glm-cn`         | uden låg          | uden låg\*                      | 20 mio               | ok           | 4        |
+| `agnes`          | uden låg          | uden låg\*                      | —                    | ok           | 3        |
+| `agnes-cn`       | uden låg          | uden låg\*                      | —                    | ok           | 3        |
+| `aion`           | uden låg          | uden låg\*                      | —                    | ok           | 4        |
+| `baidu`          | uden låg          | uden låg\*                      | —                    | forsigtighed | 1        |
+| `gemini`         | uden låg          | uden låg\*                      | —                    | forsigtighed | 4        |
+| `glm`            | uden låg          | uden låg\*                      | —                    | ok           | 2        |
+| `kilo-gateway`   | uden låg          | uden låg\*                      | —                    | forsigtighed | 12       |
+| `nvidia`         | uden låg          | uden låg\*                      | —                    | forsigtighed | 3        |
+| `onomeo`         | uden låg          | uden låg\*                      | —                    | forsigtighed | 2        |
+| `requesty`       | uden låg          | uden låg\*                      | —                    | forsigtighed | 2        |
+| `sealion`        | uden låg          | uden låg\*                      | —                    | ok           | 5        |
+| `tokenharbor`    | uden låg          | uden låg\*                      | —                    | forsigtighed | 2        |
+| `coze`           | tilbagevendende   | ikke tællet (`avoid`)           | —                    | undgå        | 1        |
+| `inference-net`  | tilbagevendende   | ikke medregnet                  | —                    | forsigtighed | 3        |
+| `kiro`           | tilbagevendende   | ikke tællet (`avoid`)           | —                    | undgå        | 7        |
+| `modelscope`     | tilbagevendende   | bag et regionalt identitetstjek | —                    | forsigtighed | 2        |
+| `nlpcloud`       | tilbagevendende   | ikke tællet (`avoid`)           | —                    | undgå        | 1        |
+| `reka`           | tilbagevendende   | ikke medregnet                  | —                    | forsigtighed | 2        |
+| `t3-web`         | tilbagevendende   | ikke tællet (`avoid`)           | —                    | undgå        | 23       |
+| `bytez`          | kredit (rek.)     | —                               | —                    | tvetydig     | 1        |
+| `doubao`         | tilmeldingskredit | —                               | 15 mio               | tvetydig     | 1        |
+| `longcat`        | tilmeldingskredit | —                               | 10 mio               | forsigtighed | 1        |
+| `deepseek`       | tilmeldingskredit | —                               | 5M                   | ok           | 2        |
+| `hyperbolic`     | tilmeldingskredit | —                               | 5M                   | ok           | 8        |
+| `nscale`         | tilmeldingskredit | —                               | 5M                   | forsigtighed | 6        |
+| `deepinfra`      | tilmeldingskredit | —                               | 1M                   | forsigtighed | 22       |
+| `qoder`          | tilmeldingskredit | —                               | 1M                   | forsigtighed | 9        |
+| `scaleway`       | tilmeldingskredit | —                               | 1M                   | ok           | 6        |
+| `novita`         | tilmeldingskredit | —                               | 500.000              | forsigtighed | 1        |
+| `agentrouter`    | tilmeldingskredit | —                               | —                    | forsigtighed | 1        |
+| `ai21`           | tilmeldingskredit | —                               | —                    | undgå        | 2        |
+| `baichuan`       | tilmeldingskredit | —                               | —                    | tvetydig     | 1        |
+| `cerebras`       | tilmeldingskredit | —                               | —                    | forsigtighed | 2        |
+| `fireworks`      | tilmeldingskredit | —                               | —                    | undgå        | 10       |
+| `freemodel-dev`  | tilmeldingskredit | —                               | —                    | ukendt       | 4        |
+| `monsterapi`     | tilmeldingskredit | —                               | —                    | tvetydig     | 1        |
+| `nebius`         | tilmeldingskredit | —                               | —                    | forsigtighed | 1        |
+| `publicai`       | tilmeldingskredit | —                               | —                    | forsigtighed | 3        |
+| `sensenova`      | tilmeldingskredit | —                               | —                    | forsigtighed | 1        |
+| `vertex`         | tilmeldingskredit | —                               | —                    | forsigtighed | 16       |
+| `agy`            | nøglefri          | —                               | —                    | undgå        | 9        |
+| `aihorde`        | nøglefri          | —                               | —                    | ok           | 3        |
+| `blackbox`       | nøglefri          | —                               | —                    | undgå        | 6        |
+| `duckduckgo-web` | nøglefri          | —                               | —                    | undgå        | 6        |
+| `friendliai`     | nøglefri          | —                               | —                    | undgå        | 2        |
+| `iflytek`        | nøglefri          | —                               | —                    | undgå        | 1        |
+| `liquid`         | nøglefri          | —                               | —                    | ukendt       | 1        |
+| `muse-spark-web` | nøglefri          | —                               | —                    | undgå        | 3        |
+| `ovhcloud`       | nøglefri          | —                               | —                    | ok           | 5        |
+| `pollinations`   | nøglefri          | —                               | —                    | forsigtighed | 24       |
+| `sparkdesk`      | nøglefri          | —                               | —                    | forsigtighed | 1        |
+| `uncloseai`      | nøglefri          | —                               | —                    | forsigtighed | 1        |
 
 ---
 

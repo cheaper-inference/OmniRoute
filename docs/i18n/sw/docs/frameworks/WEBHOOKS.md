@@ -4,15 +4,11 @@
 
 ---
 
-> **Chanzo rasmi:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Ilisasishwa mwisho:** 2026-06-28 — v3.8.40
+> **Chanzo cha ukweli:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-OmniRoute inaweza kutuma webhooks za HTTP wakati matukio ya jukwaa yanapotokea. Zitumie kuunganisha na
-Slack, PagerDuty, Datadog, huduma za ndani za arifa, au kipokeaji chochote cha HTTP.
+OmniRoute inaweza kurusha HTTP weboks kwenye matukio ya jukwaa. Zitumie kujumuika na Slack, PagerDuty, Datadog, huduma za arifa za ndani, au kipokezi chochote HTTP.
 
-Kisambazaji hutia saini kila uwasilishaji kwa HMAC-SHA256, hujaribu tena baada ya
-hitilafu za muda, hufuatilia hali ya uwasilishaji kwa kila webhook, na huzima kiotomatiki
-endpoints zinazoendelea kushindwa.
+Mtumaji hutia sahihi kila uwasilishaji kwa HMAC-SHA256, hujaribu tena matatizo ya muda mfupi, hufuatilia afya ya uwasilishaji kwa kila mtandao, na kuzima kiotomatiki sehemu za mwisho ambazo huendelea kutofaulu.
 
 ## Matukio Yanayotumika
 

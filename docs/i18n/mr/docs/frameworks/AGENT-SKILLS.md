@@ -11,14 +11,14 @@ Agent Skills या संरचित SKILL.md फाइल्स आहेत,
 
 ---
 
-## आढावा
+## विहंगावलोकन
 
-कॅटलॉगमध्ये **45 Agent Skills** आहेत (23 REST API + 21 CLI + 1 कॉन्फिगरेशन कार्यप्रवाह). प्रत्येक कौशल्यामध्ये पुढील गोष्टी असतात:
+कॅटलॉगमध्ये समाविष्ट आहे** 45 एजंट कौशल्ये** (23 REST API + 21 CLI + 1 कॉन्फिगरेशन वर्कफ्लो). प्रत्येक कौशल्य आहे:
 
-- एक **अधिकृत ID** (`omni-auth`, `cli-serve`, इ.)
-- `skills/{id}/SKILL.md` मधील YAML फ्रंटमॅटर (`name`, `description`) + समृद्ध markdown मजकूर असलेली एक **SKILL.md** फाइल
-- OpenAPI स्पेसिफिकेशन आणि CLI रजिस्ट्रीमधून व्युत्पन्न केलेले **REST एंडपॉइंट्स** (API कौशल्ये) किंवा **CLI सबकमांड्स** (CLI कौशल्ये)
-- थेट प्राप्तीसाठी एक **GitHub रॉ URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ए** प्रामाणिक ID** (`omni-auth`, `cli-serve`, इ.)
+- ए**SKILL.md** YAML फ्रंटमॅटर (`name`, `description`) + रिच मार्कडाउन बॉडीसह `skills/{id}/SKILL.md` मध्ये फाइल
+- **REST अंतिम बिंदू** (API कौशल्ये) किंवा**CLI उपकमांड** (CLI कौशल्ये) OpenAPI spec आणि CLI रेजिस्ट्री मधून व्युत्पन्न
+- ए**GitHub कच्चे URL** थेट आणण्यासाठी: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## व्याप्ती API
+## कव्हरेज API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

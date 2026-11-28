@@ -6,64 +6,25 @@
 
 @AGENTS.md
 
-**Tá rialacha uile an tionscadail in [`AGENTS.md`](AGENTS.md)** — an t-aon fhoinse fírinne do gach cúntóir
-AI (ailtireacht, coinbhinsiúin, tástáil, geataí cáilíochta, sreabhadh oibre git, na 23 Riail Dhiana,
-foghlaimí PII). Léigh ina iomláine é; ná cuir rialacha an tionscadail leis arís anseo. Baineann gach rud thíos le
-Claude Code AMHÁIN — mionchoigeartuithe oibríochtúla ar rialacha atá sainithe cheana féin in `AGENTS.md`.
+**Cónaíonn rialacha uile an tionscadail i [`AGENTS.md`](AGENTS.md)** — an fhoinse amháin fírinne do gach cúntóir AI ; lódálann an t-allmhairiú thuas é cheana féin. Ná cuir rialacha tionscadail leis seo arís. Baineann gach rud thíos le ONLY le Claude Code — mionchoigeartuithe oibríochtúla ar na rialacha atá sainmhínithe cheana féin i `AGENTS.md`.
 
-## Leithlisiú worktree — sonraí a bhaineann le Claude Code
+## Sonraíochtaí Cód leithlisiú Worktree — Claude
 
-Tá an prótacal iomlán éigeantach um leithlisiú worktree (dearbhú an bhunbhrainse, an cosán canónta `.claude/worktrees/`, `cp -al` node_modules, rialacha scortha) le fáil i [`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (achoimrithe in `AGENTS.md` → Sreabhadh Oibre Git → "Leithlisiú worktree"). Pointí a bhaineann go sonrach le Claude Code:
+- Deimhnigh an bonnbhrainse leis an oibreoir trí `AskUserQuestion` ( Hard Riail #19) mura ndúirt siad leat cheana féin.
+- Cruthaigh an crann oibre le `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (tuirlingíonn sé faoi `.claude/worktrees/`, crua-naisc `node_modules` agus cóipeanna `.husky/_`), ansin glaoigh ar `EnterWorktree` lena `path`. Pasáil an bonn i gcónaí: gan é roghnaíonn an script an `release/*` is airde , agus b'fhéidir nach é an ceann a dheimhnigh an t-oibreoir. Níl na naisc chrua ná na crúcaí ag crann oibre a chruthaíonn `EnterWorktree` leis féin, agus mar sin ní ritheann geata réamhthiomanta ann.
 
-- Deimhnigh an bunbhrainse leis an oibreoir trí `AskUserQuestion` (Cruaríail #19) mura ndúirt siad leat cheana é.
-- Tabhair tosaíocht don uirlis dhúchais `EnterWorktree` — cruthaíonn sí worktrees faoi `.claude/worktrees/` (an cosán canónta) cheana féin. Cruthaigh an worktree leis an ordú doiciméadaithe `git worktree add`, ansin glaoigh `EnterWorktree` lena `path`.
+## Substaintí agus git
 
-## Sábháilteacht trastseisiúin — sonraí sonracha do Claude Code
+Faigheann gach foghníomhaire a bhaineann le git (Uirlis Ghníomhaire nó script Sreabhadh Oibre) Riail Crua #22 a's `git stash` ban verbatim in its prompt — tháinig atarlú taifeadta na heachtra stash trí fhoghníomhaire.
 
-Rialaíonn Rialacha Dána #19/#21/#22 (in `AGENTS.md`) seisiúin chomhthreomhara. Meabhrúcháin oibríochtúla don
-chreat seo:
+## Déantáin phleanála sáraíonn cosán superpowers —
 
-- **Macasamhlaigh an cosc ar `git stash` focal ar fhocal i leid gach fo-ghníomhaire a bhaineann le git**
-  (uirlis Agent / scripteanna Workflow) — ní fhaigheann fo-ghníomhairí an comhad seo le hoidhreacht, agus tharla
-  atarlú taifeadta na heachtra stash trí fho-ghníomhaire.
-- Sula gcumascann tú nó sula mbrúnn tú chuig aon PR nár chruthaigh tú _sa seisiún seo_, rith `git worktree list`
-  agus athsheiceáil `gh pr view <N> --json state,headRefOid` (Riail Dhian #22b).
-- Críochnaigh gach seisiún agus an príomhsheiceáil amach ar an mbrainse ar ar thosaigh sí.
+Fógraíonn scileanna superpowers mainneachtainí faoi `docs/superpowers/plans/`, `docs/superpowers/specs/` agus `docs/research/`. Athscríobh gach ceann go dtí a choibhéis `_tasks/` in `AGENTS.md` → "Déantúsáin Phleanála & Taighde" sula scríobhann tú é, agus tiomnaigh le `git -C _tasks …`, nach bhfuil sa phríomhrepo riamh.
 
-## Superpowers / déantáin phleanála — sáruithe conaire
+## Comhaid scratch — `_artifacts/`, ní `/tmp`
 
-Sainítear coinbhinsiún `_tasks/` in `AGENTS.md` → "Planning & Research Artifacts". Tagann na
-scileanna superpowers le réamhshocruithe a dhíríonn ar `docs/…` — tá na réamhshocruithe sin **sáraithe
-anseo**. Nuair a fhógraíonn scil superpowers conair amhail "saved to `docs/superpowers/plans/…`",
-athscríobh í go dtí a coibhéis `_tasks/…` sula scríobhann tú:
+Sáraíonn an tionscadal seo scratchpad seisiún an úmacha (`/tmp/claude-*/…`). Scríobh comhaid shealadacha onnmhairí —, zips ginte, aschuir idirmheánacha aonuaire — go `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: cosán fréimhe gitignored `_*`, mar sin aimsíonn agus scriosann an t-oibreoir gach scratch in aon áit amháin. Téann pleananna buan, sonraíochtaí, taighde agus lámhdhírithe go `_tasks/` ina ionad sin (Rail chrua #23).
 
-| Déantán (scil)                           | Réamhshocrú (NÁ húsáid)   | Sábháil anseo ina ionad                                       |
-| ---------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Pleananna (`writing-plans`)              | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Sonraíochtaí / dearadh (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Taighde (`deep-research`, ad-hoc)        | `docs/research/`          | `_tasks/research/…`                                           |
-| Aistrithe (`/handoff`)                   | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Bonn dearg
 
-Cuir na déantáin sin faoi leaganrialú laistigh de stór `_tasks/` (`git -C _tasks …`), agus ná cuir sa phríomhstór riamh iad.
-
-## Comhaid scríobtha / shealadacha — úsáid `_artifacts/`, ní `/tmp`
-
-Sáraíonn an tionscadal seo scríobhlann réamhshocraithe seisiúin an chreata (`/tmp/claude-*/…`). Scríobh
-comhaid shealadacha/oibre — easpórtálacha, comhaid zip ghinte, aschuir idirmheánacha aonuaire, rud ar bith a
-chuirfeá in `/tmp` murach sin — chuig `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` ina ionad.
-
-- Is conair fhréimhe `_*` é `_artifacts/`: tá sí gitignored cheana féin (`AGENTS.md` → "Root `_*` paths"), maireann sí
-  ar an diosca amháin, agus ní dhéantar í a rianú riamh.
-- Cúis: má choinnítear aschur scríobtha taobh istigh den tionscadal (seachas `/tmp`), bíonn sé thar a bheith éasca don oibreoir
-  gach rud sealadach a aimsiú agus a scriosadh in aon áit amháin, in ionad cuardach a dhéanamh ar fud eolairí sealadacha
-  `/tmp` a bhaineann go sonrach le seisiúin agus a imíonn nó a charnann gan a bheith rianaithe.
-- Ná cuir é seo amú le `_tasks/` (Riail Dhian #23, a stór príobháideach git féin do phleananna/
-  sonraíochtaí/taighde/aistrithe marthanacha) — is do chomhaid oibre indiúscartha amháin é `_artifacts/`; ní gá d'aon rud
-  anseo maireachtáil nó a bheith faoi leaganrialú.
-
-## Bunleagan glas sula n-osclaítear PRanna
-
-Sula ngearrann tú brainse nó sula n-osclaíonn tú PR, rith an tseiceáil bhunleagain ghlais (`AGENTS.md` → Git Workflow →
-"Base-green check"; tagraíonn scileanna an tionscadail di mar `.agents/skills/_shared/base-green.md`). Ní mór
-`⚠️ base-red inherited: #<issue>` a bheith i gcorp PR a osclaíodh agus barr an bhunleagain dearg. Chun
-staid dhearg charntha a ghlanadh (barr dearg an bhunleagain + PRanna dearga), úsáid an scil `/sweep-reds`.
+Chun staid carntha dearg a dhraenáil (bonn tip + red PRs), bain úsáid as an scil `/sweep-reds`.

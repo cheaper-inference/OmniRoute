@@ -4,86 +4,63 @@
 
 ---
 
-> **2026-11-19: ang Megify merge queue ay itinigil na** (desisyon ng may-ari). Hindi na tinukoy `.mergify.yml` ang isang queue at tinatanggihan ang mga utos ng Mergify na nagsasama o muling nagsusulat ng isang pull request. Ang release PRs ay pinagsama-sama sa pamamagitan ng kamay sa ilalim ng repository ruleset na "Require green gates on the active release" (`Gate / CI` + `Gate / Quality`) hanggang sa tumakbo ang omni-queue sa live mode, at sa pamamagitan ng omni-queue pagkatapos noon ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Ang mga seksyon ng Pagsama-samahin sa ibaba ay naglalarawan sa pila kung ano ito.
+## Landing sa isang release branch
 
-Dahil v3.8.49 (WS3.2/WS3.4 ng quality/velocity plan) ang default na merge path para sa nasuri na PRs sa `release/vX.Y.Z` ay ang** Pagsamahin ang merge queue** (`.mergify.yml`); ang** manu-manong merge-train** ang nakadokumento sa ibaba ay ang FALLBACK — na ginagamit sa panahon ng mga insidente, pag-freeze ng release, o kung magbabago ang plano ng Mergify Open Source.
+Pinamamahalaan ng omni-queue ang mga landing sa `release/vX.Y.Z`. Basahin ang pinakamataas na antas `mode` sa `config/merge-queue/config.json` sa default na sangay bago mag-landing ng PR. Tingnan ang [Omni-Queue](OMNI_QUEUE.md).
 
-## Default na landas: ang pila ng Mergify
+- **`shadow`** nagpapatakbo ng pagpapatunay at iniiwan ang landing sa isang manu-manong pagsasama. Ilapat ang `omni-queue` sa naaprubahang PR sa huling ulo nito. Suriin ang pagiging karapat-dapat sa `npm run queue -- why <PR>`. Hintayin ang hatol para sa ulo na iyon sa `npm run queue -- history --base <branch>`. Magpatuloy sa `would-land`. Sa `culprit-found` o `would-dequeue`, pindutin nang matagal ang merge at ayusin ang dahilan.
+- **Mga pagbubukod sa anino.** Ang isang tren na may berdeng buong CI laban sa kasalukuyang base tip ay maaaring magpatuloy nang walang hiwalay na hatol sa pila. Nalalapat ang parehong pagbubukod kapag ang PR head ay naglalaman na ng kasalukuyang base tip.
+- **`live`** gumagamit ng `omni-queue` label para i-trigger ang landing. Ang pila lang ay nakarating sa PR. Iwanan ang mga merge command at direktang push sa queue.
 
-1. Sinusuri/nagiging green ang PR sa pamamagitan ng mga campaign at inaaprubahan ng ⭐
-   gate bago mag-merge ng may-ari (ang ulat + desisyon sa bawat item — tingnan ang `/merge-prs` Hakbang 0.75).
-2. Inilalapat ng may-ari (o ng session na kumikilos batay sa desisyon ng may-ari) ang label na **`queue`**.
-   Ang label MISMO ang pag-apruba sa pag-merge; isinasagawa lamang ito ng Mergify.
-3. **Sunud-sunod** na bina-validate ng Mergify ang mga nakapilang PR (paisa-isa) laban sa mga fast-gate
-   at mine-merge ang mga ito (squash). Ang batching + awtomatikong bisection ay nasa bayad na tier ng Mergify
-   ("Cannot use Merge Queue batch" sa libreng plan, #7220), kaya walang itinatakdang
-   `batch_size` ang `.mergify.yml`; nananatiling gawain ng manu-manong merge-train sa ibaba ang batching. Ang PR na
-   nakabinbin pa rin ang mga check pagkalipas ng `checks_timeout` (240 min = 2× ng nasukat na p95 ng
-   `quality.yml`) ay inaalis sa pila sa halip na patigilin ang pila.
-4. Pagkatapos ng pag-merge, bina-validate ng tuloy-tuloy na release-green workflow ang bagong tip sa pag-push
-   at nagbubukas ng attribution issue kung nagkaroon ng regression ang kombinasyon (hindi kailanman awtomatikong nagre-revert).
+Ang bawat landing ay nangangailangan ng awtorisasyon ng may-ari at ang mga naaangkop na kinakailangang tseke. Mag-apply lang `omni-queue` pagkatapos ng awtorisadong landing ng may-ari. Nangangailangan din ng `protected-approved` na desisyon ng may-ari ang PRs na humahawak sa mga protektadong landas para sa PR na iyon.
 
-Mga pananggalang (sumasalamin sa Mga Mahigpit na Panuntunan #21/#22 ng `CLAUDE.md`):
+Ang ruleset na "Require green gates on the active release" ay nangangailangan ng berdeng `Gate / CI` at `Gate / Quality` sa ulo. Huwag kailanman gumamit `--admin` upang i-bypass ang isang pulang gate. Ang isang release freeze block ay sumasama sa frozen na sangay. Tingnan ang [Hard Rule 21](HARD_RULES_DETAIL.md). Huwag kailanman lagyan ng label, pagsamahin o itulak sa isang kahilingan sa paghila na gumagana ang isa pang session. Tingnan ang [Hard Rule 22](HARD_RULES_DETAIL.md).
 
-- **Bukas ang release freeze** → HUWAG lagyan ng label ang mga PR na nagta-target sa naka-freeze na branch; i-retarget muna sa
-  aktibong `release/vX+1`.
-- **In-flight na PR ng ibang session** → huwag kailanman itong lagyan ng label; tanging ang nagmamay-aring session lamang ang
-  naglalagay sa pila ng sarili nitong gawain.
-- Ang mga diff na tests-only at mga PR na may label na `hotfix` ay nagpapatakbo na ng pinababang CI (tingnan ang
-  `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); tinatanggap ng mga kondisyon ng pila ang anumang
-  hanay ng mga check na aktuwal na tumakbo (`#check-failure=0` + `#check-pending=0`).
+## Ang kahilingan sa paghila ng tren
 
-## Fallback: ang manual merge-train
+1. Magsimula ng branch ng tren sa kasalukuyang release base tip. Isama ang eksaktong naaprubahang mga pinuno ng miyembro gamit ang mga merge commit. Panatilihin ang kanilang commit history sa pamamagitan ng pag-iwas sa squash at rebase.
+2. Buksan ang isang kahilingan sa paghila para sa sangay ng tren. I-validate PR na iyon gamit ang sarili nitong buong CI sa kasalukuyang base tip. Suriin muli ang base tip at ang mga naaprubahang pinuno ng miyembro bago lumapag. I-refresh ang tren at ang CI nito kapag nagbago ang napatunayang kandidato.
+3. Landin ang train PR gamit ang merge commit sa ilalim ng naaangkop na queue mode. Sa live mode, pinapanatili ng `merge-ff` landing method ng queue ang merge commits. Ang orihinal na mga pinuno ng miyembro ay maaaring maabot mula sa sangay ng paglabas. minarkahan ng GitHub ang miyembro PRs bilang pinagsama at pinapanatili ng mga commit ang kanilang mga may-akda.
 
-Ginagamit kapag hindi available ang queue. Isinasapormal nito ang praktis na nagproseso ng 33 PR
-sa loob ng isang araw noong v3.8.47 cycle:
+Ang isang pampublikong halimbawa ay [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Pinagsama nito ang 18 miyembrong PRs at nakarating sa isang merge commit noong 2026-11-24.
 
-1. **Buuin ang batch** (~10–30 na na-review+naaprubahang PR). Suriin ang mga banggaan sa `linked:`
-   (parehong `tap.testFiles`, parehong CHANGELOG hunks) at isa-isahin ang mga iyon.
-2. **Mag-validate NANG ISANG BESES**: sa isang nakahiwalay na worktree mula sa release tip, lokal na i-merge ang lahat ng batch
-   head, pagkatapos ay patakbuhin ang suite na katumbas ng release
-   (`npm run check:release-green`, idagdag ang `--with-build` bago ang isang release).
-   Ino-automate ng `scripts/release/merge-train.sh <base> <PR#>…` ang mga hakbang 1–2 (inaalis ang mga
-   sumasalungat na PR, nagpapatuloy ang train). Pinapatakbo ng full mode ang `npm run test:unit` — ang
-   runner na naka-tune para sa box (`--test-concurrency=20`), **hindi** ang dalawang sunod-sunod na 4-core CI
-   shard, na nagpatakbo sa pangunahing phase sa ~25% ng isang 16-core box (naayos noong
-   2026-07-18). Pinananatili ng `--fast` (mga intra-day mega-train drain, inaprubahan ng may-ari noong 2026-07-18)
-   ang bawat static gate + vitest ngunit pinapatakbo lamang ang mga node:test file na binago ng
-   mga nakasakay na PR; kailangan pa ring tumakbo ang FULL suite nang kahit isang beses bawat araw sa
-   naipong tip (isang train na walang `--fast`).
-3. **Berde** → i-merge ang mga PR nang sunod-sunod (muling sinusuri ang `state,headRefOid` bago ang bawat isa —
-   ang PR na nagbago ang head ay babalik sa review). Patunayang ang net diff ng bawat merge ay
-   sariling pagbabago ng PR (walang mga auto-resolve revert: i-audit ang `git diff --stat` para sa
-   mga out-of-scope na deletion).
-4. **Pula** → i-bisect ang batch sa mga hati (i-validate ang bawat hati) sa halip na muling mag-validate
-   nang paisa-isa; ibalik ang may-salang PR sa review queue kasama ang ebidensya.
-5. **Huwag kailanman**: mag-merge sa naka-freeze na branch habang may freeze; gumamit ng `git stash` saanman;
-   basta muling patakbuhin ang CI sa pag-asang mawawala ang pula (panuntunan: impormasyon ang pula).
+Ang isang sync-back mula `main` patungo sa susunod na release branch ay dumarating din sa pamamagitan ng isang merge commit. Ang pagpapanatili ng `main` ancestry ay kinakailangan para sa pag-sync-back sa ibang pagkakataon. Tingnan ang [Worktree Isolation](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Tiering (kung bakit ligtas ang queue kahit fast-gates lamang)
+## Ang lokal na merge-train validator
 
-- **Bawat PR** (quality.yml fast-gates): mga test na apektado ng TIA + buong unit 4-shard +
-  vitest + lint bag + typecheck + integridad ng docs/changelog.
-- **Bawat batch/tip** (continuous release-green): `--quick` HARD gates sa bawat push sa
-  release branch; buong `--with-build --full-ci` sweep nang 3×/araw.
-- **Bawat release** (ci.yml sa release PR): ang kumpletong matrix kasama ang E2E ×9,
-  package-artifact + tarball boot-smoke, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Walang bina-validate nang mas kaunti kaysa dati — tumatakbo lamang ang mabigat na surface sa bawat batch/tip
-sa halip na sa bawat PR, at ito ang nag-aalis sa mga O(N) round-trip.
+Kinukuha ng validator ang base at PR head at pinagsasama ang mga ito sa isang disposable worktree. Pinapatakbo nito ang parity suite nito nang isang beses sa resultang puno. Ang isang bigong head fetch o merge na conflict ay naglalabas na ang PR at ang script ay nagpapatuloy sa natitirang PRs.
 
-## Mga prerequisite ng fresh checkout para sa `merge-train.sh`
+- **`--plan`** nagpi-print ng mga hakbang at paglabas ng napiling mode nang hindi gumagawa ng worktree o nakikipag-ugnayan sa remote. Pagsamahin ito sa `--fast` upang siyasatin ang mabilis na plano.
+- **`--fast`** nagpapatakbo ng mga karaniwang static na gate, ang napiling binagong `node:test` file sa ilalim ng `tests/unit/`, at `npm run test:vitest`. Magpatakbo ng buong lokal na pagpapatunay nang hindi bababa sa isang beses sa isang araw sa naipon na tip kapag gumagamit ng fast mode.
+- **Buong mode** idinaragdag ang ganap na static na gate at nagpapatakbo `npm run test:unit` at `npm run test:vitest`.
 
-Nagpapatakbo ang script ng fail-fast na **preflight** sa root checkout (bago ang anumang gawain sa worktree)
-upang hindi kailanman mapagkamalang pulang train ang sirang install:
+Ang isang bagsak na static na gate ay muling ipapalabas sa hindi nagalaw na base kung ang base probe ay magagamit. Ang script ay nag-uulat ng mga minanang pagkabigo at nagpapatuloy kapag ang bawat kinikilalang linya ng paglabag ay lumabas din sa base at ang kabuuang bilang ay hindi lumaki.
 
-1. `npm ci`, pagkatapos ay patakbuhin ang `bun` postinstall na bina-block ng npm:
-   `(cd node_modules/bun && node install.js)` — kung hindi, mabibigo ang `check:provider-consistency`
-   at `check:known-symbols` (parehong `bun scripts/…`) sa train AT sa base nang
-   walang violation line.
-2. Walang ligaw na `node_modules/node_modules` (isang dobleng dependency tree; dalawang beses naglo-load ang React
-   at agad na nabibigo ang mga UI vitest suite).
-3. Naroon at executable ang `node_modules/.bin/tsc` (wala nito ang isang partial install).
+| Lumabas | Ibig sabihin                                                                                                                                                     |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`     | Na-print ang plano o natapos ang suite. Inililista ng buod ng suite ang anumang minanang static na mga pagkabigo at na-eject PRs.                                |
+| `1`     | Mga di-wastong argumento, walang Git checkout, nabigong preflight, o walang PR na nakasakay.                                                                     |
+| `2`     | Nabigo ang isang suite check at hindi naging kwalipikado bilang minana. Maaaring hatiin ng operator ang batch, i-eject ang nakakasakit PR, at muling patakbuhin. |
 
-Pinapatakbo ng train ang blocking na `npm run check:cycles:ratchet`; advisory ang simpleng `npm run check:cycles`
-(iniilista nito ang mga SCC at nag-e-exit nang non-zero kahit sa isang maayos na base).
+Ang isang lokal na pass ay nagbibigay ng diagnostic na ebidensya para lamang sa dossier ng may-ari. Nangangailangan pa rin ang bawat landing ng awtorisasyon ng may-ari, sarili nitong mga kinakailangang pagsusuri, at ang hatol ng shadow queue kapag naaangkop.
+
+## Tiering
+
+- **Per PR.** CI at Quality piliin ang mga tseke batay sa mga binagong landas. Ang code PRs ay nagpapatakbo ng mabilis na kalidad ng mga gate at naapektuhang mga pagsubok, na may magkahiwalay na unit at Vitest na trabaho sa CI.
+- **Bawat kandidato sa pila.** Pinapatakbo ng CI at Quality ang buong profile para sa binubuong kandidato sa queue ref nito.
+- **Bawat tip sa paglabas.** Ang Release-Green ay nagpapatakbo ng mabilis na hard gate sa mga push na tumutugma sa mga filter ng path nito. Tatlong naka-iskedyul na pagtakbo bawat araw ang gumamit ng buong sweep para sa release branch.
+- **Bawat release.** Kasama sa buong CI matrix ang E2E shards, pagpapatunay ng package, usok ng tarball boot, at mga pagsusuri sa saklaw. Tingnan ang [Release Checklist](RELEASE_CHECKLIST.md).
+
+## Fresh-checkout prerequisites para sa `merge-train.sh`
+
+Ang preflight ay tumatakbo bago gumawa ng mga worktree. Mag-install ng mga dependency na may `npm ci`. Kumpirmahin na ang `node_modules/.bin/tsc` ay executable at ang `node_modules/node_modules` ay wala. Tingnan kung nagtagumpay ang `node_modules/.bin/bun --version`.
+
+Kung nilaktawan ang Bun postinstall, patakbuhin ang `(cd node_modules/bun && node install.js)`. Ang pagkakapare-pareho ng provider at mga kilalang-simbulo na pagsusuri ay gumagamit Bun. Ang validator ay nagpapatakbo ng `npm run check:cycles:ratchet` bilang isang blocking gate. Ang standalone `npm run check:cycles` command ay advisory.
+
+## Kasaysayan
+
+Ang merge na pila ng Mergify ay itinigil noong 2026-11-19.

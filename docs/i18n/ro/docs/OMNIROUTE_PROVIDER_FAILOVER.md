@@ -14,10 +14,12 @@ Politica implicită între furnizori permite până la trei încercări ale furn
 
 - **Combo-uri** eșuează între țintele lor în funcție de strategia și setările proprii ale combo-ului.
 - **Un model gol** (fără prefix `provider/` ) pe care o deservesc mai mulți furnizori activi, fără o combinație cu acel nume exact, este mai întâi trimis la alegerile de inferență ale furnizorului. Dacă această încercare eșuează într-un mod în care politica reușește, aceeași solicitare este trimisă următorului furnizor activ care deservește id-ul. Răspunsul poartă `x-omniroute-fallback-attempts` cu numărul de furnizori încercați înaintea celui care a răspuns.
-  - Fiecare supleant este autorizat exact ca și cum deducția l-ar fi ales. O țintă pe care cheia API o blochează sau nu o admite este omisă fără un apel în amonte, iar clientul primește eroarea reală în amonte, nu o respingere a politicii pentru o țintă pe care nu a numit-o niciodată.
+  - Fiecare supleant este autorizat exact ca și cum deducția l-ar fi ales. O țintă pe care cheia API blochează sau nu o admite este omisă fără un apel în amonte, iar clientul primește eroarea reală în amonte, nu o respingere a politicii pentru o țintă pe care nu a numit-o niciodată.
   - Doar un răspuns eșuat continuă: nimic nu trece peste primul octet transmis în flux.
   - Schimbarea de model de rezervă de urgență se aplică numai după ce fiecare furnizor al modelului solicitat a eșuat.
   - O solicitare fixată la o conexiune (`x-omniroute-connection`) rămâne pe ea.
   - Un id cu prefix (`provider/model`) nu este niciodată redirecționat către alt furnizor.
 
 Stările circuitului sunt `closed`, `open` și `half_open`. Un cooldown programează o sondă delimitată; o sondă reușită închide circuitul și o sondă eșuată îl redeschide.
+
+Efectuarea erorii furnizorului rulează în interiorul gateway-ului. Vedeți [Când OmniRoute în sine este inaccesibil](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) pentru comportamentul clientului în timpul unei întreruperi de gateway.

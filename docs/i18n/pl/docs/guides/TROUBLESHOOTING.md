@@ -187,88 +187,49 @@ nie zawiera.
 
 ---
 
-## Fałszywe alarmy programu antywirusowego
+## Fałszywe pozytywne wyniki antywirusa
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG poddaje kwarantannie plik `README.md` z oznaczeniem `MD:HttpRequest-inf[Susp]`
+### Avast/AVG kwarantanna `README.md` z `MD:HttpRequest-inf[Susp]`
 
-**To fałszywy alarm. Nic nie jest zainfekowane i nie są wymagane żadne działania.**
+**To jest fałszywie pozytywny wynik. Nic nie jest zainfekowane i nie jest wymagane żadne działanie.**
 
-Avast i AVG używają heurystyki, która oznacza pliki tekstowe/Markdown zawierające wiele
-linków przypominających żądania HTTP. Plik `README.md` OmniRoute jest dołączony do pakietu npm
-(jest wymieniony w `package.json` → `files`), więc podczas instalacji globalnej trafia do
-`node_modules/omniroute/README.md` — i zawiera około 15 przykładów
-`http://localhost:20128/...` (punkty końcowe HTTP/SSE MCP, adres URL `.well-known` A2A oraz
-fragmenty z poleceniem `curl`). Takie zagęszczenie linków wystarcza do uruchomienia heurystyki.
+Avast i AVG stosują heurystykę, która oznacza pliki plain-text/Markdown zawierające wiele łączy wyglądających na żądania HTTP. OmniRoute `README.md` jest dostarczane w pakiecie npm (jest wymienione w `package.json` → `files`), więc ląduje na `node_modules/omniroute/README.md` w globalnej instalacji — i zawiera ~ 15 przykładów `http://localhost:20128/...` (punkty końcowe MCP HTTP/SSE, A2A `.well-known` URL i fragmenty `curl` ). Ta gęstość łączy wystarczy, aby pokonać heurystykę.
 
-Jeśli problem pojawił się dopiero niedawno: charakter pliku się nie zmienił. W README
-rozbudowano tabelę punktów końcowych (dodano MCP HTTP + SSE + A2A) oraz dodano więcej
-przykładów z poleceniem `curl`, przez co przekroczony został próg heurystyki.
+Jeśli zaczęło się to niedawno: plik nie uległ zmianie. README powiększyła swoją tabelę punktów końcowych (dodano MCP HTTP + SSE + A2A ) i więcej przykładów `curl`, co wypchnęło ją poza próg.
 
-Ten plik jest statyczną dokumentacją i nie zawiera żadnej wykonywalnej zawartości. Można go
-bezpiecznie przywrócić z kwarantanny.
+Plik jest obojętną dokumentacją z zerową zawartością wykonywalną. Możesz bezpiecznie przywrócić go z kwarantanny.
 
 **Co zrobić:**
 
-1. **Wyłącz powiadomienia** — dodaj katalog instalacyjny do wyjątków programu antywirusowego
-   (Avast: Ustawienia → Wyjątki), wskazując ścieżkę do globalnego katalogu `node_modules`
-   i/lub katalogu danych OmniRoute (`~/.omniroute/`).
-2. **Zgłoś fałszywy alarm** — <https://www.avast.com/false-positive-file-form.php>,
-   załączając poddany kwarantannie plik `README.md`. To rozwiązanie pomoże wszystkim,
-   ponieważ problem wynika ze zbyt agresywnej heurystyki producenta reagującej na plik tekstowy.
+1. **Zatrzymaj powiadomienia** — wyklucz katalog instalacyjny w swoim programie antywirusowym (Avast: Ustawienia → wyjątki), dodając globalną ścieżkę `node_modules` and/or katalog danych OmniRoute (`~/.omniroute/`).
+2. **Zgłoś fałszywie pozytywny wynik** — <https://www.avast.com/false-positive-file-form.php>, dołączanie poddanego kwarantannie `README.md`. Jest to poprawka, która pomaga wszystkim, ponieważ jest to heurystyczna reakcja dostawcy na plik tekstowy.
 
-**Dlaczego nie „naprawiamy” tego po naszej stronie:** wszystkie przykłady używają
-`http://localhost`, a localhost nie może korzystać z `https` bez komplikacji związanych
-z certyfikatem z podpisem własnym. Zniekształcanie dokumentacji w celu ominięcia heurystyki
-jednego producenta pogorszyłoby jej jakość dla każdego czytelnika tylko po to, by obejść błąd
-skanera.
+**Dlaczego nie „naprawiamy” tego po naszej stronie:** wszystkie przykłady to `http://localhost`, a localhost nie może być `https` bez problemów z certyfikatem z podpisem własnym. Manipulowanie dokumentacją w celu uniknięcia heurystyki jednego dostawcy zaszkodziłoby każdemu czytelnikowi, gdyby musiał zadowolić się błędem skanera.
 
 ### Kaspersky oznacza aplikację komputerową jako `PDM:Trojan.Win32.Generic`
 
-**To fałszywy alarm heurystyki behawioralnej. Nic nie jest zainfekowane.** Prefiks `PDM:`
-w Kaspersky oznacza, że werdykt pochodzi z modułu Proactive Defense Module (System Watcher),
-który ocenia, co instalator _robi_, zamiast porównywać go ze znanym złośliwym oprogramowaniem.
-Po wykryciu Kaspersky „wycofuje” całą instalację — usuwając pliki, które zdążył już zapisać —
-przez co aplikacja przestaje działać lub znika.
+**Jest to fałszywie pozytywny wynik heurystyki behawioralnej. Nic nie jest zakażone.** Przedrostek `PDM:` firmy Kaspersky oznacza, że werdykt pochodzi z modułu ochrony proaktywnej (kontroli systemu), który ocenia działanie instalatora, zamiast dopasowywać go do znanego szkodliwego oprogramowania. Po uruchomieniu Kaspersky „wycofuje” całą instalację — usuwając pliki, które już zapisał — w wyniku czego aplikacja przestaje działać lub znika.
 
-Oznaczane pliki to standardowe elementy zadeklarowanych zależności open source dołączonych
-do aplikacji komputerowej, na przykład:
+Pliki, które oznacza, są podstawowymi częściami zadeklarowanych zależności typu open source dołączonych do aplikacji komputerowej, na przykład:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` oraz
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), biblioteka do automatyzacji
-  przeglądarki używana do logowania u dostawców w aplikacji i obsługi czatu za pośrednictwem
-  przeglądarki.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — przypięte natywne powiązanie `wreq-js`, używane do obsługi protokołu HTTP z odciskiem
-  przeglądarki u dostawców korzystających z internetowych plików cookie (`<arch>` to `x64`
-  lub `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` i `workerProcessEntry.js` — [Playwright](https://playwright.dev), biblioteka automatyzacji przeglądarki używana do logowania się dostawcy w aplikacji i czatu obsługiwanego przez przeglądarkę.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — przypięte natywne powiązanie `wreq-js` używane dla HTTP odczytywanego odciskiem palca przeglądarki u dostawców internetowych plików cookie (`<arch>` to `x64` lub `arm64`).
 
-**Dlaczego jest oznaczany:** instalator dla systemu Windows **nie jest jeszcze podpisany
-cyfrowo**, więc niepodpisany instalator NSIS nie ma żadnej reputacji, a heurystyki
-behawioralne działają z maksymalną agresywnością. W połączeniu z dołączoną natywną
-biblioteką DLL i setkami plików `.js` zapisywanych w
-`%LOCALAPPDATA%\Programs\OmniRoute` (w tym katalogami pakietów z sufiksami skrótów z
-samodzielnej kompilacji Next.js) wystarcza to do uruchomienia heurystyki. Podpisywanie kodu
-jest planowane; do czasu jego wdrożenia problem może powtarzać się w nowych wydaniach.
+**Dlaczego się uruchamia:** jest instalator Windows** jeszcze nie podpisany kodem** , więc niepodpisany instalator NSIS ma zerową reputację, a heurystyki behawioralne działają z maksymalną agresją. W połączeniu z dołączonym natywnym DLL i setkami plików `.js` napisanych pod `%LOCALAPPDATA%\Programs\OmniRoute` (w tym katalogami pakietów z przyrostkiem skrótu z samodzielnej wersji Next.js ), wystarczy to, aby przełamać heurystykę. Planowane jest podpisanie kodu; dopóki nie wyląduje, nowe wydania mogą to powtórzyć.
 
 **Co zrobić:**
 
-1. **Najpierw zweryfikuj pobrany plik** (pozwala to wykluczyć, że został zmodyfikowany).
-   Każde wydanie zawiera plik `latest.yml`, którego pole `sha512` (base64) obejmuje instalator
-   `OmniRoute.Setup.<version>.exe`. W PowerShell, w folderze zawierającym instalator:
+1. **Najpierw sprawdź pobieranie** (wyklucza naruszony plik). Każde wydanie publikuje `latest.yml`, którego pole `sha512` (base64) obejmuje instalator `OmniRoute.Setup.<version>.exe`. W PowerShell, z folderu zawierającego instalator:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Wynik musi być zgodny z `latest.yml` → `sha512`. Jeśli nie jest, usuń plik i pobierz go
-   ponownie wyłącznie ze [strony wydań w serwisie GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Przywróć + dodaj wyjątek** — przywróć z kwarantanny elementy usunięte podczas wycofywania
-   instalacji i dodaj wyjątek dla `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Ustawienia
-   → Zagrożenia i wykluczenia), a następnie zainstaluj ponownie.
-3. **Zgłoś fałszywy alarm** — <https://opentip.kaspersky.com/>. Zgłoszenia fałszywych alarmów
-   przesyłane przez użytkowników rzeczywiście przyspieszają dodawanie plików do listy dozwolonych.
+   Dane wyjściowe muszą odpowiadać `latest.yml` → `sha512`. Jeśli tak się nie stanie, usuń plik i pobierz ponownie tylko ze [strony wydań GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Przywróć wykluczenie +** — przywróć wycofane elementy z kwarantanny i dodaj wykluczenie dla `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Ustawienia → Zagrożenia i wykluczenia), a następnie zainstaluj ponownie.
+3. **Zgłoś fałszywie pozytywny wynik** — <https://opentip.kaspersky.com/>. Raporty FP przesłane przez użytkowników naprawdę przyspieszają tworzenie listy dozwolonych.
 
 ---
 
@@ -880,10 +841,10 @@ Więcej objawów:
 
 ---
 
-## Nadal masz problem?
+## Nadal utknąłeś?
 
-- **Zgłoszenia GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Architektura**: Szczegóły wewnętrzne znajdziesz w pliku [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
-- **Dokumentacja API**: Wszystkie endpointy znajdziesz w pliku [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
-- **Panel stanu**: Bieżący stan systemu sprawdzisz w sekcji **Panel → Stan**
-- **Translator**: Aby diagnozować problemy z formatem, użyj sekcji **Panel → Translator**
+- **Problemy GitHub** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Architektura** : Zobacz [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md), aby poznać szczegóły wewnętrzne
+- **API Odniesienie** : Zobacz [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) dla wszystkich punktów końcowych
+- **Panel zdrowia** : Sprawdzać** Deska rozdzielcza → Health** dla stanu systemu w czasie rzeczywistym
+- **Tłumacz** : Używać** Pulpit nawigacyjny → Tłumacz** do debugowania problemów z formatem

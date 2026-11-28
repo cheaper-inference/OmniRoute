@@ -38,15 +38,13 @@ Les responsables de la communauté ont le droit et la responsabilité de supprim
 
 Le présent Code de conduite s’applique dans tous les espaces communautaires, ainsi que lorsqu’une personne représente officiellement la communauté dans des espaces publics. Parmi les exemples de représentation de notre communauté figurent l’utilisation d’une adresse e-mail officielle, la publication par l’intermédiaire d’un compte officiel sur les réseaux sociaux ou l’intervention en tant que représentant désigné lors d’un événement en ligne ou hors ligne.
 
-## Enforcement
+## Application
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Les cas de comportement abusif, de harcèlement ou autrement inacceptable peuvent être signalés aux dirigeants communautaires responsables de l'application en ouvrant un avis de sécurité privé à l'adresse suivante :
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+ou en envoyant un e-mail au responsable à diegosouza.pw@outlook.com. Pour les incidents sensibles en matière de sécurité, consultez [`SECURITY.md`](SECURITY.md). Toutes les plaintes seront examinées et feront l’objet d’une enquête rapide et équitable.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Tous les dirigeants communautaires sont tenus de respecter la vie privée et la sécurité de la personne qui signale tout incident.
 
 ## Directives d’application
 

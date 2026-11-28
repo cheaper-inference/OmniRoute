@@ -45,12 +45,12 @@ Kun julkaisua sovitetaan, `release-freeze` -merkkiongelma avataan. Että** ei py
 
 - Jäätynyt `release/vX.Y.Z` kuuluu aluksen vapautuskapteenille.
 - Seuraavan syklin `release/vX+1` leikataan jäätyneestä kärjestä, jotta avustajat jatkavat laskeutumistyötä.
-- Avoin PRs, joka edelleen kohdistuu jäätyneeseen oksaan, pitäisi olla** uudelleen kohdistettu** aktiiviseen (korkeimpaan) `release/v*` -haaraan.
+- Avoin PRs, joka edelleen kohdistuu jäätyneeseen oksaan, pitäisi olla** uudelleen kohdistettuja** aktiiviseen (korkeimpaan) `release/v*` -haaraan.
 
-Tarkista, onko avoin jäädytys, ennen kuin oletat, että haluamasi haara on yhdistettävissä:
+Tarkista, onko avoin jäätyminen, ennen kuin oletat, että haluamasi haara on yhdistettävissä:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Yhdistämismekaniikka (omistaja `queue` label → Mergify) on dokumentoitu [MERGE_TRAIN.md](./MERGE_TRAIN.md) -tiedostossa.

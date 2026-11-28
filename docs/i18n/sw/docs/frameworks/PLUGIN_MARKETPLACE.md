@@ -4,26 +4,13 @@
 
 ---
 
-> **Chanzo rasmi:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`,
-> `scanner.ts`, `loader.ts`), `src/app/api/plugins/`, na
-> `src/app/(dashboard)/dashboard/plugins/`
-> **Ilisasishwa mwisho:** 2026-06-28 — v3.8.40
+> **Chanzo cha ukweli:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`, `scanner.ts`, `loader.ts`), `src/app/api/plugins/` na `src/app/(dashboard)/dashboard/plugins/`
 
-OmniRoute huja na mfumo wa programu-jalizi unaofanana na wa WordPress. Programu-jalizi ni saraka
-zinazojitegemea — kila moja ikiwa na faili ya maelezo ya `plugin.json` na faili ya kuingilia — ambazo huunganishwa
-kwenye mfululizo wa kushughulikia maombi (`onRequest` / `onResponse` / `onError`) na kwenye
-matukio ya mzunguko wa maisha (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`).
+OmniRoute husafirisha mfumo wa programu-jalizi wa mtindo wa WordPress. Programu-jalizi ni saraka zinazojitosheleza — kila moja ikiwa na faili ya maelezo ya `plugin.json` na faili ya ingizo — inayoingia kwenye bomba la ombi (`onRequest` / `onResponse` / `onError`) na katika matukio ya mzunguko wa maisha (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`).
 
-**Soko la Programu-jalizi** ni safu ya ugunduzi iliyo juu ya mfumo huo. Linaweka wazi
-katalogi inayoweza kuvinjariwa ya programu-jalizi zinazoweza kusakinishwa. Kwa chaguomsingi katalogi ni
-rejista ndogo ya awali iliyojengewa ndani; mwendeshaji anaweza kuielekeza kwenye URL maalum ya
-rejista ya mbali, ambapo uletaji hulindwa dhidi ya SSRF kwa kutumia kinga inayotatua DNS
-(tazama [Usalama](#security)).
+The** Soko la programu-jalizi** ni safu ya ugunduzi juu ya mfumo huo. Inafichua katalogi inayoweza kuvinjari ya programu-jalizi zinazoweza kusakinishwa. Kwa chaguo-msingi katalogi ni sajili ndogo iliyojengwa ndani ya mbegu; opereta anaweza kuielekeza kwenye sajili maalum ya mbali URL, ambapo uchotaji unafanywa kuwa mgumu na mlinzi wa SSRF anayesuluhisha DNS (angalia [Usalama](#security) ).
 
-Kila njia ya programu-jalizi **inaruhusiwa kwenye loopback pekee** (Kiwango cha 1 — `LOCAL_ONLY`): programu-jalizi hupakia
-na kutekeleza msimbo katika michakato-toto, kwa hivyo njia hizo haziwezi kufikiwa kutoka
-chanzo kisicho cha loopback bila kujali uthibitishaji. Tazama
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
+Kila njia ya programu-jalizi ni** loopback-pekee** (Tier 1 — `LOCAL_ONLY`): programu-jalizi hupakia na kutekeleza msimbo katika michakato ya watoto, kwa hivyo njia haziwezi kufikiwa kutoka kwa asili isiyo ya nyuma bila kujali auth. Angalia [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
 ## Jinsi Inafaa Together
 
@@ -82,18 +69,19 @@ yasiyotambulika, `listMarketplacePlugins()` hurekodi onyo na kurudi kwenye orodh
 
 Miisho yote inahitaji idhini ya usimamizi (`requireManagementAuth`)** na** ni `/api/plugins` — kitanzi pekee na `/api/plugins/` zimeorodheshwa katika `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Mwisho                           | Mbinu  | Maelezo                                                                    |
-| -------------------------------- | ------ | -------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Orodhesha programu-jalizi zilizosakinishwa (kichujio `?status=` cha hiari) |
-| `/api/plugins`                   | POST   | Sakinisha programu-jalizi kutoka kwa saraka ya vyanzo vya programu-jalizi  |
-| `/api/plugins/scan`              | POST   | Changanua saraka ya programu-jalizi na usajili programu-jalizi mpya        |
-| `/api/plugins/marketplace`       | GET    | Orodhesha maingizo ya katalogi ya soko                                     |
-| `/api/plugins/[name]`            | GET    | Pata maelezo ya programu-jalizi iliyosakinishwa                            |
-| `/api/plugins/[name]`            | DELETE | Sanidua programu-jalizi                                                    |
-| `/api/plugins/[name]/activate`   | POST   | Washa (pakia ndoano za rejista + )                                         |
-| `/api/plugins/[name]/deactivate` | POST   | Zima (moto `onDeactivate`, ondoa ndoano)                                   |
-| `/api/plugins/[name]/config`     | GET    | Pata schema ya usanidi wa programu-jalizi +                                |
-| `/api/plugins/[name]/config`     | PUT    | Sasisha usanidi wa programu-jalizi (imeidhinishwa dhidi ya schema)         |
+| Mwisho                             | Mbinu  | Maelezo                                                                    |
+| ---------------------------------- | ------ | -------------------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Orodhesha programu-jalizi zilizosakinishwa (kichujio `?status=` cha hiari) |
+| `/api/plugins`                     | POST   | Sakinisha programu-jalizi kutoka kwa saraka ya vyanzo vya programu-jalizi  |
+| `/api/plugins/scan`                | POST   | Changanua saraka ya programu-jalizi na usajili programu-jalizi mpya        |
+| `/api/plugins/marketplace`         | GET    | Orodhesha maingizo ya katalogi ya soko                                     |
+| `/api/plugins/marketplace/install` | POST   | Sakinisha programu-jalizi ya soko kwa jina                                 |
+| `/api/plugins/[name]`              | GET    | Pata maelezo ya programu-jalizi iliyosakinishwa                            |
+| `/api/plugins/[name]`              | DELETE | Sanidua programu-jalizi                                                    |
+| `/api/plugins/[name]/activate`     | POST   | Washa (pakia ndoano za rejista + )                                         |
+| `/api/plugins/[name]/deactivate`   | POST   | Zima (moto `onDeactivate`, ondoa ndoano)                                   |
+| `/api/plugins/[name]/config`       | GET    | Pata schema ya usanidi wa programu-jalizi +                                |
+| `/api/plugins/[name]/config`       | PUT    | Sasisha usanidi wa programu-jalizi (imeidhinishwa dhidi ya schema)         |
 
 Kichujio cha `GET /api/plugins` `status` kinakubali mojawapo ya `installed` / `active` / `inactive` / `error`. Thamani batili inarudisha `400`.
 
@@ -113,9 +101,9 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` lazima iwe ni** kabisa** njia ya saraka** ndani ya saraka ya vyanzo vya programu-jalizi** : `plugin-sources` karibu na mzizi wa programu-jalizi, kwa hivyo `~/.omniroute/plugin-sources/` kwa chaguo-msingi, au `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` wakati utofauti huo umewekwa (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Nakili au utengeneze programu-jalizi hapo kwanza. Usakinishaji unakataliwa na `400` wakati njia ina `..` au null byte, iko nje ya saraka hiyo, hutatuliwa nje yake kupitia ulinganifu, ina ulinganifu ambao lengo lake liko nje yake, au wakati saraka haipo. Saraka chanzo lazima iwe na `plugin.json` halali (au uwe mzazi wa mtoto mmoja). Kwa mafanikio jibu ni `201` na safu ya programu-jalizi iliyosakinishwa.
+`path` lazima iwe ni** kabisa** njia ya saraka** ndani ya saraka ya vyanzo vya programu-jalizi** : `plugin-sources` karibu na mzizi wa programu-jalizi, kwa hivyo `~/.omniroute/plugin-sources/` kwa chaguo-msingi, au `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` wakati utofauti huo umewekwa (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Nakili au utengeneze programu-jalizi hapo kwanza. Usakinishaji unakataliwa na `400` wakati njia ina `..` au null byte, iko nje ya saraka hiyo, hutatuliwa nje yake kupitia ulinganifu, ina ulinganifu ambao lengo lake liko nje yake, au wakati saraka haipo. Saraka chanzo lazima iwe na `plugin.json` halali (au uwe mzazi wa mtoto mmoja). Juu ya mafanikio jibu ni `201` na safu ya programu-jalizi iliyosakinishwa.
 
-Tofauti na njia zingine za programu-jalizi, hii inahitaji kitambulisho cha usimamizi (kipindi cha dashibodi au kitufe API kilichodhibitiwa) hata wakati kuingia kumezimwa (`requireLogin=false`): kusakinisha msimbo kamwe si kitendo kisichojulikana.
+Tofauti na njia zingine za programu-jalizi, hii inahitaji kitambulisho cha usimamizi (kipindi cha dashibodi au kitufe API kilichodhibitiwa) hata wakati kuingia kumezimwa (`requireLogin=false`): kusakinisha msimbo kamwe si kitendo kisichojulikana. Hali hiyo hiyo inatumika kwa `POST /api/plugins/marketplace/install` (mwili `{ "name": "<plugin>" }`).
 
 ### Vinjari soko
 
@@ -133,7 +121,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` huthibitisha kila thamani iliyotolewa dhidi ya `configSchema` ya programu-jalizi (iliyotangazwa kwenye faili ya maelezo): sehemu za `number` heshima `min`/`max`, sehemu za `select` lazima zilingane na `enum` iliyotangazwa. Vifunguo ambavyo havipo kwenye schema vinaruhusiwa kupitia.
+`PUT .../config` huthibitisha mwili dhidi ya `configSchema` ya programu-jalizi (iliyotangazwa kwenye faili ya maelezo) na `validatePluginConfig()` kutoka `src/lib/plugins/manifest.ts`: kila ufunguo lazima utangazwe kwenye taratibu, thamani lazima zilingane na aina iliyotangazwa, sehemu za `number` huheshimu `min`/`max`, na sehemu za `select` lazima zilingane na `enum` iliyotangazwa. Ukiukaji wowote unarudisha `400` na hakuna chochote kinachohifadhiwa. Programu-jalizi inayotangaza hakuna `configSchema` haina funguo zinazoweza kusanidiwa, kwa hivyo ombi limekataliwa na `400` ("Plugin haitangazi funguo zozote zinazoweza kusanidiwa").
 
 ## Usanidi
 
@@ -213,12 +201,12 @@ URL ambayo haifaulu safu yoyote haibatilishi ombi — soko huanguka kimya kimya 
 
 ### Kutengwa kwa utekelezaji wa programu-jalizi
 
-> **Plugins si sandboxed.** Mtoto ni mchakato wa kawaida Node.js unaoendeshwa kama mtumiaji wa OmniRoute, bila muktadha VM na hakuna bendera za ruhusa Node.js, kwa hivyo msimbo wa programu-jalizi unaweza kusoma na kuandika faili yoyote ambayo mtumiaji anaweza, kuendesha programu na kufikia mtandao. `requires.permissions` huamua tu ni mazingira gani mtoto hupokea; ruhusa zingine hazitekelezwi. Sakinisha programu-jalizi unazoziamini pekee. Mpaka wa mchakato hapa chini una ajali na hutegemea; sio mpaka wa usalama.
+> **Plugins si sandboxed kwa default.** Mtoto ni mchakato wa kawaida Node.js unaoendeshwa kama mtumiaji wa OmniRoute, bila muktadha VM na hakuna bendera za ruhusa Node.js, kwa hivyo msimbo wa programu-jalizi unaweza kusoma na kuandika faili yoyote ambayo mtumiaji anaweza, kuendesha programu na kufikia mtandao. `requires.permissions` huamua tu ni mazingira gani mtoto hupokea; ruhusa zingine hazitekelezwi. Alama ya kipengele cha `PLUGIN_PERMISSION_MODEL_ENABLED` ya kuchagua (kuzimwa kwa chaguo-msingi) huendesha kila programu-jalizi chini ya modeli ya ruhusa ya Node.js iliyojengwa kutoka kwa ruhusa hizo, isipokuwa `network`, ambayo Node.js haiwezi kuwekea vikwazo (tazama [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Sakinisha programu-jalizi unazoziamini pekee. Mpaka wa mchakato hapa chini una ajali na hutegemea; sio mpaka wa usalama.
 
 - **Kutengwa kwa mchakato** — `loadPlugin()` (`src/lib/plugins/loader.ts`) huzalisha kila programu-jalizi katika mchakato tofauti wa mtoto Node.js na kuwasiliana kupitia IPC. Simu za ndoano zina muda wa kuisha na ongezeko la `SIGTERM` → `SIGKILL`.
 - **Orodha ya ruhusa ya Env** — mtoto hupokea tu seti iliyoruhusiwa ya vigezo vya mazingira; seti pana zaidi hutolewa tu wakati faili ya maelezo inapoomba ruhusa ya `env`.
 - **Sakinisha kizuizi cha chanzo** — `POST /api/plugins` inasoma tu kutoka kwa saraka ya vyanzo vya programu-jalizi (ona "Sakinisha kutoka kwa njia ya ndani"): njia imehalalishwa na `realpath`, lazima ibaki ndani kabisa ya saraka hiyo, na mti wa chanzo unaobeba ulinganifu unaotoroka umekataliwa kabla ya kitu chochote kunakiliwa.
-- **Uzuiaji wa njia** — install/upgrade/uninstall inadai kwamba saraka ya programu-jalizi na `manifest.main` inasuluhisha** ndani** mzizi wa programu-jalizi unaodhibitiwa kabla ya kunakili au ufutaji unaorudiwa (walinzi dhidi ya njia zilizoharibiwa DB na `../` traversal katika `manifest.main`). Uamilisho hutatua ulinganifu kupitia `realpath` na kukataa kupakia sehemu ya kuingilia ambayo huepuka saraka ya programu-jalizi.
+- **Uzuiaji wa njia** — install/upgrade/uninstall inadai kwamba saraka ya programu-jalizi na `manifest.main` inasuluhisha** ndani** mzizi wa programu-jalizi unaodhibitiwa kabla ya kunakili au ufutaji unaorudiwa (walinzi dhidi ya njia za DB zilizoharibiwa na `../` traversal katika `manifest.main`). Uamilisho hutatua ulinganifu kupitia `realpath` na kukataa kupakia sehemu ya kuingilia ambayo huepuka saraka ya programu-jalizi.
 - **Pini ya hiari ya uadilifu** — a faili ya maelezo inaweza kutangaza uga wa `integrity` (`sha256-<base64>`, SRI ). Ikipo, kipakiaji huthibitisha heshi ya ingizo wakati wa kupakia na kukataa kuamilisha wakati kutolingana. Ni opt-in tamper-detection,** sivyo** mpaka wa usalama: haizuii kile programu-jalizi iliyopakiwa inaweza kufanya.
 - **Hakuna kitambulisho cha mteja kwenye ndoano** — muktadha uliopitishwa kwa `onRequest`, `onResponse` na `onError` umeondoa vichwa vya `authorization`, `x-api-key`, `proxy-authorization` na `cookie`, na rekodi ya ufunguo wa API haina thamani muhimu (`redactPluginContext()` katika `src/lib/plugins/hooks.ts`).
 

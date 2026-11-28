@@ -52,7 +52,7 @@ flowchart LR
 আপনি যে শাখাটি একত্রিত করতে চান তা অনুমান করার আগে একটি খোলা ফ্রিজের জন্য পরীক্ষা করুন:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 মার্জ মেকানিক্স (মালিক `queue` লেবেল → Mergify) [MERGE_TRAIN.md](./MERGE_TRAIN.md) এ নথিভুক্ত করা হয়েছে।

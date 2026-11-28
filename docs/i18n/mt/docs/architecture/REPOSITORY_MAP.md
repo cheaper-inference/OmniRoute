@@ -4,9 +4,9 @@
 
 ---
 
-> **Dak li jgħix fejn: kull direttorju tal-ogħla livell traċċat u fajl tal-għeruq, bi skop ta 'linja waħda.** Aġġornata l-aħħar: 2026-11-13 (OmniRoute v3.8.54)
+> **Dak li jgħix fejn: kull direttorju tal-ogħla livell traċċat u fajl tal-għeruq, bi skop ta 'linja waħda.**
 >
-> Uża din il-mappa biex issib triqtek madwar il-codebase, imbagħad segwi l-links għad-dokumenti ddedikati. L-għadd tal-fajls tkejjel `git ls-files` fid-data ta' hawn fuq. Huma jinbidlu ma 'kważi kull rilaxx, għalhekk ittrattahom bħala ordnijiet ta' kobor.
+> Uża din il-mappa biex issib triqtek madwar il-codebase, imbagħad segwi l-links għad-dokumenti ddedikati. L-għadd tal-fajls jiġu minn `git ls-files` u jinbidlu ma kważi kull rilaxx. Ittrattahom bħala ordnijiet ta 'kobor.
 
 ## Siġra tal-ogħla livell
 

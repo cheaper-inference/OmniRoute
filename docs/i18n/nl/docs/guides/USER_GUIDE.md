@@ -246,33 +246,41 @@ Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Combinaties
+## 🎨 combo's
 
-Je kunt combinatiekaarten rechtstreeks in **Dashboard → Combinaties** opnieuw ordenen door de greep op elke kaart te verslepen. De volgorde wordt opgeslagen in SQLite en hersteld wanneer de pagina opnieuw wordt geladen.
+Je kunt combokaarten direct opnieuw ordenen** Dashboard → combo's** door het handvat op elke kaart te slepen. De bestelling wordt opgeslagen in SQLite en hersteld bij herladen.
 
-### Voorbeeld 1: Abonnement maximaliseren → Goedkope back-up
+### Zoek een aanbieder, model of account
+
+In Combo maken of bewerken bevatten de stapsgewijze kiezers voor Provider, Model, Account en combo-referentie een lokaal zoekveld. Zoek op een weergegeven naam, ID, provideralias of modelbron en klik vervolgens op een resultaat of gebruik de pijltoetsen en Enter. Meerdere zoektermen moeten allemaal overeenkomen. Als u de zoekopdracht wist of op Escape drukt, blijft de geselecteerde waarde ongewijzigd.
+
+De automatische accountkeuze blijft zichtbaar tijdens het zoeken. De optionele lijst met accountbeperkingen heeft een apart filter: geselecteerde accounts buiten de zichtbare resultaten blijven geselecteerd, en de telling omvat deze ook. Verborgen e-mailfragmenten kunnen niet worden doorzocht als e-mailprivacy is ingeschakeld. Voeg de stap toe en sla de combo op zoals gewoonlijk; Als u een zoekopdracht typt, wordt er niets opgeslagen of getest.
+
+Dezelfde lokale zoekopdracht is beschikbaar voor modellen voor verbindingstests, aangepaste CLI standaard- en aliasmodellen en keuzes voor opgeslagen proxy's. Bestaande acties voor opslaan, toepassen en testen blijven gescheiden.
+
+### Voorbeeld 1: Maximaliseer abonnement → Goedkope back-up
 
 ```
-Dashboard → Combinaties → Nieuwe maken
+Dashboard → Combos → Create New
 
-Naam: premium-coding
-Modellen:
-  1. cc/claude-opus-4-7 (Primair abonnement)
-  2. glm/glm-4.7 (Goedkope back-up, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Goedkoopste terugvaloptie, $0.3/1M)
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
 
-Gebruiken in CLI: premium-coding
+Use in CLI: premium-coding
 ```
 
 ### Voorbeeld 2: Alleen gratis (geen kosten)
 
 ```
-Naam: free-combo
-Modellen:
-  1. if/kimi-k2.7-code (vermelde gratis toegang; providerlimieten kunnen van toepassing zijn)
-  2. kr/qwen3-coder-next (gratis Kiro-terugvaloptie)
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
 
-Kosten: momenteel vermeld als $0; voorwaarden en beschikbaarheid kunnen wijzigen
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -420,7 +428,7 @@ omniroute autostart disable
 
 ### Verwijderen
 
-Als je OmniRoute niet langer nodig hebt, bieden we twee snelle scripts voor een schone verwijdering:
+Wanneer u OmniRoute niet langer nodig heeft, bieden wij twee snelle scripts voor een schone verwijdering:
 
 | Commando                 | Actie                                                                                |
 | ------------------------ | ------------------------------------------------------------------------------------ |
@@ -432,7 +440,7 @@ Als je OmniRoute niet langer nodig hebt, bieden we twee snelle scripts voor een 
 ### VPS -implementatie
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -514,8 +522,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -882,13 +890,13 @@ Configureer via** Dashboard → Instellingen → Routing** . Het dashboard legt 
 - `p2c` (Kracht van twee keuzes)
 - `least-used` en `cost-optimized`
 - `auto` — scoregestuurd voor alle kandidaten
-- `lkgp` (Last Known Good Provider) — pint naar de laatste succesvolle provider en valt vervolgens terug op regels
-- `context-optimized` — kiest het model met het grootste vrije contextvenster
-- `context-relay` — combineert lange-contextmodellen voor vervolgbeurten
+- `lkgp` (Last Known Good Provider) — pint naar de laatste succesvolle provider en valt vervolgens terug op de regels
+- `context-optimized` — probeert eerst het model met het grootste bekende contextvenster
+- `context-relay` — prioriteitsvolgorde plus een samenvatting van de overdracht wanneer het gesprek naar een ander account wordt verplaatst
 
 #### Externe sticky sessiekop
 
-Voor externe sessieaffiniteit (bijvoorbeeld Claude Code/Codex agenten achter omgekeerde proxy's), verzendt u:
+Voor externe sessie-affiniteit (bijvoorbeeld Claude Code/Codex agenten achter omgekeerde proxy's), verzendt u:
 
 ```http
 X-Session-Id: your-session-key
@@ -896,13 +904,13 @@ X-Session-Id: your-session-key
 
 OmniRoute accepteert ook `x_session_id` en retourneert de effectieve sessiesleutel in `X-OmniRoute-Session-Id`.
 
-Als u Nginx gebruikt en headers in onderstrepingsformulier verzendt, schakelt u het volgende in:
+Als u Nginx gebruikt en headers met onderstrepingstekens verzendt, schakelt u het volgende in:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Modelaliassen met jokertekens
+#### Wildcard-modelaliassen
 
 Maak jokertekenpatronen om modelnamen opnieuw toe te wijzen:
 
@@ -977,7 +985,7 @@ omniroute combo create free-stack \
 
 Het koppelen van gespecialiseerde vision-modellen aan snelle tekstgeneratie voor workflows waarbij afbeeldingen worden begrepen en code wordt gegenereerd.
 
-- **Patroon** : Een `Priority` combo die als eerste modellen met zichtfunctie weergeeft en als laatste een text/code model met hoge doorvoer.
+- **Patroon** : Een `Priority` combo die als eerste de modellen met zichtfunctie weergeeft en als laatste een text/code model met hoge doorvoer.
 - **Modellen** :
   1. `gemini/gemini-2.5-pro` (sterk image/multimodal begrip)
   2. `openai/gpt-4o` (evenwichtige visie en gereedschapsgebruik)
@@ -1016,9 +1024,9 @@ OmniRoute implementeert veerkracht op providerniveau met vijf componenten:
 
 4. **Wacht op afkoeling** — Als elke kandidaat-verbinding al aan het afkoelen is, kan OmniRoute wachten op de eerste cooldown en hetzelfde clientverzoek automatisch opnieuw proberen.
 
-5. **Automatische detectie van frequentielimiet** — Wanneer upstream-providers expliciete wachtvensters retourneren, overschrijven deze hints de cooldown van de lokale verbinding wanneer de instelling is ingeschakeld.
+5. **Automatische detectie van frequentielimiet** — Wanneer upstream-providers expliciete wachtvensters retourneren, overschrijven deze hints de afkoelperiode van de lokale verbinding wanneer de instelling is ingeschakeld.
 
-**Pro-tip:** Gebruik de** Gezondheid** pagina om live provideronderbrekers te inspecteren en opnieuw in te stellen na een storing. De pagina Veerkracht wijzigt alleen de configuratie.
+**Pro-tip:** Gebruik de** Gezondheid** pagina om live provideronderbrekers te inspecteren en opnieuw in te stellen na een storing. De pagina Veerkracht verandert alleen de configuratie.
 
 ---
 
@@ -1169,14 +1177,14 @@ Uitzetten** Redeneringstokenbuffer** wanneer upstream-providers strikte `max_tok
 
 Toegang via** Dashboard → Gezondheid** . Realtime overzicht van de systeemstatus met 6 kaarten:
 
-| Kaart                           | Wat het laat zien                                               |
-| ------------------------------- | --------------------------------------------------------------- |
-| **Systeemstatus**               | Uptime, versie, geheugengebruik, gegevensmap                    |
-| **Gezondheid van de aanbieder** | Algemene runtimestatus van de stroomonderbreker van de provider |
-| **Tarieflimieten**              | Actieve verbindingscooldowns per account met resterende tijd    |
-| **Actieve vergrendelingen**     | Actieve modelgerichte uitsluitingen en tijdelijke uitsluitingen |
-| **Handtekeningcache**           | Deduplicatiecachestatistieken (actieve sleutels, hitrate)       |
-| **Latency-telemetrie**          | p50/p95/p99 latency-aggregatie per provider                     |
+| Kaart                           | Wat het laat zien                                                   |
+| ------------------------------- | ------------------------------------------------------------------- |
+| **Systeemstatus**               | Uptime, versie, geheugengebruik, gegevensmap                        |
+| **Gezondheid van de aanbieder** | Algemene runtimestatus van de stroomonderbreker van de provider     |
+| **Tarieflimieten**              | Actieve cooldowns voor verbindingen per account met resterende tijd |
+| **Actieve vergrendelingen**     | Actieve modelgerichte uitsluitingen en tijdelijke uitsluitingen     |
+| **Handtekeningcache**           | Deduplicatiecachestatistieken (actieve sleutels, hitrate)           |
+| **Latency-telemetrie**          | p50/p95/p99 latency-aggregatie per provider                         |
 
 **Pro-tip:** De Gezondheidspagina wordt elke 10 seconden automatisch vernieuwd. Gebruik de stroomonderbrekerkaart om te identificeren welke providers problemen ondervinden.
 
@@ -1333,32 +1341,34 @@ Zie [API_REFERENCE.md](../reference/API_REFERENCE.md) voor de volledige endpoint
 
 ## 💻 Interne CLI
 
-OmniRoute wordt geleverd met een interne CLI (`omniroute …`) voor configuratie, diagnostiek en runtimebeheer. Deze staat **los van de pagina "CLI-hulpprogramma's" in het dashboard**, waarmee CLI's van derden (Claude Code, Cursor, Codex, Cline, …) worden geconfigureerd, zodat ze met OmniRoute kunnen communiceren.
+OmniRoute levert een interne CLI (`omniroute …`) voor installatie, diagnostiek en runtime-controle. Dit is** gescheiden van de pagina "CLI Tools" in het dashboard** , die CLIs van derden configureert (Claude Code, Cursor, Codex, Cline, ...) zodat ze met OmniRoute kunnen praten.
 
 ```bash
-omniroute setup                    # Interactieve wizard (wachtwoord, providers, combinaties)
-omniroute setup --non-interactive  # Geschikt voor CI
-omniroute doctor                   # Statusdiagnostiek (gegevensmap, database, providers, poorten)
-omniroute providers available      # Ondersteunde providers weergeven
-omniroute providers list           # Geconfigureerde verbindingen weergeven
-omniroute providers test <id>      # Een providerverbinding live testen
-omniroute combos list              # Combinaties weergeven
-omniroute combos switch <name>     # Standaardcombinatie instellen
-omniroute models                   # Beschikbare modellen weergeven (--json, --search)
-omniroute keys add | list | remove # API-sleutels beheren vanuit de terminal
-omniroute backup                   # Momentopname van configuratie en database maken
-omniroute restore [<timestamp>]    # Herstellen vanuit een momentopname
-omniroute health                   # Gedetailleerde status (stroomonderbrekers, cache, geheugen)
-omniroute quota                    # Quotagebruik van providers
-omniroute mcp status               # Status van de MCP-server
-omniroute a2a status               # Status van de A2A-server
-omniroute tunnel list|create|stop  # Cloudflare-/Tailscale-/ngrok-tunnels
-omniroute reset-password           # Beheerderswachtwoord opnieuw instellen
-omniroute --mcp                    # MCP-server starten via stdio
-omniroute --port 3000              # Server starten op een aangepaste poort
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Tip: combineer `omniroute doctor --json` met je monitoringtool om waarschuwingen te ontvangen bij ongezonde providerverbindingen.
+Tip: koppel `omniroute doctor --json` met uw monitoringtool om te waarschuwen voor een kapotte lokale installatie. `doctor` test geen providerverbindingen; gebruik daarvoor `omniroute providers test <id>`.
 
 ---
 

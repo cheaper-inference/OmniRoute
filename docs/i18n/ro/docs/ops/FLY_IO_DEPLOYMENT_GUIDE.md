@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Parametri obligatorii
+## 5. Parametrii necesari
 
-Pentru acest proiect, se recomandă configurarea pe Fly.io cel puțin a următorilor parametri.
+Acest proiect recomandă să configurați cel puțin următorii parametri pe Fly.io.
 
 ### 5.1 Parametri verificați
 
-Acești parametri au fost utilizați în implementări reale ale aplicației curente `omniroute`:
+Acești parametri au fost utilizați în implementările reale ale aplicației actuale `omniroute` :
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (obligatoriu în producție — utilizat pentru autentificarea punții WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (necesar în producție — utilizat pentru autentificarea WebSocket bridge)
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 Despre `INITIAL_PASSWORD`
 
-Proiectul curent nu setează `INITIAL_PASSWORD`, deoarece această implementare nu îl necesită.
+Proiectul actual nu setează `INITIAL_PASSWORD` deoarece această implementare nu necesită acest lucru.
 
 Dacă nu este setat:
 
-- Jurnalul de pornire va indica faptul că parola implicită este `CHANGEME`
-- Ar trebui să schimbați parola de autentificare din setările sistemului cât mai curând posibil după implementare
+- Creați parola tabloului de bord în expertul de onboarding la prima vizită. Finalizați pasul parolei: omiterea acesteia dezactivează autentificarea la tabloul de bord, ceea ce lasă tabloul de bord deschis pentru oricine poate accesa aplicația URL
+- Proxy-ul lui Fly ajunge la aplicație de la o adresă non-loopback, așa că după ce trimiteți parola, vrăjitorul vă solicită un jeton de bootstrap unic, pe care aplicația îl imprimă în jurnalul său în acel moment: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Dacă acea linie a defilat în afara jurnalului, reporniți aplicația și trimiteți din nou expertul pentru a imprima un nou simbol
 
-Dacă doriți să inițializați parola backend-ului fără intervenție manuală, o puteți adăuga ulterior:
+Pentru a seta parola nesupravegheată, adăugați-o înainte de prima vizită a tabloului de bord (odată ce parola este salvată, `INITIAL_PASSWORD` este ignorată):
 
 - `INITIAL_PASSWORD`
 
@@ -276,7 +276,7 @@ Dacă pagina `Secrets` din consolă nu afișează variabilele așteptate, verifi
 
 ## 9. Actualizări și lansări ulterioare
 
-După actualizarea codului, procesul de lansare este simplu:
+După actualizările codului, procesul de lansare este simplu:
 
 ```powershell
 git pull
@@ -289,45 +289,45 @@ Dacă trebuie doar să actualizați parametrii fără a modifica codul:
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly va efectua automat o actualizare graduală a mașinilor.
+Fly va efectua automat o actualizare continuă a mașinilor.
 
-### 9.1 Urmărirea actualizărilor depozitului upstream, păstrând fișierul `fly.toml` al fork-ului
+### 9.1 Urmărirea actualizărilor depozitului din amonte, păstrând `fly.toml` ul furcii
 
-Dacă depozitul actual este un fork și doriți să sincronizați actualizările din depozitul upstream `https://github.com/diegosouzapw/OmniRoute`, urmați fluxul de lucru de mai jos.
+Dacă depozitul curent este un furk și doriți să sincronizați actualizările din `https://github.com/cheaper-inference/OmniRoute` din amonte, urmați fluxul de lucru de mai jos.
 
-Mai întâi, verificați depozitele remote:
+În primul rând, verificați telecomenzile:
 
 ```powershell
 git remote -v
 ```
 
-Ar trebui să vedeți cel puțin:
+Ar trebui să vezi cel puțin:
 
-- `origin` indicând spre propriul fork
-- `upstream` indicând spre depozitul original
+- `origin` arătând spre propria furcă
+- `upstream` indicând depozitul original
 
 Dacă `upstream` nu este configurat, adăugați-l:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Înainte de sincronizarea cu upstream, preluați cele mai recente commituri și etichete:
+Înainte de sincronizare cu upstream, preluați cele mai recente comiteri și etichete:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Verificați versiunea curentă și etichetele upstream:
+Verificați versiunea curentă și etichetele din amonte:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Notă: Versiunea curentă a proiectului este `v3.8.0`. Referințele la `v3.4.7` de mai jos sunt păstrate doar ca exemple istorice. Pentru lansările efective, utilizați `:latest` sau eticheta versiunii curente (de exemplu, `:v3.8.0`).
+> Notă: versiunea actuală a proiectului este `v3.8.0`. Referințele `v3.4.7` de mai jos sunt păstrate doar ca exemple istorice. Pentru versiunile reale, utilizați `:latest` sau eticheta versiunii curente (de exemplu, `:v3.8.0`).
 
-Dacă doriți să îmbinați cea mai recentă versiune upstream `main`, păstrând în mod forțat fișierul `fly.toml` al fork-ului, urmați acest flux de lucru:
+Dacă doriți să îmbinați cel mai recent `main` din amonte, păstrând cu forță `fly.toml`-ul furcii, urmați acest flux de lucru:
 
 ```powershell
 git merge upstream/main
@@ -340,31 +340,31 @@ git push origin main
 Note:
 
 - `git merge upstream/main` sincronizează cel mai recent cod din depozitul original
-- `git checkout HEAD~1 -- fly.toml` restaurează propriul fișier `fly.toml` al fork-ului din starea anterioară îmbinării
-- Dacă upstream nu a modificat `fly.toml`, acest pas nu va introduce nicio diferență
-- Dacă upstream a modificat `fly.toml`, acest pas asigură că numele aplicației Fly, montarea volumului, regiunea și alte configurări de implementare specifice fork-ului nu sunt suprascrise
+- `git checkout HEAD~1 -- fly.toml` restabilește propriul `fly.toml` al furcii de înainte de îmbinare
+- Dacă în amonte nu a modificat `fly.toml`, acest pas nu va introduce nicio diferență
+- Dacă în amonte a modificat `fly.toml`, acest pas asigură că numele aplicației Fly, montarea volumului, regiunea și alte configurații de implementare specifice furcii nu sunt suprascrise
 
-Dacă doriți să vă aliniați la o anumită etichetă de lansare (de exemplu, `v3.4.7`), verificați mai întâi dacă eticheta este deja inclusă în `upstream/main`:
+Dacă doriți să vă aliniați cu o anumită etichetă de lansare (de exemplu `v3.4.7`), verificați mai întâi că eticheta este deja inclusă în `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Un rezultat pozitiv înseamnă că `upstream/main` conține deja versiunea respectivă; puteți îmbina pur și simplu `upstream/main`.
+O întoarcere reușită înseamnă că `upstream/main` conține deja acea versiune; puteți pur și simplu să îmbinați `upstream/main`.
 
-### 9.2 Secvența standard de lansare după sincronizarea cu upstream
+### 9.2 Secvență de lansare standard după sincronizare în amonte
 
-După sincronizarea cu depozitul original, urmați această ordine recomandată pentru lansare:
+După sincronizarea cu depozitul original, urmați această ordine de lansare recomandată:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Restaurați fișierul `fly.toml` al fork-ului
+3. Restabiliți `fly.toml` furcii
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Acesta este fluxul de lucru efectiv utilizat la actualizarea proiectului curent la `v3.4.7` (exemplul se referă la o versiune istorică; versiunea curentă efectivă este `v3.8.0`).
+Acesta este fluxul de lucru real utilizat la actualizarea proiectului curent la `v3.4.7` (exemplul se referă la o versiune istorică; versiunea actuală actuală este `v3.8.0`).
 
 ---
 
@@ -418,16 +418,16 @@ Dacă vedeți în schimb `/app/data/...`, `DATA_DIR` este configurat incorect ș
 
 ---
 
-## 12. Probleme frecvente
+## 12. Probleme comune
 
-### 12.1 Pagina `Secrets` este goală
+### 12.1 `Secrets` Pagina este goală
 
 De obicei, există două motive:
 
-- Nu ați executat încă `flyctl secrets set`
+- Încă nu ați rulat `flyctl secrets set`
 - Vizualizați o altă aplicație (de exemplu, `oroute` în loc de `omniroute`)
 
-### 12.2 `flyctl deploy` raportează `app not found`
+### 12.2 `flyctl deploy` Rapoarte `app not found`
 
 Creați mai întâi aplicația:
 
@@ -435,23 +435,23 @@ Creați mai întâi aplicația:
 flyctl apps create omniroute
 ```
 
-### 12.3 Analizarea fișierului `fly.toml` eșuează
+### 12.3 `fly.toml` Analizarea eșuează
 
 Verificați următoarele:
 
-- Dacă există caractere corupte în comentarii
-- Dacă ghilimelele și indentarea TOML sunt corecte
+- Dacă în comentarii există personaje deranjate
+- Dacă citarea și indentarea TOML sunt corecte
 
-### 12.4 Datele nu sunt păstrate
+### 12.4 Datele nu persistă
 
-Verificați ambele condiții de mai jos:
+Verificați ambele următoarele:
 
 - `fly.toml` conține `destination = '/data'`
-- `DATA_DIR` este setată la `/data`
+- `DATA_DIR` este setat la `/data`
 
-### 12.5 Poate rula fără `INITIAL_PASSWORD`?
+### 12.5 Poate funcționa fără `INITIAL_PASSWORD`?
 
-Da, poate rula. Va utiliza implicit parola prestabilită `CHANGEME`. Se recomandă schimbarea parolei backendului cât mai curând posibil în mediul de producție.
+Da. Cu `INITIAL_PASSWORD` dezactivat, creați parola tabloului de bord în expertul de onboarding la prima vizită (secțiunea 5.2 acoperă simbolul de bootstrap unic și pasul parolei).
 
 ---
 

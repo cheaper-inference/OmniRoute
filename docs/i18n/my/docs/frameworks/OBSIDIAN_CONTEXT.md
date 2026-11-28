@@ -123,56 +123,48 @@ identity ကို ဆက်ခံအသုံးပြု၍ မရပါ။ Pl
 authenticated key များသည် global fallback ကို ဆက်လက်အသုံးပြုသည်။ `obsidian_sync_*`
 tool လေးခုသည် ၎င်းတို့၏ သီးခြား sync-token လုပ်ဆောင်ပုံကို ဆက်လက်အသုံးပြုသည်။
 
-## MCP ကိရိယာများ (22)
+## MCP ကိရိယာ (၂၂) ခု၊
 
-`open-sse/mcp-server/tools/obsidianTools.ts` တွင် သတ်မှတ်ထားသည်။ token/base-URL ကို ခေါ်ဆိုမှုတစ်ခုချင်းစီအလိုက် ဖြေရှင်းသတ်မှတ်သည် (API key အလိုက် ဦးစွာ၊ ထို့နောက် global)။ OmniRoute **sync server** ကို အသုံးပြုသည့် ကိရိယာများ (`obsidian_sync_*` ကိရိယာလေးခု) သည် OmniRoute settings တွင် စီစဉ်သတ်မှတ်ထားသော sync auth token ကိုလည်း ထပ်မံလိုအပ်သည်။
+`open-sse/mcp-server/tools/obsidianTools.ts` တွင်သတ်မှတ်ထားသည်။ token/base-URL ခေါ်ဆိုမှုတစ်ခုအတွက် ဖြေရှင်းပေးသည် (per-API-key ပထမ၊ ထို့နောက် ဂလိုဘယ်)။ OmniRoute ကို ထိသော ကိရိယာများ** ထပ်တူကျသောဆာဗာ** ( `obsidian_sync_*` ကိရိယာလေးခု) ထို့အပြင် OmniRoute ဆက်တင်များတွင် ပြင်ဆင်ထားသော ထပ်တူပြုမှုဆိုင်ရာ စစ်မှန်ကြောင်း တိုကင်ကို လိုအပ်သည်။
 
-### ဖတ်ရှုရေးကိရိယာများ (`read:obsidian`)
+### ဖတ်ရန်ကိရိယာများ (`read:obsidian`)
 
 | ကိရိယာ                       | ဖော်ပြချက်                                                                                                           |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Local REST API ကို ဆက်သွယ်အသုံးပြုနိုင်ခြင်းနှင့် အထောက်အထားစိစစ်ပြီးဖြစ်ခြင်း ရှိမရှိ စစ်ဆေးသည်။                    |
-| `obsidian_search_simple`     | note အကြောင်းအရာကို စာသားအပြည့်အစုံ ရှာဖွေပြီး file path များပါဝင်သည့် စာသားအပိုင်းအစများကို ပြန်ပေးသည်။             |
-| `obsidian_search_structured` | JSON Logic expression (and/or/regex/path filter များ) ကို အသုံးပြု၍ ရှာဖွေသည်။                                       |
-| `obsidian_read_note`         | vault-relative path ဖြင့် note တစ်ခုကို ဖတ်ရှုသည်၊ သတ်မှတ်ထားသော heading/block/frontmatter ကိုလည်း ရွေးချယ်နိုင်သည်။ |
-| `obsidian_list_vault`        | vault အတွင်းရှိ file များနှင့် directory များကို စာရင်းပြုစုသည် (entry tree)။                                        |
-| `obsidian_get_document_map`  | note ၏ heading ဖွဲ့စည်းပုံကို heading များ → line number များပါဝင်သည့် map အဖြစ် ရယူသည်။                             |
-| `obsidian_get_note_metadata` | အကြောင်းအရာအပြည့်အစုံမပါဘဲ frontmatter၊ tag များ၊ link များနှင့် character/word အရေအတွက်ကို ရယူသည်။                  |
-| `obsidian_get_active_file`   | Obsidian တွင် လက်ရှိအသုံးပြုနေသော file ၏ path နှင့် အကြောင်းအရာကို ရယူသည်။                                           |
-| `obsidian_get_periodic_note` | ရက်စွဲတစ်ခုအတွက် နေ့စဉ်/အပတ်စဉ်/လစဉ် periodic note ကို ရယူသည် (ချန်လှပ်ထားပါက ယနေ့ရက်စွဲ)။                           |
-| `obsidian_get_tags`          | vault tag အားလုံးကို ၎င်းတို့၏ အသုံးပြုမှုအကြိမ်ရေများနှင့်အတူ စာရင်းပြုစုသည်။                                       |
-| `obsidian_list_commands`     | ရရှိနိုင်သော Obsidian command ID များကို စာရင်းပြုစုသည် (`obsidian_execute_command` နှင့် အသုံးပြုရန်)။              |
-| `obsidian_sync_status`       | OmniRoute sync server ၏ အခြေအနေ—လည်ပတ်နေခြင်း၊ vault အမည်၊ port၊ uptime နှင့် နောက်ဆုံး sync ကို ရယူသည်။             |
-| `obsidian_sync_conflicts`    | မဖြေရှင်းရသေးသော sync conflict များကို စာရင်းပြုစုသည် (path၊ conflict path၊ တွေ့ရှိသည့်အချိန်)။                      |
+| `obsidian_check_status`      | Local REST API ဆက်သွယ်၍ စစ်မှန်ကြောင်း အတည်ပြုနိုင်ခြင်း ရှိ၊ မရှိ စစ်ဆေးပါ။                                         |
+| `obsidian_search_simple`     | မှတ်စုအကြောင်းအရာ၏ စာသားအပြည့်အစုံ ရှာဖွေမှု။ ဖိုင်လမ်းကြောင်းများဖြင့် အတိုအထွာများကို ပြန်ပေးသည်။                  |
+| `obsidian_search_structured` | JSON Logic expression (and/or/regex/path filters) ကို အသုံးပြု၍ ရှာဖွေပါ။                                            |
+| `obsidian_read_note`         | vault-relative path ဖြင့် မှတ်စုကိုဖတ်ပါ။ သီးခြား heading/block/frontmatter. ရွေးချယ်နိုင်သည်။                       |
+| `obsidian_list_vault`        | ဖိုင်များနှင့် လမ်းညွှန်များကို ခန်း (ထည့်သွင်းမှုသစ်ပင်) တွင် စာရင်းပြုစုပါ။                                        |
+| `obsidian_get_document_map`  | ခေါင်းစဉ် → လိုင်းနံပါတ်များမြေပုံအဖြစ် မှတ်စု၏ ခေါင်းစီးတည်ဆောက်ပုံကို ရယူပါ။                                       |
+| `obsidian_get_note_metadata` | အကြောင်းအရာအပြည့်အစုံမပါဘဲ ရှေ့မျက်နှာစာ၊ တဂ်များ၊ လင့်ခ်များ၊ char/word အရေအတွက်ကို ရယူပါ။                          |
+| `obsidian_get_active_file`   | Obsidian တွင် လက်ရှိအသုံးပြုနေသော ဖိုင်၏လမ်းကြောင်း + အကြောင်းအရာကို ရယူပါ။                                          |
+| `obsidian_get_periodic_note` | ရက်စွဲတစ်ခုအတွက် daily/weekly/monthly အချိန်အပိုင်းအခြားမှတ်စု (ယနေ့ချန်လှပ်ထားလျှင်) ရယူပါ။                         |
+| `obsidian_get_tags`          | vault tag အားလုံးကို ၎င်းတို့၏ ကြိမ်နှုန်းများဖြင့် စာရင်းပြုစုပါ။                                                   |
+| `obsidian_list_commands`     | ရနိုင်သော Obsidian အမိန့်ကို IDs ( `obsidian_execute_command` ဖြင့်သုံးပါ)။                                          |
+| `obsidian_sync_status`       | OmniRoute စင့်ခ်ဆာဗာအခြေအနေ- လည်ပတ်နေသည်၊ ခန်းအမည်၊ ဆိပ်ကမ်း၊ အလုပ်ချိန်၊ နောက်ဆုံးစင့်ခ်လုပ်ခြင်း။                  |
+| `obsidian_sync_conflicts`    | မဖြေရှင်းရသေးသော ထပ်တူထပ်မျှသော ပဋိပက္ခများကို စာရင်းပြုစုပါ (လမ်းကြောင်း၊ ပဋိပက္ခလမ်းကြောင်း၊ စစ်ဆေးတွေ့ရှိထားသည်)။ |
 
-### ရေးသားရေးကိရိယာများ (`write:obsidian`)
+### စာရေးကိရိယာများ (`write:obsidian`)
 
-| ကိရိယာ                           | ဖော်ပြချက်                                                                                                           |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | ပေးထားသော Markdown အကြောင်းအရာဖြင့် note တစ်ခုကို ဖန်တီးသည် သို့မဟုတ် ထပ်ရေးသည်။                                     |
-| `obsidian_append_note`           | note တစ်ခုသို့ အကြောင်းအရာကို ဖြည့်စွက်သည်၊ သတ်မှတ်ထားသော heading/block သို့လည်း ဖြည့်စွက်နိုင်သည်။                  |
-| `obsidian_patch_note`            | heading၊ block သို့မဟုတ် frontmatter field တစ်ခုတွင် အကြောင်းအရာကို တိကျစွာ ဖြည့်စွက်/ရှေ့တွင်ဖြည့်စွက်/အစားထိုးသည်။ |
-| `obsidian_delete_note`           | vault မှ note တစ်ခုကို အပြီးအပိုင် ဖျက်သည်။                                                                          |
-| `obsidian_move_note`             | vault အတွင်း note တစ်ခုကို ရွှေ့သည် သို့မဟုတ် အမည်ပြောင်းသည်။                                                        |
-| `obsidian_execute_command`       | Obsidian command တစ်ခုကို ၎င်း၏ command ID ဖြင့် လုပ်ဆောင်သည်။                                                       |
-| `obsidian_open_file`             | Obsidian တွင် file တစ်ခုကို ဖွင့်သည် (မရှိပါက ဖန်တီးသည်)။                                                            |
-| `obsidian_sync_trigger`          | desktop↔mobile vault နှစ်ဖက်အပြန်အလှန် sync ကို ချက်ချင်း စတင်လုပ်ဆောင်သည်။                                          |
-| `obsidian_sync_resolve_conflict` | sync conflict တစ်ခုကို ဖြေရှင်းသည်—`local` (mobile)၊ `remote` (desktop) သို့မဟုတ် `keep-both` ကို ထိန်းသိမ်းထားသည်။  |
+| ကိရိယာ                           | ဖော်ပြချက်                                                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `obsidian_write_note`            | ပေးထားသော Markdown အကြောင်းအရာဖြင့် မှတ်စုတစ်ခုကို ဖန်တီးပါ သို့မဟုတ် ထပ်ရေးပါ။                              |
+| `obsidian_append_note`           | အကြောင်းအရာကို မှတ်စုတစ်ခုတွင် ထပ်ထည့်ပါ။ သီးခြား heading/block. ကိုရွေးချယ်နိုင်သည်။                        |
+| `obsidian_patch_note`            | ခေါင်းစီး၊ ပိတ်ဆို့ခြင်း သို့မဟုတ် ရှေ့မျက်နှာစာအကွက်တွင် append/prepend/replace ။                           |
+| `obsidian_delete_note`           | မှတ်စုကို အခန်းတွင်းမှ အပြီးတိုင်ဖျက်ပါ။                                                                     |
+| `obsidian_move_note`             | အခန်းအတွင်း မှတ်စုကို ရွှေ့ပါ သို့မဟုတ် အမည်ပြောင်းပါ။                                                       |
+| `obsidian_execute_command`       | ၎င်း၏ command ID ဖြင့် Obsidian အမိန့်ကို လုပ်ဆောင်ပါ။                                                       |
+| `obsidian_open_file`             | Obsidian တွင် ဖိုင်တစ်ခုကိုဖွင့်ပါ (၎င်းမရှိပါက ၎င်းကိုဖန်တီးပါ)။                                            |
+| `obsidian_sync_trigger`          | ချက်ခြင်း နှစ်လမ်းညွန် ဒက်စတော့↔ မိုဘိုင်းလ်တဲ စင့်ခ်လုပ်ခြင်းကို အစပျိုးပါ။                                 |
+| `obsidian_sync_resolve_conflict` | ထပ်တူကျသော ပဋိပက္ခကို ဖြေရှင်းပါ- `local` (မိုဘိုင်း)၊ `remote` (ဒက်စ်တော့) သို့မဟုတ် `keep-both` ကို ထားပါ။ |
 
 > [!NOTE]
-> `obsidian_patch_note` ၏ target များသည် `heading | block | frontmatter`
-> ဟူသော `targetType` နှင့် `append | prepend | replace` ဟူသော `operation` ကို
-> လက်ခံပြီး `createTargetIfMissing` ကို ရွေးချယ်ထည့်သွင်းနိုင်သည်။ `obsidian_sync_*`
-> ကိရိယာလေးခုသည် local sync server (`http://127.0.0.1:27781` ကို မူလသတ်မှတ်ချက်အဖြစ်)
-> နှင့် ဆက်သွယ်ကာ sync token ကို လိုအပ်သည်။
+> `obsidian_patch_note` ပစ်မှတ်များသည် `heading | block | frontmatter` ၏ `targetType` နှင့် `append | prepend | replace`၏ `operation` ၊ ရွေးချယ်နိုင်သော `createTargetIfMissing` ဖြင့် လက်ခံသည်။ `obsidian_sync_*` ကိရိယာလေးခုသည် ဒေသဆိုင်ရာ ထပ်တူကျသောဆာဗာ (မူရင်းအားဖြင့်`http://127.0.0.1:27781` ) နှင့် စကားပြောပြီး ထပ်တူကျသော တိုကင်ကို လိုအပ်သည်။
 
-### Scope များ
+### နယ်ပယ်များ
 
-ဖတ်ရှုရေးကိရိယာများသည် `read:obsidian` ကို လိုအပ်ပြီး ရေးသားရေးကိရိယာများသည် `write:obsidian` ကို လိုအပ်သည်။ Enforcement
-သည် Notion နှင့် တူညီပြီး `open-sse/mcp-server/server.ts` ရှိ `withScopeEnforcement()` က
-ကိုင်တွယ်သည်။ ၎င်းကို `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ဖြစ်သည့်အခါ အသက်ဝင်စေပြီး
-ခွင့်ပြုထားသော scope များကို `OMNIROUTE_MCP_SCOPES` သို့မဟုတ် API key ၏ scope context မှ ရယူသည်။ အသေးစိတ်ကို
-[MCP-SERVER.md](./MCP-SERVER.md) တွင် ကြည့်ပါ။
+Read tools require `read:obsidian`; write tools require `write:obsidian`. Enforcement is identical to Notion — handled by `withScopeEnforcement()` in `open-sse/mcp-server/server.ts`, gated on `OMNIROUTE_MCP_ENFORCE_SCOPES=true` and forced on for HTTP/SSE callers whose API key lacks `manage`/`admin`, with allowed scopes sourced from `OMNIROUTE_MCP_SCOPES` or the API key's scope context. See [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Endpoint များ
 

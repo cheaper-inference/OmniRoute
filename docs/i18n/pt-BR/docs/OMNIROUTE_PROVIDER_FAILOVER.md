@@ -21,3 +21,5 @@ A política padrão entre provedores permite até três tentativas de provedores
   - Um id prefixado (`provider/model`) nunca é redirecionado para outro provedor.
 
 Os estados do circuito são `closed`, `open` e `half_open`. Um resfriamento agenda uma investigação limitada; uma sonda bem-sucedida fecha o circuito e uma sonda com falha o reabre.
+
+O failover do provedor é executado dentro do gateway. Consulte [Quando o próprio OmniRoute está inacessível](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) para o comportamento do cliente durante uma interrupção do gateway.

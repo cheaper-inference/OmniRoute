@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Na-akwado** 22 ụzọ aghụghọ** (Lee `src/shared/constants/routingStrategies.ts`):
 
-| Atụmatụ             | Omume                                                                                         |
-| ------------------- | --------------------------------------------------------------------------------------------- |
-| `priority`          | Ndepụta ahaziri ebumnuche mbụ                                                                 |
-| `weighted`          | Nke puru omume site na ibu nke ebumnuche                                                      |
-| `round-robin`       | Gagharịa na ebumnuche n'usoro                                                                 |
-| `context-relay`     | Wepụ ihe ndị gbara ya gburugburu n'ofe ebumnuche                                              |
-| `fill-first`        | Jupụta oke tupu ịkwaga na-esote                                                               |
-| `p2c`               | Ike nke nhọrọ abụọ                                                                            |
-| `random`            | Uniform random                                                                                |
-| `least-used`        | Họrọ nke nwere kacha nso nso a                                                                |
-| `cost-optimized`    | Ebumnuche ahụike kacha dị ọnụ ala nke mbụ                                                     |
-| `reset-aware`       | Mara maka nrụpụta nrụpụta ndị na-eweta ya                                                     |
-| `reset-window`      | Tọgharia okporo ụzọ dabere na windo                                                           |
-| `expiry-first`      | Wefuo akaụntụ nke oke ya ga-agwụ na-ejighi ya                                                 |
-| `headroom`          | Kachasị fọduru isi ụlọ oke                                                                    |
-| `quota-weighted`    | Mafee akaụntụ ndị ike gwụrụ, wee see site na nke fọdụrụ ÷ ibu ụgbọ elu                        |
-| `strict-random`     | Otu n'ezie (enweghị ịdị arọ dị mma)                                                           |
-| `auto`              | Jiri akara ihe nwere ihe iri na isii (`autoCombo/`)                                           |
-| `lkgp`              | Ikpeazụ mara ezigbo onye na-eweta mbụ                                                         |
-| `context-optimized` | Kachasị mma maka arịrịọ ogologo okwu                                                          |
-| `cache-optimized`   | Kpanye prefix ngwa ngwa ọ bụla enwere ike iji mee ihe n'otu akaụntụ ahụ (mkpọsa cache ozugbo) |
-| `fusion`            | Ọpụpụ gaa na panel n'otu aka ahụ, wee megharịa site na onye ọka ikpe (`fusion.ts`)            |
-| `pipeline`          | Chain nzọụkwụ — mmepụta nke ọ bụla lekwasịrị anya na-azụ nke na-esote                         |
-| `jev`               | Nwepu: TypeSafe Jev kwetara nke ndenye aha họọrọ na-agba; ọzọ iji gị                          |
+| Atụmatụ             | Omume                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| `priority`          | Ndepụta ahaziri ebumnuche mbụ                                                      |
+| `weighted`          | Nke puru omume site na ibu nke ebumnuche                                           |
+| `round-robin`       | Gagharịa na ebumnuche n'usoro                                                      |
+| `context-relay`     | Wepụ ihe ndị gbara ya gburugburu n'ofe ebumnuche                                   |
+| `fill-first`        | Jupụta oke tupu ịkwaga na-esote                                                    |
+| `p2c`               | Ike nke nhọrọ abụọ                                                                 |
+| `random`            | Ngwakọta ọhụrụ maka arịrịọ ọ bụla                                                  |
+| `least-used`        | Họrọ nke nwere arịrịọ kacha nta edekọ                                              |
+| `cost-optimized`    | Ọnụahịa ntinye katalọgụ kacha ala                                                  |
+| `reset-aware`       | + ngwa ngwa nke fọdụrụ                                                             |
+| `reset-window`      | Window oke nke ga-ebu ụzọ tọgharịa ngwa ngwa                                       |
+| `expiry-first`      | Wefuo akaụntụ nke oke ya ga-agwụ na-ejighi ya                                      |
+| `headroom`          | Kachasị fọduru isi ụlọ oke                                                         |
+| `quota-weighted`    | Mafee akaụntụ ndị ike gwụrụ, wee see site na nke fọdụrụ ÷ ibu ụgbọ elu             |
+| `strict-random`     | Ogbe akpọchiri akpọchi: ebumnuche ọ bụla otu ugboro tupu emegharịa                 |
+| `auto`              | Jiri akara ihe nwere ihe iri na isii (`autoCombo/`)                                |
+| `lkgp`              | Ikpeazụ mara ezigbo onye na-eweta mbụ                                              |
+| `context-optimized` | Window gburugburu mara amara na mbụ                                                |
+| `cache-optimized`   | Hụrụ na akaụntụ ahụ nwere ike ijide prefix ozugbo na cache                         |
+| `fusion`            | Ọpụpụ gaa na panel n'otu aka ahụ, wee megharịa site na onye ọka ikpe (`fusion.ts`) |
+| `pipeline`          | Chain nzọụkwụ — mmepụta nke ọ bụla lekwasịrị anya na-azụ nke na-esote              |
+| `jev`               | Nwepu: TypeSafe Jev kwetara nke ndenye aha họọrọ na-agba; ọzọ iji gị               |
 
 ### base.ts (1170 LOC)
 
@@ -310,7 +310,7 @@ A haziri omume akọwapụtara nke onye na-eweta (akwụkwọ nkụnye eji isi m
 
 - `resilience.ts` — nwaa ọzọ, backoff, emebi orchestration
 - `emergencyFallback.ts` — ikpeazụ-ebe ọdịda ọdịda
-- `modelDeprecation.ts` — ụzọ akpaaka gaa na ụdị ndị nọchiri ya
+- `modelDeprecation.ts` — ụzọ akpaaka gaa ụdị ndị ga-anọchi ya
 
 ### Steeti
 
@@ -325,7 +325,7 @@ A haziri omume akọwapụtara nke onye na-eweta (akwụkwọ nkụnye eji isi m
 
 ### Nkà
 
-- ( kpuchie na [SKILLS.md](./SKILLS.md) )
+- (kpuchie na [SKILLS.md](./SKILLS.md) )
 
 ### Ebe nchekwa
 

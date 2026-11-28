@@ -46,14 +46,14 @@ flowchart LR
 
 නිකුතුවක් සමථයකට පත් කරන විට, `release-freeze` ලෙස ලේබල් කරන ලද සලකුණු ගැටලුවක් විවෘත වේ. ඒ** සංවර්ධනය නතර කරන්නේ නැහැ** :
 
-- ශීත කළ `release/vX.Y.Z` එම නෞකාවේ මුදා හැරීමේ කපිතාන්වරයාට අයත් වේ.
+- ශීත කළ `release/vX.Y.Z` එම නෞකාව සඳහා මුදා හැරීමේ කපිතාන්වරයාට අයත් වේ.
 - මීළඟ චක්‍රයේ `release/vX+1` ශීත කළ තුඩෙන් කපා ඇත, එබැවින් දායකයින් ගොඩබෑමේ කාර්යය දිගටම කරගෙන යයි.
 - තවමත් ශීත කළ ශාඛාව ඉලක්ක කරන විවෘත PRs විය යුතුය** නැවත ඉලක්ක කර ඇත** ක්රියාකාරී (ඉහළම) `release/v*` ශාඛාව වෙත.
 
 ඔබට අවශ්‍ය ශාඛාව ඒකාබද්ධ කළ හැකි යැයි උපකල්පනය කිරීමට පෙර විවෘත කැටි කිරීමක් සඳහා පරීක්ෂා කරන්න:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 ඒකාබද්ධ යාන්ත්‍ර විද්‍යාව (හිමිකරු `queue` ලේබලය → Mergify) [MERGE_TRAIN.md](./MERGE_TRAIN.md) හි ලේඛනගත කර ඇත.

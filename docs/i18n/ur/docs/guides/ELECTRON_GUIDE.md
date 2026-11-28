@@ -4,9 +4,9 @@
 
 ---
 
-> **سچائی کا ماخذ:** `electron/` کام کی جگہ** آخری اپ ڈیٹ:** 2026-06-28 — v3.8.40
+> **سچائی کا ماخذ:** `electron/` کام کی جگہ
 
-OmniRoute ایک کراس پلیٹ فارم ڈیسک ٹاپ ایپ (Windows / macOS / Linux) بھیجتا ہے**Electron 41** +** الیکٹران بلڈر 26.10** . ڈیسک ٹاپ ایپ ایک چائلڈ پروسیس کے طور پر Next.js اسٹینڈ اسٹون سرور کو جنم دیتی ہے، اس پر `BrowserWindow` کی نشاندہی کرتی ہے، اور سسٹم ٹرے، آٹو اپڈیٹر، IPC برج، اور زیرو کنفگ سیکرٹ بوٹسٹریپ شامل کرتی ہے۔
+OmniRoute ایک کراس پلیٹ فارم ڈیسک ٹاپ ایپ (Windows / macOS / Linux) بھیجتا ہے**Electron 41** +** الیکٹران بلڈر 26.10** . ڈیسک ٹاپ ایپ Next.js اسٹینڈ اسٹون سرور کو چائلڈ پروسیس کے طور پر تیار کرتی ہے، اس پر `BrowserWindow` پوائنٹ کرتی ہے، اور سسٹم ٹرے، آٹو اپڈیٹر، IPC برج، اور زیرو کنفگ سیکرٹ بوٹسٹریپ شامل کرتی ہے۔
 
 ## فن تعمیر
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## خودکار اپ ڈیٹ
 
-`electron-updater` GitHub فراہم کنندہ (`diegosouzapw/OmniRoute`) کے ساتھ استعمال کرتا ہے۔
+`electron-updater` GitHub فراہم کنندہ (`cheaper-inference/OmniRoute`) کے ساتھ استعمال کرتا ہے۔
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - واقعات `update-status` IPC کے ذریعے پیش کنندہ کو بھیجے گئے: `checking`, `available`, `not-available`, `downloading` ( `percent` کے ساتھ), `downloaded`, `error`
@@ -267,13 +267,13 @@ AppImage دستخط اختیاری ہے — سیٹ `LINUX_GPG_KEY` اگر دست
 
 ## تقسیم
 
-نمونے `electron/dist-electron/` میں اترتے ہیں:
+`electron/dist-electron/` میں نمونے
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ریلیزز GitHub ریلیزز (`diegosouzapw/OmniRoute`) پر شائع کی جاتی ہیں، یہ وہ جگہ ہے جہاں `electron-updater` نئے ورژن کی جانچ کرتا ہے۔
+ریلیزز GitHub ریلیزز (`cheaper-inference/OmniRoute`) پر شائع کی جاتی ہیں، یہ وہ جگہ ہے جہاں `electron-updater` نئے ورژن کی جانچ کرتا ہے۔
 
 ## خرابی کا سراغ لگانا
 

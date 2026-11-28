@@ -4,10 +4,9 @@
 
 ---
 
-> **සත්යයේ මූලාශ්රය:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **අවසන් වරට යාවත්කාලීන කරන ලදී:** 2026-09-22 — විෂය පථ නාම අවකාශ MCP-SERVER.md වෙත යොමු කරයි
+> **සත්‍ය මූලාශ්‍රය:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute සතුව සෑම API ඉල්ලීමක්ම පාලනය කරන මාර්ග-දැනුවත් අවසර නල මාර්ගයක් ඇත. වර්ගීකරණය **නිශ්චිත** සහ **අසාර්ථක-වසා දැමූ** වේ — වර්ගීකරණය කළ නොහැකි ඕනෑම දෙයක් `MANAGEMENT` ලෙස අවසන් වන අතර සැසියක් හෝ කළමනාකරණ-ශ්රේණියේ ටෝකනයක් ඉල්ලා සිටී. මෙම පිටුව මාර්ග නඩත්තු කරන හෝ නව අවසන් ලක්ෂ්ය සැලසුම් කරන ඉංජිනේරුවන් සඳහා ආකෘතිය පැහැදිලි කරයි.
+OmniRoute සතුව සෑම API ඉල්ලීමක් සඳහාම පිවිසෙන මාර්ග-දැනුවත් අවසර නල මාර්ගයක් ඇත. වර්ගීකරණය වේ** නියතිවාදී** සහ** අසාර්ථක-වසා ඇත** — වර්ගීකරණය කළ නොහැකි ඕනෑම දෙයක් `MANAGEMENT` ලෙස අවසන් වන අතර සැසියක් හෝ කළමනාකරණ ශ්‍රේණියේ ටෝකනයක් ඉල්ලා සිටී. මාර්ග නඩත්තු කරන හෝ නව අන්ත ලක්ෂ්‍ය සැලසුම් කරන ඉංජිනේරුවන්ගේ ආකෘතිය මෙම පිටුව පැහැදිලි කරයි.
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
@@ -146,35 +145,34 @@ Settings → Security වෙතින් ලියාපදිංචි කර�
 
 `MANAGEMENT` ක්‍රියා කිහිපයක් වේ** ක්රියාකරු-පමණි** : `manage` යතුරක් මදි. ගබඩා කර ඇති අක්තපත්‍ර අපනයනය කිරීම (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), සජීවී දත්ත හරහා උපස්ථයක් ප්‍රතිසාධනය කිරීම (`POST /api/db-backups/import` ඇතුළුව `dryRun=true`, `POST /api/db-backups` id මගින් ප්‍රතිසාධනය කිරීම, `POST /api/settings/import-json`), ප්‍රතිස්ථාපන ලක්ෂ්‍ය විනාශ කිරීම (`DELETE /api/db-backups` පිරිසිදු කිරීම සහ `PATCH /api/db-backups` එය රඳවා තබා ගැනීම සෑම විටම ස්වයංක්‍රීය CLI සැසියකින් පසු එය පවත්වාගෙන යාම, dash පුවරුවක් ධාවනය කිරීම අවශ්‍ය වන බැවින් විෂය, හෝ පුරනය වීම අබල කර ඇත. සමමුහුර්ත ටෝකනයක් (`POST /api/sync/tokens`) නිකුත් කිරීම සහ `admin` CLI ප්‍රවේශ ටෝකනයක් (`POST /api/cli/tokens`) සකස් කිරීම සඳහා උපකරණ පුවරු සැසියක් හෝ සෑම පිවිසුම් මාදිලියකම දේශීය CLI විෂය අවශ්‍ය වේ. ඕනෑම විෂය පථයක API යතුරු සහ `oma_` ප්‍රවේශ ටෝකන ක්‍රියාකරු අක්තපත්‍ර නොවේ: ඒවා අවශ්‍ය විටෙක `403` ලබා ගනී. චෙක්පත `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) හි ජීවත් වේ. පිවිසුම් සැකසීම් වෙනස් කිරීම ක්‍රියාකරුට පමණක් ද වේ: `POST /api/settings/require-login` (කළමනාකරණ මුරපදය සකසන්න / `requireLogin` ටොගල් කරන්න) එම අක්තපත්‍ර පමණක් පිළිගන්නේ මුරපදයක් පවතින විට — පළමු ධාවන බූට්ස්ට්‍රැප් කවුළුව (තවමත් මුරපදයක් නොමැත) — නොවෙනස්ව පවතින අතර ඩෑෂ්බෝඩ් සැසියකින් එය `currentPassword` යැවිය යුතු අතර මුරපදය ප්‍රතිස්ථාපනය කිරීමට හෝ වැරදී ඇති විට `settings.update_failed` `403` දේශීය CLI සහ පුරනය වීම අක්‍රිය කර ඇති අවස්ථාවක් ප්‍රතිසාධන මාර්ගය තබා ගන්නා අතර එය නොමැතිව මුරපදයක් සැකසිය හැක, මන්ද දෙකම දත්ත නාමාවලිය හිමි ධාරකයට බැඳී ඇත.
 
-## පයිප්ලයින්
+## නල මාර්ගය
 
 ```
-ඇතුළුවන ඉල්ලීම → src/proxy.ts
-  → src/server/authz/pipeline.ts හි runAuthzPipeline()
-    1. විශ්වාසදායක අභ්යන්තර headers ඉවත් කරන්න (x-omniroute-auth-*, x-omniroute-route-class)
-    2. ඉල්ලීම් id එක ජනනය කර, classifyRoute() හරහා route එක වර්ගීකරණය කරන්න
-    3. pathname == "/" නම් → /dashboard වෙත redirect කරන්න
-    4. draining (සුමට වසා දැමීම) සහ /api/* නම් → 503
-    5. non-GET /api/* නම් → checkBodySize() guard පරීක්ෂා කරන්න
-    6. OPTIONS නම් → CORS preflight 204
-    7. options.enforce == false නම් → route-class headers සමඟ pass-through කරන්න
-    8. එසේ නොමැතිනම්: POLICIES[routeClass].evaluate(ctx)
-       - allow  → x-omniroute-auth-{kind,id,label,scopes} සලකුණු කර → NextResponse.next()
-       - reject → correlation_id සහිත JSON දෝෂයක් (dashboard pages → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-`src/server/authz/headers.ts` හි අර්ථ දක්වා ඇති විශ්වාසදායක අභ්යන්තර headers, වර්ගීකරණයට පෙර **ඇතුළුවන ඉල්ලීම්වලින් ඉවත් කරනු ලැබේ** — clients හට subject කෙනෙකු ලෙස ව්යාජ ලෙස පෙනී සිටීමට `x-omniroute-auth-*` පෙර-පිරවිය නොහැක.
+විශ්වාසදායක අභ්‍යන්තර ශීර්ෂ ( `src/server/authz/headers.ts` හි අර්ථ දක්වා ඇත) වේ** එන ඉල්ලීම් වලින් ඉවත් කර ඇත** — වර්ගීකරණයට පෙර සේවාලාභීන්ට විෂයයක් ලෙස පෙනී සිටීම සඳහා `x-omniroute-auth-*` පූර්ව-ජනනය කළ නොහැක.
 
-### Policy ගිවිසුම්
+### ප්රතිපත්ති ගිවිසුම්
 
-සෑම route class එකකටම `src/server/authz/policies/` තුළ policy එකක් ඇත:
+සෑම මාර්ග පන්තියකටම `src/server/authz/policies/` හි ප්‍රතිපත්තියක් ඇත:
 
 - **`publicPolicy`** (`policies/public.ts`) — සෑම විටම `allow({ kind: "anonymous", id: "anonymous" })` ලබා දෙයි.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer එක උපුටාගෙන, `validateApiKey()` හරහා වලංගු කරයි. සක්රීය `REQUIRE_API_KEY` feature flag එක අක්රිය කර ඇති විට පමණක් anonymous වෙත fallback වේ. සක්රීය flag එක `isRequireApiKeyEnabled()` හරහා විසඳනු ලැබේ (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), එබැවින් Dashboard Feature Flags සහ environment variables `/api/v1/*`, `/api/v1beta/*`, සහ aliases සඳහා එකම ආකාරයෙන් බලපායි; resolver අසමත් වුවහොත් ප්රවේශය ආරක්ෂිතව වසා දමනු ලැබේ. Client API routes මත dashboard-session requests සඳහාද අවසර දෙයි (`/api/v1/models` ඇතුළුව, එය dashboard model catalog එක භාවිත කරයි).
-  Entra ID SSO සක්රීය කර ඇති විට, ව්යුහාත්මකව Entra token එකක් වන Bearer එකක් (base64url segments තුනක්, `RS*` alg එකක්, `kid`) `validateApiKey()` ට පෙර SSO branch එක මඟින් හසුරුවනු ලබන අතර එහි verdict එක අවසාන වේ — එය කිසිවිටෙක API-key path වෙත හෝ degrade-to-anonymous branch වෙත fallback නොවේ. එබැවින් identity-provider outage එකක් open access බවට පත්විය නොහැක. Static API keys වලට බලපෑමක් නැත. [Entra ID SSO](../security/ENTRA_SSO.md) බලන්න.
-- **`managementPolicy`** (`policies/management.ts`) — dashboard session, අභ්යන්තර model-sync requests (`/api/providers/[name]/(sync-models|models)` සමඟ ගැළපෙන) පිළිගනී, නැතහොත් `isAuthRequired()` මඟින් false ලබා දෙන්නේ නම් සම්පූර්ණයෙන්ම මඟ හරියි. Bearer token එකක් තිබුණත් එය වලංගු නොවේ නම් 403 (`AUTH_001`) ලබා දෙයි; අනෙක් අවස්ථාවල 401 ලබා දෙයි. ඕනෑම auth branch එකකට පෙර route-guard tiers (LOCAL_ONLY / ALWAYS_PROTECTED) ද බලාත්මක කරයි — [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) බලන්න. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` හි ඇති LOCAL_ONLY paths (දැනට: `/api/mcp/`) වෙත Bearer key එක `manage` scope එක රැගෙන යන්නේ නම් non-loopback ස්ථානයකින් ප්රවේශ විය හැක; අනෙකුත් සියලුම LOCAL_ONLY paths scope එක නොසලකා strict-loopback ලෙස පවතී.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — උපුටා ගැනීම් දරන්නා, `validateApiKey()` හරහා වලංගු වේ. ඵලදායි `REQUIRE_API_KEY` විශේෂාංග ධජය අබල කළ විට පමණක් නිර්නාමික වෙත වැටේ. ඵලදායී ධජය `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) හරහා විසඳනු ලැබේ, එබැවින් උපකරණ පුවරුව විශේෂාංග කොඩි සහ පරිසර විචල්යයන් `/api/v1/*`, `/api/v1beta/*`, සහ අන්වර්ථ පාලනය කරයි; විසදුම් අසාර්ථක අසාර්ථක වසා ඇත. සේවාලාභී API මාර්ගවල උපකරණ පුවරු-සැසි ඉල්ලීම්වලට ඉඩ දෙන්න ( `/api/v1/models` ඇතුළුව, උපකරණ පුවරු ආකෘති නාමාවලිය මගින් භාවිතා කරනු ලැබේ). Entra ID SSO සබල කර ඇති විට, ව්‍යුහාත්මකව Entra ටෝකනයක් වන Bearer එකක් (base64url කොටස් තුනක්, `RS*` alg, `kid`) SSO ශාඛාව මගින් හසුරුවනු ලැබේ.** පෙර** `validateApiKey()` සහ එහි තීන්දුව අවසාන — වේ, එය කිසි විටෙක API-key මාර්ගයට හෝ degrade-to-anonymous ශාඛාව වෙතට වැටෙන්නේ නැත, එබැවින් අනන්‍යතා සපයන්නාගේ ඇනහිටීම විවෘත ප්‍රවේශයක් බවට පත්විය නොහැක. ස්ථිතික API යතුරු බලපාන්නේ නැත. [Entra ID SSO](../security/ENTRA_SSO.md) බලන්න.
+- **`managementPolicy`** (`policies/management.ts`) — උපකරණ පුවරු සැසිය, අභ්‍යන්තර ආකෘති-සමමුහුර්ත ඉල්ලීම් ( `/api/providers/[name]/(sync-models|models)` ට එරෙහිව ගැලපේ) හෝ `isAuthRequired()` අසත්‍යයක් ලබා දෙන්නේ නම් සම්පූර්ණයෙන්ම මඟ හරියි. Bearer ටෝකනයක් පවතින නමුත් වලංගු නොවන විට 403 (`AUTH_001`) ලබා දෙයි, එසේ නොමැති නම් 401. ඕනෑම auth ශාඛාවකට පෙර මාර්ග ආරක්ෂක ස්ථර (LOCAL_ONLY / ALWAYS_PROTECTED) බලාත්මක කරයි — [මාර්ග ආරක්ෂක ස්ථර](../security/ROUTE_GUARD_TIERS.md) බලන්න. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` හි LOCAL_ONLY මාර්ග (අද: `/api/mcp/`) Bearer යතුර `manage`/`admin` විෂය පථය හෝ පටු `mcp:connect` විෂය පථය (`hasMcpConnectOrManageScope`) දරන විට හෝ සත්‍යාපනය කළ උපකරණ පුවරු සැසියක් සමඟින් ලූප්බැක් නොවන වෙතින් ප්‍රවේශ විය හැක; අනෙකුත් සියලුම LOCAL_ONLY මාර්ග විෂය පථය නොසලකා දැඩි-ලූප්බැක් ලෙස පවතී.
 
-සාර්ථක policy එකක් `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` සහිත `AuthSubject` එකක් ලබා දෙයි. නැවත auth logic ධාවනය කිරීම වෙනුවට downstream handlers හට එය `src/server/authz/assertAuth.ts` හි `assertAuth(request, "CLIENT_API")` හරහා කියවිය හැක.
+සාර්ථක ප්‍රතිපත්තියක් `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` සමඟ `AuthSubject` ලබා දෙයි. පහළ ප්‍රවාහ හසුරුවන්නන්ට සත්‍යාපන තර්කය නැවත ධාවනය කිරීම වෙනුවට `src/server/authz/assertAuth.ts` හි `assertAuth(request, "CLIENT_API")` හරහා කියවිය හැක.
 
 ## පොදු මාර්ග ලැයිස්තුව
 
@@ -263,39 +261,24 @@ export async function POST(request: Request) {
 
 පහසුව අනුව නොව, හැඩය අනුව කට්ටලය තෝරන්න. එක් මාර්ගයක් `PUBLIC_API_ROUTES_EXACT` තුළට යයි (නැතහොත් GET සඳහා පමණක් නම් `PUBLIC_READONLY_CORS_API_ROUTES` තුළට); සැබෑ උපවෘක්ෂයක් පමණක් `PUBLIC_API_ROUTE_PREFIXES` තුළට යන අතර, එය **`/` අක්ෂරයෙන් අවසන් විය යුතුය**. තනි මාර්ගයක් උපසර්ග ලැයිස්තුවට දැමීමෙන්, පසුව එක් කරන ගතික-ඛණ්ඩ සහෝදර මාර්ග ඇතුළුව, එහි ආරම්භක අක්ෂර බෙදාගන්නා සෑම යාබද මාර්ගයක්ම ද ප්රකාශයට පත් වේ (GHSA-74g9-q8f6-793h). `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` සහ `tests/unit/authz/classify.test.ts` හි ඒකක පරීක්ෂණ යාවත්කාලීන කරන්න.
 
-## විෂය පථ
+## විෂය පථයන්
 
-අවකාශ තුනක්. එක් එක් පරීක්ෂකයා කියවන්නේ තමන්ගේම තන්තු පමණි.
-`manage` `read:compression` සඳහා `scopeMatches` අසමත් වන්නේ ඇයිද යන්න සහ
-`read` ප්රවේශ ටෝකනයකට `PATCH /api/keys/{id}` කළ නොහැක්කේ මන්ද යන්න ඇතුළුව,
-පැත්තෙන් පැත්තට විස්තරය [අවකාශ නාමාවලිය තුනක්](../frameworks/MCP-SERVER.md#three-scope-namespaces) හි ඇත.
+නාම අවකාශ තුනක්. සෑම පරීක්ෂකයෙක්ම කියවන්නේ තමන්ගේම නූල් පමණි. `read:compression` සඳහා `manage` `scopeMatches` වන්නේ ඇයි සහ `read` ප්‍රවේශ ටෝකනයකට `PATCH /api/keys/{id}` කළ නොහැක්කේ ඇයි දැයි ඇතුළුව පැත්තකින් පැත්ත, [විෂය පථ නාම අවකාශයන් තුනකි](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API යතුරු `scopes` අරාවක් දරයි (`api_keys.scopes` හි JSON ලෙස ගබඩා කර ඇත, `src/lib/db/apiKeys.ts` බලන්න).
+API යතුරු `scopes` අරාවක් දරයි ( `api_keys.scopes` හි JSON ලෙස ගබඩා කර ඇත, `src/lib/db/apiKeys.ts` බලන්න).
 
 ### කළමනාකරණ විෂය පථය
 
-- `manage` / `admin` — `hasManageScope`. කළමනාකරණ API මාර්ග වෙත Bearer ප්රවේශය.
-- `mcp:connect`, `self:usage`, `self:account-quota`, සහ
-  `policy:bypass-provider-quota` යනු එකතු කළ හැකි නිශ්චිත-ගැලපෙන විෂය පථ වේ. ඒවා
-  `MANAGEMENT_API_KEY_SCOPES` වලින් පිටත පිහිටා ඇත. `mcp:connect` විවෘත කරන්නේ
-  `/api/mcp/` non-loopback carve-out පමණි.
+- `manage` / `admin` — `hasManageScope`. කළමනාකරණ API මාර්ග වෙත දරන්නා ප්‍රවේශය.
+- `mcp:connect`, `self:usage`, `self:account-quota`, සහ `policy:bypass-provider-quota` යනු ආකලන නිශ්චිත-ගැලපෙන විෂය පථයන් වේ. ඔවුන් `MANAGEMENT_API_KEY_SCOPES` පිටත වාඩි වී සිටිති. `mcp:connect` විවෘත කරන්නේ `/api/mcp/` නොවන loopback carve-out එක පමණි.
 
-### MCP මෙවලම් විෂය පථ
+### MCP මෙවලම් විෂය පථයන්
 
-නාමාවලිය සහ ගැලපෙන නීති (එකම තන්තුව, හෝ `*` වලින් අවසන් වන ලබා දුන් විෂය පථයක්):
-[MCP මෙවලම් විෂය පථ](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`src/shared/constants/mcpScopes.ts` හි ඇති `MCP_SCOPE_LIST` යනු මුල් ටයිප් කරන ලද
-උප කුලකය මිස සම්පූර්ණ නාමාවලිය නොවේ. බලාත්මක කිරීම
-`open-sse/mcp-server/scopeEnforcement.ts` හි `resolveCallerScopeContext()`
-MCP සත්යාපන තොරතුරු, ඉල්ලීම් පාර-දත්ත, හෝ `OMNIROUTE_MCP_SCOPES` වෙතින් විෂය පථ
-විසඳීමෙන් පසුව ක්රියාත්මක වේ. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` නොවන තාක් කල් එය
-ක්රියා විරහිතව පවතී.
+නාමාවලිය සහ ගැළපෙන රීති (සමාන තන්තුව, හෝ `*` වලින් අවසන් වන ලබා දී ඇති විෂය පථය): [MCP මෙවලම් විෂය පථයන්](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` හි `MCP_SCOPE_LIST` යනු මුල් ටයිප් කළ උප කුලකය මිස එම සම්පූර්ණ නාමාවලිය නොවේ. `resolveCallerScopeContext()` MCP සත්‍යාපන තොරතුරු, ඉල්ලීම් පාර-දත්ත හෝ `OMNIROUTE_MCP_SCOPES` වෙතින් විෂය පථයන් නිරාකරණය කිරීමෙන් පසුව බලාත්මක කිරීම `open-sse/mcp-server/scopeEnforcement.ts` තුළ ක්‍රියාත්මක වේ. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` එය ගෝලීයව ක්‍රියාත්මක කරයි (පෙරනිමි `false`), නමුත් කොඩිය කුමක් වුවත් API යතුරෙහි `manage`/`admin` නොමැති ( `open-sse/mcp-server/scopeEnforcement.ts` හි `shouldForceScopeEnforcement()` බලන්න) HTTP/SSE ඇමතුම්කරුවෙකු සඳහා එය සැමවිටම බලාත්මක වේ.
 
-### ප්රවේශ-ටෝකන විෂය පථ
+### ප්‍රවේශ-ටෝකන විෂය පථයන්
 
-`oma_live_…` ටෝකන මත `read` / `write` / `admin`, `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`) මගින් ශ්රේණිගත කර ඇත. මෙම ශ්රේණිය අදාළ වන්නේ
-ප්රවේශ-ටෝකන අක්තපත්රයට පමණි. [කළමනාකරණ සත්යාපනය](../guides/MANAGEMENT-AUTH.md) බලන්න.
+`oma_live_…` ටෝකන මත `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) මගින් ශ්‍රේණිගත කර ඇත. මෙම ශ්‍රේණිය ප්‍රවේශ-ටෝකන් අක්තපත්‍රයට පමණක් අදාළ වේ. [කළමනාකරණය සත්‍යාපනය](../guides/MANAGEMENT-AUTH.md) බලන්න.
 
 ## Auth Toggle අවශ්‍යයි
 

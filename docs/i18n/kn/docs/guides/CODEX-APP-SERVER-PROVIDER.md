@@ -18,27 +18,24 @@ app-server URL ನಲ್ಲಿ **ತಲುಪಬಹುದಾದ Codex CLI** ಅ�
 
 ---
 
-## 1. ಆರ್ಕಿಟೆಕ್ಚರ್
+## 1. ವಾಸ್ತುಶಿಲ್ಪ
 
 ```
-┌─ OmniRoute ಆ್ಯಪ್ ────────────────┐        ┌─ codex-app-server ಸೈಡ್ಕಾರ್ ────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ ಸಾಮರ್ಥ್ಯ ಟೋಕನ್)              │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuth ಅನ್ನು ಸ್ವತಃ ನಿರ್ವಹಿಸುತ್ತದೆ │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, ಸ್ವಯಂ-ನವೀಕರಣ) │
-        │ ಹಂಚಿಕೊಳ್ಳುತ್ತದೆ (compose ವಾಲ್ಯೂಮ್ಗಳು) └─────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS ಸಾಮರ್ಥ್ಯ ಟೋಕನ್ (ಎರಡೂ ಇದನ್ನು ಮೌಂಟ್ ಮಾಡುತ್ತವೆ)
-  codex-appserver-home    → ~/.codex (ಡ್ಯಾಶ್ಬೋರ್ಡ್ನಿಂದ ಬರೆಯಲ್ಪಡುವ auth.json,
-                             ಸೈಡ್ಕಾರ್ನ codex app-server ನಿಂದ ಓದಲ್ಪಡುತ್ತದೆ)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- ಸೈಡ್ಕಾರ್ ಸಾಮರ್ಥ್ಯ ಟೋಕನ್ನ ಹಿಂದೆ ಆಂತರಿಕ compose ನೆಟ್ವರ್ಕ್ನಲ್ಲಿ
-  (`ws://codex-app-server:1456`) **ಮಾತ್ರ** ಆಲಿಸುತ್ತದೆ. ಇದನ್ನು ಹೋಸ್ಟ್ ಅಥವಾ
-  ಇಂಟರ್ನೆಟ್ಗೆ **ಎಂದಿಗೂ** ಪ್ರಕಟಿಸಲಾಗುವುದಿಲ್ಲ.
-- Codex CLI ಅನ್ನು `omniroute:base` ನಲ್ಲೇ ಸೇರಿಸಲಾಗಿದೆ, ಆದ್ದರಿಂದ ಸೈಡ್ಕಾರ್ ಅನ್ನು
-  ಚಲಾಯಿಸುವಾಗ ಹೋಸ್ಟ್ ಅಥವಾ ಬಳಕೆದಾರರ ಯಂತ್ರದಲ್ಲಿ codex ಸ್ಥಾಪಿಸುವ ಅಗತ್ಯವಿಲ್ಲ.
+- ಸೈಡ್ಕಾರ್ ಕೇಳುತ್ತದೆ** ಮಾತ್ರ** ಸಾಮರ್ಥ್ಯದ ಟೋಕನ್ ಹಿಂದೆ ಆಂತರಿಕ ಸಂಯೋಜನೆ ನೆಟ್ವರ್ಕ್ (`ws://codex-app-server:1456`) ನಲ್ಲಿ. ಇದು** ಎಂದಿಗೂ** ಹೋಸ್ಟ್ ಅಥವಾ ಇಂಟರ್ನೆಟ್ಗೆ ಪ್ರಕಟಿಸಲಾಗಿದೆ.
+- ಸೈಡ್ಕಾರ್ `omniroute:cli-no-docker` ಬಳಸುತ್ತದೆ, `runner-cli-no-docker` ಗುರಿಯಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ, ಇದು Codex CLI ಅನ್ನು ಒಳಗೊಂಡಿದೆ.
 
 ## 2. ಇದನ್ನು ಚಾಲನೆ ಮಾಡಿ
 

@@ -43,7 +43,7 @@ flowchart LR
 
 ## ફ્રીઝ ફ્રીઝ (સમાંતર ચક્ર)
 
-જ્યારે પ્રકાશનનું સમાધાન કરવામાં આવે છે, ત્યારે `release-freeze` લેબલવાળી માર્કર સમસ્યા ખોલવામાં આવે છે. તે** વિકાસ અટકતો નથી** :
+જ્યારે રીલીઝનું સમાધાન કરવામાં આવે છે, ત્યારે `release-freeze` લેબલવાળી માર્કર ઈશ્યુ ખોલવામાં આવે છે. તે** વિકાસ અટકતો નથી** :
 
 - ફ્રોઝન `release/vX.Y.Z` તે જહાજ માટે રિલીઝ કેપ્ટનનું છે.
 - આગળના ચક્રનો `release/vX+1` ફ્રોઝન ટિપમાંથી કાપવામાં આવે છે જેથી ફાળો આપનારાઓ ઉતરાણનું કામ ચાલુ રાખે.
@@ -52,7 +52,7 @@ flowchart LR
 તમને જોઈતી શાખા મર્જ કરી શકાય તેવી છે એમ માનતા પહેલા ઓપન ફ્રીઝ માટે તપાસો:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 મર્જ મિકેનિક્સ (માલિક `queue` લેબલ → Mergify) [MERGE_TRAIN.md](./MERGE_TRAIN.md) માં દસ્તાવેજીકૃત થયેલ છે.

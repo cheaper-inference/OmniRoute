@@ -48,12 +48,12 @@ Kapag ang isang release ay pinagkasundo, isang marker na isyu na may label na `r
 
 - Ang nakapirming `release/vX.Y.Z` ay pag-aari ng release captain para sa barkong iyon.
 - Ang `release/vX+1` ng susunod na cycle ay pinutol mula sa nakapirming tip kaya patuloy na gumagana ang mga nag-aambag.
-- Buksan ang PRs na tina-target pa rin ang nakapirming sangay dapat** na-retarget** sa aktibong (pinakamataas) na sangay `release/v*`.
+- Buksan ang PRs na tina-target pa rin ang nakapirming sangay** na-retarget** sa aktibong (pinakamataas) na sangay `release/v*`.
 
-Suriin para sa isang bukas na pag-freeze bago ipagpalagay na ang sangay na gusto mo ay maaaring pagsamahin:
+Suriin para sa isang bukas na pag-freeze bago ipagpalagay na ang sangay na gusto mo ay pinagsama:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 → sa `queue` [MERGE_TRAIN](./MERGE_TRAIN.md).

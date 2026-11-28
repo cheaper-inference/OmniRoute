@@ -4,12 +4,11 @@
 
 ---
 
-> **Igazság forrása:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Utolsó frissítés:** 2026-09-22 — hatókör névterek mutatnak az MCP-SERVER.md-re
+> **Az igazság forrása:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-Az OmniRoute útvonal-érzékeny engedélyezési folyamattal rendelkezik, amely minden API kérést ellenőriz. Az osztályozás **determinisztikus** és **fail-closed** (hibásan zárt) — minden, ami nem osztályozható, `MANAGEMENT` kategóriába kerül, és munkamenet vagy menedzsment szintű tokent igényel. Ez az oldal a modelljét magyarázza el azoknak a mérnököknek, akik útvonalakat tartanak karban vagy új végpontokat terveznek.
+OmniRoute van egy útvonal-tudatos engedélyezési folyamata, amely minden API kérést átkap. Az osztályozás az** determinisztikus** és** hibazárás** — minden, amit nem lehet besorolni `MANAGEMENT` -ként végződik, és munkamenetet vagy kezelési szintű tokent igényel. Ez az oldal ismerteti a modellt az útvonalakat fenntartó vagy új végpontokat tervező mérnökök számára.
 
-![AuthZ folyamat (3 útvonalkategória + házirend-értékelés)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Forrás: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -151,35 +150,34 @@ operátor be nem kapcsolja (`src/server/auth/dashboardMfa.ts`).
 
 Néhány `MANAGEMENT` akció van** csak kezelő számára** : egy `manage` kulcs nem elég. Tárolt hitelesítő adatok exportálása (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), biztonsági mentés visszaállítása az élő adatokon keresztül (`POST /api/db-backups/import` beleértve `dryRun=true`, `POST /api/db-backups` visszaállítást id alapján , `POST /api/settings/import-json`), a visszaállítási pontok megsemmisítése (`DELETE /api/db-backups` tisztítás és `PATCH /api/db-backups`, mert az általa megkövetelt megőrzés minden da automatikus biztonsági mentés után meghajtja az da automatikus prsh lapot) CLI tárgy, vagy a bejelentkezés letiltva. A szinkronizálási token (`POST /api/sync/tokens`) kiadásához és a `admin` CLI hozzáférési jogkivonat (`POST /api/cli/tokens`) elkészítéséhez minden bejelentkezési módban szükség van egy műszerfali munkamenetre vagy a helyi CLI alanyra. A tetszőleges hatókörű API kulcsok és `oma_` hozzáférési jogkivonatok nem operátori hitelesítési adatok: `403` kapnak, amikor szükség van rá. A csekk `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) él. A bejelentkezési beállítások módosítása is csak a kezelő által történik: `POST /api/settings/require-login` (a felügyeleti jelszó beállítása / `requireLogin` váltás) csak azokat a hitelesítő adatokat fogadja el, ha már létezik jelszó — az első futtatási rendszerindítási ablak (még nincs jelszó) változatlan — és a műszerfali munkamenetnek el kell küldenie a `currentPassword` a jelszó cseréjéhez (`403`, audited hiányzik, mint `settings.update_failed`). A helyi CLI és a letiltott bejelentkezési példány megtartja a helyreállítási útvonalat, és e nélkül is beállíthat jelszót, mivel mindkettő az adatkönyvtárat birtokló gazdagéphez van kötve.
 
-## Folyamat
+## Csővezeték
 
 ```
-Beérkező kérés → src/proxy.ts
+Incoming request → src/proxy.ts
   → runAuthzPipeline() in src/server/authz/pipeline.ts
-    1. Megbízható belső fejlécek eltávolítása (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Kérésazonosító generálása, útvonal osztályozása a classifyRoute() segítségével
-    3. Ha pathname == "/" → átirányítás /dashboard
-    4. Ha leállítási folyamat zajlik (graceful shutdown) és /api/* → 503
-    5. Ha nem-GET /api/* → checkBodySize() védelem ellenőrzése
-    6. Ha OPTIONS → CORS előzetes ellenőrzés 204
-    7. Ha options.enforce == false → átengedés route-class fejlécekkel
-    8. Egyébként: POLICIES[routeClass].evaluate(ctx)
-       - allow  → x-omniroute-auth-{kind,id,label,scopes} beállítása → NextResponse.next()
-       - reject → JSON-hiba correlation_id értékkel (dashboard-oldalak → 302 /login)
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-A megbízható belső fejléceket (a `src/server/authz/headers.ts` fájlban definiálva) a rendszer **eltávolítja a beérkező kérésekből** az osztályozás előtt — az ügyfelek nem tölthetik előre az `x-omniroute-auth-*` fejléceket egy tárgy megszemélyesítéséhez.
+A megbízható belső fejlécek ( `src/server/authz/headers.ts` vannak meghatározva).** megfosztva a bejövő kérésektől** a besorolás előtt — kliensek nem tölthetik ki előre `x-omniroute-auth-*`, hogy alanynak adjanak ki magukat.
 
-### Szerződések házirendekhez
+### Politikai szerződések
 
-Minden útvonalosztályhoz tartozik egy házirend a `src/server/authz/policies/` könyvtárban:
+Minden útvonalosztálynak van egy szabályzata `src/server/authz/policies/` ban:
 
-- **`publicPolicy`** (`policies/public.ts`) — mindig `allow({ kind: "anonymous", id: "anonymous" })` értéket ad vissza.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — kinyeri a Bearer tokent, majd a `validateApiKey()` segítségével érvényesíti. Csak akkor tér vissza anonim módba, ha a tényleges `REQUIRE_API_KEY` funkciójelző le van tiltva. A tényleges jelző feloldása az `isRequireApiKeyEnabled()` segítségével történik (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), így a Dashboard funkciójelzői és a környezeti változók egységesen szabályozzák az `/api/v1/*`, `/api/v1beta/*` és az aliasok működését; a feloldási hibák alapértelmezés szerint megtagadják a hozzáférést. Engedélyezi a dashboard-munkamenetet használó kéréseket az ügyfél-API útvonalain, beleértve az `/api/v1/models` útvonalat is, amelyet a dashboard modellkatalógusa használ.
-  Ha az Entra ID SSO engedélyezve van, akkor a szerkezetileg Entra-tokennek minősülő Bearer tokent (három base64url szegmens, `RS*` alg, `kid`) az SSO-ág kezeli a `validateApiKey()` előtt, és annak eredménye végleges — a token soha nem kerül vissza az API-kulcsos ágba vagy a névtelen módba való visszalépéshez, így egy identitásszolgáltatói kiesés nem eredményezhet nyílt hozzáférést. A statikus API-kulcsokat ez nem érinti. Lásd: [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — elfogadja a dashboard-munkamenetet, a belső modell-szinkronizálási kéréseket (amelyek illeszkednek a `/api/providers/[name]/(sync-models|models)` útvonalra), vagy teljesen kihagyja az ellenőrzést, ha az `isAuthRequired()` értéke false. 403-as (`AUTH_001`) választ ad, ha Bearer-token van jelen, de érvénytelen; egyébként 401-et ad vissza. Emellett az autentikációs ágak előtt érvényesíti az útvonalvédelmi szinteket is (LOCAL_ONLY / ALWAYS_PROTECTED) — lásd: [Útvonalvédelmi szintek](../security/ROUTE_GUARD_TIERS.md). A `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` listában szereplő LOCAL_ONLY útvonalak (jelenleg: `/api/mcp/`) nem loopback címről is elérhetők, ha a Bearer-kulcs tartalmazza a `manage` hatókört; minden más LOCAL_ONLY útvonal a hatókörtől függetlenül továbbra is szigorúan loopbackre korlátozott.
+- **`publicPolicy`** (`policies/public.ts`) — mindig `allow({ kind: "anonymous", id: "anonymous" })` értéket adja vissza.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — kivonja a hordozót, `validateApiKey()` keresztül érvényesíti. Csak akkor válik névtelenné, ha a hatékony `REQUIRE_API_KEY` funkciójelző le van tiltva. A tényleges jelzőt `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) segítségével oldja fel, így az irányítópult szolgáltatásjelzői és a környezeti változók következetesen szabályozzák `/api/v1/*`, `/api/v1beta/*` és az álneveket; A megoldó hibáinak sikertelensége lezárva. Lehetővé teszi az irányítópult-munkamenet kéréseket az ügyfél API útvonalain (beleértve `/api/v1/models`, amelyet az irányítópult-modell-katalógus használ). Ha az Entra ID SSO engedélyezve van, akkor egy olyan hordozót, amely szerkezetileg egy Entra token (három base64url szegmens, `RS*` alg, `kid`), a SSO ág kezeli** előtt** `validateApiKey()` és annak ítélete végleges — soha nem esik át az API-kulcs elérési útjára vagy az anonim ágra való degradálásra, így az identitásszolgáltató kimaradása nem válhat nyílt hozzáféréssé. A statikus API billentyűket ez nem érinti. Lásd: [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — elfogadja a műszerfali munkamenetet, a belső modell-szinkronizálási kéréseket ( `/api/providers/[name]/(sync-models|models)`-vel egyeztetve), vagy teljesen kihagyja, ha `isAuthRequired()` hamis értéket ad vissza. 403 (`AUTH_001`) értéket ad vissza, ha a hordozó token jelen van, de érvénytelen, egyébként 401-et. A — lásd [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) előtt érvényesíti az útvonalőrségi szinteket is (LOCAL_ONLY / ALWAYS_PROTECTED). `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ma: `/api/mcp/`) LOCAL_ONLY elérési utak nem visszahurkolással érhetők el, ha a hordozókulcs a `manage`/`admin` hatókört vagy a szűk `mcp:connect` hatókört (`hasMcpConnectOrManageScope`) hordozza, vagy hitelesített műszerfali munkamenettel; az összes többi LOCAL_ONLY útvonal szigorú visszacsatolású marad a hatókörtől függetlenül.
 
-A sikeres házirend `AuthSubject` értéket ad vissza, amelynek `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Az alsóbb szintű kezelők az `src/server/authz/assertAuth.ts` fájlban található `assertAuth(request, "CLIENT_API")` segítségével olvashatják ki, így nincs szükségük az autentikációs logika újbóli futtatására.
+A sikeres szabályzat `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` vel adja vissza. A downstream kezelők `assertAuth(request, "CLIENT_API")` n keresztül olvashatják `src/server/authz/assertAuth.ts` -ben, ahelyett, hogy újra futtatnák az auth logikát.
 
 ## Nyilvános útvonalak listája
 
@@ -268,42 +266,24 @@ A `hasManageScope(scopes)` igaz értéket ad vissza a `"manage"` vagy `"admin"` 
 
 A halmazt az alak, ne pedig a kényelmi szempontok alapján válaszd ki. Egyetlen útvonal a `PUBLIC_API_ROUTES_EXACT` halmazba kerüljön (GET-only útvonal esetén pedig a `PUBLIC_READONLY_CORS_API_ROUTES` listába); csak valódi részfa kerülhet a `PUBLIC_API_ROUTE_PREFIXES` listába, és **`/` karakterrel kell végződnie**. Ha egyetlen útvonalat teszel az előtaglistába, azzal minden olyan szomszédos útvonalat is nyilvánossá teszel, amelynek azonosak a kezdő karakterei — beleértve a később hozzáadott, dinamikus szegmenst tartalmazó testvérútvonalakat is (GHSA-74g9-q8f6-793h). Frissítsd az egységteszteket a `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` és `tests/unit/authz/classify.test.ts` fájlokban.
 
-## Hatókörök
+## Hatókör
 
-Három névtér. Minden ellenőrző csak a saját stringjeit olvassa. Az összehasonlítás,
-beleértve azt is, hogy miért hiúsul meg a `manage` a `scopeMatches` ellenőrzésen
-a `read:compression` esetében, és miért nem tud egy `read` hozzáférési token
-`PATCH /api/keys/{id}` kérést végrehajtani, itt található:
-[Három hatókör névtér](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Három névtér. Minden ellenőrző csak a saját karakterláncait olvassa be. Az egymás mellett található [három hatókör névtér](../frameworks/MCP-SERVER.md#three-scope-namespaces), beleértve azt is, hogy `manage` miért nem működik `scopeMatches` ben `read:compression` esetén, és miért nem `read` hozzáférési jogkivonat `PATCH /api/keys/{id}`.
 
-Az API kulcsok tartalmaznak egy `scopes` tömböt (JSON formátumban tárolva az
-`api_keys.scopes` mezőben, lásd `src/lib/db/apiKeys.ts`).
+A API billentyűk `scopes` tömböt hordoznak ( JSON `api_keys.scopes` tárolva, lásd `src/lib/db/apiKeys.ts`).
 
-### Kezelési hatókör
+### Menedzsment hatókör
 
-- `manage` / `admin` — `hasManageScope`. Bearer hozzáférés a kezelési API útvonalakhoz.
-- Az `mcp:connect`, `self:usage`, `self:account-quota` és
-  `policy:bypass-provider-quota` additív, pontosan egyező hatókörök. Ezek
-  kívül esnek a `MANAGEMENT_API_KEY_SCOPES` hatókörön. Az `mcp:connect` csak
-  az `/api/mcp/` nem-loopback kivágást nyitja meg.
+- `manage` / `admin` — `hasManageScope`. Adathordozó hozzáférés a menedzsment API útvonalakhoz.
+- `mcp:connect`, `self:usage`, `self:account-quota` és `policy:bypass-provider-quota` additív pontos egyezésű hatókör. Kint ülnek `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` csak a `/api/mcp/` nem loopback kivágást nyitja meg.
 
-### MCP eszköz hatókörök
+### MCP szerszámtávcsövek
 
-Katalógus és illesztési szabályok (azonos string, vagy egy `*`-ra végződő
-megadott hatókör): [MCP eszköz hatókörök](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-Az `MCP_SCOPE_LIST` a `src/shared/constants/mcpScopes.ts` fájlban az eredeti
-típusos részhalmaz, nem a teljes katalógus. A kényszerítés az
-`open-sse/mcp-server/scopeEnforcement.ts` fájlban fut, miután a
-`resolveCallerScopeContext()` feloldja a hatóköröket az MCP hitelesítési
-információkból, a kérés metaadataiból vagy az `OMNIROUTE_MCP_SCOPES` alapján.
-Ez kikapcsolva marad, hacsak az `OMNIROUTE_MCP_ENFORCE_SCOPES=true` nincs beállítva.
+Katalógus- és illesztési szabályok (azonos karakterlánc, vagy engedélyezett hatókör, amely `*` ra végződik): [MCP eszköz hatókörei](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` `src/shared/constants/mcpScopes.ts` -ben az eredeti beírt részhalmaz, nem a teljes katalógus. A kényszerítés `open-sse/mcp-server/scopeEnforcement.ts` ben fut, miután `resolveCallerScopeContext()` feloldja a hatóköröket MCP auth info-ból, a metaadatok kéréséből vagy `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` globálisan bekapcsolja (alapértelmezett `false`), de mindig érvényesül olyan HTTP/SSE hívónál, akinek API kulcsából hiányzik `manage`/`admin` (lásd `shouldForceScopeEnforcement()` `open-sse/mcp-server/scopeEnforcement.ts`-ben), függetlenül a zászlótól.
 
-### Hozzáférési token hatókörök
+### Hozzáférési token hatókörei
 
-`read` / `write` / `admin` az `oma_live_…` tokeneken, a `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`) alapján rangsorolva. Ez a rangsor csak a
-hozzáférési token hitelesítő adatokra vonatkozik. Lásd:
-[Kezelési hitelesítés](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` a `oma_live_…` tokeneken, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) szerint rangsorolva. Ez a rang csak a hozzáférési token hitelesítő adataira vonatkozik. Lásd: [Kezelői hitelesítés](../guides/MANAGEMENT-AUTH.md).
 
 ## Auth Required kapcsoló
 

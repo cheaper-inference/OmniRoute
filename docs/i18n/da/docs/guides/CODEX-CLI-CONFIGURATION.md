@@ -480,136 +480,124 @@ I en interaktiv session:
 
 ## Langvarige opgaver
 
-To standardindstillinger i OmniRoute kan i det skjulte sabotere flere timer lange Codex CLI-sessioner. Ingen af dem er en Codex CLI-indstilling — begge findes på OmniRoute-siden. Brugere, der migrerer en konfiguration fra upstream-proxyer, som fastholder konti og deaktiverer timeout ved inaktivitet, rammer ofte begge problemer og konkluderer, at OmniRoute »ikke kan opretholde en lang session«.
+To OmniRoute standardindstillinger kan lydløst sabotere Codex CLI sessioner på flere timer. En Codex CLI indstilling — er heller ikke live på OmniRoute siden. Brugere, der migrerer en konfiguration fra upstream-proxyer, der fastgør konti og deaktiverer inaktive cutoffs, rammer ofte begge og konkluderer, OmniRoute "ikke kan opretholde en lang session."
 
-| Symptom                                                                                        | Sandsynlig årsag                                                                      | Indstilling              |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------ |
-| Sessionen bliver ved med at skifte konto / kontinuiteten i promptcachen går tabt mellem turene | TTL for sessionstilknytning er `0` (deaktiveret)                                      | `sessionAffinityTtlMs`   |
-| Forbindelsen afbrydes midt i ræsonneringen uden en prompt, der er synlig for klienten          | Vagthunden for inaktiv stream blev udløst efter 10 minutter uden en upstream-datablok | `STREAM_IDLE_TIMEOUT_MS` |
+| Symptom                                                                                | Sandsynlig årsag                                                      | Knop                     |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------ |
+| Session bliver ved med at skifte konti / prompt-cache-kontinuitet går tabt mellem ture | Sessionsaffinitet TTL er `0` (deaktiveret)                            | `sessionAffinityTtlMs`   |
+| Forbindelsen dør midt i ræsonnementet uden nogen klient-vendt prompt                   | Stream inaktiv vagthund affyret efter 10 minutter uden opstrøms chunk | `STREAM_IDLE_TIMEOUT_MS` |
 
-Relaterede diskussioner: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (afbrydelser af lange opgaver), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (hvorfor tilknytning som standard er slået fra). Sporing: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Relaterede diskussioner: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (lange opgave falder), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (hvorfor affinitet deaktiveres som standard). Sporing: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Sessionstilknytning — fasthold én samtale til én konto
+### 1. Sessionsaffinitet — fastgør én samtale til én konto
 
-**Standard:** `sessionAffinityTtlMs = 0` (deaktiveret).
+**Misligholdelse:** `sessionAffinityTtlMs = 0` (deaktiveret).
 
-**Hvor den indstilles**
+**Hvor skal den indstilles**
 
-- Dashboard → **Indstillinger → Routing** → **Sessionstilknytning** → **Tilknytningens TTL (sekunder)** (`ComboDefaultsTab`)
-- Eller brug PATCH på indstillingerne med `sessionAffinityTtlMs` i **millisekunder** (Zod-interval `0`–`86_400_000`, dvs. op til 24 timer)
+- Dashboard →** Indstillinger → Routing** →** Sessionsaffinitet** →** Affinitet TTL (sekunder)** (`ComboDefaultsTab`)
+- Eller PATCH -indstillinger med `sessionAffinityTtlMs` in** millisekunder** (Zod range `0`–`86_400_000`, dvs. op til 24 timer)
 
-> Omdøbt i #7274 fra den Codex-specifikke `codexSessionAffinityTtlMs`. Den ældre nøgle accepteres stadig som et skrivebeskyttet alias; nye konfigurationer bør bruge `sessionAffinityTtlMs`. Tilknytning gælder nu for **enhver** udbyder, når TTL er over `0`, ikke kun Codex — se [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Sessionstilknytning.
+> Omdøbt i #7274 fra Codex-only `codexSessionAffinityTtlMs`. Den ældre nøgle accepteres stadig som et skrivebeskyttet alias; nye konfigurationer skal bruge `sessionAffinityTtlMs`. Affinitet gælder nu** enhver** udbyder når TTL er over `0`, ikke kun Codex — se [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Sessionsaffinitet.
 
-**Hvad der går i stykker, når den forbliver på 0**
+**Hvad går i stykker, når den forbliver på 0**
 
-Hver tur i en Codex-samtale med flere ture routes uafhængigt af den aktive kombinationsstrategi og kan ende på en **anden konto for hver tur**. Det bryder kontinuiteten for upstream-sessionen/-promptcachen. OmniRoute tager kun Codex-sessionsheadere (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) og body-felter såsom `prompt_cache_key` / `session_id` i betragtning, når TTL er større end `0` (`extractSessionAffinityKey` i `src/sse/services/auth.ts`).
+Hver tur i en Codex samtale med flere sving rutes uafhængigt af den aktive kombinationsstrategi og kan lande på en** forskellig konto pr. tur** . Det bryder opstrøms session / prompt-cache-kontinuitet. OmniRoute konsulterer kun Codex -sessionsoverskrifter (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) og kropsfelter såsom `prompt_cache_key` / `session_id`, når TTL er større end `0` (`extractSessionAffinityKey` i `src/sse/services/auth.ts`).
 
-**Anbefalet til en enkelt opgave, der varer flere timer**
+**Anbefales til en enkelt opgave på flere timer**
 
-Indstil TTL **højere end opgavens forventede faktiske varighed** (maksimum i brugergrænsefladen er **86400 sekunder** = 24 timer):
+Indstil TTL** over opgavens forventede vægurlængde** (UI max er** 86400 sekunder** = 24 timer):
 
-| Forventet opgavelængde | Tilknytningens TTL (brugergrænseflade, sekunder) | `sessionAffinityTtlMs` |
-| ---------------------- | ------------------------------------------------ | ---------------------- |
-| Nogle få timer         | `14400` (4 t.)                                   | `14400000`             |
-| Natten over / ~12 t.   | `43200` (12 t.)                                  | `43200000`             |
-| Et helt døgn           | `86400` (24 t., maksimum)                        | `86400000`             |
+| Forventet opgavelængde | Affinitet TTL (UI, sekunder) | `sessionAffinityTtlMs` |
+| ---------------------- | ---------------------------- | ---------------------- |
+| Et par timer           | `14400` (4 timer)            | `14400000`             |
+| Overnatning / ~ 12h    | `43200` (12 timer)           | `43200000`             |
+| Hel dag                | `86400` (24 timer, maksimum) | `86400000`             |
 
-Aktivering er bevidst valgfri: Deaktivering af tilknytning prioriterer belastningsfordeling på tværs af konti; aktivering prioriterer kontinuitet for én lang agentsession. Denne vejledning ændrer **ikke** standardindstillingen — operatører, der kører lange Codex-opgaver, skal selv aktivere den.
+Tilvalget er bevidst: Deaktivering af affinitet favoriserer belastningsbalancering på tværs af konti; at aktivere det fremmer kontinuitet i en lang agentsession. Det gør denne guide** ikke** ændre standard — operatører, der kører lange Codex opgaver, skal tilmelde sig.
 
-### 2. Timeout for inaktiv stream — afbryd ikke stille ræsonneringsture
+### 2. Stream inaktiv timeout — dræber ikke stille ræsonnement vendinger
 
-**Standard:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minutter). Den nedarver fra `REQUEST_TIMEOUT_MS`, når den ikke er angivet; det fælles udgangspunkt er også 600000. Se [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
+**Misligholdelse:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minutter). Den arver fra `REQUEST_TIMEOUT_MS` når den ikke er indstillet; den delte baseline er også 600000. Se [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Hvad der går i stykker med standardindstillingen**
+**Hvad går i stykker ved standard**
 
-En Codex-reasonnerings-/værktøjssekvens, der forbliver tavs i mere end 10 minutter uden **nogen reel upstream-chunk**, tvangslukkes af SSE-inaktivitetsvagthunden (`open-sse/utils/stream.ts`). Klienten oplever ofte blot, at forbindelsen afbrydes — hvilket stemmer overens med “stoppede automatisk uden nogen meddelelse.”
+En Codex -ræsonnement / værktøjsvending, der forbliver tavs i mere end 10 minutter med** ingen reel opstrøms chunk** er tvangslukket af SSE tomgangsvagthunden (`open-sse/utils/stream.ts`). Klienten ser ofte en blottet forbindelse drop — matching "stoppet automatisk uden nogen meddelelse."
 
-Kritisk detalje: OmniRoutes syntetiske SSE-**heartbeat nulstiller ikke** inaktivitetsuret. Kun en reel upstream-body-chunk opdaterer `lastChunkTime`. En stille model, der stadig “tænker”, ser fra vagthundens synspunkt identisk ud med en upstream-forbindelse, der er gået i stå.
+Kritiske detaljer: OmniRoute syntetiske SSE** hjerteslag nulstilles ikke** det ledige ur. Kun en rigtig opstrøms kropsdel opdaterer `lastChunkTime`. En stille model, der stadig "tænker", ser fra vagthundens synspunkt identisk ud med en stoppet opstrøms.
 
-Relateret Undici-body-inaktivitet: `FETCH_BODY_TIMEOUT_MS` (har også som standard den samme grundværdi på 10 minutter; `0` deaktiverer den). Ved streaming dækker `FETCH_TIMEOUT_MS` kun opsætning af forbindelsen/de første headers — når streamen er aktiv, styres afbrydelser ved stilstand af `STREAM_IDLE_TIMEOUT_MS` og `FETCH_BODY_TIMEOUT_MS`.
+Relateret Undici-kroppsinaktivitet: `FETCH_BODY_TIMEOUT_MS` (standard til den samme 10-minutters baseline; `0` deaktiverer den). For streaming dækker `FETCH_TIMEOUT_MS` kun forbindelsesopsætning / første overskrifter —, når streamen er aktiv, er stallene styret af `STREAM_IDLE_TIMEOUT_MS` og `FETCH_BODY_TIMEOUT_MS`.
 
-**Anbefalet til en enkelt opgave, der varer flere timer**
+**Anbefales til en enkelt opgave på flere timer**
 
-I OmniRoute-processens miljø (`.env` / compose / systemd):
+I OmniRoute -procesmiljøet (`.env` / compose / systemd):
 
 ```bash
-# Deaktivér grænserne for stream-inaktivitet og body-inaktivitet ved lange ræsonneringssekvenser
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Eller hæv dem til mere end den længste stille periode, du forventer (værdierne er i millisekunder):
+Eller hæv dem over det længste stille mellemrum, du forventer (værdier er millisekunder):
 
 ```bash
-# Eksempel: Tillad op til 2 timers stilhed mellem upstream-chunks
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Genstart OmniRoute efter ændring af disse miljøvariabler.
+Genstart OmniRoute efter at have ændret disse env vars.
 
-### Konkret fremgangsmåde — Codex-opgave på flere timer
+### Konkret opskrift — multi-timers Codex opgave
 
-1. **Fastlås kontoen:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12 t.) eller `86400` (maks. 24 t.).
-2. **Hæv/deaktivér inaktivitetsgrænserne** i OmniRoutes miljø:
+1. **Fastgør kontoen:** Dashboard → Indstillinger → Routing → Sessionsaffinitet → Affinitet TTL = `43200` (12h) eller `86400` (24h maks.).
+2. **Hæv/deaktiver tomgangsafbrydelser** i OmniRoute miljø:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Behold den sædvanlige Codex-`config.toml` (`wire_api = "responses"`, korrekt `base_url`, `OMNIROUTE_API_KEY`) — der findes ingen Codex-specifikke indstillinger for affinitet/inaktivitet for disse to funktioner.
-4. Genstart OmniRoute, og start derefter den langvarige Codex-opgave.
+3. Behold de sædvanlige Codex `config.toml` (`wire_api = "responses"`, correct `base_url`, `OMNIROUTE_API_KEY`) — ingen affinity/idle knapper på Codex-siden findes for disse to adfærd.
+4. Genstart OmniRoute, og start derefter den lange Codex opgave.
 
-### Beslutning om standardværdier (#7287)
+### Standardbeslutning (#7287)
 
-| Indstilling              | Leveret standardværdi | Ændring i denne vejledning?                                                                                         |
-| ------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (fra)             | **Nej** — forbliver tilvalg (belastningsfordeling kontra kontinuitet; se Discussion #5718)                          |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min.)    | **Nej** — forbliver 10 minutter for generel trafik; operatører med langvarig Codex-brug hæver eller deaktiverer den |
+| Knop                     | Send standard     | Ændre i denne vejledning?                                                                                   |
+| ------------------------ | ----------------- | ----------------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (fra)         | **Ingen** — forbliver opt-in (belastningsbalancering vs kontinuitet; se diskussion #5718)                   |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min) | **Ingen** — forbliver 10 minutter for almindelig trafik; lange Codex operatører hæver eller deaktiverer den |
 
-Hvis en af standardværdierne ændres globalt, ændres adfærden for alle klienter på en instans, ikke kun Codex. Dokumentér indstillingerne; lad standardværdierne være uændrede, indtil en udtrykkelig operatørbeslutning siger andet.
+At vende enten standard globalt ville ændre adfærd for hver klient i en instans, ikke kun Codex. Dokumenter knapperne; lad standarderne være, indtil en eksplicit operatørbeslutning siger noget andet.
 
-### Diagnosticering af inaktivitetsafbrydelser
+### Diagnosticering af tomgangssnit
 
-Når inaktivitetsvagthunden udløses, logger OmniRoute en linje med denne form:
+Når den ledige vagthund skyder, logger OmniRoute en linje formet som:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Søg med grep efter `Idle timeout: no data from` (eller koden `stream_idle_timeout` / fejlnavnet `StreamIdleTimeoutError`). Provider-segmentet er det, OmniRoute brugte til den pågældende anmodning (`codex`, et andet provider-id eller `provider`, hvis det er ukendt) — det er ikke altid den bogstavelige streng `codex`.
+Grep for `Idle timeout: no data from` (eller koden `stream_idle_timeout` / fejlnavn `StreamIdleTimeoutError`). Udbydersegmentet er uanset hvilken OmniRoute der bruges til den anmodning (`codex`, en anden udbyder-id eller `provider` hvis ukendt) — det er ikke altid den bogstavelige streng `codex`.
 
 ---
 
 ## Fejlfinding
 
-**`Error: wire_api = "chat" understøttes ikke længere`**
-Fjern `wire_api = "chat"` fra din konfiguration. Indstil `wire_api = "responses"`, eller udelad feltet (standardværdien har været `"responses"` siden v0.138).
+**`Error: wire_api = "chat" is no longer supported`** Fjern `wire_api = "chat"` fra din config. Indstil `wire_api = "responses"` eller udelad feltet (standard til `"responses"` siden v0.138).
 
-**`Error: model not found`**
-Kontrollér, at modellen findes i OmniRoute med det korrekte præfiks. Brug `omniroute models list`, eller åbn `/dashboard/providers/<provider>`.
+**`Error: model not found`** Bekræft, at modellen findes i OmniRoute med det korrekte præfiks. Brug `omniroute models list` eller åben `/dashboard/providers/<provider>`.
 
-**`Authentication error`**
-Bekræft, at `OMNIROUTE_API_KEY` er eksporteret: `echo $OMNIROUTE_API_KEY`.
+**`Authentication error`** Bekræft, at `OMNIROUTE_API_KEY` er eksporteret: `echo $OMNIROUTE_API_KEY`.
 
-**`ERROR: Missing environment variable: OMNIROUTE_API_KEY`**
-Codex kontrollerer, at miljøvariablen findes, før den første anmodning foretages. Eksportér
-en rigtig nøgle til beskyttede servere eller en ikke-tom pladsholder såsom
-`OMNIROUTE_API_KEY=local`, når din **lokale** OmniRoute-instans ikke
-kræver godkendelse. Genstart shellen, hvis du har føjet den til `~/.bashrc` eller `~/.zshrc`.
+**`ERROR: Missing environment variable: OMNIROUTE_API_KEY`** Codex validerer, at env var eksisterer før den første anmodning. Eksporter en rigtig nøgle til beskyttede servere eller en ikke-tom pladsholder såsom `OMNIROUTE_API_KEY=local` når din** lokal** OmniRoute forekomsten kræver ikke godkendelse. Genstart skallen, hvis du føjede den til `~/.bashrc` eller `~/.zshrc`.
 
-**`Connection refused`**
-Kontrollér, at OmniRoute kører, og at `base_url`-værten og -porten er korrekte for dit netværk (lokalt kontra Tailscale kontra VPS).
+**`Connection refused`** Kontroller, OmniRoute kører, og at `base_url` host/port er korrekt for dit netværk (lokal vs Tailscale vs VPS).
 
-**Sessionen går ned tæt på kontekstgrænsen**
-Indstil `model_context_window` og `model_auto_compact_token_limit` eksplicit. Se tabellen over kontekstvinduer ovenfor.
+**Session går ned tæt på kontekstgrænsen** Indstil `model_context_window` og `model_auto_compact_token_limit` eksplicit. Se kontekstvinduet ovenfor.
 
-**Komprimering udløses for sent**
-Sænk `model_auto_compact_token_limit` til 80–85 % af vinduet. Indstil den aldrig til over 90 %.
+**Komprimering affyrer for sent** Sænk `model_auto_compact_token_limit` til 80–85 % af vinduet. Indstil aldrig over 90%.
 
-**Profilen indlæses ikke (`-p <name>` ignoreres uden fejlmeddelelse)**
-Kontrollér, at filen findes på `~/.codex/<name>.config.toml` (intet `profile-`-præfiks). Kør `ls ~/.codex/*.config.toml`.
+**Profilen indlæses ikke (`-p <name>` ignoreret stille)** Bekræft, at filen findes på `~/.codex/<name>.config.toml` (ingen `profile-` præfiks). Kør `ls ~/.codex/*.config.toml`.
 
-**Langvarig Codex-opgave afbrydes under kørslen/skifter konto mellem interaktioner**
-Se [Langvarige opgaver](#long-running-tasks). Aktivér sessionstilknytning (TTL længere end opgavens varighed), og forhøj eller deaktiver `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS`. Søg i OmniRoute-logfilerne med grep efter `Idle timeout: no data from`.
+**Lang Codex opgave falder midtvejs / skifter konto mellem sving** Se [Langvarige opgaver](#long-running-tasks). Aktiver sessionsaffinitet (TTL over opgavelængde) og hæv eller deaktiver `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS`. Grep OmniRoute logfiler til `Idle timeout: no data from`.

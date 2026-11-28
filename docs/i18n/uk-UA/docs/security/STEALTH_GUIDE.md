@@ -4,11 +4,9 @@
 
 ---
 
-> **Джерело істини:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Останнє оновлення:** 2026-09-02 — v3.8.51
-> **Аудиторія:** Інженери, які супроводжують приховані інтеграції, специфічні для постачальників.
+> **Джерело правди:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** аудиторія:** Інженери, які підтримують приховану інтеграцію постачальників.
 
-OmniRoute інтегрується з постачальниками, чиї периферійні вузли активно створюють цифрові відбитки неофіційних клієнтів (TLS JA3/JA4, порядок заголовків, структура тіла JSON, токени цілісності). На цій сторінці задокументовано доступні в OmniRoute поверхні приховування та місця їх реалізації.
+OmniRoute інтегрується з постачальниками, чиї краї активно беруть відбитки пальців неофіційних клієнтів (TLS JA3/JA4, порядок заголовків, форма тіла JSON, маркери цілісності). На цій сторінці описано стелс-поверхні, які відкриває OmniRoute, і де вони реалізовані.
 
 ## Юридичне та етичне застереження
 
@@ -77,65 +75,68 @@ OmniRoute інтегрується з постачальниками, чиї п�
 
 ---
 
-## Пакет маскування Claude Code
+## Claude Code Stealth Bundle
 
-Коли `cliCompatMode` увімкнено, OmniRoute переформатовує вихідні запити Claude так, щоб їх неможливо було відрізнити від трафіку `claude-cli`. Разом працюють три модулі:
+Коли `cliCompatMode` увімкнено, OmniRoute змінює форму вихідних запитів Claude, щоб їх було неможливо відрізнити від трафіку `claude-cli`. Три модулі співпрацюють:
 
 ### `claudeCodeFingerprint.ts`
 
-Обчислює 3-символьний відбиток `cc_version`, вбудований у заголовок білінгу:
+Обчислює 3-символьний відбиток `cc_version`, вбудований у платіжний заголовок:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (жорстко закодовано; відповідає офіційному клієнту)
-- Вхідні дані: символи з індексами 4, 7 і 20 у тексті першого повідомлення користувача + рядок версії
-- Результат: 3-символьний шістнадцятковий префікс
+- `FINGERPRINT_SALT = "59cf53e54c78"` (жорстко закодований; відповідає офіційному клієнту)
+- Вхідні дані: символи в індексах 4, 7, 20 першого тексту повідомлення користувача, рядок версії +
+- Вихід: 3-символьний шістнадцятковий префікс
 
 ### `claudeCodeCCH.ts` (хеш вмісту клієнта)
 
-Серверна перевірка цілісності, яку офіційний CLI Claude Code обчислює за допомогою Bun/Zig. OmniRoute повторно реалізує її за допомогою `xxhash-wasm`:
+Перевірка цілісності на стороні сервера. Офіційний код Claude CLI обчислює через Bun/Zig., повторне впровадження OmniRoute за допомогою `xxhash-wasm`:
 
-1. Серіалізувати тіло із заповнювачем `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. 5-символьне шістнадцяткове значення в нижньому регістрі, доповнене нулями
-4. Замінити `cch=00000;` на обчислений токен
+1. Серіалізуйте тіло за допомогою заповнювача `cch=00000;`
+2. Створіть хеш-перегляд із двома замінами простого тексту в такому порядку (`hashView()`):
+   - кожен збіг `/"model":"[^"]*"/g` стає `"model":""` — збіг зупиняється на першому `"`, тому значення з екранованими лапками (`"model":"a\"b"`) спорожняється лише до цієї лапки, як це робить клієнт
+   - кожен збіг `/"max_tokens":\d+,|,?"max_tokens":\d+/g` видаляється — тільки числові значення, на будь-якій глибині
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. 5-символьний шістнадцятковий нижній регістр із доповненими нулями
+5. Замініть `cch=00000;` на обчислений маркер
 
 Константи:
 
-- Початкове значення: `0x6e52736ac806831e`
-- Шаблон: `/\bcch=([0-9a-f]{5});/`
+- Початковий код: `0x4d659218e32a3268` (відповідає петлевим захопленням коду Claude 2.1.252 і 2.1.322)
+- Візерунок: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Вставляє Unicode-символ **з’єднувача нульової ширини** (`U+200D`) після першого символу «чутливих» назв клієнтів, щоб фільтри на стороні постачальника не могли знайти їх за допомогою grep. Стандартний список слів:
+Вставляє Unicode** з’єднувач нульової ширини** (`U+200D`) після першого символу «чутливих» імен клієнтів, щоб фільтри, що працюють над потоком, не могли їх виявити. Список слів за замовчуванням:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Застосовується до: блоків `system`, усього вмісту `messages[].content`, а також `tools[].description` / `tools[].function.description`. Оператор може перевизначити список за допомогою `setSensitiveWords()`.
+Застосовується до: блоків `system`, усіх `messages[].content` та `tools[].description` / `tools[].function.description`. Перевизначається оператором через `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — постачальники `anthropic-compatible-cc-*`
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` провайдери
 
-Для сторонніх ретрансляторів Anthropic, які приймають лише трафік «справжнього Claude Code»:
+Для сторонніх ретрансляторів Anthropic, які приймають лише «справжній код Claude »:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- Типове значення `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- Перемикач «Увімкнути бета-версію редагування міркувань» для кожного з’єднання додає `redact-thinking-2026-02-12`, коли постачальник рівня CC Compatible явно вимагає потоки з відредагованими міркуваннями
-- Перемикач «Увімкнути відображення підсумованих міркувань» для кожного з’єднання зберігає `providerSpecificData.requestDefaults.summarizeThinking` і додає `display: "summarized"` до запитів міркувань CC Compatible, для яких режим відображення ще не встановлено
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (сімейство Opus/Sonnet 4.x)
-- Стандартний шлях: `/v1/messages?beta=true`
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` за замовчуванням
+- Перемикач «Увімкнути бета-версію редагування мислення» для кожного з’єднання додає `redact-thinking-2026-02-12`, коли CC -сумісність висхідного потоку спеціально вимагає відредагованих потоків мислення
+- Перемикач «Увімкнути відображення підсумкового мислення» для кожного з’єднання зберігає `providerSpecificData.requestDefaults.summarizeThinking` та додає `display: "summarized"` до сумісних запитів мислення CC, які ще не встановили режим відображення
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (родина Opus/Sonnet 4.x)
+- Шлях за замовчуванням: `/v1/messages?beta=true`
 
-Споріднені модулі в тому самому пакеті:
+Дочірні модулі в одному пакеті:
 
-- `claudeCodeConstraints.ts` — правила температури та керування кешем
-- `claudeCodeToolRemapper.ts` — перепризначення назв інструментів
-- `claudeCodeExtraRemap.ts` — додаткова нормалізація корисного навантаження
+- `claudeCodeConstraints.ts` — temperature + правила контролю кешу
+- `claudeCodeToolRemapper.ts` — перепризначення імені інструменту
+- `claudeCodeExtraRemap.ts` — нормалізація додаткового корисного навантаження
 
 ---
 
@@ -149,15 +150,15 @@ aider, continue.dev, copilot, avante, codecompanion
 
 ### ⚠️ Ризик: `ANTIGRAVITY_CREDITS=always` (гаряча точка блокування облікового запису)
 
-маршрути `ANTIGRAVITY_CREDITS=always` (споживаються `open-sse/executors/antigravity.ts`).** кожен** запит через Antigravity AI Credit Overages (сплачені кредити Google ) замість того, щоб дозволити квотам безкоштовних рівнів Google перекривати речі. Це задокументовано як функція, але вона є** єдиний найпоширеніший звіт про порушення умов обслуговування, який ми бачимо** — кілька облікових записів Google Ultra було заблоковано за допомогою `403 / "service disabled for ToS violation" / insufficient_quota` після кількох годин роботи з `=always`.
+маршрути `ANTIGRAVITY_CREDITS=always` (споживаються `open-sse/executors/antigravity.ts`).** кожен** подати запит через Antigravity AI Credit Overages (сплачені кредити Google ) замість того, щоб дозволити квотам безкоштовних рівнів Google перекривати речі. Це задокументовано як функція, але вона є** єдиний найпоширеніший звіт про порушення умов обслуговування, який ми бачимо** — кілька облікових записів Google Ultra було заблоковано за допомогою `403 / "service disabled for ToS violation" / insufficient_quota` після кількох годин роботи з `=always`.
 
 Вихідний контроль увімкнено** сторона Google** , OmniRoute нічого не може запобігти. Назва змінної env та наявна документація звучать як безпечна ручка для повороту; це не так.
 
 **Чому це залучає виявлення зловживань більш агресивно, ніж використання лише безкоштовного рівня:**
 
-- Постійні автоматичні витрати на один обліковий запис Google позначаються інакше, ніж безкоштовні звернення-квоти та зупинки.
+- Постійні автоматичні витрати на один обліковий запис Google позначаються інакше, ніж безкоштовні звернення, квоти та зупинки.
 - Надлишок кредиту не має максимальної ставки, тому неправильно налаштований клієнт може спалити кілька сотень USD за хвилини і виглядати як перепродаж ключа API або бот-трафік.
-- Кілька користувачів OmniRoute, які паралельно отримують надлишки кредитів з одного зовнішнього IP посилюють сигнал.
+- Кілька користувачів OmniRoute, які паралельно отримують надлишок кредитів з одного зовнішнього IP посилюють сигнал.
 
 **Рекомендована поза:**
 
@@ -195,7 +196,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — читається `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — облікові дані сантехніка
-- Оригінальний звіт про інцидент: Обговорення [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Оригінальний звіт про інцидент: Обговорення [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

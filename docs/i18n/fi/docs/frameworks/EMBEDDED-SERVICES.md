@@ -4,7 +4,7 @@
 
 ---
 
-> **Versio:** v3.8.44** Viimeksi päivitetty:** 28.10.2026** Yleisö:** Insinöörit, jotka lisäävät, ylläpitävät tai korjaavat sulautettuja palveluita (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versio:** v3.8.44** Yleisö:** Insinöörit, jotka lisäävät, ylläpitävät tai korjaavat sulautettuja palveluita (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Sulautetut palvelut ovat paikallisesti asennettuja prosessin sivuvaunutyökaluja, jotka OmniRoute asentaa, valvoo ja paljastaa ensiluokkaisina reitityskohteina. Toisin kuin ulkoiset palveluntarjoajat (joihin päästään Internetin kautta API -näppäimien kautta), sulautetut palvelut toimivat samassa koneessa kuin OmniRoute ja kommunikoivat silmukan kautta.
 
@@ -45,7 +45,7 @@ Kaikki kahdeksan noudattavat samaa valvontamallia:
 - OmniRoute asentaa ne `DATA_DIR/services/{name}/` n alle (eristettynä OmniRoute:n omasta `package.json`)
 - OmniRoute synnyttää ja valvoo niitä lapsiprosesseina
 - OmniRoute ruiskuttaa lyhytaikaisen API -avaimen lapsen ympäristöön ja pyörittää sitä ilman seisokkeja (tarvittaessa)
-- Kaikki hallintareitit (`/api/services/*`) ovat**LOCAL_ONLY** — käytettävissä vain silmukan kautta (kova sääntö 17)
+- Kaikki hallintareitit (`/api/services/*`) ovat**LOCAL_ONLY** — käytettävissä vain silmukan kautta (kova sääntö #17)
 
 ### Keskeiset päätökset (suunnittelusuunnitelmasta)
 

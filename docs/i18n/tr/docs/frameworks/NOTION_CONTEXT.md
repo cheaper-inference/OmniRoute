@@ -68,43 +68,29 @@ Notion bir hata nesnesi döndürürse token temizlenir ve çağrı `400` ile ba�
 
 ## MCP araçları (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` içinde tanımlanmıştır. Token, çağrı
-sırasında `getNotionToken()` aracılığıyla çözümlenir; yapılandırılmış bir token yoksa
-araç şu hatayı fırlatır:
-`"Notion entegrasyon token'ı yapılandırılmadı. Settings > Context Sources bölümünden ayarlayın."`
+`open-sse/mcp-server/tools/notionTools.ts` tanımlıdır. Belirteç çağrı sırasında `getNotionToken()` aracılığıyla çözümlenir; hiçbiri yapılandırılmamışsa araç `"Notion integration token not configured. Set it in Settings > Context Sources."` atar
 
-| Araç                         | Kapsam         | Açıklama                                                                                                               |
-| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Metin sorgusuyla sayfaları ve veritabanlarını arar (başlıkları, kimlikleri ve URL'leri döndürür). Sayfalandırılmıştır. |
-| `notion_get_page`            | `read:notion`  | Kimliğine göre bir sayfanın içeriğini ve meta verilerini getirir.                                                      |
-| `notion_list_block_children` | `read:notion`  | Bir blok veya sayfanın tüm alt bloklarını (blok ağacını) listeler. Sayfalandırılmıştır.                                |
-| `notion_query_database`      | `read:notion`  | İsteğe bağlı `filter` + `sorts` (Notion API biçimi) ile bir veritabanını sorgular. Sayfalandırılmıştır.                |
-| `notion_get_database`        | `read:notion`  | Kimliğine göre bir veritabanının şemasını/meta verilerini getirir.                                                     |
-| `notion_append_blocks`       | `write:notion` | Mevcut bir bloğa veya sayfaya alt bloklar ekler (istek başına en fazla 100 blok).                                      |
+| Alet                         | Kapsam         | Tanım                                                                                                        |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | Sayfaları ve veritabanlarını metin sorgusuna göre arayın (başlıkları döndürür, IDs, URLs). Sayfalandırılmış. |
+| `notion_get_page`            | `read:notion`  | Bir sayfanın içeriğini ve meta verilerini ID ile alın.                                                       |
+| `notion_list_block_children` | `read:notion`  | Bir bloğun veya sayfanın (blok ağacı) tüm blok alt öğelerini listeleyin. Sayfalandırılmış.                   |
+| `notion_query_database`      | `read:notion`  | İsteğe bağlı `filter` + `sorts` (Notion API formatı) ile bir veritabanını sorgulayın. Sayfalandırılmış.      |
+| `notion_get_database`        | `read:notion`  | ID ile bir veritabanının schema/metadata alın.                                                               |
+| `notion_append_blocks`       | `write:notion` | Blok alt öğelerini mevcut bir bloğa veya sayfaya ekleyin (istek başına maksimum 100 blok).                   |
 
-### Girdi parametreleri
+### Giriş parametreleri
 
-- `notion_search` — `query` (1–500 karakter), `pageSize` (1–100, varsayılan 20),
-  `startCursor` (isteğe bağlı).
-- `notion_get_page` — `pageId` (32 karakterlik hex veya UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, varsayılan 50),
-  `startCursor` (isteğe bağlı).
-- `notion_query_database` — `databaseId`, `filter` (isteğe bağlı, Notion filtre
-  biçimi), `sorts` (isteğe bağlı dizi), `pageSize` (1–100, varsayılan 50),
-  `startCursor` (isteğe bağlı).
+- `notion_search` — `query` (1–500 karakter), `pageSize` (1–100, varsayılan 20), `startCursor` (isteğe bağlı).
+- `notion_get_page` — `pageId` (32 karakterli onaltılık veya UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, varsayılan 50), `startCursor` (isteğe bağlı).
+- `notion_query_database` — `databaseId`, `filter` (isteğe bağlı, Notion filtre formatı), `sorts` (isteğe bağlı dizi), `pageSize` (1–100, varsayılan 50), `startCursor` (isteğe bağlı).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (blok nesneleri dizisi),
-  `after` (isteğe bağlı konum).
+- `notion_append_blocks` — `blockId`, `children` (blok nesnelerinin dizisi), `after` (isteğe bağlı konum).
 
 ### Kapsamlar
 
-Okuma araçları `read:notion`, yazma aracı ise `write:notion` kapsamını gerektirir.
-Kapsamlar, yalnızca `OMNIROUTE_MCP_ENFORCE_SCOPES=true` olduğunda
-`open-sse/mcp-server/server.ts` içindeki `withScopeEnforcement()` tarafından
-uygulanır; çağıranın izin verilen kapsamları `OMNIROUTE_MCP_SCOPES` (virgülle
-ayrılmış) değerinden veya kimliği doğrulanmış API anahtarının kapsam bağlamından
-alınır. Kapsam modelinin tamamı için [MCP-SERVER.md](./MCP-SERVER.md) belgesine
-bakın.
+Okuma araçları `read:notion`, yazma aracı ise `write:notion` gerektirir. Kapsamlar, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` olduğunda `open-sse/mcp-server/server.ts` `withScopeEnforcement()` tarafından uygulanır ve her zaman API anahtarında `manage`/`admin` bulunmayan bir HTTP/SSE çağırıcısı için uygulanır; arayanın izin verilen kapsamları `OMNIROUTE_MCP_SCOPES` (virgülle ayrılmış) veya kimliği doğrulanmış API anahtarının kapsam bağlamından gelir. Tam kapsamlı model için [MCP-SERVER.md](./MCP-SERVER.md) bakın.
 
 ## Uç Noktalar
 

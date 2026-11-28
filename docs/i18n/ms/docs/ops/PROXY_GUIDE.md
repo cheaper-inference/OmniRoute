@@ -271,150 +271,150 @@ Ini berlaku sekali sahaja pada permulaan pertama selepas naik taraf. Gunakan `mi
 
 ---
 
-## Pasaran Proksi Percuma 1proxy
+## Pasaran Proksi Percuma 1proksi
 
-> 🆕 **Disumbangkan oleh [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Isu [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Disumbangkan oleh [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Isu [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute berintegrasi dengan platform komuniti **[1proxy](https://1proxy-api.aitradepulse.com)** untuk menyediakan akses kepada **ratusan proksi percuma yang telah disahkan** dari seluruh dunia. Ini sesuai untuk pengguna yang tidak mempunyai infrastruktur proksi sendiri.
+OmniRoute berintegrasi dengan** [1proksi](https://1proxy-api.aitradepulse.com)** platform komuniti untuk menyediakan akses kepada** beratus-ratus proksi percuma yang disahkan** dari seluruh dunia. Ini sesuai untuk pengguna yang tidak mempunyai infrastruktur proksi mereka sendiri.
 
-### Cara Ia Berfungsi
+### Bagaimana Ia Berfungsi
 
 ```
-┌─────────────┐   Segerak    ┌─────────────────┐    Putar      ┌──────────┐
-│  API 1proxy │ ────────────▶ │  proxy_registry  │ ────────────▶ │   API    │
-│  (luaran)   │ hingga 500   │  source=oneproxy │ ikut kualiti  │ Penyedia │
-└─────────────┘    proksi    └─────────────────┘               └──────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Segerak** — OmniRoute mendapatkan proksi yang telah disahkan daripada API 1proxy
-2. **Simpan** — Proksi disimpan dalam jadual `proxy_registry` yang sama dengan `source = 'oneproxy'`
-3. **Tapis** — Tapis mengikut protokol, negara dan skor kualiti
-4. **Putar** — Pilih proksi terbaik menggunakan strategi kualiti, rawak atau berjujukan
-5. **Degradasi automatik** — Skor kualiti proksi yang gagal akan dikurangkan; jika di bawah ambang → ditandakan sebagai tidak aktif
+1. **Segerakkan** — OmniRoute mengambil proksi yang disahkan daripada 1proxy API
+2. **Kedai** — Proksi disimpan dalam jadual `proxy_registry` yang sama dengan `source = 'oneproxy'`
+3. **Penapis** — Tapis mengikut protokol, negara, skor kualiti
+4. **Putar** — Pilih proksi terbaik menggunakan strategi berkualiti, rawak atau berurutan
+5. **Autodegradasi** — Proksi yang gagal mendapat skor kualiti mereka dikurangkan; di bawah ambang → ditanda tidak aktif
 
 ### Menyegerakkan Proksi
 
 **Melalui Papan Pemuka:**
 
-1. Pergi ke tab **Settings → 1proxy**
-2. Klik **"Sync Now"**
-3. Lihat statistik: jumlah proksi, bilangan aktif, purata kualiti dan pecahan mengikut negara
+1. Pergi ke** Tetapan → 1proksi** tab
+2. klik** "Segerakkan Sekarang"**
+3. Lihat statistik: jumlah proksi, kiraan aktif, kualiti purata, pecahan mengikut negara
 
 **Melalui API:**
 
 ```bash
-# Cetuskan penyegerakan
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Respons:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
 ### Menapis Proksi
 
 ```bash
-# Tapis mengikut protokol
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Tapis mengikut negara
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Tapis mengikut skor kualiti minimum
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Gabungkan penapis
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
 ### Skor Kualiti Proksi
 
-Setiap proksi 1proxy disertakan dengan metadata:
+Setiap proksi 1proksi disertakan dengan metadata:
 
-| Medan           | Penerangan                                          |
+| Padang          | Penerangan                                          |
 | --------------- | --------------------------------------------------- |
-| `qualityScore`  | Penarafan 0-100 daripada pengesahan 1proxy          |
-| `latencyMs`     | Kependaman rangkaian yang diukur                    |
-| `anonymity`     | `transparent`, `anonymous` atau `elite`             |
+| `qualityScore`  | Penilaian 0-100 daripada pengesahan 1proksi         |
+| `latencyMs`     | Kependaman rangkaian diukur                         |
+| `anonymity`     | `transparent`, `anonymous`, atau `elite`            |
 | `googleAccess`  | Sama ada proksi boleh mengakses perkhidmatan Google |
 | `countryCode`   | Kod negara ISO dua huruf                            |
 | `lastValidated` | Cap masa pengesahan terakhir                        |
 
 Skor kualiti dilaraskan secara dinamik:
 
-- **Permintaan yang gagal** mengurangkan skor sebanyak 10 mata
-- **Skor menurun kepada ≤10** → proksi ditandakan sebagai `inactive`
-- Proksi tidak aktif dikecualikan daripada putaran
+- **Permintaan gagal** mengurangkan markah sebanyak 10 mata
+- **Markah jatuh kepada ≤ 10** proksi → ditandakan `inactive`
+- Proksi tidak aktif dikecualikan daripada penggiliran
 
 ### Strategi Putaran
 
 ```bash
-# Putar mengikut kualiti (proksi terbaik dahulu) — lalai
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Putaran rawak
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Berjujukan (yang paling lama tidak disahkan didahulukan)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
 ### Pemutus Litar
 
-Penyegerakan 1proxy mempunyai pemutus litar terbina dalam:
+Penyegerakan 1proksi mempunyai pemutus litar terbina dalam:
 
-- Selepas **5 kegagalan penyegerakan berturut-turut**, percubaan penyegerakan seterusnya akan disekat
+- Selepas** 5 kegagalan penyegerakan berturut-turut** , percubaan penyegerakan selanjutnya disekat
 - Tetapkan semula dengan: `resetOneproxyCircuitBreaker()` atau mulakan semula pelayan
 - Status penyegerakan tersedia di `GET /api/settings/oneproxy?action=status`
 
-### Mengosongkan Proksi 1proxy
+### Membersihkan Proksi 1proksi
 
 ```bash
-# Padam satu proksi 1proxy
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# Kosongkan SEMUA proksi 1proxy (proksi manual tidak akan terjejas)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
 ---
 
-## Anti-Pengesanan & Mod Siluman
+## Anti-Pengesanan & Stealth
 
-OmniRoute bukan sekadar menghalakan trafik melalui proksi — ia menjadikan trafik kelihatan sah:
+OmniRoute bukan sahaja menghalakan trafik melalui proksi — ia menjadikan trafik kelihatan sah:
 
-### Penyamaran Cap Jari TLS
+### TLS Penipuan Cap Jari
 
-Menggunakan `wreq-js` untuk menjana cap jari TLS seperti pelayar, sekali gus memintas sistem pengesanan bot yang menandakan jabat tangan TLS bukan pelayar.
+Menggunakan `wreq-js` untuk menjana cap jari TLS seperti penyemak imbas, memintas sistem pengesanan bot yang membenderakan jabat tangan TLS bukan penyemak imbas.
 
-### Pemadanan Cap Jari CLI
+### CLI Padanan Cap Jari
 
-**Togol Cap Jari CLI** (`Tetapan → Keselamatan`) menyusun semula pengepala HTTP dan medan badan JSON agar sepadan dengan tandatangan tepat binari CLI natif (Claude Code, Codex, dan sebagainya). Ini berfungsi **di samping** proksi:
+The**CLI Togol Cap Jari** (`Settings → Security`) menyusun semula pengepala HTTP dan medan badan JSON untuk memadankan tandatangan tepat perduaan CLI asli ( Kod Claude, Codex, dsb.). Ini berfungsi** di atas** proksi:
 
 ```
-IP Anda (disekat) → IP Proksi (AS) → API Penyedia
-                     + penyamaran TLS
-                     + cap jari CLI
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-Anda memperoleh kedua-dua **penyamaran IP** dan **ketulenan permintaan** secara serentak.
+Anda mendapat kedua-duanya**IP masking** dan** meminta keaslian** serentak.
 
-### Pengekalan IP Proksi
+### Pemeliharaan proksi IP
 
-Lencana berkod warna dalam papan pemuka menunjukkan aras proksi yang aktif:
+Lencana berkod warna dalam papan pemuka menunjukkan tahap proksi yang aktif:
 
-| Lencana | Aras      | Maksud                                        |
+| Lencana | Tahap     | Maknanya                                      |
 | ------- | --------- | --------------------------------------------- |
 | 🟢      | Global    | Semua trafik melalui proksi ini               |
-| 🟡      | Penyedia  | Hanya trafik penyedia ini diproksikan         |
-| 🔵      | Sambungan | Kunci/akaun khusus ini menggunakan proksi ini |
+| 🟡      | Pembekal  | Hanya trafik penyedia ini diproksikan         |
+| 🔵      | Sambungan | key/account khusus ini menggunakan proksi ini |
 
-Lencana tersebut turut menunjukkan IP proksi yang telah dileraikan untuk pengesahan.
+Lencana juga menunjukkan IP proksi yang diselesaikan untuk pengesahan.
 
 ---
 
@@ -780,49 +780,26 @@ secara sekata)
 
 ## Pengecualian Kegagalan Automatik untuk Proksi Anda Sendiri
 
-Kumpulan pasaran 1proxy sudah menurunkan taraf proksi yang gagal secara automatik dengan sendirinya (lihat
-[Skor Kualiti Proksi](#proxy-quality-scores)). Bagi
-proksi yang **anda** tambahkan pada pendaftar, penjadual kesihatan latar belakang
-(`src/lib/proxyHealth/scheduler.ts`) menyediakan tingkah laku "mengecualikan ahli yang gagal daripada
-rantaian secara automatik" yang sama, tanpa memadamkan apa-apa:
+Kumpulan pasaran 1proksi sudah merendahkan proksi yang gagal secara automatik (lihat [Skor Kualiti Proksi](#proxy-quality-scores) ). Untuk proksi** awak** ditambahkan pada pendaftaran, penjadual kesihatan latar belakang (`src/lib/proxyHealth/scheduler.ts`) menyediakan gelagat "kecualikan ahli yang mati daripada rantai secara automatik" yang sama, tanpa memadamkan apa-apa:
 
 ```bash
-# .env — nyahdayakan proksi secara sementara selepas 3 siasatan berturut-turut gagal, dayakannya semula
-# secara automatik apabila ia mula memberikan respons kepada siasatan sekali lagi.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Cara ia berfungsi dalam rantaian berbilang proksi:
+Cara ia sesuai dengan rantai berbilang proksi:
 
-1. Penjadual menyiasat setiap proksi berdaftar pada setiap `PROXY_HEALTH_INTERVAL_MS`
-   (lalai 10 min; minimum 1 min).
-2. Selepas `PROXY_AUTO_REMOVE_AFTER` kegagalan **muktamad** berturut-turut (kegagalan
-   sambungan sebenar — tamat masa atau 5xx daripada sasaran siasatan itu sendiri tidak pernah dikira, lihat
-   [Pemeriksaan Kesihatan Proksi](#proxy-health-checking-v3816)), `status` proksi
-   ditetapkan kepada `dead`.
-3. `dead` ialah salah satu status yang dikecualikan oleh penapis status aktif yang digunakan untuk penyelesaian
-   kumpulan/putaran, maka putaran sesuatu skop (giliran bergilir / rawak / melekat /
-   kependaman — lihat [Pepohon Keputusan Strategi Putaran](#rotation-strategy-decision-tree))
-   serta-merta berhenti menyerahkan proksi tersebut kepada permintaan baharu. Tiada proksi lain dalam
-   kumpulan terjejas, dan keseluruhan kumpulan tidak akan kembali secara senyap kepada sambungan
-   langsung — lihat pelindung gagal-tertutup [Sistem Proksi 4 Peringkat](#4-level-proxy-system).
-4. Penjadual terus menyiasat proksi `dead` pada selang masa yang sama. Siasatan
-   berjaya yang seterusnya menukar `status` kembali kepada `active` dan proksi tersebut memasuki semula putaran —
-   tidak perlu ditambahkan semula secara manual.
+1. Penjadual menyiasat setiap proksi berdaftar setiap `PROXY_HEALTH_INTERVAL_MS` (lalai 10 min; minimum 1 min).
+2. Selepas `PROXY_AUTO_REMOVE_AFTER` berturut-turut** muktamad** kegagalan (kegagalan sambungan sebenar — tamat masa atau sasaran siasatan sendiri 5xx tidak pernah dikira, lihat [Pemeriksaan Kesihatan Proksi](#proxy-health-checking-v3816) ), `status` proksi ditetapkan kepada `dead`.
+3. `dead` ialah salah satu status yang dikecualikan oleh penapis status hidup yang digunakan oleh resolusi pool/rotation, jadi putaran skop (round-robin / rawak / melekit / kependaman / sesi — lihat [Pohon Keputusan Strategi Putaran](#rotation-strategy-decision-tree) ) segera berhenti menyerahkan proksi tersebut kepada permintaan baharu. Tiada proksi lain dalam kolam yang terjejas, dan seluruh kolam tidak pernah senyap-senyap kembali ke sambungan terus — lihat [Sistem Proksi 4 Tahap](#4-level-proxy-system) gagal-tertutup pengawal.
+4. Penjadual terus menyelidik proksi `dead` pada selang masa yang sama. Siasatan yang berjaya seterusnya membalikkan `status` ke `active` dan ia memasuki semula putaran — tanpa penambahan semula manual diperlukan.
 
-Ini sengaja dijadikan **pilihan serta tidak memusnahkan**: secara lalai, penjadual hanya
-mengira dan merekodkan kegagalan (lihat dasar C dalam `decision.ts`), dan `PROXY_AUTO_DISABLE`
-tidak pernah memadamkan baris — untuk tujuan itu, terdapat tanda `PROXY_AUTO_REMOVE`
-yang berasingan dan lebih agresif. Jika kedua-duanya ditetapkan kepada `true`, `PROXY_AUTO_REMOVE`
-diutamakan (proksi yang bakal dipadamkan tidak memerlukan penyahdayaan sementara terlebih dahulu). Lihat
-rujukan [Konfigurasi Persekitaran](../reference/ENVIRONMENT.md) untuk senarai
-pemboleh ubah yang lengkap.
+Ini memang sengaja** ikut serta dan tidak merosakkan** : secara lalai penjadual hanya mengira dan mencatat kegagalan (lihat dasar C dalam `decision.ts`), dan `PROXY_AUTO_DISABLE` tidak sekali-kali memadamkan baris — yang digunakan untuk bendera `PROXY_AUTO_REMOVE` yang berasingan dan lebih agresif. Jika kedua-duanya ditetapkan kepada `true`, `PROXY_AUTO_REMOVE` menang (proksi yang akan dipadamkan tidak ada gunanya untuk soft-disable di antaranya). Lihat rujukan [Konfigurasi Persekitaran](../reference/ENVIRONMENT.md) untuk senarai pembolehubah penuh.
 
 ---
 
-> 📖 **Dokumentasi berkaitan:**
+> 📖** Dokumentasi berkaitan:**
 >
-> - [Panduan Pengguna](../guides/USER_GUIDE.md) — Persediaan dan konfigurasi umum
-> - [Rujukan API](../reference/API_REFERENCE.md) — Dokumentasi API lengkap
-> - [Konfigurasi Persekitaran](../reference/ENVIRONMENT.md) — Semua pemboleh ubah persekitaran
+> - [Panduan Pengguna](../guides/USER_GUIDE.md) — Persediaan dan konfigurasi umum - [API Rujukan](../reference/API_REFERENCE.md) — Dokumentasi API penuh - [Konfigurasi Persekitaran](../reference/ENVIRONMENT.md) — Semua pembolehubah persekitaran

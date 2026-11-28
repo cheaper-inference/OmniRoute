@@ -21,24 +21,21 @@ dikonfigurasi**, dan CLI tersebut harus sudah **masuk**.
 ## 1. Arsitektur
 
 ```
-┌─ Aplikasi OmniRoute ─────────────┐        ┌─ sidecar codex-app-server ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ token kapabilitas)           │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  mengelola sendiri OAuth OpenAI     │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, pembaruan     │
-        │ berbagi (volume compose)           │   otomatis)                         │
-        ▼                                   └─────────────────────────────────────┘
-  codex-appserver-token   → token kapabilitas WS (dipasang oleh keduanya)
-  codex-appserver-home    → ~/.codex (auth.json ditulis oleh dasbor,
-                             dibaca oleh codex app-server milik sidecar)
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
+        ▼
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidecar hanya mendengarkan di jaringan compose internal
-  (`ws://codex-app-server:1456`) di balik token kapabilitas. Sidecar ini **tidak
-  pernah** dipublikasikan ke host atau internet.
-- Codex CLI sudah disertakan di dalam `omniroute:base`, sehingga Codex tidak
-  perlu diinstal pada host atau mesin pengguna saat Anda menjalankan sidecar.
+- Sespan mendengarkan** hanya** pada jaringan penulisan internal (`ws://codex-app-server:1456`) di belakang token kemampuan. Dia** tidak pernah** dipublikasikan ke host atau internet.
+- Sidecar menggunakan `omniroute:cli-no-docker`, dibuat dari target `runner-cli-no-docker`, yang mencakup Codex CLI.
 
 ## 2. Menjalankannya
 

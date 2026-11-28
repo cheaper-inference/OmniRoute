@@ -4,88 +4,63 @@
 
 ---
 
-> **19.11.2026: Die Mergify-Merge-Warteschlange wird eingestellt** (Entscheidung des Eigentümers). `.mergify.yml` definiert keine Warteschlange mehr und lehnt die Mergify-Befehle ab, die eine Pull-Anfrage zusammenführen oder neu schreiben. Release- PRs werden manuell unter dem Repository-Regelsatz „Erfordern grüne Gates für das aktive Release“ (`Gate / CI` + `Gate / Quality`) zusammengeführt, bis Omni-Queue im Live-Modus ausgeführt wird, und danach über Omni-Queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). In den folgenden Mergify-Abschnitten wird die Warteschlange so beschrieben, wie sie war.
+## Landung auf einem Release-Zweig
 
-Seit v3.8.49 (WS3.2/WS3.4 des quality/velocity Plans) ist der Standard-Mergepfad für überprüftes PRs in `release/vX.Y.Z` der** Zusammenführungswarteschlange zusammenführen** (`.mergify.yml`); Die** manueller Zusammenführungszug** Unten dokumentiert ist das FALLBACK — das bei Vorfällen, Release-Einfrierungen oder wenn sich der Mergify Open Source-Plan jemals ändert, verwendet wird.
+Die Omni-Warteschlange regelt Landungen in `release/vX.Y.Z`. Lesen Sie den `mode` der obersten Ebene in `config/merge-queue/config.json` im Standardzweig, bevor Sie einen PR landen. Siehe [Omni-Warteschlange](OMNI_QUEUE.md).
 
-## Standardpfad: die Mergify-Warteschlange
+- **`shadow`** führt die Validierung durch und überlässt die Landung einer manuellen Zusammenführung. Wenden Sie `omni-queue` an der endgültigen Spitze des genehmigten PR an. Überprüfen Sie die Berechtigung mit `npm run queue -- why <PR>`. Warten Sie auf das Urteil für diesen Kopf in `npm run queue -- history --base <branch>`. Fahren Sie mit `would-land` fort. Halten Sie bei `culprit-found` oder `would-dequeue` die Zusammenführung an und beheben Sie die Ursache.
+- **Schattenausnahmen.** Ein Zug mit grüner voller CI gegen die aktuelle Basisspitze kann ohne separates Warteschlangenurteil weiterfahren. Die gleiche Ausnahme gilt, wenn der PR Kopf bereits die aktuelle Basisspitze enthält.
+- **`live`** verwendet das `omni-queue` Label, um die Landung auszulösen. Allein die Warteschlange landet den PR. Überlassen Sie Zusammenführungsbefehle und direkte Pushs der Warteschlange.
 
-1. Der PR wird von den Kampagnen geprüft/auf Grün gesetzt und durch die ⭐-Freigabe
-   des Eigentümers vor dem Merge genehmigt (der Bericht + die Entscheidung pro Element — siehe `/merge-prs`, Schritt 0.75).
-2. Der Eigentümer (oder die Sitzung, die gemäß der Entscheidung des Eigentümers handelt) weist das Label **`queue`**
-   zu. Das Label IST die Merge-Genehmigung; Mergify führt sie lediglich aus.
-3. Mergify validiert die PRs in der Warteschlange **seriell** (jeweils einen) anhand der Schnellprüfungen
-   und führt den Merge durch (Squash). Batching + automatische Bisektion gehören zu einem kostenpflichtigen Mergify-Tarif
-   („Cannot use Merge Queue batch“ im kostenlosen Tarif, #7220), daher legt `.mergify.yml` keine
-   `batch_size` fest; Batching bleibt Aufgabe des unten beschriebenen manuellen Merge-Trains. Ein PR, dessen
-   Prüfungen nach Ablauf von `checks_timeout` (240 min = 2× der gemessene p95-Wert von
-   `quality.yml`) noch ausstehen, wird aus der Warteschlange entfernt, anstatt diese zu blockieren.
-4. Nach dem Merge validiert der kontinuierliche Release-Green-Workflow den neuen Stand bei einem Push
-   und eröffnet ein Issue zur Zuordnung, falls die Kombination eine Regression verursacht hat (niemals automatisches Revert).
+Jede Landung erfordert die Genehmigung des Eigentümers und die entsprechenden erforderlichen Kontrollen. Wenden Sie `omni-queue` erst an, nachdem der Eigentümer die Landung genehmigt hat. Für in der Warteschlange befindliches PRs, das geschützte Pfade berührt, ist auch die `protected-approved` Entscheidung des Eigentümers für dieses PR erforderlich.
 
-Schutzmaßnahmen (entsprechen den harten Regeln #21/#22 in `CLAUDE.md`):
+Der Regelsatz „Erfordern grüne Tore für die aktive Version“ erfordert grünes `Gate / CI` und `Gate / Quality` am Kopf. Verwenden Sie `--admin` niemals, um ein rotes Tor zu umgehen. Ein Release-Freeze-Block verschmilzt mit dem Frozen-Zweig. Siehe [harte Regel 21](HARD_RULES_DETAIL.md). Kennzeichnen Sie niemals eine Pull-Anfrage, führen Sie sie zusammen oder pushen Sie sie nicht darauf, dass eine andere Sitzung funktioniert. Siehe [harte Regel 22](HARD_RULES_DETAIL.md).
 
-- **Release-Freeze aktiv** → PRs, die auf den eingefrorenen Branch abzielen, NICHT mit einem Label versehen; sie zuerst auf
-  den aktiven `release/vX+1` umstellen.
-- **Laufender PR einer anderen Sitzung** → niemals mit einem Label versehen; nur die besitzende Sitzung stellt
-  ihre eigene Arbeit in die Warteschlange.
-- Reine Test-Diffs und mit `hotfix` gekennzeichnete PRs durchlaufen bereits eine reduzierte CI (siehe
-  `RELEASE_CHECKLIST.md` → Hotfix-Schnellspur); die Bedingungen der Warteschlange akzeptieren den jeweils
-  tatsächlich ausgeführten Prüfsatz (`#check-failure=0` + `#check-pending=0`).
+## Die Zug-Pull-Anfrage
 
-## Rückfallebene: der manuelle Merge-Train
+1. Starten Sie einen Zugzweig an der Spitze der aktuellen Release-Basis. Integrieren Sie mithilfe von Merge-Commits genau die genehmigten Mitgliederköpfe. Behalten Sie ihren Commit-Verlauf bei, indem Sie Squash und Rebase vermeiden.
+2. Öffnen Sie eine Pull-Anfrage für den Zugzweig. Validieren Sie diesen PR mit seinem eigenen vollständigen CI auf der aktuellen Basisspitze. Überprüfen Sie vor der Landung erneut die Basisspitze und die zugelassenen Mitgliedsköpfe. Aktualisieren Sie den Zug und seinen CI wenn sich der validierte Kandidat ändert.
+3. Landen Sie den Zug PR mit einem Merge-Commit im entsprechenden Warteschlangenmodus. Im Live-Modus behält die `merge-ff` Landemethode der Warteschlange die Merge-Commits bei. Die ursprünglichen Mitgliedsköpfe werden vom Release-Zweig aus erreichbar. GitHub markiert das Mitglied PRs als zusammengeführt und die Commits behalten ihre Autoren.
 
-Wird verwendet, wenn die Queue nicht verfügbar ist. Dies formalisiert die Vorgehensweise, mit der während
-des v3.8.47-Zyklus 33 PRs an einem Tag abgearbeitet wurden:
+Ein öffentliches Beispiel ist [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Es kombinierte 18 Mitglieds PRs und landete mit einem Merge-Commit am 24.11.2026.
 
-1. **Batch zusammenstellen** (~10–30 reviewte und genehmigte PRs). Auf `linked:`-Kollisionen prüfen
-   (dieselben `tap.testFiles`, dieselben CHANGELOG-Hunks) und diese sequenziell abarbeiten.
-2. **EINMAL validieren**: In einem isolierten Worktree, der vom Release-Tip abzweigt, alle Batch-Heads
-   lokal mergen und anschließend die Release-äquivalente Suite ausführen
-   (`npm run check:release-green`; vor einem Release `--with-build` hinzufügen).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatisiert die Schritte 1–2 (kollidierende
-   PRs werden ausgeworfen, der Train wird fortgesetzt). Im vollständigen Modus wird `npm run test:unit`
-   ausgeführt — der auf die Maschine abgestimmte Runner (`--test-concurrency=20`), **nicht** die beiden
-   sequenziellen 4-Core-CI-Shards, durch die die dominante Phase nur ~25 % einer 16-Core-Maschine
-   auslastete (behoben am 2026-07-18). `--fast` (untertägiges Abarbeiten großer Mega-Trains,
-   vom Owner am 2026-07-18 genehmigt) behält jedes statische Gate + vitest bei, führt aber nur die
-   node:test-Dateien aus, die von den aufgenommenen PRs geändert wurden; die VOLLSTÄNDIGE Suite muss
-   dennoch mindestens einmal täglich auf dem akkumulierten Tip ausgeführt werden (ein Train ohne `--fast`).
-3. **Grün** → die PRs nacheinander mergen (vor jedem Merge `state,headRefOid` erneut prüfen —
-   ein PR, dessen Head sich geändert hat, muss erneut reviewt werden). Nachweisen, dass der Netto-Diff
-   jedes Merges ausschließlich aus den eigenen Änderungen des PRs besteht (keine Auto-Resolve-Reverts:
-   `git diff --stat` auf Löschungen außerhalb des Scopes prüfen).
-4. **Rot** → den Batch in Hälften teilen (jede Hälfte validieren), statt PRs einzeln erneut zu
-   validieren; den verursachenden PR zusammen mit den Nachweisen zurück in die Review-Queue verschieben.
-5. **Niemals**: während eines Freeze in den eingefrorenen Branch mergen; irgendwo `git stash`
-   verwenden; die CI pauschal erneut ausführen und hoffen, dass ein roter Status verschwindet
-   (Regel: Ein roter Status ist Information).
+Eine Rücksynchronisierung von `main` zum nächsten Release-Zweig erfolgt ebenfalls über einen Merge-Commit. Für spätere Synchronisierungen ist die Beibehaltung `main` Abstammung erforderlich. Siehe [Worktree-Isolation](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Stufenmodell (warum die Queue allein mit Fast-Gates sicher ist)
+## Der lokale Merge-Train-Validator
 
-- **Pro PR** (Fast-Gates in quality.yml): TIA-betroffene Tests + vollständige Unit-Tests mit 4 Shards +
-  vitest + Lint-Sammlung + Typprüfung + Integrität von Dokumentation/Changelog.
-- **Pro Batch/Tip** (kontinuierliches Release-Green): HARTE `--quick`-Gates bei jedem Push auf
-  den Release-Branch; vollständige `--with-build --full-ci`-Durchläufe 3×/Tag.
-- **Pro Release** (ci.yml für den Release-PR): die vollständige Matrix einschließlich E2E ×9,
-  Paketartefakt + Tarball-Boot-Smoke-Test, Coverage/Ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Nichts wird weniger validiert als zuvor — die aufwendigen Prüfungen werden lediglich pro Batch/Tip
-statt pro PR ausgeführt, wodurch die O(N)-Roundtrips entfallen.
+Der Validator ruft die Basis- und PR Köpfe ab und kombiniert sie in einem verfügbaren Arbeitsbaum. Es führt seine Paritätssuite einmal auf dem resultierenden Baum aus. Bei einem fehlgeschlagenen Head-Fetch- oder Merge-Konflikt wird dieser PR ausgeworfen und das Skript fährt mit dem verbleibenden PRs fort.
 
-## Voraussetzungen für `merge-train.sh` bei einem frischen Checkout
+- **`--plan`** druckt die Schritte des ausgewählten Modus und beendet ihn, ohne einen Arbeitsbaum zu erstellen oder die Fernbedienung zu kontaktieren. Kombinieren Sie es mit `--fast` um den Schnellplan zu überprüfen.
+- **`--fast`** führt die allgemeinen statischen Gates und die ausgewählten geänderten `node:test` Dateien unter `tests/unit/` und `npm run test:vitest` aus. Führen Sie im Schnellmodus mindestens einmal täglich eine vollständige lokale Validierung der angesammelten Trinkgelder durch.
+- **Vollmodus** fügt die reinen statischen Tore hinzu und führt `npm run test:unit` und `npm run test:vitest` aus.
 
-Das Skript führt eine sofort abbrechende **Preflight-Prüfung** im Root-Checkout aus (vor jeglicher
-Worktree-Arbeit), damit eine fehlerhafte Installation niemals als roter Train erscheinen kann:
+Ein fehlerhaftes statisches Gate wird auf der unberührten Basis erneut ausgeführt, wenn die Basissonde verfügbar ist. Das Skript meldet vererbte Fehler und fährt fort, wenn jede erkannte Verstoßzeile auch auf der Basis erscheint und die Gesamtzahl nicht gestiegen ist.
 
-1. `npm ci` ausführen, anschließend das von npm blockierte `bun`-Postinstall:
-   `(cd node_modules/bun && node install.js)` — andernfalls schlagen `check:provider-consistency`
-   und `check:known-symbols` (beide `bun scripts/…`) sowohl für den Train ALS AUCH für die Base fehl,
-   ohne eine Zeile mit einem Verstoß auszugeben.
-2. Kein verwaistes `node_modules/node_modules` (ein doppelter Abhängigkeitsbaum; React wird zweimal
-   geladen und die UI-vitest-Suites schlagen sofort fehl).
-3. `node_modules/.bin/tsc` muss vorhanden und ausführbar sein (bei einer unvollständigen Installation fehlt es).
+| Ausfahrt | Bedeutung                                                                                                                                                         |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`      | Den Plan ausgedruckt oder die Suite fertiggestellt. Die Suite-Zusammenfassung listet alle übernommenen statischen Fehler und ausgeworfenen PRs auf.               |
+| `1`      | Ungültige Argumente, kein Git-Checkout, fehlgeschlagener Preflight oder kein PR Boarding.                                                                         |
+| `2`      | Eine Suite-Prüfung schlug fehl und wurde nicht als vererbt eingestuft. Der Bediener kann den Stapel halbieren, das fehlerhafte PR auswerfen und erneut ausführen. |
 
-Der Train führt das blockierende `npm run check:cycles:ratchet` aus; ein einfaches `npm run check:cycles`
-dient nur zur Information (es listet die SCCs auf und wird selbst bei einer fehlerfreien Base mit einem
-Exit-Code ungleich null beendet).
+Ein lokaler Pass liefert nur diagnostische Beweise für das Dossier des Eigentümers. Für jede Landung sind weiterhin die Genehmigung des Eigentümers, eigene erforderliche Prüfungen und ggf. das Urteil über die Schattenwarteschlange erforderlich.
+
+## Abstufung
+
+- **Per PR.** CI und Quality wählen Prüfungen basierend auf den geänderten Pfaden aus. Code PRs führt schnelle Quality Gates und Impact-Tests mit separaten Unit- und Vitest Jobs in CI aus.
+- **Pro Warteschlangenkandidat.** CI und Quality führen das vollständige Profil für den zusammengesetzten Kandidaten in seiner Warteschlangenreferenz aus.
+- **Pro Release-Tipp.** Release-Green führt schnelle harte Tore bei Pushs aus, die seinen Pfadfiltern entsprechen. Drei geplante Läufe pro Tag nutzen den vollständigen Sweep für den Release-Zweig.
+- **Pro Veröffentlichung.** Die vollständige CI Matrix umfasst E2E Shards, Paketvalidierung, Tarball-Boot-Smoke und Abdeckungsprüfungen. Siehe die [Release-Checkliste](RELEASE_CHECKLIST.md).
+
+## Fresh-Checkout-Voraussetzungen für `merge-train.sh`
+
+Der Preflight wird vor dem Erstellen von Arbeitsbäumen ausgeführt. Installieren Sie Abhängigkeiten mit `npm ci`. Bestätigen Sie, dass `node_modules/.bin/tsc` ausführbar ist und dass `node_modules/node_modules` nicht vorhanden ist. Überprüfen Sie, ob `node_modules/.bin/bun --version` erfolgreich ist.
+
+Wenn die Postinstallation Bun übersprungen wurde, führen Sie `(cd node_modules/bun && node install.js)` aus. Die Anbieterkonsistenz- und Known-Symbol-Prüfungen verwenden Bun. Der Validator führt `npm run check:cycles:ratchet` als blockierendes Gate aus. Der eigenständige `npm run check:cycles` Befehl ist beratend.
+
+## Geschichte
+
+Die Mergify-Merge-Warteschlange wurde am 19.11.2026 eingestellt.

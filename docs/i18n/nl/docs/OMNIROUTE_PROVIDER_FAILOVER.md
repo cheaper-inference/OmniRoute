@@ -18,6 +18,8 @@ Het standaard beleid voor meerdere providers staat maximaal drie providerpoginge
   - Alleen een mislukt antwoord gaat verder: er mislukt niets na de eerste gestreamde byte.
   - De nood-fallback-modelwissel is alleen van toepassing nadat elke aanbieder van het aangevraagde model is uitgevallen.
   - Een verzoek dat is vastgemaakt aan een verbinding (`x-omniroute-connection`) blijft hierop staan.
-  - Een voorvoegsel-id (`provider/model`) wordt nooit omgeleid naar een andere provider.
+  - Een voorvoegsel-ID (`provider/model`) wordt nooit omgeleid naar een andere provider.
 
 Circuitstatussen zijn `closed`, `open` en `half_open`. Een cooldown plant een begrensde sonde; een succesvolle sonde sluit het circuit en een mislukte sonde heropent het.
+
+De failover van de provider wordt binnen de gateway uitgevoerd. Zie [Wanneer OmniRoute zelf onbereikbaar is](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) voor clientgedrag tijdens een gatewaystoring.

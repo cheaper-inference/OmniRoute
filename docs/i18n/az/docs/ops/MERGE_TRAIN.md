@@ -4,84 +4,63 @@
 
 ---
 
-> **11-19-2026: Birləşdirmə növbəsi ləğv edildi** (sahibinin qərarı). `.mergify.yml` artıq növbə təyin etmir və çəkmə sorğusunu birləşdirən və ya yenidən yazan Birləşdirmə əmrlərini rədd edir. Buraxılış PRs "Aktiv buraxılışda yaşıl qapılar tələb olun" (`Gate / CI` + `Gate / Quality`) repozitoriya qaydaları altında əl ilə birləşdirilir, omni-növbə canlı rejimdə və ondan sonra omni-növbə vasitəsilə ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Aşağıdakı Birləşdirmə bölmələri növbəni olduğu kimi təsvir edir.
+## Buraxılış filialına enmə
 
-v3.8.49 ( quality/velocity planının WS3.2/WS3.4 ) versiyasından bəri nəzərdən keçirilən PRs üçün `release/vX.Y.Z` -yə defolt birləşmə yolu** Birləşmə növbəsini birləşdirin** (`.mergify.yml`); the** əl ilə birləşmə qatarı** aşağıda sənədləşdirilmiş FALLBACK — hadisələr zamanı, buraxılışların dondurulması və ya Merge Açıq Mənbə planı dəyişdikdə istifadə olunur.
+Omni-növbə `release/vX.Y.Z`-ya enişləri idarə edir. PR endirməzdən əvvəl defolt filialda `config/merge-queue/config.json` -də ən yüksək səviyyəli `mode` oxuyun. [Omni-Növbəyə](OMNI_QUEUE.md) baxın.
 
-## Standart yol: Mergify növbəsi
+- **`shadow`** doğrulamanı həyata keçirir və enişi əl ilə birləşməyə buraxır. Təsdiq edilmiş PR `omni-queue` son başlığında tətbiq edin. `npm run queue -- why <PR>` ilə uyğunluğu yoxlayın. `npm run queue -- history --base <branch>`-da o başın hökmünü gözləyin. `would-land` ilə davam edin. `culprit-found` və ya `would-dequeue` da birləşməni saxlayın və səbəbi düzəldin.
+- **Kölgə istisnaları.** Cari əsas ucuna qarşı yaşıl tam CI olan qatar ayrıca növbə hökmü olmadan davam edə bilər. Eyni istisna, PR başlığı artıq cari əsas ucunu ehtiva etdikdə tətbiq edilir.
+- **`live`** enişi işə salmaq üçün `omni-queue` etiketindən istifadə edir. Növbə tək başına PR yerə düşür. Birləşmə əmrlərini və növbəyə birbaşa itələmələri buraxın.
 
-1. PR kampaniyalar tərəfindən nəzərdən keçirilir/yoxlamalardan uğurla keçir və sahibin birləşdirmədən əvvəlki ⭐
-   keçid mərhələsində təsdiqlənir (hesabat + hər element üzrə qərar — `/merge-prs` Addım 0.75-ə baxın).
-2. Sahib (və ya sahibin qərarı əsasında fəaliyyət göstərən sessiya) **`queue`**
-   etiketini tətbiq edir. Etiket birləşdirmə təsdiqinin ÖZÜDÜR; Mergify sadəcə onu icra edir.
-3. Mergify növbədəki PR-ləri sürətli keçid yoxlamalarına qarşı **ardıcıl**
-   (bir dəfəyə birini) yoxlayır və birləşdirir (squash). Paketləmə + avtomatik biseksiya ödənişli Mergify səviyyəsidir
-   (pulsuz planda "Cannot use Merge Queue batch", #7220), buna görə `.mergify.yml` faylında
-   `batch_size` təyin edilmir; paketləmə aşağıdakı əl ilə idarə olunan birləşdirmə qatarının işi olaraq qalır. Yoxlamaları
-   `checks_timeout` müddətindən (240 dəq = `quality.yml` üçün ölçülmüş p95-in 2 qatı) sonra hələ də gözləmədə olan PR
-   növbəni ləngitmək əvəzinə növbədən çıxarılır.
-4. Birləşdirmədən sonra fasiləsiz buraxılışın uğurluluğunu yoxlayan iş axını push zamanı yeni son nöqtəni yoxlayır
-   və kombinasiya reqressiyaya səbəb olubsa, aidiyyət məsələsi açır (heç vaxt avtomatik geri qaytarmır).
+Hər bir eniş sahibinin icazəsini və müvafiq tələb olunan yoxlamaları tələb edir. Yalnız sahibi eniş icazəsi verdikdən sonra `omni-queue` tətbiq edin. Qorunan yollara toxunan növbəyə qoyulmuş PRs də həmin PR üçün sahibinin `protected-approved` qərarını tələb edir.
 
-Qoruyucu qaydalar (`CLAUDE.md` Sərt Qaydalar #21/#22 ilə eynidir):
+"Aktiv buraxılışda yaşıl qapılar tələb olunur" qaydalar dəsti başda yaşıl `Gate / CI` və `Gate / Quality` tələb edir. Qırmızı qapıdan keçmək üçün heç vaxt `--admin` istifadə etməyin. Sərbəst buraxılan dondurma blokları donmuş filiala birləşir. [Sərt Qayda 21-ə](HARD_RULES_DETAIL.md) baxın. Heç vaxt başqa bir seansın işlədiyini işarələməyin, birləşdirməyin və ya çəkmə sorğusuna təkan verməyin. [22-ci sərt qaydaya](HARD_RULES_DETAIL.md) baxın.
 
-- **Buraxılış dondurulması aktivdir** → dondurulmuş budağı hədəfləyən PR-ləri etiketləməyin; əvvəlcə
-  aktiv `release/vX+1` budağına yönləndirin.
-- **Başqa sessiyanın icrada olan PR-i** → onu heç vaxt etiketləməyin; yalnız sahib sessiya
-  öz işini növbəyə əlavə edir.
-- Yalnız testlərdən ibarət fərqlər və `hotfix` etiketli PR-lər artıq azaldılmış CI yoxlamalarından keçir (bax:
-  `RELEASE_CHECKLIST.md` → Təcili Düzəliş üçün Sürətli Zolaq); növbə şərtləri faktiki olaraq işə salınmış istənilən
-  yoxlama dəstini qəbul edir (`#check-failure=0` + `#check-pending=0`).
+## Qatarın çəkilməsi tələbi
 
-## Ehtiyat variantı: əl ilə birləşdirmə qatarı
+1. Cari buraxılış əsas ucunda bir qatar filialına başlayın. Birləşmə öhdəliklərindən istifadə edərək dəqiq təsdiq edilmiş üzv başlarını inteqrasiya edin. Squash və rebase qarşısını almaqla onların törəmə tarixçəsini qoruyun.
+2. Qatar filialı üçün bir çəkmə sorğusu açın. Həmin PR cari əsas ucun öz tam CI ilə təsdiq edin. Enişdən əvvəl əsas ucunu və təsdiq edilmiş üzv başlıqlarını yenidən yoxlayın. Təsdiqlənmiş namizəd dəyişdikdə qatarı və onun CI yeniləyin.
+3. Land the train PR with a merge commit under the applicable queue mode. In live mode, the queue's `merge-ff` landing method preserves the merge commits. The original member heads become reachable from the release branch. GitHub marks the member PRs as merged and the commits retain their authors.
 
-Növbə əlçatan olmadıqda istifadə olunur. Bu, v3.8.47 dövrü ərzində bir gündə
-33 PR-i emal edən təcrübəni rəsmiləşdirir:
+İctimai bir nümunə [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071) dir. O, 18 üzv PRs birləşdirdi və 2026-11-24 tarixində birləşmə öhdəliyi ilə endi.
 
-1. **Paketi formalaşdırın** (nəzərdən keçirilmiş+təsdiqlənmiş təxminən 10–30 PR). `linked:` toqquşmalarını
-   (eyni `tap.testFiles`, eyni CHANGELOG hissələri) yoxlayın və onları ardıcıl icra edin.
-2. **BİR DƏFƏ yoxlayın**: reliz ucundan yaradılmış təcrid olunmuş worktree daxilində bütün paket
-   başlıqlarını lokal olaraq birləşdirin, sonra relizə ekvivalent dəsti işə salın
-   (`npm run check:release-green`, relizdən əvvəl `--with-build` əlavə edin).
-   `scripts/release/merge-train.sh <base> <PR#>…` 1–2-ci addımları avtomatlaşdırır (toqquşan
-   PR-lər çıxarılır, qatar davam edir). Tam rejim `npm run test:unit` əmrini — sistemə
-   uyğunlaşdırılmış icraçını (`--test-concurrency=20`) — işə salır; dominant mərhələdə 16 nüvəli sistemin təxminən 25%-dən istifadə edən, ardıcıl işləyən iki 4 nüvəli CI
-   shardı DEYİL (2026-07-18 tarixində düzəldilib). `--fast` (gündaxili meqa-qatarların boşaldılması, sahib tərəfindən 2026-07-18 tarixində təsdiqlənib)
-   bütün statik yoxlamaları + vitest-i saxlayır, lakin yalnız qatara daxil edilmiş PR-lər tərəfindən dəyişdirilən
-   node:test fayllarını işlədir; TAM dəst gün ərzində ən azı bir dəfə
-   yığılmış uc üzərində icra edilməlidir (`--fast` olmadan bir qatar).
-3. **Yaşıl** → PR-ləri ardıcıllıqla birləşdirin (hər birindən əvvəl `state,headRefOid` dəyərlərini yenidən yoxlayın —
-   başlığı dəyişmiş PR yenidən nəzərdən keçirməyə qaytarılır). Hər bir birləşdirmənin xalis fərqinin
-   PR-in öz dəyişikliyi olduğunu sübut edin (avtomatik həll edilmiş geri qaytarmalar yoxdur: əhatə dairəsindən
-   kənar silinmələri müəyyənləşdirmək üçün `git diff --stat` nəticəsini audit edin).
-4. **Qırmızı** → tək-tək yenidən yoxlamaq əvəzinə paketi yarılara bölün (hər yarını yoxlayın);
-   problemli PR-i sübutlarla birlikdə nəzərdən keçirmə növbəsinə qaytarın.
-5. **Heç vaxt**: dondurma zamanı dondurulmuş budağa birləşdirməyin; heç bir yerdə `git stash` istifadə etməyin;
-   qırmızı statusun yox olacağı ümidi ilə CI-ni kütləvi şəkildə yenidən işə salmayın (qayda: qırmızı status məlumatdır).
+`main` dan növbəti buraxılış filialına sinxronizasiya da birləşmə öhdəliyi vasitəsilə həyata keçirilir. Sonrakı sinxronizasiyalar üçün `main` nəslinin qorunması tələb olunur. [İş ağacının izolyasiyasına](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash) baxın.
 
-## Səviyyələr (növbənin yalnız sürətli yoxlamalarla niyə təhlükəsiz olması)
+## Yerli birləşmə qatarı təsdiqləyicisi
 
-- **Hər PR üzrə** (quality.yml sürətli yoxlamaları): TIA-nın təsir etdiyi testlər + tam unit 4-shard +
-  vitest + lint dəsti + typecheck + sənədlər/changelog bütövlüyü.
-- **Hər paket/uc üzrə** (davamlı release-green): reliz budağına hər push zamanı `--quick` SƏRT yoxlamaları;
-  gündə 3 dəfə tam `--with-build --full-ci` yoxlamaları.
-- **Hər reliz üzrə** (reliz PR-ində ci.yml): E2E ×9 daxil olmaqla tam matris,
-  paket artefaktı + tarball ilkin işəsalma sınağı, əhatə dairəsi/ratchet yoxlamaları.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Heç nə əvvəlkindən daha az yoxlanılmır — ağır səth sadəcə hər PR üzrə deyil, hər paket/uc üzrə işləyir;
-O(N) gediş-gəlişlərini məhz bu aradan qaldırır.
+Validator baza və PR başlıqlarını götürür və onları birdəfəlik iş ağacında birləşdirir. O, yaranan ağacda bir dəfə paritet dəstini işlədir. Uğursuz başlıq gətirmə və ya birləşmə münaqişəsi həmin PR çıxarır və skript qalan PRs ilə davam edir.
 
-## `merge-train.sh` üçün təzə checkout ilkin şərtləri
+- **`--plan`** seçilmiş rejimin addımlarını çap edir və iş ağacı yaratmadan və ya pultla əlaqə saxlamadan çıxır. Sürətli planı yoxlamaq üçün onu `--fast` ilə birləşdirin.
+- **`--fast`** ümumi statik qapıları, `tests/unit/` və `npm run test:vitest` altında seçilmiş dəyişdirilmiş `node:test` fayllarını işlədir. Sürətli rejimdən istifadə edərkən yığılmış ucda gündə ən azı bir dəfə tam yerli yoxlama aparın.
+- **Tam rejim** yalnız tam statik qapıları əlavə edir və `npm run test:unit` və `npm run test:vitest` işləyir.
 
-Skript kök checkout üzərində (hər hansı worktree əməliyyatından əvvəl) dərhal dayandırılan **ilkin yoxlama** icra edir ki, pozulmuş quraşdırma heç vaxt qırmızı qatar kimi görünməsin:
+Baza zondu mövcuddursa, nasaz statik qapı toxunulmamış bazada yenidən işə salınır. Skript miras qalmış uğursuzluqları bildirir və hər bir tanınmış pozuntu xətti bazada göründükdə və ümumi sayı artmadıqda davam edir.
 
-1. `npm ci`, sonra npm-in blokladığı `bun` postinstall əməliyyatını işə salın:
-   `(cd node_modules/bun && node install.js)` — əks halda `check:provider-consistency`
-   və `check:known-symbols` (hər ikisi `bun scripts/…`) həm qatarda, HƏM DƏ bazada
-   heç bir pozuntu sətri olmadan uğursuz olur.
-2. Əlavə `node_modules/node_modules` olmamalıdır (dublikat asılılıq ağacı; React iki dəfə yüklənir
-   və UI vitest dəstləri dərhal uğursuz olur).
-3. `node_modules/.bin/tsc` mövcud və icra edilə bilən olmalıdır (natamam quraşdırmada o olmur).
+| Çıx | Mənası                                                                                                                                              |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0` | Planı çap etdi və ya paketi tamamladı. Paketin xülasəsi hər hansı irsi statik uğursuzluqları və çıxarılan PRs sadalayır.                            |
+| `1` | Etibarsız arqumentlər, Git yoxlanışı, uğursuz əvvəlcədən uçuş və ya PR boarded yoxdur.                                                              |
+| `2` | Paket yoxlanışı uğursuz oldu və miras alınmış kimi təsnif olunmadı. Operator partiyanı iki hissəyə bölə, pozan PR çıxara və yenidən işə sala bilər. |
 
-Qatar bloklayıcı `npm run check:cycles:ratchet` əmrini işlədir; sadə `npm run check:cycles`
-məsləhət xarakterlidir (SCC-ləri siyahıya alır və sağlam bazada belə sıfırdan fərqli kodla çıxır).
+Yerli keçid yalnız sahibinin dosyesi üçün diaqnostik sübut təqdim edir. Hər bir eniş üçün hələ də sahibin icazəsi, öz tələb olunan çekləri və müvafiq hallarda kölgə növbəsi hökmü tələb olunur.
+
+## Mərtəbə
+
+- **PR başına.** CI və Keyfiyyət dəyişdirilmiş yollara əsaslanaraq yoxlayır. Kod PRs CI-də ayrıca bölmə və Vitest işləri ilə sürətli keyfiyyətli qapıları və təsirli testləri idarə edir.
+- **Növbəyə görə namizəd.** CI və Keyfiyyət öz növbəsində tərtib edilmiş namizəd üçün tam profili idarə edir.
+- **Buraxılış üçün ipucu.** Release-Green, yol filtrlərinə uyğun gələn təkanlarda sürətli sərt qapıları işə salır. Gündə üç planlaşdırılan qaçış buraxılış filialı üçün tam taramadan istifadə edir.
+- **Buraxılış başına.** Tam CI matrisinə E2E parçaları, paketin yoxlanılması, tarball açılış tüstüsü və əhatə dairəsi yoxlamaları daxildir. [Buraxılış Yoxlama Siyahısına](RELEASE_CHECKLIST.md) baxın.
+
+## `merge-train.sh` üçün təzə yoxlama ilkin şərtləri
+
+Preflight iş ağacları yaratmazdan əvvəl işləyir. `npm ci` ilə asılılıqları quraşdırın. `node_modules/.bin/tsc` icra edilə bilən olduğunu və `node_modules/node_modules` olmadığını təsdiq edin. `node_modules/.bin/bun --version` uğur qazandığını yoxlayın.
+
+Əgər Bun postquraşdırma atılıbsa, `(cd node_modules/bun && node install.js)` işə salın. Provayder ardıcıllığı və məlum simvol yoxlamaları Bun istifadə edir. Doğrulayıcı `npm run check:cycles:ratchet` bloklama qapısı kimi işlədir. Bağımsız `npm run check:cycles` əmri məsləhət xarakteri daşıyır.
+
+## Tarix
+
+Birləşdirmə növbəsi 2026-11-19 tarixində dayandırıldı.

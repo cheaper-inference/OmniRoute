@@ -4,60 +4,148 @@
 
 ---
 
-> **Felhasználóknak**: Egyszerű útmutatót keres? Az ingyenes AI-hozzáférés megszerzéséhez lépésről lépésre követhető útmutatást az [Ingyenes csomagok útmutatójában](../getting-started/FREE-TIERS-GUIDE.md) talál.
+> **Felhasználóknak** : Egyszerű útmutatót keres? Tekintse meg a [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) lépésről lépésre szóló utasításait az ingyenes AI megszerzéséhez.
 
-> **Legutóbbi kutatás:** 2026-06-17 — szolgáltatónkénti webes kutatás (hivatalos dokumentáció + az elmúlt 7 nap hírei, 50 ügynökös ellenőrzés adverszariális felülvizsgálattal), amely minden ingyenes csomag kvótáját és használati feltételeit frissítette. **Részleges újbóli audit: 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — lásd az alábbi, dátummal ellátott megjegyzést).
-> **Hiteles forrás (katalógus):** `open-sse/config/freeModelCatalog.ts` (MODELLENKÉNTI keretek, készletenként deduplikálva). Az alábbi tokenkeretek élő webes kutatásból származnak, és **becslések** — lásd: [Módszertan és fenntartások](#methodology--caveats).
+> **Utoljára auditált:** 2026-11-23. Minden kvótával rendelkező sor, minden visszavont ajánlat és minden kártyakapu újra megnyílt a szolgáltató saját oldalán aznap (`config/quality/free-catalog-evidence.json`). Korábbi átadások: 2026-06-17 szolgáltatónkénti kutatás és 2026-09-02 részleges újraaudit.** Az igazság forrása (katalógus):** `open-sse/config/freeModelCatalog.ts` (MODEL-onkénti költségkeretek, készlet-felhasználás nélkül). Az alábbi token-költségvetési számok élő internetes kutatásból származnak, és egy** közelítés** — lásd [Módszertan és figyelmeztetések](#methodology--caveats).
 
-## TL;DR — mennyi ingyenes inferenciát aggregál ténylegesen az OmniRoute?
+## TL;DR — valójában mennyi szabad következtetést von össze OmniRoute ?
 
-Ezek a számok különálló külső fiókokat és jogosultsági feltételeket írnak le a katalógusban. Az OmniRoute nem biztosítja ezt a keretet: be kell szerezned a szükséges fiókokat vagy hitelesítő adatokat, csatlakoztatnod kell a jogosult szolgáltatókat, és be kell tartanod a korlátaikat. A ténylegesen használható kapacitás ennél alacsonyabb is lehet, beleértve a nullát is egy friss telepítés esetén, amelyhez nincs jogosult útvonal. A `tos: avoid` jelölésű szolgáltatók alapértelmezés szerint ki vannak zárva az automatikus útválasztásból.
+Ezek a számok külön harmadik fél fiókjait és jogosultsági feltételeit írják le a katalógusban. OmniRoute nem biztosítja ezt a költségvetést: be kell szereznie a szükséges fiókokat vagy hitelesítő adatokat, csatlakoztatnia kell a jogosult szolgáltatókat, és be kell tartania a korlátaikat. A tényleges felhasználható kapacitás alacsonyabb is lehet, beleértve a nullát egy olyan új telepítésnél, ahol nincs megfelelő útvonal. `tos: avoid` vel jelölt szolgáltatók alapértelmezés szerint ki vannak zárva az automatikus útválasztásból.
 
-**Ellenőrizve: 2026-10-08:** A [Cerebras](https://www.cerebras.ai/pricing) egyszeri, 5 dolláros promóciós jóváírást kínál, amelyhez fizetési mód szükséges, és amely 30 nap után lejár. A [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) projekt-, modell- és csomagszintű sebességkorlátokat tesz közzé; ez továbbra sem szerepel a számszerűsített havi összesítésben.
+**Ellenőrizve: 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) egyszeri 5 USD értékű promóciós jóváírást kínál, amely fizetési módot igényel, és 30 nap múlva jár le. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) közzéteszi project/model/tier sebességkorlátait; kívül marad a számszerűsített havi címsoron.
 
-| Mutató                                              | Token / hónap          | Jelentés                                                                                                                                                                                                                                                                                                                     |
-| --------------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dokumentált, ismétlődő keret (állandó)**          | **~1,62B**             | Ingyenes csomagok **pooljai** (modellenkénti katalógus), minden megosztott poolt **egyszer** számítva. A `/api/free-tier/summary` mögötti élő forrás és a vezérlőpult Free-Tier Budget oldala. **Ezt a számot használd.**                                                                                                    |
-| **+ első hónap regisztrációs jóváírásokkal**        | **~2,22B**             | Állandó keret + egyszeri regisztrációs jóváírások (Z.AI 20M, DeepSeek 5M, …), fiókonként deduplikálva. **Csak az első hónapban** — nem ismétlődik.                                                                                                                                                                           |
-| **+ tartósan ingyenes, közzétett korlát nélkül**    | _nem számszerűsíthető_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — valódi, ismétlődő hozzáférés, sebesség- és egyidejűségi korlátozással, **számolható tokenkorlát nélkül**. Fel vannak sorolva, de soha nem adjuk össze őket (az `RPM×24/7` alapján történő számítás az általunk elutasított felfújás). |
-| **+ befizetéssel feloldható növekmény**             | **+~24M**              | Egy egyszeri **10 dolláros** OpenRouter-feltöltés az ingyenes keretet napi 50-ről → 1000 kérésre emeli. Külön jelentjük, hogy soha ne növelje a stabil értéket.                                                                                                                                                              |
-| **+ regionális személyazonosság-ellenőrzés mögött** | **+~6M**               | `modelscope` (Alibaba Cloud-fiók összekapcsolása + szárazföldi kínai valódi névvel történő ellenőrzés). Valódi, ismétlődő kvóta, amely `gatedRecurringTokens` / `gatedProviders` formájában és a vezérlőpulton is megjelenik. Soha nem adjuk hozzá a fő összesítéshez: +~6M regionális személyazonosság-ellenőrzés mögött.   |
-| Elméleti felső korlát (minden sebességkorlát, 24/7) | ~10B                   | Minden szolgáltatói sebességkorlát összege, folyamatos használatra kivetítve. **Nem garancia** — ne ezt emeld ki.                                                                                                                                                                                                            |
+| Metrikus                                                | Tokenek / hónap        | Jelentése                                                                                                                                                                                                                                                                          |
+| ------------------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dokumentált visszatérő támogatás (folyamatos)**       | **~ 90M**              | Szabadszintű** medencék** (modellenkénti katalógus), minden megosztott készlet számít** egyszer** . Az élő forrás `/api/free-tier/summary` mögött és az irányítópult Free-Tier Budget oldala.** Használja ezt a számot.**                                                          |
+| **+ első hónap regisztrációs jóváírásokkal**            | **~ 153M**             | Folyamatos + egyszeri regisztrációs jóváírások (Z.AI 20M, DeepSeek 5M, …), számlánként levonva.** Csak az első hónapban** — nem ismétlődik.                                                                                                                                        |
+| **+ véglegesen ingyenes, nincs közzétett sapka**        | _nem számszerűsíthető_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — valós visszatérő hozzáférés, rate/concurrency-limited,** nincs token cap számolni** . Felsorolva, soha nem összegezve (ezeket `RPM×24/7` -re számolva az az infláció, amelyet elutasítunk). |
+| **+ befizetés-feloldó boost**                           | **+~ 24M**             | Egy egyszeri** 10 dollár** OpenRouter feltöltés 50-ről → ről 1000 req/day. ről emeli a szabad készletét.                                                                                                                                                                           |
+| **+ egy regionális személyazonosság-ellenőrzés mögött** | **+~ 6M**              | `modelscope` (Alibaba Cloud kötés + szárazföld-Kína valós név ellenőrzése). Valódi ismétlődő kvóta, `gatedRecurringTokens` / `gatedProviders` formátumban és az irányítópulton. Soha nem foglalták össze a címben: +~ 6M a regionális személyazonosság-ellenőrzés mögött.          |
 
-**Őszinte összefoglaló:** Az _OmniRoute **~1,62B dokumentált ingyenes tokent aggregál havonta** (az első hónapban regisztrációs jóváírásokkal akár ~2,22B-t) 26 ingyenes csomag poolján keresztül — ezen felül a tartósan ingyenes, korlát nélküli szolgáltatók hosszú farka is rendelkezésre áll —, az RTK + Caveman tömörítése (15–95%-os tokenmegtakarítás) pedig ezt tovább nyújtja._
+**Őszinte főcím:** _OmniRoute katalógusok**~ 90M ingyenes tokenek** egy hónap, amit ténylegesen felhasználhat (legfeljebb 153 millió ~ az első hónapban regisztrációs jóváírásokkal), 12 készletből, közzétett kvótával, plusz a tartósan ingyenes, korlátlan szolgáltatók hosszú sorával. RTK + Caveman tömörítés (15–95%-os token megtakarítás) ezt tovább nyújtja._
 
-> **Miért csökkent ez az előző ~1,94B-hoz képest.** A 2026-06-17-i frissítés korrekció az adatok hitelessége érdekében, nem veszteség: a `gemini` most poolok szerint deduplikált (korábban minden Flash-változat külön számításával fel volt duzzasztva, 462M → 60M), a `cloudflare-ai` értékét a tényleges napi 10k Neuronra korrigáltuk (122M → 30M), a `doubao` egyszeri regisztrációs jóváírásként lett újrakategorizálva (nem ismétlődőként), a leállított szinteket pedig eltávolítottuk (`chutes`/`phind`/`kluster` megszűnt). Ezt részben ellensúlyozza az `llm7` (helyes értéke napi 5M → 150M), valamint az új ingyenes szolgáltatók (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Történelmi feljegyzések. Az alábbi ábrák az akkori katalógust írják le; ezek nem a mai számok._
 >
-> **A v3.8.42-ben tovább korrigálva ~1,37B-ra:** a `longcat` egy havi 150M-os ismétlődő keretből egyszeri, 10M-os regisztrációs jóváírássá lett átkategorizálva, miután az ingyenes előnézet véget ért. Ugyanez a hitelességi szabály érvényes — egyetlen szolgáltató sem került ki tévedésből.
+> **Miért csökkent ez a korábbi 1,94 milliárdról?** A 2026. 06. 17-i frissítés őszinte korrekció, nem veszteség: `gemini` immár pool-deuped (az egyes Flash-változatok külön-külön történő számlálásával felfújták, 462M → 60M), `cloudflare-ai` a valós 10k-Neurons/day -re korrigált (122M → 30M), `doubao` újrajelentkezés és a z (egyszeri besorolás) leállási szintek eltávolítva (`chutes`/`phind`/`kluster` megszűnt). Részben ellensúlyozva `llm7` (helyes 5M/day → 150M) és az új ingyenes szolgáltatók (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Frissítve 2026-08-26-án a Felo Web kivezetése után:** A Felo Web kimarad, amíg a GPL-ből származó eredete/licencelése HOLD állapotban van; a forrás ekkor 38 poolkulcsot jelentett. A poolok száma élő és CI által ellenőrzött (`check:docs-counts` meghiúsítja a buildet, ha a fenti számok eltérnek a `computeFreeModelTotals()` értékeitől).
+> **Tovább korrigálva 1,37 milliárdra a 3.8.42-es verzióban:** `longcat` a 150M/mo ismétlődő támogatásból egyszeri 10 milliós regisztrációs jóváírásra került át, miután az ingyenes előnézet véget ért. Ugyanaz az őszinteségi szabály, — egyetlen szolgáltató sem került ki tévedésből.
 >
-> **Újra auditálva 2026-09-02-án a szolgáltatók saját oldalai alapján** (források: az `// evidence:` megjegyzések az `open-sse/config/freeModelCatalog.data.ts` fájl minden újraauditált bejegyzése mellett): a `gemini` és az `ollama-cloud` már nem tesz közzé tokenszámot (a Google 2025-12-23-án eltávolította a modellenkénti ingyenes táblázatot; az Ollama Free csomagja „kezdő használati kreditek”), ezért most **korlátlan** értékként szerepelnek, és soha nem kerülnek összegzésre (−80M); a `groq` öt **modellenkénti**, egyenként napi 200K-s korlátot jelent (mindegyik 6M, +15M), három kivezetett azonosító eltávolításával; a `nara` egyetlen napi 7M-os keret (+60M, 210M). A `mistral` 1B értéke csak a fiókkonzolban látható — lásd a _Bizonyítékosztályok_ részt a Módszertan alatt.
+> **Frissítve 2026. 08. 26-án a Felo Web nyugdíjba vonulása után:** A Felo Web ki van zárva, míg a GPL-ből származó provenance/licensing a HOLD n marad; a forrás akkor 38 pool kulcsról számolt be.
 >
-> **Frissítve 2026-11-09-én (#19334):** az `ollama-cloud` kikerült az ingyenes katalógusból, miután az Ollama megszüntette ingyenes szintjét, és minden felhőalapú modellt használatalapú számlázásra állított át.
+> **Újra auditálva 2026-09-02 a szolgáltatók saját oldalain** (források: a `// evidence:` megjegyzések `open-sse/config/freeModelCatalog.data.ts` egyes újraauditált bejegyzései mellett): `gemini` és `ollama-cloud` már nem tesz közzé jelképet (Google eltávolította a modellenkénti ingyenes táblát 2025. december 23-án; Ollama ingyenes csomagja „kezdő használati kreditek”), és most mint** kupak nélküli** , soha nem összegezve (− 80M); `groq` öt** modellenként** 200K-TPD sapkák (egyenként 6 millió, + 15 millió), három kiesett IDs vel; `nara` egy 7M/day vödör (+ 60M, 210M). `mistral` 1B csak a fiókkonzolon látható. — lásd a _Bizonyítékosztályok_ részt a Módszertan alatt.
 >
-> **Korrigálva 2026-09-03-án (#11773):** a `cerebras` egy havi 30M-os ismétlődő keretből (a korábbi, kártya nélküli napi 1M tokenes próbaidőszakból) egyszeri, 5 dolláros regisztrációs jóváírássá lett átkategorizálva, amelyhez fizetési mód szükséges. Ugyanaz a hitelességi szabály érvényes, mint a LongCat esetében.
+> **Frissítve 2026-11-09 (#19334):** `ollama-cloud` eltávolították az ingyenes katalógusból, miután Ollama befejezte ingyenes szintjét, és az összes felhőmodellt felosztó-kirovó rendszerre állította át.
 >
-> **Továbbá xKiro (2026-09-03):** az új `xkiro-free` pool (havi 150M) egy 35. ismétlődő poolkulcsot ad hozzá. A Felo Web továbbra is kimarad, amíg a GPL-ből származó eredete/licencelése HOLD állapotban van. A forrás most **26 ismétlődő poolkulcsot** és **~1,62B stabil értéket** jelent — ez az élő, CI által ellenőrzött szám (`check:docs-counts` meghiúsítja a buildet, ha ez eltér a `computeFreeModelTotals()` értékétől).
+> **Javítva 2026-09-03 (#11773):** `cerebras` a 30M/mo ismétlődő támogatásból (régi kártya nélküli 1M tokens/day próbaverzió) átsorolták egy egyszeri, 5 USD értékű regisztrációs jóváírásra, amely fizetési módot igényel. Ugyanaz az őszinteségi szabály, mint LongCat.
+>
+> **Plusz xKiro (2026-09-03):** az új `xkiro-free` pool (150M/mo) hozzáad egy 35. ismétlődő készletkulcsot. A Felo Web kizárva marad, míg a GPL-ből származó provenance/licensing a HOLD marad. Akkoriban a forrás 34 pool kulcsot és 1,62 milliárd tokent havonta (állandó).
 
-A legnagyobb **dokumentált** hozzájárulók: `mistral` 1,00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (öt modellenkénti korlát), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` kizárva — a 10M-os LongCat-2.0 keret egyszeri, KYC-hoz kötött regisztrációs jóváírás, nem ismétlődő havi keret.)
+Legnagyobb** dokumentált** hozzájárulnak a mai valós számhoz: `groq` 24M (4 modellenkénti sapka), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` kizárva — a 10 millió LongCat-2.0 támogatása egyszeri, KYC-korlátozott regisztrációs jóváírás, nem pedig ismétlődő havi költségvetés.)
 
-> ⚠️ Az elméleti felső határt (~10B) felduzzasztják a kizárólag sebességkorlátozással rendelkező, **közzétett tokenkorlát nélküli** szolgáltatók (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`), amelyek értékei `RPM/TPM × 24/7 × 30d` alapján lennének kiszámíthatók — ez olyan elméleti maximum, amelyet egyetlen fiók sem fog tartósan kihasználni. Ezeket kizárjuk a védhető számból (ehelyett a „véglegesen ingyenes, korlátlan” sorban jelennek meg). Ugyanez a felduzzasztás teszi megbízhatatlanná a versenytársak többmilliárdos állításait is.
+## Helyesbítés, 2026. november
+
+A megjelenésig ez az oldal és a README havi 1,62 milliárd ingyenes tokenről szólt. Ez rossz volt. Négy pool hordozta a 93%-át, és mind a négy cserélt a szolgáltatónál, miközben a katalógusunk változatlan maradt. A valós szám ma ~ 90 millió ingyenes token havonta. A táblázat azt mutatja, hogy mi változott az egyes szolgáltatóknál, és azt, hogy mi hibázott.
+
+| Mi változott a szolgáltatónál (dátum, forrás)                                                                                                                      | Mit rontottunk el (mit, mióta)                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Mistral: az ingyenes mód már nem tartalmazza API hozzáférést (docs.mistral.ai, olvassa el: 2026-11-18)                                                             | Folyamatosan havi 1 milliárd tokent számoltunk a 2026-09-02-i konzololvasásból, és soha többé nem ellenőriztük |
+| Nara: az ingyenes csomagban nem szerepelnek modellek (a szolgáltató `router.bynara.id/api/plans`, olvasható: 2026.11.18.)                                          | 210 millió tokent számoltunk havonta                                                                           |
+| xKiro: 500 000 token naponta fiókonként (xkiro.com, olvasás: 2026-11-18)                                                                                           | 30 már nem létező IDs modell maradt a katalógusban                                                             |
+| LLM7: a limits oldal eltűnt, és egyetlen hivatalos oldal sem tesz közzé ingyenes kvótát (2026-11-23)                                                               | Havi 150 millió tokent számoltunk, keltezett bizonyítékok nélkül                                               |
+| Groq: az ingyenes pool egyik modelljét visszavonták (2026-09-14)                                                                                                   | A medence megtartotta régi méretét                                                                             |
+| AgentRouter: a szolgáltató napi 25 dolláros bejelentkezési jóváírást és további 50 dollárt a meghívókra való feliratkozáshoz sorol fel (olvasható el: 2026.11.23.) | Felsoroltunk egy 200 dolláros regisztrációs jóváírást                                                          |
+| Predibase: a termék véget ért                                                                                                                                      | Még az első hónapban számoltuk a regisztrációs jóváírást                                                       |
+| (egyik sem)                                                                                                                                                        | 16 szolgáltató tartotta meg az ingyenes ajánlatot az ajánlat lejárta után                                      |
+| (egyik sem)                                                                                                                                                        | A README kéthetente ismételt ellenőrzést ígért. Utolsó ez előtt 2026-09-02 volt                                |
+| (egyik sem)                                                                                                                                                        | A dokumentumok ellenőrzése 0,05 milliárdos eltolódást engedélyezett, és nem tudta leolvasni a milliós számokat |
+
+Ha soronként egy kvótát összegzünk, akkor minden katalógust felfújunk, beleértve a miénket is. Ezért viseli a sorba sommás figura a címkéjét, az igazi pedig közvetlenül alatta ül.
+
+## Mi számít
+
+Egy sor beleszámít a szabad figurákba, ha mindez teljesül:
+
+- A kvóta megismétlődik, és a szolgáltató saját oldalán kerül közzétételre, a katalógus sora mellett dátumozott bizonyítékkal.
+- Szolgáltatónként egy fiók. Semmi olyat, amihez fizetés, kártya, letét vagy személyazonossági csekk (KYC) kellene. Azok a kvóták, amelyekhez telefonszámra, Telegram vagy Discord van szükség a regisztrációhoz, „társadalmi regisztrációval” külön szerepelnek a listában, soha nem a valós számban.
+- Egyetlen szolgáltató sem jelölte meg `tos: "avoid"`, és csak a szolgáltató hivatalos API.
+- Az egyszeri regisztrációs jóváírások csak az első hónapban számítanak bele, és csak akkor, ha nem kérnek kártyát. A kvótát emelő egyszeri befizetés külön lökést jelent. A promóciók soha nem számítanak a valós számban.
+- A keresési, hang- és médiaszolgáltatók kimaradnak a hozzáférés típusától és minden tokenfigurától. Ezen az oldalon kapják meg a saját számukat, saját egységeikben (eredmények, karakterek, képek), amikor egy újraszámlálás hozzáadja őket; ezeket soha nem adják hozzá egymáshoz, és nem alakítják tokenekké.
+
+Mit jelentenek az egyes nyilvános számok:
+
+- **Ingyenes hozzáféréssel rendelkező szolgáltatók** (50 ma: 43 API kulccsal, 6 kulcs nélkül, 1 eszközfiókon keresztül): szolgáltatók, amelyek legalább egy katalógussorral rendelkeznek, amely ingyenes hozzáférést biztosít, hogyan éri el.
+- **Katalógussorok ingyenes hozzáféréssel** (ma 214): szolgáltatónként és modellenként egy sor.
+- **Közzétett kvótával rendelkező medencék** (ma 12): a valós szám mögött megosztott kvóták, mindegyik egyszer számít.
+- **Különleges ingyenes modellek** (ma 185): a ID modell szerint csoportosított sorok.
+- **Ingyenes ajánlattal megjelölve** (140 + ma): minden szolgáltató, amelynek nyilvántartási bejegyzése `hasFree` hordoz, beleértve a keresési, hang- és médiaszolgáltatókat, a próbaverziókat és a regisztrációs jóváírásokat.
+
+Minden számot katalogizálnak, nem tesztelnek hívásonként: azt mondja ki, amit a katalógus felsorol, nem pedig azt, hogy minden útvonal éppen most válaszol.
+
+## Hogyan számolunk
+
+Három ábra ugyanabból a katalógusból származik, amelyet 2026-11-23-án auditáltak:
+
+- **Az igazi szám, ~ 90 millió ingyenes token havonta.** Minden megosztott kvótát egyszer számolnak, így egy napidíj mögött öt modell egy juttatás. Ez az, amit minden szolgáltatónál ténylegesen egy fiók használhat. Egyszeri regisztrációs jóváírással 153 millió ~ az első hónapban.
+- **A nagy figura, ~ 11.3B soronként összegezve** , befejeződött ajánlatok tartalmazzák. Más katalógusok is így számítanak. Szinte minden történelem: 98,6%-a már nem létező ajánlatokból. Csak a címkéjével és mellette a valós ábrával nyomtatjuk.
+- **Az élő katalógus, ~ 159M élő soronként összegezve** : soronként ugyanaz az összeg a befejezett ajánlatok nélkül.
+
+A soronkénti módszer (`row-sum-v1`) négy szabályt követ:
+
+1. Minden felsorolt sor úgy kerül hozzáadásra, ahogy van, anélkül, hogy összevonná az egy készletet megosztó sorokat.
+2. Csak a tokenben közzétett kvóták kerülnek hozzáadásra. A kérésekben, kreditekben vagy neuronokban közzétett kvóta nullának számít (`FREE_QUOTA_UNIT` a `open-sse/config/freeModelCatalog.ts`-ben).
+3. A feliratkozási jóváírások, a befizetésemelések és a kikapcsolt sorok (`enabled: false`) kimaradnak.
+4. A nagy szám minden felsorolt sorban hozzáadja a befejezett ajánlatok főkönyvét (`open-sse/config/freeModelCatalog.retired.data.ts`) az utolsó kvótához. Csak `RETIRED_LEDGER_SINCE` óta visszavont sorok lépnek be, és minden sor kiesik 12 hónappal a vége után.
+
+Ha a soronkénti számolás megszűnik, vagy a karbantartó úgy dönt, a nagy figura minden oldalt elhagy, és csak a valós figura marad.
+
+## Eltávolítva / nincs szabad szint
+
+Azok a szolgáltatók, akiknek ingyenes ajánlata lejárt, vagy nem tudták megerősíteni. A nyilvántartásban maradnak `hasFree: false` val (vagy kivonják őket az ingyenes katalógusból), és soha nem számítanak bele az ingyenes számba. Ez nem a OmniRoute ből kérésre eltávolított szolgáltatók listája (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Szolgáltató              | Mivel      | Miért                                                                                              | Forrás                                              |
+| ------------------------ | ---------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `mistral`                | 2026-11-23 | Az ingyenes mód már nem tartalmazza API hozzáférést                                                | docs.mistral.ai (használati korlátok)               |
+| `nara`                   | 2026-11-23 | Az ingyenes terv nem tartalmaz modelleket                                                          | `router.bynara.id/api/plans`                        |
+| `llm7`                   | 2026-11-23 | Egyetlen hivatalos oldal sem tesz közzé ingyenes kvótát                                            | szolgáltató webhely                                 |
+| `navy`                   | 2026-11-23 | A hivatalos oldalakon nem sikerült megerősíteni az ingyenes kvótát                                 | api.navy                                            |
+| `bluesminds`             | 2026-11-23 | A használathoz a szolgáltatótól vásárolt hitelre van szükség                                       | `api.bluesminds.com/api/status`                     |
+| `arcee-ai`               | 2026-11-23 | Csak fizetett ár                                                                                   | docs.arcee.ai (árképzés)                            |
+| `huggingface`            | 2026-11-23 | Az ingyenes fiókokhoz kreditet kell vásárolni, vagy frissíteni kell PRO ra                         | huggingface.co (Következtetés-szolgáltatók árazása) |
+| `huggingchat`            | 2026-11-23 | Ölelés Arc következtetéshez vásárolt kreditek vagy PRO szükséges                                   | huggingface.co (Következtetés-szolgáltatók árazása) |
+| `ainative`               | 2026-11-23 | A Hobbi csomag kifizetése 3 napos próbaidő után történik                                           | szolgáltató árképzési oldala                        |
+| `stepfun`                | 2026-11-23 | Csak használati díjszabás                                                                          | szolgáltató árképzési oldala                        |
+| `predibase`              | 2026-11-23 | A termék gyártása megszűnt                                                                         | predibase.com                                       |
+| `poolside`               | 2026-10-31 | A közvetlen következtetés leáll                                                                    | platform.poolside.ai                                |
+| `amazon-q`               | 2026-05-15 | Nincs új ingyenes regisztráció                                                                     | szolgáltató oldala                                  |
+| `chat-oripe`             | 2026-11-23 | A API gazdagép HTTP 530-ra válaszol                                                                | API házigazda                                       |
+| `naga-ai`                | 2026-11-23 | A Naga.ac szolgáltató másolata                                                                     | api.naga.ac                                         |
+| `dxnt`                   | 2026-11-23 | A regisztrációs bónusz létezik, de egyetlen modell sem fogadja el                                  | dxnt.com                                            |
+| `ollama-cloud`           | 2026-11-09 | A felhőmodellek tokenenként fizetendők, vagy fizetős csomagok fedezik                              | ollama.com (#19334)                                 |
+| `chutes`                 | 2026-03    | A szabad szint véget ért                                                                           | szolgáltató oldala                                  |
+| `phind`                  | 2026-01    | A cég bezárt                                                                                       | szolgáltató oldala                                  |
+| `kluster`                | 2026-06-09 | Naplemente (áthelyezve a MITO)                                                                     | szolgáltató oldala                                  |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo ingyenes visszavonva; A Nemotron promóciója 2026-06-án véget ért (újraellenőrzés: 2026-06-18) | szolgáltató oldala                                  |
+| `aimlapi`                | 2026-06-18 | Ingyenes szint szünetel                                                                            | szolgáltató oldala                                  |
+| `yi`                     | 2026-06-18 | A Yi-Light nyugdíjas, felosztó-kirovó                                                              | szolgáltató oldala                                  |
+| `featherless-ai`         | 2026-06    | Jelenleg nincs ingyenes szint                                                                      | szolgáltató oldala                                  |
+| `chipotle`               | 2026-09-15 | A mögötte lévő chat widget minden útvonalon 404-re válaszol (#13131, #4037)                        | amelia.chipotle.com                                 |
+
+`iflytek` / `sparkdesk` maradjon a felsorolásban a Használati feltételekre vonatkozó figyelmeztetéssel: A Spark Lite ingyenes, de a ToS korlátozza a proxy és a relé használatát.
 
 ---
 
-## 2026-06-17-es frissítés — mi változott 2026-06-05 óta
+## 2026-06-17 frissítés — mi változott 2026-06-05 óta
 
-Egy 50 ügynökös webkutatási menet (hivatalos dokumentáció + az elmúlt 7 nap hírei, adverszívan ellenőrizve) frissítette a teljes katalógust. Kiemelések:
+Egy 50 ügynök webkutatási igazolványa (hivatalos docs + last-7-days news, kontradiktóriusan ellenőrzött) frissítette az egész katalógust. Fénypontok:
 
-- **Eltávolítva / nincs ingyenes szint (2026):** `chutes` (az ingyenes szint 2026-03-ban megszűnt), `phind` (a cég 2026-01-ben bezárt), `kluster` (kivezetve 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (a MiMo ingyenes hozzáférés visszavonva 2026-05-24, a Nemotron-promóció véget ért 2026-06 — újraellenőrizve 2026-06-18), `aimlapi` (az ingyenes szint szünetel — újraellenőrizve 2026-06-18), `yi` (a Yi-Light kivonva, pay-as-you-go — újraellenőrizve 2026-06-18), `featherless-ai` (jelenleg nincs ingyenes szint), `chipotle` (a Chipotle „Pepper AI" — a visszafejtett `amelia.chipotle.com` Amelia chat widget, amellyel a szolgáltató kommunikált, most minden útvonalon 404-es hibát ad, beleértve a gyökérútvonalat is; kivezetett/áthelyezett backend, megerősítve 2026-09-15 — teljesen eltávolítva a katalógusból, #13131/#4037). Az `iflytek` / `sparkdesk` továbbra is szerepel, de ToS-figyelmeztetéssel (a Spark Lite ingyenes; a ToS korlátozza a proxy-/relayhasználatot).
-- **Gemini** — a `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01-én megszűnt, a `2.5 Pro` pedig elhagyta az ingyenes szintet (2026-04); az ingyenes szint mostantól **kizárólag a Flash-család** (2.5/3/3.1/3.5 Flash + Gemma). A katalógus mostantól **egybevonja** a Flash-családot (korábban felfújt volt, mert minden változatot külön számolt: 462M → 60M).
-- **Korrigált számok:** `cloudflare-ai` 122M → **30M** (valós napi 10k Neurons), `doubao` egyszeri regisztrációs kreditként újraosztályozva (nem ismétlődő), `llm7` 4M → **150M** (dokumentált napi 5M token), `together` a „-Free" végpontok megszűntek → a $25 regisztrációs kredit is eltávolítva (minimum $5-ös vásárlás szükséges, nincs ingyenes próbaidőszak), `longcat` a Preview véget ért + a Flash modellek kivonva → csak **LongCat-2.0**, egyszeri **10M** tokenes regisztrációs kreditként újraosztályozva (KYC-hoz kötött, nem ismétlődő).
-- **A Poolside közvetlen inferenciája megszűnik (ellenőrizve 2026-10-20):** a [hivatalos platform](https://platform.poolside.ai/) **2026-10-31**-i leállást jelent be, és arra irányítja a felhasználókat, hogy saját üzemeltetéshez töltsék le a modelljeit a Hugging Face-ről. A közvetlen `poolside` szolgáltató ezt a figyelmeztetést viseli. A kézzel összeállított ingyenes katalógus nem tartalmaz közvetlen Poolside-bejegyzéseket; a Poolside nevű bejegyzései a `kilo-gateway`-hez tartoznak. Ez a bejelentés nem igazolja a Kilo, a Cline, az NVIDIA vagy más átjárók által kiszolgált modellek elérhetőségét, ezért ezek a bejegyzések ezen az alapon nem kerülnek kivezetésre.
-- **Újonnan felfedezett ingyenes szolgáltatók:** ⭐ **Kilo Code** (`kilo-gateway` — váltakozó „Auto Free" készlet: NVIDIA Nemotron 3 család, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 váltakozó ingyenes kódoló modell, frissítve 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash véglegesen ingyenes + 20M regisztrációs bónusz), valamint az `arcee-ai` Trinity Large Preview.
-- **Új korrekt szintek** (lásd a Módszertan részt): egy _véglegesen-ingyenes-de-korlátlan_ kategória (valódi ismétlődő hozzáférés, nincs számolható tokenkorlát) és egy _befizetés-feloldási növelés_ (OpenRouter $10 → +24M/hó), mindkettő **külön** jelenik meg, hogy soha ne fújják fel a kiemelt számot.
+- **Eltávolítva / nincs szabad szint:** [saját részlegébe](#removed--no-free-tier) költözött.
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` leállt 2026-06-01, és `2.5 Pro` elhagyta a szabad szintet (2026-04); ingyenes szint most** Csak Flash-család** (2.5/3/3.1/3.5 Flash + Gemma). Most a katalógus** medencék** a Flash család (az egyes változatok külön-külön számításával lett felfújva: 462M → 60M).
+- **Javított számok:** `cloudflare-ai` 122M →** 30 millió** (valódi 10k-Neurons/day), `doubao` átminősítve egyszeri regisztrációs jóváírássá (nem ismétlődő), `llm7` 4M →** 150 millió** (dokumentált 5M tokens/day), `together` "-Ingyenes" végpontok megszűnt → 25 dolláros regisztrációs jóváírás szintén eltávolítva (minimum 5 dolláros vásárlás szükséges, ingyenes próbaverzió nélkül), `longcat` Az előnézet véget ért + Flash modellek nyugdíjas →**LongCat-2.0** csak egyszerivé átminősítve** 10M**-token regisztrációs jóváírás (KYC-kapu, nem ismétlődő).
+- **A medence melletti közvetlen következtetés vége (ellenőrzött 2026-10-20):** a [hivatalos platform](https://platform.poolside.ai/) bejelenti a leállást** 2026-10-31** és arra utasítja a felhasználókat, hogy töltsék le modelljeit a Hugging Face webhelyről saját tárolás céljából. A közvetlen `poolside` szolgáltató hordozza ezt a figyelmeztetést. A kézzel készített ingyenes katalógus nem tartalmaz közvetlen Poolside bejegyzéseket; annak Poolside nevű bejegyzései `kilo-gateway` tartoznak. Ez a közlemény nem határozza meg a Kilo, Cline, NVIDIA vagy más átjárók által kiszolgált modellek elérhetőségét, így ezek a listák nem kerülnek visszavonásra ezen az alapon.
+- **Új ingyenes szolgáltatókat fedeztek fel:** ⭐** Kilo kód** (`kilo-gateway` — forgó "Auto Free" készlet: NVIDIA Nemotron 3 család, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — 10 forgó szabad kódolású modell, frissítve 2026-10-20), ⭐** Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash tartósan ingyenes + 20M regisztrációs bónusz), és `arcee-ai` Trinity Large előnézet.
+- **Új becsületes szintek** (lásd: Módszertan): egy _tartósan ingyenes, de nem korlátlan_ kategória (valódi ismétlődő hozzáférés, nincs token-korlát számít) és egy _befizetés-feloldó boost_ (OpenRouter $10 → +24M/mo), mindkettő megjelent** külön** így soha nem fújják fel a címet.
 
-> Az alábbi részletes, szolgáltatónkénti táblázat a **2026-06-05-ös pillanatkép**; a fenti eltérések felülírják azt. Az élő, kanonikus forrás a modellenkénti katalógus: `open-sse/config/freeModelCatalog.ts`.
+> A lentebb található részletes szolgáltatónkénti táblázat a** 2026-06-05 pillanatkép** ; a fenti delták felülírják. Az élő, kanonikus forrás a `open-sse/config/freeModelCatalog.ts` modellenkénti katalógus.
 
 ---
 
@@ -112,28 +200,28 @@ böngészőbeli előnézet más forrást olvasna, mint a szerveroldali importál
 akkor az előnézet nem egyezne meg azzal, ami kattintáskor történik — ezt a
 szétválasztást szándékosan tartjuk fenn.
 
-## Módszertan és korlátok
+## Módszertan és figyelmeztetések
 
-- A számok **felső korlátként megadott becslések**, amelyek az egyes szolgáltatók dokumentált ingyenes csomagjainak korlátain alapulnak, a **2026-06-17-i** állapot szerint, webes kutatás alapján összegyűjtve. Az ingyenes csomagok folyamatosan változnak — egy számra való támaszkodás előtt ellenőrizd újra.
-- **Mire vállal ténylegesen garanciát egy bejegyzés?** Egyetlen bejegyzéshez sem tartozik soronkénti megbízhatósági besorolás, és az API sem szolgáltat ilyet — minden fenti számot azonos, ki nem mondott minőségű becslésként kezelj. Két adat azért eltérő, mert ezeket kézzel válogatták, nem következtették: 44 bejegyzéshez tartozik függetlenül dokumentált kemény leállás (ebből 39 az xKiro-sorok közül kerül ki, amelyek mind ugyanazt a napi keretet használják), 22 bejegyzés pedig promptképzési közzétételt tartalmaz. A `hardStopGuaranteed` csak akkor van beállítva, ha a szolgáltató saját feltételei szerint az ingyenes keret túllépése megtagadja a kérést, nem pedig csendben megkezdi a számlázást; a forrás az adott bejegyzés melletti megjegyzésben szerepel. Soha nincs alapértelmezésként `true` értékre állítva, és egy olyan bejegyzésnél, amelyet senki sem ellenőrzött, üresen marad. A hiányzó hard-stop jelző tehát azt jelenti, hogy „nincs megállapítva”, nem pedig azt, hogy „köztudottan számlázni fog”. A **STRICT mód** (az opcionálisan bekapcsolható `freeAccessPolicy=strict` útválasztási védőmechanizmus) csak azokat a bejegyzéseket veszi figyelembe, amelyek tartalmazzák ezt a jelzőt; minden más ingyenes csomagot `no-hard-stop` értékkel kizár (lásd: `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Amikor a védőmechanizmus kiszűr egy készletet, a kezelő számára látható napló a kizárások számát és azok `no-hard-stop` arányát is jelenti.
-- Az `estMonthlyFreeTokens` = csak az ismétlődő havi tokenek. **Az egyszeri regisztrációs jóváírások nem ismétlődnek**, ezért 0-nak számítanak. A megszüntetett csomagok értéke szintén 0.
-- Napi tokenkorlát → `monthly = daily × 30`. Csak RPD dokumentálása esetén → `RPD × ~800 output tokens × 30`. Csak RPM/TPM esetén (napi korlát nélkül) → **korlátlan** (lásd alább).
-- **Ingyenes hozzáférés, de közzétett tokenkorlát nélkül** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `nvidia`): ezek sebesség- és párhuzamossági korlátozásúak. `recurring-uncapped` kategóriába soroljuk őket, és **soha nem adjuk össze** — az `RPM × 24/7 × 30d` kiszámítása képzeletbeli felső határt eredményezne (ezt az általunk elutasított növelést). Az NVIDIA API-ja csak próbahasználatra szolgál; lásd az alábbi ToS-korlátozást.
-- **Befizetéssel feloldható növelés:** egy egyszeri, kis összegű feltöltés, amely tartósan növeli az ingyenes keretet (OpenRouter: $10 → 1000 req/day ≈ +24M/mo). Külön értékként jelentjük, és nem vesszük bele az állandó fő összesítésbe.
-- **Jogosultsághoz kötött kvóták** (`eligibilityGate: "regional-identity"`): valódi, ismétlődő kvóta, amely csak régióhoz kötött személyazonosság-ellenőrzés után válik elérhetővé (jelenleg szárazföldi kínai valódi névvel történő ellenőrzés). Ugyanazzal a készletduplikáció-mentesítési szabállyal számítjuk egy külön értékbe (`gatedRecurringTokens`), és soha nem vesszük bele az állandó fő összesítésbe. A rendszer (`freeType`) változatlan marad, így az útválasztás sem változik.
-- **Bizonyítékosztályok.** A szabály: a katalógusban szereplő szám forrása az adott bejegyzés melletti `// evidence:` megjegyzésben szerepel — `public-page` (szolgáltatói oldal, amelyet bárki elolvashat), `api-public` (a szolgáltató nem hitelesített végpontja, például a NaraRouter nyilvános csomag-végpontja a router.bynara.id címen), vagy `console-verified <date> por <who>` (az érték csak egy fiók kezelőfelületén látható; a megjegyzés rögzíti, hogy ki és mikor látta, valamint azt a nyilvános oldalt, amely szerint a korlát létezik). A jelenlegi állapot: az öt, 2026-09-02-án újraellenőrzött blokk tartalmazza ezt (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); a 2026-09-02-i újraellenőrzés előtt létrehozott bejegyzések a korábbi kutatást öröklik mindaddig, amíg hozzájuk nem nyúlnak; minden **új vagy módosított** szám, amelyhez nem tartozik bizonyítékmegjegyzés, hiba. Jelenleg csak a `mistral` ellenőrzött a konzolon.
+- A számok vannak** felső határértékek** az egyes szolgáltatók dokumentált szabadszintű limitjéből, utoljára ellenőrizve** 2026-11-23** minden kvótával rendelkező sorhoz. Az ingyenes szintek folyamatosan változnak, mielőtt egy figurára hagyatkozna — ellenőrizze újra.
+- **Mit garantál egy bejegyzés valójában.** Egyik bejegyzés sem tartalmaz soronkénti megbízhatósági besorolást, a API pedig egyiket sem szolgálja ki. A — minden fenti adatot ugyanolyan, meg nem határozott minőségű becslésként kezel. Két tény különbözik, mert kézzel gyűjtötték össze, nem pedig kikövetkeztetésből: 44 bejegyzés tartalmaz egy önállóan dokumentált kemény stopot (ebből 39 a xKiro sorok, amelyek mindegyike egy napidíjon osztozik), 22 bejegyzés pedig azonnali képzési nyilatkozatot tartalmaz. `hardStopGuaranteed` csak akkor van beállítva, ha a szolgáltató saját feltételei szerint az ingyenes juttatás túllépése visszautasítja a kérést, nem pedig csendben elkezdi a számlázást, a forrás megjegyzésben a bejegyzés mellett; soha nem alapértelmezett a `true`, és a senki által nem ellenőrzött bejegyzés beállítva marad. Tehát a hiányzó „hard-stop” jelző azt jelenti, hogy „nincs beállítva”, nem „tudható, hogy számlázzon”.**STRICT mód** (az opt-in `freeAccessPolicy=strict` routing guard) csak a zászlót hordozó bejegyzésekben bízik meg; minden második szabad réteg ki van zárva `no-hard-stop` ként (lásd `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Amikor az őr szűr egy készletet, a kezelő által látható napló a kizárások számát és `no-hard-stop` megosztását is jelenti.
+- Csak `estMonthlyFreeTokens` = ismétlődő havi tokenek.** Az egyszeri regisztrációs jóváírások nem ismétlődnek** és 0-nak számít. A megszűnt szintek is 0.
+- Napi token cap → `monthly = daily × 30`. Csak RPD dokumentálta → `RPD × ~800 output tokens × 30`. Csak RPM/TPM (nincs napi felső határ) →** kupak nélküli** (lásd alább).
+- **Ingyenes hozzáférés, de nincs közzétett token cap** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `nvidia`): ezek a rate/concurrency-limited. Osztjuk őket `recurring-uncapped` ill.** soha ne összegezze őket** — `RPM × 24/7 × 30d` szorzata egy fantáziaplafont (az általunk elutasított inflációt) eredményezne. NVIDIAAPI csak próbahasználatra használható; lásd alább a ToS figyelmeztetést.
+- **A befizetés feloldásának növelése:** egyszeri kis feltöltés, amely tartósan emeli az ingyenes kvótát (OpenRouter: $10 → 1000 req/day ≈ +24M/mo). Külön figuraként jelentették, kihagyva az állandó címsorból.
+- **Jogosultságtól függő kvóták** (`eligibilityGate: "regional-identity"`): valódi visszatérő kvóta, amely csak egy régióhoz kötött személyazonosság-ellenőrzés után nyílik meg (ma szárazföld-Kína valós névellenőrzés). Ugyanazzal a pool-dedupe szabállyal külön számba (`gatedRecurringTokens`) számítva, soha nem az állandó címsorba. A rezsim (`freeType`) változatlan, így az útválasztás változatlan.
+- **Bizonyítási osztályok.** A szabály: egy szám a katalógusban `// evidence:` megjegyzésben hivatkozik a forrására a — bejegyzés mellett `public-page` (bárki elolvashatja a szolgáltató oldalát), `api-public` (a szolgáltató nem hitelesített végpontja, pl. NaraRouter nyilvános terveinek végpontja a router.bynara.id címen), vagy `console-verified <date> por <who>` (az ábra csak akkor látható, ha a publikus oldalon szerepel, hogy a fiók cons, cap és a megjegyzésben szerepel létezik). A mai állapot: a 2026-09-02-én újraauditált öt blokk viszi (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); a 2026-09-02 újraellenőrzést megelőző bejegyzések érintésig öröklik a korábbi kutatást; bármilyen** új vagy megváltozott** szám bizonyíték megjegyzés nélkül hiba. Manapság csak `mistral` -t konzol ellenőrzi.
 
 ---
 
-## Miért kisebb a számunk, mint más aggregátoroké?
+## Miért kisebb a számunk más aggregátoroknál
 
-Ebben a szegmensben a legtöbb „havi ingyenes token” érték modellenkénti címkék összege. A miénk szándékosan nem ilyen:
+A legtöbb „ingyenes tokenek havonta” száma ezen a területen a modellenkénti címkék összege. A miénk nem szándékosan:
 
-- **Minden megosztott keretet egyszer számolunk.** A Mistral ingyenes csomagja szervezetenként egy havi 1B-os keret; ha öt modell alatt is felsoroljuk, attól még nem lesz 5B. Modellenként összeadva a saját katalógusunk **~7.4B** értéket mutatna (újraszámolva: 2026-09-03; ez az érték nincs CI-ellenőrzéshez kötve — a katalógus minden módosításakor mérd újra) — a főcímben **~1.47B** szerepel, mert ennyit tud ténylegesen elkölteni egy-egy fiók minden szolgáltatónál.
-- **A napi korlátokat átváltjuk, a sebességkorlátokat nem.** A dokumentált napi tokenszám-korlátból `× 30` lesz; a dokumentált napi kéréskorlátból `RPD × ~800 tokens × 30`; az a szolgáltató pedig, amely csak percenkénti kéréskorlátot tesz közzé, nem kap havi értéket, és _korlátlanként_ szerepel, soha nem adjuk hozzá az összeghez. A sebességkorlát 24/7-re való felszorzása az a felduzzasztás, amelyet elutasítunk.
-- **A regionális személyazonosság-ellenőrzés mögött lévő kvótákat külön tüntetjük fel** (`+~6M behind regional identity verification`), mert a legtöbb olvasó nem tudja használni őket.
-- **A regisztrációs jóváírások csak az első hónapra érvényesek**, ezért külön második értékként jelentjük őket, és soha nem keverjük össze az állandó értékkel.
-- **Az értéket a CI kikényszeríti.** A `npm run check:docs-counts` újraszámolja az összesítéseket a katalógusból, és meghiúsítja a buildet, ha ez a fájl, a README vagy a költségkeret-kártya eltér tőlük.
+- **Minden megosztott medence egyszer számít.** Egy juttatás mögött öt modell egy juttatás, nem pedig öt. Ugyanannak a katalógusnak a soronkénti olvasata, és hogy miért nyomtatjuk ki, [a Hogyan számolunk](#how-we-count) oldalon található.
+- **A napi felső határokat átváltják, az árfolyamokat nem.** A dokumentált tokens/day sapka `× 30` lesz; a dokumentált requests/day sapka `RPD × ~800 tokens × 30` lesz; egy szolgáltató, amely csak percenkénti kéréseket tesz közzé** nem** havi szám, és _felfüggesztés nélküli_ként szerepel, soha nem összegzik. Egy díjkorlát 24/7 vel való szorzata az az infláció, amelyet elutasítunk.
+- **A regionális személyazonosság-ellenőrzés mögötti kvóták külön jelennek meg** (`+~6M behind regional identity verification`), mert a legtöbb olvasó nem tudja használni őket.
+- **A regisztrációs jóváírások csak az első hónapra érvényesek** és második számként jelentették, soha nem keveredve az állandó számmal.
+- **Mit csinál a dokiellenőrzés.** `npm run check:docs-counts` (kiadási mód) újraszámítja a valós számot, az első havi számot és a két soronkénti összeget a katalógusból, és meghiúsul, ha a README, ez az oldal vagy a Free Tiers Guide eltérő értéket nyomtat, vagy kinyomtatja a nagy figurát a címke és az igazi nélkül. A költségvetési kártya kiadáskor ugyanazokból a tényekből készült.
 
 ---
 
@@ -242,74 +330,74 @@ Ebben a szegmensben a legtöbb „havi ingyenes token” érték modellenkénti 
 
 ---
 
-## Szolgáltatónkénti ingyenes csomag (Bytez/Nous ellenőrizve: 2026-10-15; újraellenőrzött sorok: 2026-09-02; egyéb: 2026-06-17)
+## Szolgáltatónkénti ingyenes szint (katalógus auditált: 2026-11-23)
 
-> Újragenerálva a modellenkénti katalógusból (`open-sse/config/freeModelCatalog.ts`), pool szerint duplikátummentesítve. A rendszeresen elérhető token/hó alapján rendezve. Az `uncapped*` jelölés = véglegesen ingyenes, de közzétett tokenkorlát nélküli (sebesség-/párhuzamosság-korlátozott) — tényleges hozzáférés, **nem kerül összeadásra a kiemelt összesítésben**. A `—` = kizárólag kredites / kulcs nélküli / tokenben nem számszerűsíthető.
+> Kézzel karbantartva a modellenkénti katalógusból (`open-sse/config/freeModelCatalog.data.ts`); utolsó ellenőrzés: 2026-11-23. Az egyes készletek valódi havi tokenjei szerint rendezve (minden megosztott készlet egyszer számít). `uncapped*` = véglegesen ingyenes, de nincs közzétett token cap (rate/concurrency-limited): valódi hozzáférés,** nem** összefoglalva a valós alakban. `not counted` = egy ismétlődő kvóta, amelyet a valódi alak kihagy (`avoid`, vagy egy regionális identitásellenőrzés mögött). Azok a szolgáltatók, akiknek ajánlata véget ért, [az Eltávolított / nincs ingyenes szint](#removed--no-free-tier). `—` = csak hitel / kulcs nélküli / nem token számszerűsíthető.
 
-| Szolgáltató      | Ingyenesség típusa     | Állandó token/hó | Első havi jóváírás | Szolgáltatási feltételek | Modellek |
-| ---------------- | ---------------------- | ---------------- | ------------------ | ------------------------ | -------- |
-| `mistral`        | ismétlődő              | ~1.00B           | —                  | óvatosság                | 5        |
-| `nara`           | ismétlődő              | ~210M            | —                  | óvatosság                | 8        |
-| `llm7`           | ismétlődő              | ~150M            | —                  | óvatosság                | 4        |
-| `xkiro`          | ismétlődő              | ~150M            | —                  | óvatosság                | 39       |
-| `longcat`        | egyszeri               | —                | 10M                | óvatosság                | 1        |
-| `cerebras`       | egyszeri               | —                | $5 jóváírás        | óvatosság                | 2        |
-| `cloudflare-ai`  | ismétlődő              | ~30M             | —                  | óvatosság                | 9        |
-| `groq`           | ismétlődő              | ~30M             | —                  | óvatosság                | 5        |
-| `api-airforce`   | ismétlődő              | ~24M             | —                  | óvatosság                | 7        |
-| `bluesminds`     | ismétlődő              | ~7M              | —                  | nem egyértelmű           | 22       |
-| `sambanova`      | ismétlődő              | ~6M              | —                  | óvatosság                | 5        |
-| `arcee-ai`       | ismétlődő              | ~5M              | —                  | óvatosság                | 1        |
-| `bazaarlink`     | ismétlődő              | ~4M              | —                  | óvatosság                | 32       |
-| `openrouter`     | ismétlődő              | ~1M              | —                  | óvatosság                | 1        |
-| `cohere`         | ismétlődő              | ~800K            | —                  | óvatosság                | 6        |
-| `huggingchat`    | ismétlődő              | ~500K            | —                  | óvatosság                | 4        |
-| `morph`          | ismétlődő              | ~400K            | —                  | rendben                  | 2        |
-| `huggingface`    | ismétlődő              | ~200K            | —                  | óvatosság                | 6        |
-| `kiro`           | ismétlődő              | ~25K             | —                  | kerülendő                | 12       |
-| `glm-cn`         | korlátlan              | korlátlan\*      | ~20M               | rendben                  | 4        |
-| `baidu`          | korlátlan              | korlátlan\*      | —                  | óvatosság                | 1        |
-| `gemini`         | korlátlan              | korlátlan\*      | —                  | óvatosság                | 4        |
-| `kilo-gateway`   | korlátlan              | korlátlan\*      | —                  | óvatosság                | 7        |
-| `opencode-zen`   | korlátlan              | korlátlan\*      | —                  | óvatosság                | 10       |
-| `tencent`        | korlátlan              | korlátlan\*      | —                  | óvatosság                | 1        |
-| `vertex`         | regisztrációs jóváírás | —                | ~300M              | óvatosság                | 10       |
-| `agentrouter`    | regisztrációs jóváírás | —                | ~200M              | óvatosság                | 4        |
-| `predibase`      | regisztrációs jóváírás | —                | ~25M               | óvatosság                | 1        |
-| `doubao`         | regisztrációs jóváírás | —                | ~15M               | nem egyértelmű           | 1        |
-| `ai21`           | regisztrációs jóváírás | —                | ~10M               | kerülendő                | 2        |
-| `deepseek`       | regisztrációs jóváírás | —                | ~5M                | rendben                  | 2        |
-| `hyperbolic`     | regisztrációs jóváírás | —                | ~5M                | rendben                  | 8        |
-| `nscale`         | regisztrációs jóváírás | —                | ~5M                | óvatosság                | 6        |
-| `bytez`          | jóváírás (ism.)        | —                | ismeretlen         | nem egyértelmű           | 1        |
-| `deepinfra`      | regisztrációs jóváírás | —                | ~1M                | óvatosság                | 22       |
-| `fireworks`      | regisztrációs jóváírás | —                | ~1M                | kerülendő                | 10       |
-| `nebius`         | regisztrációs jóváírás | —                | ~1M                | óvatosság                | 1        |
-| `qoder`          | regisztrációs jóváírás | —                | ~1M                | óvatosság                | 14       |
-| `scaleway`       | regisztrációs jóváírás | —                | ~1M                | rendben                  | 6        |
-| `novita`         | regisztrációs jóváírás | —                | ~500K              | óvatosság                | 1        |
-| `agy`            | kulcs nélküli          | —                | —                  | kerülendő                | 16       |
-| `baichuan`       | kulcs nélküli          | —                | —                  | nem egyértelmű           | 1        |
-| `blackbox`       | kulcs nélküli          | —                | —                  | kerülendő                | 6        |
-| `coze`           | kulcs nélküli          | —                | —                  | kerülendő                | 1        |
-| `duckduckgo-web` | kulcs nélküli          | —                | —                  | kerülendő                | 6        |
-| `freemodel-dev`  | kulcs nélküli          | —                | —                  | ismeretlen               | 4        |
-| `friendliai`     | kulcs nélküli          | —                | —                  | kerülendő                | 2        |
-| `iflytek`        | kulcs nélküli          | —                | —                  | kerülendő                | 1        |
-| `inference-net`  | kulcs nélküli          | —                | —                  | óvatosság                | 3        |
-| `liquid`         | kulcs nélküli          | —                | —                  | ismeretlen               | 1        |
-| `monsterapi`     | kulcs nélküli          | —                | —                  | nem egyértelmű           | 1        |
-| `muse-spark-web` | kulcs nélküli          | —                | —                  | kerülendő                | 3        |
-| `nlpcloud`       | kulcs nélküli          | —                | —                  | kerülendő                | 1        |
-| `nvidia`         | korlátlan              | korlátlan\*      | —                  | óvatosság                | 3        |
-| `pollinations`   | kulcs nélküli          | —                | —                  | óvatosság                | 31       |
-| `publicai`       | kulcs nélküli          | —                | —                  | óvatosság                | 3        |
-| `reka`           | kulcs nélküli          | —                | —                  | óvatosság                | 2        |
-| `sensenova`      | kulcs nélküli          | —                | —                  | óvatosság                | 1        |
-| `sparkdesk`      | kulcs nélküli          | —                | —                  | óvatosság                | 1        |
-| `stepfun`        | keyless                | —                | —                  | ok                       | 1        |
-| `t3-web`         | keyless                | —                | —                  | avoid                    | 23       |
-| `uncloseai`      | keyless                | —                | —                  | caution                  | 3        |
+| Szolgáltató      | Szabad típus           | Igazi tokens/mo                               | Első havi hitel | ToS        | Modellek |
+| ---------------- | ---------------------- | --------------------------------------------- | --------------- | ---------- | -------- |
+| `api-airforce`   | visszatérő             | ~ 24M                                         | —               | Vigyázat   | 5        |
+| `groq`           | visszatérő             | ~ 24M (4 sapka modellenként)                  | —               | Vigyázat   | 4        |
+| `cloudflare-ai`  | visszatérő             | ~ 23M                                         | —               | Vigyázat   | 8        |
+| `xkiro`          | visszatérő             | ~ 15M                                         | —               | Vigyázat   | 9        |
+| `bazaarlink`     | visszatérő             | ~ 1.4M                                        | —               | Vigyázat   | 1        |
+| `openrouter`     | visszatérő             | ~ 1.2M                                        | —               | Vigyázat   | 1        |
+| `cohere`         | visszatérő             | ~ 800K                                        | —               | Vigyázat   | 6        |
+| `sambanova`      | visszatérő             | ~ 480K                                        | —               | Vigyázat   | 2        |
+| `morph`          | visszatérő             | ~ 160K                                        | —               | Rendben    | 2        |
+| `glm-cn`         | kupak nélküli          | fedetlen\*                                    | 20M             | Rendben    | 4        |
+| `agnes`          | kupak nélküli          | fedetlen\*                                    | —               | Rendben    | 3        |
+| `agnes-cn`       | kupak nélküli          | fedetlen\*                                    | —               | Rendben    | 3        |
+| `aion`           | kupak nélküli          | fedetlen\*                                    | —               | Rendben    | 4        |
+| `baidu`          | kupak nélküli          | fedetlen\*                                    | —               | Vigyázat   | 1        |
+| `gemini`         | kupak nélküli          | fedetlen\*                                    | —               | Vigyázat   | 4        |
+| `glm`            | kupak nélküli          | fedetlen\*                                    | —               | Rendben    | 2        |
+| `kilo-gateway`   | kupak nélküli          | fedetlen\*                                    | —               | Vigyázat   | 12       |
+| `nvidia`         | kupak nélküli          | fedetlen\*                                    | —               | Vigyázat   | 3        |
+| `onomeo`         | kupak nélküli          | fedetlen\*                                    | —               | Vigyázat   | 2        |
+| `requesty`       | kupak nélküli          | fedetlen\*                                    | —               | Vigyázat   | 2        |
+| `sealion`        | kupak nélküli          | fedetlen\*                                    | —               | Rendben    | 5        |
+| `tokenharbor`    | kupak nélküli          | fedetlen\*                                    | —               | Vigyázat   | 2        |
+| `coze`           | visszatérő             | nem számítva (`avoid`)                        | —               | elkerül    | 1        |
+| `inference-net`  | visszatérő             | nem számítva                                  | —               | Vigyázat   | 3        |
+| `kiro`           | visszatérő             | nem számítva (`avoid`)                        | —               | elkerül    | 7        |
+| `modelscope`     | visszatérő             | regionális személyazonosság-ellenőrzés mögött | —               | Vigyázat   | 2        |
+| `nlpcloud`       | visszatérő             | nem számítva (`avoid`)                        | —               | elkerül    | 1        |
+| `reka`           | visszatérő             | nem számítva                                  | —               | Vigyázat   | 2        |
+| `t3-web`         | visszatérő             | nem számítva (`avoid`)                        | —               | elkerül    | 23       |
+| `bytez`          | hitel (rec.)           | —                                             | —               | kétértelmű | 1        |
+| `doubao`         | regisztrációs jóváírás | —                                             | 15M             | kétértelmű | 1        |
+| `longcat`        | regisztrációs jóváírás | —                                             | 10M             | Vigyázat   | 1        |
+| `deepseek`       | regisztrációs jóváírás | —                                             | 5M              | Rendben    | 2        |
+| `hyperbolic`     | regisztrációs jóváírás | —                                             | 5M              | Rendben    | 8        |
+| `nscale`         | regisztrációs jóváírás | —                                             | 5M              | Vigyázat   | 6        |
+| `deepinfra`      | regisztrációs jóváírás | —                                             | 1M              | Vigyázat   | 22       |
+| `qoder`          | regisztrációs jóváírás | —                                             | 1M              | Vigyázat   | 9        |
+| `scaleway`       | regisztrációs jóváírás | —                                             | 1M              | Rendben    | 6        |
+| `novita`         | regisztrációs jóváírás | —                                             | 500K            | Vigyázat   | 1        |
+| `agentrouter`    | regisztrációs jóváírás | —                                             | —               | Vigyázat   | 1        |
+| `ai21`           | regisztrációs jóváírás | —                                             | —               | elkerül    | 2        |
+| `baichuan`       | regisztrációs jóváírás | —                                             | —               | kétértelmű | 1        |
+| `cerebras`       | regisztrációs jóváírás | —                                             | —               | Vigyázat   | 2        |
+| `fireworks`      | regisztrációs jóváírás | —                                             | —               | elkerül    | 10       |
+| `freemodel-dev`  | regisztrációs jóváírás | —                                             | —               | ismeretlen | 4        |
+| `monsterapi`     | regisztrációs jóváírás | —                                             | —               | kétértelmű | 1        |
+| `nebius`         | regisztrációs jóváírás | —                                             | —               | Vigyázat   | 1        |
+| `publicai`       | regisztrációs jóváírás | —                                             | —               | Vigyázat   | 3        |
+| `sensenova`      | regisztrációs jóváírás | —                                             | —               | Vigyázat   | 1        |
+| `vertex`         | regisztrációs jóváírás | —                                             | —               | Vigyázat   | 16       |
+| `agy`            | kulcs nélküli          | —                                             | —               | elkerül    | 9        |
+| `aihorde`        | kulcs nélküli          | —                                             | —               | Rendben    | 3        |
+| `blackbox`       | kulcs nélküli          | —                                             | —               | elkerül    | 6        |
+| `duckduckgo-web` | kulcs nélküli          | —                                             | —               | elkerül    | 6        |
+| `friendliai`     | kulcs nélküli          | —                                             | —               | elkerül    | 2        |
+| `iflytek`        | kulcs nélküli          | —                                             | —               | elkerül    | 1        |
+| `liquid`         | kulcs nélküli          | —                                             | —               | ismeretlen | 1        |
+| `muse-spark-web` | kulcs nélküli          | —                                             | —               | elkerül    | 3        |
+| `ovhcloud`       | kulcs nélküli          | —                                             | —               | Rendben    | 5        |
+| `pollinations`   | kulcs nélküli          | —                                             | —               | Vigyázat   | 24       |
+| `sparkdesk`      | kulcs nélküli          | —                                             | —               | Vigyázat   | 1        |
+| `uncloseai`      | kulcs nélküli          | —                                             | —               | Vigyázat   | 1        |
 
 ---
 

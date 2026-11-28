@@ -43,7 +43,7 @@ flowchart LR
 
 ## 释放冻结（并行循环）
 
-当协调某个版本时，会打开一个标记为`release-freeze`标记问题。那**并没有停止发展**:
+当协调某个版本时，会打开一个标记为`release-freeze`标记问题。那**并没有停止发展**：
 
 - 冻结的`release/vX.Y.Z`属于该船的释放船长。
 - 下一个周期的`release/vX+1`将从冻结的尖端中删除，以便贡献者继续开展工作。
@@ -52,7 +52,7 @@ flowchart LR
 在假设您想要的分支可合并之前，检查打开的冻结：
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 合并机制（所有者`queue`标签→ Mergify）记录在[MERGE_TRAIN.md](./MERGE_TRAIN.md)中。

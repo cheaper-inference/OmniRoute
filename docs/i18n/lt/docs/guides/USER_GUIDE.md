@@ -245,33 +245,41 @@ Modeliai: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Deriniai
+## 🎨 Combos
 
-Kortelių tvarką galite keisti tiesiogiai skiltyje **Valdymo skydas → Deriniai**, vilkdami kiekvienos kortelės rankenėlę. Tvarka saugoma SQLite ir atkuriama įkėlus iš naujo.
+Galite tiesiogiai užsisakyti kombinuotas korteles** Prietaisų skydelis → Combos** vilkdami kiekvienos kortelės rankenėlę. Užsakymas saugomas SQLite ir atkuriamas įkėlus iš naujo.
 
-### 1 pavyzdys: maksimalus prenumeratos naudojimas → pigi atsarginė parinktis
+### Raskite teikėją, modelį arba paskyrą
 
-```
-Valdymo skydas → Deriniai → Sukurti naują
+Kurti arba redaguoti kombinaciją, žingsnis po žingsnio teikėjas, modelis, paskyra ir kombinuotų nuorodų rinkikliai apima vietinės paieškos lauką. Ieškokite pagal rodomą pavadinimą, identifikatorių, teikėjo slapyvardį arba modelio šaltinį, tada spustelėkite rezultatą arba naudokite rodyklių klavišus ir Enter. Visi keli paieškos terminai turi atitikti. Išvalius paiešką arba paspaudus Escape, pasirinkta reikšmė nepakeičiama.
 
-Pavadinimas: premium-coding
-Modeliai:
-  1. cc/claude-opus-4-7 (Pagrindinis prenumeratos modelis)
-  2. glm/glm-4.7 (Pigi atsarginė parinktis, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Pigiausia galutinė atsarginė parinktis, $0.3/1M)
+Automatinis paskyros pasirinkimas lieka matomas ieškant. Jo pasirenkamas paskyrų apribojimų sąrašas turi atskirą filtrą: pasirinktos paskyros, kurios nėra matomų rezultatų, lieka pasirinktos, o į skaičių jos įtraukiamos. Kai įjungtas el. pašto privatumas, paslėptų el. laiškų fragmentų ieškoti negalima. Pridėkite žingsnį ir išsaugokite kombinaciją kaip įprasta; įvedus užklausą nieko neišsaugoma ir neišbandoma.
 
-Naudojimas CLI: premium-coding
-```
+Tą pačią vietinę paiešką galima rasti ryšio tikrinimo modeliams, pasirinktiniams CLI numatytiesiems ir slapyvardžio modeliams bei išsaugoto tarpinio serverio pasirinkimams. Esami išsaugojimo, taikymo ir testavimo veiksmai lieka atskiri.
 
-### 2 pavyzdys: tik nemokami modeliai (nulinė kaina)
+### 1 pavyzdys: Padidinkite prenumeratą → pigi atsarginė kopija
 
 ```
-Pavadinimas: free-combo
-Modeliai:
-  1. if/kimi-k2.7-code (nurodoma nemokama prieiga; gali būti taikomi teikėjo apribojimai)
-  2. kr/qwen3-coder-next (nemokama atsarginė Kiro parinktis)
+Dashboard → Combos → Create New
 
-Kaina: šiuo metu nurodoma kaip $0; sąlygos ir prieinamumas gali keistis
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### 2 pavyzdys: tik nemokamas (nulinis mokestis)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -431,7 +439,7 @@ Kai jums nebereikia OmniRoute, pateikiame du greitus scenarijus švariam pašali
 ### VPS diegimas
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +521,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -600,7 +608,7 @@ post_install() {
 
 | Kintamasis                              | Numatytoji                      | Aprašymas                                                                                                                                                      |
 | --------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | _(automatiškai sugeneruota)_    | JWT pasirašymo paslaptis — automatiškai sugeneruota pirmą kartą paleidus ir išliko iki `server.env`; aiškiai nustatyti, kai duomenų katalogas yra trumpalaikis |
+| `JWT_SECRET`                            | _(automatiškai sugeneruotas)_   | JWT pasirašymo paslaptis — automatiškai sugeneruota pirmą kartą paleidus ir išliko iki `server.env`; aiškiai nustatyti, kai duomenų katalogas yra trumpalaikis |
 | `INITIAL_PASSWORD`                      | _(nustatyta)_                   | Pirmasis prisijungimo slaptažodis. npm/source diegimas prasideda `CHANGEME`: pakeiskite jį. Atšaukta: priėmimo vedlys                                          |
 | `DATA_DIR`                              | `~/.omniroute`                  | Duomenų katalogas (db, naudojimas, žurnalai)                                                                                                                   |
 | `PORT`                                  | numatytosios sistemos           | Aptarnavimo prievadas (`20128` pavyzdžiuose)                                                                                                                   |
@@ -608,7 +616,7 @@ post_install() {
 | `NODE_ENV`                              | vykdymo laikas pagal nutylėjimą | Nustatyti `production` diegimui                                                                                                                                |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`        | Viešas bazinis URL pateiktas prietaisų skydelyje ir rodomas serveryje (pakeičia seną `BASE_URL`)                                                               |
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`         | Debesų sinchronizavimo pabaigos taško bazė URL (pakeičia seną `CLOUD_URL`)                                                                                     |
-| `API_KEY_SECRET`                        | _(automatiškai sugeneruota)_    | HMAC paslaptis sugeneruotiems API raktams — automatiškai sugeneruojama pirmą kartą ir išliko `server.env`                                                      |
+| `API_KEY_SECRET`                        | _(automatiškai sugeneruotas)_   | HMAC paslaptis sugeneruotiems API raktams — automatiškai sugeneruojama pirmą kartą ir išliko `server.env`                                                      |
 | `REQUIRE_API_KEY`                       | `false`                         | Įgalinkite nešiklio API klavišą `/v1/*`                                                                                                                        |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                         | Leiskite autentifikuotiems prietaisų skydelio naudotojams pareikalavus atskleisti visas išsaugotas API raktų reikšmes                                          |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                            | Talpykloje saugomų teikėjo apribojimų duomenų atnaujinimo dažnis serverio pusėje; UI atnaujinimo mygtukai vis tiek suaktyvina rankinį sinchronizavimą          |
@@ -752,7 +760,7 @@ Pasirinkite atskirą priešdėlį (`mygw`, `acme-proxy`). Jei užklausos tinkint
 
 ### Grandininis OmniRoute Peers
 
-Kitas OmniRoute šliuzas gali būti pridėtas kaip a** Pasirinktinis su OpenAI suderinamas** teikėjas. Naudokite lygiavertės programos `/v1` bazę URL ir tam skirtą, mažiausių privilegijų API raktą, išduotą to bendraamžio.
+Kitas OmniRoute šliuzas gali būti pridėtas kaip a** Pasirinktinis su OpenAI suderinamas** teikėjas. Naudokite lygiavertės programos `/v1` bazę URL ir tam skirtą, mažiausią privilegiją turintį API raktą, išduotą to bendraamžio.
 
 Abipusėms arba kelių šuolių grandinėms įjunkite pasirinkimo kilpos apsaugą kiekviename šliuze:
 
@@ -820,7 +828,7 @@ Pateikiami modeliai, sugrupuoti pagal teikėją ir tipus (`chat`, `embedding`, `
 
 ### Cloudflare greitasis tunelis
 
-- Galima įsigyti** Prietaisų skydelio → galutiniai taškai** Docker ir kitiems savarankiškai priglobtam diegimui
+- Galima įsigyti** Prietaisų skydelis → galutiniai taškai** Docker ir kitiems savarankiškai priglobtam diegimui
 - Sukuria laikiną `https://*.trycloudflare.com` URL, kuris persiunčia į dabartinį su OpenAI suderinamą `/v1` galinį tašką
 - Pirmiausia įgalinti įdiegia `cloudflared` tik tada, kai reikia; vėliau paleidžiant iš naujo pakartotinai naudoja tą patį valdomą dvejetainį failą
 - Greitieji tuneliai nėra automatiškai atkuriami iš naujo paleidus OmniRoute arba konteinerį; prireikus vėl įjunkite juos iš prietaisų skydelio
@@ -870,7 +878,7 @@ Konfigūruoti per** Prietaisų skydelis → Nustatymai → Maršrutas** . Prieta
 | **P2C (dviejų pasirinkimų galia)** | Pasirenka 2 — paskyras ir maršrutus į sveikesnę                                                             |
 | **Atsitiktinis**                   | Atsitiktinai pasirenka paskyrą kiekvienai užklausai naudodamas Fisher-Yates shuffle                         |
 | **Mažiausiai naudotas**            | Maršrutai į paskyrą su seniausia `lastUsedAt` laiko žyma, tolygiai paskirstant srautą                       |
-| **Optimizuotos išlaidos**          | Maršrutai į paskyrą, kurios prioriteto vertė yra mažiausia, optimizuojama mažiausios kainos teikėjams       |
+| **Optimizuota kaina**              | Maršrutai į paskyrą, kurios prioriteto vertė yra mažiausia, optimizuojama pigiausių paslaugų teikėjams      |
 
 **Išplėstinės kombinuotos ir automatinės strategijos** (konfigūruojama kombinacijoje arba naudojant `auto/*` priešdėlius — žr. [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
@@ -882,8 +890,8 @@ Konfigūruoti per** Prietaisų skydelis → Nustatymai → Maršrutas** . Prieta
 - `least-used` ir `cost-optimized`
 - `auto` — rezultatas priklauso nuo visų kandidatų
 - `lkgp` (paskutinis žinomas geras teikėjas) — prisega prie paskutinio sėkmingo teikėjo, tada grįžta prie taisyklių
-- `context-optimized` — pasirenka modelį su didžiausiu laisvo konteksto langu
-- `context-relay` — grandines ilgo konteksto modeliai tolesniems posūkiams
+- `context-optimized` — pirmiausia išbando modelį su didžiausiu žinomu konteksto langu
+- `context-relay` — prioriteto tvarka ir perdavimo suvestinė, kai pokalbis perkeliamas į kitą paskyrą
 
 #### Išorinė lipni seanso antraštė
 
@@ -893,7 +901,7 @@ Dėl išorinių seansų giminingumo (pvz., Claude Code/Codex agentai už atvirk�
 X-Session-Id: your-session-key
 ```
 
-OmniRoute taip pat priima `x_session_id` ir grąžina efektyvų seanso raktą `X-OmniRoute-Session-Id`.
+OmniRoute taip pat priima `x_session_id` ir grąžina galiojantį seanso raktą `X-OmniRoute-Session-Id`.
 
 Jei naudojate Nginx ir siunčiate pabraukimo formos antraštes, įgalinkite:
 
@@ -1150,7 +1158,7 @@ Konfigūruokite derinį balansavimą** Prietaisų skydelis → Combos → Create
 | strategija                | Aprašymas                                                                          |
 | ------------------------- | ---------------------------------------------------------------------------------- |
 | **Round-Robin**           | Paeiliui sukasi per modelius                                                       |
-| **Pirmenybė**             | Visada bando pirmąjį modelį; grįžta tik dėl klaidos                                |
+| **Pirmenybė**             | Visada bando pirmąjį modelį; grįžta tik klaidos atveju                             |
 | **Atsitiktinis**          | Kiekvienai užklausai iš derinio pasirenka atsitiktinį modelį                       |
 | **Svertinis**             | Maršrutai proporcingai pagrįsti priskirtais svoriais kiekvienam modeliui           |
 | **Mažiausiai naudotas**   | Maršrutai į modelį su mažiausiai naujausių užklausų (naudojama kombinuota metrika) |
@@ -1173,7 +1181,7 @@ Prieiga per** Prietaisų skydelis → Health** . Sistemos būklės apžvalga rea
 | **Sistemos būsena**        | Veikimo laikas, versija, atminties naudojimas, duomenų katalogas     |
 | **Teikėjo sveikata**       | Pasaulinio teikėjo grandinės pertraukiklio vykdymo būsena            |
 | **Kainos ribos**           | Aktyvūs ryšio atvėsimai vienoje paskyroje su likusiu laiku           |
-| **Aktyvūs užraktai**       | Aktyvūs modelio blokavimai ir laikini išskyrimai                     |
+| **Aktyvūs blokavimai**     | Aktyvūs modelio blokavimai ir laikini išskyrimai                     |
 | **Parašo talpykla**        | Dubliavimo talpyklos statistika (aktyvūs raktai, pataikymo rodiklis) |
 | **Latencijos telemetrija** | p50/p95/p99 delsos agregacija vienam teikėjui                        |
 
@@ -1330,34 +1338,36 @@ Visą galinių taškų katalogą ir užklausų bei atsakymų schemas rasite [API
 
 ---
 
-## 💻 Vidinė CLI
+## 💻 Vidinis CLI
 
-„OmniRoute“ pateikiama su vidine CLI (`omniroute …`), skirta konfigūravimui, diagnostikai ir veikimo valdymui. Ji yra **atskira nuo valdymo skydelio puslapio „CLI įrankiai“**, kuriame konfigūruojamos trečiųjų šalių CLI („Claude Code“, „Cursor“, „Codex“, „Cline“, …), kad jos galėtų palaikyti ryšį su „OmniRoute“.
+OmniRoute pristato vidinį CLI (`omniroute …`), skirtą sąrankai, diagnostikai ir vykdymo laikui valdyti. Tai yra** atskirti nuo „CLI Tools“ puslapio prietaisų skydelyje** , kuri sukonfigūruoja trečiosios šalies CLIs (Claude Code, Cursor, Codex, Cline, …), kad jie galėtų kalbėtis su OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktyvus vediklis (slaptažodis, teikėjai, deriniai)
-omniroute setup --non-interactive  # Tinka CI aplinkai
-omniroute doctor                   # Būklės diagnostika (duomenų katalogas, DB, teikėjai, prievadai)
-omniroute providers available      # Rodyti palaikomus teikėjus
-omniroute providers list           # Rodyti sukonfigūruotus ryšius
-omniroute providers test <id>      # Realiuoju laiku patikrinti ryšį su teikėju
-omniroute combos list              # Rodyti derinius
-omniroute combos switch <name>     # Nustatyti numatytąjį derinį
-omniroute models                   # Rodyti galimus modelius (--json, --search)
-omniroute keys add | list | remove # Tvarkyti API raktus terminale
-omniroute backup                   # Sukurti konfigūracijos ir DB momentinę kopiją
-omniroute restore [<timestamp>]    # Atkurti iš momentinės kopijos
-omniroute health                   # Išsami būklė (grandinės pertraukikliai, podėlis, atmintis)
-omniroute quota                    # Teikėjų kvotų naudojimas
-omniroute mcp status               # MCP serverio būsena
-omniroute a2a status               # A2A serverio būsena
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tuneliai
-omniroute reset-password           # Iš naujo nustatyti administratoriaus slaptažodį
-omniroute --mcp                    # Paleisti MCP serverį per stdio
-omniroute --port 3000              # Paleisti serverį naudojant pasirinktinį prievadą
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Patarimas: naudokite `omniroute doctor --json` kartu su savo stebėjimo įrankiu, kad gautumėte įspėjimus apie sutrikusius ryšius su teikėjais.
+Patarimas: susiekite `omniroute doctor --json` su stebėjimo įrankiu, kad įspėtumėte apie sugedusį vietinį diegimą. `doctor` netikrina tiekėjo ryšių; tam naudokite `omniroute providers test <id>`.
 
 ---
 

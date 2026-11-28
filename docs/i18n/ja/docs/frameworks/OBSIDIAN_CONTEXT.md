@@ -116,55 +116,48 @@ ID を持たない呼び出し元には `Obsidian API token not configured` が�
 持たない認証済みキーでは、グローバル構成へのフォールバックが維持されます。4 つの
 `obsidian_sync_*` ツールでは、個別の同期トークン動作が維持されます。
 
-## MCP ツール（22）
+## MCPツール (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts` で定義されています。トークン／ベース URL は呼び出しごとに解決されます（API キー単位の設定が優先され、その後グローバル設定が使用されます）。OmniRoute **同期サーバー**を利用するツール（4 つの `obsidian_sync_*` ツール）には、追加で OmniRoute の設定に構成された同期認証トークンが必要です。
+`open-sse/mcp-server/tools/obsidianTools.ts`で定義されています。 token/base-URLは呼び出しごとに解決されます (最初は API キーごと、次にグローバル)。 OmniRouteにヒットするツール**同期サーバー**(4 つの`obsidian_sync_*`ツール) には、 OmniRoute設定で構成された同期認証トークンがさらに必要です。
 
-### 読み取りツール（`read:obsidian`）
+### 読み取りツール (`read:obsidian`)
 
-| ツール                       | 説明                                                                                                           |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Local REST API に到達でき、認証済みかどうかを確認します。                                                      |
-| `obsidian_search_simple`     | ノート内容を全文検索し、ファイルパス付きのスニペットを返します。                                               |
-| `obsidian_search_structured` | JSON Logic 式（and/or/regex/path フィルター）を使用して検索します。                                            |
-| `obsidian_read_note`         | 保管庫からの相対パスでノートを読み取ります。必要に応じて特定の見出し／ブロック／フロントマターを指定できます。 |
-| `obsidian_list_vault`        | 保管庫内のファイルとディレクトリを一覧表示します（エントリのツリー）。                                         |
-| `obsidian_get_document_map`  | ノートの見出し構造を、見出し → 行番号のマップとして取得します。                                                |
-| `obsidian_get_note_metadata` | 内容全体を取得せずに、フロントマター、タグ、リンク、文字数／単語数を取得します。                               |
-| `obsidian_get_active_file`   | Obsidian で現在アクティブなファイルのパスと内容を取得します。                                                  |
-| `obsidian_get_periodic_note` | 指定した日付の日次／週次／月次の定期ノートを取得します（省略時は今日）。                                       |
-| `obsidian_get_tags`          | 保管庫内のすべてのタグを使用頻度とともに一覧表示します。                                                       |
-| `obsidian_list_commands`     | 利用可能な Obsidian コマンド ID を一覧表示します（`obsidian_execute_command` で使用）。                        |
-| `obsidian_sync_status`       | OmniRoute 同期サーバーの状態（稼働状況、保管庫名、ポート、稼働時間、最終同期）を取得します。                   |
-| `obsidian_sync_conflicts`    | 未解決の同期競合（パス、競合パス、検出日時）を一覧表示します。                                                 |
+| 道具                         | 説明                                                                                          |
+| ---------------------------- | --------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | ローカルREST APIが到達可能で認証されているかどうかを確認します。                              |
+| `obsidian_search_simple`     | メモ内容の全文検索。ファイルパスを含むスニペットを返します。                                  |
+| `obsidian_search_structured` | JSONロジック式 (and/or/regex/pathフィルター) を使用して検索します。                           |
+| `obsidian_read_note`         | ボールト相対パスでメモを読み取ります。オプションで特定のheading/block/frontmatter.            |
+| `obsidian_list_vault`        | ボールト内のファイルとディレクトリをリストします (エントリのツリー)。                         |
+| `obsidian_get_document_map`  | メモの見出し構造を見出し→行番号のマップとして取得します。                                     |
+| `obsidian_get_note_metadata` | 完全なコンテンツなしでフロントマター、タグ、リンク、 char/wordカウントを取得します。          |
+| `obsidian_get_active_file`   | Obsidian内の現在アクティブなファイルのパス+コンテンツを取得します。                           |
+| `obsidian_get_periodic_note` | 日付 (省略した場合は今日) のdaily/weekly/monthly定期メモを取得します。                        |
+| `obsidian_get_tags`          | すべての Vault タグとその頻度をリストします。                                                 |
+| `obsidian_list_commands`     | 使用可能なObsidianコマンドIDsをリストします ( `obsidian_execute_command`とともに使用します)。 |
+| `obsidian_sync_status`       | OmniRoute同期サーバーのステータス: 実行中、ボールト名、ポート、稼働時間、最後の同期。         |
+| `obsidian_sync_conflicts`    | 未解決の同期競合 (パス、競合パス、検出された場所) をリストします。                            |
 
-### 書き込みツール（`write:obsidian`）
+### 書き込みツール (`write:obsidian`)
 
-| ツール                           | 説明                                                                                                   |
+| 道具                             | 説明                                                                                                   |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `obsidian_write_note`            | 指定された Markdown 内容でノートを作成または上書きします。                                             |
-| `obsidian_append_note`           | ノートに内容を追記します。必要に応じて特定の見出し／ブロックを指定できます。                           |
-| `obsidian_patch_note`            | 見出し、ブロック、またはフロントマターフィールドに対して、追加／前置／置換を部分的に実行します。       |
-| `obsidian_delete_note`           | 保管庫からノートを完全に削除します。                                                                   |
-| `obsidian_move_note`             | 保管庫内でノートを移動または名前変更します。                                                           |
-| `obsidian_execute_command`       | コマンド ID を指定して Obsidian コマンドを実行します。                                                 |
-| `obsidian_open_file`             | Obsidian でファイルを開きます（存在しない場合は作成します）。                                          |
-| `obsidian_sync_trigger`          | デスクトップ↔モバイル間の双方向保管庫同期を即時実行します。                                            |
-| `obsidian_sync_resolve_conflict` | 同期競合を解決します：`local`（モバイル）、`remote`（デスクトップ）、または `keep-both` を保持します。 |
+| `obsidian_write_note`            | 指定された Markdown コンテンツを使用してメモを作成または上書きします。                                 |
+| `obsidian_append_note`           | コンテンツをメモに追加します。オプションで特定のheading/block.に                                       |
+| `obsidian_patch_note`            | ヘディング、ブロック、またはフロントマター フィールドで外科的にappend/prepend/replace実行します。      |
+| `obsidian_delete_note`           | メモを Vault から完全に削除します。                                                                    |
+| `obsidian_move_note`             | Vault 内でメモを移動または名前変更します。                                                             |
+| `obsidian_execute_command`       | ObsidianコマンドをそのコマンドIDで実行します。                                                         |
+| `obsidian_open_file`             | Obsidianでファイルを開きます (存在しない場合は作成します)。                                            |
+| `obsidian_sync_trigger`          | 即時の双方向デスクトップ↔モバイル ボルト同期をトリガーします。                                         |
+| `obsidian_sync_resolve_conflict` | 同期の競合を解決します。 `local` (モバイル)、 `remote` (デスクトップ)、または`keep-both`を維持します。 |
 
 > [!NOTE]
-> `obsidian_patch_note` のターゲットには、`targetType` として `heading | block | frontmatter`
-> を、`operation` として `append | prepend | replace` を指定でき、任意で
-> `createTargetIfMissing` も指定できます。4 つの `obsidian_sync_*` ツールはローカル同期
-> サーバー（デフォルトでは `http://127.0.0.1:27781`）と通信し、同期トークンを必要とします。
+> `obsidian_patch_note`ターゲットは、 `heading | block | frontmatter`の`targetType`および`append | prepend | replace`の`operation`を受け入れますが、オプションの`createTargetIfMissing`も指定できます。 4 つの`obsidian_sync_*`ツールはローカル同期サーバー (デフォルトでは`http://127.0.0.1:27781` ) と通信し、同期トークンを必要とします。
 
 ### スコープ
 
-読み取りツールには `read:obsidian`、書き込みツールには `write:obsidian` が必要です。適用方式は
-Notion と同一で、`open-sse/mcp-server/server.ts` 内の `withScopeEnforcement()` によって処理されます。
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` の場合に有効になり、許可されるスコープは
-`OMNIROUTE_MCP_SCOPES` または API キーのスコープコンテキストから取得されます。詳細については
-[MCP-SERVER.md](./MCP-SERVER.md) を参照してください。
+読み取りツールには`read:obsidian`が必要です。書き込みツールには`write:obsidian`が必要です。強制は`open-sse/mcp-server/server.ts`の`withScopeEnforcement()`によって処理されるNotion —と同じで、 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`でゲートされ、 APIキーに`manage`/`admin`ないHTTP/SSE呼び出し元に対して強制されます。許可されるスコープは`OMNIROUTE_MCP_SCOPES`またはAPIキーのスコープ コンテキストから取得されます。 [MCP-SERVER.md](./MCP-SERVER.md)を参照してください。
 
 ## エンドポイント
 

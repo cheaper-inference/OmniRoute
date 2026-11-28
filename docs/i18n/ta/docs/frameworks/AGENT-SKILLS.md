@@ -13,12 +13,12 @@ Agent Skills என்பவை வெளிப்புற முகவர்�
 
 ## கண்ணோட்டம்
 
-இந்தப் பட்டியலில் **45 Agent Skills** உள்ளன (23 REST API + 21 CLI + 1 உள்ளமைவுப் பணிப்பாய்வு). ஒவ்வொரு திறனிலும் பின்வருபவை உள்ளன:
+அட்டவணை கொண்டுள்ளது** 45 முகவர் திறன்கள்** (23 REST API + 21 CLI + 1 உள்ளமைவு பணிப்பாய்வு). ஒவ்வொரு திறமையும் உள்ளது:
 
-- ஒரு **அதிகாரப்பூர்வ ID** (`omni-auth`, `cli-serve` போன்றவை)
-- YAML முன்தகவல் (`name`, `description`) + செறிவான markdown உள்ளடக்கம் கொண்ட `skills/{id}/SKILL.md` என்ற **SKILL.md** கோப்பு
-- OpenAPI விவரக்குறிப்பு மற்றும் CLI பதிவகத்திலிருந்து பெறப்பட்ட **REST முனைப்புள்ளிகள்** (API திறன்கள்) அல்லது **CLI துணைக் கட்டளைகள்** (CLI திறன்கள்)
-- நேரடியாகப் பெறுவதற்கான ஒரு **GitHub மூல URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ஏ** நியமன ID** (`omni-auth`, `cli-serve`, முதலியன)
+- ஏ**SKILL.md** YAML ஃப்ரண்ட்மேட்டர் (`name`, `description`) + ரிச் மார்க் டவுன் பாடியுடன் `skills/{id}/SKILL.md` இல் கோப்பு
+- **REST இறுதிப்புள்ளிகள்** (API திறன்கள்) அல்லது**CLI துணைக் கட்டளைகள்** (CLI திறன்கள்) OpenAPI ஸ்பெக் மற்றும் CLI பதிவேட்டில் இருந்து பெறப்பட்டது
+- ஏ**GitHub மூல URL** நேரடி பெறுவதற்கு: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## உள்ளடக்க API
+## கவரேஜ் API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -330,19 +330,16 @@ muutujast `OMNIROUTE_API_KEY` pärineva juurutusvõtme puhul, tagastatakse ka ma
 pikkuse võtme korral mitte ühtegi) ja ühenduse `projectId`. Kõigi teiste võtmete korral jäetakse
 mõlemad väljad vastusest välja.
 
-## Mandaatide lahendamine
+## Mandaatide resolutsioon
 
-`getCloudAgentCredentials(providerId)` failis `src/lib/cloudAgent/api.ts`:
+`getCloudAgentCredentials(providerId)` `src/lib/cloudAgent/api.ts`:
 
-1. Laadib aktiivsed teenusepakkuja ühendused funktsiooniga `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Eelistab iga ühenduse puhul `apiKey` väärtust (kärbitud). Selle puudumisel kasutab `accessToken` väärtust.
-3. Tagastab esimese mittetühja loa kujul `{ apiKey: token }`.
-4. Tagastab `null`, kui kasutatavat luba ei leita — API vastab olekukoodiga `400` ja teatega
-   `"Pilveagendi teenusepakkuja jaoks pole aktiivseid mandaate seadistatud: <id>"`.
+1. Laadib aktiivsed teenusepakkuja ühendused `getProviderConnections({ provider: providerId, isActive: true })` kaudu.
+2. Iga ühenduse jaoks eelistab `apiKey` (kärbitud). Langeb tagasi `accessToken`.
+3. Tagastab esimese mittetühja märgi, mis on pakitud kujul `{ apiKey: token }`.
+4. Tagastab `null`, kui kasutatavat märki ei leitud — API vastab `400` le `"No active credentials configured for cloud agent provider: <id>"`.
 
-See tähendab, et pilveagendid kasutavad sama teenusepakkuja ühenduste tabelit nagu tavalised LLM-i
-teenusepakkujad. Julesi lubamiseks looge aktiivne ühendus väärtusega `provider: "jules"`
-ja täidetud väljaga `apiKey`.
+See tähendab, et pilvagendid kasutavad sama teenusepakkuja ühenduse tabelit nagu tavalised LLM pakkujad. Jules lubamiseks loo aktiivne ühendus `provider: "jules"` ja asustatud `apiKey`.
 
 ## Töölaud
 

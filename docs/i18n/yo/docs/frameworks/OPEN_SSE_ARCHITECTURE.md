@@ -236,19 +236,19 @@ Awọn atilẹyin** 22 afisona ogbon** (wo `src/shared/constants/routingStrategi
 | `context-relay`     | Fi ọrọ-ọrọ kuro lori awọn ibi-afẹde                                                     |
 | `fill-first`        | Fọwọsi ipin ṣaaju gbigbe si atẹle                                                       |
 | `p2c`               | Agbara ti awọn aṣayan meji                                                              |
-| `random`            | Aṣọ ID                                                                                  |
-| `least-used`        | Yan eyi ti o ni awọn lilo aipẹ diẹ                                                      |
-| `cost-optimized`    | Àfojúsùn ilera ti o dara julọ ni akọkọ                                                  |
-| `reset-aware`       | Mọ ti olupese tun windows                                                               |
-| `reset-window`      | Tun ipa-ọna ti o da lori window ṣe                                                      |
+| `random`            | Alabapade Daarapọmọra fun ìbéèrè                                                        |
+| `least-used`        | Yan eyi ti o ni awọn ibeere ti o gbasilẹ ti o kere julọ                                 |
+| `cost-optimized`    | Ni asuwon ti owo igbewọle katalogi akọkọ                                                |
+| `reset-aware`       | Ajẹkù awọn ipin + atunto ijakadi                                                        |
+| `reset-window`      | Ferese ipin ti o tun bẹrẹ laipẹ ni akọkọ                                                |
 | `expiry-first`      | Na akọọlẹ ti ipin rẹ yoo pari ti ko lo ni akọkọ                                         |
 | `headroom`          | Julọ ti o ku ipin headroom akọkọ                                                        |
 | `quota-weighted`    | Rekọja awọn akọọlẹ ti o rẹwẹsi, lẹhinna fa nipasẹ pilẹṣẹ ti o ku ÷ ninu ẹru ọkọ ofurufu |
-| `strict-random`     | Aṣọ deede (ko si iwuwo didara)                                                          |
+| `strict-random`     | Dekini Shuffled: ibi-afẹde kọọkan ni ẹẹkan ṣaaju atunwi                                 |
 | `auto`              | Lo igbelewọn ifosiwewe 16 (`autoCombo/`)                                                |
 | `lkgp`              | Last mọ ti o dara olupese akọkọ                                                         |
-| `context-optimized` | Ti o dara julọ fun awọn ibeere ọrọ-ọrọ gigun                                            |
-| `cache-optimized`   | Pin ìpele kiakia ti a tun le lo kọọkan si akọọlẹ kanna (awọn kọlu kaṣe ni kiakia)       |
+| `context-optimized` | Ferese ọrọ-ọrọ ti o tobi julọ ti a mọ ni akọkọ                                          |
+| `cache-optimized`   | Fẹ akọọlẹ ti o ṣee ṣe lati mu ìpele kiakia ni kaṣe                                      |
 | `fusion`            | Ṣe afẹfẹ jade si igbimọ kan ni afiwe, lẹhinna ṣajọpọ nipasẹ adajọ kan (`fusion.ts`)     |
 | `pipeline`          | Awọn igbesẹ pq — igbejade ti ibi-afẹde kọọkan jẹ ifunni ti atẹle                        |
 | `jev`               | Jade-ni: TypeSafe Jev jẹwọ eyi ti awọn titẹ sii ipo nṣiṣẹ; miiran ibere re              |

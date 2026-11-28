@@ -12,54 +12,53 @@ OmniRoute għandha tliet mekkaniżmi ta’ reżiljenza distinti iżda relatati. 
 
 > **Preċedenza Env-vs-dashboard għal toggles ta' reżiljenza.** Ir-reżiljenza opt-in toggles miżrugħa mill-ambjent — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — jipprovdu biss il-_default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean jippersisti `resilienceSettings` (Dashboard →** Settings → Reżiljenza** / `PATCH /api/resilience`, maħżun `key_value`) jirbaħ fuq il-valur env: normalizzazzjoni (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) iżżomm il-boolean maħżun kull meta jeżisti wieħed. L-issettjar ta' tali env var għal `true` fuq skjerament fejn id-dashboard diġà ssejvjat `false` għalhekk ma jbiddel xejn — flip the toggle in** Settings → Reżiljenza** (jew neħħi l-qasam maħżun) minflok.
 
-## 1. Circuit Breaker tal-Provider
+## 1. Fornitur Circuit Breaker
 
-**Ambitu:** il-provider kollu (eż., `glm`, `openai`, `anthropic`).
+**Skop:** fornitur kollu (eż., `glm`, `openai`, `anthropic`).
 
-**Għan:** jieqaf jibgħat traffiku lil provider li qed ifalli ripetutament fil-livell upstream/tas-servizz.
+**Għan:** tieqaf tibgħat traffiku lil fornitur li ripetutament qed ifalli fil-livell upstream/service.
 
 **Implimentazzjoni:**
 
-- Klassi ewlenija: `src/shared/utils/circuitBreaker.ts`
-- Konnessjonijiet: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API tal-istatus: `GET /api/monitoring/health`
-- API tar-reset: `POST /api/resilience/reset`
-- Wrappers: `open-sse/services/accountFallback.ts`
-- Tabella tad-DB: `domain_circuit_breakers`
+- Core class: `src/shared/utils/circuitBreaker.ts`
+- Wiring: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Status API: `GET /api/monitoring/health`
+- Irrisettja API: `POST /api/resilience/reset`
+- Kisi: `open-sse/services/accountFallback.ts`
+- DB table: `domain_circuit_breakers`
 
 **Stati:**
 
 - `CLOSED` — traffiku normali permess
-- `DEGRADED` — it-traffiku għadu permess, iżda fallimenti elevati tal-provider qed jiġu ntraċċati; jirritorna għal `CLOSED` wara biżżejjed suċċessi, wara test tal-konnessjoni validu, jew wara l-itwal perjodu ta' żamma `OPEN` għall-aħħar tip ta' falliment (il-valur `cooldownByKind` tiegħu, inkella `resetTimeout`, × `maxBackoffMultiplier`, mill-inqas cooldown wieħed) mingħajr falliment ġdid
-- `OPEN` — il-provider imblukkat temporanjament; il-combo routing jaqbeżu
-- `HALF_OPEN` — il-reset timeout għadda; talba probe permessa
+- `DEGRADED` — traffiku għadu permess, iżda fallimenti elevati tal-fornitur qed jiġu ssorveljati; jirritorna għal `CLOSED` fuq suċċessi biżżejjed, fuq test ta 'konnessjoni validu, jew wara l-itwal `OPEN` hold għall-aħħar tip ta' falliment (il-valur `cooldownByKind` tiegħu, inkella `resetTimeout`, × `maxBackoffMultiplier`, mill-inqas cooldown wieħed) mingħajr falliment ġdid
+- `OPEN` — provider imblukkat temporanjament; kombo routing taqbeżha
+- `HALF_OPEN` — reset timeout għadda; it-talba għal sonda permessa
 
-**Valuri default konfigurabbli (`open-sse/config/constants.ts`, esposti fi Dashboard → Settings → Resilience):**
+**Defaults konfigurabbli (`open-sse/config/constants.ts`, esposti fid-Dashboard → Settings → Reżiljenza):**
 
-| Klassi  | Jiddegrada wara | Jinfetaħ wara | Reset timeout |
-| ------- | --------------- | ------------- | ------------- |
-| OAuth   | 5 fallimenti    | 8 fallimenti  | 60s           |
-| API-key | 7 fallimenti    | 12 fallimenti | 30s           |
-| Lokali  | derivat         | 2 fallimenti  | 15s           |
+| Klassi  | Degradat fi  | Jiftaħ fi       | Reset timeout |
+| ------- | ------------ | --------------- | ------------- |
+| OAuth   | 5 fallimenti | 8 fallimenti    | 60s           |
+| API-key | 7 fallimenti | 12-il falliment | 30s           |
 
-`degradationThreshold` jikkontrolla meta provider jidħol fi `DEGRADED`; `failureThreshold` jikkontrolla meta jinfetaħ u jiġi mjaqbez. Il-profili tal-providers lokali għadhom ma humiex esposti fil-paġna tas-Settings tar-Resilience.
+`degradationThreshold` tikkontrolla meta fornitur jidħol `DEGRADED`; `failureThreshold` jikkontrolla meta jinfetaħ u jinqabeż. `PROVIDER_PROFILES.local` (2 fallimenti / 15s) huwa definit `open-sse/config/constants.ts` but** għadu mhux bil-fili** : `getProviderCategory()` jirritorna biss `oauth` jew `apikey`, għalhekk il-fornituri lokali jużaw il-profil OAuth jew API-key.
 
-**Kodiċi ta' attivazzjoni (trip):** biss statusi fil-livell tal-provider `[408, 500, 502, 503, 504]`. MA jqajmux għal żbalji fil-livell tal-kont (il-biċċa l-kbira 401/403/429 — dawk jappartjenu għall-cooldown jew għall-lockout).
+**Kodiċi tal-vjaġġ:** statuss fil-livell tal-fornitur biss `[408, 500, 502, 503, 504]`. Agħmel NOT trip għal żbalji fil-livell tal-kont (il-biċċa l-kbira 401/403/429 — dawk jappartjenu għal cooldown jew lockout).
 
-**Irkupru lazy:** meta `OPEN` jiskadi, `getStatus()`, `canExecute()`, `getRetryAfterMs()` jaġġornaw l-istat għal `HALF_OPEN`. L-istess qari (u l-falliment li jmiss) jġibu `DEGRADED` li jkun stale lura għal `CLOSED` b'mod gradwali. Mhu meħtieġ ebda timer fl-isfond.
+**Irkupru għażżien:** meta `OPEN` jiskadi, `getStatus()`, `canExecute()`, `getRetryAfterMs()` aġġorna l-istat għal `HALF_OPEN`. L-istess jaqra (u l-falliment li jmiss) decay a `DEGRADED` friska lura għal `CLOSED`. Ebda timer fl-isfond meħtieġ.
 
 ---
 
-### Provider Cooldown globali opt-in (window gate)
+### Opt-in Global Provider Cooldown (bieb tat-tieqa)
 
-Saff raba', **opt-in** (`PROVIDER_COOLDOWN_ENABLED`, default **mitfi**), iżomm memorja bejn it-talbiet (cross-request) tal-providers li qed ifallu f'`open-sse/services/providerCooldownTracker.ts`, kkonsultata mir-riżoluzzjoni tal-miri tal-combo sabiex talbiet konsekuttivi tal-combo jieqfu jergħu jgħaddu minn provider li għadu kif falla. L-entrati fil-livell tal-provider jirrispettaw il-window gate ta' `PROVIDER_PROFILES`:
+Ir-raba',** opt-in** saff (`PROVIDER_COOLDOWN_ENABLED`, default** mitfi** ) iżomm memorja ta' talbiet inkroċjati ta' fornituri li qed ifallu `open-sse/services/providerCooldownTracker.ts`, ikkonsultati permezz ta' riżoluzzjoni ta' mira combo sabiex it-talbiet kombo konsekuttivi jieqfu jerġgħu jimxu fornitur li għadu kemm falla. L-entrati fil-livell tal-fornitur jonoraw il-bieb tat-tieqa `PROVIDER_PROFILES` :
 
-| Profil  | jattiva wara (`providerFailureThreshold`) | fi ħdan (`providerFailureWindowMs`) | jkessaħ għal (`providerCooldownMs`) |
-| ------- | ----------------------------------------: | ----------------------------------: | ----------------------------------: |
-| OAuth   |                                      `10` |                             `15min` |                              `5min` |
-| API key |                                      `15` |                             `30min` |                             `10min` |
+| Profil  | vjaġġi wara (`providerFailureThreshold`) | ġewwa (`providerFailureWindowMs`) | jibred ghal (`providerCooldownMs`) |
+| ------- | ---------------------------------------: | --------------------------------: | ---------------------------------: |
+| OAuth   |                                     `10` |                           `15min` |                             `5min` |
+| API key |                                     `15` |                           `30min` |                            `10min` |
 
-Taħt il-limitu, il-provider **mhux** ikkunsidrat li qed jkessaħ; suċċess iħassar it-tieqa. L-entrati fil-livell tal-konnessjoni (`provider:connectionId`) iżommu minflok il-backoff esponenzjali `minRetryCooldownMs → maxRetryCooldownMs`. Sostituzzjonijiet: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Gwardja kontra r-regressjoni: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Taħt il-limitu l-fornitur huwa** le** meqjus bħala tkessiħ; suċċess ineħħi t-tieqa. L-entrati fil-livell tal-konnessjoni (`provider:connectionId`) iżommu l-backoff esponenzjali `minRetryCooldownMs → maxRetryCooldownMs` minflok. Jissupera: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Gwardja tar-rigressjoni: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Tkessiħ tal-Konnessjoni
 
@@ -696,6 +695,21 @@ f'perjodu ta' tkessiħ. Limiti realistiċi:
 
 ---
 
+## Meta OmniRoute nnifisha ma tistax tintlahaq
+
+Is-circuit breaker tal-fornitur, it-tkessiħ tal-konnessjoni, u l-lockout tal-mudell kollha jimxu ġewwa l-gateway. Jekk il-klijent ma jistax jilħaq il-portal, ikollu żball ta 'konnessjoni. OmniRoute ma tistax tintercetta dak in-nuqqas. Il-klijent jiddeċiedi jekk jerġax jipprova u liema messaġġ juri.
+
+OmniRoute bħalissa ma jipprovdi l-ebda fallback min-naħa tal-klijent u ma jiddefinixxi l-ebda politika għaliha. Ikkonfigura kwalunkwe rotta alternattiva fil-klijent jew quddiem il-portal.
+
+- `GET /api/health` jiċċekkja l-ħajja mingħajr awtentikazzjoni.
+- `GET /api/health/ping` jiċċekkja r-rieda, inkluż jekk id-database tirrispondix.
+- `GET /api/monitoring/health` jagħti lil dawk li jċemplu awtentikati ħarsa ġenerali aktar profonda tas-saħħa.
+- `omniroute launch <tool>` sondi `/api/monitoring/health` qabel tibda l-klijent. Jista 'jibda gateway lokali awtomatikament. `--no-start`, gateway li ma jintlaħaqx jirriżulta `GatewayUnreachable` u kodiċi tal-ħruġ `69`.
+
+Biex skonnettja klijent minn OmniRoute, segwi [Revert client configuration](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Debugging
 
 - Il-combo weighted jirrispondi `503 all_targets_cooling_down` (`Retry-After` issettjat, `diagnostics.excluded` jelenka kull target b'`model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → il-pool huwa kkonfigurat u konness, kull target huwa sempliċiment eskluż minn timer tar-reżiljenza; it-twissija `[COMBO] Weighted selection: every target excluded before dispatch — …` tissemma r-raġunijiet u s-sekondi li jifdal. `404 no_executable_targets` mill-istess combo tfisser li ma kien hemm l-ebda timer tar-reżiljenza involut (xejn x'inħaddem, jew kull kont falla l-probe tal-availabbiltà). Mibni f'`open-sse/services/combo/pinRecovery.ts` mill-esklużjonijiet miġburin f'`targetResolution.ts`.
@@ -707,98 +721,68 @@ f'perjodu ta' tkessiħ. Limiti realistiċi:
 
 ---
 
-## Stat tar-runtime — referenza mgħaġġla għall-aġent
+## Runtime state — agent quick reference
 
-> Imċaqlab kelma b'kelma minn `AGENTS.md` → "Resilience Runtime State" (PR #12743) sabiex il-gwida
-> tal-aġent tibqa' taħt il-budget tal-kontest ta' 40k. Hija l-veduta kondensata, rivolta lejn
-> l-aġent, tas-sezzjonijiet ta' hawn fuq; is-sezzjonijiet numerrati jibqgħu r-referenza sħiħa.
+> Tċaqlaq verbatim minn `AGENTS.md` → "Resilience Runtime State" (PR #12743) sabiex il-gwida tal-aġent tibqa' taħt il-baġit tal-kuntest ta' 40k. Hija l-vista kondensata, li tħares lejn l-aġent tat-taqsimiet ta 'hawn fuq; it-taqsimiet numerati jibqgħu r-referenza sħiħa.
 
-OmniRoute għandu tliet mekkaniżmi relatati iżda distinti ta' falliment temporanju. Żomm
-l-ambitu tagħhom separat meta tkun qed tagħmel debugging tal-imġiba tar-routing. Ara d-
-[diagramma tar-reżiljenza b'3 saffi](../diagrams/exported/resilience-3layers.svg)
-(sors: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-għal mappa ta' ħarsa malajr.
+OmniRoute għandha tliet mekkaniżmi ta’ falliment temporanju relatati iżda distinti. Żomm l-ambitu tagħhom separat meta tiddibaggja l-imġieba tar-rotot. Ara [d-dijagramma tar-reżiljenza bi 3 saffi](../diagrams/exported/resilience-3layers.svg) (sors: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) għal mappa f'daqqa t'għajn.
 
-### Circuit Breaker tal-Provider
+### Fornitur Circuit Breaker
 
-**Ambitu**: il-provider kollu, eż. `glm`, `openai`, `anthropic`.
+**Ambitu** : fornitur sħiħ, eż. `glm`, `openai`, `anthropic`.
 
-**Għan**: twaqqaf il-ħruġ ta' traffiku lejn provider li qed ifalli ripetutament fil-livell
-upstream/servizz, sabiex provider wieħed mhux b'saħħtu ma jrattalx kull talba.
+**Għan** : tieqaf tibgħat it-traffiku lil fornitur li qed ifalli ripetutament fil-livell upstream/service, sabiex fornitur wieħed mhux tajjeb għas-saħħa ma jnaqqasx kull talba.
 
-**Implimentazzjoni**:
+**Implimentazzjoni** :
 
-- Klassi prinċipali: `src/shared/utils/circuitBreaker.ts`
-- Wiring tal-gate/eżekuzzjoni tal-chat: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API tal-istat tar-runtime: `src/app/api/monitoring/health/route.ts`
-- Wrappers kondiviżi: `open-sse/services/accountFallback.ts`
+- Core class: `src/shared/utils/circuitBreaker.ts`
+- Chat gate/execution wiring: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Runtime status API: `src/app/api/monitoring/health/route.ts`
+- Shared wrappers: `open-sse/services/accountFallback.ts`
 - Tabella tal-istat persistenti: `domain_circuit_breakers`
 
-**Stati** (4 — `src/shared/utils/circuitBreaker.ts`):
+**l-Istati** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: it-traffiku normali huwa permess.
-- `DEGRADED`: firxa ta' twissija bikrija — il-fallimenti qabżu l-limitu tad-degradazzjoni iżda
-  għadhom ma qabżux il-limitu tal-breaker; it-traffiku jibqa' jgħaddi, id-dashboards juru
-  t-twissija. Test validu tal-konnessjoni jew tieqa kwieta mingħajr falliment ġdid jirritornaha
-  lura għal `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` fih it-tieqa).
-- `OPEN`: il-provider huwa mblukkat temporanjament; il-callers jirċievu tweġiba
-  provider-circuit-open jew il-combo routing jaqbeż għal target ieħor.
-- `HALF_OPEN`: il-timeout tar-reset għadda; tippermetti probe request. Suċċess jagħlaq
-  il-breaker, falliment jiftħu mill-ġdid.
+- `CLOSED`: traffiku normali huwa permess.
+- `DEGRADED`: fallimenti — tal-banda ta' twissija bikrija qasmu l-limitu tad-degradazzjoni iżda għadu mhux il-limitu tal-interruttur; it-traffiku għadu jiċċirkola, dashboards juru t-twissija. Test ta' konnessjoni validu jew tieqa kwieta mingħajr ebda falliment ġdid jirritornaha għal `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` għandu t-tieqa).
+- `OPEN`: il-fornitur huwa temporanjament imblukkat; dawk li jċemplu jiksbu rispons fornitur-ċirkwit-miftuħ jew kombo routing skips għal mira oħra.
+- `HALF_OPEN`: il-timeout ta' reset ikun għadda; jippermetti talba għal sonda. Is-suċċess jagħlaq il-breaker, il-falliment jerġa’ jiftaħ.
 
-**Valuri predefiniti** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, ikkunsmati permezz ta'
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` f'`src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` f'`src/sse/handlers/chatHelpers.ts`). Il-breaker tal-provider
-kollu jopera fuq `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Defaults** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, consumed via `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). L-interruttur tal-fornitur kollu jaħdem fuq `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profil  | jiddegrada f' | jiftaħ f' (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
+| Profil  | tiddegrada fi | jiftaħ fi (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
 | ------- | ------------: | ------------------------------------: | ----------------------------: |
 | OAuth   |           `5` |                                   `8` |                         `60s` |
 | API key |           `7` |                                  `12` |                         `30s` |
-| Local   |     (derivat) |                                   `2` |                         `15s` |
 
-`PROVIDER_PROFILES` jiddefinixxi wkoll `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) u `providerCooldownMs` (5/10/1 min): dawn iħaddmu
-il-**gate tat-tieqa tal-Provider Cooldown globali opt-in** (`PROVIDER_COOLDOWN_ENABLED`,
-awtomatikament mitfi) — entrata fil-livell tal-provider f'`open-sse/services/providerCooldownTracker.ts`
-tqis biss bħala f'cooldown wara `providerFailureThreshold` fallimenti ġewwa
-`providerFailureWindowMs`, u mbagħad tibqa' f'cooldown għal `providerCooldownMs`. DAWN mhumiex
-il-limiti tal-breaker attiv — taġġustahomx jekk tistenna imġiba tal-breaker. Kull valur predefinit
-jista' jiġi mbejjel permezz tal-env vars `OMNIROUTE_PROVIDER_BREAKER_*` u
-`OMNIROUTE_CIRCUIT_BREAKER_*`; it-tabella tar-referenza preċiża għar-runtime tinsab f'
-`docs/architecture/RESILIENCE_GUIDE.md`.
+Profil `local` (`2` fallimenti / `15s`) jeżisti wkoll `PROVIDER_PROFILES`, iżda mhuwiex irbit fil-breaker: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) jaċċetta biss `oauth` jew `apikey`, u `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) jirritorna wieħed minn dawk iż-żewġ (fornituri mhux reġistrati jiksbu `apikey`).
 
-Biss statusijiet ta' falliment fil-livell tal-provider għandhom jiskattaw il-breaker tal-provider:
+`PROVIDER_PROFILES` jiddefinixxi wkoll `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) u `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, fejn il-valuri lokali huma inerti għall-istess raġuni bħal hawn fuq:** tieqa gate tal-opt-in globali Fornitur Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, default off) — dħul fil-livell tal-fornitur `open-sse/services/providerCooldownTracker.ts` jgħodd biss bħala tkessiħ wara `providerFailureThreshold` fallimenti ġewwa `providerFailureWindowMs`, u mbagħad jiksaħ għal `providerCooldownMs`. Huma NOT il-limiti tal-breaker ħajjin — ma tixgħelhomx jistennew imġieba tal-breaker. Kull default huwa overridable permezz tal-vars `OMNIROUTE_PROVIDER_BREAKER_*` u `OMNIROUTE_CIRCUIT_BREAKER_*` env; it-tabella ta' referenza preċiża tar-runtime tgħix `docs/architecture/RESILIENCE_GUIDE.md`.
+
+L-istatus ta' falliment fil-livell tal-fornitur biss għandu jxekkel l-interruttur tal-fornitur:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Tiskattax il-breaker tal-provider kollu għal żbalji normali ta' kont/key/mudell bħal ħafna
-każijiet `401`, `403`, jew `429`. Dawn normalment jappartjenu għall-cooldown tal-konnessjoni
-jew għall-lockout tal-mudell. `403` minn provider b'ċavetta API ġenerika għandu jkun
-irkuprabbi sakemm ma jkunx ikklassifikat bħala żball terminali tal-provider/kont.
+Tfixkilx l-interruttur tal-fornitur kollu għal żbalji account/key/model normali bħall-biċċa l-kbira tal-każijiet `401`, `403`, jew `429`. Dawk normalment jappartjenu għal cooldown tal-konnessjoni jew lockout tal-mudell. Fornitur ġeneriku ta' API-key `403` għandu jkun jista' jiġi rkuprat sakemm ma jkunx ikklassifikat bħala żball terminali provider/account.
 
-Il-breaker juża rkupru għażżien (lazy), mhux timer fl-isfond. Meta `OPEN` jiskadi,
-qrijejt bħal `getStatus()`, `canExecute()`, u `getRetryAfterMs()` jerġgħu jġeddedu
-l-istat għal `HALF_OPEN`, sabiex id-dashboards u l-bennejja tal-kandidati tal-combo
-ma jibqgħux jeskludu għal dejjem fornitur li skada.
+Il-breaker juża irkupru għażżien, mhux timer fl-isfond. Meta `OPEN` jiskadi, jaqra bħal `getStatus()`, `canExecute()`, u `getRetryAfterMs()` jġedded l-istat għal `HALF_OPEN`, sabiex dashboards u bennejja kandidati combo ma jibqgħux jeskludu fornitur skadut għal dejjem.
 
-### Cooldown tal-Konnessjoni
+### Tkessiħ tal-Konnessjoni
 
-**Ambitu**: konnessjoni/kont/ċavetta waħda tal-fornitur.
+**Ambitu** : fornitur wiehed connection/account/key.
 
-**Għan**: jaqbeż temporanjament ċavetta/kont wieħed difettuż filwaqt li jippermetti lil
-konnessjonijiet oħra tal-istess fornitur jibqgħu jservu t-talbijiet.
+**Għan** : aqbeż temporanjament key/account ħażina waħda filwaqt li tippermetti konnessjonijiet oħra għall-istess fornitur biex ikompli jservi t-talbiet.
 
-**Implimentazzjoni**:
+**Implimentazzjoni** :
 
-- Mogħdija tal-kitba/aġġornament: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Għażla/filtrazzjoni tal-kont: `src/sse/services/auth.ts::getProviderCredentials...`
-- Kalkolu tal-cooldown: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- Is-settings: `src/lib/resilience/settings.ts`
+- Write/update moghdija: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Kont selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Kalkolu tat-tkessiħ: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Settings: `src/lib/resilience/settings.ts`
 
-Oqsma importanti fuq il-konnessjonijiet tal-fornitur:
+Oqsma importanti dwar il-konnessjonijiet tal-fornitur:
 
 ```ts
 rateLimitedUntil;
@@ -809,67 +793,50 @@ errorCode;
 backoffLevel;
 ```
 
-Waqt l-għażla tal-kont, konnessjoni tiġi mraqba sakemm:
+Waqt l-għażla tal-kont, konnessjoni tinqabeż waqt li:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Il-cooldowns huma wkoll għażżiena: meta `rateLimitedUntil` ikun fil-passat, il-konnessjoni
-ssir eliġibbli mill-ġdid. F'użu b'suċċess, `clearAccountError()` tnaddaf `testStatus`,
-`rateLimitedUntil`, l-oqsma tal-iżball, u `backoffLevel`.
+Cooldowns huma wkoll għażżien: meta `rateLimitedUntil` huwa fil-passat, il-konnessjoni ssir eliġibbli mill-ġdid. Meta jintuża b'suċċess, `clearAccountError()` ineħħi `testStatus`, `rateLimitedUntil`, oqsma ta' żball, u `backoffLevel`.
 
-Imġiba default tal-cooldown tal-konnessjoni:
+Imġiba tat-tkessiħ tal-konnessjoni default:
 
-- Cooldown bażiku ta' OAuth: `5s`.
-- Cooldown bażiku tal-ċavetta API: `3s`.
-- `429` tal-ċavetta API għandu jippreferi ħjiel ta' retry upstream (`Retry-After`, headers
-  ta' reset, jew test ta' reset li jista' jiġi pparżjat) meta disponibbli.
-- Fallimenti rkuprabbli ripetuti jużaw backoff esponenzjali:
+- OAuth base cooldown: `5s`.
+- Cooldown bażi API-key: `3s`.
+- API-key `429` għandu jippreferi ħjiel upstream retry (`Retry-After`, reset headers, jew reset test parseable) meta disponibbli.
+- Fallimenti ripetuti li jistgħu jiġu rkuprati jużaw backoff esponenzjali:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Il-gwardja anti-thundering-herd tiprevjeni fallimenti konkurrenti fuq l-istess konnessjoni
-milli jestendu ripetutament il-cooldown jew iżidu `backoffLevel` darbtejn.
+Il-gwardja tal-merħla kontra r-ragħad tipprevjeni fallimenti konkorrenti fuq l-istess konnessjoni milli jestendi ripetutament it-tkessiħ jew iż- `backoffLevel` inkrement doppju.
 
-L-istati terminali mhumiex cooldowns. `banned`, `expired` (li jsir terminali biss wara N
-tentattivi limitati permezz ta' `EXPIRED_RETRY_MAX`), u `credits_exhausted` huma
-maħsuba biex jibqgħu mhux disponibbli sakemm il-kredenzjali/is-settings jinbidlu jew
-operatur jerġa' jissettjahom. Tiktibx fuq l-istati terminali b'istat ta' cooldown
-transitorju.
+L-istati terminali mhumiex cooldowns. `banned`, `expired` (li jsir terminali biss wara N bounded tentattivi mill-ġdid permezz ta' `EXPIRED_RETRY_MAX`), u `credits_exhausted` huma maħsuba biex jibqgħu mhux disponibbli sakemm credentials/settings jinbidel jew operatur jerġa' jpoġġihom. Tiktibx fuq l-istati terminali bi stat ta' cooldown temporanju.
 
-### Lockout tal-Mudell
+### Mudell Lockout
 
-**Ambitu**: fornitur + konnessjoni + mudell.
+**Ambitu** : provider + connection + model.
 
-**Għan**: tevita li titfi konnessjoni sħiħa meta mudell wieħed biss ikun mhux disponibbli
-jew limitat mill-kwota għal dik il-konnessjoni.
+**Għan** : evita li tiddiżattiva konnessjoni sħiħa meta mudell wieħed biss ma jkunx disponibbli jew ikun limitat għal kwota għal dik il-konnessjoni.
 
 Eżempji:
 
-- Fornituri b'kwota għal kull mudell li jirritornaw `429`.
-- Fornituri lokali li jirritornaw `404` għal mudell wieħed nieqes.
-- Fallimenti ta' permessi ta' modalità/mudell speċifiċi għall-fornitur, bħal modalitajiet
-  magħżula ta' Grok.
+- Fornituri tal-kwota għal kull mudell li jirritornaw `429`.
+- Fornituri lokali jirritornaw `404` għal mudell wieħed nieqes.
+- Ħsarat tal-permess mode/model speċifiċi għall-fornitur bħal modi Grok magħżula.
 
-Il-lockout tal-mudell jinsab f'`open-sse/services/accountFallback.ts` u jħalli l-istess
-konnessjoni tkompli sservi mudelli oħra.
+Model lockout jgħix `open-sse/services/accountFallback.ts` u ħalli l-istess konnessjoni tkompli sservi mudelli oħra.
 
-### Gwida għad-Debugging
+### Gwida tad-Debugging
 
-- Jekk il-ċwievet kollha ta' fornitur jiġu mraqba, spezzjona kemm l-istat tal-breaker
-  tal-fornitur kif ukoll `rateLimitedUntil`/`testStatus` ta' kull konnessjoni.
-- Jekk fornitur jidher eskluż b'mod permanenti wara l-tieqa tar-reset, iċċekkja jekk
-  il-kodiċi qed jaqrawx `state` grezz minflok jużaw `getStatus()`/`canExecute()`.
-- Jekk ċavetta waħda ta' fornitur tfalli iżda oħrajn għandhom jaħdmu, ippreferi l-cooldown
-  tal-konnessjoni fuq il-breaker tal-fornitur.
-- Jekk mudell wieħed biss ifalli, ippreferi l-lockout tal-mudell fuq il-cooldown
-  tal-konnessjoni.
-- Jekk stat għandu jirkupra waħdu, għandu jkollu timestamp futur/timeout ta' reset u
-  mogħdija ta' qari li taġġorna stat skadut. L-istatusi permanenti jeħtieġu bidliet
-  manwali fil-kredenzjali jew fil-konfigurazzjoni.
+- Jekk iċ-ċwievet kollha għal fornitur jinqabżu, spezzjona kemm l-istat tal-interruttur tal-fornitur kif ukoll `rateLimitedUntil`/`testStatus` ta' kull konnessjoni.
+- Jekk fornitur jidher eskluż b'mod permanenti wara t-tieqa ta' reset, iċċekkja jekk il-kodiċi huwiex jaqra `state` mhux maħdum minflok ma tuża `getStatus()`/`canExecute()`.
+- Jekk ċavetta tal-fornitur waħda tfalli iżda oħrajn għandhom jaħdmu, tippreferi tkessiħ tal-konnessjoni fuq interruttur tal-fornitur.
+- Jekk mudell wieħed biss ifalli, tippreferi lockout tal-mudell fuq cooldown tal-konnessjoni.
+- Jekk stat għandu jirkupra lilu nnifsu, għandu jkollu timeout timestamp/reset futur u mogħdija tal-qari li jġedded l-istat skadut. Status permanenti jeħtieġu kredenzjali manwali jew bidliet konfigurazzjoni.
 
 ---
 

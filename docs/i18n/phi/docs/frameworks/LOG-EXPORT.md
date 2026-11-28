@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Iskedyul** — isang cron job ng `JobRegistry`, ang `log_export`, na may default na `0 * * * *` (bawat oras,
-  UTC). Nakarehistro sa `src/lib/initCloudSync.ts`; maaaring palitan gamit ang `OMNIROUTE_LOG_EXPORT_CRON`.
-  Sa bawat takbo, pinoproseso nito ang lahat ng nakabinbing record ng bawat **naka-enable** na destinasyon, nang sunud-sunod.
-- **Cursor** — ang implicit na `call_logs.rowid` ng SQLite, na sine-save para sa bawat destinasyon sa
-  `log_export_destinations.cursor_row_id`. Sadyang hindi ginagamit ang `timestamp` bilang cursor: maaaring
-  magbigay ang mga caller ng sarili nilang value, kaya maaaring maisulat ang isang mabagal na request pagkatapos ng mas mabilis na request na nagsimula
-  nang mas huli, at malalaktawan ito ng cursor na nakabatay sa timestamp.
-- **Pagba-batch** — `batch_size` na mga row bawat request (default na 500), `max_rows_per_run` na mga row bawat takbo
-  (default na 10000) upang maubos ang malaking backlog sa ilang takbo sa halip na humarang sa iisang takbo.
-- **Paghahatid** — uusad lamang ang cursor pagkatapos matagumpay na matapos ang `send()`. Kapag nabigo ang isang batch, mananatili
-  ang cursor sa dating posisyon nito, kaya muling susubukan ang parehong mga row sa susunod na takbo. Ang garantiya ay
-  hindi bababa sa isang paghahatid kasama ng pag-aalis ng duplikado sa destinasyon, hindi tunay na eksaktong isang paghahatid: ginagamit ng BigQuery ang call-log id bilang key ng bawat
-  row, na kinikilala nito sa abot ng makakaya sa loob ng sarili nitong panahon para sa pag-aalis ng duplikado.
-- **Proteksyon laban sa pagsasabay** — maaaring sabay na ma-trigger ang cron tick at `POST .../run`. Ang isang destinasyong
-  kasalukuyang pinoproseso ay nilalaktawan sa halip na iproseso nang dalawang beses (`skipped: true` sa resulta ng takbo),
-  kaya hindi maaaring muling magpadala ng batch o magsulat ng paatras na cursor ang isang kasabay na takbo.
-- **Pagbawi pagkatapos ng purge** — kung lumampas ang `cursor_row_id` sa `MAX(rowid)` (na-purge ang buong table at
-  nagsimulang muli ang mga rowid), ibinabalik ng runner ang cursor sa 0 sa halip na permanenteng hindi na makakita ng mga record.
+- **Iskedyul** — one `JobRegistry` cron job, `log_export`, defaulting to `0 * * * *` (hourly, UTC). Nakarehistro sa `src/lib/initCloudSync.ts`; overridable sa `OMNIROUTE_LOG_EXPORT_CRON`. Ang bawat tik ay umaagos sa bawat** pinagana** patutunguhan, sunud-sunod.
+- **Cursor** Ang implicit `call_logs.rowid` ng — SQLite, ay nagpatuloy sa bawat destinasyon sa `log_export_destinations.cursor_row_id`. `timestamp` ay sadyang hindi ang cursor: ang mga tumatawag ay maaaring magbigay ng kanilang sariling halaga, kaya ang isang mabagal na kahilingan ay maaaring maisulat pagkatapos ng isang mas mabilis na nagsimula sa ibang pagkakataon, at ang isang timestamp na cursor ay laktawan ito.
+- **Batching** — `batch_size` rows per request (default 500), `max_rows_per_run` rows per run (default 10000) kaya ang isang malaking backlog ay dumadaloy sa ilang ticks sa halip na harangan ang isa.
+- **Paghahatid** — ang cursor ay umuusad lamang pagkatapos na malutas `send()`. Ang isang nabigong batch ay umalis sa cursor kung nasaan ito, kaya ang parehong mga hilera ay muling sinusubukan sa susunod na pagtakbo. Ang garantiya ay hindi bababa sa isang beses kasama ang destination-side de-duplication, hindi eksaktong-isang beses: pini-key ng BigQuery ang bawat row sa pamamagitan ng call-log id, na pinarangalan nito sa isang pinakamahusay na pagsisikap na batayan sa loob ng sarili nitong dedup window.
+- **Overlap na bantay** — ang cron tick at `POST .../run` ay maaaring magpaputok nang magkasama. Nilaktawan ang isang patutunguhan na nag-draining sa halip na ma-drain nang dalawang beses (`skipped: true` sa resulta ng pagtakbo), kaya ang kasabay na pagtakbo ay hindi maaaring muling magpadala ng isang batch o maisulat ang cursor pabalik.
+- **Purge pagbawi** — kung `cursor_row_id` ay napupunta sa itaas ng `MAX(rowid)` (na-purged ang buong mesa at na-restart ang mga rowids), magre-rewind ang runner sa 0 sa halip na maging permanenteng bulag.
 
 ### Nakahiwalay na runner at mga limitasyon
 
-Ang bawat takbo ng destinasyon sa Node ay nagsisimula ng hiwalay at panandaliang OS child process (`child_process`
-na may IPC, hindi `worker_threads`). Ang pagbabasa ng body, pag-parse/serialization ng payload JSON, ang
-`prepare()` ng destinasyon, at ang network I/O ng destinasyon ay pawang tumatakbo roon, hindi sa event loop ng server.
-Configuration at maliliit na mensahe ng progreso lamang ang dumadaan sa IPC; hindi kailanman bumabalik sa
-server ang mga na-export na record. Pinananatili ng cron job at ng route na Run now ang parehong pampublikong resulta at proteksyon laban sa pagsasabay.
+Ang bawat destinasyon na tumatakbo sa Node ay nagsisimula ng isang hiwalay, panandaliang proseso OS child (`child_process` na may IPC, hindi `worker_threads`). Ang body reads, payload JSON parsing/serialization, destination `prepare()` at destination network I/O lahat ay tumatakbo doon, hindi sa event loop ng server. Tanging ang configuration at maliliit na mensahe ng progreso ay tumatawid IPC; hindi na bumalik sa server ang mga nai-export na tala. Ang cron job at Run now na ruta ay nagpapanatili ng parehong pampublikong resulta at overlap na bantay.
 
-Binubuksan ng child ang na-resolve na `DATA_DIR/storage.sqlite` ng server bilang read-only gamit ang `node:sqlite`,
-na may `busy_timeout=5000` at `query_only=ON`. Hindi ito nag-i-import ng DB singleton at hindi nagsasagawa ng
-mga migration, backup o update sa SQLite. Ang pagtatala ng mga nawawala/sirang artifact (kasama ang
-UPDATE para sa sirang artifact) ay nananatili lamang sa daloy ng detalye ng dashboard. Parehong gumagamit ang dalawang daloy ng isang purong
-detail resolver; gumagamit ang pag-export ng asynchronous na pagbabasa ng filesystem at ng parehong pagkakasunod-sunod ng pag-resolve: artifact → legacy
-inline → legacy disk → wala. Kinukuha ng isang takbo ang pinakamataas na insertion rowid
-kapag binuksan ng child ang reader nito; maghihintay sa susunod na takbo ang mga susunod na insertion. Hangganan ito ng insertion,
-hindi isang pangmatagalang transaksyon sa SQLite: malayang makakapagpatuloy ang mga WAL writer at checkpoint habang
-naghihintay sa network. Hindi pinipigilan ng hangganang ito ang mga update/pagtanggal ng mga kasalukuyang row.
+Binubuksan ng bata ang nalutas na `DATA_DIR/storage.sqlite` na read-only ng server gamit `node:sqlite`, na may `busy_timeout=5000` at `query_only=ON`. Wala itong ini-import DB singleton at hindi nagsasagawa ng mga paglilipat, pag-backup o pag-update SQLite. Missing/corrupt artifact bookkeeping (kabilang ang corrupt-artifact UPDATE) ay nananatili lamang sa path ng detalye ng dashboard. Ang parehong mga landas ay nagbabahagi ng isang purong solver ng detalye; Ang pag-export ay gumagamit ng mga asynchronous na filesystem reads at ang parehong artifact → legacy inline → legacy disk → none resolution order. Kinukuha ng isang run ang maximum insertion rowid kapag binuksan ng bata ang reader nito; mamaya pagsingit maghintay para sa susunod na run. Ito ay isang hangganan ng pagpapasok, hindi isang pangmatagalang transaksyon SQLite : WAL na manunulat at mga checkpoint ay nananatiling libre habang naghihintay sa network. Updates/deletions ng mga umiiral na row ay hindi naka-freeze sa hangganang ito.
 
-Pagkatapos ng bawat tinanggap na batch, naghihintay ang child ng pagkilala. Sine-save muna ng server
-ang cursor gamit ang `advanceLogExportCursor`, saka ipinapadala ang `ack`; walang susunod na batch na magsisimula bago iyon.
-Ang pagkabigo sa pagpapadala, pag-crash o timeout ay nagtatala ng pagkabigo nang hindi isinusulong ang cursor para sa batch na iyon. Nananatiling
-naka-commit ang mga batch na dati nang kinilala; ang iisang batch lamang na hindi pa kinikilala ang maaaring muling ipadala.
-Itinatala lamang ang tagumpay pagkatapos ng `done` at ng maayos na pag-exit ng child. Tinatapos ng mga pagkabigo ang child
-gamit ang SIGTERM, na itinataas sa SIGKILL pagkalipas ng 500 ms, at naghihintay ang runner na magsara ang proseso.
+Pagkatapos ng bawat tinanggap na batch, ang bata ay naghihintay para sa isang pagkilala. Ang server ay unang nagpatuloy sa cursor na may `advanceLogExportCursor`, pagkatapos ay nagpapadala ng `ack`; walang susunod na batch na magsisimula bago ito. Ang isang pagkabigo sa pagpapadala, pag-crash o timeout ay nagtatala ng pagkabigo nang hindi isinusulong ang batch na iyon. Ang mga dating kinikilalang batch ay nananatiling nakatuon; sa pinakamaraming ang isang hindi kinikilalang batch ay maaaring ipadala muli. Ang tagumpay ay naitala lamang pagkatapos `done` at isang malinis na paglabas ng bata. Ang mga pagkabigo ay nagwawakas sa bata ng SIGTERM, na tataas sa SIGKILL pagkatapos ng 500 ms, at ang runner ay naghihintay para sa pagsasara ng proseso.
 
-| Environment variable                          | Default | Layunin                                         |
-| --------------------------------------------- | ------- | ----------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000  | Limitasyon sa aktuwal na oras bawat destinasyon |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024    | Limitasyon ng V8 old-space ng child sa MB       |
+| variable ng kapaligiran                       | Default | Layunin                                       |
+| --------------------------------------------- | ------- | --------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000  | Bawat destinasyon na limitasyon sa wall-clock |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024    | Bata V8 na limitasyon sa lumang espasyo sa MB |
 
-Ginagamit ang mga default para sa mga value na di-wasto/hindi positibo/hindi integer. Ang setting ng heap ay hindi kabuuang
-limitasyon ng RSS; maaari pa ring maubos ng napakalalaking batch ang memory ng child at ligtas na mapabigo ang takbo.
-Ang default na 1024 MB ay naglalaan ng ekstrang kapasidad para sa default na batch na 500 row ng mga artifact na 512 KiB na
-naka-enable ang mga body, kasama ang JSON serialization ng BigQuery na hinahati sa mga chunk ayon sa byte. Hindi nito ginagawang ligtas ang isang
-batch na 10000 row na may mga body. Ang pagkaubos ng V8 heap ay nagtatala ng pagkabigong may malinaw na hakbang para malutas ito: bawasan ang laki
-ng batch o taasan ang `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; nananatili ang cursor sa huling
-batch na kinilala. Hindi saklaw ng modernong limitasyon ng artifact ang mga lumang inline/disk body.
-Dapat hiwalay na maglaan ng kapasidad para sa RSS ang mga operator, lalo na sa mga container na may limitadong memory.
+ginagamit ng mga halaga Invalid/non-positive/non-integer ang mga default. Ang setting ng heap ay hindi kabuuang limitasyon RSS ; ang napakalaking batch ay maaari pa ring maubos ang memorya ng bata at mabigo nang ligtas sa pagtakbo. Ang 1024 MB default ay umalis sa headroom para sa default na 500-row na batch ng 512 KiB artifact na may mga body na naka-enable, kasama ang byte-chunked JSON serialization ng BigQuery. Hindi nito ginagawang ligtas ang isang 10000-row na katawan ng batch. Ang V8 heap exhaustion ay nagtatala ng isang naaaksyunan na kabiguan: babaan ang laki ng batch o taasan ang `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; mananatili ang cursor sa huling kinikilalang batch. Ang mga makasaysayang katawan inline/disk ay hindi sakop ng modernong artifact cap. Ang mga operator ay dapat magbadyet RSS nang hiwalay, lalo na sa loob ng mga lalagyan na limitado sa memorya.
 
-Minamana lamang ng child process ang na-resolve na `DATA_DIR`, `NODE_ENV`, tahasang `TZ` (pag-resolve ng lokal na oras
-para sa mga legacy na filename), `ELECTRON_RUN_AS_NODE` kapag mayroon, at ang mga sumusunod na input para sa outbound:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (at ang mga lowercase na anyo ng mga ito),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Ginagamit ng isang global na Undici dispatcher ang parehong pag-resolve ng proxy batay lamang sa environment at mga panuntunan
-sa pag-bypass ng lokal na host ng server, kabilang ang `NO_PROXY`; hindi nito ini-import ang `proxyFetch.ts` o ang mga DB/feature flag nito.
-Itinatago ang mga kredensyal ng proxy sa ipinapasang output at mga naitalang error. Ang mga kredensyal ng destinasyon
-ay ipinapadala lamang sa iisang panimulang mensahe ng IPC, hindi kailanman sa argv o environment; ang pagpapasa ng output/error ay
-nilalagyan ng prefix at nililinis. Tanging `ExperimentalWarning` ang dini-disable sa mga exec argument ng child process upang maiwasang
-maulit ang babala ng Node tungkol sa SQLite sa bawat pagtakbo ng cron; nananatiling nakikita ang iba pang uri ng babala.
+Mamanahin lang ng bata ang naresolbang `DATA_DIR`, `NODE_ENV`, tahasang `TZ` (legacy filename local-time resolution), `ELECTRON_RUN_AS_NODE` kapag naroroon, at ang mga sumusunod na papalabas na input: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (at ang kanilang mga lowercase na form), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Ang isang pandaigdigang dispatcher ng Undici ay nagbabahagi ng purong environment-proxy na resolution ng server at mga panuntunan sa bypass ng local-host, kabilang ang `NO_PROXY`; hindi ito nag-import `proxyFetch.ts` o mga DB/feature flag nito. Ang mga kredensyal ng proxy ay na-redact mula sa ipinasa na output at mga naitalang error. Ang mga kredensyal ng patutunguhan ay naglalakbay lamang sa isang simula IPC na mensahe, hindi kailanman argv o kapaligiran; output/error forwarding ay naka-prefix at na-sanitize. Ang `ExperimentalWarning` lang ang hindi pinagana sa mga child exec na argumento upang maiwasang maulit SQLite ng Node na nagbabala sa bawat cron run; nananatiling nakikita ang iba pang mga uri ng babala.
 
-Dapat ma-import ang mga module ng destinasyon nang walang mga dependency sa Next.js/server-only. Natutugunan na
-ng kasalukuyang implementasyon ng BigQuery ang kontratang iyon. Ang mga cache ng access token ay tumatagal lamang habang tumatakbo ang child process,
-hindi sa pagitan ng mga pagtakbo. Node ang sinusuportahang runtime (engines sa `package.json`), ngunit ang seksiyon ng README tungkol sa pag-install
-ng Bun at ang `Dockerfile.bun` ay nagsasaad din ng landas ng compatibility para sa production gamit ang
-`bun:sqlite` (`src/lib/db/core.ts` / mga adapter). Sa Bun, samakatuwid, pinananatili ng mga export ang dating
-in-process na paraan at naglalabas ng isang beses na babala: hindi available ang isolation ng heap/timeout sa child process. Gumamit ng
-Node para sa isolation ng event loop at OOM; hindi itinuturing na para lamang sa development ang Bun dito.
+Dapat na ma-import ang mga module ng patutunguhan nang walang mga dependency Next.js/server-only. Ang umiiral na pagpapatupad BigQuery ay nakakatugon na sa kontratang iyon. Ang mga access-token cache ay tatagal lamang para sa child run, hindi sa mga run. Ang node ay ang sinusuportahang runtime (`package.json` engines). May pinakamabuting pagsisikap, hindi sinusuportahang landas ng compatibility Bun (`bun:sqlite` sa `src/lib/db/core.ts` / adapters, at `Dockerfile.bun`), kaya hindi dapat masira ang mga pag-export sa ilalim nito. Sa ilalim ng Bun, pinapanatili ng mga pag-export ang nakaraang in-process na path at naglalabas ng isang beses na babala: hindi available ang child heap/timeout isolation. Gamitin ang Node para sa event-loop at OOM isolation.
 
-Kapag naka-enable ang `includeBodies`, mas mainam ang iskedyul na kada ilang minuto gaya ng
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` sa halip na mag-ipon ng backlog ng payload kada oras.
-Nililimitahan pa rin ng mga limitasyon sa batch at row ang bawat pagtakbo. May gastos sa pagsisimula ng process para sa bawat destinasyon sa bawat pagtakbo;
-ipinagpapalit nito ang maliit na gastos sa pagsisimula para sa isolation ng event loop ng server, hindi para mabawasan ang kabuuang paggamit ng CPU.
+Kapag naka-enable ang `includeBodies`, mas gusto ang isang minutong antas na cadence gaya ng `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` kaysa mag-ipon ng isang oras-oras na payload backlog. Ang mga limitasyon ng batch at row ay nakatali pa rin sa bawat pagtakbo. Ang proseso ng pagsisimula ay binabayaran sa bawat destinasyon sa bawat pagtakbo; nakikipagkalakalan ito ng maliit na gastos sa pagsisimula para sa paghihiwalay ng event-loop ng server, hindi binawasan ang kabuuang paggamit CPU.
 
-### Mga payload (mga prompt at completion)
+### Mga kargamento (prompt at pagkumpleto)
 
-Bilang default, ang export ay naglalaman lamang ng mga field ng buod na ipinapakita sa **listahan** ng Logs. Kapag in-on ang
-**I-export ang mga prompt at tugon** (`includeBodies`), ipinapadala rin ang ipinapakita ng pane ng **detalye**
-ng Logs para sa bawat tawag:
+Bilang default, ang pag-export ay nagdadala lamang ng mga field ng buod ng Mga Log** listahan** mga palabas. Naka-on** I-export ang mga prompt at tugon** (`includeBodies`) Bilang karagdagan, ipinapadala kung ano ang mga Log** detalye** lumalabas ang pane para sa bawat tawag:
 
-| Field                            | Nilalaman nito                                                        |
-| -------------------------------- | --------------------------------------------------------------------- |
-| `request_body` / `response_body` | Mga payload ng tawag ayon sa pagkaka-render ng dashboard              |
-| `pipeline_route_decision`        | Aling target at modelo ang pinili ng router                           |
-| `pipeline_client_request`        | Ang hilaw na request na eksaktong gaya ng ipinadala ng client         |
-| `pipeline_openai_request`        | Pagkatapos isalin sa panloob na format ng OpenAI                      |
-| `pipeline_provider_request`      | Gaya ng aktuwal na ipinadala sa upstream, sa format ng provider       |
-| `pipeline_provider_response`     | Ang hilaw na tugon mula sa upstream                                   |
-| `pipeline_client_response`       | Ang ibinalik sa tumawag                                               |
-| `pipeline_error`                 | Detalye ng error sa antas ng pipeline para sa nabigong tawag          |
-| `bodies_truncated`               | True kapag umabot sa `maxBodyBytes` ang alinman sa mga field sa itaas |
+| Patlang                          | Kung ano ang hawak nito                                                 |
+| -------------------------------- | ----------------------------------------------------------------------- |
+| `request_body` / `response_body` | Nag-load ang tawag habang nire-render sila ng dashboard                 |
+| `pipeline_route_decision`        | Aling target at modelo ang pinili ng router                             |
+| `pipeline_client_request`        | Ang hilaw na kahilingan ay eksakto kung paano ito ipinadala ng kliyente |
+| `pipeline_openai_request`        | Pagkatapos ng pagsasalin sa panloob na hugis OpenAI                     |
+| `pipeline_provider_request`      | Bilang aktwal na ipinadala sa itaas ng agos, sa diyalekto ng provider   |
+| `pipeline_provider_response`     | Ang hilaw na upstream na tugon                                          |
+| `pipeline_client_response`       | Ano ang ibinalik sa tumatawag                                           |
+| `pipeline_error`                 | Detalye ng error sa antas ng pipeline para sa isang nabigong tawag      |
+| `bodies_truncated`               | Tama kapag ang anumang field sa itaas ay tumama `maxBodyBytes`          |
 
-Nilalaman ito ng prompt, kaya **naka-off ito bilang default** at sadyang pinipili para sa bawat destinasyon.
-Ang ipinapadala ay ang ipinapakita ng dashboard, dahil magkapareho ang pag-resolve ng detalye ng export at `getCallLogById`:
-ang mga payload ay
-nalinis na ng PII at naitago na ang mga lihim sa oras na isulat ang mga ito, at ang tawag na ginawa gamit ang
-API key na `noLog` ay hindi nag-iimbak ng anumang payload, kaya walang ie-export.
+Ito ay mabilis na nilalaman, kaya ito ay** naka-off bilang default** at sadyang isang pagpipilian sa bawat destinasyon. Kung ano ang ipinapadala ay kung ano ang ipinapakita ng dashboard, dahil ang pag-export at `getCallLogById` ay nagbabahagi ng resolusyon ng detalye: ang mga payload ay nasa PII-sanitised na at sikretong-redacted kapag isinulat ang mga ito, at ang isang tawag na ginawa gamit ang `noLog` API key ay nag-iimbak ng walang payload, kaya wala nang mai-export.
 
-Binabasa ang mga payload para sa bawat row mula sa artifact sa filesystem, kaya isinasagawa lamang ang hydration para sa mga destinasyong
-humiling nito. Kapag nawawala o sira ang isang artifact, ine-export ang buod nito na may mga null na payload sa halip
-na mabigo ang batch at maiwang hindi umuusad ang cursor.
+Ang mga payload ay binabasa bawat hilera mula sa filesystem artifact, kaya ang hydration ay tumatakbo lamang para sa mga destinasyong humiling nito. Ang isang nawawala o corrupt na artifact ay nag-e-export ng buod nito na may mga null payload sa halip na mabigo ang batch at ma-stranding ang cursor.
 
-Nililimitahan ng `maxBodyBytes` (default na 262144) ang bawat field. Ang mas mahahabang payload ay **pinuputol sa halip na
-alisin** — nasasagot pa rin ng pinutol na prompt ang "ano ang itinanong" — at nilalagyan ang row ng flag na
-`bodies_truncated`. Hindi ine-export ang mga delta na ini-stream nang paisa-isang chunk; ang nabuong tugon ay
-nasa `pipeline_provider_response` at `pipeline_client_response` na.
+Nilalagay ng `maxBodyBytes` (default 262144) ang bawat field. Mas mahahabang payload** pinutol sa halip na nalaglag** — ang isang clipped prompt ay sumasagot pa rin ng "kung ano ang tinanong" — at ang row ay na-flag ng `bodies_truncated`. Ang mga naka-stream na chunk-by-chunk delta ay hindi na-export; ang pinagsama-samang tugon ay nasa `pipeline_provider_response` at `pipeline_client_response`.
 
 ---
 

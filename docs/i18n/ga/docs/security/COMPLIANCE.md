@@ -4,20 +4,11 @@
 
 ---
 
-> **Foinse údaráis:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Nuashonraithe go deireanach:** 2026-06-28 — v3.8.40
+> **Foinse na fírinne:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-Taifeadann OmniRoute gníomhartha riaracháin, teagmhais fíordheimhnithe, athruithe
-ar shaolré dhintiúir soláthraithe, agus agairtí uirlisí MCP i dtáblaí iniúchta
-le tacaíocht SQLite. Mínítear ar an leathanach seo cad a logáiltear, cá bhfuil
-sé stóráilte, cá fhad a choinnítear é, conas is féidir le heochracha API roghnú
-gan a bheith páirteach, agus conas na sonraí a cheistiú.
+Déanann OmniRoute taifead ar ghníomhartha riaracháin, imeachtaí fíordheimhnithe, athruithe ar shaolré creidiúnaithe an tsoláthraí, agus agairt uirlisí MCP chuig táblaí iniúchta le tacaíocht SQLite. Clúdaíonn an leathanach seo cad a logáiltear, cá bhfuil sé ina chónaí, cé chomh fada agus a choinnítear é, conas is féidir le heochracha API rogha an diúltaithe, agus conas na sonraí a fhiosrú.
 
-Tá an cur chun feidhme in `src/lib/compliance/index.ts` (T-43 — "Rialuithe
-Comhlíontachta") agus `src/lib/compliance/providerAudit.ts`. Ní chaitheann
-scríobhanna iniúchta eisceacht riamh: má tharlaíonn aon teip, slogtar an glao
-go ciúin ionas nach féidir le logáil iniúchta cur isteach ar phríomhshreabhadh
-na hiarrata.
+Maireann an cur i bhfeidhm i `src/lib/compliance/index.ts` (T-43 — "Rialuithe Comhlíonta") agus `src/lib/compliance/providerAudit.ts`. Ní scríobhann an t-iniúchadh ná caith riamh: má theipeann ar bith déantar an glao a shlogadh go ciúin mar sin ní féidir le logáil iniúchta an príomhshreabhadh iarratais a bhriseadh.
 
 ## Cad a Logáiltear
 
@@ -137,30 +128,33 @@ ar `POST /api/settings/purge-request-history`, rud a scriosann `call_logs`,
 Sainítear na réamhshocruithe in `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Díliostáil `noLog` (de réir eochair API)
+## `noLog` Opt-Out (in aghaidh an eochair API )
 
-Is féidir eochracha API a mharcáil ionas nach logáiltear a dtrácht glaonna iartheachtach. Tá an
-bhratach i dtábla `api_keys` (`no_log INTEGER DEFAULT 0`) agus déantar í a scáthánú
-i dtacar sa chuimhne le haghaidh cuardaigh ar an gconair the.
+Is féidir eochracha API a chur in iúl ionas nach mbeidh a dtrácht glaonna iartheachtacha logáilte isteach. Tá an bhratach ina chónaí ar an mbord `api_keys` (`no_log INTEGER DEFAULT 0`) agus tá sé léirithe i sraith cuimhneacháin le haghaidh cuardaigh te cosáin.
 
 ```bash
-# Cruthaigh eochair gan logáil (fíordheimhniú bainistíochta riachtanach)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Feidhmeanna cúnta (`src/lib/compliance/index.ts`):
+Cúntóirí (`src/lib/compliance/index.ts`) :
 
-- `setNoLog(apiKeyId, true|false)` — scoránaigh an iontráil sa chuimhne
-- `isNoLog(apiKeyId)` — seiceáiltear é ar chonair an iarratais; mura n-éiríonn leis sin, úsáidtear léamh
-  taiscthe 30 s ó `api_keys.no_log`
-- `NO_LOG_API_KEY_IDS` (athróg timpeallachta, scartha le camóga) — réamhlódáiltear isteach sa tacar sa chuimhne é
-  ag am tosaithe; úsáideach nuair nach féidir leat an colún a scoránú go díreach
+- `setNoLog(apiKeyId, true|false)` — scoránaigh an iontráil i gcuimhne
+- `isNoLog(apiKeyId)` — sheiceáil ar chonair an iarratais; ag titim siar go dtí léamh 30 s i dtaisce ó `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, camóg-scartha) — réamhluchtaithe isteach sa tacar cuimhneacháin ar tosaithe; úsáideach nuair nach féidir leat an colún a scor go díreach
 
-Ní dhéanann `noLog` difear do theagmhais iniúchta riaracháin (logáil isteach, athruithe soláthraí, glaonna uirlisí MCP, srl.) —
-ní dhíliostáiltear ach logáil tráchta de réir iarratais.
+Tá imeachtaí iniúchta riaracháin (logáil isteach, athruithe soláthraithe, glaonna uirlisí MCP, etc.).** nach bhfuil** a bhfuil tionchar ag `noLog` — uirthi ní dhiúltaítear ach logáil tráchta in aghaidh an iarratais.
+
+### Rogha an diúltaithe de réir iarratais (`x-omniroute-no-log`)
+
+Is féidir le cliant iarratas tátal amháin a roghnú as marthanacht pálasta gan eochair tiomnaithe a chruthú. Seol `x-omniroute-no-log: true` ar an iarratas (glactar le `1` agus `yes` freisin, cás-neamhíogair). Baineann sé le gach bealach comhrá-teaghlaigh a ritheann tríd an láimhseálaí comhrá: Críochnú Comhrá, Freagraí, Teachtaireachtaí, Críochnaithe agus an cosán Comhoiriúnach le Gemini. Tá an tsraith glao-logála fós scríofa lena stampa ama, samhail, soláthraí, stádas, fad agus comhaireamh comharthaí, ach fágtar ar lár `request_body`, `response_body`, achoimrí iarratais agus déantáin píblíne.
+
+Is é ORed an ceanntásc agus an bhratach eochrach: fanann eochair gan loga gan logáil beag beann ar an gceanntásc, agus ní féidir leis an gceanntásc logáil isteach d'eochair gan logáil a athchumasú. Baintear an ceanntásc sula gcuirtear an t-iarratas ar aghaidh in aghaidh an tsrutha.
+
+Déanann an ceanntásc seo** nach bhfuil** díchumasaigh eastóscadh Cuimhne nó an taisce shéimeantach. Seol `x-omniroute-no-memory: true` agus `x-omniroute-no-cache: true` taobh leis nuair nach féidir leis an iarratas leanúint ar aghaidh le hábhar sna fochórais sin ach an oiread.
 
 ## REST API
 

@@ -13,12 +13,12 @@ Agent Skills అనేవి బాహ్య ఏజెంట్లు, MCP క�
 
 ## అవలోకనం
 
-ఈ కేటలాగ్లో **45 Agent Skills** ఉన్నాయి (23 REST API + 21 CLI + 1 కాన్ఫిగరేషన్ వర్క్ఫ్లో). ప్రతి స్కిల్లో ఇవి ఉంటాయి:
+కేటలాగ్ కలిగి ఉంది** 45 ఏజెంట్ నైపుణ్యాలు** (23 REST API + 21 CLI + 1 కాన్ఫిగరేషన్ వర్క్ఫ్లో). ప్రతి నైపుణ్యం కలిగి ఉంటుంది:
 
-- ఒక **కానానికల్ ID** (`omni-auth`, `cli-serve` మొదలైనవి)
-- YAML ఫ్రంట్మ్యాటర్ (`name`, `description`) + సమగ్ర markdown బాడీతో కూడిన `skills/{id}/SKILL.md`లోని ఒక **SKILL.md** ఫైల్
-- OpenAPI స్పెక్ మరియు CLI రిజిస్ట్రీ నుండి ఉత్పన్నమైన **REST ఎండ్పాయింట్లు** (API స్కిల్స్) లేదా **CLI సబ్కమాండ్లు** (CLI స్కిల్స్)
-- ప్రత్యక్షంగా పొందడం కోసం ఒక **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ఎ** కానానికల్ ID** (`omni-auth`, `cli-serve`, మొదలైనవి)
+- ఎ**SKILL.md** YAML ఫ్రంట్మాటర్ (`name`, `description`) + రిచ్ మార్క్డౌన్ బాడీతో `skills/{id}/SKILL.md` లో ఫైల్ చేయండి
+- **REST ముగింపు పాయింట్లు** (API నైపుణ్యాలు) లేదా**CLI ఉపకమాండ్లు** (CLI నైపుణ్యాలు) OpenAPI స్పెక్ మరియు CLI రిజిస్ట్రీ నుండి తీసుకోబడ్డాయి
+- ఎ**GitHub ముడి URL** ప్రత్యక్షంగా పొందడం కోసం: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 

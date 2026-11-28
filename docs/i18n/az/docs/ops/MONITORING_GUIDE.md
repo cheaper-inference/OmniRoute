@@ -99,31 +99,31 @@ Hər kombinasiya üzrə:
 
 ---
 
-## Sağlamlıq Yoxlaması API-si
+## Sağlamlıq yoxlanışı API
 
-OmniRoute **iki** HTTP sağlamlıq səthi təqdim edir. Orkestratorlar üçün onlar bir-birini əvəz etmir.
+OmniRoute ifşa edir** iki** HTTP sağlamlıq səthləri. Onlar orkestrlər üçün əvəz edilə bilməz.
 
-| Yol                          | Məqsəd                                                           | Yük                                | İstifadə sahəsi                                                                   |
-| ---------------------------- | ---------------------------------------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------- |
-| `GET /healthz`               | Həyat dövrü canlılığı/hazırlığı (`ok` / `starting` / `stopping`) | Cüzi (yalnız mərhələ bayrağı)      | Kubernetes **hazırlığı**; HTTP istifadə etməlisinizsə, yumşaq **canlılıq**        |
-| `GET /api/monitoring/health` | Dərin sistem + provayder xülasəsi (DB, heap, kataloq sayları, …) | Ağır (sinxron DB / monitorinq işi) | İdarə panelləri, blackbox dərin yoxlamaları, Docker-in daxili sağlamlıq yoxlaması |
+| Yol                          | Məqsəd                                                                | Çəki                                      | üçün istifadə edin                                                            |
+| ---------------------------- | --------------------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
+| `GET /healthz`               | Həyat dövrü liveness/readiness (`ok` / `starting` / `stopping`)       | Önəmsiz (yalnız mərhələ bayrağı)          | Kubernetes** hazırlıq** ; yumşaq** canlılıq** HTTP istifadə etməlisinizsə     |
+| `GET /api/monitoring/health` | Dərin sistem + provayderinin xülasəsi (DB, yığın, kataloq sayları, …) | Ağır (sinxronizasiya DB / monitorinq işi) | Tablolar, qara qutunun dərin yoxlanışı, Docker-nın daxili sağlamlıq yoxlaması |
 
-> **Qeyd:** Provayder sağlamlıq matrisləri, autopilot problemləri, kvota monitorları, token sağlamlığı və `/api/monitoring/health` çərçivəsindən kənar gecikmə təfərrüatları **MCP aləti** `observability_snapshot` və ya **idarə paneli** səhifələri vasitəsilə əlçatandır — bunlar üçün ayrıca REST marşrutları yoxdur.
+> **Qeyd:** Provayderin sağlamlıq matrisləri, avtopilot məsələləri, kvota monitorları, token sağlamlığı və `/api/monitoring/health` kənar gecikmə təfərrüatları vasitəsilə əldə edilə bilər.**MCP aləti** `observability_snapshot` və ya** idarə paneli** pages — bunlar üçün xüsusi REST marşrutları yoxdur.
 
-Hər iki marşrut sorğuların emalı ilə **eyni Node hadisə dövrəsində** işləyir. CPU-yə bağlı yol (böyük `GET /v1/models` kataloq işi, uzun kontekstin sıxılması / tokenlərin sayılması) `/healthz` daxil olmaqla **bütün** HTTP emalçılarında gecikmə yarada bilər. Hadisə dövrəsinin məşğul olması ≠ prosesin dayanması. Yük yaradan səbəbi aradan qaldırmağa üstünlük verin; yoxlamanın tənzimlənməsi yalnız yanlış dayandırmaların sayını azaldır.
+Hər iki marşrut xətti üzərində işləyir** eyni Node hadisə döngəsi** sorğunun işlənməsi kimi. CPU ilə əlaqəli yol (böyük `GET /v1/models` kataloqu işi, uzun kontekstdə sıxılma / işarələrin hesablanması) gecikdirə bilər** hamısı** HTTP işləyiciləri, o cümlədən `/healthz`. Hadisə döngəsi məşğul ≠ prosesi bitdi. Donuzu düzəltməyə üstünlük verin; zond tənzimləməsi yalnız yalançı öldürmələri azaldır.
 
-### Yüngül orkestrator yoxlaması
+### Yüngül orkestr zondu
 
 ```bash
 GET /healthz
-# və ya HEAD /healthz
+# or HEAD /healthz
 ```
 
-- Serverin həyat dövrü mərhələsi hazır olduqda **200** + `ok` gövdəsi
-- Başlatma və ya dayandırma zamanı **503** + `starting` / `stopping`
-- Reallaşdırma: `src/app/healthz/route.ts` (DB ping-i yoxdur)
+- **200** serverin həyat dövrü mərhələsi hazır olduqda + body `ok`
+- **503** + `starting` / `stopping` açılış və ya bağlanma zamanı
+- İcra: `src/app/healthz/route.ts` ( DB ping yoxdur)
 
-### Sistem sağlamlığı (dərin)
+### Sistem Sağlamlığı (dərin)
 
 ```bash
 GET /api/monitoring/health
@@ -153,44 +153,35 @@ Cavab:
 }
 ```
 
-#### `credentialHealth`: yoxlama keşi və SQLite `test_status` müqayisəsi
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth`, `provider_connections.test_status` sahəsinin canlı çıxarışı deyil, **yaddaşdaxili yoxlama keşi
-göstəricisidir**. #12532-dən sonra sorğu yolu yalnız
-`getCachedCredentialHealthSummary()` funksiyasını oxuyur; fon yoxlamaları keşi
-hadisə dövrəsindən kənarda yeniləyir.
+`GET /api/monitoring/health` → `credentialHealth` edir** yaddaşdaxili prob-keş ölçmə cihazı** , `provider_connections.test_status` canlı dump deyil . #12532 dən sonra sorğu yolu yalnız `getCachedCredentialHealthSummary()` oxuyur; fon zondları hadisə dövrəsindən kənar yaddaşı təzələyir.
 
-| Səviyyə                     | Yer                                                                   | Mənası                                                                                                                                                                                                                          |
-| --------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Yoxlama keşi göstəricisi    | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Proses yaddaşında hələ də saxlanılan son etimadnamə sağlamlığı yoxlamalarının nəticələri. `source` həmişə `probe-cache` olur.                                                                                                   |
-| Uğursuz bağlantı təfərrüatı | `credentialHealth.failedConnections`                                  | **Yalnız `failed > 0` olduqda** mövcuddur. `status=error` olan keş sətirlərinin məhdud siyahısı (`connectionId`, `status`, təmizlənmiş `lastError` / `lastErrorType`). Siyahı məhdudlaşdırıldıqda `failedOmitted` təyin edilir. |
-| SQLite sabit statusu        | `credentialHealth.staleDbNonOkCount`                                  | Saxlanılan `test_status` dəyəri məlum qeyri-normal statuslardan biri (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`) olan **aktiv** (`is_active=1`) bağlantı sətirlərinin sayı.               |
+| Qat                    | Harada                                                                | Nə deməkdir                                                                                                                                                                                                               |
+| ---------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Zond-keş ölçer         | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Son etimadnamə-sağlamlıq araşdırması nəticələri hələ də proses yaddaşında saxlanılır. `source` həmişə `probe-cache`.                                                                                                      |
+| Uğursuz əlaqə detalı   | `credentialHealth.failedConnections`                                  | təqdim** yalnız `failed > 0` olduqda** . `status=error` (`connectionId`, `status`, təmizlənmiş `lastError` / `lastErrorType`) ilə keş sətirlərinin məhdud siyahısı. `failedOmitted` siyahıya son qoyulduqda təyin edilir. |
+| SQLite yapışqan status | `credentialHealth.staleDbNonOkCount`                                  | sayı** aktiv** (`is_active=1`) davamlı `test_status` qeyri-ok (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`) olan əlaqə sıraları.                                                      |
 
-Bu iki səviyyə məqsədli şəkildə fərqlənə bilər:
+İki təbəqə məqsədlə razılaşa bilməz:
 
-- `staleDbNonOkCount>0` olduğu halda göstəricidə `failed=0` — SQLite-da hələ də
-  son yoxlama keşi görüntüsünün `status=error` kimi hesablamadığı sabit
-  `test_status` (məsələn, `expired` və ya `credits_exhausted`) mövcuddur.
-- SQLite sağlam göründüyü halda göstəricidə `failed>0` — son yoxlama uğursuz olub və
-  keşlənib; DB sətri yenilənməyib və ya daha sonra təmizlənib.
+- `staleDbNonOkCount>0` — SQLite hələ də yapışqan `test_status` (məsələn `expired` və ya `credits_exhausted`) olduğu halda `failed=0` ölçün, ən son prob-keş snapshot `status=error` kimi sayılmır.
+- SQLite sağlam göründüyü halda `failed>0` ölçün — son zond uğursuz oldu və keşləndi; DB cərgəsi yenilənməyib və ya sonradan silinib.
 
-Bu son nöqtədən məlumat toplayarkən yalnız `provider_connections.test_status`
-əsasında xəbərdarlıq yaratmayın. Canlı yoxlama uğursuzluqları üçün `failed` +
-`failedConnections`, saxlanılan sabit statusların sayı lazım olduqda isə
-`staleDbNonOkCount` istifadə edin.
+Bu son nöqtəni qırarkən yalnız `provider_connections.test_status` ilə bağlı xəbərdarlıq etməyin. Canlı zond uğursuzluqları üçün `failed` + `failedConnections` və davamlı yapışqan status sayına ehtiyacınız olduqda `staleDbNonOkCount` istifadə edin.
 
-### Kubernetes yoxlaması üçün tövsiyələr
+### Kubernetes araşdırma tövsiyələri
 
-OmniRoute **vahid Node prosesidir** (bir hadisə dövrəsi). Standart Docker `HEALTHCHECK` yüngül `/healthz` marşrutunu hədəfləyir. `/api/monitoring/health` kubelet canlılıq intervalları üçün **həddindən artıq ağırdır**.
+OmniRoute a** tək Node prosesi** (bir hadisə dövrü). Fond Docker `HEALTHCHECK` yüngül `/healthz` hədəfləyir. `/api/monitoring/health` edir** çox ağır** kubelet canlılıq intervalları üçün.
 
-| Yoxlama             | Tövsiyə olunan hədəf                                                            | Qeydlər                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Başlanğıc**       | Uzun `failureThreshold` (və ya böyük `startPeriod`) ilə HTTP `GET /healthz`     | Soyuq başlanğıc + SQLite miqrasiyası bir neçə saniyədən çox çəkə bilər                                                                                                                                                                                                                                                                                                                                             |
-| **Hazırlıq**        | HTTP `GET /healthz`                                                             | Həyat dövrü `ok` / `starting` / `stopping` (200 və ya 503). Dövr CPU tərəfindən bloklanarsa, vəziyyət yenə də tez-tez dəyişir. **Bir neçə saniyəyə gələn 200 sağlamlıq göstəricisi deyil** (#10303) — bu, 3 baytlıq emalçı işə düşməzdən əvvəl hadisə dövrəsinin resurs çatışmazlığı yaşadığını göstərir                                                                                                           |
-| **Canlılıq**        | HTTP `GET /livez` **və ya** əsas xidmət portunda TCP (`PORT`, standart `20128`) | `/livez` yalnız prosesin işlək olduğunu göstərir (emalçı işləyərsə, həmişə 200 qaytarır). O, yenə də eyni hadisə dövrəsindən istifadə edir — məşğul ≠ ölü və hadisə dövrəsinin resurs çatışmazlığını (#10303) TCP-dən daha yaxşı aşkarlamır. Kataloq/sıxılma yükü altında HTTP yoxlamalarının vaxtı bitirsə, **TCP**-yə üstünlük verin; hər iki halda qısa hadisə dövrəsi dayanmasına görə pod-u **dayandırmayın** |
-| **Dərin sağlamlıq** | Xarici yoxlayıcıdan `GET /api/monitoring/health`                                | kubelet `livenessProbe` / sərt `readinessProbe` üçün deyil                                                                                                                                                                                                                                                                                                                                                         |
+| Prob                | Tövsiyə olunan hədəf                                                            | Qeydlər                                                                                                                                                                                                                                                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Başlanğıc**       | uzun `failureThreshold` (və ya böyük `startPeriod`) ilə HTTP `GET /healthz`     | Soyuq başlanğıc + SQLite miqrasiyası bir neçə saniyədən çox ola bilər                                                                                                                                                                                                                                                                     |
+| **Hazırlıq**        | HTTP `GET /healthz`                                                             | Həyat dövrü `ok` / `starting` / `stopping` (200 vs 503). Döngə CPU tərəfindən bloklanırsa, yenə də çırpılır. A** Bir neçə saniyədə 200 sağlam deyil** (#10303) — o deməkdir ki, 3 baytlıq işləyici işə düşməmişdən əvvəl hadisə dövrəsi ac qalmışdır                                                                                      |
+| **Canlılıq**        | HTTP `GET /livez`,** və ya TCP** əsas xidmət portunda (`PORT`, default `20128`) | `/livez` yalnız prosesdədir (işləyici işləyirsə həmişə 200). O, hələ də — busy ≠ dead hadisə döngəsini paylaşır və hadisə döngəsinin aclığını (#10303) TCP dən daha yaxşı aşkar etmir. üstünlük verin**TCP** HTTP probları catalog/compression yükü altında vaxt aşıbsa; et** yox** hər iki şəkildə qısa hadisə döngələrində podu öldürün |
+| **Dərin sağlamlıq** | xarici yoxlayıcıdan `GET /api/monitoring/health`                                | Kubelet `livenessProbe` / sıx `readinessProbe` üçün deyil                                                                                                                                                                                                                                                                                 |
 
-Nümunə struktur (hədləri soyuq başlanğıc və sıxılma yükünüzə uyğunlaşdırın):
+Nümunə forma (soyuq başlanğıc və sıxılma yükünə hədləri tənzimləyin):
 
 ```yaml
 ports:
@@ -216,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Hadisə dövrəsi dayandıqda HTTP /livez üçün də vaxt bitə bilər. TCP
-  # daha konservativ alternativdir:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-kubelet **canlılıq** yoxlamasını `/api/monitoring/health` ünvanına **yönəltməyin**. Bu yol real DB/monitorinq işi görür və yük altında yanlış müsbət nəticə verəcək.
+**etməyin** nöqtə kubelet** canlılıq** `/api/monitoring/health`. Bu yol real DB/monitoring işləyir və yük altında yanlış müsbət olacaq.
 
-Əlaqəli: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (hadisə dövrəsi məşğul olarkən yoxlamalar), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (kataloq qiymətləndirməsinin resursları zəbt etməsi), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (sıxılma üçün token sayımının resursları zəbt etməsi).
+Əlaqədar: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (hadisə dövrəsi məşğul olarkən zondlar), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (kataloq qiymətləri), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (sıxılma işarəsi sayının hesablanması).
 
-### systemd nəzarətçisi (donmuş hadisə dövrəsi)
+### systemd watchdog (dondurulmuş hadisə dövrəsi)
 
-systemd hostunda OmniRoute hazır olduqda bunu xidmət menecerinə bildirir və ona müntəzəm siqnallar göndərir; beləliklə, hadisə dövrəsi ilişib qalmış server işlək və səssiz qalmaq əvəzinə dayandırılıb yenidən başladılır. Siqnallar serverin öz hadisə dövrəsindən gəlir: dövrə bloklandıqda siqnallar dayanır və `WatchdogSec` müddəti ərzində heç bir siqnal alınmazsa, systemd xidməti yenidən başladır.
+Sistemli hostda OmniRoute xidmət menecerinə hazır olduqda xəbər verir və onu pingləməyə davam edir, beləliklə, hadisə dövrəsi ilişib qalan server ayağa qalxıb susmaq əvəzinə öldürülür və yenidən işə salınır. Pinqlər serverin öz hadisə döngəsindən gəlir: bloklayanda onlar dayanır və `WatchdogSec` bitdikdən sonra systemd xidməti yenidən işə salır.
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) artıq bu parametrlərlə istifadəçi vahidi yaradır. Özünüz yaratdığınız vahiddə (standart `Type=simple`) nəzarətçi olmur, buna görə onun `[Service]` bölməsinə bu sətirləri əlavə edin:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) bununla artıq istifadəçi vahidi yazır. Özünüz yazdığınız vahid (standart `Type=simple`) heç bir nəzarətçi almır, ona görə də onun `[Service]` bölməsinə bu sətirləri əlavə edin:
 
 ```ini
 [Service]
@@ -240,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-Yaradılan vahid `Restart=on-failure` parametrini təyin edir, ona görə həmin sətri də əlavə edin — bu parametr olmadan nəzarətçi ilişib qalmış xidməti yenidən başlatmaq əvəzinə yalnız dayandırır.
+Yaradılan vahid `Restart=on-failure` təyin edir, ona görə də bu xətti əlavə edin və — onsuz da nəzarətçi onu yenidən işə salmaq əvəzinə sadəcə yapışmış xidməti öldürür.
 
-- `Type=notify`: proses fork edildikdə deyil, server `READY=1` göndərdikdə xidmət "başladılmış" sayılır. `TimeoutStartSec` ləng başlanğıcı məhdudlaşdırır.
-- `NotifyAccess=all`: siqnallar `omniroute serve` nəzarətçisinin törəmə prosesi olan server prosesi tərəfindən göndərilir.
-- `WatchdogSec`: siqnallar hər 60 saniyədən bir göndərilir, buna görə **120 və ya daha çox** istifadə edin. Daha kiçik dəyərlər sağlam serveri yenidən başladardı.
-- `omniroute serve` əmrini ön planda işlədin. `--daemon` serveri vahidin cgroup-undan ayırır və bildiriş razılaşması heç vaxt tamamlanmır.
+- `Type=notify`: xidmət server `READY=1` göndərdikdə "başlanır", proses çəngəlləndikdə deyil. `TimeoutStartSec` yavaş başlanğıcı məhdudlaşdırır.
+- `NotifyAccess=all`: pinglər `omniroute serve` nəzarətçisinin övladı olan server prosesi tərəfindən göndərilir.
+- `WatchdogSec`: pinglər hər 60 saniyədən bir sönür, ona görə də istifadə edin** 120 və ya daha çox** . Daha kiçik dəyərlər sağlam serveri yenidən işə salacaq.
+- Ön planda `omniroute serve` işə salın. `--daemon` serveri bölmənin qruplarından ayırır və bildiriş əl sıxması heç vaxt tamamlanmır.
 
-Yenidən başladıqdan sonra onun aktiv olduğunu yoxlayın:
+Yenidən başladıqdan sonra onun aktiv olub olmadığını yoxlayın:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` konfiqurasiya edilmiş gecikməni göstərir və `WatchdogTimestamp` hər dəqiqə irəliləyir. Nəzarətçinin səbəb olduğu yenidən başlatma `Result=watchdog` kimi qeydə alınır. Vahidi olduğu kimi saxlayaraq siqnalları söndürmək üçün `OMNIROUTE_DISABLE_SD_NOTIFY=1` təyin edin; `NOTIFY_SOCKET` olmadıqda (terminal, Docker, Electron, Windows) heç nə göndərilmir.
+`WatchdogUSec` konfiqurasiya edilmiş gecikməni göstərir və `WatchdogTimestamp` hər dəqiqə irəliləyir. Gözətçi iti tərəfindən yenidən işə salınma `Result=watchdog` olaraq qeyd olunur. Cihazı olduğu kimi saxlayarkən pingləri söndürmək üçün `OMNIROUTE_DISABLE_SD_NOTIFY=1` seçin; `NOTIFY_SOCKET` olmadan (terminal, Docker, Electron, Windows) heç nə göndərilmir.
 
-Nəzarətçi yalnız hadisə dövrəsinin işləməyə davam etdiyini yoxlayır. Ləng işləyən, lakin hələ də dövr etməyə davam edən server yenidən başladılmır.
+Gözətçi yalnız hadisə dövrəsinin işləməyə davam etdiyini yoxlayır. Yavaş işləyən, lakin yenə də dönən server yenidən işə salınmayıb.
 
-### Sorğu yolunda əlavə işlər (yaddaş, bacarıqlar, token yeniləməsi)
+### İsteğe bağlı sorğu yolu işi (yaddaş, bacarıqlar, token yeniləməsi)
 
-Yaddaşın çıxarılması, bacarıqların yeridilməsi və OAuth tokeninin yenilənməsi `/healthz` ilə eyni **əsas Node hadisə dövrəsini** paylaşır. Bunlar işçi hovuzu deyil, idarəetmə panelindən aktivləşdirilib-deaktivləşdirilən funksiyalardır (`memoryEnabled`, `skillsEnabled`). Baxın: [Mühit — hadisə dövrəsi xərci](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Yaddaşın çıxarılması, bacarıqların inyeksiyası və OAuth tokeninin yenilənməsi paylaşılır** əsas Node hadisə dövrəsi** `/healthz` ilə. Onlar işçi hovuzu deyil, tablosuna keçid funksiyalarıdır (`memoryEnabled`, `skillsEnabled`). [Ətraf mühit — hadisə dövriyyəsi dəyərinə](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349) baxın.
 
-### Provayderin vəziyyəti
+### Provayder Sağlamlığı
 
-> **REST son nöqtəsi yoxdur.** Provayderin vəziyyəti haqqında məlumatlara MCP aləti `observability_snapshot` və ya idarəetmə panelindəki `/dashboard/providers` səhifəsi vasitəsilə baxmaq olar.
+> **REST son nöqtəsi yoxdur.** Provayderin sağlamlıq məlumatları MCP aləti `observability_snapshot` və ya idarə paneli `/dashboard/providers` səhifəsi vasitəsilə əldə edilə bilər.
 
-### Provayder təfərrüatları
+### Provayder Təfərrüatı
 
-> **REST son nöqtəsi yoxdur.** Hər bir provayder üzrə təfərrüatlara idarəetmə panelindəki `/dashboard/providers` səhifəsi vasitəsilə baxmaq olar.
+> **REST son nöqtəsi yoxdur.** Hər provayder təfərrüatını tablosuna `/dashboard/providers` səhifəsindən əldə etmək olar.
 
 ---
 

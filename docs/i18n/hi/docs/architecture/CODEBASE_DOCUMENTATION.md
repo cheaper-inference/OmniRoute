@@ -4,18 +4,11 @@
 
 ---
 
-> **संस्करण:** v3.8.51
-> **अंतिम अपडेट:** 2026-06-28
-> **लक्षित पाठक:** OmniRoute में योगदान करने वाले या इसके ऊपर इंटीग्रेशन बनाने वाले इंजीनियर।
+> **संस्करण:** v3.8.51** श्रोता:** इंजीनियर OmniRoute में योगदान दे रहे हैं या इसके शीर्ष पर एकीकरण का निर्माण कर रहे हैं।
 >
-> उच्च-स्तरीय आर्किटेक्चर आरेखों और प्रत्येक सबसिस्टम के पीछे के तर्क के लिए,
-> [ARCHITECTURE.md](./ARCHITECTURE.md) पढ़ें। अलग-अलग सबसिस्टम पर गहन जानकारी के लिए
-> (Auto Combo, MCP सर्वर, A2A सर्वर, Skills, Memory, Cloud Agents, Resilience,
-> Compression आदि), इस `docs/` डायरेक्टरी में उनकी समर्पित फ़ाइलें देखें।
+> उच्च-स्तरीय वास्तुकला आरेखों और प्रत्येक उपप्रणाली के पीछे के तर्क के लिए, [ARCHITECTURE.md](./ARCHITECTURE.md) पढ़ें। अलग-अलग सबसिस्टम (ऑटो कॉम्बो, MCP सर्वर, A2A सर्वर, कौशल, मेमोरी, क्लाउड एजेंट, लचीलापन, संपीड़न, आदि) पर गहन जानकारी के लिए इस `docs/` निर्देशिका में उनकी समर्पित फ़ाइलें देखें।
 
-यह फ़ाइल बताती है कि **आज रिपॉज़िटरी में क्या मौजूद है**, ताकि कोई नया इंजीनियर
-ट्री में नेविगेट कर सके, रनटाइम लेयरिंग को समझ सके, और नए मॉड्यूल बनाए बिना यह जान सके
-कि कोड कहाँ जोड़ना है।
+यह फ़ाइल वर्णन करती है** आज भंडार में क्या मौजूद है** ताकि एक नया इंजीनियर ट्री को नेविगेट कर सके, रनटाइम लेयरिंग को समझ सके, और जान सके कि नए मॉड्यूल का आविष्कार किए बिना कोड कहां जोड़ना है।
 
 ---
 
@@ -568,33 +561,12 @@ bin/
 
 उद्देश्य के अनुसार 6 उपफ़ोल्डरों में व्यवस्थित।
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`।
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, साथ ही केवल-पढ़ने योग्य PR निगरानी सहायक
-  `ci-discriminate.sh` (किसी संदर्भ PR या base-red समस्या के सापेक्ष किसी PR के विफल-जाँच हस्ताक्षरों को स्वयं के / विरासत में मिले /
-  अज्ञात में वर्गीकृत करता है) और `audit-worktree.sh`
-  (अशुद्ध फ़ाइलें, संरक्षित सतहें, हटाए गए assertions, suppression की संख्याएँ, शेष
-  अस्थायी tsconfigs, PR head बनाम स्थानीय HEAD — किसी worker का PR स्वीकार किए जाने से पहले)।
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`।
-- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`।
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`।
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`।
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, प्लस रीड-ओनली PR बेबीसिटिंग हेल्पर्स `ci-discriminate.sh` (एक PR के फेलिंग-चेक हस्ताक्षरों को सॉर्ट करता है किसी संदर्भ PR या आधार-लाल मुद्दे के विरुद्ध अपना / विरासत में मिला / अज्ञात) और `audit-worktree.sh` (गंदी फ़ाइलें, संरक्षित सतहें, हटाए गए दावे, दमन गणना, बचे हुए tmp tsconfigs, PR सिर बनाम स्थानीय HEAD — एक कार्यकर्ता के PR स्वीकार किए जाने से पहले)।
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`। `check-deprecated-versions.mjs` फ़्लैग संस्करण स्पष्ट रूप से OmniRoute (3.6.x और इससे पहले) के लिए जिम्मेदार हैं। चेक तारीखों को नजरअंदाज करता है।
+- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

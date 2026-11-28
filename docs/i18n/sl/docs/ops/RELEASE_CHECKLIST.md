@@ -4,12 +4,9 @@
 
 ---
 
-> **Zadnja posodobitev:** 2026-08-28 — v3.8.51
-> Poenostavljen postopek izdaje, ki za avtomatizacijo uporablja veščine Claude Code.
+> Poenostavljen tok izdaje, ki izkorišča spretnosti kode Claude za avtomatizacijo.
 >
-> **Med izdajami ohranjajte čakalno vrsto/vejo v zelenem stanju:** glejte [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (družina `/green-prs` + `npm run check:release-green` + `/babysit` + nočno izvajanje). Redno izvajanje
-> tega postopka — še posebej **pred** uporabo tega kontrolnega seznama — zagotovi, da se PR za izdajo začne v zelenem stanju.
+> **Naj bo queue/branch zelena med izdajami:** glejte [RELEASE_GREEN.md](./RELEASE_GREEN.md) ( družina `/green-prs` + `npm run check:release-green` + `/babysit` + vsak večer). Občasno zagon tega — in še posebej** prej** ta kontrolni seznam — poskrbi, da se izdaja PR začne zeleno.
 
 ## Na kratko
 
@@ -58,9 +55,11 @@ Potek dela npm-publish ne objavlja več neposredno: zažene zapakirano arhivsko 
 
 **Priročnik z zlomljenimi artefakti (nespremenjen):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` kot privzeti refleks (minute, reverzibilen); `npm unpublish` samo znotraj okna 72h/no-dependents in nikoli kot prva poteza. Docker: nikoli ne prepišite oznake različice — rollback ponovno kaže `latest` na zadnji dober izvleček.
 
-**Docker Hub `latest` (potreben pri vsaki stabilni objavi SemVer ):** potek dela `docker-publish` mora označiti** oboje** `X.Y.Z` in, ko se `should-promote-latest.sh` strinja, je to najvišja stabilna SemVer, `:latest` z** isti digest** . Po opravilu: Hub `latest` digest je enak novemu SemVer digestu in `last_updated` premaknjen. Ne pustite `:latest` na starejši zgradbi, medtem ko opombe ob izdaji govorijo o popravkih, ki obstajajo samo na git-u. Hitri začetki za sestavljanje uporabite `:latest`; GitOps bi moral še naprej pripenjati `X.Y.Z`. Oglejte si [kanale za izdajo Docker](../guides/DOCKER_GUIDE.md#release-channels) in #10317.
+**Docker Hub `latest` (potreben pri vsaki stabilni objavi SemVer ):** potek dela `docker-publish` mora označiti** oboje** `X.Y.Z` in, ko se `should-promote-latest.sh` strinja, je to najvišja stabilna SemVer, `:latest` z** isti digest** . Po opravilu: Hub `latest` digest je enak novemu SemVer digestu in `last_updated` premaknjen. Ne pustite `:latest` na starejši gradnji, medtem ko opombe ob izdaji govorijo o popravkih, ki obstajajo samo na git-u. Hitri začetki za sestavljanje uporabite `:latest`; GitOps bi moral še naprej pripenjati `X.Y.Z`. Oglejte si [kanale za izdajo Docker](../guides/DOCKER_GUIDE.md#release-channels) in #10317.
 
-**Docker Hub organization repository (`cheaperinference/omniroute`):** Docker Hub cannot move a repository between namespaces, so `diegosouzapw/omniroute` keeps its pull history and every release, and the `mirror-org-dockerhub` job of `docker-publish` copies each released version (and `:latest` when promoted) from `ghcr.io/cheaper-inference/omniroute` to the organization repository. It needs the `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` secrets; without them the job stays green with a "Docker Hub org mirror skipped" warning and the other registries publish normally. To publish a released version there later, run **Actions → Mirror Docker image to the Docker Hub org → Run workflow** with `version=X.Y.Z` (and `promote_latest` for the highest stable version): it copies the existing images, no rebuild.
+**Repozitorij organizacije Docker Hub (`cheaperinference/omniroute`):** Središče Docker ne more premikati repozitorija med imenskimi prostori, zato `diegosouzapw/omniroute` hrani svojo zgodovino vlekov in vsako izdajo, opravilo `mirror-org-dockerhub` `docker-publish` pa kopira vsako izdano različico (in `:latest` ko je povišan) iz `ghcr.io/cheaper-inference/omniroute` v repozitorij organizacije. Potrebuje skrivnosti `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; brez njih ostane opravilo zeleno z opozorilom "Docker Hub org mirror skipped" in drugi registri objavljajo normalno. Če želite tam pozneje objaviti izdano različico, zaženite** Dejanja → Zrcaljenje slike Docker v Docker Hub org → Run workflow** z `version=X.Y.Z` (in `promote_latest` za najvišjo stabilno različico): kopira obstoječe slike, brez ponovne gradnje. Pregled Docker Hub tega repozitorija je nastavljen ročno: API, ki ga ureja, zavrača žetone za dostop organizacije.
+
+Isti potek dela tudi kopira vsako izdajo v podedovani paket GHCR `ghcr.io/diegosouzapw/omniroute` do 30. junija 2027, tako da se namestitve, ki so še vedno pripete nanj, posodabljajo; njegov indeks nosi opis "premaknjeno v `ghcr.io/cheaper-inference/omniroute`". Potrebuje skrivnost `GHCR_LEGACY_TOKEN` (klasičen žeton osebnega dostopa `diegosouzapw` z `write:packages`); brez njega to opravilo preskoči z opozorilom "Legacy GHCR mirror skipped".
 
 ## Hitra pot za nujne popravke (oznaka `hotfix`)
 
@@ -133,7 +132,7 @@ preskočijo matriko E2E brez kakršne koli oznake.
 Husky kljuke živijo v `.husky/` in se samodejno izvajajo pri operacijah git.
 
 - **vnaprej zavezati:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **predhodni pritisk:** hitra deterministična vrata — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktivirana 2026-06-13). Namerno izključuje `test:unit` (počasen; zajet z opravilom CI `test-unit` ).
+- **predhodni pritisk:** hitra deterministična vrata — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktivirana 2026-06-13). Namenoma izključuje `test:unit` (počasen; pokriva opravilo CI `test-unit` ).
   - Zaženite `npm run test:unit` ročno, preden potisnete sprostitvene veje.
 
 Če kavelj ne uspe: odpravite osnovno težavo, ne obidite z `--no-verify`.
@@ -146,12 +145,12 @@ Vse objave, vezane na izdajo, morajo slediti formatu `type(scope): subject`.
 
 **Veljavni obsegi:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-Prelomne spremembe: dodajte nogo `BREAKING CHANGE:` ali `!` za obseg (npr. `feat(api)!: drop /v0`).
+Ključne spremembe: dodajte nogo `BREAKING CHANGE:` ali `!` za obseg (npr. `feat(api)!: drop /v0`).
 
 ### Dokumentacija
 
 - [ ] `npm run check:docs-sync` prehaja (samodejni zagon s predhodno potrditvijo)
-- [ ] `npm run check:docs-all` prehaja (dežnik: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` prehaja. Njegov svetovalni `check:deprecated-versions` označuje različice, ki so izrecno pripisane OmniRoute (3.6.x in starejši), in ignorira datume.
 - [ ] `npm run check:env-doc-sync` izhodi 0 koda — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env pogodba je nedotaknjena
 - [ ] `npm run check:doc-links` izhodi 0 — brez pokvarjenih notranjih referenc znižanja po prestrukturiranju
 - [ ] `docs/architecture/ARCHITECTURE.md` pregledan za storage/runtime drift
@@ -160,7 +159,7 @@ Prelomne spremembe: dodajte nogo `BREAKING CHANGE:` ali `!` za obseg (npr. `feat
 - [ ] Če ima nova funkcija UI: `docs/guides/USER_GUIDE.md` jo omenja
 - [ ] Če ima nova funkcija API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml`
 - [ ] Če je nova funkcija modul: namenski `docs/<MODULE>.md` obstaja
-- [ ] Če se sprememba prekine: `docs/guides/TROUBLESHOOTING.md` ima opombo o selitvi
+- [ ] Če se sprememba pokvari: `docs/guides/TROUBLESHOOTING.md` ima opombo o selitvi
 
 ### i18n
 
@@ -399,11 +398,11 @@ Razvijanje bump commit je zgrajeno z git plumbing (nobenega delujočega drevesa 
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Zagon izvede `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, zapakira tarball, zažene `npm run check:pack-boot` (lažne skrivnosti, imenik kratkotrajnih podatkov), ponovno zapakira in ne uspe, razen če je povzetek identičen, nato zabeleži `artifact-identity.json` (glava SHA, osnova SHA, zgoščena datoteka ključavnice, platforma, arch, vozlišče ABI, povezovalnik, pravilnik gradnje — `scripts/release/artifact-identity.mjs`) in potrdi tarball v ločenem opravilu. Spodbujanje predogleda pomeni namestitev tega arhiva: nikoli ne zgradite znova iz izvorne kode.
+Zagon izvede `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, zapakira tarball, zažene `npm run check:pack-boot` (lažne skrivnosti, imenik kratkotrajnih podatkov), ponovno zapakira in ne uspe, razen če je povzetek identičen, nato zabeleži `artifact-identity.json` (glava SHA, osnova SHA, zgoščena datoteka ključavnice, platforma, arch, vozlišče ABI, povezovalnik, politika gradnje — `scripts/release/artifact-identity.mjs`) in potrdi tarball v ločenem opravilu. Spodbujanje predogleda pomeni namestitev tega arhiva: nikoli ne zgradite znova iz izvorne kode.
 
 ### Rez (3.9.0, po GO)
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **সত্যের উত্স:** `electron/` কর্মক্ষেত্র** সর্বশেষ আপডেট:** 2026-06-28 — v3.8.40
+> **সত্যের উত্স:** `electron/` কর্মক্ষেত্র
 
 OmniRoute একটি ক্রস-প্ল্যাটফর্ম ডেস্কটপ অ্যাপ (Windows / macOS / Linux) তৈরি করে**Electron 41** +** ইলেক্ট্রন-বিল্ডার 26.10** . ডেস্কটপ অ্যাপটি একটি শিশু প্রক্রিয়া হিসাবে Next.js স্ট্যান্ডঅ্যালোন সার্ভার তৈরি করে, এটিতে একটি `BrowserWindow` নির্দেশ করে এবং একটি সিস্টেম ট্রে, অটো-আপডেটার, IPC ব্রিজ এবং জিরো-কনফিগ গোপন বুটস্ট্র্যাপ যোগ করে।
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## স্বয়ংক্রিয় আপডেট
 
-GitHub প্রদানকারীর সাথে `electron-updater` ব্যবহার করে (`diegosouzapw/OmniRoute`)।
+GitHub প্রদানকারীর সাথে `electron-updater` ব্যবহার করে (`cheaper-inference/OmniRoute`)।
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC এর মাধ্যমে রেন্ডারারের কাছে ইভেন্ট ফরওয়ার্ড করা হয়েছে : `checking`, `available`, `not-available`, `downloading` ( `percent` সহ ), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage স্বাক্ষর হল ঐচ্ছিক — সেট `LINUX
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-রিলিজগুলি GitHub রিলিজে প্রকাশিত হয় (`diegosouzapw/OmniRoute`), যেখানে `electron-updater` নতুন সংস্করণের জন্য পরীক্ষা করে।
+রিলিজগুলি GitHub রিলিজে প্রকাশিত হয় (`cheaper-inference/OmniRoute`), যেখানে `electron-updater` নতুন সংস্করণের জন্য পরীক্ষা করে।
 
 ## সমস্যা সমাধান
 

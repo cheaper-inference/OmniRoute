@@ -168,9 +168,9 @@ Microsoft 365 प्रदाता मध्ये** कनेक्शन ज�
 
 ## संदर्भ
 
-- समस्या: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- चर्चा: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- स्रोत: `src/shared/constants/providers/web-cookie.ts` (प्रदात्याची व्याख्या)
+- समस्या: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- चर्चा: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- स्रोत: `src/shared/constants/providers/web-cookie.ts` (प्रदाता व्याख्या)
 - HAR आयात: `src/shared/utils/m365HarImport.ts`
-- क्रेडेन्शियल फील्ड्स: `src/shared/providers/webSessionCredentials.ts`
-- टिअर मोडल: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- क्रेडेंशियल फील्ड: `src/shared/providers/webSessionCredentials.ts`
+- टियर मॉडेल: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

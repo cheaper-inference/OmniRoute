@@ -4,9 +4,9 @@
 
 ---
 
-> **Cái gì tồn tại ở đâu: mọi thư mục cấp cao nhất và tệp gốc được theo dõi, với mục đích một dòng.** Cập nhật lần cuối: 2026-11-13 (OmniRoute v3.8.54)
+> **Cái gì tồn tại ở đâu: mọi thư mục cấp cao nhất và tệp gốc được theo dõi, với mục đích một dòng.**
 >
-> Sử dụng bản đồ này để tìm đường đi trong cơ sở mã, sau đó đi theo các liên kết đến các tài liệu chuyên dụng. Số lượng tập tin được đo bằng `git ls-files` vào ngày trên. Chúng thay đổi theo hầu hết mỗi lần phát hành, vì vậy hãy coi chúng như những cấp độ quan trọng.
+> Sử dụng bản đồ này để tìm đường đi trong cơ sở mã, sau đó đi theo các liên kết đến các tài liệu chuyên dụng. Số lượng tệp đến từ `git ls-files` và thay đổi theo hầu hết mọi bản phát hành. Hãy coi chúng như những mệnh lệnh quan trọng.
 
 ## Cây cấp cao nhất
 

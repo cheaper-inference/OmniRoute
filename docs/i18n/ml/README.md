@@ -6,266 +6,228 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute ഡാഷ്ബോർഡ്" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — സൗജന്യ AI ഗേറ്റ്വേ
+# OmniRoute — സൗജന്യ AI ഗേറ്റ്വേ
 
-**[Diego Souza](https://github.com/diegosouzapw) സൃഷ്ടിച്ചത്**
+**[ഡീഗോ സൗസ](https://github.com/diegosouzapw) സൃഷ്ടിച്ചത്**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ഒരിക്കലും കോഡിംഗ് നിർത്തരുത്. ഓരോ AI ടൂളും → ഒരു എൻഡ്പോയിന്റിലൂടെ 394 പ്രൊവൈഡർമാർ — 150+ സൗജന്യ പ്രൊവൈഡർമാർ. Claude Code, Codex, Cursor, Cline, Copilot, Antigravity എന്നിവയെ ഓട്ടോ-ഫോൾബാക്കോടെ സൗജന്യ Claude / GPT / Gemini-യിലേക്ക്. RTK + Caveman സ്റ്റാക്ക് ചെയ്ത കംപ്രഷൻ 15–95% ടോക്കണുകൾ (~89% ശരാശരി) ലാഭിക്കുന്നു — പരിധികളിൽ ഒരിക്കലും എത്തില്ല. 394 AI പ്രൊവൈഡർമാർ · 150+ സൗജന്യ ടിയറുകൾ · ~1.62B സൗജന്യ ടോക്കണുകൾ/മാസം · 22 റൂട്ടിംഗ് തന്ത്രങ്ങൾ · ആരംഭിക്കാൻ $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 394 providers — 140+ with a free offer — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 394 AI providers · 140+ with a free offer · free tokens a month: ~11.3B as others count · ~90M real · 22 routing strategies · $0 to start."/>
 
 </div>
 
+<a id="free-tokens"></a>
 <div align="center">
 
-## 💰 മൂന്നാംകക്ഷി സൗജന്യ ടിയറുകളിലുടനീളം പ്രതിമാസം ~1.62B ടോക്കണുകൾ
+## ഒരു മാസത്തെ സൗജന്യ ടോക്കണുകൾ: മറ്റുള്ളവരുടെ എണ്ണം പോലെ ~ 11.3B · ~ 90M റിയൽ
 
 </div>
 
-> **നിങ്ങളുടെ സ്വന്തം പ്രൊവൈഡർ അക്കൗണ്ടുകൾ ഉപയോഗിക്കുക.** ഇത് പ്രത്യേകം അർഹമായ മൂന്നാംകക്ഷി സൗജന്യ ടിയറുകളിലുടനീളമുള്ള ഏകദേശ ആകെ കണക്കാണ്; OmniRoute നൽകുന്ന ടോക്കൺ ഗ്രാന്റല്ല. ആവശ്യമായിടത്ത് സൈൻ അപ്പ് ചെയ്ത് ക്രെഡൻഷ്യലുകൾ നേടുകയും, നിങ്ങൾക്ക് ഉപയോഗിക്കാനാകുന്ന പ്രൊവൈഡർമാരെ ബന്ധിപ്പിക്കുകയും ചെയ്യുക; ഓരോ പ്രൊവൈഡറും അതിന്റെ പരിധികൾ, ലഭ്യത, നിബന്ധനകൾ എന്നിവ നിയന്ത്രിക്കുന്നു.
+> **~ 11.3B സൗജന്യ ടോക്കണുകൾ / മാസം**<br/> <sub> മറ്റ് കാറ്റലോഗുകൾ കണക്കാക്കുന്ന രീതിയിലാണ് കണക്കാക്കുന്നത്: ഓരോ വരിയും ചേർത്തു, അവസാനിച്ച ഓഫറുകളിൽ </sub> ഉൾപ്പെടുന്നു
 >
-> സൗജന്യ ടിയറുകൾ കൈകൊണ്ട് കൂട്ടിച്ചേർക്കുന്നത് ബുദ്ധിമുട്ടാണ് — ഡസൻ കണക്കിന് SDK-കൾ, ഡസൻ കണക്കിന് നിരക്ക് പരിധികൾ, യഥാർത്ഥത്തിൽ നിങ്ങൾക്ക് എത്ര ലഭ്യമാണെന്നതിനെക്കുറിച്ച് യാതൊരു ധാരണയും ഇല്ല. OmniRoute **34 ആവർത്തിച്ച് ഉപയോഗിക്കുന്ന പൂൾ കീകളിലായി 465 സൗജന്യ-ടിയർ എൻട്രികൾ** കാറ്റലോഗ് ചെയ്യുകയും, പങ്കിട്ട പൂളുകൾക്ക് ഒരിക്കൽ മാത്രം കണക്കാക്കിക്കൊണ്ട്, **പ്രസിദ്ധീകരിച്ച പോസിറ്റീവ് പ്രതിമാസ ബജറ്റുള്ള 17 പൂളുകളിൽ നിന്നുള്ളതും കൂടാതെ ഓരോ മോഡലിനുമുള്ള അഞ്ച് Groq പരിധികളിൽ നിന്നുള്ളതുമായ** ടോക്കൺ ഹെഡ്ലൈൻ കണക്കാക്കുകയും ചെയ്യുന്നു. പ്രാദേശിക ഐഡന്റിറ്റി പരിശോധനയ്ക്ക് ശേഷം മാത്രമേ തുറക്കുകയുള്ളൂ എന്ന ക്വോട്ടകൾ (ഇന്ന്: ModelScope) വേർതിരിച്ച് കാണിക്കുന്നു; പ്രാദേശിക ഐഡന്റിറ്റി പരിശോധനയ്ക്ക് പിന്നിലെ +~6M ഹെഡ്ലൈനിൽ ഒരിക്കലും കൂട്ടിച്ചേർക്കുന്നില്ല. ഫലം ഡാഷ്ബോർഡിൽ (`/dashboard/free-tiers`) തുടർന്നും കാണാനാകും.
-
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute സൗജന്യ-ടിയർ ബജറ്റ് കാർഡ്: പ്രതിമാസം സ്ഥിരമായി ~1.62B സൗജന്യ ടോക്കണുകൾ, സൈൻഅപ്പ് ക്രെഡിറ്റുകളോടെ ആദ്യ മാസത്തിൽ പരമാവധി ~2.22B വരെ; ഒരൊറ്റ എൻഡ്പോയിന്റിന് കീഴിൽ 465 കാറ്റലോഗ് ചെയ്ത സൗജന്യ-ടിയർ എൻട്രികളെ ഉൾക്കൊള്ളുന്ന 34 രേഖപ്പെടുത്തിയ ആവർത്തിക്കുന്ന പൂൾ കീകളിൽ നിന്ന്. സത്യസന്ധമായ പൂൾ-ഡ്യൂപ്ലിക്കേറ്റ് നീക്കം ചെയ്ത കണക്ക് — ഓരോ പങ്കിട്ട പൂളും ഒരിക്കൽ മാത്രം കണക്കാക്കുന്നു; പ്രസിദ്ധീകരിച്ച പോസിറ്റീവ് പ്രതിമാസ ടോക്കൺ ബജറ്റുള്ള 17 ആവർത്തിക്കുന്ന പൂളുകളും ഓരോ മോഡലിനുമുള്ള അഞ്ച് Groq പരിധികളും ഇതിൽ ഉൾപ്പെടുന്നു; നിബന്ധനാ-അപകടസാധ്യതാ കാറ്റലോഗിൽ 12 പ്രൊവൈഡർമാർ ഒഴിവാക്കുക എന്ന് അടയാളപ്പെടുത്തിയിരിക്കുന്നു, അതിനാൽ തീരുമാനം നിങ്ങളുടേത്. ബജറ്റ് ബാറിൽ Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (ഓരോ മോഡലിനുമുള്ള അഞ്ച് പരിധികൾ), മറ്റ് ചെറിയ പൂളുകൾ എന്നിവയും, ആദ്യ മാസത്തെ സൈൻഅപ്പ് ക്രെഡിറ്റുകളും സ്ഥിരമായി സൗജന്യമായ, ടോക്കൺ പരിധിയില്ലാത്ത പ്രൊവൈഡർമാരെയും പ്രത്യേകം കാണിക്കുന്നു; അതിനാൽ അവ ഹെഡ്ലൈനിനെ കൃത്രിമമായി ഉയർത്തുന്നില്ല. /dashboard/free-tiers-ൽ തത്സമയം ഉപയോഗിച്ചതും ശേഷിക്കുന്നതും കാണാം."/>
-
-> തത്സമയ `/dashboard/free-tiers` പേജിന്റെ ആനിമേറ്റുചെയ്ത സംഗ്രഹം. പൂർണ്ണ രീതിശാസ്ത്രം (പൂൾ ഡ്യൂപ്ലിക്കേറ്റ് നീക്കം, ക്രെഡിറ്റ് ടിയറുകൾ, പ്രൊവൈഡർ നിബന്ധനകൾ): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> **~ 90M ഇന്ന് യഥാർത്ഥമാണ്**<br/> <sub> ഓരോ പങ്കിട്ട ക്വാട്ടയും ഒരിക്കൽ കണക്കാക്കി: നിങ്ങൾക്ക് യഥാർത്ഥത്തിൽ </sub> എന്താണ് ഉപയോഗിക്കാൻ കഴിയുക
 >
-> <sub>ഈ കണക്കുകൾ തത്സമയ കാറ്റലോഗിനെ അടിസ്ഥാനമാക്കി ഓരോ രണ്ടാഴ്ചയ്ക്കും വീണ്ടും ഓഡിറ്റ് ചെയ്യപ്പെടുന്നു, കൂടാതെ **ഇവ രണ്ട് ദിശകളിലേക്കും മാറാം** — ഒരു പ്രൊവൈഡർ സൗജന്യ ടിയർ അവസാനിപ്പിച്ചാൽ എണ്ണം കുറയും; പുതിയത് വന്നാൽ അത് കൂടും. കാറ്റലോഗ് യഥാർത്ഥത്തിൽ കണക്കാക്കുന്നതാണ് ഞങ്ങൾ പ്രസിദ്ധീകരിക്കുന്നത്; മുകളിലേക്ക് റൗണ്ട് ചെയ്ത മികച്ച സാഹചര്യമല്ല.</sub>
+> **ഇവിടെ എല്ലാം സൗജന്യമാണ്. പേവാൾ ഇല്ല.**<br/> ★ [ഇഷ്ടപ്പെട്ടോ? GitHub യിൽ ഞങ്ങളെ നക്ഷത്രചിഹ്നം നൽകുക](https://github.com/cheaper-inference/OmniRoute)
+
+മറ്റ് കാറ്റലോഗുകൾ തത്സമയ ഡാറ്റയിലേക്ക് ആജീവനാന്ത ആക്സസ്സിനായി പ്രതിവർഷം US$ 19 മുതൽ US$ 49 വരെ ഈടാക്കുന്നു. ഇവിടെ എല്ലാം സൗജന്യമാണ്. <sub> വിലകൾ 2026-11-18-ന് പരിശോധിച്ചു.</sub>
+
+<sub>കാറ്റലോഗ് അവസാനമായി ഓഡിറ്റ് ചെയ്തത് 2026-11-23-നാണ്. [നമ്മൾ എങ്ങനെയാണ് → കണക്കാക്കുന്നത്](docs/reference/FREE_TIERS.md#how-we-count)</sub>
+
+> **നിങ്ങളുടെ സ്വന്തം ദാതാവിൻ്റെ അക്കൗണ്ടുകൾ കൊണ്ടുവരിക.** ഇവ മൂന്നാം കക്ഷി ഫ്രീ ടയറുകളാണ്, OmniRoute യിൽ നിന്നുള്ള ടോക്കൺ ഗ്രാൻ്റല്ല. സൈൻ അപ്പ് ചെയ്യുക, ഒരു ദാതാവ് ആവശ്യപ്പെടുന്ന ക്രെഡൻഷ്യലുകൾ നേടുക, നിങ്ങൾക്ക് ഉപയോഗിക്കാനാകുന്നവ ബന്ധിപ്പിക്കുക. ഓരോ ദാതാവും അതിൻ്റേതായ പരിധികളും ലഭ്യതയും നിബന്ധനകളും സജ്ജമാക്കുന്നു.
+>
+> സ്വതന്ത്ര ശ്രേണികൾ കൈകൊണ്ട് അടുക്കുക എന്നതിനർത്ഥം ഡസൻ കണക്കിന് SDKs, ഡസൻ കണക്കിന് നിരക്ക് പരിധികൾ കൂടാതെ നിങ്ങൾക്ക് എന്താണ് അവശേഷിക്കുന്നതെന്ന് വ്യക്തമായ ധാരണയില്ല. OmniRoute സൗജന്യ ആക്സസ് ഉള്ള 214 കാറ്റലോഗ് വരികൾ സൂക്ഷിക്കുകയും 12 പൂളുകളിൽ നിന്ന് ഒരു പ്രസിദ്ധീകരിച്ച ക്വാട്ട ഉപയോഗിച്ച് യഥാർത്ഥ കണക്ക് കണക്കാക്കുകയും ചെയ്യുന്നു, ഓരോ പങ്കിട്ട പൂളും ഒരിക്കൽ കണക്കാക്കുന്നു. പ്രാദേശിക ഐഡൻ്റിറ്റി പരിശോധനയ്ക്ക് ശേഷം മാത്രം തുറക്കുന്ന ക്വാട്ടകൾ (ഇന്ന്, ModelScope) വേർതിരിച്ച് കാണിക്കുന്നു, പ്രാദേശിക ഐഡൻ്റിറ്റി സ്ഥിരീകരണത്തിന് പിന്നിൽ +~ 6M, യഥാർത്ഥ കണക്കിലേക്ക് ഒരിക്കലും ചേർക്കില്ല. അവശേഷിക്കുന്നത് ഡാഷ്ബോർഡിൽ (`/dashboard/free-tiers`) കാണിക്കുന്നു.
+
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card. Free tokens a month: ~11.3B as others count · ~90M real. Up to ~153M in your first month with one-time signup credits. 12 pools with a published quota and 214 catalog rows with free access behind one endpoint, catalog audited 2026-11-23. The bar shows where the real figure comes from, one segment per pool. Signup credits and free providers without a token cap are listed apart and never added to it. Live used and remaining tokens on /dashboard/free-tiers."/>
+
+> തത്സമയ `/dashboard/free-tiers` പേജിൻ്റെ ആനിമേറ്റഡ് സംഗ്രഹം. ഓരോ കണക്കും എങ്ങനെ കണക്കാക്കുന്നു:** [docs/reference/FREE_TIERS.md#എങ്ങനെ-ഞങ്ങൾ-എണ്ണം](docs/reference/FREE_TIERS.md#how-we-count)** .
+>
+> <sub> കാറ്റലോഗ് അവസാനമായി ഓഡിറ്റ് ചെയ്തത് 2026-11-23-നാണ്. കണക്കുകൾ രണ്ട് വഴിക്കും നീങ്ങുന്നു. ഒരു ദാതാവ് ഒരു ഫ്രീ ടയർ അവസാനിപ്പിക്കുകയും യഥാർത്ഥ സംഖ്യ കുറയുകയും ചെയ്യുന്നു. പുതിയൊരെണ്ണം ഇറങ്ങുന്നു, അത് കയറുന്നു. കാറ്റലോഗ് കണക്കാക്കുന്നത് ഞങ്ങൾ പ്രസിദ്ധീകരിക്കുന്നു, ഒരിക്കലും ഒരു മികച്ച കേസല്ല.</sub>
 
 <br/>
 
 <div align="center">
 
-<h3>
+### കമ്മ്യൂണിറ്റിയിൽ ചേരുക
 
-OMNIROUTE നിങ്ങളെ പണം ലാഭിക്കാനും ജോലി എളുപ്പമാക്കാനും സഹായിച്ചെങ്കിൽ റിപ്പോയ്ക്ക് ⭐ സ്റ്റാർ നൽകുക.
+**👋 പരിപാലിക്കുന്നയാളെ പിന്തുടരുക — ആദ്യം പുതിയ ദാതാക്കളെയും റിലീസുകളും നുറുങ്ങുകളും നേടുക:**
 
-</h3>
+[![ LinkedIn യിൽ ഡീഗോയെ പിന്തുടരുക](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c) ](https://www.linkedin.com/in/diegosouzapw/) [![ GitHub ൽ @diegosouzapw പിന്തുടരുക](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c) ](https://github.com/diegosouzapw)
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
-[![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
+[Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)https://discord.gg/U47eFqAXCn[Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)https://t.me/omnirouteOficial[WhatsApp](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4[WhatsApp](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4[](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)https://omniroute.online
 
-### 💬 കമ്മ്യൂണിറ്റിയിൽ ചേരുക
+**ചോദ്യങ്ങൾ, ദാതാക്കളുടെ നുറുങ്ങുകൾ, റോഡ്മാപ്പ് & പിന്തുണ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 ഔദ്യോഗിക ചാനൽ](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [പോർട്ടൽ](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
-**👋 പരിപാലകനെ പിന്തുടരുക — പുതിയ പ്രൊവൈഡർമാർ, റിലീസുകൾ, ടിപ്പുകൾ എന്നിവ ആദ്യം നേടുക:**
-
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw)
-
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
-
-**ചോദ്യങ്ങൾ, പ്രൊവൈഡർ ടിപ്പുകൾ, റോഡ്മാപ്പ്, പിന്തുണ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Official Channel](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
-
-<br/>
-
-## 📈 ഗേറ്റ്വേ തുടർച്ചയായി വളരുന്നു
-
-<div align="center">
-
-|                                    |          v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
-| ---------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 പ്രൊവൈഡർമാർ                     |            352            |   **358**   |          394          |
-| 🧠 തനതായ ചാറ്റ് മോഡൽ ഐഡികൾ         |           1320            |  **1374**   |         1491          |
-| 🖼️ മോഡാലിറ്റി ബ്രിഡ്ജ്             | 🆕 ദൃശ്യ + ഓഡിയോ + വീഡിയോ |      ✓      |           ✓           |
-| 📡 റഡാർ സൗജന്യ കാറ്റലോഗ്           |       🆕 ഓപ്റ്റ്-ഇൻ       |      ✓      |           ✓           |
-| ⚖️ ക്വോട്ടാ-അവബോധമുള്ള ഷെഡ്യൂളിംഗ് |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 ക്വോട്ടാ ടെലിമെട്രി             |        🆕 തത്സമയം         |      ✓      |           ✓           |
-| 🧰 ഹെഡ്ലെസ് മോഡ്                   |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS റെയിൽ ഇൻഫ്രാ                |             —             |      —      |   🆕 റിലീസ് ചാനലുകൾ   |
-| 🔎 മോഡൽ കണ്ടെത്തൽ API              |             —             |      —      | 🆕 `/v1/models/query` |
-
-**→ [റോഡ്മാപ്പ്](ROADMAP.md) — `v3.9.0 LTS`-ലേക്കുള്ള റെയിലിൽ സഞ്ചരിക്കുന്നു**
+[![നക്ഷത്രങ്ങൾ](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c) ](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![നക്ഷത്ര ചരിത്ര റാങ്ക്](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark) ](https://www.star-history.com/cheaper-inference/omniroute) [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute) ](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 </div>
 
 <br/>
 
-## 🧩 ലഭ്യം
+## ഗേറ്റ്വേ വളരുന്നു
 
-[![npm പതിപ്പ്](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM പ്രതിമാസം](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
-[![ലൈസൻസ്: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker ഡൗൺലോഡുകൾ](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron ഡൗൺലോഡുകൾ](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+<img src="./docs/diagrams/readme-lts-rail.svg" width="100%" alt="The OmniRoute release rail. Prepare window: v3.8.50 to v3.8.53 (registry, decomposition, headless mode) and v3.8.54 (release infrastructure, last prepare release). Validate window, fixes, docs, translations and provider updates only: v3.8.55 characterization tests and boundaries, v3.8.56 canary and performance baseline, v3.8.57 security and compliance sweep, v3.8.58 dry run of the 3.9.0 cut, v3.8.59 final freeze and GO/NO-GO. Then v3.9.0 LTS: the stable/v3 line, with v4 opening on develop. There is no v3.8.60."/>
 
 <table>
   <tr>
-    <td align="right"><b>🚀 ആരംഭിക്കുക</b></td>
-    <td align="center"><a href="#-quick-start">🚀 ദ്രുത ആരംഭം</a></td>
-    <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 ഇൻസ്റ്റാൾ ചെയ്യുക</a></td>
-    <td align="center"><a href="#first-run">🆓 ഒരു പ്രൊവൈഡറുമായി ബന്ധിപ്പിക്കുക</a></td>
+    <td align="center" width="25%"><b>394</b><br/><sub>ദാതാക്കൾ</sub></td>
+    <td align="center" width="25%"><b>1,539</b><br/><sub>അദ്വിതീയ ചാറ്റ് മോഡൽ IDs</sub></td>
+    <td align="center" width="25%"><b>140+</b><br/><sub>ദാതാക്കൾ ഒരു സൗജന്യ ഓഫറുമായി ഫ്ലാഗ് ചെയ്തു</sub></td>
+    <td align="center" width="25%"><b>22</b><br/><sub>പൊതു റൂട്ടിംഗ് തന്ത്രങ്ങൾ</sub></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 പഠിക്കുക</b></td>
-    <td align="center"><a href="#-the-promise">💥 വാഗ്ദാനം</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 OmniRoute എന്തുകൊണ്ട്</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 ഇതിനെ വേറിട്ടുനിർത്തുന്നത്</a></td>
-  </tr>
-  <tr>
-    <td align="right"><b>⚙️ സവിശേഷതകൾ</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 കോംബോകൾ</a></td>
-    <td align="center"><a href="#-394-ai-providers--153-catalog-marked-free">🌐 പ്രൊവൈഡർമാർ</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
-  </tr>
-  <tr>
-    <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ കംപ്രഷൻ</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ ഇത് പ്രവർത്തിക്കുന്ന ഇടങ്ങൾ</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 സ്വകാര്യ</a></td>
-  </tr>
-  <tr>
-    <td align="right"><b>👀 കാണുക</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 പ്രവർത്തനത്തിൽ</a></td>
-    <td align="center"><a href="#-whats-new">✨ പുതിയത് എന്താണ്</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 അനുയോജ്യമായ CLI-കൾ</a></td>
-  </tr>
-  <tr>
-    <td align="right"><b>💚 പിന്തുണ</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 പിന്തുണ / സംഭാവന</a></td>
-    <td align="center"><a href="#-community--help">💬 കമ്മ്യൂണിറ്റി</a></td>
-    <td align="center"><a href="#-sponsors">💖 സ്പോൺസർമാർ</a></td>
-  </tr>
-  <tr>
-    <td align="right"><b>📦 പ്രോജക്റ്റ്</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ ടെക് സ്റ്റാക്ക്</a></td>
-    <td align="center"><a href="#-documentation">📖 ഡോക്യുമെന്റേഷൻ</a></td>
-    <td align="center"><a href="#-1000-contributors">👥 സംഭാവകർ</a></td>
+    <td colspan="4" align="center"><sub>v3.8.54 (17 നവംബർ 2026)-ൽ അളക്കുന്ന ചാറ്റ് എണ്ണം: 3,186 provider/model ജോഡികളിലുടനീളം 1,539 IDs. സൗജന്യ ഓഫർ ലേബൽ ചുവടെയുള്ള കാറ്റലോഗ് ഓഡിറ്റിനെ പിന്തുടരുന്നു.</sub></td>
   </tr>
 </table>
 
-</div>
+ഓരോ റിലീസും മുറിക്കുമ്പോൾ v3.8.55 മുതൽ v3.8.59 വരെയുള്ള പ്രൊവൈഡർ, മോഡൽ മൊത്തങ്ങൾ അളക്കുന്നു. ലക്ഷ്യങ്ങളൊന്നുമില്ല.
+
+<p align="center"><b><a href="ROADMAP.md">റോഡ്മാപ്പ്</a></b> · <a href="docs/ops/RELEASE_STRATEGY.md">റിലീസ് തന്ത്രം</a> · <a href="docs/ops/LTS_GO_NO_GO.md">LTS GO/NO-GO ചെക്ക്ലിസ്റ്റ്</a> · <a href="SECURITY.md#lts-support-window-v39x">LTS പിന്തുണ വിൻഡോ</a></p>
+
+<br/>
+
+## ലഭ്യമാണ്
 
 <div align="center">
-  <b>🌐 67 ഭാഷകളിൽ</b>
+
+[![npm പതിപ്പ്](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) [![npm പ്രതിമാസം ഡൗൺലോഡുകൾ](https://img.shields.io/npm/dm/omniroute?label=npm%2Fmonth&color=cb3837&logo=npm) ](https://www.npmjs.com/package/omniroute) [![ഏറ്റവും പുതിയ റിലീസ്](https://img.shields.io/github/v/release/cheaper-inference/OmniRoute?label=latest%20release&logo=github&color=20211c) ](https://github.com/cheaper-inference/OmniRoute/releases/latest) [![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED) ](https://hub.docker.com/r/cheaperinference/omniroute) ![ [Docker pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED) []](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=release%20asset%20downloads&logo=github&color=47848F) (https://hub.docker.com/r/diegosouzapw/omniroute[MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square) ]LICENSEhttps://github.com/cheaper-inference/OmniRoute/releases
+
+</div>
+
+ഈ README യുടെ എല്ലാ വിഭാഗങ്ങളും, നിങ്ങൾ എന്താണ് ചെയ്യാൻ ആഗ്രഹിക്കുന്നതെന്ന് ഗ്രൂപ്പുചെയ്തിരിക്കുന്നു.
+
+| ലക്ഷ്യം                       | വിഭാഗങ്ങൾ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ആരംഭിക്കുക**                | [ഇൻസ്റ്റാൾ ചെയ്യുക, ബന്ധിപ്പിക്കുക, ആദ്യ അഭ്യർത്ഥന](#install-connect-a-provider-then-route-through-one-endpoint) · [ദ്രുത ആരംഭം](#quick-start) · [കൂടുതൽ ഇൻസ്റ്റാളേഷൻ രീതികൾ](#more-install-methods--docker-source-pnpm-arch) · [ഫ്രീ-ടയർ ടോക്കൺ ബജറ്റ്](#free-tokens) · [ഭാഷകൾ](#languages)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **മനസ്സിലാക്കുക**             | [വാഗ്ദത്തം](#the-promise) · [എന്തുകൊണ്ട് OmniRoute?](#why-omniroute) · [എന്താണ് OmniRoute വേറിട്ടു നിർത്തുന്നത്](#what-sets-omniroute-apart) · [ഗേറ്റ്വേ വളർന്നുകൊണ്ടിരിക്കുന്നു](#the-gateway-keeps-growing) · [പുതിയതെന്താണ്](#whats-new)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **റൂട്ട്**                    | [കോമ്പോസ്](#combos-the-flagship) · [സീറോ-കോൺഫിഗ് `auto`](#zero-config-just-use-auto) · [22 റൂട്ടിംഗ് സ്ട്രാറ്റജികൾ](#or-build-your-own-22-routing-strategies) · [റെസിലിയൻസ് ലെയറുകൾ](#resilience-is-built-in-3-independent-layers) · [OmniRoute റഡാർ](#omniroute-radar)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **ദാതാക്കളും ഉപകരണങ്ങളും**    | [AI ദാതാക്കൾ](#ai-providers) · [എല്ലാ പ്രധാന ലാബും](#every-major-lab--through-one-endpoint) · [എല്ലാ ദിവസവും അല്ലെങ്കിൽ മാസവും സൗജന്യം](#free-every-day-or-month) · [ട്രയലുകളും സൈൻഅപ്പ് ക്രെഡിറ്റുകളും](#trial-and-signup-credits) · [അനുയോജ്യമായ CLIs, കോഡിംഗ് ഏജൻ്റുകൾ](#compatible-clis--coding-agents)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **അത് പ്രവർത്തിപ്പിക്കുക**    | [OmniRoute പ്രവർത്തിക്കുന്നിടത്ത്](#where-omniroute-runs) · [VS കോഡിന്OmniCopilot](#omnicopilot-omniroute-inside-vs-codes-native-copilot-chat) · [macOS ന്OmniRouteTray](#omniroutetray-omniroute-in-the-macos-menu-bar) · [സ്വകാര്യവും പ്രാദേശികവും ആദ്യം](#private--local-first)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **CLI, പ്രോട്ടോക്കോളുകൾ**     | [പൂർണ്ണ CLI, MCP, A2A](#full-cli-mcp-and-a2a) · [CLI](#a-real-cli-not-just-start) · [റിമോട്ട് മോഡ്](#remote-mode-the-cli-on-your-laptop-omniroute-on-a-server) · [ഒരു ഏജൻ്റിനെ ബന്ധിപ്പിക്കുക](#connect-an-agent)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **ടോക്കണുകൾ സംരക്ഷിക്കുക**    | [കംപ്രഷൻ അവലോകനം](#save-1595-tokens--automatically) · [ഇത് എങ്ങനെ പ്രവർത്തിക്കുന്നു](#how-it-works--pipeline-architecture--savings-math) · [12-എഞ്ചിൻ സ്റ്റാക്ക്](#the-12-engine-stack) · [ഔട്ട്പുട്ട് ശൈലികളും ഓരോ അഭ്യർത്ഥന നിയന്ത്രണവും](#beyond-the-engines--output-styles-the-adaptive-dial--per-request-control)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **അത് കാണുക**                 | [OmniRoute പ്രവർത്തനത്തിലാണ്](#omniroute-in-action) · [വീഡിയോ ഗൈഡുകൾ](#video-guides)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **റഫറൻസ്**                    | [ടെക് സ്റ്റാക്ക്](#tech-stack) · [ഡോക്യുമെൻ്റേഷൻ](#documentation) · [പുതിയ ഉപയോക്താക്കൾ](#if-you-are-new-to-omniroute) · [ഓപ്പറേറ്റർമാർ](#if-you-are-deploying-or-operating-a-server) · [റൂട്ടിംഗ് ഡോക്സ്](#if-you-want-to-control-how-requests-are-routed) · [ചെലവഴിക്കലും ക്വാട്ടയും](#if-you-want-to-track-spend-and-quota) · [പ്രൊവൈഡർ ഗൈഡുകൾ](#if-you-are-connecting-a-specific-provider) · [ടോക്കണുകളും സന്ദർഭവും](#if-you-want-to-save-tokens-or-add-context) · [കോഡിംഗ് ടൂളുകളും CLI](#if-you-use-a-coding-tool-or-the-omniroute-cli) · [API](#if-you-are-building-against-the-api) · [വിപുലീകരണങ്ങളും ട്രാഫിക്കും](#if-you-want-to-extend-omniroute-or-watch-its-traffic) · [അപ്സ്ട്രീം പ്രോക്സികൾ](#if-you-route-upstream-traffic-through-proxies) · [സുരക്ഷാ അവലോകനം](#if-you-are-reviewing-security) · [കോഡ്](#if-you-want-to-understand-the-code) · [സംഭാവന ചെയ്യുന്നു](#if-you-want-to-contribute) · [അസറ്റ് കുറിപ്പുകൾ](#if-you-are-looking-for-asset-notes) |
+| **സമൂഹം**                     | [കമ്മ്യൂണിറ്റിയും സഹായവും](#community--help) · [കമ്മ്യൂണിറ്റിയിൽ ചേരുക](#join-the-community) · [മുൻനിര സംഭാവകർ](#top-contributors) · [ലയിപ്പിച്ച പുൾ അഭ്യർത്ഥനകൾ വഴി](#external-contributors-by-merged-pull-requests) · [GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ വഴി](#github-attributed-commits) · [എല്ലാ സംഭാവകരും](#1200-contributors) · [എങ്ങനെ സംഭാവന ചെയ്യാം](#how-to-contribute) · [ഒരു പുതിയ പതിപ്പ് പുറത്തിറക്കുന്നു](#releasing-a-new-version) · [നക്ഷത്രങ്ങൾ](#stars) · [StarMapper](#starmapper)                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **പിന്തുണയും ക്രെഡിറ്റുകളും** | [പിന്തുണ OmniRoute](#support-omniroute) · [സ്പോൺസർമാർ](#sponsors) · [ഓപ്പൺ സോഴ്സ് സുഹൃത്തുക്കൾ](#supported-by-our-open-source-friends) · [ലൈസൻസ്](#license)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **അംഗീകാരങ്ങൾ**               | [അവലോകനം](#acknowledgments) · [ലൈനേജും ഗേറ്റ്വേയും](#lineage--gateway) · [കംപ്രഷൻ എഞ്ചിനുകൾ](#context--token-compression--engines) · [കോംപാക്റ്റ് ഫോർമാറ്റുകളും കോഡ്-അവയർ ടൂളിംഗും](#compact-formats-token-research--code-aware-tooling) · [മെമ്മറിയും RAG](#memory--rag) · [ട്രാഫിക് പരിശോധനയും MITM](#traffic-inspection-mitm--transparent-proxy) · [മോഡൽ ഡാറ്റ, നിരീക്ഷണക്ഷമതയും UI](#model-data-observability--ui) · [സുരക്ഷ](#security) · [കോംപ്ലിമെൻ്ററി ടൂളുകൾ](#complementary-tools)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+
+<a id="languages"></a>
+
+<div align="center">
+  <b>67 ഭാഷകളിൽ 🌐</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="ഇംഗ്ലീഷ് (en)" title="ഇംഗ്ലീഷ് (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="പോർച്ചുഗീസ് — ബ്രസീൽ (pt-BR)" title="പോർച്ചുഗീസ് — ബ്രസീൽ (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="പോർച്ചുഗീസ് (pt)" title="പോർച്ചുഗീസ് (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="സ്പാനിഷ് (es)" title="സ്പാനിഷ് (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="ഫ്രഞ്ച് (fr)" title="ഫ്രഞ്ച് (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="ഇറ്റാലിയൻ (it)" title="ഇറ്റാലിയൻ (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="ജർമ്മൻ (de)" title="ജർമ്മൻ (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="ഡച്ച് (nl)" title="ഡച്ച് (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="റഷ്യൻ (ru)" title="റഷ്യൻ (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="ഉക്രേനിയൻ (uk-UA)" title="ഉക്രേനിയൻ (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="പോളിഷ് (pl)" title="പോളിഷ് (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="ചെക്ക് (cs)" title="ചെക്ക് (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="സ്ലോവാക് (sk)" title="സ്ലോവാക് (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="റൊമാനിയൻ (ro)" title="റൊമാനിയൻ (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="ഹംഗേറിയൻ (hu)" title="ഹംഗേറിയൻ (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="ബൾഗേറിയൻ (bg)" title="ബൾഗേറിയൻ (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="ഡാനിഷ് (da)" title="ഡാനിഷ് (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="ഫിന്നിഷ് (fi)" title="ഫിന്നിഷ് (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="നോർവീജിയൻ (no)" title="നോർവീജിയൻ (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="സ്വീഡിഷ് (sv)" title="സ്വീഡിഷ് (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="ചൈനീസ് — ലളിതരൂപം (zh-CN)" title="ചൈനീസ് — ലളിതരൂപം (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="ചൈനീസ് — പരമ്പരാഗതരൂപം (zh-TW)" title="ചൈനീസ് — പരമ്പരാഗതരൂപം (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="ജാപ്പനീസ് (ja)" title="ജാപ്പനീസ് (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="കൊറിയൻ (ko)" title="കൊറിയൻ (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="തായ് (th)" title="തായ് (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="വിയറ്റ്നാമീസ് (vi)" title="വിയറ്റ്നാമീസ് (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="ഇൻഡോനേഷ്യൻ (id)" title="ഇൻഡോനേഷ്യൻ (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="മലയ് (ms)" title="മലയ് (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="ഫിലിപ്പിനോ (phi)" title="ഫിലിപ്പിനോ (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ഹിന്ദി (hi)" title="ഹിന്ദി (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ഗുജറാത്തി (gu)" title="ഗുജറാത്തി (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മറാത്തി (mr)" title="മറാത്തി (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="തമിഴ് (ta)" title="തമിഴ് (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="തെലുങ്ക് (te)" title="തെലുങ്ക് (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="ബംഗാളി (bn)" title="ബംഗാളി (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="ഉർദു (ur)" title="ഉർദു (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="പേർഷ്യൻ (fa)" title="പേർഷ്യൻ (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="അറബിക് (ar)" title="അറബിക് (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="ഹീബ്രു (he)" title="ഹീബ്രു (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="ടർക്കിഷ് (tr)" title="ടർക്കിഷ് (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="അസർബൈജാനി (az)" title="അസർബൈജാനി (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="സ്വാഹിലി (sw)" title="സ്വാഹിലി (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="ഗ്രീക്ക് (el)" title="ഗ്രീക്ക് (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="ക്രൊയേഷ്യൻ (hr)" title="ക്രൊയേഷ്യൻ (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="സെർബിയൻ (sr)" title="സെർബിയൻ (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="ലിത്വാനിയൻ (lt)" title="ലിത്വാനിയൻ (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="എസ്റ്റോണിയൻ (et)" title="എസ്റ്റോണിയൻ (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="ലാത്വിയൻ (lv)" title="ലാത്വിയൻ (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="സ്ലോവേനിയൻ (sl)" title="സ്ലോവേനിയൻ (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="മാൾട്ടീസ് (mt)" title="മാൾട്ടീസ് (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="ഐറിഷ് (ga)" title="ഐറിഷ് (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="കന്നഡ (kn)" title="കന്നഡ (kn)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
   <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ഒഡിയ (or)" title="ഒഡിയ (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="പഞ്ചാബി (pa)" title="പഞ്ചാബി (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="നേപ്പാളി (ne)" title="നേപ്പാളി (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="സിംഹള (si)" title="സിംഹള (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="ബർമീസ് (my)" title="ബർമീസ് (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ഖെമർ (km)" title="ഖെമർ (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="ഹൗസ (ha)" title="ഹൗസ (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="യൊറൂബ (yo)" title="യൊറൂബ (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="ഇഗ്ബോ (ig)" title="ഇഗ്ബോ (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="അംഹാരിക് (am)" title="അംഹാരിക് (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="ഉസ്ബെക്ക് (uz)" title="ഉസ്ബെക്ക് (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ജോർജിയൻ (ka)" title="ജോർജിയൻ (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="അർമേനിയൻ (hy)" title="അർമേനിയൻ (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="ബോസ്നിയൻ (bs)" title="ബോസ്നിയൻ (bs)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
 <br/>
-
-<div align="center">
 
 <a id="first-run"></a>
 
-## 🆓 ഇൻസ്റ്റാൾ ചെയ്യുക, ഒരു ദാതാവിനെ ബന്ധിപ്പിക്കുക, തുടർന്ന് ഒരൊറ്റ എൻഡ്പോയിന്റിലൂടെ റൂട്ട് ചെയ്യുക
+## ഇൻസ്റ്റാൾ ചെയ്യുക, ഒരു ദാതാവിനെ ബന്ധിപ്പിക്കുക, തുടർന്ന് ഒരു അവസാന പോയിൻ്റിലൂടെ റൂട്ട് ചെയ്യുക
 
-</div>
-
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="മൂന്ന് ഘട്ടങ്ങൾ: OmniRoute ഇൻസ്റ്റാൾ ചെയ്ത് ആരംഭിക്കുക, നിങ്ങളുടെ സ്വന്തം അക്കൗണ്ട് അല്ലെങ്കിൽ API കീ ഉപയോഗിച്ച് യോഗ്യമായ ഒരു ദാതാവിനെ ബന്ധിപ്പിക്കുക, തുടർന്ന് OmniRoute API കീയും model auto-യും ഉപയോഗിച്ച് നിങ്ങളുടെ ടൂൾ localhost:20128/v1-ലേക്ക് ചൂണ്ടിക്കാണിക്കുക. ലഭ്യമായ യോഗ്യമായ കണക്ഷനുകളും ദാതാവിന്റെ പരിധികളും അനുസരിച്ചാണ് റൂട്ടിംഗ് നടക്കുന്നത്."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Four steps to use OmniRoute. Install with npm install -g omniroute, run omniroute, connect a provider and create an API key in the dashboard, then call http://localhost:20128/v1 with model auto."/>
 
 ```bash
-# ഒരു ദാതാവിനെ ബന്ധിപ്പിച്ച ശേഷം, Dashboard → Endpoints-ൽ നിന്ന് നിങ്ങളുടെ OmniRoute കീ പകർത്തുക:
+# After connecting a provider, create your OmniRoute key in Dashboard → API Keys:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto`-യ്ക്ക് യോഗ്യമായ ഒരു റൂട്ട് ആവശ്യമാണ്. പുതിയ ഇൻസ്റ്റാളേഷനിൽ യോഗ്യമായ keyless ലക്ഷ്യങ്ങളൊന്നും ഉണ്ടായിരിക്കണമെന്നില്ല, കൂടാതെ ഒരു keyless ദാതാവ് മൂന്നാംകക്ഷി ക്ലയന്റുകളെ നിരസിച്ചേക്കാം. Kiro ഉൾപ്പെടെ `tos: avoid` എന്ന് അടയാളപ്പെടുത്തിയ ദാതാക്കളെ സ്വയമേവയുള്ള റൂട്ടിംഗിൽ നിന്ന് ഡിഫോൾട്ടായി ഒഴിവാക്കുന്നു; ഒരു അക്കൗണ്ട് ബന്ധിപ്പിച്ചതുകൊണ്ട് ആ ക്രമീകരണം മാറില്ല. ഒരു ദാതാവിനെ തിരഞ്ഞെടുക്കുന്നതിന് മുമ്പ് [Free Tiers Guide](docs/getting-started/FREE-TIERS-GUIDE.md) കാണുക.</sub>
+<sub>`auto` യോഗ്യമായ ഒരു റൂട്ട് ആവശ്യമാണ്. ഒരു പുതിയ ഇൻസ്റ്റാളേഷന് യോഗ്യതയുള്ള കീലെസ് ടാർഗെറ്റുകൾ ഉണ്ടാകില്ല, കൂടാതെ ഒരു കീലെസ്സ് ദാതാവ് മൂന്നാം കക്ഷി ക്ലയൻ്റുകളെ നിരസിച്ചേക്കാം. `tos: avoid` എന്ന് അടയാളപ്പെടുത്തിയ ദാതാക്കളെ, Kiro ഉൾപ്പെടെ, സ്വയമേവയുള്ള റൂട്ടിംഗിൽ നിന്ന് ഒഴിവാക്കിയിരിക്കുന്നു; ഒരു അക്കൗണ്ട് ബന്ധിപ്പിക്കുന്നത് ആ ക്രമീകരണത്തെ മറികടക്കുന്നില്ല. ഒരു ദാതാവിനെ തിരഞ്ഞെടുക്കുന്നതിന് മുമ്പ് [ഫ്രീ ടയർ ഗൈഡ്](docs/getting-started/FREE-TIERS-GUIDE.md) കാണുക.</sub>
 
-<sub>📦 **Python, Node.js, PHP, കൂടാതെ cURL** എന്നിവയ്ക്കായുള്ള പകർത്തി ഒട്ടിക്കാവുന്ന ദ്രുതാരംഭ സ്ക്രിപ്റ്റുകൾ → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>ഇതിനായുള്ള ക്വിക്ക്സ്റ്റാർട്ട് സ്ക്രിപ്റ്റുകൾ പകർത്തി ഒട്ടിക്കുക** പൈത്തൺ, Node.js, PHP, cURL** : [`examples/quickstart/`](examples/quickstart/). ഘട്ടം ഘട്ടമായുള്ള പതിപ്പ്: [ദ്രുത ആരംഭം](#quick-start).</sub>
 
 <br/>
 
-<div align="center">
+<br/>
 
-# 💥 വാഗ്ദാനം
+# വാഗ്ദത്തം
 
-</div>
-
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="വാഗ്ദാനം — ഒരൊറ്റ എൻഡ്പോയിന്റും 394 ദാതാക്കളും. മറ്റൊരു ആരോഗ്യകരമായ ലക്ഷ്യം ലഭ്യമായിരിക്കുമ്പോൾ സ്വയമേവയുള്ള fallback റൂട്ടിംഗ് തുടരുന്നു. ആറ് തൂണുകൾ: 394 ദാതാക്കളിലുടനീളമുള്ള പ്രതിരോധശേഷിയുള്ള fallback · യോഗ്യമായ ജോലിഭാരങ്ങളിൽ പരമാവധി 95% ടോക്കൺ ലാഭം · 150+ സൗജന്യ ടയറുകളും ആവർത്തിക്കുന്ന/കീ ഇല്ലാത്ത എന്നേക്കും സൗജന്യമായ 40 ദാതാക്കളുമുള്ള $0 ആരംഭച്ചെലവ് · ഒരൊറ്റ കോൺഫിഗറിലൂടെ 39 CLI/agent സംയോജനങ്ങൾ · /v1-ൽ OpenAI, Claude, Gemini, Responses API അനുയോജ്യത · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals, കൂടാതെ 7,800+-ലധികം ട്രാക്ക് ചെയ്ത ടെസ്റ്റ് ഫയലുകളിലുടനീളമുള്ള 56,000+-ലധികം സ്റ്റാറ്റിക് ടെസ്റ്റ് ഡിക്ലറേഷനുകൾ ഉൾപ്പെടെയുള്ള പ്രൊഡക്ഷൻ നിയന്ത്രണങ്ങൾ."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 394 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 394 providers · up to 95% token savings on eligible workloads · $0 to start with 140+ providers with a free offer and 40 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 65,000+ static test declarations across 9,500+ tracked test files."/>
 
 <br/>
 <br/>
 
-<div align="center">
+# എന്തുകൊണ്ട് OmniRoute?
 
-# 🤔 എന്തുകൊണ്ട് OmniRoute?
-
-</div>
-
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="എന്തുകൊണ്ട് OmniRoute — 10 ഡാഷ്ബോർഡുകൾ, പ്രവർത്തനരഹിതമായ API കീകൾ, അപ്രതീക്ഷിത ബില്ലുകൾ എന്നിവ കൈകാര്യം ചെയ്യുന്നത് നിർത്തുക. ദിവസേന നേരിടുന്ന പത്ത് പ്രശ്നങ്ങളും പരിഹാരങ്ങളും: ഉപയോഗിക്കാതെ ക്വോട്ട കാലഹരണപ്പെടുന്നു → സബ്സ്ക്രിപ്ഷനുകൾ പരമാവധി പ്രയോജനപ്പെടുത്തുക; കോഡിങ്ങിനിടെ rate limits → 4-ടയർ auto-fallback (Subscription → API → Cheap → Free); ടൂൾ ഔട്ട്പുട്ടുകൾ ടോക്കണുകൾ ചെലവഴിക്കുന്നു → RTK + Caveman compression (15–95%); ചെലവേറിയ API-കൾ → ചെലവ്-ഒപ്റ്റിമൈസ് ചെയ്ത റൂട്ടിംഗ്; ഓരോ ടൂളിനും സ്വന്തം സജ്ജീകരണം → ഒരൊറ്റ എൻഡ്പോയിന്റ്, ഒരൊറ്റ ഡാഷ്ബോർഡ്; AI തടയപ്പെടുന്നു → 3-ലെവൽ proxy + TLS stealth; പ്രവർത്തനരഹിതമായ കീകൾ → 3-ലെയർ പ്രതിരോധശേഷി (circuit breakers, key cooldown, model lockout); ഒരു സബ്സ്ക്രിപ്ഷൻ പങ്കിടുന്ന ടീം → ന്യായമായ പങ്കിടൽ ക്വോട്ടകളുള്ള key pools; മറ്റൊരാളുടെ cloud വഴി പ്രോംപ്റ്റുകൾ പോകുന്നു → AES-256-GCM എൻക്രിപ്റ്റ് ചെയ്ത കീകളോടുകൂടിയ local-first; ചെലവിന്റെ ദൃശ്യപരതയില്ല → തത്സമയ analytics (usage, quota, savings, p95 latency)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Why OmniRoute — stop juggling 10 dashboards, dead API keys and surprise bills. Ten daily pains vs fixes: quota expiring unused → maximize subscriptions; rate limits mid-coding → 4-tier auto-fallback (Subscription → API → Cheap → Free); tool outputs burning tokens → RTK + Caveman compression (15–95%); expensive APIs → cost-optimized routing that tries lower input-token prices first; every tool its own setup → one endpoint, one dashboard; AI blocked → 3-level proxy + TLS stealth; dead keys → 3-layer resilience (circuit breakers, key cooldown, model lockout); team sharing one subscription → key pools with fair-share quotas; prompts through someone's cloud → local-first with AES-256-GCM encrypted keys; no spend visibility → live analytics (usage, quota, savings, p95 latency)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute അഭ്യർത്ഥന പ്രവാഹം: നിങ്ങളുടെ IDE അല്ലെങ്കിൽ CLI (Claude Code, Cursor, Cline…) ഒരൊറ്റ പ്രാദേശിക എൻഡ്പോയിന്റായ (http://localhost:20128/v1) വിളിക്കുന്നു; OmniRoute Smart Router (RTK + Caveman compression, 22 routing strategies, circuit breakers, TLS stealth, MCP, A2A, guardrails) യോഗ്യമായ ആരോഗ്യകരമായ ഒരു ലക്ഷ്യം നിലനിൽക്കുന്നിടത്തോളം 4 ദാതാ ടയറുകളിലുടനീളം fallback ചെയ്യാം — ടയർ 1 Subscription, ടയർ 2 API Key, ടയർ 3 Cheap, ടയർ 4 Free."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute request flow: your IDE or CLI (Claude Code, Cursor, Cline…) calls one local endpoint (http://localhost:20128/v1); the OmniRoute Smart Router (RTK + Caveman compression, 22 routing strategies, circuit breakers, TLS stealth, MCP, A2A, guardrails) can fall back across 4 provider tiers while an eligible healthy target remains — Tier 1 Subscription, Tier 2 API Key, Tier 3 Cheap and Tier 4 Free."/>
 
 </div>
 
@@ -273,17 +235,17 @@ curl http://localhost:20128/v1/chat/completions \
 
 <div align="center">
 
-## 🤝 ഞങ്ങളുടെ ഓപ്പൺ സോഴ്സ് സുഹൃത്തുക്കളുടെ പിന്തുണയോടെ
+## ഞങ്ങളുടെ ഓപ്പൺ സോഴ്സ് സുഹൃത്തുക്കൾ പിന്തുണയ്ക്കുന്നു
 
 </div>
 
 <p align="center">
   <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
-    <img src="public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — ഓപ്പൺ ഫ്രോണ്ടിയർ ഇൻ്റലിജൻസ് · 2.8T പാരാമീറ്ററുകൾ · 1M-ടോക്കൺ കോൺടെക്സ്റ്റ്"/>
+    <img src="public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — Open Frontier Intelligence · 2.8T parameters · 1M-token context"/>
   </a>
 </p>
 
-> **ഒരു ഓപ്പൺ സോഴ്സ് സുഹൃത്തായി ചേരാൻ താൽപ്പര്യമുണ്ടോ?** ഓപ്പൺ സോഴ്സിനെ പിന്തുണയ്ക്കുകയും OmniRoute മുന്നോട്ട് കൊണ്ടുപോകാൻ സഹായിക്കുകയും ചെയ്യുന്ന കമ്പനികളാണിവ — അവർ ഞങ്ങൾക്ക് നൽകുന്ന ഓരോ ടോക്കണും എവിടെയാണ് ഉപയോഗിക്കുന്നതെന്ന് ഞങ്ങൾ പരസ്യമായി പറയുന്നു. ബന്ധപ്പെടുക: [diegosouza.pw@outlook.com](mailto:diegosouza.pw@outlook.com)
+> **ഒരു ഓപ്പൺ സോഴ്സ് സുഹൃത്തായി ചേരാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?** ഓപ്പൺ സോഴ്സിന് പിന്തുണ നൽകുന്ന കമ്പനികളാണിവ, OmniRoute — ചലിപ്പിക്കുന്നത് നിലനിർത്താൻ സഹായിക്കുകയും അവർ ഞങ്ങൾക്ക് നൽകുന്ന ഓരോ ടോക്കണും എവിടേക്കാണ് പോകുന്നതെന്ന് ഞങ്ങൾ പരസ്യമായി പറയുകയും ചെയ്യുന്നു. എത്തിച്ചേരുക: [diegosouza.pw@outlook.com](mailto:diegosouza.pw@outlook.com)
 
 <table>
   <tr>
@@ -291,262 +253,204 @@ curl http://localhost:20128/v1/chat/completions \
       <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset="public/providers/kimi-logomark-dark.svg">
-          <img src="public/providers/kimi-logomark-light.svg" width="64" alt="കിമി (മൂൺഷോട്ട് AI)"/>
+          <img src="public/providers/kimi-logomark-light.svg" width="64" alt="Kimi (Moonshot AI)"/>
         </picture>
       </a>
       <br/><b>Kimi</b><br/><sub>Moonshot AI</sub><br/><br/>
-      <img src="https://img.shields.io/badge/Founding_Friend-1783FF?style=flat-square" alt="സ്ഥാപക ഓപ്പൺ സോഴ്സ് സുഹൃത്ത്"/>
+      <img src="https://img.shields.io/badge/Founding_Friend-1783FF?style=flat-square" alt="Founding Open Source Friend"/>
     </td>
     <td>
-      ഈ പ്രോജക്റ്റിനെ പിന്തുണച്ചതിന് ഞങ്ങളുടെ സ്ഥാപക ഓപ്പൺ സോഴ്സ് സുഹൃത്തായ <b>Kimi (Moonshot AI)</b>-ക്ക് നന്ദി! Kimi എന്നത് ഓപ്പൺ-വെയ്റ്റ് K2, K3 മോഡൽ കുടുംബങ്ങൾക്ക് പിന്നിലുള്ള AI ലാബാണ് — <b>Kimi K3</b> 1M-ടോക്കൺ കോൺടെക്സ്റ്റ് വിൻഡോ, നേറ്റീവ് വിഷൻ, ഫ്രോണ്ടിയർ-ലെവൽ കോഡിംഗ് എന്നിവ ക്ലോസ്ഡ്-മോഡൽ വിലയുടെ ഒരു അംശത്തിൽ നൽകുന്നു, കൂടാതെ Claude Code, Codex, OmniRoute നൽകുന്ന എല്ലാ കോഡിംഗ് ടൂളുകളോടും ഒപ്പം ഇത് പ്രവർത്തിക്കുന്നു.
+      Thanks to <b>Kimi (Moonshot AI)</b>, our founding Open Source Friend, for backing this project! Kimi is the AI lab behind the open-weight K2 and K3 model families — <b>Kimi K3</b> delivers a 1M-token context window, native vision and frontier-level coding at a fraction of closed-model prices, and works out of the box with Claude Code, Codex and every coding tool OmniRoute serves.
       <br/><br/>
-      <b>Kimi-യുടെ പിന്തുണ നൽകുന്നത്:</b> Kimi-യുടെ API ക്രെഡിറ്റുകൾ OmniRoute-ൻ്റെ AI-വാലിഡേറ്റഡ് റിലീസ് പൈപ്പ്ലൈനിന് ശക്തി നൽകുന്നു — ഓരോ പുൾ റിക്വസ്റ്റും ഷിപ്പ് ചെയ്യുന്നതിന് മുമ്പ് അവലോകനം ചെയ്യുന്ന <i>Kimi K3 നൽകുന്ന മെർജ് വാലിഡേഷൻ</i> ഘട്ടം — കൂടാതെ ദൈനംദിന ഫീച്ചർ വികസനവും. ഫസ്റ്റ്-ക്ലാസ് Kimi പിന്തുണ രണ്ട് രീതികളിലും ലഭ്യമാണ്: നേരിട്ടുള്ള <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">Kimi API</a> (<code>kimi-k3</code>), <a href="https://www.kimi.ai/code?aff=omniroute">Kimi Code കോഡിംഗ് പ്ലാൻ</a> (OAuth, API കീ). Kimi-യുടെ സപ്പോർട്ട് പ്രോഗ്രാമിലെ ആദ്യത്തെ ബ്രസീലിയൻ ഓപ്പൺ സോഴ്സ് പ്രോജക്റ്റ് കൂടിയാണ് OmniRoute. <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute"><b>15% അധിക ക്രെഡിറ്റുകളോടെ ഒരു Kimi API കീ നേടുക →</b></a>
+      <b>Kimi യുടെ പിന്തുണാ ശക്തികൾ എന്തൊക്കെയാണ്:</b> Kimi's API ക്രെഡിറ്റ് പവർ OmniRoute's AI- സാധൂകരിച്ച റിലീസ് പൈപ്പ്ലൈൻ — <i>Kimi K3 നൽകുന്ന സാധൂകരണം ലയിപ്പിക്കുക</i> — കൂടാതെ ദൈനംദിന ഫീച്ചർ ഡെവലപ്മെൻ്റ് ഷിപ്പുചെയ്യുന്നതിന് മുമ്പ് ഓരോ പുൾ അഭ്യർത്ഥനയും അവലോകനം ചെയ്യുന്ന ഘട്ടം. രണ്ട് റെയിലുകളിലും ഫസ്റ്റ് ക്ലാസ് Kimi സപ്പോർട്ട് ഷിപ്പുകൾ: നേരിട്ടുള്ള <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">Kimi API</a> (<code>kimi-k3</code>) കൂടാതെ <a href="https://www.kimi.ai/code?aff=omniroute">Kimi കോഡ് കോഡിംഗ് പ്ലാൻ</a> (OAuth, API കീ). Kimi ൻ്റെ പിന്തുണ പ്രോഗ്രാമിലെ ആദ്യത്തെ ബ്രസീലിയൻ ഓപ്പൺ സോഴ്സ് പ്രോജക്റ്റ് കൂടിയാണ് OmniRoute. <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute"><b>15% അധിക ക്രെഡിറ്റുകൾ → ഉള്ള ഒരു Kimi API കീ നേടുക</b></a>
     </td>
   </tr>
   <tr>
     <td align="center" width="150">
       <a href="https://cheaperinference.com/?utm_source=omniroute">
-        <img src="./public/providers/cli-generic.svg" width="64" alt="ചീപ്പർ ഇൻഫറൻസ്"/>
+        <img src="./public/providers/cli-generic.svg" width="64" alt="Cheaper Inference"/>
       </a>
-      <br/><b>Cheaper Inference</b><br/><sub>cheaperinference.com</sub><br/><br/>
-      <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="ഓപ്പൺ സോഴ്സ് സുഹൃത്ത്"/>
+      <br/><b>വിലകുറഞ്ഞ അനുമാനം</b><br/><sub>cheaperinference.com</sub><br/><br/>
+      <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="Open Source Friend"/>
     </td>
     <td>
-      ഈ പ്രോജക്റ്റിനെ പിന്തുണച്ചതിന് OmniRoute ഓപ്പൺ സോഴ്സ് സുഹൃത്തായ <b>Cheaper Inference</b>-ന് നന്ദി! Cheaper Inference എന്നത് ഒരു കോസ്റ്റ്-റാങ്ക്ഡ് ഗേറ്റ്വേയാണ്, അത് 42 ഫ്രോണ്ടിയർ മോഡലുകൾ — Claude, GPT-5.x, Gemini, Kimi K3, GLM, DeepSeek, Grok, MiniMax — ഒരു OpenAI-അനുയോജ്യമായ എൻഡ്പോയിന്റിന് പിന്നിൽ റീസെൽ ചെയ്യുന്നു, ഓരോ അഭ്യർത്ഥനയും മോഡൽ നിർമ്മാതാവിൻ്റെ ലിസ്റ്റ് വിലയേക്കാൾ കൂടുതൽ ഈടാക്കാതെ ഏറ്റവും വിലകുറഞ്ഞ യോഗ്യതയുള്ള ദാതാവിലേക്ക് റൂട്ട് ചെയ്യുന്നു.
+      ഈ പ്രോജക്റ്റിനെ പിന്തുണച്ചതിന് <b> Cheaper Inference </b>, OmniRoute ഓപ്പൺ സോഴ്സ് സുഹൃത്തിന് നന്ദി! വിലകുറഞ്ഞ അനുമാനം എന്നത് 42 മുൻനിര മോഡലുകൾ — Claude, GPT-5.x, Gemini, Kimi K3, GLM, DeepSeek, Grok, MiniMax — വീണ്ടും വിൽക്കുന്ന ഒരു ചെലവ് റാങ്ക് ഗേറ്റ്വേയാണ് നിർമ്മാതാവിൻ്റെ ലിസ്റ്റ് വില.
       <br/><br/>
-      <b>OmniRoute-ലെ ഫസ്റ്റ്-ക്ലാസ് പിന്തുണ:</b> Chat Completions, നേറ്റീവ് <code>/v1/responses</code> എൻഡ്പോയിന്റ്, വിഷൻ, ടൂൾ കോളിംഗ്, 3 ഇമേജ് മോഡലുകൾ (<code>grok-imagine</code>, <code>nano-banana-pro</code>, <code>nano-banana-2</code>, <code>cheaperinference/&lt;model&gt;</code> ആയി ലഭ്യമാണ്). <a href="https://cheaperinference.com/?utm_source=omniroute"><b>ഒരു API കീ നേടുക →</b></a>
+      <b>OmniRoute യിലെ ഫസ്റ്റ് ക്ലാസ് പിന്തുണ:</b> ചാറ്റ് പൂർത്തിയാക്കലുകൾ, നേറ്റീവ് <code>/v1/responses</code> എൻഡ്പോയിൻ്റ്, വിഷൻ, ടൂൾ കോളിംഗ്, 3 ഇമേജ് മോഡലുകൾ (<code>grok-imagine</code>, <code>nano-banana-pro</code>, <code>nano-banana-2</code>, <code>cheaperinference/&lt;model&gt;</code> ആയി എത്തിച്ചേരാനാകും). <a href="https://cheaperinference.com/?utm_source=omniroute"><b>ഒരു API കീ → നേടുക</b></a>
     </td>
   </tr>
 </table>
 
-<sub><code>aff=omniroute</code> എന്ന് ടാഗ് ചെയ്ത ലിങ്കുകൾ പങ്കാളി ലിങ്കുകളാണ്. നിങ്ങൾക്ക് അധിക ചിലവില്ലാതെ അവ പ്രോജക്റ്റിന് ധനസഹായം നൽകുന്നു.</sub>
+<sub><code>aff=omniroute</code> ടാഗ് ചെയ്ത ലിങ്കുകൾ പങ്കാളി ലിങ്കുകളാണ്. അവർ നിങ്ങൾക്ക് അധിക ചിലവില്ലാതെ പദ്ധതിക്ക് പണം നൽകുന്നു.</sub>
 
 <br/>
 
 <details open>
-<summary><sub><b>🎟️ അഫിലിയേറ്റ് പ്രൊമോ</b> — ഞങ്ങൾ സ്പോൺസർ ചെയ്യാത്ത ദാതാക്കളിൽ നിന്നുള്ള സൗജന്യ സൈൻഅപ്പ് കൂപ്പണുകൾ (വികസിപ്പിക്കാൻ ക്ലിക്ക് ചെയ്യുക)</sub></summary>
+<summary><sub><b>🎟️ അനുബന്ധ പ്രൊമോ</b> ഞങ്ങൾ സ്പോൺസർ ചെയ്യാത്ത ദാതാക്കളിൽ നിന്നുള്ള — സൗജന്യ സൈൻഅപ്പ് കൂപ്പണുകൾ (വിപുലീകരിക്കാൻ ക്ലിക്ക് ചെയ്യുക)</sub></summary>
 
-<sub><i>ഈ വിഭാഗം റഫറൽ/കൂപ്പൺ കോഡുകൾക്ക് മാത്രമുള്ളതാണ്. സ്പോൺസർ ചെയ്ത പങ്കാളിത്തങ്ങൾ മുകളിലുള്ള <b>🤝 ഞങ്ങളുടെ ഓപ്പൺ സോഴ്സ് സുഹൃത്തുക്കളുടെ പിന്തുണയോടെ</b> എന്ന വിഭാഗത്തിൽ കാണാം. OmniRoute-ന് ഇവിടെ ലിസ്റ്റ് ചെയ്തിട്ടുള്ള ദാതാക്കളുമായി സ്പോൺസർഷിപ്പോ പങ്കാളിത്തമോ ഇല്ല — ഇവ ആർക്കും ഉപയോഗിക്കാവുന്ന പൊതു കൂപ്പണുകളാണ്.</i></sub>
+<sub><i>ഈ വിഭാഗം referral/coupon കോഡുകൾക്ക് മാത്രമുള്ളതാണ്. സ്പോൺസേർഡ് പാർട്ണർഷിപ്പുകൾ ജീവിക്കുന്നു <b>🤝 ഞങ്ങളുടെ ഓപ്പൺ സോഴ്സ് സുഹൃത്തുക്കൾ പിന്തുണയ്ക്കുന്നു</b> മുകളിൽ. OmniRoute ഇവിടെ ലിസ്റ്റുചെയ്തിരിക്കുന്ന ദാതാക്കളുമായി സ്പോൺസർഷിപ്പോ പങ്കാളിത്തമോ ഇല്ല — ഇവ ആർക്കും ഉപയോഗിക്കാവുന്ന പൊതു കൂപ്പണുകളാണ്.</i></sub>
 
 <table>
   <tr>
     <td align="center" width="120">
       <a href="https://agentrouter.org/register?aff=70LM">
-        <img src="./public/providers/cli-generic.svg" width="32" alt="ഏജൻ്റ്റൂട്ടർ"/>
+        <img src="./public/providers/cli-generic.svg" width="32" alt="AgentRouter"/>
       </a>
       <br/><sub><b>AgentRouter</b></sub><br/><sub>agentrouter.org</sub>
     </td>
     <td>
-      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — അഫിലിയേറ്റ് സൈൻഅപ്പ് · സൈൻഅപ്പ് ചെയ്യുമ്പോൾ <b>$100 സൗജന്യ ക്രെഡിറ്റുകൾ</b> (സൗജന്യ സെർവർ, ഉയർന്ന ലേറ്റൻസി പ്രതീക്ഷിക്കുക — ടെസ്റ്റിംഗിന് ഏറ്റവും മികച്ചത്, പ്രൊഡക്ഷന് അല്ല). <b>v3.8.50</b> മുതൽ OmniRoute-ൽ ഫസ്റ്റ്-ക്ലാസ് പിന്തുണ: Chat Completions, Anthropic-അനുയോജ്യമായ വയർ ഫോർമാറ്റ്, OpenAI-അനുയോജ്യമായ പാത. ലഭ്യമായ മോഡലുകളിൽ <code>claude-opus-4-8</code>, <code>claude-opus-5</code>, <code>gpt-5.6-sol</code> എന്നിവയും അതിലേറെയും ഉൾപ്പെടുന്നു. <b><a href="https://agentrouter.org/register?aff=70LM">നിങ്ങളുടെ $100 നേടുക →</a></b></sub>
+      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — റഫറൽ ലിങ്ക് (ഔദ്യോഗിക സൈറ്റ്: <a href="https://agentrouter.org">agentrouter.org</a>) · <b>ദിവസേന $25 ചെക്ക്-ഇൻ ക്രെഡിറ്റ്</b>, കൂടാതെ ഒരു ക്ഷണം കോഡ് ഉള്ള സൈൻ-അപ്പുകൾക്ക് $50 കൂടുതൽ ലഭിക്കും (2026-11-23 പരിശോധിച്ചു; സൗജന്യ സെർവർ, ഉൽപ്പാദനത്തിനല്ല, ടെസ്റ്റിങ്ങിന് ഉയർന്ന ലേറ്റൻസി — പ്രതീക്ഷിക്കുന്നു). മുതൽ OmniRoute ൽ ഫസ്റ്റ് ക്ലാസ് പിന്തുണ <b>v3.8.50</b>: ചാറ്റ് പൂർത്തിയാക്കലുകൾ, ആന്ത്രോപിക്-അനുയോജ്യമായ വയർ ഫോർമാറ്റ്, OpenAI-അനുയോജ്യമായ പാത. അതിൻ്റെ പൊതു മോഡൽ പട്ടികയിൽ നിലവിൽ <code>gpt-6.1-sol</code>, <code>gpt-5.6-sol</code> എന്നിവ കാണിക്കുന്നു. <b><a href="https://agentrouter.org/register?aff=70LM">→ സൈൻ അപ്പ് ചെയ്യുക</a></b></sub>
       <br/><br/>
-      <sub>⚠️ <i>അഫിലിയേറ്റ് ലിങ്ക് — OmniRoute-ന് ഈ ദാതാവുമായി സ്പോൺസർഷിപ്പോ പങ്കാളിത്തമോ ഇല്ല.</i></sub>
+      <sub>⚠️ <i>അഫിലിയേറ്റ് ലിങ്ക് — OmniRoute ഈ ദാതാവുമായി സ്പോൺസർഷിപ്പോ പങ്കാളിത്തമോ ഇല്ല.</i></sub>
     </td>
   </tr>
 </table>
 
-<sub>OmniRoute ഉപയോക്താക്കൾക്ക് പ്രയോജനം ചെയ്യുന്ന ഉദാരമായ സൗജന്യ സൈൻഅപ്പ് കൂപ്പണുകളുള്ള മറ്റൊരു ദാതാവിനെ അറിയാമോ? ഒരു ഇഷ്യൂ തുറക്കുക, ഞങ്ങൾ അത് ഇവിടെ ചേർക്കും.</sub>
+<sub>OmniRoute ഉപയോക്താക്കൾക്ക് പ്രയോജനപ്പെടുന്ന ഉദാരമായ സൗജന്യ സൈനപ്പ് കൂപ്പണുള്ള മറ്റൊരു ദാതാവിനെ അറിയാമോ? ഒരു പ്രശ്നം തുറക്കുക, ഞങ്ങൾ അത് ഇവിടെ ചേർക്കും.</sub>
 
 </details>
 
 <br/>
 
-<div align="center">
+## കോമ്പോസ്: മുൻനിര
 
-## 🎯 കോംബോകൾ — പ്രധാന സവിശേഷത
+1. **`auto` ഉപയോഗിച്ച് ആരംഭിക്കുക.** നിങ്ങളുടെ OpenAI-അനുയോജ്യമായ ക്ലയൻ്റിൽ മോഡൽ സജ്ജമാക്കുക. OmniRoute കണക്റ്റുചെയ്ത ദാതാക്കളിൽ നിന്ന് ഒരു വെർച്വൽ കോംബോ നിർമ്മിക്കുകയും ഉദ്യോഗാർത്ഥികളെ ലൈവ് സ്കോർ ചെയ്യുകയും ചെയ്യുന്നു.
+2. **കൂടുതൽ നിയന്ത്രണത്തിനായി ഒരു കോംബോ സംരക്ഷിക്കുക.** ഒരു പേര്, ടാർഗെറ്റ് ലിസ്റ്റ്, തന്ത്രം എന്നിവ തിരഞ്ഞെടുക്കുക, തുടർന്ന് ആ പേര് മോഡലായി ഉപയോഗിക്കുക. ഏത് ലക്ഷ്യമാണ് ആദ്യം പോകുന്നതെന്നും ബാക്കിയുള്ളവ എങ്ങനെ പരീക്ഷിക്കണമെന്നും തന്ത്രം സജ്ജമാക്കുന്നു.
 
-</div>
+ഒരു കോംബോ മോഡലുകളിലുടനീളം സ്വയമേവ സഞ്ചരിക്കുന്നു. ക്വാട്ട ക്ഷീണം, ദാതാവിൻ്റെ പരാജയം അല്ലെങ്കിൽ മോഡൽ ലോക്കൗട്ട് എന്നിവയിൽ, അത് അടുത്ത യോഗ്യതയുള്ള ആരോഗ്യകരമായ ലക്ഷ്യത്തിനായി ശ്രമിക്കുന്നു.
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="22 കോംബോ റൂട്ടിംഗ് തന്ത്രങ്ങളിൽ 18 എണ്ണത്തിനായുള്ള ആനിമേറ്റഡ് ഉദാഹരണങ്ങൾ — ഓരോ തന്ത്രത്തിനും ഓരോ ടൈൽ: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted, expiry-first, jev എന്നിവ ആനിമേറ്റ് ചെയ്തിട്ടില്ല; താഴെയുള്ള പട്ടികയിൽ 22 തന്ത്രങ്ങളും വിവരിക്കുന്നു."/>
+### സീറോ കോൺഫിഗറേഷൻ: `auto` ഉപയോഗിക്കുക
 
-> ഒരു **കോംബോ** എന്നത് OmniRoute **സ്വയമേവ** റൂട്ട് ചെയ്യുന്ന മോഡലുകളുടെ ഒരു ശൃംഖലയാണ്. ക്വോട്ട തീർന്നാലോ, ഒരു പ്രൊവൈഡർ പരാജയപ്പെട്ടാലോ, ചെലവ് കുത്തനെ ഉയർന്നാലോ, കോംബോയ്ക്ക് അടുത്ത യോഗ്യവും ആരോഗ്യകരവുമായ മോഡലിലേക്ക് മാറാൻ കഴിയും. 🛡️
+```bash
+curl http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <your-omniroute-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "auto", "messages": [{"role": "user", "content": "Hello"}]}'
+```
 
-### ⚡ കോൺഫിഗറേഷൻ ഒന്നും വേണ്ട — `auto` ഉപയോഗിച്ചാൽ മതി
+വകഭേദങ്ങൾ ഭാരം ട്യൂൺ ചെയ്യുന്നു. അവസാനം അറിയപ്പെടുന്ന-നല്ല റൂട്ടിംഗ് പരാജയപ്പെടുന്നതുവരെ അവസാനത്തെ വിജയകരമായ ദാതാവിനൊപ്പം തുടരും, തുടർന്ന് അത് വീണ്ടെടുക്കും. വേഗതയേറിയതോ വിലകുറഞ്ഞതോ ആയ മോഡലിന് ഉറപ്പുനൽകാതെ `auto/fast`, `auto/cheap` എക്സ്പ്രസ് മുൻഗണനകൾ.
 
-കോംബോ സൃഷ്ടിക്കേണ്ടതില്ല. നിങ്ങളുടെ മോഡൽ `auto` (അല്ലെങ്കിൽ അതിന്റെ ഒരു വകഭേദം) ആയി സജ്ജീകരിക്കുക; കണക്റ്റ് ചെയ്തിരിക്കുന്ന പ്രൊവൈഡർമാരിൽ നിന്ന് OmniRoute തത്സമയം സ്കോർ ചെയ്ത് ഒരു വിർച്വൽ കോംബോ നിർമ്മിക്കും:
+| മോഡൽ ID             | പെരുമാറ്റം                                                                                                                                                                                                                                                                                                  |
+| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`              | സന്തുലിതമായ ഡിഫോൾട്ട് ഭാരം.                                                                                                                                                                                                                                                                                 |
+| `auto/fast`         | കുറഞ്ഞ കാലതാമസവും ദാതാവിൻ്റെ ആരോഗ്യവും അനുകൂലമാക്കുന്നു.                                                                                                                                                                                                                                                    |
+| `auto/cheap`        | കുറഞ്ഞ കാറ്റലോഗ് വിലകളെ അനുകൂലിക്കുന്നു.                                                                                                                                                                                                                                                                    |
+| `auto/coding`       | കോഡ് സൃഷ്ടിക്കുന്നതിനുള്ള ഗുണമേന്മയുള്ള ആദ്യ തൂക്കങ്ങൾ.                                                                                                                                                                                                                                                     |
+| `auto/smart`        | 10% പര്യവേക്ഷണത്തോടുകൂടിയ ഗുണമേന്മയുള്ള-ആദ്യ തൂക്കം (ഡിഫോൾട്ട് 5%).                                                                                                                                                                                                                                         |
+| `auto/lkgp`         | `auto` യുടെ അതേ ഭാരമുള്ള വ്യക്തമായ അവസാനത്തെ അറിയപ്പെടുന്ന നല്ല റൂട്ടിംഗ്.                                                                                                                                                                                                                                  |
+| `auto/subscription` | തത്സമയ പരിശോധിച്ചുറപ്പിച്ച പ്ലാൻ ക്വാട്ട മാത്രം ഉപയോഗിക്കുന്നു. ഒന്നും ലഭ്യമല്ലാത്തപ്പോൾ HTTP 503 തിരികെ നൽകുകയും ബില്ല് ഫാൾബാക്ക് ഒഴിവാക്കുകയും ചെയ്യുന്നു.                                                                                                                                                |
+| `auto/thrifty`      | → കീലെസ്സ് → സൗജന്യ → വിലകുറഞ്ഞ → പ്രീമിയം പ്ലാൻ ചെയ്യുക. ക്വാട്ടയും കൂൾഡൗണും അനുവദിക്കുമ്പോൾ ബിൽ ചെയ്ത മോഡലുകളിലും പ്ലാനിലേക്ക് മടങ്ങുകയും ചെയ്തേക്കാം.                                                                                                                                                    |
+| `auto/offline`      | ക്വോട്ടയും നിരക്ക്-പരിധി ഹെഡ്റൂമും അനുകൂലമാക്കുന്നു. അഭ്യർത്ഥനകൾ ഇപ്പോഴും നിങ്ങളുടെ ദാതാക്കളിലേക്ക് പോകുന്നു.                                                                                                                                                                                               |
+| `auto/chaos`        | ഒരു ദാതാവിന് സമാന്തരമായി ഒരു മോഡൽ, ഡിഫോൾട്ടായി അഞ്ച് വരെ അല്ലെങ്കിൽ കോൺഫിഗർ ചെയ്യുമ്പോൾ പത്ത് വരെ. ഓരോ മോഡലിനും ഒരു അപ്സ്ട്രീം കോൾ. മുൻനിര മോഡൽ പരാജയപ്പെടുകയാണെങ്കിൽ ഉയർന്ന റാങ്കുള്ള മറുപടിയോ അവസാനത്തെ വിജയകരമായ പാനൽ മറുപടിയോ നൽകുന്നു. ഒരു ജഡ്ജിയുമായി മറുപടികൾ സമന്വയിപ്പിക്കാൻ `fusion` ഉപയോഗിക്കുക. |
 
-<table>
-  <tr><th align="left">മോഡൽ ID</th><th align="left">ഏത് കാര്യത്തിനാണ് ഇത് മുൻഗണന നൽകുന്നത്</th></tr>
-  <tr><td align="left" nowrap><code>auto</code></td><td align="left">🎯 സമതുലിതമായ ഡിഫോൾട്ട് (LKGP — അവസാനമായി നല്ല പ്രകടനം കാഴ്ചവെച്ച പ്രൊവൈഡറിൽ തന്നെ തുടരുന്നു)</td></tr>
-  <tr><td align="left" nowrap><code>auto/coding</code></td><td align="left">🧑💻 കോഡ് ജനറേഷനായി ഗുണനിലവാരത്തിന് മുൻഗണന നൽകുന്ന വെയിറ്റുകൾ</td></tr>
-  <tr><td align="left" nowrap><code>auto/fast</code></td><td align="left">⚡ ഏറ്റവും കുറഞ്ഞ ലാറ്റൻസി ആദ്യം</td></tr>
-  <tr><td align="left" nowrap><code>auto/cheap</code></td><td align="left">💰 ടോക്കണിന് ഏറ്റവും കുറഞ്ഞ ചെലവുള്ളത് ആദ്യം</td></tr>
-  <tr><td align="left" nowrap><code>auto/subscription</code></td><td align="left">🎟️ നിങ്ങൾ ഇതിനകം പണമടച്ച സബ്സ്ക്രിപ്ഷൻ ക്വോട്ട മാത്രം — പരാജയപ്പെട്ടാൽ അടച്ചുപൂട്ടും, ബിൽ ചെയ്യാവുന്ന ഫാൾബാക്ക് ഒരിക്കലും ഉപയോഗിക്കില്ല (<a href="./docs/routing/SUBSCRIPTION_LADDER.md">ഗൈഡ്</a>)</td></tr>
-  <tr><td align="left" nowrap><code>auto/thrifty</code></td><td align="left">🪜 ആദ്യം പ്ലാൻ ക്വോട്ട, തുടർന്ന് ഏറ്റവും കുറഞ്ഞ ചെലവുള്ള പണമടച്ച ഓപ്ഷനുകളിലേക്ക് ഓരോ ഘട്ടമായി — റീസെറ്റ് ചെയ്ത ശേഷം വീണ്ടും പ്ലാനിലേക്ക് (<a href="./docs/routing/SUBSCRIPTION_LADDER.md">ഗൈഡ്</a>)</td></tr>
-  <tr><td align="left" nowrap><code>auto/offline</code></td><td align="left">🔋 ഏറ്റവും കൂടുതലുള്ള ക്വോട്ട / റേറ്റ്-ലിമിറ്റ് ഹെഡ്റൂം ആദ്യം</td></tr>
-  <tr><td align="left" nowrap><code>auto/smart</code></td><td align="left">🔭 ഗുണനിലവാരത്തിന് മുൻഗണന + മികച്ച മോഡലുകൾ കണ്ടെത്താൻ 10% പര്യവേക്ഷണം</td></tr>
-  <tr><td align="left" nowrap><code>auto/lkgp</code></td><td align="left">📌 അവസാനമായി നല്ല പ്രകടനം കാഴ്ചവെച്ച പ്രൊവൈഡറിൽ തുടരുന്നത് വ്യക്തമായി പ്രയോഗിക്കുന്നു</td></tr>
-  <tr><td align="left" nowrap><code>auto/chaos</code></td><td align="left">🧪 മോഡലുകളുടെ ഒരു പാനലിലേക്ക് സമാന്തര fan-out (ഓരോ പ്രൊവൈഡറിനും ഒന്ന്, ഡിഫോൾട്ടായി 5 എണ്ണം), ഒരു ഉത്തരം തിരികെ നൽകുന്നു; പാനലിലെ ഓരോ മോഡലിനും ഓരോ upstream കോൾ, fault injection അല്ല</td></tr>
-</table>
+വിഭാഗത്തിലും ഓപ്ഷണൽ ടയർ ഉദാഹരണങ്ങളിലും `auto/coding:fast`, `auto/coding:free`, `auto/reasoning:pro`, `auto/vision` എന്നിവ ഉൾപ്പെടുന്നു. ബന്ധിപ്പിച്ച കാൻഡിഡേറ്റ് പൊരുത്തപ്പെടുന്നില്ലെങ്കിൽ, അഭ്യർത്ഥന HTTP 503 നൽകുന്നു, പൂൾ ഇടുങ്ങിയതായിരിക്കും. [ഓട്ടോ-കോംബോ ഗൈഡ്](./docs/routing/AUTO-COMBO.md) · [സബ്സ്ക്രിപ്ഷൻ-ആദ്യ റൂട്ടിംഗ്](./docs/routing/SUBSCRIPTION_LADDER.md)
 
-##
+### അല്ലെങ്കിൽ സ്വന്തമായി നിർമ്മിക്കുക: 22 റൂട്ടിംഗ് തന്ത്രങ്ങൾ
 
-### 🔀 അല്ലെങ്കിൽ സ്വന്തമായി നിർമ്മിക്കുക — 22 റൂട്ടിംഗ് തന്ത്രങ്ങൾ
+```bash
+omniroute combo create my-pool --strategy fill-first \
+  --models "provider-a/model-1,provider-b/model-2"
+```
 
-എല്ലാ **22** തന്ത്രങ്ങളും — ഓരോ കോംബോ ഘട്ടത്തിനും ഇഷ്ടാനുസരണം ചേർത്തും മാറ്റിയും ഉപയോഗിക്കുക:
+22 തന്ത്രങ്ങളിൽ 15 എണ്ണം CLI അംഗീകരിക്കുന്നു. ഡാഷ്ബോർഡും കോമ്പോസുകളും API 22-ഉം സ്വീകരിക്കുന്നു.
 
-<table>
-  <tr>
-    <th>#</th>
-    <th align="left">തന്ത്രം</th>
-    <th align="left">ഇത് ചെയ്യുന്നത്</th>
-  </tr>
-  <tr>
-    <td align="center">1</td>
-    <td nowrap><code>priority</code></td>
-    <td>ആദ്യ ലക്ഷ്യങ്ങളുടെ ക്രമപ്പെടുത്തിയ പട്ടിക — അടുത്തതിലേക്ക് നീങ്ങുന്നതിന് മുമ്പ് ഓരോന്നും പൂർണ്ണമായി ഉപയോഗിക്കുന്നു 🥇</td>
-  </tr>
-  <tr>
-    <td align="center">2</td>
-    <td nowrap><code>fill-first</code></td>
-    <td>അടുത്ത ലക്ഷ്യത്തിലേക്ക് നീങ്ങുന്നതിന് മുമ്പ് ഓരോ ലക്ഷ്യത്തിന്റെയും ക്വോട്ട പൂർണ്ണമായി നിറയ്ക്കുന്നു</td>
-  </tr>
-  <tr>
-    <td align="center">3</td>
-    <td nowrap><code>weighted</code></td>
-    <td>ഓരോ ലക്ഷ്യത്തിന്റെയും ഭാരമനുസരിച്ചുള്ള വെയ്റ്റഡ് റാൻഡം തിരഞ്ഞെടുപ്പ്</td>
-  </tr>
-  <tr>
-    <td align="center">4</td>
-    <td nowrap><code>round-robin</code></td>
-    <td>ലക്ഷ്യങ്ങളിലൂടെ ക്രമത്തിൽ ചക്രാകാരമായി സഞ്ചരിക്കുന്നു</td>
-  </tr>
-  <tr>
-    <td align="center">5</td>
-    <td nowrap><code>p2c</code></td>
-    <td>രണ്ട് തിരഞ്ഞെടുപ്പുകളുടെ പവർ അടിസ്ഥാനമാക്കിയുള്ള റാൻഡം ലോഡ് ബാലൻസിംഗ്</td>
-  </tr>
-  <tr>
-    <td align="center">6</td>
-    <td nowrap><code>least-used</code></td>
-    <td>നിലവിലെ ലോഡ് ഏറ്റവും കുറഞ്ഞ ലക്ഷ്യം തിരഞ്ഞെടുക്കുന്നു</td>
-  </tr>
-  <tr>
-    <td align="center">7</td>
-    <td nowrap><code>random</code></td>
-    <td>സമവായ സാധ്യതയുള്ള റാൻഡം തിരഞ്ഞെടുപ്പ് (ഡ്യൂപ്ലിക്കേറ്റുകൾ നീക്കംചെയ്തത്)</td>
-  </tr>
-  <tr>
-    <td align="center">8</td>
-    <td nowrap><code>strict-random</code></td>
-    <td>ആവർത്തനങ്ങൾ ഡ്യൂപ്ലിക്കേറ്റ് നീക്കം ചെയ്യാതെ റാൻഡം തിരഞ്ഞെടുപ്പ് 🎲</td>
-  </tr>
-  <tr>
-    <td align="center">9</td>
-    <td nowrap><code>cost-optimized</code></td>
-    <td>തത്സമയ കാറ്റലോഗ് നിരക്കുകളിൽ നിന്നുള്ള ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള $ ചെലവ് കുറയ്ക്കുന്നു 💸</td>
-  </tr>
-  <tr>
-    <td align="center">10</td>
-    <td nowrap><code>headroom</code></td>
-    <td>ശേഷിക്കുന്ന ക്വോട്ട ഏറ്റവും കൂടുതലുള്ള ലക്ഷ്യം തിരഞ്ഞെടുക്കുന്നു</td>
-  </tr>
-  <tr>
-    <td align="center">11</td>
-    <td nowrap><code>quota-weighted</code></td>
-    <td>ക്വോട്ട തീർന്ന അക്കൗണ്ടുകൾ ഒഴിവാക്കി, ശേഷിക്കുന്ന ക്വോട്ട ÷ നിലവിൽ പ്രവർത്തിക്കുന്ന ലോഡ് എന്ന അനുപാതത്തിൽ തിരഞ്ഞെടുക്കുന്നു — നിലവിലുള്ള സംഭാഷണങ്ങൾ അതേ ലക്ഷ്യത്തിൽ തന്നെ തുടരുന്നു ⚖️</td>
-  </tr>
-  <tr>
-    <td align="center">12</td>
-    <td nowrap><code>reset-window</code></td>
-    <td>ക്വോട്ട വിൻഡോ ഏറ്റവും വേഗം പുനഃസജ്ജമാകുന്ന ലക്ഷ്യത്തിന് മുൻഗണന നൽകുന്നു</td>
-  </tr>
-  <tr>
-    <td align="center">13</td>
-    <td nowrap><code>reset-aware</code></td>
-    <td>ക്വോട്ട പുനഃസജ്ജീകരണ സമയമനുസരിച്ച് റാങ്ക് ചെയ്യുന്നു — കുറഞ്ഞ വിൻഡോകൾക്ക് ആദ്യം മുൻഗണന 📊</td>
-  </tr>
-  <tr>
-    <td align="center">14</td>
-    <td nowrap><code>context-relay</code></td>
-    <td>ദീർഘമായ സംഭാഷണങ്ങൾക്കായി ലക്ഷ്യങ്ങളിലുടനീളം കോൺടെക്സ്റ്റ് കൈമാറുന്നു 🧠</td>
-  </tr>
-  <tr>
-    <td align="center">15</td>
-    <td nowrap><code>context-optimized</code></td>
-    <td>നിലവിലെ കോൺടെക്സ്റ്റ് വലുപ്പത്തിന് ഏറ്റവും അനുയോജ്യമായത് തിരഞ്ഞെടുക്കുന്നു</td>
-  </tr>
-  <tr>
-    <td align="center">16</td>
-    <td nowrap><code>cache-optimized</code></td>
-    <td>പുനരുപയോഗിക്കാവുന്ന ഓരോ പ്രോംപ്റ്റ് പ്രിഫിക്സും അതേ അക്കൗണ്ടിൽ തന്നെ നിശ്ചയിക്കുന്നു — പ്രോംപ്റ്റ്-കാഷ് ഹിറ്റുകൾ പരമാവധി വർധിപ്പിക്കുന്നു 🎯</td>
-  </tr>
-  <tr>
-    <td align="center">17</td>
-    <td nowrap><code>lkgp</code></td>
-    <td>അവസാനം വിജയിച്ച പ്രൊവൈഡറിൽ നിശ്ചയിച്ച്, തുടർന്ന് നിയമങ്ങളിലേക്ക് ഫാൾബാക്ക് ചെയ്യുന്നു — Last-Known-Good Path</td>
-  </tr>
-  <tr>
-    <td align="center">18</td>
-    <td nowrap><code>auto</code></td>
-    <td>ഓരോ കണക്ഷനിലും 16 ഘടകങ്ങളെ അടിസ്ഥാനമാക്കിയുള്ള തത്സമയ സ്കോറിംഗ് 🤖</td>
-  </tr>
-  <tr>
-    <td align="center">19</td>
-    <td nowrap><code>fusion</code></td>
-    <td>മോഡലുകളുടെ ഒരു പാനലിലേക്ക് ഒരേസമയം അഭ്യർത്ഥനകൾ അയച്ച്, ഒരു ജഡ്ജ് ഒരൊറ്റ ഉത്തരം സംയോജിപ്പിക്കുന്നു 🧬</td>
-  </tr>
-  <tr>
-    <td align="center">20</td>
-    <td nowrap><code>pipeline</code></td>
-    <td>ഘട്ടങ്ങൾ പരസ്പരം ബന്ധിപ്പിക്കുന്നു — ഓരോ ലക്ഷ്യത്തിന്റെയും ഔട്ട്പുട്ട് അടുത്തതിലേക്ക് നൽകുന്നു 🔗</td>
-  </tr>
-  <tr>
-    <td align="center">21</td>
-    <td nowrap><code>expiry-first</code></td>
-    <td>ഉപയോഗിക്കാതെ ആദ്യം കാലഹരണപ്പെടാനിരിക്കുന്ന ക്വോട്ടയുള്ള അക്കൗണ്ടിന്റെ ക്വോട്ട ഉപയോഗിക്കുന്നു — ഏറ്റവും സമീപമുള്ള പുനഃസജ്ജീകരണമുള്ള, ശേഷിപ്പ് ഏറ്റവും കൂടുതലുള്ള അക്കൗണ്ടാണ് വിജയിക്കുന്നത് ⏳</td>
-  </tr>
-  <tr>
-    <td align="center">22</td>
-    <td nowrap><code>jev</code></td>
-    <td>നിങ്ങളുടെ റാങ്ക് ചെയ്ത പട്ടിക; ഓരോ അഭ്യർത്ഥനയിലും ഏത് എൻട്രികൾ പ്രവർത്തിക്കണമെന്ന് TypeSafe Jev തിരഞ്ഞെടുക്കുന്നു, തുടർന്ന് നിങ്ങളുടെ ക്രമത്തിലേക്ക് ഫാൾബാക്ക് ചെയ്യുന്നു (ഓപ്റ്റ്-ഇൻ ഫ്ലാഗ്) ⚖️</td>
-  </tr>
-</table>
+| തന്ത്രം             | പെരുമാറ്റം                                                                                                                                                                                                                                  |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`              | റാങ്ക് സ്ഥാനാർത്ഥികൾ 16-ഘടക ഓട്ടോ-കോംബോ സ്കോറർക്കൊപ്പം തത്സമയം.                                                                                                                                                                             |
+| `cache-optimized`   | പ്രോംപ്റ്റ് പ്രിഫിക്സ് കാഷെയിൽ സൂക്ഷിക്കാൻ സാധ്യതയുള്ള അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക.                                                                                                                                                            |
+| `context-optimized` | അറിയപ്പെടുന്ന ഏറ്റവും വലിയ സന്ദർഭ വിൻഡോ ആദ്യം പരീക്ഷിക്കുക.                                                                                                                                                                                 |
+| `context-relay`     | അക്കൗണ്ടുകൾ മാറുമ്പോൾ നിങ്ങളുടെ ഓർഡർ സൂക്ഷിക്കുകയും സംഭാഷണ സംഗ്രഹം കൈമാറുകയും ചെയ്യുക.                                                                                                                                                      |
+| `cost-optimized`    | കാറ്റലോഗ് ഇൻപുട്ട്-ടോക്കൺ വില പ്രകാരം അടുക്കുക, അജ്ഞാതമാണ് അവസാനമായി. അന്തിമ അഭ്യർത്ഥന ചെലവ് വ്യത്യാസപ്പെടാം.                                                                                                                               |
+| `expiry-first`      | ചെലവഴിക്കുക ക്വാട്ട കാലഹരണപ്പെടാൻ സാധ്യതയുണ്ട്, ആദ്യം പുനഃസജ്ജമാക്കുന്നത് വരെ മണിക്കൂറിൽ ഏറ്റവും കൂടുതൽ ശേഷിക്കുന്നു.                                                                                                                       |
+| `fill-first`        | ആദ്യം ലഭ്യമായ ടാർഗെറ്റ് അവസാനിക്കുകയോ പരാജയപ്പെടുകയോ ചെയ്യുന്നതുവരെ അതിൽ തുടരുക, തുടർന്ന് മുന്നോട്ട് പോകുക.                                                                                                                                 |
+| `fusion`            | ഒരു പാനൽ സമാന്തരമായി അന്വേഷിക്കുകയും ഒരു ജഡ്ജിയെ ഒരു ഉത്തരം സമന്വയിപ്പിക്കുകയും ചെയ്യുക.                                                                                                                                                    |
+| `headroom`          | 5-മണിക്കൂർ, പ്രതിവാര വിൻഡോകളിൽ ഏറ്റവും സൗജന്യ ശേഷി തിരഞ്ഞെടുക്കുക.                                                                                                                                                                          |
+| `jev`               | TypeSafe Jev നിങ്ങളുടെ റാങ്ക് ലിസ്റ്റിലെ എൻട്രികൾ തിരഞ്ഞെടുക്കുന്നു. ഓരോ അഭ്യർത്ഥനയ്ക്കും ഒരു ഉദ്ധരണി അയയ്ക്കാനും പണമടച്ചുള്ള TypeSafe കോളുകൾ ഉപയോഗിക്കാനും `COMBO_JEV_STRATEGY_ENABLED` ഓണാക്കുക. ഇത് ഓഫാക്കിയാൽ, നിങ്ങളുടെ ഓർഡർ ബാധകമാണ്. |
+| `least-used`        | ഈ കോമ്പോയിൽ രേഖപ്പെടുത്തിയിട്ടുള്ള ഏറ്റവും കുറച്ച് അഭ്യർത്ഥനകളുള്ള ടാർഗെറ്റ് തിരഞ്ഞെടുക്കുക.                                                                                                                                                |
+| `lkgp`              | അവസാനം വിജയിച്ച ദാതാവിനെ ആദ്യം പരീക്ഷിക്കുക, അല്ലാത്തപക്ഷം നിങ്ങളുടെ ഓർഡർ നിലനിർത്തുക.                                                                                                                                                      |
+| `p2c`               | രണ്ട് ലക്ഷ്യങ്ങൾ സാമ്പിൾ ചെയ്ത് വിജയനിരക്കും ലേറ്റൻസിയും അനുസരിച്ച് തിരഞ്ഞെടുക്കുക.                                                                                                                                                         |
+| `pipeline`          | ഓരോ ഘട്ടത്തിൻ്റെയും ഔട്ട്പുട്ടും അടുത്ത ലക്ഷ്യത്തിലേക്ക് ക്രമത്തിൽ നൽകുകയും അന്തിമ ഉത്തരം മാത്രം നൽകുകയും ചെയ്യുക.                                                                                                                          |
+| `priority`          | നിങ്ങളുടെ ക്രമത്തിൽ ലക്ഷ്യങ്ങൾ പരീക്ഷിക്കുക. സെഷൻ സ്റ്റിക്കിനെസ് അതിനെ സംരക്ഷിക്കുന്നു.                                                                                                                                                     |
+| `quota-weighted`    | തീർന്നുപോയ അക്കൗണ്ടുകൾ ഒഴിവാക്കി ശേഷിക്കുന്ന ക്വാട്ടയും ഇൻ-ഫ്ലൈറ്റ് ലോഡും ഉപയോഗിച്ച് വരയ്ക്കുക.                                                                                                                                             |
+| `random`            | ഓരോ അഭ്യർത്ഥനയ്ക്കും ഷഫിൾ ചെയ്യുക. ആദ്യ ലക്ഷ്യം തന്നെ ആവർത്തിക്കാം.                                                                                                                                                                         |
+| `reset-aware`       | സെഷനിലും പ്രതിവാര വിൻഡോകളിലും റീസെറ്റ് ചെയ്യാനുള്ള ശേഷിക്കുന്ന ക്വാട്ടയും സമയവും സ്കോർ ചെയ്യുക.                                                                                                                                             |
+| `reset-window`      | ക്വാട്ട വിൻഡോ എത്രയും വേഗം പുനഃസജ്ജമാക്കുന്ന അക്കൗണ്ട് പരീക്ഷിക്കുക.                                                                                                                                                                        |
+| `round-robin`       | ക്രമത്തിൽ തിരിക്കുക, ഡിഫോൾട്ടായി ഓരോ ലക്ഷ്യത്തിനും മൂന്ന് വിജയങ്ങൾ.                                                                                                                                                                         |
+| `strict-random`     | ആവർത്തനത്തിന് മുമ്പ് ഓരോ ടാർഗെറ്റും ഒരു തവണ ലീഡ് ചെയ്യുന്ന തരത്തിൽ ഷഫിൾ ചെയ്ത ഡെക്കിൽ നിന്ന് കൈകാര്യം ചെയ്യുക.                                                                                                                              |
+| `weighted`          | ഭാരമനുസരിച്ച് ആദ്യ ലക്ഷ്യം വരച്ച് ബാക്കിയുള്ളവ ഫാൾബാക്കുകളായി സൂക്ഷിക്കുക. വിഭജനം സ്ഥിതിവിവരക്കണക്ക് ആണ്. കർശനമായ ഭ്രമണത്തിന് `round-robin` ഉപയോഗിക്കുക.                                                                                    |
 
-<sub>Auto-Combo എഞ്ചിൻ ഓരോ സ്ഥാനാർഥിയെയും **16 ഘടകങ്ങൾ** (ആരോഗ്യം, ക്വോട്ട, ചെലവ്, ലാറ്റൻസി, ടാസ്ക് അനുയോജ്യത, ഗുണനിലവാരം, സെഷൻ ലഭ്യത…) അടിസ്ഥാനമാക്കി സ്കോർ ചെയ്യുന്നു — [`docs/routing/AUTO-COMBO.md`](docs/routing/AUTO-COMBO.md) കാണുക.</sub>
+5 മണിക്കൂർ, പ്രതിവാര സബ്സ്ക്രിപ്ഷൻ വിൻഡോകൾ ഉൾപ്പെടെ ദാതാക്കൾ റിപ്പോർട്ട് ചെയ്യുന്ന തത്സമയ ഡാറ്റ ക്വാട്ട സ്ട്രാറ്റജികൾ ഉപയോഗിക്കുന്നു. `fusion`, `pipeline` ഓരോ അഭ്യർത്ഥനയിലും ഒന്നിലധികം അപ്സ്ട്രീം കോളുകൾ ചെയ്യുന്നു.
 
-##
+16-ഘടക സ്കോറർ ക്വാട്ട, ആരോഗ്യം, ചെലവ്, ലേറ്റൻസി, ടാസ്ക് ഫിറ്റ്, സ്ഥിരത, ടയർ മുൻഗണന, ടയർ അഫിനിറ്റി, സ്പെസിസിറ്റി പൊരുത്തം, സന്ദർഭ അഫിനിറ്റി, കാഷെ അഫിനിറ്റി, സെഷൻ ലഭ്യത, റീസെറ്റ്-വിൻഡോ അഫിനിറ്റി, കണക്ഷൻ സാന്ദ്രത, ഗുണനിലവാരം, വിശ്വാസ്യത എന്നിവ ഉപയോഗിക്കുന്നു. പ്രൊഫൈൽ അനുസരിച്ച് ഭാരം വ്യത്യാസപ്പെടുന്നു. കാഷെ അഫിനിറ്റി, റീസെറ്റ്-വിൻഡോ അഫിനിറ്റി, വിശ്വാസ്യത എന്നിവയ്ക്ക് ഡിഫോൾട്ടായി പൂജ്യം ഭാരമില്ല. [സ്കോറിംഗ് ഘടകങ്ങൾ](./docs/routing/AUTO-COMBO.md#how-it-works-persisted-auto-combos)
 
-### 🧱 പ്രതിരോധശേഷി ഉൾക്കൊള്ളിച്ചിരിക്കുന്നു (3 സ്വതന്ത്ര പാളികൾ)
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animated grid showing how all 22 public OmniRoute combo routing strategies select, order, or chain targets."/>
 
-<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute പ്രതിരോധശേഷി — 3 സ്വതന്ത്ര സ്വയം-ശമന പാളികൾ, ഓരോ തകരാറിനും അനുയോജ്യമായ പാളി. പാളി 1 പ്രൊവൈഡർ സർക്യൂട്ട് ബ്രേക്കർ (മുഴുവൻ പ്രൊവൈഡറും): 408/5xx-ൽ മാത്രം ട്രിപ്പ് ചെയ്യുന്നു, പരിധികൾ OAuth 8× / API-key 12× / local 2×, 60s/30s/15s കഴിഞ്ഞ് HALF-OPEN പ്രോബിലേക്ക് പുനഃസജ്ജമാകുന്നു, മന്ദഗതിയിലുള്ള വീണ്ടെടുക്കൽ; OPEN ആയിരിക്കുമ്പോൾ കോംബോ അടുത്ത പ്രൊവൈഡറിലേക്ക് റീറൂട്ട് ചെയ്യുന്നു. പാളി 2 കണക്ഷൻ കൂൾഡൗൺ (ഒരു കീ/അക്കൗണ്ട്): അടിസ്ഥാന സമയം OAuth 5s / API-key 3s, anti-thundering-herd ഗാർഡോടുകൂടിയ exponential ×2 ബാക്ക്ഓഫ്, 429 Retry-After മാനിക്കുന്നു, വിജയം എല്ലാ പിശക് നിലകളും മായ്ക്കുന്നു; ഒരു കൂൾഡൗണിലുള്ള കീ ഒഴിവാക്കപ്പെടുമ്പോഴും സഹോദര കീകൾ സേവനം തുടരുന്നു. പാളി 3 മോഡൽ ലോക്ക്ഔട്ട് (ഒരു മോഡൽ): ഓരോ മോഡലിലുമുള്ള 429, local 404 അല്ലെങ്കിൽ മോഡ് നിരാകരണങ്ങൾ ആ മോഡലിനെ മാത്രം ലോക്ക് ചെയ്യുന്നു — മുഴുവൻ കണക്ഷനെയും ഒരിക്കലും അല്ല. ടെർമിനൽ നിലകൾ (banned, expired, credits exhausted) ഓപ്പറേറ്റർക്കുള്ളതാണ്, കൂൾഡൗണുകൾക്കുള്ളതല്ല."/>
+`strategy: "auto"` ഉപയോഗിച്ച് സംരക്ഷിച്ച കോമ്പോയിൽ, `config.routerStrategy` `rules`, `score`, `cost` (`eco`), `latency` (`fast`), `sla-aware` (`sla`), `lkgp`, `nadir` അല്ലെങ്കിൽ `decision` എന്നിവ തിരഞ്ഞെടുക്കുന്നു. [ഓട്ടോ റൂട്ടർ തന്ത്രങ്ങൾ](./docs/routing/AUTO-COMBO.md#auto-router-strategies)
 
-<sub>📖 [Auto-Combo എഞ്ചിൻ](docs/routing/AUTO-COMBO.md) · [പ്രതിരോധശേഷി ഗൈഡ്](docs/architecture/RESILIENCE_GUIDE.md)</sub>
+<img src="./docs/diagrams/auto-router-strategies.svg" width="100%" alt="Eight auto router strategies with example picks and aliases grouped. Nadir and decision fall back to rules when their deciders are unavailable."/>
+
+### പ്രതിരോധശേഷി നിർമ്മിച്ചിരിക്കുന്നത്: 3 സ്വതന്ത്ര പാളികൾ
+
+പരാജയങ്ങൾ മൂന്ന് സ്കോപ്പുകളിൽ കൈകാര്യം ചെയ്യപ്പെടുന്നു, അതിനാൽ ഒരു മോശം മോഡൽ അതിൻ്റെ അക്കൗണ്ട് എടുത്തുകളയുന്നില്ല, ഒരു മോശം അക്കൗണ്ട് അതിൻ്റെ ദാതാവിനെ നീക്കം ചെയ്യുന്നില്ല.
+
+<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute resilience: 3 independent self-healing layers, the right layer for the right failure. Layer 1, provider circuit breaker (whole provider): trips only on 408/500/502/503/504, opens after 8 failures for OAuth providers or 12 for API-key providers, resets after 60s or 30s into a HALF-OPEN probe, lazy recovery; while OPEN the combo reroutes to the next provider. Layer 2, connection cooldown (one key or account): base 5s OAuth or 3s API-key, exponential backoff with an anti-thundering-herd guard, success clears the error state; one cooling key is skipped while sibling keys keep serving. Layer 3, model lockout (one model): per-model 429, 404 or access denials lock just that model, never the whole connection. Terminal states (banned, expired, credits exhausted) wait for the operator; they are not cooldowns."/>
+
+#### ഒരു മുഴുവൻ ദാതാവ് കുറവാണെങ്കിൽ
+
+ദി** ദാതാവ് സർക്യൂട്ട് ബ്രേക്കർ** സ്റ്റാറ്റസ് 408, 500, 502, 503 അല്ലെങ്കിൽ 504 ഉള്ള 8 (OAuth) അല്ലെങ്കിൽ 12 (API കീ) പരാജയങ്ങൾക്ക് ശേഷം തുറക്കുന്നു. അത് തുറന്നിരിക്കുമ്പോൾ കോംബോസ് ആ ദാതാവിനെ ഒഴിവാക്കുക. 60 സെക്കൻ്റുകളോ 30 സെക്കൻ്റുകളോ കഴിഞ്ഞാൽ, ഒരു അന്വേഷണ അഭ്യർത്ഥന അത് അടയ്ക്കുമോ എന്ന് തീരുമാനിക്കുന്നു.
+
+#### ഒരു കീ അല്ലെങ്കിൽ അക്കൗണ്ട് നിരക്ക് പരിമിതമാണെങ്കിൽ
+
+ദി** കണക്ഷൻ കൂൾഡൗൺ** 5 സെ (OAuth) അല്ലെങ്കിൽ 3 സെ (API കീ) മുതൽ എക്സ്പോണൻഷ്യൽ ബാക്ക്ഓഫ് ഉള്ള ആ കണക്ഷൻ മാത്രം ബെഞ്ചുകൾ. ഒരേ ദാതാവിനുള്ള മറ്റ് കീകൾ സേവനം തുടരുന്നു.
+
+#### ഒരു മോഡൽ നിരസിച്ചാൽ
+
+ദി** മോഡൽ ലോക്കൗട്ട്** ഓരോ മോഡൽ 429, 404 അല്ലെങ്കിൽ ആക്സസ് നിരസിച്ചതിന് ശേഷം ആ കണക്ഷനിൽ ആ മോഡൽ മാത്രം തടയുന്നു. ഒരേ കണക്ഷനിലുള്ള മറ്റ് മോഡലുകൾ സേവനം തുടരുന്നു.
+
+നിരോധിക്കപ്പെട്ടതും കാലഹരണപ്പെട്ടതും ക്രെഡിറ്റ് ഇല്ലാത്തതുമായ കണക്ഷനുകൾ ടെർമിനൽ അവസ്ഥകളാണ്, കൂൾഡൗണുകളല്ല: അവ നിങ്ങൾ പരിഹരിക്കുന്നതിനായി കാത്തിരിക്കുന്നു.
+
+<sub>[ഓട്ടോ-കോംബോ എഞ്ചിൻ](docs/routing/AUTO-COMBO.md) · [റെസിലൻസ് ഗൈഡ്](docs/architecture/RESILIENCE_GUIDE.md)</sub>
 
 <br/>
 
-<div align="center">
+## എന്താണ് OmniRoute വേർതിരിക്കുന്നത്
 
-## 🏆 OmniRoute-നെ വ്യത്യസ്തമാക്കുന്നത്
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 394 providers, 140+ providers with a free offer, 22 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
-</div>
-
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-നെ വ്യത്യസ്തമാക്കുന്നത് — 13 ശേഷികളിലായി 9router, OpenRouter, CLIProxyAPI, LiteLLM എന്നിവയുമായി താരതമ്യം ചെയ്യുന്ന, തീയതിയോടുകൂടിയ ഫീച്ചർ സ്നാപ്ഷോട്ട്. OmniRoute: 394 ദാതാക്കൾ, ഇതിനകം ഉൾപ്പെടുത്തിയ 150+ സൗജന്യ ടിയറുകൾ, 22 റൂട്ടിംഗ് തന്ത്രങ്ങൾ, 12-എഞ്ചിൻ ടോക്കൺ കംപ്രഷൻ, 110 ടൂളുകളുള്ള ബിൽറ്റ്-ഇൻ MCP സെർവർ, A2A ഏജന്റ് പ്രോട്ടോക്കോൾ, സ്ഥിരമായ മെമ്മറി, ഗാർഡ്റെയിലുകൾ, ക്ലൗഡ് ഏജന്റുകൾ, TLS ഫിംഗർപ്രിന്റ് സ്റ്റെൽത്ത്, Desktop/Termux/PWA, 67 i18n UI ലോക്കേലുകൾ. OmniRoute MIT ലൈസൻസിലുള്ളതും സ്വയം ഹോസ്റ്റ് ചെയ്യാവുന്നതുമാണ്. മത്സരികളിലെ ശേഷികളും എണ്ണങ്ങളും മാറാം; ലിങ്ക് ചെയ്ത രീതിശാസ്ത്രം കാണുക."/>
-
-<sub>📊 9router, OpenRouter, CLIProxyAPI, LiteLLM എന്നിവയുമായുള്ള പൂർണ്ണ രീതിശാസ്ത്രവും ഓരോ ഫീച്ചറിന്റെയും വിശദാംശങ്ങളും → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 ഫുൾ മെത്തഡോളജി &amp; per-feature details vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
-## 💚 OmniRoute-നെ പിന്തുണയ്ക്കുക
+<a id="-support-omniroute"></a>
+<a id="support"></a>
 
-OmniRoute MIT ലൈസൻസുള്ളതും തുറന്ന രീതിയിൽ പരിപാലിക്കപ്പെടുന്നതുമാണ്. ഇത് നിങ്ങളുടെ സമയമോ പണമോ ലാഭിക്കുന്നുവെങ്കിൽ, അതിന്റെ സ്വാതന്ത്ര്യം നിലനിർത്താൻ സഹായിക്കുന്ന വഴികൾ ഇതാ — നിങ്ങൾക്ക് അനുയോജ്യമായത് തിരഞ്ഞെടുക്കുക. സ്പോൺസർഷിപ്പ് ഒരിക്കലും റൂട്ടിംഗ് മുൻഗണനയെ ബാധിക്കില്ല; അത് നൽകുന്നത് ദൃശ്യപരതയാണ്, റാങ്കിംഗല്ല.
+## പിന്തുണ OmniRoute
+
+OmniRoute MIT-ലൈസൻസുള്ളതും തുറന്ന സ്ഥലത്ത് പരിപാലിക്കുന്നതുമാണ്. ഇത് നിങ്ങളുടെ സമയമോ പണമോ ലാഭിക്കുകയാണെങ്കിൽ, ഇത് സ്വതന്ത്രമായി നിലനിർത്താൻ സഹായിക്കുന്ന മാർഗ്ഗങ്ങളാണ്. സ്പോൺസർഷിപ്പ് ഒരിക്കലും റൂട്ടിംഗിനെ ബാധിക്കില്ല: ഇത് ദൃശ്യപരത വാങ്ങുന്നു, റാങ്കിംഗല്ല.
 
 <table>
-  <tr><td nowrap>⭐ <b>റിപ്പോസിറ്ററിക്ക് സ്റ്റാർ നൽകുക</b></td><td>സൗജന്യം — ദൃശ്യപരത വർധിപ്പിക്കാൻ ഇത് യഥാർത്ഥത്തിൽ സഹായിക്കുന്നു</td><td><a href="https://github.com/diegosouzapw/OmniRoute">OmniRoute-ന് സ്റ്റാർ നൽകുക</a></td></tr>
-  <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>ഒറ്റത്തവണയോ പ്രതിമാസമോ · പ്ലാറ്റ്ഫോം ഫീസ് ഇല്ല</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
-  <tr><td nowrap>☕ <b>Ko-fi</b></td><td>വേഗത്തിലുള്ള ഒറ്റത്തവണ സംഭാവന, സംഭാവന നൽകുന്നയാൾ സൈൻ അപ്പ് ചെയ്യേണ്ടതില്ല</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
-  <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>ചെറിയ, അനൗപചാരികമായ പിന്തുണ</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
-  <tr><td nowrap>🖐 <b>Liberapay</b></td><td>ആവർത്തിച്ചുള്ളത് · ലാഭേച്ഛയില്ലാത്തത് · ഓപ്പൺ സോഴ്സ്</td><td><a href="https://liberapay.com/diegosouzapw">liberapay.com/diegosouzapw</a></td></tr>
-  <tr><td nowrap>🇧🇷 <b>PIX</b> (ബ്രസീൽ)</td><td>തൽക്ഷണം, ഫീസുകളില്ല</td><td>കീയും QR-ഉം താഴെ</td></tr>
-  <tr><td nowrap>₿ <b>ക്രിപ്റ്റോ</b></td><td>BTC · ETH · USDT-TRC20 · USDC-Solana</td><td>വിലാസങ്ങൾ താഴെ</td></tr>
+  <tr><th align="left">രീതി</th><th align="left">മികച്ചത്</th><th align="left">ലിങ്ക്</th></tr>
+  <tr><td nowrap><b>റിപ്പോ നക്ഷത്രമിടുക</b></td><td>സൗജന്യമാണ്, ഇത് ദൃശ്യപരതയെ സഹായിക്കുന്നു</td><td><a href="https://github.com/cheaper-inference/OmniRoute">നക്ഷത്രം OmniRoute</a></td></tr>
+  <tr><td nowrap><b>GitHub സ്പോൺസർമാർ</b></td><td>ഒറ്റത്തവണ അല്ലെങ്കിൽ പ്രതിമാസം. വ്യക്തിഗത അക്കൗണ്ടുകളിൽ നിന്നുള്ള സ്പോൺസർഷിപ്പുകൾക്ക് പ്ലാറ്റ്ഫോം ഫീസില്ല</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
+  <tr><td nowrap><b>കോ-ഫി</b></td><td>വേഗത്തിലുള്ള ഒറ്റത്തവണ ടിപ്പ്, ദാതാവിന് സൈൻഅപ്പ് ഇല്ല</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
+  <tr><td nowrap><b>എനിക്കൊരു കാപ്പി വാങ്ങൂ</b></td><td>ചെറിയ, അനൗപചാരിക ആംഗ്യം</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
+  <tr><td nowrap><b>ലിബറപേ</b></td><td>ലാഭേച്ഛയില്ലാതെ പ്രവർത്തിക്കുന്ന ആവർത്തന</td><td><a href="https://liberapay.com/diegosouzapw">liberapay.com/diegosouzapw</a></td></tr>
+  <tr><td nowrap><b>ഓപ്പൺ കളക്ടീവ്</b><br/><sub>കമ്പനികൾ, ഇൻവോയ്സുകൾ</sub></td><td>ഉടൻ തുറക്കുന്നു: കൂട്ടായ്മ സാമ്പത്തിക-ഹോസ്റ്റ് അംഗീകാരത്തിനായി കാത്തിരിക്കുകയാണ്, ഇതുവരെ സംഭാവനകൾ സ്വീകരിക്കുന്നില്ല</td><td><a href="https://opencollective.com/omniroute">opencollective.com/omniroute</a></td></tr>
+  <tr><td nowrap><b>PIX</b> (ബ്രസീൽ)</td><td>തൽക്ഷണം, ഫീസ് ഇല്ല</td><td>താഴെ കീയും QR</td></tr>
+  <tr><td nowrap><b>ക്രിപ്റ്റോ</b></td><td>BTC, ETH, USDT-TRC20, USDC-Solana (Monero ഉടൻ വരുന്നു)</td><td>താഴെ വിലാസങ്ങൾ</td></tr>
 </table>
 
-**🇧🇷 PIX** — തൽക്ഷണം, ഫീസുകളില്ല (ബ്രസീൽ)
+### ഒരു കമ്പനിയായി സ്പോൺസർ ചെയ്യുന്നു
 
-<img src="docs/assets/pix-qr.png" width="140" align="right" alt="OmniRoute PIX QR കോഡ്"/>
+ഓർഗനൈസേഷനുകൾക്കായി ഇൻവോയ്സ് ബില്ലിംഗ് വാഗ്ദാനം ചെയ്യുന്ന GitHub സ്പോൺസർമാർ മുഖേന ഒരു GitHub ഓർഗനൈസേഷൻ അക്കൗണ്ടിൽ നിന്ന് കമ്പനികൾക്ക് ഇന്ന് സ്പോൺസർ ചെയ്യാൻ കഴിയും. ഇൻവോയ്സുകളും പബ്ലിക് അക്കൗണ്ടിംഗും ആവശ്യമുള്ള കമ്പനികൾക്കായി [ഓപ്പൺ കളക്ടീവ് പേജ്](https://opencollective.com/omniroute) സജ്ജീകരിച്ചിരിക്കുന്നു, എന്നാൽ ഒരു സാമ്പത്തിക ഹോസ്റ്റ് അത് അംഗീകരിച്ചതിന് ശേഷം മാത്രമേ അത് തുറക്കൂ. നികുതി ചികിത്സ ആ ഹോസ്റ്റിനെയും നിങ്ങളുടെ രാജ്യത്തെയും ആശ്രയിച്ചിരിക്കും. ഒരു സംഭാവനയ്ക്ക് നികുതിയിളവ് ലഭിക്കുമെന്ന് OmniRoute വാഗ്ദാനം ചെയ്യുന്നില്ല.
 
-കീ (ക്രമരഹിതം): `5d865059-bc44-483a-962d-43ceb80126eb`
+### PIX (ബ്രസീൽ)
 
-Pix പകർത്തി ഒട്ടിക്കുക:
+<img src="docs/assets/pix-qr.png" width="140" align="right" alt="OmniRoute PIX QR code"/>
+
+കീ (റാൻഡം): `5d865059-bc44-483a-962d-43ceb80126eb`
+
+Pix copia-e-cola:
 
 ```
 00020101021126580014br.gov.bcb.pix01365d865059-bc44-483a-962d-43ceb80126eb5204000053039865802BR5922OMNIROUTE CONTRIBUICAO6006BRASIL62070503***630475DD
@@ -554,159 +458,236 @@ Pix പകർത്തി ഒട്ടിക്കുക:
 
 <br clear="right"/>
 
-<details>
-<summary><b>₿ ക്രിപ്റ്റോ</b> — BTC · ETH · USDT-TRC20 · USDC-Solana (വികസിപ്പിക്കാൻ ക്ലിക്ക് ചെയ്യുക)</summary>
+### ക്രിപ്റ്റോ
 
 <table>
-  <tr><td nowrap><b>₿ BTC</b></td><td nowrap>Bitcoin (SegWit)</td><td><code>bc1qh00smz004sy85wyl28v77tenkt3ckl6eaep7fd</code></td></tr>
-  <tr><td nowrap><b>Ξ ETH</b></td><td nowrap>Ethereum (ERC20)</td><td><code>0x64Cf6B68A6Ff34288e89172950a2d00102337a84</code></td></tr>
-  <tr><td nowrap><b>₮ USDT</b></td><td nowrap>Tron (TRC20)</td><td><code>TKAF41JpuQrHbKTnsQa9svJE2T192Hvsc2</code></td></tr>
-  <tr><td nowrap><b>$ USDC</b></td><td nowrap>Solana</td><td><code>2emNNZzVVWQc3FQ2wk9M6qXUQmW8AKdjjL174fXR28Tu</code></td></tr>
+  <tr><th align="left">നാണയം</th><th align="left">നെറ്റ്വർക്ക്</th><th align="left"><img width="2000" height="0" alt=""> വിലാസം</th></tr>
+  <tr><td nowrap><b>BTC</b></td><td nowrap>ബിറ്റ്കോയിൻ (SegWit)</td><td><code>bc1qh00smz004sy85wyl28v77tenkt3ckl6eaep7fd</code></td></tr>
+  <tr><td nowrap><b>ETH</b></td><td nowrap>Ethereum (ERC20)</td><td><code>0x64Cf6B68A6Ff34288e89172950a2d00102337a84</code></td></tr>
+  <tr><td nowrap><b>USDT</b></td><td nowrap>ട്രോൺ (TRC20)</td><td><code>TKAF41JpuQrHbKTnsQa9svJE2T192Hvsc2</code></td></tr>
+  <tr><td nowrap><b>USDC</b></td><td nowrap>സോളാന</td><td><code>2emNNZzVVWQc3FQ2wk9M6qXUQmW8AKdjjL174fXR28Tu</code></td></tr>
+  <tr><td nowrap><b>XMR</b></td><td nowrap>മോനേറോ</td><td>വിലാസം ഉടൻ വരും</td></tr>
 </table>
 
-<sub>⚠️ ഓരോ കോയിനും കാണിച്ചിരിക്കുന്ന നെറ്റ്വർക്കിൽ മാത്രം അയയ്ക്കുക — തെറ്റായ നെറ്റ്വർക്കിലൂടെ അയച്ചാൽ പണം നഷ്ടപ്പെടാം.</sub>
+> [!IMPORTANT]
+> കാണിച്ചിരിക്കുന്ന നെറ്റ്വർക്കിൽ മാത്രം ഓരോ നാണയവും അയയ്ക്കുക. തെറ്റായ നെറ്റ്വർക്കിലെ കൈമാറ്റം ഫണ്ടുകൾ നഷ്ടപ്പെടുത്താം.
 
-</details>
-
-🐛 ഒരു ബഗ് കണ്ടെത്തിയോ അഭിപ്രായമുണ്ടോ? ഒരു [ചർച്ച](https://github.com/diegosouzapw/OmniRoute/discussions) ആരംഭിക്കുക.
-
-<br/>
-
-<p><strong>ഡെവലപ്പർ കുറിപ്പുകൾ:</strong> ഡെവലപ്പർമാരുടെ സൗകര്യത്തിനായി npm install/postinstall സമയത്ത് പ്രോജക്റ്റ് ഒരു പ്രാദേശിക <code>.env</code> ഫയൽ സൃഷ്ടിച്ചേക്കാം. ഈ ഫയൽ മനഃപൂർവം <code>.gitignore</code> വഴി അവഗണിക്കപ്പെടുന്നു (<code>.gitignore</code> കാണുക), അത് ഒരിക്കലും കമ്മിറ്റ് ചെയ്യരുത് — അബദ്ധത്തിൽ കമ്മിറ്റ് ചെയ്താൽ, വെളിപ്പെട്ട ഏതെങ്കിലും രഹസ്യങ്ങൾ മാറ്റുകയും ചരിത്രത്തിൽനിന്ന് ഫയൽ നീക്കം ചെയ്യുകയും വേണം. പ്രാദേശിക എൻവയോൺമെന്റ് ഫയലുകളും രഹസ്യങ്ങളും കൈകാര്യം ചെയ്യുന്നതിനുള്ള മാർഗനിർദേശങ്ങൾക്ക് <a href="docs/DEVELOPER-ENVIRONMENT.md">docs/DEVELOPER-ENVIRONMENT.md</a> കാണുക.</p>
-
-## 📡 OmniRoute Radar
-
-മുകളിൽ രേഖപ്പെടുത്തിയിട്ടുള്ള, പൂൾ അടിസ്ഥാനത്തിൽ ഡ്യൂപ്ലിക്കേറ്റുകൾ നീക്കിയ കാറ്റലോഗിൽ നിന്നുള്ള പ്രധാന സൗജന്യ-ടയർ പരിധി **~1.62B ടോക്കണുകൾ/മാസം** ആയി തുടരുന്നു. താൽക്കാലിക പ്രൊവൈഡർ സൈൻ-അപ്പ് ക്രെഡിറ്റുകൾക്ക് ആദ്യ മാസത്തെ പരിധി പ്രത്യേകം **~2.22B** ആയി ഉയർത്താനാകും. OmniRoute റിലീസുകൾക്കിടയിൽ സൗജന്യ മോഡലുകളുടെ ലഭ്യതയെക്കുറിച്ചുള്ള കൂടുതൽ പുതുമയുള്ള വിവരങ്ങൾ ആഗ്രഹിക്കുന്നവർക്കായി, ഐച്ഛികമായി ഉപയോഗിക്കാവുന്ന സൈൻ ചെയ്ത കാറ്റലോഗ് ഓവർലേയാണ് Radar; കമ്മ്യൂണിറ്റി കാറ്റലോഗും നിലവിലുള്ള എല്ലാ സൗജന്യ ഫീച്ചറുകളും സൗജന്യമായി തന്നെ തുടരും.
-
-പിന്തുണ നൽകുന്നവർക്ക് ലൈവ് കാറ്റലോഗും അധിക പ്രൊവൈഡർ അവസരങ്ങളും ലഭിക്കാം. പ്രൊവൈഡർ ലഭ്യതയെ ആശ്രയിച്ച്, ഇതിന്റെ വേറിട്ടതും മാറ്റത്തിന് വിധേയവുമായ പരമാവധി പരിധി **ഏറ്റവും കൂടിയത് ഏകദേശം 3B ടോക്കണുകൾ/മാസം** ആണ്. ആ പരിധി ഉറപ്പുനൽകുന്നതല്ല: പ്രൊവൈഡർമാർക്ക് ക്വോട്ടകൾ, യോഗ്യതാ മാനദണ്ഡങ്ങൾ, മോഡലുകൾ, അല്ലെങ്കിൽ മേഖലകൾ എപ്പോൾ വേണമെങ്കിലും മാറ്റാനാകും.
-
-Radar തിരഞ്ഞെടുക്കുന്നവർക്ക് മാത്രം സജീവമാകുന്നതും GET അഭ്യർത്ഥനകൾക്ക് മാത്രമുള്ളതുമാണ്. OmniRoute ക്ലയന്റ് പ്രോംപ്റ്റുകൾ, ട്രാഫിക്, പ്രൊവൈഡർ കോൺഫിഗറേഷൻ, ഉപയോഗ ടെലിമെട്രി, അല്ലെങ്കിൽ പ്രാദേശിക അറിയിപ്പ്-നിരസിക്കൽ നില എന്നിവ അപ്ലോഡ് ചെയ്യുന്നില്ല. യോഗ്യതയെക്കുറിച്ചും നിലവിലെ കാറ്റലോഗിനെക്കുറിച്ചും **[radar.omniroute.online/planos](https://radar.omniroute.online/planos)** എന്നതിൽ അറിയുക.
+ഒരു ബഗ് കണ്ടെത്തിയോ അതോ ഫീഡ്ബാക്ക് ഉണ്ടോ? ഒരു [ചർച്ച](https://github.com/cheaper-inference/OmniRoute/discussions) തുറക്കുക.
 
 <br/>
 
-<div align="center">
+<p><strong>ഡെവലപ്പർ കുറിപ്പുകൾ:</strong> ഡെവലപ്പർമാരുടെ സൗകര്യത്തിനായി npm install/postinstall സമയത്ത് പ്രോജക്റ്റ് ഒരു പ്രാദേശിക <code>.env</code> ഫയൽ സൃഷ്ടിച്ചേക്കാം. ഈ ഫയൽ മനപ്പൂർവ്വം <code>.gitignore</code> വഴി അവഗണിക്കപ്പെട്ടതാണ്, അത് ഒരിക്കലും പ്രതിജ്ഞാബദ്ധമാകരുത്. ഇത് ആകസ്മികമായി സംഭവിച്ചതാണെങ്കിൽ, തുറന്നുകാട്ടപ്പെട്ട ഏതെങ്കിലും രഹസ്യങ്ങൾ തിരിക്കുകയും ചരിത്രത്തിൽ നിന്ന് ഫയൽ നീക്കം ചെയ്യുകയും ചെയ്യുക. കാണുക <a href="docs/DEVELOPER-ENVIRONMENT.md">docs/DEVELOPER-ENVIRONMENT.md</a> പ്രാദേശിക പരിസ്ഥിതി ഫയലുകളും രഹസ്യങ്ങളും കൈകാര്യം ചെയ്യുന്നതിനുള്ള മാർഗ്ഗനിർദ്ദേശത്തിനായി.</p>
 
-## ✨ പുതുതായി എന്തുണ്ട്
+## OmniRoute റഡാർ
 
-</div>
+മുകളിലുള്ള ഫ്രീ-ടയർ കാറ്റലോഗിൻ്റെ തത്സമയ ഒപ്പിട്ട പകർപ്പാണ് റഡാർ, ഇത് എല്ലാവർക്കും സൗജന്യമാണ്. പേവാൾ, കാത്തിരിപ്പ് കാലയളവ് എന്നിവയില്ല. ഇത് തിരഞ്ഞെടുക്കുന്നതിനും നേടുന്നതിനും മാത്രമുള്ളതാണ്. OmniRoute ക്ലയൻ്റ് റഡാറിലേക്ക് ഒന്നും അയയ്ക്കുന്നില്ല: നിർദ്ദേശങ്ങളോ ട്രാഫിക്കോ ദാതാവിൻ്റെ കോൺഫിഗറേഷനോ ഉപയോഗ ടെലിമെട്രിയോ ഇല്ല.
 
-> **v3.8.20 → v3.8.55** വരെയുള്ള സമീപകാല ഹൈലൈറ്റുകൾ. പൂർണ്ണ ചരിത്രം [`CHANGELOG.md`](CHANGELOG.md)-ൽ.
+മുകളിലെ നമ്പറുകൾ ഈ റിലീസിനൊപ്പം അയച്ച കാറ്റലോഗിൽ നിന്നാണ്. റിലീസുകൾക്കിടയിൽ പുതിയ ഡാറ്റ കാണിക്കാൻ റഡാറിന് കഴിയും. ഓരോ ആഴ്ചയും പുതിയ സൗജന്യ ഓഫറുകളും പ്രമോഷനുകളും ചേർക്കുന്നു. റഡാറിൽ യഥാർത്ഥ സംഖ്യ വളരുന്നത് കാണുക.
 
-- **⚖️ `quota-weighted` റൂട്ടിംഗ്** — 20-ാമത്തെ കോംബോ തന്ത്രം ഉപയോഗം തീർന്ന അക്കൗണ്ടുകൾ ഒഴിവാക്കി, ശേഷിക്കുന്നവയിൽ ബാക്കിയുള്ള ക്വോട്ട ÷ ഇൻ-ഫ്ലൈറ്റ് ലോഡ് എന്ന അനുപാതത്തിൽ തിരഞ്ഞെടുക്കുന്നു; നിലവിലുള്ള സംഭാഷണങ്ങൾ അതത് അക്കൗണ്ടിൽ തന്നെ പിൻ ചെയ്തുനിൽക്കും. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 ഹെഡ്ലെസ് മോഡ്** — `omniroute serve --headless` (അല്ലെങ്കിൽ `OMNIROUTE_HEADLESS=1`) ഡാഷ്ബോർഡും ഡാഷ്ബോർഡ്-മാത്രമുള്ള സബ്സിസ്റ്റങ്ങളും പ്രവർത്തനരഹിതമാക്കി `/v1/*` പ്രോക്സി എൻജിൻ മാത്രം പ്രവർത്തിപ്പിക്കുന്നു. → [ഹെഡ്ലെസ് മോഡ്](docs/guides/HEADLESS.md)
-- **🔎 മോഡൽ കണ്ടെത്തൽ** — `/v1/models` ശേഷി, കോൺടെക്സ്റ്റ്, തരം, ടെക്സ്റ്റ് എന്നിവ അനുസരിച്ച് ഫിൽട്ടർ ചെയ്യുന്നു; `POST /v1/models/query` അതേ ഓരോ-കീ ദൃശ്യപരതയോടെ ചുരുക്കവും നിർണയാത്മകവുമായ ഷോർട്ട്ലിസ്റ്റ് നൽകുന്നു. → [API റഫറൻസ്](docs/reference/API_REFERENCE.md)
-- **🔑 ഓരോ കീയ്ക്കുമുള്ള റൂട്ടിംഗ് നിയന്ത്രണം** — `forcedModel` ഉപയോഗിച്ച് ഒരു API കീ ഒരു മോഡലിലേക്കോ കോംബോയിലേക്കോ പിൻ ചെയ്യാം; കൂടാതെ ഒരു കീയുടെ മോഡലുകളും കോംബോകളും ആറ്റോമിക്കായി ചേർക്കുകയോ നീക്കം ചെയ്യുകയോ ചെയ്യാം (`/api/keys/{id}/access`). → [API റഫറൻസ്](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ കൂടുതൽ സൂക്ഷ്മമായ PII നിയന്ത്രണങ്ങൾ** — ഓരോ തരവും പ്രത്യേകം തിരഞ്ഞെടുക്കൽ, പരമാവധി 20 എണ്ണം സാധൂകരിച്ച കസ്റ്റം മാസ്കിംഗ് പാറ്റേണുകൾ, ഓരോ തരത്തിനുമുള്ള കണ്ടെത്തൽ കൗണ്ടറുകൾ; മാസ്കിംഗ് സ്വതവേ പ്രവർത്തനക്ഷമമല്ല. → [Guardrails](docs/security/GUARDRAILS.md)
-- **🌍 67 ഭാഷകൾ** — ഡാഷ്ബോർഡ്, ഡോക്സ് മിററുകൾ, CLI എന്നിവയ്ക്കായി; `npm run i18n:add-locale` ഉപയോഗിച്ച് ഒരൊറ്റ കമാൻഡിൽ എല്ലായിടത്തും ഒരു ഭാഷ ചേർക്കാം. → [i18n ഗൈഡ്](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — നിങ്ങളുടെ ഏജന്റ് ഫ്ലീറ്റിലേക്കുള്ള ഇൻബൗണ്ട് A2A ഡെലിഗേഷൻ, Agent Card-ലെ Conductor കഴിവുകൾ, Faro പുഷ്-ടു-ടോക്ക് വോയ്സ് ചാറ്റുള്ള ഡാഷ്ബോർഡ് പാനൽ. → [A2A സെർവർ](docs/frameworks/A2A-SERVER.md)
-- **🛂 അഡാപ്റ്റീവ് അഡ്മിഷനും ഓവർലോഡ് സംരക്ഷണവും** — ഭാരമേറിയ ചാറ്റ് അഭ്യർത്ഥനകൾ 503 നൽകുന്നതിന് പകരം ക്യൂവിൽ കാത്തിരിക്കും; ഓരോ കണക്ഷനും ആറ്റോമിക് RPM റോളിംഗ് ലീസുകൾ ഉപയോഗിക്കുന്നു. → [Resilience ഗൈഡ്](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ കാനോണിക്കൽ `/v1/models` ക്രമീകരണം** — ഓരോ പ്രൊവൈഡറിനും ഒരൊറ്റ തുടർച്ചയായ പ്രൊവൈഡർ-ഗ്രൂപ്പുചെയ്ത ബ്ലോക്ക് (കോംബോകൾ ആദ്യം പിൻ ചെയ്തിരിക്കും); എല്ലാ കാറ്റലോഗ് സ്രോതസ്സുകളിലും സ്ഥിരതയോടെ. → [API റഫറൻസ്](docs/reference/API_REFERENCE.md)
-- **🗜️ കംപ്രഷൻ ഹാർഡനിംഗ്** — ഡിഫോൾട്ടായി പ്രവർത്തനക്ഷമമായ ഇൻഫ്ലേഷൻ ഗാർഡ്, DE / FR / JA + ചൈനീസ് (wényán) ഭാഷകൾക്കുള്ള Caveman പാക്കുകൾ, Gradle & .NET-നുള്ള RTK ഫിൽട്ടറുകൾ. → [കംപ്രഷൻ](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 സുതാര്യമായ ഫ്ലാറ്റ്-റേറ്റ് ചെലവ്** — സബ്സ്ക്രിപ്ഷൻ / coding-plan പ്രൊവൈഡറുകളുടെ ചെലവ് അനലിറ്റിക്സിൽ **$0** ആയി കാണിക്കും; ബജറ്റ്, ക്വോട്ട, റൂട്ടിംഗ് എന്നിവയുടെ കണക്കുകൂട്ടൽ തുടരും. → [API റഫറൻസ്](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Share റൂട്ടിംഗ്** — പങ്കിട്ട അക്കൗണ്ടിന്റെ ക്വോട്ട പൂൾ ചെയ്ത കീകൾക്കിടയിൽ ന്യായമായി വിഭജിക്കുന്നു; പ്രവർത്തനരഹിതമായ സ്ലൈസുകൾ കടം കൊടുക്കുന്നതിനാൽ വിഭവങ്ങൾ പരമാവധി ഉപയോഗിക്കുന്നു. → [Resilience ഗൈഡ്](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 ഒറ്റ കമാൻഡിൽ CLI/ഏജന്റ് സജ്ജീകരണം** — രജിസ്റ്റർ ചെയ്ത 15 `setup-*` കമാൻഡുകൾ; `omniroute run` 7 CLI-കൾ (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI) ആരംഭിക്കുന്നു; `omniroute configure` ഇന്ററാക്ടീവ് പ്രൊവൈഡർ+മോഡൽ പിക്കറും ഓരോ കോൺടെക്സ്റ്റിനുമുള്ള പ്രിയപ്പെട്ടവയും സഹിതം 11 ടാർഗെറ്റുകൾ പിന്തുണയ്ക്കുന്നു. → [CLI ഇന്റഗ്രേഷനുകൾ](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ റിമോട്ട് മോഡ്** — സ്കോപ്പ് ചെയ്ത ടോക്കണുകൾ (`connect` / `contexts` / `tokens`) ഉപയോഗിച്ച് റിമോട്ട് OmniRoute നിയന്ത്രിക്കാം; VPS ഇൻസ്റ്റാളുകൾക്കായി `antigravity` OAuth ഹെൽപ്പറും ലഭ്യമാണ്. → [റിമോട്ട് മോഡ്](docs/guides/REMOTE-MODE.md)
-- **🧭 കൂടുതൽ ബുദ്ധിമത്തായ ഓട്ടോ-റൂട്ടിംഗ്** — `auto/<category>:<tier>` കോംബോകൾ, **Fusion** (മോഡൽ പാനൽ + ജഡ്ജ്), ടാസ്ക്-അവബോധമുള്ള റൂട്ടിംഗ്, ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള മോഡൽ / മോഡ് / USD-ബജറ്റ് ഓവർറൈഡുകൾ. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ പ്ലഗ്ഗബിൾ കംപ്രഷൻ** — 12 സംയോജിപ്പിക്കാവുന്ന എൻജിനുകളും Compression Studios-ഉം: LLMLingua-2, രണ്ട്-തട്ടുള്ള Ultra, omniglyph, ഓരോ ഘട്ടത്തിനുമുള്ള fidelity gate, GCF v3.2, ഡ്രാഗ്-റീഓർഡർ എഡിറ്റർ. → [കംപ്രഷൻ](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ സുതാര്യമായ MITM ഡീക്രിപ്റ്റ് (TPROXY)** — പ്രോക്സി എൻവ് വേരിയബിളുകൾ അവഗണിക്കുന്ന CLI-കളുടെ ക്യാപ്ചർ, ഓരോ SNI-ക്കുമുള്ള CA + trust-store ഇൻസ്റ്റാളർ സഹിതം. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 എല്ലായിടത്തുമുള്ള ചെലവ് ടെലിമെട്രി** — എല്ലാ എൻഡ്പോയിന്റുകളിലും `X-OmniRoute-*` ചെലവ്/ഉപയോഗ ഹെഡറുകൾ, കാഷ്-HIT സേവിംഗ്സ് ഹെഡർ, ഓരോ കീയ്ക്കുമുള്ള USD ചെലവ് ക്വോട്ടകൾ. → [API റഫറൻസ്](docs/reference/API_REFERENCE.md)
-- **🧠 നിങ്ങളുടെ നിയന്ത്രണത്തിലുള്ള മെമ്മറി** — ഡിഫോൾട്ടായി ഓഫാണ്; opt-in int8 വെക്റ്റർ ക്വാണ്ടൈസേഷനും ടൈപ്പ് ചെയ്ത decay-യും, ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള `x-omniroute-no-memory` പിന്തുണയും. → [മെമ്മറി](docs/frameworks/MEMORY.md)
-- **🛡️ സുരക്ഷ** — എല്ലാ LLM റൂട്ടുകളിലും prompt-injection ഗാർഡ് (red-team സ്യൂട്ട്), opt-in credential-masking guardrail (രണ്ട് ദിശകളിലുമുള്ള ചോർന്ന API കീകൾ/സീക്രട്ടുകൾ മറയ്ക്കുന്നു), സൗജന്യ DuckDuckGo അവസാന ആശ്രയ വെബ് തിരച്ചിൽ, ഡാഷ്ബോർഡിനുള്ള ഐച്ഛിക OIDC ലോഗിൻ ഗേറ്റ് (പാസ്വേഡ് ലോഗിൻ എല്ലായ്പ്പോഴും ലഭ്യമായിരിക്കും). → [Guardrails](docs/security/GUARDRAILS.md)
-- **🖼️ പുതിയ എൻഡ്പോയിന്റുകൾ** — `/v1/ocr` (Mistral OCR), `/v1/audio/translations` (Whisper-style) എന്നിവ മീഡിയ ഉപരിതലത്തെ പൂർണമാക്കുന്നു. → [API റഫറൻസ്](docs/reference/API_REFERENCE.md)
-- **🎨 ചിത്രം / വീഡിയോ / ഓഡിയോ ജനറേഷൻ** — മീഡിയയ്ക്കായി ഒരൊറ്റ API: xAI Grok Imagine & Novita AI വീഡിയോ, ComfyUI, Magnific, Adobe Firefly, Segmind, ElevenLabs പോലുള്ള സ്പീച്ച് പ്രൊവൈഡറുകൾ. → [API റഫറൻസ്](docs/reference/API_REFERENCE.md)
-- **🌍 ഡിപ്ലോയ്മെന്റും ഓപ്സും** — റിവേഴ്സ്-പ്രോക്സി `basePath`, ബ്രൗസർ-ഭാഷ സ്വയമേവ കണ്ടെത്തൽ, ഓരോ കീയ്ക്കുമുള്ള ഡിവൈസ് ട്രാക്കിംഗ്, റൂട്ട്-ലെസ് MITM ട്രസ്റ്റ്, zh-TW ലോക്കലൈസേഷൻ. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 കൂടുതൽ പ്രൊവൈഡർമാരും ഏജന്റുമാരും** — ക്ലൗഡ് ഏജന്റുകൾ (Codex Cloud, Cursor, Devin, Jules), ബ്രൗസർ + OAuth ലോഗിനോടുകൂടിയ Grok Build (xAI), ഫസ്റ്റ്-ക്ലാസ് കാർഡായ Ollama, Claude Opus 5 & Sonnet 5, ഔദ്യോഗിക Kimi പങ്കാളിത്തം (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… കൂടാതെ പുതുക്കിയ **394-പ്രൊവൈഡർ കാറ്റലോഗും**. → [പ്രൊവൈഡറുകൾ](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 റൂട്ടിംഗ് സുതാര്യത** — ഓരോ പ്രതികരണത്തിലും അത് സേവിച്ച strategy/provider/latency വ്യക്തമാക്കുന്ന `X-OmniRoute-Decision` ഹെഡർ ഉണ്ടാകും; പുതിയ `cache-optimized` കോംബോ തന്ത്രവും Auto-Combo `cacheAffinity` ഫാക്ടറും ആവർത്തിച്ച അഭ്യർത്ഥനകളെ കാഷ് ചെയ്ത പ്രിഫിക്സ് കൈവശമുള്ള കണക്ഷനിലേക്ക് തിരിച്ചുവിടുന്നു; കൂടാതെ വായിക്കാൻ മാത്രമുള്ള `/v1/auto-combo/{channel}/candidates` എൻഡ്പോയിന്റ് ഒരു `auto/*` ചാനലിന്റെ ലൈവ് കാൻഡിഡേറ്റ് പൂൾ പുറത്തുവിടുന്നു. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ പ്രാദേശിക പ്രകടനവും ഇൻഫ്രാസ്ട്രക്ചറും** — ഒറ്റ ക്ലിക്കിലൂടെ പ്രാദേശിക Redis, Cloudflare Workers / Deno Deploy റിലേ ഡിപ്ലോയർമാർ, മേൽനോട്ടത്തിലുള്ള എംബഡഡ് സേവനങ്ങളായി Bifrost & Mux. → [എംബഡഡ് സേവനങ്ങൾ](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 ഇതും ഉൾപ്പെട്ടിരിക്കുന്നു** — പ്ലഗിൻ ഫ്രെയിംവർക്ക് + മാർക്കറ്റ്പ്ലേസ്, Omni/Agent/GitHub സ്കിൽസ് ഫ്രെയിംവർക്കുകൾ, Obsidian വോൾട്ട് ഇന്റഗ്രേഷൻ (22 MCP ടൂളുകൾ), OpenAI-യുമായി പൊരുത്തപ്പെടുന്ന Batch & Files APIs, സെമാന്റിക് പ്രതികരണ കാഷെ, ലീഡർബോർഡുകളോടുകൂടിയ ഗാമിഫിക്കേഷൻ, ACP ഏജന്റ് കണ്ടെത്തൽ (അന്തർനിർമിതമായ 15 ഏജന്റുകൾ), BigQuery-യിലേക്ക് ഷെഡ്യൂൾ ചെയ്ത ലോഗ് എക്സ്പോർട്ട്, `auto/chaos` സമാന്തര മൾട്ടി-മോഡൽ ഫാൻ-ഔട്ട്, Telegram ബോട്ട് ബ്രിഡ്ജ്, ആപ്പിനുള്ളിലെ വേർഷൻ മാനേജർ, LMArena-ELO സൗജന്യ-പ്രൊവൈഡർ റാങ്കിംഗുകൾ. → [ഡോക്യുമെന്റേഷൻ](docs/README.md)
+**[OmniRoute റഡാർ →](docs/frameworks/RADAR.md)**
 
 <br/>
 
-<div align="center">
+## പുതിയതെന്താണ്
 
-## 🤖 അനുയോജ്യമായ CLIകളും കോഡിംഗ് ഏജന്റുകളും
+<a id="v3854"></a>
 
-> ഒരു കോൺഫിഗ് — `http://localhost:20128/v1` — എന്നിട്ട് **എല്ലാ** AI IDEകളും CLIകളും സൗജന്യവും കുറഞ്ഞ ചെലവിലുള്ള മോഡലുകളിൽ പ്രവർത്തിക്കും.
+### v3.8.54 (2026-11-17)
 
-<div align="center">
+ഏറ്റവും പുതിയ റിലീസ്. [റിലീസ് നോട്ടുകൾ](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.54).
+
+- **അക്കൗണ്ട് റൂട്ടിംഗ്.** ഓട്ടോ കോംബോ അക്കൗണ്ടുകൾ മുൻഗണന, സാധാരണ, കരുതൽ അല്ലെങ്കിൽ ഒഴിവാക്കിയതായി അടയാളപ്പെടുത്തുക. ഇഷ്ടപ്പെട്ട അക്കൗണ്ട് പ്രതികരിക്കാൻ മന്ദഗതിയിലാകുമ്പോൾ ഒരു സഹോദര അക്കൗണ്ടിലേക്ക് പരാജയം പ്രവർത്തനക്ഷമമാക്കുക. [ഓട്ടോ-കോംബോ](docs/routing/AUTO-COMBO.md#account-preferences-for-saved-auto-combos) · [PR #19259](https://github.com/cheaper-inference/OmniRoute/pull/19259)
+- **പുതിയ കോംബോ തന്ത്രങ്ങൾ.** കാലഹരണപ്പെടുന്നതിന് സമീപമുള്ള ക്വാട്ടയ്ക്ക് `expiry-first` മുൻഗണന നൽകുന്നു. `jev` ഒരു ടാർഗെറ്റും അതിൻ്റെ ഫാൾബാക്കുകളും തിരഞ്ഞെടുക്കാൻ സിസ്റ്റം വൺ ഉപയോഗിക്കുന്നു. [ഓട്ടോ-കോംബോ](docs/routing/AUTO-COMBO.md)
+- **അവസാന പോയിൻ്റ് അനുസരിച്ച് കോമ്പോസ്.** ചാറ്റ്, സെർച്ച് ആൻഡ് ഫെച്ച്, എംബെഡിംഗുകൾ, റീറാങ്ക്, ഇമേജുകൾ, വീഡിയോ, മ്യൂസിക്, OCR, ഓഡിയോ എന്നിവയ്ക്കായി പ്രത്യേക ടാർഗെറ്റുകളും തന്ത്രങ്ങളും സജ്ജമാക്കുക. [PR #18731](https://github.com/cheaper-inference/OmniRoute/pull/18731)
+- **ഏജൻ്റ് പൈപ്പ് ലൈനുകൾ.** മാറ്റമില്ലാത്ത ഫലങ്ങളോ തുടർച്ചയായ പരാജയങ്ങളോ ഉള്ള ആവർത്തിച്ചുള്ള ടൂൾ റൗണ്ടുകൾ പ്ലാനർക്ക് നിയന്ത്രണം തിരികെ നൽകുന്നു. [PR #19318](https://github.com/cheaper-inference/OmniRoute/pull/19318)
+- **API കീ നിയന്ത്രണങ്ങൾ.** രഹസ്യങ്ങളില്ലാതെ പുനരുപയോഗിക്കാവുന്ന നയങ്ങൾ സംരക്ഷിക്കുക, ഓരോ കീയിലും അഞ്ച് മണിക്കൂർ ചെലവിടൽ പരിധികൾ ക്രമീകരിക്കുക. [പ്രധാന ടെംപ്ലേറ്റുകൾ](docs/guides/KEY-TEMPLATES.md) · [PR #18362](https://github.com/cheaper-inference/OmniRoute/pull/18362)
+- **ദാതാവിൻ്റെ സൈൻ-ഇൻ.** പൊതു പ്രതികരണങ്ങൾക്കായി ChatGPT ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക API ഉപയോഗിക്കുക അല്ലെങ്കിൽ ഒരു ജോലി അല്ലെങ്കിൽ സ്കൂൾ അക്കൗണ്ട് ഉപയോഗിച്ച് Microsoft 365 Copilot ലേക്ക് സൈൻ ഇൻ ചെയ്യുക. [PR #15201](https://github.com/cheaper-inference/OmniRoute/pull/15201) · [Microsoft 365 Copilot](docs/providers/COPILOT-M365.md)
+- **പുതിയ ദാതാക്കൾ.** സെറിബ്രിയം, ഹെറ്റ്സ്നർ അനുമാനം, ഗ്രോക്കിഫൈഡ് എന്നിവയ്ക്കായുള്ള പുതിയ കണക്ടറുകൾക്കൊപ്പം Replicate ചാറ്റും ചേർക്കുന്നു. [PR #19206](https://github.com/cheaper-inference/OmniRoute/pull/19206)
+
+<a id="v3853"></a>
+
+### v3.8.53 (2026-11-06)
+
+പുനർരൂപകൽപ്പന ചെയ്ത ഡാഷ്ബോർഡ്, ടീം കോസ്റ്റ് സെൻ്ററുകൾ, API ആക്സസിനായുള്ള എൻട്രാ ID, ടു-ഫാക്ടർ ഡാഷ്ബോർഡ് സൈൻ-ഇൻ, കുബർനെറ്റസ് മാനിഫെസ്റ്റുകൾ. [റിലീസ് നോട്ടുകൾ](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.53).
+
+<a id="v3852"></a>
+
+### v3.8.52 (2026-10-19)
+
+ഹെഡ്ലെസ് മോഡ്, മോഡൽ ഡിസ്കവറി ഫിൽട്ടറുകൾ, ഓരോ കീ മോഡൽ പിന്നിംഗ്, നാദിർ റൂട്ടർ, LLMLingua കംപ്രഷൻ സൈഡ്കാർ. [റിലീസ് നോട്ടുകൾ](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.52).
+
+<a id="v3851"></a>
+
+### v3.8.51 (2026-09-30)
+
+സബ്സ്ക്രിപ്ഷൻ-ആദ്യ റൂട്ടിംഗ്, `quota-weighted` സ്ട്രാറ്റജി, ഓർക്കസ്ട്രേഷൻ ഡാഷ്ബോർഡ്, വിപുലീകരിച്ച ഭാഷാ പിന്തുണ, OpenCode v2 പ്ലഗിൻ. [റിലീസ് നോട്ടുകൾ](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.51).
+
+<a id="v3850"></a>
+
+### v3.8.50 (2026-08-26)
+
+മോഡാലിറ്റി ബ്രിഡ്ജ്, ഓപ്റ്റ്-ഇൻ റഡാർ കാറ്റലോഗ്, OmniConductor ഫ്ലീറ്റ് ഡെലിഗേഷൻ, പ്രവർത്തിക്കുന്ന സെർവറിലേക്ക് ഡെസ്ക്ടോപ്പ് ആപ്പ് ബന്ധിപ്പിക്കുന്നതിനുള്ള പിന്തുണ. [റിലീസ് നോട്ടുകൾ](https://github.com/cheaper-inference/OmniRoute/releases/tag/v3.8.50).
+
+എല്ലാ മാറ്റങ്ങൾക്കും [CHANGELOG.md](CHANGELOG.md) കാണുക, ആസൂത്രിതമായ ജോലികൾക്കായി [ROADMAP.md](ROADMAP.md).
+
+<br/>
+
+## അനുയോജ്യമായ CLIs & കോഡിംഗ് ഏജൻ്റുകൾ
+
+ഡാഷ്ബോർഡ് കാറ്റലോഗ് ലിസ്റ്റുകൾ** 39 സംയോജനങ്ങൾ** (28 കോഡിംഗ് ടൂളുകളും 11 ഏജൻ്റുമാരും). CLI മാനിഫെസ്റ്റ് Gemini CLI ചേർക്കുന്നു, അത് `omniroute run` ഉപയോഗിച്ച് സമാരംഭിക്കുന്നു, കൂടാതെ അതിന് മാത്രം കണ്ടെത്താനാകുന്ന നാല് ടൂളുകളും. അവരിൽ എല്ലാവരിലും,** 8** `omniroute run` ഉപയോഗിച്ച് സമാരംഭിക്കുക,** 12** `omniroute configure` ഉപയോഗിച്ച് സജ്ജീകരിക്കാം, കൂടാതെ** 16** ഒരു സമർപ്പിത `setup-*` കമാൻഡ് ഉണ്ടായിരിക്കുക. നിങ്ങൾ ആഗ്രഹിക്കുന്നതുമായി പൊരുത്തപ്പെടുന്ന പാത തിരഞ്ഞെടുക്കുക.
+
+### നിങ്ങൾക്ക് ഒരു കമാൻഡിൽ ഒരു ഉപകരണം സമാരംഭിക്കണമെങ്കിൽ
+
+`omniroute run` അതിൻ്റെ പരിതസ്ഥിതിയിൽ OmniRoute ൻ്റെ URL, കീ എന്നിവ ഉപയോഗിച്ച് ഉപകരണം ആരംഭിക്കുന്നു. ഡിസ്കിൽ ഒന്നും എഴുതിയിട്ടില്ല.
+
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
-  </tr>
-  <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
-  </tr>
-  <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
-  </tr>
-  <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" height="40" alt="Claude Code"/><br/><sub><b>Claude കോഡ്</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" height="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub></a></td>
+    <td align="center" width="96"><img src="./public/providers/gemini.svg" width="40" height="40" alt="Gemini CLI"/><br/><sub><b>Gemini CLI</b></sub></td>
+    <td align="center" width="96"><a href="https://qwenlm.github.io/qwen-code-docs/en/users/configuration/model-providers/"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qwen-color.svg" width="40" height="40" alt="Qwen Code"/><br/><sub><b>Qwen കോഡ്</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/anomalyco/opencode"><img src="./docs/assets/cli-icons/opencode-tile.svg" width="40" height="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub></a></td>
+    <td align="center" width="96"><a href="https://aider.chat/docs/config/options.html"><img src="./docs/assets/cli-icons/aider-tile.svg" width="40" height="40" alt="Aider"/><br/><sub><b>എയ്ഡർ</b></sub></a></td>
+    <td align="center" width="96"><a href="https://block.github.io/goose/"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" height="40" alt="Goose"/></picture><br/><sub><b>വാത്ത്</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/whycorporation/whycodes"><img src="./docs/assets/cli-icons/whycodes-tile.svg" width="40" height="40" alt="WhyCodes"/><br/><sub><b>WhyCodes</b></sub></a></td>
   </tr>
 </table>
-</div>
-
-<div align="center">
-<b>＋ ഇതോടൊപ്പം പ്രവർത്തിക്കുന്നവ</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>ഏതെങ്കിലും OpenAI-അനുകൂലമായ ടൂൾ</b>
-</div>
-
-<sub>📖 എല്ലാ 39 ടൂളുകൾക്കും (28 CLI കോഡ് + 11 CLI ഏജന്റുകൾ) വേണ്ടി ഓരോ ടൂളിനും പ്രത്യേകം സജ്ജീകരണം → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 ഓപ്പൺകോഡ് പ്ലഗിൻ → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
-
-</div>
-
-<br/>
-
-**ഒറ്റ കമാൻഡിൽ ഒമ്നിറൂട്ടിലൂടെ പിന്തുണയുള്ള ഏതെങ്കിലും CLI ആരംഭിക്കുക** — കോൺഫിഗ് ഫയലുകൾ എഴുതേണ്ടതില്ല,
-ഓരോ പ്രോസസ്സിനും ക്രെഡൻഷ്യലുകൾ ഇൻജക്റ്റ് ചെയ്യുന്നു, Qwen/Gemini-യ്ക്ക് താൽക്കാലികമായി ഐസൊലേറ്റഡ് ഹോം ലഭിക്കും:
 
 ```bash
-omniroute run claude   --model openai/gpt-5.4          # ക്ലോഡ് കോഡ്
-omniroute run codex    --model glm/glm-5.2             # ഓപ്പൺഎഐ കോഡെക്സ് CLI
+omniroute run claude   --model openai/gpt-5.4          # Claude Code
+omniroute run codex    --model glm/glm-5.2             # Codex CLI
 omniroute run aider    --model glm/glm-5.2 -- --message "reply OK"
 omniroute run goose    --model glm/glm-5.2
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
+omniroute setup-whycodes && omniroute run whycodes --model glm/glm-5.2
 
-# അല്ലെങ്കിൽ provider+model ഇന്ററാക്ടീവ് ആയി തിരഞ്ഞെടുക്കുകയും ടൂളിന്റെ സ്വന്തം കോൺഫിഗ് എഴുതുകയും ചെയ്യാം:
-omniroute configure codex          # ഇതിലും: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider and model interactively and write the tool's own config:
+omniroute configure codex   # also: claude opencode qwen aider goose gemini whycodes cline continue kilo 5dive
 ```
 
-ഓരോ കമാൻഡും സജീവമായ റിമോട്ട് കോൺടെക്സ്റ്റ് (`omniroute connect <host>`) മാനിക്കുന്നു, `--dry-run`
-പ്രവർത്തിപ്പിക്കാതെ തന്നെ കൃത്യമായ env/args പ്രിവ്യൂ ചെയ്യുന്നു, കൂടാതെ `--api-key-env NAME` നിങ്ങളുടെ ഷെൽ ഹിസ്റ്ററിയിൽ നിന്ന് രഹസ്യങ്ങൾ ഒഴിവാക്കുന്നു. → [CLI ഇന്റഗ്രേഷനുകൾ](docs/guides/CLI-INTEGRATIONS.md)
+ഓരോ കമാൻഡും സജീവമായ റിമോട്ട് സന്ദർഭത്തെ (`omniroute connect <host>`) മാനിക്കുന്നു. `--dry-run` ഒന്നും പ്രവർത്തിപ്പിക്കാതെ കൃത്യമായ env പ്രിൻ്റ് ചെയ്യുകയും args ചെയ്യുകയും ചെയ്യുന്നു, കൂടാതെ `--api-key-env NAME` നിങ്ങളുടെ ഷെൽ ചരിത്രത്തിൽ നിന്ന് കീ സൂക്ഷിക്കുന്നു. Qwen കോഡും Gemini CLI ഉം ഒരു താൽക്കാലിക ഹോമിൽ പ്രവർത്തിക്കുന്നു, അത് പുറത്തുകടക്കുമ്പോൾ ഇല്ലാതാക്കപ്പെടും. WhyCodes അതിൻ്റെ ദാതാവിനെ `config.toml` ൽ നിന്ന് മാത്രമേ വായിക്കൂ, അതിനാൽ `run whycodes`മുമ്പ് ഒരിക്കൽ `setup-whycodes` പ്രവർത്തിപ്പിക്കുക. → [CLI സംയോജനങ്ങൾ](docs/guides/CLI-INTEGRATIONS.md)
 
-<br/>
+### നിങ്ങൾക്ക് ഉപകരണത്തിൻ്റെ കോൺഫിഗറേഷൻ എഴുതാൻ OmniRoute വേണമെങ്കിൽ
+
+ഒരു ദാതാവിനെയും മോഡലിനെയും തിരഞ്ഞെടുക്കാൻ `omniroute configure <tool>` നിങ്ങളെ അനുവദിക്കുന്നു, തുടർന്ന് ഉപകരണത്തിൻ്റെ സ്വന്തം കോൺഫിഗറേഷൻ ഫയൽ എഴുതുന്നു. എട്ട് വിക്ഷേപണ ലക്ഷ്യങ്ങളും ഇതിനെ പിന്തുണയ്ക്കുന്നു, കൂടാതെ താഴെയുള്ള നാല് ടൂളുകളും. നാല് ടൂളുകൾക്ക് പകരം ഒരു സമർപ്പിത `setup-*` കമാൻഡ് ഉണ്ട്.
+
+<table>
+  <tr>
+    <td align="center" width="96"><a href="https://docs.cline.bot/"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" height="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.continue.dev/"><img src="./public/providers/continue.svg" width="40" height="40" alt="Continue"/><br/><sub><b>തുടരുക</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/Kilo-Org/kilocode"><img src="./docs/assets/cli-icons/kilo-tile.svg" width="40" height="40" alt="Kilo Code"/><br/><sub><b>കിലോ കോഡ്</b></sub></a></td>
+    <td align="center" width="96"><a href="https://5dive.ai"><img src="./docs/assets/cli-icons/5dive-tile.svg" width="40" height="40" alt="5dive"/><br/><sub><b>5 ഡൈവ്</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.cursor.com/settings/models"><img src="./public/providers/cursor.svg" width="40" height="40" alt="Cursor"/><br/><sub><b>Cursor</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.roocode.com/"><img src="./public/providers/roocode.svg" width="40" height="40" alt="Roo Code"/><br/><sub><b>റൂ കോഡ്</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/charmbracelet/crush"><img src="./docs/assets/cli-icons/crush-tile.svg" width="40" height="40" alt="Crush"/><br/><sub><b>ക്രഷ്</b></sub></a></td>
+    <td align="center" width="96"><a href="https://zed.dev/docs/ai/llm-providers#openai-api-compatible"><img src="./public/providers/zed-hosted.svg" width="40" height="40" alt="Zed"/><br/><sub><b>Zed</b></sub></a></td>
+  </tr>
+</table>
+
+| <img width="2000" height="0" alt=""> ടൂൾ                                                     | കമാൻഡ്                         | അത് എന്താണ് എഴുതുന്നത്                                   |
+| -------------------------------------------------------------------------------------------- | ------------------------------ | -------------------------------------------------------- |
+| [Claude കോഡ്](https://github.com/anthropics/claude-code)                                     | `omniroute configure claude`   | ~/.claude/settings.json                                  |
+| [Codex CLI](https://github.com/openai/codex)                                                 | `omniroute configure codex`    | ~/.codex/config.toml                                     |
+| Gemini CLI                                                                                   | `omniroute configure gemini`   | ~/.gemini/settings.json                                  |
+| [Qwen കോഡ്](https://qwenlm.github.io/qwen-code-docs/en/users/configuration/model-providers/) | `omniroute configure qwen`     | ~/.qwen/settings.json                                    |
+| [OpenCode](https://github.com/anomalyco/opencode)                                            | `omniroute configure opencode` | ~/.config/opencode/opencode.json                         |
+| [എയ്ഡർ](https://aider.chat/docs/config/options.html)                                         | `omniroute configure aider`    | ~/.aider.conf.yml                                        |
+| [വാത്ത്](https://block.github.io/goose/)                                                     | `omniroute configure goose`    | ~/.config/goose/config.yaml                              |
+| [WhyCodes](https://github.com/whycorporation/whycodes)                                       | `omniroute configure whycodes` | ~/.whycodes/config.toml                                  |
+| [Cline](https://docs.cline.bot/)                                                             | `omniroute configure cline`    | ~/.cline/data/globalState.json                           |
+| [തുടരുക](https://docs.continue.dev/)                                                         | `omniroute configure continue` | ~/.continue/config.yaml                                  |
+| [കിലോ കോഡ്](https://github.com/Kilo-Org/kilocode)                                            | `omniroute configure kilo`     | ~/.local/share/kilo/auth.json                            |
+| [5 ഡൈവ്](https://5dive.ai)                                                                   | `omniroute configure 5dive`    | 5dive auth പ്രൊഫൈൽ                                       |
+| [Cursor](https://docs.cursor.com/settings/models)                                            | `omniroute setup-cursor`       | ഒന്നുമില്ല; Cursor ക്രമീകരണ ഘട്ടങ്ങൾ പ്രിൻ്റ് ചെയ്യുന്നു |
+| [റൂ കോഡ്](https://docs.roocode.com/)                                                         | `omniroute setup-roo`          | Roo ഇറക്കുമതി JSON, autoImport പോയിൻ്റർ                  |
+| [ക്രഷ്](https://github.com/charmbracelet/crush)                                              | `omniroute setup-crush`        | ~/.config/crush/crush.json                               |
+| [Zed](https://zed.dev/docs/ai/llm-providers#openai-api-compatible)                           | `omniroute setup-zed`          | Zed settings.json                                        |
+
+### നിങ്ങളുടെ ഉപകരണം ഒരു അടിസ്ഥാന URL മാത്രം എടുക്കുകയാണെങ്കിൽ
+
+ഈ കാറ്റലോഗ് എൻട്രികൾക്ക് ഡാഷ്ബോർഡിൽ ഒരു ടൂൾ ഗൈഡ് ഉണ്ട്. ഉപകരണത്തിൻ്റെ OpenAI- അല്ലെങ്കിൽ ആന്ത്രോപിക്-അനുയോജ്യമായ ബേസ് URL `http://localhost:20128/v1` ആയി സജ്ജമാക്കി ഒരു OmniRoute API കീ ഉപയോഗിക്കുക. അവയിൽ മൂന്നെണ്ണം (ഫാക്ടറി ഡ്രോയിഡ്, Cursor ഏജൻ്റ് CLI, Warp AI) ഒരു ഇഷ്ടാനുസൃത ബേസ് URL ഭാഗികമായി മാത്രമേ പിന്തുണയ്ക്കൂ.
+
+<table>
+  <tr>
+    <td align="center" width="96"><a href="https://github.com/Hmbown/CodeWhale"><img src="./docs/assets/cli-icons/codewhale-tile.svg" width="40" height="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/hunterbown/deepseek-tui"><img src="./public/providers/deepseek.svg" width="40" height="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub></a></td>
+    <td align="center" width="96"><img src="./public/providers/factory.svg" width="40" height="40" alt="Factory Droid"/><br/><sub><b>ഫാക്ടറി ഡ്രോയിഡ്</b></sub></td>
+    <td align="center" width="96"><a href="https://github.com/antinomyhq/forge"><img src="./docs/assets/cli-icons/forge-tile.svg" width="40" height="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub></a></td>
+    <td align="center" width="96"><a href="https://x.ai/cli"><img src="./public/providers/grok.svg" width="40" height="40" alt="Grok Build"/><br/><sub><b>Grok ബിൽഡ്</b></sub></a></td>
+  </tr>
+  <tr>
+    <td align="center" width="96"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" height="40" alt="Hermes Agent"/></picture><br/><sub><b>ഹെർമിസ് ഏജൻ്റ്</b></sub></td>
+    <td align="center" width="96"><a href="https://github.com/1jehuang/jcode"><img src="./docs/assets/cli-icons/jcode-tile.svg" width="40" height="40" alt="jcode"/><br/><sub><b>jcode</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.letta.com"><img src="./docs/assets/cli-icons/letta-tile.svg" width="40" height="40" alt="Letta CLI"/><br/><sub><b>ലെറ്റ CLI</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/can1357/oh-my-pi"><img src="./docs/assets/cli-icons/omp-tile.svg" width="40" height="40" alt="Oh My Pi"/><br/><sub><b>ഓ മൈ പൈ</b></sub></a></td>
+    <td align="center" width="96"><img src="./public/providers/openclaw.svg" width="40" height="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="96"><a href="https://github.com/badlogic/pi"><img src="./docs/assets/cli-icons/pi-tile.svg" width="40" height="40" alt="Pi"/><br/><sub><b>പൈ</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/PrimeIntellect-ai/prime-agent"><img src="./docs/assets/cli-icons/prime-agent-tile.svg" width="40" height="40" alt="Prime Agent"/><br/><sub><b>പ്രധാന ഏജൻ്റ്</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/leonardcser/smelt"><img src="./docs/assets/cli-icons/smelt-tile.svg" width="40" height="40" alt="Smelt"/><br/><sub><b>മണക്കുക</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/asheshgoplani/agent-deck"><img src="./docs/assets/cli-icons/agent-deck-tile.svg" width="40" height="40" alt="Agent Deck"/><br/><sub><b>ഏജൻ്റ് ഡെക്ക്</b></sub></a></td>
+    <td align="center" width="96"><a href="https://code.visualstudio.com/docs/copilot/overview"><img src="./public/providers/copilot.svg" width="40" height="40" alt="GitHub Copilot"/><br/><sub><b>GitHub Copilot</b></sub></a></td>
+  </tr>
+  <tr>
+    <td align="center" width="96"><a href="https://docs.cursor.com/advanced/api"><img src="./public/providers/cursor.svg" width="40" height="40" alt="Cursor Agent CLI"/><br/><sub><b>Cursor ഏജൻ്റ് CLI</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.openinterpreter.com/"><img src="./docs/assets/cli-icons/interpreter-tile.svg" width="40" height="40" alt="Open Interpreter"/><br/><sub><b>വിവർത്തകൻ തുറക്കുക</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/Gitlawb/openclaude"><img src="./docs/assets/cli-icons/openclaude-tile.svg" width="40" height="40" alt="OpenClaude"/><br/><sub><b>OpenClaude</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.warp.dev/"><img src="./docs/assets/cli-icons/warp-tile.svg" width="40" height="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub></a></td>
+    <td align="center" width="96"><img src="./public/providers/cli-generic.svg" width="40" height="40" alt="Custom CLI"/><br/><sub><b>ഇഷ്ടാനുസൃത CLI</b></sub></td>
+  </tr>
+</table>
+
+```bash
+export OPENAI_BASE_URL=http://localhost:20128/v1
+export OPENAI_API_KEY=<your OmniRoute API key>
+```
+
+### നിങ്ങളുടെ ടൂളിന് അടിസ്ഥാന URL ക്രമീകരണം ഇല്ലെങ്കിലോ അല്ലെങ്കിൽ കണ്ടെത്തിയാൽ മാത്രം
+
+ഈ ഉപകരണങ്ങൾ ഒരു ഇഷ്ടാനുസൃത ബേസ് URL സ്വീകരിക്കുന്നില്ല. ZCode അതിൻ്റെ പ്രാദേശിക ആപ്പ് സെർവർ വഴിയും Antigravity, Kiro എന്നിവയിലൂടെ OmniRoute യുടെ MITM ടാർഗെറ്റുകളിലൂടെയും ബന്ധിപ്പിക്കുന്നു, കൂടാതെ ഹെർമിസിന് ഒരു ഗൈഡ്-ഒൺലി എൻട്രി ഉണ്ട് (അടിസ്ഥാന-URL സജ്ജീകരണത്തിനായി ഹെർമിസ് ഏജൻ്റ് ഉപയോഗിക്കുക). Amp, Devin CLI, Qoder CLI, Windsurf എന്നിവ നിങ്ങളുടെ മെഷീനിൽ കണ്ടെത്തിയെങ്കിലും കാറ്റലോഗിൽ ഇല്ല.
+
+<table>
+  <tr>
+    <td align="center" width="96"><a href="https://zcode.z.ai"><img src="./public/providers/zhipu.svg" width="40" height="40" alt="ZCode"/><br/><sub><b>ZCode</b></sub></a></td>
+    <td align="center" width="96"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" height="40" alt="Hermes"/></picture><br/><sub><b>ഹെർമിസ്</b></sub></td>
+    <td align="center" width="96"><img src="./docs/assets/cli-icons/antigravity-tile.svg" width="40" height="40" alt="Antigravity"/><br/><sub><b>Antigravity</b></sub></td>
+    <td align="center" width="96"><img src="./public/providers/kiro.svg" width="40" height="40" alt="Kiro"/><br/><sub><b>Kiro</b></sub></td>
+    <td align="center" width="96"><img src="./docs/assets/cli-icons/amp-tile.svg" width="40" height="40" alt="Amp"/><br/><sub><b>Amp</b></sub></td>
+    <td align="center" width="96"><img src="./docs/assets/cli-icons/devin-tile.svg" width="40" height="40" alt="Devin CLI"/><br/><sub><b>Devin CLI</b></sub></td>
+    <td align="center" width="96"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="40" height="40" alt="Qoder CLI"/><br/><sub><b>Qoder CLI</b></sub></td>
+    <td align="center" width="96"><img src="./public/providers/windsurf.svg" width="40" height="40" alt="Windsurf"/><br/><sub><b>Windsurf</b></sub></td>
+  </tr>
+</table>
+
+### പ്രവർത്തിക്കുന്നുവെന്നും റിപ്പോർട്ട് ചെയ്തു
+
+deyin.ai, Zoo കോഡ് എന്നിവ കാറ്റലോഗിലോ CLI മാനിഫെസ്റ്റിലോ ഇല്ല. അവയെ പൊതുവായ OpenAI-അനുയോജ്യമായ ക്ലയൻ്റുകളായി കോൺഫിഗർ ചെയ്യുക.
+
+<table>
+  <tr>
+    <td align="center" width="96"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" height="40" alt="deyin.ai"/><br/><sub><b>deyin.AI</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./docs/assets/cli-icons/zoo-code-tile.svg" width="40" height="40" alt="Zoo Code"/><br/><sub><b>മൃഗശാല കോഡ്</b></sub></a></td>
+  </tr>
+</table>
+
+<sub>ഈ ശേഖരത്തിൽ ഐക്കൺ സംഭരിച്ചിട്ടില്ലാത്ത ടൂളുകളെ ഗ്രേ ടെക്സ്റ്റ് ടൈലുകൾ അടയാളപ്പെടുത്തുന്നു; അവ പ്ലെയ്സ്ഹോൾഡറുകളാണ്, പദ്ധതികളുടെ ലോഗോകളല്ല. ഓരോ ടൂൾ സെറ്റപ്പ് → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · OpenCode പാക്കേജുകൾ: [`@omniroute/opencode-plugin`](https://www.npmjs.com/package/@omniroute/opencode-plugin) (OpenCode v1, ഇൻസ്റ്റാൾ ചെയ്തത് `omniroute setup opencode`) കൂടാതെ [`@omniroute/opencode-plugin-v2`](https://www.npmjs.com/package/@omniroute/opencode-plugin-v2) (OpenCode v2). പഴയ `@omniroute/opencode-provider` ഒഴിവാക്കി.</sub>
+
+<a id="ai-providers"></a>
+
+## 394 AI ദാതാക്കൾ, 50 സൗജന്യ ആക്സസ്
+
+ഓരോ സംഖ്യയും വ്യത്യസ്തമായ എന്തെങ്കിലും കണക്കാക്കുന്നു. അവയൊന്നും മറ്റൊന്നിലേക്ക് ചേർത്തിട്ടില്ല.
+
+<img src="./docs/diagrams/provider-numbers.svg" width="100%" alt="What each number counts. 394 registered providers. 140+ flagged with a free offer. 50 with free access: 43 with an API key, 6 without a key, 1 through a tool account and 0 through a web chat. 214 catalog rows with free access, 185 distinct free models, 40 recurring or keyless providers, and 12 pools with a published quota. Free tokens a month: ~11.3B as others count · ~90M real. The first figure adds up every row, including ended offers. The real figure counts each shared quota once."/>
+
+<sub>ചാറ്റ് കാറ്റലോഗ്: 250 ദാതാക്കളിൽ നിന്നുള്ള സ്റ്റാറ്റിക് മോഡൽ ലിസ്റ്റുകൾ, 3,186 provider/model ജോഡികൾ, 1,539 വ്യത്യസ്ത റോ മോഡൽ IDs.</sub>
+
+### എല്ലാ പ്രധാന ലാബ് — ഒരു അവസാന പോയിൻ്റിലൂടെ
 
 <div align="center">
-
-## 🌐 394 AI ദാതാക്കൾ — 153 എണ്ണം കാറ്റലോഗിൽ സൗജന്യമായി അടയാളപ്പെടുത്തിയവ
-
-</div>
-
-> കാനോണിക്കൽ ചാറ്റ്, മീഡിയ, തിരയൽ, ലോക്കൽ, ക്ലൗഡ്-ഏജന്റ്, സിസ്റ്റം ശേഖരങ്ങളിലായി **394 രജിസ്റ്റർ ചെയ്ത ദാതാക്കൾ**, ഇതിൽ **153 എണ്ണത്തിന് `hasFree: true` കണ്ടെത്തൽ മെറ്റാഡാറ്റയുണ്ട്**. ചാറ്റ് മോഡൽ രജിസ്ട്രിയിൽ **239 ദാതാക്കൾ / 3,059 വ്യത്യസ്ത ദാതാവ്-മോഡൽ ജോഡികൾ / 1,475 അസംസ്കൃത മോഡൽ ID-കൾ** ഉൾപ്പെടുന്നു; വേറിട്ട സൗജന്യ-ബജറ്റ് കാറ്റലോഗിൽ ഓരോ മോഡലിനുമുള്ള **465 വരികൾ**, **34 ആവർത്തിക്കുന്ന പൂളുകൾ**, കൂടാതെ **40 ആവർത്തിക്കുന്ന/കീ ആവശ്യമില്ലാത്ത എക്കാലവും സൗജന്യമായ ദാതാക്കൾ** എന്നിവയുണ്ട്. ഇവ രൂപകൽപ്പനാപരമായി വ്യത്യസ്തമായ ഹരങ്ങളാണ്; നിർവചനങ്ങളും പൂൾ-ഡ്യൂപ്ലിക്കേഷൻ നീക്കം ചെയ്ത കണക്കുകൂട്ടലുകളും [ദാതാവ് റഫറൻസ്](docs/reference/PROVIDER_REFERENCE.md), [സൗജന്യ നിരകൾ](docs/reference/FREE_TIERS.md) എന്നിവയിൽ കാണാം.
-
-<div align="center">
-
-### 🏢 എല്ലാ പ്രധാന ലാബുകളും — ഒരൊറ്റ എൻഡ്പോയിന്റിലൂടെ
 
 <table>
   <tr>
@@ -719,14 +700,14 @@ omniroute configure codex          # ഇതിലും: claude opencode qwen ai
   </tr>
   <tr>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qwen-color.svg" width="40" alt="Qwen"/><br/><sub>Qwen</sub><br/><sub>                           </sub></td>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/meta-color.svg" width="40" alt="Meta Llama"/><br/><sub>Meta Llama</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/meta-color.svg" width="40" alt="Meta Llama"/><br/><sub>മെറ്റാ Llama</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/groq.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/groq.svg" width="40" alt="Groq"/></picture><br/><sub>Groq</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nvidia-color.svg" width="40" alt="NVIDIA"/><br/><sub>NVIDIA</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/minimax-color.svg" width="40" alt="MiniMax"/><br/><sub>MiniMax</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cohere-color.svg" width="40" alt="Cohere"/><br/><sub>Cohere</sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/perplexity-color.svg" width="40" alt="Perplexity"/><br/><sub>Perplexity</sub><br/><sub>                           </sub></td>
+    <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/perplexity-color.svg" width="40" alt="Perplexity"/><br/><sub>ആശയക്കുഴപ്പം</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/huggingface-color.svg" width="40" alt="Hugging Face"/><br/><sub>HuggingFace</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/together-color.svg" width="40" alt="Together"/><br/><sub>Together</sub><br/><sub>                           </sub></td>
     <td align="center" width="80"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/fireworks-color.svg" width="40" alt="Fireworks"/><br/><sub>Fireworks</sub><br/><sub>                           </sub></td>
@@ -735,218 +716,265 @@ omniroute configure codex          # ഇതിലും: claude opencode qwen ai
   </tr>
 </table>
 
-<sub>…കൂടാതെ 350-ലധികം — ഓരോ ഐക്കണും ഡാഷ്ബോർഡിന്റെ ദാതാവ് കാറ്റലോഗിൽ നിന്ന് തത്സമയം ലഭിക്കുന്നു. 📖 [ദാതാവ് റഫറൻസ്](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>രജിസ്റ്റർ ചെയ്ത 394 ദാതാക്കളിൽ 18 എണ്ണം കാണിച്ചിരിക്കുന്നു. അവയെല്ലാം [ദാതാവിൻ്റെ റഫറൻസിൽ](docs/reference/PROVIDER_REFERENCE.md) കാണുക.</sub>
 
-<br/>
+</div>
 
-### 🆓 എക്കാലവും സൗജന്യം — $0, കാർഡ് ആവശ്യമില്ല</
+### എല്ലാ ദിവസവും അല്ലെങ്കിൽ മാസവും സൗജന്യം
+
+ഈ ദാതാക്കൾ ആവർത്തിച്ചുള്ള അല്ലെങ്കിൽ കീലെസ്സ് സൗജന്യ ആക്സസ് വാഗ്ദാനം ചെയ്യുന്നു.
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>ടോക്കൺ പരിധിയില്ല</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>ഓട്ടോ-റൂട്ടർ, Tencent Hy3<br/>എക്കാലവും സൗജന്യം</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>എക്കാലവും സൗജന്യം</sub></td>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>സൗജന്യ ശ്രേണി</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>എക്കാലവും സൗജന്യം</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>എക്കാലവും സൗജന്യം</sub></td>
+    <td align="center" width="150"><img src="./docs/assets/provider-icons/kilo-gateway-tile.svg" width="42" alt="Kilo Gateway"/><br/><b>കിലോ ഗേറ്റ്വേ</b><br/><sub>ആവർത്തിക്കുന്നു<br/>കിലോ ഓട്ടോ ഫ്രീ, Tencent Hy3<br/>12 സൗജന്യ മോഡലുകൾ, പ്രസിദ്ധീകരിച്ച ടോക്കൺ ക്യാപ് ഇല്ല</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>അഭ്യർത്ഥന</b><br/><sub>ആവർത്തിക്കുന്നു<br/>GPT-OSS 120B, നെമോട്രോൺ 3 നാനോ 30B<br/>ഏകദേശം 200 requests/day</sub></td>
+    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>ആവർത്തിക്കുന്നു<br/>GLM-4.7-ഫ്ലാഷ്, GLM-4.5-ഫ്ലാഷ്<br/>പ്രസിദ്ധീകരിച്ച ടോക്കൺ ക്യാപ് ഇല്ല</sub></td>
+    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ആവർത്തിക്കുന്നു<br/>ERNIE 4.0 8K<br/>പ്രസിദ്ധീകരിച്ച ടോക്കൺ ക്യാപ് ഇല്ല</sub></td>
+    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>പരാഗണങ്ങൾ</b><br/><sub>കീലെസ്സ്<br/>24 മോഡലുകൾ, കീ ഇല്ല<br/>അജ്ഞാതമായ പ്രവേശനം മികച്ച ശ്രമമാണ്</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare Workers AI"/><br/><b>Cloudflare തൊഴിലാളികൾ AI</b><br/><sub>ദിവസേന<br/>9 മോഡലുകൾ<br/>10K Neurons/day</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>പരിധിയില്ലാത്ത സൗജന്യം</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>കീ ആവശ്യമില്ല</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ മോഡലുകൾ<br/>പ്രതിദിനം 10K ന്യൂറോണുകൾ</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM സൗജന്യം</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>ഒറ്റത്തവണ $5 ക്രെഡിറ്റ്; കാർഡ് ആവശ്യമാണ്</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free മോഡലുകൾ<br/>+$10 → ഉയർന്ന RPM</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>ആവർത്തിക്കുന്നു<br/>ജെമ്മ 4 31 ബി, നെമോട്രോൺ 3.5 സൂപ്പർ<br/>ഏകദേശം 40 RPM</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>ദിവസേന<br/><code>:free</code> മോഡലുകൾ<br/>ഒറ്റത്തവണ $10 ടോപ്പ്-അപ്പ് പരിധി 1,000 requests/day ആയി ഉയർത്തുന്നു</sub></td>
+    <td align="center" width="150"><img src="./public/providers/gemini.svg" width="42" alt="Gemini"/><br/><b>Gemini</b><br/><sub>ആവർത്തിക്കുന്നു<br/>Gemini 2.5 ഫ്ലാഷ്, Gemini 3 ഫ്ലാഷ് പ്രിവ്യൂ<br/>നിരക്ക് പരിമിതമാണ്, പ്രസിദ്ധീകരിച്ച ടോക്കൺ ക്യാപ് ഇല്ല</sub></td>
+    <td align="center" width="150"><img src="./public/providers/groq.svg" width="42" alt="Groq"/><br/><b>Groq</b><br/><sub>ദിവസേന<br/>GPT-OSS 120B, GPT-OSS 20B<br/>ഓരോ മോഡലിനും പ്രതിദിന ക്യാപ്</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cohere.svg" width="42" alt="Cohere"/><br/><b>Cohere</b><br/><sub>പ്രതിമാസ<br/>ഒരു കുടുംബത്തെ കമാൻഡ് ചെയ്യുക<br/>ഏകദേശം 800K tokens/month</sub></td>
+    <td align="center" width="150"><img src="./public/providers/morph.svg" width="42" alt="Morph"/><br/><b>മോർഫ്</b><br/><sub>പ്രതിമാസ<br/>morph-v3-large, morph-v3-fast<br/>200 requests/month</sub></td>
   </tr>
 </table>
 
-📖 പൂർണ്ണ യന്ത്രവായനാസൗഹൃദ കാറ്റലോഗ് → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+### ട്രയൽ, സൈൻഅപ്പ് ക്രെഡിറ്റുകൾ
 
-<br/>
-</div>
-
-<div align="center">
-
-## 🖥️ OmniRoute പ്രവർത്തിക്കുന്നത് എവിടെയെല്ലാം — എല്ലായിടത്തും
-
-</div>
-
-> അതേ ആപ്പ്, നിങ്ങളുടെ മെഷീൻ, നിങ്ങളുടെ നിയമങ്ങൾ. ആഗോള npm ഇൻസ്റ്റാളിൽ നിന്ന് **നിങ്ങളുടെ ഫോണിലേക്ക്** വരെ, Termux വഴി.
+ഈ ട്രയലുകളും സൈൻഅപ്പ് ക്രെഡിറ്റുകളും അവസാനിക്കുകയോ കാലഹരണപ്പെടുകയോ ചെയ്യുന്ന ഒറ്റത്തവണ ഓഫറുകളാണ്.
 
 <table>
-  <tr><th align="left">പ്ലാറ്റ്ഫോം</th><th align="left">ഇൻസ്റ്റാൾ</th><th align="left">പ്രധാന സവിശേഷതകൾ</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (global)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">ഒരു കമാൻഡ്, ഏത് OS-ലും</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">അതേ രജിസ്ട്രി tarball, കൂടുതൽ വേഗത്തിലുള്ള ഇൻസ്റ്റാളുകൾ</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Multi-arch <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>ഡെസ്ക്ടോപ്പ് (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">നേറ്റീവ് വിൻഡോ + സിസ്റ്റം ട്രേ — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>മെനു-ബാർ (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">സെർവറിനെ നിരീക്ഷിക്കുകയും സ്വയമേവ അപ്ഡേറ്റ് ചെയ്യുകയും ചെയ്യുന്നു — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>നേറ്റീവ് <code>arm64</code></td><td align="left">Raspberry Pi, ARM സെർവറുകൾ, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left"><b>നിങ്ങളുടെ ഫോണിൽ</b>, 24/7, root ആവശ്യമില്ലാതെ പ്രവർത്തിക്കുന്നു</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"ഹോം സ്ക്രീനിലേക്ക് ചേർക്കുക"</td><td align="left">ഫുൾസ്ക്രീൻ, ഓഫ്ലൈൻ, ബ്രൗസറിൽ നിന്ന് ഇൻസ്റ്റാൾ ചെയ്യാം</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode പ്ലഗിൻ</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">നേറ്റീവ് OpenCode ഇന്റഗ്രേഷൻ</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap><b>OmniCopilot</b> എക്സ്റ്റൻഷൻ ഇൻസ്റ്റാൾ ചെയ്യുക</td><td align="left">നേറ്റീവ് Copilot Chat പിക്കറിൽ എല്ലാ OmniRoute മോഡലുകളും — stable &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>സോഴ്സിൽ നിന്ന്</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">പരിഷ്കരിക്കുക, സംഭാവന ചെയ്യുക</td></tr>
+  <tr>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS 120B<br/>ഒറ്റത്തവണ $5 ക്രെഡിറ്റ്, സാധുത 30 ദിവസം. കാർഡ് ആവശ്യമാണ്.</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder"/><br/><b>Qoder</b><br/><sub>Qwen3.8-Max-Preview, Kimi-K3<br/>9 മോഡലുകളിൽ സൈൻഅപ്പ് ക്രെഡിറ്റുകൾ</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>SiliconFlow ലിസ്റ്റ് ചെയ്ത $0 മോഡലുകൾ<br/>$1 ക്രെഡിറ്റ്, കൂടാതെ ഐഡൻ്റിറ്റി പരിശോധിച്ചുറപ്പിച്ചതിന് ശേഷം $0 മോഡലുകളും</sub></td>
+    <td align="center" width="150"><img src="./public/providers/deepseek.svg" width="42" alt="DeepSeek"/><br/><b>DeepSeek</b><br/><sub>DeepSeek V4 പ്രോ, V4 ഫ്ലാഷ്<br/>സൈൻ അപ്പ് ചെയ്യുമ്പോൾ 5M ടോക്കണുകൾ, കാർഡില്ല</sub></td>
+    <td align="center" width="150"><img src="./public/providers/fireworks.svg" width="42" alt="Fireworks"/><br/><b>Fireworks</b><br/><sub>DeepSeek V4, GLM 5.1<br/>$1 സ്റ്റാർട്ടർ ക്രെഡിറ്റ്</sub></td>
+    <td align="center" width="150"><img src="./public/providers/hyperbolic.svg" width="42" alt="Hyperbolic"/><br/><b>ഹൈപ്പർബോളിക്</b><br/><sub>QwQ 32B, DeepSeek R1<br/>$1–5 ട്രയൽ ക്രെഡിറ്റ്</sub></td>
+  </tr>
 </table>
 
-<sub>📖 [Docker ഗൈഡ്](docs/guides/DOCKER_GUIDE.md) · [ഡെസ്ക്ടോപ്പ്](electron/README.md) · [മെനു-ബാർ ട്രേ](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+ദാതാവിൻ്റെ പരിധികളും യോഗ്യതാ മാറ്റവും; നിങ്ങൾ ഒരു ക്വാട്ടയെ ആശ്രയിക്കുന്നതിന് മുമ്പ് ദാതാവിനെ പരിശോധിക്കുക. പൂർണ്ണ കാറ്റലോഗ് → [പ്രൊവൈഡർ റഫറൻസ്](docs/reference/PROVIDER_REFERENCE.md) · പരിധികൾ, പൂളുകൾ, ബജറ്റ് കണക്ക് → [സൗജന്യ നിരകൾ](docs/reference/FREE_TIERS.md) · തത്സമയ ഉപയോഗം → <code>/dashboard/free-tiers</code>
 
-<br/>
+## OmniRoute എവിടെയാണ് പ്രവർത്തിക്കുന്നത്
 
-<div align="center">
+> ഒരു സെർവർ, നിരവധി വീടുകൾ: ഒരു ആഗോള npm ഇൻസ്റ്റാൾ, ഒരു കണ്ടെയ്നർ, ഒരു ഡെസ്ക്ടോപ്പ് ആപ്പ്, macOS മെനു ബാർ അല്ലെങ്കിൽ ഒരു Android ഫോൺ. ക്ലയൻ്റുകൾ പിന്നീട് ബ്രൗസറിൽ നിന്നോ VS കോഡിൽ നിന്നോ OpenCode നിന്നോ ഇതിലേക്ക് കണക്റ്റുചെയ്യുന്നു.
 
-### 🧩 പുതിയത്: VS Code-ന്റെ നേറ്റീവ് Copilot Chat-നുള്ളിൽ OmniRoute
+<p align="center">
+  <a href="https://www.npmjs.com/package/omniroute"><img src="https://img.shields.io/npm/dm/omniroute?logo=npm&label=npm%20downloads" alt="npm downloads per month"/></a>
+  <a href="https://hub.docker.com/r/diegosouzapw/omniroute"><img src="https://img.shields.io/docker/pulls/diegosouzapw/omniroute?logo=docker&label=docker%20pulls" alt="Docker pulls of diegosouzapw/omniroute"/></a>
+  <a href="https://github.com/cheaper-inference/OmniRoute/releases"><img src="https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?logo=github&label=release%20asset%20downloads" alt="GitHub release asset downloads"/></a>
+  <a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"><img src="https://img.shields.io/open-vsx/v/diegosouzapw/omnicopilot?label=OmniCopilot%20on%20Open%20VSX" alt="OmniCopilot version on Open VSX"/></a>
+  <a href="https://github.com/zoispag/omniroute-tray/releases"><img src="https://img.shields.io/github/downloads/zoispag/omniroute-tray/total?logo=apple&label=OmniRouteTray%20downloads" alt="OmniRouteTray DMG downloads"/></a>
+</p>
 
-</div>
-
-> പുതിയ സൈഡ്ബാറില്ല, പുതിയ ചാറ്റ് UI-യില്ല — OmniRoute നൽകുന്ന എല്ലാ മോഡലുകളും നിങ്ങൾ ഇതിനകം ഉപയോഗിക്കുന്ന
-> **Copilot Chat മോഡൽ പിക്കറിൽ തന്നെ കാണപ്പെടും**. VS Code 1.122 മുതൽ, GitHub സൈൻ-ഇൻ അല്ലെങ്കിൽ
-> Copilot സബ്സ്ക്രിപ്ഷൻ ഇല്ലാതെയും പ്രൊവൈഡർ മോഡലുകൾ പ്രവർത്തിക്കും — agent mode, tool calling, vision എന്നിവ
-> സൗജന്യമായി.
-
-**[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** എക്സ്റ്റൻഷൻ ഇൻസ്റ്റാൾ ചെയ്ത്, അത് നിങ്ങളുടെ
-OmniRoute സെർവറിലേക്ക് ചൂണ്ടിക്കാണിക്കുക (സ്ഥിരസ്ഥിതി `localhost:20128`), തുടർന്ന് Copilot Chat → model picker
-→ **Manage Models…** → **OmniRoute** തുറക്കുക.
+### സെർവർ പ്രവർത്തിപ്പിക്കുക
 
 <table>
-  <tr><th align="left">സ്റ്റോർ</th><th align="left">ലിങ്ക്</th><th align="left">പ്രവർത്തിക്കുന്നത്</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">ഇൻസ്റ്റാൾ →</a></td><td align="left">VS Code — stable &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">ഇൻസ്റ്റാൾ →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left">പ്ലാറ്റ്ഫോം</th><th align="left">ഇൻസ്റ്റാൾ ചെയ്യുക</th><th align="left">കുറിപ്പുകൾ</th></tr>
+  <tr><td align="left" nowrap><b>npm (Node.js)</b></td><td align="left" nowrap><code>npm install -g omniroute</code> → <code>omniroute</code></td><td align="left">Windows, macOS, Linux. Node.js <code>&gt;=22.22.2 &lt;23</code> അല്ലെങ്കിൽ <code>&gt;=24 &lt;27</code></td></tr>
+  <tr><td align="left" nowrap><b>Docker</b></td><td align="left"><code>docker run -d -p 20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest</code></td><td align="left"><code>linux/amd64</code>, <code>linux/arm64</code>. മുമ്പത്തെ ചിത്രങ്ങളും <code>next</code> ചാനലും <code>diegosouzapw/omniroute</code> ൽ തുടരും</td></tr>
+  <tr><td align="left" nowrap><b>പോഡ്മാൻ</b></td><td align="left" nowrap><code>podman compose</code> അല്ലെങ്കിൽ ക്വാഡ്ലെറ്റ്</td><td align="left">റെഡിമെയ്ഡ് യൂണിറ്റുകൾ <a href="contrib/podman/README.md"><code>contrib/podman</code></a></td></tr>
+  <tr><td align="left" nowrap><b>തലയില്ലാത്ത സെർവർ / VPS</b></td><td align="left" nowrap><code>omniroute serve --headless</code></td><td align="left">API മാത്രം, ഡാഷ്ബോർഡ് ഓഫാണ്. കഠിനമാക്കിയ കമ്പോസ് ബണ്ടിൽ <a href="contrib/vps/README.md"><code>contrib/vps</code></a></td></tr>
+  <tr><td align="left" nowrap><b>ഡെസ്ക്ടോപ്പ് ആപ്പ് (Electron)</b></td><td align="left" nowrap><a href="https://github.com/cheaper-inference/OmniRoute/releases/latest">റിലീസുകളിൽ നിന്ന് ഡൗൺലോഡ് ചെയ്യുക</a></td><td align="left">Windows <code>.exe</code>, macOS <code>.dmg</code> (ഇൻ്റലും ആപ്പിൾ സിലിക്കണും), Linux <code>.AppImage</code>, <code>.deb</code> (x64, arm64)</td></tr>
+  <tr><td align="left" nowrap><b>CLI യിൽ നിന്നുള്ള സിസ്റ്റം ട്രേ</b></td><td align="left" nowrap><code>omniroute serve --tray</code></td><td align="left">macOS, Windows, ഗ്രാഫിക്കൽ Linux. ട്രേ മെനു ഡാഷ്ബോർഡ് തുറന്ന് ലോഗ് ചെയ്യുന്നു, ഓട്ടോ-സ്റ്റാർട്ട് ടോഗിൾ ചെയ്യുന്നു, സെർവർ നിർത്തുന്നു</td></tr>
+  <tr><td align="left" nowrap><b>macOS മെനു ബാർ (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">കമ്മ്യൂണിറ്റി ആപ്പ്. സെർവറിൻ്റെ മേൽനോട്ടം വഹിക്കുകയും സ്വയമേവ അപ്ഡേറ്റ് ചെയ്യുകയും ചെയ്യുന്നു. ആപ്പിൾ സിലിക്കൺ, macOS 13 +. <a href="#omniroutetray">വിശദാംശങ്ങൾ താഴെ</a></td></tr>
+  <tr><td align="left" nowrap><b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs python build-essential git</code><br/><code>npx -y omniroute@latest</code></td><td align="left">റൂട്ട് ഇല്ല. നോഡ് 22.x അല്ലെങ്കിൽ 24.x + ആവശ്യമാണ് കൂടാതെ നേറ്റീവ് മൊഡ്യൂളുകൾക്കുള്ള ബിൽഡ് ടൂളുകളും ആവശ്യമാണ്. അത് പ്രവർത്തിപ്പിക്കാൻ ബാറ്ററി ഒപ്റ്റിമൈസേഷൻ പ്രവർത്തനരഹിതമാക്കുക</td></tr>
+  <tr><td align="left" nowrap><b>ഉറവിടത്തിൽ നിന്ന്</b></td><td align="left" nowrap><code>npm install &amp;&amp; npm run dev</code></td><td align="left">അത് ഹാക്ക് ചെയ്ത് സംഭാവന ചെയ്യുക</td></tr>
 </table>
 
-എഡിറ്ററിനുള്ളിൽ നിന്ന്: **Extensions** കാഴ്ച തുറന്ന് **"OmniRoute"** തിരയുക, **Install** ക്ലിക്ക് ചെയ്യുക
-— രണ്ട് സ്റ്റോറുകളിലും ഇതേ രീതിയിൽ പ്രവർത്തിക്കും. സോഴ്സ്, പ്രശ്നങ്ങൾ, പ്രസിദ്ധീകരണ റൺബുക്ക് എന്നിവ
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)-ൽ ലഭ്യമാണ്.
+> [!NOTE]
+> **Node.js പിന്തുണയ്ക്കുന്ന റൺടൈമാണ്.** ഒരു മികച്ച-പ്രയത്ന അനുയോജ്യത പാത്ത്, അതേ പിന്തുണ ഗ്യാരണ്ടി കൂടാതെ, `bun:sqlite` ൽ `bun install -g omniroute` ആരംഭിക്കാൻ അനുവദിക്കുന്നു.
 
-<sub>📖 [VS Code Copilot Chat ഗൈഡ്](docs/guides/VSCODE-COPILOT.md) — സജ്ജീകരണം, പിക്കറിൽ കാണുന്നത്, ഒരു ടാബിലെ dashboard, പ്രശ്നപരിഹാരം</sub>
+### പ്രവർത്തിക്കുന്ന ഒരു സെർവറിലേക്ക് കണക്റ്റുചെയ്യുക
+
+<table>
+  <tr><th align="left">ക്ലയൻ്റ്</th><th align="left">എങ്ങനെ</th><th align="left">കുറിപ്പുകൾ</th></tr>
+  <tr><td align="left" nowrap><b>ബ്രൗസർ / PWA</b></td><td align="left" nowrap>ഡാഷ്ബോർഡ് → തുറക്കുക "ഹോം സ്ക്രീനിലേക്ക് ചേർക്കുക" / "ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യുക"</td><td align="left">Android, iOS, desktop Chrome/Edge. എന്നിവ പൂർണ്ണസ്ക്രീനിൽ പ്രവർത്തിക്കുകയും സ്റ്റാറ്റിക് അസറ്റുകൾ കാഷെ ചെയ്യുകയും ചെയ്യുന്നു; റൂട്ടിംഗിനായി സെർവർ എത്തിച്ചേരാവുന്നതായിരിക്കണം</td></tr>
+  <tr><td align="left" nowrap><b>VS കോഡ് Copilot ചാറ്റ്</b></td><td align="left" nowrap>ഇൻസ്റ്റാൾ ചെയ്യുക <b>OmniCopilot</b> വിപുലീകരണം</td><td align="left">നേറ്റീവ് Copilot ചാറ്റ് പിക്കറിലെOmniRoute മോഡലുകൾ. <a href="#omnicopilot">വിശദാംശങ്ങൾ താഴെ</a></td></tr>
+  <tr><td align="left" nowrap><b>OpenCode</b></td><td align="left" nowrap><code>omniroute config opencode</code> അല്ലെങ്കിൽ <code>@omniroute/opencode-provider</code></td><td align="left">നിങ്ങളുടെ ഗേറ്റ്വേയ്ക്കായി OpenCode പ്രൊവൈഡർ കോൺഫിഗറേഷൻ എഴുതുന്നു</td></tr>
+</table>
+
+### വിതരണം സ്നാപ്പ്ഷോട്ട് — 16 നവംബർ 2026
+
+| അളക്കുക                                    |     എണ്ണുക | വ്യാപ്തി                                                                                                    |
+| ------------------------------------------ | ---------: | ----------------------------------------------------------------------------------------------------------- |
+| npm ഡൗൺലോഡുകൾ, കഴിഞ്ഞ 30 ദിവസം             |   371,000+ | `omniroute`, 17 ഒക്ടോബർ - 15 നവംബർ 2026                                                                     |
+| ആദ്യം പ്രസിദ്ധീകരിച്ചത് മുതൽ npm ഡൗൺലോഡുകൾ | 1,450,000+ | `omniroute`, 14 ഫെബ്രുവരി - 15 നവംബർ 2026                                                                   |
+| Docker പുൾസ്, ചരിത്ര ചിത്രം                | 1,900,000+ | `diegosouzapw/omniroute`, 2026 ഫെബ്രുവരി മുതൽ                                                               |
+| Docker പുൾസ്, ഓർഗനൈസേഷൻ ചിത്രം             |        143 | `cheaperinference/omniroute`, 2026 നവംബർ 16 മുതലുള്ള ഔദ്യോഗിക ചിത്രം                                        |
+| ഡെസ്ക്ടോപ്പ് ഇൻസ്റ്റാളർ ഡൗൺലോഡുകൾ          |   201,000+ | `.exe`, `.dmg`, `.AppImage` അല്ലെങ്കിൽ `.deb` എന്നിവയിൽ അവസാനിക്കുന്ന അസറ്റുകൾ റിലീസ് ചെയ്യുക, 283 റിലീസുകൾ |
+| എല്ലാ GitHub റിലീസ് അസറ്റ് ഡൗൺലോഡുകളും     |   574,000+ | ഇൻസ്റ്റാളറുകൾ പ്ലസ് അപ്ഡേറ്റ് മാനിഫെസ്റ്റുകൾ, ഉറവിട ആർക്കൈവുകൾ, SBOMs, ഓപ്ഷണൽ പാക്കുകൾ                      |
+| OmniCopilot, VS കോഡ് മാർക്കറ്റ്പ്ലേസ്      |    49,000+ | മാർക്കറ്റ്പ്ലേസ് `install` സ്ഥിതിവിവരക്കണക്ക്                                                               |
+| OmniCopilot, VSX തുറക്കുക                  |    18,900+ | VSX `downloadCount` തുറക്കുക                                                                                |
+| OmniRouteTray DMG ഡൗൺലോഡുകൾ                |     1,600+ | എല്ലാ `zoispag/omniroute-tray` റിലീസുകളും                                                                   |
+
+<sub>ഡൗൺലോഡുകൾ, ഇൻസ്റ്റാൾ ചെയ്യലുകൾ, വലിച്ചിടലുകൾ എന്നിവ അദ്വിതീയ ഉപയോക്താക്കളല്ല, ഓരോ വരിയും അതിൻ്റേതായ സ്കോപ്പ് നിലനിർത്തുന്നു, അതിനാൽ വരികൾ ഒരുമിച്ച് ചേർക്കില്ല. ഉറവിടങ്ങൾ: npm ഡൗൺലോഡുകൾ API, Docker Hub API, GitHub റിലീസുകൾ API, വിഷ്വൽ സ്റ്റുഡിയോ മാർക്കറ്റ് പ്ലേസ് ഗാലറി API, VSX API തുറക്കുക. മുകളിലുള്ള ബാഡ്ജുകൾ തത്സമയം അപ്ഡേറ്റ് ചെയ്യുന്നു.</sub>
+
+<sub>ഗൈഡുകൾ: [Docker](docs/guides/DOCKER_GUIDE.md) · [തലയില്ലാത്ത മോഡ്](docs/guides/HEADLESS.md) · [ഡെസ്ക്ടോപ്പ്](docs/guides/ELECTRON_GUIDE.md) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md) · [മെനു-ബാർ ട്രേ](https://github.com/zoispag/omniroute-tray)</sub>
 
 <br/>
 
-<div align="center">
+<a id="omnicopilot"></a>
 
-### 🎩 പുതിയത്: OmniRouteTray — മെനു ബാറിൽ പ്രവർത്തിക്കുന്ന നിങ്ങളുടെ ഗേറ്റ്വേ
+### OmniCopilot: OmniRoute VS കോഡിൻ്റെ നേറ്റീവ് Copilot ചാറ്റിനുള്ളിൽ
 
-</div>
+> പുതിയ സൈഡ്ബാറും പുതിയ ചാറ്റ് UI ഇല്ല. നിങ്ങളുടെ OmniRoute നൽകുന്ന എല്ലാ ചാറ്റ് മോഡലും ഇതിൽ ദൃശ്യമാകും** നിങ്ങൾ ഇതിനകം ഉപയോഗിക്കുന്ന Copilot ചാറ്റ് മോഡൽ പിക്കർ** , കൂടാതെ Copilot ൻ്റെ ഏജൻ്റ് മോഡ്, ടൂൾ കോളിംഗ്, MCP സെർവറുകൾ, ഇഷ്ടാനുസൃത നിർദ്ദേശങ്ങൾ എന്നിവ നിങ്ങൾ തിരഞ്ഞെടുക്കുന്ന മോഡലിൽ പ്രവർത്തിക്കുന്നു.
 
-> `omniroute serve` എല്ലായ്പ്പോഴും പ്രവർത്തിക്കുമ്പോഴാണ് ഏറ്റവും സന്തോഷകരം. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> അതിനെ macOS-നുള്ള, ഒരിക്കൽ സജ്ജീകരിച്ചാൽ മറക്കാവുന്ന ഒരു മെനു-ബാർ ആപ്പാക്കി മാറ്റുന്നു: ഇത് സെർവർ ആരംഭിക്കുകയും,
-> റീബൂട്ടുകൾക്കിടയിലും അത് പ്രവർത്തനക്ഷമമായി നിലനിർത്തുകയും, അതേ ഇടത്ത് അപ്ഡേറ്റ് ചെയ്യുകയും, നിങ്ങളുടെ ലൈവ്
-> ടോക്കൺ ബജറ്റ് ഒരു ക്ലിക്കിൽ ലഭ്യമാക്കുകയും ചെയ്യുന്നു — **ടെർമിനൽ വിൻഡോ തുറന്നുവെക്കേണ്ടതില്ല,
-> `npm install -g omniroute` പരിപാലിക്കേണ്ടതുമില്ല.**
-
-[Tauri v2](https://v2.tauri.app/) ഉപയോഗിച്ച് നിർമ്മിച്ചിരിക്കുന്നത് (റൗണ്ടിംഗ് പിശകിനേക്കാൾ ചെറുതായ Rust core), ഇത്
-സ്വന്തം signed Node 24 runtime സഹിതമാണ് വരുന്നത്, കൂടാതെ ആപ്പിന്റെ ഉടമസ്ഥതയിലുള്ള OmniRoute ഇൻസ്റ്റാൾ നിയന്ത്രിക്കുന്നു;
-അതിനാൽ ഇത് നിങ്ങളുടെ global `node`/`bun`-മായി ഒരിക്കലും സംഘർഷിക്കില്ല. ഇത് നിങ്ങളുടെ നിലവിലുള്ള
-`~/.omniroute/` config-വും database-വും **പങ്കിടുന്നു** — അതിനാൽ നിങ്ങൾ ഇതിനകം പ്രവർത്തിപ്പിക്കുന്ന അതേ OmniRoute തന്നെയാണ്,
-വെറും ഒരു തൊപ്പിയോടെ. 🎩
+ഇൻസ്റ്റാൾ ചെയ്യുക**OmniCopilot** , നിങ്ങളുടെ OmniRoute സെർവർ ആരംഭിക്കുക (ഡിഫോൾട്ട് `http://localhost:20128` ലേക്ക് ), തുടർന്ന് Copilot ചാറ്റ് → മോഡൽ പിക്കർ → തുറക്കുക** മോഡലുകൾ നിയന്ത്രിക്കുക...** →**OmniRoute** നിങ്ങൾക്ക് ആവശ്യമുള്ള മോഡലുകൾ ടിക്ക് ചെയ്യുക. എഡിറ്ററിൽ നിങ്ങൾക്ക് തുറക്കാനും കഴിയും** വിപുലീകരണങ്ങൾ** കാണുക, തിരയുക** "OmniRoute"** ക്ലിക്ക് ചെയ്യുക** ഇൻസ്റ്റാൾ ചെയ്യുക** .
 
 <table>
-  <tr><th align="left">ഇത് ചെയ്യുന്നത്</th><th align="left">എങ്ങനെ</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>സെർവറിനെ മേൽനോട്ടം വഹിക്കുന്നു</b></td><td align="left"><code>omniroute serve</code> ആരംഭിക്കുകയും, ഇതിനകം പ്രവർത്തിക്കുന്ന ഇൻസ്റ്റൻസിനെ പകർത്തുന്നതിന് പകരം അതിനെ ഏറ്റെടുക്കുകയും ചെയ്യുന്നു</td></tr>
-  <tr><td align="left" nowrap>📊 <b>തത്സമയ ഉപയോഗം ഒറ്റനോട്ടത്തിൽ</b></td><td align="left">പ്രൊവൈഡർ ക്വോട്ട ബാറുകൾ, റീസെറ്റ് കൗണ്ട്ഡൗണുകളോടുകൂടിയ Claude സെഷൻ/ആഴ്ച്ചാ പരിധികൾ, 30 ദിവസത്തെ ചെലവ് വിഭജനം</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>സ്ഥലത്തുവെച്ച് സ്വയം അപ്ഡേറ്റ് ചെയ്യുന്നു</b></td><td align="left">സ്റ്റേജ് ചെയ്ത ഇൻസ്റ്റാൾ, ആറ്റോമിക് സ്വാപ്പ്, പരാജയപ്പെട്ടാൽ റോൾബാക്ക് — എല്ലായ്പ്പോഴും ഏറ്റവും പുതിയ റിലീസിൽ</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>ലോഗിൻ ചെയ്യുമ്പോൾ ആരംഭിക്കുക</b></td><td align="left">ലോഗിൻ ചെയ്യുമ്പോൾ ഓപ്ഷണൽ ആയി ആരംഭിക്കാം; ട്രേയിൽ മാത്രം, ഡോക്ക് ഐക്കൺ ഇല്ല</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>Doctor &amp; ലോഗുകൾ</b></td><td align="left">ഒറ്റ ക്ലിക്കിൽ ഡയഗ്നോസ്റ്റിക്സും സെർവർ ലോഗുകളിലേക്കുള്ള ആക്സസും</td></tr>
+  <tr><th align="left">സ്റ്റോർ</th><th align="left">ഇൻസ്റ്റാൾ ചെയ്യുക</th><th align="left">എഡിറ്റർമാർ</th><th align="right">സ്നാപ്പ്ഷോട്ട്, 16 നവംബർ 2026</th></tr>
+  <tr><td align="left" nowrap><b>VS കോഡ് മാർക്കറ്റ്പ്ലേസ്</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">digosouzapw.omnicopilot</a></td><td align="left">VS കോഡ് സ്ഥിരതയുള്ളതും ഇൻസൈഡറുകളും</td><td align="right">49,000 + ഇൻസ്റ്റാൾ ചെയ്യുന്നു</td></tr>
+  <tr><td align="left" nowrap><b>VSX രജിസ്ട്രി തുറക്കുക</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">diegosouzapw/omnicopilot</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, കോഡ്-സെർവർ, Gitpod, Antigravity, Kiro</td><td align="right">18,900 + ഡൗൺലോഡുകൾ</td></tr>
+</table>
+
+<sub>രണ്ട് സ്റ്റോറുകളിലെയും നിലവിലെ റിലീസ്: <b>1.5.0</b> (1.4.0, 1.5.0 എന്നിവ 2026 നവംബർ 15-ന് അയച്ചു). മാർക്കറ്റ്പ്ലേസ് ഇൻസ്റ്റാളുകളും ഓപ്പൺ VSX ഡൗൺലോഡുകളും വ്യത്യസ്ത അളവുകളാണ്, അവ ഒരുമിച്ച് ചേർക്കില്ല. മോഡലുകൾ ദൃശ്യമാകുന്നതിന് ഫോർക്ക് VS കോഡിൻ്റെ ചാറ്റ് പ്രൊവൈഡർ API നടപ്പിലാക്കണം.</sub>
+
+<table>
+  <tr><th align="left">കഴിവ്</th><th align="left">നിങ്ങൾക്ക് എന്ത് ലഭിക്കും</th></tr>
+  <tr><td align="left" nowrap><b>ഏജൻ്റ് മോഡും ടൂൾ കോളിംഗും</b></td><td align="left">VS കോഡിൻ്റെ മാതൃഭാഷ-മോഡൽ പ്രൊവൈഡർ API യിൽ പ്രവർത്തിക്കുന്നു, അതിനാൽ Copilot യുടെ ഏജൻ്റ് മോഡ്, ഉപകരണങ്ങൾ, MCP സെർവറുകൾ, നിർദ്ദേശങ്ങൾ എന്നിവ മാറ്റമില്ലാതെ പ്രവർത്തിക്കുന്നു. 64 അക്ഷരങ്ങളിൽ കൂടുതലുള്ള MCP ടൂൾ പേരുകൾ വയറിൽ ചുരുക്കി പുനഃസ്ഥാപിക്കുന്നു</td></tr>
+  <tr><td align="left" nowrap><b>ദർശനം</b></td><td align="left">OmniRoute കാറ്റലോഗിൽ ദർശന ശേഷിയുള്ളതായി ഫ്ലാഗുചെയ്ത മോഡലുകൾ ചാറ്റിൽ ഇമേജ് അറ്റാച്ച്മെൻ്റുകൾ സ്വീകരിക്കുന്നു</td></tr>
+  <tr><td align="left" nowrap><b>സ്ട്രീമിംഗ് ന്യായവാദം</b></td><td align="left">ചിന്താ മാതൃകകൾ ഉത്തരം സ്ട്രീം ചെയ്യുമ്പോൾ അതിന് മുകളിൽ അവരുടെ യുക്തി കാണിക്കുന്നു. VS കോഡ് 1.120 + ൽ, a <b>ചിന്താശ്രമം</b> മെനു <code>reasoning_effort</code> അയയ്ക്കുന്നു</td></tr>
+  <tr><td align="left" nowrap><b>പിക്കറിലെ വിലകളും കോമ്പോകളും</b></td><td align="left">ഓരോ മോഡലും അതിൻ്റെ വിലയും സന്ദർഭ വിൻഡോയും കാണിക്കുന്നു. OmniRoute കോമ്പോകൾ അവയുടെ തന്ത്രവും ഘട്ടങ്ങളും ഉപയോഗിച്ച് മോഡലുകളായി ദൃശ്യമാകുന്നു</td></tr>
+  <tr><td align="left" nowrap><b>കണക്ഷനും ഉപയോഗവും</b></td><td align="left">സ്റ്റാറ്റസ്-ബാർ ഡോട്ട്, പ്രതിദിന-പരിധി ശതമാനം, നിങ്ങളുടെ കീയുടെ ചിലവുകളും പ്രൊവൈഡർ ക്വാട്ടകളും ഉള്ള ഒരു പ്രവർത്തന ബാർ പാനലും (v3.8.50 അല്ലെങ്കിൽ അതിനുശേഷമുള്ളതിൽ ഒരു OmniRoute സെർവർ ആവശ്യമാണ്)</td></tr>
+  <tr><td align="left" nowrap><b>കീകൾ സുരക്ഷിതമായി സൂക്ഷിച്ചിരിക്കുന്നു</b></td><td align="left">VS കോഡിലെAPI കീ SecretStorage (OS കീചെയിൻ), അത് സംരക്ഷിച്ച സെർവറുമായി ബന്ധിപ്പിച്ചിരിക്കുന്നു. ഓരോ വർക്ക്സ്പെയ്സിനും ഓപ്ഷണൽ കീ</td></tr>
+  <tr><td align="left" nowrap><b>കോഡിംഗ് CLIs</b></td><td align="left">Codex CLI, Claude കോഡ്, Cline, തുടരുക, Cursor, Aider, OpenCode എന്നിവയ്ക്കും മറ്റും OmniRoute പ്രൊഫൈലുകൾ <code>OmniRoute: Configure Coding CLI</code> എഴുതുന്നു</td></tr>
+  <tr><td align="left" nowrap><b>ഒരു ടാബിൽ ഡാഷ്ബോർഡ്</b></td><td align="left">സെർവർ <code>DASHBOARD_ALLOW_EMBED=vscode</code> ഉപയോഗിച്ച് നിർമ്മിക്കുമ്പോൾ ഒരു എഡിറ്റർ ടാബിൽ OmniRoute ഡാഷ്ബോർഡ് തുറക്കുന്നു; അല്ലെങ്കിൽ അത് വീണ്ടും ബ്രൗസറിലേക്ക് വീഴും</td></tr>
+  <tr><td align="left" nowrap><b>42 ഭാഷകൾ</b></td><td align="left">UI എന്ന വിപുലീകരണം നിങ്ങളുടെ VS കോഡ് പ്രദർശന ഭാഷയെ പിന്തുടരുന്നു</td></tr>
+</table>
+
+> [!NOTE]
+> **ആവശ്യകതകൾ.** OmniCopilot ആവശ്യമാണ്**VS കോഡ് 1.104 +** . നിന്ന്**VS കോഡ് 1.122** , പ്രൊവൈഡർ മോഡലുകൾ ഒരു GitHub സൈൻ-ഇൻ അല്ലെങ്കിൽ Copilot പ്ലാൻ ഇല്ലാതെ പ്രവർത്തിക്കുന്നു; പഴയ പതിപ്പുകൾക്കും സൈൻ ഇൻ ചെയ്ത Copilot പ്ലാൻ ആവശ്യമാണ്. ഇൻലൈൻ പൂർത്തീകരണങ്ങളും ഉൾച്ചേർക്കൽ അധിഷ്ഠിത സവിശേഷതകളും ദാതാവിൻ്റെ API പുറത്താണ്, ഇപ്പോഴും GitHub Copilot ആവശ്യമാണ്. Copilot Business/Enterprise ൽ, അഡ്മിനുകൾക്ക് മൂന്നാം കക്ഷി മോഡൽ ദാതാക്കളെ പ്രവർത്തനരഹിതമാക്കാൻ കഴിയും. അപ്സ്ട്രീം ഉപയോഗം ഓരോ ദാതാവിൻ്റെയും സ്വന്തം വിലയും ക്വാട്ടയും പിന്തുടരുന്നു.
+
+<sub>ഉറവിടം, ലക്കങ്ങൾ, റിലീസുകൾ: [cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT). സജ്ജീകരണം, പിക്കർ എണ്ണങ്ങൾ, ഡാഷ്ബോർഡ് ടാബ്, ട്രബിൾഷൂട്ടിംഗ്: [VS കോഡ് Copilot ചാറ്റ് ഗൈഡ്](docs/guides/VSCODE-COPILOT.md).</sub>
+
+<br/>
+
+<a id="omniroutetray"></a>
+
+### OmniRouteTray: macOS മെനു ബാറിൽ OmniRoute
+
+> **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)** മെനു ബാറിൽ നിന്ന് `omniroute serve` പ്രവർത്തിക്കുന്നു: ഇത് സെർവർ ആരംഭിക്കുന്നു, റീബൂട്ടുകളിൽ ഉടനീളം സജീവമാക്കി നിലനിർത്തുന്നു, ടെർമിനലൊന്നും തുറന്നിട്ടില്ല. [Tauri v2](https://v2.tauri.app/) ഉപയോഗിച്ച് നിർമ്മിച്ചത്, ഇത് സ്വന്തമായി ഒപ്പിട്ട നോഡ് 24 റൺടൈമും ആപ്പ് ഉടമസ്ഥതയിലുള്ള OmniRoute ഇൻസ്റ്റാളും ഷിപ്പുചെയ്യുന്നു, കൂടാതെ നിങ്ങളുടെ നിലവിലുള്ള `~/.omniroute/` കോൺഫിഗും ഡാറ്റാബേസും പങ്കിടുന്നു.
+
+<table>
+  <tr><th align="left">ഫീച്ചർ</th><th align="left">അത് എന്ത് ചെയ്യുന്നു</th></tr>
+  <tr><td align="left" nowrap><b>സെർവർ മേൽനോട്ടം</b></td><td align="left"><code>omniroute serve</code> ഉണ്ടാക്കുന്നു അല്ലെങ്കിൽ ഇതിനകം പ്രവർത്തിക്കുന്ന ഒരു ഉദാഹരണം സ്വീകരിക്കുന്നു; ഒറ്റ ക്ലിക്ക് പുനരാരംഭിക്കുക</td></tr>
+  <tr><td align="left" nowrap><b>ഗേറ്റ്വേ ആരോഗ്യം</b></td><td align="left">സജീവ ദാതാക്കൾ, p95 ലേറ്റൻസി, പ്രോംപ്റ്റ്-കാഷെ നിരക്ക്, ഒരു സ്റ്റാറ്റസ് ലൈനിൽ ഓപ്പൺ സർക്യൂട്ട് ബ്രേക്കറുകൾ</td></tr>
+  <tr><td align="left" nowrap><b>ക്വാട്ടകൾ</b></td><td align="left">റീസെറ്റ് കൗണ്ട്ഡൗണുകളുള്ള പ്രൊവൈഡർ ക്വാട്ട ബാറുകളും Claude session/weekly പരിധികളും, % ഇടത് അല്ലെങ്കിൽ % ഉപയോഗിച്ചതായി കാണിച്ചിരിക്കുന്നു; നിങ്ങൾക്ക് ആവശ്യമില്ലാത്ത അക്കൗണ്ടുകൾ മറയ്ക്കുക</td></tr>
+  <tr><td align="left" nowrap><b>ചെലവും പ്രവണതയും</b></td><td align="left">ഇന്ന്, ഇന്നലെ, 1D, 7D അല്ലെങ്കിൽ 30D, ഡോളറിലോ ടോക്കണുകളിലോ ചെലവഴിക്കുക, കൂടാതെ 30 ദിവസത്തെ ഉപയോഗ സ്പാർക്ക്ലൈനും</td></tr>
+  <tr><td align="left" nowrap><b>സ്വയമേവ അപ്ഡേറ്റ്</b></td><td align="left">സ്ഥലത്ത് പുതിയ OmniRoute റിലീസുകൾ ഇൻസ്റ്റാൾ ചെയ്യുന്നു: ഘട്ടം ഘട്ടമായുള്ള ഇൻസ്റ്റാളേഷൻ, ആറ്റോമിക് സ്വാപ്പ്, പരാജയത്തിൽ റോൾബാക്ക്. ഒരു പുതിയ ട്രേ റിലീസും ഫ്ലാഗ് ചെയ്യുന്നു</td></tr>
+  <tr><td align="left" nowrap><b>ഡോക്ടർ, ലോഗുകൾ, ഡാഷ്ബോർഡ്</b></td><td align="left">ഒറ്റ-ക്ലിക്ക് ഡയഗ്നോസ്റ്റിക്സ്, സെർവർ ലോഗുകൾ, പോർട്ട് ലിങ്കിൽ നിന്നുള്ള ഡാഷ്ബോർഡ്</td></tr>
+  <tr><td align="left" nowrap><b>ട്രേ-മാത്രം, ലോഗിൻ ചെയ്യുമ്പോൾ ആരംഭിക്കുക</b></td><td align="left">ഡോക്ക് ഐക്കൺ ഇല്ല; സജീവമായ ഇടം പിന്തുടരുന്നു, പൂർണ്ണ സ്ക്രീൻ അപ്ലിക്കേഷനുകൾ ഉൾപ്പെടുന്നു; ലോഗിൻ ചെയ്യുമ്പോൾ ഓപ്ഷണൽ ലോഞ്ച്</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>ഡൗൺലോഡ് ചെയ്യുന്നതാണോ ഇഷ്ടം? ഏറ്റവും പുതിയ <code>.dmg</code> ഫയൽ
-<a href="https://github.com/zoispag/omniroute-tray/releases">റിലീസുകളിൽ</a> നിന്ന് നേടൂ. സോഴ്സ്, പ്രശ്നങ്ങൾ, ബിൽഡ്
-ഡോക്യുമെന്റേഷൻ എന്നിവ <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>-ൽ ലഭ്യമാണ്.
-<br/>💛 <a href="https://github.com/zoispag">@zoispag</a> ഒരുക്കിയ കമ്മ്യൂണിറ്റി പ്രോജക്റ്റ് — ഔദ്യോഗിക OmniRoute റിലീസ് അല്ല.</sub>
+<sub>Apple സിലിക്കൺ, macOS 13 Ventura അല്ലെങ്കിൽ പുതിയത്. ഏറ്റവും പുതിയ റിലീസ് <b>v0.1.22</b>; <b>1,600 + DMG ഡൗൺലോഡുകൾ</b> 2026 നവംബർ 16 വരെയുള്ള റിലീസുകളിലുടനീളം. ഒരു ഡൗൺലോഡ് തിരഞ്ഞെടുക്കണോ? നിന്ന് <code>.dmg</code> നേടുക <a href="https://github.com/zoispag/omniroute-tray/releases">റിലീസുകൾ</a>; ബിൽഡ് അഡ്-ഹോക്ക് സൈൻ ചെയ്തതാണ്, അതിനാൽ <code>xattr -dr com.apple.quarantine /Applications/OmniRouteTray.app</code> ഒരിക്കൽ പ്രവർത്തിപ്പിക്കുക (ഹോംബ്രു നിങ്ങൾക്കായി ഇത് ചെയ്യുന്നു).<br/>ഒരു കമ്മ്യൂണിറ്റി പ്രൊജക്റ്റ് <a href="https://github.com/zoispag">@zoispag</a> (MIT), ഒരു ഔദ്യോഗിക OmniRoute റിലീസ് അല്ല.</sub>
 
 <br/>
 
-<div align="center">
+## സ്വകാര്യവും പ്രാദേശികവും-ആദ്യം
 
-## 🔒 സ്വകാര്യവും ലോക്കൽ-ഫസ്റ്റും
+<img src="./docs/diagrams/privacy-local.svg" width="100%" alt="Private and local-first — OmniRoute's gateway and control plane run on your machine. Prompts are sent to the upstream provider selected for each request; OmniRoute adds no hosted prompt-processing hop and telemetry is disabled by default. Credentials are encrypted at rest with AES-256-GCM; controls include API-key scoping, IP filtering, rate limits, prompt-injection guards, upstream-header scrubbing, opt-in PII redaction, sanitized errors and a local SQLite audit trail. OmniRoute is MIT-licensed and self-hostable."/>
 
-</div>
-
-<img src="./docs/diagrams/privacy-local.svg" width="100%" alt="സ്വകാര്യവും ലോക്കൽ-ഫസ്റ്റും — OmniRoute-ന്റെ ഗേറ്റ്വേയും കൺട്രോൾ പ്ലെയിനും നിങ്ങളുടെ മെഷീനിൽ പ്രവർത്തിക്കുന്നു. ഓരോ അഭ്യർത്ഥനയ്ക്കും തിരഞ്ഞെടുത്ത അപ്സ്ട്രീം ദാതാവിലേക്കാണ് പ്രോംപ്റ്റുകൾ അയയ്ക്കുന്നത്; OmniRoute ഹോസ്റ്റ് ചെയ്ത പ്രോംപ്റ്റ്-പ്രോസസ്സിംഗ് ഹോപ്പുകളൊന്നും ചേർക്കുന്നില്ല, കൂടാതെ ടെലിമെട്രി ഡിഫോൾട്ടായി പ്രവർത്തനരഹിതമാണ്. ക്രെഡൻഷ്യലുകൾ AES-256-GCM ഉപയോഗിച്ച് സംഭരണാവസ്ഥയിൽ എൻക്രിപ്റ്റ് ചെയ്യുന്നു; നിയന്ത്രണങ്ങളിൽ API-കീ സ്കോപ്പിംഗ്, IP ഫിൽട്ടറിംഗ്, നിരക്ക് പരിധികൾ, പ്രോംപ്റ്റ്-ഇൻജക്ഷൻ പ്രതിരോധങ്ങൾ, അപ്സ്ട്രീം-ഹെഡർ നീക്കംചെയ്യൽ, ഓപ്റ്റ്-ഇൻ PII റിഡാക്ഷൻ, സാനിറ്റൈസ് ചെയ്ത പിശകുകൾ, ലോക്കൽ SQLite ഓഡിറ്റ് ട്രെയിൽ എന്നിവ ഉൾപ്പെടുന്നു. OmniRoute MIT ലൈസൻസുള്ളതും സ്വയം ഹോസ്റ്റ് ചെയ്യാവുന്നതുമാണ്."/>
-
-<sub>📖 [അംഗീകാര നിയന്ത്രണം](docs/architecture/AUTHZ_GUIDE.md) · [സുരക്ഷാ നിയന്ത്രണങ്ങൾ](docs/security/GUARDRAILS.md) · [അനുസരണക്ഷമത](docs/security/COMPLIANCE.md)</sub>
+<sub>📖 [ഓതറൈസേഷൻ](docs/architecture/AUTHZ_GUIDE.md) · [ഗാർഡ്രെയിലുകൾ](docs/security/GUARDRAILS.md) · [പാലിക്കൽ](docs/security/COMPLIANCE.md)</sub>
 
 <br/>
 
-<div align="center">
+<a id="-full-cli--a2a--mcp"></a>
+<a id="cli-protocols"></a>
 
-## 🔌 പൂർണ്ണ CLI + A2A & MCP
+## മുഴുവൻ CLI, MCP, A2A
 
-</div>
+> OmniRoute ഒരു കമാൻഡ്-ലൈൻ ക്ലയൻ്റ് ഷിപ്പ് ചെയ്യുന്നു** 91 ഉയർന്ന തലത്തിലുള്ള കമാൻഡുകളും കമാൻഡ് ഗ്രൂപ്പുകളും** (754 കമാൻഡുകൾ ഉപകമാൻഡുകൾ കണക്കാക്കുന്നു), ഒരു** 110 ടൂളുകളും 33 സ്കോപ്പുകളുമുള്ള MCP സെർവർ** , ഒപ്പം ഒരു** 6 കഴിവുകളുള്ള A2A ഏജൻ്റ്** . സ്ക്രിപ്റ്റുകൾ, ടെർമിനലുകൾ, AI ഏജൻ്റുകൾ എന്നിവയ്ക്കെല്ലാം ഒരേ ഗേറ്റ്വേ പ്രവർത്തിപ്പിക്കാൻ കഴിയും.
 
-> സെർവറിനപ്പുറം, OmniRoute എന്നത് **80+ കമാൻഡുകളുള്ള പൂർണ്ണ കമാൻഡ്-ലൈൻ കൺട്രോൾ പാനലാണ്**, കൂടാതെ ഒരു AI ഏജന്റിന് ഇത് **സ്വയം നിയന്ത്രിക്കാനാകുന്ന** ഓപ്പൺ ഏജന്റ് പ്രോട്ടോക്കോളുകളും ഇതിലുണ്ട്.
-
-### ⌨️ ഒരു യഥാർത്ഥ CLI (`start` മാത്രം അല്ല)
-
-```bash
-omniroute               # ഗേറ്റ്വേ + ഡാഷ്ബോർഡ് നൽകുന്നു (പോർട്ട് 20128)
-omniroute chat          # ഇന്ററാക്ടീവ് TUI ചാറ്റ് ക്ലയന്റ് (സ്ലാഷ്: /model /combo /skill /memory)
-omniroute setup         # മാർഗനിർദ്ദേശമുള്ള ആദ്യ-റൺ വിസാർഡ്
-omniroute doctor        # പ്രൊവൈഡറുകൾ, പോർട്ടുകൾ, നേറ്റീവ് ഡിപ്പൻഡൻസികൾ എന്നിവ നിർണ്ണയിക്കുന്നു
-```
-
-### 🛰️ റിമോട്ട് മോഡ് — ഇവിടെ CLI പ്രവർത്തിപ്പിക്കുക, VPS-ൽ OmniRoute പ്രവർത്തിപ്പിക്കുക
-
-സെർവറിൽ OmniRoute ആണോ? **അതേ CLI** ഉപയോഗിച്ച് നിങ്ങളുടെ ലാപ്ടോപ്പിൽ നിന്ന് ഇത് നിയന്ത്രിക്കുക. സ്കോപ്പ് ചെയ്ത ആക്സസ് ടോക്കൺ ഉപയോഗിച്ച് ഒരിക്കൽ ലോഗിൻ ചെയ്താൽ,
-തുടർന്നുള്ള ഓരോ കമാൻഡും റിമോട്ടിനെ ലക്ഷ്യമാക്കും.
+### ഒരു യഥാർത്ഥ CLI, `start` മാത്രമല്ല
 
 ```bash
-omniroute connect 192.168.0.15            # പാസ്വേഡ് → സ്കോപ്പ് ചെയ്ത ടോക്കൺ, ഒരു കോൺടെക്സ്റ്റായി സംരക്ഷിക്കുന്നു
-omniroute models                         # ← REMOTE സെർവറിനെതിരെ പ്രവർത്തിക്കുന്നു
-omniroute configure codex                 # ← ഒരു റിമോട്ട് മോഡൽ തിരഞ്ഞെടുക്കുന്നു, ലോക്കൽ Codex പ്രൊഫൈൽ എഴുതുന്നു
-omniroute tokens create --name ci --scope read   # മറ്റ് മെഷീനുകൾക്കായി കൂടുതൽ പരിമിതമായ ടോക്കണുകൾ സൃഷ്ടിക്കുന്നു
-omniroute contexts use default            # ← ലോക്കൽ സെർവറിലേക്ക് തിരികെ മാറുന്നു
+omniroute                 # start the gateway and dashboard (port 20128)
+omniroute setup           # guided first-run wizard
+omniroute repl            # interactive chat in the terminal (/model /combo /skill /memory)
+omniroute chat "hello"    # one-shot prompt; also reads --file or --stdin
+omniroute doctor          # check config, database, ports, Node runtime and native deps
 ```
 
-ടോക്കണുകൾക്ക് `read` / `write` / `admin` എന്നിങ്ങനെ സ്കോപ്പുകളുണ്ട്; പ്രോസസ് സൃഷ്ടിക്കുന്ന റൂട്ടുകൾ ലൂപ്പ്ബാക്കിൽ മാത്രമായി തുടരും.
-<sub>📖 [റിമോട്ട് മോഡ്](docs/guides/REMOTE-MODE.md)</sub>
+ഗ്ലോബൽ `--output table|json|jsonl|csv` ഫ്ലാഗ് സ്ക്രിപ്റ്റുകളിൽ നിന്നും CI യിൽ നിന്നും ഒരേ കമാൻഡുകൾ ഉപയോഗപ്രദമാക്കുന്നു.
+
+### റിമോട്ട് മോഡ്: നിങ്ങളുടെ ലാപ്ടോപ്പിലെ CLI, സെർവറിലെ OmniRoute
+
+ഒരു റിമോട്ട് സെർവറിലേക്ക് ഒരിക്കൽ ലോഗിൻ ചെയ്യുക. CLI അതിനെ a ആയി സംരക്ഷിക്കുന്നു** സന്ദർഭം** നിങ്ങൾ തിരികെ മാറുന്നതുവരെ പിന്നീടുള്ള കമാൻഡുകൾ ആ സെർവറിനെതിരെ പ്രവർത്തിക്കുന്നു.
+
+```bash
+omniroute connect omniroute.example.com          # asks for the password, saves a scoped token as a context
+omniroute models                                 # runs against the remote server
+omniroute configure codex                        # picks a remote model, writes a local Codex profile
+omniroute tokens create --name ci --scope read   # mint a narrower token for another machine
+omniroute contexts use default                   # switch back to the local server
+```
+
+| ടോക്കൺ സ്കോപ്പ് | <img width="2000" height="0" alt=""> എന്താണ് അനുവദിക്കുന്നത്                   |
+| --------------- | ------------------------------------------------------------------------------ |
+| `read`          | ലിസ്റ്റും പരിശോധനയും: മോഡലുകൾ, സ്റ്റാറ്റസ്, ലോഗുകൾ, ഉപയോഗം                     |
+| `write`         | `read` പ്ലസ് കോൺഫിഗർ ചെയ്ത് പ്രയോഗിക്കുക: ക്ലയൻ്റ് സജ്ജീകരണം, കീകൾ, കോൺഫിഗറേഷൻ |
+| `admin`         | `write` പ്ലസ് മാനേജ് ചെയ്യുക: ടോക്കണുകൾ, ദാതാക്കൾ, സേവനങ്ങൾ, നയം               |
+
+ഒരു ബെയർ ഹോസ്റ്റിന് `http://`, പോർട്ട് 20128 എന്നിവ ലഭിക്കുന്നു; സെർവർ TLS പിന്നിൽ ഇരിക്കുമ്പോൾ ഒരു മുഴുവൻ `https://` URL കടന്നുപോകുക. ടോക്കൺ എന്തുതന്നെയായാലും, പ്രക്രിയകൾ സൃഷ്ടിക്കാൻ കഴിയുന്ന റൂട്ടുകൾ ലൂപ്പ്ബാക്ക്-മാത്രം നിലനിൽക്കും.
+<sub>[റിമോട്ട് മോഡ് ഗൈഡ്](docs/guides/REMOTE-MODE.md)</sub>
 
 <div align="left">
 
-<img src="./docs/diagrams/cli-terminal.svg" width="50%" alt="OmniRoute CLI പ്രദർശിപ്പിക്കുന്ന ആനിമേറ്റഡ് ടെർമിനൽ — omniroute providers list, omniroute combo list, omniroute health — 89-കമാൻഡ് ടോപ്പ്-ലെവൽ ഉപരിതലത്തിലൂടെ ചക്രാകാരമായി പ്രവർത്തിക്കുന്നു: providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
+<img src="./docs/diagrams/cli-terminal.svg" width="50%" alt="Animated terminal demo of the OmniRoute CLI running omniroute providers list, omniroute combo list and omniroute health with sample data, over a ticker of the 91 top-level commands and groups: providers, oauth, keys, combo, nodes, models, cache, compression, cost, usage, quota, health, resilience, telemetry, logs, audit, mcp, a2a, cloud, memory, skills, eval, doctor, repl, tunnel, backup, sync, webhooks, policy, pricing, translator, simulate and more."/>
 
 </div>
 
-### 🤝 ഒരു ഏജന്റിനെ കണക്റ്റുചെയ്യുക — അത് OmniRoute-നെ തന്നെ നിയന്ത്രിക്കും
+### ഒരു ഏജൻ്റിനെ ബന്ധിപ്പിക്കുക
 
-**MCP**, **A2A**, ഒരു **REST API**, **വെബ്ഹുക്കുകൾ** അല്ലെങ്കിൽ ഒരു **റിമോട്ട് CLI** വഴി OmniRoute തുറന്നുകൊടുക്കുക — കഴിവുള്ള ഏത് ഏജന്റിനും (അല്ലെങ്കിൽ നിങ്ങളുടെ സ്വന്തം കോഡിനും) മുഴുവൻ ഗേറ്റ്വേയിലേക്കുള്ള നിയന്ത്രണം ലഭിക്കും: റൂട്ടിംഗ്, പ്രൊവൈഡറുകൾ, കോംബോകൾ, കാഷെ, കംപ്രഷൻ, മെമ്മറി — സ്വയംഭരണത്തോടെ. താഴെയുള്ള HTTP എൻഡ്പോയിന്റുകൾ `http://localhost:20128`-ന് കീഴിലാണ് നൽകുന്നത്.
+ഒരു ഏജൻ്റിന് അല്ലെങ്കിൽ നിങ്ങളുടെ സ്വന്തം കോഡിന്, റൂട്ടിംഗ്, ദാതാക്കൾ, കോമ്പോകൾ, കാഷെ, കംപ്രഷൻ, മെമ്മറി എന്നിവ ഈ ഇൻ്റർഫേസുകളിലൂടെ നയിക്കാനാകും. HTTP പാതകൾ ഗേറ്റ്വേ വഴി നൽകുന്നു, സ്ഥിരസ്ഥിതിയായി `http://localhost:20128`.
 
-<table>
-  <tr><th align="left">ഇന്റർഫേസ്</th><th align="left">എൻഡ്പോയിന്റ് / കമാൻഡ്</th><th align="left">ഇതിനായി ഉപയോഗിക്കുക</th></tr>
-  <tr><td align="left" nowrap>🧰 <b>MCP (stdio)</b></td><td align="left" nowrap><code>omniroute --mcp</code></td><td align="left">Claude Desktop, Cursor, ഏതെങ്കിലും MCP ക്ലയന്റ് എന്നിവയിലേക്ക് പ്ലഗ് ചെയ്യുക</td></tr>
-  <tr><td align="left" nowrap>🌊 <b>MCP (HTTP)</b></td><td align="left" nowrap><code>/api/mcp/stream</code></td><td align="left">റിമോട്ട് MCP — <b>110 ടൂളുകൾ</b>, 33 സ്കോപ്പുകൾ (എൻഫോഴ്സ്മെന്റ് ഓപ്റ്റ്-ഇൻ), പൂർണ്ണ ഓഡിറ്റ് ട്രെയിൽ</td></tr>
-  <tr><td align="left" nowrap>📡 <b>MCP (SSE)</b></td><td align="left" nowrap><code>/api/mcp/sse</code></td><td align="left">സ്ട്രീമിംഗ് MCP ട്രാൻസ്പോർട്ട്</td></tr>
-  <tr><td align="left" nowrap>🤝 <b>A2A</b></td><td align="left" nowrap><code>/.well-known/agent.json</code></td><td align="left">ഏജന്റ്-ടു-ഏജന്റ്, <b>JSON-RPC 2.0</b> + SSE, 6 സ്കില്ലുകൾ</td></tr>
-  <tr><td align="left" nowrap>🌐 <b>REST API</b></td><td align="left" nowrap><code>/v1/*</code></td><td align="left">OpenAI-അനുയോജ്യം — ചാറ്റ്, എംബെഡ്ഡിംഗുകൾ, ചിത്രങ്ങൾ, ഓഡിയോ, OCR</td></tr>
-  <tr><td align="left" nowrap>🔔 <b>വെബ്ഹുക്കുകൾ</b></td><td align="left" nowrap><code>/api/webhooks</code></td><td align="left">അഭ്യർത്ഥന / ക്വോട്ട ഇവന്റുകൾ Slack, Discord, Telegram അല്ലെങ്കിൽ ഏതെങ്കിലും URL-ലേക്ക് പുഷ് ചെയ്യുക</td></tr>
-  <tr><td align="left" nowrap>🛰️ <b>റിമോട്ട് CLI</b></td><td align="left" nowrap><code>omniroute connect <host></code></td><td align="left">സ്കോപ്പ് ചെയ്ത ആക്സസ് ടോക്കണുകൾ ഉപയോഗിച്ച് ഒരു റിമോട്ട് ഇൻസ്റ്റൻസ് നിയന്ത്രിക്കുക</td></tr>
-</table>
+| ഇൻ്റർഫേസ്                      | എൻഡ് പോയിൻ്റ് അല്ലെങ്കിൽ കമാൻഡ് | ഇതിനായി ഉപയോഗിക്കുക                                                                            |
+| ------------------------------ | ------------------------------- | ---------------------------------------------------------------------------------------------- |
+| MCP ഓവർ stdio                  | `omniroute --mcp`               | Claude ഡെസ്ക്ടോപ്പ്, Cursor, മറ്റ് പ്രാദേശിക MCP ക്ലയൻ്റുകൾ                                    |
+| സ്ട്രീം ചെയ്യാവുന്ന HTTP ൽ MCP | `/api/mcp/stream`               | റിമോട്ട് MCP ക്ലയൻ്റുകൾ: 110 ടൂളുകൾ, 33 സ്കോപ്പുകൾ, ഓഡിറ്റ് ലോഗിൽ എഴുതിയിരിക്കുന്ന ഓരോ കോളും   |
+| MCP ൽ SSE                      | `/api/mcp/sse`                  | ഇപ്പോഴും SSE ഗതാഗതം ഉപയോഗിക്കുന്ന ക്ലയൻ്റുകൾ                                                   |
+| A2A കണ്ടെത്തൽ                  | `/.well-known/agent.json`       | ഏജൻ്റ് കാർഡ്: OmniRoute എന്തുചെയ്യാനാകുമെന്ന് മറ്റ് ഏജൻ്റുമാരോട് പറയുന്നു                      |
+| A2A എക്സിക്യൂഷൻ                | `POST /a2a`                     | JSON-RPC 2.0 ടാസ്ക്കുകൾ, സിൻക്രണസ് അല്ലെങ്കിൽ സ്ട്രീം ചെയ്ത SSE, 6 കഴിവുകളിലുടനീളം             |
+| REST API                       | `/v1/*`                         | OpenAI-അനുയോജ്യമായ ചാറ്റ്, പ്രതികരണങ്ങൾ, ഉൾച്ചേർക്കലുകൾ, ചിത്രങ്ങൾ, ഓഡിയോ, OCR                 |
+| വെബ്ബുക്കുകൾ                   | `/api/webhooks`                 | Slack, Discord, Telegram, അല്ലെങ്കിൽ HMAC സൈനിംഗുള്ള ഏതെങ്കിലും URL എന്നിവയിലേക്കുള്ള ഇവൻ്റുകൾ |
+| റിമോട്ട് CLI                   | `omniroute connect <host>`      | സ്കോപ്പ്ഡ് ആക്സസ് ടോക്കണുകൾ ഉപയോഗിച്ച് ഒരു റിമോട്ട് ഇൻസ്റ്റൻസ് ഡ്രൈവ് ചെയ്യുക                  |
+
+`smart-routing`, `quota-management`, `provider-discovery`, `cost-analysis`, `health-report`, `list-capabilities` എന്നിവയാണ് ആറ് A2A കഴിവുകൾ.
+
+**നിങ്ങൾ ബന്ധിപ്പിക്കുന്നതിന് മുമ്പ്:**
+
+- **MCP ഓവർ HTTP പ്രവർത്തനരഹിതമാക്കാൻ ആരംഭിക്കുന്നു.** `omniroute mcp enable --transport streamable-http` ഉപയോഗിച്ചോ ഡാഷ്ബോർഡിൻ്റെ എൻഡ്പോയിൻ്റ് പേജിൽ നിന്നോ ഇത് ഓണാക്കുക. ഒരു സമയം ഒരു HTTP ഗതാഗതം സജീവമാണ്: `streamable-http` `/api/mcp/stream` നൽകുന്നു, `sse` `/api/mcp/sse` നൽകുന്നു.
+- **A2A പ്രവർത്തനരഹിതമായി ആരംഭിക്കുന്നു.** ഡാഷ്ബോർഡിൻ്റെ എൻഡ്പോയിൻ്റ്സ് പേജിൽ ഇത് പ്രവർത്തനക്ഷമമാക്കുക. `POST /a2a` തുടർന്ന് `/v1` യുടെ അതേ API-കീ നിയമങ്ങൾ പിന്തുടരുന്നു.
+- **റിമോട്ട് MCP അനുയോജ്യമായ ഒരു കീ ആവശ്യമാണ്.** `/api/mcp/*` സ്ഥിരസ്ഥിതിയായി ലൂപ്പ്ബാക്ക് മാത്രമേ ഉത്തരം നൽകൂ. മറ്റൊരു ഹോസ്റ്റിൽ നിന്ന്, `manage` അല്ലെങ്കിൽ `admin` (എല്ലാ ടൂളുകളും) അല്ലെങ്കിൽ `mcp:connect` കൂടാതെ നിങ്ങൾക്ക് ആവശ്യമുള്ള ടൂളുകളുടെ സ്കോപ്പുകൾ ഉപയോഗിച്ച് ഒരു കീ അയയ്ക്കുക. `manage`/`admin` ഇല്ലാത്ത കീകൾക്കായി, ടൂൾ സ്കോപ്പുകൾ എല്ലായ്പ്പോഴും നടപ്പിലാക്കുന്നു.
 
 ```bash
-# MCP വഴി Claude Code-ന് പൂർണ്ണ OmniRoute ടൂൾസെറ്റ് നൽകുക:
+# Give Claude Code the OmniRoute toolset over MCP:
 omniroute mcp enable --transport streamable-http
 claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
   --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
-<sub>📖 [MCP സെർവർ](docs/frameworks/MCP-SERVER.md) · [A2A സെർവർ](docs/frameworks/A2A-SERVER.md) · [ഏജന്റ് പ്രോട്ടോക്കോളുകൾ](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>
+<sub>[MCP സെർവർ](docs/frameworks/MCP-SERVER.md) · [A2A സെർവർ](docs/frameworks/A2A-SERVER.md) · [ഏജൻ്റ് പ്രോട്ടോക്കോളുകൾ](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md) · [Webhooks](docs/frameworks/WEBHOOKS.md) · [റൂട്ട് ഗാർഡ് ടയറുകൾ](docs/security/ROUTE_GUARD_TIERS.md)</sub>
 
 <br/>
 
-<div align="center">
+## 15-95% ടോക്കണുകൾ — സ്വയമേവ സംരക്ഷിക്കുക
 
-## 🗜️ ടോക്കണുകൾ 15–95% വരെ സംരക്ഷിക്കുക — സ്വയമേവ
+### ഇത് എങ്ങനെ പ്രവർത്തിക്കുന്നു — പൈപ്പ്ലൈൻ, ആർക്കിടെക്ചർ & സേവിംഗ്സ് കണക്ക്
 
-</div>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute compression pipeline: an illustrative 10,000-token client request passes through 12 composable engines — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra and OmniGlyph — and can reach the provider at about 1,080 tokens in the documented stacked example. Structured content is protected by preservation guards and per-step fidelity gates; explicit lossy or experimental modes may transform eligible content."/>
 
-### 📖 ഇത് എങ്ങനെ പ്രവർത്തിക്കുന്നു — പൈപ്പ്ലൈൻ, ആർക്കിടെക്ചർ, സേവിംഗ്സ് കണക്കുകൂട്ടൽ
-
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute കംപ്രഷൻ പൈപ്പ്ലൈൻ: 10,000-ടോക്കൺ ക്ലയന്റ് അഭ്യർത്ഥന 12 composable എഞ്ചിനുകളിലൂടെ — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra, OmniGlyph — കടന്നുപോകുന്ന ഒരു ഉദാഹരണം; ഡോക്യുമെന്റ് ചെയ്ത stacked ഉദാഹരണത്തിൽ ഏകദേശം 1,080 ടോക്കണുകളോടെ provider-ലേക്ക് എത്താൻ കഴിയും. Preservation guards, ഓരോ ഘട്ടത്തിലുമുള്ള fidelity gates എന്നിവ structured content സംരക്ഷിക്കുന്നു; വ്യക്തമായി lossy അല്ലെങ്കിൽ experimental ആയ മോഡുകൾ eligible content മാറ്റിയേക്കാം."/>
-
-Default stacked combo runs `RTK → Caveman`. രണ്ടും ഒരേ tool/context payload-ൽ പ്രവർത്തിക്കുമ്പോൾ, savings compound ചെയ്യുന്നു:
+ഡിഫോൾട്ട് സ്റ്റാക്ക് ചെയ്ത കോംബോ `RTK → Caveman` റൺ ചെയ്യുന്നു. രണ്ടും ഒരേ tool/context പേലോഡിൽ പ്രവർത്തിക്കുമ്പോൾ, സേവിംഗ്സ് സംയുക്തം:
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -954,135 +982,169 @@ average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
 range    = 78.4 – 94.6%
 ```
 
-Code blocks, URLs, JSON, structured data എന്നിവ preservation engine **എപ്പോഴും സംരക്ഷിക്കുന്നു**.
+കോഡ് ബ്ലോക്കുകൾ, URLs, JSON, ഘടനാപരമായ ഡാറ്റ എന്നിവയാണ്** എപ്പോഴും സംരക്ഷിക്കപ്പെടുന്നു** സംരക്ഷണ എഞ്ചിൻ വഴി.
 
-> **കുറച്ച് ടോക്കണുകൾ കൊണ്ട് കാര്യം സാധിക്കുമ്പോൾ ഇത്രയും ടോക്കണുകൾ എന്തിന്?** ഓരോ അഭ്യർത്ഥനയും OmniRoute-ന്റെ compression pipeline-ലൂടെ **സുതാര്യമായി** കടന്നുപോകുന്നു — client മാറ്റങ്ങളൊന്നും ആവശ്യമില്ല. ഇപ്പോൾ ഇത് ക്രമത്തിൽ പ്രവർത്തിക്കുന്നതും ഓരോ routing combo-നും അനുസരിച്ച് mix & match ചെയ്യാവുന്നതുമായ **12 composable എഞ്ചിനുകളുടെ stack** ആണ് — [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua), [Troglodita](https://github.com/leninejunior/troglodita) (PT-BR) എന്നിവയിലെ ആശയങ്ങളെ അടിസ്ഥാനമാക്കി.
+> **കുറച്ച് ടോക്കണുകൾ ട്രിക്ക് ചെയ്യുമ്പോൾ എന്തിനാണ് പല ടോക്കണുകൾ ഉപയോഗിക്കുന്നത്?** എല്ലാ അഭ്യർത്ഥനകളും OmniRoute യുടെ കംപ്രഷൻ പൈപ്പ്ലൈനിലൂടെ കടന്നുപോകുന്നു** സുതാര്യമായി** — ക്ലയൻ്റ് മാറ്റങ്ങളൊന്നുമില്ല. അത് ഇപ്പോൾ എ** 12 കമ്പോസിബിൾ എഞ്ചിനുകളുടെ ശേഖരം** [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K +), [LLMLingua-2](https://github.com/microsoft/LLMLingua), [Troglodita](https://github.com/leninejunior/troglodita) (PT-BR) എന്നിവയിൽ നിന്നുള്ള ആശയങ്ങളിൽ ഓരോ റൂട്ടിംഗ് കോംബോ — ബിൽഡിംഗും ക്രമത്തിൽ പ്രവർത്തിക്കുകയും മിക്സ് & മാച്ച് ചെയ്യുകയും ചെയ്യുന്നു.
 
-### 🧱 12-എഞ്ചിൻ stack
+### 12-എഞ്ചിൻ സ്റ്റാക്ക്
 
-എഞ്ചിനുകൾ pipeline ക്രമത്തിൽ പ്രവർത്തിക്കുന്നു; ഓരോന്നും സ്വതന്ത്രമായി toggle ചെയ്യാനും ഓരോ combo-നും അനുസരിച്ച് configure ചെയ്യാനും കഴിയും:
-
-<table>
-  <tr><th align="center">#</th><th align="left">എഞ്ചിൻ</th><th align="left">ഇത് ചെയ്യുന്നത്</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">turn-ുകൾക്കിടയിൽ ആവർത്തിക്കുന്ന content ഒഴിവാക്കുന്നു (content-addressed, cross-turn)</td></tr>
-  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">വലിയ blocks retrieve markers-ന് പിന്നിൽ archive ചെയ്യുന്നു; ആവശ്യപ്പെടുമ്പോൾ fetch ചെയ്യുന്നു</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Whitespace + image-URL trimming (latency-light baseline)</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">Smart tool-result filtering, dedup & truncation (command-aware)</td></tr>
-  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">shell/patch/search/build outputs-നായി lossless-first JSON + bounded diagnostic compression (Responses API)</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">vendored <b>GCF</b> codec ഉപയോഗിച്ച് JSON arrays-ന്റെ lossless tabular compaction (~30%)</td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">അവസാന user query-യുമായി താരതമ്യം ചെയ്തുള്ള extractive sentence scoring</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">Rule-based prose compression (output-ൽ ~65–75%)</td></tr>
-  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">പഴയ turn-ുകളുടെ summarization + progressive aging</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">MobileBERT ONNX വഴി ML semantic pruning — code-safe, async</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">ഓപ്ഷണൽ small-model (SLM) tier ഉള്ള heuristic token pruning</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">direct Anthropic wire-ൽ അളന്ന Claude Fable 5-നായി experimental context-as-image encoding; provider receipts ലഭിക്കുന്നതുവരെ GPT 5.6 transformers fail-closed ആയി തുടരും. നാല് compression profiles (aggressive default, balanced, coding-safe, passthrough) (ഏറ്റവും aggressive; opt-in)</td></tr>
-</table>
-
-Code blocks, URLs, structured data എന്നിവ **byte-perfect ആയി എപ്പോഴും സംരക്ഷിക്കപ്പെടുന്നു**. **One-click presets** എഞ്ചിനുകളെ സംയോജിപ്പിക്കുന്നു:
+എഞ്ചിനുകൾ പൈപ്പ്ലൈൻ ക്രമത്തിൽ പ്രവർത്തിക്കുന്നു; ഓരോന്നും സ്വതന്ത്രമായി ടോഗിൾ ചെയ്യാവുന്നതും ഓരോ കോമ്പോയിൽ ക്രമീകരിക്കാവുന്നതുമാണ്:
 
 <table>
-  <tr><th align="left">മോഡ്</th><th align="left">സേവിംഗ്സ്</th><th align="left">ഏറ്റവും അനുയോജ്യം</th></tr>
-  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">എപ്പോഴും പ്രവർത്തിക്കുന്ന സുരക്ഷിത default</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">ദൈനംദിന coding</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">നീണ്ട tool-heavy sessions</td></tr>
-  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">പരമാവധി സേവിംഗ്സ്</td></tr>
-  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Shell/test/build/git output</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">Mixed prompts + tool logs</td></tr>
+  <tr><th align="center">#</th><th align="left">എഞ്ചിൻ</th><th align="left">അത് എന്ത് ചെയ്യുന്നു</th></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>സെഷൻ-ഡെഡപ്പ്</b></td><td align="left">തിരിവുകളിലുടനീളം ആവർത്തിച്ചുള്ള ഉള്ളടക്കം ഡ്രോപ്പ് ചെയ്യുക (ഉള്ളടക്ക വിലാസം, ക്രോസ്-ടേൺ)</td></tr>
+  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">റിട്രീവ് മാർക്കറുകൾക്ക് പിന്നിൽ വലിയ ബ്ലോക്കുകൾ ആർക്കൈവ് ചെയ്യുന്നു, ആവശ്യാനുസരണം ലഭ്യമാക്കുന്നു</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>ലൈറ്റ്</b></td><td align="left">വൈറ്റ്സ്പേസ് + ഇമേജ്-URL ട്രിമ്മിംഗ് (ലേറ്റൻസി-ലൈറ്റ് ബേസ്ലൈൻ)</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">സ്മാർട്ട് ടൂൾ-ഫല ഫിൽട്ടറിംഗ്, ഡീഡപ്പ് & ട്രങ്കേഷൻ (കമാൻഡ്-അവേർ)</td></tr>
+  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>പ്രതികരണങ്ങൾ ടൂൾ ഔട്ട്പുട്ട്</b></td><td align="left">shell/patch/search/build ഔട്ട്പുട്ടുകൾക്കുള്ള ലോസ്ലെസ്-ഫസ്റ്റ് JSON + ബൗണ്ടഡ് ഡയഗ്നോസ്റ്റിക് കംപ്രഷൻ (പ്രതികരണങ്ങൾ API)</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>ഹെഡ്റൂം</b></td><td align="left">ഒരു വെണ്ടർ വഴി JSON അറേകളുടെ (~ 30%) ലോസ്ലെസ് ടേബിൾ കോംപാക്ഷൻ <b>GCF</b> കോഡെക്</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>പ്രസക്തി</b></td><td align="left">അവസാന ഉപയോക്തൃ അന്വേഷണത്തിനെതിരായ എക്സ്ട്രാക്റ്റീവ് വാക്യ സ്കോറിംഗ്</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>ഗുഹാമനുഷ്യൻ</b></td><td align="left">നിയമാധിഷ്ഠിത ഗദ്യ കംപ്രഷൻ ( ഔട്ട്പുട്ടിൽ ~ 65-75%)</td></tr>
+  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>അഗ്രസീവ്</b></td><td align="left">പഴയ തിരിവുകളുടെ പുരോഗമന വാർദ്ധക്യം + സംഗ്രഹം</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">ML സെമാൻ്റിക് പ്രൂണിംഗ് വഴി MobileBERT ONNX — കോഡ്-സേഫ്, അസിൻക്</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>അൾട്രാ</b></td><td align="left">ഓപ്ഷണൽ സ്മോൾ മോഡൽ (SLM) ടയർ ഉപയോഗിച്ച് ഹ്യൂറിസ്റ്റിക് ടോക്കൺ പ്രൂണിംഗ്</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">ഡയറക്ട് Anthropic വയറിൽ അളന്ന Claude ഫേബിൾ 5-നുള്ള പരീക്ഷണാത്മക സന്ദർഭ-ചിത്ര എൻകോഡിംഗ്; GPT 5.6 ട്രാൻസ്ഫോർമറുകൾ, ദാതാവിൻ്റെ രസീതുകൾ തീർപ്പുകൽപ്പിക്കാതെ അടച്ചുപൂട്ടിയതായി തുടരുന്നു. നാല് കംപ്രഷൻ പ്രൊഫൈലുകൾ (അഗ്രസീവ് ഡിഫോൾട്ട്, ബാലൻസ്ഡ്, കോഡിംഗ്-സേഫ്, പാസ്ത്രൂ) (ഏറ്റവും ആക്രമണാത്മകം; തിരഞ്ഞെടുക്കൽ)</td></tr>
 </table>
 
-**യഥാർത്ഥ ഉദാഹരണം — Standard mode:**
+കോഡ് ബ്ലോക്കുകൾ, URLs, ഘടനാപരമായ ഡാറ്റ എന്നിവയാണ്** എപ്പോഴും സംരക്ഷിച്ചിരിക്കുന്നു** ബൈറ്റ്-തികഞ്ഞത്.** ഒറ്റ ക്ലിക്ക് പ്രീസെറ്റുകൾ** എഞ്ചിനുകൾ സംയോജിപ്പിക്കുക:
 
-> **മുമ്പ് (69 tokens):** _"The reason your React component is re-rendering is likely because you're creating a new object reference on each render cycle. When you pass an inline object as a prop, React's shallow comparison sees it as a different object every time, which triggers a re-render. I would recommend using useMemo to memoize the object."_
->
-> **ശേഷം (19 tokens):** _"New object ref each render. Inline object prop = new ref = re-render. Wrap in useMemo."_
->
-> **അതേ ഉത്തരം. 72% കുറവ് ടോക്കണുകൾ. കൃത്യതയിൽ യാതൊരു നഷ്ടവുമില്ല.** ✅
+<table>
+  <tr><th align="left">മോഡ്</th><th align="left">സേവിംഗ്സ്</th><th align="left"><img width="2000" height="0" alt=""> മികച്ചത്</th></tr>
+  <tr><td align="left" nowrap>🪶 <b>ലൈറ്റ്</b></td><td align="left" nowrap>~15%</td><td align="left">എപ്പോഴും സുരക്ഷിത ഡിഫോൾട്ട് ഓണാണ്</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>സ്റ്റാൻഡേർഡ് (കേവ്മാൻ)</b></td><td align="left" nowrap>~30%</td><td align="left">പ്രതിദിന കോഡിംഗ്</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>അഗ്രസീവ്</b></td><td align="left" nowrap>~50%</td><td align="left">ദൈർഘ്യമേറിയ ടൂൾ-ഹെവി സെഷനുകൾ</td></tr>
+  <tr><td align="left" nowrap>🔥 <b>അൾട്രാ</b></td><td align="left" nowrap>~75%</td><td align="left">പരമാവധി സമ്പാദ്യം</td></tr>
+  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Shell/test/build/git ഔട്ട്പുട്ട്</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>അടുക്കിയിരിക്കുന്നു (RTK → ഗുഹാമനുഷ്യൻ)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">മിക്സഡ് + ടൂൾ ലോഗുകൾ ആവശ്യപ്പെടുന്നു</td></tr>
+</table>
 
-**PT-BR ഉദാഹരണം — [Troglodita](https://github.com/leninejunior/troglodita) mode:**
+**യഥാർത്ഥ ഉദാഹരണം — സ്റ്റാൻഡേർഡ് മോഡ്:**
 
-> **മുമ്പ് (42 ടോക്കണുകൾ):** _"ഓരോ റെൻഡറിംഗ് സൈക്കിളിലും ഒരു പുതിയ ഒബ്ജക്റ്റ് റഫറൻസ് സൃഷ്ടിക്കപ്പെടുന്നതിനാൽ ഘടകം വീണ്ടും റെൻഡർ ചെയ്യപ്പെടുന്നതാണ് പ്രശ്നം. `useMemo` ഉപയോഗിക്കാൻ ഞാൻ ശുപാർശ ചെയ്യും."_
+> **മുമ്പ് (69 ടോക്കണുകൾ):** _"നിങ്ങളുടെ React ഘടകം വീണ്ടും റെൻഡർ ചെയ്യാനുള്ള കാരണം, നിങ്ങൾ ഓരോ റെൻഡർ സൈക്കിളിലും ഒരു പുതിയ ഒബ്ജക്റ്റ് റഫറൻസ് സൃഷ്ടിക്കുന്നതുകൊണ്ടാകാം. നിങ്ങൾ ഒരു ഇൻലൈൻ ഒബ്ജക്റ്റ് ഒരു പ്രോപ്പായി കൈമാറുമ്പോൾ, React യുടെ ആഴം കുറഞ്ഞ താരതമ്യം ഓരോ തവണയും അതിനെ മറ്റൊരു ഒബ്ജക്റ്റായി കാണുന്നു, ഇത് വീണ്ടും റെൻഡർ ചെയ്യാൻ പ്രേരിപ്പിക്കുന്നു. ഒബ്ജക്റ്റ് ഓർമ്മിക്കാൻ useMemo ഉപയോഗിക്കാൻ ഞാൻ ശുപാർശ ചെയ്യുന്നു."_
 >
-> **ശേഷം (12 ടോക്കണുകൾ):** _"വീണ്ടും-റെൻഡർ: ഓരോ സൈക്കിളിലും പുതിയ റഫറൻസ് (ഇൻലൈൻ ഒബ്ജക്റ്റ് പുനഃസൃഷ്ടിക്കുന്നു). `useMemo` ഉപയോഗിക്കുക."_
+> **ശേഷം (19 ടോക്കണുകൾ):** _"പുതിയ ഒബ്ജക്റ്റ് ഓരോ റെൻഡറും റഫർ ചെയ്യുന്നു. ഇൻലൈൻ ഒബ്ജക്റ്റ് പ്രോപ്പ് = പുതിയ ref = റീ-റെൻഡർ ചെയ്യുന്നു. useMemo ൽ പൊതിയുക ."_
 >
-> **അതേ മറുപടി. ഏകദേശം 70% കുറവ് ടോക്കണുകൾ. സാങ്കേതിക കൃത്യത പൂർണ്ണമായി നിലനിൽക്കുന്നു.** ✅
+> **അതേ ഉത്തരം. 72% കുറവ് ടോക്കണുകൾ. പൂജ്യം കൃത്യത നഷ്ടം.** ✅
+
+**PT-BR ഉദാഹരണം — [Troglodita](https://github.com/leninejunior/troglodita) മോഡ്:**
+
+> **ആൻ്റിസ് (42 ടോക്കണുകൾ):** _"O problema é que o componente está re-renderizando porque Uma nova referência de objeto está sendo criada em cada ciclo de renderização. Eu recomendaria usar useMemo."_
+>
+> **ഡിപോയിസ് (12 ടോക്കണുകൾ):** _"വീണ്ടും റെൻഡർ ചെയ്യുക: ref nova cada ciclo (objeto inline recriado). Usar `useMemo`."_
+>
+> **മെസ്മ റെസ്പോസ്റ്റ. ~ 70% മെനോസ് ടോക്കണുകൾ. പ്രിസിസോ ടെക്നിക്ക ഇറ്റാക്റ്റ.** ✅
 
 <br/>
 
-### 🎚️ എൻജിനുകൾക്കപ്പുറം — ഔട്ട്പുട്ട് ശൈലികൾ, അഡാപ്റ്റീവ് ഡയൽ, ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള നിയന്ത്രണം
+### എഞ്ചിനുകൾക്കപ്പുറം — ഔട്ട്പുട്ട് ശൈലികൾ, അഡാപ്റ്റീവ് ഡയൽ & ഓരോ അഭ്യർത്ഥന നിയന്ത്രണവും
 
-മുകളിലെ 12 എൻജിനുകൾ **അകത്തേക്ക്** പോകുന്ന ഉള്ളടക്കം ചുരുക്കുന്നു. മൂന്ന് അധിക പാളികൾ **എങ്ങനെ**, **എപ്പോൾ**, എന്താണ് **പുറത്തേക്ക്** വരുന്നത് എന്നത് രൂപപ്പെടുത്തുന്നു:
+മറുപടി രൂപപ്പെടുത്തുക, മോഡലിൻ്റെ സന്ദർഭ വിൻഡോ ടാർഗെറ്റ് ചെയ്യുക അല്ലെങ്കിൽ ഓരോ അഭ്യർത്ഥനയ്ക്കും ഒരു കംപ്രഷൻ പ്ലാൻ തിരഞ്ഞെടുക്കുക.
 
-- **🪄 ഔട്ട്പുട്ട് ശൈലികൾ** _(ഔട്ട്പുട്ട്-അക്ഷ നിയന്ത്രണം)_ — നിർണ്ണായകവും കാഷ്-സുരക്ഷിതവുമായ പ്രതികരണ-രൂപീകരണ നിർദ്ദേശങ്ങൾ ചേർക്കുന്നു; പരസ്പരം സംയോജിപ്പിക്കാം, ഓരോന്നിനും `lite` / `full` / `ultra` തീവ്രതകൾ. ഒരു ശൈലി ചേർക്കുന്നത് ഒരു വരിയിലുള്ള രജിസ്ട്രി എൻട്രിയാണ്:
-  - **ചുരുക്കിയ ഗദ്യം** — നിറയ്ക്കുപദങ്ങൾ / ആർട്ടിക്കിളുകൾ / അനിശ്ചിതത്വപ്രകടനങ്ങൾ ഒഴിവാക്കുക; സാങ്കേതിക ഉള്ളടക്കം കൃത്യമായി നിലനിർത്തുക.
-  - **കുറച്ച് കോഡ്** — "മടിയനായ സീനിയർ ഡെവ്" YAGNI: പ്രവർത്തിക്കുന്ന ഏറ്റവും ചെറിയ മാറ്റം, ആവശ്യപ്പെടാത്ത അധിക ഘടനകളൊന്നുമില്ല.
-  - **Ponytail (മടിയനായ സീനിയർ ഡെവ്)** — YAGNI പടവുകൾ കയറുക, മൂലകാരണം പരിഹരിക്കുക, പ്രവർത്തിക്കുന്ന ഏറ്റവും ചെറിയ വ്യത്യാസം മാത്രം വരുത്തുക.
-  - **എനിക്ക് ADHD ഉണ്ട് (പ്രവർത്തനത്തിന് മുൻഗണന)** — അടുത്ത പ്രവർത്തനം ആദ്യം, ഘട്ടങ്ങൾക്ക് നമ്പർ നൽകുക, ഒരു വ്യക്തമായ അടുത്ത ഘട്ടം, ആമുഖമില്ല.
-  - **ചുരുക്കിയ CJK (文言)** — ക്ലാസിക്കൽ-ചൈനീസ് അൾട്രാ-ചുരുക്ക ശൈലി (`zh` ലോക്കേലിലേക്ക് പരിമിതപ്പെടുത്തിയിരിക്കുന്നു).
-- **🎯 അഡാപ്റ്റീവ് കോൺടെക്സ്റ്റ്-ബജറ്റ്** _(ഡയൽ)_ — ഒരു ഓൺ/ഓഫ് ടോക്കൺ പരിധിക്ക് പകരം, മോഡലിന്റെ കോൺടെക്സ്റ്റ് വിൻഡോയിൽ ഒതുങ്ങുന്നതുവരെ ഏറ്റവും കുറഞ്ഞ ചെലവുള്ളതും ഏറ്റവും കുറവ് നഷ്ടമുണ്ടാക്കുന്നതുമായ എൻജിനുകൾ ആവശ്യത്തിന് മാത്രം ശക്തിപ്പെടുത്തുന്നു. നയം: `reserve-output` (ഡീഫോൾട്ട്, മോഡൽ-അവബോധമുള്ളത്) · `percentage` · `absolute`. മോഡ്: `floor` (ഒതുങ്ങുമെന്ന് ഉറപ്പാക്കുന്നു) · `replace-autotrigger` (നിങ്ങളുടെ വ്യക്തമായ തിരഞ്ഞെടുപ്പിന് മുൻഗണന) · `off` (പാരമ്പര്യ പരിധി).
-- **🎛️ കംപ്രഷൻ എവിടെയാണ് തീരുമാനിക്കുന്നത്** _(മുൻഗണന, ഉയർന്നത് → താഴ്ന്നത്)_ — ഓരോ അഭ്യർത്ഥനയിലുമുള്ള `x-omniroute-compression` ഹെഡർ › routing-combo override › സജീവമായ പേരിട്ട പ്രൊഫൈൽ › adaptive / auto-trigger › പാനൽ ഡീഫോൾട്ട് › off. പ്രയോഗിച്ച പ്ലാൻ `X-OmniRoute-Compression: <mode>; source=<source>` പ്രതികരണ ഹെഡറിൽ തിരിച്ചുനൽകുന്നു.
+#### ഔട്ട്പുട്ട് ശൈലികൾ
 
-ടോക്കൺ പരിധി ഉപയോഗിച്ച് ഓട്ടോ-ട്രിഗർ ചെയ്യുക, അഡാപ്റ്റീവ് ഡയൽ പ്രവർത്തനക്ഷമമാക്കുക, പേരിട്ട പ്രൊഫൈൽ പിൻ ചെയ്യുക, ഓരോ അഭ്യർത്ഥനയ്ക്കും ഒറ്റത്തവണ ക്രമീകരണം നൽകുക, അല്ലെങ്കിൽ ഓരോ routing combo-യ്ക്കും ഒരു പൈപ്പ്ലൈൻ നിശ്ചയിക്കുക — നിങ്ങളുടെ വർക്ക്ലോഡിന് അനുയോജ്യമായത് തിരഞ്ഞെടുക്കുക. മാറ്റം പ്രമോട്ട് ചെയ്യുന്നതിന് മുമ്പ്, പിൻ ചെയ്ത കോർപ്പസിൽ വിശ്വാസ്യതയും ലാഭവും വിലയിരുത്തുന്ന ഓപ്റ്റ്-ഇൻ ഓഫ്ലൈൻ **eval harness** (`npm run eval:compression`) ലഭ്യമാണ്.
+| ശൈലി                               | <img width="2000" height="0" alt=""> അത് എന്താണ് ചെയ്യുന്നത്                                          |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| തീവ്രമായ ഗദ്യം                     | സാങ്കേതിക വിശദാംശങ്ങൾ സംരക്ഷിക്കുമ്പോൾ ഫില്ലറും ഹെഡ്ജിംഗും മുറിക്കുന്നു.                              |
+| കുറവ് കോഡ്                         | ഏറ്റവും ചെറിയ പ്രവർത്തന മാറ്റം ആവശ്യപ്പെടുകയും നിലവിലുള്ള കോഡ് വീണ്ടും ഉപയോഗിക്കുകയും ചെയ്യുന്നു.     |
+| പോണിടെയിൽ (അലസനായ മുതിർന്ന ദേവൻ)   | പുനരുപയോഗിക്കാനോ നീക്കം ചെയ്യാനോ കഴിയുന്നവ പരിശോധിച്ച് ഒരു മൂലകാരണ പരിഹാരത്തിനായി ആവശ്യപ്പെടുന്നു.    |
+| എനിക്ക് ADHD ഉണ്ട് (ആക്ഷൻ ഫസ്റ്റ്) | പ്രവർത്തനത്തിലേക്ക് നയിക്കുന്നു, ഘട്ടങ്ങൾ അക്കമിട്ട് ഒരു കോൺക്രീറ്റ് അടുത്ത ഘട്ടത്തിൽ അവസാനിക്കുന്നു. |
+| Terse CJK (文言)                   | സംക്ഷിപ്ത ക്ലാസിക്കൽ ചൈനീസ് ഉപയോഗിക്കുന്നു. `zh` യ്ക്ക് ലഭ്യമാണ്.                                     |
 
-📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
+ഓരോ ശൈലിക്കും `lite`, `full`, `ultra` തീവ്രതകളുണ്ട്. ഔട്ട്പുട്ട് സ്റ്റൈൽ രജിസ്ട്രിയിൽ എൻട്രി ഉള്ള ഒരു ശൈലി ചേർക്കുക.
+
+#### അഡാപ്റ്റീവ് സന്ദർഭ ബജറ്റ്
+
+| ക്രമീകരണം | ഓപ്ഷനുകൾ                                                                                                                                                                                                       |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| നയം       | `reserve-output` (സ്ഥിരസ്ഥിതി) മറുപടിക്കും ഒരു സുരക്ഷാ മാർജിനും നീക്കിവയ്ക്കുന്നു. `percentage` സന്ദർഭ വിൻഡോയുടെ ഒരു പങ്ക് ഉപയോഗിക്കുന്നു. `absolute` ഒരു നിശ്ചിത ടോക്കൺ ടാർഗെറ്റ് സജ്ജമാക്കുന്നു.             |
+| മോഡ്      | സന്ദർഭ ജാലകത്തിന് അനുയോജ്യമായ രീതിയിൽ തിരഞ്ഞെടുത്ത പ്ലാൻ വർദ്ധിപ്പിക്കാൻ `floor` കഴിയും. `replace-autotrigger` യാന്ത്രിക വർദ്ധനവിന് ബജറ്റ് ഉപയോഗിക്കുന്നു. `off` ടോക്കൺ-ത്രെഷോൾഡ് ഓട്ടോ-ട്രിഗർ നിലനിർത്തുന്നു. |
+
+#### എവിടെയാണ് കംപ്രഷൻ തീരുമാനിക്കുന്നത്
+
+| ഓർഡർ ചെയ്യുക | <img width="2000" height="0" alt=""> ഉറവിടം                        |
+| ------------ | ------------------------------------------------------------------ |
+| 1            | അംഗീകൃത `x-omniroute-compression` അഭ്യർത്ഥന തലക്കെട്ട്             |
+| 2            | റൂട്ടിംഗ് കോംബോ അസാധുവാക്കൽ                                        |
+| 3            | സജീവമായ പേരുള്ള പ്രൊഫൈൽ                                            |
+| 4            | അഡാപ്റ്റീവ് സന്ദർഭ ബജറ്റ് അല്ലെങ്കിൽ ടോക്കൺ-ത്രെഷോൾഡ് ഓട്ടോ-ട്രിഗർ |
+| 5            | കംപ്രഷൻ പാനൽ ഡിഫോൾട്ട്                                             |
+| 6            | പ്ലാനൊന്നും ബാധകമല്ലാത്തപ്പോൾ ഓഫ്                                  |
+
+ആഗോള കംപ്രഷൻ സ്വിച്ച് ഈ ടേബിളിൽ മുൻഗണന നൽകുന്നു. `X-OmniRoute-Compression` പ്രതികരണ തലക്കെട്ട് `<mode>; source=<source>` റിപ്പോർട്ട് ചെയ്യുന്നു.
+
+[കംപ്രഷൻ ഗൈഡ്](docs/compression/COMPRESSION_GUIDE.md) · [RTK കംപ്രഷൻ](docs/compression/RTK_COMPRESSION.md) · [കംപ്രഷൻ എഞ്ചിനുകൾ](docs/compression/COMPRESSION_ENGINES.md)
+
+ഒപ്റ്റ്-ഇൻ എവൽ ഹാർനെസ് (`npm run eval:compression`) ഒരു നിശ്ചിത കോർപ്പസിലെ പ്രതികരണ വിശ്വാസ്യതയും ടോക്കൺ സേവിംഗും താരതമ്യം ചെയ്യുന്നു.
 
 <br/>
 
-<div align="center">
+<a id="quick-start"></a>
 
-# ⚡ ദ്രുതാരംഭം
+# ദ്രുത ആരംഭം
 
-</div>
+<img src="./docs/diagrams/quick-start-steps.svg" width="100%" alt="OmniRoute Quick Start in six steps. Check with node --version for Node.js 22.22.2 or later in 22.x, or 24.x, 25.x or 26.x. Run npm install -g omniroute, then omniroute. Open the dashboard at http://localhost:20128, set a password and connect a provider. In API Keys, create an OmniRoute key and save it when shown. Send a POST to /v1/chat/completions with model auto. GET /v1/models lists what your key can reach. Run omniroute configure codex or omniroute run claude --model auto to connect your coding tool.">
 
-**1) ഇൻസ്റ്റാൾ ചെയ്ത് പ്രവർത്തിപ്പിക്കുക**
+<sub><code>engines.node</code> മുതൽ Node.js ശ്രേണി <a href="package.json">package.json</a>. ഒരു ഡാഷ്ബോർഡ് പാസ്വേഡ് ഇല്ലാതെ നിങ്ങൾക്ക് സജ്ജീകരണ സമയത്ത് ദാതാക്കളെ ചേർക്കാൻ കഴിയില്ല. കൈകൊണ്ട് ടൂൾ സജ്ജീകരണം: <a href="docs/guides/CLI-INTEGRATIONS.md">CLI സംയോജനങ്ങൾ</a>.</sub>
+
+**ആദ്യ അഭ്യർത്ഥന**
 
 ```bash
-npm install -g omniroute
-omniroute
+curl http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-> 💡 `npm warn ERESOLVE` അല്ലെങ്കിൽ peer-dep മുന്നറിയിപ്പുകൾ കാണുന്നുണ്ടോ? [അവ പ്രശ്നകരമല്ല](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 അല്ലെങ്കിൽ അതിനുശേഷമുള്ള പതിപ്പാണോ ഉപയോഗിക്കുന്നത്?** അനുവദിച്ചിട്ടില്ലെങ്കിൽ npm പാക്കേജ് ലൈഫ്സൈക്കിൾ സ്ക്രിപ്റ്റുകൾ തടഞ്ഞേക്കാം. OmniRoute-ന്റെ `postinstall` (`node scripts/build/postinstall.mjs`) അതിന്റെ നേറ്റീവ് റൺടൈം ഫയലുകൾ തയ്യാറാക്കാൻ ആവശ്യമാണ്. ആഗോളമായി ഇൻസ്റ്റാൾ ചെയ്യുമ്പോൾ npm-ന്റെ മുന്നറിയിപ്പിൽ പേരിട്ടിരിക്കുന്ന പാക്കേജുകൾ അനുവദിക്കുക. OmniRoute 3.8.55 റിപ്പോർട്ട് ചെയ്ത പാക്കേജ് സെറ്റിനായി:
->
-> ```bash
-> npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
-> ```
->
-> ഭാവിയിലെ ആഗോള ഇൻസ്റ്റാളുകൾക്കായി ഈ അനുവദനീയ ലിസ്റ്റ് വീണ്ടും ഉപയോഗിക്കാൻ, ഒരിക്കൽ ക്രമീകരിച്ച് സാധാരണ രീതിയിൽ ഇൻസ്റ്റാൾ ചെയ്യുക:
->
-> ```bash
-> npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
-> npm install -g omniroute
-> ```
->
-> റിലീസുകൾക്കിടയിൽ ഡിപെൻഡൻസി ലിസ്റ്റ് മാറാം; npm വ്യത്യസ്തമായ ഒരു ലിസ്റ്റ് റിപ്പോർട്ട് ചെയ്താൽ, ആ മുന്നറിയിപ്പിലുള്ള പാക്കേജ് പേരുകൾ ഉപയോഗിക്കുക. ഒരു പാക്കേജ് അനുവദിക്കുന്നത് അതിന്റെ ഇൻസ്റ്റാൾ സ്ക്രിപ്റ്റുകൾ പ്രവർത്തിപ്പിക്കാൻ അനുമതി നൽകുന്നു.
-> **Gemini Web അല്ലെങ്കിൽ മറ്റൊരു വെബ്-കുക്കി പ്രൊവൈഡറാണോ ഉപയോഗിക്കുന്നത്?** npm പാക്കേജിൽ
-> Playwright ഉൾപ്പെടുന്നു, എന്നാൽ അതിന്റെ Chromium ബൈനറി ഉൾപ്പെടുന്നില്ല. ആദ്യത്തെ വെബ്-പ്രൊവൈഡർ അഭ്യർത്ഥന നടത്തുന്നതിന് മുമ്പ്
-> [Playwright Chromium സജ്ജീകരണം](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium)
-> എന്ന കുറിപ്പ് കാണുക.
+**നിങ്ങളുടെ കീ ഏതൊക്കെ മോഡലുകളിൽ എത്തിച്ചേരാനാകുമെന്ന് പരിശോധിക്കുക**
 
-`http://localhost:20128`-ൽ ഡാഷ്ബോർഡ് · `http://localhost:20128/v1`-ൽ API.
+```bash
+curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_OMNIROUTE_KEY"
+```
 
-**2) നിങ്ങളുടെ സ്വന്തം അക്കൗണ്ട് ഉപയോഗിച്ച് യോഗ്യമായ ഒരു പ്രൊവൈഡറുമായി ബന്ധിപ്പിക്കുക**
-
-ഡാഷ്ബോർഡ് → **പ്രൊവൈഡർമാർ** → നിലവിലെ നിബന്ധനകളും ക്വോട്ടയും നിങ്ങളുടെ ഉപയോഗസാഹചര്യത്തിന് അനുയോജ്യമായ ഒരു പ്രൊവൈഡർ തിരഞ്ഞെടുക്കുക → അതിന്റെ API കീ ചേർക്കുക അല്ലെങ്കിൽ അക്കൗണ്ട് പ്രക്രിയ പൂർത്തിയാക്കുക. സൗജന്യ ടിയറുകൾക്ക് സൈൻഅപ്പ്, അംഗീകാരം, അല്ലെങ്കിൽ പേയ്മെന്റ് രീതി ആവശ്യമായേക്കാം. [സൗജന്യ ടിയറുകൾ ഗൈഡ്](docs/getting-started/FREE-TIERS-GUIDE.md) പരിശോധിക്കുക; കീ ഇല്ലാത്ത ലഭ്യത ഉറപ്പുനൽകുന്നില്ല, കൂടാതെ `tos: avoid` എന്ന് അടയാളപ്പെടുത്തിയ പ്രൊവൈഡർമാരെ ഡീഫോൾട്ടായി `auto`-യിൽ നിന്ന് ഒഴിവാക്കുന്നു.
-
-**3) നിങ്ങളുടെ കോഡിംഗ് ടൂൾ ചൂണ്ടിക്കാണിക്കുക**
+**മാനുവൽ ടൂൾ ക്രമീകരണങ്ങൾ**
 
 ```txt
 Base URL: http://localhost:20128/v1
-API Key:  [copy from Dashboard → Endpoints]
+API Key:  [the key from Dashboard → API Keys]
 Model:    auto            (routes among eligible connections — or choose provider/model)
 ```
 
-**4) ഇത് പ്രവർത്തിക്കുന്നുണ്ടെന്ന് സ്ഥിരീകരിക്കുക**
+> [!IMPORTANT]
+> **ഒരു ദാതാവിനെ തിരഞ്ഞെടുക്കുന്നു.** നിങ്ങളുടെ ഉപയോഗ സാഹചര്യത്തിന് അനുയോജ്യമായ നിലവിലെ നിബന്ധനകളും ക്വാട്ടയും തിരഞ്ഞെടുക്കുക. സൗജന്യ ശ്രേണികൾക്ക് സൈൻ അപ്പ്, അംഗീകാരം അല്ലെങ്കിൽ ഒരു പേയ്മെൻ്റ് രീതി ആവശ്യമായി വന്നേക്കാം. [ഫ്രീ ടയർ ഗൈഡ്](docs/getting-started/FREE-TIERS-GUIDE.md) അവലോകനം ചെയ്യുക; കീലെസ്സ് ലഭ്യത ഉറപ്പില്ല, കൂടാതെ `tos: avoid` എന്ന് അടയാളപ്പെടുത്തിയ ദാതാക്കളെ സ്ഥിരസ്ഥിതിയായി `auto` ൽ നിന്ന് ഒഴിവാക്കിയിരിക്കുന്നു.
 
-```bash
-curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
-```
+> [!TIP]
+> **മുന്നറിയിപ്പുകൾ ഇൻസ്റ്റാൾ ചെയ്യുക.** `npm warn ERESOLVE`, പിയർ ഡിപൻഡൻസി മുന്നറിയിപ്പുകൾ [നിരുപദ്രവകരമാണ്](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
+>
+> **npm 11 അല്ലെങ്കിൽ അതിനുശേഷമുള്ളത്** പാക്കേജ് ലൈഫ് സൈക്കിൾ സ്ക്രിപ്റ്റുകൾ അനുവദിച്ചിട്ടില്ലെങ്കിൽ അവ ബ്ലോക്ക് ചെയ്തേക്കാം. അതിൻ്റെ നേറ്റീവ് റൺടൈം ഫയലുകൾ തയ്യാറാക്കാൻ OmniRoute's `postinstall` (`node scripts/build/postinstall.mjs`) ആവശ്യമാണ്. ആഗോളതലത്തിൽ ഇൻസ്റ്റാൾ ചെയ്യുമ്പോൾ npm-ൻ്റെ മുന്നറിയിപ്പിൽ പേരിട്ടിരിക്കുന്ന പാക്കേജുകൾ അനുവദിക്കുക. OmniRoute 3.8.55 റിപ്പോർട്ട് ചെയ്ത പാക്കേജിനായി:
+>
+> `bash npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute `
+>
+> ഭാവിയിലെ ആഗോള ഇൻസ്റ്റാളേഷനുകൾക്കായി ഈ അനുവദനീയ ലിസ്റ്റ് വീണ്ടും ഉപയോഗിക്കുന്നതിന്, അത് ഒരിക്കൽ കോൺഫിഗർ ചെയ്യുക, തുടർന്ന് സാധാരണ രീതിയിൽ ഇൻസ്റ്റാൾ ചെയ്യുക:
+>
+> `bash npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user npm install -g omniroute `
+>
+> റിലീസുകൾക്കിടയിൽ ഡിപൻഡൻസി ലിസ്റ്റ് മാറാം; npm മറ്റൊരു ലിസ്റ്റ് റിപ്പോർട്ട് ചെയ്യുകയാണെങ്കിൽ, ആ മുന്നറിയിപ്പിൽ നിന്നുള്ള പാക്കേജ് പേരുകൾ ഉപയോഗിക്കുക. ഒരു പാക്കേജ് അനുവദിക്കുന്നത് അതിൻ്റെ ഇൻസ്റ്റാളേഷൻ സ്ക്രിപ്റ്റുകൾ പ്രവർത്തിപ്പിക്കാൻ അനുവദിക്കുന്നു.
+>
+> **Gemini വെബും മറ്റ് വെബ് കുക്കി ദാതാക്കളും.** npm പാക്കേജിൽ Playwright ഉൾപ്പെടുന്നു, എന്നാൽ അതിൻ്റെ Chromium ബൈനറി അല്ല. ആദ്യ വെബ് പ്രൊവൈഡർ അഭ്യർത്ഥന നടത്തുന്നതിന് മുമ്പ് [Playwright Chromium സജ്ജീകരണ](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium) കുറിപ്പ് കാണുക.
 
-നിങ്ങൾ ബന്ധിപ്പിച്ച മോഡലുകളുടെ ലിസ്റ്റ് കാണണം. 🎉 അത്ര തന്നെ — കോഡിംഗ് ആരംഭിക്കൂ; OmniRoute നിങ്ങൾക്കായി സ്വയമേവ റൂട്ടുചെയ്യുകയും ഫാൾബാക്ക് ചെയ്യുകയും ചെയ്യും.
+<table>
+  <tr>
+    <td valign="top" width="50%">
+      <b>മറ്റ് ഇൻസ്റ്റാളേഷൻ രീതികൾ</b><br/>
+      Docker, ഉറവിടം, pnpm, Arch Linux, ഡെസ്ക്ടോപ്പ് ആപ്പ്.<br/>
+      <sub><a href="docs/guides/SETUP_GUIDE.md#install-methods">സജ്ജീകരണ ഗൈഡ് → ഇൻസ്റ്റാളേഷൻ രീതികൾ</a> · <a href="docs/guides/DOCKER_GUIDE.md">Docker ഗൈഡ്</a></sub>
+    </td>
+    <td valign="top" width="50%">
+      <b>എന്തെങ്കിലും പ്രവർത്തിക്കുന്നില്ലേ?</b><br/>
+      <code>omniroute doctor</code> ഡാറ്റാബേസും സെർവർ ഹെൽത്ത് എൻഡ് പോയിൻ്റും പരിശോധിക്കുന്നു.<br/>
+      <sub><a href="docs/guides/TROUBLESHOOTING.md">ട്രബിൾഷൂട്ടിംഗ്</a></sub>
+    </td>
+  </tr>
+</table>
 
-നിങ്ങളുടെ ക്ലയന്റിന് കസ്റ്റം ഹെഡറുകൾ അയയ്ക്കാൻ കഴിയുന്നില്ലെങ്കിൽ, OmniRoute ടോക്കണൈസ്ഡ് അനുയോജ്യതാ അലിയാസുകളും നൽകുന്നു:
+**ഇഷ്ടാനുസൃത തലക്കെട്ടുകൾ അയയ്ക്കാൻ കഴിയാത്ത ക്ലയൻ്റുകൾ**
+
+OmniRoute ടോക്കണൈസ്ഡ് കോംപാറ്റിബിലിറ്റി അപരനാമങ്ങളും തുറന്നുകാട്ടുന്നു:
 
 ```txt
 OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
@@ -1093,11 +1155,13 @@ Ollama chat:      http://localhost:20128/vscode/YOUR_KEY/api/chat
 Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-`Authorization: Bearer ...` ചേർക്കാൻ കഴിയാത്ത ക്ലയന്റുകൾക്കായി മാത്രം ഇവ ഉപയോഗിക്കുക. ഹെഡർ ഓത്ത് ഇപ്പോഴും മുൻഗണനയുള്ള മോഡാണ്.
+`Authorization: Bearer ...` അറ്റാച്ചുചെയ്യാൻ കഴിയാത്ത ക്ലയൻ്റുകൾക്കായി മാത്രം ഇവ ഉപയോഗിക്കുക. ഹെഡർ ഓത്ത് തിരഞ്ഞെടുക്കപ്പെട്ട മോഡായി തുടരുന്നു.
 
 <br/>
 
-## 📦 കൂടുതൽ ഇൻസ്റ്റാൾ രീതികൾ — Docker, സോഴ്സ്, pnpm, Arch
+<br/>
+
+## കൂടുതൽ ഇൻസ്റ്റാളേഷൻ രീതികൾ — Docker, ഉറവിടം, pnpm, ആർച്ച്
 
 **🐳 Docker**
 
@@ -1106,13 +1170,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
-`:latest` ഏറ്റവും പുതിയ **പ്രസിദ്ധീകരിച്ച** സ്ഥിരതയുള്ള SemVer പതിപ്പിനെ പിന്തുടരുന്നു. ഇത് git `main` പിന്തുടരുന്നില്ല. GitOps-നായി `:X.Y.Z` പതിപ്പ് നിർദ്ദിഷ്ടമായി ഉപയോഗിക്കുക. [Docker Release Channels](docs/guides/DOCKER_GUIDE.md#release-channels) കാണുക. ഇമേജ് **`OMNIROUTE_MEMORY_MB=1024`** ആയി സജ്ജീകരിച്ചിരിക്കുന്നു. ഡാഷ്ബോർഡിനും ലഘുവായ ചാറ്റിനും ഇത് മതിയാകും. **കോഡിംഗ് ഏജന്റുകൾ** (`POST /v1/responses` Claude Code, Codex, Grok, … എന്നിവയിൽ നിന്ന്) വളരെ വലുതായ V8 heap ആവശ്യപ്പെടുന്നു; അല്ലാത്തപക്ഷം, രണ്ട് പരസ്പരം മൂടിവരുന്ന ദീർഘമായ കോൺടെക്സ്റ്റുകൾക്കിടയിൽ ഏകദേശം 12 GiB-ൽ പ്രോസസ് `FATAL ERROR` ഉണ്ടാക്കും. native buffers V8-ന് പുറത്തായതിനാൽ, heap-നേക്കാൾ വലുതായി കണ്ടെയ്നർ വലുപ്പം സജ്ജീകരിക്കുക:
+`:latest` ഏറ്റവും ഉയർന്നത് പിന്തുടരുന്നു** പ്രസിദ്ധീകരിച്ചു** സ്ഥിരതയുള്ള SemVer. ഇത് git `main` ട്രാക്ക് ചെയ്യുന്നില്ല. GitOps യ്ക്ക് `:X.Y.Z` പിൻ ചെയ്യുക. [Docker റിലീസ് ചാനലുകൾ](docs/guides/DOCKER_GUIDE.md#release-channels) കാണുക .ചിത്രം പിന്നുകൾ**`OMNIROUTE_MEMORY_MB=1024`** . ഡാഷ്ബോർഡിനും ലൈറ്റ് ചാറ്റിനും ഇത് മതിയാകും.** കോഡിംഗ് ഏജൻ്റുകൾ** ( Claude കോഡിൽ നിന്ന്`POST /v1/responses`, Codex, Grok, …) വളരെ വലിയ V8 കൂമ്പാരം അല്ലെങ്കിൽ രണ്ട് ഓവർലാപ്പിംഗ് ദൈർഘ്യമേറിയ സന്ദർഭങ്ങൾക്ക് കീഴിൽ ~ 12 GiB ൽ `FATAL ERROR` s ആവശ്യമാണ്. കൂമ്പാരത്തിന് മുകളിലുള്ള കണ്ടെയ്നറിൻ്റെ വലുപ്പം (നേറ്റീവ് ബഫറുകൾ V8-ന് പുറത്ത് ഇരിക്കുന്നു):
 
-| Workload                                                        | Heap (`-e OMNIROUTE_MEMORY_MB`) | Container (`--memory`) |
-| --------------------------------------------------------------- | ------------------------------- | ---------------------- |
-| ഡാഷ്ബോർഡ് / ലഘു ചാറ്റ്                                          | `1024` (ഇമേജ് ഡീഫോൾട്ട്)        | ≥2 g                   |
-| ഒരു കോഡിംഗ് ഏജന്റ്                                              | `8192`                          | ≥10 g                  |
-| ഒരേസമയം പ്രവർത്തിക്കുന്ന രണ്ട് ദീർഘ `/v1/responses` അഭ്യർത്ഥനകൾ | `10240`–`12288`                 | ≥12–16 g               |
+| <img width="2000" height="0" alt=""> ജോലിഭാരം | കൂമ്പാരം (`-e OMNIROUTE_MEMORY_MB`) | കണ്ടെയ്നർ (`--memory`) |
+| --------------------------------------------- | ----------------------------------- | ---------------------- |
+| ഡാഷ്ബോർഡ് / ലൈറ്റ് ചാറ്റ്                     | `1024` (ചിത്രം സ്ഥിരസ്ഥിതി)         | ≥ 2 ഗ്രാം              |
+| ഒരു കോഡിംഗ് ഏജൻ്റ്                            | `8192`                              | ≥ 10 ഗ്രാം             |
+| രണ്ട് സമാന്തര നീളമുള്ള `/v1/responses`        | `10240`–`12288`                     | ≥ 12-16 ഗ്രാം          |
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -1120,27 +1184,25 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
-പൂർണ്ണ പട്ടിക: [Docker Guide — runtime RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
+പൂർണ്ണ പട്ടിക: [Docker ഗൈഡ് — റൺടൈം RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
 
-> **പ്രീ-റിലീസ് Docker ചാനൽ:** `diegosouzapw/omniroute:next`, `diegosouzapw/omniroute:next-web` എന്നിവ നിലവിലെ ഡീഫോൾട്ട് `release/v*`
-> ബ്രാഞ്ചിനെ പിന്തുടരുന്നു. പുറത്തിറക്കാത്ത പരിഹാരങ്ങൾ പരീക്ഷിക്കുന്നതിനായി മാത്രമാണ് ഈ മാറ്റാവുന്ന ടാഗുകൾ ഉദ്ദേശിച്ചിരിക്കുന്നത്;
-> അവ **പ്രൊഡക്ഷനിൽ പിന്തുണയ്ക്കുന്നില്ല**. [Docker Release Channels](docs/guides/DOCKER_GUIDE.md#release-channels) കാണുക.
+> **പ്രീ-റിലീസ് Docker ചാനൽ:** `diegosouzapw/omniroute:next`, `diegosouzapw/omniroute:next-web` നിലവിലുള്ള ഡിഫോൾട്ട് `release/v*` ബ്രാഞ്ച് പിന്തുടരുന്നു. ഈ മാറ്റാവുന്ന ടാഗുകൾ റിലീസ് ചെയ്യാത്ത പരിഹാരങ്ങൾ പരീക്ഷിക്കുന്നതിന് വേണ്ടിയുള്ളതാണ്** ഉത്പാദനത്തിന് പിന്തുണയില്ല** . [Docker റിലീസ് ചാനലുകൾ](docs/guides/DOCKER_GUIDE.md#release-channels) കാണുക.
 
 **🥟 Bun**
 
-Bun runtime detection വഴി സാധാരണ `bun install`-ഉം ഗ്ലോബൽ ഇൻസ്റ്റാളേഷനും (`bun install -g omniroute`) പിന്തുണയ്ക്കുന്നു:
+സ്റ്റാൻഡേർഡ് `bun install`, ഗ്ലോബൽ ഇൻസ്റ്റലേഷൻ (`bun install -g omniroute`) എന്നിവ Bun റൺടൈം ഡിറ്റക്ഷൻ വഴി പിന്തുണയ്ക്കുന്നു:
 
-- **Built-in `bun:sqlite`**: Bun-ൽ പ്രവർത്തിക്കുമ്പോൾ OmniRoute Bun-ന്റെ built-in `bun:sqlite` driver ഉപയോഗിക്കുന്നു; Node.js-ൽ `better-sqlite3`-ലേക്കോ `sql.js`-ലേക്കോ fallback ചെയ്യുന്നു.
-- **dev-ൽ സ്വയമേവ Webpack bundler തിരഞ്ഞെടുക്കൽ**: Development (`bun run dev`) Bun കണ്ടെത്തുകയും native V8 binding പൊരുത്തക്കേടുകൾ ഒഴിവാക്കാൻ Turbopack പ്രവർത്തനരഹിതമാക്കി Webpack ഉപയോഗിക്കുകയും ചെയ്യുന്നു. Production builds (`bun run build`) Node-ലേതുപോലെ തന്നെ `OMNIROUTE_USE_TURBOPACK` കൃത്യമായി പിന്തുടരുന്നു: ഡീഫോൾട്ടായി Turbopack, Webpack ഉപയോഗിച്ച് build ചെയ്യാൻ `OMNIROUTE_USE_TURBOPACK=0` (`Dockerfile.bun` ഇത് `--build-arg` ആയി expose ചെയ്യുന്നു).
-- **പ്രത്യേക Bun Dockerfile**: native Bun production deployments-നായി multi-stage `Dockerfile.bun` (`docker build -f Dockerfile.bun -t omniroute:bun .`).
+- **അന്തർനിർമ്മിത `bun:sqlite`** : Bun കീഴിൽ പ്രവർത്തിക്കുമ്പോൾ OmniRoute Bun യുടെ ബിൽറ്റ്-ഇൻ `bun:sqlite` ഡ്രൈവർ ഉപയോഗിക്കുന്നു, Node.js അല്ലെങ്കിൽ `sql.js` ൽ `better-sqlite3` ലേക്ക് മടങ്ങുന്നു.
+- **dev-ൽ സ്വയമേവയുള്ള വെബ്പാക്ക് ബണ്ടർ തിരഞ്ഞെടുക്കൽ** : വികസനം (`bun run dev`) സ്വയമേവ Bun കണ്ടെത്തുകയും നേറ്റീവ് V8 ബൈൻഡിംഗ് പൊരുത്തക്കേടുകൾ തടയുന്നതിന് വെബ്പാക്കിന് അനുകൂലമായി Turbopack പ്രവർത്തനരഹിതമാക്കുകയും ചെയ്യുന്നു. പ്രൊഡക്ഷൻ ബിൽഡുകൾ (`bun run build`) നോഡിലെ പോലെ തന്നെ `OMNIROUTE_USE_TURBOPACK` പിന്തുടരുന്നു: സ്ഥിരസ്ഥിതിയായി Turbopack, Webpack ഉപയോഗിച്ച് നിർമ്മിക്കാൻ `OMNIROUTE_USE_TURBOPACK=0` (`Dockerfile.bun` അതിനെ ഒരു `--build-arg` ആയി വെളിപ്പെടുത്തുന്നു).
+- **സമർപ്പിത Bun Dockerfile** : നേറ്റീവ് Bun പ്രൊഡക്ഷൻ വിന്യാസങ്ങൾക്കുള്ള മൾട്ടി-സ്റ്റേജ് `Dockerfile.bun` (`docker build -f Dockerfile.bun -t omniroute:bun .`).
 
 ```bash
-# Bun ഉപയോഗിച്ച് ഇൻസ്റ്റാൾ ചെയ്ത് പ്രവർത്തിപ്പിക്കുക
+# Install and run with Bun
 bun install
 bun run dev
 ```
 
-**🛠️ സോഴ്സിൽ നിന്ന്**
+**🛠️ ഉറവിടത്തിൽ നിന്ന്**
 
 ```bash
 cp .env.example .env && npm install
@@ -1153,397 +1215,735 @@ PORT=20128 npm run dev
 pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/core && omniroute
 ```
 
-**🐧 Arch Linux (AUR)**
+**🐧 ആർച്ച് Linux (AUR)**
 
 ```bash
 yay -S omniroute-bin && systemctl --user enable --now omniroute.service
 ```
 
-**🔧 Nix (Flake)**
+**🔧 നിക്സ് (ഫ്ലേക്ക്)**
 
 ```bash
-# Nix flakes ഉപയോഗിക്കുന്നു
+# Using Nix flakes
 nix develop
 npm run dev
 
-# അല്ലെങ്കിൽ devbox ഉപയോഗിക്കുന്നു
+# Or using devbox
 devbox run npm run dev
 ```
 
-📖 [Docker Guide](docs/guides/DOCKER_GUIDE.md) — Compose profiles, Caddy HTTPS, Cloudflare tunnels.
+📖 [Docker ഗൈഡ്](docs/guides/DOCKER_GUIDE.md) — പ്രൊഫൈലുകൾ രചിക്കുക, Caddy HTTPS, Cloudflare ടണലുകൾ.
 
-**🦭 Podman**
+**🦭 പോഡ്മാൻ**
 
 ```bash
-# 1. bind-mounted data directory തയ്യാറാക്കുക
+# 1. Prepare the bind-mounted data directory
 mkdir -p data
 
-# 2. Linux + local rootless Podman മാത്രം (remote Podman Machine client ഒരിക്കലും ഉപയോഗിക്കരുത്):
+# 2. Linux + local rootless Podman only (never a remote Podman Machine client):
 podman unshare chown 1000:1000 ./data
 
-# 3. runtime hint സജ്ജീകരിച്ച് local Compose image build ചെയ്ത് ആരംഭിക്കുക
+# 3. Set the runtime hint, build the local Compose image, and start
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
-macOS അല്ലെങ്കിൽ Windows-ൽ Podman ഒരു remote Podman Machine ഉപയോഗിക്കുന്നു: `podman unshare` ഒഴിവാക്കി
-[topology-specific data directory guidance](contrib/podman/README.md#data-directory-permissions-by-topology) പിന്തുടരുക.
+macOS അല്ലെങ്കിൽ Windows യിൽ, Podman ഒരു റിമോട്ട് Podman മെഷീൻ ഉപയോഗിക്കുന്നു: `podman unshare` ഒഴിവാക്കി [ടോപ്പോളജി-നിർദ്ദിഷ്ട ഡാറ്റ ഡയറക്ടറി മാർഗ്ഗനിർദ്ദേശം](contrib/podman/README.md#data-directory-permissions-by-topology) പിന്തുടരുക.
 
-📖 [Podman Guide](contrib/podman/README.md) — Compose builds, Podman Machine, കൂടാതെ
-Linux/systemd Quadlet setup.
+📖 [Podman Guide](contrib/podman/README.md) — കമ്പോസ് ബിൽഡുകൾ, പോഡ്മാൻ മെഷീൻ, Linux/systemd ക്വാഡ്ലെറ്റ് സജ്ജീകരണം.
 
-**⚡ വേഗതയേറിയ / ലഘുവായ ഇൻസ്റ്റാൾ (native build ഒഴിവാക്കുക)**
+**⚡ വേഗതയേറിയ / മെലിഞ്ഞ ഇൻസ്റ്റാളേഷൻ (നേറ്റീവ് ബിൽഡ് ഒഴിവാക്കുക)**
 
-native SQLite engine (`better-sqlite3`) ഒരു **optional** dependency ആണ്. അതിനാൽ ഒരു global
-install സോഴ്സിൽ നിന്ന് compile ചെയ്യുന്നതിൽ ഒരിക്കലും തടസ്സപ്പെടില്ല: നിങ്ങളുടെ platform/Node-ന് അനുയോജ്യമായ prebuilt binary ലഭ്യമാണെങ്കിൽ അത് ഉപയോഗിക്കുകയും, അല്ലെങ്കിൽ pure-JS engine-ലേക്ക്
-(`node:sqlite` Node 22+-ൽ, അല്ലെങ്കിൽ bundled `sql.js` WASM) സുതാര്യമായി fallback ചെയ്യുകയും ചെയ്യും — build tools ആവശ്യമില്ല.
+നേറ്റീവ് SQLite എഞ്ചിൻ (`better-sqlite3`) ആണ്** ഓപ്ഷണൽ** ഡിപൻഡൻസി, അതിനാൽ ഒരു ആഗോള ഇൻസ്റ്റാളേഷൻ ഉറവിടത്തിൽ നിന്ന് കംപൈൽ ചെയ്യുന്നത് ഒരിക്കലും തടയില്ല: നിങ്ങളുടെ platform/Node യുമായി പൊരുത്തപ്പെടുമ്പോൾ അത് ഒരു പ്രീ-ബിൽറ്റ് ബൈനറി ഉപയോഗിക്കുന്നു, അല്ലാത്തപക്ഷം ഒരു പ്യുവർ-ജെഎസ് എഞ്ചിനിലേക്ക് സുതാര്യമായി മടങ്ങുന്നു (നോഡ് 22 + ലെ`node:sqlite`, അല്ലെങ്കിൽ ബണ്ടിൽ ചെയ്ത `sql.js` WASM) — ബിൽഡ് ടൂളുകൾ ആവശ്യമില്ല.
 
-post-install **native warm-up** പൂർണ്ണമായും ഒഴിവാക്കാൻ (CI, headless, അല്ലെങ്കിൽ വേഗത കുറഞ്ഞ മെഷീനുകൾ).
-ശ്രദ്ധിക്കുക: ഇത് native SQLite warm-up ഘട്ടം മാത്രം (`scripts/postinstall.mjs`) ഒഴിവാക്കുന്നു; binary-copy/repair hook (`scripts/build/postinstall.mjs`) സാധാരണ പോലെ പ്രവർത്തിക്കും:
+പോസ്റ്റ്-ഇൻസ്റ്റാൾ ഒഴിവാക്കുന്നതിന്** നാടൻ ഊഷ്മളത** പൂർണ്ണമായും (CI, തലയില്ലാത്ത അല്ലെങ്കിൽ വേഗത കുറഞ്ഞ യന്ത്രങ്ങൾ). ശ്രദ്ധിക്കുക: ഇത് നേറ്റീവ് SQLite വാം-അപ്പ് സ്റ്റെപ്പ് (`scripts/postinstall.mjs`) ഒഴിവാക്കുന്നു; binary-copy/repair ഹുക്ക് (`scripts/build/postinstall.mjs`) ഇപ്പോഴും സാധാരണ രീതിയിൽ പ്രവർത്തിക്കുന്നു:
 
 ```bash
-OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ഇതും ഒഴിവാക്കുന്നു
+OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 also skips it
 ```
 
-ഏറ്റവും വേഗത്തിലുള്ള ഇൻസ്റ്റാളുകൾക്കായി **pnpm** തിരഞ്ഞെടുക്കുക (content-addressed store + hard links — മുകളിൽ കാണുക).
-ഡാഷ്ബോർഡില്ലാത്ത, headless runtime-നായി Docker `base` profile (മുകളിൽ കാണുക) അല്ലെങ്കിൽ
-[Termux guide](docs/guides/TERMUX_GUIDE.md) ഉപയോഗിക്കുക. CLI-യും web dashboard-ഉം ഒരേ port-ൽ
-ഒരേ process ആണ് നൽകുന്നത്; അതിനാൽ ഇന്ന് പ്രത്യേക CLI-only package ഇല്ല.
+ഏറ്റവും വേഗതയേറിയ ഇൻസ്റ്റാളേഷനുകൾക്ക് മുൻഗണന നൽകുക** pnpm** (ഉള്ളടക്ക വിലാസമുള്ള സ്റ്റോർ + ഹാർഡ് ലിങ്കുകൾ — മുകളിൽ കാണുക). ഒരു ഡാഷ്ബോർഡ് രഹിത, ഹെഡ്ലെസ്സ് റൺടൈമിനായി Docker `base` പ്രൊഫൈൽ (മുകളിൽ) അല്ലെങ്കിൽ [Termux ഗൈഡ്](docs/guides/TERMUX_GUIDE.md) ഉപയോഗിക്കുക. CLI ഉം വെബ് ഡാഷ്ബോർഡും ഒരു പോർട്ടിൽ ഒരേ പ്രക്രിയയാണ് നൽകുന്നത്, അതിനാൽ ഇന്ന് പ്രത്യേക CLI-മാത്രം പാക്കേജ് ഒന്നുമില്ല.
 
 <br/>
 
-<div align="center">
+# OmniRoute പ്രവർത്തനത്തിലാണ്
 
-# 🎬 OmniRoute പ്രവർത്തനത്തിൽ
+## വീഡിയോ ഗൈഡുകൾ
 
-</div>
+കമ്മ്യൂണിറ്റി സ്രഷ്ടാക്കൾ OmniRoute കുറിച്ച് ആയിരക്കണക്കിന് വീഡിയോകൾ പ്രസിദ്ധീകരിച്ചു. നിങ്ങൾക്ക് ആവശ്യമുള്ളതുമായി പൊരുത്തപ്പെടുന്ന ലിസ്റ്റ് ഉപയോഗിക്കുക.
 
-## 📹 വീഡിയോ ഗൈഡുകൾ
+### ആരെങ്കിലും അത് സജ്ജീകരിക്കുന്നത് കാണണമെങ്കിൽ
 
-<div align="center">
-
-<sub>2026-10-18-ലെ ഡാഷ്ബോർഡ് സ്നാപ്പ്ഷോട്ട് · അസംസ്കൃത കാറ്റലോഗ്: YT 1.352 | TT 334 | IG 290 · പുതുമ (ദിവസങ്ങൾ): YT 5 | TT 48 | IG 49</sub>
+സമീപകാല നടപ്പാതകൾ. ഓരോ ലിങ്കും 2026-11-16-ന് YouTube യുടെ oEmbed എൻഡ്പോയിൻ്റിനെതിരെ പരിശോധിച്ചു.
 
 <table>
   <tr>
-    <td align="center" width="320">
-      <a href="https://www.instagram.com/reel/Da8ZthUPK98/">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nick_saraev&font=montserrat&bold=true" alt="Instagram റീൽ — nick_saraev" width="300"/>
-      </a><br/>
-      <b>🎬 #1 — Instagram</b><br/>
-      <sub>nick_saraev — 3,042,474 കാഴ്ചകൾ</sub>
-    </td>
-    <td align="center" width="320">
-      <a href="https://www.instagram.com/reel/Dbp7wv_CIO0/">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nnapier7&font=montserrat&bold=true" alt="Instagram റീൽ — nnapier7" width="300"/>
-      </a><br/>
-      <b>🎬 #2 — Instagram</b><br/>
-      <sub>nnapier7 — 1,454,535 കാഴ്ചകൾ</sub>
-    </td>
-    <td align="center" width="320">
-      <a href="https://www.youtube.com/watch?v=NJ0TQ-pyMDY">
-        <img src="https://img.youtube.com/vi/NJ0TQ-pyMDY/maxresdefault.jpg" alt="YouTube — Amidia AI & Tech" width="300"/>
-      </a><br/>
-      <b>🎬 #3 — YouTube</b><br/>
-      <sub>Amidia AI & Tech — 794,974 കാഴ്ചകൾ</sub>
-    </td>
-    <td align="center" width="320">
-      <a href="https://www.instagram.com/reel/DaSs65mMrHk/">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+theopenstack&font=montserrat&bold=true" alt="Instagram റീൽ — theopenstack" width="300"/>
-      </a><br/>
-      <b>🎬 #4 — Instagram</b><br/>
-      <sub>theopenstack — 692,419 കാഴ്ചകൾ</sub>
-    </td>
-    <td align="center" width="320">
-      <a href="https://www.tiktok.com/@migue.baena/video/7670919268216622358">
-        <img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+migue.baena&font=montserrat&bold=true" alt="TikTok — migue.baena" width="300"/>
-      </a><br/>
-      <b>🎬 #5 — TikTok</b><br/>
-      <sub>migue.baena — 685,788 കാഴ്ചകൾ</sub>
-    </td>
+    <td valign="top" width="33%"><a href="https://www.youtube.com/watch?v=1GWGCjrgppI"><img src="https://i.ytimg.com/vi/1GWGCjrgppI/hqdefault.jpg" alt="YouTube — Remigiusz Zalewski" width="100%"/></a><br/><sub>Remigiusz Zalewski · 2026-11-04</sub></td>
+    <td valign="top" width="33%"><a href="https://www.youtube.com/watch?v=Ib-boTvKCIY"><img src="https://i.ytimg.com/vi/Ib-boTvKCIY/hqdefault.jpg" alt="YouTube — Abi" width="100%"/></a><br/><sub>അബി · 2026-10-23</sub></td>
+    <td valign="top" width="33%"><a href="https://www.youtube.com/watch?v=z5VAMUixQBc"><img src="https://i.ytimg.com/vi/z5VAMUixQBc/hqdefault.jpg" alt="YouTube — Mostafa-JoOo" width="100%"/></a><br/><sub>Mostafa-JoOo · 2026-11-05</sub></td>
   </tr>
 </table>
 
-</div>
+| സൃഷ്ടാവ്                                                          | അത് എന്താണ് ഉൾക്കൊള്ളുന്നത്                                                                          | പ്രസിദ്ധീകരിച്ചു | സ്നാപ്പ്ഷോട്ടിലെ കാഴ്ചകൾ |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------- | -----------------------: |
+| [Remigiusz Zalewski](https://www.youtube.com/watch?v=1GWGCjrgppI) | Claude കോഡിനായി സൗജന്യ LLM APIs ഉപയോഗിച്ച് OmniRoute ഇൻസ്റ്റാൾ ചെയ്യുകയും കോൺഫിഗർ ചെയ്യുകയും ചെയ്യുക | 2026-11-04       |                   55,951 |
+| [അബി](https://www.youtube.com/watch?v=Ib-boTvKCIY)                | Claude, GPT, Gemini OmniRoute ലേക്ക് ബന്ധിപ്പിക്കുക                                                  | 2026-10-23       |                    1,873 |
+| [മൊസ്തഫ-JoOo](https://www.youtube.com/watch?v=z5VAMUixQBc)        | OmniRoute വഴി ഹെർമിസ് ഏജൻ്റ് പ്രവർത്തിപ്പിക്കുക (അറബിയിൽ)                                            | 2026-11-05       |                   12,711 |
 
-**സമ്പൂർണ്ണ റാങ്കിങ് (ആവർത്തനങ്ങൾ നീക്കംചെയ്ത കാനോനിക്കൽ URLs, `v > 0`, ഏറ്റവും കൂടുതൽ റീച്ച്):**
+### നിങ്ങൾക്ക് ഏറ്റവും കൂടുതൽ കണ്ട വീഡിയോകൾ വേണമെങ്കിൽ
 
-| #1                                                                                     | #2                                                                                  | #3                                                                                      | #4                                                                                    | #5                                                                                                  |
-| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [nick_saraev — Instagram](https://www.instagram.com/reel/Da8ZthUPK98/) — **3,042,474** | [nnapier7 — Instagram](https://www.instagram.com/reel/Dbp7wv_CIO0/) — **1,454,535** | [Amidia AI & Tech — YouTube](https://www.youtube.com/watch?v=NJ0TQ-pyMDY) — **794,974** | [theopenstack — Instagram](https://www.instagram.com/reel/DaSs65mMrHk/) — **692,419** | [migue.baena — TikTok](https://www.tiktok.com/@migue.baena/video/7670919268216622358) — **685,788** |
+<table>
+  <tr>
+    <td align="center" width="20%"><a href="https://www.instagram.com/reel/Da8ZthUPK98/"><img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nick_saraev&font=montserrat&bold=true" alt="Instagram — nick_saraev" width="160"/></a><br/><sub>#1 · nick_saraev</sub></td>
+    <td align="center" width="20%"><a href="https://www.instagram.com/reel/Dbp7wv_CIO0/"><img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+nnapier7&font=montserrat&bold=true" alt="Instagram — nnapier7" width="160"/></a><br/><sub>#2 · nnapier7</sub></td>
+    <td align="center" width="20%"><a href="https://www.youtube.com/watch?v=NJ0TQ-pyMDY"><img src="https://i.ytimg.com/vi/NJ0TQ-pyMDY/hqdefault.jpg" alt="YouTube — Amidia AI & Tech" width="160"/></a><br/><sub>#3 · Amidia AI & Tech</sub></td>
+    <td align="center" width="20%"><a href="https://www.youtube.com/watch?v=l3WLKr56gQQ"><img src="https://i.ytimg.com/vi/l3WLKr56gQQ/hqdefault.jpg" alt="YouTube — Umair Alam Chaudhry" width="160"/></a><br/><sub>#4 · ഉമൈർ ആലം ചൗധരി</sub></td>
+    <td align="center" width="20%"><a href="https://www.instagram.com/reel/DaSs65mMrHk/"><img src="https://placehold.co/320x180/111827/FFFFFF?text=Instagram+Reel+%7C+theopenstack&font=montserrat&bold=true" alt="Instagram — theopenstack" width="160"/></a><br/><sub>#5 · theopenstack</sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="20%"><a href="https://www.tiktok.com/@migue.baena/video/7670919268216622358"><img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+migue.baena&font=montserrat&bold=true" alt="TikTok — migue.baena" width="160"/></a><br/><sub>#6 · migue.baena</sub></td>
+    <td align="center" width="20%"><a href="https://www.tiktok.com/@milesreevesai/video/7667980059189366019"><img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+milesreevesai&font=montserrat&bold=true" alt="TikTok — milesreevesai" width="160"/></a><br/><sub>#7 · milesreevesai</sub></td>
+    <td align="center" width="20%"><a href="https://www.tiktok.com/@nikothetech/video/7671890769665477918"><img src="https://placehold.co/320x180/111827/FFFFFF?text=TikTok+%7C+nikothetech&font=montserrat&bold=true" alt="TikTok — nikothetech" width="160"/></a><br/><sub>#8 · nikothetech</sub></td>
+    <td align="center" width="20%"><a href="https://www.youtube.com/watch?v=QucgvbO5gsM"><img src="https://i.ytimg.com/vi/QucgvbO5gsM/hqdefault.jpg" alt="YouTube — Vaibhav Sisinty" width="160"/></a><br/><sub>#9 · വൈഭവ് സിസ്റ്റി</sub></td>
+    <td align="center" width="20%"><a href="https://www.youtube.com/shorts/fZIBK_4fKq8"><img src="https://i.ytimg.com/vi/fZIBK_4fKq8/hqdefault.jpg" alt="YouTube Shorts — Nick Automates" width="160"/></a><br/><sub>#10 · നിക്ക് ഓട്ടോമേറ്റ്സ്</sub></td>
+  </tr>
+</table>
 
-| #6                                                                                                      | #7                                                                                                  | #8                                                                                     | #9                                                                                        | #10                                                                                 |
-| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| [milesreevesai — TikTok](https://www.tiktok.com/@milesreevesai/video/7667980059189366019) — **620,400** | [nikothetech — TikTok](https://www.tiktok.com/@nikothetech/video/7671890769665477918) — **610,803** | [Vaibhav Sisinty — YouTube](https://www.youtube.com/watch?v=QucgvbO5gsM) — **509,281** | [buildwithai.club — Instagram](https://www.instagram.com/reel/DbIt9AjK7-U/) — **347,652** | [nivedan.ai — Instagram](https://www.instagram.com/reel/DbIrCksJiqq/) — **331,973** |
+|   # | <img width="2000" height="0" alt=""> സ്രഷ്ടാവ്                                 | പ്ലാറ്റ്ഫോം       | പ്രസിദ്ധീകരിച്ചു | അറിയപ്പെടുന്ന കാഴ്ചകൾ |
+| --: | ------------------------------------------------------------------------------ | ----------------- | ---------------- | --------------------: |
+|   1 | [nick_saraev](https://www.instagram.com/reel/Da8ZthUPK98/)                     | ഇൻസ്റ്റാഗ്രാം     | 2026-07-18       |             3,042,474 |
+|   2 | [നാപ്പിയർ7](https://www.instagram.com/reel/Dbp7wv_CIO0/)                       | ഇൻസ്റ്റാഗ്രാം     | 2026-08-05       |             1,454,535 |
+|   3 | [Amidia AI & Tech](https://www.youtube.com/watch?v=NJ0TQ-pyMDY)                | YouTube           | 2026-08-21       |             1,073,166 |
+|   4 | [ഉമൈർ ആലം ചൗധരി](https://www.youtube.com/watch?v=l3WLKr56gQQ)                  | YouTube           | 2026-07-26       |               785,126 |
+|   5 | [theopenstack](https://www.instagram.com/reel/DaSs65mMrHk/)                    | ഇൻസ്റ്റാഗ്രാം     | 2026-07-02       |               692,419 |
+|   6 | [migue.baena](https://www.tiktok.com/@migue.baena/video/7670919268216622358)   | TikTok            | 2026-08-06       |               685,788 |
+|   7 | [മൈൽശ്രീവേസൈ](https://www.tiktok.com/@milesreevesai/video/7667980059189366019) | TikTok            | 2026-07-29       |               620,400 |
+|   8 | [നിക്കോതെടെക്](https://www.tiktok.com/@nikothetech/video/7671890769665477918)  | TikTok            | 2026-08-09       |               610,803 |
+|   9 | [വൈഭവ് സിസ്റ്റി](https://www.youtube.com/watch?v=QucgvbO5gsM)                  | YouTube           | 2026-07-22       |               547,609 |
+|  10 | [നിക്ക് ഓട്ടോമേറ്റ്സ്](https://www.youtube.com/shorts/fZIBK_4fKq8)             | YouTube ഷോർട്ട്സ് | 2026-07-18       |               426,596 |
 
-2026-10-18-ലെ കാനോനിക്കൽ മെട്രിക്കുകൾ: **1.976 തനതായ വീഡിയോകൾ** · **20.220.289 അറിയപ്പെടുന്ന കാഴ്ചകൾ** (`v > 0`) · **ഓരോ നെറ്റ്വർക്കിലുമായി 1.210 ചാനലുകൾ/പ്രൊഫൈലുകൾ**. അസംസ്കൃത ഡാഷ്ബോർഡിൽ 1.976 വരികളുണ്ട് (YouTube 1.352 = 740 ദൈർഘ്യമേറിയ വീഡിയോകൾ + 612 Shorts · TikTok 334 · Instagram 290); ഓരോ വീഡിയോയുടെയും ഏറ്റവും ഉയർന്ന കാഴ്ചകളുടെ എണ്ണം നിലനിർത്തുന്ന കാനോനിക്കൽ URL അടിസ്ഥാനമാക്കിയുള്ള നോർമലൈസേഷനുശേഷം ആവർത്തനങ്ങളൊന്നും ശേഷിച്ചിട്ടില്ല. YouTube ഡാറ്റ ശേഖരണം 2026-10-13 മുതൽ മരവിപ്പിച്ചിരിക്കുകയാണ് (14 മുതൽ 18/10 വരെ API ക്വോട്ട തീർന്നതിനാൽ), TikTok/Instagram ഡാറ്റ ശേഖരണം 2026-09-02 മുതലും (ശേഖരണ ക്രെഡിറ്റുകൾ ഇല്ലാത്തതിനാൽ); 76 വീഡിയോകൾക്ക് ഇപ്പോഴും കാഴ്ചകളുടെ എണ്ണം ലഭ്യമല്ല.
+സ്രഷ്ടാവിൻ്റെ തലക്കെട്ടുകളും അടിക്കുറിപ്പുകളും അവരുടേതാണ്. ചിലർ OmniRoute ഗ്യാരണ്ടികളേക്കാൾ കൂടുതൽ വാഗ്ദാനം ചെയ്യുന്നു; ദാതാവിൻ്റെ ക്വാട്ടകളും നിബന്ധനകളും നിങ്ങൾക്ക് യഥാർത്ഥത്തിൽ എന്താണ് ലഭിക്കേണ്ടതെന്ന് തീരുമാനിക്കുന്നു.
 
-> 🎬 **OmniRoute-നെക്കുറിച്ച് ഒരു വീഡിയോ തയ്യാറാക്കിയോ?** ലിങ്ക് സഹിതം ഒരു [ഇഷ്യൂ](https://github.com/diegosouzapw/OmniRoute/issues/new) അല്ലെങ്കിൽ [ചർച്ച](https://github.com/diegosouzapw/OmniRoute/discussions) ആരംഭിക്കൂ — ഞങ്ങൾ അത് ഇവിടെ ഫീച്ചർ ചെയ്യും.
+### നിങ്ങൾക്ക് നമ്പറുകൾ വേണമെങ്കിൽ
+
+| <img width="2000" height="0" alt=""> പ്ലാറ്റ്ഫോം |  വീഡിയോകൾ | അറിയപ്പെടുന്ന കാഴ്ചകൾ |
+| ------------------------------------------------ | --------: | --------------------: |
+| YouTube ദീർഘ-രൂപം                                |       928 |            10,340,464 |
+| YouTube ഷോർട്ട്സ്                                |       774 |             2,793,933 |
+| ഇൻസ്റ്റാഗ്രാം                                    |       290 |             8,054,601 |
+| TikTok                                           |       334 |             3,515,835 |
+| **ആകെ**                                          | **2,326** |        **24,704,833** |
+
+2026-11-16-ലെ സ്നാപ്പ്ഷോട്ട്:** 2,326 അദ്വിതീയ വീഡിയോകൾ** (YouTube 1,702 = 928 ലോംഗ്-ഫോം + 774 ഷോർട്ട്സ് · TikTok 334 · Instagram 290),** 24,704,833 അറിയപ്പെടുന്ന കാഴ്ചകൾ** ,** 1,395 ചാനലുകളും പ്രൊഫൈലുകളും** . ഡ്യൂപ്ലിക്കേറ്റുകൾ കാനോനിക്കൽ URL ഉപയോഗിച്ച് ലയിപ്പിക്കുന്നു, ഉയർന്ന എണ്ണം നിലനിർത്തുന്നു; 79 വീഡിയോകൾക്ക് ഇതുവരെ വ്യൂ കൗണ്ട് ഇല്ല, അവ കണക്കാക്കിയിട്ടില്ല. 2026-11-15-ൽ പ്രസിദ്ധീകരിച്ച വീഡിയോകൾ വരെ YouTube ശേഖരിക്കുന്നു; TikTok, Instagram ശേഖരം 2026-09-02 മുതൽ മരവിപ്പിച്ചതിനാൽ അവയുടെ എണ്ണം പഴയതാണ്.
+
+### നിങ്ങൾ ഒരു വീഡിയോ ചെയ്താൽ
+
+**OmniRoute കുറിച്ച് ഒരു വീഡിയോ ഉണ്ടാക്കിയിട്ടുണ്ടോ?** ലിങ്ക് ഉപയോഗിച്ച് ഒരു [പ്രശ്നമോ](https://github.com/cheaper-inference/OmniRoute/issues/new) [ചർച്ചയോ](https://github.com/cheaper-inference/OmniRoute/discussions) തുറക്കുക, ഞങ്ങൾ അത് ഇവിടെ ചേർക്കും.
+
+<br/>
 
 <br/>
 
 <div align="center">
 
-# 📧 കമ്മ്യൂണിറ്റിയും സഹായവും
+# കമ്മ്യൂണിറ്റിയും സഹായവും
 
-> എല്ലാം ഒരിടത്ത് — മെയിന്റെയ്നറെ പിന്തുടരുക, കമ്മ്യൂണിറ്റിയുമായി ചാറ്റ് ചെയ്യുക, അല്ലെങ്കിൽ ഒരു ഇഷ്യൂ ആരംഭിക്കുക.
+> ഒരിടത്ത് എല്ലാം — പരിപാലിക്കുന്നയാളെ പിന്തുടരുക, കമ്മ്യൂണിറ്റിയുമായി ചാറ്റ് ചെയ്യുക അല്ലെങ്കിൽ ഒരു പ്രശ്നം തുറക്കുക.
 
-| ചാനൽ                                                     | എവിടെ / എങ്ങനെ                                                                                                                        |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| 💼 **LinkedIn** — പരിപാലകനെ പിന്തുടരുക                   | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                                             |
-| 🐙 **GitHub** — റിലീസുകൾക്കും നുറുങ്ങുകൾക്കും പിന്തുടരുക | [@diegosouzapw](https://github.com/diegosouzapw)                                                                                      |
-| 💬 **Discord**                                           | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                                |
-| ✈️ **Telegram**                                          | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                                |
-| 🟢 **WhatsApp — 🌍 ആഗോളം**                               | [ഗ്രൂപ്പിൽ ചേരുക](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                                    |
-| 🟢 **WhatsApp — 🇧🇷 ബ്രസീൽ**                              | [ഗ്രൂപ്പിൽ ചേരുക](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                    |
-| 🌍 **വെബ്സൈറ്റ്**                                        | [omniroute.online](https://omniroute.online)                                                                                          |
-| 🌍 **🌍StHub OmniRoute കമ്മ്യൂണിറ്റി (സൗജന്യം)**         | [StHub പോർട്ടൽ](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                                |
-| 📦 **സോഴ്സ് കോഡ്**                                       | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                        |
-| 🐛 **ഒരു ബഗ് റിപ്പോർട്ട് ചെയ്യുക**                       | [ഒരു ഇഷ്യൂ തുറക്കുക](https://github.com/diegosouzapw/OmniRoute/issues) — `npm run system-info` ഔട്ട്പുട്ട് അറ്റാച്ച് ചെയ്യുക          |
-| 🤝 **സംഭാവന ചെയ്യുക**                                    | [CONTRIBUTING.md](CONTRIBUTING.md) · [ബ്രാഞ്ചിംഗ് & റിലീസ് മോഡൽ](docs/ops/BRANCHING_MODEL.md) · ഒരു `good first issue` തിരഞ്ഞെടുക്കുക |
-| 💚 **പ്രോജക്റ്റിനെ പിന്തുണയ്ക്കുക**                      | [പിന്തുണയ്ക്കാനുള്ള മാർഗങ്ങൾ ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                    |
+| ചാനൽ                                                       | എവിടെ / എങ്ങനെ                                                                                                                        |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 💼**LinkedIn** — പരിപാലിക്കുന്നയാളെ പിന്തുടരുക             | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                                             |
+| 🐙**GitHub** റിലീസുകൾക്കും നുറുങ്ങുകൾക്കുമായി — പിന്തുടരുക | [@diegosouzapw](https://github.com/diegosouzapw)                                                                                      |
+| 💬 **Discord**                                             | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                                |
+| ✈️ **Telegram**                                            | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                                |
+| 🟢**WhatsApp — 🌍 ഗ്ലോബൽ**                                 | [ഗ്രൂപ്പിൽ ചേരുക](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                                    |
+| 🟢**WhatsApp — 🇧🇷 ബ്രസീൽ**                                 | [ഗ്രൂപ്പില്ല](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                        |
+| 🌍** വെബ്സൈറ്റ്**                                          | [omniroute.online](https://omniroute.online)                                                                                          |
+| 🌍**🌍StHub OmniRoute കമ്മ്യൂണിറ്റി (സൌജന്യ)**             | [പോർട്ടൽ അപൂർണ്ണം](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                             |
+| 📦** ഉറവിട കോഡ്**                                          | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                              |
+| 🐛** ഒരു ബഗ് റിപ്പോർട്ട് ചെയ്യുക**                         | [ഒരു പ്രശ്നം തുറക്കുക](https://github.com/cheaper-inference/OmniRoute/issues) — അറ്റാച്ച് `npm run system-info` ഔട്ട്പുട്ട്           |
+| 🤝** സംഭാവന ചെയ്യുക**                                      | [CONTRIBUTING.md](CONTRIBUTING.md) · [ബ്രാഞ്ചിംഗ് & റിലീസ് മോഡൽ](docs/ops/BRANCHING_MODEL.md) · ഒരു `good first issue` തിരഞ്ഞെടുക്കുക |
+| 💚** പദ്ധതിയെ പിന്തുണയ്ക്കുക**                             | [Ways to support ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                                |
 
 </div>
 
 ---
 
 <br/>
-<div align="center">
-
-## 🛠️ ടെക് സ്റ്റാക്ക്
-
-</div>
-
-<table>
-  <tr><th align="left">ലെയർ</th><th align="left">സാങ്കേതികവിദ്യ</th></tr>
-  <tr><td nowrap><b>റൺടൈം</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ഭാഷ</b></td><td>TypeScript 6.0 — <code>src/</code>, <code>open-sse/</code> എന്നിവയിലാകെ <b>100% TypeScript</b> (v2.0 മുതൽ കോറിൽ <code>any</code> ഒന്നുമില്ല)</td></tr>
-  <tr><td nowrap><b>ഫ്രെയിംവർക്ക്</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL ജേണലിംഗ്) + LowDB (JSON ലെഗസി) — 147 ഡൊമെയ്ൻ മോഡ്യൂളുകൾ, 252 മൈഗ്രേഷനുകൾ</td></tr>
-  <tr><td nowrap><b>മെമ്മറി</b></td><td>SQLite FTS5 പൂർണ്ണ-ടെക്സ്റ്റ് + int8-quantized വെക്ടർ എംബെഡിംഗുകൾ, ടൈപ്പ് ചെയ്ത ഡികേ</td></tr>
-  <tr><td nowrap><b>സ്കീമകൾ</b></td><td>Zod 4 — MCP ടൂൾ I/O സാധുതാ പരിശോധന + API കരാറുകൾ</td></tr>
-  <tr><td nowrap><b>പ്രോട്ടോക്കോളുകൾ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>സ്ട്രീമിംഗ്</b></td><td>Server-Sent Events (SSE) + WebSocket ബ്രിഡ്ജ് (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>കംപ്രഷൻ</b></td><td>12-എഞ്ചിൻ പൈപ്പ്ലൈൻ — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>പ്രാമാണീകരണവും &amp; സുരക്ഷയും</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP സ്കോപ്പ്ഡ് ഓത്ത് · വിശ്രമാവസ്ഥയിൽ AES-256-GCM · DOMPurify</td></tr>
-  <tr><td nowrap><b>സ്റ്റെൽത്ത്</b></td><td>wreq-js — JA3 / JA4 TLS ഫിംഗർപ്രിന്റ് ഇംപേഴ്സണേഷൻ, 3-ലെവൽ പ്രോക്സി</td></tr>
-  <tr><td nowrap><b>റെസിലിയൻസ്</b></td><td>സർക്യൂട്ട് ബ്രേക്കർ, എക്സ്പോണൻഷ്യൽ ബാക്കോഫ്, ആന്റി-തണ്ടറിംഗ്-ഹെർഡ്, ഓട്ടോ-കോംബോ സ്വയം-പരിഹാരം</td></tr>
-  <tr><td nowrap><b>ലോഗിംഗ്</b></td><td>pino — റിക്വസ്റ്റ് കോൺടെക്സ്റ്റോടുകൂടിയ ഘടനാപരമായ JSON ലോഗുകൾ</td></tr>
-  <tr><td nowrap><b>ടെസ്റ്റിംഗ്</b></td><td>Node.js ടെസ്റ്റ് റണ്ണർ + Vitest — 8,400-ലധികം ട്രാക്ക് ചെയ്ത ടെസ്റ്റ് ഫയലുകളിലായി <b>60,000-ലധികം സ്റ്റാറ്റിക് ടെസ്റ്റ് ഡിക്ലറേഷനുകൾ</b> (യൂണിറ്റ്, ഇന്റഗ്രേഷൻ, E2E, സുരക്ഷ, ഇക്കോസിസ്റ്റം)</td></tr>
-  <tr><td nowrap><b>പ്ലാറ്റ്ഫോമുകൾ</b></td><td>ഡെസ്ക്ടോപ്പ് (Electron) · Android (Termux) · PWA (ഏത് ബ്രൗസറും)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — റിലീസിൽ സ്വയമേവ npm പ്രസിദ്ധീകരണം + Docker Hub</td></tr>
-  <tr><td nowrap><b>ലിങ്കുകൾ</b></td><td><a href="https://omniroute.online">വെബ്സൈറ്റ്</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
-</table>
-
-<div align="center">
-
 <br/>
 
-## 📖 ഡോക്യുമെന്റേഷൻ
+## ടെക് സ്റ്റാക്ക്
 
-</div>
-
-### 📘 ആരംഭിക്കൽ
+`release/v3.8.55` യിലെ [`package.json`](package.json) ൽ പ്രഖ്യാപിച്ചിരിക്കുന്നതുപോലെ, എന്ത് OmniRoute ഉപയോഗിച്ചാണ് നിർമ്മിച്ചിരിക്കുന്നത്.
 
 <table>
-  <tr><th align="left">ഡോക്യുമെന്റ്</th><th align="left">വിവരണം</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">ഉപയോക്തൃ ഗൈഡ്</a></b></td><td>Providers, combos, CLI സംയോജനം, deployment</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">സജ്ജീകരണ ഗൈഡ്</a></b></td><td>പൂർണ്ണമായ ഇൻസ്റ്റാൾ രീതികൾ, CLI tool configs, protocol setup, timeout tuning</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI Tools ഗൈഡ്</a></b></td><td>Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot എന്നിവയ്ക്കുള്ള ഓരോ tool-ിനുമുള്ള സജ്ജീകരണം</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Remote Mode</a></b></td><td>scoped access tokens ഉപയോഗിച്ച് നിങ്ങളുടെ laptop CLI-ൽ നിന്ന് ഒരു remote OmniRoute (VPS) നിയന്ത്രിക്കുക</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code Config</a></b></td><td><code>launch</code> + per-model profiles ഉപയോഗിച്ച് Claude Code-നെ OmniRoute-ലേക്ക് (local/remote) ചൂണ്ടിക്കാണിക്കുക</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">ദ്രുതാരംഭം</a></b></td><td>3 ഘട്ടങ്ങളിലായി install → connect → configure</td></tr>
-</table>
-
-### 🔧 പ്രവർത്തനങ്ങളും വിന്യാസവും
-
-<table>
-  <tr><th align="left">ഡോക്യുമെന്റ്</th><th align="left">വിവരണം</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker ഗൈഡ്</a></b></td><td>Docker run, Compose profiles, Caddy HTTPS, tunnels, image tags</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Podman ഗൈഡ്</a></b></td><td>Quadlet systemd സംയോജനം, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM വിന്യാസം</a></b></td><td>പൂർണ്ണ ഗൈഡ്: VM + nginx + Cloudflare സജ്ജീകരണം</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io വിന്യാസം</a></b></td><td>persistent storage ഉപയോഗിച്ച് Fly.io-ലേക്ക് വിന്യസിക്കുക</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux ഗൈഡ്</a></b></td><td>Termux വഴി Android-ൽ OmniRoute പ്രവർത്തിപ്പിക്കുക</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA ഗൈഡ്</a></b></td><td>Progressive Web App ഇൻസ്റ്റാളേഷൻ, caching, architecture</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">അൺഇൻസ്റ്റാൾ ഗൈഡ്</a></b></td><td>എല്ലാ ഇൻസ്റ്റാൾ രീതികൾക്കുമുള്ള പൂർണ്ണ നീക്കം</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Environment Config</a></b></td><td>പൂർണ്ണമായ <code>.env</code> variables-ഉം references-ഉം</td></tr>
-</table>
-
-### 🧠 സവിശേഷതകളും ആർക്കിടെക്ചറും
-
-<table>
-  <tr><th align="left">ഡോക്യുമെന്റ്</th><th align="left">വിവരണം</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">ആർക്കിടെക്ചർ</a></b></td><td>സിസ്റ്റം architecture, data flow, internals</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Compression ഗൈഡ്</a></b></td><td>7-option pipeline: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK Compression</a></b></td><td>Command-output compression, filters, trust, verify, raw-output recovery</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Compression Engines</a></b></td><td>Caveman, RTK, stacked pipelines, dashboard/API/MCP surfaces</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Compression Rules Format</a></b></td><td>Caveman, RTK filters എന്നിവയ്ക്കുള്ള JSON rule-pack schemas</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Compression Language Packs</a></b></td><td>Language detection, Caveman rule-pack authoring</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Resilience ഗൈഡ്</a></b></td><td>Circuit breakers, cooldowns, queue, anti-thundering herd, TLS spoofing</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo Engine</a></b></td><td>16-factor scoring, mode packs, self-healing</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy ഗൈഡ്</a></b></td><td>3-level proxy system, 1proxy marketplace, registry CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Free Tiers</a></b></td><td>ഏകീകരിച്ച directory: രേഖപ്പെടുത്തിയ 34 recurring pools / catalog ചെയ്ത 465 free-tier entries</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Features Gallery</a></b></td><td>Screenshots സഹിതമുള്ള visual dashboard tour</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Codebase Documentation</a></b></td><td>തുടക്കക്കാർക്ക് സൗഹൃദമായ codebase walkthrough</td></tr>
-</table>
-
-### 🤖 പ്രോട്ടോക്കോളുകളും API-കളും
-
-<table>
-  <tr><th align="left">ഡോക്യുമെന്റ്</th><th align="left">വിവരണം</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API Reference</a></b></td><td>ഉദാഹരണങ്ങളോടുകൂടിയ എല്ലാ endpoints-ഉം</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI Spec</a></b></td><td>OpenAPI 3.0 specification</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP Server</a></b></td><td>110 MCP tools, IDE configs, Python/TS/Go clients</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP Server ഗൈഡ്</a></b></td><td>MCP installation, transports, tool reference</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A Server</a></b></td><td>JSON-RPC 2.0 protocol, skills, streaming, task mgmt</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A Server ഗൈഡ്</a></b></td><td>A2A agent card, tasks, skills, streaming</td></tr>
-</table>
-
-### 📋 പ്രോജക്റ്റും ഗുണനിലവാരവും
-
-<table>
-  <tr><th align="left">രേഖ</th><th align="left">വിവരണം</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">സംഭാവന നൽകൽ</a></b></td><td>വികസന സജ്ജീകരണവും മാർഗ്ഗനിർദ്ദേശങ്ങളും</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ബ്രാഞ്ചിംഗും റിലീസ് മോഡലും</a></b></td><td>PR-കൾ ലക്ഷ്യമിടുന്ന സ്ഥലം (<code>release/*</code>), <code>main</code>-നും ടാഗുകൾക്കും ഉള്ള അർത്ഥം</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">മാറ്റപ്പട്ടിക</a></b></td><td>ഓരോ പതിപ്പിന്റെയും പൂർണ്ണ റിലീസ് ചരിത്രം</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">സുരക്ഷാ നയം</a></b></td><td>ദുർബലത റിപ്പോർട്ടിംഗും സുരക്ഷാ പ്രവർത്തനരീതികളും</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n ഗൈഡ്</a></b></td><td>67 ഭാഷകൾക്കുള്ള പിന്തുണ, വിവർത്തന പ്രവാഹം, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">റിലീസ് ചെക്ക്ലിസ്റ്റ്</a></b></td><td>റിലീസിന് മുമ്പുള്ള സാധൂകരണ ഘട്ടങ്ങൾ</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">കവറേജ് പ്ലാൻ</a></b></td><td>8,400-ലധികം ട്രാക്ക് ചെയ്ത ടെസ്റ്റ് ഫയലുകളിലായി 60,000-ലധികം സ്റ്റാറ്റിക് ടെസ്റ്റ് ഡിക്ലറേഷനുകൾക്കുള്ള ടെസ്റ്റ് കവറേജ് തന്ത്രം</td></tr>
+  <tr><th align="left">പാളി</th><th align="left">സാങ്കേതികവിദ്യ</th></tr>
+  <tr><td nowrap><b>പ്രവർത്തനസമയം</b></td><td>Node.js <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code> (22.x മുതൽ 22.22.2, 24.x മുതൽ 26.x വരെ). Bun 1.4.2 പിൻ ചെയ്തിരിക്കുന്നത് കുറച്ച് ബിൽഡ് സ്ക്രിപ്റ്റുകളും മികച്ച-പ്രയത്ന അനുയോജ്യത പാതയും പ്രവർത്തിപ്പിക്കുന്നതിന് മാത്രമാണ്; ഇത് പിന്തുണയ്ക്കുന്ന റൺടൈം അല്ല</td></tr>
+  <tr><td nowrap><b>ഭാഷ</b></td><td>ആപ്പിനും സ്ട്രീമിംഗ് എഞ്ചിനും (<code>src/</code>, <code>open-sse/</code>)TypeScript 6; <code>omniroute</code> CLI ES-module <code>bin/</code> JavaScript</td></tr>
+  <tr><td nowrap><b>ചട്ടക്കൂട്</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4, വെണ്ടർ ചെയ്ത Keak CI UI കിറ്റിനൊപ്പം (<code>packages/ui-kit</code>)</td></tr>
+  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>SQLite ലൂടെ WAL ജേണലിംഗ്, better-sqlite3<code>src/lib/db/</code> ഒരു ഡ്രൈവർ ഫാൾബാക്ക് ചെയിൻ — 178 മൊഡ്യൂളുകൾ, 252 മൈഗ്രേഷനുകൾ</td></tr>
+  <tr><td nowrap><b>മെമ്മറി</b></td><td>SQLite FTS5 ഫുൾ-ടെക്സ്റ്റ് തിരയൽ + int8-quantized വെക്ടർ എംബെഡ്ഡിംഗുകൾ ടൈപ്പ് ചെയ്ത ശോഷണം; ഓപ്ഷണൽ Qdrant</td></tr>
+  <tr><td nowrap><b>സ്കീമുകൾ</b></td><td>Zod 4 — API കരാറുകളും MCP ടൂൾ input/output മൂല്യനിർണ്ണയവും</td></tr>
+  <tr><td nowrap><b>പ്രോട്ടോക്കോളുകൾ</b></td><td>MCP (stdio / SSE / Streamable HTTP, 110 ടൂളുകൾ) + A2A v0.3 (JSON-RPC 2.0 + SSE) A2A v1.0 ക്ലയൻ്റ് അനുയോജ്യത</td></tr>
+  <tr><td nowrap><b>സ്ട്രീമിംഗ്</b></td><td>സെർവർ അയച്ച ഇവൻ്റുകൾ (SSE) + WebSocket ബ്രിഡ്ജ് (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>കംപ്രഷൻ</b></td><td>RTK, Caveman, LLMLingua-2 (ONNX, TinyBERT ഡിഫോൾട്ടായി), ഹെഡ്റൂം, OmniGlyph എന്നിവ ഉൾപ്പെടെ 15 ബിൽറ്റ്-ഇൻ എഞ്ചിനുകൾ</td></tr>
+  <tr><td nowrap><b>Auth &amp; സുരക്ഷ</b></td><td>OAuth 2.0 (PKCE) + JWT + API കീകൾ + MCP സ്കോപ്പ്ഡ് ഓത്ത് · ഓപ്ഷണൽ എൻട്രാ ID, OIDC, TOTP സൈൻ ഇൻ · AES-256-GCM വിശ്രമത്തിൽ · DOMPurify</td></tr>
+  <tr><td nowrap><b>സ്റ്റെൽത്ത്</b></td><td>wreq-js — JA3 / JA4 TLS ഫിംഗർപ്രിൻ്റ് ആൾമാറാട്ടം, 3-ലെവൽ പ്രോക്സി</td></tr>
+  <tr><td nowrap><b>പ്രതിരോധശേഷി</b></td><td>പ്രൊവൈഡർ സർക്യൂട്ട് ബ്രേക്കർ, കണക്ഷൻ കൂൾഡൗൺ, മോഡൽ ലോക്കൗട്ട്, എക്സ്പോണൻഷ്യൽ ബാക്ക്ഓഫ്, അഡാപ്റ്റീവ് അഡ്മിഷൻ</td></tr>
+  <tr><td nowrap><b>ലോഗിംഗ്</b></td><td>അഭ്യർത്ഥന സന്ദർഭത്തോടുകൂടിയ pino — ഘടനാപരമായ JSON ലോഗുകൾ</td></tr>
+  <tr><td nowrap><b>ടെസ്റ്റിംഗ്</b></td><td>Node.js ടെസ്റ്റ് റണ്ണർ + Vitest + Playwright — <code>tests/</code> ന് കീഴിലുള്ള 9,500 + ടെസ്റ്റ് ഫയലുകൾ (യൂണിറ്റ്, ഇൻ്റഗ്രേഷൻ, E2E, സുരക്ഷ, ഇക്കോസിസ്റ്റം)</td></tr>
+  <tr><td nowrap><b>പ്ലാറ്റ്ഫോമുകൾ</b></td><td>npm linux/arm64Windows / macOS / Linux) + Docker Electronlinux/amd64, PWA)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub പ്രവർത്തനങ്ങൾ — npm വിശ്വസനീയമായ പ്രസിദ്ധീകരണത്തിലൂടെയും (OIDC) Docker ഹബ് ചിത്രങ്ങളിലൂടെയും പ്രസിദ്ധീകരിക്കുന്നു</td></tr>
+  <tr><td nowrap><b>ലിങ്കുകൾ</b></td><td><a href="https://omniroute.online">വെബ്സൈറ്റ്</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker ഹബ്</a></td></tr>
 </table>
 
 <br/>
 
+## ഡോക്യുമെൻ്റേഷൻ
+
+വിവർത്തനങ്ങൾക്ക് പുറത്തുള്ള [`docs/`](docs/) യിലെ എല്ലാ മാർക്ക്ഡൗൺ ഫയലുകളും, കൂടാതെ റിപ്പോസിറ്ററിയിൽ മറ്റെവിടെയെങ്കിലും ഉള്ള പ്രമാണങ്ങളും (സഹായിക്കുന്ന ഗൈഡ്, ചേഞ്ച്ലോഗ്, പാക്കേജ് READMEs, OpenAPI ഫയൽ) ചുവടെ ലിങ്ക് ചെയ്തിരിക്കുന്നു. തിരയാനാകുന്ന സൂചിക [`docs/README.md`](docs/README.md) ആണ്. 66 ഭാഷകളിലേക്കുള്ള വിവർത്തനങ്ങൾ [`docs/i18n/`](docs/i18n/README.md) യിലാണ്.
+
+| നിങ്ങൾ എങ്കിൽ…                                                                 | <img width="2000" height="0" alt=""> ആദ്യം വായിക്കുക             | എന്നിട്ട് ബ്രൗസ് ചെയ്യുക      |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------- | ----------------------------- |
+| OmniRoute യിൽ പുതിയവരാണ്                                                       | [ഡോക്യുമെൻ്റേഷൻ സൂചിക](docs/README.md)                           | [13 രേഖകൾ](#docs-start)       |
+| ഒരു സെർവർ വിന്യസിക്കുകയോ പ്രവർത്തിപ്പിക്കുകയോ ചെയ്യുന്നു                       | [Docker ഗൈഡ്](docs/guides/DOCKER_GUIDE.md)                       | [24 രേഖകൾ](#docs-deploy)      |
+| അഭ്യർത്ഥനകൾ എങ്ങനെ റൂട്ട് ചെയ്യപ്പെടുന്നു എന്നത് നിയന്ത്രിക്കാൻ ആഗ്രഹിക്കുന്നു | [ഓട്ടോ-കോംബോ എഞ്ചിൻ](docs/routing/AUTO-COMBO.md)                 | [20 രേഖകൾ](#docs-routing)     |
+| ചെലവും ക്വാട്ടയും ട്രാക്ക് ചെയ്യാൻ ആഗ്രഹിക്കുന്നു                              | [ചെലവും ചെലവും ട്രാക്കിംഗ്](docs/guides/COST_TRACKING.md)        | [10 രേഖകൾ](#docs-usage)       |
+| ഒരു നിർദ്ദിഷ്ട ദാതാവിനെ ബന്ധിപ്പിക്കുന്നു                                      | [ദാതാവിൻ്റെ റഫറൻസ്](docs/reference/PROVIDER_REFERENCE.md)        | [33 രേഖകൾ](#docs-providers)   |
+| ടോക്കണുകൾ സംരക്ഷിക്കാനോ സന്ദർഭം ചേർക്കാനോ ആഗ്രഹിക്കുന്നു                       | [കംപ്രഷൻ ഗൈഡ്](docs/compression/COMPRESSION_GUIDE.md)            | [11 രേഖകൾ](#docs-compression) |
+| ഒരു കോഡിംഗ് ടൂൾ അല്ലെങ്കിൽ omniroute CLI ഉപയോഗിക്കുക                           | [CLI സംയോജനങ്ങൾ](docs/guides/CLI-INTEGRATIONS.md)                | [17 രേഖകൾ](#docs-cli)         |
+| API യ്ക്ക് എതിരായി പണിയുന്നു                                                   | [API റഫറൻസ്](docs/reference/API_REFERENCE.md)                    | [17 രേഖകൾ](#docs-api)         |
+| OmniRoute നീട്ടാനോ അതിൻ്റെ ട്രാഫിക് കാണാനോ ആഗ്രഹിക്കുന്നു                      | [പ്ലഗിൻ മാർക്കറ്റ്പ്ലേസ്](docs/frameworks/PLUGIN_MARKETPLACE.md) | [16 രേഖകൾ](#docs-extend)      |
+| പ്രോക്സികൾ വഴി അപ്സ്ട്രീം ട്രാഫിക്ക് റൂട്ട് ചെയ്യുക                            | [പ്രോക്സി ഗൈഡ്](docs/ops/PROXY_GUIDE.md)                         | [6 രേഖകൾ](#docs-network)      |
+| സുരക്ഷ അവലോകനം ചെയ്യുന്നു                                                      | [സുരക്ഷാ നയം](SECURITY.md)                                       | [17 രേഖകൾ](#docs-security)    |
+| കോഡ് മനസ്സിലാക്കാൻ ആഗ്രഹിക്കുന്നു                                              | [വാസ്തുവിദ്യ](docs/architecture/ARCHITECTURE.md)                 | [10 രേഖകൾ](#docs-internals)   |
+| സംഭാവന നൽകാൻ ആഗ്രഹിക്കുന്നു                                                    | [സംഭാവന ചെയ്യുന്നു](CONTRIBUTING.md)                             | [25 രേഖകൾ](#docs-project)     |
+| അസറ്റ് നോട്ടുകൾക്കായി തിരയുന്നു                                                | [പതാക ഐക്കണുകൾ](docs/assets/flags/README.md)                     | [1 പ്രമാണം](#docs-records)    |
+
+<a id="docs-start"></a>
+
+### നിങ്ങൾ OmniRoute യിൽ പുതിയ ആളാണെങ്കിൽ
+
+ഇൻസ്റ്റാൾ ചെയ്യുക, ആദ്യ ദാതാവിനെ ബന്ധിപ്പിച്ച് ഡാഷ്ബോർഡ് പഠിക്കുക. വിഷയം:** ആമുഖം** .
+
+| പ്രമാണം                                                          | <img width="2000" height="0" alt=""> എന്താണ് ഉത്തരം നൽകുന്നത്                                        | ഫയൽ                                        |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| [ഡോക്യുമെൻ്റേഷൻ സൂചിക](docs/README.md)                           | മുഴുവൻ ഡോക്യുമെൻ്റേഷൻ സെറ്റിൻ്റെയും നാവിഗബിൾ സൂചിക, ഉദ്ദേശ്യമനുസരിച്ച് ഗ്രൂപ്പുചെയ്തു                | `docs/README.md`                           |
+| [ദ്രുത ആരംഭ ഗൈഡ്](docs/getting-started/QUICK-START.md)           | ഇൻസ്റ്റാൾ ചെയ്യുക, യോഗ്യതയുള്ള ഒരു ദാതാവിനെ ബന്ധിപ്പിച്ച് നിങ്ങളുടെ IDE OmniRoute ൽ പോയിൻ്റ് ചെയ്യുക | `docs/getting-started/QUICK-START.md`      |
+| [ദാതാക്കളുടെ ഗൈഡ്](docs/getting-started/PROVIDERS-GUIDE.md)      | എന്താണ് ദാതാവ്, AI മോഡലുകളെ OmniRoute ലേക്ക് എങ്ങനെ ബന്ധിപ്പിക്കാം                                   | `docs/getting-started/PROVIDERS-GUIDE.md`  |
+| [സൗജന്യ ടയർ ഗൈഡ്](docs/getting-started/FREE-TIERS-GUIDE.md)      | പ്രൊവൈഡർ ഫ്രീ ആക്സസ് എങ്ങനെ പ്രവർത്തിക്കുന്നു, അത് എങ്ങനെ ഉത്തരവാദിത്തത്തോടെ സംയോജിപ്പിക്കാം         | `docs/getting-started/FREE-TIERS-GUIDE.md` |
+| [ഓട്ടോ-കോംബോ ഗൈഡ്](docs/getting-started/AUTO-COMBO-GUIDE.md)     | ഓരോ അഭ്യർത്ഥനയിലും മോഡൽ തിരഞ്ഞെടുക്കാൻ OmniRoute അനുവദിക്കുന്നതിനുള്ള തുടക്കക്കാരൻ്റെ ആമുഖം          | `docs/getting-started/AUTO-COMBO-GUIDE.md` |
+| [വെബ് കുക്കി ദാതാക്കൾ](docs/getting-started/WEB-COOKIE-GUIDE.md) | ഒരു API കീക്ക് പകരം നിങ്ങളുടെ നിലവിലുള്ള ബ്രൗസർ സെഷനിലൂടെ ഒരു AI സേവനം ഉപയോഗിക്കുക                   | `docs/getting-started/WEB-COOKIE-GUIDE.md` |
+| [സ്വയം-ഹോസ്റ്റ് ഗൈഡ്](docs/getting-started/SELF_HOST_GUIDE.md)   | Docker കമ്പോസിനൊപ്പം അഞ്ച് മിനിറ്റ് സ്വയം ഹോസ്റ്റ് ചെയ്ത വിന്യാസം                                    | `docs/getting-started/SELF_HOST_GUIDE.md`  |
+| [ഉപയോക്തൃ ഗൈഡ്](docs/guides/USER_GUIDE.md)                       | ദാതാക്കൾ, കോമ്പോകൾ, CLI സംയോജനവും വിന്യാസവും                                                         | `docs/guides/USER_GUIDE.md`                |
+| [സജ്ജീകരണ ഗൈഡ്](docs/guides/SETUP_GUIDE.md)                      | എല്ലാ ഇൻസ്റ്റാളേഷൻ രീതിയും CLI ടൂൾ കോൺഫിഗറേഷനും MCP/A2A സജ്ജീകരണവും ടൈംഔട്ട് ട്യൂണിംഗും              | `docs/guides/SETUP_GUIDE.md`               |
+| [സവിശേഷതകൾ ഗാലറി](docs/guides/FEATURES.md)                       | എല്ലാ ഡാഷ്ബോർഡ് വിഭാഗത്തിൻ്റെയും വിഷ്വൽ ടൂർ                                                          | `docs/guides/FEATURES.md`                  |
+| [നിരകൾ](docs/guides/TIERS.md)                                    | റൂട്ടിംഗിനായി ദാതാക്കളെ എങ്ങനെയാണ് മൂന്ന് സാമ്പത്തിക ശ്രേണികളായി തരം തിരിച്ചിരിക്കുന്നത്             | `docs/guides/TIERS.md`                     |
+| [ട്രബിൾഷൂട്ടിംഗ്](docs/guides/TROUBLESHOOTING.md)                | ഇൻസ്റ്റാൾ മുന്നറിയിപ്പുകൾ ഉൾപ്പെടെയുള്ള പൊതുവായ പ്രശ്നങ്ങളും അവയുടെ പരിഹാരങ്ങളും                     | `docs/guides/TROUBLESHOOTING.md`           |
+| [ഗൈഡ് അൺഇൻസ്റ്റാൾ ചെയ്യുക](docs/guides/UNINSTALL.md)             | ഓരോ ഇൻസ്റ്റാളേഷൻ രീതിക്കും ക്ലീൻ നീക്കംചെയ്യൽ                                                        | `docs/guides/UNINSTALL.md`                 |
+
+<a id="docs-deploy"></a>
+
+### നിങ്ങൾ ഒരു സെർവർ വിന്യസിക്കുകയോ പ്രവർത്തിപ്പിക്കുകയോ ആണെങ്കിൽ
+
+ഒരു ലാപ്ടോപ്പ്, VPS, കണ്ടെയ്നർ പ്ലാറ്റ്ഫോമിലോ ഫോണിലോ OmniRoute പ്രവർത്തിപ്പിച്ച് അത് കോൺഫിഗർ ചെയ്യുക. വിഷയം:** ഇൻസ്റ്റാൾ ചെയ്യുക, വിന്യസിക്കുക, കോൺഫിഗർ ചെയ്യുക** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                      | അത് എന്ത് ഉത്തരം നൽകുന്നു                                                                                     | ഫയൽ                                       |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| [Docker ഗൈഡ്](docs/guides/DOCKER_GUIDE.md)                        | Docker റൺ, പ്രൊഫൈലുകൾ രചിക്കുക, Caddy HTTPS, ടണലുകൾ, ഇമേജ് ടാഗുകൾ                                             | `docs/guides/DOCKER_GUIDE.md`             |
+| [പോഡ്മാൻ ഗൈഡ്](contrib/podman/README.md)                          | പോഡ്മാൻ കമ്പോസ്, ക്വാഡ്ലെറ്റ് സിസ്റ്റംഡ് ഇൻ്റഗ്രേഷൻ, SELinux കുറിപ്പുകൾ                                       | `contrib/podman/README.md`                |
+| [തലയില്ലാത്ത Linux VPS ബണ്ടിൽ](contrib/vps/README.md)             | പ്രസിദ്ധീകരിച്ച സെർവർ ഇമേജ് ഡെസ്ക്ടോപ്പ് ഇല്ലാതെ ഒരു Linux VPS ൽ പ്രവർത്തിപ്പിക്കുക                           | `contrib/vps/README.md`                   |
+| [Windows സഹായികൾ](contrib/windows/README.md)                      | ഒരു Windows ഉറവിട ചെക്ക്ഔട്ടിൽ നിന്ന് OmniRoute പ്രവർത്തിപ്പിക്കുന്നതിന് സ്ക്രിപ്റ്റുകൾ ഡബിൾ ക്ലിക്ക് ചെയ്യുക | `contrib/windows/README.md`               |
+| [VM വിന്യാസം](docs/ops/VM_DEPLOYMENT_GUIDE.md)                    | VM + nginx + Cloudflare വിന്യാസം, അവസാനം മുതൽ അവസാനം വരെ                                                      | `docs/ops/VM_DEPLOYMENT_GUIDE.md`         |
+| [Fly.io വിന്യാസം](docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md)            | സ്ഥിരമായ സംഭരണത്തോടെ Fly.io-ലേക്ക് വിന്യസിക്കുക                                                               | `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`     |
+| [കുബെർനെറ്റസ് വിന്യാസം](docs/ops/KUBERNETES_DEPLOYMENT_GUIDE.md)  | k3s, k8s എന്നിവയ്ക്കായി ഓവർലേകൾ ഇഷ്ടാനുസൃതമാക്കുക, ഒപ്പം ഒരു ഹെൽം ചാർട്ടും                                    | `docs/ops/KUBERNETES_DEPLOYMENT_GUIDE.md` |
+| [തലയില്ലാത്ത മോഡ്](docs/guides/HEADLESS.md)                       | ഡാഷ്ബോർഡ് ഇല്ലാതെ `/v1/*` പ്രോക്സി മാത്രം പ്രവർത്തിപ്പിക്കുക                                                  | `docs/guides/HEADLESS.md`                 |
+| [Electron ഡെസ്ക്ടോപ്പ് ഗൈഡ്](docs/guides/ELECTRON_GUIDE.md)       | Windows, macOS, Linux എന്നിവയ്ക്കുള്ള ഡെസ്ക്ടോപ്പ് അപ്ലിക്കേഷൻ                                                | `docs/guides/ELECTRON_GUIDE.md`           |
+| [Electron ആപ്പ് ഉറവിടം](electron/README.md)                       | ഡെസ്ക്ടോപ്പ് റാപ്പർ എങ്ങനെ നിർമ്മിക്കുകയും പാക്കേജുചെയ്യുകയും ചെയ്യുന്നു                                      | `electron/README.md`                      |
+| [ടെർമക്സ് ഗൈഡ്](docs/guides/TERMUX_GUIDE.md)                      | ആൻഡ്രോയിഡിൽ തലയില്ലാത്ത സെർവറായി OmniRoute പ്രവർത്തിപ്പിക്കുക                                                 | `docs/guides/TERMUX_GUIDE.md`             |
+| [PWA ഗൈഡ്](docs/guides/PWA_GUIDE.md)                              | ഒരു പ്രോഗ്രസീവ് വെബ് ആപ്പായി ഡാഷ്ബോർഡ് ഇൻസ്റ്റാൾ ചെയ്യുക                                                      | `docs/guides/PWA_GUIDE.md`                |
+| [പ്രാദേശിക Ollama + Docker](docs/guides/LOCAL_OLLAMA_DOCKER.md)   | ഹോസ്റ്റിൽ Ollama പ്രവർത്തിക്കുമ്പോൾ Docker ൽ OmniRoute                                                        | `docs/guides/LOCAL_OLLAMA_DOCKER.md`      |
+| [Docker മോഡൽ റണ്ണർ](docs/guides/DOCKER_MODEL_RUNNER.md)           | ഒരു പ്രാദേശിക ദാതാവായി Docker മോഡൽ റണ്ണർ ഉപയോഗിക്കുക                                                          | `docs/guides/DOCKER_MODEL_RUNNER.md`      |
+| [ബ്രൗസർ-ലോഗിൻ കണ്ടെയ്നർ](docker/vnc-browser/README.md)            | ഒരു ഇൻ്ററാക്ടീവ് വെബ് ലോഗിൻ ആവശ്യമുള്ള ദാതാക്കൾക്കായി ഒറ്റപ്പെട്ട ബ്രൗസർ                                      | `docker/vnc-browser/README.md`            |
+| [റിമോട്ട് മോഡ്](docs/guides/REMOTE-MODE.md)                       | സ്കോപ്ഡ് ടോക്കണുകൾ ഉപയോഗിച്ച് നിങ്ങളുടെ ലാപ്ടോപ്പ് CLI ൽ നിന്ന് റിമോട്ട് OmniRoute ഡ്രൈവ് ചെയ്യുക             | `docs/guides/REMOTE-MODE.md`              |
+| [ടണൽ ഗൈഡ്](docs/ops/TUNNELS_GUIDE.md)                             | ടണലുകളിലൂടെ പ്രാദേശിക സെർവറിനെ പരസ്യമായി വെളിപ്പെടുത്തുക                                                      | `docs/ops/TUNNELS_GUIDE.md`               |
+| [Redis പ്രൊഡക്ഷൻ കോൺഫിഗറേഷൻ](docs/ops/REDIS_PRODUCTION_CONFIG.md) | കാഷെകൾ, അഫിനിറ്റി, മൾട്ടി-ഇൻസ്റ്റൻസ് സജ്ജീകരണങ്ങൾ എന്നിവയ്ക്കായുള്ള ഓപ്ഷണൽ Redis                              | `docs/ops/REDIS_PRODUCTION_CONFIG.md`     |
+| [ഡാറ്റാബേസ് ഗൈഡ്](docs/ops/DATABASE_GUIDE.md)                     | സ്കീമ, മൈഗ്രേഷൻ, ഡാറ്റാബേസ് പ്രവർത്തനങ്ങൾ                                                                     | `docs/ops/DATABASE_GUIDE.md`              |
+| [SQLite പ്രവർത്തനസമയം](docs/ops/SQLITE_RUNTIME.md)                | സ്റ്റാർട്ടപ്പിൽ SQLite ഡ്രൈവർ എങ്ങനെ പരിഹരിക്കപ്പെടും                                                         | `docs/ops/SQLITE_RUNTIME.md`              |
+| [പരിസ്ഥിതി വേരിയബിളുകൾ](docs/reference/ENVIRONMENT.md)            | എല്ലാ `.env` വേരിയബിളും അതിൻ്റെ ഡിഫോൾട്ടും                                                                    | `docs/reference/ENVIRONMENT.md`           |
+| [ഫീച്ചർ ഫ്ലാഗുകൾ](docs/reference/FEATURE_FLAGS.md)                | റൺടൈം ടോഗിളുകളും അവ എങ്ങനെ മാറ്റാം                                                                            | `docs/reference/FEATURE_FLAGS.md`         |
+| [മാനേജ്മെൻ്റ് ആധികാരികത](docs/guides/MANAGEMENT-AUTH.md)          | മാനേജ്മെൻ്റ് റൂട്ടുകൾക്ക് അംഗീകാരം നൽകാൻ കഴിയുന്ന നാല് ക്രെഡൻഷ്യൽ കുടുംബങ്ങൾ                                  | `docs/guides/MANAGEMENT-AUTH.md`          |
+| [i18n ഗൈഡ്](docs/guides/I18N.md)                                  | 67-ഭാഷാ പിന്തുണ, വിവർത്തന വർക്ക്ഫ്ലോ, RTL                                                                     | `docs/guides/I18N.md`                     |
+
+<a id="docs-routing"></a>
+
+### അഭ്യർത്ഥനകൾ എങ്ങനെയാണ് വഴിതിരിച്ചുവിടുന്നതെന്ന് നിങ്ങൾക്ക് നിയന്ത്രിക്കണമെങ്കിൽ
+
+കോമ്പോസ്, സ്ട്രാറ്റജികൾ, ഫാൾബാക്ക്സ്, മൂന്ന് റെസിലൻസ് മെക്കാനിസങ്ങൾ. വിഷയം:** റൂട്ടിംഗ്, കോമ്പോസ്, റെസിലൻസ്** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                                   | അത് എന്ത് ഉത്തരം നൽകുന്നു                                                                  | ഫയൽ                                             |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| [ഓട്ടോ-കോംബോ എഞ്ചിൻ](docs/routing/AUTO-COMBO.md)                               | സ്കോറിംഗ് ഘടകങ്ങൾ, തന്ത്രങ്ങൾ, മോഡ് പാക്കുകൾ, സ്വയം സുഖപ്പെടുത്തൽ                          | `docs/routing/AUTO-COMBO.md`                    |
+| [സബ്സ്ക്രിപ്ഷൻ-ആദ്യ റൂട്ടിംഗ്](docs/routing/SUBSCRIPTION_LADDER.md)            | പണമടച്ചവയ്ക്ക് മുമ്പ് പ്ലാൻ ഉൾപ്പെടുത്തിയ കണക്ഷനുകൾ തിരഞ്ഞെടുക്കുക                         | `docs/routing/SUBSCRIPTION_LADDER.md`           |
+| [STRICT_ZERO_COST](docs/routing/STRICT_ZERO_COST.md)                           | സ്ഥിരീകരിക്കാൻ കഴിയുന്ന തരത്തിൽ സൗജന്യമല്ലാത്ത ഏതൊരു ലക്ഷ്യവും നിരസിക്കുക                  | `docs/routing/STRICT_ZERO_COST.md`              |
+| [ക്വാട്ട പങ്കിടൽ എഞ്ചിൻ](docs/routing/QUOTA_SHARE.md)                          | കീകളിലുടനീളം പങ്കിട്ട അക്കൗണ്ടിൻ്റെ സമയാധിഷ്ഠിത ക്വാട്ട വിഭജിക്കുക                         | `docs/routing/QUOTA_SHARE.md`                   |
+| [API-കീ കണക്ഷൻ മുൻഗണന](docs/routing/API_KEY_CONNECTION_PREFERENCE.md)          | ഫാൾബാക്ക് ഉപയോഗിച്ച് ഓരോ പ്രോജക്റ്റും അതിൻ്റേതായ പ്രാഥമിക അക്കൗണ്ടിലേക്ക് റൂട്ട് ചെയ്യുക   | `docs/routing/API_KEY_CONNECTION_PREFERENCE.md` |
+| [മോഡൽ എക്സ്പോഷർ allow/deny ലിസ്റ്റ്](docs/routing/MODEL_EXPOSURE_LIST.md)      | ഏത് മോഡലുകളാണ് `/v1/models` പരസ്യം ചെയ്യുന്നതെന്ന് ക്യൂറേറ്റ് ചെയ്യുക                      | `docs/routing/MODEL_EXPOSURE_LIST.md`           |
+| [മോഡൽ ഇൻ്റലിജൻസ്](docs/routing/MODEL_INTELLIGENCE.md)                          | റൂട്ടിംഗ് ഉപയോഗിക്കുന്ന ക്രൗഡ്-സോഴ്സ് ELO നിലവാര സിഗ്നൽ                                    | `docs/routing/MODEL_INTELLIGENCE.md`            |
+| [റീസണിംഗ് റൂട്ടിംഗ്](docs/routing/REASONING_ROUTING.md)                        | ആവശ്യങ്ങളെ ന്യായീകരിച്ചുകൊണ്ട് ആ വഴി ഭരിക്കുന്നു                                           | `docs/routing/REASONING_ROUTING.md`             |
+| [റീസണിംഗ് റീപ്ലേ](docs/routing/REASONING_REPLAY.md)                            | ഫോളോ-അപ്പ് ടേണുകളിൽ അത് ആവശ്യമുള്ള ദാതാക്കൾക്ക് ന്യായവാദ ഉള്ളടക്കം വീണ്ടും പ്ലേ ചെയ്യുക    | `docs/routing/REASONING_REPLAY.md`              |
+| [ഡിറ്റർമിനിസ്റ്റിക് റൂട്ടിംഗ്](docs/routing/DETERMINISTIC_ROUTING.md)          | സ്വയം-ഹോസ്റ്റ് ചെയ്ത പ്രവേശനത്തിനുള്ള നിർണ്ണായക തന്ത്രങ്ങൾ                                 | `docs/routing/DETERMINISTIC_ROUTING.md`         |
+| [സ്വയം ഹോസ്റ്റ് ചെയ്ത OpenAI എൻട്രി](docs/routing/SELF_HOSTED_OPENAI_ENTRY.md) | നിങ്ങളുടെ സ്വന്തം OpenAI-അനുയോജ്യമായ സെർവറുകളിലേക്ക് `/v1/chat/completions` റൂട്ട് ചെയ്യുക | `docs/routing/SELF_HOSTED_OPENAI_ENTRY.md`      |
+| [സാധുവായ ശൂന്യമായ തിരിവുകൾ](docs/routing/EMPTY_TURNS.md)                       | ദൃശ്യമായ ടെക്സ്റ്റ് ഇല്ലാതെ അസിസ്റ്റൻ്റ് തിരിയുന്നത് എങ്ങനെ സംരക്ഷിക്കപ്പെടുന്നു           | `docs/routing/EMPTY_TURNS.md`                   |
+| [ചാവോസ് മോഡ്](docs/guides/CHAOS-MODE.md)                                       | ഒരേസമയം നിരവധി ദാതാക്കൾക്ക് ഒരു ടാസ്ക് അയയ്ക്കുക                                           | `docs/guides/CHAOS-MODE.md`                     |
+| [ചിന്തിക്കുന്ന ബജറ്റ്](docs/guides/THINKING_BUDGET.md)                         | ദാതാക്കളിലേക്കുള്ള വഴിയിൽ ക്ലയൻ്റ് ചിന്തകളും ന്യായവാദ പാരാമീറ്ററുകളും മാറ്റിയെഴുതുക        | `docs/guides/THINKING_BUDGET.md`                |
+| [റെസിലൻസ് ഗൈഡ്](docs/architecture/RESILIENCE_GUIDE.md)                         | സർക്യൂട്ട് ബ്രേക്കർ, കണക്ഷൻ കൂൾഡൗൺ, മോഡൽ ലോക്കൗട്ട്                                        | `docs/architecture/RESILIENCE_GUIDE.md`         |
+| [അഡാപ്റ്റീവ് റൂട്ടിംഗ്](docs/architecture/ADAPTIVE_ROUTING.md)                 | റൂട്ടിംഗ് ഇവൻ്റുകൾ, ഗുണമേന്മയുള്ള ഫീഡ്ബാക്ക്, വിശദീകരണം                                    | `docs/architecture/ADAPTIVE_ROUTING.md`         |
+| [പ്രവേശന പാതകൾ](docs/architecture/admission-lanes.md)                          | രണ്ട് ലെയ്ൻ സംവിധാനങ്ങൾ, ഓരോന്നിനും ഏതൊക്കെ ഗേറ്റുകൾ, എവിടെയാണ് റിപ്പോർട്ട് ചെയ്യുന്നത്    | `docs/architecture/admission-lanes.md`          |
+| [റൂട്ടിംഗ് നയം](docs/OMNIROUTE_ROUTING_POLICY.md)                              | വിഹിതം, ആരോഗ്യം, ക്വാട്ട, ലേറ്റൻസി നിയമങ്ങൾ ബാധകമാകുന്ന ക്രമം                              | `docs/OMNIROUTE_ROUTING_POLICY.md`              |
+| [ദാതാവിൻ്റെ പരാജയം](docs/OMNIROUTE_PROVIDER_FAILOVER.md)                       | വീണ്ടും ശ്രമിക്കുന്നതിന് മുമ്പ് പരാജയങ്ങളെ തരംതിരിച്ചിരിക്കുന്നത് എങ്ങനെ                   | `docs/OMNIROUTE_PROVIDER_FAILOVER.md`           |
+| [അലോക്കേഷൻ ഹാൻഡ്ഓഫ്](docs/OMNIROUTE_ALLOCATION_HANDOFF.md)                     | അലോക്കേഷൻ വേഴ്സ് പ്രൊവൈഡർ ക്വാട്ട                                                          | `docs/OMNIROUTE_ALLOCATION_HANDOFF.md`          |
+
+<a id="docs-usage"></a>
+
+### ചെലവും ക്വാട്ടയും ട്രാക്ക് ചെയ്യണമെങ്കിൽ
+
+ചെലവ് കണക്കാക്കൽ, ക്വാട്ട ട്രാക്കിംഗ്, ടീം ബജറ്റുകൾ, ഫ്രീ-ടയർ ഡാറ്റ എന്നിവ. വിഷയം:** ഉപയോഗം, ക്വാട്ട, ചെലവ്** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                             | അത് എന്ത് ഉത്തരം നൽകുന്നു                                                                | ഫയൽ                                        |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------ |
+| [ചെലവും ചെലവും ട്രാക്കിംഗ്](docs/guides/COST_TRACKING.md)                | അഭ്യർത്ഥന ചെലവ് എങ്ങനെ കണക്കാക്കുകയും രേഖപ്പെടുത്തുകയും റിപ്പോർട്ടുചെയ്യുകയും ചെയ്യുന്നു | `docs/guides/COST_TRACKING.md`             |
+| [ഉപയോഗം, ക്വാട്ട & ചെലവ്](docs/guides/USAGE_QUOTA_GUIDE.md)              | ഉപയോഗ അനലിറ്റിക്സ്, ക്വാട്ട കാർഡുകൾ, ഓരോ കീ പരിധികളും                                    | `docs/guides/USAGE_QUOTA_GUIDE.md`         |
+| [ടീം ചെലവ് കേന്ദ്രങ്ങൾ](docs/guides/TEAM_COST_CENTERS.md)                | ഒരു ബില്ലിംഗ് ഉടമയ്ക്ക് കീഴിലുള്ള ഗ്രൂപ്പ് കീകൾ പങ്കിട്ട ബജറ്റുകൾ                        | `docs/guides/TEAM_COST_CENTERS.md`         |
+| [പ്രധാന ടെംപ്ലേറ്റുകൾ](docs/guides/KEY-TEMPLATES.md)                     | API കീ ക്രമീകരണങ്ങളുടെ പുനരുപയോഗിക്കാവുന്ന, രഹസ്യരഹിത സ്നാപ്പ്ഷോട്ടുകൾ                   | `docs/guides/KEY-TEMPLATES.md`             |
+| [കാഷെ ചെയ്ത ഇൻപുട്ട് റിപ്പോർട്ടിംഗ്](docs/ops/CACHED_INPUT_REPORTING.md) | കാഷെ-റീഡ് ടോക്കണുകൾ എങ്ങനെയാണ് അനലിറ്റിക്സിൽ കാണിക്കുന്നത്                               | `docs/ops/CACHED_INPUT_REPORTING.md`       |
+| [ക്വാട്ട ടെലിമെട്രി](docs/OMNIROUTE_QUOTA_TELEMETRY.md)                  | പ്രൊവൈഡർ ക്വാട്ട ടെലിമെട്രിയും അക്കൗണ്ടിംഗും                                             | `docs/OMNIROUTE_QUOTA_TELEMETRY.md`        |
+| [സൗജന്യ നിരകളും സൗജന്യ ടോക്കൺ ബജറ്റും](docs/reference/FREE_TIERS.md)     | പ്രസിദ്ധീകരിച്ച ക്വാട്ടയുള്ള 12 പൂളുകളും സൗജന്യ ആക്സസ് ഉള്ള 214 കാറ്റലോഗ് വരികളും        | `docs/reference/FREE_TIERS.md`             |
+| [സൗജന്യ ദാതാക്കളുടെ റാങ്കിംഗുകൾ](docs/guides/FREE_PROVIDER_RANKINGS.md)  | Arena ELO റാങ്കിംഗും സൗജന്യ ദാതാക്കൾക്കുള്ള യഥാർത്ഥ ട്രാഫിക് വിശ്വാസ്യതയും               | `docs/guides/FREE_PROVIDER_RANKINGS.md`    |
+| [നിരീക്ഷണവും നിരീക്ഷണവും](docs/ops/MONITORING_GUIDE.md)                  | ആരോഗ്യ എൻഡ് പോയിൻ്റുകൾ, മെട്രിക്സ്, ലോഗുകൾ                                               | `docs/ops/MONITORING_GUIDE.md`             |
+| [നിരീക്ഷണവും ചെലവ് നാവിഗേഷനും](docs/architecture/MONITORING_SECTIONS.md) | മോണിറ്ററിംഗ്, ചെലവ് പേജുകളുടെ ഘടന                                                        | `docs/architecture/MONITORING_SECTIONS.md` |
+
+<a id="docs-providers"></a>
+
+### നിങ്ങൾ ഒരു നിർദ്ദിഷ്ട ദാതാവിനെ ബന്ധിപ്പിക്കുകയാണെങ്കിൽ
+
+പ്രത്യേക സജ്ജീകരണമുള്ള ദാതാക്കൾക്കുള്ള പ്രൊവൈഡർ കാറ്റലോഗും ഗൈഡുകളും. വിഷയം:** ദാതാക്കൾ** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                                             | അത് എന്ത് ഉത്തരം നൽകുന്നു                                                               | ഫയൽ                                                |
+| ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| [ദാതാവിൻ്റെ റഫറൻസ്](docs/reference/PROVIDER_REFERENCE.md)                                | രജിസ്റ്റർ ചെയ്ത എല്ലാ ദാതാവിൻ്റെയും കാറ്റലോഗ് സൃഷ്ടിച്ചു                                | `docs/reference/PROVIDER_REFERENCE.md`             |
+| [ദാതാക്കളെ നീക്കം ചെയ്തു](docs/reference/REMOVED_PROVIDERS.md)                           | അവരുടെ ഓപ്പറേറ്ററുടെ അഭ്യർത്ഥന പ്രകാരം ദാതാക്കൾ നീക്കം ചെയ്തു                           | `docs/reference/REMOVED_PROVIDERS.md`              |
+| [ദാതാവിൻ്റെ പ്ലഗിൻ മാനിഫെസ്റ്റ്](docs/reference/PROVIDER_PLUGIN_MANIFEST.md)             | JSON-സേഫ് പ്രൊവൈഡർ ശേഷി മാനിഫെസ്റ്റ്                                                    | `docs/reference/PROVIDER_PLUGIN_MANIFEST.md`       |
+| [Claude കോഡ് (OAuth)](docs/providers/CLAUDE_CODE.md)                                     | ഒരു Claude കോഡ് അക്കൗണ്ട് വഴി Claude മോഡലുകൾ സേവിക്കുക                                  | `docs/providers/CLAUDE_CODE.md`                    |
+| [Claude കോഡ് സജ്ജീകരണ ടോക്കൺ](docs/providers/CLAUDE_CODE_SETUP_TOKEN.md)                 | ഒരു `claude setup-token` ടോക്കൺ ഉപയോഗിച്ച് ബന്ധിപ്പിക്കുക                               | `docs/providers/CLAUDE_CODE_SETUP_TOKEN.md`        |
+| [Claude വെബ്](docs/providers/CLAUDE_WEB.md)                                              | ഒരു ആധികാരികതയുള്ള claude.ai സെഷനിലൂടെ OpenAI- ഫോർമാറ്റ് അഭ്യർത്ഥനകൾ                    | `docs/providers/CLAUDE_WEB.md`                     |
+| [ChatGPT വെബ് (Codex)](docs/providers/CHATGPT_WEB.md)                                    | ബ്രിഡ്ജ് Codex പ്രതികരണങ്ങൾ ChatGPT വെബ് വഴി മാറുന്നു                                   | `docs/providers/CHATGPT_WEB.md`                    |
+| [ChatGPT വെബ് സ്ഥിരമായ CDP പ്രൊഫൈൽ](docs/guides/CHATGPT-WEB-PERSISTENT-CDP.md)           | സ്ഥിരമായ ഒരു Chrome DevTools പ്രൊഫൈൽ വീണ്ടും ഉപയോഗിക്കുക                                | `docs/guides/CHATGPT-WEB-PERSISTENT-CDP.md`        |
+| [Codex ആപ്പ്-സെർവർ ദാതാവ്](docs/guides/CODEX-APP-SERVER-PROVIDER.md)                     | OmniRoute വഴി OpenAI Codex ഉപയോഗിക്കുന്നതിനുള്ള രണ്ട് വഴികൾ                             | `docs/guides/CODEX-APP-SERVER-PROVIDER.md`         |
+| [GitHub Copilot](docs/providers/GITHUB-COPILOT.md)                                       | പരീക്ഷണാത്മക Copilot ദാതാവും അതിൻ്റെ നയ മുന്നറിയിപ്പുകളും                               | `docs/providers/GITHUB-COPILOT.md`                 |
+| [Microsoft 365 Copilot](docs/providers/COPILOT-M365.md)                                  | Microsoft 365 Copilot വഴിയുള്ള OpenAI- ഫോർമാറ്റ് അഭ്യർത്ഥനകൾ                            | `docs/providers/COPILOT-M365.md`                   |
+| [Cursor API കീയും CLI](docs/providers/CURSOR-API-KEY-AND-CLI.md)                         | ഒരു IDE സെഷൻ ഇല്ലാതെ OmniRoute പിന്നിൽ Cursor ഇടുക                                      | `docs/providers/CURSOR-API-KEY-AND-CLI.md`         |
+| [Docker ൽ Cursor](docs/providers/CURSOR-DOCKER.md)                                       | OmniRoute ഒരു കണ്ടെയ്നറിൽ പ്രവർത്തിക്കുമ്പോൾ Cursor പ്രൊവൈഡർ സജ്ജീകരണം                  | `docs/providers/CURSOR-DOCKER.md`                  |
+| [Cursor ഇമേജ് ജനറേഷൻ](docs/providers/CURSOR_IMAGE.md)                                    | `/v1/images/generations` ലെCursor പ്ലാൻ ചിത്രങ്ങൾ                                       | `docs/providers/CURSOR_IMAGE.md`                   |
+| [Zed ൽ Docker](docs/providers/ZED-DOCKER.md)                                             | OmniRoute ഒരു കണ്ടെയ്നറിൽ പ്രവർത്തിക്കുമ്പോൾ Zed അക്കൗണ്ട് ഇറക്കുമതി ചെയ്യുക            | `docs/providers/ZED-DOCKER.md`                     |
+| [Antigravity ഓൺബോർഡിംഗ്](docs/guides/ANTIGRAVITY-ONBOARDING.md)                          | Google One AI (Antigravity) അക്കൗണ്ടുകൾ ബന്ധിപ്പിക്കുക                                  | `docs/guides/ANTIGRAVITY-ONBOARDING.md`            |
+| [Kiro സജ്ജീകരണം](docs/guides/KIRO_SETUP.md)                                              | Kiro (AWS-ഹോസ്റ്റഡ് കോഡിംഗ് അസിസ്റ്റൻ്റ്) അക്കൗണ്ടുകൾ ചേർക്കുക                          | `docs/guides/KIRO_SETUP.md`                        |
+| [AgentRouter](docs/providers/AGENTROUTER.md)                                             | AgentRouter ആന്ത്രോപിക്-അനുയോജ്യമായ റിലേ സജ്ജീകരിക്കുക                                  | `docs/providers/AGENTROUTER.md`                    |
+| [Alibaba, Qwen കുടുംബങ്ങൾ](docs/providers/ALIBABA-QWEN-PROVIDER-FAMILIES.md)             | Alibaba, Qwen ദാതാക്കളുടെ കുടുംബങ്ങൾ എങ്ങനെ വിഭജിക്കപ്പെട്ടിരിക്കുന്നു                  | `docs/providers/ALIBABA-QWEN-PROVIDER-FAMILIES.md` |
+| [ChatPlayground](docs/providers/CHATPLAYGROUND.md)                                       | ChatPlayground's Azure, LMSYS, Perplexity എൻഡ്പോയിൻ്റുകളിലൂടെയുള്ള റൂട്ട്               | `docs/providers/CHATPLAYGROUND.md`                 |
+| [ഡെമോൺ റൂട്ട്](docs/providers/DEMON_ROUTE.md)                                            | ബാഹ്യമായി ഹോസ്റ്റ് ചെയ്ത OpenAI-അനുയോജ്യമായ ഗേറ്റ്വേ                                    | `docs/providers/DEMON_ROUTE.md`                    |
+| [MiniMax കോഡ്](docs/providers/MINIMAX_CODE.md)                                           | നിയന്ത്രിത MiniMax സബ്സ്ക്രിപ്ഷൻ ഗേറ്റ്വേയിലൂടെ റൂട്ട് ചാറ്റ് ചെയ്യുക                   | `docs/providers/MINIMAX_CODE.md`                   |
+| [പകർപ്പും സെറിബ്രിയവും](docs/providers/REPLICATE-CEREBRIUM.md)                           | ഫ്രീ-എൽഎൽഎം ഡയറക്ടറിയിൽ നിന്ന് ചാറ്റ് ദാതാക്കളെ ചേർത്തു                                 | `docs/providers/REPLICATE-CEREBRIUM.md`            |
+| [Grok OAuth മീഡിയ നിർമ്മിക്കുക](docs/providers/grok-cli-media.md)                        | ഒരു Grok ബിൽഡ് കണക്ഷനിലൂടെ ചിത്രങ്ങൾ, വീഡിയോ, സംഭാഷണം                                   | `docs/providers/grok-cli-media.md`                 |
+| [Grok ഇമേജ് ജനറേഷൻ](docs/guides/GROK_IMAGES.md)                                          | `/v1/images/generations` യിലെGrok ചിത്രങ്ങൾ                                             | `docs/guides/GROK_IMAGES.md`                       |
+| [ZCode ഇമേജ് ഇൻപുട്ട്](docs/ops/ZCODE_IMAGES.md)                                         | ZCode എക്സിക്യൂട്ടറിനുള്ള നേറ്റീവ് ഇമേജ് ബ്ലോക്കുകൾ                                     | `docs/ops/ZCODE_IMAGES.md`                         |
+| [Devin Claude പാലം](docs/DEVIN_CLAUDE_BRIDGE.md)                                         | OmniRoute ൻ്റെ Anthropic എൻഡ് പോയിൻ്റിലൂടെ യഥാർത്ഥ Claude കോഡ് റൺടൈം പ്രവർത്തിപ്പിക്കുക | `docs/DEVIN_CLAUDE_BRIDGE.md`                      |
+| [ഫാൽ നേറ്റീവ് APIs](docs/integrations/FAL_NATIVE.md)                                     | ഓപ്റ്റ്-ഇൻ ഫാൾ മൾട്ടിമോഡൽ മോഡൽ APIs                                                     | `docs/integrations/FAL_NATIVE.md`                  |
+| [ഇഷ്ടാനുസൃത JSON API നോഡുകൾ](docs/guides/CUSTOM_JSON_API.md)                             | OpenAI ഫോർമാറ്റ് സംസാരിക്കാത്ത JSON എൻഡ് പോയിൻ്റുകൾ ബന്ധിപ്പിക്കുക                      | `docs/guides/CUSTOM_JSON_API.md`                   |
+| [CSV അല്ലെങ്കിൽ JSON ൽ നിന്ന് ദാതാക്കളെ ഇറക്കുമതി ചെയ്യുക](docs/providers/CSV-IMPORT.md) | ഒരു ഫയലിൽ നിന്ന് നിരവധി API-കീ കണക്ഷനുകൾ സൃഷ്ടിക്കുക                                    | `docs/providers/CSV-IMPORT.md`                     |
+| [ബ്രൗസർ സെഷൻ സമന്വയ വിപുലീകരണം](docs/guides/SESSION-SYNC-EXTENSION.md)                   | വെബ് പ്രൊവൈഡർ സെഷനുകൾ സമന്വയത്തിൽ സൂക്ഷിക്കുക                                           | `docs/guides/SESSION-SYNC-EXTENSION.md`            |
+| [സെഷൻ സമന്വയ വിപുലീകരണ ഉറവിടം](contrib/session-sync/README.md)                           | സെഷൻ കുക്കികളെ സമന്വയിപ്പിക്കുന്ന Chrome വിപുലീകരണവും ലൂപ്പ്ബാക്ക് ബ്രിഡ്ജും            | `contrib/session-sync/README.md`                   |
+| [ഒരു ഇഷ്ടാനുസൃത മോഡൽ സാധൂകരിക്കുക](docs/guides/MODEL-VALIDATION.md)                      | ഒരു മോഡൽ ചേർക്കുന്നതിന് മുമ്പ്`omniroute models test-add`                               | `docs/guides/MODEL-VALIDATION.md`                  |
+
+<a id="docs-compression"></a>
+
+### നിങ്ങൾക്ക് ടോക്കണുകൾ സംരക്ഷിക്കാനോ സന്ദർഭം ചേർക്കാനോ താൽപ്പര്യമുണ്ടെങ്കിൽ
+
+പ്രോംപ്റ്റ് കംപ്രഷൻ എഞ്ചിനുകൾ, സന്ദർഭ ഉറവിടങ്ങൾ, സ്ഥിരമായ മെമ്മറി. വിഷയം:** കംപ്രഷൻ, സന്ദർഭം, മെമ്മറി** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                                  | അത് എന്ത് ഉത്തരം നൽകുന്നു                                                 | ഫയൽ                                              |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------ |
+| [കംപ്രഷൻ ഗൈഡ്](docs/compression/COMPRESSION_GUIDE.md)                         | മോഡുകൾ, ട്രിഗറുകൾ, സജീവമായ കംപ്രഷൻ പൈപ്പ്ലൈൻ                              | `docs/compression/COMPRESSION_GUIDE.md`          |
+| [കംപ്രഷൻ എഞ്ചിനുകൾ](docs/compression/COMPRESSION_ENGINES.md)                  | എഞ്ചിൻ കരാറുകൾ, അടുക്കിയ പൈപ്പ് ലൈനുകൾ, dashboard/API/MCP പ്രതലങ്ങൾ       | `docs/compression/COMPRESSION_ENGINES.md`        |
+| [RTK കംപ്രഷൻ](docs/compression/RTK_COMPRESSION.md)                            | കമാൻഡ്-ഔട്ട്പുട്ട് കംപ്രഷൻ, ഫിൽട്ടറുകൾ, റോ-ഔട്ട്പുട്ട് വീണ്ടെടുക്കൽ       | `docs/compression/RTK_COMPRESSION.md`            |
+| [കംപ്രഷൻ നിയമങ്ങളുടെ ഫോർമാറ്റ്](docs/compression/COMPRESSION_RULES_FORMAT.md) | കേവ്മാൻ, RTK എന്നിവയ്ക്കായുള്ള JSON റൂൾ-പാക്ക് സ്കീമകൾ                    | `docs/compression/COMPRESSION_RULES_FORMAT.md`   |
+| [കംപ്രഷൻ ഭാഷാ പായ്ക്കുകൾ](docs/compression/COMPRESSION_LANGUAGE_PACKS.md)     | ഭാഷ കണ്ടെത്തലും കേവ്മാൻ റൂൾ-പാക്ക് എഴുത്തും                               | `docs/compression/COMPRESSION_LANGUAGE_PACKS.md` |
+| [കംപ്രഷൻ വിപുലീകരിക്കുന്നു](docs/compression/EXTENDING_COMPRESSION.md)        | പൈപ്പ് ലൈനിലേക്ക് നിങ്ങളുടെ സ്വന്തം എഞ്ചിൻ അല്ലെങ്കിൽ സ്റ്റെപ്പ് ചേർക്കുക | `docs/compression/EXTENDING_COMPRESSION.md`      |
+| [നിയുക്ത സന്ദർഭ എഡിറ്റിംഗ്](docs/compression/CONTEXT_EDITING.md)              | ക്ലോഡ്-ഒൺലി കോൺടെക്സ്റ്റ് മാനേജ്മെൻ്റ് Anthropic ലേക്ക് നിയോഗിക്കപ്പെട്ടു | `docs/compression/CONTEXT_EDITING.md`            |
+| [മെമ്മറി](docs/frameworks/MEMORY.md)                                          | FTS5, വെക്ടറുകൾ എന്നിവയ്ക്കൊപ്പം സ്ഥിരമായ സംഭാഷണ മെമ്മറി                  | `docs/frameworks/MEMORY.md`                      |
+| [പ്രാദേശിക കോർപ്പസ് സന്ദർഭം](docs/frameworks/LOCAL_CORPUS_CONTEXT.md)         | ടെക്സ്റ്റ് ഫയലുകളുടെ ഒരു അംഗീകൃത ഡയറക്ടറി സന്ദർഭമായി തുറന്നുകാട്ടുക       | `docs/frameworks/LOCAL_CORPUS_CONTEXT.md`        |
+| [Notion സന്ദർഭം](docs/frameworks/NOTION_CONTEXT.md)                           | ഒരു സന്ദർഭ ഉറവിടമായി ഒരു Notion വർക്ക്സ്പെയ്സ് ഉപയോഗിക്കുക                | `docs/frameworks/NOTION_CONTEXT.md`              |
+| [Obsidian സന്ദർഭം](docs/frameworks/OBSIDIAN_CONTEXT.md)                       | ഒരു സന്ദർഭ ഉറവിടമായി ഒരു Obsidian നിലവറ ഉപയോഗിക്കുക                       | `docs/frameworks/OBSIDIAN_CONTEXT.md`            |
+
+<a id="docs-cli"></a>
+
+### നിങ്ങൾ ഒരു കോഡിംഗ് ടൂൾ അല്ലെങ്കിൽ omniroute CLI ഉപയോഗിക്കുകയാണെങ്കിൽ
+
+കോഡിംഗ് CLIs, എഡിറ്ററുകൾ കോൺഫിഗർ ചെയ്യുക, കൂടാതെ `omniroute` കമാൻഡ് ഉപയോഗിക്കുക. വിഷയം:**CLI ടൂളുകളും കോഡിംഗ് ഏജൻ്റുമാരും** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                            | അത് എന്ത് ഉത്തരം നൽകുന്നു                                                      | ഫയൽ                                           |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- |
+| [CLI സംയോജനങ്ങൾ](docs/guides/CLI-INTEGRATIONS.md)                       | പിന്തുണയ്ക്കുന്ന ഓരോ ടൂളിനും`setup-*`, `configure`, `run`                      | `docs/guides/CLI-INTEGRATIONS.md`             |
+| [CLI ടൂൾസ് റഫറൻസ്](docs/reference/CLI-TOOLS.md)                         | CLIs, എഡിറ്റർമാർ എന്നിവ കോഡിംഗ് ചെയ്യുന്നതിനുള്ള ഓരോ ടൂൾ സജ്ജീകരണ കുറിപ്പുകൾ   | `docs/reference/CLI-TOOLS.md`                 |
+| [Claude കോഡ് കോൺഫിഗറേഷൻ](docs/guides/CLAUDE-CODE-CONFIGURATION.md)      | ഒരു ലോക്കൽ അല്ലെങ്കിൽ റിമോട്ട് OmniRoute ൽ Claude കോഡ് പോയിൻ്റ് ചെയ്യുക        | `docs/guides/CLAUDE-CODE-CONFIGURATION.md`    |
+| [Codex CLI കോൺഫിഗറേഷൻ](docs/guides/CODEX-CLI-CONFIGURATION.md)          | Codex CLI അതിൻ്റെ ബാക്കെൻഡായി OmniRoute ഉപയോഗിച്ച് ഉപയോഗിക്കുക                 | `docs/guides/CODEX-CLI-CONFIGURATION.md`      |
+| [OpenCode സംയോജനം](docs/frameworks/OPENCODE.md)                         | OpenCode എങ്ങനെയാണ് OmniRoute ൻ്റെ കാറ്റലോഗ് വായിക്കുന്നത്                     | `docs/frameworks/OPENCODE.md`                 |
+| [OpenCode v2 പ്ലഗിൻ](docs/guides/OPENCODE-V2-PLUGIN.md)                 | `@omniroute/opencode-plugin-v2` ഇൻസ്റ്റാൾ ചെയ്ത് കോൺഫിഗർ ചെയ്യുക               | `docs/guides/OPENCODE-V2-PLUGIN.md`           |
+| [opencode-plugin-v2 പാക്കേജ്](@omniroute/opencode-plugin-v2/README.md)  | OpenCode v2 പ്ലഗിനിനായുള്ള പാക്കേജ് README                                     | `@omniroute/opencode-plugin-v2/README.md`     |
+| [ഓപ്പൺകോഡ്-പ്ലഗിൻ പാക്കേജ്](@omniroute/opencode-plugin/README.md)       | OpenCode v1 പ്ലഗിനിനായുള്ള പാക്കേജ് README                                     | `@omniroute/opencode-plugin/README.md`        |
+| [opencode-provider പാക്കേജ്](@omniroute/opencode-provider/README.md)    | OpenCode യ്ക്കുള്ള ലെഗസി കോൺഫിഗറേഷൻ ജനറേറ്റർ                                   | `@omniroute/opencode-provider/README.md`      |
+| [OpenCode സെഷൻ ഐഡൻ്റിറ്റി](docs/reference/OPENCODE-SESSION-IDENTITY.md) | OpenCode സംഭാഷണ ഐഡികൾ എങ്ങനെ തിരിവുകളിൽ സൂക്ഷിക്കുന്നു                         | `docs/reference/OPENCODE-SESSION-IDENTITY.md` |
+| [VS കോഡ് Copilot ചാറ്റ് (OmniCopilot)](docs/guides/VSCODE-COPILOT.md)   | VS കോഡിൻ്റെ നേറ്റീവ് Copilot ചാറ്റ് പിക്കറിലെOmniRoute മോഡലുകൾ                 | `docs/guides/VSCODE-COPILOT.md`               |
+| [CLI കമ്പാനിയൻ](docs/guides/CLI-COMPANION.md)                           | CLI യ്ക്കുള്ള കോപ്പി-മാത്രം ഡാഷ്ബോർഡ് കമ്പാനിയൻ                                | `docs/guides/CLI-COMPANION.md`                |
+| [CLI മോഡൽ കാറ്റലോഗ്](docs/guides/CLI-MANUAL-MODELS.md)                  | കാറ്റലോഗ് വായിച്ച് CLI യിൽ നിന്ന് മാനുവൽ മോഡൽ മെറ്റാഡാറ്റ മാനേജ് ചെയ്യുക       | `docs/guides/CLI-MANUAL-MODELS.md`            |
+| [CLI ലോഞ്ച് കരാറുകൾ](docs/guides/CLI-LAUNCH-CONTRACTS.md)               | CLI ഐഡികൾ, ലോഞ്ച്, കോൺഫിഗറേഷൻ എന്നിവയ്ക്കായി പങ്കിട്ട മാനിഫെസ്റ്റ്             | `docs/guides/CLI-LAUNCH-CONTRACTS.md`         |
+| [CLI പുക പരിശോധനകൾ](docs/guides/CLI-SMOKE-TESTS.md)                     | ഇൻസ്റ്റാൾ ചെയ്ത CLIs കോഡിംഗിനുള്ള ഒറ്റപ്പെട്ട ഹാർനെസ്                          | `docs/guides/CLI-SMOKE-TESTS.md`              |
+| [CLI കോൺഫിഗറേഷൻ പ്രിവ്യൂകൾ](docs/security/CLI-CONFIGURATION.md)         | എങ്ങനെ കോൺഫിഗറേഷൻ പ്രിവ്യൂകൾക്കും എഴുത്തുകൾക്കും അംഗീകാരം നൽകുന്നു             | `docs/security/CLI-CONFIGURATION.md`          |
+| [CLI മെഷീൻ-ഐഡി ടോക്കൺ](docs/security/CLI_TOKEN.md)                      | CLI കമാൻഡുകൾ എങ്ങനെയാണ് പ്രാദേശിക മാനേജ്മെൻ്റ് API ലേക്ക് പ്രാമാണീകരിക്കുന്നത് | `docs/security/CLI_TOKEN.md`                  |
+
+<a id="docs-api"></a>
+
+### നിങ്ങൾ API എതിരെയാണ് നിർമ്മിക്കുന്നതെങ്കിൽ
+
+HTTP API, OpenAPI, MCP, A2A, ACP, ക്ലൗഡ് ഏജൻ്റുകൾ. വിഷയം:**APIs, ഏജൻ്റ് പ്രോട്ടോക്കോളുകൾ** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                             | അത് എന്ത് ഉത്തരം നൽകുന്നു                                                       | ഫയൽ                                        |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------- | ------------------------------------------ |
+| [API റഫറൻസ്](docs/reference/API_REFERENCE.md)                            | പൊതു `/v1` ഉപരിതലവും ഏറ്റവും കൂടുതൽ ഉപയോഗിക്കുന്ന മാനേജ്മെൻ്റ് എൻഡ്പോയിൻ്റുകളും | `docs/reference/API_REFERENCE.md`          |
+| [OpenAPI സ്പെസിഫിക്കേഷൻ](docs/openapi.yaml)                              | മെഷീൻ-റീഡബിൾ OpenAPI 3.1 സ്പെസിഫിക്കേഷൻ                                         | `docs/openapi.yaml`                        |
+| [OpenAI അനുയോജ്യത](docs/reference/OPENAI_COMPATIBILITY.md)               | `/v1` ൽ OpenAI-ആകൃതിയിലുള്ള ക്ലയൻ്റ് API                                        | `docs/reference/OPENAI_COMPATIBILITY.md`   |
+| [ഉൾച്ചേർക്കൽ റൺബുക്ക്](docs/reference/EMBEDDINGS.md)                     | `POST /v1/embeddings` ഓപ്പറേറ്റർ കുറിപ്പുകൾ                                     | `docs/reference/EMBEDDINGS.md`             |
+| [ക്വിക്ക്സ്റ്റാർട്ട് കോഡ് ഉദാഹരണങ്ങൾ](examples/quickstart/README.md)     | പൈത്തൺ, Node.js, PHP, cURL സ്ക്രിപ്റ്റുകൾ പകർത്തി ഒട്ടിക്കുക                    | `examples/quickstart/README.md`            |
+| [റിലേ ബാക്കെൻഡ് സ്ട്രാറ്റജി](docs/reference/RELAY_BACKEND_STRATEGY.md)   | `/api/v1/relay/chat/completions` യ്ക്കുള്ള മൂന്ന് റിലേ മോഡുകൾ                   | `docs/reference/RELAY_BACKEND_STRATEGY.md` |
+| [റിലേ ട്രബിൾഷൂട്ടിംഗ്](docs/reference/RELAY_TROUBLESHOOTING.md)          | Vercel, Deno, Cloudflare റിലേ പ്രശ്നങ്ങൾ                                        | `docs/reference/RELAY_TROUBLESHOOTING.md`  |
+| [MCP സെർവർ ഗൈഡ്](docs/frameworks/MCP-SERVER.md)                          | ഇൻസ്റ്റാളേഷൻ, ട്രാൻസ്പോർട്ടുകൾ, 110-ടൂൾ റഫറൻസ്                                  | `docs/frameworks/MCP-SERVER.md`            |
+| [MCP സെർവർ README](open-sse/mcp-server/README.md)                        | 110 MCP ടൂളുകൾ, IDE കോൺഫിഗറുകൾ, Python/TS/Go ക്ലയൻ്റുകൾ                         | `open-sse/mcp-server/README.md`            |
+| [MarkItDown MCP](docs/integrations/MARKITDOWN_MCP.md)                    | ഡോക്യുമെൻ്റ്-ടു-മാർക്ക്ഡൗൺ MCP സെർവർ ഏകീകരണം                                    | `docs/integrations/MARKITDOWN_MCP.md`      |
+| [സംയോജന സൂചിക](docs/integrations/README.md)                              | OmniRoute യുമായി സംയോജിപ്പിക്കുന്ന ബാഹ്യ സേവനങ്ങളും ഉപകരണങ്ങളും                 | `docs/integrations/README.md`              |
+| [A2A സെർവർ ഗൈഡ്](docs/frameworks/A2A-SERVER.md)                          | ഏജൻ്റ് കാർഡ്, ടാസ്ക്കുകൾ, കഴിവുകൾ, സ്ട്രീമിംഗ്                                  | `docs/frameworks/A2A-SERVER.md`            |
+| [A2A സെർവർ README](src/lib/a2a/README.md)                                | JSON-RPC 2.0 പ്രോട്ടോക്കോൾ, കഴിവുകൾ, ടാസ്ക് മാനേജ്മെൻ്റ്                        | `src/lib/a2a/README.md`                    |
+| [ഏജൻ്റ് പ്രോട്ടോക്കോളുകൾ ഗൈഡ്](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md) | A2A, ACP അല്ലെങ്കിൽ ക്ലൗഡ് ഏജൻ്റുകൾ എപ്പോൾ ഉപയോഗിക്കണം                          | `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` |
+| [ACP](docs/frameworks/ACP.md)                                            | ഏജൻ്റ് ക്ലയൻ്റ് പ്രോട്ടോക്കോൾ രജിസ്ട്രിയും CLI ലോഞ്ചറുകളും                      | `docs/frameworks/ACP.md`                   |
+| [ക്ലൗഡ് ഏജൻ്റുകൾ](docs/frameworks/CLOUD_AGENT.md)                        | Codex ക്ലൗഡ്, Cursor, Devin, Jules എന്നിവ ഓർക്കസ്ട്രേറ്റ് ചെയ്യുക               | `docs/frameworks/CLOUD_AGENT.md`           |
+| [AgentBridge](docs/frameworks/AGENTBRIDGE.md)                            | IDE ഏജൻ്റ് HTTPS ട്രാഫിക് OmniRoute വഴി തിരിച്ചുവിടുക                           | `docs/frameworks/AGENTBRIDGE.md`           |
+
+<a id="docs-extend"></a>
+
+### നിങ്ങൾക്ക് OmniRoute നീട്ടാനോ അതിൻ്റെ ട്രാഫിക് കാണാനോ താൽപ്പര്യമുണ്ടെങ്കിൽ
+
+പ്ലഗിനുകൾ, കഴിവുകൾ, ഉൾച്ചേർത്ത സേവനങ്ങൾ, വെബ്ഹൂക്കുകൾ, കയറ്റുമതി, സ്റ്റുഡിയോകൾ. വിഷയം:** നീട്ടി നിരീക്ഷിക്കുക** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                      | അത് എന്ത് ഉത്തരം നൽകുന്നു                                                     | ഫയൽ                                      |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------- |
+| [പ്ലഗിൻ മാർക്കറ്റ്പ്ലേസ്](docs/frameworks/PLUGIN_MARKETPLACE.md)  | സ്വയം ഉൾക്കൊള്ളുന്ന സെർവർ പ്ലഗിന്നുകളും അവ എങ്ങനെ ഇൻസ്റ്റാൾ ചെയ്യാം           | `docs/frameworks/PLUGIN_MARKETPLACE.md`  |
+| [CLI പ്ലഗിൻ സിസ്റ്റം](docs/frameworks/PLUGINS.md)                 | `omniroute-cmd-*` പ്ലഗിനുകൾ ഉപയോഗിച്ച് `omniroute` CLI വിപുലീകരിക്കുക         | `docs/frameworks/PLUGINS.md`             |
+| [പ്ലഗിൻ SDK](docs/frameworks/PLUGIN_SDK.md)                       | പ്ലഗിൻ API റഫറൻസ്                                                             | `docs/frameworks/PLUGIN_SDK.md`          |
+| [ലാംഗ്ഫ്യൂസ് പ്ലഗിൻ ഉദാഹരണം](examples/plugins/langfuse/README.md) | റൂട്ട് ചെയ്ത ഓരോ പൂർത്തീകരണത്തിനും ലാങ്ഫ്യൂസ് ട്രെയ്സുകൾ എമിറ്റ് ചെയ്യുക      | `examples/plugins/langfuse/README.md`    |
+| [നൈപുണ്യ ചട്ടക്കൂട്](docs/frameworks/SKILLS.md)                   | മോഡലുകൾക്കും ഓപ്പറേറ്റർമാർക്കും വീണ്ടും ഉപയോഗിക്കാവുന്ന കഴിവുകൾ               | `docs/frameworks/SKILLS.md`              |
+| [ഏജൻ്റ് സ്കിൽ കാറ്റലോഗ്](docs/frameworks/AGENT-SKILLS.md)         | OmniRoute ഉപയോഗിക്കാൻ ഏജൻ്റുമാരെ പഠിപ്പിക്കുന്ന SKILL.md ഫയലുകൾ               | `docs/frameworks/AGENT-SKILLS.md`        |
+| [ഉൾച്ചേർത്ത സേവനങ്ങൾ](docs/frameworks/EMBEDDED-SERVICES.md)       | OmniRoute ഇൻസ്റ്റാൾ ചെയ്യുകയും മേൽനോട്ടം വഹിക്കുകയും ചെയ്യുന്ന സൈഡ്കാർ ടൂളുകൾ | `docs/frameworks/EMBEDDED-SERVICES.md`   |
+| [റൂട്ടർ ബാക്കെൻഡുകൾ](docs/architecture/ROUTER_BACKENDS.md)        | നേറ്റീവ്, ബിഫ്രോസ്റ്റ്, CLIProxy, മറ്റ് ബാക്ക്എൻഡുകൾ എന്നിവയ്ക്കുള്ള കരാർ     | `docs/architecture/ROUTER_BACKENDS.md`   |
+| [വെബ്ബുക്കുകൾ](docs/frameworks/WEBHOOKS.md)                       | പ്ലാറ്റ്ഫോം ഇവൻ്റുകളിൽ HTTP webhooks                                          | `docs/frameworks/WEBHOOKS.md`            |
+| [ലോഗ് കയറ്റുമതി](docs/frameworks/LOG-EXPORT.md)                   | അനലിറ്റിക്സ് സ്റ്റോറുകളിലേക്ക് കോൾ ലോഗുകളുടെ തുടർച്ചയായ കയറ്റുമതി             | `docs/frameworks/LOG-EXPORT.md`          |
+| [എവൽസ്](docs/frameworks/EVALS.md)                                 | ബെഞ്ച്മാർക്ക് റൂട്ടിംഗും മോഡൽ ഗുണനിലവാരവും                                    | `docs/frameworks/EVALS.md`               |
+| [ട്രാഫിക് ഇൻസ്പെക്ടർ](docs/frameworks/TRAFFIC_INSPECTOR.md)       | LLM-അറിയുന്ന HTTPS ട്രാഫിക് ഡീബഗ്ഗർ                                           | `docs/frameworks/TRAFFIC_INSPECTOR.md`   |
+| [കളിസ്ഥലം സ്റ്റുഡിയോ](docs/frameworks/PLAYGROUND_STUDIO.md)       | ഡാഷ്ബോർഡ് കളിസ്ഥലം                                                            | `docs/frameworks/PLAYGROUND_STUDIO.md`   |
+| [തിരയൽ ടൂൾസ് സ്റ്റുഡിയോ](docs/frameworks/SEARCH_TOOLS_STUDIO.md)  | ഒരു സ്റ്റുഡിയോയിൽ വെബ് തിരയലും ദാതാക്കളെ ലഭ്യമാക്കലും                         | `docs/frameworks/SEARCH_TOOLS_STUDIO.md` |
+| [റഡാർ](docs/frameworks/RADAR.md)                                  | സൈൻ ചെയ്ത സൗജന്യ മോഡൽ കാറ്റലോഗ് ഓവർലേ ഓപ്റ്റ്-ഇൻ ചെയ്യുക                      | `docs/frameworks/RADAR.md`               |
+| [ഗാമിഫിക്കേഷൻ](docs/frameworks/GAMIFICATION.md)                   | പ്രാദേശിക XP, സ്ട്രീക്കുകൾ, ലീഡർബോർഡുകൾ                                       | `docs/frameworks/GAMIFICATION.md`        |
+
+<a id="docs-network"></a>
+
+### നിങ്ങൾ പ്രോക്സികൾ വഴി അപ്സ്ട്രീം ട്രാഫിക്ക് റൂട്ട് ചെയ്യുകയാണെങ്കിൽ
+
+ഔട്ട്ബൗണ്ട് പ്രോക്സികൾ, പ്രോക്സി പൂളുകൾ, എഗ്രസ് കൺട്രോളുകൾ. വിഷയം:** പ്രോക്സികളും നെറ്റ്വർക്കും** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                              | അത് എന്ത് ഉത്തരം നൽകുന്നു                                        | ഫയൽ                                  |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------ |
+| [പ്രോക്സി ഗൈഡ്](docs/ops/PROXY_GUIDE.md)                                  | അപ്സ്ട്രീം ട്രാഫിക്കിനായിHTTP, HTTPS, SOCKS5 പ്രോക്സികൾ          | `docs/ops/PROXY_GUIDE.md`            |
+| [ബൾക്ക് പ്രോക്സി ഇറക്കുമതി എന്ന് പേരിട്ടു](docs/ops/PROXY_BULK_IMPORT.md) | ഒരേസമയം നിരവധി പേരുള്ള പ്രോക്സികൾ ഒട്ടിക്കുക                     | `docs/ops/PROXY_BULK_IMPORT.md`      |
+| [പ്രോക്സി പേലോഡ് ട്രാഫിക്](docs/ops/PROXY_PAYLOAD_TRAFFIC.md)             | ഓരോ പ്രോക്സിയും അപ്ലോഡ് ചെയ്ത് പേലോഡ് കൗണ്ടറുകൾ ഡൗൺലോഡ് ചെയ്യുക  | `docs/ops/PROXY_PAYLOAD_TRAFFIC.md`  |
+| [പ്രാദേശിക പ്രോക്സി കോർ കോൺഫിഗറേഷൻ](docs/routing/PROXY_CORE_CONFIG.md)    | ഒരു സബ്സ്ക്രിപ്ഷനിൽ നിന്ന് ഒരു ലോക്കൽ കോർ കോൺഫിഗറേഷൻ സൃഷ്ടിക്കുക | `docs/routing/PROXY_CORE_CONFIG.md`  |
+| [സൗജന്യ പ്രോക്സികൾ API](docs/reference/FREE_PROXIES_API.md)               | ക്യൂറേറ്റഡ് ഫ്രീ പ്രോക്സി പൂളും അതിൻ്റെ API                      | `docs/reference/FREE_PROXIES_API.md` |
+| [Egress IP കുടുംബ നയം](docs/security/EGRESS_POLICY.md)                    | ഓരോ പ്രോക്സിയിലും IPv4 അല്ലെങ്കിൽ IPv6 നിർബന്ധിക്കുക             | `docs/security/EGRESS_POLICY.md`     |
+
+<a id="docs-security"></a>
+
+### നിങ്ങൾ സുരക്ഷ അവലോകനം ചെയ്യുകയാണെങ്കിൽ
+
+പ്രാമാണീകരണം, ഗാർഡ്റെയിലുകൾ, കാഠിന്യം, വിതരണ ശൃംഖല. വിഷയം:** സുരക്ഷയും അനുസരണവും** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                             | അത് എന്ത് ഉത്തരം നൽകുന്നു                                                 | ഫയൽ                                       |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ----------------------------------------- |
+| [സുരക്ഷാ നയം](SECURITY.md)                                               | ദുർബലതാ റിപ്പോർട്ടിംഗും പിന്തുണയ്ക്കുന്ന പതിപ്പുകളും                      | `SECURITY.md`                             |
+| [ഗാർഡ്രെയിലുകൾ](docs/security/GUARDRAILS.md)                             | PII, പ്രോംപ്റ്റ്-ഇഞ്ചക്ഷൻ, മോഡാലിറ്റി ഗാർഡ്റെയിലുകൾ                       | `docs/security/GUARDRAILS.md`             |
+| [അനുമാനത്തിൻ്റെ ആധികാരിക ഭാവം](docs/security/INFERENCE_AUTH_POSTURE.md)  | `/v1/models`, അനുമാന എൻഡ്പോയിൻ്റുകൾ എന്നിവ എങ്ങനെ ഗേറ്റ് ചെയ്യപ്പെടുന്നു  | `docs/security/INFERENCE_AUTH_POSTURE.md` |
+| [അംഗീകാര ഗൈഡ്](docs/architecture/AUTHZ_GUIDE.md)                         | റൂട്ട്-അറിയൽ, പരാജയം-അടച്ച അംഗീകാര പൈപ്പ്ലൈൻ                              | `docs/architecture/AUTHZ_GUIDE.md`        |
+| [റൂട്ട് ഗാർഡ് നിരകൾ](docs/security/ROUTE_GUARD_TIERS.md)                 | മാനേജ്മെൻ്റ് റൂട്ടുകൾക്കായുള്ള മൂന്ന് സംരക്ഷണ ശ്രേണികൾ                    | `docs/security/ROUTE_GUARD_TIERS.md`      |
+| [എൻട്രാ ID SSO](docs/security/ENTRA_SSO.md)                              | ക്ലയൻ്റ് API നുള്ള Microsoft Entra ID ടോക്കണുകൾ                           | `docs/security/ENTRA_SSO.md`              |
+| [CORS](docs/security/CORS.md)                                            | ഏത് ബ്രൗസർ ഉത്ഭവമാണ് പ്രതികരണങ്ങൾ വായിക്കാൻ കഴിയുക                        | `docs/security/CORS.md`                   |
+| [പാലിക്കലും ഓഡിറ്റും](docs/security/COMPLIANCE.md)                       | അഡ്മിനിസ്ട്രേറ്റീവ്, പ്രൊവൈഡർ പ്രവർത്തനങ്ങൾക്കുള്ള ഓഡിറ്റ് റെക്കോർഡുകൾ    | `docs/security/COMPLIANCE.md`             |
+| [സ്റ്റെൽത്ത് ഗൈഡ്](docs/security/STEALTH_GUIDE.md)                       | TLS, ഹെഡർ ഫിംഗർപ്രിൻ്റ് കൈകാര്യം ചെയ്യൽ                                   | `docs/security/STEALTH_GUIDE.md`          |
+| [MITM TPROXY ഡീക്രിപ്റ്റ് ചെയ്യുക](docs/security/MITM-TPROXY-DECRYPT.md) | പ്രോക്സി ക്രമീകരണങ്ങൾ അവഗണിക്കുന്ന CLIs യ്ക്കുള്ള സുതാര്യമായ ക്യാപ്ചർ     | `docs/security/MITM-TPROXY-DECRYPT.md`    |
+| [കണ്ടെത്തൽ നിരോധിക്കുക](docs/security/BAN_DETECTION.md)                  | അപ്സ്ട്രീം പിശകുകളിൽ നിന്ന് അക്കൗണ്ട് നിരോധനങ്ങൾ കണ്ടെത്തുക               | `docs/security/BAN_DETECTION.md`          |
+| [AgentRouter WAF](docs/security/AGENTROUTER_WAF.md)                      | അപ്സ്ട്രീമിലെ ഏജൻ്റ്റൂട്ടറിലെ കീവേഡ് അടിസ്ഥാനമാക്കിയുള്ള ഉള്ളടക്ക ഫിൽട്ടർ | `docs/security/AGENTROUTER_WAF.md`        |
+| [അണുവിമുക്തമാക്കൽ പിശക്](docs/security/ERROR_SANITIZATION.md)            | പ്രതികരണങ്ങളിൽ നിന്ന് സ്റ്റാക്ക് ട്രെയ്സുകൾ സൂക്ഷിക്കുക                   | `docs/security/ERROR_SANITIZATION.md`     |
+| [പൊതു യോഗ്യതാപത്രങ്ങൾ](docs/security/PUBLIC_CREDS.md)                    | പൊതു അപ്സ്ട്രീം OAuth മൂല്യങ്ങൾ എങ്ങനെയാണ് ഉൾച്ചേർത്തിരിക്കുന്നത്         | `docs/security/PUBLIC_CREDS.md`           |
+| [സപ്ലൈ ചെയിൻ](docs/security/SUPPLY_CHAIN.md)                             | npm, Docker എന്നിവയ്ക്കുള്ള പ്രോവൻസും ഇൻ്റഗ്രിറ്റി ഗേറ്റുകളും             | `docs/security/SUPPLY_CHAIN.md`           |
+| [Socket.dev കണ്ടെത്തലുകൾ](docs/security/SOCKET_DEV_FINDINGS.md)          | വിതരണ ശൃംഖല കണ്ടെത്തലുകൾക്കായി മെയിൻറനർ സാക്ഷ്യപ്പെടുത്തൽ                 | `docs/security/SOCKET_DEV_FINDINGS.md`    |
+| [LTS സുരക്ഷാ അടിസ്ഥാനം](docs/security/LTS_SECURITY_BASELINE.md)          | v3.9.x LTS ലൈനിനുള്ള സുരക്ഷാ തയ്യാറെടുപ്പ്                                | `docs/security/LTS_SECURITY_BASELINE.md`  |
+
+<a id="docs-internals"></a>
+
+### നിങ്ങൾക്ക് കോഡ് മനസിലാക്കണമെങ്കിൽ
+
+സിസ്റ്റം എങ്ങനെ സംയോജിപ്പിച്ചിരിക്കുന്നു, അത് എങ്ങനെ മാറ്റാം. വിഷയം:** വാസ്തുവിദ്യയും ആന്തരികവും** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                                   | അത് എന്ത് ഉത്തരം നൽകുന്നു                                  | ഫയൽ                                                 |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------- | --------------------------------------------------- |
+| [വാസ്തുവിദ്യ](docs/architecture/ARCHITECTURE.md)                               | സിസ്റ്റം ആർക്കിടെക്ചർ, ഡാറ്റ ഫ്ലോ, ഇൻ്റേണലുകൾ              | `docs/architecture/ARCHITECTURE.md`                 |
+| [കോഡ്ബേസ് ഡോക്യുമെൻ്റേഷൻ](docs/architecture/CODEBASE_DOCUMENTATION.md)         | റിപ്പോസിറ്ററിയിൽ നിലനിൽക്കുന്നതിൻ്റെ വഴിത്തിരിവ്           | `docs/architecture/CODEBASE_DOCUMENTATION.md`       |
+| [റിപ്പോസിറ്ററി മാപ്പ്](docs/architecture/REPOSITORY_MAP.md)                    | കോഡിൻ്റെ ഓരോ ഭാഗവും താമസിക്കുന്നിടത്ത്                     | `docs/architecture/REPOSITORY_MAP.md`               |
+| [open-sse വാസ്തുവിദ്യ](docs/frameworks/OPEN_SSE_ARCHITECTURE.md)               | സ്ട്രീമിംഗ് എഞ്ചിൻ വർക്ക്സ്പേസ്                            | `docs/frameworks/OPEN_SSE_ARCHITECTURE.md`          |
+| [പരിഷ്ക്കരണ സാഹചര്യങ്ങൾ](docs/architecture/MODIFICATION_SCENARIOS.md)          | സാധാരണ മാറ്റങ്ങൾക്കുള്ള ഘട്ടം ഘട്ടമായുള്ള പാചകക്കുറിപ്പുകൾ | `docs/architecture/MODIFICATION_SCENARIOS.md`       |
+| [ഡിസൈൻ സിസ്റ്റം](docs/architecture/DESIGN_SYSTEM.md)                           | വിഷ്വൽ ഐഡൻ്റിറ്റിയും വെണ്ടർ ചെയ്ത UI കിറ്റും               | `docs/architecture/DESIGN_SYSTEM.md`                |
+| [പെർസിസ്റ്റൻസ് ബൗണ്ടറി ADR](docs/architecture/persistence-backend-boundary.md) | `src/lib/db/` പിന്നിൽ പ്ലഗ്ഗബിൾ പെർസിസ്റ്റൻസ്              | `docs/architecture/persistence-backend-boundary.md` |
+| [ക്ലസ്റ്റർ തീരുമാനങ്ങൾ](docs/architecture/cluster-decisions.md)                | ഓപ്ഷണൽ സൈഡ്കാർ പ്രൊഫൈലുകൾക്കുള്ള നിർദ്ദേശം                 | `docs/architecture/cluster-decisions.md`            |
+| [OmniRoute vs ഇതരമാർഗങ്ങൾ](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)       | മറ്റ് ഓപ്പൺ സോഴ്സ് റൂട്ടറുകളുമായുള്ള ഫീച്ചർ താരതമ്യം       | `docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`      |
+| [ഡയഗ്രമുകൾ](docs/diagrams/README.md)                                           | മെർമെയ്ഡ് ഉറവിടങ്ങളും കയറ്റുമതി ചെയ്ത SVGs                 | `docs/diagrams/README.md`                           |
+
+<a id="docs-project"></a>
+
+### നിങ്ങൾ സംഭാവന ചെയ്യാൻ ആഗ്രഹിക്കുന്നുവെങ്കിൽ
+
+പ്രൊജക്റ്റിലേക്ക് ജോലി എങ്ങനെ എത്തുന്നു, റിലീസുകൾ എങ്ങനെ വെട്ടിക്കുറയ്ക്കുന്നു. വിഷയം:** സംഭാവന, ഗുണനിലവാരം, റിലീസുകൾ** .
+
+| <img width="2000" height="0" alt=""> പ്രമാണം                            | അത് എന്ത് ഉത്തരം നൽകുന്നു                                           | ഫയൽ                                              |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------ |
+| [സംഭാവന ചെയ്യുന്നു](CONTRIBUTING.md)                                    | വികസന സജ്ജീകരണവും മാർഗ്ഗനിർദ്ദേശങ്ങളും                              | `CONTRIBUTING.md`                                |
+| [പെരുമാറ്റച്ചട്ടം](CODE_OF_CONDUCT.md)                                  | സംഭാവക ഉടമ്പടി                                                      | `CODE_OF_CONDUCT.md`                             |
+| [ചേഞ്ച്ലോഗ്](CHANGELOG.md)                                              | ഓരോ പതിപ്പിനും റിലീസ് ചരിത്രം                                       | `CHANGELOG.md`                                   |
+| [റോഡ്മാപ്പ്](ROADMAP.md)                                                | v3.9.0 LTS വരെയും അതിനുശേഷവും ആസൂത്രണം ചെയ്ത നാഴികക്കല്ലുകൾ         | `ROADMAP.md`                                     |
+| [ഡെവലപ്പർ പരിസ്ഥിതി](docs/DEVELOPER-ENVIRONMENT.md)                     | വികസന സമയത്ത് പ്രാദേശിക `.env` പെരുമാറ്റവും രഹസ്യങ്ങളും             | `docs/DEVELOPER-ENVIRONMENT.md`                  |
+| [സംഭാവനയുടെ സുവർണ്ണ പാത](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)          | ഒരു PR യ്ക്കുള്ള ഏറ്റവും ചെറിയ വിശ്വസനീയമായ വികസന ലൂപ്പ്            | `docs/ops/CONTRIBUTION_GOLDEN_PATH.md`           |
+| [ബ്രാഞ്ചിംഗ് & റിലീസ് മോഡൽ](docs/ops/BRANCHING_MODEL.md)                | PRs ടാർഗെറ്റ് എവിടെ, `main`, ടാഗുകൾ എന്നിവ എന്താണ് അർത്ഥമാക്കുന്നത് | `docs/ops/BRANCHING_MODEL.md`                    |
+| [വർക്ക്ട്രീ ഒറ്റപ്പെടൽ](docs/ops/WORKTREE_ISOLATION.md)                 | ഓരോ ടാസ്ക്കിലും ഒരു വർക്ക്ട്രീയും ശാഖയും                            | `docs/ops/WORKTREE_ISOLATION.md`                 |
+| [കഠിനമായ നിയമങ്ങൾ](docs/ops/HARD_RULES_DETAIL.md)                       | പ്രോജക്റ്റിൻ്റെ കഠിനമായ നിയമങ്ങളുടെ പൂർണ്ണ വാചകവും യുക്തിയും        | `docs/ops/HARD_RULES_DETAIL.md`                  |
+| [പ്രധാന ശാഖകളുടെ സംരക്ഷണം](docs/ops/BRANCH_PROTECTION_MAIN.md)          | ആവശ്യമായ സംരക്ഷണ ക്രമീകരണങ്ങൾ                                       | `docs/ops/BRANCH_PROTECTION_MAIN.md`             |
+| [ഓമ്നി ക്യൂ](docs/ops/OMNI_QUEUE.md)                                    | പദ്ധതിയുടെ സ്വന്തം ലയന ക്യൂ                                         | `docs/ops/OMNI_QUEUE.md`                         |
+| [ട്രെയിൻ റൺബുക്ക് ലയിപ്പിക്കുക](docs/ops/MERGE_TRAIN.md)                | ക്യൂവും മാനുവൽ മെർജ്-ട്രെയിൻ നടപടിക്രമവും ലയിപ്പിക്കുക              | `docs/ops/MERGE_TRAIN.md`                        |
+| [റിലേ ഇൻ്റഗ്രേഷൻ ക്യൂ](docs/ops/RELAY_INTEGRATION_QUEUE.md)             | മുൻകൂട്ടി തയ്യാറാക്കിയ സംയോജനങ്ങൾക്കായി ഓപ്റ്റ്-ഇൻ ക്യൂ റൂൾ         | `docs/ops/RELAY_INTEGRATION_QUEUE.md`            |
+| [ഗുണനിലവാരമുള്ള ഗേറ്റുകൾ](docs/architecture/QUALITY_GATES.md)           | ഓരോ CI നിലവാരമുള്ള ഗേറ്റും                                          | `docs/architecture/QUALITY_GATES.md`             |
+| [ക്വാളിറ്റി-ഗേറ്റ് പ്ലേബുക്ക്](docs/ops/QUALITY_GATE_PLAYBOOK.md)       | ഗേറ്റ് സിസ്റ്റത്തിനായുള്ള മൂല്യനിർണ്ണയവും അനുകരണ ഗൈഡും              | `docs/ops/QUALITY_GATE_PLAYBOOK.md`              |
+| [ഗുണനിലവാര തെളിവ് കരാർ](docs/architecture/QUALITY_EVIDENCE_CONTRACT.md) | റിലീസ്-സ്വീകാര്യത റിപ്പോർട്ടിൻ്റെ പതിപ്പ് ഫോർമാറ്റ്                 | `docs/architecture/QUALITY_EVIDENCE_CONTRACT.md` |
+| [കവറേജ് പ്ലാൻ](docs/ops/COVERAGE_PLAN.md)                               | ടെസ്റ്റ് കവറേജ് തന്ത്രം                                             | `docs/ops/COVERAGE_PLAN.md`                      |
+| [മുന്നറിയിപ്പുകൾ നിർമ്മിക്കുക](docs/ops/BUILD_WARNINGS.md)              | പ്രതീക്ഷിക്കുന്ന ബിൽഡ് മുന്നറിയിപ്പുകളും Bun ട്രബിൾഷൂട്ടിംഗും       | `docs/ops/BUILD_WARNINGS.md`                     |
+| [ചെക്ക്ലിസ്റ്റ് റിലീസ് ചെയ്യുക](docs/ops/RELEASE_CHECKLIST.md)          | പ്രീ-റിലീസ് മൂല്യനിർണ്ണയ ഘട്ടങ്ങൾ                                   | `docs/ops/RELEASE_CHECKLIST.md`                  |
+| [റിലീസ്-പച്ച](docs/ops/RELEASE_GREEN.md)                                | ക്യൂ നിലനിർത്തുക, ശാഖ പച്ചയായി വിടുക                                | `docs/ops/RELEASE_GREEN.md`                      |
+| [റിലീസ് തന്ത്രം](docs/ops/RELEASE_STRATEGY.md)                          | LTS റെയിൽ, ചാനലുകൾ, ലേബലുകൾ                                         | `docs/ops/RELEASE_STRATEGY.md`                   |
+| [3.9.0 LTS GO/NO-GO](docs/ops/LTS_GO_NO_GO.md)                          | v3.8.59 ൻ്റെ അവസാനം മെയിൻ്റനർമാരുടെ തീരുമാന ചെക്ക്ലിസ്റ്റ്          | `docs/ops/LTS_GO_NO_GO.md`                       |
+| [പ്രകടനത്തിൻ്റെ അടിസ്ഥാനം](docs/ops/PERF_BASELINE.md)                   | LTS റെയിലിനുള്ള പുനരുൽപ്പാദിപ്പിക്കാവുന്ന പ്രകടന അടിസ്ഥാനം          | `docs/ops/PERF_BASELINE.md`                      |
+| [ഹോമോലോഗേഷൻ സ്യൂട്ട്](docs/ops/HOMOLOGATION.md)                         | യഥാർത്ഥ-പരിസ്ഥിതി E2E മൂല്യനിർണ്ണയം                                 | `docs/ops/HOMOLOGATION.md`                       |
+| [റണ്ണർ ബോക്സ് പ്രവർത്തനങ്ങൾ](docs/ops/RUNNER_BOX.md)                    | സ്വയം ഹോസ്റ്റ് ചെയ്ത CI റണ്ണർ പ്രവർത്തനങ്ങൾ                         | `docs/ops/RUNNER_BOX.md`                         |
+
+<a id="docs-records"></a>
+
+### നിങ്ങൾ അസറ്റ് നോട്ടുകൾക്കായി തിരയുകയാണെങ്കിൽ
+
+`docs/` യിൽ സൂക്ഷിച്ചിരിക്കുന്ന ഇമേജ് അസറ്റുകളെക്കുറിച്ചുള്ള കുറിപ്പുകൾ. വിഷയം:** പ്രവർത്തന രേഖകൾ** .
+
+| പ്രമാണം                                      | <img width="2000" height="0" alt=""> എന്താണ് ഉത്തരം നൽകുന്നത് | ഫയൽ                           |
+| -------------------------------------------- | ------------------------------------------------------------- | ----------------------------- |
+| [പതാക ഐക്കണുകൾ](docs/assets/flags/README.md) | ഭാഷാ സെലക്ടർ ഉപയോഗിക്കുന്ന രാജ്യ പതാകകൾ                       | `docs/assets/flags/README.md` |
+
+<br/>
+
+<br/>
+
 <div align="center">
 
-# ⭐ മുൻനിര സംഭാവനക്കാർ
+# മുൻനിര സംഭാവകർ
 
-> ആവേശഭരിതമായ ഒരു ഓപ്പൺ-സോഴ്സ് സമൂഹമാണ് OmniRoute-നെ രൂപപ്പെടുത്തുന്നത്. പ്രോജക്റ്റിന്റെ ഗുണനിലവാരം, സ്ഥിരത, വ്യാപ്തി എന്നിവയിൽ നേരിട്ട് നിർണായക സ്വാധീനം ചെലുത്തിയ അസാധാരണ സംഭാവനകളാണ് ഈ വ്യക്തികൾ നൽകിയിരിക്കുന്നത്. **നന്ദി.**
+> വികാരാധീനമായ ഒരു ഓപ്പൺ സോഴ്സ് കമ്മ്യൂണിറ്റിയാണ്OmniRoute രൂപപ്പെടുത്തിയിരിക്കുന്നത്. ഈ വ്യക്തികൾ പ്രോജക്റ്റിൻ്റെ ഗുണനിലവാരം, സ്ഥിരത, എത്തിച്ചേരൽ എന്നിവയെ നേരിട്ട് സ്വാധീനിക്കുന്ന അസാധാരണമായ സംഭാവനകൾ നൽകിയിട്ടുണ്ട്.** നന്ദി.**
 
-### ലയിപ്പിച്ച pull request-ുകൾ പ്രകാരമുള്ള ബാഹ്യ സംഭാവനക്കാർ
+### ലയിപ്പിച്ച പുൾ അഭ്യർത്ഥനകൾ വഴിയുള്ള ബാഹ്യ സംഭാവനകൾ
 
 <table>
-  <tr><th align="center">റാങ്ക്</th><th align="left">സംഭാവകൻ</th><th align="center">ലയിപ്പിച്ച PR-കൾ</th><th align="right">~മാറ്റിയ വരികൾ</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><th align="center">റാങ്ക്</th><th align="left">സംഭാവകൻ</th><th align="center">ലയിപ്പിച്ച PRs</th><th align="right">~ വരികൾ മാറ്റി</th></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">429</td><td align="right">25,379,104</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">345</td><td align="right">13,590,900</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>പാക്കോകാർട്ടോൺസ്</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
   <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">201</td><td align="right">3,583,349</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">191</td><td align="right">412,053</td></tr>
   <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
-  <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
-  <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
-  <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
-  <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
-  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
-  <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
+  <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>സ്വയം</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
+  <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">125</td><td align="right">500,381</td></tr>
+  <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>ഹെർജർസ</b></a></td><td align="center">89</td><td align="right">231,099</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>ഹാർട്ട്മാർക്ക്</b></a></td><td align="center">87</td><td align="right">2,850,688</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">75</td><td align="right">153,717</td></tr>
+  <tr><td align="center">13</td><td align="left"><a href="https://github.com/serenity-X"><b>ശാന്തത-X</b></a></td><td align="center">69</td><td align="right">27,510</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/artickc"><b>ആർട്ടിക് സി</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/chirag127"><b>ചിരാഗ്127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/Bl0ck154"><b>Bl0ck154</b></a></td><td align="center">49</td><td align="right">11,872</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">49</td><td align="right">812,132</td></tr>
+  <tr><td align="center">20</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">47</td><td align="right">152,462</td></tr>
 </table>
 
-<sub>2026-11-03 03:01:19 UTC-ന് തത്സമയ <code>release/v3.8.53</code> ടിപ്പ് <code>05bc048d6c</code> ഉപയോഗിച്ച് സെൻസസ് എടുത്തു. പേജിനേറ്റ് ചെയ്ത GitHub GraphQL സെൻസസിൽ 9,947 ലയിപ്പിച്ച PR-കൾ ഉൾപ്പെടുന്നു: റിപ്പോസിറ്ററി ഉടമയുടേത് 4,130, Dependabot-ന്റേത് 240, മറ്റ് ബോട്ടുകൾ/ആപ്പുകളുടേത് 6, കൂടാതെ <b>883 വ്യത്യസ്ത സംഭാവകരിൽ നിന്നുള്ള 5,571 ബാഹ്യ PR-കൾ</b>. “മാറ്റിയ വരികൾ” എന്നത് GitHub-ലെ കൂട്ടിച്ചേർക്കലുകളും നീക്കംചെയ്യലുകളും ചേർന്നതും ജനറേറ്റ് ചെയ്ത ഫയലുകൾ, ലോക്ക്ഫയലുകൾ, കാറ്റലോഗുകൾ, വിവർത്തനങ്ങൾ, ഡോക്യുമെന്റേഷൻ എന്നിവ ഉൾപ്പെടുന്നതുമാണ്; ഇത് churn ആണ്, രചയിതാവ് എഴുതിയ LOC അല്ല. 500,000 വരികളിൽ കൂടുതലുള്ള GitHub ഡിഫുകൾ 53 PR-കൾ റിപ്പോർട്ട് ചെയ്യുന്നു (ഉദാഹരണത്തിന് #13399 എന്നത് ഒരൊറ്റ പ്രൊവൈഡർ കൂട്ടിച്ചേർക്കലാണ്, കൂടാതെ 2,347 മാറ്റിയ ഫയലുകൾ പട്ടികപ്പെടുത്തുന്നു), ഇത് മുകളിലെ ചില മൊത്തം കണക്കുകൾ വർദ്ധിപ്പിക്കുന്നു. സമനിലയിലുള്ളവർ ഒരേ റാങ്കിൽ ഉൾപ്പെടുത്തിയിരിക്കുന്നു.</sub>
+<sub><code>release/v3.8.54</code> യിൽ 2026-11-16 15:55:12 UTC എടുത്ത സെൻസസ് പിന്നീട് ലയനത്തിനായി 2026-11-17 00:12 UTC ൽ വീണ്ടും പരിശോധിച്ചു. പേജ് ചെയ്ത GitHub GraphQL സെൻസസിൽ 10,685 ലയിപ്പിച്ച PRs അടങ്ങിയിരിക്കുന്നു: 4,399 റിപ്പോസിറ്ററി ഉടമ, 249 ഡിപെൻഡബോട്ട്, 6 മറ്റ് bots/apps, കൂടാതെ <b>922 വ്യത്യസ്ത സംഭാവകരിൽ നിന്ന് 6,031 ബാഹ്യ PRs</b>. "മാറ്റപ്പെട്ട വരികൾ" എന്നത് GitHub കൂട്ടിച്ചേർക്കലുകളുടെ + ഇല്ലാതാക്കലാണ്, ഈ പട്ടികയിൽ കണക്കാക്കിയിട്ടുള്ള ഓരോ PR നും 2026-11-17-ന് വായിച്ചു, കൂടാതെ ജനറേറ്റ് ചെയ്ത ഫയലുകൾ, ലോക്ക് ഫയലുകൾ, കാറ്റലോഗുകൾ, വിവർത്തനങ്ങൾ, ഡോക്യുമെൻ്റേഷൻ എന്നിവ ഉൾപ്പെടുന്നു; LOC രചിച്ചതല്ല, അത് ചങ്കൂറ്റമാണ്. ഈ പട്ടികയിലെ 2,716 PRs ൽ 46 എണ്ണം GitHub 500,000 വരികൾക്ക് മുകളിലാണ് (ഉദാഹരണത്തിന് #13399, ഒരൊറ്റ ദാതാവ് കൂട്ടിച്ചേർക്കൽ, 2,347 മാറ്റിയ ഫയലുകൾ ലിസ്റ്റുചെയ്യുന്നു), ഇത് മുകളിലുള്ള നിരവധി ടോട്ടലുകൾ വർദ്ധിപ്പിക്കുന്നു. ബന്ധങ്ങൾ ഒരുമിച്ച് റാങ്ക് ചെയ്തിരിക്കുന്നു.</sub>
 
-### GitHub ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ
+### GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ
 
 <table>
   <tr>
     <td align="center" width="160">
       <a href="https://github.com/maxmad64bis">
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
-        <b>Dizzle</b>
+        <b>തലകറക്കം</b>
       </a><br/>
-      <sub>🥇 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 418 കമ്മിറ്റുകൾ</sub>
+      <sub>🥇 429 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
-        <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
-        <b>Bob.Hou</b>
+        <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Minxi Hou"/><br/>
+        <b>മിൻസി ഹൌ</b>
       </a><br/>
-      <sub>🥈 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 294 കമ്മിറ്റുകൾ</sub>
+      <sub>🥈 345 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
-        <b>Paijo</b>
+        <b>പൈജോ</b>
       </a><br/>
-      <sub>🥉 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 229 കമ്മിറ്റുകൾ</sub>
+      <sub>🥉 230 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+        <b>പാക്കോ കാർട്ടോൺസ്</b>
       </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 222 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 222 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 202 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 202 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
+        <b>ജാൻ ലിയോൺ</b>
       </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 134 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 137 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
-        <b>Ravi Tharuma</b>
+        <b>രവി തരുമ</b>
       </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 126 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 128 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
-        <b>Markus Hartung</b>
+        <b>മാർക്കസ് ഹാർട്ടുങ്</b>
       </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 115 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 117 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
-        <b>Randi</b>
+        <b>റാണ്ടി</b>
       </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 108 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 108 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/xiaoyaner0201">
+        <img src="https://github.com/xiaoyaner0201.png" width="40" style="border-radius:50%" alt="小妍儿"/><br/>
+        <b>小妍儿</b>
+      </a><br/>
+      <sub>🏅 75 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
-        <b>Chris</b>
+        <b>ക്രിസ്</b>
       </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 70 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 70 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
+    <td align="center" width="160">
+      <a href="https://github.com/serenity-X">
+        <img src="https://github.com/serenity-X.png" width="40" style="border-radius:50%" alt="serenity"/><br/>
+        <b>ശാന്തത</b>
+      </a><br/>
+      <sub>🏅 69 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
+    </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 68 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 68 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
-        <b>Koosha Paridehpour</b>
+        <b>കൂഷ പരിദെഹ്പൂർ</b>
       </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 68 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 68 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/zen0bit">
+        <img src="https://github.com/zen0bit.png" width="40" style="border-radius:50%" alt="zenobit"/><br/>
+        <b>zenobit</b>
+      </a><br/>
+      <sub>🏅 62 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/xz-dev">
+        <img src="https://github.com/xz-dev.png" width="40" style="border-radius:50%" alt="Xiangzhe"/><br/>
+        <b>സിയാങ്ഷെ</b>
+      </a><br/>
+      <sub>🏅 51 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/woodsonl">
+        <img src="https://github.com/woodsonl.png" width="40" style="border-radius:50%" alt="Lance Woodson"/><br/>
+        <b>ലാൻസ് വുഡ്സൺ</b>
+      </a><br/>
+      <sub>🏅 49 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/Bl0ck154">
+        <img src="https://github.com/Bl0ck154.png" width="40" style="border-radius:50%" alt="Bl0ck"/><br/>
+        <b>Bl0ck</b>
+      </a><br/>
+      <sub>🏅 49 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ</sub>
     </td>
   </tr>
 </table>
 
-<sub>2026-11-03 02:09:16 UTC-ൽ വീണ്ടും പരിശോധിച്ചു: <code>release/v3.8.53</code> ഡീഫോൾട്ട് ബ്രാഞ്ചിനായി റിപ്പോസിറ്ററിയുടെ Contributors API റിപ്പോർട്ട് ചെയ്ത GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ. API 903 ഐഡന്റിറ്റികൾ (429 ഉപയോക്താക്കൾ, 2 ബോട്ടുകൾ, 472 അനാമികർ) തിരികെ നൽകി; ഈ പട്ടികയിൽ മെന്റൈനർ, ബോട്ടുകൾ, അനാമിക ഐഡന്റിറ്റികൾ എന്നിവ ഒഴിവാക്കി, മത്സരത്തിലെ സമനിലകൾ നിലനിർത്തിയിരിക്കുന്നു. ഇത് മുകളിലുള്ള ലയിപ്പിച്ച PR റാങ്കിങ്ങിൽ നിന്നും താഴെയുള്ള Git-മെറ്റാഡാറ്റ സെൻസസിൽ നിന്നും വ്യത്യസ്തമാണ്.</sub>
+<sub>2026-11-17 00:12:50 UTC ൽ വീണ്ടും പരിശോധിച്ചു: <code>release/v3.8.54</code> ഡിഫോൾട്ട് ബ്രാഞ്ചിനായി റിപ്പോസിറ്ററി Contributors API റിപ്പോർട്ട് ചെയ്ത GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ. API 944 ഐഡൻ്റിറ്റികൾ തിരികെ നൽകി (430 ഉപയോക്താക്കൾ, 2 ബോട്ടുകൾ, 512 അജ്ഞാതർ); ഈ പട്ടിക മെയിൻ്റനർ, ബോട്ടുകൾ, അജ്ഞാത ഐഡൻ്റിറ്റികൾ എന്നിവ ഒഴിവാക്കുകയും മത്സര ബന്ധങ്ങൾ നിലനിർത്തുകയും ചെയ്യുന്നു. മുകളിലുള്ള ലയിപ്പിച്ച-പിആർ റാങ്കിംഗിൽ നിന്നും താഴെയുള്ള Git-മെറ്റാഡാറ്റ സെൻസസിൽ നിന്നും ഇത് വ്യത്യസ്തമാണ്.</sub>
 
-> 🙏 ഈ സംഭാവകരുടെ ഫീച്ചറുകളും, ബഗ് പരിഹാരങ്ങളും, ഇൻഫ്രാസ്ട്രക്ചർ മെച്ചപ്പെടുത്തലുകളും OmniRoute-നെ വിശ്വസനീയവും സമ്പന്നമായ ഫീച്ചറുകളുള്ളതുമാക്കുന്നതിന്റെ **കാതലായ ഭാഗമാണ്**. ഓരോ പുൾ റിക്വസ്റ്റും, ഓരോ ടെസ്റ്റ് കേസും, ഓരോ i18n വിവർത്തന ഫയലും പ്രധാനമാണ്. ഇവരെപ്പോലുള്ള ആളുകളാണ് ഓപ്പൺ സോഴ്സ് നിർമ്മിക്കുന്നത്.
+> 🙏 ഈ സംഭാവകരുടെ സവിശേഷതകൾ, ബഗ് പരിഹാരങ്ങൾ, അടിസ്ഥാന സൗകര്യ മെച്ചപ്പെടുത്തലുകൾ എന്നിവ ഒരു** പ്രധാന ഭാഗം** OmniRoute വിശ്വസനീയവും സവിശേഷതകളാൽ സമ്പന്നവുമാക്കുന്നത്. ഓരോ പുൾ അഭ്യർത്ഥനയും ഓരോ ടെസ്റ്റ് കേസും ഓരോ i18n വിവർത്തന ഫയലും പ്രധാനമാണ്. ഓപ്പൺ സോഴ്സ് നിർമ്മിച്ചിരിക്കുന്നത് അവരെപ്പോലുള്ള ആളുകളാണ്.
 
 </div>
 
@@ -1551,25 +1951,18 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ഇതും ഒ�
 
 <br/>
 
-## 💖 സ്പോൺസർമാർ
+## സ്പോൺസർമാർ
 
 <div align="center">
 
-സ്വന്തം പണത്തിൽ നിന്ന് OmniRoute-ന് ധനസഹായം നൽകുന്നവർക്ക് ഹൃദയം നിറഞ്ഞ നന്ദി — ഓരോ സംഭാവനയും ഈ പ്രോജക്റ്റിനെ സൗജന്യവും സ്വതന്ത്രവും സജീവവുമായി നിലനിർത്തുന്നു.
+സ്വന്തം പോക്കറ്റിൽ നിന്ന് OmniRoute ഫണ്ട് ചെയ്യുന്ന ആളുകൾക്ക് ഹൃദയംഗമമായ നന്ദി — ഓരോ സംഭാവനയും പദ്ധതിയെ സ്വതന്ത്രവും സ്വതന്ത്രവും ചലനാത്മകവുമായി നിലനിർത്തുന്നു.
 
 <table>
   <tr>
     <td align="center" width="160">
-      <a href="https://github.com/drewbitt">
-        <img src="https://github.com/drewbitt.png?size=140" width="72" style="border-radius:50%" alt="Andrew"/><br/>
-        <b>Andrew</b>
-      </a><br/>
-      <sub>💛 സജീവ പ്രതിമാസ സ്പോൺസർ</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/psylligent">
         <img src="https://github.com/psylligent.png?size=140" width="72" style="border-radius:50%" alt="Vlad I"/><br/>
-        <b>Vlad I</b>
+        <b>വ്ലാഡ് ഐ</b>
       </a><br/>
       <sub>💛 സജീവ പ്രതിമാസ സ്പോൺസർ</sub>
     </td>
@@ -1581,71 +1974,97 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ഇതും ഒ�
       <sub>💛 സജീവ പ്രതിമാസ സ്പോൺസർ</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/Guilsc">
-        <img src="https://github.com/Guilsc.png?size=140" width="72" style="border-radius:50%" alt="Guilherme Costa"/><br/>
-        <b>Guilherme Costa</b>
+      <a href="https://github.com/lak-is-law">
+        <img src="https://github.com/lak-is-law.png?size=140" width="72" style="border-radius:50%" alt="Lakshya Agarwal"/><br/>
+        <b>ലക്ഷ്യ അഗർവാൾ</b>
       </a><br/>
       <sub>💛 സജീവ ഒറ്റത്തവണ സ്പോൺസർ</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/TheVingance">
-        <img src="https://github.com/TheVingance.png?size=140" width="72" style="border-radius:50%" alt="Henrique Triches Iurkiv"/><br/>
-        <b>Henrique Iurkiv</b>
+      <a href="https://github.com/rafacpti23">
+        <img src="https://github.com/rafacpti23.png?size=140" width="72" style="border-radius:50%" alt="Rafa Martins"/><br/>
+        <b>റാഫ മാർട്ടിൻസ്</b>
       </a><br/>
       <sub>💛 സജീവ ഒറ്റത്തവണ സ്പോൺസർ</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/somesh-ghaturle">
-        <img src="https://github.com/somesh-ghaturle.png?size=140" width="72" style="border-radius:50%" alt="Somesh Ghaturle"/><br/>
-        <b>Somesh Ghaturle</b>
+      <a href="https://github.com/drewbitt">
+        <img src="https://github.com/drewbitt.png?size=140" width="72" style="border-radius:50%" alt="Andrew"/><br/>
+        <b>ആൻഡ്രൂ</b>
       </a><br/>
-      <sub>💛 സജീവ ഒറ്റത്തവണ സ്പോൺസർ</sub>
+      <sub>💛 കഴിഞ്ഞ പ്രതിമാസ പിന്തുണക്കാരൻ</sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="160">
+      <a href="https://github.com/Guilsc">
+        <img src="https://github.com/Guilsc.png?size=140" width="72" style="border-radius:50%" alt="Guilherme Costa"/><br/>
+        <b>Guilherme കോസ്റ്റ</b>
+      </a><br/>
+      <sub>💛 കഴിഞ്ഞ ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/TheVingance">
+        <img src="https://github.com/TheVingance.png?size=140" width="72" style="border-radius:50%" alt="Henrique Triches Iurkiv"/><br/>
+        <b>ഹെൻറിക്ക് യൂർകിവ്</b>
+      </a><br/>
+      <sub>💛 കഴിഞ്ഞ ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/somesh-ghaturle">
+        <img src="https://github.com/somesh-ghaturle.png?size=140" width="72" style="border-radius:50%" alt="Somesh Ghaturle"/><br/>
+        <b>സോമേഷ് ഘാതുർലെ</b>
+      </a><br/>
+      <sub>💛 കഴിഞ്ഞ ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/Kolonie-AI">
         <img src="https://github.com/Kolonie-AI.png?size=140" width="72" style="border-radius:50%" alt="Kolonie AI"/><br/>
-        <b>Kolonie AI</b>
+        <b>കോളനി AI</b>
       </a><br/>
-      <sub>💛 മുൻകാല ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
+      <sub>💛 കഴിഞ്ഞ ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/igormorais123">
         <img src="https://github.com/igormorais123.png?size=140" width="72" style="border-radius:50%" alt="Professor Igor Morais Vasconcelos"/><br/>
-        <b>Prof. Igor Morais</b>
+        <b>ഇഗോർ മൊറൈസ് പ്രൊഫ</b>
       </a><br/>
-      <sub>💛 മുൻകാല ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
+      <sub>💛 കഴിഞ്ഞ ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
     </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/PixmaNts">
         <img src="https://github.com/PixmaNts.png?size=140" width="72" style="border-radius:50%" alt="Pixma"/><br/>
-        <b>Pixma</b>
+        <b>പിക്സ്മ</b>
       </a><br/>
-      <sub>💛 മുൻകാല ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
+      <sub>💛 കഴിഞ്ഞ ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png?size=140" width="72" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+        <b>പാക്കോ കാർട്ടോൺസ്</b>
       </a><br/>
-      <sub>💛 മുൻകാല ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
+      <sub>💛 കഴിഞ്ഞ ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/longtao77">
         <img src="https://github.com/longtao77.png?size=140" width="72" style="border-radius:50%" alt="longtao"/><br/>
         <b>longtao</b>
       </a><br/>
-      <sub>💛 മുൻകാല ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
+      <sub>💛 കഴിഞ്ഞ ഒറ്റത്തവണ പിന്തുണക്കാരൻ</sub>
     </td>
   </tr>
 </table>
 
-<sub>… കൂടാതെ സ്വകാര്യമായി തുടരാൻ ആഗ്രഹിക്കുന്ന മറ്റുള്ളവരും 💛</sub>
+<sub>… കൂടാതെ സ്വകാര്യ 💛 തുടരാൻ താൽപ്പര്യപ്പെടുന്ന മറ്റുള്ളവരും</sub>
 
-<sub>GitHub Sponsors GraphQL API വഴി പൊതു GitHub Sponsors വിവരങ്ങൾ 2026-10-18-ന് വീണ്ടും സാധൂകരിച്ചു: ആകെയുള്ള 14 സ്പോൺസർഷിപ്പുകളിൽ 11 എണ്ണം പൊതുവായവയാണ് (6 സജീവം, 5 മുൻകാലത്തേത്). മുകളിലുള്ള സജീവ ലേബലുകൾ നിർണ്ണയിക്കുന്നത് GitHub-ന്റെ <code>isActive</code> നിലയാണ്; മുൻകാല പൊതു ഒറ്റത്തവണ പിന്തുണക്കാർക്കുള്ള നന്ദി നിലനിർത്തുന്നു, സ്വകാര്യ സ്പോൺസർമാർ അജ്ഞാതരായി തുടരുന്നു. പൊതു സ്പോൺസർ രേഖ ഇല്ലാത്തതിനാൽ Ko-fi, Buy Me a Coffee, Liberapay, PIX, ക്രിപ്റ്റോ സംഭാവനകൾ എന്നിവ പട്ടികപ്പെടുത്തിയിട്ടില്ല.</sub>
+<sub>പബ്ലിക് GitHub സ്പോൺസർമാരെ 2026-11-17-ന് GitHub സ്പോൺസർമാരായ GraphQL API വഴി പുനർമൂല്യപ്പെടുത്തി: മൊത്തം 17 ൽ 13 പബ്ലിക് സ്പോൺസർഷിപ്പുകൾ (4 സജീവം, 9 കഴിഞ്ഞത്). GitHub യുടെ <code>isActive</code> നില മുകളിലുള്ള സജീവ ലേബലുകൾ നിർണ്ണയിക്കുന്നു; പബ്ലിക് ഒറ്റത്തവണ പിന്തുണച്ചവർ നന്ദിയുള്ളവരായി തുടരുന്നു, സ്വകാര്യ സ്പോൺസർമാർ അജ്ഞാതരായി തുടരുന്നു. Ko-fi, Buy Me a Coffee, Liberapay, PIX, crypto സംഭാവനകൾ ലിസ്റ്റ് ചെയ്തിട്ടില്ല കാരണം അവയ്ക്ക് പൊതു സ്പോൺസർ റെക്കോർഡ് ഇല്ല.</sub>
 
-<b><a href="https://github.com/sponsors/diegosouzapw">💖 ഒരു സ്പോൺസറാകൂ →</a></b> — ഓരോ ഡോളറും OmniRoute-നെ സൗജന്യവും സ്വതന്ത്രവുമായി നിലനിർത്തുന്നു.
+<b><a href="https://github.com/sponsors/diegosouzapw">💖 ഒരു സ്പോൺസർ ആകുക →</a></b> — ഓരോ ഡോളറും OmniRoute സ്വതന്ത്രവും സ്വതന്ത്രവുമായി നിലനിർത്തുന്നു.
 
 </div>
 
@@ -1653,29 +2072,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ഇതും ഒ�
 
 <div align="center">
 
-## 👥 1,000+ സംഭാവകർ
+## 1,200 + സംഭാവകർ
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![സംഭാവകർ](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1317&columns=20&anon=1) ](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
-<sub>2026-11-02-ന് ലൈവ് <code>release/v3.8.53</code> ടിപ്പായ <code>1c7135e0fb</code>-ൽ (7,972 കമ്മിറ്റുകൾ) ഓഡിറ്റ് ചെയ്തത്: <b>1,074 സാധാരണപ്പെടുത്തിയ മനുഷ്യ Git ഐഡന്റിറ്റികൾ</b> — 759 എണ്ണം കമ്മിറ്റ് രചയിതാക്കളായി (മെയിന്റെയ്നർ ഉൾപ്പെടെ) പ്രത്യക്ഷപ്പെടുന്നു, 315 എണ്ണം വ്യക്തമായ <code>Co-authored-by</code> ട്രെയിലറുകളിൽ മാത്രം കാണപ്പെടുന്നു. ഈ കണക്കെടുപ്പിൽ <code>.mailmap</code> പ്രയോഗിക്കുന്നു, ഇ-മെയിൽ വിലാസങ്ങളെ വലിയക്ഷരവും ചെറിയക്ഷരവും പരിഗണിക്കാതെ താരതമ്യം ചെയ്യുന്നു, ഒരേ ഹാൻഡിൽ എൻകോഡ് ചെയ്യുന്ന സാഹചര്യത്തിൽ മാത്രം സംഖ്യാ, സാധാരണ GitHub noreply വിലാസങ്ങളെ കൂട്ടിച്ചേർക്കുന്നു, 29 ബോട്ട്/ഏജന്റ്/സർവീസ്/പ്ലേസ്ഹോൾഡർ ഐഡന്റിറ്റികളെ ഒഴിവാക്കുന്നു, കൂടാതെ പ്രദർശനനാമങ്ങൾ ഒത്തുപോകുന്നു എന്ന കാരണത്താൽ മാത്രം സാധാരണ ഇ-മെയിൽ വിലാസങ്ങളെ ലയിപ്പിക്കുന്നില്ല. 2026-08-24-ലെ ഓഡിറ്റിൽ 639 പേർ പ്രസിദ്ധീകരിച്ചിരുന്നു; ആ ഓഡിറ്റിന്റെ അടിസ്ഥാനമായ <code>ac02c5b42f</code>-ൽ ഇതേ രീതി വീണ്ടും പ്രയോഗിച്ചപ്പോൾ 619 ലഭിച്ചു. അതിനാൽ വർധനവ് പുതിയ സംഭാവകരുടെ വരവുകൊണ്ടാണ്, കൂടുതൽ ഇളവുള്ള രീതിയിലൂടെ അല്ല.</sub>
+<sub>2026-11-17-ന് <code>release/v3.8.54</code> commit <code>a9539085bd</code> ൽ ഓഡിറ്റ് ചെയ്തു (13,520 കമ്മിറ്റുകൾ, പൂർണ്ണ ചരിത്രം): <b>1,317 സാധാരണ മനുഷ്യ Git ഐഡൻ്റിറ്റികൾ</b> — 943 കമ്മിറ്റ് രചയിതാക്കളായി പ്രത്യക്ഷപ്പെടുന്നു (പരിപാലകൻ ഉൾപ്പെടെ) കൂടാതെ 374 വ്യക്തമായ <code>Co-authored-by</code> ട്രെയിലറുകളിൽ മാത്രം. സെൻസസ് ബാധകമാണ് <code>.mailmap</code>, ഇ-മെയിൽ വിലാസങ്ങൾ കേസ്-ഇൻസെൻസിറ്റീവ് ആയി താരതമ്യം ചെയ്യുന്നു, ഒരേ ഹാൻഡിൽ എൻകോഡ് ചെയ്യുമ്പോൾ മാത്രമേ സംഖ്യാ, പ്ലെയിൻ GitHub നോർപ്ലൈ വിലാസങ്ങളിൽ ചേരൂ, 138 bot/agent/service/placeholder ഐഡൻ്റിറ്റികളും ട്രെയിലർ മൂല്യങ്ങളും ഒഴിവാക്കുന്നു. മുമ്പത്തെ കണക്ക് ( <code>1c7135e0fb</code> ൽ 1,074) കണക്കാക്കിയത്, ആ കമ്മിറ്റിൻ്റെ 12,041 കമ്മിറ്റുകളിൽ 7,972 എണ്ണം മാത്രം നടത്തിയ ചരിത്രത്തിലാണ്; ഈ രീതി <code>1c7135e0fb</code> ൻ്റെ പൂർണ്ണ ചരിത്രത്തിൽ വീണ്ടും പ്രവർത്തിപ്പിക്കുന്നത് 1,235 നൽകുന്നു, അതിനാൽ അതിനു ശേഷമുള്ള വർദ്ധനവ് പുതിയ സംഭാവകരിൽ നിന്നാണ് വരുന്നത്, അയഞ്ഞ രീതിയിൽ നിന്നല്ല. മുകളിലുള്ള ചിത്രം GitHub Contributors API (944 ഐഡൻ്റിറ്റികൾ) ൽ നിന്ന് വരച്ചതാണ് കൂടാതെ Git സെൻസസിനേക്കാൾ കുറച്ച് മുഖങ്ങൾ കാണിക്കുന്നു.</sub>
 
-### സംഭാവന ചെയ്യുന്നത് എങ്ങനെ
+### എങ്ങനെ സംഭാവന ചെയ്യാം
 
-1. റിപ്പോസിറ്ററി ഫോർക്ക് ചെയ്യുക
-2. **സജീവമായ** `release/vX.Y.Z` ടിപ്പിൽ നിന്ന് ബ്രാഞ്ച് ചെയ്യുക (`main`-ൽ നിന്ന് അല്ല) — [ബ്രാഞ്ചിംഗും റിലീസ് മാതൃകയും](docs/ops/BRANCHING_MODEL.md) കാണുക
-3. നിങ്ങളുടെ ഫീച്ചർ ബ്രാഞ്ച് സൃഷ്ടിക്കുക (`git checkout -b feat/amazing-feature`)
-4. നിങ്ങളുടെ മാറ്റങ്ങൾ കമ്മിറ്റ് ചെയ്യുക (`git commit -m 'feat: add amazing feature'`)
-5. ബ്രാഞ്ചിലേക്ക് പുഷ് ചെയ്യുക (`git push origin feat/amazing-feature`)
-6. **അടിസ്ഥാനം = ആ `release/vX.Y.Z` ബ്രാഞ്ച്** എന്ന നിലയിൽ ഒരു പുൾ റിക്വസ്റ്റ് തുറക്കുക
+1. ശേഖരം ഫോർക്ക് ചെയ്യുക
+2. ൽ നിന്നുള്ള ശാഖ** സജീവമാണ്** `release/vX.Y.Z` നുറുങ്ങ് ( `main` അല്ല) — [ബ്രാഞ്ചിംഗ് & റിലീസ് മോഡൽ](docs/ops/BRANCHING_MODEL.md) കാണുക
+3. നിങ്ങളുടെ ഫീച്ചർ ബ്രാഞ്ച് (`git checkout -b feat/amazing-feature`) സൃഷ്ടിക്കുക
+4. നിങ്ങളുടെ മാറ്റങ്ങൾ വരുത്തുക (`git commit -m 'feat: add amazing feature'`)
+5. ശാഖയിലേക്ക് തള്ളുക (`git push origin feat/amazing-feature`)
+6. ഉപയോഗിച്ച് ഒരു പുൾ അഭ്യർത്ഥന തുറക്കുക** അടിസ്ഥാന = ആ `release/vX.Y.Z` ശാഖ**
 
 വിശദമായ മാർഗ്ഗനിർദ്ദേശങ്ങൾക്കായി [CONTRIBUTING.md](CONTRIBUTING.md) കാണുക.
 
-### പുതിയ പതിപ്പ് റിലീസ് ചെയ്യുന്നു
+### ഒരു പുതിയ പതിപ്പ് പുറത്തിറക്കുന്നു
 
 ```bash
-# ഒരു റിലീസ് സൃഷ്ടിക്കുക — npm publish സ്വയമേവ നടക്കും
+# Create a release — npm publish happens automatically
 VERSION=x.y.z
 gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 ```
@@ -1684,21 +2103,23 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 <div align="center">
 
-## 📊 നക്ഷത്രങ്ങൾ
+## നക്ഷത്രങ്ങൾ
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="നക്ഷത്ര ചരിത്ര ചാർട്ട്" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left" />
  </picture>
 </a>
+
+</div>
 
 <br/>
 
 <div align="center">
 
-## 🌍 StarMapper
+## StarMapper
 
 <a href="https://starmapper.bruniaux.com/diegosouzapw/omniroute">
   <picture>
@@ -1711,118 +2132,114 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 <br/>
 
-<div align="center">
+## അംഗീകാരങ്ങൾ
 
-## 🙏 അംഗീകാരങ്ങൾ
+OmniRoute ഭീമൻമാരുടെ തോളിൽ നിൽക്കുന്നു. ഇത് ഒരു നാൽക്കവലയായി ആരംഭിച്ചു** [9 റൂട്ടർ](https://github.com/decolua/9router)** ഗോ പദ്ധതിയുടെ ഒരു TypeScript പോർട്ടും** [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — അവിടെ നിന്ന്, താഴെയുള്ള എല്ലാ സബ്സിസ്റ്റവും ആദ്യം അവിടെ എത്തിയ ഒരു ഓപ്പൺ സോഴ്സ് പ്രോജക്റ്റിൽ നിന്ന് പ്രചോദനം ഉൾക്കൊണ്ടതാണ്. ഓരോന്നും OmniRoute യുടെ ഒരു കോൺക്രീറ്റ് കഷണം രൂപപ്പെടുത്തി. ഇത് അവർക്കെല്ലാം ഞങ്ങളുടെ നന്ദി അറിയിക്കുന്നു. 🙏
 
-</div>
+> 2026 നവംബർ 16-ന് GitHub ൻ്റെ REST API ൽ നിന്ന് പരിശോധിച്ച ⭐ നക്ഷത്രങ്ങളുടെ എണ്ണം ഈ പ്രോജക്റ്റുകൾക്ക് ഒരു — നൽകുന്നു. കണക്കുകൾ കൃത്യമായ കാലികമായ സ്നാപ്പ്ഷോട്ടാണ്, അത് സ്വാഭാവികമായും മാറും. GrokBridge ആ തീയതിയിൽ HTTP 404 തിരികെ നൽകി; അതിൻ്റെ ആട്രിബ്യൂഷൻ സൂക്ഷിച്ചിരിക്കുന്നു.
 
-OmniRoute മഹത്തായ മുൻഗാമികളുടെ പാതയിലാണ് നിലകൊള്ളുന്നത്. ഇത് ആദ്യം **[9router](https://github.com/decolua/9router)**-ന്റെ ഒരു fork ആയാണ് ആരംഭിച്ചത്, കൂടാതെ Go പ്രോജക്റ്റായ **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)**-യുടെ TypeScript port കൂടിയായിരുന്നു — അതിനുശേഷം താഴെപ്പറയുന്ന ഓരോ subsystem-വും ആദ്യം വഴി തെളിച്ച ഒരു open-source പ്രോജക്റ്റിൽ നിന്ന് പ്രചോദനം നേടി. ഓരോന്നും OmniRoute-ന്റെ ഒരു പ്രത്യേക ഘടകത്തെ രൂപപ്പെടുത്തി. അവരൊക്കെയോടുമുള്ള ഞങ്ങളുടെ നന്ദിയാണിത്. 🙏
-
-> ⭐ GitHub-ന്റെ REST API-ൽ നിന്ന് 2026 നവംബർ 3-ന് star എണ്ണങ്ങൾ സ്ഥിരീകരിച്ചു — ഈ പ്രോജക്റ്റുകൾക്ക് ഒരു star നൽകൂ. എണ്ണങ്ങൾ ആ തീയതിയിലെ കൃത്യമായ snapshot ആണ്, സ്വാഭാവികമായും മാറിക്കൊണ്ടിരിക്കും.
-
-### 🧬 പാരമ്പര്യവും gateway-യും
+### വംശവും ഗേറ്റ്വേയും
 
 <table>
-  <tr><th align="left">പ്രോജക്റ്റ്</th><th align="center">⭐</th><th align="left">ഇത് OmniRoute-നെ എങ്ങനെ പ്രചോദിപ്പിച്ചു</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>ഈ fork നിർമ്മിച്ചിരിക്കുന്ന യഥാർത്ഥ പ്രോജക്റ്റ് — multi-modal APIs-ഉം പൂർണ്ണമായ TypeScript rewrite-ഉം ഉപയോഗിച്ച് ഇവിടെ വിപുലീകരിച്ചിരിക്കുന്നു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>ഈ JavaScript / TypeScript port-ന് പ്രചോദനമായ Go implementation.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>ഇതിന്റെ public pricing dataset ഞങ്ങളുടെ cost-tracking sync-ന് ഡാറ്റ നൽകുകയും provider-normalization model ഞങ്ങളുടെ routing-നെ സ്വാധീനിക്കുകയും ചെയ്ത AI gateway.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>Vendored ChatGPT Web → Codex Responses bridge-ലേക്ക് സ്വീകരിച്ച MIT source; browser-session, response-framing, usage, web-search adapters എന്നിവ ഇതിൽ ഉൾപ്പെടുന്നു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Stream recovery, no-thinking aliases, fallback web search, sliding-window limits, log redaction, hardened launcher flows എന്നിവയിലേക്ക് port ചെയ്ത patterns.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Cursor Composer tool-choice, output-constraint, tool-commit patterns native Cursor executor-ലേക്ക് സ്വീകരിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Fresh-login, refresh-token rotation patterns Codex OAuth reauthentication-ലേക്ക് port ചെയ്തു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Claude Code-ന് അനുയോജ്യമായ transform defaults, billing-header behavior എന്നിവ OmniRoute-ന്റെ config-driven bridge-ലേക്ക് പൊതുവൽക്കരിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>ഇതിലെ Grok model mappings, fake-TypeError Statsig generator, request and device defaults, NDJSON response processor എന്നിവ OmniRoute-ന്റെ Grok Web executor-ലേക്ക് കാര്യമായ രീതിയിൽ സ്വീകരിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>grok2api-merged-ന് പിന്നിലെ പ്രധാന transitive code source; ഇതിന്റെ model, header, payload, Statsig, processor implementations എന്നിവ Grok Web lineage-ൽ നിലനിർത്തിയിരിക്കുന്നു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Grok payload, device defaults, Statsig generator, TQZHR, grok2api-merged എന്നിവയിലൂടെ കൈമാറിയ <code>result.response</code> processor എന്നിവയ്ക്കുള്ള അടിസ്ഥാന MIT source.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>ഇതിലെ proxy-pool layer-ന് grok2api-merged credit ചെയ്യുന്ന transitive source; OmniRoute ഈ lineage notice നിലനിർത്തുന്നുവെങ്കിലും അതിന്റെ bounded Grok Web executor-ൽ proxy-pool port അവകാശപ്പെടുന്നില്ല.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>ഇതിലെ cookie-authenticated Grok proxy, <code>result.response.token</code> streaming pattern എന്നിവ OmniRoute-ന്റെ Grok Web transport-നെ സ്വാധീനിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>ഇതിന്റെ HTTP/browser upstream design പരിശോധിച്ചാണ് യഥാർത്ഥ Grok Web implementation തയ്യാറാക്കിയത്; ഇതിന്റെ direct HTTP path GrokProxy-യിൽ നിന്നാണ് ഉരുത്തിരിഞ്ഞത്, അതിനാൽ സ്വതന്ത്രമായ code port അവകാശപ്പെടുന്നില്ല.</td></tr>
+  <tr><th align="left">പദ്ധതി</th><th align="center">⭐</th><th align="left">അത് എങ്ങനെയാണ് OmniRoute പ്രചോദിപ്പിച്ചത്</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9 റൂട്ടർ</a></b></td><td align="center">32,509</td><td>മൾട്ടി-മോഡൽ APIs ഉം ഒരു പൂർണ്ണ TypeScript റീറൈറ്റും ഉപയോഗിച്ച് ഇവിടെ വിപുലീകരിച്ച — യിലാണ് ഈ ഫോർക്ക് നിർമ്മിച്ചിരിക്കുന്നത്.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">58,717</td><td>ഈ JavaScript / TypeScript പോർട്ടിന് പ്രചോദനമായ Go നടപ്പിലാക്കൽ.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">63,346</td><td>AI ഗേറ്റ്വേ, അതിൻ്റെ പൊതു വിലനിർണ്ണയ ഡാറ്റാസെറ്റ് ഞങ്ങളുടെ ചെലവ്-ട്രാക്കിംഗ് സമന്വയത്തെ ഫീഡ് ചെയ്യുന്നു, അതിൻ്റെ പ്രൊവൈഡർ-നോർമലൈസേഷൻ മോഡൽ ഞങ്ങളുടെ റൂട്ടിംഗിനെ അറിയിച്ചു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,747</td><td>ബ്രൗസർ-സെഷൻ, പ്രതികരണം-ഫ്രെയിമിംഗ്, ഉപയോഗം, വെബ്-സെർച്ച് അഡാപ്റ്ററുകൾ എന്നിവയുൾപ്പെടെ, വെണ്ടർ ചെയ്ത ChatGPT വെബ് → Codex പ്രതികരണങ്ങളുടെ ബ്രിഡ്ജിലേക്ക്MIT ഉറവിടം സ്വീകരിച്ചു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">സ്വതന്ത്ര-ക്ലോഡ്-കോഡ്</a></b></td><td align="center">70,769</td><td>സ്ട്രീം വീണ്ടെടുക്കൽ, നോ-തിങ്കിംഗ് അപരനാമങ്ങൾ, ഫാൾബാക്ക് വെബ് തിരയൽ, സ്ലൈഡിംഗ്-വിൻഡോ പരിധികൾ, ലോഗ് റിഡക്ഷൻ, ഹാർഡ്നഡ് ലോഞ്ചർ ഫ്ലോകൾ എന്നിവയിലേക്ക് പാറ്റേണുകൾ പോർട്ട് ചെയ്തു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">കമ്പോസർ-എപിഐ</a></b></td><td align="center">350</td><td>Cursor കമ്പോസർ ടൂൾ-ചോയ്സ്, ഔട്ട്പുട്ട്-നിയന്ത്രണം, ടൂൾ-കമ്മിറ്റ് പാറ്റേണുകൾ എന്നിവ നേറ്റീവ് Cursor എക്സിക്യൂട്ടറിലേക്ക് പൊരുത്തപ്പെടുത്തി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">കോഡെക്സ്-മൾട്ടി-ഓത്ത്</a></b></td><td align="center">565</td><td>പുതിയ-ലോഗിൻ, പുതുക്കൽ-ടോക്കൺ റൊട്ടേഷൻ പാറ്റേണുകൾ Codex OAuth വീണ്ടും പ്രാമാണീകരണത്തിലേക്ക് പോർട്ട് ചെയ്തു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">563</td><td>Claude കോഡ്-അനുയോജ്യമായ ട്രാൻസ്ഫോർമേഷൻ ഡിഫോൾട്ടുകളും ബില്ലിംഗ്-ഹെഡർ സ്വഭാവവും OmniRoute ൻ്റെ കോൺഫിഗറേഷൻ-ഡ്രൈവ് ബ്രിഡ്ജിലേക്ക് സാമാന്യവൽക്കരിച്ചു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>ഇതിൻ്റെ Grok മോഡൽ മാപ്പിംഗുകൾ, വ്യാജ-ടൈപ്പ്-എറർ സ്റ്റാറ്റ്സിഗ് ജനറേറ്റർ, അഭ്യർത്ഥന, ഉപകരണ ഡിഫോൾട്ടുകൾ, NDJSON പ്രതികരണ പ്രോസസ്സർ എന്നിവ OmniRoute യുടെ Grok വെബ് എക്സിക്യൂട്ടറിലേക്ക് മെറ്റീരിയലായി പൊരുത്തപ്പെടുത്തി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">703</td><td>grok2api-merged പിന്നിലെ പ്രധാന ട്രാൻസിറ്റീവ് കോഡ് ഉറവിടം; അതിൻ്റെ മോഡൽ, ഹെഡർ, പേലോഡ്, സ്റ്റാറ്റ്സിഗ്, പ്രോസസർ നടപ്പിലാക്കലുകൾ എന്നിവ Grok വെബ് ലൈനേജിൽ സംരക്ഷിച്ചിരിക്കുന്നു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,902</td><td>Grok പേലോഡിനും ഡിവൈസ് ഡിഫോൾട്ടുകൾക്കുമുള്ള അടിസ്ഥാന MIT ഉറവിടം, statsig ജനറേറ്റർ, TQZHR, grok2api-merged എന്നിവയിലൂടെ കൊണ്ടുപോകുന്ന <code>result.response</code> പ്രോസസ്സർ.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>പ്രോക്സി പൂൾ ലെയറിനായി grok2api-merged ക്രെഡിറ്റ് ചെയ്ത ഒരു ട്രാൻസിറ്റീവ് ഉറവിടം; OmniRoute ആ ലൈനേജ് നോട്ടീസ് സംരക്ഷിക്കുന്നു, എന്നാൽ അതിൻ്റെ ബൗണ്ടഡ് Grok വെബ് എക്സിക്യൂട്ടറിൽ ഒരു പ്രോക്സി-പൂൾ പോർട്ട് ക്ലെയിം ചെയ്യുന്നില്ല.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">53</td><td>അതിൻ്റെ കുക്കി-ആധികാരിക Grok പ്രോക്സിയും <code>result.response.token</code> സ്ട്രീമിംഗ് പാറ്റേണും OmniRoute യുടെ Grok വെബ് ഗതാഗതത്തെ അറിയിച്ചു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">—</td><td>യഥാർത്ഥ Grok വെബ് നടപ്പിലാക്കൽ അതിൻ്റെ HTTP/browser അപ്സ്ട്രീം ഡിസൈൻ പരിശോധിച്ചു; അതിൻ്റെ നേരിട്ടുള്ള HTTP പാത്ത് GrokProxy ൽ നിന്ന് ഉരുത്തിരിഞ്ഞതാണ്, അതിനാൽ ഒരു സ്വതന്ത്ര കോഡ് പോർട്ടും അവകാശപ്പെടുന്നില്ല.</td></tr>
 </table>
 
-### 🗜️ Context-ഉം token compression-ഉം — engines
+### സന്ദർഭവും ടോക്കൺ കംപ്രഷൻ — എഞ്ചിനുകളും
 
 <table>
-  <tr><th align="left">പ്രോജക്റ്റ്</th><th align="center">⭐</th><th align="left">ഇത് OmniRoute-നെ എങ്ങനെ പ്രചോദിപ്പിച്ചു</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>വൈറലായ "കുറച്ച് ടോക്കണുകൾ മതിയാകുമ്പോൾ എന്തിന് കൂടുതൽ ടോക്കണുകൾ ഉപയോഗിക്കണം" എന്ന പ്രോജക്റ്റ് — ഇതിന്റെ caveman-speak തത്ത്വചിന്തയാണ് ഞങ്ങളുടെ സ്റ്റാൻഡേർഡ് കംപ്രഷൻ മോഡിനും 30-ലധികം filler/condensation നിയമങ്ങൾക്കും അടിസ്ഥാനം.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>ഉയർന്ന പ്രകടനമുള്ള കമാൻഡ്-ഔട്ട്പുട്ട് കംപ്രഷൻ — ഞങ്ങളുടെ RTK engine, JSON filter DSL, raw-output recovery, കൂടാതെ stacked RTK → Caveman pipeline എന്നിവയ്ക്ക് പ്രചോദനമായി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>തിരിച്ചെടുക്കാൻ കഴിയുന്ന context-compression (SmartCrusher) — ഞങ്ങളുടെ <code>headroom</code> engine-നും <code>ccr</code> retrieve-marker pattern-നും പ്രചോദനമായി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Prompt-compression ഗവേഷണം (LLMLingua / LLMLingua-2) — ഞങ്ങളുടെ async, code-safe, fail-open <code>llmlingua</code> engine-ന് പ്രചോദനമായി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>ഞങ്ങളുടെ LLMLingua engine-ന്റെ worker-thread backend ആയി ഉപയോഗിക്കുന്ന JS/ONNX port (MobileBERT / XLM-RoBERTa).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>PT-BR token compression — Brazilian-Portuguese വ്യാകരണത്തിനായി ക്രമീകരിച്ച pleonasm reduction, filler removal എന്നിവയുള്ള ഞങ്ങളുടെ pt-BR language pack-നെ ശക്തിപ്പെടുത്തുന്നു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>വൈറലായ "lazy senior dev" YAGNI-coder skill — ഞങ്ങളുടെ <b>less-code</b> Output Style-ന് പ്രചോദനമായി: Caveman-ന്റെ ചുരുക്കിയ prose-ന്റെ output-axis sibling ആയ, _ജനറേറ്റ് ചെയ്യുന്ന_ code കുറയ്ക്കുന്ന smallest-working-change steering.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>ഇതിന്റെ action-first, ADHD-friendly response style അഞ്ച് ഭാഷകളിലുടനീളമുള്ള OmniRoute-ന്റെ concise output style-ലേക്ക് രൂപാന്തരപ്പെടുത്തി.</td></tr>
+  <tr><th align="left">പദ്ധതി</th><th align="center">⭐</th><th align="left">അത് എങ്ങനെയാണ് OmniRoute പ്രചോദിപ്പിച്ചത്</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">ഗുഹാമനുഷ്യൻ</a></b></td><td align="center">120,680</td><td>വൈറൽ "എന്തുകൊണ്ടാണ് കുറച്ച് ടോക്കൺ ഡൂ ട്രിക്" പ്രൊജക്റ്റ് — അതിൻ്റെ ഗുഹാമനുഷ്യൻ-സംസാരിക്കുന്ന തത്ത്വചിന്ത ഞങ്ങളുടെ സ്റ്റാൻഡേർഡ് കംപ്രഷൻ മോഡിനും 30 + filler/condensation നിയമങ്ങൾക്കും ശക്തി നൽകുന്നു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK - റസ്റ്റ് ടോക്കൺ കില്ലർ</a></b></td><td align="center">86,744</td><td>ഉയർന്ന പ്രകടനമുള്ള കമാൻഡ്-ഔട്ട്പുട്ട് കംപ്രഷൻ — ഞങ്ങളുടെ RTK എഞ്ചിൻ, JSON ഫിൽട്ടർ DSL, റോ-ഔട്ട്പുട്ട് വീണ്ടെടുക്കൽ, അടുക്കിയിരിക്കുന്ന RTK → കേവ്മാൻ പൈപ്പ്ലൈൻ എന്നിവയ്ക്ക് പ്രചോദനം നൽകി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">ഹെഡ്റൂം</a></b></td><td align="center">79,813</td><td>റിവേഴ്സിബിൾ സന്ദർഭ-കംപ്രഷൻ (SmartCrusher) — ഞങ്ങളുടെ <code>headroom</code> എഞ്ചിനും <code>ccr</code> വീണ്ടെടുക്കൽ-മാർക്കർ പാറ്റേണിനും പ്രചോദനം നൽകി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,823</td><td>പ്രോംപ്റ്റ്-കംപ്രഷൻ ഗവേഷണം (LLMLingua / LLMLingua-2) — ഞങ്ങളുടെ അസിൻക്, കോഡ്-സേഫ്, പരാജയം-ഓപ്പൺ <code>llmlingua</code> എഞ്ചിന് പ്രചോദനം നൽകി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>JS/ONNX പോർട്ട് (MobileBERT / XLM-RoBERTa) ഞങ്ങളുടെ LLMLingua എഞ്ചിനുള്ള വർക്കർ-ത്രെഡ് ബാക്കെൻഡായി ഉപയോഗിക്കുന്നു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">ട്രോഗ്ലോഡിറ്റ</a></b></td><td align="center">51</td><td>PT-BR ടോക്കൺ കംപ്രഷൻ — ഞങ്ങളുടെ pt-BR ഭാഷാ പാക്കിനെ ശക്തിപ്പെടുത്തുന്നു: ബ്രസീലിയൻ-പോർച്ചുഗീസ് വ്യാകരണത്തിനായി ട്യൂൺ ചെയ്ത പ്ലോനാസം കുറയ്ക്കലും ഫില്ലർ നീക്കംചെയ്യലും.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">പോണിടെയിൽ</a></b></td><td align="center">191,931</td><td>വൈറൽ ആയ "ലസി സീനിയർ ദേവ്" YAGNI-coder സ്കിൽ — നമ്മെ പ്രചോദിപ്പിച്ചു <b>കുറവ്-കോഡ്</b> ഔട്ട്പുട്ട് ശൈലി: _ജനറേറ്റഡ്_ കോഡ് (കേവ്മാൻ്റെ ടെഴ്സ് ഗദ്യത്തിലേക്കുള്ള ഔട്ട്പുട്ട്-അക്ഷസഹോദരങ്ങൾ) വെട്ടിക്കുറയ്ക്കുന്ന ഏറ്റവും ചെറിയ പ്രവർത്തന-മാറ്റ സ്റ്റിയറിംഗ്.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">എനിക്ക്-എഡിഎച്ച്ഡി ഉണ്ട്</a></b></td><td align="center">61,370</td><td>അതിൻ്റെ പ്രവർത്തന-ആദ്യം, ADHD-സൗഹൃദ പ്രതികരണ ശൈലി അഞ്ച് ഭാഷകളിലുടനീളമുള്ള OmniRoute യുടെ സംക്ഷിപ്ത ഔട്ട്പുട്ട് ശൈലിയിലേക്ക് സ്വീകരിച്ചു.</td></tr>
 </table>
 
-### 🧩 Compact formats, token research & code-aware tooling
+### കോംപാക്റ്റ് ഫോർമാറ്റുകൾ, ടോക്കൺ റിസർച്ച് & കോഡ്-അവയർ ടൂളിംഗ്
 
 <table>
-  <tr><th align="left">പ്രോജക്റ്റ്</th><th align="center">⭐</th><th align="left">ഇത് OmniRoute-നെ എങ്ങനെ പ്രചോദിപ്പിച്ചു</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Token-Oriented Object Notation — ഇതിന്റെ columnar, header-plus-rows model ഞങ്ങളുടെ tabular compaction stage-നെ രൂപപ്പെടുത്തി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>ഇതിന്റെ compact graph format-ും generic-profile design-ഉം OmniRoute-ന്റെ tabular compaction, Headroom codec format എന്നിവയെ സ്വാധീനിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Headroom generic-profile codec ആയി നേരിട്ട് vendored ചെയ്ത് വിപുലീകരിച്ച MIT TypeScript implementation.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Brotli/SQLite cache + per-session context-delta — ഞങ്ങളുടെ <code>session-dedup</code> engine-ന് പ്രചോദനമായി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Bash-output compaction + MCP profiles — ഞങ്ങളുടെ compression bail-out discipline-നും MCP tool-manifest reduction-നും പ്രചോദനമായി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Content-aware, per-file-type output compression with failure-aware bail-out — ഞങ്ങളുടെ per-type dispatch, minimum-gain skip എന്നിവ സാധൂകരിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>"Find the ghost tokens" — ഇതിന്റെ offload + recoverable-handle pattern ഞങ്ങളുടെ CCR offload ചിന്തയെ സ്വാധീനിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>ഞങ്ങളുടെ session-dedup design-നെ സ്വാധീനിച്ച session-graph + cross-turn line-dedup blueprint.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust columnar-JSON + content-addressed retrieve + cross-message dedup — ഞങ്ങളുടെ <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> engine design-ും cache-stable "compressed form is position-independent" invariant-ും സാധൂകരിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>MCP tool-schema/description compression — ഞങ്ങളുടെ MCP tool-manifest cardinality reduction-നെ സ്വാധീനിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Aider-style repo-map ranking — ഞങ്ങളുടെ repo-map / retrieval-ranking അന്വേഷണത്തെ സ്വാധീനിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>MCP-യിലൂടെയുള്ള Declarative shell-output reduction — ഞങ്ങളുടെ declarative bash-output compaction സാധൂകരിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>TypeScript Compiler API toolkit — string, template, regex literals എന്നിവ സംരക്ഷിച്ചുകൊണ്ടുള്ള ഞങ്ങളുടെ parser-based comment removal-ന് പ്രചോദനമായി.</td></tr>
+  <tr><th align="left">പദ്ധതി</th><th align="center">⭐</th><th align="left">അത് എങ്ങനെയാണ് OmniRoute പ്രചോദിപ്പിച്ചത്</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,634</td><td>ടോക്കൺ-ഓറിയൻ്റഡ് ഒബ്ജക്റ്റ് നോട്ടേഷൻ — അതിൻ്റെ കോളം, ഹെഡർ-പ്ലസ്-റോ മോഡൽ ഞങ്ങളുടെ ടാബുലാർ കോംപാക്ഷൻ ഘട്ടത്തെ രൂപപ്പെടുത്തി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF - ഗ്രാഫ് കോംപാക്റ്റ് ഫോർമാറ്റ്</a></b></td><td align="center">62</td><td>അതിൻ്റെ കോംപാക്റ്റ് ഗ്രാഫ് ഫോർമാറ്റും ജനറിക്-പ്രൊഫൈൽ ഡിസൈനും OmniRoute യുടെ ടാബുലാർ കോംപാക്ഷനെയും ഹെഡ്റൂം കോഡെക് ഫോർമാറ്റിനെയും അറിയിച്ചു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">5</td><td>MIT TypeScript നടപ്പിലാക്കൽ നേരിട്ട് വെണ്ടർ ചെയ്യുകയും ഹെഡ്റൂം ജനറിക് പ്രൊഫൈൽ കോഡെക് ആയി വിപുലീകരിക്കുകയും ചെയ്തു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">ടോക്കൺ-ഒപ്റ്റിമൈസർ-എംസിപി</a></b></td><td align="center">585</td><td>Brotli/SQLite കാഷെ + പെർ-സെഷൻ സന്ദർഭം-ഡെൽറ്റ — ഞങ്ങളുടെ <code>session-dedup</code> എഞ്ചിന് പ്രചോദനം നൽകി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">ടോക്കൺ-രക്ഷകൻ</a></b></td><td align="center">1,222</td><td>ബാഷ്-ഔട്ട്പുട്ട് കോംപാക്ഷൻ + MCP പ്രൊഫൈലുകൾ — ഞങ്ങളുടെ കംപ്രഷൻ ബെയിൽ-ഔട്ട് അച്ചടക്കത്തിനും MCP ടൂൾ-മാനിഫെസ്റ്റ് റിഡക്ഷനും പ്രചോദനം നൽകി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">ടോക്കൺ-സേവർ</a></b></td><td align="center">166</td><td>പരാജയം-അറിയൽ ബെയ്ൽ-ഔട്ട് — ഉള്ള ഉള്ളടക്കം-അറിയൽ, ഓരോ ഫയൽ-ടൈപ്പ് ഔട്ട്പുട്ട് കംപ്രഷൻ ഞങ്ങളുടെ ഓരോ തരത്തിലുള്ള ഡിസ്പാച്ചും മിനിമം-ഗെയിൻ സ്കിപ്പും സാധൂകരിച്ചു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">ടോക്കൺ-ഒപ്റ്റിമൈസർ</a></b></td><td align="center">2,998</td><td>"ഗോസ്റ്റ് ടോക്കണുകൾ കണ്ടെത്തുക" — അതിൻ്റെ ഓഫ്ലോഡ് + വീണ്ടെടുക്കാവുന്ന-ഹാൻഡിൽ പാറ്റേൺ ഞങ്ങളുടെ CCR ഓഫ്ലോഡ് ചിന്തയെ അറിയിച്ചു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">35</td><td>ഞങ്ങളുടെ സെഷൻ-ഡെഡപ്പ് ഡിസൈൻ അറിയിച്ച ഒരു സെഷൻ-ഗ്രാഫ് + ക്രോസ്-ടേൺ ലൈൻ-ഡെഡപ്പ് ബ്ലൂപ്രിൻ്റ്.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust columnar-JSON + ഉള്ളടക്കം-വിലാസത്തിൽ വീണ്ടെടുക്കുക + ക്രോസ്-മെസേജ് dedup — ഞങ്ങളുടെ <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> എഞ്ചിൻ ഡിസൈൻ സാധൂകരിക്കുകയും കാഷെ-സ്ഥിരതയുള്ള "കംപ്രസ് ചെയ്ത ഫോം പൊസിഷൻ-ഇൻഡിപെൻഡൻ്റ് ആണ്" മാറ്റമില്ലാത്തതുമാണ്.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">143</td><td>MCP tool-schema/description compression — ഞങ്ങളുടെ MCP ടൂൾ-മാനിഫെസ്റ്റ് കാർഡിനാലിറ്റി റിഡക്ഷൻ അറിയിച്ചു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">219</td><td>Aider-style repo-map റാങ്കിംഗ് — ഞങ്ങളുടെ റിപ്പോ-മാപ്പ് / വീണ്ടെടുക്കൽ-റാങ്കിംഗ് പര്യവേക്ഷണത്തെ അറിയിച്ചു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">നിശബ്ദ-ഷെൽ-എംസിപി</a></b></td><td align="center">4</td><td>MCP — നേക്കാൾ ഡിക്ലറേറ്റീവ് ഷെൽ-ഔട്ട്പുട്ട് കുറയ്ക്കൽ ഞങ്ങളുടെ ഡിക്ലറേറ്റീവ് ബാഷ്-ഔട്ട്പുട്ട് കോംപാക്ഷൻ സാധൂകരിക്കുന്നു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,229</td><td>TypeScript കംപൈലർ API ടൂൾകിറ്റ് — സ്ട്രിംഗ്, ടെംപ്ലേറ്റ്, റീജക്സ് ലിറ്ററലുകൾ എന്നിവ സംരക്ഷിക്കുന്ന ഞങ്ങളുടെ പാർസർ അടിസ്ഥാനമാക്കിയുള്ള കമൻ്റ് നീക്കംചെയ്യലിന് പ്രചോദനം നൽകി.</td></tr>
 </table>
 
-### 🧠 Memory & RAG
+### മെമ്മറി & RAG
 
 <table>
-  <tr><th align="left">പ്രോജക്റ്റ്</th><th align="center">⭐</th><th align="left">ഇത് OmniRoute-നെ എങ്ങനെ പ്രചോദിപ്പിച്ചു</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>സാർവത്രിക മെമ്മറി ലെയർ — ഇതിന്റെ proxy-as-write/read-boundary മാതൃകയാണ് ഞങ്ങളുടെ മെമ്മറി ആർക്കിടെക്ചറിനെ രൂപപ്പെടുത്തിയത്.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>നിലകളായി വിഭജിച്ച മെമ്മറിയുള്ള stateful ഏജന്റുകൾ — ഞങ്ങളുടെ Context Control & Recovery (CCR) tiered മോഡലിന് പ്രചോദനമായി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>ആവർത്തിച്ച് സംഭവിക്കുന്ന 16 RAG/LLM പരാജയമാർഗങ്ങളുടെ ProblemMap വർഗ്ഗീകരണം — ഞങ്ങളുടെ troubleshooting ഗൈഡിലെ പങ്കിട്ട പദാവലി.</td></tr>
+  <tr><th align="left">പദ്ധതി</th><th align="center">⭐</th><th align="left">അത് എങ്ങനെയാണ് OmniRoute പ്രചോദിപ്പിച്ചത്</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">മെം0</a></b></td><td align="center">69,065</td><td>യൂണിവേഴ്സൽ മെമ്മറി ലെയർ — അതിൻ്റെ proxy-as-write/read-boundary മോഡൽ ഞങ്ങളുടെ മെമ്മറി ആർക്കിടെക്ചറിനെ രൂപപ്പെടുത്തി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">ലെറ്റ (MemGPT)</a></b></td><td align="center">25,463</td><td>ടയേർഡ് മെമ്മറി — ഉള്ള സ്റ്റേറ്റ്ഫുൾ ഏജൻ്റുകൾ ഞങ്ങളുടെ സന്ദർഭ നിയന്ത്രണവും വീണ്ടെടുക്കലും (CCR) ശ്രേണിയിലുള്ള മോഡലിന് പ്രചോദനം നൽകി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,805</td><td>16 ആവർത്തന RAG/LLM പരാജയ മോഡുകളുടെ ProblemMap ടാക്സോണമി ഞങ്ങളുടെ ട്രബിൾഷൂട്ടിംഗ് ഗൈഡിലെ പങ്കിട്ട പദാവലി —.</td></tr>
 </table>
 
-### 🛰️ ട്രാഫിക് പരിശോധന, MITM, സുതാര്യ പ്രോക്സി
+### ട്രാഫിക് പരിശോധന, MITM & സുതാര്യമായ പ്രോക്സി
 
 <table>
-  <tr><th align="left">പ്രോജക്റ്റ്</th><th align="center">⭐</th><th align="left">ഇത് OmniRoute-നെ എങ്ങനെ പ്രചോദിപ്പിച്ചു</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>coding-assistant ↔ LLM ട്രാഫിക്കിന്റെ MITM interception/analysis, ആദ്യകാല Traffic Inspector ആവശ്യകതകളെ നിർവചിക്കാൻ സഹായിച്ചു. മുമ്പ് ഇതിൽനിന്ന് ഉരുത്തിരിഞ്ഞ നാല് മൊഡ്യൂളുകൾ — SSE merging, conversation normalization, secret masking, header sanitization — പൊതുവായി ലഭ്യമായ പ്രോട്ടോക്കോൾ മാനദണ്ഡങ്ങളെ അടിസ്ഥാനമാക്കിയുള്ള സ്വതന്ത്ര clean-room implementations ഉപയോഗിച്ച് മാറ്റിസ്ഥാപിച്ചിട്ടുണ്ട്. രണ്ട് host-passthrough surfaces (<code>passthrough.ts</code>, <code>_internal/bypass.cjs</code>) OmniRoute-ന്റെ ആഭ്യന്തര implementations ആയി തുടരുന്നു; അവ സ്വതന്ത്രമായി വർഗ്ഗീകരിച്ചവയാണ്, ആ മാറ്റിസ്ഥാപിക്കൽ നടപടിയുടെ ഭാഗമായി അവ പുനഃരചിച്ചിട്ടില്ല.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>ഓരോ പ്രോസസിനും സുതാര്യമായ പ്രോക്സി റൂട്ടിംഗ് — crash-safe MITM teardown, socket idle-timeouts, <code>/proc</code> process attribution, TPROXY capture എന്നിവയ്ക്ക് പ്രചോദനമായി.</td></tr>
+  <tr><th align="left">പദ്ധതി</th><th align="center">⭐</th><th align="left">അത് എങ്ങനെയാണ് OmniRoute പ്രചോദിപ്പിച്ചത്</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-ഇൻ്റർസെപ്റ്റർ</a></b></td><td align="center">83</td><td>കോഡിംഗ്-അസിസ്റ്റൻ്റ് ↔ LLM ട്രാഫിക്കിൻ്റെMITM interception/analysis നേരത്തെയുള്ള ട്രാഫിക് ഇൻസ്പെക്ടർ ആവശ്യകതകൾ അറിയിച്ചു. മുമ്പ് ഉരുത്തിരിഞ്ഞ നാല് മൊഡ്യൂളുകൾ — SSE ലയനം, സംഭാഷണ നോർമലൈസേഷൻ, രഹസ്യ മാസ്കിംഗ്, ഹെഡർ സാനിറ്റൈസേഷൻ — പകരം പബ്ലിക് പ്രോട്ടോക്കോൾ മാനദണ്ഡങ്ങൾ അടിസ്ഥാനമാക്കിയുള്ള സ്വതന്ത്രമായ ക്ലീൻ-റൂം നടപ്പിലാക്കലുകൾ നടത്തി. രണ്ട് ഹോസ്റ്റ്-പാസ്ത്രൂ പ്രതലങ്ങൾ (<code>passthrough.ts</code>, <code>_internal/bypass.cjs</code>) ഓമ്നിറൂട്ട്-ആന്തരിക നിർവ്വഹണങ്ങൾ സ്വതന്ത്രമായി വർഗ്ഗീകരിച്ചിരിക്കുന്നു; ആ പകരത്തിൻ്റെ ഭാഗമായി അവ മാറ്റിയെഴുതപ്പെട്ടില്ല.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">7,138</td><td>സുതാര്യമായ പെർ-പ്രോസസ് പ്രോക്സി റൂട്ടിംഗ് — ഞങ്ങളുടെ ക്രാഷ്-സേഫ് MITM ടിയർഡൗൺ, സോക്കറ്റ് നിഷ്ക്രിയ-ടൈംഔട്ടുകൾ, <code>/proc</code> പ്രോസസ് ആട്രിബ്യൂഷൻ, TPROXY ക്യാപ്ചർ എന്നിവയ്ക്ക് പ്രചോദനം നൽകി.</td></tr>
 </table>
 
-### 📚 മോഡൽ ഡാറ്റ, നിരീക്ഷണക്ഷമത, UI
+### മോഡൽ ഡാറ്റ, നിരീക്ഷണക്ഷമത & UI
 
 <table>
-  <tr><th align="left">പ്രോജക്റ്റ്</th><th align="center">⭐</th><th align="left">ഇത് OmniRoute-നെ എങ്ങനെ പ്രചോദിപ്പിച്ചു</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>AI മോഡൽ സ്പെസിഫിക്കേഷനുകൾ, വിലനിർണ്ണയം, കഴിവുകൾ എന്നിവയുടെ തുറന്ന ഡാറ്റാബേസ് — ഞങ്ങളുടെ model catalog-ലേക്ക് native ആയി സമന്വയിപ്പിച്ചിരിക്കുന്നു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>ഞങ്ങളുടെ real-time Compression Studio, Combo/Routing Studio എന്നിവയ്ക്ക് ശക്തി പകരുന്ന node-based graph library.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>LangGraph Studio-യുടെ live workflow-graph visualization, ഞങ്ങളുടെ Studios-ന്റെ real-time cascade view-ന് പ്രചോദനമായി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>ഇതിന്റെ trace → span → generation observability മോഡലാണ് ഞങ്ങളുടെ Compression Studio waterfall-നെ രൂപപ്പെടുത്തിയത്.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Istio service-mesh observability — Routing/Combo Studio-യിലെ ഞങ്ങളുടെ circuit-breaker badges, error-edge visuals എന്നിവയ്ക്ക് പ്രചോദനമായി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>ഞങ്ങളുടെ dashboard-ിൽ provider icons ആയി render ചെയ്യുന്ന AI/LLM ബ്രാൻഡ് ലോഗോകൾ.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>README language selector ഉപയോഗിക്കുന്ന MIT-licensed SVG flags നൽകുന്നു.</td></tr>
+  <tr><th align="left">പദ്ധതി</th><th align="center">⭐</th><th align="left">അത് എങ്ങനെയാണ് OmniRoute പ്രചോദിപ്പിച്ചത്</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,657</td><td>ഞങ്ങളുടെ മോഡൽ കാറ്റലോഗിലേക്ക് പ്രാദേശികമായി — AI മോഡൽ സവിശേഷതകൾ, വിലനിർണ്ണയം, കഴിവുകൾ എന്നിവയുടെ ഡാറ്റാബേസ് തുറക്കുക.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React ഫ്ലോ / xyflow</a></b></td><td align="center">39,037</td><td>ഞങ്ങളുടെ തത്സമയ കംപ്രഷൻ സ്റ്റുഡിയോയെയും Combo/Routing സ്റ്റുഡിയോയെയും ശക്തിപ്പെടുത്തുന്ന നോഡ് അടിസ്ഥാനമാക്കിയുള്ള ഗ്രാഫ് ലൈബ്രറി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">45,027</td><td>LangGraph സ്റ്റുഡിയോയുടെ തത്സമയ വർക്ക്ഫ്ലോ-ഗ്രാഫ് ദൃശ്യവൽക്കരണം ഞങ്ങളുടെ സ്റ്റുഡിയോയുടെ തത്സമയ കാസ്കേഡ് കാഴ്ചയ്ക്ക് പ്രചോദനമായി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">ലാംഗ്ഫ്യൂസ്</a></b></td><td align="center">37,494</td><td>അതിൻ്റെ ട്രെയ്സ് → സ്പാൻ → ജനറേഷൻ നിരീക്ഷണ മോഡൽ ഞങ്ങളുടെ കംപ്രഷൻ സ്റ്റുഡിയോ വെള്ളച്ചാട്ടത്തെ രൂപപ്പെടുത്തി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">കിയാലി</a></b></td><td align="center">3,649</td><td>Routing/Combo സ്റ്റുഡിയോയിലെ ഞങ്ങളുടെ സർക്യൂട്ട്-ബ്രേക്കർ ബാഡ്ജുകൾക്കും പിശക്-എഡ്ജ് വിഷ്വലുകൾക്കും ഇസ്തിയോ സർവീസ്-മെഷ് നിരീക്ഷണക്ഷമത — പ്രചോദനം നൽകി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">ലോബ്-ഐക്കണുകൾ</a></b></td><td align="center">2,705</td><td>ഞങ്ങളുടെ ഡാഷ്ബോർഡിലുടനീളം ദാതാവിൻ്റെ ഐക്കണുകൾ റെൻഡർ ചെയ്യുന്ന AI/LLM ബ്രാൻഡ് ലോഗോകൾ.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">പതാക-ഐക്കണുകൾ</a></b></td><td align="center">12,532</td><td>README ഭാഷാ സെലക്ടർ ഉപയോഗിക്കുന്ന MIT-ലൈസൻസ് ഉള്ള SVG ഫ്ലാഗുകൾ നൽകുന്നു.</td></tr>
 </table>
 
-### 🛡️ സുരക്ഷ
+### സുരക്ഷ
 
 <table>
-  <tr><th align="left">പ്രോജക്റ്റ്</th><th align="center">⭐</th><th align="left">ഇത് OmniRoute-നെ എങ്ങനെ പ്രചോദിപ്പിച്ചു</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>സുരക്ഷിതമായ ഡീഫോൾട്ടുകളോടെ പ്രവർത്തിക്കുന്ന ലൈബ്രറികളുടെ curated പട്ടിക; ഞങ്ങളുടെ സുരക്ഷാ തിരഞ്ഞെടുപ്പുകൾക്ക് (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink) ഇത് മാർഗ്ഗനിർദേശം നൽകുന്നു.</td></tr>
+  <tr><th align="left">പദ്ധതി</th><th align="center">⭐</th><th align="left">അത് എങ്ങനെയാണ് OmniRoute പ്രചോദിപ്പിച്ചത്</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">724</td><td>ഞങ്ങളുടെ സുരക്ഷാ ചോയ്സുകളെ (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink) നയിക്കുന്ന സുരക്ഷിത-ബൈ-ഡിഫോൾട്ട് ലൈബ്രറികളുടെ ഒരു ക്യൂറേറ്റഡ് ലിസ്റ്റ്.</td></tr>
 </table>
 
-### 🧭 അനുബന്ധ ഉപകരണങ്ങൾ
+### അനുബന്ധ ഉപകരണങ്ങൾ
 
 <table>
-  <tr><th align="left">പ്രോജക്റ്റ്</th><th align="center">⭐</th><th align="left">ഇത് OmniRoute-നെ എങ്ങനെ പ്രചോദിപ്പിച്ചു</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>request deduplication, emergency zero-cost fallback, pluggable Auto-Combo strategies, multilingual intent classification എന്നിവയ്ക്ക് പ്രചോദനമായി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>ഇതിന്റെ account-aware model remapping, executable-path validation, plan-label behavior എന്നിവ OmniRoute-ന്റെ Antigravity runtime-ന്റെ രൂപകൽപ്പനയെ സ്വാധീനിച്ചു.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>ഇതിലെ compact quota-reset countdown format, OmniRoute-ലെ അനുബന്ധ provider-limit display-ന് പ്രചോദനമായി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>ഇതിന്റെ ACP integrations, ഇൻസ്റ്റാൾ ചെയ്ത CLI agents സ്വയമേവ കണ്ടെത്താനുള്ള OmniRoute-ന്റെ സംവിധാനത്തിന് പ്രചോദനമായി.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Grok Build quota surface തിരിച്ചറിഞ്ഞു; തുടർന്ന് OmniRoute live wire format സ്വതന്ത്രമായി പരിശോധിച്ച് തിരുത്തി.</td></tr>
+  <tr><th align="left">പദ്ധതി</th><th align="center">⭐</th><th align="left">അത് എങ്ങനെയാണ് OmniRoute പ്രചോദിപ്പിച്ചത്</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,666</td><td>പ്രചോദിതമായ അഭ്യർത്ഥന ഡ്യൂപ്ലിക്കേഷൻ, അടിയന്തര പൂജ്യം-ചെലവ് ഫാൾബാക്ക്, പ്ലഗ്ഗബിൾ ഓട്ടോ-കോംബോ തന്ത്രങ്ങൾ, ബഹുഭാഷാ ഉദ്ദേശ വർഗ്ഗീകരണം.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">ആൻ്റിഗ്രാവിറ്റി-മാനേജർ</a></b></td><td align="center">33,173</td><td>അതിൻ്റെ അക്കൗണ്ട്-അവബോധ മോഡൽ റീമാപ്പിംഗ്, എക്സിക്യൂട്ടബിൾ-പാത്ത് മൂല്യനിർണ്ണയം, പ്ലാൻ-ലേബൽ പെരുമാറ്റം എന്നിവ OmniRoute യുടെ Antigravity റൺടൈമിനെ അറിയിച്ചു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vcode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>അതിൻ്റെ കോംപാക്റ്റ് ക്വാട്ട-റീസെറ്റ് കൗണ്ട്ഡൗൺ ഫോർമാറ്റ് OmniRoute യിലെ അനുബന്ധ പ്രൊവൈഡർ-ലിമിറ്റ് ഡിസ്പ്ലേയെ പ്രചോദിപ്പിച്ചു.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">34,320</td><td>അതിൻ്റെ ACP സംയോജനങ്ങൾ OmniRoute ൻ്റെ ഇൻസ്റ്റോൾ ചെയ്ത CLI ഏജൻ്റുമാരെ സ്വയമേവ കണ്ടെത്തുന്നതിന് പ്രചോദനം നൽകി.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">23,182</td><td>Grok ബിൽഡ് ക്വാട്ട ഉപരിതലം തിരിച്ചറിഞ്ഞു; OmniRoute സ്വതന്ത്രമായി ലൈവ് വയർ ഫോർമാറ്റ് പരിശോധിച്ച് ശരിയാക്കി.</td></tr>
 </table>
 
-## 📄 ലൈസൻസ്
+## ലൈസൻസ്
 
 MIT ലൈസൻസ് - വിശദാംശങ്ങൾക്ക് [LICENSE](LICENSE) കാണുക.
 
@@ -1830,9 +2247,9 @@ MIT ലൈസൻസ് - വിശദാംശങ്ങൾക്ക് [LICENSE]
 
 <div align="center">
 
-**[⬆ മുകളിലേക്ക് മടങ്ങുക](#-omniroute)** · ഓപ്പൺ-സോഴ്സ് AI സമൂഹത്തിനായി ❤️ സഹിതം നിർമ്മിച്ചത്.
+**[⬆ മുകളിലേക്ക് മടങ്ങുക](#omniroute--the-free-ai-gateway)** · ഓപ്പൺ സോഴ്സ് AI കമ്മ്യൂണിറ്റിക്കായി ❤️ ഉപയോഗിച്ച് നിർമ്മിച്ചത്.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> സൃഷ്ടിച്ചത് · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT ലൈസൻസ് · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>സൃഷ്ടിച്ചത് <a href="https://github.com/diegosouzapw">ഡീഗോ സൂസ</a> · OmniRoute v3.8.55 · നോഡ് ≥ 22.22.2 · MIT ലൈസൻസ് · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- സമൂഹത്തിന്റെ ചോദ്യോത്തരങ്ങൾക്കായി GitHub Discussions പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുന്നു -->
+<!-- GitHub Discussions enabled for community Q&A -->

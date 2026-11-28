@@ -52,7 +52,7 @@ flowchart LR
 ଆପଣ ଚାହୁଁଥିବା ଶାଖା ମିଶ୍ରିତ ହେବା ପୂର୍ବରୁ ଏକ ଖୋଲା ଫ୍ରିଜ୍ ଯାଞ୍ଚ କରନ୍ତୁ:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 ମେକାନିକ୍ସ ମିଶ୍ରଣ (ମାଲିକ `queue` ଲେବଲ୍ → ମିଶ୍ରଣ) [MERGE_TRAIN.md](./MERGE_TRAIN.md) ରେ ଡକ୍ୟୁମେଣ୍ଟ୍ ହୋଇଛି।

@@ -234,24 +234,23 @@ curl -X POST http://localhost:20128/api/tunnels/tailscale/enable \
 | --------------- | ------------------------------------ |
 | `TAILSCALE_BIN` | `tailscale` બાઇનરી પાથને ઓવરરાઇડ કરો |
 
-## એન્ડપોઇન્ટ સારાંશ
+## અંતિમ બિંદુ સારાંશ
 
-| એન્ડપોઇન્ટ                            | પદ્ધતિ | બોડી                                | ઑથ         |
-| ------------------------------------- | ------ | ----------------------------------- | ---------- |
-| `/api/tunnels/cloudflared`            | `GET`  | —                                   | management |
-| `/api/tunnels/cloudflared`            | `POST` | `{action: "enable" \| "disable"}`   | management |
-| `/api/tunnels/ngrok`                  | `GET`  | —                                   | management |
-| `/api/tunnels/ngrok`                  | `POST` | `{action, authToken?}`              | management |
-| `/api/tunnels/tailscale`              | `GET`  | —                                   | management |
-| `/api/tunnels/tailscale/check`        | `GET`  | —                                   | management |
-| `/api/tunnels/tailscale/install`      | `POST` | `{sudoPassword?}` (SSE)             | management |
-| `/api/tunnels/tailscale/start-daemon` | `POST` | `{sudoPassword?}`                   | management |
-| `/api/tunnels/tailscale/login`        | `POST` | `{hostname?}`                       | management |
-| `/api/tunnels/tailscale/enable`       | `POST` | `{sudoPassword?, hostname?, port?}` | management |
-| `/api/tunnels/tailscale/disable`      | `POST` | `{sudoPassword?}`                   | management |
+| અંતિમ બિંદુ                           | પદ્ધતિ | શરીર                                | ઓથ     |
+| ------------------------------------- | ------ | ----------------------------------- | ------ |
+| `/api/tunnels/cloudflared`            | `GET`  | —                                   | સંચાલન |
+| `/api/tunnels/cloudflared`            | `POST` | `{action: "enable" \| "disable"}`   | સંચાલન |
+| `/api/tunnels/ngrok`                  | `GET`  | —                                   | સંચાલન |
+| `/api/tunnels/ngrok`                  | `POST` | `{action, authToken?}`              | સંચાલન |
+| `/api/tunnels/tailscale`              | `GET`  | —                                   | સંચાલન |
+| `/api/tunnels/tailscale/check`        | `GET`  | —                                   | સંચાલન |
+| `/api/tunnels/tailscale/install`      | `POST` | `{sudoPassword?}` (SSE)             | સંચાલન |
+| `/api/tunnels/tailscale/start-daemon` | `POST` | `{sudoPassword?}`                   | સંચાલન |
+| `/api/tunnels/tailscale/login`        | `POST` | `{hostname?}`                       | સંચાલન |
+| `/api/tunnels/tailscale/enable`       | `POST` | `{sudoPassword?, hostname?, port?}` | સંચાલન |
+| `/api/tunnels/tailscale/disable`      | `POST` | `{sudoPassword?}`                   | સંચાલન |
 
-કોઈ કેન્દ્રીય `/api/settings/tunnels` એન્ડપોઇન્ટ નથી — દરેક બૅકએન્ડ
-સ્વતંત્ર છે.
+ત્યાં કોઈ કેન્દ્રિય `/api/settings/tunnels` એન્ડપોઇન્ટ — નથી દરેક બેકએન્ડ સ્વતંત્ર છે.
 
 ## OAuth કૉલબૅક સંબંધિત બાબતો
 

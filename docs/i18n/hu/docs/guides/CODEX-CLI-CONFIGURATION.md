@@ -423,7 +423,7 @@ region  = "us-east-1"
 
 ---
 
-## Több kiszolgáló
+## Több szerver
 
 ```toml
 [model_providers.omniroute-main]
@@ -483,107 +483,107 @@ Interaktív munkameneten belül:
 
 ---
 
-## Hosszú ideig futó feladatok
+## Hosszú távú feladatok
 
-Az OmniRoute két alapértelmezett beállítása észrevétlenül tönkreteheti a többórás Codex CLI-munkameneteket. Egyik sem Codex CLI-beállítás — mindkettő az OmniRoute oldalán található. Azok a felhasználók, akik olyan upstream proxykról migrálnak konfigurációt, amelyek fiókokhoz rögzítik a munkameneteket és letiltják az inaktivitási időkorlátokat, gyakran mindkét problémába beleütköznek, és arra következtetnek, hogy az OmniRoute „nem képes fenntartani egy hosszú munkamenetet”.
+Két OmniRoute alapértelmezett beállítás csendesen szabotálja a többórás Codex CLI munkameneteket. Egyik Codex CLI sem állítja be a — mindkettő a OmniRoute oldalon él. Azok a felhasználók, akik a fiókokat rögzítő és a tétlenségi leállításokat letiltó upstream proxykról áttelepítenek egy konfigurációt, gyakran mindkettőt eltalálják, és arra a következtetésre jutnak, hogy OmniRoute „nem tud fenntartani egy hosszú munkamenetet”.
 
-| Tünet                                                                                                  | Valószínű ok                                                                          | Beállítás                |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- | ------------------------ |
-| A munkamenet folyamatosan fiókot vált / a prompt-gyorsítótár folytonossága megszakad a fordulók között | A munkamenet-affinitás TTL-je `0` (letiltva)                                          | `sessionAffinityTtlMs`   |
-| A kapcsolat az érvelés közben megszakad anélkül, hogy a kliens bármilyen üzenetet kapna                | Az adatfolyam inaktivitásfigyelője 10 perc után aktiválódott upstream adatrész nélkül | `STREAM_IDLE_TIMEOUT_MS` |
+| Tünet                                                                                               | Valószínű oka                                                                  | Gomb                     |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------ |
+| A munkamenet folyamatosan vált a fiókok között / a gyorsítótár folyamatossága elvész a körök között | A TTL munkamenet-affinitás `0` (letiltva)                                      | `sessionAffinityTtlMs`   |
+| A kapcsolat megszakad az okok közepette, az ügyfél felé irányuló felszólítás nélkül                 | A tétlen adatfolyam-figyelő 10 perc után kilőtt, felfelé irányuló darab nélkül | `STREAM_IDLE_TIMEOUT_MS` |
 
-Kapcsolódó beszélgetések: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (hosszú feladatok megszakadása), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (miért van alapértelmezetten kikapcsolva az affinitás). Nyomon követés: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Kapcsolódó megbeszélések: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (hosszú feladat-eldobások), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (miért van alapértelmezetten kikapcsolva az affinitás). Követés: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Munkamenet-affinitás — egy beszélgetés rögzítése egy fiókhoz
 
-**Alapértelmezés:** `sessionAffinityTtlMs = 0` (letiltva).
+**Alapértelmezett:** `sessionAffinityTtlMs = 0` (fogyatékos).
 
-**Hol állítható be**
+**Hol kell beállítani**
 
-- Irányítópult → **Beállítások → Útválasztás** → **Munkamenet-affinitás** → **Affinitás TTL (másodperc)** (`ComboDefaultsTab`)
-- Vagy PATCH-kéréssel módosítsa a beállításokat a `sessionAffinityTtlMs` mezővel, **ezredmásodpercben** (Zod-tartomány: `0`–`86_400_000`, azaz legfeljebb 24 óra)
+- Műszerfal →** Beállítások → Routing** →** Munkamenet-affinitás** →** Affinitás TTL (másodperc)** (`ComboDefaultsTab`)
+- Vagy PATCH beállítások `sessionAffinityTtlMs` bemenettel** ezredmásodperc** (Zod tartomány `0`–`86_400_000`, azaz akár 24 óra)
 
-> A #7274-ben átnevezték a kizárólag Codexhez tartozó `codexSessionAffinityTtlMs` névről. A régi kulcs továbbra is elfogadott csak olvasható aliasként; az új konfigurációkban a `sessionAffinityTtlMs` használata javasolt. Az affinitás mostantól **bármely** szolgáltatóra érvényes, amint a TTL nagyobb `0`-nál, nem csak a Codexre — lásd: [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Munkamenet-affinitás.
+> Átnevezve #7274 ra a csak Codexben elérhető `codexSessionAffinityTtlMs` ből. A régi kulcs továbbra is olvasható álnévként; az új konfigurációknak `sessionAffinityTtlMs` kell használniuk. Az affinitás most a következőre vonatkozik** bármilyen** szolgáltató, ha a TTL `0` felett van, nem csak Codex — lásd [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Session affinitást.
 
-**Mi romlik el, ha az érték 0 marad**
+**Mi törik, ha 0 marad**
 
-Egy többfordulós Codex-beszélgetés minden fordulóját az aktív kombinációs stratégia egymástól függetlenül irányítja, így az egyes fordulók **eltérő fiókhoz kerülhetnek**. Ez megszakítja az upstream munkamenet / prompt-gyorsítótár folytonosságát. Az OmniRoute csak akkor veszi figyelembe a Codex munkamenet-fejléceit (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) és a törzs olyan mezőit, mint a `prompt_cache_key` / `session_id`, ha a TTL nagyobb `0`-nál (`extractSessionAffinityKey` a `src/sse/services/auth.ts` fájlban).
+A többfordulós Codex beszélgetés minden fordulatát függetlenül irányítja az aktív kombinált stratégia, és egy** körönként különböző fiók** . Ez megszakítja az upstream session / prompt-cache folytonosságát. OmniRoute csak Codex munkamenet fejléceit (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) és a törzsmezőket (például `prompt_cache_key` / `session_id` veszi figyelembe, ha a TTL nagyobb, mint `0` (`extractSessionAffinityKey` `src/sse/services/auth.ts`-ben).
 
-**Javaslat többórás, egyetlen feladathoz**
+**Több órás egyetlen feladathoz ajánlott**
 
-Állítsa a TTL-t **a feladat várható valós idejű időtartamánál hosszabbra** (a felhasználói felület maximuma **86400 másodperc** = 24 óra):
+Állítsa be a TTL** a feladat várható falióra-hossza felett** (UI max** 86400 másodperc** = 24 óra):
 
-| Várható feladathossz  | Affinitás TTL-je (felhasználói felület, másodperc) | `sessionAffinityTtlMs` |
-| --------------------- | -------------------------------------------------- | ---------------------- |
-| Néhány óra            | `14400` (4 óra)                                    | `14400000`             |
-| Egy éjszaka / ~12 óra | `43200` (12 óra)                                   | `43200000`             |
-| Teljes nap            | `86400` (24 óra, maximum)                          | `86400000`             |
+| A feladat várható hossza | Affinitás TTL (UI, másodperc) | `sessionAffinityTtlMs` |
+| ------------------------ | ----------------------------- | ---------------------- |
+| Néhány óra               | `14400` (4 óra)               | `14400000`             |
+| Éjszaka / ~ 12h          | `43200` (12h)                 | `43200000`             |
+| Egész nap                | `86400` (24 óra, maximum)     | `86400000`             |
 
-A külön engedélyezés szándékos: az affinitás letiltása a fiókok közötti terheléselosztást részesíti előnyben; engedélyezése pedig egy hosszú ügynökmunkamenet folytonosságát. Ez az útmutató **nem** módosítja az alapértelmezést — a hosszú Codex-feladatokat futtató üzemeltetőknek külön kell engedélyezniük.
+A feliratkozás szándékos: az affinitás letiltása előnyben részesíti a fiókok közötti terheléselosztást; engedélyezése egy hosszú ügynöki munkamenet folytonosságának kedvez. Ez az útmutató igen** nem** módosítsa az alapértelmezett — operátorokat a hosszú Codex feladatokat futtató operátoroknak engedélyezniük kell.
 
-### 2. Adatfolyam inaktivitási időkorlátja — ne szakítsa meg a csendes érvelési fordulókat
+### 2. Az üresjárati időkorlát — ne ölje meg a csendes érvelési fordulatokat
 
-**Alapértelmezés:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 perc). Ha nincs beállítva, a `REQUEST_TIMEOUT_MS` értékét örökli; a közös alapérték szintén 600000. Lásd: [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Időkorlátok.
+**Alapértelmezett:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 perc). Ha nincs beállítva, örökli `REQUEST_TIMEOUT_MS` ; a megosztott alapvonal szintén 600000. Lásd [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Mi romlik el az alapértelmezett beállítás mellett**
+**Mi törik az alapértelmezésben**
 
-Az olyan Codex reasoning / tool kör, amely több mint 10 percig csendben marad, és **nem érkezik tényleges upstream adatblokk**, az SSE inaktivitásfigyelő (`open-sse/utils/stream.ts`) kényszerített lezárása alá kerül. A kliens gyakran csak a kapcsolat minden további tájékoztatás nélküli megszakadását érzékeli — ami megfelel annak, hogy „értesítés nélkül automatikusan leállt”.
+Codex érvelés / szerszámfordulat, amely több mint 10 percig néma marad** nincs igazi upstream darab** a SSE idle watchdog (`open-sse/utils/stream.ts`) kényszerzárva van. A kliens gyakran látja a csupasz kapcsolat megszakítását, — egyezést, amely „automatikusan leállt, minden értesítés nélkül” egyezik.
 
-Fontos részlet: az OmniRoute szintetikus SSE-**szívverése nem nullázza** az inaktivitási időzítőt. A `lastChunkTime` értékét csak egy tényleges upstream törzsadatblokk frissíti. Az inaktivitásfigyelő szempontjából egy csendben tovább „gondolkodó” modell megkülönböztethetetlen az elakadt upstream kapcsolattól.
+Kritikus részlet: OmniRoute szintetikus SSE** a szívverés nem áll vissza** az üresjárati óra. Csak egy igazi upstream body chunk frissíti `lastChunkTime`. Egy halk, még „gondolkodó” modell a megfigyelő szemszögéből nézve megegyezik az elakadt upstream modellel.
 
-Kapcsolódó Undici törzsinaktivitási beállítás: `FETCH_BODY_TIMEOUT_MS` (szintén ugyanaz az alapértelmezett 10 perces alapérték; a `0` letiltja). Streamelés esetén a `FETCH_TIMEOUT_MS` csak a kapcsolat felépítésére / első fejlécek megérkezésére vonatkozik — miután a stream aktívvá vált, az elakadásokat a `STREAM_IDLE_TIMEOUT_MS` és a `FETCH_BODY_TIMEOUT_MS` szabályozza.
+Kapcsolódó Undici-törzs inaktivitása: `FETCH_BODY_TIMEOUT_MS` (alapértelmezésben is ugyanaz a 10 perces alapvonal; `0` letiltja). Streamelés esetén `FETCH_TIMEOUT_MS` csak a kapcsolat beállítását / első — fedi le, ha az adatfolyam aktív, a leállásokat `STREAM_IDLE_TIMEOUT_MS` és `FETCH_BODY_TIMEOUT_MS` szabályozza.
 
-**Többórás, egyetlen feladathoz ajánlott beállítás**
+**Több órás egyetlen feladathoz ajánlott**
 
-Az OmniRoute folyamat környezetében (`.env` / compose / systemd):
+A OmniRoute folyamatkörnyezetben (`.env` / compose / systemd):
 
 ```bash
-# A stream inaktivitási és a törzsinaktivitási időkorlátok letiltása hosszú reasoning körökhöz
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Vagy állítsa őket a várható leghosszabb csendes időszaknál magasabbra (az értékek ezredmásodpercben értendők):
+Vagy emelje azokat a várt leghosszabb csendes rés fölé (az értékek ezredmásodpercek):
 
 ```bash
-# Példa: legfeljebb 2 óra csend engedélyezése az upstream adatblokkok között
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-A környezeti változók módosítása után indítsa újra az OmniRoute-ot.
+Indítsa újra OmniRoute az env vars megváltoztatása után.
 
-### Konkrét recept — többórás Codex-feladat
+### Konkrét recept — több órás Codex feladat
 
-1. **Rögzítse a fiókot:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12 óra) vagy `86400` (legfeljebb 24 óra).
-2. **Növelje vagy tiltsa le az inaktivitási időkorlátokat** az OmniRoute környezetében:
+1. **Fiók rögzítése:** Irányítópult → Beállítások → Útválasztás → Munkamenet affinitás → Affinitás TTL = `43200` (12 óra) vagy `86400` (max. 24 óra).
+2. **Az üresjárati letiltás emelése / letiltása** OmniRoute környezetében:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Tartsa meg a szokásos Codex `config.toml` konfigurációt (`wire_api = "responses"`, helyes `base_url`, `OMNIROUTE_API_KEY`) — ehhez a két viselkedéshez nem léteznek Codex-oldali affinitási/inaktivitási beállítások.
-4. Indítsa újra az OmniRoute-ot, majd indítsa el a hosszú Codex-feladatot.
+3. Tartsa meg a szokásos Codex `config.toml` (`wire_api = "responses"`, helyes `base_url`, `OMNIROUTE_API_KEY`) — e két viselkedéshez nem létezik Codex oldali affinity/idle potméter.
+4. Indítsa újra OmniRoute, majd indítsa el a hosszú Codex feladatot.
 
-### Döntés az alapértelmezésekről (#7287)
+### Alapértelmezett döntés (#7287)
 
-| Beállítás                | Kiadási alapértelmezés | Módosul ebben az útmutatóban?                                                                                         |
-| ------------------------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (kikapcsolva)      | **Nem** — továbbra is opcionális (terheléselosztás kontra folytonosság; lásd: Discussion #5718)                       |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 perc)     | **Nem** — az általános forgalomnál továbbra is 10 perc; a hosszú Codex-feladatokat üzemeltetők növelik vagy letiltják |
+| Gomb                     | Szállítás alapértelmezett | Változás ebben az útmutatóban?                                                                   |
+| ------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------ |
+| `sessionAffinityTtlMs`   | `0` (ki)                  | **Nem** — továbbra is választható (terheléselosztás vs folytonosság; lásd #5718 megbeszélést)    |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 perc)        | **Nem** — 10 perc marad az általános forgalomnál; hosszú Codex operátorok emelik vagy tiltják le |
 
-Bármelyik alapértelmezés globális átállítása az adott példány minden kliensének viselkedését megváltoztatná, nem csak a Codexét. Dokumentálja a beállításokat; az alapértelmezéseket hagyja változatlanul mindaddig, amíg kifejezett üzemeltetői döntés másként nem rendelkezik.
+Bármelyik alapértelmezett átfordítása globálisan megváltoztatná a példány minden kliensének viselkedését, nem csak Codex. Dokumentálja a gombokat; hagyja békén az alapértelmezett értékeket, amíg egy kifejezett kezelői döntés mást nem mond.
 
-### Inaktivitás miatti megszakítások diagnosztizálása
+### Üresjárati vágások diagnosztizálása
 
-Amikor az inaktivitásfigyelő aktiválódik, az OmniRoute a következő formájú sort naplózza:
+Amikor az üresjárati őrzőkutya tüzel, OmniRoute a következő alakú vonalat rögzíti:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Keressen rá az `Idle timeout: no data from` szövegre (vagy a `stream_idle_timeout` kódra / `StreamIdleTimeoutError` hibanévre). A szolgáltatói szegmens azt mutatja, amit az OmniRoute az adott kéréshez használt (`codex`, egy másik szolgáltatói azonosító, vagy ismeretlen szolgáltató esetén `provider`) — ez nem mindig szó szerint a `codex` karakterlánc.
+Grep `Idle timeout: no data from` -hoz (vagy a `stream_idle_timeout` kód / hibanév `StreamIdleTimeoutError`). A szolgáltatói szegmens az adott kéréshez használt OmniRoute (`codex`, másik szolgáltató azonosítója vagy `provider`, ha ismeretlen). — ez nem mindig a `codex` karakterlánc.
 
 ---
 

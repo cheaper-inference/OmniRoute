@@ -8,114 +8,107 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## மேம்பாட்டு அமைப்பு
+## வளர்ச்சி அமைப்பு
 
-### முன்தேவைகள்
+### முன்நிபந்தனைகள்
 
-- **Node.js** `>=22.22.2 <23`, அல்லது `>=24.0.0 <27` (பரிந்துரைக்கப்படுகிறது: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`, அல்லது `>=24.0.0 <27` (பரிந்துரைக்கப்பட்டது: 24 LTS)
+- **npm** 10 +
 
-> **Node 24 உடன் Windows:** தற்போதைய 24 LTS patch வெளியீட்டை (குறைந்தது 24.20.0) பயன்படுத்தவும்.  
-> முந்தைய வெளியீடுகளில் `--test-force-exit` செயல்முறையை மூடிய பிறகு, வெற்றிகரமான சோதனைகளுக்குப் பின்னரும் செயல்முறை நிறுத்தப்படலாம். Node இன் [Windows libuv திருத்தம்](https://github.com/nodejs/node/pull/61999) இந்த runtime செயலிழப்பைத் தீர்க்கிறது; சோதனை assertions மற்றும் runner exit checks ஆகியவை இயக்கப்பட்ட நிலையிலேயே இருக்கட்டும்.
+> **முனை 24 உடன்Windows :** தற்போதைய 24 LTS பேட்ச் வெளியீட்டைப் பயன்படுத்தவும் (குறைந்தது 24.20.0). `--test-force-exit` செயல்முறையை மூடும் போது வெற்றிகரமான சோதனைகளுக்குப் பிறகு முந்தைய வெளியீடுகள் நிறுத்தப்படலாம். நோட்டின் [Windows libuv பிழைத்திருத்தம்](https://github.com/nodejs/node/pull/61999) இந்த இயக்க நேர செயலிழப்பைக் குறிக்கிறது; சோதனை வலியுறுத்தல்கள் மற்றும் ரன்னர் வெளியேறும் காசோலைகளை இயக்கத்தில் வைத்திருங்கள்.
 
-> **npm v11+ பயனர்கள் (Node 24+):** `npm install` இயக்கிய பிறகு, native modules நிறுவப்பட்டுள்ளனவா என்பதைச் சரிபார்க்கவும்:  
-> `node -e "require('better-sqlite3')"` . இது `MODULE_NOT_FOUND` பிழையுடன் தோல்வியடைந்தால்,  
-> `npm approve-scripts better-sqlite3 && npm install` இயக்கவும்.  
-> [Troubleshooting](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) பார்க்கவும்.
+> **npm v11 + பயனர்கள் (நோட் 24 +):** `npm install` க்குப் பிறகு, சொந்த தொகுதிகள் நிறுவப்பட்டதை சரிபார்க்கவும்: `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` இல் தோல்வியடைந்தால், `npm approve-scripts better-sqlite3 && npm install` இயக்கவும். [சிக்கலைத் தீர்ப்பதைப்](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) பார்க்கவும்.
 
 - **Git**
 
-### குளோன் செய்து நிறுவுதல்
+### குளோன் & நிறுவவும்
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### சூழல் மாறிகள்
+### சுற்றுச்சூழல் மாறிகள்
 
 ```bash
-# உங்கள் .env கோப்பை வார்ப்புருவிலிருந்து உருவாக்கவும்
+# Create your .env from the template
 cp .env.example .env
 
-# தேவையான ரகசியங்களை உருவாக்கவும்
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-மேம்பாட்டிற்கான முக்கிய மாறிகள்:
+வளர்ச்சிக்கான முக்கிய மாறிகள்:
 
-| Variable               | Development Default      | Description                 |
+| மாறி                   | வளர்ச்சி இயல்புநிலை      | விளக்கம்                    |
 | ---------------------- | ------------------------ | --------------------------- |
-| `PORT`                 | `20128`                  | சேவையகப் போர்ட்             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | frontend-க்கான அடிப்படை URL |
-| `JWT_SECRET`           | (மேலே உருவாக்கவும்)      | JWT கையொப்பமிடும் ரகசியம்   |
+| `PORT`                 | `20128`                  | சர்வர் போர்ட்               |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | முன்பகுதிக்கான அடிப்படை URL |
+| `JWT_SECRET`           | (மேலே உருவாக்கவும்)      | JWT கையெழுத்திடும் ரகசியம்  |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | முதல் உள்நுழைவு கடவுச்சொல்  |
-| `APP_LOG_LEVEL`        | `info`                   | பதிவு விரிவாக்க நிலை        |
+| `APP_LOG_LEVEL`        | `info`                   | லாக் verbosity நிலை         |
 
-### Dashboard அமைப்புகள்
+### டாஷ்போர்டு அமைப்புகள்
 
-சூழல் மாறிகள் வழியாகவும் கட்டமைக்கக்கூடிய அம்சங்களுக்கான UI மாற்றிகளை dashboard வழங்குகிறது:
+டாஷ்போர்டு சூழல் மாறிகள் வழியாகவும் கட்டமைக்கக்கூடிய அம்சங்களுக்கான UI மாற்றங்களை வழங்குகிறது:
 
-| Setting Location    | Toggle             | Description                              |
-| ------------------- | ------------------ | ---------------------------------------- |
-| Settings → Advanced | Debug Mode         | debug request பதிவுகளை இயக்கவும் (UI)    |
-| Settings → General  | Sidebar Visibility | sidebar பிரிவுகளைக் காட்டவும்/மறைக்கவும் |
+| இருப்பிடத்தை அமைத்தல்   | நிலைமாற்று             | விளக்கம்                                    |
+| ----------------------- | ---------------------- | ------------------------------------------- |
+| அமைப்புகள் → மேம்பட்டது | பிழைத்திருத்த முறை     | பிழைத்திருத்த கோரிக்கை பதிவுகளை இயக்கு (UI) |
+| அமைப்புகள் → பொது       | பக்கப்பட்டி தெரிவுநிலை | Show/hide பக்கப்பட்டி பிரிவுகள்             |
 
-இந்த அமைப்புகள் database-ல் சேமிக்கப்பட்டு, மறுதொடக்கங்களுக்குப் பிறகும் நிலைத்திருக்கும்; அமைக்கப்பட்டபோது env var இயல்புநிலைகளை மீறுகின்றன.
+இந்த அமைப்புகள் தரவுத்தளத்தில் சேமிக்கப்பட்டு மறுதொடக்கம் முழுவதும் தொடர்ந்து இருக்கும், அமைக்கப்படும் போது env var இயல்புநிலைகளை மீறும்.
 
-### உள்ளூரில் இயக்குதல்
+### உள்ளூரில் இயங்குகிறது
 
 ```bash
-# மேம்பாட்டு முறை (hot reload)
+# Development mode (hot reload)
 npm run dev
 
 # Production build
-npm run build    # next build → .build/next/ பின்னர் assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# பங்களிப்பாளர்களின் மாற்றங்களுக்கான விரைவான backend/API-only compile
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Release build (சுத்தமான rebuild + HEAD sentinel — deploy-க்கு தேவை)
-npm run build:release   # rm -rf .build dist பின்னர் build + dist/BUILD_SHA எழுதுகிறது
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# பொதுவான போர்ட் கட்டமைப்பு
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-பங்களிப்பாளர் build compile-only சரிபார்ப்பைச் செய்கிறது: இது standalone distribution-ஐ assemble செய்யாது அல்லது விருப்ப native packaging assets-ஐ build செய்யாது. deploy செய்யக்கூடிய bundle-ஐச் சரிபார்க்க வேண்டும்போது வழக்கமான production build-ஐப் பயன்படுத்தவும்.
+பங்களிப்பாளர் உருவாக்கமானது தொகுத்தல்-மட்டும் சரிபார்ப்பைச் செய்கிறது: இது தனித்த விநியோகத்தை ஒருங்கிணைக்காது அல்லது விருப்பமான சொந்த பேக்கேஜிங் சொத்துக்களை உருவாக்காது. நீங்கள் அனுப்பக்கூடிய மூட்டையை சரிபார்க்க வேண்டியிருக்கும் போது வழக்கமான உற்பத்தி கட்டமைப்பைப் பயன்படுத்தவும்.
 
-### Build வெளியீட்டு அமைப்பு
+### வெளியீட்டு தளவமைப்பை உருவாக்கவும்
 
-| Directory | Contents                                                                  | Tracked |
-| --------- | ------------------------------------------------------------------------- | ------- |
-| `src/`    | Application source (TypeScript / TSX)                                     | ஆம்     |
-| `.build/` | Intermediates — `next build` output (gitignored, `distDir = .build/next`) | இல்லை   |
-| `dist/`   | Shippable bundle — assembled by `assembleStandalone` (gitignored)         | இல்லை   |
+| அடைவு     | உள்ளடக்கம்                                                                             | கண்காணிக்கப்பட்டது |
+| --------- | -------------------------------------------------------------------------------------- | ------------------ |
+| `src/`    | விண்ணப்ப ஆதாரம் (TypeScript / TSX)                                                     | ஆம்                |
+| `.build/` | இடைநிலைகள் — `next build` வெளியீடு (gitignored, `distDir = .build/next`)               | இல்லை              |
+| `dist/`   | அனுப்பக்கூடிய மூட்டை — `assembleStandalone` ஆல் அசெம்பிள் செய்யப்பட்டது (ஜிடிஜினோர்டு) | இல்லை              |
 
-Build pipeline ஒரே கட்டமாகும்:
+பைப்லைன் கட்டுவது ஒற்றை பாஸ் ஆகும்:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js output)
-  └─ assembleStandalone()                 (standalone + static + public + native assets-ஐ நகலெடுக்கிறது)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` கூடுதலாக முதலில் இரு directories-ஐயும் சுத்தம் செய்து, deploy integrity sentinel ஆக  
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) எழுதுகிறது.
+`npm run build:release` கூடுதலாக இரண்டு கோப்பகங்களையும் முதலில் சுத்தம் செய்கிறது மற்றும் `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ஒரு வரிசைப்படுத்தல் ஒருமைப்பாடு செண்டினலாக எழுதுகிறது.
 
-`npm run build:contributor` backend-only build profile-ஐப் பயன்படுத்துகிறது. Build செய்யும்போது dashboard UI கோப்புகளைத் தற்காலிகமாக stub செய்து, API route handlers-ஐ வைத்திருந்து, build முடிந்ததும் அசல் கோப்புகளை மீட்டமைக்கிறது. Dashboard UI-ஐ பாதிக்கும் மாற்றங்களுக்கு அல்லது முழுமையான release validation-க்கு `npm run build` பயன்படுத்தவும்; contributor profile, release build-க்கு மாற்றாகாது.
+`npm run build:contributor` பின்தளத்தில் மட்டும் உருவாக்க சுயவிவரத்தைப் பயன்படுத்துகிறது. இது உருவாக்கும்போது டேஷ்போர்டு UI கோப்புகளை தற்காலிகமாக நிறுத்துகிறது, API ரூட் ஹேண்ட்லர்களை வைத்திருக்கிறது மற்றும் கட்டமைக்கப்பட்ட பிறகு அசல் கோப்புகளை மீட்டெடுக்கிறது. டாஷ்போர்டு UI பாதிக்கும் மாற்றங்களுக்கு அல்லது முழு வெளியீட்டு சரிபார்ப்புக்கு `npm run build` பயன்படுத்தவும்; பங்களிப்பாளர் சுயவிவரம் வெளியீட்டு உருவாக்கத்திற்கு மாற்றாக இல்லை.
 
-> **VPS deploy குறிப்பு:** remote image directory `/usr/lib/node_modules/omniroute/app/`  
-> மாற்றமின்றி உள்ளது. deploy skills, `dist/` உள்ளடக்கங்களை அதில் rsync செய்கின்றன.  
-> repository-க்குள் உள்ள build output path மட்டும் மாற்றப்பட்டது (`app/` → `dist/`).
+> **VPS வரிசைப்படுத்தல் குறிப்பு:** ரிமோட் பட அடைவு `/usr/lib/node_modules/omniroute/app/` மாறாமல் உள்ளது. வரிசைப்படுத்துதல் திறன்கள் `dist/` இன் உள்ளடக்கங்களை அதனுள் ஒத்திசைக்கிறது. இன்-ரெப்போ பில்ட் அவுட்புட் பாதை மட்டும் நகர்த்தப்பட்டது (`app/` → `dist/`).
 
 இயல்புநிலை URLs:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **டாஷ்போர்டு** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -423,8 +416,8 @@ VPS deployment-களுக்கு, `npm run build` அல்லாமல் `
 
 ## உதவி பெறுதல்
 
-- **கட்டமைப்பு**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)-ஐப் பார்க்கவும்
-- **API குறிப்பு**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)-ஐப் பார்க்கவும்
-- **பாதுகாப்பு ஆவணங்கள்**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **செயல்பாட்டு ஆவணங்கள்**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **சிக்கல்கள்**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **கட்டிடக்கலை** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) பார்க்கவும்
+- **API குறிப்பு** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) பார்க்கவும்
+- **பாதுகாப்பு ஆவணங்கள்** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops ஆவணங்கள்** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **சிக்கல்கள்** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

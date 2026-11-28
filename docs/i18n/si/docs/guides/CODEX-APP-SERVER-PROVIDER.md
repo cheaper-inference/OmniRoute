@@ -18,27 +18,24 @@ app-server URL එකෙන් ළඟා විය හැකි Codex CLI එක
 
 ---
 
-## 1. නිර්මාණ ව්යුහය
+## 1. ගෘහ නිර්මාණ ශිල්පය
 
 ```
-┌─ OmniRoute යෙදුම ────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ හැකියා ටෝකනය)               │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuth ස්වයංව පාලනය කරයි    │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, ස්වයං-නැවුම්) │
-        │ බෙදාගනී (compose volumes)          └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS හැකියා ටෝකනය (දෙකම එය mount කරයි)
-  codex-appserver-home    → ~/.codex (dashboard මඟින් auth.json ලියනු ලබන අතර,
-                             sidecar හි codex app-server මඟින් කියවනු ලැබේ)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- sidecar එක හැකියා ටෝකනයක් පිටුපස ඇති අභ්යන්තර compose ජාලයේ
-  (`ws://codex-app-server:1456`) **පමණක්** සවන් දෙයි. එය host වෙත හෝ අන්තර්ජාලයට
-  **කිසිවිටෙකත්** publish නොකෙරේ.
-- Codex CLI එක `omniroute:base` තුළම අන්තර්ගත කර ඇති බැවින්, sidecar එක
-  ධාවනය කරන විට host එකේ හෝ පරිශීලකයාගේ යන්ත්රයේ codex ස්ථාපනය කිරීම අවශ්ය නොවේ.
+- පැතිකාරයා සවන් දෙයි** පමණි** හැකියාවන් ටෝකනය පිටුපස අභ්යන්තර රචනා ජාලය (`ws://codex-app-server:1456`) මත. එය වේ** කවදාවත්** ධාරකයට හෝ අන්තර්ජාලයට ප්‍රකාශයට පත් කෙරේ.
+- සයිඩ්කාර් `omniroute:cli-no-docker` භාවිතා කරයි , `runner-cli-no-docker` ඉලක්කයෙන් ගොඩනගා ඇති අතර එයට Codex CLI.
 
 ## 2. එය ආරම්භ කිරීම
 

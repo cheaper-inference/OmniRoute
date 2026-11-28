@@ -4,7 +4,7 @@
 
 ---
 
-> **Fonte della verità:** `electron/` spazio di lavoro** Ultimo aggiornamento:** 2026-06-28 — v3.8.40
+> **Fonte della verità:** `electron/` spazio di lavoro
 
 OmniRoute fornisce un'app desktop multipiattaforma (Windows / macOS / Linux) integrata**Electron 41** +** costruttore di elettroni 26.10** . L'app desktop genera il server autonomo Next.js come processo figlio, punta `BrowserWindow` su di esso e aggiunge una barra delle applicazioni, un aggiornamento automatico, un bridge IPC e un bootstrap segreto a configurazione zero.
 
@@ -198,7 +198,7 @@ Impostato tramite `session.defaultSession.webRequest.onHeadersReceived`. Diretti
 
 ## Aggiornamento automatico
 
-Utilizza `electron-updater` con il provider GitHub (`diegosouzapw/OmniRoute`).
+Utilizza `electron-updater` con il provider GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Eventi inoltrati al renderer tramite `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (con `percent`), `downloaded`, `error`
@@ -240,7 +240,7 @@ Env esegue l'override: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `E
 
 ## Firma del codice
 
-`electron/package.json` lo fa** non** trasferire direttamente le credenziali di firma. Passali tramite env vars a `electron-builder`:
+`electron/package.json` lo fa** non** trasferire direttamente le credenziali per la firma. Passali tramite env vars a `electron-builder`:
 
 ### macOS
 
@@ -273,7 +273,7 @@ Gli artefatti atterrano in `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Le versioni vengono pubblicate su GitHub Releases (`diegosouzapw/OmniRoute`), che è anche il luogo in cui `electron-updater` verifica la presenza di nuove versioni.
+Le versioni vengono pubblicate su GitHub Releases (`cheaper-inference/OmniRoute`), che è anche il luogo in cui `electron-updater` verifica la presenza di nuove versioni.
 
 ## Risoluzione dei problemi
 

@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Sprijină** 22 de strategii de rutare** (vezi `src/shared/constants/routingStrategies.ts`):
 
-| Strategie           | Comportament                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------------ |
-| `priority`          | Lista ordonată pentru prima țintă                                                          |
-| `weighted`          | Probabilistic prin greutatea pe țintă                                                      |
-| `round-robin`       | Parcurgeți ținte în ordine                                                                 |
-| `context-relay`     | Transmite contextul între ținte                                                            |
-| `fill-first`        | Completați cota înainte de a trece la următoarea                                           |
-| `p2c`               | Puterea a două alegeri                                                                     |
-| `random`            | Uniform aleatoriu                                                                          |
-| `least-used`        | Alegeți cel cu cele mai puține utilizări recente                                           |
-| `cost-optimized`    | Cel mai ieftin obiectiv sănătos mai întâi                                                  |
-| `reset-aware`       | Conștient de ferestrele de resetare ale furnizorului                                       |
-| `reset-window`      | Resetați rutarea bazată pe ferestre                                                        |
-| `expiry-first`      | Cheltuiți mai întâi contul a cărui cotă ar expira neutilizată                              |
-| `headroom`          | În primul rând, cea mai mare cotă rămasă                                                   |
-| `quota-weighted`    | Omiteți conturile epuizate, apoi extrageți din cota rămasă ÷ încărcătură în zbor           |
-| `strict-random`     | Cu adevărat uniformă (fără ponderare a calității)                                          |
-| `auto`              | Utilizați scorul cu 16 factori (`autoCombo/`)                                              |
-| `lkgp`              | Ultimul furnizor bun cunoscut mai întâi                                                    |
-| `context-optimized` | Cel mai bun pentru solicitări în context lung                                              |
-| `cache-optimized`   | Fixați fiecare prefix de prompt reutilizabil în același cont (accesări în cache-ul prompt) |
-| `fusion`            | Ventilați către un panel în paralel, apoi sintetizați printr-un judecător (`fusion.ts`)    |
-| `pipeline`          | Lanțul de pași — rezultatul fiecărei ținte îl alimentează pe următorul                     |
-| `jev`               | Opt-in: TypeSafe Jev admite ce intrări clasate rulează; altfel comanda ta                  |
+| Strategie           | Comportament                                                                            |
+| ------------------- | --------------------------------------------------------------------------------------- |
+| `priority`          | Lista ordonată pentru prima țintă                                                       |
+| `weighted`          | Probabilistică în funcție de greutatea țintă                                            |
+| `round-robin`       | Parcurgeți ținte în ordine                                                              |
+| `context-relay`     | Transmite contextul între ținte                                                         |
+| `fill-first`        | Completați cota înainte de a trece la următoarea                                        |
+| `p2c`               | Puterea a două alegeri                                                                  |
+| `random`            | Amestecare proaspătă la cerere                                                          |
+| `least-used`        | Alegeți-l pe cel cu cele mai puține solicitări înregistrate                             |
+| `cost-optimized`    | Cel mai mic preț de intrare de catalog mai întâi                                        |
+| `reset-aware`       | Cota rămasă + resetează urgența                                                         |
+| `reset-window`      | Fereastra de cotă care se resetează mai devreme                                         |
+| `expiry-first`      | Cheltuiți mai întâi contul a cărui cotă ar expira neutilizată                           |
+| `headroom`          | În primul rând, cea mai mare cotă rămasă                                                |
+| `quota-weighted`    | Omiteți conturile epuizate, apoi extrageți din cota rămasă ÷ încărcătură în zbor        |
+| `strict-random`     | Punctul amestecat: fiecare țintă o dată înainte de a se repeta                          |
+| `auto`              | Utilizați scorul cu 16 factori (`autoCombo/`)                                           |
+| `lkgp`              | Ultimul furnizor bun cunoscut mai întâi                                                 |
+| `context-optimized` | Mai întâi, cea mai mare fereastră de context cunoscută                                  |
+| `cache-optimized`   | Preferați contul care probabil să dețină prefixul prompt în cache                       |
+| `fusion`            | Ventilați către un panel în paralel, apoi sintetizați printr-un judecător (`fusion.ts`) |
+| `pipeline`          | Lanțul de pași — rezultatul fiecărei ținte îl alimentează pe următorul                  |
+| `jev`               | Opt-in: TypeSafe Jev admite ce intrări clasate rulează; altfel comanda ta               |
 
 ### base.ts (1170 LOC)
 

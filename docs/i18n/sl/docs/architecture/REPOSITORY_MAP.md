@@ -4,9 +4,9 @@
 
 ---
 
-> **Kaj živi kje: vsak sledeni imenik najvišje ravni in korenska datoteka z namenom ene vrstice.** Zadnja posodobitev: 2026-11-13 (OmniRoute v3.8.54)
+> **Kaj živi kje: vsak sledeni imenik najvišje ravni in korenska datoteka z namenom ene vrstice.**
 >
-> Uporabite ta zemljevid, da se poiščete po zbirki kode, nato sledite povezavam do namenskih dokumentov. Število datotek je bilo izmerjeno z `git ls-files` na zgornji datum. Spreminjajo se s skoraj vsako izdajo, zato jih obravnavajte kot redove velikosti.
+> Uporabite ta zemljevid, da se poiščete po zbirki kode, nato pa sledite povezavam do namenskih dokumentov. Število datotek prihaja iz `git ls-files` in se spreminja s skoraj vsako izdajo. Obravnavajte jih kot redove velikosti.
 
 ## Drevo najvišje ravni
 

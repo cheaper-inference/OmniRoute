@@ -4,7 +4,7 @@
 
 ---
 
-> **Leagan:** v3.8.44** Nuashonraithe is déanaí:** 2026-10-28** Lucht Féachana:** Innealtóirí ag cur, ag cothabháil, nó ag dífhabhtú seirbhísí leabaithe (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Leagan:** v3.8.44** Lucht Féachana:** Innealtóirí ag cur, ag cothabháil, nó ag dífhabhtú seirbhísí leabaithe (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Is uirlisí taobhcharr próisis iad seirbhísí leabaithe a shuiteálann go háitiúil a shuiteálann OmniRoute, a mhaoirsíonn agus a nochtar mar spriocanna ródaithe den chéad scoth. Murab ionann agus soláthraithe seachtracha (a mbaintear amach ar an idirlíon trí eochracha API ), ritheann seirbhísí leabaithe ar an meaisín céanna le OmniRoute agus cumarsáid a dhéanamh thar loopback.
 

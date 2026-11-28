@@ -4,210 +4,213 @@
 
 ---
 
-> **Qısa xülasə**: Uyğun provayder hesablarınızı özünüz təmin edin. OmniRoute konfiqurasiya etdiyiniz bağlantıları birləşdirir; elan edilən ümumi token büdcəsini özü təqdim etmir. Pulsuz giriş qeydiyyat, API açarı, təsdiq və ya ödəniş üsulu tələb edə bilər. Provayder limitləri, məxfilik siyasətləri və şərtləri qüvvədə qalır.
+> **TL;DR** : Öz uyğun provayder hesablarınızı gətirin. OmniRoute konfiqurasiya etdiyiniz əlaqələri birləşdirir; o, elan edilmiş məcmu token büdcəsini vermir. Pulsuz giriş qeydiyyat, API açarı, təsdiq və ya ödəniş metodu tələb edə bilər. Provayder məhdudiyyətləri, məxfilik siyasəti və şərtlər hələ də qüvvədədir.
 
 ---
 
-## Pulsuz Səviyyələr Nədir?
+## Pulsuz pillələr nədir?
 
-Bir çox AI provayderi müəyyən formada **pulsuz giriş** təklif edir. Provayderdən asılı olaraq bu, autentifikasiya tələb etməyən son nöqtə, mütəmadi yenilənən kvota, sürət məhdudiyyətli limitsiz giriş, qeydiyyat bonusu, manual təsdiq və ya müvəqqəti kampaniya ola bilər. Bəzi seçimlər hesab, API açarı, kredit kartı, KYC və ya provayderə xas şərtlərin qəbul edilməsini tələb edir.
+Bir çox AI provayderi bir növ təklif edir** pulsuz giriş** . Provayderdən asılı olaraq, bu, autentsiz son nöqtə, təkrarlanan kvota, tarif məhdudiyyəti olmayan giriş, qeydiyyat qrantı, əl ilə təsdiq və ya müvəqqəti təşviq ola bilər. Bəzi seçimlər hesab, API açarı, kredit kartı, KYC və ya provayderə məxsus şərtlərin qəbulunu tələb edir.
 
-OmniRoute konfiqurasiya edilmiş bağlantıları bir son nöqtədə **birləşdirir**. Hesab tələb edən hər bir provayderdə yenə də ayrıca qeydiyyatdan keçməlisiniz. Həmin hesabları qoşun və uyğun hədəflər arasında marşrutlaşdırma aparmaq üçün `model: "auto"` istifadə edin. Yeni quraşdırmada açarsız uyğun hədəf olmaya bilər; təkcə OmniRoute-un quraşdırılması uğurlu çat cavabına zəmanət vermir.
-
----
-
-## Təmsilçi Pulsuz Giriş Təminatçıları
-
-### Təkrarlanan, Açarsız və ya Limitsiz Giriş
-
-Bu təminatçıların yoxlanılmış kataloqda təkrarlanan, açarsız və ya limitsiz pulsuz giriş imkanı var. “Limitsiz” dərc edilmiş token limitinin olmaması deməkdir; sürət, paralel sorğu, hesab, regional və siyasət məhdudiyyətləri yenə də tətbiq oluna bilər:
-
-| Təminatçı         | Modellər                                                                           | Kvota                                                                                                                                            | Necə Qoşulmalı                                                                                                                                    |
-| ----------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 və digərləri                           | Yoxlanılmış kataloq aylıq 25K-token həcmində ortaq hovuz olduğunu təxmin edir                                                                    | OAuth/hesab prosesi; kataloqda Xidmət Şərtləri `avoid` kimi işarələnib                                                                            |
-| **Pollinations**  | Cari açarsız model dəsti; bəzi əvvəlki modellər dayandırılıb və ya açar tələb edir | Açarsızdır; dərc edilmiş token limiti yoxdur                                                                                                     | Açarsız modellər üçün təminatçı giriş məlumatları tələb olunmur                                                                                   |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 və digərləri           | Pulsuz API açarı (sürət limiti və kart tələbi yoxdur); tədqiqat üçün **hər sorğu qeydə alınır** (logfare.ai/consent ünvanında imtina etmək olar) | Açarı dərhal logfare.ai/register ünvanından əldə edin; Xidmət Şərtləri və məxfilik qaydaları logfare.ai/tos və logfare.ai/privacy ünvanlarındadır |
-| **Cloudflare AI** | Workers AI kataloqu                                                                | Yoxlanılmış hovuz dərc edilmiş istifadə vahidlərinə əsasən ayda ~30M token olduğunu təxmin edir                                                  | Cloudflare hesabı və API giriş məlumatları                                                                                                        |
-| **Gemini**        | Gemini Flash ailəsi                                                                | Layihə/model üzrə dəyişən sürət limitləri; əsas təklifə sabit aylıq token paketi daxil deyil                                                     | Google AI Studio API açarı; layihənin aktiv limitlərini yoxlayın                                                                                  |
-| **Groq**          | Llama, GPT-OSS və Qwen modelləri                                                   | Yoxlanılmış hovuz ayda ~15M token olduğunu təxmin edir                                                                                           | Groq API açarı; sürət limitləri tətbiq olunur                                                                                                     |
-
-### Qeydiyyat Bonusları və Təminatçıya Xas Kreditlər
-
-Bu təminatçılar uyğunluq qaydalarına tabe olmaqla qeydiyyat bonusları və ya promosyon kreditləri təklif edirlər. 2026-10-08 tarixində təsdiqləndiyi kimi, [Cerebras qiymətləri](https://www.cerebras.ai/pricing) 30 gündən sonra müddəti bitən birdəfəlik $5 kredit üçün ödəniş üsulu tələb edir; bu, təkrarlanan token kvotası deyil. [Gemini sürət limitləri](https://ai.google.dev/gemini-api/docs/rate-limits) layihə, model və səviyyəyə görə dəyişir, buna görə də onlar zəmanətli aylıq token paketinə çevrilmir.
-
-| Təminatçı     | Pulsuz Kreditlər                                                   | Modellər                    | Necə Əldə Etməli                                                         |
-| ------------- | ------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------------------ |
-| **Cerebras**  | Birdəfəlik $5 promosyon krediti; müddəti 30 gündən sonra bitir     | Cari inferensiya kataloqu   | Hesab və etibarlı ödəniş üsulu                                           |
-| **DeepSeek**  | 5M pulsuz token                                                    | DeepSeek V4                 | platform.deepseek.com ünvanında qeydiyyatdan keçin                       |
-| **LongCat**   | Birdəfəlik 10M-token bonusu                                        | LongCat 2.0                 | API açarı + KYC; bonusdan sonra istifadəyə görə ödəniş                   |
-| **Vertex AI** | Büdcə modelində ~300M token kimi göstərilən $300 qeydiyyat krediti | Gemini və tərəfdaş modellər | Google Cloud hesabı; fakturalandırma və uyğunluq qaydaları tətbiq olunur |
-
-### Digər Məhdud Giriş İmkanları
-
-Bu təminatçıların xüsusi limitləri olan **pulsuz səviyyələri** var:
-
-| Təminatçı                       | Pulsuz Limit                                                                                         | Modellər                             | Ən Uyğun İstifadə |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------ | ----------------- |
-| **GitHub Models**               | Yoxlanılmış ortaq hovuz ayda ~18M token olduğunu təxmin edir                                         | Geniş model qiymətləndirilməsi       |
-| **Hugging Face**                | Kiçik, təkrarlanan aylıq hovuz                                                                       | Təcrübələr və model müxtəlifliyi     |
-| **OpenRouter pulsuz modelləri** | Ortaq, sorğu sayı məhdud hovuz; istəyə bağlı birdəfəlik balans artırımı təkrarlanan limiti yüksəldir | Geniş ehtiyat kataloqu               |
-| **AI Horde**                    | Açarsız icma tutumu; əlçatanlıq dəyişir                                                              | Fürsət olduqda paylanmış inferensiya |
+OmniRoute** aqreqatlar** konfiqurasiya edilmiş əlaqələri bir son nöqtəyə. Siz hələ də hesab tələb edən hər bir provayder üçün ayrıca qeydiyyatdan keçməlisiniz. Həmin hesabları birləşdirin və uyğun hədəflər arasında marşrutlaşdırmaq üçün `model: "auto"` istifadə edin. Təzə quraşdırmanın uyğun açarsız hədəfi ola bilməz; OmniRoute tək başına quraşdırılması uğurlu söhbət cavabına zəmanət vermir.
 
 ---
 
-## Pulsuz Səviyyələri Necə Birləşdirmək Olar
+## Nümayəndə Sərbəst Giriş Provayderləri
 
-OmniRoute-un əsas üstünlüyü **pulsuz səviyyələri birləşdirməkdir**. Tək bir provayderə güvənmək əvəzinə, bir neçə pulsuz provayderi qoşur və OmniRoute-a hər sorğu üçün ən uyğun olanı avtomatik seçməyə imkan verirsiniz.
+### Təkrarlanan, Açarsız və ya Qapaqsız Giriş
 
-### Nümunə: Daha Geniş Pulsuz Səviyyə Əhatəsi
+Bu provayderlərin yoxlanılan kataloqda təkrarlanan, açarsız və ya qapaqsız sərbəst giriş yolu var. “Qapaqsız” heç bir dərc edilmiş nişan qapağı deməkdir; dərəcə, paralellik, hesab, regional və siyasət limitləri hələ də tətbiq oluna bilər:
 
-Hər hansı bir kvotadan asılılığı azaltmaq üçün bir neçə provayder qoşun:
+| Provayder          | Modellər                                                                              | Kvota                                                                                                                                   | Necə Qoşulmaq olar                                                       |
+| ------------------ | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| **Kiro AI**        | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 və s.                                     | Yoxlanılan kataloq 25K-token paylaşılan aylıq hovuzu təxmin edir                                                                        | OAuth/account axını; ToS kataloqda `avoid` ilə işarələnmişdir            |
+| **Tozlandırmalar** | Hazırkı açarsız model dəsti; bəzi köhnə modellər dayandırılıb və ya açar tələb olunur | açarsız; dərc edilmiş nişan qapağı yoxdur                                                                                               | Açarsız modellər üçün provayder etimadnaməsi yoxdur                      |
+| **Logfare**        | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 və s.                     | Pulsuz API açarı (tarif məhdudiyyəti yoxdur, kart yoxdur);** hər sorğu qeyd olunur** tədqiqat üçün ( logfare.ai/consent-də imtina edin) | logfare.ai/register; ToS/privacy at logfare.ai/tos və logfare.ai/privacy |
+| **Cloudflare AI**  | İşçilər AI kataloqu                                                                   | Nəşr edilmiş istifadə vahidlərindən yoxlanılmış hovuz təxminləri ~ 23M tokens/month (kataloq 2026-11-23 yoxlanılıb)                     | Cloudflare hesabı və API etimadnaməsini                                  |
+| **Gemini**         | Gemini Flash ailəsi                                                                   | Dəyişən project/model dərəcəsi məhdudiyyətləri; başlığa heç bir sabit aylıq token qrantı daxil edilmir                                  | Google AI Studio API açarı; layihənin aktiv limitlərini yoxlayın         |
+| **Groq**           | Llama, GPT-OSS və Qwen modelləri                                                      | Audit edilmiş hovuz təxminləri ~ 24M tokens/month (hər model üçün 4 başlıq, kataloq yoxlanılıb 23.11.2026)                              | Groq API açarı; tarif limitləri tətbiq edilir                            |
 
-1. **Gemini** — dövri API açarı kvotası
-2. **Groq** — dövri API açarı kvotası
-3. **Pollinations** — açarsız, sorğu tezliyi məhdudlaşdırılmış giriş
-4. **LongCat** — qeydiyyat zamanı birdəfəlik verilən kredit (KYC tələb olunur)
+### Qeydiyyat Qrantları və Provayderə Xüsusi Kreditlər
 
-Sonra `model: "auto"` istifadə edin və OmniRoute:
+Bu provayderlər uyğunluq qaydalarına uyğun olaraq qeydiyyatdan keçmə qrantları və ya tanıtım kreditləri təklif edirlər. 2026-10-08 tarixində təsdiq edildiyi kimi, [Cerebras qiymətləri](https://www.cerebras.ai/pricing) 30 gündən sonra müddəti bitən birdəfəlik 5 dollarlıq kredit üçün ödəniş metodu tələb edir; bu təkrarlanan token kvotası deyil. [Gemini dərəcəsi məhdudiyyətləri](https://ai.google.dev/gemini-api/docs/rate-limits) layihə, model və səviyyəyə görə dəyişir, ona görə də onlar zəmanətli aylıq token qrantına çevrilmir.
 
-- Əvvəlcə uyğun olan ən yüksək prioritetli bağlantını sınayacaq
-- Onun kvotası tükənərsə və ya sağlamlıq yoxlaması uğursuz olarsa → növbəti konfiqurasiya edilmiş provayderi sınayacaq
-- Açarsız provayder əlçatan olmazsa → qalan hədəfləri sınamağa davam edəcək
-- Heç bir uyğun bağlantı uğurlu olmazsa → xəta qaytaracaq; qeydiyyat kreditləri yalnız etibarlı və əlçatan olduğu müddətdə istifadə edilə bilər
+| Provayder     | Pulsuz Kreditlər                                                                 | Modellər                     | Necə əldə etmək olar                                                    |
+| ------------- | -------------------------------------------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------- |
+| **Cerebras**  | Birdəfəlik $5 promo kredit; 30 gündən sonra başa çatır                           | Cari nəticə kataloqu         | Hesab və etibarlı ödəniş üsulu                                          |
+| **DeepSeek**  | 5 milyon pulsuz token                                                            | DeepSeek V4                  | platform.deepseek.com saytında qeydiyyatdan keçin                       |
+| **LongCat**   | 10M-token birdəfəlik qrant                                                       | LongCat 2.0                  | API açarı + KYC; qrantdan sonra getdikcə ödəyin                         |
+| **Vertex AI** | Büdcə modelində ~ 300M ayələr kimi təmsil olunan 300 dollarlıq qeydiyyat krediti | Gemini və tərəfdaş modelləri | Google Cloud hesabı; faturalandırma və uyğunluq qaydaları tətbiq olunur |
 
-**Nəticə**: avtomatik ehtiyat keçidlə daha geniş pulsuz səviyyə əhatəsi — qeyri-məhdud tutuma zəmanət deyil.
+### Digər Məhdud Giriş
 
----
+Bu provayderlər var** pulsuz pillələr** xüsusi məhdudiyyətlərlə:
 
-## Pulsuz Provayderlərə Necə Qoşulmalı
-
-### Addım 1: İdarəetmə Panelini Açın
-
-Brauzerinizdə `http://localhost:20128` ünvanına keçin.
-
-### Addım 2: Provayderlər Bölməsinə Keçin
-
-Yan paneldə **Provayderlər** üzərinə klikləyin.
-
-### Addım 3: Provayder Əlavə Et Düyməsinə Klikləyin
-
-**+ Provayder Əlavə Et** düyməsinə klikləyin.
-
-### Addım 4: Pulsuz Provayder Seçin
-
-Kataloqu nəzərdən keçirin və hər bir provayderin cari `hasFree`, autentifikasiya, kvota, məxfilik və Xidmət Şərtləri metadatasını yoxlayın. Provayder kartı və
-[Pulsuz Tariflər üzrə İstinad](../reference/FREE_TIERS.md) təkrarlanan limit paketlərini,
-limitsiz/açarsız girişi, qeydiyyat kreditlərini, dayandırılmış seçimləri və daha yüksək riskli mənbələri fərqləndirir.
-
-### Addım 5: Qoşul Düyməsinə Klikləyin
-
-`NOAUTH` provayderi üçün OmniRoute yuxarı səviyyəli giriş məlumatı tələb etmir. Bu, yuxarı səviyyəli xidmətin üçüncü tərəf klientlərini qəbul etdiyinə və ya əlçatan tutuma malik olduğuna zəmanət vermir. OAuth və API açarı tələb edən provayderlər sənədləşdirilmiş hesab proseduru vasitəsilə qoşulmalıdır. Router autentifikasiyası aktiv olduqda, klientiniz yenə də **İdarəetmə Paneli → Son Nöqtələr** bölməsində göstərilən OmniRoute API açarından istifadə edir.
-
-### Addım 6: Təkrarlayın
-
-Şərtləri və məxfilik modeli istifadə ssenarinizə uyğun olan bir neçə provayderi qoşun.
+| Provayder                      | Pulsuz Limit                                                                                  | Modellər                         | Üçün ən yaxşısı |
+| ------------------------------ | --------------------------------------------------------------------------------------------- | -------------------------------- | --------------- |
+| **GitHub modelləri**           | Audit edilmiş paylaşılan hovuz təxminləri ~ 18M tokens/month                                  | Geniş model qiymətləndirməsi     |
+| **Qucaqlayan Üz**              | Kiçik təkrarlanan aylıq hovuz                                                                 | Təcrübələr və model müxtəlifliyi |
+| **OpenRouter pulsuz modellər** | Paylaşılan sorğu-məhdud hovuz; isteğe bağlı birdəfəlik doldurma təkrarlanan müavinəti artırır | Geniş ehtiyat kataloqu           |
+| **AI Orda**                    | Açarsız icma qabiliyyəti; mövcudluğu dəyişir                                                  | Fürsətçi paylanmış nəticə        |
 
 ---
 
-## Kataloqu düzgün oxumaq
+## Pulsuz pillələri necə yığmaq olar
 
-- `NOAUTH` o deməkdir ki, OmniRoute sizdən provayder giriş məlumatı tələb etmir; bu,
-  fasiləsiz işləməyə, məxfiliyə və ya limitsiz tutuma zəmanət vermir.
-- `hasFree` aşkarlama metadatasıdır. Bu, təkrarlanan kvotanı, açarsız girişi,
-  qeydiyyat kreditini, təsdiq proqramını və ya kampaniyanı ifadə edə bilər.
-- `recurring-uncapped` dərc edilmiş token limitinin mövcud olmadığını bildirir; sürət və
-  paralellik məhdudiyyətləri yenə də tətbiq olunur.
-- `one-time-initial` qeydiyyat zamanı verilən kredit istifadə edildikdən sonra təkrarlanmır.
-- `tos: avoid` provayderləri standart olaraq avtomatik marşrutlaşdırmadan çıxarılır (`excludeTosAvoid`). Hesabın qoşulması bu filtrdən yan keçmir. Operator tərəfindən edilən istənilən istisna provayderin şərtləri və hesab riski nəzərdən keçirildikdən sonra tətbiq olunmalıdır.
-- `discontinued` ilə işarələnmiş qeydlər tarixi sübut kimi saxlanılır və hazırda
-  pulsuz kimi təqdim edilməməlidir.
+OmniRoute sehri budur** pulsuz pillələrin yığılması** . Bir provayderə güvənmək əvəzinə, birdən çox pulsuz provayderi birləşdirirsiniz və OmniRoute hər sorğu üçün avtomatik olaraq ən yaxşısını seçməyə icazə verirsiniz.
+
+### Misal: Daha Geniş Sərbəst Səviyyəli Əhatə
+
+İstənilən tək kvotadan asılılığı azaltmaq üçün bir neçə provayderi birləşdirin:
+
+1. **Gemini** — təkrarlanan API açarı kvotası
+2. **Groq** — təkrarlanan API açarı kvotası
+3. **Tozlandırmalar** — açarsız, limitli giriş
+4. **LongCat** — birdəfəlik qeydiyyat qrantı ( KYC tələb olunur)
+
+Sonra `model: "auto"` istifadə edin və OmniRoute :
+
+- Əvvəlcə ən yüksək səviyyəli uyğun əlaqəni sınayın
+- Kvota və ya sağlamlıq yoxlanışı uğursuz olarsa, növbəti konfiqurasiya edilmiş provayderi →
+- Açarsız provayder mövcud deyilsə, → qalan hədəflərə davam edin
+- Heç bir uyğun əlaqə uğursuz olarsa → xəta qaytarın; qeydiyyat kreditləri yalnız etibarlı və mövcud olduqda istifadə edilə bilər
+
+**Nəticə** : avtomatik geri dönüş — ilə daha geniş pulsuz səviyyəli əhatə dairəsi qeyri-məhdud tutuma zəmanət deyil.
 
 ---
 
-## OmniRoute pulsuz səviyyələri necə yaxşılaşdırır
+## Pulsuz Provayderləri necə bağlamaq olar
 
-### 1. Avtomatik ehtiyat keçid
+### Addım 1: İdarə panelini açın
 
-Pulsuz provayderlərdən biri məşğul və ya əlçatmaz olarsa, OmniRoute avtomatik olaraq növbətisini sınayır. Heç nə etməyinizə ehtiyac yoxdur.
+Brauzerinizdə `http://localhost:20128` ya keçin.
+
+### Addım 2: Provayderlərə keçin
+
+basın** Provayderlər** yan paneldə.
+
+### Addım 3: Provayder əlavə et klikləyin
+
+üzərinə klikləyin**+ Provayder əlavə edin** düyməsi.
+
+### Addım 4: Pulsuz Provayder seçin
+
+Kataloqu nəzərdən keçirin və hər bir provayderin cari `hasFree`, auth, kvota, məxfilik və ToS metadatasını yoxlayın. Provayder kartı və [Pulsuz Tier Referansı](../reference/FREE_TIERS.md) təkrarlanan hovuzları, uncapped/keyless girişini, qeydiyyat kreditlərini, dayandırılmış girişləri və daha yüksək riskli mənbələri fərqləndirir.
+
+### Addım 5: Bağlan düyməsini basın
+
+Bir `NOAUTH` provayderi üçün OmniRoute yuxarı axın etimadnaməsini tələb etmir. Bu, yuxarı axının üçüncü tərəf müştərilərini qəbul etməsinə və ya mövcud imkanlara malik olduğuna zəmanət vermir. OAuth və API açarı təminatçıları sənədləşdirilmiş hesab axını vasitəsilə birləşdirilməlidir. Müştəriniz hələ də yaradılmış OmniRoute API açarından istifadə edir** İdarə paneli → API düymələri** marşrutlaşdırıcının autentifikasiyası aktiv olduqda (yalnız bir dəfə yaradılarkən göstərilir).
+
+### Addım 6: təkrarlayın
+
+Şərtləri və məxfilik modeli istifadə vəziyyətinizə uyğun gələn bir neçə provayderi birləşdirin.
+
+---
+
+## dsh-dən "Pulsuz Modelimiz"dən gəlir
+
+dsh agent hostu üçün [dsh-our-free-model](https://github.com/Ebony-Vinyl/dsh-our-free-model) plaqini iki yuxarı axına çatır. OmniRoute artıq hər biri üçün bir provayderi var, lakin onlardan yalnız biri OmniRoute-də pulsuz yoldur:
+
+| Plugin zolağı | Yuxarı                                      | OmniRoute provayderi        | OmniRoute pulsuz? | Necə qoşulmaq olar                                                                      |
+| ------------- | ------------------------------------------- | --------------------------- | ----------------- | --------------------------------------------------------------------------------------- |
+| Kilo kanalı   | Kilo AI gateway (`api.kilo.ai/api/gateway`) | `kilo-gateway` (ləqəb `kg`) | Bəli              | API açarı isteğe bağlıdır: şlüzün pulsuz hovuzundan istifadə etmək üçün onu boş buraxın |
+| Sərbəst zolaq | OpenCode Zen (`opencode.ai`)                | `opencode-zen`              | yox               | [opencode.ai/zen](https://opencode.ai/zen) -dən öz OpenCode API açarınız                |
+
+**kilo.** Pulsuz hovuza `kilo-gateway/<model>` və ya `kg/<model>` kimi zəng edin, məsələn, `kg/kilo-auto/free` (Kilo-nun pulsuz avtomatik marşrutlaşdırıcısı) və ya şlüzün `:free` modellərindən biri. Sərbəst dəst fırlanır; `kilo-gateway` OmniRoute-in daxili siyahısında olmayan model id-lərindən keçir, ona görə də bu gün şlüzün siyahıya aldığı modeli kataloqa daxil etməmişdən əvvəl onu çağırmaq olar. Kilo-nun pulsuz model kartları deyir ki, göstərişlər yuxarı provayder tərəfindən daxil oluna və onun xidmətlərini təkmilləşdirmək üçün istifadə oluna bilər, ona görə də həssas məlumatları göndərməyin.
+
+**OpenCode.** Pluginin sərbəst zolağı OpenCode-nin açarsız təklifidir. OmniRoute bu təklifi pulsuz giriş kimi təmin etmir:
+
+- OmniRoute-nın açarsız OpenCode provayderi OpenCode-nin operatorunun tələbi ilə silindi ( [Silinmiş Provayderlərə](../reference/REMOVED_PROVIDERS.md) baxın).
+- OpenCode-nın [son nöqtə sənədləri](https://opencode.ai/v2/docs/console/models/#endpoints) pulsuz söhbət təkliflərini OpenCode-nin öz müştərisi ilə əlaqələndirir, ona görə də OmniRoute onları pulsuz hesab etmir və ya nişan vermir.
+
+Model `deepseek-v4.1-flash-free`, `mimo-v2.6-flash-free` və `nemotron-3.5-lightning-free` kimi plaqinin göstərdiyi identifikatorlar `opencode-zen` kataloqundadır. OpenCode hesabınızın şərtlərinə uyğun olaraq istifadə etmək üçün `opencode-zen` öz OpenCode açarınızla birləşdirin.
+
+**Pluginin yerli portu.** Plugin öz modellərini yerli OpenAI-uyğun portda ifşa edə bilər (defolt `18899`). İstənilən belə son nöqtə [xüsusi OpenAI-a uyğun provayder](../guides/USER_GUIDE.md#custom-openai-compatible-providers) kimi əlavə edilə bilər, lakin OmniRoute plaqini quraşdırmır, işə salmır və ya yeniləmir və plagin hər sorğuya hansı yuxarı axının xidmət göstərəcəyinə qərar verir. Yuxarıdakı OpenCode məhdudiyyətləri hansı müştəri sorğu göndərirsə, OpenCode təklifinə tətbiq edilir.
+
+---
+
+## Kataloqun düzgün oxunması
+
+- `NOAUTH` o deməkdir ki, OmniRoute sizdən provayder etimadnaməsini tələb etmir; iş vaxtına, məxfiliyə və ya məhdudiyyətsiz tutuma zəmanət vermir.
+- `hasFree` kəşf metadatasıdır. O, təkrarlanan kvota, açarsız giriş, qeydiyyat krediti, təsdiq proqramı və ya təşviqi təmsil edə bilər.
+- `recurring-uncapped` heç bir dərc edilmiş token tavanının mövcud olmadığını bildirir; məzənnə və paralellik limitləri hələ də qüvvədədir.
+- `one-time-initial` qeydiyyat qrantı istehlak edildikdən sonra təkrarlanmır.
+- `tos: avoid` provayderləri defolt olaraq avtomatik marşrutlaşdırmadan xaric edilir (`excludeTosAvoid`). Hesabın qoşulması bu filtrdən yan keçmir. İstənilən operatorun ləğvi provayder şərtlərinin və hesab riskinin nəzərdən keçirilməsinə əməl etməlidir.
+- `discontinued` qeyd olunan girişlər tarixi sübut olaraq qalır və hazırda pulsuz olaraq təqdim edilməməlidir.
+
+---
+
+## OmniRoute pulsuz pillələri necə yaxşılaşdırır
+
+### 1. Avtomatik Fallback
+
+Bir pulsuz provayder məşğuldursa və ya işləmirsə, OmniRoute avtomatik olaraq növbətisini sınayır. Heç bir şey etmək lazım deyil.
 
 ### 2. Ağıllı marşrutlaşdırma
 
-OmniRoute hər sorğu üçün **ən yaxşı pulsuz provayderi** aşağıdakılara əsasən seçir:
+OmniRoute seçir** ən yaxşı pulsuz provayder** hər bir sorğu üçün:
 
-- Sürət — Hazırda hansı provayder daha sürətlidir?
-- Keyfiyyət — Bu tapşırıq üçün hansı provayder daha uyğundur?
-- Tutum — Hansı provayderin qalan kvotası var?
+- Speed — Hazırda ən sürətli provayder hansıdır?
+- Keyfiyyət — Hansı provayder bu iş üçün ən yaxşısıdır?
+- Tutum — Hansı provayderdə kvota qalıb?
 
-### 3. Token qənaəti
+### 3. Token Əmanətləri
 
-OmniRoute-un sıxılma konveyeri uyğun sorğu və alət çıxışı tokenlərinin sayını azalda bilər.
-Faktiki qənaət məzmundan, seçilmiş mühərriklərdən, provayderin hesablama qaydasından və dəqiqlik
-parametrlərindən asılıdır; sıxılma hər provayderin kvotasını sabit bir əmsalla artırmır.
+OmniRoute-nın sıxılma boru kəməri uyğun təklif və alət çıxışı nişanlarını azalda bilər. Faktiki qənaət məzmundan, seçilmiş mühərriklərdən, provayderin uçotundan və etibarlılıq parametrlərindən asılıdır; sıxılma hər provayder kvotasını sabit məbləğə vurmur.
 
-### 4. Çoxsaylı hesab dəstəyi
+### 4. Çox Hesab Dəstəyi
 
-Provayderin şərtləri bir neçə hesaba və ya giriş məlumatına icazə verirsə, OmniRoute hər
-bağlantını ayrıca marşrutlaşdırma namizədi kimi qəbul edə bilər. Provayderin kvota və ya
-giriş siyasətindən yayınmaq üçün əlavə hesablar yaratmayın.
+Əgər provayder şərtləri birdən çox hesaba və ya etimadnaməyə icazə verirsə, OmniRoute hər bir əlaqəni ayrıca marşrutlaşdırma namizədi kimi nəzərdən keçirə bilər. Provayderin kvotasından və ya giriş siyasətindən yayınmaq üçün əlavə hesablar yaratmayın.
 
 ---
 
-## Pulsuz Səviyyə Hesablaması
+## Pulsuz səviyyəli riyaziyyat
 
-Canlı, hovuzlar üzrə dublikatları aradan qaldırılmış kataloq hazırda aşağıdakıları göstərir:
+Canlı, hovuzda təkrarlanan kataloq hazırda məlumat verir:
 
-| Metrika                        | Cari audit edilmiş dəyər | Şərh                                                                       |
-| ------------------------------ | -----------------------: | -------------------------------------------------------------------------- |
-| Təkrarlanan hesablanmış limit  |      **~1.62B token/ay** | Ortaq hovuzlar bir dəfə hesablanıb; limitsiz provayderlər cəmdən çıxarılıb |
-| Qeydiyyat limitləri ilə ilk ay |         **~2.22B token** | Təkrarlanan cəm, üstəgəl birdəfəlik və təkrarlanan kreditlər               |
+| Metrik                         |        Cari yoxlanılmış dəyər | Təfsir                                                                                    |
+| ------------------------------ | ----------------------------: | ----------------------------------------------------------------------------------------- |
+| Təkrarlanan kəmiyyətli qrant   | **~ 90M pulsuz tokens/month** | Paylaşılan hovuzlar bir dəfə sayılır; məbləğdən məhdudiyyətsiz provayderləri istisna edir |
+| Qeydiyyat qrantları ilə ilk ay |       **ilk ayınızda ~ 153M** | Təkrarlanan cəmi üstəgəl birdəfəlik və təkrarlanan kreditlər                              |
 
-Bunlar ayrı-ayrı uyğun hesablara əsaslanan, bütün kataloqu əhatə edən təxmini göstəricilərdir; OmniRoute tərəfindən təqdim olunan limit və ya yeni quraşdırma üçün proqnoz deyil. İstifadə edə biləcəyiniz tutum qoşduğunuz provayderlərdən və onların cari şərtlərindən asılıdır. Dəyərlər `open-sse/config/freeModelCatalog.ts` faylından hesablanır; hovuzların dublikatlarının aradan qaldırılması, ToS işarələri,
-dayandırılmış qeydlər və qeydiyyat krediti metodologiyası üçün
-[Pulsuz Səviyyələr üzrə İstinad](../reference/FREE_TIERS.md) sənədinə baxın.
+Bunlar OmniRoute tərəfindən təmin edilən ehtiyat və ya yeni quraşdırma üçün proqnoz deyil, ayrı-ayrı uyğun hesablar üzrə kataloq miqyasında təxminlərdir. İstifadə qabiliyyətiniz qoşulduğunuz provayderlərdən və onların cari şərtlərindən asılıdır. Qiymətlər `open-sse/config/freeModelCatalog.ts` dən hesablanır; Hovuzun təkrarlanması, ToS bayraqları, dayandırılmış girişlər və qeydiyyat-kredit metodologiyası üçün [Pulsuz Səviyyə Referansına](../reference/FREE_TIERS.md) baxın.
 
 ---
 
-## Tez-tez Verilən Suallar
+## Ümumi suallar
 
 ### "Bu, həqiqətən pulsuzdur?"
 
-Kataloqda provayderlərin dərc etdiyi şərtlər və layihə araşdırmaları qeyd olunur, lakin təkliflər dəyişə bilər.
-İstifadədən əvvəl provayderin cari qiymətlərini, kvotasını, məxfilik siyasətini və uyğunluq tələblərini yoxlayın.
+Kataloq provayder tərəfindən nəşr olunan şərtləri və layihə araşdırmasını qeyd edir, lakin təkliflər dəyişə bilər. İstifadə etməzdən əvvəl provayderin cari qiymətini, kvotasını, məxfilik siyasətini və uyğunluğunu yoxlayın.
 
-### "Pulsuz səviyyənin limiti tükənəcəkmi?"
+### "Pulsuz pillə bitəcəkmi?"
 
-Hər bir provayder sorğu tezliyini məhdudlaşdıra, modelləri dəyişə, girişi dayandıra və ya oflayn ola bilər. Çoxsaylı
-bağlantılar ehtiyat marşrut əhatəsini yaxşılaşdırır, lakin pulsuz marşrutun mövcudluğuna zəmanət vermir.
+Hər bir provayder qiymətləri məhdudlaşdıra, modelləri dəyişdirə, girişi dayandıra və ya oflayn ola bilər. Birdən çox əlaqə ehtiyat əhatə dairəsini yaxşılaşdırır, lakin mövcud pulsuz marşruta zəmanət vermir.
 
-### "Pulsuz provayderlərdən istehsal mühitində istifadə edə bilərəmmi?"
+### "Mən istehsal üçün pulsuz provayderlərdən istifadə edə bilərəmmi?"
 
-Yalnız provayderin SLA-sı, məlumatların emalı qaydaları, limitləri və şərtləri istehsal
-tələblərinizə cavab verirsə. Kritik iş yükləri monitorinq edilən və müqavilə baxımından uyğun ehtiyat marşruta malik olmalıdır.
+Yalnız provayderin SLA, məlumatların idarə edilməsi, məhdudiyyətləri və şərtləri istehsal tələblərinizə cavab verərsə. Kritik iş yüklərinin monitorinqi, müqaviləyə uyğun geri qaytarılması olmalıdır.
 
-### "Gizli məqam nədir?"
+### – Tutmaq nədir?
 
-Mənfi cəhətlərə sərt limitlər, gözləmə siyahıları, KYC, kredit kartı yoxlaması, sorğular üzərində
-təlim, daha zəif məxfilik, SLA-nın olmaması, modellərin tez-tez dəyişməsi, coğrafi məhdudiyyətlər, limitdən artıq istifadəyə görə ödəniş və ya
-hesab siyasəti riski daxil ola bilər. OmniRoute mövcud metadatanı göstərir; nəyi aktivləşdirəcəyinizi siz seçirsiniz.
+Mübadilələrə ciddi limitlər, gözləmə siyahıları, KYC, kredit kartının yoxlanılması, göstərişlər üzrə təlim, daha zəif məxfilik, SLA olmaması, modelin boşalması, coğrafi məhdudiyyətlər, ödənişli ödəniş və ya hesab siyasəti riski daxil ola bilər. OmniRoute mövcud metaməlumatları üzə çıxarır; nəyi aktivləşdirəcəyinizi seçirsiniz.
 
-### "Daha çox pulsuz kvotanı necə əldə edə bilərəm?"
+### "Mən daha çox pulsuz kvotanı necə əldə edə bilərəm?"
 
-1. Daha çox pulsuz provayder qoşun
-2. Uyğun sıxışdırma mühərriklərini aktivləşdirin və iş yükünüz üçün qənaəti ölçün
-3. Pulsuz/ucuz provayderlərə üstünlük vermək üçün `auto/cheap` istifadə edin
-4. Provayder şərtlərini pozmadan əlavə icazəli provayderlər və ya giriş məlumatları əlavə edin
+1. Daha çox pulsuz provayderi birləşdirin
+2. Müvafiq sıxılma mühərriklərini işə salın və iş yükünüz üçün qənaət ölçün
+3. free/cheap provayderlərinə üstünlük vermək üçün `auto/cheap` istifadə edin
+4. Provayderin şərtlərini pozmadan əlavə icazə verilən provayderlər və ya etimadnamələr əlavə edin
 
-### "Pulsuz provayderlərin keyfiyyəti daha aşağıdır?"
+### "Pulsuz provayderlərin daha pis keyfiyyəti varmı?"
 
-Mütləq deyil. Bəzi provayderlər ödənişli
-marşrutlarda mövcud olan eyni model ailələrini təqdim edir, lakin limitlər, gecikmə, məxfilik, etibarlılıq və model versiyaları fərqlənə bilər.
-Keyfiyyət göstəricisi kimi Pulsuz Provayder Reytinqləri səhifəsindən istifadə edin və faktiki təqdim olunan modeli yoxlayın.
+Mütləq deyil. Bəzi provayderlər ödənişli marşrutlar vasitəsilə mövcud olan eyni model ailələrini ifşa edir, lakin məhdudiyyətlər, gecikmə, məxfilik, etibarlılıq və model versiyaları fərqli ola bilər. Keyfiyyət siqnalı kimi Pulsuz Provayder Reytinqləri səhifəsindən istifadə edin və xidmət edilən faktiki modeli yoxlayın.
 
 ---
 
-## Növbəti addım nədir?
+## Növbəti nə var?
 
-- **[Avtomatik kombinasiya təlimatı](./AUTO-COMBO-GUIDE.md)** — Qoy OmniRoute sizin üçün ən yaxşı süni intellekti seçsin
-- **[Provayderlər üzrə təlimat](./PROVIDERS-GUIDE.md)** — Daha çox provayder qoşun
-- **[Nasazlıqların aradan qaldırılması](../guides/TROUBLESHOOTING.md)** — Ümumi problemləri həll edin
-- **[Pulsuz paketlər üzrə arayış](../reference/FREE_TIERS.md)** — Pulsuz paketlərin tam siyahısı
+- **[Avtomatik Kombo Bələdçisi](./AUTO-COMBO-GUIDE.md)** — Qoy OmniRoute sizin üçün ən yaxşı AI seçsin
+- **[Provayderlər Bələdçisi](./PROVIDERS-GUIDE.md)** — Daha çox provayderi birləşdirin
+- **[Problemlərin aradan qaldırılması](../guides/TROUBLESHOOTING.md)** — Ümumi problemləri həll edin
+- **[Pulsuz pillələrə istinad](../reference/FREE_TIERS.md)** — Pulsuz səviyyələrin tam siyahısı

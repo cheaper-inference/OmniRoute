@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Všechna pravidla projektu jsou uvedena v souboru [`AGENTS.md`](AGENTS.md)** — jediném zdroji pravdy pro každého AI
-asistenta (architektura, konvence, testování, kontroly kvality, pracovní postup gitu, 23 tvrdých pravidel,
-poznatky o PII). Přečtěte si jej celý; pravidla projektu sem znovu nepřidávejte. Vše níže se vztahuje POUZE
-na Claude Code — jde o provozní upřesnění pravidel již definovaných v souboru `AGENTS.md`.
+**Všechna pravidla projektu žijí v [`AGENTS.md`](AGENTS.md)** — jediný zdroj pravdy pro každého asistenta AI ; výše uvedený import jej již načte. Zde znovu nepřidávejte pravidla projektu. Vše níže platí ONLY na Claude Provozní upřesnění kódu — pravidel již definovaných v `AGENTS.md`.
 
-## Izolace worktree — specifika pro Claude Code
+## Izolace pracovního stromu — Claude Specifika kódu
 
-Kompletní povinný protokol worktree (potvrzení základní větve, kanonická cesta
-`.claude/worktrees/`, `cp -al` node_modules, pravidla pro odstranění) je v
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (shrnuto v `AGENTS.md` →
-Pracovní postup Gitu → "Izolace worktree"). Body specifické pro Claude Code:
+- Potvrďte základní větev u operátora prostřednictvím `AskUserQuestion` (Hard Rule #19), pokud vám to již neřekl.
+- Vytvořte pracovní strom pomocí `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (přistane pod `.claude/worktrees/`, pevně připojí `node_modules` a zkopíruje `.husky/_`), poté zavolejte `EnterWorktree` pomocí jeho `path`. Vždy předejte základ: bez něj skript vybere nejvyšší `release/*`, což nemusí být to, které operátor potvrdil. Pracovní strom, který `EnterWorktree` vytvoří sám, nemá ani pevné odkazy, ani háky, takže v něm neběží žádná brána před potvrzením.
 
-- Potvrďte základní větev s operátorem pomocí `AskUserQuestion` (Pevné pravidlo č. 19), pokud
-  vám ji již nesdělil.
-- Upřednostněte nativní nástroj `EnterWorktree` — ten již vytváří worktree pod
-  `.claude/worktrees/` (kanonická cesta). Vytvořte worktree zdokumentovaným příkazem `git
-worktree add` a poté zavolejte `EnterWorktree` s jeho `path`.
+## Subagenty a git
 
-## Bezpečnost napříč relacemi — specifika Claude Code
+Každý subagent, který se dotkne git (nástroj agenta nebo skript Workflow), dostane ve své výzvě doslovně zákaz #22 a `git stash` — zaznamenané opakování incidentu s skrýší přišlo přes subagenta.
 
-Souběžné relace se řídí tvrdými pravidly č. 19/21/22 (v `AGENTS.md`). Provozní připomínky pro toto
-prostředí:
+## Plánovací artefakty přepisují cestu superschopností —
 
-- **Zákaz `git stash` doslovně zopakujte v promptu každého subagenta, který pracuje s gitem**
-  (nástroj Agent / skripty Workflow) — subagenti tento soubor nedědí a zaznamenaný
-  opakovaný incident se stash nastal právě prostřednictvím subagenta.
-- Před sloučením nebo odesláním změn do jakéhokoli PR, které jste nevytvořili _v této relaci_, spusťte `git worktree list`
-  a znovu zkontrolujte `gh pr view <N> --json state,headRefOid` (tvrdé pravidlo č. 22b).
-- Každou relaci ukončete s hlavním checkoutem na větvi, na které začala.
+Schopnosti superschopnosti oznamují výchozí hodnoty pod `docs/superpowers/plans/`, `docs/superpowers/specs/` a `docs/research/`. Před zápisem každý přepište na jeho ekvivalent `_tasks/` v `AGENTS.md` → "Plánování a výzkum artefaktů" a potvrďte je pomocí `git -C _tasks …`, nikdy v hlavním repo.
 
-## Superpowers / plánovací artefakty — přepsání cest
+## Scratch soubory — `_artifacts/`, ne `/tmp`
 
-Konvence `_tasks/` je definována v `AGENTS.md` → „Planning & Research Artifacts“. Dovednosti
-superpowers jsou dodávány s výchozími hodnotami odkazujícími na `docs/…` — tyto výchozí hodnoty jsou **zde
-přepsány**. Když dovednost superpowers oznámí cestu, například „uloženo do `docs/superpowers/plans/…`“,
-před zápisem ji změňte na odpovídající cestu v `_tasks/…`:
+Tento projekt přepíše zápisník relace svazku (`/tmp/claude-*/…`). Zápis dočasných souborů exporty —, generované zipy, jednorázové mezivýstupy — až `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: gitignorovaná kořenová cesta `_*`, takže operátor najde a odstraní všechny škrábance na jednom místě. Odolné plány, specifikace, výzkum a předání jdou místo toho do `_tasks/` (tvrdé pravidlo #23).
 
-| Artefakt (dovednost)                  | Výchozí umístění (NEPOUŽÍVAT) | Místo toho uložit sem                                         |
-| ------------------------------------- | ----------------------------- | ------------------------------------------------------------- |
-| Plány (`writing-plans`)               | `docs/superpowers/plans/`     | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Specifikace / návrh (`brainstorming`) | `docs/superpowers/specs/`     | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Výzkum (`deep-research`, ad-hoc)      | `docs/research/`              | `_tasks/research/…`                                           |
-| Předání (`/handoff`)                  | —                             | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Červená základna
 
-Tyto artefakty commitujte uvnitř repozitáře `_tasks/` (`git -C _tasks …`), nikdy v hlavním repozitáři.
-
-## Pracovní / dočasné soubory — používejte `_artifacts/`, nikoli `/tmp`
-
-Tento projekt přepisuje výchozí dočasné úložiště relace tohoto prostředí (`/tmp/claude-*/…`). Zapisujte
-dočasné/pracovní soubory — exporty, generované zipy, jednorázové mezivýstupy a cokoli, co byste
-jinak umístili do `/tmp` — namísto toho do `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` je kořenová cesta `_*`: git ji již ignoruje (`AGENTS.md` → „Root `_*` paths“), existuje
-  pouze na disku a nikdy se nesleduje.
-- Důvod: uchovávání pracovních výstupů uvnitř projektu (namísto `/tmp`) operátorovi výrazně usnadňuje
-  vyhledání a odstranění všech dočasných souborů na jednom místě, místo jejich hledání v dočasných
-  adresářích `/tmp` specifických pro jednotlivé relace, které mizí nebo se hromadí bez sledování.
-- **Nezaměňujte** jej s `_tasks/` (tvrdé pravidlo č. 23, vlastní soukromý gitový repozitář pro trvalé
-  plány/specifikace/výzkum/předání) — `_artifacts/` slouží pouze pro jednorázové pracovní soubory; nic
-  zde nemusí přetrvat ani být verzováno.
-
-## Zelený základ před otevřením PR
-
-Před vytvořením větve nebo otevřením PR spusťte kontrolu zeleného základu (`AGENTS.md` → Git Workflow →
-„Base-green check“; dovednosti projektu na ni odkazují jako na `.agents/skills/_shared/base-green.md`). PR
-otevřené v době, kdy je špička základní větve červená, musí ve svém těle obsahovat `⚠️ base-red inherited: #<issue>`. K
-odstranění nahromaděného červeného stavu (špička základní větve + červená PR) použijte dovednost `/sweep-reds`.
+Chcete-li vypustit nahromaděný červený stav (základní hrot + červená PRs), použijte dovednost `/sweep-reds`.

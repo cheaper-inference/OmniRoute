@@ -469,107 +469,107 @@ codex debug models --bundled       # elenka l-katalgu ta’ mudelli inklużi bħ
 
 ---
 
-## Kompiti li jdumu għaddejjin
+## Ħidmiet fit-tul
 
-Żewġ valuri predefiniti ta’ OmniRoute jistgħu fis-skiet ifixklu sessjonijiet ta’ Codex CLI li jdumu diversi sigħat. L-ebda wieħed minnhom mhu setting ta’ Codex CLI — it-tnejn jinsabu fuq in-naħa ta’ OmniRoute. Utenti li jemigraw konfigurazzjoni minn proxies upstream li jorbtu l-kontijiet u jiddiżattivaw il-limiti ta’ inattività spiss jiltaqgħu mat-tnejn u jikkonkludu li OmniRoute “ma jistax iżomm sessjoni twila.”
+Żewġ defaults OmniRoute jistgħu sabotaġġ siekta sessjonijiet Codex CLI ta 'ħafna sigħat. Lanqas huwa Codex CLI setting — it-tnejn jgħixu fuq in-naħa OmniRoute. Utenti li jemigraw konfigurazzjoni minn proxy upstream li pin kontijiet u jiddiżattivaw cutoffs idle spiss jolqtu t-tnejn u jikkonkludu OmniRoute "ma jistgħux isostnu sessjoni twila."
 
-| Sintomu                                                                                                | Kawża probabbli                                                                    | Kontroll                 |
-| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- | ------------------------ |
-| Is-sessjoni tibqa’ taqleb il-kontijiet / il-kontinwità tal-cache tal-prompt tintilef bejn dawra u oħra | It-TTL tal-affinità tas-sessjoni huwa `0` (diżattivat)                             | `sessionAffinityTtlMs`   |
-| Il-konnessjoni tieqaf waqt ir-raġunament mingħajr prompt viżibbli għall-klijent                        | Il-watchdog tal-inattività tal-fluss attiva wara 10 minuti mingħajr chunk upstream | `STREAM_IDLE_TIMEOUT_MS` |
+| Sintomu                                                                                        | Kawża probabbli                                                         | Pum                      |
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------ |
+| Is-sessjoni żżomm taqleb il-kontijiet / il-kontinwità fil-pront-cache tintilef bejn id-dawriet | L-affinità tas-sessjoni TTL hija `0` (diżattivata)                      | `sessionAffinityTtlMs`   |
+| Konnessjoni tmut nofs ir-raġunament mingħajr ebda pront li jiffaċċja l-klijent                 | Stream idle watchdog sparat wara 10 minuti mingħajr ebda biċċa upstream | `STREAM_IDLE_TIMEOUT_MS` |
 
-Diskussjonijiet relatati: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (kompiti twal li jieqfu), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (għaliex l-affinità hija diżattivata b’mod predefinit). Traċċar: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Diskussjonijiet relatati: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (waqgħat tal-kompitu twal), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (għaliex l-affinità tiddiżattiva). Traċċar: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Affinità tas-sessjoni — orbot konverżazzjoni waħda ma’ kont wieħed
+### 1. Sessjoni affinità — pin konverżazzjoni waħda għal kont wieħed
 
-**Valur predefinit:** `sessionAffinityTtlMs = 0` (diżattivat).
+**Default:** `sessionAffinityTtlMs = 0` (disabled).
 
-**Fejn għandek tissettjah**
+**Fejn issettjaha**
 
-- Dashboard → **Settings → Routing** → **Session affinity** → **Affinity TTL (seconds)** (`ComboDefaultsTab`)
-- Jew ibgħat PATCH lis-settings b’`sessionAffinityTtlMs` f’**millisekondi** (medda ta’ Zod `0`–`86_400_000`, jiġifieri sa 24 siegħa)
+- Dashboard →** Settings → Routing** →** Affinità tas-sessjoni** →** Affinità TTL (sekondi)** (`ComboDefaultsTab`)
+- Jew PATCH settings ma `sessionAffinityTtlMs` in** millisekondi** ( medda Zod `0`–`86_400_000`, jiġifieri sa 24 siegħa)
 
-> Ingħata isem ġdid f’#7274 minn `codexSessionAffinityTtlMs`, li kien għal Codex biss. Il-key antika għadha aċċettata bħala alias li jinqara biss; konfigurazzjonijiet ġodda għandhom jużaw `sessionAffinityTtlMs`. L-affinità issa tapplika għal **kwalunkwe** provider ladarba t-TTL ikun ogħla minn `0`, mhux għal Codex biss — ara [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Affinità tas-sessjoni.
+> Ismu mill-ġdid fi #7274 mill-Codex-only `codexSessionAffinityTtlMs`. Iċ-ċavetta tal-wirt għadha aċċettata bħala alias li jinqara biss; konfigurazzjonijiet ġodda għandhom jużaw `sessionAffinityTtlMs`. L-affinità issa tapplika għal** kwalunkwe** fornitur ladarba l- TTL huwa 'l fuq minn `0`, mhux biss Codex — ara [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Sessjoni affinità.
 
-**X’jieqaf jaħdem meta jibqa’ f’0**
+**Dak li jinkiser meta jibqa' f'0**
 
-Kull dawra ta’ konverżazzjoni Codex b’diversi dawriet tiġi diretta b’mod indipendenti mill-istrateġija combo attiva u tista’ tasal f’**kont differenti għal kull dawra**. Dan jikser il-kontinwità tas-sessjoni / tal-cache tal-prompt upstream. OmniRoute jikkonsulta biss il-headers tas-sessjoni ta’ Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) u oqsma tal-body bħal `prompt_cache_key` / `session_id` meta t-TTL ikun akbar minn `0` (`extractSessionAffinityKey` f’`src/sse/services/auth.ts`).
+Kull dawra ta' konverżazzjoni Codex b'ħafna dawriet tiġi mgħoddija b'mod indipendenti mill-istrateġija kombinata attiva u tista' tinżel fuq** kont differenti għal kull dawra** . Li jkisser is-sessjoni upstream / il-kontinwità fil-pront-cache. OmniRoute jikkonsulta biss headers tas-sessjoni Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) u oqsma tal-ġisem bħal `prompt_cache_key` / `session_id` meta TTL huwa akbar minn `0` (`extractSessionAffinityKey` fi `src/sse/services/auth.ts`).
 
-**Rakkomandat għal kompitu wieħed li jdum diversi sigħat**
+**Rakkomandat għal kompitu wieħed ta' bosta sigħat**
 
-Issettja t-TTL **ogħla mit-tul mistenni tal-kompitu skont il-ħin reali** (il-massimu tal-UI huwa **86400 sekonda** = 24 siegħa):
+Issettja l TTL** fuq it-tul mistenni tal-arloġġ tal-ħajt tal-kompitu** (UI max huwa** 86400 sekonda** = 24 siegħa):
 
-| Tul mistenni tal-kompitu | TTL tal-affinità (UI, sekondi) | `sessionAffinityTtlMs` |
-| ------------------------ | ------------------------------ | ---------------------- |
-| Ftit sigħat              | `14400` (4s)                   | `14400000`             |
-| Matul il-lejl / ~12s     | `43200` (12s)                  | `43200000`             |
-| Ġurnata sħiħa            | `86400` (24s, massimu)         | `86400000`             |
+| Tul mistenni tal-kompitu | Affinità TTL (UI, sekondi) | `sessionAffinityTtlMs` |
+| ------------------------ | -------------------------- | ---------------------- |
+| Ftit sigħat              | `14400` (4h)               | `14400000`             |
+| Matul il-lejl / ~ 12h    | `43200` (12h)              | `43200000`             |
+| Ġurnata sħiħa            | `86400` (24h, massimu)     | `86400000`             |
 
-L-għażla volontarja hija intenzjonata: id-diżattivazzjoni tal-affinità tiffavorixxi l-ibbilanċjar tat-tagħbija bejn il-kontijiet; l-attivazzjoni tagħha tiffavorixxi l-kontinwità għal sessjoni twila waħda ta’ aġent. Din il-gwida **ma** tibdilx il-valur predefinit — l-operaturi li jħaddmu kompiti twal ta’ Codex iridu jagħżlu li jattivawha.
+Opt-in huwa intenzjonat: id-diżattivazzjoni tal-affinità tiffavorixxi l-ibbilanċjar tat-tagħbija bejn il-kontijiet; li jippermettilha tiffavorixxi l-kontinwità għal sessjoni waħda twila ta' aġent. Din il-gwida tagħmel** le** jibdlu l-default — operaturi li jmexxu ħidmiet twal Codex iridu jagħżlu.
 
-### 2. Timeout tal-inattività tal-fluss — twaqqafx dawriet ta’ raġunament kwieti
+### 2. Stream idle timeout — ma joqtolx dawriet raġunar kwiet
 
-**Valur predefinit:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minuti). Meta ma jkunx issettjat, jiret minn `REQUEST_TIMEOUT_MS`; il-linja bażi kondiviża hija wkoll 600000. Ara [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
+**Default:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minuti). Jiret minn `REQUEST_TIMEOUT_MS` meta mhux issettjat; il-linja bażi kondiviża hija wkoll 600000. Ara [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**X’jieqaf jaħdem bil-valur predefinit**
+**Dak li jinkiser fil-kontumaċja**
 
-Turn ta’ raġunament / għodda ta’ Codex li jibqa’ sieket għal aktar minn 10 minuti **mingħajr ebda blokka reali upstream** jingħalaq bil-forza mill-għassies tal-inattività SSE (`open-sse/utils/stream.ts`). Il-klijent spiss jara biss qtugħ tal-konnessjoni — li jaqbel ma’ “waqaf awtomatikament mingħajr ebda notifika.”
+A Codex ragunament / tool turn li jibqa sieket ghal aktar minn 10 minuti ma** ebda biċċa upstream reali** jingħalaq bil-forza mill-għassies idle SSE (`open-sse/utils/stream.ts`). Il-klijent ħafna drabi jara li konnessjoni vojta tinżel — li taqbel "waqfet awtomatikament mingħajr ebda notifika."
 
-Dettall kritiku: Il-**heartbeat** SSE sintetiku ta’ OmniRoute ma jirrisettjax l-arloġġ tal-inattività. Blokka reali biss mill-body upstream taġġorna `lastChunkTime`. Mudell sieket li għadu qed “jaħseb” jidher identiku għal upstream imwaħħal mill-perspettiva tal-għassies.
+Dettall kritiku: OmniRoute's SSE sintetiku** it-taħbit tal-qalb ma jerġax jissettja** l-arloġġ idle. Biss biċċa korp upstream reali jaġġorna `lastChunkTime`. Mudell kwiet li għadu "jaħseb" jidher identiku għal upstream wieqaf mill-perspettiva tal-għassies.
 
-Inattività relatata tal-body ta’ Undici: `FETCH_BODY_TIMEOUT_MS` (b’mod awtomatiku juża wkoll l-istess bażi ta’ 10 minuti; `0` jiddiżattivah). Għall-istreaming, `FETCH_TIMEOUT_MS` ikopri biss l-istabbiliment tal-konnessjoni / l-ewwel headers — ladarba l-istream ikun attiv, il-waqfiet jiġu rregolati minn `STREAM_IDLE_TIMEOUT_MS` u `FETCH_BODY_TIMEOUT_MS`.
+Inattività tal-ġisem Undici relatata: `FETCH_BODY_TIMEOUT_MS` (ukoll default għall-istess linja bażi ta' 10 minuti; `0` jiskonnettjah). Għall-istreaming, `FETCH_TIMEOUT_MS` ikopri biss is-setup tal-konnessjoni / l-ewwel headers — ladarba n-nixxiegħa tkun attiva, il-stalls huma rregolati minn `STREAM_IDLE_TIMEOUT_MS` u `FETCH_BODY_TIMEOUT_MS`.
 
-**Rakkomandat għal kompitu wieħed ta’ diversi sigħat**
+**Rakkomandat għal kompitu wieħed ta' bosta sigħat**
 
-Fl-ambjent tal-proċess ta’ OmniRoute (`.env` / compose / systemd):
+Fl-ambjent tal-proċess OmniRoute (`.env` / compose / systemd):
 
 ```bash
-# Iddiżattiva l-limiti tal-inattività tal-istream u tal-body għal turns twal ta’ raġunament
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Jew għollihom għal aktar mill-itwal intervall ta’ silenzju li tistenna (il-valuri huma f’millisekondi):
+Jew għollihom 'il fuq mill-itwal distakk kwiet li tistenna (il-valuri huma millisekondi):
 
 ```bash
-# Eżempju: ippermetti sa sagħtejn ta’ silenzju bejn blokok upstream
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Erġa’ ibda OmniRoute wara li tibdel dawn il-varjabbli tal-ambjent.
+Erġa ibda OmniRoute wara li tbiddel dawn il-vars env.
 
-### Riċetta konkreta — kompitu Codex ta’ diversi sigħat
+### Riċetta tal-konkrit — Codex b'ħafna sigħat
 
-1. **Waħħal il-kont:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12h) jew `86400` (massimu ta’ 24h).
-2. **Għolli / iddiżattiva l-limiti tal-inattività** fl-ambjent ta’ OmniRoute:
+1. **Pin il-kont:** Dashboard → Settings → Routing → Affinità tas-sessjoni → Affinity TTL = `43200` (12h) jew `86400` (24h max).
+2. **Għolli / iddiżattiva cutoffs idle** fl-ambjent ta' OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Żomm il-`config.toml` tas-soltu ta’ Codex (`wire_api = "responses"`, `base_url` korrett, `OMNIROUTE_API_KEY`) — ma jeżistux settings min-naħa ta’ Codex għall-affinità/inattività għal dawn iż-żewġ imġibiet.
-4. Erġa’ ibda OmniRoute, imbagħad ibda l-kompitu twil ta’ Codex.
+3. Żomm is-soltu Codex `config.toml` (`wire_api = "responses"`, correct `base_url`, `OMNIROUTE_API_KEY`) — ma jeżistux pumi affinity/idle fuq in-naħa tal-Codex għal dawn iż-żewġ imġieba.
+4. Ibda mill-ġdid OmniRoute, imbagħad ibda l-kompitu twil Codex.
 
-### Deċiżjoni dwar il-valuri awtomatiċi (#7287)
+### Deċiżjoni ta' Defaults (#7287)
 
-| Setting                  | Valur awtomatiku distribwit | Jinbidel f’din il-gwida?                                                                                              |
-| ------------------------ | --------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (mitfi)                 | **Le** — jibqa’ fakultattiv (ibbilanċjar tat-tagħbija kontra kontinwità; ara Discussion #5718)                        |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)           | **Le** — jibqa’ 10 minuti għat-traffiku ġenerali; l-operaturi ta’ Codex għal kompiti twal jgħolluh jew jiddiżattivawh |
+| Pum                      | Inadempjenza tal-vapur | Bidla f'din il-gwida?                                                                            |
+| ------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------ |
+| `sessionAffinityTtlMs`   | `0` (mitfi)            | **Nru** — jibqa' opt-in (ibbilanċjar tat-tagħbija vs kontinwità; ara Diskussjoni #5718)          |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)      | **Nru** — tibqa 10 minuti ghat-traffiku generali; operaturi Codex twil jgħollu jew jiskonnettjaw |
 
-Il-bidla ta’ kwalunkwe wieħed minn dawn il-valuri awtomatiċi globalment tibdel l-imġiba għal kull klijent ta’ istanza, mhux għal Codex biss. Iddokumenta s-settings; ħalli l-valuri awtomatiċi kif inhuma sakemm deċiżjoni espliċita tal-operatur ma tgħidx mod ieħor.
+Il-qlib jew default globalment ibiddel l-imġiba għal kull klijent ta 'istanza, mhux biss Codex. Iddokumenta l-pumi; ħalli l-inadempjenzi waħedhom sakemm deċiżjoni espliċita tal-operatur tgħid mod ieħor.
 
-### Dijanjosi ta’ qtugħ minħabba inattività
+### Id-dijanjosi ta' qatgħat idle
 
-Meta jiskatta l-għassies tal-inattività, OmniRoute jirreġistra linja b’din il-forma:
+Meta l-għassies idle jispara, OmniRoute jilloggja linja forma bħal:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Fittex b’grep għal `Idle timeout: no data from` (jew il-kodiċi `stream_idle_timeout` / l-isem tal-iżball `StreamIdleTimeoutError`). Is-segment tal-fornitur ikun dak li OmniRoute uża għal dik it-talba (`codex`, id ta’ fornitur ieħor, jew `provider` jekk mhux magħruf) — mhux dejjem ikun litteralment is-string `codex`.
+Grep għal `Idle timeout: no data from` (jew il-kodiċi `stream_idle_timeout` / isem tal-iżball `StreamIdleTimeoutError`). Is-segment tal-fornitur huwa kwalunkwe OmniRoute użat għal dik it-talba (`codex`, id-fornitur ieħor, jew `provider` jekk mhux magħruf) — mhuwiex dejjem is-sekwenza letterali `codex`.
 
 ---
 

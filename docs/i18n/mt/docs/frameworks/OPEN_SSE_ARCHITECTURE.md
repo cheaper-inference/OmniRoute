@@ -236,19 +236,19 @@ Jappoġġja** 22 strateġiji ta' rotta** (ara `src/shared/constants/routingStrat
 | `context-relay`     | Agħti l-kuntest bejn il-miri                                                              |
 | `fill-first`        | Imla l-kwota qabel ma timxi għal li jmiss                                                 |
 | `p2c`               | Qawwa ta' żewġ għażliet                                                                   |
-| `random`            | Uniformi każwali                                                                          |
-| `least-used`        | Agħżel dik bl-inqas użi riċenti                                                           |
-| `cost-optimized`    | L-orħos mira b'saħħitha l-ewwel                                                           |
-| `reset-aware`       | Konxju tat-twieqi reset tal-fornitur                                                      |
-| `reset-window`      | Irrisettja r-rotot ibbażat fuq it-tieqa                                                   |
+| `random`            | Shuffle frisk għal kull talba                                                             |
+| `least-used`        | Agħżel dik bl-inqas talbiet irreġistrati                                                  |
+| `cost-optimized`    | L-irħas prezz tad-dħul tal-katalgu l-ewwel                                                |
+| `reset-aware`       | Fdal kwota + reset urgenza                                                                |
+| `reset-window`      | Tieqa tal-kwota li tirrisettja mill-aktar fis l-ewwel                                     |
 | `expiry-first`      | Onfoq il-kont li l-kwota tiegħu tiskadi mhux użat l-ewwel                                 |
 | `headroom`          | Il-biċċa l-kbira tal-kwota li fadal l-ewwel                                               |
 | `quota-weighted`    | Aqbeż il-kontijiet eżawriti, imbagħad iġbed bil-kwota li fadal ÷ waqt it-titjira          |
-| `strict-random`     | Verament uniformi (l-ebda piż tal-kwalità)                                                |
+| `strict-random`     | Gverta mħasda: kull mira darba qabel tirrepeti                                            |
 | `auto`              | Uża punteġġ ta' 16-il fattur (`autoCombo/`)                                               |
 | `lkgp`              | L-aħħar fornitur tajjeb magħruf l-ewwel                                                   |
-| `context-optimized` | L-aħjar għal talbiet għal kuntest twil                                                    |
-| `cache-optimized`   | Pin kull prefiss fil-pront li jista' jerġa' jintuża fl-istess kont (hits fil-pront-cache) |
+| `context-optimized` | L-akbar tieqa tal-kuntest magħrufa l-ewwel                                                |
+| `cache-optimized`   | Ippreferi l-kont li x'aktarx iżomm il-prefiss fil-pront fil-cache                         |
 | `fusion`            | Fan out għal panel b'mod parallel, imbagħad sintetizza permezz ta' imħallef (`fusion.ts`) |
 | `pipeline`          | Chain steps — l-output ta 'kull mira għalf lil dak li jmiss                               |
 | `jev`               | Opt-in: TypeSafe Jev jammetti liema entrati klassifikati jimxu; inkella l-ordni tiegħek   |

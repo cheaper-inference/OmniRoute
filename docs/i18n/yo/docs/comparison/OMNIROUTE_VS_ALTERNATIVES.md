@@ -11,7 +11,7 @@ Ifiwera ẹya ara ẹrọ pẹlu awọn olulana AI ìmọ-orisun olokiki.
 | Ẹya ara ẹrọ                                            |                OmniRoute 3.8                | LiteLLM 1.x | OpenRouter (SaaS) | Portkey  |
 | ------------------------------------------------------ | :-----------------------------------------: | :---------: | :---------------: | :------: |
 | **Awọn olupese**                                       |                   **329**                   |    ~100     |        ~50        |   ~30    |
-| **Free/no-auth katalogi awọn titẹ sii**                |                   **155**                   |     n/a     |      irekọja      |   n/a    |
+| **Awọn olupese pẹlu wiwọle ọfẹ**                       |           **50 pẹlu free wiwọle**           |     n/a     |      irekọja      |   n/a    |
 | **Ti ara ẹni alejo gbigba**                            |                     ✅                      |     ✅      |        ❌         |  ⚠ san   |
 | **OAuth katalogi awọn titẹ sii**                       |                   **23**                    |   apa kan   |        ❌         |    ❌    |
 | **Aifọwọyi-fallback combos**                           |                **22 ogbon**                 | ayo-orisun  |   ipele-orisun    |  òṣuwọn  |
@@ -23,7 +23,7 @@ Ifiwera ẹya ara ẹrọ pẹlu awọn olulana AI ìmọ-orisun olokiki.
 | **A2A Ilana**                                          |                 ✅ 6 ogbon                  |     ❌      |        ❌         |    ❌    |
 | **Iranti (FTS5 + fekito)**                             |                     ✅                      |     ❌      |        ❌         |    ❌    |
 | **Awọn ọna opopona (PII, abẹrẹ, iran)**                |                     ✅                      |   apa kan   |        ❌         |  ✅ san  |
-| **Awọsanma oluranlowo integrations**                   |         Codex, Cursor, Devin, Jules         |     ❌      |        ❌         |    ❌    |
+| **Awọn iṣọpọ aṣoju awọsanma**                          |         Codex, Cursor, Devin, Jules         |     ❌      |        ❌         |    ❌    |
 | **Olupin Circuit fun olupese**                         |         ✅ 3-ipinle, ọlẹ imularada          |    ipilẹ    |        ❌         |    ✅    |
 | **lilọ ni ifura ika TLS (JA3/JA4)**                    |                 ✅ wreq-js                  |     ❌      |        ❌         |    ❌    |
 | **Ilana Eval**                                         |                ✅ -itumọ ti                 |     ❌      |        ❌         |  ⚠ san   |
@@ -38,7 +38,7 @@ Ifiwera ẹya ara ẹrọ pẹlu awọn olulana AI ìmọ-orisun olokiki.
 
 ## Nigbati lati yan OmniRoute
 
-- O ara-ogun ati ki o fẹ** o pọju agbegbe olupese** (awọn olupese 394, awọn titẹ sii katalogi 155 free/no-auth )
+- O ara-ogun ati ki o fẹ** o pọju agbegbe olupese** (awọn olupese 394, 50 pẹlu wiwọle ọfẹ)
 - O nilo a** olupin MCP ti a ṣe sinu** (awọn irinṣẹ LLM, iranti, awọn ọgbọn ti a fi han bi awọn irinṣẹ)
 - O nilo**A2A Ilana** fun aṣoju-si-aṣoju workflows
 - O fẹ** lilọ ni ifura ika** (JA3/JA4) lati yago fun wiwa nipasẹ CAPTCHAs oke
@@ -56,12 +56,12 @@ Ifiwera ẹya ara ẹrọ pẹlu awọn olulana AI ìmọ-orisun olokiki.
 - O fara mọ́ sísan owó fún token kọ̀ọ̀kan pẹ̀lú àfikún iye SaaS
 - O nílò **ọ̀nà ìsanwó kan ṣoṣo** fún gbogbo àwọn olùpèsè
 
-## Ìgbà tí ó yẹ kí o yan Portkey
+## Nigbati lati yan Portkey
 
-- O nílò **SLA ti ìṣòwò** pẹ̀lú ìdánilójú pé iṣẹ́ yóò wà lórí afẹ́fẹ́
-- O fẹ́ **pátákó ìṣàkóso tí a ń bójú tó** láìsí ẹrù iṣẹ́ ìṣàkóso
-- O nílò àwọn **ẹ̀ya ara ìbámu ilé-iṣẹ́ ńlá** tí ó ti ṣetán láti inú àpótí
+- O nilo a** SLA** pẹlu uptime onigbọwọ
+- O fẹ a** Dasibodu isakoso** laisi ops lori oke
+- O nilo** ibamu kekeke** awọn ẹya ara ẹrọ jade kuro ninu apoti
 
 ---
 
-_Ìmúdójúìwọ̀n tó kẹ́yìn: 2026-08-02. Fi àwọn àtúnṣe ránṣẹ́ nípasẹ̀ PR láti jẹ́ kí tábìlì yìí péye._
+_Fi awọn atunṣe silẹ nipasẹ PR lati jẹ ki tabili yii jẹ deede._

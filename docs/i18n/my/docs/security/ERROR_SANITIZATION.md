@@ -4,13 +4,7 @@
 
 ---
 
-> **အမှန်တရား၏ မူရင်းရင်းမြစ်:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` နှင့် `open-sse/utils/error.ts` ရှိ public builders များ
-> **စမ်းသပ်မှုများ:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **နောက်ဆုံးပြင်ဆင်သည့်ရက်:** 2026-09-02 — v3.8.51
-> **ရည်ရွယ်ထားသူများ:** error response များကို ကိုင်တွယ်သည့် အင်ဂျင်နီယာတိုင်း (HTTP routes, SSE streams, executors, MCP handlers)။
-> **အခြေအနေ:** client သို့ error message ပြန်ပို့သည့် code path တိုင်းအတွက် **မဖြစ်မနေ လိုက်နာရမည်**။
+> **အမှန်တရားအရင်းအမြစ်-** `open-sse/utils/errorSanitization.ts`၊ `open-sse/utils/errorPathRedaction.ts` နှင့် `open-sse/utils/error.ts` ရှိ အများသူငှာ တည်ဆောက်သူများ** စမ်းသပ်မှုများ** `tests/unit/error-message-sanitization.test.ts`၊ `tests/unit/error-public-boundaries-hardening.test.ts`** ပရိသတ်-** မည်သည့်အင်ဂျင်နီယာမဆို အမှားတုံ့ပြန်မှုများ (HTTP လမ်းကြောင်းများ၊ SSE လမ်းကြောင်းများ၊ စီမံဆောင်ရွက်သူများ၊ MCP ကိုင်တွယ်သူများ)။** အခြေအနေ-****MANDATORY** ကုဒ်လမ်းကြောင်းတိုင်းအတွက် error message ကို client ထံပြန်ပို့သည်။
 
 ## ဤအရာ ရှိရသည့်အကြောင်းရင်း
 

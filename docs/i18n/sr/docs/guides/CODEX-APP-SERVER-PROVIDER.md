@@ -21,25 +21,21 @@ OmniRoute пружа **два** начина за коришћење OpenAI Code
 ## 1. Архитектура
 
 ```
-┌─ OmniRoute апликација ──────────┐        ┌─ codex-app-server пратећи контејнер ┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ токен могућности)            │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  самостално управља OpenAI OAuth-ом │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, аутоматско    │
-        │ дели (compose волумени)            │   освежавање)                        │
-        ▼                                    └─────────────────────────────────────┘
-  codex-appserver-token   → WS токен могућности (оба га монтирају)
-  codex-appserver-home    → ~/.codex (auth.json уписује контролна табла,
-                             а чита га codex app-server пратећег контејнера)
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
+        ▼
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Пратећи контејнер слуша **искључиво** на интерној compose мрежи
-  (`ws://codex-app-server:1456`), заштићен токеном могућности. **Никада** није
-  изложен хосту нити интернету.
-- Codex CLI је уграђен у `omniroute:base`, тако да приликом покретања пратећег
-  контејнера није потребно инсталирати codex на хосту нити на корисниковом
-  рачунару.
+- Приколица слуша** само** на интерној мрежи састављања (`ws://codex-app-server:1456`) иза токена способности. јесте** никад** објављено на хосту или на интернету.
+- Приколица користи `omniroute:cli-no-docker`, изграђену од `runner-cli-no-docker` мете, која укључује Codex CLI.
 
 ## 2. Покретање
 

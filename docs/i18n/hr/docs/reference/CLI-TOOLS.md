@@ -4,14 +4,12 @@
 
 ---
 
-Zadnje ažuriranje: 2026-08-23
-
 OmniRoute se integrira s tri kategorije CLI alata raspoređenih na tri namjenske stranice nadzorne ploče:
 
 | Stranica       | Ruta                    | Koncept                                                                               | Računati         |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------- | ---------------- |
 | **CLI kodovi** | `/dashboard/cli-code`   | Alati za kodiranje koje usmjerite na OmniRoute (klijent → CLI → OmniRoute → davatelj) | 26               |
-| **CLI agenti** | `/dashboard/cli-agents` | Autonomni agenti koje usmjerite na OmniRoute (isti tijek, širi opseg)                 | 11               |
+| **CLI agenti** | `/dashboard/cli-agents` | Autonomni agenti koje usmjerite na OmniRoute (isti protok, širi opseg)                | 11               |
 | **ACP agenti** | `/dashboard/acp-agents` | CLIs koji OmniRoute pokreće kao backend preko stdio/ACP (obrnuti tok)                 | vidjeti registar |
 
 Naslijeđene rute preusmjeravaju putem 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.

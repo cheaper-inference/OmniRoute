@@ -151,30 +151,30 @@ Thèmes des phases 6 à 7 :
 - [ ] Ajouter des tests de régression pour chaque bogue de production non couvert corrigé lors de la progression vers 90 %
 - [ ] Relever le seuil de couverture dans la CI uniquement après que la référence locale est restée stable pendant au moins deux exécutions consécutives
 
-## Politique de progression par paliers
+## Politique de cliquet
 
-Mettez à jour les seuils de `npm run test:coverage` uniquement lorsque le projet dépasse réellement le palier suivant avec une marge confortable.
+Mettez à jour les seuils `npm run test:coverage` uniquement une fois que le projet a réellement dépassé le prochain jalon avec un tampon confortable.
 
-**Seuil actuel :** `npm run test:coverage` impose **60 instructions / 60 lignes / 60 fonctions / 60 branches** (la métrique a été recalculée lors de la phase 6A.1 des contrôles qualité — la valeur de référence précédente de 82,58 % était artificiellement élevée, car elle comptabilisait les fichiers de test et excluait `open-sse`). La commande `test:coverage:legacy` conserve l’ancienne métrique 50/50/50 à des fins de comparaison historique.
+**Portail actuel :** `npm run test:coverage` applique** 60 instructions / 60 lignes / 60 fonctions / 60 branches** (la métrique a été rebasée dans Quality-Gates Fase 6A.1 — la ligne de base précédente de 82,58 % a été gonflée car elle comptait les fichiers de test et excluait `open-sse`). La commande `test:coverage:legacy` conserve l'ancienne métrique 50/50/50 à des fins de comparaison historique.
 
-Pour effectuer des vérifications ponctuelles des seuils sur le dernier rapport, utilisez :
+Pour les vérifications de seuil ad hoc par rapport au dernier rapport, utilisez :
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Séquence de progression recommandée (l’ordre est `instructions-lignes / branches / fonctions`) :
+Séquence de cliquet recommandée (l'ordre est `statements-lines / branches / functions`) :
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- seuil actuel (75/70/75)
+5. 75/70/72 <-- porte actuelle (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Le prochain objectif de progression est `80/75/78`, une fois que la couverture des branches se maintient au-dessus de 78 % pendant deux exécutions consécutives.
+La prochaine cible à cliquet est `80/75/78` une fois que la couverture des succursales est supérieure à 78 % pendant deux exécutions consécutives.
 
 ## Lacune connue
 

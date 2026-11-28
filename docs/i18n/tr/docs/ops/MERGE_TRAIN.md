@@ -4,89 +4,63 @@
 
 ---
 
-> **2026-11-19: Birleştirme birleştirme sırası kullanımdan kaldırıldı** (sahibin kararı). `.mergify.yml` artık bir kuyruk tanımlamıyor ve bir çekme isteğini birleştiren veya yeniden yazan Birleştir komutlarını reddediyor. PRs sürümü, omni-queue canlı modda çalışana kadar ve bundan sonra omni-queue aracılığıyla ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) "Aktif sürümde yeşil kapılar gerektir" (`Gate / CI` + `Gate / Quality`) depo kural seti altında elle birleştirilir. Aşağıdaki Birleştirme bölümleri kuyruğu olduğu gibi tanımlar.
+## Bir serbest bırakma dalına iniş
 
-V3.8.49'dan bu yana ( quality/velocity planının WS3.2/WS3.4 ), incelenen PRs `release/vX.Y.Z` varsayılan birleştirme yolu şudur:** Birleştirme kuyruğunu birleştir** (`.mergify.yml`); the** manuel birleştirme treni** Aşağıda, olaylar sırasında, sürümün dondurulması sırasında veya Açık Kaynak Birleştirme planının değişmesi durumunda kullanılan FALLBACK — belgelenmiştir.
+Omni-queue, `release/vX.Y.Z` inişleri yönetir. PR yerleştirmeden önce varsayılan dalda `config/merge-queue/config.json` üst düzey `mode` okuyun. Bkz. [Omni-Queue](OMNI_QUEUE.md).
 
-## Varsayılan yol: Mergify kuyruğu
+- **`shadow`** doğrulamayı çalıştırır ve girişi manuel birleştirmeye bırakır. Onaylanan PR son noktasında `omni-queue` uygulayın. `npm run queue -- why <PR>` ile uygunluğu kontrol edin. `npm run queue -- history --base <branch>` o kafa için verilecek kararı bekleyin. `would-land` devam edin. `culprit-found` veya `would-dequeue` üzerinde birleştirmeyi basılı tutun ve nedeni düzeltin.
+- **Gölge istisnaları.** Mevcut üs ucuna karşı yeşil dolu CI sahip bir tren ayrı bir kuyruk kararı olmadan ilerleyebilir. Aynı istisna, PR kafasının halihazırda geçerli taban ucunu içerdiği durumlarda da geçerlidir.
+- **`live`** inişi tetiklemek için `omni-queue` etiketini kullanır. Kuyruk tek başına PR indirir. Birleştirme komutlarını bırakın ve itmeleri kuyruğa yönlendirin.
 
-1. PR, kampanyalar tarafından incelenir/yeşil duruma getirilir ve sahibin birleştirme öncesi ⭐
-   geçidinde onaylanır (rapor + öğe bazında karar — bkz. `/merge-prs` Adım 0.75).
-2. Sahip (veya sahibin kararına göre hareket eden oturum) **`queue`**
-   etiketini uygular. Etiket, birleştirme onayının KENDİSİDİR; Mergify yalnızca bunu yürütür.
-3. Mergify, kuyruğa alınmış PR'ları hızlı geçitlere göre **seri olarak** (teker teker)
-   doğrular ve birleştirir (squash). Gruplama + otomatik ikiye bölme, ücretli bir Mergify
-   katmanıdır (ücretsiz planda "Cannot use Merge Queue batch", #7220); bu nedenle `.mergify.yml`
-   herhangi bir `batch_size` ayarlamaz; gruplama, aşağıdaki manuel birleştirme treninin görevi
-   olmaya devam eder. Denetimleri `checks_timeout` sonrasında hâlâ beklemede olan bir PR
-   (240 dk. = `quality.yml` için ölçülen p95'in 2 katı), kuyruğu durdurmak yerine kuyruktan çıkarılır.
-4. Birleştirme sonrasında, sürekli sürüm yeşil durum iş akışı push sırasında yeni uç noktayı
-   doğrular ve kombinasyon gerilemeye yol açtıysa bir ilişkilendirme kaydı açar (asla otomatik
-   olarak geri almaz).
+Her iniş, sahibinin iznini ve gerekli kontrollerin yapılmasını gerektirir. `omni-queue` yalnızca sahibi inişe izin verdikten sonra uygulayın. Korunan yollara dokunan sıraya alınmış PRs aynı zamanda o PR için sahibinin `protected-approved` kararını da gerektirir.
 
-Korkuluklar (`CLAUDE.md` Katı Kurallar #21/#22 ile aynıdır):
+"Aktif sürümde yeşil kapılar gerektir" kural seti, kafada yeşil `Gate / CI` ve `Gate / Quality` gerektirir. Kırmızı bir kapıyı atlamak için asla `--admin` kullanmayın. Serbest bırakma dondurma blokları donmuş dalla birleşir. Bkz. [Katı Kural 21](HARD_RULES_DETAIL.md). Başka bir oturumun çalıştığını belirten bir çekme isteğini asla etiketlemeyin, birleştirmeyin veya iletmeyin. Bkz [. Sert Kural 22](HARD_RULES_DETAIL.md).
 
-- **Sürüm dondurması açık** → dondurulmuş dalı hedefleyen PR'ları etiketlemeyin; önce
-  etkin `release/vX+1` dalını hedefleyecek şekilde değiştirin.
-- **Başka bir oturumun devam eden PR'ı** → asla etiketlemeyin; yalnızca sahibi olan oturum
-  kendi çalışmasını kuyruğa alır.
-- Yalnızca test değişiklikleri içeren ve `hotfix` etiketli PR'lar zaten azaltılmış CI'ı çalıştırır
-  (bkz. `RELEASE_CHECKLIST.md` → Düzeltme Hızlı Şeridi); kuyruk koşulları, gerçekte çalıştırılmış
-  olan denetim kümesini kabul eder (`#check-failure=0` + `#check-pending=0`).
+## Tren çekme isteği
 
-## Yedek yöntem: manuel birleştirme treni
+1. Mevcut yayın tabanı ucunda bir tren şubesi başlatın. Birleştirme taahhütlerini kullanarak tam olarak onaylanmış üye başkanlarını entegre edin. Squash ve rebase'den kaçınarak taahhüt geçmişlerini koruyun.
+2. Tren şubesi için bir çekme talebi açın. Bu PR mevcut temel uçta kendi tam CI ile doğrulayın. İnmeden önce taban ucunu ve onaylı üye kafalarını tekrar kontrol edin. Doğrulanan aday değiştiğinde treni ve CI yenileyin.
+3. Geçerli kuyruk modunda birleştirme taahhüdüyle tren PR indirin. Canlı modda kuyruğun `merge-ff` açılış yöntemi birleştirme taahhütlerini korur. Orijinal üye kafalarına serbest bırakma şubesinden ulaşılabilir hale gelir. GitHub PRs üyesini birleştirilmiş olarak işaretler ve taahhütler yazarlarını korur.
 
-Kuyruk kullanılamadığında kullanılır. Bu, v3.8.47 döngüsü sırasında bir günde 33 PR'ın
-tamamlanmasını sağlayan uygulamayı standartlaştırır:
+Genel bir örnek [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). 18 üyeli PRs birleştirdi ve 2026-11-24 tarihinde birleştirme taahhüdüyle indi.
 
-1. **Toplu grubu oluşturun** (yaklaşık 10–30 incelenmiş+onaylanmış PR). `linked:` çakışmalarını
-   (aynı `tap.testFiles`, aynı CHANGELOG bölümleri) denetleyin ve bunları sıraya koyun.
-2. **BİR KEZ doğrulayın**: sürüm ucundan oluşturulmuş yalıtılmış bir worktree içinde tüm toplu grup
-   head'lerini yerel olarak birleştirin, ardından sürümle eşdeğer paketi çalıştırın
-   (`npm run check:release-green`; sürümden önce `--with-build` ekleyin).
-   `scripts/release/merge-train.sh <base> <PR#>…`, 1–2. adımları otomatikleştirir (çakışan
-   PR'lar çıkarılır, tren devam eder). Tam mod, `npm run test:unit` komutunu çalıştırır —
-   sistem için ayarlanmış çalıştırıcıyı (`--test-concurrency=20`), 16 çekirdekli bir sistemde
-   baskın aşamanın kapasitenin yaklaşık %25'inde çalışmasına yol açan iki sıralı 4 çekirdekli CI
-   parçasını **değil** (2026-07-18 tarihinde düzeltildi). `--fast` (gün içi mega tren
-   tamamlamaları, sahip tarafından 2026-07-18 tarihinde onaylandı) tüm statik kapıları + vitest'i
-   korur ancak yalnızca trene alınan PR'lar tarafından değiştirilmiş node:test dosyalarını çalıştırır;
-   TAM paket, birikmiş uç üzerinde yine de günde en az bir kez çalıştırılmalıdır
-   (`--fast` olmadan bir tren).
-3. **Yeşil** → PR'ları sırayla birleştirin (her birinden önce `state,headRefOid` değerlerini
-   yeniden denetleyin — head'i değişmiş bir PR yeniden incelemeye girer). Her birleştirmenin net
-   farkının PR'ın kendi değişikliği olduğunu kanıtlayın (otomatik çözümlemeyle geri alma yok:
-   kapsam dışı silmeler için `git diff --stat` çıktısını denetleyin).
-4. **Kırmızı** → tek tek yeniden doğrulamak yerine toplu grubu yarılara bölün (her yarıyı doğrulayın);
-   soruna neden olan PR'ı kanıtlarla birlikte inceleme kuyruğuna geri gönderin.
-5. **Asla yapmayın**: dondurma sırasında dondurulmuş dala birleştirme; herhangi bir yerde
-   `git stash`; kırmızı durumun kaybolmasını umarak CI'ı topluca yeniden çalıştırma
-   (kural: kırmızı durum bilgidir).
+`main` bir sonraki sürüm şubesine geri senkronizasyon da birleştirme taahhüdü yoluyla gerçekleşir. Daha sonraki geri senkronizasyonlar için `main` soyunun korunması gerekir. Bkz. [Çalışma Ağacı Yalıtımı](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Katmanlandırma (kuyruğun yalnızca hızlı kapılarla neden güvenli olduğu)
+## Yerel birleştirme treni doğrulayıcısı
 
-- **PR başına** (quality.yml hızlı kapıları): TIA'dan etkilenen testler + 4 parçalı tam birim
-  testi + vitest + lint paketi + typecheck + dokümantasyon/changelog bütünlüğü.
-- **Toplu grup/uç başına** (sürekli release-green): sürüm dalına yapılan her push'ta `--quick`
-  KESİN kapıları; günde 3 kez tam `--with-build --full-ci` taramaları.
-- **Sürüm başına** (sürüm PR'ındaki ci.yml): E2E ×9, paket artefaktı + tarball boot-smoke,
-  coverage/ratchets dâhil eksiksiz matris.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Hiçbir şey eskisinden daha az doğrulanmıyor — ağır yüzey artık PR başına değil, toplu grup/uç
-başına çalışıyor; O(N) gidiş gelişleri ortadan kaldıran da budur.
+Doğrulayıcı, tabanı ve PR kafalarını getirir ve bunları tek kullanımlık bir çalışma ağacında birleştirir. Ortaya çıkan ağaçta eşlik paketini bir kez çalıştırır. Başarısız bir kafa getirme veya birleştirme çakışması PR çıkarır ve komut dosyası kalan PRs ile devam eder.
 
-## `merge-train.sh` için temiz checkout önkoşulları
+- **`--plan`** seçilen modun adımlarını yazdırır ve bir çalışma ağacı oluşturmadan veya uzaktan kumandaya başvurmadan çıkar. Hızlı planı incelemek için `--fast` ile birleştirin.
+- **`--fast`** ortak statik geçitleri, seçilen değiştirilmiş `node:test` dosyalarını `tests/unit/` ve `npm run test:vitest` altında çalıştırır. Hızlı modu kullanırken, biriken ipucu üzerinde günde en az bir kez tam yerel doğrulama çalıştırın.
+- **Tam mod** yalnızca tam statik geçitleri ekler ve `npm run test:unit` ve `npm run test:vitest` çalıştırır.
 
-Betik, bozuk bir kurulumun asla kırmızı bir tren gibi görünmemesi için kök checkout üzerinde
-(herhangi bir worktree işleminden önce) ilk hatada duran bir **ön kontrol** çalıştırır:
+Temel sonda mevcutsa, arızalı bir statik kapı, dokunulmamış tabanda yeniden çalıştırılır. Komut dosyası, devralınan hataları bildirir ve tanınan her ihlal satırı tabanda göründüğünde ve toplam sayı artmadığında devam eder.
 
-1. `npm ci`, ardından npm'in engellediği `bun` postinstall işlemini çalıştırın:
-   `(cd node_modules/bun && node install.js)` — aksi takdirde `check:provider-consistency`
-   ve `check:known-symbols` (ikisi de `bun scripts/…`) hem trende HEM DE base üzerinde,
-   herhangi bir ihlal satırı olmadan başarısız olur.
-2. Gereksiz `node_modules/node_modules` bulunmamalıdır (yinelenen bir bağımlılık ağacı; React iki kez
-   yüklenir ve UI vitest paketleri anında başarısız olur).
-3. `node_modules/.bin/tsc` mevcut ve çalıştırılabilir olmalıdır (kısmi bir kurulumda bu eksiktir).
+| Çıkış | Anlam                                                                                                                                                                  |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`   | Planı yazdırdı veya paketi tamamladı. Paket özeti, devralınan tüm statik hataları ve çıkarılan PRs listeler.                                                           |
+| `1`   | Geçersiz bağımsız değişkenler, Git ödemesi yok, ön kontrol başarısız oldu veya PR binilmedi.                                                                           |
+| `2`   | Bir paket denetimi başarısız oldu ve devralınmış olarak nitelendirilmedi. Operatör toplu işi ikiye bölebilir, rahatsız edici PR çıkarabilir ve yeniden çalıştırabilir. |
 
-Tren, engelleyici `npm run check:cycles:ratchet` komutunu çalıştırır; yalın `npm run check:cycles`
-tavsiye niteliğindedir (SCC'leri listeler ve sağlıklı bir base üzerinde bile sıfır olmayan kodla çıkar).
+Yerel geçiş kartı yalnızca sahibinin dosyası için teşhis kanıtı sağlar. Her iniş hâlâ sahibinin iznini, kendi gerekli kontrollerini ve uygun olduğunda gölge kuyruk kararını gerektirir.
+
+## Katmanlama
+
+- **PR başına.** CI ve Kalite seçim kontrolleri, değiştirilen yollara göre yapılır. Code PRs, CI ayrı birim ve Vitest işleriyle hızlı kaliteli geçitleri ve etkilenen testleri çalıştırır.
+- **Sıra adayı başına.** CI ve Quality, sıra ref'inde oluşturulan adayın tam profilini çalıştırır.
+- **Sürüm ipucu başına.** Release-Green, yol filtreleriyle eşleşen itmelerde hızlı sert geçitleri çalıştırır. Günde üç programlı çalıştırma, sürüm dalı için tam taramayı kullanır.
+- **Sürüm başına.** Tam CI matrisi, E2E parçalarını, paket doğrulamasını, tarball önyükleme dumanını ve kapsam kontrollerini içerir. [Sürüm Kontrol Listesine](RELEASE_CHECKLIST.md) bakın.
+
+## `merge-train.sh` için yeni ödeme önkoşulları
+
+Ön kontrol, çalışma ağaçları oluşturulmadan önce çalışır. Bağımlılıkları `npm ci` ile yükleyin. `node_modules/.bin/tsc` çalıştırılabilir olduğunu ve `node_modules/node_modules` bulunmadığını doğrulayın. `node_modules/.bin/bun --version` başarılı olup olmadığını kontrol edin.
+
+Bun postinstall atlandıysa `(cd node_modules/bun && node install.js)` komutunu çalıştırın. Sağlayıcı tutarlılığı ve bilinen sembol kontrolleri Bun kullanır. Doğrulayıcı `npm run check:cycles:ratchet` engelleme kapısı olarak çalıştırır. Bağımsız `npm run check:cycles` komutu tavsiye niteliğindedir.
+
+## Tarih
+
+Birleştirme birleştirme sırası 2026-11-19 tarihinde kullanımdan kaldırıldı.

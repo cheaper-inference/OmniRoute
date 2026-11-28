@@ -13,7 +13,7 @@ pipelinen er registerbasert, så flere destinasjoner kan legges til.
 
 ---
 
-## 1. Slik fungerer det
+## 1. Hvordan det fungerer
 
 ```
 server (decrypt + validate config, reconcile cursor)
@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Tidsplan** — én cron-jobb i `JobRegistry`, `log_export`, med standardverdien `0 * * * *` (hver time,
-  UTC). Registrert i `src/lib/initCloudSync.ts`; kan overstyres med `OMNIROUTE_LOG_EXPORT_CRON`.
-  Hver kjøring eksporterer alle ventende poster for hver **aktivert** destinasjon, sekvensielt.
-- **Markør** — SQLites implisitte `call_logs.rowid`, lagret per destinasjon i
-  `log_export_destinations.cursor_row_id`. `timestamp` brukes bevisst ikke som markør: kallere
-  kan oppgi sin egen verdi, så en treg forespørsel kan bli skrevet etter en raskere som startet
-  senere, og en tidsstempelmarkør ville hoppet over den.
-- **Satsvis behandling** — `batch_size` rader per forespørsel (standard 500), `max_rows_per_run` rader per kjøring
-  (standard 10000), slik at et stort etterslep behandles over flere kjøringer i stedet for å blokkere én.
-- **Levering** — markøren flyttes frem først etter at `send()` er fullført. En mislykket sats lar
-  markøren stå der den var, slik at de samme radene forsøkes på nytt ved neste kjøring. Garantien er
-  minst én gang pluss deduplisering på destinasjonssiden, ikke ekte nøyaktig én gang: BigQuery bruker
-  kallogg-ID-en som nøkkel for hver rad og respekterer denne etter beste evne innenfor sitt eget dedupliseringsvindu.
-- **Overlappsvern** — cron-kjøringen og `POST .../run` kan utløses samtidig. En destinasjon
-  som allerede eksporterer, hoppes over i stedet for å eksporteres to ganger (`skipped: true` i kjøringsresultatet),
-  slik at en samtidig kjøring ikke kan sende en sats på nytt eller flytte markøren bakover.
-- **Gjenoppretting etter tømming** — hvis `cursor_row_id` havner over `MAX(rowid)` (hele tabellen ble
-  tømt og rad-ID-ene startet på nytt), tilbakestiller kjøreren til 0 i stedet for å bli permanent blind.
+- **Rute** — one `JobRegistry` cron jobb, `log_export`, som standard er `0 * * * *` (timelig, UTC). Registrert i `src/lib/initCloudSync.ts`; overstyres med `OMNIROUTE_LOG_EXPORT_CRON`. Hver flått renner hver** aktivert** destinasjon, sekvensielt.
+- **Cursor** — SQLite implisitte `call_logs.rowid`, vedvarte per destinasjon i `log_export_destinations.cursor_row_id`. `timestamp` er bevisst ikke markøren: innringere kan oppgi sin egen verdi, så en langsom forespørsel kan skrives etter en raskere som startet senere, og en tidsstempelmarkør ville hoppe over den.
+- **Batching** — `batch_size` rader per forespørsel (standard 500), `max_rows_per_run` rader per kjøring (standard 10000) slik at et stort etterslep renner over flere haker i stedet for å blokkere en.
+- **Leveranse** — beveger markøren seg først etter at `send()` er løst. En mislykket batch forlater markøren der den var, så de samme radene prøves på nytt ved neste kjøring. Garantien er minst én gang pluss de-duplisering på destinasjonssiden, ikke nøyaktig én gang: BigQuery taster hver rad med anropslogg-IDen, som den respekterer etter beste innsats innenfor sitt eget dedup-vindu.
+- **Overlappingsvern** — cron tick og `POST .../run` kan skyte sammen. En destinasjon som allerede tømmes, hoppes over i stedet for å tømmes to ganger (`skipped: true` i kjøringsresultatet), så en samtidig kjøring kan ikke sende en batch på nytt eller skrive markøren bakover.
+- **Rens utvinning** — hvis `cursor_row_id` havner over `MAX(rowid)` (hele bordet ble renset og rader startet på nytt), spoler løperen tilbake til 0 i stedet for å bli permanent blind.
 
-### Isolert kjører og grenser
+### Isolert løper og grenser
 
-Hver destinasjonskjøring på Node starter en separat, kortlivet underprosess på OS-nivå (`child_process`
-med IPC, ikke `worker_threads`). Lesing av innhold, JSON-parsing/-serialisering av nyttelast, destinasjonens
-`prepare()` og destinasjonens nettverks-I/O kjøres der, ikke i serverens hendelsesløkke.
-Bare konfigurasjon og små fremdriftsmeldinger sendes over IPC; eksporterte poster returneres aldri til
-serveren. Cron-jobben og Kjør nå-ruten beholder samme offentlige resultat og overlappsvern.
+Hver destinasjon som kjøres på Node starter en separat, kortvarig OS -underordnet prosess (`child_process` med IPC, ikke `worker_threads`). Brødtekst, nyttelast JSON parsing/serialization, destination `prepare()` og destinasjonsnettverk I/O kjører alle der, ikke på serverens hendelsesløkke. Bare konfigurasjons- og små fremdriftsmeldinger krysser IPC; eksporterte poster kommer aldri tilbake til serveren. Cron-jobben og Run now-ruten beholder det samme offentlige resultatet og overlappingsbeskyttelsen.
 
-Underprosessen åpner serverens oppløste `DATA_DIR/storage.sqlite` skrivebeskyttet med `node:sqlite`,
-med `busy_timeout=5000` og `query_only=ON`. Den importerer ingen databasesingleton og utfører ingen
-migreringer, sikkerhetskopier eller SQLite-oppdateringer. Bokføring av manglende/korrupte artefakter (inkludert
-UPDATE for korrupte artefakter) forblir utelukkende i dashbordets detaljflyt. Begge flytene deler en ren
-detaljoppløser; eksport bruker asynkrone filsystemlesinger og samme oppløsningsrekkefølge: artefakt → eldre
-innebygd innhold → eldre diskinnhold → ingen. En kjøring tar et øyeblikksbilde av høyeste innsettings-rowid
-når underprosessen åpner leseren; senere innsettinger venter til neste kjøring. Dette er en innsettingsgrense,
-ikke en langvarig SQLite-transaksjon: WAL-skrivere og sjekkpunkter forblir uhindret under
-nettverksventing. Oppdateringer/slettinger av eksisterende rader fryses ikke av denne grensen.
+Barnet åpner serverens løste `DATA_DIR/storage.sqlite` skrivebeskyttet ved å bruke `node:sqlite`, med `busy_timeout=5000` og `query_only=ON`. Den importerer ingen DB singleton og utfører ingen migreringer, sikkerhetskopier eller SQLite -oppdateringer. Missing/corrupt -artefaktbokføring (inkludert den korrupte artefakten UPDATE) forblir bare i dashbordets detaljsti. Begge banene deler en ren detaljløser; eksport bruker asynkrone filsystemlesninger og den samme artefakten → legacy inline → legacy disk → ingen oppløsningsrekkefølge. Et løp tar øyeblikksbilder av den maksimale innsettingen når barnet åpner leseren sin; senere innlegg venter på neste kjøring. Dette er en innsettingsgrense, ikke en langvarig SQLite transaksjon: WAL skrivere og sjekkpunkter forblir ledige under nettverksventer. Updates/deletions av eksisterende rader er ikke frosset av denne grensen.
 
-Etter hver akseptert sats venter underprosessen på en bekreftelse. Serveren lagrer først
-markøren med `advanceLogExportCursor`, og sender deretter `ack`; ingen ny sats starter før dette.
-En sendefeil, krasj eller tidsavbrudd registrerer feil uten å flytte markøren for den aktuelle satsen. Tidligere
-bekreftede satser forblir lagret; høyst den ene ubekreftede satsen kan sendes på nytt.
-Vellykket kjøring registreres først etter `done` og en normal avslutning av underprosessen. Feil avslutter underprosessen
-med SIGTERM, med eskalering til SIGKILL etter 500 ms, og kjøreren venter til prosessen er lukket.
+Etter hvert akseptert parti venter barnet på en bekreftelse. Serveren vedvarer først markøren med `advanceLogExportCursor`, og sender deretter `ack`; ingen neste batch starter før den. En sendingsfeil, krasj eller tidsavbrudd registrerer feil uten å gå videre med den batchen. Tidligere anerkjente partier forblir forpliktet; maksimalt den ene ikke-bekreftede batchen kan sendes på nytt. Suksess registreres først etter `done` og en ren barneutgang. Feil avslutter barnet med SIGTERM, eskalerer til SIGKILL etter 500 ms, og løperen venter på prosessavslutning.
 
-| Miljøvariabel                                 | Standard | Formål                                                |
-| --------------------------------------------- | -------- | ----------------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Tidsgrense per destinasjon målt i faktisk forløpt tid |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Grense for underprosessens V8 old-space i MB          |
+| Miljøvariabel                                 | Misligholde | Hensikt                          |
+| --------------------------------------------- | ----------- | -------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000      | Veggklokkegrense per destinasjon |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024        | Child V8 old-space limit i MB    |
 
-Ugyldige/ikke-positive/ikke-heltallige verdier bruker standardverdiene. Heap-innstillingen er ikke en total
-RSS-grense; svært store satser kan fortsatt bruke opp underprosessens minne og få kjøringen til å feile på en trygg måte.
-Standardverdien på 1024 MB gir slingringsmonn for standardsatsen på 500 rader med artefakter på 512 KiB med
-innhold aktivert, inkludert BigQuerys JSON-serialisering i bytebaserte blokker. Den gjør ikke en
-sats på 10000 rader med innhold trygg. Uttømming av V8-heapen registrerer en feil med konkrete tiltak: reduser satsstørrelsen
-eller øk `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; markøren blir stående ved den sist
-bekreftede satsen. Historisk innebygd innhold / diskinnhold omfattes ikke av den moderne artefaktgrensen.
-Operatører må budsjettere RSS separat, særlig i containere med begrenset minne.
+Invalid/non-positive/non-integer -verdier bruker standardverdiene. Heap-innstillingen er ikke en total RSS grense; svært store partier kan fortsatt tømme barneminnet og feile kjøringen på en sikker måte. 1024 MB standarden gir rom for standard 500-rads batch med 512 KiB artefakter med kropper aktivert, inkludert BigQuery byte-chunked JSON serialisering. Det gjør ikke en 10000-rads karosseri batchsikker. V8-heap-utmattelse registrerer en handlingsbar feil: lavere batchstørrelse eller øk `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; markøren forblir på den siste bekreftede batchen. Historiske inline/disk kropper dekkes ikke av den moderne artefakthetten. Operatører må budsjettere RSS separat, spesielt innenfor minnebegrensede beholdere.
 
-Underprosessen arver bare den ferdig oppløste `DATA_DIR`, `NODE_ENV`, eksplisitt `TZ` (oppløsning av
-lokal tid i eldre filnavn), `ELECTRON_RUN_AS_NODE` når den finnes, og følgende inndata for utgående trafikk:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (og variantene med små bokstaver),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-En global Undici-dispatcher deler serverens rent miljøbaserte proxyoppløsning og regler for å omgå
-proxy for lokale verter, inkludert `NO_PROXY`; den importerer ikke `proxyFetch.ts` eller tilhørende database-/funksjonsflagg.
-Proxyens påloggingsopplysninger sladdes i videresendte utdata og registrerte feil. Destinasjonens påloggingsopplysninger
-overføres bare i én IPC-startmelding, aldri via argv eller miljøet; videresendte utdata og feil får
-et prefiks og renses. Bare `ExperimentalWarning` deaktiveres i underprosessens kjøreargumenter for å unngå
-at Nodes SQLite-advarsel gjentas ved hver cron-kjøring; andre advarselstyper forblir synlige.
+Barnet arver bare de oppløste `DATA_DIR`, `NODE_ENV`, eksplisitte `TZ` (legacy filnavn lokaltidsoppløsning), `ELECTRON_RUN_AS_NODE` når de er tilstede, og følgende utgående innganger: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (og deres små bokstaver), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. En global Undici-dispatcher deler serverens rene miljøproxy-oppløsning og lokale vertsbypass-regler, inkludert `NO_PROXY`; den importerer ikke `proxyFetch.ts` eller DB/feature -flaggene. Fullmaktslegitimasjon blir redigert fra videresendt utdata og registrerte feil. Destinasjonslegitimasjon går bare i én start IPC melding, aldri argv eller miljø; output/error videresending er prefiks og renset. Bare `ExperimentalWarning` er deaktivert i child exec-argumenter for å unngå å gjenta Nodes SQLite som advarer hver cron-kjøring; andre advarselstyper forblir synlige.
 
-Destinasjonsmoduler må kunne importeres uten avhengigheter til Next.js eller komponenter som bare kan kjøres på serveren. Den eksisterende
-BigQuery-implementasjonen oppfyller allerede dette kravet. Hurtiglagre for tilgangstokener varer bare under
-kjøringen av underprosessen, ikke på tvers av kjøringer. Node er det støttede kjøremiljøet (`package.json` engines), men Bun-installasjonsdelen
-i README og `Dockerfile.bun` beskriver også en kompatibilitetsløsning for produksjon med
-`bun:sqlite` (`src/lib/db/core.ts` / adaptere). Under Bun beholder eksportene derfor den tidligere
-utførelsen i samme prosess og viser en engangsadvarsel: isolering av underprosessens heap og tidsavbrudd er ikke tilgjengelig. Bruk
-Node for isolering av hendelsesløkke og OOM; Bun regnes ikke som kun for utvikling her.
+Destinasjonsmoduler må kunne importeres uten Next.js/server-only avhengigheter. Den eksisterende BigQuery implementeringen oppfyller allerede den kontrakten. Cacher for tilgangstoken varer bare for barneløpet, ikke på tvers av løpeturer. Node er den støttede kjøretiden (`package.json` motorer). En best-innsats, ikke-støttet Bun -kompatibilitetsbane eksisterer (`bun:sqlite` i `src/lib/db/core.ts` / adaptere og `Dockerfile.bun`), så eksport må ikke brytes under den. Under Bun beholder eksporten den forrige prosessen underveis og sender ut en engangsadvarsel: underordnet heap/timeout isolasjon er utilgjengelig. Bruk Node for event-loop og OOM isolasjon.
 
-Når `includeBodies` er aktivert, bør du foretrekke et intervall på minuttnivå, for eksempel
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, fremfor å bygge opp en times etterslep av nyttelaster.
-Batch- og radgrenser begrenser fortsatt hver kjøring. Prosessoppstart skjer per destinasjon per kjøring;
-dette bytter en liten oppstartskostnad mot isolering av serverens hendelsesløkke, ikke redusert samlet CPU-bruk.
+Når `includeBodies` er aktivert, foretrekk en tråkkfrekvens på minuttnivå som `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` i stedet for å akkumulere en timebasert nyttelastetterslep. Gruppe- og radgrenser er fortsatt bundet til hver kjøring. Prosessoppstart betales per destinasjon per kjøring; dette bytter en liten oppstartskostnad for server-hendelsesløkke-isolasjon, ikke redusert total CPU bruk.
 
-### Nyttelaster (ledetekster og fullføringer)
+### Nyttelast (forespørsler og fullføringer)
 
-Som standard inneholder eksporten bare sammendragsfeltene som vises i **listen** i logger. Hvis du aktiverer
-**Eksporter ledetekster og svar** (`includeBodies`), sendes i tillegg det som vises i **detaljruten**
-i logger for hvert kall:
+Som standard har eksporten bare sammendragsfeltene Loggene** liste** viser. Slår på** Eksporter forespørsler og svar** (`includeBodies`) sender i tillegg det loggene** detalj** ruten viser for hver samtale:
 
-| Felt                             | Hva det inneholder                                                  |
-| -------------------------------- | ------------------------------------------------------------------- |
-| `request_body` / `response_body` | Kallets nyttelaster slik de vises i dashbordet                      |
-| `pipeline_route_decision`        | Hvilket mål og hvilken modell ruteren valgte                        |
-| `pipeline_client_request`        | Den rå forespørselen nøyaktig slik klienten sendte den              |
-| `pipeline_openai_request`        | Etter oversettelse til det interne OpenAI-formatet                  |
-| `pipeline_provider_request`      | Slik den faktisk ble sendt til leverandøren, i leverandørens format |
-| `pipeline_provider_response`     | Det rå svaret fra leverandøren                                      |
-| `pipeline_client_response`       | Det som ble returnert til den som utførte kallet                    |
-| `pipeline_error`                 | Feildetaljer på pipelinenivå for et mislykket kall                  |
-| `bodies_truncated`               | Sann når et av feltene ovenfor nådde `maxBodyBytes`                 |
+| Felt                             | Hva den inneholder                                     |
+| -------------------------------- | ------------------------------------------------------ |
+| `request_body` / `response_body` | Samtalen lastes etter hvert som dashbordet gjengir dem |
+| `pipeline_route_decision`        | Hvilket mål og hvilken modell ruteren valgte           |
+| `pipeline_client_request`        | Råforespørselen nøyaktig slik klienten sendte den      |
+| `pipeline_openai_request`        | Etter oversettelse til den interne OpenAI formen       |
+| `pipeline_provider_request`      | Som faktisk sendt oppstrøms, på leverandørdialekten    |
+| `pipeline_provider_response`     | Den rå oppstrømsresponsen                              |
+| `pipeline_client_response`       | Det som ble levert tilbake til den som ringte          |
+| `pipeline_error`                 | Feildetaljer på rørledningsnivå for et mislykket anrop |
+| `bodies_truncated`               | Sant når et felt ovenfor treffer `maxBodyBytes`        |
 
-Dette er ledetekstinnhold, så funksjonen er **av som standard** og er bevisst et valg per destinasjon.
-Det som sendes, er det dashbordet viser, fordi eksporten og `getCallLogById` deler samme
-detaljoppløsning: nyttelastene er
-allerede renset for personopplysninger og hemmeligheter når de skrives, og et kall utført med en
-`noLog`-API-nøkkel lagrer ingen nyttelast, så det finnes ingenting å eksportere.
+Dette er raskt innhold, så det er det** av som standard** og bevisst et valg per destinasjon. Det som sendes er det dashbordet viser, fordi eksport og `getCallLogById` deler detaljoppløsning: nyttelaster er allerede PII-sanitisert og hemmelig-redigert når de skrives, og et anrop gjort med en `noLog` API nøkkel lagrer ingen nyttelast i det hele tatt, så det er ingenting å eksportere.
 
-Nyttelaster leses per rad fra filsystemartefakten, så innlasting av disse kjøres bare for destinasjoner
-som har bedt om det. Hvis en artefakt mangler eller er skadet, eksporteres sammendraget med nullverdier for nyttelastene i stedet
-for at batchen feiler og markøren blir stående fast.
+Nyttelaster leses per rad fra filsystemartefakten, så hydrering kjører bare for destinasjoner som ba om det. En manglende eller korrupt artefakt eksporterer sammendraget med null nyttelast i stedet for å svikte batchen og strande markøren.
 
-`maxBodyBytes` (standard 262144) begrenser hvert felt. Lengre nyttelaster **avkortes i stedet for å
-utelates** — en avkortet ledetekst svarer fortsatt på «hva ble det spurt om» — og raden merkes med
-`bodies_truncated`. Strømmede deltaer, del for del, eksporteres ikke; det sammensatte svaret finnes
-allerede i `pipeline_provider_response` og `pipeline_client_response`.
+`maxBodyBytes` (standard 262144) begrenser hvert felt. Lengre nyttelast er** kuttes i stedet for å slippes** — en klippet ledetekst svarer fortsatt "hva ble spurt" — og raden er flagget med `bodies_truncated`. Strømmede del-for-del-deltaer eksporteres ikke; den sammensatte responsen er allerede i `pipeline_provider_response` og `pipeline_client_response`.
 
 ---
 

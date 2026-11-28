@@ -8,21 +8,22 @@
 
 ## Indholdsfortegnelse
 
-- [Hurtig kørsel](#quick-run)
+- [Hurtigt løb](#quick-run)
 - [Med miljøfil](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Docker Skriv](#docker-compose)
 - [Tilgængelige profiler](#available-profiles)
-- [Konfiguration af CLI-værktøjer på værten, når OmniRoute kører i Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redis-sidecar](#redis-sidecar)
-- [Compose til produktion](#production-compose)
-- [Dockerfile-faser](#dockerfile-stages)
+- [Beholderhærdning](#container-hardening)
+- [Konfiguration af værts CLI -værktøjer, når OmniRoute kører i Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Sidevogn](#redis-sidecar)
+- [Produktion komponere](#production-compose)
+- [Dockerfile-stadier](#dockerfile-stages)
 - [Kritiske miljøvariabler](#critical-environment-variables)
-- [Docker Compose med Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Hurtig Cloudflare-tunnel](#cloudflare-quick-tunnel)
-- [Image-tags](#image-tags)
+- [Docker Komponer med Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
+- [Billed-tags](#image-tags)
 - [Dashboard-opdateringer i Docker](#dashboard-updates-in-docker)
-- [Tilgængelighed: SQLite-standarden understøtter kun én replika](#availability-default-sqlite-is-single-replica)
-- [Regionale Gemini-fejl i Docker](#gemini-regional-errors-inside-docker)
+- [Tilgængelighed: standard SQLite er enkelt-replika](#availability-default-sqlite-is-single-replica)
+- [Gemini regionale fejl inde i Docker](#gemini-regional-errors-inside-docker)
 - [Vigtige bemærkninger](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute leveres med Compose-profiler til de vigtigste implementeringsformer. V
 | `web`             | `omniroute-web`  | Websessionsudbydere, der kræver en browser: `gemini-web`, `claude-web`, `claude-turnstile` (bygger `runner-web`, Chromium inkluderet)                  | `docker compose --profile web up -d`         |
 
 > Flere profiler kan kombineres: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Beholderhærdning
+
+`base`, `web`, `cli` og `host` app-tjenesterne i `docker-compose.yml` bruger `cap_drop: [ALL]` og `no-new-privileges:true` sikkerhedsmuligheden. Billedet kører som ikke-rootbrugeren `node` og lytter på høje porte, så det behøver ingen Linux funktioner. Sikkerhedsindstillingen forhindrer processer i at opnå privilegier gennem setuid binære filer.
+
+Kun `cli` profilen monterer Docker stikket til auto-opdateringen. Se [Escape hatch: Konfigurer containerens egen CLIs](#escape-hatch-configure-the-containers-own-clis-use-sparingly) for sikkerhedsimplikationerne.
+
+Rodfilsystemet forbliver skrivbart som standard. `cli` profilen skriver CLI konfiguration og cacher i containerens hjemmemappe, `web` profilen gemmer Chromium-sessionstilstand, og Next.js runtimen kan skrive caches uden for `/app/data`.
+
+For at prøve et skrivebeskyttet rodfilsystem med `base` profilen skal du gemme dette som `docker-compose.override.yml` ud for `docker-compose.yml`. Compose læser automatisk tilsidesættelsen.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Det eksisterende `/app/data` mount forbliver skrivbart. Test din arbejdsbyrde, før du bruger denne tilsidesættelse i produktionen, da den muligvis skal skrive til andre stier.
 
 ## Konfiguration af værtsbaserede CLI-værktøjer, når OmniRoute kører i Docker
 
@@ -295,7 +320,7 @@ Hukommelsesadfærd i Docker:
 
 ### Runtime RAM for kodningsagenter
 
-Standarden på 1 GiB Docker er et dashboard/light-chat gulv, ikke en produktionsstørrelse. Lange `POST /v1/responses` kroppe (hundredevis af beskeder, snesevis af værktøjer) bevarer flere hukommelsesgrafer under komprimering. To overlappende ~ 3 MiB / ~ 750k-token-anmodninger har afbrudt V8 på en** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) og ramte også en 16 GiB cgroup OOM. Se [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Standarden på 1 GiB Docker er et dashboard/light-chat gulv, ikke en produktionsstørrelse. Lange `POST /v1/responses` kroppe (hundredevis af beskeder, snesevis af værktøjer) bevarer flere hukommelsesgrafer under komprimering. To overlappende ~ 3 MiB / ~ 750k-token-anmodninger har afbrudt V8 på en** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) og ramte også en 16 GiB cgroup OOM. Se [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Størrelse** cgroup `--memory` over bunken** — native buffere, SQLite og kompressionsmellemprodukter sidder uden for V8.
 
@@ -415,7 +440,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy indstiller standardvideresendelseshovederne for opstrømscontaineren. OmniRoute bruger `NEXT_PUBLIC_BASE_URL` som den kanoniske offentlige oprindelse for OAuth tilbagekald og genererede offentlige links; autentificerede dashboard-skrivninger bruger anmodninger med samme oprindelse plus sessionsbundet CSRF beskyttelse. Aktiver kun `OMNIROUTE_TRUST_PROXY` for avancerede implementeringer, hvor du med vilje ønsker, at OmniRoute skal udlede den offentlige oprindelse fra betroede videresendte overskrifter i stedet for eksplicit konfiguration.
+Caddy indstiller standard videresendelseshoveder for opstrømscontaineren. OmniRoute bruger `NEXT_PUBLIC_BASE_URL` som den kanoniske offentlige oprindelse for OAuth tilbagekald og genererede offentlige links; autentificerede dashboard-skrivninger bruger anmodninger med samme oprindelse plus sessionsbundet CSRF beskyttelse. Aktiver kun `OMNIROUTE_TRUST_PROXY` for avancerede implementeringer, hvor du med vilje ønsker, at OmniRoute skal udlede den offentlige oprindelse fra betroede videresendte overskrifter i stedet for eksplicit konfiguration.
 
 ## Cloudflare Quick Tunnel
 
@@ -587,15 +612,15 @@ sudo systemctl enable --now omniroute-update.path
 Tjenesten fjerner anmodningen før hentningen, så en mislykket kørsel ikke gentages i en løkke. Uden
 `DOCKER_UPDATE_TRIGGER_FILE` bevarer dashboardet det manuelle kommandoforløb.
 
-## Tilgængelighed: standard SQLite er enkelt replika
+## Tilgængelighed: standard SQLite er enkelt-replika
 
 Stock Docker / Kubernetes OmniRoute er** én Node-proces + én SQLite skriver** . Høj tilgængelighed er** ikke understøttet** på den topologi.
 
-| Begrænsning                            | Følge                                                                                                                                                                                                                                                                                                                    |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Single forfatter                       | Gør** ikke** køre flere replikaer mod den samme SQLite fil. Det ødelægger DB.                                                                                                                                                                                                                                            |
-| Genopret / genstart / HEALTHCHECK kill | **Fuld afbrydelse** af SSE under flyvningen, dashboard-sessioner og tilstand i hukommelsen. Hver tilsluttet klient falder. Nye anmodninger under det tomme slutpunktsvindue får en omvendt proxy**`502 Bad Gateway: Unknown error`** , ikke OmniRoute JSON — klienter kan ikke skelne dette fra en udbyderfejl (#11015). |
-| Samme begivenhedsløkke som `/healthz`  | Et travlt katalog eller kompressionsflueben kan forsinke sonder; en kort timeout genstarter derefter** kun** replika.                                                                                                                                                                                                    |
+| Begrænsning                            | Følge                                                                                                                                                                                                                                                                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Single forfatter                       | Gør** ikke** køre flere replikaer mod den samme SQLite fil. Det ødelægger DB.                                                                                                                                                                                                                                             |
+| Genopret / genstart / HEALTHCHECK kill | **Fuld afbrydelse** af SSE under flyvningen, dashboard-sessioner og tilstand i hukommelsen. Hver tilsluttet klient falder. Nye anmodninger under det tomme slutpunktsvindue får en omvendt proxy**`502 Bad Gateway: Unknown error`** , ikke OmniRoute JSON — -klienter kan ikke skelne dette fra en udbyderfejl (#11015). |
+| Samme begivenhedsløkke som `/healthz`  | Et travlt katalog eller kompressionsflueben kan forsinke sonder; en kort timeout genstarter derefter** kun** replika.                                                                                                                                                                                                     |
 
 **Probe matrix** (se også [Kubernetes sondeanbefalinger](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -636,23 +661,23 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep lader kube droppe Service-endepunkter før SIGTERM så** ny** trafikken holder op med at ramme den døende proces. In-flight `/v1/responses` SSE drænes op til `SHUTDOWN_TIMEOUT_MS` (standard 30s) via tungvægtsadgangsleasingkontrakter (#11015). Nye anmodninger, der stadig når processen, får `503` + `Retry-After: 5`. Genopret tomt slutpunktsgab, indtil udskiftningen er klar, forbliver en hård afbrydelse - det er SQLite topologien, ikke en fejlkonfiguration af sonden.
+`preStop` sleep lader kube droppe Service-endepunkter før SIGTERM så** ny** trafikken holder op med at ramme den døende proces. In-flight `/v1/responses` SSE drænes op til `SHUTDOWN_TIMEOUT_MS` (standard 30s) via tungvægtsadgangsleasingkontrakter (#11015). Nye anmodninger, der stadig når processen, får `503` + `Retry-After: 5`. Genopret tomt slutpunktsgab, indtil erstatningen er klar, forbliver et hårdt udfald — der er SQLite topologien, ikke en fejlkonfiguration af sonden.
 
-Ekstern Postgres / multi-writer HA er** ikke** en dokumenteret lagersti. Hvis du har brug for HA, behold en enkelt replika eller kør en topologi, som projektet har testet og dokumenteret separat. Postgres/MySQL værket bor i [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Indtil det afsendes, den eneste understøttede måde at formere sig på** stor** `/v1/responses` kapaciteten er N uafhængige processer (næste afsnit), ikke `replicas > 1` på én volumen.
+Ekstern Postgres / multi-writer HA er** ikke** en dokumenteret lagersti. Hvis du har brug for HA, behold en enkelt replika eller kør en topologi, som projektet har testet og dokumenteret separat. Postgres/MySQL -værket bor i [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Indtil det afsendes, den eneste understøttede måde at formere sig på** stor** `/v1/responses` kapaciteten er N uafhængige processer (næste afsnit), ikke `replicas > 1` på én volumen.
 
 ## Udskalering: N uafhængige processer
 
 ### Codex token rotation ejerskab
 
-Kopier af én Codex konto må ikke uafhængigt forbruge dens engangsopdateringstoken. På forekomster, der kun bruger synkroniserede legitimationsoplysninger, skal du indstille `OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` (alias `cx`). Lad den være uaktiveret på ejeren af den enkelte rotation. Hver proces har stadig brug for sin egen `DATA_DIR`; denne mulighed deler hverken SQLite eller leverer token-synkronisering eller en distribueret lås.
+Kopier af én Codex konto må ikke uafhængigt forbruge dens engangsopdateringstoken. På forekomster, der kun bruger synkroniserede legitimationsoplysninger, skal du indstille `OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` (alias `cx`). Lad den være ude af drift på ejeren af en enkelt rotation. Hver proces har stadig brug for sin egen `DATA_DIR`; denne mulighed deler hverken SQLite eller leverer token-synkronisering eller en distribueret lås.
 
-Den passive forekomst genlæser forbindelsen, når en opdatering er nødvendig, og vedtager kun et andet, uudløbet adgangstoken. Ellers deaktiveres opdatering uden at udløbe eller deaktivere forbindelsen eller tælle en opdaterings-breaker-fejl. Reelle upstream-godkendelsesfejl bruger stadig normal fejlregnskab, eksponentiel nedkøling og den normale klientfejl; kontodeaktivering forbliver permanent. Synkroniser ejerens roterede tokens, før adgangstokens udløber (standard proaktive opdateringsled er fem minutter), eller genimporter Codex godkendelsesfilen. Passiv import lagrer de leverede tokens uden at validere dem ved token-slutpunktet. Manuel dashboard/API refresh returnerer `409 refresh_disabled`; nye OAuth logins er uændrede. Se [miljøhenvisning](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
+Den passive instans genlæser forbindelsen, når en opdatering er nødvendig, og vedtager kun et andet, uudløbet adgangstoken. Ellers deaktiveres opdatering uden at udløbe eller deaktivere forbindelsen eller tælle en opdaterings-breaker-fejl. Reelle upstream-godkendelsesfejl bruger stadig normal fejlregnskab, eksponentiel nedkøling og den normale klientfejl; kontodeaktivering forbliver permanent. Synkroniser ejerens roterede tokens, før adgangstokens udløber (standard proaktive opdateringsled er fem minutter), eller genimporter Codex godkendelsesfilen. Passiv import lagrer de leverede tokens uden at validere dem ved token-endepunktet. Manuel dashboard/API refresh returnerer `409 refresh_disabled`; nye OAuth logins er uændrede. Se [miljøhenvisning](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-En Node-proces er** en V8-bunke** . To overlappende ~ 3 MiB / ~ 750k-token kodningsagent `POST /v1/responses` (RTK + Caveman) afbryder den bunke ved ~ 12 Gi (`FATAL ERROR: Reached heap limit`) og kan OOM en 16 Gi cgruppe. Se [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Den måling er en** hukommelsesbudget** advarsel, ikke et produkt hard-max på to samtidige lange `/v1/responses`. Tungvægts-chatadgang er lukket af et auto-afledt indtag-byte-budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) med størrelse fra det samme V8/cgroup loft — der tilsidesætter det opad (eller indstiller det gamle `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) på en proces af allerede størrelse, genindfører afbrydelsen. Små chats, `/healthz`, `/v1/models` og MCP er** ikke** i den kasket.
+En Node-proces er** en V8-bunke** . To overlappende ~ 3 MiB / ~ 750k-token kodningsagent `POST /v1/responses` (RTK + Caveman) afbryder den bunke ved ~ 12 Gi (`FATAL ERROR: Reached heap limit`) og kan OOM en 16 Gi cgruppe. Se [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Den måling er en** hukommelsesbudget** advarsel, ikke et produkt hard-max på to samtidige lange `/v1/responses`. Tungvægts-chatadgang er lukket af et auto-afledt indtag-byte-budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) på størrelse fra det samme V8/cgroup loft — der tilsidesætter det opad (eller indstiller det ældre `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` -anmodningstælleloft) på en proces af allerede størrelse, genindfører afbrydelsen. Små chats, `/healthz`, `/v1/models` og MCP er** ikke** i den kasket.
 
 ### En-proces: mere end to lange `/v1/responses`
 
-EN** sund** proces (heap under `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, standard `0.75`)** maj** køre mere end to samtidige lange `POST /v1/responses` når det proces-dækkende inflight-byte-budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) stadig har plads. Organer på eller over `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standard 256 KiB) tager den samme sværvægtslejekontrakt som strukturtunge anmodninger og bruger den samme [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Titusvis af samtidige lange SSE klienter (operatører har ofte brug for 40-50) er en** hukommelsesbudget** spørgsmål — størrelse heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ikke en hård "max 2" produktgrænse. En presset bunke falder stadig med `503`, der kan prøves igen, så #7849 vender ikke tilbage.
+EN** sund** proces (heap under `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, standard `0.75`)** maj** køre mere end to samtidige lange `POST /v1/responses`, når det proces-dækkende inflight-byte-budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) stadig har plads. Organer på eller over `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standard 256 KiB) tager den samme sværvægtslejekontrakt som strukturtunge anmodninger og bruger den samme [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Titusvis af samtidige lange SSE klienter (operatører har ofte brug for 40–50) er en** hukommelsesbudget** spørgsmål — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ikke en hård "max 2" produktgrænse. En presset bunke falder stadig med `503` der kan prøves igen, så #7849 ikke vender tilbage.
 
 Til** formere dynger** (uafhængige V8 old-spaces)** i dag** :
 
@@ -660,13 +685,13 @@ Til** formere dynger** (uafhængige V8 old-spaces)** i dag** :
 | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
 | Løbe** N containers/pods** , hver med sit** egen** `DATA_DIR` / volumen                                                                          | Indstil `replicas > 1` én SQLite -fil                        |
 | Størrelse tung under-flyvning + sund-headroom fra heap / inflight-byte budget; 1–2 er den konservative #7849 standard, ikke et hårdt produkt max | Giv én proces 8 × RAM og et ubegrænset tælleloft             |
-| Valgfrit: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for** delte kvotetællere**                                                        | Behandl Redis som delt SQLite — er det ikke                  |
+| Valgfrit: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` til** delte kvotetællere**                                                        | Behandl Redis som delt SQLite — er det ikke                  |
 | Dupliker udbyderhemmeligheder i hver instans (eller accepter opdelte dashboards)                                                                 | Forvent ét dashboard / én opkaldslog på tværs af forekomster |
 | Foran med enhver belastningsbalancer; sticky af API -tasten eller session er nok                                                                 | Kræv en leverandørspecifik størrelsesbevidst middleware      |
 
-Session-til-konto affinitet kan også deles gennem Redis: sæt `OMNIROUTE_SESSION_AFFINITY_STORE=redis` og `REDIS_URL` på hver proces med den samme `REDIS_KEY_PREFIX` og en positiv `sessionAffinityTtlMs` indstilling. Pins løser hash-brugskontoidentiteter til hver process kvalificerede lokale forbindelse, så OAuth -konti med matchende identitetsmetadata behøver ikke at have matchende forbindelse IDs. Kendte kontoidentiteter har forrang over modstridende lokale IDs i pin-opløsning og bevogtet udsættelse; poster uden identitet (eller udsættelseskaldere uden identitet) bevarer den gamle ID vagt. Konti uden en stabil brugsidentitet kræver stadig matchende IDs. Redis fejl eller opkald, der overstiger 100 ms, falder tilbage til lokale SQLite. Hver Redis affinitetsbutik begrænser udestående operationer til 8, omgår Redis med det samme, når den er fuld, og frigiver kun slots, når det underliggende arbejde afvikles, ikke ved deadline for opkald. Under en Redis afbrydelse er der ingen delt sandhed: hver instans falder tilbage til sin egen lokale affinitet, sessioner kan fastgøres igen én gang pr. instans, og instanser kan divergere. Klæbrighed konvergerer igen gennem Redis, når den kommer sig. Timeout-grænserne venter, ikke en sendt EVAL, som kan lande efter fallback. Routingskrivninger sammenligner den nøjagtige værdi observeret af routingbeslutningen, ikke en ny mutationstidslæsning; en observeret miss eller en SQLite faldback-observation sammenlignes med en fraværende Redis nøgle. Forældede ben udskiftes i én CAS, så en sen kommando kan ikke erstatte eller slette en nyere, anden pin. Redis læser atomisk returnerer værdien og den resterende server TTL; positiv PTTL (eller ingen udløb) bestemmer livlighed, ikke forfatterens JSON tidsstempel eller læserens ur. Lokale snapshots kortlægger den resterende TTL til en lokal deadline; eksisterende JSON nøgler forbliver læsbare, og deres rå bytes bibeholdes for CAS. Redis er den eneste kilde til sandhed, mens den svarer. Bekræftede delte upserts, berøringer og sletninger fjerner den lokale post, installer eller opdater den aldrig. SQLite på Redis stien indeholder kun denne instanss egne fallback-beslutninger fra Redis fejl, timeouts eller adgangsmætning, TTL-grænset som før. En manglende lokal pin ved et senere udfald koster et nyt valg (én prompt-cache-miss), ikke en forkert eller smidt konto. Afviste upserts returnerer den delte vinder og dens resterende TTL atomært: ordinært valg kontrollerer igen den kortlagte lokale deadline og bruger en stadig levende kvalificeret vinder, berører brug og logning for den konto uden en anden delt skrivning. Hvis den ikke er tilgængelig, beholder valget den lokale kandidat, forlader den delte pin uændret og udsender én fejlretningsmeddelelse. Afvist CAS skriver ikke SQLite; Redis fejl, timeouts eller adgangsmætning anvender i stedet den eksisterende lokale operation. Hvis en sendt mutations svar ankommer efter timeout (accepteret, afvist eller fejl), fjerner en synkron, nøjagtig serialiseret-værdi sammenligne-og-slet kun den byte-identiske timeout fallback række. Der er ingen ventetid mellem denne sammenligning og sletning; en nyere fejlskrivning er bevaret. Bevogtet udsættelse fjerner den mislykkede kontos egen lokale pin, selv med Redis nede, og renser den igen efter bekræftet delt udsættelse. Afventende tidligere delte svar kan ikke gendanne en smidt lokal pin, fordi delte succeser aldrig skriver SQLite. Et senere udfald kan genindlæse en konto; en senere accepteret delt skrivning findes kun i Redis. Redis misses konsulterer ikke lokal reservetilstand. Med driveren slukket bevarer nyvalgte stifter den gamle firefelts SQLite JSON form; kun Redis routing tilføjer den hashed kontoidentitet. Forudhentede stifter kontrolleres igen ved deres udløbsgrænse. Redis non-lease selection genlæser butikken, men synkron leasing planlægning kan stadig bruge en pin smidt ud mellem prefetch og planlægning (et accepteret bedste-indsats vindue). En leasingforpligtelse kan ikke skifte konto efter et varigt krav: ved afvist upsert beholder den den påståede kandidat kun for denne anmodning og lader den delte vinder være urørt, så enighed på tværs af instanser er afgrænset på den vej. Resten af tabellen gælder stadig: dette deler ikke combo session stickiness, native Codex turn pins, konto semaforer, lockouts, forbrugsgrænser, konfiguration eller opkaldslogs.
+Session-til-konto affinitet kan også deles gennem Redis: sæt `OMNIROUTE_SESSION_AFFINITY_STORE=redis` og `REDIS_URL` på hver proces med den samme `REDIS_KEY_PREFIX` og en positiv `sessionAffinityTtlMs` indstilling. Pins løser hash-brugskontoidentiteter til hver process kvalificerede lokale forbindelse, så OAuth -konti med matchende identitetsmetadata behøver ikke at have matchende forbindelse IDs. Kendte kontoidentiteter har forrang over modstridende lokale IDs i pin-opløsning og bevogtet udsættelse; registreringer uden identitet (eller udsættelseskaldere uden identitet) bevarer den gamle ID vagt. Konti uden en stabil brugsidentitet kræver stadig matchende IDs. Redis fejl eller opkald, der overstiger 100 ms, falder tilbage til lokale SQLite. Hver Redis affinitetsbutik begrænser udestående operationer til 8, omgår Redis med det samme, når den er fuld, og frigiver kun slots, når det underliggende arbejde afvikles, ikke ved deadline for opkald. Under en Redis afbrydelse er der ingen delt sandhed: hver instans falder tilbage til sin egen lokale affinitet, sessioner kan fastgøres igen én gang pr. instans, og instanser kan divergere. Klæbrighed konvergerer igen gennem Redis, når den kommer sig. Timeoutgrænsen venter, ikke en sendt EVAL, som kan lande efter fallback. Routingskrivninger sammenligner den nøjagtige værdi observeret af routingbeslutningen, ikke en ny mutationstidslæsning; en observeret miss eller en SQLite faldback-observation sammenlignes med en fraværende Redis nøgle. Forældede pins udskiftes i én CAS, så en sen kommando kan ikke erstatte eller slette en nyere, anden pin. Redis læser atomisk returnerer værdien og den resterende server TTL; positiv PTTL (eller ingen udløb) bestemmer livlighed, ikke forfatterens JSON tidsstempel eller læserens ur. Lokale snapshots kortlægger den resterende TTL til en lokal deadline; eksisterende JSON nøgler forbliver læsbare, og deres rå bytes bibeholdes for CAS. Redis er den eneste kilde til sandhed, mens den svarer. Bekræftede delte upserts, berøringer og sletninger fjerner den lokale post, installer eller opdater den aldrig. SQLite på Redis stien indeholder kun denne instanss egne fallback-beslutninger fra Redis fejl, timeouts eller adgangsmætning, TTL-grænset som før. En manglende lokal pin ved et senere udfald koster et nyt valg (én prompt-cache-miss), ikke en forkert eller smidt konto. Afviste upserts returnerer den delte vinder og dens resterende TTL atomært: ordinært valg kontrollerer igen den kortlagte lokale deadline og bruger en stadig levende kvalificeret vinder, berører brug og logning for den konto uden en anden delt skrivning. Hvis den ikke er tilgængelig, beholder valget den lokale kandidat, forlader den delte pin uændret og udsender én fejlretningsmeddelelse. Afvist CAS skriver ikke SQLite; Redis fejl, timeouts eller adgangsmætning anvender i stedet den eksisterende lokale operation. Hvis en sendt mutations svar ankommer efter timeout (accepteret, afvist eller fejl), fjerner en synkron, nøjagtig serialiseret-værdi sammenligne-og-slet kun den byte-identiske timeout fallback række. Der er ingen ventetid mellem denne sammenligning og sletning; en nyere fejlskrivning er bevaret. Bevogtet udsættelse fjerner den mislykkede kontos egen lokale pin, selv med Redis nede, og renser den igen efter bekræftet delt udsættelse. Afventende tidligere delte svar kan ikke gendanne en smidt lokal pin, fordi delte succeser aldrig skriver SQLite. Et senere udfald kan genindlæse en konto; en senere accepteret delt skrivning findes kun i Redis. Redis misses konsulterer ikke lokal reservetilstand. Med driveren slukket bevarer nyvalgte stifter den gamle firefelts SQLite JSON form; kun Redis routing tilføjer den hashed kontoidentitet. Forudhentede stifter kontrolleres igen ved deres udløbsgrænse. Redis non-lease selection genlæser butikken, men synkron leasing planlægning kan stadig bruge en pin smidt ud mellem prefetch og planlægning (et accepteret bedste-indsats vindue). En leasingforpligtelse kan ikke skifte konto efter et varigt krav: ved afvist upsert beholder den den påståede kandidat kun for denne anmodning og lader den delte vinder være urørt, så enighed på tværs af instanser er afgrænset på den vej. Resten af tabellen gælder stadig: dette deler ikke combo session stickiness, native Codex turn pins, konto semaforer, lockouts, forbrugsgrænser, konfiguration eller opkaldslogs.
 
-Hardware: per instans samtidig lang `/v1/responses` er en** hukommelsesbudget** spørgsmål (heap + inflight-byte / #10110). `N` uafhængige `DATA_DIR` formerer stadig dynger: vært RAM skal dække `N × cgroup`, ikke "én 16 Gi pod med N = 8." Aldrig `replicas > 1` på én SQLite fil.
+Hardware: per instans samtidig lang `/v1/responses` er en** hukommelsesbudget** spørgsmål (heap + inflight-byte / #10110). `N` uafhængige `DATA_DIR` s multiplicerer stadig dynger: vært RAM skal dække `N × cgroup`, ikke "én 16 Gi pod med N = 8." Aldrig `replicas > 1` på én SQLite fil.
 
 Komponer skitse (to dynger, to bind — ikke `deploy.replicas: 2`):
 
@@ -695,55 +720,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Densitet i processen (komprimering af HTTP isolatet) er [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). En logisk klynge på delt holdbar tilstand er [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Densitet i processen (komprimering fra HTTP isolatet) er [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). En logisk klynge på delt holdbar tilstand er [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Regionale Gemini-fejl i Docker
+## Gemini regionale fejl inde i Docker
 
-Google AI Studio / Gemini API kan returnere HTTP 400 med FAILED_PRECONDITION og
-`User location is not supported for the API use.` En vellykket anmodning på værten
-beviser ikke, at containeren bruger den samme udgående rute. DNS-rækkefølge,
-IPv4/IPv6-forbindelse, VPN-routing og konfigurerede proxyer kan være forskellige. Kontrollér
-[Googles understøttede regioner](https://ai.google.dev/gemini-api/docs/available-regions)
-samt den faktiske forbindelsesrute; denne fejl alene indikerer ikke en ugyldig API-nøgle.
+Google AI Studio / Gemini API kan returnere HTTP 400 med FAILED_PRECONDITION og `User location is not supported for the API use.` En vellykket anmodning på værten beviser ikke, at containeren bruger den samme udgående rute. DNS bestilling, IPv4/IPv6 -forbindelse, VPN -routing og konfigurerede proxyer kan variere. Tjek [Google's understøttede regioner](https://ai.google.dev/gemini-api/docs/available-regions) såvel som den faktiske forbindelsesrute; denne fejl alene identificerer ikke en dårlig API nøgle.
 
-### Foretræk en forbindelsesspecifik proxy
+### Foretrækker en forbindelsesspecifik proxy
 
-Brug OmniRoutes [proxykonfiguration pr. forbindelse](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-til den berørte Gemini-forbindelse, og gentag derefter **Test forbindelse** og en lille anmodning
-med den samme model. Dette begrænser routingændringen til den pågældende forbindelse. Kontrollér,
-at proxyen kan nås fra containeren, og at forbindelsen rent faktisk vælger
-den. En ændring af ruten garanterer ikke regional adgang hos upstream-tjenesten.
+Brug OmniRoute[per-forbindelse proxy-konfiguration](../ops/PROXY_GUIDE.md#4-level-proxy-system) til den berørte Gemini forbindelse, og gentag derefter** Test forbindelse** og en lille forespørgsel med samme model. Dette holder routingændringen omfattet af den forbindelse. Bekræft, at proxyen er tilgængelig fra containeren, og at forbindelsen virkelig vælger den. Ændring af ruten garanterer ikke opstrøms regional støtteberettigelse.
 
-### Sammenlign netværket på værten og i containeren
+### Sammenlign host- og containernetværk
 
-Bevar samme nøgle, model og anmodning, når du sammenligner godkendte resultater; indsæt aldrig
-legitimationsoplysninger, proxyadgangskoder eller komplette autorisationsheadere i en issue.
-Undersøg først, hvilke adressefamilier operativsystemets resolver tilbyder, ved at bruge den samme kommando
-på værten og inde i containeren:
+Hold nøglen, modellen og anmodningen identiske, når du sammenligner autentificerede resultater; Indsæt aldrig legitimationsoplysninger, proxy-adgangskoder eller komplette autorisationsoverskrifter i et problem. Undersøg først, hvilke adressefamilier OS resolveren tilbyder, ved at bruge den samme kommando på værten og inde i containeren:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Erstat `omniroute` med den tjeneste, du kører (for eksempel `omniroute-web`). Disse
-kommandoer udskriver adressefamilier uden legitimationsoplysninger eller IP-adresser. En returneret `6`
-viser kun et IPv6-DNS-resultat: Det beviser **ikke**, at der er en brugbar IPv6-rute eller API-adgang.
-Hvor `curl` er installeret, skal du sammenligne `curl -4 -I https://generativelanguage.googleapis.com`
-med `curl -6 -I https://generativelanguage.googleapis.com` i begge miljøer.
-Et HTTP-svar beviser forbindelsen for denne test, selv hvis det er en ikke-godkendt
-fejl; kun den godkendte modelanmodning tester adgangen til Gemini.
+Erstat `omniroute` med den service, du kører (for eksempel `omniroute-web`). Disse kommandoer udskriver adressefamilier uden legitimationsoplysninger eller IP -adresser. En returneret `6` viser kun et IPv6 DNS -resultat: det gør den** ikke** bevise en brugbar IPv6 rute eller API adgang. Hvor `curl` er installeret, sammenligne `curl -4 -I https://generativelanguage.googleapis.com` med `curl -6 -I https://generativelanguage.googleapis.com` i begge miljøer. Et HTTP svar beviser forbindelsen for den pågældende sonde, selvom det er en uautoriseret fejl; kun den autentificerede modelanmodning tester Gemini kvalificering.
 
 ### Alternativ på værtsniveau: fungerende IPv6 og resolverpolitik
 
-Indberetteren af [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) gendannede
-adgangen i sit miljø ved at aktivere IPv6 for containere og ændre glibc's adressevalg.
-Betragt dette som et miljøspecifikt alternativ. Bekræft, at værtens IPv6,
-containerens udgående forbindelse/routing og firewallregler fungerer, før resolverens præferencer justeres.
-En privat ULA-adresse er ikke i sig selv bevis på offentlig IPv6-forbindelse.
+Reporteren af [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) genoprettede adgang i deres miljø ved at aktivere container IPv6 og ændre glibc adressevalg. Behandl dette som et miljøspecifikt alternativ. Bekræft fungerende vært IPv6, container egress/routing og firewall regler, før du justerer resolver præferencer. En privat ULA -adresse i sig selv etablerer ikke offentlig IPv6 -forbindelse.
 
-For tjenester, der allerede er tilknyttet Composes standardnetværk, aktiverer dette fragment
-IPv6 på dette netværk; behold resten af din tjeneste-, port-, diskenheds- og konfiguration:
+For tjenester, der allerede er knyttet til Composes standardnetværk, aktiverer dette fragment IPv6 på det netværk; behold resten af din service, porte, volumener og konfiguration:
 
 ```yaml
 networks:
@@ -751,30 +753,13 @@ networks:
     enable_ipv6: true
 ```
 
-For et navngivet netværk skal det aktiveres på det netværk, som tjenesten rent faktisk tilslutter sig. Docker kan
-tildele et ULA-undernet; vælg kun et eksplicit, ikke-overlappende undernet, når dit netværk
-kræver det. Se [Docker IPv6-netværk](https://docs.docker.com/engine/daemon/ipv6/)
-og [Compose-netværksindstillinger](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+For et navngivet netværk skal du aktivere det på det netværk, tjenesten faktisk tilslutter sig. Docker kan allokere et ULA undernet; vælg kun et eksplicit, ikke-overlappende undernet, når dit netværk kræver det. Se indstillinger for [Docker IPv6 -netværk](https://docs.docker.com/engine/daemon/ipv6/) og [Compose-netværk](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-På et **glibc-baseret image** kan `/etc/gai.conf` ændre adressevalget. Det nuværende
-repositorys Dockerfile bruger Debian; brugerdefinerede musl-baserede images anvender ikke denne mekanisme.
-Den rapporterede justering ændrer ULA-labelen fra `label fc00::/7 6` til
-`label fc00::/7 1`. Tag udgangspunkt i imagets komplette politiktabel, og bevar dets øvrige
-poster: Tilføjelse af en `label`- eller `precedence`-post erstatter denne standardtabel, så en fil,
-der kun indeholder den ændrede linje, er utilstrækkelig.
-[glibc-konfigurationsreferencen](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-dokumenterer denne funktionsmåde. Bind-mount den gennemgåede fil skrivebeskyttet på `/etc/gai.conf`,
-og genopret tjenesten for at anvende den.
+På en** glibc-baseret billede** , `/etc/gai.conf` kan ændre adressevalg. Det nuværende lager Dockerfile bruger Debian; brugerdefinerede musl-baserede billeder deler ikke denne mekanisme. Den rapporterede justering ændrer ULA etiketten fra `label fc00::/7 6` til `label fc00::/7 1`. Start fra billedets komplette politiktabel og bevar dets andre poster: Tilføjelse af en `label` eller `precedence` -post erstatter den standardtabel, så en fil, der kun indeholder den ændrede linje, er utilstrækkelig. [Glibc-konfigurationsreferencen](https://github.com/bminor/glibc/blob/master/posix/gai.conf) dokumenterer denne semantik. Bind-mount den gennemgåede fil skrivebeskyttet på `/etc/gai.conf` og genskab tjenesten for at anvende den.
 
-Dette ændrer operativsystemets adressevalg for **al udgående trafik i den pågældende container**.
-Det tvinger ikke alle applikationer til at vælge IPv6: Nodes DNS-rækkefølge og forbindelsesvalg
-har også betydning. Især foretrækker `--dns-result-order=ipv4first` IPv4 og
-er ikke en løsning på en fejl, der kun opstår med IPv4. Se [Node DNS-rækkefølge](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Dette ændrer OS adressevalg for** al udgående trafik i den pågældende container** . Det tvinger ikke alle programmer til at vælge IPv6: Nodes DNS rækkefølge og valg af forbindelse har også betydning. Især foretrækker `--dns-result-order=ipv4first` IPv4 og er ikke et middel mod en IPv4-only fejl. Se [Node DNS bestilling](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Test Gemini og dine øvrige udbydere igen efter enhver ændring på værtsniveau. For at rulle tilbage
-skal du fjerne det brugerdefinerede `gai.conf`-mount, gendanne den tidligere netværkskonfiguration og
-genoprette den berørte tjeneste/det berørte netværk i et vedligeholdelsesvindue. Genoprettelse af et netværk
-kan afbryde andre containere, der er tilknyttet det; slet ikke den persistente datadiskenhed.
+Test Gemini og dine andre udbydere igen efter enhver ændring på værtsniveau. For at rulle tilbage skal du fjerne den brugerdefinerede `gai.conf` montering, gendanne den tidligere netværkskonfiguration og genskabe den berørte service/network under et vedligeholdelsesvindue. Genskabelse af et netværk kan afbryde andre beholdere, der er knyttet til det; slet ikke den vedvarende datamængde.
 
 ## Vigtige bemærkninger
 

@@ -4,14 +4,12 @@
 
 ---
 
-Terakhir diperbarui: 23-08-2026
-
 OmniRoute terintegrasi dengan tiga kategori alat CLI yang tersebar di tiga halaman dasbor khusus:
 
 | Halaman      | Rute                    | Konsep                                                                              | Menghitung     |
 | ------------ | ----------------------- | ----------------------------------------------------------------------------------- | -------------- |
 | **Kode CLI** | `/dashboard/cli-code`   | Alat pengkodean yang Anda tunjuk ke OmniRoute (Penyedia Klien → CLI → OmniRoute → ) | 26             |
-| **Agen CLI** | `/dashboard/cli-agents` | Agen otonom yang Anda tunjuk pada OmniRoute (aliran yang sama, cakupan lebih luas)  | 11             |
+| **Agen CLI** | `/dashboard/cli-agents` | Agen otonom yang Anda tunjuk ke OmniRoute (aliran yang sama, cakupan lebih luas)    | 11             |
 | **Agen ACP** | `/dashboard/acp-agents` | CLIs yang OmniRoute munculkan sebagai backend melalui stdio/ACP (aliran balik)      | lihat registri |
 
 Rute lama dialihkan melalui 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.

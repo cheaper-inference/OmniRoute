@@ -93,52 +93,30 @@ rutarea sau selectarea modelului — consultați opțiunea separată de mai jos.
 
 ---
 
-## Sincronizarea datelor este o opțiune SEPARATĂ — promisiunea privind confidențialitatea
+## Sincronizarea datelor este un SEPARATE opt-in — promisiunea de confidențialitate
 
-Activarea `RADAR_ENABLED` deblochează doar interfața cu utilizatorul. Sincronizarea fluxului necesită o a doua
-opțiune independentă, stocată în `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migrarea `136_radar_cache_settings.sql`). `syncRadar()` verifică flagul _și_ opțiunea
-înainte de a efectua orice apel în rețea:
+Activarea `RADAR_ENABLED` deblochează numai UI. Sincronizarea feedului necesită o a doua înscriere independentă stocată în `radar_settings.opt_in` (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`). `syncRadar()` verifică steag-ul _și_ înscrierea înainte de a efectua orice apel de rețea:
 
 ```
-Flag dezactivat  → { status: "disabled" }   — niciun apel în rețea
-Opțiune refuzată → { status: "opt_out" }    — niciun apel în rețea
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
 Când ambele sunt activate, calea de sincronizare este:
 
-1. `GET <URL de bază al fluxului>/v1/catalog/latest` cu `x-omniroute-radar-schema: 2` și un antet opțional
-   `Authorization: Bearer <cheie de susținător>` (consultați mai jos). În absența antetului schemei, serverele utilizează implicit
-   artefactul de tranziție v1 semnat separat, astfel încât clienții instalați mai vechi să continue
-   să primească actualizări.
-2. Acesta este un flux al aplicației exclusiv pentru descărcare, dar reprezintă totuși o solicitare HTTPS. Infrastructura
-   găzduită primește metadate obișnuite ale conexiunii, precum adresa IP sursă. Când este configurată o cheie de susținător,
-   sincronizarea trimite și cheia respectivă în antetul Bearer, astfel încât serviciul să poată determina
-   drepturile de acces. La revizia exactă a serverului privat identificată în limita dovezilor de mai sus,
-   contabilizarea solicitărilor fluxului utilizează hashuri ale cheilor, utilizare agregată și un HMAC trunchiat, cu rotație
-   zilnică, al adresei IP pentru verificarea manuală a abuzurilor; aceste tabele nu păstrează nici cheia, nici adresa IP în formă brută.
-   Jurnalele de acces ale infrastructurii și căsuța de livrare criptată reprezintă limite operaționale
-   separate.
-3. OmniRoute nu trimite niciodată prompturi, răspunsuri, conversații, acreditări ale furnizorilor, trafic al modelelor,
-   disponibilitate, latență sau configurația locală a furnizorilor către serviciul Radar.
-4. Răspunsul este verificat, validat și stocat local în cache (consultați
-   [Modelul de securitate](#security-model)). Radar are exact patru căi de rețea pe partea de server:
-   `syncRadar()` pentru catalog, `syncRadarReferrals()` pentru recomandări și
-   `syncRadarOffers()` / `syncRadarIntel()` pentru oferte și informații Intel destinate exclusiv susținătorilor.
+1. `GET <feed base URL>/v1/catalog/latest` cu `x-omniroute-radar-schema: 2` și un antet `Authorization: Bearer <supporter key>` opțional (vezi mai jos). Serverele utilizează implicit artefactul de tranziție v1 semnat separat atunci când antetul schemei este absent, astfel încât clienții mai vechi instalați continuă să primească actualizări.
+2. Acesta este un flux de aplicații doar pentru descărcare, dar este încă o solicitare HTTPS. Infrastructura găzduită primește metadate de conexiune obișnuite, cum ar fi sursa IP. Când o cheie de suport este configurată, sincronizarea trimite și cheia respectivă în antetul Purtătorului, astfel încât serviciul să poată rezolva dreptul. La revizuirea exactă a serverului privat identificată în limita dovezilor de mai sus, contabilitatea cererilor de feed folosește hash-uri cheie, utilizare agregată și un HMAC trunchiat rotativ zilnic al IP pentru revizuirea manuală a abuzului; acele tabele nu persistă nici cheia, nici IP în formă brută. Jurnalele de acces la infrastructură și căsuța de livrare criptată sunt granițe operaționale separate.
+3. OmniRoute nu trimite niciodată solicitări, răspunsuri, conversații, acreditări ale furnizorului, trafic de model, timp de funcționare, latență sau configurația furnizorului local către serviciul Radar.
+4. Răspunsul este verificat, validat și stocat în cache local (consultați [Modelul de securitate](#security-model) ). Radar are exact patru căi de rețea pe partea de server: `syncRadar()` pentru catalog, `syncRadarReferrals()` pentru recomandări și `syncRadarOffers()` / `syncRadarIntel()` pentru oferte doar pentru suporteri și Intel.
 
-**Cheia de susținător** este un token Bearer opțional (`radar_settings.supporter_key`)
-care permite serviciului de flux să decidă ce nivel să furnizeze (consultați
-[Niveluri](#tiers-community-and-live)). Aceasta este:
+Verificarea catalogului are loc la fiecare 24 de ore. Când feedul verificat încă mai conține versiunea și nivelul din cache, sincronizarea păstrează sarcina utilă din cache, reînnoiește `fetchedAt`, iar următoarea verificare vine 24 de ore mai târziu în loc de următoarea bifă orară.
 
-- Stocată **criptat în repaus** cu aceleași funcții auxiliare AES-256-GCM `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`) utilizate pentru acreditările furnizorilor.
-- Setată prin `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) și
-  **nu este niciodată returnată integral** — răspunsul returnează o formă mascată (`omr_****abcd`).
-- Modificarea sau ștergerea acesteia invalidează atomic cache-urile pentru catalog, recomandări, oferte și Intel.
-  Următoarea sincronizare/citire determină noile drepturi de acces pe partea de server; salvarea unei chei nu efectuează
-  în sine o solicitare de rețea și nu consumă o cheie de activare de unică folosință.
-- Trimisă serviciului de flux ca token Bearer în solicitarea GET de sincronizare — nicio altă informație despre
-  cheie nu părăsește vreodată clientul.
+The** cheia suporterului** este un simbol Bearer opțional (`radar_settings.supporter_key`) care permite serviciului de feed să decidă ce nivel să servească (consultați [Nivelurile](#tiers-community-and-live) ). Este:
+
+- Stocat** criptat în repaus** cu aceleași AES-256-GCM `encrypt()`/`decrypt()` helpers (`src/lib/db/encryption.ts`) utilizate pentru acreditările furnizorului.
+- Setați prin `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) și** nu a răsunat niciodată** — răspunsul returnează o formă mascata (`omr_****abcd`).
+- Schimbarea sau ștergerea acestuia invalidează atomic catalogul, recomandările, ofertele și memoria cache Intel. Următorul sync/read rezolvă noul drept de pe partea de server; salvarea unei chei nu face în sine o solicitare de rețea sau consumă o cheie de activare de unică folosință.
+- Trimis către serviciul de feed ca simbol Bearer pe sincronizarea GET — nimic altceva despre cheie nu părăsește clientul.
 
 ---
 
@@ -404,84 +382,45 @@ version, tier }` — aceasta este valoarea afișată de panoul de control, nicio
 
 ---
 
-## Reguli de îmbinare a suprapunerii la citire
+## Reguli de îmbinare suprapuse în timp de citire
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) îmbină fluxul din cache **peste**
-referința statică la **momentul citirii**, în interiorul `getRadarCatalog()`. Matricea de referință
-(`FREE_MODEL_BUDGETS`) nu este modificată niciodată — un `MergedEntry[]` este calculat de la zero la fiecare
-apel.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) îmbină fluxul din cache** peste** linia de bază statică la** timp de citit** , în interiorul `getRadarCatalog()`. Matricea de bază (`FREE_MODEL_BUDGETS`) nu este niciodată mutată — a `MergedEntry[]` este calculată proaspăt la fiecare apel.
 
-Patru reguli, în ordinea precedenței:
+Patru reguli, în ordinea de prioritate:
 
-1. **Fluxul nu suprascrie niciodată o valoare locală personalizată.** Pentru fiecare câmp: dacă operatorul a
-   personalizat un câmp al unei intrări (harta `localOverrides`, indexată după `provider:modelId`),
-   valoarea din flux pentru acel câmp specific este omisă — valoarea operatorului are prioritate.
-2. **`enabled: false` dezactivează intrarea, păstrând proveniența.** O intrare din flux care
-   dezactivează o intrare setează `enabled: false` și `disabledBy: "radar"` în rezultatul îmbinat,
-   astfel încât UI-ul să poată explica _de ce_ o intrare a trecut de la disponibilă la dezactivată.
-3. **O intrare adăugată de utilizator, care nu este prezentă în flux, rămâne nealterată.** Intrările care
-   există numai în referință (sau au fost adăugate local) și nu au o intrare corespunzătoare în flux
-   sunt transmise mai departe fără modificări.
-4. **O intrare marcată pentru ștergere nu este reactivată niciodată.** Dacă operatorul a șters explicit o
-   intrare (setul `tombstones`), readăugarea acelui `provider:modelId` de către flux într-o versiune
-   ulterioară nu o readuce.
+1. **Feed nu suprascrie niciodată o suprascriere locală.** Per-câmp: dacă operatorul a personalizat un câmp pe o intrare (hartă `localOverrides`, `provider:modelId` tastat), valoarea feedului pentru acel câmp specific este omisă — valoarea operatorului câștigă.
+2. **`enabled: false` dezactivează intrarea, cu proveniența.** O intrare de feed care dezactivează o intrare setează `enabled: false` și `disabledBy: "radar"` pe rezultatul îmbinat, astfel încât UI poate explica _de ce_ o intrare a trecut de la disponibilă la dezactivată.
+3. **O intrare adăugată de utilizator care nu este prezentă în feed supraviețuiește neatinsă.** Intrările care există doar în linia de bază (sau au fost adăugate local) și nu au nicio intrare de feed corespunzătoare trec neschimbate.
+4. **O intrare cu pietre funerare nu este niciodată reînviată.** Dacă operatorul a șters în mod explicit o intrare (`tombstones` set ), feedul readăugând acel `provider:modelId` într-o versiune ulterioară nu o aduce înapoi.
 
-Câmpurile editabile și marcajele de ștergere sunt persistate în
-`radar_local_model_state` (migrarea `153_radar_local_model_state.sql`). Adaptorul public pentru baza de date
-(`src/lib/db/radar.ts`) convertește acele rânduri în harta `localOverrides` și
-setul `tombstones` utilizate de `applyFeed()`; în producție, `getRadarCatalog()` încarcă acea stare
-după ce sunt trecute verificările pentru indicator, cache și schemă. Numai `displayName` și `enabled` pot fi
-editate de operator. Identitatea furnizorului/modelului, proveniența fluxului, cota, capabilitățile, ToS
-și datele de configurare nu pot fi scrise prin această interfață.
+Câmpurile editabile și pietrele funerare sunt persistente în `radar_local_model_state` (migrare `153_radar_local_model_state.sql`). Adaptorul public DB (`src/lib/db/radar.ts`) convertește acele rânduri în harta `localOverrides` și setul `tombstones` folosit de `applyFeed()`; production `getRadarCatalog()` încarcă această stare după trecerea porților de steag, cache și schema. Doar `displayName` și `enabled` sunt editabile de către operator. Identitatea Provider/model, proveniența feedului, cota, capabilitățile, ToS și datele de configurare nu pot fi scrise prin această suprafață.
 
-Panoul de control oferă patru acțiuni locale:
+Tabloul de bord expune patru acțiuni locale:
 
-- **Editare** modifică numele afișat local și starea de activare.
-- **Resetarea modificărilor locale** șterge ambele câmpuri editabile fără a modifica un marcaj de ștergere.
-- **Ascundere** creează un marcaj de ștergere, astfel încât actualizările ulterioare ale fluxului să nu poată recrea rândul.
-- **Restaurare** elimină marcajul de ștergere; orice valoare personalizată salvată separat rămâne în vigoare.
+- **Edita** modifică numele afișat local și starea activată.
+- **Resetați modificările locale** șterge ambele câmpuri editabile fără a schimba o piatră funerară.
+- **Ascunde** creează o piatră de mormânt, astfel încât actualizările ulterioare de feed nu pot recrea rândul.
+- **Restabili** îndepărtează piatra funerară; orice modificare salvată separat rămâne în vigoare.
 
-Un `enabled: false` din flux rămâne excepția de siguranță: are prioritate față de un
-`enabled: true` local învechit, păstrează intrarea îmbinată dezactivată și înregistrează `disabledBy: "radar"`.
+Un feed `enabled: false` rămâne excepția de siguranță: câștigă un `enabled: true` local învechit, păstrează intrarea îmbinată dezactivată și înregistrează `disabledBy: "radar"`.
 
-Publicările catalogului utilizează `schemaVersion: 2`. `contextWindow` și fiecare dintre `tools`, `vision` și
-`thinking` sunt în mod independent `number | null` / `boolean | null`: `null` înseamnă necunoscut, în timp ce
-`false` înseamnă că o sursă oficială a furnizorului, confirmată conform D16, afirmă explicit că respectiva capabilitate este absentă.
-Indicatorii interni ai registrului/specificațiilor de model OmniRoute nu sunt niciodată promovați direct ca fapte în flux. Clientul
-acceptă în continuare instantanee v1; deoarece vechiul constructor utiliza `false` drept substituent pentru absență, valoarea v1 `false` este
-normalizată la necunoscut, în timp ce v1 `true` rămâne factuală. Versiunile necunoscute ale schemei eșuează în mod sigur, iar
-ultimul cache valid rămâne disponibil. Fiecare model v2 cu un context/o capabilitate nenul(ă) trebuie să conțină un
-`metadataEvidenceUrls[]` HTTPS care nu necesită acreditări; în caz contrar, validarea schemei eșuează, iar cache-ul
-nu este înlocuit. Tabelul catalogului afișează toate cele trei stări ca `✓`, `✕` și `?`.
+Publicațiile de catalog folosesc `schemaVersion: 2`. `contextWindow` și fiecare dintre `tools`, `vision` și `thinking` sunt independent `number | null` / `boolean | null`: `null` înseamnă necunoscut, în timp ce `false` înseamnă că o sursă oficială a furnizorului D16-confirmed spune în mod explicit că capacitatea este absentă. Steaguri interne OmniRoute registry/model-spec nu sunt niciodată promovate direct pentru a transmite informații. Clientul încă acceptă instantanee v1; deoarece vechiul constructor a folosit `false` ca substituent de absență, v1 `false` este normalizat la necunoscut, în timp ce v1 `true` rămâne faptic. Versiunile de schemă necunoscute nu s-au închis și ultimul cache valid rămâne disponibil. Fiecare model v2 cu un context/capability non-null trebuie să aibă un HTTPS `metadataEvidenceUrls[]` fără acreditări; în caz contrar, validarea schemei eșuează și memoria cache nu este înlocuită. Tabelul de catalog redă toate cele trei stări ca `✓`, `✕` și `?`.
 
-### Combinații ghidate și acces MCP
+### Combo ghidat și acces MCP
 
-Valorile `familyId` confirmate supraviețuiesc suprapunerii la citire și controlează modulul pur
-`buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). O familie este sugerată
-numai atunci când cel puțin doi furnizori distincți au conexiuni active și expun exact ID-ul de model selectat.
-Modelele dezactivate, furnizorii inactivi, ID-urile de model lipsă, familiile cu un singur membru și potrivirile
-ambigue de alias/prefix eșuează în mod sigur. Sugestiile utilizează strategia existentă `priority`, ordonând
-mai întâi cel mai mare buget lunar recurent; UI-ul le creează numai prin `POST /api/combos`.
+Valorile `familyId` confirmate supraviețuiesc suprapunerii timpului de citire și conduc modulul `buildRadarComboSuggestions()` pur (`src/lib/radar/comboSuggestions.ts`). O familie este sugerată numai atunci când cel puțin doi furnizori diferiți au conexiuni active și expun modelul curat exact ID. Modelele dezactivate, furnizorii inactivi, modelul IDs lipsă, familiile singleton și potrivirile alias/prefix ambigue nu se închid. Sugestiile folosesc strategia `priority` existentă, ordonând mai întâi cel mai mare buget lunar recurent; UI le creează numai prin `POST /api/combos`.
 
-Interfața ghidată se află la `/dashboard/radar/combos`. Aceasta citește doar endpointurile locale
-`GET /api/radar/catalog` și `GET /api/combos/builder/options`. Nu declanșează niciodată sincronizarea Radar,
-nu citește credențialele furnizorului și nu scrie direct în baza de date cu combinații.
+UI ghidat locuiește la `/dashboard/radar/combos`. Citește numai punctele finale locale `GET /api/radar/catalog` și `GET /api/combos/builder/options`. Nu declanșează niciodată sincronizarea Radar, nu citește acreditările furnizorului sau nu scrie direct în baza de date combinată.
 
-Clienții MCP pot citi aceeași proiecție locală cu `omniroute_radar_catalog` (`read:radar`). Filtrele
-opționale `provider`, `familyId` și `enabledOnly` sunt evaluate după o singură citire locală
-`GET /api/radar/catalog`. Rezultatul său restricționat include metadatele catalogului, precum și furnizorul/modelul,
-numele afișat, `familyId`, cota, capabilitățile, starea de activare, originea și `disabledBy`; URL-urile de configurare,
-pașii, conexiunile, adresele de e-mail, cheile și datele de recomandare nu sunt returnate niciodată. Acest instrument
-este doar pentru citire și nu invocă niciodată `/api/radar/sync`.
+Clienții MCP pot citi aceeași proiecție locală cu `omniroute_radar_catalog` (`read:radar`). Filtrele opționale `provider`, `familyId` și `enabledOnly` sunt evaluate după o citire `GET /api/radar/catalog` locală. Ieșirea sa închisă include metadatele catalogului plus provider/model, numele afișat, `familyId`, cota, capabilități, starea activată, originea și `disabledBy`; setup URLs, pașii, conexiunile, adresele de e-mail, cheile și datele de referință nu sunt returnate niciodată. Acest instrument este doar pentru citire și nu invocă niciodată `/api/radar/sync`. Când fluxul din cache este anterioară catalogului instalat, `meta.olderThanRelease` este `true` și instrumentul returnează modele din catalogul instalat cu modificări locale și pietre funerare aplicate.
 
 ### Marcatori de proveniență
 
-Fiecare intrare îmbinată conține un câmp `origin`, pe care interfața îl afișează ca insignă:
+Fiecare intrare îmbinată poartă un câmp `origin` pe care UI îl redă ca insignă:
 
-- `"baseline"` — nemodificată față de catalogul static al versiunii.
-- `"radar"` — unul sau mai multe câmpuri au fost actualizate de flux.
-- `"local"` — operatorul are cel puțin o suprascriere locală pentru această intrare (suprascrierile
-  locale au întotdeauna prioritate față de flux, conform regulii 1, indiferent de ceea ce indică fluxul).
+- `"baseline"` — neatins din catalogul de lansări static.
+- `"radar"` — unul sau mai multe câmpuri au fost reîmprospătate de feed.
+- `"local"` — operatorul are cel puțin o modificare locală pentru această intrare (overriderile locale câștigă întotdeauna feedul conform regulii 1, indiferent de ceea ce spune feedul).
 
 ---
 

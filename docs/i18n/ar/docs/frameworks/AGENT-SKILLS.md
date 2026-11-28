@@ -11,14 +11,14 @@
 
 ---
 
-## نظرة عامة
+## ملخص
 
-يحتوي الكتالوج على **45 مهارة وكيل** (23 لـ REST API + 21 لـ CLI + سير عمل واحد للتهيئة). تتضمن كل مهارة:
+يحتوي الكتالوج** 45 مهارات الوكيل** (23 REST API + 21 CLI + 1 سير عمل التكوين). كل مهارة لديها:
 
-- **معرّفًا أساسيًا** (`omni-auth`، و`cli-serve`، وما إلى ذلك)
-- ملف **SKILL.md** في `skills/{id}/SKILL.md` يتضمن ترويسة YAML (`name`، و`description`) + محتوى markdown غنيًا
-- **نقاط نهاية REST** (لمهارات API) أو **أوامر CLI فرعية** (لمهارات CLI) مشتقة من مواصفات OpenAPI وسجل CLI
-- **عنوان URL أوليًا على GitHub** للجلب المباشر: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- أ** ID الكنسي** (`omni-auth`، `cli-serve`، الخ.)
+- أ**SKILL.md** ملف في `skills/{id}/SKILL.md` مع YAML frontmatter (`name`، `description`) + rich markdown body
+- **نقاط النهاية REST** (مهارات API ) أو** الأوامر الفرعية CLI** (مهارات CLI ) المستمدة من مواصفات OpenAPI وتسجيل CLI
+- أ**GitHub الخام URL** للجلب المباشر: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## واجهة API للتغطية
+## تغطية API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -4,14 +4,13 @@
 
 ---
 
-> **Sursă de adevăr:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Ultima actualizare:** 2026-09-22 — spațiile de nume ale scopurilor indică spre MCP-SERVER.md
+> **Sursa adevărului:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute are un pipeline de autorizare conștient de rute, care filtrează fiecare cerere API. Clasificarea este **determinată** și **fail-closed** — orice nu poate fi clasificat ajunge ca `MANAGEMENT` și necesită o sesiune sau un token de nivel management. Această pagină explică modelul pentru inginerii care întrețin rute sau proiectează noi endpoint-uri.
+OmniRoute are o conductă de autorizare care ține seama de rută care pornește fiecare cerere API. Clasificarea este** determinist** şi** fail-închis** — orice nu poate fi clasificat ajunge ca `MANAGEMENT` și necesită un token de sesiune sau de management. Această pagină explică modelul pentru inginerii care întrețin rute sau proiectează noi puncte finale.
 
-![Pipeline AuthZ (3 clase de rute + evaluare politici)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> Sursă: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> Sursa: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## Două moduri de autentificare
 
@@ -195,7 +194,7 @@ Fiecare clasă de rută are o politică în `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — returnează întotdeauna `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extrage Bearer, validează prin `validateApiKey()`. Devine anonim numai atunci când indicatorul caracteristicii efective `REQUIRE_API_KEY` este dezactivat. Indicatorul efectiv este rezolvat prin `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), astfel încât Indicatorii de caracteristică a tabloului de bord și variabilele de mediu guvernează în mod consecvent `/api/v1/*`, `/api/v1beta/*` și aliasurile; eșecurile rezolutorului eșuate închise. Permite solicitări de sesiuni de tablou de bord pe rutele client API (inclusiv `/api/v1/models`, utilizat de catalogul modelelor de tablou de bord). Când Entra ID SSO este activat, un purtător care este structural un token Entra (trei segmente base64url, `RS*` alg, `kid`) este gestionat de ramura SSO** înainte** `validateApiKey()` și verdictul său este final — nu ajunge niciodată la calea cheii API sau la ramura de degradare la anonimă, astfel încât o întrerupere a furnizorului de identitate nu poate deveni acces deschis. Cheile statice API nu sunt afectate. Vezi [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — acceptă sesiunile de tablou de bord, cererile interne de sincronizare a modelului (potrivite cu `/api/providers/[name]/(sync-models|models)`) sau omite complet dacă `isAuthRequired()` returnează false. Returnează 403 (`AUTH_001`) când este prezent un simbol Bearer, dar nu este valid, 401 în caz contrar. De asemenea, impune nivelurile de gardă rută (LOCAL_ONLY / ALWAYS_PROTECTED) înainte de orice ramură de autentificare — vezi [Nivelurile de gardă rută](../security/ROUTE_GUARD_TIERS.md). Căile LOCAL_ONLY în `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (azi: `/api/mcp/`) pot fi accesate din non-loopback atunci când cheia Bearer poartă domeniul `manage` ; toate celelalte căi LOCAL_ONLY rămân strict-loopback, indiferent de domeniul de aplicare.
+- **`managementPolicy`** (`policies/management.ts`) — acceptă sesiunile de tablou de bord, cererile interne de sincronizare a modelului (potrivite cu `/api/providers/[name]/(sync-models|models)`) sau omite complet dacă `isAuthRequired()` returnează false. Returnează 403 (`AUTH_001`) când este prezent un simbol Bearer, dar nu este valid, 401 în caz contrar. De asemenea, impune nivelurile de gardă rută (LOCAL_ONLY / ALWAYS_PROTECTED) înainte de orice ramură de autentificare — vezi [Nivelurile de gardă rută](../security/ROUTE_GUARD_TIERS.md). Căile LOCAL_ONLY în `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (azi: `/api/mcp/`) pot fi accesate din non-loopback atunci când tasta Bearer poartă domeniul `manage`/`admin` sau domeniul îngust `mcp:connect` (`hasMcpConnectOrManageScope`) sau cu o sesiune de tablou de bord autentificată; toate celelalte căi LOCAL_ONLY rămân strict-loopback, indiferent de domeniul de aplicare.
 
 O politică de succes returnează `AuthSubject` cu `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Managerii din aval îl pot citi prin `assertAuth(request, "CLIENT_API")` în `src/server/authz/assertAuth.ts` în loc să ruleze din nou logica de autentificare.
 
@@ -286,38 +285,24 @@ export async function POST(request: Request) {
 
 Alegeți setul în funcție de formă, nu de comoditate. O rută individuală trebuie adăugată în `PUBLIC_API_ROUTES_EXACT` (sau în `PUBLIC_READONLY_CORS_API_ROUTES` dacă acceptă doar GET); numai un subarbore autentic trebuie adăugat în `PUBLIC_API_ROUTE_PREFIXES`, iar acesta **trebuie să se termine cu `/`**. Adăugarea unei rute individuale în lista de prefixe face publică și fiecare cale adiacentă care are aceleași caractere inițiale — inclusiv rutele înrudite cu segmente dinamice adăugate ulterior (GHSA-74g9-q8f6-793h). Actualizați testele unitare din `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` și `tests/unit/authz/classify.test.ts`.
 
-## Domenii de aplicare (Scopes)
+## Domenii de aplicare
 
-Trei spații de nume. Fiecare verificator citește doar propriile șiruri de caractere. Comparația alăturată,
-inclusiv de ce `manage` eșuează `scopeMatches` pentru `read:compression` și de ce un
-token de acces `read` nu poate `PATCH /api/keys/{id}`, se găsește la
-[Trei spații de nume pentru domenii de aplicare](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Trei spații de nume. Fiecare verificator citește doar propriile șiruri de caractere. Alăturat, inclusiv motivul pentru care `manage` eșuează `scopeMatches` pentru `read:compression` și de ce un jeton de acces `read` nu poate `PATCH /api/keys/{id}`, este [Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Cheile API conțin un array `scopes` (stocat ca JSON în `api_keys.scopes`, vezi `src/lib/db/apiKeys.ts`).
+Cheile API poartă o matrice `scopes` (stocat ca JSON în `api_keys.scopes`, vezi `src/lib/db/apiKeys.ts`).
 
-### Domeniul de aplicare pentru management
+### Domeniul de management
 
-- `manage` / `admin` — `hasManageScope`. Acces de tip Bearer la rutele API de management.
-- `mcp:connect`, `self:usage`, `self:account-quota` și
-  `policy:bypass-provider-quota` sunt domenii de aplicare aditive cu potrivire exactă. Ele se află
-  în afara `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` deschide doar
-  secțiunea non-loopback `/api/mcp/`.
+- `manage` / `admin` — `hasManageScope`. Accesul purtătorului la rutele de management API.
+- `mcp:connect`, `self:usage`, `self:account-quota` și `policy:bypass-provider-quota` sunt domenii de potrivire exactă aditive. Ei stau afara `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` deschide numai `/api/mcp/` non-loopback carve-out.
 
-### Domenii de aplicare pentru instrumentele MCP
+### lunete de instrumente MCP
 
-Catalog și reguli de potrivire (șir identic, sau un domeniu de aplicare acordat care se termină cu `*`):
-[Domenii de aplicare pentru instrumentele MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` în `src/shared/constants/mcpScopes.ts` este subsetul tipizat original,
-nu acel catalog complet. Aplicarea se realizează în
-`open-sse/mcp-server/scopeEnforcement.ts` după ce `resolveCallerScopeContext()`
-rezolvă domeniile de aplicare din informațiile de autentificare MCP, metadatele cererii sau `OMNIROUTE_MCP_SCOPES`.
-Rămâne dezactivată, cu excepția cazului în care `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Catalog și reguli de potrivire (șir identic sau un domeniu de aplicare acordat care se termină în `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` în `src/shared/constants/mcpScopes.ts` este subsetul original tipizat, nu acel catalog complet. Aplicarea se execută în `open-sse/mcp-server/scopeEnforcement.ts` după ce `resolveCallerScopeContext()` rezolvă domeniile din informațiile de autentificare MCP, metadatele de solicitare sau `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` îl activează la nivel global (implicit `false`), dar este întotdeauna aplicat pentru un apelant HTTP/SSE căruia îi lipsește cheia API `manage`/`admin` (vezi `shouldForceScopeEnforcement()` în `open-sse/mcp-server/scopeEnforcement.ts`), indiferent de steag.
 
-### Domenii de aplicare pentru token-uri de acces
+### Domenii de aplicare a jetonului de acces
 
-`read` / `write` / `admin` pe token-uri `oma_live_…`, clasificate prin `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Acest rang se aplică doar credențialului token-ului de acces.
-Vezi [Autentificarea Managementului](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` pe jetoane `oma_live_…`, clasate după `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Acest rang se aplică numai acreditării jetonului de acces. Consultați [Autentificare de management](../guides/MANAGEMENT-AUTH.md).
 
 ## Autentificare obligatorie Comutare
 

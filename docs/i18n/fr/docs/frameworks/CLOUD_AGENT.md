@@ -329,19 +329,16 @@ un aperçu masqué (`maskedApiKey` : jusqu’à 4 caractères à chaque extrémi
 aucun pour les clés de 8 caractères ou moins) ainsi que le `projectId` de la connexion. Ces deux champs sont omis
 de la réponse pour toute autre clé.
 
-## Résolution des identifiants
+## Résolution des informations d'identification
 
-`getCloudAgentCredentials(providerId)` dans `src/lib/cloudAgent/api.ts` :
+`getCloudAgentCredentials(providerId)` dans `src/lib/cloudAgent/api.ts`:
 
 1. Charge les connexions actives du fournisseur via `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Pour chaque connexion, donne la priorité à `apiKey` (sans espaces superflus). Utilise `accessToken` à défaut.
-3. Renvoie le premier jeton non vide sous la forme `{ apiKey: token }`.
-4. Renvoie `null` si aucun jeton utilisable n’est trouvé — l’API répond avec le code `400` et
-   `"Aucun identifiant actif configuré pour le fournisseur d’agent cloud : <id>"`.
+2. Pour chaque connexion, préfère `apiKey` (rogné). Revient à `accessToken`.
+3. Renvoie le premier jeton non vide enveloppé sous la forme `{ apiKey: token }`.
+4. Renvoie `null` si aucun jeton utilisable n'est trouvé — le API répond `400` avec `"No active credentials configured for cloud agent provider: <id>"`.
 
-Cela signifie que les agents cloud réutilisent la même table de connexions de fournisseurs que les fournisseurs
-LLM classiques. Pour activer Jules, créez une connexion active avec `provider: "jules"`
-et une valeur `apiKey` renseignée.
+Cela signifie que les agents cloud réutilisent la même table de connexion de fournisseur que les fournisseurs LLM classiques. Pour activer Jules, créez une connexion active avec `provider: "jules"` et un `apiKey` renseigné.
 
 ## Tableau de bord
 

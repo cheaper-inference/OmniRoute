@@ -4,14 +4,14 @@
 
 ---
 
-Maƙasudin fasalin kwatanta da mashahurin buɗaɗɗen tushen AI magudanar ruwa.
+Maƙasudin fasalin kwatanta da mashahuran buɗaɗɗen tushen hanyar AI.
 
-> **Hanya** : An duba wuraren ajiyar jama'a 2026-Q2. Siffofin kamar yadda aka jera. Gabatar da gyara ta hanyar PR — muna son wannan ya zama daidai.
+> **Hanya** : An duba wuraren ajiyar jama'a 2026-Q2. Sigogi kamar yadda aka jera. Gabatar da gyara ta hanyar PR — muna son wannan ya zama daidai.
 
 | Siffar                                             |              OmniRoute 3.8               |  LiteLLM 1.x  | OpenRouter (SaaS) |  Portkey   |
 | -------------------------------------------------- | :--------------------------------------: | :-----------: | :---------------: | :--------: |
 | **Masu bayarwa**                                   |                 **329**                  |     ~100      |        ~50        |    ~30     |
-| **Free/no-auth catalog shigarwar**                 |                 **155**                  |      n/a      |      wucewa       |    n/a     |
+| **Masu ba da damar shiga kyauta**                  |       **50 tare da shiga kyauta**        |      n/a      |      wucewa       |    n/a     |
 | **Mai son kai**                                    |                    ✅                    |      ✅       |        ❌         |   ⚠ biya   |
 | **OAuth catalog shigarwar**                        |                  **23**                  |       m       |        ❌         |     ❌     |
 | **Haɗuwa ta atomatik**                             |              **Dabaru 22**               | tushen fifiko |  tushen matakin   |   nauyi    |
@@ -38,7 +38,7 @@ Maƙasudin fasalin kwatanta da mashahurin buɗaɗɗen tushen AI magudanar ruwa.
 
 ## Lokacin zabar OmniRoute
 
-- Kai mai masaukin baki da so** matsakaicin ɗaukar hoto** (Masu samar da 394, shigarwar kundin free/no-auth 155)
+- Kai mai masaukin baki da so** matsakaicin ɗaukar hoto** (Masu samar da 394, 50 tare da shiga kyauta)
 - Kuna buƙatar a** ginanniyar uwar garken MCP** (kayan aikin LLM, ƙwaƙwalwar ajiya, ƙwarewar da aka fallasa azaman kayan aiki)
 - Kuna bukata**A2A protocol** don wakili-zuwa-wakili ayyukan aiki
 - Kuna so** satar sawun yatsa** (JA3/JA4) don gujewa ganowa ta sama CAPTCHAs
@@ -56,12 +56,12 @@ Maƙasudin fasalin kwatanta da mashahurin buɗaɗɗen tushen AI magudanar ruwa.
 - Ka yarda da biyan kuɗi bisa kowane token tare da ƙarin farashin SaaS
 - Kana buƙatar **hanyar biyan kuɗi guda ɗaya** ga duk masu samarwa
 
-## Lokacin zaɓar Portkey
+## Lokacin zabar Portkey
 
-- Kana buƙatar **SLA na kasuwanci** tare da tabbacin ci gaba da aiki
-- Ka fi son **allon gudanarwa da ake sarrafawa** ba tare da nauyin ayyukan gudanarwa ba
-- Kana buƙatar **siffofin bin ƙa’idojin kamfanoni** kai tsaye
+- Kuna buƙatar a** kasuwanci SLA** tare da garanti na lokaci-lokaci
+- Kun fi son a** dashboard da aka gudanar** ba tare da ops sama ba
+- Kuna bukata** yarda da kasuwanci** fasali daga cikin akwatin
 
 ---
 
-_An sabunta na ƙarshe: 2026-08-02. Aiko da gyare-gyare ta PR don ci gaba da tabbatar da daidaiton wannan tebur._
+_A ƙaddamar da gyara ta hanyar PR don kiyaye wannan tebur ɗin daidai._

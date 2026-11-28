@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Parameter Wajib
+## 5. Parameter yang Diperlukan
 
 Proyek ini merekomendasikan untuk mengonfigurasi setidaknya parameter berikut di Fly.io.
 
-### 5.1 Parameter yang Telah Diverifikasi
+### 5.1 Parameter Terverifikasi
 
-Parameter berikut telah digunakan dalam deployment aktual pada aplikasi `omniroute` saat ini:
+Parameter berikut telah digunakan dalam penerapan aktual pada aplikasi `omniroute` saat ini:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (diwajibkan dalam produksi — digunakan untuk autentikasi bridge WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (diperlukan dalam produksi — digunakan untuk otentikasi jembatan WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 Tentang `INITIAL_PASSWORD`
 
-Proyek saat ini tidak menetapkan `INITIAL_PASSWORD` karena deployment ini tidak memerlukannya.
+Proyek saat ini tidak menetapkan `INITIAL_PASSWORD` karena penerapan ini tidak memerlukannya.
 
-Jika tidak ditetapkan:
+Jika tidak disetel:
 
-- Log startup akan menunjukkan bahwa kata sandi default adalah `CHANGEME`
-- Anda harus mengubah kata sandi login di pengaturan sistem sesegera mungkin setelah deployment
+- Anda membuat kata sandi dasbor di panduan orientasi pada kunjungan pertama. Selesaikan langkah kata sandi: melewatkannya akan menonaktifkan login dasbor, yang membuat dasbor terbuka bagi siapa saja yang dapat mengakses aplikasi URL
+- Proksi Fly menjangkau aplikasi dari alamat non-loopback, jadi setelah Anda mengirimkan kata sandi, wizard meminta token bootstrap satu kali, yang dicetak aplikasi ke lognya pada saat itu: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Jika baris tersebut telah keluar dari log, mulai ulang aplikasi dan kirimkan kembali wizard untuk mencetak token baru
 
-Jika Anda ingin menginisialisasi kata sandi backend tanpa interaksi, Anda dapat menambahkannya nanti:
+Untuk menyetel kata sandi tanpa pengawasan, tambahkan kata sandi sebelum kunjungan dasbor pertama (setelah kata sandi disimpan, `INITIAL_PASSWORD` diabaikan):
 
 - `INITIAL_PASSWORD`
 
@@ -274,9 +274,9 @@ Jika halaman `Secrets` di konsol tidak menampilkan variabel yang diharapkan, per
 
 ---
 
-## 9. Pembaruan dan Rilis Berikutnya
+## 9. Pembaruan dan Rilis Selanjutnya
 
-Setelah pembaruan kode, proses rilis dapat dilakukan dengan mudah:
+Setelah pembaruan kode, proses rilis menjadi mudah:
 
 ```powershell
 git pull
@@ -289,11 +289,11 @@ Jika Anda hanya perlu memperbarui parameter tanpa mengubah kode:
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly akan secara otomatis melakukan pembaruan mesin secara bertahap.
+Fly secara otomatis akan melakukan pembaruan mesin secara bergulir.
 
-### 9.1 Melacak Pembaruan Repositori Upstream Sambil Mempertahankan `fly.toml` Milik Fork Anda
+### 9.1 Melacak Pembaruan Repositori Upstream Sambil Mempertahankan `fly.toml` Fork Anda
 
-Jika repositori saat ini merupakan sebuah fork dan Anda ingin menyinkronkan pembaruan dari upstream `https://github.com/diegosouzapw/OmniRoute`, ikuti alur kerja di bawah ini.
+Jika repositori saat ini adalah fork dan Anda ingin menyinkronkan pembaruan dari `https://github.com/cheaper-inference/OmniRoute` upstream, ikuti alur kerja di bawah ini.
 
 Pertama, verifikasi remote Anda:
 
@@ -303,13 +303,13 @@ git remote -v
 
 Anda setidaknya akan melihat:
 
-- `origin` yang mengarah ke fork Anda sendiri
-- `upstream` yang mengarah ke repositori asli
+- `origin` menunjuk ke garpumu sendiri
+- `upstream` menunjuk ke repositori asli
 
-Jika `upstream` belum dikonfigurasi, tambahkan:
+Jika `upstream` tidak dikonfigurasi, tambahkan:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Sebelum menyinkronkan dengan upstream, ambil commit dan tag terbaru:
@@ -325,9 +325,9 @@ git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Catatan: Versi proyek saat ini adalah `v3.8.0`. Referensi `v3.4.7` di bawah ini dipertahankan hanya sebagai contoh historis. Untuk rilis aktual, gunakan `:latest` atau tag versi saat ini (misalnya `:v3.8.0`).
+> Catatan: Versi proyek saat ini adalah `v3.8.0`. Referensi `v3.4.7` di bawah ini disimpan sebagai contoh sejarah saja. Untuk rilis sebenarnya, gunakan `:latest` atau tag versi saat ini (misalnya `:v3.8.0`).
 
-Jika Anda ingin menggabungkan `main` upstream terbaru sambil secara paksa mempertahankan `fly.toml` milik fork Anda, ikuti alur kerja ini:
+Jika Anda ingin menggabungkan `main` upstream terbaru sambil mempertahankan `fly.toml` fork Anda secara paksa, ikuti alur kerja ini:
 
 ```powershell
 git merge upstream/main
@@ -340,9 +340,9 @@ git push origin main
 Catatan:
 
 - `git merge upstream/main` menyinkronkan kode terbaru dari repositori asli
-- `git checkout HEAD~1 -- fly.toml` memulihkan `fly.toml` milik fork Anda dari kondisi sebelum penggabungan
+- `git checkout HEAD~1 -- fly.toml` memulihkan `fly.toml` fork Anda sendiri dari sebelum penggabungan
 - Jika upstream tidak mengubah `fly.toml`, langkah ini tidak akan menimbulkan perbedaan apa pun
-- Jika upstream mengubah `fly.toml`, langkah ini memastikan nama aplikasi Fly, pemasangan volume, region, dan konfigurasi deployment khusus fork lainnya tidak ditimpa
+- Jika upstream memang memodifikasi `fly.toml`, langkah ini memastikan nama aplikasi Fly Anda, pemasangan volume, wilayah, dan konfigurasi penerapan khusus fork lainnya tidak ditimpa
 
 Jika Anda ingin menyelaraskan dengan tag rilis tertentu (misalnya `v3.4.7`), verifikasi terlebih dahulu bahwa tag tersebut sudah disertakan dalam `upstream/main`:
 
@@ -350,21 +350,21 @@ Jika Anda ingin menyelaraskan dengan tag rilis tertentu (misalnya `v3.4.7`), ver
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Hasil yang berhasil berarti `upstream/main` sudah berisi versi tersebut; Anda cukup menggabungkan `upstream/main`.
+Pengembalian yang berhasil berarti `upstream/main` sudah berisi versi tersebut; Anda cukup menggabungkan `upstream/main`.
 
-### 9.2 Urutan Rilis Standar Setelah Menyinkronkan Upstream
+### 9.2 Urutan Rilis Standar Setelah Sinkronisasi Upstream
 
-Setelah menyinkronkan dengan repositori asli, ikuti urutan rilis yang direkomendasikan berikut:
+Setelah menyinkronkan dengan repositori asli, ikuti urutan rilis yang disarankan ini:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Pulihkan `fly.toml` milik fork
+3. Kembalikan `fly.toml` garpu
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Ini adalah alur kerja aktual yang digunakan saat meningkatkan proyek saat ini ke `v3.4.7` (contoh tersebut merujuk pada versi historis; versi aktual saat ini adalah `v3.8.0`).
+Ini adalah alur kerja aktual yang digunakan saat memutakhirkan proyek saat ini ke `v3.4.7` (contoh mengacu pada versi historis; versi aktual saat ini adalah `v3.8.0`).
 
 ---
 
@@ -420,14 +420,14 @@ Jika Anda melihat `/app/data/...`, berarti `DATA_DIR` salah dikonfigurasi dan ha
 
 ## 12. Masalah Umum
 
-### 12.1 Halaman `Secrets` Kosong
+### 12.1 `Secrets` Halaman Kosong
 
-Biasanya ada dua penyebab:
+Biasanya ada dua alasan:
 
 - Anda belum menjalankan `flyctl secrets set`
-- Anda sedang melihat aplikasi yang berbeda (misalnya `oroute`, bukan `omniroute`)
+- Anda sedang melihat aplikasi yang berbeda (misalnya `oroute` dari pada `omniroute`)
 
-### 12.2 `flyctl deploy` Melaporkan `app not found`
+### 12.2 `flyctl deploy` Laporan `app not found`
 
 Buat aplikasinya terlebih dahulu:
 
@@ -435,23 +435,23 @@ Buat aplikasinya terlebih dahulu:
 flyctl apps create omniroute
 ```
 
-### 12.3 Penguraian `fly.toml` Gagal
+### 12.3 `fly.toml` Penguraian Gagal
 
-Periksa hal-hal berikut:
+Periksa hal berikut:
 
-- Apakah ada karakter yang rusak dalam komentar
-- Apakah tanda kutip dan indentasi TOML sudah benar
+- Apakah ada karakter yang kacau di komentar
+- Apakah kutipan dan indentasi TOML sudah benar
 
-### 12.4 Data Tidak Tersimpan Secara Persisten
+### 12.4 Data Tidak Bertahan
 
 Verifikasi kedua hal berikut:
 
 - `fly.toml` berisi `destination = '/data'`
 - `DATA_DIR` diatur ke `/data`
 
-### 12.5 Apakah Dapat Berjalan Tanpa `INITIAL_PASSWORD`?
+### 12.5 Bisakah Ini Berjalan Tanpa `INITIAL_PASSWORD`?
 
-Ya, aplikasi dapat berjalan. Aplikasi akan menggunakan kata sandi default `CHANGEME`. Sebaiknya ubah kata sandi backend sesegera mungkin di lingkungan produksi.
+Ya. Dengan `INITIAL_PASSWORD` yang tidak disetel, Anda membuat kata sandi dasbor di wizard orientasi pada kunjungan pertama (bagian 5.2 mencakup token bootstrap satu kali dan langkah kata sandi).
 
 ---
 

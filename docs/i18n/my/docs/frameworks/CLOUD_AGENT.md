@@ -66,9 +66,9 @@ Sync သည် **lazy** ဖြစ်သည်။ `GET /tasks/[id]` တောင�
 အသစ်ပြန်လည်ရယူသည်။ နောက်ခံ poller မရှိပါ။ နောက်ဆုံးအခြေအနေကို လိုအပ်သော Dashboard များသည် GET
 endpoint ကို သင့်လျော်သော အချိန်အပိုင်းအခြားဖြင့် poll လုပ်သင့်သည်။
 
-## `CloudAgentBase` အင်တာဖေ့စ်
+## `CloudAgentBase` Interface
 
-ရင်းမြစ်: `src/lib/cloudAgent/baseAgent.ts`
+အရင်းအမြစ်: `src/lib/cloudAgent/baseAgent.ts`
 
 ```typescript
 export interface AgentCredentials {
@@ -110,15 +110,15 @@ export abstract class CloudAgentBase {
     c: AgentCredentials
   ): Promise<{ name: string; url: string; branch?: string }[]>;
 
-  protected mapStatus(raw: string): CloudAgentStatus; // upstream string ကို heuristic နည်းဖြင့် enum သို့ ပြောင်းလဲခြင်း
+  protected mapStatus(raw: string): CloudAgentStatus; // heuristic upstream-string → enum
   protected generateTaskId(): string; // `task_<ts>_<rand>`
   protected generateActivityId(): string; // `act_<ts>_<rand>`
 }
 ```
 
-`CodexCloudAgent.approvePlan` သည် ရည်ရွယ်ချက်ရှိရှိ error ပစ်ပါသည် — Codex Cloud သည် အစီအစဉ်ကို အလိုအလျောက် ရေးဆွဲပြီး အတည်ပြုမှုဂိတ် မရှိပါ။ `CodexCloudAgent.listSources` သည် `[]` ကို ပြန်ပေးပါသည်။
+`CodexCloudAgent.approvePlan` — Codex Cloud အော်တိုအစီအစဉ်များကို ရည်ရွယ်ချက်ရှိရှိ ပစ်ချပြီး ခွင့်ပြုချက်ဂိတ်မရှိပါ။ `CodexCloudAgent.listSources` `[]` ပြန်ပေးသည်။
 
-`CursorCloudAgent` သည် **အသုံးပြုသူ သို့မဟုတ် service-account API key** ဖြင့် Cursor ၏ တရားဝင် REST API (`api.cursor.com/v0`) မှတစ်ဆင့် ၎င်း၏ Background / Cloud Agents များကို ထိန်းချုပ်ပါသည် — ၎င်းသည် အသုံးပြုခွင့်ပိတ်ပင်ခံရနိုင်ခြေဆိုင်ရာ သတိပေးချက်ပါရှိသော Cursor IDE ၏ OAuth session (provider `cursor`) ကို ပြန်လည်အသုံးပြုခြင်းထက် ပိုမိုလုံခြုံသော first-party အခြားရွေးချယ်စရာ ဖြစ်ပါသည်။ ၎င်းသည် ရိုးရှင်းသော REST adapter တစ်ခုဖြစ်ပြီး `@cursor/sdk` native dependency မရှိပါ။ `approvePlan` သည် error ပစ်ပါသည် (Cursor agent များသည် အလိုအလျောက် လုပ်ဆောင်ကြသည်)၊ `listSources` သည် key ဖြင့် ဝင်ရောက်နိုင်သော repository များကို စာရင်းပြုစုပါသည်။ Cursor သည် UPPERCASE status enum များ (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`) ကို ပြန်ပေးပြီး ၎င်းတို့ကို မျှဝေသုံးထားသော `CloudAgentStatus` သို့ တိကျစွာ map လုပ်ထားပါသည်။ API version/path ကို code ပြောင်းလဲစရာမလိုဘဲ ပြင်ဆင်နိုင်ရန် credential တစ်ခုချင်းအလိုက် `baseUrl` ကို override လုပ်နိုင်ပါသည်။
+`CursorCloudAgent` ၎င်း၏တရားဝင် REST API (`api.cursor.com/v0`) မှတဆင့် Cursor၏ နောက်ခံ / Cloud အေးဂျင့်များကို မောင်းနှင်သည်** အသုံးပြုသူ သို့မဟုတ် ဝန်ဆောင်မှု-အကောင့် API သော့** — Cursor IDE၏ OAuth စက်ရှင်ကို ပြန်လည်အသုံးပြုရန် ပိုမိုဘေးကင်းသော၊ ပထမပါတီမှ အစားထိုးသည့်နည်းလမ်း (ပံ့ပိုးပေးသူ `cursor`၊ တားမြစ်အန္တရာယ် သတိပေးချက်ပါရှိသော)။ ၎င်းသည် ရိုးရိုး REST adapter ( `@cursor/sdk` ဇာတိ မှီခိုမှု မရှိပါ)။ `approvePlan` throws (Cursor အေးဂျင့်များသည် အလိုအလျောက်လုပ်ဆောင်သည် ); `listSources` သော့ဖြင့်ရောက်ရှိနိုင်သော သိုလှောင်မှုများကို စာရင်းပြုစုသည်။ Cursor UPPERCASE status enums (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`) ကို ပြန်ပေးသည် ၊ မျှဝေထားသော `CloudAgentStatus` တွင် အတိအလင်း ပုံဖော်ထားသည်။ `baseUrl` သည် အထောက်အထားတစ်ခုလျှင် ကျော်လွန်၍ မရသောကြောင့် API version/path ကုဒ်ပြောင်းခြင်းမရှိဘဲ ပြင်နိုင်သည်။
 
 ## Domain အမျိုးအစားများ
 

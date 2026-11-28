@@ -270,114 +270,114 @@ Esto ocurre una sola vez durante el primer inicio tras la actualización. Usa `m
 
 ---
 
-## Mercado de proxies gratuitos de 1proxy
+## 1proxy Mercado de proxy gratuito
 
-> 🆕 **Contribución de [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (incidencia [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Contribuido por [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Emitir [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute se integra con la plataforma comunitaria **[1proxy](https://1proxy-api.aitradepulse.com)** para proporcionar acceso a **cientos de proxies gratuitos y validados** de todo el mundo. Esto es ideal para usuarios que no disponen de su propia infraestructura de proxies.
+OmniRoute se integra con el** [1proxy](https://1proxy-api.aitradepulse.com)** plataforma comunitaria para proporcionar acceso a** cientos de servidores proxy validados y gratuitos** de todo el mundo. Esto es perfecto para usuarios que no tienen su propia infraestructura de proxy.
 
 ### Cómo funciona
 
 ```
-┌─────────────┐  Sincronizar  ┌─────────────────┐    Rotar      ┌───────────┐
-│ API 1proxy  │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Proveedor │
-│  (externa)  │ hasta 500     │  source=oneproxy │  por calidad  │    API     │
-└─────────────┘   proxies     └─────────────────┘               └───────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Sincronización** — OmniRoute obtiene proxies validados desde la API de 1proxy
-2. **Almacenamiento** — Los proxies se guardan en la misma tabla `proxy_registry` con `source = 'oneproxy'`
-3. **Filtrado** — Filtra por protocolo, país y puntuación de calidad
-4. **Rotación** — Selecciona el mejor proxy mediante estrategias de calidad, aleatoria o secuencial
-5. **Degradación automática** — La puntuación de calidad de los proxies que fallen se reduce; por debajo del umbral → se marcan como inactivos
+1. **Sincronizar** — OmniRoute obtiene proxies validados del 1proxy API
+2. **Almacenar** Los proxy — se guardan en la misma tabla `proxy_registry` con `source = 'oneproxy'`
+3. **Filtrar** — Filtrar por protocolo, país, nivel de calidad
+4. **Girar** — Elija el mejor proxy utilizando estrategias de calidad, aleatorias o secuenciales
+5. **Degradación automática** — Los proxies fallidos ven reducido su nivel de calidad; por debajo del umbral → marcado como inactivo
 
-### Sincronización de proxies
+### Sincronización de servidores proxy
 
-**Mediante el panel de control:**
+**A través del Panel de control:**
 
-1. Ve a la pestaña **Settings → 1proxy**
-2. Haz clic en **"Sync Now"**
-3. Consulta las estadísticas: número total de proxies, cantidad de proxies activos, calidad media y desglose por país
+1. Ir a** Configuración → 1proxy** pestaña
+2. Hacer clic** "Sincronizar ahora"**
+3. Ver estadísticas: proxies totales, recuento activo, calidad promedio, desglose por país
 
-**Mediante la API:**
+**Vía API:**
 
 ```bash
-# Iniciar la sincronización
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Respuesta:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
-### Filtrado de proxies
+### Filtrado de servidores proxy
 
 ```bash
-# Filtrar por protocolo
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Filtrar por país
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Filtrar por puntuación mínima de calidad
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Combinar filtros
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### Puntuaciones de calidad de los proxies
+### Puntuaciones de calidad del proxy
 
-Cada proxy de 1proxy incluye metadatos:
+Cada proxy de 1proxy viene con metadatos:
 
-| Campo           | Descripción                                            |
-| --------------- | ------------------------------------------------------ |
-| `qualityScore`  | Puntuación de 0 a 100 de la validación de 1proxy       |
-| `latencyMs`     | Latencia de red medida                                 |
-| `anonymity`     | `transparent`, `anonymous` o `elite`                   |
-| `googleAccess`  | Indica si el proxy puede acceder a servicios de Google |
-| `countryCode`   | Código de país ISO de dos letras                       |
-| `lastValidated` | Marca de tiempo de la última validación                |
+| Campo           | Descripción                                      |
+| --------------- | ------------------------------------------------ |
+| `qualityScore`  | Calificación 0-100 de la validación de 1proxy    |
+| `latencyMs`     | Latencia de red medida                           |
+| `anonymity`     | `transparent`, `anonymous` o `elite`             |
+| `googleAccess`  | Si el proxy puede acceder a los servicios Google |
+| `countryCode`   | Código de país ISO de dos letras                 |
+| `lastValidated` | Marca de tiempo de la última validación          |
 
-Las puntuaciones de calidad se ajustan dinámicamente:
+Los puntajes de calidad se ajustan dinámicamente:
 
-- **Las solicitudes fallidas** reducen la puntuación en 10 puntos
-- **La puntuación baja a ≤10** → el proxy se marca como `inactive`
-- Los proxies inactivos se excluyen de la rotación
+- **Solicitudes fallidas** reducir la puntuación en 10 puntos
+- **La puntuación cae a ≤ 10** El proxy → está marcado `inactive`
+- Los apoderados inactivos quedan excluidos de la rotación
 
 ### Estrategias de rotación
 
 ```bash
-# Rotar por calidad (el mejor proxy primero) — opción predeterminada
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Rotación aleatoria
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Secuencial (primero el validado hace más tiempo)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
-### Disyuntor
+### Cortacircuitos
 
-La sincronización de 1proxy incorpora un disyuntor:
+La sincronización 1proxy tiene un disyuntor incorporado:
 
-- Después de **5 fallos de sincronización consecutivos**, se bloquean los siguientes intentos de sincronización
-- Restablécelo con `resetOneproxyCircuitBreaker()` o reinicia el servidor
+- Después** 5 fallos de sincronización consecutivos** , se bloquean más intentos de sincronización
+- Restablecer con: `resetOneproxyCircuitBreaker()` o reiniciar el servidor
 - El estado de sincronización está disponible en `GET /api/settings/oneproxy?action=status`
 
-### Eliminación de proxies de 1proxy
+### Borrar servidores proxy de 1proxy
 
 ```bash
-# Eliminar un único proxy de 1proxy
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# Eliminar TODOS los proxies de 1proxy (los proxies manuales no se modifican)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
@@ -385,35 +385,35 @@ curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 
 ## Antidetección y sigilo
 
-OmniRoute no se limita a enrutar el tráfico a través de un proxy, sino que hace que el tráfico parezca legítimo:
+OmniRoute no sólo enruta el tráfico a través de un proxy — sino que hace que el tráfico parezca legítimo:
 
-### Suplantación de huella digital TLS
+### Suplantación de huellas dactilares TLS
 
-Utiliza `wreq-js` para generar huellas digitales TLS similares a las de los navegadores, eludiendo los sistemas de detección de bots que identifican los protocolos de enlace TLS que no proceden de navegadores.
+Utiliza `wreq-js` para generar huellas digitales TLS similares a las de un navegador, evitando los sistemas de detección de bots que señalan los apretones de manos TLS no son del navegador.
 
-### Coincidencia de huellas digitales de CLI
+### Coincidencia de huellas dactilares CLI
 
-El **selector de huella digital de CLI** (`Configuración → Seguridad`) reordena los encabezados HTTP y los campos del cuerpo JSON para que coincidan con la firma exacta de los binarios de CLI nativos (Claude Code, Codex, etc.). Esto funciona **además del** proxy:
+El** Alternar huella digital CLI** (`Settings → Security`) reordena los encabezados HTTP y los campos del cuerpo JSON para que coincidan con la firma exacta de los binarios nativos CLI (código Claude, Codex, etc.). Esto funciona** encima de** el apoderado:
 
 ```
-Tu IP (bloqueada) → IP del proxy (EE. UU.) → API del proveedor
-                    + suplantación de TLS
-                    + huella digital de CLI
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-Obtienes simultáneamente tanto **ocultación de IP** como **autenticidad de las solicitudes**.
+obtienes ambos** enmascaramiento IP** y** solicitar autenticidad** simultáneamente.
 
-### Conservación de la IP del proxy
+### Preservación de proxy IP
 
-Las insignias codificadas por colores del panel muestran qué nivel de proxy está activo:
+Las insignias codificadas por colores en el panel muestran qué nivel de proxy está activo:
 
-| Insignia | Nivel     | Significado                                           |
-| -------- | --------- | ----------------------------------------------------- |
-| 🟢       | Global    | Todo el tráfico pasa por este proxy                   |
-| 🟡       | Proveedor | Solo se enruta por proxy el tráfico de este proveedor |
-| 🔵       | Conexión  | Esta clave/cuenta específica utiliza este proxy       |
+| Insignia | Nivel     | Significado                                 |
+| -------- | --------- | ------------------------------------------- |
+| 🟢       | Global    | Todo el tráfico pasa por este proxy.        |
+| 🟡       | Proveedor | Sólo el tráfico de este proveedor es proxy  |
+| 🔵       | Conexión  | Este key/account específico usa este proxy. |
 
-La insignia también muestra la IP resuelta del proxy para su verificación.
+La insignia también muestra el proxy IP resuelto para su verificación.
 
 ---
 
@@ -777,51 +777,28 @@ Utilice `random`
 uniformemente)
 ```
 
-## Exclusión automática de fallos para tus propios proxies
+## Exclusión automática de fallas para sus propios proxy
 
-El pool del marketplace de 1proxy ya degrada automáticamente por sí solo los proxies que fallan (consulta
-[Puntuaciones de calidad de los proxies](#proxy-quality-scores)). Para los
-proxies que **tú** añadiste al registro, el programador de comprobaciones de estado en segundo plano
-(`src/lib/proxyHealth/scheduler.ts`) proporciona el mismo comportamiento de «excluir automáticamente de
-la cadena un miembro inactivo», sin eliminar nada:
+El grupo de mercado 1proxy ya degrada automáticamente los proxies fallidos por sí solo (consulte [Niveles de calidad de proxy](#proxy-quality-scores) ). Para apoderados** tú** agregado al registro, el programador de salud en segundo plano (`src/lib/proxyHealth/scheduler.ts`) proporciona el mismo comportamiento de "excluir un miembro muerto de la cadena automáticamente", sin eliminar nada:
 
 ```bash
-# .env — deshabilita temporalmente un proxy después de 3 sondeos fallidos consecutivos y vuelve a habilitarlo
-# automáticamente cuando empiece a responder de nuevo a los sondeos.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Cómo funciona dentro de una cadena de varios proxies:
+Cómo encaja en una cadena multiproxy:
 
-1. El programador sondea cada proxy registrado cada `PROXY_HEALTH_INTERVAL_MS`
-   (valor predeterminado: 10 min; mínimo: 1 min).
-2. Después de `PROXY_AUTO_REMOVE_AFTER` fallos **concluyentes** consecutivos (un fallo
-   real de conexión; un tiempo de espera agotado o un error 5xx del propio destino del sondeo nunca cuentan; consulta
-   [Comprobación del estado de los proxies](#proxy-health-checking-v3816)), el `status` del proxy se
-   establece en `dead`.
-3. `dead` es uno de los estados que excluye el filtro de estados activos utilizado por la resolución
-   de pools/rotación, por lo que la rotación de un ámbito (round-robin / aleatoria / persistente /
-   por latencia; consulta el [Árbol de decisión de estrategias de rotación](#rotation-strategy-decision-tree))
-   deja inmediatamente de asignar ese proxy a nuevas solicitudes. Ningún otro proxy del
-   pool se ve afectado, y el pool completo nunca recurre silenciosamente a una conexión
-   directa; consulta el mecanismo de cierre seguro del [Sistema de proxies de 4 niveles](#4-level-proxy-system).
-4. El programador continúa sondeando los proxies `dead` con el mismo intervalo. El siguiente
-   sondeo correcto vuelve a cambiar el `status` a `active` y el proxy se reincorpora a la rotación,
-   sin necesidad de volver a añadirlo manualmente.
+1. El programador sondea cada proxy registrado cada `PROXY_HEALTH_INTERVAL_MS` (predeterminado 10 min; mínimo 1 min).
+2. Después de `PROXY_AUTO_REMOVE_AFTER` consecutivo** concluyente** fallas (una falla de conexión real — un tiempo de espera o el propio 5xx del objetivo de la sonda nunca cuenta, consulte [Comprobación del estado del proxy](#proxy-health-checking-v3816) ), el `status` del proxy está configurado en `dead`.
+3. `dead` es uno de los estados que excluye el filtro de estado activo utilizado por la resolución pool/rotation, por lo que la rotación de un alcance (por turnos/aleatorio/fijo/latencia/sesión — consulte [Árbol de decisión de estrategia de rotación](#rotation-strategy-decision-tree) ) inmediatamente deja de entregar ese proxy a nuevas solicitudes. Ningún otro proxies en el grupo se ve afectado, y todo el grupo nunca vuelve silenciosamente a una conexión directa — ve la protección cerrada contra fallas [del sistema de proxy de 4 niveles](#4-level-proxy-system).
+4. El programador sigue sondeando proxies `dead` en el mismo intervalo. La siguiente sonda exitosa vuelve a girar `status` a `active` y vuelve a ingresar a la rotación — no es necesario volver a agregarla manualmente.
 
-Esto es deliberadamente **opcional y no destructivo**: de forma predeterminada, el programador solo
-cuenta y registra los fallos (consulta la política C en `decision.ts`), y `PROXY_AUTO_DISABLE`
-nunca elimina una fila; para eso existe la opción independiente y más agresiva
-`PROXY_AUTO_REMOVE`. Si ambas están establecidas en `true`, `PROXY_AUTO_REMOVE`
-tiene prioridad (no sirve de nada deshabilitar temporalmente un proxy que está a punto de eliminarse).
-Consulta la referencia de [Configuración del entorno](../reference/ENVIRONMENT.md) para ver la lista
-completa de variables.
+Esto es deliberadamente** opt-in y no destructivo** : de forma predeterminada, el programador solo cuenta y registra fallas (consulte la política C en `decision.ts`), y `PROXY_AUTO_DISABLE` nunca elimina una fila — para eso sirve el indicador `PROXY_AUTO_REMOVE` separado y más agresivo. Si ambos están configurados en `true`, `PROXY_AUTO_REMOVE` gana (un proxy a punto de ser eliminado no sirve para una desactivación suave en el medio). Consulte la referencia [de configuración del entorno](../reference/ENVIRONMENT.md) para obtener la lista completa de variables.
 
 ---
 
-> 📖 **Documentación relacionada:**
+> 📖** Documentación relacionada:**
 >
-> - [Guía del usuario](../guides/USER_GUIDE.md) — Instalación y configuración generales
-> - [Referencia de la API](../reference/API_REFERENCE.md) — Documentación completa de la API
-> - [Configuración del entorno](../reference/ENVIRONMENT.md) — Todas las variables de entorno
+> - [Guía del usuario](../guides/USER_GUIDE.md) — Instalación y configuración general - [API Referencia](../reference/API_REFERENCE.md) — Documentación completa API - [Configuración de entorno](../reference/ENVIRONMENT.md) — Todas las variables de entorno

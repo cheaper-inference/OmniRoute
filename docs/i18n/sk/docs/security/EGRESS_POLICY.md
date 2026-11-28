@@ -69,35 +69,35 @@ Direktíva je zámerne definovaná **pre každý proxy server**, nie globálne �
 
 ## Tri hodnoty
 
-| Hodnota | Označenie v používateľskom rozhraní | Správanie                                                                                                                                                                                   |
-| ------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`  | `Automaticky (dual-stack)`          | Rodinu vyberie operačný systém. Pri hostiteľovi proxy zadanom ako IP literál je rodina daná samotným literálom; pri názve hostiteľa možno použiť obe rodiny. Toto je predvolené nastavenie. |
-| `ipv4`  | `Iba IPv4`                          | Obmedzí pripojenie na IPv4. Ak hostiteľ proxy nemá záznam IPv4 (A), pripojenie sa bezpečne odmietne.                                                                                        |
-| `ipv6`  | `Iba IPv6`                          | Obmedzí pripojenie na IPv6. Ak hostiteľ proxy nemá záznam IPv6 (AAAA), pripojenie sa bezpečne odmietne.                                                                                     |
+| Hodnota | štítok UI           | Správanie                                                                                                                                                                  |
+| ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`  | `Auto (dual-stack)` | OS vyberie rodinu. V prípade IP-literálneho proxy hostiteľa je rodina inherentná pre doslovný; pre názov hostiteľa sú oprávnené obe rodiny. Toto je predvolené nastavenie. |
+| `ipv4`  | `IPv4 only`         | Pripojí pripojenie k IPv4. Zatvorenie zlyhá, ak hostiteľ proxy nemá záznam IPv4 (A).                                                                                       |
+| `ipv6`  | `IPv6 only`         | Pripojí pripojenie k IPv6. Zatvorenie zlyhá, ak hostiteľ proxy nemá záznam IPv6 (AAAA).                                                                                    |
 
-Reťazce používateľského rozhrania sa nachádzajú v `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI reťazce žijú v `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
 ## Ako to nakonfigurovať
 
-### Ovládací panel
+### Dashboard
 
-Selektor sa nachádza vo formulári proxy na karte **Fond proxy**:
+Selektor je v zástupnom tvare** Proxy bazén** karta:
 
-1. Otvorte **Ovládací panel → Nastavenia → Proxy → Fond proxy**
+1. OTVORENÉ** Dashboard → Settings → Proxy → Proxy pool**
 2. Pridajte alebo upravte proxy
-3. Nastavte rozbaľovaciu ponuku **Rodina IP** na `Automaticky (dual-stack)`, `Iba IPv4` alebo `Iba IPv6`
-4. Uložte zmeny
+3. Nastavte**IP rodina** rozbaľovacia ponuka na `Auto (dual-stack)`, `IPv4 only` alebo `IPv6 only`
+4. Uložiť
 
-Ovládací prvok vykresľuje `ProxyRegistryManager.tsx` (pripojený v `proxy/ProxyPoolTab.tsx`).
+Ovládanie je poskytnuté `ProxyRegistryManager.tsx` (namontované v `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Pole `family` je súčasťou dátových častí požiadaviek na vytvorenie a aktualizáciu registra proxy, overuje sa pomocou `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) a spracúva sa pomocou `POST` / `PATCH /api/v1/management/proxies`:
+Pole `family` je súčasťou create/update dát z proxy registra, overuje ho `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) a spracováva ho `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Vytvorenie proxy iba s protokolom IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Zmena existujúcej proxy na proxy iba s protokolom IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Rovnaké pole prijíma aj vnorený objekt konfigurácie proxy používaný pre položky upstream proxy (`upstream_proxy_config.family`, pozrite si [Dátový model](#data-model)).
+Rovnaké pole akceptuje aj inline konfiguračný objekt proxy používaný pre upstream-proxy položky (`upstream_proxy_config.family`, pozri [Dátový model](#data-model) ).
 
-Informácie o zvyšnej časti rozhrania API na vytváranie, čítanie, aktualizáciu, odstraňovanie a priraďovanie proxy nájdete v dokumente [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Zvyšok proxy CRUD/assignment API nájdete [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Sva projektna pravila nalaze se u [`AGENTS.md`](AGENTS.md)** — jedinom izvoru istine za svakog AI
-asistenta (arhitektura, konvencije, testiranje, kontrole kvaliteta, git radni tok, 23 stroga pravila,
-saznanja o ličnim identifikacijskim podacima). Pročitajte ga u cijelosti; nemojte ovdje ponovo dodavati projektna pravila. Sve u nastavku odnosi se ISKLJUČIVO
-na Claude Code — operativna pojašnjenja pravila koja su već definirana u `AGENTS.md`.
+**Sva pravila projekta žive u [`AGENTS.md`](AGENTS.md)** — jedini izvor istine za svakog AI asistenta; gornji uvoz ga već učitava. Ovdje nemojte ponovo dodavati pravila projekta. Sve ispod se odnosi na ONLY na Claude Operativna preciziranja koda — pravila koja su već definirana u `AGENTS.md`.
 
-## Izolacija worktreea — specifičnosti za Claude Code
+## Izolacija radnog stabla — Claude Specifičnosti koda
 
-Cijeli obavezni worktree protokol (potvrda osnovne grane, kanonska putanja
-`.claude/worktrees/`, `cp -al` node_modules, pravila za uklanjanje) nalazi se u
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (sažeto u `AGENTS.md` →
-Git Workflow → "Worktree isolation"). Tačke specifične za Claude Code:
+- Potvrdite osnovnu granu kod operatera putem `AskUserQuestion` (tvrdo pravilo #19) osim ako vam je već rekao.
+- Kreirajte stablo rada pomoću `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (dolazi pod `.claude/worktrees/`, tvrde veze `node_modules` i kopira `.husky/_`), zatim pozovite `EnterWorktree` sa njegovim `path`. Uvijek proslijedite bazu: bez nje skripta bira najviši `release/*`, koji možda nije onaj koji je potvrdio operater. Stablo rada koje `EnterWorktree` kreira sam nema ni čvrste veze ni kuke, tako da se u njemu ne radi nikakva kapija pre urezivanja.
 
-- Potvrdite osnovnu granu s operaterom putem `AskUserQuestion` (Strogo pravilo br. 19), osim
-  ako vam je to već rekao.
-- Dajte prednost nativnom alatu `EnterWorktree` — on već kreira worktreeove pod
-  `.claude/worktrees/` (kanonska putanja). Kreirajte worktree dokumentiranom naredbom `git
-worktree add`, a zatim pozovite `EnterWorktree` s njegovom putanjom `path`.
+## Subagenti i git
 
-## Sigurnost između sesija — specifičnosti za Claude Code
+Svaki podagent koji dotakne git (alatka agenta ili skripta toka rada) dobija doslovno zabranu `git stash` Hard Rule #22 a u svom promptu — zabeleženo ponavljanje incidenta sa skrivenim sadržajem je došlo preko subagenta.
 
-Stroga pravila #19/#21/#22 (u `AGENTS.md`) uređuju paralelne sesije. Operativni podsjetnici za ovaj
-sistem:
+## Planiranje artefakata — supermoći puta poništava
 
-- **Doslovno ponovite zabranu korištenja `git stash` u upitu svakog podagenta koji koristi git**
-  (alat Agent / skripte radnog toka) — podagenti ne nasljeđuju ovu datoteku, a zabilježeno
-  ponavljanje incidenta sa stashom dogodilo se putem podagenta.
-- Prije spajanja ili slanja izmjena u bilo koji PR koji niste kreirali _u ovoj sesiji_, pokrenite `git worktree list`
-  i ponovo provjerite `gh pr view <N> --json state,headRefOid` (strogo pravilo #22b).
-- Završite svaku sesiju tako da glavna radna kopija bude na grani na kojoj je sesija započela.
+Vještine supermoći objavljuju zadane vrijednosti pod `docs/superpowers/plans/`, `docs/superpowers/specs/` i `docs/research/`. Prepišite svaki na njegov `_tasks/` ekvivalent u `AGENTS.md` → "Artefaktima planiranja i istraživanja" prije pisanja, i urezujte ga sa `git -C _tasks …`, nikad u glavnom repo-u.
 
-## Superpowers / artefakti planiranja — zamjene putanja
+## Grebanje datoteka — `_artifacts/`, ne `/tmp`
 
-Konvencija `_tasks/` definirana je u `AGENTS.md` → „Artefakti planiranja i istraživanja“. Vještine
-superpowers isporučuju se sa zadanim vrijednostima koje upućuju na `docs/…` — te zadane vrijednosti su **zamijenjene
-ovdje**. Kada vještina superpowers navede putanju poput „sačuvano u `docs/superpowers/plans/…`“,
-prije zapisivanja zamijenite je odgovarajućom putanjom u `_tasks/…`:
+Ovaj projekat poništava blok za pisanje sesije pojasa (`/tmp/claude-*/…`). Pisanje privremenih datoteka — izvoza, generiranih zipova, jednokratnih srednjih izlaza — do `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: gitignorirana korijenska `_*` putanja, tako da operater pronalazi i briše sve ogrebotine na jednom mjestu. Trajni planovi, specifikacije, istraživanja i predaje idu u `_tasks/` umjesto toga (tvrdo pravilo #23).
 
-| Artefakt (vještina)                      | Zadana lokacija (NE koristite) | Umjesto toga sačuvajte ovdje                                  |
-| ---------------------------------------- | ------------------------------ | ------------------------------------------------------------- |
-| Planovi (`writing-plans`)                | `docs/superpowers/plans/`      | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Specifikacije / dizajn (`brainstorming`) | `docs/superpowers/specs/`      | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Istraživanje (`deep-research`, ad hoc)   | `docs/research/`               | `_tasks/research/…`                                           |
-| Primopredaje (`/handoff`)                | —                              | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Crvena baza
 
-Commitujte te artefakte unutar repozitorija `_tasks/` (`git -C _tasks …`), nikada u glavnom repozitoriju.
-
-## Privremene / radne datoteke — koristite `_artifacts/`, ne `/tmp`
-
-Ovaj projekt zamjenjuje zadanu radnu lokaciju sesije ovog sistema (`/tmp/claude-*/…`). Pišite
-privremene/radne datoteke — izvoze, generirane zip arhive, jednokratne međurezultate, sve što biste
-inače smjestili u `/tmp` — u `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` je korijenska putanja `_*`: već je zanemarena u gitu (`AGENTS.md` → „Korijenske putanje `_*`“), postoji
-  samo na disku i nikada se ne prati.
-- Razlog: čuvanje privremenih rezultata unutar projekta (umjesto u `/tmp`) omogućava operateru
-  da jednostavno pronađe i izbriše sve privremeno na jednom mjestu, umjesto da pretražuje prolazne
-  direktorije `/tmp` specifične za sesiju, koji nestaju ili gomilaju nepraćene datoteke.
-- **Nemojte** ovo zamijeniti s `_tasks/` (strogo pravilo #23, zaseban privatni git repozitorij za trajne
-  planove/specifikacije/istraživanja/primopredaje) — `_artifacts/` služi samo za potrošne radne datoteke; ništa
-  ovdje ne treba opstati niti biti verzionirano.
-
-## Zelena osnovna grana prije otvaranja PR-ova
-
-Prije kreiranja grane ili otvaranja PR-a pokrenite provjeru zelene osnovne grane (`AGENTS.md` → Git radni tok →
-„Provjera zelene osnovne grane“; projektne vještine upućuju na nju kao `.agents/skills/_shared/base-green.md`). PR
-otvoren dok je vrh osnovne grane crven mora u svom opisu sadržavati `⚠️ base-red inherited: #<issue>`. Za
-uklanjanje nagomilanog crvenog stanja (vrh osnovne grane + crveni PR-ovi) koristite vještinu `/sweep-reds`.
+Da ispraznite akumulirano crveno stanje (osnovni vrh + red PRs), koristite `/sweep-reds` vještinu.

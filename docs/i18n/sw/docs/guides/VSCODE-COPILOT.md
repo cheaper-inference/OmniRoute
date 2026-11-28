@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** huweka kila modeli inayotolewa na OmniRoute yako kwenye kichagua modeli cha _asili_ cha GitHub Copilot Chat.
-Hakuna utepe wa pili wa pembeni, wala kiolesura tofauti cha gumzo — hali ya wakala ya Copilot, uitaji wa zana,
-seva za MCP na maagizo maalum yote huendelea kufanya kazi, ila sasa yakitumia modeli unayochagua.
+**OmniCopilot** inaongeza miundo na michanganyiko yako ya gumzo ya OmniRoute kwa kiteua muundo asili Copilot Chat. Tumia gumzo na utendakazi wa wakala uliopo, ukiwa na upigaji simu wa zana na maono inapoauniwa na muundo uliochaguliwa.
 
-|                              |                                                                                                                                                 |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sakinisha (VS Code)**      | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Sakinisha (forks)**        | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Msimbo chanzo / matatizo** | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Inahitaji**                | VS Code 1.104+                                                                                                                                  |
+|                             |                                                                                                                               |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Sakinisha ( Msimbo VS )** | [Soko → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)             |
+| **Sakinisha (Fungua VSX)**  | [Fungua VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — inahitaji mtoaji wa kielelezo cha lugha na gumzo APIs |
+| **Chanzo / masuala**        | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                            |
+| **Inahitaji**               | Msimbo wa VS 1.104 + (+ 1.122 kuutumia bila kuingia kwa GitHub au mpango Copilot )                                            |
+| **Toleo la sasa**           | OmniCopilot v1.5.1 kwenye maduka yote mawili (iliyotolewa 2026-11-24)                                                         |
 
-> **Usajili wa Copilot hauhitajiki.** Tangu VS Code 1.122, mtoa modeli za lugha hufanya kazi
-> bila kuingia katika GitHub na bila mpango wowote wa Copilot. Ukamilishaji ndani ya mistari na
-> vipengele vinavyotegemea embeddings hubaki nje ya API ya mtoa huduma na bado vinahitaji Copilot.
+Hifadhi picha imewashwa** 2026-11-25 (01:43 UTC)** , toleo la sasa:** Sakinisho 52,081 za Marketplace** na** 20,989 Fungua vipakuliwa VSX** . Hizi ni vipimo tofauti vya duka, sio hesabu ya watumiaji iliyojumuishwa. Vyanzo: [Soko](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) na [Fungua VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Upatikanaji wa VSX yenyewe hauonyeshi utangamano na kila mhariri anayetumia sajili hiyo. Angalia gumzo la mhariri na usaidizi wa API wa muundo wa lugha.
+
+> **Hakuna usajili wa Copilot unaohitajika kwa gumzo la BYOK katika Msimbo wa VS 1.122 +.** Microsoft inasaidia gumzo, zana na MCP bila kuingia kwa GitHub wakati mtoa huduma amesanidiwa. Kwenye Msimbo wa VS 1.104–1.121 kiendelezi bado kinafanya kazi, lakini Msimbo VS unahitaji mpango Copilot ulioingia. Mapendekezo ya ndani na vipengele vinavyotokana na upachikaji hukaa nje ya mtoa huduma API na bado vinahitaji Copilot; wasimamizi wa Copilot Business/Enterprise wanaweza kuzima watoa huduma wa wahusika wengine kwa sera; uma huonyesha miundo ikiwa tu itatekeleza mtoa gumzo API. Matumizi ya mtoaji wa mkondo wa juu bado yanaweza kutozwa. Tazama [maelezo ya toleo ya VS Code 1.122](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) na [mwongozo wa muundo wa lugha](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
-## Usanidi
+## Sanidi
 
 1. **Endesha OmniRoute** — `npm install -g omniroute && omniroute` (dashibodi kwenye `http://localhost:20128`).
-2. **Sakinisha kiendelezi** — tafuta "OmniRoute" katika mwonekano wa Extensions.
-3. **Chagua modeli** — Copilot Chat → kichagua modeli → **Manage Models…** → **OmniRoute**, kisha teua
-   unazotaka.
+2. **Sakinisha kiendelezi** — tafuta "OmniRoute" katika mwonekano wa Viendelezi.
+3. **Unganisha** — weka `http://localhost:20128` chaguo-msingi au weka seva yako URL na ufunguo wa API kupitia**OmniRoute: Dhibiti Muunganisho** .
+4. **Chagua mfano** — Copilot Piga gumzo → kichagua modeli →** Dhibiti Miundo...** →**OmniRoute** , kisha weka alama unayotaka.
 
-Hakuna cha kusanidi wakati OmniRoute inaendeshwa kwenye kituo chaguomsingi. Kwa instansi ya mbali, fungua
-**ikoni ya OmniRoute katika Activity Bar** (au endesha `OmniRoute: Manage Connection`) na uweke:
+Kwa mipangilio ya uunganisho, fungua**OmniRoute ikoni katika Upau wa Shughuli** (au endesha `OmniRoute: Manage Connection`) na uweke:
 
-- **URL ya seva** — mzizi wa seva, k.m. `http://192.168.0.15:20128`. Kiambishi `/v1`
-  huongezwa na kiendelezi; usikijumuishe.
-- **Ufunguo wa API** — pale tu seva inapoweka `REQUIRE_API_KEY`. Huhifadhiwa katika mkufu wa funguo wa OS kupitia VS
-  Code SecretStorage, kamwe si katika `settings.json`.
+- **Seva URL** — mzizi wa seva, kwa mfano `http://omniroute.example.com:20128`. Kiambishi tamati `/v1` kinaambatanishwa na kiendelezi; usiijumuishe.
+- **ufunguo wa API** — inahitajika wakati sera ya uthibitishaji wa inference ya seva inahitaji moja. Imehifadhiwa kupitia Msimbo wa VS SecretStorage, kamwe katika `settings.json`; funguo maalum za nafasi ya kazi zinapatikana. Tumia kitufe kilichoidhinishwa kwa miundo unayotaka kufichua.
+
+Kiendelezi pia hutoa kiashirio cha muunganisho, kionyesha upya kielelezo, muktadha wa kielelezo na metadata ya bei (combos pamoja), hoja iliyotiririshwa na** Jitihada za kufikiri** menyu kwenye Msimbo wa VS 1.120 +, kiashiria cha kikomo cha upau wa hali ya kila siku na paneli ya matumizi (OmniRoute 3.8.50 +), usanidi wa CLI na kichupo cha hiari cha dashibodi. Muundo uliochaguliwa na sera ya seva huamua uwezo unaoweza kutumia.
 
 ---
 
@@ -119,26 +119,25 @@ Tazama [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) na suala
 
 ---
 
-## Kusanidi zana zako nyingine ukiwa ndani ya VS Code
+## Kusanidi zana zako zingine kutoka ndani ya Msimbo VS
 
-**`OmniRoute: Configure Coding CLI`** huendesha CLI ya `omniroute` ili kuandika wasifu ulio tayari kutumika
-kwa Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo na Roo — usanidi uleule uliofafanuliwa katika
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). Ufunguo wa API hupitishwa kwa CLI kupitia
-kigezo cha mazingira cha `OMNIROUTE_API_KEY`, kamwe si kwenye mstari wa amri.
+**`OmniRoute: Configure Coding CLI`** huendesha `omniroute` CLI kuandika profaili zilizo tayari kutumika kwa zana 16: Codex CLI, Claude Code, Cline, Endelea, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed na WhyCodes Kiendelezi kinaomba amri `setup-*` katika terminal iliyounganishwa; sasisha toleo la OmniRoute CLI ambalo linajumuisha amri iliyochaguliwa. Tazama [mwongozo wa ujumuishaji wa CLI](CLI-INTEGRATIONS.md) wa faili na bendera ambazo kila mapishi hutumia na [sajili ya zana ya kiendelezi](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+Kitufe API kinakabidhiwa CLI kupitia `OMNIROUTE_API_KEY`, kamwe kwenye mstari wa amri. Mipangilio ya mapishi inaweza kuendelea na vitambulisho katika usanidi wa zana lengwa. Unaposhiriki ufunguo mahususi wa nafasi ya kazi na usanidi wa kiwango cha mtumiaji wa zana, kiendelezi kinaomba uthibitisho kwanza.
 
 ---
 
-## Utatuzi wa matatizo
+## Kutatua matatizo
 
-| Dalili                                                                | Sababu / suluhisho                                                                                                                                                                                                                                                                              |
-| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Hakuna modeli za OmniRoute kwenye kiteuzi                             | Seva haifikiki. Nukta ya upau wa hali huwa ya kijivu; endesha `OmniRoute: Check Connection`. Ugunduzi hufanyika kimya kimakusudi na hauongezi modeli zozote badala ya kuonyesha ombi.                                                                                                           |
-| Kila modeli huonekana mara mbili                                      | Unatumia OmniCopilot ya zamani kuliko 1.0.1 — sasisha. Sasa kiendelezi huomba `?prefix=alias`.                                                                                                                                                                                                  |
-| Modeli ya picha/sauti iliyokuwa ikiorodheshwa imetoweka               | Hii ni ya makusudi tangu 1.0.1 — haikuweza kamwe kujibu ombi la gumzo.                                                                                                                                                                                                                          |
-| Paneli haipo kwenye Activity Bar                                      | VS Code huhamisha vikasha vya ziada vya mionekano hadi kwenye sehemu ya ziada ya **"…"** iliyo chini ya Activity Bar, na kikasha kilichofichwa kwa kubofya kulia hubaki kimefichwa. Bofya kulia Activity Bar → weka tiki kwenye **OmniRoute**, au ukifungue kwa `OmniRoute: Manage Connection`. |
-| Dashibodi hufunguka kwenye kivinjari licha ya modi ya `editor`        | Seva haiku**jengwa** kwa `DASHBOARD_ALLOW_EMBED=vscode` (tazama hapo juu) — kuiweka wakati wa kuanzisha usakinishaji uliojengwa tayari hakubadilishi chochote. Kurudi kwenye kivinjari cha nje ni jambo la makusudi.                                                                            |
-| Orodha ya modeli imepitwa na wakati baada ya kubadilisha watoa huduma | `OmniRoute: Refresh Models`, au kiungo cha ↻ kwenye paneli.                                                                                                                                                                                                                                     |
+| Dalili                                                          | Sababu / kurekebisha                                                                                                                                                                                                                                                     |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Hakuna mifano OmniRoute kwenye kiteuzi                          | Seva haipatikani. Nukta ya upau-halisi inakuwa ya kijivu; kukimbia `OmniRoute: Check Connection`. Ugunduzi hauko kimya kulingana na muundo na hauchangii miundo badala ya kushawishi.                                                                                    |
+| Kila mfano unaonekana mara mbili                                | Uko kwenye sasisho OmniCopilot la zamani zaidi ya 1.0.1 —. Kiendelezi sasa kinaomba `?prefix=alias`.                                                                                                                                                                     |
+| Mfano wa image/audio uliwahi kuorodheshwa na haupo              | Kwa makusudi tangu 1.0.1 — haiwezi kamwe kujibu ombi la gumzo.                                                                                                                                                                                                           |
+| Paneli haipo kwenye Upau wa Shughuli                            | VS Code husogeza vyombo vya mwonekano wa ziada kwenye** "…"** kufurika chini ya Upau wa Shughuli, na kontena iliyofichwa kupitia kubofya kulia hubakia kufichwa. Bofya kulia kwenye Upau wa Shughuli → tiki**OmniRoute** , au fungua kwa `OmniRoute: Manage Connection`. |
+| Dashibodi hufungua katika kivinjari licha ya hali ya `editor`   | Seva haikuwa hivyo** kujengwa** na `DASHBOARD_ALLOW_EMBED=vscode` (tazama hapo juu) — kuiweka wakati wa kuanza kwenye usakinishaji uliojengwa awali haifanyi chochote. Njia mbadala ni ya makusudi.                                                                      |
+| Orodha ya mifano ni ya zamani baada ya kubadilisha watoa huduma | `OmniRoute: Refresh Models`, au kiungo cha ↻ kwenye paneli.                                                                                                                                                                                                              |
+| Paneli inasema _Mtandaoni (miundo imezuiwa)_, kiteuzi tupu      | Seva inakataa ufunguo. Hifadhi ufunguo sahihi na** Hifadhi na Ujaribu** . Ikiwa ufunguo uliwekwa kwenye seva badala yake (umewezeshwa, au kupewa ufikiaji wa mifano), kiendelezi hakijitambui yenyewe: endesha `OmniRoute: Refresh Models` au fungua paneli OmniRoute.   |
 
 ---
 

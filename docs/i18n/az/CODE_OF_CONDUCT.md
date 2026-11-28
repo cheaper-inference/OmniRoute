@@ -42,15 +42,13 @@ icmanı rəsmi şəkildə təmsil etdiyi hallarda tətbiq olunur.
 rəsmi sosial media hesabı vasitəsilə paylaşım etmək və ya onlayn, yaxud oflayn tədbirdə
 təyin olunmuş nümayəndə kimi çıxış etmək nümunə ola bilər.
 
-## Enforcement
+## İcra
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Təcavüzkar, təqib və ya başqa yollarla qəbuledilməz davranış halları barədə şəxsi təhlükəsizlik məsləhətxanası açmaqla icraya cavabdeh olan icma liderlərinə məlumat verilə bilər.
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+və ya baxıcıya diegosouza.pw@outlook.com ünvanına e-poçt göndərməklə. Təhlükəsizliyə həssas insidentlər üçün [`SECURITY.md`](SECURITY.md) baxın. Bütün şikayətlərə operativ və ədalətli şəkildə baxılacaq və araşdırılacaq.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Bütün icma liderləri hər hansı bir hadisənin müxbirinin şəxsi həyatına və təhlükəsizliyinə hörmət etməyə borcludurlar.
 
 ## İcra Qaydaları
 

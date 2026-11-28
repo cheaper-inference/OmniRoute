@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** pievieno visus OmniRoute apkalpotos modeļus _iebūvētajai_ GitHub Copilot Chat
-modeļu izvēlnei. Nekādas otras sānjoslas vai atsevišķas tērzēšanas saskarnes — Copilot aģenta režīms, rīku izsaukšana,
-MCP serveri un pielāgotās instrukcijas turpina darboties, tikai izmantojot jūsu izvēlēto modeli.
+**OmniCopilot** pievieno jūsu OmniRoute tērzēšanas modeļus un kombinācijas vietējam Copilot tērzēšanas modeļu atlasītājam. Izmantojiet redaktora esošās tērzēšanas un aģenta darbplūsmas ar rīku izsaukšanu un vīziju, ja to atbalsta atlasītais modelis.
 
-|                               |                                                                                                                                                 |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Instalēšana (VS Code)**     | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Instalēšana (atzarojumos)** | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Pirmkods / problēmas**      | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Prasības**                  | VS Code 1.104+                                                                                                                                  |
+|                              |                                                                                                                                                      |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Instalēšana (VS kods)**    | [Tirgus → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                                  |
+| **Instalēšana (Atvērt VSX)** | [Lai atvērtu VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — ir nepieciešams saderīgs valodas modeļa nodrošinātājs un APIs tērzēšana |
+| **Avots / problēmas**        | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                                                   |
+| **Nepieciešams**             | VS kods 1.104 + (1.122 +, lai to izmantotu bez GitHub pierakstīšanās vai Copilot plāna)                                                              |
+| **Pašreizējais izlaidums**   | OmniCopilot v1.5.1 abos veikalos (izlaists 2026-11-24)                                                                                               |
 
-> **Copilot abonements nav nepieciešams.** Kopš VS Code 1.122 valodas modeļu nodrošinātājs darbojas
-> bez pierakstīšanās GitHub kontā un bez jebkāda Copilot plāna. Iekļautā koda pabeigšana un
-> uz ieguldījumiem balstītās funkcijas neietilpst nodrošinātāja API un joprojām pieprasa Copilot.
+Saglabāt momentuzņēmumu ieslēgts** 2026-11-25 (01:43 UTC)** , pašreizējais laidiens:** 52 081 Marketplace instalēšanas reizes** un** 20 989 Open VSX lejupielādes** . Tie ir dažādi veikala rādītāji, nevis apvienots lietotāju skaits. Avoti: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) un [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Atvērtā VSX pieejamība pati par sevi nenodrošina saderību ar katru redaktoru, kas izmanto šo reģistru. Pārbaudiet redaktora tērzēšanas un valodas modeļa API atbalstu.
+
+> **BYOK tērzēšanai VS kodā 1.122 + nav nepieciešams Copilot abonements.** Ja pakalpojumu sniedzējs ir konfigurēts, Microsoft atbalsta tērzēšanu, rīkus un MCP bez GitHub pierakstīšanās. VS kodā 1.104–1.121 paplašinājums joprojām darbojas, taču VS kodam ir nepieciešams pierakstījies Copilot plāns. Iekļautie ieteikumi un uz iegulšanu balstītie līdzekļi paliek ārpus nodrošinātāja API, un tiem joprojām ir nepieciešams Copilot; Copilot Business/Enterprise administratori var atspējot trešo pušu modeļu nodrošinātājus pēc politikas; dakša parāda modeļus tikai tad, ja tajā ir ieviests tērzēšanas nodrošinātājs API. Par pakalpojumu sniedzēja izmantošanu joprojām var tikt piemērota maksa. Skatiet [VS Code 1.122 izlaišanas piezīmes](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) un [valodas modeļa rokasgrāmatu](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
 ## Iestatīšana
 
-1. **Palaidiet OmniRoute** — `npm install -g omniroute && omniroute` (vadības panelis pieejams adresē `http://localhost:20128`).
-2. **Instalējiet paplašinājumu** — paplašinājumu skatā meklējiet „OmniRoute”.
-3. **Izvēlieties modeli** — Copilot Chat → modeļu izvēlne → **Manage Models…** → **OmniRoute**, pēc tam atzīmējiet
-   vajadzīgos modeļus.
+1. **Palaist OmniRoute** — `npm install -g omniroute && omniroute` (informācijas panelis uz `http://localhost:20128`).
+2. **Instalējiet paplašinājumu** — paplašinājumu skatā meklējiet "OmniRoute".
+3. **Savienot** — saglabājiet noklusējuma `http://localhost:20128` vai iestatiet servera URL un API atslēgu**OmniRoute: Pārvaldīt savienojumu** .
+4. **Izvēlieties modeli** — Copilot Tērzēšana → modeļu atlasītājs →** Pārvaldīt modeļus…** →**OmniRoute** , pēc tam atzīmējiet to, ko vēlaties.
 
-Ja OmniRoute darbojas noklusējuma portā, nekas nav jākonfigurē. Attālai instancei atveriet
-**OmniRoute ikonu darbību joslā** (vai palaidiet `OmniRoute: Manage Connection`) un iestatiet:
+Lai skatītu savienojuma iestatījumus, atveriet**OmniRoute ikonu darbību joslā** (vai palaidiet `OmniRoute: Manage Connection`) un iestatiet:
 
-- **Servera URL** — servera saknes adrese, piemēram, `http://192.168.0.15:20128`. Sufiksu `/v1`
-  pievieno paplašinājums; neiekļaujiet to.
-- **API atslēga** — tikai tad, ja serverī ir iestatīts `REQUIRE_API_KEY`. Tā tiek glabāta operētājsistēmas atslēgu saišķī, izmantojot VS
-  Code SecretStorage, un nekad netiek glabāta failā `settings.json`.
+- **Serveris URL** — servera sakne, piemēram, `http://omniroute.example.com:20128`. `/v1` sufiksu pievieno paplašinājums; neiekļauj to.
+- **API atslēga** — ir nepieciešams, ja servera secinājumu autentifikācijas politika to pieprasa. Saglabāts, izmantojot VS Code SecretStorage, nekad `settings.json`; ir pieejamas darbvietai specifiskas atslēgas. Izmantojiet atslēgu, kas atļauta tiem modeļiem, kurus vēlaties eksponēt.
+
+Paplašinājums nodrošina arī savienojuma indikatoru, modeļa atsvaidzināšanu, modeļa kontekstu un cenu metadatus (iekļautas kombinācijas), straumētu argumentāciju ar** Domāšanas piepūle** VS koda 1.120 + izvēlne, statusa joslas dienas limita indikators un lietošanas panelis (OmniRoute 3.8.50 +), CLI konfigurācija un papildu informācijas paneļa cilne. Atlasītais modelis un servera politika nosaka izmantojamās iespējas.
 
 ---
 
@@ -119,26 +119,25 @@ Skatiet [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) un problēmu
 
 ---
 
-## Citu rīku konfigurēšana no VS Code
+## Citu rīku konfigurēšana no VS koda iekšpuses
 
-**`OmniRoute: Configure Coding CLI`** izmanto `omniroute` CLI, lai izveidotu lietošanai gatavus profilus
-Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo un Roo — tās pašas konfigurācijas, kas aprakstītas
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). API atslēga CLI tiek nodota, izmantojot
-vides mainīgo `OMNIROUTE_API_KEY`, un nekad netiek norādīta komandrindā.
+**`OmniRoute: Configure Coding CLI`** vada `omniroute` CLI Zed rakstītu lietošanai gatavus profilus 16 rīkiem: Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, WhyCodes Paplašinājums izsauc `setup-*` komandas integrētajā terminālī; instalējiet OmniRoute CLI versiju, kas ietver atlasīto komandu. Skatiet [CLI integrācijas rokasgrāmatu](CLI-INTEGRATIONS.md) par failiem un karodziņiem, ko izmanto katra recepte, un [paplašinājuma rīku reģistru](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+API taustiņš tiek nodots CLI izmantojot `OMNIROUTE_API_KEY`, nevis komandrindā. Iestatīšanas receptes var saglabāt akreditācijas datus mērķa rīka konfigurācijā. Kopīgojot darbvietai raksturīgu atslēgu ar rīka lietotāja līmeņa konfigurāciju, paplašinājums vispirms pieprasa apstiprinājumu.
 
 ---
 
 ## Problēmu novēršana
 
-| Pazīme                                                                            | Cēlonis/risinājums                                                                                                                                                                                                                                                                         |
-| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Atlasītājā nav OmniRoute modeļu                                                   | Serveris nav sasniedzams. Statusa joslas punkts kļūst pelēks; palaidiet `OmniRoute: Check Connection`. Atklāšana pēc nolūka notiek bez paziņojumiem un nepievieno nevienu modeli, nevis parāda uzvedni.                                                                                    |
-| Katrs modelis tiek parādīts divreiz                                               | Jūs izmantojat OmniCopilot versiju, kas vecāka par 1.0.1 — atjauniniet to. Tagad paplašinājums pieprasa `?prefix=alias`.                                                                                                                                                                   |
-| Iepriekš sarakstā redzamais attēlu/audio modelis ir pazudis                       | Tas ir apzināti kopš versijas 1.0.1 — tas nekad nevarēja atbildēt uz tērzēšanas pieprasījumu.                                                                                                                                                                                              |
-| Darbību joslā nav paneļa                                                          | VS Code pārvieto papildu skatu konteinerus uz **"…"** pārpildes izvēlni darbību joslas apakšdaļā, un ar labo klikšķi paslēpts konteiners paliek paslēpts. Ar peles labo pogu noklikšķiniet uz darbību joslas → atzīmējiet **OmniRoute** vai atveriet to ar `OmniRoute: Manage Connection`. |
-| Informācijas panelis tiek atvērts pārlūkprogrammā, neraugoties uz `editor` režīmu | Serveris netika **uzbūvēts** ar `DASHBOARD_ALLOW_EMBED=vscode` (skatiet iepriekš) — tā iestatīšana palaišanas laikā iepriekš uzbūvētā instalācijā neko nemaina. Pārslēgšanās ir apzināta.                                                                                                  |
-| Pēc pakalpojumu sniedzēju maiņas modeļu saraksts ir novecojis                     | `OmniRoute: Refresh Models` vai ↻ saite panelī.                                                                                                                                                                                                                                            |
+| Simptoms                                                                          | Izraisīt / labot                                                                                                                                                                                                                                                                                     |
+| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nav OmniRoute modeļu savācējā                                                     | Serveris nav sasniedzams. Statusa joslas punkts kļūst pelēks; palaist `OmniRoute: Check Connection`. Discovery dizains ir kluss un nesniedz nekādus modeļus, nevis pamudina.                                                                                                                         |
+| Katrs modelis parādās divas reizes                                                | Jūs izmantojat OmniCopilot kas ir vecāks par 1.0.1 — atjauninājumu. Paplašinājums tagad pieprasa `?prefix=alias`.                                                                                                                                                                                    |
+| image/audio modelis agrāk bija sarakstā un vairs nav                              | Tīši kopš 1.0.1 — tas nekad nevarēja atbildēt uz tērzēšanas pieprasījumu.                                                                                                                                                                                                                            |
+| Darbību joslā trūkst paneļa                                                       | VS Code pārvieto papildu skata konteinerus uz** "…"** pārplūde darbību joslas apakšā, un konteiners, kas paslēpts, noklikšķinot ar peles labo pogu, paliek paslēpts. Ar peles labo pogu noklikšķiniet uz darbības joslas → atzīmes**OmniRoute** , vai atveriet to ar `OmniRoute: Manage Connection`. |
+| Informācijas panelis tiek atvērts pārlūkprogrammā, neskatoties uz `editor` režīmu | Serveris nebija** celta** ar `DASHBOARD_ALLOW_EMBED=vscode` (skatiet iepriekš), — iestatot to startēšanas laikā iepriekš iebūvētā instalācijā, nekas nedod. Atkāpšanās ir apzināta.                                                                                                                  |
+| Modeļu saraksts pēc pakalpojumu sniedzēja maiņas ir novecojis                     | `OmniRoute: Refresh Models` vai ↻ saite panelī.                                                                                                                                                                                                                                                      |
+| Panelis saka _Tiešsaistē (modeļi bloķēti)_, atlasītājs tukšs                      | Serveris noraida atslēgu. Saglabājiet labo taustiņu ar** Saglabāt un pārbaudīt** . Ja atslēga tika labota serverī (iespējota vai piešķirta piekļuve modeļiem), paplašinājums pats to nepamana: palaidiet `OmniRoute: Refresh Models` vai atveriet OmniRoute paneli.                                  |
 
 ---
 

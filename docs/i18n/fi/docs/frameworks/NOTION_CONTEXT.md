@@ -62,42 +62,31 @@ Kaikki kolme metodia edellyttävät hallintapaneelin todennusta (`isAuthenticate
 OmniRoute tallentaa tunnuksen ja suorittaa välittömästi yhden tuloksen testihaun. Jos Notion
 palauttaa virheobjektin, tunnus poistetaan ja kutsu epäonnistuu tilakoodilla `400`.
 
-## MCP-työkalut (6)
+## MCP työkalut (6)
 
-Määritelty tiedostossa `open-sse/mcp-server/tools/notionTools.ts`. Tunnus selvitetään kutsun
-aikana funktion `getNotionToken()` avulla. Jos tunnusta ei ole määritetty, työkalu palauttaa virheen
-`"Notion-integraatiotunnusta ei ole määritetty. Määritä se kohdassa Asetukset > Kontekstilähteet."`
+Määritelty kielellä `open-sse/mcp-server/tools/notionTools.ts`. Token ratkaistaan puhelun aikana `getNotionToken()` kautta; jos mitään ei ole määritetty, työkalu heittää `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Työkalu                      | Käyttöoikeusalue | Kuvaus                                                                                                 |
-| ---------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------ |
-| `notion_search`              | `read:notion`    | Hae sivuja ja tietokantoja tekstikyselyllä (palauttaa otsikot, tunnukset ja URL-osoitteet). Sivutettu. |
-| `notion_get_page`            | `read:notion`    | Hae sivun sisältö ja metatiedot sen tunnuksen perusteella.                                             |
-| `notion_list_block_children` | `read:notion`    | Listaa kaikki lohkon tai sivun alilohkot (lohkopuu). Sivutettu.                                        |
-| `notion_query_database`      | `read:notion`    | Tee tietokantakysely valinnaisilla `filter`- ja `sorts`-parametreilla (Notion API -muoto). Sivutettu.  |
-| `notion_get_database`        | `read:notion`    | Hae tietokannan skeema/metatiedot tunnuksen perusteella.                                               |
-| `notion_append_blocks`       | `write:notion`   | Lisää alilohkoja olemassa olevaan lohkoon tai sivuun (enintään 100 lohkoa pyyntöä kohden).             |
+| Työkalu                      | Laajuus        | Kuvaus                                                                                              |
+| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Hae sivuja ja tietokantoja tekstikyselyllä (palauttaa otsikot, IDs, URLs). Sivutettu.               |
+| `notion_get_page`            | `read:notion`  | Hanki sivun sisältö ja metatiedot sen ID avulla.                                                    |
+| `notion_list_block_children` | `read:notion`  | Listaa kaikki lohkon tai sivun lohkon alat (lohkopuu). Sivutettu.                                   |
+| `notion_query_database`      | `read:notion`  | Tee kysely tietokannasta valinnaisella `filter` + `sorts` -muodolla (Notion API -muoto). Sivutettu. |
+| `notion_get_database`        | `read:notion`  | Hanki tietokannan schema/metadata ID avulla.                                                        |
+| `notion_append_blocks`       | `write:notion` | Liitä lohkon alakohdat olemassa olevaan lohkoon tai sivuun (enintään 100 lohkoa per pyyntö).        |
 
-### Syöteparametrit
+### Syöttöparametrit
 
-- `notion_search` — `query` (1–500 merkkiä), `pageSize` (1–100, oletus 20),
-  `startCursor` (valinnainen).
-- `notion_get_page` — `pageId` (32-merkkinen heksadesimaalitunnus tai UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, oletus 50),
-  `startCursor` (valinnainen).
-- `notion_query_database` — `databaseId`, `filter` (valinnainen, Notion-suodatinmuoto),
-  `sorts` (valinnainen taulukko), `pageSize` (1–100, oletus 50), `startCursor` (valinnainen).
+- `notion_search` — `query` (1–500 merkkiä), `pageSize` (1–100, oletusarvo 20), `startCursor` (valinnainen).
+- `notion_get_page` — `pageId` (32-merkkinen hex tai UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, oletus 50), `startCursor` (valinnainen).
+- `notion_query_database` — `databaseId`, `filter` (valinnainen, Notion -suodatinmuoto), `sorts` (valinnainen matriisi), `pageSize` (1–100, oletusarvo 50), `startCursor` (valinnainen).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (lohko-objektien taulukko),
-  `after` (valinnainen sijainti).
+- `notion_append_blocks` — `blockId`, `children` (lohkoobjektien joukko), `after` (valinnainen sijainti).
 
-### Käyttöoikeusalueet
+### Soveltamisalat
 
-Lukutyökalut edellyttävät käyttöoikeusaluetta `read:notion` ja kirjoitustyökalu käyttöoikeusaluetta `write:notion`.
-Käyttöoikeusalueet pakotetaan tiedoston `open-sse/mcp-server/server.ts`
-`withScopeEnforcement()`-toiminnolla vain, kun `OMNIROUTE_MCP_ENFORCE_SCOPES=true`. Kutsujan
-sallitut käyttöoikeusalueet tulevat pilkuin erotellusta `OMNIROUTE_MCP_SCOPES`-muuttujasta tai
-todennetun API-avaimen käyttöoikeusaluekontekstista. Koko käyttöoikeusaluemalli on kuvattu tiedostossa
-[MCP-SERVER.md](./MCP-SERVER.md).
+Lukutyökalut vaativat `read:notion` ja kirjoitustyökalu `write:notion`. Soveltamisalat pakotetaan `withScopeEnforcement()` :llä `open-sse/mcp-server/server.ts` ssä, kun `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, ja aina HTTP/SSE -soittajalle, jonka API -näppäimestä puuttuu `manage`/`admin`; soittajan sallitut laajuudet tulevat `OMNIROUTE_MCP_SCOPES` :stä (pilkuilla erotettu) tai todennetun API -avaimen laajuuskontekstista. Katso koko mallin [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Päätepisteet
 

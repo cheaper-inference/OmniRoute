@@ -11,14 +11,14 @@ Les compétences d’agent sont des fichiers SKILL.md structurés qui enseignent
 
 ---
 
-## Vue d’ensemble
+## Aperçu
 
-Le catalogue contient **45 compétences d’agent** (23 pour l’API REST + 21 pour la CLI + 1 flux de travail de configuration). Chaque compétence possède :
+Le catalogue contient** 45 compétences d'agent** (23 flux de travail de configuration REST API + 21 CLI + 1). Chaque compétence possède :
 
-- Un **ID canonique** (`omni-auth`, `cli-serve`, etc.)
-- Un fichier **SKILL.md** dans `skills/{id}/SKILL.md`, avec un frontmatter YAML (`name`, `description`) et un corps markdown détaillé
-- Des **endpoints REST** (compétences API) ou des **sous-commandes CLI** (compétences CLI) dérivés de la spécification OpenAPI et du registre CLI
-- Une **URL GitHub brute** permettant une récupération en direct : `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- UN** ID canonique** (`omni-auth`, `cli-serve`, etc.)
+- UN**SKILL.md** fichier en `skills/{id}/SKILL.md` avec le frontmatter YAML (`name`, `description`) corps de démarque riche +
+- **points de terminaison REST** (compétences API ) ou** sous-commandes CLI** (compétences CLI ) dérivées de la spécification OpenAPI et du registre CLI
+- UN**GitHub brut URL** pour la récupération en direct : `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ La réponse du générateur est un `GeneratorReport` :
 
 ---
 
-## API de couverture
+## Couverture API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

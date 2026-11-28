@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute, tamamen kurulabilir bir Progressive Web App olarak sunulur. Kontrol paneline herhangi bir mobil tarayıcıdan — Android (Chrome) veya iOS (Safari) — eriştiğinizde, **"Ana Ekrana Ekle"** seçeneğini kullanarak uygulama mağazasına ihtiyaç duymadan yerel uygulama benzeri bir deneyim elde edebilirsiniz.
+Ana ekranınızdan veya masaüstünüzden bağımsız bir pencerede açmak için OmniRoute kontrol panelini Progressive Web Uygulaması olarak yükleyin. Yüklenen uygulamanın navigasyon, kontrol paneli verileri ve API istekleri için hâlâ OmniRoute sunucunuzla bağlantıya ihtiyacı var. Önbelleğe alınmış statik varlıklar, çevrimdışı bir ağ geçidi veya çevrimdışı bir kontrol paneli sağlamaz.
 
-## PWA Nedir?
+## PWA nedir?
 
-Progressive Web App, OmniRoute web kontrol panelini yerel bir mobil uygulama gibi görünen ve çalışan bir uygulamaya dönüştürür. Kurulduktan sonra:
+Progresif Web Uygulaması, bir uygulama simgesi ve ayrı bir pencere ile web kontrol panelini kullanır. Kurulduktan sonra OmniRoute:
 
-- Kendine ait simgesiyle ana ekranınızdan başlatılır
-- Tam ekran açılır — tarayıcı adres çubuğu veya sekme arayüzü gösterilmez
-- Özel bir bağlantı sayfasıyla çevrimdışı çalışır
-- Daha hızlı yükleme için statik varlıkları önbelleğe alır
-- Hem dikey hem de yatay ekran yönlerini destekler
+- Ana ekranınızdan veya masaüstünüzden başlatılır
+- Tarayıcının normal adres çubuğu ve sekmeleri olmadan bağımsız modda açılır
+- Seçilen statik varlıkları önbelleğe alır
+- Dikey ve yatay yönelimleri destekler
 
 ## Kurulum
 
-### Android (Chrome)
+Başka bir cihazdaki sunucu için HTTPS adresi kullanın. Sunucu aynı cihazda çalıştığında `http://localhost:20128`, tarayıcının kurulabilirlik gereksinimlerini de karşılar. Düz bir `http://YOUR_IP:20128` adresi bu gereksinimleri karşılamaz. Kurulum menüleri ve istemleri tarayıcıya ve işletim sistemine bağlıdır. [MDNPWA kurulum gereksinimlerine](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required) bakın.
 
-1. OmniRoute kontrol panelini Chrome'da açın: `http://YOUR_IP:20128`
-2. Chrome otomatik olarak **"OmniRoute'u Ana ekrana ekle"** başlıklı bir banner gösterir veya:
-   - **⋮** menüsüne (üç nokta) dokunun → **"Ana ekrana ekle"** veya **"Uygulamayı yükle"**
-3. İstemi onaylayın
-4. OmniRoute, bağımsız bir uygulama olarak ana ekranınızda görünür
+### Android (Krom)
+
+1. Aynı telefondaki bir sunucu için OmniRoute HTTPS adresinizi veya `http://localhost:20128` açın.
+2. Aç**⋮** menüyü seçin ve seçin** Uygulamayı yükle** veya** Ana ekrana ekle** teklif edilirse.
+3. İstemi onaylayın.
+4. Ana ekrandan OmniRoute açın.
 
 ### iOS (Safari)
 
-1. OmniRoute kontrol panelini Safari'de açın: `http://YOUR_IP:20128`
-2. **Paylaş** düğmesine (ok bulunan kutu) dokunun
-3. Aşağı kaydırın ve **"Ana Ekrana Ekle"** seçeneğine dokunun
-4. Bir ad verin (varsayılan olarak "OmniRoute") ve **Ekle** seçeneğine dokunun
-5. OmniRoute, uygulama simgesiyle ana ekranınızda görünür
+1. OmniRoute HTTPS adresinizi Safari'de açın.
+2. Musluk** Paylaşmak** →** Ana Ekrana Ekle** .
+3. Adı onaylayın ve dokunun** Eklemek** .
+4. Ana ekrandan OmniRoute açın.
 
 ### Masaüstü (Chrome / Edge)
 
-1. OmniRoute kontrol panelini açın
-2. Adres çubuğundaki **yükleme simgesine** tıklayın (veya ⋮ → "OmniRoute'u yükle...")
-3. İstemi onaylayın
-4. OmniRoute bağımsız bir pencerede açılır — sekme veya adres çubuğu gösterilmez
+1. OmniRoute kontrol panelinizi açın.
+2. Tarayıcının yükleme simgesini veya** Uygulamayı yükle** teklif edilirse menü girişi.
+3. OmniRoute kendi penceresinde açma istemini onaylayın.
 
 ## Özellikler
 
-### Tam Ekran Deneyimi
+### Bağımsız Pencere
 
-Manifest, `display: "fullscreen"` ile yapılandırılmıştır; bu, yüklenen uygulamanın ekranın tamamını kullandığı anlamına gelir — tarayıcı arayüzü ve durum çubuğu çakışması yoktur. Böylece kontrol paneli gerçekten yerel bir uygulama hissi verir.
+Manifest `display: "standalone"` ve `start_url: "/dashboard"` ayarlar. Yüklenen uygulama, kontrol panelini bir uygulama penceresinde açar. Tarayıcı ve işletim sistemi kontrolleri görünmeye devam edebilir; bildirim tam ekran modunu talep etmez.
 
-### Çevrimdışı Destek
+### Önbelleğe Alınmış Varlıklar ve Ağ Gereksinimleri
 
-OmniRoute, akıllı önbelleğe alma sağlayan bir service worker (`sw.js`) içerir:
+[Hizmet çalışanı](../../public/sw.js) seçilen aynı kökenli kaynakları önbelleğe alır:
 
-| Varlık Türü                                                                                                                                                                                                                    | Strateji                         | Davranış                                                                                                            |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Uygulama Kabuğu**                                                                                                                                                                                                            | Önce önbellek                    | `/`, `/offline`, manifest ve simgeler kurulum sırasında önceden önbelleğe alınır                                    |
-| **Statik varlıklar** (CSS, JS, görseller, yazı tipleri)                                                                                                                                                                        | Önce ağ, önbelleğe geri dönüş    | Ağdan güncel sürümü getirir; çevrimdışıysa önbelleğe geri döner                                                     |
-| **Next.js paketleri** (`/_next/`)                                                                                                                                                                                              | Önce ağ, önbellek güncellemeli   | Ağdan getirip önbelleği günceller; çevrimdışıysa önbellekteki sürümü sunar                                          |
-| **Gezinme istekleri**                                                                                                                                                                                                          | Atlanır (asla müdahale edilmez)  | HTTP/3→HTTP/2 geri dönüşünü tarayıcı yönetir; çalışmayan bir QUIC soketi `Response.error()` sonucuna dönüşmemelidir |
-| **API / kontrol paneli rotaları** (`/api/`, `/a2a`, `/dashboard`, istemci API takma adları `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, ayrıca `/callback`, `/login`; büyük/küçük harf duyarsız eşleştirilir) | Atlanır (asla önbelleğe alınmaz) | Her zaman doğrudan sunucuya gider — service worker tarafından asla müdahale edilmez                                 |
+| Talep veya varlık                               | Strateji           | Davranış                                                                                                             |
+| ----------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Yükleme zamanı kaynakları                       | Ön önbellek        | `/`, `/manifest.webmanifest`, `/icon-512.png` ve `/apple-touch-icon.png` çalışan kurulumu sırasında önbelleğe alınır |
+| Next.js statik varlıkları (`/_next/`)           | Ağ öncelikli       | Başarılı yanıtlar önbelleği günceller; bir ağ hatası mevcut önbelleğe alınmış bir yanıta geri dönüyor                |
+| Diğer statik CSS, JS, resimler ve yazı tipleri  | Önbellek öncelikli | Mevcut önbelleğe alınmış bir yanıt yeniden kullanılır; başarılı ağ yanıtları kaçırıldığında önbelleğe alınır         |
+| Sayfada gezinme                                 | Baypas             | Tarayıcı sayfayı doğrudan getirir; çevrimdışı geri dönüş sunulmuyor                                                  |
+| API, kontrol paneli ve kimlik doğrulama yolları | Baypas             | Çalışan bu istekleri engellemez veya önbelleğe almaz                                                                 |
+| Diğer statik olmayan istekler                   | Ağ                 | Önbellek araması veya depolama yok                                                                                   |
 
-### Çevrimdışı Sayfası
+Hariç tutulan rotalar `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` ve `/login` ve yol sınırlarında büyük/küçük harfe duyarlı olmayacak şekilde eşleştirilir. Çapraz menşeli ve GET olmayan istekler de çalışanı atlar.
 
-Ağ kullanılamadığında ve kullanıcı yeni bir sayfaya gittiğinde service worker, aşağıdaki özelliklere sahip özel bir `/offline` sayfası sunar:
+### Bağlantı Sayfası
 
-- Açık bir **"Bağlantı Sorunu"** mesajı görüntüler
-- Gerçek zamanlı olarak güncellenen canlı bir **çevrimiçi/çevrimdışı durum göstergesi** sunar
-- Bağlantı geri geldiğinde yeniden yüklemek için bir **"Bağlantıyı Yeniden Dene"** düğmesi sağlar
-- Tanılama için **Durum Sayfası** bağlantısı sunar
+`/offline` sayfası bir bağlantı mesajı, bir online/offline göstergesi ve bir** Bağlantıyı Yeniden Dene** düğmesi ve durum sayfasına bir bağlantı. öyle** önceden önbelleğe alınmamış** ve servis çalışanı bunu yapar** Olumsuz** Başarısız olan gezinmeleri ona yönlendirin. Varlığı, yeni sayfaların sunucu olmadan erişilebilir olmasını sağlamaz.
 
 ### Uygulama Simgeleri
 
-OmniRoute, her platform için optimize edilmiş simgeler sağlar:
+Manifest şu PNG simgelerini tanıtır:
 
-| Dosya                  | Boyut            | Kullanıldığı Yer                      |
-| ---------------------- | ---------------- | ------------------------------------- |
-| `icon-512.png`         | 512×512          | Android yükleme istemi, açılış ekranı |
-| `apple-touch-icon.png` | 180×180          | iOS ana ekran simgesi                 |
-| `icon-192.svg`         | 192×192 (vektör) | Android uyarlanabilir simgesi         |
-| `apple-touch-icon.svg` | 180×180 (vektör) | Apple yedeği                          |
-| `favicon.svg`          | Vektör           | Tarayıcı sekmeleri                    |
-| `favicon.ico`          | Çoklu boyut      | Eski tarayıcılar                      |
+| Dosya                  | Boyut   | Kullanmak                                |
+| ---------------------- | ------- | ---------------------------------------- |
+| `icon-192.png`         | 192×192 | Genel uygulama simgesi                   |
+| `icon-512.png`         | 512×512 | Genel ve maskelenebilir uygulama simgesi |
+| `apple-touch-icon.png` | 180×180 | Apple ana ekran simgesi                  |
+
+Tarayıcı, kurulum hedefi için uygun simgeyi seçer.
 
 ### Otomatik Kayıt
 
-Service worker, kök düzende bulunan `<PwaRegister />` bileşeni aracılığıyla otomatik olarak kaydedilir. Kullanıcının herhangi bir işlem yapmasına gerek yoktur — tarayıcı geçerli manifesti ve service worker'ı algıladığı anda uygulama kurulabilir hâle gelir.
+`PwaRegister` tarayıcı hizmet çalışanlarını desteklediğinde çalışanı üretime kaydeder. Geliştirme modu, eski varlıkların çalışırken yeniden yüklemeyi engellemesini önlemek için çalışanların kaydını siler ve önbellekleri temizler. Yükleme istemleri bir tarayıcı kararı olarak kalır.
 
 ## Teknik Mimari
 
-### Web Uygulaması Manifestosu (`manifest.webmanifest`)
+### Web Uygulaması Bildirimi
 
-Next.js tarafından `src/app/manifest.ts` üzerinden oluşturulur:
+Next.js [`src/app/manifest.ts`](../../src/app/manifest.ts) `/manifest.webmanifest` üretir. Temel ayarları şunlardır:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Ayar                       | Değer                                     |
+| -------------------------- | ----------------------------------------- |
+| `short_name`               | `OmniRoute`                               |
+| `start_url`                | `/dashboard`                              |
+| `scope`                    | `/`                                       |
+| `display`                  | `standalone`                              |
+| `orientation`              | `any`                                     |
+| Arka plan ve tema renkleri | `PWA_THEME_COLORS` varsayılan ışık paleti |
 
-### Service Worker (`public/sw.js`)
+Bildirinin adı ve açıklaması o kaynak dosyadaki statik değerlerdir. Yüklenen bildirim, her ziyarette örnek adı ayarını veya etkin paleti takip etmiyor.
 
-Herhangi bir framework bağımlılığı bulunmayan, aşağıdaki özelliklere sahip standart bir service worker:
+### Servis Çalışanı
 
-- **Yükleme aşaması**: Uygulama kabuğunu (kök dizin, çevrimdışı sayfası, manifesto ve simgeler) önbelleğe alır
-- **Etkinleştirme aşaması**: Eski önbellek sürümlerini temizler ve tüm istemcilerin denetimini devralır
-- **Fetch aşaması**: İstek türüne (gezinme, statik varlık, API) göre akıllı yönlendirme yapar
-- **Önbellek sürümleme**: `omniroute-pwa-v3` — güncelleme sırasında yeni bir önbellek oluşturulmasını zorlamak için bunu artırın
+[`public/sw.js`](../../public/sw.js) hizmet çalışanı çerçevesi bağımlılığı yoktur:
 
-### Layout Meta Verileri (`src/app/layout.tsx`)
+- **Düzenlemek:** yukarıda listelenen dört kaynağı önceden önbelleğe alır ve yeni çalışanı etkinleştirir.
+- **Etkinleştir:** eski önbellek nesillerini kaldırır ve istemcileri talep eder.
+- **Gidip getirmek:** yukarıdaki statik varlık stratejilerini ve rota hariç tutmalarını uygular.
+- **Sürüm oluşturma:** kaynak önbellek adı `omniroute-pwa-v3`; üretim yapısı önbellek kimliğini damgalar.
+- **Bildirimler:** gelen `push` olaylarını yönetir ve bir bildirim tıklandığında odaklanır veya bir pencere açar.
 
-Kök layout, PWA uyumluluğu için gerekli tüm meta etiketlerini sağlar:
+Push olay işleyicileri tek başına etkin bir push aboneliği veya yapılandırılmış sunucu teslimatı oluşturmaz. Bildirimlerin yalnızca PWA yüklü olduğu için etkinleştirildiğini varsaymayın.
 
-- `/manifest.webmanifest` dosyasına yönlendiren `manifest` bağlantısı
-- iOS bağımsız modu için `apple-web-app-capable: true`
-- `apple-web-app-status-bar-style: black-translucent`
-- Android Chrome için `mobile-web-app-capable: yes`
-- `theme-color: #0b0f1a`
-- Kenardan kenara işleme için `viewport-fit: cover`
+### Düzen Meta Verileri ve Kayıt
 
-### Bileşen: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) manifest bağlantısını, Apple bağımsız meta verilerini, tema renklerini ve `viewport-fit: cover` sağlar. Sayfa başlığı ve Apple web uygulaması başlığı örnek adını kullanır. Canlı tarayıcı teması rengi paleti takip eder; yükleme bildirimi varsayılan ışık rengini kullanır.
 
-`src/shared/components/PwaRegister.tsx` konumunda bulunan bu istemci bileşeni:
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) istemcide çalışır ve `/sw.js` URL dosyasındaki ID yapısıyla kaydeder. Eşleşmeyen önbellek nesillerini algılar ve çalışanı sıfırlayabilir ve eski bir kurulumdan kurtulmak için bir kez yeniden yükleyebilir. Kayıt hatası kontrol panelini engellemez.
 
-1. Bağlandığında çalışır (yalnızca istemci tarafında)
-2. Tarayıcıda `serviceWorker` desteği olup olmadığını kontrol eder
-3. `/sw.js` dosyasını sessizce kaydeder (uygulamanın engellenmesini önlemek için hatalar yok sayılır)
-4. Hiçbir şey render etmez (`return null`) — yalnızca yan etki oluşturan bir bileşendir
+## Termux ile Kullanın (Android)
 
-## Termux (Android) ile Kullanım
+1. Termux'ta OmniRoute başlatın: `npx -y omniroute@latest`.
+2. Chrome'u aynı telefonda açın: `http://localhost:20128`.
+3. PWA tarayıcının kurulum menüsünden yükleyin.
+4. Kontrol panelini kullanırken Termux sunucusunu çalışır durumda tutun.
 
-OmniRoute, Android üzerinde Termux aracılığıyla çalıştırıldığında PWA sorunsuz şekilde çalışır:
+Telefon hem ağ geçidini hem de kontrol panelini barındırır. Uzak AI sağlayıcılarına yapılan isteklerin hâlâ ağ erişimine ihtiyacı var. Kurulum ve Android işlem ömrüyle ilgili hususlar için [Termux kılavuzuna](TERMUX_GUIDE.md) bakın.
 
-1. OmniRoute'u Termux'ta başlatın: `npx omniroute`
-2. Aynı telefonda Chrome'u açın: `http://localhost:20128`
-3. PWA'yı "Ana Ekrana Ekle" seçeneğiyle yükleyin
-4. PWA, yerel Termux sunucusuna bağlanır — her şey cihaz üzerinde çalışır
+## Diğer Cihazlardan Kullan
 
-Bu kombinasyon, Android telefonunuzun hem **sunucu** (Termux) hem de **istemci** (PWA) olduğu anlamına gelir — tamamen bağımsız bir yapay zekâ ağ geçidi.
-
-## Diğer Cihazlardan Kullanım
-
-PWA'yı, OmniRoute sunucunuza tarayıcı erişimi olan herhangi bir cihaza yükleyin:
-
-- **Başka bir telefon/tablet**: `http://PHONE_IP:20128` adresine gidin ve PWA'yı yükleyin
-- **Dizüstü bilgisayar**: Chrome/Edge'i açın ve masaüstü PWA olarak yükleyin
-- **Tarayıcılı akıllı TV**: Kontrol paneline tam ekran erişin
+Sunucunun HTTPS adresini bir telefonda, tablette veya masaüstünde açın, ardından o tarayıcının kurulum akışını takip edin. Sunucuya her cihazdan ulaşılabilir durumda kalmalıdır. Uzaktan erişim seçenekleri için [tünel kılavuzuna](../ops/TUNNELS_GUIDE.md) bakın.
 
 ## Özelleştirme
 
 ### Örnek Adı
 
-PWA başlığı, `Dashboard → Settings` bölümündeki **Instance Name** ayarını kullanır. Örneğinizin adını "My AI Gateway" olarak değiştirirseniz yüklü PWA bu adı gösterir.
+**Örnek Adı** ayar, sayfa başlığı ve Apple web uygulaması başlığı da dahil olmak üzere kontrol paneli meta verilerini değiştirir. Oluşturulan bildirim statik bir ad kullandığından bu ayar, önceden yüklenmiş bir uygulamanın yeniden adlandırılacağını garanti etmez.
 
-### Özel Favicon
+### Özel Site Simgesi
 
-`Dashboard → Settings` üzerinden özel bir favicon yüklerseniz masaüstündeki PWA simgesi bu özel simgeyi kullanır. Mobil ana ekran simgeleri, önceden oluşturulmuş `icon-512.png` ve `apple-touch-icon.png` dosyalarını kullanır.
+Özel bir favicon, tarayıcının favicon'unu değiştirir. Yükleme bildirimi hâlâ yukarıdaki PNG dosyalarının tanıtımını yapıyor; favicon'u değiştirmek ana ekran simgelerinin yerini almaz.
 
 ## Sınırlamalar
 
-- **Anlık bildirim yok** — Service worker, Push API'yi uygulamaz. Bildirimler bunun yerine Electron uygulaması tarafından yönetilir.
-- **Arka planda senkronizasyon yok** — Çevrimdışı eylemler daha sonra yeniden yürütülmek üzere kuyruğa alınmaz. PWA, temel olarak bir pano görüntüleyicisidir.
-- **iOS kısıtlamaları** — iOS'teki Safari tüm PWA özelliklerini desteklemez (ör. yükleme istemleri manueldir ve arka plan service worker'ları sınırlıdır).
-- **Önbellek boyutu** — Service worker yalnızca statik varlıkları önbelleğe alır. `/api/` rotalarından gelen büyük yanıt yükleri hiçbir zaman önbelleğe alınmaz.
-- **Mobilde özel simgeler** — Ayarlarda favicon'u değiştirmek, mobil cihazdaki ana ekran simgesini güncellemez (bunun için PWA simgelerinin yeniden oluşturulması gerekir).
+- **Sunucu bağlantısı gerekli:** sayfada gezinme, kontrol paneli durumu ve API isteklerinin çevrimdışı bir geri dönüşü yoktur.
+- **Arka planda senkronizasyon yok:** çevrimdışı eylemler yeniden oynatılmak üzere sıraya alınmaz.
+- **Tarayıcı farklılıkları:** kurulum menüleri, pencere sunumu ve bildirim desteği platforma göre değişir.
+- **API yanıt önbelleği yok:** çalışan API, gösterge tablosu ve kimlik doğrulama rotalarını hariç tutar.
+- **Statik kurulum simgeleri:** bu simgelerin güncellenmesi, reklamı yapılan varlıkların değiştirilmesini gerektirir; tarayıcılar yüklü meta verileri koruyabilir.
 
 ## Dosya Referansı
 
-| Dosya                                   | Amaç                                                                  |
-| --------------------------------------- | --------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Next.js manifest rotası (`manifest.webmanifest` oluşturur)            |
-| `public/sw.js`                          | Önbelleğe alma mantığına sahip service worker                         |
-| `src/shared/components/PwaRegister.tsx` | Service worker'ı kaydeden istemci bileşeni                            |
-| `src/app/offline/page.tsx`              | Canlı durum göstergesine sahip çevrimdışı geri dönüş sayfası          |
-| `src/app/layout.tsx`                    | PWA meta verilerini içeren kök düzen (apple-web-app, theme-color vb.) |
-| `public/icon-512.png`                   | 512×512 PNG simgesi (Android, açılış ekranı)                          |
-| `public/apple-touch-icon.png`           | 180×180 PNG simgesi (iOS ana ekranı)                                  |
-| `public/icon-192.svg`                   | 192×192 SVG simgesi (Android uyarlanabilir simgesi)                   |
-| `public/apple-touch-icon.svg`           | 180×180 SVG simgesi (Apple geri dönüş simgesi)                        |
+| Dosya                                                                                  | Amaç                                                          |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Oluşturulan web uygulaması bildirimi                          |
+| [public/sw.js](../../public/sw.js)                                                     | Önbelleğe alma, hariç tutmalar ve bildirim olayı işleyicileri |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Üretim kaydı ve eski önbellek kurtarma                        |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Bağlantı sayfası, otomatik bir çevrimdışı geri dönüş değil    |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Sayfa meta verileri ve görünüm ayarları                       |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Paylaşılan tema-renk değerleri                                |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 uygulama simgesi                                    |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple simgesi                                       |

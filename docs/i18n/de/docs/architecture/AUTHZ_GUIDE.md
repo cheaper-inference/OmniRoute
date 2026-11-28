@@ -4,12 +4,11 @@
 
 ---
 
-> **Maßgebliche Quelle:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Zuletzt aktualisiert:** 2026-09-22 — Scope-Namespaces verweisen auf MCP-SERVER.md
+> **Quelle der Wahrheit:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute verfügt über eine routenabhängige Autorisierungspipeline, die jede API-Anfrage absichert. Die Klassifizierung ist **deterministisch** und erfolgt nach dem **Fail-Closed-Prinzip** — alles, was nicht klassifiziert werden kann, wird als `MANAGEMENT` eingestuft und erfordert eine Sitzung oder ein Token mit Berechtigungen auf Management-Ebene. Diese Seite erläutert das Modell für Entwickler, die Routen verwalten oder neue Endpunkte entwerfen.
+OmniRoute verfügt über eine routenbewusste Autorisierungspipeline, die jede API Anfrage steuert. Klassifizierung ist** deterministisch** Und** Fail-Closed** — Alles, was nicht klassifiziert werden kann, endet als `MANAGEMENT` und erfordert ein Sitzungs- oder Management-Token. Auf dieser Seite wird das Modell für Ingenieure erläutert, die Routen verwalten oder neue Endpunkte entwerfen.
 
-![Autorisierungspipeline (3 Routenklassen + Richtlinienauswertung)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Quelle: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -221,7 +220,7 @@ Jede Routenklasse hat eine Richtlinie in `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — gibt immer `allow({ kind: "anonymous", id: "anonymous" })` zurück.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extrahiert Bearer und validiert über `validateApiKey()`. Fällt nur dann auf „Anonym“ durch, wenn das effektive `REQUIRE_API_KEY` Feature-Flag deaktiviert ist. Das effektive Flag wird durch `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) aufgelöst, sodass Dashboard-Feature-Flags und Umgebungsvariablen `/api/v1/*`, `/api/v1beta/*` und Aliase konsistent steuern. Resolver-Ausfälle schlagen fehl. Ermöglicht Dashboard-Sitzungsanfragen auf Client- API Routen (einschließlich `/api/v1/models`, das vom Dashboard-Modellkatalog verwendet wird). Wenn Entra ID SSO aktiviert ist, wird ein Bearer, der strukturell ein Entra-Token ist (drei base64url-Segmente, `RS*` alg, `kid`), vom SSO Zweig verarbeitet** vor** `validateApiKey()` und sein Urteil ist endgültig — es fällt niemals auf den API-Schlüsselpfad oder den Degrade-to-anonymous-Zweig durch, sodass ein Ausfall des Identitätsanbieters nicht zu offenem Zugriff werden kann. Statische API Schlüssel sind davon nicht betroffen. Siehe [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — akzeptiert Dashboard-Sitzungen, interne Modellsynchronisierungsanforderungen (abgeglichen mit `/api/providers/[name]/(sync-models|models)`) oder überspringt vollständig, wenn `isAuthRequired()` „false“ zurückgibt. Gibt 403 (`AUTH_001`) zurück, wenn ein Bearer-Token vorhanden, aber ungültig ist, andernfalls 401. Erzwingt außerdem die Route-Guard-Stufen (LOCAL_ONLY / ALWAYS_PROTECTED) vor jedem Authentifizierungszweig — siehe [Route Guard-Stufen](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY Pfade in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (heute: `/api/mcp/`) kann von Nicht-Loopback aus zugegriffen werden, wenn der Bearer-Schlüssel den `manage` Bereich trägt; Alle anderen LOCAL_ONLY -Pfade bleiben unabhängig vom Bereich strikt-Loopback.
+- **`managementPolicy`** (`policies/management.ts`) — akzeptiert Dashboard-Sitzungen, interne Modellsynchronisierungsanforderungen (abgeglichen mit `/api/providers/[name]/(sync-models|models)`) oder überspringt vollständig, wenn `isAuthRequired()` „false“ zurückgibt. Gibt 403 (`AUTH_001`) zurück, wenn ein Bearer-Token vorhanden, aber ungültig ist, andernfalls 401. Erzwingt außerdem die Route-Guard-Stufen (LOCAL_ONLY / ALWAYS_PROTECTED) vor jedem Authentifizierungszweig — siehe [Route Guard-Stufen](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY Pfade in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (heute: `/api/mcp/`) kann ohne Loopback zugegriffen werden, wenn der Bearer-Schlüssel den `manage`/`admin` -Bereich oder den engen `mcp:connect` Bereich (`hasMcpConnectOrManageScope`) trägt, oder mit einer authentifizierten Dashboard-Sitzung; Alle anderen LOCAL_ONLY -Pfade bleiben unabhängig vom Bereich strikt-Loopback.
 
 Eine erfolgreiche Richtlinie gibt `AuthSubject` mit `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` zurück. Downstream-Handler können es über `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` lesen, anstatt die Authentifizierungslogik erneut ausführen zu müssen.
 
@@ -313,38 +312,24 @@ export async function POST(request: Request) {
 
 Wählen Sie die Menge anhand der Form aus, nicht nach Bequemlichkeit. Eine einzelne Route gehört in `PUBLIC_API_ROUTES_EXACT` (oder bei ausschließlich per GET aufrufbaren Routen in `PUBLIC_READONLY_CORS_API_ROUTES`); nur ein echter Unterbaum gehört in `PUBLIC_API_ROUTE_PREFIXES`, und er **muss mit `/` enden**. Wird eine einzelne Route in die Präfixliste aufgenommen, werden dadurch auch alle benachbarten Pfade veröffentlicht, die dieselben führenden Zeichen aufweisen — einschließlich später hinzugefügter Geschwister mit dynamischen Segmenten (GHSA-74g9-q8f6-793h). Aktualisieren Sie die Unit-Tests unter `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` und `tests/unit/authz/classify.test.ts`.
 
-## Scopes
+## Bereiche
 
-Drei Namensräume. Jede Prüfung liest nur ihre eigenen Zeichenfolgen. Die Gegenüberstellung,
-einschließlich der Gründe, warum `manage` bei `scopeMatches` für `read:compression` fehlschlägt und warum ein
-`read`-Zugriffstoken `PATCH /api/keys/{id}` nicht aufrufen kann, finden Sie unter
-[Drei Scope-Namensräume](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Drei Namensräume. Jeder Prüfer liest nur seine eigenen Zeichenfolgen. Die Seite an Seite, einschließlich der Gründe, warum `manage` `scopeMatches` für `read:compression` fehlschlägt und warum ein `read` Zugriffstoken nicht `PATCH /api/keys/{id}` sein kann, ist [Drei Bereichs-Namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API-Schlüssel enthalten ein `scopes`-Array (als JSON in `api_keys.scopes` gespeichert, siehe `src/lib/db/apiKeys.ts`).
+API -Schlüssel tragen ein `scopes` Array (gespeichert als JSON in `api_keys.scopes`, siehe `src/lib/db/apiKeys.ts`).
 
-### Verwaltungs-Scope
+### Verwaltungsumfang
 
-- `manage` / `admin` — `hasManageScope`. Bearer-Zugriff auf Routen der Verwaltungs-API.
-- `mcp:connect`, `self:usage`, `self:account-quota` und
-  `policy:bypass-provider-quota` sind additive Scopes mit exakter Übereinstimmung. Sie liegen
-  außerhalb von `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` öffnet nur die
-  Nicht-Loopback-Ausnahme für `/api/mcp/`.
+- `manage` / `admin` — `hasManageScope`. Trägerzugriff auf Management- API -Routen.
+- `mcp:connect`, `self:usage`, `self:account-quota` und `policy:bypass-provider-quota` sind additive Bereiche mit exakter Übereinstimmung. Sie sitzen draußen `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` öffnet nur den `/api/mcp/` -Nicht-Loopback-Carveout.
 
-### MCP-Tool-Scopes
+### MCP Tool-Umfänge
 
-Katalog und Abgleichregeln (identische Zeichenfolge oder ein gewährter Scope, der mit `*` endet):
-[MCP-Tool-Scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` ist die ursprüngliche typisierte
-Teilmenge, nicht der vollständige Katalog. Die Durchsetzung erfolgt in
-`open-sse/mcp-server/scopeEnforcement.ts`, nachdem `resolveCallerScopeContext()`
-die Scopes aus MCP-Authentifizierungsinformationen, Anfragemetadaten oder `OMNIROUTE_MCP_SCOPES`
-ermittelt hat. Sie bleibt deaktiviert, sofern nicht `OMNIROUTE_MCP_ENFORCE_SCOPES=true` gesetzt ist.
+Katalog- und Übereinstimmungsregeln (identische Zeichenfolge oder ein gewährter Bereich, der auf `*` endet): [MCP Tool-Bereiche](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` ist die ursprünglich typisierte Teilmenge, nicht der vollständige Katalog. Die Durchsetzung wird in `open-sse/mcp-server/scopeEnforcement.ts` ausgeführt, nachdem `resolveCallerScopeContext()` Bereiche aus MCP -Authentifizierungsinformationen, Anforderungsmetadaten oder `OMNIROUTE_MCP_SCOPES` aufgelöst hat. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` aktiviert es global (Standard `false`), aber es wird immer für einen HTTP/SSE Aufrufer erzwungen, dessen API Schlüssel `manage`/`admin` fehlt (siehe `shouldForceScopeEnforcement()` in `open-sse/mcp-server/scopeEnforcement.ts`), unabhängig vom Flag.
 
-### Zugriffstoken-Scopes
+### Zugriffstokenbereiche
 
-`read` / `write` / `admin` für `oma_live_…`-Token, eingestuft durch `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Diese Rangfolge gilt nur für die Zugriffstoken-
-Anmeldeinformationen. Siehe [Verwaltungsauthentifizierung](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` auf `oma_live_…` Tokens, geordnet nach `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Dieser Rang gilt nur für die Zugangstoken-Anmeldeinformationen. Siehe [Verwaltungsauthentifizierung](../guides/MANAGEMENT-AUTH.md).
 
 ## Umschalter „Authentifizierung erforderlich“
 

@@ -4,13 +4,7 @@
 
 ---
 
-> **Извор истине:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` и јавни градитељи у `open-sse/utils/error.ts`
-> **Тестови:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Последње ажурирање:** 2026-09-02 — v3.8.51
-> **Публика:** Сви инжењери који раде са одговорима о грешкама (HTTP руте, SSE токови, извршиоци, MCP обрађивачи).
-> **Статус:** **ОБАВЕЗНО** за сваку путању кода која клијенту враћа поруку о грешци.
+> **Извор истине:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, и јавни градитељи у `open-sse/utils/error.ts`** тестови:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** публика:** Било који инжењер који додирне одговоре на грешке (HTTP руте, SSE токови, извршиоци, MCP руковаоци).** Статус:****MANDATORY** за сваку путању кода која клијенту враћа поруку о грешци.
 
 ## Зашто ово постоји
 

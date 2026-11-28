@@ -4,15 +4,11 @@
 
 ---
 
-> **신뢰할 수 있는 원본:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **마지막 업데이트:** 2026-06-28 — v3.8.40
+> **진실의 출처:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-OmniRoute는 플랫폼 이벤트 발생 시 HTTP 웹훅을 전송할 수 있습니다. 이를 사용하여
-Slack, PagerDuty, Datadog, 내부 알림 서비스 또는 모든 HTTP 수신기와 통합할 수 있습니다.
+OmniRoute 플랫폼 이벤트에서 HTTP webhooks를 실행할 수 있습니다. 이를 사용하여 Slack, PagerDuty, Datadog, 내부 경고 서비스 또는 모든 HTTP 수신기와 통합하세요.
 
-디스패처는 각 전송을 HMAC-SHA256으로 서명하고, 일시적인 장애가 발생하면
-재시도하며, 웹훅별 전송 상태를 추적하고, 계속 실패하는 엔드포인트를
-자동으로 비활성화합니다.
+디스패처는 HMAC-SHA256 사용하여 각 전달에 서명하고, 일시적인 실패에 대해 재시도하고, 웹훅당 전달 상태를 추적하고, 계속 실패하는 엔드포인트를 자동으로 비활성화합니다.
 
 ## 지원되는 이벤트
 

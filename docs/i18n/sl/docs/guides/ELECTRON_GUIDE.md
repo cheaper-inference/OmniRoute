@@ -4,7 +4,7 @@
 
 ---
 
-> **Vir resnice:** delovni prostor `electron/`** Zadnja posodobitev:** 2026-06-28 — v3.8.40
+> **Vir resnice:** delovni prostor `electron/`
 
 OmniRoute pošilja namizno aplikacijo za več platform (Windows / macOS / Linux), zgrajeno na**Electron 41** +** elektron-graditelj 26.10** . Namizna aplikacija ustvari samostojni strežnik Next.js kot podrejeni proces, nanj usmeri `BrowserWindow` in doda sistemsko vrstico, samodejno posodabljanje, most IPC in skrivni zagon z ničelno konfiguracijo.
 
@@ -198,7 +198,7 @@ Nastavite prek `session.defaultSession.webRequest.onHeadersReceived`. Pomembne d
 
 ## Samodejno posodabljanje
 
-Uporablja `electron-updater` s ponudnikom GitHub (`diegosouzapw/OmniRoute`).
+Uporablja `electron-updater` s ponudnikom GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Dogodki, posredovani upodabljalniku prek `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (z `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefakti pristanejo v `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Izdaje so objavljene v GitHub Releases (`diegosouzapw/OmniRoute`), kjer `electron-updater` tudi preverja, ali so na voljo nove različice.
+Izdaje so objavljene v GitHub Releases (`cheaper-inference/OmniRoute`), kjer `electron-updater` tudi preverja, ali so na voljo nove različice.
 
 ## Odpravljanje težav
 

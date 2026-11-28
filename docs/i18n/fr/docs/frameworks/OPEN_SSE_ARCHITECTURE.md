@@ -236,19 +236,19 @@ Prise en charge** 22 stratégies de routage** (voir `src/shared/constants/routin
 | `context-relay`     | Transférer le contexte entre les cibles                                                    |
 | `fill-first`        | Remplir le quota avant de passer au suivant                                                |
 | `p2c`               | Pouvoir de deux choix                                                                      |
-| `random`            | Uniforme aléatoire                                                                         |
-| `least-used`        | Choisissez celui avec le moins d'utilisations récentes                                     |
-| `cost-optimized`    | Cible saine la moins chère en premier                                                      |
-| `reset-aware`       | Conscient des fenêtres de réinitialisation du fournisseur                                  |
-| `reset-window`      | Réinitialiser le routage basé sur la fenêtre                                               |
+| `random`            | Mélange frais par demande                                                                  |
+| `least-used`        | Choisissez celui avec le moins de demandes enregistrées                                    |
+| `cost-optimized`    | Prix d'entrée le plus bas du catalogue en premier                                          |
+| `reset-aware`       | Quota restant + réinitialisation d'urgence                                                 |
+| `reset-window`      | Fenêtre de quota qui se réinitialise le plus tôt possible                                  |
 | `expiry-first`      | Dépensez en premier le compte dont le quota expirerait sans être utilisé                   |
 | `headroom`          | La plus grande marge de quota restante en premier                                          |
 | `quota-weighted`    | Ignorez les comptes épuisés, puis tirez en fonction du quota restant ÷ en charge en vol    |
-| `strict-random`     | Vraiment uniforme (pas de pondération de qualité)                                          |
+| `strict-random`     | Deck mélangé : chaque cible une fois avant de se répéter                                   |
 | `auto`              | Utiliser une notation à 16 facteurs (`autoCombo/`)                                         |
 | `lkgp`              | Dernier bon fournisseur connu en premier                                                   |
-| `context-optimized` | Idéal pour les requêtes à long contexte                                                    |
-| `cache-optimized`   | Épinglez chaque préfixe d'invite réutilisable sur le même compte (accès au cache d'invite) |
+| `context-optimized` | La plus grande fenêtre de contexte connue en premier                                       |
+| `cache-optimized`   | Préférer le compte susceptible de contenir le préfixe d'invite en cache                    |
 | `fusion`            | Diffusez sur un panel en parallèle, puis synthétisez via un juge (`fusion.ts`)             |
 | `pipeline`          | Étapes en chaîne — la sortie de chaque cible alimente la suivante                          |
 | `jev`               | Opt-in : TypeSafe Jev admet quelles entrées classées sont diffusées ; sinon votre commande |

@@ -8,226 +8,148 @@
 
 Kõik OmniRoute'i haldus-API marsruudid liigitatakse ühte kolmest kaitsetasemest. Liigitus on staatiline, määratletud failis `src/server/authz/routeGuard.ts`, ning seda hinnatakse enne mis tahes muu autentimisharu käivitamist.
 
-## Astmed
+## Tasemed
 
-### 1. aste — LOCAL_ONLY
+### 1. tase — LOCAL_ONLY
 
-**Jõustaja:** `isLocalOnlyPath(path)` → loopback-hosti kontroll
-**Möödaminek:** Vaikimisi puudub. Kitsas erand teedel, mis asuvad
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` all, kui päring sisaldab kehtivat
-`manage`-ulatusega API-võtit (vt [manage-ulatuse erand](#manage-scope-carve-out)).
+**Jõustab:** `isLocalOnlyPath(path)` → loopback hosti kontroll** Möödasõit:** Vaikimisi mitte ühtegi. Kitsa väljalõike teede jaoks `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` -s, kui päring kannab kehtivat API võtit koos `manage` ulatusega (vt [Ulatuse haldamine](#manage-scope-carve-out) ).
 
-Need marsruudid käivitavad alamprotsesse või täidavad käitusaegset koodi. Nende
-avamine loopback-välisele liiklusele võimaldaks kehtiva JWT saanud ründajal (nt
-Cloudflaredi/Ngroki tunneli kaudu) käivitada protsesside loomise — see on tuntud
-CVE-klass ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+Need marsruudid loovad alamprotsesse või käivitavad käitusaja koodi. Nende eksponeerimine mittesilmusliiklusele võimaldaks ründajal, kes sai kehtiva JWT (nt Cloudflared/Ngrok tunneli kaudu), käivitada protsessi, mis loob — teadaoleva CVE klassi ( [GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj) ).
 
-**Mis on GHSA-fhh6-4qxv-rpqj (rünnakuklass):** haldus-/agendiserver
-avab lõpp-punkti, mis käivitab alamprotsessi (`npm install`, `node`, brauseri,
-puhverserveri, `git`, `tar`, …). Kui sellele lõpp-punktile pääseb ligi hostiväliselt — kuna
-operaator paigutas OmniRoute'i nginxi/Cloudflare'i/Tailscale'i tunneli taha ja JWT
-lekkis või autentimine oli valesti konfigureeritud — muudab ründaja „API kutsumise”
-„hostis käsu käivitamiseks” (koodi kaugkäivitus). OmniRoute takistab seda, jõustades
-**tingimusteta loopback-hosti kontrolli enne mis tahes autentimiskontrolli** igal
-protsessi käivitamist võimaldaval marsruudil: tunneli kaudu lekkinud loa abil ei saa
-ikkagi protsessi käivitamiseni jõuda.
+**Mis on GHSA-fhh6-4qxv-rpqj (ründeklass):** management/agent server paljastab lõpp-punkti, mis käivitab alamprotsessi (`npm install`, `node`, brauser, puhverserver, `git`, `tar`, ...). Kui see lõpp-punkt on juurdepääsetav hostivälisest — kuna operaator pani OmniRoute nginx/Cloudflare/Tailscale tunneli taha ja JWT lekkis või autentimine oli valesti konfigureeritud — muudab ründaja "call a API" käsuks "käivita hostis käsk" (koodi kaugkäivitamine). OmniRoute sulgeb selle, jõustades a** loopback hosti kontrolli tingimusteta, enne mis tahes autentimiskontrolli** , igal kudemisvõimelisel marsruudil: tunneli kohal lekkinud žetoon ei pääse ikka veel kudema.
 
-**Täielik LOCAL_ONLY-komplekt.** Ametlik allikas on
-`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` failis
-`src/server/authz/routeGuard.ts`; allolev tabel kajastab praegust olekut. Värav
-`check-route-guard-membership` loendab kõik `route.ts`-failid
-protsessi käivitamist võimaldavate prefiksite all ja CI nurjub, kui mõni neist ei ole
-klassifitseeritud ainult lokaalseks.
+**Täielik LOCAL_ONLY komplekt.** Autoriteetne allikas on `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` `src/server/authz/routeGuard.ts`; allolev tabel peegeldab hetkeseisu. `check-route-guard-membership` värav loetleb kõik `route.ts` kudemisvõimeliste eesliidete all ja ebaõnnestub CI, kui mõni pole klassifitseeritud ainult kohalikuks.
 
-| Prefiks / muster                                                                                         | Miks see on ainult lokaalne                                                                                             |
-| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP-server — käivitab stdio-sillad ja SSE-käitlejad                                                                     |
-| `/api/cli-tools/runtime/`                                                                                | CLI-tööriista käituskeskkond — käivitab suvalise plugina koodi                                                          |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Tööriistapõhised seadete kirjutajad, mis võivad hostis tööriistade binaarfaile/konfiguratsiooni muuta                   |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Sama `getCliRuntimeStatus()` käivitus nagu kuuel eespool nimetatud sõsarmarsruudil (GHSA-35fw-cv32-2373)                |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI-inventari kontrollid — käivitavad iga tööriista jaoks `command -v` / `--version` (GHSA-35fw-cv32-2373)              |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM-puhverserveri juhtimine (käivitab süsteemse puhverserveri või suunab selle kaudu)                      |
-| `/api/modality-bridge/video/`                                                                            | Rangelt usaldatud loopbacki Video Bridge'i käituskeskkonna kontroll ja sisemine ekstraktsioonisild                      |
-| `/api/services/`                                                                                         | Manustatud teenused (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + käivitus                             |
-| `/dashboard/providers/services/`                                                                         | Pöördpuhverserver manustatud teenuste kasutajaliidestele                                                                |
-| `/api/tunnels/cloudflared`                                                                               | Installib/käivitab cloudflared-binaarfaili                                                                              |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installib/juhib hostis tailscaled-i                                                                                     |
-| `/api/copilot/`                                                                                          | Autentimata LLM-draiver — vaikimisi ainult CLI kaudu                                                                    |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — käivitab MITM-serveri ja muudab DNS-i                                                                     |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy-kuulaja ja süsteemne puhverserver                                                        |
-| `/api/settings/mitm`                                                                                     | Lubab MITM-i pealtkuulamise (süsteemitaseme puhverserveri olek)                                                         |
-| `/api/issue-agent/`                                                                                      | Issue agent — käivitab repositooriumi suhtes kohalikke tööriistu                                                        |
-| `/api/plugins/`, `/api/plugins`                                                                          | Pluginad — laaditakse/käivitatakse `worker_threads` + `child_process` kaudu                                             |
-| `/api/middleware/`                                                                                       | Kasutaja vahevara — laadib/käivitab operaatori koodi protsessi sees                                                     |
-| `/api/system/version`                                                                                    | Automaatne värskendamine (ainult POST; GET/HEAD/OPTIONS on vabastatud) — käivitab `git checkout` + `npm install`        |
-| `/api/db-backups/exportAll`                                                                              | Käivitab ekspordiarhiivi jaoks `tar`                                                                                    |
-| `/api/local/`                                                                                            | Ühe klõpsuga lokaalsed käivitajad (praegu Redis) — käivitavad podmani/dockeri                                           |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom-puhverserveri elutsükkel — käivitab pythoni CLI / saadab signaale PID-le                                       |
-| `/api/jobs`, `/api/jobs/`                                                                                | Tööde käitaja juhtimine — käivitab ajastatud hostipoolseid ülesandeid                                                   |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` enne mandaatide importimist                                                             |
-| `/api/oauth/kiro/auto-import`                                                                            | Loeb hostist Kiro CLI mandaadifailid                                                                                    |
-| `/api/skills/collect/`                                                                                   | Oskuste kogumine — tuvastab/installerib kohalikke tööriistu                                                             |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Oskuse töötleja registreerimine + käivitamine — jõuab liivakonteineri loomiseni (GHSA-jx89)                             |
-| `/api/discovery/`                                                                                        | Kohaliku võrgu/pakkuja avastamise sondid                                                                                |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Loob nähtava graafilise liidesega brauseri + interaktiivseteks sisselogimisteks VNC-seansi                              |
-| `/api/acp/agents`                                                                                        | ACP — avastab ja käivitab kohalikud CLI-agendi binaarfailid                                                             |
-| `/api/resilience/connections`                                                                            | Konto-põhine vastupidavuse JSON (jahutusaeg, kaitselüliti, lukustus). Armatuurlaua HTML ei ole ainult kohalik.          |
-| `/api/providers/cursor/agent-availability`                                                               | Armatuurlaua installimise meeldetuletuse kontroll — käivitab `cursor-agent status --format json`                        |
-| `/api/providers/{id}/login` (regex)                                                                      | Käivitab veebiküpsistega sisselogimiseks nähtava graafilise liidesega Playwright Chromiumi                              |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Käsitsi nähtava graafilise liidesega voog + seansipõhine telefoni/SMS-i automaatne sisselogimine (käivitab Playwrighti) |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Käsitsi Cursor-seansi uuendamine — annab `cursor-agent`-ile tõuke                                                       |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Diagnoosib kohaliku Codex CLI installi (käivitab binaarfaili)                                                           |
+| Eesliide / muster                                                                                        | Miks see on ainult kohalik?                                                                             |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP server — loob stdio sillad + SSE töötlejad                                                          |
+| `/api/cli-tools/runtime/`                                                                                | CLI tööriista käitusaeg — käivitab suvalise pistikprogrammi koodi                                       |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Tööriistapõhised sätete kirjutajad, mis saavad hostis puudutada tööriista binaries/config               |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Sama `getCliRuntimeStatus()` kude mis kuuel ülaltoodud õel-vennal (GHSA-35fw-cv32-2373)                 |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI inventuurisondid — spawn `command -v` / `--version` tööriista kohta (GHSA-35fw-cv32-2373)           |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM puhverserveri juhtimine (spawns/points süsteemi puhverserver)                          |
+| `/api/modality-bridge/video/`                                                                            | Range usaldusväärse loopback-videosilla käitusaegne sond ja sisemine väljatõmbesild                     |
+| `/api/services/`                                                                                         | Manustatud teenused (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn                |
+| `/dashboard/providers/services/`                                                                         | Pöördpuhverserver manustatud teenusele UIs                                                              |
+| `/api/tunnels/cloudflared`                                                                               | Installs/spawns cloudflared binaar                                                                      |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Installs/controls tailscaled hostil                                                                     |
+| `/api/copilot/`                                                                                          | Autentimata LLM draiver — CLI vaikimisi ainult                                                          |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — tekitab MITM serveri + DNS muudatusi                                                      |
+| `/api/tools/traffic-inspector/`                                                                          | Liiklusinspektor — http-puhverserveri kuulaja + süsteemi puhverserver                                   |
+| `/api/settings/mitm`                                                                                     | Lubab MITM pealtkuulamise (süsteemitaseme puhverserveri olek)                                           |
+| `/api/issue-agent/`                                                                                      | Emissiooniagent — loob repo vastu kohalikud tööriistad                                                  |
+| `/api/plugins/`, `/api/plugins`                                                                          | Pluginad — load/execute + `worker_threads` `child_process`                                              |
+| `/api/middleware/`                                                                                       | Kasutaja vahevara — loads/executes operaatorikood on protsessis                                         |
+| `/api/system/version`                                                                                    | Automaatne värskendamine (ainult POST ; GET/HEAD/OPTIONS vaba) — tekitab `git checkout` + `npm install` |
+| `/api/db-backups/exportAll`                                                                              | Koeb `tar` ekspordiarhiivi jaoks                                                                        |
+| `/api/local/`                                                                                            | 1 klõpsuga kohalikud kanderaketid (Redis täna) — loob podman/docker                                     |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Pearuumi puhverserveri elutsükkel — sünnitab python CLI / signaalid PID                                 |
+| `/api/jobs`, `/api/jobs/`                                                                                | Job Runner Control — teostab ajastatud hostipoolset tööd                                                |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` enne krediitide importimist                                             |
+| `/api/oauth/kiro/auto-import`                                                                            | Loeb hostist Kiro CLI mandaadifaile                                                                     |
+| `/api/skills/collect/`                                                                                   | Oskuste kogumine — detects/installs kohalikud tööriistad                                                |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Oskuste töötleja registreerimine + täitmine — jõudmine liivakasti konteinerisse (GHSA-jx89)             |
+| `/api/discovery/`                                                                                        | Kohalikud network/provider avastussondid                                                                |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Loob interaktiivsete sisselogimiste jaoks äkilise brauseri + VNC seansi                                 |
+| `/api/acp/agents`                                                                                        | ACP — avastab ja loob kohalikud CLI agendi binaarfailid                                                 |
+| `/api/resilience/connections`                                                                            | Kontopõhine vastupidavus JSON (jahutus, katkestus, lukustus). Armatuurlaud HTML ei ole ainult kohalik.  |
+| `/api/providers/cursor/agent-availability`                                                               | Armatuurlaua installimise-nukistamise kontroll — kudeb `cursor-agent status --format json`              |
+| `/api/providers/{id}/login` (regex)                                                                      | Käivitab veebiküpsisefailide kaudu sisselogimiseks mõeldud Playwright Chromiumi                         |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Manuaalne peavoolu + seansipõhine phone/SMS automaatne sisselogimine (spawns Playwright)                |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Manuaalne Cursor seansi uuendamine — lükkab `cursor-agent`                                              |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Diagnoosib kohaliku Codex CLI installi (loob binaarfaili)                                               |
 
-**Rikkumise korral vastus:** `403 LOCAL_ONLY`
+**Vastus rikkumisele:** `403 LOCAL_ONLY`
 
-#### Manage-ulatuse erand
+#### Halda-ulatus-välja
 
-Alamhulgale LOCAL_ONLY-teedest MAY pääseda ka loopback-välisest aadressist ainult juhul, kui päring sisaldab `Authorization: Bearer <api-key>` päist, mille metaandmed sisaldavad `manage`-ulatust (või `admin`-ulatust). Erand on iga tee puhul selgesõnaliselt lubatud `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` kaudu, nii et mis tahes uue LOCAL_ONLY-tee vaikekäitumine jääb rangelt loopback-põhiseks. Autentimata päringud ja mitte-manage-võtmetega päringud lükatakse endiselt tagasi vastusega `403 LOCAL_ONLY`.
+LOCAL_ONLY -teede alamhulgale MAY pääseb juurde ka mitte-tagasisilmuse kaudu siis ja ainult siis, kui päring kannab `Authorization: Bearer <api-key>` mille metaandmed sisaldavad `manage` ulatust (või `admin`). Väljalõikamine on `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` kaudu otseselt rajatud, nii et iga uue LOCAL_ONLY tee vaikeseade jääb rangeks tagasilülituseks. Autentimata päringud ja mittehaldusvõtmetega päringud lükatakse endiselt tagasi `403 LOCAL_ONLY` abil.
 
-Praegu on ainus erandi alla kuuluv prefiks `/api/mcp/`. `/api/cli-tools/runtime/` ja
-`/api/services/` on teadlikult välja jäetud, sest need võivad käivitada suvalisi
-alamprotsesse (`npm install`, `node`), mis on täpselt see CVE-klass, mille vältimiseks
-LOCAL_ONLY-tase eksisteerib.
+Vaikimisi möödapääsetavad eesliited on `/api/mcp/` ja `/api/resilience/connections`. Teine on kirjutuskaitstud JSON, mis ei tekita midagi; see on loendis, nii et Resilience > Connections laadib kaugarmatuurlauale (hallatud eksemplar, tunnel, pöördpuhverserver) autentitud armatuurlaua seansi või `manage` klahvi jaoks, samas kui anonüümne kaughelistaja saab ikkagi `403 LOCAL_ONLY` — ka siis, kui `requireLogin=false`. Installimine, mis salvestas oma loendi, säilitab selle loendi. `/api/cli-tools/runtime/` ja `/api/services/` on tahtlikult välistatud, kuna need võivad tekitada suvalisi alamprotsesse (`npm install`, `node`), mis on täpne CVE klass, mille vältimiseks LOCAL_ONLY tasand on olemas.
 
-**#7895 — `mcp:connect` kitsas ulatus:** `/api/mcp/` erand aktsepteerib ALSO
-Bearer-võtit, millel on kitsas `mcp:connect`-ulatus
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), mida kontrollitakse
-`hasMcpConnectOrManageScope()` kaudu failis `src/server/authz/policies/management.ts`.
-See kehtib ONLY `/api/mcp/` puhul — `mcp:connect` ei anna õigusi ühelgi teisel
-haldusmarsruudil (sealhulgas ühelgi teisel LOCAL_ONLY-erandi prefiksil, kui selline
-kunagi lisatakse) ning see on teadlikult välja jäetud väärtusest
-`MANAGEMENT_API_KEY_SCOPES`. Võti, millel on `manage`/`admin`, läbib erandi
-endiselt täpselt nagu varem; `mcp:connect` on väiksemate õigustega alternatiiv
-kaug-MCP-kutsujatele, kes ei peaks vajama laiaulatuslikku haldusjuurdepääsu.
+#### Lugemismeetodi erandid
 
-| Päring                                                        | Tee                        | Tulemus                    |
-| ------------------------------------------------------------- | -------------------------- | -------------------------- |
-| Loopback-väline, ilma Bearerita                               | `/api/mcp/*`               | 403 LOCAL_ONLY             |
-| Loopback-väline, Bearer koos `manage`-ulatusega               | `/api/mcp/*`               | Lubatud                    |
-| Loopback-väline, Bearer koos `mcp:connect`-ulatusega          | `/api/mcp/*`               | Lubatud                    |
-| Loopback-väline, Bearer ilma `manage`/`mcp:connect`-ulatuseta | `/api/mcp/*`               | 403 LOCAL_ONLY             |
-| Loopback-väline, Bearer koos `mcp:connect`-ulatusega          | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY             |
-| Loopback-väline, Bearer koos `manage`-ulatusega               | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY             |
-| Loopback, mis tahes/ilma Bearerita                            | mis tahes LOCAL_ONLY       | Lubatud (kontroll läbitud) |
+Mõned LOCAL_ONLY -teed on vabastatud ainult `GET`/`HEAD`/`OPTIONS` jaoks, täpse tee (`LOCAL_ONLY_API_GET_EXEMPTIONS`) järgi: lugemine ei tekita kudesid, kirjutamismeetodid seda teevad. `GET /api/skills/executions` on üks neist, — see loetleb salvestatud täiteridad (kaks SQLite lugemist), nii et Skills > Executions laaditakse kaugarmatuurlauale, samas kui `POST /api/skills/executions`, mis käivitab oskusi ja jõuab liivakasti konteineri kudemiseni, jääb ainult loopbackiks. Vabastatud lugemine langeb MANAGEMENT tasemele.
 
-#### Juhised operaatorile ja auditeerimine
+**#7895 — `mcp:connect` kitsas ulatus:** `/api/mcp/` carve-out ALSO aktsepteerib kandevõtit, millel on kitsas `mcp:connect` ulatus (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), mida kontrollitakse `hasMcpConnectOrManageScope()` kaudu in `src/server/authz/policies/management.ts`. Selle ulatus on `/api/mcp/` ONLY — `mcp:connect` ei anna mitte midagi ühelgi teisel haldusmarsruudil (kaasa arvatud iga teine LOCAL_ONLY möödaviigu eesliide, kui see peaks kunagi olema lisatud) ja see jäetakse `MANAGEMENT_API_KEY_SCOPES` teadlikult välja. Võtmega `manage`/`admin` läbib väljalõike täpselt nagu varem; `mcp:connect` on madalama privileegiga alternatiiv ainult kaug-MCP-helistajatele, kes ei peaks vajama laia haldamise juurdepääsu.
 
-Kui käitate OmniRoute’i pöördproksi või tunneli taga (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok), kaitseb loopback-kontroll endiselt ülaltoodud käivitamisvõimelisi
-marsruute — päring, mille kliendiaadress ei ole loopback, lükatakse tagasi vastusega
-`403 LOCAL_ONLY` **enne autentimise käivitamist**, seega ei pääse lekkinud JWT
-käivitamiseni. Operaatori kohustuseks jääb veel kaks asja:
+| Taotlus                                             | Tee                        | Tulemus            |
+| --------------------------------------------------- | -------------------------- | ------------------ |
+| Non-loopback, ilma kandjata                         | `/api/mcp/*`               | 403 LOCAL_ONLY     |
+| Non-loopback, kandja `manage` ulatusega             | `/api/mcp/*`               | Luba               |
+| Non-loopback, kandja `mcp:connect` ulatusega        | `/api/mcp/*`               | Luba               |
+| Tagasisilmuseta, kandja ilma `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY     |
+| Non-loopback, kandja `mcp:connect` ulatusega        | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY     |
+| Non-loopback, kandja `manage` ulatusega             | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY     |
+| Loopback, any/no Bearer                             | mis LOCAL_ONLY             | Luba (värav läbib) |
 
-- **Ärge „parandage” 403-viga kliendi IP-aadressi loopback-aadressiks võltsimisega.** `X-Forwarded-For: 127.0.0.1` määramine või puhverserver, mis kirjutab lähteaadressiks loopback-aadressi, avab uuesti täpselt selle RCE-klassi, mille see tasand sulgeb. Avaldage puhverserveri kaudu juhtpaneel/API — mitte kunagi spawn-võimelisi marsruute.
-- **Hoidke manage-ulatusega möödaviik minimaalne.** Möödaviidav on ainult `/api/mcp/` ja sedagi ainult `manage`-ulatusega API-võtme korral. `SPAWN_CAPABLE_PREFIXES`-eid ei saa kunagi möödaviiguloendisse lisada — zod-skeem lükkab need tagasi ning `isLocalOnlyBypassableByManageScope` keelab need käitusajal (kaitse süviti), mida juhtpaneel tähendab fraasiga „ei saa möödaviidavaks muuta”. Sama keeluloend sisaldab ka mõnda `LOCAL_ONLY` marsruuti, mis ei käivita protsesse, kuid millele ei tohi samuti kunagi kaugelt ligi pääseda — `/api/oauth/kiro/auto-import` (loeb hosti kohalikest Kiro mandaatide failidest), `/api/discovery/` ja `/api/issue-agent/`. Käitusaja hetktõmmise laadija eemaldab sellised kirjed ka salvestatud seadistuste reast ning pärand-JSON-i import (`/api/settings/import-json`) ei kirjuta möödaviiguvõtmeid kunagi. Iga `LOCAL_ONLY_API_PREFIXES`-i kirje peab olema kas keeluloendis või üle vaadatud kui möödaviiguks sobiv (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Dünaamilise segmendi ja staatilise tee spawn-võimelisi marsruute `/api/providers/` all (nt `/login`, `/refresh-cursor`) katab regulaaravaldisel põhinev `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` kaaslane failis `src/shared/constants/spawnCapablePrefixes.ts`, mitte lame `SPAWN_CAPABLE_PREFIXES`-i massiiv — lame massiiv peaks nende tabamiseks katma kogu `/api/providers/` prefiksi, muutes marsruudipuu liiga laialt keelatuks, kuigi kaugjuhtpaneelid kasutavad seda õiguspäraselt teenusepakkujate CRUD-i jaoks.
+#### Operaatori juhised ja auditeerimine
 
-**Juurdepääsu auditeerimine** — veendumaks, et hostiväliselt ei jõuta nende marsruutideni:
+Kui käivitate OmniRoute pöördpuhverserveri või tunneli (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok) taga, kaitseb tagasisilmuskontroll ikkagi — kohal olevaid kudemisvõimelisi marsruute. Päring, mille kliendi aadress on mitteloopback, lükatakse `403 LOCAL_ONLY` tagasi.** enne autentimise käivitamist** , nii et lekkinud JWT ei jõua kudemiseni. Kaks operaatori kohustust jäävad:
 
-- Avage **Authorization Inventory** aadressil `/dashboard/settings/security`: see renderdab aktiivse `LOCAL_ONLY`-prefiksite loendi, millised prefiksid on möödaviidavad, ning kompileerimisaja spawn-võimeliste marsruutide hulga („ei saa möödaviidavaks muuta”).
-- Otsige pöördpuhverserveri / juurdepääsulogidest ülaltoodud prefikseid koos mitteloopback-kliendiaadressiga. Kui mõni selline päring sai `200` vastuseks `403 LOCAL_ONLY` asemel, tähendab see, et puhverserver varjab tegelikku kliendi IP-aadressi — parandage puhverserver.
-- `403 LOCAL_ONLY` OmniRoute'i logides ühe sellise tee kohta tähendab, et kaitse töötab ettenähtult, mitte viga, mida tuleks maha suruda.
+- **Ärge "parandage" 403, võltsides kliendi IP tagasisilmusena.** Kui seadistate `X-Forwarded-For: 127.0.0.1` või puhverserveri, mis kirjutab lähteaadressi ümber silmusel, avatakse uuesti täpselt see RCE klass, mille see tasand sulgeb. Näidake dashboard/API puhverserveri kaudu — mitte kunagi kudemisvõimelisi marsruute.
+- **Hoidke haldusulatusest möödaviigu minimaalne.** Vaikimisi on möödapääsetavad ainult `/api/mcp/` ja kirjutuskaitstud `/api/resilience/connections` ning ainult `manage` -scoped API võtmega või autentitud armatuurlaua seansiga. `SPAWN_CAPABLE_PREFIXES` ei saa kunagi lisada möödaviiguloendisse. — zod-skeem lükkab need tagasi ja `isLocalOnlyBypassableByManageScope` keelab need käitusajal (defence-in-depth), mida armatuurlaud tähendab väljendiga "ei saa mööda minna". Samas keelamisloendis on ka mõned LOCAL_ONLY marsruudid, mis ei ilmu, kuid ei tohi olla kunagi kaugjuurdepääsetavad, kas — `/api/oauth/kiro/auto-import` (loeb hosti kohalikke Kiro mandaadifaile), `/api/discovery/` ja `/api/issue-agent/`. Käitusaegne hetktõmmise laadija eemaldab sellised kirjed ka salvestatud sätete realt ja pärand JSON import (`/api/settings/import-json`) ei kirjuta kunagi möödaviiguklahve. Iga `LOCAL_ONLY_API_PREFIXES` kirje peab olema kas keelamisloendis või üle vaadatud kui möödasõidukõlbulik (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Dünaamilise segmendi ja staatilise tee kudemisvõimelised marsruudid `/api/providers/` all (nt `/login`, `/refresh-cursor`) on kaetud regexil põhineva `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` kaaslasega `src/shared/constants/spawnCapablePrefixes.ts`, mitte lame `SPAWN_CAPABLE_PREFIXES` massiiviga — lame massiiv peaks katma kogu nende püüdmise `/api/providers/` marsruudi eesliide-bro. õiguspäraselt kasutada teenusepakkuja CRUD jaoks.
 
-#### Kaugelt ligipääsetavad marsruudid koos kutsumiskoha sondi väravaga
+**Auditi juurdepääs** — kontrollimaks, et miski väljaspool hosti ei jõuaks nendele marsruutidele:
 
-Mõned marsruudid peavad jääma kaugjuhtpaneelilt ligipääsetavaks, kuid käitavad hostipoolset sondi
-(`which <binary>`, `<binary> --version`, `tailscale status --json`) kohalike kutsujate korral.
-Need ei ole `GET`-i puhul `LOCAL_ONLY`; selle asemel loeb töötleja usaldusväärse partneri otsuse
-funktsiooniga `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ja käivitab sondi ainult
-`loopback` / `lan` kutsujate korral. `remote` kutsuja saab sama kujuga vastuse, mis koostatakse
-protsesse mittekäivitavatest allikatest (püsiv olek, seadistused, fs-kontrollid), ning mille lipuks on
-`probed: false`.
+- Avage** Volituste loend** `/dashboard/settings/security` puhul: see muudab reaalajas LOCAL_ONLY eesliidete loendi, millest saab mööda minna, ja kompileerimisaja kudemisvõimega ("ei saa mööda minna") seatud.
+- Koostage ülaltoodud eesliidete pöördpuhverserveri / juurdepääsu logid, mis on seotud tagasilülituseta kliendi aadressiga. Iga selline tabamus, mis tagastas `403 LOCAL_ONLY` asemel `200` tähendab, et puhverserver varjab tegelikku klienti. IP — parandab puhverserveri.
+- `403 LOCAL_ONLY` OmniRoute logides ühele neist teedest näitab, et valvur töötab nii, nagu ette nähtud, mitte tõrge, mida tuleb maha suruda.
 
-| Marsruut                                                                 | Kaugkutsujate korral vahele jäetav sond                                                       |
-| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`             | CLI käituskeskkonna sond (`allowLocalRuntimeProbe`) ja CLI-varuvariandi protsessi käivitamine |
-| `GET /api/headroom/status`                                               | `which headroom` ja Pythoni `--version`-sondid                                                |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check`         | `which tailscale`, `tailscale status/funnel --json`, `which brew`                             |
-| `GET /api/tunnels/cloudflared` (GET-i puhul `LOCAL_ONLY`-ist vabastatud) | `which cloudflared` PATH-i otsing                                                             |
+#### Kaugjuurdepääsetavad marsruudid kõnekoha sondiväravaga
 
-Uus lugemismarsruut, mis sondib hosti, järgib sama mustrit või liigitatakse otse
-`LOCAL_ONLY`-iks.
+Mõned marsruudid peavad jääma kaugjuhtimispaneelilt ligipääsetavaks, kuid käivitama kohalike helistajate jaoks hostipoolse sondi (`which <binary>`, `<binary> --version`, `tailscale status --json`). Need ei ole LOCAL_ONLY `GET` jaoks; selle asemel loeb töötleja usaldusväärse partneri otsuse `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) abil ja käivitab proovi ainult `loopback` / `lan` helistajate jaoks. `remote` helistaja saab sama vastusekuju, mis on loodud mitte-kudemisallikatest (püsiv olek, sätted, fs-kontrollid), märgistatud `probed: false`.
 
-### 2. tasand — ALWAYS_PROTECTED
+| Marsruut                                                         | Kaughelistajate sond jäeti vahele                                 |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI käitusaegne sond (`allowLocalRuntimeProbe`) ja CLI-varumine   |
+| `GET /api/headroom/status`                                       | `which headroom` ja python `--version` sondid                     |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew` |
+| `GET /api/tunnels/cloudflared` (GET-vabastus LOCAL_ONLY)         | `which cloudflared` PATH                                          |
 
-**Jõustatakse funktsiooniga:** `isAlwaysProtectedPath(path)` → jätab vahele `requireLogin=false` möödaviigu  
-**Möödaviik:** puudub, kui `requireLogin=false`; JWT on alati nõutud
+Uus lugemismarsruut, mis uurib peremeest, järgib sama mustrit või on klassifitseeritud LOCAL_ONLY.
 
-Need marsruudid on hävitavad või pöördumatud. Nende lubamine „paroolita”
-paigalduses tähendaks, et iga sama kohtvõrgu kasutaja võiks andmebaasi tühjendada või
-serveriprotsessi lõpetada.
+### 2. tase — ALWAYS_PROTECTED
 
-| Path                                      | Põhjus                                                                 |
+**Jõustab:** `isAlwaysProtectedPath(path)` → jäta `requireLogin=false` möödaviigu vahele** Möödasõit:** Puudub, kui `requireLogin=false`; JWT on alati nõutav
+
+Need teed on hävitavad või pöördumatud. Kui lubate neil installida ilma paroolita, võib igaüks sama LAN andmebaasi kustutada või serveri protsessi tappa.
+
+| Tee                                       | Põhjus                                                                 |
 | ----------------------------------------- | ---------------------------------------------------------------------- |
 | `/api/shutdown`                           | Lõpetab serveriprotsessi                                               |
-| `/api/settings/database`                  | Andmebaasi eksport, import ja tühjendamine                             |
-| `/api/db-backups`                         | Täieliku andmebaasi varukoopiaarhiivi juurdepääs                       |
-| `/api/settings/export-json`               | Ekspordib kogu seadistuste bloki (sh saladused)                        |
-| `/api/settings/import-json`               | Asendab kogu seadistuste bloki                                         |
-| `/api/providers/health-autopilot/actions` | Käivitab autopiloodi parandustoimingud                                 |
-| `/api/settings/obsidian`                  | Loob mis tahes varamu juure jaoks korduvkasutatavad WebDAV-i mandaadid |
-| `/api/relay/tokens`                       | Loob, loetleb, muudab ja tühistab releemärke                           |
+| `/api/settings/database`                  | Andmebaasi eksport, import ja kustutamine                              |
+| `/api/db-backups`                         | Täielik juurdepääs andmebaasi varundusarhiivile                        |
+| `/api/settings/export-json`               | Ekspordib kogu seadete blobi (sh saladused)                            |
+| `/api/settings/import-json`               | Asendab täieliku seadete blobi                                         |
+| `/api/providers/health-autopilot/actions` | Täidab autopiloodi parandustoiminguid                                  |
+| `/api/settings/obsidian`                  | Rahapajab korduvkasutatavaid WebDAV krediite mis tahes võlvjuure jaoks |
+| `/api/relay/tokens`                       | Rahastab, loetleb, muudab ja tühistab edastusmärke                     |
 | `/api/agent-skills/generate`              | Kirjutab ja kärbib hostis oskuste kaustu                               |
-| `/api/skills/marketplace/install`         | Installib igale võtmele globaalse oskuse                               |
-| `/api/skills/skillssh/install`            | Installib igale võtmele globaalse oskuse                               |
-| `/api/cli-tools/apply`                    | Kirjutab operaatori hosti CLI konfiguratsiooni ümber                   |
+| `/api/skills/marketplace/install`         | Installib iga võtme jaoks globaalse oskuse                             |
+| `/api/skills/skillssh/install`            | Installib iga võtme jaoks globaalse oskuse                             |
+| `/api/cli-tools/apply`                    | Kirjutab ümber operaatori hosti CLI konfiguratsiooni                   |
 | `/api/cli-tools/guide-settings`           | Kirjutab juhendipõhiseid CLI konfiguratsioonifaile                     |
 | `/api/cli-tools/hermes-agent-settings`    | Kirjutab Hermese agendi konfiguratsiooni                               |
-| `/api/cli-tools/backups`                  | Taastab ja kustutab CLI konfiguratsiooni varukoopiaid                  |
+| `/api/cli-tools/backups`                  | Taastab ja kustutab CLI konfiguratsiooni varukoopiad                   |
 | `/api/log-export`                         | Saadab kõnelogid konfigureeritud sihtkohta                             |
-| `/api/restart`                            | Taaskäivitab serveriprotsessi                                          |
+| `/api/restart`                            | Taaskäivitab serveri protsessi                                         |
 
-**Rikkumise vastus:** `401 Authentication required`
+**Vastus rikkumisele:** `401 Authentication required`
 
-`/api/settings/obsidian` hõlmab oma alamteed `/webdav`: `POST` suunab WebDAV-failiteenuse —
-mida teenindab enne Next.js-i kohandatud Node'i kiht ja mis asub väljaspool seda konveierit —
-kutsuja valitud juurele ning tagastab vastloodud Basic-mandaadid, `DELETE` roteerib need ja
-ülemise taseme `POST` salvestab Obsidiani REST API loa. GHSA-62vw varjas ainult parooli
-`GET`-iga avaldamise; väljastamine oli endiselt tõrketaluvuse avatud tasemel
-(GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` keeldub lisaks varamust, mis on
-andmekataloog, asub selle sees või sisaldab seda.
+`/api/settings/obsidian` katab oma `/webdav` alase: `POST` osutab WebDAV failiteenusele — mida teenindab kohandatud sõlmekiht, enne Next.js, väljaspool seda konveieri — helistaja valitud juurtes ja kordab värskelt vermitud põhimandaate, `DELETE` pöörab neid ja ülem- `POST` REST API Obsidian. GHSA-62vw maskeeris ainult `GET` parooli paljastamise; emissioon oli endiselt tõrkeotsingu tasemel (GHSA-7pq4-8pvv-rx7r). Lisaks keeldub `enableObsidianVaultSync()` hoidlast, mis on, asub sees või sisaldab andmekataloogi.
 
-#### Mandaatide eksport ja taastamine on ainult operaatori ülesanded
+#### Mandaatide eksportimine ja taastamine toimub ainult operaatori poolt
 
-Ülaltoodud tase otsustab ainult, kas mõni mandaat on nõutav. Salvestatud mandaatide
-allalaadimise marsruudid lisavad töötlejas teise kontrolli: `GET /api/settings/export-json`
-(dekrüptitud teenusepakkuja ühendused ja töötlemata API-võtmed), `GET /api/db-backups/export`
-(SQLite-fail) ja `GET /api/db-backups/exportAll` (täielik arhiiv) kutsuvad välja
-`requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). See aktsepteerib
-juhtpaneeli seanssi, kohalikku CLI-subjekti või sisselogimise keelatud eksemplari ning vastab
-`403`, kui tegemist on mis tahes ulatusega API-võtmetega (sh `manage` ja `admin`) või
-`oma_`-juurdepääsutokenitega. Hävitavad vasted järgivad sama piiri:
-`POST /api/db-backups/import` (üles laaditud `.sqlite`, sh `dryRun=true`),
-`POST /api/db-backups` (salvestatud varukoopia taastamine ID järgi) ja
-`POST /api/settings/import-json` (pärand-JSON-i taastamine) asendavad aktiivse andmebaasi või
-kogu seadistuste/ühenduste/API-võtmete kogumi, seega ei saa ka masinamandaat neid käivitada.
-Taastepunktide hävitamisel kehtib sama piir:
-`DELETE /api/db-backups` (puhastamine — säilita viimased N / eemalda vanemad kui D päeva) ja
-`PATCH /api/db-backups` (säilitusseaded), sest püsivat säilitust rakendab täpselt
-`cleanupDbBackups()` pärast iga automaatset varukoopiat (`src/lib/db/backup.ts`), mistõttu
-masinamandaat, millega saaks salvestada `keepLatest: 1`, kärbiks järgmisel hetktõmmisel kõik.
-Varukoopiate loetlemine ja loomine (`GET`/`PUT /api/db-backups`) kasutavad endiselt tavalist
-halduse autentimist. Sünkroonimislubade väljastamine (`POST /api/sync/tokens`) kasutab sama
-abilist ning lisaks usaldatud loopbacki siseteenuse tokenit.
+Ülaltoodud tase otsustab ainult selle, kas _mõned_ mandaati on vaja. Marsruudid, mis laadivad alla salvestatud mandaadid, lisavad töötlejas teise kontrolli: `GET /api/settings/export-json` (dekrüpteeritud pakkuja ühendused ja töötlemata API -võtmed), `GET /api/db-backups/export` ( SQLite -fail) ja `GET /api/db-backups/exportAll` (täielik arhiiv) kutsuvad `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). See aktsepteerib armatuurlaua seanssi, kohalikku CLI subjekti või eksemplari, mille sisselogimine on keelatud, ning vastab mis tahes ulatusega `403` API klahvidele (sh `manage` ja `admin`) ja `oma_` -pääsulubadele. Destruktiivsetel vastetel on sama piir: `POST /api/db-backups/import` (üleslaaditud `.sqlite`, `dryRun=true` kaasa arvatud), `POST /api/db-backups` (salvestatud varukoopia taastamine ID järgi) ja `POST /api/settings/import-json` (pärandi JSON taastamine) asendavad reaalajas andmebaasi või kogu settings/connections/API-key komplekti, nii et ka masina mandaat ei saa neid käivitada. Taastepunktide hävitamisel on sama piir: `DELETE /api/db-backups` (puhastamine — hoiab uusima N / D-päevast vanemad) ja `PATCH /api/db-backups` (säilitusseaded), sest püsisäilitus on täpselt see, mida `cleanupDbBackups()` rakendab pärast iga automaatset varundamist (`src/lib/db/backup.ts`), nii et masina mandaat, mis võiks `keepLatest: 1` salvestada, kärbib kõik järgmisel. Loetlemine ja varukoopiate loomine (`GET`/`PUT /api/db-backups`) säilitavad tavalise haldusautentimise. Sünkroonimisloa väljastamine (`POST /api/sync/tokens`) kasutab sama abimeest ja usaldusväärset siseteenuse luba.
 
-### Värske installi alglaadimine on ainult loopbacki kaudu — tegeliku partneri, mitte `Host`-i järgi
+### Värskelt installitud buutstrap on ainult loopback — tõelise kaaslase poolt, mitte `Host`
 
-Kui haldusparooli pole konfigureeritud (ja puudub `INITIAL_PASSWORD`), hoiab `isAuthRequired()`
-failis `src/shared/utils/apiAuth.ts` anonüümse alglaadimise avatuna **ainult loopbacki
-partneritele**. Loopback määratakse usaldatud partnerisignaalide põhjal järgmises järjekorras:
-tokeniga märgistatud tegelik TCP-partner
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, mida poliitika näeb), konveieri enda
-`AUTHZ_HEADER_PEER_LOCALITY` otsus (mida marsruudikäitlejad näevad ja mida usaldatakse ainult
-siis, kui `OMNIROUTE_PEER_STAMP_TOKEN` on määratud) või otsene helistaja tegeliku sokli
-partner. `Host` / `nextUrl.hostname`-i ei arvestata kunagi ning esimese parooli kirjutamine
-(`POST /api/settings/require-login`) allub samale piirangule, mitte ei ole avatud igale
-võrgupartnerile (GHSA-7pq4-8pvv-rx7r). `managementPolicy` edastab oma `peerContext`-i
-otsuse sõnaselgelt allapoole, mistõttu ALGSE (enne eemaldamist) päringu päised ei otsusta seda.
+Kui haldusparool pole konfigureeritud (ja `INITIAL_PASSWORD`), hoiab `isAuthRequired()` `src/shared/utils/apiAuth.ts` anonüümse alglaadimise avatuna** ainult loopback eakaaslaste jaoks** . Loopback otsustatakse usaldusväärsete partnerite signaalide põhjal järgmises järjekorras: märgiga tembeldatud tõeline TCP partner (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, mida näeb poliitika), torujuhtme enda `AUTHZ_HEADER_PEER_LOCALITY` otsus (mida näevad marsruudi töötlejad, usaldusväärne ainult siis, kui `OMNIROUTE_PEER_STAMP_TOKEN` on seadistatud) või otsehelistajatele mõeldud tõeline pistikupesa partner. `Host` / `nextUrl.hostname` ei konsulteerita kunagi ja esimese parooli kirjutamine (`POST /api/settings/require-login`) on pigem sama piirangu all kui avatud kõigile võrgukaaslastele (GHSA-7pq4-8pvv-rx7r). `managementPolicy` edastab omaenda `peerContext` otsuse selgesõnaliselt, nii et ORIGINAL (ribaeelse) päringu päised ei otsusta seda kunagi.
 
-### Tase 3 — MANAGEMENT (vaikimisi)
+### Tase 3 — MANAGEMENT (vaikeseade)
 
-Kõik muud haldusmarsruudid. Autentimine on nõutav, välja arvatud juhul, kui on
-konfigureeritud `requireLogin=false`. CLI-tokenid saavad neid marsruute autentida
-(loopback + kehtiv HMAC).
+Kõik muud juhtimisviisid. Vajalik on autentimine, kui `requireLogin=false` pole konfigureeritud. CLI märgid saavad neid marsruute autentida (loopback + valid HMAC).
 
 ## Hindamisjärjekord
 

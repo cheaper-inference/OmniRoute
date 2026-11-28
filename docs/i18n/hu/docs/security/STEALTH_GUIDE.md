@@ -4,11 +4,9 @@
 
 ---
 
-> **Hiteles forrás:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Legutóbbi frissítés:** 2026-09-02 — v3.8.51
-> **Célközönség:** Szolgáltatóspecifikus rejtőzködő integrációkat karbantartó mérnökök.
+> **Az igazság forrása:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Közönség:** Szolgáltató-specifikus lopakodó integrációkat fenntartó mérnökök.
 
-Az OmniRoute olyan szolgáltatókkal integrálódik, amelyek peremhálózatai aktívan ujjlenyomatozzák a nem hivatalos klienseket (TLS JA3/JA4, fejlécek sorrendje, JSON-törzs szerkezete, integritási tokenek). Ez az oldal az OmniRoute által biztosított rejtőzködési felületeket és azok megvalósítási helyét dokumentálja.
+OmniRoute integrálódik azokkal a szolgáltatókkal, amelyek élei aktívan ujjlenyomatot vesznek a nem hivatalos ügyfelekről (TLS JA3/JA4, fejlécek rendezése, JSON testforma, integritási tokenek). Ez az oldal a OmniRoute által feltárt lopakodó felületeket és azok megvalósítási helyét dokumentálja.
 
 ## Jogi és etikai tájékoztató
 
@@ -75,65 +73,68 @@ változhat. Mielőtt egy upstream böngészővel való egyenértékűséget áll
 
 ---
 
-## Claude Code lopakodó csomag
+## Claude Code Stealth Bundle
 
-Amikor a `cliCompatMode` be van kapcsolva, az OmniRoute úgy alakítja át a kimenő Claude-kéréseket, hogy azok megkülönböztethetetlenek legyenek a `claude-cli` forgalmától. Három modul működik együtt:
+Amikor `cliCompatMode` be van kapcsolva, OmniRoute átformálja a kimenő Claude kéréseket, így azok megkülönböztethetetlenek `claude-cli` forgalomtól. Három modul működik együtt:
 
 ### `claudeCodeFingerprint.ts`
 
-Kiszámítja a számlázási fejlécbe ágyazott, 3 karakteres `cc_version` ujjlenyomatot:
+Kiszámítja a számlázási fejlécbe ágyazott 3 karakteres `cc_version` ujjlenyomatot:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (beégetett érték; megegyezik a hivatalos klienssel)
-- Bemenetek: az első felhasználói üzenet szövegének 4., 7. és 20. indexű karaktere + a verziókarakterlánc
+- `FINGERPRINT_SALT = "59cf53e54c78"` (keménykódolt; megfelel a hivatalos kliensnek)
+- Bemenetek: karakterek az első felhasználói üzenet szövegének 4., 7., 20. indexénél + version string
 - Kimenet: 3 karakteres hexadecimális előtag
 
-### `claudeCodeCCH.ts` (kliensoldali tartalomkivonat)
+### `claudeCodeCCH.ts` (Client Content Hash)
 
-Szerveroldali integritás-ellenőrzés, amelyet a hivatalos Claude Code CLI a Bun/Zig segítségével számít ki. Az OmniRoute ezt az `xxhash-wasm` használatával valósítja meg újra:
+Szerveroldali integritás-ellenőrzés a hivatalos Claude kódban, CLI Bun/Zig. OmniRoute `xxhash-wasm` újraimplementációin keresztül számít ki:
 
-1. A törzs szerializálása `cch=00000;` helyőrzővel
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Nullákkal 5 karakteresre feltöltött, kisbetűs hexadecimális érték
-4. A `cch=00000;` lecserélése a kiszámított tokenre
+1. A törzs sorba rendezése `cch=00000;` helyőrzővel
+2. Építse fel a hash nézetet két egyszerű szöveges helyettesítéssel, ebben a sorrendben (`hashView()`):
+   - A `/"model":"[^"]*"/g` minden egyezése `"model":""` — lesz, az egyezés az első `"` nél megáll, így a kihagyott idézőjellel (`"model":"a\"b"`) rendelkező érték csak addig az idézetig ürül ki, ahogyan az ügyfél is teszi
+   - `/"max_tokens":\d+,|,?"max_tokens":\d+/g` minden egyezése eltávolítva — csak numerikus értékeket, bármilyen mélységben
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Nulla párnázott 5 karakteres kisbetűs hatszögletű
+5. Cserélje ki a `cch=00000;` a számított tokenre
 
-Konstansok:
+Állandók:
 
-- Seed: `0x6e52736ac806831e`
+- Seed: `0x4d659218e32a3268` (egyezik a 2.1.252 és 2.1.322 Claude kód visszacsatolási rögzítésével)
 - Minta: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Egy Unicode **zéró szélességű összekötőt** (`U+200D`) szúr az „érzékeny” kliensnevek első karaktere után, hogy a felsőbb rétegbeli szűrők ne tudjanak rájuk grep-keresést végezni. Alapértelmezett szólista:
+Unicode-ot szúr be** nulla szélességű asztalos** (`U+200D`) az "érzékeny" kliensnevek első karaktere után, így az upstream szűrők nem tudják grep őket. Alapértelmezett szólista:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Alkalmazási helyek: `system` blokkok, az összes `messages[].content`, valamint a `tools[].description` / `tools[].function.description`. Az üzemeltető a `setSensitiveWords()` segítségével felülbírálhatja.
+Alkalmazható: `system` blokkok, minden `messages[].content` és `tools[].description` / `tools[].function.description`. Kezelő felülírható `setSensitiveWords()` keresztül.
 
 ### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` szolgáltatók
 
-Olyan külső Anthropic-továbbítókhoz, amelyek csak „valódi Claude Code” forgalmat fogadnak el:
+Harmadik féltől származó Anthropic relék esetében, amelyek csak "valódi Claude -kód" forgalmat fogadnak el:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- Az `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` alapértelmezés szerint
-- A kapcsolatonkénti „Enable redact-thinking beta” kapcsoló hozzáadja a `redact-thinking-2026-02-12` értéket, amikor egy CC Compatible felsőbb rétegbeli szolgáltató kifejezetten kitakart gondolkodási adatfolyamokat igényel
-- A kapcsolatonkénti „Enable summarized thinking display” kapcsoló eltárolja a `providerSpecificData.requestDefaults.summarizeThinking` értéket, és hozzáadja a `display: "summarized"` beállítást azokhoz a CC Compatible gondolkodási kérésekhez, amelyek még nem adtak meg megjelenítési módot
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` alapértelmezés szerint
+- A kapcsolatonkénti "Redact-thinking béta engedélyezése" kapcsoló hozzáadja `redact-thinking-2026-02-12` ha egy CC kompatibilis upstream kifejezetten redaktált gondolkodási folyamokat igényel
+- A kapcsolatonkénti "Összefoglalt gondolkodás megjelenítésének engedélyezése" kapcsoló tárolja `providerSpecificData.requestDefaults.summarizeThinking`, és hozzáadja `display: "summarized"` CC Kompatibilis gondolkodási kérések, amelyek még nem állítottak be megjelenítési módot
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x család)
-- Alapértelmezett útvonal: `/v1/messages?beta=true`
+- Alapértelmezett elérési út: `/v1/messages?beta=true`
 
-Ugyanezen csomag kapcsolódó moduljai:
+Testvér modulok ugyanabban a csomagban:
 
-- `claudeCodeConstraints.ts` — hőmérséklet- és gyorsítótár-vezérlési szabályok
-- `claudeCodeToolRemapper.ts` — eszköznevek leképezése
-- `claudeCodeExtraRemap.ts` — a hasznos adat további normalizálása
+- `claudeCodeConstraints.ts` — hőmérséklet + gyorsítótár-vezérlési szabályok
+- `claudeCodeToolRemapper.ts` — eszköznév újraleképezés
+- `claudeCodeExtraRemap.ts` — extra hasznos teher normalizálás
 
 ---
 
@@ -185,7 +186,7 @@ Mindkét szolgáltató a Antigravity termék OAuth munkamenetével hitelesít, e
 | `gemini`                | Gemini (Google AI Studio) | Gemini API kulcs a Google AI Studio-tól (ingyenes szint elérhető)                     |
 | `vertex`                | Vertex AI                 | Szolgáltatásfiók JSON, OAuth hozzáférési token vagy Vertex Express API kulcs (Gemini) |
 
-Ezek a szolgáltatók hitelesítő adatok Google problémákat használnak API hozzáféréshez, ellentétben a Antigravity termékmunkamenettel. Nem tesznek minden használatot megfelelővé, és nem szüntetik meg a végrehajtás kockázatát: mindegyikre a saját feltételei vonatkoznak, amelyeket az üzemeltetőnek ellenőriznie kell a telepítéshez. Például a [Gemini API Kiegészítő Szolgáltatási Feltételek](https://ai.google.dev/gemini-api/terms) csak Fizetett szolgáltatásokat engedélyeznek, ha API klienseket az Európai Gazdasági Térségben, Svájcban vagy az Egyesült Királyságban a felhasználók rendelkezésére bocsátják, és a Nem fizetett szolgáltatásoknak küldött tartalmak felhasználhatók Google termékeinek fejlesztésére. A Vertex AI ehelyett a Google Cloud feltételei alá esik ( [szolgáltatásspecifikus feltételek](https://cloud.google.com/terms/service-terms) ). Az árak és a kvóták a API feltételeket követik, nem pedig a Antigravity előfizetést.
+Ezek a szolgáltatók hitelesítési adatok Google problémákat használnak API hozzáféréshez, ellentétben a Antigravity termékmunkamenettel. Nem tesznek minden használatot megfelelővé, és nem szüntetik meg a végrehajtás kockázatát: mindegyikre a saját feltételei vonatkoznak, amelyeket az üzemeltetőnek ellenőriznie kell a telepítéshez. Például a [Gemini API Kiegészítő Szolgáltatási Feltételek](https://ai.google.dev/gemini-api/terms) csak Fizetett szolgáltatásokat engedélyeznek, ha API klienseket az Európai Gazdasági Térségben, Svájcban vagy az Egyesült Királyságban a felhasználók rendelkezésére bocsátják, és a Nem fizetett szolgáltatásoknak küldött tartalmak felhasználhatók Google termékeinek fejlesztésére. A Vertex AI ehelyett a Google Cloud feltételei alá esik ( [szolgáltatásspecifikus feltételek](https://cloud.google.com/terms/service-terms) ). Az árak és a kvóták a API feltételeket követik, nem pedig a Antigravity előfizetést.
 
 Azoknak az üzemeltetőknek, akik szeretnék elkerülni a fent leírt Antigravity felfüggesztéseket, Gemini forgalmat ezen szolgáltatók egyikén kell átirányítaniuk `antigravity` / `agy` helyett, miután ellenőrizték, hogy használatuk megfelel-e a szolgáltató feltételeinek.
 
@@ -193,7 +194,7 @@ Azoknak az üzemeltetőknek, akik szeretnék elkerülni a fent leírt Antigravit
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` olvas
 - `src/lib/oauth/providers/antigravity.ts` — hitelesítő vízvezeték
-- Eredeti eseményjelentés: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Eredeti eseményjelentés: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

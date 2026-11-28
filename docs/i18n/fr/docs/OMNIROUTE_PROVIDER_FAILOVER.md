@@ -21,3 +21,5 @@ La stratégie inter-fournisseurs par défaut autorise jusqu'à trois tentatives 
   - Un identifiant préfixé (`provider/model`) n'est jamais redirigé vers un autre fournisseur.
 
 Les états du circuit sont `closed`, `open` et `half_open`. Un temps de recharge programme une sonde limitée ; une sonde réussie ferme le circuit et une sonde échouée le rouvre.
+
+Le basculement du fournisseur s’exécute à l’intérieur de la passerelle. Voir [Quand OmniRoute lui-même est inaccessible](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) pour le comportement du client lors d'une panne de passerelle.

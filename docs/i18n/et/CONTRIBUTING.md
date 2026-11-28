@@ -13,29 +13,23 @@ katvuse ja vastavusse viimise sammudega.
 
 ---
 
-## Arenduskeskkonna seadistamine
+## Arendusseadistus
 
-### Eeltingimused
+### Eeldused
 
 - **Node.js** `>=22.22.2 <23` või `>=24.0.0 <27` (soovitatav: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows koos Node 24-ga:** kasutage praeguse 24 LTS-i haru uusimat paigaversiooni (vähemalt 24.20.0).
-> Varasemad versioonid võivad pärast edukalt läbitud teste katkestada, kui `--test-force-exit` protsessi
-> sulgeb. Node'i [Windowsi libuv parandus](https://github.com/nodejs/node/pull/61999) lahendab
-> selle käitusaegse krahhi; jätke testiväited ja käituri väljumise kontrollid sisse.
+> **Windows koos sõlmega 24:** kasutage praegust 24 LTS plaastri väljalaset (vähemalt 24.20.0). Varasemad väljaanded võivad pärast edukaid teste katkeda, kui `--test-force-exit` protsessi sulgeb. Node'i [Windows libuv parandus](https://github.com/nodejs/node/pull/61999) käsitleb seda käitusaegset krahhi; hoidke testiväited ja jooksja väljumiskontrollid sisse lülitatud.
 
-> **npm v11+ kasutajad (Node 24+):** pärast `npm install` käivitamist kontrollige, kas natiivsed moodulid on installitud:
-> `node -e "require('better-sqlite3')"`. Kui see nurjub veaga `MODULE_NOT_FOUND`,
-> käivitage `npm approve-scripts better-sqlite3 && npm install`. Vt
-> [Tõrkeotsing](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + kasutajad (sõlm 24 +):** Pärast `npm install` kontrollige, kas algmoodulid on installitud: `node -e "require('better-sqlite3')"`. Kui see `MODULE_NOT_FOUND` abil ebaõnnestub, käivitage `npm approve-scripts better-sqlite3 && npm install`. Vt [Tõrkeotsing](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klooni loomine ja installimine
+### Klooni ja installi
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -43,92 +37,83 @@ npm install
 ### Keskkonnamuutujad
 
 ```bash
-# Looge mallist oma .env
+# Create your .env from the template
 cp .env.example .env
 
-# Genereerige vajalikud saladused
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Arenduse jaoks olulised muutujad:
+Peamised arendusmuutujad:
 
-| Muutuja                | Arenduse vaikeväärtus    | Kirjeldus                      |
-| ---------------------- | ------------------------ | ------------------------------ |
-| `PORT`                 | `20128`                  | Serveri port                   |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Veebikliendi baas-URL          |
-| `JWT_SECRET`           | (genereerige ülal)       | JWT allkirjastamise saladus    |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Esimese sisselogimise parool   |
-| `APP_LOG_LEVEL`        | `info`                   | Logimise üksikasjalikkuse tase |
+| Muutuv                 | Arenduse vaikeseade      | Kirjeldus                   |
+| ---------------------- | ------------------------ | --------------------------- |
+| `PORT`                 | `20128`                  | Serveri port                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Esiosa põhi URL             |
+| `JWT_SECRET`           | (genereeri ülal)         | JWT allkirjastamise saladus |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Esimene sisselogimisparool  |
+| `APP_LOG_LEVEL`        | `info`                   | Logi paljusõnalisuse tase   |
 
-### Armatuurlaua seaded
+### Armatuurlaua sätted
 
-Armatuurlaud pakub kasutajaliidese lüliteid funktsioonide jaoks, mida saab seadistada ka keskkonnamuutujate kaudu:
+Armatuurlaud pakub UI lüliteid funktsioonide jaoks, mida saab konfigureerida ka keskkonnamuutujate kaudu:
 
-| Seadistuse asukoht  | Lüliti             | Kirjeldus                                  |
-| ------------------- | ------------------ | ------------------------------------------ |
-| Settings → Advanced | Debug Mode         | Silumisrežiimi päringulogide lubamine (UI) |
-| Settings → General  | Sidebar Visibility | Külgriba jaotiste kuvamine/peitmine        |
+| Asukoha määramine | Lülita            | Kirjeldus                        |
+| ----------------- | ----------------- | -------------------------------- |
+| Seaded → Advanced | Silumisrežiim     | Luba silumistaotluste logid (UI) |
+| Seaded → Üldine   | Külgriba nähtavus | Show/hide külgriba sektsioonid   |
 
-Need seaded salvestatakse andmebaasi ja säilivad taaskäivituste vahel, kui need on määratud, tühistades keskkonnamuutujate vaikeväärtused.
+Need sätted salvestatakse andmebaasi ja jäävad püsima ka taaskäivitamisel, alistades määramisel env var vaikeseaded.
 
-### Kohalik käivitamine
+### Kohalik jooksmine
 
 ```bash
-# Arendusrežiim (kuumlaadimine)
+# Development mode (hot reload)
 npm run dev
 
-# Tootmisjärk
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Kiire ainult tagarakenduse/API kompileerimine kaasautorite muudatuste jaoks
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Väljalaskejärk (puhas ümberehitus + HEAD-i marker — juurutamiseks nõutav)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Levinud pordi seadistus
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Kaasautorite järk teostab ainult kompileerimise valideerimise: see ei koosta eraldiseisvat
-distributsiooni ega ehita valikulisi natiivse pakendamise varasid. Kui teil on vaja
-valmivat paketti valideerida, kasutage tavalist tootmisjärku.
+Kaasautori järg teostab ainult kompileerimise valideerimist: see ei koosta iseseisvat distributsiooni ega loo valikulisi natiivseid pakendivarasid. Tarnitava komplekti kinnitamiseks kasutage tavalist tootmisjärku.
 
-### Järgu väljundipaigutus
+### Ehitage väljundi paigutus
 
-| Kataloog  | Sisu                                                                    | Jälgitav |
-| --------- | ----------------------------------------------------------------------- | -------- |
-| `src/`    | Rakenduse lähtekood (TypeScript / TSX)                                  | Jah      |
-| `.build/` | Vahefailid — `next build` väljund (gitignored, `distDir = .build/next`) | Ei       |
-| `dist/`   | Valmis pakett — koostatud `assembleStandalone` abil (gitignored)        | Ei       |
+| Kataloog  | Sisu                                                                            | Jälgitud |
+| --------- | ------------------------------------------------------------------------------- | -------- |
+| `src/`    | Rakenduse allikas (TypeScript / TSX)                                            | Jah      |
+| `.build/` | Vahepealsed — `next build` väljund (gitignoositud, `distDir = .build/next`)     | Ei       |
+| `dist/`   | Tarnitav — komplekt, mille on kokku pannud `assembleStandalone` (gitignoositud) | Ei       |
 
-Järgu töövoog on ühekordne:
+Ehitatav torujuhe on ühekordne:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js väljund)
-  └─ assembleStandalone()                 (kopeerib standalone + static + public + native assets)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` puhastab lisaks esmalt mõlemad kataloogid ja kirjutab
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) juurutamise terviklikkuse markerina.
+Lisaks puhastab `npm run build:release` esmalt mõlemad kataloogid ja kirjutab `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) juurutamise terviklikkuse valvurina.
 
-`npm run build:contributor` kasutab ainult tagarakenduse järgu profiili. See asendab
-järgu ajaks ajutiselt armatuurlaua kasutajaliidese failid, säilitab API marsruudikäitlejad
-ja taastab pärast järku algsed failid. Kasutage `npm run build` muudatuste korral, mis
-mõjutavad armatuurlaua kasutajaliidest, või täielikuks väljalaske valideerimiseks;
-kaasautorite profiil ei asenda väljalaskejärku.
+`npm run build:contributor` kasutab ainult taustaprogrammi ehitusprofiili. See sulgeb ajutiselt armatuurlaua UI failid ehitamise ajal, säilitab API marsruudi töötlejad ja taastab pärast ehitamist algsed failid. Kasutage `npm run build` muudatuste jaoks, mis mõjutavad armatuurlauda UI, või täielikuks väljalaske kinnitamiseks; kaasautori profiil ei asenda versiooni järgu.
 
-> **VPS-i juurutamise märkus:** kaugpildi kataloog `/usr/lib/node_modules/omniroute/app/`
-> jääb muutmata. Juurutamisoskused sünkroonivad `dist/` sisu sinna rsynci abil.
-> Muudeti ainult repositooriumisisese järgu väljundirada (`app/` → `dist/`).
+> **VPS juurutamise märkus:** kaugkujutise kataloog `/usr/lib/node_modules/omniroute/app/` on muutumatu. Juurutusoskused rsünkroonivad sellesse `dist/` sisu. Teisaldati ainult reposisene järgu väljundtee (`app/` → `dist/`).
 
-Vaike-URL-id:
+Vaikimisi URLs:
 
-- **Armatuurlaud**: `http://localhost:20128/dashboard`
+- **Armatuurlaud** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -435,8 +420,8 @@ Seejärel kasuta töövooge `/deploy-vps-*-cc`, mis kasutavad rsync-i `dist/` ed
 
 ## Abi saamine
 
-- **Arhitektuur**: Vaadake faili [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API viitedokumentatsioon**: Vaadake faili [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Turbedokumentatsioon**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Käitlusdokumentatsioon**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Probleemid**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arhitektuur** : Vt [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API viide** : Vt [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Turvadokumendid** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Opsi dokumendid** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Probleemid** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

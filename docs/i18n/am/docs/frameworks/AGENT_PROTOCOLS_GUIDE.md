@@ -182,15 +182,15 @@ DELETE /api/v1/agents/tasks/[id]
 
 ## የውህደት ምሳሌዎች
 
-### የOmniRouteን A2A ችሎታዎች ያግኙ
+### OmniRoute's A2A ችሎታዎችን ያግኙ
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-ሁሉንም 6 ክህሎቶች፣ ማጓጓዣዎች እና ስሪት የያዘውን Agent Card ይመልሳል።
+ወኪል ካርዱን በሁሉም 6 ችሎታዎች፣ መጓጓዣዎች እና ስሪት ይመልሳል።
 
-### OmniRouteን እንደ A2A ወኪል ይጠቀሙ
+### OmniRoute እንደ A2A ወኪል ይደውሉ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -206,7 +206,7 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-### በACP በኩል የተጫኑ CLI ወኪሎችን ይዘርዝሩ
+### በ ACP በኩል የተጫኑ CLI ወኪሎችን ይዘርዝሩ
 
 ```bash
 curl http://localhost:20128/api/acp/agents \
@@ -229,7 +229,7 @@ curl -X POST http://localhost:20128/api/acp/agents \
   }'
 ```
 
-### የCloud Agent ተግባር ያስገቡ
+### የክላውድ ወኪል ተግባር አስገባ
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/agents/tasks \
@@ -246,7 +246,7 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks \
   }'
 ```
 
-### የCloud ተግባር ሁኔታን በየጊዜው ይፈትሹ
+### የሕዝብ አስተያየት ደመና ተግባር ሁኔታ
 
 ```bash
 curl http://localhost:20128/api/v1/agents/tasks/<task-id> \

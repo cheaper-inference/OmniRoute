@@ -471,105 +471,105 @@ Interaktyviojo seanso metu:
 
 ## Ilgai trunkančios užduotys
 
-Dvi numatytosios OmniRoute nuostatos gali nepastebimai pakenkti daug valandų trunkantiems Codex CLI seansams. Nė viena iš jų nėra Codex CLI nuostata — abi yra OmniRoute pusėje. Naudotojai, perkeliantys konfigūraciją iš tarpinių serverių, kurie priskiria paskyras ir išjungia neveiklumo ribojimus, dažnai susiduria su abiem problemomis ir padaro išvadą, kad OmniRoute „negali palaikyti ilgo seanso“.
+Du numatytieji OmniRoute nustatymai gali tyliai sabotuoti kelių valandų trukmės Codex CLI seansus. Nė vienas iš Codex CLI nenustato — abu veikia OmniRoute pusėje. Naudotojai, perkeliantys konfigūraciją iš tarpinių serverių, kurie prisega paskyras ir išjungia neveikimo atjungimus, dažnai pasiekia abu ir daro išvadą, kad OmniRoute „negali išlaikyti ilgos sesijos“.
 
-| Požymis                                                                                  | Tikėtina priežastis                                                                                       | Nuostata                 |
-| ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------ |
-| Seansas nuolat perjungia paskyras / tarp veiksmų prarandamas raginimų podėlio tęstinumas | Seanso susiejimo TTL yra `0` (išjungtas)                                                                  | `sessionAffinityTtlMs`   |
-| Ryšys nutrūksta samprotavimo metu, klientui nepateikiant jokio raginimo                  | Srauto neveiklumo stebėjimo mechanizmas suveikė, kai 10 minučių negauta jokio pirminio serverio fragmento | `STREAM_IDLE_TIMEOUT_MS` |
+| Simptomas                                                                                            | Tikėtina priežastis                                                              | Rankenėlė                |
+| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------ |
+| Sesijos metu nuolat perjungiamos paskyros / tarp posūkių prarandamas greitosios talpyklos tęstinumas | Seanso bendrumas TTL yra `0` (išjungtas)                                         | `sessionAffinityTtlMs`   |
+| Ryšys nutrūksta įpusėjus samprotavimui, nesant kliento raginimo                                      | Neveikiantis srauto sargybinis šuo paleistas po 10 minučių be priešsrovės gabalo | `STREAM_IDLE_TIMEOUT_MS` |
 
-Susijusios diskusijos: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ilgų užduočių nutrūkimai), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (kodėl susiejimas pagal numatytąją nuostatą išjungtas). Stebėjimas: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Susijusios diskusijos: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ilgi užduočių kritimai), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (kodėl giminingumas išjungtas pagal nutylėjimą). Stebėjimas: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Seanso susiejimas — vieną pokalbį priskirkite vienai paskyrai
+### 1. Seanso giminingumas — prisegti vieną pokalbį prie vienos paskyros
 
-**Numatytoji reikšmė:** `sessionAffinityTtlMs = 0` (išjungta).
+**Numatytasis:** `sessionAffinityTtlMs = 0` (neįgalus).
 
-**Kur ją nustatyti**
+**Kur jį nustatyti**
 
-- Valdymo skydas → **Nuostatos → Maršruto parinkimas** → **Seanso susiejimas** → **Susiejimo TTL (sekundėmis)** (`ComboDefaultsTab`)
-- Arba PATCH metodu atnaujinkite nuostatas, nurodydami `sessionAffinityTtlMs` **milisekundėmis** (Zod diapazonas `0`–`86_400_000`, t. y. iki 24 valandų)
+- Prietaisų skydelis →** Nustatymai → Routing** →** Seanso giminingumas** →** Afinitetas TTL (sekundėmis)** (`ComboDefaultsTab`)
+- Arba PATCH nustatymai su `sessionAffinityTtlMs` in** milisekundės** (Zod diapazonas `0`–`86_400_000`, ty iki 24 valandų)
 
-> #7274 pakeitime pavadinimas pakeistas iš tik Codex skirto `codexSessionAffinityTtlMs`. Senasis raktas vis dar priimamas kaip tik skaityti skirtas alternatyvus pavadinimas; naujose konfigūracijose turėtų būti naudojamas `sessionAffinityTtlMs`. Dabar susiejimas taikomas **bet kuriam** teikėjui, kai TTL yra didesnis nei `0`, ne tik Codex — žr. [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Seanso susiejimas.
+> Pervadintas į #7274 iš tik Codex `codexSessionAffinityTtlMs`. Senas raktas vis dar priimamas kaip tik skaitomas pseudonimas; naujos konfigūracijos turėtų naudoti `sessionAffinityTtlMs`. Bendrumas dabar taikomas** bet koks** teikėjas, kai TTL yra didesnis nei `0`, žr. ne tik Codex — [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → seanso giminingumą.
 
-**Kas neveikia, kai reikšmė lieka 0**
+**Kas nutrūksta, kai lieka 0**
 
-Kiekvienas kelių veiksmų Codex pokalbio veiksmas maršrutu parenkamas atskirai pagal aktyvią kombinuotąją strategiją ir kiekvieną kartą gali patekti į **kitą paskyrą**. Tai sutrikdo pirminio serverio seanso / raginimų podėlio tęstinumą. OmniRoute atsižvelgia į Codex seanso antraštes (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) ir užklausos turinio laukus, pvz., `prompt_cache_key` / `session_id`, tik kai TTL yra didesnis nei `0` (`extractSessionAffinityKey`, esantis `src/sse/services/auth.ts`).
+Kiekvienas kelių posūkių Codex pokalbio posūkis yra nukreipiamas nepriklausomai pagal aktyvią kombinuotą strategiją ir gali būti nukreiptas į** skirtinga sąskaita vienam posūkiui** . Tai nutraukia seanso / greitosios talpyklos tęstinumą. OmniRoute peržiūri tik Codex seanso antraštes (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) ir pagrindinius laukus, pvz. `prompt_cache_key` / `session_id` kai TTL yra didesnis nei `0` (`extractSessionAffinityKey` `src/sse/services/auth.ts`).
 
-**Rekomenduojama vienai kelias valandas trunkančiai užduočiai**
+**Rekomenduojama kelių valandų vienai užduočiai**
 
-Nustatykite TTL, **viršijantį numatomą bendrą užduoties trukmę** (didžiausia reikšmė naudotojo sąsajoje yra **86400 sekundžių** = 24 valandos):
+Nustatykite TTL** viršija numatytą užduoties sieninio laikrodžio trukmę** (UI max yra** 86400 sekundžių** = 24 valandos):
 
-| Numatoma užduoties trukmė | Susiejimo TTL (naudotojo sąsajoje, sekundėmis) | `sessionAffinityTtlMs` |
-| ------------------------- | ---------------------------------------------- | ---------------------- |
-| Kelios valandos           | `14400` (4 val.)                               | `14400000`             |
-| Per naktį / ~12 val.      | `43200` (12 val.)                              | `43200000`             |
-| Visa para                 | `86400` (24 val., didžiausia reikšmė)          | `86400000`             |
+| Numatoma užduoties trukmė | Afinitetas TTL (UI, sekundės) | `sessionAffinityTtlMs` |
+| ------------------------- | ----------------------------- | ---------------------- |
+| Kelios valandos           | `14400` (4 val.)              | `14400000`             |
+| Nakvynė / ~ 12h           | `43200` (12h)                 | `43200000`             |
+| Visa diena                | `86400` (24 val., maksimalus) | `86400000`             |
 
-Pasirenkamasis įjungimas yra apgalvotas: išjungus susiejimą pirmenybė teikiama apkrovos balansavimui tarp paskyrų, o jį įjungus — vieno ilgo agento seanso tęstinumui. Šiame vadove numatytoji nuostata **nekeičiama** — operatoriai, vykdantys ilgas Codex užduotis, turi patys ją įjungti.
+Pasirinkimas yra apgalvotas: išjungus bendrumą, paskyrų apkrova paskirstoma; įgalinus jį, užtikrinamas vienos ilgos agento sesijos tęstinumas. Šis vadovas tai daro** ne** pakeisti numatytuosius — operatoriai, vykdantys ilgas Codex užduotis, turi pasirinkti.
 
-### 2. Srauto neveiklumo skirtasis laikas — nenutraukite tylių samprotavimo veiksmų
+### 2. Srauto tuščiosios eigos skirtasis laikas — neužmuša tylių samprotavimo posūkių
 
-**Numatytoji reikšmė:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minučių). Kai reikšmė nenustatyta, ji perimama iš `REQUEST_TIMEOUT_MS`; bendroji bazinė reikšmė taip pat yra 600000. Žr. [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Skirtieji laikai.
+**Numatytasis:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minučių). Jis paveldimas iš `REQUEST_TIMEOUT_MS`, kai nenustatytas; bendras pradinis lygis taip pat yra 600 000. Žr. [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Kas neveikia naudojant numatytąją reikšmę**
+**Kas sugenda esant nutylėjimui**
 
-„Codex“ samprotavimo / įrankio veiksmas, kuris išlieka tylus ilgiau nei 10 minučių ir negauna **jokio tikro iš pirminio serverio gaunamo duomenų fragmento**, yra priverstinai nutraukiamas SSE neveiklumo stebėjimo mechanizmo (`open-sse/utils/stream.ts`). Klientas dažnai mato tik nutrūkusį ryšį — tai atitinka situaciją „sustojo automatiškai be jokio pranešimo“.
+Codex samprotavimas / įrankio posūkis, kuris tyli ilgiau nei 10 minučių** jokio tikro prieš srovę gabalo** yra priverstinai uždarytas SSE idle watchdog (`open-sse/utils/stream.ts`). Klientas dažnai mato tiesioginio ryšio nutrūkimą — atitinkantį „sustabdomas automatiškai be jokio įspėjimo“.
 
-Svarbi detalė: „OmniRoute“ sintetinis SSE **periodinis signalas neatnaujina** neveiklumo laikmačio. `lastChunkTime` atnaujinamas tik gavus tikrą pirminio serverio atsakymo turinio fragmentą. Tyliai vis dar „mąstantis“ modelis stebėjimo mechanizmo požiūriu atrodo lygiai taip pat kaip nebeatsakantis pirminis serveris.
+Kritinė detalė: OmniRoute sintetinis SSE** širdies plakimas nenustatomas iš naujo** tuščiosios eigos laikrodis. Tik tikras prieš srovę esantis korpuso gabalas atnaujina `lastChunkTime`. Tylus, vis dar „mąstantis“ modelis sargybinio požiūriu atrodo identiškas užstrigusiam prieš srovę.
 
-Susijęs „Undici“ atsakymo turinio neveiklumo nustatymas: `FETCH_BODY_TIMEOUT_MS` (pagal numatytuosius nustatymus taip pat taikoma ta pati 10 minučių bazinė reikšmė; `0` jį išjungia). Srautiniam perdavimui `FETCH_TIMEOUT_MS` apima tik ryšio užmezgimą / pirmąsias antraštes — kai srautas tampa aktyvus, jo strigtis valdo `STREAM_IDLE_TIMEOUT_MS` ir `FETCH_BODY_TIMEOUT_MS`.
+Susijęs Undici kūno neveiklumas: `FETCH_BODY_TIMEOUT_MS` (taip pat nustatyta ta pati 10 minučių pradinė linija; `0` jį išjungia). Srautiniam perdavimui `FETCH_TIMEOUT_MS` apima tik ryšio sąranką / pirmąsias antraštes — kai srautas yra aktyvus, sustojimus valdo `STREAM_IDLE_TIMEOUT_MS` ir `FETCH_BODY_TIMEOUT_MS`.
 
-**Rekomenduojama vienai kelias valandas trunkančiai užduočiai**
+**Rekomenduojama kelių valandų vienai užduočiai**
 
-„OmniRoute“ proceso aplinkoje (`.env` / compose / systemd):
+OmniRoute proceso aplinkoje (`.env` / compose / systemd):
 
 ```bash
-# Išjungti srauto neveiklumo ir atsakymo turinio neveiklumo ribojimus ilgiems samprotavimo veiksmams
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Arba padidinkite jų reikšmes virš ilgiausio numatomo tylos intervalo (reikšmės nurodomos milisekundėmis):
+Arba pakelkite juos aukščiau ilgiausio tylaus tarpo, kurio tikitės (reikšmės yra milisekundės):
 
 ```bash
-# Pavyzdys: leisti iki 2 valandų tylos tarp iš pirminio serverio gaunamų fragmentų
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Pakeitę šiuos aplinkos kintamuosius, paleiskite „OmniRoute“ iš naujo.
+Pakeitę šiuos env vars, paleiskite OmniRoute iš naujo.
 
-### Konkretus receptas — kelias valandas trunkanti „Codex“ užduotis
+### Konkretus receptas — kelių valandų Codex užduotis
 
-1. **Priskirkite paskyrą:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12 val.) arba `86400` (maks. 24 val.).
-2. **Padidinkite / išjunkite neveiklumo ribojimus** „OmniRoute“ aplinkoje:
+1. **Prisekite paskyrą:** Prietaisų skydelis → Nustatymai → Maršrutas → Seanso giminingumas → Affinity TTL = `43200` (12 val.) arba `86400` (maks. 24 val.).
+2. **Padidinkite / išjunkite tuščiosios eigos ribą** OmniRoute aplinkoje:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Palikite įprastą „Codex“ `config.toml` (`wire_api = "responses"`, teisingą `base_url`, `OMNIROUTE_API_KEY`) — šiems dviem veikimo aspektams „Codex“ pusėje nėra seanso susiejimo / neveiklumo valdiklių.
-4. Paleiskite „OmniRoute“ iš naujo, tada pradėkite ilgą „Codex“ užduotį.
+3. Laikykite įprastą Codex `config.toml` (`wire_api = "responses"`, teisingą `base_url`, `OMNIROUTE_API_KEY`) — Kodekso pusės affinity/idle rankenėlių šiems dviem veiksmams nėra.
+4. Iš naujo paleiskite OmniRoute, tada pradėkite ilgą Codex užduotį.
 
-### Sprendimas dėl numatytųjų reikšmių (#7287)
+### Numatytasis sprendimas (#7287)
 
-| Valdiklis                | Platinama numatytoji reikšmė | Keisti šiame vadove?                                                                                            |
-| ------------------------ | ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (išjungta)               | **Ne** — lieka pasirenkama funkcija (apkrovos balansavimas ar tęstinumas; žr. Discussion #5718)                 |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min.)           | **Ne** — bendram srautui lieka 10 minučių; ilgų „Codex“ užduočių operatoriai šią reikšmę padidina arba išjungia |
+| Rankenėlė                | Numatytasis pristatymas | Pakeisti šiame vadove?                                                                      |
+| ------------------------ | ----------------------- | ------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (išjungta)          | **Nr** — lieka pasirenkamas (apkrovos balansavimas ir tęstinumas; žr. diskusiją #5718)      |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min.)      | **Nr** — lieka 10 minučių bendrajam eismui; ilgi Codex operatoriai jį pakelia arba išjungia |
 
-Visuotinis bet kurios numatytosios reikšmės pakeitimas pakeistų kiekvieno egzemplioriaus kliento, o ne tik „Codex“, veikimą. Dokumentuokite valdiklius; nekeiskite numatytųjų reikšmių, kol nebus priimtas aiškus operatoriaus sprendimas.
+Pakeitus bet kurį numatytąjį parametrą visame pasaulyje, pasikeistų kiekvieno egzemplioriaus kliento elgesys, o ne tik Codex. Dokumentuokite rankenėles; palikite numatytuosius nustatymus, kol aiškus operatoriaus sprendimas nenurodys kitaip.
 
-### Neveiklumo nutraukimų diagnostika
+### Tuščiosios eigos pjūvių diagnozavimas
 
-Suveikus neveiklumo stebėjimo mechanizmui, „OmniRoute“ įrašo maždaug tokią žurnalo eilutę:
+Kai neveikiantis sarginis šuo užsidega, OmniRoute įrašo tokią liniją:
 
 ```text
-[STREAM] Neveiklumo skirtasis laikas: iš codex negauta duomenų 600000ms (modelis: cx/gpt-5.5)
+[STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Ieškokite `Idle timeout: no data from` (arba kodo `stream_idle_timeout` / klaidos pavadinimo `StreamIdleTimeoutError`). Teikėjo segmentas yra tas, kurį „OmniRoute“ naudojo tai užklausai (`codex`, kitas teikėjo identifikatorius arba `provider`, jei jis nežinomas) — tai ne visada yra tiesioginė eilutė `codex`.
+Grep `Idle timeout: no data from` (arba kodas `stream_idle_timeout` / klaidos pavadinimas `StreamIdleTimeoutError`). Teikėjo segmentas yra bet koks OmniRoute naudojamas tai užklausai (`codex`, kito teikėjo ID arba `provider`, jei nežinomas) — tai ne visada yra pažodinė eilutė `codex`.
 
 ---
 

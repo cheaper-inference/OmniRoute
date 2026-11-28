@@ -4,12 +4,9 @@
 
 ---
 
-> **Soʻnggi yangilanish:** 2026-08-28 — v3.8.51
-> Avtomatlashtirish uchun Claude Code ko‘nikmalaridan foydalanadigan soddalashtirilgan reliz jarayoni.
+> Avtomatlashtirish uchun Claude Code ko'nikmalaridan foydalanadigan soddalashtirilgan relizlar oqimi.
 >
-> **Relizlar orasida navbat/tarmoqni yashil holatda saqlang:** [RELEASE_GREEN.md](./RELEASE_GREEN.md) fayliga qarang
-> (`/green-prs` oilasi + `npm run check:release-green` + `/babysit` + tungi ishga tushirish). Buni
-> muntazam ravishda — va ayniqsa ushbu nazorat roʻyxatidan **oldin** — ishga tushirish reliz PR’ining yashil holatda boshlanishini taʼminlaydi.
+> **Relizlar orasida queue/branch yashil rangda saqlang:** qarang [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` oilasi + `npm run check:release-green` + `/babysit` + tungi). Buni vaqti-vaqti bilan ishga tushirish — va ayniqsa** oldin** bu nazorat ro'yxati — reliz PR boshlanishini yashil qiladi.
 
 ## Qisqacha
 
@@ -58,9 +55,11 @@ Npm-publish ish jarayoni endi to'g'ridan-to'g'ri nashr etmaydi: u to'plangan tar
 
 **Buzilgan artefakt o'yin kitobi (o'zgarmagan):** standart refleks sifatida `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` (daqiqa, qaytariladigan); `npm unpublish` faqat 72h/no-dependents oynasida va hech qachon birinchi harakat sifatida. Docker: versiya tegini hech qachon qayta yozmang — ortga qaytarish `latest` oxirgi yaxshi dayjestga qayta ishora qiladi.
 
-**Docker Hub `latest` (har bir barqaror SemVer nashrida talab qilinadi):** `docker-publish` ish jarayoni tegi kerak** ikkalasi ham** `X.Y.Z` va agar `should-promote-latest.sh` mos kelsa, bu eng yuqori barqaror SemVer, `:latest` bilan** bir xil hazm qilish** . Ishdan so'ng: Hub `latest` dayjest yangi SemVer dayjestiga teng va `last_updated` ko'chirildi. Chiqarilgan yozuvlar faqat git-da mavjud tuzatishlar haqida gapirganda, `:latest` eski versiyada qoldirmang. Tezkor ishga tushirishni yaratish `:latest` dan foydalaning; GitOps `X.Y.Z` ni mahkamlashda davom etishi kerak. [Docker chiqarish kanallari](../guides/DOCKER_GUIDE.md#release-channels) va #10317 qarang.
+**Docker Hub `latest` (har bir barqaror SemVer nashrida talab qilinadi):** `docker-publish` ish jarayoni tegi kerak** ikkalasi ham** `X.Y.Z` va `should-promote-latest.sh` mos kelsa, bu eng yuqori barqaror SemVer, `:latest` bilan** bir xil hazm qilish** . Ishdan keyin: Hub `latest` dayjest yangi SemVer dayjestiga teng va `last_updated` ko'chirildi. Chiqarilgan yozuvlar faqat git-da mavjud tuzatishlar haqida gapirganda, `:latest` eski versiyada qoldirmang. Tezkor ishga tushirishni yaratish `:latest` dan foydalaning; GitOps `X.Y.Z` ni mahkamlashda davom etishi kerak. [Docker chiqarish kanallari](../guides/DOCKER_GUIDE.md#release-channels) va #10317 qarang.
 
-**Docker Hub organization repository (`cheaperinference/omniroute`):** Docker Hub cannot move a repository between namespaces, so `diegosouzapw/omniroute` keeps its pull history and every release, and the `mirror-org-dockerhub` job of `docker-publish` copies each released version (and `:latest` when promoted) from `ghcr.io/cheaper-inference/omniroute` to the organization repository. It needs the `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` secrets; without them the job stays green with a "Docker Hub org mirror skipped" warning and the other registries publish normally. To publish a released version there later, run **Actions → Mirror Docker image to the Docker Hub org → Run workflow** with `version=X.Y.Z` (and `promote_latest` for the highest stable version): it copies the existing images, no rebuild.
+**Docker Hub organization repository (`cheaperinference/omniroute`):** Docker Hub cannot move a repository between namespaces, so `diegosouzapw/omniroute` keeps its pull history and every release, and the `mirror-org-dockerhub` job of `docker-publish` copies each released version (and `:latest` when promoted) from `ghcr.io/cheaper-inference/omniroute` to the organization repository. It needs the `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` secrets; without them the job stays green with a "Docker Hub org mirror skipped" warning and the other registries publish normally. To publish a released version there later, run **Actions → Mirror Docker image to the Docker Hub org → Run workflow** with `version=X.Y.Z` (and `promote_latest` for the highest stable version): it copies the existing images, no rebuild. That repository's Docker Hub overview is set by hand: the API that edits it rejects Organization Access Tokens.
+
+Xuddi shu ish jarayoni 2027-06-30 gacha har bir nashrni GHCR to‘plami `ghcr.io/diegosouzapw/omniroute` ko‘chiradi, shuning uchun unga mahkamlangan o‘rnatishlar hali ham yangilanib turadi; uning indeksi " `ghcr.io/cheaper-inference/omniroute` ga ko'chirildi" tavsifiga ega. Bunga `GHCR_LEGACY_TOKEN` siri kerak ( `write:packages` bilan `diegosouzapw` ning klassik shaxsiy kirish tokeni); busiz bu ish "Legacy GHCR oynasi o'tkazib yuborildi" ogohlantirishi bilan o'tkazib yuboriladi.
 
 ## Hotfix tezkor yoʻlagi (`hotfix` yorligʻi)
 
@@ -121,7 +120,7 @@ matritsasini hech qanday yorliqsiz avtomatik ravishda oʻtkazib yuboradi.
 - [ ] `npm run test:vitest` — pass (MCP server, autoCombo, kesh)
 - [ ] `npm run test:coverage` — darvozasi 60/60/60/60 mamnun (statements/lines/functions/branches)
 - [ ] `npm run test:integration` — pass (agar DB / ishlov beruvchilarga teginish o'zgartirilsa)
-- [ ] `npm run test:combo:matrix` — pass (kombo strategiya matritsasi: barcha 22 umumiy marshrutlash strategiyasini tanlash qarorlarini aniq isbotlaydi; birlashgan marshrutlash, strategiya rezolyutsiyasi yoki zaxira mantiqqa tegganda ishga tushirish)
+- [ ] `npm run test:combo:matrix` — pass (kombo strategiya matritsasi: barcha 22 umumiy marshrut strategiyasini tanlash qarorlarini aniq tasdiqlaydi; birlashgan marshrutlash, strategiya rezolyutsiyasi yoki zaxira mantiqqa tegganda ishga tushirish)
 - [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (darvozali real-yuqoridagi tutun; VPS `root@192.168.0.15` dan faqat o‘qish uchun mo‘ljallangan DB snapshotini oladi; haqiqiy provayderlarga tegadi, kreditlar turadi; hech qachon CI da ishlamaydi; darvozasiz toza o‘tkazib yuboradi)
 - [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS jonli tutun: jonli `.15` serveriga qarshi oddiy ESM tugun orqali 7 HTTP stsenariysi; `ssh root@192.168.0.15` talab qiladi; creates/deletes faqat `__live_test__*` kombinatsiyalari; haqiqiy provayderlarga tegadi; hech qachon CI da ishlamaydi)
 - [ ] `npm run test:e2e` — pass (UI o'zgarishlar)
@@ -151,7 +150,7 @@ O'zgarishlarni buzish: qamrovdan keyin `BREAKING CHANGE:` altbilgisi yoki `!` qo
 ### Hujjatlar
 
 - [ ] `npm run check:docs-sync` o'tishlari (avtomatik ravishda oldindan topshirilgan)
-- [ ] `npm run check:docs-all` o‘tishlari (soyabon: docs-sync + docs-counts + env-doc-sync + eskirgan versiyalar + doc-links)
+- [ ] `npm run check:docs-all` o'tadi. Uning `check:deprecated-versions` maslahati aniq OmniRoute (3.6.x va undan oldingi) ga tegishli versiyalarni belgilaydi va sanalarni e'tiborsiz qoldiradi.
 - [ ] `npm run check:env-doc-sync` chiqadi 0 — kodi ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env shartnomasi buzilmagan
 - [ ] `npm run check:doc-links` 0 — dan chiqadi, qayta tuzilishdan so'ng buzilgan ichki belgilash havolalari yo'q
 - [ ] `docs/architecture/ARCHITECTURE.md` storage/runtime drift uchun ko'rib chiqildi
@@ -160,7 +159,7 @@ O'zgarishlarni buzish: qamrovdan keyin `BREAKING CHANGE:` altbilgisi yoki `!` qo
 - [ ] Agar yangi xususiyatda UI bo'lsa: `docs/guides/USER_GUIDE.md` bu haqda eslatib o'tadi
 - [ ] Agar yangi funksiyada API bo'lsa: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` yangilandi
 - [ ] Agar yangi xususiyat modul bo'lsa: ajratilgan `docs/<MODULE>.md` mavjud
-- [ ] Agar o'zgarishlar buzilgan bo'lsa: `docs/guides/TROUBLESHOOTING.md` migratsiya qaydi mavjud
+- [ ] Agar o'zgarish buzilgan bo'lsa: `docs/guides/TROUBLESHOOTING.md` migratsiya qaydi mavjud
 
 ### i18n
 
@@ -257,7 +256,7 @@ Joylashtirish ko'nikmalari yorug'lik rsync oqimidan foydalanadi — no `npm pack
 - [ ] Joylashtirishdan oldin `dist/BUILD_SHA` == `git rev-parse --short HEAD` tasdiqlang
 - [ ] Build `node_modules` haqiqiy boʻlgan joyda ishlashi kerak (asosiy hisob yoki `npm ci`'d worktree — NOT simli bogʻlangan ishchi daraxt)
 - [ ] Tutun sinovi o'rnatilgan namunasi:
-  - `/dashboard/health` → oching, versiya satri nashrga mos kelishini tekshiring
+  - `/dashboard/health` → versiyasi satriga mos kelishini tekshirishni oching
   - Ma'lum provayderga qarshi `/v1/chat/completions` so'rovini ishga tushiring
   - `/api/monitoring/health` `CLOSED` o'chirgichlarni qaytarishini tekshiring
   - MCP transportlarining javob berishini tasdiqlang (`/mcp` HTTP, `/mcp-sse` SSE)
@@ -269,14 +268,14 @@ Joylashtirish ko'nikmalari yorug'lik rsync oqimidan foydalanadi — no `npm pack
   - Eslatmalar / blog postlari uchun biriktiriladi
 - [ ] Chiqarish e'lonlari bilan GitHub Discussions / Discord ni yangilang
 - [ ] Keyingi versiya uchun muhim bosqichni oching
-- [ ] Agar muhim bo'lsa: ilova ichidagi banner uchun muhokamani yoki postni `news.json` ga qo'ying
+- [ ] Agar muhim bo'lsa: ilova ichidagi banner uchun muhokamani belgilang yoki `news.json` -da post qoldiring
 
 ### Radar ommaviy ishga tushirish eshigi
 
 Radar e'lonlari `active: false` bilan ataylab qilingan. Quyidagi har bir element tasdiqlanganidan keyin faollashtirish alohida o'zgarishdir:
 
 - [ ] Barcha stacked Radar PRs birlashtirilgan va bo'shatish uchi CI yashil rangda
-- [ ] Sukut bo'yicha `RADAR_ENABLED` o'chirilgan holda OSS Radar marshrutlarini o'rnating va cheking
+- [ ] Sukut bo'yicha `RADAR_ENABLED` hali ham o'chirilgan holda OSS Radar marshrutlarini o'rnating va cheking
 - [ ] Nomlangan Radar hostida `GET /planos`, `/termos`, `/privacidade` va `/reembolso` tutun
 - [ ] Xususiy xizmatda identity/contact/address operatori va egasi tomonidan tasdiqlangan yuridik tekshiruvni yozib oling
 - [ ] Exercise Stripe Checkout va imzolangan vebhuk faqat test rejimida
@@ -399,7 +398,7 @@ Rivojlanish bump commit git plumbing bilan qurilgan (hech qanday ishlaydigan dar
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

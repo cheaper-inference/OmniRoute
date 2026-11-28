@@ -13,12 +13,12 @@ Agent Skills ውጫዊ ኤጀንቶችን፣ MCP ደንበኞችን እና A2A �
 
 ## አጠቃላይ እይታ
 
-ካታሎጉ **45 Agent Skills** (23 REST API + 21 CLI + 1 የውቅር የሥራ ፍሰት) ይዟል። እያንዳንዱ ክህሎት የሚከተሉት አሉት፦
+ካታሎግ ይዟል** 45 ወኪል ችሎታዎች** (23 REST API + 21 CLI + 1 የማዋቀር የስራ ፍሰት)። እያንዳንዱ ችሎታ አለው:
 
-- **መደበኛ ID** (`omni-auth`፣ `cli-serve`፣ ወዘተ)
-- በ`skills/{id}/SKILL.md` ውስጥ YAML frontmatter (`name`፣ `description`) + ዝርዝር markdown ይዘት ያለው **SKILL.md** ፋይል
-- ከOpenAPI ዝርዝር መግለጫ እና ከCLI መዝገብ የተወሰዱ **REST መጨረሻ ነጥቦች** (የAPI ክህሎቶች) ወይም **CLI ንዑስ ትዕዛዞች** (የCLI ክህሎቶች)
-- በቀጥታ ለማምጣት **GitHub raw URL**፦ `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ሀ** ቀኖናዊ ID** (`omni-auth`፣ `cli-serve`፣ ወዘተ.)
+- ሀ**SKILL.md** ፋይል በ `skills/{id}/SKILL.md` በ YAML frontmatter (`name`፣ `description`) + የበለፀገ ምልክት ማድረጊያ አካል
+- **REST የመጨረሻ ነጥቦች** (API ችሎታዎች) ወይም**CLI ንዑስ ትዕዛዞች** (CLI skills) ከ OpenAPI spec እና CLI መዝገብ የተገኘ
+- ሀ**GitHub ጥሬ URL** ለቀጥታ ማምጣት `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## የሽፋን API
+## ሽፋን API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

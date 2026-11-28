@@ -93,51 +93,30 @@ marsruutimist või mudeli valikut — vt allpool kirjeldatud eraldiseisvat nõus
 
 ---
 
-## Andmete sünkroonimine on ERALDI nõusolekut nõudev — privaatsuslubadus
+## Andmete sünkroonimine on SEPARATE opt-in — privaatsuslubadus
 
-Muutuja `RADAR_ENABLED` sisselülitamine avab ainult kasutajaliidese. Voo sünkroonimiseks on vaja teist,
-sõltumatut nõusolekut, mis salvestatakse väljal `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migratsioon `136_radar_cache_settings.sql`). `syncRadar()` kontrollib enne mis tahes võrgupäringu tegemist nii lippu _kui ka_
-nõusolekut:
+`RADAR_ENABLED` sisselülitamine avab ainult UI lukustuse. Voo sünkroonimiseks on vaja teist sõltumatut luba, mis on salvestatud kaustas `radar_settings.opt_in` (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`). `syncRadar()` kontrollib lippu _ja_ lubamist enne mis tahes võrgukõne tegemist:
 
 ```
-Lipp väljas      → { status: "disabled" }   — võrgupäringut ei tehta
-Nõusolek puudub  → { status: "opt_out" }    — võrgupäringut ei tehta
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Kui mõlemad on sisse lülitatud, on sünkroonimise käik järgmine:
+Kui mõlemad on sisse lülitatud, on sünkroonimistee:
 
-1. `GET <voo baas-URL>/v1/catalog/latest` päisega `x-omniroute-radar-schema: 2` ja valikulise
-   päisega `Authorization: Bearer <toetaja võti>` (vt allpool). Kui skeemipäis puudub, kasutavad serverid vaikimisi eraldi
-   allkirjastatud v1 üleminekuartefakti, et vanemad installitud kliendid saaksid jätkuvalt
-   värskendusi.
-2. See on ainult allalaadimiseks mõeldud rakendusvoog, kuid siiski HTTPS-päring. Majutatud
-   taristu saab tavapäraseid ühenduse metaandmeid, näiteks lähte-IP-aadressi. Kui toetaja
-   võti on seadistatud, saadab sünkroonimine ka selle võtme Bearer-päises, et teenus saaks
-   kasutusõiguse tuvastada. Eespool toodud tõenduspiiris määratletud privaatserveri täpses redaktsioonis
-   kasutab voopäringute arvestus võtmeräse, koondkasutust ja IP-aadressi iga päev vahetuvat kärbitud HMAC-i
-   käsitsi tehtavaks väärkasutuse kontrolliks; need tabelid ei talleta võtit ega IP-aadressi töötlemata kujul.
-   Taristu juurdepääsulogid ja krüpteeritud väljastuse väljundkast on eraldiseisvad käituspiirid.
-3. OmniRoute ei saada Radari teenusele kunagi viipu, vastuseid, vestlusi, teenusepakkuja autentimisandmeid, mudeliliiklust,
-   tööaega, latentsust ega kohaliku teenusepakkuja konfiguratsiooni.
-4. Vastus kontrollitakse, valideeritakse ja puhverdatakse kohapeal (vt
-   [Turbemudel](#security-model)). Radaril on täpselt neli serveripoolset võrguteed:
-   kataloogi jaoks `syncRadar()`, soovituste jaoks `syncRadarReferrals()` ning
-   ainult toetajatele mõeldud pakkumiste ja Inteli jaoks `syncRadarOffers()` / `syncRadarIntel()`.
+1. `GET <feed base URL>/v1/catalog/latest` koos `x-omniroute-radar-schema: 2` ja valikulise `Authorization: Bearer <supporter key>` päisega (vt allpool). Kui skeemi päis puudub, kasutavad serverid vaikimisi eraldi allkirjastatud v1 üleminekuartefakti, nii et vanemad installitud kliendid saavad jätkuvalt värskendusi.
+2. See on ainult allalaaditav rakenduste voog, kuid see on siiski HTTPS taotlus. Hostitav infrastruktuur võtab vastu tavalisi ühenduse metaandmeid, näiteks allika IP. Kui tugivõti on konfigureeritud, saadab sünkroonimine selle võtme ka kandja päises, et teenus saaks õiguse lahendada. Ülaltoodud tõendite piiril tuvastatud täpse privaatserveri redaktsiooni korral kasutab vootaotluse arvestus võtmeräsi, koondkasutust ja IP iga päev pöörlevat kärbitud HMAC -d väärkasutuse käsitsi ülevaatamiseks; need tabelid ei säilita töötlemata kujul ei võtit ega IP. Infrastruktuuri juurdepääsulogid ja krüptitud tarneväljundkaust on eraldi tööpiirid.
+3. OmniRoute ei saada kunagi radariteenusele viipasid, vastuseid, vestlusi, pakkuja mandaate, mudeli liiklust, tööaega, latentsust ega kohaliku pakkuja konfiguratsiooni.
+4. Vastus kontrollitakse, kinnitatakse ja salvestatakse vahemällu kohapeal (vt [Turvamudel](#security-model) ). Radaril on täpselt neli serveripoolset võrguteed: `syncRadar()` kataloogi jaoks, `syncRadarReferrals()` suunamiste jaoks ning `syncRadarOffers()` / `syncRadarIntel()` ainult toetajatele mõeldud pakkumiste ja Inteli jaoks.
 
-**Toetaja võti** on valikuline Bearer-tõend (`radar_settings.supporter_key`),
-mis võimaldab vooteenusel otsustada, millist taset pakkuda (vt
-[Tasemed](#tiers-community-and-live)). See:
+Kataloogikontroll toimub iga 24 tunni järel. Kui kinnitatud voog kannab endiselt vahemällu salvestatud versiooni ja taset, säilitab sünkroonimine vahemällu salvestatud kasuliku koormuse, uuendab `fetchedAt` ja järgmine kontroll tehakse 24 tundi hiljem, mitte järgmise tunnise linnukesega.
 
-- Salvestatakse **puhkeolekus krüpteeritult** samade AES-256-GCM-i `encrypt()`/`decrypt()`
-  abifunktsioonidega (`src/lib/db/encryption.ts`), mida kasutatakse teenusepakkuja autentimisandmete jaoks.
-- Määratakse päringuga `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) ja seda
-  **ei tagastata kunagi** — vastus sisaldab maskitud kuju (`omr_****abcd`).
-- Selle muutmine või eemaldamine tühistab atomaarselt kataloogi, soovituste, pakkumiste ja Inteli puhvrid. Järgmine
-  sünkroonimine või lugemine tuvastab uue kasutusõiguse serveri poolel; võtme salvestamine ei tee iseenesest
-  võrgupäringut ega kasuta ära ühekordset aktiveerimisvõtit.
-- See saadetakse sünkroonimise GET-päringus vooteenusele Bearer-tõendina — võtme kohta ei välju kliendist
-  midagi muud.
+The** toetaja võti** on valikuline kandja tunnus (`radar_settings.supporter_key`), mis võimaldab vooteenusel otsustada, millist taset teenindada (vt [Tasemed](#tiers-community-and-live) ). See on:
+
+- Salvestatud** krüpteeritud puhkeolekus** samade AES-256-GCM `encrypt()`/`decrypt()` abimeestega (`src/lib/db/encryption.ts`), mida kasutatakse pakkuja mandaatide jaoks.
+- Määrake `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) ja kaudu** pole kunagi vastu kajanud** — vastus tagastab maskeeritud vormi (`omr_****abcd`).
+- Selle muutmine või tühjendamine muudab kataloogi, viited, pakkumised ja Inteli vahemälud kehtetuks. Järgmine sync/read lahendab serveripoolse uue õiguse; võtme salvestamine ise ei tee võrgupäringut ega tarbi ühekordset aktiveerimisvõtit.
+- Saadetud kanaliteenusele kandja märgina sünkroonimisel GET — midagi muud võtme kohta ei lahku kliendist kunagi.
 
 ---
 
@@ -401,84 +380,45 @@ version, tier }` — juhtpaneel kuvab just seda väärtust, mitte kunagi keha t�
 
 ---
 
-## Lugemisaegse ülekihi liitmise reeglid
+## Lugemisaja ülekatte liitmise reeglid
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) liidab puhverdatud voo **staatilise alusandmestiku
-peale** **lugemise ajal** funktsioonis `getRadarCatalog()`. Alusandmestiku massiivi
-(`FREE_MODEL_BUDGETS`) ei muudeta kunagi — igal väljakutsel arvutatakse värske
-`MergedEntry[]`.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) liidab vahemällu salvestatud voo** läbi** the static baseline at** read time** , inside `getRadarCatalog()`. Baasjoone massiivi (`FREE_MODEL_BUDGETS`) ei muteerita kunagi — a `MergedEntry[]` arvutatakse iga kõne korral värskelt.
 
-Neli reeglit tähtsuse järjekorras:
+Neli reeglit paremusjärjestuses:
 
-1. **Voog ei kirjuta kunagi kohalikku ülekirjutust üle.** Väljade kaupa: kui operaator on
-   kirje välja kohandanud (`localOverrides` kaart, mille võti on `provider:modelId`),
-   jäetakse voo vastava välja väärtus vahele — operaatori väärtus jääb peale.
-2. **`enabled: false` keelab kirje ja säilitab päritolu.** Kirje välja lülitav
-   vookirje määrab liidetud tulemuses `enabled: false` ja `disabledBy: "radar"`,
-   et kasutajaliides saaks selgitada, _miks_ kirje muutus saadaval olevast keelatuks.
-3. **Kasutaja lisatud kirje, mida voos ei ole, jääb puutumatult alles.** Kirjed, mis
-   eksisteerivad ainult alusandmestikus (või lisati kohalikult) ja millele ei vasta ükski vookirje,
-   edastatakse muutmata kujul.
-4. **Hauakiviga tähistatud kirjet ei taastata kunagi.** Kui operaator kustutas kirje
-   sõnaselgelt (`tombstones` kogum), ei too voo hilisemas versioonis uuesti lisatud
-   `provider:modelId` seda tagasi.
+1. **Voog ei kirjuta kunagi kohalikku alistamist üle.** Välja kohta: kui operaator on kirjel välja kohandanud (`localOverrides` kaart, võtmega `provider:modelId`), jäetakse selle konkreetse välja voo väärtus vahele. — operaatori väärtus võidab.
+2. **`enabled: false` keelab sisestuse lähtekohaga.** Vookirje, mis lülitab kirje välja, seab `enabled: false` ja `disabledBy: "radar"` ühendatud tulemusele, nii et UI saab selgitada, _miks_ kirje muutus saadaolevast keelatuks.
+3. **Kasutaja lisatud kirje, mida voos pole, jääb puutumatuks.** Kirjed, mis eksisteerivad ainult lähtejoonel (või lisati kohapeal) ja millel puudub vastav voo sisestus, läbivad muutmata kujul.
+4. **Hauakiviga kantud sissekanne ei tõuse kunagi ellu.** Kui operaator kustutas selgesõnaliselt kirje (`tombstones` set), ei too uues versioonis `provider:modelId` uuesti lisamine seda tagasi.
 
-Muudetavad väljad ja hauakivid talletatakse tabelis
-`radar_local_model_state` (migratsioon `153_radar_local_model_state.sql`). Avalik andmebaasiadapter
-(`src/lib/db/radar.ts`) teisendab need read `localOverrides` kaardiks ja
-`tombstones` kogumiks, mida kasutab `applyFeed()`; tootmiskeskkonna `getRadarCatalog()` laadib selle oleku
-pärast funktsioonilipu, puhvri ja skeemi kontrollide läbimist. Operaator saab muuta ainult välju `displayName` ja
-`enabled`. Teenusepakkuja/mudeli identiteeti, voo päritolu, kvooti, võimekusi, kasutustingimusi
-ega seadistusandmeid ei saa selle liidese kaudu muuta.
+Redigeeritavad väljad ja hauakivid säilivad `radar_local_model_state` (migratsioon `153_radar_local_model_state.sql`). Avalik DB adapter (`src/lib/db/radar.ts`) teisendab need read `localOverrides` -kaardiks ja `tombstones` komplektiks, mida kasutab `applyFeed()`; tootmise `getRadarCatalog()` laadib, mis on pärast lipu, vahemälu ja skeemi väravate möödumist. Ainult `displayName` ja `enabled` on operaatoriga muudetavad. Selle pinna kaudu ei saa kirjutada Provider/model identiteeti, sööda päritolu, kvooti, võimalusi, ToS ja seadistusandmeid.
 
-Juhtpaneel pakub nelja kohalikku toimingut:
+Armatuurlaud kuvab neli kohalikku toimingut.
 
 - **Muuda** muudab kohalikku kuvatavat nime ja lubatud olekut.
-- **Lähtesta kohalikud muudatused** tühjendab mõlemad muudetavad väljad hauakivi muutmata.
-- **Peida** loob hauakivi, et hilisemad voovärskendused ei saaks rida uuesti luua.
-- **Taasta** eemaldab hauakivi; eraldi salvestatud ülekirjutus jääb kehtima.
+- **Reset local changes** tühjendab mõlemad redigeeritavad väljad ilma hauakivi muutmata.
+- **Hide** loob hauakivi, nii et hilisemad voovärskendused ei saa rida uuesti luua.
+- **Restore** removes the tombstone; kõik eraldi salvestatud alistamised jäävad kehtima.
 
-Voo `enabled: false` jääb ohutuserandiks: see on aegunud kohaliku
-`enabled: true` suhtes ülimuslik, hoiab liidetud kirje keelatuna ja salvestab `disabledBy: "radar"`.
+Voog `enabled: false` jääb ohutuse erandiks: see võidab aegunud kohaliku `enabled: true`, hoiab ühendatud kirje keelatud ja salvestab `disabledBy: "radar"`.
 
-Kataloogi väljaanded kasutavad `schemaVersion: 2`. `contextWindow` ning väljad `tools`, `vision` ja
-`thinking` on üksteisest sõltumatult `number | null` / `boolean | null`: `null` tähendab teadmata väärtust,
-samas kui `false` tähendab, et D16-kinnitatud ametlik teenusepakkuja allikas ütleb sõnaselgelt, et võimekus puudub.
-OmniRoute'i sisemise registri või mudelispetsifikatsiooni lippe ei muudeta kunagi otse voo faktideks. Klient
-aktsepteerib endiselt v1 hetktõmmiseid; kuna vana koostaja kasutas puudumise kohatäitena väärtust `false`, normaliseeritakse
-v1 `false` teadmata väärtuseks, samas kui v1 `true` jääb faktiks. Tundmatute skeemiversioonide korral tõrjutakse andmed
-turvaliselt ja viimane kehtiv puhver jääb kättesaadavaks. Igal v2 mudelil, millel on nullist erinev konteksti- või
-võimekuseväärtus, peab olema autentimisandmeid mittenõudev HTTPS-i `metadataEvidenceUrls[]`; vastasel juhul skeemi valideerimine
-nurjub ja puhvrit ei asendata. Kataloogitabel kuvab kõiki kolme olekut kujul `✓`, `✕` ja `?`.
+Kataloogiväljaannetes kasutatakse `schemaVersion: 2`. `contextWindow` ning `tools`, `vision` ja `thinking` on sõltumatult `number | null` / `boolean | null`: `null` tähendab tundmatut, samas kui `false` tähendab, et D16-confirmed ametlik pakkuja allikas ütleb selgesõnaliselt, et see võimalus puudub. Sisemisi OmniRoute registry/model-spec lippe ei reklaamita kunagi otse faktide edastamiseks. Klient aktsepteerib endiselt v1 hetktõmmiseid; kuna vana ehitaja kasutas puudumise kohahoidjana `false`, normaliseeritakse v1 `false` tundmatuks, samas kui v1 `true` jääb faktiliseks. Tundmatud skeemi versioonid ebaõnnestuvad ja viimane kehtiv vahemälu jääb kättesaadavaks. Iga v2 mudel, mille context/capability ei ole null, peab kandma mandaadivaba HTTPS `metadataEvidenceUrls[]`; vastasel juhul skeemi valideerimine nurjub ja vahemälu ei asendata. Kataloogitabel esitab kõik kolm olekut kui `✓`, `✕` ja `?`.
 
-### Juhendatud kombinatsioonid ja MCP-juurdepääs
+### Juhendatud kombod ja MCP juurdepääs
 
-Kinnitatud `familyId` väärtused säilivad lugemisaegses ülekihis ja juhivad puhast
-moodulit `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Mudeliperekonda soovitatakse
-ainult siis, kui vähemalt kahel erineval teenusepakkujal on aktiivsed ühendused ja nad pakuvad täpselt kureeritud mudeli
-ID-d. Keelatud mudelid, mitteaktiivsed teenusepakkujad, puuduvad mudeli ID-d, ühe liikmega perekonnad ja mitmetähenduslikud
-aliase või prefiksi vasted tõrjutakse turvaliselt. Soovitused kasutavad olemasolevat `priority` strateegiat, järjestades
-suurima korduva kuueelarve esimeseks; kasutajaliides loob need ainult päringu `POST /api/combos` kaudu.
+Kinnitatud `familyId` väärtused jäävad lugemisaja ülekatte ellu ja juhivad puhast `buildRadarComboSuggestions()` moodulit (`src/lib/radar/comboSuggestions.ts`). Perekonda soovitatakse ainult siis, kui vähemalt kahel erineval teenusepakkujal on aktiivsed ühendused ja nad kuvavad täpselt kureeritud mudeli ID. Keelatud mudelid, passiivsed pakkujad, puuduv mudel IDs, üksikperekonnad ja mitmetähenduslikud alias/prefix vasted suletakse. Soovitused kasutavad olemasolevat `priority` -strateegiat, tellides kõigepealt suurima korduva kuueelarve; UI loob need ainult `POST /api/combos` kaudu.
 
-Juhendatud kasutajaliides asub aadressil `/dashboard/radar/combos`. See loeb ainult kohalikke
-lõpp-punkte `GET /api/radar/catalog` ja `GET /api/combos/builder/options`. See ei käivita kunagi Radari sünkroonimist,
-ei loe teenusepakkuja identimisteavet ega kirjuta otse kombinatsioonide andmebaasi.
+Juhendatud UI elab aadressil `/dashboard/radar/combos`. See loeb ainult kohalikke `GET /api/radar/catalog` ja `GET /api/combos/builder/options` lõpp-punkte. See ei käivita kunagi radari sünkroonimist, ei loe teenusepakkuja mandaate ega kirjuta otse kombineeritud andmebaasi.
 
-MCP kliendid saavad sama kohalikku projektsiooni lugeda tööriistaga `omniroute_radar_catalog` (`read:radar`). Valikulisi
-filtreid `provider`, `familyId` ja `enabledOnly` rakendatakse pärast ühte kohalikku
-`GET /api/radar/catalog` päringut. Selle piiratud väljund sisaldab kataloogi metaandmeid ning teenusepakkujat/mudelit,
-kuvatavat nime, `familyId` väärtust, kvooti, võimekusi, lubatud olekut, päritolu ja `disabledBy` väärtust; seadistus-URL-e,
-samme, ühendusi, e-posti aadresse, võtmeid ega soovitusandmeid ei tagastata kunagi. See tööriist on
-kirjutuskaitstud ega kutsu kunagi välja `/api/radar/sync`.
+MCP kliendid saavad sama kohalikku projektsiooni lugeda `omniroute_radar_catalog` ga (`read:radar`). Valikulisi `provider`, `familyId` ja `enabledOnly` filtreid hinnatakse pärast ühte kohalikku `GET /api/radar/catalog` lugemist. Selle suletud väljund sisaldab kataloogi metaandmeid pluss provider/model, kuvatav nimi, `familyId`, kvoot, võimalused, lubatud olek, päritolu ja `disabledBy`; setup URLs, samme, ühendusi, e-posti aadresse, võtmeid ja viiteandmeid ei tagastata kunagi. See tööriist on kirjutuskaitstud ja ei kutsu kunagi välja `/api/radar/sync`. Kui vahemällu salvestatud voog on enne installitud kataloogi, on `meta.olderThanRelease` `true` ja tööriist tagastab mudelid installitud kataloogist, kus on rakendatud kohalikud alistamised ja hauakivid.
 
-### Päritolutähised
+### Provenance markers
 
-Iga ühendatud kirje sisaldab välja `origin`, mida kasutajaliides kuvab märgina:
+Igal ühendatud kirjel on `origin` väli, mille UI renderdab märgina:
 
-- `"baseline"` — staatilise väljalaskekataloogiga võrreldes muutmata.
-- `"radar"` — voog värskendas üht või mitut välja.
-- `"local"` — operaator on sellele kirjele määranud vähemalt ühe kohaliku alistuse (kohalikud
-  alistused on reegli 1 kohaselt alati voo suhtes ülimuslikud, olenemata sellest, mida voog ütleb).
+- `"baseline"` — staatilisest väljalaskekataloogist puutumata.
+- `"radar"` — Voog värskendas üht või mitut välja.
+- `"local"` — operaatoril on sellel kirjel vähemalt üks kohalik alistamine (kohalikud alistamised võidavad 1. reegli kohaselt voo alati, olenemata sellest, mida voog ütleb).
 
 ---
 

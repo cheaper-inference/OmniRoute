@@ -267,7 +267,7 @@ Ag am tosaithe, `migrationRunner.ts`:
 
 1. Cruthaíonn tábla `_omniroute_migrations` mura bhfuil sé ann
 2. Ceisteanna maidir le himscrúduithe a cuireadh i bhfeidhm cheana féin
-3. Cuirtear aon aistrithe nua i bhfeidhm in ord, gach ceann acu in idirbheart
+3. Cuirtear aon ascnaimh nua i bhfeidhm in ord, gach ceann díobh in idirbheart
 4. Taifeadtar gach ascnamh feidhmeach le stampa ama
 
 ```ts
@@ -307,7 +307,7 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 1. **Cruthaigh an comhad leis an gineadóir** : `npm run db:new-migration -- <description>` (mar shampla `npm run db:new-migration -- add combo priority`). Scríobhann sé `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` leis an am UTC reatha agus ceanntásc nóta tráchta, bogtar ar aghaidh soicind amháin má ghlactar leis an stampa ama sin, agus ní fhorscríobhtar comhad riamh. Ná roghnaigh uimhir de láimh.
 2. **Bain úsáid DDL sábháilte** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
 3. **Sonraí aislíonta go cúramach** : bain úsáid as `UPDATE ... WHERE ...` chun na sraitheanna atá ann cheana a láimhseáil
-4. **Seiceáil ordú agus ainmniú** : `npm run test:migrations:fresh` (gach ascnamh ar bhunachar sonraí folamh) agus `npm run check:migration-numbering`
+4. **Seiceáil ordú agus ainmniú** : `npm run test:migrations:fresh` (gach ascnamh ar bhunachar sonraí folamh) agus `npm run check:migration-numbering`. Ritheann an duán réamh-tiomantas husky `check:migration-numbering` leis féin nuair a dhéanann an tiomnú comhad a chéimniú faoi `src/lib/db/migrations/`, mar sin ní theipeann ar ainm a roghnaíodh de láimh nó ainm drochfhoirmithe (mar shampla `242_x.sql`) an tiomantas go háitiúil leis an teachtaireacht chéanna priontaí CI. Seiceálann an duán ainmneacha, dúbailt agus an tsraith reoite `001`–`241` amháin; tá an chomparáid leis an mbonn PR (imscrúduithe bainte, athainmnithe nó as-ord) fós i CI
 5. **Tástáil ar chóip** : níor rith riamh ascnaimh neamhthástála ar tháirgeadh
 6. **Teastaíonn aistriú freisin ó thábla a chruthaítear ó chód** : má chruthaíonn modúl freisin an tábla leisciúil (`CREATE TABLE IF NOT EXISTS`, coinnithe mar chonair féin-leigheas), caithfidh imirce é a chruthú leis an DDL céanna . Seachas sin, críochnóidh suiteáil ghlan agus suiteáil uasghrádaithe le scéimeanna éagsúla, ag brath ar cé acu an raibh cosán an chóid sin ar siúl. Déanann `tests/unit/db/lazy-table-migration-guard.test.ts` scanadh `src/` agus `open-sse/` agus teipeann ar `CREATE` leisciúil gan ascnamh (#20557). Sampla: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 

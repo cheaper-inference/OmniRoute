@@ -4,10 +4,9 @@
 
 ---
 
-> **Foydalanuvchilar uchun**: Oddiy qoʻllanma qidiryapsizmi? Bepul AI’dan foydalanish boʻyicha bosqichma-bosqich koʻrsatmalar uchun [Bepul tariflar qoʻllanmasi](../getting-started/FREE-TIERS-GUIDE.md)ni koʻring.
+> **Foydalanuvchilar uchun** : Oddiy qo'llanma qidiryapsizmi? Bepul AI olish bo'yicha bosqichma-bosqich ko'rsatmalar uchun [Bepul darajalar qo'llanmasiga](../getting-started/FREE-TIERS-GUIDE.md) qarang.
 
-> **Soʻnggi tadqiqot sanasi:** 2026-06-17 — har bir provayder boʻyicha veb-tadqiqot (rasmiy hujjatlar + soʻnggi 7 kundagi yangiliklar, adversarial verifikatsiyali 50 agentli tekshiruv) barcha bepul tarif kvotalari va ToS maʼlumotlarini yangiladi. **Qisman qayta audit: 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — quyidagi sanali qaydga qarang).
-> **Asosiy ishonchli manba (katalog):** `open-sse/config/freeModelCatalog.ts` (har bir MODEL boʻyicha byudjetlar, pool boʻyicha takrorlari chiqarilgan). Quyidagi token byudjeti raqamlari jonli veb-tadqiqotdan olingan va **taxminiy** hisoblanadi — [Metodologiya va cheklovlar](#methodology--caveats)ni koʻring.
+> **Oxirgi tekshirilgan:** 2026-11-23. Kvotaga ega har bir qator, har bir iste'foga chiqqan taklif va har bir karta eshigi o'sha kuni provayderning o'z sahifasida qayta ochildi (`config/quality/free-catalog-evidence.json`). Oldingi o'tishlar: 2026-06-17 har bir provayder tadqiqoti va 2026-09-02 qisman qayta tekshirish.** Haqiqat manbai (katalog):** `open-sse/config/freeModelCatalog.ts` (MODEL bo'yicha byudjetlar, puldan ajratilgan). Quyidagi token-byudjet raqamlari jonli veb-tadqiqotdan olingan va ular bir** yaqinlashish** — [Metodologiya va ogohlantirishlarga](#methodology--caveats) qarang.
 
 ## TL;DR — OmniRoute qancha bepul xulosani jamlaydi?
 
@@ -17,47 +16,136 @@ Bu raqamlar alohida uchinchi tomon hisoblarini va katalogdagi muvofiqlik shartla
 
 | Metrik                                               | Tokenlar / oy           | Ma'nosi                                                                                                                                                                                                                                                                                      |
 | ---------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hujjatli takroriy grant (barqaror)**               | **~ 1.62B**             | Erkin daraja** basseynlar** (har bir model katalogi), har bir umumiy hovuz hisoblangan** bir marta** . `/api/free-tier/summary` orqasidagi jonli manba va boshqaruv panelining bepul darajali byudjet sahifasi.** Ushbu raqamdan foydalaning.**                                              |
-| **+ birinchi oy ro'yxatdan o'tish kreditlari bilan** | **~ 2.22B**             | Doimiy + bir martalik roʻyxatdan oʻtish kreditlari (Z.AI 20M, DeepSeek 5M, …), har bir hisob uchun hisobdan chiqariladi.** Faqat birinchi oy** — takrorlanmaydi.                                                                                                                             |
+| **Hujjatli takroriy grant (barqaror)**               | **~ 90M**               | Erkin daraja** basseynlar** (har bir model katalogi), har bir umumiy hovuz hisoblangan** bir marta** . `/api/free-tier/summary` orqasidagi jonli manba va boshqaruv panelining bepul darajali byudjet sahifasi.** Ushbu raqamdan foydalaning.**                                              |
+| **+ birinchi oy ro'yxatdan o'tish kreditlari bilan** | **~ 153M**              | Doimiy + bir martalik roʻyxatdan oʻtish kreditlari (Z.AI 20M, DeepSeek 5M, …), har bir hisob uchun hisobdan chiqariladi.** Faqat birinchi oy** — takrorlanmaydi.                                                                                                                             |
 | **+ doimiy ravishda bepul, nashr etilgan qopqoqsiz** | _hisoblab bo'lmaydigan_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — real takroriy kirish, rate/concurrency-limited,** hisoblash uchun token qopqog'i yo'q** . Ro'yxatga kiritilgan, hech qachon yig'ilmagan (ularni `RPM×24/7` da sanash - biz rad etadigan inflyatsiya). |
-| **+ depozit - qulfni ochish**                        | **+~ 24M**              | Bir martalik** 10 dollar** OpenRouter to'ldirish o'zining bepul pulini 50 → 1000 req/day. dan oshiradi. Alohida xabar berilgan, shuning uchun u hech qachon barqaror raqamni oshirmaydi.                                                                                                     |
+| **+ depozit - qulfni ochish**                        | **+~ 24M**              | Bir martalik** $10** OpenRouter to'ldirish o'zining bepul pulini 50 → 1000 req/day. dan oshiradi. Alohida xabar berilgan, shuning uchun u hech qachon barqaror raqamni oshirmaydi.                                                                                                           |
 | **mintaqaviy shaxsni tekshirish ortida +**           | **+~ 6M**               | `modelscope` (Alibaba Cloud bog'lovchi + materik-Xitoy haqiqiy nomini tekshirish). Haqiqiy takrorlanuvchi kvota, `gatedRecurringTokens` / `gatedProviders` sifatida va asboblar panelida ko'rsatiladi. Hech qachon sarlavhaga kiritilmagan: +~ 6M mintaqaviy shaxsni tekshirish ortida.      |
-| Nazariy shift (barcha tarif chegaralari, 24/7)       | ~ 10B                   | Uzluksiz foydalanish uchun ekstrapolyatsiya qilingan har bir provayder tarif limiti summasi.** Kafolat emas** — buni sarlavha qilmang.                                                                                                                                                       |
 
-**Halol sarlavha:** _OmniRoute agregatlari**~ 1.62B hujjatlashtirilgan oyiga bepul tokenlar** (roʻyxatdan oʻtish kreditlari bilan birinchi oyda ~ 2.22B gacha) — bepul 26 ta hovuz va doimiy bepul, cheksiz — va RTK + Caveman siqish provayderlarining uzun qismi (15–95% token tejash) buni yanada kengaytiradi._
+**Halol sarlavha:** _OmniRoute kataloglari**~ 90M bepul tokenlar** Siz haqiqatda foydalanishingiz mumkin bo'lgan oy (ro'yxatdan o'tish kreditlari bilan birinchi oyda ~ 153M gacha), e'lon qilingan kvotaga ega 12 ta hovuzdan, shuningdek, doimiy bepul, cheklovsiz provayderlarning uzun qismidan. RTK + Caveman siqish (15–95% tokenni tejash) buni yanada kengaytiradi._
 
-> **Nima uchun bu avvalgi ~ 1.94B dan tushib ketdi.** 2026-06-17 yangilanishi bu yo‘qotish emas, halollik bilan bog‘liq tuzatishdir: `gemini` endi hovuzga ajratildi (har bir Flash variantini alohida hisoblash orqali oshirildi, 462M → 60M), `cloudflare-ai` haqiqiy 10k-Neurons/day (122M → 30M), qayta ro‘yxatdan o‘tish `doubao` qayta ro‘yxatdan o‘tish emas) va o'chirish darajalari olib tashlandi (`chutes`/`phind`/`kluster` to'xtatildi). Qisman `llm7` (to'g'ri 5M/day → 150M) va yangi bepul provayderlar (Kilo, OpenCode Zen, Z.AI GLM-Flash) tomonidan qoplanadi.
+> _Tarixiy eslatmalar. Quyidagi raqamlar o'sha paytdagi katalogni tavsiflaydi; ular bugungi raqamlar emas._
 >
-> **Keyinchalik v3.8.42 da ~ 1.37B ga tuzatildi:** Bepul koʻrib chiqish tugagandan soʻng `longcat` 150M/mo grantdan bir martalik 10M roʻyxatdan oʻtish kreditiga qayta tasniflandi. Xuddi shu halollik qoidasi — hech qanday provayder xatolik bilan tushib qolmadi.
+> **Nima uchun bu avvalgi 1,94 milliarddan kamaydi.** 2026-06-17 yangilanishi bu yo‘qotish emas, halollik bilan bog‘liq tuzatishdir: `gemini` endi hovuzga ajratildi (har bir Flash variantini alohida hisoblash orqali oshirildi, 462M → 60M), `cloudflare-ai` haqiqiy 10k-Neurons/day (122M → 30M) ga tuzatildi, `doubao` qayta ro‘yxatdan o‘tkazilmadi o'chirish darajalari olib tashlandi (`chutes`/`phind`/`kluster` to'xtatildi). Qisman `llm7` (to'g'ri 5M/day → 150M) va yangi bepul provayderlar (Kilo, OpenCode Zen, Z.AI GLM-Flash) tomonidan qoplanadi.
 >
-> **Felo Web iste'foga chiqqanidan keyin 2026-08-26 da yangilangan:** Felo Web bundan mustasno, uning GPL dan olingan provenance/licensing HOLD da qolishi; manba o'sha paytda 38 ta hovuz kaliti haqida xabar bergan. Hovuzlar soni jonli va CI-ga bog'langan (agar yuqoridagi raqamlar `computeFreeModelTotals()` dan chetga chiqsa,`check:docs-counts` tuzilmayapti).
+> **Keyinchalik v3.8.42 da 1,37 milliardga tuzatildi:** Bepul koʻrib chiqish tugagandan soʻng `longcat` 150M/mo takroriy grantdan bir martalik 10 million roʻyxatdan oʻtish kreditiga qayta tasniflandi. Xuddi shu halollik qoidasi — hech bir provayder xatolik bilan o'chirilgan.
 >
-> **2026-09-02 da provayderlarning o‘z sahifalariga nisbatan qayta tekshirilgan** (manbalar: `open-sse/config/freeModelCatalog.data.ts` da qayta tekshirilgan har bir yozuvning yonidagi `// evidence:` sharhlari): `gemini` va `ollama-cloud` endi token raqamlarini nashr etmaydi (Google 2025-12-23 da har bir model uchun bepul jadvalni olib tashladi; Ollama ning bepul rejasi “boshlang‘ich foydalanish kreditlari”) va endi ro‘yxatda** qopqoqsiz** , hech qachon yig'ilmagan (− 80M); `groq` - besh** har bir model uchun** 200K-TPD qopqoqlari (har biri 6M, + 15M) uchta nafaqaga chiqqan IDs tushirildi; `nara` - bitta 7M/day chelak (+ 60M, 210M). `mistral` ning 1B faqat hisob konsolida ko'rinadi — Metodologiya bo'limida _Dalil sinflari_ bo'limiga qarang.
+> **Felo Web iste'foga chiqqanidan keyin 2026-08-26 da yangilangan:** Felo Web bundan mustasno, uning GPL dan olingan provenance/licensing HOLD da qolsa; manba o'sha paytda 38 ta hovuz kaliti haqida xabar bergan.
+>
+> **2026-09-02 da provayderlarning o‘z sahifalariga nisbatan qayta tekshirilgan** (manbalar: `open-sse/config/freeModelCatalog.data.ts` da qayta tekshirilgan har bir yozuvning yonidagi `// evidence:` sharhlari): `gemini` va `ollama-cloud` endi token raqamlarini nashr etmaydi (Google 2025-12-23 da har bir model uchun bepul jadvalni olib tashladi; Ollama ning bepul rejasi “boshlang‘ich foydalanish kreditlari”) va endi ro‘yxatda** qopqoqsiz** , hech qachon yig'ilmagan (− 80M); `groq` - besh** har bir model uchun** 200K-TPD qopqoqlari (har biri 6M, + 15M) uchta nafaqaga chiqqan IDs tushib ketgan; `nara` - bitta 7M/day chelak (+ 60M, 210M). `mistral` ning 1B faqat hisob konsolida ko'rinadi — Metodologiya bo'limida _Dalil sinflari_ bo'limiga qarang.
 >
 > **Yangilangan sana: 2026-11-09 (#19334):** Ollama oʻzining bepul darajasini tugatgandan va barcha bulutli modellarni ishlatganingizcha toʻlashga oʻtgandan soʻng, `ollama-cloud` bepul katalogdan olib tashlandi.
 >
 > **2026-09-03 (#11773) da tuzatilgan:** `cerebras` 30M/mo grantdan (kartasiz 1 million tokens/day sinov muddati) bir martalik ro‘yxatdan o‘tish uchun to‘lov usulini talab qiluvchi $5 kreditga qayta tasniflandi. LongCat bilan bir xil halollik qoidasi.
 >
-> **Plus xKiro (2026-09-03):** yangi `xkiro-free` hovuzi (150M/mo) 35-takroriy hovuz kalitini qo'shadi. Felo Web HOLD da GPL-dan olingan provenance/licensing qolsa, istisno qoladi. Hozirda manba xabar bermoqda** 26 ta takrorlanuvchi pul kalitlari** va**~ 1.62B barqaror** — jonli, CI-shartli raqam (agar bu `computeFreeModelTotals()` dan chetga chiqsa,`check:docs-counts` tuzilmayapti).
+> **Plus xKiro (2026-09-03):** yangi `xkiro-free` hovuzi (150M/mo) 35-takroriy hovuz kalitini qo'shadi. Felo Web HOLD da GPL-dan olingan provenance/licensing qolsa, istisno qoladi. O'sha paytda manba 34 ta pul kaliti va oyiga 1,62 milliard token (barqaror) haqida xabar berdi.
 
-Eng katta** hujjatlashtirilgan** hissa qo'shuvchilar: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (har bir model uchun beshta qopqoq), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` bundan mustasno — uning 10M LongCat-2.0 granti bir martalik, KYC-shartli roʻyxatdan oʻtish krediti boʻlib, takroriy oylik byudjet emas.)
+Eng katta** hujjatlashtirilgan** bugungi kunda haqiqiy raqamga hissa qo'shuvchilar: `groq` 24M (har bir model uchun 4 ta qopqoq), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` bundan mustasno — uning 10M LongCat-2.0 granti bir martalik, KYC-ga ruxsat berilgan ro‘yxatdan o‘tish krediti bo‘lib, takroriy oylik byudjet emas.)
 
-> ⚠️ Nazariy shift (~ 10B) faqat tarif chegarasi bo'lgan provayderlar tomonidan oshirilgan.** e'lon qilingan token qopqog'i yo'q** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`) ularning raqamlari `RPM/TPM × 24/7 × 30d` — bo'ladigan nazariy maksimal hech qanday yagona hisobni qo'llab-quvvatlamaydi. Ular** istisno qilingan** himoyalangan raqamdan (o'rniga "doimiy bepul, qopqoqsiz" qatorida ko'rsatilgan). Bu raqobatchilarning ko'p milliardli da'volarini ishonchsiz qiladigan bir xil inflyatsiya.
+## Tuzatish, 2026 yil noyabr
+
+Ushbu nashrga qadar ushbu sahifa va README oyiga 1,62 milliard bepul tokenlarni aytdi. Bu noto'g'ri edi. To'rtta hovuz uning 93 foizini o'z zimmasiga oldi va to'rttasi ham provayderda o'zgardi, bizning katalogimiz o'zgarishsiz qoldi. Bugungi kunda haqiqiy ko'rsatkich - oyiga ~ 90M bepul tokenlar. Jadvalda har bir provayderda nima o'zgargan, biz xato qilgan narsaning yoniga qo'yamiz.
+
+| Provayderda nima o'zgargan (sana, manba)                                                                                                                                        | Nima xato qildik (nima, qachondan beri)                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Mistral: bepul rejim endi API kirishni o'z ichiga olmaydi (docs.mistral.ai, 2026-11-18 da o'qing)                                                                               | Biz 2026-09-02dagi konsol oʻqishidan oyiga 1 milliard tokenni hisoblashni davom ettirdik va uni boshqa tekshirmadik. |
+| Nara: Bepul rejada modellar yo'q (provayderning `router.bynara.id/api/plans`, 2026-11-18 da o'qing)                                                                             | Biz oyiga 210 million tokenni hisobladik                                                                             |
+| xKiro: har bir hisob uchun kuniga 500K token (xkiro.com, 2026-11-18 da o‘qing)                                                                                                  | Katalogda mavjud bo'lmagan 30 ta model IDs qoldi                                                                     |
+| LLM7: chegaralar sahifasi yo‘qoldi va hech qanday rasmiy sahifa bepul kvotani e’lon qilmaydi (2026-11-23)                                                                       | Biz oyiga 150 million tokenni sanab o'tmagan dalillarsiz hisobladik                                                  |
+| Groq: bepul hovuzdagi bitta model nafaqaga chiqdi (2026-09-14)                                                                                                                  | Hovuz eski hajmini saqlab qoldi                                                                                      |
+| AgentRouter: provayder har kuni 25 AQSh dollari miqdorida ro'yxatdan o'tish kreditini va taklifni ro'yxatdan o'tkazish uchun yana 50 dollarni ko'rsatadi (2026-11-23 da o'qing) | Biz 200 dollarlik ro'yxatdan o'tish kreditini sanab o'tdik                                                           |
+| Predibase: mahsulot tugadi                                                                                                                                                      | Biz hali ham birinchi oyda uning ro'yxatdan o'tish kreditini hisobladik                                              |
+| (yo'q)                                                                                                                                                                          | 16 ta provayder taklif tugaganidan keyin bepul taklif bayrog'ini saqlab qoldi                                        |
+| (yo'q)                                                                                                                                                                          | README har ikki haftada qayta tekshirishni va'da qildi. Bungacha oxirgisi 2026-09-20 da bo‘lgan                      |
+| (yo'q)                                                                                                                                                                          | Hujjatlarni tekshirish 0,05B driftga ruxsat berdi va millionlab raqamlarni o'qiy olmadi                              |
+
+Har bir satrga bitta kvotani yig'ish biznikini ham o'z ichiga olgan har qanday katalogni oshiradi. Shuning uchun qator yig'ilgan raqam o'z yorlig'ini olib yuradi va haqiqiysi uning ostida o'tiradi.
+
+## Nima muhim
+
+Bularning barchasi bajarilganda, qator bepul raqamlar uchun hisoblanadi:
+
+- Kvota takrorlanadi va provayderning o'z sahifasida e'lon qilinadi, katalogdagi qatorning yonida sanasi ko'rsatilgan.
+- Har bir provayder uchun bitta hisob. To'lov, karta, depozit yoki shaxsni tasdiqlovchi hujjatlar (KYC) talab qilinmaydi. Ro'yxatdan o'tish uchun telefon raqami, Telegram yoki Discord kerak bo'lgan kvota "ijtimoiy ro'yxatdan o'tgan" sifatida alohida ko'rsatilgan, hech qachon haqiqiy raqamda emas.
+- Hech bir provayder `tos: "avoid"` deb belgilanmagan va faqat provayderning rasmiy API.
+- Bir martalik ro'yxatdan o'tish kreditlari faqat birinchi oydagi raqamda hisobga olinadi va faqat karta so'ralmaganda. Kvotani ko'taradigan bir martalik omonat alohida ko'tariladi. Aktsiyalar hech qachon haqiqiy raqamda hisoblanmaydi.
+- Qidiruv, ovozli va media provayderlari kirish turi bo'yicha va har bir token raqamidan tashqarida qoladilar. Qayta sanash ularni qo'shganda, ular ushbu sahifada o'z birliklarida (natijalar, belgilar, tasvirlar) o'z hisoblarini oladi; ular hech qachon bir-biriga qo'shilmaydi yoki tokenga aylantirilmaydi.
+
+Har bir ommaviy hisob nimani anglatadi:
+
+- **Bepul kirish huquqiga ega provayderlar** (bugungi kunda 50 ta: API kaliti bilan 43 ta, kalitsiz 6 ta, asbob hisobi orqali 1 ta): bepul kirish imkonini beruvchi kamida bitta katalog qatoriga ega provayderlar.
+- **Erkin kirish bilan katalog qatorlari** (Bugun 214): har bir provayder va model uchun bitta qator.
+- **Chop etilgan kvotaga ega hovuzlar** (Bugun 12): haqiqiy raqam ortidagi umumiy kvotalar, har biri bir marta hisoblangan.
+- **Alohida bepul modellar** (185 bugun): ID modeli bo'yicha guruhlangan qatorlar.
+- **Bepul taklif bilan belgilandi** (bugungi kunda 140 + ): ro'yxatga olish kitobi `hasFree` ga ega bo'lgan har bir provayder, jumladan, qidiruv, ovozli va media provayderlari, sinov sinovlari va ro'yxatdan o'tish kreditlari.
+
+Har bir raqam kataloglanadi, har bir qo'ng'iroq uchun sinovdan o'tkazilmaydi: unda har bir marshrut hozir javob bermasligi emas, balki katalogda nimalar ro'yxati ko'rsatilgan.
+
+## Biz qanday hisoblaymiz
+
+2026-11-23 da tekshirilgan bir xil katalogdan uchta raqam keltirilgan:
+
+- **Haqiqiy raqam, oyiga ~ 90M bepul tokenlar.** Har bir umumiy kvota bir marta hisoblanadi, shuning uchun bir kunlik nafaqa orqasida beshta model bitta nafaqa hisoblanadi. Bu har bir provayderda bitta hisobdan foydalanishi mumkin. Bir martalik roʻyxatdan oʻtish kreditlari bilan birinchi oyda ~ 153M.
+- **Katta raqam, ~ 11.3B ketma-ket jamlangan** , tugallangan takliflar kiritilgan. Boshqa kataloglar shu tarzda hisoblanadi. Bularning deyarli barchasi tarix: 98,6% endi mavjud bo'lmagan takliflardan. Biz uni faqat yorlig'i va yonidagi haqiqiy rasm bilan chop etamiz.
+- **Jonli katalog, ~ jonli qatorga 159M** : yakunlangan takliflarsiz bir xil qator-qator summasi.
+
+Qator-qator usuli (`row-sum-v1`) to'rtta qoidaga amal qiladi:
+
+1. Har bir sanab o'tilgan qator bir hovuzga ega bo'lgan qatorlarni birlashtirmasdan, xuddi shunday qo'shiladi.
+2. Faqat tokenlarda chop etilgan kvotalar qo'shiladi. So'rovlar, kreditlar yoki neyronlarda chop etilgan kvota nolga teng ( `open-sse/config/freeModelCatalog.ts` da `FREE_QUOTA_UNIT` ).
+3. Roʻyxatdan oʻtish kreditlari, depozitni oshirish va oʻchirilgan qatorlar (`enabled: false`) hisobga olinmaydi.
+4. Katta raqam yakunlangan takliflar daftarini (`open-sse/config/freeModelCatalog.retired.data.ts`) har bir qatorning oxirgi kvotasiga qo'shadi. Unga `RETIRED_LEDGER_SINCE` kiritilgandan beri faqat qatorlar tugatildi va har bir satr tugaganidan keyin 12 oy o'tib ketadi.
+
+Agar qator-qator hisoblash usuli odatiy bo'lib qolsa yoki boshqaruvchi shunday qaror qabul qilsa, katta raqam har bir sahifani tark etadi va faqat haqiqiy raqam qoladi.
+
+## O'chirildi / bepul daraja yo'q
+
+Bepul taklifi tugagan yoki tasdiqlana olmagan provayderlar. Ular `hasFree: false` bilan registrda qoladilar (yoki bepul katalogdan nafaqaga chiqqanlar) va hech qachon hech qanday bepul raqamda hisoblanmaydilar. Bu so'rov bo'yicha OmniRoute dan olib tashlangan provayderlar ro'yxati emas (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Provayder                | beri       | Nima uchun                                                                                             | Manba                                         |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| `mistral`                | 2026-11-23 | Bepul rejim endi API kirishni o'z ichiga olmaydi                                                       | docs.mistral.ai (foydalanish chegaralari)     |
+| `nara`                   | 2026-11-23 | Bepul rejada hech qanday model yo'q                                                                    | `router.bynara.id/api/plans`                  |
+| `llm7`                   | 2026-11-23 | Hech bir rasmiy sahifa bepul kvotani nashr etmaydi                                                     | provayder sayti                               |
+| `navy`                   | 2026-11-23 | Rasmiy sahifalarda bepul kvotani tasdiqlab bo'lmadi                                                    | api.navy                                      |
+| `bluesminds`             | 2026-11-23 | Foydalanish uchun provayderdan sotib olingan kredit kerak                                              | `api.bluesminds.com/api/status`               |
+| `arcee-ai`               | 2026-11-23 | Faqat to'langan narx                                                                                   | docs.arcee.ai (narx)                          |
+| `huggingface`            | 2026-11-23 | Bepul hisoblar kredit sotib olishi yoki PRO-ga yangilanishi kerak                                      | huggingface.co (Inference Providers narxlari) |
+| `huggingchat`            | 2026-11-23 | Hugging Face xulosasi uchun sotib olingan kreditlar yoki PRO kerak                                     | huggingface.co (Inference Providers narxlari) |
+| `ainative`               | 2026-11-23 | Hobbyist rejasi 3 kunlik sinovdan so'ng to'lanadi                                                      | provayder narxlari sahifasi                   |
+| `stepfun`                | 2026-11-23 | Faqat foydalanish uchun to'lov narxi                                                                   | provayder narxlari sahifasi                   |
+| `predibase`              | 2026-11-23 | Mahsulot ishlab chiqarish to'xtatildi                                                                  | predibase.com                                 |
+| `poolside`               | 2026-10-31 | To'g'ridan-to'g'ri xulosa yopildi                                                                      | platform.poolside.ai                          |
+| `amazon-q`               | 2026-05-15 | Yangi bepul roʻyxatdan oʻtish yoʻq                                                                     | provayder sahifasi                            |
+| `chat-oripe`             | 2026-11-23 | API hosti HTTP 530 ga javob beradi                                                                     | API xost                                      |
+| `naga-ai`                | 2026-11-23 | Naga.ac provayderining dublikati                                                                       | api.naga.ac                                   |
+| `dxnt`                   | 2026-11-23 | Ro'yxatdan o'tish bonusi mavjud, lekin hech bir model uni qabul qilmaydi                               | dxnt.com                                      |
+| `ollama-cloud`           | 2026-11-09 | Bulutli modellar token uchun to'lanadi yoki pullik rejalar bilan qoplanadi                             | ollama.com (#19334)                           |
+| `chutes`                 | 2026-03    | Bepul bosqich tugadi                                                                                   | provayder sahifasi                            |
+| `phind`                  | 2026-01    | Kompaniya yopildi                                                                                      | provayder sahifasi                            |
+| `kluster`                | 2026-06-09 | Quyosh botishi ( MITO ga ko'chirildi)                                                                  | provayder sahifasi                            |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo bepul bekor qilingan; Nemotron reklamasi 2026-06-20 da yakunlandi (qayta tasdiqlangan 2026-06-18) | provayder sahifasi                            |
+| `aimlapi`                | 2026-06-18 | Bepul daraja pauza qilindi                                                                             | provayder sahifasi                            |
+| `yi`                     | 2026-06-18 | Yi-Light nafaqaga chiqdi, ishlagancha to'lang                                                          | provayder sahifasi                            |
+| `featherless-ai`         | 2026-06    | Hozirgi bepul daraja yo'q                                                                              | provayder sahifasi                            |
+| `chipotle`               | 2026-09-15 | Uning orqasida joylashgan chat vidjeti har bir marshrutda 404 ga javob beradi (#13131, #4037)          | amelia.chipotle.com                           |
+
+`iflytek` / `sparkdesk` ToS-ehtiyotkorlik eslatmasi bilan ro'yxatda qolish: Spark Lite bepul, ammo ToS proksi-server va releydan foydalanishni cheklaydi.
 
 ---
 
-## 2026-06-17 yangilanishi — 2026-06-05 dan beri nimalar o'zgardi
+## 2026-06-17 — yangilang 2026-06-05 dan beri nima o'zgardi
 
-50 ta agentli veb-tadqiqot (rasmiy hujjatlar + so'nggi 7 kunlik yangiliklar, adversarial tarzda tekshirilgan) butun katalogni yangiladi. Asosiy jihatlar:
+50 agentli veb-tadqiqot chiptasi (rasmiy hujjatlar + last-7-days yangiliklari, qarama-qarshilik bilan tasdiqlangan) butun katalogni yangiladi. Diqqatga sazovor joylar:
 
-- **O'chirilgan / bepul tarif yo'q (2026):** `chutes` (bepul tarif 2026-03 da tugadi), `phind` (kompaniya 2026-01 da yopildi), `kluster` (2026-06-09 da to'xtatildi → MITO), `gitlawb` + `gitlawb-gmi` (MiMo bepul versiyasi 2026-05-24 da bekor qilindi, Nemotron promosi 2026-06 da tugadi — 2026-06-18 da qayta tekshirildi), `aimlapi` (bepul tarif vaqtincha to'xtatildi — 2026-06-18 da qayta tekshirildi), `yi` (Yi-Light chiqarib tashlandi, pay-as-you-go — 2026-06-18 da qayta tekshirildi), `featherless-ai` (hozirgi bepul tarif yo'q), `chipotle` (Chipotle'ning "Pepper AI" — provayder bog'langan, teskari muhandislik qilingan `amelia.chipotle.com` Amelia chat vidjeti endi har bir yo'nalishda, jumladan ildizda ham, 404 qaytaradi; backend ishlab chiqarishdan chiqarilgan/ko'chirilgan, 2026-09-15 da tasdiqlangan — katalogdan to'liq o'chirildi, #13131/#4037). `iflytek` / `sparkdesk` ro'yxatda qoladi, lekin ToS-ogohlantirish eslatmasi bilan (Spark Lite bepul; ToS proksi/reley orqali foydalanishni cheklaydi).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01 da to'xtatildi va `2.5 Pro` bepul tarifdan chiqdi (2026-04); bepul tarif endi **faqat Flash oilasi** (2.5/3/3.1/3.5 Flash + Gemma). Katalog endi Flash oilasini **bitta pulga jamlaydi** (ilgari har bir variant alohida sanalgani uchun ko'rsatkich shishirilgan edi: 462M → 60M).
-- **Tuzatilgan raqamlar:** `cloudflare-ai` 122M → **30M** (haqiqiy kuniga 10k Neuron), `doubao` bir martalik ro'yxatdan o'tish krediti sifatida qayta tasniflandi (takroriy emas), `llm7` 4M → **150M** (hujjatlashtirilgan kuniga 5M token), `together` "-Free" endpointlari to'xtatildi → $25 ro'yxatdan o'tish krediti ham o'chirildi (kamida $5 lik xarid talab qilinadi, bepul sinov yo'q), `longcat` Preview tugadi + Flash modellari chiqarib tashlandi → faqat **LongCat-2.0**, bir martalik **10M** tokenlik ro'yxatdan o'tish krediti sifatida qayta tasniflandi (KYC bilan cheklangan, takroriy emas).
-- **Poolside to'g'ridan-to'g'ri inference tugayapti (2026-10-20 da tekshirildi):** [rasmiy platforma](https://platform.poolside.ai/) **2026-10-31** da yopilishini e'lon qiladi va foydalanuvchilarga o'z modellarini self-hosting uchun Hugging Face'dan yuklab olishni tavsiya qiladi. To'g'ridan-to'g'ri `poolside` provayderi ushbu ogohlantirishni o'z ichiga oladi. Qo'lda tuzilgan bepul katalogda to'g'ridan-to'g'ri Poolside yozuvlari yo'q; uning Poolside nomli yozuvlari `kilo-gateway` ga tegishli. Ushbu e'lon Kilo, Cline, NVIDIA yoki boshqa shlyuzlar tomonidan taqdim etiladigan modellarning mavjudligini tasdiqlamaydi, shuning uchun bu yozuvlar shu asosda chiqarib tashlanmaydi.
-- **Yangi bepul provayderlar aniqlandi:** ⭐ **Kilo Code** (`kilo-gateway` — aylanma "Auto Free" to'plami: NVIDIA Nemotron 3 oilasi, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 ta aylanma bepul kodlash modeli, 2026-10-20 da yangilangan), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash doimiy bepul + 20M ro'yxatdan o'tish bonusi), hamda `arcee-ai` Trinity Large Preview.
-- **Yangi halol darajalar** (Metodologiyaga qarang): _doimiy-bepul-lekin-chegaralanmagan_ toifasi (haqiqiy takroriy kirish, sanaladigan token chegarasi yo'q) va _depozit-ochish kuchaytirgichi_ (OpenRouter $10 → oyiga +24M), ikkalasi ham **alohida** ko'rsatiladi, shunda ular hech qachon asosiy ko'rsatkichni shishirmaydi.
+- **O'chirildi / bepul daraja yo'q:** [o'z bo'limiga](#removed--no-free-tier) ko'chirildi.
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01 da yopildi va `2.5 Pro` bepul darajani tark etdi (2026-04); bepul bosqich endi** Faqat Flash oilasi** (2.5/3/3.1/3.5 Flash + Gemma). Katalog hozir** basseynlar** Flash oilasi (har bir variantni alohida hisoblash orqali oshirilgan: 462M → 60M).
+- **Tuzatilgan raqamlar:** `cloudflare-ai` 122M →** 30M** (real 10k-Neurons/day), `doubao` bir martalik ro‘yxatdan o‘tish krediti sifatida qayta tasniflangan (takroriy emas), `llm7` 4M →** 150M** (hujjatlangan 5M tokens/day), `together` "-Free" soʻnggi nuqtalar toʻxtatilgan → $25 roʻyxatdan oʻtish krediti ham olib tashlandi (minimum $5 xarid talab qilinadi, bepul sinov muddati yoʻq), `longcat` Koʻrib chiqish tugadi + Flash modellari →**LongCat-2.0** faqat, bir martalik sifatida qayta tasniflanadi** 10M**-token ro'yxatdan o'tish krediti (KYC-ga o'rnatilgan, takrorlanmaydigan).
+- **Hovuz bo'yida to'g'ridan-to'g'ri xulosa chiqarish (tasdiqlangan 2026-10-20):** [rasmiy platforma](https://platform.poolside.ai/) yopilganligini e'lon qiladi** 2026-10-31** va foydalanuvchilarni o'z-o'zini xosting uchun Hugging Face'dan o'z modellarini yuklab olishga yo'naltiradi. To'g'ridan-to'g'ri `poolside` provayderi bu ogohlantirishni bajaradi. Qo'lda tayyorlangan bepul katalogda to'g'ridan-to'g'ri Poolside yozuvlari yo'q; uning Poolside nomidagi yozuvlari `kilo-gateway` ga tegishli. Ushbu e'lon Kilo, Cline, NVIDIA yoki boshqa shlyuzlar tomonidan taqdim etilgan modellarning mavjudligini aniqlamaydi, shuning uchun bu ro'yxatlar shu asosda bekor qilinmaydi.
+- **Yangi bepul provayderlar topildi:** ⭐** Kilo kodi** (`kilo-gateway` — aylanadigan "Avtomatik bepul" to'plami: NVIDIA Nemotron 3 oilasi, StepFun, Hovuz bo'yi, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — 10 aylanadigan bepul kodlash modellari, 2026-10-20 yangilangan), ⭐** Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash doimiy bepul + 20M roʻyxatdan oʻtish bonusi) va `arcee-ai` Trinity Large Preview.
+- **Yangi halol darajalar** (Uslubga qarang): _doimiy bepul, lekin cheklanmagan_ toifa (haqiqiy takroriy kirish, hisoblash uchun token chegarasi yo'q) va _depozitni ochishni kuchaytirish_ (OpenRouter $10 → +24M/mo), ikkalasi ham paydo bo'ldi** alohida** shuning uchun ular hech qachon sarlavhani shishirmaydilar.
 
-> Quyida keltirilgan batafsil provayderlar bo'yicha jadval **2026-06-05 snapshoti** hisoblanadi; yuqoridagi o'zgarishlar uni almashtiradi. Jonli, kanonik manba — har bir model bo'yicha katalog `open-sse/config/freeModelCatalog.ts`.
+> Har bir provayder uchun batafsil jadval quyida joylashgan** 2026-06-05 surati** ; yuqoridagi deltalar uning o'rnini bosadi. Jonli, kanonik manba har bir model uchun `open-sse/config/freeModelCatalog.ts` katalogidir.
 
 ---
 
@@ -115,7 +203,7 @@ kelardi — bu ajratish ataylab saqlangan.
 
 ## Metodologiya va ogohlantirishlar
 
-- Raqamlar** yuqori chegaradagi taxminlar** har bir provayderning hujjatlashtirilgan bepul darajali chegaralaridan** 2026-06-17** , veb-tadqiqot tomonidan to'plangan. Bepul darajalar doimiy ravishda o'zgarib turadi — raqamga tayanishdan oldin qayta tekshiring.
+- Raqamlar** yuqori chegaradagi taxminlar** har bir provayderning hujjatlashtirilgan bepul daraja chegaralaridan, oxirgi tekshirilgan** 2026-11-23** kvota bilan har bir qator uchun. Bepul darajalar doimiy ravishda o'zgarib turadi — raqamga tayanishdan oldin qayta tekshiring.
 - **Kirish aslida nimaga kafolat beradi.** Hech bir yozuv har bir satr uchun ishonchlilik reytingiga ega emas va API hech — xizmat qilmaydi. Ikkita fakt bir-biridan farq qiladi, chunki ular xulosa chiqarishdan ko‘ra qo‘lda tuziladi: 44 ta yozuv mustaqil hujjatlashtirilgan qattiq to‘xtash joyiga ega (ulardan 39 tasi xKiro qatorlari, ularning barchasi bir kunlik nafaqani taqsimlaydi) va 22 ta yozuvda tezkor treningni ochib berish. `hardStopGuaranteed` faqat provayderning o'z shartlariga ko'ra, bepul nafaqadan oshib ketish sizni indamay hisob-kitob qilishni boshlashdan ko'ra so'rovni rad etishini aytganida o'rnatiladi, yozuvning yonidagi izohda manba; u hech qachon `true` ga o'rnatilmaydi va hech kim tasdiqlamagan yozuv sozlanmagan bo'lib qoladi. Shunday qilib, yo'qolgan qattiq to'xtash bayrog'i "o'rnatilmagan" degan ma'noni anglatadi, "sizga ma'lum" emas.**STRICT rejimi** ( `freeAccessPolicy=strict` marshrutlash qo'riqchisi) faqat bayroq ko'tarilgan yozuvlarga ishonadi; har bir boshqa erkin daraja `no-hard-stop` sifatida chiqarib tashlanadi (qarang: `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Qo'riqchi hovuzni filtrlaganda, operator tomonidan ko'rinadigan jurnal istisnolar soni va uning `no-hard-stop` ulushi haqida xabar beradi.
 - `estMonthlyFreeTokens` = faqat takrorlanuvchi oylik tokenlar.** Bir martalik ro'yxatdan o'tish kreditlari takrorlanmaydi** va 0 deb hisoblang. To'xtatilgan darajalar ham 0 ga teng.
 - Kundalik token cap → `monthly = daily × 30`. Faqat RPD hujjatlashtirilgan → `RPD × ~800 output tokens × 30`. Faqat RPM/TPM (kunlik chegarasiz) →** qopqoqsiz** (pastga qarang).
@@ -126,15 +214,15 @@ kelardi — bu ajratish ataylab saqlangan.
 
 ---
 
-## Nega bizning raqamimiz boshqa agregatorlarnikidan kichik
+## Nima uchun bizning raqamimiz boshqa agregatorlarga qaraganda kichikroq
 
-Bu sohadagi aksariyat «oyiga bepul tokenlar» ko‘rsatkichlari har bir model uchun berilgan raqamlar yig‘indisidir. Bizniki ataylab bunday hisoblanmagan:
+Bu maydondagi aksariyat "oyiga bepul tokenlar" raqamlari har bir modeldagi teglar yig'indisidir. Bizniki, ataylab shunday emas:
 
-- **Har bir umumiy havza faqat bir marta hisoblanadi.** Mistral bepul tarifi har bir tashkilot uchun oyiga bitta 1B limit beradi; uni beshta model ostida ko‘rsatish bu limitni 5B qilmaydi. Har bir model bo‘yicha qo‘shib chiqilsa, o‘z katalogimizdagi ko‘rsatkich **~7.4B** bo‘lardi (2026-09-03 kuni qayta hisoblangan; bu ko‘rsatkich CI orqali nazorat qilinmaydi — katalog har safar o‘zgarganda uni qayta o‘lchang) — sarlavhadagi ko‘rsatkich **~1.47B**, chunki har bir provayderdagi bittadan hisob amalda shuncha sarflashi mumkin.
-- **Kunlik limitlar oylik ko‘rsatkichga aylantiriladi, tezlik limitlari esa yo‘q.** Hujjatlarda ko‘rsatilgan tokens/day limiti `× 30` tarzida; hujjatlarda ko‘rsatilgan requests/day limiti esa `RPD × ~800 tokens × 30` tarzida hisoblanadi; faqat requests-per-minute ko‘rsatkichini e’lon qiladigan provayder uchun oylik raqam **berilmaydi** va u _limitsiz_ deb ko‘rsatiladi, hech qachon umumiy yig‘indiga qo‘shilmaydi. Tezlik limitini 24/7 ga ko‘paytirish — biz rad etadigan sun’iy oshirishdir.
-- **Mintaqaviy shaxsni tasdiqlash ortidagi kvotalar alohida ko‘rsatiladi** (`+~6M behind regional identity verification`), chunki aksariyat o‘quvchilar ulardan foydalana olmaydi.
-- **Ro‘yxatdan o‘tish kreditlari faqat birinchi oy uchun beriladi** va doimiy ko‘rsatkichga qo‘shilmasdan, ikkinchi raqam sifatida ko‘rsatiladi.
-- **Ko‘rsatkich CI tomonidan nazorat qilinadi.** `npm run check:docs-counts` katalog asosida umumiy raqamlarni qayta hisoblaydi va ushbu fayl, README yoki budjet kartasidagi qiymatlar ulardan farq qilsa, buildni muvaffaqiyatsiz qiladi.
+- **Har bir umumiy hovuz bir marta hisobga olinadi.** Bir nafaqa ortidagi beshta model beshta emas, bir nafaqadir. Xuddi shu katalogning satr-qator o'qilishi va uni nima uchun chop etishimiz " [Biz qanday hisoblaymiz"](#how-we-count) bo'limida.
+- **Kundalik chegaralar konvertatsiya qilinadi, stavkalar o'zgartirilmaydi.** Hujjatlangan tokens/day qopqog'i `× 30` aylanadi; hujjatlashtirilgan requests/day qopqog'i `RPD × ~800 tokens × 30` bo'ladi; faqat so'rovlar-daqiqada nashr bir provayder bor** yo'q** oylik ko'rsatkich va _uncapped_ sifatida ro'yxatga olinadi, hech qachon yig'ilmaydi. Stavka chegarasini 24/7 ga ko'paytirish biz rad etayotgan inflyatsiyadir.
+- **Mintaqaviy identifikatsiya tekshiruvi ortidagi kvotalar alohida ko'rsatilgan** (`+~6M behind regional identity verification`), chunki ko'pchilik o'quvchilar ulardan foydalana olmaydi.
+- **Ro'yxatdan o'tish kreditlari faqat birinchi oy uchun beriladi** va ikkinchi raqam sifatida xabar qilingan, hech qachon barqaror raqamga aralashmaydi.
+- **Hujjatlarni tekshirish nima qiladi.** `npm run check:docs-counts` (chiqarish rejimi) katalogdagi haqiqiy raqamni, birinchi oy ko‘rsatkichini va ikki satr-qator yig‘indini qayta hisoblab chiqadi va README, bu sahifa yoki Free Tiers Guide boshqa qiymatni chop etganda yoki katta raqamni yorlig‘i va haqiqiysisiz chop etganda ishlamay qoladi. Byudjet kartasi chiqarilganda xuddi shu faktlardan qayta tuziladi.
 
 ---
 
@@ -243,74 +331,74 @@ Bu sohadagi aksariyat «oyiga bepul tokenlar» ko‘rsatkichlari har bir model u
 
 ---
 
-## Har bir provayder uchun bepul daraja (Bytez/Nous tekshirildi 2026-10-15; qayta tekshirilgan qatorlar 2026-09-02; boshqalar 2026-06-17)
+## Har bir provayder uchun bepul daraja (katalog tekshirilgan 2026-11-23)
 
-> Har bir model katalogidan (`open-sse/config/freeModelCatalog.ts`) qayta tiklangan, hovuzdan olingan. Takroriy doimiy tokens/mo. `uncapped*` = bo‘yicha saralangan, doimiy bo‘sh, lekin nashr etilgan token qopqog‘i (rate/concurrency-limited) — haqiqiy ruxsati yo‘q,** emas** sarlavhaga jamlangan. `—` = faqat kredit uchun / kalitsiz / token miqdorini aniqlash mumkin emas.
+> Har bir model bo'yicha katalogdan qo'lda saqlanadi (`open-sse/config/freeModelCatalog.data.ts`); oxirgi tekshirilgan 2026-11-23. Har bir hovuzning haqiqiy oylik tokenlari boʻyicha saralangan (har bir umumiy hovuz bir marta hisoblanadi). `uncapped*` = doimiy ravishda bepul, lekin e'lon qilingan token qopqog'i yo'q (rate/concurrency-limited): haqiqiy kirish,** emas** haqiqiy raqamga jamlangan. `not counted` = haqiqiy raqam qoldiradigan takrorlanuvchi kvota (`avoid`, yoki mintaqaviy identifikatsiya tekshiruvi ortida). Taklifi tugatilgan provayderlar [O'chirilgan / bepul darajaga](#removed--no-free-tier) ega. `—` = faqat kredit uchun / kalitsiz / token miqdorini aniqlash mumkin emas.
 
-| Provayder        | Erkin turi                | Barqaror tokens/mo | Birinchi oylik kredit | ToS         | Modellar |
-| ---------------- | ------------------------- | ------------------ | --------------------- | ----------- | -------- |
-| `mistral`        | takrorlanuvchi            | ~ 1.00B            | —                     | ehtiyot     | 5        |
-| `nara`           | takrorlanuvchi            | ~ 210M             | —                     | ehtiyot     | 8        |
-| `llm7`           | takrorlanuvchi            | ~ 150M             | —                     | ehtiyot     | 4        |
-| `xkiro`          | takrorlanuvchi            | ~ 150M             | —                     | ehtiyot     | 39       |
-| `longcat`        | bir marta                 | —                  | 10M                   | ehtiyot     | 1        |
-| `cerebras`       | bir marta                 | —                  | $5 kredit             | ehtiyot     | 2        |
-| `cloudflare-ai`  | takrorlanuvchi            | ~ 30M              | —                     | ehtiyot     | 9        |
-| `groq`           | takrorlanuvchi            | ~ 30M              | —                     | ehtiyot     | 5        |
-| `api-airforce`   | takrorlanuvchi            | ~ 24M              | —                     | ehtiyot     | 7        |
-| `bluesminds`     | takrorlanuvchi            | ~ 7M               | —                     | noaniq      | 22       |
-| `sambanova`      | takrorlanuvchi            | ~ 6M               | —                     | ehtiyot     | 5        |
-| `arcee-ai`       | takrorlanuvchi            | ~ 5M               | —                     | ehtiyot     | 1        |
-| `bazaarlink`     | takrorlanuvchi            | ~ 4M               | —                     | ehtiyot     | 32       |
-| `openrouter`     | takrorlanuvchi            | ~ 1M               | —                     | ehtiyot     | 1        |
-| `cohere`         | takrorlanuvchi            | ~ 800K             | —                     | ehtiyot     | 6        |
-| `huggingchat`    | takrorlanuvchi            | ~ 500K             | —                     | ehtiyot     | 4        |
-| `morph`          | takrorlanuvchi            | ~ 400K             | —                     | Kelishdikmi | 2        |
-| `huggingface`    | takrorlanuvchi            | ~ 200K             | —                     | ehtiyot     | 6        |
-| `kiro`           | takrorlanuvchi            | ~ 25K              | —                     | qochish     | 12       |
-| `glm-cn`         | qopqoqsiz                 | yopilmagan\*       | ~ 20M                 | Kelishdikmi | 4        |
-| `baidu`          | qopqoqsiz                 | yopilmagan\*       | —                     | ehtiyot     | 1        |
-| `gemini`         | qopqoqsiz                 | yopilmagan\*       | —                     | ehtiyot     | 4        |
-| `kilo-gateway`   | qopqoqsiz                 | yopilmagan\*       | —                     | ehtiyot     | 7        |
-| `opencode-zen`   | qopqoqsiz                 | yopilmagan\*       | —                     | ehtiyot     | 10       |
-| `tencent`        | qopqoqsiz                 | yopilmagan\*       | —                     | ehtiyot     | 1        |
-| `vertex`         | ro'yxatdan o'tish krediti | —                  | ~ 300M                | ehtiyot     | 10       |
-| `agentrouter`    | ro'yxatdan o'tish krediti | —                  | ~ 200M                | ehtiyot     | 4        |
-| `predibase`      | ro'yxatdan o'tish krediti | —                  | ~ 25M                 | ehtiyot     | 1        |
-| `doubao`         | ro'yxatdan o'tish krediti | —                  | ~ 15M                 | noaniq      | 1        |
-| `ai21`           | ro'yxatdan o'tish krediti | —                  | ~ 10M                 | qochish     | 2        |
-| `deepseek`       | ro'yxatdan o'tish krediti | —                  | ~ 5M                  | Kelishdikmi | 2        |
-| `hyperbolic`     | ro'yxatdan o'tish krediti | —                  | ~ 5M                  | Kelishdikmi | 8        |
-| `nscale`         | ro'yxatdan o'tish krediti | —                  | ~ 5M                  | ehtiyot     | 6        |
-| `bytez`          | kredit (tavsiya)          | —                  | noma'lum              | noaniq      | 1        |
-| `deepinfra`      | ro'yxatdan o'tish krediti | —                  | ~ 1M                  | ehtiyot     | 22       |
-| `fireworks`      | ro'yxatdan o'tish krediti | —                  | ~ 1M                  | qochish     | 10       |
-| `nebius`         | ro'yxatdan o'tish krediti | —                  | ~ 1M                  | ehtiyot     | 1        |
-| `qoder`          | ro'yxatdan o'tish krediti | —                  | ~ 1M                  | ehtiyot     | 14       |
-| `scaleway`       | ro'yxatdan o'tish krediti | —                  | ~ 1M                  | Kelishdikmi | 6        |
-| `novita`         | ro'yxatdan o'tish krediti | —                  | ~ 500K                | ehtiyot     | 1        |
-| `agy`            | kalitsiz                  | —                  | —                     | qochish     | 16       |
-| `baichuan`       | kalitsiz                  | —                  | —                     | noaniq      | 1        |
-| `blackbox`       | kalitsiz                  | —                  | —                     | qochish     | 6        |
-| `coze`           | kalitsiz                  | —                  | —                     | qochish     | 1        |
-| `duckduckgo-web` | kalitsiz                  | —                  | —                     | qochish     | 6        |
-| `freemodel-dev`  | kalitsiz                  | —                  | —                     | noma'lum    | 4        |
-| `friendliai`     | kalitsiz                  | —                  | —                     | qochish     | 2        |
-| `iflytek`        | kalitsiz                  | —                  | —                     | qochish     | 1        |
-| `inference-net`  | kalitsiz                  | —                  | —                     | ehtiyot     | 3        |
-| `liquid`         | kalitsiz                  | —                  | —                     | noma'lum    | 1        |
-| `monsterapi`     | kalitsiz                  | —                  | —                     | noaniq      | 1        |
-| `muse-spark-web` | kalitsiz                  | —                  | —                     | qochish     | 3        |
-| `nlpcloud`       | kalitsiz                  | —                  | —                     | qochish     | 1        |
-| `nvidia`         | qopqoqsiz                 | yopilmagan\*       | —                     | ehtiyot     | 3        |
-| `pollinations`   | kalitsiz                  | —                  | —                     | ehtiyot     | 31       |
-| `publicai`       | kalitsiz                  | —                  | —                     | ehtiyot     | 3        |
-| `reka`           | kalitsiz                  | —                  | —                     | ehtiyot     | 2        |
-| `sensenova`      | kalitsiz                  | —                  | —                     | ehtiyot     | 1        |
-| `sparkdesk`      | kalitsiz                  | —                  | —                     | ehtiyot     | 1        |
-| `stepfun`        | kalitsiz                  | —                  | —                     | Kelishdikmi | 1        |
-| `t3-web`         | kalitsiz                  | —                  | —                     | qochish     | 23       |
-| `uncloseai`      | kalitsiz                  | —                  | —                     | ehtiyot     | 3        |
+| Provayder        | Erkin turi                | Haqiqiy tokens/mo                       | Birinchi oylik kredit | ToS         | Modellar |
+| ---------------- | ------------------------- | --------------------------------------- | --------------------- | ----------- | -------- |
+| `api-airforce`   | takrorlanuvchi            | ~ 24M                                   | —                     | ehtiyot     | 5        |
+| `groq`           | takrorlanuvchi            | ~ 24M (har bir model uchun 4 ta qopqoq) | —                     | ehtiyot     | 4        |
+| `cloudflare-ai`  | takrorlanuvchi            | ~ 23M                                   | —                     | ehtiyot     | 8        |
+| `xkiro`          | takrorlanuvchi            | ~ 15M                                   | —                     | ehtiyot     | 9        |
+| `bazaarlink`     | takrorlanuvchi            | ~ 1.4M                                  | —                     | ehtiyot     | 1        |
+| `openrouter`     | takrorlanuvchi            | ~ 1,2M                                  | —                     | ehtiyot     | 1        |
+| `cohere`         | takrorlanuvchi            | ~ 800K                                  | —                     | ehtiyot     | 6        |
+| `sambanova`      | takrorlanuvchi            | ~ 480K                                  | —                     | ehtiyot     | 2        |
+| `morph`          | takrorlanuvchi            | ~ 160K                                  | —                     | Kelishdikmi | 2        |
+| `glm-cn`         | qopqoqsiz                 | yopilmagan\*                            | 20M                   | Kelishdikmi | 4        |
+| `agnes`          | qopqoqsiz                 | yopilmagan\*                            | —                     | Kelishdikmi | 3        |
+| `agnes-cn`       | qopqoqsiz                 | yopilmagan\*                            | —                     | Kelishdikmi | 3        |
+| `aion`           | qopqoqsiz                 | yopilmagan\*                            | —                     | Kelishdikmi | 4        |
+| `baidu`          | qopqoqsiz                 | yopilmagan\*                            | —                     | ehtiyot     | 1        |
+| `gemini`         | qopqoqsiz                 | yopilmagan\*                            | —                     | ehtiyot     | 4        |
+| `glm`            | qopqoqsiz                 | yopilmagan\*                            | —                     | Kelishdikmi | 2        |
+| `kilo-gateway`   | qopqoqsiz                 | yopilmagan\*                            | —                     | ehtiyot     | 12       |
+| `nvidia`         | qopqoqsiz                 | yopilmagan\*                            | —                     | ehtiyot     | 3        |
+| `onomeo`         | qopqoqsiz                 | yopilmagan\*                            | —                     | ehtiyot     | 2        |
+| `requesty`       | qopqoqsiz                 | yopilmagan\*                            | —                     | ehtiyot     | 2        |
+| `sealion`        | qopqoqsiz                 | yopilmagan\*                            | —                     | Kelishdikmi | 5        |
+| `tokenharbor`    | qopqoqsiz                 | yopilmagan\*                            | —                     | ehtiyot     | 2        |
+| `coze`           | takrorlanuvchi            | hisoblanmaydi (`avoid`)                 | —                     | qochish     | 1        |
+| `inference-net`  | takrorlanuvchi            | hisoblanmaydi                           | —                     | ehtiyot     | 3        |
+| `kiro`           | takrorlanuvchi            | hisoblanmaydi (`avoid`)                 | —                     | qochish     | 7        |
+| `modelscope`     | takrorlanuvchi            | mintaqaviy shaxsni tekshirish ortida    | —                     | ehtiyot     | 2        |
+| `nlpcloud`       | takrorlanuvchi            | hisoblanmaydi (`avoid`)                 | —                     | qochish     | 1        |
+| `reka`           | takrorlanuvchi            | hisoblanmaydi                           | —                     | ehtiyot     | 2        |
+| `t3-web`         | takrorlanuvchi            | hisoblanmaydi (`avoid`)                 | —                     | qochish     | 23       |
+| `bytez`          | kredit (tavsiya)          | —                                       | —                     | noaniq      | 1        |
+| `doubao`         | ro'yxatdan o'tish krediti | —                                       | 15 mln                | noaniq      | 1        |
+| `longcat`        | ro'yxatdan o'tish krediti | —                                       | 10M                   | ehtiyot     | 1        |
+| `deepseek`       | ro'yxatdan o'tish krediti | —                                       | 5M                    | Kelishdikmi | 2        |
+| `hyperbolic`     | ro'yxatdan o'tish krediti | —                                       | 5M                    | Kelishdikmi | 8        |
+| `nscale`         | ro'yxatdan o'tish krediti | —                                       | 5M                    | ehtiyot     | 6        |
+| `deepinfra`      | ro'yxatdan o'tish krediti | —                                       | 1 mln                 | ehtiyot     | 22       |
+| `qoder`          | ro'yxatdan o'tish krediti | —                                       | 1 mln                 | ehtiyot     | 9        |
+| `scaleway`       | ro'yxatdan o'tish krediti | —                                       | 1 mln                 | Kelishdikmi | 6        |
+| `novita`         | ro'yxatdan o'tish krediti | —                                       | 500 ming              | ehtiyot     | 1        |
+| `agentrouter`    | ro'yxatdan o'tish krediti | —                                       | —                     | ehtiyot     | 1        |
+| `ai21`           | ro'yxatdan o'tish krediti | —                                       | —                     | qochish     | 2        |
+| `baichuan`       | ro'yxatdan o'tish krediti | —                                       | —                     | noaniq      | 1        |
+| `cerebras`       | ro'yxatdan o'tish krediti | —                                       | —                     | ehtiyot     | 2        |
+| `fireworks`      | ro'yxatdan o'tish krediti | —                                       | —                     | qochish     | 10       |
+| `freemodel-dev`  | ro'yxatdan o'tish krediti | —                                       | —                     | noma'lum    | 4        |
+| `monsterapi`     | ro'yxatdan o'tish krediti | —                                       | —                     | noaniq      | 1        |
+| `nebius`         | ro'yxatdan o'tish krediti | —                                       | —                     | ehtiyot     | 1        |
+| `publicai`       | ro'yxatdan o'tish krediti | —                                       | —                     | ehtiyot     | 3        |
+| `sensenova`      | ro'yxatdan o'tish krediti | —                                       | —                     | ehtiyot     | 1        |
+| `vertex`         | ro'yxatdan o'tish krediti | —                                       | —                     | ehtiyot     | 16       |
+| `agy`            | kalitsiz                  | —                                       | —                     | qochish     | 9        |
+| `aihorde`        | kalitsiz                  | —                                       | —                     | Kelishdikmi | 3        |
+| `blackbox`       | kalitsiz                  | —                                       | —                     | qochish     | 6        |
+| `duckduckgo-web` | kalitsiz                  | —                                       | —                     | qochish     | 6        |
+| `friendliai`     | kalitsiz                  | —                                       | —                     | qochish     | 2        |
+| `iflytek`        | kalitsiz                  | —                                       | —                     | qochish     | 1        |
+| `liquid`         | kalitsiz                  | —                                       | —                     | noma'lum    | 1        |
+| `muse-spark-web` | kalitsiz                  | —                                       | —                     | qochish     | 3        |
+| `ovhcloud`       | kalitsiz                  | —                                       | —                     | Kelishdikmi | 5        |
+| `pollinations`   | kalitsiz                  | —                                       | —                     | ehtiyot     | 24       |
+| `sparkdesk`      | kalitsiz                  | —                                       | —                     | ehtiyot     | 1        |
+| `uncloseai`      | kalitsiz                  | —                                       | —                     | ehtiyot     | 1        |
 
 ---
 

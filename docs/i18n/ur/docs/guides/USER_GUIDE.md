@@ -245,33 +245,41 @@ Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 کومبوز
+## 🎨 کومبوس
 
-آپ ہر کارڈ کے ہینڈل کو گھسیٹ کر براہِ راست **ڈیش بورڈ → کومبوز** میں کومبو کارڈز کی ترتیب بدل سکتے ہیں۔ ترتیب SQLite میں محفوظ ہوتی ہے اور دوبارہ لوڈ کرنے پر بحال ہو جاتی ہے۔
+آپ کومبو کارڈز کو براہ راست دوبارہ ترتیب دے سکتے ہیں۔** ڈیش بورڈ → کومبوس** ہر کارڈ پر ہینڈل گھسیٹ کر۔ آرڈر کو SQLite میں محفوظ کیا جاتا ہے اور دوبارہ لوڈ کرنے پر بحال کیا جاتا ہے۔
 
-### مثال 1: سبسکرپشن کا زیادہ سے زیادہ استعمال → سستا بیک اپ
+### ایک فراہم کنندہ، ماڈل، یا اکاؤنٹ تلاش کریں۔
 
-```
-ڈیش بورڈ → کومبوز → نیا بنائیں
+کومبو بنائیں یا ترمیم کریں میں، مرحلہ وار فراہم کنندہ، ماڈل، اکاؤنٹ، اور کومبو حوالہ چننے والوں میں ایک مقامی تلاش کا میدان شامل ہے۔ دکھائے گئے نام، شناخت کنندہ، فراہم کنندہ کے عرف یا ماڈل کے ذریعہ تلاش کریں، پھر کسی نتیجے پر کلک کریں یا تیر والے بٹنوں کا استعمال کریں اور Enter کریں۔ ایک سے زیادہ تلاش کی اصطلاحات سبھی کو مماثل ہونا چاہیے۔ تلاش کو صاف کرنے یا Escape کو دبانے سے منتخب قدر میں کوئی تبدیلی نہیں ہوتی۔
 
-نام: premium-coding
-ماڈلز:
-  1. cc/claude-opus-4-7 (بنیادی سبسکرپشن)
-  2. glm/glm-4.7 (سستا بیک اپ، $0.6/1M)
-  3. minimax/MiniMax-M2.7 (سب سے سستا متبادل، $0.3/1M)
+تلاش کرتے وقت خودکار اکاؤنٹ کا انتخاب نظر آتا ہے۔ اس کے اختیاری اکاؤنٹ کی پابندی کی فہرست میں ایک الگ فلٹر ہے: مرئی نتائج سے باہر منتخب اکاؤنٹس منتخب رہتے ہیں، اور شمار میں وہ شامل ہوتے ہیں۔ ای میل کی رازداری آن ہونے کے دوران پوشیدہ ای میل کے ٹکڑے تلاش کے قابل نہیں ہوتے ہیں۔ قدم شامل کریں اور کامبو کو معمول کے مطابق محفوظ کریں۔ کوئی سوال ٹائپ کرنے سے کچھ محفوظ یا ٹیسٹ نہیں ہوتا ہے۔
 
-CLI میں استعمال کریں: premium-coding
-```
+وہی مقامی تلاش کنکشن ٹیسٹ ماڈلز، کسٹم CLI ڈیفالٹ اور عرفی ماڈلز، اور محفوظ شدہ پراکسی انتخاب کے لیے دستیاب ہے۔ موجودہ محفوظ کرنے، لاگو کرنے، اور جانچ کے اقدامات الگ رہتے ہیں۔
 
-### مثال 2: صرف مفت (صفر لاگت)
+### مثال 1: سبسکرپشن کو زیادہ سے زیادہ → سستا بیک اپ
 
 ```
-نام: free-combo
-ماڈلز:
-  1. if/kimi-k2.7-code (مفت رسائی کے طور پر درج؛ فراہم کنندہ کی حدود لاگو ہو سکتی ہیں)
-  2. kr/qwen3-coder-next (Kiro کا مفت متبادل)
+Dashboard → Combos → Create New
 
-لاگت: فی الحال $0 کے طور پر درج؛ شرائط اور دستیابی تبدیل ہو سکتی ہیں
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### مثال 2: صرف مفت (زیرو لاگت)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -431,7 +439,7 @@ omniroute autostart disable
 ### VPS تعیناتی
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +521,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -752,7 +760,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 ### زنجیروں میں OmniRoute
 
-ایک اور OmniRoute گیٹ وے کو بطور a شامل کیا جا سکتا ہے۔** اپنی مرضی کے مطابق اوپن اے آئی سے مطابقت رکھتا ہے۔** فراہم کنندہ ہم مرتبہ کی `/v1` بیس URL اور اس پیر کے ذریعہ جاری کردہ ایک وقف شدہ، کم سے کم استحقاق والی API کلید استعمال کریں۔
+ایک اور OmniRoute گیٹ وے کو بطور a شامل کیا جا سکتا ہے۔** اپنی مرضی کے مطابق OpenAI سے مطابقت رکھتا ہے۔** فراہم کنندہ ہم مرتبہ کی `/v1` بیس URL اور ایک وقف شدہ، کم از کم استحقاق والی API کلید استعمال کریں۔
 
 باہمی یا ملٹی ہاپ چینز کے لیے، ہر گیٹ وے پر آپٹ ان لوپ گارڈ کو فعال کریں:
 
@@ -770,7 +778,7 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-صرف واضح طور پر اجازت یافتہ پیر URL کو بھیجی گئی درخواستیں `X-OmniRoute-Peer-Trace` ہیڈر وصول کرتی ہیں۔ ایک گیٹ وے HTTP `508 Loop Detected` کے ساتھ بار بار ہونے والے ID یا ختم شدہ ہاپ بجٹ کو مسترد کرتا ہے۔ عام اپ اسٹریم فراہم کنندگان کو کوئی ہم مرتبہ میٹا ڈیٹا نہیں ملتا ہے۔
+صرف واضح طور پر اجازت یافتہ پیر URL کو بھیجی گئی درخواستیں `X-OmniRoute-Peer-Trace` ہیڈر وصول کرتی ہیں۔ ایک گیٹ وے HTTP `508 Loop Detected` کے ساتھ بار بار ہونے والے ID یا ختم شدہ ہاپ بجٹ کو مسترد کرتا ہے۔ عام اپ اسٹریم فراہم کنندگان کو کوئی ہم مرتبہ میٹا ڈیٹا موصول نہیں ہوتا ہے۔
 
 پیر چیننگ ڈیٹا بیس کی نقل یا میزبان فیل اوور نہیں ہے۔ ہر گیٹ وے آزاد SQLite سٹیٹ، کیشز، ریٹ کاؤنٹرز، اور سیشنز رکھتا ہے۔ active/passive یا active/active دستیابی کے لیے ہیلتھ چیک شدہ ریورس پراکسی یا کلائنٹ فیل اوور کا استعمال کریں، اور کبھی بھی ایک SQLite ڈیٹا بیس کو ایک سے زیادہ چلنے والے OmniRoute مثالوں میں نہ لگائیں۔
 
@@ -826,7 +834,7 @@ curl http://localhost:20128/api/models/catalog
 - OmniRoute یا کنٹینر دوبارہ شروع ہونے کے بعد فوری سرنگیں خود بخود بحال نہیں ہوتی ہیں۔ ضرورت پڑنے پر انہیں ڈیش بورڈ سے دوبارہ فعال کریں۔
 - ٹنل URLs عارضی ہیں اور جب بھی آپ سرنگ کو stop/start تو بدل جاتے ہیں۔
 - بند کنٹینرز میں شور مچانے والے QUIC UDP بفر وارننگ سے بچنے کے لیے HTTP/2 ٹرانسپورٹ کے لیے مینیجڈ کوئیک ٹنل ڈیفالٹ
-- `CLOUDFLARED_PROTOCOL=quic` یا `auto` سیٹ کریں اگر آپ منظم نقل و حمل کے انتخاب کو اوور رائڈ کرنا چاہتے ہیں۔
+- `CLOUDFLARED_PROTOCOL=quic` یا `auto` سیٹ کریں اگر آپ منظم ٹرانسپورٹ کے انتخاب کو اوور رائڈ کرنا چاہتے ہیں۔
 - `CLOUDFLARED_BIN` سیٹ کریں اگر آپ مینیجڈ ڈاؤن لوڈ کے بجائے پہلے سے انسٹال شدہ `cloudflared` بائنری استعمال کرنا چاہتے ہیں
 - Cloudflare کوئیک ٹنل، Tailscale فنل، اور ngrok ٹنل پینلز کو دکھایا یا چھپایا جا سکتا ہے** ترتیبات → ظاہری شکل** . پینل کو چھپانے سے چلتی ہوئی سرنگ نہیں رکتی۔
 
@@ -846,7 +854,7 @@ curl http://localhost:20128/api/models/catalog
 | ----------------- | ---------------------------------------------------------------------------------------------------- |
 | **کھیل کا میدان** | source/target فارمیٹس کو منتخب کریں، ایک درخواست چسپاں کریں، اور ترجمہ شدہ آؤٹ پٹ فوری طور پر دیکھیں |
 | **چیٹ ٹیسٹر**     | پراکسی کے ذریعے لائیو چیٹ پیغامات بھیجیں اور مکمل request/response سائیکل کا معائنہ کریں۔            |
-| **ٹیسٹ بینچ**     | ترجمہ کی درستگی کی تصدیق کرنے کے لیے متعدد فارمیٹ کے امتزاج میں بیچ ٹیسٹ چلائیں۔                     |
+| **ٹیسٹ بینچ**     | ترجمہ کی درستگی کی تصدیق کرنے کے لیے متعدد فارمیٹ کے مجموعوں میں بیچ ٹیسٹ چلائیں۔                    |
 | **لائیو مانیٹر**  | ریئل ٹائم ترجمہ دیکھیں کیونکہ درخواستیں پراکسی کے ذریعے آتی ہیں۔                                     |
 
 **مقدمات استعمال کریں:**
@@ -882,12 +890,12 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` اور `cost-optimized`
 - تمام امیدواروں میں `auto` — سکور پر مبنی
 - `lkgp` (آخری معروف اچھا فراہم کنندہ) — آخری کامیاب فراہم کنندہ کو پن کرتا ہے، پھر قواعد پر واپس آتا ہے
-- `context-optimized` — سب سے بڑی مفت سیاق و سباق والی ونڈو والا ماڈل چنتا ہے۔
-- `context-relay` — فالو اپ موڑ کے لیے طویل سیاق و سباق کے ماڈلز کو زنجیروں میں ڈالتا ہے۔
+- `context-optimized` — سب سے پہلے معلوم سیاق و سباق کی ونڈو کے ساتھ ماڈل کو آزماتا ہے۔
+- `context-relay` — ترجیحی آرڈر کے علاوہ ایک ہینڈ آف سمری جب بات چیت دوسرے اکاؤنٹ میں منتقل ہو جاتی ہے
 
 #### بیرونی چسپاں سیشن ہیڈر
 
-بیرونی سیشن وابستگی کے لیے (مثال کے طور پر، ریورس پراکسی کے پیچھے Claude Code/Codex ایجنٹس)، بھیجیں:
+بیرونی سیشن کے تعلق کے لیے (مثال کے طور پر، ریورس پراکسی کے پیچھے Claude Code/Codex ایجنٹس)، بھیجیں:
 
 ```http
 X-Session-Id: your-session-key
@@ -957,7 +965,7 @@ curl -X POST http://localhost:20128/api/combos \
 
 #### 2. فری ٹائر آٹو فیل اوور کومبو
 
-API لاگت کے بغیر اپ ٹائم کو زیادہ سے زیادہ کرنے کے لیے متعدد فری ٹائر اور کیلیس فراہم کنندگان کو زنجیروں میں ڈالتا ہے۔
+API لاگت کے بغیر اپ ٹائم کو زیادہ سے زیادہ کرنے کے لیے متعدد فری ٹائر اور کیلیس فراہم کنندگان کی زنجیریں۔
 
 - **حکمت عملی** : `Least Used` یا `Round Robin` (کوٹے میں بوجھ تقسیم کرتا ہے)
 - **ماڈلز** :
@@ -990,12 +998,12 @@ omniroute combo create free-stack \
 
 OmniRoute پانچ اجزاء کے ساتھ فراہم کنندہ کی سطح کی لچک کو نافذ کرتا ہے:
 
-1. **قطار اور پیسنگ کی درخواست کریں۔** — سسٹم کی سطح کی درخواست کی تشکیل:
+1. **قطار اور پیکنگ کی درخواست کریں۔** — سسٹم کی سطح کی درخواست کی تشکیل:
    - **درخواستیں فی منٹ (RPM)** — فی منٹ فی اکاؤنٹ زیادہ سے زیادہ درخواستیں۔
    - **درخواستوں کے درمیان کم سے کم وقت** — درخواستوں کے درمیان ملی سیکنڈ میں کم از کم فرق
    - **زیادہ سے زیادہ سمورتی درخواستیں۔** — فی اکاؤنٹ زیادہ سے زیادہ بیک وقت درخواستیں۔
 
-2. **کنکشن کولڈاؤن** دوبارہ قابل کوشش ناکامیوں کے بعد ایک کنکشن کے لیے — فی تصنیف قسم کی ترتیب:
+2. **کنکشن کولڈاؤن** دوبارہ کوشش کے قابل ناکامیوں کے بعد ایک کنکشن کے لیے — فی تصنیف قسم کی ترتیب:
    - **بیس کولڈاؤن** دوبارہ کوشش کے قابل اپ اسٹریم ناکامیوں کے لیے — ڈیفالٹ کول ڈاؤن ونڈو
    - **اپ اسٹریم دوبارہ کوشش کرنے کے اشارے استعمال کریں۔** — آنرز مستند `Retry-After` یا ری سیٹ اشارے فراہم کرنے پر
    - **میکس بیک آف اسٹیپس** — بار بار ناکامیوں کے لیے زیادہ سے زیادہ ایکسپونینشل بیک آف لیول
@@ -1015,7 +1023,7 @@ OmniRoute پانچ اجزاء کے ساتھ فراہم کنندہ کی سطح ک
 
 4. **کولڈاؤن کا انتظار کریں۔** — اگر ہر امیدوار کنکشن پہلے سے ہی ٹھنڈا ہو رہا ہے تو، OmniRoute جلد سے جلد کول ڈاؤن کا انتظار کر سکتا ہے اور اسی کلائنٹ کی درخواست کو خود بخود دوبارہ آزما سکتا ہے۔
 
-5. **ریٹ لمیٹ آٹو ڈیٹیکشن** — جب اپ اسٹریم فراہم کنندگان واضح انتظار کی ونڈوز واپس کرتے ہیں، تو ترتیب فعال ہونے پر وہ اشارے مقامی کنکشن کولڈاؤن کو اوور رائیڈ کر دیتے ہیں۔
+5. **ریٹ لمیٹ آٹو ڈیٹیکشن** — جب اپ اسٹریم فراہم کنندگان واضح انتظار کی ونڈوز واپس کرتے ہیں، تو سیٹنگ فعال ہونے پر وہ اشارے مقامی کنکشن کولڈاؤن کو اوور رائیڈ کر دیتے ہیں۔
 
 **پرو ٹپ:** استعمال کریں۔** صحت** بندش کے بعد لائیو فراہم کنندہ بریکرز کا معائنہ اور دوبارہ ترتیب دینے کے لیے صفحہ۔ لچکدار صفحہ صرف ترتیب کو تبدیل کرتا ہے۔
 
@@ -1064,7 +1072,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | **AI**           | سوچنے والا بجٹ (پاس تھرو / آٹو پٹی / کسٹم / انکولی — دیکھیں [THINKING_BUDGET.md](./THINKING_BUDGET.md) ) , گلوبل سسٹم پرامپٹ، پرامپٹ کیشے کے اعدادوشمار                 |
 | **سیکورٹی**      | Login/Password ترتیبات، IP رسائی کنٹرول، `/models` کے لیے API auth، فراہم کنندہ کو بلاک کرنا، فوری انجیکشن گارڈ                                                         |
 | **روٹنگ**        | عالمی روٹنگ حکمت عملی (پھریں پہلے / راؤنڈ رابن / P2C / بے ترتیب / سب سے کم استعمال شدہ / لاگت کو بہتر بنایا گیا)، وائلڈ کارڈ ماڈل عرفی نام، فال بیک چینز، کومبو ڈیفالٹس |
-| **لچک**          | قطار، کنکشن کولڈاؤن، پرووائیڈر بریکر کنفیگریشن، اور انتظار کے لیے ٹھنڈا رویہ کی درخواست کریں۔                                                                           |
+| **لچک**          | قطار، کنکشن کولڈاؤن، پرووائیڈر بریکر کنفگ، اور انتظار کے لیے ٹھنڈا رویہ کی درخواست کریں۔                                                                                |
 | **اعلی درجے کی** | گلوبل پراکسی کنفیگریشن (HTTP/SOCKS5)، فی فراہم کنندہ پراکسی اوور رائیڈز                                                                                                 |
 
 جنرل اب صرف پڑھنے کے لیے لاگنگ اور کیشے نوٹس کی نقل نہیں کرتا ہے۔ ڈیٹا بیس کی برقراری اور اصلاح کی ترتیبات `/api/settings/database` کے ذریعے برقرار رہتی ہیں۔ دستی کیشے صاف کرنے میں `DELETE /api/cache` استعمال ہوتا ہے۔ درخواست اور پراکسی لاگ قطار کیپس کو `CALL_LOGS_TABLE_MAX_ROWS` اور `PROXY_LOGS_TABLE_MAX_ROWS` کے ذریعے کنٹرول کیا جاتا ہے۔
@@ -1096,7 +1104,7 @@ curl http://localhost:20128/api/usage/budget
 
 ### آڈیو ٹرانسکرپشن
 
-OmniRoute اوپن اے آئی کے موافق اختتامی نقطہ کے ذریعے آڈیو ٹرانسکرپشن کی حمایت کرتا ہے:
+OmniRoute اوپن اے آئی کے موافق اختتامی نقطہ کے ذریعے آڈیو ٹرانسکرپشن کو سپورٹ کرتا ہے:
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1110,7 +1118,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` دیپگرام کا مقامی راستہ ہے اور اسے Deepgram API کلید کی ضرورت ہے۔ اگر صرف OpenRouter کو کنفیگر کیا گیا ہے تو `openrouter/deepgram/nova-3` استعمال کریں۔
+`deepgram/nova-3` ڈیپگرام کا مقامی راستہ ہے اور اسے ڈیپگرام API کلید کی ضرورت ہے۔ اگر صرف OpenRouter کو کنفیگر کیا گیا ہے تو `openrouter/deepgram/nova-3` استعمال کریں۔
 
 **تقریر سے متن (نقل)** فراہم کنندگان:
 
@@ -1330,34 +1338,36 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ---
 
-## 💻 داخلی CLI
+## 💻 اندرونی CLI
 
-OmniRoute سیٹ اپ، تشخیص، اور رن ٹائم کنٹرول کے لیے ایک داخلی CLI (`omniroute …`) کے ساتھ آتا ہے۔ یہ ڈیش بورڈ میں موجود **"CLI ٹولز" صفحے سے الگ ہے**، جو فریقِ ثالث کے CLIs (Claude Code، Cursor، Codex، Cline، …) کو اس طرح ترتیب دیتا ہے کہ وہ OmniRoute سے رابطہ کر سکیں۔
+OmniRoute سیٹ اپ، تشخیص، اور رن ٹائم کنٹرول کے لیے اندرونی CLI (`omniroute …`) بھیجتا ہے۔ یہ ہے** ڈیش بورڈ میں "CLI ٹولز" صفحہ سے الگ** ، جو تھرڈ پارٹی CLIs (Claude کوڈ، Cursor، Codex، Cline، …) کو ترتیب دیتا ہے تاکہ وہ OmniRoute سے بات کر سکیں۔
 
 ```bash
-omniroute setup                    # انٹرایکٹو وزارڈ (پاس ورڈ، فراہم کنندگان، کومبوز)
-omniroute setup --non-interactive  # CI کے لیے موزوں
-omniroute doctor                   # صحت کی تشخیص (ڈیٹا ڈائریکٹری، DB، فراہم کنندگان، پورٹس)
-omniroute providers available      # معاونت یافتہ فراہم کنندگان کی فہرست
-omniroute providers list           # ترتیب دیے گئے کنکشنز کی فہرست
-omniroute providers test <id>      # فراہم کنندہ کے کنکشن کا لائیو ٹیسٹ
-omniroute combos list              # کومبوز کی فہرست
-omniroute combos switch <name>     # ڈیفالٹ کومبو مقرر کریں
-omniroute models                   # دستیاب ماڈلز کی فہرست (--json، --search)
-omniroute keys add | list | remove # ٹرمینل سے API کلیدوں کا نظم کریں
-omniroute backup                   # کنفیگریشن + DB کا اسنیپ شاٹ
-omniroute restore [<timestamp>]    # اسنیپ شاٹ سے بحال کریں
-omniroute health                   # تفصیلی صحت کی معلومات (بریکرز، کیش، میموری)
-omniroute quota                    # فراہم کنندہ کے کوٹے کا استعمال
-omniroute mcp status               # MCP سرور کی حیثیت
-omniroute a2a status               # A2A سرور کی حیثیت
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok ٹنلز
-omniroute reset-password           # ایڈمن پاس ورڈ ری سیٹ کریں
-omniroute --mcp                    # stdio پر MCP سرور شروع کریں
-omniroute --port 3000              # سرور کو حسبِ ضرورت پورٹ پر شروع کریں
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-مشورہ: غیر صحت مند فراہم کنندہ کنکشنز پر الرٹ حاصل کرنے کے لیے `omniroute doctor --json` کو اپنے مانیٹرنگ ٹول کے ساتھ استعمال کریں۔
+ٹپ: ٹوٹے ہوئے مقامی انسٹال پر الرٹ کرنے کے لیے `omniroute doctor --json` اپنے مانیٹرنگ ٹول کے ساتھ جوڑیں۔ `doctor` فراہم کنندہ کے کنکشن کی جانچ نہیں کرتا ہے۔ اس کے لیے `omniroute providers test <id>` استعمال کریں۔
 
 ---
 

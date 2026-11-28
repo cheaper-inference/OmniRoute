@@ -510,27 +510,27 @@ wenn sich die Bestenlistendaten seit der letzten Übertragung tatsächlich geän
 
 ---
 
-## Token-Weitergabe
+## Token-Sharing
 
 **Datei:** `src/lib/gamification/sharing.ts`
 
-### Doppelte Buchführung
+### Doppeltes Hauptbuch
 
-Jede Übertragung erstellt zwei Zeilen in `token_ledger`:
+Bei jeder Übertragung werden zwei Zeilen in `token_ledger` erstellt:
 
-| Zeile      | `from_key_id` | `to_key_id` | `amount` |
-| ---------- | ------------- | ----------- | -------- |
-| Belastung  | Absender      | Empfänger   | +Betrag  |
-| Gutschrift | Empfänger     | Absender    | -Betrag  |
+| Reihe       | `from_key_id` | `to_key_id` | `amount` |
+| ----------- | ------------- | ----------- | -------- |
+| Lastschrift | Absender      | Empfänger   | +-Betrag |
+| Kredit      | Empfänger     | Absender    | -amount  |
 
-Moment — die Konvention lautet:
+Warten Sie — die Konvention lautet:
 
-| Zeile   | `from_key_id` | `to_key_id` | `amount` | Bedeutung              |
-| ------- | ------------- | ----------- | -------- | ---------------------- |
-| Senden  | Absender      | Empfänger   | +Betrag  | Abfluss beim Absender  |
-| Empfang | Empfänger     | Absender    | +Betrag  | Zufluss beim Empfänger |
+| Reihe    | `from_key_id` | `to_key_id` | `amount` | Bedeutung             |
+| -------- | ------------- | ----------- | -------- | --------------------- |
+| Schicken | Absender      | Empfänger   | +-Betrag | Abfluss vom Absender  |
+| Erhalten | Empfänger     | Absender    | +-Betrag | Zufluss zum Empfänger |
 
-Der Kontostand wird wie folgt berechnet:
+Der Saldo wird wie folgt berechnet:
 
 ```sql
 SELECT
@@ -541,7 +541,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Übertragungsablauf
+### Übertragungsfluss
 
 ```typescript
 export async function transferTokens(
@@ -552,19 +552,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Validierung**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotenz**: Prüfen, ob `idempotency_key` bereits im Ledger vorhanden ist.
-   Falls ja, das zwischengespeicherte Ergebnis zurückgeben.
-3. **Transaktion** (einzelne SQLite-Transaktion):
-   a. Kontostand des Absenders berechnen.
-   b. Falls `balance < amount`, abbrechen (unzureichendes Guthaben).
-   c. Sendezeile einfügen (`from=sender,` zurückgeben.
+1. **Bestätigen** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotenz** : Überprüfen Sie, ob `idempotency_key` bereits im Hauptbuch vorhanden ist. Wenn ja, geben Sie das zwischengespeicherte Ergebnis zurück.
+3. **Transaktion** (einzelne SQLite -Transaktion): a. Berechnen Sie den Kontostand des Absenders. B. Wenn `balance < amount`, Abbruch (nicht genügend Mittel). C. Sendezeile einfügen (`from=sender, to=receiver, amount`). D. Empfangszeile einfügen (`from=receiver, to=sender, amount`).
+4. **Ratenbegrenzung** : Übertragungsrate für Absender prüfen (max. 10 transfers/min).
+5. **Ereignis** : `token_share` -Gamification-Ereignis für XP + -Abzeichenbewertung ausgeben.
+6. Geben Sie `{ success: true, balance: newBalance }` zurück.
 
 ### Ratenbegrenzung
 
-- Max. 10 Übertragungen pro Minute und API-Schlüssel.
-- Max. 10.000 Token pro einzelner Übertragung.
-- Max. 100.000 übertragene Token pro Tag und API-Schlüssel.
+- Maximal 10 Übertragungen pro Minute pro API -Schlüssel.
+- Maximal 10.000 Token pro Einzelübertragung.
+- Pro API -Schlüssel werden maximal 100.000 Token pro Tag übertragen.
 
 ---
 

@@ -14,10 +14,12 @@ Standardpolitikken på tværs af udbydere tillader op til tre udbyderforsøg, ge
 
 - **Combos** mislykkes mellem deres mål i henhold til comboens egen strategi og indstillinger.
 - **Et blottet model-id** (ingen `provider/` præfiks), som flere aktive udbydere tjener, uden kombination af det nøjagtige navn, sendes først til udbyderens konklusioner. Hvis dette forsøg mislykkes på en måde, som politikken mislykkes, sendes den samme anmodning til den næste aktive udbyder, der betjener id'et. Svaret bærer `x-omniroute-fallback-attempts` med antallet af prøvede udbydere før den, der svarede.
-  - Hver suppleant er autoriseret nøjagtigt, som om slutningen havde valgt den. Et mål, som API nøglen blokerer eller ikke indrømmer, springes over uden et opstrømskald, og klienten får den rigtige upstream-fejl, ikke en politikafvisning for et mål, den aldrig har navngivet.
+  - Hver suppleant er autoriseret nøjagtigt, som om slutningen havde valgt den. Et mål, som API nøglen blokerer eller ikke indrømmer, springes over uden et upstream-kald, og klienten får den rigtige upstream-fejl, ikke en politikafvisning for et mål, den aldrig har navngivet.
   - Kun et mislykket svar fortsætter: intet fejler efter den første streamede byte.
   - Nødudskiftning af reservemodel gælder kun, efter at hver udbyder af den anmodede model har fejlet.
   - En anmodning fastgjort til en forbindelse (`x-omniroute-connection`) forbliver på den.
   - Et præfikset id (`provider/model`) omdirigeres aldrig til en anden udbyder.
 
 Kredsløbstilstande er `closed`, `open` og `half_open`. En nedkøling planlægger en afgrænset sonde; en vellykket sonde lukker kredsløbet, og en fejlbehæftet sonde genåbner det.
+
+Provider failover kører inde i gatewayen. Se [Når OmniRoute selv er utilgængelig](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) for klientadfærd under en gateway-afbrydelse.

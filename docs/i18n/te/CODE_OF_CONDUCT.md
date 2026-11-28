@@ -47,15 +47,13 @@
 ఖాతా ద్వారా పోస్ట్ చేయడం లేదా ఆన్లైన్ లేదా ఆఫ్లైన్ కార్యక్రమంలో నియమిత
 ప్రతినిధిగా వ్యవహరించడం వంటివి మా కమ్యూనిటీకి ప్రాతినిధ్యం వహించడానికి ఉదాహరణలు.
 
-## Enforcement
+## అమలు
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+దుర్వినియోగం, వేధింపులు లేదా ఆమోదయోగ్యం కాని ప్రవర్తనకు సంబంధించిన సందర్భాలు ప్రైవేట్ సెక్యూరిటీ అడ్వైజరీని తెరవడం ద్వారా అమలుకు బాధ్యత వహించే సంఘం నాయకులకు నివేదించబడవచ్చు.
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+లేదా మెయింటెయినర్కి diegosouza.pw@outlook.comలో ఇమెయిల్ చేయడం ద్వారా. భద్రతా-సున్నితమైన సంఘటనల కోసం, [`SECURITY.md`](SECURITY.md) చూడండి. అన్ని ఫిర్యాదులు తక్షణమే మరియు న్యాయంగా సమీక్షించబడతాయి మరియు విచారించబడతాయి.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+ఏదైనా సంఘటన రిపోర్టర్ యొక్క గోప్యత మరియు భద్రతను గౌరవించాల్సిన బాధ్యత సంఘం నాయకులందరికీ ఉంది.
 
 ## అమలు మార్గదర్శకాలు
 

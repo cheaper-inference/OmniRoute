@@ -6,67 +6,25 @@
 
 @AGENTS.md
 
-**Minden projektszabály az [`AGENTS.md`](AGENTS.md) fájlban található** — ez az egyetlen hiteles információforrás minden AI-asszisztens számára (architektúra, konvenciók, tesztelés, minőségi ellenőrzőkapuk, git-munkafolyamat, a 23 szigorú szabály, személyazonosításra alkalmas adatokkal kapcsolatos tanulságok). Olvasd el teljes egészében; ne add hozzá újra ide a projektszabályokat. Az alábbiak KIZÁRÓLAG a Claude Code-ra vonatkoznak — az `AGENTS.md` fájlban már meghatározott szabályok működésbeli pontosításai.
+**Minden projektszabály a [`AGENTS.md`](AGENTS.md) ban él** — az igazság egyetlen forrása minden AI asszisztens számára; a fenti import már betölti. Ne adja ide újra a projektszabályokat. Az alábbiakban minden Claude ONLY `AGENTS.md` — vonatkozik.
 
-## Worktree-izoláció — Claude Code-specifikus tudnivalók
+## Munkafa elkülönítése — Claude Kód sajátosságai
 
-A teljes, kötelező worktree-protokoll (a base branch megerősítése, a `.claude/worktrees/`
-kanonikus útvonal, a `cp -al` node_modules, a lebontási szabályok) a
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) fájlban található (összefoglalva az `AGENTS.md` →
-Git-munkafolyamat → „Worktree-izoláció” részben). Claude Code-specifikus tudnivalók:
+- Erősítse meg az alapelágazást a kezelővel `AskUserQuestion` (Kemény szabály #19) segítségével, hacsak nem mondták már.
+- Hozzuk létre a munkafát a `scripts/dev/new-worktree.sh <branch> <confirmed-base>` ( `.claude/worktrees/` alatt landol, `node_modules` kemény linkekkel másolja, és `.husky/_` másolja), majd hívjuk meg `EnterWorktree` `path`. Mindig adja át a bázist: enélkül a szkript a legmagasabb `release/*` választja, amely nem biztos, hogy az operátor által megerősített. A `EnterWorktree` által önmagában létrehozott munkafának nincsenek se hard linkjei, se horgjai, így nem fut benne pre-commit kapu.
 
-- Erősítsd meg a base branchet az operátorral az `AskUserQuestion` segítségével (Hard Rule #19),
-  hacsak nem közölte már veled.
-- Részesítsd előnyben a natív `EnterWorktree` eszközt — az eleve a `.claude/worktrees/` alatt
-  hozza létre a worktree-ket (a kanonikus útvonal). Hozd létre a worktree-t a dokumentált `git
-worktree add` paranccsal, majd hívd meg az `EnterWorktree` eszközt a `path` értékével.
+## Subagents és git
 
-## Munkamenetek közötti biztonság — Claude Code-specifikus részletek
+Minden alágens, amely megérinti a git-et (ügynökeszköz vagy munkafolyamat-szkript), megkapja a kemény szabály #22 a `git stash` ban parancsát — promptjában, a rejtett incidens rögzített megismétlődése egy alágensen keresztül történt.
 
-A párhuzamos munkameneteket a 19./21./22. szigorú szabályok (az `AGENTS.md` fájlban) szabályozzák. Működésbeli emlékeztetők ehhez a
-környezethez:
+## Műtermékek tervezése — szuperhatalmak útvonalának felülbírálása
 
-- **A `git stash` tiltását szó szerint másold be minden githez hozzáférő alügynök promptjába**
-  (Agent eszköz / munkafolyamat-szkriptek) — az alügynökök nem öröklik ezt a fájlt, és a stash-incidens dokumentált
-  megismétlődése is egy alügynökön keresztül történt.
-- Mielőtt olyan PR-t egyesítenél vagy küldenél fel, amelyet nem _ebben a munkamenetben_ hoztál létre, futtasd a `git worktree list`
-  parancsot, és ellenőrizd újra a `gh pr view <N> --json state,headRefOid` kimenetét (22b. szigorú szabály).
-- Minden munkamenetet úgy fejezz be, hogy a fő checkout azon az ágon legyen, amelyen a munkamenet kezdetekor volt.
+A szuperképességi készségek bejelentik az alapértelmezett értékeket `docs/superpowers/plans/`, `docs/superpowers/specs/` és `docs/research/` alatt. Írás előtt írja át mindegyiket `_tasks/` megfelelőjükre `AGENTS.md` → "Planning & Research Artifacts"-ban, és véglegesítse `git -C _tasks …`-vel, soha ne a fő repóban.
 
-## Superpowers / tervezési műtermékek — útvonal-felülírások
+## Scratch fájlok — `_artifacts/`, nem `/tmp`
 
-Az `_tasks/` konvenciót az `AGENTS.md` → „Planning & Research Artifacts” szakasza határozza meg. A
-superpowers készségek alapértelmezései a `docs/…` útvonalra mutatnak — ezeket az alapértelmezéseket **itt
-felülírjuk**. Amikor egy superpowers készség olyan útvonalat közöl, mint a „saved to `docs/superpowers/plans/…`”,
-írás előtt helyettesítsd azt a megfelelő `_tasks/…` útvonallal:
+Ez a projekt felülírja a kábelköteg munkamenet scratchpadját (`/tmp/claude-*/…`). Írjon ideiglenes fájlokat — export, generált zip, egyszeri köztes kimenetek — - `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: egy gitignorált gyökér `_*` elérési út, így az operátor egy helyen talál és töröl minden karcolást. A tartós tervek, specifikációk, kutatások és átadások helyett `_tasks/` (Hard Rule #23) kerül sor.
 
-| Műtermék (készség)                         | Alapértelmezés (NE használd) | Helyette ide mentsd                                           |
-| ------------------------------------------ | ---------------------------- | ------------------------------------------------------------- |
-| Tervek (`writing-plans`)                   | `docs/superpowers/plans/`    | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Specifikációk / tervezés (`brainstorming`) | `docs/superpowers/specs/`    | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Kutatás (`deep-research`, ad hoc)          | `docs/research/`             | `_tasks/research/…`                                           |
-| Átadások (`/handoff`)                      | —                            | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Piros alap
 
-Ezeket a műtermékeket az `_tasks/` repóban commitold (`git -C _tasks …`), soha ne a fő repóban.
-
-## Jegyzet- / ideiglenes fájlok — az `_artifacts/` útvonalat használd, ne a `/tmp` könyvtárat
-
-Ez a projekt felülírja a környezet alapértelmezett munkamenet-jegyzettömbjét (`/tmp/claude-*/…`). Az
-ideiglenes/munkafájlokat — exportokat, generált zip-fájlokat, egyszer használatos köztes kimeneteket, bármit, amit
-egyébként a `/tmp` könyvtárba helyeznél — ehelyett a `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` útvonalra írd.
-
-- Az `_artifacts/` egy gyökérszintű `_*` útvonal: már szerepel a gitignore-ban (`AGENTS.md` → „Root `_*` paths”), csak
-  a lemezen létezik, és soha nincs verziókövetve.
-- Indoklás: ha a jegyzetjellegű kimeneteket a projekten belül tartjuk (a `/tmp` helyett), az operátor
-  egyszerűen megtalálhat és egyetlen helyről törölhet minden ideiglenes fájlt, ahelyett, hogy
-  eltűnő vagy verziókövetetlen fájlokat felhalmozó, rövid életű, munkamenet-specifikus `/tmp` könyvtárakban kellene keresgélnie.
-- **Ne** keverd össze ezt az `_tasks/` könyvtárral (23. szigorú szabály, saját privát git-repóval rendelkezik a tartós
-  tervekhez/specifikációkhoz/kutatásokhoz/átadásokhoz) — az `_artifacts/` kizárólag eldobható munkafájlokhoz való; itt
-  semminek sem kell fennmaradnia vagy verziókövetés alá kerülnie.
-
-## Zöld alapállapot PR-ek megnyitása előtt
-
-Mielőtt ágat hoznál létre vagy PR-t nyitnál, futtasd az alapállapot zöld ellenőrzését (`AGENTS.md` → Git-munkafolyamat →
-„Base-green check”; a projekt készségei `.agents/skills/_shared/base-green.md` néven hivatkoznak rá). Ha egy PR
-akkor nyílik meg, amikor az alapág csúcsa piros, a törzsében szerepelnie kell a `⚠️ base-red inherited: #<issue>` szövegnek. A
-felhalmozódott piros állapot (az alapág csúcsa + piros PR-ek) felszámolásához használd a `/sweep-reds` készséget.
+A felgyülemlett vörös állapot (alapcsúcs + red PRs) kiürítéséhez használja a `/sweep-reds` készségeket.

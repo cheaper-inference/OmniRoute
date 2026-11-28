@@ -93,52 +93,30 @@ perutean atau pemilihan model — lihat opt-in terpisah di bawah ini.
 
 ---
 
-## Sinkronisasi data adalah opt-in TERPISAH — janji privasi
+## Sinkronisasi data adalah SEPARATE opt-in — janji privasi
 
-Mengaktifkan `RADAR_ENABLED` hanya membuka UI. Sinkronisasi feed memerlukan opt-in kedua
-yang independen dan disimpan di `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migrasi `136_radar_cache_settings.sql`). `syncRadar()` memeriksa flag _dan_ opt-in
-sebelum melakukan panggilan jaringan apa pun:
+Mengaktifkan `RADAR_ENABLED` hanya akan membuka kunci UI. Menyinkronkan feed memerlukan keikutsertaan independen kedua yang disimpan di `radar_settings.opt_in` (`src/lib/db/radar.ts`, migrasi `136_radar_cache_settings.sql`). `syncRadar()` memeriksa tanda _dan_ keikutsertaan sebelum melakukan panggilan jaringan apa pun:
 
 ```
-Flag nonaktif → { status: "disabled" }   — tidak ada panggilan jaringan
-Opt-in false  → { status: "opt_out" }    — tidak ada panggilan jaringan
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Saat keduanya aktif, alur sinkronisasinya adalah:
+Jika keduanya aktif, jalur sinkronisasinya adalah:
 
-1. `GET <URL dasar feed>/v1/catalog/latest` dengan `x-omniroute-radar-schema: 2` dan header
-   `Authorization: Bearer <supporter key>` opsional (lihat di bawah). Server secara default menggunakan artefak
-   transisi v1 yang ditandatangani secara terpisah saat header skema tidak ada, sehingga klien lama yang telah terinstal tetap
-   menerima pembaruan.
-2. Ini adalah alur aplikasi khusus pengunduhan, tetapi tetap merupakan permintaan HTTPS. Infrastruktur
-   yang di-host menerima metadata koneksi biasa seperti IP sumber. Saat supporter key
-   dikonfigurasi, sinkronisasi juga mengirimkan key tersebut di header Bearer agar layanan dapat menentukan
-   hak akses. Pada revisi private-server yang tepat sebagaimana diidentifikasi dalam batas bukti di atas,
-   pencatatan permintaan feed menggunakan hash key, penggunaan agregat, dan HMAC terpotong dari IP
-   yang dirotasi setiap hari untuk peninjauan penyalahgunaan secara manual; tabel tersebut tidak menyimpan key maupun IP dalam bentuk mentah.
-   Log akses infrastruktur dan outbox pengiriman terenkripsi merupakan batas operasional
-   yang terpisah.
-3. OmniRoute tidak pernah mengirim prompt, respons, percakapan, kredensial penyedia, traffic model,
-   uptime, latensi, atau konfigurasi penyedia lokal ke layanan Radar.
-4. Respons diverifikasi, divalidasi, dan di-cache secara lokal (lihat
-   [Model keamanan](#security-model)). Radar memiliki tepat empat jalur jaringan sisi server:
-   `syncRadar()` untuk katalog, `syncRadarReferrals()` untuk rujukan, serta
-   `syncRadarOffers()` / `syncRadarIntel()` untuk penawaran dan Intel khusus pendukung.
+1. `GET <feed base URL>/v1/catalog/latest` dengan `x-omniroute-radar-schema: 2` dan header `Authorization: Bearer <supporter key>` opsional (lihat di bawah). Server default ke artefak transisi v1 yang ditandatangani secara terpisah ketika header skema tidak ada, sehingga klien yang diinstal lebih lama terus menerima pembaruan.
+2. Ini adalah alur aplikasi yang hanya dapat diunduh, tetapi masih berupa permintaan HTTPS. Infrastruktur yang dihosting menerima metadata koneksi biasa seperti sumber IP. Saat kunci pendukung dikonfigurasi, sinkronisasi juga mengirimkan kunci tersebut di header Bearer sehingga layanan dapat menyelesaikan penetapan tersebut. Pada revisi server pribadi yang diidentifikasi dalam batas bukti di atas, penghitungan permintaan umpan menggunakan hash kunci, penggunaan agregat, dan HMAC terpotong yang dirotasi setiap hari dari IP untuk tinjauan penyalahgunaan manual; tabel-tabel tersebut tidak menyimpan kunci maupun IP dalam bentuk mentah. Log akses infrastruktur dan kotak keluar pengiriman terenkripsi merupakan batas operasional yang terpisah.
+3. OmniRoute tidak pernah mengirimkan perintah, respons, percakapan, kredensial penyedia, lalu lintas model, waktu aktif, latensi, atau konfigurasi penyedia lokal ke layanan Radar.
+4. Responsnya diverifikasi, divalidasi, dan disimpan dalam cache secara lokal (lihat [Model keamanan](#security-model) ). Radar memiliki empat jalur jaringan sisi server: `syncRadar()` untuk katalog, `syncRadarReferrals()` untuk referensi, dan `syncRadarOffers()` / `syncRadarIntel()` untuk penawaran khusus pendukung dan Intel.
 
-**Supporter key** adalah token Bearer opsional (`radar_settings.supporter_key`)
-yang memungkinkan layanan feed menentukan tier mana yang akan disediakan (lihat
-[Tier](#tiers-community-and-live)). Key tersebut:
+Pemeriksaan katalog dilakukan setiap 24 jam. Ketika feed terverifikasi masih membawa versi dan tingkatan yang di-cache, sinkronisasi akan menyimpan payload yang di-cache, memperbarui `fetchedAt`, dan pemeriksaan berikutnya dilakukan 24 jam kemudian, bukan pada jam berikutnya.
 
-- Disimpan dalam keadaan **terenkripsi saat tersimpan** dengan helper AES-256-GCM `encrypt()`/`decrypt()`
-  yang sama (`src/lib/db/encryption.ts`) seperti yang digunakan untuk kredensial penyedia.
-- Diatur melalui `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) dan
-  **tidak pernah dikirim kembali** — respons mengembalikan bentuk yang disamarkan (`omr_****abcd`).
-- Mengubah atau menghapusnya secara atomik membatalkan cache katalog, rujukan, penawaran, dan Intel. Sinkronisasi/pembacaan
-  berikutnya menentukan hak akses baru di sisi server; menyimpan key tidak dengan sendirinya
-  membuat permintaan jaringan atau menggunakan key aktivasi sekali pakai.
-- Dikirim ke layanan feed sebagai token Bearer dalam GET sinkronisasi — tidak ada hal lain tentang
-  key tersebut yang pernah keluar dari klien.
+Itu** kunci pendukung** adalah token Pembawa opsional (`radar_settings.supporter_key`) yang memungkinkan layanan feed memutuskan tingkatan mana yang akan dilayani (lihat [Tingkatan](#tiers-community-and-live) ). Dia:
+
+- Tersimpan** dienkripsi saat istirahat** dengan pembantu AES-256-GCM `encrypt()`/`decrypt()` (`src/lib/db/encryption.ts`) yang sama digunakan untuk kredensial penyedia.
+- Diatur melalui `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) dan** tidak pernah bergema kembali** — responsnya mengembalikan formulir bertopeng (`omr_****abcd`).
+- Mengubah atau menghapusnya secara atom akan membatalkan katalog, referensi, penawaran, dan cache Intel. sync/read berikutnya menyelesaikan sisi server hak yang baru; menyimpan kunci tidak dengan sendirinya membuat permintaan jaringan atau menggunakan kunci aktivasi sekali pakai.
+- Dikirim ke layanan umpan sebagai token Pembawa pada sinkronisasi GET — tidak ada hal lain tentang kunci yang pernah meninggalkan klien.
 
 ---
 
@@ -425,85 +403,45 @@ version, tier }` — nilai inilah yang ditampilkan dasbor, bukan kolom mentah da
 
 ---
 
-## Aturan penggabungan overlay saat pembacaan
+## Aturan penggabungan overlay waktu baca
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) menggabungkan feed yang tersimpan di cache **di atas**
-baseline statis pada **saat pembacaan**, di dalam `getRadarCatalog()`. Array baseline
-(`FREE_MODEL_BUDGETS`) tidak pernah dimutasi — sebuah `MergedEntry[]` dihitung ulang pada setiap
-pemanggilan.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) menggabungkan feed yang di-cache** lebih** garis dasar statis di** waktu membaca** , di dalam `getRadarCatalog()`. Array dasar (`FREE_MODEL_BUDGETS`) tidak pernah bermutasi — `MergedEntry[]` dihitung baru pada setiap panggilan.
 
-Empat aturan, berdasarkan urutan prioritas:
+Empat aturan, dalam urutan prioritas:
 
-1. **Feed tidak pernah menimpa override lokal.** Per kolom: jika operator telah
-   menyesuaikan sebuah kolom pada entri (`localOverrides` map, dengan kunci `provider:modelId`),
-   nilai feed untuk kolom spesifik tersebut dilewati — nilai operator yang digunakan.
-2. **`enabled: false` menonaktifkan entri, dengan asal-usulnya.** Entri feed yang
-   menonaktifkan sebuah entri menetapkan `enabled: false` dan `disabledBy: "radar"` pada hasil penggabungan,
-   sehingga UI dapat menjelaskan _mengapa_ sebuah entri berubah dari tersedia menjadi dinonaktifkan.
-3. **Entri yang ditambahkan pengguna dan tidak ada di feed tetap bertahan tanpa perubahan.** Entri yang
-   hanya ada di baseline (atau ditambahkan secara lokal) dan tidak memiliki entri feed yang sesuai
-   diteruskan tanpa perubahan.
-4. **Entri yang telah diberi tombstone tidak pernah dihidupkan kembali.** Jika operator secara eksplisit menghapus
-   sebuah entri (`tombstones` set), penambahan kembali `provider:modelId` tersebut oleh feed dalam versi
-   berikutnya tidak akan mengembalikannya.
+1. **Umpan tidak pernah menimpa penggantian lokal.** Per bidang: jika operator telah menyesuaikan bidang pada entri (`localOverrides` map, dengan kunci `provider:modelId`), nilai umpan untuk bidang spesifik tersebut dilewati — nilai operator menang.
+2. **`enabled: false` menonaktifkan entri, dengan asal.** Entri umpan yang menonaktifkan entri menetapkan `enabled: false` dan `disabledBy: "radar"` pada hasil gabungan, sehingga UI dapat menjelaskan _mengapa_ entri berubah dari tersedia menjadi dinonaktifkan.
+3. **Entri yang ditambahkan pengguna yang tidak ada dalam umpan akan tetap tidak tersentuh.** Entri yang hanya ada di baseline (atau ditambahkan secara lokal) dan tidak memiliki entri feed yang sesuai akan lolos tanpa perubahan.
+4. **Entri yang dikuburkan tidak pernah dibangkitkan.** Jika operator secara eksplisit menghapus entri (`tombstones` set), feed yang menambahkan kembali `provider:modelId` tersebut di versi yang lebih baru tidak akan mengembalikannya.
 
-Kolom yang dapat diedit dan tombstone disimpan dalam
-`radar_local_model_state` (migrasi `153_radar_local_model_state.sql`). Adapter DB publik
-(`src/lib/db/radar.ts`) mengonversi baris-baris tersebut menjadi `localOverrides` map dan
-`tombstones` set yang digunakan oleh `applyFeed()`; `getRadarCatalog()` produksi memuat status tersebut
-setelah pemeriksaan flag, cache, dan skema lolos. Hanya `displayName` dan `enabled` yang
-dapat diedit oleh operator. Identitas penyedia/model, asal-usul feed, kuota, kapabilitas, ToS,
-dan data penyiapan tidak dapat ditulis melalui antarmuka ini.
+Bidang dan batu nisan yang dapat diedit dipertahankan di `radar_local_model_state` (migrasi `153_radar_local_model_state.sql`). Adaptor DB publik (`src/lib/db/radar.ts`) mengubah baris tersebut menjadi peta `localOverrides` dan kumpulan `tombstones` yang digunakan oleh `applyFeed()`; produksi `getRadarCatalog()` memuat status tersebut setelah gerbang flag, cache, dan skema dilewati. Hanya `displayName` dan `enabled` yang dapat diedit oleh operator. identitas Provider/model, asal feed, kuota, kemampuan, ToS, dan data penyiapan tidak dapat ditulis melalui permukaan ini.
 
-Dasbor menyediakan empat tindakan lokal:
+Dasbor memperlihatkan empat tindakan lokal:
 
-- **Edit** mengubah nama tampilan lokal dan status aktif.
-- **Reset local changes** menghapus kedua kolom yang dapat diedit tanpa mengubah tombstone.
-- **Hide** membuat tombstone, sehingga pembaruan feed berikutnya tidak dapat membuat ulang baris tersebut.
-- **Restore** menghapus tombstone; override yang disimpan secara terpisah tetap berlaku.
+- **Sunting** mengubah nama tampilan lokal dan status yang diaktifkan.
+- **Setel ulang perubahan lokal** menghapus kedua bidang yang dapat diedit tanpa mengubah batu nisan.
+- **Bersembunyi** membuat batu nisan, jadi pembaruan feed selanjutnya tidak dapat membuat ulang baris tersebut.
+- **Memulihkan** menghapus batu nisan; setiap penggantian yang disimpan secara terpisah tetap berlaku.
 
-`enabled: false` dari feed tetap menjadi pengecualian keselamatan: nilai ini mengungguli
-`enabled: true` lokal yang usang, menjaga entri hasil penggabungan tetap dinonaktifkan, dan mencatat
-`disabledBy: "radar"`.
+Umpan `enabled: false` tetap menjadi pengecualian keamanan: ia menang atas `enabled: true` lokal yang sudah basi, menonaktifkan entri gabungan, dan mencatat `disabledBy: "radar"`.
 
-Publikasi katalog menggunakan `schemaVersion: 2`. `contextWindow` serta masing-masing dari `tools`, `vision`, dan
-`thinking` secara independen bertipe `number | null` / `boolean | null`: `null` berarti tidak diketahui, sedangkan
-`false` berarti sumber resmi penyedia yang dikonfirmasi D16 secara eksplisit menyatakan bahwa kapabilitas tersebut tidak ada.
-Flag spesifikasi model/registri internal OmniRoute tidak pernah dipromosikan secara langsung menjadi fakta feed. Klien
-tetap menerima snapshot v1; karena builder lama menggunakan `false` sebagai placeholder untuk ketidakadaan, `false` pada v1
-dinormalisasi menjadi tidak diketahui, sedangkan `true` pada v1 tetap dianggap faktual. Versi skema yang tidak dikenal ditolak secara aman dan
-cache valid terakhir tetap tersedia. Setiap model v2 dengan konteks/kapabilitas non-null harus memiliki
-`metadataEvidenceUrls[]` HTTPS yang tidak memerlukan kredensial; jika tidak, validasi skema gagal dan cache
-tidak diganti. Tabel katalog merender ketiga status sebagai `✓`, `✕`, dan `?`.
+Publikasi katalog menggunakan `schemaVersion: 2`. `contextWindow` dan masing-masing `tools`, `vision`, dan `thinking` secara independen `number | null` / `boolean | null`: `null` berarti tidak diketahui, sedangkan `false` berarti sumber penyedia resmi D16-confirmed secara eksplisit mengatakan kemampuan tersebut tidak ada. Bendera OmniRoute registry/model-spec internal tidak pernah dipromosikan secara langsung untuk memberikan fakta. Klien masih menerima snapshot v1; karena pembuat lama menggunakan `false` sebagai pengganti ketidakhadiran, v1 `false` dinormalisasi menjadi tidak diketahui sementara v1 `true` tetap faktual. Versi skema yang tidak diketahui gagal ditutup dan cache terakhir yang valid tetap tersedia. Setiap model v2 dengan context/capability bukan null harus membawa HTTPS `metadataEvidenceUrls[]` bebas kredensial; jika tidak, validasi skema gagal dan cache tidak diganti. Tabel katalog menampilkan ketiga status sebagai `✓`, `✕`, dan `?`.
 
-### Kombinasi terpandu dan akses MCP
+### Kombo terpandu dan akses MCP
 
-Nilai `familyId` yang telah dikonfirmasi tetap tersedia setelah overlay saat pembacaan dan menggerakkan modul murni
-`buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Sebuah keluarga disarankan
-hanya jika setidaknya dua penyedia berbeda memiliki koneksi aktif dan menyediakan ID model pilihan yang
-persis sama. Model yang dinonaktifkan, penyedia yang tidak aktif, ID model yang tidak ada, keluarga tunggal, serta
-kecocokan alias/prefix yang ambigu ditolak secara aman. Saran menggunakan strategi `priority` yang sudah ada, dengan
-mengurutkan anggaran bulanan berulang terbesar terlebih dahulu; UI hanya membuatnya melalui `POST /api/combos`.
+Nilai `familyId` yang dikonfirmasi bertahan dalam overlay waktu baca dan menggerakkan modul `buildRadarComboSuggestions()` murni (`src/lib/radar/comboSuggestions.ts`). Sebuah keluarga disarankan hanya ketika setidaknya dua penyedia berbeda memiliki koneksi aktif dan mengekspos model kurasi yang tepat ID. Model yang dinonaktifkan, penyedia tidak aktif, model IDs yang hilang, keluarga tunggal, dan kecocokan alias/prefix yang ambigu gagal ditutup. Saran gunakan strategi `priority` yang ada, urutkan anggaran bulanan berulang yang terbesar terlebih dahulu; UI menciptakannya hanya melalui `POST /api/combos`.
 
-UI terpandu berada di `/dashboard/radar/combos`. UI ini hanya membaca endpoint lokal
-`GET /api/radar/catalog` dan `GET /api/combos/builder/options`. UI ini tidak pernah memicu sinkronisasi Radar,
-membaca kredensial penyedia, atau menulis langsung ke database combo.
+UI yang dipandu tinggal di `/dashboard/radar/combos`. Itu hanya membaca titik akhir `GET /api/radar/catalog` dan `GET /api/combos/builder/options` lokal. Itu tidak pernah memicu sinkronisasi Radar, membaca kredensial penyedia, atau menulis langsung ke database kombo.
 
-Klien MCP dapat membaca proyeksi lokal yang sama dengan `omniroute_radar_catalog` (`read:radar`). Filter
-opsional `provider`, `familyId`, dan `enabledOnly` dievaluasi setelah satu pembacaan lokal
-`GET /api/radar/catalog`. Output tertutupnya mencakup metadata katalog serta penyedia/model,
-nama tampilan, `familyId`, kuota, kapabilitas, status aktif, asal, dan `disabledBy`; URL penyiapan,
-langkah-langkah, koneksi, alamat surel, kunci, dan data rujukan tidak pernah dikembalikan. Alat ini
-bersifat hanya-baca dan tidak pernah memanggil `/api/radar/sync`.
+klien MCP dapat membaca proyeksi lokal yang sama dengan `omniroute_radar_catalog` (`read:radar`). Filter opsional `provider`, `familyId`, dan `enabledOnly` dievaluasi setelah satu `GET /api/radar/catalog` lokal dibaca. Output tertutupnya mencakup metadata katalog ditambah provider/model, nama tampilan, `familyId`, kuota, kemampuan, status yang diaktifkan, asal, dan `disabledBy`; setup URLs, langkah, koneksi, alamat email, kunci, dan data rujukan tidak pernah dikembalikan. Alat ini bersifat read-only dan tidak pernah memanggil `/api/radar/sync`. Ketika umpan yang disimpan dalam cache mendahului katalog yang diinstal, `meta.olderThanRelease` adalah `true` dan alat tersebut mengembalikan model dari katalog yang diinstal dengan penggantian lokal dan penerapan batu nisan.
 
-### Penanda asal-usul
+### Penanda asal
 
-Setiap entri gabungan memiliki bidang `origin` yang dirender UI sebagai lencana:
+Setiap entri yang digabungkan membawa bidang `origin` yang dirender oleh UI sebagai lencana:
 
-- `"baseline"` — tidak berubah dari katalog rilis statis.
-- `"radar"` — satu atau beberapa bidang telah diperbarui oleh umpan.
-- `"local"` — operator memiliki setidaknya satu penggantian lokal pada entri ini (penggantian
-  lokal selalu lebih diutamakan daripada umpan sesuai aturan 1, terlepas dari apa yang dinyatakan umpan).
+- `"baseline"` — tidak tersentuh dari katalog rilis statis.
+- `"radar"` — satu atau lebih kolom disegarkan oleh feed.
+- `"local"` — operator memiliki setidaknya satu penggantian lokal pada entri ini (penggantian lokal selalu memenangkan feed per aturan 1, apa pun yang tertulis di feed).
 
 ---
 

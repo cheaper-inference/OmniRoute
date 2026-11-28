@@ -13,95 +13,90 @@ qamrovi va muvofiqlashtirish bosqichlari bilan bogʻlangan.
 
 ---
 
-## Ishlab chiqish muhiti
+## Rivojlanishni sozlash
 
-### Talablar
+### Old shartlar
 
-- **Node.js** `>=22.22.2 <23`, yoki `>=24.0.0 <27` (tavsiya etiladi: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` yoki `>=24.0.0 <27` (tavsiya etiladi: 24 LTS)
+- **npm** 10 +
 
-> **Node 24 o‘rnatilgan Windows:** joriy 24 LTS patch versiyasidan foydalaning (kamida 24.20.0).
-> Oldingi versiyalar `--test-force-exit` jarayonni yopganidan keyin testlar muvaffaqiyatli
-> yakunlangan bo‘lsa ham, jarayonni to‘satdan to‘xtatishi mumkin. Node'ning [Windows libuv tuzatishi](https://github.com/nodejs/node/pull/61999)
-> ushbu runtime ishdan chiqishini bartaraf etadi; test tasdiqlarini va runner chiqish tekshiruvlarini yoqilgan holda qoldiring.
+> **24-tugun bilan Windows :** joriy 24 LTS yamoq versiyasidan foydalaning (kamida 24.20.0). `--test-force-exit` jarayonni yopib qo'yganda, muvaffaqiyatli sinovlardan so'ng oldingi versiyalar to'xtatilishi mumkin. Tugunning [Windows libuv tuzatishi](https://github.com/nodejs/node/pull/61999) ushbu ish vaqtining ishdan chiqishini hal qiladi; sinov tasdiqlarini va yuguruvchining chiqish tekshiruvlarini yoqilgan holda saqlang.
 
-> **npm v11+ foydalanuvchilari (Node 24+):** `npm install` dan so‘ng native modullar o‘rnatilganini tekshiring:
-> `node -e "require('better-sqlite3')"`. Agar u `MODULE_NOT_FOUND` xatosi bilan ishlamasa,
-> `npm approve-scripts better-sqlite3 && npm install` buyrug‘ini ishga tushiring. [Muammolarni bartaraf etish](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) bo‘limiga qarang.
+> **npm v11 + foydalanuvchilari (tugun 24 +):** `npm install` dan so'ng mahalliy modullar o'rnatilganligini tekshiring: `node -e "require('better-sqlite3')"`. Agar `MODULE_NOT_FOUND` bilan bajarilmasa, `npm approve-scripts better-sqlite3 && npm install` ishga tushiring. [Nosozliklarni bartaraf etish](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klonlash va o‘rnatish
+### Klonlash va o'rnatish
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Muhit o‘zgaruvchilari
+### Atrof-muhit o'zgaruvchilari
 
 ```bash
-# Shablondan .env faylingizni yarating
+# Create your .env from the template
 cp .env.example .env
 
-# Talab qilinadigan maxfiy kalitlarni yarating
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Ishlab chiqish uchun asosiy o‘zgaruvchilar:
+Rivojlanish uchun asosiy o'zgaruvchilar:
 
-| O‘zgaruvchi            | Ishlab chiqishdagi standart qiymat | Tavsif                       |
-| ---------------------- | ---------------------------------- | ---------------------------- |
-| `PORT`                 | `20128`                            | Server porti                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | Frontend uchun asosiy URL    |
-| `JWT_SECRET`           | (yuqorida yarating)                | JWT imzolash maxfiy kaliti   |
-| `INITIAL_PASSWORD`     | `CHANGEME`                         | Birinchi kirish paroli       |
-| `APP_LOG_LEVEL`        | `info`                             | Jurnal batafsilligi darajasi |
+| O'zgaruvchan           | Rivojlanish standarti    | Tavsif                      |
+| ---------------------- | ------------------------ | --------------------------- |
+| `PORT`                 | `20128`                  | Server porti                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Frontend uchun URL bazasi   |
+| `JWT_SECRET`           | (yuqorida yaratish)      | JWT imzolash siri           |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Birinchi kirish paroli      |
+| `APP_LOG_LEVEL`        | `info`                   | Jurnalning aniqlik darajasi |
 
 ### Boshqaruv paneli sozlamalari
 
-Boshqaruv paneli muhit o‘zgaruvchilari orqali ham sozlanishi mumkin bo‘lgan funksiyalar uchun UI tugmalarini taqdim etadi:
+Boshqaruv panelida atrof-muhit o'zgaruvchilari orqali ham sozlanishi mumkin bo'lgan xususiyatlar uchun UI o'tish tugmalari mavjud:
 
-| Sozlama joylashuvi          | Tugma                | Tavsif                                      |
-| --------------------------- | -------------------- | ------------------------------------------- |
-| Sozlamalar → Kengaytirilgan | Debug rejimi         | Debug so‘rov jurnallarini yoqish (UI)       |
-| Sozlamalar → Umumiy         | Yon panel ko‘rinishi | Yon panel bo‘limlarini ko‘rsatish/yashirish |
+| Joylashuvni sozlash   | Oʻchirish                     | Tavsif                                                 |
+| --------------------- | ----------------------------- | ------------------------------------------------------ |
+| Sozlamalar → Advanced | Nosozliklarni tuzatish rejimi | Nosozliklarni tuzatish so‘rov jurnallarini yoqish (UI) |
+| Sozlamalar → General  | Yon panelning ko'rinishi      | Show/hide yon panel bo'limlari                         |
 
-Bu sozlamalar ma’lumotlar bazasida saqlanadi va qayta ishga tushirishlar orasida saqlanib qoladi; sozlanganida ular muhit o‘zgaruvchilaridagi standart qiymatlarni bekor qiladi.
+Ushbu sozlamalar ma'lumotlar bazasida saqlanadi va o'rnatilganda env var standartlarini bekor qilib, qayta ishga tushirishda saqlanib qoladi.
 
-### Lokal ishga tushirish
+### Mahalliy ishga tushirish
 
 ```bash
-# Ishlab chiqish rejimi (hot reload)
+# Development mode (hot reload)
 npm run dev
 
 # Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Contributor o‘zgarishlari uchun backend/API-only tezkor kompilyatsiya
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Release build (toza qayta qurish + HEAD sentinel — deploy uchun talab qilinadi)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Portni sozlashning keng tarqalgan usuli
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Contributor build faqat kompilyatsiya tekshiruvini amalga oshiradi: u standalone distributivini yig‘maydi yoki ixtiyoriy native packaging aktivlarini build qilmaydi. Yetkazib beriladigan to‘plamni tekshirish kerak bo‘lganda oddiy production build'dan foydalaning.
+Himoyachi qurilishi faqat kompilyatsiya uchun tekshirishni amalga oshiradi: u mustaqil tarqatishni yig'maydi yoki ixtiyoriy mahalliy qadoqlash aktivlarini yaratmaydi. Yuborilishi mumkin bo'lgan to'plamni tasdiqlash kerak bo'lganda oddiy ishlab chiqarish qurilmasidan foydalaning.
 
-### Build chiqishi tuzilishi
+### Chiqish tartibini yaratish
 
-| Katalog   | Tarkib                                                                               | Kuzatiladi |
-| --------- | ------------------------------------------------------------------------------------ | ---------- |
-| `src/`    | Ilova manba kodi (TypeScript / TSX)                                                  | Ha         |
-| `.build/` | Oraliq fayllar — `next build` chiqishi (gitignored, `distDir = .build/next`)         | Yo‘q       |
-| `dist/`   | Yetkazib beriladigan to‘plam — `assembleStandalone` tomonidan yig‘iladi (gitignored) | Yo‘q       |
+| Katalog   | Tarkib                                                                         | Kuzatilgan |
+| --------- | ------------------------------------------------------------------------------ | ---------- |
+| `src/`    | Ilova manbasi (TypeScript / TSX)                                               | Ha         |
+| `.build/` | Oraliq — `next build` chiqishi (gitignored, `distDir = .build/next`)           | Yo'q       |
+| `dist/`   | Yuboriladigan — toʻplami `assembleStandalone` tomonidan yigʻilgan (gitignored) | Yo'q       |
 
-Build pipeline bir martalik o‘tishdan iborat:
+Qurilish quvuri bitta o'tishdan iborat:
 
 ```
 npm run build
@@ -110,18 +105,15 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` qo‘shimcha ravishda avval ikkala katalogni tozalaydi va
-`dist/BUILD_SHA` fayliga (= `git rev-parse --short HEAD`) deploy yaxlitligi indikatori sifatida yozadi.
+`npm run build:release` qo'shimcha ravishda avval ikkala katalogni tozalaydi va `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ni tarqatish yaxlitligi nazoratchisi sifatida yozadi.
 
-`npm run build:contributor` backend-only build profilidan foydalanadi. Build jarayonida dashboard UI fayllarini vaqtincha stub bilan almashtiradi, API route handler'larini saqlab qoladi va build tugagach asl fayllarni tiklaydi. Dashboard UI'ga ta’sir qiladigan o‘zgarishlar yoki to‘liq release tekshiruvi uchun `npm run build` dan foydalaning; contributor profili release build o‘rnini bosa olmaydi.
+`npm run build:contributor` faqat backend qurilish profilidan foydalanadi. U qurilayotganda asboblar panelidagi UI fayllarini vaqtincha o'chirib qo'yadi, API marshrutni qayta ishlovchilarini saqlaydi va tuzilgandan so'ng asl fayllarni tiklaydi. Boshqaruv paneli UI ta'sir qiladigan o'zgarishlar yoki to'liq nashrni tekshirish uchun `npm run build` foydalaning; hissa qo'shuvchi profili reliz tuzilishini almashtirmaydi.
 
-> **VPS deploy qaydi:** masofaviy image katalogi `/usr/lib/node_modules/omniroute/app/`
-> o‘zgartirilmaydi. Deploy skills `dist/` tarkibini unga rsync qiladi.
-> Faqat repozitoriy ichidagi build chiqishi yo‘li o‘zgargan (`app/` → `dist/`).
+> **VPS deploy eslatmasi:** masofaviy tasvirlar katalogi `/usr/lib/node_modules/omniroute/app/` o'zgarmagan. Joylashtirish ko'nikmalari `dist/` tarkibini unga sinxronlashtiradi. Faqat in-repo qurish chiqish yo'li ko'chirildi (`app/` → `dist/`).
 
-Standart URL'lar:
+Standart URLs:
 
-- **Boshqaruv paneli**: `http://localhost:20128/dashboard`
+- **Boshqaruv paneli** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -430,8 +422,8 @@ So‘ng `dist/` tarkibini masofaviy `app/` katalogiga rsync orqali sinxronlaydig
 
 ## Yordam olish
 
-- **Arxitektura**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) fayliga qarang
-- **API maʼlumotnomasi**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) fayliga qarang
-- **Xavfsizlik hujjatlari**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Operatsion hujjatlar**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Muammolar**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arxitektura** : Qarang [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API havolasi** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) ga qarang
+- **Xavfsizlik hujjatlari** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Operatsiya hujjatlari** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Muammolar** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

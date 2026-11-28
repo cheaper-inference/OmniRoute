@@ -409,7 +409,7 @@ region  = "us-east-1"
 
 ---
 
-## Uwar garke da yawa
+## Sabar masu yawa
 
 ```toml
 [model_providers.omniroute-main]
@@ -469,107 +469,107 @@ A cikin zama mai hulɗa:
 
 ---
 
-## Ayyuka masu ɗaukar dogon lokaci
+## Ayyuka masu tsayi
 
-Tsoffin saituna biyu na OmniRoute na iya lalata zaman Codex CLI na sa'o'i da yawa ba tare da an lura ba. Babu ɗayansu da yake saitin Codex CLI — dukansu suna ɓangaren OmniRoute. Masu amfani da ke ƙaura da tsari daga upstream proxies waɗanda ke ɗaure asusu kuma suke kashe iyakokin zaman banza sukan gamu da matsalolin biyu, sannan su yanke hukuncin cewa OmniRoute “ba zai iya ci gaba da dogon zama ba.”
+Matsalolin OmniRoute guda biyu na iya yin shuru suna lalata CLI Codex sa'o'i da yawa. Babu wani Codex CLI saitin — duka suna rayuwa a gefen OmniRoute. Masu amfani da ke ƙaura saiti daga wakilai na sama waɗanda ke saka asusu kuma suna kashe yankewa marasa aiki sau da yawa suna buga duka biyu kuma suna kammala OmniRoute "ba za su iya ɗaukar dogon zama ba."
 
-| Alama                                                                            | Dalili mai yiwuwa                                                                              | Maɓallin saiti           |
-| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------ |
-| Zama yana ci gaba da sauya asusu / an rasa ci gaba na prompt-cache tsakanin juyi | Session affinity TTL yana `0` (a kashe)                                                        | `sessionAffinityTtlMs`   |
-| Haɗi yana yankewa a tsakiyar tunani ba tare da saƙon da abokin ciniki ke gani ba | Mai sa ido kan rashin aikin stream ya kunna bayan mintuna 10 ba tare da chunk daga upstream ba | `STREAM_IDLE_TIMEOUT_MS` |
+| Alama                                                                           | Mai yiwuwa dalili                                                                | Knob                     |
+| ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------ |
+| Zama yana ci gaba da canza asusun / ci gaba da cache ya ɓace tsakanin juyi      | TTL kusancin zama `0` ne (an kashe shi)                                          | `sessionAffinityTtlMs`   |
+| Haɗin kai ya mutu tsakiyar hankali ba tare da saurin fuskantar abokin ciniki ba | An kori mai sa ido mara amfani bayan mintuna 10 ba tare da wani gungu na sama ba | `STREAM_IDLE_TIMEOUT_MS` |
 
-Tattaunawa masu alaƙa: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (yankewar dogon aiki), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (dalilin da ya sa affinity yake kashe a tsohon saiti). Bibiyar batu: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Tattaunawa masu alaƙa: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (tsawon ɗawainiya ya ragu), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (me yasa alaƙar ta ƙare). Bibiya: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Session affinity — ɗaure tattaunawa ɗaya ga asusu ɗaya
+### 1. Dangantakar zama — saka zance ɗaya zuwa asusu ɗaya
 
-**Tsohon saiti:** `sessionAffinityTtlMs = 0` (a kashe).
+**Na baya:** `sessionAffinityTtlMs = 0` (nakasassu).
 
 **Inda za a saita shi**
 
-- Dashboard → **Settings → Routing** → **Session affinity** → **Affinity TTL (seconds)** (`ComboDefaultsTab`)
-- Ko a yi PATCH ga saituna da `sessionAffinityTtlMs` cikin **millisecond** (kewayon Zod `0`–`86_400_000`, wato har zuwa awa 24)
+- Dashboard →** Saituna → Hanyar Hanya** →** Dangantakar zama** →** Affinity TTL (dakika)** (`ComboDefaultsTab`)
+- Ko saitunan PATCH tare da `sessionAffinityTtlMs` a ciki** millise seconds** (Zod kewayon `0`-`86_400_000`, watau har zuwa awanni 24)
 
-> An sake masa suna a #7274 daga `codexSessionAffinityTtlMs` mai aiki ga Codex kawai. Har yanzu ana karɓar tsohon key ɗin a matsayin alias na karantawa kawai; ya kamata sabbin tsare-tsare su yi amfani da `sessionAffinityTtlMs`. Yanzu affinity yana aiki ga **kowane** provider da zarar TTL ya haura `0`, ba ga Codex kawai ba — duba [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Session affinity.
+> Sake suna cikin #7274 daga Codex-kawai `codexSessionAffinityTtlMs`. Har ila yau ana karɓar maɓallin gado a matsayin laƙabin karantawa kawai; sabbin saiti yakamata suyi amfani da `sessionAffinityTtlMs`. Affinity yanzu ya shafi** kowane** mai bayarwa da zarar TTL yana sama da `0`, ba kawai Codex — duba [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → zumuncin Zama.
 
-**Abin da ke lalacewa idan ya ci gaba da kasancewa 0**
+**Abin da ke karya lokacin da ya tsaya a 0**
 
-Kowane juyi na tattaunawar Codex mai juyi da yawa ana yi masa routing daban bisa ga dabarar combo da ke aiki, kuma zai iya sauka kan **wani asusu daban a kowane juyi**. Wannan yana karya ci gaban session / prompt-cache na upstream. OmniRoute yana duba Codex session headers (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) da body fields kamar `prompt_cache_key` / `session_id` ne kawai idan TTL ya fi `0` (`extractSessionAffinityKey` a cikin `src/sse/services/auth.ts`).
+Kowane juzu'i na zance mai-juyawa Codex ana fatattake shi da kansa ta hanyar dabarun haɗaka mai aiki kuma yana iya sauka akan a** daban-daban asusu kowace bi da bi** . Wannan yana karya ci gaba mai gudana / saurin cache. OmniRoute kawai yana tuntubar shugabannin zaman Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) da filayen jiki kamar `prompt_cache_key` / `session_id` lokacin da TTL ya fi `0` (`extractSessionAffinityKey` a `src/sse/services/auth.ts`).
 
-**Abin da aka ba da shawara don aiki guda da zai ɗauki sa'o'i da yawa**
+**An ba da shawarar don ɗawainiya ɗaya na sa'o'i da yawa**
 
-Saita TTL **sama da tsawon lokacin ainihi da ake sa ran aikin zai ɗauka** (matsakaicin UI shi ne **86400 seconds** = awa 24):
+Saita TTL** sama da tsayin agogon bangon da ake tsammani na aikin** (UI max da** 86400 seconds** = 24 hours):
 
-| Tsawon aikin da ake sa ran | Affinity TTL (UI, seconds) | `sessionAffinityTtlMs` |
-| -------------------------- | -------------------------- | ---------------------- |
-| 'Yan sa'o'i                | `14400` (4h)               | `14400000`             |
-| Tsawon dare / ~12h         | `43200` (12h)              | `43200000`             |
-| Cikakken yini              | `86400` (24h, iyaka)       | `86400000`             |
+| Tsawon aikin da ake tsammani | Affinity TTL (UI, seconds) | `sessionAffinityTtlMs` |
+| ---------------------------- | -------------------------- | ---------------------- |
+| Sa'o'i kaɗan                 | `14400` (4h)               | `14400000`             |
+| Dare / ~ 12h                 | `43200` (12h)              | `43200000`             |
+| Cikakken yini                | `86400` (24h, iyakar)      | `86400000`             |
 
-Shiga da zaɓi abu ne da aka yi da gangan: kashe affinity yana fifita daidaita nauyi tsakanin asusu; kunna shi yana fifita ci gaba ga dogon zaman agent guda ɗaya. Wannan jagorar **ba ta** canza tsohon saiti — dole ne masu gudanar da dogayen ayyukan Codex su zaɓi shiga.
+Ficewar shiga da gangan ce: ɓata alaƙar da ke da alaƙa da daidaita nauyi a cikin asusun; ba da damar shi yana ba da damar ci gaba na dogon lokaci guda ɗaya. Wannan jagorar yayi** ba** canza tsoffin ma'aikatan — masu gudanar da ayyukan Codex masu tsawo dole ne su shiga.
 
-### 2. Lokacin ƙarewar stream mara aiki — kada a kashe juyin tunani mai shiru
+### 2. Fitowa maras lokaci — kar a kashe tunanin shuru
 
-**Tsohon saiti:** `STREAM_IDLE_TIMEOUT_MS = 600000` (mintuna 10). Yana gado daga `REQUEST_TIMEOUT_MS` idan ba a saita shi ba; ma'aunin tushe na bai ɗaya ma 600000 ne. Duba [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Lokutan ƙarewa.
+**Na baya:** `STREAM_IDLE_TIMEOUT_MS = 600000` (minti 10). Yana gado daga `REQUEST_TIMEOUT_MS` idan ba a saita shi ba; tushen da aka raba kuma shine 600000. Dubi [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Abin da ke lalacewa a tsohon saitin**
+**Abin da ke karya a tsoho**
 
-Zagayen tunani / kayan aiki na Codex da ya yi shiru fiye da mintuna 10 ba tare da **wani ainihin ɓangaren bayanai daga upstream ba** ana rufe shi da ƙarfi ta mai sa ido kan zaman banza na SSE (`open-sse/utils/stream.ts`). Sau da yawa abokin ciniki yana ganin haɗin ya yanke kawai — abin da ya yi daidai da “ya tsaya ta atomatik ba tare da wani sanarwa ba.”
+Juya tunanin Codex / kayan aiki wanda ke yin shiru sama da mintuna 10 tare da** babu ainihin tsinkayar sama** An tilasta-rufe ta hanyar SSE mara aiki (`open-sse/utils/stream.ts`). Abokin ciniki sau da yawa yana ganin haɗin kai mara amfani ya sauke — daidai "an tsaya kai tsaye ba tare da wani sanarwa ba."
 
-Muhimmin bayani: Bugun-zuciyar SSE na wucin gadi na OmniRoute **ba ya sake saita** agogon zaman banza. Ainihin ɓangaren jikin bayanai daga upstream ne kawai yake sabunta `lastChunkTime`. Samfurin da ya yi shiru alhali har yanzu yana “tunani” yana kama da upstream da ya tsaya cik a mahangar mai sa idon.
+Mahimman bayanai: OmniRoute's synthetic SSE** bugun zuciya baya sake saitawa** agogon banza. Haƙiƙa na zahiri ne kawai ke sabunta chunk ɗin jiki na `lastChunkTime`. Samfurin shuru wanda har yanzu yana “tunani” yayi kama da wanda ya tsaya cak daga mahangar sa ido.
 
-Rashin aiki na jikin Undici mai alaƙa: `FETCH_BODY_TIMEOUT_MS` (shi ma a tsohuwa yana amfani da ma’aunin mintuna 10 iri ɗaya; `0` yana kashe shi). Don yawo, `FETCH_TIMEOUT_MS` yana rufe kafa haɗi / karɓar headers na farko ne kawai — da zarar yawo ya fara aiki, `STREAM_IDLE_TIMEOUT_MS` da `FETCH_BODY_TIMEOUT_MS` ne ke sarrafa tsayawar bayanai.
+Rashin aikin Undici mai alaƙa: `FETCH_BODY_TIMEOUT_MS` (kuma ya saba da tushe na mintuna 10 iri ɗaya; `0` yana kashe shi). Don yawo, `FETCH_TIMEOUT_MS` kawai yana rufe saitin haɗin kai / masu kai na farko — da zarar rafin ya fara aiki, `STREAM_IDLE_TIMEOUT_MS` da `FETCH_BODY_TIMEOUT_MS` ke tafiyar da rumfunan.
 
-**Shawarar da ta dace don aiki guda da zai ɗauki sa’o’i da yawa**
+**An ba da shawarar don ɗawainiya ɗaya na sa'o'i da yawa**
 
-A cikin muhallin aikin OmniRoute (`.env` / compose / systemd):
+A cikin yanayin tsarin OmniRoute (`.env` / compose / systemd):
 
 ```bash
-# Kashe iyakokin zaman banza na yawo + rashin aikin jiki don zagayen tunani masu tsawo
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Ko kuma a ɗaga su sama da mafi tsawon lokacin shiru da kake tsammani (ƙimomin suna cikin milliseƙondi):
+Ko ɗaga su sama da mafi tsayi shuru rata da kuke tsammani (darajar su ne millise seconds):
 
 ```bash
-# Misali: ba da damar shiru na har zuwa awa 2 tsakanin ɓangarorin bayanai daga upstream
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
 Sake kunna OmniRoute bayan canza waɗannan env vars.
 
-### Takamaiman hanya — aikin Codex na sa’o’i da yawa
+### Kankare girke-girke — Multi-hour Codex aiki
 
-1. **Ƙayyade asusun:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12h) ko `86400` (iyakar 24h).
-2. **Ɗaga / kashe iyakokin zaman banza** a muhallin OmniRoute:
+1. **Sanya asusun:** Dashboard → Saitunan → Rarraba → Zama kusanci → Affinity TTL = `43200` (12h) ko `86400` (24h max).
+2. **Tada / musaki yanke yanke marasa aiki** a cikin muhallin OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Ci gaba da amfani da `config.toml` na Codex na yau da kullum (`wire_api = "responses"`, `base_url` daidai, `OMNIROUTE_API_KEY`) — babu saitunan affinity/zaman banza a ɓangaren Codex don waɗannan halaye biyu.
-4. Sake kunna OmniRoute, sannan ka fara aikin Codex mai tsawo.
+3. A kiyaye Codex `config.toml` da aka saba (`wire_api = "responses"`, daidai `base_url`, `OMNIROUTE_API_KEY`) — babu ƙulli na Codex-gefen affinity/idle don waɗannan halaye guda biyu.
+4. Sake kunna OmniRoute, sannan fara dogon aikin Codex.
 
-### Shawarar tsoffin ƙimomi (#7287)
+### Shawarar Default (#7287)
 
-| Saiti                    | Tsohon ƙimar fitarwa | A canza a wannan jagorar?                                                                                          |
-| ------------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `sessionAffinityTtlMs`   | `0` (a kashe)        | **A’a** — zai ci gaba da zama na zaɓi (daidaita nauyi da ci gaba da zama; duba Discussion #5718)                   |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (minti 10)  | **A’a** — zai ci gaba da zama mintuna 10 don zirga-zirgar gama-gari; masu gudanar da Codex su ɗaga ko su kashe shi |
+| Knob                     | Tsohuwar jirgi      | Canza a cikin wannan jagorar?                                                                              |
+| ------------------------ | ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (kashe)         | **A'a** — ya ci gaba da ficewa (load-daidaitacce vs ci gaba; duba Tattaunawar #5718)                       |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (minti 10) | **A'a** — ya rage minti 10 don zirga-zirga na gaba ɗaya; dogayen ma'aikatan Codex suna ɗagawa ko kashe shi |
 
-Sauya ɗaya daga cikin tsoffin ƙimomin a duniya zai canza hali ga kowane abokin cinikin wata instance, ba Codex kaɗai ba. A rubuta bayanin saitunan; a bar tsoffin ƙimomin yadda suke har sai an yanke wata takamaiman shawara ta mai gudanarwa.
+Juyawa ko dai tsoho a duniya zai canza hali ga kowane abokin ciniki na misali, ba kawai Codex ba. Rubutun ƙulli; bar abubuwan da ba a cika ba su kaɗai har sai takamaiman shawarar mai aiki ta faɗi akasin haka.
 
-### Gano yankewar zaman banza
+### Gano cuts marasa aiki
 
-Lokacin da mai sa idon zaman banza ya fara aiki, OmniRoute yana rubuta layi mai kama da haka:
+Lokacin da ma'aikacin tsaro ya kunna wuta, OmniRoute ya rubuta layi mai siffa kamar:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Yi grep don `Idle timeout: no data from` (ko lambar `stream_idle_timeout` / sunan kuskure `StreamIdleTimeoutError`). Sashen provider shi ne duk abin da OmniRoute ya yi amfani da shi don wannan buƙatar (`codex`, wani provider id, ko `provider` idan ba a sani ba) — ba koyaushe ne zai zama ainihin rubutun `codex` ba.
+Grep don `Idle timeout: no data from` (ko lambar `stream_idle_timeout` / sunan kuskure `StreamIdleTimeoutError`). Bangaren mai bayarwa shine duk abin da OmniRoute da aka yi amfani da shi don wannan buƙatun (`codex`, wani ID na mai bayarwa, ko `provider` idan ba a sani ba) — ba koyaushe ne ainihin kirtani `codex` ba.
 
 ---
 

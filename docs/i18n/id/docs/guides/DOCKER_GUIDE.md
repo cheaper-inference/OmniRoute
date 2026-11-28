@@ -6,23 +6,24 @@
 
 > Referensi lengkap deployment Docker. Untuk memulai dengan cepat, lihat [bagian Docker di README](../README.md#-docker).
 
-## Daftar Isi
+## Daftar isi
 
-- [Menjalankan dengan Cepat](#quick-run)
-- [Dengan File Environment](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Jalankan Cepat](#quick-run)
+- [Dengan File Lingkungan](#with-environment-file)
+- [Docker Menulis](#docker-compose)
 - [Profil yang Tersedia](#available-profiles)
-- [Mengonfigurasi alat CLI host saat OmniRoute berjalan di Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Sidecar Redis](#redis-sidecar)
-- [Compose Produksi](#production-compose)
+- [Pengerasan wadah](#container-hardening)
+- [Mengonfigurasi alat host CLI saat OmniRoute berjalan di Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis sespan](#redis-sidecar)
+- [Komposisi Produksi](#production-compose)
 - [Tahapan Dockerfile](#dockerfile-stages)
-- [Variabel Environment Penting](#critical-environment-variables)
-- [Docker Compose dengan Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
-- [Tag Image](#image-tags)
+- [Variabel Lingkungan Kritis](#critical-environment-variables)
+- [Docker Menulis dengan Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Terowongan Cepat](#cloudflare-quick-tunnel)
+- [Tag Gambar](#image-tags)
 - [Pembaruan dasbor di Docker](#dashboard-updates-in-docker)
-- [Ketersediaan: SQLite bawaan hanya mendukung satu replika](#availability-default-sqlite-is-single-replica)
-- [Error regional Gemini di dalam Docker](#gemini-regional-errors-inside-docker)
+- [Ketersediaan: SQLite default adalah replika tunggal](#availability-default-sqlite-is-single-replica)
+- [kesalahan regional Gemini di dalam Docker](#gemini-regional-errors-inside-docker)
 - [Catatan Penting](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute menyediakan profil Compose untuk bentuk deployment utama. Pilih profil
 | `web`           | `omniroute-web`  | Penyedia sesi web yang memerlukan browser: `gemini-web`, `claude-web`, `claude-turnstile` (membangun `runner-web`, termasuk Chromium)                     | `docker compose --profile web up -d`         |
 
 > Beberapa profil dapat digabungkan: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Pengerasan wadah
+
+Layanan aplikasi `base`, `web`, `cli`, dan `host` di `docker-compose.yml` menggunakan `cap_drop: [ALL]` dan opsi keamanan `no-new-privileges:true`. Gambar dijalankan sebagai pengguna non-root `node` dan mendengarkan pada port tinggi, sehingga tidak memerlukan kemampuan Linux. Opsi keamanan mencegah proses mendapatkan hak istimewa melalui binari setuid.
+
+Hanya profil `cli` yang memasang soket Docker untuk pembaruan otomatis. Lihat [Escape hatch: konfigurasikan CLIs milik container](#escape-hatch-configure-the-containers-own-clis-use-sparingly) untuk mengetahui implikasi keamanannya.
+
+Sistem file root tetap dapat ditulis secara default. Profil `cli` menulis konfigurasi dan cache CLI di direktori home container, profil `web` menyimpan status sesi Chromium, dan runtime Next.js dapat menulis cache di luar `/app/data`.
+
+Untuk mencoba sistem file root read-only dengan profil `base`, simpan ini sebagai `docker-compose.override.yml` di sebelah `docker-compose.yml`. Compose membaca override secara otomatis.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Mount `/app/data` yang ada tetap dapat ditulisi. Uji beban kerja Anda sebelum menggunakan penggantian ini dalam produksi, karena beban kerja tersebut mungkin perlu menulis ke jalur lain.
 
 ## Mengonfigurasi alat CLI host saat OmniRoute berjalan di Docker
 
@@ -272,7 +297,7 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` diaktifkan, jadi `next build` menjalankan induknya** Dan** proses pekerja dan masing-masing menghormati `OMNIROUTE_BUILD_MEMORY_MB` secara terpisah. Ukuran plafon kontainer di atas kira-kira dua kali lipat nilainya, tidak hanya sekali.
+`webpackBuildWorker` diaktifkan, jadi `next build` menjalankan induknya** Dan** proses pekerja dan masing-masing menghormati `OMNIROUTE_BUILD_MEMORY_MB` secara terpisah. Ukuran plafon kontainer di atas kira-kira dua kali lipat nilainya, tidak hanya satu kali.
 
 Diukur pada pohon ini (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
@@ -295,7 +320,7 @@ Perilaku memori di Docker:
 
 ### RAM runtime untuk agen pengkodean
 
-Default 1 GiB Docker adalah dashboard/light-chat floor, bukan ukuran produksi. Badan `POST /v1/responses` yang panjang (ratusan pesan, puluhan alat) menyimpan beberapa grafik dalam memori selama kompresi. Dua permintaan token ~ 3 MiB / ~ 750k yang tumpang tindih telah membatalkan V8 di a** 12 GiB** ruang lama (`FATAL ERROR: Reached heap limit`) dan juga mencapai 16 GiB cgroup OOM. Lihat [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Default 1 GiB Docker adalah dashboard/light-chat floor, bukan ukuran produksi. Badan `POST /v1/responses` yang panjang (ratusan pesan, puluhan alat) menyimpan beberapa grafik dalam memori selama kompresi. Dua permintaan token ~ 3 MiB / ~ 750k yang tumpang tindih telah membatalkan V8 di a** 12 GiB** ruang lama (`FATAL ERROR: Reached heap limit`) dan juga mencapai 16 GiB cgroup OOM. Lihat [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Ukuran** cgroup `--memory` di atas heap** — buffer asli, SQLite, dan perantara kompresi berada di luar V8.
 
@@ -605,7 +630,7 @@ Stok Docker / Kubernetes OmniRoute adalah** satu proses Node + satu penulis SQLi
 | Kesiapan        | HTTP `GET /healthz`                                         | Batas waktu ketat yang menganggap perulangan peristiwa sibuk sebagai mati |
 | Dalam / manusia | `/api/monitoring/health`                                    | Keaktifan kubelet otomatis                                                |
 
-**Peningkatan:** berharap setiap sesi turun. Tiriskan klien jika Anda bisa; tidak ada pembaruan bergulir pada SQLite default. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` juga akan menggantikan satu-satunya proses ketika containernya Tidak Sehat — radius ledakan yang sama.
+**Peningkatan:** berharap setiap sesi turun. Tiriskan klien jika Anda bisa; tidak ada pembaruan bergulir pada SQLite default. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` juga akan menggantikan satu-satunya proses ketika container tidak sehat — radius ledakan yang sama.
 
 Manifes yang sudah jadi dan diagram Helm tersedia di `deploy/kubernetes/` dan `deploy/helm/omniroute/` — lihat [panduan penerapan Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
@@ -636,9 +661,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep memungkinkan kube menjatuhkan titik akhir Layanan sebelum SIGTERM jadi** baru** lalu lintas berhenti mencapai proses kematian. Dalam penerbangan `/v1/responses` SSE dikuras hingga `SHUTDOWN_TIMEOUT_MS` (default 30s) melalui sewa masuk kelas berat (#11015). Permintaan baru yang masih mencapai proses dapatkan `503` + `Retry-After: 5`. Celah Rekreasi titik akhir kosong hingga penggantinya Siap tetap merupakan pemadaman keras - itu adalah topologi SQLite, bukan kesalahan konfigurasi probe.
+`preStop` sleep memungkinkan kube menjatuhkan titik akhir Layanan sebelum SIGTERM jadi** baru** lalu lintas berhenti mencapai proses kematian. `/v1/responses` SSE dalam penerbangan dikuras hingga `SHUTDOWN_TIMEOUT_MS` (default 30 detik) melalui sewa masuk kelas berat (#11015). Permintaan baru yang masih mencapai proses get `503` + `Retry-After: 5`. Buat ulang celah titik akhir kosong hingga penggantinya Siap tetap merupakan pemadaman keras — yang merupakan topologi SQLite, bukan kesalahan konfigurasi probe.
 
-Postgres eksternal / HA multi-penulis adalah** bukan** jalur stok yang terdokumentasi. Jika Anda memerlukan HA, simpan satu replika atau jalankan topologi yang telah diuji dan didokumentasikan oleh proyek secara terpisah. Pekerjaan Postgres/MySQL ada di [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Hingga dikirimkan, satu-satunya cara yang didukung untuk berkembang biak** besar** kapasitas `/v1/responses` adalah N proses independen (bagian berikutnya), bukan `replicas > 1` pada satu volume.
+Postgres eksternal / HA multi-penulis adalah** bukan** jalur stok yang terdokumentasi. Jika Anda memerlukan HA, simpan satu replika atau jalankan topologi yang telah diuji dan didokumentasikan oleh proyek secara terpisah. Pekerjaan Postgres/MySQL ada di [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Hingga dikirimkan, satu-satunya cara yang didukung untuk berkembang biak** besar** kapasitas `/v1/responses` adalah N proses independen (bagian selanjutnya), bukan `replicas > 1` pada satu volume.
 
 ## Scale-out: N proses independen
 
@@ -648,25 +673,25 @@ Salinan satu akun Codex tidak boleh menggunakan token penyegaran sekali pakai se
 
 Contoh pasif membaca ulang koneksi ketika penyegaran diperlukan dan hanya mengadopsi token akses berbeda yang belum kedaluwarsa. Jika tidak, penyegaran dinonaktifkan tanpa kedaluwarsa atau menonaktifkan koneksi atau menghitung kegagalan pemutus penyegaran. Kegagalan otentikasi hulu yang sebenarnya masih menggunakan penghitungan kegagalan normal, cooldown eksponensial, dan kesalahan klien normal; penonaktifan akun tetap permanen. Sinkronkan token yang dirotasi pemilik sebelum token akses kedaluwarsa (proaktif refresh lead default adalah lima menit), atau impor ulang file autentikasi Codex. Impor pasif menyimpan token yang disediakan tanpa memvalidasinya di titik akhir token. Penyegaran dashboard/API manual mengembalikan `409 refresh_disabled`; login OAuth baru tidak berubah. Lihat [referensi lingkungan](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Satu proses Node adalah** satu tumpukan V8** . Dua ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman) yang tumpang tindih membatalkan tumpukan itu di ~ 12 Gi (`FATAL ERROR: Reached heap limit`) dan dapat OOM a 16 Gi cgroup. Lihat [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Pengukuran tersebut adalah a** anggaran memori** peringatan, bukan produk hard-max dari dua `/v1/responses` panjang bersamaan. Penerimaan obrolan kelas berat dibatasi oleh anggaran byte penyerapan yang diturunkan secara otomatis (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) yang berukuran dari batas atas V8/cgroup yang sama — menimpanya ke atas (atau menyetel batas jumlah permintaan `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` yang lama) pada proses yang sudah berukuran besar sehingga membatalkan pembatalan. Obrolan kecil, `/healthz`, `/v1/models`, dan MCP adalah** bukan** di topi itu.
+Satu proses Node adalah** satu tumpukan V8** . Dua ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman) yang tumpang tindih membatalkan tumpukan itu di ~ 12 Gi (`FATAL ERROR: Reached heap limit`) dan dapat OOM a 16 Gi cgroup. Lihat [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Pengukuran tersebut adalah a** anggaran memori** peringatan, bukan produk hard-max dari dua `/v1/responses` panjang bersamaan. Penerimaan obrolan kelas berat dibatasi oleh anggaran byte penyerapan yang diturunkan secara otomatis (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) yang berukuran dari batas atas V8/cgroup yang sama — menimpanya ke atas (atau menyetel batas jumlah permintaan `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` lama) pada proses yang sudah berukuran besar sehingga membatalkan pembatalan. Obrolan kecil, `/healthz`, `/v1/models`, dan MCP adalah** bukan** di topi itu.
 
 ### Satu proses: lebih dari dua `/v1/responses` panjang
 
-A** sehat** proses (tumpukan di bawah `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** mungkin** menjalankan lebih dari dua `POST /v1/responses` panjang secara bersamaan ketika anggaran byte dalam proses di seluruh proses (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) masih memiliki ruang. Badan pada atau di atas `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) mengambil sewa kelas berat yang sama dengan permintaan struktur-berat dan menggunakan [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Puluhan klien SSE panjang secara bersamaan (operator sering kali membutuhkan 40–50) adalah a** anggaran memori** pertanyaan — ukuran heap + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — bukan batas produk “maks 2” yang sulit. Tumpukan yang ditekan masih hilang dengan `503` yang dapat dicoba ulang sehingga #7849 tidak kembali.
+A** sehat** proses (tumpukan di bawah `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** mungkin** menjalankan lebih dari dua `POST /v1/responses` panjang secara bersamaan ketika anggaran byte dalam proses di seluruh proses (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) masih memiliki ruang. Badan pada atau di atas `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) mengambil sewa kelas berat yang sama dengan permintaan struktur-berat dan menggunakan pelarian [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Puluhan klien SSE panjang secara bersamaan (operator sering kali membutuhkan 40–50) adalah a** anggaran memori** pertanyaan — ukuran heap + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — bukan batas produk “maks 2” yang sulit. Tumpukan yang ditekan masih berisi `503` yang dapat dicoba ulang sehingga #7849 tidak kembali.
 
 Ke** perbanyak tumpukan** (ruang lama V8 independen)** Hari ini** :
 
 | Melakukan                                                                                                                                                           | Tidak                                                           |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | Berlari** containers/pods** , masing-masing dengan miliknya sendiri** memiliki** `DATA_DIR` / volume                                                                | Setel `replicas > 1` terhadap satu file SQLite                  |
-| Ukuran ruang kepala sehat + dalam penerbangan yang berat dari anggaran heap / byte dalam penerbangan; 1–2 adalah default konservatif #7849, bukan produk keras maks | Berikan satu proses 8 × RAM dan batas hitungan tak terbatas     |
+| Ukuran ruang kepala sehat + dalam penerbangan yang berat dari anggaran heap / byte dalam penerbangan; 1–2 adalah #7849 default konservatif, bukan produk keras maks | Berikan satu proses 8 × RAM dan batas hitungan tak terbatas     |
 | Opsional: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` untuk** penghitung kuota bersama**                                                                   | Perlakukan Redis sebagai SQLite — yang dibagikan, padahal bukan |
 | Duplikat rahasia penyedia ke dalam setiap instance (atau terima dasbor yang dipartisi)                                                                              | Harapkan satu dasbor/satu log panggilan di seluruh instance     |
 | Depan dengan penyeimbang beban apa pun; lengket dengan kunci atau sesi API sudah cukup                                                                              | Memerlukan middleware yang sadar ukuran khusus vendor           |
 
-Afinitas sesi-ke-akun juga dapat dibagikan melalui Redis: setel `OMNIROUTE_SESSION_AFFINITY_STORE=redis` dan `REDIS_URL` pada setiap proses, dengan `REDIS_KEY_PREFIX` yang sama dan pengaturan `sessionAffinityTtlMs` positif. Pin menyelesaikan identitas akun penggunaan yang di-hash ke koneksi lokal yang memenuhi syarat setiap proses, sehingga akun OAuth dengan metadata identitas yang cocok tidak perlu memiliki koneksi yang cocok IDs. Identitas akun yang diketahui lebih diutamakan daripada IDs lokal yang bertentangan dalam penyelesaian pin dan penggusuran yang dijaga; catatan tanpa identitas (atau penelepon penggusuran tanpa identitas) mempertahankan penjaga ID warisan. Akun tanpa identitas penggunaan yang stabil masih memerlukan pencocokan IDs. kesalahan Redis atau panggilan melebihi 100 ms dikembalikan ke SQLite lokal. Setiap penyimpanan afinitas Redis membatasi operasi yang luar biasa pada 8, melewati Redis segera ketika penuh, dan melepaskan slot hanya ketika pekerjaan yang mendasarinya diselesaikan, bukan pada tenggat waktu pemanggil. Selama pemadaman Redis tidak ada kebenaran yang sama: setiap instance kembali ke afinitas lokalnya masing-masing, sesi dapat dipasang ulang satu kali per instance, dan instance mungkin berbeda. Kelengketan menyatu kembali melalui Redis ketika pulih. Batas waktu menunggu, bukan EVAL yang dikirim, yang mungkin muncul setelah fallback. Penulisan perutean membandingkan nilai persis yang diamati oleh keputusan perutean, bukan pembacaan waktu mutasi baru; kesalahan yang diamati atau pengamatan fallback SQLite dibandingkan dengan kunci Redis yang tidak ada. Pin yang usang diganti dalam satu CAS, sehingga perintah yang terlambat tidak dapat mengganti atau menghapus pin yang lebih baru dan berbeda. Redis membaca secara atom mengembalikan nilai dan server yang tersisa TTL; PTTL positif (atau tidak ada masa berlaku) yang menentukan keaktifan, bukan stempel waktu JSON penulis atau jam pembaca. Snapshot lokal memetakan sisa TTL ke tenggat waktu lokal; kunci JSON yang ada tetap dapat dibaca dan byte mentahnya dipertahankan untuk CAS. Redis adalah satu-satunya sumber kebenaran sementara ia menjawab. Peningkatan, sentuhan, dan penghapusan bersama yang dikonfirmasi menghapus entri lokal, jangan pernah menginstal atau menyegarkannya. SQLite di jalur Redis hanya menyimpan keputusan fallback instance ini dari kesalahan Redis, batas waktu, atau saturasi penerimaan, dibatasi TTL seperti sebelumnya. Pin lokal yang hilang pada pemadaman berikutnya memerlukan satu pengambilan baru (satu kesalahan cache cepat), bukan akun yang salah atau dikeluarkan. Upsert yang ditolak mengembalikan pemenang bersama dan sisa TTL secara atom: pilihan biasa memeriksa ulang tenggat waktu lokal yang dipetakan dan menggunakan pemenang yang masih aktif, menyentuh penggunaan dan mencatat akun tersebut tanpa penulisan bersama lainnya. Jika tidak tersedia, seleksi akan mempertahankan kandidat lokal, membiarkan pin bersama tidak berubah dan mengeluarkan satu pesan debug. CAS yang ditolak tidak menulis SQLite; kesalahan Redis, batas waktu, atau saturasi penerimaan menerapkan operasi lokal yang ada. Jika balasan mutasi yang dikirim tiba setelah waktu habis (diterima, ditolak, atau error), perbandingan dan penghapusan nilai serial yang tepat dan sinkron hanya menghapus baris fallback batas waktu tunggu yang identik dengan byte. Tidak ada penantian antara perbandingan dan penghapusan itu; penulisan pemadaman yang lebih baru dipertahankan. Penggusuran yang dijaga menghapus pin lokal akun yang gagal meskipun Redis tidak aktif, dan membersihkannya lagi setelah penggusuran bersama dikonfirmasi. Balasan yang dibagikan sebelumnya yang tertunda tidak dapat memulihkan pin lokal yang dikeluarkan karena keberhasilan yang dibagikan tidak pernah menulis SQLite. Penggantian pemadaman di kemudian hari dapat memasang ulang akun; penulisan bersama yang diterima kemudian hanya ada di Redis. Redis meleset jangan konsultasikan dengan status fallback lokal. Dengan driver dimatikan, pin yang baru dipilih mempertahankan bentuk SQLite JSON empat bidang yang lama; hanya perutean Redis yang menambahkan identitas akun yang di-hash. Pin yang diambil sebelumnya diperiksa ulang pada batas masa berlakunya. Redis pilihan non-sewa membaca ulang penyimpanan, tetapi perencanaan sewa sinkron masih dapat menggunakan pin yang dikeluarkan antara pengambilan awal dan perencanaan (jendela upaya terbaik yang diterima). Komitmen sewa tidak dapat berpindah akun setelah klaim yang tahan lama: pada bagian yang ditolak, komitmen sewa akan mempertahankan kandidat yang diklaim hanya untuk permintaan tersebut dan membiarkan pemenang bersama tidak tersentuh, sehingga kesepakatan antar instance dibatasi pada jalur tersebut. Tabel lainnya masih berlaku: ini tidak berbagi kelekatan sesi kombo, pin putaran Codex asli, semafor akun, penguncian, batas pembelanjaan, konfigurasi atau log panggilan.
+Afinitas sesi-ke-akun juga dapat dibagikan melalui Redis: setel `OMNIROUTE_SESSION_AFFINITY_STORE=redis` dan `REDIS_URL` pada setiap proses, dengan `REDIS_KEY_PREFIX` yang sama dan pengaturan `sessionAffinityTtlMs` positif. Pin menyelesaikan identitas akun penggunaan yang di-hash ke koneksi lokal yang memenuhi syarat setiap proses, sehingga akun OAuth dengan metadata identitas yang cocok tidak perlu memiliki koneksi yang cocok IDs. Identitas akun yang diketahui lebih diutamakan daripada IDs lokal yang bertentangan dalam penyelesaian pin dan penggusuran yang dijaga; catatan tanpa identitas (atau penelepon penggusuran tanpa identitas) mempertahankan penjaga ID warisan. Akun tanpa identitas penggunaan yang stabil masih memerlukan pencocokan IDs. kesalahan Redis atau panggilan melebihi 100 ms dikembalikan ke SQLite lokal. Setiap penyimpanan afinitas Redis membatasi operasi yang luar biasa pada 8, melewati Redis segera ketika penuh, dan melepaskan slot hanya ketika pekerjaan yang mendasarinya diselesaikan, bukan pada tenggat waktu pemanggil. Selama pemadaman Redis tidak ada kebenaran yang sama: setiap instance kembali ke afinitas lokalnya masing-masing, sesi dapat dipasang ulang satu kali per instance, dan instance mungkin berbeda. Kelengketan menyatu kembali melalui Redis ketika pulih. Batas waktu menunggu, bukan EVAL yang dikirim, yang mungkin muncul setelah fallback. Penulisan perutean membandingkan nilai persis yang diamati oleh keputusan perutean, bukan pembacaan waktu mutasi baru; kesalahan yang diamati atau pengamatan fallback SQLite dibandingkan dengan kunci Redis yang tidak ada. Pin yang usang diganti dalam satu CAS, sehingga perintah yang terlambat tidak dapat mengganti atau menghapus pin yang lebih baru dan berbeda. Redis membaca secara atom mengembalikan nilai dan server yang tersisa TTL; PTTL positif (atau tidak ada masa berlaku) yang menentukan keaktifan, bukan stempel waktu JSON penulis atau jam pembaca. Snapshot lokal memetakan sisa TTL ke tenggat waktu lokal; kunci JSON yang ada tetap dapat dibaca dan byte mentahnya dipertahankan untuk CAS. Redis adalah satu-satunya sumber kebenaran sementara ia menjawab. Peningkatan, sentuhan, dan penghapusan bersama yang dikonfirmasi menghapus entri lokal, jangan pernah menginstal atau menyegarkannya. SQLite di jalur Redis hanya menyimpan keputusan fallback instance ini dari kesalahan Redis, batas waktu, atau saturasi penerimaan, dibatasi TTL seperti sebelumnya. Pin lokal yang hilang pada pemadaman berikutnya memerlukan satu pilihan baru (satu kesalahan cache cepat), bukan akun yang salah atau dikeluarkan. Upsert yang ditolak mengembalikan pemenang bersama dan sisa TTL secara atom: pilihan biasa memeriksa ulang tenggat waktu lokal yang dipetakan dan menggunakan pemenang yang masih aktif, menyentuh penggunaan dan mencatat akun tersebut tanpa penulisan bersama lainnya. Jika tidak tersedia, seleksi akan mempertahankan kandidat lokal, membiarkan pin bersama tidak berubah dan mengeluarkan satu pesan debug. CAS yang ditolak tidak menulis SQLite; kesalahan Redis, batas waktu, atau saturasi penerimaan menerapkan operasi lokal yang ada. Jika balasan mutasi yang dikirim tiba setelah waktu habis (diterima, ditolak, atau error), perbandingan dan penghapusan nilai serial yang tepat dan sinkron hanya menghapus baris fallback batas waktu tunggu yang identik dengan byte. Tidak ada penantian antara perbandingan dan penghapusan itu; penulisan pemadaman yang lebih baru dipertahankan. Penggusuran yang dijaga menghapus pin lokal akun yang gagal meskipun Redis tidak aktif, dan membersihkannya lagi setelah penggusuran bersama dikonfirmasi. Balasan yang dibagikan sebelumnya yang tertunda tidak dapat memulihkan pin lokal yang dikeluarkan karena keberhasilan yang dibagikan tidak pernah menulis SQLite. Penggantian pemadaman di kemudian hari dapat memasang ulang akun; penulisan bersama yang diterima kemudian hanya ada di Redis. Redis meleset jangan konsultasikan dengan status fallback lokal. Dengan driver dimatikan, pin yang baru dipilih mempertahankan bentuk SQLite JSON empat bidang yang lama; hanya perutean Redis yang menambahkan identitas akun yang di-hash. Pin yang diambil sebelumnya diperiksa ulang pada batas masa berlakunya. Redis pilihan non-sewa membaca ulang penyimpanan, tetapi perencanaan sewa sinkron masih dapat menggunakan pin yang dikeluarkan antara pengambilan awal dan perencanaan (jendela upaya terbaik yang diterima). Komitmen sewa tidak dapat berpindah akun setelah klaim yang tahan lama: pada bagian yang ditolak, komitmen sewa akan mempertahankan kandidat yang diklaim hanya untuk permintaan tersebut dan membiarkan pemenang bersama tidak tersentuh, sehingga kesepakatan antar instance dibatasi pada jalur tersebut. Tabel lainnya masih berlaku: ini tidak berbagi kelekatan sesi kombo, pin putaran Codex asli, semafor akun, penguncian, batas pembelanjaan, konfigurasi atau log panggilan.
 
-Perangkat keras: `/v1/responses` panjang bersamaan per instance adalah a** anggaran memori** pertanyaan (tumpukan + inflight-byte / #10110). `N` independen `DATA_DIR` s masih mengalikan tumpukan: host RAM harus mencakup `N × cgroup`, bukan “satu pod 16 Gi dengan N = 8.” Jangan pernah `replicas > 1` pada satu file SQLite.
+Perangkat keras: `/v1/responses` panjang bersamaan per instance adalah a** anggaran memori** pertanyaan (tumpukan + inflight-byte / #10110). `N` independen `DATA_DIR` s masih mengalikan tumpukan: host RAM harus mencakup `N × cgroup`, bukan “satu 16 Gi pod dengan N = 8.” Jangan pernah `replicas > 1` pada satu file SQLite.
 
 Buat sketsa (dua tumpukan, dua volume — bukan `deploy.replicas: 2`):
 
@@ -695,55 +720,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Kepadatan dalam proses (kompresi dari isolat HTTP ) adalah [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Satu klaster logis pada status tahan lama bersama adalah [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Kepadatan dalam proses (kompresi dari isolat HTTP ) adalah [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Satu klaster logis pada status tahan lama bersama adalah [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Error regional Gemini di dalam Docker
+## kesalahan regional Gemini di dalam Docker
 
-Google AI Studio / Gemini API dapat mengembalikan HTTP 400 dengan FAILED_PRECONDITION dan
-`User location is not supported for the API use.` Permintaan yang berhasil pada host
-tidak membuktikan bahwa kontainer menggunakan rute keluar yang sama. Urutan DNS,
-konektivitas IPv4/IPv6, perutean VPN, dan proksi yang dikonfigurasi dapat berbeda. Periksa
-[wilayah yang didukung Google](https://ai.google.dev/gemini-api/docs/available-regions)
-serta rute koneksi yang sebenarnya; error ini saja tidak menunjukkan bahwa API key bermasalah.
+Google AI Studio / Gemini API dapat mengembalikan HTTP 400 dengan FAILED_PRECONDITION dan `User location is not supported for the API use.` Permintaan yang berhasil pada host tidak membuktikan bahwa container menggunakan rute keluar yang sama. pemesanan DNS, konektivitas IPv4/IPv6, perutean VPN, dan proxy yang dikonfigurasi dapat berbeda. Periksa [wilayah yang didukung Google](https://ai.google.dev/gemini-api/docs/available-regions) serta rute koneksi sebenarnya; kesalahan ini saja tidak mengidentifikasi kunci API yang buruk.
 
-### Utamakan proksi khusus koneksi
+### Lebih suka proxy khusus koneksi
 
-Gunakan [konfigurasi proksi per koneksi](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-OmniRoute untuk koneksi Gemini yang terdampak, lalu ulangi **Uji Koneksi** dan permintaan kecil
-dengan model yang sama. Ini menjaga agar perubahan perutean hanya berlaku pada koneksi tersebut. Pastikan
-proksi dapat dijangkau dari kontainer, dan bahwa koneksi tersebut benar-benar memilihnya.
-Mengubah rute tidak menjamin kelayakan regional di sisi upstream.
+Gunakan [konfigurasi proksi per koneksi](../ops/PROXY_GUIDE.md#4-level-proxy-system) OmniRoute untuk koneksi Gemini yang terpengaruh, lalu ulangi** Uji Koneksi** dan permintaan kecil dengan model yang sama. Hal ini membuat perubahan perutean tetap tercakup dalam koneksi tersebut. Verifikasi bahwa proksi dapat dijangkau dari kontainer, dan koneksi benar-benar memilihnya. Perubahan rute tidak menjamin kelayakan wilayah hulu.
 
-### Bandingkan jaringan host dan kontainer
+### Bandingkan jaringan host dan container
 
-Pertahankan key, model, dan permintaan yang identik saat membandingkan hasil terautentikasi; jangan pernah
-menempelkan kredensial, kata sandi proksi, atau header otorisasi lengkap ke dalam issue.
-Pertama, periksa keluarga alamat yang ditawarkan resolver OS menggunakan perintah yang sama
-pada host dan di dalam kontainer:
+Jaga agar kunci, model, dan permintaan tetap identik saat membandingkan hasil yang diautentikasi; jangan pernah menempelkan kredensial, kata sandi proksi, atau header otorisasi lengkap ke dalam suatu masalah. Pertama-tama periksa keluarga alamat mana yang ditawarkan oleh penyelesai OS, menggunakan perintah yang sama pada host dan di dalam wadah:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Ganti `omniroute` dengan layanan yang Anda jalankan (misalnya, `omniroute-web`). Perintah-perintah ini
-mencetak keluarga alamat tanpa kredensial atau alamat IP. Nilai `6` yang dikembalikan
-hanya menunjukkan hasil DNS IPv6: ini **tidak** membuktikan adanya rute IPv6 yang dapat digunakan atau akses API.
-Jika `curl` terinstal, bandingkan `curl -4 -I https://generativelanguage.googleapis.com`
-dengan `curl -6 -I https://generativelanguage.googleapis.com` di kedua lingkungan.
-Respons HTTP membuktikan konektivitas untuk pengujian tersebut, meskipun berupa error tanpa autentikasi;
-hanya permintaan model terautentikasi yang menguji kelayakan Gemini.
+Ganti `omniroute` dengan layanan yang Anda jalankan (misalnya, `omniroute-web`). Perintah ini mencetak kelompok alamat tanpa kredensial atau alamat IP. `6` yang dikembalikan hanya menampilkan hasil IPv6 DNS : ya** bukan** buktikan rute IPv6 atau akses API yang dapat digunakan. Jika `curl` diinstal, bandingkan `curl -4 -I https://generativelanguage.googleapis.com` dengan `curl -6 -I https://generativelanguage.googleapis.com` di kedua lingkungan. Respons HTTP membuktikan konektivitas untuk probe tersebut, meskipun itu adalah kesalahan yang tidak diautentikasi; hanya permintaan model yang diautentikasi yang menguji kelayakan Gemini.
 
-### Alternatif tingkat host: IPv6 yang berfungsi dan kebijakan resolver
+### Alternatif tingkat host: IPv6 yang berfungsi dan kebijakan penyelesai
 
-Pelapor [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) memulihkan
-akses di lingkungannya dengan mengaktifkan IPv6 kontainer dan mengubah pemilihan alamat
-glibc. Perlakukan ini sebagai alternatif khusus lingkungan. Pastikan IPv6 host berfungsi,
-egress/perutean kontainer, dan aturan firewall sudah benar sebelum menyesuaikan preferensi resolver.
-Alamat ULA privat saja tidak membuktikan konektivitas IPv6 publik.
+Pelapor [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) memulihkan akses di lingkungannya dengan mengaktifkan container IPv6 dan mengubah pilihan alamat glibc. Perlakukan ini sebagai alternatif khusus lingkungan. Konfirmasikan aturan host IPv6, container egress/routing, dan firewall yang berfungsi sebelum menyesuaikan preferensi penyelesai. Alamat ULA pribadi dengan sendirinya tidak membentuk konektivitas IPv6 publik.
 
-Untuk layanan yang sudah terhubung ke jaringan default Compose, fragmen ini mengaktifkan
-IPv6 pada jaringan tersebut; pertahankan konfigurasi layanan, port, volume, dan konfigurasi lainnya:
+Untuk layanan yang sudah terpasang ke jaringan default Compose, fragmen ini mengaktifkan IPv6 di jaringan tersebut; pertahankan sisa layanan, port, volume, dan konfigurasi Anda:
 
 ```yaml
 networks:
@@ -751,30 +753,13 @@ networks:
     enable_ipv6: true
 ```
 
-Untuk jaringan bernama, aktifkan fitur tersebut pada jaringan yang benar-benar digunakan layanan. Docker dapat
-mengalokasikan subnet ULA; pilih subnet eksplisit yang tidak tumpang tindih hanya jika jaringan Anda
-memerlukannya. Lihat [jaringan IPv6 Docker](https://docs.docker.com/engine/daemon/ipv6/)
-dan [opsi jaringan Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Untuk jaringan bernama, aktifkan jaringan tersebut di jaringan tempat layanan tersebut bergabung. Docker dapat mengalokasikan subnet ULA ; pilih subnet yang eksplisit dan tidak tumpang tindih hanya jika jaringan Anda memerlukannya. Lihat opsi [jaringan Docker IPv6](https://docs.docker.com/engine/daemon/ipv6/) dan [Tulis jaringan](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Pada **image berbasis glibc**, `/etc/gai.conf` dapat mengubah pemilihan alamat. Dockerfile
-repositori saat ini menggunakan Debian; image kustom berbasis musl tidak menggunakan mekanisme yang sama.
-Penyesuaian yang dilaporkan mengubah label ULA dari `label fc00::/7 6` menjadi
-`label fc00::/7 1`. Mulailah dari tabel kebijakan lengkap milik image dan pertahankan entri
-lainnya: menambahkan entri `label` atau `precedence` akan menggantikan tabel default tersebut, sehingga file
-yang hanya berisi baris yang diubah tidaklah memadai.
-[Referensi konfigurasi glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-mendokumentasikan semantik tersebut. Bind-mount file yang telah ditinjau sebagai hanya-baca di `/etc/gai.conf`
-dan buat ulang layanan untuk menerapkannya.
+Pada suatu** gambar berbasis glibc** , `/etc/gai.conf` dapat mengubah pilihan alamat. Repositori Dockerfile saat ini menggunakan Debian; gambar khusus berbasis musl tidak menggunakan mekanisme ini. Penyesuaian yang dilaporkan mengubah label ULA dari `label fc00::/7 6` menjadi `label fc00::/7 1`. Mulai dari tabel kebijakan lengkap gambar dan pertahankan entri lainnya: menambahkan entri `label` atau `precedence` akan menggantikan tabel default tersebut, sehingga file yang hanya berisi baris yang diubah saja tidak cukup. [Referensi konfigurasi glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) mendokumentasikan semantik tersebut. Ikat-pasang file yang ditinjau hanya-baca di `/etc/gai.conf` dan buat ulang layanan untuk menerapkannya.
 
-Ini mengubah pemilihan alamat OS untuk **semua lalu lintas keluar di kontainer tersebut**.
-Ini tidak memaksa setiap aplikasi memilih IPv6: urutan DNS dan pemilihan koneksi
-Node juga berpengaruh. Secara khusus, `--dns-result-order=ipv4first` memprioritaskan IPv4 dan
-bukan solusi untuk kegagalan yang hanya terjadi pada IPv4. Lihat [pengurutan DNS Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Ini mengubah pilihan alamat OS** semua lalu lintas keluar dalam wadah itu** . Itu tidak memaksa setiap aplikasi untuk memilih IPv6: Urutan DNS node dan pemilihan koneksi juga penting. Secara khusus, `--dns-result-order=ipv4first` lebih memilih IPv4 dan bukan solusi untuk kegagalan IPv4-only. Lihat [Pemesanan Node DNS](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Uji kembali Gemini dan penyedia Anda lainnya setelah perubahan tingkat host apa pun. Untuk melakukan rollback,
-hapus mount `gai.conf` kustom, pulihkan konfigurasi jaringan sebelumnya, dan
-buat ulang layanan/jaringan yang terdampak dalam periode pemeliharaan. Membuat ulang jaringan
-dapat mengganggu kontainer lain yang terhubung dengannya; jangan hapus volume data persisten.
+Uji ulang Gemini dan penyedia Anda yang lain setelah terjadi perubahan tingkat host. Untuk memutar kembali, hapus pemasangan `gai.conf` khusus, pulihkan konfigurasi jaringan sebelumnya, dan buat ulang service/network yang terpengaruh selama masa pemeliharaan. Membuat ulang jaringan dapat mengganggu container lain yang terpasang padanya; jangan hapus volume data yang persisten.
 
 ## Catatan Penting
 

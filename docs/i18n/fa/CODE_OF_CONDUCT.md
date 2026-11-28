@@ -47,15 +47,13 @@
 انتشار مطلب از طریق حساب رسمی رسانههای اجتماعی یا ایفای نقش بهعنوان نماینده
 منصوبشده در یک رویداد آنلاین یا حضوری است.
 
-## Enforcement
+## اجرا
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+مواردی از رفتار توهین آمیز، آزاردهنده یا غیرقابل قبول ممکن است به رهبران جامعه که مسئول اجرا هستند با باز کردن یک مشاوره امنیتی خصوصی در
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+یا از طریق ایمیل به نگهدارنده در diegosouza.pw@outlook.com. برای حوادث حساس امنیتی، [`SECURITY.md`](SECURITY.md) ببینید. همه شکایات به سرعت و منصفانه بررسی و بررسی خواهند شد.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+همه رهبران جامعه موظف به رعایت حریم خصوصی و امنیت گزارشگر هر حادثه هستند.
 
 ## دستورالعملهای اجرایی
 

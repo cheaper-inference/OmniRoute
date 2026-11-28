@@ -236,19 +236,19 @@ Suporta** 22 estratégias de encaminhamento** (ver `src/shared/constants/routing
 | `context-relay`     | Distribua o contexto pelos alvos                                                                        |
 | `fill-first`        | Preencha a quota antes de passar para a próxima                                                         |
 | `p2c`               | Poder de duas escolhas                                                                                  |
-| `random`            | Uniforme aleatório                                                                                      |
-| `least-used`        | Escolha aquele com menos utilizações recentes                                                           |
-| `cost-optimized`    | Alvo saudável mais barato primeiro                                                                      |
-| `reset-aware`       | Ciente das janelas de reposição do fornecedor                                                           |
-| `reset-window`      | Redefinir o encaminhamento baseado em janela                                                            |
+| `random`            | Novo embaralhamento por solicitação                                                                     |
+| `least-used`        | Escolha aquele com menos pedidos registados                                                             |
+| `cost-optimized`    | Preço de entrada mais baixo do catálogo primeiro                                                        |
+| `reset-aware`       | Urgência de redefinição de quota restante +                                                             |
+| `reset-window`      | Janela de cota que é redefinida primeiro                                                                |
 | `expiry-first`      | Gastar a conta cuja quota expiraria sem ser utilizada primeiro                                          |
 | `headroom`          | A maior margem de quota restante primeiro                                                               |
 | `quota-weighted`    | Ignorar as contas esgotadas e, em seguida, levantar pela quota restante ÷ carga em trânsito             |
-| `strict-random`     | Verdadeiramente uniforme (sem ponderação de qualidade)                                                  |
+| `strict-random`     | Baralho embaralhado: cada alvo uma vez antes de se repetir                                              |
 | `auto`              | Utilizar pontuação de 16 fatores (`autoCombo/`)                                                         |
 | `lkgp`              | Primeiro o último bom fornecedor conhecido                                                              |
-| `context-optimized` | Melhor para pedidos de contexto longo                                                                   |
-| `cache-optimized`   | Fixe cada prefixo de prompt reutilizável na mesma conta (ocorrências de cache de prompt)                |
+| `context-optimized` | A maior janela de contexto conhecida primeiro                                                           |
+| `cache-optimized`   | Prefira a conta que provavelmente conterá o prefixo do prompt na cache                                  |
 | `fusion`            | Distribua-se num painel em paralelo e depois sintetize através de um juiz (`fusion.ts`)                 |
 | `pipeline`          | Passos da cadeia — a saída de cada alvo alimenta o próximo                                              |
 | `jev`               | Aceitação: TypeSafe Jev admite quais as inscrições classificadas que são executadas; senão o seu pedido |

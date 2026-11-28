@@ -41,48 +41,31 @@ A `domain/routing/routerBackends.ts` szerződés (a kód a [#5868](https://githu
 
 A `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`, `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) lehetővé teszi, hogy a hívók az alapján szűrjenek, mire képes ténylegesen egy motor, ahelyett, hogy az egyes azonosítókhoz külön ágakat kódolnának.
 
-## A tengely — beágyazott szolgáltatások (felügyelt folyamat oldala)
+## A tengely — beágyazott szolgáltatások (felügyelt folyamatoldal)
 
-- **Felügyelt folyamatok nyilvántartása:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (jelenleg: `9router`, `cliproxy`).
-- **Az életciklus kezelője:** `src/lib/services/ServiceSupervisor.ts` — a `start()` elindítja a
-  gyermekfolyamatot, megvárja a `waitForHealthy()` sikerét, valamint a stdout/stderr kimenetét egy körkörös pufferbe irányítja;
-  a `stop()` SIGTERM→SIGKILL; minden művelet zárolással van sorosítva.
-- **Állapotunió** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error`, valamint egy
-  ortogonális `HealthState = healthy | unhealthy | unknown`.
-- **Miért külön folyamat (és nem folyamaton belüli SDK)?** A folyamatizoláció teszi lehetővé,
-  hogy az egyes sidecarok telepítése/indítása/leállítása/állapotellenőrzése/naplózása egymástól függetlenül vezérelhető legyen, és hogy
-  a loopback indításvédelme alkalmazható legyen. A folyamaton belüli adapter modellezése jövőbeli feladat — ezt
-  a `native-hot-path` képességjelző fejezné ki.
+- **A felügyelt folyamatok nyilvántartása:** `src/lib/services/bootstrap.ts` `SERVICES[]` (ma: `9router`, `cliproxy`).
+- **Életciklus tulajdonosa:** `src/lib/services/ServiceSupervisor.ts` — `start()` szüli a gyermeket, bekapja `waitForHealthy()`, stdout/stderr csap egy gyűrűpufferbe; `stop()` SIGTERM→SIGKILL; minden zár alatt szerializálva.
+- **Államszövetség** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error`, plusz egy ortogonális `HealthState = healthy | unhealthy | unknown`.
+- **Miért egy külön folyamat (nem egy in-proc SDK)?** A folyamat elkülönítése teszi install/start/stop/health/logs oldalkocsinként függetlenül vezérelhetővé, és lehetővé teszi a loopback spawn-guard alkalmazását. Az in-proc adapter modellezése a jövőbeli munka. — a `native-hot-path` képesség jelzője az, ahol ez kifejeződik.
 
-### Életciklus-útvonal szerződése (`/api/services/<tool>/…`)
+### Életciklus útvonal szerződés (`/api/services/<tool>/…`)
 
-Az állapotkódok **szándékosan állapot-/ige-/útvonalspecifikusak** — ez maga a szerződés, nem
-következetlenség:
+Az állapotkódok**state/verb/path-specific tervezés szerint** — ez a szerződés, nem következetlenség:
 
-| Hívás                         | Feltétel                        | Állapot                              |
-| ----------------------------- | ------------------------------- | ------------------------------------ |
-| `POST .../start`              | a szolgáltatás `not_installed`  | **409** (előfeltétel)                |
-| `POST .../stop`               | már le van állítva              | **200** (idempotens üres művelet)    |
-| `GET .../status`              | rendben                         | **200** (`live ?? row ?? "unknown"`) |
-| `POST .../start`              | indítási hiba                   | **503** (átmeneti)                   |
-| `GET .../status`, `.../stop`  | kezeletlen hiba                 | **500**                              |
-| `GET /api/services/<x>/logs`  | ismeretlen eszköz: `<x>`        | **404** `Service '<x>' not found`    |
-| `GET .../status?reveal=key`   | hiányzó `X-Reveal-Confirm: yes` | **403** (csak 9router)               |
-| **bármely** `/api/services/*` | a hívó nem loopback/privát LAN  | **403 LOCAL_ONLY**                   |
+| Hívás                           | Állapot                          | Állapot                              |
+| ------------------------------- | -------------------------------- | ------------------------------------ |
+| `POST .../start`                | szerviz `not_installed`          | **409** (előfeltétel)                |
+| `POST .../stop`                 | már megállt                      | **200** (idempotens no-op)           |
+| `GET .../status`                | OK                               | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`                | spawn hiba                       | **503** (átmeneti)                   |
+| `GET .../status`, `.../stop`    | fel nem fogott hiba              | **500**                              |
+| `GET /api/services/<x>/logs`    | ismeretlen szerszám `<x>`        | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`     | hiányzik `X-Reveal-Confirm: yes` | **403** (csak 9 router)              |
+| **bármilyen** `/api/services/*` | hívó nem loopback/private-LAN    | **403 LOCAL_ONLY**                   |
 
-Minden hibatörzs formáját a `createErrorResponse()` határozza meg →
-`{ error: { message, type }, requestId }`, ahol a `type` az állapotkódból származik
-(`500→server_error`, `404→not_found`, `409→conflict`, egyébként `invalid_request`), és ez a
-géppel feldolgozható megkülönböztető érték. Az üzenetek előzetesen megtisztításra kerülnek
-(`sanitizeErrorMessage()`, 12. szigorú szabály).
+Az összes hibatestet `createErrorResponse()` → `{ error: { message, type }, requestId }` formálja, ahol `type` a státuszból (`500→server_error`, `404→not_found`, `409→conflict`, else `invalid_request`) származik, és a gépileg végrehajtható megkülönböztető. Az üzenetek előzetesen fertőtlenítettek (`sanitizeErrorMessage()`, kemény szabály #12).
 
-**A loopback-védelem** a `403` leggyakoribb forrása: az `/api/services/` szerepel a
-`LOCAL_ONLY_API_PREFIXES` listában (`src/server/authz/routeGuard.ts`), és a
-`src/server/authz/policies/management.ts` **a hitelesítés előtt** elutasít minden nem loopback / nem privát LAN-ról érkező
-hívót, mivel ezek az útvonalak gyermekfolyamatokat indítanak (15. és 17.
-szigorú szabály). A nyilvános alagúton keresztüli elérésük szándékosan `403` választ ad.
+**A hurokvédő** a `403` leggyakoribb forrása: `/api/services/` `LOCAL_ONLY_API_PREFIXES` ben (`src/server/authz/routeGuard.ts`) található, és `src/server/authz/policies/management.ts` elutasít minden nem visszahurkolt / nem privát LAN-hívót** hitelesítés előtt** , mert ezek az útvonalak gyermekfolyamatokat hoznak létre (15. és 17. kemény szabály). Elérni őket egy nyilvános alagúton keresztül `403` tervezés.
 
 ## B tengely — relay-útválasztási háttérrendszer (továbbítási oldal)
 

@@ -4,13 +4,7 @@
 
 ---
 
-> **Ճշմարտության աղբյուր՝** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` և `open-sse/utils/error.ts`-ի հանրային կառուցիչները
-> **Թեստեր՝** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Վերջին թարմացումը՝** 2026-09-02 — v3.8.51
-> **Թիրախային լսարան՝** Սխալների պատասխանների հետ աշխատող ցանկացած ինժեներ (HTTP երթուղիներ, SSE հոսքեր, կատարիչներ, MCP մշակիչներ)։
-> **Կարգավիճակ՝** **ՊԱՐՏԱԴԻՐ** յուրաքանչյուր կոդային ուղու համար, որը հաճախորդին սխալի հաղորդագրություն է վերադարձնում։
+> **Ճշմարտության աղբյուրը.** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, and the public builders in `open-sse/utils/error.ts`** Թեստեր.** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Հանդիսատես.** Ցանկացած ինժեներ, դիպչելով սխալի պատասխաններին (HTTP երթուղիներ, SSE հոսքեր, կատարողներ, MCP մշակողներ):** Կարգավիճակը:****MANDATORY** յուրաքանչյուր կոդային ուղու համար, որը սխալի հաղորդագրություն է վերադարձնում հաճախորդին:
 
 ## Ինչու է սա անհրաժեշտ
 

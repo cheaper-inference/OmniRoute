@@ -4,7 +4,7 @@
 
 ---
 
-> **Izvor istine:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Posljednje ažurirano:** 2026-06-28 — v3.8.40
+> **Izvor istine:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute hvata pomoćnika `reasoning_content` proizvedenog u modelima u načinu razmišljanja i reprodukuje ga transparentno na zahtjeve za više okreta kada to zahtijeva upstream provajder. Ovo eliminiše HTTP 400 greške koje strogi provajderi podižu kada klijentovoj istoriji razgovora nedostaje obrazloženje prethodnog poteza.
 

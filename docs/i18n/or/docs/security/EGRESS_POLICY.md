@@ -69,35 +69,35 @@ PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777)ରେ ପ୍ର�
 
 ## ତିନୋଟି ମୂଲ୍ୟ
 
-| ମୂଲ୍ୟ  | UI ଲେବଲ୍                  | ଆଚରଣ                                                                                                                                                 |
-| ------ | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `ସ୍ୱୟଂଚାଳିତ (dual-stack)` | OS ଫ୍ୟାମିଲି ବାଛେ। IP-literal ପ୍ରକ୍ସି ହୋଷ୍ଟ ପାଇଁ, ଫ୍ୟାମିଲିଟି literal ମଧ୍ୟରେ ଅନ୍ତର୍ନିହିତ ଥାଏ; ଏକ ହୋଷ୍ଟନାମ ପାଇଁ, ଉଭୟ ଫ୍ୟାମିଲି ଯୋଗ୍ୟ ଅଟନ୍ତି। ଏହା ଡିଫଲ୍ଟ। |
-| `ipv4` | `କେବଳ IPv4`               | ସଂଯୋଗକୁ IPv4ରେ ସ୍ଥିର କରେ। ପ୍ରକ୍ସି ହୋଷ୍ଟର କୌଣସି IPv4 (A) ରେକର୍ଡ ନଥିଲେ ସଂଯୋଗକୁ ଅସ୍ୱୀକାର କରେ।                                                           |
-| `ipv6` | `କେବଳ IPv6`               | ସଂଯୋଗକୁ IPv6ରେ ସ୍ଥିର କରେ। ପ୍ରକ୍ସି ହୋଷ୍ଟର କୌଣସି IPv6 (AAAA) ରେକର୍ଡ ନଥିଲେ ସଂଯୋଗକୁ ଅସ୍ୱୀକାର କରେ।                                                        |
+| ମୂଲ୍ୟ  | UI ଲେବଲ୍।           | ଆଚରଣ                                                                                                                                                 |
+| ------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS ପରିବାରକୁ ବାଛେ। ଏକ ଆଇପି-ଆକ୍ଷରିକ ପ୍ରକ୍ସି ହୋଷ୍ଟ ପାଇଁ, ପରିବାର ଆକ୍ଷରିକ ଭାବରେ ଅନ୍ତର୍ନିହିତ; ଏକ ହୋଷ୍ଟନାମ ପାଇଁ, ଉଭୟ ପରିବାର ଯୋଗ୍ୟ ଅଟନ୍ତି। ଏହା ହେଉଛି ଡିଫଲ୍ଟ। |
+| `ipv4` | `IPv4 only`         | IPv4 ସହିତ ସଂଯୋଗକୁ ପିନ୍ କରନ୍ତୁ। ଯଦି ପ୍ରକ୍ସି ହୋଷ୍ଟରେ IPv4 (A) ରେକର୍ଡ ନଥାଏ ତେବେ ବନ୍ଦ ହୋଇଯାଏ।                                                            |
+| `ipv6` | `IPv6 only`         | IPv6 ସହିତ ସଂଯୋଗକୁ ପିନ୍ କରନ୍ତୁ। ଯଦି ପ୍ରକ୍ସି ହୋଷ୍ଟର କ z ଣସି IPv6 (AAAA) ରେକର୍ଡ ନଥାଏ ତେବେ ବନ୍ଦ ହୋଇଯାଏ।                                                  |
 
-UI ଷ୍ଟ୍ରିଙ୍ଗଗୁଡ଼ିକ `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`)ରେ ଅଛି।
+UI ଷ୍ଟ୍ରିଙ୍ଗଗୁଡ଼ିକ `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) ରେ ବାସ କରନ୍ତି।
 
 ---
 
-## ଏହାକୁ କିପରି ବିନ୍ୟାସ କରିବେ
+## ଏହାକୁ କିପରି ବିନ୍ୟାସ କରିବେ।
 
-### ଡ୍ୟାଶବୋର୍ଡ
+### ଡ୍ୟାସବୋର୍ଡ।
 
-ଚୟନକର୍ତ୍ତାଟି **Proxy Pool** ଟ୍ୟାବ୍ର ପ୍ରକ୍ସି ଫର୍ମରେ ଅଛି:
+ଚୟନକର୍ତ୍ତା ପ୍ରକ୍ସି ଫର୍ମରେ ଅଛନ୍ତି।** ପ୍ରକ୍ସି ପୁଲ୍।** ଟ୍ୟାବ୍:
 
-1. **Dashboard → Settings → Proxy → Proxy Pool** ଖୋଲନ୍ତୁ
-2. ଏକ ପ୍ରକ୍ସି ଯୋଡ଼ନ୍ତୁ କିମ୍ବା ସମ୍ପାଦନ କରନ୍ତୁ
-3. **IP family** ଡ୍ରପ୍ଡାଉନ୍କୁ `ସ୍ୱୟଂଚାଳିତ (dual-stack)`, `କେବଳ IPv4`, କିମ୍ବା `କେବଳ IPv6`ରେ ସେଟ୍ କରନ୍ତୁ
-4. ସଞ୍ଚୟ କରନ୍ତୁ
+1. ଖୋଲନ୍ତୁ।** ଡ୍ୟାସବୋର୍ଡ → ସେଟିଂସମୂହ → ପ୍ରକ୍ସି → ପ୍ରକ୍ସି ପୁଲ୍।**
+2. ଏକ ପ୍ରକ୍ସି ଯୋଡନ୍ତୁ କିମ୍ବା ସଂପାଦନ କରନ୍ତୁ।
+3. ସେଟ୍ କରନ୍ତୁ।**IP ପରିବାର** `Auto (dual-stack)`, `IPv4 only`, କିମ୍ବା `IPv6 only` କୁ ଡ୍ରପଡାଉନ୍।
+4. ସଞ୍ଚୟ କରନ୍ତୁ।
 
-ଏହି ନିୟନ୍ତ୍ରଣଟି `ProxyRegistryManager.tsx` ଦ୍ୱାରା ରେଣ୍ଡର୍ ହୁଏ (`proxy/ProxyPoolTab.tsx`ରେ ମାଉଣ୍ଟ କରାଯାଇଛି)।
+ନିୟନ୍ତ୍ରଣ `ProxyRegistryManager.tsx` ଦ୍ୱାରା ଉପସ୍ଥାପିତ ହୋଇଛି ( `proxy/ProxyPoolTab.tsx` ରେ ସ୍ଥାପିତ)।
 
 ### API
 
-`family` ଫିଲ୍ଡଟି ପ୍ରକ୍ସି ରେଜିଷ୍ଟ୍ରି ସୃଷ୍ଟି/ଅଦ୍ୟତନ payloadଗୁଡ଼ିକର ଅଂଶ, ଯାହା `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ଦ୍ୱାରା ବୈଧୀକୃତ ଏବଂ `POST` / `PATCH /api/v1/management/proxies` ଦ୍ୱାରା ପରିଚାଳିତ ହୁଏ:
+`family` କ୍ଷେତ୍ର ପ୍ରକ୍ସି ରେଜିଷ୍ଟ୍ରି create/update ପେଲୋଡ୍ ର ଏକ ଅଂଶ, `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ଦ୍ୱାରା ବ valid ଧ ଏବଂ `POST` / `PATCH /api/v1/management/proxies` ଦ୍ୱାରା ପରିଚାଳିତ:
 
 ```bash
-# ଏକ କେବଳ-IPv6 ପ୍ରକ୍ସି ସୃଷ୍ଟି କରନ୍ତୁ
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# ଏକ ବିଦ୍ୟମାନ ପ୍ରକ୍ସିକୁ କେବଳ-IPv4ରେ ପରିବର୍ତ୍ତନ କରନ୍ତୁ
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-ସମାନ ଫିଲ୍ଡଟି upstream-proxy ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ ପାଇଁ ବ୍ୟବହୃତ inline ପ୍ରକ୍ସି config ଅବଜେକ୍ଟ ଦ୍ୱାରା ମଧ୍ୟ ଗ୍ରହଣ କରାଯାଏ (`upstream_proxy_config.family`, [ଡାଟା ମଡେଲ୍](#data-model) ଦେଖନ୍ତୁ)।
+ସମାନ କ୍ଷେତ୍ର ଅପଷ୍ଟ୍ରିମ-ପ୍ରକ୍ସି ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ ପାଇଁ ବ୍ୟବହୃତ ଇନଲାଇନ ପ୍ରକ୍ସି ବିନ୍ୟାସ ବସ୍ତୁ ଦ୍ୱାରା ମଧ୍ୟ ଗ୍ରହଣ କରାଯାଏ (`upstream_proxy_config.family`, [ଡାଟା ମଡେଲ](#data-model) ଦେଖନ୍ତୁ)।
 
-ପ୍ରକ୍ସି CRUD/ନ୍ୟସ୍ତକରଣ APIର ଅବଶିଷ୍ଟ ଅଂଶ ପାଇଁ, [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) ଦେଖନ୍ତୁ।
+ବାକି ପ୍ରକ୍ସି CRUD/assignment API ପାଇଁ, [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) ଦେଖନ୍ତୁ।
 
 ---
 

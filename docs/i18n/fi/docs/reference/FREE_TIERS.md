@@ -4,60 +4,148 @@
 
 ---
 
-> **Käyttäjille**: Etsitkö yksinkertaista opasta? Katso vaiheittaiset ohjeet ilmaisen tekoälyn käyttöönottoon [ilmaistasojen oppaasta](../getting-started/FREE-TIERS-GUIDE.md).
+> **Käyttäjille** : Etsitkö yksinkertaista opasta? Katso [Free Tiers -oppaasta](../getting-started/FREE-TIERS-GUIDE.md) vaiheittaiset ohjeet ilmaisen AI hankkimiseen.
 
-> **Viimeksi tutkittu:** 2026-06-17 — palveluntarjoajakohtainen verkkotutkimus (viralliset dokumentaatiot + viimeisten 7 päivän uutiset, 50 agentin tarkistus vastakkaisella varmennuksella), jossa päivitettiin jokaisen ilmaistason kiintiö ja käyttöehdot. **Osittainen uudelleentarkastus 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — katso alla oleva päivätty huomautus).
-> **Ensisijainen tietolähde (luettelo):** `open-sse/config/freeModelCatalog.ts` (mallikohtaiset budjetit, päällekkäiset poolit poistettu). Alla olevat tokenbudjettiluvut perustuvat ajantasaiseen verkkotutkimukseen ja ovat **arvioita** — katso [Menetelmät ja huomautukset](#methodology--caveats).
+> **Viimeksi tarkastettu:** 23.11.2026. Jokainen kiintiöllinen rivi, jokainen poistunut tarjous ja jokainen korttiportti avattiin uudelleen palveluntarjoajan omaa sivua vastaan sinä päivänä (`config/quality/free-catalog-evidence.json`). Aiemmat passit: palveluntarjoajakohtainen tutkimus 2026-06-17 ja osittainen uudelleentarkastus 2026-09-02.** Totuuden lähde (luettelo):** `open-sse/config/freeModelCatalog.ts` (MALLIkohtaiset budjetit, poolitettu). Alla olevat tunnusbudjettiluvut ovat peräisin reaaliaikaisesta verkkotutkimuksesta ja ovat** likiarvo** — katso [Metodologia ja varoitukset](#methodology--caveats).
 
-## TL;DR — kuinka paljon ilmaista inferenssiä OmniRoute todella kokoaa?
+## TL;DR — kuinka paljon vapaata päätelmää OmniRoute itse asiassa kerää?
 
-Nämä luvut kuvaavat erillisiä kolmannen osapuolen tilejä ja luettelon käyttöoikeusehtoja. OmniRoute ei myönnä tätä kapasiteettia: sinun on hankittava vaaditut tilit tai tunnistetiedot, yhdistettävä käyttöoikeusehdot täyttävät palveluntarjoajat ja noudatettava niiden rajoituksia. Todellinen käytettävissä oleva kapasiteetti voi olla pienempi, myös nolla uudessa asennuksessa, jossa ei ole yhtään käyttöoikeusehdot täyttävää reittiä. Palveluntarjoajat, joiden merkintä on `tos: avoid`, jätetään oletusarvoisesti automaattisen reitityksen ulkopuolelle.
+Nämä luvut kuvaavat erilliset kolmannen osapuolen tilit ja kelpoisuusehdot koko luettelossa. OmniRoute ei myönnä tätä budjettia: sinun on hankittava tarvittavat tilit tai tunnistetiedot, yhdistettävä kelvolliset palveluntarjoajat ja noudatettava niiden rajoja. Todellinen käytettävissä oleva kapasiteetti voi olla pienempi, mukaan lukien nolla uudessa asennuksessa, jossa ei ole kelvollista reittiä. Palveluntarjoajat, jotka on merkitty `tos: avoid` suljetaan oletusarvoisesti automaattisen reitityksen ulkopuolelle.
 
-**Tarkistettu 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) tarjoaa kertaluonteisen 5 dollarin kampanjahyvityksen, joka edellyttää maksutapaa ja vanhenee 30 päivän kuluttua. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) julkaisee projekti-, malli- ja tasokohtaiset nopeusrajoitukset; se jää kuukausittaisten määrällisten yhteenvetolukujen ulkopuolelle.
+**Tarkastettu 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) tarjoaa kertaluonteisen 5 dollarin tarjoushyvityksen, joka vaatii maksutavan ja joka vanhenee 30 päivän kuluttua. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) julkaisee project/model/tier -nopeusrajoitukset; se jää määrällisen kuukausiotsikon ulkopuolelle.
 
-| Mittari                                                | Tokenia / kuukausi   | Merkitys                                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------------------------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Dokumentoitu toistuva hyvitys (vakaa)**              | **~1.62B**           | Ilmaisen tason **poolit** (mallikohtaisessa luettelossa), kukin jaettu pooli laskettuna **kerran**. `/api/free-tier/summary`-rajapinnan ja hallintapaneelin Free-Tier Budget -sivun taustalla oleva reaaliaikainen lähde. **Käytä tätä lukua.**                                                                          |
-| **+ ensimmäinen kuukausi rekisteröitymishyvityksillä** | **~2.22B**           | Vakaa määrä + kertaluonteiset rekisteröitymishyvitykset (Z.AI 20M, DeepSeek 5M, …), päällekkäisyydet poistettuna tiliä kohden. **Vain ensimmäinen kuukausi** — ei toistu.                                                                                                                                                |
-| **+ pysyvästi ilmainen, ei julkaistua ylärajaa**       | _ei määritettävissä_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — todellinen toistuva käyttömahdollisuus, jota rajoittavat nopeus ja samanaikaisuus, **ei laskettavaa token-ylärajaa**. Listataan, mutta ei koskaan summata (niiden laskeminen muodossa `RPM×24/7` on paisuttelua, jonka torjumme). |
-| **+ talletuksella avattava lisäys**                    | **+~24M**            | Kertaluonteinen **10 dollarin** OpenRouter-täydennys nostaa sen ilmaisen poolin 50:stä → 1000 pyyntöön päivässä. Ilmoitetaan erikseen, jotta se ei koskaan paisuta vakaata lukua.                                                                                                                                        |
-| **+ alueellisen henkilöllisyystarkistuksen takana**    | **+~6M**             | `modelscope` (Alibaba Cloud -sidonta + Manner-Kiinan oikean nimen vahvistus). Todellinen toistuva kiintiö, joka tuodaan näkyviin muodossa `gatedRecurringTokens` / `gatedProviders` ja hallintapaneelissa. Ei koskaan sisällytetä pääotsikon lukuun: +~6M alueellisen henkilöllisyyden vahvistuksen takana.              |
-| Teoreettinen yläraja (kaikki nopeusrajoitukset, 24/7)  | ~10B                 | Kaikkien palveluntarjoajien nopeusrajoitusten summa jatkuvaan käyttöön ekstrapoloituna. **Ei takuu** — älä käytä tätä pääotsikon lukuna.                                                                                                                                                                                 |
+| Metrinen                                               | Tokenit / kuukausi | Merkitys                                                                                                                                                                                                                                                                         |
+| ------------------------------------------------------ | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dokumentoitu toistuva apuraha (jatkuva)**            | **~ 90M**          | Vapaa taso** altaat** (mallikohtainen luettelo), jokainen jaettu pooli lasketaan** kerran** . Live lähde `/api/free-tier/summary` takana ja kojelaudan Free-Tier Budget -sivu.** Käytä tätä numeroa.**                                                                           |
+| **+ ensimmäinen kuukausi rekisteröitymishyvityksellä** | **~ 153M**         | Tasaiset + -kertaluonteiset kirjautumishyvitykset (Z.AI 20M, DeepSeek 5M, …), dedupped per tili.** Vain ensimmäinen kuukausi** — ei toistu.                                                                                                                                      |
+| **+ pysyvästi ilmainen, ei julkaistua korkkia**        | _mittattavissa_    | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — todellinen toistuva pääsy, rate/concurrency-limited,** ei token capa laskea** . Listattu, ei koskaan summattu (ne lasketaan `RPM×24/7` :ksi on inflaatio, jonka hylkäämme).               |
+| **+ talletuksen avaustehostus**                        | **+~ 24M**         | Kertaluonteinen** 10 dollaria** OpenRouter -lisäys nostaa ilmaisen altaan 50:stä → 1000 req/day. Raportoitu erikseen, joten se ei koskaan lisää tasaista lukua.                                                                                                                  |
+| **+ alueellisen henkilöllisyyden tarkistuksen takana** | **+~ 6M**          | `modelscope` (Alibaba Cloud sitova + Manner-Kiina oikean nimen vahvistus). Todellinen toistuva kiintiö, joka näkyy muodossa `gatedRecurringTokens` / `gatedProviders` ja kojelaudassa. Ei koskaan tiivistetty otsikkoon: +~ 6M alueellisen henkilöllisyyden todentamisen takana. |
 
-**Rehellinen pääotsikko:** _OmniRoute kokoaa **~1.62B dokumentoitua ilmaista tokenia kuukaudessa** (ensimmäisen kuukauden aikana jopa ~2.22B rekisteröitymishyvitysten kanssa) 26 ilmaisen tason poolista — minkä lisäksi käytettävissä on pitkä häntä pysyvästi ilmaisia, ylärajattomia palveluntarjoajia — ja RTK- sekä Caveman-pakkaus (15–95 % tokenisäästöt) venyttää tätä vielä pidemmälle._
+**Rehellinen otsikko:** _OmniRoute-luettelot**~ 90M ilmaisia tokeneja** kuukausi, jonka voit todella käyttää (enintään 153 miljoonaa ~ ensimmäisen kuukauden aikana rekisteröitymishyvityksellä) 12 poolista, joissa on julkaistu kiintiö, sekä pitkä pyrstö pysyvästi ilmaisia, ilman korkoa tarjoavia palveluntarjoajia. RTK + Caveman-pakkaus (15–95 %:n säästö tokenissa) venyttää sitä entisestään._
 
-> **Miksi tämä laski edellisestä noin 1,94 miljardista.** 2026-06-17 tehty päivitys on rehellisyyskorjaus, ei tappio: `gemini` deduplikoidaan nyt pooleittain (aiemmin lukema paisui, koska jokainen Flash-versio laskettiin erikseen, 462M → 60M), `cloudflare-ai` korjattiin vastaamaan sen todellista 10k Neuronsia/päivä (122M → 30M), `doubao` luokiteltiin uudelleen kertaluonteiseksi rekisteröitymishyvitykseksi (ei toistuvaksi), ja käytöstä poistetut tasot poistettiin (`chutes`/`phind`/`kluster` lopetettu). Osittain tätä tasoittavat `llm7` (oikea 5M/päivä → 150M) ja uudet ilmaiset palveluntarjoajat (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Historiallisia muistiinpanoja. Alla olevat luvut kuvaavat senhetkistä luetteloa; ne eivät ole tämän päivän numeroita._
 >
-> **Edelleen korjattu noin 1,37 miljardiin versiossa v3.8.42:** `longcat` luokiteltiin uudelleen 150M/kk toistuvasta hyvityksestä kertaluonteiseksi 10M:n rekisteröitymishyvitykseksi sen ilmaisen esikatselun päätyttyä. Sama rehellisyyssääntö — yhtäkään palveluntarjoajaa ei poistettu vahingossa.
+> **Miksi tämä laski aiemmasta 1,94 miljardista?** 2026-06-17 päivitys on rehellinen korjaus, ei tappio: `gemini` on nyt poolitettu (lisätty laskemalla jokainen Flash-versio erikseen, 462M → 60M), `cloudflare-ai` korjattiin sen todelliseen 10k-Neurons/day (122M → 30M), `doubao` -rekisteröity uudelleen, z (yksiaikaisesti rekisteröitynyt) sammutustasot poistettu (`chutes`/`phind`/`kluster` lopetettu). Osittain kompensoi `llm7` (oikea 5M/day → 150M) ja uudet ilmaiset palveluntarjoajat (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Päivitetty 2026-08-26 Felo Webin käytöstä poistamisen jälkeen:** Felo Web ei sisälly lukemaan, kunnes sen GPL:stä johdettu alkuperä ja lisensointi eivät enää ole HOLD-tilassa; lähde ilmoitti tuolloin 38 pooliavainta. Poolien määrä on reaaliaikainen ja CI:n valvoma (`check:docs-counts` epäonnistuttaa koontiversion, jos yllä olevat luvut poikkeavat funktion `computeFreeModelTotals()` tuloksesta).
+> **Korjattu edelleen 1,37 miljardiin versiossa 3.8.42:** `longcat` luokiteltiin uudelleen 150M/mo n toistuvasta apurahasta kertaluonteiseksi 10 miljoonan rekisteröitymishyvitykseen sen ilmaisen esikatselun päätyttyä. Sama rehellisyyssääntö — yksikään palveluntarjoaja ei pudonnut vahingossa.
 >
-> **Uudelleenauditoitu 2026-09-02 palveluntarjoajien omien sivujen perusteella** (lähteet: `// evidence:`-kommentit kunkin uudelleenauditoidun kohteen vieressä tiedostossa `open-sse/config/freeModelCatalog.data.ts`): `gemini` ja `ollama-cloud` eivät enää julkaise tokenimäärää (Google poisti mallikohtaisen ilmaisen taulukon 2025-12-23; Ollaman Free-sopimus on ”aloituskäytön hyvityksiä”), joten ne on nyt merkitty **rajoittamattomiksi** eikä niitä koskaan lasketa yhteen (−80M); `groq` koostuu viidestä **mallikohtaisesta** 200K:n TPD-rajoituksesta (6M kustakin, +15M), ja kolme käytöstä poistettua tunnistetta poistettiin; `nara` on yksi 7M/päivä-pooli (+60M, 210M). `mistral`in 1B näkyy vain tilikonsolissa — katso menetelmän alta _Näyttöluokat_.
+> **Päivitetty 26.8.2026 Felo Webin eläkkeelle siirtymisen jälkeen:** Felo Web on poissuljettu, kun taas sen GPL-peräinen provenance/licensing pysyy HOLD:ssä; lähde kertoi tuolloin 38 pooliavaimesta.
 >
-> **Päivitetty 2026-11-09 (#19334):** `ollama-cloud` poistettiin ilmaisten luettelosta, kun Ollama lopetti ilmaisen tasonsa ja siirsi kaikki pilvimallit käyttöperusteiseen laskutukseen.
+> **Auditoitu uudelleen 2026-09-02 palveluntarjoajien omien sivujen perusteella** (lähteet: `// evidence:` -kommentit jokaisen uudelleen auditoidun merkinnän vieressä `open-sse/config/freeModelCatalog.data.ts`:ssä): `gemini` ja `ollama-cloud` eivät enää julkaise tunnuslukua (Google poisti mallikohtaisen ilmaisen taulukon 23.12.2025; Ollama:n ilmainen paketti on "aloituskäyttöpisteet") ja on nyt listattu nimellä** korkkiton** , ei koskaan summattu (− 80M); `groq` on viisi** mallikohtaisesti** 200K-TPD caps (6M kukin, + 15M) ja kolme eläkkeellä olevaa IDs poistettiin; `nara` on yksi 7M/day ämpäri (+ 60M, 210M). `mistral`:n 1B näkyy vain tilikonsolissa. — katso _Evidence classes_ kohdasta Metodologia.
 >
-> **Korjattu 2026-09-03 (#11773):** `cerebras` luokiteltiin uudelleen 30M/kk toistuvasta hyvityksestä (vanha kortiton 1M tokenin/päivä kokeilu) kertaluonteiseksi 5 dollarin rekisteröitymishyvitykseksi, joka edellyttää maksutapaa. Sama rehellisyyssääntö kuin LongCatilla.
+> **Päivitetty 2026-11-09 (#19334):** `ollama-cloud` poistettiin ilmaisesta luettelosta sen jälkeen, kun Ollama lopetti ilmaisen tasonsa ja siirsi kaikki pilvimallit jakokäyttöön.
 >
-> **Lisäksi xKiro (2026-09-03):** uusi `xkiro-free`-pooli (150M/kk) lisää 35. toistuvan pooliavaimen. Felo Web ei edelleenkään sisälly lukemaan, kunnes sen GPL:stä johdettu alkuperä ja lisensointi eivät enää ole HOLD-tilassa. Lähde ilmoittaa nyt **26 toistuvaa pooliavainta** ja **noin 1,62B:n vakaan määrän** — reaaliaikaisen CI:n valvoman luvun (`check:docs-counts` epäonnistuttaa koontiversion, jos tämä poikkeaa funktion `computeFreeModelTotals()` tuloksesta).
+> **Korjattu 2026-09-03 (#11773):** `cerebras` luokiteltiin uudelleen 30M/mo n toistuvasta apurahasta (vanha no-card 1M tokens/day -kokeilu) kertaluonteiseksi 5 dollarin kirjautumishyvitykseen, joka vaatii maksutavan. Sama rehellisyyssääntö kuin LongCat.
+>
+> **Plus xKiro (2026-09-03):** uusi `xkiro-free` pool (150M/mo) lisää 35. toistuvan pooliavaimen. Felo Web pysyy poissuljettuina, kun taas sen GPL-peräinen provenance/licensing pysyy HOLD ssä. Tuolloin lähde raportoi 34 pool-avainta ja 1,62 miljardia tokenia kuukaudessa (tasainen).
 
-Suurimmat **dokumentoidut** rahoittajat: `mistral` 1,00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (viisi mallikohtaista rajoitusta), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` ei sisälly lukuun — sen 10M:n LongCat-2.0-hyvitys on kertaluonteinen, KYC:n edellyttämä rekisteröitymishyvitys, ei toistuva kuukausibudjetti.)
+Suurin** dokumentoitu** Tämän päivän todellisen luvun vaikuttajat: `groq` 24M (4 mallikohtaista korkkia), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` on poissuljettu — sen 10 miljoonan LongCat-2.0 -apuraha on kertaluonteinen KYC-rajoitettu rekisteröitymishyvitys, ei toistuva kuukausibudjetti.)
 
-> ⚠️ Teoreettista ylärajaa (noin 10B) paisuttavat nopeusrajoituksiin perustuvat palveluntarjoajat, joilla **ei ole julkaistua tokenirajaa** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`), joiden luvut olisivat `RPM/TPM × 24/7 × 30d` — teoreettinen enimmäismäärä, jota yksikään tili ei pysty ylläpitämään. Ne on **jätetty pois perusteltavissa olevasta luvusta** (ja esitetään sen sijaan rivillä ”pysyvästi ilmainen, ei rajoitusta”). Tämä on sama paisutustapa, joka tekee kilpailijoiden monen miljardin väitteistä epäluotettavia.
+## Korjaus, marraskuu 2026
+
+Tähän julkaisuun asti tällä sivulla ja README kerrottiin 1,62 miljardia ilmaista tokenia kuukaudessa. Se oli väärin. Neljä poolia sisälsi 93 % siitä, ja kaikki neljä olivat vaihtuneet toimittajalla, vaikka luettelomme pysyi ennallaan. Todellinen luku tänään on ~ 90 miljoonaa ilmaista tokenia kuukaudessa. Taulukossa on lueteltu kunkin palveluntarjoajan muuttuminen sen vierelle, mitä me epäonnistuimme.
+
+| Mikä muuttui palveluntarjoajalta (päivämäärä, lähde)                                                                                                               | Mitä menimme pieleen (mitä, mistä lähtien)                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| Mistral: ilmainen tila ei enää sisällä API -käyttöä (docs.mistral.ai, lue 18.11.2026)                                                                              | Laskemme jatkuvasti 1 miljardi tokenia kuukaudessa konsolin lukemasta 2026-09-02 emmekä tarkistaneet sitä uudelleen |
+| Nara: Ilmainen suunnitelma ei sisällä malleja (palveluntarjoajan `router.bynara.id/api/plans`, lue 18.11.2026)                                                     | Laskemme 210 miljoonaa tokenia kuukaudessa                                                                          |
+| xKiro: 500 000 tokenia päivässä tiliä kohden (xkiro.com, lue 18.11.2026)                                                                                           | 30 mallia IDs, joita ei enää ole, jäi luetteloon                                                                    |
+| LLM7: rajoitussivu on poissa, eikä mikään virallinen sivu julkaise ilmaista kiintiötä (2026-11-23)                                                                 | Laskemme 150 miljoonaa tokenia kuukaudessa ilman päivättyjä todisteita                                              |
+| Groq: yksi malli ilmaisesta poolista jäi eläkkeelle (2026-09-14)                                                                                                   | Allas säilytti vanhan kokonsa                                                                                       |
+| AgentRouter: palveluntarjoaja ilmoittaa päivittäisen 25 dollarin sisäänkirjautumishyvityksen ja 50 dollaria lisää kutsurekisteröityjen yhteydessä (lue 23.11.2026) | Listasimme 200 dollarin rekisteröitymishyvityksen                                                                   |
+| Predibase: tuote päättyi                                                                                                                                           | Laskimme silti sen rekisteröitymishyvityksen ensimmäisen kuukauden aikana                                           |
+| (ei mitään)                                                                                                                                                        | 16 palveluntarjoajaa piti ilmaisen tarjouksen lipun tarjouksensa päättymisen jälkeen                                |
+| (ei mitään)                                                                                                                                                        | README lupasi tehdä uusintatarkastuksen kahden viikon välein. Viimeisin ennen tätä oli 2026-09-02                   |
+| (ei mitään)                                                                                                                                                        | Asiakirjojen tarkistus salli 0,05 miljardin poikkeaman, eikä lukuja voitu lukea miljoonissa                         |
+
+Yhden kiintiön summaaminen riviä kohti kasvattaa kaikkia luetteloita, myös meidän. Siksi rivisummattu hahmo kantaa etikettiään ja oikea istuu sen alla.
+
+## Mikä laskee
+
+Rivi lasketaan mukaan ilmaisiin lukuihin, kun kaikki tämä pätee:
+
+- Kiintiö toistuu ja julkaistaan palveluntarjoajan omalla sivulla, päivätty todisteet luettelon rivin vieressä.
+- Yksi tili palveluntarjoajaa kohden. Ei mitään, mikä vaatii maksua, korttia, talletusta tai henkilöllisyystodistusta (KYC). Kiintiö, joka vaatii puhelinnumeron, Telegram tai Discord rekisteröitymiseen, on lueteltu erillään "sosiaalisen rekisteröinnin yhteydessä", ei koskaan todellisuudessa.
+- Yksikään palveluntarjoaja ei ole ilmoittanut `tos: "avoid"`, vaan vain palveluntarjoajan virallinen API.
+- Kertakirjautumishyvitykset lasketaan vain ensimmäisen kuukauden lukuun ja vain silloin, kun korttia ei kysytä. Kiintiötä nostava kertatalletus on erillinen lisä. Promootiot eivät koskaan laske todellista lukua.
+- Haku-, puhe- ja mediapalveluntarjoajat pysyvät poissa pääsyn tyypin ja jokaisen tunnuskuvan perusteella. He saavat omat lukemansa omissa yksiköissään (tulokset, merkit, kuvat) tälle sivulle, kun uusintalaskenta lisää ne; niitä ei koskaan lisätä toisiinsa tai muuttaa rahakkeiksi.
+
+Mitä kukin julkinen määrä tarkoittaa:
+
+- **Palveluntarjoajat, joilla on ilmainen pääsy** (50 tänään: 43 API -avaimella, 6 ilman avainta, 1 työkalutilin kautta): palveluntarjoajat, joilla on vähintään yksi luettelorivi, joka antaa vapaan pääsyn sen saavuttamisen perusteella.
+- **Katalogirivit vapaalla pääsyllä** (214 tänään): yksi rivi toimittajaa ja mallia kohti.
+- **Poolit, joilla on julkaistu kiintiö** (12 tänään): jaetut kiintiöt todellisen luvun takana, jokainen lasketaan kerran.
+- **Erilliset ilmaiset mallit** (185 tänään): rivit ryhmitelty mallin ID mukaan.
+- **Ilmoitettu ilmaisella tarjouksella** (140 + tänään): jokainen palveluntarjoaja, jonka rekisterimerkintä sisältää `hasFree`, mukaan lukien haku-, puhe- ja mediapalveluntarjoajat, kokeilut ja kirjautumishyvitykset.
+
+Jokainen määrä on luetteloitu, ei testattu puhelua kohden: se kertoo mitä luettelo näyttää, ei sitä, että jokainen reitti vastaa juuri nyt.
+
+## Kuinka laskemme
+
+Kolme lukua on peräisin samasta luettelosta, joka on auditoitu 23.11.2026:
+
+- **Todellinen luku, ~ 90 miljoonaa ilmaista tokenia kuukaudessa.** Jokainen jaettu kiintiö lasketaan kerran, joten viisi mallia yhden päivärahan takana on yksi päiväraha. Tätä voi itse asiassa käyttää yksi tili kussakin palveluntarjoajassa. Kertaluonteisilla kirjautumispisteillä, ~ 153M ensimmäisen kuukauden aikana.
+- **Suuri hahmo, ~ 11.3B, summattu rivi riviltä** , päättyneet tarjoukset mukana. Tämä on tapa, jolla muut luettelot lasketaan. Melkein kaikki se on historiaa: 98,6 % tarjouksista, joita ei enää ole. Tulostamme sen vain etiketin kanssa ja sen vieressä olevan todellisen hahmon kanssa.
+- **Live-luettelo, ~ 159M, summattu live-riviä kohti** : sama rivi riviltä ilman päättyviä tarjouksia.
+
+Rivi riviltä -menetelmä (`row-sum-v1`) noudattaa neljää sääntöä:
+
+1. Jokainen listattu rivi lisätään sellaisenaan yhdistämättä rivejä, jotka jakavat yhden poolin.
+2. Vain tokeneissa julkaistut kiintiöt lisätään. Pyynnöissä, hyvityksissä tai neuroneissa julkaistu kiintiö lasketaan nollaksi (`FREE_QUOTA_UNIT` in `open-sse/config/freeModelCatalog.ts`).
+3. Kirjautumiskrediitit, talletuskorotukset ja pois päältä kytketyt rivit (`enabled: false`) jätetään pois.
+4. Iso luku lisää päättyneiden tarjousten kirjanpidon (`open-sse/config/freeModelCatalog.retired.data.ts`) jokaisen listatun rivin viimeiseen kiintiöön. Vain `RETIRED_LEDGER_SINCE` jälkeen poistuneet rivit tulevat siihen, ja jokainen rivi putoaa 12 kuukauden kuluttua sen päättymisestä.
+
+Jos rivikohtainen laskentatapa lakkaa olemasta yleinen tai ylläpitäjä päättää niin, iso hahmo poistuu joka sivulta ja vain oikea luku jää.
+
+## Poistettu / ei ilmaista tasoa
+
+Palveluntarjoajat, joiden ilmainen tarjous päättyi tai joita ei voitu vahvistaa. Ne pysyvät rekisterissä `hasFree: false` kanssa (tai ne on poistettu ilmaisesta luettelosta), eikä niitä koskaan lasketa mihinkään ilmaisiin lukuihin. Tämä ei ole luettelo palveluntarjoajista, jotka on poistettu OmniRoute stä pyynnöstä (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Palveluntarjoaja         | Koska      | Miksi                                                                                         | Lähde                                              |
+| ------------------------ | ---------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `mistral`                | 2026-11-23 | Vapaa tila ei enää sisällä API -käyttöä                                                       | docs.mistral.ai (käyttörajoitukset)                |
+| `nara`                   | 2026-11-23 | Ilmainen suunnitelma ei sisällä malleja                                                       | `router.bynara.id/api/plans`                       |
+| `llm7`                   | 2026-11-23 | Mikään virallinen sivu ei julkaise ilmaista kiintiötä                                         | palveluntarjoajan sivusto                          |
+| `navy`                   | 2026-11-23 | Ilmaista kiintiötä ei voitu vahvistaa virallisilla sivuilla                                   | api.navy                                           |
+| `bluesminds`             | 2026-11-23 | Käyttö edellyttää palveluntarjoajalta ostettua luottoa                                        | `api.bluesminds.com/api/status`                    |
+| `arcee-ai`               | 2026-11-23 | Vain maksettu hinnoittelu                                                                     | docs.arcee.ai (hinnoittelu)                        |
+| `huggingface`            | 2026-11-23 | Ilmaisilla tileillä on ostettava krediittejä tai päivitettävä PRO                             | huggingface.co (päätelmien tarjoajien hinnoittelu) |
+| `huggingchat`            | 2026-11-23 | Hugging Face -päätelmä vaatii ostettuja krediittejä tai PRO                                   | huggingface.co (päätelmien tarjoajien hinnoittelu) |
+| `ainative`               | 2026-11-23 | Hobbyist-suunnitelma maksetaan 3 päivän kokeilujakson jälkeen                                 | palveluntarjoajan hintasivu                        |
+| `stepfun`                | 2026-11-23 | Vain käyttökohtainen hinnoittelu                                                              | palveluntarjoajan hintasivu                        |
+| `predibase`              | 2026-11-23 | Tuote lopetettu                                                                               | predibase.com                                      |
+| `poolside`               | 2026-10-31 | Suora päättely suljettiin                                                                     | platform.poolside.ai                               |
+| `amazon-q`               | 2026-05-15 | Ei uusia Free Tier -kirjautumisia                                                             | palveluntarjoajan sivu                             |
+| `chat-oripe`             | 2026-11-23 | API -isäntä vastaa HTTP 530                                                                   | API isäntä                                         |
+| `naga-ai`                | 2026-11-23 | Naga.ac-palveluntarjoajan kopio                                                               | api.naga.ac                                        |
+| `dxnt`                   | 2026-11-23 | Kirjautumisbonus on olemassa, mutta mikään malli ei hyväksy sitä                              | dxnt.com                                           |
+| `ollama-cloud`           | 2026-11-09 | Pilvimallit ovat maksullisia per token tai maksullisten suunnitelmien kattamia                | ollama.com (#19334)                                |
+| `chutes`                 | 2026-03    | Vapaa taso päättyi                                                                            | palveluntarjoajan sivu                             |
+| `phind`                  | 2026-01    | Yritys suljettu                                                                               | palveluntarjoajan sivu                             |
+| `kluster`                | 2026-06-09 | Auringonlasku (siirretty MITO)                                                                | palveluntarjoajan sivu                             |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo ilmainen peruutettu; Nemotron-kampanja päättyi 2026-06 (vahvistettu uudelleen 18.6.2026) | palveluntarjoajan sivu                             |
+| `aimlapi`                | 2026-06-18 | Ilmainen taso keskeytetty                                                                     | palveluntarjoajan sivu                             |
+| `yi`                     | 2026-06-18 | Yi-Light eläkkeellä, jako-jako                                                                | palveluntarjoajan sivu                             |
+| `featherless-ai`         | 2026-06    | Ei nykyistä ilmaista tasoa                                                                    | palveluntarjoajan sivu                             |
+| `chipotle`               | 2026-09-15 | Sen takana oleva chat-widget vastaa 404:ään jokaisella reitillä (#13131, #4037)               | amelia.chipotle.com                                |
+
+`iflytek` / `sparkdesk` pysy luettelossa ToS-varoitusmerkinnällä: Spark Lite on ilmainen, mutta ToS rajoittaa välityspalvelimen ja releen käyttöä.
 
 ---
 
-## 2026-06-17-päivitys — mitä muuttui 2026-06-05:n jälkeen
+## 2026-06-17 päivitä — mikä on muuttunut 2026-06-05 jälkeen
 
-50 agentin verkkotutkimuskierros (viralliset dokumentit + viimeisen 7 päivän uutiset, kriittisesti ristiintarkistettu) päivitti koko luettelon. Kohokohdat:
+50 agentin verkkotutkimuspassi (virallinen docs + last-7-days -uutinen, kiistanalaisesti vahvistettu) päivitti koko luettelon. Kohokohdat:
 
-- **Poistettu / ei ilmaistasoa (2026):** `chutes` (ilmaistaso päättyi 2026-03), `phind` (yritys lopetti toimintansa 2026-01), `kluster` (poistettu käytöstä 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo-ilmaisversio peruutettiin 2026-05-24, Nemotron-kampanja päättyi 2026-06 — vahvistettu uudelleen 2026-06-18), `aimlapi` (ilmaistaso tauotettu — vahvistettu uudelleen 2026-06-18), `yi` (Yi-Light poistettu käytöstä, maksu käytön mukaan — vahvistettu uudelleen 2026-06-18), `featherless-ai` (ei tällä hetkellä ilmaistasoa), `chipotle` (Chipotlen "Pepper AI" — käänteissuunniteltu `amelia.chipotle.com`-sivuston Amelia-chat-widget, johon palveluntarjoaja yhdisti, palauttaa nyt 404-virheen jokaiselta reitiltä mukaan lukien juuren; taustajärjestelmä poistettu käytöstä/siirretty, vahvistettu 2026-09-15 — poistettu kokonaan luettelosta, #13131/#4037). `iflytek` / `sparkdesk` pysyvät listalla, mutta niihin liittyy käyttöehtovaroitus (Spark Lite on ilmainen; käyttöehdot rajoittavat proxy-/välityskäyttöä).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` lopetettiin 2026-06-01 ja `2.5 Pro` poistui ilmaistasolta (2026-04); ilmaistaso kattaa nyt **vain Flash-perheen** (2.5/3/3.1/3.5 Flash + Gemma). Luettelo **yhdistää** nyt Flash-perheen yhdeksi pooliksi (luku oli aiemmin liioiteltu, koska jokainen variantti laskettiin erikseen: 462M → 60M).
-- **Korjatut luvut:** `cloudflare-ai` 122M → **30M** (todellinen 10k Neuronia/päivä), `doubao` luokiteltu uudelleen kertaluonteiseksi rekisteröitymiskrediitiksi (ei toistuva), `llm7` 4M → **150M** (dokumentoitu 5M tokenia/päivä), `together`-palvelun "-Free"-päätepisteet lopetettu → myös 25 $:n rekisteröitymiskrediitti poistettu (vaatii vähintään 5 $:n ostoksen, ei ilmaista kokeilujaksoa), `longcat` Preview päättyi + Flash-mallit poistettu käytöstä → vain **LongCat-2.0**, luokiteltu uudelleen kertaluonteiseksi **10M**-tokenin rekisteröitymiskrediitiksi (KYC-rajattu, ei toistuva).
-- **Poolsiden suora päättely päättyy (vahvistettu 2026-10-20):** [virallinen alusta](https://platform.poolside.ai/) ilmoittaa lopettavansa **2026-10-31** ja ohjaa käyttäjät lataamaan sen mallit Hugging Facesta itseisännöintiä varten. Suorassa `poolside`-palveluntarjoajassa on tämä varoitus. Käsin kootussa ilmaisluettelossa ei ole suoria Poolside-merkintöjä; sen Poolside-nimetyt merkinnät kuuluvat `kilo-gateway`-palveluun. Tämä ilmoitus ei takaa Kilon, Clinen, NVIDIAn tai muiden yhdyskäytävien tarjoamien mallien saatavuutta, joten kyseisiä listauksia ei poisteta tällä perusteella.
-- **Uusia ilmaisia palveluntarjoajia löydetty:** ⭐ **Kilo Code** (`kilo-gateway` — kiertävä "Auto Free" -valikoima: NVIDIA Nemotron 3 -perhe, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 kiertävää ilmaista koodausmallia, päivitetty 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash pysyvästi ilmaisia + 20M rekisteröitymisbonus) sekä `arcee-ai` Trinity Large Preview.
-- **Uudet rehelliset tasot** (katso Menetelmät): _pysyvästi ilmainen mutta rajoittamaton_ -kategoria (todellinen toistuva käyttöoikeus, ei laskettavaa token-rajaa) ja _talletuksen avaama lisäys_ (OpenRouter 10 $ → +24M/kk), molemmat esitetään **erikseen**, jotta ne eivät koskaan liiottele päälukua.
+- **Poistettu / ei ilmaista tasoa:** siirtyi [omalle osastolleen](#removed--no-free-tier).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` suljettiin 2026-06-01 ja `2.5 Pro` poistui vapaasta tasosta (2026-04); ilmainen taso on nyt** Vain Flash-perhe** (2.5/3/3.1/3.5 Flash + Gemma). Katalogi nyt** altaat** Flash-perhe (täytetty laskemalla jokainen variantti erikseen: 462M → 60M).
+- **Korjatut numerot:** `cloudflare-ai` 122M →** 30 milj** (todellinen 10k-Neurons/day), `doubao` luokiteltu uudelleen kertaluonteiseksi rekisteröitymishyviksi (ei toistuvaksi), `llm7` 4M →** 150 milj** (dokumentoitu 5M tokens/day), `together` "-Free" päätepisteet lopetettu → 25 dollarin kirjautumishyvitys myös poistettu (edellyttää vähintään 5 dollarin ostosta, ei ilmaista kokeilua), `longcat` Esikatselu päättyi + Flash-mallit eläkkeellä →**LongCat-2.0** vain, luokiteltu uudelleen kertaluonteiseksi** 10 milj**-token kirjautumishyvitys (KYC-porteilla, ei toistuvasti).
+- **Uima-altaan reunan suora päättelypääte (vahvistettu 20.10.2026):** [virallinen alusta](https://platform.poolside.ai/) ilmoittaa sammutuksen** 31.10.2026** ja ohjaa käyttäjiä lataamaan mallinsa Hugging Facesta itsepalvelua varten. Suora `poolside` palveluntarjoaja sisältää tämän varoituksen. Käsin kuratoidussa ilmaisessa luettelossa ei ole suoria Poolside-merkintöjä; sen Poolside-nimiset merkinnät kuuluvat `kilo-gateway` lle. Tämä ilmoitus ei ilmoita Kilon, Cline, NVIDIA tai muiden yhdyskäytävien palvelemien mallien saatavuutta, joten näitä tietoja ei poisteta tällä perusteella.
+- **Uusia ilmaisia palveluntarjoajia löydetty:** ⭐** Kilo koodi** (`kilo-gateway` — pyörivä "Auto Free" -setti: NVIDIA Nemotron 3 perhe, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — 10 pyörivää vapaata koodausmallia, päivitetty 2026-10-20), ⭐** Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash pysyvästi ilmainen + 20M rekisteröitymisbonus) ja `arcee-ai` Trinity Large Preview.
+- **Uudet rehelliset tasot** (katso Metodologia): _pysyvästi ilmainen, mutta rajaamaton_ luokka (todellinen toistuva käyttö, ei token capa laskettavaa) ja _talletuksen avaustehostin_ (OpenRouter $ 10 → +24M/mo), molemmat esiteltiin** erikseen** joten ne eivät koskaan paisuuta otsikkoa.
 
-> Alempana oleva yksityiskohtainen palveluntarjoajakohtainen taulukko on **2026-06-05-tilannekuva**; yllä olevat muutokset korvaavat sen. Ajantasainen, kanoninen lähde on mallikohtainen luettelo `open-sse/config/freeModelCatalog.ts`.
+> Yksityiskohtainen palveluntarjoajakohtainen taulukko alempana on** 2026-06-05 tilannekuva** ; yläpuolella olevat deltat korvaavat sen. Live, kanoninen lähde on mallikohtainen luettelo `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -110,26 +198,28 @@ esikatselu lukisi yhtä lähdettä ja palvelimen tuonti toista, esikatselu olisi
 napsautuksen jälkeisen toiminnan kanssa — jako säilytetään
 tarkoituksella.
 
-## Menetelmä ja varaukset
+## Metodologia ja varoitukset
 
-- Luvut ovat kunkin palveluntarjoajan dokumentoituihin ilmaistason rajoihin perustuvia **yläraja-arvioita**, jotka on kerätty verkkotutkimuksella päivämäärän **2026-06-17** tilanteen mukaan. Ilmatasot muuttuvat jatkuvasti — varmista luku uudelleen ennen kuin luotat siihen.
-- **Mitä merkintä todella takaa.** Yhdelläkään merkinnällä ei ole rivikohtaista luottamusarviota, eikä API tarjoa sellaisia — käsittele jokaista yllä olevaa lukua saman, ilmoittamattoman laatutason arviona. Kaksi tietoa ovat poikkeuksia, koska ne on kuratoitu käsin eikä päätelty: 44 merkinnällä on itsenäisesti dokumentoitu ehdoton pysäytysraja (39 niistä on xKiro-rivejä, joilla kaikilla on sama päivittäinen kiintiö), ja 22 merkinnällä on ilmoitus kehotteiden käytöstä koulutuksessa. `hardStopGuaranteed` asetetaan vain, kun palveluntarjoajan omissa ehdoissa sanotaan, että ilmaisen kiintiön ylittäminen hylkää pyynnön sen sijaan, että laskutus alkaisi huomaamatta, ja lähde on merkitty kommenttiin merkinnän viereen; sitä ei koskaan oleteta arvoksi `true`, ja merkintä, jota kukaan ei ole vahvistanut, jätetään asettamatta. Puuttuva hard-stop-lippu tarkoittaa siis ”ei vahvistettu”, ei ”tiedetään, että tästä laskutetaan”. **STRICT-tila** (valinnainen `freeAccessPolicy=strict`-reitityksen suojamekanismi) luottaa vain lippua sisältäviin merkintöihin; kaikki muut ilmaistasot suljetaan pois tunnisteella `no-hard-stop` (katso `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kun suojamekanismi suodattaa joukkoa, operaattorille näkyvä loki ilmoittaa sekä poissuljettujen määrän että niiden `no-hard-stop`-osuuden.
-- `estMonthlyFreeTokens` = vain toistuvat kuukausittaiset tokenit. **Kertaluonteiset rekisteröitymishyvitykset eivät toistu**, ja niiden arvoksi lasketaan 0. Käytöstä poistetut tasot ovat myös 0.
-- Päivittäinen tokeniraja → `monthly = daily × 30`. Vain RPD dokumentoituna → `RPD × ~800 output tokens × 30`. Vain RPM/TPM (ei päivittäistä rajaa) → **rajoittamaton** (katso alla).
-- **Ilmainen käyttö, mutta julkaistua tokenirajaa ei ole** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `nvidia`): näitä rajoittavat nopeus ja samanaikaisuus. Luokittelemme ne luokkaan `recurring-uncapped` emmekä koskaan laske niitä yhteen — kertolasku `RPM × 24/7 × 30d` tuottaisi kuvitteellisen ylärajan (inflaation, jonka hylkäämme). NVIDIA:n API on tarkoitettu vain kokeilukäyttöön; katso alla oleva ToS-varaus.
-- **Talletuksella avattava lisäys:** kertaluonteinen pieni lisätalletus, joka kasvattaa ilmaista kiintiötä pysyvästi (OpenRouter: $10 → 1000 pyyntöä päivässä ≈ +24M/kk). Ilmoitetaan erillisenä lukuna eikä sisällytetä vakiintuneeseen pääsummaan.
-- **Kelpoisuustarkistetut kiintiöt** (`eligibilityGate: "regional-identity"`): todellinen toistuva kiintiö, joka avautuu vasta aluesidonnaisen henkilöllisyystarkistuksen jälkeen (tällä hetkellä Manner-Kiinan nimen tarkistus). Lasketaan saman poolin deduplikointisäännön mukaisesti erilliseen lukuun (`gatedRecurringTokens`), ei koskaan vakiintuneeseen pääsummaan. Järjestelmä (`freeType`) ei muutu, joten reititys pysyy ennallaan.
-- **Todisteluokat.** Sääntö: luettelon luku viittaa lähteeseensä merkinnän vieressä olevassa `// evidence:`-kommentissa — `public-page` (palveluntarjoajan sivu, jonka kuka tahansa voi lukea), `api-public` (palveluntarjoajan todentamaton päätepiste, esimerkiksi NaraRouterin julkinen suunnitelmien päätepiste osoitteessa router.bynara.id) tai `console-verified <date> por <who>` (luku näkyy vain tilin hallintakonsolissa; kommenttiin kirjataan, kuka näki sen ja milloin, sekä julkinen sivu, joka ilmoittaa rajan olemassaolosta). Nykytila: viisi 2026-09-02 uudelleenauditoitua lohkoa sisältää tämän (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); ennen 2026-09-02 tehtyä uudelleenauditointia olevat merkinnät perivät aiemman tutkimuksen, kunnes niitä muokataan; mikä tahansa **uusi tai muutettu** luku ilman evidence-kommenttia on virhe. Tällä hetkellä vain `mistral` on vahvistettu hallintakonsolissa.
+- Numerot ovat** ylärajan arvioita** kunkin palveluntarjoajan dokumentoiduista vapaan tason rajoista, viimeksi tarkastettu** 23.11.2026** jokaiselle riville, jolla on kiintiö. Ilmaiset tasot muuttuvat jatkuvasti — tarkista ennen kuin luotat kuvaan.
+- **Mitä merkintä oikeastaan takaa.** Mikään merkintä ei sisällä rivikohtaista luotettavuusluokitusta, ja API ei palvele mitään. — käsittelee jokaista yllä olevaa lukua saman, ilmoittamattoman laadun arviona. Kaksi tosiasiaa eroavat toisistaan, koska ne on kuratoitu käsin eikä päätelty: 44 merkinnässä on itsenäisesti dokumentoitu kova rajoitus (39 niistä xKiro rivejä, jotka kaikki jakavat yhden päivärahan) ja 22 merkinnässä on nopea koulutusilmoitus. `hardStopGuaranteed` asetetaan vain, kun palveluntarjoajan omissa ehdoissa sanotaan, että ilmaisen päästömäärän ylittäminen hylkää pyynnön sen sijaan, että alkaa hiljaa laskuttaa sinua, kun lähde on kommentissa merkinnän vieressä; se ei ole koskaan oletuksena `true`, ja merkintä, jota kukaan ei ole vahvistanut, pysyy määrittämättä. Joten puuttuva hard-stop-lippu tarkoittaa "ei perustettu", ei "tietää laskuttaa sinua".**STRICT -tila** (opt-in `freeAccessPolicy=strict` reitityssuoja) luottaa vain merkintöihin, joissa on lippu; kaikki muut vapaat tasot jätetään pois `no-hard-stop` :na (katso `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kun vartija suodattaa poolin, käyttäjälle näkyvä loki raportoi sekä poissulkemismäärän että sen `no-hard-stop` osuuden.
+- `estMonthlyFreeTokens` = vain toistuvat kuukausimerkit.** Kertakirjautumishyvitykset eivät toistu** ja lasketaan 0:ksi. Lopetetut tasot ovat myös 0.
+- Päivittäinen token cap → `monthly = daily × 30`. Vain RPD dokumentoi → `RPD × ~800 output tokens × 30`. Vain RPM/TPM (ei päivittäistä ylärajaa) →** korkkiton** (katso alla).
+- **Vapaa pääsy, mutta ei julkaistua tunnuskattoa** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `nvidia`): nämä ovat rate/concurrency-limited. Luokittelemme ne `recurring-uncapped` ja** älä koskaan laske niitä yhteen** — kertominen `RPM × 24/7 × 30d` tuottaisi fantasiakaton (inflaatio, jonka hylkäämme). NVIDIA:n API on vain kokeilukäyttöön; katso sen ToS varoitus alla.
+- **Talletuksen avaustehostus:** kertaluonteinen pieni lisäys, joka nostaa pysyvästi ilmaista kiintiötä (OpenRouter: $10 → 1000 req/day ≈ +24M/mo). Raportoitu erillisenä lukuna, pidetty poissa tasaisesta otsikosta.
+- **Kelpoisuusrajoitukset** (`eligibilityGate: "regional-identity"`): todellinen toistuva kiintiö, joka avautuu vasta alueelle sidotun henkilöllisyyden tarkistuksen jälkeen (Manner-Kiinan oikean nimen vahvistus nykyään). Lasketaan samalla pool-dedupe-säännöllä erilliseksi luvuksi (`gatedRecurringTokens`), ei koskaan tasaiseen otsikkoon. Järjestelmä (`freeType`) on muuttumaton, joten reititys on muuttumaton.
+- **Todistusluokat.** Sääntö: luettelossa oleva numero lainaa lähteensä `// evidence:` -kommentissa merkinnän vieressä — `public-page` (palveluntarjoajan sivu, jota kuka tahansa voi lukea), `api-public` (palveluntarjoajan todentamaton päätepiste, esim. NaraRouter:n julkisten suunnitelmien päätepiste osoitteessa router.bynara.id) tai `console-verified <date> por <who>` (luku on näkyvissä vain, kun julkinen sivu on näkyvissä, kun se näki kommentin sisällä cons ja cap olemassa). Tila tänään: 2026-09-02 uudelleen auditoidut viisi lohkoa kantavat sen (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); 2026-09-02 uudelleentarkastusta edeltävät merkinnät perivät aikaisemman tutkimuksen, kunnes niitä kosketetaan; mikä tahansa** uusi tai muutettu** numero ilman todisteita on virhe. Nykyään vain `mistral` on konsolivarmennettu.
 
-## Miksi lukumme on pienempi kuin muilla koontipalveluilla
+---
 
-Useimmat tämän alan ”ilmaista token-määrää kuukaudessa” koskevat luvut ovat mallikohtaisten merkintöjen summia. Meidän lukumme ei ole sitä, tarkoituksella:
+## Miksi lukumäärämme on pienempi kuin muiden aggregaattoreiden
 
-- **Jokainen yhteinen kiintiö lasketaan kerran.** Mistralin ilmaispaketti on yksi organisaatiokohtainen 1B/kuukausi-kiintiö; sen ilmoittaminen viiden mallin kohdalla ei tee siitä 5B:tä. Mallikohtaisesti summattuna oma luettelomme näyttäisi **~7.4B** (laskettu uudelleen 2026-09-03; tämä luku ei ole CI:n valvoma — mittaa se uudelleen aina, kun luettelo muuttuu) — otsikossa ilmoitetaan **~1.47B**, koska sen verran yksi tili kustakin palveluntarjoajasta voi todellisuudessa käyttää.
-- **Päiväkohtaiset rajat muunnetaan, nopeusrajoja ei.** Dokumentoitu tokenia/päivä-raja muunnetaan muotoon `× 30`; dokumentoitu pyyntöä/päivä-raja muotoon `RPD × ~800 tokens × 30`; palveluntarjoajalle, joka ilmoittaa vain pyyntöä/minuutti-rajan, ei ilmoiteta kuukausilukua, vaan se merkitään _rajoittamattomaksi_ eikä sitä koskaan summata. Nopeusrajoituksen kertominen 24/7-ajalla on paisuttelua, jota emme hyväksy.
-- **Alueellisen henkilöllisyyden tarkistuksen taakse jäävät kiintiöt näytetään erikseen** (`+~6M behind regional identity verification`), koska useimmat lukijat eivät voi käyttää niitä.
-- **Rekisteröitymishyvitykset koskevat vain ensimmäistä kuukautta**, ja ne ilmoitetaan toisena lukuna, eikä niitä koskaan yhdistetä jatkuvaan lukuun.
-- **CI valvoo lukua.** `npm run check:docs-counts` laskee summat uudelleen luettelosta ja keskeyttää koontiversion, jos tämä tiedosto, README tai budjettikortti poikkeaa niistä.
+Useimmat "ilmaiset rahakkeet kuukaudessa" -luvut tässä tilassa ovat mallikohtaisten tarrojen summia. Meidän ei tarkoituksella:
+
+- **Jokainen yhteinen allas lasketaan kerran.** Viisi mallia yhden korvauksen takana on yksi korvaus, ei viisi. Saman luettelon rivi riviltä ja miksi sen tulostamme, on kohdassa [Miten laskemme](#how-we-count).
+- **Päivittäiset ylärajat muunnetaan, hinnat eivät.** Dokumentoidusta tokens/day korkista tulee `× 30`; dokumentoidusta requests/day korkista tulee `RPD × ~800 tokens × 30`; palveluntarjoaja, joka julkaisee vain pyyntöjä minuutissa** ei** kuukausittainen luku ja se on listattu _rajoittamattomana_, ei koskaan summattu. Koron rajan kertominen 24/7 llä on inflaatio, jota kiellämme.
+- **Alueellisen henkilöllisyyden tarkistuksen takana olevat kiintiöt näkyvät erillään** (`+~6M behind regional identity verification`), koska useimmat lukijat eivät voi käyttää niitä.
+- **Kirjautumishyvitykset ovat vain ensimmäisen kuukauden aikana** ja raportoitu toisena lukuna, joka ei koskaan sulautunut tasaiseen numeroon.
+- **Mitä asiakirjojen tarkistus tekee.** `npm run check:docs-counts` (julkaisutila) laskee uudelleen todellisen luvun, ensimmäisen kuukauden luvun ja kaksi rivikohtaista summaa luettelosta, ja epäonnistuu, kun README, tämä sivu tai Free Tiers Guide tulostavat eri arvon tai tulostavat suuren luvun ilman etikettiä ja todellista. Budjettikortti on piirretty samoista faktoista julkaisun yhteydessä.
 
 ---
 
@@ -238,74 +328,74 @@ Useimmat tämän alan ”ilmaista token-määrää kuukaudessa” koskevat luvut
 
 ---
 
-## Palvelukohtainen ilmaiskäyttökiintiö (Bytez/Nous tarkistettu 2026-10-15; uudelleen tarkistetut rivit 2026-09-02; muut 2026-06-17)
+## Palveluntarjoajakohtainen ilmainen taso (luettelo tarkastettu 23.11.2026)
 
-> Luotu uudelleen mallikohtaisesta luettelosta (`open-sse/config/freeModelCatalog.ts`), poolin kaksoiskappaleet poistettu. Järjestetty jatkuvien tokenien määrän mukaan kuukaudessa. `uncapped*` = pysyvästi ilmainen, mutta julkaistua tokenirajaa ei ole (rajoitettu nopeuden/samanaikaisuuden mukaan) — todellinen käyttömahdollisuus, **ei laskettu yhteen otsikkoluvussa**. `—` = vain krediitteihin perustuva / ilman avainta / tokenimäärää ei voida määrittää.
+> Käsin ylläpidetty mallikohtaisesta luettelosta (`open-sse/config/freeModelCatalog.data.ts`); viimeksi tarkastettu 23.11.2026. Lajiteltu kunkin poolin todellisten kuukausittaisten merkkien mukaan (jokainen jaettu pooli lasketaan kerran). `uncapped*` = pysyvästi ilmainen, mutta ei julkaistua token capa (rate/concurrency-limited): todellinen pääsy,** ei** summattu todelliseksi hahmoksi. `not counted` = toistuva kiintiö, jonka todellinen henkilö jättää pois (`avoid`, tai alueellisen henkilöllisyyden tarkistuksen takana). Palveluntarjoajat, joiden tarjous päättyi, ovat [Poistettu/ei ilmaista tasoa](#removed--no-free-tier). `—` = vain luotto / avaimeton / ei token-mittattavissa.
 
-| Palveluntarjoaja | Ilmaistyyppi           | Jatkuvat tokenit/kk | Ensimmäisen kuukauden hyvitys | Käyttöehdot | Mallit |
-| ---------------- | ---------------------- | ------------------- | ----------------------------- | ----------- | ------ |
-| `mistral`        | toistuva               | ~1.00B              | —                             | varoitus    | 5      |
-| `nara`           | toistuva               | ~210M               | —                             | varoitus    | 8      |
-| `llm7`           | toistuva               | ~150M               | —                             | varoitus    | 4      |
-| `xkiro`          | toistuva               | ~150M               | —                             | varoitus    | 39     |
-| `longcat`        | kertaluonteinen        | —                   | 10M                           | varoitus    | 1      |
-| `cerebras`       | kertaluonteinen        | —                   | $5:n hyvitys                  | varoitus    | 2      |
-| `cloudflare-ai`  | toistuva               | ~30M                | —                             | varoitus    | 9      |
-| `groq`           | toistuva               | ~30M                | —                             | varoitus    | 5      |
-| `api-airforce`   | toistuva               | ~24M                | —                             | varoitus    | 7      |
-| `bluesminds`     | toistuva               | ~7M                 | —                             | epäselvä    | 22     |
-| `sambanova`      | toistuva               | ~6M                 | —                             | varoitus    | 5      |
-| `arcee-ai`       | toistuva               | ~5M                 | —                             | varoitus    | 1      |
-| `bazaarlink`     | toistuva               | ~4M                 | —                             | varoitus    | 32     |
-| `openrouter`     | toistuva               | ~1M                 | —                             | varoitus    | 1      |
-| `cohere`         | toistuva               | ~800K               | —                             | varoitus    | 6      |
-| `huggingchat`    | toistuva               | ~500K               | —                             | varoitus    | 4      |
-| `morph`          | toistuva               | ~400K               | —                             | ok          | 2      |
-| `huggingface`    | toistuva               | ~200K               | —                             | varoitus    | 6      |
-| `kiro`           | toistuva               | ~25K                | —                             | vältä       | 12     |
-| `glm-cn`         | rajoittamaton          | rajoittamaton\*     | ~20M                          | ok          | 4      |
-| `baidu`          | rajoittamaton          | rajoittamaton\*     | —                             | varoitus    | 1      |
-| `gemini`         | rajoittamaton          | rajoittamaton\*     | —                             | varoitus    | 4      |
-| `kilo-gateway`   | rajoittamaton          | rajoittamaton\*     | —                             | varoitus    | 7      |
-| `opencode-zen`   | rajoittamaton          | rajoittamaton\*     | —                             | varoitus    | 10     |
-| `tencent`        | rajoittamaton          | rajoittamaton\*     | —                             | varoitus    | 1      |
-| `vertex`         | rekisteröitymishyvitys | —                   | ~300M                         | varoitus    | 10     |
-| `agentrouter`    | rekisteröitymishyvitys | —                   | ~200M                         | varoitus    | 4      |
-| `predibase`      | rekisteröitymishyvitys | —                   | ~25M                          | varoitus    | 1      |
-| `doubao`         | rekisteröitymishyvitys | —                   | ~15M                          | epäselvä    | 1      |
-| `ai21`           | rekisteröitymishyvitys | —                   | ~10M                          | vältä       | 2      |
-| `deepseek`       | rekisteröitymishyvitys | —                   | ~5M                           | ok          | 2      |
-| `hyperbolic`     | rekisteröitymishyvitys | —                   | ~5M                           | ok          | 8      |
-| `nscale`         | rekisteröitymishyvitys | —                   | ~5M                           | varoitus    | 6      |
-| `bytez`          | hyvitys (toist.)       | —                   | tuntematon                    | epäselvä    | 1      |
-| `deepinfra`      | rekisteröitymishyvitys | —                   | ~1M                           | varoitus    | 22     |
-| `fireworks`      | rekisteröitymishyvitys | —                   | ~1M                           | vältä       | 10     |
-| `nebius`         | rekisteröitymishyvitys | —                   | ~1M                           | varoitus    | 1      |
-| `qoder`          | rekisteröitymishyvitys | —                   | ~1M                           | varoitus    | 14     |
-| `scaleway`       | rekisteröitymishyvitys | —                   | ~1M                           | ok          | 6      |
-| `novita`         | rekisteröitymishyvitys | —                   | ~500K                         | varoitus    | 1      |
-| `agy`            | avaimeton              | —                   | —                             | vältä       | 16     |
-| `baichuan`       | avaimeton              | —                   | —                             | epäselvä    | 1      |
-| `blackbox`       | avaimeton              | —                   | —                             | vältä       | 6      |
-| `coze`           | avaimeton              | —                   | —                             | vältä       | 1      |
-| `duckduckgo-web` | avaimeton              | —                   | —                             | vältä       | 6      |
-| `freemodel-dev`  | avaimeton              | —                   | —                             | tuntematon  | 4      |
-| `friendliai`     | avaimeton              | —                   | —                             | vältä       | 2      |
-| `iflytek`        | avaimeton              | —                   | —                             | vältä       | 1      |
-| `inference-net`  | avaimeton              | —                   | —                             | varoitus    | 3      |
-| `liquid`         | avaimeton              | —                   | —                             | tuntematon  | 1      |
-| `monsterapi`     | avaimeton              | —                   | —                             | epäselvä    | 1      |
-| `muse-spark-web` | avaimeton              | —                   | —                             | vältä       | 3      |
-| `nlpcloud`       | avaimeton              | —                   | —                             | vältä       | 1      |
-| `nvidia`         | rajoittamaton          | rajoittamaton\*     | —                             | varoitus    | 3      |
-| `pollinations`   | avaimeton              | —                   | —                             | varoitus    | 31     |
-| `publicai`       | avaimeton              | —                   | —                             | varoitus    | 3      |
-| `reka`           | avaimeton              | —                   | —                             | varoitus    | 2      |
-| `sensenova`      | avaimeton              | —                   | —                             | varoitus    | 1      |
-| `sparkdesk`      | avaimeton              | —                   | —                             | varoitus    | 1      |
-| `stepfun`        | keyless                | —                   | —                             | ok          | 1      |
-| `t3-web`         | keyless                | —                   | —                             | avoid       | 23     |
-| `uncloseai`      | keyless                | —                   | —                             | caution     | 3      |
+| Palveluntarjoaja | Vapaa tyyppi       | Todellinen tokens/mo                             | Ensimmäisen kuukauden luotto | ToS           | Mallit |
+| ---------------- | ------------------ | ------------------------------------------------ | ---------------------------- | ------------- | ------ |
+| `api-airforce`   | toistuva           | ~ 24M                                            | —                            | varovaisuutta | 5      |
+| `groq`           | toistuva           | ~ 24M (4 korkkia mallia kohti)                   | —                            | varovaisuutta | 4      |
+| `cloudflare-ai`  | toistuva           | ~ 23M                                            | —                            | varovaisuutta | 8      |
+| `xkiro`          | toistuva           | ~ 15M                                            | —                            | varovaisuutta | 9      |
+| `bazaarlink`     | toistuva           | ~ 1.4M                                           | —                            | varovaisuutta | 1      |
+| `openrouter`     | toistuva           | ~ 1.2M                                           | —                            | varovaisuutta | 1      |
+| `cohere`         | toistuva           | ~ 800K                                           | —                            | varovaisuutta | 6      |
+| `sambanova`      | toistuva           | ~ 480K                                           | —                            | varovaisuutta | 2      |
+| `morph`          | toistuva           | ~ 160K                                           | —                            | okei          | 2      |
+| `glm-cn`         | korkkiton          | päällystämätön\*                                 | 20 milj                      | okei          | 4      |
+| `agnes`          | korkkiton          | päällystämätön\*                                 | —                            | okei          | 3      |
+| `agnes-cn`       | korkkiton          | päällystämätön\*                                 | —                            | okei          | 3      |
+| `aion`           | korkkiton          | päällystämätön\*                                 | —                            | okei          | 4      |
+| `baidu`          | korkkiton          | päällystämätön\*                                 | —                            | varovaisuutta | 1      |
+| `gemini`         | korkkiton          | päällystämätön\*                                 | —                            | varovaisuutta | 4      |
+| `glm`            | korkkiton          | päällystämätön\*                                 | —                            | okei          | 2      |
+| `kilo-gateway`   | korkkiton          | päällystämätön\*                                 | —                            | varovaisuutta | 12     |
+| `nvidia`         | korkkiton          | päällystämätön\*                                 | —                            | varovaisuutta | 3      |
+| `onomeo`         | korkkiton          | päällystämätön\*                                 | —                            | varovaisuutta | 2      |
+| `requesty`       | korkkiton          | päällystämätön\*                                 | —                            | varovaisuutta | 2      |
+| `sealion`        | korkkiton          | päällystämätön\*                                 | —                            | okei          | 5      |
+| `tokenharbor`    | korkkiton          | päällystämätön\*                                 | —                            | varovaisuutta | 2      |
+| `coze`           | toistuva           | ei lasketa (`avoid`)                             | —                            | välttää       | 1      |
+| `inference-net`  | toistuva           | ei lasketa                                       | —                            | varovaisuutta | 3      |
+| `kiro`           | toistuva           | ei lasketa (`avoid`)                             | —                            | välttää       | 7      |
+| `modelscope`     | toistuva           | alueellisen henkilöllisyyden tarkistuksen takana | —                            | varovaisuutta | 2      |
+| `nlpcloud`       | toistuva           | ei lasketa (`avoid`)                             | —                            | välttää       | 1      |
+| `reka`           | toistuva           | ei lasketa                                       | —                            | varovaisuutta | 2      |
+| `t3-web`         | toistuva           | ei lasketa (`avoid`)                             | —                            | välttää       | 23     |
+| `bytez`          | luotto (kirjaus)   | —                                                | —                            | epäselvä      | 1      |
+| `doubao`         | kirjautumishyvitys | —                                                | 15 milj                      | epäselvä      | 1      |
+| `longcat`        | kirjautumishyvitys | —                                                | 10 milj                      | varovaisuutta | 1      |
+| `deepseek`       | kirjautumishyvitys | —                                                | 5 milj                       | okei          | 2      |
+| `hyperbolic`     | kirjautumishyvitys | —                                                | 5 milj                       | okei          | 8      |
+| `nscale`         | kirjautumishyvitys | —                                                | 5 milj                       | varovaisuutta | 6      |
+| `deepinfra`      | kirjautumishyvitys | —                                                | 1 milj                       | varovaisuutta | 22     |
+| `qoder`          | kirjautumishyvitys | —                                                | 1 milj                       | varovaisuutta | 9      |
+| `scaleway`       | kirjautumishyvitys | —                                                | 1 milj                       | okei          | 6      |
+| `novita`         | kirjautumishyvitys | —                                                | 500K                         | varovaisuutta | 1      |
+| `agentrouter`    | kirjautumishyvitys | —                                                | —                            | varovaisuutta | 1      |
+| `ai21`           | kirjautumishyvitys | —                                                | —                            | välttää       | 2      |
+| `baichuan`       | kirjautumishyvitys | —                                                | —                            | epäselvä      | 1      |
+| `cerebras`       | kirjautumishyvitys | —                                                | —                            | varovaisuutta | 2      |
+| `fireworks`      | kirjautumishyvitys | —                                                | —                            | välttää       | 10     |
+| `freemodel-dev`  | kirjautumishyvitys | —                                                | —                            | tuntematon    | 4      |
+| `monsterapi`     | kirjautumishyvitys | —                                                | —                            | epäselvä      | 1      |
+| `nebius`         | kirjautumishyvitys | —                                                | —                            | varovaisuutta | 1      |
+| `publicai`       | kirjautumishyvitys | —                                                | —                            | varovaisuutta | 3      |
+| `sensenova`      | kirjautumishyvitys | —                                                | —                            | varovaisuutta | 1      |
+| `vertex`         | kirjautumishyvitys | —                                                | —                            | varovaisuutta | 16     |
+| `agy`            | avaimeton          | —                                                | —                            | välttää       | 9      |
+| `aihorde`        | avaimeton          | —                                                | —                            | okei          | 3      |
+| `blackbox`       | avaimeton          | —                                                | —                            | välttää       | 6      |
+| `duckduckgo-web` | avaimeton          | —                                                | —                            | välttää       | 6      |
+| `friendliai`     | avaimeton          | —                                                | —                            | välttää       | 2      |
+| `iflytek`        | avaimeton          | —                                                | —                            | välttää       | 1      |
+| `liquid`         | avaimeton          | —                                                | —                            | tuntematon    | 1      |
+| `muse-spark-web` | avaimeton          | —                                                | —                            | välttää       | 3      |
+| `ovhcloud`       | avaimeton          | —                                                | —                            | okei          | 5      |
+| `pollinations`   | avaimeton          | —                                                | —                            | varovaisuutta | 24     |
+| `sparkdesk`      | avaimeton          | —                                                | —                            | varovaisuutta | 1      |
+| `uncloseai`      | avaimeton          | —                                                | —                            | varovaisuutta | 1      |
 
 ---
 

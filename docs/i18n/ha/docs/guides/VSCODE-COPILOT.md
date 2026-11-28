@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** yana sanya duk wani model da OmniRoute ɗinka ke samarwa cikin mai zaɓar model na _asali_ na GitHub Copilot Chat.
-Babu sidebar na biyu, babu wata UI ta chat dabam — agent mode na Copilot, kiran kayan aiki,
-MCP servers da custom instructions duk suna ci gaba da aiki, sai dai suna gudana ne a kan model ɗin da ka zaɓa.
+**OmniCopilot** yana ƙara ƙirar taɗi OmniRoute ɗinku da haɗakarwa zuwa ga ɗan asalin Copilot Chat mai zaɓin ƙira. Yi amfani da taɗi na editan da ke akwai da tafiyar aiki na wakili, tare da kiran kayan aiki da hangen nesa lokacin da zaɓin ƙirar ke goyan bayan.
 
-|                        |                                                                                                                                                 |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Shigarwa (VS Code)** | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Shigarwa (forks)**   | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Source / matsaloli** | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Yana buƙatar**       | VS Code 1.104+                                                                                                                                  |
+|                        |                                                                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Shigar ( code VS )** | [Kasuwa → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                      |
+| **Shigar (Buɗe VSX)**  | [Buɗe VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — yana buƙatar mai ba da samfur-harshe masu jituwa da kuma taɗi APIs |
+| **Source / al'amurra** | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                                       |
+| **Ana bukata**         | VS Code 1.104 + (1.122 + don amfani da shi ba tare da shigar GitHub ko shirin Copilot ba)                                                |
+| **Sakin na yanzu**     | OmniCopilot v1.5.1 akan duka shagunan biyu (an saki 2026-11-24)                                                                          |
 
-> **Ba a buƙatar rajistar Copilot.** Tun daga VS Code 1.122, language-model provider yana aiki
-> ba tare da shiga GitHub ba kuma ba tare da wani tsarin Copilot ba. Inline completions da
-> fasalolin da suka dogara da embeddings ba sa cikin provider API kuma har yanzu suna buƙatar Copilot.
+Ajiye hoton hoto a kunne** 2026-11-25 (01:43 UTC)** , saki na yanzu:** 52,081 An shigar da Wurin Kasuwa** kuma** 20,989 Buɗe zazzagewar VSX** . Waɗannan su ne ma'auni daban-daban na kantin sayar da kayayyaki, ba haɗakar adadin mai amfani ba. Tushen: [Kasuwa](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) da [Buɗe VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Buɗe samuwar VSX baya tabbatar da dacewa da kowane edita ta amfani da wannan rajista. Bincika taɗi na editan da tallafin yare-samfurin API.
+
+> **Babu biyan kuɗin Copilot da ake buƙata don tattaunawar BYOK a cikin lambar VS 1.122 +.** Microsoft yana goyan bayan taɗi, kayan aiki da MCP ba tare da shigar GitHub ba lokacin da aka saita mai bayarwa. A kan lambar VS 1.104–1.121 tsawo har yanzu yana aiki, amma lambar VS tana buƙatar shirin Copilot mai shiga. Shawarwari na kan layi da abubuwan da suka dogara da abubuwan sakawa suna tsayawa a wajen mai bada API kuma har yanzu suna buƙatar Copilot; Copilot Business/Enterprise admins na iya kashe masu samar da samfur na ɓangare na uku ta hanyar manufa; cokali mai yatsa yana nuna samfuran kawai idan ya aiwatar da mai ba da taɗi API. Amfani na sama na sama na iya haifar da caji. Duba [lambar VS 1.122 bayanin kula da saki](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) da [jagorar ƙirar harshe](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
-## Saitawa
+## Saita
 
-1. **Gudanar da OmniRoute** — `npm install -g omniroute && omniroute` (dashboard a `http://localhost:20128`).
-2. **Shigar da extension** — bincika "OmniRoute" a cikin kallon Extensions.
-3. **Zaɓi model** — Copilot Chat → mai zaɓar model → **Manage Models…** → **OmniRoute**, sannan ka yi alama
-   a kan waɗanda kake so.
+1. **Run OmniRoute** — `npm install -g omniroute && omniroute` (dashboard akan `http://localhost:20128`).
+2. **Shigar da tsawo** bincike — "OmniRoute" a cikin duban Extensions.
+3. **Haɗa** — kiyaye tsohon `http://localhost:20128` ko saita URL uwar garken ku da maɓallin API ta hanyar**OmniRoute: Sarrafa Connection** .
+4. **Zaɓi samfurin** — Copilot Chat → samfurin picker →** Sarrafa Samfura…** →**OmniRoute** , sannan ka yiwa abin da kake so.
 
-Ba sai an saita komai ba idan OmniRoute yana gudana a default port. Don instance mai nisa, buɗe
-**alamar OmniRoute a Activity Bar** (ko gudanar da `OmniRoute: Manage Connection`) sannan ka saita:
+Don saitunan haɗi, buɗe** icon OmniRoute a cikin Bar Aiki** (ko gudu `OmniRoute: Manage Connection`) kuma saita:
 
-- **Server URL** — tushen server, misali `http://192.168.0.15:20128`. Extension ɗin ne yake
-  ƙara suffix ɗin `/v1`; kada ka haɗa shi.
-- **API key** — kawai idan server ya saita `REQUIRE_API_KEY`. Ana adana shi a OS keychain ta hanyar VS
-  Code SecretStorage, ba a taɓa adana shi a `settings.json` ba.
+- **Server URL** — tushen uwar garken, misali `http://omniroute.example.com:20128`. An haɗa maƙalar `/v1` da kari; kar a hada da shi.
+- **API key** ana buƙatar — lokacin da manufar tantancewar uwar garken yana buƙatar ɗaya. An adana ta hanyar VS Code SecretStorage, ba a cikin `settings.json`; Akwai takamaiman maɓalli na sararin aiki. Yi amfani da maɓallin izini don ƙirar da kuke son fallasa.
+
+Tsawaita kuma yana ba da alamar haɗin kai, sabuntawar ƙira, mahallin ƙirar ƙira da metadata farashin (haɗin haɗaɗɗen haɗaɗɗiya), dalili mai gudana tare da** Ƙoƙarin tunani** menu akan lambar VS 1.120 +, madaidaicin ma'auni na yau da kullun da rukunin amfani (OmniRoute 3.8.50 +), daidaitawar CLI da shafin dashboard na zaɓi. Zaɓaɓɓen samfuri da manufofin uwar garken sun ƙayyade ƙarfin da za ku iya amfani da su.
 
 ---
 
@@ -119,26 +119,25 @@ Duba [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) da issue
 
 ---
 
-## Daidaita sauran kayan aikinku daga cikin VS Code
+## Ana saita sauran kayan aikin ku daga ciki lambar VS
 
-**`OmniRoute: Configure Coding CLI`** yana sarrafa `omniroute` CLI domin rubuta profiles da suke shirye don amfani
-ga Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo da Roo — config iri ɗaya da aka bayyana a
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). Ana miƙa API key ɗin zuwa CLI ta hanyar
-environment variable `OMNIROUTE_API_KEY`, ba a kan command line ba.
+**`OmniRoute: Configure Coding CLI`** yana fitar da `omniroute` CLI don rubuta bayanan bayanan da aka shirya don kayan aiki 16: Codex CLI, lambar Claude, Cline, Ci gaba, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes da 5dive. Tsawaita yana kiran umarnin `setup-*` a cikin hadedde m; shigar da sigar OmniRoute CLI wanda ya haɗa da zaɓin umarni. Dubi [jagorar haɗin kai CLI](CLI-INTEGRATIONS.md) don fayiloli da tutoci kowane girke-girke yana amfani da shi da [rajistar kayan aiki na tsawo](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+Ana mika maɓallin API CLI ta hanyar `OMNIROUTE_API_KEY`, ba a kan layin umarni ba. Saita girke-girke na iya dagewa a cikin tsarin kayan aikin da aka yi niyya. Lokacin raba takamaiman maɓalli na filin aiki tare da saitin matakin mai amfani na kayan aiki, tsawo yana neman tabbaci da farko.
 
 ---
 
-## Warware matsaloli
+## Shirya matsala
 
-| Alama                                                   | Dalili / gyara                                                                                                                                                                                                                                                              |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Babu models na OmniRoute a cikin picker                 | Ba a iya isa ga uwar garken. Digon status-bar zai koma toka; gudanar da `OmniRoute: Check Connection`. An tsara discovery ya yi shiru kuma ba zai ƙara models ba maimakon ya nuna prompt.                                                                                   |
-| Kowane model yana bayyana sau biyu                      | Kuna amfani da OmniCopilot wanda ya girmi 1.0.1 — sabunta shi. Yanzu extension ɗin yana neman `?prefix=alias`.                                                                                                                                                              |
-| An daina nuna image/audio model da ake nunawa a da      | An yi hakan da gangan tun daga 1.0.1 — ba zai taɓa iya amsa chat request ba.                                                                                                                                                                                                |
-| Panel ya ɓace daga Activity Bar                         | VS Code yana matsar da ƙarin view containers zuwa **"…"** na overflow a ƙasan Activity Bar, kuma container da aka ɓoye ta hanyar danna-dama zai ci gaba da kasancewa a ɓoye. Danna-dama a Activity Bar → zaɓi **OmniRoute**, ko buɗe shi da `OmniRoute: Manage Connection`. |
-| Dashboard yana buɗewa a burauza duk da yanayin `editor` | Ba a yi wa uwar garken **build** da `DASHBOARD_ALLOW_EMBED=vscode` ba (duba sama) — saita shi lokacin startup a kan prebuilt install ba ya canza komai. Komawa ga burauzar waje da gangan ne.                                                                               |
-| Jerin models bai sabunta ba bayan canza providers       | `OmniRoute: Refresh Models`, ko mahaɗin ↻ da ke cikin panel.                                                                                                                                                                                                                |
+| Alama                                                         | Dalili / gyara                                                                                                                                                                                                                                               |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Babu samfurin OmniRoute a cikin mai zaɓe                      | Ba za a iya isa ga uwar garken ba. Digin matsayi-bar yana launin toka; run `OmniRoute: Check Connection`. Gano shiru ta hanyar ƙira kuma baya ba da gudummawar ƙira maimakon faɗakarwa.                                                                      |
+| Kowane samfurin yana bayyana sau biyu                         | Kuna kan OmniCopilot wanda ya girmi 1.0.1 —. Tsawaita yanzu yana buƙatar `?prefix=alias`.                                                                                                                                                                    |
+| An jera samfurin image/audio ya tafi                          | Tun da 1.0.1 — niyya ba zai taɓa amsa buƙatar taɗi ba.                                                                                                                                                                                                       |
+| Panel ya ɓace daga Bar Ayyukan Ayyuka                         | Lambar VS tana matsar da ƙarin kwantenan gani zuwa cikin** "..."** ambaliya a kasan Bar Ayyukan aiki, kuma akwati da aka ɓoye ta danna dama yana ɓoye. Danna dama-dama kan Barn Ayyuka → tick**OmniRoute** , ko bude shi da `OmniRoute: Manage Connection`.  |
+| Dashboard yana buɗewa a cikin burauza duk da yanayin `editor` | Sabar ba ta kasance ba** gina** tare da `DASHBOARD_ALLOW_EMBED=vscode` (duba sama) — saita shi a farawa akan shigar da aka riga aka gina ba ya yin komai. Komawa da gangan ne.                                                                               |
+| Lissafin samfura ya ƙare bayan canza masu samarwa             | `OmniRoute: Refresh Models`, ko kuma hanyar haɗin ↻ a cikin panel.                                                                                                                                                                                           |
+| Panel ya ce _Online (an katange samfura)_, mai ɗaukar komai   | Sabar ta ƙi maɓalli. Ajiye maɓallin dama tare da** Ajiye & Gwaji** . Idan an saita maɓalli akan uwar garken maimakon (an kunna, ko aka ba da dama ga samfuran), tsawo baya lura da kanta: gudanar da `OmniRoute: Refresh Models` ko buɗe ɓangaren OmniRoute. |
 
 ---
 

@@ -508,23 +508,23 @@ wakati data ya jedwali la vinara imebadilika kwa kweli tangu utumaji wa mwisho.
 
 **Faili:** `src/lib/gamification/sharing.ts`
 
-### Leja ya Ingizo Maradufu
+### Leja ya Kuingiza Mara Mbili
 
-Kila uhamisho huunda safu mlalo mbili katika `token_ledger`:
+Kila uhamishaji huunda safu mbili katika `token_ledger`:
 
-| Safu mlalo | `from_key_id` | `to_key_id` | `amount` |
-| ---------- | ------------- | ----------- | -------- |
-| Debiti     | mtumaji       | mpokeaji    | +kiasi   |
-| Krediti    | mpokeaji      | mtumaji     | -kiasi   |
+| Safu   | `from_key_id` | `to_key_id` | `amount`    |
+| ------ | ------------- | ----------- | ----------- |
+| Debit  | mtumaji       | mpokeaji    | kiasi cha + |
+| Mikopo | mpokeaji      | mtumaji     | -amount     |
 
-Subiri — utaratibu unaotumika ni:
+Subiri — mkataba ni:
 
-| Safu mlalo | `from_key_id` | `to_key_id` | `amount` | Maana                           |
-| ---------- | ------------- | ----------- | -------- | ------------------------------- |
-| Tuma       | mtumaji       | mpokeaji    | +kiasi   | Kiasi kinachotoka kwa mtumaji   |
-| Pokea      | mpokeaji      | mtumaji     | +kiasi   | Kiasi kinachoingia kwa mpokeaji |
+| Safu  | `from_key_id` | `to_key_id` | `amount`    | Maana                        |
+| ----- | ------------- | ----------- | ----------- | ---------------------------- |
+| Tuma  | mtumaji       | mpokeaji    | kiasi cha + | Mtiririko kutoka kwa mtumaji |
+| Pokea | mpokeaji      | mtumaji     | kiasi cha + | Uingiaji kwa mpokeaji        |
 
-Salio huhesabiwa kama ifuatavyo:
+Mizani inakokotolewa kama:
 
 ```sql
 SELECT
@@ -546,19 +546,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Thibitisha**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotensi**: angalia ikiwa `idempotency_key` tayari ipo katika leja.
-   Ikiwa ndiyo, rudisha matokeo yaliyohifadhiwa kwenye akiba.
-3. **Muamala** (muamala mmoja wa SQLite):
-   a. Hesabu salio la mtumaji.
-   b. Ikiwa `balance < amount`, sitisha (fedha hazitoshi).
-   c. Ingiza safu mlalo ya kutuma (`from=sender,`.
+1. **Thibitisha** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Upungufu** : angalia ikiwa `idempotency_key` tayari ipo kwenye leja. Ikiwa ndio, rudisha matokeo yaliyohifadhiwa.
+3. **Shughuli** (muamala wa SQLite moja): a. Kokotoa salio la mtumaji. b. Ikiwa `balance < amount`, acha (fedha haitoshi). c. Ingiza safu mlalo ya kutuma (`from=sender, to=receiver, amount`). d. Ingiza safu mlalo ya kupokea (`from=receiver, to=sender, amount`).
+4. **Kiwango cha juu** : angalia kiwango cha uhamisho kwa mtumaji (max 10 transfers/min).
+5. **Tukio** : toa tukio la uigaji wa `token_share` kwa tathmini ya beji ya XP +.
+6. Rudia `{ success: true, balance: newBalance }`.
 
-### Uwekaji wa Vikomo vya Kasi
+### Kupunguza Kiwango
 
-- Kiwango cha juu ni uhamisho 10 kwa dakika kwa kila ufunguo wa API.
-- Kiwango cha juu ni tokeni 10,000 kwa uhamisho mmoja.
-- Kiwango cha juu ni tokeni 100,000 zinazohamishwa kwa siku kwa kila ufunguo wa API.
+- Uhamisho usiozidi 10 kwa dakika kwa kila kitufe cha API.
+- Upeo wa tokeni 10,000 kwa uhamisho mmoja.
+- Upeo wa tokeni 100,000 zinazohamishwa kwa siku kwa kila ufunguo wa API.
 
 ---
 

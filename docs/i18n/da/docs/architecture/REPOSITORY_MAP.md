@@ -4,9 +4,9 @@
 
 ---
 
-> **Hvad bor hvor: hver sporet mappe på øverste niveau og rodfil med et enkelt-linje formål.** Sidst opdateret: 2026-11-13 (OmniRoute v3.8.54)
+> **Hvad bor hvor: hver sporet mappe på øverste niveau og rodfil, med et enkelt-linje formål.**
 >
-> Brug dette kort til at finde rundt i kodebasen, og følg derefter linkene til de dedikerede dokumenter. Filantal blev målt med `git ls-files` på ovenstående dato. De ændrer sig med næsten hver udgivelse, så behandl dem som størrelsesordener.
+> Brug dette kort til at finde rundt i kodebasen, og følg derefter linkene til de dedikerede dokumenter. Filantal kommer fra `git ls-files` og ændres med næsten hver udgivelse. Behandl dem som størrelsesordener.
 
 ## Træ på øverste niveau
 

@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute na zuwa a matsayin cikakkiyar Progressive Web App da za a iya girkawa. Lokacin da ka shiga dashboard daga kowace manhajar binciken yanar gizo ta wayar hannu — Android (Chrome) ko iOS (Safari) — za ka iya yin "Ƙara zuwa Fuskar Farko" domin samun ƙwarewa irin ta manhajar asali ba tare da buƙatar kantin manhajoji ba.
+Shigar da dashboard ɗin OmniRoute azaman App na Yanar Gizo mai Ci gaba don buɗe shi daga allon gida ko tebur a cikin taga keɓe. Ka'idar da aka shigar har yanzu tana buƙatar haɗi zuwa sabar OmniRoute ɗin ku don kewayawa, bayanan dashboard da buƙatun API. Kaddarorin da aka adana ba sa samar da ƙofa ta layi ko dashboard ɗin layi.
 
-## Mene Ne PWA?
+## Menene PWA?
 
-Progressive Web App tana mayar da dashboard na yanar gizon OmniRoute zuwa wani abu mai kama da aiki irin na manhajar wayar hannu ta asali. Bayan an girka ta, tana:
+Aikace-aikacen Yanar Gizo mai Ci gaba yana amfani da dashboard ɗin gidan yanar gizo tare da alamar ƙa'ida da wata taga daban. Da zarar an shigar, OmniRoute:
 
-- Buɗewa daga fuskar farko da tambarinta na musamman
-- Buɗewa a cikakken allo — babu mashigin adireshin burauza ko mahaɗin shafuka
-- Aiki ba tare da intanet ba tare da keɓantaccen shafin haɗin yanar gizo
-- Adana kadarorin tsaye a cache domin saurin lodawa
-- Goyon bayan yanayin tsaye da na kwance
+- Yana farawa daga allon gida ko tebur
+- Yana buɗewa a keɓantacce, ba tare da madaidaicin adireshin mai binciken da shafuka ba
+- Caches da aka zaɓa a tsaye kadarorin
+- Yana goyan bayan yanayin hoto da shimfidar wuri
 
-## Girkawa
+## Shigarwa
+
+Yi amfani da adireshin HTTPS don uwar garken akan wata na'ura. Lokacin da uwar garken ke aiki akan na'ura iri ɗaya, `http://localhost:20128` kuma ya cika buƙatun shigar mai bincike. Adireshin `http://YOUR_IP:20128` bayyananne bai cika waɗannan buƙatun ba. Menu na shigarwa da faɗakarwa sun dogara da mai lilo da tsarin aiki. Duba [buƙatun shigarwa MDN's PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
 
 ### Android (Chrome)
 
-1. Buɗe dashboard na OmniRoute a Chrome: `http://YOUR_IP:20128`
-2. Chrome zai nuna tutar **"Ƙara OmniRoute zuwa Fuskar farko"** ta atomatik, ko kuma:
-   - Taɓa menu na **⋮** (dige uku) → **"Ƙara zuwa Fuskar farko"** ko **"Girka manhaja"**
-3. Tabbatar da saƙon neman izini
-4. OmniRoute zai bayyana a fuskar farko a matsayin manhaja mai zaman kanta
+1. Bude adireshin OmniRoute HTTPS ɗinku, ko `http://localhost:20128` don uwar garken akan waya ɗaya.
+2. Bude**⋮** menu kuma zaɓi** Shigar da app** ko** Ƙara zuwa Fuskar allo** , idan aka bayar.
+3. Tabbatar da faɗakarwa.
+4. Bude OmniRoute daga allon gida.
 
 ### iOS (Safari)
 
-1. Buɗe dashboard na OmniRoute a Safari: `http://YOUR_IP:20128`
-2. Taɓa maɓallin **Rabawa** (akwati mai kibiya)
-3. Gungura ƙasa sannan ka taɓa **"Ƙara zuwa Fuskar Farko"**
-4. Sanya mata suna (tsohon zaɓi shi ne "OmniRoute") sannan ka taɓa **Ƙara**
-5. OmniRoute zai bayyana a fuskar farko tare da tambarin manhajar
+1. Bude adireshin OmniRoute HTTPS a cikin Safari.
+2. Taɓa** Raba** →** Ƙara zuwa Fuskar allo** .
+3. Tabbatar da sunan kuma matsa** Ƙara** .
+4. Bude OmniRoute daga allon gida.
 
-### Kwamfutar Tebur (Chrome / Edge)
+### Desktop (Chrome / Edge)
 
-1. Buɗe dashboard na OmniRoute
-2. Danna **tambarin girkawa** a mashigin adireshi (ko ⋮ → "Girka OmniRoute...")
-3. Tabbatar da saƙon neman izini
-4. OmniRoute zai buɗe a matsayin taga mai zaman kanta — babu shafuka, babu mashigin adireshi
+1. Bude dashboard ɗin OmniRoute ɗinku.
+2. Yi amfani da gunkin shigarwa na burauza ko** Shigar da app** shigar menu, idan an bayar.
+3. Tabbatar da saurin buɗe OmniRoute a cikin taga nasa.
 
-## Fasali
+## Siffofin
 
-### Ƙwarewar Cikakken Allo
+### Tagar tsaye
 
-An saita manifest da `display: "fullscreen"`, wanda ke nufin manhajar da aka girka tana amfani da dukkan allo — babu kayan aikin burauza, kuma babu karo da mashigin matsayi. Wannan yana sa dashboard ya ji kamar manhajar asali ta gaske.
+Bayanin yana saita `display: "standalone"` da `start_url: "/dashboard"`. Manhajar da aka shigar tana buɗe dashboard a cikin taga app. Mai bincike da sarrafa tsarin aiki na iya bayyana; bayanin baya buƙatar yanayin cikakken allo.
 
-### Goyon Bayan Aiki Ba Tare da Intanet Ba
+### Abubuwan da aka adana da buƙatun hanyar sadarwa
 
-OmniRoute ya ƙunshi service worker (`sw.js`) wanda ke samar da adanawa a cache cikin basira:
+[Ma'aikacin sabis](../../public/sw.js) yana adana zaɓaɓɓun albarkatu na asali iri ɗaya:
 
-| Nau'in Kadara                                                                                                                                                                                                                                    | Dabara                                        | Halayya                                                                                                      |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Tsarin Asalin Manhaja**                                                                                                                                                                                                                        | Cache da farko                                | Ana riga-kafin adana `/`, `/offline`, manifest, da tambura a cache yayin girkawa                             |
-| **Kadarorin tsaye** (CSS, JS, hotuna, fonts)                                                                                                                                                                                                     | Hanyar sadarwa da farko tare da komawa cache  | Yana ɗauko sabbi daga hanyar sadarwa; yana komawa cache idan babu intanet                                    |
-| **Kunshin Next.js** (`/_next/`)                                                                                                                                                                                                                  | Hanyar sadarwa da farko tare da sabunta cache | Yana ɗauko daga hanyar sadarwa kuma yana sabunta cache; yana bayar da sigar da ke cache idan babu intanet    |
-| **Buƙatun kewayawa**                                                                                                                                                                                                                             | Ketarewa (ba a taɓa tsoma baki ba)            | Burauza ce ke kula da komawar HTTP/3→HTTP/2; matacciyar soket ɗin QUIC ba dole ta zama `Response.error()` ba |
-| **Hanyoyin API / dashboard** (`/api/`, `/a2a`, `/dashboard`, laƙabin client API `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, da kuma `/callback`, `/login`; ana daidaita su ba tare da la’akari da manya ko ƙananan haruffa ba) | Ketarewa (ba a taɓa adanawa a cache ba)       | Koyaushe yana zuwa kai tsaye zuwa uwar garken — service worker ba ya taɓa tsoma baki                         |
+| nema ko kadara                             | Dabarun               | Hali                                                                                                               |
+| ------------------------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Abubuwan shigar-lokaci                     | Pre-cache             | `/`, `/manifest.webmanifest`, `/icon-512.png` da `/apple-touch-icon.png` ana adana su yayin shigarwar ma'aikaci    |
+| Next.js static dukiya (`/_next/`)          | Cibiyar sadarwa-farko | Amsoshin da suka yi nasara suna sabunta cache; Kuskuren hanyar sadarwa yana komawa zuwa martanin da aka adana      |
+| Sauran a tsaye CSS, JS, hotuna da rubutu   | Cache-farko           | Ana sake amfani da martanin da aka ɓoye da ke akwai; martanin hanyar sadarwa masu nasara ana adana su akan kuskure |
+| kewayawar shafi                            | Ketare                | Mai binciken yana ɗaukar shafin kai tsaye; ba a aika koma baya ta layi                                             |
+| API, dashboard da kuma hanyoyin tantancewa | Ketare                | Ma'aikacin baya sata ko adana waɗannan buƙatun                                                                     |
+| Sauran buƙatun da ba na tsaye ba           | Cibiyar sadarwa       | Babu binciken cache ko ajiya                                                                                       |
 
-### Shafin Rashin Intanet
+Hanyoyin da aka keɓe sune `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` da `/login`, waɗanda suka dace da shari'a-ba tare da saninsa ba a kan iyakokin hanya. Buƙatun na asali da waɗanda ba na GET ba su ma ketare ma'aikaci.
 
-Lokacin da hanyar sadarwa ba ta samuwa kuma mai amfani ya kewaya zuwa sabon shafi, service worker zai bayar da keɓantaccen shafin `/offline` wanda:
+### Shafin Haɗuwa
 
-- Ke nuna bayyanannen saƙon **"Matsalar Haɗin Yanar Gizo"**
-- Ke nuna **alama ta halin haɗuwa/rashin haɗuwa** kai tsaye wadda ke sabuntawa a ainihin lokaci
-- Ke samar da maɓallin **"Sake Gwada Haɗawa"** domin sake loda shafin idan haɗin yanar gizo ya dawo
-- Ke haɗawa zuwa **Shafin Matsayi** domin binciken matsala
+Shafin `/offline` yana ba da saƙon haɗin kai, alamar online/offline, a** Sake gwada Haɗin kai** maballin da hanyar haɗi zuwa shafin matsayi. Yana da** ba pre-cached** kuma ma'aikacin sabis yayi** ba** tura da kasa kewayawa zuwa gare shi. Kasancewarsa baya sa sabbin shafuka su sami dama ba tare da uwar garken ba.
 
-### Tambarin Manhaja
+### Gumakan App
 
-OmniRoute yana samar da tamburan da aka inganta domin kowane dandali:
+Bayanin yana tallata waɗannan gumakan PNG :
 
-| Fayil                  | Girma            | Inda Ake Amfani Da Shi                 |
-| ---------------------- | ---------------- | -------------------------------------- |
-| `icon-512.png`         | 512×512          | Saƙon girkawa na Android, allon farawa |
-| `apple-touch-icon.png` | 180×180          | Tambarin fuskar farko na iOS           |
-| `icon-192.svg`         | 192×192 (vector) | Tambarin daidaitawa na Android         |
-| `apple-touch-icon.svg` | 180×180 (vector) | Madadin Apple                          |
-| `favicon.svg`          | Vector           | Shafukan burauza                       |
-| `favicon.ico`          | Girma iri-iri    | Tsofaffin burauzozi                    |
+| Fayil                  | Girman  | Amfani                                  |
+| ---------------------- | ------- | --------------------------------------- |
+| `icon-192.png`         | 192×192 | Ikon app na gabaɗaya                    |
+| `icon-512.png`         | 512×512 | Ikon app na gabaɗaya da abin rufe fuska |
+| `apple-touch-icon.png` | 180×180 | Ikon allon gida na Apple                |
 
-### Rijista Ta Atomatik
+Mai lilo yana zaɓar gunkin da ya dace don makasudin shigarwa.
 
-Ana rijistar service worker ta atomatik ta hanyar ɓangaren `<PwaRegister />` da ke cikin tushen layout. Ba a buƙatar wani mataki daga mai amfani — manhajar za ta zama abin girkawa da zarar burauza ta gano ingantaccen manifest da service worker.
+### Rijista ta atomatik
 
-## Tsarin Fasaha
+`PwaRegister` yana yin rijistar ma'aikaci a samarwa lokacin da mai lilo ya goyi bayan ma'aikatan sabis. Yanayin ci gaba yana cire ma'aikata rajista kuma yana share ma'ajin don gujewa tsugunar da kadarorin da ke tsoma baki tare da sake lodin zafi. Shigar da faɗakarwa ya kasance shawarar mai lilo.
 
-### Bayanin Manhajar Yanar Gizo (`manifest.webmanifest`)
+## Fasahar Gine-gine
 
-Next.js ne ke samar da shi ta hanyar `src/app/manifest.ts`:
+### Bayanin App na Yanar Gizo
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+Next.js yana haifar da `/manifest.webmanifest` daga [`src/app/manifest.ts`](../../src/app/manifest.ts). Maɓallin saitin sa shine:
 
-### Service Worker (`public/sw.js`)
+| Saita                          | Daraja                                         |
+| ------------------------------ | ---------------------------------------------- |
+| `short_name`                   | `OmniRoute`                                    |
+| `start_url`                    | `/dashboard`                                   |
+| `scope`                        | `/`                                            |
+| `display`                      | `standalone`                                   |
+| `orientation`                  | `any`                                          |
+| Bayanan bango da launukan jigo | Tsohuwar palette haske daga `PWA_THEME_COLORS` |
 
-Service worker na asali (ba tare da dogaro da wani framework ba) wanda yake da:
+Sunan bayyanun da bayanin martaba ne a tsaye a cikin fayil ɗin tushen. Fitar da bayanan da aka shigar baya bin saitin suna-misali ko palette mai aiki akan kowace ziyara.
 
-- **Matakin girkawa**: Yana riga-kafin adana ginshiƙin manhajar a cache (tushen shafi, shafin rashin haɗi, manifest, da gumaka)
-- **Matakin kunnawa**: Yana share tsofaffin nau'ikan cache kuma ya mallaki dukkan clients
-- **Matakin fetch**: Hanyar turawa mai kaifin basira bisa nau'in buƙata (navigation, static asset, API)
-- **Sarrafa nau'in cache**: `omniroute-pwa-v3` — ƙara wannan don tilasta sabon cache bayan sabuntawa
+### Ma'aikacin Sabis
 
-### Metadata na Layout (`src/app/layout.tsx`)
+[`public/sw.js`](../../public/sw.js) bashi da dogaron tsarin ma'aikacin sabis:
 
-Layout na tushe yana samar da duk meta tags da ake buƙata don bin ƙa'idodin PWA:
+- **Shigar:** pre-caches hudu albarkatun da aka jera a sama da kunna sabon ma'aikaci.
+- **Kunna:** yana cire tsofaffin tsararru na cache da da'awar abokan ciniki.
+- **Dauke:** yana amfani da dabarun kadari da ke sama.
+- **Sigar:** tushen cache sunan shine `omniroute-pwa-v3`; samar da gina tambarin cache ainihi.
+- **Sanarwa:** yana sarrafa abubuwan da ke shigowa `push` kuma yana mai da hankali ko buɗe taga lokacin da aka danna sanarwa.
 
-- Mahaɗin `manifest` zuwa `/manifest.webmanifest`
-- `apple-web-app-capable: true` don yanayin standalone na iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` don Android Chrome
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` don nunawa daga gefe zuwa gefe
+Tura masu gudanar da taron su kaɗai ba sa kafa aikin biyan kuɗin turawa ko daidaita isar da sabar. Kar a ɗauka an kunna sanarwar kawai saboda an shigar da PWA.
 
-### Bangare: `PwaRegister`
+### Layout Metadata da Rajista
 
-Yana a `src/shared/components/PwaRegister.tsx`, wannan bangaren client:
+[`src/app/layout.tsx`](../../src/app/layout.tsx) yana ba da hanyar haɗin kai tsaye, metadata ta Apple, launukan jigo da `viewport-fit: cover`. Taken shafi da taken gidan yanar gizo na Apple suna amfani da sunan misali. Launin jigon burauza mai rai yana bin palette; shigar da bayyanuwar yana amfani da tsohuwar launi mai haske.
 
-1. Yana aiki lokacin mount (a ɓangaren client kawai)
-2. Yana bincika goyon bayan `serviceWorker` a browser
-3. Yana rajistar `/sw.js` a ɓoye (ana yin watsi da kurakurai don kada su hana manhajar aiki)
-4. Ba ya nuna komai (`return null`) — bangare ne da aikinsa kawai shi ne haifar da side effect
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) yana gudana akan abokin ciniki kuma yayi rijistar `/sw.js` tare da gina ID a cikin URL sa. Yana gano tsararrun ma'ajin da ba su dace ba kuma yana iya sake saita ma'aikaci kuma ya sake loda sau ɗaya don murmurewa daga tsohuwar shigarwa. Rashin yin rajista baya toshe dashboard ɗin.
 
-## Amfani Tare da Termux (Android)
+## Yi amfani da Termux (Android)
 
-Lokacin gudanar da OmniRoute a Android ta hanyar Termux, PWA yana aiki ba tare da matsala ba:
+1. Fara OmniRoute a cikin Termux: `npx -y omniroute@latest`.
+2. Bude Chrome akan waya ɗaya: `http://localhost:20128`.
+3. Shigar da PWA ta cikin menu na shigarwa na mai lilo.
+4. Ci gaba da uwar garken Termux yana gudana yayin amfani da dashboard.
 
-1. Fara OmniRoute a Termux: `npx omniroute`
-2. Buɗe Chrome a wayar guda: `http://localhost:20128`
-3. Girka PWA ta hanyar "Ƙara zuwa Fuskar Farko"
-4. PWA yana haɗuwa da uwar garken Termux na cikin gida — komai yana gudana a kan na'urar
-
-Wannan haɗin yana nufin wayarka ta Android ita ce **uwar garken** (Termux), kuma ita ce **client** (PWA) — cikakkiyar ƙofar AI mai zaman kanta.
+Wayar tana ɗaukar duka gateway da dashboard ɗinta. Buƙatun zuwa masu samar da AI mai nisa har yanzu suna buƙatar samun hanyar sadarwa. Dubi [jagorar Termux](TERMUX_GUIDE.md) don saiti da la'akari da tsarin rayuwa na Android.
 
 ## Amfani Daga Wasu Na'urori
 
-Girka PWA a kowace na'ura da browser ɗinta zai iya shiga uwar garken OmniRoute ɗinka:
-
-- **Wata waya/tablet**: Je zuwa `http://PHONE_IP:20128` sannan ka girka PWA
-- **Laptop**: Buɗe Chrome/Edge sannan ka girka shi a matsayin PWA na desktop
-- **Smart TV mai browser**: Shiga dashboard a cikakken allo
+Bude adireshin HTTPS na uwar garken akan waya, kwamfutar hannu ko tebur, sannan bi hanyar shigarwar mai lilo. Dole ne uwar garken ya kasance mai iya samuwa daga kowace na'ura. Duba [jagorar ramin](../ops/TUNNELS_GUIDE.md) don zaɓuɓɓukan shiga nesa.
 
 ## Keɓancewa
 
-### Sunan Instance
+### Misali Suna
 
-Taken PWA yana bin saitin **Instance Name** daga `Dashboard → Settings`. Idan ka sake sanya wa instance ɗinka suna zuwa "Ƙofar AI Ta", PWA da aka girka zai nuna wannan suna.
+The** Misali Suna** saitin yana canza metadata na dashboard, gami da taken shafi da take Apple web-app. Bayanin da aka ƙirƙira yana amfani da tsayayyen suna, don haka wannan saitin baya ba da garantin cewa an sake sanya wa wani ƙa'idar da aka riga aka shigar.
 
-### Favicon na Musamman
+### Favicon na al'ada
 
-Idan ka ɗora favicon na musamman ta hanyar `Dashboard → Settings`, gunkin PWA a desktop zai nuna gunkin da aka keɓance. Gumakan fuskar farko ta wayar hannu suna amfani da fayilolin `icon-512.png` da `apple-touch-icon.png` da aka riga aka gina.
+Favicon na al'ada yana canza favicon mai lilo. Fayil ɗin shigarwa har yanzu yana tallata fayilolin PNG a sama; canza favicon baya maye gurbin waɗannan gumakan allo na gida.
 
-## Iyakoki
+## Iyakance
 
-- **Babu sanarwar turawa** — Service worker ɗin bai aiwatar da Push API ba. Maimakon haka, manhajar Electron ce ke sarrafa sanarwar.
-- **Babu aiki tare a bango** — Ba a jera ayyukan da aka yi ba tare da intanet ba domin sake aiwatar da su. PWA ɗin galibi na duba dashboard ne.
-- **Ƙuntatawar iOS** — Safari a kan iOS ba ya goyon bayan dukkan fasalolin PWA (misali, sai an yi buƙatar girkawa da hannu, sannan service workers masu aiki a bango suna da iyaka).
-- **Girman cache** — Service worker ɗin yana adana static assets kawai a cache. Ba a taɓa adana manyan response payloads daga hanyoyin `/api/` a cache ba.
-- **Keɓaɓɓun gumaka a wayar hannu** — Canza favicon a cikin saituna ba ya sabunta gunkin allon gida a wayar hannu (wannan yana buƙatar sake samar da gumakan PWA).
+- **Ana buƙatar haɗin uwar garken:** kewayawa shafi, jihar dashboard da buƙatun API ba su da koma baya ta layi.
+- **Babu aiki tare na bango:** Ayyukan layi ba a yin layi don sake kunnawa.
+- **Bambance-bambancen mai lilo:** menu na shigarwa, gabatarwar taga da goyan bayan sanarwar sun bambanta ta dandamali.
+- **Babu cache amsa API :** ma'aikacin ya ware API, dashboard da kuma hanyoyin tantancewa.
+- **Gumakan shigarwa a tsaye:** sabunta waɗannan gumakan yana buƙatar canza kadarorin da aka yi talla; masu bincike na iya riƙe shigar metadata.
 
-## Bayanin Fayiloli
+## Maganar Fayiloli
 
-| Fayil                                   | Manufa                                                                    |
-| --------------------------------------- | ------------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Hanyar manifest ta Next.js (tana samar da `manifest.webmanifest`)         |
-| `public/sw.js`                          | Service worker mai tsarin adanawa a cache                                 |
-| `src/shared/components/PwaRegister.tsx` | Client component da ke rajistar service worker                            |
-| `src/app/offline/page.tsx`              | Shafin madadin lokacin babu intanet tare da mai nuna halin haɗi kai tsaye |
-| `src/app/layout.tsx`                    | Root layout mai metadata na PWA (apple-web-app, theme-color, da sauransu) |
-| `public/icon-512.png`                   | Gunkin PNG mai girman 512×512 (Android, allon farawa)                     |
-| `public/apple-touch-icon.png`           | Gunkin PNG mai girman 180×180 (allon gida na iOS)                         |
-| `public/icon-192.svg`                   | Gunkin SVG mai girman 192×192 (Android adaptive)                          |
-| `public/apple-touch-icon.svg`           | Gunkin SVG mai girman 180×180 (madadin Apple)                             |
+| Fayil                                                                                  | Manufar                                                 |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Bayyanar aikace-aikacen gidan yanar gizo da aka ƙirƙira |
+| [public/sw.js](../../public/sw.js)                                                     | Caching, keɓancewa da masu gudanar da taron sanarwa     |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Rijistar samarwa da dawo da ma'ajin da ba a so          |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Shafin haɗin kai, ba faɗuwar layi ta atomatik ba        |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | metadata na shafi da saitunan gani                      |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Raba dabi'un jigo-launi                                 |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 app icon                                      |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple ikon                                    |

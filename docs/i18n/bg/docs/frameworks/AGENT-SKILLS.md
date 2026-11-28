@@ -11,14 +11,14 @@ Agent Skills представляват структурирани файлов�
 
 ---
 
-## Общ преглед
+## Преглед
 
-Каталогът съдържа **45 Agent Skills** (23 за REST API + 21 за CLI + 1 работен процес за конфигуриране). Всяко умение има:
+Каталогът съдържа** 45 агентски умения** (23 REST API + 21 CLI + 1 работен поток за конфигурация). Всяко умение има:
 
-- **Каноничен идентификатор** (`omni-auth`, `cli-serve` и т.н.)
-- Файл **SKILL.md** в `skills/{id}/SKILL.md` с YAML метаданни (`name`, `description`) + богато markdown съдържание
-- **REST крайни точки** (API умения) или **CLI подкоманди** (CLI умения), извлечени от OpenAPI спецификацията и CLI регистъра
-- **Необработен GitHub URL адрес** за извличане в реално време: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- А** каноничен ID** (`omni-auth`, `cli-serve` и т.н.)
+- А**SKILL.md** файл в `skills/{id}/SKILL.md` с YAML frontmatter (`name`, `description`) + rich markdown body
+- **REST крайни точки** (API умения) или**CLI подкоманди** (CLI умения), получени от OpenAPI spec и CLI регистър
+- А**GitHub суров URL** за извличане на живо: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## API за покритие
+## Покритие API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -4,9 +4,9 @@
 
 ---
 
-> **Totuuden lähde:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Viimeksi päivitetty:** 28.6.2026 — v3.8.40
+> **Totuuden lähde:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
-OmniRoute kaappaa ajattelutilan mallien tuottaman avustajan `reasoning_content` ja toistaa sen läpinäkyvästi usean kierroksen pyynnöissä, kun ylävirran toimittaja sitä vaatii. Tämä eliminoi HTTP 400 -virheet, joita tiukat palveluntarjoajat nostavat esiin, kun asiakkaan keskusteluhistoriasta puuttuu edellisen vuoron perustelut.
+OmniRoute kaappaa ajattelutilan mallien tuottaman avustajan `reasoning_content` ja toistaa sen läpinäkyvästi usean kierroksen pyynnöissä, kun ylävirran toimittaja sitä vaatii. Tämä eliminoi HTTP 400 -virheet, joita tiukat palveluntarjoajat tuovat esiin, kun asiakkaan keskusteluhistoriasta puuttuu edellisen vuoron perustelut.
 
 ## Miksi tämä on olemassa
 
@@ -61,7 +61,7 @@ Kirjoitukset menevät molemmille. Lukemat tarkistavat ensin muistin, sitten pala
 
 ## Tietokantakaavio
 
-Muutto: `src/lib/db/migrations/033_create_reasoning_cache.sql`
+Muuttoliike: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 
 ```sql
 CREATE TABLE IF NOT EXISTS reasoning_cache (
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-Indeksit: `expires_at`, `provider`, `model`, `created_at`. `expires_at` tallennetaan Unix-epokkisekunteina; SELECT taso normalisoi vanhat tekstiarvot `EXPIRES_AT_EPOCH_SQL` kautta.
+Indeksit: `expires_at`, `provider`, `model`, `created_at`. `expires_at` tallennetaan Unix-epokkisekunteina; the SELECT layer normalizes legacy text values via `EXPIRES_AT_EPOCH_SQL`.
 
 ## Palveluntarjoajan/mallin tunnistus
 

@@ -13,28 +13,23 @@ UI/UX፣ i18n፣ CLI፣ database እና build/deploy ለውጦችን ከውሎ�
 
 ---
 
-## የልማት ማዋቀር
+## የእድገት ማዋቀር
 
-### ቅድመ ሁኔታዎች
+### ቅድመ-ሁኔታዎች
 
-- **Node.js** `>=22.22.2 <23`፣ ወይም `>=24.0.0 <27` (የሚመከረው፦ 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`፣ ወይም `>=24.0.0 <27` (የሚመከር፡ 24 LTS)
+- **npm** 10 +
 
-> **Windows ከ Node 24 ጋር፦** የአሁኑን 24 LTS patch ልቀት (ቢያንስ 24.20.0) ይጠቀሙ።
-> ቀደምት ልቀቶች `--test-force-exit` ሂደቱን ሲዘጋ የተሳካ ሙከራዎችን ተከትሎ ሊቋረጡ ይችላሉ።
-> የNode የ[Windows libuv ማስተካከያ](https://github.com/nodejs/node/pull/61999) ይህንን
-> የአሂድ ጊዜ ብልሽት ይፈታል፤ የሙከራ ማረጋገጫዎችን እና የrunner መውጫ ማረጋገጫዎችን እንደነበሩ ያስቀምጡ።
+> **Windows በኖድ 24** የአሁኑን 24 LTS patch ልቀት ተጠቀም (ቢያንስ 24.20.0)። ቀደም ሲል የተለቀቁት ስኬታማ ሙከራዎች `--test-force-exit` ሂደቱን ሲዘጋው ፅንስ ማስወረድ ይችላሉ። የመስቀለኛ መንገድ [Windows libuv መጠገኛ](https://github.com/nodejs/node/pull/61999) ይህን የአሂድ ጊዜ ብልሽት አድራሻዎች፤ የሙከራ ማረጋገጫዎችን እና የሯጭ መውጫ ፍተሻዎችን እንደነቃ ያቆዩ።
 
-> **npm v11+ ተጠቃሚዎች (Node 24+)፦** `npm install` ካስኬዱ በኋላ native modules መጫናቸውን ያረጋግጡ፦
-> `node -e "require('better-sqlite3')"`. ይህ በ `MODULE_NOT_FOUND` ካልተሳካ፣
-> `npm approve-scripts better-sqlite3 && npm install` ያስኪዱ። [የችግር መፍቻ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ይመልከቱ።
+> **npm v11 + ተጠቃሚዎች (ኖድ 24 +):** ከ `npm install` በኋላ፣ ቤተኛ ሞጁሎች መጫኑን ያረጋግጡ `node -e "require('better-sqlite3')"`. በ `MODULE_NOT_FOUND` ካልተሳካ `npm approve-scripts better-sqlite3 && npm install` ን ያሂዱ። [መላ መፈለግን](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ተመልከት።
 
-- **Git**
+- **ጊት**
 
-### መዝገብ ቤቱን መቅዳት እና መጫን
+### ክሎን እና ጫን
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -42,92 +37,84 @@ npm install
 ### የአካባቢ ተለዋዋጮች
 
 ```bash
-# ከአብነቱ .env ፋይልዎን ይፍጠሩ
+# Create your .env from the template
 cp .env.example .env
 
-# አስፈላጊ ሚስጥሮችን ያመንጩ
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ለልማት ቁልፍ ተለዋዋጮች፦
+ለልማት ቁልፍ ተለዋዋጮች
 
-| ተለዋዋጭ                  | የልማት ነባሪ እሴት             | መግለጫ                |
+| ተለዋዋጭ                  | የልማት ነባሪ                 | መግለጫ                |
 | ---------------------- | ------------------------ | ------------------- |
-| `PORT`                 | `20128`                  | የሰርቨር ፖርት           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | የfrontend መነሻ URL   |
-| `JWT_SECRET`           | (ከላይ ያመንጩ)               | የJWT መፈረሚያ ሚስጥር     |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | የመጀመሪያ መግቢያ የይለፍ ቃል |
-| `APP_LOG_LEVEL`        | `info`                   | የሎግ ዝርዝር ደረጃ        |
+| `PORT`                 | `20128`                  | የአገልጋይ ወደብ          |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ቤዝ URL ለግንባር        |
+| `JWT_SECRET`           | (ከላይ ማመንጨት)              | JWT የመፈረሚያ ሚስጥር     |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | መጀመሪያ የመግቢያ የይለፍ ቃል |
+| `APP_LOG_LEVEL`        | `info`                   | የቃል ደረጃን ይመዝግቡ      |
 
-### የዳሽቦርድ ቅንብሮች
+### ዳሽቦርድ ቅንብሮች
 
-ዳሽቦርዱ በአካባቢ ተለዋዋጮች ሊዋቀሩ ለሚችሉ ባህሪያት የUI መቀያየሪያዎችን ያቀርባል፦
+ዳሽቦርዱ በአካባቢ ተለዋዋጮች በኩል ሊዋቀሩ ለሚችሉ ባህሪያት UI መቀያየሪያዎችን ያቀርባል፡-
 
-| የቅንብር ቦታ      | መቀያየሪያ       | መግለጫ                     |
-| ------------- | ------------ | ------------------------ |
-| ቅንብሮች → የላቀ   | የማረሚያ ሁነታ    | የማረሚያ የጥያቄ ሎጎችን አንቃ (UI) |
-| ቅንብሮች → አጠቃላይ | የጎን አሞሌ ታይነት | የጎን አሞሌ ክፍሎችን አሳይ/ደብቅ    |
+| አካባቢን ማቀናበር   | ቀያይር         | መግለጫ                            |
+| ------------- | ------------ | ------------------------------- |
+| ቅንብሮች → የላቀ   | ማረም ሁነታ      | የማረም ጥያቄ ምዝግብ ማስታወሻዎችን አንቃ (UI) |
+| ቅንብሮች → አጠቃላይ | የጎን አሞሌ ታይነት | Show/hide የጎን አሞሌ ክፍሎች          |
 
-እነዚህ ቅንብሮች በዳታቤዝ ውስጥ ይቀመጣሉ እና ከዳግም ማስነሳቶች በኋላም ይቆያሉ፤ ሲቀናበሩም የenv var ነባሪ እሴቶችን ይተካሉ።
+እነዚህ ቅንብሮች በመረጃ ቋቱ ውስጥ ይቀመጣሉ እና እንደገና ሲጀመሩ የ env var ነባሪዎችን በመሻር ይቀጥላሉ
 
-### በአካባቢው ማስኬድ
+### በአካባቢው መሮጥ
 
 ```bash
-# የልማት ሁነታ (ራስ-ሰር ዳግም መጫን)
+# Development mode (hot reload)
 npm run dev
 
-# የምርት ግንባታ
-npm run build    # next build → .build/next/ ከዚያ assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# ለአበርካቾች ለሚደረጉ ለውጦች ፈጣን backend/API-only ኮምፓይል
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# የልቀት ግንባታ (ንጹህ ዳግም ግንባታ + HEAD sentinel — ለdeploy አስፈላጊ)
-npm run build:release   # rm -rf .build dist እና build + dist/BUILD_SHA ይጽፋል
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# የተለመደ የፖርት ውቅር
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-የአበርካች ግንባታው የኮምፓይል-ብቻ ማረጋገጫን ያከናውናል፤ standalone
-ስርጭቱን አያዘጋጅም ወይም አማራጭ native packaging ንብረቶችን አይገነባም። ለሚላክ ጥቅል
-ማረጋገጫ ሲያስፈልግዎት መደበኛውን የምርት ግንባታ ይጠቀሙ።
+የአስተዋጽዖ አበርካች ግንባታ የማጠናቀር-ብቻ ማረጋገጫን ያከናውናል፡ ራሱን የቻለ ስርጭትን አይሰበስብም ወይም አማራጭ ቤተኛ ማሸጊያ ንብረቶችን አይገነባም። ሊላክ የሚችል ጥቅል ማረጋገጥ ሲፈልጉ መደበኛውን የምርት ግንባታ ይጠቀሙ።
 
-### የግንባታ ውጤት አቀማመጥ
+### የውጤት አቀማመጥን ይገንቡ
 
-| ማውጫ       | ይዘቶች                                                                | በመዝገብ የተያዘ |
-| --------- | ------------------------------------------------------------------- | ---------- |
-| `src/`    | የመተግበሪያ ምንጭ (TypeScript / TSX)                                      | አዎ         |
-| `.build/` | መካከለኛ ፋይሎች — `next build` ውጤት (gitignored, `distDir = .build/next`) | አይ         |
-| `dist/`   | ለመላክ ዝግጁ ጥቅል — በ`assembleStandalone` የተዘጋጀ (gitignored)             | አይ         |
+| ማውጫ       | ይዘቶች                                                            | ክትትል ተደርጓል |
+| --------- | --------------------------------------------------------------- | ---------- |
+| `src/`    | የመተግበሪያ ምንጭ (TypeScript / TSX)                                  | አዎ         |
+| `.build/` | መካከለኛ — `next build` ውፅዓት (gitignored፣ `distDir = .build/next`) | አይ         |
+| `dist/`   | ሊላክ የሚችል ቅርቅብ — በ `assembleStandalone` ተሰብስቦ (ጊቲግኖይድ)           | አይ         |
 
-የግንባታ ሂደቱ አንድ ዙር ብቻ ነው፦
+የግንባታ ቧንቧው አንድ ነጠላ ማለፊያ ነው-
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js ውጤት)
-  └─ assembleStandalone()                 (standalone + static + public + native assets ይቀዳል)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` በተጨማሪ ሁለቱንም ማውጫዎች መጀመሪያ ያጸዳል እና
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) የማሰማራት ታማኝነት sentinel ሆኖ ይጽፋል።
+`npm run build:release` በተጨማሪ ሁለቱንም ማውጫዎች መጀመሪያ ያጸዳል እና `dist/BUILD_SHA` (= `git rev-parse --short HEAD`)ን እንደ ማሰማራት ታማኝነት ይጽፋል።
 
-`npm run build:contributor` backend-only የግንባታ መገለጫን ይጠቀማል። በግንባታ ጊዜ
-የዳሽቦርድ UI ፋይሎችን ለጊዜው ይተካል፣ የAPI route handlersን ያስቀራል እና
-ግንባታው ካለቀ በኋላ ዋናዎቹን ፋይሎች ይመልሳል። የዳሽቦርድ UI ላይ ለሚደረጉ ለውጦች
-ወይም ለሙሉ የልቀት ማረጋገጫ `npm run build` ይጠቀሙ፤ የአበርካች መገለጫው የልቀት ግንባታ ምትክ አይደለም።
+`npm run build:contributor` ከኋላ-ብቻ የግንባታ መገለጫ ይጠቀማል። በሚገነባበት ጊዜ ዳሽቦርድ UI ፋይሎችን ለጊዜው ያቆማል፣ API ራውተር ተቆጣጣሪዎችን ያቆያል እና ከግንባታው በኋላ ኦሪጅናል ፋይሎችን ወደነበረበት ይመልሳል። በዳሽቦርድ UI ተጽዕኖ ለሚያደርጉ ለውጦች ወይም ለሙሉ የልቀት ማረጋገጫ `npm run build` ይጠቀሙ; የአስተዋጽዖ አድራጊው መገለጫ የመልቀቂያ ግንባታ ምትክ አይደለም።
 
-> **የVPS ማሰማራት ማስታወሻ፦** የርቀት image ማውጫ `/usr/lib/node_modules/omniroute/app/`
-> አልተለወጠም። የማሰማራት skills የ`dist/` ይዘቶችን ወደዚያ ያመሳስላሉ።
-> የተንቀሳቀሰው በin-repo ያለው የግንባታ ውጤት መንገድ ብቻ ነው (`app/` → `dist/`)።
+> **VPS አሰማር ማስታወሻ፡-** የርቀት ምስል ማውጫ `/usr/lib/node_modules/omniroute/app/` አልተለወጠም። የማሰማራት ችሎታው የ `dist/` ይዘቶችን ወደ እሱ ያመሳስለዋል። የውስጠ-repo ግንባታ ውፅዓት መንገድ ብቻ ተንቀሳቅሷል (`app/` → `dist/`)።
 
-ነባሪ URLs፦
+ነባሪ URLs
 
-- **ዳሽቦርድ**፦ `http://localhost:20128/dashboard`
-- **API**፦ `http://localhost:20128/v1`
+- **ዳሽቦርድ** : `http://localhost:20128/dashboard`
+- **API**: `http://localhost:20128/v1`
 
 ---
 
@@ -431,10 +418,10 @@ docs/
 
 ---
 
-## እገዛ ማግኘት
+## እርዳታ በማግኘት ላይ
 
-- **አርክቴክቸር**፦ [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)ን ይመልከቱ
-- **የAPI ማጣቀሻ**፦ [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)ን ይመልከቱ
-- **የደህንነት ሰነዶች**፦ [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md)፣ [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md)፣ [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md)፣ [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **የክወና ሰነዶች**፦ [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **ችግሮች**፦ [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **አርክቴክቸር** [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) ተመልከት
+- **API ማጣቀሻ** ፦ [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) ተመልከት
+- **የደህንነት ሰነዶች** [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **ኦፕ ሰነዶች** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **ጉዳዮች** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

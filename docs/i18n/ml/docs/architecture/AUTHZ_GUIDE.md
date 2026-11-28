@@ -4,10 +4,9 @@
 
 ---
 
-> **വിശ്വസനീയമായ ഉറവിടം:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **അവസാനം അപ്ഡേറ്റ് ചെയ്തത്:** 2026-09-22 — സ്കോപ്പ് നെയിംസ്പേസുകൾ MCP-SERVER.md-ലേക്ക് വിരൽ ചൂണ്ടുന്നു
+> **സത്യത്തിൻ്റെ ഉറവിടം:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-ഓരോ API അഭ്യർത്ഥനകളെയും നിയന്ത്രിക്കുന്ന ഒരു റൂട്ട്-അവബോധമുള്ള ഓതറൈസേഷൻ പൈപ്പ്ലൈൻ OmniRoute-നുണ്ട്. വർഗ്ഗീകരണം **നിർണ്ണായകവും** **ഫെയിൽ-ക്ലോസ്ഡും** ആണ് — വർഗ്ഗീകരിക്കാൻ കഴിയാത്ത എന്തും `MANAGEMENT` ആയി മാറുകയും ഒരു സെഷനോ മാനേജ്മെൻ്റ്-ഗ്രേഡ് ടോക്കണോ ആവശ്യപ്പെടുകയും ചെയ്യും. റൂട്ടുകൾ പരിപാലിക്കുന്ന അല്ലെങ്കിൽ പുതിയ എൻഡ്പോയിന്റുകൾ രൂപകൽപ്പന ചെയ്യുന്ന എഞ്ചിനീയർമാർക്കായി ഈ പേജ് മോഡൽ വിശദീകരിക്കുന്നു.
+എല്ലാ API അഭ്യർത്ഥനകളും ഗേറ്റ് ചെയ്യുന്ന ഒരു റൂട്ട്-അവയർ ഓതറൈസേഷൻ പൈപ്പ്ലൈൻ OmniRoute ഉണ്ട്. വർഗ്ഗീകരണം ആണ്** നിർണായകമായ** ഒപ്പം** പരാജയം-അടഞ്ഞു** — വർഗ്ഗീകരിക്കാൻ കഴിയാത്ത എന്തും `MANAGEMENT` ആയി അവസാനിക്കുകയും ഒരു സെഷനോ മാനേജ്മെൻ്റ് ഗ്രേഡ് ടോക്കണോ ആവശ്യപ്പെടുകയും ചെയ്യുന്നു. റൂട്ടുകൾ പരിപാലിക്കുന്ന അല്ലെങ്കിൽ പുതിയ എൻഡ് പോയിൻ്റുകൾ രൂപകൽപ്പന ചെയ്യുന്ന എഞ്ചിനീയർമാർക്കുള്ള മാതൃക ഈ പേജ് വിശദീകരിക്കുന്നു.
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
@@ -175,7 +174,7 @@ Incoming request → src/proxy.ts
        - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-വിശ്വസനീയമായ ആന്തരിക തലക്കെട്ടുകളാണ് ( `src/server/authz/headers.ts` യിൽ നിർവചിച്ചിരിക്കുന്നത്).** ഇൻകമിംഗ് അഭ്യർത്ഥനകളിൽ നിന്ന് നീക്കം ചെയ്തു** വർഗ്ഗീകരണത്തിന് മുമ്പ് — ക്ലയൻ്റുകൾക്ക് ഒരു വിഷയമായി ആൾമാറാട്ടം നടത്താൻ `x-omniroute-auth-*` മുൻകൂട്ടി പോപ്പുലേറ്റ് ചെയ്യാൻ കഴിയില്ല.
+വിശ്വസനീയമായ ആന്തരിക തലക്കെട്ടുകളാണ് ( `src/server/authz/headers.ts` യിൽ നിർവചിച്ചിരിക്കുന്നത്).** ഇൻകമിംഗ് അഭ്യർത്ഥനകളിൽ നിന്ന് നീക്കം ചെയ്തു** വർഗ്ഗീകരണത്തിന് മുമ്പ് — ക്ലയൻ്റുകൾക്ക് ഒരു വിഷയമായി ആൾമാറാട്ടം നടത്തുന്നതിന് `x-omniroute-auth-*` പ്രീ-പോപ്പുലേറ്റ് ചെയ്യാൻ കഴിയില്ല.
 
 ### നയ കരാറുകൾ
 
@@ -183,9 +182,9 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — എപ്പോഴും `allow({ kind: "anonymous", id: "anonymous" })` നൽകുന്നു.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — എക്സ്ട്രാക്ട് ബെയറർ, `validateApiKey()` വഴി സാധൂകരിക്കുന്നു. ഫലപ്രദമായ `REQUIRE_API_KEY` ഫീച്ചർ ഫ്ലാഗ് അപ്രാപ്തമാക്കുമ്പോൾ മാത്രമേ അജ്ഞാതനാകൂ. ഫലപ്രദമായ ഫ്ലാഗ് `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) വഴി പരിഹരിക്കപ്പെടുന്നു, അതിനാൽ ഡാഷ്ബോർഡ് ഫീച്ചർ ഫ്ലാഗുകളും പരിസ്ഥിതി വേരിയബിളുകളും `/api/v1/*`, `/api/v1beta/*`, അപരനാമങ്ങൾ എന്നിവ സ്ഥിരമായി നിയന്ത്രിക്കുന്നു; റിസോൾവർ പരാജയങ്ങൾ പരാജയപ്പെട്ടു. ക്ലയൻ്റ് API റൂട്ടുകളിൽ ഡാഷ്ബോർഡ്-സെഷൻ അഭ്യർത്ഥനകൾ അനുവദിക്കുന്നു (ഡാഷ്ബോർഡ് മോഡൽ കാറ്റലോഗ് ഉപയോഗിക്കുന്ന `/api/v1/models` ഉൾപ്പെടെ). Entra ID SSO പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ, ഘടനാപരമായി ഒരു എൻട്രാ ടോക്കൺ (മൂന്ന് base64url സെഗ്മെൻ്റുകൾ, `RS*` alg, `kid`) ഒരു ബെയറർ കൈകാര്യം ചെയ്യുന്നത് SSO ബ്രാഞ്ചാണ്.** മുമ്പ്** `validateApiKey()`, അതിൻ്റെ വിധി അന്തിമ — ആണ്, ഇത് ഒരിക്കലും API-കീ പാഥിലേക്കോ ഡീഗ്രേഡ്-ടു-അജ്ഞാത ബ്രാഞ്ചിലേക്കോ വരുന്നില്ല, അതിനാൽ ഒരു ഐഡൻ്റിറ്റി പ്രൊവൈഡർ ഔട്ടേജ് ഓപ്പൺ ആക്സസ് ആകാൻ കഴിയില്ല. സ്റ്റാറ്റിക് API കീകളെ ബാധിക്കില്ല. [Entra ID SSO](../security/ENTRA_SSO.md) കാണുക.
-- **`managementPolicy`** (`policies/management.ts`) — ഡാഷ്ബോർഡ് സെഷൻ, ആന്തരിക മോഡൽ-സമന്വയ അഭ്യർത്ഥനകൾ ( `/api/providers/[name]/(sync-models|models)` മായി പൊരുത്തപ്പെടുന്നു) സ്വീകരിക്കുന്നു അല്ലെങ്കിൽ `isAuthRequired()` തെറ്റായി നൽകുകയാണെങ്കിൽ പൂർണ്ണമായും ഒഴിവാക്കുന്നു. ഒരു ബെയറർ ടോക്കൺ നിലവിലുണ്ടെങ്കിലും അസാധുവാണെങ്കിൽ 403 (`AUTH_001`) നൽകുന്നു, അല്ലാത്തപക്ഷം 401. ഏതെങ്കിലും auth ബ്രാഞ്ചിന് മുമ്പ് റൂട്ട് ഗാർഡ് ടയറുകൾ (LOCAL_ONLY / ALWAYS_PROTECTED) നടപ്പിലാക്കുന്നു — [റൂട്ട് ഗാർഡ് ടയറുകൾ](../security/ROUTE_GUARD_TIERS.md) കാണുക. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ലെ LOCAL_ONLY പാതകൾ (ഇന്ന്: `/api/mcp/`) ബെയറർ കീ `manage` സ്കോപ്പ് വഹിക്കുമ്പോൾ നോൺ-ലൂപ്പ്ബാക്കിൽ നിന്ന് ആക്സസ് ചെയ്യാവുന്നതാണ്; മറ്റെല്ലാ LOCAL_ONLY പാതകളും വ്യാപ്തി പരിഗണിക്കാതെ കർശനമായ-ലൂപ്പ്ബാക്ക് ആയി തുടരുന്നു.
+- **`managementPolicy`** (`policies/management.ts`) — ഡാഷ്ബോർഡ് സെഷൻ, ആന്തരിക മോഡൽ-സമന്വയ അഭ്യർത്ഥനകൾ ( `/api/providers/[name]/(sync-models|models)` മായി പൊരുത്തപ്പെടുന്നു) സ്വീകരിക്കുന്നു അല്ലെങ്കിൽ `isAuthRequired()` തെറ്റായി നൽകുകയാണെങ്കിൽ പൂർണ്ണമായും ഒഴിവാക്കുന്നു. ഒരു ബെയറർ ടോക്കൺ നിലവിലുണ്ടെങ്കിലും അസാധുവായപ്പോൾ 403 (`AUTH_001`) നൽകുന്നു, അല്ലാത്തപക്ഷം 401. ഏതെങ്കിലും auth ബ്രാഞ്ചിന് മുമ്പായി റൂട്ട് ഗാർഡ് ടയറുകൾ (LOCAL_ONLY / ALWAYS_PROTECTED) നടപ്പിലാക്കുന്നു — [റൂട്ട് ഗാർഡ് ടയറുകൾ](../security/ROUTE_GUARD_TIERS.md) കാണുക. ബെയറർ കീ `manage`/`admin` സ്കോപ്പ് അല്ലെങ്കിൽ ഇടുങ്ങിയ `mcp:connect` സ്കോപ്പ് (`hasMcpConnectOrManageScope`) വഹിക്കുമ്പോൾ അല്ലെങ്കിൽ ഒരു ആധികാരിക ഡാഷ്ബോർഡ് സെഷൻ ഉപയോഗിച്ച് `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ഇന്ന്: `/api/mcp/`)-ലെ LOCAL_ONLY പാതകൾ നോൺ-ലൂപ്പ്ബാക്കിൽ നിന്ന് ആക്സസ്സ് ചെയ്യാം; മറ്റെല്ലാ LOCAL_ONLY പാതകളും വ്യാപ്തി പരിഗണിക്കാതെ കർശനമായ-ലൂപ്പ്ബാക്ക് ആയി തുടരുന്നു.
 
-വിജയകരമായ ഒരു പോളിസി `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` നൊപ്പം `AuthSubject` നൽകുന്നു. ആധികാരിക ലോജിക് വീണ്ടും പ്രവർത്തിപ്പിക്കുന്നതിനുപകരം `src/server/authz/assertAuth.ts` ൽ `assertAuth(request, "CLIENT_API")` വഴി ഡൗൺസ്ട്രീം ഹാൻഡ്ലർമാർക്ക് ഇത് വായിക്കാനാകും.
+വിജയകരമായ ഒരു നയം `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` നൊപ്പം `AuthSubject` നൽകുന്നു. ഡൗൺസ്ട്രീം ഹാൻഡ്ലർമാർക്ക് ഓത്ത് ലോജിക് വീണ്ടും പ്രവർത്തിപ്പിക്കുന്നതിന് പകരം `src/server/authz/assertAuth.ts` ൽ `assertAuth(request, "CLIENT_API")` വഴി വായിക്കാൻ കഴിയും.
 
 ## പൊതു റൂട്ടുകളുടെ പട്ടിക
 
@@ -276,22 +275,22 @@ export async function POST(request: Request) {
 
 ## സ്കോപ്പുകൾ
 
-മൂന്ന് നെയിംസ്പേസുകൾ. ഓരോ ചെക്കറും അതിൻ്റേതായ സ്ട്രിംഗുകൾ മാത്രമേ വായിക്കൂ. `manage` എന്തുകൊണ്ട് `read:compression` എന്നതിനായുള്ള `scopeMatches` പരാജയപ്പെടുത്തുന്നു, ഒരു `read` ആക്സസ് ടോക്കണിന് എന്തുകൊണ്ട് `PATCH /api/keys/{id}` ചെയ്യാൻ കഴിയില്ല എന്നതുൾപ്പെടെയുള്ള താരതമ്യം, [മൂന്ന് സ്കോപ്പ് നെയിംസ്പേസുകൾ](../frameworks/MCP-SERVER.md#three-scope-namespaces) എന്നതിൽ കാണുക.
+മൂന്ന് നാമമേഖലകൾ. ഓരോ ചെക്കറും സ്വന്തം സ്ട്രിംഗുകൾ മാത്രം വായിക്കുന്നു. സൈഡ്-ബൈ-സൈഡ്, എന്തുകൊണ്ട് `manage` `read:compression` `scopeMatches` പരാജയപ്പെടുന്നു, എന്തുകൊണ്ട് ഒരു `read` ആക്സസ് ടോക്കണിന് `PATCH /api/keys/{id}` കഴിയില്ല എന്നിവ ഉൾപ്പെടെ, [മൂന്ന് സ്കോപ്പ് നെയിംസ്പെയ്സ്](../frameworks/MCP-SERVER.md#three-scope-namespaces) ആണ്.
 
-API കീകൾ ഒരു `scopes` അറേ വഹിക്കുന്നു (`api_keys.scopes` എന്നതിൽ JSON ആയി സംഭരിച്ചിരിക്കുന്നു, `src/lib/db/apiKeys.ts` കാണുക).
+API കീകൾ ഒരു `scopes` അറേ വഹിക്കുന്നു ( `api_keys.scopes` ൽ JSON ആയി സംഭരിച്ചിരിക്കുന്നു, `src/lib/db/apiKeys.ts` കാണുക).
 
-### മാനേജ്മെൻ്റ് സ്കോപ്പ്
+### മാനേജ്മെൻ്റ് വ്യാപ്തി
 
 - `manage` / `admin` — `hasManageScope`. മാനേജ്മെൻ്റ് API റൂട്ടുകളിലേക്കുള്ള ബെയറർ ആക്സസ്.
-- `mcp:connect`, `self:usage`, `self:account-quota`, കൂടാതെ `policy:bypass-provider-quota` എന്നിവ അഡിറ്റീവ് എക്സാക്റ്റ്-മാച്ച് സ്കോപ്പുകളാണ്. അവ `MANAGEMENT_API_KEY_SCOPES` എന്നതിന് പുറത്താണ്. `mcp:connect` എന്നത് `/api/mcp/` നോൺ-ലൂപ്പ്ബാക്ക് കാർവ്-ഔട്ട് മാത്രമേ തുറക്കൂ.
+- `mcp:connect`, `self:usage`, `self:account-quota`, `policy:bypass-provider-quota` എന്നിവ കൃത്യമായ പൊരുത്തമുള്ള സ്കോപ്പുകളാണ്. അവർ `MANAGEMENT_API_KEY_SCOPES` പുറത്ത് ഇരിക്കുന്നു. `mcp:connect` `/api/mcp/` നോൺ-ലൂപ്പ്ബാക്ക് കാർവ്-ഔട്ട് മാത്രമേ തുറക്കൂ.
 
 ### MCP ടൂൾ സ്കോപ്പുകൾ
 
-കാറ്റലോഗും പൊരുത്തപ്പെടുന്ന നിയമങ്ങളും (ഒരേ സ്ട്രിംഗ്, അല്ലെങ്കിൽ `*` എന്നതിൽ അവസാനിക്കുന്ന ഒരു അനുവദിച്ച സ്കോപ്പ്): [MCP ടൂൾ സ്കോപ്പുകൾ](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` എന്നതിലെ `MCP_SCOPE_LIST` എന്നത് യഥാർത്ഥ ടൈപ്പ് ചെയ്ത ഉപവിഭാഗമാണ്, ആ മുഴുവൻ കാറ്റലോഗല്ല. `resolveCallerScopeContext()` MCP ഓത്ത് വിവരങ്ങൾ, അഭ്യർത്ഥന മെറ്റാഡാറ്റ, അല്ലെങ്കിൽ `OMNIROUTE_MCP_SCOPES` എന്നിവയിൽ നിന്ന് സ്കോപ്പുകൾ പരിഹരിച്ച ശേഷം `open-sse/mcp-server/scopeEnforcement.ts` എന്നതിൽ എൻഫോഴ്സ്മെൻ്റ് പ്രവർത്തിക്കുന്നു. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` അല്ലെങ്കിൽ ഇത് ഓഫായിരിക്കും.
+കാറ്റലോഗും പൊരുത്തപ്പെടുത്തൽ നിയമങ്ങളും (സമാന സ്ട്രിംഗ്, അല്ലെങ്കിൽ `*` യിൽ അവസാനിക്കുന്ന ഒരു അനുവദിച്ച സ്കോപ്പ്): [MCP ടൂൾ സ്കോപ്പുകൾ](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` ലെ `MCP_SCOPE_LIST` യഥാർത്ഥ ടൈപ്പ് ചെയ്ത ഉപഗണമാണ്, ആ മുഴുവൻ കാറ്റലോഗ് അല്ല. MCP auth വിവരം, അഭ്യർത്ഥന മെറ്റാഡാറ്റ അല്ലെങ്കിൽ `OMNIROUTE_MCP_SCOPES` എന്നിവയിൽ നിന്നുള്ള സ്കോപ്പുകൾ `resolveCallerScopeContext()` പരിഹരിച്ചതിന് ശേഷം `open-sse/mcp-server/scopeEnforcement.ts` ൽ എൻഫോഴ്സ്മെൻ്റ് പ്രവർത്തിക്കുന്നു. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` അത് ആഗോളതലത്തിൽ ഓണാക്കുന്നു (സ്ഥിരസ്ഥിതി `false`), എന്നാൽ ഫ്ലാഗ് പരിഗണിക്കാതെ തന്നെ API കീയിൽ `manage`/`admin` ( `open-sse/mcp-server/scopeEnforcement.ts` ലെ `shouldForceScopeEnforcement()` കാണുക) ഇല്ലാത്ത ഒരു HTTP/SSE കോളർക്കായി ഇത് എല്ലായ്പ്പോഴും നടപ്പിലാക്കുന്നു.
 
 ### ആക്സസ്-ടോക്കൺ സ്കോപ്പുകൾ
 
-`oma_live_…` ടോക്കണുകളിലെ `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) അനുസരിച്ച് റാങ്ക് ചെയ്തിരിക്കുന്നു. ഈ റാങ്ക് ആക്സസ്-ടോക്കൺ ക്രെഡൻഷ്യലിന് മാത്രമേ ബാധകമാകൂ. [മാനേജ്മെൻ്റ് ഓതൻ്റിക്കേഷൻ](../guides/MANAGEMENT-AUTH.md) കാണുക.
+`oma_live_…` ടോക്കണുകളിൽ `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) പ്രകാരം റാങ്ക് ചെയ്തിരിക്കുന്നു. ഈ റാങ്ക് ആക്സസ്-ടോക്കൺ ക്രെഡൻഷ്യലിന് മാത്രം ബാധകമാണ്. [മാനേജ്മെൻ്റ് ആധികാരികത](../guides/MANAGEMENT-AUTH.md) കാണുക.
 
 ## ഓത്ത് ടോഗിൾ ആവശ്യമാണ്
 

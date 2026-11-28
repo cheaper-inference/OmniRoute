@@ -188,87 +188,45 @@ içermez.
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG, `README.md` dosyasını `MD:HttpRequest-inf[Susp]` olarak karantinaya alıyor
+### Avast/AVG `README.md` `MD:HttpRequest-inf[Susp]` ile karantinaya alın
 
-**Bu bir yanlış pozitiftir. Hiçbir dosyaya virüs bulaşmamıştır ve herhangi bir işlem yapılması gerekmez.**
+**Bu yanlış bir pozitiftir. Hiçbir şeye virüs bulaşmadı ve herhangi bir işlem yapılmasına gerek yok.**
 
-Avast ve AVG, çok sayıda HTTP isteğine benzeyen bağlantı içeren düz metin/Markdown
-dosyalarını işaretleyen sezgisel bir tarama çalıştırır. OmniRoute'un `README.md` dosyası npm
-paketine dahildir (`package.json` → `files` altında listelenir), dolayısıyla global kurulumda
-`node_modules/omniroute/README.md` konumuna yerleştirilir ve yaklaşık 15
-`http://localhost:20128/...` örneği içerir (MCP HTTP/SSE uç noktaları, A2A `.well-known`
-URL'si ve `curl` örnekleri). Bu bağlantı yoğunluğu, sezgisel taramayı tetiklemek için
-yeterlidir.
+Avast ve AVG birçok HTTP isteği görünümlü bağlantı içeren plain-text/Markdown dosyalarını işaretleyen bir buluşsal yöntem çalıştırır. OmniRoute `README.md` npm paketi içinde gönderilir ( `package.json` → `files` içinde listelenir), dolayısıyla genel — kurulumunda `node_modules/omniroute/README.md` ulaşır ve ~ 15 `http://localhost:20128/...` örneği ( MCP HTTP/SSE uç noktaları, A2A `.well-known` URL ve `curl` parçacıkları) içerir. Bu bağlantı yoğunluğu buluşsal yöntemi tetiklemek için yeterlidir.
 
-Bu durum kısa süre önce başladıysa: dosyanın türünde bir değişiklik olmadı. README'deki uç
-noktalar tablosu genişletildi (MCP HTTP + SSE + A2A eklendi) ve daha fazla `curl` örneği
-eklendi; bu da dosyanın eşiği aşmasına neden oldu.
+Bu daha yeni başladıysa: dosya aynı şekilde değişmedi. README uç nokta tablosunu (MCP HTTP + SSE + A2A eklendi) ve daha fazla `curl` örneğini büyüttü ve bu da onu eşiğin ötesine itti.
 
-Dosya, hiçbir çalıştırılabilir içerik barındırmayan pasif bir dokümantasyon dosyasıdır. Dosyayı
-karantinadan güvenle geri yükleyebilirsiniz.
+Dosya, sıfır yürütülebilir içeriğe sahip atıl bir belgedir. Karantinadan güvenle geri yükleyebilirsiniz.
 
-**Yapılması gerekenler:**
+**Ne yapalım:**
 
-1. **Bildirimleri durdurun** — antivirüsünüzde kurulum dizinini hariç tutun
-   (Avast: Ayarlar → İstisnalar); global `node_modules` yolunuzu ve/veya OmniRoute veri
-   dizinini (`~/.omniroute/`) ekleyin.
-2. **Yanlış pozitifi bildirin** — <https://www.avast.com/false-positive-file-form.php>
-   adresine giderek karantinaya alınan `README.md` dosyasını ekleyin. Sorun, üreticinin
-   sezgisel taramasının bir metin dosyasına aşırı tepki vermesinden kaynaklandığı için herkese
-   yardımcı olacak çözüm budur.
+1. **Bildirimleri durdur** — antivirüsünüzdeki kurulum dizinini hariç tutun (Avast: Ayarlar → İstisnalar), genel `node_modules` yolunuzu and/or OmniRoute veri dizinine (`~/.omniroute/`) ekleyin.
+2. **Yanlış pozitifi bildirin** — <https://www.avast.com/false-positive-file-form.php>, karantinaya alınan `README.md` ekliyor. Bu, satıcının buluşsal yönteminin bir metin dosyasına aşırı tepki vermesi nedeniyle herkese yardımcı olan düzeltmedir.
 
-**Bunu neden kendi tarafımızda "düzeltmiyoruz":** örneklerin tümü `http://localhost`
-kullanır ve localhost, kendinden imzalı sertifikaların yol açtığı zorluklar olmadan `https`
-kullanamaz. Bir üreticinin sezgisel taramasından kaçınmak için dokümantasyonu bozmak, bir
-tarayıcı hatasını gidermek uğruna tüm okuyuculara zarar verir.
+**Bunu neden kendi tarafımıza "düzeltmiyoruz":** örneklerin tümü `http://localhost` ve localhost, kendinden imzalı sertifika sürtünmesi olmadan `https` olamaz. Bir satıcının buluşsal yönteminden kaçınmak için dokümanları karıştırmak, bir tarayıcı hatasını gidermek isteyen her okuyucuya zarar verecektir.
 
 ### Kaspersky, Masaüstü uygulamasını `PDM:Trojan.Win32.Generic` olarak işaretliyor
 
-**Bu, davranışsal bir sezgisel taramadan kaynaklanan yanlış pozitiftir. Hiçbir dosyaya virüs
-bulaşmamıştır.** Kaspersky'nin `PDM:` öneki, kararın Proactive Defense Module (System
-Watcher) tarafından verildiği anlamına gelir; bu modül, yükleyiciyi bilinen kötü amaçlı
-yazılımlarla eşleştirmek yerine yükleyicinin _ne yaptığını_ değerlendirir. Tetiklendiğinde
-Kaspersky tüm kurulumu "geri alır" ve daha önce yazdığı dosyaları siler; bunun sonucunda
-uygulama bozulur veya kaybolur.
+**Bu, davranışsal buluşsal yöntemden kaynaklanan hatalı bir pozitiftir. Hiçbir şey enfekte değil.** Kaspersky'nin `PDM:` öneki, kararın, bilinen kötü amaçlı yazılımlarla eşleştirmek yerine yükleyicinin ne yaptığını değerlendiren Proaktif Savunma Modülü'nden (Sistem İzleyici) geldiği anlamına gelir. Etkinleştiğinde Kaspersky, — kurulumunun tamamını "geri alır" ve — yazdığı dosyaları silerek uygulamanın bozulmasına veya kaybolmasına neden olur.
 
-İşaretlediği dosyalar, masaüstü uygulamasıyla birlikte paketlenen, beyan edilmiş açık kaynaklı
-bağımlılıkların standart parçalarıdır. Örneğin:
+İşaretlediği dosyalar, masaüstü uygulamasıyla birlikte verilen, bildirilen açık kaynaklı bağımlılıkların stok parçalarıdır; örneğin:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` ve
-  `workerProcessEntry.js` — uygulama içi sağlayıcı oturum açma işlemleri ve tarayıcı destekli
-  sohbet için kullanılan tarayıcı otomasyon kütüphanesi
-  [Playwright](https://playwright.dev).
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — web çerezi kullanan sağlayıcılarda tarayıcı parmak izi taşıyan HTTP için kullanılan,
-  sürümü sabitlenmiş yerel `wreq-js` bağlaması (`<arch>`, `x64` veya `arm64` değeridir).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` ve `workerProcessEntry.js` — [Playwright](https://playwright.dev), uygulama içi sağlayıcı oturum açma ve tarayıcı destekli sohbet için kullanılan tarayıcı otomasyon kitaplığı.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — web çerezi sağlayıcılarındaki tarayıcı parmak izi HTTP için kullanılan sabitlenmiş `wreq-js` yerel bağlamasıdır (`<arch>`, `x64` veya `arm64`).
 
-**Neden tetikleniyor:** Windows yükleyicisi **henüz kod imzalı değildir**; dolayısıyla
-imzasız bir NSIS yükleyicisinin itibarı sıfırdır ve davranışsal sezgisel taramalar en yüksek
-agresiflik düzeyinde çalışır. Buna paketlenmiş yerel bir DLL'nin ve
-`%LOCALAPPDATA%\Programs\OmniRoute` altına yazılan yüzlerce `.js` dosyasının (Next.js
-bağımsız derlemesinden gelen, adlarının sonunda karma değerleri bulunan paket dizinleri
-dahil) eklenmesi, sezgisel taramayı tetiklemek için yeterlidir. Kod imzalama planlanmaktadır;
-uygulanana kadar yeni sürümlerde bu durum tekrarlanabilir.
+**Neden patlıyor:** Windows yükleyicisi** henüz kod imzalı değil** yani imzasız bir NSIS yükleyicisinin itibarı sıfırdır ve davranışsal buluşsal yöntemler maksimum düzeyde saldırganlıkla çalışır. Paketlenmiş bir yerel DLL ve `%LOCALAPPDATA%\Programs\OmniRoute` altında yazılmış yüzlerce `.js` dosyasıyla ( Next.js bağımsız yapısından karma son eklenmiş paket dizinleri dahil) bir araya getirildiğinde bu, buluşsal yöntemi tetiklemek için yeterlidir. Kod imzalanması planlanıyor; inene kadar yeni çıkanlar bunu tekrarlayabilir.
 
-**Yapılması gerekenler:**
+**Ne yapalım:**
 
-1. **Önce indirdiğiniz dosyayı doğrulayın** (dosyada oynanmış olma ihtimalini ortadan
-   kaldırır). Her sürüm, `sha512` alanı (base64) `OmniRoute.Setup.<version>.exe`
-   yükleyicisini kapsayan `latest.yml` dosyasını yayımlar. PowerShell'de, yükleyicinin
-   bulunduğu klasörden:
+1. **Önce indirmenizi doğrulayın** (Kurcalanmış bir dosyayı hariç tutar). Her sürüm, `sha512` alanı (base64) `OmniRoute.Setup.<version>.exe` yükleyicisini kapsayan `latest.yml` yayınlar. PowerShell dosyasında yükleyiciyi içeren klasörden:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Çıktı, `latest.yml` → `sha512` değeriyle eşleşmelidir. Eşleşmiyorsa dosyayı silin ve
-   yalnızca [GitHub sürümleri sayfasından](https://github.com/diegosouzapw/OmniRoute/releases)
-   yeniden indirin.
-2. **Geri yükleyin + hariç tutun** — geri alınan öğeleri karantinadan geri yükleyin,
-   `%LOCALAPPDATA%\Programs\OmniRoute` için bir hariç tutma kuralı ekleyin (Kaspersky →
-   Ayarlar → Tehditler ve Hariç Tutmalar), ardından yeniden yükleyin.
-3. **Yanlış pozitifi bildirin** — <https://opentip.kaspersky.com/>. Kullanıcıların gönderdiği
-   yanlış pozitif raporları, izin verilenler listesine ekleme sürecini gerçekten hızlandırır.
+   Çıktı `latest.yml` → `sha512` ile eşleşmelidir. Aksi takdirde dosyayı silin ve yalnızca [GitHub sürümleri sayfasından](https://github.com/cheaper-inference/OmniRoute/releases) yeniden indirin.
+2. **+ hariç tutmayı geri yükle** — geri alınan öğeleri karantinadan geri yükleyin ve `%LOCALAPPDATA%\Programs\OmniRoute` için bir hariç tutma ekleyin (Kaspersky → Ayarları → Tehditler ve Dışlamalar), ardından yeniden yükleyin.
+3. **Yanlış pozitifi bildirin** — <https://opentip.kaspersky.com/>. Kullanıcı tarafından gönderilen FP raporları, izin verilenler listesine eklemeyi gerçekten hızlandırır.
 
 ---
 
@@ -880,10 +838,10 @@ Daha fazla semptom:
 
 ---
 
-## Hâlâ Takıldınız mı?
+## Hala Sıkışmış Mısınız?
 
-- **GitHub Sorunları**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Mimari**: Dahili ayrıntılar için [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) belgesine bakın
-- **API Referansı**: Tüm uç noktalar için [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) belgesine bakın
-- **Sistem Durumu Panosu**: Gerçek zamanlı sistem durumu için **Pano → Sistem Durumu** bölümünü kontrol edin
-- **Çevirici**: Biçim sorunlarında hata ayıklamak için **Pano → Çevirici** bölümünü kullanın
+- **GitHub Sorunları** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Mimarlık** : Dahili ayrıntılar için [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) bakın
+- **API Referansı** : Tüm uç noktalar için [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) bakın
+- **Sağlık Kontrol Paneli** : Kontrol etmek** Kontrol Paneli → Sağlık** gerçek zamanlı sistem durumu için
+- **Çevirmen** : Kullanmak** Kontrol Paneli → Tercüman** biçim sorunlarının hatalarını ayıklamak için

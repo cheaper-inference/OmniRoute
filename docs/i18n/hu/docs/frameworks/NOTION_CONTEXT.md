@@ -63,43 +63,31 @@ Mindhárom metódus irányítópult-hitelesítést (`isAuthenticated`) igényel.
 az OmniRoute menti a tokent, majd azonnal lefuttat egy 1 találatos próbakeresést; ha a Notion
 hibaobjektumot ad vissza, a token törlődik, és a hívás `400` hibával meghiúsul.
 
-## MCP-eszközök (6)
+## MCP szerszámok (6)
 
-Definíciójuk az `open-sse/mcp-server/tools/notionTools.ts` fájlban található. A token feloldása
-a híváskor történik a `getNotionToken()` segítségével; ha nincs beállítva token, az eszköz a következő
-hibát adja:
-`"A Notion-integrációs token nincs beállítva. Állítsa be a Beállítások > Kontextusforrások területen."`
+A `open-sse/mcp-server/tools/notionTools.ts` definíciója. A token feloldása híváskor történik `getNotionToken()` keresztül; ha egyik sincs beállítva, az eszköz `"Notion integration token not configured. Set it in Settings > Context Sources."` dob
 
-| Eszköz                       | Hatókör        | Leírás                                                                                                          |
-| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Oldalak és adatbázisok keresése szöveges lekérdezéssel (címeket, azonosítókat és URL-eket ad vissza). Lapozott. |
-| `notion_get_page`            | `read:notion`  | Egy oldal tartalmának és metaadatainak lekérése az azonosítója alapján.                                         |
-| `notion_list_block_children` | `read:notion`  | Egy blokk vagy oldal összes gyermekblokkjának (a blokkfának) a listázása. Lapozott.                             |
-| `notion_query_database`      | `read:notion`  | Adatbázis lekérdezése opcionális `filter` + `sorts` használatával (Notion API-formátumban). Lapozott.           |
-| `notion_get_database`        | `read:notion`  | Egy adatbázis sémájának/metaadatainak lekérése azonosító alapján.                                               |
-| `notion_append_blocks`       | `write:notion` | Gyermekblokkok hozzáfűzése egy meglévő blokkhoz vagy oldalhoz (kérésenként legfeljebb 100 blokk).               |
+| Eszköz                       | Hatály         | Leírás                                                                                             |
+| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Oldalak és adatbázisok keresése szöveges lekérdezéssel (címeket, IDs, URLs) adja vissza. Lapozva.  |
+| `notion_get_page`            | `read:notion`  | Szerezze meg az oldal tartalmát és metaadatait ID segítségével.                                    |
+| `notion_list_block_children` | `read:notion`  | Sorolja fel egy blokk vagy oldal összes blokk-utódját (a blokkfát). Lapozva.                       |
+| `notion_query_database`      | `read:notion`  | Adatbázis lekérdezése opcionális `filter` + `sorts` (Notion API formátum) használatával. Lapozva.  |
+| `notion_get_database`        | `read:notion`  | Szerezze meg egy adatbázis schema/metadata értékét ID segítségével.                                |
+| `notion_append_blocks`       | `write:notion` | Blokk gyermekek hozzáfűzése egy meglévő blokkhoz vagy oldalhoz (kérésenként legfeljebb 100 blokk). |
 
 ### Bemeneti paraméterek
 
-- `notion_search` — `query` (1–500 karakter), `pageSize` (1–100, alapértelmezett: 20),
-  `startCursor` (opcionális).
-- `notion_get_page` — `pageId` (32 karakteres hexadecimális érték vagy UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, alapértelmezett: 50),
-  `startCursor` (opcionális).
-- `notion_query_database` — `databaseId`, `filter` (opcionális, Notion-szűrőformátum),
-  `sorts` (opcionális tömb), `pageSize` (1–100, alapértelmezett: 50), `startCursor` (opcionális).
+- `notion_search` — `query` (1–500 karakter), `pageSize` (1–100, alapértelmezett 20), `startCursor` (opcionális).
+- `notion_get_page` — `pageId` (32 karakteres hex vagy UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, alapértelmezett 50), `startCursor` (opcionális).
+- `notion_query_database` — `databaseId`, `filter` (opcionális, Notion szűrőformátum), `sorts` (opcionális tömb), `pageSize` (1–100, alapértelmezett 50), `startCursor` (opcionális).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (blokkobjektumok tömbje),
-  `after` (opcionális pozíció).
+- `notion_append_blocks` — `blockId`, `children` (blokkobjektumok tömbje), `after` (opcionális pozíció).
 
-### Hatókörök
+### Hatókör
 
-Az olvasási eszközökhöz `read:notion`, az írási eszközhöz pedig `write:notion` szükséges.
-A hatóköröket az `open-sse/mcp-server/server.ts` fájlban található `withScopeEnforcement()`
-csak akkor kényszeríti ki, ha `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; a hívó engedélyezett
-hatókörei az `OMNIROUTE_MCP_SCOPES` (vesszővel elválasztott) értékéből vagy a hitelesített
-API-kulcs hatókör-kontextusából származnak. A teljes hatókörmodellt lásd az
-[MCP-SERVER.md](./MCP-SERVER.md) dokumentumban.
+Az olvasási eszközökhöz `read:notion`, az íróeszközhöz pedig `write:notion` szükséges. A hatóköröket `withScopeEnforcement()` kényszeríti ki `open-sse/mcp-server/server.ts` -ben, amikor `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, és mindig olyan HTTP/SSE hívónál, akinek API kulcsából hiányzik `manage`/`admin`; a hívó engedélyezett hatókörei `OMNIROUTE_MCP_SCOPES` ből (vesszővel elválasztva) vagy a hitelesített API kulcs hatókörkörnyezetéből származnak. Lásd [MCP-SERVER.md](./MCP-SERVER.md) a teljes körű modellért.
 
 ## Végpontok
 

@@ -4,9 +4,9 @@
 
 ---
 
-> **Versi:** v3.8.44** Terakhir diperbarui:** 28-10-2026** Hadirin:** Insinyur menambahkan, memelihara, atau men-debug layanan tertanam (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versi:** v3.8.44** Hadirin:** Insinyur menambahkan, memelihara, atau men-debug layanan tertanam (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Layanan tertanam adalah alat sespan proses yang diinstal secara lokal yang OmniRoute instal, awasi, dan ekspos sebagai target perutean kelas satu. Tidak seperti penyedia eksternal (yang dijangkau melalui internet melalui kunci API ), layanan tertanam berjalan pada mesin yang sama dengan OmniRoute dan berkomunikasi melalui loopback.
+Layanan tertanam adalah alat sespan proses yang dipasang secara lokal yang dipasang, diawasi, dan diekspos OmniRoute sebagai target perutean kelas satu. Tidak seperti penyedia eksternal (yang dijangkau melalui internet melalui kunci API ), layanan tertanam berjalan pada mesin yang sama dengan OmniRoute dan berkomunikasi melalui loopback.
 
 ---
 

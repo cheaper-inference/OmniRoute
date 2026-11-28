@@ -21,24 +21,21 @@ app-server URL ਉੱਤੇ ਪਹੁੰਚਯੋਗ Codex CLI** ਲੋੜੀਂ
 ## 1. ਆਰਕੀਟੈਕਚਰ
 
 ```
-┌─ OmniRoute ਐਪ ──────────────────┐        ┌─ codex-app-server ਸਾਈਡਕਾਰ ────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ ਸਮਰੱਥਾ ਟੋਕਨ)                │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuth ਨੂੰ ਆਪ ਸੰਭਾਲਦਾ ਹੈ    │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, ਆਟੋ-ਰਿਫ੍ਰੈਸ਼) │
-        │ ਸਾਂਝੇ ਕਰਦਾ ਹੈ (compose ਵਾਲਿਊਮ)    └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS ਸਮਰੱਥਾ ਟੋਕਨ (ਦੋਵੇਂ ਇਸਨੂੰ ਮਾਊਂਟ ਕਰਦੇ ਹਨ)
-  codex-appserver-home    → ~/.codex (auth.json ਡੈਸ਼ਬੋਰਡ ਵੱਲੋਂ ਲਿਖੀ ਜਾਂਦੀ ਹੈ,
-                             ਸਾਈਡਕਾਰ ਦਾ codex app-server ਇਸਨੂੰ ਪੜ੍ਹਦਾ ਹੈ)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- ਸਾਈਡਕਾਰ ਸਮਰੱਥਾ ਟੋਕਨ ਦੇ ਪਿੱਛੇ **ਸਿਰਫ਼** ਅੰਦਰੂਨੀ compose ਨੈੱਟਵਰਕ
-  (`ws://codex-app-server:1456`) ਉੱਤੇ ਸੁਣਦਾ ਹੈ। ਇਸਨੂੰ ਹੋਸਟ ਜਾਂ ਇੰਟਰਨੈੱਟ ਉੱਤੇ
-  **ਕਦੇ ਵੀ** ਪ੍ਰਕਾਸ਼ਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ।
-- Codex CLI ਨੂੰ `omniroute:base` ਵਿੱਚ ਹੀ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ ਹੈ, ਇਸ ਲਈ ਸਾਈਡਕਾਰ
-  ਚਲਾਉਂਦੇ ਸਮੇਂ ਹੋਸਟ ਜਾਂ ਵਰਤੋਂਕਾਰ ਦੀ ਮਸ਼ੀਨ ਉੱਤੇ codex ਇੰਸਟਾਲ ਕਰਨ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ।
+- ਸਾਈਡਕਾਰ ਸੁਣਦਾ ਹੈ** ਸਿਰਫ਼** ਇੱਕ ਸਮਰੱਥਾ ਟੋਕਨ ਦੇ ਪਿੱਛੇ ਅੰਦਰੂਨੀ ਕੰਪੋਜ਼ ਨੈੱਟਵਰਕ (`ws://codex-app-server:1456`) ਉੱਤੇ। ਇਹ ਹੈ** ਕਦੇ ਨਹੀਂ** ਹੋਸਟ ਜਾਂ ਇੰਟਰਨੈੱਟ 'ਤੇ ਪ੍ਰਕਾਸ਼ਿਤ ਕੀਤਾ ਗਿਆ ਹੈ।
+- ਸਾਈਡਕਾਰ `omniroute:cli-no-docker` ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ, `runner-cli-no-docker` ਟੀਚੇ ਤੋਂ ਬਣਾਇਆ ਗਿਆ ਹੈ, ਜਿਸ ਵਿੱਚ Codex CLI ਸ਼ਾਮਲ ਹੈ।
 
 ## 2. ਇਸਨੂੰ ਚਾਲੂ ਕਰੋ
 

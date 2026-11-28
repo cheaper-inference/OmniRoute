@@ -94,52 +94,30 @@ maršruto parinkimas ar modelio pasirinkimas nekeičiamas — žr. toliau apraš
 
 ---
 
-## Duomenų sinchronizavimas yra ATSKIRAS pasirinkimas — privatumo pažadas
+## Duomenų sinchronizavimas yra SEPARATE pasirinkimas — privatumo pažadas
 
-Įjungus `RADAR_ENABLED` atrakinama tik naudotojo sąsaja. Srautui sinchronizuoti būtinas antras,
-nepriklausomas pasirinkimas, saugomas `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migracija `136_radar_cache_settings.sql`). Prieš atlikdama bet kokią tinklo užklausą, `syncRadar()` patikrina žymą _ir_
-pasirinkimą:
+Įjungus `RADAR_ENABLED` atrakinamas tik UI. Norint sinchronizuoti sklaidos kanalą, reikalingas antras nepriklausomas pasirinkimas, saugomas `radar_settings.opt_in` (`src/lib/db/radar.ts`, migracija `136_radar_cache_settings.sql`). `syncRadar()` patikrina vėliavėlę _ir_ pasirinkimą prieš skambindamas tinkle:
 
 ```
 Flag off      → { status: "disabled" }   — no network call
 Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Kai abu įjungti, sinchronizavimas vyksta taip:
+Kai abu įjungti, sinchronizavimo kelias yra:
 
-1. `GET <feed base URL>/v1/catalog/latest` su `x-omniroute-radar-schema: 2` ir pasirenkama
-   `Authorization: Bearer <supporter key>` antrašte (žr. toliau). Kai schemos antraštės nėra, serveriai pagal numatytąją nuostatą
-   naudoja atskirai pasirašytą v1 pereinamąjį artefaktą, todėl senesni įdiegti klientai ir toliau
-   gauna naujinimus.
-2. Tai tik atsisiuntimui skirtas programos srautas, tačiau vis tiek atliekama HTTPS užklausa. Prieglobos
-   infrastruktūra gauna įprastus ryšio metaduomenis, pvz., šaltinio IP adresą. Kai sukonfigūruotas rėmėjo
-   raktas, sinchronizuojant šis raktas taip pat siunčiamas Bearer antraštėje, kad paslauga galėtų nustatyti
-   teisę į paslaugą. Tikslioje privataus serverio versijoje, nurodytoje pirmiau apibrėžtoje įrodymų riboje,
-   srauto užklausų apskaitai naudojamos raktų maišos, suvestinis naudojimas ir kasdien keičiamas sutrumpintas IP adreso HMAC,
-   skirtas rankinei piktnaudžiavimo peržiūrai; šiose lentelėse nei raktas, nei IP adresas neįrašomi neapdorotu pavidalu.
-   Infrastruktūros prieigos žurnalai ir šifruota pristatymo siunčiamųjų pranešimų eilė yra atskiros veiklos
-   ribos.
-3. OmniRoute niekada nesiunčia Radar paslaugai užklausų, atsakymų, pokalbių, teikėjų prisijungimo duomenų, modelio srauto,
-   veikimo trukmės, delsos ar vietinės teikėjo konfigūracijos.
-4. Atsakymas patikrinamas, validuojamas ir išsaugomas vietiniame podėlyje (žr.
-   [Saugumo modelį](#security-model)). Radar turi lygiai keturis serverio pusės tinklo kelius:
-   `syncRadar()` katalogui, `syncRadarReferrals()` rekomendacijoms ir
-   `syncRadarOffers()` / `syncRadarIntel()` tik rėmėjams skirtiems pasiūlymams bei Intel.
+1. `GET <feed base URL>/v1/catalog/latest` su `x-omniroute-radar-schema: 2` ir pasirenkama `Authorization: Bearer <supporter key>` antrašte (žr. toliau). Serveriai pagal numatytuosius nustatymus naudoja atskirai pasirašytą v1 perėjimo artefaktą, kai schemos antraštės nėra, todėl senesni įdiegti klientai nuolat gauna naujinimus.
+2. Tai tik atsisiuntimo programos srautas, tačiau tai vis tiek yra HTTPS užklausa. Priglobta infrastruktūra gauna įprastus ryšio metaduomenis, pvz., šaltinį IP. Kai sukonfigūruotas palaikymo raktas, sinchronizavimas taip pat siunčia tą raktą nešiklio antraštėje, kad paslauga galėtų išspręsti teisę. Tiksliai privataus serverio peržiūroje, nurodytoje aukščiau pateiktoje įrodymų riboje, sklaidos kanalo užklausų apskaitoje naudojamos raktų maišos, bendras naudojimas ir kasdien besisukantis sutrumpintas HMAC IP piktnaudžiavimo peržiūrai; tose lentelėse neapdorota forma nėra nei rakto, nei IP. Infrastruktūros prieigos žurnalai ir šifruotas pristatymo siuntų aplankas yra atskiros veiklos ribos.
+3. OmniRoute niekada nesiunčia raginimų, atsakymų, pokalbių, teikėjo kredencialų, modelio srauto, veikimo laiko, delsos ar vietinio teikėjo konfigūracijos į radaro paslaugą.
+4. Atsakymas patikrinamas, patvirtinamas ir saugomas talpykloje vietoje (žr. [Saugos modelis](#security-model) ). „Radar“ turi tiksliai keturis serverio tinklo kelius: `syncRadar()` katalogui, `syncRadarReferrals()` nukreipimams ir `syncRadarOffers()` / `syncRadarIntel()` tik rėmėjams skirtiems pasiūlymams ir „Intel“.
 
-**Rėmėjo raktas** yra pasirenkamas Bearer prieigos raktas (`radar_settings.supporter_key`),
-leidžiantis srauto paslaugai nuspręsti, kurį lygį pateikti (žr.
-[Lygius](#tiers-community-and-live)). Jis:
+Katalogo tikrinimas vyksta kas 24 valandas. Kai patvirtintame sklaidos kanale vis dar yra talpykloje saugoma versija ir pakopa, sinchronizavimas išlaiko talpykloje saugomą naudingąją apkrovą, atnaujina `fetchedAt` ir kitas patikrinimas atliekamas po 24 valandų, o ne kas valandą.
 
-- Saugomas **užšifruotas ramybės būsenoje**, naudojant tas pačias AES-256-GCM `encrypt()`/`decrypt()`
-  pagalbines funkcijas (`src/lib/db/encryption.ts`), kurios naudojamos teikėjų prisijungimo duomenims.
-- Nustatomas per `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) ir
-  **niekada negrąžinamas** — atsakyme pateikiama užmaskuota forma (`omr_****abcd`).
-- Jį pakeitus arba pašalinus, vienu atominiu veiksmu panaikinamas katalogo, rekomendacijų, pasiūlymų ir Intel podėlių galiojimas. Kito
-  sinchronizavimo ar skaitymo metu nauja teisė nustatoma serverio pusėje; rakto išsaugojimas savaime
-  neatlieka tinklo užklausos ir nepanaudoja vienkartinio aktyvinimo rakto.
-- Siunčiamas srauto paslaugai kaip Bearer prieigos raktas sinchronizavimo GET užklausoje — jokia kita
-  informacija apie raktą nepalieka kliento.
+The** rėmėjo raktas** yra pasirenkamas nešiklio prieigos raktas (`radar_settings.supporter_key`), leidžiantis tiekimo tarnybai nuspręsti, kurią pakopą teikti (žr. [Pakopos](#tiers-community-and-live) ). Tai yra:
+
+- Saugoma** užšifruotas ramybės būsenoje** su tais pačiais AES-256-GCM `encrypt()`/`decrypt()` pagalbininkais (`src/lib/db/encryption.ts`), naudojamais teikėjo kredencialams.
+- Nustatyti per `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) ir** niekada neatsiliepė** — atsakymas grąžina užmaskuotą formą (`omr_****abcd`).
+- Pakeitus arba išvalius jį, katalogas, persiuntimai, pasiūlymai ir „Intel“ talpyklos tampa negaliojančiais. Kitas sync/read išsprendžia naujas teises serverio pusėje; Išsaugojus raktą savaime nepateikiama tinklo užklausa ir nesunaudojamas vienkartinis aktyvinimo raktas.
+- Išsiųstas sklaidos kanalo tarnybai kaip nešiklio prieigos raktas sinchronizacijoje GET — nieko daugiau apie raktą nepalieka kliento.
 
 ---
 
@@ -294,98 +272,56 @@ nuotolinės HTTP paskirties vietos saugiai atmetami, o naršymas lieka neaktyvus
 
 ---
 
-## Saugumo modelis
+## Apsaugos modelis
 
-### Ed25519 parašas, taikomas tiksliems baitams
+### Ed25519 parašas per tikslius baitus
 
-Kanalo naudingoji apkrova pasirašoma naudojant Ed25519. `verifyFeedBytes()`
-(`src/lib/radar/verify.ts`) tikrina **tikslių atsakymo baitų**, gautų ryšio kanalu,
-parašą — prieš tikrinimą naudingoji apkrova niekada iš naujo neserializuojama, todėl
-pakartotinis kodavimas baitas į baitą negali nepastebimai panaikinti ar apeiti parašo
-patikros. Nepavykus patikrai (`invalid_signature`), sinchronizavimas nutraukiamas dar
-prieš išanalizuojant arba talpykloje išsaugant naudingąją apkrovą.
+Tiekimo naudingoji apkrova pasirašyta su Ed25519. `verifyFeedBytes()` (`src/lib/radar/verify.ts`) patikrina parašą per** tikslaus atsakymo baitų** Gauta per laidą — naudingoji apkrova niekada neperserializuojama prieš patikrinimą, todėl baitas po baito perkodavimas negali tyliai anuliuoti arba apeiti parašo tikrinimo. Patvirtinimo klaida (`invalid_signature`) nutraukia sinchronizavimą, kol naudingoji apkrova kada nors išanalizuota arba talpykloje.
 
-### Prisegtas viešasis raktas ir jo keitimas
+### Prisegtas viešojo rakto + pasukimas
 
-Tikrinimo viešasis raktas yra prisegtas faile `src/lib/radar/pinnedKeys.ts`
-(`PINNED_FEED_PUBLIC_KEYS`); tai yra masyvas, kad prieš keičiant raktą naująjį būtų
-galima pridėti pradžioje, o senos talpykloje laikomos kanalo versijos, pasirašytos
-ankstesniu raktu, liktų galiojančios iki pakartotinio sinchronizavimo.
+Patvirtinantis viešasis raktas yra prisegtas `src/lib/radar/pinnedKeys.ts` (`PINNED_FEED_PUBLIC_KEYS`) – masyve, todėl prieš sukimąsi galima pridėti naują raktą, o senos talpyklos informacijos santraukos, pasirašytos ankstesniu raktu, galioja iki pakartotinio sinchronizavimo.
 
-### Aplinkos kintamųjų perrašymai, patogūs atšakoms
+### Šakės draugiškas env nepaiso
 
-Du aplinkos kintamieji leidžia atšakoms ir savarankiškai prieglobą valdantiems
-naudotojams nukreipti klientą į savo kanalą vietoj numatytosios OmniRoute paslaugos —
-žr. toliau pateiktą skyrių
-[Kaip savarankiškai teikti kanalo prieglobą](#how-to-self-host-a-feed):
+Du env vartai leidžia šakėms ir savarankiškiems priegloboms nukreipti klientą į savo sklaidos kanalą, o ne į [numatytąją](#how-to-self-host-a-feed) OmniRoute paslaugą —
 
-| Kintamasis          | Paskirtis                                                                                                        |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `RADAR_FEED_URL`    | Perrašo bazinį kanalo URL (numatytoji reikšmė `https://radar.omniroute.online`).                                 |
-| `RADAR_FEED_PUBKEY` | Perrašo prisegtą viešąjį raktą (base64-DER SPKI arba PEM), integruotą masyvą pakeisdamas šiuo vieninteliu raktu. |
+| Var                 | Tikslas                                                                                                    |
+| ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `RADAR_FEED_URL`    | Nepaiso tiekimo bazės URL (numatytasis `https://radar.omniroute.online`).                                  |
+| `RADAR_FEED_PUBKEY` | Nepaiso prisegto viešojo rakto (base64-DER SPKI arba PEM), pakeisdamas integruotą masyvą šiuo vienu raktu. |
 
-### Apatinė versijos riba
+### Versija grindys
 
-`syncRadar()` atmeta atsisiųstą kanalą, kurio `version` nėra griežtai naujesnė už
-šiuo metu talpykloje laikomą versiją (`compareVersions()`, taškais atskirtų
-`YYYY.MM.DD.n` reikšmių palyginimas) — `{ status: "stale" }`. Tai neleidžia pažeistam
-arba netinkamai sukonfigūruotam kanalo galiniam taškui grąžinti klientą prie senesnės,
-kitaip pasirašytos naudingosios apkrovos.
+`syncRadar()` atmeta atsisiųstą informacijos santrauką, kurios `version` nėra griežtai naujesnė nei šiuo metu talpykloje saugoma versija (`compareVersions()`, taškinis `YYYY.MM.DD.n` palyginimas) — `{ status: "stale" }`. Tai neleidžia pažeistam arba netinkamai sukonfigūruotam sklaidos kanalo galutiniam taškui grąžinti klientą į senesnį, kitaip pasirašytą naudingą apkrovą.
 
 ### Dvi datos ir kodėl saugomos abi
 
-Talpykloje laikomas kanalas turi dvi skirtingas datas, o jų nepainioti ir yra pagrindinė
-priežastis saugoti abi:
+Talpykloje esančiame sklaidos kanale yra dvi skirtingos datos, o jas supainioti yra svarbiausia išlaikyti abi:
 
-| Laukas        | Šaltinis                   | Į kokį klausimą atsako                |
-| ------------- | -------------------------- | ------------------------------------- |
-| `generatedAt` | pasirašytas kanalo turinys | kokio senumo yra **duomenys**         |
-| `fetchedAt`   | šio diegimo laikrodis      | kada šis diegimas juos **atsisiuntė** |
+| Laukas        | Ateina iš                   | Atsakymai                              |
+| ------------- | --------------------------- | -------------------------------------- |
+| `generatedAt` | pasirašytas pašaro korpusas | kiek metų** duomenis** yra             |
+| `fetchedAt`   | šio diegimo laikrodis       | kai šis įdiegiamas** atsisiųstas** tai |
 
-Prieš kelias minutes gautame kanale gali būti kelių savaičių senumo duomenys, todėl
-vien `fetchedAt` neleidžia administratoriui nustatyti, ar papildomas sluoksnis yra
-naujesnis už bazinius duomenis, ant kurių jis taikomas. Abi datos išsaugomos
-`radar_feed_cache`, grąžinamos per `getRadarCatalog().meta` ir atskirai pateikiamos
-per `GET /api/radar/status`. Įrašas, išsaugotas talpykloje prieš atsirandant stulpeliui
-`generated_at` (163 migracija), nuskaitomas kaip `null` — nežinoma reikšmė lieka
-nežinoma, užuot naudojus atsisiuntimo laiką. `radar_referrals_cache` savo
-`generated_at` saugo nuo 142 migracijos.
+Prieš kelias minutes gautame sklaidos kanale gali būti kelių savaičių senumo skaičiai, todėl vien `fetchedAt` negali pasakyti operatoriui, ar perdanga yra naujesnė už bazinę liniją, ant kurios ji yra. Abu yra išsaugoti `radar_feed_cache`, grąžinami `getRadarCatalog().meta` ir pateikiami atskirai `GET /api/radar/status`. Eilutė, įrašyta talpykloje prieš egzistuojant `generated_at` stulpeliui (163 perkėlimas), skaitoma atgal, nes `null` — unknown lieka nežinomas, o ne skolina gavimo laiką. `radar_referrals_cache` išlaikė savo `generated_at` nuo migracijos 142.
 
-Pirmiau aprašyta apatinė versijos riba lygina `version`, o ne kurią nors datą.
+Aukščiau pateiktoje versijos aukšte lyginama `version`, o ne data.
 
-Lieka dvi spragos, abi sąmoningos: valdymo skydelyje vis dar rodoma tik
-`Paskutinį kartą gauta`, todėl norint ten pateikti sudarymo datą reikia naujos etiketės
-(ir jos 41 lokalės įrašo); be to, pasiūlymų ir žvalgybos talpyklose sudarymo data visai
-nesaugoma, nors jų kanalų schemose ji yra — todėl `GET
-/api/radar/status` šiems dviem lauką praleidžia, užuot pateikęs `null`, kuris būtų
-suprantamas kaip „nežinoma“.
+Liko dvi spragos, abi apgalvotos: prietaisų skydelyje vis dar rodoma tik `Last fetched`, todėl norint nuskaityti sukūrimo datą, reikia naujos etiketės (ir jos 41 lokalės įrašo); o pasiūlymuose ir „Intel“ talpyklose iš viso nėra sukūrimo datos, nors jų sklaidos kanalo schemose yra vienas — `GET /api/radar/status` todėl praleidžiamas šių dviejų laukelis, o ne pranešama apie `null`, kuris būtų skaitomas kaip „nežinomas“.
 
-### Schemos validavimas
+### Schemos patvirtinimas
 
-Atsisiųsti baitai analizuojami ir tikrinami pagal `RadarFeedSchema`
-(`src/lib/radar/feedSchema.ts`, Zod schema) **po** parašo patikros. Jei schema
-neatitinka, grąžinama `{ status: "invalid_schema" }`, o talpykla lieka nepakeista.
-Talpykloje laikoma naudingoji apkrova prevenciškai tikrinama dar kartą kiekvieno
-nuskaitymo metu (`getRadarCatalog()`) — jei talpyklos įrašas sugadintas arba redaguotas
-rankiniu būdu, naudojami baziniai duomenys, užuot pateikus tokį įrašą.
+Atsisiųsti baitai išanalizuojami ir patvirtinami pagal `RadarFeedSchema` (`src/lib/radar/feedSchema.ts`, Zod schema)** po to** parašo patikrinimas. Schemos neatitikimas grąžina `{ status: "invalid_schema" }`, o talpykla lieka nepaliesta. Talpykloje saugoma naudingoji apkrova gynybiniu būdu iš naujo patvirtinama kiekvieną kartą nuskaitant (`getRadarCatalog()`) — sugadinta arba ranka redaguota talpyklos eilutė grįžta į pradinę, o ne aptarnaujama.
 
-### Atsakymo dydžio riba (10 MB)
+### Atsako dydžio riba (10 MB)
 
-`syncRadar()` taiko **griežtą 10 MB ribą** kanalo atsakymo turiniui — pasirašytas
-kanalas yra KB dydžio JSON dokumentas, todėl didesnis turinys rodo netinkamai
-sukonfigūruotą arba kenkėjišką `RADAR_FEED_URL` (arba beverčius duomenis teikiantį
-tarpinį šaltinį), o ne teisėtą katalogą. Riba taikoma dviem lygmenimis:
+`syncRadar()` vykdo a** 10 MB kietas dangtelis** informacijos santraukos atsako tekste — pasirašytas sklaidos kanalas yra KB masto JSON dokumentas, todėl viskas, kas yra anksčiau, rodo netinkamai sukonfigūruotą arba priešišką `RADAR_FEED_URL` (arba prieš srovę teikiamą šiukšlę), o ne teisėtą katalogą. Vykdymas yra dviejų sluoksnių:
 
-1. Išankstinė `Content-Length` patikra visiškai praleidžia turinio nuskaitymą, kai
-   antraštėje iš karto nurodoma ribą viršijanti reikšmė.
-2. Nuskaitant turinį atliekama einamosios bendros sumos patikra užtikrina ribos
-   laikymąsi net tada, kai `Content-Length` nėra arba joje nurodytas mažesnis nei
-   tikrasis dydis — vien antrašte niekada nepasitikima. Sukauptų fragmentų sujungimas
-   išsaugo tikslius baitus, reikalingus vėlesnei Ed25519 parašo patikrai.
+1. `Content-Length` patikrinimas prieš skrydį praleidžia visą tekstą, kai antraštė jau deklaruoja vertę virš ribos.
+2. Vykdomas sumos patikrinimas nuskaitant turinį, net kai `Content-Length` nėra arba jis pervertinamas realaus dydžio — antrašte niekada nepasitikima. Sujungus sukauptus gabalus, išsaugomi tikslūs baitai, reikalingi Ed25519 parašo patikrinimui vėliau.
 
-Viršijus ribą grąžinama `{ status: "too_large" }`, o talpykla lieka nepakeista,
-laikantis tokio paties neardomojo principo kaip ir visų kitų sinchronizavimo klaidų
-atvejais (`invalid_signature`, `invalid_schema`, `stale`).
+Viršijus ribą, grąžinama `{ status: "too_large" }`, o talpykla lieka nepaliesta, vadovaujantis tuo pačiu neardomuoju modeliu, kaip ir bet kuri kita sinchronizavimo klaida (`invalid_signature`, `invalid_schema`, `stale`).
 
 ---
 
@@ -430,84 +366,45 @@ version, tier }` — būtent šią reikšmę rodo valdymo skydelis, o ne neapdor
 
 ---
 
-## Nuskaitymo metu taikomos perdengimo suliejimo taisyklės
+## Skaitymo laiko perdangos sujungimo taisyklės
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) **ant** statinio bazinio rinkinio uždeda
-podėlyje esantį srautą **nuskaitymo metu**, funkcijoje `getRadarCatalog()`. Bazinis masyvas
-(`FREE_MODEL_BUDGETS`) niekada nekeičiamas — kiekvieno iškvietimo metu iš naujo apskaičiuojamas
-`MergedEntry[]`.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) sujungia talpykloje saugomą tiekimą** baigta** statinė bazinė linija ties** skaitymo laikas** , viduje `getRadarCatalog()`. Bazinis masyvas (`FREE_MODEL_BUDGETS`) niekada nėra mutuojamas — a `MergedEntry[]` skaičiuojamas iš naujo kiekvieno skambučio metu.
 
-Keturios taisyklės pirmumo tvarka:
+Keturios taisyklės, išdėstytos pirmumo tvarka:
 
-1. **Srautas niekada neperrašo vietinio pakeitimo.** Kiekvienam laukui atskirai: jei operatorius
-   pritaikė įrašo lauką (`localOverrides` atvaizdyje, kurio raktas yra `provider:modelId`),
-   konkretaus lauko reikšmė iš srauto praleidžiama — pirmenybė teikiama operatoriaus reikšmei.
-2. **`enabled: false` išjungia įrašą ir išsaugo kilmę.** Kai srauto įrašas išjungia
-   įrašą, sulietame rezultate nustatoma `enabled: false` ir `disabledBy: "radar"`,
-   kad naudotojo sąsaja galėtų paaiškinti, _kodėl_ įrašas iš pasiekiamo tapo išjungtas.
-3. **Naudotojo pridėtas įrašas, kurio nėra sraute, išlieka nepakeistas.** Įrašai, kurie
-   egzistuoja tik baziniame rinkinyje (arba buvo pridėti vietoje) ir neturi atitinkamo srauto
-   įrašo, perduodami nepakeisti.
-4. **Pažymėtas kaip pašalintas įrašas niekada neatkuriamas.** Jei operatorius aiškiai pašalino
-   įrašą (`tombstones` rinkinyje), vėlesnėje versijoje srautui iš naujo pridėjus tą
-   `provider:modelId`, įrašas negrąžinamas.
+1. **Sklaidos kanalas niekada neperrašo vietinio nepaisymo.** Kiekvienam laukui: jei operatorius pritaikė lauką įraše (`localOverrides` žemėlapis, raktas `provider:modelId`), to konkretaus lauko sklaidos kanalo reikšmė praleidžiama — laimi operatoriaus reikšmė.
+2. **`enabled: false` išjungia įvestį su kilme.** Sklaidos kanalo įrašas, išjungiantis įrašą, nustato `enabled: false` ir `disabledBy: "radar"` sujungtame rezultate, todėl UI gali paaiškinti, _kodėl_ įrašas tapo prieinamas į išjungtą.
+3. **Naudotojo pridėtas įrašas, kurio nėra sklaidos kanale, išlieka nepaliestas.** Įrašai, kurie egzistuoja tik bazinėje linijoje (arba buvo įtraukti vietoje) ir neturi atitinkamo sklaidos kanalo įrašo, praeina nepakitę.
+4. **Antkapinis įrašas niekada neprikeliamas.** Jei operatorius aiškiai ištrynė įrašą (`tombstones` set ), sklaidos kanalas vėl pridedant tą `provider:modelId` vėlesnėje versijoje jo nesugrąžina.
 
-Redaguojami laukai ir pašalinimo žymės saugomi
-`radar_local_model_state` (migracija `153_radar_local_model_state.sql`). Viešoji DB
-sąsaja (`src/lib/db/radar.ts`) konvertuoja šias eilutes į `localOverrides` atvaizdį ir
-`tombstones` rinkinį, naudojamus `applyFeed()`; gamybinė `getRadarCatalog()` įkelia šią būseną
-po to, kai sėkmingai pereinamos požymio, podėlio ir schemos patikros. Operatorius gali redaguoti
-tik `displayName` ir `enabled`. Teikėjo ar modelio tapatybė, srauto kilmė, kvota, galimybės,
-paslaugų teikimo sąlygos ir sąrankos duomenys negali būti keičiami per šią sąsają.
+Redaguojami laukai ir antkapiai išlieka `radar_local_model_state` (migracijos `153_radar_local_model_state.sql`). Viešasis DB adapteris (`src/lib/db/radar.ts`) konvertuoja tas eilutes į `localOverrides` žemėlapį ir `tombstones` rinkinį, kurį naudoja `applyFeed()`; gamybos `getRadarCatalog()` įkelia, kad būsena po to, kai vėliavėlė, talpykla ir schemos vartai praeina. Tik `displayName` ir `enabled` gali redaguoti operatorius. Provider/model tapatybės, pašarų kilmės, kvotos, galimybių, ToS ir sąrankos duomenų negalima įrašyti per šį paviršių.
 
-Valdymo skydelyje pateikiami keturi vietiniai veiksmai:
+Prietaisų skydelyje rodomi keturi vietiniai veiksmai:
 
-- **Redaguoti** pakeičia vietinį rodomą pavadinimą ir įjungimo būseną.
-- **Atkurti vietinius pakeitimus** išvalo abu redaguojamus laukus, nepakeisdamas pašalinimo žymės.
-- **Slėpti** sukuria pašalinimo žymę, todėl vėlesni srauto naujiniai negali iš naujo sukurti eilutės.
-- **Atkurti** pašalina pašalinimo žymę; bet koks atskirai išsaugotas pakeitimas lieka galioti.
+- **Redaguoti** pakeičia vietinį rodomą pavadinimą ir įjungtą būseną.
+- **Iš naujo nustatyti vietinius pakeitimus** išvalo abu redaguojamus laukus nekeičiant antkapio.
+- **Slėpti** sukuria antkapinį paminklą, todėl vėlesni informacijos santraukos atnaujinimai negali atkurti eilutės.
+- **Atkurti** nuima antkapinį paminklą; bet koks atskirai išsaugotas nepaisymas lieka galioti.
 
-Srauto `enabled: false` išlieka saugos išimtimi: jam teikiama pirmenybė prieš pasenusį vietinį
-`enabled: true`, sulietas įrašas lieka išjungtas ir įrašoma `disabledBy: "radar"`.
+Sklaidos kanalas `enabled: false` išlieka saugos išimtimi: jis laimi pasenusį vietinį `enabled: true`, sulietą įrašą palieka išjungtą ir įrašo `disabledBy: "radar"`.
 
-Katalogo publikacijose naudojama `schemaVersion: 2`. `contextWindow` ir kiekvienas iš `tools`, `vision` bei
-`thinking` atskirai yra `number | null` / `boolean | null`: `null` reiškia, kad reikšmė nežinoma, o
-`false` reiškia, kad D16 patvirtintas oficialus teikėjo šaltinis aiškiai nurodo, jog galimybės nėra.
-Vidiniai OmniRoute registro ar modelio specifikacijos požymiai niekada tiesiogiai nepaverčiami srauto faktais. Klientas
-vis dar priima v1 momentines kopijas; kadangi senoji kūrimo priemonė naudojo `false` kaip nebuvimo vietaženklį, v1 `false`
-normalizuojama į nežinomą reikšmę, o v1 `true` išlieka faktine reikšme. Nežinomos schemos versijos saugiai atmetamos, o
-paskutinis galiojantis podėlis lieka pasiekiamas. Kiekvienas v2 modelis, turintis ne `null` kontekstą ar galimybę, privalo turėti
-prisijungimo duomenų nereikalaujantį HTTPS `metadataEvidenceUrls[]`; priešingu atveju schemos tikrinimas nepavyksta ir podėlis
-nepakeičiamas. Katalogo lentelėje visos trys būsenos vaizduojamos kaip `✓`, `✕` ir `?`.
+Katalogo leidiniuose naudojama `schemaVersion: 2`. `contextWindow` ir kiekvienas iš `tools`, `vision` ir `thinking` yra nepriklausomai `number | null` / `boolean | null`: `null` reiškia nežinomą, o `false` reiškia D16-confirmed oficialų teikėjo šaltinį, kuriame aiškiai nurodyta, kad galimybės nėra. Vidinės OmniRoute registry/model-spec vėliavėlės niekada nėra tiesiogiai reklamuojamos siekiant pateikti faktus. Klientas vis tiek priima v1 momentines nuotraukas; kadangi senasis kūrėjas naudojo `false` kaip nebuvimo vietos rezervavimo ženklą, v1 `false` normalizuojamas iki nežinomo, o v1 `true` lieka faktinis. Nežinomos schemos versijos nepavyksta uždaryti, o paskutinė galiojanti talpykla lieka pasiekiama. Kiekvienas v2 modelis su nenuline context/capability turi turėti be kredencialų HTTPS `metadataEvidenceUrls[]`; kitu atveju nepavyksta patvirtinti schemos ir talpykla nepakeičiama. Katalogo lentelėje visos trys būsenos pateikiamos kaip `✓`, `✕` ir `?`.
 
-### Valdomi deriniai ir MCP prieiga
+### Vadovaujami deriniai ir MCP prieiga
 
-Patvirtintos `familyId` reikšmės išlieka po nuskaitymo metu taikomo perdengimo ir naudojamos grynajame
-`buildRadarComboSuggestions()` modulyje (`src/lib/radar/comboSuggestions.ts`). Šeima siūloma
-tik tada, kai bent du skirtingi teikėjai turi aktyvius ryšius ir pateikia tikslų kuruojamą modelio
-ID. Išjungti modeliai, neaktyvūs teikėjai, trūkstami modelių ID, vieno elemento šeimos ir dviprasmiški
-pseudonimų ar prefiksų atitikmenys saugiai atmetami. Pasiūlymuose naudojama esama `priority` strategija, pirmiausia
-rikiuojant didžiausią pasikartojantį mėnesio biudžetą; naudotojo sąsaja juos kuria tik per `POST /api/combos`.
+Patvirtintos `familyId` reikšmės išlaiko skaitymo laiko perdangą ir valdo gryną `buildRadarComboSuggestions()` modulį (`src/lib/radar/comboSuggestions.ts`). Šeima siūloma tik tada, kai bent du skirtingi paslaugų teikėjai turi aktyvius ryšius ir pateikia tikslų kuruojamą modelį ID. Išjungti modeliai, neaktyvūs teikėjai, trūkstamo modelio IDs, pavienių šeimų ir dviprasmiškų alias/prefix atitikčių nepavyksta uždaryti. Pasiūlymuose naudojama esama `priority` strategija, pirmiausia užsakant didžiausią pasikartojantį mėnesio biudžetą; UI juos sukuria tik per `POST /api/combos`.
 
-Valdomoji naudotojo sąsaja pasiekiama adresu `/dashboard/radar/combos`. Ji skaito tik vietinius
-`GET /api/radar/catalog` ir `GET /api/combos/builder/options` galinius taškus. Ji niekada neinicijuoja Radar sinchronizavimo,
-neskaito teikėjo prisijungimo duomenų ir nerašo tiesiogiai į kombinacijų duomenų bazę.
+Vadovaujamas UI gyvena `/dashboard/radar/combos`. Jis skaito tik vietinius `GET /api/radar/catalog` ir `GET /api/combos/builder/options` galutinius taškus. Jis niekada nesuaktyvina radaro sinchronizavimo, neskaito teikėjo kredencialų arba nerašo tiesiai į kombinuotą duomenų bazę.
 
-MCP klientai gali skaityti tą pačią vietinę projekciją naudodami `omniroute_radar_catalog` (`read:radar`). Pasirenkami
-`provider`, `familyId` ir `enabledOnly` filtrai įvertinami po vieno vietinio
-`GET /api/radar/catalog` nuskaitymo. Jo uždaras išvesties formatas apima katalogo metaduomenis, teikėją / modelį,
-rodomą pavadinimą, `familyId`, kvotą, galimybes, įjungimo būseną, kilmę ir `disabledBy`; sąrankos URL,
-veiksmai, ryšiai, el. pašto adresai, raktai ir nukreipimo duomenys niekada negrąžinami. Šis įrankis skirtas
-tik skaityti ir niekada neiškviečia `/api/radar/sync`.
+MCP klientai gali skaityti tą pačią vietinę projekciją naudodami `omniroute_radar_catalog` (`read:radar`). Pasirenkami `provider`, `familyId` ir `enabledOnly` filtrai įvertinami po vieno vietinio `GET /api/radar/catalog` nuskaitymo. Jo uždaroje išvestyje yra katalogo metaduomenys ir provider/model, rodomas pavadinimas, `familyId`, kvota, galimybės, įjungta būsena, kilmė ir `disabledBy`; setup URLs, veiksmai, ryšiai, el. pašto adresai, raktai ir persiuntimo duomenys niekada negrąžinami. Šis įrankis yra tik skaitomas ir niekada neiškviečia `/api/radar/sync`. Kai talpykloje esantis sklaidos kanalas yra ankstesnis nei įdiegtas katalogas, `meta.olderThanRelease` yra `true` ir įrankis grąžina modelius iš įdiegto katalogo su vietiniais nepaisymais ir pritaikytais antkapiais.
 
-### Kilmės žymekliai
+### Kilmės žymenys
 
-Kiekvienas sujungtas įrašas turi `origin` lauką, kurį naudotojo sąsaja rodo kaip ženklelį:
+Kiekviename sujungtame įraše yra `origin` laukas, kurį UI pateikia kaip ženklelį:
 
-- `"baseline"` — nepakeistas statinio leidimo katalogo įrašas.
-- `"radar"` — vienas ar keli laukai buvo atnaujinti iš duomenų kanalo.
-- `"local"` — operatorius šiam įrašui turi bent vieną vietinį perrašymą (vietiniai
-  perrašymai pagal 1 taisyklę visada turi pirmenybę prieš duomenų kanalą, nepaisant to, ką nurodo duomenų kanalas).
+- `"baseline"` — nepaliestas iš statinio leidimų katalogo.
+- `"radar"` — sklaidos kanalas atnaujino vieną ar daugiau laukų.
+- `"local"` — operatorius turi bent vieną vietinį šio įrašo nepaisymą (vietiniai nepaisymai visada laimi sklaidos kanalą pagal 1 taisyklę, neatsižvelgiant į tai, kas sakoma sklaidos kanale).
 
 ---
 

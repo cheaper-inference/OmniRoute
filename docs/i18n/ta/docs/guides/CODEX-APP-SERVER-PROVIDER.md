@@ -18,27 +18,24 @@ app-server URL-இல் அணுகக்கூடிய Codex CLI** அதற
 
 ---
 
-## 1. கட்டமைப்பு
+## 1. கட்டிடக்கலை
 
 ```
-┌─ OmniRoute செயலி ───────────────┐        ┌─ codex-app-server sidecar ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ திறன் டோக்கன்)               │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuth-ஐத் தானே நிர்வகிக்கிறது │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, தானியக்கப் புதுப்பிப்பு) │
-        │ பகிர்கிறது (compose volumes)       └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS திறன் டோக்கன் (இரண்டும் இதை mount செய்கின்றன)
-  codex-appserver-home    → ~/.codex (dashboard எழுதும் auth.json,
-                             sidecar-இன் codex app-server படிக்கும்)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- திறன் டோக்கனுக்குப் பின்னால் உள்ளக compose பிணையத்தில்
-  (`ws://codex-app-server:1456`) **மட்டுமே** sidecar செவிமடுக்கிறது. இது host
-  அல்லது இணையத்தில் **ஒருபோதும்** வெளியிடப்படுவதில்லை.
-- Codex CLI, `omniroute:base`-இல் முன்பே சேர்க்கப்பட்டுள்ளது; எனவே sidecar-ஐ
-  இயக்கும்போது host அல்லது பயனரின் கணினியில் codex-ஐ நிறுவ வேண்டியதில்லை.
+- பக்கத்துக்காரன் கேட்கிறான்** மட்டுமே** இன்டர்னல் கம்போஸ் நெட்வொர்க்கில் (`ws://codex-app-server:1456`) திறன் டோக்கனுக்குப் பின்னால். அது** ஒருபோதும்** ஹோஸ்ட் அல்லது இணையத்தில் வெளியிடப்பட்டது.
+- சைட்கார் `omniroute:cli-no-docker` ஐப் பயன்படுத்துகிறது, `runner-cli-no-docker` இலக்கிலிருந்து கட்டப்பட்டது, இதில் Codex CLI.
 
 ## 2. அதை இயக்குதல்
 

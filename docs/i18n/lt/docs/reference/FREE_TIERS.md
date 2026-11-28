@@ -4,10 +4,9 @@
 
 ---
 
-> **Naudotojams**: ieškote paprasto vadovo? Žr. [Nemokamų lygių vadovą](../getting-started/FREE-TIERS-GUIDE.md), kuriame pateiktos nuoseklios instrukcijos, kaip nemokamai naudotis DI.
+> **Vartotojams** : Ieškote paprasto vadovo? Išsamias instrukcijas, kaip gauti nemokamą AI rasite [nemokamų lygių vadove](../getting-started/FREE-TIERS-GUIDE.md).
 
-> **Paskutinį kartą tirta:** 2026-06-17 — kiekvieno teikėjo tyrimas internete (oficiali dokumentacija + pastarųjų 7 dienų naujienos, 50 agentų patikra su oponentiniu verifikavimu), atnaujinant visas nemokamų lygių kvotas ir paslaugų teikimo sąlygas. **Dalinis pakartotinis auditas 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — žr. toliau pateiktą pastabą su data).
-> **Patikimas šaltinis (katalogas):** `open-sse/config/freeModelCatalog.ts` (kiekvieno MODELIO biudžetai, bendri fondai nedubliuojami). Toliau pateikti žetonų biudžeto skaičiai gauti atliekant tiesioginį tyrimą internete ir yra **apytiksliai** — žr. [Metodika ir išlygos](#methodology--caveats).
+> **Paskutinį kartą tikrinta:** 2026-11-23. Tą dieną kiekviena eilutė su kvota, kiekvienas nebenaudojamas pasiūlymas ir kiekvienas kortelių užraktas buvo iš naujo atidarytas paties teikėjo puslapyje (`config/quality/free-catalog-evidence.json`). Ankstesni leidimai: 2026-06-17 vienam teikėjui atliktas tyrimas ir 2026-09-02 dalinis pakartotinis auditas.** Tiesos šaltinis (katalogas):** `open-sse/config/freeModelCatalog.ts` (biudžetai pagal MODELIUS, atšaukti iš fondo). Toliau pateikti žetonų biudžeto skaičiai gauti iš tiesioginių žiniatinklio tyrimų ir yra** aproksimacija** — žr. [metodiką ir įspėjimus](#methodology--caveats).
 
 ## TL;DR — kiek laisvos išvados iš tikrųjų surenka OmniRoute ?
 
@@ -17,47 +16,136 @@
 
 | Metrika                                                 | Žetonai / mėn  | Reikšmė                                                                                                                                                                                                                                                                            |
 | ------------------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dokumentuota pasikartojanti dotacija (nuolatinė)**    | **~ 1.62B**    | Laisva pakopa** baseinai** (kiekvieno modelio katalogas), skaičiuojamas kiekvienas bendras baseinas** vieną kartą** . Tiesioginis `/api/free-tier/summary` šaltinis ir prietaisų skydelio nemokamas biudžeto puslapis.** Naudokite šį numerį.**                                    |
-| **+ pirmasis mėnuo su registracijos kreditais**         | **~ 2.22B**    | Nuolatiniai + vienkartiniai prisiregistravimo kreditai (Z.AI 20M, DeepSeek 5M, …), nurašomi vienai paskyrai.** Tik pirmas menesis** — nepasikartoja.                                                                                                                               |
+| **Dokumentuota pasikartojanti dotacija (nuolatinė)**    | **~ 90M**      | Laisva pakopa** baseinai** (kiekvieno modelio katalogas), skaičiuojamas kiekvienas bendras baseinas** vieną kartą** . Tiesioginis `/api/free-tier/summary` šaltinis ir prietaisų skydelio nemokamas biudžeto puslapis.** Naudokite šį numerį.**                                    |
+| **+ pirmasis mėnuo su registracijos kreditais**         | **~ 153M**     | Nuolatiniai + vienkartiniai prisiregistravimo kreditai (Z.AI 20M, DeepSeek 5M, …), nurašomi vienai paskyrai.** Tik pirmas menesis** — nepasikartoja.                                                                                                                               |
 | **+ visam laikui nemokama, nepaskelbta viršutinė riba** | _neįvertinama_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — tikra pasikartojanti prieiga, rate/concurrency-limited,** nėra žetonų dangtelio skaičiuoti** . Sąrašas, niekada nesumuojamas (suskaičiavus juos `RPM×24/7` tai infliacija, kurią atmetame). |
 | **+ depozito atrakinimo padidinimas**                   | **+~ 24M**     | Vienkartinis** 10 USD** OpenRouter papildymas padidina laisvą baseiną nuo 50 → 1000 req/day. Pranešama atskirai, todėl niekada nepadidėja pastovus skaičius.                                                                                                                       |
 | **+ už regioninės tapatybės patikrinimo**               | **+~ 6M**      | `modelscope` (Alibaba Debesis privalomas + žemyninė Kinija tikrojo vardo patvirtinimas). Tikra pasikartojanti kvota, rodoma kaip `gatedRecurringTokens` / `gatedProviders` ir prietaisų skydelyje. Niekada neįtraukta į antraštę: +~ 6M už regioninės tapatybės patvirtinimo.      |
-| Teorinės ribos (visos normos ribos, 24/7)               | ~ 10B          | Kiekvieno teikėjo tarifo limito suma, ekstrapoliuota į nepertraukiamą naudojimą.** Ne garantija** — nerašykite antraštės.                                                                                                                                                          |
 
-**Nuoširdi antraštė:** _OmniRoute agregatai**~ 1.62B dokumentuoti nemokami žetonai per mėnesį** (iki ~ 2,22B per pirmąjį mėnesį su prisiregistravimo kreditais) 26 laisvos pakopos telkiniuose — plius ilga visam laikui nemokamų, be ribos teikėjų — ir RTK + Caveman suspaudimo uodega (sutaupoma 15–95 % žetonų).
+**Nuoširdi antraštė:** _OmniRoute katalogai**~ 90M nemokami žetonai** mėnuo, kurį iš tikrųjų galite naudoti (iki 153 mln ~ per pirmąjį mėnesį su prisiregistravimo kreditais), iš 12 telkinių su paskelbta kvota ir ilga nuolatinių nemokamų paslaugų teikėjų uodega. RTK + urvinio žmogaus suspaudimas (15–95 % sutaupyta žetonų) tai dar labiau išplečia.
 
-> **Kodėl tai sumažėjo nuo ankstesnio ~ 1.94B.** 2026-06-17 atnaujinimas yra sąžiningas pataisymas, o ne nuostolis: `gemini` dabar pašalintas iš baseino (buvo padidintas skaičiuojant kiekvieną Flash variantą atskirai, 462M → 60M), `cloudflare-ai` pataisytas į tikrąjį 10k-Neurons/day (122M → 30M), `doubao` ir pakartotinis registravimas pašalintos išjungimo pakopos (`chutes`/`phind`/`kluster` nutraukta). Iš dalies kompensuoja `llm7` (teisingas 5M/day → 150M) ir nauji nemokami tiekėjai (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Istorijos užrašai. Žemiau pateikti skaičiai apibūdina to meto katalogą; tai ne šiandieniniai skaičiai._
 >
-> **Toliau pataisyta į ~ 1.37B v3.8.42:** Pasibaigus nemokamai peržiūrai, `longcat` buvo perklasifikuotas iš 150M/mo pasikartojančios dotacijos į vienkartinį 10 mln. registracijos kreditą. Ta pati sąžiningumo taisyklė — nė vienas teikėjas nebuvo pašalintas per klaidą.
+> **Kodėl tai sumažėjo nuo ankstesnio 1,94 mlrd.** 2026-06-17 atnaujinimas yra sąžiningas pataisymas, o ne nuostolis: `gemini` dabar pašalinta iš baseino (buvo padidinta skaičiuojant kiekvieną Flash variantą atskirai, 462M → 60M), `cloudflare-ai` pataisyta į tikrąjį 10k-Neurons/day (122M → 30M), `doubao` pakartotinai prisiregistravo, aqf ir pakartotinė registracija pašalintos išjungimo pakopos (`chutes`/`phind`/`kluster` nutraukta). Iš dalies kompensuoja `llm7` (teisingas 5M/day → 150M) ir nauji nemokami tiekėjai (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Atnaujinta 2026-08-26, pasitraukus iš „Felo Web“:** „Felo Web“ neįtraukiamas, o jo GPL išvestas provenance/licensing lieka HOLD; šaltinis tuo metu pranešė apie 38 baseino raktus. Grupės skaičius yra aktyvus ir ribojamas su CI (`check:docs-counts` nepavyksta sukurti, jei aukščiau esantys skaičiai nukrypsta nuo `computeFreeModelTotals()`).
+> **Toliau pataisyta iki 1,37 mlrd. 3.8.42 versijoje:** Pasibaigus nemokamam peržiūrai, `longcat` buvo perklasifikuotas iš 150M/mo pasikartojančios dotacijos į vienkartinį 10 mln. registracijos kreditą. Ta pati sąžiningumo taisyklė — nė vienas teikėjas nebuvo pašalintas per klaidą.
 >
-> **Pakartotinai patikrinta 2026-09-02 pagal pačių teikėjų puslapius** (šaltiniai: `// evidence:` komentarai prie kiekvieno pakartotinai patikrinto `open-sse/config/freeModelCatalog.data.ts` įrašo): `gemini` ir `ollama-cloud` nebeskelbia atpažinimo simbolio (2025-12-23 Google pašalino nemokamą kiekvieno modelio lentelę; Ollama nemokamas planas yra "pradžios naudojimo kreditai") ir dabar yra išvardyti kaip** neuždengtas** , niekada nesumuojama (− 80M); `groq` yra penki** pagal modelį** 200K-TPD dangteliai (kiekvienas po 6 mln., + 15 mln.), kurių trys nebeliko IDs ; `nara` yra vienas 7M/day kibiras (+ 60M, 210M). `mistral` 1B matomas tik paskyros konsolėje. — žr. _Įrodymų klasės_ skiltyje Metodika.
+> **Atnaujinta 2026-08-26, pasitraukus iš „Felo Web“:** „Felo Web“ neįtraukiamas, o jo GPL išvestas provenance/licensing lieka HOLD; šaltinis tuo metu pranešė apie 38 baseino raktus.
+>
+> **Pakartotinai patikrinta 2026-09-02 pagal pačių teikėjų puslapius** (šaltiniai: `// evidence:` komentarai prie kiekvieno pakartotinai patikrinto `open-sse/config/freeModelCatalog.data.ts` įrašo): `gemini` ir `ollama-cloud` nebeskelbia atpažinimo simbolio (2025-12-23 Google pašalino nemokamą kiekvieno modelio lentelę; Ollama nemokamas planas yra "pradžios naudojimo kreditai") ir dabar yra išvardyti kaip** neuždengtas** , niekada nesumuojama (− 80M); `groq` yra penki** pagal modelį** 200K-TPD dangteliai (kiekvienas po 6 mln., + 15 mln.), kurių trys nebeliko IDs ; `nara` yra vienas 7M/day kibiras (+ 60M, 210M). `mistral` 1B matomas tik paskyros konsolėje. — žr. _Įrodymų klases_ dalyje Metodika.
 >
 > **Atnaujinta 2026-11-09 (#19334):** `ollama-cloud` buvo pašalintas iš nemokamo katalogo po to, kai Ollama nutraukė savo nemokamą pakopą ir visus debesų modelius perkėlė į mokėjimą, kaip eiti.
 >
 > **Taisyta 2026-09-03 (#11773):** `cerebras` buvo perklasifikuotas iš 30M/mo pasikartojančios dotacijos (senas be kortelės 1M tokens/day bandomasis laikotarpis) į vienkartinį 5 USD registracijos kreditą, kuriam reikalingas mokėjimo būdas. Ta pati sąžiningumo taisyklė kaip ir LongCat.
 >
-> **Plus xKiro (2026-09-03):** naujasis `xkiro-free` baseinas (150M/mo) prideda 35-ąjį pasikartojantį telkinio raktą. Felo Web lieka neįtrauktas, o jo GPL gautas provenance/licensing lieka HOLD. Dabar praneša šaltinis** 26 pasikartojantys baseino raktai** ir**~ 1.62B pastovus** — tiesioginis, CI uždaromas numeris (`check:docs-counts` nepavyksta sukurti, jei jis nukrypsta nuo `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** naujasis `xkiro-free` baseinas (150M/mo) prideda 35-ąjį pasikartojantį telkinio raktą. Felo Web lieka neįtrauktas, o jo GPL gautas provenance/licensing lieka HOLD. Tuo metu šaltinis pranešė apie 34 fondo raktus ir 1,62 milijardo žetonų per mėnesį (nuolatinis).
 
-Didžiausias** dokumentuota** Pagalbininkai: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (penki kiekvieno modelio dangteliai), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` neįtrauktas — jo 10 mln. LongCat-2.0 dotacija yra vienkartinis registracijos kreditas su KYC, o ne pasikartojantis mėnesio biudžetas.)
+Didžiausias** dokumentuota** prisideda prie tikrosios šiandienos figūros: `groq` 24M (4 kiekvieno modelio dangteliai), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` neįtraukiama — jo 10 mln. LongCat-2.0 dotacija yra vienkartinis registracijos kreditas su KYC, o ne pasikartojantis mėnesio biudžetas.)
 
-> ⚠️ Teorines ribas (~ 10B) padidina tik tarifo ribą turintys paslaugų teikėjai su** nėra paskelbto žetonų dangtelio** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`), kurių skaičiai būtų `RPM/TPM × 24/7 × 30d` — teorinis maksimumas, kurio nepalaikys jokia sąskaita. Jie yra** neįtraukti** iš apgintino skaičiaus (rodomas eilutėje „nuolat laisva, be ribos“). Tai ta pati infliacija, dėl kurios konkurentų kelių milijardų pretenzijos tampa nepatikimos.
+## Pataisa, 2026 m. lapkričio mėn
+
+Iki šio išleidimo šiame puslapyje ir README buvo nurodyta 1,62 milijardo nemokamų žetonų per mėnesį. Tai buvo neteisinga. Keturiuose telkiniuose buvo 93% jo, o visi keturi buvo pakeisti pas tiekėją, o mūsų katalogas liko toks pat. Tikrasis skaičius šiandien yra ~ 90M nemokamų žetonų per mėnesį. Lentelėje pateikiama tai, kas pasikeitė pas kiekvieną teikėją, šalia to, ką suklydome.
+
+| Kas pasikeitė pas teikėją (data, šaltinis)                                                                                             | Ką mes suklydome (kas, nuo kada)                                                                              |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Mistral: nemokamas režimas nebeturi API prieigos (docs.mistral.ai, skaitykite 2026-11-18)                                              | Nuo 2026-09-02 konsolės rodmenų nuolat skaičiuodavome 1 milijardą žetonų per mėnesį ir daugiau to netikrinome |
+| Nara: nemokamame plane nėra modelių (tiekėjo `router.bynara.id/api/plans`, skaitykite 2026-11-18)                                      | Per mėnesį suskaičiavome 210 milijonų žetonų                                                                  |
+| xKiro: 500 000 žetonų per dieną vienai paskyrai (xkiro.com, skaitykite 2026-11-18)                                                     | Kataloge liko 30 nebeegzistuojančių IDs modelių                                                               |
+| LLM7: apribojimų puslapio nebėra ir jokiame oficialiame puslapyje neskelbiama nemokama kvota (2026-11-23)                              | Mes suskaičiavome 150 milijonų žetonų per mėnesį be datuotų įrodymų                                           |
+| Groq: vienas modelis iš nemokamo baseino buvo pašalintas (2026-09-14)                                                                  | Baseinas išlaikė seną dydį                                                                                    |
+| AgentRouter: teikėjas nurodo kasdienį 25 USD registravimosi kreditą ir 50 USD daugiau už kvietimų registraciją (skaitykite 2026-11-23) | Pateikėme 200 USD registracijos kreditą                                                                       |
+| Predibase: produktas baigėsi                                                                                                           | Vis dar skaičiavome jo registracijos kreditą pirmąjį mėnesį                                                   |
+| (nėra)                                                                                                                                 | Pasibaigus pasiūlymui, 16 teikėjų pasiliko nemokamo pasiūlymo vėliavėlę                                       |
+| (nėra)                                                                                                                                 | README pažadėjo pakartotinį auditą kas dvi savaites. Paskutinis prieš tai buvo 2026-09-02                     |
+| (nėra)                                                                                                                                 | Dokumentų patikrinimas leido nukrypti nuo 0,05 milijardo milijardų ir negalėjo nuskaityti skaičių milijonais  |
+
+Susumavus vieną kvotą eilutėje, išpūstas bet koks katalogas, įskaitant mūsų. Štai kodėl eilėmis sumuota figūra turi savo etiketę, o tikroji sėdi tiesiai po ja.
+
+## Kas skaičiuoja
+
+Į laisvus skaičius įskaičiuojama eilutė, kai visa tai galioja:
+
+- Kvota kartojama ir skelbiama paties teikėjo puslapyje, šalia katalogo eilutės pateikiami įrodymai su data.
+- Viena paskyra vienam teikėjui. Nieko, dėl ko reikia mokėjimo, kortelės, užstato ar tapatybės čekio (KYC). Kvota, kuriai norint prisiregistruoti reikia telefono numerio, Telegram arba Discord nurodoma atskirai, kaip „prisiregistravus socialiniuose tinkluose“, niekuomet realiai.
+- Nė vienas teikėjas nepažymėjo `tos: "avoid"`, o tik oficialus teikėjo API.
+- Vienkartiniai registracijos kreditai įskaičiuojami tik į pirmojo mėnesio skaičių ir tik tada, kai kortelės neprašoma. Vienkartinis indėlis, padidinantis kvotą, yra atskiras postūmis. Reklamos niekada neįskaičiuojamos realiai.
+- Paieškos, balso ir medijos paslaugų teikėjai neatsižvelgia į prieigos tipą ir kiekvieną simbolinį skaičių. Jie gauna savo skaičių savo vienetais (rezultatai, simboliai, vaizdai) šiame puslapyje, kai juos prideda perskaičiavimas; jie niekada nededami vienas prie kito arba nepaverčiami žetonais.
+
+Ką reiškia kiekvienas viešas skaičius:
+
+- **Teikėjai, turintys nemokamą prieigą** (50 šiandien: 43 su API raktu, 6 be rakto, 1 per įrankio paskyrą): teikėjai, turintys bent vieną katalogo eilutę, suteikiančią nemokamą prieigą pagal tai, kaip ją pasiekiate.
+- **Katalogo eilutės su nemokama prieiga** (šiandien 214): viena eilutė kiekvienam teikėjui ir modeliui.
+- **Baseinai su paskelbta kvota** (šiandien 12): bendros kvotos už realų skaičių, kiekviena skaičiuojama vieną kartą.
+- **Skirtingi nemokami modeliai** (šiandien 185): eilutės sugrupuotos pagal modelį ID.
+- **Pažymėtas nemokamu pasiūlymu** (šiandien 140 + ): kiekvienas paslaugų teikėjas, kurio registro įrašas turi `hasFree`, įskaitant paieškos, balso ir medijos teikėjus, bandomąsias versijas ir registracijos kreditus.
+
+Kiekvienas skaičius yra kataloguojamas, o ne tikrinamas vieno skambučio metu: nurodoma, kas nurodyta kataloge, o ne tai, kad kiekvienas maršrutas atsako dabar.
+
+## Kaip mes skaičiuojame
+
+Trys skaičiai yra iš to paties katalogo, patikrinto 2026-11-23:
+
+- **Tikras skaičius, ~ 90M nemokamų žetonų per mėnesį.** Kiekviena bendra kvota skaičiuojama vieną kartą, taigi penki modeliai už vienos dienpinigių yra viena pašalpa. Tai iš tikrųjų gali naudoti viena kiekvieno teikėjo paskyra. Turėdami vienkartinius registracijos kreditus, per pirmąjį mėnesį gaukite 153 mln. ~.
+- **Didelė figūra, ~ 11.3B, sumuojama eilutė po eilutės** , įtraukti pasibaigę pasiūlymai. Taip skaičiuojami kiti katalogai. Beveik visa tai yra istorija: 98,6% pasiūlymų, kurių nebėra. Spausdiname tik su etikete ir tikra figūra šalia.
+- **Tiesioginis katalogas, ~ 159M, sumuojamas vienoje tiesioginėje eilutėje** : ta pati eilutė po eilutės suma be pasibaigusių pasiūlymų.
+
+Eilutės po eilės metodas (`row-sum-v1`) vadovaujasi keturiomis taisyklėmis:
+
+1. Kiekviena išvardyta eilutė pridedama tokia, kokia yra, nesujungiant eilučių, kurios dalijasi vienu telkiniu.
+2. Pridedamos tik žetonuose paskelbtos kvotos. Užklausose, kredituose ar neuronuose paskelbta kvota skaičiuojama kaip nulis (`FREE_QUOTA_UNIT` `open-sse/config/freeModelCatalog.ts`).
+3. Registracijos kreditai, indėlių padidinimai ir išjungtos eilutės (`enabled: false`) neįtraukiamos.
+4. Didelė figūra prideda pasibaigusių pasiūlymų knygą (`open-sse/config/freeModelCatalog.retired.data.ts`) prie paskutinės kiekvienos nurodytos eilutės kvotos. Į ją patenka tik eilutės, kurios buvo pašalintos nuo `RETIRED_LEDGER_SINCE`, ir kiekviena eilutė iškrenta praėjus 12 mėnesių nuo jos pabaigos.
+
+Jei skaičiavimas iš eilės nustoja būti įprastas arba prižiūrėtojas taip nusprendžia, didelė figūra palieka kiekvieną puslapį ir lieka tik tikroji figūra.
+
+## Pašalinta / nėra laisvos pakopos
+
+Teikėjai, kurių nemokamas pasiūlymas baigėsi arba kurių nepavyko patvirtinti. Jie lieka registre su `hasFree: false` (arba išbraukiami iš nemokamo katalogo) ir niekada neįskaičiuojami į jokią nemokamą skaičių. Tai nėra teikėjų, pašalintų iš OmniRoute paprašius (`docs/reference/REMOVED_PROVIDERS.md`), sąrašas.
+
+| Teikėjas                 | Kadangi    | Kodėl                                                                                      | Šaltinis                                  |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| `mistral`                | 2026-11-23 | Nemokamas režimas nebeturi prieigos prie API                                               | docs.mistral.ai (naudojimo apribojimai)   |
+| `nara`                   | 2026-11-23 | Nemokamame plane nėra modelių                                                              | `router.bynara.id/api/plans`              |
+| `llm7`                   | 2026-11-23 | Nė vienas oficialus puslapis neskelbia nemokamos kvotos                                    | teikėjo svetainė                          |
+| `navy`                   | 2026-11-23 | Oficialiuose puslapiuose laisvos kvotos patvirtinti nepavyko                               | api.navy                                  |
+| `bluesminds`             | 2026-11-23 | Naudojimui reikalingas kreditas, pirktas iš teikėjo                                        | `api.bluesminds.com/api/status`           |
+| `arcee-ai`               | 2026-11-23 | Tik mokama kaina                                                                           | docs.arcee.ai (kainodara)                 |
+| `huggingface`            | 2026-11-23 | Nemokamose paskyrose reikia įsigyti kreditų arba atnaujinti į PRO                          | huggingface.co (išvadų teikėjų kainodara) |
+| `huggingchat`            | 2026-11-23 | Apkabinimas veidas daro išvadą, kad reikia įsigyti kreditų arba PRO                        | huggingface.co (išvadų teikėjų kainodara) |
+| `ainative`               | 2026-11-23 | „Hobbyist“ planas mokamas po 3 dienų bandomojo laikotarpio                                 | teikėjo kainodaros puslapis               |
+| `stepfun`                | 2026-11-23 | Tik mokėjimas už naudojimą                                                                 | teikėjo kainodaros puslapis               |
+| `predibase`              | 2026-11-23 | Produktas nutrauktas                                                                       | predibase.com                             |
+| `poolside`               | 2026-10-31 | Tiesioginė išvada išjungta                                                                 | platform.poolside.ai                      |
+| `amazon-q`               | 2026-05-15 | Nėra naujų nemokamos pakopos registracijų                                                  | teikėjo puslapis                          |
+| `chat-oripe`             | 2026-11-23 | API šeimininkas atsako HTTP 530                                                            | API šeimininkas                           |
+| `naga-ai`                | 2026-11-23 | Naga.ac teikėjo dublikatas                                                                 | api.naga.ac                               |
+| `dxnt`                   | 2026-11-23 | Registracijos premija yra, bet joks modelis jos nepriima                                   | dxnt.com                                  |
+| `ollama-cloud`           | 2026-11-09 | Debesų modeliai yra mokami už žetoną arba padengiami pagal mokamus planus                  | ollama.com (#19334)                       |
+| `chutes`                 | 2026-03    | Nemokama pakopa baigėsi                                                                    | teikėjo puslapis                          |
+| `phind`                  | 2026-01    | Įmonė uždaryta                                                                             | teikėjo puslapis                          |
+| `kluster`                | 2026-06-09 | Saulėlydis (perkeltas į MITO)                                                              | teikėjo puslapis                          |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo free atšauktas; Nemotron akcija baigėsi 2026-06 (pakartotinai patvirtinta 2026-06-18) | teikėjo puslapis                          |
+| `aimlapi`                | 2026-06-18 | Nemokama pakopa pristabdyta                                                                | teikėjo puslapis                          |
+| `yi`                     | 2026-06-18 | „Yi-Light“ išėjo į pensiją, mokamas kaip einantis                                          | teikėjo puslapis                          |
+| `featherless-ai`         | 2026-06    | Nėra dabartinės nemokamos pakopos                                                          | teikėjo puslapis                          |
+| `chipotle`               | 2026-09-15 | Už jo esantis pokalbių valdiklis atsako į 404 kiekviename maršrute (#13131, #4037)         | amelia.chipotle.com                       |
+
+`iflytek` / `sparkdesk` likti sąraše su TS perspėjimu: „Spark Lite“ yra nemokama, tačiau ToS riboja tarpinio serverio ir relės naudojimą.
 
 ---
 
-## 2026-06-17 atnaujinimas — kas pasikeitė nuo 2026-06-05
+## 2026-06-17 atnaujinti — kas pasikeitė nuo 2026-06-05
 
-50 agentų internetinės paieškos etapas (oficiali dokumentacija + pastarųjų 7 dienų naujienos, patikrinta varžomuoju būdu) atnaujino visą katalogą. Svarbiausia:
+50 agentų žiniatinklio tyrimų leidimas (oficialios docs + last-7-days naujienos, patikrintos prieštaringai) atnaujino visą katalogą. Svarbiausi dalykai:
 
-- **Pašalinta / nebėra nemokamo plano (2026):** `chutes` (nemokamas planas pasibaigė 2026-03), `phind` (įmonė užsidarė 2026-01), `kluster` (eksploatacija nutraukta 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (nemokama MiMo prieiga atšaukta 2026-05-24, Nemotron akcija pasibaigė 2026-06 — pakartotinai patikrinta 2026-06-18), `aimlapi` (nemokamas planas pristabdytas — pakartotinai patikrinta 2026-06-18), `yi` (Yi-Light išjungtas, liko mokėjimas pagal naudojimą — pakartotinai patikrinta 2026-06-18), `featherless-ai` (šiuo metu nemokamo plano nėra), `chipotle` (Chipotle „Pepper AI“ — atvirkštine inžinerija atkurtas `amelia.chipotle.com` Amelia pokalbių valdiklis, su kuriuo teikėjas bendravo, dabar grąžina 404 visuose keliuose, įskaitant šakninį; išjungta/perkelta serverinė dalis, patvirtinta 2026-09-15 — visiškai pašalinta iš katalogo, #13131/#4037). `iflytek` / `sparkdesk` lieka sąraše, bet turi įspėjimą dėl naudojimo sąlygų (Spark Lite yra nemokamas; naudojimo sąlygos riboja tarpinio serverio / perdavimo naudojimą).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` išjungti 2026-06-01, o `2.5 Pro` paliko nemokamą planą (2026-04); nemokamas planas dabar yra **tik Flash šeima** (2.5/3/3.1/3.5 Flash + Gemma). Katalogas dabar **apjungia** Flash šeimą į vieną grupę (anksčiau skaičiai buvo išpūsti, nes kiekvienas variantas buvo skaičiuojamas atskirai: 462M → 60M).
-- **Pataisyti skaičiai:** `cloudflare-ai` 122M → **30M** (reali 10 tūkst. Neuronų per dieną riba), `doubao` perklasifikuota kaip vienkartinis registracijos kreditas (nesikartojantis), `llm7` 4M → **150M** (dokumentuota 5M žetonų per dieną), `together` „-Free“ galiniai taškai nutraukti → 25 USD registracijos kreditas taip pat pašalintas (reikalingas minimalus 5 USD pirkimas, nemokamo bandomojo laikotarpio nėra), `longcat` Preview pasibaigė + Flash modeliai išjungti → liko tik **LongCat-2.0**, perklasifikuota kaip vienkartinis **10M** žetonų registracijos kreditas (ribojamas KYC patikros, nesikartojantis).
-- **Poolside tiesioginė inferencija baigiasi (patikrinta 2026-10-20):** [oficialioje platformoje](https://platform.poolside.ai/) skelbiama apie išjungimą **2026-10-31**, o naudotojai nukreipiami atsisiųsti modelius iš Hugging Face savarankiškam talpinimui. Tiesioginis `poolside` teikėjas turi šį įspėjimą. Rankiniu būdu prižiūrimame nemokamame kataloge nėra tiesioginių Poolside įrašų; jo Poolside pavadintieji įrašai priklauso `kilo-gateway`. Šis pranešimas nenustato Kilo, Cline, NVIDIA ar kitų šliuzų teikiamų modelių prieinamumo, todėl tie įrašai dėl šios priežasties neišbraukiami.
-- **Atrasti nauji nemokami teikėjai:** ⭐ **Kilo Code** (`kilo-gateway` — rotuojamas „Auto Free“ rinkinys: NVIDIA Nemotron 3 šeima, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 rotuojamų nemokamų programavimo modelių, atnaujinta 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash visam laikui nemokami + 20M registracijos premija) ir `arcee-ai` Trinity Large Preview.
-- **Nauji sąžiningi planų lygiai** (žr. Metodologiją): _visam laikui nemokama, bet neribojama_ kategorija (reali pasikartojanti prieiga be skaičiuojamos žetonų ribos) ir _indėlio atrakinimo priedas_ (OpenRouter 10 USD → +24M/mėn.) — abu pateikiami **atskirai**, kad niekada nepripuštų pagrindinio skaičiaus.
+- **Pašalinta / nėra laisvos pakopos:** perkeltas į [savo skyrių](#removed--no-free-tier).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` išjungtas 2026-06-01 ir `2.5 Pro` paliko laisvą pakopą (2026-04); nemokama pakopa dabar** Tik „Flash“ šeimai** (2.5/3/3.1/3.5 Flash + Gemma). Katalogas dabar** baseinai** „Flash“ šeima (buvo išpūsta skaičiuojant kiekvieną variantą atskirai: 462M → 60M).
+- **Pataisyti skaičiai:** `cloudflare-ai` 122M →** 30 mln** (tikrasis 10k-Neurons/day), `doubao` perklasifikuotas kaip vienkartinis registracijos kreditas (nepasikartojantis), `llm7` 4M →** 150 mln** (dokumentuota 5M tokens/day), `together` "-Nemokami" galiniai taškai nutraukti → 25 USD registracijos kreditas taip pat pašalintas (reikia įsigyti mažiausiai 5 USD, nemokama bandomoji versija), `longcat` Peržiūra baigėsi + Flash modeliai nebenaudojami →**LongCat-2.0** tik, perkvalifikuotas į vienkartinį** 10 mln**-token registracijos kreditas (priklausomas KYC, nepasikartojantis).
+- **Baseino tiesioginės išvados pabaiga (patvirtinta 2026-10-20):** [oficiali platforma](https://platform.poolside.ai/) praneša apie išjungimą** 2026-10-31** ir nukreipia vartotojus atsisiųsti modelius iš „Hugging Face“, kad galėtų juos savarankiškai naudoti. Tiesioginis `poolside` teikėjas pateikia šį įspėjimą. Rankomis kuruotame nemokamame kataloge nėra tiesioginių įrašų prie baseino; jo baseino pavadinimo įrašai priklauso `kilo-gateway`. Šiame pranešime nenurodoma, ar modeliai, kuriuos aptarnauja Kilo, Cline, NVIDIA ar kiti šliuzai, pasiekiami, todėl šie sąrašai šiuo pagrindu nėra panaikinami.
+- **Atrasta naujų nemokamų paslaugų teikėjų:** ⭐** Kilo kodas** (`kilo-gateway` — besisukantis "Auto Free" rinkinys: NVIDIA Nemotron 3 family, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — 10 besisukančių nemokamo kodavimo modelių, atnaujinta 2026-10-20), ⭐** Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash visam laikui nemokama + 20M registracijos premija) ir `arcee-ai` Trinity Large Preview.
+- **Naujos sąžiningos pakopos** (žr. Metodologiją): _visam laikui nemokama, bet neribota_ kategorija (tikra pasikartojanti prieiga, nereikia skaičiuoti prieigos raktų ribos) ir _įnešimo atrakinimo padidinimas_ (OpenRouter $10 → +24M/mo), abi pasirodė** atskirai** todėl jie niekada neišpučia antraštės.
 
-> Išsami teikėjų lentelė žemiau yra **2026-06-05 momentinė kopija**; aukščiau pateikti pokyčiai ją pakeičia. Gyvasis kanoninis šaltinis yra modelių katalogas `open-sse/config/freeModelCatalog.ts`.
+> Toliau pateikiama išsami lentelė kiekvienam teikėjui** 2026-06-05 momentinė nuotrauka** ; aukščiau esančios deltos jį pakeičia. Tiesioginis kanoninis šaltinis yra kiekvieno modelio katalogas `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -113,7 +201,7 @@ todėl šis atskyrimas išlaikomas sąmoningai.
 
 ## Metodika ir įspėjimai
 
-- Skaičiai yra** viršutinės ribos įverčiai** nuo kiekvieno teikėjo dokumentais patvirtintų laisvos pakopos limitų** 2026-06-17** , surinkta atlikus žiniatinklio tyrimą. Nemokamos pakopos nuolat keičiasi, prieš pasikliaudami figūra, patikrinkite — naujo.
+- Skaičiai yra** viršutinės ribos įverčiai** nuo kiekvieno teikėjo dokumentais patvirtintų laisvosios pakopos limitų, paskutinį kartą patikrintų** 2026-11-23** kiekvienai eilutei su kvota. Nemokamos pakopos nuolat keičiasi, prieš pasikliaudami figūra, patikrinkite — naujo.
 - **Ką iš tikrųjų garantuoja įrašas.** Nė vienas įrašas neapima kiekvienos eilutės patikimumo įvertinimo, o API neaptarnauja jokio — kiekvieną aukščiau pateiktą skaičių traktuoja kaip tos pačios nenurodytos kokybės įvertinimą. Du faktai skiriasi, nes jie yra surenkami ranka, o ne numanomi: 44 įrašuose yra nepriklausomai dokumentuotas griežtas sustabdymas (39 iš jų xKiro eilutės, kurios visos dalijasi viena dienpinigiais), o 22 įrašuose pateikiamas greitas mokymas. `hardStopGuaranteed` nustatomas tik tada, kai paties teikėjo sąlygose teigiama, kad viršijus nemokamą pašalpą prašymas atsisakoma, o ne tyliai pradedama išrašyti sąskaitas, o šaltinis yra komentare šalia įrašo; pagal nutylėjimą niekada nenustatytas `true`, o įrašas, kurio niekas nepatvirtino, lieka nenustatytas. Taigi trūkstama „hard-stop“ vėliavėlė reiškia „neįsteigta“, o ne „žinoma, kad jums atsiskaitys“.**STRICT režimas** (pasirenkama `freeAccessPolicy=strict` maršruto parinkimo apsauga) pasitiki tik įrašais, kuriuose yra vėliavėlė; kiekviena kita nemokama pakopa neįtraukiama kaip `no-hard-stop` (žr. `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kai apsauga filtruoja telkinį, operatoriaus matomas žurnalas praneša ir išskyrimų skaičių, ir jo `no-hard-stop` dalį.
 - Tik `estMonthlyFreeTokens` = pasikartojantys mėnesiniai žetonai.** Vienkartiniai registracijos kreditai nepasikartoja** ir skaičiuoti kaip 0. Nutrauktos pakopos taip pat yra 0.
 - Dienos žetonų dangtelis → `monthly = daily × 30`. Tik RPD dokumentuotas → `RPD × ~800 output tokens × 30`. Tik RPM/TPM (be dienos ribos) →** neuždengtas** (žr. žemiau).
@@ -128,11 +216,11 @@ todėl šis atskyrimas išlaikomas sąmoningai.
 
 Dauguma „nemokamų žetonų per mėnesį“ skaičių šioje srityje yra kiekvieno modelio etikečių sumos. Mūsų nėra tyčia:
 
-- **Kiekvienas bendras baseinas skaičiuojamas vieną kartą.** nemokamas Mistral planas yra viena 1B/month pašalpa vienai organizacijai; įtraukus jį į penkis modelius, jis nepatenka į 5B. Susumavus pagal modelį, skaitytų mūsų katalogas**~ 7.4B** (perskaičiuota 2026-09-03; šis skaičius nėra CI apsaugotas, išmatuokite jį iš naujo — kai pasikeičia katalogas) — antraštė sako**~ 1.47B** nes tiek iš tikrųjų gali išleisti viena kiekvieno teikėjo sąskaita.
-- **Dienos ribos konvertuojamos, įkainiai ne.** Dokumentais patvirtintas tokens/day dangtelis tampa `× 30`; dokumentuotas requests/day dangtelis tampa `RPD × ~800 tokens × 30`; teikėjas, kuris skelbia tik užklausas per minutę** ne** mėnesio skaičius ir yra nurodytas kaip _neapribotas_, niekada nesumuojamas. Kainos ribos padauginimas iš 24/7 yra infliacija, kurios mes atsisakome.
+- **Kiekvienas bendras baseinas skaičiuojamas vieną kartą.** Penki modeliai už vieną pašalpą yra viena pašalpa, o ne penki. To paties katalogo eilutė po eilutės ir kodėl mes jį spausdiname, yra skiltyje [Kaip mes skaičiuojame](#how-we-count).
+- **Dienos ribos konvertuojamos, įkainiai ne.** Dokumentais patvirtintas tokens/day dangtelis tampa `× 30`; dokumentuotas requests/day dangtelis tampa `RPD × ~800 tokens × 30`; teikėjas, kuris skelbia tik užklausas per minutę, turi** ne** mėnesio skaičius ir yra nurodytas kaip _neapribotas_, niekada nesumuojamas. Kainos ribos padauginimas iš 24/7 yra infliacija, kurios mes atsisakome.
 - **Regioninės tapatybės patikros kvotos rodomos atskirai** (`+~6M behind regional identity verification`), nes dauguma skaitytojų negali jomis naudotis.
 - **Registracijos kreditai yra tik pirmąjį mėnesį** ir pateikiamas kaip antras skaičius, niekada nesusimaišęs su pastoviu skaičiumi.
-- **Figūrą užtikrina CI.** `npm run check:docs-counts` perskaičiuoja bendras sumas iš katalogo ir nepavyksta sukurti, kai šis failas, README arba biudžeto kortelė nukrypsta nuo jų.
+- **Ką daro dokumentų patikra.** `npm run check:docs-counts` (išleidimo režimas) perskaičiuoja tikrąjį skaičių, pirmojo mėnesio skaičių ir dviejų eilučių sumas iš katalogo ir nepavyksta, kai README, šis puslapis arba nemokamų lygių vadovas atspausdina kitą reikšmę arba išspausdina didelę figūrą be etiketės ir tikrosios. Biudžeto kortelė yra perbraižyta pagal tuos pačius faktus išleidžiant.
 
 ---
 
@@ -241,74 +329,74 @@ Dauguma „nemokamų žetonų per mėnesį“ skaičių šioje srityje yra kiekv
 
 ---
 
-## Teikėjo nemokama pakopa (Bytez/Nous patikrinta 2026-10-15; pakartotinai tikrintos eilutės 2026-09-02; kitos 2026-06-17)
+## Teikėjo nemokama pakopa (katalogas audituotas 2026-11-23)
 
-> Atnaujinta iš kiekvieno modelio katalogo (`open-sse/config/freeModelCatalog.ts`), priderinta prie baseino. Rūšiuojama pagal pasikartojančius nuolatinius tokens/mo. `uncapped*` = visam laikui nemokamas, bet nepaskelbtas prieigos raktų ribos (rate/concurrency-limited) — realios prieigos,** ne** apibendrinamas antraštėje. `—` = tik kreditas / be rakto / kiekybiškai neįvertinamas žetonų.
+> Prižiūrėtas rankomis iš kiekvieno modelio katalogo (`open-sse/config/freeModelCatalog.data.ts`); paskutinį kartą tikrinta 2026-11-23. Rūšiuojama pagal realius kiekvieno telkinio mėnesio žetonus (kiekvienas bendras telkinys skaičiuojamas vieną kartą). `uncapped*` = visam laikui nemokama, bet nepaskelbta prieigos rakto riba (rate/concurrency-limited): reali prieiga,** ne** sumuoti į tikrąją figūrą. `not counted` = pasikartojanti kvota, kurios tikroji figūra nepalieka (`avoid`, arba už regioninės tapatybės patikrinimo). Teikėjai, kurių pasiūlymas baigėsi, yra [Pašalinta / nėra nemokamos pakopos](#removed--no-free-tier). `—` = kreditas tik / beraktis / ne žetonų kiekybiškai įvertinamas.
 
-| Teikėjas         | Laisvas tipas          | Pastovus tokens/mo | Pirmo mėnesio kreditas | ToS           | Modeliai |
-| ---------------- | ---------------------- | ------------------ | ---------------------- | ------------- | -------- |
-| `mistral`        | pasikartojantis        | ~ 1.00B            | —                      | atsargiai     | 5        |
-| `nara`           | pasikartojantis        | ~ 210M             | —                      | atsargiai     | 8        |
-| `llm7`           | pasikartojantis        | ~ 150M             | —                      | atsargiai     | 4        |
-| `xkiro`          | pasikartojantis        | ~ 150M             | —                      | atsargiai     | 39       |
-| `longcat`        | vienkartinis           | —                  | 10 mln                 | atsargiai     | 1        |
-| `cerebras`       | vienkartinis           | —                  | 5 USD kreditas         | atsargiai     | 2        |
-| `cloudflare-ai`  | pasikartojantis        | ~ 30M              | —                      | atsargiai     | 9        |
-| `groq`           | pasikartojantis        | ~ 30M              | —                      | atsargiai     | 5        |
-| `api-airforce`   | pasikartojantis        | ~ 24M              | —                      | atsargiai     | 7        |
-| `bluesminds`     | pasikartojantis        | ~ 7M               | —                      | dviprasmiškas | 22       |
-| `sambanova`      | pasikartojantis        | ~ 6M               | —                      | atsargiai     | 5        |
-| `arcee-ai`       | pasikartojantis        | ~ 5M               | —                      | atsargiai     | 1        |
-| `bazaarlink`     | pasikartojantis        | ~ 4M               | —                      | atsargiai     | 32       |
-| `openrouter`     | pasikartojantis        | ~ 1M               | —                      | atsargiai     | 1        |
-| `cohere`         | pasikartojantis        | ~ 800K             | —                      | atsargiai     | 6        |
-| `huggingchat`    | pasikartojantis        | ~ 500K             | —                      | atsargiai     | 4        |
-| `morph`          | pasikartojantis        | ~ 400K             | —                      | gerai         | 2        |
-| `huggingface`    | pasikartojantis        | ~ 200K             | —                      | atsargiai     | 6        |
-| `kiro`           | pasikartojantis        | ~ 25K              | —                      | vengti        | 12       |
-| `glm-cn`         | neuždengtas            | neuždengtas\*      | ~ 20M                  | gerai         | 4        |
-| `baidu`          | neuždengtas            | neuždengtas\*      | —                      | atsargiai     | 1        |
-| `gemini`         | neuždengtas            | neuždengtas\*      | —                      | atsargiai     | 4        |
-| `kilo-gateway`   | neuždengtas            | neuždengtas\*      | —                      | atsargiai     | 7        |
-| `opencode-zen`   | neuždengtas            | neuždengtas\*      | —                      | atsargiai     | 10       |
-| `tencent`        | neuždengtas            | neuždengtas\*      | —                      | atsargiai     | 1        |
-| `vertex`         | registracijos kreditas | —                  | ~ 300M                 | atsargiai     | 10       |
-| `agentrouter`    | registracijos kreditas | —                  | ~ 200M                 | atsargiai     | 4        |
-| `predibase`      | registracijos kreditas | —                  | ~ 25M                  | atsargiai     | 1        |
-| `doubao`         | registracijos kreditas | —                  | ~ 15M                  | dviprasmiškas | 1        |
-| `ai21`           | registracijos kreditas | —                  | ~ 10M                  | vengti        | 2        |
-| `deepseek`       | registracijos kreditas | —                  | ~ 5M                   | gerai         | 2        |
-| `hyperbolic`     | registracijos kreditas | —                  | ~ 5M                   | gerai         | 8        |
-| `nscale`         | registracijos kreditas | —                  | ~ 5M                   | atsargiai     | 6        |
-| `bytez`          | kreditas (įskaitant)   | —                  | nežinomas              | dviprasmiškas | 1        |
-| `deepinfra`      | registracijos kreditas | —                  | ~ 1M                   | atsargiai     | 22       |
-| `fireworks`      | registracijos kreditas | —                  | ~ 1M                   | vengti        | 10       |
-| `nebius`         | registracijos kreditas | —                  | ~ 1M                   | atsargiai     | 1        |
-| `qoder`          | registracijos kreditas | —                  | ~ 1M                   | atsargiai     | 14       |
-| `scaleway`       | registracijos kreditas | —                  | ~ 1M                   | gerai         | 6        |
-| `novita`         | registracijos kreditas | —                  | ~ 500K                 | atsargiai     | 1        |
-| `agy`            | be rakto               | —                  | —                      | vengti        | 16       |
-| `baichuan`       | be rakto               | —                  | —                      | dviprasmiškas | 1        |
-| `blackbox`       | be rakto               | —                  | —                      | vengti        | 6        |
-| `coze`           | be rakto               | —                  | —                      | vengti        | 1        |
-| `duckduckgo-web` | be rakto               | —                  | —                      | vengti        | 6        |
-| `freemodel-dev`  | be rakto               | —                  | —                      | nežinomas     | 4        |
-| `friendliai`     | be rakto               | —                  | —                      | vengti        | 2        |
-| `iflytek`        | be rakto               | —                  | —                      | vengti        | 1        |
-| `inference-net`  | be rakto               | —                  | —                      | atsargiai     | 3        |
-| `liquid`         | be rakto               | —                  | —                      | nežinomas     | 1        |
-| `monsterapi`     | be rakto               | —                  | —                      | dviprasmiškas | 1        |
-| `muse-spark-web` | be rakto               | —                  | —                      | vengti        | 3        |
-| `nlpcloud`       | be rakto               | —                  | —                      | vengti        | 1        |
-| `nvidia`         | neuždengtas            | neuždengtas\*      | —                      | atsargiai     | 3        |
-| `pollinations`   | be rakto               | —                  | —                      | atsargiai     | 31       |
-| `publicai`       | be rakto               | —                  | —                      | atsargiai     | 3        |
-| `reka`           | be rakto               | —                  | —                      | atsargiai     | 2        |
-| `sensenova`      | be rakto               | —                  | —                      | atsargiai     | 1        |
-| `sparkdesk`      | be rakto               | —                  | —                      | atsargiai     | 1        |
-| `stepfun`        | be rakto               | —                  | —                      | gerai         | 1        |
-| `t3-web`         | be rakto               | —                  | —                      | vengti        | 23       |
-| `uncloseai`      | be rakto               | —                  | —                      | atsargiai     | 3        |
+| Teikėjas         | Laisvas tipas          | Tikra tokens/mo                        | Pirmo mėnesio kreditas | ToS           | Modeliai |
+| ---------------- | ---------------------- | -------------------------------------- | ---------------------- | ------------- | -------- |
+| `api-airforce`   | pasikartojantis        | ~ 24M                                  | —                      | atsargiai     | 5        |
+| `groq`           | pasikartojantis        | ~ 24M (4 kiekvieno modelio dangteliai) | —                      | atsargiai     | 4        |
+| `cloudflare-ai`  | pasikartojantis        | ~ 23M                                  | —                      | atsargiai     | 8        |
+| `xkiro`          | pasikartojantis        | ~ 15M                                  | —                      | atsargiai     | 9        |
+| `bazaarlink`     | pasikartojantis        | ~ 1.4M                                 | —                      | atsargiai     | 1        |
+| `openrouter`     | pasikartojantis        | ~ 1,2 mln                              | —                      | atsargiai     | 1        |
+| `cohere`         | pasikartojantis        | ~ 800K                                 | —                      | atsargiai     | 6        |
+| `sambanova`      | pasikartojantis        | ~ 480K                                 | —                      | atsargiai     | 2        |
+| `morph`          | pasikartojantis        | ~ 160K                                 | —                      | gerai         | 2        |
+| `glm-cn`         | neuždengtas            | neuždengtas\*                          | 20 mln                 | gerai         | 4        |
+| `agnes`          | neuždengtas            | neuždengtas\*                          | —                      | gerai         | 3        |
+| `agnes-cn`       | neuždengtas            | neuždengtas\*                          | —                      | gerai         | 3        |
+| `aion`           | neuždengtas            | neuždengtas\*                          | —                      | gerai         | 4        |
+| `baidu`          | neuždengtas            | neuždengtas\*                          | —                      | atsargiai     | 1        |
+| `gemini`         | neuždengtas            | neuždengtas\*                          | —                      | atsargiai     | 4        |
+| `glm`            | neuždengtas            | neuždengtas\*                          | —                      | gerai         | 2        |
+| `kilo-gateway`   | neuždengtas            | neuždengtas\*                          | —                      | atsargiai     | 12       |
+| `nvidia`         | neuždengtas            | neuždengtas\*                          | —                      | atsargiai     | 3        |
+| `onomeo`         | neuždengtas            | neuždengtas\*                          | —                      | atsargiai     | 2        |
+| `requesty`       | neuždengtas            | neuždengtas\*                          | —                      | atsargiai     | 2        |
+| `sealion`        | neuždengtas            | neuždengtas\*                          | —                      | gerai         | 5        |
+| `tokenharbor`    | neuždengtas            | neuždengtas\*                          | —                      | atsargiai     | 2        |
+| `coze`           | pasikartojantis        | neskaičiuojama (`avoid`)               | —                      | vengti        | 1        |
+| `inference-net`  | pasikartojantis        | neskaičiuojamas                        | —                      | atsargiai     | 3        |
+| `kiro`           | pasikartojantis        | neskaičiuojama (`avoid`)               | —                      | vengti        | 7        |
+| `modelscope`     | pasikartojantis        | už regiono tapatybės patikrinimą       | —                      | atsargiai     | 2        |
+| `nlpcloud`       | pasikartojantis        | neskaičiuojama (`avoid`)               | —                      | vengti        | 1        |
+| `reka`           | pasikartojantis        | neskaičiuojamas                        | —                      | atsargiai     | 2        |
+| `t3-web`         | pasikartojantis        | neskaičiuojama (`avoid`)               | —                      | vengti        | 23       |
+| `bytez`          | kreditas (įskaitant)   | —                                      | —                      | dviprasmiškas | 1        |
+| `doubao`         | registracijos kreditas | —                                      | 15 mln                 | dviprasmiškas | 1        |
+| `longcat`        | registracijos kreditas | —                                      | 10 mln                 | atsargiai     | 1        |
+| `deepseek`       | registracijos kreditas | —                                      | 5 mln                  | gerai         | 2        |
+| `hyperbolic`     | registracijos kreditas | —                                      | 5 mln                  | gerai         | 8        |
+| `nscale`         | registracijos kreditas | —                                      | 5 mln                  | atsargiai     | 6        |
+| `deepinfra`      | registracijos kreditas | —                                      | 1 mln                  | atsargiai     | 22       |
+| `qoder`          | registracijos kreditas | —                                      | 1 mln                  | atsargiai     | 9        |
+| `scaleway`       | registracijos kreditas | —                                      | 1 mln                  | gerai         | 6        |
+| `novita`         | registracijos kreditas | —                                      | 500 tūkst              | atsargiai     | 1        |
+| `agentrouter`    | registracijos kreditas | —                                      | —                      | atsargiai     | 1        |
+| `ai21`           | registracijos kreditas | —                                      | —                      | vengti        | 2        |
+| `baichuan`       | registracijos kreditas | —                                      | —                      | dviprasmiškas | 1        |
+| `cerebras`       | registracijos kreditas | —                                      | —                      | atsargiai     | 2        |
+| `fireworks`      | registracijos kreditas | —                                      | —                      | vengti        | 10       |
+| `freemodel-dev`  | registracijos kreditas | —                                      | —                      | nežinomas     | 4        |
+| `monsterapi`     | registracijos kreditas | —                                      | —                      | dviprasmiškas | 1        |
+| `nebius`         | registracijos kreditas | —                                      | —                      | atsargiai     | 1        |
+| `publicai`       | registracijos kreditas | —                                      | —                      | atsargiai     | 3        |
+| `sensenova`      | registracijos kreditas | —                                      | —                      | atsargiai     | 1        |
+| `vertex`         | registracijos kreditas | —                                      | —                      | atsargiai     | 16       |
+| `agy`            | be rakto               | —                                      | —                      | vengti        | 9        |
+| `aihorde`        | be rakto               | —                                      | —                      | gerai         | 3        |
+| `blackbox`       | be rakto               | —                                      | —                      | vengti        | 6        |
+| `duckduckgo-web` | be rakto               | —                                      | —                      | vengti        | 6        |
+| `friendliai`     | be rakto               | —                                      | —                      | vengti        | 2        |
+| `iflytek`        | be rakto               | —                                      | —                      | vengti        | 1        |
+| `liquid`         | be rakto               | —                                      | —                      | nežinomas     | 1        |
+| `muse-spark-web` | be rakto               | —                                      | —                      | vengti        | 3        |
+| `ovhcloud`       | be rakto               | —                                      | —                      | gerai         | 5        |
+| `pollinations`   | be rakto               | —                                      | —                      | atsargiai     | 24       |
+| `sparkdesk`      | be rakto               | —                                      | —                      | atsargiai     | 1        |
+| `uncloseai`      | be rakto               | —                                      | —                      | atsargiai     | 1        |
 
 ---
 

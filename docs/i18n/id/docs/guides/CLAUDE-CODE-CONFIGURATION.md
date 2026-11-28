@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) dan OpenCode (`x-opencode-session`) dikenal
 
 Direktori kerja berbeda antar mesin, sehingga repositori yang sama dapat muncul di jalur yang berbeda. Kirimkan proyek secara eksplisit: Claude Code menambahkan header apa pun yang terdaftar di `ANTHROPIC_CUSTOM_HEADERS` ke setiap permintaan model, dan OmniRoute membaca dua di antaranya:
 
-| Tajuk                      | Nilai                                                                   |
-| -------------------------- | ----------------------------------------------------------------------- |
-| `x-omniroute-project`      | Nama proyek, misalnya `omniroute`                                       |
-| `x-omniroute-project-repo` | Remote yang dinormalisasi, misalnya `github.com/diegosouzapw/OmniRoute` |
+| Tajuk                      | Nilai                                                                        |
+| -------------------------- | ---------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Nama proyek, misalnya `omniroute`                                            |
+| `x-omniroute-project-repo` | Remote yang dinormalisasi, misalnya `github.com/cheaper-inference/OmniRoute` |
 
 Keduanya hanya dibaca untuk atribusi; mereka tidak pernah diteruskan ke penyedia hulu.
 
@@ -286,28 +286,20 @@ diperlukan flag tambahan. Timpa untuk setiap pemanggilan dengan `--remote` / `--
 
 ## Pemecahan masalah
 
-**Claude Code mengabaikan gateway** — pastikan `ANTHROPIC_BASE_URL` **tidak
-mengandung `/v1`** dan mulai ulang `claude` (env hanya dibaca sekali saat proses dimulai). `omniroute launch`
-menangani hal ini untuk Anda.
+**Kode Claude mengabaikan gateway** — konfirmasi `ANTHROPIC_BASE_URL` punya** tidak ada `/v1`** dan restart `claude` (env dibaca sekali saat startup). `omniroute launch` menangani ini untuk Anda.
 
-**Pemilih `/model` kosong / model gateway tidak tersedia** — memerlukan Claude Code
-v2.1.219+ dan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Hanya ID model `claude*` /
-`anthropic*` yang muncul di pemilih; paksa model lain dengan
-`ANTHROPIC_MODEL=<id>` (inilah yang dilakukan oleh profil).
+**`/model` picker model gateway kosong/hilang** — membutuhkan Kode Claude v2.1.219 + dan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Hanya model `claude*` / `anthropic*` IDs yang muncul di pemilih; paksa model lain dengan `ANTHROPIC_MODEL=<id>` (inilah yang dilakukan profil).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code selalu mengirimkan ID model **tanpa prefiks**
-(misalnya `claude-opus-4-8`), sehingga ketika penyedia Claude Code (`cc/…`) dan
-Claude (`claude/…`) keduanya terhubung, ID tanpa prefiks cocok dengan dua rute dan
-OmniRoute menolak untuk menebak. Perbaiki dengan salah satu cara berikut: tetapkan ID berprefiks dengan
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, atau aktifkan **Prioritaskan Claude Code untuk
-model Claude tanpa prefiks** — tombol pengalih di halaman penyedia Claude, atau
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (secara default nonaktif;
-lihat [Lingkungan](../reference/ENVIRONMENT.md)) — yang merutekan ID `claude-*`
-tanpa prefiks ke Claude Code. Prefiks penyedia eksplisit selalu diprioritaskan.
+**`400 Ambiguous model 'claude-…'`** — Claude Kode selalu terkirim** tanpa awalan** model IDs (misalnya `claude-opus-4-8`), jadi ketika penyedia Kode Claude (`cc/…`) dan Claude (`claude/…`) terhubung, id kosong cocok dengan dua rute dan OmniRoute menolak menebak. Perbaiki dengan cara apa pun: sematkan id awalan dengan `ANTHROPIC_MODEL=cc/claude-opus-4-8`, atau aktifkan** Lebih suka Kode Claude untuk model Claude tanpa awalan** — tombol di halaman penyedia Claude, atau `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (tidak aktif secara default; lihat [Lingkungan](../reference/ENVIRONMENT.md) ) — yang merutekan `claude-*` IDs ke Kode Claude sebagai gantinya. Awalan penyedia eksplisit selalu menang.
 
-**Kesalahan autentikasi** — profil tidak menyimpan token. Gunakan `omniroute launch --profile`
-(menyuntikkannya) atau ekspor `ANTHROPIC_AUTH_TOKEN`.
+**"mode otomatis… sesi ini tidak memenuhi syarat" (permintaan pengklasifikasi ditagih)** — dalam mode otomatis Claude Kode meminta server untuk meninjau tindakan di dalam permintaan modelnya sendiri ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Itu memerlukan nilai `anthropic-beta` `dangerous-tool-use-2026-09-03` dan bidang `safeguards` body untuk mencapai Anthropic sebagai pasangan, dan `safeguard_results` ditambah penggunaan alat hulu IDs agar kembali tidak berubah. OmniRoute melakukan ini ketika permintaan dialihkan ke penyedia `claude` asli atau ke node `anthropic-compatible-*`, dialirkan atau tidak (penjaga regresi: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Target lain tidak dapat mengembalikan ulasan, sehingga Kode Claude kembali ke permintaan pengklasifikasinya sendiri dan menampilkan pemberitahuan:
 
-**Profil tidak terisolasi** — setiap profil merupakan `CLAUDE_CONFIG_DIR` yang berbeda;
-pastikan `echo $CLAUDE_CONFIG_DIR` di dalam sesi mengarah ke
-`~/.claude/profiles/<name>`.
+- model pada penyedia non-Antropik, atau kombinasi yang ada pada salah satu penyedia;
+- node relai yang kompatibel dengan Claude-Code (`anthropic-compatible-cc-*`), yang membangun kembali badan permintaan dan tidak membawa `safeguards`;
+- OmniRoute lama yang mendahului beta yang diizinkan, atau versi Kode Claude di bawah daftar halaman Anthropic untuk sesi gateway.
+
+Jalankan `/status` di kode Claude : the** Server mode otomatis** baris membaca `Enabled` saat tinjauan server aktif. Apakah permintaan tersebut ditagih ditentukan oleh Anthropic, bukan oleh OmniRoute.
+
+**Kesalahan autentikasi** — profil tidak memiliki token. Gunakan `omniroute launch --profile` (menyuntikkannya) atau mengekspor `ANTHROPIC_AUTH_TOKEN`.
+
+**Profil tidak mengisolasi** — setiap profil adalah `CLAUDE_CONFIG_DIR` yang berbeda; verifikasi `echo $CLAUDE_CONFIG_DIR` di dalam titik sesi di `~/.claude/profiles/<name>`.

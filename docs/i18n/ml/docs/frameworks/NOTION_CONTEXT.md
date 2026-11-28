@@ -61,42 +61,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute ടോക്കൺ സംരക്ഷിക്കുകയും ഉടൻതന്നെ 1 ഫലം ആവശ്യപ്പെടുന്ന ഒരു പരീക്ഷണ തിരച്ചിൽ നടത്തുകയും ചെയ്യുന്നു; Notion
 ഒരു പിശക് ഒബ്ജക്റ്റ് മടക്കിനൽകുകയാണെങ്കിൽ, ടോക്കൺ മായ്ക്കപ്പെടുകയും കോൾ `400` പിശകോടെ പരാജയപ്പെടുകയും ചെയ്യും.
 
-## MCP ടൂളുകൾ (6)
+## MCP ഉപകരണങ്ങൾ (6)
 
-`open-sse/mcp-server/tools/notionTools.ts`-ൽ നിർവചിച്ചിരിക്കുന്നു. കോൾ ചെയ്യുന്ന
-സമയത്ത് `getNotionToken()` വഴി ടോക്കൺ കണ്ടെത്തുന്നു; ഒന്നും ക്രമീകരിച്ചിട്ടില്ലെങ്കിൽ ടൂൾ
-`"Notion integration token not configured. Set it in Settings > Context Sources."` എന്ന പിശക് ഉയർത്തുന്നു.
+`open-sse/mcp-server/tools/notionTools.ts` ൽ നിർവ്വചിച്ചിരിക്കുന്നു. `getNotionToken()` വഴി കോൾ സമയത്ത് ടോക്കൺ പരിഹരിക്കപ്പെടും; ഒന്നും ക്രമീകരിച്ചിട്ടില്ലെങ്കിൽ, ഉപകരണം `"Notion integration token not configured. Set it in Settings > Context Sources."` എറിയുന്നു
 
-| ടൂൾ                          | സ്കോപ്പ്       | വിവരണം                                                                                                                                       |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | ടെക്സ്റ്റ് ക്വറി ഉപയോഗിച്ച് പേജുകളും ഡാറ്റാബേസുകളും തിരയുന്നു (ശീർഷകങ്ങൾ, ID-കൾ, URL-കൾ എന്നിവ മടക്കിനൽകുന്നു). പേജിനേറ്റ് ചെയ്തിരിക്കുന്നു. |
-| `notion_get_page`            | `read:notion`  | ഒരു പേജിന്റെ ID ഉപയോഗിച്ച് അതിന്റെ ഉള്ളടക്കവും മെറ്റാഡാറ്റയും നേടുന്നു.                                                                      |
-| `notion_list_block_children` | `read:notion`  | ഒരു ബ്ലോക്കിന്റെയോ പേജിന്റെയോ എല്ലാ ചൈൽഡ് ബ്ലോക്കുകളും (ബ്ലോക്ക് ട്രീ) പട്ടികപ്പെടുത്തുന്നു. പേജിനേറ്റ് ചെയ്തിരിക്കുന്നു.                    |
-| `notion_query_database`      | `read:notion`  | ഓപ്ഷണൽ `filter` + `sorts` (Notion API ഫോർമാറ്റ്) ഉപയോഗിച്ച് ഒരു ഡാറ്റാബേസ് ക്വറി ചെയ്യുന്നു. പേജിനേറ്റ് ചെയ്തിരിക്കുന്നു.                    |
-| `notion_get_database`        | `read:notion`  | ID ഉപയോഗിച്ച് ഒരു ഡാറ്റാബേസിന്റെ സ്കീമ/മെറ്റാഡാറ്റ നേടുന്നു.                                                                                 |
-| `notion_append_blocks`       | `write:notion` | നിലവിലുള്ള ഒരു ബ്ലോക്കിലേക്കോ പേജിലേക്കോ ചൈൽഡ് ബ്ലോക്കുകൾ കൂട്ടിച്ചേർക്കുന്നു (ഒരു അഭ്യർത്ഥനയിൽ പരമാവധി 100 ബ്ലോക്കുകൾ).                     |
+| ഉപകരണം                       | വ്യാപ്തി       | വിവരണം                                                                                                             |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | ടെക്സ്റ്റ് അന്വേഷണത്തിലൂടെ പേജുകളും ഡാറ്റാബേസുകളും തിരയുക (ശീർഷകങ്ങൾ, IDs, URLs തിരികെ നൽകുന്നു). പേജ് ചെയ്തു.     |
+| `notion_get_page`            | `read:notion`  | ഒരു പേജിൻ്റെ ഉള്ളടക്കവും മെറ്റാഡാറ്റയും അതിൻ്റെ ID വഴി നേടുക.                                                      |
+| `notion_list_block_children` | `read:notion`  | ഒരു ബ്ലോക്കിൻ്റെയോ പേജിൻ്റെയോ (ബ്ലോക്ക് ട്രീ) എല്ലാ ബ്ലോക്ക് കുട്ടികളെയും പട്ടികപ്പെടുത്തുക. പേജ് ചെയ്തു.          |
+| `notion_query_database`      | `read:notion`  | ഓപ്ഷണൽ `filter` + `sorts` (Notion API ഫോർമാറ്റ്) ഉള്ള ഒരു ഡാറ്റാബേസ് അന്വേഷിക്കുക. പേജ് ചെയ്തു.                    |
+| `notion_get_database`        | `read:notion`  | ID ഉപയോഗിച്ച് ഒരു ഡാറ്റാബേസിൻ്റെ schema/metadata നേടുക.                                                            |
+| `notion_append_blocks`       | `write:notion` | ബ്ലോക്ക് കുട്ടികളെ നിലവിലുള്ള ഒരു ബ്ലോക്കിലേക്കോ പേജിലേക്കോ ചേർക്കുക (ഒരു അഭ്യർത്ഥനയ്ക്ക് പരമാവധി 100 ബ്ലോക്കുകൾ). |
 
 ### ഇൻപുട്ട് പാരാമീറ്ററുകൾ
 
-- `notion_search` — `query` (1–500 പ്രതീകങ്ങൾ), `pageSize` (1–100, ഡിഫോൾട്ട് 20),
-  `startCursor` (ഓപ്ഷണൽ).
-- `notion_get_page` — `pageId` (32-പ്രതീക ഹെക്സ് അല്ലെങ്കിൽ UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ഡിഫോൾട്ട് 50),
-  `startCursor` (ഓപ്ഷണൽ).
-- `notion_query_database` — `databaseId`, `filter` (ഓപ്ഷണൽ, Notion ഫിൽട്ടർ ഫോർമാറ്റ്),
-  `sorts` (ഓപ്ഷണൽ അറേ), `pageSize` (1–100, ഡിഫോൾട്ട് 50), `startCursor` (ഓപ്ഷണൽ).
+- `notion_search` — `query` (1–500 അക്ഷരങ്ങൾ), `pageSize` (1–100, ഡിഫോൾട്ട് 20), `startCursor` (ഓപ്ഷണൽ).
+- `notion_get_page` — `pageId` (32-char hex അല്ലെങ്കിൽ UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ഡിഫോൾട്ട് 50), `startCursor` (ഓപ്ഷണൽ).
+- `notion_query_database` — `databaseId`, `filter` (ഓപ്ഷണൽ, Notion ഫിൽട്ടർ ഫോർമാറ്റ്), `sorts` (ഓപ്ഷണൽ അറേ), `pageSize` (1–100, ഡിഫോൾട്ട് 50), `startCursor` (ഓപ്ഷണൽ).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (ബ്ലോക്ക് ഒബ്ജക്റ്റുകളുടെ അറേ),
-  `after` (ഓപ്ഷണൽ സ്ഥാനം).
+- `notion_append_blocks` — `blockId`, `children` (ബ്ലോക്ക് ഒബ്ജക്റ്റുകളുടെ നിര), `after` (ഓപ്ഷണൽ സ്ഥാനം).
 
 ### സ്കോപ്പുകൾ
 
-റീഡ് ടൂളുകൾക്ക് `read:notion` ആവശ്യമാണ്; റൈറ്റ് ടൂളിന് `write:notion` ആവശ്യമാണ്.
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ആയിരിക്കുമ്പോൾ മാത്രം
-`open-sse/mcp-server/server.ts`-ലെ `withScopeEnforcement()` ഉപയോഗിച്ച് സ്കോപ്പുകൾ നിർബന്ധിതമാക്കപ്പെടുന്നു;
-കോൾ ചെയ്യുന്നയാളുടെ അനുവദനീയമായ സ്കോപ്പുകൾ `OMNIROUTE_MCP_SCOPES`-ൽ നിന്ന് (കോമ ഉപയോഗിച്ച് വേർതിരിച്ചത്) അല്ലെങ്കിൽ
-പ്രാമാണീകരിച്ച API കീയുടെ സ്കോപ്പ് കോൺടെക്സ്റ്റിൽ നിന്ന് ലഭിക്കുന്നു. പൂർണ്ണമായ
-സ്കോപ്പ് മോഡലിനായി [MCP-SERVER.md](./MCP-SERVER.md) കാണുക.
+വായനാ ഉപകരണങ്ങൾക്ക് `read:notion` ആവശ്യമാണ്, എഴുത്ത് ഉപകരണത്തിന് `write:notion` ആവശ്യമാണ്. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ആയിരിക്കുമ്പോൾ `open-sse/mcp-server/server.ts` ൽ `withScopeEnforcement()` ആണ് സ്കോപ്പുകൾ നടപ്പിലാക്കുന്നത്, കൂടാതെ API കീയിൽ `manage`/`admin` ഇല്ലാത്ത ഒരു HTTP/SSE കോളർക്ക് എപ്പോഴും; വിളിക്കുന്നയാളുടെ അനുവദനീയമായ സ്കോപ്പുകൾ `OMNIROUTE_MCP_SCOPES` (കോമയാൽ വേർതിരിച്ച) അല്ലെങ്കിൽ ആധികാരികമായ API കീയുടെ സ്കോപ്പ് സന്ദർഭത്തിൽ നിന്നാണ് വരുന്നത്. പൂർണ്ണ സ്കോപ്പ് മോഡലിന് [MCP-SERVER.md](./MCP-SERVER.md) കാണുക.
 
 ## എൻഡ്പോയിന്റുകൾ
 

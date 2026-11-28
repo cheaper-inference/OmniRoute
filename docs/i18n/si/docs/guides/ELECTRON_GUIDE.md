@@ -4,9 +4,9 @@
 
 ---
 
-> **සත්‍ය මූලාශ්‍රය:** `electron/` වැඩබිම** අවසන් වරට යාවත්කාලීන කළේ:** 2026-06-28 — v3.8.40
+> **සත්‍ය මූලාශ්‍රය:** `electron/` වැඩබිම
 
-OmniRoute විසින් ගොඩනගා ඇති හරස් වේදිකා ඩෙස්ක්ටොප් යෙදුමක් (Windows / macOS / Linux) නැව්ගත කරයි**Electron 41** +** ඉලෙක්ට්රෝන සාදන්නා 26.10** . ඩෙස්ක්ටොප් යෙදුම ළමා ක්‍රියාවලියක් ලෙස Next.js ස්වාධීන සේවාදායකයක් බිහි කරයි, එයට `BrowserWindow` පෙන්වා, සහ පද්ධති තැටියක්, ස්වයංක්‍රීය යාවත්කාලීන කරන්නා, IPC පාලම සහ ශුන්‍ය-වින්‍යාස රහස් බූට්ස්ට්‍රැප් එක් කරයි.
+OmniRoute විසින් ගොඩනගා ඇති හරස් වේදිකා ඩෙස්ක්ටොප් යෙදුමක් (Windows / macOS / Linux) නැව්ගත කරයි**Electron 41** +** ඉලෙක්ට්රෝන සාදන්නා 26.10** . ඩෙස්ක්ටොප් යෙදුම ළමා ක්‍රියාවලියක් ලෙස Next.js ස්වාධීන සේවාදායකයක් ඇති කරයි, එයට `BrowserWindow` පෙන්වා, සහ පද්ධති තැටියක්, ස්වයංක්‍රීය යාවත්කාලීන කරන්නා, IPC පාලම සහ ශුන්‍ය-වින්‍යාස රහස් බූට්ස්ට්‍රැප් එක් කරයි.
 
 ## ගෘහ නිර්මාණ ශිල්පය
 
@@ -92,7 +92,7 @@ scripts/
     └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-`main.js` සහ `preload.js` දෙකම වේ**CommonJS `.js`** TypeScript නොවේ. විදැහුම්කරු පාර්ශ්වයේ යතුරු ලියනය `electron/types.d.ts` හි ජීවත් වේ.
+`main.js` සහ `preload.js` දෙකම වේ**CommonJS `.js`** TypeScript නොවේ . විදැහුම්කරු පාර්ශ්වයේ යතුරු ලියනය `electron/types.d.ts` හි ජීවත් වේ.
 
 ## IPC පාලම (`preload.js`)
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## ස්වයංක්‍රීය යාවත්කාලීන කිරීම
 
-GitHub සපයන්නා (`diegosouzapw/OmniRoute`) සමඟ `electron-updater` භාවිතා කරයි.
+GitHub සපයන්නා (`cheaper-inference/OmniRoute`) සමඟ `electron-updater` භාවිතා කරයි.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - සිදුවීම් `update-status` IPC හරහා විදැහුම්කරු වෙත යොමු කරන ලදී: `checking`, `available`, `not-available`, `downloading` ( `percent` සමඟ ), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage අත්සන් කිරීම වෛකල්පිත — සක�
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-නිකුතු GitHub Releases (`diegosouzapw/OmniRoute`) වෙත ප්‍රකාශයට පත් කරනු ලැබේ, එය `electron-updater` නව අනුවාද සඳහා පරීක්ෂා කරයි.
+නිකුතු GitHub Releases (`cheaper-inference/OmniRoute`) වෙත ප්‍රකාශයට පත් කරනු ලැබේ, එය `electron-updater` නව අනුවාද සඳහා පරීක්ෂා කරයි.
 
 ## දෝෂගවේෂණය
 

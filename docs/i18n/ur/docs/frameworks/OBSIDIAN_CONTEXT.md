@@ -115,53 +115,46 @@ Obsidian کنفیگریشن کو `api_key_context_sources` ٹیبل
 
 ## MCP ٹولز (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts` میں متعین ہیں۔ ٹوکن/base-URL ہر کال کے لیے حل کیے جاتے ہیں (پہلے فی-API-key، پھر عالمی)۔ OmniRoute **sync server** سے رابطہ کرنے والے ٹولز (چار `obsidian_sync_*` ٹولز) کے لیے اضافی طور پر OmniRoute کی ترتیبات میں تشکیل کردہ sync auth token درکار ہوتا ہے۔
+`open-sse/mcp-server/tools/obsidianTools.ts` میں بیان کیا گیا ہے۔ token/base-URL فی کال حل کیے جاتے ہیں (فی-API-key پہلے، پھر عالمی)۔ ٹولز جو OmniRoute کو مارتے ہیں۔** مطابقت پذیری سرور** (چار `obsidian_sync_*` ٹولز) اضافی طور پر OmniRoute سیٹنگز میں کنفیگر کردہ Sync auth ٹوکن کی ضرورت ہوتی ہے۔
 
-### پڑھنے کے ٹولز (`read:obsidian`)
+### پڑھنے کے اوزار (`read:obsidian`)
 
-| ٹول                          | وضاحت                                                                                            |
-| ---------------------------- | ------------------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | جانچیں کہ آیا Local REST API قابلِ رسائی ہے اور اس کی توثیق ہو چکی ہے۔                           |
-| `obsidian_search_simple`     | نوٹ کے مواد میں مکمل متن کی تلاش؛ فائل پاتھز کے ساتھ اقتباسات لوٹاتا ہے۔                         |
-| `obsidian_search_structured` | JSON Logic expression (and/or/regex/path فلٹرز) استعمال کرتے ہوئے تلاش کریں۔                     |
-| `obsidian_read_note`         | vault-relative path کے ذریعے نوٹ پڑھیں؛ اختیاری طور پر کوئی مخصوص heading/block/frontmatter۔     |
-| `obsidian_list_vault`        | vault میں موجود فائلوں اور ڈائریکٹریز کی فہرست بنائیں (اندراجات کی tree)۔                        |
-| `obsidian_get_document_map`  | نوٹ کی heading ساخت کو headings → line numbers کے نقشے کے طور پر حاصل کریں۔                      |
-| `obsidian_get_note_metadata` | مکمل مواد کے بغیر frontmatter، tags، links، اور حروف/الفاظ کی تعداد حاصل کریں۔                   |
-| `obsidian_get_active_file`   | Obsidian میں فی الحال فعال فائل کا path + content حاصل کریں۔                                     |
-| `obsidian_get_periodic_note` | کسی تاریخ کے لیے روزانہ/ہفتہ وار/ماہانہ periodic note حاصل کریں (اگر تاریخ نہ دی جائے تو آج کا)۔ |
-| `obsidian_get_tags`          | vault کے تمام tags کو ان کی frequencies کے ساتھ فہرست کریں۔                                      |
-| `obsidian_list_commands`     | دستیاب Obsidian command IDs کی فہرست بنائیں (`obsidian_execute_command` کے ساتھ استعمال کریں)۔   |
-| `obsidian_sync_status`       | OmniRoute sync server کی حالت: چل رہا ہے یا نہیں، vault کا نام، port، uptime، آخری sync۔         |
-| `obsidian_sync_conflicts`    | حل نہ ہونے والے sync conflicts کی فہرست بنائیں (path، conflict path، detected-at)۔               |
+| ٹول                          | تفصیل                                                                                           |
+| ---------------------------- | ----------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | چیک کریں کہ آیا مقامی REST API قابل رسائی اور تصدیق شدہ ہے۔                                     |
+| `obsidian_search_simple`     | نوٹ کے مواد کی مکمل متن کی تلاش؛ فائل پاتھ کے ساتھ ٹکڑوں کو واپس کرتا ہے۔                       |
+| `obsidian_search_structured` | JSON لاجک ایکسپریشن (and/or/regex/path فلٹرز) کا استعمال کرتے ہوئے تلاش کریں۔                   |
+| `obsidian_read_note`         | والٹ رشتہ دار راستے کے ذریعے ایک نوٹ پڑھیں؛ اختیاری طور پر ایک مخصوص heading/block/frontmatter. |
+| `obsidian_list_vault`        | والٹ میں فائلوں اور ڈائریکٹریوں کی فہرست بنائیں (اندراجات کا درخت)۔                             |
+| `obsidian_get_document_map`  | → لائن نمبرز کے عنوانات کے نقشے کے طور پر نوٹ کی سرخی کا ڈھانچہ حاصل کریں۔                      |
+| `obsidian_get_note_metadata` | مکمل مواد کے بغیر فرنٹ میٹر، ٹیگز، لنکس، char/word شمار حاصل کریں۔                              |
+| `obsidian_get_active_file`   | Obsidian میں فی الحال فعال فائل کا پاتھ + مواد حاصل کریں۔                                       |
+| `obsidian_get_periodic_note` | تاریخ کے لیے daily/weekly/monthly متواتر نوٹ حاصل کریں (آج اگر چھوڑ دیا جائے)۔                  |
+| `obsidian_get_tags`          | تمام والٹ ٹیگز کو ان کی تعدد کے ساتھ درج کریں۔                                                  |
+| `obsidian_list_commands`     | دستیاب Obsidian کمانڈ IDs کی فہرست بنائیں ( `obsidian_execute_command` کے ساتھ استعمال کریں)۔   |
+| `obsidian_sync_status`       | OmniRoute مطابقت پذیری سرور کی حیثیت: چل رہا ہے، والٹ کا نام، پورٹ، اپ ٹائم، آخری مطابقت پذیری. |
+| `obsidian_sync_conflicts`    | غیر حل شدہ مطابقت پذیری کے تنازعات کی فہرست بنائیں (راستہ، تنازعہ کا راستہ، پتہ چلا ہوا)۔       |
 
-### لکھنے کے ٹولز (`write:obsidian`)
+### لکھنے کے اوزار (`write:obsidian`)
 
-| ٹول                              | وضاحت                                                                                     |
-| -------------------------------- | ----------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | دیے گئے Markdown مواد کے ساتھ نوٹ بنائیں یا اسے overwrite کریں۔                           |
-| `obsidian_append_note`           | نوٹ میں مواد شامل کریں؛ اختیاری طور پر کسی مخصوص heading/block میں۔                       |
-| `obsidian_patch_note`            | heading، block، یا frontmatter field پر درستگی سے append/prepend/replace کریں۔            |
-| `obsidian_delete_note`           | vault سے نوٹ مستقل طور پر حذف کریں۔                                                       |
-| `obsidian_move_note`             | vault کے اندر نوٹ منتقل کریں یا اس کا نام تبدیل کریں۔                                     |
-| `obsidian_execute_command`       | Obsidian command کو اس کی command ID کے ذریعے چلائیں۔                                     |
-| `obsidian_open_file`             | Obsidian میں فائل کھولیں (اگر موجود نہ ہو تو اسے بنا دیتا ہے)۔                            |
-| `obsidian_sync_trigger`          | فوری دوطرفہ desktop↔mobile vault sync شروع کریں۔                                          |
-| `obsidian_sync_resolve_conflict` | sync conflict حل کریں: `local` (mobile)، `remote` (desktop)، یا `keep-both` برقرار رکھیں۔ |
+| ٹول                              | تفصیل                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | دیئے گئے مارک ڈاؤن مواد کے ساتھ ایک نوٹ بنائیں یا اوور رائٹ کریں۔                           |
+| `obsidian_append_note`           | مواد کو ایک نوٹ میں شامل کریں؛ اختیاری طور پر ایک مخصوص heading/block. کے لیے               |
+| `obsidian_patch_note`            | سرجیکل طور پر سرخی، بلاک، یا فرنٹ میٹر فیلڈ میں append/prepend/replace ۔                    |
+| `obsidian_delete_note`           | والٹ سے ایک نوٹ کو مستقل طور پر حذف کریں۔                                                   |
+| `obsidian_move_note`             | والٹ میں کسی نوٹ کو منتقل کریں یا اس کا نام تبدیل کریں۔                                     |
+| `obsidian_execute_command`       | Obsidian کمانڈ کو اس کی کمانڈ کے ذریعے ID پر عمل کریں۔                                      |
+| `obsidian_open_file`             | Obsidian میں فائل کھولیں (اگر یہ موجود نہیں ہے تو اسے بناتا ہے)۔                            |
+| `obsidian_sync_trigger`          | فوری طور پر دو طرفہ ڈیسک ٹاپ ↔ موبائل والٹ مطابقت پذیری کو متحرک کریں۔                      |
+| `obsidian_sync_resolve_conflict` | مطابقت پذیری کا تنازعہ حل کریں: `local` (موبائل)، `remote` (ڈیسک ٹاپ) یا `keep-both` رکھیں۔ |
 
 > [!NOTE]
-> `obsidian_patch_note` کے targets، `heading | block | frontmatter` میں سے کوئی `targetType`
-> اور `append | prepend | replace` میں سے کوئی `operation` قبول کرتے ہیں، جبکہ
-> `createTargetIfMissing` اختیاری ہے۔ چار `obsidian_sync_*` ٹولز مقامی sync
-> server (بطور ڈیفالٹ `http://127.0.0.1:27781`) سے رابطہ کرتے ہیں اور ان کے لیے sync token درکار ہے۔
+> `obsidian_patch_note` اہداف `heading | block | frontmatter` کے `targetType` اور `append | prepend | replace` کے `operation` اختیاری `createTargetIfMissing` کے ساتھ قبول کرتے ہیں۔ چار `obsidian_sync_*` ٹولز مقامی مطابقت پذیری سرور سے بات کرتے ہیں (`http://127.0.0.1:27781` بذریعہ ڈیفالٹ) اور مطابقت پذیری ٹوکن کی ضرورت ہوتی ہے۔
 
-### Scopes
+### دائرہ کار
 
-پڑھنے کے ٹولز کے لیے `read:obsidian`؛ لکھنے کے ٹولز کے لیے `write:obsidian` درکار ہے۔ نفاذ
-Notion جیسا ہی ہے — اسے `open-sse/mcp-server/server.ts` میں `withScopeEnforcement()` کے ذریعے
-سنبھالا جاتا ہے، `OMNIROUTE_MCP_ENFORCE_SCOPES=true` کے تحت فعال کیا جاتا ہے، جبکہ
-اجازت یافتہ scopes، `OMNIROUTE_MCP_SCOPES` یا API key کے scope context سے حاصل ہوتے ہیں۔ دیکھیں
-[MCP-SERVER.md](./MCP-SERVER.md)۔
+پڑھنے والے ٹولز کے لیے `read:obsidian` ضرورت ہوتی ہے۔ تحریری ٹولز کو `write:obsidian` کی ضرورت ہوتی ہے۔ نفاذ `open-sse/mcp-server/server.ts` میں `withScopeEnforcement()` کے ذریعے ہینڈل کردہ Notion — کی طرح ہے، `OMNIROUTE_MCP_ENFORCE_SCOPES=true` پر گیٹ کیا جاتا ہے اور HTTP/SSE کال کرنے والوں کے لیے مجبور کیا جاتا ہے جن کی API کلید میں `manage`/`admin` کی کمی ہے، `OMNIROUTE_MCP_SCOPES` یا API کلید کے دائرہ کار کے سیاق و سباق سے حاصل کردہ اسکوپس کے ساتھ۔ [MCP-SERVER.md](./MCP-SERVER.md) دیکھیں۔
 
 ## اینڈ پوائنٹس
 

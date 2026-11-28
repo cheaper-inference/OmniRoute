@@ -132,30 +132,30 @@ flyctl deploy
 
 ## 5. 필수 매개변수
 
-이 프로젝트에서는 Fly.io에 최소한 다음 매개변수를 구성할 것을 권장합니다.
+이 프로젝트에서는 Fly.io에서 최소한 다음 매개변수를 구성할 것을 권장합니다.
 
 ### 5.1 검증된 매개변수
 
-다음 매개변수는 현재 `omniroute` 애플리케이션의 실제 배포에서 사용되었습니다.
+다음 매개변수는 현재 `omniroute` 애플리케이션의 실제 배포에 사용되었습니다.
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (프로덕션 환경에서 필수 — WebSocket 브리지 인증에 사용)
+- `OMNIROUTE_WS_BRIDGE_SECRET` ( WebSocket 브리지 인증에 사용되는 — 프로덕션에 필요함)
 - `STORAGE_ENCRYPTION_KEY`
 
-### 5.2 `INITIAL_PASSWORD` 정보
+### 5.2 `INITIAL_PASSWORD` 소개
 
-이 배포에는 필요하지 않으므로 현재 프로젝트에서는 `INITIAL_PASSWORD`를 설정하지 않습니다.
+현재 프로젝트에서는 zqa가 필요하지 않기 때문에 `INITIAL_PASSWORD` 설정하지 않습니다.
 
-설정하지 않은 경우:
+설정되지 않은 경우:
 
-- 시작 로그에 기본 비밀번호가 `CHANGEME`라고 표시됩니다
-- 배포 후 가능한 한 빨리 시스템 설정에서 로그인 비밀번호를 변경해야 합니다
+- 처음 방문 시 온보딩 마법사에서 대시보드 비밀번호를 생성합니다. 비밀번호 단계를 완료하세요. 건너뛰면 대시보드 로그인이 꺼지고 URL 앱에 접근할 수 있는 모든 사람에게 대시보드가 열려 있게 됩니다.
+- Fly의 프록시는 루프백이 아닌 주소에서 앱에 도달하므로 비밀번호를 제출하면 마법사가 일회성 부트스트랩 토큰을 요청합니다. 이 토큰은 해당 순간에 앱이 로그에 인쇄합니다: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. 해당 줄이 로그 밖으로 스크롤된 경우 앱을 다시 시작하고 마법사를 다시 제출하여 새 토큰을 인쇄하세요.
 
-백엔드 비밀번호를 무인 방식으로 초기화하려는 경우 나중에 다음 항목을 추가할 수 있습니다.
+대신 비밀번호를 무인으로 설정하려면 첫 번째 대시보드 방문 전에 비밀번호를 추가하세요(비밀번호가 저장되면 `INITIAL_PASSWORD` 무시됩니다).
 
 - `INITIAL_PASSWORD`
 
@@ -276,7 +276,7 @@ flyctl secrets list -a omniroute
 
 ## 9. 후속 업데이트 및 릴리스
 
-코드를 업데이트한 후의 릴리스 과정은 간단합니다.
+코드 업데이트 후 릴리스 프로세스는 간단합니다.
 
 ```powershell
 git pull
@@ -289,27 +289,27 @@ flyctl deploy
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly는 머신의 롤링 업데이트를 자동으로 수행합니다.
+Fly는 자동으로 머신의 롤링 업데이트를 수행합니다.
 
-### 9.1 포크의 `fly.toml`을 유지하면서 업스트림 저장소 업데이트 추적
+### 9.1 포크의 `fly.toml` 보존하면서 업스트림 저장소 업데이트 추적
 
-현재 저장소가 포크이고 업스트림 `https://github.com/diegosouzapw/OmniRoute`의 업데이트를 동기화하려면 아래 워크플로를 따르세요.
+현재 저장소가 포크이고 업스트림 `https://github.com/cheaper-inference/OmniRoute` 의 업데이트를 동기화하려면 아래 워크플로를 따르세요.
 
-먼저 원격 저장소를 확인합니다.
+먼저 리모컨을 확인하세요.
 
 ```powershell
 git remote -v
 ```
 
-최소한 다음 항목이 표시되어야 합니다.
+최소한 다음을 확인해야 합니다.
 
-- 자체 포크를 가리키는 `origin`
+- 자신의 포크를 가리키는 `origin`
 - 원본 저장소를 가리키는 `upstream`
 
-`upstream`이 구성되어 있지 않다면 추가합니다.
+`upstream` 구성되지 않은 경우 추가하십시오.
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 업스트림과 동기화하기 전에 최신 커밋과 태그를 가져옵니다.
@@ -318,16 +318,16 @@ git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 git fetch upstream --tags
 ```
 
-현재 버전과 업스트림 태그를 확인합니다.
+현재 버전과 업스트림 태그를 확인하세요.
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> 참고: 현재 프로젝트 버전은 `v3.8.0`입니다. 아래의 `v3.4.7` 참조는 과거 예시로만 유지됩니다. 실제 릴리스에는 `:latest` 또는 현재 버전 태그(예: `:v3.8.0`)를 사용하세요.
+> 참고: 현재 프로젝트 버전은 `v3.8.0` 입니다. 아래의 `v3.4.7` 참조는 역사적 예시로만 유지됩니다. 실제 릴리스의 경우 `:latest` 또는 현재 버전 태그(예: `:v3.8.0`)를 사용하세요.
 
-포크의 `fly.toml`을 강제로 유지하면서 최신 업스트림 `main`을 병합하려면 다음 워크플로를 따르세요.
+포크의 `fly.toml` 강제로 유지하면서 최신 업스트림 `main` 병합하려면 다음 워크플로를 따르세요.
 
 ```powershell
 git merge upstream/main
@@ -339,32 +339,32 @@ git push origin main
 
 참고:
 
-- `git merge upstream/main`은 원본 저장소의 최신 코드를 동기화합니다.
-- `git checkout HEAD~1 -- fly.toml`은 병합 이전 포크의 자체 `fly.toml`을 복원합니다.
-- 업스트림에서 `fly.toml`을 수정하지 않았다면 이 단계에서 차이가 발생하지 않습니다.
-- 업스트림에서 `fly.toml`을 수정했다면 이 단계를 통해 Fly 애플리케이션 이름, 볼륨 마운트, 리전 및 기타 포크별 배포 구성이 덮어써지지 않도록 할 수 있습니다.
+- `git merge upstream/main` 원본 저장소의 최신 코드를 동기화합니다.
+- `git checkout HEAD~1 -- fly.toml` 병합 전의 포크 자체 `fly.toml` 복원합니다.
+- 업스트림이 `fly.toml` 수정하지 않은 경우 이 단계에서는 아무런 차이가 발생하지 않습니다.
+- 업스트림이 `fly.toml` 수정한 경우 이 단계를 통해 Fly 애플리케이션 이름, 볼륨 마운트, 지역 및 기타 포크별 배포 구성을 덮어쓰지 않도록 합니다.
 
-특정 릴리스 태그(예: `v3.4.7`)에 맞추려면 먼저 해당 태그가 이미 `upstream/main`에 포함되어 있는지 확인합니다.
+특정 릴리스 태그(예: `v3.4.7`)에 맞춰 정렬하려면 먼저 해당 태그가 이미 `upstream/main` 에 포함되어 있는지 확인하세요.
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-명령이 성공적으로 반환되면 `upstream/main`에 해당 버전이 이미 포함되어 있다는 의미이므로 `upstream/main`을 그대로 병합하면 됩니다.
+성공적인 반환은 `upstream/main` 해당 버전이 이미 포함되어 있음을 의미합니다. 간단하게 `upstream/main` 병합할 수 있습니다.
 
 ### 9.2 업스트림 동기화 후 표준 릴리스 순서
 
-원본 저장소와 동기화한 후에는 다음 권장 릴리스 순서를 따르세요.
+원본 저장소와 동기화한 후 다음 권장 릴리스 순서를 따르세요.
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. 포크의 `fly.toml` 복원
+3. 포크의 `fly.toml` 복원합니다.
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-이것은 현재 프로젝트를 `v3.4.7`로 업그레이드할 때 실제로 사용된 워크플로입니다(이 예시는 과거 버전을 가리키며, 현재 실제 버전은 `v3.8.0`입니다).
+이는 현재 프로젝트를 `v3.4.7` 로 업그레이드할 때 사용되는 실제 작업 흐름입니다(예제는 기록 버전을 참조하고 현재 실제 버전은 `v3.8.0` 입니다).
 
 ---
 
@@ -420,38 +420,38 @@ try {
 
 ## 12. 일반적인 문제
 
-### 12.1 `Secrets` 페이지가 비어 있음
+### 12.1 `Secrets` 페이지가 비어 있습니다
 
-일반적으로 다음 두 가지 원인이 있습니다.
+일반적으로 두 가지 이유가 있습니다.
 
-- 아직 `flyctl secrets set`을 실행하지 않았습니다.
-- 다른 애플리케이션을 보고 있습니다(예: `omniroute`가 아닌 `oroute`).
+- 아직 `flyctl secrets set` 실행하지 않았습니다.
+- 다른 애플리케이션을 보고 있습니다(예: `oroute` 대신 `omniroute`).
 
-### 12.2 `flyctl deploy`에서 `app not found`가 보고됨
+### 12.2 `flyctl deploy` `app not found` 보고한다
 
-먼저 애플리케이션을 생성합니다.
+먼저 애플리케이션을 만듭니다.
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 `fly.toml` 구문 분석 실패
+### 12.3 `fly.toml` 분석 실패
 
-다음 사항을 확인하세요.
+다음을 확인하세요.
 
-- 주석에 깨진 문자가 있는지 여부
-- TOML의 따옴표와 들여쓰기가 올바른지 여부
+- 댓글에 잘못된 문자가 있는지 여부
+- TOML 인용 및 들여쓰기가 올바른지 여부
 
-### 12.4 데이터가 영구적으로 저장되지 않음
+### 12.4 데이터가 지속되지 않음
 
-다음 두 가지를 모두 확인하세요.
+다음을 모두 확인합니다.
 
-- `fly.toml`에 `destination = '/data'`가 포함되어 있는지
-- `DATA_DIR`이 `/data`로 설정되어 있는지
+- `fly.toml` `destination = '/data'` 포함되어 있습니다.
+- `DATA_DIR` `/data` 로 설정되었습니다.
 
 ### 12.5 `INITIAL_PASSWORD` 없이 실행할 수 있나요?
 
-예, 실행할 수 있습니다. 기본 비밀번호인 `CHANGEME`가 대신 사용됩니다. 프로덕션 환경에서는 가능한 한 빨리 백엔드 비밀번호를 변경하는 것이 좋습니다.
+예. `INITIAL_PASSWORD` 설정되지 않은 상태에서 처음 방문 시 온보딩 마법사에서 대시보드 비밀번호를 생성합니다(섹션 5.2에서는 일회성 부트스트랩 토큰 및 비밀번호 단계를 다룹니다).
 
 ---
 

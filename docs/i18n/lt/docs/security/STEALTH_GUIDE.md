@@ -4,11 +4,9 @@
 
 ---
 
-> **Tiesos šaltinis:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Paskutinį kartą atnaujinta:** 2026-09-02 — v3.8.51
-> **Auditorija:** inžinieriai, prižiūrintys konkretiems teikėjams skirtas maskavimo integracijas.
+> **Tiesos šaltinis:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Auditorija:** Inžinieriai, prižiūrintys konkrečiam teikėjui būdingas slaptas integracijas.
 
-„OmniRoute“ integruojamas su teikėjais, kurių perimetro sistemos aktyviai identifikuoja neoficialių klientų skaitmeninius atspaudus (TLS JA3/JA4, antraščių tvarką, JSON turinio struktūrą, vientisumo prieigos raktus). Šiame puslapyje aprašomi „OmniRoute“ suteikiami maskavimo mechanizmai ir jų įgyvendinimo vietos.
+OmniRoute integruojasi su tiekėjais, kurių kraštai aktyviai renka neoficialių klientų pirštų atspaudus (TLS JA3/JA4, antraštės užsakymas, JSON kūno forma, vientisumo žetonai). Šiame puslapyje dokumentuojami slapti paviršiai, kuriuos atskleidžia OmniRoute, ir kur jie naudojami.
 
 ## Teisinė ir etinė pastaba
 
@@ -77,65 +75,68 @@ patikrinkite pirštų atspaudų pakeitimus naudodami aiškiai autorizuotą reali
 
 ---
 
-## Claude Code maskavimo rinkinys
+## Claude Code Stealth Bundle
 
-Kai `cliCompatMode` įjungtas, OmniRoute pertvarko siunčiamas Claude užklausas taip, kad jų nebūtų galima atskirti nuo `claude-cli` srauto. Kartu veikia trys moduliai:
+Kai `cliCompatMode` įjungtas, OmniRoute pertvarko išeinančias Claude užklausas, kad jų nebūtų galima atskirti nuo `claude-cli` srauto. Bendradarbiauja trys moduliai:
 
 ### `claudeCodeFingerprint.ts`
 
-Apskaičiuoja 3 simbolių `cc_version` kontrolinį atspaudą, įterpiamą į atsiskaitymo antraštę:
+Apskaičiuoja 3 simbolių `cc_version` piršto atspaudą, įdėtą atsiskaitymo antraštėje:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (įrašyta tiesiogiai; sutampa su oficialiu klientu)
-- Įvestys: pirmojo naudotojo pranešimo teksto simboliai, esantys 4, 7 ir 20 indeksuose, bei versijos eilutė
-- Išvestis: 3 simbolių šešioliktainis prefiksas
+- `FINGERPRINT_SALT = "59cf53e54c78"` (užkoduotas; atitinka oficialų klientą)
+- Įvestys: simboliai, esantys 4, 7, 20 pirmojo vartotojo pranešimo teksto + versijos eilutėje
+- Išvestis: 3 simbolių šešioliktainis priešdėlis
 
 ### `claudeCodeCCH.ts` (kliento turinio maiša)
 
-Serverio pusės vientisumo patikra, kurią oficiali Claude Code CLI apskaičiuoja naudodama Bun/Zig. OmniRoute ją iš naujo įgyvendina su `xxhash-wasm`:
+Serverio pusės vientisumo patikrinimas oficialus Claude kodas CLI apskaičiuojamas naudojant Bun/Zig. OmniRoute reimplements su `xxhash-wasm`:
 
-1. Serializuoti turinį naudojant `cch=00000;` vietos rezervavimo reikšmę
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Nuliais iš kairės papildytas 5 simbolių mažųjų raidžių šešioliktainis skaičius
-4. Pakeisti `cch=00000;` apskaičiuotu žetonu
+1. Serijuokite korpusą naudodami `cch=00000;` rezervuotąją vietą
+2. Sukurkite maišos rodinį naudodami du paprasto teksto pakeitimus šia tvarka (`hashView()`):
+   - kiekvienas `/"model":"[^"]*"/g` atitikmuo tampa `"model":""` — atitikmuo sustoja ties pirmuoju `"`, todėl reikšmė su ištrūkusia citata (`"model":"a\"b"`) ištuštinama tik iki tos kabutės, kaip tai daro klientas
+   - pašalinamos visos `/"max_tokens":\d+,|,?"max_tokens":\d+/g` atitiktys — tik skaitinės reikšmės bet kuriame gylyje
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Nulinis paminkštinimas 5 simbolių mažosiomis šešiakampėmis raidėmis
+5. Pakeiskite `cch=00000;` apskaičiuotu prieigos raktu
 
 Konstantos:
 
-- Pradinė reikšmė: `0x6e52736ac806831e`
-- Šablonas: `/\bcch=([0-9a-f]{5});/`
+- Pradinė versija: `0x4d659218e32a3268` (atitinka Claude kodų 2.1.252 ir 2.1.322 atgalinius fiksavimus)
+- Raštas: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Po pirmojo „jautrių“ klientų pavadinimų simbolio įterpia Unicode **nulinio pločio jungiklį** (`U+200D`), kad aukštesnio lygio filtrai negalėtų jų aptikti naudodami grep. Numatytasis žodžių sąrašas:
+Įterpia Unicode** nulinio pločio stalius** (`U+200D`) po pirmojo „jautrių“ klientų pavadinimų simbolio, todėl prieš srovę esantys filtrai negali jų atpažinti. Numatytasis žodžių sąrašas:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Taikoma: `system` blokams, visam `messages[].content` ir `tools[].description` / `tools[].function.description` turiniui. Operatorius gali pakeisti naudodamas `setSensitiveWords()`.
+Taikoma: `system` blokams, visiems `messages[].content` ir `tools[].description` / `tools[].function.description`. Operatoriaus nepaisoma per `setSensitiveWords()`.
 
 ### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` teikėjai
 
-Trečiųjų šalių Anthropic tarpinėms tarnyboms, priimančioms tik „tikrą Claude Code“ srautą:
+Trečiųjų šalių Anthropic relės, kurios priima tik „tikrojo Claude kodo“ srautą:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- Pagal numatytuosius nustatymus `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- Kiekvieno ryšio perjungiklis „Įjungti redact-thinking beta“ prideda `redact-thinking-2026-02-12`, kai CC Compatible aukštesnio lygio tarnybai konkrečiai reikia redaguotų samprotavimo srautų
-- Kiekvieno ryšio perjungiklis „Įjungti apibendrinto samprotavimo rodymą“ išsaugo `providerSpecificData.requestDefaults.summarizeThinking` ir prideda `display: "summarized"` prie CC Compatible samprotavimo užklausų, kuriose rodymo režimas dar nenustatytas
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` pagal nutylėjimą
+- Kiekvienam ryšiui skirtas perjungiklis „Įgalinti redaguoti mąstymo beta versiją“ prideda `redact-thinking-2026-02-12` kai CC suderinamai prieš srovę konkrečiai reikalauja redaguotų mąstymo srautų
+- Kiekvienam ryšiui skirtas perjungiklis „Įgalinti apibendrintą mąstymo rodymą“ išsaugo `providerSpecificData.requestDefaults.summarizeThinking` ir prideda `display: "summarized"` prie CC Suderinamos mąstymo užklausos, kurios dar nenustatė rodymo režimo
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x šeima)
 - Numatytasis kelias: `/v1/messages?beta=true`
 
-Susiję to paties rinkinio moduliai:
+Seseriniai moduliai tame pačiame pakete:
 
-- `claudeCodeConstraints.ts` — temperatūros ir podėlio valdymo taisyklės
-- `claudeCodeToolRemapper.ts` — įrankių pavadinimų persiejimas
-- `claudeCodeExtraRemap.ts` — papildomas naudingosios apkrovos normalizavimas
+- `claudeCodeConstraints.ts` — temperatūra + talpyklos valdymo taisyklės
+- `claudeCodeToolRemapper.ts` — įrankio pavadinimo pertvarkymas
+- `claudeCodeExtraRemap.ts` — papildomos naudingosios apkrovos normalizavimas
 
 ---
 
@@ -184,7 +185,7 @@ Abu teikėjai autentifikuojasi naudodami Antigravity produkto OAuth seansą, api
 
 | Teikėjo ID | Prietaisų skydelio pavadinimas | Kredencialas                                                                          |
 | ---------- | ------------------------------ | ------------------------------------------------------------------------------------- |
-| `gemini`   | Gemini (Google AI Studio)      | Gemini API raktas iš Google AI Studio (galima nemokama pakopa)                        |
+| `gemini`   | Gemini (Google AI Studio)      | Gemini API raktas iš Google AI Studio (galima nemokamai)                              |
 | `vertex`   | Viršūnė AI                     | Paslaugos paskyra JSON, OAuth prieigos raktas arba Vertex Express API raktas (Gemini) |
 
 Šie teikėjai naudoja kredencialų Google problemas API prieigai, skirtingai nei Antigravity produkto seanso metu. Jomis ne kiekvienas naudojimas atitinka reikalavimus arba pašalinama vykdymo rizika: kiekvienai jų taikomos atskiros sąlygos, kurias operatorius turi patikrinti, kad būtų naudojamasi. Pavyzdžiui, [Gemini API papildomos paslaugų teikimo sąlygos](https://ai.google.dev/gemini-api/terms) leidžia teikti tik mokamas paslaugas, kai API klientai yra prieinami vartotojams Europos ekonominėje erdvėje, Šveicarijoje arba Jungtinėje Karalystėje, o į nemokamoms paslaugoms išsiųstas turinys gali būti naudojamas Google produktams tobulinti. Vietoj to Vertex AI patenka į Google Cloud sąlygas ( [specifinės paslaugos sąlygos](https://cloud.google.com/terms/service-terms) ). Kainos ir kvotos atitinka šias API sąlygas, o ne Antigravity prenumeratą.
@@ -195,7 +196,7 @@ Lietimo taškai:
 
 - `open-sse/executors/antigravity.ts` — skaito `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — kredencialų santechnika
-- Originalus incidento pranešimas: Diskusija [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Originalus incidento pranešimas: Diskusija [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

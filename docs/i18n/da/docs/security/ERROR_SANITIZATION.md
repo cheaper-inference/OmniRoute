@@ -4,13 +4,7 @@
 
 ---
 
-> **Sandhedskilde:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` og de offentlige builders i `open-sse/utils/error.ts`
-> **Tests:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Senest opdateret:** 2026-09-02 — v3.8.51
-> **Målgruppe:** Alle udviklere, der arbejder med fejlsvar (HTTP-ruter, SSE-streams, executors, MCP-handlers).
-> **Status:** **OBLIGATORISK** for enhver kodesti, der returnerer en fejlmeddelelse til en klient.
+> **Sandhedens kilde:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` og de offentlige bygherrer i `open-sse/utils/error.ts`** Tester:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Målgruppe:** Enhver ingeniør, der rører ved fejlsvar (HTTP -ruter, SSE streams, udførere, MCP handlere).** Status:****MANDATORY** for hver kodesti, der returnerer en fejlmeddelelse til en klient.
 
 ## Hvorfor dette findes
 

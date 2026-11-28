@@ -4,12 +4,9 @@
 
 ---
 
-> **Legutóbb frissítve:** 2026-08-28 — v3.8.51
-> Egyszerűsített kiadási folyamat, amely a Claude Code készségeit használja az automatizáláshoz.
+> Áramvonalas kiadási folyamat, amely kihasználja Claude Code készségeit az automatizáláshoz.
 >
-> **Tartsd zölden a várólistát/ágat a kiadások között:** lásd: [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs` család + `npm run check:release-green` + `/babysit` + éjszakai futtatás). Ennek rendszeres futtatása
-> — különösen **ezen ellenőrzőlista előtt** — biztosítja, hogy a kiadási PR zölden induljon.
+> **A queue/branch zöld legyen a kiadások között:** lásd [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` family + `npm run check:release-green` + `/babysit` + nightly). Futás ezt időszakosan — és különösen** előtt** ez a — ellenőrzőlista zöld színűvé teszi a PR kiadást.
 
 ## Röviden
 
@@ -58,9 +55,11 @@ Az npm-publish munkafolyamat már nem tesz közzé közvetlenül: elindítja a c
 
 **Törött műtárgy-játékkönyv (változatlan):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` mint alapértelmezett reflex (perc, megfordítható); `npm unpublish` csak a 72h/no-dependents ablakon belül, és soha nem az első lépésként. Docker: soha ne írjon át verziócímkét. — rollback `latest` az utolsó jó kivonathoz irányítja.
 
-**Docker Hub `latest` (minden stabil SemVer közzétételhez szükséges):** a `docker-publish` munkafolyamatnak címkéznie kell** mindkét** `X.Y.Z` és ha `should-promote-latest.sh` egyetért, ez a legmagasabb stabil SemVer, `:latest` a** ugyanaz az emésztés** . A feladat elvégzése után: A Hub `latest` kivonat megegyezik az új SemVer kivonattal, és `last_updated` áthelyezve. Ne hagyja `:latest` egy régebbi builden, miközben a kiadási megjegyzések csak a git-en létező javításokról beszélnek. Gyorsindítások összeállítása használja `:latest`; GitOps folyamatosan rögzítenie kell `X.Y.Z`. Lásd [Docker kiadási csatornák](../guides/DOCKER_GUIDE.md#release-channels) és #10317.
+**Docker Hub `latest` (minden stabil SemVer közzétételhez szükséges):** a `docker-publish` munkafolyamatnak címkéznie kell** mindkét** `X.Y.Z` és ha `should-promote-latest.sh` egyetért, ez a legmagasabb stabil SemVer, `:latest` a** ugyanaz az emésztés** . A feladat elvégzése után: Hub `latest` kivonat megegyezik az új SemVer kivonattal, és `last_updated` áthelyezve. Ne hagyja `:latest` egy régebbi builden, miközben a kiadási megjegyzések csak a git-en létező javításokról beszélnek. Gyorsindítások összeállítása használja `:latest`; GitOps folyamatosan rögzítenie kell `X.Y.Z`. Lásd [Docker kiadási csatornák](../guides/DOCKER_GUIDE.md#release-channels) és #10317.
 
-**Docker Hub szervezeti adattár (`cheaperinference/omniroute`):** Docker Hub nem tud áthelyezni egy adattárat a névterek között, ezért `diegosouzapw/omniroute` megőrzi lehívási előzményeit és minden kiadást, a `docker-publish` `mirror-org-dockerhub` feladata pedig minden egyes kiadott verziót (és előléptetéskor `:latest` ) átmásolja a `ghcr.io/cheaper-inference/omniroute` ból a szervezeti lerakatba. Szüksége van a `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` titkaira; nélkülük a feladat zöld marad, a "Docker Hub org mirror kihagyva" figyelmeztetéssel, és a többi registry normálisan publikál. A kiadott verzió későbbi közzétételéhez futtassa** Műveletek → Docker kép tükrözése a Docker Hub org-hoz → Munkafolyamat futtatása** `version=X.Y.Z` vel (és `promote_latest` a legmagasabb stabil verziónál): a meglévő képeket másolja, nincs újraépítés.
+**Docker Hub szervezeti adattár (`cheaperinference/omniroute`):** Docker Hub nem tud áthelyezni egy adattárat a névterek között, ezért `diegosouzapw/omniroute` megőrzi lehívási előzményeit és minden kiadást, a `docker-publish` `mirror-org-dockerhub` feladata pedig minden egyes kiadott verziót (és előléptetéskor `:latest` ) átmásolja a `ghcr.io/cheaper-inference/omniroute` ból a szervezeti lerakatba. Szüksége van a `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` titkaira; nélkülük a feladat zöld marad, a "Docker Hub org mirror kihagyva" figyelmeztetéssel, és a többi registry normálisan publikál. A kiadott verzió későbbi közzétételéhez futtassa** Műveletek → Docker kép tükrözése a Docker Hub org-hoz → Munkafolyamat futtatása** `version=X.Y.Z` vel (és `promote_latest` a legmagasabb stabil verziónál): a meglévő képeket másolja, nincs újraépítés. Ennek a tárháznak Docker hub áttekintése kézzel van beállítva: az azt szerkesztõ API elutasítja a szervezeti hozzáférési tokeneket.
+
+Ugyanez a munkafolyamat minden kiadást a `ghcr.io/diegosouzapw/omniroute` örökölt GHCR csomagba másol 2027-06-30-ig, így a még mindig hozzá rögzített telepítések folyamatosan frissülnek; indexe "mozgatott `ghcr.io/cheaper-inference/omniroute`" leírást tartalmaz. Szüksége van a `GHCR_LEGACY_TOKEN` secret-re (a `diegosouzapw` klasszikus személyes hozzáférési tokenje a `write:packages`); enélkül a feladat kihagyja a "Régi GHCR tükör kihagyva" figyelmeztetéssel.
 
 ## Gyorsított hotfix-folyamat (`hotfix` címke)
 
@@ -150,8 +149,8 @@ Törőmódosítások: a hatókör után adjon hozzá `BREAKING CHANGE:` lábléc
 
 ### Dokumentáció
 
-- [ ] `npm run check:docs-sync` megfelel (automatikus futás előzetes véglegesítéssel)
-- [ ] `npm run check:docs-all` passzol (ernyő: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-sync` igazolványok (automatikus futás előzetes véglegesítéssel)
+- [ ] `npm run check:docs-all` passzol. Tanácsadó `check:deprecated-versions` -je megjelöli a kifejezetten OmniRoute (3.6.x és korábbi) tulajdonított verziókat, és figyelmen kívül hagyja a dátumokat.
 - [ ] `npm run check:env-doc-sync` kilép 0 — kód ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env szerződés sértetlen
 - [ ] `npm run check:doc-links` kilép 0 — nincs törött belső leárazási hivatkozás a szerkezetátalakítás után
 - [ ] `docs/architecture/ARCHITECTURE.md` értékelte a következőt: storage/runtime drift
@@ -211,7 +210,7 @@ A repository három különálló kimeneti könyvtárat használ — soha ne kev
 | `.build/` | Köztes — `next build` kimenet létrehozása (`distDir`)                | Nem (gitignorálva) |
 | `dist/`   | Szállítható npm — köteg, amelyet `assembleStandalone` állított össze | Nem (gitignorálva) |
 
-> **Kezelői megjegyzés:** a távoli VPS képkönyvtár `/usr/lib/node_modules/omniroute/app/` marad. Csak a** in-repo** build kimenet áthelyezve (`app/` → `dist/`). A készségek telepítése rsync `dist/` tartalmat a távoli `app/` dir — nem igényel VPS elérési utat.
+> **Üzemeltetői megjegyzés:** a távoli VPS képkönyvtár `/usr/lib/node_modules/omniroute/app/` marad. Csak a** in-repo** build kimenet áthelyezve (`app/` → `dist/`). A készségek telepítése rsync `dist/` tartalmat a távoli `app/` dir — nem igényel VPS elérési utat.
 
 **Egyépületes áramlás:**
 
@@ -230,7 +229,7 @@ NOT futtassa `npm run build` majd egy külön `npm run build:cli` — telepíté
 - [ ] `npm run build:release` sikerül és `dist/BUILD_SHA` == `git rev-parse --short HEAD`
 - [ ] `npm run check:pack-artifact` tiszta — nincs `app.__qa_backup`, `scripts/scratch`, `package-lock.json` vagy más helyi maradék
 - [ ] `dist/server.js` a build után létezik
-- [ ] Opcionális helyi csomagolt futásidejű füst: `npm run dev:candidate -- validate` után a `npm run dev:candidate -- build` elindítja a csomagolt tarballt egy izolált `DATA_DIR`, és ellenőrzi `/api/health` + `/v1/models` (lásd [a Golden Path közreműködést](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
+- [ ] Opcionális helyi csomagolt futásidejű füst: `npm run dev:candidate -- validate` után a `npm run dev:candidate -- build` elindítja a csomagolt tarballt egy izolált `DATA_DIR`, és ellenőrzi `/api/health` + `/v1/models` (lásd [a Golden Path közreműködését](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
 ### Címkézés és kiadás
 
@@ -256,9 +255,9 @@ A készségek telepítése a könnyű rsync flow használatával — no `npm pac
   - `/deploy-vps-both-cc` — mindkettő
 - [ ] Üzembe helyezés előtt erősítse meg `dist/BUILD_SHA` == `git rev-parse --short HEAD`
 - [ ] A buildnek ott kell futnia, ahol `node_modules` valódi (fő pénztár vagy `npm ci`'d munkafa — NOT szimbolizált munkafa)
-- [ ] Füstvizsgálat telepített példánya:
+- [ ] Füstteszt telepített példánya:
   - Nyissa meg a `/dashboard/health` →
-  - Futtasson egy `/v1/chat/completions` kérést egy ismert szolgáltatóval szemben
+  - Futtasson egy `/v1/chat/completions` kérést egy ismert szolgáltató ellen
   - Ellenőrizze, hogy `/api/monitoring/health` visszaadja-e `CLOSED` megszakítókat
   - MCP transports válaszának megerősítése (`/mcp` HTTP, `/mcp-sse` SSE)
 
@@ -279,7 +278,7 @@ A Radar bejelentését szándékosan követték el `active: false`. Az aktivál�
 - [ ] Telepítse és füstölje ki a OSS Radar útvonalakat úgy, hogy `RADAR_ENABLED` alapértelmezés szerint továbbra is ki van kapcsolva
 - [ ] Füstölje el `GET /planos`, `/termos`, `/privacidade` és `/reembolso` elnevezést a Radar gazdagépen
 - [ ] Lemezkezelő identity/contact/address és tulajdonos által jóváhagyott jogi felülvizsgálat a magánszolgáltatásban
-- [ ] A Stripe Checkout gyakorlatot és az aláírt webhookot csak teszt módban végezze
+- [ ] A Stripe Checkout gyakorlat és az aláírt webhook csak teszt módban használható
 - [ ] Gyakoroljon egy titkosított tranzakciós e-mail kézbesítést a jóváhagyott sender/domain val
 - [ ] Bizonyítsa be a biztonsági mentés visszaállítását és egy felügyelt, költségvetéssel korlátozott kutatási futtatást
 - [ ] Az adományozási bizonyítékok elfogadása előtt hagyja jóvá a BRL/PIX felülvizsgálati szabályzatát
@@ -399,7 +398,7 @@ A fejlesztési bump commit git plumbing segítségével épül fel (nem érinti 
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

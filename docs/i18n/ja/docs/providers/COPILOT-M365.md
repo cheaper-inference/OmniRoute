@@ -223,11 +223,11 @@ Microsoft 365 プロバイダーの **接続を追加** または **接続を編
 
 `copilot-m365-web` が **Dashboard → Providers** で有効になっていることを確認してください。一部のティアでは、プロバイダーがデフォルトで非表示になっている場合があります。
 
-## 参考資料
+## 参考文献
 
-- Issue: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- ディスカッション: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- ソース: `src/shared/constants/providers/web-cookie.ts`（プロバイダー定義）
-- HAR インポート: `src/shared/utils/m365HarImport.ts`
-- 認証情報フィールド: `src/shared/providers/webSessionCredentials.ts`
-- ティアモーダル: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- 問題: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- ディスカッション: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- 出典: `src/shared/constants/providers/web-cookie.ts` (プロバイダー定義)
+- HARインポート: `src/shared/utils/m365HarImport.ts`
+- 資格情報フィールド: `src/shared/providers/webSessionCredentials.ts`
+- 階層モーダル: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

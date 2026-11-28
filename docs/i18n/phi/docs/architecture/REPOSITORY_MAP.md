@@ -4,9 +4,9 @@
 
 ---
 
-> **Ano ang naninirahan kung saan: bawat sinusubaybayang nangungunang antas na direktoryo at root file, na may layuning isang linya.** Huling na-update: 2026-11-13 (OmniRoute v3.8.54)
+> **Ano ang naninirahan kung saan: bawat sinusubaybayang nangungunang antas na direktoryo at root file, na may layuning isang linya.**
 >
-> Gamitin ang mapang ito upang mahanap ang iyong paraan sa paligid ng codebase, pagkatapos ay sundin ang mga link sa mga nakalaang doc. Sinukat ang mga bilang ng file gamit ang `git ls-files` sa petsa sa itaas. Nagbabago sila sa halos bawat paglabas, kaya ituring sila bilang mga order ng magnitude.
+> Gamitin ang mapang ito upang hanapin ang iyong paraan sa paligid ng codebase, pagkatapos ay sundin ang mga link sa mga nakalaang doc. Ang mga bilang ng file ay nagmumula sa `git ls-files` at nagbabago sa halos bawat paglabas. Tratuhin ang mga ito bilang mga order ng magnitude.
 
 ## Puno ng pinakamataas na antas
 

@@ -173,17 +173,17 @@ DELETE /api/v1/agents/tasks/[id]
 | 사용 사례        | 에이전트 간 협업, 서비스 형태의 스마트 라우팅                                    | "저장소 Y에 기능 X 구현" 위임    |
 | 인증             | `/a2a`에는 선택적 `OMNIROUTE_API_KEY`, `/api/a2a/*` REST 헬퍼에는 관리 인증 필요 | 항상 관리 인증 필요              |
 
-## 통합 예시
+## 통합 예
 
-### OmniRoute의 A2A 기능 검색
+### OmniRoute 의 A2A 기능 살펴보기
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-6개의 모든 스킬, 전송 방식 및 버전이 포함된 Agent Card를 반환합니다.
+6가지 스킬, 전송 및 버전이 모두 포함된 에이전트 카드를 반환합니다.
 
-### OmniRoute를 A2A 에이전트로 호출
+### A2A 에이전트로 OmniRoute 호출합니다.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -199,14 +199,14 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-### ACP를 통해 설치된 CLI 에이전트 목록 조회
+### ACP 통해 설치된 CLI 에이전트 나열
 
 ```bash
 curl http://localhost:20128/api/acp/agents \
   -H "Authorization: Bearer <api-key>"
 ```
 
-### 사용자 지정 CLI 에이전트 추가
+### 사용자 정의 CLI 에이전트 추가
 
 ```bash
 curl -X POST http://localhost:20128/api/acp/agents \
@@ -222,7 +222,7 @@ curl -X POST http://localhost:20128/api/acp/agents \
   }'
 ```
 
-### Cloud Agent 작업 제출
+### 클라우드 에이전트 작업 제출
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/agents/tasks \

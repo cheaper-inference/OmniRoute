@@ -4,11 +4,9 @@
 
 ---
 
-> **Sumber kebenaran:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Kemas kini terakhir:** 2026-09-02 — v3.8.51
-> **Khalayak:** Jurutera yang menyelenggara integrasi penyamaran khusus penyedia.
+> **Sumber kebenaran:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Khalayak:** Jurutera yang mengekalkan penyepaduan siluman khusus pembekal.
 
-OmniRoute berintegrasi dengan penyedia yang bahagian pinggirannya secara aktif mengecap jari klien tidak rasmi (TLS JA3/JA4, susunan pengepala, bentuk badan JSON, token integriti). Halaman ini mendokumentasikan permukaan penyamaran yang disediakan oleh OmniRoute dan lokasi pelaksanaannya.
+OmniRoute berintegrasi dengan penyedia yang tepinya secara aktif cap jari pelanggan bukan rasmi (TLS JA3/JA4, pesanan pengepala, bentuk badan JSON, token integriti). Halaman ini mendokumenkan permukaan stealth OmniRoute didedahkan dan tempat ia dilaksanakan.
 
 ## Notis Undang-undang dan Etika
 
@@ -74,9 +72,9 @@ sebelum mendakwa kesetaraan dengan pelayar huluan.
 
 ---
 
-## Himpunan Mod Senyap Claude Code
+## Claude Code Stealth Bundle
 
-Apabila `cliCompatMode` dihidupkan, OmniRoute membentuk semula permintaan Claude keluar supaya tidak dapat dibezakan daripada trafik `claude-cli`. Tiga modul bekerjasama:
+Apabila `cliCompatMode` dihidupkan, OmniRoute membentuk semula permintaan Claude keluar supaya ia tidak dapat dibezakan daripada trafik `claude-cli`. Tiga modul bekerjasama:
 
 ### `claudeCodeFingerprint.ts`
 
@@ -86,53 +84,56 @@ Mengira cap jari `cc_version` 3 aksara yang dibenamkan dalam pengepala pengebila
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (dikod keras; sepadan dengan klien rasmi)
-- Input: aksara pada indeks 4, 7, 20 daripada teks mesej pengguna pertama + rentetan versi
-- Output: awalan heks 3 aksara
+- `FINGERPRINT_SALT = "59cf53e54c78"` (berkod keras; sepadan dengan pelanggan rasmi)
+- Input: aksara pada indeks 4, 7, 20 daripada teks mesej pengguna pertama rentetan versi +
+- Output: awalan hex 3-char
 
-### `claudeCodeCCH.ts` (Cincangan Kandungan Klien)
+### `claudeCodeCCH.ts` (Cincang Kandungan Pelanggan)
 
-Semakan integriti pada pelayan yang dikira oleh Claude Code CLI rasmi melalui Bun/Zig. OmniRoute melaksanakannya semula dengan `xxhash-wasm`:
+Integriti sebelah pelayan semak Kod Claude rasmi CLI dikira melalui Bun/Zig. OmniRoute reimplements dengan `xxhash-wasm`:
 
-1. Sirikan isi dengan ruang letak `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Heks huruf kecil 5 aksara dengan pendahuluan sifar
-4. Gantikan `cch=00000;` dengan token yang dikira
+1. Sirikan badan dengan pemegang tempat `cch=00000;`
+2. Bina paparan cincang dengan dua penggantian teks biasa, dalam susunan ini (`hashView()`):
+   - setiap padanan `/"model":"[^"]*"/g` menjadi `"model":""` — perlawanan berhenti pada `"` pertama, jadi nilai dengan petikan yang dilepaskan (`"model":"a\"b"`) dikosongkan hanya sehingga petikan itu, seperti yang dilakukan oleh pelanggan
+   - setiap padanan `/"max_tokens":\d+,|,?"max_tokens":\d+/g` dikeluarkan — hanya nilai angka, pada sebarang kedalaman
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Hex huruf kecil 5 aksara berlapik sifar
+5. Gantikan `cch=00000;` dengan token yang dikira
 
 Pemalar:
 
-- Benih: `0x6e52736ac806831e`
+- Benih: `0x4d659218e32a3268` (memadankan tangkapan gelung balik Kod Claude 2.1.252 dan 2.1.322)
 - Corak: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Menyisipkan **penyambung lebar sifar** Unicode (`U+200D`) selepas aksara pertama nama klien yang "sensitif" supaya penapis huluan tidak dapat mencarinya dengan grep. Senarai perkataan lalai:
+Memasukkan Unicode** penyambung lebar sifar** (`U+200D`) selepas aksara pertama nama pelanggan "sensitif" supaya penapis huluan tidak dapat menangkapnya. Senarai perkataan lalai:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Digunakan pada: blok `system`, semua `messages[].content`, dan `tools[].description` / `tools[].function.description`. Boleh diubah oleh pengendali melalui `setSensitiveWords()`.
+Digunakan pada: blok `system`, semua `messages[].content`, dan `tools[].description` / `tools[].function.description`. Boleh diganti oleh operator melalui `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — penyedia `anthropic-compatible-cc-*`
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-Untuk geganti Anthropic pihak ketiga yang hanya menerima trafik "Claude Code sebenar":
+Untuk geganti Anthropic pihak ketiga yang hanya menerima trafik "Kod Claude sebenar":
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` secara lalai
-- Togol "Enable redact-thinking beta" bagi setiap sambungan menambahkan `redact-thinking-2026-02-12` apabila huluan CC Compatible secara khusus memerlukan strim pemikiran yang disunting
-- Togol "Enable summarized thinking display" bagi setiap sambungan menyimpan `providerSpecificData.requestDefaults.summarizeThinking` dan menambahkan `display: "summarized"` pada permintaan pemikiran CC Compatible yang belum menetapkan mod paparan
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (keluarga Opus/Sonnet 4.x)
+- Togol setiap sambungan "Dayakan suntingan beta" menambah `redact-thinking-2026-02-12` apabila CC Serasi huluan memerlukan aliran pemikiran yang disunting secara khusus
+- Togol setiap sambungan "Dayakan paparan pemikiran ringkas" menyimpan `providerSpecificData.requestDefaults.summarizeThinking` dan menambahkan `display: "summarized"` pada CC Permintaan pemikiran serasi yang belum menetapkan mod paparan
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x keluarga)
 - Laluan lalai: `/v1/messages?beta=true`
 
-Modul berkaitan dalam himpunan yang sama:
+Modul kakak dalam berkas yang sama:
 
-- `claudeCodeConstraints.ts` — peraturan suhu + kawalan cache
+- `claudeCodeConstraints.ts` — suhu + peraturan kawalan cache
 - `claudeCodeToolRemapper.ts` — pemetaan semula nama alat
-- `claudeCodeExtraRemap.ts` — penormalan muatan tambahan
+- penormalan muatan tambahan `claudeCodeExtraRemap.ts` —
 
 ---
 
@@ -192,7 +193,7 @@ Titik sentuh:
 
 - `open-sse/executors/antigravity.ts` — membaca `process.env.ANTIGRAVITY_CREDITS`
 - paip kelayakan `src/lib/oauth/providers/antigravity.ts` —
-- Laporan kejadian asal: Perbincangan [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Laporan kejadian asal: Perbincangan [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

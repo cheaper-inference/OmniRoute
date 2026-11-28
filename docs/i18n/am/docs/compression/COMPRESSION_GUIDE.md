@@ -283,9 +283,9 @@ curl -X POST http://localhost:20128/api/context/rtk/test \
 
 ---
 
-## የመጭመቂያ ስታቲስቲክሶች
+## የመጭመቂያ ስታቲስቲክስ
 
-እያንዳንዱ የተጨመቀ ጥያቄ በአገልጋዩ ሎጎች ውስጥ ስታቲስቲክሶችን ያካትታል፦
+እያንዳንዱ የታመቀ ጥያቄ በአገልጋይ ምዝግብ ማስታወሻዎች ውስጥ ስታቲስቲክስን ያካትታል፡-
 
 ```json
 {
@@ -323,36 +323,24 @@ curl -X POST http://localhost:20128/api/context/rtk/test \
 
 ---
 
-## የላቁ የማመቅ ስርዓቶች
+## የላቀ መጭመቂያ ስርዓቶች
 
-ከላይ ከተገለጹት 7 ሁነታዎች ባሻገር (ምንጩ በተጨማሪ `codex-responses` እና
-`omniglyph` ሁነታዎችን ይቀበላል፤ ይህ መመሪያ ግን አይሸፍናቸውም)፣ ከታች ያሉት ክፍሎች
-በእነዚያ ሁነታዎች ውስጥ ወይም ከእነሱ ጎን ለጎን የሚሰሩ ባህሪያትን ይሸፍናሉ፦ Tool Result Compression እና Progressive Aging
-የኃይለኛው ሞተር ደረጃ 1 እና 2 ናቸው (Aggressive ሁነታ እና በተደራራቢ ቧንቧ መስመር ውስጥ ያለ `aggressive` ደረጃ)፣
-Stacked Pipeline ደግሞ Stacked ሁነታ የሚሰራበት መንገድ ነው፤ Cache-Aware Compression
-ማመቅ በርቶ ሳለ ለመሸጎጫ አቅራቢዎች `aggressive` እና `ultra`ን ወደ `standard` ዝቅ ያደርጋል፤
-Caveman Output Mode እና Output Styles ደግሞ በነባሪነት የጠፉ፣ በምርጫ የሚነቁ የስርዓት-መጠየቂያ መመሪያዎች ሲሆኑ፣
-ጥያቄውን ከማመቅ ይልቅ የሞዴሉን ውጤት ይቀርጻሉ።
+ከላይ ከተገለጹት 7 ሁነታዎች ባሻገር (ምንጩ ደግሞ `codex-responses` እና `omniglyph` ሁነታዎችን ይቀበላል፣ ይህ መመሪያ የማይሸፍነውን)፣ ከታች ያሉት ክፍሎች ከውስጥም ሆነ ከእነዚያ ሁነታዎች ጋር አብረው የሚሰሩ ባህሪያትን ይሸፍናሉ፡ የመሳሪያ ውጤት መጭመቂያ እና ፕሮግረሲቭ እርጅና የአግሪ ሞተር ደረጃዎች 1 እና 2 (አግgressive mode እና `aggressive` ደረጃ የተቆለለ የቧንቧ መስመር)፣ የተቆለለ የቧንቧ መስመር እንዴት እንደሚሰራ መጭመቂያው በርቶ እያለ `aggressive` እና `ultra` ወደ `standard` አቅራቢዎችን መሸጎጫ ዝቅ ያደርጋል፣ እና Caveman Output Mode እና የውጤት ስልቶች መርጠው የገቡ ስርዓት-ፈጣን መመሪያዎች በነባሪነት ጠያቂውን ከመጨመቅ ይልቅ የሞዴሉን ውፅዓት የሚቀርፁ ናቸው።
 
-### መሸጎጫን የሚያገናዝብ ማመቅ
+### መሸጎጫ-አዋቂ መጭመቂያ
 
-አንዳንድ አቅራቢዎች (ለምሳሌ Anthropic በመጠየቂያ መሸጎጥ) **የመጠየቂያ መሸጎጥን**
-ይደግፋሉ፤ ይህም ወጪንና መዘግየትን ለመቀነስ የመጠየቂያውን ክፍሎች በመሸጎጫ እንዲያስቀምጡ ያስችላቸዋል።
-መሸጎጥ ሲነቃ፣ ኃይለኛ ማመቅ በመሸጎጫ የተቀመጡ ቶከኖችን ስለሚቀይርና
-መሸጎጫውን ዋጋ ቢስ ስለሚያደርግ፣ አፈጻጸሙን በእርግጥ **ሊጎዳ** ይችላል።
+አንዳንድ አቅራቢዎች (እንደ Anthropic በፈጣን መሸጎጫ) ድጋፍ** ፈጣን መሸጎጫ** ወጪዎችን እና መዘግየትን ለመቀነስ የጥያቄውን ክፍሎች እንዲሸጎጡ ያስችላቸዋል። መሸጎጥ ሲነቃ፣ ኃይለኛ መጨናነቅ በእርግጥ ይችላል።** ተጎዳ** አፈጻጸሙ የተሸጎጡ ቶከኖችን ስለሚቀይር መሸጎጫውን ዋጋ ስለሚያጠፋ ነው።
 
-የ`cachingAware.ts` ሞጁል **የመሸጎጫ አውድን በመለየት** እና
-በዚያ መሠረት **የማመቅ ስልቱን በማስተካከል** ይህን ችግር ይፈታል።
+የ `cachingAware.ts` ሞጁል ይህንን በ** መሸጎጫ አውድ መፈለግ** እና** የመጨመቂያ ስልቱን ማስተካከል** በዚህ መሠረት.
 
 #### እንዴት እንደሚሰራ
 
-1. **የመሸጎጫ አውድን ይለያል** — የጥያቄውን አካል ለ`cache_control` ምልክቶች ይቃኛል
-2. **የመሸጎጫ አቅራቢዎችን ይለያል** — ዒላማው አቅራቢ መሸጎጥን የሚደግፍ መሆኑን ይፈትሻል
-3. **ስልቱን ያስተካክላል** — ለመሸጎጫ አቅራቢዎች `aggressive`/`ultra`ን ወደ `standard` ዝቅ ያደርጋል
-4. **የስርዓት መጠየቂያውን ይዘላል** — የስርዓት መጠየቂያዎች ብዙውን ጊዜ ይሸጎጣሉ፣ ስለዚህ አያምቃቸውም
+1. **መሸጎጫ አውድ አግኝ** — የጠያቂውን አካል ለ `cache_control` ማርከሮች ይቃኛል።
+2. **መሸጎጫ አቅራቢዎችን ይለዩ** — ኢላማ አቅራቢው መሸጎጫን የሚደግፍ መሆኑን ያረጋግጣል
+3. **ስልት አስተካክል።** — ለመሸጎጫ አቅራቢዎች `aggressive`/`ultra` ወደ `standard` ያደርጋል
+4. **የስርዓት ጥያቄን ዝለል** — የስርዓት መጠየቂያዎች ብዙውን ጊዜ የተሸጎጡ ናቸው፣ ስለዚህ አይጨምቋቸው
 
-የስልት ረዳቱ በተጨማሪ `deterministicOnly` ጠቋሚን ይመልሳል፣ ነገር ግን የዕቅድ ገንቢው
-የሚጠቀመው ስልቱን ብቻ ነው — በአሁኑ ጊዜ ከዚያ በኋላ ያለ ምንም ክፍል ጠቋሚውን አያነብም።
+የስትራቴጂው አጋዥ እንዲሁ `deterministicOnly` ባንዲራ ይመልሳል፣ ነገር ግን ፕላን ገንቢው ስልቱን ብቻ ይጠቀማል — ምንም ከስር ያለው ባንዲራ የሚያነብ አይደለም።
 
 #### የኮድ ምሳሌ
 
@@ -365,7 +353,7 @@ import {
 const body = {
   model: "anthropic/claude-sonnet-4.5",
   messages: [{ role: "user", content: "Hello" }],
-  cache_control: { type: "ephemeral" }, // ← የመሸጎጫ ምልክት
+  cache_control: { type: "ephemeral" }, // ← Cache marker
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
@@ -375,28 +363,19 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 // → { strategy: "standard", skipSystemPrompt: true, deterministicOnly: true }
 ```
 
-#### መቼ መጠቀም እንደሚገባ
+#### መቼ መጠቀም
 
-መሸጎጫን የሚያገናዝብ ማመቅ **ሁልጊዜ እንደበራ ነው** — ምንም ውቅር አያስፈልግም።
-ማመቅ በርቶ እና ዒላማው አቅራቢ የመጠየቂያ መሸጎጥን በሚደግፍበት ጊዜ (Anthropic፣ OpenAI፣
-ወዘተ) ሁሉ ይሰራል፤ ግልጽ የ`cache_control` ምልክቶች አያስፈልጉም — የመሸጎጫ አቅራቢ ብቻውን
-ወደ ዝቅተኛው ስልት መውረድን ያስጀምራል፣ ምልክቶች ብቻቸውን ግን ፈጽሞ አያስጀምሩትም
-(የምልክት ማወቂያው የሚመግበው የመሸጎጫ ቴሌሜትሪን እንጂ የስልት ውሳኔውን አይደለም)።
+መሸጎጫ የሚያውቅ መጭመቅ ነው።** ሁልጊዜ በርቷል** — ምንም ማዋቀር አያስፈልግም። መጭመቅ በበራ ቁጥር ወደ ውስጥ ይገባል እና ዒላማው አቅራቢው ፈጣን መሸጎጫ (Anthropic, OpenAI, ወዘተ.) ይደግፋል; ግልጽ `cache_control` ማርከሮች አያስፈልጉም — መሸጎጫ አቅራቢ ብቻውን ማሽቆልቆሉን ያነሳሳል፣ እና ማርከሮች ብቻውን በጭራሽ አያደርጉትም (ማርከር ማወቂያ መሸጎጫ ቴሌሜትሪ እንጂ የስትራቴጂ ውሳኔ አይደለም።
 
-### ቀስ በቀስ ማርጀት
+OpenRouter እንደ መሸጎጫ አቅራቢ የሚቆጠረው ለ `anthropic/*` ሞዴሎች ብቻ ነው Claude ኮድ ጥያቄዎች `cache_control` መግቻ ነጥቦቻቸውን (ቢበዛ 4) ይጠብቃሉ እና ጠባቂው ቅድመ ቅጥያውን ይጠብቃል፣ ሁሉም ሌሎች OpenRouter ቤተሰብ (`openai/`፣ `google/`፣ `qwen/`፣ …) ተራቁተው እና ሳይጠበቁ ይቆያሉ።
 
-ረጅም ውይይቶች ብዙ የመልዕክት ተራዎችን ያከማቻሉ፣ ነገር ግን የቆዩ ተራዎች
-አግባብነታቸው እየቀነሰ ይሄዳል። የ`progressiveAging.ts` ሞጁል **መልዕክቶችን በተራ ርቀት መሠረት ያቃልላል**
-(ርቀቱ የሚለካው ከውይይቱ መጨረሻ አንጻር ነው)። በቀረቡት ነባሪ ቅንብሮች
-(`verbatim: 2, light: 2, moderate: 3`)፦
+### ፕሮግረሲቭ እርጅና
 
-- **የመጨረሻዎቹ 2 ተራዎች (ርቀት ≤ 2)**፦ ቃል በቃል ይቀመጣሉ
-- **ርቀት 3**፦ Caveman ማመቅ (መሙያ ቃላትን ማስወገድ)
-- **ርቀት 4+**፦ የረዳት መልዕክቶች ይጠቃለላሉ፤ የተጠቃሚ መልዕክቶች እስከ 120 ቁምፊዎች
-  በሚገደብ ሁኔታ ወደ መጀመሪያ መስመራቸው ይቀነሳሉ፤ ሌሎች ሚናዎች ሳይነኩ ይቀራሉ። የስርዓት መጠየቂያዎች፣
-  ቀደም ሲል ያረጁ መልዕክቶች እና የቅርብ ጊዜው የተጠቃሚ መልዕክት ርቀታቸው ምንም ይሁን ምን ሁልጊዜ ቃል በቃል ይቀመጣሉ።
-  ምንም ነገር ሙሉ በሙሉ አይጣልም፣ እና በቀረቡት ነባሪዎች (`light` ከ`verbatim` ጋር እኩል ነው)
-  የ`light` ወሰን ሊደረስበት አይችልም።
+ረጅም ንግግሮች ብዙ የመልእክት ማዞሪያዎችን ይሰበስባሉ፣ ነገር ግን የቆዩ ተራዎች ብዙም ተዛማጅ ይሆናሉ። የ `progressiveAging.ts` ሞጁል** መልእክቶችን በተራ ርቀት ዝቅ ያደርጋል** (ከንግግሩ መጨረሻ የሚለካው ርቀት)። በተላኩ ነባሪዎች (`verbatim: 2, light: 2, moderate: 3`):
+
+- **የመጨረሻዎቹ 2 መዞሪያዎች (ርቀት ≤ 2)** በቃላት ተጠብቆ ቆይቷል
+- **ርቀት 3** ዋሻማን መጭመቅ (መሙያ መወገድ)
+- **ርቀት 4 +** : ረዳት መልእክቶች ተጠቃለዋል; የተጠቃሚ መልእክቶች ወደ መጀመሪያው መስመር ተቀንሰዋል፣ በ120 ቁምፊዎች ተሸፍነዋል። ሌሎች ሚናዎች አልተነኩም. የስርዓት መጠየቂያዎች፣ ቀድሞ ያረጁ መልእክቶች እና የቅርብ ጊዜ የተጠቃሚዎች መልእክት ርቀቱ ምንም ይሁን ምን ሁልጊዜ በቃል ይቀመጣሉ። ምንም ነገር በትክክል አልተጣለም፣ እና የ `light` ባንድ በተላኩ ነባሪዎች (`light` `verbatim` ጋር እኩል ነው) የማይደረስ ነው።
 
 #### የኮድ ምሳሌ
 
@@ -407,67 +386,47 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... 50 ተጨማሪ ተራዎች ...
+  // ... 50 more turns ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // የመጨረሻዎቹ 3 ተራዎች፦ ቃል በቃል
-  light: 8, // ርቀት <= 8፦ ቀላል ማመቅ
-  moderate: 20, // ርቀት <= 20፦ caveman ማመቅ
-  fullSummary: 5, // በዓይነቱ የሚያስፈልግ፣ በወሰን አከፋፈል ኮዱ የማይነበብ
-  // ርቀት > 20፦ ይጠቃለላል (assistant) / የመጀመሪያው መስመር ይቀመጣል (user)
+  verbatim: 3, // last 3 turns: verbatim
+  light: 8, // distance <= 8: lite compression
+  moderate: 20, // distance <= 20: caveman compression
+  fullSummary: 5, // required by the type, not read by the banding code
+  // distance > 20: summarized (assistant) / first line kept (user)
 });
 
-// saved = የተቆጠቡ ቶከኖች ብዛት
+// saved = number of tokens saved
 ```
 
-#### መቼ መጠቀም እንደሚገባ
+#### መቼ መጠቀም
 
-ቀስ በቀስ ማርጀት ለ`aggressive` ሁነታ **ሁልጊዜ እንደበራ ነው** — ይህ የ
-`compressAggressive()` ደረጃ 2 ነው። Ultra ሁነታ አያስኬደውም። በተለይ ለሚከተሉት
-ውጤታማ ነው፦
+ተራማጅ እርጅና ነው።** ሁልጊዜ በርቷል** ለ `aggressive` ሁነታ — የ `compressAggressive()` ደረጃ 2 ነው. አልትራ ሞድ አያስኬደውም። እሱ በተለይ ለሚከተሉት ውጤታማ ነው-
 
-- ለረጅም ጊዜ የሚቀጥሉ የኮድ አጻጻፍ ክፍለ ጊዜዎች
-- ብዙ ቀናት የሚቆዩ ውይይቶች
-- ብዙ የመሣሪያ ጥሪዎች ያሏቸው ወኪላዊ የሥራ ፍሰቶች
+- ረጅም ጊዜ የሚሄዱ የኮድ ማስቀመጫዎች
+- የብዙ ቀን ውይይቶች
+- ከብዙ የመሳሪያ ጥሪዎች ጋር ወኪላዊ የስራ ፍሰቶች
 
-### Caveman የውጤት ሁነታ
+### Caveman ውፅዓት ሁነታ
 
-Caveman የውጤት ሁነታ ሞዴሉ ራሱ አጭር ውጤት እንዲሰጥ የሚጠይቁ
-**የስርዓት መጠየቂያ መመሪያዎችን** ያክላል — የ`lite` ደረጃ ሙሉ ዓረፍተ ነገሮችን የሚያቆዩ አጭር መልሶችን ይጠይቃል፣ `full`
-ደግሞ "respond terse like smart caveman" ብሎ እንዲመልስ ይጠይቀዋል፣ `ultra` ደግሞ እጅግ አጭር፣ እንደ ቴሌግራፍ ያለ ውጤትን ይጠይቃል፤
-መመሪያዎቹ የሚጠይቁ ብቻ ናቸው፣ ውጤቱን ዋስትና ሊሰጡ አይችሉም። ጥያቄዎች እነዚህን በ
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) በኩል ይቀበላሉ፦
-`open-sse/handlers/chatCore.ts` በመጀመሪያ ምርጫውን በወደኋላ-ተኳኋኝነት አስተካካዩ
-(`resolveOutputStyleSelection()` በ
-`open-sse/services/compression/outputStyles/backCompat.ts`) ይወስናል፤ ይህም `outputStyles`
-ባዶ ሲሆን፣ የነቃ `cavemanOutputMode`ን በ`cavemanOutputMode.intensity` ደረጃ ወደ `terse-prose` የውጤት ቅጥ
-ይመድባል (ከታች ያለውን ወደኋላ-ተኳኋኝነት ይመልከቱ)፤ ባዶ ያልሆነ `outputStyles`
-ምርጫ እንዳለ ይጠቀማል፣ ከዚያም `cavemanOutputMode.enabled` እና `intensity` ምንም
-ተፅዕኖ አይኖራቸውም፣ የ`autoClarity` መቀያየሪያው ግን አሁንም ተግባራዊ ይሆናል። `outputMode.ts`
-የመመሪያ ጽሑፎቹን (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`)፣ የይዘት ማለፊያውን እና
-መርፌ ማስገባቱ የሚጠቀምበትን የአቀማመጥ ረዳት ይይዛል፤ የራሱ `applyCavemanOutputMode()` መርፌ አስገቢ ግን
-በምርት አካባቢ የሚጠራው አካል የለውም።
+Caveman ውፅዓት ሁነታ ይጨምራል** የስርዓት ፈጣን መመሪያዎች** ሞዴሉን እራሱ ለተጨባጭ ውፅዓት — `lite` ደረጃ ሙሉ ዓረፍተ ነገሮችን የሚይዝ አጭር መልሶችን ይጠይቃል፣ `full` "እንደ ስማርት ዋሻ ሰው ምላሽ እንዲሰጥ" ይጠይቃል፣ እና `ultra` የቴሌግራፊክ ውፅዓት ይጠይቃል። መመሪያዎች ብቻ ይጠይቃሉ, ዋስትና ሊሰጡ አይችሉም. ጥያቄዎች በ `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) ይቀበላሉ `open-sse/handlers/chatCore.ts` በመጀመሪያ ምርጫውን የሚፈታው ከኋላ-ኮምፓት shim (`resolveOutputStyleSelection()` in `open-sse/services/compression/outputStyles/backCompat.ts`) ነው፣ እሱም፣ `outputStyles` ባዶ ሲሆን፣ የነቃ `cavemanOutputMode` ወደ `terse-prose` የውጤት ዘይቤ `cavemanOutputMode.intensity` ላይ ያዘጋጃል (ከዚህ በታች Back-compat ይመልከቱ)። ባዶ ያልሆነ `outputStyles` ምርጫ እንደዚያው ጥቅም ላይ ይውላል፣ እና `cavemanOutputMode.enabled` እና `intensity` ከዚያ ምንም ውጤት አይኖራቸውም፣ `autoClarity` መቀየሪያው አሁንም ይሠራል። `outputMode.ts` የመመሪያ ጽሑፎችን (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`)፣ የይዘት ማለፊያ እና መርፌ የሚጠቀመውን የምደባ አጋዥ ይይዛል። የራሱ `applyCavemanOutputMode()` ኢንጀክተር የምርት ደዋይ የለውም።
 
 #### እንዴት እንደሚሰራ
 
-ይህ ሁነታ ግቤቱን አያመቀውም። ወደ system prompt የመመሪያ ብሎክ ያክላል
-(ከታች How injection worksን ይመልከቱ)፣ እና ለጥያቄው የተመረጠ ማንኛውም የግቤት ማመቂያ ሁነታ
-ከዚያ በኋላም ብሎኩን አሁን በያዘው ይዘት ላይ ይሠራል። እያንዳንዱ ደረጃ በሚያበቃበት የጋራ
-ወሰኖች አንቀጽ በፊት፣ የእንግሊዝኛው `full` ደረጃ እንዲህ ይላል፦
+ይህ ሁነታ ግቤትን አይጨምቀውም. በስርዓት መጠየቂያው ላይ የማስተማሪያ እገዳን ይጨምራል (ከዚህ በታች መርፌ እንዴት እንደሚሰራ ይመልከቱ) እና ለጥያቄው የተመረጠው ማንኛውም የግቤት መጭመቂያ ሁነታ አሁንም በኋላ ይሠራል ፣ አሁን እገዳውን በተሸከመው አካል ላይ። እያንዳንዱ ደረጃ የሚያበቃው ከተጋራው የድንበር አንቀጽ በፊት፣ የእንግሊዝ `full` ደረጃ እንዲህ ይነበባል፡-
 
-> "እንደ ብልህ ዋሻ-ሰው አጭር መልስ ስጥ። articles (a/an/the)፣ ሙሌት ቃላት (just/really/basically/actually/simply)፣ የጨዋነት አባባሎች፣ ማወላወልን አስወግድ። ያልተሟሉ ሐረጎች ችግር የለባቸውም። አጭር ተመሳሳይ ቃላትን ተጠቀም (big እንጂ extensive አይደለም፣ fix እንጂ implement አይደለም)። ሁሉንም ቴክኒካዊ ይዘት፣ code፣ errors፣ URLs፣ identifiers ሳይለወጡ አቆይ።"
+> "እንደ ብልጥ ዋሻ ሰው ምላሽ ይስጡ. መጣጥፎችን (a/an/the), መሙያ (just/really/basically/actually/simply), አስደሳች ነገሮች, አጥር. ቁርጥራጮች OK. አጭር ተመሳሳይ ቃላት (ትልቅ አይደለም, አስተካክል አይተገበርም). ሁሉንም ቴክኒካዊ ንጥረ ነገሮች, ኮድ, ስህተቶች, URLs, መለያዎች በትክክል ያስቀምጡ. "
 
-ይህ በተለይ ለሚከተሉት በጥሩ ሁኔታ ይሠራል፦
+ይህ በተለይ ለሚከተሉት በጥሩ ሁኔታ ይሰራል-
 
-- ኮድ ማመንጨት (አጭር ውጤት = ጥቂት tokens)
-- ፈጣን ጥያቄና መልስ (ሰፊ ማብራሪያዎች አያስፈልጉም)
-- ባች ሂደት (የሥራ ፍሰትን ከፍተኛ ማድረግ)
+- ኮድ ማመንጨት (ተርሰር ውፅዓት = ያነሱ ቶከኖች)
+- ፈጣን ጥያቄ እና መልስ (የተብራራ ማብራሪያ አያስፈልግም)
+- ባች ማቀነባበር (የፍተሻውን መጠን ከፍ አድርግ)
 
-#### መቼ መጠቀም እንደሚገባ
+#### መቼ መጠቀም
 
-Caveman output mode **በምርጫ የሚነቃ** ነው። ማመቂያው ሲበራ (`enabled: true`፣ በCompression Settings ገጽ ላይ ያለው ዋና መቀያየሪያ)፣ በ`cavemanOutputMode.enabled` ያብሩት፤ `intensity`
-`lite`፣ `full` ወይም `ultra`ን ይመርጣል፦
+Caveman ውፅዓት ሁነታ ነው** መርጦ መግባት** . ከታመቀ ጋር (`enabled: true`, በ Compression Settings ገጽ ላይ ዋናው መቀያየር), በ `cavemanOutputMode.enabled` ያብሩት; `intensity` `lite`፣ `full` ወይም `ultra` ይመርጣል
 
 ```json
 {
@@ -479,97 +438,44 @@ Caveman output mode **በምርጫ የሚነቃ** ነው። ማመቂያው ሲ�
 }
 ```
 
-የማመቂያ ጥምረት **Output Mode** መቀያየሪያ (`outputMode`፣ ደረጃው በ`outputModeIntensity`)
-ያ ጥምረት ለሚተገበርባቸው ጥያቄዎች ተመሳሳይ መቀያየሪያን ያዘጋጃል፣ እና
-`omniroute_set_compression_engine` MCP መሣሪያ በboolean `outputMode`
-ነጋሪ እሴቱ በኩል ይጽፈዋል። ባዶ ያልሆነ የ`outputStyles` ምርጫ ከዚህ መቀያየሪያ ቅድሚያ ያገኛል። በdashboard ውስጥ፣ የ**Terse prose** output styleን ማንቃት ተመሳሳይ ብሎክን ያስገባል (ከታች Output
-Stylesን ይመልከቱ)።
+የጨመቅ ጥምር** የውጤት ሁነታ** መቀያየር (`outputMode`፣ ደረጃ በ `outputModeIntensity`) ኮምቦ ለሚመለከቷቸው ጥያቄዎች አንድ አይነት ማብሪያ / ማጥፊያ ያዘጋጃል፣ እና `omniroute_set_compression_engine` MCP መሳሪያው በቦሊያን `outputMode` ክርክር በኩል ይጽፋል። ባዶ ያልሆነ `outputStyles` ምርጫ ከዚህ መቀየሪያ ይቀድማል። በዳሽቦርዱ ውስጥ፣ የንቃት** ተራ ፕሮዝ** የውጤት ዘይቤ ተመሳሳይ ብሎክ ያስገባል (ከዚህ በታች የውጤት ቅጦችን ይመልከቱ)።
 
-### Output Styles (ካታሎግ)
+### የውጤት ቅጦች (ካታሎግ)
 
-ከላይ ያለው Caveman output mode **የቆየው ነጠላ-style መንገድ** ነው። Phase 4 ይህን
-ወደ ሊጣመሩ የሚችሉ output styles ካታሎግ አጠቃላይ አድርጎታል፦ `OUTPUT_STYLE_CATALOG` በ
-`open-sse/services/compression/outputStyles/catalog.ts`። እያንዳንዱ style ሞዴሉ ራሱ አነስተኛ ወጪ ያለው ውጤት እንዲሰጥ የሚጠይቅ system-prompt
-መመሪያ ነው፤ styles በአንድ ላይ ሊነቁ ይችላሉ፣ እና በካታሎጉ ቅደም ተከተል ይገባሉ።
+ከላይ Caveman ውፅዓት ሁነታ ነው** የቆየ ነጠላ-ቅጥ መንገድ** . ደረጃ 4 በጥቅል ወደሚችሉ የውጤት ቅጦች ካታሎግ አቅርቧል `OUTPUT_STYLE_CATALOG` in `open-sse/services/compression/outputStyles/catalog.ts`. እያንዳንዱ ዘይቤ ሞዴሉን ራሱ በርካሽ ውፅዓት እንዲጠይቅ የሚጠይቅ ስርዓት-አፋጣኝ መመሪያ ነው። ቅጦች አንድ ላይ ሊነቁ እና በካታሎግ ቅደም ተከተል ሊከተቡ ይችላሉ።
 
-| Style                     | `id`            | የሚያደርገው                                                                                                                                                                                                 | የመመሪያ ቋንቋዎች                                   |
-| ------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| አጭር ስድ ንባብ                | `terse-prose`   | ሙሌት ቃላትን/articles/ማወላወልን ያስወግዳል፤ ቴክኒካዊ ይዘትን ሳይለወጥ ያቆያል። ከቆየው caveman output mode ጋር ተመሳሳይ ጽሑፍ ነው (እንደገና አልተጻፈም፣ በማጣቀሻ ይጠቀማል)።                                                                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| ያነሰ ኮድ                    | `less-code`     | YAGNI ደረጃ፦ አነስተኛው የሚሠራ ለውጥ፣ ያልተጠየቁ abstractions አይኖሩም።                                                                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ponytail (ሰነፍ senior dev) | `ponytail`      | "ምርጡ ኮድ ፈጽሞ ያልተጻፈው ኮድ ነው"፦ ዳግም መጠቀም > ዳግም መጻፍ፣ ዋና መንስኤ > ምልክት፣ አጭሩ የሚሠራ diff።                                                                                                                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| ADHD አለብኝ (እርምጃ-ቀዳሚ)      | `i-have-adhd`   | እርምጃ መጀመሪያ (ከስድ ጽሑፍ በፊት command/path/snippet)፣ ቁጥር ያላቸው የተወሰኑ ደረጃዎች፣ አንድ ተጨባጭ ቀጣይ እርምጃ፣ መግቢያ/ማጠቃለያ/መዝጊያ የለም። ከ[ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT) የተወሰደ።                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Antislop UI ማጣሪያ          | `antislop-ui`   | እያንዳንዱ የእይታ ቴክኒክ የዓላማ ፈተናን (ተዋረድ፣ ማንነት፣ ተነባቢነት) ማለፍ አለበት፤ ነባሪ gradients/glass/glow የሉም፣ የተገደበ palette፣ template layouts የሉም። ሁለቱም antislop styles የማይሠሩ controls / የተፈበረኩ የይገባኛል ጥያቄዎች እንዳይኖሩ ወሰን ያክላሉ። | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Antislop የጽሑፍ እና የሰው ማጣሪያ | `antislop-copy` | የተወሰነ ጽሑፍ (em dash፣ አጠቃላይ CTAs፣ buzzwords፣ chatbot መዝጊያዎች፣ የተፈጠሩ እውነታዎች የሉም) ከሰዎች ጋር የተያያዙ ደንቦችን ጨምሮ፦ WCAG AA contrast፣ የሚታይ focus፣ በkeyboard ተደራሽነት፣ empty/loading/error states፣ mobile reflow።        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| አጭር CJK (文言)            | `terse-cjk`     | የ`full`/`ultra` መልስ በClassical Chinese (文言)፤ `lite` የተግባር ቃላት፣ የጨዋነት አባባሎች ወይም ጌጣጌጥ የሌሉትን አጭር መልሶች ብቻ ይጠይቃል።                                                                                          | zh (በlocale የተገደበ፣ ከታች ይመልከቱ)                 |
+| ቅጥ                     | `id`            | ምን ያደርጋል                                                                                                                                                                                      | የትምህርት ቋንቋዎች                                  |
+| ---------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| ተራ ፕሮዝ                 | `terse-prose`   | ዝቃን filler/articles/hedging; ቴክኒካዊ ንጥረ ነገሮችን በትክክል ያቆዩ። ከዋሻ ሰው ውፅዓት ሁነታ ጋር ተመሳሳይ ጽሑፍ (የተጣቀሰ እንጂ እንደገና አልተተየበም)።                                                                               | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| ያነሰ ኮድ                 | `less-code`     | YAGNI መሰላል፡ ትንሹ የስራ ለውጥ፣ ምንም ያልተጠየቁ ማጠቃለያዎች የሉም።                                                                                                                                              | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Ponytail (ሰነፍ ሲኒየር ዴቪ) | `ponytail`      | "ምርጡ ኮድ በፍፁም ያልተፃፈ ኮድ ነው"፡ እንደገና ተጠቀም > rewrite፣ root cause > ምልክት፣ በጣም አጭር የስራ ልዩነት።                                                                                                         | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| ADHD አለኝ (ድርጊት-መጀመሪያ)  | `i-have-adhd`   | እርምጃ መጀመሪያ (command/path/snippet ከስድ ፅሁፍ በፊት)፣ በቁጥር የተደረደሩ ደረጃዎች፣ ONE ኮንክሪት ቀጣይ ደረጃ፣ ምንም preamble/recap/closers. ከ [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT) የተወሰደ።   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| አንቲስሎፕ UI ማጣሪያ         | `antislop-ui`   | እያንዳንዱ የእይታ ቴክኒክ የዓላማ ፈተናን ማለፍ አለበት (ተዋረድ፣ ማንነት፣ ተነባቢነት)። ምንም ነባሪ gradients/glass/glow የለም፣ የታሸገ ቤተ-ስዕል፣ ምንም የአብነት አቀማመጦች የሉም። ሁለቱም ጸረ-ስላፕ ቅጦች ምንም-ሙት-መቆጣጠሪያዎች/ምንም-የተሰራ-የይገባኛል ጥያቄ ወሰን ይጨምራሉ። | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| አንቲስሎፕ ቅጂ እና የሰው ማጣሪያ  | `antislop-copy` | የተወሰነ ቅጂ (ምንም ኢም ዳሽ፣ አጠቃላይ CTAs፣ buzzwords፣ chatbot closers፣ የፈለሰፉ እውነታዎች) እና የሰዎች ደንቦች WCAG AA ንፅፅር፣ የሚታይ ትኩረት፣ የቁልፍ ሰሌዳ መድረስ፣ empty/loading/error ግዛቶች፣ የሞባይል ዳግም ፍሰት።                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| ቴርስ CJK (文言)         | `terse-cjk`     | `full`/`ultra` መልስ በክላሲካል ቻይንኛ (文言); `lite` ያለ ተግባር ቃላት፣ አስደሳች ነገሮች ወይም ማስዋቢያዎች አጫጭር መልሶችን ብቻ ይጠይቃል።                                                                                        | zh (አካባቢ-የተከለለ፣ ከታች ይመልከቱ)                    |
 
-እያንዳንዱ style ሦስት intensity ደረጃዎችን — `lite`፣ `full`፣ `ultra` — ይዞ ይመጣል፣ እና እያንዳንዱ ደረጃ
-በጋራ ወሰኖች አንቀጽ (`SHARED_BOUNDARIES` በ`outputMode.ts`) ያበቃል፤ ይህም
-code blocks፣ file paths፣ commands፣ errors እና URLs ሳይለወጡ ያቆያል። የ`terse-prose` እና
-`terse-cjk` ደረጃ ጽሑፎች identifiersን ወደዚያ ዝርዝር ያክላሉ።
+እያንዳንዱ ዘይቤ ሦስት የጥንካሬ ደረጃዎች — `lite`፣ `full`፣ `ultra` — ይልካል እና እያንዳንዱ ደረጃ የሚጨርሰው በተጋራው የድንበር አንቀጽ (`SHARED_BOUNDARIES` in `outputMode.ts`) ነው፣ እሱም የኮድ ብሎኮችን፣ የፋይል መንገዶችን፣ ትዕዛዞችን፣ ስህተቶችን እና URLs በትክክል ያስቀምጣል። የ `terse-prose` እና `terse-cjk` ደረጃ ጽሑፎች ለዚያ ዝርዝር መለያዎችን ይጨምራሉ።
 
-`terse-cjk` በሁለት ቦታዎች ለ`zh` በlocale የተገደበ ነው። የCompression Settings ገጽ
-የdashboard UI ቋንቋ ቻይንኛ (`zh-CN` ወይም `zh-TW`) ሲሆን ብቻ ረድፉን ያሳያል፣ እና
-`applyOutputStyles()` የጥያቄው የተወሰነ ቋንቋ (ከታች Language
-selectionን ይመልከቱ) `zh` ሲሆን ብቻ ያስገባዋል። ረድፉን መደበቅ የተቀመጠ `terse-cjk` ምርጫን አያጸዳም፦
-የsettings API ማንኛውንም style id ይቀበላል፣ እና በገጹ ላይ ሌሎች stylesን ማስቀመጥ ያንን ያቆየዋል። ጥያቄው
-በሚሠራበት ጊዜ፣ የ`applyOutputStyles()` ቋንቋ ማረጋገጫ ብቸኛው locale gate ነው።
+`terse-cjk` በሁለት ቦታዎች ላይ ወደ `zh` አከባቢ-የተገባ ነው። የመጭመቂያ ቅንጅቶች ገጹ ረድፉን የሚዘረዝረው ዳሽቦርዱ UI ቋንቋ ቻይንኛ ሲሆን (`zh-CN` ወይም `zh-TW`) ሲሆን `applyOutputStyles()` የሚያስገባው የጥያቄው መፍትሄ የተገኘ ቋንቋ ሲሆን (ከዚህ በታች ያለውን የቋንቋ ምርጫ ይመልከቱ) `zh` ነው። ረድፉን መደበቅ የተቀመጠ `terse-cjk` ምርጫን አያጸዳውም፡ ቅንጅቶቹ API ማንኛውንም የቅጥ መታወቂያ ይቀበላል እና ሌሎች ቅጦችን በገጹ ላይ ማስቀመጥ ያስቀምጣል። በተጠየቀ ጊዜ፣ የ `applyOutputStyles()` ቋንቋ ፍተሻ ብቸኛው የአካባቢ በር ነው።
 
-#### ማስገባቱ እንዴት እንደሚሠራ
+#### መርፌ እንዴት እንደሚሰራ
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) ምርጫውን
-ከካታሎጉ ጋር ያመሳክራል (ያልታወቁ ids እና ከlocale ጋር የማይዛመዱ styles
-ይወገዳሉ፣ ፈጽሞ እንደ ስህተት አይቆጠሩም፤ ወደ ምንም style የማይደርስ ምርጫ bodyውን
-ሳይቀይር ይተወዋል፣ እንደ `no_styles` ይዘለላል)፣ የተመረጡትን instructions በካታሎጉ
-ቅደም ተከተል ያገናኛል፣
-የboundaries clauseን **አንድ ጊዜ** ይጨምራል (እንዲሁም `less-code` ወይም
-`ponytail` ሲመረጥ safety clauseን፣ `SAFETY_BOUNDARIES`ን ወይም ትርጉሙን)፣ እና blockውን
-በአንድ idempotency marker (`[OmniRoute Output Styles]`) ይጀምራል፤ ስለዚህ እንደገና
-መተግበር ምንም ለውጥ አያመጣም። የተወሰነው ቋንቋ (ከታች ያለውን የቋንቋ ምርጫ ይመልከቱ)
-ትርጉም ሲኖረው፣ ከእንግሊዝኛው ይልቅ localized instruction ይገባል።
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) ምርጫውን በካታሎግ ላይ ይፈታል (የማይታወቁ መታወቂያዎች እና የአካባቢ-ተዛማጅ ቅጦች ተጥለዋል ፣ በጭራሽ ስህተት የለም ፣ ምንም አይነት ዘይቤ የማይፈታ ምርጫ አካል ሳይለወጥ ፣ እንደ `no_styles` ተዘለለ) ፣ የተመረጠውን መመሪያ በካታሎግ ቅደም ተከተል ያጣምራል ፣ የድንበር አንቀጽን ይጨምራል።** አንድ ጊዜ** (ከደህንነት አንቀጽ፣ `SAFETY_BOUNDARIES` ወይም ትርጉሙ፣ `less-code` ወይም `ponytail` ሲመረጥ) እና እገዳውን በነጠላ idempotency ማርከር (`[OmniRoute Output Styles]`) ይጀምራል፣ ስለዚህ እንደገና ማመልከት ምንም-op ነው። የተፈታው ቋንቋ (ከዚህ በታች ያለውን የቋንቋ ምርጫ ይመልከቱ) ትርጉም ሲኖረው፣ ከእንግሊዝኛ ይልቅ የተተረጎመው መመሪያ ነው የሚወጋው።
 
-ባዶ ያልሆነ `messages` array ባለው body ላይ idempotency check ከcontent bypass
-በፊት ይሰራል፦ `[OmniRoute Output Styles]` marker አስቀድሞ በtop-level
-`system` field (string ወይም content-block array) ወይም string content ባለው system
-message ውስጥ ካለ፣ bodyው እንደ `already_applied` ሳይቀየር ይቀራል እና ምንም keyword
-check አይከናወንም። አለበለዚያ content bypass (`shouldBypassCavemanOutputMode()`
-በ`open-sse/services/compression/outputMode.ts`) ሚናቸው ምንም ይሁን ምን የመጨረሻዎቹን
-ሦስት messages ጽሑፍ ይመረምራል፣ እና ያ ጽሑፍ ከsecurity፣ irreversible-action ወይም
-clarification keywords ጋር ሲዛመድ፣ ወይም በቅደም ተከተል ላይ ጥገኛ ከሆነው ተከታታይ፦
-`first`፣ `then`፣ `after that`፣ `before`፣ `rollback` ወይም
-`backup`፣ በ240 characters ውስጥ `delete`፣ `drop`፣ `migrate`፣ `deploy` ወይም
-`release` ተከትሎት ከመጣ፣ ለመላው turn stylesን ይዘላል። bypassው **Auto-Clarity
-Bypass** toggle (`cavemanOutputMode.autoClarity`፣ በነባሪ የበራ) በርቶ ሳለ
-ይሰራል፤ toggleውን ማጥፋት keyword checkን ይዘላል።
+On a body with a non-empty `messages` array, the idempotency check runs before the content bypass: when the `[OmniRoute Output Styles]` marker is already in the top-level `system` field (a string or a content-block array) or in a system message with string content, the body is left unchanged as `already_applied` and no keyword check runs. Otherwise a content bypass (`shouldBypassCavemanOutputMode()` in `open-sse/services/compression/outputMode.ts`) checks the text of the last three messages, whatever their role, and skips the styles for the whole turn when that text matches its security, irreversible-action or clarification keywords, or an order-sensitive sequence: `first`, `then`, `after that`, `before`, `rollback` or `backup` followed within 240 characters by `delete`, `drop`, `migrate`, `deploy` or `release`. The bypass runs while the **Auto-Clarity Bypass** toggle (`cavemanOutputMode.autoClarity`, on by default) is on; turning the toggle off skips the keyword check.
 
-bypassው turnን ሲያሳልፍ፣ `placeSystemInstruction()` (በዚያው file)፣ ፈጽሞ አዲስ
-`messages[0]` የማይፈጥረው፣ blockውን ከሚከተሉት መካከል መጀመሪያ ባገኘው ቦታ ያስቀምጣል፦
+ማለፊያው መዞሪያው እንዲያልፍ ሲፈቅድ፣ `placeSystemInstruction()` (ተመሳሳይ ፋይል)፣ አዲስ `messages[0]` ፈጽሞ የማይፈጥር፣ እገዳውን በመጀመሪያዎቹ ውስጥ ያስቀምጣቸዋል፡-
 
-1. string content ያለው መሪ system message፦ blockው ከጽሑፉ በኋላ ይጨመራል።
-2. top-level `system` field፦ blockው ከstring ጽሑፍ በኋላ ይጨመራል፣ ወይም
-   ወደ content-block array እንደ አዲስ text block ይጨመራል።
-3. string content ያለው በኋላ የሚገኝ የመጀመሪያው system message፦ blockው ከጽሑፉ
-   በኋላ ይጨመራል።
-4. ከላይ ካሉት አንዱም ከሌለ፦ blockው በ`messages` መጨረሻ ላይ በአዲስ system message
-   ውስጥ ይገባል።
+1. የሕብረቁምፊ ይዘት ያለው መሪ የስርዓት መልእክት፡ እገዳው ከጽሑፉ በኋላ ተያይዟል።
+2. ከፍተኛ-ደረጃ `system` መስክ፡ እገዳው ከሕብረቁምፊ ጽሑፍ በኋላ ተያይዟል ወይም እንደ አዲስ የጽሑፍ እገዳ ወደ የይዘት ማገድ ድርድር ታክሏል።
+3. የመጀመሪያው በኋላ የስርዓት መልእክት ከሕብረቁምፊ ይዘት ጋር፡ እገዳው ከጽሑፉ በኋላ ተያይዟል።
+4. ከላይ ከተጠቀሱት ውስጥ አንዳቸውም አይደሉም: እገዳው በ `messages` መጨረሻ ላይ ወደ አዲስ የስርዓት መልእክት ይገባል.
 
-`messages` array በሌለው body ላይ (ወይም ባዶ ከሆነ) ምንም content bypass
-አይሰራም እና top-level `system` field አይመረመርም። blockው ከstring
-`instructions` field ጽሑፍ በኋላ ይጨመራል፣ fieldው አስቀድሞ
-`[OmniRoute Output Styles]` markerን ካልያዘ በስተቀር፤ ከያዘ፣ bodyው እንደ
-`already_applied` ሳይቀየር ይቀራል። bodyው string `instructions` field ሳይኖረው
-`input` (string ወይም array) ካለው፣ blockው `instructions` ይሆናል፣ ያ field
-ይዞት የነበረውን string ያልሆነ value ይተካል። string `instructions` fieldም ሆነ
-string ወይም array `input` የሌለው body ሳይቀየር ይቀራል እና እንደ `no_messages`
-ይዘለላል።
+`messages` አደራደር በሌለው አካል ላይ (ወይም በባዶ)፣ ምንም የይዘት ማለፊያ አይሄድም እና ከፍተኛ ደረጃ ያለው `system` መስክ አይመከርም። ማገጃው የተገጠመለት ከሕብረቁምፊ `instructions` መስክ ጽሑፍ በኋላ ነው፣ያ መስክ አስቀድሞ `[OmniRoute Output Styles]` ማርከርን ካልያዘ በስተቀር፣በዚህ ሁኔታ አካሉ ሳይቀየር `already_applied` ሆኖ ይቀራል። አካሉ ሕብረቁምፊ `instructions` መስክ ከሌለው ነገር ግን `input` (ሕብረቁምፊ ወይም ድርድር) ሲይዝ እገዳው `instructions` ይሆናል፣ ይህም መስክ የተያዘውን ማንኛውንም የሕብረቁምፊ ያልሆነ እሴት ይተካል። ሕብረቁምፊ `instructions` መስክ ወይም ሕብረቁምፊ ወይም ድርድር `input` የሌለው አካል ሳይለወጥ ይቀራል እና `no_messages` ሆኖ ይዘላል.
 
 #### እንዴት ማንቃት እንደሚቻል
 
-በdashboard ውስጥ፦ **Compression Context → Compression Settings**
-(`/dashboard/context/settings`)፣ በOutput styles ክፍል፦ ለእያንዳንዱ style አንድ ረድፍ፣
-ከon/off toggle እና level selector ጋር። compression ራሱ በርቶ ሳለ (የገጹ master
-toggle፣ `enabled`) styles ይገባሉ። **Auto-Clarity Bypass** toggle በ**Caveman**
-ገጽ (`/dashboard/context/caveman`)፣ በ**Output Mode** card ውስጥ ይገኛል። በፕሮግራም
-ሲደረግ፣ compression config ምርጫውን እንደሚከተለው ያስቀምጣል፦
+በዳሽቦርዱ ውስጥ፡-** የማመቅ አውድ → የማመቂያ ቅንጅቶች** (`/dashboard/context/settings`)፣ የውጤት ቅጦች ክፍል፡- አንድ ረድፍ በስታይል ከ on/off መቀያየር እና ደረጃ መራጭ ጋር። መጭመቂያው ራሱ በርቶ ሳለ ቅጦች መርፌ (የገጹ ዋና መቀየሪያ፣ `enabled`)። የ** ራስ-ግልጽነት ማለፊያ** መቀያየር በ ላይ ነው።** ዋሻማን** ገጽ (`/dashboard/context/caveman`)፣ በውስጡ** የውጤት ሁነታ** ካርድ. ፕሮግራማዊ በሆነ መንገድ፣ የማመቅ አወቃቀሩ ምርጫውን እንደሚከተለው ይቀጥላል፡-
 
 ```json
 {
@@ -580,135 +486,50 @@ toggle፣ `enabled`) styles ይገባሉ። **Auto-Clarity Bypass** toggle በ**
 }
 ```
 
-የኋላ-ተኳኋኝነት፦ `outputStyles` ባዶ ሆኖ ሳለ፣ የቆየው
-`cavemanOutputMode.enabled` setting ወደ `terse-prose` በ
-`cavemanOutputMode.intensity` ይመደባል። ከዚያ blockው በ
-`[OmniRoute Output Styles]` marker ይጀምራል፣ የቆየው `applyCavemanOutputMode()`
-injector `[OmniRoute Caveman Output Mode]`ን በጻፈበት ቦታ። ከmarkerው በታች፣
-ጽሑፉ በen፣ pt-BR፣ es፣ de፣ fr፣ it፣ ru፣ id እና vi ከቆየው injection ጋር
-ይዛመዳል፤ በja እና zh ግን ከboundaries clause በፊት አንድ ተጨማሪ space አለው።
-`terse-prose` ወደ pt-BR፣ es፣ de፣ fr፣ it፣ ru፣ zh፣ ja፣ id እና vi ይተረጎማል፤
-ስለዚህ resolved language `hu` የሆነ request፣ የቆየው injector የሃንጋሪኛ ጽሑፉን
-በተጠቀመበት ቦታ የእንግሊዝኛውን ጽሑፍ ያገኛል።
+Back-compat `outputStyles` ባዶ ሳለ፣ የድሮው `cavemanOutputMode.enabled` ካርታ ወደ `terse-prose` በ `cavemanOutputMode.intensity` ያዘጋጃል። ከዚያም እገዳው በ `[OmniRoute Output Styles]` ማርከር ይጀምራል፣ የትሩፋት `applyCavemanOutputMode()` ኢንጀክተር `[OmniRoute Caveman Output Mode]` በፃፈበት። ከጠቋሚው በታች፣ ጽሑፉ በ en፣ pt-BR፣ es፣ de, fr, it, ru, id እና vi ውስጥ ካለው የርስት መርፌ ጋር ይዛመዳል፤ በጃ እና zh ከድንበር አንቀፅ በፊት አንድ ተጨማሪ ቦታ ይይዛል። `terse-prose` ወደ pt-BR, es, de, fr, it, ru, zh, ja, id እና vi ይተረጎማል, ስለዚህ የተፈታ ቋንቋ `hu` የሆነ ጥያቄ የቅርስ ኢንጀክተሩ የሃንጋሪውን የተጠቀመበት የእንግሊዝኛ ጽሑፍ ያገኛል።
 
-የOutput-style ቋንቋ ምርጫ (`resolveOutputStyleLanguage()` በ
-`outputStyles/apply.ts`)፦ `languageConfig.enabled` በርቶ ሳለ፣ `autoDetect`
-በrequestው `messages` array ውስጥ ጽሑፍ ካለው የቅርብ ጊዜ user message (string
-content፣ ወይም የcontent parts `text`) ናሙና ወስዶ የCaveman engine detectorን
-(`detectCompressionLanguage()`) በእሱ ላይ ያስኬዳል። detectorው kana የሌለበት
-የHan characters ጽሑፍ `zh`ን ይመልሳል፤ አለበለዚያ ከ`it`፣ `pt-BR`፣ `es`፣
-`de`፣ `fr`፣ `ru`፣ `ja`፣ `hu` እና `id` መካከል ብዙ የhint matches ያለውን
-ይመልሳል፣ እና ምንም match ከሌለ `en`ን ይመልሳል — ሊመድበው የማይችለው ጽሑፍ
-`defaultLanguage`ን ሳይሆን እንግሊዝኛን ያገኛል፣ እና styles የ`vi` ጽሑፍ ቢያካትቱም
-`vi` ፈጽሞ አይለይም። የResponses API body turnsን በ`input` ውስጥ ያስቀምጣል፣
-እሱም ናሙና አይደረግበትም፤ ስለዚህ `defaultLanguage`ን፣ ከዚያም እንግሊዝኛን
-ያገኛል። በ`messages` ውስጥ ምንም user message ጽሑፍ ከሌለው፣ ወይም
-`autoDetect` ጠፍቶ ከሆነ፣ `defaultLanguage` ተግባራዊ ይሆናል፣ ከዚያም እንግሊዝኛ።
-`languageConfig.enabled` ጠፍቶ ሳለ፣ ቋንቋው እንግሊዝኛ ነው — ለrequestው
-compression combo ካልተተገበረ በስተቀር (ለrequestው routing combo የተመደበ combo፣
-ወይም chatCore ለbuilt-in stacked pipeline የሚመለስበት default compression combo)፦
-comboን መተግበር ለዚያ request `languageConfig.enabled`ን ያበራል እና
-`defaultLanguage`ን ከcomboው language packs ያዘጋጃል (የተቀመጠው value ከcomboው
-packs አንዱ ከሆነ እሱን፣ አለበለዚያ የcomboውን የመጀመሪያ pack፣ ይህም በነባሪ `en`
-ነው)፣ የተቀመጠው `autoDetect` (በነባሪ የበራ) ግን አሁንም ተግባራዊ ይሆናል።
-የCaveman input engine የrule-pack ቋንቋውን በተለየ መንገድ ይመርጣል — ለእያንዳንዱ
-text part ለየብቻ፣ እና auto-detect ጠፍቶ ሳለ በ`enabledPacks` የተገደበ ሆኖ።
+የውጤት አይነት የቋንቋ ምርጫ (`resolveOutputStyleLanguage()` in `outputStyles/apply.ts`): `languageConfig.enabled` ሲበራ፣ `autoDetect` በጥያቄው `messages` ድርድር ውስጥ የቅርብ ጊዜውን የተጠቃሚ መልእክት ናሙና ያሳያል (የሕብረቁምፊ ይዘት ወይም የይዘቱ ክፍሎቹ `text` ) እና በላዩ ላይ የ Caveman ሞተር መፈለጊያ (`detectCompressionLanguage()`) ያስኬዳል። ፈላጊው ከሃን ቁምፊዎች ጋር ለጽሑፍ `zh` ይመልሳል እና ምንም ካና የለም; ያለበለዚያ የትኛውንም `it`፣ `pt-BR`፣ `es`፣ `de`፣ `fr`፣ `ru`፣ `ja`፣ `hu` እና `id` በጣም ፍንጭ ያለው ይመልሳል ፣ እና `en` ምንም ተዛማጅ — ጽሑፍ ካልመድበው እንግሊዘኛ ያገኛል ፣ በጭራሽ `defaultLanguage`፣ እና `vi` በጭራሽ አይታወቅም ምንም እንኳን የስታይል መርከብ `vi` ጽሑፍ። ምላሾች API አካል ተራውን በ `input` ይጠብቃል፣ ይህም ለናሙና አልተወሰደም፣ ስለዚህ `defaultLanguage` ያገኛል፣ ከዚያም እንግሊዝኛ። በ `messages` ውስጥ ምንም የተጠቃሚ መልእክት ጽሑፍ ከሌለው ወይም `autoDetect` ጠፍቶ ከሆነ `defaultLanguage` ይተገበራል ፣ ከዚያ እንግሊዝኛ። `languageConfig.enabled` ጠፍቶ፣ ቋንቋው እንግሊዘኛ — ነው የማመቂያ ጥምር ለጥያቄው እስካልተተገበረ ድረስ (ለጥያቄው ማዘዋወር ጥምር የተመደበ ጥምር፣ ወይም ነባሪው መጭመቂያ ኮምቦ chatCore አብሮ በተሰራው ለተደራራቢ ቧንቧው ተመልሶ ይወድቃል)፡ ጥምር መተግበር ለጥያቄው `languageConfig.enabled` ያበራና `defaultLanguage` ከጥምርው የዋጋ ጥቅል ያዘጋጃል (በሌላ መልኩ አንዱ የተቀመጠ የቋንቋ ጥቅል ከሆነ) የ combo የመጀመሪያ ጥቅል፣ ወደ `en` ነባሪ የሆነ፣ የተቀመጠ `autoDetect` (በነባሪ) አሁንም ተፈጻሚ ይሆናል። የ Caveman ግቤት ሞተር የደንብ-ጥቅል ቋንቋውን በተለየ መልኩ — በእያንዳንዱ የጽሑፍ ክፍል ይመርጣል እና በራስ-አግኝቶ በ `enabledPacks` ላይ ይከፈታል።
 
-የቅጥ × ቋንቋ ማትሪክሱ በ
-`tests/unit/compression/output-styles-i18n-matrix.test.ts` ተወስኗል፦ እያንዳንዱ የካታሎግ ቅጥ በፈተናው `BASELINE_LANGUAGES` ውስጥ
-ግቤት ሊኖረው ይገባል፤ በአካባቢያዊ ቋንቋ ያልተገደበ ቅጥ የ
-pt-BR ትርጉም አብሮት መቅረብ አለበት (በአካባቢያዊ ቋንቋ የተገደበው `terse-cjk` ከዚህ ደንብ ነፃ ነው)፤ አለበለዚያ በ
-`KNOWN_ENGLISH_ONLY` ውስጥ መዘርዘር አለበት፣ ይህም ምንም ትርጉም የሌላቸውን ቅጦች ብቻ ሊይዝ ይችላል —
-በዝርዝሩ ውስጥ ያለ ቅጥ ማንኛውም ትርጉም ካለው ፈተናውን አያልፍም፤ እንዲሁም አንድ ቅጥ
-በ`BASELINE_LANGUAGES` ግቤቱ ውስጥ ከተዘረዘሩት ቋንቋዎች አንዱን ካጣ ፈተናውን አያልፍም። ቅጥ ለመጨመር
-[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style)ን ይመልከቱ።
+× ቋንቋ ማትሪክስ በ `tests/unit/compression/output-styles-i18n-matrix.test.ts` ተሰክቷል፡ እያንዳንዱ ካታሎግ ዘይቤ በፈተናው `BASELINE_LANGUAGES` ውስጥ መግባት ያስፈልገዋል። የአካባቢ-ጋቴድ ያልሆነ ዘይቤ pt-BR ትርጉም መላክ አለበት (አካባቢያዊ-gated `terse-cjk` ከዚህ ህግ ነፃ ነው) በ `KNOWN_ENGLISH_ONLY` ውስጥ ካልተዘረዘረ በስተቀር፣ ምንም አይነት ትርጉም የሌላቸው ቅጦች ብቻ ሊይዝ ይችላል — ምንም አይነት ትርጉም ያለው የተዘረዘረ ዘይቤ ፈተናውን ወድቋል። እና አንድ ስታይል `BASELINE_LANGUAGES` መግቢያው የዘረዘረውን ቋንቋ ሲያጣ ፈተናውን ይወድቃል። ቅጥ ለመጨመር [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style) ን ይመልከቱ።
 
-### የመሣሪያ ውጤት ማመቅ
+### የመሳሪያ ውጤት መጨናነቅ
 
-በ`open-sse/services/compression/toolResultCompressor.ts` ውስጥ ያለው
-`compressToolResult()` የመሣሪያ ውጤት ጽሑፍን በ**5 ስልቶች** ያመቃል። በዚህ ቅደም ተከተል ይሞክራቸዋል፣ እና
-ማረጋገጫው ከይዘቱ ጋር የሚዛመደው የመጀመሪያው የነቃ ስልት ውጤቱን ይወስናል፦
+`compressToolResult()` በ `open-sse/services/compression/toolResultCompressor.ts` የመሳሪያ ውጤት ጽሑፍን ይጭናል።** 5 ስልቶች** . በዚህ ቅደም ተከተል ይሞክራቸዋል፣ እና የመጀመሪያው የነቃ ስልት ከይዘቱ ጋር የሚዛመድበትን ውጤት ይወስናል፡
 
-1. **`fileContent`**፦ 3 ወይም ከዚያ በላይ መስመሮች ያሉት ይዘት፤ ቢያንስ አንድ መስመር፣
-   የመጀመሪያው ገብ ችላ ሲባል፣ በ`import `፣ `export `፣ `function `፣ `class `፣
-   `const `፣ `let `፣ `var ` ወይም `return ` (ቁልፍ ቃሉ ከክፍተት ጋር) ወይም በ`if`፣
-   `for` ወይም `while` ተጀምሮ `(` ወይም ` (` ሲከተለው፣ የመጀመሪያዎቹን 20 እና የመጨረሻዎቹን 5 መስመሮች ያቆያል፣
-   የተዘለለውን መካከለኛ ክፍል በምልክት ያሳያል።
-2. **`grepSearch`**፦ ቢያንስ አንድ `<path>:<digits>:` ቅርጽ ያለው መስመር የያዘ ይዘት፤
-   ከመጀመሪያው ኮለን በፊት ያለው ጽሑፍ ነጭ ቦታ የሌለው ሲሆን፣ እነዚያን መስመሮች ብቻ እስከ
-   30 ድረስ ያቆያል፤ ከዚያም የተጨማሪ ተዛማጆችን ብዛት እና የተዛመዱ ፋይሎችን ዝርዝር ያክላል፤
-   ሌሎች መስመሮች በሙሉ ይወገዳሉ። ስልቱን ለማስነሳት አንድ እንደዚህ ያለ መስመር በቂ ነው፤ ስለዚህ
-   እንደ `12:30:45` ባለ የጊዜ ማህተም የሚጀምር የምዝግብ መስመርም ይቆጠራል።
-3. **`shellOutput`**፦ የANSI CSI ተከታታይ (`ESC[`፣ ከዚያ አሃዞች ወይም
-   ሴሚኮሎኖች፣ ከዚያም ፊደል፣ ለምሳሌ በቀለም ኮዶች ውስጥ) ወይም በጽሑፉ ውስጥ በማንኛውም ቦታ
-   ነጭ ቦታ የሚከተለው `$` ያለው ውጤት እነዚያን ተከታታዮች ያጣል (እንደ `ESC[?25l` ወይም
-   የOSC መስኮት-ርዕስ ተከታታይ ያሉ ሌሎች የማምለጫ ተከታታዮች ይቀመጣሉ) እና የመጨረሻዎቹን 50 መስመሮች ያቆያል፤ ተከታታይ
-   የተደጋገሙ መስመሮች ይጠቀለላሉ። ይህ ማረጋገጫ ከ`json` እና `errorMessage` በፊት ስለሚሠራ፣
-   እንደዚህ ያለ `$` የያዘ JSON ወይም የስህተት ውጤት `shellOutput` በርቶ ሳለ
-   ወደ እነሱ ፈጽሞ አይደርስም።
-4. **`json`**፦ ከ2,000 በላይ ቁምፊዎች ያሉት፣ በ`{` ወይም `[` የሚጀምር (ከአማራጭ
-   ነጭ ቦታ በኋላ) እና በትክክል የሚተነተን የJSON ጭነት ይጠቃለላል፦ ከ7 በላይ ንጥሎች ያሉት ድርድር
-   የመጀመሪያዎቹን 5፣ የመጨረሻዎቹን 2 ንጥሎች እና ጠቅላላ ብዛቱን ያቆያል፤ ኦብጀክት ደግሞ የመጀመሪያዎቹን 20
-   ቁልፎች ያቆያል፣ እያንዳንዱን የተከተተ ኦብጀክት ወይም የድርድር እሴት በ`{…N keys}` ቦታ-ያዥ
-   (ለድርድር፣ N ርዝመቱ ነው) ይተካል፣ እንዲሁም ከመጀመሪያዎቹ 20 በኋላ የተወገዱትን ቁልፎች
-   የሚቆጥር የ`_remaining_<N>_keys` ምልክት ያክላል። ስኬላር እሴቶች ሙሉ በሙሉ ይቀዳሉ፤ ስለዚህ 20 ወይም ከዚያ
-   ያነሱ ቁልፎች ያሉትና የተከተቱ እሴቶች የሌሉት ኦብጀክት እንደገና ገብ ብቻ ይደረግለታል — የተቀነሰ ኦብጀክት
-   ተጨማሪ ቁምፊዎችን ያገኝና ሳይቀየር ይቀራል።
-5. **`errorMessage`**፦ በማንኛውም ቦታና በማንኛውም የፊደል አቀራረብ `error:`፣
-   `error ` (ቃሉን የሚከተል ክፍተት፣ እንደ `no error found`)፣ `[error]`፣
-   `exception:`፣ `exception `፣ `[exception]` ወይም `traceback` የያዘ ውጤት የመጀመሪያውን መስመር፣
-   የሚቀጥሉትን 10 መስመሮች እና የመጨረሻዎቹን 3 ያቆያል፤ በመካከላቸው ባሉት መስመሮች ቦታ
-   `… [N frames elided] …` ምልክት ይገባል። ምልክቱ የሚታየው ከመጀመሪያው መስመር በኋላ ከ13 በላይ
-   መስመሮች ሲኖሩ ብቻ ነው፤ ስለዚህ 14 ወይም ከዚያ ያነሱ መስመሮች ያሉት የስህተት ውጤት አይነጠፍም
-   (12 ወይም 13 መስመሮች ሲኖሩ፣ የመጨረሻዎቹ 3 ቀድሞ የተቀመጡ መስመሮችን ይደግማሉ)።
+1. **`fileContent`** የ 3 ወይም ከዚያ በላይ መስመሮች ይዘት ቢያንስ አንድ መስመር፣ መሪ መግባቱን ችላ በማለት በ `import `፣ `export `፣ `function `፣ `class `፣ `const `፣ `let `፣ `var ` ወይም `return ` (ቁልፍ ቃሉ እና ቦታ) ፣ ወይም በ `if`፣ `for` ወይም `while` በ `(` ወይም ` (` የተከተለ ፣ መካከለኛው 2 እና የመጨረሻ 2 ያለው።
+2. **`grepSearch`** : ቅርጹ ቢያንስ አንድ መስመር ያለው ይዘት `<path>:<digits>:`, ከመጀመሪያው ኮሎን በፊት ያለው ጽሑፍ ምንም ነጭ ቦታ የሌለው, እነዚያን መስመሮች ብቻ የሚይዝ, ቢበዛ 30, ተጨማሪ ተጨማሪ ግጥሚያዎች እና የተጣጣሙ ፋይሎች ዝርዝር ይቆጥራሉ; ሁሉም ሌላ መስመር ተጥሏል. ስልቱን ለመቀስቀስ አንድ እንደዚህ አይነት መስመር በቂ ነው፣ ስለዚህ እንደ `12:30:45` ባሉ የጊዜ ማህተም የሚጀምር የምዝግብ ማስታወሻ መስመርም ይቆጥራል።
+3. **`shellOutput`** : የ ANSI CSI ቅደም ተከተል የያዘ (`ESC[` ከዚያም አሃዞች ወይም ሴሚኮሎን ከዚያም ፊደል፣ እንደ ቀለም ኮድ) ወይም `$` ተከትሎ በጽሁፉ ውስጥ የትኛውም ቦታ ላይ ነጭ ቦታ ያለው ውፅዓት እነዚያን ቅደም ተከተሎች ያጣል (ሌሎች ማምለጫዎች፣ እንደ `ESC[?25l` ወይም የ OSC መስኮት ርዕስ ቅደም ተከተል ተቀምጠዋል) እና የመጨረሻዎቹን 50 መስመሮች ያቆያል፣ መስመርም ተደገመ። ይህ ቼክ `json` እና `errorMessage` በፊት ስለሚሄድ፣ `shellOutput` በሚበራበት ጊዜ JSON ወይም የስህተት ውፅዓት እንደዚህ አይነት `$` ያለው በጭራሽ አይደርስባቸውም።
+4. **`json`** ፦ JSON ከ2,000 ቁምፊዎች በላይ የሚጫነው በ `{` ወይም `[` የሚጀምር (ከአማራጭ ነጭ ቦታ በኋላ) እና መተንተን ተጠቃሏል፡ ከ 7 በላይ እቃዎች ድርድር የመጀመሪያውን 5 እና የመጨረሻ 2 እቃዎችን እና አጠቃላይ ቁጥሩን ያቆያል እና እቃው የመጀመሪያውን 20 ቁልፎችን ይይዛል በእያንዳንዱ ጎጆ እቃ ወይም የድርድር እሴት ይተካዋል እና በ `{…N keys}` ይተካዋል `_remaining_<N>_keys` ማርከር ቁልፎቹን መቁጠር ከመጀመሪያው 20 በላይ ተጥሏል። ስኩላር እሴቶች ሙሉ በሙሉ ይገለበጣሉ፣ ስለዚህ 20 ቁልፎች ወይም ከዚያ ያነሰ ነገር ያለ ምንም የጎጆ እሴት እንደገና ገብቷል — አንድ የተቀነሰ ሰው ቁምፊዎችን ያገኛል እና ሳይለወጥ ይቆያል።
+5. **`errorMessage`** : በየትኛውም ቦታ እና በማንኛውም የፊደል መያዣ, `error:`, `error ` (በቦታ የተከተለው ቃል, እንደ `no error found`), `[error]`, `exception:`, `exception `, `[exception]` ወይም `traceback` የመጀመሪያውን መስመር, ቀጣዩን 10 መስመሮችን እና የመጨረሻውን 3 ይይዛል, በመካከላቸው ባሉ መስመሮች ምትክ `… [N frames elided] …` ምልክት ያለው. ምልክት ማድረጊያው የሚመጣው ከ13 በላይ መስመሮች የመጀመሪያውን መስመር ሲከተሉ ብቻ ነው፣ ስለዚህ የ14 መስመሮች ወይም ከዚያ ያነሰ የስህተት ውጤት አያጥርም (በ12 ወይም 13 መስመር የመጨረሻዎቹ 3 ተደጋጋሚ መስመሮች ቀደም ብለው ተቀምጠዋል)።
 
-አንድ ስልት ከተዛመደ በኋላ፣ ምንም ቅናሽ ባያስገኝም እንኳ፣ ተከታዮቹ ስልቶች
-አይሞከሩም። የተዛመደው ስልት ምንም የተገመተ ቶከን ባያስቀር (ርዝመት ÷ 4፣ ወደ ላይ የተጠጋጋ) —
-ለምሳሌ 25 ወይም ከዚያ ያነሱ መስመሮች ያሉት ኮድ-መሰል ፋይል፣ ወይም ከ2,000
-ቁምፊዎች በላይ ሆኖ 7 ወይም ከዚያ ያነሱ ንጥሎች ያሉት የJSON ድርድር — አጥቂው ሞተር ዋናውን የመሣሪያ
-ውጤት ያቆያል፦ ሁለቱም ጠሪዎች (`compressAggressive()` እና `compressAnthropicToolResultBlock()`)
-`saved` 0 ወይም ከዚያ በታች ሲሆን ዋናውን ያቆያሉ፣ `compressToolResult()` ራሱ ግን
-የዚያን ስልት ውጤት አሁንም ይመልሳል። የመሣሪያ-ውጤት ደረጃው የመጨረሻ ውሳኔ አይደለም፦ የሞተሩ
-የመጠባበቂያ ማጠቃለያ ሰጪ ከ8,192 ቁምፊዎች በላይ የሆነ `tool` ወይም `function` መልዕክትን
-አሁንም ሊያሳጥር ይችላል (`maxTokensPerMessage`፣ 2,048፣ በ4 ተባዝቶ)።
+አንድ ስትራቴጂ ከተመሳሰለ በኋላ፣ ምንም እንኳን ምንም የማያድን፣ የኋለኞቹ ስልቶች አልተሞከሩም። የማዛመጃው ስልት ምንም የሚገመቱ ምልክቶችን ( ÷ 4 ርዝመት፣ የተጠቀለለ) — ለምሳሌ ኮድ መሰል ፋይል 25 መስመር ወይም ከዚያ ያነሰ፣ ወይም JSON ድርድር ከ2,000 በላይ ቁምፊዎች ያለው 7 ንጥሎች ወይም ያነሰ — የጥቃት ሞተሩ ዋናውን የመሳሪያውን ውጤት ያስቀምጣል፡ ሁለቱም ደዋዮች (`compressAggressive()` እና `compressAnthropicToolResultBlock()`) አሁንም `compressToolResult()` `saved` በታች ይሆናሉ። የስትራቴጂው ውጤት. የመሳሪያ-ውጤት ደረጃ የመጨረሻው ቃል አይደለም፡የኤንጂኑ መውደቅ ማጠቃለያ አሁንም `tool` ወይም `function` መልእክትን ከ8,192 ቁምፊዎች (`maxTokensPerMessage`, 2,048, times 4) ማሳጠር ይችላል።
 
-#### መቼ መጠቀም እንደሚገባ
+#### መቼ መጠቀም
 
-የመሣሪያ ውጤት ማመቅ የአጥቂው ሞተር ደረጃ 1 ነው (`compressAggressive()` በ
-`open-sse/services/compression/aggressive.ts` ውስጥ)፤ ስለዚህ በAggressive ሁነታ እና
-በተደራረበ ቧንቧ መስመር `aggressive` ደረጃ ውስጥ ይሠራል። የOpenAI ቅርጽ ያላቸውን `tool` እና `function`
-መልዕክቶች፣ እንዲሁም በAnthropic `tool_result` ብሎኮች ውስጥ ያለውን ጽሑፍ ያመቃል። እያንዳንዱ ስልት በ
-`aggressive.toolStrategies` ሥር የራሱ መቀየሪያ አለው፣ ሁሉም በነባሪነት በርተዋል። በዳሽቦርዱ ውስጥ፣
-ማመቅ በርቶና ነባሪ ሁነታው Aggressive ሆኖ ሳለ መቀየሪያዎቹ በCaveman ገጽ **Advanced** ዕይታ ውስጥ ይገኛሉ።
+የመሳሪያው ውጤት መጭመቅ የጨረር ሞተር (`compressAggressive()` in `open-sse/services/compression/aggressive.ts`) ደረጃ 1 ነው፣ ስለዚህ በአግረሲቭ ሁነታ እና በ `aggressive` ደረጃ በተቆለለ የቧንቧ መስመር ይሰራል። የOpenAI-ቅርጽ `tool` እና `function` መልዕክቶችን እና በ Anthropic `tool_result` ውስጥ ያለውን ጽሑፍ ያጨቃል። እያንዳንዱ ስልት በ `aggressive.toolStrategies` ስር የራሱ ማብሪያ / ማጥፊያ አለው ፣ ሁሉም በነባሪ። በዳሽቦርዱ ውስጥ፣ ማብሪያዎቹ በዋሻማን ገጽ ውስጥ ናቸው።** የላቀ** መጭመቂያው ሲበራ ይመልከቱ እና ነባሪው ሁነታ ኃይለኛ ነው።
 
-### የተደራረበ ቧንቧ መስመር
+### የተቆለለ የቧንቧ መስመር
 
-የተደራረበው ሁነታ **በርካታ ሞተሮችን በቅደም ተከተል** ያስኬዳል — ብዙውን ጊዜ መጀመሪያ RTK
-(በመሣሪያ ውጤት ላይ 60-90% ቅናሽ)፣ ከዚያም በቀሪው ጽሑፍ ላይ Caveman (~46% የግቤት
-ቅናሽ)። ሲዋሃዱ፣ ይህ **78-95% ብቁ ክልል** ነው (ከላይ ያለውን Upstream Savings Math
-ይመልከቱ)፦ `1 - (1 - 0.60..0.90) × (1 - 0.46)` አማካዩ ≈89% ነው።
+የተቆለለ ሁነታ ይሰራል** በርካታ ሞተሮች በቅደም ተከተል** — ብዙውን ጊዜ RTK መጀመሪያ (ከ60-90% ቁጠባዎች በመሳሪያ ውፅዓት)፣ ከዚያም Caveman በቀሪው ጽሁፍ (~ 46% የግብዓት ቁጠባዎች)። የተቀናበረ፣ ያ ነው።** 78-95% ብቁ ክልል** (ከላይ ያለውን የቁጠባ ሂሳብ ይመልከቱ) `1 - (1 - 0.60..0.90) × (1 - 0.46)` አማካይ ≈ 89% ነው።
 
-#### እንዴት እንደሚሠራ
+#### እንዴት እንደሚሰራ
 
 ```
-ግቤት (1000 ቶከኖች)
-  → RTK (ትዕዛዝ-ተኮር ማጣሪያ) → 200 ቶከኖች
-    → Caveman (ትርፍ ጽሑፍ ማስወገድ) → 108 ቶከኖች
-  → ውጤት (108 ቶከኖች፣ ~89% ቅናሽ)
+Input (1000 tokens)
+  → RTK (command-aware filter) → 200 tokens
+    → Caveman (filler removal) → 108 tokens
+  → Output (108 tokens, ~89% savings)
 ```
 
-#### መቼ መጠቀም እንደሚገባ
+#### መቼ መጠቀም
 
-የተደራረበ ሁነታን ለሚከተሉት ይጠቀሙ፦
+ለተደራራቢ ሁነታ ተጠቀም ለ፡-
 
-- መሣሪያ-ተኮር የሥራ ፍሰቶች (ወኪላዊ ኮድ ማዘጋጀት፣ ምርምር)
-- ወጪን ለሚያስቀድም የቡድን ሂደት
-- ከፍተኛውን የቶከን ቅናሽ ሲፈልጉ
+- መሣሪያ-ከባድ የሥራ ፍሰቶች (ወኪል ኮድ ማድረግ፣ ምርምር)
+- ወጪ ቆጣቢ ባች ሂደት
+- ከፍተኛ የማስመሰያ ቁጠባ ሲያስፈልግ
 
-የተደራረቡ ቧንቧ መስመሮች በዓለም አቀፉ `stackedPipeline` የማመቅ
-ቅንብር፣ ወይም ለማዘዋወሪያ ጥምረት በተመደበ ስም ባለው የማመቅ ጥምረት በኩል ይዋቀራሉ (ከላይ
-ያለውን Per-Combo Override ይመልከቱ) — በራስ-ሰር ጥምረት `modePack` በኩል አይደለም (ያ መስክ
-የራስ-ሰር ጥምረት ሞዴል ምርጫ ክብደቶችን ብቻ እንደገና ያስተካክላል፣ እና `stacked` ትክክለኛ የጥቅል ስም አይደለም)።
+የተደራረቡ የቧንቧ መስመሮች የሚዋቀሩት በአለምአቀፍ `stackedPipeline` መጭመቂያ መቼት ነው፣ ወይም በተሰየመ የመጭመቂያ ኮምቦ ለመዘዋወር ኮምቦ በተሰየመ (ከላይ ያለውን የፐር-ኮምቦ መሻርን ይመልከቱ) — በራስ-ኮምቦ `modePack` በኩል አይደለም (ያ መስክ የራስ-ኮምቦ ሞዴል ምርጫን ብቻ ይመዝናል እና `stacked` የሚሰራ የጥቅል ስም አይደለም)።
 
 ---
 

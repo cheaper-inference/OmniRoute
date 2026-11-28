@@ -4,12 +4,9 @@
 
 ---
 
-> **Päivitetty viimeksi:** 2026-08-28 — v3.8.51
-> Virtaviivaistettu julkaisuprosessi, joka hyödyntää Claude Code -taitoja automatisointiin.
+> Virtaviivainen julkaisuvirta, joka hyödyntää Claude Coden taitoja automatisointiin.
 >
-> **Pidä jono/haara vihreänä julkaisujen välillä:** katso [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs`-komentoperhe + `npm run check:release-green` + `/babysit` + öinen ajo). Tämän suorittaminen
-> säännöllisesti — ja erityisesti **ennen** tätä tarkistuslistaa — varmistaa, että julkaisun PR on alusta alkaen vihreä.
+> **Pidä queue/branch vihreä julkaisujen välillä:** katso [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` perhe + `npm run check:release-green` + `/babysit` + iltaisin). Running tämä määräajoin — ja erityisesti** ennen** tämä tarkistuslista — tekee julkaisun PR aloituksen vihreäksi.
 
 ## Pähkinänkuoressa
 
@@ -60,7 +57,9 @@ npm-publish-työnkulku ei enää julkaise suoraan: se käynnistää pakatun tarb
 
 **Docker Hub `latest` (pakollinen jokaisessa vakaassa SemVer julkaisussa):** `docker-publish` työnkulussa on oltava tunniste** molemmat** `X.Y.Z` ja kun `should-promote-latest.sh` on samaa mieltä, tämä on korkein vakaa SemVer, `:latest`** sama tiivistelmä** . Työn jälkeen: Hub `latest` digest on yhtä suuri kuin uusi SemVer digest ja `last_updated` siirretty. Älä jätä `:latest` ää vanhempaan koontiversioon, kun julkaisutiedot puhuvat vain gitissä olevista korjauksista. Luo pikakäynnistykset käytä `:latest`; GitOps pitäisi jatkaa `X.Y.Z` kiinnittämistä. Katso [Docker -vapautuskanavat](../guides/DOCKER_GUIDE.md#release-channels) ja #10317.
 
-**Docker Hub -organisaation tietovarasto (`cheaperinference/omniroute`):** Docker Hub ei voi siirtää arkistoa nimiavaruuksien välillä, joten `diegosouzapw/omniroute` säilyttää vetohistoriansa ja jokaisen julkaisun, ja `docker-publish` :n `mirror-org-dockerhub` -työ kopioi jokaisen julkaistun version (ja `:latest` ylennyksen yhteydessä) `ghcr.io/cheaper-inference/omniroute` :sta organisaation arkistoon. Se tarvitsee `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` salaisuudet; ilman niitä työ pysyy vihreänä "Docker Hub org -peili ohitettu" -varoituksen kanssa ja muut rekisterit julkaistaan normaalisti. Jos haluat julkaista julkaistun version siellä myöhemmin, suorita** Toiminnot → Peilaa Docker -kuva Docker Hubiin org → Suorita työnkulku** `version=X.Y.Z` llä (ja `promote_latest` korkeimmalle vakaalle versiolle): se kopioi olemassa olevat kuvat, ei uudelleenrakentamista.
+**Docker Hub -organisaation tietovarasto (`cheaperinference/omniroute`):** Docker Hub ei voi siirtää arkistoa nimiavaruuksien välillä, joten `diegosouzapw/omniroute` säilyttää vetohistoriansa ja jokaisen julkaisun, ja `docker-publish` :n `mirror-org-dockerhub` -työ kopioi jokaisen julkaistun version (ja `:latest` ylennyksen yhteydessä) `ghcr.io/cheaper-inference/omniroute` :sta organisaation arkistoon. Se tarvitsee `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` salaisuudet; ilman niitä työ pysyy vihreänä "Docker Hub org -peili ohitettu" -varoituksen kanssa ja muut rekisterit julkaistaan normaalisti. Jos haluat julkaista julkaistun version siellä myöhemmin, suorita** Toiminnot → Peilaa Docker -kuva Docker Hub -organisaatioon → Suorita työnkulku** `version=X.Y.Z` llä (ja `promote_latest` korkeimmalle vakaalle versiolle): se kopioi olemassa olevat kuvat, ei uudelleenrakentamista. Tämän arkiston Docker Hub -yleiskatsaus on asetettu käsin: sitä muokkaava API hylkää organisaation käyttöoikeudet.
+
+Sama työnkulku kopioi myös jokaisen julkaisun vanhaan GHCR pakettiin `ghcr.io/diegosouzapw/omniroute` 30.6.2027 asti, joten siihen edelleen kiinnitetyt asennukset päivittyvät jatkuvasti. sen hakemistossa on "siirretty `ghcr.io/cheaper-inference/omniroute`" -kuvaus. Se tarvitsee `GHCR_LEGACY_TOKEN` salaisuuden (perinteinen henkilökohtainen `diegosouzapw` -pääsytunnus, jossa on `write:packages`); ilman sitä työ ohitetaan "Vanha GHCR peili ohitettu" -varoituksen kanssa.
 
 ## Hotfix-pikakaista (tunniste `hotfix`)
 
@@ -151,9 +150,9 @@ Rikolliset muutokset: lisää `BREAKING CHANGE:` -alatunniste tai `!` laajuuden 
 ### Dokumentaatio
 
 - [ ] `npm run check:docs-sync` -passit (automaattisesti suoritettava ennakkositouttaminen)
-- [ ] `npm run check:docs-all` passit (sateenvarjo: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` kulkee. Sen neuvoa-antava `check:deprecated-versions` merkitsee versiot, jotka on nimenomaisesti liitetty OmniRoute (3.6.x ja aikaisemmat), ja jättää päivämäärät huomiotta.
 - [ ] `npm run check:env-doc-sync` poistuu 0 — -koodi ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env sopimus on ehjä
-- [ ] `npm run check:doc-links` irtautuu 0 — ei rikkinäisiä sisäisiä arvostusviittauksia uudelleenjärjestelyn jälkeen
+- [ ] `npm run check:doc-links` poistuu 0 — ei rikkinäisiä sisäisiä arvostusviittauksia uudelleenjärjestelyn jälkeen
 - [ ] `docs/architecture/ARCHITECTURE.md` arvosteli storage/runtime drift
 - [ ] `docs/guides/TROUBLESHOOTING.md` tarkistettu env var:n ja toiminnallisen driftin varalta
 - [ ] Jos `.env.example` muuttui: `docs/reference/ENVIRONMENT.md` päivitetty
@@ -199,7 +198,7 @@ Jos `electron/` muuttui:
 - [ ] Rakenne on testattu vähintään yhdelle seuraavista: `:win`, `:mac`, `:linux`
 - [ ] Koodin allekirjoitussertifikaatit eivät ole vanhentuneet (jos allekirjoitetaan)
 - [ ] `electron/package.json` versio vastaa juuri `package.json`
-- [ ] Automaattisen päivityksen kanavan osoitin päivitetään, jos se vapautetaan `stable`
+- [ ] Automaattisen päivityksen kanavaosoitin päivitetään, jos vapautetaan `stable`
 
 ### Rakenna asettelu
 
@@ -230,7 +229,7 @@ Suorita NOT `npm run build` ja sen jälkeen erillinen `npm run build:cli` — k�
 - [ ] `npm run build:release` onnistuu ja `dist/BUILD_SHA` == `git rev-parse --short HEAD`
 - [ ] `npm run check:pack-artifact` clean — ei `app.__qa_backup`, `scripts/scratch`, `package-lock.json` tai muita paikallisia jäämiä
 - [ ] `dist/server.js` on olemassa rakentamisen jälkeen
-- [ ] Valinnainen paikallinen pakattu ajonaikainen savu: `npm run dev:candidate -- validate` jälkeen `npm run dev:candidate -- build` käynnistää pakatun tarballin eristetylle `DATA_DIR` lle ja tarkistaa `/api/health` + `/v1/models` (katso [Kultainen polku](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ).
+- [ ] Valinnainen paikallinen paketoitu ajonaikainen savu: `npm run dev:candidate -- validate` sen jälkeen, kun `npm run dev:candidate -- build` käynnistää pakatun tarballin eristetylle `DATA_DIR` lle ja tarkistaa `/api/health` + `/v1/models` (katso [Kultainen polku](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ).
 
 ### Merkintä ja julkaisu
 
@@ -275,7 +274,7 @@ Ota käyttöön taidot käyttämällä kevyttä rsync-virtausta — no `npm pack
 
 Tutka-ilmoitus on tarkoituksella sitoutunut `active: false`. Aktivointi on erillinen muutos sen jälkeen, kun jokainen alla oleva kohta on todistettu:
 
-- [ ] Kaikki pinottu Radar PRs on yhdistetty ja vapautuskärjen CI on vihreä
+- [ ] Kaikki pinotut tutka PRs on yhdistetty ja vapautuskärjen CI on vihreä
 - [ ] Ota käyttöön ja polta OSS Radar -reitit `RADAR_ENABLED` ollessa edelleen pois päältä oletuksena
 - [ ] Smoke `GET /planos`, `/termos`, `/privacidade` ja `/reembolso` nimetyllä tutka-isännällä
 - [ ] Levyoperaattori identity/contact/address ja omistajan hyväksymä oikeudellinen tarkistus yksityisessä palvelussa
@@ -399,7 +398,7 @@ Kehitysbump commit on rakennettu git-putkistolla (työpuuhun ei kosketa) ja se t
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

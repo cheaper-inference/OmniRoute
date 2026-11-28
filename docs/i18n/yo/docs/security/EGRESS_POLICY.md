@@ -67,37 +67,37 @@ A mọ̀ọ́mọ̀ ṣe àṣẹ náà fún **proxy kọ̀ọ̀kan**, kì í �
 
 ---
 
-## Àwọn Iye Mẹ́ta Náà
+## Awọn iye mẹta
 
-| Iye    | Àkọlé UI                | Ìhùwàsí                                                                                                                                                       |
-| ------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `Aifọwọyi (dual-stack)` | OS ló yan family náà. Fún host proxy tí ó jẹ́ IP-literal, family náà jẹ́ èyí tí literal náà ní lábínibí; fún hostname, family méjèèjì lè ṣiṣẹ́. Èyí ni àiyípadà. |
-| `ipv4` | `IPv4 nìkan`            | Ó fi ìsopọ̀ náà mọ́ IPv4. Ó máa kuna ní ipò títì pa bí host proxy náà kò bá ní àkọsílẹ̀ IPv4 (A).                                                                |
-| `ipv6` | `IPv6 nìkan`            | Ó fi ìsopọ̀ náà mọ́ IPv6. Ó máa kuna ní ipò títì pa bí host proxy náà kò bá ní àkọsílẹ̀ IPv6 (AAAA).                                                             |
+| Iye    | UI aami             | Iwa                                                                                                                                    |
+| ------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS iyan ebi. Fun agbalejo aṣoju aṣoju IP-gangan, ẹbi jẹ ojulowo si ti gidi; fun a hostname, mejeeji idile ni o wa yẹ. Eyi ni aiyipada. |
+| `ipv4` | `IPv4 only`         | Pin asopọ si IPv4. Kuna ni pipade ti agbalejo aṣoju ko ba ni igbasilẹ IPv4 (A).                                                        |
+| `ipv6` | `IPv6 only`         | Pin asopọ si IPv6. Kuna ni pipade ti agbalejo aṣoju ko ba ni igbasilẹ IPv6 (AAAA).                                                     |
 
-Àwọn ọ̀rọ̀ UI wà nínú `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+awọn gbolohun UI n gbe ni `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Bí A Ṣe Lè Ṣètò Rẹ̀
+## Bawo ni lati Tunto Rẹ
 
-### Dashboard
+### Dasibodu
 
-Selector náà wà nínú fọ́ọ̀mù proxy ti táàbù **Proxy Pool**:
+Awọn selector jẹ ninu awọn aṣoju fọọmu ti awọn** Aṣoju Pool** taabu:
 
-1. Ṣí **Dashboard → Settings → Proxy → Proxy Pool**
-2. Ṣàfikún proxy kan tàbí ṣàtúnṣe rẹ̀
-3. Ṣètò dropdown **IP family** sí `Aifọwọyi (dual-stack)`, `IPv4 nìkan`, tàbí `IPv6 nìkan`
-4. Fipamọ́
+1. Ṣii** Dasibodu → Eto → Aṣoju → Aṣoju Pool**
+2. Ṣafikun tabi ṣatunkọ aṣoju kan
+3. Ṣeto awọn**IP** silẹ si `Auto (dual-stack)`, `IPv4 only`, tabi `IPv6 only`
+4. Fipamọ
 
-`ProxyRegistryManager.tsx` ló ń render control náà (tí a mount sínú `proxy/ProxyPoolTab.tsx`).
+Iṣakoso naa jẹ nipasẹ `ProxyRegistryManager.tsx` (ti a gbe sori `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Field `family` jẹ́ apá kan àwọn payload ìṣẹ̀dá/ìṣàtúnṣe registry proxy, tí `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ń validate, tí `POST` / `PATCH /api/v1/management/proxies` sì ń bójú tó:
+Aaye `family` jẹ apakan ti awọn fifuye isanwo create/update iforukọsilẹ aṣoju, ti a fọwọsi nipasẹ `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ati mimu nipasẹ `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Ṣẹ̀dá proxy IPv6-nìkan
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Yí proxy tó ti wà padà sí IPv4-nìkan
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Object config proxy inline tí a ń lò fún àwọn entry upstream-proxy náà tún gba field kan náà (`upstream_proxy_config.family`, wo [Àwòṣe Dátà](#data-model)).
+Aaye kanna ni a tun gba nipasẹ ohun atunto aṣoju inline ti a lo fun awọn titẹ sii-aṣoju oke (`upstream_proxy_config.family`, wo [Awoṣe Data](#data-model) ).
 
-Fún ìyókù API CRUD/assignment proxy, wo [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Fun iyokù aṣoju CRUD/assignment API, wo [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

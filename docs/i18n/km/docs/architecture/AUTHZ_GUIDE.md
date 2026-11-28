@@ -4,14 +4,13 @@
 
 ---
 
-> **ប្រភពនៃការពិត:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **បានធ្វើបច្ចុប្បន្នភាពចុងក្រោយ:** 2026-09-22 — ឈ្មោះលំហនៃវិសាលភាពចង្អុលទៅ MCP-SERVER.md
+> **ប្រភពនៃការពិត៖** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute មានបំពង់បង្ហូរការអនុញ្ញាតដែលដឹងពីផ្លូវ ដែលទប់ស្កាត់រាល់សំណើ API។ ការចាត់ថ្នាក់គឺ **កំណត់បាន** និង **បរាជ័យបិទ** — អ្វីដែលមិនអាចចាត់ថ្នាក់បាននឹងក្លាយជា `MANAGEMENT` ហើយទាមទារវគ្គ ឬថូខឹនកម្រិតគ្រប់គ្រង។ ទំព័រនេះពន្យល់ពីគំរូសម្រាប់វិស្វករដែលថែទាំផ្លូវ ឬរចនាចំណុចបញ្ចប់ថ្មី។
+OmniRoute មានបំពង់ការអនុញ្ញាតដែលដឹងអំពីផ្លូវដែលចេញរាល់សំណើ API ។ ចំណាត់ថ្នាក់គឺ** កំណត់** និង** បរាជ័យ - បិទ** — អ្វីដែលមិនអាចចាត់ថ្នាក់បានបញ្ចប់ជា `MANAGEMENT` ហើយទាមទារវគ្គ ឬសញ្ញាសម្គាល់ថ្នាក់គ្រប់គ្រង។ ទំព័រនេះពន្យល់អំពីគំរូសម្រាប់វិស្វករដែលរក្សាផ្លូវ ឬរចនាចំណុចបញ្ចប់ថ្មី។
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> ប្រភព: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> ប្រភព៖ [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## របៀបផ្ទៀងផ្ទាត់អត្តសញ្ញាណ ២ ប្រភេទ
 
@@ -193,8 +192,8 @@ Incoming request → src/proxy.ts
 ថ្នាក់ផ្លូវនីមួយៗមានគោលការណ៍នៅក្នុង `src/server/authz/policies/`៖
 
 - **`publicPolicy`** (`policies/public.ts`) — តែងតែត្រឡប់ `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — ស្រង់ចេញ Bearer ធ្វើឱ្យមានសុពលភាពតាមរយៈ `validateApiKey()`។ ធ្លាក់ចូលទៅក្នុងអនាមិកតែនៅពេលដែលទង់មុខងារ `REQUIRE_API_KEY` ដែលមានប្រសិទ្ធភាពត្រូវបានបិទ។ ទង់ដែលមានប្រសិទ្ធភាពត្រូវបានដោះស្រាយតាមរយៈ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ដូច្នេះ Dashboard Feature Flags និងបរិស្ថានគ្រប់គ្រង `/api/v1/*`, `/api/v1beta/*` និងឈ្មោះក្លែងក្លាយជាប់លាប់។ ដំណោះស្រាយបរាជ័យបានបិទ។ អនុញ្ញាតសំណើសម័យផ្ទាំងគ្រប់គ្រងលើផ្លូវអតិថិជន API (រួមទាំង `/api/v1/models` ប្រើដោយកាតាឡុកគំរូផ្ទាំងគ្រប់គ្រង)។ នៅពេលដែល Entra ID SSO ត្រូវបានបើក អ្នកកាន់ដែលមានរចនាសម្ព័ន្ធជានិមិត្តសញ្ញា Entra (បីផ្នែក base64url, `RS*` alg, `kid`) ត្រូវបានគ្រប់គ្រងដោយសាខា SSO** ពីមុន** `validateApiKey()` ហើយសាលក្រមរបស់វាគឺ — ចុងក្រោយ វាមិនដែលធ្លាក់ចូលទៅក្នុងផ្លូវ API-key ឬសាខា degrade-to-អនាមិកទេ ដូច្នេះការដាច់ចេញពីអ្នកផ្តល់អត្តសញ្ញាណមិនអាចក្លាយជាការចូលប្រើបើកចំហបានទេ។ គ្រាប់ចុច API ឋិតិវន្តមិនប៉ះពាល់ទេ។ សូមមើល [Entra ID SSO](../security/ENTRA_SSO.md) ។
-- **`managementPolicy`** (`policies/management.ts`) — ទទួលយកសម័យផ្ទាំងគ្រប់គ្រង សំណើធ្វើសមកាលកម្មគំរូខាងក្នុង (ត្រូវគ្នានឹង `/api/providers/[name]/(sync-models|models)`) ឬរំលងទាំងស្រុងប្រសិនបើ `isAuthRequired()` ត្រឡប់មិនពិត។ ត្រឡប់ 403 (`AUTH_001`) នៅពេលដែលនិមិត្តសញ្ញា Bearer មានវត្តមាន ប៉ុន្តែមិនត្រឹមត្រូវ 401 បើមិនដូច្នេះទេ។ អនុវត្តផងដែរនូវជួរការពារផ្លូវ (LOCAL_ONLY / ALWAYS_PROTECTED) មុនពេលសាខាផ្ទៀងផ្ទាត់ណាមួយ — ឃើញ [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ។ LOCAL_ONLY ផ្លូវក្នុង `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ថ្ងៃនេះ៖ `/api/mcp/`) អាចត្រូវបានចូលប្រើពី non-loopback នៅពេលដែល Bearer key អនុវត្តវិសាលភាព `manage` ។ ផ្លូវ LOCAL_ONLY ផ្សេងទៀតទាំងអស់នៅតែជារង្វិលជុំតឹងរ៉ឹងដោយមិនគិតពីវិសាលភាព។
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ស្រង់ចេញ Bearer ធ្វើឱ្យមានសុពលភាពតាមរយៈ `validateApiKey()`។ ធ្លាក់ចូលទៅក្នុងអនាមិកតែនៅពេលដែលទង់មុខងារ `REQUIRE_API_KEY` ដែលមានប្រសិទ្ធភាពត្រូវបានបិទ។ ទង់ដែលមានប្រសិទ្ធភាពត្រូវបានដោះស្រាយតាមរយៈ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ដូច្នេះ Dashboard Feature Flags និងបរិស្ថានគ្រប់គ្រង `/api/v1/*`, `/api/v1beta/*` និងឈ្មោះក្លែងក្លាយជាប់លាប់។ ដំណោះស្រាយបរាជ័យបានបិទ។ អនុញ្ញាតសំណើសម័យផ្ទាំងគ្រប់គ្រងលើផ្លូវអតិថិជន API (រួមទាំង `/api/v1/models` ប្រើដោយកាតាឡុកគំរូផ្ទាំងគ្រប់គ្រង)។ នៅពេលដែល Entra ID SSO ត្រូវបានបើក អ្នកកាន់ដែលមានរចនាសម្ព័ន្ធជានិមិត្តសញ្ញា Entra (បីផ្នែក base64url, `RS*` alg, `kid`) ត្រូវបានគ្រប់គ្រងដោយសាខា SSO** មុន** `validateApiKey()` ហើយសាលក្រមរបស់វាគឺ — ចុងក្រោយ វាមិនដែលធ្លាក់ចូលទៅក្នុងផ្លូវ API-key ឬសាខា degrade-to-អនាមិកទេ ដូច្នេះការដាច់ចេញពីអ្នកផ្តល់អត្តសញ្ញាណមិនអាចក្លាយជាការចូលប្រើបើកចំហបានទេ។ គ្រាប់ចុច API ឋិតិវន្តមិនប៉ះពាល់ទេ។ សូមមើល [Entra ID SSO](../security/ENTRA_SSO.md) ។
+- **`managementPolicy`** (`policies/management.ts`) — ទទួលយកសម័យផ្ទាំងគ្រប់គ្រង សំណើធ្វើសមកាលកម្មគំរូខាងក្នុង (ត្រូវគ្នានឹង `/api/providers/[name]/(sync-models|models)`) ឬរំលងទាំងស្រុងប្រសិនបើ `isAuthRequired()` ត្រឡប់មិនពិត។ ត្រឡប់ 403 (`AUTH_001`) នៅពេលដែលនិមិត្តសញ្ញា Bearer មានវត្តមាន ប៉ុន្តែមិនត្រឹមត្រូវ 401 បើមិនដូច្នេះទេ។ អនុវត្តផងដែរនូវជួរការពារផ្លូវ (LOCAL_ONLY / ALWAYS_PROTECTED) មុនពេលសាខាផ្ទៀងផ្ទាត់ណាមួយ — ឃើញ [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ។ LOCAL_ONLY paths ក្នុង `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ថ្ងៃនេះ៖ `/api/mcp/`) អាចត្រូវបានចូលប្រើពី non-loopback នៅពេលដែល Bearer key អនុវត្តវិសាលភាព `manage`/`admin` ឬវិសាលភាព `mcp:connect` តូចចង្អៀត (`hasMcpConnectOrManageScope`) ឬជាមួយនឹងវគ្គ dashboard ដែលត្រូវបានផ្ទៀងផ្ទាត់។ ផ្លូវ LOCAL_ONLY ផ្សេងទៀតទាំងអស់នៅតែវិលត្រឡប់មកវិញយ៉ាងតឹងរឹងដោយមិនគិតពីវិសាលភាព។
 
 គោលការណ៍ជោគជ័យ ត្រឡប់ `AuthSubject` ជាមួយ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`។ អ្នកដោះស្រាយខាងក្រោមអាចអានវាតាមរយៈ `assertAuth(request, "CLIENT_API")` ក្នុង `src/server/authz/assertAuth.ts` ជំនួសឱ្យការដំណើរការតក្កវិជ្ជាផ្ទៀងផ្ទាត់ឡើងវិញ។
 
@@ -202,7 +201,7 @@ Incoming request → src/proxy.ts
 
 `src/shared/constants/publicApiRoutes.ts` គឺជាបញ្ជីអនុញ្ញាតច្បាស់លាស់៖
 
-បញ្ជីត្រូវបានបំបែកដោយ** រាង** ហើយការបំបែកគឺផ្ទុកបន្ទុក (GHSA-74g9-q8f6-793h): បុព្វបទត្រូវបានផ្គូផ្គងជាមួយ `startsWith()` ដូច្នេះវាក៏ត្រូវគ្នានឹងគ្រប់ផ្លូវដែលនៅជាប់គ្នាដែលចែករំលែកតួអក្សរនាំមុខរបស់វា។ `/api/usage/om-usage` ជាបុព្វបទដែលបានសម្គាល់ `/api/usage/om-usage<anything>` PUBLIC ហើយបន្ទាប់ដោះស្រាយវាទៅ `/api/usage/[connectionId]` — អ្នកគ្រប់គ្រងដោយគ្មានសិទ្ធិផ្ទាល់ខ្លួន។
+បញ្ជីត្រូវបានបំបែកដោយ** រាង** ហើយការបំបែកគឺផ្ទុកបន្ទុក (GHSA-74g9-q8f6-793h): បុព្វបទមួយត្រូវបានផ្គូផ្គងជាមួយ `startsWith()` ដូច្នេះវាក៏ត្រូវគ្នានឹងគ្រប់ផ្លូវដែលនៅជាប់គ្នាដែលចែករំលែកតួអក្សរនាំមុខរបស់វា។ `/api/usage/om-usage` ជាបុព្វបទដែលបានសម្គាល់ `/api/usage/om-usage<anything>` PUBLIC ហើយបន្ទាប់ដោះស្រាយវាទៅ `/api/usage/[connectionId]` — អ្នកគ្រប់គ្រងដោយគ្មានសិទ្ធិផ្ទាល់ខ្លួន។
 
 ```ts
 // Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
@@ -285,24 +284,24 @@ export async function POST(request: Request) {
 
 ជ្រើសរើស set តាមទម្រង់ មិនមែនតាមភាពងាយស្រួលទេ។ Route មួយត្រូវដាក់ក្នុង `PUBLIC_API_ROUTES_EXACT` (ឬ `PUBLIC_READONLY_CORS_API_ROUTES` សម្រាប់ GET-only)។ មានតែ subtree ពិតប្រាកដប៉ុណ្ណោះដែលត្រូវដាក់ក្នុង `PUBLIC_API_ROUTE_PREFIXES` ហើយវា **ត្រូវតែបញ្ចប់ដោយ `/`**។ ការដាក់ route ទោលមួយក្នុងបញ្ជី prefix ក៏ធ្វើឱ្យ path ជាប់គ្នាទាំងអស់ដែលមានតួអក្សរដើមដូចគ្នាក្លាយជាសាធារណៈផងដែរ — រួមទាំង dynamic-segment sibling ដែលត្រូវបានបន្ថែមនៅពេលក្រោយ (GHSA-74g9-q8f6-793h)។ ធ្វើបច្ចុប្បន្នភាព unit test នៅ `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` និង `tests/unit/authz/classify.test.ts`។
 
-## Scopes
+## វិសាលភាព
 
-ឈ្មោះលំហបី។ កម្មវិធីពិនិត្យនីមួយៗអានតែខ្សែអក្សររបស់វាប៉ុណ្ណោះ។ ការប្រៀបធៀបគ្នា រួមទាំងមូលហេតុដែល `manage` បរាជ័យ `scopeMatches` សម្រាប់ `read:compression` និងមូលហេតុដែល access token `read` មិនអាច `PATCH /api/keys/{id}` គឺ [ឈ្មោះលំហបី](../frameworks/MCP-SERVER.md#three-scope-namespaces)។
+ចន្លោះឈ្មោះបី។ អ្នកត្រួតពិនិត្យនីមួយៗអានតែខ្សែអក្សររបស់វាប៉ុណ្ណោះ។ ផ្នែកម្ខាងៗ រួមទាំងមូលហេតុដែល `manage` បរាជ័យ `scopeMatches` សម្រាប់ `read:compression` និងហេតុអ្វីបានជាលេខសម្ងាត់ចូលប្រើ `read` មិនអាច `PATCH /api/keys/{id}` គឺជា [ទំហំឈ្មោះវិសាលភាពបី](../frameworks/MCP-SERVER.md#three-scope-namespaces) ។
 
-API keys មាន array `scopes` (រក្សាទុកជា JSON ក្នុង `api_keys.scopes` សូមមើល `src/lib/db/apiKeys.ts`)។
+គ្រាប់ចុច API ផ្ទុកអារេ `scopes` (រក្សាទុកជា JSON ក្នុង `api_keys.scopes` សូមមើល `src/lib/db/apiKeys.ts`)។
 
-### Management scope
+### វិសាលភាពនៃការគ្រប់គ្រង
 
-- `manage` / `admin` — `hasManageScope`។ ការចូលប្រើ Bearer ទៅកាន់ផ្លូវ API គ្រប់គ្រង។
-- `mcp:connect`, `self:usage`, `self:account-quota`, និង `policy:bypass-provider-quota` គឺជា scopes ដែលត្រូវគ្នាពិតប្រាកដបន្ថែម។ ពួកវាស្ថិតនៅខាងក្រៅ `MANAGEMENT_API_KEY_SCOPES`។ `mcp:connect` បើកតែ `/api/mcp/` non-loopback carve-out ប៉ុណ្ណោះ។
+- `manage` / `admin` — `hasManageScope`។ អ្នកកាន់សិទ្ធិចូលទៅកាន់ផ្លូវ API គ្រប់គ្រង។
+- `mcp:connect`, `self:usage`, `self:account-quota`, និង `policy:bypass-provider-quota` គឺជាវិសាលភាពនៃការផ្គូផ្គងជាក់លាក់បន្ថែម។ ពួកគេអង្គុយនៅខាងក្រៅ `MANAGEMENT_API_KEY_SCOPES`។ `mcp:connect` បើកតែ `/api/mcp/` non-loopback carve-out។
 
-### MCP tool scopes
+### វិសាលភាពឧបករណ៍MCP
 
-កាតាឡុក និងច្បាប់ផ្គូផ្គង (ខ្សែអក្សរដូចគ្នា ឬ scope ដែលបានផ្តល់ដែលបញ្ចប់ដោយ `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes)។ `MCP_SCOPE_LIST` ក្នុង `src/shared/constants/mcpScopes.ts` គឺជា subset ដែលបានកំណត់ប្រភេទដើម មិនមែនជាកាតាឡុកពេញលេញនោះទេ។ ការអនុវត្តដំណើរការក្នុង `open-sse/mcp-server/scopeEnforcement.ts` បន្ទាប់ពី `resolveCallerScopeContext()` ដោះស្រាយ scopes ពីព័ត៌មាន MCP auth, metadata សំណើ, ឬ `OMNIROUTE_MCP_SCOPES`។ វានៅតែបិទ លុះត្រាតែ `OMNIROUTE_MCP_ENFORCE_SCOPES=true`។
+កាតាឡុក និងច្បាប់ដែលត្រូវគ្នា (ខ្សែអក្សរដូចគ្នាបេះបិទ ឬវិសាលភាពដែលបានអនុញ្ញាតបញ្ចប់ដោយ `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ។ `MCP_SCOPE_LIST` ក្នុង `src/shared/constants/mcpScopes.ts` គឺជាសំណុំរងដែលបានវាយដើម មិនមែនកាតាឡុកពេញលេញនោះទេ។ ការអនុវត្តដំណើរការក្នុង `open-sse/mcp-server/scopeEnforcement.ts` បន្ទាប់ពី `resolveCallerScopeContext()` ដោះស្រាយវិសាលភាពពីព័ត៌មាន MCP auth សំណើទិន្នន័យមេតា ឬ `OMNIROUTE_MCP_SCOPES`។ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` បើកវាជាសកល ( `false` លំនាំដើម) ប៉ុន្តែវាតែងតែត្រូវបានអនុវត្តសម្រាប់អ្នកហៅ HTTP/SSE ដែល API key ខ្វះ `manage`/`admin` (សូមមើល `shouldForceScopeEnforcement()` ក្នុង `open-sse/mcp-server/scopeEnforcement.ts`) ដោយមិនគិតពីទង់ជាតិ។
 
-### Access-token scopes
+### វិសាលភាពនៃសញ្ញាសម្ងាត់ចូលប្រើ
 
-`read` / `write` / `admin` លើ tokens `oma_live_…` ដែលត្រូវបានចាត់ថ្នាក់ដោយ `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`)។ ចំណាត់ថ្នាក់នេះអនុវត្តចំពោះ access-token credential ប៉ុណ្ណោះ។ សូមមើល [Management Authentication](../guides/MANAGEMENT-AUTH.md)។
+`read` / `write` / `admin` នៅលើ `oma_live_…` tokens ចំណាត់ថ្នាក់ដោយ `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) ។ ចំណាត់ថ្នាក់នេះអនុវត្តចំពោះតែអត្តសញ្ញាណប័ណ្ណចូលប្រើប៉ុណ្ណោះ។ សូមមើល [ការផ្ទៀងផ្ទាត់ការគ្រប់គ្រង](../guides/MANAGEMENT-AUTH.md) ។
 
 ## បិទ/បើកតម្រូវឱ្យមានការផ្ទៀងផ្ទាត់
 

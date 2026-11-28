@@ -13,7 +13,7 @@ mfumo wa uchakataji hutumia rejista, hivyo malengwa mengine yanaweza kuongezwa.
 
 ---
 
-## 1. Jinsi unavyofanya kazi
+## 1. Jinsi inavyofanya kazi
 
 ```
 server (decrypt + validate config, reconcile cursor)
@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Ratiba** — kazi moja ya cron ya `JobRegistry`, `log_export`, yenye thamani chaguomsingi ya `0 * * * *` (kila saa,
-  UTC). Imesajiliwa katika `src/lib/initCloudSync.ts`; inaweza kubadilishwa kwa `OMNIROUTE_LOG_EXPORT_CRON`.
-  Kila kichocheo cha ratiba huchakata rekodi zote zinazosubiri kwa kila lengwa **lililowezeshwa**, moja baada ya jingine.
-- **Kielekezi** — `call_logs.rowid` ya SQLite inayopatikana kiotomatiki, inayohifadhiwa kwa kila lengwa katika
-  `log_export_destinations.cursor_row_id`. Kwa makusudi, `timestamp` si kielekezi: waitaji
-  wanaweza kutoa thamani yao wenyewe, hivyo ombi la polepole linaweza kuandikwa baada ya ombi la haraka zaidi lililoanza
-  baadaye, na kielekezi cha muhuri wa muda kingeliruka.
-- **Makundi** — safu `batch_size` kwa kila ombi (chaguomsingi 500), safu `max_rows_per_run` kwa kila utekelezaji
-  (chaguomsingi 10000) ili rekodi nyingi zinazosubiri zichakatwe katika vichocheo kadhaa vya ratiba badala ya kuzuia kimoja.
-- **Uwasilishaji** — kielekezi husonga mbele tu baada ya `send()` kukamilika kwa mafanikio. Kundi lililoshindwa huacha
-  kielekezi pale kilipokuwa, hivyo safu hizohizo hujaribiwa tena katika utekelezaji unaofuata. Dhamana ni
-  uwasilishaji angalau mara moja pamoja na kuondoa nakala rudufu upande wa lengwa, si uwasilishaji halisi wa mara moja tu: BigQuery huweka ufunguo wa kila
-  safu kwa kutumia kitambulisho cha kumbukumbu ya mwito, ambacho hukizingatia kadiri iwezekanavyo ndani ya kipindi chake cha kuondoa nakala rudufu.
-- **Kinga ya mwingiliano** — kichocheo cha cron na `POST .../run` vinaweza kuanzishwa pamoja. Lengwa
-  ambalo tayari linachakatwa hurukwa badala ya kuchakatwa mara mbili (`skipped: true` katika matokeo ya utekelezaji),
-  hivyo utekelezaji sambamba hauwezi kutuma kundi tena au kurudisha kielekezi nyuma.
-- **Urejeshaji baada ya kufuta data yote** — ikiwa `cursor_row_id` itakuwa juu ya `MAX(rowid)` (jedwali lote
-  lilifutwa na rowid zikaanza upya), kiendeshaji hurudisha kielekezi hadi 0 badala ya kushindwa kabisa kuona rekodi mpya.
+- **Ratiba** — one `JobRegistry` cron job, `log_export`, ikibadilika kuwa `0 * * * *` (kila saa, UTC). Imesajiliwa katika `src/lib/initCloudSync.ts`; inayoweza kupita kiasi na `OMNIROUTE_LOG_EXPORT_CRON`. Kila kupe humwaga maji kila** kuwezeshwa** marudio, mfululizo.
+- **Cursor** — SQLite kamili ya `call_logs.rowid`, iliendelea kwa kila lengwa katika `log_export_destinations.cursor_row_id`. `timestamp` sio kielekezi kimakusudi: wapigaji simu wanaweza kutoa thamani yao wenyewe, kwa hivyo ombi la polepole linaweza kuandikwa baada ya haraka zaidi iliyoanza baadaye, na kishale cha muhuri wa muda kinaweza kuruka.
+- **Kukusanya** — `batch_size` safu mlalo kwa kila ombi (chaguo-msingi 500), safu mlalo `max_rows_per_run` kwa kila kukimbia (chaguo-msingi 10000) kwa hivyo safu kubwa ya nyuma hutiririsha kupe kadhaa badala ya kuzuia moja.
+- **Uwasilishaji** — mshale husonga mbele baada ya `send()` kutatuliwa. Kundi lililoshindwa huacha kielekezi mahali kilipokuwa, kwa hivyo safu mlalo zile zile zinajaribiwa tena kwenye mwendo unaofuata. Dhamana ni angalau-mara moja pamoja na kulengwa-upande-rudufu, si kweli kabisa-mara moja: BigQuery hufungua kila safu kwa kitambulisho cha rekodi ya simu, ambayo inaiheshimu kwa msingi wa juhudi bora ndani ya dirisha lake la kujitenga.
+- **Mlinzi wa kuingiliana** — tiki ya cron na `POST .../run` zinaweza kurusha pamoja. Marudio ambayo tayari yametoka maji yanarukwa badala ya kumwagika mara mbili (`skipped: true` katika matokeo ya kukimbia), kwa hivyo kukimbia kwa wakati mmoja hakuwezi kutuma tena kundi au kuandika kishale nyuma.
+- **Futa ahueni** — ikiwa `cursor_row_id` itaishia juu ya `MAX(rowid)` (meza nzima ilisafishwa na safu kuanzishwa upya), mkimbiaji anarudi nyuma hadi 0 badala ya kuwa kipofu kabisa.
 
-### Kiendeshaji kilichotengwa na mipaka
+### Mkimbiaji aliyetengwa na mipaka
 
-Kila utekelezaji wa lengwa kwenye Node huanzisha mchakato tofauti wa mtoto wa mfumo endeshi unaodumu kwa muda mfupi (`child_process`
-wenye IPC, si `worker_threads`). Usomaji wa miili, uchanganuzi/ubadilishaji wa data ya JSON, `prepare()`
-ya lengwa na ingizo/tokeo la mtandao la lengwa vyote hutekelezwa humo, si kwenye kitanzi cha matukio cha seva.
-Mipangilio na ujumbe mdogo wa maendeleo pekee ndivyo hupitia IPC; rekodi zilizohamishwa hazirudi
-kwenye seva kamwe. Kazi ya cron na njia ya Run now huhifadhi matokeo yaleyale yanayoonekana kwa umma na kinga ya mwingiliano.
+Kila marudio inayoendeshwa kwenye Node huanza mchakato tofauti, wa muda mfupi wa mtoto OS (`child_process` na IPC, si `worker_threads`). Mwili unasoma, upakiaji wa malipo JSON parsing/serialization, `prepare()` lengwa na mtandao lengwa I/O zote zinaendeshwa hapo, si kwenye kitanzi cha tukio la seva. Usanidi na jumbe ndogo za maendeleo pekee ndizo zinazovuka IPC; rekodi zilizohamishwa hazirudi kwa seva. Njia ya cron na Run sasa huweka matokeo sawa ya umma na ulinzi unaoingiliana.
 
-Mchakato wa mtoto hufungua `DATA_DIR/storage.sqlite` iliyobainishwa na seva kwa usomaji tu kwa kutumia `node:sqlite`,
-ikiwa na `busy_timeout=5000` na `query_only=ON`. Hauingizi singleton yoyote ya DB wala kufanya
-uhamishaji wa muundo, nakala rudufu au masasisho ya SQLite. Utunzaji wa taarifa za vizalia vinavyokosekana/vilivyoharibika (ikiwemo
-UPDATE ya kizalia kilichoharibika) hubaki kwenye njia ya maelezo ya dashibodi pekee. Njia zote mbili hutumia kitatuzi kimoja safi cha
-maelezo; uhamishaji hutumia usomaji wa mfumo wa faili usiolandanifu na mpangilio uleule wa utatuzi wa kizalia → data ya zamani
-iliyopachikwa → data ya zamani kwenye diski → hakuna. Utekelezaji huchukua picha ya rowid ya juu zaidi ya uingizaji
-wakati mchakato wa mtoto unapofungua kisomaji chake; rekodi zinazoongezwa baadaye husubiri utekelezaji unaofuata. Huu ni mpaka wa
-uingizaji, si muamala wa SQLite unaodumu kwa muda mrefu: waandishi wa WAL na sehemu za ukaguzi hubaki huru wakati wa
-kusubiri mtandao. Masasisho/ufutaji wa safu zilizopo hauzuiwi na mpaka huu.
+Mtoto hufungua `DATA_DIR/storage.sqlite` iliyotatuliwa ya seva kwa kutumia `node:sqlite`, na `busy_timeout=5000` na `query_only=ON`. Haiingizii singleton DB na haifanyi uhamiaji, chelezo au visasisho vya SQLite. uwekaji hesabu wa vizalia vya Missing/corrupt (pamoja na corrupt-artifact UPDATE) unasalia katika njia ya maelezo ya dashibodi pekee. Njia zote mbili zinashiriki kisuluhishi cha maelezo safi; usafirishaji hutumia usomaji wa mfumo wa faili usiolingana na vizalia vya programu sawa vya urithi wa → ndani ya diski ya urithi → → hakuna mpangilio wa azimio. Uendeshaji hupiga picha ya upeo wa juu wa safu ya kuchomeka mtoto anapofungua msomaji wake; viingilio vya baadaye subiri ukimbiaji unaofuata. Huu ni mpaka wa kuingiza, sio shughuli ya muda mrefu SQLite : waandishi WAL na vituo vya ukaguzi husalia bila malipo wakati wa kusubiri kwa mtandao. Updates/deletions ya safu mlalo zilizopo hazijagandishwa na mpaka huu.
 
-Baada ya kila kundi kukubaliwa, mchakato wa mtoto husubiri uthibitisho. Seva kwanza huhifadhi
-kielekezi kwa `advanceLogExportCursor`, kisha hutuma `ack`; hakuna kundi linalofuata linaloanza kabla ya hapo.
-Hitilafu ya kutuma, kuanguka au kuisha kwa muda hurekodi kushindwa bila kusogeza kielekezi kwa kundi hilo. Makundi
-yaliyothibitishwa awali hubaki yamehifadhiwa; kwa kiwango cha juu, ni kundi moja tu ambalo halijathibitishwa linaloweza kutumwa tena.
-Mafanikio hurekodiwa tu baada ya `done` na mchakato wa mtoto kuondoka bila hitilafu. Hitilafu husitisha mchakato wa mtoto
-kwa SIGTERM, na hatua hiyo kupandishwa hadi SIGKILL baada ya milisekunde 500, huku kiendeshaji kikisubiri mchakato ufungwe.
+Baada ya kila kundi lililokubaliwa, mtoto anasubiri kukiri. Seva kwanza hudumisha kishale kwa `advanceLogExportCursor`, kisha kutuma `ack`; hakuna kundi linalofuata linaloanza kabla yake. Kushindwa kutuma, kuacha kufanya kazi au kuisha kwa muda hurekodi kutofaulu bila kuendeleza kundi hilo. Vikundi vilivyokubaliwa hapo awali hubakia kujitolea; kwa wingi kundi moja ambalo halijakubaliwa linaweza kutumwa tena. Mafanikio yanarekodiwa tu baada ya `done` na kutoka kwa mtoto safi. Kushindwa kusimamisha mtoto kwa SIGTERM, kuongezeka hadi SIGKILL baada ya ms 500, na mkimbiaji husubiri kufungwa kwa mchakato.
 
-| Kigezo cha mazingira                          | Chaguomsingi | Kusudi                                                 |
-| --------------------------------------------- | ------------ | ------------------------------------------------------ |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000       | Kikomo cha muda halisi kwa kila lengwa                 |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024         | Kikomo cha old-space ya V8 ya mchakato wa mtoto kwa MB |
+| Tofauti ya mazingira                          | Chaguomsingi | Kusudi                                             |
+| --------------------------------------------- | ------------ | -------------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000       | Kikomo cha saa ya ukutani kwa kila lengwa          |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024         | Kikomo cha nafasi ya zamani cha mtoto V8 katika MB |
 
-Thamani zisizo halali/zisizo chanya/zisizo nambari kamili hutumia chaguomsingi. Mpangilio wa heap si kikomo cha
-jumla cha RSS; makundi makubwa sana bado yanaweza kumaliza kumbukumbu ya mchakato wa mtoto na kusababisha utekelezaji kushindwa kwa usalama.
-Chaguomsingi la MB 1024 huacha nafasi ya ziada kwa kundi chaguomsingi la safu 500 za vizalia vya KiB 512 huku
-miili ikiwa imewezeshwa, ikiwemo ubadilishaji wa JSON wa BigQuery unaogawanywa katika vipande vya baiti. Haufanyi kundi
-la safu 10000 lenye miili kuwa salama. Kuisha kwa heap ya V8 hurekodi hitilafu yenye hatua ya kuchukua: punguza ukubwa
-wa kundi au ongeza `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kielekezi hubaki kwenye kundi la mwisho
-lililothibitishwa. Miili ya kihistoria iliyopachikwa/iliyo kwenye diski haijumuishwi katika kikomo cha kisasa cha vizalia.
-Waendeshaji lazima wapangie RSS kando, hasa ndani ya kontena zenye kumbukumbu iliyowekewa kikomo.
+Invalid/non-positive/non-integer maadili hutumia chaguo-msingi. Mpangilio wa lundo sio kikomo cha jumla RSS ; makundi makubwa sana bado yanaweza kumaliza kumbukumbu ya mtoto na kushindwa kukimbia kwa usalama. Chaguo-msingi ya 1024 MB huacha chumba cha habari kwa kundi chaguo-msingi la safu mlalo 500 la vizalia vya programu 512 KiB vilivyo na miili iliyowezeshwa, ikijumuisha ufuataji wa BigQuery's byte-chunked JSON. Haifanyi kundi la miili ya safu 10000 kuwa salama. Kutoweka kwa lundo la V8 hurekodi kutofaulu kwa hatua: saizi ya chini ya bechi au kuongeza `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kishale hukaa kwenye kundi la mwisho lililokubaliwa. Miili ya kihistoria inline/disk haijafunikwa na kofia ya kisasa ya vizalia. Waendeshaji lazima waweke bajeti ya RSS tofauti, hasa ndani ya vyombo visivyo na kumbukumbu.
 
-Mchakato mtoto hurithi tu `DATA_DIR` iliyotatuliwa, `NODE_ENV`, `TZ` iliyowekwa wazi (utatuzi wa saa
-za ndani kwa majina ya faili ya mfumo wa zamani), `ELECTRON_RUN_AS_NODE` inapokuwepo, na ingizo zifuatazo za miunganisho inayotoka:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (pamoja na matoleo yake ya herufi ndogo),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Kisambazaji cha kimataifa cha Undici kinatumia utatuzi uleule wa seva wa proksi unaotegemea mazingira pekee na kanuni za
-kupita proksi kwa seva za ndani, ikiwemo `NO_PROXY`; hakiingizi `proxyFetch.ts` wala viashiria vyake vya DB/vipengele.
-Taarifa za uthibitishaji wa proksi hufichwa katika matokeo yanayopitishwa na hitilafu zinazorekodiwa. Taarifa za uthibitishaji wa lengwa
-hutumwa tu katika ujumbe mmoja wa kuanzisha wa IPC, kamwe si kupitia argv au mazingira; matokeo/hitilafu zinazopitishwa
-huongezewa kiambishi awali na kusafishwa. Ni `ExperimentalWarning` pekee inayozimwa katika hoja za utekelezaji za mchakato mtoto ili kuepuka
-kurudia onyo la SQLite la Node katika kila utekelezaji wa cron; aina nyingine za maonyo hubaki kuonekana.
+The child inherits only the resolved `DATA_DIR`, `NODE_ENV`, explicit `TZ` (legacy filename local-time resolution), `ELECTRON_RUN_AS_NODE` when present, and the following outbound inputs: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (and their lowercase forms), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. A global Undici dispatcher shares the server's pure environment-proxy resolution and local-host bypass rules, including `NO_PROXY`; it does not import `proxyFetch.ts` or its DB/feature flags. Proxy credentials are redacted from forwarded output and recorded errors. Destination credentials travel only in one start IPC message, never argv or environment; output/error forwarding is prefixed and sanitized. Only `ExperimentalWarning` is disabled in child exec arguments to avoid repeating Node's SQLite warning each cron run; other warning types remain visible.
 
-Moduli za lengwa lazima ziweze kuingizwa bila vitegemezi vya Next.js/vya seva pekee. Utekelezaji uliopo wa
-BigQuery tayari unatimiza sharti hilo. Akiba za tokeni za ufikiaji hudumu tu wakati wa
-utekelezaji wa mchakato mtoto, si kati ya utekelezaji tofauti. Node ndiyo mazingira ya utekelezaji yanayoungwa mkono (`package.json` engines), lakini sehemu ya usakinishaji wa Bun
-katika README na `Dockerfile.bun` pia zinaeleza njia ya uoanifu wa uzalishaji inayotumia
-`bun:sqlite` (`src/lib/db/core.ts` / adapta). Kwa hiyo, chini ya Bun, uhamishaji huhifadhi njia ya awali
-ya ndani ya mchakato na kutoa onyo mara moja: utenganishaji wa heap/muda wa mwisho wa mchakato mtoto haupatikani. Tumia
-Node kwa utenganishaji wa mzunguko wa matukio na OOM; Bun haichukuliwi hapa kuwa ya maendeleo pekee.
+Sehemu lengwa lazima ziweze kuingizwa bila tegemezi za Next.js/server-only. Utekelezaji uliopo BigQuery tayari unakidhi mkataba huo. Akiba za ishara za ufikiaji hudumu tu kwa mtoto kukimbia, sio kukimbia kwa njia zote. Node ndio wakati unaotumika (injini za `package.json` ). Juhudi bora, njia ya uoanifu ya Bun isiyotumika ipo (`bun:sqlite` in `src/lib/db/core.ts` /adapta, na `Dockerfile.bun`), kwa hivyo uhamishaji lazima usivunjike chini yake. Chini ya Bun, uhamishaji huhifadhi njia ya awali ya mchakato na kutoa onyo la mara moja: kutengwa kwa heap/timeout mtoto hakupatikani. Tumia Nodi kwa kitanzi cha tukio na kutengwa kwa OOM.
 
-`includeBodies` inapowezeshwa, pendelea ratiba ya kiwango cha dakika kama vile
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` badala ya kukusanya mrundikano wa mizigo ya data wa saa nzima.
-Vikomo vya makundi na safu bado vinadhibiti kila utekelezaji. Gharama ya kuanzisha mchakato hulipwa kwa kila lengwa katika kila utekelezaji;
-hii hubadilisha gharama ndogo ya kuanzisha kuwa utenganishaji wa mzunguko wa matukio wa seva, si kupunguza jumla ya matumizi ya CPU.
+Wakati `includeBodies` imewashwa, pendelea mwako wa kiwango cha dakika kama vile `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` badala ya kukusanya rekodi ya upakiaji wa kila saa. Vikomo vya bechi na safu mlalo bado vimefungwa kila kukimbia. Uanzishaji wa mchakato hulipwa kwa kila marudio kwa kila kukimbia; hii inauza gharama ndogo ya kuanzisha kwa kutenganisha kitanzi cha tukio la seva, haipunguzi matumizi ya jumla CPU.
 
-### Mizigo ya data (maagizo na majibu)
+### Upakiaji (maongozi na ukamilishaji)
 
-Kwa chaguomsingi uhamishaji hubeba tu sehemu za muhtasari zinazoonyeshwa kwenye **orodha** ya Kumbukumbu. Kuwasha
-**Hamisha maagizo na majibu** (`includeBodies`) pia hutuma yale yanayoonyeshwa kwenye kidirisha cha **maelezo**
-cha Kumbukumbu kwa kila mwito:
+Kwa chaguo-msingi uhamishaji hubeba tu sehemu za muhtasari wa Kumbukumbu** orodha** maonyesho. Inawasha** Hamisha vidokezo na majibu** (`includeBodies`) zaidi ya hayo husafirisha yale Magogo** undani** kidirisha kinaonyesha kwa kila simu:
 
-| Sehemu                           | Inachohifadhi                                                                       |
-| -------------------------------- | ----------------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Mizigo ya data ya mwito kama dashibodi inavyoionyesha                               |
-| `pipeline_route_decision`        | Lengwa na modeli zilizochaguliwa na kipanga njia                                    |
-| `pipeline_client_request`        | Ombi ghafi kama lilivyotumwa na mteja kabisa                                        |
-| `pipeline_openai_request`        | Baada ya kubadilishwa kuwa muundo wa ndani wa OpenAI                                |
-| `pipeline_provider_request`      | Kama lilivyotumwa kwa mtoa huduma, katika muundo wake                               |
-| `pipeline_provider_response`     | Jibu ghafi kutoka kwa mtoa huduma                                                   |
-| `pipeline_client_response`       | Kilichorudishwa kwa mwitaji                                                         |
-| `pipeline_error`                 | Maelezo ya hitilafu katika kiwango cha mnyororo wa uchakataji kwa mwito ulioshindwa |
-| `bodies_truncated`               | Kweli ikiwa sehemu yoyote hapo juu ilifikia `maxBodyBytes`                          |
+| Shamba                           | Inashikilia nini                                                    |
+| -------------------------------- | ------------------------------------------------------------------- |
+| `request_body` / `response_body` | Simu hupakia kadri dashibodi inavyozionyesha                        |
+| `pipeline_route_decision`        | Ambayo lengo na mfano router ilichukua                              |
+| `pipeline_client_request`        | Ombi ghafi kama vile mteja alituma                                  |
+| `pipeline_openai_request`        | Baada ya tafsiri katika umbo OpenAI wa ndani                        |
+| `pipeline_provider_request`      | Kama ilivyotumwa juu ya mkondo, katika lahaja ya mtoaji             |
+| `pipeline_provider_response`     | Jibu ghafi la mkondo wa juu                                         |
+| `pipeline_client_response`       | Nini alirudishiwa mpigaji                                           |
+| `pipeline_error`                 | Maelezo ya hitilafu ya kiwango cha bomba kwa simu ambayo haikufaulu |
+| `bodies_truncated`               | Kweli wakati sehemu yoyote hapo juu iligonga `maxBodyBytes`         |
 
-Haya ni maudhui ya maagizo, kwa hiyo **yamezimwa kwa chaguomsingi** na kwa makusudi huchaguliwa kwa kila lengwa.
-Kinachotumwa ndicho kinachoonyeshwa na dashibodi, kwa sababu uhamishaji na `getCallLogById` hutumia utatuzi uleule
-wa maelezo: mizigo ya data
-tayari husafishwa taarifa binafsi zinazoweza kumtambulisha mtu na kufichwa siri inapoandikwa, na mwito unaofanywa kwa
-ufunguo wa API wa `noLog` hauhifadhi mzigo wowote wa data, hivyo hakuna cha kuhamisha.
+Haya ni maudhui ya haraka, ndivyo ilivyo** imezimwa kwa chaguo-msingi** na kwa makusudi chaguo la kila marudio. Je, meli ni nini dashibodi inaonyesha, kwa sababu utatuzi wa maelezo ya mauzo ya nje na `getCallLogById` hushiriki: mizigo tayari imesafishwa kwa PII na kurekebishwa kwa siri wakati imeandikwa, na simu iliyopigwa na `noLog` API muhimu huhifadhi hakuna malipo yoyote, kwa hiyo hakuna kitu cha kuuza nje.
 
-Mizigo ya data husomwa kwa kila safu kutoka kwenye faili ya mfumo wa faili, kwa hiyo ujazaji wa data hufanyika tu kwa malengwa
-yaliyouomba. Faili inayokosekana au iliyoharibika huhamisha muhtasari wake huku mizigo ya data ikiwa null badala ya
-kusababisha kundi kushindwa na kukwamisha kishale.
+Upakiaji husomwa kwa kila safu mlalo kutoka kwa vizalia vya mfumo wa faili, kwa hivyo uwekaji maji hutumika tu kwa maeneo ambayo yaliomba. Vizalia vya programu vilivyokosekana au mbovu husafirisha muhtasari wake na mizigo isiyo na maana badala ya kushindwa kundi na kuzima kielekezi.
 
-`maxBodyBytes` (chaguomsingi 262144) huweka kikomo kwa kila sehemu. Mizigo mirefu zaidi ya data **hukatwa badala ya
-kuondolewa** — agizo lililokatwa bado hujibu "nini kiliulizwa" — na safu huwekewa alama ya
-`bodies_truncated`. Mabadiliko yanayotiririshwa kipande kwa kipande hayahamishwi; jibu lililounganishwa
-tayari liko katika `pipeline_provider_response` na `pipeline_client_response`.
+`maxBodyBytes` (chaguo-msingi 262144) hufunika kila sehemu. Mizigo mirefu zaidi ni** kupunguzwa badala ya kuachwa** — haraka iliyopunguzwa bado inajibu "kile kilichoulizwa" — na safu hiyo imealamishwa na `bodies_truncated`. Delta zinazotiririshwa kwa vipande-vipande hazisafirishwi nje; majibu yaliyokusanywa tayari yako `pipeline_provider_response` na `pipeline_client_response`.
 
 ---
 

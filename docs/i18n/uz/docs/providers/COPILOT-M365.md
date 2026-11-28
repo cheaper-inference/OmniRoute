@@ -166,11 +166,11 @@ Joylashtirilgan hisob ma’lumotlari uchun Test ulanishi hisob ma’lumotlari sh
 
 `copilot-m365-web` yoqilganligiga ishonch hosil qiling** Boshqaruv paneli → provayderlari** . Provayder ba'zi darajalarda sukut bo'yicha yashirin bo'lishi mumkin.
 
-## Manbalar
+## Ma'lumotnomalar
 
-- Muammo: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Muhokama: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Manba: `src/shared/constants/providers/web-cookie.ts` (provayder ta’rifi)
+- Muammo: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Munozara: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Manba: `src/shared/constants/providers/web-cookie.ts` (provayder ta'rifi)
 - HAR importi: `src/shared/utils/m365HarImport.ts`
-- Hisobga kirish ma’lumotlari maydonlari: `src/shared/providers/webSessionCredentials.ts`
-- Tarif modal oynasi: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Hisob ma'lumotlari maydonlari: `src/shared/providers/webSessionCredentials.ts`
+- Modal daraja: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

@@ -45,10 +45,10 @@ obično moraju da promene ciljnu granu pre spajanja.
 - `release/vX+1` следећег циклуса се исече из замрзнутог врха тако да сарадници настављају са радом.
 - Отворени PRs који још увек циљају замрзнуту грану би требало да буду** ретаргетед** на активну (највишу) грану `release/v*`.
 
-Проверите да ли постоји отворено замрзавање пре него што претпоставите да је грана коју желите спојива:
+Проверите да ли је отворено замрзавање пре него што претпоставите да је грана коју желите спојива:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Механика спајања (власник `queue` лабел → Мергифи) је документована у [MERGE_TRAIN.мд](./MERGE_TRAIN.md).

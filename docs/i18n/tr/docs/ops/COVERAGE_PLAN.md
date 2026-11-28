@@ -151,30 +151,30 @@ Bu dosyalar bugün en düşük satır kapsamına (< %60) sahip ve 6-7. Aşamalar
 - [ ] %90'a ulaşma sürecinde düzeltilen her kapsanmamış üretim hatası için regresyon testleri ekle
 - [ ] CI kapsam eşiğini yalnızca yerel başlangıç değeri art arda en az iki çalıştırmada kararlı kaldıktan sonra yükselt
 
-## Ratchet politikası
+## Cırcır politikası
 
-`npm run test:coverage` eşiklerini yalnızca proje bir sonraki kilometre taşını rahat bir marjla gerçekten aştıktan sonra güncelleyin.
+`npm run test:coverage` eşiklerini ancak proje rahat bir tamponla bir sonraki kilometre taşını gerçekten aştıktan sonra güncelleyin.
 
-**Mevcut eşik:** `npm run test:coverage`, **60 ifade / 60 satır / 60 fonksiyon / 60 dal** değerlerini zorunlu kılar (metrik, Quality-Gates Aşama 6A.1'de yeniden temel alındı — önceki %82,58'lik temel değer, test dosyalarını saydığı ve `open-sse` paketini hariç tuttuğu için şişirilmişti). `test:coverage:legacy` komutu, geçmişe dönük karşılaştırma için eski 50/50/50 metriğini korur.
+**Mevcut kapı:** `npm run test:coverage` uygular** 60 ifade / 60 satır / 60 fonksiyon / 60 dal** (Metrik, Quality-Gates Fase 6A.1 — yeniden temellendirildi; önceki %82,58'lik taban çizgisi, test dosyalarını saydığı ve `open-sse` hariç tuttuğu için şişirildi). `test:coverage:legacy` komutu, geçmiş karşılaştırma için eski 50/50/50 metriğini korur.
 
-En son rapora göre anlık eşik kontrolleri yapmak için şunu kullanın:
+En son rapor kullanımına göre geçici eşik kontrolleri için:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Önerilen ratchet sıralaması (sıra `ifadeler-satırlar / dallar / fonksiyonlar` şeklindedir):
+Önerilen cırcır sırası (sıra `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- mevcut eşik (75/70/75)
+5. 75/70/72 <-- mevcut kapı (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Dal kapsamı art arda iki çalıştırmada %78'in üzerinde kaldığında bir sonraki ratchet hedefi `80/75/78` olacaktır.
+Bir sonraki kilit hedef, şube kapsamının art arda iki çalıştırmada %78'in üzerinde kalması durumunda `80/75/78`.
 
 ## Bilinen eksiklik
 

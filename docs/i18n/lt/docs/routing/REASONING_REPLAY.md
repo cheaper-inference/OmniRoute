@@ -4,7 +4,7 @@
 
 ---
 
-> **Tiesos šaltinis:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Paskutinį kartą atnaujinta:** 2026-06-28 — v3.8.40
+> **Tiesos šaltinis:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute užfiksuoja pagalbinį `reasoning_content` sukurtą mąstymo režimo modelių, ir skaidriai atkuria jį kelių posūkių užklausose, kai to reikalauja tiekėjas. Tai pašalina HTTP 400 klaidas, kurias iškelia griežti paslaugų teikėjai, kai kliento pokalbių istorijoje trūksta ankstesnio posūkio motyvų.
 

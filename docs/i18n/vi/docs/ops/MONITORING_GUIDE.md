@@ -99,37 +99,37 @@ Theo từng combo:
 
 ---
 
-## API kiểm tra tình trạng
+## Kiểm tra sức khỏe API
 
-OmniRoute cung cấp **hai** điểm kiểm tra tình trạng qua HTTP. Chúng không thể thay thế lẫn nhau đối với các trình điều phối.
+OmniRoute vạch trần** hai** bề mặt sức khỏe HTTP. Chúng không thể thay thế cho nhau đối với người dàn nhạc.
 
-| Đường dẫn                    | Mục đích                                                                         | Mức tải                             | Dùng cho                                                                             |
-| ---------------------------- | -------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------ |
-| `GET /healthz`               | Tình trạng sống/sẵn sàng theo vòng đời (`ok` / `starting` / `stopping`)          | Không đáng kể (chỉ cờ giai đoạn)    | **Sẵn sàng** của Kubernetes; kiểm tra **sống** nhẹ nếu buộc phải dùng HTTP           |
-| `GET /api/monitoring/health` | Tổng quan chuyên sâu về hệ thống + nhà cung cấp (DB, heap, số lượng danh mục, …) | Nặng (DB đồng bộ / tác vụ giám sát) | Bảng điều khiển, kiểm tra sâu kiểu blackbox, kiểm tra tình trạng tích hợp của Docker |
+| Con đường                    | Mục đích                                                             | Cân nặng                               | Sử dụng cho                                                                    |
+| ---------------------------- | -------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------ |
+| `GET /healthz`               | Vòng đời liveness/readiness (`ok` / `starting` / `stopping`)         | Tầm thường (chỉ cờ giai đoạn)          | Kubernetes** sẵn sàng** ; mềm mại** sự sống động** nếu bạn phải sử dụng HTTP   |
+| `GET /api/monitoring/health` | Tóm tắt nhà cung cấp + hệ thống sâu (DB, heap, số lượng danh mục, …) | Nặng (đồng bộ DB / công việc giám sát) | Bảng điều khiển, kiểm tra sâu hộp đen, kiểm tra tình trạng tích hợp của Docker |
 
-> **Lưu ý:** Ma trận tình trạng nhà cung cấp, sự cố autopilot, trình giám sát hạn ngạch, tình trạng token và chi tiết độ trễ ngoài `/api/monitoring/health` có sẵn thông qua **công cụ MCP** `observability_snapshot` hoặc các trang **bảng điều khiển** — không có route REST chuyên biệt cho những nội dung này.
+> **Ghi chú:** Ma trận tình trạng nhà cung cấp, các vấn đề về chế độ lái tự động, giám sát hạn ngạch, tình trạng mã thông báo và chi tiết về độ trễ ngoài `/api/monitoring/health` đều có sẵn thông qua** công cụ MCP** `observability_snapshot` hoặc** bảng điều khiển** các trang — không có tuyến đường REST dành riêng cho những trang đó.
 
-Cả hai route đều chạy trên **cùng một vòng lặp sự kiện Node** với quá trình xử lý yêu cầu. Một luồng bị giới hạn bởi CPU (xử lý danh mục lớn của `GET /v1/models`, nén ngữ cảnh dài / đếm token) có thể làm chậm **tất cả** trình xử lý HTTP, bao gồm `/healthz`. Vòng lặp sự kiện bận ≠ tiến trình đã chết. Ưu tiên khắc phục tác vụ chiếm dụng tài nguyên; việc điều chỉnh probe chỉ giúp giảm các trường hợp dừng nhầm.
+Cả hai tuyến đều chạy trên** cùng một vòng lặp sự kiện Node** như xử lý yêu cầu. Đường dẫn giới hạn CPU (công việc danh mục `GET /v1/models` lớn, nén/đếm mã thông báo theo ngữ cảnh dài) có thể bị trì hoãn** tất cả** trình xử lý HTTP, bao gồm `/healthz`. Quá trình ≠ bận của vòng lặp sự kiện đã chết. Thích sửa con lợn hơn; điều chỉnh đầu dò chỉ làm giảm số lần giết sai.
 
-### Probe nhẹ dành cho trình điều phối
+### Đầu dò dàn nhạc nhẹ
 
 ```bash
 GET /healthz
-# hoặc HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + nội dung `ok` khi giai đoạn vòng đời của máy chủ đã sẵn sàng
-- **503** + `starting` / `stopping` trong lúc khởi động hoặc tắt
-- Phần triển khai: `src/app/healthz/route.ts` (không ping DB)
+- **200** + body `ok` khi giai đoạn vòng đời máy chủ đã sẵn sàng
+- **503** + `starting` / `stopping` trong khi khởi động hoặc tắt máy
+- Triển khai: `src/app/healthz/route.ts` (không có ping DB )
 
-### Tình trạng hệ thống (chuyên sâu)
+### Tình trạng hệ thống (sâu)
 
 ```bash
 GET /api/monitoring/health
 ```
 
-Phản hồi:
+Phản ứng:
 
 ```json
 {
@@ -153,40 +153,35 @@ Phản hồi:
 }
 ```
 
-#### `credentialHealth`: bộ nhớ đệm probe so với `test_status` của SQLite
+#### `credentialHealth`: bộ đệm thăm dò và SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth` là **thước đo bộ nhớ đệm probe trong bộ nhớ**, không phải bản kết xuất trực tiếp của `provider_connections.test_status`. Sau #12532, đường dẫn yêu cầu chỉ đọc `getCachedCredentialHealthSummary()`; các probe chạy nền làm mới bộ nhớ đệm bên ngoài vòng lặp sự kiện.
+`GET /api/monitoring/health` → `credentialHealth` là** máy đo bộ đệm thăm dò trong bộ nhớ** , không phải là kết xuất trực tiếp của `provider_connections.test_status`. Sau #12532 đường dẫn yêu cầu chỉ đọc `getCachedCredentialHealthSummary()` ; các đầu dò nền làm mới bộ đệm khỏi vòng lặp sự kiện.
 
-| Lớp                             | Vị trí                                                                | Ý nghĩa                                                                                                                                                                                                                      |
-| ------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Thước đo bộ nhớ đệm probe       | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Kết quả probe tình trạng thông tin xác thực gần nhất vẫn được giữ trong bộ nhớ của tiến trình. `source` luôn là `probe-cache`.                                                                                               |
-| Chi tiết kết nối thất bại       | `credentialHealth.failedConnections`                                  | Chỉ xuất hiện **khi `failed > 0`**. Danh sách giới hạn các hàng bộ nhớ đệm có `status=error` (`connectionId`, `status`, `lastError` / `lastErrorType` đã được làm sạch). `failedOmitted` được đặt khi danh sách bị giới hạn. |
-| Trạng thái cố định trong SQLite | `credentialHealth.staleDbNonOkCount`                                  | Số hàng kết nối **đang hoạt động** (`is_active=1`) có `test_status` được lưu là trạng thái không ổn đã biết (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                               |
+| Lớp                               | Ở đâu                                                                 | Nó có nghĩa là gì                                                                                                                                                                                                      |
+| --------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Máy đo bộ đệm thăm dò             | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Kết quả thăm dò tình trạng chứng chỉ cuối cùng vẫn được lưu giữ trong bộ nhớ quy trình. `source` luôn là `probe-cache`.                                                                                                |
+| Chi tiết kết nối không thành công | `credentialHealth.failedConnections`                                  | Hiện tại** chỉ khi `failed > 0`** . Danh sách giới hạn các hàng bộ đệm có `status=error` (`connectionId`, `status`, `lastError` / `lastErrorType` được khử trùng). `failedOmitted` được đặt khi danh sách bị giới hạn. |
+| trạng thái dính SQLite            | `credentialHealth.staleDbNonOkCount`                                  | Số lượng** tích cực** (`is_active=1`) các hàng kết nối có `test_status` vẫn tồn tại được coi là không ổn định (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                       |
 
-Hai lớp có thể chủ đích không nhất quán:
+Hai lớp có thể không đồng ý về mục đích:
 
-- Thước đo `failed=0` trong khi `staleDbNonOkCount>0` — SQLite vẫn có một `test_status`
-  cố định (ví dụ `expired` hoặc `credits_exhausted`) mà ảnh chụp bộ nhớ đệm probe mới nhất
-  không tính là `status=error`.
-- Thước đo `failed>0` trong khi SQLite có vẻ bình thường — một probe gần đây đã thất bại và
-  được lưu vào bộ nhớ đệm; hàng trong DB chưa được cập nhật hoặc sau đó đã được xóa trạng thái.
+- Đo `failed=0` trong khi `staleDbNonOkCount>0` — SQLite vẫn có `test_status` dính (ví dụ `expired` hoặc `credits_exhausted`) mà ảnh chụp nhanh bộ đệm thăm dò mới nhất không được tính là `status=error`.
+- Đo `failed>0` trong khi SQLite trông khỏe mạnh — một thăm dò gần đây không thành công và được lưu vào bộ nhớ đệm; hàng DB chưa được cập nhật hoặc sau đó đã bị xóa.
 
-Không cảnh báo chỉ dựa trên `provider_connections.test_status` khi thu thập dữ liệu từ
-endpoint này. Dùng `failed` + `failedConnections` cho các lỗi probe trực tiếp và
-`staleDbNonOkCount` khi cần số lượng trạng thái cố định được lưu.
+Đừng chỉ cảnh báo về `provider_connections.test_status` khi quét điểm cuối này. Sử dụng `failed` + `failedConnections` cho các lỗi thăm dò trực tiếp và `staleDbNonOkCount` khi bạn cần số lượng trạng thái cố định liên tục.
 
-### Khuyến nghị về probe Kubernetes
+### Đề xuất thăm dò Kubernetes
 
-OmniRoute là một **tiến trình Node duy nhất** (một vòng lặp sự kiện). `HEALTHCHECK` mặc định của Docker nhắm đến `/healthz` nhẹ. `/api/monitoring/health` **quá nặng** đối với các khoảng thời gian kiểm tra liveness của kubelet.
+OmniRoute là một** quá trình nút đơn** (một vòng lặp sự kiện). Cổ phiếu Docker `HEALTHCHECK` mục tiêu `/healthz` nhẹ. `/api/monitoring/health` là** quá nặng** cho khoảng thời gian hoạt động của kubelet.
 
-| Probe            | Mục tiêu được khuyến nghị                                                          | Ghi chú                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ---------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Khởi động**    | HTTP `GET /healthz` với `failureThreshold` dài (hoặc `startPeriod` lớn)            | Khởi động nguội + di chuyển SQLite có thể mất hơn vài giây                                                                                                                                                                                                                                                                                                                                                       |
-| **Sẵn sàng**     | HTTP `GET /healthz`                                                                | Vòng đời `ok` / `starting` / `stopping` (200 so với 503). Vẫn dao động nếu vòng lặp bị nghẽn CPU. **Phản hồi 200 mất nhiều giây không có nghĩa là khỏe mạnh** (#10303) — điều đó có nghĩa là vòng lặp sự kiện đã bị thiếu tài nguyên trước khi trình xử lý 3 byte được chạy                                                                                                                                      |
-| **Hoạt động**    | HTTP `GET /livez`, **hoặc TCP** trên cổng dịch vụ chính (`PORT`, mặc định `20128`) | `/livez` chỉ kiểm tra tiến trình còn hoạt động (luôn trả về 200 nếu trình xử lý chạy). Nó vẫn dùng chung vòng lặp sự kiện — bận ≠ chết, và không phát hiện tình trạng vòng lặp sự kiện bị thiếu tài nguyên (#10303) tốt hơn TCP. Ưu tiên **TCP** nếu các probe HTTP hết thời gian chờ dưới tải danh mục/nén; dù dùng cách nào cũng **không** được dừng pod chỉ vì vòng lặp sự kiện bị khựng trong thời gian ngắn |
-| **Sức khỏe sâu** | `GET /api/monitoring/health` từ một trình kiểm tra bên ngoài                       | Không dành cho `livenessProbe` của kubelet / `readinessProbe` có tần suất dày                                                                                                                                                                                                                                                                                                                                    |
+| thăm dò              | Mục tiêu được đề xuất                                                               | Ghi chú                                                                                                                                                                                                                                                                                                                                                                         |
+| -------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Khởi động**        | HTTP `GET /healthz` với `failureThreshold` dài (hoặc `startPeriod` lớn)             | Quá trình di chuyển + SQLite khởi động nguội có thể vượt quá vài giây                                                                                                                                                                                                                                                                                                           |
+| **Sẵn sàng**         | HTTP `GET /healthz`                                                                 | Vòng đời `ok` / `starting` / `stopping` (200 so với 503). Vẫn hoạt động nếu vòng lặp bị chặn CPU. MỘT** 200 trong nhiều giây là không tốt cho sức khỏe** (#10303) — nó có nghĩa là vòng lặp sự kiện đã bị bỏ đói trước khi trình xử lý 3 byte chạy                                                                                                                              |
+| **Sự sống động**     | HTTP `GET /livez`,** hoặc TCP** trên cổng dịch vụ chính (`PORT`, `20128` mặc định ) | `/livez` chỉ hoạt động trong quá trình (luôn là 200 nếu trình xử lý chạy). Nó vẫn chia sẻ vòng lặp sự kiện — bận ≠ chết và nó không phát hiện tình trạng đói của vòng lặp sự kiện (#10303) tốt hơn TCP. Thích hơn**TCP** nếu HTTP thăm dò hết thời gian dưới tải catalog/compression ; LÀM** không** Dù sao đi nữa, hãy tiêu diệt nhóm trên các quầy hàng vòng lặp sự kiện ngắn |
+| **Sức khỏe sâu sắc** | `GET /api/monitoring/health` từ trình kiểm tra bên ngoài                            | Không dành cho kubelet `livenessProbe` / `readinessProbe` chặt chẽ                                                                                                                                                                                                                                                                                                              |
 
-Cấu hình mẫu (điều chỉnh các ngưỡng theo tải khởi động nguội và tải nén của bạn):
+Hình dạng ví dụ (điều chỉnh ngưỡng cho tải khởi động nguội và tải nén):
 
 ```yaml
 ports:
@@ -212,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Khi vòng lặp sự kiện bị khựng, HTTP /livez vẫn có thể hết thời gian chờ. TCP là
-  # phương án thay thế thận trọng hơn:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-**Không** trỏ probe **liveness** của kubelet tới `/api/monitoring/health`. Đường dẫn đó thực hiện công việc DB/giám sát thực tế và sẽ báo lỗi giả khi chịu tải.
+**Đừng** điểm kubelet** sự sống động** tại `/api/monitoring/health`. Đường dẫn đó thực sự DB/monitoring hoạt động và sẽ dương tính giả khi tải.
 
-Liên quan: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (các probe khi vòng lặp sự kiện đang bận), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (định giá danh mục chiếm dụng tài nguyên), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (đếm token khi nén chiếm dụng tài nguyên).
+Liên quan: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (thăm dò trong khi vòng lặp sự kiện đang bận), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (hog định giá danh mục), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (hog đếm mã thông báo nén).
 
-### Watchdog của systemd (vòng lặp sự kiện bị đóng băng)
+### cơ quan giám sát systemd (vòng lặp sự kiện bị đóng băng)
 
-Trên máy chủ systemd, OmniRoute thông báo cho trình quản lý dịch vụ khi nó đã sẵn sàng và tiếp tục gửi tín hiệu định kỳ, nhờ đó một máy chủ có vòng lặp sự kiện bị kẹt sẽ bị dừng và khởi động lại thay vì tiếp tục chạy nhưng không phản hồi. Các tín hiệu này được gửi từ chính vòng lặp sự kiện của máy chủ: khi vòng lặp bị chặn, chúng sẽ dừng lại và systemd khởi động lại dịch vụ sau khi hết khoảng thời gian `WatchdogSec` mà không nhận được tín hiệu nào.
+Trên máy chủ systemd, OmniRoute thông báo cho người quản lý dịch vụ khi nó sẵn sàng và tiếp tục ping nó, do đó, máy chủ có vòng lặp sự kiện bị kẹt sẽ bị tắt và khởi động lại thay vì ở trạng thái im lặng. Các ping đến từ vòng lặp sự kiện của chính máy chủ: khi nó chặn, chúng sẽ dừng và systemd khởi động lại dịch vụ sau khi `WatchdogSec` trôi qua mà không có sự kiện nào.
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) đã tạo một unit người dùng có cấu hình này. Unit do bạn tự tạo (`Type=simple` theo mặc định) không có watchdog, vì vậy hãy thêm các dòng sau vào phần `[Service]` của unit:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) đã viết một đơn vị người dùng bằng cái này. Đơn vị bạn tự viết (mặc định `Type=simple`) không có cơ quan giám sát, vì vậy hãy thêm các dòng này vào phần `[Service]` của nó:
 
 ```ini
 [Service]
@@ -236,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-Unit được tạo đặt `Restart=on-failure`, vì vậy hãy thêm cả dòng đó — nếu không có nó, watchdog chỉ dừng dịch vụ bị kẹt thay vì khởi động lại dịch vụ.
+Đơn vị được tạo đặt `Restart=on-failure`, vì vậy hãy thêm dòng đó — mà không có nó, cơ quan giám sát chỉ giết dịch vụ bị kẹt thay vì khởi động lại nó.
 
-- `Type=notify`: dịch vụ được coi là đã "khởi động" khi máy chủ gửi `READY=1`, không phải khi tiến trình phân nhánh. `TimeoutStartSec` giới hạn thời gian khởi động chậm.
-- `NotifyAccess=all`: các tín hiệu được gửi bởi tiến trình máy chủ, là tiến trình con của tiến trình giám sát `omniroute serve`.
-- `WatchdogSec`: tín hiệu được gửi mỗi 60 giây, vì vậy hãy dùng **120 trở lên**. Các giá trị nhỏ hơn sẽ khởi động lại một máy chủ đang hoạt động bình thường.
-- Chạy `omniroute serve` ở tiền cảnh. `--daemon` tách máy chủ khỏi cgroup của unit và quá trình bắt tay thông báo sẽ không bao giờ hoàn tất.
+- `Type=notify`: dịch vụ được "bắt đầu" khi máy chủ gửi `READY=1`, không phải khi quá trình phân nhánh. `TimeoutStartSec` giới hạn một khởi đầu chậm.
+- `NotifyAccess=all`: các ping được gửi bởi tiến trình máy chủ, là tiến trình con của người giám sát `omniroute serve`.
+- `WatchdogSec`: ping sẽ tắt cứ sau 60 giây, vì vậy hãy sử dụng** 120 hoặc hơn** . Giá trị nhỏ hơn sẽ khởi động lại một máy chủ khỏe mạnh.
+- Chạy `omniroute serve` ở phía trước. `--daemon` tách máy chủ khỏi nhóm của đơn vị và quá trình bắt tay thông báo không bao giờ hoàn tất.
 
-Kiểm tra xem nó có đang hoạt động sau khi khởi động lại hay không:
+Kiểm tra xem nó có hoạt động sau khi khởi động lại không:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` hiển thị độ trễ đã cấu hình và `WatchdogTimestamp` tiến lên sau mỗi phút. Một lần khởi động lại do watchdog gây ra được ghi nhận là `Result=watchdog`. Để tắt các tín hiệu trong khi vẫn giữ nguyên unit, hãy đặt `OMNIROUTE_DISABLE_SD_NOTIFY=1`; nếu không có `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows), sẽ không có gì được gửi đi.
+`WatchdogUSec` hiển thị độ trễ được định cấu hình và `WatchdogTimestamp` di chuyển về phía trước mỗi phút. Một lần khởi động lại do cơ quan giám sát gây ra sẽ được ghi lại là `Result=watchdog`. Để tắt ping trong khi vẫn giữ nguyên thiết bị, hãy đặt `OMNIROUTE_DISABLE_SD_NOTIFY=1`; không có `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) thì không có gì được gửi.
 
-Watchdog chỉ kiểm tra xem vòng lặp sự kiện có tiếp tục chạy hay không. Một máy chủ chậm nhưng vẫn tiếp tục xử lý sẽ không bị khởi động lại.
+Cơ quan giám sát chỉ kiểm tra xem vòng lặp sự kiện có tiếp tục chạy hay không. Máy chủ chậm nhưng vẫn quay sẽ không được khởi động lại.
 
-### Công việc tùy chọn trên đường dẫn yêu cầu (bộ nhớ, kỹ năng, làm mới token)
+### Công việc đường dẫn yêu cầu tùy chọn (bộ nhớ, kỹ năng, làm mới mã thông báo)
 
-Trích xuất bộ nhớ, chèn kỹ năng và làm mới token OAuth dùng chung **vòng lặp sự kiện Node chính** với `/healthz`. Đây là các tính năng có thể bật/tắt trên bảng điều khiển (`memoryEnabled`, `skillsEnabled`), không phải một nhóm worker. Xem [Môi trường — chi phí vòng lặp sự kiện](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Trích xuất bộ nhớ, chèn kỹ năng và làm mới mã thông báo OAuth chia sẻ** vòng lặp sự kiện nút chính** với `/healthz`. Chúng là các tính năng chuyển đổi bảng điều khiển (`memoryEnabled`, `skillsEnabled`), không phải là nhóm công nhân. Xem [Chi phí vòng lặp sự kiện — của Môi trường](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
-### Tình trạng nhà cung cấp
+### Sức khỏe nhà cung cấp
 
-> **Không có endpoint REST.** Dữ liệu tình trạng nhà cung cấp có sẵn thông qua công cụ MCP `observability_snapshot` hoặc trang `/dashboard/providers` trên bảng điều khiển.
+> **Không có điểm cuối REST.** Dữ liệu sức khỏe của nhà cung cấp có sẵn thông qua công cụ MCP `observability_snapshot` hoặc trang `/dashboard/providers` của bảng điều khiển.
 
 ### Chi tiết nhà cung cấp
 
-> **Không có endpoint REST.** Thông tin chi tiết theo từng nhà cung cấp có sẵn thông qua trang `/dashboard/providers` trên bảng điều khiển.
+> **Không có điểm cuối REST.** Thông tin chi tiết về mỗi nhà cung cấp có sẵn thông qua trang `/dashboard/providers` của bảng điều khiển.
 
 ---
 

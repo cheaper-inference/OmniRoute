@@ -4,18 +4,11 @@
 
 ---
 
-> **Həqiqət mənbəyi:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Son yenilənmə:** 2026-06-28 — v3.8.40
+> **Həqiqətin mənbəyi:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute inzibati əməliyyatları, autentifikasiya hadisələrini, provayder
-etimadnamələrinin həyat dövrü dəyişikliklərini və MCP aləti çağırışlarını SQLite əsaslı audit
-cədvəllərinə qeyd edir. Bu səhifədə nələrin jurnala yazıldığı, onların harada saxlandığı, nə qədər müddət
-qorunduğu, API açarlarının bu qeydəalmadan necə imtina edə biləcəyi və verilənlərin necə sorğulana biləcəyi izah olunur.
+OmniRoute inzibati hərəkətləri, autentifikasiya hadisələrini, provayderin etimadnaməsinin həyat dövrü dəyişikliklərini və SQLite tərəfindən dəstəklənən audit cədvəllərinə MCP alət çağırışlarını qeyd edir. Bu səhifə nəyin daxil edildiyini, harada yaşadığını, nə qədər müddət saxlandığını, API düymələrinin necə imtina edə biləcəyini və məlumatların necə sorğulanacağını əhatə edir.
 
-İmplementasiya `src/lib/compliance/index.ts` (T-43 — "Uyğunluq
-Nəzarətləri") və `src/lib/compliance/providerAudit.ts` fayllarında yerləşir. Audit yazıları heç vaxt xəta atmır:
-hər hansı nasazlıq baş verdikdə çağırış səssizcə dayandırılır ki, audit jurnalına yazma
-əsas sorğu axınını poza bilməsin.
+Tətbiq `src/lib/compliance/index.ts` (T-43 — "Uyğunluğa Nəzarət") və `src/lib/compliance/providerAudit.ts` də yaşayır. Audit yazır, heç vaxt atmayın: hər hansı bir uğursuzluqda zəng səssizcə udulur, beləliklə audit qeydi əsas sorğu axınını poza bilməz.
 
 ## Nələr qeydə alınır
 
@@ -125,25 +118,33 @@ Sorğu tarixçəsinin əl ilə təmizlənməsi saxlanma müddətinə əsaslanan 
 
 Standart dəyərlər `src/lib/logEnv.ts` faylında müəyyən edilib (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## `noLog` ilə İmtina (hər API açarı üzrə)
+## `noLog` Opt-Out ( API açarı üçün)
 
-API açarları, onların aşağı axın zəng trafiki qeydə alınmayacaq şəkildə işarələnə bilər. Bu bayraq `api_keys` cədvəlində saxlanılır (`no_log INTEGER DEFAULT 0`) və sürətli icra yollarındakı axtarışlar üçün yaddaşdaxili çoxluqda əks etdirilir.
+API düymələri işarələnə bilər ki, onların aşağı axınındakı zəng trafiki daxil olmasın. Bayraq `api_keys` cədvəlində (`no_log INTEGER DEFAULT 0`) yaşayır və qaynar yol axtarışları üçün yaddaşdaxili dəstdə əks olunur.
 
 ```bash
-# Jurnallaşdırılmayan açar yaradın (idarəetmə autentifikasiyası tələb olunur)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Köməkçi funksiyalar (`src/lib/compliance/index.ts`):
+Köməkçilər (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — yaddaşdaxili qeydi aktiv və ya deaktiv edir
-- `isNoLog(apiKeyId)` — sorğu emalı yolunda yoxlanılır; uyğun qeyd tapılmadıqda `api_keys.no_log` cədvəlindən 30 saniyəlik keşlənmiş oxumadan istifadə edir
-- `NO_LOG_API_KEY_IDS` (mühit dəyişəni, vergüllə ayrılmış) — sistem işə salınarkən yaddaşdaxili çoxluğa əvvəlcədən yüklənir; sütunun dəyərini birbaşa dəyişə bilmədiyiniz hallarda faydalıdır
+- `setNoLog(apiKeyId, true|false)` — yaddaşdaxili girişi dəyişdirin
+- `isNoLog(apiKeyId)` — sorğu yolunda yoxlanılır; `api_keys.no_log` dən 30 s keşlənmiş oxuya geri düşür
+- `NO_LOG_API_KEY_IDS` (env, vergüllə ayrılmış) — açılışda yaddaşdaxili dəstinə əvvəlcədən yüklənmişdir; sütunu birbaşa dəyişdirə bilmədiyiniz zaman faydalıdır
 
-İnzibati audit hadisələri (giriş, provayder dəyişiklikləri, MCP alət çağırışları və s.) `noLog` parametrindən **təsirlənmir** — imtina yalnız hər sorğu üzrə trafik jurnalının aparılmasına aiddir.
+İnzibati audit hadisələri (giriş, provayder dəyişiklikləri, MCP alətinə zənglər və s.)** yox** `noLog` — -dən təsirlənənlər yalnız hər sorğu üçün trafik qeydindən çıxarılır.
+
+### Hər sorğudan imtina (`x-omniroute-no-log`)
+
+Müştəri xüsusi açar yaratmadan faydalı yükün davamlılığından kənar tək nəticə sorğusunu seçə bilər. Sorğu üzrə `x-omniroute-no-log: true` göndərin (`1` və `yes` də qəbul edilir, hərf-həssas deyil). Bu, söhbət idarəçisindən keçən hər bir söhbət ailəsi marşrutuna aiddir: Çat Tamamlamaları, Cavablar, Mesajlar, Tamamlamalar və Əkizlərə uyğun gələn yol. Zəng qeydləri cərgəsi hələ də vaxt damğası, modeli, provayderi, statusu, müddəti və işarə sayıları ilə yazılır, lakin `request_body`, `response_body`, sorğu xülasələri və boru kəməri artefaktları buraxılıb.
+
+Başlıq açar bayrağı ilə ORed : başlıqdan asılı olmayaraq qeydsiz açar qeydsiz qalır və başlıq qeydsiz açar üçün girişi yenidən aktivləşdirə bilməz. Sorğu yuxarıya yönləndirilməmişdən əvvəl başlıq silinir.
+
+Bu başlıq edir** yox** Yaddaş çıxarılmasını və ya semantik keşi söndürün. Sorğu həmin alt sistemlərdə də məzmunu saxlamamalı olduqda, onun yanında `x-omniroute-no-memory: true` və `x-omniroute-no-cache: true` göndərin.
 
 ## REST API
 

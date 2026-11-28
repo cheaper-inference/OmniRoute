@@ -88,18 +88,19 @@ Das an `register(program, ctx)` übergebene `ctx`-Objekt:
 | `ctx.baseUrl`                | `string`         | Aufgelöste Basis-URL                                                  |
 | `ctx.apiKey`                 | `string \| null` | API-Schlüssel, sofern angegeben                                       |
 
-## Erkennung
+## Entdeckung
 
-Plugins werden an folgenden Orten gesucht:
+Plugins werden entdeckt von:
 
-1. `~/.omniroute/plugins/<name>/` — benutzerlokale Installationen
-2. Umgebungsvariable `OMNIROUTE_PLUGIN_PATH` — benutzerdefiniertes Verzeichnis
+1. `~/.omniroute/plugins/node_modules/<name>/` — wo `omniroute plugin install` Pakete ablegt (ein npm `--prefix`, nicht `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — handkopierte Plugin-Verzeichnisse
+3. `OMNIROUTE_PLUGIN_PATH` env var — benutzerdefiniertes Verzeichnis
 
-Beide gelten **nur für die CLI**. Die serverseitige Plugin-Laufzeitumgebung (die Marketplace-/`plugin.json`-Plugins, die innerhalb des Proxys ausgeführt werden) besitzt einen eigenen Scanner mit einer eigenen Überschreibung namens `OMNIROUTE_PLUGINS_DIR` — siehe
-[PLUGIN_MARKETPLACE.md → Plugin-Verzeichnis](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Das Festlegen der einen Option hat keine Auswirkungen auf die andere.
+Symlinked-Verzeichnisse (was npm für `plugin install ./dir` erstellt) werden befolgt.
 
-Fehler beim Laden werden abgefangen und als Warnungen ausgegeben — ein defektes Plugin bringt die CLI niemals zum Absturz.
+Beide sind es** Nur CLI** . Die serverseitige Plugin-Laufzeit (die Marktplatz-/`plugin.json` -Plugins, die im Proxy ausgeführt werden) verfügt über einen eigenen Scanner mit eigener Überschreibung, `OMNIROUTE_PLUGINS_DIR` — siehe [PLUGIN_MARKETPLACE.md → Plugin-Verzeichnis](./PLUGIN_MARKETPLACE.md#plugin-directory). Die Einstellung des einen hat keinen Einfluss auf das andere.
+
+Ladefehler werden abgefangen und als Warnungen ausgegeben. — Ein defektes Plugin führt nie zum Absturz von CLI.
 
 ## Sicherheit
 

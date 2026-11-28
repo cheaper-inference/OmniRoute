@@ -4,13 +4,7 @@
 
 ---
 
-> **Patiesības avots:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` un publiskie veidotāji failā `open-sse/utils/error.ts`
-> **Testi:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Pēdējoreiz atjaunināts:** 2026-09-02 — v3.8.51
-> **Mērķauditorija:** Ikviens inženieris, kas strādā ar kļūdu atbildēm (HTTP maršrutiem, SSE straumēm, izpildītājiem, MCP apstrādātājiem).
-> **Statuss:** **OBLIGĀTS** ikvienam koda ceļam, kas klientam atgriež kļūdas ziņojumu.
+> **Patiesības avots:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` un sabiedriskie celtnieki `open-sse/utils/error.ts`** Pārbaudes:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Auditorija:** Jebkurš inženieris, kas pieskaras kļūdu atbildēm (HTTP maršruti, SSE straumes, izpildītāji, MCP apstrādātāji).** Statuss:****MANDATORY** katram koda ceļam, kas klientam atgriež kļūdas ziņojumu.
 
 ## Kāpēc tas ir nepieciešams
 

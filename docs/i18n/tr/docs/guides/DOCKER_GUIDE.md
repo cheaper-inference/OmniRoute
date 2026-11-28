@@ -8,20 +8,21 @@
 
 ## İçindekiler
 
-- [Hızlı Çalıştırma](#quick-run)
-- [Ortam Dosyasıyla](#with-environment-file)
-- [Docker Compose](#docker-compose)
-- [Kullanılabilir Profiller](#available-profiles)
-- [OmniRoute Docker'da çalışırken ana makinedeki CLI araçlarını yapılandırma](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redis Sidecar](#redis-sidecar)
-- [Üretim Compose Yapılandırması](#production-compose)
-- [Dockerfile Aşamaları](#dockerfile-stages)
+- [Hızlı Çalıştır](#quick-run)
+- [Ortam Dosyası ile](#with-environment-file)
+- [Docker Oluştur](#docker-compose)
+- [Mevcut Profiller](#available-profiles)
+- [Konteyner sertleştirme](#container-hardening)
+- [OmniRoute Docker çalıştığında ana bilgisayar CLI araçlarını yapılandırma](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Sepeti](#redis-sidecar)
+- [Üretim Oluşturma](#production-compose)
+- [Docker Dosyası Aşamaları](#dockerfile-stages)
 - [Kritik Ortam Değişkenleri](#critical-environment-variables)
-- [Caddy (HTTPS) ile Docker Compose](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare Hızlı Tüneli](#cloudflare-quick-tunnel)
-- [İmaj Etiketleri](#image-tags)
-- [Docker'da Dashboard güncellemeleri](#dashboard-updates-in-docker)
-- [Kullanılabilirlik: Varsayılan SQLite tek replikalıdır](#availability-default-sqlite-is-single-replica)
+- [Docker Caddy ile Oluşturun (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Hızlı Tünel](#cloudflare-quick-tunnel)
+- [Resim Etiketleri](#image-tags)
+- [Docker kontrol paneli güncellemeleri](#dashboard-updates-in-docker)
+- [Kullanılabilirlik: varsayılan SQLite tek kopyadır](#availability-default-sqlite-is-single-replica)
 - [Docker içindeki Gemini bölgesel hataları](#gemini-regional-errors-inside-docker)
 - [Önemli Notlar](#important-notes)
 
@@ -89,6 +90,30 @@ OmniRoute, başlıca dağıtım biçimleri için Compose profilleriyle birlikte 
 | `web`               | `omniroute-web`  | Tarayıcı gerektiren web oturumu sağlayıcıları: `gemini-web`, `claude-web`, `claude-turnstile` (`runner-web` oluşturulur, Chromium dahildir)                   | `docker compose --profile web up -d`         |
 
 > Birden fazla profil birleştirilebilir: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Konteyner sertleştirme
+
+`docker-compose.yml` `base`, `web`, `cli` ve `host` uygulama hizmetleri `cap_drop: [ALL]` ve `no-new-privileges:true` güvenlik seçeneğini kullanır. Görüntü, root olmayan kullanıcı `node` olarak çalışır ve yüksek bağlantı noktalarını dinler, dolayısıyla hiçbir Linux özelliğine ihtiyaç duymaz. Güvenlik seçeneği, işlemlerin setuid ikili dosyalar aracılığıyla ayrıcalık kazanmasını engeller.
+
+Otomatik güncelleyici için Docker soketini yalnızca `cli` profili bağlar. Güvenlik etkileri için [Kaçış taraması: kapsayıcının kendi CLIs yapılandırma](#escape-hatch-configure-the-containers-own-clis-use-sparingly) konusuna bakın.
+
+Kök dosya sistemi varsayılan olarak yazılabilir durumda kalır. `cli` profili, CLI yapılandırmasını yazar ve kapsayıcının ana dizininde önbellekler, `web` profili Chromium oturum durumunu depolar ve Next.js çalışma zamanı, önbellekleri `/app/data` dışına yazabilir.
+
+`base` profiliyle salt okunur bir kök dosya sistemini denemek için bunu `docker-compose.yml` yanına `docker-compose.override.yml` olarak kaydedin. Compose, geçersiz kılmayı otomatik olarak okur.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Mevcut `/app/data` montajı yazılabilir durumda kalır. Başka yollara yazması gerekebileceğinden, bu geçersiz kılmayı üretimde kullanmadan önce iş yükünüzü test edin.
 
 ## OmniRoute Docker'da çalışırken ana makine CLI araçlarını yapılandırma
 
@@ -262,7 +287,7 @@ docker build --target runner-web  -t omniroute:web  .
 | `OMNIROUTE_BUILD_MEMORY_MB` | `6144`     | Oluşturulan `next build` için V8 yığın tavanı (`--max-old-space-size`).                                 |
 | `OMNIROUTE_BUILD_WORKERS`   | `2`        | `CIRCLE_NODE_TOTAL` besler; Daha sonra sayfa verilerinin toplanması için `workers = N - 1` türetir.     |
 
-`OMNIROUTE_BUILD_WORKERS` büyük bir inşaatçıya karşı yükselen ve kısıtlı bir yapı öldüğünde şüphelenilen kişidir** sonrasında** `✓ Compiled successfully`. Her sayfa veri çalışanı ve üst `next build` kendisi de kendi sürecidir; canlı bir VPS çoğaltımı ( #7518 sorunu), `NODE_OPTIONS` yığın bayrağından bağımsız olarak her işlemin RSS zirvesini ~ 4,5 GB ölçtü (Turbopack V8 yığınının dışındaki native/Rust belleğinde derlenir). `2` varsayılan değeri (→ 1 çalışan, toplam 2 işlem), yayınlama hattının kullandığı 16 GB / 4 vCPU GitHub tarafından barındırılan çalıştırıcılara göre boyutlandırılmıştır. `8` (→ 7 işçi) koşucunun belleği tükendi ve buildkit `ResourceExhausted: ... cannot allocate memory` adımında başarısız oldu; `3` (→ 2 işçi), süreç başına RSS çıkarım yapmak yerine doğrudan ölçüldüğünde hala uymuyordu. `tests/unit/docker-build-memory-budget.test.ts` ölçülen rakama göre aritmetik yapar ve düğmelerden herhangi biri koşucuyu aşarsa başarısız olur.
+`OMNIROUTE_BUILD_WORKERS` büyük bir inşaatçıya karşı yükselen ve kısıtlı bir yapı öldüğünde şüphelenilen kişidir** sonrasında** `✓ Compiled successfully`. Her sayfa veri çalışanı ve üst `next build` kendisi de kendi sürecidir; canlı bir VPS çoğaltımı ( #7518 sorunu), `NODE_OPTIONS` yığın bayrağından bağımsız olarak her işlemin zirve RSS ~ 4,5 GB ölçtü (Turbopack V8 yığınının dışındaki native/Rust belleğinde derlenir). `2` varsayılan değeri (→ 1 çalışan, toplam 2 işlem), yayınlama hattının kullandığı 16 GB / 4 vCPU GitHub tarafından barındırılan çalıştırıcılara göre boyutlandırılmıştır. `8` (→ 7 işçi) koşucunun belleği tükendi ve buildkit `ResourceExhausted: ... cannot allocate memory` adımında başarısız oldu; `3` (→ 2 işçi), süreç başına RSS çıkarım yapmak yerine doğrudan ölçüldüğünde hala uymuyordu. `tests/unit/docker-build-memory-budget.test.ts` ölçülen rakama göre aritmetik yapar ve düğmelerden herhangi biri koşucuyu aşarsa başarısız olur.
 
 Turbopack yaşayan yerel Rust belleğinde derlenir** dıştan** V8 yığını olduğundan `OMNIROUTE_BUILD_MEMORY_MB` onu bağlamaz. Bellek tavanına sahip bir ana bilgisayarda yapı daha sonra OOM katili tarafından hiçbir hata metni olmadan SIGKILLed dönüştürülür — basitçe orta `Creating an optimized production build` durdurur, bu da yetersiz bellek yerine bir askıda kalma gibi görünür. `Dockerfile` varsayılan olarak webpack (`OMNIROUTE_USE_TURBOPACK=0`) olmasının nedeni budur, `npm run dev` / `npm run build` farklı olarak, burada Turbopack varsayılan koddur: derleme bağımsız değişkenleri olmayan çıplak bir `docker build .` (Demiryolu ve diğer tek tıklamalı ana bilgisayarların çalıştırdığı), bellek sınırı olan bir oluşturucuda sessizce ölmemelidir. Yayınlanan görüntüler zaten `docker-publish.yml` açıkça `OMNIROUTE_USE_TURBOPACK=0` geçiyor. Bol miktarda RAM içeren bir oluşturucuda, daha hızlı bir yapı için Turbopack tercih edin:
 
@@ -295,7 +320,7 @@ Docker bellek davranışı:
 
 ### Kodlama aracıları için çalışma zamanı RAM
 
-1 GiB Docker varsayılanı bir üretim boyutu değil, bir dashboard/light-chat tabanıdır. Uzun `POST /v1/responses` gövdeleri (yüzlerce mesaj, onlarca araç) sıkıştırma sırasında birden fazla bellek içi grafiği korur. Çakışan iki ~ 3 MiB / ~ 750k-token isteği, V8'i bir anda iptal etti** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) ve ayrıca 16 GiB cgroup OOM ulaştı. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) bakın.
+1 GiB Docker varsayılanı bir üretim boyutu değil, bir dashboard/light-chat tabanıdır. Uzun `POST /v1/responses` gövdeleri (yüzlerce mesaj, onlarca araç) sıkıştırma sırasında birden fazla bellek içi grafiği korur. Çakışan iki ~ 3 MiB / ~ 750k-token isteği, V8'i bir anda iptal etti** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) ve ayrıca 16 GiB cgroup OOM ulaştı. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) bakın.
 
 Boyut** yığının üstündeki cgroup `--memory`** — yerel arabellekleri, SQLite ve sıkıştırma ara öğeleri V8'in dışında bulunur.
 
@@ -592,23 +617,23 @@ Servis, başarısız bir çalıştırmanın döngüye girmemesi için çekme iş
 
 Stok Docker / Kubernetes OmniRoute :** bir Düğüm süreci + bir SQLite yazıcı** . Yüksek kullanılabilirlik** desteklenmiyor** bu topoloji üzerinde.
 
-| Kısıtlama                                           | Sonuçlar                                                                                                                                                                                                                                                                                          |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tek yazar                                           | Yapmak** Olumsuz** aynı SQLite dosyasında birden fazla kopya çalıştırın. Bu DB bozar.                                                                                                                                                                                                             |
-| Yeniden oluştur / yeniden başlat / HEALTHCHECK kill | **Tam kesinti** uçuş içi SSE, kontrol paneli oturumları ve bellek içi durum. Bağlı her istemci düşer. Boş uç nokta penceresi sırasında yeni istekler ters proxy alır**`502 Bad Gateway: Unknown error`** , OmniRoute JSON değil — istemciler bunu bir sağlayıcı hatasından ayırt edemez (#11015). |
-| `/healthz` ile aynı olay döngüsü                    | Meşgul bir katalog veya sıkıştırma işareti, araştırmaları geciktirebilir; kısa bir zaman aşımı ardından yeniden başlatır** sadece** kopya.                                                                                                                                                        |
+| Kısıtlama                                           | Sonuçlar                                                                                                                                                                                                                                                                                         |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tek yazar                                           | Yapmak** Olumsuz** aynı SQLite dosyasında birden fazla kopya çalıştırın. Bu DB bozar.                                                                                                                                                                                                            |
+| Yeniden oluştur / yeniden başlat / HEALTHCHECK kill | **Tam kesinti** uçuş içi SSE, kontrol paneli oturumları ve bellek içi durum. Bağlı her istemci düşer. Boş uç nokta penceresi sırasında yeni istekler ters proxy alır**`502 Bad Gateway: Unknown error`** OmniRoute değil JSON — istemcileri bunu bir sağlayıcı hatasından (#11015) ayırt edemez. |
+| `/healthz` ile aynı olay döngüsü                    | Meşgul bir katalog veya sıkıştırma işareti, araştırmaları geciktirebilir; kısa bir zaman aşımı ardından yeniden başlatır** sadece** kopya.                                                                                                                                                       |
 
 **Prob matrisi** (Ayrıca bkz. [Kubernetes araştırma önerileri](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Prob             | Hedef                                                       | Kullanma                                                            |
+| Prob             | Hedef                                                       | kullanmayın                                                         |
 | ---------------- | ----------------------------------------------------------- | ------------------------------------------------------------------- |
 | canlılık         | TCP `PORT` varsayılan `20128`) veya yumuşak HTTP `/healthz` | `/api/monitoring/health`                                            |
 | Hazırlık         | HTTP `GET /healthz`                                         | Olay döngüsü meşgulünü ölü olarak değerlendiren sıkı zaman aşımları |
 | Derin / insanlar | `/api/monitoring/health`                                    | Otomatik kubelet canlılığı                                          |
 
-**Yükseltmeler:** Her oturumun düşmesini bekliyoruz. Mümkünse müşterileri boşaltın; varsayılan SQLite sürekli güncelleme yoktur. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` konteyner Sağlıksız olduğunda (aynı patlama yarıçapı) tek işlemin yerini alacaktır.
+**Yükseltmeler:** Her oturumun düşmesini bekliyoruz. Mümkünse müşterileri boşaltın; varsayılan SQLite sürekli güncelleme yoktur. `restart: unless-stopped` artı Docker `HEALTHCHECK` oluşturmak, konteyner Sağlıksız — aynı patlama yarıçapına sahip olduğunda tek işlemin yerini alacaktır.
 
-Hazır bildirimler ve Helm grafiği `deploy/kubernetes/` ve `deploy/helm/omniroute/` yayında — [Kubernetes dağıtım kılavuzuna](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) bakın.
+`deploy/kubernetes/` ve `deploy/helm/omniroute/` — hazır bildirimler ve canlı Helm grafiği için [Kubernetes dağıtım kılavuzuna](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) bakın.
 
 Kubernetes snippet'i** tek kopya** (Yeniden oluşturma gereklidir; `replicas` bir SQLite dosyasına karşı yükseltmeyin):
 
@@ -637,9 +662,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` uyku, kube'nin SIGTERM önce Hizmet uç noktalarını bırakmasına izin verir, böylece** yeni** trafik ölme sürecine çarpmayı bırakır. Uçuş sırasındaki `/v1/responses` SSE ağır giriş kiralamaları (#11015) aracılığıyla `SHUTDOWN_TIMEOUT_MS` (varsayılan 30 saniye) kadar boşaltılır. Hala sürece ulaşan yeni istekler `503` + `Retry-After: 5` alır. Değiştirme Hazır olana kadar boş uç nokta boşluğunu yeniden oluştur, ciddi bir kesinti olmaya devam eder; bu, bir prob yanlış yapılandırması değil, SQLite topolojisidir.
+`preStop` uyku, kube'nin SIGTERM önce Hizmet uç noktalarını bırakmasına izin verir, böylece** yeni** trafik ölme sürecine çarpmayı bırakır. Uçuş sırasındaki `/v1/responses` SSE ağır kabul kiralamaları (#11015) yoluyla `SHUTDOWN_TIMEOUT_MS` (varsayılan 30 saniye) kadar boşaltılır. Hala sürece ulaşan yeni istekler `503` + `Retry-After: 5` olur. Değiştirme Hazır olana kadar boş uç nokta boşluğunu yeniden oluştur, bir prob yanlış yapılandırması değil, SQLite topolojisi olan sert bir kesinti — olarak kalır.
 
-Harici Postgres / çoklu yazarlı HA** Olumsuz** belgelenmiş bir stok yolu. HA ihtiyacınız varsa tek bir kopya tutun veya projenin ayrı olarak test ettiği ve belgelediği bir topolojiyi çalıştırın. Postgres/MySQL çalışması [#8075'te](https://github.com/diegosouzapw/OmniRoute/issues/8075) yaşıyor. O gemiye kadar çoğalmanın desteklenen tek yolu** büyük** `/v1/responses` kapasitesi, tek bir birimdeki `replicas > 1` değil, N bağımsız süreçtir (sonraki bölüm).
+Harici Postgres / çoklu yazarlı HA** Olumsuz** belgelenmiş bir stok yolu. HA ihtiyacınız varsa tek bir kopya tutun veya projenin ayrı olarak test ettiği ve belgelediği bir topolojiyi çalıştırın. Postgres/MySQL çalışması [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) yaşıyor. O gemiye kadar çoğalmanın desteklenen tek yolu** büyük** `/v1/responses` kapasitesi, tek bir birimdeki `replicas > 1` değil, N bağımsız süreçtir (sonraki bölüm).
 
 ## Ölçeklendirme: N bağımsız süreç
 
@@ -649,25 +674,25 @@ Bir Codex hesabının kopyaları, tek kullanımlık yenileme jetonunu bağımsı
 
 Pasif örnek, yenileme gerektiğinde bağlantıyı yeniden okur ve yalnızca farklı, süresi dolmamış bir erişim belirtecini benimser. Aksi takdirde yenileme, bağlantının süresi dolmadan veya devre dışı bırakılmadan veya bir yenileme kesici hatası sayılmadan devre dışı bırakılır. Gerçek yukarı akış kimlik doğrulama hataları hala normal hata hesaplamasını, üstel bekleme süresini ve normal istemci hatasını kullanıyor; Hesabın devre dışı bırakılması kalıcı olarak kalır. Erişim belirteçlerinin süresi dolmadan önce sahibinin döndürülen belirteçlerini senkronize edin (varsayılan proaktif yenileme süresi beş dakikadır) veya Codex kimlik doğrulama dosyasını yeniden içe aktarın. Pasif içe aktarmalar, sağlanan belirteçleri, belirteç uç noktasında doğrulamadan saklar. Manuel dashboard/API yenileme `409 refresh_disabled` değerini döndürür; yeni OAuth oturum açma bilgileri değişmedi. Bkz. [ortam referansı](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Bir Düğüm süreci** bir V8 yığını** . Üst üste binen iki ~ 3 MiB / ~ 750k-token kodlama aracısı `POST /v1/responses` (RTK + Caveman), ~ 12 Gi (`FATAL ERROR: Reached heap limit`)'deki yığını iptal eder ve 16 Gi cgroup'u OOM edebilir. Bkz. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Bu ölçüm bir** bellek bütçesi** uyarı, hard-max iki eşzamanlı uzun `/v1/responses` ürünü değil. Ağır sohbet kabulü, aynı V8/cgroup tavanından boyutlandırılmış otomatik olarak türetilmiş bir besleme bayt bütçesi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) tarafından engellenir — zaten boyutlandırılmış bir süreçte bunu yukarı doğru geçersiz kılar (veya eski `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` istek sayısı sınırını ayarlayarak) iptali yeniden başlatır. Küçük sohbetler, `/healthz`, `/v1/models` ve MCP** Olumsuz** o şapkanın içinde.
+Bir Düğüm süreci** bir V8 yığını** . Üst üste binen iki ~ 3 MiB / ~ 750k-token kodlama aracısı `POST /v1/responses` (RTK + Caveman), ~ 12 Gi (`FATAL ERROR: Reached heap limit`)'deki yığını iptal eder ve 16 Gi cgroup'u OOM edebilir. Bakınız [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Bu ölçüm bir** bellek bütçesi** uyarı, hard-max iki eşzamanlı uzun `/v1/responses` ürünü değil. Ağır sohbet kabulü, aynı V8/cgroup tavanından boyutlandırılmış, otomatik olarak türetilmiş bir besleme bayt bütçesi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) tarafından engellenir — zaten boyutlandırılmış bir süreçte bunu yukarı doğru geçersiz kılar (veya eski `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` istek sayısı sınırını ayarlayarak), iptali yeniden başlatır. Küçük sohbetler, `/healthz`, `/v1/models` ve MCP** Olumsuz** o şapkanın içinde.
 
 ### Tek işlem: ikiden fazla uzun `/v1/responses`
 
-A** sağlıklı** süreç ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` altındaki yığın, varsayılan `0.75`)** mayıs** süreç genelindeki uçuş bayt bütçesinde (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) hala yer olduğunda ikiden fazla eşzamanlı uzun `POST /v1/responses` çalıştırın. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (varsayılan 256 KiB) veya üzerindeki gövdeler, yapı ağırlıklı isteklerle aynı ağır kiralamayı alır ve aynı [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` kaçışını (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) kullanır. Onlarca eşzamanlı uzun SSE istemcisi (operatörler genellikle 40-50'ye ihtiyaç duyar)** bellek bütçesi** soru — boyutu yığın + primary/headroom yuvaları + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — zor bir “maksimum 2” ürün sınırı değildir. Baskılı bir yığın yeniden denenebilir `503` ile hala tutuluyor, dolayısıyla #7849 geri dönmüyor.
+A** sağlıklı** süreç ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` altındaki yığın, varsayılan `0.75`)** mayıs** İşlem genelindeki uçuş bayt bütçesinde (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) hala yer olduğunda ikiden fazla eşzamanlı uzun `POST /v1/responses` çalıştırın. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (varsayılan 256 KiB) veya üzerindeki gövdeler, yapı ağırlıklı isteklerle aynı ağır kiralamayı alır ve aynı [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` çıkışını (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) kullanır. Onlarca eşzamanlı uzun SSE istemcisi (operatörler genellikle 40-50'ye ihtiyaç duyar)** bellek bütçesi** soru — boyutu yığın + primary/headroom yuvaları + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — zor bir "maksimum 2" ürün sınırı değildir. Baskılı bir yığın, yeniden denenebilir `503` ile hala tutuluyor, dolayısıyla #7849 geri dönmüyor.
 
 İle** yığınları çoğalt** (bağımsız V8 eski alanları)** Bugün** :
 
 | Yapmak                                                                                                                                       | Yapamaz                                                        |
 | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | Koşmak** N containers/pods** , her biri kendi** sahip olmak** `DATA_DIR` / hacim                                                             | `replicas > 1` bir SQLite dosyasına göre ayarlayın             |
-| Yığın / uçuş bayt bütçesinden ağır uçuş sırasında + sağlıklı boşluk payı; 1-2, muhafazakar #7849 varsayılanıdır, maksimum sert ürün değildir | Bir işleme 8 × RAM ve sınırsız bir sayım sınırı verin          |
+| Yığın / uçuş bayt bütçesinden ağır uçuş sırasında + sağlıklı boşluk payı; 1-2, sabit bir maksimum ürün değil, ihtiyatlı #7849 varsayılanıdır | Bir işleme 8 × RAM ve sınırsız bir sayım sınırı verin          |
 | İsteğe bağlı: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` için** paylaşılan kota sayaçları**                                        | Redis paylaşılan SQLite — gibi davran                          |
 | Sağlayıcı sırlarını her bir örneğe kopyalayın (veya bölümlenmiş kontrol panellerini kabul edin)                                              | Örnekler arasında bir kontrol paneli/bir çağrı kaydı bekleyin  |
 | Herhangi bir yük dengeleyiciyle ön; API anahtarı veya oturumu ile yapışkanlık yeterlidir                                                     | Satıcıya özel, boyuta duyarlı bir ara katman yazılımı gerektir |
 
 Oturumdan hesaba benzeşim aynı zamanda Redis aracılığıyla da paylaşılabilir: her işlemde aynı `REDIS_KEY_PREFIX` ve pozitif `sessionAffinityTtlMs` ayarıyla `OMNIROUTE_SESSION_AFFINITY_STORE=redis` ve `REDIS_URL` ayarlayın. Pinler, karma kullanımlı hesap kimliklerini her işlemin uygun yerel bağlantısına çözer; dolayısıyla eşleşen kimlik meta verilerine sahip OAuth hesaplarının eşleşen IDs bağlantısına sahip olması gerekmez. Bilinen hesap kimlikleri, pin çözümünde ve korumalı tahliyede çelişkili yerel IDs göre önceliklidir; kimliği olmayan kayıtlar (veya kimliği olmayan tahliye arayanlar) eski ID korumasını korur. Sabit bir kullanım kimliğine sahip olmayan hesaplar yine de IDs ile eşleşmeyi gerektirir. Redis hataları veya 100 ms'yi aşan çağrılar yerel SQLite geri döner. Her Redis benzeşim deposu olağanüstü işlemleri 8 ile sınırlandırır, dolduğunda Redis hemen atlar ve yuvaları arayanın son teslim tarihinde değil, yalnızca temel iş yerleştiğinde serbest bırakır. Redis kesintisi sırasında paylaşılan bir gerçek yoktur: her örnek kendi yerel benzeşimine geri döner, oturumlar örnek başına bir kez yeniden sabitlenebilir ve örnekler farklılaşabilir. Yapışkanlık düzeldiğinde Redis aracılığıyla yeniden birleşir. Zaman aşımı, geri dönüşten sonra inebilecek gönderilen bir EVAL değil, beklemeyi sınırlar. Yönlendirme yazmaları, yeni bir mutasyon zamanı okumasını değil, yönlendirme kararı tarafından gözlemlenen tam değeri karşılaştırır; gözlemlenen bir kayıp veya SQLite geri dönüş gözlemi, eksik bir Redis anahtarıyla karşılaştırılır. Eski pinler tek bir CAS değiştirilir, dolayısıyla geç bir komut daha yeni, farklı bir pini değiştiremez veya silemez. Redis okur, değeri ve kalan sunucuyu atomik olarak döndürür TTL; pozitif PTTL (veya süre sonu olmaması) canlılığı belirler, yazarın JSON zaman damgasını veya okuyucunun saatini değil. Yerel anlık görüntüler, kalan TTL yerel bir son tarihe kadar eşleştirir; mevcut JSON anahtarları okunabilir durumda kalır ve bunların ham baytları CAS için korunur. Redis cevap verirken gerçeğin tek kaynağıdır. Onaylanan paylaşılan yükseltmeler, dokunuşlar ve silmeler yerel girişi kaldırır, asla kurmayın veya yenilemeyin. Redis yolundaki SQLite daha önce olduğu gibi TTL ile sınırlı olarak yalnızca bu örneğin Redis hatalarından, zaman aşımlarından veya kabul doygunluğundan kaynaklanan kendi geri dönüş kararlarını tutar. Daha sonraki bir kesintide eksik bir yerel pin, yanlış veya tahliye edilmiş bir hesaba değil, bir yeni seçime (bir anlık önbellek kaçırma) mal olur. Reddedilen yükselişler, paylaşılan kazananı ve kalan TTL atomik olarak döndürür: sıradan seçim, eşlenen yerel son tarihi yeniden kontrol eder ve hala canlı olan uygun bir kazananı kullanır, kullanıma dokunur ve başka bir paylaşılan yazma olmadan bu hesap için oturum açar. Mevcut değilse, seçim yerel adayı korur, paylaşılan pini değiştirmeden bırakır ve bir hata ayıklama mesajı gönderir. Reddedilen CAS SQLite yazmaz; Redis hataları, zaman aşımları veya kabul doygunluğu bunun yerine mevcut yerel işlemi uygular. Gönderilen bir mutasyonun yanıtı zaman aşımından sonra (kabul edildi, reddedildi veya hata) gelirse, senkronize bir tam serileştirilmiş değer karşılaştırma ve silme işlemi yalnızca baytla aynı zaman aşımı geri dönüş satırını kaldırır. O karşılaştırma ile silme arasında hiçbir bekleme yoktur; daha yeni bir kesinti yazma işlemi korunur. Korumalı tahliye, Redis kapalı olsa bile başarısız olan hesabın kendi yerel pinini kaldırır ve paylaşılan tahliye onaylandıktan sonra tekrar temizler. Bekleyen daha önceki paylaşılan yanıtlar, çıkarılan bir yerel pini geri yükleyemez çünkü paylaşılan başarılar hiçbir zaman SQLite yazmaz. Daha sonraki bir kesinti geri dönüşü, bir hesabı yeniden tanımlayabilir; daha sonra kabul edilen bir paylaşılan yazma yalnızca Redis mevcuttur. Redis hatalarında yerel geri dönüş durumuna başvurmaz. Sürücü kapalıyken, yeni seçilen pinler eski dört alanlı SQLite JSON şeklini korur; yalnızca Redis yönlendirmesi karma hesap kimliğini ekler. Önceden getirilen pinler, son kullanma sınırlarında yeniden kontrol edilir. Redis kiralama dışı seçim, depoyu yeniden okur, ancak eşzamanlı kiralama planlaması, önceden alma ve planlama arasında çıkarılan bir pini kullanmaya devam edebilir (kabul edilen en iyi çaba penceresi). Kira taahhüdü, kalıcı bir hak talebinden sonra hesap değiştiremez: reddedilen bir artış durumunda, yalnızca bu istek için talep edilen adayı tutar ve paylaşılan kazanana dokunulmaz, dolayısıyla örnekler arasındaki anlaşma bu yol ile sınırlıdır. Tablonun geri kalanı hala geçerlidir: bu, birleşik oturum yapışkanlığını, yerel Codex dönüş pinlerini, hesap semaforlarını, kilitlemeleri, harcama limitlerini, yapılandırmayı veya çağrı günlüklerini paylaşmaz.
 
-Donanım: örnek başına eşzamanlı uzun `/v1/responses` bir** bellek bütçesi** soru (yığın + uçuş baytı / #10110). `N` bağımsız `DATA_DIR` hâlâ yığınları çoğaltır: RAM ana bilgisayarı "N = 8'e sahip bir 16 Gi pod"u değil, `N × cgroup` kapsamalıdır. Asla bir SQLite dosyasında `replicas > 1`.
+Donanım: örnek başına eşzamanlı uzun `/v1/responses` bir** bellek bütçesi** soru (yığın + uçuş baytı / #10110). `N` bağımsız `DATA_DIR` hâlâ yığınları çoğaltır: ana bilgisayar RAM "N = 8'e sahip bir 16 Gi pod"u değil, `N × cgroup` kapsamalıdır. Asla bir SQLite dosyasında `replicas > 1`.
 
 Taslak oluşturun (iki yığın, iki cilt — değil `deploy.replicas: 2`):
 
@@ -696,11 +721,11 @@ volumes:
   omniroute-b-data:
 ```
 
-İşlem içi yoğunluk ( HTTP izolatının sıkıştırılması) [#11023'tür](https://github.com/diegosouzapw/OmniRoute/issues/11023). Paylaşılan dayanıklı durumdaki mantıksal kümelerden biri [#8075'tir](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+İşlem içi yoğunluk ( HTTP izolatının sıkıştırılması) [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Paylaşılan dayanıklı durumdaki mantıksal kümelerden biri [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
 ## Docker içindeki Gemini bölgesel hataları
 
-Google AI Studio / Gemini API FAILED_PRECONDITION ve `User location is not supported for the API use.` ile HTTP 400 döndürebilir Ana bilgisayardaki başarılı bir istek, konteynerin aynı giden yolu kullandığını kanıtlamaz. DNS sıralaması, IPv4/IPv6 bağlantısı, VPN yönlendirmesi ve yapılandırılmış proxy'ler farklılık gösterebilir. [Google desteklediği bölgelerin](https://ai.google.dev/gemini-api/docs/available-regions) yanı sıra gerçek bağlantı yolunu da kontrol edin; Bu hata tek başına hatalı bir API anahtarını tanımlamaz.
+Google AI Studio / Gemini API FAILED_PRECONDITION ve `User location is not supported for the API use.` ile HTTP 400'ü döndürebilir Ana bilgisayardaki başarılı bir istek, konteynerin aynı giden yolu kullandığını kanıtlamaz. DNS sıralaması, IPv4/IPv6 bağlantısı, VPN yönlendirmesi ve yapılandırılmış proxy'ler farklılık gösterebilir. [Google desteklediği bölgelerin](https://ai.google.dev/gemini-api/docs/available-regions) yanı sıra gerçek bağlantı yolunu da kontrol edin; Bu hata tek başına hatalı bir API anahtarını tanımlamaz.
 
 ### Bağlantıya özel bir proxy tercih edin
 
@@ -715,11 +740,11 @@ node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: t
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-`omniroute` çalıştırdığınız hizmetle değiştirin (örneğin, `omniroute-web`). Bu komutlar, kimlik bilgileri veya IP adresleri olmadan adres ailelerini yazdırır. Döndürülen bir `6` yalnızca IPv6 DNS sonucunu gösterir: öyle olur** Olumsuz** Kullanılabilir bir IPv6 rotasını veya API erişimini kanıtlayın. `curl` kurulu olduğu yerde, her iki ortamda da `curl -4 -I https://generativelanguage.googleapis.com` `curl -6 -I https://generativelanguage.googleapis.com` ile karşılaştırın. Bir HTTP yanıtı, kimliği doğrulanmamış bir hata olsa bile o araştırma için bağlantıyı kanıtlar; yalnızca kimliği doğrulanmış model isteği Gemini'nin uygunluğunu test eder.
+`omniroute` çalıştırdığınız hizmetle değiştirin (örneğin, `omniroute-web`). Bu komutlar, kimlik bilgileri veya IP adresleri olmadan adres ailelerini yazdırır. Döndürülen bir `6` yalnızca IPv6 DNS sonucunu gösterir: öyle olur** Olumsuz** Kullanılabilir bir IPv6 rotasını veya API erişimini kanıtlayın. `curl` kurulu olduğu yerde, her iki ortamda da `curl -4 -I https://generativelanguage.googleapis.com` `curl -6 -I https://generativelanguage.googleapis.com` ile karşılaştırın. Bir HTTP yanıtı, kimliği doğrulanmamış bir hata olsa bile o araştırma için bağlantıyı kanıtlar; yalnızca kimliği doğrulanmış model isteği Gemini uygunluğunu test eder.
 
 ### Ana bilgisayar düzeyinde alternatif: çalışan IPv6 ve çözümleyici politikası
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) muhabiri, IPv6 konteynerini etkinleştirerek ve glibc adres seçimini değiştirerek kendi ortamındaki erişimi yeniden sağladı. Bunu çevreye özgü bir alternatif olarak değerlendirin. Çözümleyici tercihlerini ayarlamadan önce çalışan ana bilgisayar IPv6, kapsayıcı egress/routing ve güvenlik duvarı kurallarını onaylayın. Özel bir ULA adresi tek başına genel IPv6 bağlantısı kurmaz.
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) muhabiri, IPv6 konteynerini etkinleştirerek ve glibc adres seçimini değiştirerek kendi ortamındaki erişimi yeniden sağladı. Bunu çevreye özgü bir alternatif olarak değerlendirin. Çözümleyici tercihlerini ayarlamadan önce çalışan ana bilgisayar IPv6, kapsayıcı egress/routing ve güvenlik duvarı kurallarını onaylayın. Özel bir ULA adresi tek başına genel IPv6 bağlantısı kurmaz.
 
 Compose'un varsayılan ağına zaten bağlı olan hizmetler için bu parça, o ağda IPv6 etkinleştirir; Hizmetinizin geri kalanını, bağlantı noktalarını, birimleri ve yapılandırmayı koruyun:
 
@@ -735,7 +760,7 @@ bir** glibc tabanlı görüntü** , `/etc/gai.conf` adres seçimini değiştireb
 
 Bu, OS adresi seçimini değiştirir** o kapsayıcıdaki tüm giden trafik** . Her uygulamayı IPv6 seçmeye zorlamaz: Düğümün DNS sırası ve bağlantı seçimi de önemlidir. Özellikle `--dns-result-order=ipv4first`, IPv4 tercih eder ve IPv4-only başarısızlığına çare değildir. Bkz. [Düğüm DNS sıralaması](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Ana makine düzeyinde herhangi bir değişiklikten sonra Gemini'yi ve diğer sağlayıcılarınızı yeniden test edin. Geri almak için özel `gai.conf` montajını kaldırın, önceki ağ yapılandırmasını geri yükleyin ve bakım penceresi sırasında etkilenen service/network yeniden oluşturun. Bir ağı yeniden oluşturmak, ona bağlı diğer kapsayıcıları kesintiye uğratabilir; kalıcı veri birimini silmeyin.
+Ana makine düzeyinde herhangi bir değişiklikten sonra Gemini ve diğer sağlayıcılarınızı yeniden test edin. Geri almak için özel `gai.conf` bağlantısını kaldırın, önceki ağ yapılandırmasını geri yükleyin ve bakım penceresi sırasında etkilenen service/network yeniden oluşturun. Bir ağı yeniden oluşturmak, ona bağlı diğer kapsayıcıları kesintiye uğratabilir; kalıcı veri birimini silmeyin.
 
 ## Önemli Notlar
 

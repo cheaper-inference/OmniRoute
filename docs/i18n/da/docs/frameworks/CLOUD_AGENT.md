@@ -329,19 +329,16 @@ en maskeret forhåndsvisning (`maskedApiKey`: op til 4 tegn i hver ende, færre 
 nøgle og ingen for 8 tegn eller færre) samt forbindelsens `projectId`. Begge felter udelades
 fra svaret for alle andre nøgler.
 
-## Fortolkning af legitimationsoplysninger
+## Opløsning af legitimationsoplysninger
 
 `getCloudAgentCredentials(providerId)` i `src/lib/cloudAgent/api.ts`:
 
 1. Indlæser aktive udbyderforbindelser via `getProviderConnections({ provider: providerId, isActive: true })`.
-2. For hver forbindelse foretrækkes `apiKey` (uden indledende og afsluttende mellemrum). Hvis den ikke findes, bruges `accessToken`.
-3. Returnerer den første ikke-tomme token pakket som `{ apiKey: token }`.
-4. Returnerer `null`, hvis der ikke findes en anvendelig token — API'et svarer med `400` og
-   `"Ingen aktive legitimationsoplysninger konfigureret for cloudagentudbyderen: <id>"`.
+2. For hver forbindelse foretrækker `apiKey` (trimmet). Falder tilbage til `accessToken`.
+3. Returnerer det første ikke-tomme token pakket som `{ apiKey: token }`.
+4. Returnerer `null` hvis der ikke findes et brugbart token — API svarer `400` med `"No active credentials configured for cloud agent provider: <id>"`.
 
-Det betyder, at Cloud Agents genbruger den samme tabel over udbyderforbindelser som almindelige LLM-udbydere.
-For at aktivere Jules skal du oprette en aktiv forbindelse med `provider: "jules"`
-og en udfyldt `apiKey`.
+Dette betyder, at Cloud-agenter genbruger den samme Provider Connection-tabel som almindelige LLM udbydere. For at aktivere Jules skal du oprette en aktiv forbindelse med `provider: "jules"` og en udfyldt `apiKey`.
 
 ## Dashboard
 

@@ -11,14 +11,14 @@ Agent Skills sind strukturierte SKILL.md-Dateien, die externen Agenten, MCP-Clie
 
 ---
 
-## Übersicht
+## Überblick
 
-Der Katalog enthält **45 Agent Skills** (23 für die REST-API + 21 für die CLI + 1 Konfigurations-Workflow). Jeder Skill verfügt über:
+Der Katalog enthält** 45 Agentenfähigkeiten** (23 REST API + 21 CLI + 1 Konfigurationsworkflow). Jede Fertigkeit hat:
 
-- Eine **kanonische ID** (`omni-auth`, `cli-serve` usw.)
-- Eine **SKILL.md-Datei** unter `skills/{id}/SKILL.md` mit YAML-Frontmatter (`name`, `description`) und einem ausführlichen Markdown-Inhalt
-- **REST-Endpunkte** (API-Skills) oder **CLI-Unterbefehle** (CLI-Skills), die aus der OpenAPI-Spezifikation und der CLI-Registry abgeleitet werden
-- Eine **GitHub-Raw-URL** zum direkten Abruf: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanonische ID** (`omni-auth`, `cli-serve` usw.)
+- A**SKILL.md** Datei in `skills/{id}/SKILL.md` mit YAML frontmatter (`name`, `description`) + Rich Markdown Body
+- **REST Endpunkte** (API -Fähigkeiten) oder**CLI -Unterbefehle** (CLI Fähigkeiten) abgeleitet von der OpenAPI -Spezifikation und CLI -Registrierung
+- A**GitHub raw URL** für Live-Abruf: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Die Antwort des Generators ist ein `GeneratorReport`:
 
 ---
 
-## Abdeckungs-API
+## Abdeckung API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Kohandatud päised
 
-| Header                   | Suund  | Kirjeldus                                                                                                                                                                                                                          |
-| ------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Päring | Määra väärtuseks `true`, et vahemälu vahele jätta                                                                                                                                                                                  |
-| `x-omniroute-no-memory`  | Päring | Määra väärtuseks `true`, et jätta selle päringu puhul mälu + oskuste sisestamine vahele (peegeldab vahemälu vahelejätmist; väldib iga kutsega kaasnevat loa-/kuluüldkulu)                                                          |
-| `X-OmniRoute-Progress`   | Päring | Määra väärtuseks `true`, et saada edenemissündmusi                                                                                                                                                                                 |
-| `X-Session-Id`           | Päring | Püsiva seansi võti välise seansi seostamise jaoks                                                                                                                                                                                  |
-| `x_session_id`           | Päring | Allkriipsuga variant on samuti toetatud (otse HTTP puhul)                                                                                                                                                                          |
-| `X-OmniRoute-Session-Id` | Päring | Kutsuja määratud seansi-/vestluse silt (toidab ka mälu). Olemasolu korral salvestatakse see muutmata kujul väljale `call_logs.session_tag` seansipõhiseks kulude omistamiseks (#8249) — puudumise korral ei sünteesita seda kunagi |
-| `Idempotency-Key`        | Päring | Duplikaatide eemaldamise võti (5 sekundi pikkune aken)                                                                                                                                                                             |
-| `X-Request-Id`           | Päring | Alternatiivne duplikaatide eemaldamise võti                                                                                                                                                                                        |
-| `x-omniroute-connection` | Päring | Seo ühe mudeli päring ühe pakkuja ühendusega (kontoga) selle ID alusel — vt [Päringuühenduse fikseerimine](#account-pinning-per-request)                                                                                           |
-| `X-OmniRoute-Cache`      | Vastus | `HIT` või `MISS` (voogedastuseta)                                                                                                                                                                                                  |
-| `X-OmniRoute-Idempotent` | Vastus | `true`, kui duplikaat eemaldati                                                                                                                                                                                                    |
-| `X-OmniRoute-Progress`   | Vastus | `enabled`, kui edenemise jälgimine on sisse lülitatud                                                                                                                                                                              |
-| `X-OmniRoute-Session-Id` | Vastus | OmniRoute'i kasutatud tegelik seansi ID                                                                                                                                                                                            |
-| `X-OmniRoute-Request-Id` | Vastus | Päringute korrelatsiooni ID (kui teada)                                                                                                                                                                                            |
-| `X-OmniRoute-Version`    | Vastus | OmniRoute'i järgu versioon (alati olemas)                                                                                                                                                                                          |
-| `X-OmniRoute-Cost-Saved` | Vastus | USD, mille vahemälu `HIT` korral säästis (ainult vahemälu tabamuste puhul)                                                                                                                                                         |
-| `X-OmniRoute-Decision`   | Vastus | Marsruutimise jälg: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` on kombineeritud strateegia või `single` mitte-kombineeritud päringu korral) — lõpetamisvastustes alati olemas                                   |
+| Päis                     | Suund   | Kirjeldus                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Taotlus | Vahemälust möödahiilimiseks määrake `true`                                                                                                                                                                                                                                                                                                                                             |
+| `x-omniroute-no-memory`  | Taotlus | Määrake väärtusele `true`, et jätta selle päringu puhul vahele mälu + oskuste sisestamine (peegeldab ilma vahemäluta; väldib kõne kohta token/cost lisakulusid)                                                                                                                                                                                                                        |
+| `x-omniroute-no-log`     | Taotlus | Määrake väärtusele `true`, et jätta selle järelduspäringu kõnelogidest välja request/response kasulikud koormused (kõik vestlusperekonna marsruudid: vestluse lõpetamised, vastused, sõnumid, lõpetamised, Gemini). Ajatempel, mudel, olek, kestus ja märkide arv salvestatakse endiselt. Kombineerige `x-omniroute-no-memory` ja `x-omniroute-no-cache`, et sisust täielikult loobuda |
+| `X-OmniRoute-Progress`   | Taotlus | Edenemissündmuste jaoks määrake `true`                                                                                                                                                                                                                                                                                                                                                 |
+| `X-Session-Id`           | Taotlus | Kleepuv seansi võti välise seansi afiinsuse jaoks                                                                                                                                                                                                                                                                                                                                      |
+| `x_session_id`           | Taotlus | Aktsepteeritud on ka allakriipsu variant (otsene HTTP)                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Session-Id` | Taotlus | Helistaja tarnitav session/conversation silt (toidab ka mälu). Kui see on olemas, säilis sõna-sõnalt `call_logs.session_tag` seansi kulude omistamiseks (#8249) — ei sünteesitud puudumisel kunagi                                                                                                                                                                                     |
+| `Idempotency-Key`        | Taotlus | Dedup võti (5 sekundi aken)                                                                                                                                                                                                                                                                                                                                                            |
+| `X-Request-Id`           | Taotlus | Alternatiivne dedup-võti                                                                                                                                                                                                                                                                                                                                                               |
+| `x-omniroute-connection` | Taotlus | Kinnitage ühe mudeli taotlus ühele pakkuja ühendusele (kontole) selle ID-ga — vt [Konto kinnitamine päringu kohta](#account-pinning-per-request)                                                                                                                                                                                                                                       |
+| `X-OmniRoute-Cache`      | Vastus  | `HIT` või `MISS` (mittevoogesitus)                                                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Idempotent` | Vastus  | `true`, kui dubleeritakse                                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Progress`   | Vastus  | `enabled` kui edenemise jälgimine on sisse lülitatud                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Session-Id` | Vastus  | Tõhus seanss ID mida kasutab OmniRoute                                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Request-Id` | Vastus  | Taotle korrelatsiooni ID-d (kui on teada)                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Version`    | Vastus  | OmniRoute build versioon (alati olemas)                                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Cost-Saved` | Vastus  | USD välditud vahemälu HIT (ainult vahemälu tabamused)                                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Decision`   | Vastus  | Marsruutimise jälg: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` on kombineeritud strateegia või `single` mittekombineeritud päringu puhul) — on lõpetamisvastustes alati olemas                                                                                                                                                                                      |
 
-> Nginxi märkus: kui kasutad allkriipsuga päiseid (näiteks `x_session_id`), luba `underscores_in_headers on;`.
+> Nginxi märkus: kui tuginete alakriipsu päistele (nt `x_session_id`), lubage `underscores_in_headers on;`.
 
-#### Ühenduse fikseerimine päringu kohta
+#### Konto kinnitamine taotluse alusel
 
-Kui pakkujal on mitu ühendust (kontot või võtit), valib OmniRoute tavaliselt ühe
-oma konto valimise strateegia kaudu. Päring võib selle asemel fikseerida ühe konkreetse ühenduse
-päise `x-omniroute-connection` abil:
+Kui teenusepakkujal on mitu ühendust (kontot või võtmeid), valib OmniRoute tavaliselt ühe oma konto valimise strateegia kaudu. Taotlus võib selle asemel kinnitada ühe konkreetse ühenduse `x-omniroute-connection` päisega:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,24 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Kust ID-d leida.** Avage juhtpaneelil teenusepakkuja leht
-  (**Dashboard → Providers → <provider>**) ja klõpsake ühenduse real `xxxxxxxx…` ID-kiibil — see kopeerib kogu ühenduse ID.
-- **Millised päringud seda arvestavad.** Ühe mudeliga päringud (`provider/model`) aadressidel
-  `/v1/chat/completions`, `/v1/messages` ja `/v1/responses`. Kombod päist eiravad: määrake
-  konto iga kombo sammu jaoks eraldi sammu enda ühenduse kaudu.
-- **Kinnitus on range, mitte eelistus.** Kinnitatud ühendust kasutatakse eranditult. Päringu sees
-  tekkinud tõrge registreerib konto jahtumisaja, kuid **ei** suuna päringut sama teenusepakkuja
-  teisele kontole.
-- **Jahtumisaeg ja kvoot vabastavad kinnituse.** Kui kinnitatud ühendus jahtub,
-  kvoot on ammendatud või kvoodipoliitika on selle blokeerinud, kasutavad hilisemad päringud
-  teenusepakkuja teisi ühendusi, täpselt nagu kinnitamata liiklus.
-- **Tundmatud või keelatud ID-d põhjustavad tõrke.** ID, mida teenusepakkuja aktiivses kogumis ei ole (kustutatud,
-  deaktiveeritud või kuulub teisele teenusepakkujale), ei jäta ühtegi sobivat kontot, mistõttu päring
-  nurjub, selle asemel et vaikselt mujale suunata.
+- **Kust leida ID.** Ava armatuurlaual pakkuja leht (** Armatuurlaud → Pakkujad → <provider>** ) ja klõpsake ühenduse `xxxxxxxx…` id kiibil — see kopeerib ühenduse täieliku ID.
+- **Millised taotlused austavad seda.** Ühe mudeli päringud (`provider/model`) `/v1/chat/completions`, `/v1/messages` ja `/v1/responses` kohta. Kombod ignoreerivad päist: selle asemel kinnitage konto iga kombineeritud sammu kohta toimingu enda ühenduse kaudu.
+- **Nööpnõel on range, mitte eelistus.** Kinnitatud ühendust kasutatakse ainult. Päringu sees esinev tõrge salvestab konto jahtumise, kuid seda teeb** mitte** vahetada sama teenusepakkuja õde-venda kontole.
+- **Jahutamine ja kvoot vabastavad nööpnõela.** Kui kinnitatud ühendus jahtub, kvoot on ammendunud või kvoodipoliitika tõttu blokeeritud, langevad hilisemad päringud teenusepakkuja teistele ühendustele täpselt nagu kinnitamata liiklus.
+- **Tundmatud või keelatud ID-d ebaõnnestuvad.** ID, mis ei ole teenusepakkuja aktiivses kogumis (kustutatud, deaktiveeritud või kuulub teisele pakkujale), ei jäta sobivat kontot, mistõttu taotlus nurjub, selle asemel et vaikselt mujale suunata.
 
-Claude Code saadab kohandatud päiseid `ANTHROPIC_CUSTOM_HEADERS` kaudu. Lisage see faili
-`~/.claude/settings.json` plokki `env` või projekti tasemel faili `.claude/settings.json`, et
-kinnitada iga projekti jaoks erinev konto:
+Claude kood saadab kohandatud päised `ANTHROPIC_CUSTOM_HEADERS` kaudu. Lisage see `env` plokki `~/.claude/settings.json` või projektitasemel `.claude/settings.json`, et kinnitada projekti kohta erinev konto:
 
 ```jsonc
 {
@@ -132,12 +120,11 @@ kinnitada iga projekti jaoks erinev konto:
 }
 ```
 
-Allikas: `src/sse/handlers/chat.ts` (päise lugemine), `src/sse/services/auth.ts` ja
-`src/sse/services/sessionAffinityPin.ts` (kinnituse vabastamine ja kogumist puudumise kontroll).
+Allikas: `src/sse/handlers/chat.ts` (päise lugemine), `src/sse/services/auth.ts` ja `src/sse/services/sessionAffinityPin.ts` (nööpnõela vabastamine ja puuduva basseini kontroll).
 
-> **Kulutelemeetria päised:** voota eduka vastuse korral sisaldavad vastused ka `X-OmniRoute-*` kulutelemeetria komplekti — `X-OmniRoute-Response-Cost` (USD, fikseeritud 10 kümnendkohaga; tasuta või hinnastamata päringu korral `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` ja `X-OmniRoute-Fallback-Attempts` (ainult juhul, kui väärtus on suurem kui 0), lisaks `X-OmniRoute-Request-Id` ja `X-OmniRoute-Version`. Need lisatakse vestluse lõpetamise päringutele, `/v1/responses`, `/v1/messages` **ning meediaotspunktidele** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` ja `/v1/moderations` (kulu on alati `0`). Meedia kulu arvutatakse saadaoleva hinnastuse korral iga modaalsuse järgi (pildi, sekundi, märgi või otsinguühiku kohta), vastasel juhul on väärtus `0` (tõrkeid lubav käitumine).
+> **Kulude telemeetria päised:** mittevoogesituse õnnestumise vastused sisaldavad ka `X-OmniRoute-*` kulu-telemeetria komplekti — `X-OmniRoute-Response-Cost` (USD, fikseeritud 10 kümnendkohta; `0.0000000000` free/unpriced jaoks ), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` ja `X-OmniRoute-Fallback-Attempts` ), pluss > `X-OmniRoute-Request-Id` `X-OmniRoute-Version` Neid edastavad vestluse lõpetamised, `/v1/responses`, `/v1/messages`,** ja meedia lõpp-punktid** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` ja `/v1/moderations` (maksab alati `0`). Meediumikulu arvutatakse modaalsuse (pildi, sekundi, tähemärgi, otsinguühiku kohta), kui hinnakujundus on saadaval, muul juhul `0` (tõrkeopen).
 
-> **Vahemäluhiti kulu semantika:** semantilise vahemälu tabamuse (`X-OmniRoute-Cache-Hit: true`) korral ülesvoolu päringut ei tehta, seega on `X-OmniRoute-Response-Cost` väärtus `0.0000000000` (tabamuse edastamise **inkrementaalne** kulu). Algne või oleks olnud kulu esitatakse eraldi päises `X-OmniRoute-Cost-Saved`. Arvelduse tarbijad peaksid summeerima `X-OmniRoute-Response-Cost` väärtused (tabamused ei maksa midagi); vahemälu analüütika võib koondada `X-OmniRoute-Cost-Saved` väärtused.
+> **Vahemälu tabamuse maksumuse semantika:** semantilises vahemälus HIT (`X-OmniRoute-Cache-Hit: true`) ülesvoolu üleskutset ei tehta, seega on `X-OmniRoute-Response-Cost` `0.0000000000` (** astmeline** tabamuse kättetoimetamise kulu). original/would-have-been maksumus on esitatud `X-OmniRoute-Cost-Saved` is eraldi. Arveldavad tarbijad peaksid summa `X-OmniRoute-Response-Cost` (hitid ei maksa midagi); vahemälu analüütika suudab koondada `X-OmniRoute-Cost-Saved`.
 
 ## Hallatava seansi eksklusiivsed liisingud
 
@@ -374,6 +361,8 @@ Saadaolevate pakkujate hulka kuuluvad OpenAI (GPT pilt 2), xAI (Grok pilt), Toge
 
 `n` tagastab `n` pildid `data[]`. Pakkujad, kelle ülesvoolu API tagastab ühe pildi kõne kohta (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), saavad `n` eraldi ülesvoolu kõnet, maksimaalselt 4 lennu ajal. Fikseeritud `seed` kompenseeritakse kõneindeksiga (`seed`, `seed + 1`, …), nii et pildid erinevad, kuid jäävad reprodutseeritavaks. `n` ülempiir on 10. Taotlus ebaõnnestub tervikuna, kui mõni kõne ebaõnnestub. Väljapuhutavate vormingute loend on `SINGLE_IMAGE_FANOUT_FORMATS` ja `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Pildimudelid (`codex/gpt-image-*`) tagastavad ainult PNG : ülesvoolu vastab `200` PNG baitidega isegi siis, kui küsitakse `jpeg` või `webp`. Mis tahes muu `output_format` (`webp`, `jpeg`, ...) taotlus lükatakse HTTP 400-ga tagasi, selle asemel et seda vaikselt ignoreerida; jätke see välja või saatke `png`. `output_compression` ei edastata.
+
 ZenMux kasutab uuesti olemasolevat API-võtme ühendust ja aktsepteerib `zenmux/` või `zm/` eesliiteid:
 
 - `zenmux/openai/gpt-image-2` kasutab ZenMuxOpenAI API. Valikud hõlmavad `size`, `quality`, `n`, `output_format`, `output_compression`, `background` ja `response_format`.
@@ -382,7 +371,7 @@ ZenMux kasutab uuesti olemasolevat API-võtme ühendust ja aktsepteerib `zenmux/
 
 See integratsioon toetab tekstist pildiks genereerimist, mitte viitekujutise redigeerimist. Tipu väljund normaliseeritakse väärtusele `data[].b64_json`; `response_format: "url"` tagastab ülesvoolu HTTPS URL või base64 andme URL kui saadaval on ainult pildibaidid. Empty/filtered väljundid tagastavad pigem vea kui tühja õnnestumise. Juurdepääs mudelile sõltub ZenMux kontost. Vaadake [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) ja [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
-Microsoft 365 Copilot sisselogimisühendus teenindab `copilot-m365-web/m365-copilot-image` Copilot pilditööriista kaudu: üks Copilot pööre pildi kohta (`n` 1–4), `size` juhib ainult orientatsiooni ja kujutised tagastatakse reasiseselt (`b64_json` või andme- URL `response_format: "url"` jaoks). Vaadake [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+Microsoft 365 Copilot sisselogimisühendus teenindab `copilot-m365-web/m365-copilot-image` Copilot pilditööriista kaudu: üks Copilot pööre pildi kohta (`n` 1–4), `size` juhib ainult orientatsiooni ja kujutised tagastatakse tekstisiseselt (`b64_json` või andme- URL `response_format: "url"` jaoks). Vaadake [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
 # List all image models
@@ -391,7 +380,7 @@ GET /v1/images/generations
 
 ---
 
-## Dokumendi OCR
+## Dokument OCR
 
 ```bash
 POST /v1/ocr
@@ -407,17 +396,15 @@ Content-Type: application/json
 }
 ```
 
-`model` valib OCR-i pakkuja eesliite `provider/model` kaudu; ilma eesliiteta mudeli ID (nt
-`mistral-ocr-latest`) lahendatakse selle registreeritud pakkujale ja välja jäetud `model` kasutab
-vaikimisi Mistrali (`mistral-ocr-latest`). Registreeritud pakkujad (`open-sse/config/ocrRegistry.ts`):
+`model` valib OCR pakkuja `provider/model` prefiksi kaudu; tühi mudeli ID (nt `mistral-ocr-latest`) lahendab selle registreeritud pakkuja ja välja jäetud `model` vaikeväärtus on Mistral (`mistral-ocr-latest`). Registreeritud pakkujad (`open-sse/config/ocrRegistry.ts`):
 
-| Pakkuja ID                    | Mudeli ID            | `model` väärtus                                                         | Märkused                                                                                                             |
-| ----------------------------- | -------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (või ilma eesliiteta `mistral-ocr-latest`) | Sünkroonne — vastus tagastatakse otse ühest ülesvoolu päringust.                                                     |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                             | Asünkroonne ülesvoolu töötlus (`analyze` + poll) — vt allpool.                                                       |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                                 | Sünkroonne, Vertex AI `openapi/chat/completions` partneri lõpp-punkti kaudu — autentimise ja URL-i kohta vt allpool. |
+| Pakkuja id                    | Mudeli id                                  | `model` väärtus                                                | Märkmed                                                                                                                                                                                                  |
+| ----------------------------- | ------------------------------------------ | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                       | `mistral/mistral-ocr-latest` (või paljas `mistral-ocr-latest`) | Sünkroonne — vastus tagastatakse otse ühest ülesvoolu kõnest.                                                                                                                                            |
+| `azure-document-intelligence` | `prebuilt-read`                            | `azure-document-intelligence/prebuilt-read`                    | Asünkroonne ülesvoolu (`analyze` + poll) — vt allpool.                                                                                                                                                   |
+| `vertex-deepseek-ocr`         | isekasutatud (ilma sisseehitatud mudelita) | `vertex-deepseek-ocr/<your-deployed-model-id>`                 | Sünkroonne teie enda Vertex AI Model Garden DeepSeek-OCR lõpp-punkti kaudu (`openapi/chat/completions` kujuga); Google sulges hallatava `deepseek-ocr-maas` 21.10.2026 (#20423), nii et ID tagastab 400. |
 
-Kõik kolm pakkujat vastavad sama Mistrali-kujulise kehaga:
+Kõik kolm pakkujat vastavad sama Mistral-kujulise kehaga:
 
 ```json
 {
@@ -427,28 +414,13 @@ Kõik kolm pakkujat vastavad sama Mistrali-kujulise kehaga:
 }
 ```
 
-### Azure Document Intelligence'i küsitluse töövoog
+### Azure Document Intelligence küsitlusvoog
 
-Azure Document Intelligence'i `analyze` API on asünkroonne: esialgne päring tagastab keha asemel
-päise `Operation-Location` ning tulemust tuleb küsitleda. Töötleja
-(`open-sse/handlers/ocr.ts`) küsitleb seda URL-i iga sekundi järel kuni 30 katse jooksul, lõpetab
-kohe (ei jätka küsitlemist) mittesobiva (`ok`) vastuse või oleku `"failed"` korral ning tagastab
-`504`, kui toiming töötab pärast katsete limiidi ammendumist endiselt. Azure'i lõplik vastus
-normaliseeritakse enne helistajale tagastamist samasse `pages`/`markdown` kujusse, mida kasutab Mistral,
-seega ei pea kliendikood pakkujat eraldi käsitlema.
+Azure Document Intelligence'i `analyze` API on asünkroonne: esialgne päring tagastab keha asemel `Operation-Location` päise ja tulemus tuleb küsitleda. Käsitleja (`open-sse/handlers/ocr.ts`) küsitleb, et URL iga sekund kuni 30 katset, ebaõnnestub kiiresti (ei jätka pollimist) mitte-`ok` -küsitluse vastuse või `"failed"` -oleku korral ja tagastab `504` kui toiming töötab pärast katse eelarve ammendumist. Lõplik Azure'i vastus normaliseeritakse enne helistajale tagastamist samasse `pages`/`markdown` -kuju, mida kasutas Mistral, nii et kliendikood ei pea teenusepakkujat erijuhtudel kasutama.
 
-### Vertex AI DeepSeek OCR-i autentimine ja lõpp-punkti lahendamine
+### Vertex AI DeepSeek OCR autentimine ja lõpp-punkti eraldusvõime
 
-`vertex-deepseek-ocr` kasutab sama Vertex AI autentimist, mida OmniRoute juba toetab
-vestluse/pildi liikluse jaoks (`open-sse/executors/vertex.ts`): ühenduse API-võti on kas
-teenusekonto JSON-mandaat (mille vastu vahetatakse JWT kandja voo kaudu lühiajaline OAuthi
-pääsutoken) või juba väljastatud OAuthi pääsutoken, mida kasutatakse muutmata kujul. Ülesvoolu lõpp-punkti URL on Vertexi üldine
-`openapi/chat/completions` partneri lõpp-punkt, mis koostatakse ühenduse projekti ja piirkonna põhjal —
-selgesõnaliselt määratud `providerSpecificData.project`/`providerSpecificData.region` on alati
-ülimuslikud; muul juhul tuletatakse projekt teenusekonto JSON-i väärtusest `project_id` ja piirkonna
-vaikeväärtus on `us-central1`. Mõlemad lahendused toimuvad failis `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) ning neid kasutab
-`src/app/api/v1/ocr/route.ts` enne saatmist funktsioonile `handleOcr`.
+`vertex-deepseek-ocr` kasutab uuesti sama Vertexi AI autentimist. OmniRoute toetab juba chat/image liiklust (`open-sse/executors/vertex.ts`): ühenduse API -võti on kas teenusekonto JSON mandaat (vahetatakse lühiajalise OAuth juurdepääsuloa vastu JWT-kandja voo kaudu) või juba vermitud OAuth juurdepääsuluba, mida kasutatakse as-is. Ülesvoolu lõpp-punkt URL on Vertexi üldine `openapi/chat/completions` partneri lõpp-punkt, mis on üles ehitatud ühenduse projektist ja piirkonnast — eksplitsiitne `providerSpecificData.project`/`providerSpecificData.region` võidab alati; muidu tuletatakse projekt teenusekonto JSON `project_id` -st ja piirkonna vaikeväärtus on `us-central1`. Mõlemad eraldusvõimed toimuvad `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), mida `src/app/api/v1/ocr/route.ts` tarbib enne `handleOcr` sse saatmist.
 
 ---
 
@@ -697,98 +669,104 @@ muusikamudelile, väljundvormingule ega API-funktsioonile: ElevenLabs otsustab �
 
 ---
 
-## Ühilduvuslõpp-punktid
+## Ühilduvuse lõpp-punktid
 
-| Meetod | Tee                                       | Vorming                                  |
-| ------ | ----------------------------------------- | ---------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                   |
-| POST   | `/v1/messages`                            | Anthropic                                |
-| POST   | `/v1/responses`                           | OpenAI Responses                         |
-| POST   | `/v1/embeddings`                          | OpenAI                                   |
-| POST   | `/v1/images/generations`                  | OpenAI Images                            |
-| POST   | `/v1/images/edits`                        | OpenAI Images (töötlus/inpainting)       |
-| POST   | `/v1/videos/generations`                  | OpenAI-laadne videote genereerimine      |
-| POST   | `/v1/music/generations`                   | OpenAI-laadne muusika genereerimine      |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                       |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (tagastab helikeha)           |
-| POST   | `/v1/rerank`                              | Cohere/Voyage'i-laadne ümberjärjestamine |
-| POST   | `/v1/classify`                            | Jina klassifitseerija (`api.jina.ai`)    |
-| POST   | `/v1/segment`                             | Jina segmenteerija (`segment.jina.ai`)   |
-| POST   | `/v1/moderations`                         | OpenAI modereerimine                     |
-| GET    | `/v1/models`                              | OpenAI                                   |
-| POST   | `/v1/models/query`                        | Filtreeritud mudelite valik              |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                                |
-| GET    | `/v1beta/models`                          | Gemini                                   |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                   |
-| POST   | `/v1/api/chat`                            | Ollama                                   |
-| GET    | `/api/v1/vscode/{token}/`                 | OpenAI kataloogi alias                   |
-| GET    | `/api/v1/vscode/{token}/models`           | OpenAI mudelite alias                    |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokeniseeritud alias              |
-| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responsesi tokeniseeritud alias   |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama tokeniseeritud alias              |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama siltide tokeniseeritud alias      |
+| meetod | Tee                                       | Vorming                               |
+| ------ | ----------------------------------------- | ------------------------------------- |
+| POST   | `/v1/chat/completions`                    | OpenAI                                |
+| POST   | `/v1/messages`                            | Anthropic                             |
+| POST   | `/v1/responses`                           | OpenAI vastused                       |
+| POST   | `/v1/embeddings`                          | OpenAI                                |
+| POST   | `/v1/images/generations`                  | OpenAI Pildid                         |
+| POST   | `/v1/images/edits`                        | OpenAI pildid (edit/inpaint)          |
+| POST   | `/v1/videos/generations`                  | OpenAI-stiilis video genereerimine    |
+| POST   | `/v1/music/generations`                   | OpenAI stiilis muusika genereerimine  |
+| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
+| POST   | `/v1/audio/speech`                        | OpenAI TTS (tagastab helikeha)        |
+| POST   | `/v1/rerank`                              | Cohere/Voyage-style rerank            |
+| POST   | `/v1/classify`                            | Jina klassifitseerima (`api.jina.ai`) |
+| POST   | `/v1/segment`                             | Jina segmentija (`segment.jina.ai`)   |
+| POST   | `/v1/moderations`                         | OpenAI Moderatsioonid                 |
+| POST   | `/v1/systemone`                           | System One'i trükitud otsused         |
+| POST   | `/v1/decisions`                           | OpenAI otsused (native)               |
+| GET    | `/v1/systemone/models`                    | Otsus-mudeli kataloog                 |
+| GET    | `/v1/models`                              | OpenAI                                |
+| POST   | `/v1/models/query`                        | Filtreeritud mudelite valikloend      |
+| POST   | `/v1/messages/count_tokens`               | Anthropic                             |
+| GET    | `/v1beta/models`                          | Gemini                                |
+| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                |
+| POST   | `/v1/api/chat`                            | Ollama                                |
+| GET    | `/api/v1/vscode/{token}/`                 | OpenAI kataloogi varjunimi            |
+| GET    | `/api/v1/vscode/{token}/models`           | OpenAI mudelite varjunimi             |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokeniseeritud alias           |
+| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Vastuste tokeniseeritud alias  |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama tokeniseeritud alias           |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama sildid tokeniseeritud alias    |
 
-Kõik POST-marsruudid järgivad sama kuju: `Bearer your-api-key` + Zodi valideeritud JSON-keha (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` jne; vt `src/shared/validation/schemas.ts`). Skeemi valideerimise ebaõnnestumisel tagastatakse 4xx.
+Kõik POST marsruudid järgivad sama kuju: `Bearer your-api-key` + Zod-valideeritud JSON keha (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` jne, vt `src/shared/validation/schemas.ts`). 4xx tagastatakse skeemi rikke korral.
 
-Klientide puhul, kes ei saa lisada päist `Authorization: Bearer ...`, aktsepteerib OmniRoute API-võtmeid URL-is kas päringuparameetrite kaudu (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) või spetsiaalsete `/api/v1/vscode/{token}/...` lõpp-punktide kaudu, mida kirjeldatakse allpool.
+Klientide puhul, kes ei saa `Authorization: Bearer ...` manustada, aktsepteerib OmniRoute ka API -võtmeid URL kas päringustringi ühilduvuse (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) või allpool dokumenteeritud spetsiaalsete `/api/v1/vscode/{token}/...` lõpp-punktide kaudu.
 
 ```bash
-# Ümberjärjestamine (pilveregistri pakkuja või OpenAI-ga ühilduva pakkuja sõlm kujul "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina klassifitseerimine (Foundation API mandaadid)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina segmenteerija
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina otsing (s.jina.ai; pakkujaaliased: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Modereerimine
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — tagastab audio/mpeg (või soovitud vormingu) keha
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS nõuab keelt ja häält: `language` vaikeväärtus on "en"; puuduva
-# hääle või OpenAI standardse häälenime (alloy, nova, …) korral kasutatakse häält "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Pildi töötlemine (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Video/muusika genereerimine (pakkuja eesliitega mudeli ID)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Teenusepakkuja sõlmede ümberjärjestamine:** `POST /v1/rerank` suunab päringud ka OpenAI-ga ühilduvatele teenusepakkuja sõlmedele
-> (oMLX, vLLM, Infinity, lüüsi taga töötav TEI, …), mille aadress on kujul `<node-prefix>/<model>`. Loopback-
-> sõlmed (`localhost`, `127.0.0.1`, `172.16.0.0/12`) on alati sobilikud, samuti hostinimed, mille operaator
-> loetleb muutujas `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (nt Dockeri/Compose’i teenusenimi, näiteks
-> `http://reranker:8080/v1`; nende poole pöördutakse otse, mitte kunagi `HTTP(S)_PROXY` või
-> ühenduse fikseeritud proksi kaudu). Mis tahes muul hostil asuvad sõlmed — olgu need kohtvõrgu arvuti või Tailscale’i
-> partner — on sobilikud ainult juhul, kui operaator lubab funktsioonilipu
-> `RERANK_REMOTE_PROVIDER_NODES` **ja** sõlme baas-URL läbib teenusepakkuja väljaminevate URL-ide poliitika
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Mälumängumootori ümberjärjestamise samm kutsub seda marsruuti välja loopbacki kaudu,
-> seega kehtib sama reegel mäluseadetes `rerankProviderModel` jaoks.
+> **Pakkuja sõlmede järjestamine ümber:** `POST /v1/rerank` suunab ka OpenAI-ga ühilduvatesse pakkujasõlmedesse (oMLX, vLLM, Infinity, TEI taga lüüsi jne), mis on adresseeritud kui `<node-prefix>/<model>`. Tagasisilmussõlmed (`localhost`, `127.0.0.1`, `172.16.0.0/12`) on alati sobivad, samuti on sobivad hostinimed, mille operaator loetleb `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (nt Docker/Compose teenuse nimi, näiteks `http://reranker:8080/v1`; neid kutsutakse otse, mitte kunagi `HTTP(S)_PROXY` või ühenduse kinnitatud puhverserveri kaudu). Mis tahes muu hosti — LAN kasti või Tailscale peer — sõlmed on sobilikud ainult siis, kui operaator lubab `RERANK_REMOTE_PROVIDER_NODES` funktsiooni lipu** ja** sõlme baas URL edastab pakkuja väljamineva URL poliitika (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Mälumootori ümberpaigutamise samm kutsub seda marsruuti tagasi silmuse kaudu, nii et sama reegel reguleerib `rerankProviderModel` mäluseadetes.
 >
-> **Kohaliku serveri vormid:** sõlme kutsutakse aadressil `<base>/v1/rerank` ja 404 korral aadressil `<base>/rerank`
-> (Infinity, TEI). Ülesvoolu päringu keha sisaldab nii Cohere’i/OpenAI kirjaviisi (`documents`,
-> `return_documents`) kui ka TEI kirjaviisi (`texts`, `return_text`) ning ülesvoolu vastus
-> normaliseeritakse Cohere’i ümbrikuks: TEI paljas `[{index, score, text}]`, õhukeste lüüside
-> `{results: [{index, score}]}` ja Voyage’i laadne `{data: [...]}` jõuavad kliendini kujul
-> `{results: [{index, relevance_score, document?}]}`, skoori järgi sordituna ja `top_n` väärtusega piiratud.
+> **Kohaliku serveri kujud:** sõlme kutsutakse `<base>/v1/rerank` ja 404 puhul `<base>/rerank` (lõpmatus, TEI). Ülesvoolu keha kannab nii Cohere/OpenAI õigekirja (`documents`, `return_documents`) kui ka TEI õigekirja (`texts`, `return_text`) ja ülesvoolu vastus normaliseeritakse Cohere ümbriku järgi: TEI paljas `[{index, score, text}]` `{results: [{index, relevance_score, document?}]}` `{results: [{index, score}]}` alates õhukesest kliendi lüüsist ja tagasi Vozqn-stiilist `{data: [...]}`, sorteeritud skoori järgi ja piiriks on `top_n`.
 
-> **Teenusepakkuja sõlmede tuvastamine:** OpenAI-ga ühilduva teenusepakkuja sõlme mudelid kuvatakse `GET /v1/models`
-> vastuses sõlme prefiksi all. Read, millel puuduvad lõpp-punkti metaandmed (tüüpiline kohalike `/v1/models` loendite
-> puhul), pärivad sõlme `apiType` väärtuse, seega on `embeddings`-sõlme mudelite tüüp `type: "embedding"` ja
-> `rerank`-sõlme mudelite tüüp `type: "rerank"`, mitte vaikimisi chat; sünkroonitud või käsitsi lisatud rea
-> otseselt määratud `supportedEndpoints` on siiski ülimuslik.
+> **Pakkuja-sõlme avastamine:** OpenAI-ga ühilduva pakkuja sõlme mudelid kuvatakse `GET /v1/models` sõlme eesliite all. Read, mis ei kanna lõpp-punkti metaandmeid (tüüpiline kohalike `/v1/models` -loendite jaoks), pärivad sõlme `apiType`, nii et `embeddings` -sõlme mudelid on `type: "embedding"` ja `rerank` -sõlme mudelid `type: "rerank"` selle asemel, et vestlust vaikimisi kasutada; sünkroonitud või käsitsi lisatud rea selgesõnaline `supportedEndpoints` on endiselt ülimuslik.
 
-### Spetsiaalsed teenusepakkuja marsruudid
+### Trükitud otsused
+
+Otsustusmudelid vastavad teksti genereerimise asemel trükitud küsimustele kalibreeritud tõenäosustega. Need ei ole kunagi vestlusmudelid ja kahte juhtmevormingut ei tõlgita kunagi üksteiseks:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter otsused, Cloudflare Töötajate AI, kohalik Ollama).
+- `POST /v1/decisions` — algne OpenAI Otsused `{ model, input, questions: [...] }`, teenindab `openai` ühendus. Mudel on `openai/gpt-6-luna` (töötab ka paljas `gpt-6-luna` ). Vastused tulevad tagasi küsitavas järjekorras, puutumata.
+- `GET /v1/systemone/models` — üks mõlemat tüüpi kataloog; iga rida nimetab oma `api_format` (`systemone` või `decisions`). `limit` / `after` lehele lõplik nimekiri. `X-OmniRoute-Catalog-Status` päises on `complete`, `partial` või `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` puhul kontrollitakse API -võtme mudeli lubatud loendit `decisions` lõpp-punkti kategooriat, eelarvet ja ühenduse ulatust enne mandaadi lugemist. Mandaat on salvestatud `openai` -ühendus võtme ulatusse (mitte kunagi keskkonnavõti); ühenduse baasi URL austatakse ainult siis, kui see on `http(s)` URL ilma mandaatideta, päringu või fragmendita, mis ei osuta sellele OmniRoute. Kõne väljub sama valvatud transpordi kaudu nagu `decision` automaatne ruuter ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): teenusepakkuja väljamineku valvur, korduskatsed, ümbersuunamised, 5-sekundiline ajalõpp ja 64 KB vastuse piirang (suurem vastus on 502). Taotluste osad on piiratud 4 MiB. Iga kõne saadab uue `Idempotency-Key`. Vead kannavad ainult ülesvoolu olekut, mitte kunagi selle sisu, URL, võtit ega viipa.
+
+### Pühendatud teenusepakkuja marsruudid
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -796,7 +774,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Teenusepakkuja prefiks lisatakse automaatselt, kui see puudub. Sobimatud mudelid tagastavad `400`.
+Pakkuja eesliide lisatakse automaatselt, kui see puudub. Sobimatud mudelid tagastavad `400`.
 
 ---
 

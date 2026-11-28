@@ -4,12 +4,9 @@
 
 ---
 
-> **آخر تحديث:** 2026-08-28 — v3.8.51
-> مسار إصدار مبسّط يستفيد من مهارات Claude Code للأتمتة.
+> تدفق إصدار مبسط يعزز مهارات Claude Code للأتمتة.
 >
-> **حافظ على سلامة قائمة الانتظار/الفرع بين الإصدارات:** راجع [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (عائلة `/green-prs` +‏ `npm run check:release-green` +‏ `/babysit` + التشغيل الليلي). يساعد تشغيل
-> هذا دوريًا — وخصوصًا **قبل** قائمة التحقق هذه — على بدء طلب سحب الإصدار بحالة سليمة.
+> **حافظ على queue/branch الأخضر بين الإصدارات:** انظر [RELEASE_GREEN.md](./RELEASE_GREEN.md) (عائلة `/green-prs` + `npm run check:release-green` + `/babysit` + ليلاً). تشغيل هذا دوريا — وخاصة** قبل** قائمة التحقق هذه — تجعل إصدار PR يبدأ باللون الأخضر.
 
 ## الخلاصة
 
@@ -58,9 +55,11 @@ npm run test:e2e           # اختياري، لكنه موصى به
 
 **قواعد اللعب الخاصة بالقطعة الأثرية المكسورة (بدون تغيير):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` باعتباره المنعكس الافتراضي (الدقائق، قابلة للعكس)؛ `npm unpublish` فقط داخل نافذة 72h/no-dependents وليس كخطوة أولى أبدًا. Docker: لا تقم أبدًا بإعادة كتابة علامة الإصدار، حيث يقوم التراجع عن — بإعادة تعيين `latest` إلى آخر ملخص جيد.
 
-**Docker Hub `latest` (مطلوب في كل نشرة SemVer مستقرة):** يجب وضع علامة على سير عمل `docker-publish`** كلاهما** `X.Y.Z` ، وعندما يوافق `should-promote-latest.sh` يكون هذا هو أعلى مستوى مستقر SemVer، `:latest` مع** نفس الملخص** . بعد المهمة: Hub `latest` Digest يساوي ملخص SemVer الجديد ويتم نقل `last_updated`. لا تترك `:latest` على إصدار أقدم بينما تتحدث ملاحظات الإصدار عن الإصلاحات الموجودة فقط على git. إنشاء بدايات سريعة باستخدام `:latest`؛ يجب أن يستمر GitOps في تثبيت `X.Y.Z`. راجع [قنوات إصدار Docker](../guides/DOCKER_GUIDE.md#release-channels) و #10317.
+**Docker Hub `latest` (مطلوب في كل نشرة SemVer مستقرة):** يجب وضع علامة على سير عمل `docker-publish`** كلاهما** `X.Y.Z` ، وعندما يوافق `should-promote-latest.sh` على أن هذا هو أعلى SemVer مستقر، `:latest` مع** نفس الملخص** . بعد المهمة: Hub `latest` Digest يساوي ملخص SemVer الجديد ويتم نقل `last_updated`. لا تترك `:latest` على إصدار أقدم بينما تتحدث ملاحظات الإصدار عن الإصلاحات الموجودة فقط على git. إنشاء بدايات سريعة باستخدام `:latest`؛ يجب أن يستمر GitOps في تثبيت `X.Y.Z`. راجع [قنوات إصدار Docker](../guides/DOCKER_GUIDE.md#release-channels) و #10317.
 
-**مستودع منظمة Docker Hub (`cheaperinference/omniroute`):** لا يستطيع Docker Hub نقل مستودع بين مساحات الأسماء، لذلك يحتفظ `diegosouzapw/omniroute` بسجل السحب الخاص به وكل إصدار، وتقوم مهمة `mirror-org-dockerhub` لـ `docker-publish` بنسخ كل إصدار تم إصداره (و `:latest` عند ترقيته) من `ghcr.io/cheaper-inference/omniroute` إلى مستودع المؤسسة. يحتاج إلى أسرار `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ؛ بدونها، تظل الوظيفة خضراء مع تحذير "تم تخطي مرآة Docker Hub org" وتنشر السجلات الأخرى بشكل طبيعي. لنشر نسخة تم إصدارها هناك لاحقًا، قم بتشغيل** الإجراءات → قم بعكس صورة Docker على Docker Hub org → Run سير العمل** باستخدام `version=X.Y.Z` (و `promote_latest` لأعلى إصدار مستقر): يقوم بنسخ الصور الموجودة، دون إعادة البناء.
+**مستودع منظمة Docker Hub (`cheaperinference/omniroute`):** لا يستطيع Docker Hub نقل مستودع بين مساحات الأسماء، لذلك يحتفظ `diegosouzapw/omniroute` بسجل السحب الخاص به وكل إصدار، وتقوم مهمة `mirror-org-dockerhub` لـ `docker-publish` بنسخ كل إصدار تم إصداره (و `:latest` عند ترقيته) من `ghcr.io/cheaper-inference/omniroute` إلى مستودع المؤسسة. يحتاج إلى أسرار `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ؛ بدونها، تظل الوظيفة خضراء مع تحذير "تم تخطي مرآة Docker Hub org" وتنشر السجلات الأخرى بشكل طبيعي. لنشر نسخة تم إصدارها هناك لاحقًا، قم بتشغيل** الإجراءات → قم بعكس صورة Docker على Docker Hub org → Run سير العمل** باستخدام `version=X.Y.Z` (و `promote_latest` لأعلى إصدار مستقر): يقوم بنسخ الصور الموجودة، دون إعادة البناء. يتم تعيين النظرة العامة على Docker Hub لهذا المستودع يدويًا: حيث ترفض API التي تقوم بتحريرها رموز الوصول إلى المؤسسة.
+
+ينسخ سير العمل نفسه أيضًا كل إصدار لحزمة GHCR القديمة `ghcr.io/diegosouzapw/omniroute` حتى 30/06/2027، لذلك تستمر عمليات التثبيت المثبتة به في التحديث؛ يحمل فهرسه وصفًا "تم النقل إلى `ghcr.io/cheaper-inference/omniroute`". إنه يحتاج إلى سر `GHCR_LEGACY_TOKEN` (رمز وصول شخصي كلاسيكي لـ `diegosouzapw` مع `write:packages`) ؛ بدونها، يتم تخطي هذه المهمة مع ظهور تحذير "تم تخطي مرآة GHCR القديمة".
 
 ## المسار السريع للإصلاحات العاجلة (التسمية `hotfix`)
 
@@ -146,12 +145,12 @@ npm run test:e2e           # اختياري، لكنه موصى به
 
 **النطاقات الصالحة:** `db`، `sse`، `oauth`، `dashboard`، `api`، `cli`، `docker`، `ci`، `mcp`، `a2a`، `memory`، `skills`، `cloud-agent`، `guardrails`، `compression`، `auto-combo`، `resilience`، `providers`، `executors`، `translator`، `domain`، `authz`
 
-التغييرات العاجلة: قم بإضافة تذييل `BREAKING CHANGE:` أو `!` بعد النطاق (على سبيل المثال `feat(api)!: drop /v0`).
+التغييرات العاجلة: أضف تذييل `BREAKING CHANGE:` أو `!` بعد النطاق (على سبيل المثال `feat(api)!: drop /v0`).
 
 ### التوثيق
 
 - [ ] تمريرات `npm run check:docs-sync` (التشغيل التلقائي عن طريق الالتزام المسبق)
-- [ ] تمريرات `npm run check:docs-all` (المظلة: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] يمر `npm run check:docs-all`. تُنسب إصدارات إشارات `check:deprecated-versions` الاستشارية صراحةً إلى OmniRoute (3.6.x والإصدارات الأقدم) وتتجاهل التواريخ.
 - [ ] مخارج `npm run check:env-doc-sync` 0 رمز — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env العقد سليم
 - [ ] `npm run check:doc-links` يخرج 0 — لا توجد مراجع تخفيض أسعار داخلية مكسورة بعد إعادة الهيكلة
 - [ ] تمت مراجعة `docs/architecture/ARCHITECTURE.md` لـ storage/runtime Drift
@@ -165,7 +164,7 @@ npm run test:e2e           # اختياري، لكنه موصى به
 ### i18n
 
 - [ ] يخرج `npm run i18n:check` من 0 حالة ترجمة — (`.i18n-state.json`) متزامنة مع المستندات المصدر (لا توجد مصادر منجرفة في الوضع الصارم؛ يُعد تحذير وضع التحذير مقبولًا لعمليات لمس المستند في اللحظة الأخيرة، ولكن يجب أن يكون 0 قبل وضع العلامات)
-- [ ] `npm run i18n:check-ui-coverage` يخرج 0 — من كل منطقة UI عند أو فوق أرضية التغطية 80%
+- [ ] `npm run i18n:check-ui-coverage` يخرج 0 — من كل منطقة UI عند أو فوق أرضية التغطية بنسبة 80%
 - [ ] تقارير `npm run i18n:sync-ui:dry` 0 مفاتيح مفقودة في جميع اللغات المستهدفة البالغ عددها 66 (كل لغة باستثناء مصدر `en` )
 - [ ] إذا تغيرت المستندات الإنجليزية المصدر، فقم بتشغيل `npm run i18n:run` (يتطلب `OMNIROUTE_TRANSLATION_API_KEY` في `.env`) قبل وضع العلامات
 - [ ] يمكن تأجيل مساهمات الترجمة إلى الإصدار التالي إذا كانت ثانوية (المسار في CHANGELOG)
@@ -189,7 +188,7 @@ npm run test:e2e           # اختياري، لكنه موصى به
 - [ ] إذا تمت إضافة موفر جديد: المنفذ المقابل في `open-sse/executors/`
 - [ ] إذا كان التنسيق غير OpenAI: مترجم بتنسيق `open-sse/translator/`
 - [ ] الموديلات المسجلة في `open-sse/config/providerRegistry.ts`
-- [ ] اختبارات الوحدة في تصنيف مزود تغطية `tests/unit/` والتوجيه
+- [ ] اختبارات الوحدة في `tests/unit/` تغطي تصنيف مقدم الخدمة والتوجيه
 
 ### سطح المكتب (Electron)
 
@@ -276,7 +275,7 @@ npm run build:release
 إعلان الرادار ملتزم عمدا `active: false`. التنشيط هو تغيير منفصل بعد إثبات كل عنصر أدناه:
 
 - [ ] يتم دمج جميع الرادارات PRs المكدسة ويكون طرف التحرير CI باللون الأخضر
-- [ ] قم بنشر وتدخين مسارات OSS Radar مع بقاء `RADAR_ENABLED` في وضع إيقاف التشغيل بشكل افتراضي
+- [ ] قم بنشر مسارات رادار OSS وتدخينها مع بقاء `RADAR_ENABLED` في وضع إيقاف التشغيل بشكل افتراضي
 - [ ] قم بتدخين `GET /planos` و `/termos` و `/privacidade` و `/reembolso` على مضيف الرادار المسمى
 - [ ] سجل المشغل identity/contact/address والمراجعة القانونية المعتمدة من المالك في الخدمة الخاصة
 - [ ] قم بتمرين Stripe Checkout وخطاف الويب الموقع في وضع الاختبار فقط
@@ -357,7 +356,7 @@ npm run build:release
 
 ## 3.9.0 قطع LTS (تم التدرب عليه في 3.8.58)
 
-بعد v3.8.59، الإصدار التالي هو 3.9.0، ويصبح طرفه فرعين طويلي العمر: `stable/v3` (خط v3 LTS ، npm `latest`) و `develop` (v4، تم رفعه إلى 4.0.0، npm `nightly`). نموذج branch/channel والمنفذ الأمامي والتسميات موجودة بصيغة [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ؛ الخطة في [ROADMAP](../../ROADMAP.md) (المرحلة 3). يتم القطع مرة واحدة؛ 3.8.58 يتدرب على ذلك من طرف إلى طرف على شوكة، ويغلق 3.8.59 [بقائمة التحقق GO/NO-GO](./LTS_GO_NO_GO.md).
+بعد v3.8.59، الإصدار التالي هو 3.9.0، ويصبح طرفه فرعين طويلي العمر: `stable/v3` (خط v3 LTS ، npm `latest`) و `develop` (v4، تم رفعه إلى 4.0.0، npm `nightly`). نموذج branch/channel والمنفذ الأمامي والتسميات موجودة بصيغة [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ؛ الخطة في [ROADMAP](../../ROADMAP.md) (المرحلة 3). يتم القطع مرة واحدة؛ 3.8.58 يتدرب على ذلك من طرف إلى طرف على شوكة، ويغلق 3.8.59 بقائمة [مراجعة GO/NO-GO](./LTS_GO_NO_GO.md).
 
 ### التشغيل الجاف (للقراءة فقط، آمن في أي وقت)
 
@@ -399,7 +398,7 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

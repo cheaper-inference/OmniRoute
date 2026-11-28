@@ -6,12 +6,12 @@
 
 Objektiv funktionssammenligning vs populære open source AI routere.
 
-> **Metode** : Offentlige reposer revideret 2026-Q2. Versioner som anført. Indsend rettelser via PR — vi ønsker, at dette er nøjagtigt.
+> **Metodik** : Offentlige reposer revideret 2026-Q2. Versioner som anført. Indsend rettelser via PR — vi ønsker, at dette er nøjagtigt.
 
 | Feature                                                |               OmniRoute 3.8                |     LiteLLM 1.x      | OpenRouter (SaaS) |  Portnøgle  |
 | ------------------------------------------------------ | :----------------------------------------: | :------------------: | :---------------: | :---------: |
 | **Udbydere**                                           |                  **329**                   |         ~100         |        ~50        |     ~30     |
-| **Free/no-auth katalogindgange**                       |                  **155**                   |         n/a          |     gennemløb     |     n/a     |
+| **Udbydere med gratis adgang**                         |           **50 med fri adgang**            |         n/a          |     gennemløb     |     n/a     |
 | **Selvværtbar**                                        |                     ✅                     |          ✅          |        ❌         |  ⚠ betalt   |
 | **OAuth katalogindgange**                              |                   **23**                   |        delvis        |        ❌         |     ❌      |
 | **Auto-fallback-kombinationer**                        |             **22 strategier**              | prioriteringsbaseret |   tier-baseret    |   vægtet    |
@@ -38,11 +38,11 @@ Objektiv funktionssammenligning vs populære open source AI routere.
 
 ## Hvornår skal man vælge OmniRoute
 
-- Du er selvvært og ønsker** maksimal udbyderdækning** (394 udbydere, 155 free/no-auth katalogindgange)
+- Du er selvvært og ønsker** maksimal udbyderdækning** (394 udbydere, 50 med gratis adgang)
 - Du har brug for en** indbygget MCP server** (LLM værktøjer, hukommelse, færdigheder eksponeret som værktøjer)
-- Du har brug for**A2A protokol** til agent-til-agent arbejdsgange
+- Du har brug for**A2A protokol** for agent-til-agent arbejdsgange
 - Du vil have** fingeraftryk stealth** (JA3/JA4) for at undgå detektion af opstrøms CAPTCHAs
-- Du har brug for** virksomhedsfunktioner** (værgelænder, evaler, revisionsspor) uden en SaaS -regning
+- Du har brug for** virksomhedsfunktioner** (gelænder, evals, revisionsspor) uden en SaaS -regning
 
 ## Hvornår du bør vælge LiteLLM
 
@@ -56,12 +56,12 @@ Objektiv funktionssammenligning vs populære open source AI routere.
 - Du accepterer at betale pr. token med et SaaS-pristillæg
 - Du har brug for **én betalingsmetode** på tværs af alle udbydere
 
-## Hvornår du bør vælge Portkey
+## Hvornår skal du vælge Portkey
 
-- Du har brug for en **kommerciel SLA** med oppetidsgarantier
-- Du foretrækker et **administreret dashboard** uden driftsmæssigt overhead
-- Du har brug for **funktioner til virksomhedsoverholdelse** direkte fra start
+- Du har brug for en** kommerciel SLA** med oppetidsgarantier
+- Du foretrækker en** administreret dashboard** uden ops overhead
+- Du har brug for** virksomhedens overholdelse** funktioner ud af æsken
 
 ---
 
-_Senest opdateret: 2026-08-02. Indsend rettelser via PR for at holde denne tabel nøjagtig._
+_Send rettelser via PR for at holde denne tabel nøjagtig._

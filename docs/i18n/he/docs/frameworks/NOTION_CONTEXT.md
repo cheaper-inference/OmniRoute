@@ -63,42 +63,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 ‏OmniRoute שומר את האסימון ומריץ מיד חיפוש בדיקה שמחזיר תוצאה אחת; אם Notion
 מחזיר אובייקט שגיאה, האסימון נמחק והקריאה נכשלת עם `400`.
 
-## כלי MCP‏ (6)
+## MCP tools (6)
 
-מוגדרים ב־`open-sse/mcp-server/tools/notionTools.ts`. האסימון מאוחזר בזמן הקריאה
-באמצעות `getNotionToken()`; אם לא הוגדר אסימון, הכלי זורק את השגיאה
-`"אסימון האינטגרציה של Notion אינו מוגדר. הגדירו אותו תחת הגדרות > מקורות הקשר."`
+מוגדר ב- `open-sse/mcp-server/tools/notionTools.ts`. האסימון נפתר בזמן השיחה באמצעות `getNotionToken()`; אם אף אחד לא מוגדר הכלי זורק `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| כלי                          | הרשאה          | תיאור                                                                                               |
-| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | חיפוש דפים ומסדי נתונים באמצעות שאילתת טקסט (מחזיר כותרות, מזהים וכתובות URL). מחולק לעמודים.       |
-| `notion_get_page`            | `read:notion`  | קבלת התוכן והמטא־נתונים של דף לפי המזהה שלו.                                                        |
-| `notion_list_block_children` | `read:notion`  | הצגת כל בלוקי הצאצא של בלוק או דף (עץ הבלוקים). מחולק לעמודים.                                      |
-| `notion_query_database`      | `read:notion`  | ביצוע שאילתה במסד נתונים עם `filter` ו־`sorts` אופציונליים (בפורמט ה־API של Notion). מחולק לעמודים. |
-| `notion_get_database`        | `read:notion`  | קבלת הסכימה/המטא־נתונים של מסד נתונים לפי מזהה.                                                     |
-| `notion_append_blocks`       | `write:notion` | הוספת בלוקי צאצא לבלוק או לדף קיימים (עד 100 בלוקים לבקשה).                                         |
+| כְּלִי                       | תְחוּם         | תֵאוּר                                                                       |
+| ---------------------------- | -------------- | ---------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | חיפוש דפים ומסדי נתונים לפי שאילתת טקסט (מחזיר כותרות, IDs, URLs). מְעוּמָד. |
+| `notion_get_page`            | `read:notion`  | קבל תוכן ומטא נתונים של דף לפי ID שלו.                                       |
+| `notion_list_block_children` | `read:notion`  | רשום את כל ילדי החסימה של בלוק או עמוד (עץ הבלוק). מְעוּמָד.                 |
+| `notion_query_database`      | `read:notion`  | שאל מסד נתונים עם `filter` + `sorts` (פורמט Notion API אופציונלי). מְעוּמָד. |
+| `notion_get_database`        | `read:notion`  | קבל את schema/metadata של מסד נתונים על ידי ID.                              |
+| `notion_append_blocks`       | `write:notion` | הוסף ילדי בלוק לבלוק או דף קיים (מקסימום 100 בלוקים לכל בקשה).               |
 
-### פרמטרי קלט
+### קלט פרמטרים
 
-- `notion_search` —‏ `query`‏ (1–500 תווים),‏ `pageSize`‏ (1–100, ברירת המחדל היא 20),
-  ‏`startCursor` (אופציונלי).
-- `notion_get_page` —‏ `pageId` (ערך הקסדצימלי בן 32 תווים או UUID).
-- `notion_list_block_children` —‏ `blockId`,‏ `pageSize`‏ (1–100, ברירת המחדל היא 50),
-  ‏`startCursor` (אופציונלי).
-- `notion_query_database` —‏ `databaseId`,‏ `filter` (אופציונלי, בפורמט המסננים של Notion),
-  ‏`sorts` (מערך אופציונלי),‏ `pageSize`‏ (1–100, ברירת המחדל היא 50),‏ `startCursor` (אופציונלי).
-- `notion_get_database` —‏ `databaseId`.
-- `notion_append_blocks` —‏ `blockId`,‏ `children` (מערך של אובייקטי בלוקים),
-  ‏`after` (מיקום אופציונלי).
+- `notion_search` — `query` (1–500 תווים), `pageSize` (1–100, ברירת מחדל 20), `startCursor` (אופציונלי).
+- `notion_get_page` — `pageId` (32-char hex או UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1-100, ברירת מחדל 50), `startCursor` (אופציונלי).
+- `notion_query_database` — `databaseId`, `filter` (אופציונלי, פורמט מסנן Notion ), `sorts` (מערך אופציונלי), `pageSize` (1-100, ברירת מחדל 50), `startCursor` (אופציונלי).
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`, `children` (מערך של אובייקטים בלוקים), `after` (מיקום אופציונלי).
 
-### הרשאות
+### היקפים
 
-כלי הקריאה דורשים `read:notion`, וכלי הכתיבה דורש `write:notion`.
-ההרשאות נאכפות באמצעות `withScopeEnforcement()` בקובץ
-`open-sse/mcp-server/server.ts` רק כאשר `OMNIROUTE_MCP_ENFORCE_SCOPES=true`;
-ההרשאות המותרות למבצע הקריאה מגיעות מ־`OMNIROUTE_MCP_SCOPES` (מופרדות בפסיקים)
-או מהקשר ההרשאות של מפתח ה־API המאומת. למודל ההרשאות המלא ראו
-[MCP-SERVER.md](./MCP-SERVER.md).
+כלי הקריאה דורשים `read:notion` וכלי הכתיבה דורשים `write:notion`. היקפים נאכפים על ידי `withScopeEnforcement()` ב- `open-sse/mcp-server/server.ts` כאשר `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, ותמיד עבור מתקשר HTTP/SSE שמפתח API שלו חסר `manage`/`admin`; ההיקפים המותרים של המתקשר מגיעים מהקשר של `OMNIROUTE_MCP_SCOPES` (מופרד בפסיק) או מהקשר ה-scope של מפתח API המאומת. ראה [MCP-SERVER.md](./MCP-SERVER.md) למודל ההיקף המלא.
 
 ## נקודות קצה
 

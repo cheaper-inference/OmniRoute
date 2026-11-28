@@ -5,11 +5,10 @@
 ---
 
 > **Patiesības avots:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Pēdējoreiz atjaunināts:** 2026-09-22 — tvēruma nosaukumvietas norāda uz MCP-SERVER.md
 
-OmniRoute ir maršrutu apzinoša autorizācijas cauruļvads, kas aizsargā katru API pieprasījumu. Klasifikācija ir **deterministiska** un **slēgta kļūmes gadījumā** — viss, ko nevar klasificēt, nonāk kā `MANAGEMENT` un prasa sesiju vai pārvaldības līmeņa pilnvaru. Šī lapa izskaidro modeli inženieriem, kas uztur maršrutus vai izstrādā jaunus galapunktus.
+OmniRoute ir maršruta autorizācijas cauruļvads, kas nodrošina katru API pieprasījumu. Klasifikācija ir** deterministisks** un** atteices aizvērts** — viss, ko nevar klasificēt, nonāk kā `MANAGEMENT` un pieprasa sesijas vai pārvaldības līmeņa pilnvaru. Šajā lapā ir izskaidrots modelis inženieriem, kuri uztur maršrutus vai izstrādā jaunus galapunktus.
 
-![Autorizācijas cauruļvads (3 maršrutu klases + politikas novērtēšana)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Avots: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -186,7 +185,7 @@ Katrai maršruta klasei ir `src/server/authz/policies/` politika:
 
 - **`publicPolicy`** (`policies/public.ts`) — vienmēr atgriež `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — izvilkumi nesējs, apstiprina, izmantojot `validateApiKey()`. Tiek uzskatīts par anonīmu tikai tad, ja ir atspējots efektīvais `REQUIRE_API_KEY` līdzekļa karodziņš. Efektīvais karodziņš tiek atrisināts, izmantojot `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), tāpēc informācijas paneļa līdzekļu karogi un vides mainīgie konsekventi pārvalda `/api/v1/*`, `/api/v1beta/*` un aizstājvārdus; atrisinātāja kļūmes neizdodas aizvērtas. Ļauj informācijas paneļa sesiju pieprasījumus klienta API maršrutos (tostarp `/api/v1/models`, ko izmanto informācijas paneļa modeļu katalogā). Kad Entra ID SSO ir iespējots, nesēju, kas strukturāli ir Entra marķieris (trīs base64url segmenti, `RS*` alg, `kid`), apstrādā SSO filiāle.** pirms tam** `validateApiKey()` un tā spriedums ir galīgs — tas nekad neietilpst API atslēgas ceļā vai atzarojumā no degradācijas uz anonīmu, tāpēc identitātes nodrošinātāja darbības pārtraukums nevar kļūt par atvērtu piekļuvi. Statiskie API taustiņi netiek ietekmēti. Skatiet sadaļu [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — pieņem informācijas paneļa sesiju, iekšējā modeļa sinhronizācijas pieprasījumus (saskaņo ar `/api/providers/[name]/(sync-models|models)`) vai pilnībā izlaiž, ja `isAuthRequired()` atgriež false. Atgriež 403 (`AUTH_001`), ja uzrādītāja marķieris ir, bet nederīgs, pretējā gadījumā atgriež 401. Ievieš arī maršruta apsardzes līmeņus (LOCAL_ONLY / ALWAYS_PROTECTED) pirms jebkuras autentifikācijas filiāles — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY ceļiem `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (šodien: `/api/mcp/`) var piekļūt no atpakaļcilpas, ja nesēja atslēga nes `manage` tvērumu; visi pārējie LOCAL_ONLY ceļi paliek stingras cilpas neatkarīgi no darbības jomas.
+- **`managementPolicy`** (`policies/management.ts`) — pieņem informācijas paneļa sesiju, iekšējā modeļa sinhronizācijas pieprasījumus (saskaņo ar `/api/providers/[name]/(sync-models|models)`) vai pilnībā izlaiž, ja `isAuthRequired()` atgriež false. Atgriež 403 (`AUTH_001`), ja uzrādītāja marķieris ir, bet nederīgs, pretējā gadījumā atgriež 401. Ievieš arī maršruta apsardzes līmeņus (LOCAL_ONLY / ALWAYS_PROTECTED) pirms jebkuras autentifikācijas filiāles — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY ceļiem `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (šodien: `/api/mcp/`) var piekļūt no atpakaļcilpas, ja nesēja atslēga satur `manage`/`admin` tvērumu vai šauru `mcp:connect` tvērumu (`hasMcpConnectOrManageScope`), vai ar autentificētu informācijas paneļa sesiju; visi pārējie LOCAL_ONLY ceļi paliek stingras cilpas neatkarīgi no darbības jomas.
 
 Veiksmīga politika atgriež `AuthSubject` ar `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Pakārtotie apstrādātāji var to nolasīt, izmantojot `assertAuth(request, "CLIENT_API")` programmā `src/server/authz/assertAuth.ts` nevis atkārtoti palaist autentifikācijas loģiku.
 
@@ -232,7 +231,7 @@ PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Tikai lasāmie maršruti ir publiski** tikai** par drošām metodēm. Piezīme: `classifyRoute()` izslēdz `/api/v1/*` un `/api/v1beta/*` no PUBLIC fall-through — tie vienmēr ir `CLIENT_API` tāpēc joprojām tiek piemērota uzrādītāja atslēgas politika.
+Tikai lasāmi maršruti ir publiski** tikai** par drošām metodēm. Piezīme: `classifyRoute()` izslēdz `/api/v1/*` un `/api/v1beta/*` no PUBLIC fall-through — tie vienmēr ir `CLIENT_API` tāpēc joprojām tiek piemērota uzrādītāja atslēgas politika.
 
 ## Jauna maršruta pievienošana
 
@@ -279,33 +278,22 @@ Izvēlieties kopu pēc struktūras, nevis ērtības. Viens maršruts jāievieto 
 
 ## Darbības jomas
 
-Trīs nosaukumvietas. Katrs pārbaudītājs lasa tikai savas virknes. Salīdzinājums,
-tostarp tas, kāpēc `manage` neiztur `scopeMatches` pārbaudi attiecībā uz `read:compression` un kāpēc `read` piekļuves marķieris nevar `PATCH /api/keys/{id}`, ir
-[Trīs darbības jomu nosaukumvietas](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Trīs nosaukumvietas. Katrs pārbaudītājs nolasa tikai savas virknes. Blakus, tostarp to, kāpēc `manage` neizdodas `scopeMatches` `read:compression` un kāpēc `read` piekļuves pilnvara nevar `PATCH /api/keys/{id}`, ir [trīs tvēruma nosaukumvietas](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API atslēgas satur `scopes` masīvu (saglabāts kā JSON failā `api_keys.scopes`, skatīt `src/lib/db/apiKeys.ts`).
+API taustiņiem ir `scopes` masīvs (saglabāts kā JSON mapē `api_keys.scopes`, skatiet `src/lib/db/apiKeys.ts`).
 
-### Pārvaldības darbības joma
+### Pārvaldības joma
 
-- `manage` / `admin` — `hasManageScope`. Nesēja piekļuve pārvaldības API maršrutiem.
-- `mcp:connect`, `self:usage`, `self:account-quota` un
-  `policy:bypass-provider-quota` ir aditīvas precīzas atbilstības darbības jomas. Tās atrodas ārpus `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` atver tikai
-  `/api/mcp/` bezcilpas izgriezumu.
+- `manage` / `admin` — `hasManageScope`. Nesēja piekļuve vadības API maršrutiem.
+- `mcp:connect`, `self:usage`, `self:account-quota` un `policy:bypass-provider-quota` ir aditīvi precīzas atbilstības tvērumi. Viņi sēž ārpus `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` atver tikai `/api/mcp/` bezcilpas izgriezumu.
 
-### MCP rīku darbības jomas
+### MCP instrumentu tēmekļi
 
-Katalogs un atbilstības noteikumi (identiska virkne vai piešķirta darbības joma, kas beidzas ar `*`):
-[MCP rīku darbības jomas](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` failā `src/shared/constants/mcpScopes.ts` ir oriģinālā tipizētā
-apakškopa, nevis pilns katalogs. Izpilde notiek
-`open-sse/mcp-server/scopeEnforcement.ts` pēc tam, kad `resolveCallerScopeContext()` atrisina darbības jomas no MCP autentifikācijas informācijas, pieprasījuma metadatiem vai `OMNIROUTE_MCP_SCOPES`.
-Tā paliek izslēgta, ja vien `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Katalogs un atbilstības noteikumi (identiska virkne vai piešķirts tvērums, kas beidzas ar `*`): [MCP rīku tvērumi](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` `src/shared/constants/mcpScopes.ts` ir sākotnējā drukātā apakškopa, nevis pilns katalogs. Izpilde tiek izpildīta `open-sse/mcp-server/scopeEnforcement.ts` pēc tam, kad `resolveCallerScopeContext()` atrisina tvērumus no MCP auth info, pieprasījuma metadatiem vai `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` to ieslēdz globāli (noklusējuma `false`), taču tas vienmēr tiek izpildīts HTTP/SSE zvanītājam, kura API taustiņā nav `manage`/`admin` (skatiet `shouldForceScopeEnforcement()` `open-sse/mcp-server/scopeEnforcement.ts`), neatkarīgi no karoga.
 
-### Piekļuves marķiera darbības jomas
+### Piekļuves pilnvaru tvērumi
 
-`read` / `write` / `admin` uz `oma_live_…` marķieriem, ranžēti pēc `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Šis rangs attiecas tikai uz piekļuves marķiera
-akreditācijas datiem. Skatīt [Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` uz `oma_live_…` marķieriem, ranžēts pēc `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Šis rangs attiecas tikai uz piekļuves pilnvaras akreditācijas datiem. Skatiet [sadaļu Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md).
 
 ## Nepieciešama autentifikācija
 

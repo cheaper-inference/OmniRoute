@@ -15,95 +15,88 @@ UI/UX, i18n, CLI, database, සහ build/deploy වෙනස්කම් ඒව�
 
 ## සංවර්ධන සැකසුම
 
-### පූර්ව අවශ්යතා
+### පූර්වාවශ්යතාවයන්
 
 - **Node.js** `>=22.22.2 <23`, හෝ `>=24.0.0 <27` (නිර්දේශිත: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Node 24 සහිත Windows:** වත්මන් 24 LTS patch නිකුතුව භාවිත කරන්න (අවම වශයෙන් 24.20.0).
-> පැරණි නිකුතු මඟින් `--test-force-exit` ක්රියාවලිය වසා දැමූ පසු සාර්ථක පරීක්ෂණවලින් අනතුරුව
-> ක්රියාවලිය අසාමාන්ය ලෙස අවසන් විය හැක. Node හි [Windows libuv fix](https://github.com/nodejs/node/pull/61999) මඟින්
-> මෙම runtime බිඳවැටීම විසඳයි; පරීක්ෂණ assertions සහ runner exit checks සක්රීයව තබන්න.
+> **Node 24 සමඟ Windows :** වත්මන් 24 LTS පැච් නිකුතුව භාවිතා කරන්න (අවම වශයෙන් 24.20.0). `--test-force-exit` ක්‍රියාවලිය වසා දැමූ විට සාර්ථක පරීක්‍ෂණවලින් පසු පෙර නිකුත් කිරීම් නවතා දැමිය හැක. Node හි [Windows libuv නිවැරදි කිරීම](https://github.com/nodejs/node/pull/61999) මෙම ධාවන කාල බිඳවැටීම ආමන්ත්‍රණය කරයි; පරීක්ෂණ ප්‍රකාශයන් සහ ධාවන පිටවීමේ චෙක්පත් සක්‍රීය කර තබා ගන්න.
 
-> **npm v11+ පරිශීලකයන් (Node 24+):** `npm install` පසුව, native modules ස්ථාපනය වී ඇති බව තහවුරු කරන්න:
-> `node -e "require('better-sqlite3')"`. එය `MODULE_NOT_FOUND` සමඟ අසාර්ථක වන්නේ නම්,
-> `npm approve-scripts better-sqlite3 && npm install` ධාවනය කරන්න. [ගැටලු නිරාකරණය](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) බලන්න.
+> **npm v11 + භාවිතා කරන්නන් (Node 24 +):** `npm install` පසුව, දේශීය මොඩියුල ස්ථාපනය කර ඇති බව තහවුරු කරන්න: `node -e "require('better-sqlite3')"`. එය `MODULE_NOT_FOUND` සමඟ අසමත් වුවහොත්, `npm approve-scripts better-sqlite3 && npm install` ධාවනය කරන්න. [දෝශ නිරාකරණය](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) බලන්න.
 
 - **Git**
 
-### ක්ලෝන කිරීම සහ ස්ථාපනය
+### ක්ලෝන කර ස්ථාපනය කරන්න
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### පරිසර විචල්ය
+### පාරිසරික විචල්යයන්
 
 ```bash
-# අච්චුවෙන් ඔබේ .env සාදන්න
+# Create your .env from the template
 cp .env.example .env
 
-# අවශ්ය secrets ජනනය කරන්න
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-සංවර්ධනය සඳහා ප්රධාන විචල්ය:
+සංවර්ධනය සඳහා ප්රධාන විචල්යයන්:
 
-| විචල්යය                | සංවර්ධන පෙරනිමිය         | විස්තරය                  |
-| ---------------------- | ------------------------ | ------------------------ |
-| `PORT`                 | `20128`                  | සේවාදායක port            |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | frontend සඳහා මූලික URL  |
-| `JWT_SECRET`           | (ඉහත ජනනය කරන්න)         | JWT අත්සන් කිරීමේ secret |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | පළමු login මුරපදය        |
-| `APP_LOG_LEVEL`        | `info`                   | Log විස්තරාත්මක මට්ටම    |
+| විචල්ය                 | සංවර්ධන පෙරනිමිය         | විස්තරය               |
+| ---------------------- | ------------------------ | --------------------- |
+| `PORT`                 | `20128`                  | සේවාදායක වරාය         |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ඉදිරිපස සඳහා URL පදනම |
+| `JWT_SECRET`           | (ඉහත උත්පාදනය කරන්න)     | JWT අත්සන් කිරීමේ රහස |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | පළමු පිවිසුම් මුරපදය  |
+| `APP_LOG_LEVEL`        | `info`                   | ලොග් වාචික මට්ටම      |
 
-### Dashboard සැකසුම්
+### උපකරණ පුවරු සැකසීම්
 
-Dashboard මඟින් පරිසර විචල්ය හරහාද සැකසිය හැකි විශේෂාංග සඳහා UI toggle සපයයි:
+පරිසර විචල්‍යයන් හරහා වින්‍යාසගත කළ හැකි විශේෂාංග සඳහා උපකරණ පුවරුව UI ටොගල් සපයයි:
 
-| සැකසුම් ස්ථානය      | Toggle             | විස්තරය                              |
-| ------------------- | ------------------ | ------------------------------------ |
-| Settings → Advanced | Debug Mode         | Debug request logs සක්රීය කරන්න (UI) |
-| Settings → General  | Sidebar Visibility | Sidebar කොටස් පෙන්වන්න/සඟවන්න        |
+| ස්ථානය සැකසීම     | ටොගල් කරන්න           | විස්තරය                                |
+| ----------------- | --------------------- | -------------------------------------- |
+| සැකසීම් → උසස්    | නිදොස් කිරීමේ මාදිලිය | දෝශ නිරාකරණ ඉල්ලීම් ලොග සබල කරන්න (UI) |
+| සැකසුම් → සාමාන්ය | පැති තීරු දෘශ්‍යතාව   | Show/hide පැති තීරු කොටස්              |
 
-මෙම සැකසුම් database තුළ ගබඩා වන අතර restart කිරීමෙන් පසුවද පවතී. සැකසූ විට, ඒවා env var පෙරනිමි අගයන් අභිබවා යයි.
+මෙම සිටුවම් දත්ත සමුදායේ ගබඩා කර ඇති අතර නැවත ආරම්භ කිරීම් හරහා පවතිනු ඇත, සැකසූ විට env var පෙරනිමිය ඉක්මවා යයි.
 
-### දේශීයව ධාවනය කිරීම
+### දේශීයව ධාවනය
 
 ```bash
-# සංවර්ධන මාදිලිය (hot reload)
+# Development mode (hot reload)
 npm run dev
 
 # Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# දායකයන්ගේ වෙනස්කම් සඳහා වේගවත් backend/API-only compile කිරීම
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Release build (පිරිසිදු rebuild + HEAD sentinel — deploy සඳහා අවශ්ය)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# සාමාන්ය port configuration
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-දායකයන්ගේ build මඟින් compile-only වලංගුකරණය සිදු කරයි: එය standalone
-distribution එක assemble කිරීම හෝ විකල්ප native packaging assets build කිරීම සිදු නොකරයි.
-deploy කළ හැකි bundle එක වලංගු කිරීමට අවශ්ය විට සාමාන්ය production build භාවිත කරන්න.
+දායක ගොඩ නැගීම සම්පාදනය-පමණක් වලංගු කිරීම සිදු කරයි: එය ස්වාධීන බෙදාහැරීම එකලස් නොකරයි හෝ විකල්ප දේශීය ඇසුරුම් වත්කම් ගොඩනඟන්නේ නැත. ඔබට නැව්ගත කළ හැකි බණ්ඩලය වලංගු කිරීමට අවශ්‍ය විට නිත්‍ය නිෂ්පාදන ගොඩනැගීම භාවිතා කරන්න.
 
-### Build ප්රතිදාන සැලැස්ම
+### නිමැවුම් පිරිසැලසුම සාදන්න
 
-| නාමාවලිය  | අන්තර්ගතය                                                                 | Tracked |
-| --------- | ------------------------------------------------------------------------- | ------- |
-| `src/`    | Application source (TypeScript / TSX)                                     | Yes     |
-| `.build/` | Intermediates — `next build` output (gitignored, `distDir = .build/next`) | No      |
-| `dist/`   | Shippable bundle — assembled by `assembleStandalone` (gitignored)         | No      |
+| නාමාවලිය  | අන්තර්ගතය                                                                     | ලුහුබැඳ ගියේය |
+| --------- | ----------------------------------------------------------------------------- | ------------- |
+| `src/`    | යෙදුම් මූලාශ්රය (TypeScript / TSX)                                            | ඔව්           |
+| `.build/` | අතරමැදි — `next build` ප්‍රතිදානය (gitignored, `distDir = .build/next`)       | නැත           |
+| `dist/`   | `assembleStandalone` මගින් එකලස් කරන ලද නැව්ගත කළ හැකි — මිටියක් (ගිටිනොර්ඩ්) | නැත           |
 
-Build pipeline එක එක් පියවරකින් සමන්විත වේ:
+ගොඩනැගීමේ නල මාර්ගය තනි පාස් එකකි:
 
 ```
 npm run build
@@ -112,22 +105,15 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` මඟින් පළමුව නාමාවලි දෙකම පිරිසිදු කර, deploy integrity sentinel එකක් ලෙස
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ලියයි.
+`npm run build:release` අතිරේකව මුලින්ම නාමාවලි දෙකම පිරිසිදු කරන අතර `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) යෙදවුම් අඛණ්ඩතා සෙන්ටිනල් ලෙස ලියයි.
 
-`npm run build:contributor` backend-only build profile එක භාවිත කරයි. එය build කරන අතරතුර
-dashboard UI files තාවකාලිකව stub කර, API route handlers තබාගෙන, build එකෙන් පසුව
-මුල් files ප්රතිස්ථාපනය කරයි. Dashboard UI වෙත බලපාන වෙනස්කම් සඳහා හෝ සම්පූර්ණ
-release validation සඳහා `npm run build` භාවිත කරන්න; contributor profile එක release build එකට
-ආදේශකයක් නොවේ.
+`npm run build:contributor` පසුබිම්-පමණක් ගොඩනැගීමේ පැතිකඩ භාවිතා කරයි. එය තනන අතරතුර උපකරණ පුවරුව UI ගොනු තාවකාලිකව stubs කරයි, API මාර්ග හසුරුවන්නා තබා ගනී, සහ ගොඩනැගීමෙන් පසු මුල් ගොනු ප්‍රතිසාධනය කරයි. උපකරණ පුවරුව UI බලපාන වෙනස්කම් සඳහා හෝ සම්පූර්ණ නිකුතුව වලංගු කිරීම සඳහා `npm run build` භාවිතා කරන්න; දායක පැතිකඩ නිකුතු ගොඩනැගීම සඳහා ආදේශකයක් නොවේ.
 
-> **VPS deploy සටහන:** remote image directory `/usr/lib/node_modules/omniroute/app/`
-> වෙනස් නොවේ. Deploy skills මඟින් `dist/` හි අන්තර්ගතය එයට rsync කරයි.
-> වෙනස් වී ඇත්තේ repository තුළ ඇති build output path එක පමණි (`app/` → `dist/`).
+> **VPS යෙදවීමේ සටහන:** දුරස්ථ රූප නාමාවලිය `/usr/lib/node_modules/omniroute/app/` නොවෙනස්ව ඇත. යෙදවීමේ කුසලතා `dist/` හි අන්තර්ගතය එයට සමමුහුර්ත කරයි. ඉන්-රෙපෝ ගොඩනැගීමේ ප්‍රතිදාන මාර්ගය පමණක් ගෙන යන ලදී (`app/` → `dist/`).
 
 පෙරනිමි URLs:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **උපකරණ පුවරුව** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -435,8 +421,8 @@ VPS යෙදවීම් සඳහා, `npm run build` වෙනුවට `npm 
 
 ## උපකාර ලබා ගැනීම
 
-- **ගෘහ නිර්මාණ ශිල්පය**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) බලන්න
-- **API යොමුව**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) බලන්න
-- **ආරක්ෂක ලේඛන**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **මෙහෙයුම් ලේඛන**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **ගැටලු**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **ගෘහ නිර්මාණ ශිල්පය** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) බලන්න
+- **API යොමුව** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) බලන්න
+- **ආරක්ෂක ලේඛන** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops ලේඛන** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **ගැටළු** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

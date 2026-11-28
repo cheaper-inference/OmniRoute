@@ -49,7 +49,7 @@ Katra izvietotā instance piedāvā savu specifikācijas kopiju vietnē `/openap
 
 ---
 
-## Tērzēšanas pabeigšanas
+## Tērzēšanas pabeigšana
 
 ```bash
 POST /v1/chat/completions
@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Pielāgotas galvenes
 
-| Header                   | Direction | Description                                                                                                                                                                                                                                  |
-| ------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Request   | Iestatiet uz `true`, lai apietu kešatmiņu                                                                                                                                                                                                    |
-| `x-omniroute-no-memory`  | Request   | Iestatiet uz `true`, lai šim pieprasījumam izlaistu atmiņas un prasmju ievietošanu (atspoguļo no-cache; novērš katra izsaukuma marķieru/izmaksu pieskaitījumu)                                                                               |
-| `X-OmniRoute-Progress`   | Request   | Iestatiet uz `true`, lai aktivizētu norises notikumus                                                                                                                                                                                        |
-| `X-Session-Id`           | Request   | Noturīgas sesijas atslēga ārējai sesijas piesaistes nodrošināšanai                                                                                                                                                                           |
-| `x_session_id`           | Request   | Tiek pieņemts arī variants ar pasvītrojumu (tiešajam HTTP)                                                                                                                                                                                   |
-| `X-OmniRoute-Session-Id` | Request   | Izsaucēja nodrošināta sesijas/sarunas atzīme (tiek izmantota arī atmiņā). Ja tā ir norādīta, tā tiek saglabāta `call_logs.session_tag` nemainītā veidā sesijas izmaksu attiecināšanai (#8249) — ja tā nav norādīta, tā nekad netiek ģenerēta |
-| `Idempotency-Key`        | Request   | Dublēšanas novēršanas atslēga (5 sekunžu logs)                                                                                                                                                                                               |
-| `X-Request-Id`           | Request   | Alternatīva dublēšanas novēršanas atslēga                                                                                                                                                                                                    |
-| `x-omniroute-connection` | Request   | Piesaista viena modeļa pieprasījumu vienam nodrošinātāja savienojumam (kontam) pēc tā ID — skatiet [Konta piesaiste katram pieprasījumam](#account-pinning-per-request)                                                                      |
-| `X-OmniRoute-Cache`      | Response  | `HIT` vai `MISS` (ne straumēšanas režīmā)                                                                                                                                                                                                    |
-| `X-OmniRoute-Idempotent` | Response  | `true`, ja dublēšana ir novērsta                                                                                                                                                                                                             |
-| `X-OmniRoute-Progress`   | Response  | `enabled`, ja norises izsekošana ir aktivizēta                                                                                                                                                                                               |
-| `X-OmniRoute-Session-Id` | Response  | Efektīvais sesijas ID, ko izmanto OmniRoute                                                                                                                                                                                                  |
-| `X-OmniRoute-Request-Id` | Response  | Pieprasījuma korelācijas ID (ja zināms)                                                                                                                                                                                                      |
-| `X-OmniRoute-Version`    | Response  | OmniRoute būvējuma versija (vienmēr ir pieejama)                                                                                                                                                                                             |
-| `X-OmniRoute-Cost-Saved` | Response  | USD summa, ko kešatmiņa ietaupīja `HIT` gadījumā (tikai kešatmiņas trāpījumiem)                                                                                                                                                              |
-| `X-OmniRoute-Decision`   | Response  | Maršrutēšanas izsekojums: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` ir kombinētā stratēģija vai `single` pieprasījumam, kas nav kombinēts) — vienmēr ir pieejams pabeigšanas atbildēs                                    |
+| Virsraksts               | Virziens  | Apraksts                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Pieprasīt | Iestatiet uz `true`, lai apietu kešatmiņu                                                                                                                                                                                                                                                                                                                                                                     |
+| `x-omniroute-no-memory`  | Pieprasīt | Iestatiet uz `true`, lai izlaistu atmiņas + prasmju ievadīšanu šim pieprasījumam (atspoguļo bez kešatmiņas; izvairās no katra zvana token/cost pieskaitāmās izmaksas)                                                                                                                                                                                                                                         |
+| `x-omniroute-no-log`     | Pieprasīt | Iestatiet uz `true`, lai šim secinājumu pieprasījumam izlaistu request/response lietderīgās slodzes zvanu žurnālos (visi tērzēšanas ģimenes maršruti: tērzēšanas pabeigšanas, atbildes, ziņojumi, pabeigšanas, Gemini). Laikspiedols, modelis, statuss, ilgums un marķieru skaits joprojām tiek reģistrēts. Apvienojiet ar `x-omniroute-no-memory` un `x-omniroute-no-cache`, lai pilnībā atteiktos no satura |
+| `X-OmniRoute-Progress`   | Pieprasīt | Iestatiet uz `true` progresa notikumiem                                                                                                                                                                                                                                                                                                                                                                       |
+| `X-Session-Id`           | Pieprasīt | Lipīga sesijas atslēga ārējai sesijas radniecībai                                                                                                                                                                                                                                                                                                                                                             |
+| `x_session_id`           | Pieprasīt | Pasvītras variants arī pieņemts (tiešais HTTP)                                                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Session-Id` | Pieprasīt | Zvanītāja nodrošināts session/conversation tags (arī baro atmiņu). Ja ir, saglabājās burtiski uz `call_logs.session_tag` sesijas izmaksu attiecinājumam (#8249) — nekad netika sintezēts prombūtnes laikā                                                                                                                                                                                                     |
+| `Idempotency-Key`        | Pieprasīt | Atcelšanas atslēga (5 s logs)                                                                                                                                                                                                                                                                                                                                                                                 |
+| `X-Request-Id`           | Pieprasīt | Alternatīva dedup atslēga                                                                                                                                                                                                                                                                                                                                                                                     |
+| `x-omniroute-connection` | Pieprasīt | Viena modeļa pieprasījumu piespraust vienam pakalpojumu sniedzēja savienojumam (kontam) pēc tā id — skatiet [sadaļu Konta piespraušana katram pieprasījumam](#account-pinning-per-request)                                                                                                                                                                                                                    |
+| `X-OmniRoute-Cache`      | Atbilde   | `HIT` vai `MISS` (nav straumēšanas)                                                                                                                                                                                                                                                                                                                                                                           |
+| `X-OmniRoute-Idempotent` | Atbilde   | `true` ja tiek dedublēts                                                                                                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Progress`   | Atbilde   | `enabled` ja ir ieslēgta progresa izsekošana                                                                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Session-Id` | Atbilde   | Efektīvā sesija ID ko izmanto OmniRoute                                                                                                                                                                                                                                                                                                                                                                       |
+| `X-OmniRoute-Request-Id` | Atbilde   | Pieprasīt korelācijas ID (ja zināms)                                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Version`    | Atbilde   | OmniRoute build versija (vienmēr klāt)                                                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Cost-Saved` | Atbilde   | USD no kešatmiņas izvairīties HIT (tikai kešatmiņas trāpījumi)                                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Decision`   | Atbilde   | Maršrutēšanas izsekošana: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` ir kombinētā stratēģija vai `single` pieprasījumam, kas nav kombinēts) — vienmēr ir redzams pēc pabeigšanas atbildēm                                                                                                                                                                                                  |
 
-> Nginx piezīme: ja izmantojat galvenes ar pasvītrojumiem (piemēram, `x_session_id`), iespējojiet `underscores_in_headers on;`.
+> Nginx piezīme: ja paļaujaties uz pasvītrojuma galvenēm (piemēram `x_session_id`), iespējojiet `underscores_in_headers on;`.
 
-#### Konta piesaiste katram pieprasījumam
+#### Konta piespraušana pēc pieprasījuma
 
-Ja nodrošinātājam ir vairāki savienojumi (konti vai atslēgas), OmniRoute parasti izvēlas vienu,
-izmantojot sava konta atlases stratēģiju. Tā vietā pieprasījums var piesaistīt vienu konkrētu savienojumu,
-izmantojot galveni `x-omniroute-connection`:
+Ja pakalpojumu sniedzējam ir vairāki savienojumi (konti vai atslēgas), OmniRoute parasti izvēlas vienu, izmantojot savu kontu atlases stratēģiju. Tā vietā pieprasījums var piespraust vienu konkrētu savienojumu ar `x-omniroute-connection` galveni:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,16 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Kur atrast ID.** Atveriet pakalpojumu sniedzēja lapu informācijas panelī
-  (**Informācijas panelis → Pakalpojumu sniedzēji → <provider>**) un savienojuma rindā noklikšķiniet uz `xxxxxxxx…` ID elementa — tas nokopēs pilno savienojuma ID.
-- **Kuri pieprasījumi to ievēro.** Viena modeļa pieprasījumi (`provider/model`) uz
-  `/v1/chat/completions`, `/v1/messages` un `/v1/responses`. Kombinācijas galveni ignorē: piesaistiet kontu katram kombinācijas solim, izmantojot paša soļa savienojumu.
-- **Piesaistīšana ir obligāta, nevis tikai ieteikums.** Piesaistītais savienojums tiek izmantots tikai un vienīgi. Kļūme pieprasījuma laikā reģistrē konta dīkstāves periodu, bet **nepārslēdzas** uz citu tā paša pakalpojumu sniedzēja kontu.
-- **Dīkstāves periods un kvota atceļ piesaisti.** Kamēr piesaistītais savienojums atrodas dīkstāves periodā, ir izsmēlis kvotu vai kvotas politika to bloķē, nākamie pieprasījumi tiek novirzīti uz citiem pakalpojumu sniedzēja savienojumiem — tieši tāpat kā nepiesaistītas datplūsmas gadījumā.
-- **Nezināmi vai atspējoti ID izraisa kļūmi.** ID, kas neatrodas pakalpojumu sniedzēja aktīvajā kopā (ir dzēsts, deaktivizēts vai pieder citam pakalpojumu sniedzējam), neatstāj nevienu piemērotu kontu, tāpēc pieprasījums neizdodas, nevis tiek nemanāmi novirzīts citur.
+- **Kur atrast ID.** Informācijas panelī atveriet pakalpojumu sniedzēja lapu (** Informācijas panelis → Providers → <provider>** ) un savienojuma rindā noklikšķiniet uz `xxxxxxxx…` id mikroshēmas, — tas kopē pilnu savienojuma ID.
+- **Kuri pieprasījumi to ievēro.** Viena modeļa pieprasījumi (`provider/model`) `/v1/chat/completions`, `/v1/messages` un `/v1/responses`. Kombinācijas ignorē galveni: tā vietā piespraudiet kontu katrai kombinētajai darbībai, izmantojot pašas darbības savienojumu.
+- **Piespraude ir stingra, nevis priekšroka.** Piespraustais savienojums tiek izmantots tikai. Pieprasījuma kļūme reģistrē konta atdzišanu, taču tā notiek** nē** pāriet uz tā paša pakalpojumu sniedzēja brāļa un māsas kontu.
+- **Atdzesēšana un kvota atlaidiet spraudīti.** Kamēr piespraustais savienojums atdziest, ir izsmelts vai bloķēts kvotu politikas dēļ, vēlāki pieprasījumi tiek nosūtīti citiem pakalpojumu sniedzēja savienojumiem, tieši tāpat kā nepiespraustā datplūsma.
+- **Nezināmi vai atspējoti ID neizdodas.** ID, kas nav pakalpojumu sniedzēja aktīvajā pūlā (izdzēsts, deaktivizēts vai pieder citam pakalpojumu sniedzējam), neatstāj piemērotu kontu, tāpēc pieprasījums neizdodas, tā vietā, lai klusi novirzītu citur.
 
-Claude Code nosūta pielāgotās galvenes, izmantojot `ANTHROPIC_CUSTOM_HEADERS`. Ievietojiet to
-`~/.claude/settings.json` blokā `env` vai projekta līmeņa failā `.claude/settings.json`, lai katram projektam piesaistītu citu kontu:
+Claude kods nosūta pielāgotas galvenes, izmantojot `ANTHROPIC_CUSTOM_HEADERS`. Ievietojiet to `env` blokā `~/.claude/settings.json` vai projekta līmeņa `.claude/settings.json`, lai katram projektam piespraustu citu kontu:
 
 ```jsonc
 {
@@ -124,12 +120,11 @@ Claude Code nosūta pielāgotās galvenes, izmantojot `ANTHROPIC_CUSTOM_HEADERS`
 }
 ```
 
-Avots: `src/sse/handlers/chat.ts` (galvenes nolasīšana), `src/sse/services/auth.ts` un
-`src/sse/services/sessionAffinityPin.ts` (piesaistes atbrīvošana un pārbaude, vai savienojums trūkst kopā).
+Avots: `src/sse/handlers/chat.ts` (galvenes nolasīšana), `src/sse/services/auth.ts` un `src/sse/services/sessionAffinityPin.ts` (tapas atbrīvošana un trūkstošo no baseina pārbaude).
 
-> **Izmaksu telemetrijas galvenes:** sekmīgas atbildes bez straumēšanas ietver arī `X-OmniRoute-*` izmaksu telemetrijas kopu — `X-OmniRoute-Response-Cost` (USD, fiksētas 10 zīmes aiz komata; `0.0000000000` bezmaksas vai nenovērtētam pieprasījumam), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` un `X-OmniRoute-Fallback-Attempts` (tikai tad, ja vērtība ir > 0), kā arī `X-OmniRoute-Request-Id` un `X-OmniRoute-Version`. Tās tiek izvadītas tērzēšanas pabeigšanas pieprasījumos, `/v1/responses`, `/v1/messages` un **multivides galapunktos** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` un `/v1/moderations` (vienmēr ar izmaksām `0`). Multivides izmaksas tiek aprēķinātas atbilstoši modalitātei (par attēlu, sekundi, rakstzīmi vai meklēšanas vienību), ja ir pieejama cenu informācija; pretējā gadījumā tās ir `0` (fail-open).
+> **Izmaksu telemetrijas galvenes:** nestraumēšanas veiksmīgās atbildes ietver arī `X-OmniRoute-*` izmaksu un telemetrijas kopu — `X-OmniRoute-Response-Cost` (USD, fiksētas 10 zīmes aiz komata; `0.0000000000` — free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` un > ), `X-OmniRoute-Request-Id` `X-OmniRoute-Fallback-Attempts` `X-OmniRoute-Version` Tos izstaro tērzēšanas pabeigšana, `/v1/responses`, `/v1/messages`,** un mediju galapunktiem** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` un `/v1/moderations` (vienmēr maksā `0`). Multivides izmaksas tiek aprēķinātas atkarībā no modalitātes (par attēlu, sekundē, par rakstzīmi, par vienu meklēšanas vienību), ja ir pieejama cena, pretējā gadījumā `0` (neatteices).
 
-> **Kešatmiņas trāpījuma izmaksu semantika:** semantiskās kešatmiņas trāpījuma gadījumā (`X-OmniRoute-Cache-Hit: true`) netiek veikts augšupējs izsaukums, tāpēc `X-OmniRoute-Response-Cost` vērtība ir `0.0000000000` (trāpījuma apkalpošanas **inkrementālās** izmaksas). Sākotnējās vai paredzamās izmaksas tiek norādītas atsevišķi laukā `X-OmniRoute-Cost-Saved`. Norēķinu patērētājiem jāsumē `X-OmniRoute-Response-Cost` (trāpījumi neko nemaksā); kešatmiņas analītikā var apkopot `X-OmniRoute-Cost-Saved`.
+> **Kešatmiņas trāpījumu izmaksu semantika:** semantiskajā kešatmiņā HIT (`X-OmniRoute-Cache-Hit: true`) netiek veikts augšējais izsaukums, tāpēc `X-OmniRoute-Response-Cost` ir `0.0000000000` (** pakāpeniski** trāpījuma apkalpošanas izmaksas). original/would-have-been izmaksas tiek norādītas atsevišķi `X-OmniRoute-Cost-Saved`. Norēķinu patērētājiem ir jāaprēķina `X-OmniRoute-Response-Cost` (trāpījumi neko nemaksā); kešatmiņas analītika var apkopot `X-OmniRoute-Cost-Saved`.
 
 ## Ekskluzīvas pārvaldītu sesiju nomas
 
@@ -343,6 +338,8 @@ Pieejamie pakalpojumu sniedzēji ietver OpenAI (GPT Image 2 ), xAI (Grok Image )
 
 `n` atgriež `n` attēlus `data[]`. Pakalpojumu sniedzēji, kuru augšējais API atgriež vienu attēlu katrā izsaukumā (Black Forest Labs, Stabilitātes AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), saņem `n` atsevišķus augšupējus zvanus, ne vairāk kā 4 lidojuma laikā. Fiksētais `seed` tiek kompensēts ar izsaukuma indeksu (`seed`, `seed + 1`, …), tāpēc attēli atšķiras, bet joprojām ir reproducējami. `n` ierobežojums ir 10. Ja kāds zvans neizdodas, pieprasījums kopumā neizdodas. Fan-out formātu saraksts ir `SINGLE_IMAGE_FANOUT_FORMATS` formātā `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Attēlu modeļi (`codex/gpt-image-*`) atgriež tikai PNG : augšupējā straume atbild `200` ar PNG baitiem pat tad, ja tiek pieprasīts `jpeg` vai `webp`. Pieprasījums ar jebkuru citu `output_format` (`webp`, `jpeg`, ...) tiek noraidīts ar HTTP 400, nevis tiek klusi ignorēts; izlaidiet to vai nosūtiet `png`. `output_compression` netiek pārsūtīts.
+
 ZenMux atkārtoti izmanto esošo API atslēgas savienojumu un pieņem `zenmux/` vai `zm/` prefiksus:
 
 - `zenmux/openai/gpt-image-2` izmanto ZenMuxOpenAI attēlus API. Iespējas ietver `size`, `quality`, `n`, `output_format`, `output_compression`, `background` un `response_format`.
@@ -360,7 +357,7 @@ GET /v1/images/generations
 
 ---
 
-## Dokumentu OCR
+## Dokuments OCR
 
 ```bash
 POST /v1/ocr
@@ -376,17 +373,15 @@ Content-Type: application/json
 }
 ```
 
-`model` atlasa OCR nodrošinātāju, izmantojot `provider/model` prefiksu; vienkāršs modeļa identifikators (piemēram,
-`mistral-ocr-latest`) tiek piesaistīts tā reģistrētajam nodrošinātājam, bet, ja `model` nav norādīts, pēc noklusējuma tiek izmantots
-Mistral (`mistral-ocr-latest`). Reģistrētie nodrošinātāji (`open-sse/config/ocrRegistry.ts`):
+`model` atlasa OCR nodrošinātāju, izmantojot `provider/model` prefiksu; tukša modeļa ID (piem., `mistral-ocr-latest`) tiek izmantots tā reģistrētajam nodrošinātājam, un izlaistā `model` noklusējuma vērtība ir Mistral (`mistral-ocr-latest`). Reģistrētie pakalpojumu sniedzēji (`open-sse/config/ocrRegistry.ts`):
 
-| Provider id                   | Model id             | `model` value                                               | Notes                                                                                                                                 |
-| ----------------------------- | -------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (or bare `mistral-ocr-latest`) | Sinhrons — atbilde tiek atgriezta tieši no viena augšupējā izsaukuma.                                                                 |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                 | Asinhrons augšupējais process (`analyze` + aptauja) — skatiet tālāk.                                                                  |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                     | Sinhrons, izmantojot Vertex AI `openapi/chat/completions` partnera galapunktu — informāciju par autentifikāciju un URL skatiet tālāk. |
+| Pakalpojumu sniedzēja id      | Modeļa id                          | `model` vērtība                                               | Piezīmes                                                                                                                                                                                                 |
+| ----------------------------- | ---------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`               | `mistral/mistral-ocr-latest` (vai tukšs `mistral-ocr-latest`) | Sinhronā — atbilde tiek atgriezta tieši no viena augšpus zvana.                                                                                                                                          |
+| `azure-document-intelligence` | `prebuilt-read`                    | `azure-document-intelligence/prebuilt-read`                   | Asinhrona augšup pa straumi (`analyze` + aptauja) — skatiet tālāk.                                                                                                                                       |
+| `vertex-deepseek-ocr`         | pašizvietots (nav iebūvēta modeļa) | `vertex-deepseek-ocr/<your-deployed-model-id>`                | Sinhrons, izmantojot savu Vertex AI Model Garden DeepSeek-OCR galapunktu (`openapi/chat/completions` forma); Google pārtrauca pārvaldīto `deepseek-ocr-maas` 2026.10.21. (#20423), tāpēc ID atgriež 400. |
 
-Visi trīs nodrošinātāji atbild ar vienādu Mistral formas pamattekstu:
+Visi trīs pakalpojumu sniedzēji atbild vienā un tajā pašā Mistral formas korpusā:
 
 ```json
 {
@@ -396,27 +391,13 @@ Visi trīs nodrošinātāji atbild ar vienādu Mistral formas pamattekstu:
 }
 ```
 
-### Azure Document Intelligence aptaujas plūsma
+### Azure Document Intelligence aptauju plūsma
 
-Azure Document Intelligence `analyze` API ir asinhrona: sākotnējais pieprasījums pamatteksta vietā atgriež
-`Operation-Location` galveni, un rezultāts ir jāiegūst, veicot aptauju. Apdarinātājs
-(`open-sse/handlers/ocr.ts`) aptaujā šo URL reizi sekundē, veicot ne vairāk kā 30 mēģinājumus, nekavējoties pārtrauc darbu (nepārtrauc aptauju)
-ja aptaujas atbilde nav `ok` vai tās statuss ir `"failed"`, un atgriež `504`, ja pēc mēģinājumu limita beigām darbība joprojām tiek izpildīta. Galīgā Azure atbilde tiek
-normalizēta tajā pašā `pages`/`markdown` formā, ko izmanto Mistral, pirms tā tiek atgriezta
-izsaucējam, tāpēc klienta kodam nav īpaši jāapstrādā konkrētais nodrošinātājs.
+Azure Document Intelligence `analyze` API ir asinhrons: sākotnējais pieprasījums atgriež `Operation-Location` galveni, nevis pamattekstu, un rezultāts ir jāaptaujā. Apdarinātājs (`open-sse/handlers/ocr.ts`) veic aptauju, kas URL ik pēc sekundes līdz 30 mēģinājumiem, ātri neizdodas (neturpina aptauju) pēc atbildes, kas nav `ok`, vai `"failed"` statusā, un atgriež `504` ja darbība joprojām darbojas pēc tam, kad mēģinājuma budžets ir iztērēts. Galīgā Azure atbilde tiek normalizēta tajā pašā `pages`/`markdown` formā, ko izmantoja Mistral, pirms tā tiek atgriezta zvanītājam, tāpēc klienta kodā nav nepieciešams norādīt pakalpojumu sniedzēja īpašos gadījumus.
 
-### Vertex AI DeepSeek OCR autentifikācija un galapunkta atrisināšana
+### Vertex AI DeepSeek OCR autentifikācija un galapunkta izšķirtspēja
 
-`vertex-deepseek-ocr` atkārtoti izmanto to pašu Vertex AI autentifikāciju, ko OmniRoute jau atbalsta
-tērzēšanas/attēlu datplūsmai (`open-sse/executors/vertex.ts`): savienojuma API atslēga ir vai nu
-Service Account JSON akreditācijas dati (apmainīti pret īslaicīgu OAuth piekļuves pilnvaru, izmantojot JWT-bearer
-plūsmu), vai jau izveidota OAuth piekļuves pilnvara, kas tiek izmantota bez izmaiņām. Augšupējā galapunkta URL ir Vertex vispārīgais
-`openapi/chat/completions` partnera galapunkts, kas izveidots no savienojuma projekta un reģiona — tieši norādīts
-`providerSpecificData.project`/`providerSpecificData.region` vienmēr ir prioritārs;
-pretējā gadījumā projekts tiek iegūts no Service Account JSON `project_id`, bet reģiona noklusējuma vērtība ir
-`us-central1`. Abas atrisināšanas darbības notiek failā `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), un tās izmanto
-`src/app/api/v1/ocr/route.ts` pirms nosūtīšanas uz `handleOcr`.
+`vertex-deepseek-ocr` atkārtoti izmanto to pašu Vertex AI autentifikāciju. OmniRoute jau atbalsta chat/image trafiku (`open-sse/executors/vertex.ts`): savienojuma API atslēga ir vai nu pakalpojuma konta JSON akreditācijas dati (tiek apmainīti pret īslaicīgu OAuth piekļuves pilnvaru, izmantojot JWT nesēja plūsmu), vai jau izveidots piekļuves marķieris, kas tiek izmantots OAuth. Augšējais galapunkts URL ir Vertex vispārīgais `openapi/chat/completions` partnera galapunkts, kas izveidots no savienojuma projekta un reģiona — vienmēr uzvar skaidri izteikts `providerSpecificData.project`/`providerSpecificData.region` ; pretējā gadījumā projekts tiek atvasināts no pakalpojuma konta JSON `project_id` un reģiona noklusējuma vērtība ir `us-central1`. Abas izšķirtspējas notiek `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), ko patērē `src/app/api/v1/ocr/route.ts` pirms nosūtīšanas uz `handleOcr`.
 
 ---
 
@@ -670,96 +651,102 @@ Augšupējā pakalpojuma līgumi: [skaņas efekti](https://elevenlabs.io/docs/ap
 
 ## Saderības galapunkti
 
-| Metode | Ceļš                                      | Formāts                                    |
-| ------ | ----------------------------------------- | ------------------------------------------ |
-| POST   | `/v1/chat/completions`                    | OpenAI                                     |
-| POST   | `/v1/messages`                            | Anthropic                                  |
-| POST   | `/v1/responses`                           | OpenAI Responses                           |
-| POST   | `/v1/embeddings`                          | OpenAI                                     |
-| POST   | `/v1/images/generations`                  | OpenAI Images                              |
-| POST   | `/v1/images/edits`                        | OpenAI Images (rediģēšana/inpainting)      |
-| POST   | `/v1/videos/generations`                  | OpenAI stila video ģenerēšana              |
-| POST   | `/v1/music/generations`                   | OpenAI stila mūzikas ģenerēšana            |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                         |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (atgriež audio pamattekstu)     |
-| POST   | `/v1/rerank`                              | Cohere/Voyage stila pārkārtošana           |
-| POST   | `/v1/classify`                            | Jina klasifikācija (`api.jina.ai`)         |
-| POST   | `/v1/segment`                             | Jina segmentētājs (`segment.jina.ai`)      |
-| POST   | `/v1/moderations`                         | OpenAI moderēšana                          |
-| GET    | `/v1/models`                              | OpenAI                                     |
-| POST   | `/v1/models/query`                        | Filtrēts modeļu īsais saraksts             |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                                  |
-| GET    | `/v1beta/models`                          | Gemini                                     |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                     |
-| POST   | `/v1/api/chat`                            | Ollama                                     |
-| GET    | `/api/v1/vscode/{token}/`                 | OpenAI kataloga aizstājvārds               |
-| GET    | `/api/v1/vscode/{token}/models`           | OpenAI modeļu aizstājvārds                 |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI marķierizēts aizstājvārds           |
-| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses marķierizēts aizstājvārds |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama marķierizēts aizstājvārds           |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama tagu marķierizēts aizstājvārds      |
+| Metode | Ceļš                                      | Formāts                                   |
+| ------ | ----------------------------------------- | ----------------------------------------- |
+| POST   | `/v1/chat/completions`                    | OpenAI                                    |
+| POST   | `/v1/messages`                            | Anthropic                                 |
+| POST   | `/v1/responses`                           | OpenAI atbildes                           |
+| POST   | `/v1/embeddings`                          | OpenAI                                    |
+| POST   | `/v1/images/generations`                  | OpenAI attēli                             |
+| POST   | `/v1/images/edits`                        | OpenAI attēli (edit/inpaint)              |
+| POST   | `/v1/videos/generations`                  | OpenAI stila video paaudze                |
+| POST   | `/v1/music/generations`                   | OpenAI stila mūzikas paaudze              |
+| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                        |
+| POST   | `/v1/audio/speech`                        | OpenAI TTS (atgriež audio korpusu)        |
+| POST   | `/v1/rerank`                              | Cohere/Voyage-style rerank                |
+| POST   | `/v1/classify`                            | Jina klasificēt (`api.jina.ai`)           |
+| POST   | `/v1/segment`                             | Džina segmentētāja (`segment.jina.ai`)    |
+| POST   | `/v1/moderations`                         | OpenAI Moderācijas                        |
+| POST   | `/v1/systemone`                           | System One drukāti lēmumi                 |
+| POST   | `/v1/decisions`                           | OpenAI lēmumi (vietējā)                   |
+| GET    | `/v1/systemone/models`                    | Lēmumu modeļu katalogs                    |
+| GET    | `/v1/models`                              | OpenAI                                    |
+| POST   | `/v1/models/query`                        | Filtrēts modeļu saraksts                  |
+| POST   | `/v1/messages/count_tokens`               | Anthropic                                 |
+| GET    | `/v1beta/models`                          | Gemini                                    |
+| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                    |
+| POST   | `/v1/api/chat`                            | Ollama                                    |
+| GET    | `/api/v1/vscode/{token}/`                 | OpenAI kataloga aizstājvārds              |
+| GET    | `/api/v1/vscode/{token}/models`           | OpenAI modeļu aizstājvārds                |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenizētais aizstājvārds          |
+| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI atbildes marķierizēts aizstājvārds |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenizētais aizstājvārds          |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama tagu marķierizēts aizstājvārds     |
 
-Visi POST maršruti izmanto vienādu struktūru: `Bearer your-api-key` + ar Zod validēts JSON pamatteksts (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` u. c.; skatiet `src/shared/validation/schemas.ts`). Ja shēma neiztur validāciju, tiek atgriezta 4xx atbilde.
+Visiem POST maršrutiem ir tāda pati forma: `Bearer your-api-key` + Zod apstiprināts JSON korpuss (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` utt., skatiet `src/shared/validation/schemas.ts`). 4xx tiek atgriezts shēmas kļūmes gadījumā.
 
-Klientiem, kuri nevar pievienot `Authorization: Bearer ...`, OmniRoute pieņem API atslēgas arī URL, izmantojot vai nu ar vaicājuma virkni saderīgu formu (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`), vai īpašos `/api/v1/vscode/{token}/...` galapunktus, kas dokumentēti tālāk.
+Klientiem, kuri nevar pievienot `Authorization: Bearer ...`, OmniRoute arī pieņem API atslēgas URL izmantojot vaicājuma virknes saderību (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`), vai tālāk dokumentētos īpašos `/api/v1/vscode/{token}/...` galapunktus.
 
 ```bash
-# Pārkārtošana (mākoņa reģistra nodrošinātājs vai ar OpenAI saderīga nodrošinātāja mezgls kā "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina klasifikācija (Foundation API akreditācijas dati)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina segmentētājs
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina meklēšana (s.jina.ai; nodrošinātāju aizstājvārdi: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderēšana
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — atgriež audio/mpeg (vai pieprasītā formāta) pamattekstu
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS nepieciešama valoda un balss: `language` pēc noklusējuma ir "en"; ja nav norādīta
-# balss vai izmantots OpenAI standarta balss nosaukums (alloy, nova, …), tā kļūst par "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Attēla rediģēšana (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Video / mūzikas ģenerēšana (ar nodrošinātāja prefiksu papildināts modeļa ID)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Pārkārtošanas nodrošinātāja mezgli:** `POST /v1/rerank` arī maršrutē pie OpenAI saderīgu nodrošinātāju mezgliem
-> (oMLX, vLLM, Infinity, TEI aiz vārtejas, …), kas adresēti kā `<node-prefix>/<model>`. Atgriezeniskās cilpas
-> mezgli (`localhost`, `127.0.0.1`, `172.16.0.0/12`) vienmēr ir izmantojami, tāpat arī resursdatoru nosaukumi, ko
-> operators norāda `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (piemēram, Docker/Compose pakalpojuma nosaukums, piemēram,
-> `http://reranker:8080/v1`; šie mezgli tiek izsaukti tieši, nekad neizmantojot `HTTP(S)_PROXY` vai
-> savienojumam piesaistīto starpniekserveri). Mezglus jebkurā citā
-> resursdatorā — LAN datorā vai Tailscale partnerī — var izmantot tikai tad, ja operators iespējo
-> `RERANK_REMOTE_PROVIDER_NODES` funkcionalitātes karodziņu **un** mezgla pamata URL atbilst nodrošinātāja
-> izejošo URL politikas prasībām (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Atmiņas programma pārkārtošanas darbību izsauc caur atgriezenisko cilpu, tāpēc tas pats noteikums attiecas uz
-> `rerankProviderModel` Atmiņas iestatījumos.
+> **Pārkārtot nodrošinātāja mezglus:** `POST /v1/rerank` arī novirza uz ar OpenAI saderīgiem pakalpojumu sniedzēju mezgliem (oMLX, vLLM, Infinity, TEI aiz vārtejas,…), kas ir adresēti kā `<node-prefix>/<model>`. Atpakaļcilpas mezgli (`localhost`, `127.0.0.1`, `172.16.0.0/12`) vienmēr ir piemēroti, tāpat arī saimniekdatoru nosaukumi, kurus operators uzskaita `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (piemēram Docker/Compose pakalpojuma nosaukums, piemēram, `http://reranker:8080/v1`; tie tiek izsaukti tieši, nekad caur `HTTP(S)_PROXY` vai savienojuma piesprausto starpniekserveri). Jebkura cita resursdatora — LAN lodziņā vai Tailscale vienādranga — mezgli ir piemēroti tikai tad, ja operators iespējo `RERANK_REMOTE_PROVIDER_NODES` līdzekļa karogu.** un** mezgla bāzes URL iztur pakalpojumu sniedzēja izejošo URL politiku (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Atmiņas programmas pārkārtošanas darbība izsauc šo maršrutu, izmantojot atpakaļcilpu, tāpēc tas pats noteikums regulē `rerankProviderModel` atmiņas iestatījumos.
 >
-> **Lokālā servera formas:** mezgls tiek izsaukts vietnē `<base>/v1/rerank` un pēc 404 kļūdas vietnē `<base>/rerank`
-> (Infinity, TEI). Augšupvērstā pieprasījuma pamattekstā ir gan Cohere/OpenAI rakstība (`documents`,
-> `return_documents`), gan TEI rakstība (`texts`, `return_text`), un augšupvērstā atbilde tiek
-> normalizēta uz Cohere aploksni: TEI neietvertie dati `[{index, score, text}]`, `{results: [{index, score}]}`
-> no vienkāršām vārtejām un Voyage stila `{data: [...]}` klientam tiek atgriezti kā
-> `{results: [{index, relevance_score, document?}]}`, sakārtoti pēc rezultāta un ierobežoti līdz `top_n`.
+> **Vietējā servera formas:** mezgls tiek izsaukts `<base>/v1/rerank` un 404. punktā `<base>/rerank` (Infinity, TEI). Augšpuses pamattekstā ir gan Cohere/OpenAI pareizrakstība (`documents`, `return_documents`), gan TEI pareizrakstība (`texts`, `return_text`), un augšupējā atbilde tiek normalizēta atbilstoši Cohere aploksnei: TEI tukšais `[{index, score, text}]`, `{results: [{index, score}]}` no plānas Vozqn-sty, un back to klienta vārteja `{results: [{index, relevance_score, document?}]}` `{data: [...]}` sakārtots pēc rezultāta un ierobežots ar `top_n`.
 
-> **Nodrošinātāja mezglu atklāšana:** modeļi OpenAI saderīgā nodrošinātāja mezglā tiek parādīti `GET /v1/models`
-> sadaļā ar mezgla prefiksu. Ieraksti, kuriem nav galapunkta metadatu (raksturīgi lokāliem `/v1/models` sarakstiem),
-> manto mezgla `apiType`, tāpēc `embeddings` mezgla modeļiem ir `type: "embedding"` un
-> `rerank` mezgla modeļiem ir `type: "rerank"`, nevis noklusējuma tērzēšanas tips; skaidri norādīts
-> `supportedEndpoints` sinhronizētā vai manuāli pievienotā ierakstā joprojām ir prioritārs.
+> **Pakalpojumu sniedzēja mezgla atklāšana:** modeļi ar OpenAI saderīgā nodrošinātāja mezglā tiek parādīti `GET /v1/models` zem mezgla prefiksa. Rindas, kurās nav galapunkta metadatu (parasti vietējiem `/v1/models` ierakstiem), manto mezgla `apiType`, tāpēc `embeddings` mezgla modeļi ir `type: "embedding"` un `rerank` mezgla modeļi ir `type: "rerank"` nevis pēc noklusējuma tērzēšanai; nepārprotama `supportedEndpoints` sinhronizētā vai manuāli pievienotā rindā joprojām ir prioritāte.
 
-### Īpašie nodrošinātāju maršruti
+### Ierakstīti lēmumi
+
+Lēmumu modeļi atbild uz drukātiem jautājumiem ar kalibrētām varbūtībām, nevis ģenerē tekstu. Tie nekad nav tērzēšanas modeļi, un abi vadu formāti nekad netiek tulkoti viens otrā:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter Decisions, Cloudflare Workers AI, local Ollama).
+- `POST /v1/decisions` — native OpenAI Lēmumi `{ model, input, questions: [...] }`, apkalpo `openai` savienojums. Modelis ir `openai/gpt-6-luna` (darbojas arī tukšais `gpt-6-luna` ). Atbildes tiek atgrieztas jautājumu secībā, neskartas.
+- `GET /v1/systemone/models` — viens abu veidu katalogs; katra rinda nosauc savu `api_format` (`systemone` vai `decisions`). `limit` / `after` lapā galīgo sarakstu. `X-OmniRoute-Catalog-Status` galvene skan `complete`, `partial` vai `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` API atslēgas modeļa atļaušanas sarakstā `decisions` galapunkta kategorija, budžets un savienojuma apjoms tiek pārbaudīts pirms jebkādu akreditācijas datu nolasīšanas. Akreditācijas dati ir atslēgas darbības jomā saglabātais `openai` savienojums (nekad nav vides atslēga); savienojuma bāze URL tiek ievērota tikai tad, ja tā ir `http(s)` URL bez akreditācijas datiem, vaicājuma vai fragmenta, kas nenorāda uz šo OmniRoute. Zvans iziet, izmantojot to pašu apsargāto transportu, ko izmanto `decision` automātiskais maršrutētājs ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): nodrošinātāja izejošais aizsargs, bez mēģinājumiem, bez novirzīšanas, 5 s noildze un 64 KB atbildes ierobežojums (lielāka atbilde ir 502). Pieprasījumu struktūras ir ierobežotas līdz 4 MiB. Katrs zvans nosūta jaunu `Idempotency-Key`. Kļūdām tiek norādīts tikai augšējais statuss, nevis tās pamatteksts, URL, atslēga vai uzvedne.
+
+### Īpaši pakalpojumu sniedzēju maršruti
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -767,7 +754,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Nodrošinātāja prefikss tiek automātiski pievienots, ja tā trūkst. Neatbilstoši modeļi atgriež `400`.
+Pakalpojumu sniedzēja prefikss tiek automātiski pievienots, ja trūkst. Neatbilstoši modeļi atgriež `400`.
 
 ---
 

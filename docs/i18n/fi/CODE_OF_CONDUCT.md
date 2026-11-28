@@ -42,15 +42,13 @@ Esimerkkejä yhteisömme edustamisesta ovat virallisen sähköpostiosoitteen kä
 julkaiseminen virallisella sosiaalisen median tilillä tai toimiminen nimettynä
 edustajana verkko- tai lähitapahtumassa.
 
-## Enforcement
+## Täytäntöönpano
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Loukkaavasta, häiritsevästä tai muuten sopimattomasta käytöksestä voidaan ilmoittaa täytäntöönpanosta vastaaville yhteisön johtajille avaamalla yksityinen turvallisuusneuvonta osoitteessa
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+tai lähettämällä sähköpostia ylläpitäjälle osoitteeseen diegosouza.pw@outlook.com. Katso tietoturvaan liittyvät tapahtumat kohdasta [`SECURITY.md`](SECURITY.md). Kaikki valitukset käsitellään ja tutkitaan nopeasti ja oikeudenmukaisesti.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Kaikki yhteisön johtajat ovat velvollisia kunnioittamaan tapahtumien raportoijan yksityisyyttä ja turvallisuutta.
 
 ## Täytäntöönpano-ohjeet
 

@@ -4,13 +4,11 @@
 
 ---
 
-Dernière mise à jour : 2026-08-23
-
 OmniRoute s'intègre à trois catégories d'outils CLI répartis sur trois pages de tableau de bord dédiées :
 
 | Page           | Itinéraire              | Concept                                                                                | Compter          |
 | -------------- | ----------------------- | -------------------------------------------------------------------------------------- | ---------------- |
-| **Codes CLI**  | `/dashboard/cli-code`   | Outils de codage que vous pointez vers OmniRoute (client → CLI → OmniRoute → Provider) | 26               |
+| **Codes CLI**  | `/dashboard/cli-code`   | Outils de codage que vous pointez vers OmniRoute (Client → CLI → OmniRoute → Provider) | 26               |
 | **Agents CLI** | `/dashboard/cli-agents` | Agents autonomes que vous pointez vers OmniRoute (même flux, portée plus large)        | 11               |
 | **Agents ACP** | `/dashboard/acp-agents` | CLIs que OmniRoute apparaît en tant que backend via stdio/ACP (flux inverse)           | voir le registre |
 
@@ -228,7 +226,7 @@ Les nouveaux outils avec `configType: "custom"` ont des paramètres dédiés aux
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                            |
 | `POST /api/cli-tools/qwen-settings`         | Code Qwen (clé `.env` dédiée + `~/.qwen/settings.json` )                         |
 
-Toutes les routes utilisent `sanitizeErrorMessage()` pour les réponses aux erreurs (règle stricte n°12).
+Toutes les routes utilisent `sanitizeErrorMessage()` pour les réponses aux erreurs (Hard Rule #12).
 
 ---
 

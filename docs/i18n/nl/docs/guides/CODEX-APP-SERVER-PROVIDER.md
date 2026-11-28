@@ -21,25 +21,21 @@ moet **aangemeld zijn**.
 ## 1. Architectuur
 
 ```
-┌─ OmniRoute-app ─────────────────┐        ┌─ codex-app-server-sidecar ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ capaciteitstoken)            │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  beheert OpenAI OAuth zelf          │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, autovernieuwing)│
-        │ gedeeld (compose-volumes)          └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → het WS-capaciteitstoken (beide koppelen dit)
-  codex-appserver-home    → ~/.codex (auth.json wordt door het dashboard geschreven
-                             en door de codex app-server van de sidecar gelezen)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- De sidecar luistert **alleen** op het interne compose-netwerk
-  (`ws://codex-app-server:1456`), beveiligd met een capaciteitstoken. Deze wordt
-  **nooit** op de host of het internet gepubliceerd.
-- De Codex CLI is ingebouwd in `omniroute:base`, zodat Codex niet op de host of
-  de machine van de gebruiker hoeft te worden geïnstalleerd wanneer je de
-  sidecar uitvoert.
+- Het zijspan luistert** alleen** op het interne compose-netwerk (`ws://codex-app-server:1456`) achter een capaciteitstoken. Het is** nooit** gepubliceerd op de host of op internet.
+- Het zijspan maakt gebruik van `omniroute:cli-no-docker`, opgebouwd uit het `runner-cli-no-docker` doel, dat de Codex CLI omvat.
 
 ## 2. Opstarten
 

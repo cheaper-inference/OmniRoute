@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Gbogbo àwọn òfin iṣẹ́ àkànṣe wà nínú [`AGENTS.md`](AGENTS.md)** — orísun òtítọ́ kan ṣoṣo fún gbogbo
-olùrànlọ́wọ́ AI (àkópọ̀-ẹ̀rọ, àwọn àṣà, ìdánwò, àwọn ìlànà ìdánilójú dídára, ìṣàn iṣẹ́ git, àwọn Òfin Líle 23,
-àwọn ẹ̀kọ́ PII). Ka gbogbo rẹ̀; má ṣe tún fi àwọn òfin iṣẹ́ àkànṣe kún ibi yìí. Gbogbo ohun tó wà nísàlẹ̀ yìí kan
-Claude Code NÌKAN — àwọn àtúnṣe ìṣiṣẹ́ sí àwọn òfin tí a ti ṣàlàyé tẹ́lẹ̀ nínú `AGENTS.md`.
+**Gbogbo ise agbese ofin gbe ni [`AGENTS.md`](AGENTS.md)** — orisun otitọ kanṣoṣo fun gbogbo oluranlọwọ AI ; gbe wọle loke tẹlẹ èyà o. Maṣe tun fi awọn ofin ise agbese kun nibi. Ohun gbogbo ti o wa ni isalẹ n kan ONLY si Claude Code — awọn isọdọtun iṣẹ ṣiṣe ti awọn ofin ti ṣe alaye tẹlẹ ni `AGENTS.md`.
 
-## Ìyàsọ̀tọ̀ worktree — àwọn kókó pàtó fún Claude Code
+## Worktree ipinya — Claude Code pato
 
-Ìlànà worktree tó jẹ́ dandan ní kíkun (ìjẹ́rìsí base branch, ọ̀nà ìlànà `.claude/worktrees/`,
-`cp -al` node_modules, àwọn òfin ìtúká) wà nínú
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (tí a ṣe àkótán rẹ̀ nínú `AGENTS.md` →
-Git Workflow → "Worktree isolation"). Àwọn kókó pàtó fún Claude Code:
+- Jẹrisi ẹka ipilẹ pẹlu oniṣẹ nipasẹ `AskUserQuestion` (Hard Rule #19) ayafi ti wọn ba sọ fun ọ tẹlẹ.
+- Ṣẹda igi iṣẹ pẹlu `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (o balẹ labẹ `.claude/worktrees/`, awọn ọna asopọ lile `node_modules` ati awọn ẹda `.husky/_`), lẹhinna pe `EnterWorktree` pẹlu `path` rẹ. Nigbagbogbo kọja ipilẹ: laisi rẹ iwe afọwọkọ n yan `release/*` ti o ga julọ, eyiti o le ma jẹ ọkan ti oniṣẹ jẹrisi. Igi iṣẹ kan ti `EnterWorktree` ṣẹda funrararẹ ko ni awọn ọna asopọ lile tabi awọn ìkọ, nitorina ko si ẹnu-ọna iṣaaju-ifaramọ ti n ṣiṣẹ ninu rẹ.
 
-- Jẹ́rìsí base branch náà pẹ̀lú olùṣàkóso nípasẹ̀ `AskUserQuestion` (Hard Rule #19) àyafi tí wọ́n bá
-  ti sọ fún ọ tẹ́lẹ̀.
-- Yan irinṣẹ́ `EnterWorktree` abínibí jù lọ — ó ti ń dá àwọn worktree sílẹ̀ lábẹ́
-  `.claude/worktrees/` (ọ̀nà ìlànà náà). Dá worktree náà pẹ̀lú àṣẹ `git
-worktree add` tí a ti kọ sílẹ̀, kí o sì pe `EnterWorktree` pẹ̀lú `path` rẹ̀.
+## Subagents ati git
 
-## Ààbò láàárín àwọn sáà — àwọn àlàyé pàtó fún Claude Code
+Gbogbo subagent ti o fọwọkan git (Ọpa Aṣoju tabi iwe afọwọkọ Iṣiṣẹ) gba Ofin Lile #22 a's `git stash` ban verbatim ni kiakia — iwifun ti o gbasilẹ ti isẹlẹ isẹlẹ naa wa nipasẹ abẹlẹ kan.
 
-Àwọn Òfin Líle #19/#21/#22 (nínú `AGENTS.md`) ń darí àwọn sáà tó ń ṣiṣẹ́ ní àfikún. Àwọn ìránnilétí ìṣiṣẹ́ fún
-harness yìí:
+## Gbimọ onisebaye — superpowers ona dojuiwọn
 
-- **Ṣàdàkọ ìfòfindè `git stash` ní ọ̀rọ̀ kan náà sínú prompt gbogbo subagent tó bá fọwọ́ kan git**
-  (irinṣẹ́ Agent / àwọn script Workflow) — àwọn subagent kò jogún fáìlì yìí, ìṣẹ̀lẹ̀ stash tí a sì ṣàkọsílẹ̀
-  pé ó tún ṣẹlẹ̀ wá láti ọ̀dọ̀ subagent kan.
-- Ṣáájú pípapọ̀ tàbí títì sí PR èyíkéyìí tí ìwọ kò ṣẹ̀dá _ní sáà yìí_, ṣiṣẹ́ `git worktree list`
-  kí o sì tún yẹ `gh pr view <N> --json state,headRefOid` wò (Òfin Líle #22b).
-- Parí gbogbo sáà pẹ̀lú checkout àkọ́kọ́ lórí ẹ̀ka tí ó wà nígbà tí sáà náà bẹ̀rẹ̀.
+Awọn ọgbọn Superpowers n kede awọn aseku labẹ `docs/superpowers/plans/`, `docs/superpowers/specs/` ati `docs/research/`. Tun ọkọọkan kọ si `_tasks/` rẹ deede ni `AGENTS.md` → "Igbero & Awọn Iṣẹ iṣe Iwadi" ṣaaju ki o to kọ, ki o si ṣe pẹlu `git -C _tasks …`, kii ṣe ni repo akọkọ.
 
-## Superpowers / àwọn ohun èlò ètò — àwọn ìyípadà ọ̀nà
+## Yiyọ awọn faili — `_artifacts/`, kii ṣe `/tmp`
 
-Àṣà `_tasks/` ni a ṣàlàyé nínú `AGENTS.md` → "Àwọn Ohun Èlò Ètò & Ìwádìí". Àwọn ọgbọ́n
-superpowers ní àwọn àiyipada tó tọ́ka sí `docs/…` — a **ti fagilé àwọn àiyipada wọ̀nyẹn
-níbí**. Nígbà tí ọgbọ́n superpowers kan bá kéde ọ̀nà bíi "a fi pamọ́ sí `docs/superpowers/plans/…`",
-tún un kọ sí èyí tó bá a mu lábẹ́ `_tasks/…` ṣáájú kí o tó kọ ọ́:
+Ise agbese yii dojukọ scratchpad igba ijanu (`/tmp/claude-*/…`). Kọ awọn faili igba diẹ — okeere, awọn zips ti ipilẹṣẹ, awọn abajade agbedemeji ọkan-pipa — si `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: ọna gitignored root `_*`, nitorinaa oniṣẹ wa ati paarẹ gbogbo ibere ni aaye kan. Awọn ero ti o tọ, awọn alaye lẹkunrẹrẹ, iwadii ati awọn piparẹ ọwọ lọ si `_tasks/` dipo (Ofin Lile #23).
 
-| Ohun èlò (ọgbọ́n)                      | Àiyipada (MÁ ṣe lò ó)     | Fi pamọ́ síbí dípò rẹ̀                                          |
-| ------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Àwọn ètò (`writing-plans`)            | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Àwọn àlàyé / àwòrán (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Ìwádìí (`deep-research`, ad-hoc)      | `docs/research/`          | `_tasks/research/…`                                           |
-| Ìfiranṣẹ́ iṣẹ́ (`/handoff`)             | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Ipilẹ pupa
 
-Commit àwọn ohun èlò wọ̀nyẹn sínú repo `_tasks/` (`git -C _tasks …`), kì í ṣe sínú repo àkọ́kọ́.
-
-## Àwọn fáìlì ìkọ̀kọ̀ / ìgbà díẹ̀ — lo `_artifacts/`, kì í ṣe `/tmp`
-
-Iṣẹ́ àkànṣe yìí fagilé scratchpad sáà àiyipada ti harness (`/tmp/claude-*/…`). Kọ
-àwọn fáìlì ìgbà díẹ̀/tí a fi ń ṣiṣẹ́ — àwọn export, àwọn zip tí a ṣẹ̀dá, àwọn àbájáde àárín gbùngbùn ẹ̀ẹ̀kan, ohunkóhun tí ìwọ
-ìbá fi sínú `/tmp` — sínú `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` dípò rẹ̀.
-
-- `_artifacts/` jẹ́ ọ̀nà `_*` ní gbòǹgbò: a ti fi sí gitignore (`AGENTS.md` → "Àwọn ọ̀nà `_*` ní Gbòǹgbò"), ó wà
-  lórí disk nìkan, a kì í tọpinpin rẹ̀ láéláé.
-- Ìdí: fífi àbájáde ìgbà díẹ̀ sí inú iṣẹ́ àkànṣe (dípò `/tmp`) mú kó rọrùn gan-an fún olùdarí
-  láti rí gbogbo ohun ìgbà díẹ̀ kí ó sì pa wọ́n ní ibi kan, dípò wíwá káàkiri àwọn
-  directory `/tmp` àkànṣe-sáà tó jẹ́ ti ìgbà díẹ̀, tí wọ́n máa ń pòórá tàbí kó àwọn ohun tí a kò tọpinpin jọ.
-- **Má ṣe** da èyí rú pẹ̀lú `_tasks/` (Òfin Líle #23, repo git àdáni tirẹ̀ fún àwọn
-  ètò/àlàyé/ìwádìí/ìfiranṣẹ́ iṣẹ́ tó yẹ kó pé) — `_artifacts/` jẹ́ fún àwọn fáìlì iṣẹ́ tí a lè sọ nù nìkan, kò sí ohunkóhun
-  níbí tó nílò láti wà pẹ́ tàbí láti ní version.
-
-## Base-green ṣáájú ṣíṣí àwọn PR
-
-Ṣáájú gígé ẹ̀ka tàbí ṣíṣí PR, ṣiṣẹ́ àyẹ̀wò base-green (`AGENTS.md` → Ìṣàn Iṣẹ́ Git →
-"Àyẹ̀wò base-green"; àwọn ọgbọ́n iṣẹ́ àkànṣe tọ́ka sí i gẹ́gẹ́ bí `.agents/skills/_shared/base-green.md`). PR
-tí a ṣí nígbà tí tip ìpìlẹ̀ bá pupa gbọ́dọ̀ ní `⚠️ base-red inherited: #<issue>` nínú body rẹ̀. Láti
-mú ipò pupa tó ti kójọ kúrò (tip ìpìlẹ̀ + àwọn PR pupa), lo ọgbọ́n `/sweep-reds`.
+Lati fa ipo pupa ti o ṣajọpọ (ipilẹ tip + red PRs), lo ọgbọn `/sweep-reds`.

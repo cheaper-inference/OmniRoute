@@ -13,7 +13,7 @@ ibi ìpamọ́ dátà agbègbè lọ, kí a sì lè so ó pọ̀ mọ́ dátà m
 
 ---
 
-## 1. Bí ó ṣe ń ṣiṣẹ́
+## 1. Bi o ti ṣiṣẹ
 
 ```
 server (decrypt + validate config, reconcile cursor)
@@ -24,119 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Ètò àkókò** — iṣẹ́ cron `JobRegistry` kan, `log_export`, tí àiyípadà rẹ̀ jẹ́ `0 * * * *` (ní gbogbo wákàtí,
-  UTC). A forúkọ rẹ̀ sílẹ̀ nínú `src/lib/initCloudSync.ts`; a lè yí i padà pẹ̀lú `OMNIROUTE_LOG_EXPORT_CRON`.
-  Ní ìgbà kọ̀ọ̀kan tí ó bá jí, ó ń kó gbogbo àkọsílẹ̀ tó dúró sí ibi ìrìnàjò kọ̀ọ̀kan tí a **mú ṣiṣẹ́**, lọ́kọ̀ọ̀kan.
-- **Atọ́ka ipò** — `call_logs.rowid` àìfihàn ti SQLite, tí a ń pa mọ́ fún ibi ìrìnàjò kọ̀ọ̀kan sínú
-  `log_export_destinations.cursor_row_id`. A mọ̀ọ́mọ̀ kò lo `timestamp` gẹ́gẹ́ bí atọ́ka ipò: àwọn olùpè
-  lè pèsè iye tiwọn, nítorí náà a lè kọ ìbéèrè tó lọ́ra lẹ́yìn èyí tó yára tí ó bẹ̀rẹ̀
-  lẹ́yìn rẹ̀, atọ́ka ipò tó dá lórí àkókò yóò sì fo èyí tó lọ́ra náà.
-- **Pípín sí ìdìpọ̀** — àwọn ìlà `batch_size` fún ìbéèrè kọ̀ọ̀kan (àiyípadà 500), àwọn ìlà `max_rows_per_run` fún ìṣiṣẹ́ kọ̀ọ̀kan
-  (àiyípadà 10000) kí àkójọpọ̀ ńlá tó dúró lè tán ní ọ̀pọ̀ ìgbà jíjí dípò kí ó dí ìgbà kan ṣoṣo mú.
-- **Ìfiránṣẹ́** — atọ́ka ipò ń tẹ̀ síwájú lẹ́yìn tí `send()` bá parí ní àṣeyọrí nìkan. Ìdìpọ̀ tó kùnà ń fi
-  atọ́ka ipò sí ibi tó wà, nítorí náà a ó tún gbìyànjú àwọn ìlà kan náà ní ìṣiṣẹ́ tó kàn. Ìdánilójú náà jẹ́
-  ó kéré tán lẹ́ẹ̀kan pẹ̀lú yíyọ àdàkọ ní ẹ̀gbẹ́ ibi ìrìnàjò, kì í ṣe lẹ́ẹ̀kan ṣoṣo ní tòótọ́: BigQuery ń lo
-  id àkọsílẹ̀ ìpè gẹ́gẹ́ bí kọ́kọ́rọ́ ìlà kọ̀ọ̀kan, ó sì ń bọ̀wọ̀ fún un bí agbára rẹ̀ ṣe tó láàárín àkókò yíyọ àdàkọ tirẹ̀.
-- **Ìdènà ìṣiṣẹ́ lórí ara wọn** — jíjí cron àti `POST .../run` lè ṣẹlẹ̀ papọ̀. A máa fo ibi ìrìnàjò
-  tí ìkójáde rẹ̀ ti ń lọ dípò kí a kó jáde lẹ́ẹ̀mejì (`skipped: true` nínú èsì ìṣiṣẹ́),
-  kí ìṣiṣẹ́ tó ń lọ lẹ́ẹ̀kan náà má bàa tún ìdìpọ̀ ránṣẹ́ tàbí kọ atọ́ka ipò sẹ́yìn.
-- **Ìmúpadàbọ̀ lẹ́yìn píparẹ́** — bí `cursor_row_id` bá ga ju `MAX(rowid)` lọ (a ti pa gbogbo tábìlì
-  rẹ́, àwọn rowid sì tún bẹ̀rẹ̀), olùṣiṣẹ́ yóò padà sí 0 dípò kí ó má rí ohunkóhun mọ́ títí láé.
+- **Iṣeto** — ọkan `JobRegistry` cron job, `log_export`, aiyipada si `0 * * * *` (wakati, UTC). Forukọsilẹ ni `src/lib/initCloudSync.ts`; apọju pẹlu `OMNIROUTE_LOG_EXPORT_CRON`. Kọọkan ami sisan gbogbo** ṣiṣẹ** nlo, lesese.
+- **Cursor** — SQLite o fojuhan ti `call_logs.rowid`, duro fun ibi kan ni `log_export_destinations.cursor_row_id`. `timestamp` ko mọọmọ kii ṣe kọsọ: awọn olupe le pese iye tiwọn, nitorinaa ibeere ti o lọra le jẹ kikọ lẹhin iyara ti o bẹrẹ nigbamii, ati kọsọ timestamp kan yoo foju rẹ.
+- **Batching** — `batch_size` awọn ori ila fun ibeere (aiyipada 500), awọn ori ila `max_rows_per_run` fun ṣiṣe (aiyipada 10000) nitorinaa apo ẹhin nla kan n yọ lori ọpọlọpọ awọn ami dipo idilọwọ ọkan.
+- **Ifijiṣẹ** — kọsọ siwaju nikan lẹhin ti `send()` pinnu. Ipele ti o kuna fi kọsọ silẹ nibiti o wa, nitorinaa a tun gbiyanju awọn ori ila kanna ni ṣiṣe atẹle. Atilẹyin jẹ o kere ju-ẹẹkan pẹlu ipari-ẹgbẹ-idajijẹ, kii ṣe otitọ-ẹẹkan: awọn bọtini BigQuery ni ọna kọọkan nipasẹ id-log id, eyiti o bọla fun ipilẹ-igbiyanju ti o dara julọ laarin window dedup tirẹ.
+- **ni lqkan oluso** — ami cron ati `POST .../run` le ina papo. Ilọ-ajo ti o ti ṣagbe tẹlẹ ti fo kuku ju ki o gbẹ lẹẹmeji (`skipped: true` ninu abajade ṣiṣe), nitorinaa ṣiṣe nigbakan ko le tun fi ipele ranṣẹ tabi kọ kọsọ sẹhin.
+- **Pa imularada** — ti `cursor_row_id` ba pari loke `MAX(rowid)` (gbogbo tabili ni a sọ di mimọ ati tun bẹrẹ awọn ori ila), olusare yi pada si 0 dipo ki o lọ afọju patapata.
 
-### Olùṣiṣẹ́ tí a yà sọ́tọ̀ àti àwọn ààlà
+### Ya sọtọ Isare ati awọn ifilelẹ
 
-Ìṣiṣẹ́ ibi ìrìnàjò kọ̀ọ̀kan lórí Node ń bẹ̀rẹ̀ ìlànà ọmọ OS ọ̀tọ̀ tí kò pẹ́ (`child_process`
-pẹ̀lú IPC, kì í ṣe `worker_threads`). Kíkà ara àkóónú, ṣíṣe ìtúpalẹ̀/ìyípadà JSON dátà ìfiránṣẹ́,
-`prepare()` ibi ìrìnàjò àti I/O nẹ́tíwọ́ọ̀kì ibi ìrìnàjò gbogbo ń ṣiṣẹ́ níbẹ̀, kì í ṣe lórí yípo ìṣẹ̀lẹ̀ olupin.
-Ìṣètò àti àwọn ìfiránṣẹ́ kéékèèké nípa ìlọsíwájú nìkan ni ń kọjá IPC; àwọn àkọsílẹ̀ tí a kó jáde kì í padà sí
-olupin. Iṣẹ́ cron àti ipa-ọ̀nà Ṣiṣẹ́ nísinsìnyí ń pa èsì gbogbogbò àti ìdènà ìṣiṣẹ́ lórí ara wọn kan náà mọ́.
+Gbogbo ibi-afẹde ti n ṣiṣẹ lori Node bẹrẹ ọna lọtọ, ilana ọmọ OS igba diẹ (`child_process` pẹlu IPC, kii ṣe `worker_threads`). Ara kika, payload JSON parsing/serialization, nlo `prepare()` ati nlo nẹtiwọki I/O gbogbo ṣiṣe awọn nibẹ, ko lori olupin ká iṣẹlẹ loop. Nikan iṣeto ni ati awọn ifiranṣẹ ilọsiwaju kekere kọja IPC; awọn igbasilẹ okeere ko pada si olupin naa. Iṣẹ cron ati Ṣiṣe bayi ipa-ọna tọju abajade gbangba kanna ati oluso agbekọja.
 
-Ìlànà ọmọ ń ṣí `DATA_DIR/storage.sqlite` tí olupin ti pinnu fún kíkà nìkan nípa lílo `node:sqlite`,
-pẹ̀lú `busy_timeout=5000` àti `query_only=ON`. Kò ń gbé singleton DB wọlé, kò sì ń ṣe
-ìṣípòpadà, àfẹ́yìntì tàbí àtúnṣe SQLite. Ṣíṣàkóso àkọsílẹ̀ artifact tó sọnù/tó bàjẹ́ (pẹ̀lú
-UPDATE artifact tó bàjẹ́) ṣì wà ní ipa-ọ̀nà àlàyé dashboard nìkan. Àwọn ipa-ọ̀nà méjèèjì ń lo
-olùyànjú àlàyé mímọ́ kan náà; ìkójáde ń lo kíkà ètò fáìlì aláìdádúró àti ìtẹ̀lé ìyànjú kan náà láti artifact → àkóónú inú ìlà
-àtijọ́ → dìsíkì àtijọ́ → kò sí. Ìṣiṣẹ́ kan ń ya àwòrán rowid ìfikún tó pọ̀ jù lọ
-nígbà tí ìlànà ọmọ bá ṣí olùkà rẹ̀; àwọn ìfikún tó bá wá lẹ́yìn yóò dúró de ìṣiṣẹ́ tó kàn. Èyí jẹ́ ààlà
-ìfikún, kì í ṣe ìṣòwò SQLite tó ń pẹ́: àwọn olùkọ WAL àti àwọn ibi àyẹ̀wò ṣì wà lómìnira nígbà
-dídúró de nẹ́tíwọ́ọ̀kì. Ààlà yìí kò dá àwọn àtúnṣe/píparẹ́ àwọn ìlà tó ti wà dúró.
+Ọmọ naa ṣi ṣiṣatunṣe `DATA_DIR/storage.sqlite` kika-nikan olupin naa nipa lilo `node:sqlite`, pẹlu `busy_timeout=5000` ati `query_only=ON`. Ko ṣe akowọle DB singleton ko si ṣe awọn iṣiwa, awọn afẹyinti tabi awọn imudojuiwọn SQLite. Ṣiṣafipamọ iwe ohun-ọṣọ Missing/corrupt (pẹlu ibajẹ-artifact UPDATE) wa ninu ọna alaye dasibodu nikan. Mejeeji ona pin a funfun apejuwe awọn resolver; okeere nlo asynchronous filesystem kika ati kanna artifact → julọ inline → julọ disk → ọkan ipinnu. A run snapshots awọn ti o pọju ifibọ rowid nigbati awọn ọmọ ṣí awọn oniwe-kawe; awọn ifibọ nigbamii duro fun ṣiṣe atẹle. Eyi jẹ aala ifibọ, kii ṣe iṣowo SQLite pipẹ: awọn onkọwe WAL ati awọn aaye ayẹwo wa ni ọfẹ lakoko awọn iduro nẹtiwọọki. Updates/deletions ti awọn ori ila ti o wa ko ni didi nipasẹ ala yii.
 
-Lẹ́yìn ìdìpọ̀ kọ̀ọ̀kan tí a gbà, ìlànà ọmọ ń dúró de ìjẹ́rìísí. Olupin kọ́kọ́ ń pa
-atọ́ka ipò mọ́ pẹ̀lú `advanceLogExportCursor`, lẹ́yìn náà ó ń fi `ack` ránṣẹ́; kò sí ìdìpọ̀ tó kàn tí yóò bẹ̀rẹ̀ ṣáájú èyí.
-Ìkùnà ìfiránṣẹ́, ìṣubú tàbí píparí àkókò ń ṣe àkọsílẹ̀ ìkùnà láì mú ìdìpọ̀ yẹn tẹ̀ síwájú. Àwọn
-ìdìpọ̀ tí a ti jẹ́rìí sí tẹ́lẹ̀ ṣì dúró gẹ́gẹ́ bí èyí tí a ti fi múlẹ̀; ó pọ̀ jù lọ, ìdìpọ̀ kan tí a kò tíì jẹ́rìí sí nìkan ni a lè tún ránṣẹ́.
-A ń ṣe àkọsílẹ̀ àṣeyọrí lẹ́yìn `done` àti ìjáde ìlànà ọmọ láìsí ìṣòro nìkan. Àwọn ìkùnà ń fòpin sí ìlànà ọmọ
-pẹ̀lú SIGTERM, tí a ń gbé sókè sí SIGKILL lẹ́yìn 500 ms, olùṣiṣẹ́ sì ń dúró de pípa ìlànà náà.
+Lẹhin ipele kọọkan ti o gba, ọmọ naa duro fun ifọwọsi. Olupin naa kọkọ duro kọsọ pẹlu `advanceLogExportCursor`, lẹhinna firanṣẹ `ack`; ko si ipele atẹle ti o bẹrẹ ṣaaju rẹ. Ikuna ifiranšẹ, jamba tabi akoko ipari ṣe igbasilẹ ikuna laisi ilọsiwaju ipele yẹn. Awọn ipele ti a ti gba tẹlẹ duro ni ifaramọ; ni pupọ julọ ipele ti a ko gba ni a le tun fi ranṣẹ. Aṣeyọri ni igbasilẹ nikan lẹhin `done` ati ijade ọmọde ti o mọ. Awọn ikuna fopin si ọmọ pẹlu SIGTERM, jijẹ si SIGKILL lẹhin 500 ms, ati pe olusare nduro fun pipade ilana.
 
-| Oníyípadà àyíká                               | Àiyípadà | Ète                                    |
-| --------------------------------------------- | -------- | -------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Ààlà àkókò gidi fún ibi ìrìnàjò kọ̀ọ̀kan |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Ààlà old-space V8 ìlànà ọmọ ní MB      |
+| Ayika oniyipada                               | Aiyipada | Idi                         |
+| --------------------------------------------- | -------- | --------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Fun-ibi opin odi-aago       |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Ọmọ V8 atijọ-aaye iye ni MB |
 
-Àwọn iye tí kò tọ́/tí kò ju òdo lọ/tí kì í ṣe odidi nọ́ńbà ń lo àwọn àiyípadà. Ìṣètò heap kì í ṣe ààlà
-RSS lápapọ̀; àwọn ìdìpọ̀ tó tóbi gan-an ṣì lè lo gbogbo ìrántí ìlànà ọmọ tán kí ìṣiṣẹ́ sì kùnà láìléwu.
-Àiyípadà 1024 MB fi àyè sílẹ̀ fún ìdìpọ̀ àiyípadà onílà 500 ti àwọn artifact 512 KiB pẹ̀lú
-ara àkóónú tí a mú ṣiṣẹ́, títí kan ìyípadà JSON tí BigQuery ń pín sí ìdìpọ̀ báìtì. Kò mú kí
-ìdìpọ̀ ara àkóónú onílà 10000 wà láìléwu. Bí heap V8 bá tán, a ń ṣe àkọsílẹ̀ ìkùnà tí a lè gbé ìgbésẹ̀ lé lórí: dín ìwọ̀n
-ìdìpọ̀ kù tàbí mú `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` pọ̀ sí i; atọ́ka ipò ń dúró sí ìdìpọ̀
-ìkẹyìn tí a jẹ́rìí sí. Ààlà artifact òde òní kò bo àwọn ara àkóónú inú ìlà/lórí dìsíkì àtijọ́.
-Àwọn olùṣàkóso gbọ́dọ̀ ṣètò ìpín RSS lọ́tọ̀, pàápàá nínú àwọn container tí ìrántí wọn ní ààlà.
+awọn iye Invalid/non-positive/non-integer lo awọn aiyipada. Eto okiti kii ṣe opin RSS lapapọ; awọn ipele ti o tobi pupọ tun le mu iranti ọmọ kuro ki o kuna ṣiṣe ni aabo. Awọn aiyipada 1024 MB fi ori yara silẹ fun ipele 500-ila aiyipada ti awọn ohun-ọṣọ 512 KiB pẹlu awọn ara ti o ṣiṣẹ, pẹlu BigQuery's byte-chunked JSON serialization. Ko ṣe aabo ipele ara-ila 10000. Irẹwẹsi okiti V8 ṣe igbasilẹ ikuna ti o ṣiṣẹ: iwọn ipele kekere tabi gbe `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` soke; kọsọ duro ni awọn ti o kẹhin jẹwọ ipele. Awọn ara inline/disk itan ko ni aabo nipasẹ fila artifact ode oni. Awọn oniṣẹ gbọdọ ṣe isuna RSS lọtọ, pataki inu awọn apoti ti o lopin iranti.
 
-Ìlànà ọmọ jogún kìkì `DATA_DIR`, `NODE_ENV` tí a ti yanjú, `TZ` tí a sọ ní pàtó (ìyanjú àkókò agbègbè fún orúkọ fáìlì àtijọ́), `ELECTRON_RUN_AS_NODE` nígbà tí ó bá wà, àti àwọn àbáwọlé ìjáde wọ̀nyí:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (àti àwọn ẹ̀dà wọn ní lẹ́tà kékeré),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Olùpín iṣẹ́ Undici àgbáyé kan ń lo ìyanjú aṣojú láti inú àyíká nìkan àti àwọn òfin
-ìkọjá fún olùgbàlejò agbègbè tí olupin ń lò, pẹ̀lú `NO_PROXY`; kò ṣe àgbéwọlé `proxyFetch.ts` tàbí àwọn àsíá DB/ẹ̀yà iṣẹ́ rẹ̀.
-A máa ń pa àwọn ẹ̀rí ìwọlé aṣojú mọ́ kúrò nínú àbájáde tí a firánṣẹ́ síwájú àti àwọn àṣìṣe tí a gbasilẹ. Àwọn ẹ̀rí ìwọlé ibi ìrìnàjò
-ń rìn kìkì nínú ìfiránṣẹ́ IPC ìbẹ̀rẹ̀ kan, kì í ṣe nínú argv tàbí àyíká; fífi àbájáde/àṣìṣe ránṣẹ́ síwájú
-ní ìpele ìdánimọ̀ ní ìbẹ̀rẹ̀, a sì ń sọ ọ́ di mímọ́. `ExperimentalWarning` nìkan ni a pa nínú àwọn àríyànjiyàn exec ọmọ láti yẹra fún
-títún ìkìlọ̀ SQLite ti Node sọ ní gbogbo ìṣiṣẹ́ cron; àwọn irú ìkìlọ̀ yòókù ṣì máa ń hàn.
+Ọmọ naa jogun nikan `DATA_DIR` ti o yanju , `NODE_ENV`, `TZ` ti o fojuhan (ogan faili orukọ agbegbe ipinnu akoko), `ELECTRON_RUN_AS_NODE` nigbati o wa, ati awọn igbewọle ti njade wọnyi: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (ati awọn fọọmu kekere wọn), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Dispatcher Undici agbaye kan pin ipinnu agbegbe mimọ-aṣoju ti olupin ati awọn ofin fori agbalejo agbegbe, pẹlu `NO_PROXY`; ko wole `proxyFetch.ts` tabi asia DB/feature re. Awọn iwe-ẹri aṣoju jẹ atunṣe lati iṣelọpọ ti a firanṣẹ siwaju ati awọn aṣiṣe ti o gbasilẹ. Awọn iwe-ẹri ibi-afẹde rin irin-ajo nikan ni ifiranṣẹ IPC ibere kan, rara argv tabi ayika; output/error firanšẹ siwaju jẹ iṣaju ati mimọ. `ExperimentalWarning` nikan ni o jẹ alaabo ninu awọn ariyanjiyan exec ọmọde lati yago fun atunwi SQLite Node's ikilọ fun ṣiṣe cron kọọkan; miiran Ikilọ orisi wa han.
 
-Àwọn módù ibi ìrìnàjò gbọ́dọ̀ ṣeé gbé wọlé láìsí àwọn ìgbẹ́kẹ̀lé Next.js/tí ó jẹ́ ti olupin nìkan. Ìmúṣẹ
-BigQuery tó wà tẹ́lẹ̀ ti bá àdéhùn yẹn mu. Àwọn káṣì àmì ìwọlé wà fún ìgbà
-ìṣiṣẹ́ ọmọ nìkan, kì í kọjá láti ìṣiṣẹ́ kan sí òmíràn. Node ni àyíká ìṣiṣẹ́ tí a ṣe àtìlẹ́yìn fún (`package.json` engines), ṣùgbọ́n apá ìfìsípò Bun nínú README
-àti `Dockerfile.bun` tún ń polówó ọ̀nà ìbámu fún àyíká iṣelọpọ nípa lílo
-`bun:sqlite` (`src/lib/db/core.ts` / àwọn adapter). Nítorí náà, lábẹ́ Bun, àwọn ìfiránṣẹ́ jáde ṣì ń lo
-ọ̀nà inú ìlànà kan náà tó wà tẹ́lẹ̀, wọ́n sì ń fi ìkìlọ̀ hàn lẹ́ẹ̀kan ṣoṣo: ìyàsọ́tọ̀ heap/àkókò ìparí fún ọmọ kò sí. Lo
-Node fún ìyàsọ́tọ̀ event-loop àti OOM; a kò ka Bun sí ohun fún ìdàgbàsókè nìkan níbí.
+Awọn modulu opin si gbọdọ jẹ agbewọle laisi awọn igbẹkẹle Next.js/server-only. Imuse BigQuery ti o wa tẹlẹ ti pade adehun yẹn. Awọn kaṣe ami-iwọle ṣiṣe nikan fun ṣiṣe ọmọ, kii ṣe kọja awọn isin. Node jẹ akoko ṣiṣe atilẹyin (awọn ẹrọ `package.json` ). Igbiyanju ti o dara julọ, ọna ibamu Bun ti ko ṣe atilẹyin wa (`bun:sqlite` ni `src/lib/db/core.ts` / awọn oluyipada, ati `Dockerfile.bun`), nitorina awọn ọja okeere ko gbọdọ fọ labẹ rẹ. Labẹ Bun, awọn ọja okeere ṣe idaduro ọna ti o wa ninu ilana iṣaaju ati ki o gbejade ikilọ ọkan-akoko kan: iyasọtọ heap/timeout ọmọde ko si. Lo Node fun iṣẹlẹ-lupu ati ipinya OOM.
 
-Nígbà tí `includeBodies` bá ṣiṣẹ́, ó dára láti lo àárín ìgbà tó dá lórí ìṣẹ́jú bíi
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` dípò kíkó ẹrù dátà jọ fún wákàtí kan.
-Àwọn ààlà àkójọpọ̀ àti ìlà ṣì ń fi ààlà sí ìṣiṣẹ́ kọ̀ọ̀kan. Iye owó ìbẹ̀rẹ̀ ìlànà wà fún ibi ìrìnàjò kọ̀ọ̀kan ní ìṣiṣẹ́ kọ̀ọ̀kan;
-èyí ń fi iye owó ìbẹ̀rẹ̀ díẹ̀ pààrọ̀ fún ìyàsọ́tọ̀ event-loop olupin, kì í ṣe ìdínkù àpapọ̀ lílo CPU.
+Nigbati `includeBodies` ba ti ṣiṣẹ, fẹran iwọn-iṣẹju-iṣẹju kan gẹgẹbi `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` dipo kikojọpọ ẹhin fifuye wakati kan. Ipele ati awọn ifilelẹ kana si tun dè kọọkan run. Ibẹrẹ ilana jẹ sisan fun opin irin ajo kan; eyi n ṣowo idiyele ibẹrẹ kekere fun ipinya iṣẹlẹ-lupu olupin, ko dinku lilo CPU lapapọ.
 
-### Àwọn ẹrù dátà (àwọn ìtọ́nisọ́nà àti ìdáhùn)
+### Awọn ẹru isanwo (awọn ibere ati awọn ipari)
 
-Ní ìṣètò àiyípadà, ìfiránṣẹ́ jáde ní kìkì àwọn pápá àkótán tí **àtòjọ** Logs ń fi hàn. Títan
-**Fi àwọn ìtọ́nisọ́nà àti ìdáhùn jáde** (`includeBodies`) tún ń fi ohun tí àpótí **àlàyé**
-Logs ń fi hàn fún ìpè kọ̀ọ̀kan ránṣẹ́:
+Nipa aiyipada awọn okeere gbejade nikan awọn aaye akojọpọ Awọn Wọle** akojọ** fihan. Titan-an** Gbejade awọn ibeere ati awọn idahun** (`includeBodies`) afikun ohun ti awọn Wọle** apejuwe awọn** PAN fihan fun ipe kọọkan:
 
-| Pápá                             | Ohun tí ó ní                                                   |
-| -------------------------------- | -------------------------------------------------------------- |
-| `request_body` / `response_body` | Àwọn ẹrù dátà ìpè bí dashboard ṣe ń fi wọ́n hàn                 |
-| `pipeline_route_decision`        | Àfojúsùn àti àwòṣe tí router yàn                               |
-| `pipeline_client_request`        | Ìbéèrè àìṣe àtúnṣe gẹ́gẹ́ bí client ṣe fi ránṣẹ́ gan-an           |
-| `pipeline_openai_request`        | Lẹ́yìn yíyípadà sí ìrísí OpenAI inú ètò                         |
-| `pipeline_provider_request`      | Bí a ṣe fi ránṣẹ́ sí olupèsè gan-an, ní ìrísí tirẹ̀              |
-| `pipeline_provider_response`     | Ìdáhùn àìṣe àtúnṣe láti ọ̀dọ̀ olupèsè                            |
-| `pipeline_client_response`       | Ohun tí a dá padà fún olùpè                                    |
-| `pipeline_error`                 | Àlàyé àṣìṣe ní ìpele pipeline fún ìpè tí ó kùnà                |
-| `bodies_truncated`               | Òótọ́ nígbà tí èyíkéyìí lára àwọn pápá òkè bá dé `maxBodyBytes` |
+| Aaye                             | Ohun ti o dimu                                            |
+| -------------------------------- | --------------------------------------------------------- |
+| `request_body` / `response_body` | Awọn fifuye ipe ipe bi dasibodu ṣe mu wọn                 |
+| `pipeline_route_decision`        | Eyi ti afojusun ati awoṣe olulana ti gbe                  |
+| `pipeline_client_request`        | Awọn aise ìbéèrè gangan bi awọn ose rán o                 |
+| `pipeline_openai_request`        | Lẹhin itumọ sinu apẹrẹ OpenAI inu                         |
+| `pipeline_provider_request`      | Gẹgẹbi a ti firanṣẹ gangan ni oke, ni dialect olupese     |
+| `pipeline_provider_response`     | Idahun ti oke aise                                        |
+| `pipeline_client_response`       | Ohun ti a fi pada si olupe naa                            |
+| `pipeline_error`                 | Awọn alaye aṣiṣe ipele opo gigun ti epo fun ipe ti o kuna |
+| `bodies_truncated`               | Otitọ nigbati eyikeyi aaye loke lu `maxBodyBytes`         |
 
-Èyí jẹ́ àkóónú ìtọ́nisọ́nà, nítorí náà ó **wà ní pípa ní ìṣètò àiyípadà**, a sì mọ̀ọ́mọ̀ jẹ́ kí yíyàn rẹ̀ jẹ́ ti ibi ìrìnàjò kọ̀ọ̀kan.
-Ohun tí a firánṣẹ́ ni ohun tí dashboard ń fi hàn, nítorí ìfiránṣẹ́ jáde àti `getCallLogById` jọ ń lo ìyanjú
-àlàyé: a ti
-sọ àwọn ẹrù dátà di mímọ́ kúrò ní PII, a sì ti pa àwọn àṣírí mọ́ nígbà tí a kọ wọ́n, ìpè tí a sì ṣe pẹ̀lú
-kọ́kọ́rọ́ API `noLog` kì í tọ́jú ẹrù dátà kankan rárá, nítorí náà kò sí ohun láti firánṣẹ́ jáde.
+Eyi jẹ akoonu kiakia, nitorina o jẹ** pipa nipa aiyipada** ati koto a fun-ibi wun. Awọn ọkọ oju omi wo ni ohun ti dasibodu fihan, nitori okeere ati `getCallLogById` pin ipinnu alaye: awọn isanwo ti wa tẹlẹ PII-sanitised ati aṣiri-atunṣe nigbati wọn ba kọ wọn, ati pe ipe ti a ṣe pẹlu bọtini `noLog` API kan ko tọju fifuye isanwo rara, nitorinaa ko si nkankan lati okeere.
 
-A ń ka àwọn ẹrù dátà fún ìlà kọ̀ọ̀kan láti inú fáìlì àbájáde lórí ètò fáìlì, nítorí náà kíkún dátà ń ṣiṣẹ́ fún àwọn ibi ìrìnàjò
-tí ó béèrè rẹ̀ nìkan. Fáìlì àbájáde tí kò sí tàbí tí ó bàjẹ́ ń fi àkótán rẹ̀ jáde pẹ̀lú àwọn ẹrù dátà null dípò
-kíkó àkójọpọ̀ náà kùnà àti dídẹkùn ìtọ́ka ipò.
+Awọn fifuye isanwo ni a ka ni ọna kan lati inu ohun-ini ọna faili, nitorinaa hydration nikan nṣiṣẹ fun awọn ibi ti o beere fun. Ohun-ọṣọ ti o nsọnu tabi ibajẹ n ṣe okeere akopọ rẹ pẹlu awọn ẹru isanwo asan dipo kiko ipele naa ki o di kọsọ naa.
 
-`maxBodyBytes` (àiyípadà 262144) fi ààlà sí pápá kọ̀ọ̀kan. Àwọn ẹrù dátà tó gùn jù ni a **gé kúrú dípò
-sísọ wọ́n nù** — ìtọ́nisọ́nà tí a gé ṣì ń dáhùn “kí ni a béèrè” — a sì fi àmì
-`bodies_truncated` sí ìlà náà. A kì í fi àwọn àyípadà tí a ń ṣàn ní ẹyọ kọ̀ọ̀kan jáde; ìdáhùn tí a ti kó jọ
-ti wà nínú `pipeline_provider_response` àti `pipeline_client_response`.
+`maxBodyBytes` (aiyipada 262144) awọn bọtini aaye kọọkan. Gun payloads ni** truncated kuku ju silẹ** — itọka gige kan tun dahun "kini a beere" — ati pe ila naa jẹ aami pẹlu `bodies_truncated`. Sisan chunk-nipasẹ-chunk deltas ko ba wa ni okeere; idahun ti o pejọ ti wa tẹlẹ ni `pipeline_provider_response` ati `pipeline_client_response`.
 
 ---
 

@@ -13,131 +13,66 @@ pipelinen är registerbaserad, så fler destinationer kan läggas till.
 
 ---
 
-## 1. Så fungerar det
+## 1. Hur det fungerar
 
 ```
-server (dekryptera + validera konfiguration, stäm av markör)
-  → starta IPC → isolerad exportChild-OS-process
-    → skrivskyddad storage.sqlite → delad fråga/mappning för anropsloggar
-      → asynkron inläsning av artefaktinnehåll → destinationens prepare()/send()
-        → batch-IPC → servern sparar markören → ack-IPC
-          → nästa batch; done-IPC → servern registrerar att körningen lyckades
+server (decrypt + validate config, reconcile cursor)
+  → start IPC → isolated exportChild OS process
+    → read-only storage.sqlite → shared call-log query/mapping
+      → async artifact hydration → destination prepare()/send()
+        → batch IPC → server persists cursor → ack IPC
+          → next batch; done IPC → server records success
 ```
 
-- **Schema** — ett `JobRegistry`-cronjobb, `log_export`, med standardvärdet `0 * * * *` (varje timme,
-  UTC). Registreras i `src/lib/initCloudSync.ts`; kan åsidosättas med `OMNIROUTE_LOG_EXPORT_CRON`.
-  Vid varje schematillfälle bearbetas alla **aktiverade** destinationer, i tur och ordning.
-- **Markör** — SQLites implicita `call_logs.rowid`, som sparas per destination i
-  `log_export_destinations.cursor_row_id`. `timestamp` används avsiktligt inte som markör: anropare
-  kan ange ett eget värde, så en långsam förfrågan kan skrivas efter en snabbare som startade
-  senare, och en tidsstämpelbaserad markör skulle hoppa över den.
-- **Batchindelning** — `batch_size` rader per förfrågan (standardvärde 500), `max_rows_per_run` rader per körning
-  (standardvärde 10000), så att en stor kö bearbetas över flera schematillfällen i stället för att blockera ett enda.
-- **Leverans** — markören flyttas fram först när `send()` har slutförts utan fel. En misslyckad batch lämnar
-  markören där den var, så samma rader skickas på nytt vid nästa körning. Garantin är
-  minst en gång plus deduplicering på destinationssidan, inte strikt exakt en gång: BigQuery använder
-  anropsloggens id som nyckel för varje rad och tar hänsyn till detta efter bästa förmåga inom sitt eget dedupliceringsfönster.
-- **Överlappningsskydd** — cronjobbet och `POST .../run` kan utlösas samtidigt. En destination
-  som redan bearbetas hoppas över i stället för att bearbetas två gånger (`skipped: true` i körningsresultatet),
-  så en samtidig körning kan inte skicka om en batch eller flytta markören bakåt.
-- **Återhämtning efter rensning** — om `cursor_row_id` hamnar över `MAX(rowid)` (hela tabellen har
-  rensats och rad-id:na har börjat om), återställer köraren markören till 0 i stället för att permanent missa nya poster.
+- **Schema** — one `JobRegistry` cron job, `log_export`, som standard är `0 * * * *` (timme, UTC). Registrerad i `src/lib/initCloudSync.ts`; överstyrbar med `OMNIROUTE_LOG_EXPORT_CRON`. Varje fästing dräneras varje** aktiverat** destination, sekventiellt.
+- **Cursor** — SQLite implicita `call_logs.rowid`, kvarstod per destination i `log_export_destinations.cursor_row_id`. `timestamp` är medvetet inte markören: anropare kan ange sitt eget värde, så en långsam begäran kan skrivas efter en snabbare som startade senare, och en tidsstämpelmarkör skulle hoppa över den.
+- **Batchning** — `batch_size` rader per förfrågan (standard 500), `max_rows_per_run` rader per körning (standard 10000) så en stor eftersläpning dräneras över flera bockar istället för att blockera en.
+- **Leverans** — flyttas markören först efter att `send()` har löst sig. En misslyckad batch lämnar markören där den var, så samma rader försöks igen vid nästa körning. Garantin är åtminstone en gång plus de-duplicering på destinationssidan, inte sant exakt-en gång: BigQuery nycklar varje rad med anropslogg-id, som den respekterar på bästa sätt inom sitt eget dedup-fönster.
+- **Överlappsskydd** — cron tick och `POST .../run` kan elda tillsammans. En destination som redan dräneras hoppas över i stället för att dräneras två gånger (`skipped: true` i körningsresultatet), så en samtidig körning kan inte skicka om en batch eller skriva markören bakåt.
+- **Rensa återhämtning** — om `cursor_row_id` hamnar över `MAX(rowid)` (hela bordet rensades och raderna startade om), spolar löparen tillbaka till 0 istället för att bli permanent blind.
 
-### Isolerad körare och gränser
+### Isolerad löpare och gränser
 
-Varje destinationskörning på Node startar en separat, kortlivad underprocess i operativsystemet (`child_process`
-med IPC, inte `worker_threads`). Läsning av meddelandekroppar, JSON-tolkning/serialisering av nyttolast, destinationens
-`prepare()` och destinationens nätverks-I/O körs där, inte i serverns händelseloop.
-Endast konfiguration och små förloppsmeddelanden passerar via IPC; exporterade poster återvänder aldrig till
-servern. Cronjobbet och routen för Kör nu behåller samma publika resultat och överlappningsskydd.
+Varje destination som körs på Node startar en separat, kortlivad OS underordnad process (`child_process` med IPC, inte `worker_threads`). Kroppsläsningar, nyttolast JSON parsing/serialization, destination `prepare()` och destinationsnätverk I/O körs alla där, inte på serverns händelseslinga. Endast konfigurations- och små förloppsmeddelanden korsar IPC; exporterade poster kommer aldrig tillbaka till servern. Cron-jobbet och Run now-rutten behåller samma offentliga resultat och överlappningsskydd.
 
-Underprocessen öppnar serverns upplösta `DATA_DIR/storage.sqlite` skrivskyddat med `node:sqlite`,
-med `busy_timeout=5000` och `query_only=ON`. Den importerar ingen DB-singleton och utför inga
-migreringar, säkerhetskopieringar eller SQLite-uppdateringar. Hantering av saknad/skadad artefaktmetadata (inklusive
-UPDATE för skadade artefakter) finns fortfarande endast i kontrollpanelens detaljflöde. Båda flödena delar en ren
-detaljresolver; exporten använder asynkrona filsystemsläsningar och samma prioritetsordning: artefakt → äldre
-inline-lagring → äldre disklagring → ingen. En körning tar en ögonblicksbild av det högsta infogade rad-id:t
-när underprocessen öppnar sin läsare; senare infogningar får vänta till nästa körning. Detta är en gräns för infogningar,
-inte en långvarig SQLite-transaktion: WAL-skrivare och kontrollpunkter kan fortsätta arbeta under
-nätverksväntetider. Uppdateringar/borttagningar av befintliga rader fryses inte av denna gräns.
+Barnet öppnar serverns lösta `DATA_DIR/storage.sqlite` -skrivskyddade med `node:sqlite`, med `busy_timeout=5000` och `query_only=ON`. Den importerar ingen DB singleton och utför inga migreringar, säkerhetskopieringar eller SQLite -uppdateringar. Missing/corrupt artefaktbokföring (inklusive den korrupta artefakten UPDATE) finns endast kvar i instrumentpanelens detaljsökväg. Båda vägarna delar en ren detaljlösare; export använder asynkrona filsystemläsningar och samma artefakt → legacy inline → legacy disk → ingen upplösningsordning. En körning tar ögonblicksbilder av den maximala infogningsraden när barnet öppnar sin läsare; senare insatser väntar på nästa körning. Detta är en insättningsgräns, inte en långlivad SQLite transaktion: WAL skrivare och kontrollpunkter förblir lediga under nätverksväntningar. Updates/deletions av befintliga rader fryses inte av denna gräns.
 
-Efter varje accepterad batch väntar underprocessen på en bekräftelse. Servern sparar först
-markören med `advanceLogExportCursor` och skickar sedan `ack`; ingen nästa batch startar dessförinnan.
-Ett sändningsfel, en krasch eller en tidsgränsöverskridning registreras som ett fel utan att markören flyttas fram för den batchen. Tidigare
-bekräftade batcher förblir sparade; högst den enda obekräftade batchen kan skickas om.
-En lyckad körning registreras först efter `done` och en normal avslutning av underprocessen. Vid fel avslutas underprocessen
-med SIGTERM, som eskaleras till SIGKILL efter 500 ms, och köraren väntar tills processen har stängts.
+Efter varje godkänd batch väntar barnet på en bekräftelse. Servern fortsätter först med markören med `advanceLogExportCursor` och skickar sedan `ack`; ingen nästa batch börjar före den. Ett sändningsfel, krasch eller timeout registrerar misslyckande utan att den batchen flyttas fram. Tidigare erkända partier förblir engagerade; som mest kan den obekräftade batchen skickas på nytt. Framgång registreras först efter `done` och en ren barnutgång. Fel avslutar barnet med SIGTERM, eskalerar till SIGKILL efter 500 ms, och löparen väntar på att processen stängs.
 
-| Miljövariabel                                 | Standardvärde | Syfte                                       |
-| --------------------------------------------- | ------------- | ------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000        | Tidsgräns i faktisk tid per destination     |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024          | Gräns för underprocessens V8 old-space i MB |
+| Miljövariabel                                 | Standard | Ändamål                              |
+| --------------------------------------------- | -------- | ------------------------------------ |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Gräns för väggklocka per destination |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Child V8 old-space limit i MB        |
 
-Ogiltiga värden, icke-positiva värden och värden som inte är heltal ersätts med standardvärdena. Heapinställningen är inte en gräns för total
-RSS; mycket stora batcher kan fortfarande förbruka underprocessens minne och få körningen att misslyckas på ett säkert sätt.
-Standardvärdet 1024 MB ger marginal för standardbatchen på 500 rader med artefakter på 512 KiB och
-aktiverade meddelandekroppar, inklusive BigQuerys byteuppdelade JSON-serialisering. Det gör inte en
-batch med 10000 rader med meddelandekroppar säker. Om V8-heapen tar slut registreras ett fel med en konkret åtgärd: minska batchstorleken
-eller höj `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; markören stannar vid den senast
-bekräftade batchen. Historiska meddelandekroppar som lagras inline/på disk omfattas inte av den moderna artefaktgränsen.
-Driftansvariga måste budgetera RSS separat, särskilt i containrar med begränsat minne.
+Invalid/non-positive/non-integer värden använder standardvärdena. Heap-inställningen är inte en total RSS gräns; mycket stora partier kan fortfarande tömma barnminnet och misslyckas med körningen på ett säkert sätt. 1024 MB standarden lämnar utrymme för standard 500-rads batch av 512 KiB artefakter med kroppar aktiverade, inklusive BigQuery byte-chunked JSON serialisering. Det gör inte en 10000-rads kaross batchsäker. V8-högutmattning registrerar ett åtgärdbart misslyckande: minska batchstorleken eller höj `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; markören stannar vid den senast bekräftade batchen. Historiska inline/disk kroppar täcks inte av den moderna artefakthöljet. Operatörer måste budgetera RSS separat, särskilt i minnesbegränsade behållare.
 
-Barnprocessen ärver endast det upplösta `DATA_DIR`, `NODE_ENV`, explicit angivet `TZ` (äldre filnamnsbaserad
-upplösning av lokal tid), `ELECTRON_RUN_AS_NODE` när det finns, samt följande indata för utgående trafik:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (och deras former med gemener),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-En global Undici-dispatcher delar serverns proxyupplösning som enbart baseras på miljövariabler och regler för att
-kringgå proxyn för lokala värdar, inklusive `NO_PROXY`; den importerar inte `proxyFetch.ts` eller dess databas-/funktionsflaggor.
-Proxyautentiseringsuppgifter maskeras i vidarebefordrad utdata och registrerade fel. Destinationens autentiseringsuppgifter
-överförs endast i ett IPC-startmeddelande, aldrig via argv eller miljövariabler; vidarebefordrad utdata och fel
-förses med prefix och saneras. Endast `ExperimentalWarning` inaktiveras i barnprocessens körningsargument för att undvika
-att Nodes SQLite-varning upprepas vid varje cron-körning; andra varningstyper förblir synliga.
+Barnet ärver endast upplösta `DATA_DIR`, `NODE_ENV`, explicita `TZ` (äldre filnamn lokaltidsupplösning), `ELECTRON_RUN_AS_NODE` när de finns och följande utgående indata: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (och deras gemener), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. En global Undici-avsändare delar serverns rena miljö-proxyupplösning och lokala värdbypass-regler, inklusive `NO_PROXY`; den importerar inte `proxyFetch.ts` eller dess DB/feature flaggor. Fullmaktsuppgifter redigeras från vidarebefordrad utdata och registrerade fel. Destinationsuppgifterna färdas endast i ett start- IPC -meddelande, aldrig argv eller miljö; output/error -vidarebefordran har prefix och saneras. Endast `ExperimentalWarning` är inaktiverat i underordnade exec-argument för att undvika att Nodes SQLite varnar för varje cron-körning. andra varningstyper förblir synliga.
 
-Destinationsmoduler måste kunna importeras utan beroenden på Next.js eller server-only. Den befintliga
-BigQuery-implementeringen uppfyller redan det kontraktet. Cachelagrade åtkomsttoken finns endast under barnprocessens
-körning, inte mellan körningar. Node är den runtime som stöds (`package.json` engines), men README:s avsnitt om
-installation med Bun och `Dockerfile.bun` beskriver också en kompatibilitetsväg för produktion med
-`bun:sqlite` (`src/lib/db/core.ts` / adaptrar). Under Bun behåller exporter därför den tidigare
-körningen inom samma process och visar en engångsvarning: isolering av barnprocessens heap och timeout är inte tillgänglig. Använd
-Node för isolering av händelseloopen och skydd mot minnesbrist (OOM); Bun betraktas inte som enbart avsett för utveckling här.
+Destinationsmoduler måste kunna importeras utan Next.js/server-only beroenden. Den befintliga BigQuery implementeringen uppfyller redan det kontraktet. Cacher med åtkomsttoken räcker endast för barnkörningen, inte över löpningarna. Node är den stödda körtiden (`package.json` motorer). En bästa möjliga, ostödda Bun kompatibilitetssökväg finns (`bun:sqlite` i `src/lib/db/core.ts` / adaptrar och `Dockerfile.bun`), så export får inte bryta under den. Under Bun behåller export den tidigare pågående sökvägen och avger en engångsvarning: underordnad heap/timeout isolering är inte tillgänglig. Använd Node för event-loop och OOM isolering.
 
-När `includeBodies` är aktiverat bör du föredra ett intervall på minutnivå, till exempel
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, framför att samla på dig en timmes nyttolaster.
-Batch- och radgränser begränsar fortfarande varje körning. Kostnaden för processstart tillkommer per destination och körning;
-detta byter en liten startkostnad mot isolering av serverns händelseloop, inte minskad total CPU-användning.
+När `includeBodies` är aktiverat, föredrar du en kadens på minutnivå som `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` istället för att samla på sig en eftersläpning av nyttolast per timme. Batch- och radgränser är fortfarande bundna för varje körning. Processstart betalas per destination och körning; detta byter ut en liten startkostnad för isolering av serverhändelser, inte minskad total CPU användning.
 
-### Nyttolaster (promptar och genererade svar)
+### Nyttolaster (uppmaningar och slutföranden)
 
-Som standard innehåller exporten endast de sammanfattningsfält som visas i loggarnas **lista**. Om du aktiverar
-**Exportera promptar och svar** (`includeBodies`) skickas även det som loggarnas **detaljpanel**
-visar för varje anrop:
+Som standard innehåller exporten endast sammanfattningsfälten Loggarna** lista** visar. Slår på** Exportera uppmaningar och svar** (`includeBodies`) skickar dessutom vad loggarna** detalj** rutan visar för varje samtal:
 
-| Fält                             | Innehåll                                                        |
-| -------------------------------- | --------------------------------------------------------------- |
-| `request_body` / `response_body` | Anropets nyttolaster så som de visas i instrumentpanelen        |
-| `pipeline_route_decision`        | Vilket mål och vilken modell routern valde                      |
-| `pipeline_client_request`        | Den råa begäran exakt som klienten skickade den                 |
-| `pipeline_openai_request`        | Efter översättning till det interna OpenAI-formatet             |
-| `pipeline_provider_request`      | Så som den faktiskt skickades uppströms, i leverantörens format |
-| `pipeline_provider_response`     | Det råa svaret från uppströmsleverantören                       |
-| `pipeline_client_response`       | Det som returnerades till anroparen                             |
-| `pipeline_error`                 | Felinformation på pipelinenivå för ett misslyckat anrop         |
-| `bodies_truncated`               | Sant när något fält ovan nådde `maxBodyBytes`                   |
+| Fält                             | Vad den rymmer                                        |
+| -------------------------------- | ----------------------------------------------------- |
+| `request_body` / `response_body` | Samtalet laddas när instrumentpanelen renderar dem    |
+| `pipeline_route_decision`        | Vilket mål och vilken modell routern valde            |
+| `pipeline_client_request`        | Den råa begäran exakt som kunden skickade den         |
+| `pipeline_openai_request`        | Efter översättning till den inre OpenAI formen        |
+| `pipeline_provider_request`      | Som faktiskt skickas uppströms, på provider-dialekten |
+| `pipeline_provider_response`     | Det råa uppströmssvaret                               |
+| `pipeline_client_response`       | Det som lämnades tillbaka till den som ringde         |
+| `pipeline_error`                 | Feldetaljer på pipelinenivå för ett misslyckat samtal |
+| `bodies_truncated`               | Sant när något fält ovan träffar `maxBodyBytes`       |
 
-Detta är promptinnehåll, så det är **inaktiverat som standard** och är avsiktligt ett val per destination.
-Det som skickas är det som instrumentpanelen visar, eftersom exporten och `getCallLogById` delar samma
-detaljupplösning: nyttolasterna har
-redan sanerats från personuppgifter och fått hemligheter maskerade när de skrivs, och ett anrop med en
-`noLog`-API-nyckel lagrar ingen nyttolast alls, så det finns inget att exportera.
+Detta är snabbt innehåll, så det är** av som standard** och medvetet ett val per destination. Det som skickas är vad instrumentpanelen visar, eftersom export och `getCallLogById` delar detaljupplösning: nyttolaster är redan PII-sanerade och hemliga redigerade när de skrivs, och ett anrop som görs med en `noLog` API nyckel lagrar ingen nyttolast alls, så det finns inget att exportera.
 
-Nyttolaster läses per rad från filsystemsartefakten, så hydrering körs endast för destinationer
-som har begärt det. Om en artefakt saknas eller är skadad exporteras sammanfattningen med null-värden för nyttolasterna i stället
-för att batchen misslyckas och markören fastnar.
+Nyttolaster läses per rad från filsystemartefakten, så hydrering körs bara för destinationer som bad om det. En saknad eller korrupt artefakt exporterar sin sammanfattning med nollnyttolaster istället för att misslyckas med batchen och strandar markören.
 
-`maxBodyBytes` (standardvärde 262144) begränsar varje fält. Längre nyttolaster **trunkeras i stället för att
-utelämnas** — en avklippt prompt besvarar fortfarande frågan ”vad efterfrågades” — och raden markeras med
-`bodies_truncated`. Strömmade deltauppdateringar, bit för bit, exporteras inte; det sammansatta svaret finns
-redan i `pipeline_provider_response` och `pipeline_client_response`.
+`maxBodyBytes` (standard 262144) begränsar varje fält. Längre nyttolaster är** trunkeras snarare än tappas** — en avskuren prompt svarar fortfarande "vad frågade" — och raden är flaggad med `bodies_truncated`. Strömmade del för bit exporteras inte; det sammansatta svaret är redan i `pipeline_provider_response` och `pipeline_client_response`.
 
 ---
 

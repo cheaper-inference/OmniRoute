@@ -12,6 +12,12 @@ Il contratto `config/cli-tools-manifest.json` neutro dichiara IDs canonico, alia
 
 I segnali di interruzione e terminazione vengono inoltrati al bambino. Il programma di avvio attende l'evento di chiusura del bambino prima di rimuovere la configurazione temporanea. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` controlla il periodo di grazia prima della terminazione forzata (predefinito 5000 millisecondi).
 
+`omniroute launch <tool>` (vedi [LAUNCH.md](./LAUNCH.md) ) segue le stesse regole dell'ambiente e l'inoltro del segnale e aggiunge:
+
+- **Avvio automatico del gateway.** Per un target locale, quando nessun gateway risponde sulla porta, il programma di avvio avvia `omniroute serve --headless --no-open` associato a `127.0.0.1` in un processo reaper distaccato. Ogni lancio in esecuzione contiene un lease in `DATA_DIR/launch/leases/` (battito cardiaco ogni 15 s, obsoleto dopo 45 s o quando il processo è terminato). Il reaper arresta il gateway avviato una volta che nessun lease è stato attivo per il periodo di inattività (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, predefinito 10000 millisecondi). Un gateway avviato dall'utente viene utilizzato ma non viene mai arrestato. `--keep-gateway` o `omniroute gateway keep` trasformano un gateway di avvio in uno normale; `--no-start` ripristina il vecchio comportamento fail-if-down. Vengono sondati solo i target remoti.
+- **Avviare sessioni.** Ogni lancio conia un token di sessione `olx_` di breve durata dalle credenziali principali (`POST /api/launch/sessions`), lo esegue l'heartbeat durante l'esecuzione dello strumento, legge il riepilogo dell'utilizzo e lo revoca all'uscita dello strumento. Il token è un sottoinsieme rigoroso del suo genitore: stesse autorizzazioni, catalogo uguale o più ristretto, durata più breve e non è una credenziale del dashboard. Lo strumento riceve il token di sessione, mai la credenziale principale, e le richieste vengono contrassegnate con `launch:<tool>:<sessionId>` a meno che non venga fornito `--tag`. Un gateway senza la sessione API fallisce con `GatewayTooOld` invece di ricorrere a un avvio senza ambito.
+- **Configurazione per lancio.** I file di configurazione dello strumento vengono scritti in una directory temporanea privata (modalità 0700, prefisso `omnirouter-`) e rimossi dopo l'uscita del figlio. Uno `SIGKILL` del launcher lascia la directory dietro; `omniroute launch --cleanup` rimuove tali directory una volta che sono più vecchie di un giorno.
+
 ## Gemini configurazione persistente
 
 ```bash

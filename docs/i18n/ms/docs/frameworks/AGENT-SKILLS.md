@@ -11,14 +11,14 @@ Agent Skills ialah fail SKILL.md berstruktur yang mengajar ejen luaran, klien MC
 
 ---
 
-## Gambaran Keseluruhan
+## Gambaran keseluruhan
 
-Katalog ini mengandungi **45 Agent Skills** (23 REST API + 21 CLI + 1 aliran kerja konfigurasi). Setiap kemahiran mempunyai:
+Katalog mengandungi** 45 Kemahiran Ejen** (23 REST API + 21 CLI + 1 aliran kerja konfigurasi). Setiap kemahiran mempunyai:
 
-- **ID kanonik** (`omni-auth`, `cli-serve`, dan sebagainya)
-- Fail **SKILL.md** dalam `skills/{id}/SKILL.md` dengan bahagian hadapan YAML (`name`, `description`) + kandungan markdown yang lengkap
-- **Titik akhir REST** (kemahiran API) atau **subperintah CLI** (kemahiran CLI) yang diterbitkan daripada spesifikasi OpenAPI dan daftar CLI
-- **URL mentah GitHub** untuk pengambilan langsung: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** ID berkanun** (`omni-auth`, `cli-serve`, dsb.)
+- A**SKILL.md** fail dalam `skills/{id}/SKILL.md` dengan YAML frontmatter (`name`, `description`) badan penurunan harga kaya +
+- **titik akhir REST** ( kemahiran API ) atau** subperintah CLI** ( kemahiran CLI ) yang diperoleh daripada daftar OpenAPI spec dan CLI
+- A**GitHub mentah URL** untuk pengambilan langsung: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Respons penjana ialah `GeneratorReport`:
 
 ---
 
-## API Liputan
+## Perlindungan API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

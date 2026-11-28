@@ -65,7 +65,7 @@ Devin, Jules) ଦୀର୍ଘକାଳୀନ ଟାସ୍କ ଭାବେ ସଂ
 କୌଣସି ପୃଷ୍ଠଭୂମି ପୋଲର୍ ନାହିଁ। ନବୀନତମ ସ୍ଥିତି ଆବଶ୍ୟକ କରୁଥିବା ଡ୍ୟାସ୍ବୋର୍ଡଗୁଡ଼ିକ ଉଚିତ ବ୍ୟବଧାନରେ GET
 ଏଣ୍ଡପଏଣ୍ଟକୁ ପୋଲ୍ କରିବା ଉଚିତ।
 
-## `CloudAgentBase` ଇଣ୍ଟରଫେସ୍
+## `CloudAgentBase` ଇଣ୍ଟରଫେସ୍।
 
 ଉତ୍ସ: `src/lib/cloudAgent/baseAgent.ts`
 
@@ -109,15 +109,15 @@ export abstract class CloudAgentBase {
     c: AgentCredentials
   ): Promise<{ name: string; url: string; branch?: string }[]>;
 
-  protected mapStatus(raw: string): CloudAgentStatus; // ହ୍ୟୁରିଷ୍ଟିକ୍ ଅପ୍ଷ୍ଟ୍ରିମ୍-ଷ୍ଟ୍ରିଙ୍ଗ୍ → ଏନମ୍
+  protected mapStatus(raw: string): CloudAgentStatus; // heuristic upstream-string → enum
   protected generateTaskId(): string; // `task_<ts>_<rand>`
   protected generateActivityId(): string; // `act_<ts>_<rand>`
 }
 ```
 
-`CodexCloudAgent.approvePlan` ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବେ ଥ୍ରୋ କରେ — Codex Cloud ସ୍ୱୟଂଚାଳିତ ଭାବେ ଯୋଜନା ପ୍ରସ୍ତୁତ କରେ ଏବଂ ଏଥିରେ କୌଣସି ଅନୁମୋଦନ ଗେଟ୍ ନାହିଁ। `CodexCloudAgent.listSources`, `[]` ଫେରାଏ।
+`CodexCloudAgent.approvePlan` ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବରେ — Codex କ୍ଲାଉଡ୍ ଅଟୋ-ପ୍ଲାନ୍ ପକାଇଥାଏ ଏବଂ ଏହାର କ approval ଣସି ଅନୁମୋଦନ ଗେଟ୍ ନାହିଁ। `CodexCloudAgent.listSources` `[]` ଫେରସ୍ତ କରେ
 
-`CursorCloudAgent`, ଏକ **ଉପଯୋଗକର୍ତ୍ତା କିମ୍ବା ସେବା-ଆକାଉଣ୍ଟ API କି** ମାଧ୍ୟମରେ Cursorର ଅଧିକୃତ REST API (`api.cursor.com/v0`) ବ୍ୟବହାର କରି ଏହାର Background / Cloud Agentsକୁ ପରିଚାଳନା କରେ — ଏହା Cursor IDEର OAuth ସେସନ୍କୁ ପୁନଃବ୍ୟବହାର କରିବା ଅପେକ୍ଷା ଅଧିକ ସୁରକ୍ଷିତ, ପ୍ରଥମ-ପକ୍ଷ ବିକଳ୍ପ (ପ୍ରଦାନକାରୀ `cursor`, ଯେଉଁଥିରେ ବ୍ୟାନ୍ ହେବାର ଝୁମ୍ପ ସମ୍ପର୍କିତ ଚେତାବନୀ ରହିଛି)। ଏହା ଏକ ସରଳ REST ଆଡାପ୍ଟର୍ (କୌଣସି `@cursor/sdk` ନେଟିଭ୍ ଡିପେଣ୍ଡେନ୍ସି ନାହିଁ)। `approvePlan` ଥ୍ରୋ କରେ (Cursor ଏଜେଣ୍ଟଗୁଡ଼ିକ ସ୍ୱୟଂଶାସିତ ଭାବେ ଚାଲେ); `listSources` କି ଦ୍ୱାରା ପ୍ରବେଶଯୋଗ୍ୟ ରିପୋଜିଟୋରିଗୁଡ଼ିକୁ ତାଲିକାଭୁକ୍ତ କରେ। Cursor, UPPERCASE ସ୍ଥିତି ଏନମ୍ଗୁଡ଼ିକ (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`) ଫେରାଏ, ଯାହାକୁ ସ୍ପଷ୍ଟ ଭାବେ ସାଧାରଣ `CloudAgentStatus` ସହିତ ମ୍ୟାପ୍ କରାଯାଏ। `baseUrl`କୁ ପ୍ରତ୍ୟେକ କ୍ରେଡେନ୍ସିଆଲ୍ ଅନୁସାରେ ଓଭର୍ରାଇଡ୍ କରାଯାଇପାରେ, ଯାହାଦ୍ୱାରା କୋଡ୍ ପରିବର୍ତ୍ତନ ବିନା API ଭର୍ସନ୍/ପାଥ୍ ସଂଶୋଧନ କରାଯାଇପାରିବ।
+`CursorCloudAgent` ଏହାର ଅଫିସିଆଲ୍ REST API (`api.cursor.com/v0`) ମାଧ୍ୟମରେ Cursor ର ପୃଷ୍ଠଭୂମି / କ୍ଲାଉଡ୍ ଏଜେଣ୍ଟଗୁଡ଼ିକୁ ଡ୍ରାଇଭ୍ କରେ।** ବ୍ୟବହାରକାରୀ କିମ୍ବା ସେବା-ଖାତା API କି** Cursor IDE ର OAuth ଅଧିବେଶନକୁ ପୁନ using ବ୍ୟବହାର କରିବା ପାଇଁ — ନିରାପଦ, ପ୍ରଥମ-ପକ୍ଷ ବିକଳ୍ପ (ପ୍ରଦାନକାରୀ `cursor`, ଯାହା ଏକ ନିଷେଧ-ବିପଦ ଚେତାବନୀ ବହନ କରେ)। ଏହା ଏକ ସାଧା REST ଆଡାପ୍ଟର ( `@cursor/sdk` ଦେଶୀ ନିର୍ଭରଶୀଳତା ନାହିଁ)। `approvePlan` ଥ୍ରୋ (Cursor ଏଜେଣ୍ଟଗୁଡିକ ସ୍ୱୟଂଚାଳିତ ଭାବରେ ଚାଲିଥାଏ); `listSources` ଚାବି ଦ୍ୱାରା ଉପଲବ୍ଧ ରେପୋଜିଟୋରୀଗୁଡ଼ିକୁ ତାଲିକାଭୁକ୍ତ କରେ। Cursor UPPERCASE ସ୍ଥିତି enums (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`) ଫେରସ୍ତ କରେ, ଅଂଶୀଦାରିତ `CloudAgentStatus` କୁ ସ୍ପଷ୍ଟ ଭାବରେ ମ୍ୟାପ୍ ହୋଇଛି। `baseUrl` ପ୍ରତି-ପରିଚୟପତ୍ରକୁ ଅତିକ୍ରମ କରିହେବ ତେଣୁ API version/path କୁ କୋଡ୍ ପରିବର୍ତ୍ତନ ବିନା ସଂଶୋଧନ କରାଯାଇପାରିବ।
 
 ## ଡୋମେନ୍ ପ୍ରକାରଗୁଡ଼ିକ
 

@@ -88,20 +88,19 @@ Objekt `ctx`, mis edastatakse funktsioonile `register(program, ctx)`:
 | `ctx.baseUrl`                | `string`         | Lahendatud baas-URL                                                |
 | `ctx.apiKey`                 | `string \| null` | API võti, kui see on määratud                                      |
 
-## Tuvastamine
+## Avastus
 
-Pluginaid otsitakse järgmistest asukohtadest:
+Pluginad leitakse aadressilt:
 
-1. `~/.omniroute/plugins/<name>/` — kasutaja kohalikud installid
-2. Keskkonnamuutuja `OMNIROUTE_PLUGIN_PATH` — kohandatud kataloog
+1. `~/.omniroute/plugins/node_modules/<name>/` — kuhu `omniroute plugin install` paneb paketid (npm `--prefix`, mitte `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — käsitsi kopeeritud pistikprogrammide kataloogid
+3. `OMNIROUTE_PLUGIN_PATH` env var — kohandatud kataloog
 
-Mõlemad on mõeldud **ainult CLI-le**. Serveripoolsel pluginate käituskeskkonnal (turuplatsi/`plugin.json`
-pluginad, mis töötavad puhverserveris) on eraldi skanner koos oma alistusega
-`OMNIROUTE_PLUGINS_DIR` — vaata
-[PLUGIN_MARKETPLACE.md → Pluginate kataloog](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Ühe määramine ei mõjuta teist.
+Järgitakse sümlingitud katalooge (mida npm loob `plugin install ./dir` jaoks).
 
-Laadimisvead püütakse kinni ja kuvatakse hoiatustena — vigane plugin ei põhjusta kunagi CLI krahhi.
+Mõlemad on** Ainult CLI** . Serveripoolsel pistikprogrammi käitusajal (puhverserveris töötavad pluginad Marketplace/`plugin.json` ) on oma skanner, millel on oma alistamine, `OMNIROUTE_PLUGINS_DIR` — vt [PLUGIN_MARKETPLACE.md → pluginate kataloog](./PLUGIN_MARKETPLACE.md#plugin-directory). Ühe seadistamine ei mõjuta teist.
+
+Laadimisvead püütakse kinni ja prinditakse hoiatustena — katkine pistikprogramm ei jookse CLI kunagi kokku.
 
 ## Turvalisus
 

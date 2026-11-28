@@ -15,96 +15,88 @@ da matakan daidaitawa.
 
 ## Saitin Ci gaba
 
-### Abubuwan da ake buƙata
+### Abubuwan da ake bukata
 
-- **Node.js** `>=22.22.2 <23`, ko `>=24.0.0 <27` (abin da aka ba da shawara: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`, ko `>=24.0.0 <27` (an shawarta: 24 LTS)
+- **npm** 10 +
 
-> **Windows tare da Node 24:** yi amfani da sabon patch release na 24 LTS (aƙalla 24.20.0).
-> Tsofaffin releases na iya dakatarwa bayan gwaje-gwaje sun yi nasara lokacin da `--test-force-exit` ya rufe
-> aikin. [Gyaran Windows libuv na Node](https://github.com/nodejs/node/pull/61999) yana magance
-> wannan matsalar rushewar runtime; ci gaba da kunna tabbatarwar gwaje-gwaje da na fita daga runner.
+> **Windows tare da Node 24:** yi amfani da sakin facin 24 LTS na yanzu (akalla 24.20.0). Tun da farko za a iya zubar da ciki bayan gwaje-gwaje masu nasara lokacin da `--test-force-exit` ya rufe aikin. Node's [Windows libuv fix](https://github.com/nodejs/node/pull/61999) yana magance wannan karon lokacin gudu; ci gaba da tabbatar da gwajin gwajin da tabbatar da fitowar mai gudu.
 
-> **Masu amfani da npm v11+ (Node 24+):** Bayan `npm install`, tabbatar an shigar da native modules:
-> `node -e "require('better-sqlite3')"`. Idan ya gaza da `MODULE_NOT_FOUND`,
-> gudanar da `npm approve-scripts better-sqlite3 && npm install`. Duba
-> [Shirya matsaloli](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + masu amfani (Node 24 +):** Bayan `npm install`, tabbatar an shigar da na'urori na asali: `node -e "require('better-sqlite3')"`. Idan ya kasa tare da `MODULE_NOT_FOUND`, gudanar da `npm approve-scripts better-sqlite3 && npm install`. Duba [Shirya matsala](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Kwafi & Shigarwa
+### Clone & Shigar
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Masu Canjin Muhalli
+### Canje-canjen Muhalli
 
 ```bash
-# Ƙirƙiri .env naka daga samfurin
+# Create your .env from the template
 cp .env.example .env
 
-# Samar da sirrin da ake buƙata
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Muhimman masu canji don ci gaba:
+Mabuɗin maɓalli don haɓakawa:
 
-| Mai canji              | Tsohuwar ƙima ta ci gaba | Bayani                       |
-| ---------------------- | ------------------------ | ---------------------------- |
-| `PORT`                 | `20128`                  | Tashar uwar garke            |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL na asali na frontend     |
-| `JWT_SECRET`           | (samar a sama)           | Sirrin sa hannun JWT         |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Kalmar sirri ta farkon shiga |
-| `APP_LOG_LEVEL`        | `info`                   | Matakin yawan bayanan log    |
+| Mai canzawa            | Default na ci gaba       | Bayani                |
+| ---------------------- | ------------------------ | --------------------- |
+| `PORT`                 | `20128`                  | tashar jiragen ruwa   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Tushen URL don gaba   |
+| `JWT_SECRET`           | (ƙirƙira a sama)         | JWT sa hannu          |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Kalmar shiga ta farko |
+| `APP_LOG_LEVEL`        | `info`                   | Shiga matakin magana  |
 
 ### Saitunan Dashboard
 
-Dashboard yana samar da maɓallan UI don siffofin da kuma za a iya saita su ta masu canjin muhalli:
+Dashboard ɗin yana ba da jujjuyawar UI don fasalulluka waɗanda kuma za'a iya saita su ta masu canjin yanayi:
 
-| Wurin Saiti         | Maɓalli            | Bayani                           |
-| ------------------- | ------------------ | -------------------------------- |
-| Settings → Advanced | Debug Mode         | Kunna logs na buƙatun debug (UI) |
-| Settings → General  | Sidebar Visibility | Nuna/ɓoye sassan sidebar         |
+| Saitin Wuri           | Juyawa                | Bayani                                    |
+| --------------------- | --------------------- | ----------------------------------------- |
+| Saitunan → Na ci gaba | Yanayin gyara kuskure | Kunna rajistan ayyukan gyara kuskure (UI) |
+| Saituna → Gabaɗaya    | Ganuwa na gefen gefe  | sassan labarun Show/hide                  |
 
-Ana adana waɗannan saituna a cikin rumbun bayanai kuma suna ci gaba bayan sake farawa, suna rinjayar tsoffin ƙimomin env var idan an saita su.
+Ana adana waɗannan saituna a cikin ma'ajin bayanai kuma suna dagewa cikin sake farawa, suna ƙetare kurakuran env var lokacin da aka saita.
 
-### Gudanarwa a Kwamfuta ta Gida
+### Gudun Gida
 
 ```bash
-# Yanayin ci gaba (sake loda kai tsaye)
+# Development mode (hot reload)
 npm run dev
 
-# Gina na production
-npm run build    # next build → .build/next/ sannan assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Haɗawa cikin sauri na backend/API kawai don canje-canjen masu ba da gudummawa
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Gina release (sake ginawa mai tsabta + HEAD sentinel — ana buƙata don deploy)
-npm run build:release   # rm -rf .build dist sannan build + yana rubuta dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Tsarin tashar da aka saba amfani da shi
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Ginin mai ba da gudummawa yana yin tantancewa ta compile kawai: ba ya haɗa rarrabawar standalone
-ko gina optional native packaging assets. Yi amfani da ginin production na yau da kullum lokacin da
-kake buƙatar tantance bundle ɗin da za a iya fitarwa.
+Gina mai ba da gudummawa yana aiwatar da ingantaccen tattarawa-kawai: baya haɗa rarrabawar kai tsaye ko gina kadarorin marufi na asali na zaɓi. Yi amfani da ginin samarwa na yau da kullun lokacin da kuke buƙatar tabbatar da tarin jigilar kaya.
 
-### Tsarin Fitarwar Gina
+### Gina Fitar da Fitowa
 
-| Directory | Abubuwan da ke cikinsa                                                            | Ana bin diddigi |
-| --------- | --------------------------------------------------------------------------------- | --------------- |
-| `src/`    | Tushen application (TypeScript / TSX)                                             | Eh              |
-| `.build/` | Abubuwan tsaka-tsaki — `next build` output (gitignored, `distDir = .build/next`)  | A'a             |
-| `dist/`   | Bundle ɗin da za a iya fitarwa — `assembleStandalone` ne ke haɗa shi (gitignored) | A'a             |
+| Jagora    | Abubuwan da ke ciki                                                       | Ana bin sawu |
+| --------- | ------------------------------------------------------------------------- | ------------ |
+| `src/`    | Tushen aikace-aikacen (TypeScript / TSX)                                  | Ee           |
+| `.build/` | Matsakaicin fitarwar — `next build` (gitignored, `distDir = .build/next`) | A'a          |
+| `dist/`   | Bundle — mai jigilar kaya wanda `assembleStandalone` ya tara (gitignored) | A'a          |
 
-Bututun ginin wucewa guda ɗaya ne:
+Gina bututun wucewa guda ɗaya ne:
 
 ```
 npm run build
@@ -113,21 +105,15 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` yana kuma fara share kundin adireshi biyun sannan ya rubuta
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) a matsayin sentinel na amincin deploy.
+`npm run build:release` kuma yana wanke kundayen adireshi biyu da farko kuma ya rubuta `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) azaman aika saƙon gaskiya.
 
-`npm run build:contributor` yana amfani da bayanin ginin backend-only. Yana maye gurbin fayilolin
-dashboard UI na ɗan lokaci yayin gini, yana riƙe da masu sarrafa API route, sannan ya dawo da ainihin
-fayilolin bayan ginin. Yi amfani da `npm run build` don canje-canjen da suka shafi dashboard UI ko
-don cikakken tantancewar release; bayanin contributor ba madadin ginin release ba ne.
+`npm run build:contributor` yana amfani da bayanan ginin baya-kawai. Yana toshe fayilolin UI dashboard na ɗan lokaci yayin gini, yana riƙe masu sarrafa hanyar API, kuma yana maido da ainihin fayilolin bayan ginin. Yi amfani da `npm run build` don canje-canjen da suka shafi dashboard UI ko don cikakken ingantaccen fitarwa; bayanin mai ba da gudummawa ba shine maye gurbin ginin sakin ba.
 
-> **Bayanin deploy na VPS:** kundin hoton remote `/usr/lib/node_modules/omniroute/app/`
-> bai canza ba. Ƙwarewar deploy na rsync tana daidaita abubuwan da ke cikin `dist/` zuwa cikinsa.
-> Hanyar fitarwar gini da ke cikin repository ce kawai ta motsa (`app/` → `dist/`).
+> **VPS deploy note:** `/usr/lib/node_modules/omniroute/app/` na hoton nesa ba ya canzawa. Ƙwarewar ƙaddamar da abubuwan da ke cikin `dist/` a ciki. Hanyar fitarwar in-repo kawai ta motsa (`app/` → `dist/`).
 
-Tsoffin URLs:
+Default URLs:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **Dashboard** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -436,8 +422,8 @@ Daga nan sai a yi amfani da skills na `/deploy-vps-*-cc`, waɗanda ke amfani da 
 
 ## Samun Taimako
 
-- **Tsarin Gine-gine**: Duba [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Manazartar API**: Duba [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Takardun tsaro**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Takardun gudanarwa**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Matsaloli**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Gine-gine** : See [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Reference** : ga [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Dokokin tsaro** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), za , [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops docs** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Batutuwa** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

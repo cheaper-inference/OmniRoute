@@ -4,9 +4,9 @@
 
 ---
 
-> **ಸತ್ಯದ ಮೂಲ:** `electron/` ಕಾರ್ಯಸ್ಥಳ** ಕೊನೆಯದಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ:** 2026-06-28 — v3.8.40
+> **ಸತ್ಯದ ಮೂಲ:** `electron/` ಕಾರ್ಯಸ್ಥಳ
 
-OmniRoute ಕ್ರಾಸ್-ಪ್ಲಾಟ್ಫಾರ್ಮ್ ಡೆಸ್ಕ್ಟಾಪ್ ಅಪ್ಲಿಕೇಶನ್ (Windows / macOS / Linux) ಅನ್ನು ನಿರ್ಮಿಸಲಾಗಿದೆ**Electron 41** +** ಎಲೆಕ್ಟ್ರಾನ್-ಬಿಲ್ಡರ್ 26.10** . ಡೆಸ್ಕ್ಟಾಪ್ ಅಪ್ಲಿಕೇಶನ್ Next.js ಸ್ಟ್ಯಾಂಡ್ಲೋನ್ ಸರ್ವರ್ ಅನ್ನು ಮಗುವಿನ ಪ್ರಕ್ರಿಯೆಯಾಗಿ ಹುಟ್ಟುಹಾಕುತ್ತದೆ, ಅದರ ಮೇಲೆ `BrowserWindow` ಅನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ಸಿಸ್ಟಮ್ ಟ್ರೇ, ಸ್ವಯಂ-ಅಪ್ಡೇಟರ್, IPC ಸೇತುವೆ ಮತ್ತು ಶೂನ್ಯ ಕಾನ್ಫಿಗರ್ ರಹಸ್ಯ ಬೂಟ್ಸ್ಟ್ರ್ಯಾಪ್ ಅನ್ನು ಸೇರಿಸುತ್ತದೆ.
+OmniRoute ಕ್ರಾಸ್-ಪ್ಲಾಟ್ಫಾರ್ಮ್ ಡೆಸ್ಕ್ಟಾಪ್ ಅಪ್ಲಿಕೇಶನ್ (Windows / macOS / Linux) ಅನ್ನು ನಿರ್ಮಿಸಲಾಗಿದೆ**Electron 41** +** ಎಲೆಕ್ಟ್ರಾನ್-ಬಿಲ್ಡರ್ 26.10** . ಡೆಸ್ಕ್ಟಾಪ್ ಅಪ್ಲಿಕೇಶನ್ Next.js ಸ್ವತಂತ್ರ ಸರ್ವರ್ ಅನ್ನು ಮಗುವಿನ ಪ್ರಕ್ರಿಯೆಯಾಗಿ ಹುಟ್ಟುಹಾಕುತ್ತದೆ, ಅದರ ಮೇಲೆ `BrowserWindow` ಅನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ಸಿಸ್ಟಮ್ ಟ್ರೇ, ಸ್ವಯಂ-ಅಪ್ಡೇಟರ್, IPC ಸೇತುವೆ ಮತ್ತು ಶೂನ್ಯ-ಕಾನ್ಫಿಗ್ ರಹಸ್ಯ ಬೂಟ್ಸ್ಟ್ರಾಪ್ ಅನ್ನು ಸೇರಿಸುತ್ತದೆ.
 
 ## ವಾಸ್ತುಶಿಲ್ಪ
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## ಸ್ವಯಂ-ನವೀಕರಣ
 
-GitHub ಪೂರೈಕೆದಾರರೊಂದಿಗೆ (`diegosouzapw/OmniRoute`) `electron-updater` ಬಳಸುತ್ತದೆ.
+GitHub ಪೂರೈಕೆದಾರರೊಂದಿಗೆ (`cheaper-inference/OmniRoute`) `electron-updater` ಬಳಸುತ್ತದೆ.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - ಈವೆಂಟ್ಗಳನ್ನು `update-status` IPC ಮೂಲಕ ರೆಂಡರರ್ಗೆ ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗಿದೆ: `checking`, `available`, `not-available`, `downloading` ( `percent` ನೊಂದಿಗೆ), `downloaded`, `error`
@@ -273,7 +273,7 @@ npm run electron:build:win
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ಬಿಡುಗಡೆಗಳನ್ನು GitHub ಬಿಡುಗಡೆಗಳಿಗೆ ಪ್ರಕಟಿಸಲಾಗಿದೆ (`diegosouzapw/OmniRoute`), ಇದು `electron-updater` ಹೊಸ ಆವೃತ್ತಿಗಳಿಗಾಗಿ ಪರಿಶೀಲಿಸುತ್ತದೆ.
+ಬಿಡುಗಡೆಗಳನ್ನು GitHub ಬಿಡುಗಡೆಗಳಿಗೆ ಪ್ರಕಟಿಸಲಾಗಿದೆ (`cheaper-inference/OmniRoute`), ಇದು `electron-updater` ಹೊಸ ಆವೃತ್ತಿಗಳಿಗಾಗಿ ಪರಿಶೀಲಿಸುತ್ತದೆ.
 
 ## ದೋಷನಿವಾರಣೆ
 

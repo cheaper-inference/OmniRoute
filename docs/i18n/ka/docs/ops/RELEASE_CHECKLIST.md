@@ -4,12 +4,9 @@
 
 ---
 
-> **ბოლო განახლება:** 2026-08-28 — v3.8.51
-> გამარტივებული გამოშვების პროცესი, რომელიც ავტომატიზაციისთვის Claude Code-ის უნარებს იყენებს.
+> გამარტივებული გამოშვების ნაკადი, რომელიც იყენებს Claude Code-ის უნარებს ავტომატიზაციისთვის.
 >
-> **გამოშვებებს შორის რიგი/ბრენჩი გამართულ მდგომარეობაში შეინარჩუნეთ:** იხილეთ [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (`/green-prs` ოჯახი + `npm run check:release-green` + `/babysit` + ყოველღამიური გაშვება). ამის
-> პერიოდულად — და განსაკუთრებით ამ საკონტროლო სიის შესრულებამდე — გაშვება უზრუნველყოფს, რომ გამოშვების PR თავიდანვე გამართული იყოს.
+> **შეინახეთ queue/branch მწვანე გამოშვებებს შორის:** იხ [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` family + `npm run check:release-green` + `/babysit` + nightly). გაშვებული ეს პერიოდულად — და განსაკუთრებით** ადრე** ეს ჩამონათვალი — ხდის გამოშვებას PR მწვანედ.
 
 ## მოკლედ
 
@@ -60,7 +57,9 @@ npm-publish სამუშაო პროცესი პირდაპირ
 
 **Docker Hub `latest` (აუცილებელია ყოველი სტაბილური SemVer გამოქვეყნებისთვის):** `docker-publish` სამუშაო ნაკადი უნდა მონიშნოს** ორივე** `X.Y.Z` და, როდესაც `should-promote-latest.sh` ეთანხმება, ეს არის უმაღლესი სტაბილური SemVer, `:latest` ერთად** იგივე დაიჯესტი** . სამუშაოს შემდეგ: Hub `latest` დაიჯესტი უდრის ახალ SemVer დაიჯესტს და `last_updated` გადატანილს. არ დატოვოთ `:latest` ძველ ნაგებობაზე, სანამ გამოშვების შენიშვნები საუბრობენ შესწორებებზე, რომლებიც მხოლოდ git-ზე არსებობს. სწრაფი სტარტების შედგენა `:latest` გამოყენებით; GitOps უნდა გააგრძელოს `X.Y.Z` დამაგრება. იხილეთ [Docker გამოშვების არხები](../guides/DOCKER_GUIDE.md#release-channels) და #10317.
 
-**Docker Hub ორგანიზაციის საცავი (`cheaperinference/omniroute`):** Docker Hub-ს არ შეუძლია გადაიტანოს საცავი სახელთა სივრცეებს შორის, ამიტომ `diegosouzapw/omniroute` ინახავს თავის მოზიდვის ისტორიას და ყოველ გამოშვებას, ხოლო `mirror-org-dockerhub` სამუშაო `docker-publish` აკოპირებს თითოეულ გამოშვებულ ვერსიას (და `:latest` დაწინაურებისას) `ghcr.io/cheaper-inference/omniroute` დან ორგანიზაციის საცავში. მას სჭირდება `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` საიდუმლოებები; მათ გარეშე სამუშაო რჩება მწვანე გაფრთხილებით "Docker Hub org mirror skipped" და სხვა რეესტრები აქვეყნებენ ჩვეულებრივად. გამოქვეყნებული ვერსიის იქ მოგვიანებით გამოსაქვეყნებლად, გაუშვით** ქმედებები → ასახეთ Docker გამოსახულება Docker Hub org → სამუშაო ნაკადის გაშვება** `version=X.Y.Z` ით (და `promote_latest` უმაღლესი სტაბილური ვერსიისთვის): ის აკოპირებს არსებულ სურათებს, რეკონსტრუქციის გარეშე.
+**Docker Hub ორგანიზაციის საცავი (`cheaperinference/omniroute`):** Docker Hub-ს არ შეუძლია გადაიტანოს საცავი სახელთა სივრცეებს შორის, ამიტომ `diegosouzapw/omniroute` ინახავს თავის მოზიდვის ისტორიას და ყოველ გამოშვებას, ხოლო `mirror-org-dockerhub` სამუშაო `docker-publish` აკოპირებს თითოეულ გამოშვებულ ვერსიას (და `:latest` დაწინაურებისას) `ghcr.io/cheaper-inference/omniroute` დან ორგანიზაციის საცავში. მას სჭირდება `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` საიდუმლოებები; მათ გარეშე სამუშაო რჩება მწვანე გაფრთხილებით "Docker Hub org mirror skipped" და სხვა რეესტრები აქვეყნებენ ჩვეულებრივად. გამოქვეყნებული ვერსიის იქ მოგვიანებით გამოსაქვეყნებლად, გაუშვით** ქმედებები → ასახეთ Docker გამოსახულება Docker Hub org → სამუშაო ნაკადის გაშვება** `version=X.Y.Z` ით (და `promote_latest` უმაღლესი სტაბილური ვერსიისთვის): ის აკოპირებს არსებულ სურათებს, რეკონსტრუქციის გარეშე. ამ საცავის Docker Hub მიმოხილვა დაყენებულია ხელით: API, რომელიც მას არედაქტირებს, უარყოფს ორგანიზაციის წვდომის ტოკენებს.
+
+იგივე სამუშაო პროცესი ასევე აკოპირებს ყველა გამოშვებას მოძველებულ GHCR პაკეტში `ghcr.io/diegosouzapw/omniroute` 2027-06-30 წლამდე, ასე რომ, ინსტალაციები კვლავ მიმაგრებული განახლდება; მისი ინდექსი შეიცავს "გადავიდა `ghcr.io/cheaper-inference/omniroute`" აღწერას. მას სჭირდება `GHCR_LEGACY_TOKEN` საიდუმლო ( `diegosouzapw` ს კლასიკური პერსონალური წვდომის ნიშანი `write:packages` თან ერთად); ამის გარეშე, სამუშაო გამოტოვებს გაფრთხილებით "Legacy GHCR mirror skipped".
 
 ## Hotfix-ის სწრაფი ზოლი (ჭდე `hotfix`)
 
@@ -88,7 +87,7 @@ E2E მატრიცას ავტომატურად, ყოველ�
 
 ### წინასწარი გამოშვება
 
-- [ ] ყველა PRs რომელიც გამიზნულია ამ გამოშვებისთვის, გაერთიანებულია `release/vX.Y.0` თან
+- [ ] ყველა PRs რომელიც გამიზნულია ამ გამოშვებაზე, გაერთიანებულია `release/vX.Y.0` თან
 - [ ] ყველა ღია Linear/issue ელემენტი ამ ვერსიისთვის დახურულია ან გადადის შემდეგ ეტაპზე
 - [ ] CI მწვანე `release/vX.Y.0` ტოტზე
 - [ ] არ არის `TODO(release)` მარკერები კოდში: `grep -r "TODO(release)" src/ open-sse/`
@@ -113,7 +112,7 @@ E2E მატრიცას ავტომატურად, ყოველ�
 - [ ] `npm run check:cycles:ratchet` — გაყინული `metrics.cycles` ჭერის ფარგლებში (შიშველი `check:cycles` გამოდის 1 ნებისმიერ ციკლზე, #15281)
 - [ ] `npm run check:any-budget:t11` — ბიუჯეტის ფარგლებში
 - [ ] `npm run check:route-validation:t06` — სუფთა
-- [ ] `npm run check:node-runtime` — მხარდაჭერილი გაშვების სართულის შეხვედრა (`>=22.22.2 <23`, `>=24.0.0 <27`, per `SUPPORTED_NODE_RANGE` in `src/shared/utils/nodeRuntimeSupport.ts`; გასწორებული `package.json` `engines`)
+- [ ] `npm run check:node-runtime` — მხარდაჭერილი გაშვების სართული დახვდა (`>=22.22.2 <23`, `>=24.0.0 <27`, თითო `SUPPORTED_NODE_RANGE` `src/shared/utils/nodeRuntimeSupport.ts` ში; გასწორებული `package.json` `engines`)
 
 ### ტესტირება
 
@@ -136,7 +135,7 @@ E2E მატრიცას ავტომატურად, ყოველ�
 - **წინასწარი ბიძგი:** სწრაფი დეტერმინისტული კარიბჭე — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (გააქტიურებულია 2026-06-13). განზრახ გამორიცხავს `test:unit` (ნელი; დაფარული CI `test-unit` სამუშაოთი).
   - გაუშვით `npm run test:unit` ხელით, სანამ არ დააჭერთ გამოშვების ტოტებს.
 
-თუ კაუჭი ვერ მოხერხდა: მოაგვარეთ ძირითადი პრობლემა, ნუ გადალახავთ `--no-verify`.
+თუ კაუჭი ვერ მოხერხდა: მოაგვარეთ ძირითადი პრობლემა, არ გადახვიდეთ `--no-verify` ით.
 
 ### ჩვეულებრივი ვალდებულებები
 
@@ -151,7 +150,7 @@ E2E მატრიცას ავტომატურად, ყოველ�
 ### დოკუმენტაცია
 
 - [ ] `npm run check:docs-sync` პასები (ავტომატური გაშვება წინასწარი ჩაწერით)
-- [ ] `npm run check:docs-all` პასები (ქოლგა: docs-sync + docs-counts + env-doc-sync + მოძველებული-ვერსიები + doc-links)
+- [ ] `npm run check:docs-all` გადის. მისი საკონსულტაციო `check:deprecated-versions` დროშებით ასახელებს OmniRoute (3.6.x და უფრო ადრე) მიკუთვნებულ ვერსიებს და უგულებელყოფს თარიღებს.
 - [ ] `npm run check:env-doc-sync` გადის 0 — კოდი ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env კონტრაქტი ხელუხლებელია
 - [ ] `npm run check:doc-links` გადის 0 — რესტრუქტურიზაციის შემდეგ გატეხილი შიდა ნიშნების მითითებების გარეშე
 - [ ] `docs/architecture/ARCHITECTURE.md` განხილულია storage/runtime დრიფტისთვის
@@ -168,7 +167,7 @@ E2E მატრიცას ავტომატურად, ყოველ�
 - [ ] `npm run i18n:check-ui-coverage` გამოდის 0 — ყოველ UI ლოკალს 80% დაფარვის სართულზე ან ზემოთ
 - [ ] `npm run i18n:sync-ui:dry` იტყობინება 0 დაკარგული გასაღები ყველა 66 სამიზნე ლოკალში (თითოეული ლოკალი გარდა `en` წყაროსა)
 - [ ] თუ წყაროს ინგლისური დოკუმენტები შეიცვალა, გაუშვით `npm run i18n:run` (მოითხოვს `OMNIROUTE_TRANSLATION_API_KEY` in `.env`) თეგირების წინ
-- [ ] თარგმანის შენატანები შეიძლება გადაიდოს შემდეგ გამოცემაზე, თუ უმნიშვნელოა (ჩამოწერა CHANGELOG ში)
+- [ ] თარგმანის შენატანები შეიძლება გადაიდოს შემდეგ გამოცემაზე, თუ უმნიშვნელოა (ტრეკზე CHANGELOG)
 
 ### მონაცემთა ბაზის მიგრაცია
 
@@ -399,17 +398,17 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-გაშვება აკეთებს `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, აწყობს tarball-ს, აწარმოებს `npm run check:pack-boot` (ყალბი საიდუმლოებები, ეფემერული მონაცემების dir), ხელახლა შეფუთულია და ფუჭდება, თუ დაიჯესტი არ არის იდენტური, შემდეგ ჩაწერს `artifact-identity.json` (head SHA, საბაზისო SHA, lockfile hash, პლატფორმა, ABI, `scripts/release/artifact-identity.mjs` — ტარბოლი ცალკე სამუშაოში. წინასწარი გადახედვის ხელშეწყობა ნიშნავს ამ tarball-ის დაყენებას: არასოდეს აღადგინოთ წყაროდან.
+გაშვება აკეთებს `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, აწყობს tarball-ს, აწარმოებს `npm run check:pack-boot` (ყალბი საიდუმლოებები, ეფემერული მონაცემების dir), ხელახლა შეფუთულია და ფუჭდება, თუ დაიჯესტი არ არის იდენტური, შემდეგ ჩაწერს `artifact-identity.json` (head SHA, საბაზისო SHA, lockfile hash, პლატფორმა, ABI, `scripts/release/artifact-identity.mjs` — ტარბოლი ცალკე სამუშაოში. გადახედვის ხელშეწყობა ნიშნავს ამ tarball-ის დაყენებას: არასოდეს აღადგინოთ წყაროდან.
 
 ### გაჭრა (3.9.0, GO შემდეგ)
 
 1. GO ჩაწერილი [LTS_GO_NO_GO.მდ](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` ბეჭდავს `RESULT: READY`.
-3. შექმენით ტოტები `origin` ზე ხელით ბრძანებებით dry-run prints — სკრიპტი უარს ამბობს `origin` ზე გადასვლაზე. განხილული განვითარების commit-ის ხელახლა გამოსაყენებლად, ჯერ გაიარეთ `--execute` რეპეტიცია 3.9.0 წვერით თქვენი ჩანგლის წინააღმდეგ; ის ბეჭდავს ორივე SHAs და იგივე დავალებების შესრულება შესაძლებელია:
+3. შექმენით ტოტები `origin` ზე ხელით ბრძანებებით dry-run prints — სკრიპტი უარს ამბობს `origin` ზე გადასვლაზე. განხილული განვითარების commit-ის ხელახლა გამოსაყენებლად, ჯერ გაუშვით `--execute` რეპეტიცია 3.9.0 წვერით თქვენი ჩანგლის საწინააღმდეგოდ; ის ბეჭდავს ორივე SHAs და იგივე დავალებების შესრულება შესაძლებელია:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop

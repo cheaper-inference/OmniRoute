@@ -130,11 +130,11 @@ flyctl deploy
 
 ---
 
-## 5. Privalomi parametrai
+## 5. Reikalingi parametrai
 
-Šiame projekte rekomenduojama Fly.io platformoje sukonfigūruoti bent šiuos parametrus.
+Šiame projekte Fly.io rekomenduojama sukonfigūruoti bent šiuos parametrus.
 
-### 5.1 Patikrinti parametrai
+### 5.1 Patvirtinti parametrai
 
 Šie parametrai buvo naudojami faktiškai diegiant dabartinę `omniroute` programą:
 
@@ -143,19 +143,19 @@ flyctl deploy
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (privalomas produkcinėje aplinkoje — naudojamas „WebSocket“ tilto autentifikavimui)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (būtina gamyboje — naudojamas WebSocket tilto autentifikavimui)
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 Apie `INITIAL_PASSWORD`
 
-Dabartiniame projekte `INITIAL_PASSWORD` nenustatytas, nes šiam diegimui jis nereikalingas.
+Dabartinis projektas nenustato `INITIAL_PASSWORD` nes šiam diegimui to nereikia.
 
 Jei jis nenustatytas:
 
-- Paleidimo žurnale bus nurodyta, kad numatytasis slaptažodis yra `CHANGEME`
-- Po diegimo turėtumėte kuo greičiau pakeisti prisijungimo slaptažodį sistemos nustatymuose
+- Prietaisų skydelio slaptažodį sukuriate prisijungimo vedlyje pirmojo apsilankymo metu. Užbaikite slaptažodžio veiksmą: jį praleidus išjungiamas prisijungimas prie prietaisų skydelio, todėl prietaisų skydelis lieka atviras visiems, kurie gali pasiekti programą URL
+- „Fly“ tarpinis serveris pasiekia programą iš negrįžtamo adreso, todėl po to, kai pateikiate slaptažodį, vedlys paprašo vienkartinio įkrovos prieigos rakto, kurį programa tuo metu išspausdina į savo žurnalą: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Jei ta eilutė išslinko iš žurnalo, iš naujo paleiskite programą ir dar kartą pateikite vedlį, kad išspausdintumėte naują prieigos raktą
 
-Jei norite automatiškai inicijuoti serverio slaptažodį, vėliau galite pridėti:
+Jei norite nustatyti slaptažodį be priežiūros, pridėkite jį prieš pirmą apsilankymą informacijos suvestinėje (išsaugojus slaptažodį, `INITIAL_PASSWORD` nepaisoma):
 
 - `INITIAL_PASSWORD`
 
@@ -274,60 +274,60 @@ Jei konsolės puslapyje `Secrets` nerodomi numatyti kintamieji, patikrinkite:
 
 ---
 
-## 9. Tolesni naujinimai ir leidimai
+## 9. Vėlesni atnaujinimai ir leidimai
 
-Atnaujinus kodą, leidimo procesas yra paprastas:
+Atnaujinus kodą, išleidimo procesas yra paprastas:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Jei reikia tik atnaujinti parametrus nekeičiant kodo:
+Jei reikia atnaujinti tik parametrus nekeičiant kodo:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-„Fly“ automatiškai atliks laipsnišką mašinų naujinimą.
+„Fly“ automatiškai atnaujins mašinas.
 
-### 9.1 Pagrindinės saugyklos naujinimų sekimas išsaugant jūsų atšakos `fly.toml`
+### 9.1 Prieš srovę esančios saugyklos atnaujinimų sekimas išsaugant jūsų šakutės `fly.toml`
 
-Jei dabartinė saugykla yra atšaka ir norite sinchronizuoti naujinimus iš pagrindinės saugyklos `https://github.com/diegosouzapw/OmniRoute`, atlikite toliau nurodytus veiksmus.
+Jei dabartinė saugykla yra šakutė ir norite sinchronizuoti naujinimus iš ankstesnio `https://github.com/cheaper-inference/OmniRoute`, vykdykite toliau pateiktą darbo eigą.
 
-Pirmiausia patikrinkite nuotolines saugyklas:
+Pirmiausia patikrinkite nuotolinio valdymo pultus:
 
 ```powershell
 git remote -v
 ```
 
-Turėtumėte matyti bent:
+Turėtumėte pamatyti bent:
 
-- `origin`, nukreiptą į jūsų pačių atšaką
-- `upstream`, nukreiptą į pradinę saugyklą
+- `origin` rodydamas į savo šakutę
+- `upstream` nukreipia į pradinę saugyklą
 
-Jei `upstream` nesukonfigūruota, pridėkite ją:
+Jei `upstream` nesukonfigūruotas, pridėkite jį:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Prieš sinchronizuodami su pagrindine saugykla, gaukite naujausius pakeitimus ir žymas:
+Prieš sinchronizuodami su ankstesniu srautu, gaukite naujausius įsipareigojimus ir žymas:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Patikrinkite dabartinę versiją ir pagrindinės saugyklos žymas:
+Patikrinkite dabartinę versiją ir ankstesnes žymas:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Pastaba: dabartinė projekto versija yra `v3.8.0`. Toliau pateiktos nuorodos į `v3.4.7` paliktos tik kaip istoriniai pavyzdžiai. Faktiniams leidimams naudokite `:latest` arba dabartinės versijos žymą (pvz., `:v3.8.0`).
+> Pastaba: dabartinė projekto versija yra `v3.8.0`. Toliau pateiktos `v3.4.7` nuorodos laikomos tik kaip istoriniai pavyzdžiai. Tikriems leidimams naudokite `:latest` arba dabartinės versijos žymą (pvz., `:v3.8.0`).
 
-Jei norite sujungti naujausią pagrindinės saugyklos `main` šaką ir priverstinai išsaugoti savo atšakos `fly.toml`, atlikite toliau nurodytus veiksmus:
+Jei norite sujungti naujausią `main` prieš srovę, stipriai išlaikydami šakės `fly.toml`, atlikite šią darbo eigą:
 
 ```powershell
 git merge upstream/main
@@ -340,31 +340,31 @@ git push origin main
 Pastabos:
 
 - `git merge upstream/main` sinchronizuoja naujausią kodą iš pradinės saugyklos
-- `git checkout HEAD~1 -- fly.toml` atkuria jūsų atšakos `fly.toml`, buvusį prieš sujungimą
-- Jei pagrindinėje saugykloje `fly.toml` nebuvo pakeistas, šis veiksmas nesukurs jokių skirtumų
-- Jei pagrindinėje saugykloje `fly.toml` buvo pakeistas, šis veiksmas užtikrins, kad jūsų „Fly“ programos pavadinimas, tomo prijungimo taškas, regionas ir kita jūsų atšakai būdinga diegimo konfigūracija nebus perrašyti
+- `git checkout HEAD~1 -- fly.toml` atkuria jūsų šakutės `fly.toml` prieš sujungimą
+- Jei prieš srovę nepakeitė `fly.toml`, šis veiksmas nesukels jokių skirtumų
+- Jei prieš srovę buvo pakeistas `fly.toml`, šis veiksmas užtikrina, kad jūsų Fly programos pavadinimas, tomo prijungimas, regionas ir kita šakutei būdinga diegimo konfigūracija nebus perrašyti
 
-Jei norite suderinti su konkretaus leidimo žyma (pvz., `v3.4.7`), pirmiausia patikrinkite, ar ši žyma jau įtraukta į `upstream/main`:
+Jei norite suderinti su konkrečia leidimo žyma (pvz. `v3.4.7`), pirmiausia patikrinkite, ar žyma jau įtraukta į `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Sėkmingas rezultatas reiškia, kad `upstream/main` jau yra ši versija; galite tiesiog sujungti `upstream/main`.
+Sėkmingas grąžinimas reiškia, kad `upstream/main` jau yra ta versija; galite tiesiog sujungti `upstream/main`.
 
-### 9.2 Standartinė leidimo seka po sinchronizavimo su pagrindine saugykla
+### 9.2 Standartinė išleidimo seka po sinchronizavimo prieš srovę
 
-Sinchronizavę su pradine saugykla, laikykitės šios rekomenduojamos leidimo veiksmų sekos:
+Sinchronizavę su pradine saugykla, vadovaukitės šia rekomenduojama išleidimo tvarka:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Atkurkite atšakos `fly.toml`
+3. Atkurkite šakės `fly.toml`
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Tai yra faktinė darbo eiga, naudota naujinant dabartinį projektą į `v3.4.7` (pavyzdyje nurodyta istorinė versija; dabartinė faktinė versija yra `v3.8.0`).
+Tai yra tikroji darbo eiga, naudojama atnaujinant dabartinį projektą į `v3.4.7` (pavyzdys nurodo istorinę versiją; dabartinė tikroji versija yra `v3.8.0`).
 
 ---
 
@@ -418,16 +418,16 @@ Jei vietoje to matote `/app/data/...`, `DATA_DIR` sukonfigūruotas netinkamai ir
 
 ---
 
-## 12. Dažniausios problemos
+## 12. Dažni klausimai
 
-### 12.1 Puslapis `Secrets` yra tuščias
+### 12.1 `Secrets` puslapis tuščias
 
-Paprastai tam yra dvi priežastys:
+Paprastai yra dvi priežastys:
 
-- Dar nepaleidote `flyctl secrets set`
-- Peržiūrite kitą programą (pvz., `oroute`, o ne `omniroute`)
+- Jūs dar nepaleidote `flyctl secrets set`
+- Jūs žiūrite kitą programą (pvz., `oroute` vietoj `omniroute`)
 
-### 12.2 `flyctl deploy` praneša `app not found`
+### 12.2 `flyctl deploy` Pranešimai `app not found`
 
 Pirmiausia sukurkite programą:
 
@@ -435,23 +435,23 @@ Pirmiausia sukurkite programą:
 flyctl apps create omniroute
 ```
 
-### 12.3 Nepavyksta išanalizuoti `fly.toml`
+### 12,3 `fly.toml` analizė nepavyksta
 
-Patikrinkite:
+Patikrinkite šiuos dalykus:
 
-- Ar komentaruose nėra iškraipytų simbolių
-- Ar TOML kabutės ir įtraukos yra teisingos
+- Ar komentaruose yra iškraipytų simbolių
+- Ar teisingos TOML citatos ir įtrauka
 
 ### 12.4 Duomenys neišsaugomi
 
 Patikrinkite abu šiuos dalykus:
 
-- Faile `fly.toml` yra `destination = '/data'`
+- `fly.toml` yra `destination = '/data'`
 - `DATA_DIR` nustatytas į `/data`
 
-### 12.5 Ar programa gali veikti be `INITIAL_PASSWORD`?
+### 12.5 Ar gali veikti be `INITIAL_PASSWORD`?
 
-Taip, gali. Bus naudojamas numatytasis slaptažodis `CHANGEME`. Gamybinėje aplinkoje rekomenduojama kuo greičiau pakeisti vidinės sistemos slaptažodį.
+Taip. Nustačius `INITIAL_PASSWORD`, prietaisų skydelio slaptažodį sukuriate prisijungimo vedlyje pirmojo apsilankymo metu (5.2 skyriuje aprašomas vienkartinis įkrovos prieigos raktas ir slaptažodžio veiksmas).
 
 ---
 

@@ -1,4 +1,9 @@
+# Notion Context Source (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/NOTION_CONTEXT.md) · 🇪🇹 [am](../../../am/docs/frameworks/NOTION_CONTEXT.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/NOTION_CONTEXT.md) · 🇦🇿 [az](../../../az/docs/frameworks/NOTION_CONTEXT.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/NOTION_CONTEXT.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/NOTION_CONTEXT.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/NOTION_CONTEXT.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/NOTION_CONTEXT.md) · 🇩🇰 [da](../../../da/docs/frameworks/NOTION_CONTEXT.md) · 🇩🇪 [de](../../../de/docs/frameworks/NOTION_CONTEXT.md) · 🇬🇷 [el](../../../el/docs/frameworks/NOTION_CONTEXT.md) · 🇪🇸 [es](../../../es/docs/frameworks/NOTION_CONTEXT.md) · 🇪🇪 [et](../../../et/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/NOTION_CONTEXT.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/NOTION_CONTEXT.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/NOTION_CONTEXT.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇱 [he](../../../he/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/NOTION_CONTEXT.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/NOTION_CONTEXT.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/NOTION_CONTEXT.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇩 [id](../../../id/docs/frameworks/NOTION_CONTEXT.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇹 [it](../../../it/docs/frameworks/NOTION_CONTEXT.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/NOTION_CONTEXT.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/NOTION_CONTEXT.md) · 🇰🇭 [km](../../../km/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/NOTION_CONTEXT.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/NOTION_CONTEXT.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/NOTION_CONTEXT.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/NOTION_CONTEXT.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/NOTION_CONTEXT.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/NOTION_CONTEXT.md) · 🇲🇲 [my](../../../my/docs/frameworks/NOTION_CONTEXT.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/NOTION_CONTEXT.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/NOTION_CONTEXT.md) · 🇳🇴 [no](../../../no/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇳 [or](../../../or/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/NOTION_CONTEXT.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/NOTION_CONTEXT.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/NOTION_CONTEXT.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/NOTION_CONTEXT.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/NOTION_CONTEXT.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/NOTION_CONTEXT.md) · 🇱🇰 [si](../../../si/docs/frameworks/NOTION_CONTEXT.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/NOTION_CONTEXT.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/NOTION_CONTEXT.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/NOTION_CONTEXT.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/NOTION_CONTEXT.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/NOTION_CONTEXT.md) · 🇮🇳 [te](../../../te/docs/frameworks/NOTION_CONTEXT.md) · 🇹🇭 [th](../../../th/docs/frameworks/NOTION_CONTEXT.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/NOTION_CONTEXT.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/NOTION_CONTEXT.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/NOTION_CONTEXT.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/NOTION_CONTEXT.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/NOTION_CONTEXT.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/NOTION_CONTEXT.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/NOTION_CONTEXT.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/NOTION_CONTEXT.md)
+
 ---
+
 title: "Źródło kontekstu Notion"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -67,43 +72,31 @@ Wszystkie trzy metody wymagają uwierzytelnienia dashboardu (`isAuthenticated`).
 jeśli Notion zwróci obiekt błędu, token jest czyszczony, a wywołanie kończy się
 `400`.
 
-## Narzędzia MCP (6)
+## narzędzia MCP (6)
 
-Zdefiniowane w `open-sse/mcp-server/tools/notionTools.ts`. Token jest rozwiązywany
-w momencie wywołania przez `getNotionToken()`; jeśli nie jest skonfigurowany, narzędzie
-rzuca
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+Zdefiniowane w `open-sse/mcp-server/tools/notionTools.ts`. Token jest rozwiązywany w czasie połączenia poprzez `getNotionToken()`; jeśli żaden nie jest skonfigurowany, narzędzie zgłasza `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Tool                         | Scope          | Description                                                                            |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Wyszukuje strony i bazy po zapytaniu tekstowym (zwraca titles, IDs, URLs). Paginowane. |
-| `notion_get_page`            | `read:notion`  | Pobiera treść i metadane strony po jej ID.                                             |
-| `notion_list_block_children` | `read:notion`  | Listuje wszystkie bloki-dzieci bloku lub strony (drzewo bloków). Paginowane.           |
-| `notion_query_database`      | `read:notion`  | Odpytuje bazę z opcjonalnymi `filter` + `sorts` (format Notion API). Paginowane.       |
-| `notion_get_database`        | `read:notion`  | Pobiera schemat/metadane bazy po ID.                                                   |
-| `notion_append_blocks`       | `write:notion` | Dopisuje bloki-dzieci do istniejącego bloku lub strony (max 100 bloków na request).    |
+| Narzędzie                    | Zakres         | Opis                                                                                                   |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | Przeszukuj strony i bazy danych za pomocą zapytania tekstowego (zwraca tytuły, IDs, URLs). Paginowane. |
+| `notion_get_page`            | `read:notion`  | Pobierz treść i metadane strony poprzez jej ID.                                                        |
+| `notion_list_block_children` | `read:notion`  | Lista wszystkich bloków potomnych bloku lub strony (drzewo bloków). Paginowane.                        |
+| `notion_query_database`      | `read:notion`  | Zapytanie do bazy danych za pomocą opcjonalnego `filter` + `sorts` (format Notion API ). Paginowane.   |
+| `notion_get_database`        | `read:notion`  | Pobierz schema/metadata bazy danych przez ID.                                                          |
+| `notion_append_blocks`       | `write:notion` | Dołącz elementy podrzędne bloku do istniejącego bloku lub strony (maksymalnie 100 bloków na żądanie).  |
 
 ### Parametry wejściowe
 
-- `notion_search` — `query` (1–500 chars), `pageSize` (1–100, default 20),
-  `startCursor` (optional).
-- `notion_get_page` — `pageId` (32-char hex or UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, default 50),
-  `startCursor` (optional).
-- `notion_query_database` — `databaseId`, `filter` (optional, Notion filter format),
-  `sorts` (optional array), `pageSize` (1–100, default 50), `startCursor` (optional).
+- `notion_search` — `query` (1–500 znaków), `pageSize` (1–100, domyślnie 20), `startCursor` (opcjonalnie).
+- `notion_get_page` — `pageId` (32 znaki szesnastkowe lub UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, domyślnie 50), `startCursor` (opcjonalnie).
+- `notion_query_database` — `databaseId`, `filter` (opcjonalnie, format filtra Notion ), `sorts` (tablica opcjonalna), `pageSize` (1–100, domyślnie 50), `startCursor` (opcjonalnie).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (array of block objects),
-  `after` (optional position).
+- `notion_append_blocks` — `blockId`, `children` (tablica obiektów blokowych), `after` (opcjonalna pozycja).
 
-### Scope'y
+### Zakresy
 
-Narzędzia odczytu wymagają `read:notion`, a narzędzie zapisu — `write:notion`.
-Scope'y są egzekwowane przez `withScopeEnforcement()` w
-`open-sse/mcp-server/server.ts` tylko gdy `OMNIROUTE_MCP_ENFORCE_SCOPES=true`;
-dozwolone scope'y wywołującego pochodzą z `OMNIROUTE_MCP_SCOPES` (rozdzielone
-przecinkami) albo z kontekstu scope'ów uwierzytelnionego klucza API. Pełny model
-scope'ów: [MCP-SERVER.md](./MCP-SERVER.md).
+Narzędzia do odczytu wymagają `read:notion`, a narzędzie do zapisu wymaga `write:notion`. Zakresy są wymuszane przez `withScopeEnforcement()` w `open-sse/mcp-server/server.ts`, gdy `OMNIROUTE_MCP_ENFORCE_SCOPES=true` i zawsze dla osoby wywołującej HTTP/SSE, której klucz API nie zawiera `manage`/`admin`; dozwolone zakresy wywołującego pochodzą z `OMNIROUTE_MCP_SCOPES` (oddzielone przecinkami) lub kontekstu zasięgu uwierzytelnionego klucza API. Zobacz [MCP-SERVER.md](./MCP-SERVER.md), aby zapoznać się z modelem o pełnym zakresie.
 
 ## Endpointy
 

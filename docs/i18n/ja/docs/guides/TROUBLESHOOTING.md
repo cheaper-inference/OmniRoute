@@ -178,85 +178,49 @@ npx playwright install chromium
 
 ---
 
-## アンチウイルスソフトによる誤検知
+## ウイルス対策の誤検知
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG が `README.md` を `MD:HttpRequest-inf[Susp]` として隔離する
+### Avast/AVG `README.md`を`MD:HttpRequest-inf[Susp]`で隔離
 
-**これは誤検知です。何も感染しておらず、対応は不要です。**
+**これは誤検知です。何も感染していないため、アクションは必要ありません。**
 
-Avast と AVG は、HTTP リクエストのように見えるリンクを多数含むプレーンテキスト/Markdown ファイルを
-検出するヒューリスティックを実行します。OmniRoute の `README.md` は npm パッケージ内に同梱され
-（`package.json` → `files` に記載されています）、グローバルインストール時に
-`node_modules/omniroute/README.md` に配置されます。また、このファイルには約15個の
-`http://localhost:20128/...` の例（MCP HTTP/SSE エンドポイント、A2A `.well-known` URL、
-および `curl` スニペット）が含まれています。このリンク密度だけでヒューリスティックの検出条件を
-満たしてしまいます。
+アバストとAVG HTTP リクエストと思われるリンクを多数含むplain-text/Markdownファイルにフラグを付けるヒューリスティックを実行します。 OmniRouteの`README.md`は npm パッケージ内に同梱されているため ( `package.json` → `files`にリストされています)、グローバル インストール—の`node_modules/omniroute/README.md`に配置され、 ~ 15 `http://localhost:20128/...`例 ( MCP HTTP/SSEエンドポイント、 A2A `.well-known` URL、および`curl`スニペット) が含まれています。そのリンク密度は、ヒューリスティックをトリップさせるのに十分です。
 
-この問題が最近になって発生し始めた場合でも、ファイルの性質が変わったわけではありません。README の
-エンドポイント表が拡充され（MCP HTTP + SSE + A2A が追加され）、`curl` の例も増えたことで、
-しきい値を超えただけです。
+これが最近始まった場合: ファイルの種類は変更されていません。 READMEエンドポイント テーブルを拡張し (MCP HTTP + SSE + A2Aが追加されました)、さらに多くの`curl`サンプルが追加され、しきい値を超えました。
 
-このファイルは実行可能な内容を一切含まない、無害なドキュメントです。隔離から安全に復元できます。
+このファイルは、実行可能コンテンツがまったく含まれていない不活性なドキュメントです。隔離から安全に復元できます。
 
-**対処方法：**
+**何をするか：**
 
-1. **通知を停止する** — アンチウイルスソフトでインストールディレクトリを除外し
-   （Avast: 設定 → 例外）、グローバル `node_modules` のパスや
-   OmniRoute のデータディレクトリ（`~/.omniroute/`）を追加してください。
-2. **誤検知を報告する** — <https://www.avast.com/false-positive-file-form.php> から、
-   隔離された `README.md` を添付して報告してください。これはベンダーのヒューリスティックが
-   テキストファイルに過剰反応している問題であるため、この対応がすべてのユーザーに役立つ解決策となります。
+1. **通知を停止する**—アンチウイルスのインストール ディレクトリを除外し (アバスト: 設定→例外)、グローバル`node_modules`パスand/or OmniRouteデータ ディレクトリ (`~/.omniroute/`) に追加します。
+2. **誤検知を報告する**— <https://www.avast.com/false-positive-file-form.php>、隔離された`README.md`を接続します。これはベンダーのヒューリスティックによるテキスト ファイルへの過剰反応であるため、誰にとっても役立つ修正です。
 
-**こちら側で「修正」しない理由：** 例はすべて `http://localhost` であり、
-自己署名証明書に伴う煩雑さなしに localhost を `https` にすることはできません。あるベンダーの
-ヒューリスティックを回避するためにドキュメントを不自然に改変すると、スキャナーの不具合に合わせる代わりに
-すべての読者の利便性を損なうことになります。
+**私たちがこれを「修正」しない理由:**例はすべて`http://localhost`であり、自己署名証明書の摩擦がなければ localhost を`https`にすることはできません。 1 つのベンダーのヒューリスティックを回避するためにドキュメントを破壊すると、スキャナーのバグを満たすためにすべての読者に損害を与えることになります。
 
-### Kaspersky がデスクトップアプリを `PDM:Trojan.Win32.Generic` として検出する
+### カスペルスキーはデスクトップ アプリに`PDM:Trojan.Win32.Generic`としてフラグを立てます
 
-**これは動作ヒューリスティックによる誤検知です。何も感染していません。** Kaspersky の
-`PDM:` プレフィックスは、その判定が既知のマルウェアとの照合ではなく、インストーラーの
-_動作_ を評価する Proactive Defense Module（System Watcher）によるものであることを意味します。
-検出が発生すると、Kaspersky はインストール全体を「ロールバック」し、すでに書き込まれたファイルも
-削除するため、アプリが破損したり消失したりします。
+**これは、行動ヒューリスティックからの誤検知です。何も感染していません。** Kaspersky の`PDM:`プレフィックスは、既知のマルウェアと照合するのではなく、インストーラーの「動作」を判断するプロアクティブ ディフェンス モジュール (システム ウォッチャー) によって判定が下されることを意味します。カスペルスキーが起動すると、インストール全体が「ロールバック」 —すでに書き込まれていたファイルが削除されます—ので、アプリが壊れるか、見つからなくなります。
 
-検出されるファイルは、デスクトップアプリに同梱された、明示済みのオープンソース依存関係に含まれる
-標準的な構成要素です。例：
+フラグを付けるファイルは、デスクトップ アプリにバンドルされている、宣言されたオープンソースの依存関係のストック部分です。次に例を示します。
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` および
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev)。アプリ内でのプロバイダーログインと、
-  ブラウザーを利用したチャットに使用されるブラウザー自動化ライブラリです。
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — Web Cookie を使用するプロバイダーで、ブラウザーのフィンガープリントを模倣した HTTP 通信に使用する、
-  バージョン固定済みの `wreq-js` ネイティブバインディングです（`<arch>` は `x64` または `arm64`）。
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js`および`workerProcessEntry.js` — [Playwright](https://playwright.dev) 、アプリ内プロバイダーのログインとブラウザーを使用したチャットに使用されるブラウザー自動化ライブラリです。
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — Web Cookie プロバイダー (`<arch>`は`x64`または`arm64`) 上のブラウザーフィンガープリントHTTPに使用されるピン留めされた`wreq-js`ネイティブ バインディング。
 
-**検出される理由：** Windows インストーラーは**まだコード署名されていない**ため、署名のない NSIS
-インストーラーにはレピュテーションがまったくなく、動作ヒューリスティックが最も厳しい設定で実行されます。
-さらに、同梱されたネイティブ DLL と、`%LOCALAPPDATA%\Programs\OmniRoute` 配下に書き込まれる
-数百個の `.js` ファイル（Next.js スタンドアロンビルドによるハッシュサフィックス付きのパッケージ
-ディレクトリを含む）が組み合わさることで、ヒューリスティックの検出条件を満たしてしまいます。
-コード署名は予定されていますが、導入されるまでは新しいリリースでもこの問題が繰り返される可能性があります。
+**発火する理由:** Windowsインストーラーは**まだコード署名されていない**したがって、署名されていないNSISインストーラーにはレピュテーションがゼロであり、動作ヒューリスティックは最大の攻撃性で実行されます。バンドルされたネイティブDLLと、 `%LOCALAPPDATA%\Programs\OmniRoute`で作成された数百の`.js`ファイル ( Next.jsスタンドアロン ビルドのハッシュ サフィックスが付いたパッケージ ディレクトリを含む) を組み合わせると、ヒューリスティックをトリップするには十分です。コード署名が計画されています。それがリリースされるまで、新しいリリースはこれを繰り返す可能性があります。
 
-**対処方法：**
+**何をするか：**
 
-1. **まずダウンロードを検証する**（ファイルが改ざんされていないことを確認します）。各リリースでは、
-   `OmniRoute.Setup.<version>.exe` インストーラー全体を対象とした base64 形式の `sha512`
-   フィールドを含む `latest.yml` が公開されています。PowerShell で、インストーラーがある
-   フォルダーから次を実行してください：
+1. **まずダウンロードを確認してください**(改ざんされたファイルを除外します)。すべてのリリースで`latest.yml`が公開され、その`sha512`フィールド (base64) が`OmniRoute.Setup.<version>.exe`インストーラーをカバーします。 PowerShellで、インストーラーを含むフォルダーから次のようにします。
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   出力は `latest.yml` → `sha512` と一致する必要があります。一致しない場合はファイルを削除し、
-   [GitHub リリースページ](https://github.com/diegosouzapw/OmniRoute/releases)からのみ再ダウンロードしてください。
-2. **復元して除外する** — ロールバックされて隔離された項目を復元し、
-   `%LOCALAPPDATA%\Programs\OmniRoute` を除外対象に追加して（Kaspersky → 設定 → 脅威と除外）、
-   再インストールしてください。
-3. **誤検知を報告する** — <https://opentip.kaspersky.com/>。ユーザーが送信する誤検知報告は、
-   実際に許可リストへの登録を迅速化します。
+   出力は`latest.yml` → `sha512`と一致する必要があります。そうでない場合は、ファイルを削除し、 [GitHubリリース ページ](https://github.com/cheaper-inference/OmniRoute/releases)からのみ再ダウンロードしてください。
+2. **+除外を復元する**— 、隔離からロールバックされたアイテムを復元し、 `%LOCALAPPDATA%\Programs\OmniRoute`の除外 (カスペルスキー→設定→脅威と除外) を追加してから、再インストールします。
+3. **誤検知を報告する**— <https://opentip.kaspersky.com/>。ユーザーが送信したFPレポートにより、ホワイトリストへの登録が大幅に高速化されます。
 
 ---
 
@@ -861,10 +825,10 @@ Diagnostic matrix for the compression CCR (`ccr`) and `session-dedup` tools. For
 
 ---
 
-## まだ解決しない場合
+## まだ行き詰まっていますか?
 
-- **GitHub Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **アーキテクチャ**: 内部の詳細については、[`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) を参照してください
-- **API リファレンス**: すべてのエンドポイントについては、[`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) を参照してください
-- **ヘルスダッシュボード**: リアルタイムのシステム状態を確認するには、**Dashboard → Health** を確認してください
-- **トランスレーター**: フォーマットの問題をデバッグするには、**Dashboard → Translator** を使用してください
+- **GitHub問題**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **建築**: 内部の詳細については、 [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)参照してください。
+- **APIリファレンス**: すべてのエンドポイントについては[`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)参照してください。
+- **ヘルスダッシュボード**： チェック**ダッシュボード→ヘルス**リアルタイムのシステムステータス用
+- **翻訳者**： 使用**ダッシュボード→トランスレーター**フォーマットの問題をデバッグするには

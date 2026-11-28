@@ -53,7 +53,7 @@ flowchart LR
 మీరు కోరుకునే బ్రాంచ్ను విలీనం చేయవచ్చని భావించే ముందు ఓపెన్ ఫ్రీజ్ కోసం తనిఖీ చేయండి:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 విలీన మెకానిక్స్ (యజమాని `queue` లేబుల్ → Mergify) [MERGE_TRAIN.md](./MERGE_TRAIN.md) లో డాక్యుమెంట్ చేయబడింది.

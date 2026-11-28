@@ -4,12 +4,9 @@
 
 ---
 
-> **Ostatnia aktualizacja:** 2026-08-28 — v3.8.51
-> Usprawniony proces wydawania, który wykorzystuje umiejętności Claude Code do automatyzacji.
+> Usprawniony przepływ wersji, który wykorzystuje umiejętności Claude Code do automatyzacji.
 >
-> **Utrzymuj kolejkę/gałąź w stanie green między wydaniami:** zobacz [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (rodzina `/green-prs` + `npm run check:release-green` + `/babysit` + zadanie nocne). Okresowe uruchamianie
-> tego procesu — a zwłaszcza **przed** wykonaniem tej listy kontrolnej — sprawia, że PR wydania rozpoczyna się w stanie green.
+> **Utrzymuj zielone queue/branch pomiędzy wydaniami:** zobacz [RELEASE_GREEN.md](./RELEASE_GREEN.md) (rodzina `/green-prs` + `npm run check:release-green` + `/babysit` + co noc). Uruchamianie tego okresowo —, a zwłaszcza** zanim** ta lista kontrolna — sprawia, że wydanie PR zaczyna się na zielono.
 
 ## TL;DR
 
@@ -58,9 +55,11 @@ Przepływ pracy npm-publish nie publikuje już bezpośrednio: uruchamia spakowan
 
 **Podręcznik z uszkodzonymi artefaktami (bez zmian):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` jako odruch domyślny (minuty, odwracalne); `npm unpublish` tylko w oknie 72h/no-dependents i nigdy jako pierwszy ruch. Docker: nigdy nie przepisuj znacznika wersji. Wycofanie zmian — powoduje przekierowanie `latest` do ostatniego dobrego skrótu.
 
-**Docker Hub `latest` (wymagane przy każdej stabilnej publikacji SemVer ):** przepływ pracy `docker-publish` musi zostać oznaczony** Zarówno** `X.Y.Z` i, gdy `should-promote-latest.sh` się zgadza, jest to najwyższa stabilna SemVer, `:latest` z** to samo podsumowanie** . Po zadaniu: Hub `latest` Digest jest równy nowemu podsumowaniu SemVer i przeniesieniu `last_updated`. Nie zostawiaj `:latest` w starszej kompilacji, podczas gdy informacje o wydaniu mówią o poprawkach, które istnieją tylko w git. Tworzenie przewodników Szybki Start użyj `:latest`; GitOps powinien nadal przypinać `X.Y.Z`. Zobacz [kanały wydania Docker](../guides/DOCKER_GUIDE.md#release-channels) i #10317.
+**Docker Hub `latest` (wymagane przy każdej stabilnej publikacji SemVer ):** przepływ pracy `docker-publish` musi zostać oznaczony** Zarówno** `X.Y.Z` i, gdy `should-promote-latest.sh` się zgadza, jest to najwyższa stabilna SemVer, `:latest` z** to samo podsumowanie** . Po zadaniu: Hub `latest` Digest jest równy nowemu podsumowaniu SemVer i przeniesieniu `last_updated`. Nie zostawiaj `:latest` na starszej kompilacji, podczas gdy informacje o wydaniu mówią o poprawkach, które istnieją tylko w git. Tworzenie przewodników Szybki start za pomocą `:latest`; GitOps powinien nadal przypinać `X.Y.Z`. Zobacz [kanały wydania Docker](../guides/DOCKER_GUIDE.md#release-channels) i #10317.
 
-**Repozytorium organizacji Docker Hub (`cheaperinference/omniroute`):** Docker Hub nie może przenosić repozytorium pomiędzy przestrzeniami nazw, więc `diegosouzapw/omniroute` przechowuje swoją historię ściągania i każde wydanie, a zadanie `mirror-org-dockerhub` `docker-publish` kopiuje każdą wydaną wersję (i `:latest` gdy jest promowana) z `ghcr.io/cheaper-inference/omniroute` do repozytorium organizacji. Potrzebuje sekretów `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; bez nich zadanie pozostaje zielone z ostrzeżeniem „Docker Hub org Mirror pominięto”, a inne rejestry są publikowane normalnie. Aby później opublikować tam wydaną wersję, uruchom** Akcje → Odbicie lustrzane obrazu Docker do przepływu pracy Docker Hub org → Uruchom** z `version=X.Y.Z` (i `promote_latest` dla najwyższej stabilnej wersji): kopiuje istniejące obrazy, bez przebudowy.
+**Repozytorium organizacji Docker Hub (`cheaperinference/omniroute`):** Docker Hub nie może przenosić repozytorium pomiędzy przestrzeniami nazw, więc `diegosouzapw/omniroute` przechowuje swoją historię ściągania i każde wydanie, a zadanie `mirror-org-dockerhub` `docker-publish` kopiuje każdą wydaną wersję (i `:latest` gdy jest promowana) z `ghcr.io/cheaper-inference/omniroute` do repozytorium organizacji. Potrzebuje sekretów `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; bez nich zadanie pozostaje zielone z ostrzeżeniem „Docker Hub org Mirror pominięto”, a inne rejestry są publikowane normalnie. Aby później opublikować tam wydaną wersję, uruchom** Akcje → Odbij obraz Docker do przepływu pracy Docker Hub org → Uruchom** z `version=X.Y.Z` (i `promote_latest` dla najwyższej stabilnej wersji): kopiuje istniejące obrazy, bez przebudowy. Przegląd centrum Docker tego repozytorium jest ustawiany ręcznie: API, który go edytuje, odrzuca tokeny dostępu organizacji.
+
+Ten sam przepływ pracy kopiuje również każdą wersję do starszego pakietu GHCR `ghcr.io/diegosouzapw/omniroute` do 30.06.2027 r., więc instalacje nadal do niego przypięte są aktualizowane; jego indeks zawiera opis „przeniesiony do `ghcr.io/cheaper-inference/omniroute`”. Potrzebuje sekretu `GHCR_LEGACY_TOKEN` (klasyczny osobisty token dostępu `diegosouzapw` z `write:packages`); bez tego zadanie zostanie pominięte i wyświetli się ostrzeżenie „Pominięto starszą wersję lustrzaną GHCR ”.
 
 ## Szybka ścieżka poprawek awaryjnych (etykieta `hotfix`)
 
@@ -110,7 +109,7 @@ E2E, bez żadnej etykiety.
 - [ ] `npm run lint` — 0 błędów (ostrzeżenia już istnieją)
 - [ ] `npm run typecheck:core` — czyste
 - [ ] `npm run typecheck:noimplicit:core` — czysty (ścisły)
-- [ ] `npm run check:cycles:ratchet` — w zamrożonym suficie `metrics.cycles` (gołe `check:cycles` wychodzi 1 w dowolnym cyklu, #15281)
+- [ ] `npm run check:cycles:ratchet` — w zamarzniętym suficie `metrics.cycles` (gołe `check:cycles` wychodzi 1 w dowolnym cyklu, #15281)
 - [ ] `npm run check:any-budget:t11` — w ramach budżetu
 - [ ] `npm run check:route-validation:t06` — czyste
 - [ ] `npm run check:node-runtime` — obsługiwany poziom środowiska wykonawczego met (`>=22.22.2 <23`, `>=24.0.0 <27`, per `SUPPORTED_NODE_RANGE` w `src/shared/utils/nodeRuntimeSupport.ts`; wyrównane z `package.json` `engines`)
@@ -122,7 +121,7 @@ E2E, bez żadnej etykiety.
 - [ ] `npm run test:coverage` — brama 60/60/60/60 usatysfakcjonowana (statements/lines/functions/branches)
 - [ ] `npm run test:integration` — pass (jeśli zmiany dotyczą DB / handlerów)
 - [ ] `npm run test:combo:matrix` — pass (macierz strategii kombinowanej: w sposób deterministyczny potwierdza decyzje dotyczące wyboru wszystkich 22 strategii routingu publicznego; uruchamiane po dotknięciu routingu kombinowanego, rozwiązania strategii lub logiki awaryjnej)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (bramkowany dym z prawdziwego źródła; pobiera migawkę DB tylko do odczytu z VPS `root@192.168.0.15`; uderza w prawdziwych dostawców, kosztuje kredyty; nigdy nie działa w CI; przeskakuje czysto bez bramy)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (bramkowany dym z prawdziwego źródła; pozyskuje migawkę DB tylko do odczytu z VPS `root@192.168.0.15`; uderza w prawdziwych dostawców, kosztuje kredyty; nigdy nie działa w CI; przeskakuje czysto bez bramy)
 - [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live smoke: 7 scenariuszy HTTP przeciwko żywemu serwerowi `.15` przez zwykły węzeł ESM; wymaga `ssh root@192.168.0.15`; creates/deletes tylko kombinacje `__live_test__*` ; uderza prawdziwych dostawców; nigdy nie działa w CI)
 - [ ] `npm run test:e2e` — pass (zmiany UI )
 - [ ] `npm run test:protocols:e2e` — pass (zmiany MCP/A2A )
@@ -151,7 +150,7 @@ Najważniejsze zmiany: dodaj stopkę `BREAKING CHANGE:` lub `!` po zakresie (np.
 ### Dokumentacja
 
 - [ ] `npm run check:docs-sync` przechodzi (automatycznie uruchamiane przed zatwierdzeniem)
-- [ ] `npm run check:docs-all` passs (parasol: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` przechodzi. Jego doradcze `check:deprecated-versions` oznacza wersje wyraźnie przypisane do OmniRoute (3.6.x i wcześniejsze) i ignoruje daty.
 - [ ] `npm run check:env-doc-sync` wychodzi 0 — kod ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env kontrakt jest nienaruszony
 - [ ] `npm run check:doc-links` wychodzi 0 — brak zepsutych wewnętrznych odniesień do przecen po restrukturyzacji
 - [ ] `docs/architecture/ARCHITECTURE.md` sprawdzone pod kątem storage/runtime drift
@@ -235,7 +234,7 @@ Wykonaj NOT uruchom `npm run build` a następnie oddzielny `npm run build:cli`, 
 ### Tagowanie i zwalnianie
 
 - [ ] Uruchom `/generate-release-cc` (umiejętność kodowania Claude ):
-  - Tworzy tag `vX.Y.Z`
+  - Tworzy znacznik `vX.Y.Z`
   - Popycha znacznik i gałąź
   - Otwiera wydanie GitHub z treścią dziennika zmian
   - Dołącza instalatory Electron (jeśli są wbudowane)
@@ -266,7 +265,7 @@ Wdróż umiejętności, używając lekkiego przepływu rsync — no `npm pack`, 
 
 - [ ] Uruchom `/capture-release-evidences-cc` (umiejętność kodowania Claude )
   - Przechwytuje WebP screenshots/recordings nowych funkcji
-  - Załączany do informacji o wydaniu/poście na blogu
+  - Załączany do informacji o wersji/poście na blogu
 - [ ] Zaktualizuj dyskusje GitHub / Discord z ogłoszeniem o wydaniu
 - [ ] Otwórz kamień milowy dla następnej wersji
 - [ ] Jeśli jest to krytyczne: przypnij dyskusję lub opublikuj post w `news.json`, aby wyświetlić baner w aplikacji
@@ -399,11 +398,11 @@ Zatwierdzenie podbicia programistycznego jest zbudowane za pomocą git hydraulic
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Uruchomienie wykonuje `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakuje archiwum tar, uruchamia `npm run check:pack-boot` (fałszywe sekrety, katalog danych efemerycznych), przepakowuje i kończy się niepowodzeniem, chyba że skrót jest identyczny, następnie rejestruje `artifact-identity.json` (head SHA, baza SHA, hash pliku blokady, platforma, arch, węzeł ABI, pakieter, polityka kompilacji — `scripts/release/artifact-identity.mjs`) i potwierdza archiwum w osobnym zadaniu. Promowanie podglądu oznacza instalację tego archiwum tar: nigdy nie kompiluj ze źródła.
+Uruchomienie wykonuje `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakuje archiwum tar, uruchamia `npm run check:pack-boot` (fałszywe sekrety, katalog danych efemerycznych), przepakowuje i kończy się niepowodzeniem, chyba że podsumowanie jest identyczne, następnie rejestruje `artifact-identity.json` (head SHA, baza SHA, hash pliku blokady, platforma, arch, węzeł ABI, pakieter, polityka kompilacji — `scripts/release/artifact-identity.mjs`) i potwierdza archiwum w osobnym zadaniu. Promowanie podglądu oznacza instalację tego archiwum tar: nigdy nie kompiluj ze źródła.
 
 ### Cięcie (3.9.0, po GO)
 

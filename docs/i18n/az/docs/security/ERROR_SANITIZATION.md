@@ -4,13 +4,7 @@
 
 ---
 
-> **Həqiqətin əsas mənbəyi:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` və `open-sse/utils/error.ts` daxilindəki ictimai qurucular
-> **Testlər:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Son yenilənmə:** 2026-09-02 — v3.8.51
-> **Auditoriya:** Xəta cavabları ilə işləyən istənilən mühəndis (HTTP marşrutları, SSE axınları, icraçılar, MCP işləyiciləri).
-> **Status:** Müştəriyə xəta mesajı qaytaran hər bir kod yolu üçün **MƏCBURİDİR**.
+> **Həqiqətin mənbəyi:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, və `open-sse/utils/error.ts` -də ictimai inşaatçılar** Testlər:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Tamaşaçılar:** Səhv cavablarına toxunan hər hansı mühəndis (HTTP marşrutları, SSE axınları, icraçılar, MCP işləyiciləri).** Vəziyyət:****MANDATORY** müştəriyə səhv mesajı qaytaran hər kod yolu üçün.
 
 ## Bu niyə mövcuddur
 

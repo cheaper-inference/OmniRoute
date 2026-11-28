@@ -63,42 +63,31 @@ Toate cele trei metode necesită autentificarea în panoul de control (`isAuthen
 OmniRoute salvează tokenul și execută imediat o căutare de test cu 1 rezultat; dacă Notion
 returnează un obiect de eroare, tokenul este șters, iar apelul eșuează cu `400`.
 
-## Instrumente MCP (6)
+## unelte MCP (6)
 
-Definite în `open-sse/mcp-server/tools/notionTools.ts`. Tokenul este rezolvat în momentul apelului
-prin `getNotionToken()`; dacă nu este configurat niciunul, instrumentul generează eroarea
-`"Tokenul de integrare Notion nu este configurat. Setați-l în Setări > Surse de context."`
+Definit în `open-sse/mcp-server/tools/notionTools.ts`. Tokenul este rezolvat în timpul apelului prin `getNotionToken()`; dacă nu este configurat niciunul, instrumentul aruncă `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Instrument                   | Domeniu        | Descriere                                                                                                      |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Caută pagini și baze de date după o interogare text (returnează titluri, ID-uri și URL-uri). Paginat.          |
-| `notion_get_page`            | `read:notion`  | Obține conținutul și metadatele unei pagini pe baza ID-ului acesteia.                                          |
-| `notion_list_block_children` | `read:notion`  | Listează toate blocurile descendente directe ale unui bloc sau ale unei pagini (arborele de blocuri). Paginat. |
-| `notion_query_database`      | `read:notion`  | Interoghează o bază de date cu `filter` + `sorts` opționale (formatul API-ului Notion). Paginat.               |
-| `notion_get_database`        | `read:notion`  | Obține schema/metadatele unei baze de date pe baza ID-ului.                                                    |
-| `notion_append_blocks`       | `write:notion` | Adaugă blocuri descendente directe la un bloc sau la o pagină existentă (maximum 100 de blocuri per cerere).   |
+| Instrument                   | Domeniul de aplicare | Descriere                                                                                      |
+| ---------------------------- | -------------------- | ---------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`        | Căutați pagini și baze de date după interogare de text (afișează titluri, IDs, URLs). Paginat. |
+| `notion_get_page`            | `read:notion`        | Obțineți conținut și metadate ale unei pagini prin ID.                                         |
+| `notion_list_block_children` | `read:notion`        | Listați toți copii de bloc ai unui bloc sau unei pagini (arborele blocurilor). Paginat.        |
+| `notion_query_database`      | `read:notion`        | Interogați o bază de date cu `filter` + `sorts` opțional (formatul Notion API ). Paginat.      |
+| `notion_get_database`        | `read:notion`        | Obțineți schema/metadata unei baze de date de ID.                                              |
+| `notion_append_blocks`       | `write:notion`       | Adăugați copii bloc la un bloc sau o pagină existentă (maximum 100 de blocuri per solicitare). |
 
-### Parametri de intrare
+### Parametrii de intrare
 
-- `notion_search` — `query` (1–500 de caractere), `pageSize` (1–100, valoare implicită 20),
-  `startCursor` (opțional).
-- `notion_get_page` — `pageId` (hexazecimal cu 32 de caractere sau UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, valoare implicită 50),
-  `startCursor` (opțional).
-- `notion_query_database` — `databaseId`, `filter` (opțional, formatul filtrelor Notion),
-  `sorts` (matrice opțională), `pageSize` (1–100, valoare implicită 50), `startCursor` (opțional).
+- `notion_search` — `query` (1–500 de caractere), `pageSize` (1–100, implicit 20), `startCursor` (opțional).
+- `notion_get_page` — `pageId` (hex sau UUID de 32 de caractere).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, implicit 50), `startCursor` (opțional).
+- `notion_query_database` — `databaseId`, `filter` (opțional, format de filtru Notion ), `sorts` (matrice opțională), `pageSize` (1–100, implicit 50), `startCursor` (opțional).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (matrice de obiecte de tip bloc),
-  `after` (poziție opțională).
+- `notion_append_blocks` — `blockId`, `children` (matrice de obiecte bloc), `after` (poziție opțională).
 
-### Domenii
+### Domenii de aplicare
 
-Instrumentele de citire necesită `read:notion`, iar instrumentul de scriere necesită `write:notion`.
-Domeniile sunt impuse de `withScopeEnforcement()` în
-`open-sse/mcp-server/server.ts` numai când `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; domeniile
-permise apelantului provin din `OMNIROUTE_MCP_SCOPES` (separate prin virgule) sau din contextul
-domeniilor cheii API autentificate. Consultați [MCP-SERVER.md](./MCP-SERVER.md) pentru
-modelul complet al domeniilor.
+Instrumentele de citire necesită `read:notion`, iar instrumentul de scriere necesită `write:notion`. Domeniile sunt impuse de `withScopeEnforcement()` în `open-sse/mcp-server/server.ts` când `OMNIROUTE_MCP_ENFORCE_SCOPES=true` și întotdeauna pentru un apelant HTTP/SSE a cărui cheie API nu are `manage`/`admin`; domeniile permise ale apelantului provin din contextul `OMNIROUTE_MCP_SCOPES` (separat prin virgulă) sau din contextul cheii API autentificate. Consultați [MCP-SERVER.md](./MCP-SERVER.md) pentru modelul cu sfera completă.
 
 ## Endpointuri
 

@@ -4,10 +4,9 @@
 
 ---
 
-> **Kwa Watumiaji**: Unatafuta mwongozo rahisi? Tazama [Mwongozo wa Viwango vya Bure](../getting-started/FREE-TIERS-GUIDE.md) kwa maelekezo ya hatua kwa hatua kuhusu jinsi ya kupata AI bila malipo.
+> **Kwa Watumiaji** : Je, unatafuta mwongozo rahisi? Tazama [Mwongozo wa Viwango Visivyolipishwa](../getting-started/FREE-TIERS-GUIDE.md) kwa maagizo ya hatua kwa hatua ya kupata AI bila malipo.
 
-> **Utafiti wa mwisho:** 2026-06-17 — utafiti wa wavuti kwa kila mtoa huduma (nyaraka rasmi + habari za siku 7 zilizopita, ukaguzi wa mawakala 50 wenye uthibitishaji pinzani) uliosasisha kila kiwango cha matumizi bila malipo + ToS. **Ukaguzi wa sehemu uliofanywa upya 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — tazama dokezo lenye tarehe hapa chini).
-> **Chanzo cha ukweli (katalogi):** `open-sse/config/freeModelCatalog.ts` (bajeti kwa kila MODEL, zilizondolewa urudufu kulingana na hifadhi ya pamoja). Idadi za bajeti ya tokeni hapa chini zinatokana na utafiti wa moja kwa moja wa wavuti na ni **makadirio** — tazama [Mbinu na tahadhari](#methodology--caveats).
+> **Ilikaguliwa mwisho:** 2026-11-23. Kila safu iliyo na kiasi, kila ofa iliyostaafu na kila lango la kadi lilifunguliwa upya dhidi ya ukurasa wa mtoa huduma mwenyewe siku hiyo (`config/quality/free-catalog-evidence.json`). Ufaulu wa awali: utafiti wa kila mtoa huduma wa 2026-06-17 na ukaguzi wa upya wa 2026-09-02.** Chanzo cha ukweli (katalogi):** `open-sse/config/freeModelCatalog.ts` (bajeti kwa kila MODEL, iliyopunguzwa kwenye bwawa). Nambari za bajeti ya ishara hapa chini zinatoka kwa utafiti wa moja kwa moja wa wavuti na ni** makadirio** — tazama [Methodology & caveats](#methodology--caveats).
 
 ## TL;DR — OmniRoute inajumlisha kiasi gani cha bure?
 
@@ -15,22 +14,23 @@ Takwimu hizi zinaelezea akaunti tofauti za watu wengine na masharti ya ustahiki 
 
 **Iliangaliwa 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) inatoa mkopo wa ofa wa $5 wa mara moja unaohitaji njia ya kulipa, ambayo muda wake unaisha baada ya siku 30. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) inachapisha viwango vya project/model/tier ; inabaki nje ya kichwa cha habari cha kila mwezi kilichohesabiwa.
 
-| Kipimo                                              | Ishara / mwezi         | Maana                                                                                                                                                                                                                                                                                                      |
-| --------------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ruzuku ya mara kwa mara iliyoandikwa (tulivu)**   | **~ 1.62B**            | Kiwango cha bure** mabwawa** (orodha ya kila modeli), kila bwawa la pamoja limehesabiwa** mara moja** . Chanzo cha moja kwa moja nyuma ya `/api/free-tier/summary` na ukurasa wa Bajeti ya Kiwango Huria wa dashibodi.** Tumia nambari hii.**                                                              |
-| **+ mwezi wa kwanza na mikopo ya kujisajili**       | **~ 2.22B**            | + thabiti za kujisajili mara moja (Z.AI 20M, DeepSeek 5M, …), zinazokatwa kwa kila akaunti.** Mwezi wa kwanza tu** — haijirudii.                                                                                                                                                                           |
-| **+ bure kabisa, hakuna kofia iliyochapishwa**      | _isiyoweza kuhesabiwa_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — ufikiaji halisi unaorudiwa, rate/concurrency-limited,** hakuna kofia ya ishara ya kuhesabu** . Zilizoorodheshwa, hazijajumlishwa (kuzihesabu kwa `RPM×24/7` ni mfumuko wa bei tunaokataa).                          |
-| **+ amana-kufungua kuongeza**                       | **+~ 24M**             | Mara moja** $10** OpenRouter top-up inainua bwawa lake lisilolipishwa kutoka 50 → 1000 req/day. Imeripotiwa kando ili isiwahi kuongeza idadi thabiti.                                                                                                                                                      |
-| **+ nyuma ya ukaguzi wa utambulisho wa kikanda**    | **+~ 6M**              | `modelscope` (Alibaba Cloud binding + bara-China uthibitishaji wa jina halisi). Kiasi halisi kinachojirudia, kilichofichuliwa kama `gatedRecurringTokens` / `gatedProviders` na kwenye dashibodi. Haijawahi kufupishwa katika kichwa cha habari: +~ 6M nyuma ya uthibitishaji wa kitambulisho cha kikanda. |
-| Dari ya kinadharia (vikomo vyote vya viwango, 24/7) | ~ ya 10B               | Jumla ya kila kikomo cha kiwango cha mtoa huduma kinachoongezwa kwa matumizi yasiyo ya kikomo.** Sio dhamana** — usiweke kichwa hiki.                                                                                                                                                                      |
+| Kipimo                                            | Ishara / mwezi         | Maana                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ruzuku ya mara kwa mara iliyoandikwa (tulivu)** | **~ 90M**              | Kiwango cha bure** mabwawa** (orodha ya kila modeli), kila bwawa la pamoja limehesabiwa** mara moja** . Chanzo cha moja kwa moja nyuma ya `/api/free-tier/summary` na ukurasa wa Bajeti ya Kiwango Huria wa dashibodi.** Tumia nambari hii.**                                                              |
+| **+ mwezi wa kwanza na mikopo ya kujisajili**     | **~ 153M**             | + thabiti za kujisajili mara moja (Z.AI 20M, DeepSeek 5M, …), zinazokatwa kwa kila akaunti.** Mwezi wa kwanza tu** — haijirudii.                                                                                                                                                                           |
+| **+ bure kabisa, hakuna kofia iliyochapishwa**    | _isiyoweza kuhesabiwa_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — ufikiaji halisi unaorudiwa, rate/concurrency-limited,** hakuna kofia ya ishara ya kuhesabu** . Zilizoorodheshwa, hazijajumlishwa (kuzihesabu kwa `RPM×24/7` ni mfumuko wa bei tunaokataa).                          |
+| **+ amana-kufungua kuongeza**                     | **+~ 24M**             | Mara moja** $10** OpenRouter top-up inainua bwawa lake lisilolipishwa kutoka 50 → 1000 req/day. Imeripotiwa kando ili isiwahi kuongeza idadi thabiti.                                                                                                                                                      |
+| **+ nyuma ya ukaguzi wa utambulisho wa kikanda**  | **+~ 6M**              | `modelscope` (Alibaba Cloud binding + bara-China uthibitishaji wa jina halisi). Kiasi halisi kinachojirudia, kilichofichuliwa kama `gatedRecurringTokens` / `gatedProviders` na kwenye dashibodi. Haijawahi kufupishwa katika kichwa cha habari: +~ 6M nyuma ya uthibitishaji wa kitambulisho cha kikanda. |
 
-**Kichwa cha uaminifu:** _Majumuisho ya OmniRoute**~ 1.62B ilirekodi tokeni za bure kwa mwezi** (hadi ~ 2.22B katika mwezi wako wa kwanza na salio la kujisajili) katika madimbwi 26 ya viwango vya bure — pamoja na mkia mrefu wa watoa huduma wa bure bila malipo kabisa — na RTK + Caveman compression (15–95% ya akiba ya tokeni) inazidisha hilo._
+**Kichwa cha uaminifu:** _Katalogi za OmniRoute**~ 90M ishara za bure** mwezi ambao unaweza kutumia (hadi ~ 153M katika mwezi wako wa kwanza na salio la kujisajili), kutoka kwa vikundi 12 vilivyo na nafasi iliyochapishwa, pamoja na mkia mrefu wa watoa huduma wa bure bila malipo kabisa. RTK + Mfinyazo wa Caveman (akiba ya ishara 15-95%) huzidisha hilo._
 
-> **Kwa nini hii ilishuka kutoka ~ 1.94B iliyopita.** Usahihishaji wa 2026-06-17 ni urekebishaji wa uaminifu, sio hasara: `gemini` sasa imepunguzwa (iliongezwa kwa kuhesabu kila lahaja ya Flash kivyake, 462M → 60M), `cloudflare-ai` iliyosahihishwa hadi 10k-Neurons/day yake halisi (122M → 30M), kujisajili tena kama `doubao` ), (kujisajili tena kama aqg) viwango vya kufunga vimeondolewa (`chutes`/`phind`/`kluster` imekoma). Imetatuliwa kwa `llm7` ( 5M/day → 150M sahihi) na watoa huduma wapya bila malipo (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Maelezo ya kihistoria. Takwimu zilizo hapa chini zinaelezea orodha ya wakati huo; sio nambari za leo._
 >
-> **Imesahihishwa zaidi kuwa ~ 1.37B katika v3.8.42:** `longcat` iliainishwa upya kutoka kwa ruzuku inayojirudia 150M/mo hadi salio la mara moja la kujisajili la 10M baada ya onyesho lake la kukagua bila malipo kuisha. Sheria hiyo hiyo ya uaminifu — hakuna mtoaji aliyeangushwa kimakosa.
+> **Kwa nini hii imeshuka kutoka bilioni 1.94 iliyopita.** Usahihishaji wa 2026-06-17 ni urekebishaji wa uaminifu, sio hasara: `gemini` sasa imepunguzwa (iliongezwa kwa kuhesabu kila lahaja ya Flash kivyake, 462M → 60M), `cloudflare-ai` iliyosahihishwa hadi 10k-Neurons/day yake halisi (122M → 30M), kujisajili kwa muda wa `doubao` ), na kujisajili kwa wakati mmoja (kuzima kwa wakati mmoja). tiers kuondolewa (`chutes`/`phind`/`kluster` imekoma). Imetatuliwa kwa `llm7` ( 5M/day → 150M sahihi) na watoa huduma wapya bila malipo (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Ilisasishwa mnamo 2026-08-26 baada ya kustaafu Felo Web:** Felo Web haijajumuishwa wakati provenance/licensing yake inayotokana na GPL inabaki kwenye HOLD; chanzo kiliripoti funguo 38 za bwawa wakati huo. Hesabu ya dimbwi ni ya moja kwa moja na ina CI-gated (`check:docs-counts` itashindwa kujenga ikiwa nambari zilizo hapo juu zitasogea kutoka `computeFreeModelTotals()`).
+> **Imesahihishwa zaidi hadi bilioni 1.37 katika v3.8.42:** `longcat` iliainishwa upya kutoka kwa ruzuku inayojirudia 150M/mo hadi salio la mara moja la kujisajili la 10M baada ya onyesho lake la kukagua bila malipo kuisha. Sheria hiyo hiyo ya uaminifu — hakuna mtoa huduma aliyeangushwa kimakosa.
+>
+> **Ilisasishwa mnamo 2026-08-26 baada ya kustaafu Felo Web:** Felo Web haijajumuishwa wakati provenance/licensing yake inayotokana na GPL inabaki kwenye HOLD; chanzo kiliripoti funguo 38 za bwawa wakati huo.
 >
 > **Ilikaguliwa tena mnamo 2026-09-02 dhidi ya kurasa za watoa huduma wenyewe** (vyanzo: maoni ya `// evidence:` karibu na kila ingizo lililokaguliwa tena katika `open-sse/config/freeModelCatalog.data.ts`): `gemini` na `ollama-cloud` hazichapishi tena takwimu (Google iliondoa jedwali lisilolipishwa la kila modeli mnamo 2025-12-23; Mpango wa Bure wa Ollama ni "karama za matumizi ya mwanzo") na sasa zimeorodheshwa kama** haijafungwa** , haijawahi kujumlishwa (− 80M); `groq` ni tano** kwa kila mfano** Kofia 200K-TPD (6M kila moja, + 15M) na IDs tatu zilizostaafu zimeshuka; `nara` ni ndoo moja ya 7M/day (+ 60M, 210M). `mistral`'s 1B inaonekana tu katika dashibodi ya akaunti — tazama _Evidence classes_ chini ya Methodology.
 >
@@ -38,26 +38,114 @@ Takwimu hizi zinaelezea akaunti tofauti za watu wengine na masharti ya ustahiki 
 >
 > **Ilirekebishwa mnamo 2026-09-03 (#11773):** `cerebras` iliainishwa upya kutoka kwa ruzuku inayojirudia 30M/mo (jaribio la zamani la 1M tokens/day bila kadi) hadi salio la mara moja la $5 la kujisajili ambalo linahitaji njia ya kulipa. Sheria sawa ya uaminifu kama LongCat.
 >
-> **Plus xKiro (2026-09-03):** bwawa jipya `xkiro-free` (150M/mo) linaongeza ufunguo wa 35 unaorudiwa wa bwawa. Felo Web husalia kutengwa huku provenance/licensing yake inayotokana na GPL ikisalia HOLD. Chanzo sasa kinaripoti** Funguo 26 za bwawa zinazorudiwa** na**~ 1.62B thabiti** — nambari ya moja kwa moja, iliyo na lango la CI (`check:docs-counts` itashindwa kujenga ikiwa hii itayumba kutoka `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** bwawa jipya `xkiro-free` (150M/mo) linaongeza ufunguo wa 35 unaorudiwa wa bwawa. Felo Web husalia kutengwa huku provenance/licensing yake inayotokana na GPL ikisalia HOLD. Wakati huo chanzo kiliripoti funguo 34 za bwawa na tokeni bilioni 1.62 kwa mwezi (tulivu).
 
-Kubwa zaidi** kumbukumbu** wachangiaji: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (kofia tano kwa kila mfano), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` haijajumuishwa — ruzuku yake ya LongCat-2 10M .0 ni salio la mara moja, la kujisajili la KYC, si bajeti ya kila mwezi inayojirudia.)
+Kubwa zaidi** kumbukumbu** wachangiaji wa takwimu halisi leo: `groq` 24M (kofia 4 kwa kila mfano), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` haijajumuishwa — ruzuku yake ya LongCat-2 10M .0 ni salio la mara moja, la kujisajili la KYC, si bajeti ya kila mwezi inayojirudia.)
 
-> ⚠️ Dari ya kinadharia (~ 10B) imechangiwa na watoa huduma wa kikomo cha viwango pekee na** hakuna kofia ya ishara iliyochapishwa** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`) ambaye takwimu zake zingekuwa `RPM/TPM × 24/7 × 30d` — kiwango cha juu cha kinadharia hakuna akaunti moja inayoweza kudumu. Wao ni** kutengwa** kutoka kwa nambari inayoweza kulindwa (iliyoonyeshwa kwenye safu mlalo ya "bure kabisa, hakuna kofia"). Huu ni mfumuko wa bei uleule unaofanya madai ya mabilioni ya washindani kutokuwa ya kuaminika.
+## Marekebisho, Novemba 2026
+
+Hadi toleo hili, ukurasa huu na README walisema tokeni za bure bilioni 1.62 kwa mwezi. Hilo lilikuwa kosa. Mabwawa manne yalibeba 93% yake, na zote nne zilikuwa zimebadilika kwa mtoa huduma huku katalogi yetu ikisalia sawa. Takwimu halisi leo ni tokeni za bure za ~ 90M kwa mwezi. Jedwali linaweka kilichobadilika kwa kila mtoa huduma karibu na tulichokosea.
+
+| Ni nini kilibadilika kwa mtoa huduma (tarehe, chanzo)                                                                         | Tumekosea nini (nini, tangu lini)                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Mistral: hali ya bila malipo haijumuishi tena ufikiaji wa API (docs.mistral.ai, soma mnamo 2026-11-18)                        | Tuliendelea kuhesabu tokeni bilioni 1 kwa mwezi kutoka kwa usomaji wa kiweko wa 2026-09-02 na hatukuikagua tena. |
+| Nara: Mpango wa Bure huorodhesha hakuna mifano ( `router.bynara.id/api/plans` ya mtoa huduma, soma mnamo 2026-11-18)          | Tulihesabu tokeni milioni 210 kwa mwezi                                                                          |
+| xKiro: tokeni 500K kwa siku kwa kila akaunti (xkiro.com, soma mnamo 2026-11-18)                                               | IDs 30 za mfano ambazo hazipo tena zilibaki kwenye orodha                                                        |
+| LLM7: ukurasa wa mipaka umekwenda na hakuna ukurasa rasmi unaochapisha nafasi ya bure (2026-11-23)                            | Tulihesabu tokeni milioni 150 kwa mwezi bila ushahidi wa tarehe                                                  |
+| Groq: mwanamitindo mmoja kwenye bwawa lisilolipishwa alistaafu (2026-09-14)                                                   | Bwawa lilihifadhi saizi yake ya zamani                                                                           |
+| AgentRouter: mtoa huduma huorodhesha mkopo wa kuingia wa $25 wa kila siku na $50 zaidi kwa kujisajili (soma mnamo 2026-11-23) | Tuliorodhesha mkopo wa kujisajili wa $200                                                                        |
+| Predibase: bidhaa iliisha                                                                                                     | Bado tulihesabu salio lake la kujisajili katika mwezi wa kwanza                                                  |
+| (hakuna)                                                                                                                      | Watoa huduma 16 walihifadhi bendera ya ofa bila malipo baada ya ofa yao kuisha                                   |
+| (hakuna)                                                                                                                      | README aliahidi kukaguliwa upya kila baada ya wiki mbili. Ya mwisho kabla ya hii ilikuwa 2026-09-02              |
+| (hakuna)                                                                                                                      | Ukaguzi wa hati uliruhusu kusogea kwa 0.05B na haikuweza kusoma takwimu katika mamilioni                         |
+
+Kujumlisha mgawo mmoja kwa kila safu huongeza orodha yoyote, yetu ikiwa ni pamoja na. Ndiyo maana takwimu iliyofupishwa hubeba lebo yake na ile halisi hukaa chini yake.
+
+## Nini cha kuhesabu
+
+Safu mlalo huhesabiwa kuelekea tarakimu zisizolipishwa wakati yote haya yanashikilia:
+
+- Kiasi hicho kinajirudia na huchapishwa kwenye ukurasa wa mtoa huduma mwenyewe, kukiwa na ushahidi wa tarehe karibu na safu mlalo katika katalogi.
+- Akaunti moja kwa kila mtoa huduma. Hakuna chochote kinachohitaji malipo, kadi, amana au hundi ya utambulisho (KYC). Kiasi kinachohitaji nambari ya simu, Telegram au Discord ili kujisajili kimeorodheshwa kando, kama "kujisajili kwa jamii", kamwe katika takwimu halisi.
+- Hakuna mtoa huduma aliyealamisha `tos: "avoid"`, na ni API rasmi ya mtoa huduma pekee .
+- Salio za kujisajili mara moja huhesabiwa tu katika takwimu ya mwezi wa kwanza, na tu wakati hakuna kadi inayoombwa. Amana ya mara moja ambayo huongeza mgawo ni nyongeza tofauti. Matangazo kamwe hayahesabiki katika takwimu halisi.
+- Watoa huduma za utafutaji, sauti na maudhui hutoka kwenye hesabu kwa aina ya ufikiaji na kutoka kwa kila tokeni. Wanapata hesabu zao wenyewe, katika vitengo vyao wenyewe (matokeo, wahusika, picha), kwenye ukurasa huu hesabu inapowaongeza; hizo haziongezi kamwe au kugeuzwa kuwa ishara.
+
+Nini maana ya kila hesabu ya umma:
+
+- **Watoa huduma walio na ufikiaji wa bure** (50 leo: 43 na ufunguo API, 6 bila ufunguo, 1 kupitia akaunti ya zana): watoa huduma walio na angalau safu mlalo ya katalogi inayotoa ufikiaji bila malipo, kulingana na jinsi unavyoifikia.
+- **Safu mlalo za katalogi zilizo na ufikiaji bila malipo** (214 leo): safu mlalo moja kwa kila mtoaji na modeli.
+- **Mabwawa yaliyo na mgawo uliochapishwa** (12 leo): nafasi zilizoshirikiwa nyuma ya takwimu halisi, kila moja imehesabiwa mara moja.
+- **Mifano tofauti za bure** (185 leo): safu mlalo zilizopangwa kwa mtindo ID.
+- **Imealamishwa na ofa isiyolipishwa** (+ 140 leo): kila mtoa huduma ambaye ingizo lake la usajili hubeba `hasFree`, ikijumuisha utafutaji, watoa huduma za sauti na maudhui, majaribio na salio la kujisajili.
+
+Kila hesabu imeorodheshwa, haijajaribiwa kwa kila simu: inasema orodha hiyo inaorodhesha nini, sio kwamba kila njia inajibu hivi sasa.
+
+## Jinsi tunavyohesabu
+
+Takwimu tatu zinatoka kwa katalogi sawa, iliyokaguliwa mnamo 2026-11-23:
+
+- **Takwimu halisi, tokeni za bure za ~ 90M kwa mwezi.** Kila sehemu iliyoshirikiwa huhesabiwa mara moja, kwa hivyo miundo mitano nyuma ya posho moja ya kila siku ni posho moja. Hivi ndivyo akaunti moja katika kila mtoa huduma inaweza kutumia. Kwa salio la kujisajili mara moja, ~ 153M katika mwezi wako wa kwanza.
+- **Umbo kubwa, ~ 11.3B muhtasari wa safu kwa safu** , ofa zilizomalizika zimejumuishwa. Hivi ndivyo katalogi zingine zinavyohesabu. Takriban yote ni historia: 98.6% kutoka kwa matoleo ambayo hayapo tena. Tunachapisha tu kwa lebo yake na kwa takwimu halisi karibu nayo.
+- **Katalogi ya moja kwa moja, ~ 159M muhtasari kwa kila safu ya moja kwa moja** : jumla ya safu mlalo kwa safu bila matoleo yaliyokamilika.
+
+Njia ya safu kwa safu (`row-sum-v1`) inafuata sheria nne:
+
+1. Kila safu iliyoorodheshwa huongezwa kama ilivyo, bila kuunganisha safu zinazoshiriki dimbwi moja.
+2. Viwango vilivyochapishwa katika tokeni pekee ndivyo vinavyoongezwa. Kiasi kilichochapishwa katika maombi, salio au niuroni huhesabiwa kuwa sufuri (`FREE_QUOTA_UNIT` katika `open-sse/config/freeModelCatalog.ts`).
+3. Salio la kujisajili, nyongeza za amana na safu mlalo kuzimwa (`enabled: false`) huachwa nje.
+4. Nambari kubwa huongeza daftari la matoleo yaliyomalizika (`open-sse/config/freeModelCatalog.retired.data.ts`) katika mgawo wa mwisho kila safu iliyoorodheshwa. Ni safu mlalo pekee ambazo zimestaafu tangu `RETIRED_LEDGER_SINCE` iingie, na kila safu hutoka miezi 12 baada ya kumalizika.
+
+Ikiwa njia ya safu-kwa-safu ya kuhesabu itaacha kuwa ya kawaida, au mtunzaji anaamua hivyo, takwimu kubwa huondoka kila ukurasa na takwimu halisi pekee hubakia.
+
+## Imeondolewa / hakuna daraja la bure
+
+Watoa huduma ambao ofa yao ya bila malipo iliisha au haikuweza kuthibitishwa. Wanakaa kwenye sajili na `hasFree: false` (au wamestaafu kutoka kwa orodha ya bure) na hawahesabiki katika takwimu yoyote ya bure. Hii sio orodha ya watoa huduma walioondolewa kutoka OmniRoute kwa ombi (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Mtoa huduma              | Tangu      | Kwa nini                                                                                | Chanzo                                  |
+| ------------------------ | ---------- | --------------------------------------------------------------------------------------- | --------------------------------------- |
+| `mistral`                | 2026-11-23 | Hali ya bure haijumuishi tena ufikiaji wa API                                           | docs.mistral.ai (vikomo vya matumizi)   |
+| `nara`                   | 2026-11-23 | Mpango wa bure huorodhesha hakuna mifano                                                | `router.bynara.id/api/plans`            |
+| `llm7`                   | 2026-11-23 | Hakuna ukurasa rasmi unaochapisha sehemu isiyolipishwa                                  | tovuti ya mtoa huduma                   |
+| `navy`                   | 2026-11-23 | Hakuna nafasi ya bure inayoweza kuthibitishwa kwenye kurasa rasmi                       | api.navy                                |
+| `bluesminds`             | 2026-11-23 | Matumizi yanahitaji mkopo kununuliwa kutoka kwa mtoa huduma                             | `api.bluesminds.com/api/status`         |
+| `arcee-ai`               | 2026-11-23 | Bei iliyolipwa pekee                                                                    | docs.arcee.ai (bei)                     |
+| `huggingface`            | 2026-11-23 | Akaunti za bure lazima zinunue salio au kuboresha hadi PRO                              | huggingface.co (bei ya Watoa Maelekezo) |
+| `huggingchat`            | 2026-11-23 | Maelekezo ya Hugging Face inahitaji mikopo iliyonunuliwa au PRO                         | huggingface.co (bei ya Watoa Maelekezo) |
+| `ainative`               | 2026-11-23 | Mpango wa Hobbyist hulipwa baada ya jaribio la siku 3                                   | ukurasa wa bei ya mtoa huduma           |
+| `stepfun`                | 2026-11-23 | Bei ya lipa kwa matumizi pekee                                                          | ukurasa wa bei ya mtoa huduma           |
+| `predibase`              | 2026-11-23 | Bidhaa imekoma                                                                          | predibase.com                           |
+| `poolside`               | 2026-10-31 | Maoni ya moja kwa moja yamezimwa                                                        | jukwaa.poolside.ai                      |
+| `amazon-q`               | 2026-05-15 | Hakuna usajili mpya wa Kiwango cha Bure                                                 | ukurasa wa mtoaji                       |
+| `chat-oripe`             | 2026-11-23 | Mwenyeji wa API anajibu HTTP 530                                                        | mwenyeji API                            |
+| `naga-ai`                | 2026-11-23 | Nakala ya mtoa huduma wa Naga.ac                                                        | api.naga.ac                             |
+| `dxnt`                   | 2026-11-23 | Bonasi ya kujisajili ipo, lakini hakuna mfano unaoikubali                               | dxnt.com                                |
+| `ollama-cloud`           | 2026-11-09 | Miundo ya wingu ni malipo kwa kila tokeni au inafunikwa na mipango inayolipishwa        | ollama.com (#19334)                     |
+| `chutes`                 | 2026-03    | Kiwango cha bure kimeisha                                                               | ukurasa wa mtoaji                       |
+| `phind`                  | 2026-01    | Kampuni imefungwa                                                                       | ukurasa wa mtoaji                       |
+| `kluster`                | 2026-06-09 | Machweo (yamehamishwa hadi MITO)                                                        | ukurasa wa mtoaji                       |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo bure kufutwa; Ofa ya Nemotron ilikamilika 2026-06 (imethibitishwa tena 2026-06-18) | ukurasa wa mtoaji                       |
+| `aimlapi`                | 2026-06-18 | Kiwango cha bure kimesitishwa                                                           | ukurasa wa mtoaji                       |
+| `yi`                     | 2026-06-18 | Yi-Light alistaafu, lipa-unavyokwenda                                                   | ukurasa wa mtoaji                       |
+| `featherless-ai`         | 2026-06    | Hakuna kiwango cha sasa cha bure                                                        | ukurasa wa mtoaji                       |
+| `chipotle`               | 2026-09-15 | Wijeti ya gumzo nyuma yake inajibu 404 kwa kila njia (#13131, #4037)                    | amelia.chipotle.com                     |
+
+`iflytek` / `sparkdesk` kukaa kwa kuorodheshwa kwa dokezo la ToS-tahadhari: Spark Lite ni bure, lakini ToS huzuia matumizi ya seva mbadala na relay.
 
 ---
 
-## 2026-06-17 usasishaji — kilichobadilika tangu 2026-06-05
+## 2026-06-17 onyesha upya — kilichobadilika tangu 2026-06-05
 
-Mapitio ya utafiti wa wavuti kwa mawakala 50 (hati rasmi + habari za siku 7 zilizopita, yaliyothibitishwa kwa uhakika) yamesasisha orodha nzima. Mambo muhimu:
+Pasi ya utafiti wa wavuti ya wakala 50 (hati rasmi + last-7-days habari, imethibitishwa kwa njia ya hadaa) ilionyesha upya katalogi nzima. Vivutio:
 
-- **Yaliyoondolewa / hakuna kiwango cha bure (2026):** `chutes` (kiwango cha bure kilikoma 2026-03), `phind` (kampuni ilifungwa 2026-01), `kluster` (ilifutwa 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo ya bure ilifutwa 2026-05-24, ofa ya Nemotron ilikwisha 2026-06 — imethibitishwa tena 2026-06-18), `aimlapi` (kiwango cha bure kimesitishwa — kimethibitishwa tena 2026-06-18), `yi` (Yi-Light imeondolewa, lipa-unavyotumia — imethibitishwa tena 2026-06-18), `featherless-ai` (hakuna kiwango cha bure kwa sasa), `chipotle` ("Pepper AI" ya Chipotle — kipengele cha gumzo cha Amelia cha `amelia.chipotle.com` kilichochimbuliwa kinyume ambacho mtoa huduma alikuwa akizungumza nacho sasa kinarudisha 404 kwenye kila njia, ikijumuisha mzizi; seva ya nyuma imeondolewa/imehamishwa, imethibitishwa 2026-09-15 — imeondolewa kabisa kwenye orodha, #13131/#4037). `iflytek` / `sparkdesk` zinabaki zimeorodheshwa lakini zina doleo la tahadhari ya ToS (Spark Lite ni ya bure; ToS inazuia matumizi ya proksi/relei).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` zilizimwa 2026-06-01 na `2.5 Pro` ilitoka kwenye kiwango cha bure (2026-04); kiwango cha bure sasa ni **familia ya Flash tu** (2.5/3/3.1/3.5 Flash + Gemma). Orodha sasa **inaunganisha** familia ya Flash (ilikuwa imevimbiishwa kwa kuhesabu kila lahaja kando: 462M → 60M).
-- **Namba zilizosahihishwa:** `cloudflare-ai` 122M → **30M** (Neuron 10k halisi kwa siku), `doubao` imeainishwa upya kama mkopo wa usajili wa mara moja (si unaoendelea), `llm7` 4M → **150M** (tokeni 5M zilizoandikwa kwa siku), `together` sehemu za mwisho za "-Free" zilizosimamishwa → mkopo wa usajili wa $25 pia umeondolewa (inahitaji ununuzi wa chini wa $5, hakuna jaribio la bure), `longcat` Preview imekwishia + modeli za Flash zimeondolewa → **LongCat-2.0** tu, imeainishwa upya kama mkopo wa usajili wa tokeni **10M** wa mara moja (unaozuiliwa na KYC, si unaoendelea).
-- **Utoaji wa moja kwa moja wa Poolside unakwisha (umethibitishwa 2026-10-20):** [jukwaa rasmi](https://platform.poolside.ai/) linatangaza kufungwa tarehe **2026-10-31** na kuwaelekeza watumiaji kupakua modeli zake kutoka Hugging Face kwa kujihudumia. Mtoa huduma wa moja kwa moja `poolside` ana onyo hili. Orodha ya bure iliyokusanywa kwa mkono haina maingizo ya moja kwa moja ya Poolside; maingizo yake yenye jina la Poolside ni ya `kilo-gateway`. Tangazo hili halithibitishi upatikanaji wa modeli zinazohudumiwa na Kilo, Cline, NVIDIA au lango zingine, kwa hivyo orodha hizo hazijaondolewa kwa msingi huo.
-- **Watoa huduma wapya wa bure waliogunduliwa:** ⭐ **Kilo Code** (`kilo-gateway` — seti inayozunguka ya "Auto Free": familia ya NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — modeli 10 za upangaji programu za bure zinazozunguka, zimesasishwa 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash bure kabisa + bonasi ya usajili ya 20M), na Trinity Large Preview ya `arcee-ai`.
-- **Viwango vipya vya uaminifu** (tazama Mbinu): kategoria _ya bure kabisa lakini isiyo na kikomo_ (ufikiaji halisi unaoendelea, hakuna kikomo cha tokeni cha kuhesabu) na _nyongeza ya kufunguliwa kwa amana_ (OpenRouter $10 → +24M/mwezi), zote mbili zimeonyeshwa **kando** ili zisiongeze kamwe kichwa cha habari.
+- **Imeondolewa / hakuna daraja la bure:** imehamishwa hadi [sehemu yake](#removed--no-free-tier).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` imefungwa 2026-06-01 na `2.5 Pro` iliacha daraja la bure (2026-04); kiwango cha bure ni sasa** Flash-familia pekee** (2.5/3/3.1/3.5 Flash + Gemma). Katalogi sasa** mabwawa** familia ya Flash (iliongezwa kwa kuhesabu kila lahaja tofauti: 462M → 60M).
+- **Nambari zilizosahihishwa:** `cloudflare-ai` 122M →** 30M** ( 10k-Neurons/day halisi ), `doubao` iliyoainishwa upya kama mkopo wa kujisajili mara moja (hairudiwi), `llm7` 4M →** 150M** (iliyoandikwa 5M tokens/day), `together` "-Zisizolipishwa" hati za mwisho zimekomeshwa → $25 mkopo wa kujisajili pia umeondolewa (inahitaji ununuzi wa chini wa $5, hakuna jaribio la bila malipo), Muhtasari wa `longcat` umeisha + Miundo ya Flash iliyostaafu →**LongCat-2.0** pekee, iliyoainishwa tena kama ya mara moja** 10M** mkopo wa -token wa kujisajili (umefungwa kwa KYC, haujirudii).
+- **Mwisho wa uelekezaji wa moja kwa moja wa Poolside (uliothibitishwa 2026-10-20):** [jukwaa rasmi](https://platform.poolside.ai/) linatangaza kuzimwa** 2026-10-31** na inaelekeza watumiaji kupakua miundo yake kutoka kwa Hugging Face kwa kujipangisha. Mtoa `poolside` wa moja kwa moja anabeba onyo hili. Katalogi isiyolipishwa iliyoratibiwa kwa mikono haina maingizo ya moja kwa moja ya Poolside; maingizo yake yenye jina la Poolside ni ya `kilo-gateway`. Tangazo hili haliashirii upatikanaji wa miundo inayotolewa na Kilo, Cline, NVIDIA au lango lingine, kwa hivyo uorodheshaji huo haujastaafu kwa msingi huo.
+- **Watoa huduma wapya bila malipo waligundua:** ⭐** Msimbo wa Kilo** (`kilo-gateway` — inayozunguka seti ya "Isiyo na Kiotomatiki": NVIDIA Nemotron 3 familia, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — miundo 10 ya usimbaji inayozunguka bila malipo, iliyoonyeshwa upya 2026-10-20), ⭐** Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash bonasi ya kujisajili bila malipo kabisa + 20M), na Onyesho la Kuchungulia Kubwa la `arcee-ai` Trinity.
+- **Viwango vipya vya uaminifu** (angalia Methodology): kategoria _isiyo na malipo ya kudumu-lakini-isiyofungwa_ (ufikiaji halisi unaorudiwa, hakuna kikomo cha tokeni cha kuhesabiwa) na _deposit-unlock boost_ (OpenRouter $10 → +24M/mo), zote zimejitokeza** tofauti** kwa hivyo hawapendi kichwa cha habari kamwe.
 
-> Jedwali la kina la kila mtoa huduma lililo chini ni **picha ya 2026-06-05**; mabadiliko yaliyo hapo juu yanalifuta. Chanzo hai na cha rasmi ni orodha ya kila modeli `open-sse/config/freeModelCatalog.ts`.
+> Jedwali la kina kwa kila mtoa huduma chini zaidi ni** Muhtasari wa 2026-06-05** ; delta zilizo juu zinaichukua. Chanzo cha moja kwa moja cha kanuni ni katalogi ya kila modeli `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -112,7 +200,7 @@ makusudi.
 
 ## Mbinu na tahadhari
 
-- Nambari ni** makadirio ya hali ya juu** kutoka kwa vikomo vya viwango vya bure vya kila mtoa huduma kama vya** 2026-06-17** , iliyokusanywa na utafiti wa wavuti. Viwango vya bure hubadilika kila mara — thibitisha tena kabla ya kutegemea takwimu.
+- Nambari ni** makadirio ya hali ya juu** kutoka kwa vikomo vya viwango vya bure vya kila mtoa huduma, vilivyoangaliwa mara ya mwisho** 2026-11-23** kwa kila safu iliyo na kiasi. Viwango vya bure hubadilika kila mara — thibitisha tena kabla ya kutegemea takwimu.
 - **Ni kiingilio gani kinathibitisha.** Hakuna ingizo linalobeba ukadiriaji wa uaminifu kwa kila safu, na API haitumii — yoyote inayochukulia kila takwimu iliyo hapo juu kama makadirio ya ubora sawa, ambao haujatajwa. Mambo mawili ni tofauti, kwa sababu yameratibiwa kwa mkono badala ya kukisiwa: Maingizo 44 yana sehemu ngumu iliyo na kumbukumbu inayojitegemea (39 kati yao safu mlalo xKiro, ambazo zote hushiriki posho moja ya kila siku), na maingizo 22 yana ufichuzi wa mafunzo ya haraka. `hardStopGuaranteed` huwekwa tu wakati masharti ya mtoa huduma mwenyewe yanasema kwamba kuzidi posho ya bure kunakataa ombi badala ya kuanza kukutoza kimya kimya, na chanzo kwenye maoni karibu na ingizo; haijawahi kuwa chaguomsingi `true`, na ingizo ambalo hakuna mtu ameithibitisha halijawekwa. Kwa hivyo bendera inayokosekana ina maana "haijaanzishwa", haijulikani "kukutoza".** hali ya STRICT** (kinzi cha uelekezaji `freeAccessPolicy=strict` ) huamini tu maingizo yanayobeba bendera; kila daraja lingine huru limetengwa kama `no-hard-stop` (tazama `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Wakati mlinzi anachuja dimbwi, logi inayoonekana na mwendeshaji huripoti hesabu ya kutengwa na sehemu yake ya `no-hard-stop`.
 - `estMonthlyFreeTokens` = tokeni zinazorudiwa za kila mwezi pekee.** Salio za kujisajili mara moja hazijirudii** na kuhesabu kama 0. Viwango vilivyosimamishwa pia ni 0.
 - Kikomo cha tokeni ya kila siku → `monthly = daily × 30`. Ni RPD pekee iliyoandikwa → `RPD × ~800 output tokens × 30`. RPM/TPM pekee (hakuna kofia ya kila siku) →** haijafungwa** (tazama hapa chini).
@@ -125,13 +213,13 @@ makusudi.
 
 ## Kwa nini idadi yetu ni ndogo kuliko wakusanyaji wengine '
 
-Takwimu nyingi za "ishara za bure kwa mwezi" katika nafasi hii ni jumla ya lebo za kila mfano. Yetu sio, kwa makusudi:
+Takwimu nyingi za "tokeni za bure kwa mwezi" katika nafasi hii ni jumla ya lebo za kila mfano. Yetu sio, kwa makusudi:
 
-- **Kila bwawa lililoshirikiwa linahesabiwa mara moja.** Mpango wa bure wa Mistral ni posho ya 1B/month moja kwa kila shirika; kuorodhesha chini ya mifano mitano haifanyi kuwa 5B. Kwa muhtasari kwa kila modeli, katalogi yetu wenyewe ingesoma**~ 7.4B** (ilihesabiwa 2026-09-03; takwimu hii haijapimwa tena — wakati wowote orodha inapobadilika) — kichwa cha habari kinasema**~ 1.47B** kwa sababu hiyo ndiyo akaunti moja ya kila mtoa huduma inaweza kutumia.
+- **Kila bwawa lililoshirikiwa linahesabiwa mara moja.** Modeli tano nyuma ya posho moja ni posho moja, sio tano. Usomaji wa safu mlalo wa katalogi sawa, na kwa nini tunaichapisha, uko kwenye [Jinsi tunavyohesabu](#how-we-count).
 - **Vikomo vya kila siku vinabadilishwa, viwango haviko.** Kofia tokens/day iliyoandikwa inakuwa `× 30`; kofia requests/day iliyoandikwa inakuwa `RPD × ~800 tokens × 30`; mtoa huduma anayechapisha maombi kwa kila dakika pekee** hapana** takwimu ya mwezi na imeorodheshwa kama _uncapped_, haijawahi kujumlishwa. Kuzidisha kiwango cha juu kwa 24/7 ni mfumuko wa bei tunaokataa.
 - **Nafasi zilizo nyuma ya ukaguzi wa utambulisho wa eneo zinaonyeshwa kando** (`+~6M behind regional identity verification`), kwa sababu wasomaji wengi hawawezi kuzitumia.
 - **Salio la kujisajili ni la mwezi wa kwanza pekee** na kuripotiwa kama takwimu ya pili, haijawahi kuunganishwa katika nambari thabiti.
-- **Kielelezo kinatekelezwa na CI.** `npm run check:docs-counts` hukokotoa jumla kutoka kwa katalogi na kushindwa kujenga faili hii, README au kadi ya bajeti inapotoshwa kutoka kwao.
+- **Nini ukaguzi wa hati hufanya.** `npm run check:docs-counts` (hali ya kutoa) hukusanya tena takwimu halisi, takwimu ya mwezi wa kwanza na hesabu mbili za safu kwa safu kutoka kwenye katalogi, na inashindikana wakati README, ukurasa huu au Mwongozo wa Tiers Huru huchapisha thamani tofauti au kuchapisha takwimu kubwa bila lebo yake na ile halisi. Kadi ya bajeti imechorwa upya kutoka kwa ukweli sawa wakati wa kutolewa.
 
 ---
 
@@ -240,74 +328,74 @@ Takwimu nyingi za "ishara za bure kwa mwezi" katika nafasi hii ni jumla ya lebo 
 
 ---
 
-## Kiwango cha bure cha mtoa huduma kwa kila (Bytez/Nous imechaguliwa 2026-10-15; safumlalo zilizokaguliwa upya 2026-09-02; zingine 2026-06-17)
+## Kiwango cha bure cha mtoa huduma kwa kila (orodha iliyokaguliwa 2026-11-23)
 
-> Imetolewa upya kutoka kwa orodha ya kila modeli (`open-sse/config/freeModelCatalog.ts`), imetolewa kwenye bwawa. Imepangwa kwa tokens/mo. `uncapped*` = inayojirudia bila malipo kabisa lakini hakuna kifuniko cha tokeni kilichochapishwa (rate/concurrency-limited) — ufikiaji halisi,** sivyo** muhtasari wa kichwa cha habari. `—` = ya mkopo pekee / isiyo na ufunguo / isiyoweza kukadiriwa.
+> Imetunzwa kwa mkono kutoka kwa orodha ya mfano (`open-sse/config/freeModelCatalog.data.ts`); mara ya mwisho kuangaliwa 2026-11-23. Imepangwa kwa tokeni halisi za kila mwezi za kila bwawa (kila bwawa lililoshirikiwa limehesabiwa mara moja). `uncapped*` = bure kabisa lakini hakuna kofia ya ishara iliyochapishwa (rate/concurrency-limited): ufikiaji halisi,** sivyo** muhtasari wa takwimu halisi. `not counted` = mgawo unaojirudia ambao takwimu halisi huiacha (`avoid`, au nyuma ya ukaguzi wa utambulisho wa eneo). Watoa huduma ambao ofa yao iliisha wako katika [Kuondolewa / hakuna kiwango cha bure](#removed--no-free-tier). `—` = mkopo-pekee / ufunguo / sio ishara-inaweza kukadiriwa.
 
-| Mtoa huduma      | Aina ya bure     | Imara tokens/mo | Mkopo wa mwezi wa kwanza | ToS         | Mifano |
-| ---------------- | ---------------- | --------------- | ------------------------ | ----------- | ------ |
-| `mistral`        | inayojirudia     | ~ 1.00B         | —                        | tahadhari   | 5      |
-| `nara`           | inayojirudia     | ~ 210M          | —                        | tahadhari   | 8      |
-| `llm7`           | inayojirudia     | ~ 150M          | —                        | tahadhari   | 4      |
-| `xkiro`          | inayojirudia     | ~ 150M          | —                        | tahadhari   | 39     |
-| `longcat`        | mara moja        | —               | 10M                      | tahadhari   | 1      |
-| `cerebras`       | mara moja        | —               | mkopo wa $5              | tahadhari   | 2      |
-| `cloudflare-ai`  | inayojirudia     | ~ 30M           | —                        | tahadhari   | 9      |
-| `groq`           | inayojirudia     | ~ 30M           | —                        | tahadhari   | 5      |
-| `api-airforce`   | inayojirudia     | ~ 24M           | —                        | tahadhari   | 7      |
-| `bluesminds`     | inayojirudia     | ~ 7m            | —                        | utata       | 22     |
-| `sambanova`      | inayojirudia     | ~ 6M            | —                        | tahadhari   | 5      |
-| `arcee-ai`       | inayojirudia     | ~ 5m            | —                        | tahadhari   | 1      |
-| `bazaarlink`     | inayojirudia     | ~ 4m            | —                        | tahadhari   | 32     |
-| `openrouter`     | inayojirudia     | ~ 1M            | —                        | tahadhari   | 1      |
-| `cohere`         | inayojirudia     | ~               | —                        | tahadhari   | 6      |
-| `huggingchat`    | inayojirudia     | ~ 500K          | —                        | tahadhari   | 4      |
-| `morph`          | inayojirudia     | ~ 400K          | —                        | sawa        | 2      |
-| `huggingface`    | inayojirudia     | ~ 200K          | —                        | tahadhari   | 6      |
-| `kiro`           | inayojirudia     | ~ 25k           | —                        | kuepuka     | 12     |
-| `glm-cn`         | haijafungwa      | haijafungwa\*   | ~ 20M                    | sawa        | 4      |
-| `baidu`          | haijafungwa      | haijafungwa\*   | —                        | tahadhari   | 1      |
-| `gemini`         | haijafungwa      | haijafungwa\*   | —                        | tahadhari   | 4      |
-| `kilo-gateway`   | haijafungwa      | haijafungwa\*   | —                        | tahadhari   | 7      |
-| `opencode-zen`   | haijafungwa      | haijafungwa\*   | —                        | tahadhari   | 10     |
-| `tencent`        | haijafungwa      | haijafungwa\*   | —                        | tahadhari   | 1      |
-| `vertex`         | mkopo wa usajili | —               | ~ 300M                   | tahadhari   | 10     |
-| `agentrouter`    | mkopo wa usajili | —               | ~ 200M                   | tahadhari   | 4      |
-| `predibase`      | mkopo wa usajili | —               | ~ 25M                    | tahadhari   | 1      |
-| `doubao`         | mkopo wa usajili | —               | ~ 15M                    | utata       | 1      |
-| `ai21`           | mkopo wa usajili | —               | ~ 10M                    | kuepuka     | 2      |
-| `deepseek`       | mkopo wa usajili | —               | ~ 5m                     | sawa        | 2      |
-| `hyperbolic`     | mkopo wa usajili | —               | ~ 5m                     | sawa        | 8      |
-| `nscale`         | mkopo wa usajili | —               | ~ 5m                     | tahadhari   | 6      |
-| `bytez`          | mkopo (rec.)     | —               | haijulikani              | utata       | 1      |
-| `deepinfra`      | mkopo wa usajili | —               | ~ 1M                     | tahadhari   | 22     |
-| `fireworks`      | mkopo wa usajili | —               | ~ 1M                     | kuepuka     | 10     |
-| `nebius`         | mkopo wa usajili | —               | ~ 1M                     | tahadhari   | 1      |
-| `qoder`          | mkopo wa usajili | —               | ~ 1M                     | tahadhari   | 14     |
-| `scaleway`       | mkopo wa usajili | —               | ~ 1M                     | sawa        | 6      |
-| `novita`         | mkopo wa usajili | —               | ~ 500K                   | tahadhari   | 1      |
-| `agy`            | bila ufunguo     | —               | —                        | kuepuka     | 16     |
-| `baichuan`       | bila ufunguo     | —               | —                        | utata       | 1      |
-| `blackbox`       | bila ufunguo     | —               | —                        | kuepuka     | 6      |
-| `coze`           | bila ufunguo     | —               | —                        | kuepuka     | 1      |
-| `duckduckgo-web` | bila ufunguo     | —               | —                        | kuepuka     | 6      |
-| `freemodel-dev`  | bila ufunguo     | —               | —                        | haijulikani | 4      |
-| `friendliai`     | bila ufunguo     | —               | —                        | kuepuka     | 2      |
-| `iflytek`        | bila ufunguo     | —               | —                        | kuepuka     | 1      |
-| `inference-net`  | bila ufunguo     | —               | —                        | tahadhari   | 3      |
-| `liquid`         | bila ufunguo     | —               | —                        | haijulikani | 1      |
-| `monsterapi`     | bila ufunguo     | —               | —                        | utata       | 1      |
-| `muse-spark-web` | bila ufunguo     | —               | —                        | kuepuka     | 3      |
-| `nlpcloud`       | bila ufunguo     | —               | —                        | kuepuka     | 1      |
-| `nvidia`         | haijafungwa      | haijafungwa\*   | —                        | tahadhari   | 3      |
-| `pollinations`   | bila ufunguo     | —               | —                        | tahadhari   | 31     |
-| `publicai`       | bila ufunguo     | —               | —                        | tahadhari   | 3      |
-| `reka`           | bila ufunguo     | —               | —                        | tahadhari   | 2      |
-| `sensenova`      | bila ufunguo     | —               | —                        | tahadhari   | 1      |
-| `sparkdesk`      | bila ufunguo     | —               | —                        | tahadhari   | 1      |
-| `stepfun`        | bila ufunguo     | —               | —                        | sawa        | 1      |
-| `t3-web`         | bila ufunguo     | —               | —                        | kuepuka     | 23     |
-| `uncloseai`      | bila ufunguo     | —               | —                        | tahadhari   | 3      |
+| Mtoa huduma      | Aina ya bure     | tokens/mo halisi                           | Mkopo wa mwezi wa kwanza | ToS         | Mifano |
+| ---------------- | ---------------- | ------------------------------------------ | ------------------------ | ----------- | ------ |
+| `api-airforce`   | inayojirudia     | ~ 24M                                      | —                        | tahadhari   | 5      |
+| `groq`           | inayojirudia     | ~ 24M (kofia 4 kwa kila mfano)             | —                        | tahadhari   | 4      |
+| `cloudflare-ai`  | inayojirudia     | ~ 23M                                      | —                        | tahadhari   | 8      |
+| `xkiro`          | inayojirudia     | ~ 15M                                      | —                        | tahadhari   | 9      |
+| `bazaarlink`     | inayojirudia     | ~ 1.4M                                     | —                        | tahadhari   | 1      |
+| `openrouter`     | inayojirudia     | ~ 1.2M                                     | —                        | tahadhari   | 1      |
+| `cohere`         | inayojirudia     | ~                                          | —                        | tahadhari   | 6      |
+| `sambanova`      | inayojirudia     | ~ 480K                                     | —                        | tahadhari   | 2      |
+| `morph`          | inayojirudia     | ~ 160K                                     | —                        | sawa        | 2      |
+| `glm-cn`         | haijafungwa      | haijafungwa\*                              | 20M                      | sawa        | 4      |
+| `agnes`          | haijafungwa      | haijafungwa\*                              | —                        | sawa        | 3      |
+| `agnes-cn`       | haijafungwa      | haijafungwa\*                              | —                        | sawa        | 3      |
+| `aion`           | haijafungwa      | haijafungwa\*                              | —                        | sawa        | 4      |
+| `baidu`          | haijafungwa      | haijafungwa\*                              | —                        | tahadhari   | 1      |
+| `gemini`         | haijafungwa      | haijafungwa\*                              | —                        | tahadhari   | 4      |
+| `glm`            | haijafungwa      | haijafungwa\*                              | —                        | sawa        | 2      |
+| `kilo-gateway`   | haijafungwa      | haijafungwa\*                              | —                        | tahadhari   | 12     |
+| `nvidia`         | haijafungwa      | haijafungwa\*                              | —                        | tahadhari   | 3      |
+| `onomeo`         | haijafungwa      | haijafungwa\*                              | —                        | tahadhari   | 2      |
+| `requesty`       | haijafungwa      | haijafungwa\*                              | —                        | tahadhari   | 2      |
+| `sealion`        | haijafungwa      | haijafungwa\*                              | —                        | sawa        | 5      |
+| `tokenharbor`    | haijafungwa      | haijafungwa\*                              | —                        | tahadhari   | 2      |
+| `coze`           | inayojirudia     | haijahesabiwa (`avoid`)                    | —                        | kuepuka     | 1      |
+| `inference-net`  | inayojirudia     | haijahesabiwa                              | —                        | tahadhari   | 3      |
+| `kiro`           | inayojirudia     | haijahesabiwa (`avoid`)                    | —                        | kuepuka     | 7      |
+| `modelscope`     | inayojirudia     | nyuma ya ukaguzi wa utambulisho wa kikanda | —                        | tahadhari   | 2      |
+| `nlpcloud`       | inayojirudia     | haijahesabiwa (`avoid`)                    | —                        | kuepuka     | 1      |
+| `reka`           | inayojirudia     | haijahesabiwa                              | —                        | tahadhari   | 2      |
+| `t3-web`         | inayojirudia     | haijahesabiwa (`avoid`)                    | —                        | kuepuka     | 23     |
+| `bytez`          | mkopo (rec.)     | —                                          | —                        | utata       | 1      |
+| `doubao`         | mkopo wa usajili | —                                          | 15M                      | utata       | 1      |
+| `longcat`        | mkopo wa usajili | —                                          | 10M                      | tahadhari   | 1      |
+| `deepseek`       | mkopo wa usajili | —                                          | 5M                       | sawa        | 2      |
+| `hyperbolic`     | mkopo wa usajili | —                                          | 5M                       | sawa        | 8      |
+| `nscale`         | mkopo wa usajili | —                                          | 5M                       | tahadhari   | 6      |
+| `deepinfra`      | mkopo wa usajili | —                                          | 1M                       | tahadhari   | 22     |
+| `qoder`          | mkopo wa usajili | —                                          | 1M                       | tahadhari   | 9      |
+| `scaleway`       | mkopo wa usajili | —                                          | 1M                       | sawa        | 6      |
+| `novita`         | mkopo wa usajili | —                                          | 500K                     | tahadhari   | 1      |
+| `agentrouter`    | mkopo wa usajili | —                                          | —                        | tahadhari   | 1      |
+| `ai21`           | mkopo wa usajili | —                                          | —                        | kuepuka     | 2      |
+| `baichuan`       | mkopo wa usajili | —                                          | —                        | utata       | 1      |
+| `cerebras`       | mkopo wa usajili | —                                          | —                        | tahadhari   | 2      |
+| `fireworks`      | mkopo wa usajili | —                                          | —                        | kuepuka     | 10     |
+| `freemodel-dev`  | mkopo wa usajili | —                                          | —                        | haijulikani | 4      |
+| `monsterapi`     | mkopo wa usajili | —                                          | —                        | utata       | 1      |
+| `nebius`         | mkopo wa usajili | —                                          | —                        | tahadhari   | 1      |
+| `publicai`       | mkopo wa usajili | —                                          | —                        | tahadhari   | 3      |
+| `sensenova`      | mkopo wa usajili | —                                          | —                        | tahadhari   | 1      |
+| `vertex`         | mkopo wa usajili | —                                          | —                        | tahadhari   | 16     |
+| `agy`            | bila ufunguo     | —                                          | —                        | kuepuka     | 9      |
+| `aihorde`        | bila ufunguo     | —                                          | —                        | sawa        | 3      |
+| `blackbox`       | bila ufunguo     | —                                          | —                        | kuepuka     | 6      |
+| `duckduckgo-web` | bila ufunguo     | —                                          | —                        | kuepuka     | 6      |
+| `friendliai`     | bila ufunguo     | —                                          | —                        | kuepuka     | 2      |
+| `iflytek`        | bila ufunguo     | —                                          | —                        | kuepuka     | 1      |
+| `liquid`         | bila ufunguo     | —                                          | —                        | haijulikani | 1      |
+| `muse-spark-web` | bila ufunguo     | —                                          | —                        | kuepuka     | 3      |
+| `ovhcloud`       | bila ufunguo     | —                                          | —                        | sawa        | 5      |
+| `pollinations`   | bila ufunguo     | —                                          | —                        | tahadhari   | 24     |
+| `sparkdesk`      | bila ufunguo     | —                                          | —                        | tahadhari   | 1      |
+| `uncloseai`      | bila ufunguo     | —                                          | —                        | tahadhari   | 1      |
 
 ---
 

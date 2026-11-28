@@ -236,26 +236,26 @@ Hỗ trợ** 22 chiến lược định tuyến** (xem `src/shared/constants/rou
 | `context-relay`     | Phân bổ bối cảnh cho các mục tiêu                                                                       |
 | `fill-first`        | Điền vào hạn ngạch trước khi chuyển sang phần tiếp theo                                                 |
 | `p2c`               | Sức mạnh của hai sự lựa chọn                                                                            |
-| `random`            | Thống nhất ngẫu nhiên                                                                                   |
-| `least-used`        | Chọn cái có ít lần sử dụng gần đây nhất                                                                 |
-| `cost-optimized`    | Mục tiêu lành mạnh rẻ nhất đầu tiên                                                                     |
-| `reset-aware`       | Nhận biết các cửa sổ thiết lập lại nhà cung cấp                                                         |
-| `reset-window`      | Đặt lại định tuyến dựa trên cửa sổ                                                                      |
+| `random`            | Trộn mới theo yêu cầu                                                                                   |
+| `least-used`        | Chọn yêu cầu có ít yêu cầu được ghi lại nhất                                                            |
+| `cost-optimized`    | Giá đầu vào catalog thấp nhất trước                                                                     |
+| `reset-aware`       | Cấp bách thiết lập lại hạn ngạch + còn lại                                                              |
+| `reset-window`      | Cửa sổ hạn ngạch đặt lại sớm nhất trước tiên                                                            |
 | `expiry-first`      | Chi tiêu tài khoản có hạn ngạch sẽ hết hạn mà không sử dụng trước                                       |
 | `headroom`          | Phần lớn hạn ngạch còn lại đầu tiên                                                                     |
 | `quota-weighted`    | Bỏ qua các tài khoản đã cạn kiệt, sau đó rút theo hạn ngạch ÷ còn lại khi tải trong chuyến bay          |
-| `strict-random`     | Thực sự đồng nhất (không có trọng số chất lượng)                                                        |
+| `strict-random`     | Bộ bài xáo trộn: mỗi mục tiêu một lần trước khi lặp lại                                                 |
 | `auto`              | Sử dụng tính điểm 16 yếu tố (`autoCombo/`)                                                              |
 | `lkgp`              | Nhà cung cấp tốt được biết đến lần cuối đầu tiên                                                        |
-| `context-optimized` | Tốt nhất cho các yêu cầu ngữ cảnh dài                                                                   |
-| `cache-optimized`   | Ghim từng tiền tố lời nhắc có thể sử dụng lại vào cùng một tài khoản (lần truy cập bộ đệm nhắc nhở)     |
+| `context-optimized` | Cửa sổ ngữ cảnh lớn nhất được biết đến đầu tiên                                                         |
+| `cache-optimized`   | Ưu tiên tài khoản có khả năng giữ tiền tố lời nhắc trong bộ đệm                                         |
 | `fusion`            | Quạt ra một bảng song song, sau đó tổng hợp thông qua một giám khảo (`fusion.ts`)                       |
 | `pipeline`          | Các bước chuỗi — đầu ra của mỗi mục tiêu sẽ cung cấp dữ liệu cho mục tiêu tiếp theo                     |
 | `jev`               | Chọn tham gia: TypeSafe Jev thừa nhận mục nào được xếp hạng sẽ chạy; nếu không thì đơn đặt hàng của bạn |
 
 ### base.ts (1170 LOC)
 
-các** người thi hành trừu tượng** mà mọi lớp người thực thi đều mở rộng (trực tiếp hoặc thông qua `DefaultExecutor` và các lớp con khác). Nó chứa:
+các** người thi hành trừu tượng** mà mọi lớp thực thi đều mở rộng (trực tiếp hoặc thông qua `DefaultExecutor` và các lớp con khác). Nó chứa:
 
 - xây dựng URL mặc định `buildUrl()` — (ghi đè các lớp con cho tùy chỉnh)
 - tiêu đề mặc định `buildHeaders()` — (auth, loại nội dung)

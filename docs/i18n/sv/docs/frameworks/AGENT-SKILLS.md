@@ -13,12 +13,12 @@ Agent Skills är strukturerade SKILL.md-filer som lär externa agenter, MCP-klie
 
 ## Översikt
 
-Katalogen innehåller **45 Agent Skills** (23 för REST API + 21 för CLI + 1 konfigurationsarbetsflöde). Varje färdighet har:
+Katalogen innehåller** 45 Agentfärdigheter** (23 REST API + 21 CLI + 1 konfigurationsarbetsflöde). Varje färdighet har:
 
-- Ett **kanoniskt ID** (`omni-auth`, `cli-serve` osv.)
-- En **SKILL.md-fil** i `skills/{id}/SKILL.md` med YAML-frontmatter (`name`, `description`) + ett innehållsrikt markdown-dokument
-- **REST-endpoints** (API-färdigheter) eller **CLI-underkommandon** (CLI-färdigheter) som härleds från OpenAPI-specifikationen och CLI-registret
-- En **rå GitHub-URL** för direkt hämtning: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanoniska ID** (`omni-auth`, `cli-serve`, etc.)
+- A**SKILL.md** fil i `skills/{id}/SKILL.md` med YAML frontmatter (`name`, `description`) + rich markdown body
+- **REST slutpunkter** (API färdigheter) eller**CLI underkommandon** (CLI skills) härledd från OpenAPI spec och CLI registret
+- A**GitHub rå URL** för livehämtning: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Generatorns svar är en `GeneratorReport`:
 
 ---
 
-## API för täckning
+## Täckning API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

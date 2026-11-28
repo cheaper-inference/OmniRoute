@@ -67,10 +67,10 @@ Codex (`<environment_context><cwd>`) və OpenCode (`x-opencode-session`) eyni ş
 
 İş kataloqu maşınlar arasında fərqlənir, buna görə də eyni depo müxtəlif yollar altında görünə bilər. Bunun əvəzinə layihəni açıq şəkildə göndərin: Claude Code hər model sorğusuna `ANTHROPIC_CUSTOM_HEADERS` də sadalanan başlıqları əlavə edir və OmniRoute onlardan ikisini oxuyur:
 
-| Başlıq                     | Dəyər                                                                |
-| -------------------------- | -------------------------------------------------------------------- |
-| `x-omniroute-project`      | Layihə adı, məsələn `omniroute`                                      |
-| `x-omniroute-project-repo` | Normallaşdırılmış pult, məsələn, `github.com/diegosouzapw/OmniRoute` |
+| Başlıq                     | Dəyər                                                                     |
+| -------------------------- | ------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Layihə adı, məsələn `omniroute`                                           |
+| `x-omniroute-project-repo` | Normallaşdırılmış pult, məsələn, `github.com/cheaper-inference/OmniRoute` |
 
 Hər ikisi yalnız istinad üçün oxunur; onlar heç vaxt yuxarı axın provayderinə ötürülmür.
 
@@ -95,7 +95,7 @@ x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed` ifadəsi hər hansı etimadnamələri, sorğu sətirini və uzaq URL də daxil edilmiş fraqmenti silir və artıq `ANTHROPIC_CUSTOM_HEADERS` də olan başlıqlar saxlanılır. IDE uzantıları Claude Kodunu qabığınız olmadan işə salır, buna görə də onların sessiyaları işçi qovluğuna qayıdır.
+`sed` ifadəsi hər hansı etimadnamələri, sorğu sətrini və uzaq URL-ə daxil edilmiş fraqmenti silir və artıq `ANTHROPIC_CUSTOM_HEADERS` də olan başlıqlar saxlanılır. IDE uzantıları Claude Kodunu qabığınız olmadan işə salır, buna görə də onların sessiyaları işçi qovluğuna qayıdır.
 
 ---
 
@@ -276,28 +276,20 @@ avtomatik olaraq həmin uzaq serveri hədəfləyir və onun əhatə dairəsi mə
 
 ## Problemlərin aradan qaldırılması
 
-**Claude Code şlüzü nəzərə almır** — `ANTHROPIC_BASE_URL` dəyərində **`/v1`
-olmadığını** təsdiqləyin və `claude`-u yenidən başladın (env yalnız işə salınarkən bir dəfə oxunur). `omniroute launch`
-bunu sizin üçün idarə edir.
+**Claude Kodu şlüzə məhəl qoymur** — təsdiq `ANTHROPIC_BASE_URL` var** yox `/v1`** və `claude` yenidən başladın (env başlanğıcda bir dəfə oxunur). `omniroute launch` bunu sizin üçün idarə edir.
 
-**`/model` seçicisi boşdur / şlüz modelləri yoxdur** — Claude Code
-v2.1.219+ və `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` tələb olunur. Seçicidə yalnız `claude*` /
-`anthropic*` model ID-ləri görünür; istənilən digər modeli
-`ANTHROPIC_MODEL=<id>` ilə məcburi seçin (profillər də məhz bunu edir).
+**`/model` seçicisi boşdur / şlüz modelləri yoxdur** — Claude Code v2.1.219 + və `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` tələb edir. Seçicidə yalnız `claude*` / `anthropic*` modeli IDs görünür; hər hansı digər modeli `ANTHROPIC_MODEL=<id>` ilə məcbur edin (profillər bunu edir).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code həmişə **prefikssiz**
-model ID-ləri (məsələn, `claude-opus-4-8`) göndərir, buna görə həm Claude Code (`cc/…`), həm də
-Claude (`claude/…`) provayderləri qoşulduqda prefikssiz ID iki marşruta uyğun gəlir və
-OmniRoute təxmin etməyi rədd edir. Bunu iki üsuldan biri ilə düzəldin: prefiksli ID-ni
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` ilə sabitləyin və ya **Prefikssiz Claude modelləri üçün Claude Code-a üstünlük ver**
-seçimini aktivləşdirin — Claude provayderi səhifəsindəki keçid və ya
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (standart olaraq deaktivdir;
-baxın: [Mühit](../reference/ENVIRONMENT.md)) — bu, prefikssiz `claude-*`
-ID-lərini əvəzinə Claude Code-a yönləndirir. Aydın şəkildə göstərilmiş provayder prefiksləri həmişə üstünlük təşkil edir.
+**`400 Ambiguous model 'claude-…'`** — Claude Kodu həmişə göndərir** prefikssiz** IDs modeli (məsələn, `claude-opus-4-8`), buna görə də həm Claude Kodu (`cc/…`) həm də Claude (`claude/…`) provayderləri birləşdirildikdə çılpaq id iki marşruta uyğun gəlir və OmniRoute təxmin etməkdən imtina edir. İstənilən şəkildə düzəldin: `ANTHROPIC_MODEL=cc/claude-opus-4-8` ilə prefiksli identifikatoru birləşdirin və ya aktivləşdirin** Prefikssiz Claude modelləri üçün Claude koduna üstünlük verin** Claude provayder səhifəsində keçidi — və ya `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (defolt deaktiv; [Ətraf mühitə](../reference/ENVIRONMENT.md) baxın) — əvəzinə çılpaq `claude-*` IDs Claude Koduna yönləndirin. Açıq provayder prefiksləri həmişə qalib gəlir.
 
-**Autentifikasiya xətaları** — profildə token saxlanılmır. `omniroute launch --profile`
-istifadə edin (onu daxil edir) və ya `ANTHROPIC_AUTH_TOKEN` dəyişənini export edin.
+**"avtomatik rejim ... bu sessiya uyğun deyil" (klassifikator sorğuları hesablanır)** avtomatik rejimdə — Claude Kod serverdən öz model sorğuları daxilində hərəkətləri nəzərdən keçirməyi xahiş edir ( [Anthropic sənədlər](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Bunun üçün `anthropic-beta` dəyəri `dangerous-tool-use-2026-09-03` və `safeguards` bədən sahəsi cüt olaraq Anthropic çatmaq üçün, `safeguard_results` üstəgəl dəyişməz geri qayıtmaq üçün yuxarı axın alətindən istifadə IDs lazımdır. OmniRoute bunu sorğu yerli `claude` provayderinə və ya `anthropic-compatible-*` qovşağına yönləndirildikdə, axın və ya yayımlanmadıqda edir (reqressiya qoruyucusu: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Digər hədəflər baxışı qaytara bilməz, ona görə də Claude Code öz təsnifatlandırıcı sorğularına qayıdır və bildiriş göstərir:
 
-**Profillər bir-birindən təcrid edilmir** — hər profil ayrıca `CLAUDE_CONFIG_DIR` istifadə edir;
-sessiya daxilində `echo $CLAUDE_CONFIG_DIR` nəticəsinin
-`~/.claude/profiles/<name>` yolunu göstərdiyini yoxlayın.
+- qeyri-antropik provayderdə model və ya birinə düşən kombinasiya;
+- sorğu orqanını yenidən quran və `safeguards` daşımayan Claude-Code uyğun relay node (`anthropic-compatible-cc-*`);
+- icazə verilmiş beta versiyalarından əvvəl olan köhnə OmniRoute və ya şlüz sessiyaları üçün Anthropic səhifəsinin siyahılarından aşağıda olan Claude Code versiyası.
+
+Claude kodunda `/status` işə salın: the** Avtomatik rejim serveri** serverin nəzərdən keçirilməsi aktiv olduqda sıra `Enabled` oxuyur. Bu sorğuların hesablanacağına Anthropic deyil, OmniRoute qərar verir.
+
+**Auth səhvləri** — profildə heç bir əlamət yoxdur. `omniroute launch --profile` istifadə edin (inyeksiya edir) və ya ixrac `ANTHROPIC_AUTH_TOKEN`.
+
+**Profillər təcrid olunmur** — hər profil fərqli `CLAUDE_CONFIG_DIR`; `~/.claude/profiles/<name>`-də sessiya nöqtələrində `echo $CLAUDE_CONFIG_DIR` yoxlayın.

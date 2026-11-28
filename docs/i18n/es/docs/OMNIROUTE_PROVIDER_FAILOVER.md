@@ -21,3 +21,5 @@ La política predeterminada entre proveedores permite hasta tres intentos de pro
   - Una identificación con prefijo (`provider/model`) nunca se redirige a otro proveedor.
 
 Los estados del circuito son `closed`, `open` y `half_open`. Un tiempo de reutilización programa una sonda limitada; una sonda exitosa cierra el circuito y una sonda fallida lo vuelve a abrir.
+
+La conmutación por error del proveedor se ejecuta dentro de la puerta de enlace. Consulte [Cuando no se puede acceder al propio OmniRoute](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) para conocer el comportamiento del cliente durante una interrupción de la puerta de enlace.

@@ -4,11 +4,9 @@
 
 ---
 
-> **Totuuden lähde:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Viimeksi päivitetty:** 2026-09-02 — v3.8.51
-> **Kohderyhmä:** Palveluntarjoajakohtaisia häivetoteutuksia ylläpitävät insinöörit.
+> **Totuuden lähde:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Yleisö:** Insinöörit, jotka ylläpitävät palveluntarjoajakohtaisia piilointegraatioita.
 
-OmniRoute integroituu palveluntarjoajiin, joiden reunapalvelut tunnistavat aktiivisesti epävirallisia asiakasohjelmia sormenjälkien perusteella (TLS JA3/JA4, otsakkeiden järjestys, JSON-pyynnön rungon rakenne, eheystunnisteet). Tällä sivulla kuvataan OmniRouten tarjoamat häiveominaisuudet ja niiden toteutussijainnit.
+OmniRoute integroituu palveluntarjoajien kanssa, joiden reunat ottavat aktiivisesti sormenjälkiä ei-virallisista asiakkaista (TLS JA3/JA4, otsikkojärjestys, JSON kehon muoto, eheystunnukset). Tällä sivulla dokumentoidaan OmniRoute paljastaa piilopinnat ja missä ne on toteutettu.
 
 ## Oikeudellinen ja eettinen huomautus
 
@@ -89,65 +87,68 @@ tilillä, ennen kuin väität niiden vastaavan taustapalvelun selainta.
 
 ---
 
-## Claude Code -häivepaketti
+## Claude Code Stealth Bundle
 
-Kun `cliCompatMode` on käytössä, OmniRoute muotoilee lähtevät Claude-pyynnöt uudelleen niin, ettei niitä voi erottaa `claude-cli`-liikenteestä. Kolme moduulia toimii yhdessä:
+Kun `cliCompatMode` on päällä, OmniRoute muotoilee lähtevät Claude -pyynnöt uudelleen niin, että niitä ei voi erottaa `claude-cli` -liikenteestä. Kolme moduulia toimii yhteistyössä:
 
 ### `claudeCodeFingerprint.ts`
 
-Laskee laskutusotsakkeeseen upotetun 3-merkkisen `cc_version`-sormenjäljen:
+Laskee laskutusotsikkoon upotetun 3-merkin `cc_version` sormenjäljen:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (kovakoodattu; vastaa virallista asiakasohjelmaa)
-- Syötteet: ensimmäisen käyttäjäviestin tekstin indeksien 4, 7 ja 20 merkit + versiojono
-- Tulos: 3-merkkinen heksadesimaalietuliite
+- `FINGERPRINT_SALT = "59cf53e54c78"` (kovakoodattu; vastaa virallista asiakasta)
+- Syötteet: merkit ensimmäisen käyttäjäviestin tekstin indeksissä 4, 7, 20 + version merkkijono
+- Lähtö: 3-merkkinen hex-etuliite
 
-### `claudeCodeCCH.ts` (asiakassisällön tiiviste)
+### `claudeCodeCCH.ts` (Client Content Hash)
 
-Palvelinpuolen eheystarkistus, jonka virallinen Claude Code CLI laskee Bun/Zigillä. OmniRoute toteuttaa sen uudelleen `xxhash-wasm`-paketilla:
+Palvelinpuolen eheystarkista virallinen Claude koodi CLI laskee Bun/Zig. OmniRoute reimplementtien kautta `xxhash-wasm` llä:
 
-1. Serialisoi runko käyttäen `cch=00000;`-paikkamerkkiä
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Nollilla täytetty 5-merkkinen heksadesimaaliarvo pienillä kirjaimilla
-4. Korvaa `cch=00000;` lasketulla tunnisteella
+1. Sarjaa runko `cch=00000;` -paikkamerkillä
+2. Rakenna hash-näkymä kahdella tavallisella tekstikorvauksella tässä järjestyksessä (`hashView()`):
+   - jokaisesta `/"model":"[^"]*"/g` -osumasta tulee `"model":""` — vastaavuus pysähtyy ensimmäiseen `"`, joten arvo, jossa on pakotettu lainausmerkki (`"model":"a\"b"`), tyhjennetään vain tähän lainausmerkkiin asti, kuten asiakas tekee.
+   - jokainen `/"max_tokens":\d+,|,?"max_tokens":\d+/g` -osuma poistetaan — vain numeeriset arvot missä tahansa syvyydessä
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Nollapehmustettu 5-merkkinen pieni kuusio
+5. Korvaa `cch=00000;` lasketulla tunnuksella
 
 Vakiot:
 
-- Siemen: `0x6e52736ac806831e`
-- Lauseke: `/\bcch=([0-9a-f]{5});/`
+- Siemen: `0x4d659218e32a3268` (vastaa Claude -koodien 2.1.252 ja 2.1.322 silmukkakaappauksia)
+- Kuvio: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Lisää Unicode-**nollaleveyksisen yhdistäjän** (`U+200D`) arkaluonteisten asiakasohjelmien nimien ensimmäisen merkin jälkeen, jotta ylävirran suodattimet eivät voi löytää niitä grep-haulla. Oletussanaluettelo:
+Lisää Unicoden** nollaleveä puuseppä** (`U+200D`) "arkaluonteisten" asiakasnimien ensimmäisen merkin jälkeen, joten ylävirran suodattimet eivät voi grepiä niitä. Oletussanaluettelo:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Kohteet: `system`-lohkot, kaikki `messages[].content`-sisällöt sekä `tools[].description` / `tools[].function.description`. Operaattori voi korvata asetuksen `setSensitiveWords()`-toiminnolla.
+Sovelletaan: `system` -lohkot, kaikki `messages[].content` ja `tools[].description` / `tools[].function.description`. Operaattori ohitettava `setSensitiveWords()` kautta.
 
-### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`-palveluntarjoajat
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` palveluntarjoajat
 
-Kolmannen osapuolen Anthropic-välityspalveluille, jotka hyväksyvät vain ”aidon Claude Code” -liikenteen:
+Kolmannen osapuolen Anthropic -releet, jotka hyväksyvät vain "todellisen Claude -koodin" liikenteen:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` oletuksena
-- Yhteyskohtainen ”Enable redact-thinking beta” -valitsin lisää arvon `redact-thinking-2026-02-12`, kun CC Compatible -ylävirta edellyttää nimenomaisesti peitettyjä päättelyvirtoja
-- Yhteyskohtainen ”Enable summarized thinking display” -valitsin tallentaa arvon `providerSpecificData.requestDefaults.summarizeThinking` ja lisää asetuksen `display: "summarized"` CC Compatible -päättelypyyntöihin, joissa näyttötilaa ei ole jo määritetty
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x -tuoteperhe)
+- Yhteyskohtainen "Ota redact-thinking beta" -kytkin lisää `redact-thinking-2026-02-12`, kun CC -yhteensopiva ylävirtaan vaatii erityisesti redaktoituja ajatteluvirtoja
+- Yhteyskohtainen "Salli yhteenveto ajattelun näyttö" -kytkin tallentaa `providerSpecificData.requestDefaults.summarizeThinking` ja lisää `display: "summarized"` n CC hen Yhteensopivia ajattelupyyntöjä, jotka eivät jo ole määrittäneet näyttötilaa
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x -perhe)
 - Oletuspolku: `/v1/messages?beta=true`
 
-Saman paketin rinnakkaismoduulit:
+Sisarmoduulit samassa paketissa:
 
-- `claudeCodeConstraints.ts` — lämpötila- ja välimuistinhallintasäännöt
-- `claudeCodeToolRemapper.ts` — työkalunimien uudelleenkartoitus
-- `claudeCodeExtraRemap.ts` — hyötykuorman lisänormalisointi
+- `claudeCodeConstraints.ts` — lämpötila + välimuistin hallintasäännöt
+- `claudeCodeToolRemapper.ts` — työkalun nimen uudelleenkuvaus
+- `claudeCodeExtraRemap.ts` — ylimääräinen hyötykuorman normalisointi
 
 ---
 
@@ -161,7 +162,7 @@ Nauhat ruostumattomat SDK -merkit (`x-stainless-lang`, `x-stainless-package-vers
 
 ### ⚠️ Risk: `ANTIGRAVITY_CREDITS=always` (tilikiellon hot spot)
 
-`ANTIGRAVITY_CREDITS=always` (kuluttaa `open-sse/executors/antigravity.ts`) -reitit** joka** pyydä Antigravity kautta AI Credit Overages (maksettu Google krediitti) sen sijaan, että antaisit Google:n vapaan tason kiintiöportin asioita. Tämä on dokumentoitu ominaisuutena, mutta se on** yleisin yksittäinen käyttöehtojen rikkomusraportti, jonka näemme** — useita Google Ultra -tilejä on estetty `403 / "service disabled for ToS violation" / insufficient_quota` kanssa muutaman tunnin käytön jälkeen `=always` kanssa.
+`ANTIGRAVITY_CREDITS=always` (kuluttaa `open-sse/executors/antigravity.ts`) -reitit** joka** pyydä Antigravity kautta AI Credit Overages (maksettu Google krediitti) sen sijaan, että antaisit Google:n vapaan tason kiintiöportin asioita. Tämä on dokumentoitu ominaisuutena, mutta se on** yleisin yksittäinen käyttöehtojen rikkomusraportti, jonka näemme** — useita Google Ultra -tilejä on estetty `403 / "service disabled for ToS violation" / insufficient_quota` kanssa muutaman tunnin `=always` käytön jälkeen.
 
 Ylävirran valvonta on päällä**Google puolella** , mitään OmniRoute ei voi estää. env var -nimi ja olemassa olevat asiakirjat saavat sen kuulostamaan turvalliselta käänteeltä; se ei ole.
 
@@ -183,7 +184,7 @@ Ympäristöviite dokumentoi kunkin hyvitystilan tili- ja kulutusvaikutukset.
 
 #### Ei vain `=always`: Antigravity OAuth -reititys yleensä
 
-Jäädytykset eivät rajoitu luottojen ylittymiseen. Marraskuussa 2026 julkaistut raportit (#19223, #19266) kuvaavat useita Google tilejä, jotka on jäädytetty reititettäessä `antigravity` ja `agy` (Antigravity CLI) -palveluntarjoajien kautta:
+Jäädytykset eivät rajoitu luottojen ylityksiin. Marraskuussa 2026 julkaistut raportit (#19223, #19266) kuvaavat useita Google tilejä, jotka on jäädytetty reititettäessä `antigravity` ja `agy` (Antigravity CLI) -palveluntarjoajien kautta:
 
 ```
 403: This service has been disabled in this account for violation of Terms of Service.
@@ -207,7 +208,7 @@ Kosketuspisteet:
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — valtuutettu putkisto
-- Alkuperäinen tapausraportti: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Alkuperäinen tapausraportti: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

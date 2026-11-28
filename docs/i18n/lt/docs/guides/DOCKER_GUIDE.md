@@ -8,21 +8,22 @@
 
 ## Turinys
 
-- [Greitas paleidimas](#quick-run)
+- [Greitas bėgimas](#quick-run)
 - [Su aplinkos failu](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Docker Sukurti](#docker-compose)
 - [Galimi profiliai](#available-profiles)
-- [Pagrindinio kompiuterio CLI įrankių konfigūravimas, kai „OmniRoute“ veikia „Docker“ aplinkoje](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [„Redis“ pagalbinis konteineris](#redis-sidecar)
-- [Gamybinės aplinkos „Compose“](#production-compose)
+- [Talpyklos grūdinimas](#container-hardening)
+- [Pagrindinio CLI įrankių konfigūravimas, kai OmniRoute veikia Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis priekaba](#redis-sidecar)
+- [Produkcija Sukurti](#production-compose)
 - [Dockerfile etapai](#dockerfile-stages)
 - [Kritiniai aplinkos kintamieji](#critical-environment-variables)
-- [Docker Compose su „Caddy“ (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [„Cloudflare“ spartusis tunelis](#cloudflare-quick-tunnel)
-- [Atvaizdų žymos](#image-tags)
-- [Valdymo skydelio naujinimai „Docker“ aplinkoje](#dashboard-updates-in-docker)
-- [Pasiekiamumas: numatytoji „SQLite“ konfigūracija palaiko vieną repliką](#availability-default-sqlite-is-single-replica)
-- [„Gemini“ regioninės klaidos „Docker“ aplinkoje](#gemini-regional-errors-inside-docker)
+- [Docker Compose with Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare greitasis tunelis](#cloudflare-quick-tunnel)
+- [Vaizdo žymos](#image-tags)
+- [Prietaisų skydelio atnaujinimai Docker](#dashboard-updates-in-docker)
+- [Prieinamumas: numatytasis SQLite yra vienos replikos](#availability-default-sqlite-is-single-replica)
+- [Gemini regioninės klaidos Docker viduje](#gemini-regional-errors-inside-docker)
 - [Svarbios pastabos](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ docker compose --profile cli --profile cliproxyapi up -d
 | `web`                | `omniroute-web`  | Žiniatinklio seansų teikėjai, kuriems reikia naršyklės: `gemini-web`, `claude-web`, `claude-turnstile` (sukuriamas `runner-web`, įtrauktas Chromium)                                                  | `docker compose --profile web up -d`         |
 
 > Galima derinti kelis profilius: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Talpyklos grūdinimas
+
+`base`, `web`, `cli` ir `host` programų paslaugos `docker-compose.yml` naudoja `cap_drop: [ALL]` ir `no-new-privileges:true` saugos parinktį. Vaizdas veikia kaip ne root naudotojas `node` ir klausosi per aukštus prievadus, todėl jam nereikia Linux galimybių. Saugos parinktis neleidžia procesams įgyti privilegijų per setuid dvejetainius failus.
+
+Tik `cli` profilis tvirtina Docker lizdą automatiniam atnaujinimui. Žr. [Escape Hatch: konfigūruokite konteinerio CLIs](#escape-hatch-configure-the-containers-own-clis-use-sparingly) kad sužinotumėte apie saugumo pasekmes.
+
+Pagal numatytuosius nustatymus šakninė failų sistema lieka rašoma. `cli` profilis įrašo CLI konfigūraciją ir talpyklas į sudėtinio rodinio pagrindinį katalogą, `web` profilis išsaugo Chromium seanso būseną, o Next.js vykdymo laikas gali įrašyti talpyklas už `/app/data`.
+
+Norėdami išbandyti tik skaitomą šakninę failų sistemą su `base` profiliu, išsaugokite tai kaip `docker-compose.override.yml` šalia `docker-compose.yml`. Compose nuskaito nepaisymą automatiškai.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Esamas `/app/data` laikiklis lieka rašomas. Išbandykite darbo krūvį prieš naudodami šį nepaisymą gamyboje, nes gali reikėti rašyti kitais keliais.
 
 ## Pagrindinio kompiuterio CLI įrankių konfigūravimas, kai OmniRoute veikia Docker aplinkoje
 
@@ -295,7 +320,7 @@ Atminties elgsena Docker:
 
 ### Kodavimo agentų vykdymo laikas RAM
 
-Numatytasis 1 GiB Docker yra dashboard/light-chat grindys, o ne gamybos dydis. Ilgi `POST /v1/responses` korpusai (šimtai pranešimų, dešimtys įrankių) suspaudimo metu išsaugo kelis atmintyje esančius grafikus. Dvi persidengiančios ~ 3 MiB / ~ 750 000 atpažinimo užklausos nutraukė V8** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) ir taip pat pataikė į 16 GiB cgroup OOM. Žiūrėkite [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Numatytasis 1 GiB Docker yra dashboard/light-chat grindys, o ne gamybos dydis. Ilgi `POST /v1/responses` korpusai (šimtai pranešimų, dešimtys įrankių) suspaudimo metu išsaugo kelis atmintyje esančius grafikus. Dvi persidengiančios ~ 3 MiB / ~ 750 000 atpažinimo užklausos nutraukė V8** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) ir taip pat pataikė į 16 GiB cgroup OOM. Žiūrėkite [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Dydis** cgroup `--memory` virš krūvos** — vietiniai buferiai, SQLite ir suspaudimo tarpiniai elementai yra už V8 ribų.
 
@@ -591,11 +616,11 @@ Prieš atsisiųsdama paslauga pašalina užklausą, kad nesėkmingas vykdymas ne
 
 Akcijų Docker / Kubernetes OmniRoute yra** vienas mazgas apdoroja + vieną SQLite rašytoją** . Didelis prieinamumas yra** nepalaikoma** toje topologijoje.
 
-| Apribojimas                                    | Pasekmė                                                                                                                                                                                                                                                                                                                                    |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Vienišas rašytojas                             | Daryk** ne** paleiskite kelias kopijas tame pačiame SQLite faile. Tai sugadina DB.                                                                                                                                                                                                                                                         |
-| Atkurti / paleisti iš naujo / HEALTHCHECK kill | **Visiškas išjungimas** SSE skrydžio metu, prietaisų skydelio seansų ir atminties būsenos. Kiekvienas prijungtas klientas nukrenta. Naujos užklausos tuščiame galutinio taško lange gauna atvirkštinį tarpinį serverį**`502 Bad Gateway: Unknown error`** , o ne OmniRoute JSON – klientai negali to atskirti nuo teikėjo gedimo (#11015). |
-| Tas pats įvykio ciklas kaip `/healthz`         | Užimtas katalogas arba suspaudimo žymė gali atidėti zondus; trumpas skirtasis laikas, tada paleidžiamas iš naujo** tik** replika.                                                                                                                                                                                                          |
+| Apribojimas                                    | Pasekmė                                                                                                                                                                                                                                                                                                                                  |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vienišas rašytojas                             | Daryk** ne** paleiskite kelias kopijas tame pačiame SQLite faile. Tai sugadina DB.                                                                                                                                                                                                                                                       |
+| Atkurti / paleisti iš naujo / HEALTHCHECK kill | **Visiškas išjungimas** SSE skrydžio metu, prietaisų skydelio seansų ir atminties būsenos. Kiekvienas prijungtas klientas nukrenta. Naujos užklausos tuščiame galutinio taško lange gauna atvirkštinį tarpinį serverį**`502 Bad Gateway: Unknown error`** , ne OmniRoute JSON — klientai negali to atskirti nuo teikėjo gedimo (#11015). |
+| Tas pats įvykio ciklas kaip `/healthz`         | Užimtas katalogas arba suspaudimo varnelė gali atidėti zondus; trumpas skirtasis laikas, tada paleidžiamas iš naujo** tik** replika.                                                                                                                                                                                                     |
 
 **Zondo matrica** (taip pat žr. [Kubernetes zondo rekomendacijas](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -605,9 +630,9 @@ Akcijų Docker / Kubernetes OmniRoute yra** vienas mazgas apdoroja + vieną SQLi
 | Pasirengimas    | HTTP `GET /healthz`                                                | Trumpas skirtasis laikas, dėl kurio įvykių ciklas užimtas kaip miręs |
 | Giliai / žmonės | `/api/monitoring/health`                                           | Automatizuotas kubeleto gyvumas                                      |
 
-**Atnaujinimai:** tikisi, kad kiekviena sesija sumažės. Jei galite, nusausinkite klientus; nėra atnaujinamo numatytojo SQLite atnaujinimo. Sukurti `restart: unless-stopped` plus Docker `HEALTHCHECK` taip pat pakeis vienintelį procesą, kai konteineris yra nesveikas – toks pat sprogimo spindulys.
+**Atnaujinimai:** tikisi, kad kiekviena sesija sumažės. Jei galite, nusausinkite klientus; nėra atnaujinamo numatytojo SQLite atnaujinimo. Sukurti `restart: unless-stopped` plus Docker `HEALTHCHECK` taip pat pakeis vienintelį procesą, kai konteineris yra Nesveikas — toks pat sprogimo spindulys.
 
-Paruošti aprašai ir vairo diagrama veikia `deploy/kubernetes/` ir `deploy/helm/omniroute/` – žr. [Kubernetes diegimo vadovą](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+Paruoštus aprašus ir vairo diagramą tiesiogiai `deploy/kubernetes/` ir `deploy/helm/omniroute/` — žr. [Kubernetes diegimo vadove](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
 „Kubernetes“ fragmentas, skirtas a** viena kopija** (Reikia sukurti iš naujo; nekelkite `replicas` prieš vieną SQLite failą):
 
@@ -636,9 +661,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep“ leidžia „kube“ atsisakyti paslaugų galinių taškų prieš SIGTERM.** naujas** eismas nustoja smogti mirštančiam procesui. Skrydžio metu `/v1/responses` SSE išleidžiamas iki `SHUTDOWN_TIMEOUT_MS` (numatytasis 30 s) pagal sunkiasvorių įleidimo nuomos sutartis (#11015). Naujos užklausos, kurios vis dar pasiekia procesą, gauna `503` + `Retry-After: 5`. Atkurti tuščią galinio taško spragą, kol pakeitimas bus paruoštas, išlieka rimtu gedimu – tai yra SQLite topologija, o ne zondo klaidinga konfigūracija.
+`preStop` sleep“ leidžia „kube“ atsisakyti paslaugų galinių taškų prieš SIGTERM.** naujas** eismas nustoja smogti mirštančiam procesui. Skrydžio metu `/v1/responses` SSE išleidžiamas iki `SHUTDOWN_TIMEOUT_MS` (numatytasis 30 s) pagal sunkiasvorių įleidimo nuomos sutartis (#11015). Naujos užklausos, kurios vis dar pasiekia procesą, gauna `503` + `Retry-After: 5`. Atkurti tuščio galinio taško tarpą, kol pakeitimas bus paruoštas, išlieka sunkiu gedimu — kuris yra SQLite topologija, o ne zondo klaidinga konfigūracija.
 
-Išorinis Postgres / multi-writer HA yra** ne** dokumentais patvirtintas atsargų kelias. Jei jums reikia HA, pasilikite vieną kopiją arba paleiskite topologiją, kurią projektas išbandė ir dokumentavo atskirai. Postgres/MySQL darbas gyvena [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kol bus išsiųstas, vienintelis palaikomas būdas daugintis** didelis** `/v1/responses` talpa yra N nepriklausomų procesų (kitas skyrius), o ne `replicas > 1` viename tome.
+Išorinis Postgres / multi-writer HA yra** ne** dokumentais patvirtintas atsargų kelias. Jei jums reikia HA, pasilikite vieną kopiją arba paleiskite topologiją, kurią projektas išbandė ir dokumentavo atskirai. Postgres/MySQL darbas gyvena [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Iki to laiko vienintelis palaikomas būdas daugintis** didelis** `/v1/responses` talpa yra N nepriklausomų procesų (kitas skyrius), o ne `replicas > 1` viename tome.
 
 ## Padidinimas: N nepriklausomų procesų
 
@@ -648,25 +673,25 @@ Vienos Codex paskyros kopijos negali atskirai sunaudoti jos vienkartinio atnauji
 
 Pasyvus egzempliorius perskaito ryšį, kai reikia atnaujinti, ir priima tik kitą, nepasibaigusį prieigos raktą. Kitu atveju atnaujinimas išjungiamas nenutrūkus ar neišaktyvinus ryšio arba neįskaičiuojant atnaujinimo pertraukiklio gedimo. Tikrosios tiekėjų autentifikavimo nesėkmės vis dar naudoja įprastą gedimų apskaitą, eksponentinį atšalimą ir įprastą kliento klaidą; paskyros išjungimas išlieka visam laikui. Sinchronizuokite savininko pasuktus prieigos raktus prieš pasibaigiant prieigos prieigos raktų galiojimo laikui (numatytasis aktyvus atnaujinimas yra penkios minutės) arba iš naujo importuokite Codex auth failą. Pasyvus importavimas saugo pateiktus prieigos raktus nepatvirtindamas jų prieigos rakto galutiniame taške. Rankinis dashboard/API atnaujinimas grąžina `409 refresh_disabled`; nauji OAuth prisijungimai nepakitę. Žr. [aplinkos nuorodą](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-„One Node“ procesas yra** viena V8 krūva** . Du persidengiantys ~ 3 MiB / ~ 750k žetonų kodavimo agentas `POST /v1/responses` (RTK + Caveman) nutraukia tą krūvą esant ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ir gali OOM 16 Gi cgrupę. Žr. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Tas matavimas yra a** atmintis-biudžetas** įspėjimas, o ne produktas hard-max iš dviejų vienu metu vykstančių ilgų `/v1/responses`. Sunkusis pokalbių priėmimas yra apribotas automatiškai gautu apdorojimo baitų biudžetu (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), kurio dydis yra tas pats V8/cgroup lubos — viršijantis jį aukštyn (arba nustačius seną `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` užklausų skaičiaus viršutinę ribą) jau tokio dydžio procese, vėl įvedamas nutraukimas. Maži pokalbiai, `/healthz`, `/v1/models` ir MCP yra** ne** toje kepure.
+„One Node“ procesas yra** viena V8 krūva** . Du persidengiantys ~ 3 MiB / ~ 750k žetonų kodavimo agentas `POST /v1/responses` (RTK + Caveman) nutraukia tą krūvą esant ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ir gali OOM 16 Gi cgrupę. Žiūrėkite [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Tas matavimas yra a** atmintis-biudžetas** įspėjimas, o ne produktas hard-max iš dviejų vienu metu vykstančių ilgų `/v1/responses`. Sunkusis pokalbių priėmimas yra apribotas automatiškai gaunamu apdorojimo baitų biudžetu (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), kurio dydis yra tas pats V8/cgroup lubos — nepaisydamas jo aukštyn (arba nustačius seną `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` užklausų skaičiaus ribą) jau tokio dydžio procese, vėl įvedamas nutraukimas. Maži pokalbiai, `/healthz`, `/v1/models` ir MCP yra** ne** toje kepure.
 
 ### Vienas procesas: daugiau nei du ilgi `/v1/responses`
 
-A** sveikas** procesas (krūva žemiau `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, numatytasis `0.75`)** gali** paleiskite daugiau nei du ilgus `POST /v1/responses` vienu metu, kai viso proceso skrydžio baitų biudžete (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) dar yra vietos. Korpusai, esantys arba didesni už `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (numatytasis 256 KiB), naudojasi tokiomis pat sunkiomis nuomos sutartimis kaip ir sudėtingos struktūros užklausos ir naudoja tą patį [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` pabėgimą (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dešimtys vienu metu veikiančių ilgų SSE klientų (operatoriams dažnai reikia 40–50) yra a** atmintis-biudžetas** klausimas — dydžio krūva + primary/headroom lizdai + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nėra griežta „max 2“ produkto riba. Slėgio krūva vis dar išsiskiria su pakartotinai bandomu `503`, todėl #7849 negrįžta.
+A** sveikas** procesas (krūva žemiau `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, numatytasis `0.75`)** gali** paleiskite daugiau nei du ilgus `POST /v1/responses` vienu metu, kai viso proceso skrydžio baitų biudžete (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) dar yra vietos. Korpusai, esantys arba didesni už `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (numatytasis 256 KiB), nuomojami taip pat, kaip ir sudėtingos struktūros užklausos, ir naudoja tą patį [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` pabėgimą (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dešimtys vienu metu veikiančių ilgų SSE klientų (operatoriams dažnai reikia 40–50) yra a** atmintis-biudžetas** klausimas — dydžio krūva + primary/headroom lizdai + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nėra griežta „max 2“ produkto riba. Slėgio krūva vis tiek išsilieja su pakartotinai bandomu `503`, todėl #7849 negrįžta.
 
 Į** dauginti krūvas** (nepriklausomos V8 senosios erdvės)** šiandien** :
 
-| Daryk                                                                                                                                                 | Negalima                                                                                 |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Bėk** N containers/pods** , kiekvienas su savo** savo** `DATA_DIR` / tūris                                                                            | Nustatykite `replicas > 1` prieš vieną SQLite failą                                      |
-| Didelio dydžio skrydžio metu + sveikas aukštis iš krūvos / skrydžio baito biudžeto; 1–2 yra konservatyvus #7849 numatytasis, o ne kieto produkto maks | Suteikite vienam procesui 8 × RAM ir neribotą skaičiavimo ribą                           |
-| Pasirenkama: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for** bendrų kvotų skaitikliai**                                                    | Laikykite Redis kaip bendrą SQLite — tai nėra                                            |
-| Dubliuoti teikėjo paslaptis kiekviename egzemplioriuje (arba priimti suskirstytas informacijos suvestines)                                            | Tikėtis vienos informacijos suvestinės / vieno skambučių žurnalo visuose egzemplioriuose |
-| Priekyje su bet kokiu apkrovos balansuotoju; Užtenka lipnios pagal API klavišą arba seansą                                                            | Reikalauti pardavėjo dydžio tarpinės programinės įrangos                                 |
+| Daryk                                                                                                                                                | Negalima                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Bėk** N containers/pods** , kiekvienas su savo** savo** `DATA_DIR` / tūris                                                                           | Nustatykite `replicas > 1` prieš vieną SQLite failą                                      |
+| Didelis dydis skrydžio metu + sveikas aukštis iš krūvos / skrydžio baito biudžeto; 1–2 yra konservatyvus #7849 numatytasis, o ne kieto produkto maks | Suteikite vienam procesui 8 × RAM ir neribotą skaičiavimo ribą                           |
+| Pasirenkama: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for** bendrų kvotų skaitikliai**                                                   | Laikykite Redis kaip bendrą SQLite — tai nėra                                            |
+| Dubliuoti teikėjo paslaptis kiekviename egzemplioriuje (arba priimti suskirstytas informacijos suvestines)                                           | Tikėtis vienos informacijos suvestinės / vieno skambučių žurnalo visuose egzemplioriuose |
+| Priekyje su bet kokiu apkrovos balansuotoju; Užtenka lipnios pagal API klavišą arba seansą                                                           | Reikalauti pardavėjo dydžio tarpinės programinės įrangos                                 |
 
-Seanso ir paskyros giminingumas taip pat gali būti bendrinamas per Redis: kiekvienam procesui nustatykite `OMNIROUTE_SESSION_AFFINITY_STORE=redis` ir `REDIS_URL` su tuo pačiu `REDIS_KEY_PREFIX` ir teigiamu `sessionAffinityTtlMs` nustatymu. Smeigtukai išsprendžia maišos naudojimo paskyros tapatybes kiekvienam procesui tinkamam vietiniam ryšiui, todėl OAuth paskyrose su atitinkančiais tapatybės metaduomenimis nereikia turėti atitinkamo ryšio IDs. Žinomos paskyros tapatybės turi viršenybę prieš prieštaraujančią vietinę IDs kaiščio skiriamąją gebą ir apsaugotą iškeldinimą; įrašai be tapatybės (arba iškeldinami skambintojai be tapatybės) išlaiko seną ID apsaugą. Paskyroms be stabilios naudojimo tapatybės vis tiek reikia atitikti IDs. Redis klaidos arba skambučiai, viršijantys 100 ms, grįžta į vietinį SQLite. Kiekviena Redis affinity store apriboja neįvykdytas operacijas iki 8, apeina Redis iš karto, kai pilna, ir atlaisvina laiko tarpsnius tik tada, kai baigiasi pagrindinis darbas, o ne skambinančiojo termino pabaigoje. Per Redis nutrūkimą nėra bendros tiesos: kiekvienas egzempliorius grįžta į savo vietinį giminingumą, seansai gali būti pakartotinai prisegti vieną kartą ir egzemplioriai gali skirtis. Lipnumas vėl susilieja per Redis kai atsistato. Laukia skirtasis laikas, o ne išsiųstas EVAL, kuris gali nusileisti po atsarginės dalies. Maršruto rašymas lygina tikslią reikšmę, pastebėtą priimant sprendimą dėl nukreipimo, o ne naują mutacijos laiko skaitymą; pastebėtas praleidimas arba SQLite atsarginis stebėjimas palyginamas su neesančiu Redis klavišu. Pasenę kaiščiai pakeičiami vienu CAS, todėl pavėluota komanda negali pakeisti ar ištrinti naujesnio kito kaiščio. Redis nuskaito atomiškai grąžina reikšmę ir likusį serverį TTL; teigiamas PTTL (arba be galiojimo pabaigos) lemia gyvumą, o ne rašytojo JSON laiko žyma ar skaitytojo laikrodis. Vietos momentinės nuotraukos priskiria tą likusią TTL vietiniam terminui; esami JSON raktai išlieka įskaitomi, o jų neapdoroti baitai išsaugomi CAS. Redis yra vienintelis tiesos šaltinis, kol jis atsako. Patvirtinti bendrinami pakeitimai, palietimai ir ištrynimai pašalina vietinį įrašą, niekada jo neįdiekite ir neatnaujinkite. SQLite Redis kelyje turi tik šio egzemplioriaus atsarginius sprendimus dėl Redis klaidų, skirtojo laiko arba priėmimo prisotinimo, kaip ir anksčiau, apribota TTL. Trūksta vietinio PIN kodo vėlesnio gedimo metu kainuoja vieną naują pasirinkimą (vieną greitą talpyklos praleidimą), o ne neteisingą ar iškeltą paskyrą. Atmesti papildymai grąžina bendrinamą laimėtoją ir likusį TTL : įprasta atranka dar kartą patikrina susietą vietinį terminą ir naudoja vis dar gyvą tinkamą laimėtoją, paliečiant tos paskyros naudojimą ir registravimą be kito bendro rašymo. Jei jis nepasiekiamas, pasirinkus išlaikomas vietinis kandidatas, bendrai naudojamas PIN kodas paliekamas nepakeistas ir išsiunčiamas vienas derinimo pranešimas. Atmestas CAS nerašo SQLite; Redis klaidos, skirtasis laikas arba priėmimo prisotinimas taiko esamą vietinę operaciją. Jei išsiųstos mutacijos atsakymas gaunamas pasibaigus skirtajam laikui (priimta, atmesta arba klaida), sinchroninis tikslios serijinės vertės palyginimas ir ištrynimas pašalina tik baitui identišką skirtojo laiko atsarginę eilutę. Tarp šio palyginimo ir ištrynimo nereikia laukti; išsaugomas naujesnis gedimo raštas. Apsaugotas iškeldinimas pašalina nepavykusios paskyros vietinį PIN kodą, net jei Redis nuleistas, ir vėl išvalo jį patvirtinus bendrąjį iškeldinimą. Laukiama ankstesnių bendrinamų atsakymų negali atkurti iškeldinto vietinio PIN kodo, nes bendri pasisekimai niekada nerašo SQLite. Vėlesnis gedimo atsarginis atšaukimas gali atkurti paskyrą; vėliau priimtas bendras rašymas egzistuoja tik Redis. Redis misses nesikreipia į vietinę atsarginę būseną. Kai tvarkyklė išjungta, naujai pasirinkti kaiščiai išlaiko seną keturių laukų SQLite JSON formą; tik Redis maršrutizacija prideda maišos paskyros tapatybę. Iš anksto gauti kaiščiai dar kartą tikrinami pasibaigus jų galiojimo laikui. Redis ne nuomos pasirinkimas iš naujo nuskaito parduotuvę, tačiau planuojant sinchroninę nuomą vis tiek galima naudoti kaištį, iškeltą tarp išankstinio gavimo ir planavimo (priimtas geriausių pastangų langas). Nuomos įsipareigojimas negali pakeisti paskyrų po ilgalaikės pretenzijos: atmetus papildymą, jis išlaiko pretenziją tik tos užklausos kandidatą ir nepaliečia bendrinamo laimėtojo, todėl susitarimas tarp atvejų yra ribojamas šiuo keliu. Likusi lentelės dalis vis dar galioja: nebendrinamas kombinuotųjų seansų klampumas, vietiniai Codex posūkio kaiščiai, paskyros semaforai, blokavimai, išlaidų limitai, konfigūracija ar skambučių žurnalai.
+Seanso ir paskyros giminingumas taip pat gali būti bendrinamas per Redis: kiekvienam procesui nustatykite `OMNIROUTE_SESSION_AFFINITY_STORE=redis` ir `REDIS_URL` su tuo pačiu `REDIS_KEY_PREFIX` ir teigiamu `sessionAffinityTtlMs` nustatymu. Smeigtukai išsprendžia maišos naudojimo paskyros tapatybes kiekvienam procesui tinkamam vietiniam ryšiui, todėl OAuth paskyrose su atitinkančiais tapatybės metaduomenimis nereikia turėti atitinkamo ryšio IDs. Žinomos paskyros tapatybės turi viršenybę prieš prieštaraujančią vietinę IDs kaiščio skiriamąją gebą ir apsaugotą iškeldinimą; įrašai be tapatybės (arba iškeldinami skambintojai be tapatybės) išlaiko seną ID apsaugą. Paskyroms be stabilios naudojimo tapatybės vis tiek reikia atitikti IDs. Redis klaidos arba skambučiai, viršijantys 100 ms, grįžta į vietinį SQLite. Kiekviena Redis affinity store apriboja neįvykdytas operacijas iki 8, apeina Redis iš karto, kai pilna, ir atlaisvina laiko tarpsnius tik tada, kai baigiasi pagrindinis darbas, o ne skambinančiojo termino pabaigoje. Per Redis nutrūkimą nėra bendros tiesos: kiekvienas egzempliorius grįžta į savo vietinį giminingumą, seansai gali būti pakartotinai prisegti vieną kartą ir egzemplioriai gali skirtis. Lipnumas vėl susilieja per Redis kai atsistato. Laukia skirtasis laikas, o ne išsiųstas EVAL, kuris gali nusileisti po atsarginės dalies. Maršruto rašymas lygina tikslią reikšmę, pastebėtą priimant sprendimą dėl nukreipimo, o ne naują mutacijos laiko skaitymą; pastebėtas praleidimas arba SQLite atsarginis stebėjimas palyginamas su neesančiu Redis klavišu. Pasenę kaiščiai pakeičiami vienu CAS, todėl pavėluota komanda negali pakeisti ar ištrinti naujesnio kito kaiščio. Redis nuskaito atomiškai grąžina reikšmę ir likusį serverį TTL; teigiamas PTTL (arba be galiojimo pabaigos) lemia gyvumą, o ne rašytojo JSON laiko žyma ar skaitytojo laikrodis. Vietos momentinės nuotraukos priskiria tą likusią TTL vietiniam terminui; esami JSON raktai išlieka įskaitomi, o jų neapdoroti baitai išsaugomi CAS. Redis yra vienintelis tiesos šaltinis, kol jis atsako. Patvirtinti bendrinami pakeitimai, palietimai ir ištrynimai pašalina vietinį įrašą, niekada jo neįdiekite ir neatnaujinkite. SQLite Redis kelyje turi tik šio egzemplioriaus atsarginius sprendimus dėl Redis klaidų, skirtojo laiko arba priėmimo prisotinimo, kaip ir anksčiau, apribota TTL. Trūksta vietinio PIN kodo vėlesnio gedimo metu kainuoja vieną naują pasirinkimą (vieną greitą talpyklos praleidimą), o ne neteisingą ar iškeldintas paskyras. Atmesti papildymai grąžina bendrinamą laimėtoją ir likusį TTL : įprasta atranka dar kartą patikrina susietą vietinį terminą ir naudoja vis dar gyvą tinkamą laimėtoją, paliečiant tos paskyros naudojimą ir registravimą be kito bendro rašymo. Jei jis nepasiekiamas, pasirinkus išlaikomas vietinis kandidatas, bendrai naudojamas PIN kodas paliekamas nepakeistas ir išsiunčiamas vienas derinimo pranešimas. Atmestas CAS nerašo SQLite; Redis klaidos, skirtasis laikas arba priėmimo prisotinimas taiko esamą vietinę operaciją. Jei išsiųstos mutacijos atsakymas gaunamas pasibaigus skirtajam laikui (priimta, atmesta arba klaida), sinchroninis tikslios serijinės vertės palyginimas ir ištrynimas pašalina tik baitui identišką skirtojo laiko atsarginę eilutę. Tarp šio palyginimo ir ištrynimo nereikia laukti; išsaugomas naujesnis gedimo raštas. Apsaugotas iškeldinimas pašalina nepavykusios paskyros vietinį PIN kodą, net jei Redis nuleistas, ir vėl išvalo jį patvirtinus bendrąjį iškeldinimą. Laukiama ankstesnių bendrinamų atsakymų negali atkurti iškeldinto vietinio PIN kodo, nes bendri pasisekimai niekada nerašo SQLite. Vėlesnis gedimo atsarginis atšaukimas gali atkurti paskyrą; vėliau priimtas bendras rašymas egzistuoja tik Redis. Redis misses nesikreipia į vietinę atsarginę būseną. Kai tvarkyklė išjungta, naujai pasirinkti kaiščiai išlaiko seną keturių laukų SQLite JSON formą; tik Redis maršrutas prideda maišos paskyros tapatybę. Iš anksto gauti smeigtukai pakartotinai tikrinami pasibaigus jų galiojimo laikui. Redis ne nuomos pasirinkimas iš naujo nuskaito parduotuvę, tačiau planuojant sinchroninę nuomą vis tiek galima naudoti kaištį, iškeltą tarp išankstinio gavimo ir planavimo (priimtas geriausių pastangų langas). Nuomos įsipareigojimas negali pakeisti paskyrų po ilgalaikės pretenzijos: atmetus papildymą, jis išlaiko pretenziją tik tos užklausos kandidatą ir nepaliečia bendrinamo laimėtojo, todėl susitarimas tarp atvejų yra ribojamas šiuo keliu. Likusi lentelės dalis vis dar galioja: nebendrinamas kombinuotųjų seansų klampumas, vietiniai Codex posūkio kaiščiai, paskyros semaforai, blokavimai, išlaidų limitai, konfigūracija ar skambučių žurnalai.
 
-Techninė įranga: vienu metu vienu metu esantis ilgas `/v1/responses` yra a** atmintis-biudžetas** klausimas (heap + inflight-byte / #10110). `N` nepriklausomi `DATA_DIR` s vis dar daugina krūvas: pagrindinis RAM turi apimti `N × cgroup`, o ne „vieną 16 Gi pod su N = 8“. Niekada `replicas > 1` viename SQLite faile.
+Techninė įranga: vienu metu vienu metu esantis ilgas `/v1/responses` yra a** atmintis-biudžetas** klausimas (heap + inflight-byte / #10110). `N` nepriklausomas `DATA_DIR` s vis tiek daugina krūvas: pagrindinis RAM turi apimti `N × cgroup`, o ne „vieną 16 Gi pod su N = 8“. Niekada `replicas > 1` viename SQLite faile.
 
 Sukurkite eskizą (dvi krūvos, du tomai — ne `deploy.replicas: 2`):
 
@@ -695,57 +720,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Proceso tankis (suspaudimas nuo HTTP izoliato) yra [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Vienas loginis klasteris bendroje patvarioje būsenoje yra [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Proceso tankis (suspaudimas nuo HTTP izoliato) yra [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Vienas loginis klasteris bendroje patvarioje būsenoje yra [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## „Gemini“ regioninės klaidos „Docker“ aplinkoje
+## Gemini regioninės klaidos Docker viduje
 
-„Google AI Studio“ / „Gemini API“ gali grąžinti HTTP 400 klaidą su FAILED_PRECONDITION ir
-`User location is not supported for the API use.` Sėkminga užklausa pagrindinėje sistemoje
-neįrodo, kad konteineris naudoja tą patį išeinantį maršrutą. DNS eiliškumas,
-IPv4/IPv6 ryšys, VPN maršrutizavimas ir sukonfigūruoti tarpiniai serveriai gali skirtis. Patikrinkite
-[„Google“ palaikomus regionus](https://ai.google.dev/gemini-api/docs/available-regions)
-ir faktinį ryšio maršrutą; vien ši klaida nereiškia, kad API raktas yra netinkamas.
+Google AI Studio / Gemini API gali grąžinti HTTP 400 su FAILED_PRECONDITION ir `User location is not supported for the API use.` Sėkminga užklausa pagrindiniame kompiuteryje neįrodo, kad konteineris naudoja tą patį išvykimo maršrutą. DNS tvarka, IPv4/IPv6 ryšys, VPN maršrutas ir sukonfigūruoti tarpiniai serveriai gali skirtis. Patikrinkite [Google palaikomus regionus](https://ai.google.dev/gemini-api/docs/available-regions) ir tikrąjį ryšio maršrutą; Vien ši klaida nenustato blogo API rakto.
 
 ### Pirmenybę teikite konkretaus ryšio tarpiniam serveriui
 
-Paveiktam „Gemini“ ryšiui naudokite „OmniRoute“
-[konkretaus ryšio tarpinio serverio konfigūraciją](../ops/PROXY_GUIDE.md#4-level-proxy-system),
-tada pakartokite **Ryšio patikrą** ir mažą užklausą
-su tuo pačiu modeliu. Taip maršruto pakeitimas taikomas tik tam ryšiui. Patikrinkite,
-ar tarpinis serveris pasiekiamas iš konteinerio ir ar ryšys iš tiesų jį pasirenka.
-Maršruto pakeitimas negarantuoja, kad aukštesnio lygmens paslauga bus prieinama tame regione.
+Paveiktam Gemini ryšiui naudokite OmniRoute[tarpinio serverio konfigūraciją](../ops/PROXY_GUIDE.md#4-level-proxy-system), tada pakartokite** Bandomasis ryšys** ir mažas prašymas su tuo pačiu modeliu. Taip maršruto parinkimo pakeitimas bus taikomas šiam ryšiui. Patikrinkite, ar tarpinis serveris pasiekiamas iš konteinerio ir ar ryšys tikrai jį pasirenka. Maršruto pakeitimas negarantuoja regioninio tinkamumo prieš srovę.
 
-### Palyginkite pagrindinės sistemos ir konteinerio tinklą
+### Palyginkite pagrindinio kompiuterio ir konteinerio tinklą
 
-Lygindami autentifikuotų užklausų rezultatus naudokite tą patį raktą, modelį ir užklausą; niekada
-į problemos aprašą neįklijuokite prisijungimo duomenų, tarpinio serverio slaptažodžių ar visų autorizavimo antraščių.
-Pirmiausia patikrinkite, kurias adresų šeimas pateikia OS vardų išsprendimo priemonė, naudodami tą pačią komandą
-pagrindinėje sistemoje ir konteineryje:
+Lyginant autentifikuotus rezultatus, raktas, modelis ir užklausa turi būti identiški; Niekada į problemą neįklijuokite kredencialų, tarpinio serverio slaptažodžių ar pilnų įgaliojimų antraščių. Pirmiausia patikrinkite, kurias adresų šeimas siūlo OS solver, naudodami tą pačią komandą pagrindiniame kompiuteryje ir konteinerio viduje:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Pakeiskite `omniroute` jūsų naudojama paslauga (pavyzdžiui, `omniroute-web`). Šios
-komandos išveda adresų šeimas be prisijungimo duomenų ar IP adresų. Grąžinta reikšmė `6`
-rodo tik IPv6 DNS rezultatą: ji **neįrodo**, kad IPv6 maršrutas yra tinkamas naudoti ar kad yra prieiga prie API.
-Jei įdiegta `curl`, abiejose aplinkose palyginkite
-`curl -4 -I https://generativelanguage.googleapis.com`
-su `curl -6 -I https://generativelanguage.googleapis.com`.
-HTTP atsakymas patvirtina šio patikrinimo ryšį, net jei tai yra neautentifikuotos užklausos
-klaida; „Gemini“ tinkamumą naudoti patikrina tik autentifikuota modelio užklausa.
+Pakeiskite `omniroute` į jūsų vykdomą paslaugą (pvz., `omniroute-web`). Šios komandos spausdina adresų šeimas be kredencialų arba IP adresų. Grąžintas `6` rodo tik IPv6 DNS rezultatą: taip** ne** įrodyti tinkamą IPv6 maršrutą arba API prieigą. Ten, kur įdiegtas `curl`, palyginkite `curl -4 -I https://generativelanguage.googleapis.com` su `curl -6 -I https://generativelanguage.googleapis.com` abiejose aplinkose. HTTP atsakymas įrodo šio zondo ryšį, net jei tai neautentizuota klaida; Tik autentifikuoto modelio užklausa tikrina Gemini tinkamumą.
 
-### Pagrindinės sistemos lygmens alternatyva: veikiantis IPv6 ir vardų išsprendimo politika
+### Alternatyva prieglobos lygyje: veikianti IPv6 ir sprendiklio politika
 
-Pranešimo [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) autorius savo
-aplinkoje atkūrė prieigą įjungęs konteinerio IPv6 ir pakeitęs glibc adresų
-pasirinkimą. Laikykite tai konkrečiai aplinkai skirta alternatyva. Prieš keisdami vardų išsprendimo nuostatas
-įsitikinkite, kad pagrindinės sistemos IPv6, konteinerio išeinantis ryšys / maršrutizavimas ir užkardos taisyklės veikia.
-Vien privatus ULA adresas nepatvirtina viešojo IPv6 ryšio.
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) reporteris atkūrė prieigą prie savo aplinkos, įjungdamas konteinerį IPv6 ir pakeisdamas „glibc“ adreso pasirinkimą. Laikykite tai kaip su aplinka susijusią alternatyvą. Patvirtinkite veikiančio pagrindinio kompiuterio IPv6, konteinerio egress/routing ir ugniasienės taisykles prieš koreguodami sprendiklio nuostatas. Pats privatus ULA adresas nesukuria viešojo IPv6 ryšio.
 
-Paslaugoms, kurios jau prijungtos prie numatytojo „Compose“ tinklo, šis fragmentas įjungia
-IPv6 tame tinkle; išsaugokite likusią paslaugos, prievadų, tomų ir konfigūracijos dalį:
+Paslaugoms, kurios jau prijungtos prie numatytojo „Compose“ tinklo, šis fragmentas įgalina IPv6 tame tinkle; išlaikyti likusią paslaugą, prievadus, apimtis ir konfigūraciją:
 
 ```yaml
 networks:
@@ -753,30 +753,13 @@ networks:
     enable_ipv6: true
 ```
 
-Jei naudojamas vardinis tinklas, įjunkite IPv6 tame tinkle, prie kurio paslauga iš tikrųjų prisijungia. „Docker“ gali
-skirti ULA potinklį; aiškiai nurodytą, su kitais nepersidengiantį potinklį rinkitės tik tada, kai to reikia jūsų tinklui.
-Žr. [„Docker“ IPv6 tinklo dokumentaciją](https://docs.docker.com/engine/daemon/ipv6/)
-ir [„Compose“ tinklo parinktis](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Pavadintam tinklui įjunkite jį tinkle, prie kurio paslauga iš tikrųjų prisijungia. Docker gali skirti ULA potinklį; pasirinkite aiškų, nepersidengiantį potinklį tik tada, kai to reikia jūsų tinklui. Žr. [Docker IPv6 tinklo kūrimas](https://docs.docker.com/engine/daemon/ipv6/) ir [tinklo kūrimo parinktis](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-**glibc pagrįstame atvaizde** `/etc/gai.conf` gali pakeisti adresų pasirinkimą. Dabartinio
-saugyklos Dockerfile pagrindas yra „Debian“; pasirinktiniai musl pagrįsti atvaizdai šio mechanizmo nenaudoja.
-Aprašytas pakeitimas pakeičia ULA žymą iš `label fc00::/7 6` į
-`label fc00::/7 1`. Pradėkite nuo visos atvaizdo politikos lentelės ir išsaugokite kitus jos
-įrašus: pridėjus `label` arba `precedence` įrašą pakeičiama numatytoji lentelė, todėl failo,
-kuriame yra tik pakeista eilutė, nepakanka.
-[glibc konfigūracijos žinyne](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-aprašyta ši elgsena. Prijunkite peržiūrėtą failą tik skaitymo režimu prie `/etc/gai.conf`
-ir iš naujo sukurkite paslaugą, kad pakeitimai būtų pritaikyti.
+Ant a** glibc pagrindu sukurtas vaizdas** , `/etc/gai.conf` gali pakeisti adreso pasirinkimą. Dabartinė saugykla Dockerfile naudoja Debian; pasirinktiniai musliniai vaizdai neturi šio mechanizmo. Pateiktas koregavimas pakeičia ULA etiketę iš `label fc00::/7 6` į `label fc00::/7 1`. Pradėkite nuo visos vaizdo politikos lentelės ir išsaugokite kitus jo įrašus: pridėjus `label` arba `precedence` įrašą, ši numatytoji lentelė pakeičiama, todėl failo, kuriame yra tik pakeista eilutė, nepakanka. [Glibc konfigūracijos nuoroda](https://github.com/bminor/glibc/blob/master/posix/gai.conf) dokumentuoja tą semantiką. Prijunkite peržiūrėtą failą tik skaitymui `/etc/gai.conf` ir iš naujo sukurkite paslaugą, kad ją pritaikytumėte.
 
-Tai pakeičia OS adresų pasirinkimą **visam išeinančiam srautui tame konteineryje**.
-Tai nepriverčia kiekvienos programos pasirinkti IPv6: „Node“ DNS eiliškumas ir ryšio
-pasirinkimas taip pat yra svarbūs. Visų pirma `--dns-result-order=ipv4first` pirmenybę teikia IPv4 ir
-nėra sprendimas, kai problema kyla naudojant tik IPv4. Žr. [„Node“ DNS eiliškumą](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Tai pakeičia OS adreso pasirinkimą** visas išeinantis srautas tame konteineryje** . Tai neverčia kiekvienos programos pasirinkti IPv6: mazgo DNS tvarka ir ryšio pasirinkimas taip pat svarbūs. Visų pirma, `--dns-result-order=ipv4first` teikia pirmenybę IPv4 ir nėra vaistas nuo IPv4-only gedimo. Žr. [mazgo DNS užsakymas](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Po bet kokio pagrindinės sistemos lygmens pakeitimo iš naujo patikrinkite „Gemini“ ir kitus savo paslaugų teikėjus. Norėdami atšaukti pakeitimus,
-pašalinkite pasirinktinio `gai.conf` prijungimą, atkurkite ankstesnę tinklo konfigūraciją ir
-techninės priežiūros laikotarpiu iš naujo sukurkite paveiktą paslaugą / tinklą. Pakartotinis tinklo sukūrimas
-gali sutrikdyti kitų prie jo prijungtų konteinerių veikimą; neištrinkite nuolatinių duomenų tomo.
+Pakeitę pagrindinio kompiuterio lygį iš naujo išbandykite Gemini ir kitus savo teikėjus. Norėdami atšaukti, pašalinkite pasirinktinį `gai.conf` laikiklį, atkurkite ankstesnę tinklo konfigūraciją ir per priežiūros langą iš naujo sukurkite paveiktą service/network. Tinklo atkūrimas gali nutraukti kitus prie jo prijungtus konteinerius; neištrinkite nuolatinio duomenų kiekio.
 
 ## Svarbios pastabos
 

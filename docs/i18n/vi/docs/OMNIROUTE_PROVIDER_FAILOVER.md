@@ -21,3 +21,5 @@ Chính sách nhà cung cấp chéo mặc định cho phép tối đa ba lần th
   - Id có tiền tố (`provider/model`) không bao giờ được định tuyến lại đến nhà cung cấp khác.
 
 Các trạng thái của mạch là `closed`, `open` và `half_open`. Thời gian hồi chiêu lên lịch cho một cuộc thăm dò có giới hạn; đầu dò thành công sẽ đóng mạch và đầu dò không thành công sẽ mở lại mạch.
+
+Chuyển đổi dự phòng của nhà cung cấp chạy bên trong cổng. Xem [Khi nào bản thân OmniRoute không thể truy cập được](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) đối với hành vi của khách hàng trong thời gian cổng ngừng hoạt động.

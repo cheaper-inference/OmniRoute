@@ -236,19 +236,19 @@ Támogatja** 22 útválasztási stratégia** (lásd `src/shared/constants/routin
 | `context-relay`     | Adja át a kontextust a célok között                                                                 |
 | `fill-first`        | Töltse ki a kvótát, mielőtt a következőre lép                                                       |
 | `p2c`               | Két választás ereje                                                                                 |
-| `random`            | Egységes véletlenszerű                                                                              |
-| `least-used`        | Válassza azt, amelyik a legkevesebbet használta a közelmúltban                                      |
-| `cost-optimized`    | Először a legolcsóbb egészséges cél                                                                 |
-| `reset-aware`       | Tisztában van a szolgáltatói visszaállítási ablakokkal                                              |
-| `reset-window`      | Állítsa vissza az ablak alapú útválasztást                                                          |
+| `random`            | Friss keverés kérésre                                                                               |
+| `least-used`        | Válassza ki azt, amelyikhez a legkevesebb rögzített kérés tartozik                                  |
+| `cost-optimized`    | A legalacsonyabb katalógusbeviteli ár először                                                       |
+| `reset-aware`       | A maradék kvóta + sürgősségi visszaállítása                                                         |
+| `reset-window`      | Kvótaablak, amely a leghamarabb visszaáll                                                           |
 | `expiry-first`      | Költse el azt a fiókot, amelynek a kvótája előbb lejárna, kihasználatlanul                          |
 | `headroom`          | Először a legtöbb fennmaradó kvóta                                                                  |
 | `quota-weighted`    | Hagyja ki a kimerült fiókokat, majd húzza le a maradék kvóta ÷ repülés közbeni terhelést            |
-| `strict-random`     | Valóban egységes (nincs minőségi súlyozás)                                                          |
+| `strict-random`     | Kevert pakli: minden célpont egyszer ismétlődik                                                     |
 | `auto`              | 16 faktoros pontozás (`autoCombo/`) használata                                                      |
 | `lkgp`              | Az utolsó ismert jó szolgáltató először                                                             |
-| `context-optimized` | A legjobb hosszú kontextusú kérésekhez                                                              |
-| `cache-optimized`   | Minden újrafelhasználható prompt előtag rögzítése ugyanahhoz a fiókhoz (prompt-cache találatok)     |
+| `context-optimized` | Először a legnagyobb ismert kontextusablak                                                          |
+| `cache-optimized`   | Előnyben részesítse azt a fiókot, amely valószínűleg tartalmazza a gyorsítótárban a prompt előtagot |
 | `fusion`            | Párhuzamosan pörgessen ki egy panelre, majd szintetizáljon egy bírón keresztül (`fusion.ts`)        |
 | `pipeline`          | Lánclépések — minden cél kimenete táplálja a következőt                                             |
 | `jev`               | Feliratkozás: TypeSafe Jev elismeri, hogy mely rangsorolt bejegyzések futnak; különben a rendelésed |
@@ -260,7 +260,7 @@ A** absztrakt végrehajtó** hogy minden végrehajtó osztály kiterjed (közvet
 - `buildUrl()` — alapértelmezett URL konstrukció (az egyéni alosztályok felülbírálása)
 - `buildHeaders()` — alapértelmezett fejlécek (auth, content-type)
 - `transformRequest()` — pass-through alapértelmezés szerint
-- `execute()` — fő HTTP ciklus a retry/backoff/breaker
+- `execute()` — fő HTTP ciklus retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts

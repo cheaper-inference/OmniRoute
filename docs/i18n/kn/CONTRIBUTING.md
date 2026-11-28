@@ -18,109 +18,102 @@ UI/UX, i18n, CLI, ಡೇಟಾಬೇಸ್ ಮತ್ತು ನಿರ್ಮಾಣ
 ### ಪೂರ್ವಾಪೇಕ್ಷಿತಗಳು
 
 - **Node.js** `>=22.22.2 <23`, ಅಥವಾ `>=24.0.0 <27` (ಶಿಫಾರಸು: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Node 24 ಹೊಂದಿರುವ Windows:** ಪ್ರಸ್ತುತ 24 LTS ಪ್ಯಾಚ್ ಬಿಡುಗಡೆಯನ್ನು (ಕನಿಷ್ಠ 24.20.0) ಬಳಸಿ.
-> ಹಿಂದಿನ ಬಿಡುಗಡೆಗಳಲ್ಲಿ `--test-force-exit` ಪ್ರಕ್ರಿಯೆಯನ್ನು ಮುಚ್ಚಿದ ನಂತರ ಯಶಸ್ವಿ ಪರೀಕ್ಷೆಗಳ ಬಳಿಕವೂ ಸ್ಥಗಿತಗೊಳ್ಳಬಹುದು.
-> Node ನ [Windows libuv ಪರಿಹಾರ](https://github.com/nodejs/node/pull/61999) ಈ ರನ್ಟೈಮ್ ಕ್ರ್ಯಾಶ್ ಅನ್ನು ಪರಿಹರಿಸುತ್ತದೆ; ಪರೀಕ್ಷಾ assertions ಮತ್ತು runner exit ಪರಿಶೀಲನೆಗಳನ್ನು ಸಕ್ರಿಯವಾಗಿಯೇ ಇರಿಸಿ.
+> **ನೋಡ್ 24 ನೊಂದಿಗೆWindows :** ಪ್ರಸ್ತುತ 24 LTS ಪ್ಯಾಚ್ ಬಿಡುಗಡೆಯನ್ನು ಬಳಸಿ (ಕನಿಷ್ಠ 24.20.0). `--test-force-exit` ಪ್ರಕ್ರಿಯೆಯನ್ನು ಮುಚ್ಚಿದಾಗ ಹಿಂದಿನ ಬಿಡುಗಡೆಗಳು ಯಶಸ್ವಿ ಪರೀಕ್ಷೆಗಳ ನಂತರ ಸ್ಥಗಿತಗೊಳ್ಳಬಹುದು. ನೋಡ್ನ [Windows libuv ಫಿಕ್ಸ್](https://github.com/nodejs/node/pull/61999) ಈ ರನ್ಟೈಮ್ ಕ್ರ್ಯಾಶ್ ಅನ್ನು ಪರಿಹರಿಸುತ್ತದೆ; ಪರೀಕ್ಷಾ ಸಮರ್ಥನೆಗಳು ಮತ್ತು ರನ್ನರ್ ನಿರ್ಗಮನ ತಪಾಸಣೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ.
 
-> **npm v11+ ಬಳಕೆದಾರರು (Node 24+):** `npm install` ನಂತರ, native modules ಸ್ಥಾಪಿತವಾಗಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ:
-> `node -e "require('better-sqlite3')"`. ಇದು `MODULE_NOT_FOUND` ದೋಷದೊಂದಿಗೆ ವಿಫಲವಾದರೆ,
-> `npm approve-scripts better-sqlite3 && npm install` ಅನ್ನು ರನ್ ಮಾಡಿ. [ಸಮಸ್ಯೆ ಪರಿಹಾರ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ನೋಡಿ.
+> **npm v11 + ಬಳಕೆದಾರರು (ನೋಡ್ 24 +):** `npm install` ನಂತರ, ಸ್ಥಳೀಯ ಮಾಡ್ಯೂಲ್ಗಳನ್ನು ಸ್ಥಾಪಿಸಲಾಗಿದೆ ಎಂದು ಪರಿಶೀಲಿಸಿ: `node -e "require('better-sqlite3')"`. ಇದು `MODULE_NOT_FOUND` ನೊಂದಿಗೆ ವಿಫಲವಾದರೆ, `npm approve-scripts better-sqlite3 && npm install` ರನ್ ಮಾಡಿ. [ಸಮಸ್ಯೆ ನಿವಾರಣೆಯನ್ನು](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ನೋಡಿ.
 
 - **Git**
 
-### ಕ್ಲೋನ್ ಮಾಡಿ ಮತ್ತು ಇನ್ಸ್ಟಾಲ್ ಮಾಡಿ
+### ಕ್ಲೋನ್ ಮತ್ತು ಸ್ಥಾಪಿಸಿ
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### ಪರಿಸರ ಚರಗಳು
+### ಪರಿಸರ ವೇರಿಯಬಲ್ಸ್
 
 ```bash
-# ಟೆಂಪ್ಲೇಟ್ನಿಂದ ನಿಮ್ಮ .env ಅನ್ನು ರಚಿಸಿ
+# Create your .env from the template
 cp .env.example .env
 
-# ಅಗತ್ಯವಿರುವ ರಹಸ್ಯಗಳನ್ನು ರಚಿಸಿ
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ಅಭಿವೃದ್ಧಿಗಾಗಿ ಪ್ರಮುಖ ಚರಗಳು:
+ಅಭಿವೃದ್ಧಿಗೆ ಪ್ರಮುಖ ಅಸ್ಥಿರ:
 
-| ಚರ                     | ಅಭಿವೃದ್ಧಿಯ ಡೀಫಾಲ್ಟ್      | ವಿವರಣೆ                |
+| ವೇರಿಯಬಲ್               | ಅಭಿವೃದ್ಧಿ ಡೀಫಾಲ್ಟ್       | ವಿವರಣೆ                |
 | ---------------------- | ------------------------ | --------------------- |
 | `PORT`                 | `20128`                  | ಸರ್ವರ್ ಪೋರ್ಟ್         |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ಫ್ರಂಟ್ಎಂಡ್ನ ಮೂಲ URL   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ಮುಂಭಾಗಕ್ಕಾಗಿ ಬೇಸ್ URL |
 | `JWT_SECRET`           | (ಮೇಲೆ ರಚಿಸಿ)             | JWT ಸಹಿ ರಹಸ್ಯ         |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | ಮೊದಲ ಲಾಗಿನ್ ಪಾಸ್ವರ್ಡ್ |
-| `APP_LOG_LEVEL`        | `info`                   | ಲಾಗ್ ವಿವರ ಮಟ್ಟ        |
+| `APP_LOG_LEVEL`        | `info`                   | ಲಾಗ್ ವರ್ಬೊಸಿಟಿ ಮಟ್ಟ   |
 
 ### ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಸೆಟ್ಟಿಂಗ್ಗಳು
 
-ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪರಿಸರ ಚರಗಳ ಮೂಲಕವೂ ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದಾದ ವೈಶಿಷ್ಟ್ಯಗಳಿಗಾಗಿ UI ಟಾಗಲ್ಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ:
+ಪರಿಸರದ ಅಸ್ಥಿರಗಳ ಮೂಲಕ ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದಾದ ವೈಶಿಷ್ಟ್ಯಗಳಿಗಾಗಿ ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಟಾಗಲ್ಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ:
 
-| ಸೆಟ್ಟಿಂಗ್ ಸ್ಥಳ         | ಟಾಗಲ್           | ವಿವರಣೆ                                    |
-| ---------------------- | --------------- | ----------------------------------------- |
-| ಸೆಟ್ಟಿಂಗ್ಗಳು → ಸುಧಾರಿತ | ಡೀಬಗ್ ಮೋಡ್      | ಡೀಬಗ್ ವಿನಂತಿ ಲಾಗ್ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ (UI) |
-| ಸೆಟ್ಟಿಂಗ್ಗಳು → ಸಾಮಾನ್ಯ | ಸೈಡ್ಬಾರ್ ಗೋಚರತೆ | ಸೈಡ್ಬಾರ್ ವಿಭಾಗಗಳನ್ನು ತೋರಿಸಿ/ಮರೆಮಾಡಿ       |
+| ಸ್ಥಳವನ್ನು ಹೊಂದಿಸಲಾಗುತ್ತಿದೆ | ಟಾಗಲ್ ಮಾಡಿ      | ವಿವರಣೆ                                    |
+| -------------------------- | --------------- | ----------------------------------------- |
+| → ಸುಧಾರಿತ ಸೆಟ್ಟಿಂಗ್ಗಳು     | ಡೀಬಗ್ ಮೋಡ್      | ಡೀಬಗ್ ವಿನಂತಿ ಲಾಗ್ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ (UI) |
+| → ಸಾಮಾನ್ಯ ಸೆಟ್ಟಿಂಗ್ಗಳು     | ಸೈಡ್ಬಾರ್ ಗೋಚರತೆ | Show/hide ಸೈಡ್ಬಾರ್ ವಿಭಾಗಗಳು               |
 
-ಈ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಡೇಟಾಬೇಸ್ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಮರುಪ್ರಾರಂಭಗಳಾದರೂ ಉಳಿಯುತ್ತವೆ; ಹೊಂದಿಸಿದಾಗ ಇವು env var ಡೀಫಾಲ್ಟ್ಗಳನ್ನು ಮೀರಿಸುತ್ತವೆ.
+ಈ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಡೇಟಾಬೇಸ್ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಮರುಪ್ರಾರಂಭದಾದ್ಯಂತ ಮುಂದುವರಿಯುತ್ತದೆ, ಹೊಂದಿಸಿದಾಗ env var ಡೀಫಾಲ್ಟ್ಗಳನ್ನು ಅತಿಕ್ರಮಿಸುತ್ತದೆ.
 
-### ಸ್ಥಳೀಯವಾಗಿ ರನ್ ಮಾಡುವುದು
+### ಸ್ಥಳೀಯವಾಗಿ ಚಾಲನೆಯಲ್ಲಿದೆ
 
 ```bash
-# ಅಭಿವೃದ್ಧಿ ಮೋಡ್ (ಹಾಟ್ ರೀಲೋಡ್)
+# Development mode (hot reload)
 npm run dev
 
-# ಪ್ರೊಡಕ್ಷನ್ ಬಿಲ್ಡ್
-npm run build    # next build → .build/next/ ನಂತರ assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# ಕೊಡುಗೆದಾರರ ಬದಲಾವಣೆಗಳಿಗಾಗಿ ವೇಗದ backend/API-only ಕಂಪೈಲ್
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# ಬಿಡುಗಡೆ ಬಿಲ್ಡ್ (ಸ್ವಚ್ಛ ಮರುಬಿಲ್ಡ್ + HEAD ಸೆಂಟಿನಲ್ — ಡಿಪ್ಲಾಯ್ಗೆ ಅಗತ್ಯ)
-npm run build:release   # rm -rf .build dist ಮತ್ತು build + dist/BUILD_SHA ಬರೆಯುತ್ತದೆ
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# ಸಾಮಾನ್ಯ ಪೋರ್ಟ್ ಕಾನ್ಫಿಗರೇಶನ್
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ಕೊಡುಗೆದಾರರ ಬಿಲ್ಡ್ ಕಂಪೈಲ್-ಮಾತ್ರ ಪರಿಶೀಲನೆಯನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ: ಇದು standalone distribution ಅನ್ನು ಜೋಡಿಸುವುದಿಲ್ಲ ಅಥವಾ ಐಚ್ಛಿಕ native packaging assets ಅನ್ನು ಬಿಲ್ಡ್ ಮಾಡುವುದಿಲ್ಲ. ಶಿಪ್ ಮಾಡಬಹುದಾದ bundle ಅನ್ನು ಪರಿಶೀಲಿಸಬೇಕಾದಾಗ ನಿಯಮಿತ ಪ್ರೊಡಕ್ಷನ್ ಬಿಲ್ಡ್ ಬಳಸಿ.
+ಕೊಡುಗೆದಾರರ ರಚನೆಯು ಕಂಪೈಲ್-ಮಾತ್ರ ಮೌಲ್ಯೀಕರಣವನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ: ಇದು ಸ್ವತಂತ್ರ ವಿತರಣೆಯನ್ನು ಜೋಡಿಸುವುದಿಲ್ಲ ಅಥವಾ ಐಚ್ಛಿಕ ಸ್ಥಳೀಯ ಪ್ಯಾಕೇಜಿಂಗ್ ಸ್ವತ್ತುಗಳನ್ನು ನಿರ್ಮಿಸುವುದಿಲ್ಲ. ನೀವು ಸಾಗಿಸಬಹುದಾದ ಬಂಡಲ್ ಅನ್ನು ಮೌಲ್ಯೀಕರಿಸಬೇಕಾದಾಗ ನಿಯಮಿತ ಉತ್ಪಾದನೆಯನ್ನು ಬಳಸಿ.
 
-### ಬಿಲ್ಡ್ ಔಟ್ಪುಟ್ ವಿನ್ಯಾಸ
+### ಔಟ್ಪುಟ್ ಲೇಔಟ್ ಅನ್ನು ನಿರ್ಮಿಸಿ
 
-| ಡೈರೆಕ್ಟರಿ | ವಿಷಯಗಳು                                                                    | ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆಯೇ |
-| --------- | -------------------------------------------------------------------------- | -------------------- |
-| `src/`    | ಅಪ್ಲಿಕೇಶನ್ ಮೂಲ (TypeScript / TSX)                                          | ಹೌದು                 |
-| `.build/` | ಮಧ್ಯಂತರಗಳು — `next build` ಔಟ್ಪುಟ್ (gitignored, `distDir = .build/next`)    | ಇಲ್ಲ                 |
-| `dist/`   | ಶಿಪ್ ಮಾಡಬಹುದಾದ bundle — `assembleStandalone` ಮೂಲಕ ಜೋಡಿಸಲಾಗಿದೆ (gitignored) | ಇಲ್ಲ                 |
+| ಡೈರೆಕ್ಟರಿ | ಪರಿವಿಡಿ                                                                  | ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆ |
+| --------- | ------------------------------------------------------------------------ | ------------------ |
+| `src/`    | ಅಪ್ಲಿಕೇಶನ್ ಮೂಲ (TypeScript / TSX)                                        | ಹೌದು               |
+| `.build/` | ಮಧ್ಯಂತರ — `next build` ಔಟ್ಪುಟ್ (ಜಿಟಿಗ್ನೋರ್ಡ್, `distDir = .build/next`)   | ಸಂ                 |
+| `dist/`   | ಸಾಗಿಸಬಹುದಾದ ಬಂಡಲ್ — `assembleStandalone` ಮೂಲಕ ಜೋಡಿಸಲಾಗಿದೆ (ಜಿಟಿಗ್ನೋರ್ಡ್) | ಸಂ                 |
 
-ಬಿಲ್ಡ್ ಪೈಪ್ಲೈನ್ ಒಂದೇ ಹಂತದಲ್ಲಿ ನಡೆಯುತ್ತದೆ:
+ನಿರ್ಮಾಣ ಪೈಪ್ಲೈನ್ ಒಂದೇ ಪಾಸ್ ಆಗಿದೆ:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js ಔಟ್ಪುಟ್)
-  └─ assembleStandalone()                 (standalone + static + public + native assets ಅನ್ನು ನಕಲಿಸುತ್ತದೆ)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ಹೆಚ್ಚುವರಿಯಾಗಿ ಮೊದಲು ಎರಡೂ ಡೈರೆಕ್ಟರಿಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ಡಿಪ್ಲಾಯ್ ಸಮಗ್ರತೆಯ ಸೆಂಟಿನಲ್ ಆಗಿ
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ಅನ್ನು ಬರೆಯುತ್ತದೆ.
+`npm run build:release` ಹೆಚ್ಚುವರಿಯಾಗಿ ಎರಡೂ ಡೈರೆಕ್ಟರಿಗಳನ್ನು ಮೊದಲು ಸ್ವಚ್ಛಗೊಳಿಸುತ್ತದೆ ಮತ್ತು `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ಅನ್ನು ಡಿಪ್ಲೋಯ್ ಇಂಟೆಗ್ರಿಟಿ ಸೆಂಟಿನೆಲ್ ಆಗಿ ಬರೆಯುತ್ತದೆ.
 
-`npm run build:contributor` backend-only ಬಿಲ್ಡ್ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬಳಸುತ್ತದೆ. ಬಿಲ್ಡ್ ಮಾಡುವಾಗ ಇದು ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಫೈಲ್ಗಳನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ stub ಮಾಡುತ್ತದೆ, API route handlers ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ ಮತ್ತು ಬಿಲ್ಡ್ ನಂತರ ಮೂಲ ಫೈಲ್ಗಳನ್ನು ಮರುಸ್ಥಾಪಿಸುತ್ತದೆ. ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುವ ಬದಲಾವಣೆಗಳಿಗಾಗಿ ಅಥವಾ ಸಂಪೂರ್ಣ ಬಿಡುಗಡೆ ಪರಿಶೀಲನೆಗಾಗಿ `npm run build` ಬಳಸಿ; ಕೊಡುಗೆದಾರರ ಪ್ರೊಫೈಲ್ ಬಿಡುಗಡೆ ಬಿಲ್ಡ್ಗೆ ಪರ್ಯಾಯವಲ್ಲ.
+`npm run build:contributor` ಬ್ಯಾಕೆಂಡ್-ಮಾತ್ರ ಬಿಲ್ಡ್ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬಳಸುತ್ತದೆ. ಇದು ನಿರ್ಮಿಸುವಾಗ ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಫೈಲ್ಗಳನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ಸ್ಟಬ್ ಮಾಡುತ್ತದೆ, API ರೂಟ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳನ್ನು ಇರಿಸುತ್ತದೆ ಮತ್ತು ನಿರ್ಮಾಣದ ನಂತರ ಮೂಲ ಫೈಲ್ಗಳನ್ನು ಮರುಸ್ಥಾಪಿಸುತ್ತದೆ. ಡ್ಯಾಶ್ಬೋರ್ಡ್ UI ಪರಿಣಾಮ ಬೀರುವ ಬದಲಾವಣೆಗಳಿಗಾಗಿ ಅಥವಾ ಪೂರ್ಣ ಬಿಡುಗಡೆ ಮೌಲ್ಯೀಕರಣಕ್ಕಾಗಿ `npm run build` ಬಳಸಿ; ಕೊಡುಗೆದಾರರ ಪ್ರೊಫೈಲ್ ಬಿಡುಗಡೆಯ ನಿರ್ಮಾಣಕ್ಕೆ ಬದಲಿಯಾಗಿಲ್ಲ.
 
-> **VPS ಡಿಪ್ಲಾಯ್ ಸೂಚನೆ:** ರಿಮೋಟ್ image ಡೈರೆಕ್ಟರಿ `/usr/lib/node_modules/omniroute/app/`
-> ಬದಲಾಗುವುದಿಲ್ಲ. ಡಿಪ್ಲಾಯ್ skills `dist/` ನ ವಿಷಯಗಳನ್ನು ಅದರಲ್ಲಿ rsync ಮಾಡುತ್ತವೆ.
-> ರೆಪೊಸಿಟರಿಯೊಳಗಿನ ಬಿಲ್ಡ್ ಔಟ್ಪುಟ್ ಮಾರ್ಗ ಮಾತ್ರ ಬದಲಾಗಿದೆ (`app/` → `dist/`).
+> **VPS ನಿಯೋಜನೆ ಟಿಪ್ಪಣಿ:** ರಿಮೋಟ್ ಇಮೇಜ್ ಡೈರೆಕ್ಟರಿ `/usr/lib/node_modules/omniroute/app/` ಬದಲಾಗಿಲ್ಲ. ನಿಯೋಜನೆ ಕೌಶಲ್ಯಗಳು `dist/` ಯ ವಿಷಯಗಳನ್ನು ಅದರೊಳಗೆ ಸಿಂಕ್ ಮಾಡುತ್ತದೆ. ಇನ್-ರೆಪೋ ಬಿಲ್ಡ್ ಔಟ್ಪುಟ್ ಮಾರ್ಗವನ್ನು ಮಾತ್ರ ಸರಿಸಲಾಗಿದೆ (`app/` → `dist/`).
 
-ಡೀಫಾಲ್ಟ್ URLಗಳು:
+ಡೀಫಾಲ್ಟ್ URLs:
 
-- **ಡ್ಯಾಶ್ಬೋರ್ಡ್**: `http://localhost:20128/dashboard`
+- **ಡ್ಯಾಶ್ಬೋರ್ಡ್** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -426,10 +419,10 @@ VPS ನಿಯೋಜನೆಗಳಿಗಾಗಿ, `npm run build` ಬದಲಿಗ�
 
 ---
 
-## ಸಹಾಯ ಪಡೆಯುವುದು
+## ಸಹಾಯ ಪಡೆಯಲಾಗುತ್ತಿದೆ
 
-- **ಆರ್ಕಿಟೆಕ್ಚರ್**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) ನೋಡಿ
-- **API ಉಲ್ಲೇಖ**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) ನೋಡಿ
-- **ಭದ್ರತಾ ದಸ್ತಾವೇಜುಗಳು**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **ಕಾರ್ಯಾಚರಣೆಗಳ ದಸ್ತಾವೇಜುಗಳು**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **ಸಮಸ್ಯೆಗಳು**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **ವಾಸ್ತುಶಿಲ್ಪ** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) ನೋಡಿ
+- **API ಉಲ್ಲೇಖ** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) ನೋಡಿ
+- **ಭದ್ರತಾ ದಾಖಲೆಗಳು** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops ಡಾಕ್ಸ್** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **ಸಮಸ್ಯೆಗಳು** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

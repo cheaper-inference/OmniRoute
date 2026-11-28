@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Paramita Ndị A Chọrọ
+## 5. Nhọrọ achọrọ
 
-Ọrụ a na-atụ aro ka ị hazie ma ọ dịkarịa ala paramita ndị na-esonụ na Fly.io.
+Ọrụ a na-akwado ịhazi opekata mpe ihe ndị a na Fly.io.
 
-### 5.1 Paramita Ndị E Kwadoburu
+### 5.1 Oke enyochagoro
 
-E jirila paramita ndị a mee mbugote n'ezie na ngwa `omniroute` dị ugbu a:
+Ejila paramita ndị a na mbugharị n'ezie na ngwa `omniroute` dị ugbu a:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (a chọrọ ya na production — a na-eji ya maka nkwenye njirimara WebSocket bridge)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (chọrọ na mmepụta — ejiri maka nyocha akwa mmiri WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 Banyere `INITIAL_PASSWORD`
 
-Ọrụ dị ugbu a anaghị edobe `INITIAL_PASSWORD` n'ihi na mbugote a achọghị ya.
+Ihe oru ngo nke ugbu a anaghị edobe `INITIAL_PASSWORD` n'ihi na ntinye a anaghị achọ ya.
 
 Ọ bụrụ na edoghị ya:
 
-- Startup log ga-egosi na okwuntughe ndabara bụ `CHANGEME`
-- Ị kwesịrị ịgbanwe okwuntughe nbanye na ntọala sistemụ ozugbo enwere ike mgbe mbugote gasịrị
+- Ị na-emepụta okwuntughe dashboard na ọkachamara n'ịbanye na nleta mbụ. Mezue nzọụkwụ paswọọdụ: ịwụpụ ya na-atụgharị nbanye dashboard, nke na-ahapụ dashboard ahụ maka onye ọ bụla nwere ike iru URL ngwa.
+- Fly's proxy na-erute ngwa ahụ site na adreesị na-abụghị loopback, yabụ mgbe ị nyefere okwuntughe, ọkachamara ahụ na-arịọ maka akara bootstrap otu oge, nke ngwa ahụ na-ebipụta na log ya n'oge ahụ: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Ọ bụrụ na ahịrị ahụ esila na ndekọ ahụ pụọ, malitegharịa ngwa ahụ wee nyefee ọkachamara ahụ ọzọ ka ibipụta akara ọhụrụ.
 
-Ọ bụrụ na ịchọrọ ịmalite okwuntughe backend n'enweghị enyemaka mmadụ, ị nwere ike ịgbakwunye ya ma emechaa:
+Iji tọọ okwuntughe ahụ na-eleghị anya kama, tinye ya tupu nleta dashboard nke mbụ (otu oge echekwara paswọọdụ, a na-eleghara `INITIAL_PASSWORD` anya):
 
 - `INITIAL_PASSWORD`
 
@@ -274,60 +274,60 @@ flyctl secrets list -a omniroute
 
 ---
 
-## 9. Mmelite na Mwepụta Ndị Na-esote
+## 9. Mmelite na mwepụta ndị na-esote
 
-Mgbe emelitechara koodu, usoro mwepụta ahụ dị mfe:
+Mgbe mmelite koodu gasịrị, usoro ntọhapụ ahụ kwụ ọtọ:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Ọ bụrụ naanị na ịchọrọ imelite paramita n’agbanweghị koodu:
+Ọ bụrụ naanị na ị ga-emelite paramita na-agbanweghị koodu:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly ga-eme mmelite igwe n’usoro na-akpaghị aka.
+Fly ga-eme mmelite igwe na-akpaghị aka.
 
-### 9.1 Ịso Mmelite Ebe Nchekwa Upstream Ka Ị Na-echekwa `fly.toml` nke Fork Gị
+### 9.1 Nsochi mmelite nchekwa nchekwa dị elu ka ị na-echekwa `fly.toml` nke ndụdụ gị
 
-Ọ bụrụ na ebe nchekwa dị ugbu a bụ fork ma ịchọrọ imekọrịta mmelite sitere na upstream `https://github.com/diegosouzapw/OmniRoute`, soro usoro ọrụ dị n'okpuru.
+Ọ bụrụ na ebe nchekwa dị ugbu a bụ ndụdụ ma ịchọrọ ịmekọrịta mmelite sitere na `https://github.com/cheaper-inference/OmniRoute` elu, soro usoro ọrụ dị n'okpuru.
 
-Nke mbụ, nyochaa remotes gị:
+Nke mbụ, nyochaa n'ime anya gị:
 
 ```powershell
 git remote -v
 ```
 
-Ị kwesịrị ịhụ ma ọ dịkarịa ala:
+Ị ga-ahụ opekata mpe:
 
-- `origin` na-atụ aka na fork nke gị
-- `upstream` na-atụ aka na ebe nchekwa mbụ
+- `origin` na-atụ aka na ndụdụ nke gị
+- `upstream` na-atụ aka na ebe nchekwa izizi
 
-Ọ bụrụ na ahazibeghị `upstream`, tinye ya:
+Ọ bụrụ na ahazighị `upstream`, tinye ya:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Tupu imekọrịta na upstream, weta commits na tags kachasị ọhụrụ:
+Tupu ịmekọrịta na elu iyi, weta mmemme na mkpado kachasị ọhụrụ:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Lelee ụdị dị ugbu a na tags nke upstream:
+Lelee ụdị dị ugbu a yana mkpado elu:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Rịba ama: Ụdị ọrụ a dị ugbu a bụ `v3.8.0`. E debere ntụaka `v3.4.7` ndị dị n'okpuru naanị dịka ihe atụ akụkọ ihe mere eme. Maka mwepụta ndị a na-eji eme ihe n'ezie, jiri `:latest` ma ọ bụ tag nke ụdị dị ugbu a (dịka `:v3.8.0`).
+> Mara: Ụdị ọrụ dị ugbu a bụ `v3.8.0`. Edere ntụaka `v3.4.7` dị n'okpuru ka ọ bụrụ naanị ọmụmaatụ akụkọ ihe mere eme. Maka mwepụta n'ezie, jiri `:latest` ma ọ bụ mkpado ụdị ugbu a (dịka `:v3.8.0`).
 
-Ọ bụrụ na ịchọrọ ijikọta `main` kachasị ọhụrụ nke upstream ma jigidesie `fly.toml` nke fork gị ike, soro usoro ọrụ a:
+Ọ bụrụ na ịchọrọ ijikọ `main` kachasị ọhụrụ ka ị na-eji ike na-edobe `fly.toml` ndụdụ gị, soro usoro ọrụ a:
 
 ```powershell
 git merge upstream/main
@@ -337,34 +337,34 @@ git commit -m "chore(deploy): keep fork fly.toml"
 git push origin main
 ```
 
-Ihe ndị ị ga-eburu n'uche:
+ndetu:
 
-- `git merge upstream/main` na-emekọrịta koodu kachasị ọhụrụ sitere na ebe nchekwa mbụ
-- `git checkout HEAD~1 -- fly.toml` na-eweghachi `fly.toml` nke fork gị dịka ọ dị tupu njikọta ahụ
-- Ọ bụrụ na upstream agbanwebeghị `fly.toml`, nzọụkwụ a agaghị eweta ọdịiche ọ bụla
-- Ọ bụrụ na upstream gbanwere `fly.toml`, nzọụkwụ a na-ahụ na edegharịghị aha ngwa Fly gị, njikọta volume, region, na nhazi mbugharị ndị ọzọ pụrụ iche nye fork gị
+- `git merge upstream/main` mekọrịta koodu kachasị ọhụrụ sitere na ebe nchekwa izizi
+- `git checkout HEAD~1 -- fly.toml` weghachiri `fly.toml` nke ndụdụ gị site na tupu njikọta
+- Ọ bụrụ n'elu elu agbanweghị `fly.toml`, nzọụkwụ a agaghị ewebata ọdịiche ọ bụla
+- If upstream did modify `fly.toml`, nzọụkwụ a na-ahụ na aha ngwa Fly gị, ugwu olu, mpaghara, na nhazi nhazi ọkwa ndị ọzọ akọwapụtara ndụ adịghị edegharị
 
-Ọ bụrụ na ịchọrọ ịhazi ya ka ọ daba na otu tag mwepụta akọwapụtara (dịka `v3.4.7`), buru ụzọ chọpụta na tag ahụ adịlarị na `upstream/main`:
+Ọ bụrụ na ịchọrọ ịkwado ya na mkpado ntọhapụ (dịka `v3.4.7`), buru ụzọ chọpụta na abanyelarị na mkpado ahụ na `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Nlaghachi gara nke ọma pụtara na `upstream/main` enweelarị ụdị ahụ; ị nwere ike ijikọta `upstream/main` ozugbo.
+Nlaghachi nke ọma pụtara `upstream/main` enweelarị ụdị ahụ; ị nwere ike jikọta `upstream/main` naanị.
 
-### 9.2 Usoro Mwepụta Ọkọlọtọ Mgbe Emekọrịtachara Upstream
+### Usoro mwepụta ọkọlọtọ 9.2 Mgbe emekọrịtara elu
 
-Mgbe emekọrịtachara ya na ebe nchekwa mbụ, soro usoro mwepụta a akwadoro:
+Ka emekọrịtachara na ebe nchekwa izizi, soro usoro ntọhapụ akwadoro:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Weghachite `fly.toml` nke fork ahụ
+3. Weghachite `fly.toml` ndụdụ ahụ
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Nke a bụ usoro ọrụ e ji mee ihe n'ezie mgbe a na-ebulite ọrụ dị ugbu a gaa na `v3.4.7` (ihe atụ a na-ezo aka na ụdị akụkọ ihe mere eme; ụdị dị ugbu a n'ezie bụ `v3.8.0`).
+Nke a bụ usoro ọrụ a na-eji eme ihe mgbe ị na-ebuli ọrụ ugbu a gaa `v3.4.7` (ihe atụ na-ezo aka na ụdị akụkọ ihe mere eme; ụdị ugbu a bụ `v3.8.0`).
 
 ---
 
@@ -418,40 +418,40 @@ Isi ihe abụọ ndị a dị oke mkpa:
 
 ---
 
-## 12. Nsogbu Ndị A Na-ahụkarị
+## 12. Okwu nkịtị
 
-### 12.1 Ibe `Secrets` Ghe Ọtọ
+### 12.1 `Secrets` Ibe efu
 
-Ọ na-abụkarị n'ihi otu n'ime ihe abụọ ndị a:
+Enwerekarị ihe abụọ kpatara ya:
 
-- Ị kabeghị agba `flyctl secrets set`
-- Ị na-ele ngwa dị iche (dịka ọmụmaatụ, `oroute` kama `omniroute`)
+- Ị na-agba ọsọ `flyctl secrets set`
+- Ị na-elele ngwa dị iche (dịka `oroute` kama `omniroute`)
 
-### 12.2 `flyctl deploy` Na-akọ `app not found`
+### 12.2 `flyctl deploy` Akụkọ `app not found`
 
-Buru ụzọ mepụta ngwa ahụ:
+Buru ụzọ mepụta ngwa:
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 Ntụgharị `fly.toml` Dara
+### 12.3 `fly.toml` nleba anya ada ada
 
 Lelee ihe ndị a:
 
-- Ma enwere mkpụrụedemede ghasara aghasa na nkọwa
-- Ma nhota na nhazi oghere TOML ziri ezi
+- Ma enwere mkpụrụedemede kpara akpa na nkọwa
+- Ma nhota TOML na ntinye aka ziri ezi
 
-### 12.4 Data Anaghị Adịgide
+### 12.4 Data anaghị adịgide
 
 Nyochaa ihe abụọ ndị a:
 
 - `fly.toml` nwere `destination = '/data'`
-- Atọrọ `DATA_DIR` ka ọ bụrụ `/data`
+- `DATA_DIR` atọrọ na `/data`
 
-### 12.5 Ọ Nwere Ike Ịrụ Ọrụ Na-enweghị `INITIAL_PASSWORD`?
+### 12.5 Ọ nwere ike ịgba ọsọ na-enweghị `INITIAL_PASSWORD`?
 
-Ee, ọ nwere ike ịrụ ọrụ. Ọ ga-alaghachi n'iji okwuntughe ndabara `CHANGEME`. A na-atụ aro ka ị gbanwee okwuntughe backend ozugbo enwere ike n'ebe nrụpụta.
+Ee. Na `INITIAL_PASSWORD` unset, ị na-emepụta paswọọdụ dashboard na ọkachamara onboarding na nleta mbụ (ngalaba 5.2 na-ekpuchi akara akpụkpọ ụkwụ otu oge na nzọụkwụ paswọọdụ).
 
 ---
 

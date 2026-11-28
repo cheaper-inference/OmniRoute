@@ -151,30 +151,30 @@ Temaer for fase 6–7:
 - [ ] Legg til regresjonstester for hver produksjonsfeil som avdekkes og rettes under arbeidet mot 90 %
 - [ ] Hev dekningskravet i CI først etter at den lokale grunnlinjen har vært stabil i minst to påfølgende kjøringer
 
-## Ratchet-policy
+## Ratchet-politikk
 
-Oppdater tersklene for `npm run test:coverage` først etter at prosjektet faktisk har passert neste milepæl med en komfortabel margin.
+Oppdater `npm run test:coverage` -terskler først etter at prosjektet faktisk overskrider neste milepæl med en komfortabel buffer.
 
-**Gjeldende terskel:** `npm run test:coverage` krever **60 setninger / 60 linjer / 60 funksjoner / 60 grener** (målemetoden ble justert i Quality-Gates fase 6A.1 — den tidligere grunnlinjen på 82.58% var kunstig høy fordi den telte testfiler og utelot `open-sse`). Kommandoen `test:coverage:legacy` beholder den gamle målemetoden på 50/50/50 for historisk sammenligning.
+**Nåværende port:** `npm run test:coverage` håndhever** 60 utsagn / 60 linjer / 60 funksjoner / 60 grener** (beregningen ble rebasert i Quality-Gates Fase 6A.1 — den tidligere 82,58 % grunnlinjen ble oppblåst fordi den telte testfiler og ekskluderte `open-sse`). `test:coverage:legacy` kommandoen bevarer den gamle 50/50/50 metrikken for historisk sammenligning.
 
-Bruk følgende for frittstående terskelkontroller mot den nyeste rapporten:
+For ad hoc-terskelkontroller mot den siste rapporten, bruk:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Anbefalt ratchet-sekvens (rekkefølgen er `setninger-linjer / grener / funksjoner`):
+Anbefalt skrallesekvens (rekkefølgen er `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- gjeldende terskel (75/70/75)
+5. 75/70/72 <-- strømport (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Neste ratchet-mål er `80/75/78` når grendekningen holder seg over 78% i to påfølgende kjøringer.
+Neste skrallemål er `80/75/78` når grendekningen holder over 78 % for to påfølgende kjøringer.
 
 ## Kjent mangel
 

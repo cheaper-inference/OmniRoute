@@ -88,19 +88,19 @@ Funktiolle `register(program, ctx)` välitettävä `ctx`-objekti:
 | `ctx.baseUrl`                | `string`         | Selvitetty perus-URL                                                |
 | `ctx.apiKey`                 | `string \| null` | API-avain, jos sellainen on annettu                                 |
 
-## Löytäminen
+## Löytö
 
-Liitännäiset löydetään seuraavista sijainneista:
+Pluginit löytyvät osoitteesta:
 
-1. `~/.omniroute/plugins/<name>/` — käyttäjäkohtaiset asennukset
-2. `OMNIROUTE_PLUGIN_PATH`-ympäristömuuttuja — mukautettu hakemisto
+1. `~/.omniroute/plugins/node_modules/<name>/` — johon `omniroute plugin install` laittaa paketteja (npm `--prefix`, ei `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — käsin kopioidut laajennushakemistot
+3. `OMNIROUTE_PLUGIN_PATH` env var — mukautettu hakemisto
 
-Molemmat koskevat **vain CLI:tä**. Palvelinpuolen liitännäisten suoritusympäristöllä (välityspalvelimen sisällä suoritettavat marketplace-/`plugin.json`-liitännäiset) on oma hakutoimintonsa ja oma ohitusasetuksensa,
-`OMNIROUTE_PLUGINS_DIR` — katso
-[PLUGIN_MARKETPLACE.md → Liitännäishakemisto](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Toisen asettaminen ei vaikuta toiseen.
+Symlinkitettyjä hakemistoja (mitä npm luo `plugin install ./dir`) seurataan.
 
-Latausvirheet käsitellään ja tulostetaan varoituksina — viallinen liitännäinen ei koskaan kaada CLI:tä.
+Molemmat ovat** Vain CLI** . Palvelinpuolen laajennuksen ajonaikaisella (välityspalvelimen sisällä toimivat marketplace/`plugin.json` -laajennukset) on oma skanneri, jossa on oma ohitus, `OMNIROUTE_PLUGINS_DIR` — katso [PLUGIN_MARKETPLACE.md → Plugin-hakemisto](./PLUGIN_MARKETPLACE.md#plugin-directory). Yhden asettaminen ei vaikuta toiseen.
+
+Latausvirheet tunnistetaan ja tulostetaan varoituksina — rikkinäinen laajennus ei koskaan kaada CLI.
 
 ## Tietoturva
 

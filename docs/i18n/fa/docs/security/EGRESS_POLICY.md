@@ -67,37 +67,37 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ---
 
-## سه مقدار
+## سه ارزش
 
-| مقدار  | برچسب رابط کاربری | رفتار                                                                                                                                                                                                  |
-| ------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto` | `خودکار (دوپشته)` | سیستمعامل خانواده را انتخاب میکند. برای میزبان پراکسی که بهصورت IP صریح وارد شده است، خانواده ذاتاً توسط همان مقدار تعیین میشود؛ برای نام میزبان، هر دو خانواده قابل استفادهاند. این مقدار پیشفرض است. |
-| `ipv4` | `فقط IPv4`        | اتصال را به IPv4 محدود میکند. اگر میزبان پراکسی رکورد IPv4 (A) نداشته باشد، اتصال بهصورت بسته و ایمن شکست میخورد.                                                                                      |
-| `ipv6` | `فقط IPv6`        | اتصال را به IPv6 محدود میکند. اگر میزبان پراکسی رکورد IPv6 (AAAA) نداشته باشد، اتصال بهصورت بسته و ایمن شکست میخورد.                                                                                   |
+| ارزش   | برچسب UI            | رفتار                                                                                                                                              |
+| ------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS خانواده را انتخاب می کند. برای یک میزبان پروکسی IP-literal، خانواده ذاتی است. برای نام میزبان، هر دو خانواده واجد شرایط هستند. این پیش فرض است. |
+| `ipv4` | `IPv4 only`         | اتصال به IPv4 را پین می کند. اگر میزبان پراکسی سابقه IPv4 (A) نداشته باشد، بسته نمی شود.                                                           |
+| `ipv6` | `IPv6 only`         | اتصال به IPv6 را پین می کند. اگر میزبان پراکسی سابقه IPv6 (AAAA) نداشته باشد، بسته نمی شود.                                                        |
 
-رشتههای رابط کاربری در `src/i18n/messages/en.json` قرار دارند (`labelFamily`، `familyAuto`، `familyIpv4`، `familyIpv6`، `familyHint`).
+رشته های UI در `src/i18n/messages/en.json` زندگی می کنند (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## نحوه پیکربندی
+## چگونه آن را پیکربندی کنیم
 
 ### داشبورد
 
-انتخابگر در فرم پراکسیِ زبانه **مخزن پراکسی** قرار دارد:
+انتخابگر به شکل پروکسی است** استخر پروکسی** برگه:
 
-1. **داشبورد → تنظیمات → پراکسی → مخزن پراکسی** را باز کنید
-2. یک پراکسی اضافه یا ویرایش کنید
-3. فهرست کشویی **خانواده IP** را روی `خودکار (دوپشته)`، `فقط IPv4` یا `فقط IPv6` تنظیم کنید
+1. باز کنید** تنظیمات داشبورد → → Proxy → Proxy Pool**
+2. یک پروکسی اضافه یا ویرایش کنید
+3. را تنظیم کنید** خانواده IP** کشویی به `Auto (dual-stack)`، `IPv4 only`، یا `IPv6 only`
 4. ذخیره کنید
 
-این کنترل توسط `ProxyRegistryManager.tsx` رندر میشود (در `proxy/ProxyPoolTab.tsx` نصب شده است).
+کنترل توسط `ProxyRegistryManager.tsx` (نصب شده در `proxy/ProxyPoolTab.tsx`) ارائه می شود.
 
 ### API
 
-فیلد `family` بخشی از payloadهای ایجاد/بهروزرسانی رجیستری پراکسی است، توسط `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) اعتبارسنجی میشود و توسط `POST` / `PATCH /api/v1/management/proxies` مدیریت میشود:
+فیلد `family` بخشی از بارهای بارگذاری create/update رجیستری پراکسی است که توسط `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) تأیید شده و توسط `POST` / `PATCH /api/v1/management/proxies` مدیریت میشود:
 
 ```bash
-# ایجاد یک پراکسی فقط-IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# تغییر یک پراکسی موجود به فقط-IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-همین فیلد در شیء پیکربندی درونخطی پراکسی که برای ورودیهای پراکسی بالادستی استفاده میشود نیز پذیرفته میشود (`upstream_proxy_config.family`؛ به [مدل داده](#data-model) مراجعه کنید).
+همین فیلد توسط شیء پیکربندی پروکسی درون خطی که برای ورودی های پروکسی بالادست استفاده می شود نیز پذیرفته می شود (`upstream_proxy_config.family`، [مدل داده را](#data-model) ببینید).
 
-برای سایر بخشهای API مربوط به عملیات CRUD و تخصیص پراکسی، به [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) مراجعه کنید.
+برای بقیه پروکسی CRUD/assignment API، [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) را ببینید.
 
 ---
 

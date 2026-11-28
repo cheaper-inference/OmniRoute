@@ -93,52 +93,30 @@ směrování či výběr modelu — viz samostatný souhlas níže.
 
 ---
 
-## Synchronizace dat je SAMOSTATNĚ volitelná — závazek ochrany soukromí
+## Synchronizace dat je SEPARATE opt-in — slib ochrany soukromí
 
-Zapnutí `RADAR_ENABLED` pouze zpřístupní uživatelské rozhraní. Synchronizace kanálu vyžaduje druhý,
-nezávislý souhlas uložený v `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migrace `136_radar_cache_settings.sql`). `syncRadar()` před provedením jakéhokoli síťového volání kontroluje příznak _i_
-souhlas:
+Zapnutí `RADAR_ENABLED` pouze odemkne UI. Synchronizace zdroje vyžaduje druhé nezávislé přihlášení uložené v `radar_settings.opt_in` (`src/lib/db/radar.ts`, migrace `136_radar_cache_settings.sql`). `syncRadar()` před jakýmkoli síťovým voláním zkontroluje příznak _a_ přihlášení:
 
 ```
-Příznak vypnutý → { status: "disabled" } — žádné síťové volání
-Souhlas neudělen → { status: "opt_out" }  — žádné síťové volání
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Když jsou oba zapnuté, synchronizace probíhá následovně:
+Když jsou obě zapnuté, cesta synchronizace je:
 
-1. `GET <základní adresa URL kanálu>/v1/catalog/latest` s hlavičkou `x-omniroute-radar-schema: 2` a volitelnou
-   hlavičkou `Authorization: Bearer <klíč podporovatele>` (viz níže). Pokud hlavička schématu chybí,
-   servery ve výchozím nastavení poskytují samostatně podepsaný přechodový artefakt v1, takže starší nainstalovaní klienti
-   nadále dostávají aktualizace.
-2. Jde o aplikační tok určený pouze ke stahování, stále se však jedná o požadavek HTTPS. Hostovaná
-   infrastruktura přijímá běžná metadata připojení, například zdrojovou IP adresu. Když je nakonfigurován klíč podporovatele,
-   synchronizace tento klíč také odesílá v hlavičce Bearer, aby služba mohla určit příslušný
-   nárok. V přesné revizi privátního serveru určené ve výše uvedených hranicích důkazů
-   používá účtování požadavků kanálu hashe klíčů, agregované využití a denně obměňovaný zkrácený HMAC
-   IP adresy pro ruční kontrolu zneužití; tyto tabulky neuchovávají klíč ani IP adresu v nezpracované podobě.
-   Protokoly přístupu k infrastruktuře a šifrovaná fronta odchozího doručování představují samostatné provozní
-   hranice.
-3. OmniRoute službě Radar nikdy neodesílá výzvy, odpovědi, konverzace, přihlašovací údaje
-   poskytovatelů, provoz modelů, údaje o dostupnosti, latenci ani místní konfiguraci poskytovatelů.
-4. Odpověď je ověřena, validována a uložena do místní mezipaměti (viz
-   [Model zabezpečení](#security-model)). Radar má přesně čtyři síťové cesty na straně serveru:
-   `syncRadar()` pro katalog, `syncRadarReferrals()` pro doporučení a
-   `syncRadarOffers()` / `syncRadarIntel()` pro nabídky a Intel určené pouze podporovatelům.
+1. `GET <feed base URL>/v1/catalog/latest` se `x-omniroute-radar-schema: 2` a volitelnou hlavičkou `Authorization: Bearer <supporter key>` (viz níže). Servery ve výchozím nastavení používají samostatně podepsaný artefakt přechodu v1, když chybí záhlaví schématu, takže starší nainstalovaní klienti nadále dostávají aktualizace.
+2. Toto je tok aplikace pouze ke stažení, ale stále je to požadavek HTTPS. Hostovaná infrastruktura přijímá běžná metadata připojení, jako je zdrojový IP. Když je nakonfigurován podpůrný klíč, synchronizace také odešle tento klíč v hlavičce nosiče, aby služba mohla vyřešit nárok. Při přesné revizi soukromého serveru identifikované ve výše uvedené hranici důkazů používá účtování požadavků na zdroj klíčové hashe, agregované využití a denní rotující zkrácený HMAC IP pro manuální kontrolu zneužití; tyto tabulky nepřetrvávají ani klíč, ani IP v surové formě. Protokoly přístupu k infrastruktuře a šifrovaná pošta k odeslání představují samostatné provozní hranice.
+3. OmniRoute nikdy neodesílá výzvy, odpovědi, konverzace, přihlašovací údaje poskytovatele, modelový provoz, dobu provozuschopnosti, latenci nebo konfiguraci místního poskytovatele do služby Radar.
+4. Odpověď je ověřena, ověřena a lokálně uložena do mezipaměti (viz [Bezpečnostní model](#security-model) ). Radar má přesně čtyři síťové cesty na straně serveru: `syncRadar()` pro katalog, `syncRadarReferrals()` pro doporučení a `syncRadarOffers()` / `syncRadarIntel()` pro nabídky pouze pro podporu a Intel.
 
-**Klíč podporovatele** je volitelný token Bearer (`radar_settings.supporter_key`),
-který službě kanálu umožňuje rozhodnout, kterou úroveň poskytne (viz
-[Úrovně](#tiers-community-and-live)). Tento klíč je:
+Kontrola katalogu probíhá každých 24 hodin. Když ověřený zdroj stále obsahuje verzi a úroveň uloženou v mezipaměti, synchronizace zachová datovou část uloženou v mezipaměti, obnoví `fetchedAt` a další kontrola přijde o 24 hodin později, namísto následujícího hodinového tikání.
 
-- Uložen **šifrovaně** pomocí stejných pomocných funkcí AES-256-GCM `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`), které se používají pro přihlašovací údaje poskytovatelů.
-- Nastavován prostřednictvím `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) a
-  **nikdy se nevrací v plné podobě** — odpověď obsahuje maskovanou podobu (`omr_****abcd`).
-- Jeho změna nebo odstranění atomicky zneplatní mezipaměti katalogu, doporučení, nabídek a Intel. Při
-  příští synchronizaci či čtení se nový nárok určí na straně serveru; samotné uložení klíče
-  nevyvolá síťový požadavek ani nespotřebuje jednorázový aktivační klíč.
-- Odesílá se službě kanálu jako token Bearer při synchronizačním požadavku GET — žádné další informace o
-  klíči klient nikdy neopustí.
+The** klíč podporovatele** je volitelný token nosiče (`radar_settings.supporter_key`), který umožňuje službě informačního kanálu rozhodnout, kterou úroveň bude poskytovat (viz [úrovně](#tiers-community-and-live) ). To je:
+
+- Uloženo** v klidu zašifrované** se stejnými pomocníky AES-256-GCM `encrypt()`/`decrypt()` (`src/lib/db/encryption.ts`), které se používají pro přihlašovací údaje poskytovatele.
+- Nastavit přes `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) a** nikdy se neozval zpět** — odpověď vrátí maskovaný formulář (`omr_****abcd`).
+- Jeho změna nebo vymazání atomicky zneplatní katalog, doporučení, nabídky a mezipaměti Intel. Další sync/read řeší nové oprávnění na straně serveru; uložení klíče samo o sobě nevyvolá síťový požadavek ani nespotřebuje aktivační klíč na jedno použití.
+- Odesláno do informační služby jako token nosiče na synchronizaci GET — nic jiného o klíči nikdy neopustí klienta.
 
 ---
 
@@ -429,83 +407,45 @@ version, tier }` — řídicí panel zobrazuje tuto hodnotu, nikdy nezobrazuje n
 
 ---
 
-## Pravidla slučování překryvné vrstvy při čtení
+## Pravidla sloučení překryvných vrstev v době čtení
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) slučuje feed uložený v mezipaměti **přes**
-statický základ **při čtení** uvnitř `getRadarCatalog()`. Pole základu
-(`FREE_MODEL_BUDGETS`) se nikdy nemění — při každém volání se nově vypočítá `MergedEntry[]`.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) sloučí kanál uložený v mezipaměti** nad** statická základní čára při** čas čtení** , uvnitř `getRadarCatalog()`. Základní pole (`FREE_MODEL_BUDGETS`) není nikdy mutováno — a `MergedEntry[]` je počítáno nově při každém volání.
 
-Čtyři pravidla v pořadí podle priority:
+Čtyři pravidla v pořadí priority:
 
-1. **Feed nikdy nepřepíše místní nastavení.** Pro jednotlivá pole platí: pokud provozovatel
-   upravil pole záznamu (mapa `localOverrides` s klíčem `provider:modelId`),
-   hodnota tohoto konkrétního pole z feedu se přeskočí — přednost má hodnota provozovatele.
-2. **`enabled: false` záznam deaktivuje a zachovává informaci o původu.** Záznam feedu, který
-   záznam vypne, nastaví ve sloučeném výsledku `enabled: false` a `disabledBy: "radar"`,
-   aby UI mohlo vysvětlit, _proč_ se dostupný záznam změnil na deaktivovaný.
-3. **Uživatelem přidaný záznam, který není ve feedu, zůstane beze změny.** Záznamy, které
-   existují pouze v základu (nebo byly přidány místně) a nemají odpovídající záznam ve feedu,
-   projdou beze změny.
-4. **Záznam označený náhrobkem se nikdy neobnoví.** Pokud provozovatel záznam výslovně odstranil
-   (sada `tombstones`), jeho opětovné přidání do feedu jako `provider:modelId` v pozdější
-   verzi jej nevrátí.
+1. **Zdroj nikdy nepřepíše místní přepsání.** Na pole: Pokud operátor přizpůsobil pole v položce ( mapa `localOverrides`, zadané `provider:modelId`), hodnota zdroje pro toto konkrétní pole se přeskočí — vítězí hodnota operátora.
+2. **`enabled: false` zakáže vstup s původem.** Záznam zdroje, který záznam vypne, nastaví `enabled: false` a `disabledBy: "radar"` na sloučený výsledek, takže UI může vysvětlit, _proč_ se záznam změnil z dostupného na vypnutý.
+3. **Položka přidaná uživatelem, která se ve zdroji nenachází, přežije beze změny.** Záznamy, které existují pouze v základním plánu (nebo byly přidány lokálně) a nemají žádný odpovídající záznam zdroje, projdou beze změny.
+4. **Záznam na náhrobku není nikdy vzkříšen.** Pokud operátor explicitně smazal záznam (`tombstones` set), zdroj znovu přidá tento `provider:modelId` v pozdější verzi, nevrátí jej zpět.
 
-Upravitelná pole a náhrobky jsou trvale uloženy v
-`radar_local_model_state` (migrace `153_radar_local_model_state.sql`). Veřejný databázový
-adaptér (`src/lib/db/radar.ts`) převádí tyto řádky na mapu `localOverrides` a sadu
-`tombstones`, které používá `applyFeed()`; produkční `getRadarCatalog()` načte tento stav
-poté, co projdou kontroly příznaku, mezipaměti a schématu. Provozovatel může upravovat pouze `displayName` a `enabled`.
-Identitu poskytovatele/modelu, původ ve feedu, kvótu, schopnosti, ToS
-ani údaje o nastavení nelze prostřednictvím tohoto rozhraní zapsat.
+Upravitelná pole a náhrobky jsou zachovány v `radar_local_model_state` (migrace `153_radar_local_model_state.sql`). Veřejný adaptér DB (`src/lib/db/radar.ts`) převede tyto řádky na mapu `localOverrides` a sadu `tombstones` používanou `applyFeed()`; produkční `getRadarCatalog()` načte stav po průchodu brány příznaku, mezipaměti a schématu. Pouze `displayName` a `enabled` lze upravovat operátorem. Provider/model identitu, původ zdroje, kvótu, schopnosti, ToS a data nastavení nelze zapsat přes tento povrch.
 
 Řídicí panel nabízí čtyři místní akce:
 
-- **Upravit** změní místní zobrazovaný název a stav aktivace.
-- **Obnovit místní změny** vymaže obě upravitelná pole, aniž by změnilo náhrobek.
-- **Skrýt** vytvoří náhrobek, takže pozdější aktualizace feedu nemohou řádek znovu vytvořit.
-- **Obnovit** odstraní náhrobek; jakékoli samostatně uložené přepsání zůstane v platnosti.
+- **Upravit** změní místní zobrazovaný název a stav povoleno.
+- **Resetovat místní změny** vymaže obě upravitelná pole bez změny náhrobku.
+- **Skrýt** vytvoří náhrobek, takže pozdější aktualizace zdroje nemohou řádek znovu vytvořit.
+- **Obnovit** odstraní náhrobek; jakékoli samostatně uložené přepsání zůstává v platnosti.
 
-Hodnota `enabled: false` z feedu zůstává bezpečnostní výjimkou: má přednost před zastaralou místní
-hodnotou `enabled: true`, ponechá sloučený záznam deaktivovaný a zaznamená `disabledBy: "radar"`.
+Zdroj `enabled: false` zůstává bezpečnostní výjimkou: vítězí nad zastaralým místním `enabled: true`, udržuje sloučenou položku zakázanou a zaznamenává `disabledBy: "radar"`.
 
-Publikace katalogu používají `schemaVersion: 2`. `contextWindow` a každá z hodnot `tools`, `vision` a
-`thinking` mají nezávisle typ `number | null` / `boolean | null`: `null` znamená neznámou hodnotu, zatímco
-`false` znamená, že oficiální zdroj poskytovatele ověřený podle D16 výslovně uvádí nepřítomnost dané schopnosti.
-Interní příznaky registru/specifikace modelu OmniRoute se nikdy přímo nepovyšují na fakta feedu. Klient
-nadále přijímá snímky v1; protože starý sestavovací nástroj používal `false` jako zástupnou hodnotu nepřítomnosti, v1 `false` se
-normalizuje na neznámou hodnotu, zatímco v1 `true` zůstává faktickou hodnotou. Neznámé verze schématu bezpečně selžou a
-poslední platná mezipaměť zůstane dostupná. Každý model v2 s nenulovým kontextem/schopností musí obsahovat
-`metadataEvidenceUrls[]` s adresami HTTPS nevyžadujícími přihlašovací údaje; jinak ověření schématu selže a mezipaměť
-nebude nahrazena. Tabulka katalogu vykresluje všechny tři stavy jako `✓`, `✕` a `?`.
+Katalogové publikace používají `schemaVersion: 2`. `contextWindow` a každý z `tools`, `vision` a `thinking` jsou nezávisle `number | null` / `boolean | null`: `null` znamená neznámé, zatímco `false` znamená D16-confirmed oficiální zdroj poskytovatele výslovně říká, že tato schopnost chybí. Interní příznaky OmniRoute registry/model-spec se nikdy nepropagují přímo na fakta zdroje. Klient stále přijímá snímky verze 1; protože starý stavitel používal `false` jako zástupný symbol absence, v1 `false` je normalizováno na neznámé, zatímco v1 `true` zůstává faktické. Neznámé verze schématu se nepodaří uzavřít a zůstane k dispozici poslední platná mezipaměť. Každý model v2 s nenulovým context/capability musí nést HTTPS `metadataEvidenceUrls[]` bez pověření; jinak se ověření schématu nezdaří a mezipaměť nebude nahrazena. Katalogová tabulka vykresluje všechny tři stavy jako `✓`, `✕` a `?`.
 
-### Průvodcem vytvářené kombinace a přístup k MCP
+### Řízená komba a MCP přístup
 
-Potvrzené hodnoty `familyId` zůstávají zachovány při překrytí během čtení a používá je čistý
-modul `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Rodina se navrhne
-pouze tehdy, když mají alespoň dva různí poskytovatelé aktivní připojení a nabízejí přesný spravovaný identifikátor
-modelu. Deaktivované modely, neaktivní poskytovatelé, chybějící identifikátory modelů, rodiny s jediným členem a nejednoznačné
-shody aliasů/předpon bezpečně selžou. Návrhy používají existující strategii `priority`, která řadí
-největší opakovaný měsíční rozpočet jako první; UI je vytváří pouze prostřednictvím `POST /api/combos`.
+Potvrzené hodnoty `familyId` přežijí překrytí v době čtení a řídí čistý modul `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Rodina se navrhuje pouze v případě, že alespoň dva odlišní poskytovatelé mají aktivní připojení a vystavují přesný kurátorský model ID. Zakázané modely, neaktivní poskytovatelé, chybějící model IDs, rodiny singleton a nejednoznačné shody alias/prefix se nezdaří. Návrhy využívají stávající strategii `priority`, přičemž jako první se řadí největší opakující se měsíční rozpočet; UI je vytváří pouze prostřednictvím `POST /api/combos`.
 
-Průvodce v uživatelském rozhraní se nachází na adrese `/dashboard/radar/combos`. Čte pouze místní
-koncové body `GET /api/radar/catalog` a `GET /api/combos/builder/options`. Nikdy nespouští synchronizaci Radaru,
-nečte přihlašovací údaje poskytovatele ani nezapisuje přímo do databáze kombinací.
+Řízený UI žije v `/dashboard/radar/combos`. Čte pouze místní koncové body `GET /api/radar/catalog` a `GET /api/combos/builder/options`. Nikdy nespouští synchronizaci radaru, nečte pověření poskytovatele ani nezapisuje přímo do kombinované databáze.
 
-Klienti MCP mohou číst stejnou místní projekci pomocí `omniroute_radar_catalog` (`read:radar`). Volitelné
-filtry `provider`, `familyId` a `enabledOnly` se vyhodnocují po jednom místním
-načtení přes `GET /api/radar/catalog`. Jeho uzavřený výstup zahrnuje metadata katalogu a dále poskytovatele/model,
-zobrazovaný název, `familyId`, kvótu, funkce, stav povolení, původ a `disabledBy`; adresy URL pro nastavení,
-postup, připojení, e-mailové adresy, klíče ani referenční údaje se nikdy nevracejí. Tento nástroj je
-pouze pro čtení a nikdy nevolá `/api/radar/sync`.
+Klienti MCP mohou číst stejnou lokální projekci pomocí `omniroute_radar_catalog` (`read:radar`). Volitelné filtry `provider`, `familyId` a `enabledOnly` jsou vyhodnoceny po jednom místním čtení `GET /api/radar/catalog`. Jeho uzavřený výstup zahrnuje metadata katalogu plus provider/model, zobrazovaný název, `familyId`, kvótu, schopnosti, povolený stav, původ a `disabledBy`; setup URLs, kroky, připojení, e-mailové adresy, klíče a data doporučení se nikdy nevrátí. Tento nástroj je pouze pro čtení a nikdy nevyvolá `/api/radar/sync`. Když kanál uložený v mezipaměti předchází nainstalovaný katalog, `meta.olderThanRelease` je `true` a nástroj vrátí modely z nainstalovaného katalogu s místními přepsáními a použitými náhrobky.
 
-### Značky původu
+### Značky provenience
 
-Každá sloučená položka obsahuje pole `origin`, které uživatelské rozhraní vykresluje jako odznak:
+Každý sloučený záznam nese pole `origin`, které UI vykreslí jako odznak:
 
-- `"baseline"` — beze změn ze statického katalogu vydání.
-- `"radar"` — jedno nebo více polí bylo aktualizováno z informačního kanálu.
-- `"local"` — operátor má u této položky alespoň jednu místní úpravu (místní
-  úpravy mají podle pravidla 1 vždy přednost před informačním kanálem bez ohledu na jeho obsah).
+- `"baseline"` — nedotčeno z katalogu statických verzí.
+- `"radar"` — jedno nebo více polí bylo obnoveno zdrojem.
+- `"local"` — operátor má u této položky alespoň jedno lokální přepsání (místní přepsání vždy vítězí nad zdrojem podle pravidla 1, bez ohledu na to, co zdroj říká).
 
 ---
 

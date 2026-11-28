@@ -469,138 +469,126 @@ Di dalam sesi interaktif:
 
 ---
 
-## Tugas yang berjalan lama
+## Tugas jangka panjang
 
-Dua nilai bawaan OmniRoute dapat secara diam-diam menyabotase sesi Codex CLI yang berlangsung selama berjam-jam. Keduanya bukan pengaturan Codex CLI — keduanya berada di sisi OmniRoute. Pengguna yang memigrasikan konfigurasi dari proksi upstream yang mempertahankan akun dan menonaktifkan batas waktu idle sering kali mengalami keduanya dan menyimpulkan bahwa OmniRoute “tidak dapat mempertahankan sesi yang panjang.”
+Dua default OmniRoute dapat secara diam-diam menyabotase sesi Codex CLI multi-jam. Pengaturan Codex CLI — juga tidak ada di sisi OmniRoute. Pengguna yang memigrasikan konfigurasi dari proksi upstream yang menyematkan akun dan menonaktifkan penghentian sementara sering kali menemukan keduanya dan menyimpulkan OmniRoute “tidak dapat mempertahankan sesi yang panjang.”
 
-| Gejala                                                                       | Kemungkinan penyebab                                               | Pengaturan               |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------ |
-| Sesi terus berganti akun / kontinuitas cache prompt hilang di antara giliran | TTL afinitas sesi adalah `0` (dinonaktifkan)                       | `sessionAffinityTtlMs`   |
-| Koneksi terputus saat proses penalaran tanpa prompt yang terlihat oleh klien | Pengawas idle stream terpicu setelah 10 menit tanpa chunk upstream | `STREAM_IDLE_TIMEOUT_MS` |
+| Gejala                                                                             | Kemungkinan penyebabnya                                                    | Tombol                   |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------ |
+| Sesi terus berpindah akun/kontinuitas prompt-cache hilang antar giliran            | Afinitas sesi TTL adalah `0` (dinonaktifkan)                               | `sessionAffinityTtlMs`   |
+| Koneksi terputus di tengah proses penalaran tanpa perintah yang ditujukan ke klien | Pengawas aliran menganggur diaktifkan setelah 10 menit tanpa potongan hulu | `STREAM_IDLE_TIMEOUT_MS` |
 
-Diskusi terkait: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (tugas panjang terputus), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (alasan afinitas dinonaktifkan secara bawaan). Pelacakan: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Diskusi terkait: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (tugas panjang terhenti), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (mengapa afinitas dinonaktifkan secara default). Pelacakan: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Afinitas sesi — pertahankan satu percakapan pada satu akun
+### 1. Afinitas sesi — menyematkan satu percakapan ke satu akun
 
 **Bawaan:** `sessionAffinityTtlMs = 0` (dinonaktifkan).
 
-**Tempat mengaturnya**
+**Di mana mengaturnya**
 
-- Dasbor → **Pengaturan → Perutean** → **Afinitas sesi** → **TTL afinitas (detik)** (`ComboDefaultsTab`)
-- Atau lakukan PATCH pada pengaturan dengan `sessionAffinityTtlMs` dalam **milidetik** (rentang Zod `0`–`86_400_000`, yaitu hingga 24 jam)
+- Dasbor →** Pengaturan Perutean →** →** Afinitas sesi** →** Afinitas TTL (detik)** (`ComboDefaultsTab`)
+- Atau pengaturan PATCH dengan `sessionAffinityTtlMs` in** milidetik** ( rentang Zod `0`–`86_400_000`, yaitu hingga 24 jam)
 
-> Diubah namanya dalam #7274 dari `codexSessionAffinityTtlMs` yang khusus untuk Codex. Kunci lama masih diterima sebagai alias hanya-baca; konfigurasi baru harus menggunakan `sessionAffinityTtlMs`. Afinitas kini berlaku untuk **semua** penyedia setelah TTL lebih besar dari `0`, bukan hanya Codex — lihat [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Afinitas sesi.
+> Berganti nama menjadi #7274 dari Codex-only `codexSessionAffinityTtlMs`. Kunci lama masih diterima sebagai alias hanya-baca; konfigurasi baru harus menggunakan `sessionAffinityTtlMs`. Afinitas sekarang berlaku untuk** setiap** penyedia setelah TTL berada di atas `0`, tidak hanya Codex — lihat [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Sesi afinitas.
 
-**Hal yang rusak ketika nilainya tetap 0**
+**Apa yang rusak jika tetap di 0**
 
-Setiap giliran dalam percakapan Codex dengan banyak giliran dirutekan secara independen oleh strategi kombinasi yang aktif dan dapat diarahkan ke **akun yang berbeda pada setiap giliran**. Hal itu merusak kontinuitas sesi / cache prompt upstream. OmniRoute hanya memeriksa header sesi Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) dan bidang isi seperti `prompt_cache_key` / `session_id` ketika TTL lebih besar dari `0` (`extractSessionAffinityKey` dalam `src/sse/services/auth.ts`).
+Setiap giliran percakapan Codex multi-putaran disalurkan secara independen oleh strategi kombo aktif dan dapat mendarat di a** akun yang berbeda per giliran** . Itu memutus kesinambungan sesi upstream/prompt-cache. OmniRoute hanya berkonsultasi dengan header sesi Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) dan bidang isi seperti `prompt_cache_key` / `session_id` ketika TTL lebih besar dari `0` (`extractSessionAffinityKey` di `src/sse/services/auth.ts`).
 
-**Rekomendasi untuk satu tugas yang berlangsung selama beberapa jam**
+**Direkomendasikan untuk tugas tunggal multi-jam**
 
-Atur TTL agar **lebih lama daripada perkiraan durasi waktu nyata tugas tersebut** (maksimum UI adalah **86400 detik** = 24 jam):
+Atur TTL** melebihi panjang tugas yang diharapkan** (UI maks adalah** 86400 detik** = 24 jam):
 
-| Perkiraan durasi tugas | TTL afinitas (UI, detik) | `sessionAffinityTtlMs` |
-| ---------------------- | ------------------------ | ---------------------- |
-| Beberapa jam           | `14400` (4j)             | `14400000`             |
-| Semalaman / ~12j       | `43200` (12j)            | `43200000`             |
-| Sehari penuh           | `86400` (24j, maksimum)  | `86400000`             |
+| Durasi tugas yang diharapkan | Afinitas TTL (UI, detik)   | `sessionAffinityTtlMs` |
+| ---------------------------- | -------------------------- | ---------------------- |
+| Beberapa jam                 | `14400` (4 jam)            | `14400000`             |
+| Semalam / ~ 12 jam           | `43200` (12 jam)           | `43200000`             |
+| Sehari penuh                 | `86400` (24 jam, maksimum) | `86400000`             |
 
-Keikutsertaan bersifat disengaja: menonaktifkan afinitas mengutamakan penyeimbangan beban di antara akun; mengaktifkannya mengutamakan kontinuitas untuk satu sesi agen yang panjang. Panduan ini **tidak** mengubah nilai bawaan — operator yang menjalankan tugas Codex berdurasi panjang harus mengaktifkannya sendiri.
+Keikutsertaan ini disengaja: menonaktifkan afinitas akan mendukung penyeimbangan beban di seluruh akun; mengaktifkannya akan mendukung kesinambungan untuk satu sesi agen yang panjang. Panduan ini bisa** bukan** ubah operator — default yang menjalankan tugas Codex yang panjang harus ikut serta.
 
-### 2. Batas waktu idle stream — jangan hentikan giliran penalaran yang tenang
+### 2. Streaming batas waktu idle — tidak mematikan putaran penalaran yang tenang
 
-**Bawaan:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 menit). Nilai ini diwarisi dari `REQUEST_TIMEOUT_MS` jika tidak ditetapkan; nilai dasar bersama juga 600000. Lihat [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Batas waktu.
+**Bawaan:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 menit). Ini mewarisi dari `REQUEST_TIMEOUT_MS` ketika tidak disetel; baseline bersama juga 600000. Lihat [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeout.
 
-**Hal yang rusak dengan nilai bawaan**
+**Apa yang rusak pada defaultnya**
 
-Giliran penalaran / tool Codex yang tetap diam selama lebih dari 10 menit dengan **tidak ada chunk upstream nyata** akan ditutup paksa oleh pengawas idle SSE (`open-sse/utils/stream.ts`). Klien sering kali hanya melihat koneksi terputus begitu saja — sesuai dengan kondisi “berhenti otomatis tanpa pemberitahuan.”
+Pergantian penalaran / alat Codex yang tetap diam selama lebih dari 10 menit** tidak ada bagian hulu yang nyata** ditutup paksa oleh pengawas menganggur SSE (`open-sse/utils/stream.ts`). Klien sering melihat koneksi terputus — yang cocok "berhenti secara otomatis tanpa pemberitahuan apa pun".
 
-Detail penting: **heartbeat** SSE sintetis OmniRoute tidak mereset penghitung waktu idle. Hanya chunk body upstream nyata yang memperbarui `lastChunkTime`. Model yang diam tetapi masih “berpikir” terlihat sama dengan upstream yang macet dari sudut pandang pengawas.
+Detail penting: SSE sintetis OmniRoute** detak jantung tidak diatur ulang** jam menganggur. Hanya potongan bodi upstream nyata yang memperbarui `lastChunkTime`. Model pendiam yang masih “berpikir” terlihat identik dengan model yang terhenti di hulu dari sudut pandang pengawas.
 
-Terkait inaktivitas body Undici: `FETCH_BODY_TIMEOUT_MS` (nilai default-nya juga menggunakan baseline 10 menit yang sama; `0` menonaktifkannya). Untuk streaming, `FETCH_TIMEOUT_MS` hanya mencakup penyiapan koneksi / header pertama — setelah stream aktif, kondisi macet diatur oleh `STREAM_IDLE_TIMEOUT_MS` dan `FETCH_BODY_TIMEOUT_MS`.
+Ketidakaktifan badan Undici terkait: `FETCH_BODY_TIMEOUT_MS` (juga default pada garis dasar 10 menit yang sama; `0` menonaktifkannya). Untuk streaming, `FETCH_TIMEOUT_MS` hanya mencakup pengaturan koneksi/header pertama — setelah streaming aktif, penghentian diatur oleh `STREAM_IDLE_TIMEOUT_MS` dan `FETCH_BODY_TIMEOUT_MS`.
 
-**Rekomendasi untuk satu tugas berdurasi beberapa jam**
+**Direkomendasikan untuk tugas tunggal multi-jam**
 
-Di lingkungan proses OmniRoute (`.env` / compose / systemd):
+Di lingkungan proses OmniRoute (`.env` / composer / systemd):
 
 ```bash
-# Nonaktifkan batas waktu idle stream + inaktivitas body untuk giliran penalaran yang panjang
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Atau naikkan nilainya agar melebihi jeda diam terlama yang Anda perkirakan (nilai dalam milidetik):
+Atau naikkan nilai tersebut di atas jeda tenang terpanjang yang Anda harapkan (nilainya adalah milidetik):
 
 ```bash
-# Contoh: izinkan hingga 2 jam tanpa aktivitas di antara chunk upstream
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Mulai ulang OmniRoute setelah mengubah variabel lingkungan ini.
+Mulai ulang OmniRoute setelah mengubah env vars ini.
 
-### Langkah konkret — tugas Codex berdurasi beberapa jam
+### Resep konkret — tugas Codex multi-jam
 
-1. **Sematkan akun:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12 jam) atau `86400` (maks. 24 jam).
-2. **Naikkan / nonaktifkan batas waktu idle** di lingkungan OmniRoute:
+1. **Sematkan akun:** Dasbor → Pengaturan → Perutean → Afinitas sesi → Afinitas TTL = `43200` (12 jam) atau `86400` (maks 24 jam).
+2. **Menaikkan/menonaktifkan batas waktu idle** di lingkungan OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Pertahankan `config.toml` Codex seperti biasa (`wire_api = "responses"`, `base_url` yang benar, `OMNIROUTE_API_KEY`) — tidak ada pengaturan afinitas/idle di sisi Codex untuk kedua perilaku ini.
-4. Mulai ulang OmniRoute, lalu mulai tugas Codex berdurasi panjang.
+3. Keep the usual Codex `config.toml` (`wire_api = "responses"`, correct `base_url`, `OMNIROUTE_API_KEY`) — no Codex-side affinity/idle knobs exist for these two behaviors.
+4. Mulai ulang OmniRoute, lalu mulai tugas Codex yang panjang.
 
-### Keputusan nilai default (#7287)
+### Keputusan default (#7287)
 
-| Pengaturan               | Nilai default rilis | Diubah dalam panduan ini?                                                                                           |
-| ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (nonaktif)      | **Tidak** — tetap bersifat opt-in (penyeimbangan beban vs kontinuitas; lihat Discussion #5718)                      |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 menit) | **Tidak** — tetap 10 menit untuk lalu lintas umum; operator Codex berdurasi panjang menaikkan atau menonaktifkannya |
+| Tombol                   | Bawaan pengiriman   | Perubahan dalam panduan ini?                                                                              |
+| ------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (mati)          | **TIDAK** — tetap ikut serta (penyeimbangan beban vs kontinuitas; lihat Diskusi #5718)                    |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 menit) | **TIDAK** — tetap 10 menit untuk lalu lintas umum; operator Codex panjang menaikkan atau menonaktifkannya |
 
-Mengubah salah satu nilai default secara global akan mengubah perilaku untuk setiap klien pada sebuah instans, bukan hanya Codex. Dokumentasikan pengaturannya; biarkan nilai default tetap seperti semula hingga ada keputusan eksplisit dari operator yang menyatakan sebaliknya.
+Membalik salah satu default secara global akan mengubah perilaku setiap klien dari sebuah instance, tidak hanya Codex. Dokumentasikan kenopnya; biarkan defaultnya saja sampai keputusan operator yang eksplisit mengatakan sebaliknya.
 
-### Mendiagnosis pemutusan akibat idle
+### Mendiagnosis pemotongan menganggur
 
-Saat pengawas idle terpicu, OmniRoute mencatat baris dengan bentuk seperti:
+Ketika pengawas yang menganggur menyala, OmniRoute mencatat garis yang berbentuk seperti:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Lakukan grep untuk `Idle timeout: no data from` (atau kode `stream_idle_timeout` / nama error `StreamIdleTimeoutError`). Segmen penyedia adalah apa pun yang digunakan OmniRoute untuk permintaan tersebut (`codex`, id penyedia lain, atau `provider` jika tidak diketahui) — nilainya tidak selalu berupa string literal `codex`.
+Terima `Idle timeout: no data from` (atau kode `stream_idle_timeout` / nama kesalahan `StreamIdleTimeoutError`). Segmen penyedia adalah OmniRoute apa pun yang digunakan untuk permintaan itu (`codex`, id penyedia lain, atau `provider` jika tidak diketahui) — tidak selalu berupa string literal `codex`.
 
 ---
 
-## Pemecahan Masalah
+## Pemecahan masalah
 
-**`Error: wire_api = "chat" tidak lagi didukung`**
-Hapus `wire_api = "chat"` dari konfigurasi Anda. Tetapkan `wire_api = "responses"` atau hilangkan kolom tersebut (nilai default-nya adalah `"responses"` sejak v0.138).
+**`Error: wire_api = "chat" is no longer supported`** Hapus `wire_api = "chat"` dari konfigurasi Anda. Setel `wire_api = "responses"` atau hilangkan bidang tersebut (defaultnya adalah `"responses"` sejak v0.138).
 
-**`Error: model tidak ditemukan`**
-Pastikan model tersedia di OmniRoute dengan prefiks yang benar. Gunakan `omniroute models list` atau buka `/dashboard/providers/<provider>`.
+**`Error: model not found`** Verifikasi model ada di OmniRoute dengan awalan yang benar. Gunakan `omniroute models list` atau buka `/dashboard/providers/<provider>`.
 
-**`Kesalahan autentikasi`**
-Pastikan `OMNIROUTE_API_KEY` telah diekspor: `echo $OMNIROUTE_API_KEY`.
+**`Authentication error`** Konfirmasikan `OMNIROUTE_API_KEY` diekspor: `echo $OMNIROUTE_API_KEY`.
 
-**`ERROR: Variabel lingkungan tidak ada: OMNIROUTE_API_KEY`**
-Codex memvalidasi bahwa variabel lingkungan tersebut tersedia sebelum membuat permintaan pertama. Ekspor
-kunci asli untuk server yang dilindungi, atau placeholder yang tidak kosong seperti
-`OMNIROUTE_API_KEY=local` jika instans OmniRoute **lokal** Anda tidak
-memerlukan autentikasi. Mulai ulang shell jika Anda menambahkannya ke `~/.bashrc` atau `~/.zshrc`.
+**`ERROR: Missing environment variable: OMNIROUTE_API_KEY`** Codex memvalidasi bahwa env var ada sebelum membuat permintaan pertama. Ekspor kunci asli untuk server yang dilindungi, atau placeholder yang tidak kosong seperti `OMNIROUTE_API_KEY=local` saat Anda** lokal** instance OmniRoute tidak memerlukan autentikasi. Mulai ulang shell jika Anda menambahkannya ke `~/.bashrc` atau `~/.zshrc`.
 
-**`Koneksi ditolak`**
-Pastikan OmniRoute berjalan dan host/port `base_url` sudah benar untuk jaringan Anda (lokal vs Tailscale vs VPS).
+**`Connection refused`** Pastikan OmniRoute berjalan dan `base_url` host/port benar untuk jaringan Anda (lokal vs Tailscale vs VPS).
 
-**Sesi mengalami crash saat mendekati batas konteks**
-Tetapkan `model_context_window` dan `model_auto_compact_token_limit` secara eksplisit. Lihat tabel jendela konteks di atas.
+**Sesi mogok mendekati batas konteks** Tetapkan `model_context_window` dan `model_auto_compact_token_limit` secara eksplisit. Lihat tabel jendela konteks di atas.
 
-**Pemadatan dijalankan terlalu lambat**
-Turunkan `model_auto_compact_token_limit` menjadi 80–85% dari jendela. Jangan pernah menetapkannya di atas 90%.
+**Pemadatan terjadi terlambat** Turunkan `model_auto_compact_token_limit` ke 80–85% jendela. Jangan pernah menetapkan di atas 90%.
 
-**Profil tidak dimuat (`-p <name>` diabaikan tanpa pemberitahuan)**
-Pastikan berkas tersedia di `~/.codex/<name>.config.toml` (tanpa prefiks `profile-`). Jalankan `ls ~/.codex/*.config.toml`.
+**Profil tidak dimuat (`-p <name>` diabaikan secara diam-diam)** Konfirmasikan file ada di `~/.codex/<name>.config.toml` (tanpa awalan `profile-` ). Jalankan `ls ~/.codex/*.config.toml`.
 
-**Tugas Codex yang berlangsung lama terputus di tengah proses / berganti akun di antara giliran**
-Lihat [Tugas yang berlangsung lama](#long-running-tasks). Aktifkan afinitas sesi (TTL lebih lama daripada durasi tugas) dan naikkan nilainya atau nonaktifkan `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS`. Cari `Idle timeout: no data from` di log OmniRoute menggunakan grep.
+**Tugas Codex yang panjang turun di tengah jalan / mengalihkan akun antar putaran** Lihat [Tugas yang sudah berjalan lama](#long-running-tasks). Aktifkan afinitas sesi (TTL di atas durasi tugas) dan naikkan atau nonaktifkan `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS`. Ambil log OmniRoute untuk `Idle timeout: no data from`.

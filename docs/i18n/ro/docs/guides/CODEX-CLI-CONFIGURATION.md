@@ -413,7 +413,7 @@ region  = "us-east-1"
 
 ---
 
-## Servere multiple
+## Mai multe servere
 
 ```toml
 [model_providers.omniroute-main]
@@ -475,136 +475,124 @@ codex debug models --bundled       # listează catalogul de modele inclus sub fo
 
 ## Sarcini de lungă durată
 
-Două valori implicite OmniRoute pot sabota în mod discret sesiunile Codex CLI care durează mai multe ore. Niciuna nu este o setare Codex CLI — ambele se află în partea OmniRoute. Utilizatorii care migrează o configurație de la proxy-uri din amonte ce fixează conturile și dezactivează limitele de inactivitate se lovesc adesea de ambele și concluzionează că OmniRoute „nu poate susține o sesiune lungă”.
+Două valori implicite OmniRoute pot sabota în tăcere sesiunile Codex CLI de mai multe ore. Nici o setare Codex CLI — nu este ambele live pe partea OmniRoute. Utilizatorii care migrează o configurație de la proxy-urile din amonte care fixează conturile și dezactivează limitele de inactivitate le lovesc adesea pe ambele și concluzionează OmniRoute „nu poate susține o sesiune lungă”.
 
-| Simptom                                                                                                   | Cauză probabilă                                                                                    | Parametru                |
-| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------ |
-| Sesiunea continuă să schimbe conturile / continuitatea cache-ului promptului se pierde între interacțiuni | TTL-ul afinității sesiunii este `0` (dezactivat)                                                   | `sessionAffinityTtlMs`   |
-| Conexiunea se întrerupe în timpul raționamentului, fără nicio solicitare vizibilă pentru client           | Monitorul de inactivitate al fluxului s-a declanșat după 10 minute fără niciun fragment din amonte | `STREAM_IDLE_TIMEOUT_MS` |
+| Simptom                                                                                  | Cauza probabila                                                                       | Buton                    |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------ |
+| Sesiunea continuă să schimbe conturile / continuitatea prompt-cache se pierde între ture | Afinitatea sesiunii TTL este `0` (dezactivată)                                        | `sessionAffinityTtlMs`   |
+| Conexiunea moare la mijlocul raționamentului, fără nicio solicitare adresată clientului  | Stream inactiv watchdog a fost declanșat după 10 minute fără nicio porțiune în amonte | `STREAM_IDLE_TIMEOUT_MS` |
 
-Discuții asociate: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (întreruperi ale sarcinilor lungi), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (de ce afinitatea este dezactivată implicit). Urmărire: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Discuții înrudite: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (sarcini lungi), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (de ce afinitatea este dezactivată implicit). Urmărire: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Afinitatea sesiunii — fixați o conversație la un singur cont
+### 1. Afinitatea sesiunii — fixați o conversație la un cont
 
 **Implicit:** `sessionAffinityTtlMs = 0` (dezactivat).
 
-**Unde se configurează**
+**Unde să-l setați**
 
-- Panou de control → **Setări → Rutare** → **Afinitatea sesiunii** → **TTL-ul afinității (secunde)** (`ComboDefaultsTab`)
-- Sau actualizați setările prin PATCH folosind `sessionAffinityTtlMs` în **milisecunde** (interval Zod `0`–`86_400_000`, adică până la 24 de ore)
+- Tabloul de bord →** Setări → Routing** →** Afinitate de sesiune** →** Afinitate TTL (secunde)** (`ComboDefaultsTab`)
+- Sau setări PATCH cu `sessionAffinityTtlMs` in** milisecunde** (Zod interval `0`–`86_400_000`, adică până la 24 de ore)
 
-> Redenumit în #7274 din `codexSessionAffinityTtlMs`, care era specific exclusiv Codex. Cheia veche este acceptată în continuare ca alias doar pentru citire; configurațiile noi ar trebui să utilizeze `sessionAffinityTtlMs`. Afinitatea se aplică acum **oricărui** furnizor odată ce TTL-ul depășește `0`, nu doar Codex — consultați [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Afinitatea sesiunii.
+> Redenumită în #7274 din `codexSessionAffinityTtlMs` numai pentru Codex. Cheia moștenită este încă acceptată ca alias numai pentru citire; noile configurații ar trebui să folosească `sessionAffinityTtlMs`. Afinitatea se aplică acum pentru** orice** provider odată ce TTL este peste `0`, nu numai Codex — vezi [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Afinitatea sesiunii.
 
-**Ce nu mai funcționează când rămâne la 0**
+**Ce se rupe când rămâne la 0**
 
-Fiecare interacțiune a unei conversații Codex cu mai multe schimburi este rutată independent de strategia combinată activă și poate ajunge la un **cont diferit pentru fiecare interacțiune**. Acest lucru întrerupe continuitatea sesiunii / cache-ului promptului din amonte. OmniRoute consultă antetele de sesiune Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) și câmpurile din corp, precum `prompt_cache_key` / `session_id`, numai când TTL-ul este mai mare decât `0` (`extractSessionAffinityKey` în `src/sse/services/auth.ts`).
+Fiecare tură a unei conversații Codex cu mai multe ture este direcționată independent de strategia combo activă și poate ateriza pe un** cont diferit pe tură** . Acest lucru întrerupe continuitatea sesiunii în amonte / prompt-cache. OmniRoute consultă numai anteturile de sesiune Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) și câmpurile de corp precum `prompt_cache_key` / `session_id` atunci când TTL este mai mare decât `0` (`extractSessionAffinityKey` în `src/sse/services/auth.ts`).
 
-**Recomandare pentru o singură sarcină de mai multe ore**
+**Recomandat pentru o singură sarcină de mai multe ore**
 
-Setați TTL-ul **peste durata cronologică estimată a sarcinii** (valoarea maximă în interfața cu utilizatorul este de **86400 de secunde** = 24 de ore):
+Setați TTL** peste lungimea estimată a ceasului de perete a sarcinii** (UI max este** 86400 secunde** = 24 de ore):
 
-| Durata estimată a sarcinii | TTL-ul afinității (interfață, secunde) | `sessionAffinityTtlMs` |
-| -------------------------- | -------------------------------------- | ---------------------- |
-| Câteva ore                 | `14400` (4h)                           | `14400000`             |
-| Peste noapte / ~12h        | `43200` (12h)                          | `43200000`             |
-| O zi întreagă              | `86400` (24h, maximum)                 | `86400000`             |
+| Durata estimată a sarcinii | Afinitate TTL (UI, secunde) | `sessionAffinityTtlMs` |
+| -------------------------- | --------------------------- | ---------------------- |
+| Câteva ore                 | `14400` (4 ore)             | `14400000`             |
+| Peste noapte / ~ 12h       | `43200` (12 ore)            | `43200000`             |
+| Zi întreagă                | `86400` (24 ore, maxim)     | `86400000`             |
 
-Activarea explicită este intenționată: dezactivarea afinității favorizează echilibrarea încărcării între conturi; activarea acesteia favorizează continuitatea unei sesiuni lungi a agentului. Acest ghid **nu** modifică valoarea implicită — operatorii care rulează sarcini Codex lungi trebuie să activeze explicit această opțiune.
+Înscrierea este deliberată: dezactivarea afinității favorizează echilibrarea sarcinii între conturi; activarea acestuia favorizează continuitatea pentru o sesiune lungă de agent. Acest ghid o face** nu** Schimbați operatorii — implicit care rulează sarcini Codex lungi trebuie să se înscrie.
 
-### 2. Timpul de expirare la inactivitatea fluxului — nu întrerupeți interacțiunile de raționament silențioase
+### 2. Stream idle timeout — nu distruge raționamentul liniștit
 
-**Implicit:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minute). Când nu este setat, moștenește valoarea din `REQUEST_TIMEOUT_MS`; valoarea de bază comună este, de asemenea, 600000. Consultați [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timpi de expirare.
+**Implicit:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minute). Moștenește de la `REQUEST_TIMEOUT_MS` când este nesetat; linia de bază partajată este, de asemenea, 600000. Consultați [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Ce nu mai funcționează cu valoarea implicită**
+**Ce se rupe la implicit**
 
-Un pas de raționament / utilizare a instrumentelor Codex care rămâne silențios mai mult de 10 minute, **fără niciun fragment real din amonte**, este închis forțat de monitorul SSE pentru inactivitate (`open-sse/utils/stream.ts`). Clientul observă adesea doar întreruperea conexiunii — ceea ce corespunde situației „s-a oprit automat, fără nicio notificare”.
+Un raționament Codex / rotire a sculei care rămâne tăcut mai mult de 10 minute cu** nici o bucată reală în amonte** este închis forțat de către SSE idle watchdog (`open-sse/utils/stream.ts`). Clientul vede deseori o conexiune goală cădere — care se potrivește „oprit automat fără nicio notificare”.
 
-Detaliu esențial: semnalul de menținere în viață SSE sintetic al OmniRoute **nu resetează** cronometrul de inactivitate. Numai un fragment real din corpul răspunsului din amonte actualizează `lastChunkTime`. Din perspectiva monitorului, un model silențios care încă „gândește” arată identic cu un serviciu din amonte blocat.
+Detaliu critic: SSE sintetic al lui OmniRoute** bataile inimii nu se reseteaza** ceasul inactiv. Doar o bucată de corp reală în amonte actualizează `lastChunkTime`. Un model liniștit care încă „gândește” arată identic cu un blocat în amonte din punctul de vedere al câinelui de pază.
 
-Inactivitate asociată a corpului Undici: `FETCH_BODY_TIMEOUT_MS` (valoarea implicită este, de asemenea, aceeași bază de 10 minute; `0` îl dezactivează). Pentru streaming, `FETCH_TIMEOUT_MS` acoperă doar stabilirea conexiunii / primele antete — după activarea fluxului, blocajele sunt controlate de `STREAM_IDLE_TIMEOUT_MS` și `FETCH_BODY_TIMEOUT_MS`.
+Inactivitate corporală asociată Undici: `FETCH_BODY_TIMEOUT_MS` (de asemenea, este implicit la aceeași linie de bază de 10 minute; `0` îl dezactivează). Pentru streaming, `FETCH_TIMEOUT_MS` acoperă numai configurarea conexiunii / primele antete — odată ce fluxul este activ, blocajele sunt guvernate de `STREAM_IDLE_TIMEOUT_MS` și `FETCH_BODY_TIMEOUT_MS`.
 
-**Recomandare pentru o singură sarcină de mai multe ore**
+**Recomandat pentru o singură sarcină de mai multe ore**
 
-În mediul procesului OmniRoute (`.env` / compose / systemd):
+În mediul de proces OmniRoute (`.env` / compose / systemd):
 
 ```bash
-# Dezactivează limitele de inactivitate a fluxului și a corpului pentru pașii lungi de raționament
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Sau măriți-le peste cel mai lung interval de inactivitate anticipat (valorile sunt exprimate în milisecunde):
+Sau ridicați-le peste cel mai lung interval de liniște la care vă așteptați (valorile sunt în milisecunde):
 
 ```bash
-# Exemplu: permite până la 2 ore de inactivitate între fragmentele din amonte
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Reporniți OmniRoute după modificarea acestor variabile de mediu.
+Reporniți OmniRoute după modificarea acestor vars env.
 
 ### Rețetă concretă — sarcină Codex de mai multe ore
 
-1. **Fixați contul:** Panou de control → Setări → Rutare → Afinitatea sesiunii → TTL-ul afinității = `43200` (12h) sau `86400` (maximum 24h).
-2. **Măriți / dezactivați limitele de inactivitate** în mediul OmniRoute:
+1. **Fixați contul:** Tabloul de bord → Setări → Rutare → Afinitate sesiune → Afinitate TTL = `43200` (12h) sau `86400` (24h max).
+2. **Ridicați / dezactivați limitele de inactivitate** în mediul lui OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Păstrați configurația Codex obișnuită din `config.toml` (`wire_api = "responses"`, valoarea corectă pentru `base_url`, `OMNIROUTE_API_KEY`) — în Codex nu există opțiuni pentru afinitate/inactivitate care să controleze aceste două comportamente.
-4. Reporniți OmniRoute, apoi porniți sarcina Codex de lungă durată.
+3. Păstrați obișnuitele Codex `config.toml` (`wire_api = "responses"`, corect `base_url`, `OMNIROUTE_API_KEY`) — nu există butoane affinity/idle din partea Codex pentru aceste două comportamente.
+4. Reporniți OmniRoute, apoi porniți sarcina Codex lungă.
 
-### Decizia privind valorile implicite (#7287)
+### Decizie implicită (#7287)
 
-| Opțiune                  | Valoare implicită livrată | Modificare în acest ghid?                                                                          |
-| ------------------------ | ------------------------- | -------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (dezactivat)          | **Nu** — rămâne opțională (echilibrarea încărcării vs. continuitate; consultați Discuția #5718)    |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)         | **Nu** — rămâne la 10 minute pentru traficul general; operatorii Codex o măresc sau o dezactivează |
+| Buton                    | Livrare implicită | Schimbare în acest ghid?                                                                             |
+| ------------------------ | ----------------- | ---------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (dezactivat)  | **Nu** — rămâne opt-in (echilibrarea sarcinii vs continuitate; vezi Discuție #5718)                  |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min) | **Nu** — rămâne 10 minute pentru trafic general; operatorii long Codex îl ridică sau îl dezactivează |
 
-Schimbarea globală a oricăreia dintre valorile implicite ar modifica comportamentul pentru fiecare client al unei instanțe, nu numai pentru Codex. Documentați opțiunile; lăsați valorile implicite neschimbate până când o decizie explicită a operatorului stabilește altceva.
+Schimbarea globală a oricărei valori implicite ar schimba comportamentul fiecărui client al unei instanțe, nu numai Codex. Documentați butoanele; lăsați valorile implicite în pace până când o decizie explicită a operatorului spune contrariul.
 
-### Diagnosticarea întreruperilor cauzate de inactivitate
+### Diagnosticarea tăierilor inactiv
 
-Când se declanșează monitorul de inactivitate, OmniRoute înregistrează o linie de forma:
+Când câinele de pază inactiv trage, OmniRoute înregistrează o linie în formă de:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Căutați cu grep după `Idle timeout: no data from` (sau după codul `stream_idle_timeout` / numele erorii `StreamIdleTimeoutError`). Segmentul furnizorului este cel utilizat de OmniRoute pentru cererea respectivă (`codex`, un alt ID de furnizor sau `provider` dacă este necunoscut) — nu este întotdeauna șirul literal `codex`.
+Grep pentru `Idle timeout: no data from` (sau codul `stream_idle_timeout` / numele erorii `StreamIdleTimeoutError`). Segmentul de furnizor este orice OmniRoute folosit pentru acea cerere (`codex`, un alt ID de furnizor sau `provider` dacă necunoscut) — nu este întotdeauna șirul literal `codex`.
 
 ---
 
 ## Depanare
 
-**`Error: wire_api = "chat" nu mai este acceptat`**
-Eliminați `wire_api = "chat"` din configurație. Setați `wire_api = "responses"` sau omiteți câmpul (valoarea implicită este `"responses"` începând cu v0.138).
+**`Error: wire_api = "chat" is no longer supported`** Eliminați `wire_api = "chat"` din configurația dvs. Setați `wire_api = "responses"` sau omiteți câmpul (implicit la `"responses"` din v0.138).
 
-**`Error: model not found`**
-Verificați dacă modelul există în OmniRoute și are prefixul corect. Utilizați `omniroute models list` sau deschideți `/dashboard/providers/<provider>`.
+**`Error: model not found`** Verificați că modelul există în OmniRoute cu prefixul corect. Folosiți `omniroute models list` sau deschideți `/dashboard/providers/<provider>`.
 
-**`Authentication error`**
-Confirmați că `OMNIROUTE_API_KEY` este exportată: `echo $OMNIROUTE_API_KEY`.
+**`Authentication error`** Confirmați că `OMNIROUTE_API_KEY` este exportat: `echo $OMNIROUTE_API_KEY`.
 
-**`ERROR: Missing environment variable: OMNIROUTE_API_KEY`**
-Codex verifică existența variabilei de mediu înainte de a efectua prima solicitare. Exportați
-o cheie reală pentru serverele protejate sau o valoare substitutivă care nu este goală, precum
-`OMNIROUTE_API_KEY=local`, atunci când instanța OmniRoute **locală** nu necesită
-autentificare. Reporniți shell-ul dacă ați adăugat-o în `~/.bashrc` sau `~/.zshrc`.
+**`ERROR: Missing environment variable: OMNIROUTE_API_KEY`** Codex validează că env var există înainte de a face prima solicitare. Exportați o cheie reală pentru servere protejate sau un substituent care nu este gol, cum ar fi `OMNIROUTE_API_KEY=local` atunci când dvs** local** Instanța OmniRoute nu necesită autentificare. Reporniți shell-ul dacă l-ați adăugat la `~/.bashrc` sau `~/.zshrc`.
 
-**`Connection refused`**
-Verificați dacă OmniRoute rulează și dacă gazda/portul din `base_url` sunt corecte pentru rețeaua dvs. (locală, Tailscale sau VPS).
+**`Connection refused`** Verificați OmniRoute rulează și `base_url` host/port este corect pentru rețeaua dvs. (local vs Tailscale vs VPS).
 
-**Sesiunea se întrerupe în apropierea limitei de context**
-Setați explicit `model_context_window` și `model_auto_compact_token_limit`. Consultați tabelul de mai sus privind fereastra de context.
+**Sesiunea se blochează aproape de limita de context** Setați `model_context_window` și `model_auto_compact_token_limit` în mod explicit. Consultați tabelul ferestrei de context de mai sus.
 
-**Compactarea se declanșează prea târziu**
-Reduceți `model_auto_compact_token_limit` la 80–85% din fereastră. Nu setați niciodată o valoare mai mare de 90%.
+**Compactarea se declanșează prea târziu** Coborâți `model_auto_compact_token_limit` la 80–85% din fereastră. Nu setati niciodata peste 90%.
 
-**Profilul nu se încarcă (`-p <name>` este ignorat fără avertisment)**
-Confirmați că fișierul există la `~/.codex/<name>.config.toml` (fără prefixul `profile-`). Rulați `ls ~/.codex/*.config.toml`.
+**Profilul nu se încarcă (`-p <name>` ignorat în tăcere)** Confirmați că fișierul există la `~/.codex/<name>.config.toml` (fără prefix `profile-` ). Rulați `ls ~/.codex/*.config.toml`.
 
-**O sarcină Codex de lungă durată se întrerupe în timpul rulării / schimbă conturile între mesaje**
-Consultați [Sarcini de lungă durată](#long-running-tasks). Activați afinitatea sesiunii (cu un TTL mai mare decât durata sarcinii) și măriți valorile pentru `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS` sau dezactivați-le. Căutați în jurnalele OmniRoute folosind grep după `Idle timeout: no data from`.
+**Sarcina Codex lungă scade la mijlocul rulării / schimbă conturile între ture** Consultați [Sarcini de lungă durată](#long-running-tasks). Activați afinitatea sesiunii (TTL peste lungimea sarcinii) și creșteți sau dezactivați `STREAM_IDLE_TIMEOUT_MS` / `FETCH_BODY_TIMEOUT_MS`. Grep OmniRoute înregistrează pentru `Idle timeout: no data from`.

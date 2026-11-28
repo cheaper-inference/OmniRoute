@@ -4,13 +4,7 @@
 
 ---
 
-> **സത്യത്തിന്റെ ആധികാരിക ഉറവിടം:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, കൂടാതെ `open-sse/utils/error.ts`-ലെ പൊതു builders
-> **ടെസ്റ്റുകൾ:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **അവസാനം പുതുക്കിയത്:** 2026-09-02 — v3.8.51
-> **ഉദ്ദേശിക്കുന്നവർ:** പിശക് പ്രതികരണങ്ങൾ കൈകാര്യം ചെയ്യുന്ന ഏതൊരു എഞ്ചിനീയറും (HTTP routes, SSE streams, executors, MCP handlers).
-> **നില:** ഒരു ക്ലയന്റിലേക്ക് പിശക് സന്ദേശം മടക്കിനൽകുന്ന എല്ലാ code path-കൾക്കും **നിർബന്ധം**.
+> **സത്യത്തിൻ്റെ ഉറവിടം:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, കൂടാതെ `open-sse/utils/error.ts` യിലെ പൊതു നിർമ്മാതാക്കൾ** പരിശോധനകൾ:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** പ്രേക്ഷകർ:** ഏതെങ്കിലും എഞ്ചിനീയർ സ്പർശിക്കുന്ന പിശക് പ്രതികരണങ്ങൾ (HTTP റൂട്ടുകൾ, SSE സ്ട്രീമുകൾ, എക്സിക്യൂട്ടർമാർ, MCP ഹാൻഡ്ലറുകൾ).** നില:****MANDATORY** ഒരു ക്ലയൻ്റിലേക്ക് ഒരു പിശക് സന്ദേശം നൽകുന്ന എല്ലാ കോഡ് പാത്തിനും.
 
 ## ഇത് എന്തിനാണ് നിലവിലുള്ളത്
 

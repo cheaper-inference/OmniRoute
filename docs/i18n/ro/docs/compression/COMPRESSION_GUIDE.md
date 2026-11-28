@@ -333,34 +333,22 @@ Modul RTK este inspirat de **[RTK - Rust Token Killer](https://github.com/rtk-ai
 
 ## Sisteme avansate de compresie
 
-Pe lângă cele 7 moduri descrise mai sus (sursa acceptă și modurile `codex-responses` și
-`omniglyph`, care nu sunt tratate în acest ghid), secțiunile de mai jos prezintă funcționalități
-care operează în cadrul acelor moduri sau împreună cu ele: Compresia rezultatelor instrumentelor și Îmbătrânirea progresivă
-sunt pașii 1 și 2 ai motorului agresiv (modul Aggressive și un pas `aggressive` dintr-un
-pipeline stivuit), Pipeline-ul stivuit reprezintă modul în care rulează modul Stacked, Compresia adaptată la cache
-retrogradează `aggressive` și `ultra` la `standard` pentru furnizorii care folosesc caching, cât timp compresia
-este activată, iar Modul de ieșire Caveman și Stilurile de ieșire sunt instrucțiuni opționale pentru promptul de sistem,
-dezactivate implicit, care modelează ieșirea modelului în loc să comprime cererea.
+Dincolo de cele 7 moduri descrise mai sus (sursa acceptă și modurile `codex-responses` și `omniglyph`, pe care acest ghid nu le acoperă), secțiunile de mai jos acoperă caracteristici care funcționează în interiorul sau alături de acele moduri: Comprimarea rezultatului instrumentului și îmbătrânirea progresivă sunt pașii 1 și 2 ai motorului agresiv (modul agresiv și un pas `aggressive` al unui pipeline stacked modeline), cum funcționează stacked pipeline, Compression-ul stacked, este modul de rulare a stacked Pipeline. downgrade `aggressive` și `ultra` la `standard` pentru furnizorii de stocare în cache în timp ce compresia este activată, iar modul de ieșire Caveman și stilurile de ieșire sunt instrucțiuni opt-in de prompt de sistem, dezactivate în mod implicit, care modelează ieșirea modelului în loc să comprima cererea.
 
-### Compresie adaptată la cache
+### Compresie cache-aware
 
-Unii furnizori (precum Anthropic, cu caching pentru prompturi) acceptă **caching pentru prompturi**,
-ceea ce le permite să stocheze în cache părți ale promptului pentru a reduce costurile și latența. Când
-cachingul este activat, compresia agresivă poate chiar să **afecteze negativ** performanța,
-deoarece modifică tokenurile stocate în cache, invalidând cache-ul.
+Unii furnizori (cum ar fi Anthropic cu cache prompt) acceptă** stocarea în cache promptă** , care le permite să memoreze în cache părți ale promptului pentru a reduce costurile și latența. Când stocarea în cache este activată, compresia agresivă poate de fapt** rănit** performanță deoarece modifică jetoanele stocate în cache, invalidând memoria cache.
 
-Modulul `cachingAware.ts` rezolvă această problemă prin **detectarea contextului de caching** și
-**ajustarea strategiei de compresie** în consecință.
+Modulul `cachingAware.ts` rezolvă acest lucru prin** detectarea contextului de cache** şi** ajustarea strategiei de compresie** în consecinţă.
 
 #### Cum funcționează
 
-1. **Detectarea contextului de caching** — Scanează corpul cererii pentru marcatori `cache_control`
-2. **Identificarea furnizorilor cu caching** — Verifică dacă furnizorul țintă acceptă caching
-3. **Ajustarea strategiei** — Retrogradează `aggressive`/`ultra` la `standard` pentru furnizorii cu caching
-4. **Omiterea promptului de sistem** — Prompturile de sistem sunt, de obicei, stocate în cache, așadar nu sunt comprimate
+1. **Detectează contextul de cache** — Scanează corpul cererii pentru markeri `cache_control`
+2. **Identificați furnizorii de cache** — Verifică dacă furnizorul țintă acceptă stocarea în cache
+3. **Ajustați strategia** — Degradează `aggressive`/`ultra` la `standard` pentru furnizorii de cache
+4. **Omite promptul de sistem** Solicitările de sistem — sunt de obicei stocate în cache, așa că nu le comprimați
 
-Funcția auxiliară pentru strategie returnează și un indicator `deterministicOnly`, însă constructorul planului utilizează
-doar strategia — momentan, nicio componentă din aval nu citește acest indicator.
+Asistentul de strategie returnează și un steag `deterministicOnly`, dar generatorul de plan consumă doar strategia — nimic în aval nu citește steagul astăzi.
 
 #### Exemplu de cod
 
@@ -373,7 +361,7 @@ import {
 const body = {
   model: "anthropic/claude-sonnet-4.5",
   messages: [{ role: "user", content: "Hello" }],
-  cache_control: { type: "ephemeral" }, // ← Marcator de cache
+  cache_control: { type: "ephemeral" }, // ← Cache marker
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
@@ -383,28 +371,19 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 // → { strategy: "standard", skipSystemPrompt: true, deterministicOnly: true }
 ```
 
-#### Când se utilizează
+#### Când să utilizați
 
-Compresia adaptată la cache este **întotdeauna activă** — nu este necesară nicio configurare. Aceasta intervine ori de câte ori
-compresia este activată, iar furnizorul țintă acceptă cachingul prompturilor (Anthropic, OpenAI
-etc.); marcatorii `cache_control` expliciți nu sunt necesari — un furnizor cu caching este suficient
-pentru a declanșa retrogradarea, iar marcatorii singuri nu fac niciodată acest lucru (detectarea marcatorilor alimentează telemetria
-cache-ului, nu decizia privind strategia).
+Compresia cache-aware este** mereu aprins** — nu este nevoie de configurare. Se activează ori de câte ori compresia este activată și furnizorul țintă acceptă memorarea în cache promptă (Anthropic, OpenAI, etc.); markerii `cache_control` expliciți nu sunt necesari — doar un furnizor de cache declanșează downgrade-ul, iar markerii singuri nu o fac niciodată (detecția markerului alimentează telemetria cache, nu decizia strategiei).
+
+OpenRouter contează ca furnizor de stocare în cache numai pentru modelele `anthropic/*` : solicitările de cod Claude își păstrează punctele de întrerupere `cache_control` (cel mult 4) și garda protejează prefixul, în timp ce orice altă familie OpenRouter (`openai/`, `google/`, `qwen/`, …) rămâne nepăzită.
 
 ### Îmbătrânire progresivă
 
-Conversațiile lungi acumulează multe schimburi de mesaje, însă schimburile mai vechi devin mai puțin
-relevante. Modulul `progressiveAging.ts` **degradează mesajele în funcție de distanța dintre schimburi**
-(distanța fiind măsurată de la sfârșitul conversației). Cu valorile implicite livrate
-(`verbatim: 2, light: 2, moderate: 3`):
+Conversațiile lungi acumulează multe rânduri de mesaje, dar rândurile mai vechi devin mai puțin relevante. Modulul `progressiveAging.ts`** degradează mesajele prin distanța de viraj** (distanța măsurată de la sfârșitul conversației). Cu valorile implicite livrate (`verbatim: 2, light: 2, moderate: 3`):
 
-- **Ultimele 2 schimburi (distanță ≤ 2)**: Sunt păstrate textual
-- **Distanța 3**: Compresie Caveman (eliminarea cuvintelor de umplutură)
-- **Distanța 4+**: Mesajele asistentului sunt rezumate; mesajele utilizatorului sunt reduse la prima
-  lor linie, limitată la 120 de caractere; celelalte roluri rămân nemodificate. Prompturile de sistem, mesajele
-  deja îmbătrânite și cel mai recent mesaj al utilizatorului sunt întotdeauna păstrate textual, indiferent de distanță.
-  Nimic nu este eliminat complet, iar intervalul `light`
-  nu poate fi atins cu valorile implicite livrate (`light` este egal cu `verbatim`).
+- **Ultimele 2 viraje (distanta ≤ 2)** : Păstrat textual
+- **Distanța 3** : compresie Caveman (înlăturarea umpluturii)
+- **Distanța 4 +** : Mesajele asistentului rezumate; mesajele utilizatorului reduse la prima linie, limitată la 120 de caractere; alte roluri neatinse. Solicitările de sistem, mesajele deja vechi și cel mai recent mesaj de utilizator sunt păstrate întotdeauna textual, indiferent de distanță. Nimic nu este abandonat definitiv, iar banda `light` este inaccesibilă cu valorile implicite livrate (`light` este egal cu `verbatim`).
 
 #### Exemplu de cod
 
@@ -415,68 +394,47 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... încă 50 de schimburi ...
+  // ... 50 more turns ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // ultimele 3 schimburi: textual
-  light: 8, // distanță <= 8: compresie ușoară
-  moderate: 20, // distanță <= 20: compresie caveman
-  fullSummary: 5, // obligatoriu conform tipului, dar necitit de codul pentru intervale
-  // distanță > 20: rezumat (asistent) / prima linie păstrată (utilizator)
+  verbatim: 3, // last 3 turns: verbatim
+  light: 8, // distance <= 8: lite compression
+  moderate: 20, // distance <= 20: caveman compression
+  fullSummary: 5, // required by the type, not read by the banding code
+  // distance > 20: summarized (assistant) / first line kept (user)
 });
 
-// saved = numărul de tokenuri economisite
+// saved = number of tokens saved
 ```
 
-#### Când se utilizează
+#### Când să utilizați
 
-Îmbătrânirea progresivă este **întotdeauna activă** pentru modul `aggressive` — este pasul 2 din
-`compressAggressive()`. Modul Ultra nu o execută. Este
-deosebit de eficientă pentru:
+Îmbătrânirea progresivă este** mereu aprins** pentru modul `aggressive` — este pasul 2 din `compressAggressive()`. Modul Ultra nu îl rulează. Este deosebit de eficient pentru:
 
-- Sesiuni de programare de lungă durată
-- Conversații desfășurate pe parcursul mai multor zile
-- Fluxuri de lucru agentice cu numeroase apeluri de instrumente
+- Sesiuni de codare de lungă durată
+- Conversații de mai multe zile
+- Fluxuri de lucru agentice cu multe apeluri de instrumente
 
 ### Modul de ieșire Caveman
 
-Modul de ieșire Caveman adaugă **instrucțiuni în promptul de sistem** care îi cer modelului însuși să genereze
-un răspuns concis — nivelul `lite` solicită răspunsuri concise care păstrează propozițiile complete, `full`
-îi cere să „răspundă concis ca un om al peșterilor inteligent”, iar `ultra` solicită un răspuns telegrafic;
-instrucțiunile doar solicită acest comportament, fără a-l putea garanta. Cererile primesc aceste instrucțiuni prin
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
-`open-sse/handlers/chatCore.ts` rezolvă mai întâi selecția folosind stratul de compatibilitate retroactivă
-(`resolveOutputStyleSelection()` din
-`open-sse/services/compression/outputStyles/backCompat.ts`), care, atunci când `outputStyles`
-este gol, mapează un `cavemanOutputMode` activat la stilul de ieșire `terse-prose`, cu intensitatea
-`cavemanOutputMode.intensity` (consultați secțiunea Compatibilitate retroactivă de mai jos); o selecție `outputStyles`
-care nu este goală este utilizată ca atare, iar `cavemanOutputMode.enabled` și `intensity` nu mai au
-niciun efect, în timp ce opțiunea sa `autoClarity` continuă să se aplice. `outputMode.ts` conține
-textele instrucțiunilor (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), ocolirea bazată pe conținut și funcția auxiliară
-de poziționare utilizată de injectare; propriul său injector `applyCavemanOutputMode()` nu are niciun
-apelant în producție.
+Se adaugă modul de ieșire Caveman** instrucțiuni prompte de sistem** care solicită modelului însuși pentru ieșire concisă — nivelul `lite` solicită răspunsuri concise care păstrează propozițiile complete, `full` îi cere să „răspundă concis ca un om inteligent al peșterilor”, iar `ultra` cere ieșire telegrafică; instrucțiunile cer doar, nu pot garanta. Solicitările le primesc prin `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`): `open-sse/handlers/chatCore.ts` rezolvă mai întâi selecția cu shim-ul back-compat (`resolveOutputStyleSelection()` în `open-sse/services/compression/outputStyles/backCompat.ts`), care, în timp ce `outputStyles` este gol, mapează un `cavemanOutputMode` activat la stilul de ieșire `terse-prose` la `cavemanOutputMode.intensity` (vezi Back-compat mai jos); o selecție `outputStyles` nevide este utilizată așa cum este, iar `cavemanOutputMode.enabled` și `intensity` nu au nici un efect, în timp ce comutatorul său `autoClarity` încă se aplică. `outputMode.ts` deține textele de instrucțiuni (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), bypass-ul de conținut și asistentul de plasare pe care îl folosește injecția; propriul injector `applyCavemanOutputMode()` nu are apelant de producție.
 
 #### Cum funcționează
 
-Acest mod nu comprimă intrarea. El adaugă un bloc de instrucțiuni la promptul de sistem
-(consultați Cum funcționează injectarea mai jos), iar orice mod de comprimare a intrării selectat pentru cerere
-rulează în continuare ulterior, pe corpul care conține acum blocul. Înaintea clauzei comune privind
-limitele, cu care se încheie fiecare nivel, nivelul `full` în limba engleză este:
+Acest mod nu comprimă intrarea. Acesta adaugă un bloc de instrucțiuni la promptul de sistem (consultați Cum funcționează injecția de mai jos), iar orice mod de compresie de intrare selectat pentru cerere încă rulează ulterior, pe corpul care transportă acum blocul. Înaintea clauzei privind limitele partajate cu care se termină fiecare nivel, nivelul `full` în limba engleză spune:
 
-> „Răspunde concis, ca un om al peșterii inteligent. Elimină articolele (a/an/the), cuvintele de umplutură (just/really/basically/actually/simply), formulele de politețe și ezitările. Fragmentele sunt în regulă. Sinonime scurte (big, nu extensive; fix, nu implement). Păstrează exact toate detaliile tehnice, codul, erorile, URL-urile și identificatorii.”
+> "Răspunde concis ca un om inteligent al cavernelor. Aruncă articole (a/an/the), filler (just/really/basically/actually/simply), plăcere, acoperire. Fragmente OK. Sinonime scurte (mare, nu extins, corectare, nu implementare). Păstrează toată substanța tehnică, codul, erorile, URLs, identificatorii exacte."
 
-Acest mod funcționează deosebit de bine pentru:
+Acest lucru funcționează deosebit de bine pentru:
 
-- Generarea de cod (rezultat mai concis = mai puține tokenuri)
-- Întrebări și răspunsuri rapide (nu sunt necesare explicații elaborate)
-- Procesarea în loturi (maximizează debitul)
+- Generarea codului (ieșire terser = mai puține jetoane)
+- Întrebări și răspunsuri rapide (nu este nevoie de explicații elaborate)
+- Procesare în loturi (maximizarea debitului)
 
-#### Când se utilizează
+#### Când să utilizați
 
-Modul de ieșire „om al peșterii” este **opțional**. Cu compresia activată (`enabled: true`, comutatorul principal
-de pe pagina Setări de compresie), activați-l cu `cavemanOutputMode.enabled`; `intensity`
-selectează `lite`, `full` sau `ultra`:
+Modul de ieșire Caveman este** înscriere** . Cu compresia activată (`enabled: true`, comutatorul principal de pe pagina Setări de compresie), porniți-o cu `cavemanOutputMode.enabled`; `intensity` alege `lite`, `full` sau `ultra`:
 
 ```json
 {
@@ -488,101 +446,44 @@ selectează `lite`, `full` sau `ultra`:
 }
 ```
 
-Comutatorul **Mod de ieșire** al unei combinații de compresie (`outputMode`, cu nivelul în `outputModeIntensity`)
-configurează același comutator pentru cererile cărora li se aplică acea combinație, iar instrumentul MCP
-`omniroute_set_compression_engine` îl setează prin argumentul său boolean `outputMode`.
-O selecție `outputStyles` care nu este goală are prioritate față de acest comutator. În
-panoul de control, activarea stilului de ieșire **Proză concisă** injectează același bloc (consultați Stiluri de
-ieșire mai jos).
+Un combo de compresie** Mod de ieșire** toggle (`outputMode`, nivel în `outputModeIntensity`) setează același comutator pentru cererile cărora li se aplică combo, iar instrumentul `omniroute_set_compression_engine` MCP îl scrie prin argumentul său boolean `outputMode`. O selecție `outputStyles` care nu este goală are prioritate față de acest comutator. În tabloul de bord, activarea** proză concisă** stilul de ieșire injectează același bloc (vezi Stiluri de ieșire mai jos).
 
 ### Stiluri de ieșire (catalog)
 
-Modul de ieșire „om al peșterii” de mai sus este **calea veche cu un singur stil**. Faza 4 l-a generalizat
-într-un catalog de stiluri de ieșire compozabile: `OUTPUT_STYLE_CATALOG` din
-`open-sse/services/compression/outputStyles/catalog.ts`. Fiecare stil este o instrucțiune pentru promptul de sistem
-care îi cere modelului să genereze un răspuns mai economic; stilurile pot fi activate
-împreună și sunt injectate în ordinea din catalog.
+Modul de ieșire Caveman de mai sus este** moștenire un singur stil cale** . Faza 4 a generalizat-o într-un catalog de stiluri de ieșire componabile: `OUTPUT_STYLE_CATALOG` în `open-sse/services/compression/outputStyles/catalog.ts`. Fiecare stil este o instrucțiune de tip prompt de sistem care solicită modelului însuși rezultate mai ieftine; stilurile pot fi activate împreună și sunt injectate în ordinea catalogului.
 
-| Stil                                    | `id`            | Ce face                                                                                                                                                                                                                                                                                            | Limbile instrucțiunilor                                          |
-| --------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Proză concisă                           | `terse-prose`   | Elimină cuvintele de umplutură/articolele/ezitările; păstrează exacte detaliile tehnice. Același text ca în modul vechi de ieșire „om al peșterii” (referențiat, nu rescris).                                                                                                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                    |
-| Mai puțin cod                           | `less-code`     | Scară YAGNI: cea mai mică modificare funcțională, fără abstracții nesolicitate.                                                                                                                                                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                    |
-| Coadă de cal (dezvoltator senior comod) | `ponytail`      | „Cel mai bun cod este codul care nu a fost scris niciodată”: reutilizare > rescriere, cauză principală > simptom, cel mai scurt diff funcțional.                                                                                                                                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                    |
-| Am ADHD (acțiunea mai întâi)            | `i-have-adhd`   | Acțiunea mai întâi (comandă/cale/fragment înaintea prozei), pași numerotați și limitați, UN singur pas următor concret, fără preambul/recapitulare/formule de încheiere. Adaptat din [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                                            | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                    |
-| Filtru UI antislop                      | `antislop-ui`   | Fiecare tehnică vizuală trebuie să treacă un test de utilitate (ierarhie, identitate, lizibilitate); fără degradeuri/sticlă/strălucire implicite, paletă limitată, fără machete-șablon. Ambele stiluri antislop adaugă o limită care interzice controalele nefuncționale și afirmațiile inventate. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                    |
-| Filtru antislop pentru text și oameni   | `antislop-copy` | Text specific (fără linie de pauză, îndemnuri generice la acțiune, jargon corporatist, încheieri de chatbot sau fapte inventate), plus reguli pentru oameni: contrast WCAG AA, focalizare vizibilă, acces prin tastatură, stări goale/de încărcare/de eroare, rearanjare pe mobil.                 | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi                    |
-| CJK concis (文言)                       | `terse-cjk`     | Răspuns `full`/`ultra` în chineza clasică (文言); `lite` solicită doar răspunsuri scurte, fără cuvinte funcționale, formule de politețe sau ornamente.                                                                                                                                             | zh (limitat în funcție de setarea regională, consultați mai jos) |
+| Stil                                    | `id`            | Ce face                                                                                                                                                                                                                                                                        | Limbi de instruire                            |
+| --------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| proză concisă                           | `terse-prose`   | Drop filler/articles/hedging; păstrați exact substanța tehnică. Același text ca și modul de ieșire caveman vechi (referit, nu reintrodus).                                                                                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Mai puțin cod                           | `less-code`     | scara YAGNI : cea mai mică schimbare de lucru, fără abstracții nesolicitate.                                                                                                                                                                                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Coada de cal (dezvoltator senior leneș) | `ponytail`      | „Cel mai bun cod este codul niciodată scris”: reutilizați rescrierea >, simptomul > cauza principală, cel mai scurt difer de lucru.                                                                                                                                            | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Am ADHD (în primul rând acțiunea)       | `i-have-adhd`   | Prima acțiune (command/path/snippet înainte de proză), pași mărginiți numerotați, ONE concret pasul următor, fără preamble/recap/closers. Adaptat din [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                                                       | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Filtru antislop UI                      | `antislop-ui`   | Fiecare tehnică vizuală trebuie să treacă un test de scop (ierarhie, identitate, lizibilitate); fără gradients/glass/glow implicit, paletă limitată, fără machete de șablon. Ambele stiluri anti-slop adaugă o limită fără controale fără moarte / fără revendicări fabricate. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Copie antislop și filtru uman           | `antislop-copy` | Copie specifică (fără liniuță em, CTAs generic, cuvinte la modă, închideri chatbot, fapte inventate) plus reguli pentru oameni: contrast WCAG AA, focalizare vizibilă, acoperire tastatură, stări empty/loading/error, reflow mobil.                                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Terse CJK (文言)                        | `terse-cjk`     | răspuns `full`/`ultra` în chineză clasică (文言); `lite` cere doar răspunsuri scurte, fără cuvinte funcționale, plăcere sau înfrumusețare.                                                                                                                                     | zh (locale-gated, vezi mai jos)               |
 
-Fiecare stil include trei niveluri de intensitate — `lite`, `full`, `ultra` — și fiecare nivel
-se încheie cu clauza comună privind limitele (`SHARED_BOUNDARIES` din `outputMode.ts`), care
-păstrează exacte blocurile de cod, căile fișierelor, comenzile, erorile și URL-urile. Textele nivelurilor
-`terse-prose` și `terse-cjk` adaugă identificatorii la această listă.
+Fiecare stil include trei niveluri de intensitate — `lite`, `full`, `ultra` — și fiecare nivel se termină cu clauza de limite partajate (`SHARED_BOUNDARIES` în `outputMode.ts`), care păstrează blocurile de cod, căile fișierelor, comenzile, erorile și URLs exact. Textele de nivel `terse-prose` și `terse-cjk` adaugă identificatori la acea listă.
 
-`terse-cjk` este limitat la setarea regională `zh` în două locuri. Pagina Setări de compresie afișează
-rândul său numai când limba interfeței panoului de control este chineza (`zh-CN` sau `zh-TW`), iar
-`applyOutputStyles()` îl injectează numai când limba determinată a cererii (consultați Selectarea limbii
-mai jos) este `zh`. Ascunderea rândului nu elimină o selecție `terse-cjk` salvată:
-API-ul de setări acceptă orice id de stil, iar salvarea altor stiluri pe pagină îl păstrează. În
-momentul cererii, verificarea limbii din `applyOutputStyles()` este singura limitare bazată pe setarea regională.
+`terse-cjk` este legat de local la `zh` în două locuri. Pagina Setări de compresie listează rândul său numai atunci când limba UI din tabloul de bord este chineză (`zh-CN` sau `zh-TW`), iar `applyOutputStyles()` o injectează numai atunci când limba rezolvată a cererii (consultați Selectarea limbii de mai jos) este `zh`. Ascunderea rândului nu șterge o selecție `terse-cjk` salvată: setările API acceptă orice ID de stil, iar salvarea altor stiluri pe pagină îl păstrează. La momentul solicitării, verificarea limbii `applyOutputStyles()` este singura poartă locală.
 
-#### Cum funcționează injectarea
+#### Cum funcționează injecția
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) compară
-selecția cu catalogul (ID-urile necunoscute și stilurile care nu corespund setării regionale
-sunt eliminate, fără a genera vreodată o eroare; o selecție care nu se rezolvă la niciun stil
-lasă corpul nemodificat, fiind omisă ca `no_styles`), concatenează instrucțiunile selectate în
-ordinea din catalog,
-adaugă clauza privind limitele **o singură dată** (plus clauza de siguranță, `SAFETY_BOUNDARIES`
-sau traducerea acesteia, când este selectat `less-code` sau `ponytail`) și începe blocul cu un
-singur marcator de idempotență (`[OmniRoute Output Styles]`), astfel încât reaplicarea nu are
-niciun efect. Când limba rezolvată (consultați mai jos secțiunea Selectarea limbii) are o
-traducere, este inserată instrucțiunea localizată în locul celei în limba engleză.
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) rezolvă selecția în comparație cu catalogul (ID-urile necunoscute și stilurile nepotrivite în funcție de localitate sunt eliminate, niciodată o eroare; o selecție care se rezolvă la niciun stil lasă corpul neschimbat, omis ca `no_styles`), concatenează instrucțiunile selectate în ordinea catalogului, adaugă clauza limitelor** dată** (plus clauza de siguranță, `SAFETY_BOUNDARIES` sau traducerea acesteia, când este selectat `less-code` sau `ponytail` ) și începe blocul cu un singur marker de idempotitate (`[OmniRoute Output Styles]`), deci re-aplicarea este o opțiune fără opțiune. Când limba rezolvată (consultați Selectarea limbii de mai jos) are o traducere, instrucțiunea localizată este injectată în loc de engleză.
 
-Pentru un corp cu o matrice `messages` nevidă, verificarea idempotenței rulează înaintea
-ocolirii bazate pe conținut: când marcatorul `[OmniRoute Output Styles]` există deja în câmpul
-`system` de nivel superior (un șir sau o matrice de blocuri de conținut) ori într-un mesaj de
-sistem cu un conținut de tip șir, corpul este lăsat nemodificat ca `already_applied` și nu se
-efectuează nicio verificare a cuvintelor-cheie. În caz contrar, o ocolire bazată pe conținut
-(`shouldBypassCavemanOutputMode()` din `open-sse/services/compression/outputMode.ts`) verifică
-textul ultimelor trei mesaje, indiferent de rolul lor, și omite stilurile pentru întreaga tură
-atunci când textul respectiv corespunde cuvintelor-cheie privind securitatea, acțiunile
-ireversibile sau solicitările de clarificare ori unei secvențe sensibile la ordine: `first`,
-`then`, `after that`, `before`, `rollback` sau `backup`, urmat în maximum 240 de caractere de
-`delete`, `drop`, `migrate`, `deploy` sau `release`. Ocolirea rulează atât timp cât comutatorul
-**Ocolire automată pentru claritate** (`cavemanOutputMode.autoClarity`, activat implicit) este
-activat; dezactivarea comutatorului omite verificarea cuvintelor-cheie.
+On a body with a non-empty `messages` array, the idempotency check runs before the content bypass: when the `[OmniRoute Output Styles]` marker is already in the top-level `system` field (a string or a content-block array) or in a system message with string content, the body is left unchanged as `already_applied` and no keyword check runs. Otherwise a content bypass (`shouldBypassCavemanOutputMode()` in `open-sse/services/compression/outputMode.ts`) checks the text of the last three messages, whatever their role, and skips the styles for the whole turn when that text matches its security, irreversible-action or clarification keywords, or an order-sensitive sequence: `first`, `then`, `after that`, `before`, `rollback` or `backup` followed within 240 characters by `delete`, `drop`, `migrate`, `deploy` or `release`. The bypass runs while the **Auto-Clarity Bypass** toggle (`cavemanOutputMode.autoClarity`, on by default) is on; turning the toggle off skips the keyword check.
 
-Când ocolirea permite procesarea turei, `placeSystemInstruction()` (din același fișier), care
-nu creează niciodată un nou `messages[0]`, plasează blocul în primul dintre următoarele locuri
-pe care le găsește:
+Când bypass-ul permite trecerea, `placeSystemInstruction()` (același fișier), care nu creează niciodată un nou `messages[0]`, plasează blocul în primul dintre acestea pe care îl găsește:
 
-1. Un mesaj de sistem inițial cu conținut de tip șir: blocul este adăugat după textul acestuia.
-2. Câmpul `system` de nivel superior: blocul este adăugat după textul unui șir sau
-   este adăugat ca bloc de text nou într-o matrice de blocuri de conținut.
-3. Primul mesaj de sistem ulterior cu conținut de tip șir: blocul este adăugat după textul
-   acestuia.
-4. Niciunul dintre cele de mai sus: blocul este introdus într-un mesaj de sistem nou la
-   sfârșitul `messages`.
+1. Un mesaj de sistem principal cu conținut șir: blocul este atașat după text.
+2. Câmpul `system` de nivel superior: blocul este adăugat după textul unui șir sau adăugat ca un bloc de text nou la o matrice de blocuri de conținut.
+3. Primul mesaj de sistem ulterior cu conținut șir: blocul este adăugat după textul său.
+4. Nimic din cele de mai sus: blocul intră într-un nou mesaj de sistem la sfârșitul `messages`.
 
-Pentru un corp fără o matrice `messages` (sau cu una goală), nu rulează nicio ocolire bazată pe
-conținut, iar câmpul `system` de nivel superior nu este consultat. Blocul este adăugat după
-textul unui câmp `instructions` de tip șir, cu excepția cazului în care câmpul respectiv
-conține deja marcatorul `[OmniRoute Output Styles]`; în acest caz, corpul este lăsat
-nemodificat ca `already_applied`. Când corpul nu are un câmp `instructions` de tip șir, dar
-conține `input` (un șir sau o matrice), blocul devine `instructions`, înlocuind orice valoare
-care nu este de tip șir pe care o conținea câmpul. Un corp care nu are nici un câmp
-`instructions` de tip șir, nici un `input` de tip șir sau matrice este lăsat nemodificat și
-omis ca `no_messages`.
+Pe un corp fără o matrice `messages` (sau cu una goală), nu se execută ocolire a conținutului și nu este consultat un câmp `system` de nivel superior. Blocul este atașat după textul unui câmp `instructions` șir, cu excepția cazului în care acel câmp conține deja markerul `[OmniRoute Output Styles]`, caz în care corpul rămâne neschimbat ca `already_applied`. Când corpul nu are un câmp `instructions` șir, dar poartă `input` (un șir sau o matrice), blocul devine `instructions`, înlocuind orice valoare non-șir deținută de câmpul respectiv. Un corp fără un câmp `instructions` șir și nici un șir sau o matrice `input` este lăsat neschimbat și omis ca `no_messages`.
 
 #### Cum se activează
 
-În panoul de control: **Context de compresie → Setări de compresie**
-(`/dashboard/context/settings`), secțiunea Stiluri de ieșire: câte un rând pentru fiecare stil,
-cu un comutator de activare/dezactivare și un selector de nivel. Stilurile sunt inserate cât
-timp compresia însăși este activată (comutatorul principal al paginii, `enabled`). Comutatorul
-**Ocolire automată pentru claritate** se află pe pagina **Caveman**
-(`/dashboard/context/caveman`), în cardul **Mod de ieșire**. Programatic, configurația de
-compresie persistă selecția astfel:
+În tabloul de bord:** Context de compresie → Setări de compresie** (`/dashboard/context/settings`), Secțiunea stiluri de ieșire: un rând pe stil cu o comutare on/off și un selector de nivel. Stilurile se injectează în timp ce compresia în sine este activată (comutatorul principal al paginii, `enabled`). The** Bypass auto-claritate** comutatorul este pe** Omul cavernelor** pagina (`/dashboard/context/caveman`), în sa** Mod de ieșire** card. Programatic, configurația de compresie persistă selecția ca:
 
 ```json
 {
@@ -593,136 +494,50 @@ compresie persistă selecția astfel:
 }
 ```
 
-Compatibilitate cu versiunile anterioare: cât timp `outputStyles` este gol, setarea veche
-`cavemanOutputMode.enabled` se mapează la `terse-prose` la intensitatea
-`cavemanOutputMode.intensity`. Blocul începe apoi cu marcatorul
-`[OmniRoute Output Styles]`, în timp ce injectorul vechi `applyCavemanOutputMode()` scria
-`[OmniRoute Caveman Output Mode]`. Sub marcator, textul corespunde inserării vechi în en,
-pt-BR, es, de, fr, it, ru, id și vi; în ja și zh, acesta conține un spațiu suplimentar înaintea
-clauzei privind limitele. `terse-prose` este tradus în pt-BR, es, de, fr, it, ru, zh, ja, id
-și vi, astfel încât o solicitare a cărei limbă rezolvată este `hu` primește textul în limba
-engleză, în timp ce injectorul vechi folosea textul său în limba maghiară.
+Back-compat: în timp ce `outputStyles` este gol, setarea `cavemanOutputMode.enabled` moștenită se mapează la `terse-prose` la `cavemanOutputMode.intensity`. Blocul începe apoi cu markerul `[OmniRoute Output Styles]`, unde injectorul `applyCavemanOutputMode()` moștenit a scris `[OmniRoute Caveman Output Mode]`. Sub marcator, textul se potrivește cu injecția moștenire în en, pt-BR, es, de, fr, it, ru, id și vi; în ja și zh are un spațiu suplimentar înaintea clauzei limite. `terse-prose` se traduce în pt-BR, es, de, fr, it, ru, zh, ja, id și vi, deci o solicitare a cărei limbă rezolvată este `hu` primește textul în limba engleză în care injectorul moștenit îl folosea pe cel maghiar.
 
-Selectarea limbii pentru stilurile de ieșire (`resolveOutputStyleLanguage()` din
-`outputStyles/apply.ts`): cu `languageConfig.enabled` activat, `autoDetect` prelevează cel mai
-recent mesaj al utilizatorului din matricea `messages` a solicitării care conține text
-(conținut de tip șir sau câmpul `text` al părților sale de conținut) și rulează asupra acestuia
-detectorul motorului Caveman (`detectCompressionLanguage()`). Detectorul returnează `zh`
-pentru textul care conține caractere Han și niciun caracter kana; în caz contrar, returnează
-limba cu cele mai multe potriviri de indicii dintre `it`, `pt-BR`, `es`, `de`, `fr`, `ru`,
-`ja`, `hu` și `id`, respectiv `en` când nu există nicio potrivire — textul pe care nu îl poate
-clasifica primește limba engleză, niciodată `defaultLanguage`, iar `vi` nu este detectat
-niciodată, deși stilurile includ text în `vi`. Corpul unui API Responses își păstrează turele
-în `input`, care nu este prelevat, astfel că primește `defaultLanguage`, apoi limba engleză.
-Când niciun mesaj al utilizatorului din `messages` nu conține text sau când `autoDetect` este
-dezactivat, se aplică `defaultLanguage`, apoi limba engleză. Cu `languageConfig.enabled`
-dezactivat, limba este engleza — cu excepția cazului în care solicitării i se aplică o
-combinație de compresie (o combinație atribuită combinației de rutare a solicitării sau
-combinația de compresie implicită la care revine chatCore pentru conducta stivuită
-încorporată): aplicarea unei combinații activează `languageConfig.enabled` pentru solicitarea
-respectivă și setează `defaultLanguage` din pachetele lingvistice ale combinației (valoarea
-salvată, dacă este unul dintre pachetele combinației; în caz contrar, primul pachet al
-combinației, care este implicit `en`), în timp ce valoarea salvată pentru `autoDetect`
-(activată implicit) continuă să se aplice. Motorul de intrare Caveman își alege diferit limba
-pachetului de reguli — pentru fiecare parte de text și, când detectarea automată este
-dezactivată, condiționat de `enabledPacks`.
+Selectarea limbii în stilul de ieșire (`resolveOutputStyleLanguage()` în `outputStyles/apply.ts`): cu `languageConfig.enabled` activat, `autoDetect` eșantionează cel mai recent mesaj utilizator din matricea `messages` a cererii care are text (conținutul șirului sau `text` -ul părților sale de conținut) și rulează detectorul motorului Caveman (`detectCompressionLanguage()`) pe acesta. Detectorul returnează `zh` pentru text cu caractere Han și fără kana; în caz contrar, returnează oricare dintre `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` și `id` are cele mai multe potriviri de indicii, iar `en` când niciunul nu se potrivește cu textul — pe care nu îl poate clasifica devine engleză, deși stilul `defaultLanguage` nu este niciodată detectat și `vi` `vi`. Un corp Responses API își păstrează turele în `input`, care nu este eșantionat, deci devine `defaultLanguage`, apoi engleză. Când niciun mesaj utilizator din `messages` nu are text sau cu `autoDetect` dezactivat, se aplică `defaultLanguage`, apoi engleză. Cu `languageConfig.enabled` dezactivat, limba este engleza — cu excepția cazului în care se aplică un combo de compresie pentru cerere (un combo atribuit combo-ului de rutare al cererii sau combo-ul implicit de compresie chatCore revine pentru pipeline-ul stivuit încorporat): aplicarea unui combo activează `languageConfig.enabled` pentru acea cerere și setează `defaultLanguage` valoarea din pachetul de limbă salvată (dacă este cea a combo-ului). pachete, în caz contrar primul pachet al combo-ului, care este implicit `en`), în timp ce `autoDetect` salvat (activat în mod implicit) încă se aplică. Motorul de intrare Caveman își alege limba pachetului de reguli în mod diferit — per parte de text și, cu detectarea automată dezactivată, este activată `enabledPacks`.
 
-Matricea stil × limbă este fixată de
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`: fiecare stil din catalog necesită o
-intrare în `BASELINE_LANGUAGES` din test; un stil care nu este restricționat în funcție de localizare trebuie să includă o
-traducere pt-BR (`terse-cjk`, restricționat în funcție de localizare, este exceptat de la această regulă), cu excepția cazului în care este
-inclus în `KNOWN_ENGLISH_ONLY`, care poate conține numai stiluri fără nicio traducere —
-un stil inclus care are orice traducere face ca testul să eșueze; de asemenea, un stil face ca testul să eșueze atunci când
-pierde o limbă enumerată în intrarea sa din `BASELINE_LANGUAGES`. Pentru a adăuga un stil, consultați
-[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
+Matricea limbajului stil × este fixată de `tests/unit/compression/output-styles-i18n-matrix.test.ts`: fiecare stil de catalog are nevoie de o intrare în `BASELINE_LANGUAGES` testului; un stil care nu este limitat în funcție de localitate trebuie să livreze o traducere pt-BR ( `terse-cjk` în funcție de localitate este exceptat de la această regulă), cu excepția cazului în care este listat în `KNOWN_ENGLISH_ONLY`, care poate conține doar stiluri fără traduceri deloc — un stil listat care are orice traducere eșuează testul; iar un stil eșuează testul atunci când pierde o limbă pe care o listează intrarea `BASELINE_LANGUAGES`. Pentru a adăuga un stil, consultați [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
-### Comprimarea rezultatelor instrumentelor
+### Comprimarea rezultatului instrumentului
 
-`compressToolResult()` din `open-sse/services/compression/toolResultCompressor.ts`
-comprimă textul rezultatului unui instrument folosind **5 strategii**. Acestea sunt încercate în ordinea următoare, iar
-prima strategie activată a cărei verificare corespunde conținutului determină rezultatul:
+`compressToolResult()` în `open-sse/services/compression/toolResultCompressor.ts` comprimă textul rezultat al instrumentului cu** 5 strategii** . Le încearcă în această ordine, iar prima strategie activată a cărei verificare se potrivește cu conținutul decide rezultatul:
 
-1. **`fileContent`**: conținut format din 3 sau mai multe linii, în care cel puțin o linie, ignorând
-   indentarea de la început, începe cu `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` sau `return ` (cuvântul-cheie urmat de un spațiu), ori cu `if`,
-   `for` sau `while` urmat de `(` sau ` (`, păstrează primele 20 și ultimele 5 linii, cu
-   secțiunea intermediară omisă marcată.
-2. **`grepSearch`**: conținut cu cel puțin o linie de forma `<path>:<digits>:`,
-   unde textul dinaintea primului caracter două puncte nu conține spații albe, păstrează numai acele linii, cel
-   mult 30, urmate de numărul eventualelor potriviri suplimentare și de lista fișierelor cu potriviri;
-   toate celelalte linii sunt eliminate. O singură astfel de linie este suficientă pentru a declanșa strategia, astfel încât o
-   linie de jurnal care începe cu un marcaj temporal precum `12:30:45` este, de asemenea, luată în calcul.
-3. **`shellOutput`**: rezultatul care conține o secvență ANSI CSI (`ESC[` urmat de cifre sau
-   punct și virgulă, apoi de o literă, ca în codurile de culoare) ori un `$` urmat de un caracter de spațiere
-   oriunde în text pierde acele secvențe (alte secvențe escape, precum `ESC[?25l` sau o
-   secvență OSC pentru titlul ferestrei, sunt păstrate) și își păstrează ultimele 50 de linii, liniile
-   consecutive repetate fiind restrânse. Deoarece această verificare rulează înainte de `json` și `errorMessage`,
-   rezultatele JSON sau de eroare care conțin un astfel de `$` nu ajung niciodată la acestea cât timp
-   `shellOutput` este activat.
-4. **`json`**: o încărcătură JSON de peste 2.000 de caractere care începe cu `{` sau `[` (după
-   eventuale spații albe) și poate fi analizată este rezumată: un tablou cu mai mult de 7 elemente își păstrează
-   primele 5 și ultimele 2 elemente, precum și numărul total, iar un obiect își păstrează primele 20 de
-   chei, fiecare valoare de tip obiect sau tablou imbricat fiind înlocuită cu un substituent `{…N keys}`
-   (pentru un tablou, N este lungimea sa) și cu un marcaj `_remaining_<N>_keys` care numără cheile
-   eliminate după primele 20. Valorile scalare sunt copiate integral, astfel încât un obiect cu cel mult 20 de chei
-   și fără valori imbricate este doar reindentat — unul minificat câștigă caractere
-   și rămâne neschimbat.
-5. **`errorMessage`**: rezultatul care conține, oriunde și indiferent de combinația de majuscule și minuscule, `error:`,
-   `error ` (cuvântul urmat de un spațiu, ca în `no error found`), `[error]`,
-   `exception:`, `exception `, `[exception]` sau `traceback` își păstrează prima linie,
-   următoarele 10 linii și ultimele 3, cu un marcaj `… [N frames elided] …` în locul
-   liniilor dintre acestea. Marcajul apare numai atunci când după prima linie urmează mai mult de 13 linii,
-   astfel încât un rezultat de eroare cu cel mult 14 linii nu este scurtat (la 12 sau 13 linii,
-   ultimele 3 repetă linii deja păstrate).
+1. **`fileContent`** : conținut de 3 sau mai multe rânduri în care cel puțin o linie, ignorând indentația de început, începe cu `import `, `export `, `function `, `class `, `const `, `let `, `var ` sau `return ` (cuvântul cheie plus un spațiu), sau cu `if`, `for` sau `while`, urmat de `(`, urmat de 2 sau ultimul ` (` 2. 5 linii, cu mijlocul elidat marcat.
+2. **`grepSearch`** : conținutul cu cel puțin o linie de forma `<path>:<digits>:`, unde textul dinaintea primelor două puncte nu are spații albe, păstrează doar acele linii, cel mult 30, urmate de un număr de potriviri ulterioare și de lista fișierelor potrivite; orice altă linie este abandonată. O astfel de linie este suficientă pentru a declanșa strategia, așa că contează și o linie de jurnal care începe cu un marcaj de timp, cum ar fi `12:30:45`.
+3. **`shellOutput`** : ieșirea care conține o secvență ANSI CSI (`ESC[` apoi cifre sau punct și virgulă apoi o literă, ca în codurile de culoare) sau un `$` urmat de spații albe oriunde în text pierde acele secvențe (alte escape, cum ar fi `ESC[?25l` sau o secvență de titlu de fereastră OSC, sunt păstrate) și își păstrează liniile repetate, cu ultimele 50 linii consecutive. Deoarece această verificare rulează înainte de `json` și `errorMessage`, JSON sau ieșirea de eroare care conține un astfel de `$` nu le ajunge niciodată când `shellOutput` este activat.
+4. **`json`** : o sarcină utilă JSON de peste 2.000 de caractere care începe cu `{` sau `[` (după spații albe opționale) și analize este rezumată: o matrice de mai mult de 7 elemente își păstrează primele 5 și ultimele 2 elemente și numărul total, iar un obiect își păstrează primele 20 de chei, cu fiecare obiect imbricat sau valoarea matricei înlocuită cu o lungime a `{…N keys}` sau un numere de matrice N (pentru valoarea matricei) un marker `_remaining_<N>_keys` care numără cheile a scăzut peste primele 20. Valorile scalare sunt copiate întregi, astfel încât un obiect de 20 de chei sau mai puține fără valori imbricate este doar reindentat — un micificat câștigă caractere și rămâne neschimbat.
+5. **`errorMessage`** : ieșire care conține, oriunde și în orice literă, `error:`, `error ` (cuvântul urmat de un spațiu, ca în `no error found`), `[error]`, `exception:`, `exception `, `[exception]` sau `traceback` își păstrează prima linie, următoarele 10 linii și ultimele 3, cu un marcator `… [N frames elided] …` în locul lui. Marcatorul apare numai atunci când mai mult de 13 linii urmează prima linie, astfel încât rezultatul de eroare de 14 linii sau mai puțin nu este scurtat (la 12 sau 13 linii, ultimele 3 linii repetate deja păstrate).
 
-După ce o strategie corespunde, chiar dacă nu economisește nimic, strategiile ulterioare nu mai sunt
-încercate. Atunci când strategia corespunzătoare nu economisește niciun token estimat (lungimea ÷ 4, rotunjită în sus) —
-de exemplu, un fișier asemănător codului cu cel mult 25 de linii sau un tablou JSON de peste 2.000 de
-caractere cu cel mult 7 elemente — motorul agresiv păstrează rezultatul original al instrumentului:
-ambii apelanți (`compressAggressive()` și `compressAnthropicToolResultBlock()`)
-păstrează originalul atunci când `saved` este 0 sau mai mic, în timp ce `compressToolResult()` însuși
-returnează în continuare rezultatul strategiei respective. Pasul pentru rezultatul instrumentului nu este ultimul cuvânt:
-mecanismul de rezumare de rezervă al motorului poate scurta în continuare un mesaj `tool` sau `function` mai lung
-de 8.192 de caractere (`maxTokensPerMessage`, 2.048, înmulțit cu 4).
+După ce o strategie se potrivește, chiar și una care nu salvează nimic, strategiile ulterioare nu sunt încercate. Atunci când strategia de potrivire nu salvează nici un simbol estimat (lungime ÷ 4, rotunjită în sus) — de exemplu, un fișier asemănător codului de 25 de linii sau mai puțin, sau o matrice JSON de peste 2.000 de caractere cu 7 elemente sau mai puține — motorul agresiv păstrează rezultatul instrumentului original: ambii apelanți sunt `saved` `compressAggressive()` sau `compressAnthropicToolResultBlock()`. mai jos, în timp ce `compressToolResult()` însuși încă returnează rezultatul strategiei respective. Pasul instrument-rezultat nu este ultimul cuvânt: sumarul de rezervă al motorului poate scurta în continuare un mesaj `tool` sau `function` mai lung de 8.192 de caractere (`maxTokensPerMessage`, 2.048, ori 4).
 
-#### Când se utilizează
+#### Când să utilizați
 
-Comprimarea rezultatelor instrumentelor este pasul 1 al motorului agresiv (`compressAggressive()` din
-`open-sse/services/compression/aggressive.ts`), astfel încât rulează în modul Aggressive și într-un
-pas `aggressive` al unei conducte stivuite. Comprimă mesajele `tool` și `function`
-în format OpenAI și textul din blocurile Anthropic `tool_result`. Fiecare strategie are propriul
-comutator sub `aggressive.toolStrategies`, toate fiind activate implicit. În panoul de control,
-comutatoarele se află în vizualizarea **Advanced** a paginii Caveman atunci când comprimarea este activată, iar
-modul implicit este Aggressive.
+Comprimarea rezultatului sculei este pasul 1 al motorului agresiv (`compressAggressive()` în `open-sse/services/compression/aggressive.ts`), deci rulează în modul agresiv și într-un pas `aggressive` al unei conducte stivuite. Comprimă mesajele `tool` și `function` în formă OpenAI și textul din blocurile Anthropic `tool_result`. Fiecare strategie are propriul său comutator sub `aggressive.toolStrategies`, totul activat în mod implicit. În tabloul de bord, comutatoarele sunt în pagina Caveman** Avansat** vizualizați în timp ce compresia este activată și modul implicit este Agresiv.
 
-### Conducta stivuită
+### Conductă stivuită
 
-Modul stivuit rulează **mai multe motoare în succesiune** — de obicei mai întâi RTK
-(economii de 60-90% pentru rezultatele instrumentelor), apoi Caveman pentru textul rămas (economii de intrare
-de ~46%). Combinate, acestea oferă **intervalul eligibil de 78-95%** (consultați mai sus Calculul economiilor din amonte):
-`1 - (1 - 0.60..0.90) × (1 - 0.46)` are o medie de ≈89%.
+Modul stivuit rulează** mai multe motoare în succesiune** — de obicei, RTK mai întâi (60-90% economii la ieșirea instrumentului), apoi Caveman pe textul rămas (~ 46% economii de intrare). Compus, acesta este** 78-95% interval eligibil** (vezi matematica economii în amonte mai sus): `1 - (1 - 0.60..0.90) × (1 - 0.46)` este în medie ≈ 89%.
 
 #### Cum funcționează
 
 ```
-Intrare (1000 de tokenuri)
-  → RTK (filtru adaptat comenzilor) → 200 de tokenuri
-    → Caveman (eliminarea elementelor de umplere) → 108 tokenuri
-  → Ieșire (108 tokenuri, economii de ~89%)
+Input (1000 tokens)
+  → RTK (command-aware filter) → 200 tokens
+    → Caveman (filler removal) → 108 tokens
+  → Output (108 tokens, ~89% savings)
 ```
 
-#### Când se utilizează
+#### Când să utilizați
 
 Utilizați modul stivuit pentru:
 
-- Fluxuri de lucru care folosesc intensiv instrumente (programare agentică, cercetare)
+- Fluxuri de lucru grele de instrumente (codare agentică, cercetare)
 - Procesare în loturi sensibilă la costuri
-- Situațiile în care aveți nevoie de economii maxime de tokenuri
+- Când aveți nevoie de economii maxime de simboluri
 
-Conductele stivuite sunt configurate prin setarea globală de comprimare `stackedPipeline`
-sau printr-o combinație de comprimare denumită, atribuită unei combinații de rutare (consultați
-Suprareglarea per combinație de mai sus) — nu printr-un `modePack` al unei combinații automate (acel câmp doar
-reajustează ponderile selecției modelelor pentru combinația automată, iar `stacked` nu este un nume valid de pachet).
+Conductele stivuite sunt configurate prin setarea globală de compresie `stackedPipeline` sau printr-un combo de compresie numit atribuit unui combo de rutare (consultați Suprascrierea per combo de mai sus) — nu printr-un `modePack` auto-combo (câmpul respectiv reponderează doar selecția modelului auto-combo, iar `stacked` nu este un nume de pachet valid).
 
 ---
 

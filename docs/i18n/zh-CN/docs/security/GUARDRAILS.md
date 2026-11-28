@@ -5,28 +5,26 @@
 ---
 
 > **事实来源：** `src/lib/guardrails/`
-> **最后更新：** 2026-10-17 — v3.8.52（新增[覆盖范围与限制](#coverage-and-limits)：
-> 钩子所能触达的路由与响应路径、合并后的禁用请求头 (#16412)、作为强制边界的注入
-> 阻断模式 (#16413)，以及在 post-call 之前哪些组件会看到响应）
 
-护栏（Guardrails）在 OmniRoute 与上游提供者之间的边界上强制执行安全、策略与内容转换。每个护栏都可以检查（并可选地拒绝、转换或标注）请求负载（`preCall`）与上游响应（`postCall`）。
+护栏在OmniRoute和上游提供者之间的边界强制执行安全、策略和内容转换。每个护栏都可以检查（并可选择拒绝、转换或注释）请求有效负载 (`preCall`) 和上游响应 (`postCall`)。
 
-该系统采用**故障开放（fail-open）**设计：如果某个护栏在执行时抛出异常，注册表会记录该错误并继续执行下一个护栏，而不是让请求失败。阻断是一个显式决策（`block: true`），绝不会意外发生。唯一的例外是被中止的请求：当调用方的 `signal` 被中止时，抛出异常的护栏会使本次钩子运行被拒绝，而不是被跳过。
+该系统是**故障开放**：如果护栏在执行时抛出异常，注册表会记录错误并继续执行下一个护栏，而不是使请求失败。阻塞是一个明确的决定（`block: true`），而不是意外。一个例外是中止的请求：当调用者的`signal`中止时，抛出护栏会拒绝钩子运行而不是被跳过。
 
-这些钩子**不会**在每条路由或每个响应上运行。在将护栏当作安全控制手段依赖之前，请先阅读[覆盖范围与限制](#coverage-and-limits)。
+钩子可以**不是**在每条路线或每一个响应上运行。在依靠护栏作为安全控制之前，请先阅读[覆盖范围和限制](#coverage-and-limits)。
 
 ## 内置护栏
 
-注册表在导入时按优先顺序自动加载六个护栏（请参阅`registry.ts` → `registerDefaultGuardrails()`）：
+注册表会在导入时按优先级顺序自动加载这些护栏（请参阅`registry.ts` → `registerDefaultGuardrails()`）：
 
-| 优先事项 | 姓名                | 阶段           | 文件                  |
-| -------- | ------------------- | -------------- | --------------------- |
-| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| 优先事项 | 姓名                | 阶段           | 文件                      |
+| -------- | ------------------- | -------------- | ------------------------- |
+| `1`      | `agent-guard`       | `preCall`      | `agentGuard/guardrail.ts` |
+| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`         |
+| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`          |
+| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`          |
+| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`            |
+| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`      |
+| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts`     |
 
 运行较低优先级的号码**第一的**。
 
@@ -42,7 +40,7 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 2. 通过`extractImageParts(messages)` (`visionBridgeHelpers.ts`) 提取图像部分，委托给**统一媒体检测器**`open-sse/utils/mediaParts.ts` —的`detectMediaParts()`与组合兼容性过滤器共享单一事实来源。提取被列入`replaceImageParts`可以拼接回来的形状（提取↔替换合约）： OpenAI `image_url`、 Anthropic base64 `source.type:"base64"`、 Anthropic URL `source.type:"url"`和 Responses API `input_image`。嵌套在Claude代码`tool_result.content`和响应工具输出中的匹配图像也会被提取并替换到其原始路径；仅指示符形状是组合过滤器材料，不会被提取。如果没有找到则跳过。
 3. 通过`resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`) 解析运行时配置：新的`modalityBridge*`设置键 win；遗留的`visionBridge*`密钥仍然是**单周期回退**（回滚窗口）。当桥被禁用时，在任何媒体遍历之前跳过。
 4. 模式选择器（`modalityBridgeVisionMode`，见下表）决定重新路由与描述。重新路由返回`modifiedPayload`仅交换`model` ，加上元`{ rerouted, fromModel, toModel, imagesKept }`。
-5. 描述路径：在`maxImages`上捕获图像，编写任务感知提示，查阅描述缓存，调用视觉模型**并联**(`Promise.allSettled`)，并在其位置注入`[Image N]: <description>`文本部分。失败的描述会产生`null`：为unknown/vision-capable目标（#4012）保留原始图像，但**已确认的纯文本直接目标**或者零视觉组合为每个未描述的图像获取显式的`(unavailable — no vision-capable provider connected)`文本存根，包括部分失败和超出描述调用上限 (#17069) 的图像。现有的全部失败的组合描述后备仍然存在（#8430）。
+5. 描述路径：在`maxImages`上捕获图像，编写任务感知提示，查阅描述缓存，调用视觉模型**并联**(`Promise.allSettled`)，并在其位置注入`[Image N]: <description>`文本部分。失败的描述会产生`null`：为unknown/vision-capable目标（#4012）保留原始图像，但是**已确认的纯文本直接目标**或者零视觉组合为每个未描述的图像获取显式的`(unavailable — no vision-capable provider connected)`文本存根，包括部分失败和超出描述调用上限 (#17069) 的图像。现有的全部失败的组合描述后备仍然存在（#8430）。
 6. 返回`modifiedPayload` +元（`imagesProcessed`、 `descriptions`、 `processingTimeMs`、 `visionModel`）。
 
 #### 模式选择器 (`modalityBridgeVisionMode`)
@@ -77,7 +75,7 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 
 #### 描述缓存（`modalityBridge/bridgeCache.ts`）
 
-用于描述输出的内存中LRU + TTL缓存，在进程范围内共享。具有长度前缀帧的密钥= `sha256(imageRef + composedPrompt + configuredBridgeModel)` （无字段边界冲突）。模型组件是**配置的**桥接模型，而不是实际回答— `callVisionModel`模型可能会在内部回退，并且每次尝试键入都会使缓存碎片化。失败的描述永远不会被缓存。设置：
+用于描述输出的内存中LRU + TTL缓存，在进程范围内共享。具有长度前缀帧的密钥= `sha256(imageRef + composedPrompt + configuredBridgeModel)` （无字段边界冲突）。模型组件是**配置好的**桥接模型，而不是实际回答— `callVisionModel`模型可能会在内部回退，并且每次尝试键入都会使缓存碎片化。失败的描述永远不会被缓存。设置：
 
 | 钥匙                            | 默认   | 范围    |
 | ------------------------------- | ------ | ------- |
@@ -103,7 +101,7 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 
 专用仪表板页面是`/dashboard/settings/modality-bridge`。其 URL 可寻址`Vision`、 `Audio`和`Video`选项卡在切换`tab`值时保留查询参数。 Vision 选项卡公开启用、模式、模型选择（包括自动默认值）、任务感知提示、高级timeout/image/description-length/cache限制、运行时计数器和受保护的示例请求。 “音频”选项卡也是实时的：它公开支持、具有自动功能的仅 STT 模型选择器、 timeout/max-clip限制、音频计数器和`input_audio`样本测试。 “视频”选项卡具有功能性：它报告FFmpeg/ffprobe运行时状态—四种显式UI状态之一（探测正在运行或无法完成时的`unknown` 、客户端跳过探测的非环回仪表板主机上的`restricted` 、探测到并确认丢失后的`unavailable` ，或带有FFmpeg/ffprobe版本的`available` ） —保留enable/model/frame/video/timeout限制，将模型选择器过滤为支持视觉的模型，并公开视频计数器。
 
-之前AI设置下的Vision Bridge卡是新页面的兼容性链接；它不再拥有该表格的第二份副本。媒体提供者还将图像到文本和语音到文本工作流程链接到相应的模态桥选项卡，而无需删除现有的语音到文本游乐场。
+之前AI设置下的Vision Bridge卡是新页面的兼容链接；它不再拥有该表格的第二份副本。媒体提供者还将图像到文本和语音到文本工作流程链接到相应的模态桥选项卡，而无需删除现有的语音到文本游乐场。
 
 **Self-loop admission bypass:** when the describe call routes through OmniRoute's own `/v1` self-loop (non-standard provider model), the sub-request sends `x-omniroute-admission-bypass: internal` and is authenticated with the resolved self-loop credential — the local `sk_omniroute` sentinel in local mode, or the operator-configured `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env key (#1350) so `REQUIRE_API_KEY=true` deployments can still run the describe call. The bypass is only honored for those exact credentials, so external clients cannot use the header to skip admission.
 
@@ -156,7 +154,7 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 
 `scripts/perf/video-bridge-fu07-eval.ts`生成确定性的真实FFmpeg固定装置，用于重复数据删除后的字幕调用节省、密集运动预算分配、 blur/exposure/SI-TI证据、长尾快速剪切和逐渐淡出误报。它记录预分析墙时间，以及`/usr/bin/time`可用的子CPU和峰值RSS。它的质量检查只是结构性的预言。真正的字幕模型质量仍然是`HOLD`因为该工具没有授权端点或冻结判断。除非`--caption-cost-per-call-usd`提供明确的每次调用正估计，否则货币节省也仍然是`HOLD` ；该脚本永远不会伪造任何结果。
 
-每个帧限制为 4 MiB，所有原始帧总共限制为 23 MiB，序列化代理响应限制为 32 MiB。 `finally`中的私有临时目录被删除。 OmniRoute不捆绑FFmpeg并且不接受自定义可执行路径。在添加字幕之前，桥接器会应用保守的视觉重复数据删除过程：每个JPEG都减少为 16 × 16 灰度缓冲区，并且仅与保留的最后一帧进行比较。对于超过一帧的请求字幕预算，提取会提供最多两倍于预算的有界候选池，并且永远不会超过 16 帧。所请求的上限仅在重复数据删除后应用，当预算至少为 2 时，在最终稀疏期间保留第一个和最终选定的候选者。版本化`grayscale-16x16-mean-cells-v2`策略使用平均亮度增量和归一化增量至少为 0.05 的缩略图单元的比率中的较大者。重复阈值是常数 0.04，选择它是为了可预测性，而不是作为运行时设置公开。这种二次高对比度信号保留了仅平均值比较可以隐藏的小运动和可见文本变化。比较器或解码器错误打开并保持覆盖。输出元数据将提取的候选帧、成功使用的帧和丢弃的视觉重复项分开。
+每个帧限制为 4 MiB，所有原始帧总共限制为 23 MiB，序列化代理响应限制为 32 MiB。 `finally`中的私有临时目录被删除。 OmniRoute不捆绑FFmpeg并且不接受自定义可执行路径。在添加字幕之前，桥接器会应用保守的视觉重复数据删除过程：每个JPEG都减少为 16 × 16 灰度缓冲区，并且仅与保留的最后一帧进行比较。对于超过一帧的请求字幕预算，提取会提供最多两倍于预算的有界候选池，并且永远不会超过 16 帧。所请求的上限仅在重复数据删除后应用，并且当预算至少为 2 时，在最终稀疏期间保留第一个和最终选定的候选者。版本化`grayscale-16x16-mean-cells-v2`策略使用平均亮度增量和归一化增量至少为 0.05 的缩略图单元的比率中的较大者。重复阈值是常数 0.04，选择它是为了可预测性，而不是作为运行时设置公开。这种辅助高对比度信号保留了仅平均值比较可以隐藏的小运动和可见文本变化。比较器或解码器错误打开并保持覆盖。输出元数据将提取的候选帧、成功使用的帧和丢弃的视觉重复项分开。
 
 明确标记的视频部分可能会请求带时间戳的联系表。该桥最多构建一个4列、16帧的JPEG网格。每个 512 像素单元将其源时间戳刻录到高对比度底部带中，而相同的时间戳保留在文本元数据中以供下游关联和审核。完整的JPEG上限仍然为 32 MiB。如果`sharp`无法解码或组合网格，则桥接器会回退到各个JPEG帧；客户端中止仍然通过工作表操作传播。
 
@@ -166,13 +164,13 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 
 FU-07要求至少 98% 的质量保留和不超过 1.2 倍基线的 p95 延迟，加上等效平均字幕调用的 0.05 绝对案例平衡平均召回率改进，或至少减少 10% 的平均去重后字幕调用。 FU-09要求至少 0.85 的质量、95% 的保留率、20% 的中值延迟减少和 10% 的令牌减少。关键事实丢失、注入合规性或缺失使用会阻碍晋升。一次执行不能促进任何事情： `--previous-report`确认同一个policy/model的两个不同的、不重叠的、连续合格的执行revision/candidate/corpus.抽样实验无法确认接触表实验。
 
-收集器应该在内存中对响应进行评分，并保存`responseDigest` plus 指标和观察绑定，而不是响应文本。消费者还阅读遗留的原始观察结果，但绝不会将该文本复制到其报告中。每个观测值恰好接受`responseDigest`或`rawResponseText`之一。版本控制的允许列表保持为空，并具有不可变的`hold`默认值。合格的条目需要其证据参考、策略、模型修订、精确候选SHA、清单摘要和两个不同的运行IDs；冲突的上下文被拒绝。这些元数据是审计合同，不能证明引用的文件包含真实的测量结果。在添加任何条目之前查看实际收据。管理统计端点和视频仪表板揭示了保守的准备情况。单独配置的模型别名不会建立其修订版本或运行候选SHA，因此当前仪表板报告`HOLD`而不是重用另一个执行上下文中的资格。明确的实验选择与推广是分开的；没有默认值会自动更改。
+收集器应该在内存中对响应进行评分，并保存`responseDigest` plus 指标和观察绑定，而不是响应文本。消费者还阅读遗留的原始观察结果，但绝不会将该文本复制到其报告中。每个观测值恰好接受`responseDigest`或`rawResponseText`之一。版本控制的允许列表保持为空，并具有不可变的`hold`默认值。合格的条目需要其证据参考、策略、模型修订、精确候选SHA、清单摘要和两个不同的运行IDs；冲突的上下文被拒绝。这些元数据是审计合同，不能证明引用的文件包含真实的测量结果。在添加任何条目之前查看实际收据。管理统计端点和视频仪表板暴露了保守的准备情况。单独配置的模型别名不会建立其修订版本或运行候选SHA，因此当前仪表板报告`HOLD`而不是重用来自另一个执行上下文的资格。明确的实验选择与推广仍然是分开的；没有默认值会自动更改。
 
 当调用者已经拥有对齐文本时，可以将可选的`transcript.cues`数组附加到支持的视频部分。每个提示必须携带`text`、探测持续时间内的有限`start`/`end`间隔以及白名单`source` （`client`、 `embedded`或`audio-bridge`）； `confidence`默认为`1`并且必须保持在`0`和`1`之间。完全相同的重复提示被折叠。 OmniRoute永远不会从此元数据开始转录：经过验证的线索会被复制到具有来源、置信度和间隔的描述结果中，并与帧标题一起呈现为不受信任的观察结果。无效、超出范围或无出处的文本将被拒绝，而不是混合到字幕流中。两个请求正文转录通道都将提供的来源标准化为`client`，包括自断言的`embedded`或`audio-bridge`标签。只有服务器拥有的适配器才能通过仅代码`trustedSource`参数分配这些可信标签；请求JSON字段无法到达该参数。转录文本仍然是不受信任的媒体衍生内容，无论其来源如何，并且绝不能确定授权。
 
 高级调用者可以为同一视频提供`audioTranscript`轨道；它被视为客户端提供的文本，而不是服务器转录的证明。融合缝在一个截止日期和中止信号下运行视觉和音频观察，在公共时间线上对它们进行排序，折叠精确的重复项，并在只有一侧成功时报告部分结果。无效的`audioTranscript`会降级为部分结果—保留视觉描述，并且音频分支记录经过净化的故障代码—而不是使整个视频失败。每个分支的可用性、部分标志和清理后的故障代码都保留在所描述的结果、护栏元数据 (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`)、结果缓存元数据和桥融合计数器中。默认视频桥路径不会调用语音转文本或下载第二个媒体副本；如果没有明确的轨道，它仍然只是视频。
 
-**转录保留（#12150 P1）。**每当视频桥（本身选择加入）呈现转录提示—时，这会自动应用，没有单独的保留标志。当请求呈现任何转录提示（调用者声明的`transcript`或融合的`audioTranscript`）时，护栏将其标记为`videoBridgeObserved`并生成视频描述—的编辑阴影，其中每个提示的自由文本正文都被替换为`[redacted-video-transcript]`，通过在组装字符串之前替换结构化提示字段来构建（从不解析扁平文本，因此没有提示内容—对抗性或普通的，包括包含以下内容的正文`]`如`[inaudible]`/`[music]` —可以生存）。持久的呼叫日志请求正文将每个视频派生的文本部分交换为经过内容相等匹配的经过编辑的阴影； `fullText`锚点是从完成的预调用 Guardrail 有效负载中重新读取的，因此在后面的链 Guardrail（ PII和凭证掩码器、优先级10/95）重写描述文本并在system-prompt/handoff/memory注入重塑消息数组之后，匹配仍然成功。向上游发送到模型的主体保持不变。观察到的请求也不会填充持久内存（请求和响应派生的提取都会被跳过），因此模型自己的回复无法将转录文本回显到内存中。
+**转录保留（#12150 P1）。**每当视频桥（本身选择加入）呈现转录提示—时，这会自动应用，没有单独的保留标志。当请求呈现任何转录提示（调用者声明的`transcript`或融合的`audioTranscript`）时，护栏将其标记为`videoBridgeObserved`并生成视频描述—的编辑阴影，其中每个提示的自由文本正文都被替换为`[redacted-video-transcript]`，通过在组装字符串之前替换结构化提示字段来构建（从不解析扁平文本，因此没有提示内容—对抗性或普通的，包括包含以下内容的正文`]`如`[inaudible]`/`[music]` —可以生存）。持久的呼叫日志请求正文将每个视频派生的文本部分交换为经过内容相等匹配的经过编辑的阴影； `fullText`锚点是从完成的预调用 Guardrail 有效负载中重新读取的，因此在后面的链 Guardrail（ PII和凭证掩码器、优先级10/95）重写描述文本并在system-prompt/handoff/memory注入重塑消息数组之后，匹配仍然会成功。向上游发送到模型的主体保持不变。观察到的请求也不会填充持久内存（请求和响应派生的提取都会被跳过），因此模型自己的回复无法将转录文本回显到内存中。
 
 **原始视频字段 (#12430)。**当启用桥接且本机视频支持未知或不存在时，定义的`transcript`/`audioTranscript`字段也会激活`videoBridgeObserved`，即使在描述失败或`maxVideos`限制之后也是如此。 `null`和空字符串计数；缺失字段和非视频元数据则不会。保留的副本会编辑这些字段或省略请求，并且caches/Memory会被绕过。
 
@@ -180,7 +178,7 @@ FU-07要求至少 98% 的质量保留和不超过 1.2 倍基线的 p95 延迟，
 
 其他保留的副本使用相同的观察请求信号。原始的护栏前客户端请求快照、内存中的待处理请求和早期拒绝的请求日志在结构上取代了视频部分中的转录字段；由管道阶段和上下文切换合成的字符串提示在持久请求主体接收器中进行编辑。持久化的`video_content_removed`标记使`previous_response_id`延续无法关闭，而不是重建故意丢弃的文本。如果观察到的请求在记录之前丢失了其每部分的编辑阴影，或者甚至在稍后的请求突变后几个视频阴影之一无法匹配，则保留的请求正文将被完全省略，而不是保留部分编辑的转录本。
 
-对于观察到的请求，模型响应可能会引用转录本的任何部分，而无需结构化提示边界。因此，其持久的呼叫日志`responseBody`被遗漏标记所取代；详细的管道工件（可以包括upstream/client主体和流块）不会保留。语义、幂等性和推理重放缓存会绕过该请求的读取和写入。提供者请求和客户端可见的响应保持不变。当详细的工件被省略时，早期的保活字节将从临时缓冲区中耗尽。 Kiro的格式错误的EventStream警告仅报告有效负载字节计数，而不报告其内容或JSON解析器的原始错误。这并不是说每个不相关的provider/plugin诊断都已经过审核； #11658中跟踪更广泛的保留汇扫描。
+对于观察到的请求，模型响应可能会引用转录本的任何部分，而无需结构化提示边界。因此，其持久的呼叫日志`responseBody`被遗漏标记所取代；详细的管道工件（可以包括upstream/client主体和流块）不会保留。语义、幂等性和推理重放缓存会绕过该请求的读取和写入。提供者请求和客户端可见的响应保持不变。当省略详细的工件时，早期的保活字节将从临时缓冲区中耗尽。 Kiro的格式错误的EventStream警告仅报告有效负载字节计数，而不报告其内容或JSON解析器的原始错误。这并不是说每个不相关的provider/plugin诊断都已经过审核； #11658中跟踪更广泛的保留汇扫描。
 
 内部`/api/modality-bridge/video/drilldown`生命周期是一个单独的loopback/token-authenticated缓存底层。每个操作还需要一个规范的不透明主体ID。在启用生产调用方之前，它必须从经过身份验证的租户派生ID ，并且绝不能转发客户端选择的值。缓存键将该主体绑定到规范会话和视频引用IDs，仅存储它们的SHA-256-derived键，并将读取和删除范围限定为同一主体。缓存每个条目最多存储 16 个派生JPEG帧，十分钟后过期，并支持有界`start`/`end`读取或显式会话删除。
 
@@ -297,9 +295,83 @@ FU-07要求至少 98% 的质量保留和不超过 1.2 倍基线的 p95 延迟，
 - **仅选择加入**，与PII编辑相同的约定（硬规则#20-adjacent）：禁用，除非`settings.credentialRedactionEnabled === true`**或者**`CREDENTIAL_REDACTION_ENABLED=true`.关闭它后，护栏是一个无操作—它永远不会阻塞，也不会重写。
 - `redactCredentials()`遍历完整的payload/response树（`walkValue()`，原型污染安全，通过`WeakSet`循环安全）并用`[REDACTED:<type>]`占位符替换匹配项，仅克隆实际更改的分支。
 - `CREDENTIAL_PATTERNS`涵盖LLM提供者密钥（OpenAI、 OpenAI-proj、 Anthropic、 Google、 Hugging Face、 Replicate）、 VCS/SaaS币（GitHub、 Slack、 Linear、 Notion、 npm、 Postman、 Discord）、支付密钥（Stripe、 Square）、云密钥（AWS访问密钥、 Twilio、 SendGrid、 Mailgun）、私钥 / JWTs、凭证承载连接字符串（`mongodb://user:pass@...`等），以及通用`Authorization`/`x-api-key`/`api-key`/`apikey`标头值模式。标头形状的键（`authorization`、 `x-api-key`、 `api-key`、 `apikey`）在结构上进行编辑（仅值，保留`Bearer `/`Basic `等方案前缀），而不是通过通用文本正则表达式。
+- 即使标签后面的值没有提供者前缀，也会被屏蔽： `DB_PASSWORD=…`、 `AWS_SECRET_ACCESS_KEY=…`、 `client_secret: …`、 `?api_key=…` （标签： `password`、 `passwd`、 `secret`、 `secret_key`、 `secret_access_key`、 `api_key`、 `access_token`、 `refresh_token`、 `auth_token`，带有任何前缀，例如`DB_`）。标签和分隔符保留，值变为`[REDACTED:secret]`。该值需要 12 个或更多字符，因此`password: required`等散文仍具有可读性；以`$`或`%` （变量引用）开头的值将被保留。
 - 护栏永不遮挡；它仅重写（`modifiedPayload` / `modifiedResponse`）和注释（`meta.credentialsRedacted`， `meta.count`）。
 
 回归守卫： `tests/unit/credential-masker-guardrail.test.ts`。
+
+### 特工卫士 (`agentGuard/`)
+
+代理守卫根据其标头对向`claude`或`anthropic`提供者发出请求的客户端进行分类。 `AGENT_GUARD_MODE`采用三个值： `off` （默认）、 `monitor`和`block`。使用`off`时，不会读取任何标头，也不会记录任何内容。
+
+官方代理通过这些标头进行识别（比较时不区分大小写）：
+
+- Claude代码：以`claude-cli/`或`claude-code/`或`x-app: cli`开头的`User-Agent`以及`anthropic-beta`标头或包含`claude` `User-Agent` 。
+- Anthropic SDKs：以`Anthropic/`、 `AsyncAnthropic/`、 `anthropic-typescript/`或`anthropic-python/`开头的`User-Agent` 。
+
+生产中记录器的默认级别 (`info`) 显示两种类型的行。对于`APP_LOG_LEVEL=warn` ，仅保留已知的第三方线路。
+
+日志字段： `agent`、 `thirdParty`、 `provider`、 `model`、 `apiKeyId`、 `userAgent`、 `xApp`、 `anthropicBeta`、 `xTitle`、 `referer`、 `stainless`。标头值和模型字符串的上限为 200 个字符。记录引用者时不包含其查询字符串、片段和用户信息。 API键、 `Authorization`、 `x-api-key`和 cookies 永远不会被读取。
+
+文件： `src/lib/guardrails/agentGuard/classifier.ts`、 `src/lib/guardrails/agentGuard/policy.ts`、 `src/lib/guardrails/agentGuard/guardrail.ts`、 `src/lib/guardrails/agentGuard/settings.ts`、 `src/lib/guardrails/agentGuard/logLine.ts`、 `src/lib/guardrails/agentGuard/enforcement.ts`、 `src/sse/handlers/chat/agentGuardGate.ts`。
+
+**分类限制（两种模式）：**
+
+- 基于官方SDK构建的代理，不发送`X-Title`、 `HTTP-Referer`或自己的`User-Agent` ，看起来像SDK。仅靠`x-stainless-*`标头并不能使客户端成为正式客户端。
+- 第三方代理通过`User-Agent`、 `X-Title`和`HTTP-Referer` （或`Referer`）中的全字标记进行匹配。未列出的客户端显示为`unknown`。
+- 来自基于浏览器的客户端的请求携带浏览器自己的`User-Agent`并显示为未识别，除非`X-Title`或引用者携带已知的第三方令牌。
+- 每个观察到的请求一个日志行：预计繁忙实例上的数量。
+
+#### 监视器
+
+使用`AGENT_GUARD_MODE=monitor`，其模型字符串名称为`claude`或`anthropic`提供者的请求将按其客户端标头进行分类。当客户端不是官方代理时，会写入一行带有`tag: "AGENT_GUARD"`日志。 `warn`表示已知的第三方代理， `info`表示未知的客户端。优先级`1`：护栏仅读取标头，从不更改有效负载，因此它在媒体桥之前运行。 `monitor`从不阻塞。
+
+**`monitor`的限制：**
+
+- 每个信号都是客户端控制的标头。这是观察，而不是访问控制。
+- 在解析模型之前从模型字符串中读取提供程序： `provider/model`、提供程序别名（例如`cc/…`）和配额共享 ID (`qtSd/<group>/<provider>/<model>`)。不遵循裸模型 ID、模型别名、组合和后来的路由规范化。这些要求没有得到遵守。
+- 调用者可以通过注册表禁用通道根据请求跳过它（请参阅[根据请求禁用 Guardrails](#disabling-guardrails-per-request) ）。不会观察到跳过的请求。
+- 它仅在`runPreCallHooks`运行的地方运行（请参阅[覆盖范围和限制](#coverage-and-limits)）。
+
+#### 堵塞
+
+使用`AGENT_GUARD_MODE=block`时，预调用护栏不会执行任何操作。聊天处理程序会做出决定：
+
+1. 当目标即将被调度时，该决定是在请求解析到的提供者上做出的。涵盖了提供者别名、裸模型 ID、配额共享 ID 和每个组合目标。
+2. 它不在 Guardrail 注册表中运行，因此每个请求禁用通道不适用于它。
+3. 已知的第三方代理被拒绝。身份不明的客户端会在`monitor`中记录，并且仅在`AGENT_GUARD_STRICT=true`中被拒绝。 Claude代码和官方Anthropic SDKs是从来不拒绝的。
+4. 拒绝是HTTP 403 与`error.type` `permission_error`和`error.code` `client_agent_not_allowed`。正文是 OpenAI 风格的错误。在 Anthropic 格式请求中，它还在顶层携带`type: "error"` 。没有`Retry-After`标头，并且在任何流开始之前返回拒绝。
+5. 拒绝并不是提供者的失败。它不会触及提供者断路器、连接冷却或模型锁定。
+6. 在组合中，将跳过被拒绝的目标并运行剩余的目标。当至少一个目标被拒绝并且没有目标通过守卫时，请求会因策略错误而失败。当顶级条目通过前缀或步骤的提供程序 ID 命名另一个已知提供程序时，组合会保留自己的错误。被`fallbackOnlyOnQuotaExhaustion`拒绝的优先目标会以同样的方式被跳过，并且不会停止组合。影子目标会被检查和记录，但它永远不会被视为越过守卫的目标。
+7. 当融合服务将使用的判断被拒绝时， `fusion`组合在面板运行之前失败。该判断来自组合的配置或全局组合默认值。当通过安全网重定向到达融合组合时，会运行相同的检查。
+8. 每个请求和提供者一个日志行，其中`tag: "AGENT_GUARD"`、 `warn`表示拒绝，并且字段与`monitor`相同。
+9. 发生内部错误时，防护装置无法打开。请求继续进行并记录一行`warn`行`agent guard failed open` 。
+
+**`block`的限制：**
+
+- 每个信号都是客户端控制的标头。发送`User-Agent: claude-cli/…`客户端被视为Claude代码。 `block`阻止未经修改的第三方代理。它不是访问控制。
+- A proxy that strips the identifying headers turns any client into an unidentified one. Such a client is served without `AGENT_GUARD_STRICT` and refused with it. Run the guard on the instance that faces the clients. A second OmniRoute instance behind the first sees the first one's headers.
+- `AGENT_GUARD_STRICT`拒绝那些不是Claude代码或官方SDK的提供者的所有客户。其中包括基于浏览器的客户端和仪表板游乐场。仪表板组合实时测试是豁免的，也可以通过安全网重定向进行。
+- 某些功能会构建自己的聊天请求，而不是传递客户端的请求。其中四个通过OmniRoute的`/v1/...`路由发回：
+  - 批处理作业（`src/lib/batches/dispatch.ts`）
+  - MCP推理工具 (`open-sse/mcp-server/tools/inferenceTools.ts`)
+  - A2A智能路由（`src/lib/a2a/skills/smartRouting.ts`）
+  - 通过OmniRoute (`src/lib/guardrails/visionBridgeHelpers.ts`) 描述图像时的视觉桥
+- Telegram聊天代理 (`src/lib/telegram/chatProxy.ts`) 在进程中构建其请求并直接调用聊天处理程序。
+- 这些内部请求携带OmniRoute自己的标头，而不是启动它们的客户端的标头。警卫将他们归类为身份不明的顾客。
+- 如果没有`AGENT_GUARD_STRICT`，这些内部请求将由受保护的提供者提供服务，无论原始客户是谁。通过他们到达Claude的第三方代理不会被拒绝。
+- 使用`AGENT_GUARD_STRICT`时，无论是谁启动了这些内部请求，这些内部请求都会被受保护的提供者拒绝，包括Claude代码。
+- 只有通过聊天处理程序的请求才会被门控。模型验证（`src/lib/modelValidation/runner.ts`）直接调用请求核心并且没有门控。
+- 仅涵盖`claude`和`anthropic`提供者。其他提供者提供的Claude模型不包括在内， `claude-web`提供者也不包括在内。
+- 某些组合将其剩余目标命名为不带提供程序前缀，如裸模型 ID 或嵌套组合。当这些目标由于不相关的原因（断开断路器、冷却、锁定）而不可用时，请求将失败并出现策略错误。
+- 与任何跳过的目标一样，跳过的组合目标会清除该目标的最后一次已知良好的引脚。
+- 在小组运行之前，以受保护的提供者前缀命名的融合法官会被拒绝。其中包括`anthropic/…`、 `claude/…`、别名（例如`cc/…`、上下文后缀（例如`[1m]`以及这些提供程序上的配额共享名称。
+- 编写为裸模型 ID 或解析为受保护提供者的模型别名的融合判断仅在分派时才会被拒绝。那时面板已经运行了。使用提供者前缀命名法官可以避免这种情况。任何法官的拼写都会被看守的提供者拒绝。
+- 即使融合服务会在运行时删除该判断，预检查也会拒绝配置的Claude判断。该服务会删除操作员隐藏的判断以及无法获取请求媒体的判断。第二个案例涉及未经证实的视觉支持和法官不接受的其他媒体。两个组合路径都是这样的。
+- 在安全网重定向上，组合服务接收空设置。仅在全局组合默认值中设置的判断从不在那里使用。
+- 当`block`开启时，对于任何模型，守卫会拒绝受守卫提供者的客户端不会使用 sidecar 快速路径。 `AGENT_GUARD_STRICT`下是每一个身份不明的客户端。在中继令牌检查之后， `POST /v1/relay/chat/completions/bifrost`使用 503 和`X-Bifrost-Fallback`标头应答这些请求。
+- `POST /v1/messages/count_tokens`向客户端提供本地估计，警卫会拒绝模型解析的提供者。
+- 没有每键豁免。
 
 ## 基础契约（`base.ts`）
 
@@ -345,31 +417,31 @@ interface GuardrailContext {
 
 ## 注册表（`registry.ts`）
 
-单例 `guardrailRegistry` 提供：
+单例`guardrailRegistry`暴露：
 
-- `register(guardrail)` —— 添加一个护栏（若规范化名称相同则替换），并按 `priority` 升序重新排序。
-- `clear()` / `list()` —— 管理辅助方法。
-- `runPreCallHooks(payload, context)` —— 遍历已启用的护栏，通过 `modifiedPayload` 在链中传递载荷，并在遇到第一个 `block: true` 时停止。
-- `runPostCallHooks(response, context)` —— 在响应侧执行相同的流程。
-- `resetGuardrailsForTests({ registerDefaults })` —— 清空状态，并可选择重新注册默认护栏，以实现干净的测试隔离。
+- `register(guardrail)` —添加（或用规范化名称替换）护栏并按升序`priority`重新排序。
+- `clear()` / `list()` —行政助手。
+- `runPreCallHooks(payload, context)` —迭代活动护栏，将有效负载穿过`modifiedPayload`，并在第一个`block: true`处停止。
+- `runPostCallHooks(response, context)` —响应侧的流程相同。
+- `resetGuardrailsForTests({ registerDefaults })` —清除状态并可选择重新注册干净测试隔离的默认值。
 
-两个运行器都返回 `{ blocked, payload|response, results, guardrail?, message? }`，其中 `results` 是 `GuardrailExecutionResult` 记录数组，包含每个护栏的 `blocked`、`skipped`、`modified`、`error` 和 `meta` 字段，便于追踪。
+两个运行程序都返回`{ blocked, payload|response, results, guardrail?, message? }`其中`results`是`GuardrailExecutionResult`记录数组，其中包括每个护栏的`blocked`、 `skipped`、 `modified`、 `error`和`meta`字段，对于跟踪很有用。
 
-### 按请求禁用护栏
+### 根据请求禁用护栏
 
-`resolveDisabledGuardrails({ apiKeyInfo, body, headers })` 汇总一份去重后的护栏名称列表，这些护栏将在当前请求中被跳过。共有五个通道，按以下顺序读取并合并为一个列表（去重时以首次出现为准）：
+`resolveDisabledGuardrails({ apiKeyInfo, body, headers })`聚合了当前请求应跳过的护栏名称的去重列表。有五个通道，按此顺序读取并合并到一个列表中（去重复时第一个出现的获胜）：
 
 1. `apiKeyInfo.disabledGuardrails`
-2. 请求体中的 `disabledGuardrails`（顶层）
-3. 请求体中的 `metadata.disabledGuardrails`（仅当 `metadata` 为对象时）
-4. 请求头 `x-omniroute-disabled-guardrails`
-5. 旧版请求头 `x-disabled-guardrails`
+2. 请求正文`disabledGuardrails` （顶级）
+3. 请求体`metadata.disabledGuardrails` （仅当`metadata`是对象时）
+4. 标题`x-omniroute-disabled-guardrails`
+5. 旧标头`x-disabled-guardrails`
 
-五个通道全部会被合并，包括两个请求头：同时发送 `x-omniroute-disabled-guardrails` 和 `x-disabled-guardrails` 时，跳过的是两者列表的并集；而空的现代请求头不再遮蔽旧版请求头（[#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)，已在 [#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805) 中修复）。
+所有五个通道都被合并，包括两个标头：发送`x-omniroute-disabled-guardrails`和`x-disabled-guardrails`会跳过它们列表的并集，并且空的现代标头不再隐藏旧标头（ [#16412](https://github.com/cheaper-inference/OmniRoute/issues/16412) ，在[#16805](https://github.com/cheaper-inference/OmniRoute/pull/16805)中修复）。
 
-值可以是字符串数组，也可以是逗号分隔的字符串；名称会被去除首尾空白并规范化为小写 kebab-case（`pii_masker` → `pii-masker`），空条目会被丢弃。结果通过 `context.disabledGuardrails` 传递给注册表，注册表会跳过匹配的护栏（在 `results` 中标记为 `skipped: true`）。
+值可以是字符串数组或逗号分隔的字符串；名称被修剪并标准化为小写短横线 (`pii_masker` → `pii-masker`)，并且删除空条目。结果通过`context.disabledGuardrails`传递到注册表，注册表会跳过匹配的护栏（ `results`中的`skipped: true` ）。
 
-禁用列表仅影响**注册表**。提示注入的 `block` 模式是一条强制性边界：注入防护中间件（`src/middleware/promptInjectionGuard.ts`）在调用 `evaluatePromptInjection()` 时不接受任何调用方控制的禁用列表（它过去那个无效的 `resolveDisabledGuardrails({ body })` 调用已在 [#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934) 中移除），因此即使请求禁用了 `prompt-injection`，在 `block` 模式下仍会被拒绝。这是有意为之的设计。禁用通道由调用方控制（请求体、元数据、请求头），而调用方绝不能关闭运维人员设置的安全控制（[#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)）。[#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412) 引入的请求头并集只改变哪些注册表护栏会被跳过；它不会让客户端绕过中间件。强制性的按密钥（per-key）和按分组（per-group）护栏策略在 v4 RFC [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417) 中跟踪。参见[覆盖范围与限制](#coverage-and-limits)。
+禁用列表仅影响**注册表**。提示注入`block`模式是一个强制边界：注入防护中间件（`src/middleware/promptInjectionGuard.ts`）在没有任何调用者控制的禁用列表的情况下调用`evaluatePromptInjection()` （它用来进行的死`resolveDisabledGuardrails({ body })`调用已在[#16934](https://github.com/cheaper-inference/OmniRoute/pull/16934)中删除），因此禁用`prompt-injection`的请求在`block`模式下仍然会被拒绝。这是设计使然。禁用通道由调用者控制（请求正文、元数据、标头），调用者不得关闭操作员集 ( [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ) 的安全控制。 [#16412](https://github.com/cheaper-inference/OmniRoute/issues/16412)的标头联合仅更改跳过的注册表护栏；它不会让客户端绕过中间件。 v4 RFC [#16417](https://github.com/cheaper-inference/OmniRoute/issues/16417)中跟踪强制性的每键和每组护栏策略。请参阅[覆盖范围和限制](#coverage-and-limits)。
 
 ## 执行指令
 
@@ -404,33 +476,35 @@ interface GuardrailContext {
 
 - **媒体、嵌入和数据路由**（`/v1/images/*`、 `/v1/embeddings`、 `/v1/audio/*`、 `/v1/videos/generations`、 `/v1/music/generations`、 `/v1/rerank`、 `/v1/search`、 `/v1/moderations`）永远不会到达注册表。那里没有PII屏蔽、凭证屏蔽或模态桥。他们唯一的检查是遗留的注入防护中间件。
 - **流式响应**没有调用后护栏：没有`pii-masker`或`credential-masker`调用后，也没有调用后阻止。仅适用流式PII变换（当`PII_RESPONSE_SANITIZATION`打开时）。流式响应中回显的凭证不会被编辑。
-- **禁用通道与中间件（根据设计）：**中间件通过自己对`evaluatePromptInjection()`的调用来评估提示注入，而不传递任何调用者控制的禁用列表。 `block`模式是调用者控制的禁用无法绕过的强制边界，包括在聊天系列路由 ( [#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413) ) 上。禁用`prompt-injection`仅跳过注册表防护。
+- **禁用通道与中间件（根据设计）：**中间件通过自己对`evaluatePromptInjection()`的调用来评估提示注入，而不传递任何调用者控制的禁用列表。 `block`模式是调用者控制的禁用无法绕过的强制边界，包括在聊天家庭路由 ( [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ) 上。禁用`prompt-injection`仅跳过注册表防护。
 
 ### 通话后会看到什么回复
 
 在非流路径上的顺序是：内存提取→内置工具执行→调用后护栏→调用后块退出→语义缓存存储。
 
-- **记忆提取**和**工具执行**在调用后护栏可以重写或阻止它之前查看响应。自从[#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401)以来，当`PII_RESPONSE_SANITIZATION`打开时（流式和非流式），内存提取通过`sanitizePII`运行提取的文本，但是调用后稍后块的响应仍然提供给内存和工具。
+- **记忆提取**和**工具执行**在调用后护栏可以重写或阻止它之前查看响应。自从[#16401](https://github.com/cheaper-inference/OmniRoute/pull/16401)以来，当`PII_RESPONSE_SANITIZATION`打开时（流式和非流式），内存提取通过`sanitizePII`运行提取的文本，但是调用后稍后块的响应仍然提供给内存和工具。
 - **语义缓存**存储调用后的响应，因此它存储重写的响应，并且永远不会缓存阻塞的响应。缓存条目按API键进行键控。
 
 ## 配置
 
 内置护栏读取的环境变量：
 
-| 多变的                                | 使用者                     | 影响                                                               |
-| ------------------------------------- | -------------------------- | ------------------------------------------------------------------ |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | 设置`false`以完全禁用检测。                                        |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | 注入策略： `warn`、 `block`或`log`。旧值`redact`不会重写注入文本。 |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`         | 注射防护模式；还有一个DB功能标志**覆盖**环境变量 (DB > ENV)。      |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | `MODE=block`拒绝的最低严重性： `high` （默认）、 `medium`或`low`。 |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | `INPUT_SANITIZER_BLOCK_THRESHOLD`的旧别名。                        |
-| `PII_REDACTION_ENABLED`               | `pii-masker`               | 当`true`时，请求PII被编辑（与注入模式无关）。                      |
-| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | 使用`PII_REDACTION_ENABLED`，铸造可逆令牌并在 2xx 响应中恢复它们。 |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` （下游）      | 控制响应端掩码行为。                                               |
+| 多变的                                | 使用者                     | 影响                                                                                         |
+| ------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | 设置`false`以完全禁用检测。                                                                  |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | 注入策略： `warn`、 `block`或`log`。旧值`redact`不会重写注入文本。                           |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`         | 注射防护模式；还有一个DB功能标志**覆盖**环境变量 (DB > ENV)。                                |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | `MODE=block`拒绝的最低严重性： `high` （默认）、 `medium`或`low`。                           |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | `INPUT_SANITIZER_BLOCK_THRESHOLD`的旧别名。                                                  |
+| `PII_REDACTION_ENABLED`               | `pii-masker`               | 当`true`时，请求PII被编辑（与注入模式无关）。                                                |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | 使用`PII_REDACTION_ENABLED`，铸造可逆令牌并在 2xx 响应中恢复它们。                           |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` （下游）      | 控制响应端掩码行为。                                                                         |
+| `AGENT_GUARD_MODE`                    | `agent-guard`              | `off` （默认）、 `monitor`或`block`。还有一个DB功能标志 (DB > ENV)。                         |
+| `AGENT_GUARD_STRICT`                  | `agent-guard`              | `false` （默认）或`true`。有了`block`，也拒绝不明身份的客户。还有一个DB功能标志 (DB > ENV)。 |
 
 Modality Bridge 护栏从数据库支持的设置存储 (`getSettings()`) 读取运行时配置，而不是环境变量。 Vision 的主键是`modalityBridgeVisionEnabled`、 `modalityBridgeVisionMode`、 `modalityBridgeVisionModel`、 `modalityBridgeVisionTaskAware`、 `modalityBridgeVisionPrompt`、 `modalityBridgeVisionTimeout`、 `modalityBridgeVisionMaxImages`、 `modalityBridgeVisionMaxChars`、 `modalityBridgeCacheEnabled`、 `modalityBridgeCacheTtlMinutes`和`modalityBridgeCacheMaxEntries`。仅接受旧版`visionBridge*`密钥作为记录的单周期读取回退；仪表板写入使用主键。默认值和后备解析器位于`src/shared/constants/modalityBridgeDefaults.ts`中，遗留常量保留在`src/shared/constants/visionBridgeDefaults.ts`中。
 
-音频使用`modalityBridgeAudioEnabled`、 `modalityBridgeAudioModel`、 `modalityBridgeAudioTimeout`和`modalityBridgeAudioMaxClips`以及共享`modalityBridgeCache*`设置。音频没有旧密钥回退，因为这些密钥是通过模态桥架构引入的。
+音频使用`modalityBridgeAudioEnabled`、 `modalityBridgeAudioModel`、 `modalityBridgeAudioTimeout`和`modalityBridgeAudioMaxClips`，以及共享的`modalityBridgeCache*`设置。音频没有旧密钥回退，因为这些密钥是通过模态桥架构引入的。
 
 视频使用`modalityBridgeVideoEnabled`、 `modalityBridgeVideoAnalysisMode`、 `modalityBridgeVideoModel`、 `modalityBridgeVideoFrameCount`、 `modalityBridgeVideoSamplingPolicy`、 `modalityBridgeVideoMaxVideos`和`modalityBridgeVideoTimeout`，以及共享`modalityBridgeCache*`设置。默认情况下它是禁用的，因为FFmpeg/ffprobe是可选的操作依赖项，并且帧字幕会增加延迟和模型成本。
 
@@ -488,40 +562,23 @@ guardrailRegistry.register(new BudgetGuardrail());
 - `docs/architecture/RESILIENCE_GUIDE.md` —— 正交层（断路器、冷却期）
 - `docs/reference/ENVIRONMENT.md` —— 完整的环境变量参考
 
-## 注入防护路由覆盖与红队测试（第 8 阶段 · D 区块）
+## 注入防护路线覆盖和红队（第 8 阶段·D 区）
 
-注入防护（`createInjectionGuard` / `withInjectionGuard`）覆盖所有
-接受用户提示词的路由。它遵循 `INJECTION_GUARD_MODE`（默认 `warn` = 仅记录日志；
-`block` = 返回 HTTP 400 `SECURITY_001`）。
+注入防护（`createInjectionGuard` / `withInjectionGuard`）涵盖所有接受用户提示的路由。它尊重`INJECTION_GUARD_MODE` （仅默认`warn` =日志； `block` =返回HTTP 400 `SECURITY_001`）。
 
-| 类型         | 路由                                                                                                                                                 | 默认模式 |
+| 类型         | 路线                                                                                                                                                 | 默认模式 |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| 文本（现有） | `/v1/chat/completions`、`/v1/completions`、`/v1/relay/chat/completions`                                                                              | warn     |
-| 生成式       | `/v1/messages`、`/v1/responses`、`/v1/images/generations`、`/v1/images/edits`、`/v1/videos/generations`、`/v1/music/generations`、`/v1/audio/speech` | warn     |
-| 数据         | `/v1/embeddings`、`/v1/rerank`、`/v1/search`、`/v1/moderations`                                                                                      | warn     |
+| 文本（现有） | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | 警告     |
+| 生成式       | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | 警告     |
+| 数据         | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | 警告     |
 
-文本提取（`extractMessageContents`）覆盖 `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`。
+文本提取（`extractMessageContents`）涵盖`messages`/`input`/`prompt`/`query` + `documents`/`instructions`/`system`。
 
-**红队测试（每夜运行，`nightly-llm-security.yml`）：** promptfoo 验证每条路由在
-`INJECTION_GUARD_MODE=block` 下拦截 OWASP-LLM 语料库；garak 运行探针（没有密钥时跳过）。
-`moderations` 为保持一致性也被包含在内。Block 模式是一个强制性边界：`evaluatePromptInjection()`
-会忽略中间件传给它的按请求禁用列表，因此 `disabledGuardrails` **不能**
-使路由豁免于此（[#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)）。
+**红队（每晚， `nightly-llm-security.yml`）：** Promptfoo 验证每个路由是否会阻止`INJECTION_GUARD_MODE=block`中的 OWASP-LLM 语料库； garak 运行探针（无秘密地跳过）。包含`moderations`是为了保持一致性。块模式是强制边界： `evaluatePromptInjection()`忽略中间件传递的每个请求禁用列表，因此`disabledGuardrails`会这样做**不是**从中排除一条路由（ [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ）。
 
-该每夜工作流（`.github/workflows/nightly-llm-security.yml`，cron + 手动
-触发）包含两个任务：
+每晚工作流程（`.github/workflows/nightly-llm-security.yml`、 cron +手动调度）有两个工作：
 
-- **`promptfoo-guard`（阻塞性）** —— 在 `INJECTION_GUARD_MODE=block`
-  下运行 `promptfoo eval -c promptfooconfig.yaml`。每个对抗性用例
-  （例如 "ignore all previous instructions…"、DAN 风格的越狱）断言响应携带
-  `error.code === "SECURITY_001"`，即防护确实拒绝了该请求。
-- **`garak`（建议性）** —— 针对本地 OmniRoute 实例
-  （`http://localhost:20128/v1`）运行 garak `--probes promptinject,dan,leakreplay`。
-  由提供者密钥（`PROMPTFOO_PROVIDER_KEY`）门控；无密钥时优雅跳过，
-  并以 `|| true` 作为后缀，因此它会报告结果而不会导致 CI 失败。
+- **`promptfoo-guard` （阻止）** —与`INJECTION_GUARD_MODE=block`一起运行`promptfoo eval -c promptfooconfig.yaml` 。每个对抗性案例（例如“忽略所有先前的指令……”，DAN 式越狱）都断言响应携带`error.code === "SECURITY_001"`，即警卫实际上拒绝了请求。
+- **`garak` （咨询）** —针对本地OmniRoute实例 (`http://localhost:20128/v1`) 运行 garak `--probes promptinject,dan,leakreplay` 。受提供者秘密 (`PROMPTFOO_PROVIDER_KEY`) 控制；优雅地跳过并带有后缀`|| true`，因此它报告时不会失败CI。
 
-防护辅助器（`createInjectionGuard` / `withInjectionGuard`）的覆盖范围
-涵盖每条携带提示词的 `/v1` 路由；提示词文本由
-`src/shared/utils/inputSanitizer.ts` 中的 `extractMessageContents()` 从
-`messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`
-中提取。
+Coverage of the guard helper (`createInjectionGuard` / `withInjectionGuard`) spans every prompt-bearing `/v1` route; prompt text is pulled from `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` by `extractMessageContents()` in `src/shared/utils/inputSanitizer.ts`.

@@ -4,9 +4,9 @@
 
 ---
 
-> **Harada yaşayır: hər bir izlənilən üst səviyyəli kataloq və kök fayl, bir sətirli məqsədlə.** Son yeniləmə: 2026-11-13 (OmniRoute v3.8.54)
+> **Harada yaşayır: hər bir izlənilən üst səviyyəli kataloq və kök faylı, bir sətirli məqsədlə.**
 >
-> Kod bazası ətrafında yolunuzu tapmaq üçün bu xəritədən istifadə edin, sonra xüsusi sənədlərə keçidləri izləyin. Faylların sayı yuxarıdakı tarixdə `git ls-files` ilə ölçüldü. Demək olar ki, hər buraxılışla dəyişirlər, ona görə də onlara böyük ölçülər kimi yanaşın.
+> Kod bazası ətrafında yolunuzu tapmaq üçün bu xəritədən istifadə edin, sonra xüsusi sənədlərə keçidləri izləyin. Faylların sayı `git ls-files` dan gəlir və demək olar ki, hər buraxılışla dəyişir. Onlara böyüklük əmrləri kimi baxın.
 
 ## Ən yüksək səviyyəli ağac
 

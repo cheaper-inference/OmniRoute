@@ -4,24 +4,13 @@
 
 ---
 
-> **事實來源：** `src/lib/memory/` 與 `src/app/api/memory/`
-> **最後更新：** 2026-06-28 — v3.8.40（預設關閉 + int8 量化補齊）
+> **事實來源：** `src/lib/memory/`和`src/app/api/memory/`
 
-OmniRoute 提供以 API 金鑰（以及選用的工作階段 ID）為索引的持久化對話記憶。系統會透過輕量級的正規表示式模式比對，自動從 LLM 回應中擷取記憶，並將其重新注入後續請求，作為開頭的系統訊息（若提供者拒絕 system 角色，則作為第一則使用者訊息）。
+OmniRoute提供由API鑰（以及可選的會話 id）作為金鑰的持久會話記憶體。記憶體透過輕量級正規表示式模式匹配從LLM回應中自動提取，並作為主導系統訊息（或拒絕系統角色的提供者的第一個使用者訊息）注入後續請求中。
 
-> **記憶功能預設為關閉（v3.8.30+）。** `DEFAULT_MEMORY_SETTINGS.enabled` 現在為
-> `false`（`src/lib/memory/settings.ts`）。啟用記憶功能後，最多會將
-> `maxTokens`（約 2k）的擷取內容注入至**每一個**聊天請求中，而這些內容
-> 會計費——對新安裝環境以及自行管理上下文的用戶端而言，這可能是意料之外的成本。
-> 請在 **Settings → Memory** 中明確選擇啟用（啟用記憶功能時，
-> `MemorySkillsTab` 會顯示權杖成本警告提示）。用戶端可透過
-> `x-omniroute-no-memory` 請求標頭（`true`/`1`/`yes`），讓單一請求
-> 不使用記憶功能——請參閱 [API_REFERENCE.md](../reference/API_REFERENCE.md)
-> 中的請求標頭表格。不使用記憶的請求會設定 `memoryOwnerId = null`，
-> 因而同時停用該請求的記憶與技能注入
-> （`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`）。
+> **記憶體預設為OFF (v3.8.30 +)。** `DEFAULT_MEMORY_SETTINGS.enabled`現在是`false` (`src/lib/memory/settings.ts`)。啟用記憶體將檢索到的上下文最多`maxTokens` (~ 2k) 注入到**每一個**聊天請求，這對於新安裝和管理自己上下文的客戶端—是一個令人驚訝的成本。明確選擇加入**設定→記憶體**（啟用記憶體時， `MemorySkillsTab`顯示令牌成本警告標註）。用戶端可以使用`x-omniroute-no-memory`請求頭 (`true`/`1`/`yes`) 選擇單一請求—請參閱[API_REFERENCE.md](../reference/API_REFERENCE.md)中的請求頭表。無記憶體請求設定`memoryOwnerId = null`，這會停用**兩個都**該請求的記憶體和技能注入（`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`）。
 
-記憶是**以每個 API 金鑰為範圍**，而非以每位使用者為範圍——使用相同 API 金鑰驗證的每個請求，都會共用相同的記憶集區，並可選擇再依 `sessionId` 進一步限定範圍。
+記憶體是**每個API密鑰的範圍**，不是每個使用者—使用相同API金鑰進行身份驗證的每個請求都共享相同的記憶體池，並且可以選擇由`sessionId`進一步確定範圍。
 
 ## 架構
 
@@ -623,22 +612,22 @@ MEMORY_EMBEDDING_CACHE_TTL_MS=300000               # TTL（5 分鐘）
 
 ---
 
-## 事實擷取模式 (v3.8.16+)
+## 事實提取模式 (v3.8.16 +)
 
-`extraction.ts` 模組 (`src/lib/memory/extraction.ts`) 使用**正規表示式模式比對**，從對話訊息中擷取結構化事實。瞭解這些模式有助於針對您的使用案例調整擷取品質。
+`extraction.ts`模組 (`src/lib/memory/extraction.ts`) 使用**正規表示式模式匹配**從對話訊息中提取結構化事實。了解這些模式有助於您調整用例的擷取品質。
 
 ### 預設模式類別
 
-| 類別                | 模式範例                                             | 擷取內容             |
-| ------------------- | ---------------------------------------------------- | -------------------- |
-| PREFERENCE_PATTERNS | `"我偏好 <X>"`、`"我喜歡 <X>"`、`"我討厭 <X>"`       | 使用者偏好           |
-| DECISION_PATTERNS   | `"我會使用 <X>"`、`"我決定要 <X>"`、`"我選擇了 <X>"` | 使用者決策（情節性） |
-| PATTERN_PATTERNS    | `"我通常 <X>"`、`"我總是 <X>"`、`"我從不 <X>"`       | 持續性的行為模式     |
+| 類別                | 範例模式                                                    | 捕獲               |
+| ------------------- | ----------------------------------------------------------- | ------------------ |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | 使用者偏好         |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | 使用者決策（情境） |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | 持續的行為模式     |
 
-### 模式範例（簡化版）
+### 範例模式（簡化）
 
 ```ts
-// 來自 src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -651,36 +640,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### 會擷取哪些內容
+### 提取什麼
 
-當使用者說：
+當用戶說：
 
-> 「我偏好 TypeScript。這個專案我會使用 Postgres。我總是在推送前提交。我不喜歡 Python。」
-> 擷取會產生 4 筆記憶：
+> 「我更喜歡TypeScript。我將在這個專案中使用Postgres 。我總是在推送之前提交。我不喜歡 Python。」提取產生4個記憶：
 >
-> | 鍵值                                 | 類別       | 類型     | 內容                        |
-> | ------------------------------------ | ---------- | -------- | --------------------------- |
-> | `preference:typescript`              | preference | factual  | "TypeScript"                |
-> | `decision:postgres_for_this_project` | decision   | episodic | "Postgres for this project" |
-> | `pattern:commit_before_pushing`      | pattern    | factual  | "commit before pushing"     |
-> | `preference:python`                  | preference | factual  | "Python"                    |
+> | Key | Category | Type | Content | | ------------------------------------ | ---------- | -------- | --------------------------- | | `preference:typescript` | preference | factual | "TypeScript" | | `decision:postgres_for_this_project` | decision | episodic | "Postgres for this project" | | `pattern:commit_before_pushing` | pattern | factual | "commit before pushing" | | `preference:python` | preference | factual | "Python" |
 
-### 擷取限制
+### 萃取限度
 
-為避免無限制擷取，會套用以下限制：
+為防止失控提取，適用以下限制：
 
-| 最小內容長度 | 3 個字元 |
-| 最大內容長度 | 500 個字元 |
+| 最小內容長度 | 3 個字符 |
+| 最大內容長度 | 500 個字符 |
 
-### 何時停用擷取
+### 何時禁用提取
 
-只要啟用記憶功能，擷取就會自動執行；沒有獨立的
-僅擷取切換選項。若要將其關閉，請完全停用記憶功能（透過 `PUT /api/settings/memory`
-設定 `enabled: false`）。請在下列情況考慮這麼做：
+只要啟用記憶體，提取就會自動運行；沒有單獨的僅提取開關。要關閉它，請完全停用記憶體（`enabled: false`通過`PUT /api/settings/memory`）。在以下情況下考慮這樣做：
 
-- 訊息量很大，且擷取成本不可忽略
-- 對話大多是暫時性的（聊天、偵錯），沒有長期價值
-- 已透過自訂外掛程式擷取上下文
+- 您的消息量很大，提取成本不菲
+- 您的對話大多是暫時的（聊天、調試），沒有長期價值
+- 您已經透過自訂外掛程式捕獲上下文
 
 ---
 

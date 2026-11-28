@@ -49,7 +49,7 @@ OpenAI-ին համատեղելի արձանագրության և մատակար�
 
 ---
 
-## Զրույցի լրացումներ
+## Զրույցի ավարտ
 
 ```bash
 POST /v1/chat/completions
@@ -65,35 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### Հատուկ վերնագրեր
+### Պատվերով վերնագրեր
 
-| Header                   | Direction | Description                                                                                                                                                                                                                                                     |
-| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Հարցում   | Սահմանեք `true`, որպեսզի շրջանցեք քեշը                                                                                                                                                                                                                          |
-| `x-omniroute-no-memory`  | Հարցում   | Սահմանեք `true`, որպեսզի այս հարցման համար բաց թողնեք հիշողության + հմտությունների ներարկումը (նման է no-cache-ին․ խուսափում է յուրաքանչյուր կանչի նշանների/արժեքի ծախսից)                                                                                      |
-| `X-OmniRoute-Progress`   | Հարցում   | Սահմանեք `true`՝ առաջընթացի իրադարձությունների համար                                                                                                                                                                                                            |
-| `X-Session-Id`           | Հարցում   | Կպչուն սեսիայի բանալի արտաքին սեսիայի կապակցման համար                                                                                                                                                                                                           |
-| `x_session_id`           | Հարցում   | Ընդունվում է նաև ընդգծումով տարբերակը (ուղիղ HTTP)                                                                                                                                                                                                              |
-| `X-OmniRoute-Session-Id` | Հարցում   | Կանչողի կողմից տրամադրված սեսիայի/երկխոսության պիտակ (նաև փոխանցվում է հիշողությանը)։ Ներկայության դեպքում բառացիորեն պահպանվում է `call_logs.session_tag`-ում՝ ըստ սեսիայի արժեքի վերագրում կատարելու համար (#8249) — բացակայության դեպքում երբեք չի ստեղծվում |
-| `Idempotency-Key`        | Հարցում   | Կրկնօրինակման կանխման բանալի (5 վայրկյանի պատուհան)                                                                                                                                                                                                             |
-| `X-Request-Id`           | Հարցում   | Կրկնօրինակման կանխման այլընտրանքային բանալի                                                                                                                                                                                                                     |
-| `x-omniroute-connection` | Հարցում   | Մեկ մոդելով հարցումը կապում է մատակարարի մեկ կապի (հաշվի) հետ՝ ըստ նույնացուցիչի — տես [Հարցման համար հաշվի կապակցում](#account-pinning-per-request)                                                                                                            |
-| `X-OmniRoute-Cache`      | Պատասխան  | `HIT` կամ `MISS` (ոչ հոսքային)                                                                                                                                                                                                                                  |
-| `X-OmniRoute-Idempotent` | Պատասխան  | `true`, եթե կրկնօրինակումը կանխվել է                                                                                                                                                                                                                            |
-| `X-OmniRoute-Progress`   | Պատասխան  | `enabled`, եթե առաջընթացի հետևումն ակտիվ է                                                                                                                                                                                                                      |
-| `X-OmniRoute-Session-Id` | Պատասխան  | OmniRoute-ի կողմից օգտագործված արդյունավետ սեսիայի ID                                                                                                                                                                                                           |
-| `X-OmniRoute-Request-Id` | Պատասխան  | Հարցման փոխկապակցման ID (երբ հայտնի է)                                                                                                                                                                                                                          |
-| `X-OmniRoute-Version`    | Պատասխան  | OmniRoute-ի հավաքածուի տարբերակը (միշտ առկա է)                                                                                                                                                                                                                  |
-| `X-OmniRoute-Cost-Saved` | Պատասխան  | ԱՄՆ դոլարով գումարը, որը քեշը խնայել է HIT-ի դեպքում (միայն քեշի հարվածների դեպքում)                                                                                                                                                                            |
-| `X-OmniRoute-Decision`   | Պատասխան  | Ուղղորդման հետագիծ՝ `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>`-ը համակցված ռազմավարությունն է, կամ `single`՝ ոչ համակցված հարցման դեպքում) — ավարտի պատասխաններում միշտ առկա է                                                               |
+| Վերնագիր                 | Ուղղություն | Նկարագրություն                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Հայց        | Սահմանել `true` քեշը շրջանցելու համար                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `x-omniroute-no-memory`  | Հայց        | Սահմանեք `true` վրա՝ այս հարցման համար հիշողության + հմտությունների ներարկումը բաց թողնելու համար (հայելում է առանց քեշի, խուսափում է մեկ զանգի համար token/cost գերավճարից)                                                                                                                                                                                                                                                                   |
+| `x-omniroute-no-log`     | Հայց        | Սահմանեք `true` ՝ այս եզրակացության հարցման համար զանգերի մատյաններից request/response բեռնված բեռները բաց թողնելու համար (զրույցի ընտանեկան բոլոր երթուղիները. Զրույցի ավարտումներ, պատասխաններ, հաղորդագրություններ, ավարտումներ, Gemini): Ժամացույցի, մոդելի, կարգավիճակի, տևողության և նշանների հաշվարկը դեռևս գրանցվում է: Համատեղեք `x-omniroute-no-memory` և `x-omniroute-no-cache` հետ՝ ամբողջական բովանդակությունից հրաժարվելու համար |
+| `X-OmniRoute-Progress`   | Հայց        | Առաջընթաց իրադարձությունների համար դրեք `true` ին                                                                                                                                                                                                                                                                                                                                                                                              |
+| `X-Session-Id`           | Հայց        | Կպչուն նստաշրջանի բանալի արտաքին նստաշրջանի մերձեցման համար                                                                                                                                                                                                                                                                                                                                                                                    |
+| `x_session_id`           | Հայց        | Ընդունված է նաև ընդգծված տարբերակը (ուղիղ HTTP)                                                                                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Session-Id` | Հայց        | Զանգահարողի կողմից տրամադրված session/conversation պիտակ (նաև սնուցում է հիշողությունը): Երբ առկա է, բառացիորեն `call_logs.session_tag` ով պահպանվում է յուրաքանչյուր նստաշրջանի արժեքի վերագրման համար (#8249) — երբեք չի սինթեզվում, երբ բացակայում է                                                                                                                                                                                        |
+| `Idempotency-Key`        | Հայց        | Dedup ստեղնը (5 վրկ պատուհան)                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `X-Request-Id`           | Հայց        | Այլընտրանքային անջատման բանալի                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `x-omniroute-connection` | Հայց        | Ամրացրեք մեկ մոդելի հարցումը մեկ մատակարարի միացմանը (հաշվին) իր id — ով, տես [Հաշվի ամրացում մեկ հարցումով](#account-pinning-per-request)                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Cache`      | Արձագանք    | `HIT` կամ `MISS` (չհոսքային)                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Idempotent` | Արձագանք    | `true` եթե կրկնօրինակված է                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Progress`   | Արձագանք    | `enabled` եթե առաջընթացի հետևում է                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Session-Id` | Արձագանք    | Արդյունավետ նիստ ID որն օգտագործվում է OmniRoute կողմից                                                                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Request-Id` | Արձագանք    | Պահանջել հարաբերակցության ID (երբ հայտնի է)                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Version`    | Արձագանք    | OmniRoute build տարբերակը (միշտ ներկա)                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Cost-Saved` | Արձագանք    | USD քեշից խուսափել է HIT ում (միայն քեշը հարվածում է)                                                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Decision`   | Արձագանք    | Ուղղորդման հետք. `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` համակցված ռազմավարություն է, կամ `single` ոչ համակցված խնդրանքի համար) — միշտ առկա է ավարտի պատասխանների ժամանակ                                                                                                                                                                                                                                                |
 
-> Nginx-ի նշում․ եթե հիմնվում եք ընդգծում պարունակող վերնագրերի վրա (օրինակ՝ `x_session_id`), միացրեք `underscores_in_headers on;`։
+> Nginx նշում. եթե դուք ապավինում եք ընդգծված վերնագրերին (օրինակ `x_session_id`), միացրեք `underscores_in_headers on;`:
 
-#### Հարցման համար հաշվի կապակցում
+#### Հաշվի ամրացում յուրաքանչյուր հարցման համար
 
-Երբ մատակարարն ունի մի քանի կապ (հաշիվներ կամ բանալիներ), OmniRoute-ը սովորաբար ընտրում է դրանցից մեկը
-իր հաշվի ընտրության ռազմավարության միջոցով։ Փոխարենը հարցումը կարող է կապվել մեկ կոնկրետ կապի հետ
-`x-omniroute-connection` վերնագրի միջոցով՝
+Երբ մատակարարն ունի մի քանի կապ (հաշիվներ կամ բանալիներ), OmniRoute սովորաբար ընտրում է մեկը՝ հաշվի ընտրության ռազմավարության միջոցով: Հարցումը կարող է փոխարենը ամրացնել մեկ կոնկրետ կապ `x-omniroute-connection` վերնագրի հետ.
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,24 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Որտեղ գտնել id-ն։** Բացեք մատակարարի էջը վահանակում
-  (**Dashboard → Providers → <provider>**) և միացման տողում սեղմեք `xxxxxxxx…` id-ի չիպը․
-  այն պատճենում է միացման ամբողջական id-ն։
-- **Որ հարցումներն են հաշվի առնում այն։** Մեկ մոդելի հարցումները (`provider/model`)՝
-  `/v1/chat/completions`, `/v1/messages` և `/v1/responses` հասցեներում։ Կոմբինացիաներն անտեսում են վերնագիրը․
-  յուրաքանչյուր կոմբինացիայի քայլի համար հաշիվը ամրակցեք հենց այդ քայլի սեփական միացման միջոցով։
-- **Ամրակցումը խիստ է, ոչ թե նախապատվություն։** Ամրակցված միացումն օգտագործվում է բացառապես։
-  Հարցման ընթացքում տեղի ունեցած խափանումը գրանցում է հաշվի սառեցման ժամանակահատվածը, բայց
-  չի անցնում նույն մատակարարի մեկ այլ հաշվի։
-- **Սառեցումն ու քվոտան ազատում են ամրակցումը։** Քանի դեռ ամրակցված միացումը սառեցված է,
-  քվոտան սպառված է կամ քվոտայի քաղաքականությամբ արգելափակված է, հետագա հարցումները անցնում են
-  մատակարարի մյուս միացումներին՝ ճիշտ այնպես, ինչպես չամրակցված տրաֆիկը։
-- **Անհայտ կամ անջատված id-ները ձախողվում են։** Եթե id-ն մատակարարի ակտիվ խմբում չկա (ջնջված է,
-  ապաակտիվացված է կամ պատկանում է մեկ այլ մատակարարի), համապատասխան հաշիվ չի մնում, ուստի
-  հարցումը ձախողվում է՝ այլ տեղ անաղմուկ ուղղորդվելու փոխարեն։
+- **Որտեղ գտնել ID-ն:** Բացեք մատակարարի էջը վահանակում (** Վահանակ → Մատակարարներ → <provider>** ) և սեղմեք `xxxxxxxx…` id չիպի վրա միացման տողում — այն պատճենում է կապի ամբողջական ID-ն:
+- **Որոնք խնդրանքները հարգում են այն:** Մեկ մոդելի հարցումներ (`provider/model`) `/v1/chat/completions`, `/v1/messages` և `/v1/responses` վրա: Կոմբինատները անտեսում են վերնագիրը. փոխարենը ամրացրեք հաշիվ յուրաքանչյուր համակցված քայլի միջոցով քայլի սեփական կապի միջոցով:
+- **Քորոցը խիստ է, նախապատվություն չէ:** Կցված կապը օգտագործվում է բացառապես: Հարցման մեջ ձախողումը գրանցում է հաշվի սառեցումը, բայց գրանցում է** ոչ** պտտել նույն մատակարարի եղբայրական հաշվին:
+- **Cooldown-ը և քվոտան ազատում են քորոցը:** Մինչ ամրացված կապը սառչում է, սպառվում է չափաբաժիններով կամ արգելափակվում է քվոտայի քաղաքականության կողմից, հետագայում հարցումները վերադառնում են մատակարարի մյուս կապերին, ճիշտ այնպես, ինչպես չամրացված տրաֆիկը:
+- **Անհայտ կամ անջատված ID-ները ձախողվում են:** ID-ն, որը մատակարարի ակտիվ ֆոնդում չէ (ջնջված, ապաակտիվացված կամ այլ մատակարարի պատկանող) իրավասու հաշիվ չի թողնում, ուստի հարցումը ձախողվում է այլուր լուռ երթուղղելու փոխարեն:
 
-Claude Code-ը հատուկ վերնագրերն ուղարկում է `ANTHROPIC_CUSTOM_HEADERS`-ի միջոցով։ Այն տեղադրեք
-`~/.claude/settings.json`-ի `env` բլոկում կամ նախագծի մակարդակի `.claude/settings.json`-ում՝ յուրաքանչյուր նախագծի համար մեկ այլ հաշիվ ամրակցելու նպատակով․
+Claude Code-ն ուղարկում է հատուկ վերնագրեր `ANTHROPIC_CUSTOM_HEADERS` միջոցով: Տեղադրեք այն `~/.claude/settings.json` ի `env` բլոկում կամ նախագծի մակարդակի `.claude/settings.json` ում՝ մեկ նախագծի մեկ այլ հաշիվ ամրացնելու համար.
 
 ```jsonc
 {
@@ -132,12 +120,11 @@ Claude Code-ը հատուկ վերնագրերն ուղարկում է `ANTHROPI
 }
 ```
 
-Աղբյուր՝ `src/sse/handlers/chat.ts` (վերնագրի ընթերցում), `src/sse/services/auth.ts` և
-`src/sse/services/sessionAffinityPin.ts` (ամրակցման ազատում և խմբում բացակայության ստուգում)։
+Աղբյուր՝ `src/sse/handlers/chat.ts` (վերնագրի ընթերցում), `src/sse/services/auth.ts` և `src/sse/services/sessionAffinityPin.ts` (փին ազատում և բացակայող լողավազանից ստուգում):
 
-> **Ծախսերի հեռաչափության վերնագրեր․** հոսք չօգտագործող հաջող պատասխանները նույնպես ներառում են `X-OmniRoute-*` ծախսերի հեռաչափության հավաքածուն՝ `X-OmniRoute-Response-Cost` (ԱՄՆ դոլար, հաստատուն 10 տասնորդական նիշ․ անվճար/չգնահատվածի համար՝ `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` և `X-OmniRoute-Fallback-Attempts` (միայն երբ > 0), ինչպես նաև `X-OmniRoute-Request-Id` և `X-OmniRoute-Version`։ Դրանք ուղարկվում են chat completions-ի, `/v1/responses`, `/v1/messages` **և մեդիայի վերջնակետերի** միջոցով՝ `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` և `/v1/moderations` (միշտ՝ `0` ծախսով)։ Մեդիայի ծախսը հաշվարկվում է ըստ համապատասխան մեդիայի տեսակի (ըստ պատկերի, ըստ վայրկյանի, ըստ նիշի, ըստ որոնման միավորի), երբ գնագոյացումը հասանելի է, իսկ հակառակ դեպքում՝ `0` (fail-open)։
+> **Արժեքի հեռաչափության վերնագրեր.** Ոչ հոսքային հաջողության պատասխանները նաև պարունակում են `X-OmniRoute-*` ծախսերի հեռաչափության հավաքածու — `X-OmniRoute-Response-Cost` (USD, ֆիքսված 10 տասնորդական; `0.0000000000` free/unpriced համար), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` և `X-OmniRoute-Fallback-Attempts` (միայն երբ > 0), գումարած `X-OmniRoute-Request-Id` և `X-OmniRoute-Version`: Սրանք արտանետվում են չաթի ավարտումներով, `/v1/responses`, `/v1/messages`,** և լրատվամիջոցների վերջնակետերը** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, եւ `/v1/moderations` (միշտ արժեն `0`)։ Լրատվամիջոցների արժեքը հաշվարկվում է ըստ եղանակի (պատկերի, վայրկյանի, նիշի, որոնման միավորի համար), երբ գինը հասանելի է, հակառակ դեպքում `0` (անհաջող բաց):
 
-> **Քեշի հարվածի ծախսի իմաստը․** իմաստային քեշի HIT-ի դեպքում (`X-OmniRoute-Cache-Hit: true`) վերին հոսքի հարցում չի կատարվում, ուստի `X-OmniRoute-Response-Cost`-ը `0.0000000000` է (հարվածի սպասարկման **աճողական** ծախսը)։ Սկզբնական/ակնկալվող ծախսը առանձին հաղորդվում է `X-OmniRoute-Cost-Saved`-ում։ Գանձման համակարգի սպառողները պետք է գումարեն `X-OmniRoute-Response-Cost`-ը (հարվածներն անվճար են), իսկ քեշի վերլուծությունը կարող է միավորել `X-OmniRoute-Cost-Saved`-ը։
+> **Cache-hit ծախսերի իմաստաբանություն.** իմաստային քեշի վրա HIT (`X-OmniRoute-Cache-Hit: true`) վերընթաց զանգ չի կատարվում, ուստի `X-OmniRoute-Response-Cost` `0.0000000000` է (** աստիճանական** հիթի սպասարկման արժեքը): original/would-have-been արժեքը զեկուցվում է առանձին `X-OmniRoute-Cost-Saved` ով: Հաշվարկային սպառողները պետք է գումարեն `X-OmniRoute-Response-Cost` (հիթերը ոչինչ չեն արժենում); քեշի վերլուծությունը կարող է միավորել `X-OmniRoute-Cost-Saved`:
 
 ## Բացառիկ կառավարվող սեսիայի վարձակալություններ
 
@@ -357,6 +344,8 @@ Content-Type: application/json
 
 `n` վերադարձնում է `n` պատկերները `data[]` ում: Պրովայդերները, որոնց վերին հոսանքում API մեկ զանգի համար վերադարձնում է մեկ պատկեր (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), ստանում են `n` առանձին զանգեր վերևից՝ առավելագույնը 4 թռիչքի ժամանակ: Ֆիքսված `seed` փոխհատուցվում է զանգի ինդեքսով (`seed`, `seed + 1`,…), այնպես որ պատկերները տարբերվում են, բայց մնում են վերարտադրելի: `n` սահմանափակված է 10-ով: Հարցումն ամբողջությամբ ձախողվում է, եթե որևէ զանգ ձախողվի: Fan-out ձևաչափերի ցանկը `SINGLE_IMAGE_FANOUT_FORMATS` է `open-sse/handlers/imageGeneration/fanOut.ts` ում:
 
+Codex GPT Պատկերի մոդելները (`codex/gpt-image-*`) վերադարձնում են միայն PNG. վերին հոսանքը `200` պատասխանում է PNG բայթերով, նույնիսկ երբ պահանջվում է `jpeg` կամ `webp` : Ցանկացած այլ `output_format` ով (`webp`, `jpeg`, ...) հարցումը մերժվում է HTTP 400-ով, լուռ անտեսվելու փոխարեն. բաց թողնել այն կամ ուղարկել `png`: `output_compression` չի փոխանցվում:
+
 ZenMux նորից օգտագործում է գոյություն ունեցող API-բանալին կապը և ընդունում `zenmux/` կամ `zm/` նախածանցները.
 
 - `zenmux/openai/gpt-image-2` օգտագործում է ZenMux ի OpenAI Պատկերները API: Տարբերակները ներառում են `size`, `quality`, `n`, `output_format`, `output_compression`, `background` և `response_format`:
@@ -374,7 +363,7 @@ GET /v1/images/generations
 
 ---
 
-## Փաստաթղթերի OCR
+## Փաստաթուղթ OCR
 
 ```bash
 POST /v1/ocr
@@ -390,17 +379,15 @@ Content-Type: application/json
 }
 ```
 
-`model`-ը ընտրում է OCR մատակարարին `provider/model` նախածանցի միջոցով․ առանց նախածանցի մոդելի նույնացուցիչը (օրինակ՝
-`mistral-ocr-latest`) համապատասխանեցվում է դրա գրանցված մատակարարին, իսկ բաց թողնված `model`-ի դեպքում կանխադրվածը
-Mistral-ն է (`mistral-ocr-latest`)։ Գրանցված մատակարարները (`open-sse/config/ocrRegistry.ts`)՝
+`model` ընտրում է OCR մատակարարին `provider/model` նախածանցի միջոցով; մերկ մոդելի ID-ն (օրինակ՝ `mistral-ocr-latest`) լուծվում է իր գրանցված մատակարարին, իսկ բաց թողնված `model` լռակյաց է Mistral (`mistral-ocr-latest`): Գրանցված մատակարարներ (`open-sse/config/ocrRegistry.ts`):
 
-| Մատակարարի id                 | Մոդելի id            | `model` արժեք                                                           | Նշումներ                                                                                                                                  |
-| ----------------------------- | -------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (կամ առանց նախածանցի `mistral-ocr-latest`) | Սինխրոն — պատասխանը վերադարձվում է անմիջապես վերադասի միակ կանչից։                                                                        |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                             | Ասինխրոն վերադաս գործողություն (`analyze` + հարցում) — տես ստորև։                                                                         |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                                 | Սինխրոն՝ Vertex AI-ի `openapi/chat/completions` գործընկերային վերջնակետի միջոցով — նույնականացման և URL-ի վերաբերյալ մանրամասները՝ ստորև։ |
+| Մատակարարի ID                 | Մոդելի ID                                       | `model` արժեքը                                               | Նշումներ                                                                                                                                                                                                               |
+| ----------------------------- | ----------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                            | `mistral/mistral-ocr-latest` (կամ մերկ `mistral-ocr-latest`) | Սինխրոն — պատասխանը վերադարձվում է անմիջապես մեկ վերընթաց զանգից:                                                                                                                                                      |
+| `azure-document-intelligence` | `prebuilt-read`                                 | `azure-document-intelligence/prebuilt-read`                  | Ասինխրոն հոսանքին հակառակ (`analyze` + հարցում) — տես ստորև:                                                                                                                                                           |
+| `vertex-deepseek-ocr`         | ինքնուրույն տեղակայված (ներկառուցված մոդել չկա) | `vertex-deepseek-ocr/<your-deployed-model-id>`               | Սինքրոն, ձեր սեփական Vertex AI Model Garden DeepSeek-OCR վերջնակետի միջոցով (`openapi/chat/completions` ձև); Google հեռացրեց կառավարվող `deepseek-ocr-maas` 2026-10-21-ին (#20423), այնպես որ id-ը վերադարձնում է 400: |
 
-Բոլոր երեք մատակարարները պատասխանում են նույն՝ Mistral-ի ձևին համապատասխան մարմնով․
+Բոլոր երեք մատակարարները պատասխանում են նույն Միստրալի ձևով մարմնում.
 
 ```json
 {
@@ -410,28 +397,13 @@ Mistral-ն է (`mistral-ocr-latest`)։ Գրանցված մատակարարներ
 }
 ```
 
-### Azure Document Intelligence-ի հարցումների ընթացք
+### Azure Document Intelligence-ի հարցումների հոսք
 
-Azure Document Intelligence-ի `analyze` API-ն ասինխրոն է․ սկզբնական հարցումը մարմնի փոխարեն վերադարձնում է
-`Operation-Location` վերնագիր, և արդյունքի համար պետք է հարցումներ կատարել։ Մշակիչը
-(`open-sse/handlers/ocr.ts`) յուրաքանչյուր վայրկյանը մեկ հարցում է կատարում այդ URL-ին՝ առավելագույնը 30 փորձի
-ընթացքում, անմիջապես ձախողվում է (այլևս հարցումներ չի կատարում) ոչ `ok` հարցման պատասխանի կամ `"failed"` կարգավիճակի
-դեպքում, և վերադարձնում է `504`, եթե փորձերի բյուջեն սպառվելուց հետո գործողությունը դեռ ընթացքի մեջ է։ Azure-ի
-վերջնական պատասխանը նորմալացվում է նույն `pages`/`markdown` կառուցվածքին, որն օգտագործում է Mistral-ը, նախքան
-այն կանչողին վերադարձնելը, ուստի հաճախորդի կոդը կարիք չունի մատակարարի համար հատուկ բացառություններ մշակելու։
+Azure Document Intelligence-ի `analyze` API ասինխրոն է. սկզբնական հարցումը մարմնի փոխարեն վերադարձնում է `Operation-Location` վերնագիր, և արդյունքը պետք է հարցման ենթարկվի: Կառավարիչը (`open-sse/handlers/ocr.ts`) հարցում է անում, որ URL ամեն վայրկյան մինչև 30 փորձի համար, արագ ձախողվում է (չի շարունակում հարցումը) ոչ `ok` հարցման պատասխանի կամ `"failed"` կարգավիճակի դեպքում, և վերադարձնում է `504` եթե գործողությունը դեռ աշխատում է փորձի բյուջեի սպառումից հետո: Azure-ի վերջնական պատասխանը նորմալացվում է նույն `pages`/`markdown` ձևի մեջ, որն օգտագործվում է Mistral ի կողմից նախքան զանգահարողին վերադարձնելը, այնպես որ հաճախորդի կոդը կարիք չունի հատուկ գործի մատակարարին:
 
-### Vertex AI DeepSeek OCR-ի նույնականացում և վերջնակետի որոշում
+### Vertex AI DeepSeek OCR վավերացում և վերջնակետի լուծում
 
-`vertex-deepseek-ocr`-ը կրկին օգտագործում է Vertex AI-ի նույն նույնականացումը, որն OmniRoute-ն արդեն աջակցում է
-չաթի/պատկերների համար (`open-sse/executors/vertex.ts`)․ միացման API բանալին կա՛մ Service Account JSON հավատարմագիր
-է (JWT-bearer հոսքի միջոցով փոխանակվում է կարճաժամկետ OAuth հասանելիության նշանով), կա՛մ արդեն ստեղծված OAuth
-հասանելիության նշան, որն օգտագործվում է 그대로։ Վերադասի վերջնակետի URL-ը Vertex-ի ընդհանուր
-`openapi/chat/completions` գործընկերային վերջնակետն է, որը կազմվում է միացման նախագծից և տարածաշրջանից․ բացահայտ
-`providerSpecificData.project`/`providerSpecificData.region` արժեքները միշտ գերակայում են, իսկ հակառակ դեպքում
-նախագիծը ստացվում է Service Account JSON-ի `project_id`-ից, իսկ տարածաշրջանի կանխադրված արժեքն է
-`us-central1`։ Երկու որոշումներն էլ կատարվում են `open-sse/handlers/ocr.ts`-ում
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) և օգտագործվում են
-`src/app/api/v1/ocr/route.ts`-ում՝ նախքան `handleOcr`-ին փոխանցելը։
+`vertex-deepseek-ocr` նորից օգտագործում է նույն Vertex AI նույնականացումը OmniRoute արդեն աջակցում է chat/image տրաֆիկի համար (`open-sse/executors/vertex.ts`). կապի API ստեղնը կա՛մ Ծառայության Հաշվի JSON հավատարմագիր է (փոխանակվում է կարճատև OAuth մուտքի նշանի հետ JWT կրող հոսքի միջոցով), կա՛մ արդեն մշակված OAuth մուտքի նշան է։ Վերին հոսանքի վերջնակետը URL Vertex-ի ընդհանուր `openapi/chat/completions` գործընկեր վերջնակետն է, որը կառուցված է կապի նախագծից և — տարածաշրջանից, որը միշտ հաղթում է `providerSpecificData.project`/`providerSpecificData.region` : հակառակ դեպքում նախագիծը ստացվում է Ծառայության հաշվի JSON ի `project_id` ից, իսկ տարածաշրջանը լռելյայն է `us-central1`: Երկու լուծումներն էլ տեղի են ունենում `open-sse/handlers/ocr.ts` ում (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), որոնք սպառվում են `src/app/api/v1/ocr/route.ts` կողմից՝ նախքան `handleOcr` ուղարկելը:
 
 ---
 
@@ -668,94 +640,100 @@ Upstream contracts՝ [sound effects](https://elevenlabs.io/docs/api-reference/te
 
 ## Համատեղելիության վերջնակետեր
 
-| Մեթոդ | Ուղի                                      | Ձևաչափ                                       |
+| Մեթոդ | Ճանապարհ                                  | Ձևաչափ                                       |
 | ----- | ----------------------------------------- | -------------------------------------------- |
 | POST  | `/v1/chat/completions`                    | OpenAI                                       |
 | POST  | `/v1/messages`                            | Anthropic                                    |
-| POST  | `/v1/responses`                           | OpenAI Responses                             |
+| POST  | `/v1/responses`                           | OpenAI պատասխաններ                           |
 | POST  | `/v1/embeddings`                          | OpenAI                                       |
-| POST  | `/v1/images/generations`                  | OpenAI Images                                |
-| POST  | `/v1/images/edits`                        | OpenAI Images (խմբագրում/inpaint)            |
-| POST  | `/v1/videos/generations`                  | OpenAI-ի ոճով տեսանյութերի գեներացում        |
-| POST  | `/v1/music/generations`                   | OpenAI-ի ոճով երաժշտության գեներացում        |
-| POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                           |
-| POST  | `/v1/audio/speech`                        | OpenAI TTS (վերադարձնում է աուդիոյի մարմինը) |
-| POST  | `/v1/rerank`                              | Cohere/Voyage-ի ոճով վերադասավորում          |
-| POST  | `/v1/classify`                            | Jina-ի դասակարգում (`api.jina.ai`)           |
-| POST  | `/v1/segment`                             | Jina-ի սեգմենտավորիչ (`segment.jina.ai`)     |
-| POST  | `/v1/moderations`                         | OpenAI Moderations                           |
+| POST  | `/v1/images/generations`                  | OpenAI պատկերներ                             |
+| POST  | `/v1/images/edits`                        | OpenAI պատկերներ (edit/inpaint)              |
+| POST  | `/v1/videos/generations`                  | OpenAI-ի ոճով տեսանյութերի ստեղծում          |
+| POST  | `/v1/music/generations`                   | OpenAI ոճի երաժշտության սերունդ              |
+| POST  | `/v1/audio/transcriptions`                | OpenAI աուդիո (STT)                          |
+| POST  | `/v1/audio/speech`                        | OpenAI TTS (վերադարձնում է աուդիո մարմինը)   |
+| POST  | `/v1/rerank`                              | Cohere/Voyage-style rerank                   |
+| POST  | `/v1/classify`                            | Ջինա դասակարգում (`api.jina.ai`)             |
+| POST  | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)           |
+| POST  | `/v1/moderations`                         | OpenAI Մոդերացիաներ                          |
+| POST  | `/v1/systemone`                           | System One մուտքագրված որոշումներ            |
+| POST  | `/v1/decisions`                           | OpenAI որոշումներ (մայրենի)                  |
+| GET   | `/v1/systemone/models`                    | Որոշում-մոդել կատալոգ                        |
 | GET   | `/v1/models`                              | OpenAI                                       |
-| POST  | `/v1/models/query`                        | Զտված մոդելների կարճ ցուցակ                  |
+| POST  | `/v1/models/query`                        | Զտված մոդելի կարճ ցուցակ                     |
 | POST  | `/v1/messages/count_tokens`               | Anthropic                                    |
 | GET   | `/v1beta/models`                          | Gemini                                       |
 | POST  | `/v1beta/models/{...path}`                | Gemini generateContent                       |
 | POST  | `/v1/api/chat`                            | Ollama                                       |
-| GET   | `/api/v1/vscode/{token}/`                 | OpenAI-ի կատալոգի այլանուն                   |
-| GET   | `/api/v1/vscode/{token}/models`           | OpenAI-ի մոդելների այլանուն                  |
-| POST  | `/api/v1/vscode/{token}/chat/completions` | OpenAI-ի թոքենիզացված այլանուն               |
-| POST  | `/api/v1/vscode/{token}/responses`        | OpenAI Responses-ի թոքենիզացված այլանուն     |
-| POST  | `/api/v1/vscode/{token}/api/chat`         | Ollama-ի թոքենիզացված այլանուն               |
-| GET   | `/api/v1/vscode/{token}/api/tags`         | Ollama-ի թոքենիզացված թեգերի այլանուն        |
+| GET   | `/api/v1/vscode/{token}/`                 | OpenAI կատալոգի կեղծանունը                   |
+| GET   | `/api/v1/vscode/{token}/models`           | OpenAI մոդելների կեղծանունը                  |
+| POST  | `/api/v1/vscode/{token}/chat/completions` | OpenAI ի նշանավորած կեղծանունը               |
+| POST  | `/api/v1/vscode/{token}/responses`        | OpenAI Responses tokenized alias             |
+| POST  | `/api/v1/vscode/{token}/api/chat`         | Ollama ի նշանավորած կեղծանունը               |
+| GET   | `/api/v1/vscode/{token}/api/tags`         | Ollama պիտակավորում է նշանավորված կեղծանունը |
 
-Բոլոր POST երթուղիները հետևում են նույն կառուցվածքին՝ `Bearer your-api-key` + Zod-ով վավերացված JSON մարմին (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` և այլն, տես `src/shared/validation/schemas.ts`)։ Սխեմայի ձախողման դեպքում վերադարձվում է 4xx։
+Բոլոր POST երթուղիները հետևում են նույն ձևին. `Bearer your-api-key` + Zod-ով վավերացված JSON մարմինը (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` և այլն, տես `src/shared/validation/schemas.ts`): 4xx-ը վերադարձվում է սխեմայի ձախողման դեպքում:
 
-Այն հաճախորդների համար, որոնք չեն կարող կցել `Authorization: Bearer ...`, OmniRoute-ը նաև ընդունում է API բանալիներ URL-ում՝ կամ հարցման տողի համատեղելիության միջոցով (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`), կամ ստորև փաստագրված հատուկ `/api/v1/vscode/{token}/...` վերջնակետերի միջոցով։
+Հաճախորդների համար, ովքեր չեն կարող կցել `Authorization: Bearer ...`, OmniRoute ընդունում է նաև API ստեղները URL ում կամ հարցումների տողերի համատեղելիության (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) կամ ստորև փաստաթղթավորված հատուկ `/api/v1/vscode/{token}/...` վերջնակետերի միջոցով:
 
 ```bash
-# Վերադասավորում (ամպային ռեեստրի մատակարար կամ OpenAI-ի հետ համատեղելի մատակարարի հանգույց՝ որպես "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina-ի դասակարգում (Foundation API-ի հավատարմագրեր)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina-ի սեգմենտավորիչ
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina-ի որոնում (s.jina.ai, մատակարարների այլանուններ՝ jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Մոդերացիաներ
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — վերադարձնում է audio/mpeg (կամ պահանջված ձևաչափի) մարմին
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS-ի համար պահանջվում են լեզու և ձայն. `language`-ի լռելյայն արժեքը "en" է. բացակայող
-# ձայնը կամ OpenAI-ի ստանդարտ ձայնի անունը (alloy, nova, …) դառնում է "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Պատկերի խմբագրում (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Տեսանյութերի / երաժշտության գեներացում (մատակարարի նախածանցով մոդելի նույնացուցիչ)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Վերադասակարգման մատակարարի հանգույցներ․** `POST /v1/rerank`-ը նաև ուղղորդվում է OpenAI-ին համատեղելի մատակարարի հանգույցներին
-> (oMLX, vLLM, Infinity, TEI՝ gateway-ի հետևում, …), որոնց հասցեները տրված են `<node-prefix>/<model>` ձևաչափով։ Loopback
-> հանգույցները (`localhost`, `127.0.0.1`, `172.16.0.0/12`) միշտ թույլատրելի են, ինչպես նաև այն հոսթանունները, որոնք
-> օպերատորը նշում է `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`-ում (օրինակ՝ Docker/Compose ծառայության անունը, ինչպես
-> `http://reranker:8080/v1`․ այս հանգույցներին դիմում է անմիջականորեն՝ երբեք ոչ `HTTP(S)_PROXY`-ի, ոչ էլ
-> միացման ամրակցված պրոքսիի միջոցով)։ Ցանկացած այլ
-> հոսթում գտնվող հանգույցները՝ LAN-ի համակարգիչ կամ Tailscale-ի գործընկեր, թույլատրելի են միայն այն դեպքում, երբ օպերատորը միացնում է
-> `RERANK_REMOTE_PROVIDER_NODES` ֆունկցիայի դրոշը **և** հանգույցի բազային URL-ը անցնում է մատակարարի ելքային URL-ի քաղաքականությունը
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`)։ Հիշողության շարժիչի վերադասակարգման
-> քայլը այս երթուղին կանչում է loopback-ի միջոցով, ուստի նույն կանոնը կիրառվում է Memory-ի կարգավորումներում գտնվող
-> `rerankProviderModel`-ի նկատմամբ։
+> **Պրովայդերի հանգույցների վերադասավորում.** `POST /v1/rerank` նաև ուղղում է դեպի OpenAI-ի հետ համատեղելի մատակարար հանգույցներ (oMLX, vLLM, Infinity, TEI դարպասի հետևում, …) հասցեագրված որպես `<node-prefix>/<model>`: Loopback հանգույցները (`localhost`, `127.0.0.1`, `172.16.0.0/12`) միշտ իրավասու են, ինչպես նաև հոսթների անունները, որոնք օպերատորը ցուցակում է `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` ում (օրինակ՝ Docker/Compose ծառայության անվանումը, ինչպիսին `http://reranker:8080/v1` է, դրանք կանչվում են ուղղակիորեն, ոչ երբեք `HTTP(S)_PROXY` կամ կապի ամրացված պրոքսիի միջոցով): Ցանկացած այլ հյուրընկալող — a LAN տուփի կամ Tailscale peer — հանգույցները իրավասու են միայն այն դեպքում, երբ օպերատորը միացնում է `RERANK_REMOTE_PROVIDER_NODES` հատկանիշի դրոշը** և** հանգույցի բազային URL փոխանցում է մատակարարի ելքային URL քաղաքականությունը (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`): Հիշողության շարժիչի վերադասավորման քայլն այս երթուղին կոչում է հետադարձ կապ, ուստի նույն կանոնը կառավարում է `rerankProviderModel` Հիշողության կարգավորումներում:
 >
-> **Տեղական սերվերի ձևաչափեր․** հանգույցը կանչվում է `<base>/v1/rerank` հասցեով, իսկ 404-ի դեպքում՝ `<base>/rerank`
-> հասցեով (Infinity, TEI)։ Upstream-ի մարմինը պարունակում է ինչպես Cohere/OpenAI-ի ձևակերպումները
-> (`documents`, `return_documents`), այնպես էլ TEI-ի ձևակերպումները (`texts`, `return_text`), իսկ upstream-ի պատասխանը
-> նորմալացվում է Cohere-ի envelope-ի՝ TEI-ի առանց լրացուցիչ փաթեթավորման `[{index, score, text}]`, բարակ gateway-ներից ստացվող
-> `{results: [{index, score}]}` և Voyage-ի ոճի `{data: [...]}` պատասխանները հաճախորդին վերադարձվում են որպես
-> `{results: [{index, relevance_score, document?}]}`՝ դասավորված ըստ գնահատականի և սահմանափակված `top_n`-ով։
+> **Տեղական սերվերի ձևեր.** հանգույցը կոչվում է `<base>/v1/rerank`, իսկ 404-ին՝ `<base>/rerank` ում (Անսահմանություն, TEI): Վերին հոսքի մարմինը կրում է և՛ Cohere/OpenAI ուղղագրությունը (`documents`, `return_documents` TEI, և՛ TEI `[{index, score, text}]`(`texts`, `return_text` `{results: [{index, score}]}`, իսկ `{results: [{index, relevance_score, document?}]}` հոսքի արձագանքը նորմալացվում է Cohere `top_n` վրա. `{data: [...]}`
 
-> **Մատակարարի հանգույցների հայտնաբերում․** OpenAI-ին համատեղելի մատակարարի հանգույցի մոդելները հայտնվում են `GET /v1/models`-ում՝
-> հանգույցի նախածանցի ներքո։ Endpoint-ի մետատվյալներ չպարունակող տողերը (ինչը բնորոշ է տեղական `/v1/models` ցուցակներին)
-> ժառանգում են հանգույցի `apiType`-ը, ուստի `embeddings` հանգույցի մոդելներն ունեն `type: "embedding"`, իսկ
-> `rerank` հանգույցի մոդելները՝ `type: "rerank"`, այլ ոչ թե լռելյայն ստանում են chat տեսակը․ սակայն համաժամեցված կամ ձեռքով ավելացված
-> տողի բացահայտ `supportedEndpoints`-ը շարունակում է գերակայել։
+> **Մատակարար-հանգույցի հայտնաբերում.** OpenAI-ի հետ համատեղելի մատակարարի հանգույցի մոդելները հայտնվում են `GET /v1/models` ում՝ հանգույցի նախածանցի տակ: Այն տողերը, որոնք չունեն վերջնակետի մետատվյալներ (սովորական տեղական `/v1/models` ցուցակների համար) ժառանգում են հանգույցի `apiType`, ուստի `embeddings` հանգույցի մոդելները `type: "embedding"` են, իսկ `rerank` հանգույցների մոդելները՝ `type: "rerank"` ՝ չաթի լռելյայն լինելու փոխարեն; բացահայտ `supportedEndpoints` համաժամեցված կամ ձեռքով ավելացված տողում դեռևս առաջնահերթ է:
+
+### Մուտքագրված որոշումներ
+
+Որոշման մոդելները տեքստ ստեղծելու փոխարեն պատասխանում են մուտքագրված հարցերին տրամաչափված հավանականություններով: Նրանք երբեք չաթի մոդելներ չեն, և երկու լարերի ձևաչափերը երբեք չեն թարգմանվում միմյանց մեջ.
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter որոշումներ, Cloudflare Workers AI, local Ollama):
+- `POST /v1/decisions` — հայրենի OpenAI Որոշումներ `{ model, input, questions: [...] }`, սպասարկվում է `openai` կապով։ Մոդելը `openai/gpt-6-luna` է (գործում է նաև մերկ `gpt-6-luna` )։ Պատասխանները վերադառնում են հարցական հաջորդականությամբ, անձեռնմխելի:
+- `GET /v1/systemone/models` — երկու տեսակի մեկ կատալոգ; Յուրաքանչյուր տող անվանում է իր `api_format` (`systemone` կամ `decisions`): `limit` / `after` էջը վերջնական ցուցակը. `X-OmniRoute-Catalog-Status` վերնագիրը կարդում է `complete`, `partial` կամ `unavailable` (503):
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` ում API բանալու մոդելի թույլտվության ցանկում ստուգվում են `decisions` վերջնակետի կատեգորիան, բյուջեն և կապի շրջանակը, նախքան որևէ հավատարմագիր կարդալը: Հավատարմագիրը պահված `openai` կապն է բանալու շրջանակի ներսում (երբեք շրջակա միջավայրի բանալի); կապի հիմքը URL հարգվում է միայն այն դեպքում, երբ այն `http(s)` URL է առանց հավատարմագրերի, հարցման կամ հատվածի, որը չի մատնանշում այս OmniRoute: Զանգը հեռանում է նույն հսկվող տրանսպորտով, ինչ `decision` KB երթուղիչը ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ). Հարցման մարմինները սահմանափակված են 4 MiB ով: Յուրաքանչյուր զանգ ուղարկում է թարմ `Idempotency-Key`: Սխալները կրում են միայն վերին հոսքի կարգավիճակը, ոչ երբեք դրա մարմինը, URL ը, բանալին կամ հուշումը:
 
 ### Նվիրված մատակարարի երթուղիներ
 
@@ -765,7 +743,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Մատակարարի նախածանցը ավտոմատ ավելացվում է, եթե բացակայում է։ Չհամապատասխանող մոդելները վերադարձնում են `400`։
+Մատակարարի նախածանցը ավտոմատ կերպով ավելացվում է, եթե բացակայում է: Չհամապատասխանող մոդելները վերադարձնում են `400`:
 
 ---
 

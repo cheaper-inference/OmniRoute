@@ -63,43 +63,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 `POST`، يحفظ OmniRoute الرمز المميز ويُجري فورًا بحثًا تجريبيًا بنتيجة واحدة؛ وإذا
 أعاد Notion كائن خطأ، يُمسح الرمز المميز وتفشل المكالمة بالحالة `400`.
 
-## أدوات MCP ‏(6)
+## أدوات MCP (6)
 
-مُعرَّفة في `open-sse/mcp-server/tools/notionTools.ts`. يجري الحصول على الرمز المميز
-وقت الاستدعاء عبر `getNotionToken()`؛ وإذا لم يكن أي رمز مكوّنًا، تُطلق الأداة الخطأ
-`"لم يتم تكوين رمز مميز لتكامل Notion. قم بتعيينه في الإعدادات > مصادر السياق."`
+محددة في `open-sse/mcp-server/tools/notionTools.ts`. يتم حل الرمز المميز في وقت الاتصال عبر `getNotionToken()`؛ إذا لم يتم تكوين أي شيء، فستقوم الأداة بطرح `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| الأداة                       | النطاق         | الوصف                                                                                                   |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | البحث في الصفحات وقواعد البيانات عبر استعلام نصي (يعيد العناوين والمعرّفات وعناوين URL). مرقّم الصفحات. |
-| `notion_get_page`            | `read:notion`  | الحصول على محتوى صفحة وبياناتها الوصفية باستخدام معرّفها.                                               |
-| `notion_list_block_children` | `read:notion`  | سرد جميع الكتل الفرعية لكتلة أو صفحة (شجرة الكتل). مرقّم الصفحات.                                       |
-| `notion_query_database`      | `read:notion`  | الاستعلام من قاعدة بيانات باستخدام `filter` و`sorts` اختياريين (بتنسيق Notion API). مرقّم الصفحات.      |
-| `notion_get_database`        | `read:notion`  | الحصول على مخطط قاعدة بيانات وبياناتها الوصفية باستخدام المعرّف.                                        |
-| `notion_append_blocks`       | `write:notion` | إلحاق كتل فرعية بكتلة أو صفحة موجودة (بحد أقصى 100 كتلة لكل طلب).                                       |
+| أداة                         | نِطَاق         | وصف                                                                                          |
+| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | البحث في الصفحات وقواعد البيانات عن طريق الاستعلام النصي (إرجاع العناوين، IDs، URLs). مرقّم. |
+| `notion_get_page`            | `read:notion`  | احصل على المحتوى والبيانات الوصفية للصفحة من خلال ID الخاص بها.                              |
+| `notion_list_block_children` | `read:notion`  | قم بإدراج جميع الكتل الفرعية للكتلة أو الصفحة (شجرة الكتل). مرقّم.                           |
+| `notion_query_database`      | `read:notion`  | الاستعلام عن قاعدة بيانات باستخدام `filter` + `sorts` الاختياري (تنسيق Notion API ). مرقّم.  |
+| `notion_get_database`        | `read:notion`  | احصل على schema/metadata لقاعدة البيانات بواسطة ID.                                          |
+| `notion_append_blocks`       | `write:notion` | إلحاق كتل فرعية بكتلة أو صفحة موجودة (بحد أقصى 100 قطعة لكل طلب).                            |
 
 ### معلمات الإدخال
 
-- `notion_search` — ‏`query` (من 1 إلى 500 حرف)، و`pageSize` (من 1 إلى 100،
-  والقيمة الافتراضية 20)، و`startCursor` (اختياري).
-- `notion_get_page` — ‏`pageId` (قيمة سداسية عشرية من 32 حرفًا أو UUID).
-- `notion_list_block_children` — ‏`blockId`، و`pageSize` (من 1 إلى 100،
-  والقيمة الافتراضية 50)، و`startCursor` (اختياري).
-- `notion_query_database` — ‏`databaseId`، و`filter` (اختياري، بتنسيق مرشّح Notion)،
-  و`sorts` (مصفوفة اختيارية)، و`pageSize` (من 1 إلى 100، والقيمة الافتراضية 50)،
-  و`startCursor` (اختياري).
-- `notion_get_database` — ‏`databaseId`.
-- `notion_append_blocks` — ‏`blockId`، و`children` (مصفوفة من كائنات الكتل)،
-  و`after` (موضع اختياري).
+- `notion_search` — `query` (1–500 حرف)، `pageSize` (1–100، الافتراضي 20)، `startCursor` (اختياري).
+- `notion_get_page` — `pageId` (32 حرفًا سداسي عشريًا أو UUID).
+- `notion_list_block_children` — `blockId`، `pageSize` (1–100، الافتراضي 50)، `startCursor` (اختياري).
+- `notion_query_database` — `databaseId`، `filter` (اختياري، تنسيق مرشح Notion )، `sorts` (صفيف اختياري)، `pageSize` (1-100، الافتراضي 50)، `startCursor` (اختياري).
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`، `children` (صفيف كائنات الكتلة)، `after` (موضع اختياري).
 
 ### النطاقات
 
-تتطلب أدوات القراءة النطاق `read:notion`، بينما تتطلب أداة الكتابة النطاق
-`write:notion`. تُفرض النطاقات بواسطة `withScopeEnforcement()` في
-`open-sse/mcp-server/server.ts` فقط عندما تكون `OMNIROUTE_MCP_ENFORCE_SCOPES=true`؛
-وتأتي النطاقات المسموح بها للمتصل من `OMNIROUTE_MCP_SCOPES` (مفصولة بفواصل) أو من
-سياق نطاق مفتاح API المُصادَق عليه. راجع [MCP-SERVER.md](./MCP-SERVER.md) للاطلاع
-على نموذج النطاق الكامل.
+تتطلب أدوات القراءة `read:notion` وأداة الكتابة تتطلب `write:notion`. يتم فرض النطاقات بواسطة `withScopeEnforcement()` في `open-sse/mcp-server/server.ts` عندما `OMNIROUTE_MCP_ENFORCE_SCOPES=true`، ودائمًا بالنسبة للمتصل HTTP/SSE الذي يفتقر مفتاح API `manage`/`admin`؛ النطاقات المسموح بها للمتصل تأتي من `OMNIROUTE_MCP_SCOPES` (مفصولة بفواصل) أو سياق نطاق مفتاح API المصادق عليه. راجع [MCP-SERVER.md](./MCP-SERVER.md) للاطلاع على نموذج النطاق الكامل.
 
 ## نقاط النهاية
 

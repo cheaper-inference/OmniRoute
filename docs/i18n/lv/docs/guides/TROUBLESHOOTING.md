@@ -185,88 +185,49 @@ nav.
 
 ---
 
-## Antivīrusa kļūdaini pozitīvie rezultāti
+## Pretvīrusu viltus pozitīvi
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG ievieto `README.md` karantīnā ar `MD:HttpRequest-inf[Susp]`
+### Avast/AVG karantīna `README.md` ar `MD:HttpRequest-inf[Susp]`
 
-**Tas ir kļūdaini pozitīvs rezultāts. Nekas nav inficēts, un nekāda rīcība nav nepieciešama.**
+**Tas ir viltus pozitīvs rādītājs. Nekas nav inficēts, un nav jāveic nekādas darbības.**
 
-Avast un AVG izmanto heiristisku pārbaudi, kas atzīmē vienkārša teksta/Markdown failus, kuros ir daudz
-HTTP pieprasījumiem līdzīgu saišu. OmniRoute `README.md` tiek iekļauts npm pakotnē (tas ir
-norādīts `package.json` → `files`), tādēļ globālas instalēšanas laikā tas nonāk
-`node_modules/omniroute/README.md` — un tajā ir aptuveni 15 `http://localhost:20128/...`
-piemēri (MCP HTTP/SSE galapunkti, A2A `.well-known` URL un `curl` fragmenti). Šāds saišu
-blīvums ir pietiekams, lai aktivizētu heiristisko pārbaudi.
+Avast and AVG run a heuristic that flags plain-text/Markdown files containing many HTTP-request-looking links. OmniRoute's `README.md` ships inside the npm package (it is listed in `package.json` → `files`), so it lands at `node_modules/omniroute/README.md` on a global install — and it contains ~15 `http://localhost:20128/...` examples (the MCP HTTP/SSE endpoints, the A2A `.well-known` URL, and `curl` snippets). That link density is enough to trip the heuristic.
 
-Ja tas sākās tikai nesen: faila veids nav mainījies. README galapunktu tabula tika
-paplašināta (tika pievienoti MCP HTTP + SSE + A2A), kā arī tika pievienots vairāk `curl`
-piemēru, tādējādi pārsniedzot slieksni.
+Ja tas sākās tikai nesen: fails nav mainījies natūrā. README palielināja savu beigu punktu tabulu (tika pievienota MCP HTTP + SSE + A2A ) un vairāk `curl` piemēru, kas to pārsniedza slieksni.
 
-Fails ir neaktīva dokumentācija bez jebkāda izpildāma satura. Varat to droši atjaunot
-no karantīnas.
+Fails ir inerta dokumentācija ar nulli izpildāmā satura. Jūs varat to droši atjaunot no karantīnas.
 
-**Ko darīt:**
+**Kā rīkoties:**
 
-1. **Apturiet paziņojumus** — pievienojiet instalēšanas direktoriju sava antivīrusa
-   izņēmumiem (Avast: Settings → Exceptions), norādot globālo `node_modules` ceļu un/vai
-   OmniRoute datu direktoriju (`~/.omniroute/`).
-2. **Ziņojiet par kļūdaini pozitīvo rezultātu** — <https://www.avast.com/false-positive-file-form.php>,
-   pievienojot karantīnā ievietoto `README.md`. Šis ir risinājums, kas palīdz ikvienam, jo
-   piegādātāja heiristika pārmērīgi reaģē uz teksta failu.
+1. **Apturiet paziņojumus** — izslēdziet instalēšanas direktoriju savā pretvīrusu programmā (Avast: Settings → Exceptions), pievienojot savu globālo `node_modules` ceļu and/or OmniRoute datu direktorijā (`~/.omniroute/`).
+2. **Ziņojiet par viltus pozitīvu rezultātu** — <https://www.avast.com/false-positive-file-form.php>, pievienojot karantīnā esošo `README.md`. Šis ir labojums, kas palīdz ikvienam, jo tā ir pārdevēja heiristiska pārmērīga reakcija uz teksta failu.
 
-**Kāpēc mēs to „nelabojam” savā pusē:** visi piemēri izmanto `http://localhost`, un
-localhost nevar izmantot `https` bez sarežģījumiem, ko rada pašparakstīti sertifikāti. Dokumentācijas
-sagrozīšana, lai apietu viena piegādātāja heiristiku, kaitētu visiem lasītājiem, lai tikai
-pielāgotos skenera kļūdai.
+**Kāpēc mēs to "nelabojam" savā pusē:** visi piemēri ir `http://localhost`, un localhost nevar būt `https` bez pašparakstīta sertifikāta berzes. Dokumentu sagrozīšana, lai izvairītos no viena pārdevēja heiristikas, kaitētu ikvienam lasītājam, lai apmierinātu skenera kļūdu.
 
 ### Kaspersky atzīmē darbvirsmas lietotni kā `PDM:Trojan.Win32.Generic`
 
-**Tas ir uzvedības heiristikas izraisīts kļūdaini pozitīvs rezultāts. Nekas nav inficēts.**
-Kaspersky prefikss `PDM:` nozīmē, ka spriedumu ir izveidojis tā Proactive Defense Module
-(System Watcher), kas vērtē instalētāja _darbības_, nevis salīdzina to ar zināmu ļaunprogrammatūru.
-Kad pārbaude nostrādā, Kaspersky „atritina” visu instalāciju — dzēšot jau ierakstītos
-failus — tādēļ lietotne beigās ir bojāta vai tās nav vispār.
+**Tas ir kļūdaini pozitīvs no uzvedības heiristikas. Nekas nav inficēts.** Kaspersky `PDM:` prefikss nozīmē, ka spriedums nāk no tā proaktīvās aizsardzības moduļa (System Watcher), kas vērtē, ko instalēšanas programma _dara_, nevis salīdzina to ar zināmu ļaunprātīgu programmatūru. Kad tā tiek aktivizēta, Kaspersky "atgriež" visu instalāciju —, dzēšot failus, kas jau bija ierakstīti — tāpēc lietotne tiek sabojāta vai trūkst.
 
-Atzīmētie faili ir standarta sastāvdaļas deklarētās atvērtā pirmkoda atkarībās, kas iekļautas
-darbvirsmas lietotnē, piemēram:
+Faili, kurus tas atzīmē, ir deklarēto atvērtā koda atkarību krājumi, kas ir komplektēti ar darbvirsmas lietotni, piemēram:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` un
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), pārlūkprogrammas automatizācijas
-  bibliotēka, ko izmanto pakalpojumu sniedzēju pieteikšanās procesam lietotnē un pārlūkprogrammas
-  nodrošinātai tērzēšanai.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — fiksētās versijas `wreq-js` natīvais saistījums, ko izmanto pārlūkprogrammas nospiedumam
-  atbilstošiem HTTP pieprasījumiem tīmekļa sīkfailus izmantojošiem pakalpojumu sniedzējiem
-  (`<arch>` ir `x64` vai `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` un `workerProcessEntry.js` — [Playwright](https://playwright.dev) — pārlūkprogrammas automatizācijas bibliotēka, ko izmanto pakalpojumu sniedzēja pieteikšanās lietotnē un pārlūkprogrammas atbalstīta tērzēšana.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — piespraustā `wreq-js` sākotnējā saite, ko izmanto pārlūkprogrammas pirkstu nospiedumu HTTP tīmekļa sīkfailu nodrošinātājos (`<arch>` ir `x64` vai `arm64`).
 
-**Kāpēc tas nostrādā:** Windows instalētājs **vēl nav parakstīts ar kodu**, tādēļ neparakstītam
-NSIS instalētājam nav nekādas reputācijas un uzvedības heiristika darbojas ar maksimālu
-agresivitāti. Kopā ar komplektā iekļauto natīvo DLL un simtiem `.js` failu, kas tiek ierakstīti
-zem `%LOCALAPPDATA%\Programs\OmniRoute` (tostarp pakotņu direktorijiem ar jaucējvērtības
-sufiksiem no Next.js savrupā būvējuma), ar to pietiek, lai aktivizētu heiristisko pārbaudi.
-Koda parakstīšana ir plānota; līdz tās ieviešanai tas var atkārtoties jaunajos laidienos.
+**Kāpēc tas aizdegas:** Windows uzstādītājs ir** vēl nav parakstīts kods** , tāpēc neparakstītam NSIS instalētājam ir nulle reputācija, un uzvedības heiristika darbojas ar maksimālu agresiju. Apvienojumā ar komplektā iekļauto DLL un simtiem `.js` failu, kas rakstīti zem `%LOCALAPPDATA%\Programs\OmniRoute` (tostarp pakešu direktorijus ar hash sufiksu no Next.js atsevišķas versijas), ar to pietiek, lai izjauktu heiristiku. Tiek plānota koda parakstīšana; līdz tas nolaižas, jaunie izlaidumi to var atkārtot.
 
-**Ko darīt:**
+**Kā rīkoties:**
 
-1. **Vispirms pārbaudiet lejupielādēto failu** (tas ļauj izslēgt faila manipulācijas iespēju).
-   Katram laidienam tiek publicēts `latest.yml`, kura lauks `sha512` (base64) attiecas uz
-   instalētāju `OmniRoute.Setup.<version>.exe`. PowerShell logā no mapes, kurā atrodas
-   instalētājs:
+1. **Vispirms pārbaudiet savu lejupielādi** (izslēdz bojātu failu). Katrā laidienā tiek publicēts `latest.yml`, kura lauks `sha512` (base64) aptver `OmniRoute.Setup.<version>.exe` instalētāju. Programmā PowerShell no mapes, kurā ir instalētājs:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Izvadei jāsakrīt ar `latest.yml` → `sha512`. Ja tā nesakrīt, izdzēsiet failu un
-   atkārtoti lejupielādējiet to tikai no [GitHub laidienu lapas](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Atjaunojiet un pievienojiet izņēmumu** — atjaunojiet atsauktos vienumus no karantīnas un
-   pievienojiet izņēmumu `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
-   pēc tam instalējiet vēlreiz.
-3. **Ziņojiet par kļūdaini pozitīvo rezultātu** — <https://opentip.kaspersky.com/>. Lietotāju
-   iesniegtie ziņojumi par kļūdaini pozitīviem rezultātiem patiešām paātrina pievienošanu
-   atļauto vienumu sarakstam.
+   Izvadei ir jāatbilst `latest.yml` → `sha512`. Ja tā nav, izdzēsiet failu un atkārtoti lejupielādējiet tikai no [GitHub izlaidumu lapas](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Atjaunot + izslēgt** — atjaunojiet atsauktos vienumus no karantīnas un pievienojiet `%LOCALAPPDATA%\Programs\OmniRoute` izņēmumu (Kaspersky → Settings → Threats and Exclusions), pēc tam instalējiet atkārtoti.
+3. **Ziņojiet par viltus pozitīvu rezultātu** — <https://opentip.kaspersky.com/>. Lietotāju iesniegtie FP pārskati patiesi paātrina iekļaušanu atļauto sarakstā.
 
 ---
 
@@ -878,10 +839,10 @@ Vairāk simptomu:
 
 ---
 
-## Joprojām neizdodas?
+## Joprojām iestrēdzis?
 
-- **GitHub problēmas**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Arhitektūra**: Iekšējo informāciju skatiet [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
-- **API atsauce**: Visus galapunktus skatiet [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
-- **Darbspējas informācijas panelis**: Sistēmas statusu reāllaikā skatiet sadaļā **Informācijas panelis → Darbspēja**
-- **Tulkotājs**: Izmantojiet **Informācijas panelis → Tulkotājs**, lai atkļūdotu formāta problēmas
+- **GitHub problēmas** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Arhitektūra** : Skatiet [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) iekšējo informāciju
+- **API atsauce** : skatiet [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) par visiem galapunktiem
+- **Veselības informācijas panelis** : Pārbaudiet** Informācijas panelis → Health** reāllaika sistēmas statusam
+- **Tulkotājs** : Izmantojiet** Informācijas paneļa → tulkotājs** lai atkļūdotu formāta problēmas

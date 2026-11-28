@@ -47,7 +47,7 @@ Väljalaske vastavusse viimisel avatakse tähisprobleem `release-freeze`. See** 
 Enne kui eeldate, et soovitud haru on ühendatav, kontrollige, kas see on külmutatud:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Ühendamise mehaanika (omanik `queue` silt → Mergify) on dokumenteeritud failis [MERGE_TRAIN.md](./MERGE_TRAIN.md).

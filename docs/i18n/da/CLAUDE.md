@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Alle projektregler findes i [`AGENTS.md`](AGENTS.md)** — den eneste autoritative kilde for alle AI-
-assistenter (arkitektur, konventioner, test, kvalitetskontroller, git-arbejdsgang, de 23 hårde regler,
-erfaringer om PII). Læs den i sin helhed; tilføj ikke projektregler her igen. Alt nedenfor gælder KUN
-for Claude Code — operationelle præciseringer af regler, der allerede er defineret i `AGENTS.md`.
+**Alle projektregler lever i [`AGENTS.md`](AGENTS.md)** — den eneste kilde til sandhed for hver AI assistent; importen ovenfor indlæser den allerede. Tilføj ikke projektregler igen her. Alt nedenfor gælder ONLY for Claude Code — operationelle justeringer af regler, der allerede er defineret i `AGENTS.md`.
 
-## Worktree-isolering — Claude Code-specifikke detaljer
+## Worktree isolation — Claude Kodespecifikationer
 
-Den fulde obligatoriske worktree-protokol (bekræftelse af basisbranch, kanonisk sti
-`.claude/worktrees/`, `cp -al` node_modules, oprydningsregler) findes i
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (opsummeret i `AGENTS.md` →
-Git-arbejdsgang → "Worktree-isolering"). Claude Code-specifikke punkter:
+- Bekræft basisgrenen med operatøren via `AskUserQuestion` (Hard Rule #19), medmindre de allerede har fortalt dig det.
+- Opret arbejdstræet med `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (det lander under `.claude/worktrees/`, hard-links `node_modules` og kopierer `.husky/_`), og kald derefter `EnterWorktree` med dets `path`. Bestå altid basen: uden den vælger scriptet den højeste `release/*`, som måske ikke er den, som operatøren bekræftede. Et arbejdstræ, som `EnterWorktree` skaber af sig selv, har hverken de hårde links eller krogene, så der kører ingen pre-commit gate i det.
 
-- Bekræft basisbranchen med operatøren via `AskUserQuestion` (hård regel nr. 19), medmindre de
-  allerede har fortalt dig det.
-- Foretræk det indbyggede `EnterWorktree`-værktøj — det opretter allerede worktrees under
-  `.claude/worktrees/` (den kanoniske sti). Opret worktreet med den dokumenterede `git
-worktree add`-kommando, og kald derefter `EnterWorktree` med dets `path`.
+## Subagenter og git
 
-## Sikkerhed på tværs af sessioner — specifikt for Claude Code
+Hver subagent, der rører ved git (agentværktøj eller workflow-script) får Hard Rule #22 a's `git stash` forbud ordret i sin prompt — den registrerede gentagelse af stash-hændelsen kom gennem en subagent.
 
-De hårde regler #19/#21/#22 (i `AGENTS.md`) styrer parallelle sessioner. Operationelle påmindelser til
-dette miljø:
+## Planlægning af artefakter — supermagter sti tilsidesætter
 
-- **Gentag forbuddet mod `git stash` ordret i prompten til enhver underagent, der arbejder med git**
-  (Agent-værktøj/workflow-scripts) — underagenter arver ikke denne fil, og den registrerede
-  gentagelse af stash-hændelsen skete via en underagent.
-- Før du merger eller pusher til en PR, som du ikke oprettede _i denne session_, skal du køre `git worktree list`
-  og kontrollere `gh pr view <N> --json state,headRefOid` igen (hård regel #22b).
-- Afslut hver session med hoved-checkoutet på den gren, det startede på.
+Supermagter færdigheder annoncerer standarder under `docs/superpowers/plans/`, `docs/superpowers/specs/` og `docs/research/`. Omskriv hver til dens `_tasks/` ækvivalent i `AGENTS.md` → "Planning & Research Artifacts", før du skriver, og begå det med `git -C _tasks …`, aldrig i hovedrepoen.
 
-## Superpowers-/planlægningsartefakter — stitilsidesættelser
+## Scratch filer — `_artifacts/`, ikke `/tmp`
 
-Konventionen `_tasks/` er defineret i `AGENTS.md` → "Planlægnings- og researchartefakter".
-Superpowers-færdighederne leveres med standarder, der peger på `docs/…` — disse standarder er **tilsidesat
-her**. Når en Superpowers-færdighed angiver en sti såsom "gemt i `docs/superpowers/plans/…`",
-skal den omskrives til den tilsvarende `_tasks/…`-sti, før der skrives:
+Dette projekt tilsidesætter selens sessionskladde (`/tmp/claude-*/…`). Skriv midlertidige filer — eksporter, genererede zips, engangs mellemudgange — til `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: en gitignored root `_*` sti, så operatøren finder og sletter alle scratch på ét sted. Holdbare planer, specifikationer, forskning og overdragelser går til `_tasks/` i stedet (Hard Rule #23).
 
-| Artefakt (færdighed)                     | Standard (brug IKKE)      | Gem her i stedet                                              |
-| ---------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Planer (`writing-plans`)                 | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Specifikationer/design (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Research (`deep-research`, ad hoc)       | `docs/research/`          | `_tasks/research/…`                                           |
-| Overdragelser (`/handoff`)               | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Rød bund
 
-Commit disse artefakter i `_tasks/`-repoet (`git -C _tasks …`), aldrig i hovedrepoet.
-
-## Kladde-/midlertidige filer — brug `_artifacts/`, ikke `/tmp`
-
-Dette projekt tilsidesætter miljøets standardkladdeområde for sessioner (`/tmp/claude-*/…`). Skriv
-midlertidige/arbejdsfiler — eksporter, genererede zip-filer, midlertidige engangsresultater og alt,
-hvad du ellers ville placere i `/tmp` — til `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` i stedet.
-
-- `_artifacts/` er en `_*`-sti i roden: Den er allerede ignoreret af git (`AGENTS.md` → "`_*`-stier i roden"),
-  findes kun på disken og spores aldrig.
-- Årsag: Når kladderesultater opbevares i projektet (frem for `/tmp`), er det nemt for operatøren
-  at finde og slette alt midlertidigt ét sted i stedet for at lede i flygtige,
-  sessionsspecifikke `/tmp`-mapper, som forsvinder eller ophober usporede filer.
-- Forveksl **ikke** dette med `_tasks/` (hård regel #23, dets eget private git-repo til permanente
-  planer/specifikationer/research/overdragelser) — `_artifacts/` er kun til midlertidige arbejdsfiler;
-  intet her behøver at overleve eller blive versionsstyret.
-
-## Grøn basis før åbning af PR'er
-
-Før du opretter en gren eller åbner en PR, skal du køre kontrollen af, at basis er grøn (`AGENTS.md` → Git-arbejdsgang →
-"Kontrol af grøn basis"; projektfærdigheder henviser til den som `.agents/skills/_shared/base-green.md`). En PR,
-der åbnes, mens spidsen af basisgrenen er rød, skal indeholde `⚠️ base-red inherited: #<issue>` i sin brødtekst. Brug
-færdigheden `/sweep-reds` til at afvikle en ophobet rød tilstand (spidsen af basisgrenen + røde PR'er).
+For at dræne en akkumuleret rød tilstand (basisspids + red PRs), skal du bruge `/sweep-reds` færdigheden.

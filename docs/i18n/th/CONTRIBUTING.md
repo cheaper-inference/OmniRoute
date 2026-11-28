@@ -8,30 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## การตั้งค่าสำหรับการพัฒนา
+## การตั้งค่าการพัฒนา
 
 ### ข้อกำหนดเบื้องต้น
 
 - **Node.js** `>=22.22.2 <23` หรือ `>=24.0.0 <27` (แนะนำ: 24 LTS)
-- **npm** 10+
+- **เวลา 22.00 น** 10 +
 
-> **Windows ที่ใช้ Node 24:** ให้ใช้รุ่นแพตช์ 24 LTS ปัจจุบัน (อย่างน้อย 24.20.0)
-> รุ่นก่อนหน้าอาจยุติการทำงานหลังการทดสอบสำเร็จ เมื่อ `--test-force-exit` ปิด
-> กระบวนการ แพตช์แก้ไข Windows libuv ของ Node
-> [นี้](https://github.com/nodejs/node/pull/61999) ช่วยแก้ปัญหาโปรแกรมทำงานล้มเหลวขณะรันไทม์
-> ดังกล่าว โปรดเปิดใช้การตรวจสอบ assertion ของการทดสอบและการออกจาก runner ต่อไป
+> **Windows กับโหนด 24:** ใช้แพตช์ 24 LTS ปัจจุบัน (อย่างน้อย 24.20.0) รีลีสก่อนหน้านี้สามารถยกเลิกได้หลังจากการทดสอบสำเร็จ เมื่อ `--test-force-exit` ปิดกระบวนการ [การแก้ไข Windows libuv](https://github.com/nodejs/node/pull/61999) ของโหนดช่วยแก้ไขข้อผิดพลาดรันไทม์นี้ เปิดใช้งานการยืนยันการทดสอบและการตรวจสอบทางออกของนักวิ่ง
 
-> **ผู้ใช้ npm v11+ (Node 24+):** หลังจาก `npm install` ให้ตรวจสอบว่าโมดูล native ได้รับการติดตั้งแล้ว:
-> `node -e "require('better-sqlite3')"`. หากคำสั่งล้มเหลวด้วย `MODULE_NOT_FOUND`,
-> ให้เรียกใช้ `npm approve-scripts better-sqlite3 && npm install` ดู
-> [การแก้ไขปัญหา](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)
+> **ผู้ใช้ npm v11 + (โหนด 24 +):** หลังจาก `npm install` ให้ตรวจสอบว่าติดตั้งโมดูลดั้งเดิมแล้ว: `node -e "require('better-sqlite3')"` หากล้มเหลวด้วย `MODULE_NOT_FOUND` ให้รัน `npm approve-scripts better-sqlite3 && npm install` ดู [การแก้ไขปัญหา](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)
 
-- **Git**
+- **คอมไพล์**
 
 ### โคลนและติดตั้ง
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -39,90 +32,83 @@ npm install
 ### ตัวแปรสภาพแวดล้อม
 
 ```bash
-# สร้าง .env ของคุณจากเทมเพลต
+# Create your .env from the template
 cp .env.example .env
 
-# สร้าง secrets ที่จำเป็น
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 ตัวแปรสำคัญสำหรับการพัฒนา:
 
-| ตัวแปร                 | ค่าเริ่มต้นสำหรับการพัฒนา | คำอธิบาย                             |
-| ---------------------- | ------------------------- | ------------------------------------ |
-| `PORT`                 | `20128`                   | พอร์ตเซิร์ฟเวอร์                     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | URL พื้นฐานสำหรับ frontend           |
-| `JWT_SECRET`           | (สร้างด้านบน)             | secret สำหรับลงลายเซ็น JWT           |
-| `INITIAL_PASSWORD`     | `CHANGEME`                | รหัสผ่านสำหรับการเข้าสู่ระบบครั้งแรก |
-| `APP_LOG_LEVEL`        | `info`                    | ระดับรายละเอียดของบันทึก             |
+| ตัวแปร                 | ค่าเริ่มต้นการพัฒนา      | คำอธิบาย                    |
+| ---------------------- | ------------------------ | --------------------------- |
+| `PORT`                 | `20128`                  | พอร์ตเซิร์ฟเวอร์            |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ฐาน URL สำหรับส่วนหน้า      |
+| `JWT_SECRET`           | (สร้างด้านบน)            | ความลับในการลงนาม JWT       |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | รหัสผ่านเข้าสู่ระบบครั้งแรก |
+| `APP_LOG_LEVEL`        | `info`                   | บันทึกระดับคำฟุ่มเฟือย      |
 
 ### การตั้งค่าแดชบอร์ด
 
-แดชบอร์ดมีสวิตช์ UI สำหรับฟีเจอร์ที่สามารถกำหนดค่าผ่านตัวแปรสภาพแวดล้อมได้เช่นกัน:
+แดชบอร์ดมีการสลับ UI สำหรับคุณสมบัติที่สามารถกำหนดค่าผ่านตัวแปรสภาพแวดล้อมได้:
 
-| ตำแหน่งการตั้งค่า   | สวิตช์             | คำอธิบาย                             |
-| ------------------- | ------------------ | ------------------------------------ |
-| Settings → Advanced | โหมดดีบัก          | เปิดใช้บันทึกคำขอสำหรับการดีบัก (UI) |
-| Settings → General  | การแสดงแถบด้านข้าง | แสดง/ซ่อนส่วนต่าง ๆ ของแถบด้านข้าง   |
+| การตั้งค่าตำแหน่ง    | สลับ                  | คำอธิบาย                                 |
+| -------------------- | --------------------- | ---------------------------------------- |
+| การตั้งค่า → ขั้นสูง | โหมดแก้ไขข้อบกพร่อง   | เปิดใช้งานบันทึกคำขอแก้ไขข้อบกพร่อง (UI) |
+| การตั้งค่า → ทั่วไป  | การมองเห็นแถบด้านข้าง | ส่วนของแถบด้าน Show/hide                 |
 
-การตั้งค่าเหล่านี้จัดเก็บอยู่ในฐานข้อมูลและคงอยู่ข้ามการรีสตาร์ต โดยจะแทนที่ค่าเริ่มต้นของตัวแปรสภาพแวดล้อมเมื่อมีการกำหนดค่า
+การตั้งค่าเหล่านี้จะถูกเก็บไว้ในฐานข้อมูลและคงอยู่ตลอดการรีสตาร์ท โดยแทนที่ค่าเริ่มต้นของ env var เมื่อตั้งค่า
 
-### การเรียกใช้ในเครื่อง
+### วิ่งในพื้นที่
 
 ```bash
-# โหมดการพัฒนา (โหลดใหม่อัตโนมัติ)
+# Development mode (hot reload)
 npm run dev
 
-# บิลด์สำหรับการใช้งานจริง
-npm run build    # next build → .build/next/ จากนั้น assembleStandalone → dist/
-
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# คอมไพล์ backend/API เท่านั้นอย่างรวดเร็วสำหรับการเปลี่ยนแปลงของผู้มีส่วนร่วม
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# บิลด์สำหรับรีลีส (บิลด์ใหม่ทั้งหมด + sentinel ของ HEAD — จำเป็นสำหรับการดีพลอย)
-npm run build:release   # rm -rf .build dist และบิลด์ + เขียน dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# การกำหนดค่าพอร์ตทั่วไป
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-บิลด์สำหรับผู้มีส่วนร่วมจะตรวจสอบเฉพาะการคอมไพล์เท่านั้น โดยจะไม่ประกอบ
-ดิสทริบิวชันแบบ standalone หรือบิลด์ assets สำหรับแพ็กเกจ native ที่เป็นตัวเลือก ใช้บิลด์สำหรับการใช้งานจริงตามปกติเมื่อคุณต้องการตรวจสอบ bundle ที่พร้อมจัดส่ง
+โครงสร้างผู้สนับสนุนดำเนินการตรวจสอบความถูกต้องแบบคอมไพล์เท่านั้น โดยจะไม่ประกอบการแจกจ่ายแบบสแตนด์อโลนหรือสร้างสินทรัพย์บรรจุภัณฑ์ดั้งเดิมที่เป็นทางเลือก ใช้รุ่นที่ใช้งานจริงปกติเมื่อคุณต้องการตรวจสอบความถูกต้องของชุดรวมที่จัดส่งได้
 
-### โครงสร้างเอาต์พุตของบิลด์
+### สร้างเค้าโครงเอาท์พุต
 
-| ไดเรกทอรี | เนื้อหา                                                                                 | ติดตามในระบบควบคุมเวอร์ชัน |
-| --------- | --------------------------------------------------------------------------------------- | -------------------------- |
-| `src/`    | ซอร์สโค้ดแอปพลิเคชัน (TypeScript / TSX)                                                 | ใช่                        |
-| `.build/` | ไฟล์ระหว่างการทำงาน — เอาต์พุตของ `next build` (ถูก gitignore, `distDir = .build/next`) | ไม่ใช่                     |
-| `dist/`   | bundle ที่พร้อมจัดส่ง — ประกอบโดย `assembleStandalone` (ถูก gitignore)                  | ไม่ใช่                     |
+| ไดเรกทอรี | สารบัญ                                                                | ติดตามแล้ว |
+| --------- | --------------------------------------------------------------------- | ---------- |
+| `src/`    | แหล่งที่มาของแอปพลิเคชัน (TypeScript / TSX)                           | ใช่        |
+| `.build/` | ตัวกลาง — `next build` เอาต์พุต (gitignored, `distDir = .build/next`) | เลขที่     |
+| `dist/`   | มัดที่จัดส่งได้ — ประกอบโดย `assembleStandalone` (gitignored)         | เลขที่     |
 
-ไปป์ไลน์ของบิลด์ทำงานในขั้นตอนเดียว:
+ไปป์ไลน์การสร้างเป็นการส่งผ่านครั้งเดียว:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (เอาต์พุตของ Next.js)
-  └─ assembleStandalone()                 (คัดลอก standalone + static + public + native assets)
-       └─ เอาต์พุต: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` จะล้างไดเรกทอรีทั้งสองก่อนเพิ่มเติม และเขียน
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) เพื่อใช้เป็น sentinel สำหรับตรวจสอบความสมบูรณ์ของการดีพลอย
+`npm run build:release` ยังทำความสะอาดทั้งสองไดเร็กทอรีก่อนและเขียน `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) เป็นตัวรักษาความสมบูรณ์ในการปรับใช้
 
-`npm run build:contributor` ใช้โปรไฟล์บิลด์เฉพาะ backend โดยจะแทนที่ไฟล์ UI ของแดชบอร์ดด้วย stub ชั่วคราว
-ระหว่างการบิลด์ คงตัวจัดการเส้นทาง API ไว้ และกู้คืนไฟล์ต้นฉบับ
-หลังจากบิลด์เสร็จ ใช้ `npm run build` สำหรับการเปลี่ยนแปลงที่มีผลต่อ UI ของแดชบอร์ด หรือสำหรับการตรวจสอบรีลีสทั้งหมด โปรไฟล์สำหรับผู้มีส่วนร่วมไม่ใช่สิ่งทดแทนบิลด์สำหรับรีลีส
+`npm run build:contributor` ใช้โปรไฟล์บิลด์แบ็กเอนด์เท่านั้น โดยจะทำการ stub ไฟล์ UI แดชบอร์ดชั่วคราวในขณะที่สร้าง เก็บตัวจัดการเส้นทาง API และกู้คืนไฟล์ต้นฉบับหลังจากสร้าง ใช้ `npm run build` สำหรับการเปลี่ยนแปลงที่ส่งผลต่อแดชบอร์ด UI หรือสำหรับการตรวจสอบความถูกต้องของรีลีสทั้งหมด โปรไฟล์ผู้สนับสนุนไม่สามารถแทนที่รุ่นรุ่นได้
 
-> **หมายเหตุเกี่ยวกับการดีพลอย VPS:** ไดเรกทอรีอิมเมจระยะไกล `/usr/lib/node_modules/omniroute/app/`
-> ไม่มีการเปลี่ยนแปลง ทักษะการดีพลอยจะ rsync เนื้อหาของ `dist/` ไปยังไดเรกทอรีดังกล่าว
-> มีเพียงเส้นทางเอาต์พุตของบิลด์ภายในรีโพซิทอรีเท่านั้นที่เปลี่ยน (`app/` → `dist/`)
+> **หมายเหตุการปรับใช้VPS :** ไดเรกทอรีรูปภาพระยะไกล `/usr/lib/node_modules/omniroute/app/` ไม่มีการเปลี่ยนแปลง ทักษะการปรับใช้จะซิงค์เนื้อหาของ `dist/` ลงไป เฉพาะพาธเอาต์พุตบิลด์ in-repo ที่ถูกย้าย (`app/` → `dist/`)
 
-URL เริ่มต้น:
+ค่าเริ่มต้น URLs:
 
-- **แดชบอร์ด**: `http://localhost:20128/dashboard`
+- **แดชบอร์ด** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -430,8 +416,8 @@ docs/
 
 ## การขอความช่วยเหลือ
 
-- **สถาปัตยกรรม**: ดู [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **เอกสารอ้างอิง API**: ดู [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **เอกสารด้านความปลอดภัย**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **เอกสารด้านการปฏิบัติการ**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **ปัญหา**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **สถาปัตยกรรม** : ดู [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **อ้างอิง API** : ดู [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **เอกสารความปลอดภัย** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **เอกสารปฏิบัติการ** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **ปัญหา** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

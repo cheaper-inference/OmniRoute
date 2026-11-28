@@ -111,58 +111,48 @@ curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 מפתחות מאומתים ללא תצורת Obsidian ייעודית למפתח ממשיכים להשתמש בתצורה הגלובלית כברירת מחדל.
 ארבעת הכלים `obsidian_sync_*` ממשיכים להשתמש בהתנהגות הנפרדת שלהם עבור אסימון הסנכרון.
 
-## כלי MCP ‏(22)
+## MCP tools (22)
 
-מוגדרים ב-`open-sse/mcp-server/tools/obsidianTools.ts`. הטוקן/כתובת ה-URL הבסיסית נפתרים
-בכל קריאה (תחילה לפי מפתח API, ולאחר מכן באופן גלובלי). כלים שניגשים אל **שרת הסנכרון**
-של OmniRoute (ארבעת כלי `obsidian_sync_*`) דורשים בנוסף את טוקן האימות לסנכרון שהוגדר
-בהגדרות OmniRoute.
+מוגדר ב- `open-sse/mcp-server/tools/obsidianTools.ts`. ה- token/base-URL נפתרים בכל שיחה (לכל מפתח תחילה, ולאחר מכן גלובלי). כלים שפוגעים ב- OmniRoute** שרת סנכרון** (ארבעת הכלים `obsidian_sync_*` ) דורשים בנוסף את אסימון הסנכרון המוגדר בהגדרות OmniRoute.
 
 ### כלי קריאה (`read:obsidian`)
 
-| כלי                          | תיאור                                                                           |
-| ---------------------------- | ------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | בדיקה אם ה-Local REST API נגיש ומאומת.                                          |
-| `obsidian_search_simple`     | חיפוש טקסט מלא בתוכן ההערות; מחזיר קטעים עם נתיבי קבצים.                        |
-| `obsidian_search_structured` | חיפוש באמצעות ביטוי JSON Logic (מסנני and/or/regex/path).                       |
-| `obsidian_read_note`         | קריאת הערה לפי נתיב יחסי לכספת; אופציונלית כותרת, בלוק או frontmatter מסוימים.  |
-| `obsidian_list_vault`        | הצגת רשימת הקבצים והתיקיות בכספת (עץ רשומות).                                   |
-| `obsidian_get_document_map`  | קבלת מבנה הכותרות של ההערה כמפה של כותרות ← מספרי שורות.                        |
-| `obsidian_get_note_metadata` | קבלת frontmatter, תגיות, קישורים וספירת תווים/מילים ללא התוכן המלא.             |
-| `obsidian_get_active_file`   | קבלת הנתיב והתוכן של הקובץ הפעיל כעת ב-Obsidian.                                |
-| `obsidian_get_periodic_note` | קבלת ההערה התקופתית היומית/שבועית/חודשית עבור תאריך (היום, אם לא צוין).         |
-| `obsidian_get_tags`          | הצגת כל תגיות הכספת ותדירויותיהן.                                               |
-| `obsidian_list_commands`     | הצגת מזהי הפקודות הזמינות ב-Obsidian (לשימוש עם `obsidian_execute_command`).    |
-| `obsidian_sync_status`       | מצב שרת הסנכרון של OmniRoute: פעיל, שם הכספת, פורט, זמן פעילות והסנכרון האחרון. |
-| `obsidian_sync_conflicts`    | הצגת התנגשויות סנכרון שלא נפתרו (נתיב, נתיב ההתנגשות וזמן הזיהוי).              |
+| כְּלִי                       | תֵאוּר                                                                      |
+| ---------------------------- | --------------------------------------------------------------------------- |
+| `obsidian_check_status`      | בדוק אם ה- Local REST API נגיש ומאומת.                                      |
+| `obsidian_search_simple`     | חיפוש בטקסט מלא של תוכן הערה; מחזיר קטעים עם נתיבים לקובץ.                  |
+| `obsidian_search_structured` | חפש באמצעות ביטוי JSON Logic (מסנני and/or/regex/path ).                    |
+| `obsidian_read_note`         | קרא הערה לפי נתיב יחסי בכספת; אופציונלי heading/block/frontmatter. ספציפי   |
+| `obsidian_list_vault`        | רשימת קבצים וספריות בכספת (עץ הערכים).                                      |
+| `obsidian_get_document_map`  | קבל את מבנה הכותרות של ההערה כמפה של כותרות מספרי שורות →.                  |
+| `obsidian_get_note_metadata` | קבל frontmatter, תגים, קישורים, ספירת char/word ללא התוכן המלא.             |
+| `obsidian_get_active_file`   | קבל את תוכן הנתיב + של הקובץ הפעיל כעת ב- Obsidian.                         |
+| `obsidian_get_periodic_note` | קבלו את הפתק התקופתי daily/weekly/monthly לתאריך (היום אם הושמט).           |
+| `obsidian_get_tags`          | רשום את כל תגי הכספת עם התדרים שלהם.                                        |
+| `obsidian_list_commands`     | רשימת פקודת Obsidian הזמינה IDs (השתמש עם `obsidian_execute_command`).      |
+| `obsidian_sync_status`       | סטטוס שרת סנכרון OmniRoute : פועל, שם כספת, יציאה, זמן פעולה, סנכרון אחרון. |
+| `obsidian_sync_conflicts`    | רשום התנגשויות סנכרון לא פתורות (נתיב, נתיב התנגשות, זהה-ב).                |
 
 ### כלי כתיבה (`write:obsidian`)
 
-| כלי                              | תיאור                                                                                    |
-| -------------------------------- | ---------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | יצירה או דריסה של הערה עם תוכן Markdown נתון.                                            |
-| `obsidian_append_note`           | הוספת תוכן לסוף הערה; אופציונלית לכותרת או לבלוק מסוימים.                                |
-| `obsidian_patch_note`            | הוספה ממוקדת לסוף/להתחלה או החלפה בכותרת, בבלוק או בשדה frontmatter.                     |
-| `obsidian_delete_note`           | מחיקה לצמיתות של הערה מהכספת.                                                            |
-| `obsidian_move_note`             | העברה או שינוי שם של הערה בתוך הכספת.                                                    |
-| `obsidian_execute_command`       | ביצוע פקודת Obsidian לפי מזהה הפקודה שלה.                                                |
-| `obsidian_open_file`             | פתיחת קובץ ב-Obsidian (יוצר אותו אם אינו קיים).                                          |
-| `obsidian_sync_trigger`          | הפעלת סנכרון דו-כיווני מיידי של הכספת בין שולחן העבודה↔המכשיר הנייד.                     |
-| `obsidian_sync_resolve_conflict` | פתרון התנגשות סנכרון: שמירת `local` (מכשיר נייד), `remote` (שולחן עבודה) או `keep-both`. |
+| כְּלִי                           | תֵאוּר                                                                            |
+| -------------------------------- | --------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | צור או החלף הערה עם תוכן Markdown נתון.                                           |
+| `obsidian_append_note`           | הוסף תוכן להערה; אופציונלי ל- heading/block. ספציפי                               |
+| `obsidian_patch_note`            | כירורגי append/prepend/replace בשדה כותרת, בלוק או frontmatter.                   |
+| `obsidian_delete_note`           | מחק לצמיתות פתק מהכספת.                                                           |
+| `obsidian_move_note`             | הזז או שנה שם של פתק בתוך הכספת.                                                  |
+| `obsidian_execute_command`       | בצע פקודת Obsidian על ידי הפקודה שלה ID.                                          |
+| `obsidian_open_file`             | פתח קובץ ב- Obsidian (יוצר אותו אם הוא לא קיים).                                  |
+| `obsidian_sync_trigger`          | הפעל סנכרון דו-כיווני מיידי ↔ לכספת ניידת בשולחן העבודה.                          |
+| `obsidian_sync_resolve_conflict` | פתור התנגשות סנכרון: השאר `local` (נייד), `remote` (שולחן העבודה) או `keep-both`. |
 
 > [!NOTE]
-> יעדי `obsidian_patch_note` מקבלים `targetType` מסוג `heading | block | frontmatter`
-> ו-`operation` מסוג `append | prepend | replace`, עם
-> `createTargetIfMissing` אופציונלי. ארבעת כלי `obsidian_sync_*` מתקשרים עם שרת הסנכרון
-> המקומי (`http://127.0.0.1:27781` כברירת מחדל) ודורשים את טוקן הסנכרון.
+> מטרות `obsidian_patch_note` מקבלים `targetType` של `heading | block | frontmatter` ו- `operation` של `append | prepend | replace`, עם `createTargetIfMissing` אופציונלי. ארבעת הכלים `obsidian_sync_*` מדברים עם שרת הסנכרון המקומי (`http://127.0.0.1:27781` כברירת מחדל) ודורשים את אסימון הסנכרון.
 
 ### היקפים
 
-כלי קריאה דורשים `read:obsidian`; כלי כתיבה דורשים `write:obsidian`. האכיפה
-זהה לזו של Notion — מטופלת על ידי `withScopeEnforcement()` בתוך
-`open-sse/mcp-server/server.ts`, מותנית בכך ש-`OMNIROUTE_MCP_ENFORCE_SCOPES=true`, כאשר
-ההיקפים המותרים נלקחים מ-`OMNIROUTE_MCP_SCOPES` או מהקשר ההיקפים של מפתח ה-API. ראו
-[MCP-SERVER.md](./MCP-SERVER.md).
+כלי קריאה דורשים `read:obsidian`; כלי כתיבה דורשים `write:obsidian`. האכיפה זהה ל- Notion — המטופל על-ידי `withScopeEnforcement()` ב- `open-sse/mcp-server/server.ts`, מגודר על `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ונכפה על מתקשרי HTTP/SSE שמפתח API שלהם חסר `manage`/`admin`, עם היקפים מותרים שמקורם ב- `OMNIROUTE_MCP_SCOPES` או מהקשר ה-scope של מפתח API. ראה [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## נקודות קצה
 

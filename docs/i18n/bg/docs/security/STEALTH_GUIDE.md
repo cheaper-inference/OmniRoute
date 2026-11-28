@@ -4,11 +4,9 @@
 
 ---
 
-> **Източник на истина:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Последна актуализация:** 2026-09-02 — v3.8.51
-> **Аудитория:** Инженери, поддържащи специфични за доставчиците скрити интеграции.
+> **Източник на истината:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Публика:** Инженери, поддържащи специфични за доставчика стелт интеграции.
 
-OmniRoute се интегрира с доставчици, чиито периферни системи активно идентифицират неофициални клиенти чрез цифрови отпечатъци (TLS JA3/JA4, подредба на заглавките, структура на тялото в JSON, токени за цялост). Тази страница документира повърхностите за прикриване, които OmniRoute предоставя, и местата, където са реализирани.
+OmniRoute се интегрира с доставчици, чиито краища активно отпечатват неофициални клиенти (TLS JA3/JA4, подреждане на заглавки, форма на тялото JSON, токени за интегритет). Тази страница документира стелт повърхностите, OmniRoute излага и къде са внедрени.
 
 ## Правно и етично уведомление
 
@@ -74,65 +72,68 @@ OmniRoute се интегрира с доставчици, чиито периф
 
 ---
 
-## Пакет за прикриване на Claude Code
+## Claude Code Stealth Bundle
 
-Когато `cliCompatMode` е включен, OmniRoute преобразува изходящите заявки към Claude така, че да бъдат неразличими от трафика на `claude-cli`. Три модула работят съвместно:
+Когато `cliCompatMode` е включен, OmniRoute преоформя изходящите Claude заявки, така че да са неразличими от `claude-cli` трафика. Три модула си сътрудничат:
 
 ### `claudeCodeFingerprint.ts`
 
-Изчислява 3-знаковия отпечатък `cc_version`, вграден в заглавката за таксуване:
+Изчислява 3-символния пръстов отпечатък `cc_version` вграден в заглавката за фактуриране:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (твърдо зададена стойност; съвпада с официалния клиент)
-- Входни данни: знаците с индекси 4, 7 и 20 от текста на първото потребителско съобщение + низа на версията
-- Изходни данни: 3-знаков шестнадесетичен префикс
+- `FINGERPRINT_SALT = "59cf53e54c78"` (твърдо кодиран; съвпада с официален клиент)
+- Входове: знаци в индекс 4, 7, 20 на първия текст на потребителското съобщение, + версия, низ
+- Изход: 3-знаков шестнадесетичен префикс
 
 ### `claudeCodeCCH.ts` (хеш на клиентското съдържание)
 
-Проверка за цялост от страна на сървъра, която официалният Claude Code CLI изчислява чрез Bun/Zig. OmniRoute я реализира повторно с `xxhash-wasm`:
+Проверка на целостта от страна на сървъра официалния Claude код CLI изчислява чрез Bun/Zig. OmniRoute реимплементира с `xxhash-wasm`:
 
-1. Сериализира тялото със заместител `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. 5-знакова шестнадесетична стойност с малки букви, допълнена отпред с нули
-4. Заменя `cch=00000;` с изчисления токен
+1. Сериализиране на тялото с `cch=00000;` заместител
+2. Изградете хеш изгледа с две замени на обикновен текст в този ред (`hashView()`):
+   - всяко съвпадение на `/"model":"[^"]*"/g` става `"model":""` — съвпадението спира при първия `"`, така че стойност с екранирана кавичка (`"model":"a\"b"`) се изпразва само до тази кавичка, както прави клиентът
+   - всяко съвпадение на `/"max_tokens":\d+,|,?"max_tokens":\d+/g` се премахва — само числови стойности, на произволна дълбочина
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Подплатен с нула шестнадесетичен 5-символ с малки букви
+5. Заменете `cch=00000;` с изчисления токен
 
 Константи:
 
-- Seed: `0x6e52736ac806831e`
-- Шаблон: `/\bcch=([0-9a-f]{5});/`
+- Начално ниво: `0x4d659218e32a3268` (съвпада с обратното улавяне на Claude код 2.1.252 и 2.1.322)
+- Модел: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Вмъква Unicode **съединител с нулева ширина** (`U+200D`) след първия знак на „чувствителни“ имена на клиенти, така че филтрите нагоре по веригата да не могат да ги откриват чрез grep. Списък с думи по подразбиране:
+Вмъква Unicode** дърводелец с нулева ширина** (`U+200D`) след първия знак на "чувствителните" имена на клиенти, така че филтрите нагоре по веригата не могат да ги изведат. Списък с думи по подразбиране:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Прилага се към: блоковете `system`, цялото съдържание в `messages[].content` и `tools[].description` / `tools[].function.description`. Може да бъде заменено от оператора чрез `setSensitiveWords()`.
+Прилага се към: `system` блокове, всички `messages[].content` и `tools[].description` / `tools[].function.description`. Може да се замени от оператор чрез `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — доставчици `anthropic-compatible-cc-*`
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` доставчици
 
-За посредници на Anthropic от трети страни, които приемат само трафик от „истински Claude Code“:
+За Anthropic релета на трети страни, които приемат само трафик на „истински Claude код“:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` по подразбиране
-- Превключвателят „Enable redact-thinking beta“ за всяка връзка добавя `redact-thinking-2026-02-12`, когато конкретна CC Compatible услуга нагоре по веригата изисква потоци със скрит процес на разсъждение
-- Превключвателят „Enable summarized thinking display“ за всяка връзка съхранява `providerSpecificData.requestDefaults.summarizeThinking` и добавя `display: "summarized"` към CC Compatible заявките за разсъждение, които все още нямат зададен режим на показване
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (семейството Opus/Sonnet 4.x)
+- Превключвателят за всяка връзка „Активиране на редактиране на мислене бета“ добавя `redact-thinking-2026-02-12` когато CC съвместим нагоре по веригата специално изисква редактирани мислещи потоци
+- Превключвателят за всяка връзка „Активиране на обобщен дисплей за мислене“ съхранява `providerSpecificData.requestDefaults.summarizeThinking` и добавя `display: "summarized"` към CC Съвместими заявки за мислене, които все още не са задали режим на показване
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (семейство Opus/Sonnet 4.x)
 - Път по подразбиране: `/v1/messages?beta=true`
 
 Сродни модули в същия пакет:
 
-- `claudeCodeConstraints.ts` — правила за температурата и управлението на кеша
-- `claudeCodeToolRemapper.ts` — пренасочване на имената на инструментите
-- `claudeCodeExtraRemap.ts` — допълнително нормализиране на полезния товар
+- `claudeCodeConstraints.ts` — температура + правила за контрол на кеша
+- `claudeCodeToolRemapper.ts` — пренасочване на името на инструмента
+- `claudeCodeExtraRemap.ts` — допълнително нормализиране на полезен товар
 
 ---
 
@@ -162,7 +163,7 @@ Antigravity заявките запазват текста на повикващ
 2. **Разпределете натоварването между доставчиците чрез Auto-Combo** (`model: "auto"` или `kr/glm/etc` -combo) вместо насищане на един Antigravity акаунт.
 3. **Задайте RPM ограничения за всяка връзка** в страницата за редактиране на доставчика на Antigravity (табло за управление → доставчици → Antigravity → връзка → ограничение на скоростта). 30–60 RPM е защитима горна граница за продължителна употреба.
 4. **Използвайте стабилна, контролирана от оператора мрежа нагоре по веригата** и избягвайте споделянето на един акаунт между несвързани потребители или работни натоварвания.
-5. **Ако е забранено** : обжалване чрез `support.google.com` → „Възстановяване Workspace/Account достъп“ с точния `quota_exceeded` / `service disabled` отговор Google. Възстановяването не е гарантирано.
+5. **Ако е забранено** : обжалване чрез `support.google.com` → „Възстановяване Workspace/Account достъп“ с точния `quota_exceeded` / `service disabled` отговор, изпратен Google. Възстановяването не е гарантирано.
 
 Справката за средата документира последиците от акаунта и изразходването на всеки режим на кредити.
 
@@ -192,7 +193,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — се чете `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — акредитивен водопровод
-- Оригинален доклад за инцидент: Дискусия [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Оригинален доклад за инцидент: Дискусия [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

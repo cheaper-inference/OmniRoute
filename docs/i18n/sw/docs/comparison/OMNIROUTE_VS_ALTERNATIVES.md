@@ -11,7 +11,7 @@ Ulinganisho wa kipengele cha lengo dhidi ya vipanga njia maarufu vya chanzo-wazi
 | Kipengele                                                      |                 OmniRoute 3.8                 |    LiteLLM 1.x    |  OpenRouter (SaaS)   |   Portkey   |
 | -------------------------------------------------------------- | :-------------------------------------------: | :---------------: | :------------------: | :---------: |
 | **Watoa huduma**                                               |                    **329**                    |       ~100        |         ~50          |     ~30     |
-| **Free/no-auth maingizo ya katalogi**                          |                    **155**                    |        n/a        |    njia ya kupita    |     n/a     |
+| **Watoa huduma walio na ufikiaji wa bure**                     |          **50 na ufikiaji wa bure**           |        n/a        |    njia ya kupita    |     n/a     |
 | **Mwenyeji mwenyewe**                                          |                      ✅                       |        ✅         |          ❌          |  ⚠ kulipwa  |
 | **OAuth maingizo ya katalogi**                                 |                    **23**                     |      sehemu       |          ❌          |     ❌      |
 | **Mchanganyiko wa kurudi nyuma kiotomatiki**                   |                **Mikakati 22**                | kipaumbele-msingi | kulingana na kiwango | yenye uzito |
@@ -38,11 +38,11 @@ Ulinganisho wa kipengele cha lengo dhidi ya vipanga njia maarufu vya chanzo-wazi
 
 ## Wakati wa kuchagua OmniRoute
 
-- Wewe mwenyewe mwenyeji na unataka** kiwango cha juu cha chanjo ya mtoa huduma** (Watoa huduma 394, maingizo ya katalogi ya free/no-auth 155)
+- Wewe mwenyewe mwenyeji na unataka** chanjo ya juu ya mtoa huduma** (Watoa huduma 394, 50 na ufikiaji bila malipo)
 - Unahitaji** seva MCP iliyojengwa ndani** ( Zana za LLM, kumbukumbu, ujuzi wazi kama zana)
 - Unahitaji** itifaki A2A** kwa mtiririko wa kazi kati ya wakala kwa wakala
 - Unataka** wizi wa alama za vidole** (JA3/JA4) ili kuzuia kugunduliwa na CAPTCHAs ya juu ya mkondo
-- Unahitaji** sifa za biashara** (walinzi, wasaidizi, njia ya ukaguzi) bila muswada SaaS
+- Unahitaji** vipengele vya biashara** (walinzi, wasaidizi, njia ya ukaguzi) bila mswada SaaS
 
 ## Wakati wa kuchagua LiteLLM
 
@@ -58,10 +58,10 @@ Ulinganisho wa kipengele cha lengo dhidi ya vipanga njia maarufu vya chanzo-wazi
 
 ## Wakati wa kuchagua Portkey
 
-- Unahitaji **SLA ya kibiashara** yenye dhamana za muda wa upatikanaji
-- Unapendelea **dashibodi inayosimamiwa** bila mzigo wa uendeshaji
-- Unahitaji **vipengele vya uzingatiaji wa masharti ya biashara** vilivyo tayari kutumika
+- Unahitaji** biashara SLA** na dhamana za uptime
+- Unapendelea a** dashibodi inayosimamiwa** bila ops juu
+- Unahitaji** kufuata biashara** vipengele nje ya boksi
 
 ---
 
-_Ilisasishwa mwisho: 2026-08-02. Wasilisha masahihisho kupitia PR ili kudumisha usahihi wa jedwali hili._
+_Wasilisha masahihisho kupitia PR ili kuweka jedwali hili kwa usahihi._

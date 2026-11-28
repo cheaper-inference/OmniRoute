@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. 必需参数
+## 5. 所需参数
 
-建议至少在 Fly.io 上为此项目配置以下参数。
+本项目建议在Fly.io上至少配置以下参数。
 
-### 5.1 已验证的参数
+### 5.1 验证参数
 
-以下参数已在当前 `omniroute` 应用的实际部署中使用：
+这些参数已在当前`omniroute`应用程序的实际部署中使用：
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET`（生产环境中必需——用于 WebSocket 桥接身份验证）
+- `OMNIROUTE_WS_BRIDGE_SECRET` （生产中需要—用于WebSocket桥接验证）
 - `STORAGE_ENCRYPTION_KEY`
 
-### 5.2 关于 `INITIAL_PASSWORD`
+### 5.2 关于`INITIAL_PASSWORD`
 
-当前项目未设置 `INITIAL_PASSWORD`，因为本次部署不需要该参数。
+当前项目没有设置`INITIAL_PASSWORD`因为本次部署不需要。
 
-如果未设置：
+如果没有设置：
 
-- 启动日志会提示默认密码为 `CHANGEME`
-- 部署完成后，应尽快在系统设置中修改登录密码
+- 您可以在首次访问时在入门向导中创建仪表板密码。完成密码步骤：跳过该步骤将关闭仪表板登录，从而使仪表板向任何可以访问应用程序URL人开放
+- Fly 的代理从非环回地址到达应用程序，因此在您提交密码后，向导会要求提供一次性引导令牌，应用程序此时会将其打印到其日志中： `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`。如果该行已滚出日志，请重新启动应用程序并再次提交向导以打印新令牌
 
-如果希望以无人值守方式初始化后端密码，可以稍后添加：
+要在无人值守的情况下设置密码，请在第一次访问仪表板之前添加它（保存密码后， `INITIAL_PASSWORD`将被忽略）：
 
 - `INITIAL_PASSWORD`
 
@@ -274,45 +274,45 @@ flyctl secrets list -a omniroute
 
 ---
 
-## 9. 后续更新与发布
+## 9. 后续更新和发布
 
-更新代码后，发布流程非常简单：
+代码更新后，发布过程很简单：
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-如果只需更新参数而不更改代码：
+如果只需要更新参数而不改变代码：
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly 将自动对机器执行滚动更新。
+Fly 将自动执行机器的滚动更新。
 
-### 9.1 在保留 Fork 的 `fly.toml` 的同时跟踪上游仓库更新
+### 9.1 跟踪上游存储库更新，同时保留 Fork 的`fly.toml`
 
-如果当前仓库是一个 Fork，并且你希望从上游 `https://github.com/diegosouzapw/OmniRoute` 同步更新，请遵循以下工作流程。
+如果当前存储库是一个分支，并且您想要从上游`https://github.com/cheaper-inference/OmniRoute`同步更新，请按照以下工作流程操作。
 
-首先，检查远程仓库：
+首先，验证您的遥控器：
 
 ```powershell
 git remote -v
 ```
 
-你应该至少能看到：
+您至少应该看到：
 
-- 指向你自己的 Fork 的 `origin`
-- 指向原始仓库的 `upstream`
+- `origin`指向你自己的fork
+- `upstream`指向原始存储库
 
-如果尚未配置 `upstream`，请添加它：
+如果没有配置`upstream` ，则添加：
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-与上游同步之前，获取最新的提交和标签：
+在与上游同步之前，获取最新的提交和标签：
 
 ```powershell
 git fetch upstream --tags
@@ -325,9 +325,9 @@ git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> 注意：当前项目版本为 `v3.8.0`。以下对 `v3.4.7` 的引用仅作为历史示例保留。实际发布时，请使用 `:latest` 或当前版本标签（例如 `:v3.8.0`）。
+> 注意：当前项目版本是`v3.8.0`。下面的`v3.4.7`参考文献仅作为历史示例保留。对于实际版本，请使用`:latest`或当前版本标签（例如`:v3.8.0`）。
 
-如果要合并最新的上游 `main`，同时强制保留 Fork 中的 `fly.toml`，请遵循以下工作流程：
+如果您想合并最新的上游`main`同时强制保留分支的`fly.toml`，请遵循以下工作流程：
 
 ```powershell
 git merge upstream/main
@@ -337,40 +337,40 @@ git commit -m "chore(deploy): keep fork fly.toml"
 git push origin main
 ```
 
-说明：
+笔记：
 
-- `git merge upstream/main` 用于同步原始仓库中的最新代码
-- `git checkout HEAD~1 -- fly.toml` 用于恢复合并前 Fork 自己的 `fly.toml`
-- 如果上游未修改 `fly.toml`，此步骤不会引入任何差异
-- 如果上游修改了 `fly.toml`，此步骤可确保你的 Fly 应用程序名称、卷挂载、区域以及其他特定于 Fork 的部署配置不会被覆盖
+- `git merge upstream/main`从原始存储库同步最新代码
+- `git checkout HEAD~1 -- fly.toml`在合并之前恢复你的 fork 自己的`fly.toml`
+- 如果上游没有修改`fly.toml`，这一步不会引入任何差异
+- 如果上游确实修改了`fly.toml`，此步骤可确保您的 Fly 应用程序名称、卷安装、区域和其他特定于分叉的部署配置不会被覆盖
 
-如果要与特定发布标签（例如 `v3.4.7`）保持一致，请先验证该标签是否已包含在 `upstream/main` 中：
+如果您想与特定版本标签（例如`v3.4.7`）保持一致，请首先验证该标签是否已包含在`upstream/main`中：
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-命令成功返回意味着 `upstream/main` 已包含该版本；你只需合并 `upstream/main` 即可。
+成功返回意味着`upstream/main`已经包含该版本；您可以简单地合并`upstream/main`。
 
-### 9.2 同步上游后的标准发布流程
+### 9.2 上行同步后的标准发布顺序
 
-与原始仓库同步后，请按照以下推荐顺序进行发布：
+与原始存储库同步后，请遵循以下建议的发布顺序：
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. 恢复 Fork 的 `fly.toml`
+3. 恢复fork的`fly.toml`
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-这是将当前项目升级到 `v3.4.7` 时实际使用的工作流程（该示例引用的是历史版本；当前实际版本为 `v3.8.0`）。
+这是当前项目升级到`v3.4.7`时的实际流程（示例指的是历史版本，当前实际版本为`v3.8.0`）。
 
 ---
 
 ## 10. 部署后检查
 
-### 10.1 检查应用状态
+### 10.1 检查申请状态
 
 ```powershell
 flyctl status -a omniroute
@@ -396,7 +396,7 @@ try {
 }
 ```
 
-返回值为 `200` 表示站点响应正常。
+返回值`200`表示站点响应正常。
 
 ---
 
@@ -420,38 +420,38 @@ try {
 
 ## 12. 常见问题
 
-### 12.1 `Secrets` 页面为空
+### 12.1 `Secrets`页面为空
 
-通常有以下两个原因：
+通常有两个原因：
 
-- 尚未运行 `flyctl secrets set`
-- 当前查看的是其他应用（例如 `oroute`，而不是 `omniroute`）
+- 您还没有运行`flyctl secrets set`
+- 您正在查看不同的应用程序（例如`oroute`而不是`omniroute`）
 
-### 12.2 `flyctl deploy` 报告 `app not found`
+### 12.2 `flyctl deploy`报告`app not found`
 
-请先创建应用：
+首先创建应用程序：
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 `fly.toml` 解析失败
+### 12.3 `fly.toml`解析失败
 
-请检查以下事项：
+检查以下内容：
 
-- 注释中是否存在乱码字符
-- TOML 的引号和缩进是否正确
+- 评论是否有乱码
+- TOML引用和缩进是否正确
 
-### 12.4 数据未持久化
+### 12.4 数据不持久
 
-请验证以下两项：
+验证以下两项：
 
-- `fly.toml` 包含 `destination = '/data'`
-- `DATA_DIR` 设置为 `/data`
+- `fly.toml`包含`destination = '/data'`
+- `DATA_DIR`设置为`/data`
 
-### 12.5 可以在不设置 `INITIAL_PASSWORD` 的情况下运行吗？
+### 12.5 没有`INITIAL_PASSWORD`可以运行吗？
 
-可以运行。系统会回退使用默认密码 `CHANGEME`。建议在生产环境中尽快修改后端密码。
+是的。取消设置`INITIAL_PASSWORD`后，您可以在第一次访问时在入门向导中创建仪表板密码（第 5.2 节介绍一次性引导令牌和密码步骤）。
 
 ---
 
@@ -469,9 +469,9 @@ flyctl apps create omniroute
 
 ---
 
-## 14. 当前项目的最简发布检查清单
+## 14. 当前项目的最小发布清单
 
-后续发布最常用的命令如下：
+后续版本中最常用的命令是：
 
 ```powershell
 flyctl auth whoami
@@ -481,13 +481,13 @@ flyctl deploy
 flyctl logs --no-tail -a omniroute
 ```
 
-对于常规发布，核心命令仅为：
+对于正常发布，核心命令很简单：
 
 ```powershell
 flyctl deploy
 ```
 
-对于新环境中的首次部署，核心步骤如下：
+对于新环境中的首次部署，核心步骤是：
 
 1. `flyctl auth login`
 2. `flyctl apps create omniroute`

@@ -12,6 +12,12 @@ Neutralni `config/cli-tools-manifest.json` ugovor deklarira kanonski IDs, pseudo
 
 Signali prekida i prekida se prosljeđuju djetetu. Pokretač čeka događaj zatvaranja djeteta prije nego što ukloni privremenu konfiguraciju. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` kontrolira grejs period prije prisilnog prekida (podrazumevano 5000 milisekundi).
 
+`omniroute launch <tool>` (vidi [LAUNCH.md](./LAUNCH.md) ) slijedi ista pravila okruženja i prosljeđivanje signala, te dodaje:
+
+- **Gateway auto-start.** Za lokalni cilj, kada se na portu ne javi nijedan gateway, pokretač pokreće `omniroute serve --headless --no-open` vezan za `127.0.0.1` u okviru procesa odvojenog žeteoca. Svako pokretanje u toku ima zakup u `DATA_DIR/launch/leases/` (otkucaj srca svakih 15 s, ustajalo nakon 45 s ili kada je proces nestao). Reaper zaustavlja pristupnik koji je pokrenuo nakon što nijedan zakup nije bio aktivan za mirovanje (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, zadano 10000 milisekundi). Gateway koji je korisnik pokrenuo se koristi, ali se nikada nije zaustavio. `--keep-gateway` ili `omniroute gateway keep` pretvara lanser gateway u normalan; `--no-start` vraća staro ponašanje u slučaju otkazivanja. Ispituju se samo udaljeni ciljevi.
+- **Pokreni sesije.** Svako pokretanje stvara kratkotrajni token `olx_` sesije iz roditeljskog akreditiva (`POST /api/launch/sessions`), otkucava ga dok alat radi, čita sažetak upotrebe i opoziva ga nakon što alatka izađe. Token je strogi podskup svog roditelja: iste dozvole, isti ili uži katalog, kraći vijek trajanja i nije vjerodajnica nadzorne ploče. Alat prima token sesije, nikada roditeljski akreditiv, a zahtjevi su označeni `launch:<tool>:<sessionId>` osim ako nije dat `--tag`. Gateway bez sesije API ne uspijeva sa `GatewayTooOld` umjesto da se vrati na pokretanje bez opsega.
+- **Konfiguracija po pokretanju.** Konfiguracijske datoteke alata se upisuju u privatni privremeni direktorij (režim 0700, prefiks `omnirouter-`) i uklanjaju se nakon što dijete izađe. `SIGKILL` pokretača ostavlja direktorij iza sebe; `omniroute launch --cleanup` uklanja takve direktorije kada postanu stariji od jednog dana.
+
 ## Gemini persistent setup
 
 ```bash

@@ -37,27 +37,29 @@ omniroute mcp restart                                 # resets active sse/stream
 
 `mcp enable`/`mcp disable` PATCH 동일한 `mcpEnabled` (및 선택적으로 `mcpTransport`) 대시보드 설정은 `/api/settings` 통해 전환됩니다. `mcp restart` `POST /api/mcp/restart` 호출합니다. 활성 `sse`/`streamable-http` 세션을 해제하여 다음 요청이 깔끔하게 다시 초기화되고 MCP 비활성화된 경우 `409` 반환하며 `stdio` 전송을 위해 `501` 반환합니다(stdio 클라이언트는 자체 하위 프로세스 — 소유하므로 다시 시작할 프로세스 내 핸들이 없습니다).
 
-## 전송 방식
+## 교통수단
 
-MCP 서버는 세 가지 전송 방식을 제공하며, 모두 동일한 `createMcpServer()` 팩토리를 기반으로 합니다.
+MCP 서버는 세 가지 전송을 제공하며 모두 동일한 `createMcpServer()` 팩토리에서 지원됩니다.
 
-| 전송 방식         | 위치                                           | 사용 시점                                           |
-| :---------------- | :--------------------------------------------- | :-------------------------------------------------- |
-| `stdio`           | `open-sse/mcp-server/server.ts`                | IDE 통합(Claude Desktop, Cursor 등)                 |
-| `sse`             | `httpTransport`를 통한 `POST/GET /api/mcp/sse` | 이벤트 스트림이 필요한 브라우저/에이전트 클라이언트 |
-| `streamable-http` | `POST/GET/DELETE /api/mcp/stream`              | 다중 세션 HTTP 클라이언트(`mcp-session-id` 헤더)    |
+| 수송              | 어디                                         | 언제 사용하나요?                                 |
+| :---------------- | :------------------------------------------- | :----------------------------------------------- |
+| `stdio`           | `open-sse/mcp-server/server.ts`              | IDE 통합(Claude Desktop, Cursor 등)              |
+| `sse`             | `httpTransport` 통한 `POST/GET /api/mcp/sse` | 이벤트 스트림이 필요한 Browser/agent 클라이언트  |
+| `streamable-http` | `POST/GET/DELETE /api/mcp/stream`            | 다중 세션 HTTP 클라이언트(`mcp-session-id` 헤더) |
 
-활성 HTTP 전송 방식(`sse` 또는 `streamable-http`)은 `mcpTransport` 설정으로 선택합니다. 전송 방식을 전환하면 다른 전송 방식의 기존 세션이 종료됩니다.
+활성 HTTP 전송(`sse` 또는 `streamable-http`)은 `mcpTransport` 설정에 의해 선택됩니다. 전송을 전환하면 다른 전송의 기존 세션이 닫힙니다.
 
-### 원격 접근(manage 범위 우회)
+### 원격 액세스(관리 범위 우회)
 
-`/api/mcp/*`는 LOCAL_ONLY 계층(`src/server/authz/routeGuard.ts`)에 속하므로 기본적으로 루프백 호스트(`localhost`, `127.0.0.1`, `::1`)에서만 접근할 수 있습니다. v3.8.2부터 루프백이 아닌 클라이언트도 `manage` 범위를 가진 키를 `Authorization: Bearer <api-key>`로 제시하면 연결할 수 있습니다. 터널, 리버스 프록시 또는 공개 호스트 이름을 통해 원격 MCP 서버에 접근할 수 있는 유일한 방법입니다.
+`/api/mcp/*` LOCAL_ONLY 계층(`src/server/authz/routeGuard.ts`)에 있습니다. 경로 가드는 루프백과 신뢰할 수 있는 개인 LAN 피어를 인식합니다. 구성된 `/api/mcp/` 우회가 활성화되고 `mcp:connect`, `manage` 또는 `admin` 와 함께 `Authorization: Bearer <api-key>` 제공하는 경우 다른 클라이언트가 전송에 도달할 수 있습니다. 인증된 대시보드 세션도 이러한 우회를 충족할 수 있습니다.
+
+원격 MCP 전용 클라이언트의 경우 `mcp:connect` 에 필요한 도구 범위를 부여합니다. 예를 들어, `mcp:connect` 및 `read:health` `omniroute_get_health` 연결 및 호출을 허용합니다. 연결 범위만으로는 도구 작업을 승인할 수 없습니다. `OMNIROUTE_MCP_ENFORCE_SCOPES` 에 관계없이 `manage` 또는 `admin` 없는 HTTP/SSE 키에 대해서는 도구 범위 검사가 필수입니다.
 
 ```bash
-# manage 범위 부여: 대시보드의 API Keys 페이지를 열고 키의
-# "Management Access"를 활성화하거나, 생성할 때 scopes:["manage"]로 POST합니다.
+# Create an OmniRoute key with mcp:connect and the required tool scopes.
+# A key with manage or admin also passes the remote route gate.
 
-# 그런 다음 원격 MCP 클라이언트에서 연결합니다.
+# Then connect from a remote MCP client:
 curl -i \
   -H "Host: your-public-host.example" \
   -H "Authorization: Bearer sk-…" \
@@ -67,17 +69,17 @@ curl -i \
   https://your-public-host.example/api/mcp/stream
 ```
 
-`manage` 범위가 없는 키를 사용하거나 Bearer를 제공하지 않으면 `403 LOCAL_ONLY`가 반환됩니다. 인접한 접두사 `/api/cli-tools/runtime/*`는 의도적으로 우회할 수 없습니다. 자세한 내용은 [라우트 가드 계층 — manage 범위 예외](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)를 참조하세요.
+활성화된 우회를 충족할 수 없는 외부 클라이언트는 `403 LOCAL_ONLY` 반환합니다. `localOnlyManageScopeBypassEnabled` 비활성화하거나 `/api/mcp/` 접두사를 제거하면 관리 키에 대해서도 외부 경로 액세스가 비활성화됩니다. 형제 접두사 `/api/cli-tools/runtime/*` 의도적으로 우회할 수 없습니다 — [Route Guard Tiers — Manage-scope carve-out을](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) 참조하세요.
 
-### Origin 검증
+### 원산지 검증
 
-인증 후 `/api/mcp/*`로 가는 모든 요청(트랜스포트와 `status`, `tools`, `audit`, `restart` 같은 관리 라우트)은 호출자(API 키, CLI 토큰, 대시보드 세션, 로그인 비활성화 시 익명 루프백)와 관계없이 `Origin` 헤더를 검증받습니다. 이는 MCP Streamable HTTP 사양이 요구하는 DNS 리바인딩 방어입니다.
+인증 후 `/api/mcp/*` — 에 대한 모든 요청은 호출자(API 키, CLI 토큰, 대시보드 세션 또는 로그인이 비활성화된 익명 루프백)에 관계없이 `status`, `tools`, `audit` 및 `restart` — 와 같은 전송 및 관리 경로의 `Origin` 헤더가 검증됩니다. 이는 MCP Streamable HTTP 사양에 필요한 DNS 리바인딩 보호입니다.
 
-- **`Origin` 헤더 없음** → 허용. OmniRoute CLI, SDK, IDE 클라이언트는 이 헤더를 보내지 않습니다.
-- **허용되는 `Origin`** → 모든 포트의 `localhost` / `127.0.0.1` / `[::1]`, 또는 OmniRoute 자체 공개 origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, 신뢰된 리버스 프록시가 전달한 origin(`OMNIROUTE_TRUST_PROXY`, base URL이 설정되지 않은 경우에만), 또는 루프백/LAN IP 호스트 직접 접속. `Host` 헤더만으로는 어떤 origin도 신뢰되지 않습니다.
-- **그 밖의 모든 `Origin`(`null` 포함)** → `403`, JSON-RPC 오류 본문: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. 유효한 CSRF 토큰을 제시한 대시보드 세션은 다른 대시보드 쓰기와 마찬가지로 계속 허용됩니다.
+- **`Origin` 헤더 없음** → 허용됩니다. OmniRoute CLI, SDK 및 IDE 클라이언트는 이를 보내지 않습니다.
+- **허용된 `Origin`** 모든 포트의 → `localhost`, `127.0.0.1` 또는 `[::1]` 또는 OmniRoute 자체 공개 출처: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, 신뢰할 수 있는 역방향 프록시의 전달 출처(`OMNIROUTE_TRUST_PROXY`, 기본 URL 설정되지 않은 경우에만) 또는 직접 loopback/LAN IP 호스트. `Host` 헤더만으로는 출처를 신뢰할 수 없습니다.
+- **`null` 포함한 다른 모든 `Origin`** JSON-RPC 오류 본문이 있는 → `403` : `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. 다른 대시보드 쓰기와 마찬가지로 유효한 CSRF 토큰을 제공하는 대시보드 세션은 계속 허용됩니다.
 
-리버스 프록시 뒤에서 제공되는 브라우저 MCP 클라이언트는 `OMNIROUTE_PUBLIC_BASE_URL`가 필요하며, 다른 origin을 위한 허용 목록은 없습니다. CORS 프리플라이트(`OPTIONS`)는 Origin을 검사하지 않지만, 뒤따르는 실제 요청은 검사합니다.
+역방향 프록시 뒤에서 제공되는 브라우저 MCP 클라이언트에는 `OMNIROUTE_PUBLIC_BASE_URL` 필요합니다. 다른 원본에 대한 허용 목록은 없습니다. CORS 프리플라이트(`OPTIONS`)는 Origin에서 확인되지 않습니다. 다음 요청은 다음과 같습니다.
 
 ## IDE 구성
 
@@ -326,7 +328,7 @@ API 키의 `manage`, MCP 도구의 `read:compression`, `oma_live_…` 액세스 
 
 범위가 `["manage"]` 인 키는 `read:compression` 에 대해 `scopeMatches` 에 실패합니다. `admin`, `mcp:connect`, `read` 및 `write` 가 유일하게 부여된 문자열인 경우 동일한 호출이 실패합니다. 후행 `*` 이후의 MCP 도구 범위에는 계층 구조가 없습니다.
 
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` (기본값 `false`)가 아니면 적용이 해제됩니다. 꺼져 있는 동안 `evaluateToolScopes` 호출을 허용하고 카탈로그를 건너뜁니다. 켜져 있는 동안 HTTP Bearer 키의 `api_keys.scopes` `authInfo` 로 사용합니다( [키별 HTTP 범위 바인딩](#per-key-http-scope-binding-7895) 참조). 키 범위가 확인되지 않으면 부여된 세트는 MCP `_meta` ( HTTP 인증 컨텍스트 내에서 HTTP/SSE 호출자에 대해서만 적용됩니다. stdio 호출자의 `_meta` 클라이언트가 이를 제어하고 호출자별 ID를 전달하지 않기 때문에 무시됩니다), `OMNIROUTE_MCP_SCOPES` 으로 넘어갑니다.
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` 전역적으로 적용을 활성화합니다(기본값 `false`). 루프백을 통해 이루어진 요청을 포함하여 HTTP/SSE `authInfo` 에서 키의 범위를 확인하고 키에 `manage` 또는 `admin` 없을 때마다 적용도 필수입니다. 나머지 흐름에서 전역 플래그는 `evaluateToolScopes` 카탈로그를 확인하는지 여부를 제어합니다. HTTP/SSE 해당 플래그와 독립적으로 Bearer 키의 `api_keys.scopes` `authInfo` 에 바인딩합니다( [키별 HTTP 범위 바인딩](#per-key-http-scope-binding-7895) 참조). 키 범위가 해결되지 않으면 부여된 세트는 MCP `_meta` ( HTTP 인증 컨텍스트 내에서 HTTP/SSE 호출자에 대해서만 적용됩니다. stdio 호출자의 `_meta` 클라이언트가 이를 제어하고 호출자별 ID를 전달하지 않기 때문에 무시됩니다), `OMNIROUTE_MCP_SCOPES` 로 넘어갑니다.
 
 #### 액세스 토큰 범위
 
@@ -388,31 +390,31 @@ API 키의 `manage`, MCP 도구의 `read:compression`, `oma_live_…` 액세스 
 
 ### `mcp:connect` — 좁은 경로 기능(#7895)
 
-비루프백에서 HTTP/SSE MCP 전송(`/api/mcp/*`)에 도달하려면 `/api/mcp/` LOCAL_ONLY 분할이 필요합니다( `docs/security/ROUTE_GUARD_TIERS.md` 참조). 역사적으로 그 분할은 전체 `manage`/`admin` -scope API 키 — 만 허용했으며 MCP 만 대화하면 되는 발신자에게는 너무 광범위했습니다. `src/shared/constants/managementScopes.ts` 이제 `MCP_CONNECT_SCOPE = "mcp:connect"` 내보냅니다. `src/server/authz/policies/management.ts` 에 `/api/mcp/` ONLY 권한을 부여하는 추가적이고 좁은 범위( `SELF_USAGE_SCOPE` 와 동일한 선례)입니다. — 는 다른 관리 경로 액세스 권한을 부여하지 않으며 의도적으로 `MANAGEMENT_API_KEY_SCOPES` 의 OUT 유지합니다. `manage`/`admin` 를 보유한 키는 여전히 변경되지 않은 채 분할을 전달합니다. `mcp:connect` `hasMcpConnectOrManageScope()` 통해 확인되는 원격 MCP 전용 호출자를 위한 낮은 권한의 대안입니다.
+외부 루프백이나 신뢰할 수 있는 LAN 에서 HTTP/SSE MCP 전송(`/api/mcp/*`)에 도달하려면 `/api/mcp/` LOCAL_ONLY 분할이 필요합니다( `docs/security/ROUTE_GUARD_TIERS.md` 참조). 역사적으로 그 분할은 전체 `manage`/`admin` -scope API 키 — 만 허용했으며 MCP 만 대화하면 되는 발신자에게는 너무 광범위했습니다. `src/shared/constants/managementScopes.ts` 이제 `MCP_CONNECT_SCOPE = "mcp:connect"` 내보냅니다. `src/server/authz/policies/management.ts` 에 ONLY `/api/mcp/` 권한을 부여하는 추가적이고 좁은 범위( `SELF_USAGE_SCOPE` 와 동일한 선례)입니다. — 는 다른 관리 경로 액세스 권한을 부여하지 않으며 의도적으로 `MANAGEMENT_API_KEY_SCOPES` 의 OUT 유지합니다. `manage`/`admin` 를 보유한 키는 여전히 변경되지 않은 채로 분할을 전달합니다. `mcp:connect` `hasMcpConnectOrManageScope()` 통해 확인되는 원격 MCP 전용 호출자를 위한 낮은 권한의 대안입니다.
 
 ### 키별 HTTP 범위 바인딩(#7895)
 
-HTTP/SSE 에 대해 `open-sse/mcp-server/httpTransport.ts` 이제 `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)를 통해 호출자의 실제 `api_keys.scopes` 확인하고 이를 MCP SDK 의 `transport.handleRequest(req, { authInfo })` 에 전달하므로 각 도구 호출에 도달하는 `extra.authInfo.scopes` Bearer 키의 자체 범위를 반영합니다. `scopeEnforcement.ts` 의 `resolveCallerScopeContext()` 이미 `_meta` 보다 `authInfo` 우선순위를 지정했으며 `OMNIROUTE_MCP_SCOPES` env 폴백 — 이전에 HTTP 보다 공급되지 않았던 가장 우선순위가 높은 첫 번째 소스만 채웁니다. API 키가 해결되지 않으면(헤더 없음, 잘못된 키) `authInfo` `undefined` 유지하고 해결은 변경되지 않은 기존 `meta`/env 체인으로 전달됩니다. stdio에는 호출자별 ID가 없으며( `mcpCallerIdentity.ts` 참조) 키별 바인딩 — 의 영향을 받지 않습니다. `_meta` 단계를 건너뛰고(`_meta` HTTP 인증 컨텍스트 내에서만 적용됨, #15159) `OMNIROUTE_MCP_SCOPES` env 키만으로 해결됩니다.
+HTTP/SSE 에 대해 `open-sse/mcp-server/httpTransport.ts` 이제 `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)를 통해 호출자의 실제 `api_keys.scopes` 확인하고 이를 MCP SDK 의 `transport.handleRequest(req, { authInfo })` 에 전달하므로 각 도구 호출에 도달하는 `extra.authInfo.scopes` Bearer 키의 자체 범위를 반영합니다. `scopeEnforcement.ts` 의 `resolveCallerScopeContext()` 이미 `_meta` 보다 `authInfo` 우선순위를 지정했으며 `OMNIROUTE_MCP_SCOPES` env 폴백 — 이전에 HTTP 보다 공급되지 않았던 가장 우선순위가 높은 첫 번째 소스만 채웁니다. API 키가 해결되지 않으면(헤더 없음, 잘못된 키) `authInfo` `undefined` 유지하고 해결은 변경되지 않은 기존 `meta`/env 체인으로 전달됩니다. stdio에는 호출자별 ID가 없으며( `mcpCallerIdentity.ts` 참조) 키별 바인딩 — 의 영향을 받지 않습니다. `_meta` 단계를 건너뛰고(`_meta` HTTP 인증 컨텍스트 #15159 내에서만 적용됨) `OMNIROUTE_MCP_SCOPES` env 키만으로 해결됩니다.
 
-**`OMNIROUTE_MCP_ENFORCE_SCOPES` 에 관계없이 좁은 범위의 HTTP/SSE 호출자에 대해 강제로 적용됩니다.** `OMNIROUTE_MCP_ENFORCE_SCOPES` `false` 로 기본값을 설정하는 것은 범위를 지정할 호출자별 ID가 없는 local/stdio 단일 연산자 흐름에서만 안전합니다. `open-sse/mcp-server/server.ts::withScopeEnforcement()` `resolveCallerScopeContext()` `source === "authInfo"` (실제 키별 HTTP 인증 헤더, HTTP/SSE-only) zqm을 해결할 때마다 도구별 범위 적용을 무조건( `scopeEnforcement.ts` 의 `shouldForceScopeEnforcement()` )로 설정합니다. 해당 키 AND 전체 `manage`/`admin` 범위를 보유하지 않습니다. 이는 `/api/mcp/` LOCAL_ONLY 분할 ONLY 만 승인하는 것으로 위에 문서화된 좁은 `mcp:connect` 우회 범위 — 의 — 를 보유하는 키가 운영자가 remote/non-loopback MCP 액세스를 활성화한 후 모든 MCP 도구를 호출할 수 있는 격차를 줄여줍니다. 단순히 `OMNIROUTE_MCP_ENFORCE_SCOPES` 가 기본적으로 `false` 제공하기 때문입니다. HTTP 에 대한 전체 `manage`/`admin` 키와 모든 stdio/local 호출자는 기존 `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated 동작을 변경하지 않고 유지합니다.
+**`OMNIROUTE_MCP_ENFORCE_SCOPES` 에 관계없이 좁은 범위의 HTTP/SSE 호출자에 대해 강제로 적용됩니다.** `open-sse/mcp-server/server.ts::withScopeEnforcement()` `resolveCallerScopeContext()` `source === "authInfo"` (실제 키별 HTTP 인증 헤더, HTTP/SSE-only) zqj를 해결할 때마다 무조건 도구별 범위 적용을 활성화합니다( `scopeEnforcement.ts` 의 `shouldForceScopeEnforcement()` ). 해당 키 AND 전체 `manage`/`admin` 범위를 보유하지 않습니다. 이는 `/api/mcp/` LOCAL_ONLY 분할 — 외에는 아무것도 승인하지 않는 것으로 위에서 문서화된 좁은 `mcp:connect` 우회 범위 — 보유하고 있는 키가 ONLY `OMNIROUTE_MCP_ENFORCE_SCOPES` 기본적으로 `false` 제공하기 때문에 운영자가 remote/non-loopback MCP 액세스를 활성화한 후 모든 MCP 도구를 호출할 수 있는 격차를 줄여줍니다. HTTP 에 대한 `manage`/`admin` 키, stdio 호출자 및 키별 `authInfo` 없는 HTTP 흐름은 전역 플래그의 동작을 유지합니다. Localhost는 필수 검사에서 좁은 키 범위를 가진 HTTP 호출자를 면제하지 않습니다.
 
 ---
 
 ## 환경 변수
 
-| 변수                                    | 기본값                               | 용도                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| :-------------------------------------- | :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`             | MCP 서버가 OmniRoute 내부 API를 호출할 때 사용하는 기본 URL                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `OMNIROUTE_API_KEY`                     | (비어 있음)                          | 내부 API 호출 시 `Authorization: Bearer`로 전달되는 API 키                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (`"true"`인 경우에만 활성화) | 활성화하면 필요한 범위가 없을 경우 도구 호출을 거부하고 감사 로그에 `scope_denied:<reason>`을 기록합니다. 또한 키별 Authorization 헤더에서 확인된 모든 HTTP/SSE 호출자(`source === "authInfo"`)가 전체 `manage`/`admin` 범위를 보유하지 않은 경우(예: 제한적인 `mcp:connect` 우회 범위만 보유한 키), 이 플래그와 관계없이 적용이 강제로 활성화됩니다. 따라서 이 기본값은 로컬/stdio 단일 운영자 흐름에만 안전하며, 원격 비루프백 액세스에는 절대 안전하지 않습니다. |
-| `OMNIROUTE_MCP_SCOPES`                  | (비어 있음)                          | 기본적으로 "사용 가능"한 것으로 간주되는 쉼표로 구분된 범위 허용 목록(호출자가 자체 범위를 제공하지 않을 때 사용)                                                                                                                                                                                                                                                                                                                                                   |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (설정되지 않음 = 켜짐)               | `0/false/off/no`로 설정하면 등록 시 MCP 설명 압축을 비활성화합니다.                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (설정되지 않음 = 켜짐)               | 위와 동일한 토글에 대한 대체 별칭                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                              | 내부 관리 조회(상태, 복원력, 조합, 할당량, 사용량)의 중단 제한 시간                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                              | 제공자를 기다리는 홉(`route_request`, `web_search`, `web_fetch`)의 중단 제한 시간                                                                                                                                                                                                                                                                                                                                                                                   |
-| `MCP_TOOL_DENY`                         | (설정되지 않음 = 필터 없음)          | `tools/list`에서 제외할 쉼표로 구분된 도구 이름(도구 카디널리티 감소 — 아래 참조)                                                                                                                                                                                                                                                                                                                                                                                   |
-| `MCP_TOOL_ALLOW`                        | (설정되지 않음 = 필터 없음)          | 허용할 도구 이름을 쉼표로 구분하여 지정(허용 목록 모드 — 아래 참조)                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `DATA_DIR`                              | `~/.omniroute`                       | 하트비트 파일은 `${DATA_DIR}/runtime/mcp-heartbeat.json`에 기록됨                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 변하기 쉬운                             | 기본                        | 목적                                                                                                                                                                                                                             |
+| :-------------------------------------- | :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`    | OmniRoute 내부 APIs 를 호출할 때 MCP 서버가 사용하는 기본 URL                                                                                                                                                                    |
+| `OMNIROUTE_API_KEY`                     | (비어 있는)                 | API 키는 내부 API 호출에 `Authorization: Bearer` 로 전달됩니다.                                                                                                                                                                  |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` ( `"true"` 만 가능) | 전역 도구 범위 검사를 활성화합니다. 거부 로그 `scope_denied:<reason>`. 루프백을 통해서도 `manage`/`admin` 부족한 키별 `authInfo` 사용하는 HTTP/SSE 호출자에 대해 항상 검사가 시행됩니다. 다른 흐름에서는 이 플래그를 사용합니다. |
+| `OMNIROUTE_MCP_SCOPES`                  | (비어 있는)                 | 기본적으로 '사용 가능'하다고 간주되는 범위의 쉼표로 구분된 허용 목록(호출자가 자체 범위를 제공하지 않는 경우 사용됨)                                                                                                             |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | ( = 설정 해제)              | `0/false/off/no` 로 설정하면 등록 시 MCP 설명 압축이 비활성화됩니다.                                                                                                                                                             |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | ( = 설정 해제)              | 위와 동일한 토글에 대한 대체 별칭                                                                                                                                                                                                |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                     | 내부 관리 읽기에 대한 예산 중단(상태, 탄력성, 콤보, 할당량, 사용량)                                                                                                                                                              |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                     | 공급자를 기다리는 홉에 대한 예산 중단(`route_request`, `web_search`, `web_fetch`)                                                                                                                                                |
+| `MCP_TOOL_DENY`                         | ( = 필터 없음 설정 해제)    | `tools/list` 에서 삭제할 쉼표로 구분된 도구 이름(도구 카디널리티 감소 — 아래 참조)                                                                                                                                               |
+| `MCP_TOOL_ALLOW`                        | ( = 필터 없음 설정 해제)    | 독점적으로 유지할 쉼표로 구분된 도구 이름(허용 목록 모드 — 아래 참조)                                                                                                                                                            |
+| `DATA_DIR`                              | `~/.omniroute`              | 하트비트 파일이 `${DATA_DIR}/runtime/mcp-heartbeat.json` 에 기록됩니다.                                                                                                                                                          |
 
 ---
 

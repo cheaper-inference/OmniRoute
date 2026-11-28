@@ -49,7 +49,7 @@ Cada implementação disponibiliza a sua própria cópia da especificação em `
 
 ---
 
-## Conclusões de chat
+## Conclusões de bate-papo
 
 ```bash
 POST /v1/chat/completions
@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Cabeçalhos personalizados
 
-| Cabeçalho                | Direção  | Descrição                                                                                                                                                                                                                                 |
-| ------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Pedido   | Defina como `true` para ignorar a cache                                                                                                                                                                                                   |
-| `x-omniroute-no-memory`  | Pedido   | Defina como `true` para ignorar a injeção de memória + competências neste pedido (espelha no-cache; evita a sobrecarga de tokens/custos por chamada)                                                                                      |
-| `X-OmniRoute-Progress`   | Pedido   | Defina como `true` para eventos de progresso                                                                                                                                                                                              |
-| `X-Session-Id`           | Pedido   | Chave de sessão fixa para afinidade de sessão externa                                                                                                                                                                                     |
-| `x_session_id`           | Pedido   | A variante com sublinhado também é aceite (HTTP direto)                                                                                                                                                                                   |
-| `X-OmniRoute-Session-Id` | Pedido   | Etiqueta de sessão/conversação fornecida pelo chamador (também alimenta a memória). Quando presente, é persistida literalmente em `call_logs.session_tag` para atribuição de custos por sessão (#8249) — nunca sintetizada quando ausente |
-| `Idempotency-Key`        | Pedido   | Chave de deduplicação (janela de 5 s)                                                                                                                                                                                                     |
-| `X-Request-Id`           | Pedido   | Chave de deduplicação alternativa                                                                                                                                                                                                         |
-| `x-omniroute-connection` | Pedido   | Fixa um pedido de modelo único a uma ligação de fornecedor (conta) através do respetivo ID — consulte [Fixação de conta por pedido](#account-pinning-per-request)                                                                         |
-| `X-OmniRoute-Cache`      | Resposta | `HIT` ou `MISS` (sem transmissão em fluxo)                                                                                                                                                                                                |
-| `X-OmniRoute-Idempotent` | Resposta | `true` se tiver sido deduplicado                                                                                                                                                                                                          |
-| `X-OmniRoute-Progress`   | Resposta | `enabled` se o acompanhamento do progresso estiver ativo                                                                                                                                                                                  |
-| `X-OmniRoute-Session-Id` | Resposta | ID de sessão efetivo utilizado pelo OmniRoute                                                                                                                                                                                             |
-| `X-OmniRoute-Request-Id` | Resposta | ID de correlação do pedido (quando conhecido)                                                                                                                                                                                             |
-| `X-OmniRoute-Version`    | Resposta | Versão da compilação do OmniRoute (sempre presente)                                                                                                                                                                                       |
-| `X-OmniRoute-Cost-Saved` | Resposta | Valor em USD que a cache evitou num `HIT` (apenas em acertos da cache)                                                                                                                                                                    |
-| `X-OmniRoute-Decision`   | Resposta | Rastro de encaminhamento: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` é a estratégia combinada ou `single` para um pedido não combinado) — sempre presente nas respostas de conclusão                                   |
+| Cabeçalho                | Direção  | Descrição                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Pedido   | Defina como `true` para ignorar a cache                                                                                                                                                                                                                                                                                                                                                                       |
+| `x-omniroute-no-memory`  | Pedido   | Defina como `true` para ignorar a injeção de competências + de memória para este pedido (espelha sem cache; evita a sobrecarga token/cost por chamada)                                                                                                                                                                                                                                                        |
+| `x-omniroute-no-log`     | Pedido   | Defina como `true` para omitir cargas request/response dos registos de chamadas para este pedido de inferência (todas as rotas da família de chat: conclusões de chat, respostas, mensagens, conclusões, Gemini). O registo de data e hora, modelo, estado, duração e contagem de tokens ainda são registados. Combine com `x-omniroute-no-memory` e `x-omniroute-no-cache` para cancelar o conteúdo completo |
+| `X-OmniRoute-Progress`   | Pedido   | Defina como `true` para eventos de progresso                                                                                                                                                                                                                                                                                                                                                                  |
+| `X-Session-Id`           | Pedido   | Chave de sessão fixa para afinidade de sessão externa                                                                                                                                                                                                                                                                                                                                                         |
+| `x_session_id`           | Pedido   | Variante de sublinhado também aceite ( HTTP direto)                                                                                                                                                                                                                                                                                                                                                           |
+| `X-OmniRoute-Session-Id` | Pedido   | Tag session/conversation fornecido pelo chamador (também alimenta memória). Quando presente, persistido literalmente em `call_logs.session_tag` para atribuição de custo por sessão (#8249) — nunca sintetizado quando ausente                                                                                                                                                                                |
+| `Idempotency-Key`        | Pedido   | Chave de desduplicação (janela 5s)                                                                                                                                                                                                                                                                                                                                                                            |
+| `X-Request-Id`           | Pedido   | Chave de desduplicação alternativa                                                                                                                                                                                                                                                                                                                                                                            |
+| `x-omniroute-connection` | Pedido   | Fixe um pedido de modelo único numa ligação de fornecedor (conta) pelo seu ID — consulte [Fixação de conta por pedido](#account-pinning-per-request)                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Cache`      | Resposta | `HIT` ou `MISS` (sem streaming)                                                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Idempotent` | Resposta | `true` se desduplicado                                                                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Progress`   | Resposta | `enabled` se o acompanhamento do progresso estiver ativado                                                                                                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Session-Id` | Resposta | Sessão efetiva ID utilizada pelo OmniRoute                                                                                                                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Request-Id` | Resposta | Solicitar ID de correlação (quando conhecido)                                                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Version`    | Resposta | versão OmniRoute build (sempre presente)                                                                                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Cost-Saved` | Resposta | USD o cache evitado num HIT (apenas ocorrências de cache)                                                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Decision`   | Resposta | Rastreio de encaminhamento: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` é a estratégia de combinação ou `single` para um pedido não combinado) — sempre presente nas respostas de conclusão                                                                                                                                                                                                 |
 
-> Nota sobre o Nginx: se depender de cabeçalhos com sublinhados (por exemplo, `x_session_id`), ative `underscores_in_headers on;`.
+> Nota Nginx: se depender de cabeçalhos de sublinhado (por exemplo `x_session_id`), ative `underscores_in_headers on;`.
 
-#### Fixação de conta por pedido
+#### Fixação de conta por solicitação
 
-Quando um fornecedor tem várias ligações (contas ou chaves), o OmniRoute normalmente seleciona uma
-através da respetiva estratégia de seleção de contas. Em alternativa, um pedido pode fixar uma ligação específica
-com o cabeçalho `x-omniroute-connection`:
+Quando um fornecedor tem diversas ligações (contas ou chaves), OmniRoute escolhe normalmente uma através da sua estratégia de seleção de conta. Em vez disso, um pedido pode fixar uma ligação específica com o cabeçalho `x-omniroute-connection` :
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,24 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Onde encontrar o id.** Abra a página do fornecedor no dashboard
-  (**Dashboard → Fornecedores → <provider>**) e clique no identificador `xxxxxxxx…` numa linha de ligação
-  — o id completo da ligação é copiado.
-- **Quais pedidos o respeitam.** Pedidos de modelo único (`provider/model`) em
-  `/v1/chat/completions`, `/v1/messages` e `/v1/responses`. As combinações ignoram o cabeçalho: fixe
-  uma conta por passo da combinação através da ligação própria desse passo.
-- **A fixação é estrita, não uma preferência.** A ligação fixada é usada exclusivamente. Uma
-  falha dentro do pedido regista o período de espera da conta, mas **não** muda para uma conta
-  irmã do mesmo fornecedor.
-- **O período de espera e a quota libertam a fixação.** Enquanto a ligação fixada estiver num período
-  de espera, com a quota esgotada ou bloqueada por uma política de quotas, os pedidos seguintes
-  recorrem às outras ligações do fornecedor, exatamente como o tráfego não fixado.
-- **Ids desconhecidos ou desativados falham.** Um id que não esteja no conjunto ativo de ligações do fornecedor (eliminado,
-  desativado ou pertencente a outro fornecedor) não deixa nenhuma conta elegível, pelo que o pedido
-  falha em vez de ser encaminhado silenciosamente para outro local.
+- **Onde encontrar o ID.** Abra a página do fornecedor no painel (** Fornecedores → do painel → <provider>** ) e clique no chip `xxxxxxxx…` id numa linha de ligação — copia o ID de ligação completo.
+- **Quais as solicitações que o honram.** Pedidos de modelo único (`provider/model`) em `/v1/chat/completions`, `/v1/messages` e `/v1/responses`. Os combos ignoram o cabeçalho: em vez disso, fixe uma conta por passo do combo através da própria ligação do passo.
+- **O pin é estrito, não é uma preferência.** A ligação fixada é utilizada exclusivamente. Uma falha dentro do pedido regista o tempo de espera da conta, mas não** não** rodar para uma conta irmã do mesmo fornecedor.
+- **Cooldown e cota libertam o pin.** Enquanto a ligação fixada está a arrefecer, esgotada a quota ou bloqueada por uma política de quota, os pedidos posteriores voltam para as outras ligações do fornecedor, exatamente como o tráfego não fixado.
+- **Os IDs desconhecidos ou desativados falham.** Um ID que não esteja na pool ativa do fornecedor (eliminado, desativado ou pertencente a outro fornecedor) não deixa nenhuma conta elegível, pelo que o pedido falha em vez de ser encaminhado silenciosamente para outro local.
 
-O Claude Code envia cabeçalhos personalizados através de `ANTHROPIC_CUSTOM_HEADERS`. Coloque-o no bloco `env`
-de `~/.claude/settings.json`, ou num `.claude/settings.json` ao nível do projeto para fixar uma conta diferente por projeto:
+O código Claude envia cabeçalhos personalizados através de `ANTHROPIC_CUSTOM_HEADERS`. Coloque-o no bloco `env` do `~/.claude/settings.json` ou num `.claude/settings.json` ao nível do projeto para fixar uma conta diferente por projeto:
 
 ```jsonc
 {
@@ -132,12 +120,11 @@ de `~/.claude/settings.json`, ou num `.claude/settings.json` ao nível do projet
 }
 ```
 
-Origem: `src/sse/handlers/chat.ts` (leitura do cabeçalho), `src/sse/services/auth.ts` e
-`src/sse/services/sessionAffinityPin.ts` (libertação da fixação e verificação de ausência no conjunto).
+Fonte: `src/sse/handlers/chat.ts` (leitura do cabeçalho), `src/sse/services/auth.ts` e `src/sse/services/sessionAffinityPin.ts` (libertação do pino e verificação de falhas do pool).
 
-> **Cabeçalhos de telemetria de custos:** as respostas bem-sucedidas sem streaming também incluem o conjunto de telemetria de custos `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, 10 casas decimais fixas; `0.0000000000` para conteúdo gratuito/sem preço), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` e `X-OmniRoute-Fallback-Attempts` (apenas quando > 0), além de `X-OmniRoute-Request-Id` e `X-OmniRoute-Version`. Estes são emitidos por conclusões de chat, `/v1/responses`, `/v1/messages` **e pelos endpoints de multimédia** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` e `/v1/moderations` (sempre com custo `0`). O custo de multimédia é calculado por modalidade (por imagem, por segundo, por carácter, por unidade de pesquisa) quando existe informação de preços; caso contrário, é `0` (fail-open).
+> **Cabeçalhos de telemetria de custos:** respostas de sucesso sem streaming também carregam o conjunto de telemetria de custo `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, 10 decimais fixos; `0.0000000000` para free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` e `X-OmniRoute-Fallback-Attempts` (apenas quando > 0), mais `X-OmniRoute-Request-Id` e `X-OmniRoute-Version`. São emitidos pelas conclusões do chat, `/v1/responses`, `/v1/messages`,** e os pontos finais de suporte** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` e `/v1/moderations` (custa sempre `0`). O custo dos suportes é calculado por modalidade (por imagem, por segundo, por caractere, por unidade de pesquisa) quando o preço está disponível, caso contrário, `0` (fail-open).
 
-> **Semântica do custo de acerto da cache:** num HIT da cache semântica (`X-OmniRoute-Cache-Hit: true`) não é feita nenhuma chamada ao serviço upstream, pelo que `X-OmniRoute-Response-Cost` é `0.0000000000` (o custo **incremental** de servir o acerto). O custo original/que teria sido aplicado é comunicado separadamente em `X-OmniRoute-Cost-Saved`. Os consumidores de faturação devem somar `X-OmniRoute-Response-Cost` (os acertos não têm custo); as análises da cache podem agregar `X-OmniRoute-Cost-Saved`.
+> **Semântica de custo de acerto de cache:** numa cache semântica HIT (`X-OmniRoute-Cache-Hit: true`) não é feita nenhuma chamada upstream, então `X-OmniRoute-Response-Cost` é `0.0000000000` (o** incremental** custo de servir o acerto). O custo original/would-have-been é reportado separadamente em `X-OmniRoute-Cost-Saved`. O volume de negócios dos consumidores deverá somar `X-OmniRoute-Response-Cost` (os acertos não custam nada); a análise de cache pode agregar `X-OmniRoute-Cost-Saved`.
 
 ## Concessões Exclusivas de Sessões Geridas
 
@@ -342,6 +329,8 @@ Os fornecedores disponíveis incluem OpenAI (GPT Image 2), xAI (Grok Image), Tog
 
 `n` devolve imagens `n` em `data[]`. Os fornecedores cujo API upstream devolve uma imagem por chamada (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) recebem `n` chamadas upstream separadas, no máximo 4 em curso. Um `seed` fixo é compensado pelo índice de chamada (`seed`, `seed + 1`,…), pelo que as imagens diferem, mas permanecem reproduzíveis. `n` está limitado a 10. O pedido falhará como um todo se alguma chamada falhar. A lista de formatos de distribuição é `SINGLE_IMAGE_FANOUT_FORMATS` em `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Os modelos de imagem (`codex/gpt-image-*`) apenas devolvem PNG : o upstream responde `200` com PNG bytes mesmo quando se pede `jpeg` ou `webp`. Um pedido com qualquer outro `output_format` (`webp`, `jpeg`, ...) é rejeitado com HTTP 400 em vez de ser ignorado silenciosamente; omita ou envie `png`. `output_compression` não é encaminhado.
+
 ZenMux reutiliza a ligação de chave API existente e aceita prefixos `zenmux/` ou `zm/` :
 
 - `zenmux/openai/gpt-image-2` utiliza imagens ZenMux do OpenAI API. As opções incluem `size`, `quality`, `n`, `output_format`, `output_compression`, `background` e `response_format`.
@@ -359,7 +348,7 @@ GET /v1/images/generations
 
 ---
 
-## OCR de documentos
+## Documento OCR
 
 ```bash
 POST /v1/ocr
@@ -375,17 +364,15 @@ Content-Type: application/json
 }
 ```
 
-`model` seleciona o fornecedor de OCR através de um prefixo `provider/model`; um ID de modelo simples (por exemplo,
-`mistral-ocr-latest`) é associado ao seu fornecedor registado e, quando `model` não é especificado, é utilizado por predefinição
-o Mistral (`mistral-ocr-latest`). Fornecedores registados (`open-sse/config/ocrRegistry.ts`):
+`model` selecciona o fornecedor OCR através de um prefixo `provider/model` ; um ID de modelo simples (por exemplo, `mistral-ocr-latest`) é resolvido para o seu fornecedor registado, e um `model` omitido é padronizado como Mistral (`mistral-ocr-latest`). Provedores registrados (`open-sse/config/ocrRegistry.ts`):
 
-| ID do fornecedor              | ID do modelo         | Valor de `model`                                       | Notas                                                                                                                                           |
-| ----------------------------- | -------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (ou `mistral-ocr-latest`) | Síncrono — a resposta é devolvida diretamente pela única chamada upstream.                                                                      |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`            | Upstream assíncrono (`analyze` + consulta) — consulte abaixo.                                                                                   |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                | Síncrono, através do endpoint parceiro `openapi/chat/completions` do Vertex AI — consulte abaixo para obter informações sobre autenticação/URL. |
+| ID do fornecedor              | ID do modelo                      | valor `model`                                                  | Notas                                                                                                                                                                                                               |
+| ----------------------------- | --------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`              | `mistral/mistral-ocr-latest` (ou `mistral-ocr-latest` simples) | Síncrono — a resposta é devolvida diretamente da única chamada upstream.                                                                                                                                            |
+| `azure-document-intelligence` | `prebuilt-read`                   | `azure-document-intelligence/prebuilt-read`                    | Upstream assíncrono (`analyze` + poll) — ver abaixo.                                                                                                                                                                |
+| `vertex-deepseek-ocr`         | self-deployed (no built-in model) | `vertex-deepseek-ocr/<your-deployed-model-id>`                 | Síncrono, através do seu próprio endpoint Vertex AI Model Garden DeepSeek-OCR (formato `openapi/chat/completions` ); Google retirou o `deepseek-ocr-maas` gerido em 21/10/2026 (#20423), para que o id devolva 400. |
 
-Os três fornecedores respondem com o mesmo corpo no formato Mistral:
+Todos os três prestadores respondem no mesmo corpo em formato Mistral:
 
 ```json
 {
@@ -395,27 +382,13 @@ Os três fornecedores respondem com o mesmo corpo no formato Mistral:
 }
 ```
 
-### Fluxo de consulta do Azure Document Intelligence
+### Azure Document Intelligence poll flow
 
-A API `analyze` do Azure Document Intelligence é assíncrona: o pedido inicial devolve um cabeçalho
-`Operation-Location` em vez de um corpo, e é necessário consultar o resultado. O processador
-(`open-sse/handlers/ocr.ts`) consulta esse URL a cada segundo durante um máximo de 30 tentativas, falha imediatamente (não
-continua a consultar) perante uma resposta de consulta que não seja `ok` ou um estado `"failed"` e devolve `504` se a
-operação ainda estiver em execução depois de esgotado o número de tentativas. A resposta final do Azure é
-normalizada para a mesma estrutura `pages`/`markdown` utilizada pelo Mistral antes de ser devolvida ao
-chamador, pelo que o código cliente não precisa de tratar o fornecedor de forma especial.
+`analyze` API do Azure Document Intelligence é assíncrono: o pedido inicial devolve um cabeçalho `Operation-Location` em vez de um corpo, e o resultado deve ser pesquisado. O manipulador (`open-sse/handlers/ocr.ts`) pesquisa este URL a cada segundo até 30 tentativas, falha rapidamente (não mantém a pesquisa) numa resposta de pesquisa não `ok` ou num estado `"failed"` e devolve `504` se a operação ainda estiver a ser executada após o esgotamento do orçamento de tentativas. A resposta final do Azure é normalizada no mesmo formato `pages`/`markdown` utilizado pelo Mistral antes de ser devolvida ao chamador, pelo que o código do cliente não necessita de um caso especial para o fornecedor.
 
-### Autenticação e resolução do endpoint do OCR DeepSeek do Vertex AI
+### Vertex AI DeepSeek OCR autenticação e resolução de endpoint
 
-`vertex-deepseek-ocr` reutiliza a mesma autenticação do Vertex AI que o OmniRoute já suporta para
-tráfego de chat/imagens (`open-sse/executors/vertex.ts`): a chave de API da ligação é uma credencial JSON de uma
-Conta de Serviço (trocada por um token de acesso OAuth de curta duração através do fluxo JWT-bearer)
-ou um token de acesso OAuth já emitido, utilizado tal como está. O URL do endpoint upstream é o endpoint parceiro
-genérico `openapi/chat/completions` do Vertex, construído a partir do projeto e da região da ligação — um
-`providerSpecificData.project`/`providerSpecificData.region` explícito tem sempre precedência; caso contrário, o projeto
-é obtido do `project_id` do JSON da Conta de Serviço e a região assume `us-central1`. Ambas as resoluções ocorrem em `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) e são utilizadas por
-`src/app/api/v1/ocr/route.ts` antes de o pedido ser encaminhado para `handleOcr`.
+`vertex-deepseek-ocr` reutiliza a mesma autenticação Vertex AI OmniRoute já suporta para o tráfego chat/image (`open-sse/executors/vertex.ts`): a chave API da ligação é uma credencial JSON da conta de serviço (trocada por um token de acesso OAuth de curta duração através do fluxo do portador JWT) ou um token de acesso OAuth já cunhado utilizado tal como está. O endpoint upstream URL é o endpoint genérico do parceiro `openapi/chat/completions` da Vertex, construído a partir do projeto e da região da ligação — um `providerSpecificData.project`/`providerSpecificData.region` explícito ganha sempre; caso contrário, o projeto será derivado do `project_id` da conta de serviço JSON e o padrão da região será `us-central1`. Ambas as resoluções acontecem em `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), consumidas por `src/app/api/v1/ocr/route.ts` antes de serem despachadas para `handleOcr`.
 
 ---
 
@@ -668,97 +641,104 @@ Contratos upstream: [efeitos sonoros](https://elevenlabs.io/docs/api-reference/t
 
 ---
 
-## Endpoints de compatibilidade
+## Pontos finais de compatibilidade
 
-| Método | Caminho                                   | Formato                                 |
-| ------ | ----------------------------------------- | --------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                  |
-| POST   | `/v1/messages`                            | Anthropic                               |
-| POST   | `/v1/responses`                           | OpenAI Responses                        |
-| POST   | `/v1/embeddings`                          | OpenAI                                  |
-| POST   | `/v1/images/generations`                  | OpenAI Images                           |
-| POST   | `/v1/images/edits`                        | OpenAI Images (edição/inpainting)       |
-| POST   | `/v1/videos/generations`                  | Geração de vídeo ao estilo OpenAI       |
-| POST   | `/v1/music/generations`                   | Geração de música ao estilo OpenAI      |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                      |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (devolve o corpo de áudio)   |
-| POST   | `/v1/rerank`                              | Reclassificação ao estilo Cohere/Voyage |
-| POST   | `/v1/classify`                            | Classificação Jina (`api.jina.ai`)      |
-| POST   | `/v1/segment`                             | Segmentador Jina (`segment.jina.ai`)    |
-| POST   | `/v1/moderations`                         | Moderações OpenAI                       |
-| GET    | `/v1/models`                              | OpenAI                                  |
-| POST   | `/v1/models/query`                        | Lista restrita de modelos filtrada      |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                               |
-| GET    | `/v1beta/models`                          | Gemini                                  |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                  |
-| POST   | `/v1/api/chat`                            | Ollama                                  |
-| GET    | `/api/v1/vscode/{token}/`                 | Alias do catálogo OpenAI                |
-| GET    | `/api/v1/vscode/{token}/models`           | Alias dos modelos OpenAI                |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | Alias tokenizado OpenAI                 |
-| POST   | `/api/v1/vscode/{token}/responses`        | Alias tokenizado OpenAI Responses       |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Alias tokenizado Ollama                 |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Alias tokenizado das etiquetas Ollama   |
+| Método | Percurso                                  | Formatar                             |
+| ------ | ----------------------------------------- | ------------------------------------ |
+| POST   | `/v1/chat/completions`                    | OpenAI                               |
+| POST   | `/v1/messages`                            | Anthropic                            |
+| POST   | `/v1/responses`                           | OpenAI Respostas                     |
+| POST   | `/v1/embeddings`                          | OpenAI                               |
+| POST   | `/v1/images/generations`                  | Imagens OpenAI                       |
+| POST   | `/v1/images/edits`                        | Imagens OpenAI (edit/inpaint)        |
+| POST   | `/v1/videos/generations`                  | Geração de vídeo ao estilo OpenAI    |
+| POST   | `/v1/music/generations`                   | Geração de música ao estilo OpenAI   |
+| POST   | `/v1/audio/transcriptions`                | OpenAI Áudio (STT)                   |
+| POST   | `/v1/audio/speech`                        | OpenAI TTS (retorna corpo áudio)     |
+| POST   | `/v1/rerank`                              | Cohere/Voyage-style reclassificação  |
+| POST   | `/v1/classify`                            | Jina classificar (`api.jina.ai`)     |
+| POST   | `/v1/segment`                             | Segmentador Jina (`segment.jina.ai`) |
+| POST   | `/v1/moderations`                         | Moderação OpenAI                     |
+| POST   | `/v1/systemone`                           | Decisões digitadas no Sistema Um     |
+| POST   | `/v1/decisions`                           | Decisões OpenAI (nativo)             |
+| GET    | `/v1/systemone/models`                    | Catálogo de modelos de decisão       |
+| GET    | `/v1/models`                              | OpenAI                               |
+| POST   | `/v1/models/query`                        | Lista de modelos filtrados           |
+| POST   | `/v1/messages/count_tokens`               | Anthropic                            |
+| GET    | `/v1beta/models`                          | Gemini                               |
+| POST   | `/v1beta/models/{...path}`                | Gemini generateContent               |
+| POST   | `/v1/api/chat`                            | Ollama                               |
+| GET    | `/api/v1/vscode/{token}/`                 | alias do catálogo OpenAI             |
+| GET    | `/api/v1/vscode/{token}/models`           | apelido de modelos OpenAI            |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | alias tokenizado OpenAI              |
+| POST   | `/api/v1/vscode/{token}/responses`        | alias tokenizado de respostas OpenAI |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | alias tokenizado Ollama              |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | alias tokenizado de tags Ollama      |
 
-Todas as rotas POST seguem a mesma estrutura: `Bearer your-api-key` + corpo JSON validado pelo Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, etc.; consulte `src/shared/validation/schemas.ts`). É devolvido um erro 4xx quando ocorre uma falha de validação do esquema.
+Todas as rotas POST seguem o mesmo formato: `Bearer your-api-key` + Corpo JSON validado por Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, etc., ver `src/shared/validation/schemas.ts`). 4xx é devolvido em caso de falha de esquema.
 
-Para clientes que não conseguem anexar `Authorization: Bearer ...`, o OmniRoute também aceita chaves de API no URL através de compatibilidade por cadeia de consulta (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ou através dos endpoints dedicados `/api/v1/vscode/{token}/...` documentados abaixo.
+Para os clientes que não conseguem anexar `Authorization: Bearer ...`, OmniRoute também aceita chaves API no URL através da compatibilidade de strings de consulta (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ou dos endpoints `/api/v1/vscode/{token}/...` dedicados documentados abaixo.
 
 ```bash
-# Reclassificação (fornecedor de registo na nuvem ou um nó de fornecedor compatível com OpenAI como "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Classificação Jina (credenciais da Foundation API)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Segmentador Jina
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Pesquisa Jina (s.jina.ai; aliases do fornecedor: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderações
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — devolve o corpo audio/mpeg (ou no formato solicitado)
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# O TTS Soniox requer um idioma e uma voz: `language` assume "en" por predefinição; uma
-# voz em falta ou um nome de voz padrão OpenAI (alloy, nova, …) passa a ser "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Edição de imagem (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Geração de vídeo / música (ID do modelo com prefixo do fornecedor)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Nós de fornecedor de rerank:** `POST /v1/rerank` também encaminha pedidos para nós de fornecedores compatíveis com OpenAI
-> (oMLX, vLLM, Infinity, TEI através de um gateway, …) endereçados como `<node-prefix>/<model>`. Os nós de loopback
-> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) são sempre elegíveis, tal como os nomes de anfitrião que o
-> operador especificar em `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (por exemplo, um nome de serviço Docker/Compose, como
-> `http://reranker:8080/v1`; estes são contactados diretamente, nunca através de `HTTP(S)_PROXY` ou do proxy fixado
-> numa ligação). Os nós em qualquer outro anfitrião — uma máquina na LAN ou um par Tailscale — só são elegíveis quando o operador ativa a
-> flag de funcionalidade `RERANK_REMOTE_PROVIDER_NODES` **e** o URL base do nó cumpre a política de URLs de saída do fornecedor
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> O passo de rerank do motor de memória chama esta rota através de loopback, pelo que a mesma regra rege
-> `rerankProviderModel` nas definições de Memória.
+> **Reclassificar nós do fornecedor:** `POST /v1/rerank` também encaminha para nós de fornecedores compatíveis com OpenAI (oMLX, vLLM, Infinity, TEI atrás de um gateway,…) endereçados como `<node-prefix>/<model>`. Os nós de loopback (`localhost`, `127.0.0.1`, `172.16.0.0/12`) são sempre elegíveis, assim como os nomes de host que o operador lista em `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (por exemplo, um nome de serviço Docker/Compose como `http://reranker:8080/v1`; são chamados directamente, nunca através `HTTP(S)_PROXY` ou de um proxy fixado de ligação). Os nós em qualquer outro host —, LAN box ou Tailscale peer — são elegíveis apenas quando o operador ativa o sinalizador de recurso `RERANK_REMOTE_PROVIDER_NODES`** e** o URL base do nó passa a política URL de saída do fornecedor (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). A etapa de reclassificação do motor de memória chama esta rota através de loopback, pelo que a mesma regra rege `rerankProviderModel` nas definições de memória.
 >
-> **Formatos de servidores locais:** o nó é chamado em `<base>/v1/rerank` e, em caso de 404, em `<base>/rerank`
-> (Infinity, TEI). O corpo enviado a montante contém ambas as convenções do Cohere/OpenAI (`documents`,
-> `return_documents`) e a convenção do TEI (`texts`, `return_text`), e a resposta a montante é
-> normalizada para o envelope do Cohere: o `[{index, score, text}]` simples do TEI, `{results: [{index, score}]}`
-> de gateways simples e `{data: [...]}` ao estilo do Voyage são todos devolvidos ao cliente como
-> `{results: [{index, relevance_score, document?}]}`, ordenados por pontuação e limitados a `top_n`.
+> **Formas de servidor local:** o nó é chamado em `<base>/v1/rerank` e, em 404, em `<base>/rerank` (Infinity, TEI). O corpo upstream transporta a ortografia Cohere/OpenAI (`documents`, `return_documents`) e a ortografia TEI (`texts`, `return_text`), e a resposta upstream é normalizada para o envelope Cohere : TEI's bare `[{index, score, text}]`, `{results: [{index, score}]}` de gateways finos e estilo Voyage `{data: [...]}` todos voltam para o cliente como `{results: [{index, relevance_score, document?}]}`, classificados por pontuação e limitados em `top_n`.
 
-> **Descoberta de nós de fornecedores:** os modelos num nó de fornecedor compatível com OpenAI aparecem em `GET /v1/models`
-> sob o prefixo do nó. As linhas que não contêm metadados de endpoint (típico das listagens locais de `/v1/models`)
-> herdam o `apiType` do nó, pelo que os modelos de um nó `embeddings` têm `type: "embedding"` e os
-> modelos de um nó `rerank` têm `type: "rerank"`, em vez de assumirem por predefinição o tipo chat; um
-> `supportedEndpoints` explícito numa linha sincronizada ou adicionada manualmente continua a ter precedência.
+> **Descoberta do nó do fornecedor:** modelos num nó de fornecedor compatível com OpenAI aparecem em `GET /v1/models` sob o prefixo do nó. As linhas que não transportam metadados de endpoint (típico para listagens `/v1/models` locais) herdam o `apiType` do nó, pelo que os modelos de um nó `embeddings` são `type: "embedding"` e os modelos de um nó `rerank` são `type: "rerank"` em vez de utilizar o chat como padrão; um `supportedEndpoints` explícito numa linha sincronizada ou adicionada manualmente ainda tem precedência.
 
-### Rotas de Fornecedores Dedicadas
+### Decisões Digitadas
+
+Os modelos de decisão respondem a perguntas digitadas com probabilidades calibradas em vez de gerar texto. Nunca são modelos de chat e os dois formatos de transmissão nunca são traduzidos um no outro:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, decisões OpenRouter, Cloudflare Trabalhadores AI, Ollama local ).
+- `POST /v1/decisions` — nativo OpenAI Decisões `{ model, input, questions: [...] }`, servidas por uma ligação `openai`. O modelo é `openai/gpt-6-luna` (o `gpt-6-luna` simples também funciona). As respostas voltam pela ordem das perguntas, intactas.
+- `GET /v1/systemone/models` — um catálogo de ambos os tipos; cada linha nomeia o seu `api_format` (`systemone` ou `decisions`). `limit` / `after` pagina a lista final. O cabeçalho `X-OmniRoute-Catalog-Status` lê-se `complete`, `partial` ou `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+No `/v1/decisions` a lista de permissões do modelo da chave API, a categoria do endpoint `decisions`, o orçamento e o âmbito da ligação são verificados antes de qualquer credencial ser lida. A credencial é a ligação `openai` armazenada dentro do âmbito da chave (nunca uma chave de ambiente); uma base de ligação URL é respeitada apenas quando é um `http(s)` URL sem credenciais, consulta ou fragmento que não aponta para este OmniRoute. A chamada sai pelo mesmo transporte protegido que o router automático `decision` ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): protecção de saída do fornecedor, sem novas tentativas, sem redireccionamentos, um tempo limite de 5 s e um limite de resposta de 64 KB (uma resposta superior é 502). Os corpos de pedido estão limitados a 4 MiB. Cada chamada envia um novo `Idempotency-Key`. Os erros apenas transportam o estado upstream, nunca o seu corpo, o URL, a chave ou o prompt.
+
+### Rotas de fornecedores dedicados
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -766,7 +746,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-O prefixo do fornecedor é adicionado automaticamente se estiver em falta. Os modelos incompatíveis devolvem `400`.
+O prefixo do fornecedor é adicionado automaticamente se estiver em falta. Os modelos incompatíveis retornam `400`.
 
 ---
 

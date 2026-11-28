@@ -4,14 +4,11 @@
 
 ---
 
-> **Statuss:** Vispārēji pieejams.
-> **Mērķauditorija:** Operatori, kuri savieno OpenCode ar OmniRoute izvietojumu.
-> **Patiesais avots (konfigurācijas shēma):** `src/shared/services/opencodeConfig.ts`
-> **Patiesais avots (npm pakotne):** `@omniroute/opencode-provider/` (publicējama darbvieta)
+> **Statuss:** Vispār pieejams.** Auditorija:** Operatori savieno OpenCode ar OmniRoute izvietošanu.** Patiesības avots (konfigurācijas shēma):** `src/shared/services/opencodeConfig.ts`** Ieteicamās npm pakotnes:** `@omniroute/opencode-plugin/` (OpenCode v1, instalēja `omniroute setup opencode`) un `@omniroute/opencode-plugin-v2/` (OpenCode v2). Vecākā `@omniroute/opencode-provider/` pakete ir** novecojušas** (skat. 2. ceļu).
 
-[OpenCode](https://opencode.ai) ir aģentisks CLI/darbvirsmas MI klients. Tas nolasa savu nodrošinātāju katalogu no `~/.config/opencode/opencode.json` (vai `opencode.jsonc`) un izmanto shēmu vietnē `https://opencode.ai/config.json`. OmniRoute sevi pakalpojumā OpenCode piedāvā kā vienu no šiem nodrošinātājiem — katrs pieprasījums plūst caur OmniRoute standarta, ar OpenAI saderīgo `/v1` saskarni, tādēļ OpenCode automātiski izmanto Auto-Combo maršrutēšanas, ķēdes pārtraucēju, atslēgu politiku, novērojamības u.c. priekšrocības.
+[OpenCode](https://opencode.ai) ir aģents CLI/desktop AI klients. Tas nolasa savu pakalpojumu sniedzēja katalogu no `~/.config/opencode/opencode.json` (vai `opencode.jsonc`) un seko shēmai vietnē `https://opencode.ai/config.json`. OmniRoute pakļauj sevi OpenCode kā vienam no tiem nodrošinātājiem — katrs pieprasījums plūst caur OmniRoute standarta OpenAI saderīgo `/v1` virsmu, tāpēc OpenCode automātiski gūst labumu no automātiskās kombinācijas maršrutēšanas, ķēdes pārtraucējiem, galvenajām politikām, novērojamības utt.
 
-Tiek atbalstīti **divi integrācijas veidi**. Izvēlieties vienu — abi ģenerē vienādu konfigurāciju.
+Šajā lapā ir dokumentēti divi tālāk norādītie statiskās konfigurācijas ceļi; abi ģenerē vienu un to pašu konfigurāciju. Modeļu sarakstam, kas seko jūsu tiešsaistes katalogam, tā vietā izmantojiet spraudni: `omniroute setup opencode` instalē `@omniroute/opencode-plugin` (OpenCode v1) un `@omniroute/opencode-plugin-v2` atlasa OpenCode v2 (skatiet [CLI integrācijas](../guides/CLI-INTEGRATIONS.md) un [OpenCode v2 spraudņa rokasgrāmatu](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ Iegūtais fails (noklusējuma modeļu katalogs):
 
 ---
 
-## 2. veids — npm pakotne `@omniroute/opencode-provider`
+## 2. ceļš — npm pakotne `@omniroute/opencode-provider` (novecojusi)
 
-Ieteicams, ja konfigurāciju skriptējat no Node/TS (CI konveijeri, monorepozitoriji, pielāgotas instalēšanas plūsmas).
+> **Novecojis.** Paketē ir izveidots statisks modeļu saraksts, kas atrodas aiz jūsu tiešā OmniRoute kataloga. Tā README iesaka migrēt uz `@omniroute/opencode-plugin` (vai `@omniroute/opencode-plugin-v2` uz OpenCode v2). Tālāk norādītais API tiek saglabāts tikai esošajiem skriptiem.
+
+Izmanto, skriptējot konfigurāciju no Node/TS (CI cauruļvadi, monorepos, pielāgotas instalētāja plūsmas).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Neobligāti: aizstājiet OpenCode pieejamo modeļu katalogu
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Lai veiktu nesagraujošu sapludināšanu ar esošu failu, atkārtojiet `mergeOpenCodeConfigText()` no `opencodeConfig.ts` vai izsauciet CLI ģeneratoru.
+Lai nesagraujošu sapludināšanu ar esošu failu, replicējiet `mergeOpenCodeConfigText()` no `opencodeConfig.ts` vai izsauciet CLI ģeneratoru.
 
-Pilnu API aprakstu skatiet [pakotnes README](../../@omniroute/opencode-provider/README.md).
+Pilnu API skatiet [iepakojumā README](../../@omniroute/opencode-provider/README.md).
 
 ---
 
@@ -155,9 +154,11 @@ Anthropic stila klientiem, kas nosūta `x-api-key` un `anthropic-version`, OmniR
 
 ---
 
-## Skatiet arī
+## Skatīt arī
 
-- [API atsauce](../reference/API_REFERENCE.md) — pilns OmniRoute REST saskarņu klāsts
+- [API atsauce](../reference/API_REFERENCE.md) — pilna OmniRoute REST virsma
 - [Auto-Combo](../routing/AUTO-COMBO.md) — ko nozīmē `model: "auto"`
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (ieteicams)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (novecojis)
 - Avots: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Grafiks** — viens `JobRegistry` cron uzdevums, `log_export`, ar noklusējuma grafiku `0 * * * *` (reizi stundā,
-  UTC). Reģistrēts failā `src/lib/initCloudSync.ts`; to var pārrakstīt ar `OMNIROUTE_LOG_EXPORT_CRON`.
-  Katrā aktivizēšanas reizē secīgi tiek eksportēti visu **iespējoto** galamērķu gaidošie ieraksti.
-- **Kursors** — SQLite netiešais `call_logs.rowid`, kas katram galamērķim tiek saglabāts laukā
-  `log_export_destinations.cursor_row_id`. `timestamp` apzināti netiek izmantots kā kursors: izsaucēji
-  var norādīt savu vērtību, tāpēc lēnu pieprasījumu var ierakstīt pēc ātrāka pieprasījuma, kas sākts
-  vēlāk, un laikspiedola kursors to izlaistu.
-- **Sadalīšana paketēs** — `batch_size` rindas katrā pieprasījumā (noklusējums: 500), `max_rows_per_run` rindas katrā izpildē
-  (noklusējums: 10000), lai lielu uzkrājumu apstrādātu vairākās aktivizēšanas reizēs, nevis bloķētu vienu.
-- **Piegāde** — kursors tiek virzīts uz priekšu tikai pēc sekmīgas `send()` izpildes. Ja paketes nosūtīšana neizdodas,
-  kursors paliek iepriekšējā vietā, tāpēc tās pašas rindas tiek atkārtoti nosūtītas nākamajā izpildē. Garantija ir
-  piegāde vismaz vienu reizi kopā ar dublikātu novēršanu galamērķī, nevis patiesa piegāde tieši vienu reizi: BigQuery katras
-  rindas atslēgai izmanto izsaukumu žurnāla ID, ko tas ņem vērā iespēju robežās savā dublikātu novēršanas laika intervālā.
-- **Aizsardzība pret pārklāšanos** — cron aktivizēšana un `POST .../run` var notikt vienlaikus. Galamērķis,
-  kura ieraksti jau tiek eksportēti, tiek izlaists, nevis apstrādāts divreiz (`skipped: true` izpildes rezultātā),
-  tāpēc vienlaicīga izpilde nevar atkārtoti nosūtīt paketi vai pārrakstīt kursoru ar mazāku vērtību.
-- **Atkopšanās pēc pilnīgas dzēšanas** — ja `cursor_row_id` kļūst lielāks par `MAX(rowid)` (visa tabula ir
-  iztīrīta un rowid vērtības sāktas no jauna), izpildītājs atiestata kursoru uz 0, nevis neatgriezeniski pārstāj pamanīt jaunus ierakstus.
+- **Grafiks** — viens `JobRegistry` cron darbs, `log_export`, pēc noklusējuma tiek iestatīts `0 * * * *` (stundu, UTC). Reģistrēts `src/lib/initCloudSync.ts`; ignorējams ar `OMNIROUTE_LOG_EXPORT_CRON`. Katra ērce iztukšo katru** iespējots** galamērķis, secīgi.
+- **Cursor** — SQLite netiešais `call_logs.rowid`, saglabājās katram galamērķim `log_export_destinations.cursor_row_id`. `timestamp` apzināti nav kursors: zvanītāji var norādīt savu vērtību, tāpēc lēnu pieprasījumu var rakstīt pēc ātrāka pieprasījuma, kas sākās vēlāk, un laikspiedola kursors to izlaistu.
+- **Partiju komplektēšana** — `batch_size` rindas vienā pieprasījumā (noklusējums 500), `max_rows_per_run` rindas izpildē (noklusējuma 10 000), tāpēc liels atlikums tiek iztērēts vairākos atzīmes, nevis bloķē vienu.
+- **Piegāde** — kursors virzās uz priekšu tikai pēc `send()` atrisināšanas. Neveiksmīga partija atstāj kursoru vietā, kur tas bija, tāpēc tās pašas rindas tiek mēģinātas atkārtoti nākamajā izpildē. Garantija ir vismaz vienu reizi plus galamērķa puses dublēšanās atcelšana, nevis patiesība tieši vienreiz: BigQuery katru rindu atslēgs ar zvanu žurnāla ID, ko tā ievēro, vislabākajā veidā savā atkopšanas logā.
+- **Pārklāšanās aizsargs** — cron ērce un `POST .../run` var izšaut kopā. Mērķis, kas jau tiek iztukšots, tiek izlaists, nevis iztukšots divreiz (darba rezultātos `skipped: true` ), tāpēc vienlaicīga izpilde nevar atkārtoti nosūtīt partiju vai rakstīt kursoru atpakaļ.
+- **Iztīrīšanas atgūšana** — ja `cursor_row_id` beidzas virs `MAX(rowid)` (visa tabula tika iztīrīta un rindas tika restartētas), skrējējs attīs uz 0, nevis paliek pastāvīgi akls.
 
-### Izolēts izpildītājs un ierobežojumi
+### Izolēts skrējējs un ierobežojumi
 
-Katra galamērķa izpilde Node vidē palaiž atsevišķu, īslaicīgu operētājsistēmas bērnprocesu (`child_process`
-ar IPC, nevis `worker_threads`). Pamattekstu lasīšana, datu satura JSON parsēšana/serializēšana, galamērķa
-`prepare()` un galamērķa tīkla ievade/izvade notiek tajā, nevis servera notikumu ciklā.
-Caur IPC tiek pārsūtīta tikai konfigurācija un nelieli progresa ziņojumi; eksportētie ieraksti nekad netiek atgriezti
-serverī. Cron uzdevums un maršruts Palaist tūlīt saglabā to pašu publisko rezultātu un aizsardzību pret pārklāšanos.
+Katrs galamērķis, kas tiek palaists mezglā, sāk atsevišķu īslaicīgu OS pakārtotu procesu (`child_process` ar IPC, nevis `worker_threads`). Pamatteksta nolasījumi, lietderīgā slodze JSON parsing/serialization, galamērķa `prepare()` un galamērķa tīkls I/O darbojas tur, nevis servera notikumu cilpā. IPC šķērso tikai konfigurācijas un neliela progresa ziņojumi; eksportētie ieraksti nekad neatgriežas serverī. Cron uzdevums un maršruts Palaist tūlīt saglabā to pašu publisko rezultātu un pārklāšanās aizsardzību.
 
-Bērnprocess atver servera noteikto `DATA_DIR/storage.sqlite` tikai lasīšanai, izmantojot `node:sqlite`,
-ar `busy_timeout=5000` un `query_only=ON`. Tas neimportē datubāzes vienīgo instanci un neveic
-migrācijas, dublēšanu vai SQLite atjauninājumus. Trūkstošu/bojātu artefaktu uzskaite (tostarp
-bojāta artefakta UPDATE) paliek tikai informācijas paneļa detalizētās informācijas apstrādes ceļā. Abos ceļos tiek izmantots kopīgs
-detalizētās informācijas noteicējs bez blakusefektiem; eksportēšana izmanto asinhronu failu sistēmas lasīšanu un to pašu noteikšanas secību: artefakts → mantotais
-iekļautais saturs → mantotais saturs diskā → nav. Izpildes sākumā tiek fiksēts maksimālais ievietoto rindu rowid,
-kad bērnprocess atver lasītāju; vēlāk ievietotie ieraksti gaida nākamo izpildi. Tā ir ievietošanas
-robeža, nevis ilgstoša SQLite transakcija: tīkla gaidīšanas laikā WAL rakstītāji un kontrolpunktu izveide netiek
-bloķēti. Šī robeža nefiksē esošo rindu atjauninājumus/dzēšanu.
+Bērns atver servera atrisināto `DATA_DIR/storage.sqlite` tikai lasāmu, izmantojot `node:sqlite`, ar `busy_timeout=5000` un `query_only=ON`. Tas neimportē DB singleton un neveic migrāciju, dublējumus vai SQLite atjauninājumus. Missing/corrupt artefaktu grāmatvedība (ieskaitot bojāto artefaktu UPDATE) paliek tikai informācijas paneļa informācijas ceļā. Abiem ceļiem ir kopīgs detaļu risinātājs; eksportēšanai tiek izmantota asinhrona failu sistēmas nolasīšana un tas pats artefakts → mantojums iekļauts → mantojums disks → nav izšķirtspējas secība. Izpildes momentuzņēmumi uzņem maksimālo ievietošanas rindu, kad bērns atver lasītāju; vēlāk ieliktņi gaida nākamo skrējienu. Šī ir ievietošanas robeža, nevis ilgstošs SQLite darījums: WAL rakstītāji un kontrolpunkti paliek brīvi tīkla gaidīšanas laikā. Updates/deletions esošo rindu nav iesaldētas ar šo robežu.
 
-Pēc katras pieņemtās paketes bērnprocess gaida apstiprinājumu. Serveris vispirms saglabā
-kursoru ar `advanceLogExportCursor`, pēc tam nosūta `ack`; nākamā pakete netiek sākta pirms tā saņemšanas.
-Nosūtīšanas kļūmes, avārijas vai taimauta gadījumā tiek reģistrēta kļūme, nevirzot šīs paketes kursoru uz priekšu. Iepriekš
-apstiprinātās paketes paliek saglabātas; atkārtoti var tikt nosūtīta ne vairāk kā viena neapstiprinātā pakete.
-Sekmīgs rezultāts tiek reģistrēts tikai pēc `done` un bērnprocesa korektas iziešanas. Kļūmju gadījumā bērnprocess tiek apturēts
-ar SIGTERM, pēc 500 ms pārejot uz SIGKILL, un izpildītājs gaida procesa aizvēršanu.
+Pēc katras pieņemtās partijas bērns gaida apstiprinājumu. Serveris vispirms saglabā kursoru ar `advanceLogExportCursor`, pēc tam nosūta `ack`; pirms tās nesākas nākamā partija. Sūtīšanas kļūme, avārija vai taimauts reģistrē kļūmi, nepārvirzot šo partiju. Iepriekš atzītās partijas paliek saistības; ne vairāk kā vienu neapstiprināto partiju var nosūtīt atkārtoti. Panākumi tiek reģistrēti tikai pēc `done` un tīra bērna izejas. Kļūmes pārtrauc bērna darbību ar SIGTERM, pieaugot līdz SIGKILL pēc 500 ms, un skrējējs gaida procesa slēgšanu.
 
-| Vides mainīgais                               | Noklusējums | Nolūks                                             |
-| --------------------------------------------- | ----------- | -------------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000      | Katra galamērķa kopējā izpildes laika ierobežojums |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024        | Bērnprocesa V8 old-space ierobežojums MB           |
+| Vides mainīgais                               | Noklusējums | Mērķis                                          |
+| --------------------------------------------- | ----------- | ----------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000      | Sienas pulksteņa ierobežojums katram galamērķim |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024        | Bērnu V8 veco vietu ierobežojums MB             |
 
-Nederīgu, nepozitīvu vai neveselu vērtību vietā tiek izmantotas noklusējuma vērtības. Kaudzes iestatījums nav kopējās
-RSS atmiņas ierobežojums; ļoti lielas paketes joprojām var izsmelt bērnprocesa atmiņu un droši pārtraukt izpildi ar kļūmi.
-Noklusējuma 1024 MB atstāj rezervi noklusējuma 500 rindu paketei ar 512 KiB artefaktiem, ja
-ir iespējoti pamatteksti, tostarp BigQuery JSON serializēšanai baitos ierobežotos blokos. Tas nepadara
-10000 rindu paketi ar pamattekstiem drošu. V8 kaudzes izsmelšanas gadījumā tiek reģistrēta kļūme ar norādi uz risinājumu: samaziniet paketes
-lielumu vai palieliniet `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kursors paliek pie pēdējās
-apstiprinātās paketes. Uz vēsturiskajiem iekļautajiem vai diskā glabātajiem pamattekstiem mūsdienu artefaktu lieluma ierobežojums neattiecas.
-Operatoriem RSS atmiņas apjoms jāplāno atsevišķi, īpaši konteineros ar ierobežotu atmiņu.
+Invalid/non-positive/non-integer vērtībām tiek izmantoti noklusējuma iestatījumi. Kaudzes iestatījums nav kopējais RSS ierobežojums; ļoti lielas partijas joprojām var izsmelt bērna atmiņu un neizdoties droši. 1024 MB noklusējuma vērtība atstāj brīvu vietu noklusējuma 500 rindu 512 KiB artefaktu partijai ar iespējotiem korpusiem, tostarp BigQuery baitiem sadalīto JSON serializāciju. Tas nepadara drošu 10 000 rindu virsbūves partiju. V8 kaudzes izsmelšana reģistrē darbības traucējumu: samaziniet partijas lielumu vai palieliniet `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kursors paliek pie pēdējās apstiprinātās partijas. Mūsdienu artefaktu vāciņi nesedz vēsturiskos inline/disk korpusus. Operatoriem RSS budžets ir jāiekļauj atsevišķi, jo īpaši konteineros ar ierobežotu atmiņu.
 
-Pakārtotais process manto tikai atrisināto `DATA_DIR`, `NODE_ENV`, skaidri norādīto `TZ` (mantoto failu nosaukumu
-vietējā laika noteikšanai), `ELECTRON_RUN_AS_NODE`, ja tas ir iestatīts, un tālāk norādītos izejošo savienojumu parametrus:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (un to formas ar mazajiem burtiem),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Globālais Undici dispečers izmanto tos pašus servera starpniekservera noteikšanas noteikumus, kuru pamatā ir tikai vides mainīgie, un lokālo resursdatoru
-apiešanas noteikumus, tostarp `NO_PROXY`; tas neimportē `proxyFetch.ts` vai tā datubāzes/funkciju karodziņus.
-Starpniekservera akreditācijas dati tiek aizklāti pārsūtītajā izvadē un reģistrētajās kļūdās. Galamērķa akreditācijas dati
-tiek nosūtīti tikai vienā sākuma IPC ziņojumā, nekad argv vai vides mainīgajos; pārsūtītajai izvadei un kļūdām tiek
-pievienots prefikss, un tās tiek attīrītas. Pakārtotā procesa izpildes argumentos tiek atspējots tikai `ExperimentalWarning`, lai
-katrā cron izpildē neatkārtotu Node brīdinājumu par SQLite; citu veidu brīdinājumi paliek redzami.
+Bērns manto tikai atrisināto `DATA_DIR`, `NODE_ENV`, skaidru `TZ` (mantotais faila nosaukuma vietējā laika izšķirtspēja), `ELECTRON_RUN_AS_NODE`, ja tāds ir, un šādas izejošās ievades: `HTTP_PROXY` `SSL_CERT_DIR` `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (un to mazo burtu formas), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS` `SSL_CERT_FILE` Globālais Undici dispečers koplieto servera tīro vides starpniekservera izšķirtspēju un vietējā resursdatora apiešanas noteikumus, tostarp `NO_PROXY`; tas neimportē `proxyFetch.ts` vai tā DB/feature karogus. Starpniekservera akreditācijas dati tiek noņemti no pārsūtītās izvades un ierakstītajām kļūdām. Galamērķa akreditācijas dati tiek pārvietoti tikai vienā sākuma IPC ziņojumā, nekad argv vai vidē; output/error pārsūtīšanai ir pievienots prefikss un tā ir dezinficēta. Tikai `ExperimentalWarning` ir atspējots bērnu exec argumentos, lai izvairītos no mezgla SQLite brīdinājuma atkārtošanas katrā cron izpildē; citi brīdinājumu veidi paliek redzami.
 
-Galamērķa moduļiem jābūt importējamiem bez Next.js/servera puses atkarībām. Esošā
-BigQuery realizācija jau atbilst šai prasībai. Piekļuves pilnvaru kešatmiņas pastāv tikai pakārtotā procesa
-izpildes laikā, nevis starp izpildēm. Atbalstītā izpildvide ir Node (`package.json` engines), taču README Bun
-instalēšanas sadaļa un `Dockerfile.bun` piedāvā arī ar produkcijas vidi saderīgu risinājumu, izmantojot
-`bun:sqlite` (`src/lib/db/core.ts` / adapteri). Tāpēc Bun vidē eksportēšana saglabā iepriekšējo
-izpildi tajā pašā procesā un vienreiz parāda brīdinājumu: pakārtotā procesa dinamiskās atmiņas/taimauta izolācija nav pieejama. Izmantojiet
-Node notikumu cikla un atmiņas izsīkuma (OOM) izolācijai; Bun šeit netiek uzskatīts par paredzētu tikai izstrādei.
+Galamērķa moduļiem ir jābūt importējamiem bez Next.js/server-only atkarībām. Esošā BigQuery ieviešana jau atbilst šim līgumam. Piekļuves pilnvaru kešatmiņas ir paredzētas tikai pakārtotajam skrējienam, nevis pāri skrējieniem. Mezgls ir atbalstītais izpildlaiks (`package.json` dzinēji). Pastāv labākais neatbalstīts Bun saderības ceļš (`bun:sqlite` mapē `src/lib/db/core.ts` / adapters un `Dockerfile.bun`), tāpēc eksportēšana nedrīkst pārtrūkt. Saskaņā ar Bun eksportēšana saglabā iepriekšējo procesa ceļu un izdod vienreizēju brīdinājumu: bērna heap/timeout izolācija nav pieejama. Izmantojiet Node notikumu cilpas un OOM izolācijai.
 
-Ja ir iespējots `includeBodies`, ieteicams izmantot intervālu minūšu līmenī, piemēram,
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, nevis uzkrāt stundas laikā sakrājušos datu apjomu.
-Pakešu un rindu ierobežojumi joprojām ierobežo katru izpildi. Procesa palaišanas izmaksas rodas katram galamērķim katrā izpildē;
-nelielas palaišanas izmaksas tiek apmainītas pret servera notikumu cikla izolāciju, nevis mazāku kopējo CPU lietojumu.
+Kad `includeBodies` ir iespējots, dodiet priekšroku minūtes līmeņa ritmam, piemēram, `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` nevis stundas lietderīgās slodzes uzkrāšanai. Partijas un rindu ierobežojumi joprojām ir saistīti ar katru izpildi. Procesa palaišana tiek apmaksāta katram galamērķim vienā palaijumā; tādējādi tiek tirgotas nelielas starta izmaksas par servera notikumu cilpas izolāciju, nevis samazinātu kopējo CPU izmantošanu.
 
-### Datu saturs (uzvednes un ģenerētās atbildes)
+### Lietderīgās slodzes (uzvednes un pabeigšanas)
 
-Pēc noklusējuma eksportā ir tikai tie kopsavilkuma lauki, kas redzami žurnālu **sarakstā**. Iespējojot
-**Eksportēt uzvednes un atbildes** (`includeBodies`), papildus tiek nosūtīts tas, kas katram izsaukumam redzams žurnālu **detalizētās informācijas**
-panelī:
+Pēc noklusējuma eksportam ir tikai kopsavilkuma lauki žurnāli** sarakstu** rāda. Ieslēdzas** Eksportējiet uzvednes un atbildes** (`includeBodies`) papildus nosūta to, ko Logs** detaļa** rūts parāda katram zvanam:
 
-| Lauks                            | Ko tas satur                                                              |
-| -------------------------------- | ------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Izsaukuma dati tā, kā tos attēlo informācijas panelis                     |
-| `pipeline_route_decision`        | Maršrutētāja izvēlētais mērķis un modelis                                 |
-| `pipeline_client_request`        | Neapstrādāts pieprasījums tieši tāds, kā to nosūtīja klients              |
-| `pipeline_openai_request`        | Pēc pārveidošanas iekšējā OpenAI formātā                                  |
-| `pipeline_provider_request`      | Faktiski pakalpojuma sniedzējam nosūtītais pieprasījums tā formātā        |
-| `pipeline_provider_response`     | Neapstrādāta pakalpojuma sniedzēja atbilde                                |
-| `pipeline_client_response`       | Izsaucējam atgrieztie dati                                                |
-| `pipeline_error`                 | Apstrādes konveijera līmeņa kļūdas informācija par neveiksmīgu izsaukumu  |
-| `bodies_truncated`               | Patiess, ja kāds no iepriekš minētajiem laukiem sasniedzis `maxBodyBytes` |
+| Lauks                            | Ko tas satur                                                  |
+| -------------------------------- | ------------------------------------------------------------- |
+| `request_body` / `response_body` | Zvana lietderīgās slodzes tiek atveidotas informācijas panelī |
+| `pipeline_route_decision`        | Kuru mērķi un modeli maršrutētājs izvēlējās                   |
+| `pipeline_client_request`        | Neapstrādāts pieprasījums tieši tā, kā klients to nosūtīja    |
+| `pipeline_openai_request`        | Pēc tulkošanas iekšējā OpenAI formā                           |
+| `pipeline_provider_request`      | Kā faktiski nosūtīts augšup, pakalpojumu sniedzēja dialektā   |
+| `pipeline_provider_response`     | Neapstrādāta reakcija uz augšu                                |
+| `pipeline_client_response`       | Kas tika atdots zvanītājam                                    |
+| `pipeline_error`                 | Cauruļvada līmeņa kļūdas informācija par neveiksmīgu zvanu    |
+| `bodies_truncated`               | Taisnība, ja jebkurš lauks iepriekš sasniedz `maxBodyBytes`   |
 
-Tas ir uzvedņu saturs, tāpēc šī iespēja ir **pēc noklusējuma izslēgta** un apzināti tiek izvēlēta katram galamērķim atsevišķi.
-Tiek nosūtīts tas, kas redzams informācijas panelī, jo eksportēšana un `getCallLogById` izmanto vienu un to pašu detalizētās informācijas
-iegūšanas mehānismu: datos
-personu identificējošā informācija jau ir attīrīta un noslēpumi aizklāti to ierakstīšanas brīdī, savukārt izsaukums ar
-`noLog` API atslēgu nesaglabā nekādu datu saturu, tāpēc nav ko eksportēt.
+Šis ir tūlītējs saturs, tā tas ir** izslēgts pēc noklusējuma** un apzināti noteikta galamērķa izvēle. Informācijas panelī tiek parādīts tas, kas tiek rādīts, jo eksporta un `getCallLogById` koplietošanas detaļu izšķirtspēja: derīgās slodzes jau ir PII sanitizētas un slepeni rediģētas, kad tās tiek rakstītas, un zvans, kas veikts ar `noLog` API atslēgu, nesaglabā lietderīgo kravu, tāpēc nav ko eksportēt.
 
-Datu saturs katrai rindai tiek nolasīts no failu sistēmas artefakta, tāpēc datu ielāde notiek tikai tiem galamērķiem,
-kas to pieprasījuši. Ja artefakta nav vai tas ir bojāts, tiek eksportēts tā kopsavilkums ar null vērtībām datu satura vietā, nevis
-pārtraukta visas paketes apstrāde un apturēta kursora virzība.
+Lietderīgās slodzes tiek nolasītas katrā rindā no failu sistēmas artefakta, tāpēc hidratācija tiek veikta tikai tiem galamērķiem, kas to pieprasījuši. Trūkstošs vai bojāts artefakts eksportē savu kopsavilkumu ar nulles lietderīgajām slodzēm, nevis neizdodas izpildīt partiju un novirzīt kursoru.
 
-`maxBodyBytes` (noklusējums 262144) ierobežo katra lauka lielumu. Garāks datu saturs tiek **saīsināts, nevis
-atmests** — arī apgriezta uzvedne joprojām atbild uz jautājumu “kas tika vaicāts” — un rinda tiek atzīmēta ar
-`bodies_truncated`. Straumēto fragmentu secīgās izmaiņas netiek eksportētas; apkopotā atbilde
-jau ir ietverta `pipeline_provider_response` un `pipeline_client_response`.
+`maxBodyBytes` (noklusējuma 262144) katrā laukā ir lielie burti. Ilgākas kravnesības ir** saīsināts, nevis nomests** — apgrieztā uzvednē joprojām tiek atbildēts "kas tika jautāts" —, un rinda tiek atzīmēta ar `bodies_truncated`. Straumētās deltas pa daļām netiek eksportētas; samontētā atbilde jau ir `pipeline_provider_response` un `pipeline_client_response`.
 
 ---
 

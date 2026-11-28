@@ -4,14 +4,11 @@
 
 ---
 
-> **Állapot:** Általánosan elérhető.
-> **Célközönség:** Üzemeltetők, akik az OpenCode-ot egy OmniRoute-telepítéshez kapcsolják.
-> **Hiteles forrás (konfigurációs séma):** `src/shared/services/opencodeConfig.ts`
-> **Hiteles forrás (npm-csomag):** `@omniroute/opencode-provider/` (közzétehető munkaterület)
+> **Állapot:** Általában elérhető.** Közönség:** Az üzemeltetők OpenCode a OmniRoute telepítéshez csatlakoztatják.** Az igazság forrása (konfigurációs séma):** `src/shared/services/opencodeConfig.ts`** Ajánlott npm csomagok:** `@omniroute/opencode-plugin/` (OpenCode v1, telepítette: `omniroute setup opencode`) és `@omniroute/opencode-plugin-v2/` (OpenCode v2). A régebbi `@omniroute/opencode-provider/` csomag az** elavult** (lásd 2. útvonal).
 
-Az [OpenCode](https://opencode.ai) egy ügynökalapú CLI-/asztali AI-kliens. A szolgáltatói katalógusát a `~/.config/opencode/opencode.json` (vagy `opencode.jsonc`) fájlból olvassa be, és a `https://opencode.ai/config.json` címen található sémát követi. Az OmniRoute ezen szolgáltatók egyikeként jelenik meg az OpenCode számára — minden kérés az OmniRoute szabványos, OpenAI-kompatibilis `/v1` felületén halad át, így az OpenCode automatikusan kihasználhatja az Auto-Combo útválasztás, az áramkör-megszakítók, a kulcsházirendek, a megfigyelhetőség stb. előnyeit.
+[OpenCode](https://opencode.ai) egy ügynöki CLI/desktop AI kliens. Beolvassa a szolgáltatói katalógust `~/.config/opencode/opencode.json` ből (vagy `opencode.jsonc`), és követi a `https://opencode.ai/config.json` sémáját. OmniRoute kiszolgáltatja magát OpenCode, mint azon szolgáltatók egyike — minden kérés OmniRoute szabványos OpenAI-kompatibilis `/v1` felületén halad át, így OpenCode automatikusan profitál az Auto-Combo útválasztásból, a megszakítókból, a kulcsszabályokból, a megfigyelhetőségből stb.
 
-**Két támogatott integrációs útvonal** áll rendelkezésre. Válassza ki az egyiket — mindkettő ugyanazt a konfigurációt hozza létre.
+Ez az oldal az alábbi két statikus konfigurációs útvonalat dokumentálja; mindkettő ugyanazt a konfigurációt generálja. Az élő katalógust követő modelllistához használja helyette a beépülő modult: `omniroute setup opencode` telepíti `@omniroute/opencode-plugin` (OpenCode v1), `@omniroute/opencode-plugin-v2` pedig OpenCode v2-t célozza meg (lásd [CLI integrációkat](../guides/CLI-INTEGRATIONS.md) és a [OpenCode v2 beépülő modul útmutatóját](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ Az eredményül kapott fájl (alapértelmezett modellkatalógus):
 
 ---
 
-## 2. útvonal — `@omniroute/opencode-provider` npm-csomag
+## 2. elérési út — npm csomag `@omniroute/opencode-provider` (elavult)
 
-Akkor ajánlott, ha a konfigurációt Node/TS környezetből automatizálja (CI-folyamatok, monorepók, egyéni telepítési folyamatok).
+> **Elavult.** A csomag statikus modelllistát ír, amely az élő OmniRoute katalógus mögé sodródik. README je `@omniroute/opencode-plugin` (vagy OpenCode v2-n a `@omniroute/opencode-plugin-v2` ) való áttérést javasolja. Az alábbi API csak a meglévő szkriptekhez van megtartva.
+
+A konfiguráció leírásakor használatos a Node/TS (CI pipelines, monorepos, egyéni telepítőfolyamok).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Opcionális: az OpenCode számára elérhető modellkatalógus felülbírálása
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Meglévő fájllal való roncsolásmentes egyesítéshez valósítsa meg újra az `opencodeConfig.ts` fájlban található `mergeOpenCodeConfigText()` függvényt, vagy hívja meg a CLI-generátort.
+Egy létező fájl roncsolásmentes egyesítéséhez replikálja `mergeOpenCodeConfigText()` `opencodeConfig.ts` fájlból, vagy hívja a CLI generátort.
 
-A teljes API-t a [csomag README-fájlja](../../@omniroute/opencode-provider/README.md) ismerteti.
+Tekintse meg a [README csomagot](../../@omniroute/opencode-provider/README.md) a teljes API ért.
 
 ---
 
@@ -157,7 +156,9 @@ Az `x-api-key` + `anthropic-version` fejléceket küldő Anthropic-stílusú kli
 
 ## Lásd még
 
-- [API-referencia](../reference/API_REFERENCE.md) — az OmniRoute REST-felület teljes leírása
-- [Auto-Combo](../routing/AUTO-COMBO.md) — mit jelent a `model: "auto"`
-- Az [`@omniroute/opencode-provider` README-je](../../@omniroute/opencode-provider/README.md)
+- [API referencia](../reference/API_REFERENCE.md) — teljes OmniRoute REST felület
+- [Auto-Combo](../routing/AUTO-COMBO.md) — mit jelent `model: "auto"`
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (ajánlott)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (elavult)
 - Forrás: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

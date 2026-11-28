@@ -47,13 +47,13 @@ galibi suna buƙatar a sauya musu reshen da suke nufi kafin haɗawa.
 Lokacin da ake sulhunta sakin, ana buɗe fitowar alama mai alamar `release-freeze`. Wannan** baya daina cigaba** :
 
 - Daskararre `release/vX.Y.Z` na da kyaftin ɗin sakin na wancan jirgin.
-- Ana yanke `release/vX+1` na gaba mai zuwa daga titin daskararre don haka masu ba da gudummawa su ci gaba da aikin saukowa.
+- An yanke `release/vX+1` na gaba na gaba daga titin daskararre don haka masu ba da gudummawa su ci gaba da aikin saukowa.
 - Buɗe PRs wanda har yanzu ya kamata ya kasance daskararre reshen** mayar da martani** zuwa reshen `release/v*` mai aiki (mafi girma).
 
 Bincika buɗaɗɗen daskare kafin ɗauka cewa reshen da kuke so yana haɗuwa:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Haɗa makanikai (mai alamar `queue` → Mergify) an rubuta su a cikin [MERGE_TRAIN.md](./MERGE_TRAIN.md).

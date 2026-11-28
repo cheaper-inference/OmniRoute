@@ -21,26 +21,21 @@ ist**, und diese CLI muss **angemeldet** sein.
 ## 1. Architektur
 
 ```
-┌─ OmniRoute-App ──────────────────┐        ┌─ codex-app-server-Sidecar ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ Berechtigungstoken)           │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  verwaltet OpenAI OAuth selbst      │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, autom. Aktual.)│
-        │ gemeinsam genutzt                 └─────────────────────────────────────┘
-        │ (Compose-Volumes)
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → das WS-Berechtigungstoken (von beiden eingebunden)
-  codex-appserver-home    → ~/.codex (auth.json wird vom Dashboard geschrieben
-                             und vom codex app-server des Sidecars gelesen)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Der Sidecar lauscht **nur** im internen Compose-Netzwerk
-  (`ws://codex-app-server:1456`) und ist durch ein Berechtigungstoken geschützt.
-  Er wird **niemals** für den Host oder das Internet veröffentlicht.
-- Die Codex CLI ist in `omniroute:base` integriert, sodass bei Verwendung des
-  Sidecars keine Codex-Installation auf dem Host oder dem Rechner des Benutzers
-  erforderlich ist.
+- Der Beiwagen hört zu** nur** im internen Compose-Netzwerk (`ws://codex-app-server:1456`) hinter einem Fähigkeitstoken. Es ist** niemals** auf dem Host oder im Internet veröffentlicht.
+- Der Sidecar verwendet `omniroute:cli-no-docker`, erstellt aus dem `runner-cli-no-docker` Ziel, das Codex CLI enthält.
 
 ## 2. Starten
 

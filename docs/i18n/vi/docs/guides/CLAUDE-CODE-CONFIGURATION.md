@@ -66,12 +66,12 @@ Codex (`<environment_context><cwd>`) và OpenCode (`x-opencode-session`) đượ
 
 ### Đặt tên dự án một cách rõ ràng (được khuyến nghị)
 
-Thư mục làm việc khác nhau giữa các máy, do đó, cùng một kho lưu trữ có thể hiển thị dưới các đường dẫn khác nhau. Thay vào đó hãy gửi dự án một cách rõ ràng: Mã Claude thêm bất kỳ tiêu đề nào được liệt kê trong `ANTHROPIC_CUSTOM_HEADERS` vào mọi yêu cầu mô hình và OmniRoute đọc hai trong số chúng:
+Thư mục làm việc khác nhau giữa các máy, do đó, cùng một kho lưu trữ có thể hiển thị dưới các đường dẫn khác nhau. Thay vào đó, hãy gửi dự án một cách rõ ràng: Mã Claude thêm bất kỳ tiêu đề nào được liệt kê trong `ANTHROPIC_CUSTOM_HEADERS` vào mọi yêu cầu mô hình và OmniRoute đọc hai trong số chúng:
 
-| tiêu đề                    | Giá trị                                                                    |
-| -------------------------- | -------------------------------------------------------------------------- |
-| `x-omniroute-project`      | Tên dự án, ví dụ `omniroute`                                               |
-| `x-omniroute-project-repo` | Điều khiển từ xa được chuẩn hóa, ví dụ `github.com/diegosouzapw/OmniRoute` |
+| tiêu đề                    | Giá trị                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Tên dự án, ví dụ `omniroute`                                                    |
+| `x-omniroute-project-repo` | Điều khiển từ xa được chuẩn hóa, ví dụ `github.com/cheaper-inference/OmniRoute` |
 
 Cả hai đều chỉ được đọc để ghi công; chúng không bao giờ được chuyển tiếp đến nhà cung cấp ngược dòng.
 
@@ -285,28 +285,20 @@ cần cờ bổ sung. Ghi đè cho từng lần gọi bằng `--remote` / `--api
 
 ## Khắc phục sự cố
 
-**Claude Code bỏ qua cổng kết nối** — hãy xác nhận `ANTHROPIC_BASE_URL` **không có
-`/v1`** và khởi động lại `claude` (biến môi trường chỉ được đọc một lần khi khởi động). `omniroute launch`
-sẽ xử lý việc này cho bạn.
+**Mã Claude bỏ qua cổng** — xác nhận `ANTHROPIC_BASE_URL` có** không có `/v1`** và khởi động lại `claude` (env được đọc một lần khi khởi động). `omniroute launch` xử lý việc này cho bạn.
 
-**Trình chọn `/model` trống / thiếu các mô hình của cổng kết nối** — yêu cầu Claude Code
-v2.1.219+ và `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Chỉ các ID mô hình `claude*` /
-`anthropic*` xuất hiện trong trình chọn; buộc sử dụng bất kỳ mô hình nào khác bằng
-`ANTHROPIC_MODEL=<id>` (đây là cách các hồ sơ hoạt động).
+**bộ chọn `/model` trống/thiếu mô hình cổng** — cần Mã Claude v2.1.219 + và `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Chỉ mô hình `claude*` / `anthropic*` IDs xuất hiện trong bộ chọn; buộc bất kỳ mô hình nào khác bằng `ANTHROPIC_MODEL=<id>` (đây là những gì cấu hình làm).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code luôn gửi các ID mô hình **không có tiền tố**
-(ví dụ: `claude-opus-4-8`), vì vậy khi cả nhà cung cấp Claude Code (`cc/…`) và
-Claude (`claude/…`) đều được kết nối, ID không có tiền tố sẽ khớp với hai tuyến và
-OmniRoute từ chối phỏng đoán. Khắc phục theo một trong hai cách: cố định một ID có tiền tố bằng
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, hoặc bật **Ưu tiên Claude Code cho
-các mô hình Claude không có tiền tố** — nút bật/tắt trên trang của nhà cung cấp Claude, hoặc
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (mặc định tắt;
-xem [Môi trường](../reference/ENVIRONMENT.md)) — thao tác này sẽ định tuyến các ID `claude-*`
-không có tiền tố đến Claude Code. Tiền tố nhà cung cấp rõ ràng luôn được ưu tiên.
+**`400 Ambiguous model 'claude-…'`** — Claude Mã luôn gửi** không có tiền tố** mô hình IDs (ví dụ `claude-opus-4-8`), vì vậy khi cả hai nhà cung cấp Mã Claude (`cc/…`) và Claude (`claude/…`) được kết nối, id trần khớp với hai tuyến đường và OmniRoute từ chối đoán. Hãy khắc phục theo một trong hai cách: ghim id có tiền tố bằng `ANTHROPIC_MODEL=cc/claude-opus-4-8` hoặc bật** Ưu tiên Mã Claude cho các mô hình Claude chưa được cố định** — nút chuyển đổi trên trang nhà cung cấp Claude hoặc `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (tắt mặc định; xem [Môi trường](../reference/ENVIRONMENT.md) ) — để định tuyến `claude-*` IDs trần tới Mã Claude. Tiền tố nhà cung cấp rõ ràng luôn giành chiến thắng.
 
-**Lỗi xác thực** — hồ sơ không chứa mã thông báo. Sử dụng `omniroute launch --profile`
-(để chèn mã thông báo) hoặc xuất `ANTHROPIC_AUTH_TOKEN`.
+**"chế độ tự động... phiên này không đủ điều kiện" (yêu cầu phân loại được tính phí)** — ở chế độ tự động Mã Claude yêu cầu máy chủ xem xét các hành động bên trong các yêu cầu mô hình của chính nó ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Điều đó cần giá trị `anthropic-beta` `dangerous-tool-use-2026-09-03` và trường nội dung `safeguards` để đạt được Anthropic dưới dạng một cặp và `safeguard_results` cộng với IDs sử dụng công cụ ngược dòng để trở lại không thay đổi. OmniRoute thực hiện điều này khi yêu cầu được chuyển đến nhà cung cấp `claude` gốc hoặc tới nút `anthropic-compatible-*`, có truyền trực tuyến hay không (bảo vệ hồi quy: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Các mục tiêu khác không thể trả lại đánh giá, vì vậy Mã Claude sẽ quay trở lại các yêu cầu phân loại của chính nó và hiển thị thông báo:
 
-**Các hồ sơ không được cách ly** — mỗi hồ sơ là một `CLAUDE_CONFIG_DIR` riêng biệt;
-hãy xác minh `echo $CLAUDE_CONFIG_DIR` bên trong phiên trỏ đến
-`~/.claude/profiles/<name>`.
+- một mô hình về một nhà cung cấp không phải của Anthropic hoặc một sự kết hợp dành cho một nhà cung cấp;
+- nút chuyển tiếp tương thích với Mã Claude (`anthropic-compatible-cc-*`), xây dựng lại phần thân yêu cầu và không mang `safeguards`;
+- một OmniRoute cũ hơn có trước phiên bản beta được đưa vào danh sách cho phép hoặc một phiên bản Mã Claude bên dưới phiên bản mà trang Anthropic liệt kê cho các phiên cổng.
+
+Chạy `/status` trong mã Claude : the** Máy chủ chế độ tự động** hàng đọc `Enabled` trong khi quá trình xem xét của máy chủ đang hoạt động. Việc những yêu cầu đó có được tính phí hay không sẽ do Anthropic quyết định chứ không phải do OmniRoute.
+
+**Lỗi xác thực** — hồ sơ không có mã thông báo. Sử dụng `omniroute launch --profile` (tiêm nó) hoặc xuất `ANTHROPIC_AUTH_TOKEN`.
+
+**Hồ sơ không cô lập** — mỗi cấu hình là một `CLAUDE_CONFIG_DIR` riêng biệt; xác minh `echo $CLAUDE_CONFIG_DIR` bên trong các điểm phiên tại `~/.claude/profiles/<name>`.

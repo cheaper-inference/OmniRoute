@@ -245,33 +245,41 @@ Modely: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Kombinácie
+## 🎨 kombá
 
-Karty kombinácií môžete meniť priamo v časti **Ovládací panel → Kombinácie** potiahnutím rukoväti na každej karte. Poradie sa uloží v SQLite a po opätovnom načítaní sa obnoví.
+Kombinované karty si môžete doobjednať priamo v** Prístrojová doska → Combos** potiahnutím rukoväte na každej karte. Objednávka je uložená v SQLite a obnovená pri opätovnom načítaní.
 
-### Príklad 1: Maximalizácia predplatného → Lacná záloha
+### Nájdite poskytovateľa, model alebo účet
 
-```
-Ovládací panel → Kombinácie → Vytvoriť novú
+V položke Create or Edit Combo obsahuje podrobný výber poskytovateľa, modelu, účtu a kombinovanej referencie pole lokálneho vyhľadávania. Vyhľadajte podľa zobrazeného názvu, identifikátora, aliasu poskytovateľa alebo zdroja modelu, potom kliknite na výsledok alebo použite klávesy so šípkami a Enter. Všetky hľadané výrazy sa musia zhodovať. Vymazaním vyhľadávania alebo stlačením klávesu Escape zostane vybratá hodnota nezmenená.
 
-Názov: premium-coding
-Modely:
-  1. cc/claude-opus-4-7 (Primárny model z predplatného)
-  2. glm/glm-4.7 (Lacná záloha, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Najlacnejšia núdzová možnosť, $0.3/1M)
+Automatická voľba účtu zostane viditeľná počas vyhľadávania. Jeho voliteľný zoznam obmedzení účtov má samostatný filter: vybraté účty mimo viditeľných výsledkov zostanú vybraté a počet ich zahŕňa. Skryté fragmenty e-mailov nie je možné vyhľadávať, keď je zapnuté súkromie e-mailov. Pridajte krok a uložte kombináciu ako zvyčajne; zadaním dotazu sa nič neuloží ani neotestuje.
 
-Použitie v CLI: premium-coding
-```
+Rovnaké lokálne vyhľadávanie je dostupné pre modely testovania pripojenia, vlastné predvolené modely CLI a modely aliasov a voľby uloženého servera proxy. Existujúce akcie uloženia, použitia a testovania zostávajú oddelené.
 
-### Príklad 2: Iba bezplatné modely (nulové náklady)
+### Príklad 1: Maximalizujte predplatné → Lacná záloha
 
 ```
-Názov: free-combo
-Modely:
-  1. if/kimi-k2.7-code (uvedený bezplatný prístup; môžu platiť obmedzenia poskytovateľa)
-  2. kr/qwen3-coder-next (bezplatná záloha Kiro)
+Dashboard → Combos → Create New
 
-Náklady: momentálne uvedené ako $0; podmienky a dostupnosť sa môžu zmeniť
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### Príklad 2: Iba zadarmo (nulová cena)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -431,7 +439,7 @@ Keď už nepotrebujete OmniRoute, poskytujeme dva rýchle skripty na čisté ods
 ### VPS nasadenie
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +521,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -605,7 +613,7 @@ post_install() {
 | `DATA_DIR`                              | `~/.omniroute`               | Adresár údajov (db, využitie, protokoly)                                                                                                                            |
 | `PORT`                                  | predvolený rámec             | Port služby (v príkladoch `20128` )                                                                                                                                 |
 | `HOSTNAME`                              | predvolený rámec             | Zviazať hostiteľa (Docker predvolene `0.0.0.0`)                                                                                                                     |
-| `NODE_ENV`                              | predvolená doba spustenia    | Nastavte `production` na nasadenie                                                                                                                                  |
+| `NODE_ENV`                              | predvolená hodnota runtime   | Nastavte `production` na nasadenie                                                                                                                                  |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`     | Verejná základňa URL sa objavila na palubnej doske a bola vystavená serveru (nahrádza staršie `BASE_URL`)                                                           |
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`      | Základný koncový bod synchronizácie s cloudom URL (nahrádza starý `CLOUD_URL`)                                                                                      |
 | `API_KEY_SECRET`                        | _(automaticky vygenerované)_ | HMAC tajomstvo pre vygenerované kľúče API — sa automaticky vygenerovalo pri prvom spustení a zachovalo sa do `server.env`                                           |
@@ -709,7 +717,7 @@ Poznámky:
 
 ### Vlastní poskytovatelia kompatibilní s OpenAI
 
-Akákoľvek brána, ktorá hovorí OpenAI API (samostatne hostený proxy, vLLM, agregátor tretej strany), môže byť pridaná ako jej vlastný uzol poskytovateľa:
+Akákoľvek brána, ktorá hovorí OpenAI API (samostatne hostený proxy, vLLM, agregátor tretej strany), môže byť pridaná ako vlastný uzol poskytovateľa:
 
 1. **Poskytovatelia → Pridať OpenAI kompatibilné** .
 2. **Meno** : zobrazovaný štítok pre uzol.
@@ -770,7 +778,7 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Hlavičku `X-OmniRoute-Peer-Trace` dostanú iba žiadosti odoslané priamo na zozname povolených partnerov URL. Brána odmietne opakovanú inštanciu ID alebo vyčerpaný skokový rozpočet s HTTP `508 Loop Detected`; bežní upstream poskytovatelia nedostávajú žiadne rovnocenné metadáta.
+Hlavičku `X-OmniRoute-Peer-Trace` dostanú iba žiadosti odoslané priamo na zozname povolených partnerov URL. Brána odmietne opakovanú inštanciu ID alebo vyčerpaný skokový rozpočet s HTTP `508 Loop Detected`; bežní poskytovatelia upstreamov nedostávajú žiadne rovnocenné metadáta.
 
 Reťazenie rovnocenných partnerov nie je replikácia databázy alebo núdzové prepnutie hostiteľa. Každá brána uchováva nezávislý stav SQLite, vyrovnávaciu pamäť, počítadlá rýchlosti a relácie. Pre dostupnosť active/passive alebo active/active použite reverzný proxy server s kontrolou stavu alebo zlyhanie klienta a nikdy nepripájajte jednu databázu SQLite do viacerých spustených inštancií OmniRoute.
 
@@ -882,8 +890,8 @@ Konfigurovať cez** Dashboard → Nastavenia → Smerovanie** . Prístrojová do
 - `least-used` a `cost-optimized`
 - `auto` — založené na skóre všetkých kandidátov
 - `lkgp` (Posledný známy dobrý poskytovateľ) — pripne poslednému úspešnému poskytovateľovi, potom sa vráti k pravidlám
-- `context-optimized` — vyberie model s najväčším voľným kontextovým oknom
-- `context-relay` — reťaze modely s dlhým kontextom pre následné zákruty
+- `context-optimized` — najprv vyskúša model s najväčším známym kontextovým oknom
+- poradie priority `context-relay` — plus súhrn odovzdania, keď sa konverzácia presunie na iný účet
 
 #### Hlavička externej lepivej relácie
 
@@ -1145,7 +1153,7 @@ Podporované zvukové formáty na prepis: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `w
 
 ### Kombinované stratégie vyvažovania
 
-Nakonfigurujte vyváženie pre jednotlivé kombinácie v** Prístrojová doska → Combos → Create/Edit → Stratégia** .
+Nakonfigurujte vyváženie pre jednotlivé kombinácie** Prístrojová doska → Combos → Create/Edit → Stratégia** .
 
 | Stratégia                    | Popis                                                                                   |
 | ---------------------------- | --------------------------------------------------------------------------------------- |
@@ -1332,32 +1340,34 @@ Kompletný katalóg koncových bodov a schémy požiadaviek/odpovedí nájdete v
 
 ## 💻 Interné CLI
 
-OmniRoute obsahuje interné CLI (`omniroute …`) na nastavenie, diagnostiku a riadenie za behu. Je **oddelené od stránky „Nástroje CLI“ v ovládacom paneli**, ktorá konfiguruje CLI nástroje tretích strán (Claude Code, Cursor, Codex, Cline, …), aby mohli komunikovať s OmniRoute.
+OmniRoute dodáva interný CLI (`omniroute …`) na nastavenie, diagnostiku a riadenie runtime. Toto je** oddelene od stránky „Nástroje CLI “ na informačnom paneli** , ktorý konfiguruje CLIs tretích strán (Claude Code, Cursor, Codex, Cline, ...), aby mohli hovoriť so OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktívny sprievodca (heslo, poskytovatelia, kombinácie)
-omniroute setup --non-interactive  # Vhodné pre CI
-omniroute doctor                   # Diagnostika stavu (dátový adresár, DB, poskytovatelia, porty)
-omniroute providers available      # Zoznam podporovaných poskytovateľov
-omniroute providers list           # Zoznam nakonfigurovaných pripojení
-omniroute providers test <id>      # Test pripojenia k poskytovateľovi v reálnom čase
-omniroute combos list              # Zoznam kombinácií
-omniroute combos switch <name>     # Nastavenie predvolenej kombinácie
-omniroute models                   # Zoznam dostupných modelov (--json, --search)
-omniroute keys add | list | remove # Správa kľúčov API z terminálu
-omniroute backup                   # Snímka konfigurácie + DB
-omniroute restore [<timestamp>]    # Obnovenie zo snímky
-omniroute health                   # Podrobný stav (ističe, vyrovnávacia pamäť, pamäť)
-omniroute quota                    # Využitie kvót poskytovateľov
-omniroute mcp status               # Stav servera MCP
-omniroute a2a status               # Stav servera A2A
-omniroute tunnel list|create|stop  # Tunely Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Obnovenie hesla správcu
-omniroute --mcp                    # Spustenie servera MCP cez stdio
-omniroute --port 3000              # Spustenie servera na vlastnom porte
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Tip: prepojte `omniroute doctor --json` so svojím monitorovacím nástrojom, aby vás upozornil na nefunkčné pripojenia k poskytovateľom.
+Tip: spárujte `omniroute doctor --json` so svojím monitorovacím nástrojom, aby ste upozornili na nefunkčnú lokálnu inštaláciu. `doctor` netestuje pripojenia poskytovateľa; na to použite `omniroute providers test <id>`.
 
 ---
 

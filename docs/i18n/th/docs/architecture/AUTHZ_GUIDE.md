@@ -4,10 +4,9 @@
 
 ---
 
-> **แหล่งข้อมูลที่แท้จริง:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **อัปเดตล่าสุด:** 2026-09-22 — ขอบเขตเนมสเปซชี้ไปที่ MCP-SERVER.md
+> **ที่มาของความจริง:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute มีไปป์ไลน์การอนุญาตที่รับรู้เส้นทาง ซึ่งควบคุมทุกคำขอ API การจัดประเภทเป็นแบบ **กำหนดได้** และ **ปิดเมื่อล้มเหลว** — สิ่งใดก็ตามที่ไม่สามารถจัดประเภทได้จะถูกจัดเป็น `MANAGEMENT` และต้องใช้เซสชันหรือโทเค็นระดับการจัดการ หน้านี้อธิบายโมเดลสำหรับวิศวกรที่ดูแลเส้นทางหรือออกแบบปลายทางใหม่
+OmniRoute มีไปป์ไลน์การอนุญาตแบบรู้เส้นทางที่เกตทุกคำขอ API การจำแนกประเภทคือ** กำหนดไว้** และ** ปิดไม่สำเร็จ** — สิ่งใดก็ตามที่ไม่สามารถจัดประเภทได้จะกลายเป็น `MANAGEMENT` และต้องการเซสชันหรือโทเค็นระดับการจัดการ หน้านี้อธิบายแบบจำลองสำหรับวิศวกรที่ดูแลเส้นทางหรือการออกแบบจุดสิ้นสุดใหม่
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
@@ -176,7 +175,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — จะส่งกลับ `allow({ kind: "anonymous", id: "anonymous" })` เสมอ
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — แยก Bearer ตรวจสอบผ่าน `validateApiKey()` ตกสู่สถานะไม่ระบุชื่อเฉพาะเมื่อมีการปิดใช้งานแฟล็กคุณลักษณะ `REQUIRE_API_KEY` ที่มีผลใช้งาน แฟล็กที่มีประสิทธิผลได้รับการแก้ไขผ่าน `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ดังนั้น Dashboard Feature Flags และตัวแปรสภาพแวดล้อมจะควบคุม `/api/v1/*`, `/api/v1beta/*` และนามแฝงอย่างสม่ำเสมอ ความล้มเหลวของตัวแก้ไขล้มเหลวปิด อนุญาตคำขอเซสชันแดชบอร์ดบนเส้นทาง API ของไคลเอ็นต์ (รวมถึง `/api/v1/models` ที่ใช้โดยแค็ตตาล็อกโมเดลแดชบอร์ด) เมื่อเปิดใช้งาน Entra ID SSO ผู้ถือที่มีโครงสร้างเป็นโทเค็น Entra (สามเซ็กเมนต์ base64url, `RS*` alg, `kid`) จะได้รับการจัดการโดยสาขา SSO** ก่อน** `validateApiKey()` และคำตัดสินถือเป็นที่สิ้นสุด — จะไม่ผ่านไปยังเส้นทางคีย์ API หรือสาขาที่ลดระดับลงเป็นนิรนาม ดังนั้นการหยุดทำงานของผู้ให้บริการข้อมูลประจำตัวจึงไม่กลายเป็นการเข้าถึงแบบเปิด คีย์ API แบบคงที่จะไม่ได้รับผลกระทบ ดู [ที่ ID SSO](../security/ENTRA_SSO.md)
-- **`managementPolicy`** (`policies/management.ts`) — ยอมรับเซสชันแดชบอร์ด คำขอซิงค์โมเดลภายใน (จับคู่กับ `/api/providers/[name]/(sync-models|models)`) หรือข้ามทั้งหมดหาก `isAuthRequired()` ส่งคืนค่าเท็จ ส่งคืน 403 (`AUTH_001`) เมื่อมีโทเค็น Bearer อยู่แต่ไม่ถูกต้อง มิฉะนั้น 401 จะส่งคืน นอกจากนี้ยังบังคับใช้ระดับการป้องกันเส้นทาง (LOCAL_ONLY / ALWAYS_PROTECTED) ก่อนสาขาการรับรองความถูกต้องใดๆ — โปรดดูที่ [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) เส้นทาง LOCAL_ONLY ใน `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (วันนี้: `/api/mcp/`) อาจเข้าถึงได้จาก non-loopback เมื่อคีย์ Bearer มีขอบเขต `manage` เส้นทาง LOCAL_ONLY อื่นๆ ทั้งหมดยังคงเป็นแบบวนกลับแบบเข้มงวดโดยไม่คำนึงถึงขอบเขต
+- **`managementPolicy`** (`policies/management.ts`) — ยอมรับเซสชันแดชบอร์ด คำขอซิงค์โมเดลภายใน (จับคู่กับ `/api/providers/[name]/(sync-models|models)`) หรือข้ามทั้งหมดหาก `isAuthRequired()` ส่งคืนค่าเท็จ ส่งคืน 403 (`AUTH_001`) เมื่อมีโทเค็น Bearer อยู่แต่ไม่ถูกต้อง มิฉะนั้น 401 จะส่งคืน นอกจากนี้ยังบังคับใช้ระดับการป้องกันเส้นทาง (LOCAL_ONLY / ALWAYS_PROTECTED) ก่อนสาขาการรับรองความถูกต้องใดๆ — โปรดดูที่ [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) เส้นทาง LOCAL_ONLY ใน `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (วันนี้: `/api/mcp/`) อาจเข้าถึงได้จาก non-loopback เมื่อคีย์ Bearer มีขอบเขต `manage`/`admin` หรือขอบเขต `mcp:connect` ที่แคบ (`hasMcpConnectOrManageScope`) หรือมีเซสชันแดชบอร์ดที่ได้รับการรับรองความถูกต้อง เส้นทาง LOCAL_ONLY อื่นๆ ทั้งหมดยังคงเป็นแบบวนกลับแบบเข้มงวดโดยไม่คำนึงถึงขอบเขต
 
 นโยบายที่ประสบความสำเร็จจะส่งคืน `AuthSubject` ด้วย `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ตัวจัดการดาวน์สตรีมสามารถอ่านผ่าน `assertAuth(request, "CLIENT_API")` ใน `src/server/authz/assertAuth.ts` แทนที่จะรันตรรกะการตรวจสอบสิทธิ์อีกครั้ง
 
@@ -267,24 +266,24 @@ export async function POST(request: Request) {
 
 เลือกชุดตามรูปแบบ ไม่ใช่ตามความสะดวก เส้นทางเดียวจะอยู่ใน `PUBLIC_API_ROUTES_EXACT` (หรือ `PUBLIC_READONLY_CORS_API_ROUTES` สำหรับ GET-only); เฉพาะโครงสร้างย่อยที่แท้จริงเท่านั้นที่จะอยู่ใน `PUBLIC_API_ROUTE_PREFIXES` และ **ต้องลงท้ายด้วย `/`** การใส่เส้นทางเดียวในรายการคำนำหน้ายังเป็นการเผยแพร่เส้นทางที่อยู่ติดกันทั้งหมดที่ใช้ตัวอักษรนำหน้าเดียวกัน — รวมถึงเส้นทางพี่น้องที่มีส่วนของไดนามิกที่เพิ่มเข้ามาภายหลัง (GHSA-74g9-q8f6-793h) อัปเดตการทดสอบหน่วยที่ `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` และ `tests/unit/authz/classify.test.ts`
 
-## สโคป
+## ขอบเขต
 
-สามเนมสเปซ ตัวตรวจสอบแต่ละตัวจะอ่านเฉพาะสตริงของตัวเองเท่านั้น การเปรียบเทียบแบบเคียงข้างกัน รวมถึงเหตุผลที่ `manage` ล้มเหลวในการ `scopeMatches` สำหรับ `read:compression` และเหตุผลที่โทเค็นการเข้าถึงแบบ `read` ไม่สามารถ `PATCH /api/keys/{id}` ได้ อยู่ที่ [Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces)
+เนมสเปซสามอัน ตัวตรวจสอบแต่ละตัวจะอ่านเฉพาะสตริงของตัวเองเท่านั้น เคียงข้างกัน รวมถึงสาเหตุที่ `manage` ล้มเหลว `scopeMatches` สำหรับ `read:compression` และเหตุใดโทเค็นการเข้าถึง `read` ไม่สามารถ `PATCH /api/keys/{id}` ได้ จึงมี [เนมสเปซขอบเขตสามรายการ](../frameworks/MCP-SERVER.md#three-scope-namespaces)
 
-คีย์ API มีอาร์เรย์ `scopes` (จัดเก็บเป็น JSON ใน `api_keys.scopes` ดู `src/lib/db/apiKeys.ts`)
+คีย์API มีอาร์เรย์ `scopes` (จัดเก็บเป็น JSON ใน `api_keys.scopes` ดูที่ `src/lib/db/apiKeys.ts`)
 
-### สโคปการจัดการ
+### ขอบเขตการจัดการ
 
-- `manage` / `admin` — `hasManageScope` การเข้าถึงเส้นทาง API การจัดการแบบ Bearer
-- `mcp:connect`, `self:usage`, `self:account-quota` และ `policy:bypass-provider-quota` เป็นสโคปแบบเพิ่มค่าที่ตรงกันทุกประการ สโคปเหล่านี้อยู่นอก `MANAGEMENT_API_KEY_SCOPES` `mcp:connect` จะเปิดเฉพาะส่วน `/api/mcp/` ที่ไม่ใช่ loopback เท่านั้น
+- `manage` / `admin` — `hasManageScope`. ผู้ถือเข้าถึงเส้นทางการจัดการ API
+- `mcp:connect`, `self:usage`, `self:account-quota` และ `policy:bypass-provider-quota` เป็นขอบเขตการทำงานแบบตรงทั้งหมดแบบบวก พวกเขานั่งข้างนอก `MANAGEMENT_API_KEY_SCOPES` `mcp:connect` เปิดเฉพาะ `/api/mcp/` non-loopback carve-out
 
-### สโคปเครื่องมือ MCP
+### ขอบเขตเครื่องมือ MCP
 
-แค็ตตาล็อกและกฎการจับคู่ (สตริงที่เหมือนกัน หรือสโคปที่ได้รับซึ่งลงท้ายด้วย `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes) `MCP_SCOPE_LIST` ใน `src/shared/constants/mcpScopes.ts` เป็นชุดย่อยที่พิมพ์ไว้แต่เดิม ไม่ใช่แค็ตตาล็อกทั้งหมดนั้น การบังคับใช้จะทำงานใน `open-sse/mcp-server/scopeEnforcement.ts` หลังจาก `resolveCallerScopeContext()` แก้ไขสโคปจากข้อมูลการรับรองความถูกต้องของ MCP, เมตาดาต้าคำขอ หรือ `OMNIROUTE_MCP_SCOPES` จะยังคงปิดอยู่เว้นแต่ `OMNIROUTE_MCP_ENFORCE_SCOPES=true`
+แค็ตตาล็อกและกฎการจับคู่ (สตริงที่เหมือนกัน หรือขอบเขตที่กำหนดซึ่งลงท้ายด้วย `*`): [ขอบเขตเครื่องมือ MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes) `MCP_SCOPE_LIST` ใน `src/shared/constants/mcpScopes.ts` เป็นเซ็ตย่อยที่พิมพ์ต้นฉบับ ไม่ใช่แค็ตตาล็อกแบบเต็ม การบังคับใช้ทำงานใน `open-sse/mcp-server/scopeEnforcement.ts` หลังจากที่ `resolveCallerScopeContext()` แก้ไขขอบเขตจากข้อมูลการตรวจสอบสิทธิ์ MCP, ข้อมูลเมตาของคำขอ หรือ `OMNIROUTE_MCP_SCOPES` `OMNIROUTE_MCP_ENFORCE_SCOPES=true` เปิดใช้งานทั่วโลก (ค่าเริ่มต้น `false`) แต่จะบังคับใช้เสมอสำหรับผู้โทร HTTP/SSE ซึ่งคีย์ API ขาด `manage`/`admin` (ดู `shouldForceScopeEnforcement()` ใน `open-sse/mcp-server/scopeEnforcement.ts`) โดยไม่คำนึงถึงการตั้งค่าสถานะ
 
-### สโคปโทเค็นการเข้าถึง
+### ขอบเขตโทเค็นการเข้าถึง
 
-`read` / `write` / `admin` บนโทเค็น `oma_live_…` จัดอันดับโดย `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) การจัดอันดับนี้ใช้กับข้อมูลประจำตัวของโทเค็นการเข้าถึงเท่านั้น ดู [Management Authentication](../guides/MANAGEMENT-AUTH.md)
+`read` / `write` / `admin` บนโทเค็น `oma_live_…` จัดอันดับโดย `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) อันดับนี้ใช้กับข้อมูลรับรองโทเค็นการเข้าถึงเท่านั้น ดู [การรับรองความถูกต้องของการจัดการ](../guides/MANAGEMENT-AUTH.md)
 
 ## จำเป็นต้องมีการสลับการรับรองความถูกต้อง
 

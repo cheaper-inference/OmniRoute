@@ -8,9 +8,15 @@ Kwangilar `config/cli-tools-manifest.json` tsaka tsaki ta bayyana canonical IDs,
 
 ## Yanayin yara da yanayin rayuwa
 
-`omniroute run`, `omniroute launch` da `omniroute launch-codex` sun gaji jerin izinin dacewa OS/terminal kuma su yi allurar da zaɓaɓɓun shaidar da aka zaɓa. Ba a gaji mai ba da alaƙa da bayanan sirri ta tsohuwa. `--inherit-env` a sarari yana maido da cikakken gadon iyaye-muhalli; yi amfani da shi kawai lokacin da zaɓin tsari na ɓangare na uku ya kamata ya karɓi waɗannan ƙimar. Wannan tace muhalli ne, ba akwatin yashi OS ba: har yanzu tsarin yana gudana tare da izinin tsarin fayil ɗin mai kira.
+`omniroute run`, `omniroute launch` da `omniroute launch-codex` sun gaji jerin izinin dacewa OS/terminal kuma a yi musu allurar shaidar da aka zaɓa. Ba a gaji mai ba da alaƙa da bayanan sirri ta tsohuwa. `--inherit-env` a sarari yana maido da cikakken gadon iyaye-muhalli; yi amfani da shi kawai lokacin da zaɓin tsari na ɓangare na uku ya kamata ya karɓi waɗannan ƙimar. Wannan tace muhalli ne, ba akwatin yashi OS ba: har yanzu tsarin yana gudana tare da izinin tsarin fayil ɗin mai kira.
 
 Ana tura siginar katsewa da ƙarewa ga yaro. Mai ƙaddamarwa yana jiran taron kusa da yaron kafin cire saitin wucin gadi. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` tana sarrafa lokacin alheri kafin ƙarshen tilastawa (tsoho 5000 millise seconds).
+
+`omniroute launch <tool>` (duba [LAUNCH.md](./LAUNCH.md) ) yana bin ƙa'idodin muhalli iri ɗaya da isar da sigina, kuma yana ƙarawa:
+
+- **Gateway ta atomatik farawa.** Don manufa ta gida, lokacin da babu amsa kofa akan tashar jiragen ruwa, mai ƙaddamarwa yana farawa `omniroute serve --headless --no-open` daure zuwa `127.0.0.1` ƙarƙashin tsarin girbi da aka ware. Kowane ƙaddamar da gudu yana riƙe da haya a cikin `DATA_DIR/launch/leases/` (ƙara bugun zuciya kowane s 15, tsayawa bayan 45 s ko lokacin da aikinta ya tafi). Mai girbi yana dakatar da ƙofar da ya fara da zarar babu haya da aka yi rayuwa don alheri mara aiki (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, tsoho 10000 millise seconds). Ana amfani da ƙofar da mai amfani ya fara amma bai daina ba. `--keep-gateway` ko `omniroute gateway keep` suna juya ƙofar ƙaddamarwa zuwa na al'ada; `--no-start` yana maido da tsohuwar halayen gazawa idan ƙasa. Ana binciken makasudin nesa kawai.
+- **Kaddamar da zaman.** Kowane ƙaddamarwa yana ƙaddamar da alamar zaman `olx_` na ɗan gajeren lokaci daga shaidar shaidar iyaye (`POST /api/launch/sessions`), tana bugun shi yayin da kayan aiki ke gudana, karanta taƙaitaccen amfani kuma ya soke shi bayan kayan aikin ya fita. Alamar ƙaƙƙarfan juzu'i ce ta iyayenta: izini iri ɗaya, iri ɗaya ko mafi ƙanƙantar kasidar, gajeriyar rayuwa, kuma ba ita ce shaidar dashboard ba. Kayan aikin yana karɓar alamar zaman, ba za a taɓa samun shaidar mahaifa ba, kuma ana yiwa buƙatun alamar `launch:<tool>:<sessionId>` sai dai idan an ba `--tag`. Ƙofar ba tare da zaman API ta kasa tare da `GatewayTooOld` maimakon faɗuwa zuwa ƙaddamar da ba a cika ba.
+- **Saitin ƙaddamarwa.** Ana rubuta fayilolin saitin kayan aiki zuwa kundin adireshin ɗan lokaci mai zaman kansa (yanayin 0700, prefix `omnirouter-`) kuma a cire bayan yaron ya fita. `SIGKILL` na mai ƙaddamarwa yana barin littafin a baya; `omniroute launch --cleanup` yana cire irin waɗannan kundayen adireshi da zarar sun girmi kwana ɗaya.
 
 ## Gemini m saitin
 

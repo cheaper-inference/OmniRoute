@@ -4,15 +4,11 @@
 
 ---
 
-> **資訊來源：** `src/lib/webhookDispatcher.ts`、`src/lib/db/webhooks.ts`、`src/app/api/webhooks/`
-> **最後更新：** 2026-06-28 — v3.8.40
+> **事實來源：** `src/lib/webhookDispatcher.ts`, , `src/lib/db/webhooks.ts`, , , , , , `src/app/api/webhooks/`
 
-OmniRoute 可在平台事件發生時觸發 HTTP Webhook。您可以使用它們與
-Slack、PagerDuty、Datadog、內部警示服務或任何 HTTP 接收端整合。
+OmniRoute可以在平台事件上觸發HTTP webhook。使用它們與Slack、 PagerDuty、Datadog、內部警報服務或任何HTTP接收器整合。
 
-分派器會使用 HMAC-SHA256 簽署每次傳遞，在暫時性
-失敗時重試、個別追蹤每個 Webhook 的傳遞健康狀況，並自動停用持續
-失敗的端點。
+排程器使用HMAC-SHA256對每個交付進行簽名，重試暫時性故障，追蹤每個 Webhook 的交付運作狀況，並自動停用不斷失敗的端點。
 
 ## 支持的活動
 

@@ -42,15 +42,13 @@ Các ví dụ về việc đại diện cho cộng đồng của chúng ta bao g
 đăng bài thông qua tài khoản mạng xã hội chính thức hoặc đảm nhiệm vai trò đại diện được chỉ định
 tại một sự kiện trực tuyến hoặc ngoại tuyến.
 
-## Enforcement
+## Thực thi
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Các trường hợp lạm dụng, quấy rối hoặc hành vi không thể chấp nhận được có thể được báo cáo cho các nhà lãnh đạo cộng đồng chịu trách nhiệm thực thi bằng cách mở một cơ quan tư vấn an ninh tư nhân tại
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+hoặc bằng cách gửi email cho người bảo trì tại diegosouza.pw@outlook.com. Đối với các sự cố nhạy cảm về bảo mật, hãy xem [`SECURITY.md`](SECURITY.md). Mọi khiếu nại sẽ được xem xét và điều tra nhanh chóng và công bằng.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Tất cả các nhà lãnh đạo cộng đồng có nghĩa vụ tôn trọng quyền riêng tư và bảo mật của người báo cáo về bất kỳ vụ việc nào.
 
 ## Hướng dẫn Thực thi
 

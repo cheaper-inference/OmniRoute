@@ -94,51 +94,30 @@ ang routing o pagpili ng modelo — tingnan ang hiwalay na opt-in sa ibaba.
 
 ---
 
-## HIWALAY na opt-in ang pag-sync ng data — ang pangako sa privacy
+## Ang pag-sync ng data ay isang SEPARATE opt-in — ang pangako sa privacy
 
-Ang pag-on sa `RADAR_ENABLED` ay nagbubukas lamang sa UI. Nangangailangan ang pag-sync ng feed ng pangalawa at
-hiwalay na opt-in na nakaimbak sa `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migration na `136_radar_cache_settings.sql`). Sinusuri ng `syncRadar()` ang flag _at_ ang
-opt-in bago gumawa ng anumang network call:
+Ang pag-on ng `RADAR_ENABLED` ay magbubukas lamang ng UI. Ang pag-sync ng feed ay nangangailangan ng pangalawang, independiyenteng pag-opt-in na naka-imbak sa `radar_settings.opt_in` (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`). sinusuri ng `syncRadar()` ang flag _at_ ang opt-in bago gumawa ng anumang tawag sa network:
 
 ```
-Naka-off ang flag → { status: "disabled" }   — walang network call
-False ang opt-in  → { status: "opt_out" }    — walang network call
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Kapag parehong naka-on ang mga ito, ganito ang daloy ng sync:
+Kapag parehong naka-on, ang path ng pag-sync ay:
 
-1. `GET <feed base URL>/v1/catalog/latest` na may `x-omniroute-radar-schema: 2` at opsyonal na
-   header na `Authorization: Bearer <supporter key>` (tingnan sa ibaba). Bilang default, ginagamit ng mga server ang hiwalay na
-   nilagdaang v1 transition artifact kapag wala ang schema header, upang patuloy na
-   makatanggap ng mga update ang mas lumang naka-install na client.
-2. Isa itong daloy ng application na para lamang sa pag-download, ngunit isa pa rin itong HTTPS request. Tumatanggap ang naka-host na
-   infrastructure ng karaniwang metadata ng koneksyon gaya ng source IP. Kapag may naka-configure na supporter
-   key, ipinapadala rin ng sync ang key na iyon sa Bearer header upang matukoy ng serbisyo ang
-   entitlement. Sa eksaktong revision ng private server na tinukoy sa evidence boundary sa itaas,
-   gumagamit ang accounting ng mga feed request ng mga hash ng key, pinagsama-samang paggamit, at isang pinaikling HMAC
-   ng IP na umiikot araw-araw para sa manu-manong pagsusuri ng pang-aabuso; hindi pinapanatili ng mga table na iyon ang key o IP sa raw na anyo.
-   Hiwalay na mga hangganang operational ang mga access log ng infrastructure at ang naka-encrypt na delivery outbox.
-3. Hindi kailanman ipinapadala ng OmniRoute sa serbisyo ng Radar ang mga prompt, response, conversation, credential ng provider, traffic ng modelo,
-   uptime, latency, o lokal na configuration ng provider.
-4. Bine-verify, bina-validate, at lokal na kina-cache ang response (tingnan ang
-   [Modelo ng seguridad](#security-model)). May eksaktong apat na server-side network path ang Radar:
-   `syncRadar()` para sa catalog, `syncRadarReferrals()` para sa mga referral, at
-   `syncRadarOffers()` / `syncRadarIntel()` para sa mga offer at Intel na para lamang sa supporter.
+1. `GET <feed base URL>/v1/catalog/latest` na may `x-omniroute-radar-schema: 2` at isang opsyonal `Authorization: Bearer <supporter key>` header (tingnan sa ibaba). Default ng mga server ang hiwalay na nilagdaang v1 transition artifact kapag wala ang schema header, kaya patuloy na nakakatanggap ng mga update ang mga mas lumang naka-install na kliyente.
+2. Isa itong download-only na daloy ng application, ngunit isa pa rin itong kahilingan HTTPS. Ang naka-host na imprastraktura ay tumatanggap ng ordinaryong metadata ng koneksyon gaya ng pinagmulang IP. Kapag na-configure ang isang supporter key, ipinapadala rin ng sync ang key na iyon sa header ng Bearer para maresolba ng serbisyo ang entitlement. Sa eksaktong rebisyon ng pribadong server na tinukoy sa hangganan ng ebidensya sa itaas, ang accounting ng kahilingan sa feed ay gumagamit ng mga pangunahing hash, pinagsama-samang paggamit, at araw-araw na umiikot na pinutol na HMAC ng IP para sa manu-manong pagsusuri sa pang-aabuso; ang mga talahanayan na iyon ay hindi nananatili ang susi o ang IP sa raw form. Ang mga log ng access sa imprastraktura at ang naka-encrypt na outbox ng paghahatid ay magkahiwalay na mga hangganan ng pagpapatakbo.
+3. OmniRoute ay hindi kailanman nagpapadala ng mga prompt, tugon, pag-uusap, kredensyal ng provider, trapiko ng modelo, uptime, latency, o configuration ng lokal na provider sa serbisyo ng Radar.
+4. Ang tugon ay na-verify, napatunayan, at naka-cache nang lokal (tingnan [ang modelo ng Seguridad](#security-model) ). Ang Radar ay may eksaktong apat na mga landas sa network sa gilid ng server: `syncRadar()` para sa catalog, `syncRadarReferrals()` para sa mga referral, at `syncRadarOffers()` / `syncRadarIntel()` para sa mga alok na tagasuporta lamang at Intel.
 
-Ang **supporter key** ay isang opsyonal na Bearer token (`radar_settings.supporter_key`)
-na nagbibigay-daan sa serbisyo ng feed na magpasya kung aling tier ang ihahatid (tingnan ang
-[Mga tier](#tiers-community-and-live)). Ito ay:
+Tumatakbo ang pagsusuri ng catalog tuwing 24 na oras. Kapag ang na-verify na feed ay nagdadala pa rin ng naka-cache na bersyon at tier, pinapanatili ng pag-sync ang naka-cache na payload, nire-renew `fetchedAt`, at ang susunod na pagsusuri ay darating pagkalipas ng 24 na oras sa halip na sa susunod na oras-oras na tick.
 
-- Nakaimbak na **naka-encrypt habang hindi ginagamit** gamit ang parehong AES-256-GCM `encrypt()`/`decrypt()`
-  helper (`src/lib/db/encryption.ts`) na ginagamit para sa mga credential ng provider.
-- Itinatakda sa pamamagitan ng `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) at
-  **hindi kailanman ibinabalik nang buo** — isang naka-mask na anyo ang ibinabalik ng response (`omr_****abcd`).
-- Ang pagbabago o pag-clear nito ay sabay-sabay na nagpapawalang-bisa sa mga cache ng catalog, referral, offer, at Intel. Sa
-  susunod na sync/pagbasa, tinutukoy sa server-side ang bagong entitlement; ang pag-save ng key ay hindi mismo
-  gumagawa ng network request o gumagamit ng single-use activation key.
-- Ipinapadala sa serbisyo ng feed bilang Bearer token sa sync GET — walang iba pang impormasyon tungkol sa
-  key ang umaalis sa client.
+Ang** susi ng tagasuporta** ay isang opsyonal na Bearer token (`radar_settings.supporter_key`) na nagbibigay-daan sa serbisyo ng feed na magpasya kung aling tier ang ihahatid (tingnan [ang Mga Tier](#tiers-community-and-live) ). ito ay:
+
+- Nakaimbak** naka-encrypt sa pahinga** na may parehong AES-256-GCM `encrypt()`/`decrypt()` helpers (`src/lib/db/encryption.ts`) na ginagamit para sa mga kredensyal ng provider.
+- Itakda sa pamamagitan ng `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) at** hindi kailanman nag-echo pabalik** — ang tugon ay nagbabalik ng isang masked form (`omr_****abcd`).
+- Ang pagpapalit o pag-clear dito ng atom ay magpapawalang-bisa sa catalog, mga referral, alok, at mga cache ng Intel. Niresolba ng susunod na sync/read ang bagong entitlement server-side; ang pag-save ng isang susi ay hindi gumagawa ng isang kahilingan sa network o gumagamit ng isang solong gamit na activation key.
+- Ipinadala sa serbisyo ng feed bilang isang Bearer token sa pag-sync GET — wala nang iba pa tungkol sa susi na iniiwan sa kliyente.
 
 ---
 
@@ -424,84 +403,45 @@ version, tier }` — ito ang value na ipinapakita ng dashboard, at hindi kailanm
 
 ---
 
-## Mga panuntunan sa read-time overlay merge
+## Mga panuntunan sa pagsasanib ng read-time na overlay
 
-Pinagsasama ng `applyFeed()` (`src/lib/radar/applyFeed.ts`) ang naka-cache na feed **sa ibabaw** ng
-static baseline sa **oras ng pagbasa**, sa loob ng `getRadarCatalog()`. Hindi kailanman binabago ang baseline array
-(`FREE_MODEL_BUDGETS`) — isang bagong `MergedEntry[]` ang kinukuwenta sa bawat
-pagtawag.
+Pinagsasama ng `applyFeed()` (`src/lib/radar/applyFeed.ts`) ang naka-cache na feed** tapos na** ang static na baseline sa** oras ng pagbasa** , sa loob ng `getRadarCatalog()`. Ang baseline array (`FREE_MODEL_BUDGETS`) ay hindi kailanman na-mutate — isang `MergedEntry[]` ay kinukuwenta ng bago sa bawat tawag.
 
-Apat na panuntunan, ayon sa pagkakasunod-sunod ng prayoridad:
+Apat na panuntunan, ayon sa pagkakasunud-sunod:
 
-1. **Hindi kailanman ino-overwrite ng feed ang isang local override.** Bawat field: kung
-   na-customize ng operator ang isang field sa entry (`localOverrides` map, na may key na `provider:modelId`),
-   nilalaktawan ang value ng feed para sa partikular na field na iyon — mananaig ang value ng operator.
-2. **Dini-disable ng `enabled: false` ang entry, nang may provenance.** Ang feed entry na nag-o-off
-   sa isang entry ay nagtatakda ng `enabled: false` at `disabledBy: "radar"` sa merged result,
-   upang maipaliwanag ng UI _kung bakit_ naging disabled ang isang entry mula sa pagiging available.
-3. **Nananatiling hindi nagbabago ang entry na idinagdag ng user ngunit wala sa feed.** Ang mga entry na
-   nasa baseline lamang (o idinagdag nang lokal) at walang katumbas na feed
-   entry ay ipinapasa nang walang pagbabago.
-4. **Hindi kailanman muling binubuhay ang isang tombstoned na entry.** Kung tahasang nag-delete ang operator ng
-   entry (`tombstones` set), hindi ito ibabalik ng muling pagdaragdag ng feed sa `provider:modelId` na iyon sa mas bagong
-   version.
+1. **Hindi kailanman na-overwrite ng feed ang isang lokal na override.** Per-field: kung ang operator ay nag-customize ng field sa isang entry (`localOverrides` map, keyed `provider:modelId`), ang value ng feed para sa partikular na field na iyon ay nilaktawan — ang value ng operator ay nanalo.
+2. **hindi pinapagana `enabled: false` ang entry, na may provenance.** Ang isang entry sa feed na nag-o-off sa isang entry ay nagtatakda ng `enabled: false` at `disabledBy: "radar"` sa pinagsamang resulta, upang maipaliwanag ng UI ang _bakit_ ang isang entry ay naging available hanggang sa hindi pinagana.
+3. **Ang isang entry na idinagdag ng user na wala sa feed ay nananatiling hindi nagalaw.** Ang mga entry na umiiral lamang sa baseline (o idinagdag nang lokal) at walang katumbas na feed entry ay pumasa sa hindi nabago.
+4. **Ang isang lapida na entry ay hindi na muling nabuhay.** Kung tahasang tinanggal ng operator ang isang entry ( set `tombstones` ), hindi ito ibabalik ng feed na muling idinaragdag ang `provider:modelId` na iyon sa mas bagong bersyon.
 
-Ang mga nae-edit na field at tombstone ay pine-persist sa
-`radar_local_model_state` (migration `153_radar_local_model_state.sql`). Kino-convert ng pampublikong DB
-adapter (`src/lib/db/radar.ts`) ang mga row na iyon sa `localOverrides` map at
-`tombstones` set na ginagamit ng `applyFeed()`; nilo-load ng production `getRadarCatalog()` ang state na iyon
-pagkatapos pumasa sa mga gate para sa flag, cache, at schema. Tanging `displayName` at `enabled` ang
-maaaring i-edit ng operator. Hindi maisusulat sa pamamagitan ng surface na ito ang provider/model identity, feed provenance, quota, capabilities, ToS,
-at setup data.
+Ang mga nae-edit na field at lapida ay nananatili sa `radar_local_model_state` (migration `153_radar_local_model_state.sql`). Kino-convert ng pampublikong DB adapter (`src/lib/db/radar.ts`) ang mga row na iyon sa `localOverrides` map at `tombstones` set na ginagamit ng `applyFeed()`; Ang production `getRadarCatalog()` ay naglo-load na nakasaad pagkatapos pumasa ang flag, cache, at schema gate. Ang `displayName` at `enabled` lang ang nae-edit ng operator. Provider/model identity, feed provenance, quota, capabilities, ToS, at setup data ay hindi maisusulat sa surface na ito.
 
-Nagbibigay ang dashboard ng apat na lokal na action:
+Inilalantad ng dashboard ang apat na lokal na pagkilos:
 
-- Binabago ng **Edit** ang lokal na display name at enabled state.
-- Nililinis ng **Reset local changes** ang parehong nae-edit na field nang hindi binabago ang tombstone.
-- Lumilikha ang **Hide** ng tombstone, upang hindi muling malikha ng mga susunod na feed update ang row.
-- Inaalis ng **Restore** ang tombstone; mananatiling may bisa ang anumang override na hiwalay na na-save.
+- **I-edit** binabago ang lokal na display name at pinaganang estado.
+- **I-reset ang mga lokal na pagbabago** nililimas ang parehong mga nae-edit na field nang hindi binabago ang lapida.
+- **Magtago** lumilikha ng lapida, kaya hindi na muling likhain ng mga update sa feed ang row.
+- **Ibalik** inaalis ang lapida; mananatiling may bisa ang anumang hiwalay na na-save na override.
 
-Nananatiling safety exception ang `enabled: false` ng feed: nananaig ito sa lumang local na
-`enabled: true`, pinananatiling disabled ang merged entry, at itinatala ang `disabledBy: "radar"`.
+Ang isang feed `enabled: false` ay nananatiling isang exception sa kaligtasan: ito ay nanalo sa isang lipas na lokal `enabled: true`, pinapanatili ang pinagsamang entry na hindi pinagana, at nagtatala ng `disabledBy: "radar"`.
 
-Gumagamit ang mga publication ng catalog ng `schemaVersion: 2`. Ang `contextWindow` at bawat isa sa `tools`, `vision`, at
-`thinking` ay hiwa-hiwalay na `number | null` / `boolean | null`: ang `null` ay nangangahulugang hindi alam, samantalang
-ang `false` ay nangangahulugang tahasang sinasabi ng opisyal na source ng provider na nakumpirma ng D16 na wala ang capability.
-Hindi kailanman direktang ginagawang feed facts ang mga internal na flag ng OmniRoute registry/model-spec. Tumatanggap pa rin
-ang client ng mga v1 snapshot; dahil gumamit ang lumang builder ng `false` bilang placeholder para sa kawalan, ang v1 `false` ay
-ino-normalize bilang hindi alam habang nananatiling factual ang v1 `true`. Nagfa-fail closed ang mga hindi kilalang schema version at
-nananatiling available ang huling valid na cache. Ang bawat v2 model na may non-null na context/capability ay dapat may
-credential-free na HTTPS `metadataEvidenceUrls[]`; kung wala, mabibigo ang schema validation at hindi papalitan ang cache.
-Ipinapakita ng catalog table ang lahat ng tatlong state bilang `✓`, `✕`, at `?`.
+Gumagamit ang mga publikasyon ng katalogo `schemaVersion: 2`. `contextWindow` at bawat isa sa `tools`, `vision`, at `thinking` ay independiyenteng `number | null` / `boolean | null`: ang ibig sabihin ng `null` ay hindi alam, habang ang ibig sabihin ng `false` ay isang D16-confirmed na opisyal na pinagmulan ng provider na tahasang nagsasabing wala ang kakayahan. Ang mga panloob OmniRoute registry/model-spec flag ay hindi kailanman direktang pino-promote sa feed ng mga katotohanan. Tumatanggap pa rin ang kliyente ng mga v1 na snapshot; dahil ginamit ng lumang tagabuo `false` bilang isang placeholder ng kawalan, ang v1 `false` ay na-normalize sa hindi alam habang ang v1 `true` ay nananatiling makatotohanan. Hindi naisara ang mga hindi kilalang bersyon ng schema at nananatiling available ang huling wastong cache. Ang bawat v2 model na may non-null context/capability ay dapat na may credential-free HTTPS `metadataEvidenceUrls[]`; kung hindi, nabigo ang pagpapatunay ng schema at hindi mapapalitan ang cache. Ang talahanayan ng katalogo ay nagre-render ng lahat ng tatlong estado bilang `✓`, `✕`, at `?`.
 
-### Mga guided combo at MCP access
+### Mga ginabayang combo at MCP access
 
-Nananatili ang mga nakumpirmang value ng `familyId` sa read-time overlay at ginagamit ng purong
-`buildRadarComboSuggestions()` module (`src/lib/radar/comboSuggestions.ts`). Iminumungkahi lamang ang isang family
-kapag may active na connection ang hindi bababa sa dalawang magkaibang provider at inilalantad nila ang eksaktong curated model
-ID. Nagfa-fail closed ang mga disabled na model, inactive na provider, nawawalang model ID, singleton family, at malabong
-alias/prefix match. Ginagamit ng mga mungkahi ang kasalukuyang `priority` strategy, kung saan inuuna ang
-pinakamalaking nauulit na buwanang budget; nililikha lamang ang mga ito ng UI sa pamamagitan ng `POST /api/combos`.
+Ang mga kumpirmadong halaga `familyId` ay nakaligtas sa read-time na overlay at humimok ng purong `buildRadarComboSuggestions()` module (`src/lib/radar/comboSuggestions.ts`). Iminumungkahi lang ang isang pamilya kapag ang hindi bababa sa dalawang natatanging provider ay may aktibong koneksyon at inilantad ang eksaktong na-curate na modelong ID. Ang mga modelong may kapansanan, hindi aktibong provider, nawawalang modelong IDs, mga pamilyang singleton, at hindi malinaw na mga tugma alias/prefix ay nabigo sa pagsasara. Ginagamit ng mga suhestyon ang umiiral na diskarte `priority`, pag-order muna ng pinakamalaking umuulit na buwanang badyet; nililikha lamang sila ng UI sa pamamagitan ng `POST /api/combos`.
 
-Ang guided UI ay nasa `/dashboard/radar/combos`. Binabasa lamang nito ang mga lokal na endpoint na
-`GET /api/radar/catalog` at `GET /api/combos/builder/options`. Hindi ito kailanman nagpapasimula ng Radar sync,
-nagbabasa ng mga kredensyal ng provider, o direktang nagsusulat sa combo database.
+Ang ginabayang UI ay nakatira sa `/dashboard/radar/combos`. Binabasa lang nito ang mga lokal `GET /api/radar/catalog` at `GET /api/combos/builder/options` na endpoint. Hindi nito kailanman na-trigger ang pag-sync ng Radar, nagbabasa ng mga kredensyal ng provider, o direktang nagsusulat sa database ng combo.
 
-Mababasa ng mga MCP client ang parehong lokal na projection gamit ang `omniroute_radar_catalog` (`read:radar`). Ang
-mga opsyonal na filter na `provider`, `familyId`, at `enabledOnly` ay sinusuri pagkatapos ng isang lokal na
-pagbasa sa `GET /api/radar/catalog`. Kasama sa saradong output nito ang metadata ng catalog pati ang provider/model,
-display name, `familyId`, quota, mga capability, enabled state, origin, at `disabledBy`; hindi kailanman ibinabalik ang mga setup URL,
-hakbang, koneksyon, e-mail address, key, at referral data. Read-only ang tool na ito
-at hindi nito kailanman ini-invoke ang `/api/radar/sync`.
+Mababasa ng mga kliyente MCP ang parehong lokal na projection na may `omniroute_radar_catalog` (`read:radar`). Ang opsyonal `provider`, `familyId`, at `enabledOnly` na mga filter ay sinusuri pagkatapos basahin ang isang lokal `GET /api/radar/catalog`. Kasama sa saradong output nito ang catalog metadata plus provider/model, display name, `familyId`, quota, mga kakayahan, pinaganang estado, pinanggalingan, at `disabledBy`; setup URLs, mga hakbang, koneksyon, e-mail address, key, at data ng referral ay hindi na ibinalik. Ang tool na ito ay read-only at hindi kailanman humihiling `/api/radar/sync`. Kapag nauna ang naka-cache na feed sa naka-install na catalog, `meta.olderThanRelease` ay `true` at ang tool ay nagbabalik ng mga modelo mula sa naka-install na catalog na may mga lokal na override at lapida na inilapat.
 
-### Mga marker ng pinagmulan
+### Mga pananda ng pinagmulan
 
-Ang bawat pinagsamang entry ay may field na `origin` na nire-render ng UI bilang badge:
+Ang bawat pinagsamang entry ay may dalang `origin` field na inire-render ng UI bilang isang badge:
 
-- `"baseline"` — hindi binago mula sa static release catalog.
-- `"radar"` — isa o higit pang field ang na-refresh ng feed.
-- `"local"` — may kahit isang lokal na override ang operator sa entry na ito (ang mga lokal na
-  override ang palaging nangingibabaw sa feed ayon sa rule 1, anuman ang sinasabi ng feed).
+- `"baseline"` — hindi nagalaw mula sa static na release catalog.
+- `"radar"` — isa o higit pang mga field ang na-refresh ng feed.
+- `"local"` — ang operator ay may kahit isang lokal na override sa entry na ito (laging nananalo ang mga lokal na override sa feed sa bawat panuntunan 1, anuman ang sinasabi ng feed).
 
 ---
 

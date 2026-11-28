@@ -4,8 +4,6 @@
 
 ---
 
-Pēdējo reizi atjaunināts: 2026-08-23
-
 OmniRoute integrējas ar trīs CLI rīku kategorijām, kas izvietotas trīs īpašās informācijas paneļa lapās:
 
 | Lapa           | Maršruts                | Koncepcija                                                                             | Skaitīt          |
@@ -235,7 +233,7 @@ Jaunajiem rīkiem ar `configType: "custom"` ir īpaši iestatījumi API maršrut
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                       |
 | `POST /api/cli-tools/qwen-settings`         | Qwen kods (`~/.qwen/settings.json` + īpaša `.env` atslēga)                  |
 
-Visos maršrutos kļūdu atbildēm tiek izmantots `sanitizeErrorMessage()` (Cietais noteikums Nr. 12).
+Visos maršrutos kļūdu atbildēm tiek izmantots `sanitizeErrorMessage()` (Cietais noteikums #12).
 
 ---
 

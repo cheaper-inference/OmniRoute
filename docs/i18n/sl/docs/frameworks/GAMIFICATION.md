@@ -502,27 +502,27 @@ ko so se podatki lestvice od zadnjega pošiljanja dejansko spremenili.
 
 ---
 
-## Deljenje žetonov
+## Skupna raba žetonov
 
 **Datoteka:** `src/lib/gamification/sharing.ts`
 
-### Dvostavno knjigovodstvo
+### Dvostavna knjiga
 
 Vsak prenos ustvari dve vrstici v `token_ledger`:
 
-| Vrstica | `from_key_id` | `to_key_id` | `amount` |
+| Vrsti   | `from_key_id` | `to_key_id` | `amount` |
 | ------- | ------------- | ----------- | -------- |
-| Breme   | pošiljatelj   | prejemnik   | +znesek  |
-| Dobro   | prejemnik     | pošiljatelj | -znesek  |
+| Debetna | pošiljatelj   | sprejemnik  | +        |
+| kredit  | sprejemnik    | pošiljatelj | -amount  |
 
-Toda dogovor je naslednji:
+Počakaj — konvencija je:
 
-| Vrstica    | `from_key_id` | `to_key_id` | `amount` | Pomen                 |
-| ---------- | ------------- | ----------- | -------- | --------------------- |
-| Pošiljanje | pošiljatelj   | prejemnik   | +znesek  | Odliv od pošiljatelja |
-| Prejemanje | prejemnik     | pošiljatelj | +znesek  | Priliv k prejemniku   |
+| Vrsti  | `from_key_id` | `to_key_id` | `amount` | Pomen                 |
+| ------ | ------------- | ----------- | -------- | --------------------- |
+| Pošlji | pošiljatelj   | sprejemnik  | +        | Odtok od pošiljatelja |
+| Prejmi | sprejemnik    | pošiljatelj | +        | Dotok do sprejemnika  |
 
-Stanje se izračuna tako:
+Bilanca se izračuna kot:
 
 ```sql
 SELECT
@@ -533,7 +533,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Potek prenosa
+### Tok prenosa
 
 ```typescript
 export async function transferTokens(
@@ -544,18 +544,17 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Preverjanje veljavnosti**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotentnost**: preveri, ali `idempotency_key` že obstaja v evidenci.
-   Če obstaja, vrni predpomnjeni rezultat.
-3. **Transakcija** (ena sama transakcija SQLite):
-   a. Izračunaj stanje pošiljatelja.
-   b. Če je `balance < amount`, prekini (nezadostna sredstva).
-   c. Vstavi vrstico za pošiljanje (`from=sender,`.
+1. **Potrdi** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotenca** : preveri, ali `idempotency_key` že obstaja v knjigi. Če da, vrni predpomnjeni rezultat.
+3. **Transakcija** (posamezna transakcija SQLite ): a. Izračunaj stanje pošiljatelja. b. Če je `balance < amount`, prekini (nezadostna sredstva). c. Vstavite vrstico za pošiljanje (`from=sender, to=receiver, amount`). d. Vstavite prejemno vrstico (`from=receiver, to=sender, amount`).
+4. **Omejitev stopnje** : preveri hitrost prenosa za pošiljatelja (največ 10 transfers/min).
+5. **Dogodek** : oddaj dogodek igrifikacije `token_share` za oceno značke + XP
+6. Vrni `{ success: true, balance: newBalance }`.
 
-### Omejevanje hitrosti
+### Omejitev hitrosti
 
 - Največ 10 prenosov na minuto na ključ API.
-- Največ 10.000 žetonov na posamezen prenos.
+- Največ 10.000 žetonov na en prenos.
 - Največ 100.000 prenesenih žetonov na dan na ključ API.
 
 ---

@@ -168,9 +168,9 @@ Stellen Sie sicher, dass `copilot-m365-web` aktiviert ist** Dashboard → Anbiet
 
 ## Referenzen
 
-- Issue: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Diskussion: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Quellcode: `src/shared/constants/providers/web-cookie.ts` (Anbieterdefinition)
-- HAR-Import: `src/shared/utils/m365HarImport.ts`
-- Anmeldedatenfelder: `src/shared/providers/webSessionCredentials.ts`
-- Tarifdialog: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Problem: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Diskussion: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Quelle: `src/shared/constants/providers/web-cookie.ts` (Anbieterdefinition)
+- HAR Import: `src/shared/utils/m365HarImport.ts`
+- Anmeldefelder: `src/shared/providers/webSessionCredentials.ts`
+- Modalstufe: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

@@ -207,7 +207,7 @@ Pravidlá pre formát časovej pečiatky (vynútené `npm run check:migration-nu
 
 **Použiť objednávku.** Bežec triedi podľa číselnej hodnoty predpony, nie podľa textu: najprv staré súbory `001`–`241`, potom súbory s časovou pečiatkou v poradí podľa časových pečiatok, potom ľubovoľné adresáre s menným priestorom registrované pod `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (verzie ako `ee-001`). Čakajúca migrácia je akýkoľvek súbor, ktorého verzia nie je v `_omniroute_migrations`, takže migrácia zo staršej vetvy, ktorá sa zlúči po novšej, stále platí pre existujúce databázy.
 
-**Časová pečiatka je poradie vytvorenia, nie poradie zlúčenia.** Ak vaša migrácia závisí od tabuľky alebo stĺpca vytvorenej migráciou s a** novšie** časovej pečiatky (napríklad z inej PR, ktorá sa zlúčila ako prvá), nová databáza by najprv spustila vašu a zlyhala. Kým je váš PR stále otvorený, vygenerujte názov súboru pomocou `npm run db:new-migration`, aby získal novšiu časovú pečiatku, alebo ho urobte nezávislým. `npm run test:migrations:fresh` aplikuje každú migráciu na prázdnu databázu a zachytí ju.
+**Časová pečiatka je poradie vytvorenia, nie poradie zlúčenia.** Ak vaša migrácia závisí od tabuľky alebo stĺpca vytvorenej migráciou s a** novšie** časovej pečiatky (napríklad z inej PR, ktorá sa zlúčila ako prvá), nová databáza by spustila vašu prvú a zlyhala. Kým je váš PR stále otvorený, vygenerujte názov súboru pomocou `npm run db:new-migration`, aby získal novšiu časovú pečiatku, alebo ho urobte nezávislým. `npm run test:migrations:fresh` aplikuje každú migráciu na prázdnu databázu a zachytí ju.
 
 ### Zlúčená migrácia sa nikdy neodstráni ani nepremenuje
 
@@ -304,10 +304,10 @@ Voľne používajte klauzuly `IF NOT EXISTS`, `IF EXISTS` a `OR IGNORE` / `OR RE
 
 ### Pridanie novej migrácie
 
-1. **Vytvorte súbor pomocou generátora** : `npm run db:new-migration -- <description>` (napríklad `npm run db:new-migration -- add combo priority`). Zapíše `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` s aktuálnym časom UTC a hlavičkou komentára, posunie sa o jednu sekundu dopredu, ak sa táto časová pečiatka použije, a nikdy neprepíše súbor. Nevyberajte číslo ručne.
+1. **Vytvorte súbor pomocou generátora** : `npm run db:new-migration -- <description>` (napríklad `npm run db:new-migration -- add combo priority`). Zapíše `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` s aktuálnym časom UTC a hlavičkou komentára, posunie sa o jednu sekundu dopredu, ak je časová pečiatka prijatá, a nikdy neprepíše súbor. Nevyberajte číslo ručne.
 2. **Použite bezpečné DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
 3. **Údaje doplňte opatrne** : použite `UPDATE ... WHERE ...` na spracovanie existujúcich riadkov
-4. **Skontrolujte poradie a pomenovanie** : `npm run test:migrations:fresh` (všetky migrácie na prázdnu databázu) a `npm run check:migration-numbering`
+4. **Skontrolujte poradie a pomenovanie** : `npm run test:migrations:fresh` (všetky migrácie na prázdnu databázu) a `npm run check:migration-numbering`. Husky pre-commit hook spustí `check:migration-numbering` sám o sebe, keď odovzdanie vytvorí súbor pod `src/lib/db/migrations/`, takže ručne vybraný alebo zle vytvorený názov (napríklad `242_x.sql`) zlyhá pri lokálnom odovzdaní s rovnakou správou, ktorá sa vypíše CI. Hák kontroluje iba mená, duplikáty a zmrazené série `001`–`241` ; porovnanie so základňou PR (odstránená, premenovaná alebo migrácia mimo poradia) stále prebieha v CI
 5. **Test na kópii** : nikdy nespúšťajte netestované migrácie na produkciu
 6. **Tabuľka vytvorená z kódu tiež potrebuje migráciu** : ak modul tiež vytvorí tabuľku lenivo (`CREATE TABLE IF NOT EXISTS`, udržiavaná ako cesta samoliečenia), migrácia ju musí vytvoriť s rovnakým DDL. V opačnom prípade čistá inštalácia a inovovaná inštalácia skončia s rôznymi schémami v závislosti od toho, či cesta kódu prebehla. `tests/unit/db/lazy-table-migration-guard.test.ts` skenuje `src/` a `open-sse/` a zlyhá na lenivom `CREATE` bez migrácie (#20557). Príklad: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 

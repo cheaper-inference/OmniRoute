@@ -168,9 +168,9 @@ Varmista, että `copilot-m365-web` on käytössä** Dashboard → Providers** . 
 
 ## Viitteet
 
-- Ongelma: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Keskustelu: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Lähde: `src/shared/constants/providers/web-cookie.ts` (palveluntarjoajan määritys)
-- HAR-tuonti: `src/shared/utils/m365HarImport.ts`
-- Tunnistetietokentät: `src/shared/providers/webSessionCredentials.ts`
-- Tilaustasoikkuna: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Ongelma: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Keskustelu: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Lähde: `src/shared/constants/providers/web-cookie.ts` (palveluntarjoajan määritelmä)
+- HAR tuonti: `src/shared/utils/m365HarImport.ts`
+- Tunnistekentät: `src/shared/providers/webSessionCredentials.ts`
+- Modaalitaso: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

@@ -8,21 +8,22 @@
 
 ## Mundarija
 
-- [Tezkor ishga tushirish](#quick-run)
-- [Muhit fayli bilan](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Tez yugurish](#quick-run)
+- [Atrof-muhit fayli bilan](#with-environment-file)
+- [Docker Yozish](#docker-compose)
 - [Mavjud profillar](#available-profiles)
-- [OmniRoute Docker ichida ishlaganda host CLI vositalarini sozlash](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redis yordamchi konteyneri](#redis-sidecar)
-- [Ishlab chiqarish muhiti uchun Compose](#production-compose)
-- [Dockerfile bosqichlari](#dockerfile-stages)
-- [Muhim muhit o‘zgaruvchilari](#critical-environment-variables)
-- [Caddy (HTTPS) bilan Docker Compose](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare tezkor tunneli](#cloudflare-quick-tunnel)
-- [Tasvir teglari](#image-tags)
-- [Docker ichida boshqaruv panelini yangilash](#dashboard-updates-in-docker)
-- [Mavjudlik: standart SQLite faqat bitta replikani qo‘llab-quvvatlaydi](#availability-default-sqlite-is-single-replica)
-- [Docker ichidagi Gemini mintaqaviy xatolari](#gemini-regional-errors-inside-docker)
+- [Konteynerning qattiqlashishi](#container-hardening)
+- [OmniRoute Docker da ishlayotganida xost CLI vositalarini sozlash](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Sidecar](#redis-sidecar)
+- [Ishlab chiqarish kompozitsiyasi](#production-compose)
+- [Dockerfayl bosqichlari](#dockerfile-stages)
+- [Muhitning muhim o'zgaruvchilari](#critical-environment-variables)
+- [Docker Caddy bilan yozish (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Tez tunnel](#cloudflare-quick-tunnel)
+- [Rasm teglari](#image-tags)
+- [Docker da boshqaruv paneli yangilanishlari](#dashboard-updates-in-docker)
+- [Mavjudligi: standart SQLite bitta nusxali](#availability-default-sqlite-is-single-replica)
+- [Docker ichidagi Gemini mintaqaviy xatolar](#gemini-regional-errors-inside-docker)
 - [Muhim eslatmalar](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute asosiy joylashtirish shakllari uchun Compose profillari bilan taqdim e
 | `web`             | `omniroute-web`  | Brauzer talab qiladigan veb-sessiya provayderlari: `gemini-web`, `claude-web`, `claude-turnstile` (`runner-web` yig‘iladi, Chromium kiritilgan)                         | `docker compose --profile web up -d`         |
 
 > Bir nechta profilni birlashtirish mumkin: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Konteynerning qattiqlashishi
+
+`docker-compose.yml` -dagi `base`, `web`, `cli` va `host` ilova xizmatlari `cap_drop: [ALL]` va `no-new-privileges:true` xavfsizlik variantidan foydalanadi. Tasvir root bo'lmagan foydalanuvchi `node` sifatida ishlaydi va yuqori portlarda tinglaydi, shuning uchun u Linux imkoniyatlariga muhtoj emas. Xavfsizlik parametri o'rnatilgan ikkilik fayllar orqali jarayonlarning imtiyozlarga ega bo'lishini oldini oladi.
+
+Faqat `cli` profili avtomatik yangilash uchun Docker rozetkasini o'rnatadi. [Escape lyukiga qarang: Xavfsizlik oqibatlari uchun konteynerning o'z CLIs sozlang](#escape-hatch-configure-the-containers-own-clis-use-sparingly).
+
+Ildiz fayl tizimi sukut bo'yicha yozilishi mumkin bo'lib qoladi. `cli` profili CLI konfiguratsiyasi va keshlarini konteynerning uy katalogiga yozadi, `web` profili Chromium seans holatini saqlaydi va Next.js ish vaqti `/app/data` tashqarida keshlarni yozishi mumkin.
+
+`base` profili bilan faqat oʻqish uchun moʻljallangan ildiz fayl tizimini sinash uchun buni `docker-compose.yml` yonidagi `docker-compose.override.yml` sifatida saqlang. Yozish avtomatik ravishda bekor qilishni o'qiydi.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Mavjud `/app/data` to'plami yozilishi mumkin bo'lib qoladi. Ushbu bekor qilishni ishlab chiqarishda ishlatishdan oldin ish yukingizni sinab ko'ring, chunki u boshqa yo'llarga yozish kerak bo'lishi mumkin.
 
 ## OmniRoute Docker’da ishlaganda host CLI vositalarini sozlash
 
@@ -297,7 +322,7 @@ Docker-da xotira harakati:
 
 ### Kodlash agentlari uchun ish vaqti RAM
 
-1 GiB Docker standarti ishlab chiqarish hajmi emas, balki dashboard/light-chat qavatdir. Uzoq `POST /v1/responses` jismlar (yuzlab xabarlar, o'nlab vositalar) siqish vaqtida bir nechta xotiradagi grafiklarni saqlaydi. Ikkita bir-biriga o'xshash ~ 3 MiB / ~ 750k token so'rovlari V8ni bir vaqtning o'zida bekor qildi.** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) va shuningdek, 16 GiB cgroup OOM urdi. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ga qarang.
+1 GiB Docker standarti ishlab chiqarish hajmi emas, balki dashboard/light-chat qavatdir. Uzoq `POST /v1/responses` jismlar (yuzlab xabarlar, o'nlab vositalar) siqish vaqtida bir nechta xotiradagi grafiklarni saqlaydi. Ikkita bir-biriga o'xshash ~ 3 MiB / ~ 750k token so'rovlari V8ni bir vaqtning o'zida bekor qildi.** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) va shuningdek, 16 GiB cgroup OOM urdi. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) ga qarang.
 
 Hajmi** cgroup `--memory` to'pning ustida** — mahalliy buferlari, SQLite va siqish vositachilari V8 dan tashqarida joylashgan.
 
@@ -386,7 +411,7 @@ Orkestrlar uchun (Kubernetes, Nomad va boshqalar):
 
 ## Docker Caddy bilan yozish (HTTPS Auto-TLS)
 
-OmniRoute Caddy ning avtomatik SSL provayderi yordamida xavfsiz tarzda ochilishi mumkin. Domeningizning DNS A yozuvi serveringiz IP ga ishora qilishiga ishonch hosil qiling.
+OmniRoute Caddy-ning avtomatik SSL provayderi yordamida xavfsiz tarzda ochilishi mumkin. Domeningizning DNS A yozuvi serveringiz IP ga ishora qilishiga ishonch hosil qiling.
 
 ```yaml
 services:
@@ -417,7 +442,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy yuqoridagi konteyner uchun standart uzatish sarlavhalarini o'rnatadi. OmniRoute OAuth qayta qo'ng'iroqlari va yaratilgan umumiy havolalar uchun kanonik ommaviy manba sifatida `NEXT_PUBLIC_BASE_URL` foydalanadi; autentifikatsiya qilingan asboblar paneli yozuvlari bir xil kelib chiqish so'rovlaridan va seansga bog'langan CSRF himoyasidan foydalanadi. `OMNIROUTE_TRUST_PROXY` OmniRoute aniq konfiguratsiya oʻrniga ishonchli yoʻnaltirilgan sarlavhalardan umumiy manba olishini ataylab xohlaganingizda kengaytirilgan oʻrnatishlar uchun yoqing.
+Caddy yuqoridagi konteyner uchun standart yo'naltirish sarlavhalarini o'rnatadi. OmniRoute OAuth qayta qo'ng'iroqlari va yaratilgan umumiy havolalar uchun kanonik ommaviy manba sifatida `NEXT_PUBLIC_BASE_URL` foydalanadi; autentifikatsiya qilingan asboblar paneli yozuvlari bir xil kelib chiqish so'rovlaridan va seansga bog'langan CSRF himoyasidan foydalanadi. `OMNIROUTE_TRUST_PROXY` OmniRoute aniq konfiguratsiya oʻrniga ishonchli yoʻnaltirilgan sarlavhalardan umumiy manba olishini ataylab xohlaganingizda kengaytirilgan oʻrnatishlar uchun yoqing.
 
 ## Cloudflare Quick Tunnel
 
@@ -581,11 +606,11 @@ Xizmat olishdan oldin soʻrovni oʻchiradi, shu sababli muvaffaqiyatsiz bajarili
 
 Birja Docker / Kubernetes OmniRoute hisoblanadi** bitta tugun jarayoni + bitta SQLite yozuvchi** . Mavjudligi yuqori** qo'llab-quvvatlanmaydi** bu topologiyada.
 
-| Cheklov                                                        | Natija                                                                                                                                                                                                                                                                                                     |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Yagona yozuvchi                                                | Do** emas** bir xil SQLite fayliga qarshi bir nechta replikalarni ishga tushiring. Bu DB ni buzadi.                                                                                                                                                                                                        |
-| Qayta yaratish / qayta ishga tushirish / HEALTHCHECK o'ldirish | **To'liq uzilish** parvozdagi SSE, asboblar paneli seanslari va xotira holati. Har bir ulangan mijoz tushadi. Bo'sh so'nggi nuqta oynasidagi yangi so'rovlar teskari proksini oladi**`502 Bad Gateway: Unknown error`** , OmniRoute JSON emas — mijozlar buni provayder xatosidan ajrata olmaydi (#11015). |
-| `/healthz` bilan bir xil hodisa tsikli                         | Band bo'lgan katalog yoki siqish belgisi probalarni kechiktirishi mumkin; qisqa vaqt tugashidan so'ng uni qayta ishga tushiradi** faqat** replika.                                                                                                                                                         |
+| Cheklov                                                        | Natija                                                                                                                                                                                                                                                                                                                    |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Yagona yozuvchi                                                | Do** emas** bir xil SQLite fayliga qarshi bir nechta replikalarni ishga tushiring. Bu DB ni buzadi.                                                                                                                                                                                                                       |
+| Qayta yaratish / qayta ishga tushirish / HEALTHCHECK o'ldirish | **To'liq uzilish** parvozdagi SSE, asboblar paneli seanslari va xotira holati. Har bir ulangan mijoz tushadi. Bo'sh so'nggi nuqta oynasidagi yangi so'rovlar teskari proksini oladi**`502 Bad Gateway: Unknown error`** , OmniRoute emas JSON — mijozlar buni provayderning ishlamay qolishi (#11015) dan ajrata olmaydi. |
+| `/healthz` bilan bir xil hodisa tsikli                         | Band bo'lgan katalog yoki siqish belgisi probalarni kechiktirishi mumkin; qisqa vaqt tugashidan so'ng uni qayta ishga tushiradi** faqat** replika.                                                                                                                                                                        |
 
 **Prob matritsasi** (shuningdek qarang: [Kubernetes tekshiruvi tavsiyalari](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -595,9 +620,9 @@ Birja Docker / Kubernetes OmniRoute hisoblanadi** bitta tugun jarayoni + bitta S
 | Tayyorlik        | HTTP `GET /healthz`                                           | Hodisa-loop bandini o'lik deb hisoblaydigan qattiq taym-autlar |
 | Chuqur / odamlar | `/api/monitoring/health`                                      | Avtomatlashtirilgan kubelet jonliligi                          |
 
-**Yangilanishlar:** har bir seans tushishini kuting. Iloji bo'lsa, mijozlarni to'kib tashlang; standart SQLite hech qanday yangilanish yo'q. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` konteyner nosog‘lom bo‘lganda ham yagona jarayonni almashtiradi — bir xil portlash radiusi.
+**Yangilanishlar:** har bir seans tushishini kuting. Iloji bo'lsa, mijozlarni to'kib tashlang; standart SQLite hech qanday yangilanish yo'q. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` ham konteyner Nosog'lom — bir xil portlash radiusi bo'lganda yagona jarayonni almashtiradi.
 
-Tayyor manifestlar va Helm diagrammasi `deploy/kubernetes/` va `deploy/helm/omniroute/` -da yashaydi — [Kubernetesni joylashtirish bo'yicha qo'llanmaga](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) qarang.
+Tayyor manifestlar va Helm diagrammasi `deploy/kubernetes/` va `deploy/helm/omniroute/` — -da yashaydi, [Kubernetesni joylashtirish bo'yicha qo'llanmaga](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) qarang.
 
 a uchun Kubernetes parchasi** bitta nusxa** (Qayta yaratish kerak; bitta SQLite faylga nisbatan `replicas` ko'tarmang):
 
@@ -626,9 +651,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` uyqusi kube xizmatining so'nggi nuqtalarini SIGTERM oldin tushirishga imkon beradi** yangi** trafik o'lish jarayoniga urishni to'xtatadi. Parvozdagi `/v1/responses` SSE og'ir vaznli kirish ijarasi (#11015) orqali `SHUTDOWN_TIMEOUT_MS` gacha (standart 30s) sarflanadi. Jarayonga yetib boradigan yangi so'rovlar `503` + `Retry-After: 5` oladi. O'zgartirish tayyor bo'lgunga qadar qayta yaratish bo'sh nuqta bo'shlig'i qiyin uzilish bo'lib qoladi - bu zond noto'g'ri konfiguratsiyasi emas, balki SQLite topologiyasi.
+`preStop` uyqusi kube xizmatining so'nggi nuqtalarini SIGTERM oldin tushirishga imkon beradi** yangi** trafik o'lish jarayoniga urishni to'xtatadi. Parvozdagi `/v1/responses` SSE og'ir vaznli kirish ijarasi (#11015) orqali `SHUTDOWN_TIMEOUT_MS` gacha (standart 30s) sarflanadi. Jarayonga yetib boradigan yangi so'rovlar `503` + `Retry-After: 5` oladi. O'zgartirish tayyor bo'lgunga qadar qayta yaratish bo'sh so'nggi nuqta bo'shlig'i prob noto'g'ri konfiguratsiyasi emas, balki SQLite topologiyasi bo'lgan qattiq uzilish — bo'lib qoladi.
 
-Tashqi Postgres / ko'p yozuvchi HA hisoblanadi** emas** hujjatlashtirilgan zaxira yo'li. Agar sizga HA kerak bo'lsa, bitta nusxani saqlang yoki loyiha sinovdan o'tkazgan va alohida hujjatlashtirilgan topologiyani ishga tushiring. Postgres/MySQL ishi [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) da yashaydi. Bu kemalar qadar, ko'paytirishning yagona qo'llab-quvvatlanadigan usuli** katta** `/v1/responses` sig'imi N mustaqil jarayon (keyingi bo'lim), bir jilddagi `replicas > 1` emas.
+Tashqi Postgres / ko'p yozuvchi HA hisoblanadi** emas** hujjatlashtirilgan zaxira yo'li. Agar sizga HA kerak bo'lsa, bitta nusxani saqlang yoki loyiha sinovdan o'tkazgan va alohida hujjatlashtirilgan topologiyani ishga tushiring. Postgres/MySQL ishi [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) da yashaydi. Bu kemalar qadar, ko'paytirishning yagona qo'llab-quvvatlanadigan usuli** katta** `/v1/responses` sig'imi N mustaqil jarayon (keyingi bo'lim), bir jilddagi `replicas > 1` emas.
 
 ## Kengaytirish: N mustaqil jarayon
 
@@ -638,27 +663,27 @@ Bitta Codex hisobining nusxalari uning bir martalik yangilanish tokenini mustaqi
 
 Passiv misol yangilash kerak bo'lganda ulanishni qayta o'qiydi va faqat boshqa, muddati tugamagan kirish tokenini qabul qiladi. Aks holda, ulanish muddati tugamasdan yoki o'chirilmasdan yoki yangilash-to'xtatuvchining xatosini hisoblamasdan yangilash o'chiriladi. Haqiqiy yuqori oqim autentifikatsiya xatoliklari hali ham oddiy nosozlik hisobi, eksponensial sovutish va oddiy mijoz xatosidan foydalanadi; hisobni o'chirish doimiy bo'lib qoladi. Kirish tokenlari muddati tugashidan oldin egasining aylantirilgan tokenlarini sinxronlashtiring (standart proaktiv yangilash muddati besh daqiqa) yoki Codex auth faylini qayta import qiling. Passiv importlar taqdim etilgan tokenlarni tokenning oxirgi nuqtasida tasdiqlamasdan saqlaydi. Qo'lda dashboard/API yangilash `409 refresh_disabled` ni qaytaradi; yangi OAuth loginlari o'zgarmadi. [Atrof-muhit ma'lumotnomasiga](../reference/ENVIRONMENT.md#passive-codex-token-refresh) qarang.
 
-Bitta tugun jarayoni** bitta V8 to'plami** . Ikkita bir-biriga o'xshash ~ 3 MiB / ~ 750k-token kodlash agenti `POST /v1/responses` (RTK + Caveman) bu yig'ilishni ~ 12 Gi (`FATAL ERROR: Reached heap limit`) da bekor qiladi va 16 Gi cguruhni OOM qilishi mumkin. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ga qarang. Bu o'lchov a** xotira byudjeti** ogohlantirish emas, balki bir mahsulot qattiq-max ikki bir vaqtda uzoq `/v1/responses`. Og'ir vaznli chatga kirish o'sha V8/cgroup shiftidan — o'lchamiga ega bo'lgan avtomatik qabul qilingan bayt byudjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) bilan bog'lanadi va uni yuqoriga qarab bekor qiladi (yoki eski `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` so'rovlar soni chegarasini o'rnatish), allaqachon o'lchamdagi jarayonda bekor qilishni qaytadan kiritadi. Kichik chatlar, `/healthz`, `/v1/models` va MCP** emas** o'sha qopqoqda.
+Bitta tugun jarayoni** bitta V8 to'plami** . Ikkita bir-biriga o'xshash ~ 3 MiB / ~ 750k-token kodlash agenti `POST /v1/responses` (RTK + Caveman) bu yig'ilishni ~ 12 Gi (`FATAL ERROR: Reached heap limit`) da bekor qiladi va 16 Gi cguruhni OOM qilishi mumkin. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) qarang. Bu o'lchov a** xotira byudjeti** ogohlantirish, ikki bir vaqtda uzoq `/v1/responses` bir mahsulot qattiq-max emas. Og'ir vaznli chatga kirish o'sha V8/cgroup shiftidan — o'lchamiga ega bo'lgan avtomatik qabul qilingan bayt byudjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) bilan bog'lanadi va uni yuqoriga ko'tarib (yoki eski `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` so'rovlar soni chegarasini o'rnatish) allaqachon o'lchamdagi jarayonda bekor qilishni qaytadan kiritadi. Kichik chatlar, `/healthz`, `/v1/models` va MCP** emas** o'sha qopqoqda.
 
 ### Bitta jarayon: ikkitadan ortiq uzun `/v1/responses`
 
-A** sog'lom** jarayon ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ostidagi yig'ma, standart `0.75`)** mumkin** jarayon boʻyicha parvoz-bayt byudjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) hali ham joy boʻlsa, bir vaqtning oʻzida ikkitadan ortiq uzun `POST /v1/responses` ishga tushiring. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standart 256 KiB) yoki undan yuqori bo‘lgan jismlar tuzilmaviy talablar bilan bir xil og‘ir vaznli ijarani oladi va bir xil [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) dan foydalanadi. Bir vaqtning o'zida o'nlab uzoq SSE mijozlari (operatorlar ko'pincha 40-50 talab qiladi) - bu** xotira byudjeti** savol — hajmi to'p + primary/headroom uyalar + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — emas qattiq "max 2" mahsulot chegarasi. Bosim ostidagi to'p hali ham qayta urinib ko'riladigan `503` bilan to'kiladi, shuning uchun #7849 qaytmaydi.
+A** sog'lom** jarayon ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ostidagi yig'ma, standart `0.75`)** mumkin** jarayon boʻyicha parvoz-bayt byudjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) hali ham joy boʻlsa, bir vaqtning oʻzida ikkitadan ortiq uzun `POST /v1/responses` ishga tushiring. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standart 256 KiB) yoki undan yuqori bo‘lgan jismlar tuzilmaviy talablar bilan bir xil og‘ir vaznli ijarani oladi va bir xil [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) dan foydalanadi. Bir vaqtning o'zida o'nlab uzoq SSE mijozlari (operatorlar ko'pincha 40-50 talab qiladi) - bu** xotira byudjeti** savol — hajmi uymoq + primary/headroom uyalar + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — emas qattiq "max 2" mahsulot chegarasi. Bosim ostidagi to'p hali ham qayta urinib ko'riladigan `503` bilan to'kiladi, shuning uchun #7849 qaytmaydi.
 
 Kimga** to'plamlarni ko'paytiring** (mustaqil V8 eski joylar)** bugun** :
 
-| Do                                                                                                                                                       | Bunday qilma                                                                   |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Yugurish** N containers/pods** , har biri o'z bilan** o'z** `DATA_DIR` / hajm                                                                            | `replicas > 1` bitta SQLite fayliga o'rnating                                  |
-| Hajmi og'ir in-flight + sog'lom-headroom dan to'p/inflight-bayt byudjet; 1–2 - konservativ #7849 sukut bo'lib, qattiq mahsulotning maksimal qiymati emas | Bitta jarayonga 8 × RAM va cheksiz hisoblash boshini bering                    |
-| Majburiy emas: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` uchun** umumiy kvota hisoblagichlari**                                               | Redis umumiy SQLite — sifatida munosabatda bo'ling                             |
-| Har bir misol uchun provayder sirlarini takrorlang (yoki bo'lingan asboblar panelini qabul qiling)                                                       | Bitta boshqaruv paneli / bitta qo'ng'iroqlar jurnalini misollar bo'ylab kuting |
-| Har qanday yuk balansi bilan old; API kaliti yoki sessiya tomonidan yopishqoqlik etarli                                                                  | Sotuvchiga xos o'lchamni biladigan o'rta dasturni talab qiling                 |
+| Do                                                                                                                                           | Bunday qilma                                                                   |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Yugurish** N containers/pods** , har biri o'z bilan** o'z** `DATA_DIR` / hajm                                                                | `replicas > 1` bitta SQLite fayliga o'rnating                                  |
+| Hajmi og'ir in-flight + sog'lom-headroom dan to'p/inflight-bayt byudjet; 1–2 - konservativ #7849 sukut bo'lib, qattiq mahsulot maksimal emas | Bitta jarayonga 8 × RAM va cheksiz hisoblash boshini bering                    |
+| Majburiy emas: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` uchun** umumiy kvota hisoblagichlari**                                   | Redis umumiy SQLite — sifatida munosabatda bo'ling                             |
+| Har bir misol uchun provayder sirlarini takrorlang (yoki bo'lingan asboblar panelini qabul qiling)                                           | Bitta boshqaruv paneli / bitta qo'ng'iroqlar jurnalini misollar bo'ylab kuting |
+| Har qanday yuk balansi bilan old; API kaliti yoki sessiya tomonidan yopishqoqlik etarli                                                      | Sotuvchiga xos o'lchamni biladigan o'rta dasturni talab qiling                 |
 
-Seansdan hisobga yaqinlik Redis orqali ham bo'lishi mumkin: har bir jarayon uchun bir xil `REDIS_KEY_PREFIX` va ijobiy `sessionAffinityTtlMs` sozlamasi bilan `OMNIROUTE_SESSION_AFFINITY_STORE=redis` va `REDIS_URL` ni o'rnating. Pinlar har bir jarayonning tegishli mahalliy ulanishiga xeshlangan foydalanish hisobi identifikatorlarini hal qiladi, shuning uchun identifikator metamaʼlumotlariga mos keladigan OAuth hisoblarida mos keladigan IDs ulanishi boʻlishi shart emas. Ma'lum hisob identifikatorlari qarama-qarshi mahalliy IDs ko'ra PIN o'lchamlari va qo'riqlanadigan ko'chirishda ustunlik qiladi; identifikatorsiz yozuvlar (yoki identifikatsiyasiz qo'ng'iroq qiluvchilarni ko'chirish) meros ID qo'riqchisini saqlab qoladi. Barqaror foydalanish identifikatoriga ega bo'lmagan hisoblar hali ham mos keladigan IDs talab qiladi. Redis xatolari yoki 100 ms dan ortiq qo'ng'iroqlar mahalliy SQLite ga qaytadi. Har bir Redis yaqinlik do‘koni ajoyib operatsiyalarni 8 ga cheklaydi, to‘lganida darhol Redis chetlab o‘tadi va qo‘ng‘iroq qiluvchining oxirgi muddatida emas, faqat asosiy ish joyida bo‘lganda slotlarni chiqaradi. Redis uzilishi paytida umumiy haqiqat yo'q: har bir misol o'zining mahalliy yaqinligiga qaytadi, seanslar har bir misol uchun bir marta qayta tiklanishi mumkin va misollar bir-biridan farq qilishi mumkin. Yopishqoqlik tiklanganda Redis orqali qaytadan birlashadi. Vaqt tugashi kutish chegarasi, yuborilgan EVAL emas, bu esa qaytadan keyin tushishi mumkin. Marshrutlash yozuvlari yangi mutatsiya vaqtini o'qish emas, balki marshrutlash qarori tomonidan kuzatilgan aniq qiymatni solishtiradi; kuzatilgan miss yoki SQLite qayta kuzatuvi yo'q Redis kaliti sifatida taqqoslanadi. Eskirgan pinlar bir CAS almashtiriladi, shuning uchun kechikkan buyruq yangiroq, boshqa pinni almashtira olmaydi yoki o'chira olmaydi. Redis o'qiydi atomik qiymatni qaytaradi va qolgan server TTL; ijobiy PTTL (yoki muddati tugamagan) yozuvchining JSON vaqt tamg'asi yoki o'quvchi soatini emas, balki jonlilikni belgilaydi. Mahalliy snapshotlar TTL mahalliy muddatgacha qolgan xarita; mavjud JSON kalitlari o'qilishi mumkin bo'lib qoladi va ularning xom baytlari CAS uchun saqlanadi. Redis javob berayotganda haqiqatning yagona manbaidir. Tasdiqlangan umumiy qo'shimchalar, teginishlar va o'chirishlar mahalliy yozuvni olib tashlaydi, uni hech qachon o'rnatmang yoki yangilamang. Redis yo'lidagi SQLite faqat ushbu misolning Redis xatolari, taym-autlar yoki kirish to'yinganligidan kelib chiqqan o'zining qayta qarorlarini saqlaydi, avvalgidek TTL bilan chegaralangan. Keyinchalik uzilishda etishmayotgan mahalliy pin noto'g'ri yoki chiqarib tashlangan hisob emas, balki bitta yangi tanlash (bir tezkor kesh o'tkazib yuborish) turadi. Rad etilgan qo'shimchalar umumiy g'olibni va uning qolgan TTL atomik tarzda qaytaradi: oddiy tanlov xaritada ko'rsatilgan mahalliy muddatni qayta tekshiradi va jonli g'olibni ishlatadi, foydalanishga tegadi va boshqa umumiy yozishsiz ushbu hisob qaydnomasiga kiradi. Agar u mavjud bo'lmasa, tanlov mahalliy nomzodni saqlab qoladi, umumiy pinni o'zgartirmasdan qoldiradi va bitta disk raskadrovka xabarini chiqaradi. Rad etilgan CAS SQLite yozmaydi; Redis xatolari, vaqt tugashi yoki qabul qilishning to'yinganligi o'rniga mavjud mahalliy operatsiyani qo'llaydi. Agar yuborilgan mutatsiyaning javobi vaqt tugashidan keyin (qabul qilingan, rad etilgan yoki xato) kelsa, sinxronlashtirilgan aniq ketma-ketlashtirilgan qiymat solishtirish va o'chirish faqat baytga teng bo'lgan kutish vaqtining zaxira qatorini olib tashlaydi. Bu taqqoslash va o'chirish o'rtasida hech qanday kutish yo'q; yangi uzilish yozuvi saqlanadi. Himoyalangan ko‘chirish, hatto Redis pastga tushsa ham, muvaffaqiyatsiz hisobning mahalliy pinini olib tashlaydi va umumiy ko‘chirish tasdiqlangandan keyin uni yana tozalaydi. Kutilayotgan oldingi umumiy javoblar olib tashlangan mahalliy pinni tiklay olmaydi, chunki umumiy muvaffaqiyatlar hech qachon SQLite yozmaydi. Keyinchalik uzilishlar hisobni qayta tiklashi mumkin; keyinchalik qabul qilingan umumiy yozish faqat Redis da mavjud. Redis misses mahalliy zaxira holatiga murojaat qilmaydi. Drayv o'chirilgan bo'lsa, yangi tanlangan pinlar eski to'rt maydonli SQLite JSON shaklini saqlab qoladi; faqat Redis marshrutlash xeshlangan hisob identifikatorini qo'shadi. Oldindan olingan pinlar amal qilish muddati tugashi bilan qayta tekshiriladi. Redis ijarasiz tanlovi do'konni qayta o'qiydi, lekin sinxron ijarani rejalashtirish hali ham oldindan yuklash va rejalashtirish o'rtasida chiqarilgan pinni ishlatishi mumkin (qabul qilingan eng yaxshi harakat oynasi). Ijara majburiyati uzoq muddatli da'vodan keyin hisoblarni almashtira olmaydi: rad etilgan taqdirda u faqat ushbu so'rov uchun da'vo qilingan nomzodni saqlab qoladi va umumiy g'olibni daxlsiz qoldiradi, shuning uchun misollar bo'yicha kelishuv shu yo'lda chegaralanadi. Jadvalning qolgan qismi hali ham amal qiladi: bu kombinatsiyalangan seansning yopishqoqligi, mahalliy Codex burilish pinlari, hisob semaforlari, blokirovkalar, sarflanish cheklovlari, konfiguratsiya yoki qo'ng'iroqlar jurnallarini baham ko'rmaydi.
+Seansdan hisobga yaqinlik Redis orqali ham bo'lishi mumkin: har bir jarayon uchun bir xil `REDIS_KEY_PREFIX` va ijobiy `sessionAffinityTtlMs` sozlamasi bilan `OMNIROUTE_SESSION_AFFINITY_STORE=redis` va `REDIS_URL` ni o'rnating. Pinlar har bir jarayonning tegishli mahalliy ulanishiga xeshlangan foydalanish hisobi identifikatorlarini hal qiladi, shuning uchun identifikator metamaʼlumotlariga mos keladigan OAuth hisoblarida mos keladigan IDs ulanishi boʻlishi shart emas. Ma'lum hisob identifikatorlari qarama-qarshi mahalliy IDs ko'ra PIN o'lchamlari va qo'riqlanadigan ko'chirishda ustunlik qiladi; identifikatorsiz yozuvlar (yoki identifikatsiyasiz qo'ng'iroq qiluvchilarni ko'chirish) meros ID qo'riqchisini saqlab qoladi. Barqaror foydalanish identifikatoriga ega bo'lmagan hisoblar hali ham mos keladigan IDs talab qiladi. Redis xatolari yoki 100 ms dan ortiq qo'ng'iroqlar mahalliy SQLite ga qaytadi. Har bir Redis yaqinlik do‘koni ajoyib operatsiyalarni 8 ga cheklaydi, to‘lganida darhol Redis chetlab o‘tadi va qo‘ng‘iroq qiluvchining oxirgi muddatida emas, faqat asosiy ish joyida bo‘lganda slotlarni chiqaradi. Redis uzilishi paytida umumiy haqiqat yo'q: har bir misol o'zining mahalliy yaqinligiga qaytadi, seanslar har bir misol uchun bir marta qayta tiklanishi mumkin va misollar bir-biridan farq qilishi mumkin. Yopishqoqlik tiklanganda Redis orqali qaytadan birlashadi. Vaqt tugashi kutish chegarasi, yuborilgan EVAL emas, bu esa qaytadan keyin tushishi mumkin. Marshrutlash yozuvlari yangi mutatsiya vaqtini o'qish emas, balki marshrutlash qarori tomonidan kuzatilgan aniq qiymatni solishtiradi; kuzatilgan miss yoki SQLite qayta kuzatuvi yo'q Redis kaliti sifatida taqqoslanadi. Eskirgan pinlar bir CAS almashtiriladi, shuning uchun kechikkan buyruq yangiroq, boshqa pinni almashtira olmaydi yoki o'chira olmaydi. Redis o'qiydi atomik qiymatni qaytaradi va qolgan server TTL; ijobiy PTTL (yoki muddati tugamagan) yozuvchining JSON vaqt tamg'asi yoki o'quvchi soatini emas, balki tiriklikni belgilaydi. Mahalliy snapshotlar TTL mahalliy muddatgacha qolgan xarita; mavjud JSON kalitlari o'qilishi mumkin bo'lib qoladi va ularning xom baytlari CAS uchun saqlanadi. Redis javob berayotganda haqiqatning yagona manbaidir. Tasdiqlangan umumiy qo'shimchalar, teginishlar va o'chirishlar mahalliy yozuvni olib tashlaydi, uni hech qachon o'rnatmang yoki yangilamang. Redis yo'lidagi SQLite faqat ushbu misolning Redis xatolari, taym-autlar yoki kirish to'yinganligidan kelib chiqqan o'zining qayta qarorlarini saqlaydi, avvalgidek TTL bilan chegaralangan. Keyinchalik uzilishda etishmayotgan mahalliy pin noto'g'ri yoki chiqarib tashlangan hisob uchun emas, balki bitta yangi tanlash (bir tezkor kesh o'tkazib yuborish) turadi. Rad etilgan qo'shimchalar umumiy g'olibni va uning qolgan TTL atomik tarzda qaytaradi: oddiy tanlov xaritada ko'rsatilgan mahalliy muddatni qayta tekshiradi va jonli g'olibni ishlatadi, foydalanishga tegadi va boshqa umumiy yozishsiz ushbu hisob qaydnomasiga kiradi. Agar u mavjud bo'lmasa, tanlov mahalliy nomzodni saqlab qoladi, umumiy pinni o'zgartirmasdan qoldiradi va bitta disk raskadrovka xabarini chiqaradi. Rad etilgan CAS SQLite yozmaydi; Redis xatolari, vaqt tugashi yoki qabul qilishning to'yinganligi o'rniga mavjud mahalliy operatsiyani qo'llaydi. Agar yuborilgan mutatsiyaning javobi vaqt tugashidan keyin (qabul qilingan, rad etilgan yoki xato) kelsa, sinxronlashtirilgan aniq ketma-ketlashtirilgan qiymat solishtirish va o'chirish faqat baytga teng bo'lgan kutish vaqtining zaxira qatorini olib tashlaydi. Bu taqqoslash va o'chirish o'rtasida hech qanday kutish yo'q; yangi uzilish yozuvi saqlanadi. Himoyalangan ko‘chirish, hatto Redis pastga tushsa ham, muvaffaqiyatsiz hisobning mahalliy pinini olib tashlaydi va umumiy ko‘chirish tasdiqlangandan keyin uni yana tozalaydi. Kutilayotgan oldingi umumiy javoblar olib tashlangan mahalliy pinni tiklay olmaydi, chunki umumiy muvaffaqiyatlar hech qachon SQLite yozmaydi. Keyinchalik uzilishlar hisobni qayta tiklashi mumkin; keyinchalik qabul qilingan umumiy yozish faqat Redis da mavjud. Redis misses mahalliy zaxira holatiga murojaat qilmaydi. Drayv o'chirilgan bo'lsa, yangi tanlangan pinlar eski to'rt maydonli SQLite JSON shaklini saqlab qoladi; faqat Redis marshrutlash xeshlangan hisob identifikatorini qo'shadi. Oldindan olingan pinlar amal qilish muddati tugashi bilan qayta tekshiriladi. Redis ijarasiz tanlovi do'konni qayta o'qiydi, lekin sinxron ijarani rejalashtirish hali ham oldindan yuklash va rejalashtirish o'rtasida chiqarilgan pinni ishlatishi mumkin (qabul qilingan eng yaxshi harakat oynasi). Ijara majburiyati uzoq muddatli da'vodan keyin hisoblarni almashtira olmaydi: rad etilgan taqdirda u faqat ushbu so'rov uchun da'vo qilingan nomzodni saqlab qoladi va umumiy g'olibni daxlsiz qoldiradi, shuning uchun misollar bo'yicha kelishuv shu yo'lda chegaralanadi. Jadvalning qolgan qismi hali ham amal qiladi: bu kombinatsiyalangan seansning yopishqoqligi, mahalliy Codex burilish pinlari, hisob semaforlari, blokirovkalar, sarflanish cheklovlari, konfiguratsiya yoki qo'ng'iroqlar jurnallarini baham ko'rmaydi.
 
-Uskuna: har bir misol uchun bir vaqtda uzun `/v1/responses` - a** xotira byudjeti** savol (uyma + inflight-bayt / #10110). `N` mustaqil `DATA_DIR` s hali ham to‘plarni ko‘paytiradi: xost RAM “N = 8 bo‘lgan bitta 16 Gi pod”ni emas, balki `N × cgroup` qamrab olishi kerak. Hech qachon bitta SQLite faylida `replicas > 1`.
+Uskuna: har bir misol uchun bir vaqtda uzun `/v1/responses` - a** xotira byudjeti** savol (uyma + inflight-byte / #10110). `N` mustaqil `DATA_DIR` s hali ham to‘plarni ko‘paytiradi: xost RAM “N = 8 bilan bitta 16 Gi pod”ni emas, balki `N × cgroup` qamrab olishi kerak. Hech qachon bitta SQLite faylida `replicas > 1`.
 
-Eskizni tuzing (ikkita to'plam, ikki jild — emas `deploy.replicas: 2`):
+Eskizni tuzing (ikki to'plam, ikki jild — emas `deploy.replicas: 2`):
 
 ```yaml
 services:
@@ -685,61 +710,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Jarayondagi zichlik ( HTTP izolyatsiyasini siqish) [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) ni tashkil qiladi. Umumiy chidamli holatdagi bitta mantiqiy klaster [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) dir.
+Jarayondagi zichlik ( HTTP izolyatsiyasini siqish) [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) teng. Umumiy chidamlilik holatidagi bitta mantiqiy klaster [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) hisoblanadi.
 
-## Docker ichidagi Gemini hududiy xatolari
+## Docker ichidagi Gemini mintaqaviy xatolar
 
-Google AI Studio / Gemini API HTTP 400 javobini FAILED_PRECONDITION va
-`User location is not supported for the API use.` xabari bilan qaytarishi mumkin. Xostdagi muvaffaqiyatli soʻrov
-konteyner ham ayni chiquvchi yoʻnalishdan foydalanishini isbotlamaydi. DNS tartibi,
-IPv4/IPv6 ulanishi, VPN marshrutizatsiyasi va sozlangan proksilar farq qilishi mumkin.
-[Google qoʻllab-quvvatlaydigan hududlar](https://ai.google.dev/gemini-api/docs/available-regions)ni
-hamda amaldagi ulanish yoʻnalishini tekshiring; bu xatoning oʻzi API kaliti notoʻgʻri ekanini bildirmaydi.
+Google AI Studio / Gemini API FAILED_PRECONDITION va `User location is not supported for the API use.` bilan HTTP 400 ni qaytarishi mumkin Xostdagi muvaffaqiyatli so‘rov konteyner bir xil chiqish marshrutidan foydalanishini isbotlamaydi. DNS tartibi, IPv4/IPv6 ulanishi, VPN marshrutlash va sozlangan proksi-serverlar farq qilishi mumkin. [Google ning qo'llab-quvvatlanadigan hududlarini](https://ai.google.dev/gemini-api/docs/available-regions) va haqiqiy ulanish yo'lini tekshiring; bu xatoning o'zi yomon API kalitini aniqlamaydi.
 
-### Ulanishga xos proksini afzal koʻring
+### Ulanish uchun maxsus proksi-serverni afzal ko'ring
 
-Taʼsirlangan Gemini ulanishi uchun OmniRoute’ning
-[har bir ulanish uchun proksi konfiguratsiyasi](../ops/PROXY_GUIDE.md#4-level-proxy-system)dan
-foydalaning, soʻng **Test Connection** va ayni model bilan kichik soʻrovni takrorlang.
-Bu marshrutizatsiya oʻzgarishini faqat shu ulanish doirasida saqlaydi. Proksiga
-konteyner ichidan ulanish mumkinligini va ulanish haqiqatda uni tanlayotganini tekshiring.
-Yoʻnalishni oʻzgartirish yuqori darajadagi xizmatda hududiy muvofiqlikni kafolatlamaydi.
+Zararlangan Gemini ulanishi uchun OmniRoute ning [proksi-server konfiguratsiyasidan](../ops/PROXY_GUIDE.md#4-level-proxy-system) foydalaning va keyin takrorlang.** Sinov ulanishi** va bir xil modelga ega bo'lgan kichik so'rov. Bu o'sha ulanish uchun marshrut o'zgarishini saqlab qoladi. Proksi-serverga konteynerdan kirish mumkinligini va ulanish haqiqatan ham uni tanlaganligini tekshiring. Marshrutni o'zgartirish yuqori oqim mintaqaviy muvofiqligini kafolatlamaydi.
 
-### Xost va konteyner tarmoqlarini taqqoslang
+### Xost va konteyner tarmoqlarini solishtiring
 
-Autentifikatsiyalangan natijalarni taqqoslashda kalit, model va soʻrovni bir xil saqlang;
-hisobotga hech qachon hisob maʼlumotlari, proksi parollari yoki toʻliq avtorizatsiya
-sarlavhalarini joylamang. Avval OS rezolveri qaysi manzil oilalarini taklif qilishini
-xostda va konteyner ichida bir xil buyruq yordamida tekshiring:
+Autentifikatsiya qilingan natijalarni taqqoslashda kalit, model va so‘rovni bir xilda saqlang; hech qachon hisob ma'lumotlarini, proksi-server parollarini yoki to'liq avtorizatsiya sarlavhalarini muammoga joylashtirmang. Avval xost va konteyner ichida bir xil buyruqdan foydalanib, OS resolver qaysi oilalar manzilini taklif qilishini tekshiring:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-`omniroute`ni siz ishga tushirayotgan xizmat bilan almashtiring (masalan,
-`omniroute-web`). Bu buyruqlar hisob maʼlumotlari yoki IP manzillarisiz manzil
-oilalarini chiqaradi. Qaytarilgan `6` faqat IPv6 DNS natijasi mavjudligini koʻrsatadi:
-u ishlaydigan IPv6 yoʻnalishi yoki API’ga kirish mavjudligini **isbotlamaydi**.
-`curl` oʻrnatilgan joylarda har ikkala muhitda
-`curl -4 -I https://generativelanguage.googleapis.com` va
-`curl -6 -I https://generativelanguage.googleapis.com` natijalarini taqqoslang.
-HTTP javobi, hatto u autentifikatsiyasiz xato boʻlsa ham, shu tekshiruv uchun ulanish
-mavjudligini isbotlaydi; Gemini’dan foydalanish huquqini faqat autentifikatsiyalangan
-model soʻrovi tekshiradi.
+`omniroute` o'zingiz ishlatadigan xizmat bilan almashtiring (masalan, `omniroute-web`). Ushbu buyruqlar manzillar oilalarini hisob ma'lumotlari yoki IP manzillarisiz chop etadi. Qaytarilgan `6` faqat IPv6 DNS natijasini ko'rsatadi: shunday qiladi** emas** foydalanish mumkin IPv6 marshruti yoki API kirishni isbotlash. `curl` o'rnatilgan joyda, ikkala muhitda `curl -4 -I https://generativelanguage.googleapis.com` bilan `curl -6 -I https://generativelanguage.googleapis.com` ni solishtiring. HTTP javobi, autentifikatsiya qilinmagan xato bo'lsa ham, ushbu tekshiruv uchun ulanishni isbotlaydi; faqat autentifikatsiya qilingan model so'rovi Gemini muvofiqligini tekshiradi.
 
-### Xost darajasidagi muqobil yechim: ishlaydigan IPv6 va rezolver siyosati
+### Xost darajasidagi muqobil: ishlaydigan IPv6 va rezolyutsiya siyosati
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) muallifi oʻz muhitida
-konteyner IPv6’ini yoqish va glibc manzil tanlashini oʻzgartirish orqali kirishni
-tiklagan. Buni muayyan muhitga xos muqobil yechim sifatida koʻring. Rezolver
-afzalliklarini sozlashdan oldin xost IPv6’i ishlayotganini, konteynerning chiquvchi
-trafik/marshrutizatsiyasini va fayervol qoidalarini tekshiring. Xususiy ULA manzilining
-oʻzi ommaviy IPv6 ulanishi mavjudligini bildirmaydi.
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) muxbiri IPv6 konteynerini yoqish va glibc manzilini tanlashni o'zgartirish orqali o'z muhitiga kirishni tikladi. Buni atrof-muhitga xos alternativa sifatida ko'ring. Resolver parametrlarini sozlashdan oldin ishchi xost IPv6, konteyner egress/routing va xavfsizlik devori qoidalarini tasdiqlang. Shaxsiy ULA manzili o'z-o'zidan umumiy IPv6 ulanishini o'rnatmaydi.
 
-Compose’ning standart tarmogʻiga allaqachon ulangan xizmatlar uchun ushbu parcha
-oʻsha tarmoqda IPv6’ni yoqadi; xizmat, portlar, jildlar va konfiguratsiyaning qolgan
-qismini saqlab qoling:
+Compose standart tarmog‘iga allaqachon biriktirilgan xizmatlar uchun ushbu fragment o‘sha tarmoqdagi IPv6 yoqadi; xizmatingiz, portlar, hajmlar va konfiguratsiyaning qolgan qismini saqlab qoling:
 
 ```yaml
 networks:
@@ -747,33 +743,13 @@ networks:
     enable_ipv6: true
 ```
 
-Nomlangan tarmoq uchun IPv6’ni xizmat amalda ulanadigan tarmoqda yoqing. Docker ULA
-quyi tarmogʻini ajratishi mumkin; aniq va boshqa tarmoqlar bilan kesishmaydigan quyi
-tarmoqni faqat tarmogʻingiz buni talab qilganda tanlang. [Docker IPv6 tarmogʻi](https://docs.docker.com/engine/daemon/ipv6/)
-va [Compose tarmoq parametrlari](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6)ga qarang.
+Nomlangan tarmoq uchun uni xizmat haqiqatda qo'shiladigan tarmoqda yoqing. Docker ULA pastki tarmog'ini ajratishi mumkin; aniq, bir-biriga mos kelmaydigan pastki tarmoqni faqat sizning tarmog'ingiz talab qilganda tanlang. [Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/) va [Compose network options-ga](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6) qarang.
 
-**glibc asosidagi image**da `/etc/gai.conf` manzil tanlashni oʻzgartirishi mumkin.
-Joriy repozitoriy Dockerfile’i Debian’dan foydalanadi; maxsus musl asosidagi image’lar
-bu mexanizmdan foydalanmaydi. Xabar qilingan sozlama ULA yorligʻini
-`label fc00::/7 6`dan `label fc00::/7 1`ga oʻzgartiradi. Image’ning toʻliq siyosat
-jadvalidan boshlang va undagi boshqa yozuvlarni saqlab qoling: `label` yoki `precedence`
-yozuvini qoʻshish ushbu standart jadvalni almashtiradi, shuning uchun faqat oʻzgartirilgan
-qatorni oʻz ichiga olgan fayl yetarli emas.
-[glibc konfiguratsiyasi maʼlumotnomasi](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-bu semantikani hujjatlashtiradi. Tekshirilgan faylni `/etc/gai.conf` manziliga faqat
-oʻqish rejimida bind-mount qiling va oʻzgarishni qoʻllash uchun xizmatni qayta yarating.
+a kuni** glibc-ga asoslangan rasm** , `/etc/gai.conf` manzil tanlashni o'zgartirishi mumkin. Joriy Dockerfile ombori Debian'dan foydalanadi; maxsus musl asoslangan tasvirlar bu mexanizmni baham emas. Xabar qilingan sozlash ULA yorlig'ini `label fc00::/7 6` dan `label fc00::/7 1` ga o'zgartiradi. Tasvirning to'liq siyosat jadvalidan boshlang va uning boshqa yozuvlarini saqlang: `label` yoki `precedence` yozuvini qo'shish ushbu standart jadvalni almashtiradi, shuning uchun faqat o'zgartirilgan qatorni o'z ichiga olgan fayl etarli emas. [Glibc konfiguratsiya ma'lumotnomasi](https://github.com/bminor/glibc/blob/master/posix/gai.conf) ushbu semantikani hujjatlashtiradi. Ko'rib chiqilgan faylni faqat o'qish uchun `/etc/gai.conf` da bog'lang va uni qo'llash uchun xizmatni qayta yarating.
 
-Bu oʻsha konteynerdagi **barcha chiquvchi trafik** uchun OS manzil tanlashini
-oʻzgartiradi. Bu har bir ilovani IPv6’ni tanlashga majburlamaydi: Node’ning DNS tartibi
-va ulanish tanlovi ham muhim. Xususan, `--dns-result-order=ipv4first` IPv4’ni afzal
-koʻradi va faqat IPv4 bilan bogʻliq nosozlik uchun yechim emas.
-[Node DNS tartibi](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder)ga qarang.
+Bu OS manzili tanlovini o'zgartiradi** ushbu konteynerdagi barcha chiquvchi trafik** . Bu har bir ilovani IPv6 tanlashga majburlamaydi: Tugunning DNS tartibi va ulanish tanlovi ham muhim. Xususan, `--dns-result-order=ipv4first` IPv4 afzal ko'radi va IPv4-only muvaffaqiyatsizligi uchun vosita emas. [Node DNS buyurtmasiga](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder) qarang.
 
-Xost darajasidagi har qanday oʻzgarishdan soʻng Gemini va boshqa provayderlaringizni
-qayta sinang. Orqaga qaytarish uchun maxsus `gai.conf` ulanish nuqtasini olib tashlang,
-avvalgi tarmoq konfiguratsiyasini tiklang va texnik xizmat oynasi davomida taʼsirlangan
-xizmat/tarmoqni qayta yarating. Tarmoqni qayta yaratish unga ulangan boshqa
-konteynerlarning ishini toʻxtatishi mumkin; doimiy maʼlumotlar jildini oʻchirmang.
+Xost darajasidagi har qanday o'zgarishlardan keyin Gemini va boshqa provayderlaringizni qayta sinovdan o'tkazing. Orqaga qaytarish uchun maxsus `gai.conf` o'rnatish moslamasini olib tashlang, oldingi tarmoq konfiguratsiyasini tiklang va ta'sirlangan service/network parvarishlash oynasida qayta yarating. Tarmoqni qayta yaratish unga biriktirilgan boshqa konteynerlarni to'xtatishi mumkin; doimiy ma'lumotlar hajmini o'chirmang.
 
 ## Muhim eslatmalar
 

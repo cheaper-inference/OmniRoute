@@ -90,18 +90,17 @@ export function register(program, ctx) {
 
 ## ਖੋਜ
 
-ਪਲੱਗਇਨ ਇਨ੍ਹਾਂ ਥਾਵਾਂ ਤੋਂ ਖੋਜੇ ਜਾਂਦੇ ਹਨ:
+ਪਲੱਗਇਨ ਇਸ ਤੋਂ ਲੱਭੇ ਗਏ ਹਨ:
 
-1. `~/.omniroute/plugins/<name>/` — ਯੂਜ਼ਰ-ਲੋਕਲ ਇੰਸਟਾਲੇਸ਼ਨਾਂ
-2. `OMNIROUTE_PLUGIN_PATH` env var — ਕਸਟਮ ਡਾਇਰੈਕਟਰੀ
+1. `~/.omniroute/plugins/node_modules/<name>/` — ਜਿੱਥੇ `omniroute plugin install` ਪੈਕੇਜ ਰੱਖਦਾ ਹੈ (ਇੱਕ npm `--prefix`, `npm -g` ਨਹੀਂ)
+2. `~/.omniroute/plugins/<name>/` — ਹੱਥ-ਨਕਲ ਕੀਤੀ ਪਲੱਗਇਨ ਡਾਇਰੈਕਟਰੀਆਂ
+3. `OMNIROUTE_PLUGIN_PATH` env var — ਕਸਟਮ ਡਾਇਰੈਕਟਰੀ
 
-ਦੋਵੇਂ **ਸਿਰਫ਼ CLI ਲਈ** ਹਨ। ਸਰਵਰ-ਸਾਈਡ ਪਲੱਗਇਨ ਰਨਟਾਈਮ (ਮਾਰਕੀਟਪਲੇਸ/`plugin.json`
-ਪਲੱਗਇਨ, ਜੋ ਪ੍ਰੌਕਸੀ ਦੇ ਅੰਦਰ ਚੱਲਦੇ ਹਨ) ਦਾ ਆਪਣਾ ਸਕੈਨਰ ਅਤੇ ਆਪਣਾ ਓਵਰਰਾਈਡ,
-`OMNIROUTE_PLUGINS_DIR` ਹੈ — ਵੇਖੋ
-[PLUGIN_MARKETPLACE.md → ਪਲੱਗਇਨ ਡਾਇਰੈਕਟਰੀ](./PLUGIN_MARKETPLACE.md#plugin-directory)।
-ਇੱਕ ਨੂੰ ਸੈੱਟ ਕਰਨ ਨਾਲ ਦੂਜੇ 'ਤੇ ਕੋਈ ਅਸਰ ਨਹੀਂ ਪੈਂਦਾ।
+ਸਿਮਲਿੰਕਡ ਡਾਇਰੈਕਟਰੀਆਂ (npm `plugin install ./dir` ਲਈ ਕੀ ਬਣਾਉਂਦਾ ਹੈ) ਦੀ ਪਾਲਣਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
 
-ਲੋਡਿੰਗ ਗਲਤੀਆਂ ਨੂੰ ਫੜ ਕੇ ਚੇਤਾਵਨੀਆਂ ਵਜੋਂ ਪ੍ਰਿੰਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ — ਖਰਾਬ ਪਲੱਗਇਨ ਕਦੇ ਵੀ CLI ਨੂੰ ਕਰੈਸ਼ ਨਹੀਂ ਕਰਦਾ।
+ਦੋਵੇਂ ਹਨ** CLI-ਸਿਰਫ਼** . ਸਰਵਰ-ਸਾਈਡ ਪਲੱਗਇਨ ਰਨਟਾਈਮ (ਮਾਰਕੀਟਪਲੇਸ/`plugin.json` ਪਲੱਗਇਨ ਜੋ ਪ੍ਰੌਕਸੀ ਦੇ ਅੰਦਰ ਚੱਲਦੇ ਹਨ) ਦਾ ਆਪਣਾ ਸਕੈਨਰ ਹੈ ਜਿਸਦਾ ਆਪਣਾ ਓਵਰਰਾਈਡ ਹੈ, `OMNIROUTE_PLUGINS_DIR` — ਵੇਖੋ [PLUGIN_MARKETPLACE.md → ਪਲੱਗਇਨ ਡਾਇਰੈਕਟਰੀ](./PLUGIN_MARKETPLACE.md#plugin-directory) । ਇੱਕ ਸੈੱਟ ਕਰਨ ਨਾਲ ਦੂਜੇ 'ਤੇ ਕੋਈ ਅਸਰ ਨਹੀਂ ਪੈਂਦਾ।
+
+ਲੋਡ ਕਰਨ ਦੀਆਂ ਗਲਤੀਆਂ ਫੜੀਆਂ ਜਾਂਦੀਆਂ ਹਨ ਅਤੇ ਚੇਤਾਵਨੀਆਂ ਵਜੋਂ ਛਾਪੀਆਂ ਜਾਂਦੀਆਂ ਹਨ — ਇੱਕ ਟੁੱਟਿਆ ਪਲੱਗਇਨ ਕਦੇ ਵੀ CLI ਨੂੰ ਕਰੈਸ਼ ਨਹੀਂ ਕਰਦਾ ਹੈ।
 
 ## ਸੁਰੱਖਿਆ
 

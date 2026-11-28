@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) u OpenCode (`x-opencode-session`) huma riko
 
 Id-direttorju tax-xogħol huwa differenti bejn il-magni, u għalhekk l-istess repożitorju jista 'jippreżenta taħt mogħdijiet differenti. Ibgħat il-proġett b'mod espliċitu minflok: Claude Code iżid kwalunkwe headers elenkati `ANTHROPIC_CUSTOM_HEADERS` għal kull talba tal-mudell, u OmniRoute jaqra tnejn minnhom:
 
-| Header                     | Valur                                                       |
-| -------------------------- | ----------------------------------------------------------- |
-| `x-omniroute-project`      | Isem tal-proġett, eż `omniroute`                            |
-| `x-omniroute-project-repo` | Remote normalizzat, eż. `github.com/diegosouzapw/OmniRoute` |
+| Header                     | Valur                                                            |
+| -------------------------- | ---------------------------------------------------------------- |
+| `x-omniroute-project`      | Isem tal-proġett, eż `omniroute`                                 |
+| `x-omniroute-project-repo` | Remote normalizzat, eż. `github.com/cheaper-inference/OmniRoute` |
 
 It-tnejn jinqraw biss għall-attribuzzjoni; huma qatt ma jintbagħtu lill-fornitur upstream.
 
@@ -285,30 +285,22 @@ meħtieġa ebda flags addizzjonali. Issostitwixxi dan għal kull eżekuzzjoni pe
 
 ---
 
-## Soluzzjoni tal-problemi
+## Issolvi l-problemi
 
-**Claude Code jinjora l-gateway** — ikkonferma li `ANTHROPIC_BASE_URL` **ma fihx
-`/v1`** u erġa’ ibda `claude` (l-env jinqara darba biss waqt l-istartjar). `omniroute launch`
-jieħu ħsieb dan għalik.
+**Claude Code jinjora l-gateway** — jikkonferma `ANTHROPIC_BASE_URL` għandu** ebda `/v1`** u jerġa 'jibda `claude` (env jinqara darba fl-istartjar). `omniroute launch` jimmaniġġja dan għalik.
 
-**Is-selettur ta’ `/model` huwa vojt / il-mudelli tal-gateway huma neqsin** — jeħtieġ Claude Code
-v2.1.219+ u `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Huma biss l-IDs tal-mudelli `claude*` /
-`anthropic*` li jidhru fis-selettur; ġiegħel l-użu ta’ kwalunkwe mudell ieħor permezz ta’
-`ANTHROPIC_MODEL=<id>` (dan huwa dak li jagħmlu l-profili).
+**`/model` picker huwa vojt / nieqes mudelli ta' gateway** — jeħtieġ Claude Kodiċi v2.1.219 + u `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Biss `claude*` / `anthropic*` mudell IDs jidhru fil-picker; seħħ kwalunkwe mudell ieħor `ANTHROPIC_MODEL=<id>` (dan huwa dak li jagħmlu l-profili).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code dejjem jibgħat IDs tal-mudelli **mingħajr prefiss**
-(eż. `claude-opus-4-8`), għalhekk meta kemm il-fornituri Claude Code (`cc/…`) kif ukoll
-Claude (`claude/…`) ikunu konnessi, l-ID mingħajr prefiss jaqbel ma’ żewġ rotot u
-OmniRoute jirrifjuta li jaqta’. Irranġah b’wieħed minn dawn il-modi: iffissa ID bi prefiss permezz ta’
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, jew attiva **Ippreferi Claude Code għall-mudelli
-Claude mingħajr prefiss** — it-toggle fuq il-paġna tal-fornitur Claude, jew
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (mitfi b’mod awtomatiku;
-ara [Ambjent](../reference/ENVIRONMENT.md)) — li jidderieġi l-IDs `claude-*`
-mingħajr prefiss lejn Claude Code minflok. Il-prefissi espliċiti tal-fornituri dejjem jieħdu preċedenza.
+**`400 Ambiguous model 'claude-…'`** — Claude Kodiċi dejjem jibgħat** bla prefiss** mudell IDs (eż. `claude-opus-4-8`), allura meta kemm il-fornituri tal-Kodiċi Claude (`cc/…`) kif ukoll Claude (`claude/…`) huma konnessi l-bare id jaqbel ma’ żewġ rotot u OmniRoute jirrifjuta li raden. Waħħalha jew il-mod: pin id prefissat `ANTHROPIC_MODEL=cc/claude-opus-4-8`, jew abilita** Ippreferi l-Kodiċi Claude għal mudelli Claude mingħajr prefiss** — it-toggle fuq il-paġna tal-fornitur Claude, jew `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (default off; ara [Ambjent](../reference/ENVIRONMENT.md) ) — li jmur `claude-*` IDs vojt għal Claude Code minflok. Il-prefissi espliċiti tal-fornitur dejjem jirbħu.
 
-**Żbalji ta’ awtentikazzjoni** — il-profil ma fih ebda token. Uża `omniroute launch --profile`
-(jinjettah) jew esporta `ANTHROPIC_AUTH_TOKEN`.
+**"modalità awtomatika... din is-sessjoni mhix eliġibbli" (talbiet ta' klassifikatur ikfatturati)** — fil-modalità awtomatika Claude Code jitlob lis-server biex jirrevedi l-azzjonijiet ġewwa t-talbiet tal-mudell tiegħu stess ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Li jeħtieġ il-valur `anthropic-beta` `dangerous-tool-use-2026-09-03` u l-qasam tal-ġisem `safeguards` biex jilħqu Anthropic bħala par, u `safeguard_results` flimkien mal-għodda upstream użu IDs biex jiġu lura mhux mibdula. OmniRoute jagħmel dan meta t-talba tiġi mgħoddija lill-fornitur `claude` nattiv jew lil node `anthropic-compatible-*`, streamed jew le (gwardja tar-rigressjoni: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Miri oħra ma jistgħux jirritornaw ir-reviżjoni, għalhekk il-Kodiċi Claude jaqa' lura għat-talbiet tal-klassifikatur tiegħu stess u juri l-avviż:
 
-**Il-profili ma jiżolawx** — kull profil huwa `CLAUDE_CONFIG_DIR` distint;
-ivverifika li `echo $CLAUDE_CONFIG_DIR` ġewwa s-sessjoni jindika lejn
-`~/.claude/profiles/<name>`.
+- mudell fuq fornitur mhux Antropiku, jew kombinazzjoni li tinżel fuq waħda;
+- a relay node (`anthropic-compatible-cc-*`) kompatibbli ma Claude-Code , li jibni mill-ġdid il-korp tat-talba u ma jġorrx `safeguards`;
+- OmniRoute antik li qabel il-betas permessi, jew verżjoni tal-Kodiċi Claude taħt dik li l-paġna Anthropic telenka għal sessjonijiet tal-gateway.
+
+Mexxi `/status` fi Claude Kodiċi: the** Server tal-modalità awtomatika** ringiela taqra `Enabled` waqt li r-reviżjoni tas-server tkun attiva. Jekk dawk it-talbiet jiġux fatturati jiġi deċiż minn Anthropic, mhux minn OmniRoute.
+
+**Żbalji ta' awtorizzazzjoni** — il-profil ma jkollux token. Uża `omniroute launch --profile` (jinjettah) jew esporta `ANTHROPIC_AUTH_TOKEN`.
+
+**Il-profili ma jiżolawx** — kull profil huwa `CLAUDE_CONFIG_DIR` distint ; ivverifika `echo $CLAUDE_CONFIG_DIR` ġewwa l-punti tas-sessjoni `~/.claude/profiles/<name>`.

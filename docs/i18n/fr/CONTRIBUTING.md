@@ -8,122 +8,108 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Configuration de l’environnement de développement
+## Configuration du développement
 
-### Prérequis
+### Conditions préalables
 
-- **Node.js** `>=22.22.2 <23`, ou `>=24.0.0 <27` (recommandé : 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`, ou `>=24.0.0 <27` (recommandé : 24 LTS)
+- **npm** 10 +
 
-> **Windows avec Node 24 :** utilisez la version corrective 24 LTS actuelle (au moins 24.20.0).
-> Les versions antérieures peuvent s’interrompre après la réussite des tests lorsque `--test-force-exit` ferme le
-> processus. Le [correctif libuv pour Windows](https://github.com/nodejs/node/pull/61999) de Node résout
-> ce plantage à l’exécution ; laissez activées les assertions des tests et les vérifications de sortie de l’exécuteur.
+> **Windows avec le nœud 24 :** utilisez la version actuelle du correctif 24 LTS (au moins 24.20.0). Les versions antérieures peuvent s'abandonner après des tests réussis lorsque `--test-force-exit` ferme le processus. [Le correctif Windows libuv](https://github.com/nodejs/node/pull/61999) de Node résout ce crash d'exécution ; gardez les assertions de test et les contrôles de sortie du coureur activés.
 
-> **Utilisateurs de npm v11+ (Node 24+) :** après `npm install`, vérifiez que les modules natifs ont été installés :
-> `node -e "require('better-sqlite3')"`. Si cette commande échoue avec `MODULE_NOT_FOUND`,
-> exécutez `npm approve-scripts better-sqlite3 && npm install`. Consultez
-> [Dépannage](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Utilisateurs npm v11 + (nœud 24 +) :** Après `npm install`, vérifiez que les modules natifs ont été installés : `node -e "require('better-sqlite3')"`. Si cela échoue avec `MODULE_NOT_FOUND`, exécutez `npm approve-scripts better-sqlite3 && npm install`. Voir [Dépannage](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Clonage et installation
+### Cloner et installer
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Variables d’environnement
+### Variables d'environnement
 
 ```bash
-# Créez votre fichier .env à partir du modèle
+# Create your .env from the template
 cp .env.example .env
 
-# Générez les secrets requis
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Variables principales pour le développement :
+Variables clés pour le développement :
 
-| Variable               | Valeur par défaut en développement | Description                           |
-| ---------------------- | ---------------------------------- | ------------------------------------- |
-| `PORT`                 | `20128`                            | Port du serveur                       |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | URL de base de l’interface            |
-| `JWT_SECRET`           | (généré ci-dessus)                 | Secret de signature JWT               |
-| `INITIAL_PASSWORD`     | `CHANGEME`                         | Mot de passe de la première connexion |
-| `APP_LOG_LEVEL`        | `info`                             | Niveau de verbosité des journaux      |
+| Variable               | Défaut de développement  | Description                        |
+| ---------------------- | ------------------------ | ---------------------------------- |
+| `PORT`                 | `20128`                  | Port du serveur                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL pour le frontend          |
+| `JWT_SECRET`           | (générer ci-dessus)      | secret de signature JWT            |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Mot de passe de première connexion |
+| `APP_LOG_LEVEL`        | `info`                   | Niveau de verbosité du journal     |
 
 ### Paramètres du tableau de bord
 
-Le tableau de bord fournit des options d’interface pour les fonctionnalités qui peuvent également être configurées au moyen de variables d’environnement :
+Le tableau de bord fournit des bascules UI pour les fonctionnalités qui peuvent également être configurées via des variables d'environnement :
 
-| Emplacement du paramètre | Option                          | Description                                             |
-| ------------------------ | ------------------------------- | ------------------------------------------------------- |
-| Paramètres → Avancé      | Mode débogage                   | Active les journaux de requêtes de débogage (interface) |
-| Paramètres → Général     | Visibilité de la barre latérale | Affiche/masque les sections de la barre latérale        |
+| Emplacement de réglage | Basculer                        | Description                                       |
+| ---------------------- | ------------------------------- | ------------------------------------------------- |
+| Paramètres → Avancé    | Mode débogage                   | Activer les journaux de requêtes de débogage (UI) |
+| Paramètres → Général   | Visibilité de la barre latérale | sections de la barre latérale Show/hide           |
 
-Ces paramètres sont stockés dans la base de données et persistent après les redémarrages. Lorsqu’ils sont définis, ils remplacent les valeurs par défaut des variables d’environnement.
+Ces paramètres sont stockés dans la base de données et persistent lors des redémarrages, remplaçant les valeurs par défaut de la variable d'environnement lorsqu'elles sont définies.
 
 ### Exécution locale
 
 ```bash
-# Mode développement (rechargement à chaud)
+# Development mode (hot reload)
 npm run dev
 
-# Build de production
-npm run build    # next build → .build/next/, puis assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Compilation rapide du backend/de l’API uniquement pour les modifications des contributeurs
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Build de publication (reconstruction complète + sentinelle HEAD — requis pour le déploiement)
-npm run build:release   # rm -rf .build dist, puis build + écriture de dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Configuration courante du port
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Le build pour les contributeurs effectue uniquement une validation de la compilation : il n’assemble pas la
-distribution autonome et ne génère pas les ressources facultatives de packaging natif. Utilisez le build de production standard lorsque
-vous devez valider le paquet livrable.
+La version du contributeur effectue une validation de compilation uniquement : elle n'assemble pas la distribution autonome et ne crée pas d'actifs d'empaquetage natifs facultatifs. Utilisez la version de production standard lorsque vous devez valider le bundle livrable.
 
-### Structure des sorties du build
+### Créer une présentation de sortie
 
-| Répertoire | Contenu                                                                                     | Suivi par Git |
-| ---------- | ------------------------------------------------------------------------------------------- | ------------- |
-| `src/`     | Code source de l’application (TypeScript / TSX)                                             | Oui           |
-| `.build/`  | Fichiers intermédiaires — sortie de `next build` (ignorée par Git, `distDir = .build/next`) | Non           |
-| `dist/`    | Paquet livrable — assemblé par `assembleStandalone` (ignoré par Git)                        | Non           |
+| Annuaire  | Contenu                                                                   | Suivi |
+| --------- | ------------------------------------------------------------------------- | ----- |
+| `src/`    | Source de l'application (TypeScript / TSX)                                | Oui   |
+| `.build/` | Sortie intermédiaire — `next build` (gitignored, `distDir = .build/next`) | Non   |
+| `dist/`   | Bundle livrable — assemblé par `assembleStandalone` (gitignoré)           | Non   |
 
-Le pipeline de build s’effectue en un seul passage :
+Le pipeline de build s'effectue en un seul passage :
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (sortie Next.js)
-  └─ assembleStandalone()                 (copie les fichiers autonomes + statiques + publics + les ressources natives)
-       └─ sortie : dist/                  (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` nettoie également les deux répertoires au préalable et écrit
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) comme sentinelle d’intégrité du déploiement.
+`npm run build:release` nettoie en outre d'abord les deux répertoires et écrit `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) en tant que sentinelle d'intégrité de déploiement.
 
-`npm run build:contributor` utilise le profil de build réservé au backend. Il remplace temporairement par des stubs
-les fichiers de l’interface du tableau de bord pendant le build, conserve les gestionnaires de routes de l’API et restaure les fichiers d’origine
-après le build. Utilisez `npm run build` pour les modifications qui affectent l’interface du tableau de bord ou pour une
-validation complète de la publication ; le profil pour les contributeurs ne remplace pas le build de publication.
+`npm run build:contributor` utilise le profil de construction backend uniquement. Il supprime temporairement les fichiers UI du tableau de bord lors de la construction, conserve les gestionnaires de route API et restaure les fichiers d'origine après la construction. Utilisez `npm run build` pour les modifications qui affectent le tableau de bord UI ou pour la validation complète de la version ; le profil du contributeur ne remplace pas la version finale.
 
-> **Remarque concernant le déploiement sur VPS :** le répertoire distant de l’image `/usr/lib/node_modules/omniroute/app/`
-> reste inchangé. Les outils de déploiement synchronisent le contenu de `dist/` dans ce répertoire avec rsync.
-> Seul le chemin de sortie du build dans le dépôt a changé (`app/` → `dist/`).
+> **Remarque sur le déploiement de VPS :** le répertoire d'images distantes `/usr/lib/node_modules/omniroute/app/` est inchangé. Les compétences de déploiement y synchronisent le contenu de `dist/`. Seul le chemin de sortie de la build in-repo a été déplacé (`app/` → `dist/`).
 
-URL par défaut :
+URLs par défaut :
 
 - **Tableau de bord** : `http://localhost:20128/dashboard`
-- **API** : `http://localhost:20128/v1`
+- **API**: `http://localhost:20128/v1`
 
 ---
 
@@ -426,10 +412,10 @@ Utilisez ensuite les skills `/deploy-vps-*-cc`, qui synchronisent `dist/` avec l
 
 ---
 
-## Obtenir de l’aide
+## Obtenir de l'aide
 
-- **Architecture** : consultez [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Référence de l’API** : consultez [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Documentation sur la sécurité** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Documentation sur l’exploitation** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Problèmes** : [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Architecture** : Voir [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **Référence API** : Voir [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Documents de sécurité** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Documents opérationnels** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Problèmes** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

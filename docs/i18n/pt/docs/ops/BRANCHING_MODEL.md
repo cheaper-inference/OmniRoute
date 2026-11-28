@@ -48,7 +48,7 @@ Quando uma versão está a ser reconciliada, é aberto um problema de marcador d
 Verifique se existe um congelamento aberto antes de assumir que o branch que pretende pode ser fundido:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 A mecânica de fusão (proprietário `queue` label → Mergify) está documentada em [MERGE_TRAIN.md](./MERGE_TRAIN.md).

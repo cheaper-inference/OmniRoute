@@ -4,14 +4,11 @@
 
 ---
 
-> **Olek:** Üldiselt kättesaadav.
-> **Sihtrühm:** Operaatorid, kes ühendavad OpenCode'i OmniRoute'i juurutusega.
-> **Tõeallikas (konfiguratsiooniskeem):** `src/shared/services/opencodeConfig.ts`
-> **Tõeallikas (npm-pakett):** `@omniroute/opencode-provider/` (avaldatav tööruum)
+> **Olek:** Üldiselt saadaval.** Publik:** Operaatorid ühendavad OpenCode OmniRoute juurutusse.** Tõe allikas (konfiguratsiooniskeem):** `src/shared/services/opencodeConfig.ts`** Soovitatavad npm-paketid:** `@omniroute/opencode-plugin/` (OpenCode v1, installis `omniroute setup opencode`) ja `@omniroute/opencode-plugin-v2/` (OpenCode v2). Vanem `@omniroute/opencode-provider/` pakett on** aegunud** (vt Tee 2).
 
-[OpenCode](https://opencode.ai) on agentne käsurea-/töölaua-AI-klient. See loeb teenusepakkujate kataloogi failist `~/.config/opencode/opencode.json` (või `opencode.jsonc`) ja järgib skeemi aadressil `https://opencode.ai/config.json`. OmniRoute esitleb end OpenCode'ile ühe sellise teenusepakkujana — iga päring liigub läbi OmniRoute'i standardse OpenAI-ga ühilduva `/v1`-liidese, mistõttu saab OpenCode automaatselt kasu Auto-Combo marsruutimisest, kaitselülititest, võtmepoliitikatest, jälgitavusest jne.
+[OpenCode](https://opencode.ai) on agent CLI/desktop AI klient. See loeb oma pakkujate kataloogi `~/.config/opencode/opencode.json` (või `opencode.jsonc`) ja järgib skeemi aadressil `https://opencode.ai/config.json`. OmniRoute eksponeerib end OpenCode kui ühele neist pakkujatest — iga päring liigub läbi OmniRoute standardse OpenAI-ga ühilduva `/v1` pinna, nii et OpenCode saab automaatselt kasu automaatse kombineerimise marsruutimisest, kaitselülititest, võtmepoliitikatest, jälgitavusest jne.
 
-Toetatud on **kaks integratsiooniviisi**. Valige üks — mõlemad genereerivad sama konfiguratsiooni.
+Sellel lehel dokumenteeritakse kaks allolevat staatilise konfiguratsiooni teed; mõlemad genereerivad sama konfiguratsiooni. Reaalajas kataloogi järgiva mudeliloendi jaoks kasutage selle asemel pistikprogrammi: `omniroute setup opencode` installib `@omniroute/opencode-plugin` (OpenCode v1) ja `@omniroute/opencode-plugin-v2` sihib OpenCode v2 (vt [CLI integratsioonid](../guides/CLI-INTEGRATIONS.md) ja [OpenCode v2 pistikprogrammi juhend](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ Tulemuseks olev fail (vaikimisi mudelikataloog):
 
 ---
 
-## Viis 2 — npm-pakett `@omniroute/opencode-provider`
+## 2. tee — npm pakett `@omniroute/opencode-provider` (aegunud)
 
-Soovitatav juhul, kui skriptite konfiguratsiooni Node'i/TS-i kaudu (CI-konveierid, monorepod, kohandatud installivood).
+> **Aegunud.** Pakett kirjutab staatilise mudeliloendi, mis triivib teie reaalajas OmniRoute kataloogi taha. Selle README soovitab migreerida `@omniroute/opencode-plugin` (või `@omniroute/opencode-plugin-v2` OpenCode v2 puhul). Allolevat API säilitatakse ainult olemasolevate skriptide jaoks.
+
+Kasutatakse konfiguratsiooni skriptimisel Node/TS st (CI torujuhtmed, monorepos, kohandatud installeri vood).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Valikuline: alista OpenCode'ile pakutav mudelikataloog
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Olemasoleva failiga mittepurustavaks ühendamiseks kopeerige funktsiooni `mergeOpenCodeConfigText()` loogika failist `opencodeConfig.ts` või kutsuge välja CLI-generaator.
+Olemasoleva failiga mittepurustavaks liitmiseks kopeerige `mergeOpenCodeConfigText()` failist `opencodeConfig.ts` või helistage CLI generaatorile.
 
-Täieliku API kirjelduse leiate [paketi README-failist](../../@omniroute/opencode-provider/README.md).
+Täieliku API jaoks vaadake [paketti README](../../@omniroute/opencode-provider/README.md).
 
 ---
 
@@ -157,7 +156,9 @@ Anthropicu-laadsete klientide puhul, mis saadavad `x-api-key` + `anthropic-versi
 
 ## Vaata ka
 
-- [API viitedokumentatsioon](../reference/API_REFERENCE.md) — OmniRoute REST-liidese täielik ülevaade
+- [API viide](../reference/API_REFERENCE.md) — täis OmniRoute REST pind
 - [Auto-Combo](../routing/AUTO-COMBO.md) — mida `model: "auto"` tähendab
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
-- Lähtekood: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (soovitatav)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (aegunud)
+- Allikas: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

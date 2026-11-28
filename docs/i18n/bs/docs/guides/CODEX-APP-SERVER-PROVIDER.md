@@ -20,21 +20,21 @@ Budući da `codex-app-server` nikada ne ponavlja token, on ne nosi ograničenje 
 ## 1. Arhitektura
 
 ```
-┌─ OmniRoute aplikacija ──────────┐        ┌─ codex-app-server sidecar ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ token sposobnosti)           │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  samostalno upravlja OpenAI OAuth-om│
-└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-osvježavanje) │
-        │ dijeli (compose volumene)          └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS token sposobnosti (oboje ga montiraju)
-  codex-appserver-home    → ~/.codex (auth.json upisuje dashboard,
-                             čita ga sidecar-ov codex app-server)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidecar osluškuje **samo** na internoj compose mreži (`ws://codex-app-server:1456`) iza tokena sposobnosti. **Nikada** se ne objavljuje na hostu ili internetu.
-- Codex CLI je ugrađen u `omniroute:base`, tako da nije potrebna instalacija codex-a na hostu ili korisničkoj mašini kada pokrećete sidecar.
+- Prikolica sluša** samo** na internoj mreži sastavljanja (`ws://codex-app-server:1456`) iza tokena sposobnosti. Jeste** nikad** objavljeno na hostu ili internetu.
+- Prikolica koristi `omniroute:cli-no-docker`, izgrađenu od `runner-cli-no-docker` cilja, koji uključuje Codex CLI.
 
 ## 2. Pokretanje
 

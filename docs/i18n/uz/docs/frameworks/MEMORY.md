@@ -4,25 +4,13 @@
 
 ---
 
-> **Haqiqat manbasi:** `src/lib/memory/` va `src/app/api/memory/`
-> **Oxirgi yangilanish:** 2026-06-28 — v3.8.40 (sukut bo‘yicha o‘chirilgan + int8 kvantlashni yetkazib olish)
+> **Haqiqat manbai:** `src/lib/memory/` va `src/app/api/memory/`
 
-OmniRoute API kaliti (va ixtiyoriy ravishda sessiya identifikatori) bo‘yicha bog‘langan doimiy suhbat xotirasini taqdim etadi. Xotiralar LLM javoblaridan yengil regex andozalarini moslashtirish orqali avtomatik ravishda ajratib olinadi va yetakchi tizim xabari sifatida (yoki tizim rolini rad etadigan provayderlar uchun birinchi foydalanuvchi xabari sifatida) keyingi so‘rovlarga qayta kiritiladi.
+OmniRoute API tugmasi (va ixtiyoriy ravishda sessiya identifikatori) bilan kalitlangan doimiy suhbat xotirasini ta'minlaydi. Xotiralar LLM javoblaridan engil regex naqshini moslashtirish orqali avtomatik ravishda chiqariladi va keyingi so'rovlarga etakchi tizim xabari (yoki tizim rolini rad etgan provayderlar uchun birinchi foydalanuvchi xabari) sifatida qayta kiritiladi.
 
-> **Xotira sukut bo‘yicha O‘CHIRILGAN (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> endi `false` (`src/lib/memory/settings.ts`). Xotirani yoqish olinadigan kontekstning
-> `maxTokens` gacha (~2k) qismini **har bir** chat so‘roviga kiritadi va buning uchun
-> haq olinadi — bu yangi o‘rnatishlar hamda o‘z kontekstini o‘zi boshqaradigan
-> mijozlar uchun kutilmagan xarajat bo‘lishi mumkin. Uni **Settings → Memory**
-> bo‘limida aniq yoqing (xotira yoqilganda `MemorySkillsTab` token xarajati haqida
-> ogohlantiruvchi bildirishnomani ko‘rsatadi). Mijoz bitta so‘rov uchun
-> `x-omniroute-no-memory` so‘rov sarlavhasi (`true`/`1`/`yes`) orqali xotirani
-> o‘chirishi mumkin — [API_REFERENCE.md](../reference/API_REFERENCE.md) dagi
-> so‘rov sarlavhalari jadvaliga qarang. Xotirasiz so‘rov `memoryOwnerId = null`
-> qiymatini o‘rnatadi, bu o‘sha so‘rov uchun **ham** xotira, **ham** ko‘nikmalar
-> kiritilishini o‘chiradi (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Xotira sukut bo'yicha OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` endi `false` (`src/lib/memory/settings.ts`). Xotirani yoqish orqali olingan kontekstni `maxTokens` (~ 2k) gacha kiritish mumkin.** har** chat so'rovi yangi o'rnatishlar va o'z kontekstini boshqaradigan mijozlar uchun hayratlanarli xarajat —. ostida aniq ro'yxatdan o'ting** Sozlamalar → Xotira** (xotira yoqilganda `MemorySkillsTab` token narxi haqida ogohlantirish ko'rsatmasini ko'rsatadi). Mijoz `x-omniroute-no-memory` so'rov sarlavhasi (`true`/`1`/`yes`) bilan bitta so'rovni o'chirib qo'yishi mumkin — [API_REFERENCE.md](../reference/API_REFERENCE.md) dagi so'rov sarlavhasi jadvaliga qarang. Xotirasiz so'rov `memoryOwnerId = null` ni o'rnatadi, bu esa o'chiradi** ikkalasi ham** ushbu so'rov uchun xotira va mahorat in'ektsiyasi (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Xotira foydalanuvchi bo‘yicha emas, **har bir API kaliti doirasida** ajratiladi — bir xil API kaliti bilan autentifikatsiya qilingan har bir so‘rov bir xil xotira havzasidan foydalanadi; uni `sessionId` orqali qo‘shimcha ravishda ajratish mumkin.
+Xotira bu** API kaliti uchun qamrovli** , har bir foydalanuvchi uchun emas — bir xil API kaliti bilan autentifikatsiya qilingan har bir soʻrov bir xil xotira hovuziga ega va ixtiyoriy `sessionId` tomonidan qoʻshimcha qamrovli.
 
 ## Arxitektura
 

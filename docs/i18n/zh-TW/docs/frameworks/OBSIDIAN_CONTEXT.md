@@ -110,55 +110,48 @@ Obsidian 設定可透過 `api_key_context_sources` 資料表，將範圍限定�
 沒有個別 Obsidian 設定的已驗證金鑰仍會保留全域備援。
 四個 `obsidian_sync_*` 工具會維持其獨立的同步權杖行為。
 
-## MCP 工具（22 個）
+## MCP工具 (22)
 
-定義於 `open-sse/mcp-server/tools/obsidianTools.ts`。權杖／基底 URL 會在每次呼叫時解析（優先使用各 API 金鑰的設定，接著使用全域設定）。存取 OmniRoute **同步伺服器**的工具（四個 `obsidian_sync_*` 工具）還需要在 OmniRoute 設定中配置同步驗證權杖。
+在`open-sse/mcp-server/tools/obsidianTools.ts`中定義。 token/base-URL每次呼叫都會解析（首先是每個 API 金鑰，然後是全域）。影響OmniRoute的工具**同步伺服器**（四個`obsidian_sync_*`工具）也需要在OmniRoute設定中配置同步身份驗證令牌。
 
-### 讀取工具（`read:obsidian`）
+### 閱讀工具（`read:obsidian`）
 
-| 工具                         | 說明                                                                             |
-| ---------------------------- | -------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | 檢查 Local REST API 是否可連線且已通過驗證。                                     |
-| `obsidian_search_simple`     | 對筆記內容進行全文搜尋；傳回包含檔案路徑的片段。                                 |
-| `obsidian_search_structured` | 使用 JSON Logic 運算式（and/or/regex/path 篩選器）進行搜尋。                     |
-| `obsidian_read_note`         | 依相對於儲存庫的路徑讀取筆記；可選擇特定標題／區塊／frontmatter。                |
-| `obsidian_list_vault`        | 列出儲存庫中的檔案與目錄（項目樹狀結構）。                                       |
-| `obsidian_get_document_map`  | 取得筆記的標題結構，以標題 → 行號的對應表呈現。                                  |
-| `obsidian_get_note_metadata` | 取得 frontmatter、標籤、連結、字元數／字數，而不包含完整內容。                   |
-| `obsidian_get_active_file`   | 取得 Obsidian 中目前作用中檔案的路徑與內容。                                     |
-| `obsidian_get_periodic_note` | 取得指定日期的每日／每週／每月週期筆記（若省略則為今天）。                       |
-| `obsidian_get_tags`          | 列出儲存庫中的所有標籤及其出現頻率。                                             |
-| `obsidian_list_commands`     | 列出可用的 Obsidian 命令 ID（搭配 `obsidian_execute_command` 使用）。            |
-| `obsidian_sync_status`       | OmniRoute 同步伺服器狀態：執行狀態、儲存庫名稱、連接埠、執行時間、上次同步時間。 |
-| `obsidian_sync_conflicts`    | 列出尚未解決的同步衝突（路徑、衝突路徑、偵測時間）。                             |
+| 工具                         | 描述                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | 檢查本地REST API是否可達且已通過認證。                                          |
+| `obsidian_search_simple`     | 筆記內容全文檢索；傳回帶有檔案路徑的片段。                                      |
+| `obsidian_search_structured` | 使用JSON邏輯表達式（and/or/regex/path過濾器）進行搜尋。                         |
+| `obsidian_read_note`         | 按保管庫相對路徑閱讀註釋；可選的特定heading/block/frontmatter.                  |
+| `obsidian_list_vault`        | 列出 Vault 中的檔案和目錄（條目樹）。                                           |
+| `obsidian_get_document_map`  | 取得筆記的標題結構作為標題→行號的對應。                                         |
+| `obsidian_get_note_metadata` | 取得 frontmatter、標籤、連結、 char/word計數，而無需完整內容。                  |
+| `obsidian_get_active_file`   | 取得Obsidian中目前活動檔案的路徑+內容。                                         |
+| `obsidian_get_periodic_note` | 取得某個日期的daily/weekly/monthly定期記錄（如果省略，則為今天）。              |
+| `obsidian_get_tags`          | 列出所有保管庫標籤及其頻率。                                                    |
+| `obsidian_list_commands`     | 列出可用的Obsidian指令IDs （與`obsidian_execute_command`一起使用）。            |
+| `obsidian_sync_status`       | OmniRoute同步伺服器狀態：正在運作、保管庫名稱、連接埠、正常運作時間、上次同步。 |
+| `obsidian_sync_conflicts`    | 列出未解決的同步衝突（路徑、衝突路徑、偵測到）。                                |
 
-### 寫入工具（`write:obsidian`）
+### 編寫工具（`write:obsidian`）
 
-| 工具                             | 說明                                                                     |
-| -------------------------------- | ------------------------------------------------------------------------ |
-| `obsidian_write_note`            | 使用指定的 Markdown 內容建立或覆寫筆記。                                 |
-| `obsidian_append_note`           | 將內容附加至筆記；可選擇附加至特定標題／區塊。                           |
-| `obsidian_patch_note`            | 在標題、區塊或 frontmatter 欄位精確地附加、前置或取代內容。              |
-| `obsidian_delete_note`           | 從儲存庫中永久刪除筆記。                                                 |
-| `obsidian_move_note`             | 在儲存庫內移動或重新命名筆記。                                           |
-| `obsidian_execute_command`       | 依 Obsidian 命令 ID 執行命令。                                           |
-| `obsidian_open_file`             | 在 Obsidian 中開啟檔案（若檔案不存在則建立）。                           |
-| `obsidian_sync_trigger`          | 立即觸發桌面端↔行動端儲存庫的雙向同步。                                  |
-| `obsidian_sync_resolve_conflict` | 解決同步衝突：保留 `local`（行動端）、`remote`（桌面端）或 `keep-both`。 |
+| 工具                             | 描述                                                                  |
+| -------------------------------- | --------------------------------------------------------------------- |
+| `obsidian_write_note`            | 使用給定的 Markdown 內容建立或覆蓋筆記。                              |
+| `obsidian_append_note`           | 將內容附加到註釋；可選擇特定的heading/block.                          |
+| `obsidian_patch_note`            | 在標題、區塊或前沿領域進行外科手術append/prepend/replace 。           |
+| `obsidian_delete_note`           | 從保管庫中永久刪除註解。                                              |
+| `obsidian_move_note`             | 在庫中移動或重新命名註釋。                                            |
+| `obsidian_execute_command`       | 透過命令ID執行Obsidian命令。                                          |
+| `obsidian_open_file`             | 在Obsidian中開啟檔案（如果不存在則建立它）。                          |
+| `obsidian_sync_trigger`          | 立即觸發雙向桌面↔行動保管庫同步。                                     |
+| `obsidian_sync_resolve_conflict` | 解決同步衝突：保留`local` （移動）、 `remote` （桌面）或`keep-both`。 |
 
 > [!NOTE]
-> `obsidian_patch_note` 的目標可接受 `heading | block | frontmatter` 的 `targetType`
-> 以及 `append | prepend | replace` 的 `operation`，並可選擇指定
-> `createTargetIfMissing`。四個 `obsidian_sync_*` 工具會與本機同步
-> 伺服器通訊（預設為 `http://127.0.0.1:27781`），且需要同步權杖。
+> `obsidian_patch_note`目標接受`heading | block | frontmatter`的`targetType`和`append | prepend | replace`的`operation` ，並帶有可選的`createTargetIfMissing`。四個`obsidian_sync_*`工具與本機同步伺服器（預設為`http://127.0.0.1:27781` ）通訊並需要同步代幣。
 
-### 權限範圍
+### 範圍
 
-讀取工具需要 `read:obsidian`；寫入工具需要 `write:obsidian`。強制執行方式
-與 Notion 相同——由 `open-sse/mcp-server/server.ts` 中的
-`withScopeEnforcement()` 處理，並由 `OMNIROUTE_MCP_ENFORCE_SCOPES=true` 控制是否啟用；
-允許的權限範圍來源為 `OMNIROUTE_MCP_SCOPES` 或 API 金鑰的權限範圍上下文。請參閱
-[MCP-SERVER.md](./MCP-SERVER.md)。
+讀取工具需要`read:obsidian`；編寫工具需要`write:obsidian`。強制執行與Notion —相同，由`open-sse/mcp-server/server.ts`中的`withScopeEnforcement()`處理，在`OMNIROUTE_MCP_ENFORCE_SCOPES=true`上進行門控，並對API密鑰缺少`manage`/`admin`的HTTP/SSE呼叫者強制執行，允許的範圍源自`OMNIROUTE_MCP_SCOPES`或API密鑰的範圍上下文。參見[MCP-SERVER.md](./MCP-SERVER.md) 。
 
 ## 端點
 

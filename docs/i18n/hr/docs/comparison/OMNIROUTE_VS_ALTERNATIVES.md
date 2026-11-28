@@ -11,7 +11,7 @@ Objektivna usporedba značajki s popularnim open-source AI usmjerivačima.
 | Značajka                                                  |                     OmniRoute 3.8                     |      LiteLLM 1.x      | OpenRouter (SaaS) | Portključ  |
 | --------------------------------------------------------- | :---------------------------------------------------: | :-------------------: | :---------------: | :--------: |
 | **Pružatelji usluga**                                     |                        **329**                        |         ~100          |        ~50        |    ~30     |
-| **Free/no-auth kataloški unosi**                          |                        **155**                        |          n/a          |    prolaz kroz    |    n/a     |
+| **Davatelji s besplatnim pristupom**                      |             **50 sa slobodnim pristupom**             |          n/a          |    prolaz kroz    |    n/a     |
 | **Samodomaćin**                                           |                          ✅                           |          ✅           |        ❌         | ⚠ plaćeno  |
 | **OAuth kataloški unosi**                                 |                        **23**                         |      djelomičan       |        ❌         |     ❌     |
 | **Auto-zamjenske kombinacije**                            |                   **22 strategije**                   | na temelju prioriteta | na razini razine  | ponderiran |
@@ -38,10 +38,10 @@ Objektivna usporedba značajki s popularnim open-source AI usmjerivačima.
 
 ## Kada odabrati OmniRoute
 
-- Vi sami domaćin i želite** maksimalnu pokrivenost pružatelja usluga** (394 ponuđač, 155 free/no-auth kataloških unosa)
+- Vi sami domaćin i želite** maksimalnu pokrivenost pružatelja usluga** (394 pružatelja, 50 s besplatnim pristupom)
 - Trebate a** ugrađeni MCP poslužitelj** (LLM alati, memorija, vještine izložene kao alati)
 - Vama treba**A2A protokol** za tijekove rada između agenta
-- želite** skriveni otisak prsta** (JA3/JA4) kako bi se izbjeglo otkrivanje od strane uzvodnog CAPTCHAs
+- želite** skrivenost otiska prsta** (JA3/JA4) kako bi se izbjeglo otkrivanje od strane uzvodnog CAPTCHAs
 - Vama treba** značajke poduzeća** (guardrails, evals, audit trail) bez SaaS računa
 
 ## Kada odabrati LiteLLM
@@ -58,10 +58,10 @@ Objektivna usporedba značajki s popularnim open-source AI usmjerivačima.
 
 ## Kada odabrati Portkey
 
-- Trebate **komercijalni SLA** s jamstvima dostupnosti
-- Preferirate **upravljanu nadzornu ploču** bez operativnog opterećenja
-- Trebate gotove **značajke usklađenosti za poslovne korisnike**
+- Trebate a** komercijalni SLA** s jamstvom neprekidnog rada
+- Više volite a** upravljana nadzorna ploča** bez operativnih troškova
+- Vama treba** usklađenost poduzeća** značajke izvan okvira
 
 ---
 
-_Posljednje ažuriranje: 2026-08-02. Ispravke pošaljite putem PR-a kako bi ova tablica ostala točna._
+_Pošaljite ispravke putem PR kako bi ova tablica bila točna._

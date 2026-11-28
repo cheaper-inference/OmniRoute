@@ -62,41 +62,31 @@ Duk hanyoyin guda uku suna buƙatar tantancewar dashboard (`isAuthenticated`). A
 OmniRoute yana adana token sannan nan take ya gudanar da binciken gwaji mai sakamako 1; idan Notion
 ya dawo da abin kuskure, za a share token ɗin kuma kiran ya gaza da `400`.
 
-## Kayan aikin MCP (6)
+## MCP aiki (6)
 
-An ayyana su a cikin `open-sse/mcp-server/tools/notionTools.ts`. Ana samo token a lokacin kira
-ta hanyar `getNotionToken()`; idan ba a saita ko ɗaya ba, kayan aikin zai jefa
-`"Ba a saita token na haɗin Notion ba. Saita shi a Settings > Context Sources."`
+An bayyana a cikin `open-sse/mcp-server/tools/notionTools.ts`. Ana warware alamar a lokacin kira ta hanyar `getNotionToken()`; idan babu wanda aka saita kayan aikin yana jefa `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Kayan aiki                   | Scope          | Bayani                                                                                                 |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------ |
-| `notion_search`              | `read:notion`  | Bincika shafuka da rumbunan bayanai ta tambayar rubutu (yana dawo da take, IDs, URLs). Mai shafuffuka. |
-| `notion_get_page`            | `read:notion`  | Samo abun ciki da metadata na shafi ta ID ɗinsa.                                                       |
-| `notion_list_block_children` | `read:notion`  | Jera dukkan tubalan da ke ƙarƙashin tubali ko shafi (bishiyar tubalan). Mai shafuffuka.                |
-| `notion_query_database`      | `read:notion`  | Yi tambaya ga rumbun bayanai tare da `filter` + `sorts` na zaɓi (tsarin Notion API). Mai shafuffuka.   |
-| `notion_get_database`        | `read:notion`  | Samo schema/metadata na rumbun bayanai ta ID.                                                          |
-| `notion_append_blocks`       | `write:notion` | Ƙara tubalan yara zuwa tubali ko shafin da ke akwai (iyakar tubala 100 a kowace buƙata).               |
+| Kayan aiki                   | Iyakar         | Bayani                                                                                                     |
+| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Bincika shafuka da bayanan bayanai ta hanyar tambayar rubutu (yana mayar da lakabi, IDs, URLs). Paginated. |
+| `notion_get_page`            | `read:notion`  | Samun abun ciki da metadata na shafi ta ID.                                                                |
+| `notion_list_block_children` | `read:notion`  | Lissafa duk toshe yara na toshe ko shafi (bishiyar toshe). Paginated.                                      |
+| `notion_query_database`      | `read:notion`  | Nemi bayanai tare da zaɓin `filter` + `sorts` (tsarin Notion API ). Paginated.                             |
+| `notion_get_database`        | `read:notion`  | Samun schema/metadata na database ta ID.                                                                   |
+| `notion_append_blocks`       | `write:notion` | Haɗa toshe yara zuwa toshe ko shafi na yanzu (max 100 tubalan kowace buƙata).                              |
 
-### Sigogin shigarwa
+### Sigar shigarwa
 
-- `notion_search` — `query` (haruffa 1–500), `pageSize` (1–100, tsoho 20),
-  `startCursor` (na zaɓi).
-- `notion_get_page` — `pageId` (hex mai haruffa 32 ko UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, tsoho 50),
-  `startCursor` (na zaɓi).
-- `notion_query_database` — `databaseId`, `filter` (na zaɓi, tsarin matatar Notion),
-  `sorts` (jerin na zaɓi), `pageSize` (1–100, tsoho 50), `startCursor` (na zaɓi).
+- `notion_search` — `query` (1-500 chars), `pageSize` (1-100, tsoho 20), `startCursor` (na zaɓi).
+- `notion_get_page` — `pageId` (32-char hex ko UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1-100, tsoho 50), `startCursor` (na zaɓi).
+- `notion_query_database` — `databaseId`, `filter` (na zaɓi, tsarin tace Notion ), `sorts` (tsari na zaɓi), `pageSize` (1-100, tsoho 50), `startCursor` (na zaɓi).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (jerin abubuwan tubali),
-  `after` (matsayi na zaɓi).
+- `notion_append_blocks` — `blockId`, `children` (tsari na toshe abubuwa), `after` (matsayin zaɓi).
 
-### Scopes
+### Iyaka
 
-Kayan aikin karantawa suna buƙatar `read:notion`, kuma kayan aikin rubutawa yana buƙatar `write:notion`.
-`withScopeEnforcement()` a cikin `open-sse/mcp-server/server.ts` yana tilasta scopes ne kawai idan
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true`; scopes da aka yarda wa mai kira suna fitowa daga
-`OMNIROUTE_MCP_SCOPES` (waƙafi ne ke raba su) ko mahallin scope na API key da aka tantance.
-Duba [MCP-SERVER.md](./MCP-SERVER.md) don cikakken tsarin scope.
+Kayan aikin karantawa suna buƙatar `read:notion` kuma kayan aikin rubutu yana buƙatar `write:notion`. Ana aiwatar da madaidaicin ta hanyar `withScopeEnforcement()` a cikin `open-sse/mcp-server/server.ts` lokacin `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, kuma koyaushe ga mai kiran HTTP/SSE wanda maɓallin API ba shi da `manage`/`admin`; Izinin da aka yarda da mai kiran ya fito daga `OMNIROUTE_MCP_SCOPES` (rabu da waƙafi) ko ingantaccen mahallin mahallin maɓalli na API. Duba [MCP-SERVER.md](./MCP-SERVER.md) don cikakken samfurin iyaka.
 
 ## Endpoints
 

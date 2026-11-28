@@ -178,74 +178,49 @@ npx playwright install chromium
 
 ---
 
-## Antivirus မှားယွင်းသတိပေးချက်များ
+## Antivirus False Positives
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG က `README.md` ကို `MD:HttpRequest-inf[Susp]` ဖြင့် quarantine လုပ်ခြင်း
+### Avast/AVG သီးသန့် `README.md` `MD:HttpRequest-inf[Susp]`
 
-**ဤသည်မှာ မှားယွင်းသတိပေးချက်တစ်ခုသာ ဖြစ်သည်။ မည်သည့်အရာမျှ ကူးစက်ခံထားရခြင်းမရှိသလို မည်သည့်လုပ်ဆောင်ချက်မျှ ပြုလုပ်ရန်မလိုအပ်ပါ။**
+**ဒါက မှားယွင်းတဲ့သဘောပါ။ မည်သည့်အရာမှ ကူးစက်ခြင်းမရှိပါ၊ မည်သည့်လုပ်ဆောင်မှုမှ မလိုအပ်ပါ။**
 
-Avast နှင့် AVG တို့သည် HTTP request ပုံစံနှင့်တူသော link အများအပြားပါဝင်သည့် plain-text/Markdown ဖိုင်များကို အန္တရာယ်ရှိသည်ဟု သတ်မှတ်သည့် heuristic ကို အသုံးပြုကြသည်။ OmniRoute ၏ `README.md` ကို npm package ထဲတွင် ထည့်သွင်းဖြန့်ချိထားသည် (`package.json` → `files` တွင် စာရင်းသွင်းထားသည်)။ ထို့ကြောင့် global install ပြုလုပ်သောအခါ ၎င်းသည် `node_modules/omniroute/README.md` သို့ ရောက်ရှိသွားပြီး `http://localhost:20128/...` ဥပမာ ~15 ခု (MCP HTTP/SSE endpoint များ၊ A2A `.well-known` URL နှင့် `curl` snippet များ) ပါဝင်သည်။ ထိုမျှသော link သိပ်သည်းမှုသည် heuristic ကို သတိပေးချက်ထုတ်စေရန် လုံလောက်သည်။
+Avast နှင့် AVG HTTP-request-looking links များစွာပါဝင်သော plain-text/Markdown ဖိုင်များကို အလံပြသည့် heuristic ကိုလုပ်ဆောင်သည်။ OmniRoute၏ `README.md` သင်္ဘောများသည် npm ပက်ကေ့ဂျ်အတွင်းတွင် (၎င်းကို `package.json` → `files` တွင်ဖော်ပြထားသည်) ထို့ကြောင့် ၎င်းသည် ကမ္ဘာလုံးဆိုင်ရာထည့်သွင်းမှု — တွင် `node_modules/omniroute/README.md` တွင်ရောက်ရှိပြီး ၎င်းတွင် ~ 15 `http://localhost:20128/...` နမူနာများ ( MCP HTTP/SSE အဆုံးမှတ်များ၊ A2A `.well-known` URL နှင့် `curl` အတိုအထွာများ) ပါဝင်သည်။ ထိုလင့်ခ်သိပ်သည်းဆသည် ရူရစ်စ်ကို လည်ပတ်ရန် လုံလောက်သည်။
 
-ဤပြဿနာသည် မကြာသေးမီကမှ စတင်ခဲ့ပါကလည်း ဖိုင်၏ သဘောသဘာဝ ပြောင်းလဲသွားခြင်းမရှိပါ။ README ၏ endpoint ဇယားတွင် MCP HTTP + SSE + A2A တို့ကို ထပ်မံထည့်သွင်းခဲ့ပြီး `curl` ဥပမာများလည်း ပိုမိုပါဝင်လာသဖြင့် သတ်မှတ်ထားသော threshold ကို ကျော်လွန်သွားခြင်းဖြစ်သည်။
+၎င်းသည် မကြာသေးမီကမှ စတင်ခဲ့လျှင်- ဖိုင်သည် အမျိုးအစားတွင် ပြောင်းလဲခြင်းမရှိပါ။ README ၎င်း၏ အဆုံးမှတ်ဇယားကို တိုးလာသည် (MCP HTTP + SSE + A2A ကို ပေါင်းထည့်ထားသည်) နှင့် နောက်ထပ် `curl` ဥပမာများ ၊ ၎င်းကို သတ်မှတ်ချက်ဘောင်ကို ကျော်သွားစေသည်။
 
-ဤဖိုင်သည် executable content လုံးဝမပါဝင်သော အသုံးပြုလမ်းညွှန် documentation သက်သက်ဖြစ်သည်။ ၎င်းကို quarantine မှ ဘေးကင်းစွာ ပြန်လည်ရယူနိုင်သည်။
+ဖိုင်သည် လည်ပတ်လုပ်ဆောင်နိုင်သော အကြောင်းအရာ သုညဖြင့် ပြတ်သားသောစာရွက်စာတမ်းဖြစ်သည်။ quarantine မှ လုံခြုံစွာ ပြန်ယူနိုင်ပါသည်။
 
-**လုပ်ဆောင်ရန်များ:**
+**ဘာလုပ်မလဲ:**
 
-1. **Notification များကို ရပ်တန့်ပါ** — antivirus ထဲတွင် install directory ကို exclude လုပ်ပါ
-   (Avast: Settings → Exceptions)။ သင့် global `node_modules` path နှင့်/သို့မဟုတ်
-   OmniRoute data dir (`~/.omniroute/`) ကို ထည့်သွင်းပါ။
-2. **မှားယွင်းသတိပေးချက်ကို အစီရင်ခံပါ** — <https://www.avast.com/false-positive-file-form.php> သို့ သွားပြီး
-   quarantine လုပ်ထားသော `README.md` ကို ပူးတွဲပေးပို့ပါ။ Text ဖိုင်တစ်ခုအပေါ် vendor ၏ heuristic က
-   လွန်ကဲစွာ တုံ့ပြန်ခြင်းဖြစ်သောကြောင့် ဤနည်းလမ်းသည် လူတိုင်းအတွက် အထောက်အကူဖြစ်စေမည့် ဖြေရှင်းချက်ဖြစ်သည်။
+1. **အသိပေးချက်များကို ရပ်ပါ။** — သင်၏ antivirus ရှိ install directory ကို ဖယ်ထုတ်ပါ (Avast: ဆက်တင်များ → ခြွင်းချက်များ)၊ သင်၏ ကမ္ဘာလုံးဆိုင်ရာ `node_modules` လမ်းကြောင်း and/or OmniRoute data dir (`~/.omniroute/`) ကိုထည့်ပါ။
+2. **အတုအယောင်ကို အပြုသဘော တိုင်ကြားပါ။** — <https://www.avast.com/false-positive-file-form.php>၊ quarantined `README.md` ကို ပူးတွဲထားသည်။ ၎င်းသည် စာသားဖိုင်တစ်ခုအား ရောင်းချသူ၏ လွန်ကဲစွာတုံ့ပြန်မှုဖြစ်သောကြောင့် လူတိုင်းကို ကူညီပေးသည့် ပြုပြင်မှုဖြစ်သည်။
 
-**ကျွန်ုပ်တို့ဘက်မှ ဤအရာကို အဘယ်ကြောင့် "မပြင်ဆင်" သနည်း:** ဥပမာအားလုံးသည် `http://localhost` ဖြစ်ပြီး
-localhost ကို self-signed certificate ဆိုင်ရာ အခက်အခဲများမရှိဘဲ `https` အဖြစ် အသုံးမပြုနိုင်ပါ။ Vendor တစ်ခု၏
-heuristic ကို ရှောင်ရှားရန် documentation ကို ဖျက်ဆီးပြောင်းလဲခြင်းသည် scanner bug တစ်ခုကို ဖြည့်ဆည်းပေးရန်
-စာဖတ်သူတိုင်းအတွက် အခက်အခဲဖြစ်စေမည်။
+**ငါတို့ဘက်က ဒါကို ဘာကြောင့် မပြင်ရသလဲ၊** ဥပမာများသည် `http://localhost` အားလုံးဖြစ်ပြီး၊ မိမိကိုယ်တိုင် လက်မှတ်မထိုးထားသော လက်မှတ် ပွတ်တိုက်မှုမရှိဘဲ localhost သည် `https` မဖြစ်နိုင်ပါ။ ရောင်းချသူတစ်ဦး၏ တွေးခေါ်မှုကို ရှောင်ရန် စာရွက်စာတမ်းများကို ခိုးယူခြင်းသည် စကင်နာချွတ်ယွင်းမှုကို ကျေနပ်စေရန် စာဖတ်သူတိုင်းကို ထိခိုက်စေမည်ဖြစ်သည်။
 
-### Kaspersky က Desktop app ကို `PDM:Trojan.Win32.Generic` အဖြစ် သတ်မှတ်ခြင်း
+### Kaspersky သည် Desktop အက်ပ်အား `PDM:Trojan.Win32.Generic` အဖြစ် အလံပြသည်။
 
-**ဤသည်မှာ behavioral heuristic ကြောင့် ဖြစ်ပေါ်လာသော မှားယွင်းသတိပေးချက်တစ်ခုသာ ဖြစ်သည်။ မည်သည့်အရာမျှ ကူးစက်ခံထားရခြင်းမရှိပါ။** Kaspersky ၏
-`PDM:` prefix သည် ရလဒ်ကို ၎င်း၏ Proactive Defense Module (System Watcher) မှ ထုတ်ပေးခြင်းဖြစ်ကြောင်း ဆိုလိုသည်။
-၎င်းသည် သိရှိပြီးသား malware နှင့် တိုက်ဆိုင်စစ်ဆေးခြင်းအစား installer က မည်သည့်အရာ _လုပ်ဆောင်သည်_ ကို ဆုံးဖြတ်အကဲဖြတ်သည်။ သတိပေးချက်ထွက်ပေါ်လာသည့်အခါ
-Kaspersky သည် installation တစ်ခုလုံးကို "roll back" လုပ်ပြီး ရေးသားထားပြီးသားဖိုင်များကို ဖျက်ပစ်သောကြောင့်
-app သည် ပျက်စီးသွားခြင်း သို့မဟုတ် ပျောက်ဆုံးသွားခြင်း ဖြစ်နိုင်သည်။
+**ဤသည်မှာ အပြုအမူဆိုင်ရာ အယူဝါဒတစ်ခုမှ လွဲမှားသော အပြုသဘောဖြစ်သည်။ ဘာမှမကူးစက်ပါဘူး။** Kaspersky ၏ `PDM:` ရှေ့ဆက်သည် စီရင်ချက်သည် သိရှိထားသော malware နှင့် ကိုက်ညီမည့်အစား installer _does_ ကို စစ်ဆေးသည့် ၎င်း၏ Proactive Defense Module (System Watcher) မှ ထွက်ပေါ်လာခြင်းဖြစ်သည်။ မီးလောင်သွားသောအခါတွင်၊ Kaspersky သည် — — ရေးသားထားပြီးသော ဖိုင်များကို ဖျက်ခြင်းအား Kaspersky မှ "ပြန်သိမ်းသည်" ဖြစ်သောကြောင့် အက်ပ်သည် ကျိုးပျက်ခြင်း သို့မဟုတ် ပျောက်ဆုံးခြင်းတို့ကို အဆုံးသတ်စေသည်။
 
-၎င်းက သတိပေးသတ်မှတ်သောဖိုင်များသည် desktop app နှင့်အတူ ထည့်သွင်းထားသည့် ကြေညာထားပြီးဖြစ်သော open-source dependency များ၏ ပုံမှန်အစိတ်အပိုင်းများသာ ဖြစ်သည်။ ဥပမာ:
+၎င်း၏အလံပြထားသည့်ဖိုင်များသည် ဒက်စ်တော့အက်ပ်ဖြင့် စုစည်းထားသော ကြေငြာထားသော ပွင့်လင်းအရင်းအမြစ်မှီခိုမှု၏စတော့ရှယ်ယာအစိတ်အပိုင်းများဖြစ်သည်၊ ဥပမာ-
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` နှင့်
-  `workerProcessEntry.js` — app အတွင်း provider login နှင့် browser-backed chat အတွက် အသုံးပြုသည့် browser automation
-  library ဖြစ်သော [Playwright](https://playwright.dev)။
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — web-cookie provider များတွင် browser-fingerprinted HTTP အတွက် အသုံးပြုသည့် pinned `wreq-js` native binding
-  (`<arch>` သည် `x64` သို့မဟုတ် `arm64` ဖြစ်သည်)။
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` နှင့် `workerProcessEntry.js` — [Playwright](https://playwright.dev) ၊ အက်ပ်အတွင်းဝန်ဆောင်မှုပေးသူ၏ အကောင့်ဝင်ခြင်းနှင့် ဘရောက်ဆာ-ကျောထောက်နောက်ခံချတ်အတွက် အသုံးပြုသည့် ဘရောက်ဆာ-အလိုအလျောက်လုပ်ဆောင်သည့်စာကြည့်တိုက်။
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — ဝဘ်-ကွတ်ကီး ဝန်ဆောင်မှုပေးသူများတွင် ဘရောက်ဆာ-လက်ဗွေဖြင့် HTTP အတွက် အသုံးပြုသော ပင်ထိုးထားသော `wreq-js` မူရင်းစုစည်းမှု (`<arch>` သည် `x64` သို့မဟုတ် `arm64`)။
 
-**အဘယ်ကြောင့် သတိပေးချက်ထွက်သနည်း:** Windows installer ကို **code-sign မလုပ်ရသေးပါ**။ ထို့ကြောင့် unsigned NSIS
-installer တွင် reputation လုံးဝမရှိဘဲ behavioral heuristic များက အပြင်းထန်ဆုံးအဆင့်ဖြင့် စစ်ဆေးသည်။ Bundled native DLL တစ်ခုနှင့်
-`%LOCALAPPDATA%\Programs\OmniRoute` အောက်တွင် ရေးသားထားသော `.js` ဖိုင် ရာနှင့်ချီ (Next.js standalone build မှ
-hash suffix ပါသော package directory များအပါအဝင်) တို့ ပေါင်းစပ်လာသောအခါ heuristic ကို သတိပေးချက်ထုတ်စေရန် လုံလောက်သည်။ Code signing ပြုလုပ်ရန် စီစဉ်ထားပြီးဖြစ်သည်။
-၎င်းကို အကောင်အထည်မဖော်မီအထိ release အသစ်များတွင် ဤပြဿနာ ထပ်မံဖြစ်ပေါ်နိုင်သည်။
+**ဘာကြောင့် မီးလောင်တာလဲ** Windows installer သည်** ကုဒ်လက်မှတ်မထိုးရသေးပါ။** ထို့ကြောင့် လက်မှတ်မထိုးထားသော NSIS ထည့်သွင်းသူသည် ရန်လိုမှုအများဆုံးတွင် လုပ်ဆောင်သည့် ဂုဏ်သတင်းနှင့် အပြုအမူဆိုင်ရာ heuristics မရှိပါ။ စုစည်းထားသော မူရင်း DLL နှင့် `%LOCALAPPDATA%\Programs\OmniRoute` အောက်တွင် ရေးထားသော ရာနှင့်ချီသော `.js` ဖိုင်များ ( Next.js standalone build မှ hash-suffixed package directories များအပါအဝင်) နှင့် ပေါင်းစပ်လိုက်လျှင် heuristic ကို လည်ပတ်ရန် လုံလောက်ပါသည်။ ကုဒ်လက်မှတ်ထိုးရန် စီစဉ်ထားသည်။ မထွက်မချင်း၊ ထုတ်ဝေမှုအသစ်များသည် ၎င်းကို ပြန်လုပ်နိုင်သည်။
 
-**လုပ်ဆောင်ရန်များ:**
+**ဘာလုပ်မလဲ:**
 
-1. **သင့် download ကို ဦးစွာ အတည်ပြုပါ** (ဖိုင်ကို ပြင်ဆင်နှောင့်ယှက်ထားခြင်း မရှိကြောင်း စစ်ဆေးရန်)။ Release တိုင်းတွင်
-   `latest.yml` ကို ထုတ်ပြန်ထားပြီး ၎င်း၏ `sha512` field (base64) သည် `OmniRoute.Setup.<version>.exe`
-   installer ကို လွှမ်းခြုံထားသည်။ Installer ပါဝင်သော folder မှ PowerShell တွင်:
+1. **သင်၏ဒေါင်းလုဒ်ကို ဦးစွာအတည်ပြုပါ။** (ဆော့ဖ်ဝဲကို တားမြစ်ထားသည်)။ ထုတ်ဝေမှုတိုင်းတွင် `sha512` အကွက် (base64) သည် `OmniRoute.Setup.<version>.exe` ထည့်သွင်းသူအား အကျုံးဝင်သော `latest.yml` ထုတ်ဝေသည်။ PowerShell တွင်၊ ထည့်သွင်းသူပါရှိသောဖိုင်တွဲမှ-
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Output သည် `latest.yml` → `sha512` နှင့် ကိုက်ညီရမည်။ မကိုက်ညီပါက ဖိုင်ကို ဖျက်ပြီး
-   [GitHub releases page](https://github.com/diegosouzapw/OmniRoute/releases) မှသာ ပြန်လည် download လုပ်ပါ။
-2. **ပြန်လည်ရယူပြီး exclude လုပ်ပါ** — roll back လုပ်ခံထားရသော item များကို quarantine မှ ပြန်လည်ရယူပြီး
-   `%LOCALAPPDATA%\Programs\OmniRoute` အတွက် exclusion တစ်ခု ထည့်ပါ (Kaspersky → Settings → Threats and Exclusions)၊
-   ထို့နောက် ပြန်လည် install လုပ်ပါ။
-3. **မှားယွင်းသတိပေးချက်ကို အစီရင်ခံပါ** — <https://opentip.kaspersky.com/>။ အသုံးပြုသူများက ပေးပို့သော FP
-   report များသည် allowlisting လုပ်ငန်းစဉ်ကို အမှန်တကယ် မြန်ဆန်စေသည်။
+   အထွက်သည် `latest.yml` → `sha512` နှင့် ကိုက်ညီရမည်။ မဟုတ်ပါက ဖိုင်ကိုဖျက်ပြီး [GitHub ထုတ်ဝေမှုများ စာမျက်နှာမှ](https://github.com/cheaper-inference/OmniRoute/releases) သာလျှင် ပြန်လည်ဒေါင်းလုဒ်လုပ်ပါ။
+2. **+ exclude ကို ပြန်လည်ရယူပါ။** — ကျောပိုးထားသော အရာများကို သီးသန့်ခွဲထားခြင်းမှ ပြန်လည်ရယူပြီး `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → ဆက်တင်များ → ခြိမ်းခြောက်မှုများနှင့် ဖယ်ထုတ်မှုများ) အတွက် ချန်လှပ်မှုတစ်ခုကို ထည့်ပြီးနောက် ပြန်လည်ထည့်သွင်းပါ။
+3. **အတုအယောင်ကို အပြုသဘော တိုင်ကြားပါ။** — <https://opentip.kaspersky.com/> အသုံးပြုသူမှ တင်ပြထားသော FP အစီရင်ခံစာများသည် ခွင့်ပြုစာရင်းကို အမှန်တကယ် မြန်ဆန်စေသည်။
 
 ---
 
@@ -853,10 +828,10 @@ omniroute serve --ready-timeout 180000
 
 ---
 
-## မဖြေရှင်းနိုင်သေးပါသလား?
+## ပိတ်နေသေးလား။
 
-- **GitHub Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **ဗိသုကာဖွဲ့စည်းပုံ**: အတွင်းပိုင်း အသေးစိတ်အချက်အလက်များအတွက် [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) ကို ကြည့်ပါ
-- **API ကိုးကားချက်**: endpoint အားလုံးအတွက် [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) ကို ကြည့်ပါ
-- **စနစ်ကျန်းမာရေး Dashboard**: အချိန်နှင့်တစ်ပြေးညီ စနစ်အခြေအနေကို ကြည့်ရှုရန် **Dashboard → Health** ကို စစ်ဆေးပါ
-- **ဘာသာပြန်ကိရိယာ**: format ပြဿနာများကို debug လုပ်ရန် **Dashboard → Translator** ကို အသုံးပြုပါ
+- **GitHub ပြဿနာများ** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **ဗိသုကာပညာ** အတွင်းပိုင်းအသေးစိတ်အတွက် [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) ကြည့်ပါ။
+- **API အကား** အဆုံးမှတ်အားလုံးအတွက် [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) ကြည့်ပါ။
+- **ကျန်းမာရေးဒိုင်ခွက်** : စစ်ဆေးပါ။** ဒက်ရှ်ဘုတ် → ကျန်းမာရေး** အချိန်နှင့်တစ်ပြေးညီ စနစ်အခြေအနေအတွက်
+- **ဘာသာပြန်သူ** : သုံးပါ။** ဒက်ရှ်ဘုတ် → ဘာသာပြန်သူ** ဖော်မတ်ပြဿနာများကို အမှားရှာရန်

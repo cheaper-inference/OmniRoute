@@ -328,18 +328,16 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks/<id> \
 कुंजी के लिए इससे कम और 8 या उससे कम वर्णों के लिए कोई नहीं) और कनेक्शन का `projectId` भी लौटाता है। किसी भी अन्य कुंजी के लिए दोनों फ़ील्ड
 प्रतिक्रिया से हटा दिए जाते हैं।
 
-## क्रेडेंशियल रिज़ॉल्यूशन
+## क्रेडेंशियल संकल्प
 
-`src/lib/cloudAgent/api.ts` में `getCloudAgentCredentials(providerId)`:
+`getCloudAgentCredentials(providerId)` `src/lib/cloudAgent/api.ts`
 
-1. `getProviderConnections({ provider: providerId, isActive: true })` के माध्यम से सक्रिय प्रोवाइडर कनेक्शन लोड करता है।
-2. प्रत्येक कनेक्शन के लिए `apiKey` (ट्रिम किया हुआ) को प्राथमिकता देता है। उपलब्ध न होने पर `accessToken` का उपयोग करता है।
-3. पहले गैर-रिक्त टोकन को `{ apiKey: token }` के रूप में रैप करके लौटाता है।
-4. यदि कोई उपयोग योग्य टोकन नहीं मिलता, तो `null` लौटाता है — API `400` के साथ
-   `"क्लाउड एजेंट प्रोवाइडर के लिए कोई सक्रिय क्रेडेंशियल कॉन्फ़िगर नहीं है: <id>"` लौटाता है।
+1. `getProviderConnections({ provider: providerId, isActive: true })` के माध्यम से सक्रिय प्रदाता कनेक्शन लोड करता है।
+2. प्रत्येक कनेक्शन के लिए, `apiKey` (छंटनी) को प्राथमिकता देता है। `accessToken` पर वापस आ जाता है।
+3. `{ apiKey: token }` के रूप में लपेटा गया पहला गैर-रिक्त टोकन लौटाता है।
+4. यदि कोई उपयोग योग्य टोकन नहीं मिलता है तो `null` लौटाता है — तो API `400` `"No active credentials configured for cloud agent provider: <id>"` के साथ प्रतिक्रिया देता है।
 
-इसका अर्थ है कि Cloud Agents नियमित LLM प्रोवाइडर की तरह उसी Provider Connection तालिका का पुनः उपयोग करते हैं।
-Jules को सक्षम करने के लिए `provider: "jules"` और भरे हुए `apiKey` वाला एक सक्रिय कनेक्शन बनाएँ।
+इसका मतलब है कि क्लाउड एजेंट नियमित LLM प्रदाताओं के समान प्रदाता कनेक्शन तालिका का पुन: उपयोग करते हैं। Jules सक्षम करने के लिए, `provider: "jules"` और पॉपुलेटेड `apiKey` के साथ एक सक्रिय कनेक्शन बनाएं।
 
 ## डैशबोर्ड
 

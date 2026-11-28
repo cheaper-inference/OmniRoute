@@ -4,14 +4,11 @@
 
 ---
 
-> **Ìpò:** Ó wà fún lílò ní gbogbogbò.
-> **Àwọn olùkà:** Àwọn olùṣàkóso tó ń so OpenCode pọ̀ mọ́ ìmúṣiṣẹ́ OmniRoute.
-> **Orísun òtítọ́ (schema àtúnṣe):** `src/shared/services/opencodeConfig.ts`
-> **Orísun òtítọ́ (package npm):** `@omniroute/opencode-provider/` (workspace tí a lè tẹ̀ jáde)
+> **Ipo:** Ni gbogbogbo wa.** Olugbo:** Awọn oniṣẹ wiwi OpenCode si imuṣiṣẹ OmniRoute kan.** Orisun otitọ (eto atunto):** `src/shared/services/opencodeConfig.ts`** Awọn akojọpọ npm ti a ṣeduro:** `@omniroute/opencode-plugin/` (OpenCode v1, ti fi sori ẹrọ nipasẹ `omniroute setup opencode`) ati `@omniroute/opencode-plugin-v2/` (OpenCode v2). Awọn agbalagba `@omniroute/opencode-provider/` package ni** deprecated** (wo Ọna 2).
 
-[OpenCode](https://opencode.ai) jẹ́ oníbàárà AI CLI/desktop tó ń ṣiṣẹ́ gẹ́gẹ́ bí aṣojú. Ó ń ka àkójọ àwọn provider rẹ̀ láti `~/.config/opencode/opencode.json` (tàbí `opencode.jsonc`) ó sì ń tẹ̀lé schema tó wà ní `https://opencode.ai/config.json`. OmniRoute ń fi ara rẹ̀ hàn sí OpenCode gẹ́gẹ́ bí ọ̀kan lára àwọn provider wọ̀nyẹn — gbogbo ìbéèrè ń gba ojú-ọ̀nà `/v1` boṣewa OmniRoute tó bá OpenAI mu, nítorí náà OpenCode ń rí àǹfààní ìdarí Auto-Combo, àwọn circuit breaker, àwọn ìlànà key, àkíyèsí iṣẹ́, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ láìfọwọ́sí.
+[OpenCode](https://opencode.ai) jẹ aṣoju aṣoju CLI/desktop AI onibara. O ka iwe akọọlẹ olupese rẹ lati `~/.config/opencode/opencode.json` (tabi `opencode.jsonc`) o si tẹle eto ni `https://opencode.ai/config.json`. OmniRoute ṣe afihan ararẹ si OpenCode gẹgẹbi ọkan ninu awọn olupese wọnyẹn — gbogbo ibeere n ṣan nipasẹ OmniRoute boṣewa OpenAI-ibaramu `/v1` dada, nitorinaa OpenCode ni anfani laifọwọyi lati ipa-ọna-Aifọwọyi-Combo, awọn fifọ iyika, awọn eto imulo bọtini, akiyesi, ati bẹbẹ lọ.
 
-Àwọn **ọ̀nà ìsopọ̀ méjì ni a ṣe àtìlẹ́yìn fún**. Yan ọ̀kan — àtúnṣe kan náà ni wọ́n ń ṣe.
+Oju-iwe yii ṣe iwe awọn ọna aimi-konfigi meji ni isalẹ; mejeeji ina kanna konfigi. Fun atokọ awoṣe ti o tẹle katalogi laaye rẹ, lo itanna dipo: `omniroute setup opencode` fi sori ẹrọ `@omniroute/opencode-plugin` (OpenCode v1), ati `@omniroute/opencode-plugin-v2` fojusi OpenCode v2 (wo [awọn iṣọpọ CLI](../guides/CLI-INTEGRATIONS.md) ati [itọsọna itanna OpenCode v2](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ Fáìlì tí yóò jáde (àkójọ model àìyípadà):
 
 ---
 
-## Ọ̀nà 2 — package npm `@omniroute/opencode-provider`
+## Ona 2 — npm package `@omniroute/opencode-provider` (ti a ti parẹ)
 
-A dábàá rẹ̀ nígbà tí o bá ń kọ script fún àtúnṣe náà láti Node/TS (àwọn pipeline CI, monorepo, àwọn ìṣàn olùfisílẹ̀ àdáni).
+> **Idinku.** Apapọ naa kọ atokọ awoṣe aimi kan ti o fa lẹhin katalogi OmniRoute ifiwe rẹ. README rẹ ṣeduro gbigbe si `@omniroute/opencode-plugin` (tabi `@omniroute/opencode-plugin-v2` lori OpenCode v2). API ti o wa ni isalẹ wa ni ipamọ fun awọn iwe afọwọkọ ti o wa nikan.
+
+Ti a lo nigba kikọ atunto lati Node/TS (awọn pipelines CI, monorepos, ṣiṣan insitola aṣa).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Àṣàyàn: yí àkójọ model tí a fi hàn sí OpenCode padà
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Fún ìdapọ̀ tí kò ní ba fáìlì tó ti wà jẹ́, tún `mergeOpenCodeConfigText()` láti `opencodeConfig.ts` ṣe tàbí pe ẹ̀rọ amújáde CLI náà.
+Fun idapọ ti kii ṣe iparun lodi si faili ti o wa tẹlẹ, tun `mergeOpenCodeConfigText()` lati `opencodeConfig.ts` tabi pe olupilẹṣẹ CLI naa.
 
-Wo [README package náà](../../@omniroute/opencode-provider/README.md) fún API ẹ̀kúnrẹ́rẹ́.
+Wo [README package](../../@omniroute/opencode-provider/README.md) fun API ni kikun.
 
 ---
 
@@ -155,9 +154,11 @@ Fún àwọn client ara Anthropic tí ń fi `x-api-key` + `anthropic-version` r�
 
 ---
 
-## Wo pẹ̀lú
+## Wo tun
 
-- [Ìtọ́kasí API](../reference/API_REFERENCE.md) — gbogbo ojú-iṣẹ́ OmniRoute REST
-- [Auto-Combo](../routing/AUTO-COMBO.md) — ohun tí `model: "auto"` túmọ̀ sí
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
-- Kóòdù ìpilẹ̀ṣẹ̀: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`
+- [API itọkasi](../reference/API_REFERENCE.md) — kikun OmniRoute REST dada
+- [Auto-Combo](../routing/AUTO-COMBO.md) — kini `model: "auto"` tumo si
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (niyanju)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (ti a parẹ)
+- Orisun: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

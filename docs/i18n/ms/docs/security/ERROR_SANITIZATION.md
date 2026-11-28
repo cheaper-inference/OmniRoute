@@ -4,13 +4,7 @@
 
 ---
 
-> **Sumber rujukan utama:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, dan pembina awam dalam `open-sse/utils/error.ts`
-> **Ujian:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Kemas kini terakhir:** 2026-09-02 — v3.8.51
-> **Khalayak:** Mana-mana jurutera yang mengendalikan respons ralat (laluan HTTP, strim SSE, pelaksana, pengendali MCP).
-> **Status:** **WAJIB** bagi setiap laluan kod yang mengembalikan mesej ralat kepada klien.
+> **Sumber kebenaran:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` dan pembina awam di `open-sse/utils/error.ts`** Ujian:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Khalayak:** Mana-mana jurutera menyentuh respons ralat ( laluan HTTP, aliran SSE, pelaksana, pengendali MCP ).** Status:****MANDATORY** untuk setiap laluan kod yang mengembalikan mesej ralat kepada klien.
 
 ## Mengapa ini diperlukan
 

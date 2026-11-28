@@ -11,14 +11,14 @@ Agent Skills એ સંરચિત SKILL.md ફાઇલો છે, જે બ�
 
 ---
 
-## અવલોકન
+## વિહંગાવલોકન
 
-કૅટલૉગમાં **45 Agent Skills** (23 REST API + 21 CLI + 1 કન્ફિગરેશન વર્કફ્લો) સામેલ છે. દરેક સ્કિલમાં આ હોય છે:
+કેટલોગ સમાવે છે** 45 એજન્ટ કૌશલ્યો** (23 REST API + 21 CLI + 1 ગોઠવણી વર્કફ્લો). દરેક કુશળતા ધરાવે છે:
 
-- એક **પ્રમાણભૂત ID** (`omni-auth`, `cli-serve`, વગેરે)
-- `skills/{id}/SKILL.md`માં YAML ફ્રન્ટમેટર (`name`, `description`) + સમૃદ્ધ markdown બોડી ધરાવતી **SKILL.md** ફાઇલ
-- OpenAPI સ્પેસિફિકેશન અને CLI રજિસ્ટ્રીમાંથી મેળવેલા **REST એન્ડપોઇન્ટ્સ** (API સ્કિલ્સ) અથવા **CLI સબકમાન્ડ્સ** (CLI સ્કિલ્સ)
-- લાઇવ ફેચ માટેનું **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- એ** પ્રમાણભૂત ID** (`omni-auth`, `cli-serve`, વગેરે)
+- એ**SKILL.md** `skills/{id}/SKILL.md` માં ફાઇલ YAML ફ્રન્ટમેટર (`name`, `description`) + રિચ માર્કડાઉન બોડી સાથે
+- **REST અંતિમ બિંદુઓ** (API કુશળતા) અથવા**CLI સબકમાન્ડ્સ** (CLI કૌશલ્ય) OpenAPI સ્પેક અને CLI રજિસ્ટ્રીમાંથી મેળવેલ
+- એ**GitHub કાચો URL** જીવંત આનયન માટે: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 

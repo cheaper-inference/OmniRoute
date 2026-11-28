@@ -4,17 +4,11 @@
 
 ---
 
-> **버전:** v3.8.51
-> **최종 업데이트:** 2026-06-28
-> **대상 독자:** OmniRoute에 기여하거나 이를 기반으로 통합 기능을 구축하는 엔지니어.
+> **버전:** v3.8.51** 청중:** OmniRoute 에 기여하거나 그 위에 통합을 구축하는 엔지니어.
 >
-> 상위 수준의 아키텍처 다이어그램과 각 하위 시스템의 설계 근거는
-> [ARCHITECTURE.md](./ARCHITECTURE.md)를 참조하세요. 개별 하위 시스템
-> (Auto Combo, MCP 서버, A2A 서버, Skills, Memory, Cloud Agents, Resilience,
-> Compression 등)에 대한 심층 설명은 이 `docs/` 디렉터리의 전용 파일을 참조하세요.
+> 상위 수준의 아키텍처 다이어그램과 각 하위 시스템의 이유를 알아보려면 [ARCHITECTURE.md](./ARCHITECTURE.md) 읽어보세요. 개별 하위 시스템(자동 콤보, MCP 서버, A2A 서버, 기술, 메모리, 클라우드 에이전트, 탄력성, 압축 등)에 대한 자세한 내용은 이 `docs/` 디렉터리에 있는 전용 파일을 참조하세요.
 
-이 파일은 신규 엔지니어가 트리를 탐색하고, 런타임 계층 구조를 이해하며, 새로운 모듈을 만들지 않고도
-코드를 추가할 위치를 파악할 수 있도록 **현재 저장소에 존재하는 항목**을 설명합니다.
+이 파일은 다음을 설명합니다.** 현재 저장소에 무엇이 있는지** 새로운 엔지니어가 트리를 탐색하고, 런타임 계층을 이해하고, 새로운 모듈을 만들지 않고도 코드를 추가할 위치를 알 수 있습니다.
 
 ---
 
@@ -675,35 +669,14 @@ bin/
 
 ## 8. `scripts/`
 
-목적에 따라 6개의 하위 폴더로 구성되어 있습니다.
+목적에 따라 6개의 하위 폴더로 구성됩니다.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs` 및 읽기 전용 PR 모니터링 도우미인
-  `ci-discriminate.sh`(PR에서 실패한 검사 시그니처를 참조 PR 또는 base-red 이슈와 비교하여 자체 /
-  상속됨 / 알 수 없음으로 분류)와 `audit-worktree.sh`
-  (작업자의 PR을 승인하기 전에 변경된 파일, 보호된 영역, 제거된 assert, 억제 처리 횟수, 남아 있는
-  임시 tsconfig, PR head와 로컬 HEAD 비교를 검사).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs` 및 읽기 전용 PR 보육 도우미 `ci-discriminate.sh` ( PR 의 실패 확인 서명을 참조 PR 또는 base-red에 대해 자체 / 상속 / 알 수 없음으로 정렬 문제) 및 `audit-worktree.sh` (더티 파일, 보호된 표면, 제거된 어설션, 억제 횟수, 남은 tmp tsconfigs, 작업자의 PR 허용되기 전의 PR 헤드 대 로컬 HEAD — ).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` OmniRoute (3.6.x 및 이전 버전)에 명시적으로 귀속된 버전에 플래그를 지정합니다. 검사에서는 날짜를 무시합니다.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

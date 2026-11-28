@@ -480,25 +480,25 @@ SSE menejeri har bir qamrov boʻyicha ulangan mijozlarni kuzatadi va yangilanish
 
 ---
 
-## Tokenlarni ulashish
+## Token almashish
 
 **Fayl:** `src/lib/gamification/sharing.ts`
 
-### Ikki tomonlama buxgalteriya yozuvi
+### Ikki yozuvli daftar
 
-Har bir oʻtkazma `token_ledger` jadvalida ikkita qator yaratadi:
+Har bir transfer `token_ledger` ikkita qator hosil qiladi:
 
-| Qator  | `from_key_id`  | `to_key_id`    | `amount` |
-| ------ | -------------- | -------------- | -------- |
-| Debet  | joʻnatuvchi    | qabul qiluvchi | +miqdor  |
-| Kredit | qabul qiluvchi | joʻnatuvchi    | -miqdor  |
+| Qator  | `from_key_id`  | `to_key_id`    | `amount`  |
+| ------ | -------------- | -------------- | --------- |
+| Debet  | jo'natuvchi    | qabul qiluvchi | + miqdori |
+| Kredit | qabul qiluvchi | jo'natuvchi    | -amount   |
 
-Biroq, qoida quyidagicha:
+Kutib — konventsiya quyidagicha:
 
-| Qator        | `from_key_id`  | `to_key_id`    | `amount` | Maʼnosi                          |
-| ------------ | -------------- | -------------- | -------- | -------------------------------- |
-| Joʻnatish    | joʻnatuvchi    | qabul qiluvchi | +miqdor  | Joʻnatuvchidan mablagʻ chiqishi  |
-| Qabul qilish | qabul qiluvchi | joʻnatuvchi    | +miqdor  | Qabul qiluvchiga mablagʻ kirishi |
+| Qator        | `from_key_id`  | `to_key_id`    | `amount`  | Ma'nosi                 |
+| ------------ | -------------- | -------------- | --------- | ----------------------- |
+| Yuborish     | jo'natuvchi    | qabul qiluvchi | + miqdori | Yuboruvchidan chiqish   |
+| Qabul qilish | qabul qiluvchi | jo'natuvchi    | + miqdori | Qabul qiluvchiga kirish |
 
 Balans quyidagicha hisoblanadi:
 
@@ -511,7 +511,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Oʻtkazma jarayoni
+### Transfer oqimi
 
 ```typescript
 export async function transferTokens(
@@ -522,19 +522,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Tekshirish**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotentlik**: `idempotency_key` buxgalteriya daftarida allaqachon mavjudligini tekshiring.
-   Agar mavjud boʻlsa, keshlangan natijani qaytaring.
-3. **Tranzaksiya** (yagona SQLite tranzaksiyasi):
-   a. Joʻnatuvchi balansini hisoblang.
-   b. Agar `balance < amount` boʻlsa, bekor qiling (mablagʻ yetarli emas).
-   c. Joʻnatish qatorini kiriting (`from=sender,` natijasini qaytaring.
+1. **Tasdiqlash** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idroksizlik** : daftarda `idempotency_key` mavjudligini tekshiring. Ha bo'lsa, keshlangan natijani qaytaring.
+3. **Tranzaksiya** (bitta SQLite bitimi): a. Yuboruvchi balansini hisoblash. b. Agar `balance < amount` bo'lsa, bekor qiling (mablag'lar etarli emas). c. Yuborilgan qatorni qo'shing (`from=sender, to=receiver, amount`). d. Qabul qilish qatorini qo'shing (`from=receiver, to=sender, amount`).
+4. **Tarif chegarasi** : jo'natuvchi uchun uzatish tezligini tekshiring (maksimal 10 transfers/min).
+5. **Tadbir** : XP + nishonini baholash uchun `token_share` gamification hodisasini chiqaradi.
+6. `{ success: true, balance: newBalance }` qaytaring.
 
-### Tezlikni cheklash
+### Tarifni cheklash
 
-- Har bir API kaliti uchun daqiqasiga koʻpi bilan 10 ta oʻtkazma.
-- Bitta oʻtkazmada koʻpi bilan 10,000 ta token.
-- Har bir API kaliti uchun bir kunda koʻpi bilan 100,000 ta token oʻtkazilishi mumkin.
+- API kaliti uchun daqiqada maksimal 10 ta transfer.
+- Bitta transfer uchun maksimal 10 000 token.
+- Har API kaliti uchun kuniga maksimal 100 000 token o'tkaziladi.
 
 ---
 

@@ -4,14 +4,13 @@
 
 ---
 
-> **Orísun òtítọ́:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Ìgbà tó kẹ́yìn tí wọ́n ṣe àtúnṣe:** 2026-09-22 — àwọn orúkọ ààyè ìpele tọ́ka sí MCP-SERVER.md
+> **Orisun otitọ:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute ní ọ̀nà ìfọwọ́sí tó mọ ọ̀nà tó máa ń ṣàkóso gbogbo ìbéèrè API. Ìsọ̀rí jẹ́ **tí a lè pinnu** àti **tí kò lè kùnà** — ohunkóhun tí kò bá lè ṣe ìsọ̀rí yóò di `MANAGEMENT` yóò sì béèrè ìgbà kan tàbí àmì ìpele ìṣàkóso. Ojúewé yìí ṣàlàyé àwòrán fún àwọn onímọ̀-ẹ̀rọ tó ń tọ́jú àwọn ọ̀nà tàbí tó ń ṣe àwọn ibi ìparí tuntun.
+OmniRoute ni opo gigun ti epo-aṣẹ ti o mọ ipa-ọna ti o fa gbogbo ibeere API. Isọri jẹ** ipinnu** ati** kuna-ni pipade** — ohunkohun ti ko le wa ni classified pari soke bi `MANAGEMENT` ati ki o nbeere igba kan tabi isakoso-ite àmi. Oju-iwe yii ṣe alaye awoṣe fun awọn ẹlẹrọ ti n ṣetọju awọn ipa ọna tabi ṣe apẹrẹ awọn aaye ipari tuntun.
 
-![Ọ̀nà AuthZ (àwọn ìpele ọ̀nà 3 + ìṣàyẹ̀wò ètò)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> Orísun: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> Orisun: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## Àwọn Ọ̀nà Ìfàṣẹsí Méjì
 
@@ -180,8 +179,8 @@ Awọn akọle inu ti o gbẹkẹle (ti a ṣalaye ni `src/server/authz/headers.
 Kilasi ipa ọna kọọkan ni eto imulo ni `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — nigbagbogbo da `allow({ kind: "anonymous", id: "anonymous" })` pada.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — ayokuro Bearer, sooto nipasẹ `validateApiKey()`. Ṣubu nipasẹ ailorukọ nikan nigbati asia ẹya `REQUIRE_API_KEY` ti o munadoko jẹ alaabo. Asia ti o munadoko jẹ ipinnu nipasẹ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) nitorinaa Awọn asia Ẹya Dasibodu ati awọn oniyipada ayika ṣe akoso `/api/v1/*`, `/api/v1beta/*`, ati awọn inagijẹ nigbagbogbo; awọn ikuna ipinnu kuna ni pipade. Faye gba awọn ibeere dasibodu-igba lori awọn ipa ọna API alabara (pẹlu `/api/v1/models`, ti a lo nipasẹ katalogi awoṣe dasibodu). Nigbati o ba mu Entra ID SSO ṣiṣẹ, Oluduro ti o jẹ apẹrẹ ti o jẹ ami Entra (awọn ipele base64url mẹta, `RS*` alg, `kid`) ni a ṣakoso nipasẹ ẹka SSO** ṣaaju ki o to** `validateApiKey()` ati idajo rẹ jẹ — ti o kẹhin kii yoo ṣubu si ọna bọtini API tabi ẹka ti o bajẹ-si-ailorukọ, nitorinaa ijade olupese idanimọ ko le di iwọle si ṣiṣi. Awọn bọtini API aimi ko ni ipa. Wo [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — gba igba dasibodu, awọn ibeere amuṣiṣẹpọ inu inu (ti o baamu si `/api/providers/[name]/(sync-models|models)`), tabi fo patapata ti `isAuthRequired()` ba pada eke. Pada 403 (`AUTH_001`) nigbati aami Oluduro kan wa ṣugbọn ko wulo, 401 bibẹẹkọ. Paapaa fi agbara mu awọn ipele oluso ipa-ọna (LOCAL_ONLY / ALWAYS_PROTECTED) ṣaaju eyikeyi ẹka auth — wo [Awọn ipele Ẹṣọ Ipa-ọna](../security/ROUTE_GUARD_TIERS.md). awọn ọna LOCAL_ONLY ni `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (loni: `/api/mcp/`) le wọle lati ti kii ṣe loopback nigbati bọtini Bearer gbe aaye `manage` ; gbogbo awọn ọna LOCAL_ONLY miiran wa ti o muna-loopback laibikita iwọn.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ayokuro Bearer, sooto nipasẹ `validateApiKey()`. Ṣubu nipasẹ ailorukọ nikan nigbati asia ẹya `REQUIRE_API_KEY` ti o munadoko jẹ alaabo. Asia ti o munadoko jẹ ipinnu nipasẹ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) nitorinaa Awọn asia Ẹya Dasibodu ati awọn oniyipada ayika ṣe akoso `/api/v1/*`, `/api/v1beta/*`, ati awọn inagijẹ nigbagbogbo; awọn ikuna ipinnu ti kuna ni pipade. Faye gba awọn ibeere dasibodu-igba lori awọn ipa ọna API alabara (pẹlu `/api/v1/models`, ti a lo nipasẹ katalogi awoṣe dasibodu). Nigbati o ba mu Entra ID SSO ṣiṣẹ, Oluduro ti o jẹ apẹrẹ ti o jẹ ami Entra (awọn ipele base64url mẹta, `RS*` alg, `kid`) ni a ṣakoso nipasẹ ẹka SSO** ṣaaju ki o to** `validateApiKey()` ati idajo rẹ jẹ — ti o kẹhin kii yoo ṣubu si ọna bọtini API tabi ẹka ti o bajẹ-si-ailorukọ, nitorinaa ijade olupese idanimọ ko le di iwọle si ṣiṣi. Awọn bọtini API aimi ko ni ipa. Wo [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — gba igba dasibodu, awọn ibeere amuṣiṣẹpọ inu inu (ti o baamu si `/api/providers/[name]/(sync-models|models)`), tabi fo patapata ti `isAuthRequired()` ba pada eke. Pada 403 (`AUTH_001`) nigbati aami Oluduro kan wa ṣugbọn ko wulo, 401 bibẹẹkọ. Paapaa fi agbara mu awọn ipele oluso ipa-ọna (LOCAL_ONLY / ALWAYS_PROTECTED) ṣaaju eyikeyi ẹka auth — wo [Awọn ipele Ẹṣọ Ipa-ọna](../security/ROUTE_GUARD_TIERS.md). awọn ọna LOCAL_ONLY ni `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (loni: `/api/mcp/`) le wọle lati ti kii ṣe loopback nigbati bọtini Bearer ba gbe aaye `manage`/`admin` tabi aaye `mcp:connect` dín (`hasMcpConnectOrManageScope`), tabi pẹlu igba idasibodu ti a fọwọsi; gbogbo awọn ọna LOCAL_ONLY miiran wa ti o muna-loopback laibikita iwọn.
 
 Ilana aṣeyọri da `AuthSubject` pada pẹlu `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Awọn olutọju isalẹ le ka nipasẹ `assertAuth(request, "CLIENT_API")` ni `src/server/authz/assertAuth.ts` dipo ṣiṣiṣẹ auth kannaa.
 
@@ -189,7 +188,7 @@ Ilana aṣeyọri da `AuthSubject` pada pẹlu `kind ∈ { client_api_key, dashb
 
 `src/shared/constants/publicApiRoutes.ts` jẹ atokọ ti o han gbangba:
 
-Awọn akojọ ti wa ni pin nipa** apẹrẹ** , ati pipin jẹ fifuye-rù (GHSA-74g9-q8f6-793h): ìpele kan ni ibamu pẹlu `startsWith()`, nitorina o tun baamu gbogbo ọna ti o wa nitosi pinpin awọn ohun kikọ asiwaju rẹ. `/api/usage/om-usage` gẹgẹbi ìpele kan ti samisi `/api/usage/om-usage<anything>` PUBLIC, ati Nigbamii ti pinnu pe lati `/api/usage/[connectionId]` — oluṣakoso kan ti ko ni ijẹrisi tirẹ.
+Awọn akojọ ti wa ni pin nipa** apẹrẹ** , ati pipin jẹ fifuye-rù (GHSA-74g9-q8f6-793h): ìpele kan ti baamu pẹlu `startsWith()`, nitorina o tun baamu gbogbo ọna ti o wa nitosi pinpin awọn ohun kikọ asiwaju rẹ. `/api/usage/om-usage` gẹgẹbi ìpele ti samisi `/api/usage/om-usage<anything>` PUBLIC, ati Nigbamii ti pinnu pe lati `/api/usage/[connectionId]` — oluṣakoso kan ti ko ni ijẹrisi tirẹ.
 
 ```ts
 // Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
@@ -227,7 +226,7 @@ PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Awọn ipa ọna kika-nikan jẹ ti gbogbo eniyan** nikan** fun awọn ọna ailewu. Akiyesi: `classifyRoute()` yọkuro `/api/v1/*` ati `/api/v1beta/*` kuro ninu isubu PUBLIC -nipasẹ — awọn wọn jẹ `CLIENT_API` nigbagbogbo nitorina eto imulo bọtini Bearer tun wa.
+Awọn ipa ọna kika-nikan jẹ ti gbogbo eniyan** nikan** fun awọn ọna ailewu. Akiyesi: `classifyRoute()` yọkuro `/api/v1/*` ati `/api/v1beta/*` kuro ninu isubu PUBLIC -nipasẹ — awọn wọn jẹ `CLIENT_API` nigbagbogbo nitorina eto imulo bọtini Bearer si tun wa.
 
 ## Fífì Route Tuntun Kún Un
 
@@ -272,31 +271,24 @@ export async function POST(request: Request) {
 
 Yan set náà gẹ́gẹ́ bí ìrísí, kì í ṣe nítorí ìrọ̀rùn. Route kan ṣoṣo lọ sínú `PUBLIC_API_ROUTES_EXACT` (tàbí `PUBLIC_READONLY_CORS_API_ROUTES` fún GET-nìkan); subtree gidi nìkan ló yẹ kó lọ sínú `PUBLIC_API_ROUTE_PREFIXES`, ó sì **gbọdọ̀ parí pẹ̀lú `/`**. Fífi route kan ṣoṣo sínú àtòjọ prefix tún máa ń sọ gbogbo path tó wà lẹ́gbẹ̀ẹ́ tí wọ́n ní àwọn àmì ìbẹ̀rẹ̀ kan náà di gbangba — pẹ̀lú àwọn dynamic-segment sibling tí a bá fi kún un lọ́jọ́ iwájú (GHSA-74g9-q8f6-793h). Ṣàfikún àwọn unit test ní `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` àti `tests/unit/authz/classify.test.ts`.
 
-## Àwọn Àyè
+## Awọn aaye
 
-Àwọn àyè orúkọ mẹ́ta. Olùṣàyẹ̀wò kọ̀ọ̀kan ka àwọn okùn tirẹ̀ nìkan. Ìfiwéra, pẹ̀lú ìdí tí `manage` fi kùnà `scopeMatches` fún `read:compression` àti ìdí tí àmì ìwọlé `read` kò fi lè `PATCH /api/keys/{id}`, wà ní [Àwọn àyè orúkọ mẹ́ta](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Awọn aaye orukọ mẹta. Oluyẹwo kọọkan n ka awọn okun tirẹ nikan. Ẹgbẹ-si-ẹgbẹ, pẹlu idi ti `manage` kuna `scopeMatches` fun `read:compression` ati idi ti ami wiwọle `read` ko le `PATCH /api/keys/{id}`, jẹ [awọn aaye orukọ agbegbe mẹta](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Àwọn kọ́kọ́rọ́ API gbé àtòpọ̀ `scopes` (tí a tọ́jú sí bi JSON nínú `api_keys.scopes`, wo `src/lib/db/apiKeys.ts`).
+awọn bọtini API gbe eto `scopes` kan (ti o tọju bi JSON ni `api_keys.scopes`, wo `src/lib/db/apiKeys.ts`).
 
-### Àyè ìṣàkóso
+### Ilana iṣakoso
 
-- `manage` / `admin` — `hasManageScope`. Ìwọlé tí ó gbé àmì sí àwọn ọ̀nà API ìṣàkóso.
-- `mcp:connect`, `self:usage`, `self:account-quota`, àti
-  `policy:bypass-provider-quota` jẹ́ àwọn àyè ìbámu-gangan tí a lè fi kún. Wọ́n wà ní ìta `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` ṣí
-  `/api/mcp/` ìpín-ìwọlé tí kìí ṣe loopback nìkan.
+- `manage` / `admin` — `hasManageScope`. Wiwọle ti nrù si awọn ọna iṣakoso API.
+- `mcp:connect`, `self:usage`, `self:account-quota`, ati `policy:bypass-provider-quota` jẹ awọn aaye ibaamu deede. Won joko lode `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` ṣii nikan `/api/mcp/` ti kii ṣe loopback carve-jade.
 
-### Àwọn àyè irinṣẹ́ MCP
+### MCP ọpa scopes
 
-Ìtòlẹ́sẹẹsẹ àti àwọn òfin ìbámu (okùn kan náà, tàbí àyè tí a fún tí ó parí pẹ̀lú `*`):
-[Àwọn àyè irinṣẹ́ MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` nínú `src/shared/constants/mcpScopes.ts` jẹ́ ìpín-ẹ̀ka tí a tẹ́ tẹ́lẹ̀, kìí ṣe gbogbo ìtòlẹ́sẹẹsẹ náà. Ìmúṣẹ́ ń ṣiṣẹ́ nínú
-`open-sse/mcp-server/scopeEnforcement.ts` lẹ́hìn tí `resolveCallerScopeContext()`
-bá ti yanjú àwọn àyè láti ìwífún ìfọwọ́sí MCP, metadata ìbéèrè, tàbí `OMNIROUTE_MCP_SCOPES`. Kò ní ṣiṣẹ́ àyàfi tí `OMNIROUTE_MCP_ENFORCE_SCOPES=true` bá wà.
+Katalogi ati awọn ofin ibamu (okun kanna, tabi aaye ti a fifun ni ipari ni `*`): [awọn iwọn irinṣẹ MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` ni `src/shared/constants/mcpScopes.ts` ni atilẹba ti tẹ subset, ko pe ni kikun katalogi. Imudaniloju nṣiṣẹ ni `open-sse/mcp-server/scopeEnforcement.ts` lẹhin `resolveCallerScopeContext()` pinnu awọn aaye lati alaye MCP auth, beere metadata, tabi `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` tan-an ni agbaye (aiyipada `false`), ṣugbọn o jẹ imuṣẹ nigbagbogbo fun olupe HTTP/SSE ti bọtini API ko ni `manage`/`admin` (wo `shouldForceScopeEnforcement()` ni `open-sse/mcp-server/scopeEnforcement.ts`), laibikita asia.
 
-### Àwọn àyè àmì ìwọlé
+### Wiwọle-àmi dopin
 
-`read` / `write` / `admin` lórí àwọn àmì `oma_live_…`, tí a tò lẹ́sẹẹsẹ nípasẹ̀ `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Ìpele yìí kan ìwé-ẹ̀rí àmì ìwọlé nìkan. Wo [Ìfọwọ́sí Ìṣàkóso](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` lori awọn ami `oma_live_…`, ni ipo nipasẹ `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Ipo yii kan si iwe-ẹri wiwọle-àmi nikan. Wo [Ijeri Isakoso](../guides/MANAGEMENT-AUTH.md).
 
 ## Auth Nilo Toggle
 

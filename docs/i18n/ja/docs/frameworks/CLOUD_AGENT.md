@@ -65,9 +65,9 @@ Cloud Agent タスクは、通常のチャット補完では**ありません**�
 バックグラウンドポーラーはありません。最新の状態を必要とするダッシュボードでは、妥当な間隔で GET
 エンドポイントをポーリングしてください。
 
-## `CloudAgentBase` インターフェース
+## `CloudAgentBase`インターフェース
 
-ソース: `src/lib/cloudAgent/baseAgent.ts`
+出典: `src/lib/cloudAgent/baseAgent.ts`
 
 ```typescript
 export interface AgentCredentials {
@@ -109,15 +109,15 @@ export abstract class CloudAgentBase {
     c: AgentCredentials
   ): Promise<{ name: string; url: string; branch?: string }[]>;
 
-  protected mapStatus(raw: string): CloudAgentStatus; // 上流の文字列をヒューリスティックに enum へ変換
+  protected mapStatus(raw: string): CloudAgentStatus; // heuristic upstream-string → enum
   protected generateTaskId(): string; // `task_<ts>_<rand>`
   protected generateActivityId(): string; // `act_<ts>_<rand>`
 }
 ```
 
-`CodexCloudAgent.approvePlan` は意図的に例外をスローします。Codex Cloud は自動的に計画を立て、承認ゲートを持たないためです。`CodexCloudAgent.listSources` は `[]` を返します。
+`CodexCloudAgent.approvePlan`意図的に— Codexクラウド自動計画をスローし、承認ゲートがありません。 `CodexCloudAgent.listSources` `[]`を返します。
 
-`CursorCloudAgent` は、**ユーザーまたはサービスアカウントの API キー**を使用し、公式 REST API（`api.cursor.com/v0`）を介して Cursor の Background / Cloud Agents を操作します。これは、利用停止リスクの警告がある Cursor IDE の OAuth セッション（プロバイダー `cursor`）を再利用する方法よりも安全な、公式の代替手段です。これは通常の REST アダプターであり、`@cursor/sdk` へのネイティブ依存関係はありません。`approvePlan` は例外をスローします（Cursor エージェントは自律的に動作します）。`listSources` は、そのキーからアクセス可能なリポジトリを一覧表示します。Cursor は大文字のステータス enum（`CREATING`/`RUNNING`/`FINISHED`/`ERROR`）を返し、それらは共有の `CloudAgentStatus` へ明示的にマッピングされます。`baseUrl` は認証情報ごとに上書きできるため、コードを変更せずに API のバージョンやパスを修正できます。
+`CursorCloudAgent`公式REST API (`api.cursor.com/v0`) を介してCursorのバックグラウンド/クラウド エージェントを駆動します。**ユーザーまたはサービスアカウントのAPIキー**— 、 Cursor IDEのOAuthセッション (禁止リスクの警告があるプロバイダー`cursor`) を再利用するより安全なファーストパーティの代替手段です。これはプレーンなRESTアダプターです ( `@cursor/sdk`ネイティブ依存関係はありません)。 `approvePlan` throws (Cursorエージェントは自律的に実行されます)。 `listSources`キーによってアクセス可能なリポジトリをリストします。 Cursor 、共有`CloudAgentStatus`に明示的にマップされたUPPERCASEステータス列挙型 (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`) を返します。 `baseUrl`は認証情報ごとにオーバーライドできるため、コードを変更せずにAPI version/path修正できます。
 
 ## ドメイン型
 

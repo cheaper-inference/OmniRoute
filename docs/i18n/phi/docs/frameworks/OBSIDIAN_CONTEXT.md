@@ -29,140 +29,110 @@ Binabalot ng client (`src/lib/obsidian/api.ts`) ang Local REST API gamit ang:
   (HTTP sa `27123`, **hindi** ang MCP endpoint sa `27124`) at ang anyo para sa Tailscale.
 - **Path encoding** na relative sa vault upang maging ligtas ang mga path ng note na may mga space/slash.
 
-## Pag-set up
+## Setup
 
-**Walang environment variable** para sa Obsidian token o base URL — parehong
-nakaimbak sa SQLite `key_value` table (namespace `obsidian`) sa pamamagitan ng
-`src/lib/db/obsidian.ts`. Ang token ay **naka-encrypt habang nakaimbak** (AES-256-GCM, na may
-plaintext backward-compat fallback). I-configure mula sa tab na **Context Sources** ng
-Endpoint dashboard (`ObsidianSourceCard`), o sa pamamagitan ng settings REST API.
+meron** walang environment variable** para sa Obsidian token o base URL — pareho ay nakaimbak sa SQLite `key_value` table (namespace `obsidian`) sa pamamagitan ng `src/lib/db/obsidian.ts`. Ang token ay** naka-encrypt sa pahinga** (AES-256-GCM, na may plaintext na backward-compat fallback). I-configure mula sa** Mga Pinagmumulan ng Konteksto** tab ng Endpoint dashboard (`ObsidianSourceCard`), o sa pamamagitan ng mga setting REST API.
 
 > [!IMPORTANT]
-> Dapat naka-install at tumatakbo ang **Obsidian Local REST API** plugin. Nakikinig ang REST
-> interface nito sa **HTTP `127.0.0.1:27123`** (ang default na base URL). Ang port `27124`
-> ay isang _hiwalay_ na MCP/HTTPS endpoint at tahasang tinatanggihan ng settings route.
-> Kung kumokonekta mula sa ibang device, gamitin ang `http://<tailscale-ip>:27123`.
+> Ang**Obsidian Lokal REST API** dapat na naka-install at tumatakbo ang plugin. Nakikinig ang REST interface nito**HTTP `127.0.0.1:27123`** (ang default na base URL). Ang port `27124` ay isang _separate_ MCP/HTTPS endpoint at tahasang tinatanggihan ng ruta ng mga setting. Kung kumokonekta mula sa ibang device, gamitin `http://<tailscale-ip>:27123`.
 
-### Mga configuration key (SQLite `key_value`, namespace `obsidian`)
+### Mga susi sa pagsasaayos (SQLite `key_value`, namespace `obsidian`)
 
-| Key               | Layunin                                                     | Naka-encrypt |
-| ----------------- | ----------------------------------------------------------- | ------------ |
-| `api_key`         | Local REST API bearer token                                 | oo           |
-| `base_url`        | REST base URL (default na `http://127.0.0.1:27123`)         | hindi        |
-| `vault_path`      | Absolute path patungo sa vault directory (para sa pag-sync) | hindi        |
-| `webdav_username` | Binuong WebDAV username (pag-sync ng vault)                 | hindi        |
-| `webdav_password` | Binuong WebDAV password (pag-sync ng vault)                 | oo           |
-| `webdav_enabled`  | Kung naka-enable ang WebDAV vault sync                      | hindi        |
+| Susi              | Layunin                                                   | Naka-encrypt |
+| ----------------- | --------------------------------------------------------- | ------------ |
+| `api_key`         | Lokal na REST API bearer token                            | oo           |
+| `base_url`        | REST base URL (default `http://127.0.0.1:27123`)          | hindi        |
+| `vault_path`      | Ganap na landas sa direktoryo ng vault (para sa pag-sync) | hindi        |
+| `webdav_username` | Binuo na WebDAV username (vault sync)                     | hindi        |
+| `webdav_password` | Binuo na WebDAV password (vault sync)                     | oo           |
+| `webdav_enabled`  | Kung pinagana ang WebDAV vault sync                       | hindi        |
 
-### Pag-configure sa pamamagitan ng REST
+### I-configure sa pamamagitan ng REST
 
 ```bash
-# I-save + i-validate ang Local REST API token (nagse-validate ang POST sa pamamagitan ng status check)
+# Save + validate the Local REST API token (POST validates via a status check)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
 
-# Suriin ang status ng koneksyon (ibinabalik ang connected, hasToken, baseUrl, vaultPath)
+# Check connection status (returns connected, hasToken, baseUrl, vaultPath)
 curl http://localhost:20128/api/settings/obsidian
 
-# Idiskonekta (inaalis ang nakaimbak na token)
+# Disconnect (clears the stored token)
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Nangangailangan ang lahat ng method ng dashboard authentication. Tinatanggihan ng `POST` ang anumang URL sa port `27124`
-at bina-validate ang token sa pamamagitan ng pagtawag sa Local REST API status endpoint bago ito i-persist.
+Ang lahat ng mga pamamaraan ay nangangailangan ng pagpapatunay ng dashboard. `POST` ay tinatanggihan ang anumang URL sa port `27124` at pinapatunayan ang token sa pamamagitan ng pagtawag sa Lokal REST API status endpoint bago magpatuloy.
 
 ### WebDAV vault sync
 
-Pinamamahalaan ng `src/app/api/settings/obsidian/webdav/route.ts` ang opsyonal na WebDAV-backed
-vault sync (na pinapatakbo ng `src/lib/obsidianSync.ts`). Kapag na-enable ito, itinuturo nito ang OmniRoute sa isang
-local vault directory at bumubuo ng random na pares ng WebDAV username/password:
+`src/app/api/settings/obsidian/webdav/route.ts` ay namamahala ng isang opsyonal na WebDAV-backed vault sync (na hinimok ng `src/lib/obsidianSync.ts`). Ang pagpapagana nito ay tumuturo ng OmniRoute sa isang lokal na direktoryo ng vault at nagbibigay ng random na pares WebDAV username/password :
 
 ```bash
-# I-enable ang WebDAV sync para sa isang vault directory (bumubuo ng username/password)
+# Enable WebDAV sync for a vault directory (mints username/password)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# Kunin ang status ng WebDAV sync (ibinabalik lamang ang mga credential habang naka-enable)
+# Get WebDAV sync status (credentials returned only while enabled)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# I-disable ang WebDAV sync (inaalis ang mga credential + pinamamahalaang .stignore)
+# Disable WebDAV sync (clears credentials + managed .stignore)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
 ### Seguridad at Transportasyon
 
-WebDAV authentication ay nagpapatupad ng per-IP failure tracking at lockout (10 nabigong pagtatangka sa loob ng 60 segundong window ay nagti-trigger ng 5 minutong lockout na may `429 Too Many Requests` at `Retry-After`). Dahil nagpapadala WebDAV ng mga pangunahing kredensyal sa pagpapatotoo, ang pagwawakas ng TLS (o pagruruta sa isang secure na tunnel gaya ng Tailscale o Cloudflare Tunnel) ay lubos na inirerekomenda kapag ina-access ang WebDAV endpoint sa labas ng loopback.
+WebDAV authentication ay nagpapatupad ng per-IP failure tracking at lockout (10 nabigong pagtatangka sa loob ng 60 segundong window ay nagti-trigger ng 5 minutong lockout na may `429 Too Many Requests` at `Retry-After`). Dahil nagpapadala ang WebDAV ng mga pangunahing kredensyal sa pagpapatotoo, ang pagwawakas ng TLS (o pagruruta sa isang secure na tunnel gaya ng Tailscale o Cloudflare Tunnel) ay lubos na inirerekomenda kapag ina-access ang WebDAV endpoint sa labas ng loopback.
 
-### Context source para sa bawat API key (opsyonal)
+### Per-API-key context source (opsyonal)
 
-Maaaring limitahan ang saklaw ng Obsidian config **para sa bawat API key** sa pamamagitan ng `api_key_context_sources` table
-(`src/lib/db/apiKeyContextSources.ts`). Kapag may dalang authenticated API
-key id ang isang MCP call, inuuna ng `getObsidianConfigForApiKey()` ang sariling token/base-URL/vault-path
-ng key na iyon (`source: "api_key"`) at kung wala, ginagamit nito bilang fallback ang global config (`source: "global"`).
+Obsidian config ay maaaring saklaw** bawat API key** sa pamamagitan ng `api_key_context_sources` table (`src/lib/db/apiKeyContextSources.ts`). Kapag ang isang MCP na tawag ay nagdadala ng napatunayang API key id, mas gusto ng `getObsidianConfigForApiKey()` ang sariling token/base-URL/vault-path (`source: "api_key"`) ng key na iyon at kung hindi man ay bumabalik sa pandaigdigang config (`source: "global"`).
 
-Nangangailangan ang mga non-sync MCP tool ng natukoy na caller identity bago basahin ang configuration na ito.
-Ang caller na walang identity ay makakatanggap ng `Hindi naka-configure ang Obsidian API token`, at walang ipapadalang vault
-request. Natutukoy ang mga HTTP caller sa pamamagitan ng kanilang mga request credential; maaaring matukoy ang mga stdio caller
-sa pamamagitan ng `OMNIROUTE_API_KEY` o `ROUTER_API_KEY`. Hindi maaaring manahin ng hindi natukoy na HTTP caller
-ang environment identity ng server. Hindi nagbibigay ng pahintulot sa pag-access ang mga placeholder ID lamang;
-sinusuportahan pa rin ang isang valid na environment credential na nare-resolve sa `env-key`.
-Pinananatili ng mga authenticated key na walang per-key Obsidian configuration ang global fallback.
-Pinananatili ng apat na `obsidian_sync_*` tool ang kanilang hiwalay na gawi para sa sync-token.
+Ang mga tool na hindi naka-sync MCP ay nangangailangan ng nalutas na pagkakakilanlan ng tumatawag bago basahin ang configuration na ito. Ang isang tumatawag na walang pagkakakilanlan ay tumatanggap `Obsidian API token not configured`, at walang kahilingan sa vault na ipinadala. Ang mga tumatawag HTTP ay nalutas sa pamamagitan ng kanilang mga kredensyal sa kahilingan; Ang mga tumatawag sa stdio ay maaaring malutas sa pamamagitan ng `OMNIROUTE_API_KEY` o `ROUTER_API_KEY`. Ang isang hindi nalutas HTTP na tumatawag ay hindi maaaring magmana ng pagkakakilanlan sa kapaligiran ng server. Ang placeholder IDs lamang ay hindi nagpapahintulot ng pag-access; nananatiling suportado ang isang wastong kredensyal sa kapaligiran na lumalabas sa `env-key`. Ang mga na-authenticate na key na walang per-key Obsidian configuration ay nagpapanatili ng pandaigdigang fallback. Pinapanatili ng apat na `obsidian_sync_*` tool ang kanilang hiwalay na pag-uugali ng sync-token.
 
-## Mga MCP tool (22)
+## MCP tools (22)
 
-Tinukoy sa `open-sse/mcp-server/tools/obsidianTools.ts`. Nireresolba ang token/base-URL
-sa bawat tawag (API key muna, pagkatapos ay global). Ang mga tool na kumokonekta sa **sync server**
-ng OmniRoute (ang apat na `obsidian_sync_*` tool) ay nangangailangan din ng sync auth token na naka-configure
-sa mga setting ng OmniRoute.
+Tinukoy sa `open-sse/mcp-server/tools/obsidianTools.ts`. Ang token/base-URL ay naresolba sa bawat tawag (per-API-key muna, pagkatapos ay global). Mga tool na tumama sa OmniRoute** sync server** (ang apat `obsidian_sync_*` tool) ay nangangailangan din ng sync auth token na na-configure sa mga setting OmniRoute.
 
-### Mga tool sa pagbasa (`read:obsidian`)
+### Magbasa ng mga tool (`read:obsidian`)
 
 | Tool                         | Paglalarawan                                                                                                   |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Suriin kung naaabot at authenticated ang Local REST API.                                                       |
-| `obsidian_search_simple`     | Full-text na paghahanap sa nilalaman ng note; nagbabalik ng mga snippet na may mga file path.                  |
-| `obsidian_search_structured` | Maghanap gamit ang isang JSON Logic expression (mga filter na and/or/regex/path).                              |
-| `obsidian_read_note`         | Basahin ang isang note ayon sa path na relative sa vault; opsyonal na partikular na heading/block/frontmatter. |
-| `obsidian_list_vault`        | Ilista ang mga file at directory sa vault (tree ng mga entry).                                                 |
-| `obsidian_get_document_map`  | Kunin ang estruktura ng heading ng note bilang mapa ng mga heading → numero ng linya.                          |
-| `obsidian_get_note_metadata` | Kunin ang frontmatter, mga tag, link, at bilang ng character/salita nang wala ang buong nilalaman.             |
-| `obsidian_get_active_file`   | Kunin ang path + nilalaman ng kasalukuyang aktibong file sa Obsidian.                                          |
-| `obsidian_get_periodic_note` | Kunin ang pang-araw-araw/panlingguhan/buwanang periodic note para sa isang petsa (ngayon kung hindi tinukoy).  |
-| `obsidian_get_tags`          | Ilista ang lahat ng tag sa vault kasama ang dalas ng paglitaw ng mga ito.                                      |
-| `obsidian_list_commands`     | Ilista ang mga available na Obsidian command ID (gamitin kasama ng `obsidian_execute_command`).                |
-| `obsidian_sync_status`       | Status ng sync server ng OmniRoute: gumagana, pangalan ng vault, port, uptime, huling sync.                    |
-| `obsidian_sync_conflicts`    | Ilista ang mga hindi pa nareresolbang sync conflict (path, conflict path, oras ng pagkakatukoy).               |
+| `obsidian_check_status`      | Suriin kung ang Lokal REST API ay naaabot at napatotohanan.                                                    |
+| `obsidian_search_simple`     | Full-text na paghahanap ng nilalaman ng tala; nagbabalik ng mga snippet na may mga path ng file.               |
+| `obsidian_search_structured` | Maghanap gamit ang JSON Logic expression ( mga filter and/or/regex/path ).                                     |
+| `obsidian_read_note`         | Magbasa ng tala sa pamamagitan ng vault-relative path; opsyonal na isang partikular heading/block/frontmatter. |
+| `obsidian_list_vault`        | Maglista ng mga file at direktoryo sa vault (puno ng mga entry).                                               |
+| `obsidian_get_document_map`  | Kunin ang istraktura ng heading ng tala bilang isang mapa ng mga heading → line number.                        |
+| `obsidian_get_note_metadata` | Kumuha ng frontmatter, mga tag, link, bilang ng char/word nang wala ang buong nilalaman.                       |
+| `obsidian_get_active_file`   | Kunin ang path + na nilalaman ng kasalukuyang aktibong file sa Obsidian.                                       |
+| `obsidian_get_periodic_note` | Kunin ang daily/weekly/monthly periodic note para sa isang petsa (ngayon kung aalisin).                        |
+| `obsidian_get_tags`          | Ilista ang lahat ng mga tag ng vault sa kanilang mga frequency.                                                |
+| `obsidian_list_commands`     | Ilista ang magagamit na Obsidian command IDs (gamitin kasama ang `obsidian_execute_command`).                  |
+| `obsidian_sync_status`       | OmniRoute sync server status: tumatakbo, pangalan ng vault, port, uptime, huling pag-sync.                     |
+| `obsidian_sync_conflicts`    | Maglista ng mga hindi naresolbang salungatan sa pag-sync (path, conflict path, detected-at).                   |
 
-### Mga tool sa pagsusulat (`write:obsidian`)
+### Mga tool sa pagsulat (`write:obsidian`)
 
-| Tool                             | Paglalarawan                                                                                             |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Gumawa o mag-overwrite ng note gamit ang ibinigay na nilalamang Markdown.                                |
-| `obsidian_append_note`           | Magdagdag ng nilalaman sa isang note; opsyonal na sa isang partikular na heading/block.                  |
-| `obsidian_patch_note`            | Tiyak na mag-append/mag-prepend/magpalit sa isang heading, block, o field ng frontmatter.                |
-| `obsidian_delete_note`           | Permanenteng burahin ang isang note mula sa vault.                                                       |
-| `obsidian_move_note`             | Ilipat o palitan ang pangalan ng isang note sa loob ng vault.                                            |
-| `obsidian_execute_command`       | Magpatupad ng Obsidian command ayon sa command ID nito.                                                  |
-| `obsidian_open_file`             | Magbukas ng file sa Obsidian (gagawa nito kung hindi pa ito umiiral).                                    |
-| `obsidian_sync_trigger`          | Mag-trigger ng agarang bidirectional na desktop↔mobile vault sync.                                       |
-| `obsidian_sync_resolve_conflict` | Resolbahin ang isang sync conflict: panatilihin ang `local` (mobile), `remote` (desktop), o `keep-both`. |
+| Tool                             | Paglalarawan                                                                                               |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Gumawa o mag-overwrite ng tala na may ibinigay na Markdown na content.                                     |
+| `obsidian_append_note`           | Magdagdag ng nilalaman sa isang tala; opsyonal sa isang partikular heading/block.                          |
+| `obsidian_patch_note`            | Surgically append/prepend/replace sa isang heading, block, o frontmatter field.                            |
+| `obsidian_delete_note`           | Permanenteng tanggalin ang isang tala mula sa vault.                                                       |
+| `obsidian_move_note`             | Ilipat o palitan ang pangalan ng tala sa loob ng vault.                                                    |
+| `obsidian_execute_command`       | Magsagawa ng Obsidian command sa pamamagitan ng utos nito ID.                                              |
+| `obsidian_open_file`             | Magbukas ng file sa Obsidian (gumawa ito kung wala ito).                                                   |
+| `obsidian_sync_trigger`          | Mag-trigger ng agarang bidirectional desktop ↔ mobile vault sync.                                          |
+| `obsidian_sync_resolve_conflict` | Lutasin ang isang salungatan sa pag-sync: panatilihin `local` (mobile), `remote` (desktop), o `keep-both`. |
 
 > [!NOTE]
-> Ang mga target ng `obsidian_patch_note` ay tumatanggap ng `targetType` na `heading | block | frontmatter`
-> at `operation` na `append | prepend | replace`, na may opsyonal na
-> `createTargetIfMissing`. Ang apat na `obsidian_sync_*` tool ay nakikipag-ugnayan sa lokal na sync
-> server (`http://127.0.0.1:27781` bilang default) at nangangailangan ng sync token.
+> tumatanggap ang mga `obsidian_patch_note` target ng `targetType` ng `heading | block | frontmatter` at `operation` ng `append | prepend | replace`, na may opsyonal na `createTargetIfMissing`. Ang apat na `obsidian_sync_*` tool ay nakikipag-usap sa lokal na sync server (`http://127.0.0.1:27781` bilang default) at nangangailangan ng sync token.
 
-### Mga scope
+### Saklaw
 
-Nangangailangan ang mga tool sa pagbasa ng `read:obsidian`; nangangailangan ang mga tool sa pagsusulat ng `write:obsidian`. Ang pagpapatupad
-ay kapareho ng sa Notion — pinangangasiwaan ng `withScopeEnforcement()` sa
-`open-sse/mcp-server/server.ts`, nakadepende sa `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, at ang mga
-pinapayagang scope ay kinukuha mula sa `OMNIROUTE_MCP_SCOPES` o sa scope context ng API key. Tingnan ang
-[MCP-SERVER.md](./MCP-SERVER.md).
+Ang mga tool sa pagbabasa ay nangangailangan ng `read:obsidian`; ang mga tool sa pagsulat ay nangangailangan ng `write:obsidian`. Ang pagpapatupad ay kapareho ng Notion — na pinangangasiwaan ng `withScopeEnforcement()` sa `open-sse/mcp-server/server.ts`, naka-gate sa `OMNIROUTE_MCP_ENFORCE_SCOPES=true` at pinilit na naka-on para sa mga HTTP/SSE na tumatawag na ang API key ay walang `manage`/`admin`, na may mga pinapayagang saklaw na nagmula sa `OMNIROUTE_MCP_SCOPES` o sa konteksto ng saklaw ng API key. Tingnan ang [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Mga Endpoint
 

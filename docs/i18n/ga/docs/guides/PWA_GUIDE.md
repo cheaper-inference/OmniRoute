@@ -4,192 +4,157 @@
 
 ---
 
-Cuirtear OmniRoute ar fáil mar Aip Ghréasáin Fhorásach atá insuiteáilte go hiomlán. Nuair a osclaíonn tú an deais ó aon bhrabhsálaí móibíleach — Android (Chrome) nó iOS (Safari) — is féidir leat "Cuir leis an Scáileán Baile" a roghnú agus eispéireas cosúil le haip dhúchasach a fháil gan aon siopa aipeanna a bheith ag teastáil.
+Suiteáil an painéal OmniRoute mar Aip Gréasáin Forásach chun é a oscailt ó do scáileán baile nó deasc i bhfuinneog aonair. Tá nasc fós ag teastáil ón aip suiteáilte le do fhreastalaí OmniRoute le haghaidh loingseoireachta, sonraí deais agus iarratais API. Ní sholáthraíonn sócmhainní statacha i dtaisce geata as líne ná painéal as líne.
 
-## Cad is PWA ann?
+## Cad is PWA?
 
-Déanann Aip Ghréasáin Fhorásach aip de dheais gréasáin OmniRoute a bhfuil cuma agus mothú aip dhúchasaigh mhóibíligh uirthi. Nuair a bheidh sí suiteáilte:
+Úsáideann Aip Ghréasáin Forásach an painéal gréasáin le deilbhín app agus fuinneog ar leith. Nuair a bheidh tú suiteáilte, OmniRoute:
 
-- Seoltar í ó do scáileán baile lena deilbhín féin
-- Osclaítear í ar lánscáileán — gan barra seoltaí ná comhéadan cluaisíní an bhrabhsálaí
-- Oibríonn sí as líne le leathanach tiomnaithe nascachta
-- Taisceann sí sócmhainní statacha chun luchtú níos tapa a dhéanamh
-- Tacaíonn sí le treoshuíomh portráide agus tírdhreacha araon
+- Seolann ó do scáileán baile nó deasc
+- Osclaítear é i mód neamhspleách, gan gnáthbharra seoltaí agus cluaisíní an bhrabhsálaí
+- Taisce roghnaithe sócmhainní statacha
+- Tacaíonn treoshuíomh portráide agus tírdhreacha
 
 ## Suiteáil
 
+Úsáid seoladh HTTPS le haghaidh freastalaí ar ghléas eile. Nuair a ritheann an freastalaí ar an ngléas céanna, comhlíonann `http://localhost:20128` ceanglais insuiteála an bhrabhsálaí freisin. Ní chomhlíonann gnáthsheoladh `http://YOUR_IP:20128` na ceanglais sin. Braitheann biachláir suiteála agus leideanna ar an mbrabhsálaí agus ar an gcóras oibriúcháin. Féach [riachtanais suiteála MDN's PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
+
 ### Android (Chrome)
 
-1. Oscail deais OmniRoute in Chrome: `http://YOUR_IP:20128`
-2. Taispeánfaidh Chrome meirge **"Cuir OmniRoute leis an Scáileán Baile"** go huathoibríoch, nó:
-   - Tapáil an roghchlár **⋮** (trí phonc) → **"Cuir leis an Scáileán Baile"** nó **"Suiteáil an aip"**
-3. Deimhnigh an leid
-4. Beidh OmniRoute le feiceáil ar do scáileán baile mar aip neamhspleách
+1. Oscail do sheoladh OmniRoute HTTPS, nó `http://localhost:20128` le haghaidh freastalaí ar an bhfón céanna.
+2. Oscail an**⋮** roghchlár agus roghnaigh** Suiteáil app** nó** Cuir leis an scáileán Baile** , má thairgtear.
+3. Deimhnigh an leid.
+4. Oscail OmniRoute ón scáileán baile.
 
 ### iOS (Safari)
 
-1. Oscail deais OmniRoute in Safari: `http://YOUR_IP:20128`
-2. Tapáil an cnaipe **Comhroinn** (bosca le saighead)
-3. Scrollaigh síos agus tapáil **"Cuir leis an Scáileán Baile"**
-4. Tabhair ainm di ("OmniRoute" de réir réamhshocraithe) agus tapáil **Cuir Leis**
-5. Beidh OmniRoute le feiceáil ar do scáileán baile le deilbhín na haipe
+1. Oscail do sheoladh OmniRoute HTTPS i Safari.
+2. Beartaíonn** Comhroinn** →** Cuir leis an Scáileán Baile** .
+3. Deimhnigh an t-ainm agus tapáil** Cuir** .
+4. Oscail OmniRoute ón scáileán baile.
 
 ### Deasc (Chrome / Edge)
 
-1. Oscail deais OmniRoute
-2. Cliceáil an **deilbhín suiteála** sa bharra seoltaí (nó ⋮ → "Suiteáil OmniRoute...")
-3. Deimhnigh an leid
-4. Osclaítear OmniRoute mar fhuinneog neamhspleách — gan cluaisíní ná barra seoltaí
+1. Oscail do dheais OmniRoute.
+2. Bain úsáid as deilbhín suiteála an bhrabhsálaí nó an** Suiteáil app** iontráil roghchlár, má thairgtear é.
+3. Deimhnigh an leid chun OmniRoute a oscailt ina fhuinneog féin.
 
 ## Gnéithe
 
-### Eispéireas Lánscáileáin
+### Fuinneog Neamhspleách
 
-Tá an lastliosta cumraithe le `display: "fullscreen"`, rud a chiallaíonn go n-úsáideann an aip shuiteáilte an scáileán iomlán — gan comhéadan brabhsálaí ná forluí ar an mbarra stádais. Fágann sé seo go mothaíonn an deais fíordhúchasach.
+Leagann an forléiriú `display: "standalone"` agus `start_url: "/dashboard"`. Osclaíonn an app suiteáilte an painéal i bhfuinneog app. Is féidir le rialuithe brabhsálaí agus córais oibriúcháin a bheith le feiceáil go fóill; ní iarrann an forléiriú mód lánscáileáin.
 
-### Tacaíocht As Líne
+### Sócmhainní Taisce agus Riachtanais Líonra
 
-Áirítear le OmniRoute oibrí seirbhíse (`sw.js`) a sholáthraíonn taisceadh cliste:
+Taisceann an [t-oibrí seirbhíse](../../public/sw.js) acmhainní den bhunadh céanna:
 
-| Cineál Sócmhainne                                                                                                                                                                                                                  | Straitéis                                   | Iompar                                                                                                               |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Blaosc na hAipe**                                                                                                                                                                                                                | Taisce ar dtús                              | Déantar `/`, `/offline`, an lastliosta agus na deilbhíní a réamhthaisceadh le linn na suiteála                       |
-| **Sócmhainní statacha** (CSS, JS, íomhánna, clónna)                                                                                                                                                                                | Líonra ar dtús, agus an taisce mar chúltaca | Faightear cóip úr ón líonra; úsáidtear an taisce mar chúltaca má táthar as líne                                      |
-| **Bearta Next.js** (`/_next/`)                                                                                                                                                                                                     | Líonra ar dtús le nuashonrú taisce          | Faightear iad ón líonra agus nuashonraítear an taisce; soláthraítear an leagan taiscthe má táthar as líne            |
-| **Iarratais nascleanúna**                                                                                                                                                                                                          | Seachbhóthar (ní idircheapadh riamh iad)    | Is leis an mbrabhsálaí an cúltitim HTTP/3→HTTP/2; níor cheart do shoicéad QUIC marbh a bheith ina `Response.error()` |
-| **Bealaí API / deaise** (`/api/`, `/a2a`, `/dashboard`, ailiasanna API an chliaint `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, chomh maith le `/callback`, `/login`; meaitseáilte gan aird ar chás na litreacha) | Seachbhóthar (ní thaisctear riamh iad)      | Téann siad go díreach chuig an bhfreastalaí i gcónaí — ní idircheapann an t-oibrí seirbhíse iad riamh                |
+| Iarratas nó sócmhainn                      | Straitéis       | Iompar                                                                                                                     |
+| ------------------------------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Suiteáil-acmhainní ama                     | Réamh-taisce    | Déantar `/`, `/manifest.webmanifest`, `/icon-512.png` agus `/apple-touch-icon.png` a thaisceadh le linn suiteála an oibrí  |
+| sócmhainní statacha Next.js (`/_next/`)    | Líonra-an chéad | Déanann freagraí rathúla an taisce a nuashonrú; titeann earráid líonra ar ais go dtí freagra i dtaisce atá ann cheana féin |
+| Eile statach CSS, JS, íomhánna agus clónna | Taisce-an chéad | Déantar freagra i dtaisce atá ann cheana a athúsáid; déantar freagraí rathúla líonra a thaisceadh                          |
+| Nascleanúint leathanach                    | Seachbhóthar    | Faigheann an brabhsálaí an leathanach go díreach; ní sheirbheáiltear aon chúltaca as líne                                  |
+| API, deais agus bealaí fíordheimhnithe     | Seachbhóthar    | Ní dhéanann an t-oibrí na hiarratais seo a idircheapadh ná a thaisceadh                                                    |
+| Iarratais neamh-statacha eile              | Líonra          | Níl aon chuardach nó stóráil taisce                                                                                        |
 
-### Leathanach As Líne
+Is iad na bealaí eisiata ná `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` agus `/login`, comhoiriúnaithe cás-neamhíogair ag teorainneacha cosáin. Seachnaíonn iarratais tras-bunaidh agus neamh-GET an t-oibrí freisin.
 
-Nuair nach bhfuil an líonra ar fáil agus nuair a dhéanann úsáideoir nascleanúint chuig leathanach nua, soláthraíonn an t-oibrí seirbhíse leathanach tiomnaithe `/offline` a dhéanann na nithe seo a leanas:
+### Leathanach Nascachta
 
-- Taispeánann sé teachtaireacht shoiléir **"Fadhb Nascachta"**
-- Taispeánann sé **táscaire stádais ar líne/as líne** beo a nuashonraítear i bhfíor-am
-- Soláthraíonn sé cnaipe **"Bain Triail Eile as an Nasc"** chun athluchtú a dhéanamh nuair a fhilleann an nascacht
-- Nascann sé leis an **Leathanach Stádais** le haghaidh diagnóisice
+Soláthraíonn an leathanach `/offline` teachtaireacht nascachta, táscaire online/offline, a** Bain triail eile as Ceangal** cnaipe agus nasc chuig an leathanach stádais. Tá sé** ní réamh-thaisce** agus déanann an t-oibrí seirbhíse** nach bhfuil** atreoraigh loingseoireachtaí teipthe chuige. Ní fhágann a bhfuil ann leathanaigh nua inrochtana gan an freastalaí.
 
-### Deilbhíní Aipe
+### Deilbhíní App
 
-Soláthraíonn OmniRoute deilbhíní atá optamaithe do gach ardán:
+Fógraíonn an forógra na deilbhíní PNG seo:
 
-| Comhad                 | Méid                | Úsáidte Ag                            |
-| ---------------------- | ------------------- | ------------------------------------- |
-| `icon-512.png`         | 512×512             | Leid suiteála Android, splancscáileán |
-| `apple-touch-icon.png` | 180×180             | Deilbhín scáileáin baile iOS          |
-| `icon-192.svg`         | 192×192 (veicteoir) | Deilbhín oiriúnaitheach Android       |
-| `apple-touch-icon.svg` | 180×180 (veicteoir) | Cúltaca Apple                         |
-| `favicon.svg`          | Veicteoir           | Cluaisíní brabhsálaí                  |
-| `favicon.ico`          | Ilmhéideach         | Brabhsálaithe oidhreachta             |
+| Comhad                 | Méid    | Úsáid                                 |
+| ---------------------- | ------- | ------------------------------------- |
+| `icon-192.png`         | 192×192 | Deilbhín feidhmchláir ghinearálta     |
+| `icon-512.png`         | 512×512 | Deilbhín app ginearálta agus maskable |
+| `apple-touch-icon.png` | 180×180 | Deilbhín scáileán baile Apple         |
+
+Roghnaíonn an brabhsálaí an deilbhín cuí don sprioc suiteála.
 
 ### Clárú Uathoibríoch
 
-Cláraítear an t-oibrí seirbhíse go huathoibríoch tríd an gcomhpháirt `<PwaRegister />` sa leagan amach fréimhe. Ní theastaíonn aon ghníomh ón úsáideoir — is féidir an aip a shuiteáil a luaithe a bhraitheann an brabhsálaí an lastliosta bailí agus an t-oibrí seirbhíse.
+Cláraíonn `PwaRegister` an t-oibrí i dtáirgeadh nuair a thacaíonn an brabhsálaí le hoibrithe seirbhíse. Déanann modh forbartha oibrithe a dhíchlárú agus glanann sé taisce chun sócmhainní seanda a sheachaint ag cur isteach ar athlódáil te. Is cinneadh brabhsálaí fós é leideanna suiteála.
 
 ## Ailtireacht Theicniúil
 
-### Manifesit Aip Ghréasáin (`manifest.webmanifest`)
+### Web App Manifest
 
-Ginte ag Next.js trí `src/app/manifest.ts`:
+Gineann Next.js `/manifest.webmanifest` ó [`src/app/manifest.ts`](../../src/app/manifest.ts). Is iad a phríomhshocruithe:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Socrú                            | Luach                                                  |
+| -------------------------------- | ------------------------------------------------------ |
+| `short_name`                     | `OmniRoute`                                            |
+| `start_url`                      | `/dashboard`                                           |
+| `scope`                          | `/`                                                    |
+| `display`                        | `standalone`                                           |
+| `orientation`                    | `any`                                                  |
+| Dathanna an chúlra agus an téama | An pailéad solais réamhshocraithe ó `PWA_THEME_COLORS` |
 
-### Oibrí Seirbhíse (`public/sw.js`)
+Is luachanna statacha iad ainm agus cur síos an fhorainm sa chomhad foinse sin. Ní leanann an forléiriú suiteáilte an socrú ainm-áis nó an pailéad gníomhach ar gach cuairt.
 
-Oibrí seirbhíse fanaile (gan spleáchais ar chreatlach) ina bhfuil:
+### Oibrí Seirbhíse
 
-- **Céim suiteála**: Déanann sé sliogán na haipe a réamhthaisceadh (fréamh, leathanach as líne, manifest, deilbhíní)
-- **Céim ghníomhachtaithe**: Glanann sé seanleaganacha den taisce agus éilíonn sé gach cliant
-- **Céim gabhála**: Ródú cliste bunaithe ar chineál na hiarrata (nascleanúint, sócmhainn statach, API)
-- **Leaganú taisce**: `omniroute-pwa-v3` — méadaigh é seo chun taisce úr a fhorchur nuair a dhéantar nuashonrú
+Níl aon spleáchas ar an gcreat oibrí seirbhíse [`public/sw.js`](../../public/sw.js) :
 
-### Meiteashonraí Leagain Amach (`src/app/layout.tsx`)
+- **Suiteáil:** réamh-thaisceann sé na ceithre acmhainn atá liostaithe thuas agus gníomhaíonn sé an t-oibrí nua.
+- **Gníomhachtaigh:** baintear na glúnta taisce níos sine agus cliaint éileamh.
+- **Faigh:** cuireann i bhfeidhm na straitéisí sócmhainní statacha agus na heisiaimh bealaigh thuas.
+- **Leagan:** is é `omniroute-pwa-v3` an t-ainm foinse taisce ; stampálann an tógáil táirgeachta céannacht an taisce.
+- **Fógraí:** láimhseálann imeachtaí `push` ag teacht isteach agus díríonn sé nó osclaíonn sé fuinneog nuair a chliceáiltear fógra.
 
-Soláthraíonn an leagan amach fréimhe na meiteachlibeanna uile atá riachtanach chun PWA a chomhlíonadh:
+Ní bhunaíonn láimhseálaithe teagmhais brú amháin síntiús gníomhach don bhrú ná seachadadh freastalaí cumraithe. Ná glac leis go bhfuil fógraí cumasaithe toisc go bhfuil an PWA suiteáilte amháin.
 
-- Nasc `manifest` chuig `/manifest.webmanifest`
-- `apple-web-app-capable: true` don mhód neamhspleách ar iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` do Chrome ar Android
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` do rindreáil ó imeall go himill
+### Meiteashonraí Leagan Amach agus Clárú
 
-### Comhpháirt: `PwaRegister`
+Soláthraíonn [`src/app/layout.tsx`](../../src/app/layout.tsx) an nasc follasach, meiteashonraí neamhspleácha Apple, dathanna téama agus `viewport-fit: cover`. Úsáideann teideal an leathanaigh agus teideal feidhmchlár gréasáin Apple an t-ainm ásc. Leanann dath téama an bhrabhsálaí beo an pailéad; úsáideann an léiriú suiteála an dath solais réamhshocraithe.
 
-Suite ag `src/shared/components/PwaRegister.tsx`, déanann an chomhpháirt chliaint seo na nithe seo a leanas:
-
-1. Ritheann sí nuair a ghléasfar í (ar thaobh an chliaint amháin)
-2. Seiceálann sí an dtacaíonn an brabhsálaí le `serviceWorker`
-3. Cláraíonn sí `/sw.js` go ciúin (slogtar earráidí ionas nach gcuirfear bac ar an aip)
-4. Ní rindreálann sí rud ar bith (`return null`) — is comhpháirt í nach ndéanann ach fo-éifeacht
+Ritheann [`PwaRegister`](../../src/shared/components/PwaRegister.tsx) ar an gcliant agus cláraíonn sé `/sw.js` leis an tógáil ID ina URL. Aimsíonn sé glúnta taisce mímheaitseála agus is féidir leis an oibrí a athshocrú agus a athlódáil uair amháin chun aisghabháil ó shuiteáil níos sine. Ní chuireann teip clárúcháin bac ar an deais.
 
 ## Úsáid Le Termux (Android)
 
-Agus OmniRoute á rith ar Android trí Termux, oibríonn an PWA gan stró:
+1. Tosaigh OmniRoute i Termux: `npx -y omniroute@latest`.
+2. Oscail Chrome ar an bhfón céanna: `http://localhost:20128`.
+3. Suiteáil an PWA trí roghchlár suiteála an bhrabhsálaí.
+4. Coinnigh an freastalaí Termux ag rith agus an painéal á úsáid.
 
-1. Tosaigh OmniRoute in Termux: `npx omniroute`
-2. Oscail Chrome ar an bhfón céanna: `http://localhost:20128`
-3. Suiteáil an PWA trí "Cuir leis an Scáileán Baile"
-4. Nascann an PWA leis an bhfreastalaí áitiúil Termux — ritheann gach rud ar an ngléas
-
-Ciallaíonn an teaglaim seo gurb é d’fhón Android an **freastalaí** (Termux) agus an **cliant** (PWA) araon — geata AI iomlán féinchuimsitheach.
+Tá an geata agus a dheais araon ar an bhfón. Tá rochtain líonra fós ag teastáil ó iarratais ar sholáthraithe cianda AI. Féach an [treoir Termux](TERMUX_GUIDE.md) le haghaidh socruithe agus breithnithe ar feadh an tsaoil phróisis Android.
 
 ## Úsáid Ó Ghléasanna Eile
 
-Suiteáil an PWA ar aon ghléas a bhfuil rochtain brabhsálaí aige ar do fhreastalaí OmniRoute:
-
-- **Fón/táibléad eile**: Téigh chuig `http://PHONE_IP:20128` agus suiteáil an PWA
-- **Ríomhaire glúine**: Oscail Chrome/Edge agus suiteáil é mar PWA deisce
-- **Teilifís chliste le brabhsálaí**: Faigh rochtain ar an deais i lánscáileán
+Oscail seoladh HTTPS an fhreastalaí ar ghuthán, táibléad nó deasc, ansin lean sreabhadh suiteála an bhrabhsálaí sin. Ní mór an freastalaí a bheith inrochtana ó gach gléas. Féach ar an [treoir tolláin](../ops/TUNNELS_GUIDE.md) le haghaidh roghanna cianrochtana.
 
 ## Saincheapadh
 
-### Ainm an Áisc
+### Ainm an Cháis
 
-Urramaíonn teideal an PWA an socrú **Ainm an Áisc** ó `Deais → Socruithe`. Má athainmníonn tú d’áis mar "Mo Gheata AI", taispeánfaidh an PWA suiteáilte an t-ainm sin.
+Tá an** Ainm an Cháis** meiteashonraí painéal na n-athruithe a shocrú, lena n-áirítear teideal an leathanaigh agus teideal feidhmchláir ghréasáin Apple. Úsáideann an léiriú ginte ainm statach, mar sin ní ráthaíonn an socrú seo go n-athainmnítear aip atá suiteáilte cheana féin.
 
-### Favicon Saincheaptha
+### Favicon an Chustaim
 
-Má uaslódálann tú favicon saincheaptha trí `Deais → Socruithe`, léireoidh deilbhín an PWA ar an deasc an deilbhín saincheaptha. Úsáideann deilbhíní scáileáin baile móibíleacha na comhaid réamhthógtha `icon-512.png` agus `apple-touch-icon.png`.
+Athraíonn favicon saincheaptha favicon an bhrabhsálaí. Fógraíonn an forléiriú suiteála na comhaid PNG thuas fós; ní athraítear an favicon in ionad na ndeilbhíní scáileáin baile sin.
 
-## Srianta
+## Teorainneacha
 
-- **Gan fógraí brú** — Ní chuireann an t-oibrí seirbhíse an Push API i bhfeidhm. Láimhseálann an aip Electron na fógraí ina n-ionad.
-- **Gan sioncronú sa chúlra** — Ní chuirtear gníomhartha as líne i scuaine lena n-athsheinm. Is amharcóir deais go príomha é an PWA.
-- **Srianta iOS** — Ní thacaíonn Safari ar iOS le gach gné PWA (m.sh., ní mór leideanna suiteála a láimhseáil de láimh, agus tá srian ar oibrithe seirbhíse sa chúlra).
-- **Méid an taisce** — Ní chuireann an t-oibrí seirbhíse ach sócmhainní statacha i dtaisce. Ní chuirtear ualaí móra freagartha ó bhealaí `/api/` i dtaisce riamh.
-- **Deilbhíní saincheaptha ar ghléasanna móibíleacha** — Ní nuashonraítear deilbhín an scáileáin baile ar ghléasanna móibíleacha nuair a athraítear an favicon sna socruithe (ní mór na deilbhíní PWA a athghiniúint chuige seo).
+- **Ceangal freastalaí ag teastáil:** nascleanúint leathanaigh, staid an deais agus iarratais API nach bhfuil aon ais-ais as líne.
+- **Gan sioncronú cúlra:** ní chuirtear gníomhartha as líne i gciúáil le haghaidh athimeartha.
+- **Difríochtaí brabhsálaí:** Athraíonn biachláir suiteála, cur i láthair fuinneoige agus tacaíocht fógraí de réir ardáin.
+- **Níl aon taisce freagartha API :** ní chuireann an t-oibrí API, painéal agus bealaí fíordheimhnithe san áireamh.
+- **Deilbhíní suiteála statacha:** ní mór na sócmhainní fógraithe a athrú chun na deilbhíní sin a nuashonrú; féadfaidh brabhsálaithe meiteashonraí suiteáilte a choinneáil.
 
-## Tagairt Comhad
+## Tagairt Comhaid
 
-| Comhad                                  | Cuspóir                                                                      |
-| --------------------------------------- | ---------------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Bealach léirithe Next.js (gineann sé `manifest.webmanifest`)                 |
-| `public/sw.js`                          | Oibrí seirbhíse lena ngabhann loighic taisce                                 |
-| `src/shared/components/PwaRegister.tsx` | Comhpháirt chliaint a chláraíonn an t-oibrí seirbhíse                        |
-| `src/app/offline/page.tsx`              | Leathanach cúltaca as líne le táscaire beo stádais                           |
-| `src/app/layout.tsx`                    | Leagan amach fréimhe le meiteashonraí PWA (apple-web-app, theme-color, etc.) |
-| `public/icon-512.png`                   | Deilbhín PNG 512×512 (Android, splancscáileán)                               |
-| `public/apple-touch-icon.png`           | Deilbhín PNG 180×180 (scáileán baile iOS)                                    |
-| `public/icon-192.svg`                   | Deilbhín SVG 192×192 (deilbhín oiriúnaitheach Android)                       |
-| `public/apple-touch-icon.svg`           | Deilbhín SVG 180×180 (deilbhín cúltaca Apple)                                |
+| Comhad                                                                                 | Cuspóir                                                 |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Léiriú app gréasáin ginte                               |
+| [public/sw.js](../../public/sw.js)                                                     | Taisce, eisiaimh agus láimhseálaithe imeachtaí fógartha |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Clárú táirgeachta agus aisghabháil stale-taisce         |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Leathanach nascachta, ní cúltaca uathoibríoch as líne   |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | meiteashonraí leathanach agus socruithe amharcport      |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Luachanna datha téama comhroinnte                       |
+| [public/icon-512.png](../../public/icon-512.png)                                       | Deilbhín feidhmchláir 512 × 512                         |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 deilbhín Apple                                |

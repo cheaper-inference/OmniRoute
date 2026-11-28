@@ -4,9 +4,9 @@
 
 ---
 
-> **Qué vive y dónde: cada directorio de nivel superior y archivo raíz rastreados, con un propósito de una sola línea.** Última actualización: 2026-11-13 (OmniRoute v3.8.54)
+> **Qué vive y dónde: cada directorio de nivel superior y archivo raíz rastreados, con un propósito de una sola línea.**
 >
-> Utilice este mapa para orientarse en el código base y luego siga los enlaces a los documentos dedicados. El recuento de archivos se midió con `git ls-files` en la fecha anterior. Cambian con casi cada lanzamiento, así que trátelos como órdenes de magnitud.
+> Utilice este mapa para orientarse en el código base y luego siga los enlaces a los documentos dedicados. Los recuentos de archivos provienen de `git ls-files` y cambian con casi cada versión. Trátelos como órdenes de magnitud.
 
 ## Árbol de nivel superior
 

@@ -246,31 +246,39 @@ Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ## 🎨 คอมโบ
 
-คุณสามารถจัดลำดับการ์ดคอมโบใหม่ได้โดยตรงใน **แดชบอร์ด → คอมโบ** ด้วยการลากจุดจับบนการ์ดแต่ละใบ ลำดับจะถูกบันทึกไว้ใน SQLite และกู้คืนเมื่อโหลดใหม่
+คุณสามารถเรียงลำดับการ์ดคอมโบได้โดยตรงใน** แดชบอร์ด → Combos** โดยการลากที่จับบนการ์ดแต่ละใบ คำสั่งซื้อจะถูกจัดเก็บไว้ใน SQLite และกู้คืนเมื่อโหลดซ้ำ
 
-### ตัวอย่างที่ 1: ใช้การสมัครสมาชิกให้คุ้มค่าสูงสุด → ตัวสำรองราคาถูก
+### ค้นหาผู้ให้บริการ รุ่น หรือบัญชี
 
-```
-แดชบอร์ด → คอมโบ → สร้างใหม่
+ในการสร้างหรือแก้ไขคำสั่งผสม ตัวเลือกผู้ให้บริการ โมเดล บัญชี และการอ้างอิงคำสั่งผสมแบบทีละขั้นตอนจะรวมช่องค้นหาในเครื่องไว้ด้วย ค้นหาตามชื่อที่แสดง ตัวระบุ นามแฝงของผู้ให้บริการ หรือแหล่งที่มาของโมเดล จากนั้นคลิกผลลัพธ์หรือใช้ปุ่มลูกศรและ Enter คำค้นหาหลายคำต้องตรงกันทั้งหมด การล้างการค้นหาหรือการกด Escape จะทำให้ค่าที่เลือกไม่เปลี่ยนแปลง
 
-ชื่อ: premium-coding
-โมเดล:
-  1. cc/claude-opus-4-7 (โมเดลหลักจากการสมัครสมาชิก)
-  2. glm/glm-4.7 (ตัวสำรองราคาถูก, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (ตัวเลือกสำรองที่ถูกที่สุด, $0.3/1M)
+ตัวเลือกบัญชีอัตโนมัติจะมองเห็นได้ในขณะที่ค้นหา รายการข้อจำกัดบัญชีเพิ่มเติมมีตัวกรองแยกต่างหาก: บัญชีที่เลือกซึ่งอยู่นอกผลลัพธ์ที่มองเห็นได้ จะยังคงเลือกอยู่ และจำนวนจะรวมบัญชีเหล่านั้นด้วย ส่วนย่อยของอีเมลที่ซ่อนอยู่จะไม่สามารถค้นหาได้ในขณะที่ความเป็นส่วนตัวของอีเมลเปิดอยู่ เพิ่มขั้นตอนและบันทึกคำสั่งผสมตามปกติ การพิมพ์ข้อความค้นหาไม่ได้บันทึกหรือทดสอบอะไรเลย
 
-ใช้ใน CLI: premium-coding
-```
+การค้นหาเฉพาะเครื่องเดียวกันนี้ใช้ได้กับโมเดลการทดสอบการเชื่อมต่อ โมเดลค่าเริ่มต้นและนามแฝง CLI ที่กำหนดเอง และตัวเลือกพร็อกซีที่บันทึกไว้ การดำเนินการบันทึก ใช้ และทดสอบที่มีอยู่จะยังคงแยกจากกัน
 
-### ตัวอย่างที่ 2: ใช้เฉพาะของฟรี (ไม่มีค่าใช้จ่าย)
+### ตัวอย่างที่ 1: เพิ่มการสมัครสมาชิกสูงสุด → การสำรองข้อมูลราคาถูก
 
 ```
-ชื่อ: free-combo
-โมเดล:
-  1. if/kimi-k2.7-code (ระบุว่าเข้าถึงได้ฟรี แต่อาจมีข้อจำกัดจากผู้ให้บริการ)
-  2. kr/qwen3-coder-next (ตัวสำรองฟรีจาก Kiro)
+Dashboard → Combos → Create New
 
-ค่าใช้จ่าย: ขณะนี้ระบุเป็น $0 แต่ข้อกำหนดและความพร้อมให้บริการอาจเปลี่ยนแปลงได้
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### ตัวอย่างที่ 2: ฟรีเท่านั้น (ไม่มีค่าใช้จ่าย)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -430,7 +438,7 @@ omniroute autostart disable
 ### การปรับใช้VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -512,8 +520,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -733,7 +741,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 คีย์เหล่านี้อยู่ใน `providerSpecificData` ของการเชื่อมต่อ (เช่นผ่าน `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (จำนวนเต็ม 1–1024) — สำหรับการเชื่อมต่อที่รองรับรูปแบบแชท OpenAI ซึ่งเกตเวย์ปฏิเสธชื่อเครื่องมือขนาดยาว ชื่อที่ยาวกว่าจะถูกส่งเป็นนามแฝงแบบสั้นและเรียกคืนในการตอบกลับ OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go และ Muse Code มีชื่อนามแฝงมากกว่า 64 ตัวอักษรโดยไม่มีการตั้งค่า ค่าการเชื่อมต่อจะแทนที่ค่าเริ่มต้นของ Azure OpenAI / Azure AI Foundry (การเชื่อมต่อ Azure ที่อยู่หลังเกตเวย์ที่เข้มงวดกว่า) และกำหนดขีดจำกัดสำหรับโหนดที่เข้ากันได้แบบกำหนดเอง OpenAI, Mistral, NVIDIA, OpenCode Zen/Go และ Muse Code รักษาขีดจำกัดการลงทะเบียนและเพิกเฉยต่อมัน
+- `toolNameMaxLength` (จำนวนเต็ม 1–1024) — สำหรับการเชื่อมต่อที่รองรับรูปแบบแชท OpenAI ซึ่งเกตเวย์ปฏิเสธชื่อเครื่องมือขนาดยาว ชื่อที่ยาวกว่าจะถูกส่งเป็นนามแฝงแบบสั้นและเรียกคืนในการตอบกลับ OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go และ Muse Code มีชื่อนามแฝงมากกว่า 64 ตัวอักษรโดยไม่มีการตั้งค่า ค่าการเชื่อมต่อจะแทนที่ค่าเริ่มต้นของ Azure OpenAI / Azure AI Foundry (การเชื่อมต่อ Azure ที่อยู่ด้านหลังเกตเวย์ที่เข้มงวดกว่า) และกำหนดขีดจำกัดสำหรับโหนดที่เข้ากันได้แบบกำหนดเอง OpenAI, Mistral, NVIDIA, OpenCode Zen/Go และ Muse Code รักษาขีดจำกัดการลงทะเบียนและเพิกเฉยต่อมัน
 - `quotaEndpoint` — จุดสิ้นสุด quota/credits ของเกตเวย์ อ่านแถบโควต้าแดชบอร์ดและการกำหนดเส้นทางการรับรู้โควต้า ใช้งานได้กับทั้งการเชื่อมต่อที่เข้ากันได้กับ OpenAI และ Anthropic รูปร่างเต็มมีการบันทึกไว้ใน `open-sse/services/usage/openaiCompatible.ts`
 
 ```json
@@ -881,8 +889,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` และ `cost-optimized`
 - `auto` — ขับเคลื่อนด้วยคะแนนจากผู้สมัครทั้งหมด
 - `lkgp` (ผู้ให้บริการที่ดีคนสุดท้าย) — ปักหมุดผู้ให้บริการที่ประสบความสำเร็จคนสุดท้าย จากนั้นกลับไปสู่กฎเกณฑ์
-- `context-optimized` — เลือกโมเดลที่มีหน้าต่างบริบทอิสระที่ใหญ่ที่สุด
-- `context-relay` — เชื่อมโยงโมเดลบริบทแบบยาวสำหรับการเลี้ยวติดตามผล
+- `context-optimized` — ลองใช้โมเดลที่มีหน้าต่างบริบทที่ใหญ่ที่สุดที่รู้จักก่อน
+- ลำดับความสำคัญ `context-relay` — บวกกับสรุปแฮนด์ออฟเมื่อการสนทนาย้ายไปยังบัญชีอื่น
 
 #### ส่วนหัวเซสชัน Sticky ภายนอก
 
@@ -900,7 +908,7 @@ OmniRoute ยังยอมรับ `x_session_id` และส่งคืน
 underscores_in_headers on;
 ```
 
-#### นามแฝงโมเดลไวลด์การ์ด
+#### นามแฝงโมเดลไวด์การ์ด
 
 สร้างรูปแบบไวด์การ์ดเพื่อทำการแมปชื่อโมเดลใหม่:
 
@@ -911,7 +919,7 @@ Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 
 สัญลักษณ์ตัวแทนรองรับ `*` (อักขระใดก็ได้) และ `?` (อักขระเดี่ยว)
 
-#### โซ่สำรอง
+#### โซ่ทางเลือก
 
 กำหนดห่วงโซ่ทางเลือกส่วนกลางที่ใช้กับคำขอทั้งหมด:
 
@@ -1155,7 +1163,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **ใช้น้อยที่สุด**        | กำหนดเส้นทางไปยังโมเดลที่มีคำขอล่าสุดน้อยที่สุด (ใช้เมตริกผสม) |
 | **ปรับต้นทุนให้เหมาะสม** | เส้นทางไปยังรุ่นที่ถูกที่สุด (ใช้ตารางราคา)                    |
 
-สามารถตั้งค่าเริ่มต้นคอมโบสากลได้** แดชบอร์ด การตั้งค่า → → การกำหนดเส้นทาง → Combo ค่าเริ่มต้น** . การหมดเวลาเป้าหมายคำสั่งผสมจะสืบทอดการหมดเวลาคำขอปัจจุบันตามค่าเริ่มต้น ใช้** เป้าหมายหมดเวลา (วินาที)** ในค่าเริ่มต้นของคอมโบหรือคอมโบแต่ละรายการเฉพาะเมื่อขีดจำกัดต่อเป้าหมายที่สั้นลงควรกระตุ้นให้เกิดทางเลือกที่เร็วขึ้น
+สามารถตั้งค่าเริ่มต้นคอมโบสากลได้** แดชบอร์ด การตั้งค่า → → การกำหนดเส้นทาง → Combo ค่าเริ่มต้น** . การหมดเวลาเป้าหมายแบบผสมสืบทอดการหมดเวลาคำขอปัจจุบันตามค่าเริ่มต้น ใช้** เป้าหมายหมดเวลา (วินาที)** ในค่าเริ่มต้นของคอมโบหรือคอมโบแต่ละรายการเฉพาะเมื่อขีดจำกัดต่อเป้าหมายที่สั้นลงควรกระตุ้นให้เกิดทางเลือกที่เร็วขึ้น
 
 เลือกใช้การเพิ่มประสิทธิภาพคอมโบแบบ Zero-latency ออกจาก** การเพิ่มประสิทธิภาพแบบ Zero-latency** ปิดการใช้งานเพื่อป้องกันคุณสมบัติเวลาแฝงเหล่านี้จากเป้าหมายทางเลือกการแข่ง ข้ามเป้าหมายตามประวัติ TTFT หรือการบีบอัดคำขอทางเลือกสำรอง การเปิดใช้งานดังกล่าวทำให้สามารถกำหนดค่าการป้องกันความเสี่ยง การข้าม TTFT ที่คาดการณ์ได้ และการบีบอัดทางเลือกเชิงรุกเพื่อแลกเปลี่ยนความเที่ยงตรง routing/request เพื่อลดเวลาแฝงที่ลดลง
 
@@ -1170,7 +1178,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | การ์ด                     | มันแสดงให้เห็นอะไร                                               |
 | ------------------------- | ---------------------------------------------------------------- |
 | **สถานะของระบบ**          | เวลาทำงาน เวอร์ชัน การใช้หน่วยความจำ ไดเร็กทอรีข้อมูล            |
-| **สุขภาพของผู้ให้บริการ** | สถานะรันไทม์ของเซอร์กิตเบรกเกอร์ของผู้ให้บริการทั่วโลก           |
+| **สุขภาพของผู้ให้บริการ** | สถานะรันไทม์ของเซอร์กิตเบรกเกอร์ของผู้ให้บริการระดับโลก          |
 | **ขีดจำกัดอัตรา**         | คูลดาวน์การเชื่อมต่อที่ใช้งานอยู่ต่อบัญชีพร้อมเวลาที่เหลืออยู่   |
 | **การล็อกที่ใช้งานอยู่**  | การล็อกขอบเขตโมเดลที่ใช้งานอยู่และการยกเว้นชั่วคราว              |
 | **แคชลายเซ็น**            | สถิติแคชการขจัดข้อมูลซ้ำซ้อน (คีย์ที่ใช้งานอยู่ อัตราการเข้าถึง) |
@@ -1329,34 +1337,36 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ---
 
-## 💻 CLI ภายใน
+## 💻 ภายใน CLI
 
-OmniRoute มาพร้อม CLI ภายใน (`omniroute …`) สำหรับการตั้งค่า การวินิจฉัย และการควบคุมขณะรันไทม์ ซึ่ง **แยกจากหน้า "CLI Tools" ในแดชบอร์ด** ที่ใช้กำหนดค่า CLI ของบุคคลที่สาม (Claude Code, Cursor, Codex, Cline, …) เพื่อให้สามารถสื่อสารกับ OmniRoute ได้
+OmniRoute จัดส่ง CLI (`omniroute …`) ภายในสำหรับการตั้งค่า การวินิจฉัย และการควบคุมรันไทม์ นี่คือ** แยกจากหน้า "CLI Tools" ในแดชบอร์ด** ซึ่งกำหนดค่า CLIs บุคคลที่สาม (Claude Code, Cursor, Codex, Cline, …) เพื่อให้พวกเขาสามารถพูดคุยกับ OmniRoute ได้
 
 ```bash
-omniroute setup                    # วิซาร์ดแบบโต้ตอบ (รหัสผ่าน ผู้ให้บริการ คอมโบ)
-omniroute setup --non-interactive  # เหมาะสำหรับ CI
-omniroute doctor                   # การวินิจฉัยสถานะ (ไดเรกทอรีข้อมูล, DB, ผู้ให้บริการ, พอร์ต)
-omniroute providers available      # แสดงรายการผู้ให้บริการที่รองรับ
-omniroute providers list           # แสดงรายการการเชื่อมต่อที่กำหนดค่าไว้
-omniroute providers test <id>      # ทดสอบการเชื่อมต่อผู้ให้บริการแบบสด
-omniroute combos list              # แสดงรายการคอมโบ
-omniroute combos switch <name>     # ตั้งค่าคอมโบเริ่มต้น
-omniroute models                   # แสดงรายการโมเดลที่พร้อมใช้งาน (--json, --search)
-omniroute keys add | list | remove # จัดการคีย์ API จากเทอร์มินัล
-omniroute backup                   # สร้างสแนปช็อตการกำหนดค่า + DB
-omniroute restore [<timestamp>]    # กู้คืนจากสแนปช็อต
-omniroute health                   # สถานะโดยละเอียด (เบรกเกอร์, แคช, หน่วยความจำ)
-omniroute quota                    # การใช้โควตาของผู้ให้บริการ
-omniroute mcp status               # สถานะเซิร์ฟเวอร์ MCP
-omniroute a2a status               # สถานะเซิร์ฟเวอร์ A2A
-omniroute tunnel list|create|stop  # ทันเนล Cloudflare/Tailscale/ngrok
-omniroute reset-password           # รีเซ็ตรหัสผ่านผู้ดูแลระบบ
-omniroute --mcp                    # เริ่มเซิร์ฟเวอร์ MCP ผ่าน stdio
-omniroute --port 3000              # เริ่มเซิร์ฟเวอร์บนพอร์ตที่กำหนดเอง
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-เคล็ดลับ: ใช้ `omniroute doctor --json` ร่วมกับเครื่องมือตรวจสอบของคุณเพื่อแจ้งเตือนเมื่อการเชื่อมต่อผู้ให้บริการมีปัญหา
+เคล็ดลับ: จับคู่ `omniroute doctor --json` กับเครื่องมือตรวจสอบของคุณเพื่อแจ้งเตือนเมื่อการติดตั้งในเครื่องเสียหาย `doctor` ไม่ได้ทดสอบการเชื่อมต่อของผู้ให้บริการ ใช้ `omniroute providers test <id>` เพื่อสิ่งนั้น
 
 ---
 

@@ -4,12 +4,9 @@
 
 ---
 
-> **Última atualização:** 2026-08-28 — v3.8.51
-> Fluxo de lançamento simplificado que tira partido das competências do Claude Code para a automatização.
+> Fluxo de lançamento simplificado que aproveita as competências Claude Code para a automatização.
 >
-> **Mantenha a fila/branch verde entre lançamentos:** consulte [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (família `/green-prs` + `npm run check:release-green` + `/babysit` + execução noturna). Executar
-> isto periodicamente — e especialmente **antes** desta lista de verificação — faz com que o PR de lançamento comece verde.
+> **Mantenha o queue/branch verde entre lançamentos:** ver [RELEASE_GREEN.md](./RELEASE_GREEN.md) (família `/green-prs` + `npm run check:release-green` + `/babysit` + todas as noites). Executando isto periodicamente — e especialmente** antes** esta lista de verificação — faz com que o lançamento PR comece a verde.
 
 ## Resumo
 
@@ -60,7 +57,9 @@ O fluxo de trabalho npm-publish já não publica diretamente: inicializa o tarba
 
 **Docker Hub `latest` (obrigatório em cada publicação SemVer estável):** o fluxo de trabalho `docker-publish` deve marcar** ambos** `X.Y.Z` e, quando `should-promote-latest.sh` concorda, este é o SemVer estável mais elevado, `:latest` com o** mesmo resumo** . Após o trabalho: Hub `latest` digest é igual ao novo SemVer digest e `last_updated` movido. Não deixe `:latest` numa versão mais antiga enquanto as notas de lançamento falam de correções que só existem no git. Componha guias de início rápido utilizando `:latest`; GitOps deve continuar a fixar `X.Y.Z`. Consulte [os canais de lançamento Docker](../guides/DOCKER_GUIDE.md#release-channels) e #10317.
 
-**Repositório da organização Docker Hub (`cheaperinference/omniroute`):** Docker Hub não consegue mover um repositório entre namespaces, pelo que `diegosouzapw/omniroute` mantém o seu histórico de pull e cada lançamento, e o `mirror-org-dockerhub` job do `docker-publish` copia cada versão lançada (e `:latest` quando promovida) do `ghcr.io/cheaper-inference/omniroute` para o repositório da organização. Ele precisa dos segredos `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; sem eles, o trabalho permanece verde com um aviso "espelho Docker Hub org ignorado" e os outros registos são publicados normalmente. Para publicar uma versão lançada posteriormente, execute** Ações → Espelhar imagem Docker no Docker Hub org → Executar workflow** com `version=X.Y.Z` (e `promote_latest` para a versão estável mais elevada): copia as imagens existentes, sem reconstrução.
+**Repositório da organização Docker Hub (`cheaperinference/omniroute`):** Docker Hub não consegue mover um repositório entre namespaces, pelo que `diegosouzapw/omniroute` mantém o seu histórico de pull e cada lançamento, e o `mirror-org-dockerhub` job do `docker-publish` copia cada versão lançada (e `:latest` quando promovida) do `ghcr.io/cheaper-inference/omniroute` para o repositório da organização. Ele precisa dos segredos `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; sem eles, o trabalho permanece verde com um aviso "espelho Docker Hub org ignorado" e os outros registos são publicados normalmente. Para publicar uma versão lançada posteriormente, execute** Ações → Espelhar imagem Docker no Docker Hub org → Executar workflow** com `version=X.Y.Z` (e `promote_latest` para a versão estável mais elevada): copia as imagens existentes, sem reconstrução. A visão geral do Docker Hub deste repositório é definida manualmente: o API que o edita rejeita os tokens de acesso da organização.
+
+O mesmo fluxo de trabalho também copia cada versão para o pacote GHCR herdado `ghcr.io/diegosouzapw/omniroute` até 30/06/2027, pelo que as instalações ainda fixadas no mesmo continuam a ser atualizadas; o seu índice carrega uma descrição "movido para `ghcr.io/cheaper-inference/omniroute`". Ele precisa do `GHCR_LEGACY_TOKEN` secret (um token de acesso pessoal clássico do `diegosouzapw` com `write:packages`); sem ele, o trabalho é ignorado com um aviso "Espelho GHCR legado ignorado".
 
 ## Via Rápida de Hotfix (etiqueta `hotfix`)
 
@@ -140,7 +139,7 @@ Se um gancho falhar: corrija o problema subjacente, não ignore `--no-verify`.
 
 ### Confirmações Convencionais
 
-Todos os commits ligados ao lançamento devem seguir o formato `type(scope): subject`.
+Todos os commits ligados à versão devem seguir o formato `type(scope): subject`.
 
 **Tipos válidos:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
@@ -151,7 +150,7 @@ Alterações importantes: adicione `BREAKING CHANGE:` rodapé ou `!` após o âm
 ### Documentação
 
 - [ ] passes `npm run check:docs-sync` (execução automática por pré-confirmação)
-- [ ] passes `npm run check:docs-all` (guarda-chuva: docs-sync + docs-counts + env-doc-sync + versões obsoletas + doc-links)
+- [ ] `npm run check:docs-all` passa. O seu aviso `check:deprecated-versions` sinaliza versões explicitamente atribuídas ao OmniRoute (3.6. x e anteriores) e ignora datas.
 - [ ] `npm run check:env-doc-sync` sai 0 código — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env o contrato está intacto
 - [ ] `npm run check:doc-links` sai de 0 — sem referências de remarcação interna quebradas após reestruturação
 - [ ] `docs/architecture/ARCHITECTURE.md` revisto para storage/runtime drift
@@ -203,7 +202,7 @@ Se `electron/` mudou:
 
 ### Layout de construção
 
-O repositório utiliza três diretórios de saída distintos — nunca os confunda:
+O repositório utiliza três diretórios de saída distintos — nunca os mistura:
 
 | Diretório | Finalidade                                                | Rastreado?        |
 | --------- | --------------------------------------------------------- | ----------------- |
@@ -211,7 +210,7 @@ O repositório utiliza três diretórios de saída distintos — nunca os confun
 | `.build/` | Construir intermediários — saída `next build` (`distDir`) | Não (gitignorado) |
 | `dist/`   | Pacote npm entregável — montado por `assembleStandalone`  | Não (gitignorado) |
 
-> **Nota do operador:** o diretório de imagem VPS remoto permanece `/usr/lib/node_modules/omniroute/app/`. Apenas o** no repositório** saída de compilação movida (`app/` → `dist/`). As competências de implantação rsync `dist/` conteúdos no diretório `app/` remoto — não são necessárias alterações no caminho VPS.
+> **Nota do operador:** o diretório de imagem VPS remoto permanece `/usr/lib/node_modules/omniroute/app/`. Apenas o** no repositório** saída de compilação movida (`app/` → `dist/`). As competências de implementação rsync `dist/` conteúdos no diretório `app/` remoto — não são necessárias alterações no caminho VPS.
 
 **Fluxo de construção única:**
 
@@ -399,7 +398,7 @@ O commit bump de desenvolvimento é construído com git plumbing (nenhuma árvor
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

@@ -4,14 +4,11 @@
 
 ---
 
-> **Stádas:** Ar fáil go ginearálta.
-> **Lucht léitheoireachta:** Oibreoirí atá ag nascadh OpenCode le himscaradh OmniRoute.
-> **Foinse na fírinne (scéimre cumraíochta):** `src/shared/services/opencodeConfig.ts`
-> **Foinse na fírinne (pacáiste npm):** `@omniroute/opencode-provider/` (spás oibre infoilsithe)
+> **Stádas:** Ar fáil go ginearálta.** Lucht Féachana:** Sreangaíonn oibreoirí OpenCode chuig imscaradh OmniRoute.** Foinse na fírinne (scéimre cumraíochta):** `src/shared/services/opencodeConfig.ts`** Pacáistí npm molta:** `@omniroute/opencode-plugin/` (OpenCode v1, suiteáilte ag `omniroute setup opencode`) agus `@omniroute/opencode-plugin-v2/` (OpenCode v2). Is é an pacáiste `@omniroute/opencode-provider/` níos sine** dímheasta** (féach Conair 2).
 
-Is cliant AI gníomhach CLI/deisce é [OpenCode](https://opencode.ai). Léann sé a chatalóg soláthraithe ó `~/.config/opencode/opencode.json` (nó `opencode.jsonc`) agus leanann sé an scéimre ag `https://opencode.ai/config.json`. Cuireann OmniRoute é féin ar fáil do OpenCode mar cheann de na soláthraithe sin — téann gach iarratas trí chomhéadan caighdeánach OmniRoute atá comhoiriúnach le OpenAI, `/v1`, ionas go mbaineann OpenCode tairbhe go huathoibríoch as ródú Auto-Combo, scoradáin chiorcaid, beartais eochracha, inbhraiteacht, srl.
+Is cliant gníomhaire CLI/desktop AI [OpenCode](https://opencode.ai). Léann sé a chatalóg soláthraithe ó `~/.config/opencode/opencode.json` ( nó `opencode.jsonc`) agus leanann sé an scéimre ag `https://opencode.ai/config.json`. nochtar OmniRoute é féin do OpenCode mar cheann de na soláthraithe sin — sreabhadh gach iarratas trí dhromchla `/v1` caighdeánach OpenAI-comhoiriúnach le OmniRoute, agus mar sin baineann OpenCode leas go huathoibríoch as ródú Auto-Combo, scoradáin chiorcaid, príomhbheartais, inbhraiteacht, etc.
 
-Tá **dhá chonair chomhtháthaithe a dtacaítear leo** ann. Roghnaigh ceann amháin — gineann siad an chumraíocht chéanna.
+Déanann an leathanach seo doiciméadú ar an dá chonair statach-config thíos; an dá ghiniúint an config céanna. Le haghaidh liosta samhlacha a leanann do chatalóg beo, bain úsáid as an mbreiseán ina ionad sin: suiteálann `omniroute setup opencode` `@omniroute/opencode-plugin` (OpenCode v1), agus spriocanna `@omniroute/opencode-plugin-v2` OpenCode v2 (féach [comhtháthú CLI](../guides/CLI-INTEGRATIONS.md) agus an [treoir breiseán OpenCode v2](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ An comhad a ghintear (catalóg réamhshocraithe samhlacha):
 
 ---
 
-## Conair 2 — pacáiste npm `@omniroute/opencode-provider`
+## Conair 2 pacáiste — npm `@omniroute/opencode-provider` (neamhcheadaithe)
 
-Molta nuair atá tú ag scriptiú na cumraíochta ó Node/TS (píblínte CI, monorepos, sreafaí suiteálaí saincheaptha).
+> **Dímheasta.** Scríobhann an pacáiste liosta samhlacha statach a ghluaiseann taobh thiar do chatalóg beo OmniRoute. Molann a README aistriú go `@omniroute/opencode-plugin` (nó `@omniroute/opencode-plugin-v2` ar OpenCode v2). Coimeádtar an API thíos le haghaidh scripteanna reatha amháin.
+
+Úsáidtear é agus an cumraíocht á scríobh ó Node/TS (píblínte CI, monorepos, sreafaí suiteálaí saincheaptha).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Roghnach: sáraigh catalóg na samhlacha a nochtar do OpenCode
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Chun cumasc neamh-millteach a dhéanamh le comhad atá ann cheana, déan `mergeOpenCodeConfigText()` ó `opencodeConfig.ts` a mhacasamhlú nó glaoigh ar an ngineadóir CLI.
+Chun cumasc neamh-millteach i gcoinne comhaid atá ann cheana féin, déan `mergeOpenCodeConfigText()` a mhacasamhlú ó `opencodeConfig.ts` nó cuir glaoch ar an ngineadóir CLI.
 
-Féach ar [README an phacáiste](../../@omniroute/opencode-provider/README.md) chun an API iomlán a fháil.
+Féach an [pacáiste README](../../@omniroute/opencode-provider/README.md) don API iomlán.
 
 ---
 
@@ -157,7 +156,9 @@ I gcás cliant ar nós Anthropic a sheolann `x-api-key` + `anthropic-version`, g
 
 ## Féach freisin
 
-- [Tagairt API](../reference/API_REFERENCE.md) — dromchla iomlán REST OmniRoute
-- [Auto-Combo](../routing/AUTO-COMBO.md) — cad is brí le `model: "auto"`
-- [README `@omniroute/opencode-provider`](../../@omniroute/opencode-provider/README.md)
+- [API tagartha](../reference/API_REFERENCE.md) — dromchla iomlán OmniRoute REST
+- [Auto-Combo](../routing/AUTO-COMBO.md) — cad a chiallaíonn `model: "auto"`
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (molta)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (toigthe)
 - Foinse: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

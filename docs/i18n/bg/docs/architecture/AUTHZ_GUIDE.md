@@ -4,12 +4,11 @@
 
 ---
 
-> **Източник на истина:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Последна актуализация:** 2026-09-22 — пространствата от имена на обхватите сочат към MCP-SERVER.md
+> **Източник на истината:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute разполага с ориентиран към маршрутите конвейер за оторизация, който контролира всяка API заявка. Класифицирането е **детерминистично** и **затворено при неуспех** — всичко, което не може да бъде класифицирано, се причислява към `MANAGEMENT` и изисква сесия или токен с управленско ниво на достъп. Тази страница обяснява модела за инженерите, които поддържат маршрути или проектират нови крайни точки.
+OmniRoute има тръбопровод за оторизация, съобразен с маршрута, който пропуска всяка API заявка. Класификацията е** детерминистичен** и** неуспешно затворен** — всичко, което не може да бъде класифицирано, завършва като `MANAGEMENT` и изисква токен за сесия или ниво на управление. Тази страница обяснява модела за инженери, които поддържат маршрути или проектират нови крайни точки.
 
-![Конвейер за AuthZ (3 класа маршрути + оценяване на политики)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Източник: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -192,7 +191,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — винаги връща `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — извлича Bearer, валидира чрез `validateApiKey()`. Преминава към анонимен само когато флагът за ефективна функция `REQUIRE_API_KEY` е деактивиран. Ефективният флаг се разрешава чрез `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), така че флаговете на функциите на таблото за управление и променливите на средата управляват `/api/v1/*`, `/api/v1beta/*` и псевдонимите последователно; неуспешно затваряне на резолвера. Позволява заявки за сесия на таблото за клиентски API маршрути (включително `/api/v1/models`, използван от каталога на модела на таблото). Когато Entra ID SSO е активиран, носител, който структурно е Entra токен (три base64url сегмента, `RS*` alg, `kid`) се обработва от SSO клона** преди** `validateApiKey()` и неговата присъда е окончателна — той никога не попада в пътя на ключа на API или клона за деградиране до анонимен, така че прекъсването на доставчик на идентичност не може да стане отворен достъп. Статичните API ключове не са засегнати. Вижте [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — приема сесия на таблото за управление, вътрешни заявки за синхронизиране на модели (съвпадащи с `/api/providers/[name]/(sync-models|models)`) или пропуска изцяло, ако `isAuthRequired()` върне false. Връща 403 (`AUTH_001`), когато токенът на носител е наличен, но е невалиден, 401 в противен случай. Също така налага нивата за защита на маршрута (LOCAL_ONLY / ALWAYS_PROTECTED) преди всеки клон за удостоверяване — вижте [Нивата за защита на маршрута](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY пътеките в `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (днес: `/api/mcp/`) могат да бъдат достъпни от non-loopback, когато носещият ключ носи `manage` обхвата; всички останали LOCAL_ONLY пътища остават стриктно обратно независимо от обхвата.
+- **`managementPolicy`** (`policies/management.ts`) — приема сесия на таблото за управление, вътрешни заявки за синхронизиране на модели (съвпадащи с `/api/providers/[name]/(sync-models|models)`) или пропуска изцяло, ако `isAuthRequired()` върне false. Връща 403 (`AUTH_001`), когато токенът на носител е наличен, но е невалиден, 401 в противен случай. Също така налага нивата за защита на маршрута (LOCAL_ONLY / ALWAYS_PROTECTED) преди всеки клон за удостоверяване — вижте [Нивата за защита на маршрута](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY пътеките в `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (днес: `/api/mcp/`) могат да бъдат достъпни от non-loopback, когато ключът на носителя носи `manage`/`admin` обхвата или тесния `mcp:connect` обхват (`hasMcpConnectOrManageScope`), или с удостоверена сесия на таблото за управление; всички останали LOCAL_ONLY пътища остават стриктно обратно независимо от обхвата.
 
 Успешна политика връща `AuthSubject` с `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Манипулаторите надолу по веригата могат да го прочетат чрез `assertAuth(request, "CLIENT_API")` в `src/server/authz/assertAuth.ts` вместо да изпълняват повторно логиката за удостоверяване.
 
@@ -285,36 +284,22 @@ export async function POST(request: Request) {
 
 ## Обхвати
 
-Три пространства от имена. Всяка проверка чете само собствените си низове. Съпоставката,
-включително защо `manage` не преминава `scopeMatches` за `read:compression` и защо
-токен за достъп с `read` не може да изпълни `PATCH /api/keys/{id}`, е описана в
-[Три пространства от имена за обхвати](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Три пространства от имена. Всеки пул чете само собствените си низове. Едно до друго, включително защо `manage` не успява `scopeMatches` за `read:compression` и защо `read` токен за достъп не може `PATCH /api/keys/{id}`, е [Три пространства от имена на обхват](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API ключовете съдържат масив `scopes` (съхраняван като JSON в `api_keys.scopes`, вижте `src/lib/db/apiKeys.ts`).
+API ключовете носят `scopes` масив (съхранен като JSON в `api_keys.scopes`, вижте `src/lib/db/apiKeys.ts`).
 
-### Обхват за управление
+### Обхват на управление
 
-- `manage` / `admin` — `hasManageScope`. Bearer достъп до маршрутите на API за управление.
-- `mcp:connect`, `self:usage`, `self:account-quota` и
-  `policy:bypass-provider-quota` са допълващи обхвати с точно съвпадение. Те са
-  извън `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` отваря само
-  изключението за адреси извън loopback за `/api/mcp/`.
+- `manage` / `admin` — `hasManageScope`. Достъп на носител до управление API маршрути.
+- `mcp:connect`, `self:usage`, `self:account-quota` и `policy:bypass-provider-quota` са адитивни обхвати на точно съвпадение. Те седят отвън `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` отваря само изрязването на `/api/mcp/` без обратна връзка.
 
-### Обхвати на MCP инструменти
+### обхват на инструмента MCP
 
-Каталог и правила за съвпадение (идентичен низ или предоставен обхват, завършващ на `*`):
-[Обхвати на MCP инструменти](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` в `src/shared/constants/mcpScopes.ts` е първоначалното типизирано
-подмножество, а не пълният каталог. Налагането на ограниченията се извършва в
-`open-sse/mcp-server/scopeEnforcement.ts`, след като `resolveCallerScopeContext()`
-разреши обхватите от информацията за MCP удостоверяване, метаданните на заявката или `OMNIROUTE_MCP_SCOPES`.
-То остава изключено, освен ако `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Каталог и правила за съвпадение (идентичен низ или предоставен обхват, завършващ на `*`): [MCP обхвати на инструмента](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` в `src/shared/constants/mcpScopes.ts` е оригиналното въведено подмножество, а не този пълен каталог. Изпълнението се изпълнява в `open-sse/mcp-server/scopeEnforcement.ts` след като `resolveCallerScopeContext()` разрешава обхвати от MCP информация за удостоверяване, метаданни на заявка или `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` го включва глобално (по подразбиране `false`), но винаги се прилага за HTTP/SSE повикващ, чийто API ключ липсва `manage`/`admin` (вижте `shouldForceScopeEnforcement()` в `open-sse/mcp-server/scopeEnforcement.ts`), независимо от флага.
 
-### Обхвати на токени за достъп
+### Обхват на маркер за достъп
 
-`read` / `write` / `admin` при токени `oma_live_…`, подредени по ранг чрез `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Този ранг се прилага само към идентификационните
-данни на токена за достъп. Вижте [Удостоверяване за управление](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` на `oma_live_…` токени, класирани по `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Този ранг се прилага само за идентификационните данни на токена за достъп. Вижте [Удостоверяване на управлението](../guides/MANAGEMENT-AUTH.md).
 
 ## Изисква се удостоверяване
 

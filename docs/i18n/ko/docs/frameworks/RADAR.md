@@ -94,56 +94,30 @@ Radar는 `RADAR_ENABLED` 기능 플래그를 통해 엔드투엔드로 제어됩
 
 ---
 
-## 데이터 동기화는 별도의 옵트인입니다 — 개인정보 보호 약속
+## 데이터 동기화는 SEPARATE 의 선택 사항입니다. — 의 개인 정보 보호 약속
 
-`RADAR_ENABLED`를 켜면 UI만 활성화됩니다. 피드를 동기화하려면
-`radar_settings.opt_in`에 저장되는 별도의 독립적인 옵트인이 필요합니다
-(`src/lib/db/radar.ts`, 마이그레이션 `136_radar_cache_settings.sql`).
-`syncRadar()`는 네트워크 호출을 수행하기 전에 플래그와 옵트인을 모두 확인합니다.
+`RADAR_ENABLED` 켜면 UI 만 잠금 해제됩니다. 피드를 동기화하려면 `radar_settings.opt_in` (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`)에 저장된 두 번째 독립적인 옵트인이 필요합니다. `syncRadar()` 네트워크 호출을 하기 전에 플래그와 옵트인을 확인합니다:
 
 ```
-플래그 꺼짐    → { status: "disabled" }   — 네트워크 호출 없음
-옵트인 false   → { status: "opt_out" }    — 네트워크 호출 없음
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-둘 다 켜져 있을 때 동기화 경로는 다음과 같습니다.
+둘 다 켜져 있으면 동기화 경로는 다음과 같습니다.
 
-1. `x-omniroute-radar-schema: 2`와 선택적
-   `Authorization: Bearer <supporter key>` 헤더(아래 참조)를 사용하여
-   `GET <feed base URL>/v1/catalog/latest`를 요청합니다. 스키마 헤더가 없으면 서버는
-   별도로 서명된 v1 전환 아티팩트를 기본값으로 사용하므로, 이전에 설치된 클라이언트도
-   계속 업데이트를 받을 수 있습니다.
-2. 이는 다운로드 전용 애플리케이션 흐름이지만, 여전히 HTTPS 요청입니다. 호스팅된
-   인프라는 소스 IP와 같은 일반적인 연결 메타데이터를 수신합니다. supporter key가
-   구성된 경우 동기화 과정에서 해당 키도 Bearer 헤더로 전송하여 서비스가 권한을
-   확인할 수 있도록 합니다. 위의 증거 경계에서 식별된 정확한 비공개 서버 리비전에서
-   피드 요청 집계는 수동 남용 검토를 위해 키 해시, 집계된 사용량, 그리고 매일
-   순환되는 IP의 잘린 HMAC를 사용합니다. 해당 테이블에는 키나 IP가 원시 형태로
-   저장되지 않습니다. 인프라 액세스 로그와 암호화된 전송 아웃박스는 별도의 운영
-   경계입니다.
-3. OmniRoute는 프롬프트, 응답, 대화, 제공자 자격 증명, 모델 트래픽, 가동 시간,
-   지연 시간 또는 로컬 제공자 구성을 Radar 서비스에 절대 전송하지 않습니다.
-4. 응답은 검증 및 유효성 검사를 거친 후 로컬에 캐시됩니다
-   ([보안 모델](#security-model) 참조). Radar에는 정확히 네 가지 서버 측 네트워크
-   경로가 있습니다. 카탈로그용 `syncRadar()`, 추천용 `syncRadarReferrals()`,
-   그리고 후원자 전용 혜택 및 Intel용 `syncRadarOffers()` /
-   `syncRadarIntel()`입니다.
+1. `x-omniroute-radar-schema: 2` 및 선택적 `Authorization: Bearer <supporter key>` 헤더가 포함된 `GET <feed base URL>/v1/catalog/latest` (아래 참조) 스키마 헤더가 없으면 서버는 기본적으로 별도로 서명된 v1 전환 아티팩트를 사용하므로 이전에 설치된 클라이언트는 계속 업데이트를 받습니다.
+2. 이는 다운로드 전용 애플리케이션 흐름이지만 여전히 HTTPS 요청입니다. 호스팅된 인프라는 소스 IP 와 같은 일반 연결 메타데이터를 수신합니다. 서포터 키가 구성되면 동기화는 서비스가 자격을 확인할 수 있도록 Bearer 헤더에 해당 키도 보냅니다. 위의 증거 경계에서 식별된 정확한 개인 서버 개정에서 피드 요청 계정은 수동 남용 검토를 위해 키 해시, 집계 사용량 및 IP 의 일일 회전 잘린 HMAC 사용합니다. 해당 테이블은 키나 IP 원시 형식으로 유지하지 않습니다. 인프라 접속 로그와 암호화된 배달 발신함은 별도의 운영 경계입니다.
+3. OmniRoute 프롬프트, 응답, 대화, 공급자 자격 증명, 모델 트래픽, 가동 시간, 대기 시간 또는 로컬 공급자 구성을 Radar 서비스에 보내지 않습니다.
+4. 응답은 로컬에서 확인, 검증 및 캐시됩니다( [보안 모델](#security-model) 참조). Radar에는 정확히 4개의 서버측 네트워크 경로가 있습니다. 카탈로그용 `syncRadar()`, 추천용 `syncRadarReferrals()`, 지원자 전용 제안 및 Intel용 `syncRadarOffers()` / `syncRadarIntel()` 입니다.
 
-**supporter key**는 피드 서비스가 어떤 티어를 제공할지 결정할 수 있게 해주는 선택적
-Bearer 토큰(`radar_settings.supporter_key`)입니다
-([티어](#tiers-community-and-live) 참조). 이 키는 다음과 같이 처리됩니다.
+카탈로그 확인은 24시간마다 실행됩니다. 확인된 피드가 여전히 캐시된 버전과 계층을 전달하는 경우 동기화는 캐시된 페이로드를 유지하고 `fetchedAt` 갱신하며 다음 확인은 다음 매시간 틱이 아닌 24시간 후에 이루어집니다.
 
-- 제공자 자격 증명에 사용하는 것과 동일한 AES-256-GCM `encrypt()`/`decrypt()`
-  헬퍼(`src/lib/db/encryption.ts`)를 사용하여 **저장 시 암호화**됩니다.
-- `POST /api/radar/settings`(`{ supporterKey: "omr_" + 40 hex chars }`)를 통해
-  설정되며, **절대 그대로 반환되지 않습니다**. 응답은 마스킹된 형식
-  (`omr_****abcd`)을 반환합니다.
-- 키를 변경하거나 지우면 카탈로그, 추천, 혜택 및 Intel 캐시가 원자적으로
-  무효화됩니다. 다음 동기화/읽기 시 서버 측에서 새로운 권한을 확인합니다. 키를
-  저장하는 것 자체로는 네트워크 요청이 발생하지 않으며 일회용 활성화 키도
-  소비되지 않습니다.
-- 동기화 GET 요청에서 Bearer 토큰으로 피드 서비스에 전송됩니다. 키에 관한 그 밖의
-  어떤 정보도 클라이언트 외부로 유출되지 않습니다.
+그만큼** 서포터 키** 피드 서비스가 제공할 계층을 결정할 수 있도록 하는 선택적 Bearer 토큰(`radar_settings.supporter_key`)입니다( [Tiers](#tiers-community-and-live) 참조). 그것은:
+
+- 저장됨** 미사용 암호화됨** 공급자 자격 증명에 사용되는 것과 동일한 AES-256-GCM `encrypt()`/`decrypt()` 도우미(`src/lib/db/encryption.ts`)를 사용합니다.
+- `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`)를 통해 설정하고** 다시는 반향하지 않았어** — 응답은 마스크된 형식(`omr_****abcd`)을 반환합니다.
+- 이를 변경하거나 지우면 카탈로그, 추천, 제안 및 인텔 캐시가 자동으로 무효화됩니다. 다음 sync/read 서버측에서 새로운 자격을 확인합니다. 키를 저장한다고 해서 네트워크가 요청되거나 일회용 활성화 키가 사용되는 것은 아닙니다.
+- 동기화 GET — 에서 Bearer 토큰으로 피드 서비스에 전송된 키에 관한 다른 어떤 것도 클라이언트를 떠나지 않습니다.
 
 ---
 
@@ -366,85 +340,45 @@ version, tier }`로 반환됩니다. 대시보드에는 원시 본문
 
 ---
 
-## 읽기 시점 오버레이 병합 규칙
+## 읽기 시간 오버레이 병합 규칙
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`)는 `getRadarCatalog()` 내부의 **읽기 시점**에
-캐시된 피드를 정적 기준 데이터 **위에** 병합합니다. 기준 배열
-(`FREE_MODEL_BUDGETS`)은 절대 변경되지 않으며, 호출할 때마다 새로운 `MergedEntry[]`가
-계산됩니다.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`)는 캐시된 피드를 병합합니다.** ~ 위에** 정적 기준선** 읽는 시간** , `getRadarCatalog()` 내부. 기본 배열(`FREE_MODEL_BUDGETS`)은 — 변경되지 않으며 `MergedEntry[]` 호출할 때마다 새로 계산됩니다.
 
-우선순위에 따른 네 가지 규칙은 다음과 같습니다.
+네 가지 규칙(우선순위 순):
 
-1. **피드는 로컬 재정의를 절대 덮어쓰지 않습니다.** 필드별로 적용됩니다. 운영자가
-   항목의 필드를 사용자 지정한 경우(`provider:modelId`를 키로 사용하는 `localOverrides` 맵),
-   해당 필드에 대한 피드 값은 건너뛰며 운영자의 값이 우선합니다.
-2. **`enabled: false`는 출처 정보와 함께 항목을 비활성화합니다.** 항목을 끄는 피드 항목은
-   병합된 결과에 `enabled: false`와 `disabledBy: "radar"`를 설정하므로,
-   UI에서 항목이 사용 가능 상태에서 비활성화 상태로 변경된 _이유_를 설명할 수 있습니다.
-3. **피드에 없는 사용자 추가 항목은 변경되지 않은 채 유지됩니다.** 기준 데이터에만
-   존재하거나 로컬에서 추가되었으며 대응하는 피드 항목이 없는 항목은
-   변경 없이 그대로 전달됩니다.
-4. **삭제 표시된 항목은 절대 복원되지 않습니다.** 운영자가 항목을 명시적으로 삭제한 경우
-   (`tombstones` 집합), 이후 버전에서 피드가 해당 `provider:modelId`를 다시 추가해도
-   항목이 복원되지 않습니다.
+1. **피드는 로컬 재정의를 덮어쓰지 않습니다.** 필드별: 운영자가 항목의 필드를 사용자 정의한 경우(`localOverrides` 맵, 키 입력 `provider:modelId`) 해당 특정 필드에 대한 피드 값은 건너뛰고 — 운영자의 값이 승리합니다.
+2. **`enabled: false` 출처와 함께 항목을 비활성화합니다.** 항목을 끄는 피드 항목은 병합된 결과에 `enabled: false` 및 `disabledBy: "radar"` 설정하므로 UI 는 항목이 사용 가능에서 비활성화된 _이유_를 설명할 수 있습니다.
+3. **피드에 없는 사용자가 추가한 항목은 그대로 유지됩니다.** 기준선에만 존재하는(또는 로컬로 추가된) 항목과 해당 피드 항목이 없는 항목은 변경되지 않고 통과됩니다.
+4. **삭제 표시 항목은 결코 부활되지 않습니다.** 운영자가 항목(`tombstones` 세트)을 명시적으로 삭제한 경우 이후 버전에서 해당 `provider:modelId` 다시 추가하는 피드는 해당 항목을 다시 가져오지 않습니다.
 
-편집 가능한 필드와 삭제 표시는
-`radar_local_model_state`(마이그레이션 `153_radar_local_model_state.sql`)에 영구 저장됩니다. 공개 DB
-어댑터(`src/lib/db/radar.ts`)는 해당 행을 `applyFeed()`에서 사용하는 `localOverrides` 맵과
-`tombstones` 집합으로 변환합니다. 프로덕션의 `getRadarCatalog()`는 플래그, 캐시, 스키마
-게이트를 통과한 후 이 상태를 로드합니다. 운영자는 `displayName`과 `enabled`만
-편집할 수 있습니다. 제공자/모델 ID, 피드 출처, 할당량, 기능, 이용 약관,
-설정 데이터는 이 인터페이스를 통해 작성할 수 없습니다.
+편집 가능한 필드와 삭제 표시는 `radar_local_model_state` 에 유지됩니다(migration `153_radar_local_model_state.sql`). 공용 DB 어댑터(`src/lib/db/radar.ts`)는 해당 행을 `applyFeed()` 에서 사용하는 `localOverrides` 맵 및 `tombstones` 세트로 변환합니다. 프로덕션 `getRadarCatalog()` 플래그, 캐시 및 스키마 게이트를 통과한 후 해당 상태를 로드합니다. `displayName` 및 `enabled` 만 운영자가 편집할 수 있습니다. Provider/model ID, 피드 출처, 할당량, 기능, ToS 및 설정 데이터는 이 표면을 통해 쓸 수 없습니다.
 
-대시보드는 다음 네 가지 로컬 작업을 제공합니다.
+대시보드에는 다음 네 가지 로컬 작업이 표시됩니다.
 
-- **편집**은 로컬 표시 이름과 활성화 상태를 변경합니다.
-- **로컬 변경 사항 재설정**은 삭제 표시를 변경하지 않고 편집 가능한 두 필드를 모두 지웁니다.
-- **숨기기**는 삭제 표시를 생성하여 이후 피드 업데이트에서 해당 행을 다시 만들 수 없게 합니다.
-- **복원**은 삭제 표시를 제거합니다. 별도로 저장된 재정의가 있으면 계속 적용됩니다.
+- **편집하다** 로컬 표시 이름과 활성화된 상태를 변경합니다.
+- **로컬 변경 사항 재설정** 삭제 표시를 변경하지 않고 편집 가능한 필드를 모두 지웁니다.
+- **숨다** 삭제 표시를 생성하므로 나중에 피드를 업데이트하면 행을 다시 생성할 수 없습니다.
+- **복원하다** 묘비를 제거합니다. 별도로 저장된 재정의는 그대로 유지됩니다.
 
-피드의 `enabled: false`는 안전을 위한 예외로 유지됩니다. 오래된 로컬
-`enabled: true`보다 우선하여 병합된 항목을 비활성화 상태로 유지하고 `disabledBy: "radar"`를 기록합니다.
+피드 `enabled: false` 안전 예외로 남아 있습니다. 오래된 로컬 `enabled: true` 획득하고 병합된 항목을 비활성화된 상태로 유지하며 `disabledBy: "radar"` 기록합니다.
 
-카탈로그 게시물은 `schemaVersion: 2`를 사용합니다. `contextWindow`와 `tools`, `vision`,
-`thinking` 각각은 독립적으로 `number | null` / `boolean | null`입니다. `null`은 알 수 없음을
-의미하고, `false`는 D16으로 확인된 공식 제공자 출처에서 해당 기능이 없다고 명시했다는 의미입니다.
-내부 OmniRoute 레지스트리/모델 사양 플래그는 피드의 사실 정보로 직접 승격되지 않습니다. 클라이언트는
-여전히 v1 스냅샷을 허용합니다. 이전 빌더에서는 `false`를 부재를 나타내는 자리표시자로 사용했으므로
-v1의 `false`는 알 수 없음으로 정규화되고 v1의 `true`는 사실 정보로 유지됩니다. 알 수 없는 스키마
-버전은 안전하게 실패 처리되며 마지막 유효 캐시는 계속 사용할 수 있습니다. null이 아닌 컨텍스트/기능이
-있는 모든 v2 모델에는 자격 증명이 필요 없는 HTTPS `metadataEvidenceUrls[]`가 포함되어야 합니다. 그렇지
-않으면 스키마 검증이 실패하고 캐시가 교체되지 않습니다. 카탈로그 테이블은 세 가지 상태를 각각 `✓`,
-`✕`, `?`로 렌더링합니다.
+카탈로그 출판물은 `schemaVersion: 2` 사용합니다. `contextWindow` 및 `tools`, `vision` 및 `thinking` 각각은 독립적으로 `number | null` / `boolean | null` 입니다. `null` 알 수 없음을 의미하고, `false` D16-confirmed 공식 공급자 소스에서 해당 기능이 명시적으로 없음을 의미합니다. 내부 OmniRoute registry/model-spec 플래그는 피드 사실로 직접 승격되지 않습니다. 클라이언트는 여전히 v1 스냅샷을 허용합니다. 이전 빌더가 부재 자리 표시자로 `false` 사용했기 때문에 v1 `false` 은 알 수 없음으로 정규화되고 v1 `true` 사실로 유지됩니다. 알 수 없는 스키마 버전은 실패 처리되고 마지막 유효한 캐시는 계속 사용 가능합니다. null이 아닌 context/capability 가 있는 모든 v2 모델은 자격 증명이 없는 HTTPS `metadataEvidenceUrls[]` 전달해야 합니다. 그렇지 않으면 스키마 유효성 검사가 실패하고 캐시가 교체되지 않습니다. 카탈로그 테이블은 세 가지 상태를 모두 `✓`, `✕` 및 `?` 로 렌더링합니다.
 
-### 안내형 조합 및 MCP 액세스
+### 가이드 콤보 및 MCP 액세스
 
-확인된 `familyId` 값은 읽기 시점 오버레이 후에도 유지되며 순수
-`buildRadarComboSuggestions()` 모듈(`src/lib/radar/comboSuggestions.ts`)을 구동합니다. 서로 다른
-제공자 중 최소 두 곳에 활성 연결이 있고 정확히 선별된 모델 ID를 노출하는 경우에만 해당 제품군이
-제안됩니다. 비활성화된 모델, 비활성 제공자, 누락된 모델 ID, 제공자가 하나뿐인 제품군, 모호한
-별칭/접두사 일치는 안전하게 실패 처리됩니다. 제안은 기존 `priority` 전략을 사용하며, 반복되는 월간
-예산이 가장 큰 항목을 먼저 정렬합니다. UI에서는 `POST /api/combos`를 통해서만 해당 조합을 생성합니다.
+확인된 `familyId` 값은 읽기 시간 오버레이 후에도 유지되며 순수 `buildRadarComboSuggestions()` 모듈(`src/lib/radar/comboSuggestions.ts`)을 구동합니다. 패밀리는 둘 이상의 서로 다른 공급자가 활성 연결을 갖고 있고 정확하게 선별된 모델 ID 노출하는 경우에만 제안됩니다. 비활성화된 모델, 비활성 공급자, 모델 IDs 누락, 싱글톤 제품군 및 모호한 alias/prefix 일치 항목이 실패 처리됩니다. 제안은 기존 `priority` 전략을 사용하여 가장 큰 반복 월별 예산을 먼저 주문합니다. UI 는 `POST /api/combos` 통해서만 생성합니다.
 
-안내형 UI는 `/dashboard/radar/combos`에 있습니다. 이 UI는 로컬
-`GET /api/radar/catalog` 및 `GET /api/combos/builder/options` 엔드포인트만 읽습니다. Radar 동기화를 트리거하거나,
-제공업체 자격 증명을 읽거나, 콤보 데이터베이스에 직접 쓰지 않습니다.
+안내된 UI `/dashboard/radar/combos` 에 살고 있습니다. 로컬 `GET /api/radar/catalog` 및 `GET /api/combos/builder/options` 엔드포인트만 읽습니다. 레이더 동기화를 트리거하거나 공급자 자격 증명을 읽거나 콤보 데이터베이스에 직접 쓰지 않습니다.
 
-MCP 클라이언트는 `omniroute_radar_catalog` (`read:radar`)를 사용하여 동일한 로컬 프로젝션을 읽을 수 있습니다. 선택적
-`provider`, `familyId`, `enabledOnly` 필터는 로컬
-`GET /api/radar/catalog`을 한 번 읽은 후 평가됩니다. 제한된 출력에는 카탈로그 메타데이터와 제공업체/모델,
-표시 이름, `familyId`, 할당량, 기능, 활성화 상태, 출처 및 `disabledBy`가 포함됩니다. 설정 URL,
-단계, 연결, 이메일 주소, 키 및 추천 데이터는 절대 반환되지 않습니다. 이 도구는
-읽기 전용이며 `/api/radar/sync`를 호출하지 않습니다.
+MCP 클라이언트는 `omniroute_radar_catalog` (`read:radar`)를 사용하여 동일한 로컬 프로젝션을 읽을 수 있습니다. 선택적 `provider`, `familyId` 및 `enabledOnly` 필터는 한 번의 로컬 `GET /api/radar/catalog` 읽기 후에 평가됩니다. 닫힌 출력에는 카탈로그 메타데이터와 provider/model, 표시 이름, `familyId`, 할당량, 기능, 활성화 상태, 원본 및 `disabledBy` 포함됩니다. setup URLs, 단계, 연결, 이메일 주소, 키 및 추천 데이터는 반환되지 않습니다. 이 도구는 읽기 전용이며 절대 `/api/radar/sync` 호출하지 않습니다. 캐시된 피드가 설치된 카탈로그보다 이전인 경우 `meta.olderThanRelease` 은 `true` 이고 도구는 로컬 재정의 및 삭제 표시가 적용된 설치된 카탈로그의 모델을 반환합니다.
 
-### 출처 마커
+### 출처 표시
 
-병합된 모든 항목에는 UI가 배지로 렌더링하는 `origin` 필드가 포함됩니다.
+병합된 모든 항목에는 UI 배지로 렌더링하는 `origin` 필드가 있습니다.
 
-- `"baseline"` — 정적 릴리스 카탈로그에서 변경되지 않은 항목입니다.
-- `"radar"` — 피드에 의해 하나 이상의 필드가 갱신된 항목입니다.
-- `"local"` — 운영자가 이 항목에 하나 이상의 로컬 재정의를 적용한 상태입니다(피드의 내용과 관계없이 로컬
-  재정의는 규칙 1에 따라 항상 피드보다 우선합니다).
+- `"baseline"` — 정적 릴리스 카탈로그에서 변경되지 않았습니다.
+- `"radar"` — 하나 이상의 필드가 피드에 의해 새로 고쳐졌습니다.
+- `"local"` — 운영자는 이 항목에 대해 하나 이상의 로컬 재정의를 가지고 있습니다(로컬 재정의는 피드의 내용에 관계없이 항상 규칙 1에 따라 피드를 이깁니다).
 
 ---
 

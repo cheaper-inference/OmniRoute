@@ -113,58 +113,48 @@ toegang; een geldige omgevingsreferentie die wordt herleid tot `env-key` blijft 
 Geauthenticeerde sleutels zonder Obsidian-configuratie per sleutel behouden de globale terugvaloptie.
 De vier tools `obsidian_sync_*` behouden hun afzonderlijke gedrag voor synchronisatietokens.
 
-## MCP-tools (22)
+## MCP gereedschap (22)
 
-Gedefinieerd in `open-sse/mcp-server/tools/obsidianTools.ts`. Het token/de basis-URL worden
-per aanroep bepaald (eerst per API-sleutel, daarna globaal). Tools die de OmniRoute-**synchronisatieserver**
-gebruiken (de vier `obsidian_sync_*`-tools), vereisen daarnaast het synchronisatie-authenticatietoken dat
-in de OmniRoute-instellingen is geconfigureerd.
+Gedefinieerd in `open-sse/mcp-server/tools/obsidianTools.ts`. De token/base-URL worden per call opgelost (eerst per API-sleutel, daarna globaal). Tools die de OmniRoute raken** synchronisatieserver** (de vier `obsidian_sync_*` tools) vereisen bovendien het synchronisatie-authenticatietoken dat is geconfigureerd in OmniRoute instellingen.
 
-### Leestools (`read:obsidian`)
+### Gereedschappen lezen (`read:obsidian`)
 
-| Tool                         | Beschrijving                                                                                                  |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Controleer of de Local REST API bereikbaar is en geauthenticeerd is.                                          |
-| `obsidian_search_simple`     | Doorzoek de inhoud van notities op volledige tekst; retourneert fragmenten met bestandspaden.                 |
-| `obsidian_search_structured` | Zoek met een JSON Logic-expressie (and/or/regex/path-filters).                                                |
-| `obsidian_read_note`         | Lees een notitie via een kluisrelatief pad; optioneel een specifieke kop/blok/frontmatter.                    |
-| `obsidian_list_vault`        | Toon bestanden en mappen in de kluis (boomstructuur van items).                                               |
-| `obsidian_get_document_map`  | Haal de kopstructuur van de notitie op als een koppeling van koppen → regelnummers.                           |
-| `obsidian_get_note_metadata` | Haal frontmatter, tags, links en het aantal tekens/woorden op zonder de volledige inhoud.                     |
-| `obsidian_get_active_file`   | Haal het pad en de inhoud op van het momenteel actieve bestand in Obsidian.                                   |
-| `obsidian_get_periodic_note` | Haal de dagelijkse/wekelijkse/maandelijkse periodieke notitie voor een datum op (vandaag indien weggelaten).  |
-| `obsidian_get_tags`          | Toon alle kluistags met hun frequenties.                                                                      |
-| `obsidian_list_commands`     | Toon beschikbare Obsidian-opdracht-ID's (te gebruiken met `obsidian_execute_command`).                        |
-| `obsidian_sync_status`       | Status van de OmniRoute-synchronisatieserver: actief, kluisnaam, poort, bedrijfstijd, laatste synchronisatie. |
-| `obsidian_sync_conflicts`    | Toon onopgeloste synchronisatieconflicten (pad, conflictpad, detectietijdstip).                               |
+| Hulpmiddel                   | Beschrijving                                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Controleer of de lokale REST API bereikbaar en geverifieerd is.                                    |
+| `obsidian_search_simple`     | Zoeken in volledige tekst naar notitie-inhoud; retourneert fragmenten met bestandspaden.           |
+| `obsidian_search_structured` | Zoek met behulp van een JSON Logic-expressie (and/or/regex/path filters).                          |
+| `obsidian_read_note`         | Een notitie lezen via het kluis-relatieve pad; eventueel een specifieke heading/block/frontmatter. |
+| `obsidian_list_vault`        | Maak een lijst van bestanden en mappen in de kluis (boom met vermeldingen).                        |
+| `obsidian_get_document_map`  | Haal de kopstructuur van de notitie op als een kaart met kopteksten → regelnummers.                |
+| `obsidian_get_note_metadata` | Krijg frontmatter, tags, links, char/word -telling zonder de volledige inhoud.                     |
+| `obsidian_get_active_file`   | Haal het pad + inhoud op van het momenteel actieve bestand in Obsidian.                            |
+| `obsidian_get_periodic_note` | Ontvang de daily/weekly/monthly periodieke nota voor een datum (vandaag, indien weggelaten).       |
+| `obsidian_get_tags`          | Maak een lijst van alle kluistags met hun frequenties.                                             |
+| `obsidian_list_commands`     | Lijst met beschikbare Obsidian -opdrachten IDs (gebruiken met `obsidian_execute_command`).         |
+| `obsidian_sync_status`       | OmniRoute synchronisatieserverstatus: actief, kluisnaam, poort, uptime, laatste synchronisatie.    |
+| `obsidian_sync_conflicts`    | Lijst met onopgeloste synchronisatieconflicten (pad, conflictpad, gedetecteerd-at).                |
 
-### Schrijftools (`write:obsidian`)
+### Schrijfhulpmiddelen (`write:obsidian`)
 
-| Tool                             | Beschrijving                                                                                   |
-| -------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Maak of overschrijf een notitie met de opgegeven Markdown-inhoud.                              |
-| `obsidian_append_note`           | Voeg inhoud toe aan een notitie; optioneel aan een specifieke kop/blok.                        |
-| `obsidian_patch_note`            | Voeg gericht toe, voeg vooraan toe of vervang bij een kop, blok of frontmatter-veld.           |
-| `obsidian_delete_note`           | Verwijder een notitie permanent uit de kluis.                                                  |
-| `obsidian_move_note`             | Verplaats of hernoem een notitie binnen de kluis.                                              |
-| `obsidian_execute_command`       | Voer een Obsidian-opdracht uit via de opdracht-ID.                                             |
-| `obsidian_open_file`             | Open een bestand in Obsidian (maakt het aan als het niet bestaat).                             |
-| `obsidian_sync_trigger`          | Start onmiddellijk een bidirectionele desktop↔mobiel-kluissynchronisatie.                      |
-| `obsidian_sync_resolve_conflict` | Los een synchronisatieconflict op: behoud `local` (mobiel), `remote` (desktop) of `keep-both`. |
+| Hulpmiddel                       | Beschrijving                                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `obsidian_write_note`            | Maak of overschrijf een notitie met bepaalde Markdown-inhoud.                                    |
+| `obsidian_append_note`           | Inhoud aan een notitie toevoegen; eventueel naar een specifieke heading/block.                   |
+| `obsidian_patch_note`            | Chirurgisch append/prepend/replace op een koers-, blok- of frontmaterieveld.                     |
+| `obsidian_delete_note`           | Verwijder een notitie definitief uit de kluis.                                                   |
+| `obsidian_move_note`             | Verplaats of hernoem een notitie binnen de kluis.                                                |
+| `obsidian_execute_command`       | Voer een Obsidian -opdracht uit met de opdracht ID.                                              |
+| `obsidian_open_file`             | Open een bestand in Obsidian (maakt het aan als het niet bestaat).                               |
+| `obsidian_sync_trigger`          | Activeer een onmiddellijke bidirectionele ↔ mobiele kluissynchronisatie op de desktop.           |
+| `obsidian_sync_resolve_conflict` | Een synchronisatieconflict oplossen: behoud `local` (mobiel), `remote` (desktop) of `keep-both`. |
 
 > [!NOTE]
-> Doelen van `obsidian_patch_note` accepteren een `targetType` van `heading | block | frontmatter`
-> en een `operation` van `append | prepend | replace`, met een optionele
-> `createTargetIfMissing`. De vier `obsidian_sync_*`-tools communiceren met de lokale synchronisatieserver
-> (`http://127.0.0.1:27781` standaard) en vereisen het synchronisatietoken.
+> `obsidian_patch_note` -doelen accepteren `targetType` van `heading | block | frontmatter` en `operation` van `append | prepend | replace`, met een optionele `createTargetIfMissing`. De vier `obsidian_sync_*` tools praten met de lokale synchronisatieserver (standaard `http://127.0.0.1:27781` ) en vereisen het synchronisatietoken.
 
-### Scopes
+### Bereik
 
-Leestools vereisen `read:obsidian`; schrijftools vereisen `write:obsidian`. De handhaving
-is identiek aan die van Notion — afgehandeld door `withScopeEnforcement()` in
-`open-sse/mcp-server/server.ts`, afhankelijk van `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, met
-toegestane scopes afkomstig uit `OMNIROUTE_MCP_SCOPES` of de scopecontext van de API-sleutel. Zie
-[MCP-SERVER.md](./MCP-SERVER.md).
+Leestools vereisen `read:obsidian`; schrijftools vereisen `write:obsidian`. De handhaving is identiek aan Notion — afgehandeld door `withScopeEnforcement()` in `open-sse/mcp-server/server.ts`, gated op `OMNIROUTE_MCP_ENFORCE_SCOPES=true` en geforceerd ingeschakeld voor HTTP/SSE bellers wiens API sleutel `manage`/`admin` mist, met toegestane bereiken afkomstig van `OMNIROUTE_MCP_SCOPES` of de scope-context van de API sleutel. Zie [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Eindpunten
 

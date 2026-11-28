@@ -4,14 +4,11 @@
 
 ---
 
-> **Статус:** Опште доступно.
-> **Публика:** Оператери који повезују OpenCode са OmniRoute имплементацијом.
-> **Извор истине (шема конфигурације):** `src/shared/services/opencodeConfig.ts`
-> **Извор истине (npm пакет):** `@omniroute/opencode-provider/` (радни простор који се може објавити)
+> **Статус:** Генерално доступан.** публика:** Оператери повезују OpenCode са OmniRoute имплементацијом.** Извор истине (конфигурациона шема):** `src/shared/services/opencodeConfig.ts`** Препоручени нпм пакети:** `@omniroute/opencode-plugin/` (OpenCode в1, инсталирао `omniroute setup opencode`) и `@omniroute/opencode-plugin-v2/` (OpenCode в2). Старији пакет `@omniroute/opencode-provider/` је** застарео** (види пут 2).
 
-[OpenCode](https://opencode.ai) је агентски CLI/десктоп AI клијент. Свој каталог добављача чита из `~/.config/opencode/opencode.json` (или `opencode.jsonc`) и прати шему на адреси `https://opencode.ai/config.json`. OmniRoute се OpenCode-у представља као један од тих добављача — сваки захтев пролази кроз OmniRoute-ов стандардни `/v1` интерфејс компатибилан са OpenAI-јем, тако да OpenCode аутоматски користи предности Auto-Combo усмеравања, прекидача кола, политика кључева, опсервабилности итд.
+[OpenCode](https://opencode.ai) је агентски CLI/desktop AI клијент. Чита свој каталог добављача из `~/.config/opencode/opencode.json` (или `opencode.jsonc`) и прати шему на `https://opencode.ai/config.json`. OmniRoute се излаже OpenCode као један од тих провајдера — сваки захтев тече кроз OmniRoute-ову стандардну `/v1` површину компатибилну са ОпенАИ, тако да OpenCode аутоматски има користи од аутоматског комбинованог рутирања, прекидача, кључних смерница, видљивости итд.
 
-Постоје **два подржана начина интеграције**. Изаберите један — оба генеришу исту конфигурацију.
+Ова страница документује две путање статичке конфигурације испод; оба генеришу исту конфигурацију. За листу модела која прати ваш каталог уживо, користите додатак: `omniroute setup opencode` инсталира `@omniroute/opencode-plugin` (OpenCode в1), а `@omniroute/opencode-plugin-v2` циља OpenCode в2 (погледајте [CLI интеграције](../guides/CLI-INTEGRATIONS.md) и [OpenCode в2 водич за додатке](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ CLI у позадини позива `mergeOpenCodeConfigText()` (`src/shared/se
 
 ---
 
-## Путања 2 — npm пакет `@omniroute/opencode-provider`
+## Путања 2 — нпм пакет `@omniroute/opencode-provider` (застарео)
 
-Препоручује се када конфигурацију скриптујете из Node/TS-а (CI токови, монорепозиторијуми, прилагођени токови инсталације).
+> **Застарело.** Пакет пише статичну листу модела која се налази иза вашег живог OmniRoute каталога. Његов README препоручује миграцију на `@omniroute/opencode-plugin` (или `@omniroute/opencode-plugin-v2` на OpenCode в2). API испод се чува само за постојеће скрипте.
+
+Користи се приликом скриптовања конфигурације из Node/TS (CI цевовода, монорепоса, токова прилагођеног инсталатера).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Опционо: замените каталог модела изложен OpenCode-у
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-За недеструктивно обједињавање са постојећом датотеком, поновите логику из `mergeOpenCodeConfigText()` у `opencodeConfig.ts` или позовите CLI генератор.
+За недеструктивно спајање постојеће датотеке, реплицирајте `mergeOpenCodeConfigText()` из `opencodeConfig.ts` или позовите CLI генератор.
 
-Комплетан API потражите у [README-у пакета](../../@omniroute/opencode-provider/README.md).
+Погледајте [пакет README](../../@omniroute/opencode-provider/README.md) за цео API.
 
 ---
 
@@ -155,9 +154,11 @@ export const OMNIROUTE_DEFAULT_OPENCODE_MODELS = [
 
 ---
 
-## Такође погледајте
+## Види такође
 
-- [Референца API-ја](../reference/API_REFERENCE.md) — комплетан OmniRoute REST интерфејс
-- [Auto-Combo](../routing/AUTO-COMBO.md) — шта значи `model: "auto"`
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [API референца](../reference/API_REFERENCE.md) — пуна OmniRoute REST површина
+- [Ауто-Цомбо](../routing/AUTO-COMBO.md) — шта значи `model: "auto"`
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (препоручено)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (застарело)
 - Извор: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

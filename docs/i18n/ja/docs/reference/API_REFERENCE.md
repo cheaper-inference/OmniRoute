@@ -49,7 +49,7 @@ OpenAI 互換プロトコルとプロバイダー機能マトリックスに焦�
 
 ---
 
-## チャット補完
+## チャットの完了
 
 ```bash
 POST /v1/chat/completions
@@ -67,31 +67,32 @@ Content-Type: application/json
 
 ### カスタムヘッダー
 
-| Header                   | Direction  | Description                                                                                                                                                                                               |
-| ------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | リクエスト | キャッシュをバイパスするには `true` に設定                                                                                                                                                                |
-| `x-omniroute-no-memory`  | リクエスト | このリクエストでメモリとスキルの注入をスキップするには `true` に設定（no-cache をミラーリングし、呼び出しごとのトークン／コストのオーバーヘッドを回避）                                                   |
-| `X-OmniRoute-Progress`   | リクエスト | 進行状況イベントを有効にするには `true` に設定                                                                                                                                                            |
-| `X-Session-Id`           | リクエスト | 外部セッションアフィニティ用のスティッキーセッションキー                                                                                                                                                  |
-| `x_session_id`           | リクエスト | アンダースコア形式も受け付け（直接 HTTP）                                                                                                                                                                 |
-| `X-OmniRoute-Session-Id` | リクエスト | 呼び出し元が指定するセッション／会話タグ（メモリにも供給）。存在する場合は、セッションごとのコスト帰属（#8249）のため `call_logs.session_tag` にそのまま永続化される — 存在しない場合は決して生成されない |
-| `Idempotency-Key`        | リクエスト | 重複排除キー（5 秒間）                                                                                                                                                                                    |
-| `X-Request-Id`           | リクエスト | 代替の重複排除キー                                                                                                                                                                                        |
-| `x-omniroute-connection` | リクエスト | 単一モデルのリクエストを ID で 1 つのプロバイダー接続（アカウント）に固定 — [リクエストごとのアカウント固定](#account-pinning-per-request)を参照                                                          |
-| `X-OmniRoute-Cache`      | レスポンス | `HIT` または `MISS`（非ストリーミング）                                                                                                                                                                   |
-| `X-OmniRoute-Idempotent` | レスポンス | 重複排除された場合は `true`                                                                                                                                                                               |
-| `X-OmniRoute-Progress`   | レスポンス | 進行状況の追跡が有効な場合は `enabled`                                                                                                                                                                    |
-| `X-OmniRoute-Session-Id` | レスポンス | OmniRoute が使用した実効セッション ID                                                                                                                                                                     |
-| `X-OmniRoute-Request-Id` | レスポンス | リクエストの相関 ID（判明している場合）                                                                                                                                                                   |
-| `X-OmniRoute-Version`    | レスポンス | OmniRoute のビルドバージョン（常に存在）                                                                                                                                                                  |
-| `X-OmniRoute-Cost-Saved` | レスポンス | HIT 時にキャッシュによって回避された USD 額（キャッシュヒット時のみ）                                                                                                                                     |
-| `X-OmniRoute-Decision`   | レスポンス | ルーティングトレース: `strategy=<name>; provider=<alias>; latency_ms=<n>`（`<name>` はコンボ戦略、またはコンボ以外のリクエストでは `single`） — 完了レスポンスには常に存在                                |
+| ヘッダ                   | 方向       | 説明                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | リクエスト | キャッシュをバイパスするには`true`に設定します                                                                                                                                                                                                                                                                                                                      |
+| `x-omniroute-no-memory`  | リクエスト | このリクエストのメモリ+スキル インジェクションをスキップするには、 `true`に設定します (キャッシュなしでミラーリングし、呼び出しごとのtoken/costオーバーヘッドを回避します)。                                                                                                                                                                                        |
+| `x-omniroute-no-log`     | リクエスト | この推論リクエストの通話ログからrequest/responseペイロードを省略するには、 `true`に設定します (すべてのチャット ファミリ ルート: チャット完了、応答、メッセージ、完了、 Gemini)。タイムスタンプ、モデル、ステータス、期間、トークン数は引き続き記録されます。 `x-omniroute-no-memory`および`x-omniroute-no-cache`と組み合わせて完全なコンテンツのオプトアウトを実現 |
+| `X-OmniRoute-Progress`   | リクエスト | 進行状況イベントの場合は`true`に設定します                                                                                                                                                                                                                                                                                                                          |
+| `X-Session-Id`           | リクエスト | 外部セッション アフィニティ用のスティッキー セッション キー                                                                                                                                                                                                                                                                                                         |
+| `x_session_id`           | リクエスト | アンダースコアのバリアントも受け入れられます (直接HTTP)                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Session-Id` | リクエスト | 呼び出し元が提供するsession/conversationタグ (メモリにも供給されます)。存在する場合、セッションごとのコスト属性 (#8249) のために`call_logs.session_tag`に逐語的に永続化されます。存在しない場合、 —合成されません                                                                                                                                                   |
+| `Idempotency-Key`        | リクエスト | 重複排除キー (5 秒のウィンドウ)                                                                                                                                                                                                                                                                                                                                     |
+| `X-Request-Id`           | リクエスト | 代替の重複排除キー                                                                                                                                                                                                                                                                                                                                                  |
+| `x-omniroute-connection` | リクエスト | ID —によって単一モデルのリクエストを 1 つのプロバイダー接続 (アカウント) に固定する[「リクエストごとのアカウントの固定」を](#account-pinning-per-request)参照してください。                                                                                                                                                                                         |
+| `X-OmniRoute-Cache`      | 応答       | `HIT`または`MISS` (非ストリーミング)                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Idempotent` | 応答       | 重複排除されている場合は`true`                                                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Progress`   | 応答       | `enabled`進行状況の追跡がオンの場合                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Session-Id` | 応答       | OmniRouteによって使用される有効なセッションID                                                                                                                                                                                                                                                                                                                       |
+| `X-OmniRoute-Request-Id` | 応答       | リクエスト相関 ID (既知の場合)                                                                                                                                                                                                                                                                                                                                      |
+| `X-OmniRoute-Version`    | 応答       | OmniRouteビルド バージョン (常に存在)                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Cost-Saved` | 応答       | USD HITで回避されたキャッシュ (キャッシュ ヒットのみ)                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Decision`   | 応答       | ルーティング トレース: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>`はコンボ戦略、または非コンボ リクエストの場合は`single` ) —完了応答に常に存在します。                                                                                                                                                                                           |
 
-> Nginx に関する注意: アンダースコア付きヘッダー（例: `x_session_id`）に依存する場合は、`underscores_in_headers on;` を有効にしてください。
+> Nginx 注: アンダースコア ヘッダー (たとえば`x_session_id`) に依存する場合は、 `underscores_in_headers on;`を有効にしてください。
 
-#### リクエストごとのアカウント固定
+#### リクエストごとのアカウントの固定
 
-プロバイダーに複数の接続（アカウントまたはキー）がある場合、OmniRoute は通常、アカウント選択戦略を通じて 1 つを選択します。リクエストでは、代わりに `x-omniroute-connection` ヘッダーを使用して特定の接続 1 つに固定できます。
+プロバイダーが複数の接続 (アカウントまたはキー) を持っている場合、 OmniRoute通常、アカウント選択戦略を通じて 1 つを選択します。代わりに、リクエストは`x-omniroute-connection`ヘッダーを使用して 1 つの特定の接続を固定できます。
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -101,15 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **ID の確認方法。** ダッシュボードでプロバイダーページ
-  （**Dashboard → Providers → <provider>**）を開き、接続行にある `xxxxxxxx…` ID チップをクリックします。
-  完全な接続 ID がコピーされます。
-- **どのリクエストで有効か。** `/v1/chat/completions`、`/v1/messages`、`/v1/responses` に対する単一モデルリクエスト（`provider/model`）。コンボではヘッダーが無視されます。代わりに、各コンボステップの接続を通じて、ステップごとにアカウントを固定してください。
-- **固定は優先設定ではなく、厳密な指定です。** 固定された接続だけが排他的に使用されます。リクエスト内で障害が発生すると、そのアカウントのクールダウンが記録されますが、同じプロバイダーの別アカウントへは切り替わりません。
-- **クールダウンとクォータによって固定が解除されます。** 固定された接続がクールダウン中、クォータを使い切っている、またはクォータポリシーによってブロックされている場合、後続のリクエストは、固定されていないトラフィックとまったく同じように、プロバイダーの他の接続へフォールバックします。
-- **不明または無効な ID は失敗します。** プロバイダーのアクティブプールに存在しない ID（削除済み、無効化済み、または別のプロバイダーに属する ID）では利用可能なアカウントがなくなるため、リクエストは別の場所へ暗黙的にルーティングされず、失敗します。
+- **ID を見つける場所。**ダッシュボードでプロバイダー ページを開きます (**ダッシュボード→プロバイダー→ <provider>** ) 接続行の`xxxxxxxx…` id チップをクリックすると、完全な接続 ID が—されます。
+- **どのリクエストもそれを尊重します。** `/v1/chat/completions`、 `/v1/messages`および`/v1/responses`上の単一モデル リクエスト (`provider/model`)。コンボはヘッダーを無視します。代わりに、ステップ自体の接続を通じてコンボ ステップごとにアカウントを固定します。
+- **ピンは厳密であり、好みではありません。**ピン接続は排他的に使用されます。リクエスト内の失敗はアカウントのクールダウンを記録しますが、**ない**同じプロバイダーの兄弟アカウントにローテーションします。
+- **クールダウンとクォータによりピンが解放されます。**固定された接続が冷却されたり、クォータが使い果たされたり、クォータ ポリシーによってブロックされたりしている間、その後のリクエストは、固定されていないトラフィックとまったく同様に、プロバイダーの他の接続にフォールバックします。
+- **不明な ID または無効な ID は失敗します。**プロバイダーのアクティブなプールにない ID (削除、非アクティブ化、または別のプロバイダーに属している) には適格なアカウントが残らないため、リクエストは別の場所にサイレントにルーティングされずに失敗します。
 
-Claude Code は `ANTHROPIC_CUSTOM_HEADERS` を通じてカスタムヘッダーを送信します。`~/.claude/settings.json` の `env` ブロックに設定するか、プロジェクトごとに異なるアカウントを固定する場合は、プロジェクトレベルの `.claude/settings.json` に設定してください。
+Claudeコードは、 `ANTHROPIC_CUSTOM_HEADERS`を介してカスタム ヘッダーを送信します。これを`~/.claude/settings.json`の`env`ブロックに配置するか、プロジェクト レベルの`.claude/settings.json`に配置して、プロジェクトごとに異なるアカウントを固定します。
 
 ```jsonc
 {
@@ -121,12 +120,11 @@ Claude Code は `ANTHROPIC_CUSTOM_HEADERS` を通じてカスタムヘッダー�
 }
 ```
 
-ソース: `src/sse/handlers/chat.ts`（ヘッダーの読み取り）、`src/sse/services/auth.ts` および
-`src/sse/services/sessionAffinityPin.ts`（固定の解除とプールからの欠落チェック）。
+ソース: `src/sse/handlers/chat.ts` (ヘッダー読み取り)、 `src/sse/services/auth.ts`および`src/sse/services/sessionAffinityPin.ts` (ピンの解放とプールからの欠落チェック)。
 
-> **コストテレメトリヘッダー:** ストリーミングではない成功レスポンスには、`X-OmniRoute-*` コストテレメトリセットも含まれます — `X-OmniRoute-Response-Cost`（USD、小数点以下 10 桁固定。無料または価格未設定の場合は `0.0000000000`）、`X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`、`X-OmniRoute-Model`、`X-OmniRoute-Provider`、`X-OmniRoute-Latency-Ms`、`X-OmniRoute-Cache-Hit`、`X-OmniRoute-Fallback-Attempts`（0 より大きい場合のみ）、さらに `X-OmniRoute-Request-Id` と `X-OmniRoute-Version` です。これらはチャット補完、`/v1/responses`、`/v1/messages`、**およびメディアエンドポイント** — `/v1/embeddings`、`/v1/images/generations`、`/v1/audio/speech`、`/v1/audio/transcriptions`、`/v1/rerank`、`/v1/videos/generations`、`/v1/music/generations`、`/v1/moderations` — から出力されます（常にコストは `0`）。メディアのコストは、価格が利用可能な場合、モダリティごと（画像ごと、秒ごと、文字ごと、検索単位ごと）に計算され、それ以外の場合は `0` になります（fail-open）。
+> **コスト テレメトリ ヘッダー:**非ストリーミング成功応答には、 `X-OmniRoute-*`コスト テレメトリ セット— `X-OmniRoute-Response-Cost` (USD、固定小数点 10 桁、 free/unpricedの場合は`0.0000000000` )、 `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`、 `X-OmniRoute-Model`、 `X-OmniRoute-Provider`、 `X-OmniRoute-Latency-Ms`、 `X-OmniRoute-Cache-Hit`、および`X-OmniRoute-Fallback-Attempts` ( > 0 の場合のみ)、および`X-OmniRoute-Request-Id`および`X-OmniRoute-Version`も含まれます。 。これらは、チャット補完、 `/v1/responses`、 `/v1/messages`、**およびメディアエンドポイント**— `/v1/embeddings`、 `/v1/images/generations`、 `/v1/audio/speech`、 `/v1/audio/transcriptions`、 `/v1/rerank`、 `/v1/videos/generations`、 `/v1/music/generations`、および`/v1/moderations` (常に`0`がかかります)。メディアコストは、価格設定が可能な場合はモダリティごと (画像ごと、秒ごと、文字ごと、検索ユニットごと) に計算され、それ以外の場合は`0` (フェールオープン) で計算されます。
 
-> **キャッシュヒット時のコストの意味:** セマンティックキャッシュが HIT（`X-OmniRoute-Cache-Hit: true`）した場合、アップストリームへの呼び出しは行われないため、`X-OmniRoute-Response-Cost` は `0.0000000000` になります（ヒットを提供するための**増分**コスト）。元のコスト／発生していたはずのコストは、`X-OmniRoute-Cost-Saved` で別途報告されます。課金処理では `X-OmniRoute-Response-Cost`（ヒットのコストはゼロ）を合計し、キャッシュ分析では `X-OmniRoute-Cost-Saved` を集計できます。
+> **キャッシュヒットコストのセマンティクス:**セマンティック キャッシュHIT (`X-OmniRoute-Cache-Hit: true`) ではアップストリーム呼び出しは行われないため、 `X-OmniRoute-Response-Cost`は`0.0000000000` (**増分**ヒットを提供するコスト)。 original/would-have-beenコストは、 `X-OmniRoute-Cost-Saved`で個別にレポートされます。請求する消費者は`X-OmniRoute-Response-Cost`合計する必要があります (ヒットには費用がかかりません)。キャッシュ分析は`X-OmniRoute-Cost-Saved`を集約できます。
 
 ## 排他的マネージドセッションリース
 
@@ -323,6 +321,8 @@ Content-Type: application/json
 
 `n` `data[]`内の`n`イメージを返します。アップストリームAPIが呼び出しごとに 1 つの画像を返すプロバイダー (Black Forest Labs、Stability AI、Leonardo、Ideogram、Haiper、Hyperbolic、 Magnific/Freepik、 NVIDIA NIM、 Cloudflare Workers AI) は、 `n`の個別のアップストリーム呼び出し (最大 4 つが実行中) を取得します。固定`seed`は呼び出しインデックス (`seed`、 `seed + 1`、…) によってオフセットされるため、イメージは異なりますが、再現可能です。 `n`上限は 10 です。いずれかの呼び出しが失敗すると、リクエストは全体として失敗します。ファンアウト形式のリストは、 `open-sse/handlers/imageGeneration/fanOut.ts`の`SINGLE_IMAGE_FANOUT_FORMATS`です。
 
+Codex GPTイメージ モデル (`codex/gpt-image-*`) はPNGのみを返します。アップストリームは、 `jpeg`または`webp`が要求された場合でも、 PNGバイトで`200`応答します。他の`output_format` (`webp`、 `jpeg`、...) を使用したリクエストは、黙って無視されるのではなく、 HTTP 400 で拒否されます。省略するか、 `png`を送信してください。 `output_compression`は転送されません。
+
 ZenMux既存の API キー接続を再利用し、 `zenmux/`または`zm/`プレフィックスを受け入れます。
 
 - `zenmux/openai/gpt-image-2` 、 ZenMuxのOpenAIイメージAPIを使用します。オプションには、 `size`、 `quality`、 `n`、 `output_format`、 `output_compression`、 `background`、および`response_format`が含まれます。
@@ -340,7 +340,7 @@ GET /v1/images/generations
 
 ---
 
-## ドキュメント OCR
+## ドキュメントOCR
 
 ```bash
 POST /v1/ocr
@@ -356,17 +356,15 @@ Content-Type: application/json
 }
 ```
 
-`model` は `provider/model` プレフィックスを使用して OCR プロバイダーを選択します。プレフィックスのないモデル ID（例:
-`mistral-ocr-latest`）は登録済みのプロバイダーに解決され、省略した `model` はデフォルトで
-Mistral（`mistral-ocr-latest`）になります。登録済みのプロバイダー（`open-sse/config/ocrRegistry.ts`）:
+`model` `provider/model`プレフィックスを介してOCRプロバイダーを選択します。裸のモデル ID (例: `mistral-ocr-latest`) は登録されたプロバイダーに解決され、省略された`model`デフォルトでMistral (`mistral-ocr-latest`) になります。登録プロバイダー (`open-sse/config/ocrRegistry.ts`):
 
-| プロバイダー ID               | モデル ID            | `model` の値                                                                    | 備考                                                                                                                         |
-| ----------------------------- | -------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest`（またはプレフィックスのない `mistral-ocr-latest`） | 同期処理 — 単一の上流呼び出しからレスポンスが直接返されます。                                                                |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                                     | 上流では非同期処理（`analyze` + ポーリング） — 詳細は以下を参照してください。                                                |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                                         | Vertex AI の `openapi/chat/completions` パートナーエンドポイント経由の同期処理 — 認証と URL の詳細は以下を参照してください。 |
+| プロバイダーID                | モデルID                    | `model`値                                                     | 注意事項                                                                                                                                                                                                          |
+| ----------------------------- | --------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`        | `mistral/mistral-ocr-latest` (または裸の`mistral-ocr-latest`) | 同期—応答は単一のアップストリーム呼び出しから直接返されます。                                                                                                                                                     |
+| `azure-document-intelligence` | `prebuilt-read`             | `azure-document-intelligence/prebuilt-read`                   | 非同期アップストリーム (`analyze` +ポーリング) —以下を参照。                                                                                                                                                      |
+| `vertex-deepseek-ocr`         | 自己展開型 (内蔵モデルなし) | `vertex-deepseek-ocr/<your-deployed-model-id>`                | 同期、独自の Vertex AI Model Garden DeepSeek-OCR エンドポイント (`openapi/chat/completions`形状) 経由。 Google 2026 年 10 月 21 日 (#20423) にマネージド`deepseek-ocr-maas`を廃止したため、ID は 400 を返します。 |
 
-3 つのプロバイダーはすべて、同じ Mistral 形式の本文で応答します。
+3 つのプロバイダーはすべて、同じミストラル型の本体で応答します。
 
 ```json
 {
@@ -376,27 +374,13 @@ Mistral（`mistral-ocr-latest`）になります。登録済みのプロバイ�
 }
 ```
 
-### Azure Document Intelligence のポーリングフロー
+### Azure Document Intelligence のポーリング フロー
 
-Azure Document Intelligence の `analyze` API は非同期です。初回リクエストは本文の代わりに
-`Operation-Location` ヘッダーを返し、結果をポーリングする必要があります。ハンドラー
-（`open-sse/handlers/ocr.ts`）は、最大 30 回の試行にわたって 1 秒ごとにその URL をポーリングします。
-`ok` でないポーリングレスポンスまたは `"failed"` ステータスの場合は、ポーリングを継続せず直ちに失敗します。
-試行回数の上限に達した時点でも処理が実行中の場合は `504` を返します。最終的な Azure のレスポンスは、
-呼び出し元に返す前に、Mistral で使用されるものと同じ `pages`/`markdown` 形式に正規化されます。
-そのため、クライアントコードでプロバイダーごとの特別な処理を行う必要はありません。
+Azure Document Intelligence の`analyze` APIは非同期です。最初の要求は本文ではなく`Operation-Location`ヘッダーを返し、結果をポーリングする必要があります。ハンドラー (`open-sse/handlers/ocr.ts`) は、そのURL 1 秒ごとに最大 30 回の試行までポーリングし、非`ok`ポーリング応答または`"failed"`ステータスではすぐに失敗し (ポーリングを継続しません)、試行バジェットを使い果たした後も操作がまだ実行中の場合は`504`を返します。最終的な Azure 応答は、呼び出し元に返される前に、 Mistralで使用されるのと同じ`pages`/`markdown`形状に正規化されるため、クライアント コードでプロバイダーを特殊化する必要はありません。
 
-### Vertex AI DeepSeek OCR の認証とエンドポイント解決
+### 頂点AI DeepSeek OCR認証とエンドポイント解決
 
-`vertex-deepseek-ocr` は、OmniRoute がチャットおよび画像トラフィックですでにサポートしているものと同じ Vertex AI 認証
-（`open-sse/executors/vertex.ts`）を再利用します。接続の API キーは、サービスアカウント JSON 認証情報
-（JWT ベアラーフローを介して短期間有効な OAuth アクセストークンと交換）または、そのまま使用される既発行の OAuth アクセストークンのいずれかです。
-上流エンドポイント URL は、接続のプロジェクトとリージョンから構築される Vertex の汎用
-`openapi/chat/completions` パートナーエンドポイントです。明示的な
-`providerSpecificData.project`/`providerSpecificData.region` が常に優先され、それ以外の場合は、プロジェクトはサービスアカウント JSON の
-`project_id` から導出され、リージョンは `us-central1` がデフォルトになります。どちらの解決も
-`open-sse/handlers/ocr.ts`（`resolveVertexOcrAccessToken`、`resolveVertexOcrBaseUrl`）で行われ、
-`src/app/api/v1/ocr/route.ts` が `handleOcr` にディスパッチする前に使用します。
+`vertex-deepseek-ocr` 、 OmniRoute chat/imageトラフィック (`open-sse/executors/vertex.ts`) に対してすでにサポートしているのと同じ Vertex AI認証を再利用します。接続のAPIキーは、サービス アカウントJSON資格情報 (JWT ベアラー フローを介して有効期間の短いOAuthアクセス トークンと交換される) か、すでに作成されたOAuthアクセス トークンをそのまま使用します。アップストリーム エンドポイントURLは Vertex の汎用`openapi/chat/completions`パートナー エンドポイントであり、接続のプロジェクトとリージョン—から構築され、明示的な`providerSpecificData.project`/`providerSpecificData.region`常に優先されます。それ以外の場合、プロジェクトはサービス アカウントJSONの`project_id`から派生し、リージョンのデフォルトは`us-central1`になります。どちらの解決も`open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`、 `resolveVertexOcrBaseUrl`) で行われ、 `handleOcr`にディスパッチされる前に`src/app/api/v1/ocr/route.ts`によって消費されます。
 
 ---
 
@@ -624,75 +608,100 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
 
 ## 互換性エンドポイント
 
-| メソッド | パス                                      | 形式                                 |
-| -------- | ----------------------------------------- | ------------------------------------ |
-| POST     | `/v1/chat/completions`                    | OpenAI                               |
-| POST     | `/v1/messages`                            | Anthropic                            |
-| POST     | `/v1/responses`                           | OpenAI Responses                     |
-| POST     | `/v1/embeddings`                          | OpenAI                               |
-| POST     | `/v1/images/generations`                  | OpenAI Images                        |
-| POST     | `/v1/images/edits`                        | OpenAI Images（編集／インペイント）  |
-| POST     | `/v1/videos/generations`                  | OpenAIスタイルの動画生成             |
-| POST     | `/v1/music/generations`                   | OpenAIスタイルの音楽生成             |
-| POST     | `/v1/audio/transcriptions`                | OpenAI Audio（STT）                  |
-| POST     | `/v1/audio/speech`                        | OpenAI TTS（音声本文を返却）         |
-| POST     | `/v1/rerank`                              | Cohere／Voyageスタイルの再ランキング |
-| POST     | `/v1/classify`                            | Jina classify（`api.jina.ai`）       |
-| POST     | `/v1/segment`                             | Jina segmenter（`segment.jina.ai`）  |
-| POST     | `/v1/moderations`                         | OpenAI Moderations                   |
-| GET      | `/v1/models`                              | OpenAI                               |
-| POST     | `/v1/models/query`                        | フィルター済みモデル候補一覧         |
-| POST     | `/v1/messages/count_tokens`               | Anthropic                            |
-| GET      | `/v1beta/models`                          | Gemini                               |
-| POST     | `/v1beta/models/{...path}`                | Gemini generateContent               |
-| POST     | `/v1/api/chat`                            | Ollama                               |
-| GET      | `/api/v1/vscode/{token}/`                 | OpenAIカタログエイリアス             |
-| GET      | `/api/v1/vscode/{token}/models`           | OpenAIモデルエイリアス               |
-| POST     | `/api/v1/vscode/{token}/chat/completions` | OpenAIトークン化エイリアス           |
-| POST     | `/api/v1/vscode/{token}/responses`        | OpenAI Responsesトークン化エイリアス |
-| POST     | `/api/v1/vscode/{token}/api/chat`         | Ollamaトークン化エイリアス           |
-| GET      | `/api/v1/vscode/{token}/api/tags`         | Ollamaタグトークン化エイリアス       |
+| 方法 | パス                                      | 形式                                         |
+| ---- | ----------------------------------------- | -------------------------------------------- |
+| POST | `/v1/chat/completions`                    | OpenAI                                       |
+| POST | `/v1/messages`                            | Anthropic                                    |
+| POST | `/v1/responses`                           | OpenAI応答                                   |
+| POST | `/v1/embeddings`                          | OpenAI                                       |
+| POST | `/v1/images/generations`                  | OpenAI画像                                   |
+| POST | `/v1/images/edits`                        | OpenAI画像 (edit/inpaint)                    |
+| POST | `/v1/videos/generations`                  | OpenAI スタイルのビデオ生成                  |
+| POST | `/v1/music/generations`                   | OpenAI スタイルの音楽生成                    |
+| POST | `/v1/audio/transcriptions`                | OpenAIオーディオ (STT)                       |
+| POST | `/v1/audio/speech`                        | OpenAI TTS (オーディオ本体を返します)        |
+| POST | `/v1/rerank`                              | Cohere/Voyage-styleリランク                  |
+| POST | `/v1/classify`                            | ジナ分類 (`api.jina.ai`)                     |
+| POST | `/v1/segment`                             | ジナ セグメンター (`segment.jina.ai`)        |
+| POST | `/v1/moderations`                         | OpenAIモデレーション                         |
+| POST | `/v1/systemone`                           | システム 1 の型による決定                    |
+| POST | `/v1/decisions`                           | OpenAI決定 (ネイティブ)                      |
+| GET  | `/v1/systemone/models`                    | 意思決定モデルのカタログ                     |
+| GET  | `/v1/models`                              | OpenAI                                       |
+| POST | `/v1/models/query`                        | フィルタリングされたモデルの候補リスト       |
+| POST | `/v1/messages/count_tokens`               | Anthropic                                    |
+| GET  | `/v1beta/models`                          | Gemini                                       |
+| POST | `/v1beta/models/{...path}`                | Gemini generateContent                       |
+| POST | `/v1/api/chat`                            | Ollama                                       |
+| GET  | `/api/v1/vscode/{token}/`                 | OpenAIカタログ エイリアス                    |
+| GET  | `/api/v1/vscode/{token}/models`           | OpenAIモデルのエイリアス                     |
+| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAIトークン化されたエイリアス             |
+| POST | `/api/v1/vscode/{token}/responses`        | OpenAIレスポンスのトークン化されたエイリアス |
+| POST | `/api/v1/vscode/{token}/api/chat`         | Ollamaトークン化されたエイリアス             |
+| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollamaタグのトークン化されたエイリアス       |
 
-すべてのPOSTルートは同じ形式に従います。`Bearer your-api-key` + Zodで検証されたJSON本文（`v1RerankSchema`、`v1ModerationSchema`、`v1AudioSpeechSchema` など。`src/shared/validation/schemas.ts` を参照）。スキーマ検証に失敗した場合は4xxが返されます。
+すべてのPOSTルートは同じ形状に従います: `Bearer your-api-key` + Zod で検証されたJSON本体 (`v1RerankSchema`、 `v1ModerationSchema`、 `v1AudioSpeechSchema`など、 `src/shared/validation/schemas.ts`を参照)。スキーマ障害が発生すると 4xx が返されます。
 
-`Authorization: Bearer ...` を付加できないクライアント向けに、OmniRouteではURL経由のAPIキーも受け付けます。使用できるのは、クエリ文字列による互換性指定（`?token=...`、`?apiKey=...`、`?api_key=...`、`?key=...`）または、以下で説明する専用の `/api/v1/vscode/{token}/...` エンドポイントです。
+`Authorization: Bearer ...`を接続できないクライアントの場合、 OmniRouteクエリ文字列の互換性 (`?token=...`、 `?apiKey=...`、 `?api_key=...`、 `?key=...`) または以下に説明する専用の`/api/v1/vscode/{token}/...`エンドポイントを介してURL内のAPIキーも受け入れます。
 
 ```bash
-# 再ランキング（クラウドレジストリプロバイダー、または "<prefix>/<model>" 形式のOpenAI互換プロバイダーノード）
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina classify（Foundation APIの認証情報）
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
 # Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina search（s.jina.ai。プロバイダーエイリアス：jina-search、jina-ai、jina）
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# モデレーション
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg（または要求された形式）の本文を返却
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTSでは言語と音声が必要です。`language` のデフォルトは "en" です。指定がない
-# voice、またはOpenAIの標準音声名（alloy、nova、…）が指定された場合は "Adrian" になります
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# 画像編集（multipart）
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# 動画／音楽生成（プロバイダーのプレフィックス付きモデルID）
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **再ランクプロバイダーノード:** `POST /v1/rerank` は、`<node-prefix>/<model>` として指定された OpenAI 互換プロバイダーノード（oMLX、vLLM、Infinity、ゲートウェイ配下の TEI など）にもルーティングされます。ループバックノード（`localhost`、`127.0.0.1`、`172.16.0.0/12`）は常に利用可能であり、オペレーターが `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` に列挙したホスト名も利用可能です（例: `http://reranker:8080/v1` のような Docker/Compose サービス名。これらは常に直接呼び出され、`HTTP(S)_PROXY` や接続に固定されたプロキシを経由しません）。その他のホスト上にあるノード（LAN 上のマシンや Tailscale ピア）は、オペレーターが `RERANK_REMOTE_PROVIDER_NODES` 機能フラグを有効にし、かつノードのベース URL がプロバイダーの外向き URL ポリシー（`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`）を通過した場合にのみ利用可能です。メモリエンジンの再ランク処理はループバック経由でこのルートを呼び出すため、Memory 設定の `rerankProviderModel` にも同じルールが適用されます。
+> **プロバイダー ノードを再ランク付けします。** `POST /v1/rerank` 、 `<node-prefix>/<model>`としてアドレス指定される OpenAI 互換プロバイダー ノード (oMLX、 vLLM、 Infinity、ゲートウェイの背後にあるTEI ) にもルーティングします。ループバック ノード (`localhost`、 `127.0.0.1`、 `172.16.0.0/12`) は常に適格であり、オペレーターが`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`にリストするホスト名も同様です (たとえば、 `http://reranker:8080/v1`などのDocker/Composeサービス名。これらは、 `HTTP(S)_PROXY`や接続の固定プロキシを介さずに直接呼び出されます)。他のホスト— LANボックス、またはTailscaleピア—上のノードは、オペレータが`RERANK_REMOTE_PROVIDER_NODES`機能フラグを有効にした場合にのみ適格です。**そして**ノードのベースURLは、プロバイダーのアウトバウンドURLポリシー (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) を渡します。メモリ エンジンの再ランク ステップはループバック経由でこのルートを呼び出すため、同じルールがメモリ設定の`rerankProviderModel`に適用されます。
 >
-> **ローカルサーバーの形式:** ノードは `<base>/v1/rerank` で呼び出され、404 の場合は `<base>/rerank` で呼び出されます（Infinity、TEI）。上流へのリクエストボディには Cohere/OpenAI の表記（`documents`、`return_documents`）と TEI の表記（`texts`、`return_text`）の両方が含まれ、上流レスポンスは Cohere のエンベロープに正規化されます。TEI の単純な `[{index, score, text}]`、シンプルなゲートウェイからの `{results: [{index, score}]}`、Voyage 形式の `{data: [...]}` はすべて、スコア順にソートされ、`top_n` 件に制限された `{results: [{index, relevance_score, document?}]}` としてクライアントに返されます。
+> **ローカルサーバーの形状:**ノードは`<base>/v1/rerank`で呼び出され、404 では`<base>/rerank` (Infinity、 TEI) で呼び出されます。アップストリームの本文にはCohere/OpenAIスペル (`documents`、 `return_documents`) とTEIスペル (`texts`、 `return_text`) の両方が含まれており、アップストリームの応答はCohereエンベロープに正規化されます。 TEIの裸の`[{index, score, text}]`、シン ゲートウェイからの`{results: [{index, score}]}` 、および Voyage スタイルの`{data: [...]}`すべて、スコアによってソートされ、上限が`{results: [{index, relevance_score, document?}]}`としてクライアントに返されます。 `top_n`。
 
-> **プロバイダーノードの検出:** OpenAI 互換プロバイダーノード上のモデルは、ノードプレフィックス配下の `GET /v1/models` に表示されます。エンドポイントメタデータを持たない行（ローカルの `/v1/models` 一覧に典型的なもの）は、ノードの `apiType` を継承します。そのため、`embeddings` ノードのモデルはデフォルトでチャットになるのではなく `type: "embedding"` となり、`rerank` ノードのモデルは `type: "rerank"` となります。同期または手動で追加された行に明示的な `supportedEndpoints` がある場合は、引き続きそちらが優先されます。
+> **プロバイダーノードの検出:** OpenAI 互換プロバイダー ノード上のモデルは`GET /v1/models`のノード プレフィックスの下に表示されます。エンドポイント メタデータを持たない行 (ローカル`/v1/models`リストに典型的) はノードの`apiType`を継承するため、デフォルトでチャットするのではなく、 `embeddings`ノードのモデルは`type: "embedding"`なり、 `rerank`ノードのモデルは`type: "rerank"`になります。同期された行または手動で追加された行の明示的な`supportedEndpoints`引き続き優先されます。
+
+### 型付きの決定
+
+意思決定モデルは、テキストを生成するのではなく、調整された確率で入力された質問に回答します。これらは決してチャット モデルではなく、2 つのワイヤ形式が相互に変換されることはありません。
+
+- `POST /v1/systemone` —システム 1 `{ model, state, questions: { <id>: … } }` (TypeSafe Jev、 OpenRouterディシジョン、 CloudflareワーカーAI、ローカルOllama)。
+- `POST /v1/decisions` —ネイティブOpenAI決定`{ model, input, questions: [...] }`、 `openai`接続によって提供されます。モデルは`openai/gpt-6-luna` (素の`gpt-6-luna`も動作します)。回答は質問順にそのまま返されます。
+- `GET /v1/systemone/models` —両方の種類の 1 つのカタログ。各行はその`api_format` (`systemone`または`decisions`) に名前を付けます。 `limit` / `after`ページの最終リスト。 `X-OmniRoute-Catalog-Status`ヘッダーは、 `complete`、 `partial`または`unavailable`を読み取ります (503)。
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions`では、認証情報が読み取られる前に、 APIキーのモデル ホワイトリスト、 `decisions`エンドポイント カテゴリ、バジェット、および接続スコープがチェックされます。資格情報は、キーのスコープ内に保存された`openai`接続です (環境キーではありません)。接続ベースURL 、資格情報、クエリ、またはこのOmniRouteを指さないフラグメントのない`http(s)` URLである場合にのみ受け入れられます。コールは、 `decision`自動ルーター ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ) と同じ保護されたトランスポートを介して発信されます。プロバイダーのアウトバウンド ガード、再試行なし、リダイレクトなし、タイムアウトは 5 秒、 KB応答上限は 64 (より大きな応答は 502) です。リクエストボディは 4 MiBに制限されます。呼び出しごとに新しい`Idempotency-Key`が送信されます。エラーはアップストリームのステータスのみを伝え、その本体、 URL、キー、またはプロンプトは伝えません。
 
 ### 専用プロバイダールート
 
@@ -702,7 +711,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-プロバイダープレフィックスがない場合は自動的に追加されます。モデルが一致しない場合は `400` が返されます。
+プロバイダーのプレフィックスが存在しない場合は、自動的に追加されます。不一致のモデルは`400`を返します。
 
 ---
 
@@ -1636,10 +1645,10 @@ GET /api/telemetry/summary
 ## 予算
 
 ```bash
-# すべての API キーの予算ステータスを取得
+# Get budget status for all API keys
 GET /api/usage/budget
 
-# 予算を設定または更新
+# Set or update a budget
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1653,7 +1662,7 @@ Content-Type: application/json
 }
 ```
 
-> **スキーマに関する注意** (`setBudgetSchema`): `apiKeyId` は必須です。`dailyLimitUsd`、`weeklyLimitUsd`、または `monthlyLimitUsd` の少なくとも1つは0より大きい値である必要があります。オプションフィールド: `warningThreshold` (0–1)、`resetInterval` (`daily` | `weekly` | `monthly`)、`resetTime` (`HH:MM`)。従来の `{keyId, limit, period}` 形式では `400 Bad Request` が返されます。
+> **スキーマノート**(`setBudgetSchema`): `apiKeyId`は必須です。 `dailyLimitUsd`、 `weeklyLimitUsd`、または`monthlyLimitUsd`の少なくとも 1 つはゼロより大きくなければなりません。オプションのフィールド: `warningThreshold` (0–1)、 `resetInterval` (`daily` | `weekly` | `monthly`)、 `resetTime` (`HH:MM`)。従来の`{keyId, limit, period}`シェイプは`400 Bad Request`を返します。
 
 ## トークン制限
 

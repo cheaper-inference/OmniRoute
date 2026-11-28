@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) og OpenCode (`x-opencode-session`) gjenkjen
 
 Arbeidskatalogen er forskjellig mellom maskiner, så det samme depotet kan dukke opp under forskjellige baner. Send prosjektet eksplisitt i stedet: Claude Code legger til alle overskrifter som er oppført i `ANTHROPIC_CUSTOM_HEADERS` til hver modellforespørsel, og OmniRoute leser to av dem:
 
-| Overskrift                 | Verdi                                                                 |
-| -------------------------- | --------------------------------------------------------------------- |
-| `x-omniroute-project`      | Prosjektnavn, f.eks. `omniroute`                                      |
-| `x-omniroute-project-repo` | Normalisert fjernkontroll, f.eks. `github.com/diegosouzapw/OmniRoute` |
+| Overskrift                 | Verdi                                                                      |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Prosjektnavn, f.eks. `omniroute`                                           |
+| `x-omniroute-project-repo` | Normalisert fjernkontroll, f.eks. `github.com/cheaper-inference/OmniRoute` |
 
 Begge leses kun for attribusjon; de blir aldri videresendt til oppstrømsleverandøren.
 
@@ -286,28 +286,20 @@ ekstra flagg er nødvendig. Overstyr for hver kjøring med `--remote` / `--api-k
 
 ## Feilsøking
 
-**Claude Code ignorerer gatewayen** — bekreft at `ANTHROPIC_BASE_URL` **ikke har
-`/v1`**, og start `claude` på nytt (miljøvariablene leses én gang ved oppstart). `omniroute launch`
-håndterer dette for deg.
+**Claude Code ignorerer gatewayen** — bekrefte at `ANTHROPIC_BASE_URL` har** `/v1`** og start `claude` på nytt (env leses én gang ved oppstart). `omniroute launch` håndterer dette for deg.
 
-**`/model`-velgeren er tom / mangler gateway-modeller** — krever Claude Code
-v2.1.219+ og `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Bare modell-ID-er av typen `claude*` /
-`anthropic*` vises i velgeren; fremtving en hvilken som helst annen modell med
-`ANTHROPIC_MODEL=<id>` (det er dette profiler gjør).
+**`/model` velgeren er tom / mangler gateway-modeller** — trenger Claude Code v2.1.219 + og `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Bare `claude*` / `anthropic*` modell IDs vises i velgeren; tvinge enhver annen modell med `ANTHROPIC_MODEL=<id>` (dette er hva profiler gjør).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code sender alltid modell-ID-er
-**uten prefiks** (f.eks. `claude-opus-4-8`), så når både Claude Code (`cc/…`)- og
-Claude (`claude/…`)-leverandørene er tilkoblet, samsvarer ID-en uten prefiks med to ruter, og
-OmniRoute nekter å gjette. Løs det på én av følgende måter: Fest en ID med prefiks ved hjelp av
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, eller aktiver **Foretrekk Claude Code for
-Claude-modeller uten prefiks** — bryteren på Claude-leverandørsiden, eller
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (av som standard;
-se [Miljø](../reference/ENVIRONMENT.md)) — som i stedet ruter `claude-*`-ID-er
-uten prefiks til Claude Code. Eksplisitte leverandørprefikser har alltid forrang.
+**`400 Ambiguous model 'claude-…'`** — Claude -koden sender alltid** uten prefiks** modell IDs (f.eks. `claude-opus-4-8`), så når både leverandørene Claude Code (`cc/…`) og Claude (`claude/…`) er koblet til, samsvarer bare ID-en med to ruter og OmniRoute nekter å gjette. Løs det uansett: fest en prefiks-ID med `ANTHROPIC_MODEL=cc/claude-opus-4-8`, eller aktiver** Foretrekk Claude -kode for Claude modeller uten prefiks** — bryteren på Claude leverandørsiden, eller `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (standard av; se [Miljø](../reference/ENVIRONMENT.md) ) — som ruter bare `claude-*` IDs til Claude -koden i stedet. Eksplisitte leverandørprefikser vinner alltid.
 
-**Autentiseringsfeil** — profilen inneholder ikke noe token. Bruk `omniroute launch --profile`
-(setter det inn) eller eksporter `ANTHROPIC_AUTH_TOKEN`.
+**"automodus ... denne økten er ikke kvalifisert" (klassifiseringsforespørsler fakturert)** — i automodus Claude Code ber serveren om å gjennomgå handlinger i sine egne modellforespørsler ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Det trenger `anthropic-beta` verdien `dangerous-tool-use-2026-09-03` og `safeguards` body-feltet for å nå Anthropic som et par, og `safeguard_results` pluss oppstrøms verktøy-bruk IDs for å komme tilbake uendret. OmniRoute gjør dette når forespørselen blir rutet til den opprinnelige `claude` leverandøren eller til en `anthropic-compatible-*` node, strømmet eller ikke (regresjonsvakt: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Andre mål kan ikke returnere anmeldelsen, så Claude Code faller tilbake til sine egne klassifiseringsforespørsler og viser varselet:
 
-**Profiler isoleres ikke** — hver profil har en egen `CLAUDE_CONFIG_DIR`;
-kontroller at `echo $CLAUDE_CONFIG_DIR` i økten peker på
-`~/.claude/profiles/<name>`.
+- en modell på en ikke-antropisk leverandør, eller en kombinasjon som lander på en;
+- en Claude-Code-kompatibel relénode (`anthropic-compatible-cc-*`), som gjenoppbygger forespørselskroppen og ikke bærer `safeguards`;
+- en eldre OmniRoute som er før de tillatelseslistede betaene, eller en Claude -kodeversjon under den Anthropic siden viser for gateway-økter.
+
+Kjør `/status` i Claude Kode: the** Automatisk modusserver** rad leser `Enabled` mens serverens anmeldelse er aktiv. Om disse forespørslene blir fakturert avgjøres av Anthropic, ikke av OmniRoute.
+
+**Auth-feil** — profilen har ingen token. Bruk `omniroute launch --profile` (injiserer det) eller eksporter `ANTHROPIC_AUTH_TOKEN`.
+
+**Profiler isolerer ikke** — hver profil er en distinkt `CLAUDE_CONFIG_DIR`; verifiser `echo $CLAUDE_CONFIG_DIR` inne i sesjonspunktene på `~/.claude/profiles/<name>`.

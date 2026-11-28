@@ -14,10 +14,12 @@ Pakkujateülene vaikepoliitika lubab kuni kolm teenusepakkuja katset, proovide u
 
 - **Kombinatsioonid** ebaõnnestuvad oma sihtmärkide vahel vastavalt kombinatsiooni enda strateegiale ja seadetele.
 - **Paljas mudeli ID** (ilma `provider/` eesliideta), mida mitu aktiivset pakkujat teenindavad, ilma selle täpse nimeta kombinatsioonita, saadetakse esmalt pakkuja järelduste valikutele. Kui see katse nurjub viisil, mille korral poliitika nurjub, saadetakse sama päring järgmisele ID-d teenindavale aktiivsele pakkujale. Vastus sisaldab `x-omniroute-fallback-attempts` ja nende pakkujate arv, keda prooviti enne vastajat.
-  - Iga asendusliige on volitatud täpselt nii, nagu oleks ta järeldanud. Sihtmärk, mille API klahv blokeerib või mida ei tunnista, jäetakse vahele ilma ülesvoolu kõneta ja klient saab tõelise ülesvoolu vea, mitte poliitika tagasilükkamise sihtmärgi puhul, mida ta kunagi ei nimetanud.
+  - Iga asendusliige on volitatud täpselt nii, nagu oleks ta järeldanud. Sihtmärk, mille API klahv blokeerib või mida ta ei tunnista, jäetakse vahele ilma ülesvoolukõneta ja klient saab tõelise ülesvoolu vea, mitte poliitika tagasilükkamise sihtmärgi puhul, mida ta kunagi ei nimetanud.
   - Ainult ebaõnnestunud vastus liigub edasi: pärast esimest voogedastatud baiti ei katke midagi.
   - Hädaolukorra varumudeli vahetus rakendub alles pärast seda, kui kõik soovitud mudeli pakkujad on ebaõnnestunud.
   - Ühendusele kinnitatud taotlus (`x-omniroute-connection`) jääb sellele alles.
   - Eesliitega ID-d (`provider/model`) ei suunata kunagi ümber teisele pakkujale.
 
-Vooluahela olekud on `closed`, `open` ja `half_open`. Jahutus ajastab piiratud sondi; edukas sond sulgeb ahela ja ebaõnnestunud sond avab selle uuesti.
+Vooluahela olekud on `closed`, `open` ja `half_open`. Jahutus kavandab piiratud sondi; edukas sond sulgeb ahela ja ebaõnnestunud sond avab selle uuesti.
+
+Pakkuja tõrkesiirde töötab lüüsis. Vaadake, [millal OmniRoute ise on lüüsi katkestuse ajal kliendi käitumise jaoks kättesaamatu](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable).

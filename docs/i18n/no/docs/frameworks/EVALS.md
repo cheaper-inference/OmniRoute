@@ -183,16 +183,13 @@ Testtilfellene kjøres **sekvensielt**. Det finnes ingen innstilling for samtidi
 
 ## Dashbord
 
-Brukergrensesnittet finnes under `Dashbord → Bruk → Evalueringer`
-(`src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx`). Derfra kan du:
+UI bor på `Dashboard → Usage → Evals` (`src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx`). Derfra kan du:
 
-- Bla gjennom innebygde og egendefinerte suiter med forhåndsvisning av hvert testtilfelle.
-- Opprette, redigere og slette egendefinerte suiter med testtilfellebyggeren.
-- Velge et mål (suitens standardinnstillinger / modell / kombinasjon), eventuelt et
-  ekstra `compareTarget`, eventuelt en API-nøkkel, og deretter kjøre ved behov.
-- Inspisere kjøringshistorikk, bestått/ikke bestått per testtilfelle, responstid og registrerte resultater.
-- Se det løpende resultatkortet aggregert på tvers av den siste kjøringen for hvert
-  `(suite, target)`-omfang.
+- Bla gjennom innebygde og tilpassede suiter med forhåndsvisning fra sak til sak.
+- Create/edit/delete tilpassede suiter med saksbyggeren.
+- Velg et mål (suite standarder / modell / kombinasjon), eventuelt en andre `compareTarget`, eventuelt en API tast, og kjør deretter på forespørsel.
+- Inspiser kjørehistorikk, pass/fail per sak, ventetid og fangede utdata.
+- Se det rullende resultatkortet samlet over den siste kjøringen per `(suite, target)` omfang.
 
 ## Forholdet til RFC-en for automatisk vurdering
 

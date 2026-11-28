@@ -226,7 +226,7 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Stöder** 22 routingstrategier** (se `src/shared/constants/routingStrategies.ts`):
+Stödjer** 22 routingstrategier** (se `src/shared/constants/routingStrategies.ts`):
 
 | Strategi            | Beteende                                                                             |
 | ------------------- | ------------------------------------------------------------------------------------ |
@@ -236,19 +236,19 @@ Stöder** 22 routingstrategier** (se `src/shared/constants/routingStrategies.ts`
 | `context-relay`     | Överlämna sammanhang över mål                                                        |
 | `fill-first`        | Fyll kvoten innan du går vidare till nästa                                           |
 | `p2c`               | Kraften i två val                                                                    |
-| `random`            | Uniform slumpmässig                                                                  |
-| `least-used`        | Välj den med minsta användningsområden                                               |
-| `cost-optimized`    | Billigaste hälsosamma mål först                                                      |
-| `reset-aware`       | Medveten om leverantörsåterställningsfönster                                         |
-| `reset-window`      | Återställ fönsterbaserad routing                                                     |
+| `random`            | Färsk shuffle per förfrågan                                                          |
+| `least-used`        | Välj den med minst registrerade förfrågningar                                        |
+| `cost-optimized`    | Lägsta kataloginsatspris först                                                       |
+| `reset-aware`       | Överbliven kvot + återställning brådskande                                           |
+| `reset-window`      | Kvotfönster som återställs snarast först                                             |
 | `expiry-first`      | Spendera det konto vars kvot skulle löpa ut oanvänt först                            |
 | `headroom`          | Mest återstående kvotutrymme först                                                   |
 | `quota-weighted`    | Hoppa över uttömda konton och dra sedan av överbliven kvot ÷ under flygning          |
-| `strict-random`     | Verkligen enhetlig (ingen kvalitetsviktning)                                         |
+| `strict-random`     | Blandat kortlek: varje mål en gång innan upprepas                                    |
 | `auto`              | Använd 16-faktorspoäng (`autoCombo/`)                                                |
 | `lkgp`              | Senast kända bra leverantör först                                                    |
-| `context-optimized` | Bäst för förfrågningar med långa sammanhang                                          |
-| `cache-optimized`   | Fäst varje återanvändbart promptprefix till samma konto (prompt-cache-träffar)       |
+| `context-optimized` | Största kända sammanhangsfönstret först                                              |
+| `cache-optimized`   | Föredrar kontot som sannolikt kommer att ha promptprefixet i cachen                  |
 | `fusion`            | Fläkta ut till en panel parallellt och syntetisera sedan via en domare (`fusion.ts`) |
 | `pipeline`          | Kedjesteg — varje måls utdata matar nästa                                            |
 | `jev`               | Opt-in: TypeSafe Jev medger vilka rankade bidrag som körs; annars din beställning    |

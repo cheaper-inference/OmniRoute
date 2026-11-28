@@ -247,34 +247,44 @@ Modeļi: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Kombinācijas
+## 🎨 Combos
 
-Jūs varat pārkārtot kombināciju kartes tieši **Informācijas panelis → Kombinācijas**, velkot rokturi uz katras kartes. Kārtība tiek saglabāta SQLite un atjaunota pārlādējot.
+Jūs varat pārkārtot kombinētās kartes tieši** Informācijas panelis → Combos** velkot katras kartes turi. Pasūtījums tiek saglabāts SQLite un atjaunots pēc atkārtotas ielādes.
 
-### Piemērs 1: Maksimālais abonements → Lēta rezerve
+### Atrodiet pakalpojumu sniedzēju, modeli vai kontu
 
-```
-Informācijas panelis → Kombinācijas → Izveidot jaunu
+Sadaļā Izveidot vai rediģēt kombināciju soli pa solim nodrošinātājs, modelis, konts un kombinētās atsauces atlasītāji ietver vietējās meklēšanas lauku. Meklējiet pēc parādītā nosaukuma, identifikatora, nodrošinātāja aizstājvārda vai modeļa avota, pēc tam noklikšķiniet uz rezultāta vai izmantojiet bulttaustiņus un Enter. Visiem vairākiem meklēšanas vienumiem ir jāatbilst. Notīrot meklēšanu vai nospiežot taustiņu Escape, atlasītā vērtība netiek mainīta.
 
-Nosaukums: premium-coding
-Modeļi:
-  1. cc/claude-opus-4-7 (Abonementa galvenais)
-  2. glm/glm-4.7 (Lēta rezerve, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Lētākā rezerves opcija, $0.3/1M)
+Automātiskā konta izvēle paliek redzama meklēšanas laikā. Tā izvēles kontu ierobežojumu sarakstam ir atsevišķs filtrs: atlasītie konti, kas atrodas ārpus redzamajiem rezultātiem, paliek atlasīti, un tie tiek iekļauti skaitā. Ja ir ieslēgta e-pasta konfidencialitāte, slēptos e-pasta fragmentus nevar meklēt. Pievienojiet soli un saglabājiet kombināciju kā parasti; vaicājuma ierakstīšana neko nesaglabā un nepārbauda.
 
-Lietot CLI: premium-coding
-```
+Tāda pati vietējā meklēšana ir pieejama savienojuma pārbaudes modeļiem, pielāgotajiem CLI noklusējuma un aizstājvārdu modeļiem, kā arī saglabātā starpniekservera izvēlēm. Esošās saglabāšanas, lietošanas un pārbaudes darbības paliek atsevišķas.
 
-### Piemērs 2: Tikai bezmaksas (Nulle izmaksu)
+### 1. piemērs. Maksimizēt abonementu → Cheap Backup
 
 ```
-Nosaukums: free-combo
-Modeļi:
-  1. if/kimi-k2.7-code (uzskaitīta bezmaksas piekļuve; pakalpojumu sniedzēja ierobežojumi var būt piemērojami)
-  2. kr/qwen3-coder-next (Kiro bezmaksas rezerve)
+Dashboard → Combos → Create New
 
-Izmaksas: pašlaik uzskaitītas kā $0; nosacījumi un pieejamība var mainīties
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
 ```
+
+### 2. piemērs: tikai bezmaksas (nulles maksas)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
+```
+
+---
 
 ## 🔧 CLI integrācija
 
@@ -421,7 +431,7 @@ omniroute autostart disable
 
 Kad jums vairs nav nepieciešams OmniRoute, mēs piedāvājam divus ātrus skriptus tīrai noņemšanai:
 
-| Komanda                  | Darbība                                                                                            |
+| Pavēli                   | Darbība                                                                                            |
 | ------------------------ | -------------------------------------------------------------------------------------------------- |
 | `npm run uninstall`      | Noņem sistēmas lietotni, bet** saglabā jūsu DB un konfigurācijas** `~/.omniroute`.                 |
 | `npm run uninstall:full` | Programma AND tiek neatgriezeniski noņemta** dzēš visas konfigurācijas, atslēgas un datu bāzes** . |
@@ -431,7 +441,7 @@ Kad jums vairs nav nepieciešams OmniRoute, mēs piedāvājam divus ātrus skrip
 ### VPS izvietošana
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +523,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -600,7 +610,7 @@ post_install() {
 
 | Mainīgs                                 | Noklusējums              | Apraksts                                                                                                                                                                     |
 | --------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | _(automātiski ģenerēts)_ | JWT parakstīšanas slepenais — automātiski ģenerēts pirmajā palaišanas reizē un saglabājies līdz `server.env`; iestatiet to tieši, ja datu direktorijs ir īslaicīgs           |
+| `JWT_SECRET`                            | _(automātiski ģenerēts)_ | JWT parakstīšanas noslēpums — tika automātiski ģenerēts pirmajā palaišanas reizē un tika saglabāts līdz `server.env`; iestatiet to tieši, ja datu direktorijs ir īslaicīgs   |
 | `INITIAL_PASSWORD`                      | _(atiestatīts)_          | Pirmā pieteikšanās parole. npm/source instalācijas sākas ar `CHANGEME`: nomainiet to. Atiestatīts: iekļaušanas vednis                                                        |
 | `DATA_DIR`                              | `~/.omniroute`           | Datu direktorijs (db, lietojums, žurnāli)                                                                                                                                    |
 | `PORT`                                  | ietvara noklusējuma      | Servisa ports (`20128` piemēros)                                                                                                                                             |
@@ -882,8 +892,8 @@ Konfigurēt, izmantojot** Informācijas panelis → iestatījumi → maršrutē�
 - `least-used` un `cost-optimized`
 - `auto` —, pamatojoties uz visiem kandidātiem
 - `lkgp` (pēdējais zināmais labs pakalpojumu sniedzējs) — piesprauž pēdējam veiksmīgajam nodrošinātājam, pēc tam atgriežas pie noteikumiem
-- `context-optimized` — izvēlas modeli ar lielāko brīvā konteksta logu
-- `context-relay` — ķēdes gara konteksta modeļi sekošanas pagriezieniem
+- `context-optimized` — vispirms izmēģina modeli ar lielāko zināmo konteksta logu
+- `context-relay` — prioritātes secība, kā arī nodošanas kopsavilkums, kad saruna tiek pārvietota uz citu kontu
 
 #### Ārējā lipīgās sesijas galvene
 
@@ -1067,7 +1077,7 @@ Iestatījumu lapa ir sakārtota šādi** 7 cilnes** ērtai navigācijai:
 | **Izturība**     | Pieprasīt rindu, savienojuma atdzišanu, pakalpojumu sniedzēja pārtraucēja konfigurāciju un gaidīšanas darbību                                                                                                    |
 | **Papildu**      | Globālā starpniekservera konfigurācija (HTTP/SOCKS5), katra nodrošinātāja starpniekservera ignorēšana                                                                                                            |
 
-Vispārīgi vairs nedublē tikai lasāmas reģistrēšanas un kešatmiņas piezīmes. Datu bāzes saglabāšanas un optimizācijas iestatījumi tiek saglabāti, izmantojot `/api/settings/database`; manuāla kešatmiņas tīrīšana izmanto `DELETE /api/cache`. Pieprasījumu un starpniekservera žurnāla rindu vāciņus kontrolē `CALL_LOGS_TABLE_MAX_ROWS` un `PROXY_LOGS_TABLE_MAX_ROWS`.
+General vairs nedublē tikai lasāmas reģistrēšanas un kešatmiņas piezīmes. Datu bāzes saglabāšanas un optimizācijas iestatījumi tiek saglabāti, izmantojot `/api/settings/database`; manuāla kešatmiņas tīrīšana izmanto `DELETE /api/cache`. Pieprasījumu un starpniekservera žurnāla rindu vāciņus kontrolē `CALL_LOGS_TABLE_MAX_ROWS` un `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1160,7 +1170,7 @@ Var iestatīt globālos kombinētos noklusējuma iestatījumus** Informācijas p
 
 Nulles latentuma kombinēto optimizāciju var izvēlēties. Aiziet** Nulles latentuma optimizācija** atspējoti, lai novērstu šo latentuma funkciju sacīkšu ar atkāpšanās mērķiem, mērķu izlaišanu, pamatojoties uz TTFT vēsturi, vai atkāpšanās pieprasījumu saspiešanu; Iespējojot to, tiek nodrošināta konfigurēta riska ierobežošana, paredzamās TTFT izlaišanas un proaktīva atkāpšanās saspiešana, lai routing/request precizitāti mainītu uz mazāku aizture latentumu.
 
-Atspējot** Pamatojuma pilnvaras buferis** kad augšupējie pakalpojumu sniedzēji pieprasa stingrus `max_tokens` / `maxOutputTokens` ierobežojumus. Ja tas ir iespējots, kombinētā maršrutēšana tikai palielina argumentācijas modeļa brīvību modeļiem ar zināmu izvades ierobežojumu un atstāj klienta pilnvaras ierobežojumu nemainīgu, ja drošā bufera vērtība pārsniegtu šo ierobežojumu. Ja klienta ierobežojums jau pārsniedz zināmo ierobežojumu, OmniRoute piespiež to līdz šim ierobežojumam pirms augšupējā pieprasījuma nosūtīšanas.
+Atspējot** Pamatojuma pilnvaras buferis** kad augšupējie pakalpojumu sniedzēji pieprasa stingrus `max_tokens` / `maxOutputTokens` ierobežojumus. Ja tas ir iespējots, kombinētā maršrutēšana tikai palielina argumentācijas modeļa brīvību modeļiem ar zināmu izvades ierobežojumu un atstāj klienta pilnvaras ierobežojumu nemainīgu, ja drošā bufera vērtība pārsniegtu šo ierobežojumu. Ja klienta ierobežojums jau pārsniedz zināmo maksimālo robežu, OmniRoute piespiež to līdz šim ierobežojumam pirms augšupējā pieprasījuma nosūtīšanas.
 
 ---
 
@@ -1332,32 +1342,34 @@ Skatiet [API_REFERENCE.md](../reference/API_REFERENCE.md) pilnam galapunktu kata
 
 ## 💻 Iekšējais CLI
 
-OmniRoute piedāvā iekšējo CLI (`omniroute …`) iestatīšanai, diagnostikai un darbības kontrolei. Šis ir **atsevišķs no "CLI rīki" lapas informācijas panelī**, kas konfigurē trešās puses CLI (Claude Code, Cursor, Codex, Cline, …), lai tie varētu sazināties ar OmniRoute.
+OmniRoute piegādā iekšējo CLI (`omniroute …`) iestatīšanai, diagnostikai un izpildlaika kontrolei. Tas ir** atsevišķi no informācijas paneļa lapas "CLI Tools".** , kas konfigurē trešās puses CLIs (Claude Code, Cursor, Codex, Cline, …), lai viņi varētu runāt ar OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktīvais vednis (parole, pakalpojumu sniedzēji, kombinācijas)
-omniroute setup --non-interactive  # Piemērots CI/CD
-omniroute doctor                   # Veselības diagnostika (datu direktorija, DB, pakalpojumu sniedzēji, porti)
-omniroute providers available      # Uzskaitīt atbalstītos pakalpojumu sniedzējus
-omniroute providers list           # Uzskaitīt konfigurētos savienojumus
-omniroute providers test <id>      # Tiešsaistes testēšana pakalpojumu sniedzēja savienojumam
-omniroute combos list              # Uzskaitīt kombinācijas
-omniroute combos switch <name>     # Iestatīt noklusējuma kombināciju
-omniroute models                   # Uzskaitīt pieejamos modeļus (--json, --search)
-omniroute keys add | list | remove # Pārvaldīt API atslēgas no termināļa
-omniroute backup                   # Konfigurācijas + DB momentuzņēmums
-omniroute restore [<timestamp>]    # Atjaunot no momentuzņēmuma
-omniroute health                   # Detalizēta veselības informācija (pārtraucēji, kešatmiņa, atmiņa)
-omniroute quota                    # Pakalpojumu sniedzēja kvotas lietojums
-omniroute mcp status               # MCP servera statuss
-omniroute a2a status               # A2A servera statuss
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tuneļi
-omniroute reset-password           # Atiestatīt administratora paroli
-omniroute --mcp                    # Sākt MCP serveri pār stdio
-omniroute --port 3000              # Sākt serveri pielāgoto portu
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Padoms: savienojiet `omniroute doctor --json` ar savu monitorēšanas rīku, lai brīdinātu par neveselīgiem pakalpojumu sniedzēja savienojumiem.
+Padoms: savienojiet pārī `omniroute doctor --json` ar savu uzraudzības rīku, lai brīdinātu par bojātu vietējo instalēšanu. `doctor` nepārbauda pakalpojumu sniedzēja savienojumus; šim nolūkam izmantojiet `omniroute providers test <id>`.
 
 ---
 

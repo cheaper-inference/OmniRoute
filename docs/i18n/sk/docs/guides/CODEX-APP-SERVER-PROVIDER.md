@@ -21,25 +21,21 @@ byť **prihlásené**.
 ## 1. Architektúra
 
 ```
-┌─ Aplikácia OmniRoute ────────────┐        ┌─ Sprievodný kontajner codex-app-server ┐
-│  CodexAppServerExecutor          │  WS    │  codex app-server                      │
-│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456            │
-│  (+ token oprávnenia)            │  JSON  │  --ws-auth capability-token            │
-│                                  │  RPC   │  samostatne spravuje OpenAI OAuth       │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, automatická obnova)│
-        │ zdieľa (zväzky compose)            └────────────────────────────────────────┘
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+│  CodexAppServerExecutor          │  WS    │  codex app-server                   │
+│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → token oprávnenia WS (pripájajú ho oba kontajnery)
-  codex-appserver-home    → ~/.codex (auth.json zapisovaný ovládacím panelom,
-                             čítaný procesom codex app-server v sprievodnom kontajneri)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sprievodný kontajner počúva **iba** v internej sieti compose
-  (`ws://codex-app-server:1456`) a je chránený tokenom oprávnenia. **Nikdy**
-  nie je sprístupnený hostiteľovi ani internetu.
-- Codex CLI je zabudované do `omniroute:base`, takže pri spustení sprievodného
-  kontajnera nie je potrebné inštalovať codex na hostiteľovi ani v zariadení
-  používateľa.
+- Sajdkár počúva** iba** na internej sieti na vytváranie správ (`ws://codex-app-server:1456`) za tokenom spôsobilosti. je to tak** nikdy** zverejnené na hostiteľovi alebo na internete.
+- Postranný vozík používa `omniroute:cli-no-docker`, postavený z cieľa `runner-cli-no-docker`, ktorý zahŕňa Codex CLI.
 
 ## 2. Spustenie
 

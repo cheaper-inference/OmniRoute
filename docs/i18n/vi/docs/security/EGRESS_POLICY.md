@@ -67,37 +67,37 @@ Chỉ thị này được thiết kế có chủ đích **theo từng proxy**, k
 
 ---
 
-## Ba giá trị
+## Ba Giá Trị
 
-| Giá trị | Nhãn UI                | Hành vi                                                                                                                                                                                        |
-| ------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`  | `Tự động (dual-stack)` | Hệ điều hành chọn họ địa chỉ. Với máy chủ proxy là địa chỉ IP dạng literal, họ địa chỉ vốn được xác định bởi literal đó; với tên máy chủ, cả hai họ đều đủ điều kiện. Đây là giá trị mặc định. |
-| `ipv4`  | `Chỉ IPv4`             | Cố định kết nối ở IPv4. Từ chối kết nối nếu máy chủ proxy không có bản ghi IPv4 (A).                                                                                                           |
-| `ipv6`  | `Chỉ IPv6`             | Cố định kết nối ở IPv6. Từ chối kết nối nếu máy chủ proxy không có bản ghi IPv6 (AAAA).                                                                                                        |
+| Giá trị | UI                  | Hành vi                                                                                                                                                        |
+| ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`  | `Auto (dual-stack)` | OS chọn gia đình. Đối với máy chủ proxy theo nghĩa đen IP, họ này là nội tại theo nghĩa đen; đối với tên máy chủ, cả hai họ đều đủ điều kiện. Đây là mặc định. |
+| `ipv4`  | `IPv4 only`         | Ghim kết nối vào IPv4. Không đóng được nếu máy chủ proxy không có bản ghi IPv4 (A).                                                                            |
+| `ipv6`  | `IPv6 only`         | Ghim kết nối vào IPv6. Không đóng được nếu máy chủ proxy không có bản ghi IPv6 (AAAA).                                                                         |
 
-Các chuỗi UI nằm trong `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+chuỗi UI tồn tại ở `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Cách cấu hình
+## Cách cấu hình nó
 
-### Bảng điều khiển
+### Trang tổng quan
 
-Bộ chọn nằm trong biểu mẫu proxy của thẻ **Nhóm proxy**:
+Bộ chọn ở dạng proxy của** Nhóm ủy quyền** tab:
 
-1. Mở **Bảng điều khiển → Cài đặt → Proxy → Nhóm proxy**
-2. Thêm hoặc chỉnh sửa một proxy
-3. Đặt danh sách thả xuống **Họ IP** thành `Tự động (dual-stack)`, `Chỉ IPv4` hoặc `Chỉ IPv6`
-4. Lưu
+1. Mở** Bảng điều khiển → Cài → Proxy → Nhóm proxy**
+2. Thêm hoặc chỉnh sửa proxy
+3. Đặt** gia đình IP** thả xuống `Auto (dual-stack)`, `IPv4 only` hoặc `IPv6 only`
+4. Cứu
 
-Thành phần điều khiển được kết xuất bởi `ProxyRegistryManager.tsx` (được gắn trong `proxy/ProxyPoolTab.tsx`).
+Điều khiển được hiển thị bởi `ProxyRegistryManager.tsx` (được gắn trong `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Trường `family` là một phần của payload tạo/cập nhật sổ đăng ký proxy, được xác thực bởi `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) và được xử lý bởi `POST` / `PATCH /api/v1/management/proxies`:
+Trường `family` là một phần của tải trọng create/update của sổ đăng ký proxy, được xác thực bởi `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) và được xử lý bởi `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Tạo proxy chỉ dùng IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Chuyển một proxy hiện có sang chỉ dùng IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Trường này cũng được chấp nhận trong đối tượng cấu hình proxy nội tuyến dùng cho các mục proxy ngược dòng (`upstream_proxy_config.family`, xem [Mô hình dữ liệu](#data-model)).
+Trường tương tự cũng được chấp nhận bởi đối tượng cấu hình proxy nội tuyến được sử dụng cho các mục nhập proxy ngược dòng (`upstream_proxy_config.family`, xem [Mô hình Dữ liệu](#data-model) ).
 
-Đối với phần còn lại của API CRUD/gán proxy, hãy xem [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Đối với phần còn lại của proxy CRUD/assignment API, hãy xem [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

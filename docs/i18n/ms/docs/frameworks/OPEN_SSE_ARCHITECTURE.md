@@ -236,19 +236,19 @@ Menyokong** 22 strategi penghalaan** (lihat `src/shared/constants/routingStrateg
 | `context-relay`     | Serahkan konteks merentas sasaran                                                                   |
 | `fill-first`        | Isi kuota sebelum beralih ke seterusnya                                                             |
 | `p2c`               | Kuasa dua pilihan                                                                                   |
-| `random`            | Seragam rawak                                                                                       |
-| `least-used`        | Pilih yang paling sedikit penggunaan terkini                                                        |
-| `cost-optimized`    | Target sihat termurah dahulu                                                                        |
-| `reset-aware`       | Sedar tentang tetingkap tetapan semula pembekal                                                     |
-| `reset-window`      | Tetapkan semula penghalaan berasaskan tetingkap                                                     |
+| `random`            | Kocok segar setiap permintaan                                                                       |
+| `least-used`        | Pilih yang mempunyai permintaan yang paling sedikit direkodkan                                      |
+| `cost-optimized`    | Harga input katalog terendah dahulu                                                                 |
+| `reset-aware`       | Sisa kuota + set semula segera                                                                      |
+| `reset-window`      | Tetingkap kuota yang ditetapkan semula paling cepat dahulu                                          |
 | `expiry-first`      | Belanjakan akaun yang kuotanya akan tamat tempoh tidak digunakan dahulu                             |
 | `headroom`          | Kebanyakan kuota utama yang tinggal dahulu                                                          |
 | `quota-weighted`    | Langkau akaun yang kehabisan, kemudian cabutan mengikut baki kuota ÷ dalam muatan dalam penerbangan |
-| `strict-random`     | Benar-benar seragam (tiada pemberat kualiti)                                                        |
+| `strict-random`     | Dek kocok: setiap sasaran sekali sebelum berulang                                                   |
 | `auto`              | Gunakan pemarkahan 16 faktor (`autoCombo/`)                                                         |
 | `lkgp`              | Penyedia baik yang terakhir diketahui dahulu                                                        |
-| `context-optimized` | Terbaik untuk permintaan konteks panjang                                                            |
-| `cache-optimized`   | Semat setiap awalan gesaan yang boleh digunakan semula pada akaun yang sama (hitan cache segera)    |
+| `context-optimized` | Tetingkap konteks terbesar yang diketahui dahulu                                                    |
+| `cache-optimized`   | Lebih suka akaun yang mungkin menyimpan awalan gesaan dalam cache                                   |
 | `fusion`            | Kipas ke panel secara selari, kemudian sintesis melalui hakim (`fusion.ts`)                         |
 | `pipeline`          | Langkah rantai — setiap output sasaran menyuap yang seterusnya                                      |
 | `jev`               | Ikut serta: TypeSafe Jev mengakui penyertaan berperingkat mana yang dijalankan; lain pesanan anda   |

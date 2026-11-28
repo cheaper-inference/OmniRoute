@@ -4,36 +4,37 @@
 
 ---
 
-**OmniCopilot** na-etinye model ọ bụla OmniRoute gị na-enye n’ime ihe nhọpụta model nke GitHub Copilot Chat nke bụ _native_. Enweghị sidebar nke abụọ, enweghị UI nkata dị iche — ọnọdụ agent nke Copilot, ịkpọ ngwaọrụ,
-sava MCP na ntuziaka ahaziri iche niile ka na-arụ ọrụ, naanị na ha na-agba ọsọ na model ị họọrọ.
+**OmniCopilot** na-agbakwunye ụdị nkata OmniRoute gị na combos na onye na-ahọrọ ụdị nkata Copilot gị. Jiri nkata na-arụ ọrụ nke onye ndezi dị ugbu a, yana ọkpụkpọ oku yana ọhụụ mgbe ụdị ahọpụtara kwadoro.
 
-|                            |                                                                                                                                                 |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Wụnye (VS Code)**        | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Wụnye (forks)**          | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Koodu mmalite / nsogbu** | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Ihe achọrọ**             | VS Code 1.104+                                                                                                                                  |
+|                           |                                                                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Wụnye ( koodu VS )**    | [Ahịa → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)             |
+| **Wụnye (Mepee VSX)**     | [Mepee VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — chọrọ onye na-eweta ụdị asụsụ dakọtara yana APIs nkata |
+| **Isi mmalite / mbipụta** | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                            |
+| **choro**                 | Koodu VS 1.104 + (1.122 + iji ya na-enweghị nbanye GitHub ma ọ bụ atụmatụ Copilot )                                           |
+| **Ntọhapụ dị ugbu a**     | OmniCopilot v1.5.1 na ụlọ ahịa abụọ ahụ (wepụtara 2026-11-24)                                                                 |
 
-> **Achọghị ndenye aha Copilot.** Kemgbe VS Code 1.122, onye na-enye language-model na-arụ ọrụ
-> n’enweghị iji GitHub banye na n’enweghị atụmatụ Copilot ọ bụla. Mmecha inline na
-> atụmatụ ndị dabere na embeddings adịghị n’ime provider API ma ka chọrọ Copilot.
+Chekwaa nseta ihuenyo** 2026-11-25 (01:43 UTC)** , mwepụta ugbu a:** 52,081 wụnye ebe ahịa** na** 20,989 Mepee nbudata VSX** . Ndị a bụ metrik ụlọ ahịa dị iche iche, ọ bụghị ọnụ ọgụgụ onye ọrụ jikọtara ọnụ. Isi mmalite: [Ebe ahịa](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) na [Mepee VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Mepee VSX adịghị n'onwe ya guzobe ndakọrịta na onye ndezi ọ bụla na-eji ndekọ ahụ. Lelee nkata onye ndezi na nkwado API ụdị asụsụ.
+
+> **Enweghị ndenye aha Copilot achọrọ maka nkata BYOK na koodu VS 1.122 +.** Microsoft na-akwado nkata, ngwaọrụ na MCP na-enweghị nbanye GitHub mgbe ahaziri onye na-eweta ya. Na koodu VS 1.104–1.121 ndọtị ahụ ka na-arụ ọrụ, mana koodu VS chọrọ atụmatụ Copilot abanyela. Atụmatụ ntanetị na atụmatụ dabere na ntinye na-anọ na mpụga API onye na-eweta ma ka na-achọ Copilot; Copilot Business/Enterprise admins nwere ike gbanyụọ ndị na-eweta ụdị nke atọ site na amụma; ndụdụ na-egosi ụdị naanị ma ọ bụrụ na ọ na-emejuputa nkata-eweta API. Ojiji ndị na-eweta ihe n'elu ka nwere ike nweta ụgwọ. Hụ [ndetu ntọhapụ VS 1.122](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) yana [ntuziaka ụdị asụsụ](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
-## Nhazi
+## Melite
 
-1. **Gbaa OmniRoute** — `npm install -g omniroute && omniroute` (dashboard dị na `http://localhost:20128`).
-2. **Wụnye extension ahụ** — chọọ "OmniRoute" na nlele Extensions.
-3. **Họrọ model** — Copilot Chat → ihe nhọpụta model → **Manage Models…** → **OmniRoute**, wee kaa
-   ihe ndị ị chọrọ.
+1. **Gbaa OmniRoute** — `npm install -g omniroute && omniroute` (dashboard na `http://localhost:20128`).
+2. **Wụnye ndọtị ahụ** — "OmniRoute" na nlele ndọtị.
+3. **Jikọọ** — dobe `http://localhost:20128` ndabara ma ọ bụ tọọ URL nkesa gị na igodo API site na**OmniRoute: Jikwaa njikọ** .
+4. **Họrọ ihe nlereanya** — Copilot Mkparịta ụka → ihe atụ →** Jikwaa Ụdị…** →**OmniRoute** , wee pịa ihe ị chọrọ.
 
-Ọ dịghị ihe a ga-ahazi mgbe OmniRoute na-agba ọsọ na port ndabara. Maka instance dị anya, mepee
-**akara ngosi OmniRoute na Activity Bar** (ma ọ bụ gbaa `OmniRoute: Manage Connection`) ma tọọ:
+Maka ntọala njikọ, mepee ya** akara OmniRoute na ogwe ihe omume** (ma ọ bụ gbaa `OmniRoute: Manage Connection`) wee tọọ:
 
-- **URL sava** — mgbọrọgwụ sava ahụ, dịka `http://192.168.0.15:20128`. Extension ahụ na-agbakwunye
-  suffix `/v1`; etinyela ya.
-- **Igodo API** — naanị mgbe sava ahụ tọrọ `REQUIRE_API_KEY`. A na-echekwa ya na keychain OS site na VS
-  Code SecretStorage, ọ dịghị mgbe a na-echekwa ya na `settings.json`.
+- **Ihe nkesa URL** — mgbọrọgwụ nkesa, dịka `http://omniroute.example.com:20128`. A na-agbakwunye suffix `/v1` na ndọtị; etinyela ya.
+- **igodo API** — chọrọ mgbe amụma nnabata nnabata nke ihe nkesa chọrọ otu. Echekwara site na VS Code SecretStorage, ọ dịghị mgbe na `settings.json`; igodo oghere ọrụ dị. Jiri igodo enyere ikike maka ụdị nke ịchọrọ ikpughe.
+
+Mgbatị ahụ na-enyekwa ihe ngosi njikọ, ume ọhụrụ nlereanya, ọnọdụ ihe atụ na ọnụ ahịa metadata (gụnyere combos), echiche agbakwunyere na nke a.** Mgbalị iche echiche** menu na koodu VS 1.120 +, akara ọkwa ọkwa kwa ụbọchị-oke njedebe na ogwe ojiji (OmniRoute 3.8.50 +), nhazi CLI na taabụ dashboard nhọrọ. Ụdị ahọpụtara na amụma nkesa na-ekpebi ike ị nwere ike iji.
 
 ---
 
@@ -118,26 +119,25 @@ Lee [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) na issue
 
 ---
 
-## Ịhazigharị ngwaọrụ ndị ọzọ gị site n'ime VS Code
+## Na-ahazi ngwaọrụ gị ndị ọzọ si n'ime koodu VS
 
-**`OmniRoute: Configure Coding CLI`** na-eji `omniroute` CLI dee profaịlụ ndị dị njikere iji
-maka Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo na Roo — otu configs ndị ahụ akọwara na
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). A na-enyefe API key ahụ n'aka CLI site na
-mgbanwe gburugburu `OMNIROUTE_API_KEY`, ọ bụghị mgbe ọ bụla site n'ahịrị iwu.
+**`OmniRoute: Configure Coding CLI`** na-eme `omniroute` CLI ide profaịlụ ejikere maka ngwaọrụ iri na isii: Codex CLI, koodu Claude, Cline, Gaa n'ihu, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes na 5dive. Mgbatị ahụ na-akpọ iwu `setup-*` na ọnụ ọnụ agbakwunyere; wụnye ụdị OmniRoute CLI nke gụnyere iwu ahọpụtara. Hụ [ntuziaka njikọta CLI](CLI-INTEGRATIONS.md) maka faịlụ na ọkọlọtọ usoro nhazi ọ bụla na-eji yana [ndekọ ihe ndọtị](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+A na-enyefe igodo API n'aka CLI site na `OMNIROUTE_API_KEY`, ọ dịghị mgbe ọ dị na ahịrị iwu. Ezi ntụziaka ntọlite nwere ike ịnọgidesi ike na nzere na nhazi ngwa ọrụ ebumnuche. Mgbe ị na-ekekọrịta igodo akọwapụtara ebe ọrụ na nhazi ọkwa onye ọrụ, ndọtị ahụ na-arịọ maka nkwenye mbụ.
 
 ---
 
-## Nchọpụta na ndozi nsogbu
+## Nchọpụta nsogbu
 
-| Ihe mgbaàmà                                              | Ihe kpatara ya / ndozi                                                                                                                                                                                                                               |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Enweghị model OmniRoute n'ime picker                     | Enweghị ike ijikọ na sava. Ntụpọ dị na status bar ga-acha ntụ ntụ; mee `OmniRoute: Check Connection`. E mere discovery ka ọ ghara ikwu okwu, ọ naghịkwa etinye model ọ bụla kama ịjụ onye ọrụ.                                                       |
-| Model ọ bụla pụtara ugboro abụọ                          | Ị na-eji OmniCopilot nke tọrọ 1.0.1 — melite ya. Ugbu a extension ahụ na-arịọ `?prefix=alias`.                                                                                                                                                       |
-| E depụtaburu model image/audio ma ugbu a ọ pụọ           | E mere nke a n'ebumnuche kemgbe 1.0.1 — ọ nweghị mgbe ọ ga-enwe ike ịza arịrịọ chat.                                                                                                                                                                 |
-| Panel adịghị na Activity Bar                             | VS Code na-ebuga view container ndị ọzọ n'ime **"…"** overflow dị na ala Activity Bar, container ezokwara site na ịpị aka nri ga-anọgide na-ezo. Pịa Activity Bar aka nri → kaa **OmniRoute**, ma ọ bụ jiri `OmniRoute: Manage Connection` mepee ya. |
-| Dashboard na-emepe na browser n'agbanyeghị mode `editor` | E jighị `DASHBOARD_ALLOW_EMBED=vscode` **wuo** sava ahụ (lee n'elu) — ịtọ ya mgbe prebuilt install na-amalite agaghị agbanwe ihe ọ bụla. E kpachapụrụ anya mee fallback ahụ.                                                                         |
-| Ndepụta model agwụla oge mgbe agbanwechara providers     | `OmniRoute: Refresh Models`, ma ọ bụ link ↻ dị na panel ahụ.                                                                                                                                                                                         |
+| Mgbaàmà                                                           | Ihe kpatara / dozie                                                                                                                                                                                                                                                      |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Enweghị ụdị OmniRoute na onye na-ahọrọ                            | Enweghị ike ịnweta sava. Ntụpọ ọkwa-ogwe na-aga isi awọ; agba `OmniRoute: Check Connection`. Nchọpụta na-agbachi nkịtị site na imewe na ọ naghị enye aka ọ bụla ụdị kama ịkpali.                                                                                         |
+| Ụdị ọ bụla na-apụta ugboro abụọ                                   | Ị nọ na OmniCopilot toro karịa 1.0.1 —. Mgbatị a na-arịọ `?prefix=alias` ugbu a.                                                                                                                                                                                         |
+| A na-edepụta ihe nlereanya image/audio wee pụọ                    | N'ebumnuche kemgbe 1.0.1 — ọ nweghị ike ịza arịrịọ nkata.                                                                                                                                                                                                                |
+| Ogwe na-efu na Ogwe Ihe Omume                                     | Koodu VS na-ebuga arịa nlele ọzọ n'ime** "..."** jubigara ókè na ala nke Ogwe Ihe Omume, yana akpa zoro ezo site na ịpị aka nri na-ezobe ya. Pịa aka nri na akara ihe omume →**OmniRoute** , ma ọ bụ jiri `OmniRoute: Manage Connection` mepee ya.                       |
+| Dashboard na-emepe na ihe nchọgharị n'agbanyeghị ọnọdụ `editor`   | Ihe nkesa ahụ abụghị** wuru** ya na `DASHBOARD_ALLOW_EMBED=vscode` (lee n'elu) — ịtọ ya na mmalite na arụrụ arụrụ arụghị ihe ọ bụla. Ndaghachi azụ bụ ụma.                                                                                                               |
+| Ndepụta ụdị adịchaghị mgbe agbanwechara ndị na-eweta ya           | `OmniRoute: Refresh Models`, ma ọ bụ njikọ ↻ dị na panel.                                                                                                                                                                                                                |
+| Ogwe kwuru _Online (ụdị akpọchiela)_, onye nhọpụta tọgbọrọ chakoo | Ihe nkesa na-ajụ igodo. Jiri ya chekwaa igodo ziri ezi** Chekwa & nwalee** . Ọ bụrụ na edobere igodo ahụ na sava ahụ kama (gbanyere ya, ma ọ bụ nye ya ohere na ụdị), ndọtị ahụ anaghị achọpụta n'onwe ya: mee `OmniRoute: Refresh Models` ma ọ bụ mepee ogwe OmniRoute. |
 
 ---
 

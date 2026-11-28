@@ -4,20 +4,11 @@
 
 ---
 
-title: "OmniRoute 程式碼基礎文件"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# OmniRoute 程式碼基礎文件
-
-> **版本：** v3.8.0
-> **最後更新：** 2026-06-28
-> **讀者對象：** 為 OmniRoute 貢獻程式碼或在其之上建立整合的工程師。
+> **版本：** v3.8.51**觀眾：**工程師為OmniRoute做出貢獻或在其之上建立整合。
 >
-> 如需高階架構圖表及各子系統背後的設計理念，請參閱 [ARCHITECTURE.md](./ARCHITECTURE.md)。如需深入了解各子系統（Auto Combo、MCP 伺服器、A2A 伺服器、技能、記憶體、雲端代理、韌性、壓縮等），請參閱 `docs/` 目錄中的對應文件。
+> 有關高級架構圖和每個子系統背後的推理，請閱讀[ARCHITECTURE.md](./ARCHITECTURE.md) 。若要深入了解各個子系統（自動組合、 MCP伺服器、 A2A伺服器、技能、記憶體、雲端代理、彈性、壓縮等），請參閱此`docs/`目錄中的專用檔案。
 
-本文說明 **當前儲存庫中的內容**，使新進工程師能夠瀏覽目錄結構、理解執行時期分層，並知道在何處新增程式碼，而不需要自行發明新模組。
+該文件描述了**今天儲存庫中存在什麼**這樣新工程師就可以瀏覽樹，了解運行時分層，並知道在哪裡添加程式碼，而無需發明新模組。
 
 ---
 
@@ -676,33 +667,12 @@ bin/
 
 依用途分為 6 個子資料夾。
 
-- **`scripts/build/`** — `build-next-isolated.mjs`、`prepublish.ts`、
-  `prepare-electron-standalone.mjs`、`pack-artifact-policy.ts`、
-  `validate-pack-artifact.ts`、`postinstall.mjs`、`postinstallSupport.mjs`、
-  `uninstall.mjs`、`bootstrap-env.mjs`、`runtime-env.mjs`、
-  `native-binary-compat.mjs`。
-- **`scripts/dev/`** — `run-next.mjs`、`run-next-playwright.mjs`、
-  `run-standalone.mjs`、`standalone-server-ws.mjs`、`responses-ws-proxy.mjs`、
-  `v1-ws-bridge.mjs`、`smoke-electron-packaged.mjs`、
-  `run-playwright-tests.mjs`、`run-ecosystem-tests.mjs`、
-  `run-protocol-clients-tests.mjs`、`sync-env.mjs`、`healthcheck.mjs`、
-  `system-info.mjs`，以及唯讀的 PR 監控輔助工具：
-  `ci-discriminate.sh`（根據參考 PR 或 base-red 議題，將 PR 中失敗檢查的特徵分類為自身／繼承／
-  未知）與 `audit-worktree.sh`
-  （在接受工作者的 PR 前，檢查髒檔案、受保護區域、遭移除的斷言、抑制計數、殘留的
-  臨時 tsconfig，以及 PR head 與本機 HEAD 的差異）。
-- **`scripts/check/`** — `check-cycles.mjs`、`check-docs-sync.mjs`、
-  `check-docs-counts-sync.mjs`、`check-env-doc-sync.mjs`、
-  `check-deprecated-versions.mjs`、`check-route-validation.mjs`、
-  `check-t11-any-budget.mjs`、`check-pr-test-policy.mjs`、
-  `check-supported-node-runtime.ts`、`test-report-summary.mjs`。
-- **`scripts/docs/`** — `generate-docs-index.mjs`、`gen-provider-reference.ts`。
-- **`scripts/i18n/`** — `generate-multilang.mjs`、`run-visual-qa.mjs`、
-  `generate-qa-checklist.mjs`、`apply-priority-overrides.mjs`、
-  `validate_translation.py`、`check_translations.py`、
-  `untranslatable-keys.json`。
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`、`sync-cursor-models.mjs`、
-  `dbsetup.js`。
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`、 `run-next-playwright.mjs`、 `run-standalone.mjs`、 `standalone-server-ws.mjs`、 `responses-ws-proxy.mjs`、 `v1-ws-bridge.mjs`、 `smoke-electron-packaged.mjs`、 `run-playwright-tests.mjs`、 `run-ecosystem-tests.mjs`、 `run-protocol-clients-tests.mjs`、 `sync-env.mjs`、 `healthcheck.mjs`、 `system-info.mjs`，加上只讀PR保母基數的副`ci-discriminate.sh` PR髒PR、受保護的表面、刪除的斷言、抑制計數、剩餘的 tmp tsconfigs、 `audit-worktree.sh` PR與在接受工作人員的PR之前的本地HEAD — ）。
+- **`scripts/check/`** — 、 `check-cycles.mjs`、 `check-docs-sync.mjs`、 `check-docs-counts-sync.mjs`、 `check-env-doc-sync.mjs`、 `check-deprecated-versions.mjs`、 `check-route-validation.mjs`、 `check-t11-any-budget.mjs`、 `check-pr-test-policy.mjs`、 `check-supported-node-runtime.ts`、 `test-report-summary.mjs`。 `check-deprecated-versions.mjs`標記明確歸屬於OmniRoute版本（3.6.x 及更早版本）。該檢查忽略日期。
+- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

@@ -4,8 +4,6 @@
 
 ---
 
-آخر تحديث: 2026-08-23
-
 تتكامل OmniRoute مع ثلاث فئات من أدوات CLI المنتشرة عبر ثلاث صفحات مخصصة للوحة المعلومات:
 
 | صفحة          | طريق                    | مفهوم                                                                     | عدد          |
@@ -235,7 +233,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)            |
 | `POST /api/cli-tools/qwen-settings`         | كود Qwen (`~/.qwen/settings.json` + مفتاح `.env` مخصص)           |
 
-تستخدم جميع المسارات `sanitizeErrorMessage()` للاستجابات للأخطاء (القاعدة الصعبة رقم 12).
+تستخدم كافة المسارات `sanitizeErrorMessage()` للاستجابات للأخطاء (Hard Rule #12).
 
 ---
 

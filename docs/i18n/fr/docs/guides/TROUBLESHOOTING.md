@@ -185,83 +185,49 @@ inclut pas.
 
 ---
 
-## Faux positifs des antivirus
+## Faux positifs antivirus
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG met `README.md` en quarantaine avec `MD:HttpRequest-inf[Susp]`
+### Avast/AVG quarantaine `README.md` avec `MD:HttpRequest-inf[Susp]`
 
-**Il s’agit d’un faux positif. Rien n’est infecté et aucune action n’est requise.**
+**C'est un faux positif. Rien n'est infecté et aucune action n'est requise.**
 
-Avast et AVG utilisent une heuristique qui signale les fichiers texte brut/Markdown contenant de nombreux
-liens ressemblant à des requêtes HTTP. Le fichier `README.md` d’OmniRoute est inclus dans le package npm (il est
-répertorié dans `package.json` → `files`) ; il se retrouve donc dans `node_modules/omniroute/README.md` lors
-d’une installation globale — et il contient environ 15 exemples `http://localhost:20128/...` (les points
-de terminaison HTTP/SSE de MCP, l’URL `.well-known` d’A2A et des extraits `curl`). Cette densité de liens suffit
-à déclencher l’heuristique.
+Avast et AVG exécutent une heuristique qui signale les fichiers plain-text/Markdown contenant de nombreux liens ressemblant à des requêtes HTTP. OmniRoute de `README.md` est livré dans le package npm (il est répertorié dans `package.json` → `files`), il atterrit donc à `node_modules/omniroute/README.md` sur une installation globale — et contient ~ 15 exemples `http://localhost:20128/...` (les points de terminaison MCP HTTP/SSE, le A2A `.well-known` URL et les extraits de code `curl` ). Cette densité de liens est suffisante pour déclencher l’heuristique.
 
-Si cela n’a commencé que récemment : la nature du fichier n’a pas changé. Le tableau des points de terminaison
-du README s’est étoffé (MCP HTTP + SSE + A2A ont été ajoutés), tout comme le nombre d’exemples `curl`, ce qui lui
-a fait dépasser le seuil.
+Si cela a commencé récemment : le fichier n’a pas changé en nature. Le README a élargi sa table de points de terminaison (MCP HTTP + SSE + A2A ont été ajoutés) et davantage d'exemples `curl`, ce qui l'a poussé au-delà du seuil.
 
-Ce fichier est une documentation inerte ne contenant aucun contenu exécutable. Vous pouvez le restaurer
-depuis la quarantaine en toute sécurité.
+Le fichier est une documentation inerte sans contenu exécutable. Vous pouvez le restaurer en toute sécurité depuis la quarantaine.
 
-**Que faire :**
+**Ce qu'il faut faire:**
 
-1. **Arrêter les notifications** — excluez le répertoire d’installation dans votre antivirus
-   (Avast : Paramètres → Exceptions), en ajoutant le chemin de votre dossier global `node_modules` et/ou le
-   répertoire de données d’OmniRoute (`~/.omniroute/`).
-2. **Signaler le faux positif** — <https://www.avast.com/false-positive-file-form.php>,
-   en joignant le fichier `README.md` mis en quarantaine. C’est la solution qui aide tout le monde, puisque c’est
-   l’heuristique de l’éditeur qui réagit de manière excessive à un fichier texte.
+1. **Arrêtez les notifications** — exclut le répertoire d'installation dans votre antivirus (Avast : Paramètres → Exceptions), en ajoutant votre chemin `node_modules` global and/or le répertoire de données OmniRoute (`~/.omniroute/`).
+2. **Signaler le faux positif** — <https://www.avast.com/false-positive-file-form.php>, en attachant le `README.md` mis en quarantaine. C'est le correctif qui aide tout le monde, puisqu'il s'agit de la réaction heuristique du fournisseur à un fichier texte.
 
-**Pourquoi nous ne « corrigeons » pas cela de notre côté :** les exemples utilisent tous `http://localhost`, et
-localhost ne peut pas utiliser `https` sans les complications liées aux certificats autosignés. Altérer la documentation
-pour contourner l’heuristique d’un seul éditeur nuirait à tous les lecteurs afin de satisfaire un bogue d’analyseur.
+**Pourquoi nous ne « réparons » pas cela de notre côté :** les exemples sont tous `http://localhost`, et localhost ne peut pas être `https` sans friction de certificat auto-signé. Mutiler la documentation pour éviter l'heuristique d'un fournisseur nuirait à tous les lecteurs pour satisfaire un bug du scanner.
 
-### Kaspersky signale l’application de bureau comme `PDM:Trojan.Win32.Generic`
+### Kaspersky signale l'application de bureau comme `PDM:Trojan.Win32.Generic`
 
-**Il s’agit d’un faux positif provenant d’une heuristique comportementale. Rien n’est infecté.** Le préfixe
-`PDM:` de Kaspersky signifie que le verdict provient de son module de défense proactive (System Watcher),
-qui évalue ce que le programme d’installation _fait_ au lieu de le comparer à des logiciels malveillants connus. Lorsqu’il
-se déclenche, Kaspersky « annule » l’intégralité de l’installation — en supprimant les fichiers qu’il avait déjà
-écrits — de sorte que l’application se retrouve endommagée ou absente.
+**Il s’agit d’un faux positif issu d’une heuristique comportementale. Rien n'est infecté.** Le préfixe `PDM:` de Kaspersky signifie que le verdict vient de son module de défense proactive (System Watcher), qui juge ce que le programme d'installation _fait_ plutôt que de le comparer à des logiciels malveillants connus. Lorsqu'il se déclenche, Kaspersky "annule" l'intégralité de l'installation — en supprimant les fichiers qu'il avait déjà écrits — de sorte que l'application finit par être cassée ou manquante.
 
-Les fichiers signalés sont des composants standard de dépendances open source déclarées, incluses avec
-l’application de bureau, par exemple :
+Les fichiers qu'il signale sont des éléments de stock de dépendances open source déclarées fournies avec l'application de bureau, par exemple :
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` et
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), la bibliothèque d’automatisation de navigateur
-  utilisée pour la connexion aux fournisseurs depuis l’application et les conversations reposant sur un navigateur.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — la liaison native `wreq-js` dont la version est épinglée, utilisée pour les requêtes HTTP avec empreinte de navigateur
-  auprès des fournisseurs reposant sur des cookies web (`<arch>` vaut `x64` ou `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` et `workerProcessEntry.js` — [Playwright](https://playwright.dev), la bibliothèque d'automatisation du navigateur utilisée pour la connexion du fournisseur dans l'application et le chat sauvegardé par le navigateur.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — la liaison native `wreq-js` épinglée utilisée pour HTTP à empreintes digitales du navigateur sur les fournisseurs de cookies Web (`<arch>` est `x64` ou `arm64`).
 
-**Pourquoi il se déclenche :** le programme d’installation Windows n’est **pas encore signé avec un certificat de code** ;
-un programme d’installation NSIS non signé n’a donc aucune réputation, et les heuristiques comportementales fonctionnent
-avec une agressivité maximale. Associé à une DLL native incluse et à des centaines de fichiers `.js` écrits sous
-`%LOCALAPPDATA%\Programs\OmniRoute` (y compris des répertoires de packages dont le nom comporte un suffixe de hachage,
-issus de la compilation autonome de Next.js), cela suffit à déclencher l’heuristique. La signature du code est prévue ;
-d’ici là, ce problème peut se reproduire à chaque nouvelle version.
+**Pourquoi ça se déclenche :** le programme d'installation Windows est** pas encore signé par code** , donc un programme d'installation NSIS non signé n'a aucune réputation et les heuristiques comportementales s'exécutent avec une agressivité maximale. Combiné avec un DLL natif fourni et des centaines de fichiers `.js` écrits sous `%LOCALAPPDATA%\Programs\OmniRoute` (y compris des répertoires de packages avec suffixe de hachage de la version autonome Next.js ), cela suffit à déclencher l'heuristique. La signature du code est prévue ; jusqu'à ce qu'il atterrisse, les nouvelles versions peuvent répéter cela.
 
-**Que faire :**
+**Ce qu'il faut faire:**
 
-1. **Vérifiez d’abord votre téléchargement** (cela permet d’écarter l’hypothèse d’un fichier altéré). Chaque version publie
-   `latest.yml`, dont le champ `sha512` (base64) couvre le programme d’installation
-   `OmniRoute.Setup.<version>.exe`. Dans PowerShell, depuis le dossier contenant le programme d’installation :
+1. **Vérifiez d'abord votre téléchargement** (exclut un fichier falsifié). Chaque version publie `latest.yml`, dont le champ `sha512` (base64) couvre le programme d'installation `OmniRoute.Setup.<version>.exe`. Dans PowerShell, depuis le dossier contenant l'installateur :
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   La sortie doit correspondre à `latest.yml` → `sha512`. Si ce n’est pas le cas, supprimez le fichier et
-   téléchargez-le de nouveau uniquement depuis la [page des versions GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Restaurer + exclure** — restaurez depuis la quarantaine les éléments supprimés lors de l’annulation et ajoutez une exclusion
-   pour `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Paramètres → Menaces et exclusions),
-   puis réinstallez l’application.
-3. **Signaler le faux positif** — <https://opentip.kaspersky.com/>. Les signalements de faux positifs
-   envoyés par les utilisateurs accélèrent réellement l’ajout à la liste blanche.
+   La sortie doit correspondre `latest.yml` → `sha512`. Si ce n'est pas le cas, supprimez le fichier et retéléchargez-le uniquement à partir de la [page des versions GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Restaurer l'exclusion de +** — restaure les éléments restaurés de la quarantaine et ajoute une exclusion pour `%LOCALAPPDATA%\Programs\OmniRoute` (Paramètres Kaspersky → → Menaces et exclusions), puis réinstallez.
+3. **Signaler le faux positif** — <https://opentip.kaspersky.com/>. Les rapports FP soumis par les utilisateurs accélèrent véritablement la mise sur liste verte.
 
 ---
 
@@ -877,8 +843,8 @@ Plus de symptômes :
 
 ## Toujours bloqué ?
 
-- **Problèmes GitHub** : [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Architecture** : consultez [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) pour les détails internes
-- **Référence de l’API** : consultez [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) pour connaître tous les points de terminaison
-- **Tableau de bord d’état** : consultez **Tableau de bord → État** pour connaître l’état du système en temps réel
-- **Traducteur** : utilisez **Tableau de bord → Traducteur** pour diagnostiquer les problèmes de formatage
+- **Problèmes GitHub** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Architecture** : Voir [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) pour les détails internes
+- **Référence API** : Voir [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) pour tous les points de terminaison
+- **Tableau de bord de santé** : Vérifier** Tableau de bord → Santé** pour l'état du système en temps réel
+- **Traducteur** : Utiliser** Tableau de bord → Traducteur** pour déboguer les problèmes de format

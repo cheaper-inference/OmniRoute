@@ -39,16 +39,16 @@ trebuie, de obicei, redirecționate înainte de îmbinare.
 
 ## Eliberați înghețarea (cicluri paralele)
 
-Când o versiune este reconciliată, este deschisă o problemă de marcaj etichetată `release-freeze`. Că** nu oprește dezvoltarea** :
+Când o versiune este reconciliată, este deschisă o problemă de marcaj etichetată `release-freeze`. Că** nu opreste dezvoltarea** :
 
 - `release/vX.Y.Z` înghețat aparține căpitanului de eliberare pentru acea navă.
-- `release/vX+1` -ul următorului ciclu este tăiat din vârful înghețat, astfel încât colaboratorii să continue munca de aterizare.
-- Deschideți PRs care încă vizează ramura înghețată ar trebui să fie** redirecționate** la ramura activă (cea mai înaltă) `release/v*`.
+- `release/vX+1` -ul următorului ciclu este tăiat din vârful înghețat, astfel încât contribuitorii să continue munca de aterizare.
+- Deschideți PRs care încă vizează ramura înghețată ar trebui să fie** redirecţionate** la ramura activă (cea mai înaltă) `release/v*`.
 
 Verificați dacă există o înghețare deschisă înainte de a presupune că ramura dorită este fuzionabilă:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mecanismele de îmbinare (proprietar `queue` label → Mergify) sunt documentate în [MERGE_TRAIN.md](./MERGE_TRAIN.md).

@@ -13,7 +13,7 @@ Noklusējuma starpnodrošinātāju politika pieļauj ne vairāk kā trīs pakalp
 ## Kur tas attiecas
 
 - **Kombinācijas** pāriet starp saviem mērķiem saskaņā ar pašas kombinācijas stratēģiju un iestatījumiem.
-- **Neapstrādāta modeļa ID** (bez `provider/` prefiksa), ko apkalpo vairāki aktīvi pakalpojumu sniedzēji, bez šī precīzā nosaukuma kombinācijas, vispirms tiek nosūtīts pakalpojumu sniedzēja secinājumiem. Ja šis mēģinājums neizdodas tādā veidā, kā politika neizdodas, tas pats pieprasījums tiek nosūtīts nākamajam aktīvajam nodrošinātājam, kas apkalpo ID. Atbildē ir norādīts `x-omniroute-fallback-attempts` ar to pakalpojumu sniedzēju skaitu, kurus mēģināja izmēģināt pirms atbildētāja.
+- **Neapstrādāta modeļa ID** (bez `provider/` prefiksa), ko apkalpo vairāki aktīvi pakalpojumu sniedzēji, bez šī precīzā nosaukuma kombinācijas, vispirms tiek nosūtīts pakalpojumu sniedzēja secinājumiem. Ja šis mēģinājums neizdodas tādā veidā, kā politika neizdodas, tas pats pieprasījums tiek nosūtīts nākamajam aktīvajam nodrošinātājam, kas apkalpo ID. Atbildē ir norādīts `x-omniroute-fallback-attempts` ar to pakalpojumu sniedzēju skaitu, kuri tika izmēģināti pirms atbildētāja.
   - Katrs aizstājējs ir pilnvarots tieši tā, it kā tas būtu izdarīts ar secinājumu. Mērķis, ko API atslēga bloķē vai neatzīst, tiek izlaists bez augšupejoša zvana, un klients saņem patieso augšupvērsto kļūdu, nevis politikas noraidīšanu mērķim, kuru tas nekad nav nosaucis.
   - Tikai neveiksmīga atbilde virzās tālāk: nekas neizdodas pēc pirmā straumētā baita.
   - Ārkārtas atkāpšanās modeļa mijmaiņa tiek izmantota tikai pēc tam, kad katrs pieprasītā modeļa nodrošinātājs ir izgāzies.
@@ -21,3 +21,5 @@ Noklusējuma starpnodrošinātāju politika pieļauj ne vairāk kā trīs pakalp
   - Prefikss ID (`provider/model`) nekad netiek novirzīts citam pakalpojumu sniedzējam.
 
 Ķēdes stāvokļi ir `closed`, `open` un `half_open`. Atdzesēšana ieplāno ierobežotu zondi; veiksmīga zonde aizver ķēdi, un neveiksmīga zonde to atkal atver.
+
+Pakalpojumu sniedzēja kļūmjpārlēce darbojas vārtejā. Skatiet sadaļu [Kad OmniRoute pati par sevi nav sasniedzama](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) klienta uzvedībai vārtejas pārtraukuma laikā.

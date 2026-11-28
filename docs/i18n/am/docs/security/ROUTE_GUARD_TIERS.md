@@ -65,9 +65,13 @@
 
 LOCAL_ONLY ዱካዎች ንዑስ ስብስብም ከloopback መድረስ ይቻላል እና ጥያቄው `manage` ወሰን (ወይም `admin`)ን ያካተተ ሜታዳታው MAY የሚይዝ ከሆነ ብቻ ነው `Authorization: Bearer <api-key>` የተቀረጸው መንገድ በ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` በኩል በመንገዱ ላይ በግልፅ ተዘግቷል ስለዚህ የማንኛውም አዲስ LOCAL_ONLY መንገድ ነባሪ ጥብቅ-loopback ይቀራል። ያልተረጋገጡ ጥያቄዎች እና የማያስተዳድሩ ቁልፎች ያላቸው ጥያቄዎች አሁንም በ `403 LOCAL_ONLY` ውድቅ ይደረጋሉ።
 
-ዛሬ ማለፍ የሚቻልበት ብቸኛው ቅድመ ቅጥያ `/api/mcp/` ነው። `/api/cli-tools/runtime/` እና `/api/services/` ሆን ብለው የተገለሉ የዘፈቀደ ንዑስ ሂደቶችን (`npm install`፣ `node`) ሊፈጥሩ ስለሚችሉ ነው፣ ይህም የ LOCAL_ONLY እርከን ለመከላከል ያለው ትክክለኛ CVE ክፍል ነው።
+ነባሪው ማለፍ የሚችሉ ቅድመ ቅጥያዎች `/api/mcp/` እና `/api/resilience/connections` ናቸው። ሁለተኛው ተነባቢ-ብቻ JSON ነው ምንም የሚወልደው; ለተረጋገጠ ዳሽቦርድ ክፍለ ጊዜ ወይም ለ `manage` ቁልፍ Resilience > Connections በሩቅ ዳሽቦርድ (የሚተዳደር ለምሳሌ ዋሻ፣ ተገላቢጦሽ ፕሮክሲ) እንዲጭን በዝርዝሩ ላይ ይገኛል፣ ማንነቱ ያልታወቀ የርቀት ደዋይ ደግሞ `requireLogin=false` በሚሆንበት ጊዜም `403 LOCAL_ONLY` — ያገኛል። የራሱን ዝርዝር ያከማቸ ጭነት ያንን ዝርዝር ያስቀምጣል። `/api/cli-tools/runtime/` እና `/api/services/` ሆን ብለው የተገለሉ የዘፈቀደ ንዑስ ሂደቶችን (`npm install`፣ `node`) ሊፈጥሩ ስለሚችሉ ነው፣ ይህም የ LOCAL_ONLY እርከን ለመከላከል ያለው ትክክለኛ CVE ክፍል ነው።
 
-**#7895 — `mcp:connect` ጠባብ ወሰን** የ `/api/mcp/` ፈልሳፊው ALSO ጠባብ `mcp:connect` ወሰን (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`) የያዘ ተሸካሚ ቁልፍ ይቀበላል፣ በ `src/server/authz/policies/management.ts` ውስጥ በ `hasMcpConnectOrManageScope()` የተረጋገጠ። ይህ በ `/api/mcp/` ONLY — `mcp:connect` የተከለለ በማንኛውም ሌላ የአስተዳደር መንገድ ላይ ምንም አይሰጥም (ሌላውን LOCAL_ONLY ማለፊያ ቅድመ ቅጥያ ጨምሮ፣ አንድም መታከል አለበት) እና ሆን ተብሎ ከ `MANAGEMENT_API_KEY_SCOPES` የተገለለ ነው። `manage`/`admin` የያዘ ቁልፍ አሁንም ቀረጻውን ልክ እንደበፊቱ ያልፋል። `mcp:connect` ሰፊ የአስተዳደር መዳረሻ ለማያስፈልጋቸው የርቀት MCP-ብቻ ደዋዮች ዝቅተኛ መብት አማራጭ ነው።
+#### የንባብ ዘዴ ነፃነቶች
+
+ጥቂት LOCAL_ONLY ዱካዎች ለ `GET`/`HEAD`/`OPTIONS` ብቻ ነፃ ናቸው፣ በትክክለኛ መንገድ (`LOCAL_ONLY_API_GET_EXEMPTIONS`): ንባቡ ምንም እንከን አይፈጽምም፣ የአጻጻፍ ስልቶቹም ያደርጋሉ። `GET /api/skills/executions` ከመካከላቸው አንዱ ነው — የተከማቹ የማስፈጸሚያ ረድፎችን ይዘረዝራል (ሁለት SQLite ይነበባል) ስለዚህ ችሎታዎች > አፈጻጸም በርቀት ዳሽቦርድ ላይ ይጫናል፣ `POST /api/skills/executions` ደግሞ ክህሎትን የሚመራ እና የማጠሪያ መያዣው ስፖንጅ ላይ የሚደርሰው፣ ወደ ኋላ መመለስ ብቻ ይቀራል። ነፃ የሆነ ንባብ ወደ MANAGEMENT ደረጃ ይወርዳል።
+
+**#7895 — `mcp:connect` ጠባብ ወሰን** የ `/api/mcp/` ፈልሳፊው ALSO ጠባብ `mcp:connect` ወሰን (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`) የያዘ ተሸካሚ ቁልፍ ይቀበላል፣ በ `src/server/authz/policies/management.ts` ውስጥ በ `hasMcpConnectOrManageScope()` የተረጋገጠ። ይህ በ `/api/mcp/` ONLY — `mcp:connect` የተከለለ በማንኛውም ሌላ የአስተዳደር መንገድ ላይ ምንም አይሰጥም (ሌላውን LOCAL_ONLY ማለፊያ ቅድመ ቅጥያ ጨምሮ፣ አንድም መታከል አለበት) እና ሆን ተብሎ ከ `MANAGEMENT_API_KEY_SCOPES` የተገለለ ነው። `manage`/`admin` የያዘ ቁልፍ አሁንም ልክ እንደበፊቱ ቀረጻውን ያልፋል። `mcp:connect` ሰፊ የአስተዳደር መዳረሻ ለማያስፈልጋቸው የርቀት MCP-ብቻ ደዋዮች ዝቅተኛ መብት አማራጭ ነው።
 
 | ጥያቄ                                    | መንገድ                       | ውጤት              |
 | -------------------------------------- | -------------------------- | ---------------- |
@@ -84,7 +88,7 @@ LOCAL_ONLY ዱካዎች ንዑስ ስብስብም ከloopback መድረስ ይ�
 OmniRoute ከተገላቢጦሽ ተኪ ወይም መሿለኪያ ጀርባ (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok) ካሄዱ, የ loopback ቼክ አሁንም `403 LOCAL_ONLY` — የደንበኛ አድራሻው የማይመለስ ጥያቄን ይከላከላል.** auth ከመሮጥ በፊት** , ስለዚህ የፈሰሰ JWT ስፖን መድረስ አይችልም. ሁለት የኦፕሬተር ኃላፊነቶች ይቀራሉ፡-
 
 - **403 ደንበኛውን IP እንደ loopback በማጭበርበር “አስተካክል” አታድርጉ።** `X-Forwarded-For: 127.0.0.1` ማቀናበር ወይም የምንጭ አድራሻውን ወደ loopback የሚጽፍ ተኪ፣ ይህ ደረጃ የሚዘጋውን RCE ክፍል በትክክል እንደገና ይከፍታል። dashboard/API በፕሮክሲው — በኩል የማጋለጥ አቅም ያላቸውን መንገዶች በጭራሽ አታጋልጥ።
-- **የማስተዳደሪያ-ወሰን ማለፊያውን በትንሹ ያቆዩት።** `/api/mcp/` ብቻ ማለፍ አይቻልም፣ እና በ `manage` -scoped API ቁልፍ ብቻ። `SPAWN_CAPABLE_PREFIXES` መቼም ወደ ማለፊያ ዝርዝሩ ሊታከል አይችልም — የዞድ እቅድ አይቀበላቸውም እና `isLocalOnlyBypassableByManageScope` የሚክዳቸው በሩጫ ሰአት (መከላከያ-በጥልቀት) ሲሆን ይህም ዳሽቦርዱ "ሊታለፍ አይችልም" ሲል ምን ማለት ነው. ተመሳሳዩ የክህደት ዝርዝሩም ጥቂት LOCAL_ONLY መንገዶችን ይይዛል ነገር ግን የማይበቅሉ ነገር ግን በሩቅ ሊደረስባቸው አይገባም ወይ — `/api/oauth/kiro/auto-import` (አስተናጋጅ-አካባቢያዊ Kiro ምስክርነት ፋይሎችን ያነባል) `/api/discovery/` እና `/api/issue-agent/`. የአሂድ ጊዜ ቅጽበተ-ፎቶ ጫኚው እንደዚህ ያሉ ግቤቶችን ከተከማቸ የቅንጅቶች ረድፍ ይጥላል፣ እና የድሮው JSON ማስመጣት (`/api/settings/import-json`) የማለፊያ ቁልፎችን በጭራሽ አይጽፍም። እያንዳንዱ `LOCAL_ONLY_API_PREFIXES` ግቤት በከዳይ ዝርዝሩ ውስጥ ወይም እንደ ማለፊያ ብቁ (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`) መገምገም አለበት። ተለዋዋጭ-ክፍል እና የማይንቀሳቀስ-መንገድ ችሎታ ያላቸው መንገዶች በ `/api/providers/` (ለምሳሌ `/login`፣ `/refresh-cursor`) የሚሸፈኑት በ regex ላይ የተመሰረተ `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` ባልደረባ በ `src/shared/constants/spawnCapablePrefixes.ts` ውስጥ እንጂ በጠፍጣፋው `SPAWN_CAPABLE_PREFIXES` ድርድር አይደለም — የጠፍጣፋው አደራደር እነሱን ለመያዝ ሙሉውን `/api/providers/` ቅድመ ቅጥያ መሸፈን ነበረበት፣ የዛፍ ሰሌዳን በርቀት ለአገልግሎት አቅራቢው CRUD መንገድን ይጠቀሙ።
+- **የማስተዳደሪያ-ወሰን ማለፊያውን በትንሹ ያቆዩት።** በነባሪነት `/api/mcp/` ብቻ እና ተነባቢ-ብቻ `/api/resilience/connections` ሊታለፍ የማይችሉ ናቸው፣ እና በ `manage` -scoped API ቁልፍ ወይም በተረጋገጠ ዳሽቦርድ ክፍለ ጊዜ ብቻ። `SPAWN_CAPABLE_PREFIXES` በፍፁም ወደ ማለፊያ ዝርዝሩ ሊታከል አይችልም — የዞድ እቅድ አይቀበላቸውም እና `isLocalOnlyBypassableByManageScope` በ runtime (መከላከያ-በጥልቀት) ይክደዋቸዋል ይህም ዳሽቦርዱ "ሊታለፍ አይችልም" ሲል ምን ማለት ነው. ተመሳሳዩ የክህደት ዝርዝሩም ጥቂት LOCAL_ONLY መንገዶችን ይይዛል ነገር ግን የማይበቅሉ ነገር ግን በሩቅ ሊደረስባቸው አይገባም ወይም — `/api/oauth/kiro/auto-import` (አስተናጋጅ-አካባቢያዊ Kiro ምስክርነት ፋይሎችን ያነባል)፣ `/api/discovery/` እና `/api/issue-agent/`። የአሂድ ጊዜ ቅጽበተ-ፎቶ ጫኚው እንደዚህ ያሉ ግቤቶችን ከተከማቸ የቅንብሮች ረድፍ ይጥላል፣ እና የድሮው JSON ማስመጣት (`/api/settings/import-json`) የማለፊያ ቁልፎችን በጭራሽ አይጽፍም። እያንዳንዱ `LOCAL_ONLY_API_PREFIXES` ግቤት በከዳይ ዝርዝሩ ውስጥ ወይም እንደ ማለፊያ ብቁ (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`) መገምገም አለበት። ተለዋዋጭ-ክፍል እና የማይንቀሳቀስ-መንገድ ችሎታ ያላቸው መንገዶች በ `/api/providers/` (ለምሳሌ `/login`፣ `/refresh-cursor`) የሚሸፈኑት በ regex ላይ በተመሰረተው `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` `/api/providers/` CRUD `src/shared/constants/spawnCapablePrefixes.ts` — በጠፍጣፋው `SPAWN_CAPABLE_PREFIXES` አደራደር አይደለም
 
 **የኦዲት መዳረሻ** — ከአስተናጋጅ ውጭ ምንም ነገር ወደነዚህ መንገዶች እንደማይደርስ ለማረጋገጥ፡-
 
@@ -109,7 +113,7 @@ OmniRoute ከተገላቢጦሽ ተኪ ወይም መሿለኪያ ጀርባ (ngin
 
 **የሚተገበረው በ፡** `isAlwaysProtectedPath(path)` → `requireLogin=false` ማለፍን ይዝለሉ** ማለፍ፡** መቼም `requireLogin=false`; JWT ሁልጊዜ ያስፈልጋል
 
-እነዚህ መንገዶች አጥፊ ወይም የማይመለሱ ናቸው። "የይለፍ ቃል የለም" እንዲጭኑ መፍቀድ ማለት ማንኛውም ሰው በተመሳሳይ LAN ላይ ያለ ሰው ዳታቤዙን ማጽዳት ወይም የአገልጋዩን ሂደት ሊገድል ይችላል ማለት ነው።
+እነዚህ መንገዶች አጥፊ ወይም የማይመለሱ ናቸው። "የይለፍ ቃል የለም" እንዲጭኑ መፍቀድ ማለት በተመሳሳይ LAN ላይ ያለ ማንኛውም ሰው የውሂብ ጎታውን ማጽዳት ወይም የአገልጋዩን ሂደት ሊገድል ይችላል ማለት ነው።
 
 | መንገድ                                      | ምክንያት                                                  |
 | ----------------------------------------- | ------------------------------------------------------ |

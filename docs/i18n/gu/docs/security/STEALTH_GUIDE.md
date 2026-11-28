@@ -4,11 +4,9 @@
 
 ---
 
-> **સત્યનો સ્ત્રોત:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **છેલ્લે અપડેટ કરેલું:** 2026-09-02 — v3.8.51
-> **લક્ષિત વાચકો:** પ્રદાતા-વિશિષ્ટ સ્ટેલ્થ એકીકરણોની જાળવણી કરતા એન્જિનિયરો.
+> **સત્યનો સ્ત્રોત:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** પ્રેક્ષક:** પ્રદાતા-વિશિષ્ટ સ્ટીલ્થ એકીકરણ જાળવતા એન્જિનિયરો.
 
-OmniRoute એવા પ્રદાતાઓ સાથે એકીકૃત થાય છે, જેમની એજ સેવાઓ બિન-સત્તાવાર ક્લાયન્ટ્સની સક્રિય રીતે ફિંગરપ્રિન્ટિંગ કરે છે (TLS JA3/JA4, હેડરનો ક્રમ, JSON બૉડીનું સ્વરૂપ, ઇન્ટેગ્રિટી ટોકન્સ). આ પૃષ્ઠ OmniRoute દ્વારા ઉપલબ્ધ કરાવવામાં આવતી સ્ટેલ્થ સપાટીઓ અને તેમના અમલીકરણનાં સ્થાનોનું દસ્તાવેજીકરણ કરે છે.
+OmniRoute એવા પ્રદાતાઓ સાથે સંકલિત થાય છે જેમની ધાર સક્રિયપણે બિન-સત્તાવાર ક્લાયંટ ફિંગરપ્રિન્ટ કરે છે (TLS JA3/JA4, હેડર ઓર્ડરિંગ, JSON બોડી શેપ, અખંડિતતા ટોકન્સ). આ પૃષ્ઠ OmniRoute છતી કરવામાં આવેલી સ્ટીલ્થ સપાટીઓ અને તે ક્યાં અમલમાં મૂકવામાં આવે છે તેનું દસ્તાવેજીકરણ કરે છે.
 
 ## કાનૂની અને નૈતિક સૂચના
 
@@ -77,65 +75,68 @@ OmniRoute એવા પ્રદાતાઓ સાથે એકીકૃત થ
 
 ---
 
-## Claude Code સ્ટેલ્થ બંડલ
+## Claude કોડ સ્ટીલ્થ બંડલ
 
-જ્યારે `cliCompatMode` ચાલુ હોય છે, ત્યારે OmniRoute બહાર જતી Claude વિનંતીઓને એવી રીતે પુનઃઆકાર આપે છે કે તેઓ `claude-cli` ટ્રાફિકથી અલગ ઓળખી ન શકાય. ત્રણ મોડ્યુલો સાથે મળીને કાર્ય કરે છે:
+જ્યારે `cliCompatMode` ચાલુ હોય, ત્યારે OmniRoute આઉટગોઇંગ Claude વિનંતીઓને ફરીથી આકાર આપે છે જેથી તેઓ `claude-cli` ટ્રાફિકથી અસ્પષ્ટ હોય. ત્રણ મોડ્યુલો સહયોગ કરે છે:
 
 ### `claudeCodeFingerprint.ts`
 
-બિલિંગ હેડરમાં સમાવિષ્ટ 3-અક્ષરનું `cc_version` ફિંગરપ્રિન્ટ ગણે છે:
+બિલિંગ હેડરમાં એમ્બેડ કરેલ 3-char `cc_version` ફિંગરપ્રિન્ટની ગણતરી કરે છે:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (હાર્ડકોડ કરેલું; સત્તાવાર ક્લાયન્ટ સાથે મેળ ખાય છે)
-- ઇનપુટ્સ: પ્રથમ વપરાશકર્તા સંદેશના ટેક્સ્ટમાં ઇન્ડેક્સ 4, 7, 20 પરનાં અક્ષરો + વર્ઝન સ્ટ્રિંગ
-- આઉટપુટ: 3-અક્ષરનો હેક્સ પ્રિફિક્સ
+- `FINGERPRINT_SALT = "59cf53e54c78"` (હાર્ડકોડેડ; સત્તાવાર ક્લાયંટ સાથે મેળ ખાય છે)
+- ઇનપુટ્સ: પ્રથમ વપરાશકર્તા સંદેશ ટેક્સ્ટ + વર્ઝન સ્ટ્રિંગના અનુક્રમણિકા 4, 7, 20 પર અક્ષરો
+- આઉટપુટ: 3-ચાર હેક્સ ઉપસર્ગ
 
 ### `claudeCodeCCH.ts` (ક્લાયન્ટ કન્ટેન્ટ હેશ)
 
-સત્તાવાર Claude Code CLI દ્વારા Bun/Zig મારફતે કરવામાં આવતી સર્વર-સાઇડ અખંડિતતા ચકાસણી. OmniRoute તેને `xxhash-wasm` વડે ફરી અમલમાં મૂકે છે:
+સર્વર-સાઇડ અખંડિતતા `xxhash-wasm` સાથે Bun/Zig. OmniRoute પુન: અમલીકરણ દ્વારા સત્તાવાર Claude કોડ CLI ગણતરીઓ તપાસો :
 
-1. બોડીને `cch=00000;` પ્લેસહોલ્ડર સાથે સિરિયલાઇઝ કરો
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. શૂન્ય વડે પેડ કરેલું 5-અક્ષરનું લોઅરકેસ હેક્સ
-4. `cch=00000;` ને ગણતરી કરેલા ટોકનથી બદલો
+1. `cch=00000;` પ્લેસહોલ્ડર સાથે બોડીને સીરીયલાઇઝ કરો
+2. બે સાદા-ટેક્સ્ટ રિપ્લેસમેન્ટ સાથે હેશ વ્યૂ બનાવો, આ ક્રમમાં (`hashView()`):
+   - `/"model":"[^"]*"/g` ની દરેક મેચ `"model":""` — બની જાય છે, મેચ પ્રથમ `"` પર અટકી જાય છે, તેથી એસ્કેપ્ડ ક્વોટ (`"model":"a\"b"`) સાથેની કિંમત ફક્ત તે ક્વોટ સુધી ખાલી કરવામાં આવે છે, જેમ ક્લાયંટ કરે છે
+   - `/"max_tokens":\d+,|,?"max_tokens":\d+/g` ની દરેક મેચ — માત્ર આંકડાકીય મૂલ્યો દૂર કરવામાં આવે છે, કોઈપણ ઊંડાઈએ
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. ઝીરો-પેડેડ 5-ચાર લોઅરકેસ હેક્સ
+5. `cch=00000;` ગણતરી કરેલ ટોકન સાથે બદલો
 
-અચળાંકો:
+સ્થિરાંકો:
 
-- સીડ: `0x6e52736ac806831e`
+- બીજ: `0x4d659218e32a3268` ( Claude કોડ 2.1.252 અને 2.1.322 ના લૂપબેક કેપ્ચર સાથે મેળ ખાય છે)
 - પેટર્ન: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-"સંવેદનશીલ" ક્લાયન્ટ નામોના પ્રથમ અક્ષર પછી Unicode **ઝીરો-વિડ્થ જોઇનર** (`U+200D`) દાખલ કરે છે, જેથી અપસ્ટ્રીમ ફિલ્ટરો તેમને grep ન કરી શકે. ડિફૉલ્ટ શબ્દસૂચિ:
+યુનિકોડ દાખલ કરે છે** શૂન્ય-પહોળાઈ જોડનાર** (`U+200D`) "સંવેદનશીલ" ક્લાયંટ નામોના પ્રથમ અક્ષર પછી જેથી અપસ્ટ્રીમ ફિલ્ટર્સ તેમને ગ્રિપ કરી શકતા નથી. મૂળભૂત શબ્દ સૂચિ:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-આના પર લાગુ પડે છે: `system` બ્લોક્સ, તમામ `messages[].content`, અને `tools[].description` / `tools[].function.description`. ઑપરેટર દ્વારા `setSensitiveWords()` મારફતે ઓવરરાઇડ કરી શકાય છે.
+આના પર લાગુ: `system` બ્લોક્સ, બધા `messages[].content`, અને `tools[].description` / `tools[].function.description`. `setSensitiveWords()` દ્વારા ઓપરેટર-ઓવરરીડેબલ.
 
-### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` પ્રોવાઇડર્સ
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` પ્રદાતાઓ
 
-ફક્ત "વાસ્તવિક Claude Code" ટ્રાફિક સ્વીકારતા તૃતીય-પક્ષીય Anthropic રિલે માટે:
+તૃતીય-પક્ષ Anthropic રિલે માટે કે જે ફક્ત "વાસ્તવિક Claude કોડ" ટ્રાફિકને સ્વીકારે છે:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- ડિફૉલ્ટ રૂપે `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- જ્યારે કોઈ CC Compatible અપસ્ટ્રીમને ખાસ કરીને રિડેક્ટ કરેલા થિંકિંગ સ્ટ્રીમ્સની જરૂર હોય, ત્યારે પ્રતિ-કનેક્શન "Enable redact-thinking beta" ટૉગલ `redact-thinking-2026-02-12` ઉમેરે છે
-- પ્રતિ-કનેક્શન "Enable summarized thinking display" ટૉગલ `providerSpecificData.requestDefaults.summarizeThinking` સંગ્રહે છે અને જે CC Compatible થિંકિંગ વિનંતીઓએ પહેલેથી ડિસ્પ્લે મોડ સેટ ન કર્યો હોય તેમાં `display: "summarized"` ઉમેરે છે
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x ફેમિલી)
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` મૂળભૂત રીતે
+- પ્રતિ-કનેક્શન "રીડેક્ટ-થિંકિંગ બીટાને સક્ષમ કરો" ટૉગલ `redact-thinking-2026-02-12` ઉમેરે છે જ્યારે CC સુસંગત અપસ્ટ્રીમને ખાસ કરીને રિડેક્ટેડ વિચાર પ્રવાહની જરૂર હોય છે
+- The per-connection "Enable summarized thinking display" toggle stores `providerSpecificData.requestDefaults.summarizeThinking` and adds `display: "summarized"` to CC Compatible thinking requests that did not already set a display mode
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x કુટુંબ)
 - ડિફૉલ્ટ પાથ: `/v1/messages?beta=true`
 
-એ જ બંડલમાંનાં સંબંધિત મોડ્યુલો:
+સમાન બંડલમાં સિસ્ટર મોડ્યુલો:
 
-- `claudeCodeConstraints.ts` — ટેમ્પરેચર + કૅશ-કંટ્રોલ નિયમો
-- `claudeCodeToolRemapper.ts` — ટૂલ-નામ રીમૅપિંગ
-- `claudeCodeExtraRemap.ts` — વધારાનું પેલોડ નોર્મલાઇઝેશન
+- `claudeCodeConstraints.ts` — તાપમાન + કેશ-નિયંત્રણ નિયમો
+- `claudeCodeToolRemapper.ts` — ટૂલ-નામ રિમેપિંગ
+- `claudeCodeExtraRemap.ts` — વધારાના પેલોડ નોર્મલાઇઝેશન
 
 ---
 
@@ -195,7 +196,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` વાંચે છે
 - `src/lib/oauth/providers/antigravity.ts` — ઓળખપત્ર પ્લમ્બિંગ
-- મૂળ ઘટના અહેવાલ: ચર્ચા [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- મૂળ ઘટના અહેવાલ: ચર્ચા [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

@@ -168,9 +168,9 @@ Pastikan `copilot-m365-web` didayakan dalam** Pembekal → papan pemuka** . Pemb
 
 ## Rujukan
 
-- Isu: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Perbincangan: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Sumber: `src/shared/constants/providers/web-cookie.ts` (takrif penyedia)
-- Import HAR: `src/shared/utils/m365HarImport.ts`
-- Medan bukti kelayakan: `src/shared/providers/webSessionCredentials.ts`
+- Isu: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Perbincangan: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Sumber: `src/shared/constants/providers/web-cookie.ts` (definisi pembekal)
+- HAR import: `src/shared/utils/m365HarImport.ts`
+- Medan kelayakan: `src/shared/providers/webSessionCredentials.ts`
 - Modal peringkat: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

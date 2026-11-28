@@ -166,11 +166,11 @@ OmniRoute ለ Chathub WebSocket URLHAR ይቃኛል፣ `access_token` እና `ch
 
 `copilot-m365-web` መንቃቱን ያረጋግጡ** ዳሽቦርድ → አቅራቢዎች** . አቅራቢው በነባሪነት በአንዳንድ ደረጃዎች ሊደበቅ ይችላል።
 
-## ማጣቀሻዎች
+## ዋቢዎች
 
-- ችግር፦ [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- ውይይት፦ [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- ምንጭ፦ `src/shared/constants/providers/web-cookie.ts` (የአቅራቢ ትርጉም)
-- HAR ማስመጣት፦ `src/shared/utils/m365HarImport.ts`
-- የማረጋገጫ መስኮች፦ `src/shared/providers/webSessionCredentials.ts`
-- የደረጃ ሞዳል፦ `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- ጉዳይ [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- ውይይት [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- ምንጭ `src/shared/constants/providers/web-cookie.ts` (የአቅራቢ ትርጉም)
+- HAR ማስመጣት `src/shared/utils/m365HarImport.ts`
+- የማረጋገጫ ቦታዎች `src/shared/providers/webSessionCredentials.ts`
+- የደረጃ ሞዳል `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

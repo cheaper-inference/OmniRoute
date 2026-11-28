@@ -4,30 +4,13 @@
 
 ---
 
-> **Sannhetskilde:** `src/lib/memory/` og `src/app/api/memory/`
-> **Sist oppdatert:** 2026-06-28 — v3.8.40 (deaktivert som standard + etterinnhenting med int8-kvantisering)
+> **Kilde til sannhet:** `src/lib/memory/` og `src/app/api/memory/`
 
-OmniRoute tilbyr vedvarende samtaleminne knyttet til API-nøkkel (og
-eventuelt økt-ID). Minner trekkes automatisk ut fra LLM-svar
-via enkel mønstergjenkjenning med regulære uttrykk og settes inn igjen i etterfølgende
-forespørsler som en innledende systemmelding (eller den første brukermeldingen for leverandører som
-avviser systemrollen).
+OmniRoute gir vedvarende samtaleminne tastet av API nøkkelen (og eventuelt økt-ID). Minner trekkes automatisk ut fra LLM -svar via lett regex-mønstertilpasning og injiseres tilbake i påfølgende forespørsler som en ledende systemmelding (eller første brukermelding for leverandører som avviser systemrollen).
 
-> **Minne er AV som standard (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled` er
-> nå `false` (`src/lib/memory/settings.ts`). Aktivering av minne setter inn opptil
-> `maxTokens` (~2k) med hentet kontekst i **hver** chatforespørsel, noe som
-> faktureres — en overraskende kostnad for nye installasjoner og klienter som håndterer sin
-> egen kontekst. Aktiver det eksplisitt under **Innstillinger → Minne** (`MemorySkillsTab`
-> viser en advarsel om tokenkostnader når minne er aktivert).
-> En klient kan velge bort minne for én enkelt forespørsel med
-> forespørselshodet `x-omniroute-no-memory` (`true`/`1`/`yes`) — se tabellen over forespørselshoder i
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). En forespørsel uten minne setter
-> `memoryOwnerId = null`, noe som deaktiverer **både** innsetting av minne og ferdigheter for
-> den aktuelle forespørselen (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Minne er OFF som standard (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` er nå `false` (`src/lib/memory/settings.ts`). Aktivering av minne injiserer opptil `maxTokens` (~ 2k) med hentet kontekst inn** hver eneste** chat-forespørsel, som faktureres — en overraskende kostnad for nye installasjoner og for klienter som administrerer sin egen kontekst. Meld deg på eksplisitt under** Innstillinger → Minne** ( `MemorySkillsTab` viser en token-kostnad advarselsmelding når minnet er aktivert). En klient kan velge bort en enkelt forespørsel med `x-omniroute-no-memory` request header (`true`/`1`/`yes`) — se request-header tabellen i [API_REFERENCE.md](../reference/API_REFERENCE.md). En forespørsel uten minne setter `memoryOwnerId = null`, som deaktiverer** både** minne og ferdighetsinjeksjon for den forespørselen (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Minne er **avgrenset per API-nøkkel**, ikke per bruker — alle forespørsler som autentiseres
-med samme API-nøkkel, deler den samme minnepoolen, med valgfri ytterligere
-avgrensning etter `sessionId`.
+Minne er** omfang per API nøkkel** , ikke per bruker — hver forespørsel som er autentisert med samme API nøkkel deler samme minnepool, med valgfri ytterligere scoping av `sessionId`.
 
 ## Arkitektur
 
@@ -531,45 +514,38 @@ metadata?}` → kapsler inn `createMemory()`. Godtar bare de fire kanoniske type
 
 Se [MCP-SERVER.md](./MCP-SERVER.md) for detaljer om transport og omfang.
 
-## Kontrollpanel (Memory Studio)
+## Dashboard (Memory Studio)
 
-`src/app/(dashboard)/dashboard/memory/page.tsx` er nå et **Studio med 3 faner**:
+`src/app/(dashboard)/dashboard/memory/page.tsx` er nå en** Studio med 3 faner** :
 
 ### Fane: Minner
 
-- Konseptkort (sammenleggbar forklaring av «Slik fungerer det»).
-- Sanntidsliste, søk og paginering (300 ms forsinkelse).
-- Typefilter (`factual` / `episodic` / `procedural` / `semantic` / alle).
-- Dialogvindu for å legge til minne (nøkkel, innhold, type).
+- Konseptkort (sammenleggbar "Hvordan fungerer det"-forklaring).
+- Sanntidsliste, søk og paginering (avvist 300 ms).
+- Skriv filter (`factual` / `episodic` / `procedural` / `semantic` / all).
+- Add-minne modal (nøkkel, innhold, type).
 - Innebygd redigering (blyantknapp → `PUT /api/memory/[id]`).
-- Sletting per rad (med bekreftelsesdialog).
-- JSON-eksport av gjeldende side; JSON-import via filvelger.
-- Statistikkort: `totalEntries`, `tokensUsed`, `hitRate`.
-- «Komprimer gamle»-knapp → `POST /api/memory/summarize` (prøvekjøring viser først
-  antall kandidater og ber deretter om bekreftelse).
-- En grønn/rød helsestatusindikator drevet av `GET /api/memory/health`.
+- Slett per rad (med bekreftelsesdialog).
+- JSON eksport av gjeldende side; JSON import via filvelger.
+- Statiske kort: `totalEntries`, `tokensUsed`, `hitRate`.
+- "Kompakt gammel"-knapp → `POST /api/memory/summarize` (tørrkjøring viser først antall kandidater, deretter bekrefter).
+- En green/red helseprikk drevet av `GET /api/memory/health`.
 
-### Fane: Testområde
+### Fane: Lekeplass
 
-- Spørringsfelt + strategivelger (Eksakt / Semantisk / Hybrid) + tokenbudsjett.
-- «Simuler» → `POST /api/memory/retrieve-preview` — viser rangerte resultater med
-  `score`, `tier`, `tokens`, `vecScore`, `ftsScore`.
-- Løsningspanel som viser hvilken kilde for innebygginger / hvilket vektorlager som ble brukt, og
-  om det ble brukt en reserveløsning.
+- Spørringsinndata + -strategivelger (Eksakt / Semantisk / Hybrid) + -tokenbudsjett.
+- "Simuler" → `POST /api/memory/retrieve-preview` — viser rangerte resultater med `score`, `tier`, `tokens`, `vecScore`, `ftsScore`.
+- Oppløsningspanel som viser hvilken innbyggingskilde/vektorlager som ble brukt og om en fallback skjedde.
 
 ### Fane: Motor
 
-- Statuspanel for motoren (brikke for nøkkelord-FTS5, brikke for innebygginger, brikke for vektorlager,
-  brikke for Qdrant-status, brikke for omrangering).
-- «Indekser på nytt nå»-knapp → `POST /api/memory/reindex`.
-- Velger for innebyggingskilde (auto / ekstern / statisk / transformers + brytere).
-- Qdrant-konfigurasjonskort (aktiveringsbryter, vert/port/samling/nøkkel, test av tilkobling,
-  test av semantisk søk, opprydding).
-- Konfigurasjonskort for omrangering (aktiveringsbryter, leverandør-/modellvelger).
+- Motorstatuspanel (søkeord FTS5 brikke, innebyggingsbrikke, vektorlagerbrikke, Qdrant -helsebrikke, omrangeringsbrikke).
+- "Reindex Now"-knapp → `POST /api/memory/reindex`.
+- Innebygging av kildevelger (automatisk / fjernkontroll / statisk / transformatorer + veksler).
+- Qdrant config-kort (aktiver toggle, host/port/collection/key, testtilkobling, semantisk søketest, opprydding).
+- Ranger konfigurasjonskortet på nytt (aktiver veksle, provider/model -velger).
 
-Innstillinger for minne og Qdrant finnes også under
-`/dashboard/settings → Minne og ferdigheter` (`MemorySkillsTab.tsx`) for
-den eldre/globale innstillingsflaten.
+Minne- og Qdrant innstillinger lever også under `/dashboard/settings → Memory & Skills` (`MemorySkillsTab.tsx`) for legacy/global innstillingsoverflaten.
 
 ## Hurtigbufring
 
@@ -707,22 +683,22 @@ Ytelsestest på en typisk 4-kjerners x86-server (tekster på ~100 tokener hver):
 
 ---
 
-## Mønstre for faktauttrekking (v3.8.16+)
+## Faktaekstraksjonsmønstre (v3.8.16 +)
 
-Modulen `extraction.ts` (`src/lib/memory/extraction.ts`) bruker **mønstergjenkjenning med regulære uttrykk** for å trekke ut strukturerte fakta fra samtalemeldinger. Når du forstår disse mønstrene, kan du finjustere kvaliteten på uttrekkingen for ditt bruksområde.
+`extraction.ts` modulen (`src/lib/memory/extraction.ts`) bruker** matching av regex-mønster** å trekke ut strukturerte fakta fra samtalemeldinger. Å forstå disse mønstrene hjelper deg med å justere ekstraksjonskvaliteten for ditt bruk.
 
-### Standardkategorier for mønstre
+### Standard mønsterkategorier
 
-| Kategori            | Eksempelmønster                                                            | Fanger opp                      |
-| ------------------- | -------------------------------------------------------------------------- | ------------------------------- |
-| PREFERENCE_PATTERNS | `"Jeg foretrekker <X>"`, `"Jeg liker <X>"`, `"Jeg hater <X>"`              | Brukerpreferanser               |
-| DECISION_PATTERNS   | `"Jeg skal bruke <X>"`, `"Jeg bestemte meg for å <X>"`, `"Jeg valgte <X>"` | Brukerbeslutninger (episodiske) |
-| PATTERN_PATTERNS    | `"Jeg pleier å <X>"`, `"Jeg gjør alltid <X>"`, `"Jeg gjør aldri <X>"`      | Vedvarende atferdsmønstre       |
+| Kategori            | Eksempel mønster                                            | Fanger                        |
+| ------------------- | ----------------------------------------------------------- | ----------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Brukerpreferanser             |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Brukeravgjørelser (episodisk) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Vedvarende atferdsmønstre     |
 
 ### Eksempelmønstre (forenklet)
 
 ```ts
-// Fra src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -735,36 +711,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Hva som trekkes ut
+### Hva blir ekstrahert
 
 Når en bruker sier:
 
-> "Jeg foretrekker TypeScript. Jeg skal bruke Postgres til dette prosjektet. Jeg committer alltid før jeg pusher. Jeg liker ikke Python."
-> Uttrekkingen produserer 4 minner:
+> "Jeg foretrekker TypeScript. Jeg vil bruke Postgres for dette prosjektet. Jeg forplikter meg alltid før jeg presser. Jeg liker ikke Python." Ekstraksjon produserer 4 minner:
 >
-> | Nøkkel                               | Kategori   | Type     | Innhold                         |
-> | ------------------------------------ | ---------- | -------- | ------------------------------- |
-> | `preference:typescript`              | preference | factual  | "TypeScript"                    |
-> | `decision:postgres_for_this_project` | decision   | episodic | "Postgres for dette prosjektet" |
-> | `pattern:commit_before_pushing`      | pattern    | factual  | "commit før pushing"            |
-> | `preference:python`                  | preference | factual  | "Python"                        |
+> | Key | Category | Type | Content | | ------------------------------------ | ---------- | -------- | --------------------------- | | `preference:typescript` | preference | factual | "TypeScript" | | `decision:postgres_for_this_project` | decision | episodic | "Postgres for this project" | | `pattern:commit_before_pushing` | pattern | factual | "commit before pushing" | | `preference:python` | preference | factual | "Python" |
 
-### Begrensninger for uttrekking
+### Utvinningsgrenser
 
-For å forhindre ukontrollert uttrekking gjelder følgende grenser:
+For å forhindre løpsk utvinning gjelder følgende grenser:
 
-| Minste innholdslengde | 3 tegn |
-| Største innholdslengde | 500 tegn |
+| Min innholdslengde | 3 tegn |
+| Maks innholdslengde | 500 tegn |
 
-### Når uttrekking bør deaktiveres
+### Når du skal deaktivere utvinning
 
-Uttrekking kjøres automatisk når minne er aktivert. Det finnes ingen egen
-bryter kun for uttrekking. Hvis du vil slå det av, må du deaktivere minne helt (`enabled: false`
-via `PUT /api/settings/memory`). Vurder å gjøre dette når:
+Utvinning kjører automatisk når minnet er aktivert; det er ingen separat bryter for kun utvinning. For å slå den av, deaktiver minnet helt (`enabled: false` via `PUT /api/settings/memory`). Vurder å gjøre det når:
 
-- Du har et høyt meldingsvolum og kostnaden ved uttrekking ikke er ubetydelig
-- Samtalene dine stort sett er midlertidige (chat, feilsøking) uten langsiktig verdi
-- Du allerede registrerer kontekst via egendefinerte programtillegg
+- Du har høyt meldingsvolum og utvinningskostnaden er ikke-triviell
+- Samtalene dine er stort sett forbigående (chat, feilsøking) uten langsiktig verdi
+- Du fanger allerede kontekst via tilpassede plugins
 
 ---
 

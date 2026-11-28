@@ -11,7 +11,7 @@ Obiektywne porównanie funkcji z popularnymi routerami AI typu open source.
 | Funkcja                                                      |                OmniRoute 3.8                 |      LiteLLM 1.x       |  OpenRouter (SaaS)  |     Świstoklik      |
 | ------------------------------------------------------------ | :------------------------------------------: | :--------------------: | :-----------------: | :-----------------: |
 | **Dostawcy**                                                 |                   **329**                    |          ~100          |         ~50         |         ~30         |
-| **wpisy do katalogu Free/no-auth**                           |                   **155**                    |          n/a           |      przejście      |         n/a         |
+| **Dostawcy z bezpłatnym dostępem**                           |         **50 z bezpłatnym dostępem**         |          n/a           |      przejście      |         n/a         |
 | **Samoobsługowy**                                            |                      ✅                      |           ✅           |         ❌          |     ⚠ zapłacono     |
 | **wpisy do katalogu OAuth**                                  |                    **23**                    |       częściowy        |         ❌          |         ❌          |
 | **Kombinacje automatycznego powrotu**                        |               **22 strategie**               | oparte na priorytetach | oparte na poziomach |       ważony        |
@@ -38,7 +38,7 @@ Obiektywne porównanie funkcji z popularnymi routerami AI typu open source.
 
 ## Kiedy wybrać OmniRoute
 
-- Jesteś gospodarzem i chcesz** maksymalny zasięg dostawcy** (394 dostawców, 155 wpisów w katalogu free/no-auth )
+- Jesteś gospodarzem i chcesz** maksymalny zasięg dostawcy** (394 dostawców, 50 z bezpłatnym dostępem)
 - Potrzebujesz** wbudowany serwer MCP** (narzędzia LLM, pamięć, umiejętności eksponowane jako narzędzia)
 - Potrzebujesz** protokół A2A** dla przepływów pracy między agentami
 - Chcesz** ukrywanie odcisków palców** (JA3/JA4), aby uniknąć wykrycia przez nadrzędny CAPTCHAs
@@ -56,12 +56,12 @@ Obiektywne porównanie funkcji z popularnymi routerami AI typu open source.
 - Akceptujesz płatność per-token z marżą SaaS
 - Potrzebujesz **jednej metody płatności** u wszystkich dostawców
 
-## Kiedy wybrać Portkey
+## Kiedy wybrać Świstoklik
 
-- Potrzebujesz **komercyjnego SLA** z gwarancjami uptime
-- Wolisz **zarządzany dashboard** bez narzutu operacyjnego
-- Potrzebujesz funkcji **zgodności enterprise** od razu, out of the box
+- Potrzebujesz** komercyjne SLA** z gwarancją dostępności
+- Wolisz A** zarządzany pulpit nawigacyjny** bez kosztów operacyjnych
+- Potrzebujesz** zgodność przedsiębiorstwa** funkcje od razu po wyjęciu z pudełka
 
 ---
 
-_Ostatnia aktualizacja: 2026-06-28. Poprawki zgłaszaj przez PR, aby utrzymać dokładność tej tabeli._
+_Prześlij poprawki za pośrednictwem PR, aby tabela była dokładna._

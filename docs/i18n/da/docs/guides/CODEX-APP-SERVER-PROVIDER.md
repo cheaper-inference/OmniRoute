@@ -21,24 +21,21 @@ ind**.
 ## 1. Arkitektur
 
 ```
-┌─ OmniRoute-app ─────────────────┐        ┌─ codex-app-server-sidecar ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ kapabilitetstoken)           │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  administrerer selv OpenAI OAuth    │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, autofornyelse)│
-        │ deles (compose-diskenheder)        └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS-kapabilitetstokenen (begge monterer den)
-  codex-appserver-home    → ~/.codex (auth.json skrives af kontrolpanelet og
-                             læses af sidecarens codex app-server)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidecaren lytter **kun** på det interne compose-netværk
-  (`ws://codex-app-server:1456`) bag en kapabilitetstoken. Den eksponeres
-  **aldrig** på værten eller internettet.
-- Codex CLI er indbygget i `omniroute:base`, så det er ikke nødvendigt at
-  installere codex på værten eller brugerens maskine, når sidecaren køres.
+- Sidevognen lytter** kun** på det interne compose-netværk (`ws://codex-app-server:1456`) bag et kapacitetstoken. Det er det** aldrig** udgivet til værten eller internettet.
+- Sidevognen bruger `omniroute:cli-no-docker`, bygget fra `runner-cli-no-docker` målet, som inkluderer Codex CLI.
 
 ## 2. Start den
 

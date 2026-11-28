@@ -12,57 +12,53 @@ OmniRoute verfügt über drei unterschiedliche, aber verwandte Resilienzmechanis
 
 > **Env-vs-Dashboard-Priorität für Resilienz-Umschaltungen.** Die Opt-in-Resilienz-Schalter, die aus der Umgebung — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — geseed werden, stellen nur den _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) bereit. Ein boolescher Wert blieb in `resilienceSettings` bestehen (Dashboard →** Einstellungen → Resilienz** / `PATCH /api/resilience`, gespeichert in `key_value`) gewinnt über den env-Wert: Normalisierung (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) behält den gespeicherten booleschen Wert bei, wann immer einer existiert. Das Festlegen einer solchen Umgebungsvariable auf `true` in einer Bereitstellung, in der das Dashboard `false` bereits gespeichert hat, ändert daher nichts. — schalten den Schalter ein** Einstellungen → Resilienz** (oder löschen Sie stattdessen das gespeicherte Feld).
 
-## 1. Provider-Circuit-Breaker
+## 1. Leistungsschalter des Anbieters
 
-**Geltungsbereich:** gesamter Provider (z. B. `glm`, `openai`, `anthropic`).
+**Umfang:** gesamter Anbieter (z. B. `glm`, `openai`, `anthropic`).
 
-**Zweck:** den Datenverkehr zu einem Provider stoppen, der auf Upstream-/Service-Ebene wiederholt fehlschlägt.
+**Zweck:** Hören Sie auf, Datenverkehr an einen Anbieter zu senden, der auf upstream/service Ebene wiederholt ausfällt.
 
-**Implementierung:**
+**Durchführung:**
 
 - Kernklasse: `src/shared/utils/circuitBreaker.ts`
-- Verdrahtung: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Status-API: `GET /api/monitoring/health`
-- Reset-API: `POST /api/resilience/reset`
-- Wrapper: `open-sse/services/accountFallback.ts`
-- DB-Tabelle: `domain_circuit_breakers`
+- Verkabelung: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Status API: `GET /api/monitoring/health`
+- API zurücksetzen: `POST /api/resilience/reset`
+- Umschläge: `open-sse/services/accountFallback.ts`
+- DB Tabelle: `domain_circuit_breakers`
 
-**Zustände:**
+**Staaten:**
 
-- `CLOSED` — normaler Datenverkehr erlaubt
-- `DEGRADED` — Datenverkehr weiterhin erlaubt, aber erhöhte Provider-Fehlschläge werden verfolgt; kehrt zu `CLOSED` zurück bei ausreichend vielen Erfolgen, bei einem gültigen Verbindungstest oder nach Ablauf der längsten `OPEN`-Haltezeit für die letzte Fehlerart (deren `cooldownByKind`-Wert, sonst `resetTimeout`, × `maxBackoffMultiplier`, mindestens ein Cooldown) ohne neuen Fehlschlag
-- `OPEN` — Provider vorübergehend blockiert; Combo-Routing überspringt ihn
-- `HALF_OPEN` — Reset-Timeout abgelaufen; Prüfanfrage erlaubt
+- `CLOSED` — normaler Verkehr erlaubt
+- `DEGRADED` — -Verkehr ist weiterhin zulässig, es werden jedoch Ausfälle erhöhter Provider verfolgt; kehrt bei genügend Erfolgen, bei einem gültigen Verbindungstest oder nach der längsten `OPEN` Haltezeit für die letzte Fehlerart (sein `cooldownByKind` Wert, sonst `resetTimeout`, × `maxBackoffMultiplier`, mindestens eine Abklingzeit) zu `CLOSED` zurück, ohne dass ein neuer Fehler auftritt
+- `OPEN` — -Anbieter vorübergehend gesperrt; Combo-Routing überspringt es
+- `HALF_OPEN` — -Reset-Timeout abgelaufen; Sondenanforderung erlaubt
 
-**Konfigurierbare Standardwerte (`open-sse/config/constants.ts`, einsehbar unter Dashboard → Einstellungen → Resilienz):**
+**Konfigurierbare Standardeinstellungen (`open-sse/config/constants.ts`, verfügbar im Dashboard → -Einstellungen → Resilienz):**
 
-| Klasse        | Degradiert bei | Öffnet bei      | Reset-Timeout |
-| ------------- | -------------- | --------------- | ------------- |
-| OAuth         | 5 Fehlschlägen | 8 Fehlschlägen  | 60s           |
-| API-Schlüssel | 7 Fehlschlägen | 12 Fehlschlägen | 30s           |
-| Lokal         | abgeleitet     | 2 Fehlschlägen  | 15s           |
+| Klasse        | Degradiert bei | Öffnet um      | Timeout zurücksetzen |
+| ------------- | -------------- | -------------- | -------------------- |
+| OAuth         | 5 Fehlschläge  | 8 Fehlschläge  | 60er Jahre           |
+| API-Schlüssel | 7 Fehlschläge  | 12 Fehlschläge | 30er Jahre           |
 
-`degradationThreshold` steuert, wann ein Provider in den Zustand `DEGRADED` eintritt; `failureThreshold` steuert, wann er öffnet und übersprungen wird. Lokale Provider-Profile werden auf der Resilienz-Einstellungsseite noch nicht angezeigt.
+`degradationThreshold` steuert, wann ein Anbieter `DEGRADED` eingibt; `failureThreshold` steuert, wann es geöffnet und übersprungen wird. `PROVIDER_PROFILES.local` (2 Ausfälle / 15 s) ist in `open-sse/config/constants.ts` definiert, aber** noch nicht verkabelt** : `getProviderCategory()` gibt nur `oauth` oder `apikey` zurück, daher verwenden lokale Anbieter das OAuth oder API-Schlüsselprofil.
 
-**Auslösecodes:** nur Provider-Level-Statuscodes `[408, 500, 502, 503, 504]`. Keine Auslösung bei Account-Level-Fehlern (die meisten 401/403/429 — diese gehören zu Cooldown oder Lockout).
+**Reisecodes:** Nur Status auf Anbieterebene `[408, 500, 502, 503, 504]`. Führen Sie NOT Auslösung für Fehler auf Kontoebene durch (die meisten 401/403/429 — Fehler gehören zur Abklingzeit oder Sperrung).
 
-**Lazy Recovery:** Wenn `OPEN` abläuft, aktualisieren `getStatus()`, `canExecute()`, `getRetryAfterMs()` den Zustand auf `HALF_OPEN`. Dieselben Lesevorgänge (und der nächste Fehlschlag) lassen einen veralteten `DEGRADED` zurück auf `CLOSED` abklingen. Kein Hintergrund-Timer erforderlich.
+**Faule Erholung:** Wenn `OPEN` abläuft, aktualisieren `getStatus()`, `canExecute()` und `getRetryAfterMs()` den Status auf `HALF_OPEN`. Die gleichen Lesevorgänge (und der nächste Fehler) führen dazu, dass ein veraltetes `DEGRADED` wieder in `CLOSED` umgewandelt wird. Kein Hintergrund-Timer erforderlich.
 
 ---
 
-### Opt-in globaler Provider-Cooldown (Fenster-Gate)
+### Opt-in-Globaler Provider Cooldown (Fenstertor)
 
-Eine vierte, **Opt-in**-Schicht (`PROVIDER_COOLDOWN_ENABLED`, standardmäßig **aus**) führt in
-`open-sse/services/providerCooldownTracker.ts` ein anfrageübergreifendes Gedächtnis fehlschlagender Provider, das bei der Combo-Zielauflösung herangezogen wird, damit aufeinanderfolgende Combo-Anfragen einen gerade fehlgeschlagenen Provider nicht erneut durchlaufen. Provider-Level-Einträge berücksichtigen das `PROVIDER_PROFILES`-Fenster-Gate:
+Ein vierter,** Opt-in** Ebene (`PROVIDER_COOLDOWN_ENABLED`, Standard** aus** ) behält einen anforderungsübergreifenden Speicher von fehlgeschlagenen Anbietern in `open-sse/services/providerCooldownTracker.ts` bei und wird von der Combo-Zielauflösung konsultiert, sodass aufeinanderfolgende Combo-Anfragen nicht mehr einen gerade ausgefallenen Provider erneut durchlaufen. Einträge auf Anbieterebene berücksichtigen das `PROVIDER_PROFILES` Fenstergate:
 
-| Profil        | löst aus nach (`providerFailureThreshold`) | innerhalb von (`providerFailureWindowMs`) | kühlt ab für (`providerCooldownMs`) |
-| ------------- | -----------------------------------------: | ----------------------------------------: | ----------------------------------: |
-| OAuth         |                                       `10` |                                   `15min` |                              `5min` |
-| API-Schlüssel |                                       `15` |                                   `30min` |                             `10min` |
+| Profil         | Fahrten nach (`providerFailureThreshold`) | innen (`providerFailureWindowMs`) | cool für (`providerCooldownMs`) |
+| -------------- | ----------------------------------------: | --------------------------------: | ------------------------------: |
+| OAuth          |                                      `10` |                           `15min` |                          `5min` |
+| API -Schlüssel |                                      `15` |                           `30min` |                         `10min` |
 
-Unterhalb des Schwellenwerts gilt der Provider **nicht** als abkühlend; ein Erfolg leert das Fenster. Verbindungs-Level-Einträge (`provider:connectionId`) behalten stattdessen den exponentiellen `minRetryCooldownMs → maxRetryCooldownMs`-Backoff bei. Überschreibungen:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Regressionsabsicherung: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Unterhalb der Schwelle liegt der Anbieter** nicht** als Kühlung betrachtet; ein Erfolg macht das Fenster frei. Einträge auf Verbindungsebene (`provider:connectionId`) behalten stattdessen den exponentiellen `minRetryCooldownMs → maxRetryCooldownMs` Backoff bei. Überschreibungen: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regressionswächter: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Abklingzeit der Verbindung
 
@@ -741,6 +737,21 @@ erschöpftes Kontingent. Faire Grenzen:
 
 ---
 
+## Wenn OmniRoute selbst nicht erreichbar ist
+
+Der Leistungsschalter des Anbieters, die Verbindungsabklingzeit und die Modellsperre laufen alle im Gateway. Wenn der Client das Gateway nicht erreichen kann, erhält er einen Verbindungsfehler. OmniRoute kann diesen Fehler nicht abfangen. Der Client entscheidet, ob er es erneut versucht und welche Meldung angezeigt wird.
+
+OmniRoute bietet derzeit keinen clientseitigen Fallback und definiert keine Richtlinie dafür. Konfigurieren Sie eine beliebige alternative Route im Client oder vor dem Gateway.
+
+- `GET /api/health` prüft die Lebendigkeit ohne Authentifizierung.
+- `GET /api/health/ping` prüft die Bereitschaft, einschließlich der Frage, ob die Datenbank antwortet.
+- `GET /api/monitoring/health` bietet authentifizierten Anrufern einen tieferen Gesundheitsüberblick.
+- `omniroute launch <tool>` prüft `/api/monitoring/health` bevor der Client gestartet wird. Es kann ein lokales Gateway automatisch starten. Bei `--no-start` führt ein nicht erreichbares Gateway zu `GatewayUnreachable` und dem Exit-Code `69`.
+
+Um einen Client von OmniRoute zu trennen, folgen Sie [Clientkonfiguration wiederherstellen](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Debugging
 
 - Eine Weighted-Combo antwortet mit `503 all_targets_cooling_down` (`Retry-After` gesetzt, `diagnostics.excluded` listet jedes Ziel mit `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → der Pool ist konfiguriert und verbunden, jedes Ziel ist lediglich durch einen Resilienz-Timer ausgeschlossen; die Warnung `[COMBO] Weighted selection: every target excluded before dispatch — …` nennt die Gründe und die verbleibenden Sekunden. Ein `404 no_executable_targets` derselben Combo bedeutet, dass kein Resilienz-Timer beteiligt war (nichts auszuführen, oder jedes Konto hat die Verfügbarkeitsprüfung nicht bestanden). Implementiert in `open-sse/services/combo/pinRecovery.ts` aus den in `targetResolution.ts` gesammelten Ausschlüssen.
@@ -752,97 +763,68 @@ erschöpftes Kontingent. Faire Grenzen:
 
 ---
 
-## Laufzeitstatus — Kurzreferenz für Agents
+## Kurzreferenz zum Laufzeitstatus — Agenten
 
-> Wörtlich aus `AGENTS.md` → „Resilience Runtime State" (PR #12743) verschoben, damit der
-> Agent-Leitfaden unter dem 40k-Kontextbudget bleibt. Es ist die komprimierte, an Agents
-> gerichtete Ansicht der obigen Abschnitte; die nummerierten Abschnitte bleiben die
-> vollständige Referenz.
+> Wörtlich aus `AGENTS.md` → „Resilience Runtime State“ (PR #12743) verschoben, sodass der Agentenleitfaden unter dem Kontextbudget von 40.000 bleibt. Es handelt sich um die komprimierte, dem Agenten zugewandte Ansicht der obigen Abschnitte; Die nummerierten Abschnitte bleiben die vollständige Referenz.
 
-OmniRoute verfügt über drei verwandte, aber unterschiedliche Mechanismen für temporäre
-Fehler. Halten Sie deren Geltungsbereiche beim Debuggen des Routing-Verhaltens getrennt.
-Siehe das [3-Schichten-Resilienzdiagramm](../diagrams/exported/resilience-3layers.svg)
-(Quelle: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-für eine Übersicht auf einen Blick.
+OmniRoute verfügt über drei verwandte, aber unterschiedliche Mechanismen für vorübergehende Ausfälle. Halten Sie ihren Bereich beim Debuggen des Routing-Verhaltens getrennt. Eine Übersichtskarte finden Sie im [3-Ebenen-Resilienzdiagramm](../diagrams/exported/resilience-3layers.svg) (Quelle: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ).
 
-### Provider Circuit Breaker
+### Leistungsschalter des Anbieters
 
-**Geltungsbereich**: gesamter Provider, z. B. `glm`, `openai`, `anthropic`.
+**Umfang** : gesamter Anbieter, z. B. `glm`, `openai`, `anthropic`.
 
-**Zweck**: den Traffic zu einem Provider stoppen, der auf Upstream-/Service-Ebene wiederholt
-fehlschlägt, damit ein fehlerhafter Provider nicht jede Anfrage verlangsamt.
+**Zweck** : Stoppen Sie das Senden von Datenverkehr an einen Anbieter, der auf upstream/service Ebene wiederholt ausfällt, damit ein fehlerhafter Anbieter nicht jede Anfrage verlangsamt.
 
-**Implementierung**:
+**Durchführung** :
 
 - Kernklasse: `src/shared/utils/circuitBreaker.ts`
-- Chat-Gate-/Ausführungsverdrahtung: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Laufzeit-Status-API: `src/app/api/monitoring/health/route.ts`
-- Gemeinsame Wrapper: `open-sse/services/accountFallback.ts`
+- Chat- gate/execution -Verkabelung: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Laufzeitstatus API: `src/app/api/monitoring/health/route.ts`
+- Geteilte Wrapper: `open-sse/services/accountFallback.ts`
 - Persistierte Statustabelle: `domain_circuit_breakers`
 
-**Zustände** (4 — `src/shared/utils/circuitBreaker.ts`):
+**Staaten** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: normaler Traffic ist erlaubt.
-- `DEGRADED`: Frühwarnband — Fehler haben die Degradierungsschwelle überschritten, aber noch
-  nicht die Breaker-Schwelle; der Traffic fließt weiter, Dashboards zeigen die Warnung. Ein
-  gültiger Verbindungstest oder ein ruhiges Fenster ohne neue Fehler setzt den Zustand auf
-  `CLOSED` zurück (`docs/architecture/RESILIENCE_GUIDE.md` enthält das Fenster).
-- `OPEN`: Der Provider ist vorübergehend blockiert; Aufrufer erhalten eine
-  Provider-Circuit-Open-Antwort oder das Combo-Routing springt zu einem anderen Ziel.
-- `HALF_OPEN`: Der Reset-Timeout ist abgelaufen; eine Testanfrage wird zugelassen. Erfolg
-  schließt den Breaker, ein Fehlschlag öffnet ihn erneut.
+- `CLOSED`: Normaler Verkehr ist erlaubt.
+- `DEGRADED`: Frühwarnband- — Ausfälle haben die Verschlechterungsschwelle, aber noch nicht die Unterbrecherschwelle überschritten; Der Verkehr fließt immer noch, Dashboards zeigen die Warnung an. Ein gültiger Verbindungstest oder ein stilles Fenster ohne neuen Fehler gibt es an `CLOSED` zurück (`docs/architecture/RESILIENCE_GUIDE.md` hat das Fenster).
+- `OPEN`: Anbieter ist vorübergehend gesperrt; Anrufer erhalten eine Provider-Circuit-Open-Antwort oder ein Combo-Routing springt zu einem anderen Ziel.
+- `HALF_OPEN`: Reset-Timeout ist abgelaufen; Erlauben Sie eine Sondenanfrage. Erfolg schließt den Leistungsschalter, Misserfolg öffnet ihn wieder.
 
-**Standardwerte** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, konsumiert über
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). Der Breaker für den
-gesamten Provider läuft über `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Standardeinstellungen** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, verbraucht über `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). Der Whole-Provider-Breaker läuft auf `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profil        | degradiert bei | öffnet bei (`circuitBreakerThreshold`) | Reset (`circuitBreakerReset`) |
-| ------------- | -------------: | -------------------------------------: | ----------------------------: |
-| OAuth         |            `5` |                                    `8` |                         `60s` |
-| API-Schlüssel |            `7` |                                   `12` |                         `30s` |
-| Lokal         |   (abgeleitet) |                                    `2` |                         `15s` |
+| Profil         | verschlechtert sich bei | öffnet um (`circuitBreakerThreshold`) | zurücksetzen (`circuitBreakerReset`) |
+| -------------- | ----------------------: | ------------------------------------: | -----------------------------------: |
+| OAuth          |                     `5` |                                   `8` |                                `60s` |
+| API -Schlüssel |                     `7` |                                  `12` |                                `30s` |
 
-`PROVIDER_PROFILES` definiert außerdem `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) und `providerCooldownMs` (5/10/1 min): Diese steuern
-das **Fenster-Gate des optionalen globalen Provider-Cooldowns** (`PROVIDER_COOLDOWN_ENABLED`,
-standardmäßig aus) — ein Eintrag auf Provider-Ebene in
-`open-sse/services/providerCooldownTracker.ts` gilt erst nach `providerFailureThreshold`
-Fehlern innerhalb von `providerFailureWindowMs` als abkühlend und kühlt dann für
-`providerCooldownMs` ab. Sie sind NICHT die Schwellenwerte des aktiven Breakers — tunen Sie
-sie nicht in der Erwartung von Breaker-Verhalten. Jeder Standardwert kann über die
-Umgebungsvariablen `OMNIROUTE_PROVIDER_BREAKER_*` und `OMNIROUTE_CIRCUIT_BREAKER_*`
-überschrieben werden; die laufzeitgenaue Referenztabelle liegt in
-`docs/architecture/RESILIENCE_GUIDE.md`.
+Ein `local` Profil (`2` failed / `15s`) existiert auch in `PROVIDER_PROFILES`, ist jedoch nicht mit dem Breaker verbunden: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) akzeptiert nur `oauth` oder `apikey` und `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) gibt eines dieser beiden zurück (nicht registrierte Anbieter erhalten `apikey`).
 
-Nur Fehlerstatus auf Provider-Ebene sollten den Provider-Breaker auslösen:
+`PROVIDER_PROFILES` definiert auch `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) und `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, wobei die lokalen Werte aus dem gleichen Grund wie oben inert sind: Diese bestimmen die** Fenstertor des globalen Opt-in-Anbieter-Cooldowns** (`PROVIDER_COOLDOWN_ENABLED`, Standardeinstellung aus) — Ein Eintrag auf Anbieterebene in `open-sse/services/providerCooldownTracker.ts` zählt nur als Kühlung, nachdem `providerFailureThreshold` innerhalb `providerFailureWindowMs` ausfällt, und kühlt dann für `providerCooldownMs` ab. Sie sind NOT die Schwellenwerte des aktiven Leistungsschalters — passen sie nicht an, um das Verhalten des Leistungsschalters zu erwarten. Jeder Standardwert kann durch die Umgebungsvariablen `OMNIROUTE_PROVIDER_BREAKER_*` und `OMNIROUTE_CIRCUIT_BREAKER_*` überschrieben werden. Die laufzeitgenaue Referenztabelle befindet sich in `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Nur Fehlerstatus auf Anbieterebene sollten den Anbieterschalter auslösen:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Lösen Sie den Breaker für den gesamten Provider nicht bei normalen
-Konto-/Schlüssel-/Modellfehlern aus, wie bei den meisten `401`-, `403`- oder `429`-Fällen.
-Diese gehören üblicherweise zum Connection-Cooldown oder Model-Lockout. Ein generischer
-`403` eines API-Schlüssel-Providers sollte wiederherstellbar sein, es sei denn, er wird als
-endgültiger Provider-/Kontofehler klassifiziert.
+Lösen Sie bei normalen account/key/model Fehlern wie den meisten `401`, `403` oder `429` Fällen nicht den Leistungsschalter für den gesamten Anbieter aus. Diese gehören normalerweise zur Verbindungsabklingzeit oder zur Modellsperre. Ein generischer API-Schlüsselanbieter `403` sollte wiederherstellbar sein, es sei denn, er wird als Terminal- provider/account Fehler eingestuft.
 
-Der Breaker verwendet Lazy Recovery, keinen Hintergrund-Timer. Wenn `OPEN` abläuft, aktualisieren Lesezugriffe wie `getStatus()`, `canExecute()` und `getRetryAfterMs()` den Zustand auf `HALF_OPEN`, sodass Dashboards und Builder für Combo-Kandidaten einen Provider, dessen Sperrung abgelaufen ist, nicht dauerhaft weiter ausschließen.
+Der Breaker verwendet Lazy Recovery und keinen Hintergrund-Timer. Wenn `OPEN` abläuft, aktualisieren Lesevorgänge wie `getStatus()`, `canExecute()` und `getRetryAfterMs()` den Status auf `HALF_OPEN`, sodass Dashboards und Combo-Kandidaten-Builder einen abgelaufenen Anbieter nicht für immer ausschließen.
 
-### Verbindungs-Cooldown
+### Abklingzeit der Verbindung
 
-**Geltungsbereich**: eine Provider-Verbindung/ein Konto/ein Schlüssel.
+**Umfang** : ein Anbieter connection/account/key.
 
-**Zweck**: einen fehlerhaften Schlüssel bzw. ein fehlerhaftes Konto vorübergehend überspringen, während andere Verbindungen desselben Providers weiterhin Anfragen bedienen können.
+**Zweck** : Überspringen Sie vorübergehend eine fehlerhafte key/account während Sie anderen Verbindungen für denselben Anbieter erlauben, weiterhin Anfragen zu bearbeiten.
 
-**Implementierung**:
+**Durchführung** :
 
-- Schreib-/Aktualisierungspfad: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Kontoauswahl/-filterung: `src/sse/services/auth.ts::getProviderCredentials...`
-- Cooldown-Berechnung: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Write/update Pfad: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Konto selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Abklingzeitberechnung: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Einstellungen: `src/lib/resilience/settings.ts`
 
-Wichtige Felder auf Provider-Verbindungen:
+Wichtige Felder bei Provider-Anbindungen:
 
 ```ts
 rateLimitedUntil;
@@ -853,50 +835,50 @@ errorCode;
 backoffLevel;
 ```
 
-Während der Kontoauswahl wird eine Verbindung übersprungen, solange:
+Während der Kontoauswahl wird eine Verbindung übersprungen, während:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Cooldowns sind ebenfalls lazy ausgelegt: Wenn `rateLimitedUntil` in der Vergangenheit liegt, wird die Verbindung wieder auswählbar. Bei erfolgreicher Nutzung setzt `clearAccountError()` die Felder `testStatus`, `rateLimitedUntil`, die Fehlerfelder und `backoffLevel` zurück.
+Abklingzeiten sind ebenfalls faul: Wenn `rateLimitedUntil` in der Vergangenheit liegt, wird die Verbindung wieder aktiv. Bei erfolgreicher Verwendung löscht `clearAccountError()` `testStatus`, `rateLimitedUntil`, Fehlerfelder und `backoffLevel`.
 
-Standardverhalten des Verbindungs-Cooldowns:
+Standardverhalten der Verbindungsabklingzeit:
 
-- OAuth-Basis-Cooldown: `5s`.
-- API-Schlüssel-Basis-Cooldown: `3s`.
-- Bei `429` eines API-Schlüssels sollten Upstream-Wiederholungshinweise (`Retry-After`, Reset-Header oder parsbarer Reset-Text) bevorzugt werden, sofern verfügbar.
-- Wiederholte behebbare Fehler verwenden exponentielles Backoff:
+- OAuth Basis-Abklingzeit: `5s`.
+- Abklingzeit der API-Schlüsselbasis: `3s`.
+- Der API-Schlüssel `429` sollte Upstream-Wiederholungshinweise (`Retry-After`, Reset-Header oder analysierbarer Reset-Text) bevorzugen, sofern verfügbar.
+- Wiederholte behebbare Fehler nutzen einen exponentiellen Backoff:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Der Schutz gegen den Thundering-Herd-Effekt verhindert, dass gleichzeitig auftretende Fehler auf derselben Verbindung den Cooldown wiederholt verlängern oder `backoffLevel` doppelt erhöhen.
+Der Anti-Thundering-Herd Guard verhindert, dass gleichzeitige Fehler auf derselben Verbindung die Abklingzeit wiederholt verlängern oder `backoffLevel` doppelt erhöhen.
 
-Terminale Zustände sind keine Cooldowns. `banned`, `expired` (das erst nach N begrenzten Wiederholungen über `EXPIRED_RETRY_MAX` terminal wird) und `credits_exhausted` sollen so lange nicht verfügbar bleiben, bis sich Zugangsdaten/Einstellungen ändern oder ein Operator sie zurücksetzt. Überschreiben Sie terminale Zustände nicht mit einem transienten Cooldown-Zustand.
+Endzustände sind keine Abklingzeiten. `banned`, `expired` (das erst nach N begrenzten Wiederholungsversuchen über `EXPIRED_RETRY_MAX` zum Terminal wird) und `credits_exhausted` sollen nicht verfügbar bleiben, bis sich credentials/settings ändert oder ein Operator sie zurücksetzt. Überschreiben Sie keine Endzustände mit einem vorübergehenden Abklingzustand.
 
-### Modell-Sperrung
+### Modellsperre
 
-**Geltungsbereich**: Provider + Verbindung + Modell.
+**Umfang** : Anbieter + -Verbindung + -Modell.
 
-**Zweck**: vermeiden, dass eine ganze Verbindung deaktiviert wird, wenn nur ein Modell für diese Verbindung nicht verfügbar oder kontingentbeschränkt ist.
+**Zweck** : Vermeiden Sie die Deaktivierung einer gesamten Verbindung, wenn nur ein Modell nicht verfügbar oder das Kontingent für diese Verbindung begrenzt ist.
 
 Beispiele:
 
-- Provider mit Kontingenten pro Modell, die `429` zurückgeben.
-- Lokale Provider, die `404` für ein fehlendes Modell zurückgeben.
-- Provider-spezifische Modus-/Modell-Berechtigungsfehler, etwa bei ausgewählten Grok-Modi.
+- Modellkontingentanbieter, `429` zurückgeben.
+- Lokale Anbieter geben `404` für ein fehlendes Modell zurück.
+- Anbieterspezifische mode/model -Berechtigungsfehler, z. B. ausgewählte Grok Modi.
 
-Die Modell-Sperrung befindet sich in `open-sse/services/accountFallback.ts` und ermöglicht es derselben Verbindung, weiterhin andere Modelle zu bedienen.
+Die Modellsperre befindet sich in `open-sse/services/accountFallback.ts` und ermöglicht, dass dieselbe Verbindung weiterhin andere Modelle bedient.
 
-### Hinweise zur Fehlersuche
+### Debugging-Anleitung
 
-- Wenn alle Schlüssel eines Providers übersprungen werden, prüfen Sie sowohl den Breaker-Zustand des Providers als auch `rateLimitedUntil`/`testStatus` jeder Verbindung.
-- Wenn ein Provider nach dem Reset-Fenster dauerhaft ausgeschlossen erscheint, prüfen Sie, ob Code den rohen `state` liest, anstatt `getStatus()`/`canExecute()` zu verwenden.
-- Wenn ein Provider-Schlüssel fehlschlägt, andere aber funktionieren sollten, bevorzugen Sie den Verbindungs-Cooldown gegenüber dem Provider-Breaker.
-- Wenn nur ein Modell fehlschlägt, bevorzugen Sie die Modell-Sperrung gegenüber dem Verbindungs-Cooldown.
-- Wenn sich ein Zustand selbst erholen soll, sollte er einen zukünftigen Zeitstempel bzw. Reset-Timeout und einen Lesepfad besitzen, der abgelaufene Zustände aktualisiert. Permanente Status erfordern manuelle Änderungen an Zugangsdaten oder Konfiguration.
+- Wenn alle Schlüssel für einen Anbieter übersprungen werden, überprüfen Sie den Breaker-Status des Anbieters und `rateLimitedUntil`/`testStatus` jeder Verbindung.
+- Wenn ein Anbieter nach dem Zurücksetzen-Fenster dauerhaft ausgeschlossen erscheint, prüfen Sie, ob der Code rohes `state` liest, anstatt `getStatus()`/`canExecute()` zu verwenden.
+- Wenn ein Anbieterschlüssel ausfällt, andere aber funktionieren sollten, bevorzugen Sie die Verbindungsabklingzeit gegenüber dem Anbieterunterbrecher.
+- Wenn nur ein Modell ausfällt, bevorzugen Sie die Modellsperre gegenüber der Verbindungsabklingzeit.
+- Wenn sich ein Status selbst wiederherstellen soll, sollte er über ein zukünftiges timestamp/reset Timeout und einen Lesepfad verfügen, der den abgelaufenen Status aktualisiert. Permanente Status erfordern manuelle Anmeldeinformationen oder Konfigurationsänderungen.
 
 ---
 

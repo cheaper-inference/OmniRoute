@@ -48,7 +48,7 @@ Quando uma versão está sendo reconciliada, um problema de marcador denominado 
 Verifique se há um congelamento aberto antes de assumir que o branch que você deseja pode ser mesclado:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 A mecânica de mesclagem (proprietário `queue` rótulo → Mergify) está documentada em [MERGE_TRAIN.md](./MERGE_TRAIN.md).

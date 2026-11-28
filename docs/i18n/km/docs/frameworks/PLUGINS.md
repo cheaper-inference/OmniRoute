@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | URL មូលដ្ឋានដែលបានកំណត់                                         |
 | `ctx.apiKey`                 | `string \| null` | សោ API ប្រសិនបើបានផ្តល់                                         |
 
-## ការស្វែងរក
+## ការរកឃើញ
 
-កម្មវិធីជំនួយត្រូវបានស្វែងរកពី៖
+កម្មវិធីជំនួយត្រូវបានរកឃើញពី៖
 
-1. `~/.omniroute/plugins/<name>/` — ការដំឡើងសម្រាប់អ្នកប្រើមូលដ្ឋាន
-2. អថេរបរិស្ថាន `OMNIROUTE_PLUGIN_PATH` — ថតផ្ទាល់ខ្លួន
+1. `~/.omniroute/plugins/node_modules/<name>/` — ដែល `omniroute plugin install` ដាក់កញ្ចប់ (an npm `--prefix` មិនមែន `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — ថតចម្លងកម្មវិធីជំនួយដោយដៃ
+3. `OMNIROUTE_PLUGIN_PATH` env var — ថតផ្ទាល់ខ្លួន
 
-ទាំងពីរនេះគឺសម្រាប់តែ **CLI ប៉ុណ្ណោះ**។ runtime កម្មវិធីជំនួយខាងម៉ាស៊ីនបម្រើ (កម្មវិធីជំនួយ marketplace/`plugin.json`
-ដែលដំណើរការនៅខាងក្នុង proxy) មាន scanner និងការកំណត់ជំនួសផ្ទាល់ខ្លួនរបស់វា គឺ
-`OMNIROUTE_PLUGINS_DIR` — សូមមើល
-[PLUGIN_MARKETPLACE.md → ថតកម្មវិធីជំនួយ](./PLUGIN_MARKETPLACE.md#plugin-directory)។
-ការកំណត់មួយមិនប៉ះពាល់ដល់មួយទៀតទេ។
+Symlinked directories (អ្វីដែល npm បង្កើតសម្រាប់ `plugin install ./dir`) ត្រូវបានអនុវត្តតាម។
 
-កំហុសក្នុងការផ្ទុកត្រូវបានចាប់យក និងបោះពុម្ពជាការព្រមាន — កម្មវិធីជំនួយដែលខូចនឹងមិនធ្វើឱ្យ CLI គាំងឡើយ។
+ទាំងពីរគឺ** CLI តែប៉ុណ្ណោះ** . កម្មវិធីជំនួយផ្នែកខាងម៉ាស៊ីនមេ (កម្មវិធីជំនួយទីផ្សារ/`plugin.json` ដែលដំណើរការនៅខាងក្នុងប្រូកស៊ី) មានម៉ាស៊ីនស្កេនផ្ទាល់ខ្លួនជាមួយនឹងការបដិសេធរបស់វា `OMNIROUTE_PLUGINS_DIR` — សូមមើល [PLUGIN_MARKETPLACE.md → ថតកម្មវិធីជំនួយ](./PLUGIN_MARKETPLACE.md#plugin-directory) ។ ការកំណត់មួយមិនប៉ះពាល់ដល់មួយទៀតទេ។
+
+កំហុសក្នុងការផ្ទុកត្រូវបានចាប់ និងបោះពុម្ពជាការព្រមាន — កម្មវិធីជំនួយដែលខូចមិនដែលធ្វើឱ្យ CLI គាំងឡើយ។
 
 ## សុវត្ថិភាព
 

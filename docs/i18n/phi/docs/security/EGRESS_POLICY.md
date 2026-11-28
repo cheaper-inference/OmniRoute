@@ -67,15 +67,15 @@ Sadyang **per-proxy** ang direktiba, hindi global — maaaring magkaroon ng magk
 
 ---
 
-## Ang Tatlong Value
+## Ang Tatlong Halaga
 
-| Value  | Label sa UI               | Gawi                                                                                                                                                               |
-| ------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `auto` | `Awtomatiko (dual-stack)` | Pinipili ng OS ang family. Para sa proxy host na IP literal, likas sa literal ang family; para sa hostname, maaaring gamitin ang parehong family. Ito ang default. |
-| `ipv4` | `IPv4 lamang`             | Itinatakda ang koneksyon sa IPv4. Hindi nagpapatuloy ang koneksyon kung walang IPv4 (A) record ang proxy host.                                                     |
-| `ipv6` | `IPv6 lamang`             | Itinatakda ang koneksyon sa IPv6. Hindi nagpapatuloy ang koneksyon kung walang IPv6 (AAAA) record ang proxy host.                                                  |
+| Halaga | UI label            | Pag-uugali                                                                                                                                                                            |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | pinipili OS ang pamilya. Para sa isang IP-literal na proxy host, ang pamilya ay intrinsic sa literal; para sa isang hostname, ang parehong pamilya ay karapat-dapat. Ito ang default. |
+| `ipv4` | `IPv4 only`         | Pins ang koneksyon sa IPv4. Hindi naisara kung ang proxy host ay walang IPv4 (A) na tala.                                                                                             |
+| `ipv6` | `IPv6 only`         | Pins ang koneksyon sa IPv6. Hindi naisara kung ang proxy host ay walang IPv6 (AAAA) na tala.                                                                                          |
 
-Makikita ang mga string ng UI sa `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+Ang mga string UI ay nakatira sa `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
@@ -83,21 +83,21 @@ Makikita ang mga string ng UI sa `src/i18n/messages/en.json` (`labelFamily`, `fa
 
 ### Dashboard
 
-Makikita ang selector sa proxy form ng tab na **Proxy Pool**:
+Ang selector ay nasa proxy form ng** Proxy Pool** tab:
 
-1. Buksan ang **Dashboard → Settings → Proxy → Proxy Pool**
+1. Bukas** Dashboard → Mga Setting → Proxy → Proxy Pool**
 2. Magdagdag o mag-edit ng proxy
-3. Itakda ang dropdown na **IP family** sa `Awtomatiko (dual-stack)`, `IPv4 lamang`, o `IPv6 lamang`
+3. Itakda ang** pamilya IP** dropdown sa `Auto (dual-stack)`, `IPv4 only`, o `IPv6 only`
 4. I-save
 
-Nire-render ang control ng `ProxyRegistryManager.tsx` (naka-mount sa `proxy/ProxyPoolTab.tsx`).
+Ang kontrol ay nai-render ng `ProxyRegistryManager.tsx` (naka-mount sa `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Ang field na `family` ay bahagi ng mga payload para sa paggawa/pag-update ng proxy registry, vina-validate ng `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) at pinoproseso ng `POST` / `PATCH /api/v1/management/proxies`:
+Ang `family` field ay bahagi ng proxy registry create/update payloads, na napatunayan ng `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) at pinangangasiwaan ng `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Gumawa ng proxy na IPv6 lamang
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Baguhin ang isang kasalukuyang proxy upang maging IPv4 lamang
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Tinatanggap din ang parehong field ng inline proxy config object na ginagamit para sa mga upstream-proxy entry (`upstream_proxy_config.family`, tingnan ang [Modelo ng Data](#data-model)).
+Ang parehong field ay tinatanggap din ng inline na proxy config object na ginagamit para sa upstream-proxy na mga entry (`upstream_proxy_config.family`, tingnan ang [Modelo ng Data](#data-model) ).
 
-Para sa iba pang bahagi ng proxy CRUD/assignment API, tingnan ang [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Para sa iba pang proxy CRUD/assignment API, tingnan [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

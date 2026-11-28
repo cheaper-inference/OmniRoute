@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) ati OpenCode (`x-opencode-session`) jẹ id
 
 Itọsọna iṣẹ naa yatọ laarin awọn ẹrọ, nitorinaa ibi ipamọ kanna le ṣafihan labẹ awọn ọna oriṣiriṣi. Firanṣẹ ise agbese na ni gbangba dipo: koodu Claude ṣafikun awọn akọle eyikeyi ti a ṣe akojọ si ni `ANTHROPIC_CUSTOM_HEADERS` si gbogbo ibeere awoṣe, ati OmniRoute ka meji ninu wọn:
 
-| Akọsori                    | Iye                                                                |
-| -------------------------- | ------------------------------------------------------------------ |
-| `x-omniroute-project`      | Orukọ iṣẹ akanṣe, fun apẹẹrẹ `omniroute`                           |
-| `x-omniroute-project-repo` | Latọna jijin deede, fun apẹẹrẹ `github.com/diegosouzapw/OmniRoute` |
+| Akọsori                    | Iye                                                                     |
+| -------------------------- | ----------------------------------------------------------------------- |
+| `x-omniroute-project`      | Orukọ iṣẹ akanṣe, fun apẹẹrẹ `omniroute`                                |
+| `x-omniroute-project-repo` | Latọna jijin deede, fun apẹẹrẹ `github.com/cheaper-inference/OmniRoute` |
 
 Mejeji ti wa ni nikan ka fun ikalara; wọn ko firanṣẹ siwaju si olupese ti oke.
 
@@ -96,7 +96,7 @@ x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-Awọn ila ikosile `sed` eyikeyi awọn iwe-ẹri, okun ibeere ati ajẹkù ti a fi sinu URL latọna jijin, ati awọn akọle tẹlẹ ni `ANTHROPIC_CUSTOM_HEADERS` wa ni ipamọ. awọn amugbooro IDE ṣe ifilọlẹ koodu Claude laisi ikarahun rẹ, nitorinaa awọn akoko wọn ṣubu pada si itọsọna iṣẹ.
+Awọn ila ikosile `sed` awọn iwe-ẹri eyikeyi, okun ibeere ati ajẹkù ti a fi sinu URL latọna jijin, ati awọn akọle tẹlẹ ni `ANTHROPIC_CUSTOM_HEADERS` ti wa ni ipamọ. awọn amugbooro IDE ṣe ifilọlẹ koodu Claude laisi ikarahun rẹ, nitorinaa awọn akoko wọn ṣubu pada si itọsọna iṣẹ.
 
 ---
 
@@ -261,30 +261,22 @@ yóò dojú kọ olupin jíjìnnà yẹn láìfọwọ́yí, wọn yóò sì lo 
 
 ---
 
-## Yíyanjú ìṣòro
+## Laasigbotitusita
 
-**Claude Code kọbi ara sí ẹnubodè náà** — jẹ́rìí pé `ANTHROPIC_BASE_URL` **kò ní
-`/v1`** kí o sì tún `claude` bẹ̀rẹ̀ (env ni a máa ń kà lẹ́ẹ̀kan ṣoṣo nígbà ìbẹ̀rẹ̀). `omniroute launch`
-ń bójú tó èyí fún ọ.
+**Claude Code foju ẹnu-ọna** — jẹrisi `ANTHROPIC_BASE_URL` ni o ni** ko si `/v1`** ki o tun bẹrẹ `claude` (env ti ka ni ẹẹkan ni ibẹrẹ). `omniroute launch` mu eyi fun ọ.
 
-**Olùyan `/model` ṣófo / àwọn àwòṣe ẹnubodè kò sí** — ó nílò Claude Code
-v2.1.219+ àti `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Àwọn ID àwòṣe `claude*` /
-`anthropic*` nìkan ni yóò hàn nínú olùyan náà; fi tipátipá lo àwòṣe mìíràn èyíkéyìí pẹ̀lú
-`ANTHROPIC_MODEL=<id>` (èyí ni ohun tí àwọn profaili ń ṣe).
+**`/model` picker ti ṣofo / sonu awọn awoṣe ẹnu-ọna** — nilo Claude Code v2.1.219 + ati `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Nikan `claude*` / `anthropic*` awoṣe IDs han ninu olutayo; fi agbara mu eyikeyi awoṣe miiran pẹlu `ANTHROPIC_MODEL=<id>` (eyi ni awọn profaili ṣe).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code máa ń fi àwọn ID àwòṣe tí **kò ní ìpele-ìṣáájú**
-ránṣẹ́ nígbà gbogbo (fún àpẹẹrẹ `claude-opus-4-8`), nítorí náà nígbà tí àwọn olùpèsè Claude Code (`cc/…`) àti
-Claude (`claude/…`) méjèèjì bá ti sopọ̀, id tí kò ní ìpele-ìṣáájú yóò bá àwọn ipa-ọ̀nà méjì mu,
-OmniRoute kì yóò sì gbìyànjú láti méfò. Ṣàtúnṣe rẹ̀ ní ọ̀nà èyíkéyìí: kan id tí ó ní ìpele-ìṣáájú mọ́lẹ̀ pẹ̀lú
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, tàbí mú **Fi Claude Code ṣáájú fún
-àwọn àwòṣe Claude tí kò ní ìpele-ìṣáájú** ṣiṣẹ́ — bọ́tìnì yíyí lórí ojú-ìwé olùpèsè Claude, tàbí
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (ó pa nípa àìròtẹ́lẹ̀;
-wo [Àyíká](../reference/ENVIRONMENT.md)) — èyí tí yóò darí àwọn ID `claude-*` tí kò ní ìpele-ìṣáájú
-sí Claude Code dípò rẹ̀. Àwọn ìpele-ìṣáájú olùpèsè tí a sọ ní kedere máa ń borí nígbà gbogbo.
+**`400 Ambiguous model 'claude-…'`** — Claude Code nigbagbogbo firanṣẹ** aisọtẹlẹ** awoṣe IDs (fun apẹẹrẹ `claude-opus-4-8`), nitorinaa nigbati mejeeji koodu Claude (`cc/…`) ati Claude (`claude/…`) awọn olupese ti so pọ id ni ibaamu awọn ipa-ọna meji ati OmniRoute kọ lati gboju. Ṣe atunṣe ni ọna boya: PIN idanimọ iṣaaju pẹlu `ANTHROPIC_MODEL=cc/claude-opus-4-8`, tabi mu ṣiṣẹ** Fẹ koodu Claude fun awọn awoṣe Claude aisọtẹlẹ** — yiyi lori oju-iwe olupese Claude, tabi `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (aiyipada pa; wo [Ayika](../reference/ENVIRONMENT.md) ) — eyiti o tọ `claude-*` IDs si koodu Claude dipo. Awọn ìpele olupese olupese nigbagbogbo bori.
 
-**Àwọn àṣìṣe ìfàṣẹsí** — profaili náà kò ní token kankan. Lo `omniroute launch --profile`
-(ó máa fi í sínú rẹ̀) tàbí ṣe export `ANTHROPIC_AUTH_TOKEN`.
+**"Ipo aifọwọyi… igba yii ko yẹ" (awọn ibeere ti a gba owo ikawe)** — ni ipo aifọwọyi Claude Koodu beere lọwọ olupin lati ṣe atunyẹwo awọn iṣe inu awọn ibeere awoṣe tirẹ ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Iyẹn nilo iye `anthropic-beta` `dangerous-tool-use-2026-09-03` ati aaye ara `safeguards` lati de Anthropic gẹgẹbi bata, ati `safeguard_results` pẹlu ohun elo oke-lilo IDs lati pada wa laisi iyipada. OmniRoute ṣe eyi nigbati ibeere naa ba ti lọ si olupese `claude` abinibi tabi si ipade `anthropic-compatible-*` kan, ṣiṣan tabi rara (oluso ifasẹyin: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Awọn ibi-afẹde miiran ko le da atunyẹwo pada, nitorinaa koodu Claude ṣubu pada si awọn ibeere ikasi tirẹ ati ṣafihan akiyesi naa:
 
-**Àwọn profaili kò ya ara wọn sọ́tọ̀** — profaili kọ̀ọ̀kan jẹ́ `CLAUDE_CONFIG_DIR` ọ̀tọ̀;
-jẹ́rìí pé `echo $CLAUDE_CONFIG_DIR` nínú sáà náà tọ́ka sí
-`~/.claude/profiles/<name>`.
+- awoṣe lori olupese ti kii ṣe Anthropic, tabi konbo ti o de lori ọkan;
+- a Claude-Code-ibaramu relay node (`anthropic-compatible-cc-*`), eyi ti o tun awọn ara ìbéèrè ati ki o ko gbe `safeguards`;
+- OmniRoute agbalagba ti o ṣaju awọn akojọ beta ti a gba laaye, tabi ẹya koodu Claude ni isalẹ ọkan ti oju-iwe Anthropic ti ṣe atokọ fun awọn akoko ẹnu-ọna.
+
+Ṣiṣe `/status` ni Claude Code: awọn** Olupin ipo aifọwọyi** kana kika `Enabled` nigba ti awọn olupin ká awotẹlẹ ti nṣiṣe lọwọ. Boya awọn ibeere wọnyẹn ni idiyele jẹ ipinnu nipasẹ Anthropic, kii ṣe nipasẹ OmniRoute.
+
+**Awọn aṣiṣe idaniloju** — awọn profaili Oun ni ko si àmi. Lo `omniroute launch --profile` (ṣe abẹrẹ rẹ) tabi okeere `ANTHROPIC_AUTH_TOKEN`.
+
+**Awọn profaili ko ya sọtọ** — kọọkan profaili ni a pato `CLAUDE_CONFIG_DIR`; jẹrisi `echo $CLAUDE_CONFIG_DIR` inu awọn aaye igba ni `~/.claude/profiles/<name>`.

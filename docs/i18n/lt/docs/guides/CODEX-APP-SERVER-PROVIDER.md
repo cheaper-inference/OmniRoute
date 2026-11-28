@@ -21,24 +21,21 @@ netaikoma seanso pakartotinio perdavimo naudojimo išlyga. Tačiau būtina, kad
 ## 1. Architektūra
 
 ```
-┌─ OmniRoute programa ─────────────┐        ┌─ codex-app-server pagalbinis konteineris ┐
-│  CodexAppServerExecutor          │  WS    │  codex app-server                        │
-│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456              │
-│  (+ galimybių prieigos raktas)   │  JSON  │  --ws-auth capability-token              │
-│                                  │  RPC   │  savarankiškai valdo OpenAI OAuth         │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, autom. atnaujinimas)│
-        │ bendrina (compose tomai)           └───────────────────────────────────────────┘
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+│  CodexAppServerExecutor          │  WS    │  codex app-server                   │
+│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS galimybių prieigos raktas (jį prijungia abu)
-  codex-appserver-home    → ~/.codex (auth.json įrašo valdymo skydelis,
-                             o skaito pagalbinio konteinerio codex app-server)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Pagalbinis konteineris klausosi **tik** vidiniame compose tinkle
-  (`ws://codex-app-server:1456`) ir yra apsaugotas galimybių prieigos raktu. Jis
-  **niekada** nepublikuojamas pagrindiniame kompiuteryje ar internete.
-- Codex CLI yra integruota į `omniroute:base`, todėl paleidžiant pagalbinį
-  konteinerį Codex nereikia diegti pagrindiniame ar naudotojo kompiuteryje.
+- Šoninė priekaba klauso** tik** vidiniame kūrimo tinkle (`ws://codex-app-server:1456`), esančiame už galimybių prieigos rakto. Tai yra** niekada** paskelbta pagrindiniame kompiuteryje arba internete.
+- Šoninėje priekaboje naudojama `omniroute:cli-no-docker`, pagaminta iš `runner-cli-no-docker` taikinio, į kurį įeina ir Codex CLI.
 
 ## 2. Paleidimas
 

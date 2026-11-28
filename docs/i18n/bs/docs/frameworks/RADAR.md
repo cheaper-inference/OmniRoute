@@ -79,28 +79,32 @@ Ovo je stroga "superset" kapija: uključivanje flag-a otključava _ekrane_, niš
 
 ---
 
-## Sinhronizacija podataka je ZASEBNA saglasnost (opt-in) — obećanje o privatnosti
+## Sinhronizacija podataka je SEPARATE opt-in — obećanje privatnosti
 
-Uključivanje `RADAR_ENABLED` samo otključava korisnički interfejs (UI). Sinhronizacija feed-a zahtijeva drugu, nezavisnu saglasnost (opt-in) pohranjenu u `radar_settings.opt_in` (`src/lib/db/radar.ts`, migracija `136_radar_cache_settings.sql`). `syncRadar()` provjerava flag _i_ saglasnost prije bilo kakvog mrežnog poziva:
+Uključivanje `RADAR_ENABLED` samo otključava UI. Sinhronizacija feeda zahtijeva drugu, nezavisnu opciju koja je pohranjena u `radar_settings.opt_in` (`src/lib/db/radar.ts`, migracija `136_radar_cache_settings.sql`). `syncRadar()` provjerava oznaku _i_ opt-in prije upućivanja bilo kakvog mrežnog poziva:
 
 ```
-Flag isključen → { status: "disabled" }   — nema mrežnog poziva
-Opt-in false   → { status: "opt_out" }    — nema mrežnog poziva
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
 Kada su oba uključena, putanja sinhronizacije je:
 
-1. `GET <feed base URL>/v1/catalog/latest` sa `x-omniroute-radar-schema: 2` i opcionim `Authorization: Bearer <supporter key>` zaglavljem (pogledajte ispod). Serveri podrazumijevano koriste zasebno potpisani v1 tranzicioni artefakt kada zaglavlje šeme nedostaje, tako da stariji instalirani klijenti nastavljaju primati ažuriranja.
-2. Ovo je tok aplikacije samo za preuzimanje, ali je i dalje HTTPS zahtjev. Hostovana infrastruktura prima uobičajene metapodatke o konekciji kao što je izvorna IP adresa. Kada je konfigurisan ključ podrške (supporter key), sinhronizacija takođe šalje taj ključ u Bearer zaglavlju kako bi servis mogao riješiti pravo na pristup (entitlement). Na tačnoj reviziji privatnog servera identifikovanoj u granici dokaza iznad, računovodstvo zahtjeva za feed-om koristi hešove ključeva, agregatnu upotrebu i dnevno rotirajući skraćeni HMAC IP adrese za ručnu provjeru zloupotrebe; te tabele ne čuvaju ni ključ ni IP adresu u sirovom obliku. Pristupni logovi infrastrukture i šifrovano odlazno sanduče (delivery outbox) su zasebne operativne granice.
-3. OmniRoute nikada ne šalje upite, odgovore, razgovore, akreditive provajdera, saobraćaj modela, vrijeme rada (uptime), latenciju ili lokalnu konfiguraciju provajdera Radar servisu.
-4. Odgovor se verifikuje, validira i kešira lokalno (pogledajte [Security model](#security-model)). Radar ima tačno četiri mrežne putanje na strani servera: `syncRadar()` za katalog, `syncRadarReferrals()` za preporuke i `syncRadarOffers()` / `syncRadarIntel()` za ponude i Intel samo za podržavaoce.
+1. `GET <feed base URL>/v1/catalog/latest` sa `x-omniroute-radar-schema: 2` i opcionim `Authorization: Bearer <supporter key>` zaglavljem (pogledajte dolje). Serveri podrazumevano koriste posebno potpisani artefakt prelaza v1 kada je zaglavlje šeme odsutno, tako da stariji instalirani klijenti nastavljaju da primaju ažuriranja.
+2. Ovo je tok aplikacije samo za preuzimanje, ali je i dalje HTTPS zahtjev. Hostovana infrastruktura prima obične metapodatke veze kao što je izvorni IP. Kada je ključ podrške konfigurisan, sinhronizacija takođe šalje taj ključ u zaglavlju nosioca kako bi usluga mogla da reši pravo. U tačnoj reviziji privatnog servera identifikovanoj u gornjoj granici dokaza, računovodstvo zahtjeva za feed-om koristi hešove ključa, ukupnu upotrebu i dnevno rotirajući skraćeni HMAC IP za ručni pregled zloupotrebe; te tabele ne postoje ni ključ ni IP u sirovom obliku. Dnevnici pristupa infrastrukturi i šifrovano izlazno sanduče isporuke su odvojene operativne granice.
+3. OmniRoute nikada ne šalje upite, odgovore, razgovore, vjerodajnice provajdera, promet modela, vrijeme neprekidnog rada, kašnjenje ili konfiguraciju lokalnog provajdera Radar servisu.
+4. Odgovor je provjeren, potvrđen i lokalno keširan (pogledajte [Sigurnosni model](#security-model) ). Radar ima tačno četiri mrežne putanje na strani servera: `syncRadar()` za katalog, `syncRadarReferrals()` za preporuke i `syncRadarOffers()` / `syncRadarIntel()` za ponude samo za podršku i Intel.
 
-**Ključ podrške (supporter key)** je opcioni Bearer token (`radar_settings.supporter_key`) koji omogućava servisu feed-a da odluči koji nivo (tier) da posluži (pogledajte [Tiers](#tiers-community-and-live)). On je:
+Provjera kataloga se odvija svaka 24 sata. Kada potvrđeni feed i dalje nosi keširanu verziju i nivo, sinhronizacija zadržava keširani korisni teret, obnavlja `fetchedAt`, a sljedeća provjera dolazi 24 sata kasnije umjesto na sljedećem satu.
 
-- Pohranjen **šifrovano u stanju mirovanja (encrypted at rest)** sa istim AES-256-GCM `encrypt()`/`decrypt()` pomoćnim funkcijama (`src/lib/db/encryption.ts`) koje se koriste za akreditive provajdera.
-- Postavljen putem `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) i **nikada se ne vraća (echoed back)** — odgovor vraća maskirani oblik (`omr_****abcd`).
-- Promjena ili brisanje istog atomski poništava kešove kataloga, preporuka, ponuda i Intel-a. Sljedeća sinhronizacija/čitanje rješava novo pravo na pristup na strani servera; čuvanje ključa samo po sebi ne pravi mrežni zahtjev niti troši aktivacioni ključ za jednokratnu upotrebu.
-- Šalje se servisu feed-a kao Bearer token prilikom `GET` sinhronizacije — ništa drugo u vezi sa ključem nikada ne napušta klijenta.
+The** ključ podrške** je opcioni token nosioca (`radar_settings.supporter_key`) koji omogućava usluzi feeda da odluči koji će nivo služiti (pogledajte [Slojevi](#tiers-community-and-live) ). to je:
+
+- Pohranjeno** šifrirano u mirovanju** sa istim AES-256-GCM `encrypt()`/`decrypt()` pomoćnicima (`src/lib/db/encryption.ts`) koji se koriste za vjerodajnice provajdera.
+- Postavite preko `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) i** nikad nije odjeknuo** — odgovor vraća maskirani oblik (`omr_****abcd`).
+- Promjena ili brisanje atomski poništava katalog, preporuke, ponude i Intel keš memorije. Sljedeći sync/read rješava novo ovlaštenje na strani servera; Čuvanje ključa samo po sebi ne postavlja mrežni zahtjev niti troši ključ za jednokratnu upotrebu.
+- Poslano na feed servis kao token nosioca na sinhronizaciji GET — ništa drugo o ključu nikada ne napušta klijenta.
+
+---
 
 ## Pravila pristupa i sigurnosti prikazana prije opt-in-a
 
@@ -287,45 +291,45 @@ Polje `tier` u potpisanom **tijelu** feed-a je uvijek `"live"` — feed servis i
 
 ---
 
-## Pravila spajanja slojeva u vrijeme čitanja
+## Pravila spajanja preklapanja vremena čitanja
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) spaja keširani feed **preko** statičke osnove u **vrijeme čitanja**, unutar `getRadarCatalog()`. Niz osnove (`FREE_MODEL_BUDGETS`) se nikada ne mutira — `MergedEntry[]` se izračunava svježe pri svakom pozivu.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) spaja keširani feed** gotovo** statička osnovna linija na** vrijeme čitanja** , unutar `getRadarCatalog()`. Osnovni niz (`FREE_MODEL_BUDGETS`) nikada nije mutiran — `MergedEntry[]` se izračunava svjež na svakom pozivu.
 
-Četiri pravila, po redoslijedu prioriteta:
+Četiri pravila, po redoslijedu:
 
-1. **Feed nikada ne prepisuje lokalno preklapanje.** Po polju: ako je operater prilagodio polje na unosu (`localOverrides` mapa, ključirana `provider:modelId`), vrijednost feed-a za to specifično polje se preskače — vrijednost operatera pobjeđuje.
-2. **`enabled: false` onemogućava unos, uz porijeklo.** Feed unos koji isključuje unos postavlja `enabled: false` i `disabledBy: "radar"` na spojenom rezultatu, tako da UI može objasniti _zašto_ je unos prešao iz dostupnog u onemogućeno.
-3. **Unos koji je dodao korisnik, a koji nije prisutan u feed-u, opstaje netaknut.** Unosi koji postoje samo u osnovi (ili su dodati lokalno) i nemaju odgovarajući feed unos prolaze nepromijenjeni.
-4. **Tombstoned unos se nikada ne vraća u život.** Ako je operater eksplicitno obrisao unos (`tombstones` set), ponovno dodavanje tog `provider:modelId` od strane feed-a u kasnijoj verziji ga ne vraća.
+1. **Feed nikada ne prepisuje lokalno nadjačavanje.** Po polju: ako je operater prilagodio polje na unosu (`localOverrides` mapa, ključ `provider:modelId`), vrijednost feeda za to specifično polje se preskače — vrijednost operatora pobjeđuje.
+2. **`enabled: false` onemogućuje unos, sa porijeklom.** Unos feeda koji isključuje unos postavlja `enabled: false` i `disabledBy: "radar"` na spojeni rezultat, tako da UI može objasniti _zašto_ je unos prešao iz dostupnog u onemogućen.
+3. **Unos koji je dodao korisnik koji nije prisutan u feedu ostaje netaknut.** Unosi koji postoje samo u osnovnoj liniji (ili su dodani lokalno) i nemaju odgovarajući unos feeda prolaze nepromijenjeni.
+4. **Nadgrobni zapis nikada ne oživljava.** Ako je operater eksplicitno izbrisao unos (`tombstones` set), feed koji ponovo dodaje taj `provider:modelId` u kasnijoj verziji ga ne vraća nazad.
 
-Polja koja se mogu uređivati i tombstones se čuvaju u `radar_local_model_state` (migracija `153_radar_local_model_state.sql`). Javni DB adapter (`src/lib/db/radar.ts`) pretvara te redove u `localOverrides` mapu i `tombstones` set koje koristi `applyFeed()`; produkcijski `getRadarCatalog()` učitava to stanje nakon što prođu provjere flag-a, keša i sheme. Samo `displayName` i `enabled` su uređivi od strane operatera. Identitet provajdera/modela, porijeklo feed-a, kvota, mogućnosti, ToS i podaci o podešavanju se ne mogu pisati kroz ovu površinu.
+Polja koja se mogu uređivati i nadgrobni spomenici ostaju u `radar_local_model_state` (migracija `153_radar_local_model_state.sql`). Javni DB adapter (`src/lib/db/radar.ts`) pretvara te redove u `localOverrides` mapu i `tombstones` skup koji koristi `applyFeed()`; production `getRadarCatalog()` učitava to stanje nakon što prođu vrata zastavice, keša i šeme. Samo `displayName` i `enabled` se mogu uređivati operatorom. Provider/model identitet, porijeklo feeda, kvota, mogućnosti, ToS i podaci o postavljanju ne mogu se pisati kroz ovu površinu.
 
-Kontrolna tabla izlaže četiri lokalne akcije:
+Kontrolna ploča izlaže četiri lokalne radnje:
 
-- **Edit** mijenja lokalno ime za prikaz i stanje omogućeno/onemogućeno.
-- **Reset local changes** briše oba uređiva polja bez promjene tombstone-a.
-- **Hide** kreira tombstone, tako da kasnija ažuriranja feed-a ne mogu ponovo kreirati red.
-- **Restore** uklanja tombstone; bilo koje zasebno sačuvano preklapanje ostaje na snazi.
+- **Uredi** mijenja lokalni naziv za prikaz i omogućeno stanje.
+- **Resetujte lokalne promjene** briše oba polja koja se mogu uređivati bez promjene nadgrobnog spomenika.
+- **Sakrij se** stvara nadgrobni spomenik, tako da kasnija ažuriranja feeda ne mogu ponovo kreirati red.
+- **Vrati** uklanja nadgrobni spomenik; svako posebno sačuvano nadjačavanje ostaje na snazi.
 
-Feed `enabled: false` ostaje sigurnosni izuzetak: on pobjeđuje zastarjelo lokalno `enabled: true`, održava spojeni unos onemogućenim i bilježi `disabledBy: "radar"`.
+Feed `enabled: false` ostaje sigurnosni izuzetak: pobjeđuje zastarjeli lokalni `enabled: true`, drži spojeni unos onemogućenim i snima `disabledBy: "radar"`.
 
-Publikacije kataloga koriste `schemaVersion: 2`. `contextWindow` i svaki od `tools`, `vision` i `thinking` su nezavisno `number | null` / `boolean | null`: `null` znači nepoznato, dok `false` znači da zvanični izvor provajdera potvrđen od strane D16 eksplicitno kaže da mogućnost ne postoji. Interni OmniRoute registar/model-spec flagovi se nikada ne promovišu direktno u činjenice feed-a. Klijent i dalje prihvata v1 snimke; pošto je stari builder koristio `false` kao placeholder za odsustvo, v1 `false` se normalizuje u nepoznato dok v1 `true` ostaje činjenično. Nepoznate verzije sheme ne uspijevaju (fail closed) i posljednji validni keš ostaje dostupan. Svaki v2 model sa context/capability koji nije null mora nositi HTTPS `metadataEvidenceUrls[]` bez akreditiva; u suprotnom validacija sheme ne uspijeva i keš se ne zamjenjuje. Tabela kataloga prikazuje sva tri stanja kao `✓`, `✕` i `?`.
+Kataloške publikacije koriste `schemaVersion: 2`. `contextWindow` i svaki od `tools`, `vision` i `thinking` su nezavisno `number | null` / `boolean | null`: `null` znači nepoznato, dok `false` znači da zvanični izvor provajdera D16-confirmed eksplicitno kaže da mogućnost nema. Interne OmniRoute registry/model-spec zastavice se nikada ne promovišu direktno kao izvor činjenica. Klijent i dalje prihvata v1 snimke; jer je stari graditelj koristio `false` kao čuvar mjesta za odsutnost, v1 `false` je normaliziran na nepoznato, dok v1 `true` ostaje činjenično. Nepoznate verzije sheme nisu zatvorene i posljednji važeći keš ostaje dostupan. Svaki v2 model sa ne-null context/capability mora nositi HTTPS `metadataEvidenceUrls[]` bez vjerodajnica; u suprotnom provjera valjanosti sheme ne uspijeva i keš se ne zamjenjuje. Tabela kataloga prikazuje sva tri stanja kao `✓`, `✕` i `?`.
 
 ### Vođene kombinacije i MCP pristup
 
-Potvrđene `familyId` vrijednosti preživljavaju preklapanje u vrijeme čitanja i pokreću čisti `buildRadarComboSuggestions()` modul (`src/lib/radar/comboSuggestions.ts`). Porodica se predlaže samo kada najmanje dva različita provajdera imaju aktivne veze i izlažu tačan kurirani ID modela. Onemogućeni modeli, neaktivni provajderi, nedostajući ID-ovi modela, singleton porodice i dvosmislena podudaranja aliasa/prefiksa ne uspijevaju (fail closed). Prijedlozi koriste postojeću `priority` strategiju, naručujući najveći mjesečni budžet koji se ponavlja prvi; UI ih kreira samo putem `POST /api/combos`.
+Potvrđene `familyId` vrijednosti preživljavaju preklapanje vremena čitanja i pokreću čisti `buildRadarComboSuggestions()` modul (`src/lib/radar/comboSuggestions.ts`). Porodica se predlaže samo kada najmanje dva različita provajdera imaju aktivne veze i izlažu tačno odabrani model ID. Onemogućeni modeli, neaktivni dobavljači, nedostajući model IDs, singleton porodice i dvosmislena alias/prefix podudaranja ne uspijevaju se zatvoriti. Prijedlozi koriste postojeću `priority` strategiju, prvo naručujući najveći mjesečni budžet koji se ponavlja; UI ih stvara samo kroz `POST /api/combos`.
 
-Vođeni UI se nalazi na `/dashboard/radar/combos`. On čita samo lokalne krajnje tačke `GET /api/radar/catalog` i `GET /api/combos/builder/options`. On nikada ne pokreće Radar sinhronizaciju, ne čita akreditive provajdera niti piše direktno u bazu podataka kombinacija.
+Vođeni UI živi u `/dashboard/radar/combos`. Čita samo lokalne `GET /api/radar/catalog` i `GET /api/combos/builder/options` krajnje točke. Nikada ne pokreće radar sinhronizaciju, čita akreditive provajdera ili upisuje direktno u kombinovanu bazu podataka.
 
-MCP klijenti mogu čitati istu lokalnu projekciju pomoću `omniroute_radar_catalog` (`read:radar`). Opcioni filteri `provider`, `familyId` i `enabledOnly` se evaluiraju nakon jednog lokalnog čitanja `GET /api/radar/catalog`. Njegov zatvoreni izlaz uključuje metapodatke kataloga plus provajder/model, prikazano ime, `familyId`, kvotu, mogućnosti, stanje uključenosti, porijeklo i `disabledBy`; URL-ovi za podešavanje, koraci, konekcije, e-mail adrese, ključevi i podaci o preporukama se nikada ne vraćaju. Ovaj alat je samo za čitanje i nikada ne poziva `/api/radar/sync`.
+MCP klijenti mogu čitati istu lokalnu projekciju sa `omniroute_radar_catalog` (`read:radar`). Opcijski `provider`, `familyId` i `enabledOnly` filteri se evaluiraju nakon jednog lokalnog čitanja `GET /api/radar/catalog`. Njegov zatvoreni izlaz uključuje metapodatke kataloga plus provider/model, ime za prikaz, `familyId`, kvotu, mogućnosti, omogućeno stanje, porijeklo i `disabledBy`; setup URLs, koraci, veze, e-mail adrese, ključevi i podaci o preporukama se nikada ne vraćaju. Ovaj alat je samo za čitanje i nikada ne poziva `/api/radar/sync`. Kada keširani feed prethodi instaliranom katalogu, `meta.olderThanRelease` je `true` i alat vraća modele iz instaliranog kataloga s primijenjenim lokalnim zamjenama i nadgrobnim spomenicima.
 
-### Oznake porijekla
+### Oznake porekla
 
-Svaki spojeni unos sadrži polje `origin` koje UI prikazuje kao oznaku:
+Svaki spojeni unos nosi `origin` polje koje UI prikazuje kao značku:
 
-- `"baseline"` — netaknuto iz statičkog kataloga izdanja.
-- `"radar"` — jedno ili više polja je osvježeno putem feeda.
-- `"local"` — operater ima barem jedno lokalno preklapanje na ovom unosu (lokalna preklapanja uvijek imaju prednost nad feedom prema pravilu 1, bez obzira na to šta feed kaže).
+- `"baseline"` — netaknut iz kataloga statičkog izdanja.
+- `"radar"` — jedno ili više polja je osvježeno feedom.
+- `"local"` — operator ima najmanje jedno lokalno nadjačavanje ovog unosa (lokalno nadjačavanje uvijek pobjeđuje feed po pravilu 1, bez obzira na to što feed kaže).
 
 ---
 

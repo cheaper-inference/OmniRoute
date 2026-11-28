@@ -13,7 +13,7 @@ işlem hattı bir kayıt defteri yapısındadır, dolayısıyla yeni hedefler me
 
 ---
 
-## 1. Nasıl çalışır
+## 1. Nasıl çalışır?
 
 ```
 server (decrypt + validate config, reconcile cursor)
@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Zamanlama** — `log_export` adlı tek bir `JobRegistry` cron işi; varsayılanı `0 * * * *` (saatlik,
-  UTC). `src/lib/initCloudSync.ts` içinde kaydedilir; `OMNIROUTE_LOG_EXPORT_CRON` ile değiştirilebilir.
-  Her tetiklemede, **etkin** tüm hedeflerin bekleyen kayıtları sırayla aktarılır.
-- **İmleç** — SQLite'ın örtük `call_logs.rowid` değeri; hedef başına
-  `log_export_destinations.cursor_row_id` içinde kalıcı olarak saklanır. `timestamp` bilinçli olarak imleç olarak kullanılmaz: çağrı yapanlar
-  kendi değerlerini sağlayabilir; bu nedenle yavaş bir istek, daha sonra başlayan daha hızlı bir istekten sonra
-  yazılabilir ve zaman damgasına dayalı bir imleç bu isteği atlar.
-- **Toplu işleme** — istek başına `batch_size` satır (varsayılan 500), çalıştırma başına `max_rows_per_run` satır
-  (varsayılan 10000); böylece büyük bir birikim, tek bir tetiklemeyi engellemek yerine birkaç tetiklemede aktarılır.
-- **Teslimat** — imleç yalnızca `send()` başarıyla tamamlandıktan sonra ilerler. Başarısız bir toplu işlem,
-  imleci olduğu yerde bırakır; böylece aynı satırlar bir sonraki çalıştırmada yeniden denenir. Sağlanan garanti,
-  gerçek anlamda tam bir kez teslimat değil, en az bir kez teslimat ile hedef tarafında yinelenen kayıtların ayıklanmasıdır: BigQuery her
-  satırı çağrı günlüğü kimliğiyle anahtarlar ve kendi yinelenen kayıt ayıklama zaman aralığı içinde bu anahtarı en iyi çaba esasına göre dikkate alır.
-- **Çakışma koruması** — cron tetiklemesi ile `POST .../run` aynı anda devreye girebilir. Kayıtları
-  zaten aktarılmakta olan bir hedef, iki kez işlenmek yerine atlanır (çalıştırma sonucunda `skipped: true`);
-  böylece eşzamanlı bir çalıştırma, bir toplu işlemi yeniden gönderemez veya imleci geriye yazamaz.
-- **Temizleme sonrası kurtarma** — `cursor_row_id`, `MAX(rowid)` değerinin üzerine çıkarsa (tablonun tamamı
-  temizlenmiş ve rowid değerleri yeniden başlamışsa), çalıştırıcı kalıcı olarak yeni kayıtları göremez hâle gelmek yerine 0'a geri döner.
+- **Takvim** — bir `JobRegistry` cron işi, `log_export`, varsayılan olarak `0 * * * *` (saatlik, UTC) olarak ayarlanır. `src/lib/initCloudSync.ts` kayıtlı; `OMNIROUTE_LOG_EXPORT_CRON` ile geçersiz kılınabilir. Her tik her şeyi boşaltır** etkinleştirilmiş** hedef sırasıyla.
+- **Cursor** — SQLite örtülü `call_logs.rowid`, `log_export_destinations.cursor_row_id` hedef başına kalıcı oldu. `timestamp` kasıtlı olarak imleç değildir: arayanlar kendi değerlerini sağlayabilirler, böylece daha sonra başlayan daha hızlı bir istekten sonra yavaş bir istek yazılabilir ve bir zaman damgası imleci onu atlar.
+- **harmanlama** istek başına — `batch_size` satırları (varsayılan 500), çalıştırma başına `max_rows_per_run` satırları (varsayılan 10000) böylece büyük bir biriktirme listesi, bir tanesini engellemek yerine birkaç onay işareti üzerinden akar.
+- **Teslimat** — imleç yalnızca `send()` çözümlendikten sonra ilerler. Başarısız bir grup, imleci olduğu yerde bırakır, böylece aynı satırlar bir sonraki çalıştırmada yeniden denenir. Garanti, en az bir kez artı hedef tarafında tekilleştirmedir, tam olarak bir kez doğru değildir: BigQuery kendi tekilleştirme penceresi içinde en iyi çaba esasına göre onurlandırdığı çağrı günlüğü kimliğine göre her satırı anahtarlar.
+- **Örtüşme koruması** — cron tik ve `POST .../run` birlikte ateş edebilir. Halihazırda boşalan bir hedef, iki kez boşaltmak yerine atlanır (çalışma sonucunda `skipped: true` ), dolayısıyla eşzamanlı bir çalıştırma, bir toplu işi yeniden gönderemez veya imleci geriye doğru yazamaz.
+- **Kurtarmayı temizle** — `cursor_row_id` `MAX(rowid)` üzerine çıkarsa (tüm masa temizlendi ve satırlar yeniden başlatıldı), koşucu kalıcı olarak kör olmak yerine 0'a geri sarılır.
 
-### Yalıtılmış çalıştırıcı ve sınırlar
+### İzole koşucu ve sınırlar
 
-Node üzerinde her hedef çalıştırması ayrı, kısa ömürlü bir işletim sistemi alt süreci başlatır (IPC kullanan
-`child_process`, `worker_threads` değil). Gövde okumaları, yükün JSON olarak ayrıştırılması/serileştirilmesi, hedefin
-`prepare()` işlemi ve hedefin ağ G/Ç işlemlerinin tümü sunucunun olay döngüsünde değil, burada çalışır.
-IPC üzerinden yalnızca yapılandırma ve küçük ilerleme mesajları geçer; dışa aktarılan kayıtlar hiçbir zaman
-sunucuya geri dönmez. Cron işi ve Şimdi çalıştır rotası, dışarıya sunulan aynı sonucu ve çakışma korumasını korur.
+Düğümde çalıştırılan her hedef, ayrı, kısa ömürlü bir OS alt süreci başlatır ( IPC ile değil, `worker_threads` ile `child_process` ). Gövde okumaları, yük JSON parsing/serialization, hedef `prepare()` ve hedef ağ I/O tümü sunucunun olay döngüsünde değil, orada çalışır. Yalnızca yapılandırma ve küçük ilerleme mesajları IPC geçer; dışa aktarılan kayıtlar hiçbir zaman sunucuya geri dönmez. Cron işi ve Run now rotası aynı genel sonucu ve örtüşme korumasını korur.
 
-Alt süreç, sunucunun çözümlenmiş `DATA_DIR/storage.sqlite` dosyasını `node:sqlite` kullanarak salt okunur biçimde,
-`busy_timeout=5000` ve `query_only=ON` ayarlarıyla açar. Hiçbir veritabanı tekil örneğini içe aktarmaz ve hiçbir
-geçiş, yedekleme veya SQLite güncellemesi gerçekleştirmez. Eksik/bozuk artefakt kayıt takibi (bozuk artefakta ilişkin
-UPDATE işlemi dâhil) yalnızca pano ayrıntı yolunda kalır. Her iki yol da saf bir
-ayrıntı çözümleyicisini paylaşır; dışa aktarma, eşzamansız dosya sistemi okumalarını ve aynı artefakt → eski
-satır içi → eski disk → yok çözümleme sırasını kullanır. Alt süreç okuyucusunu açtığında çalıştırma,
-en yüksek ekleme rowid değerinin anlık görüntüsünü alır; daha sonraki eklemeler bir sonraki çalıştırmayı bekler. Bu bir ekleme
-sınırıdır, uzun ömürlü bir SQLite işlemi değildir: WAL yazıcıları ve denetim noktaları ağ beklemeleri sırasında
-serbest kalır. Mevcut satırlardaki güncellemeler/silmeler bu sınır tarafından dondurulmaz.
+Çocuk, sunucunun çözümlenen `DATA_DIR/storage.sqlite` salt okunur olarak `node:sqlite` kullanarak `busy_timeout=5000` ve `query_only=ON` ile açar. Hiçbir DB singleton'unu içe aktarmaz ve hiçbir geçiş, yedekleme veya SQLite güncellemesi gerçekleştirmez. Missing/corrupt yapıt defter tutma (bozuk yapı UPDATE dahil) yalnızca kontrol paneli ayrıntı yolunda kalır. Her iki yol da saf bir ayrıntı çözümleyiciyi paylaşıyor; dışa aktarma, eşzamansız dosya sistemi okumalarını ve aynı yapıyı kullanır → eski satır içi → eski disk → yok çözümleme sırası. Bir çalıştırma, alt okuyucuyu açtığında maksimum ekleme satır kimliğinin anlık görüntüsünü alır; daha sonraki eklemeler bir sonraki çalıştırmayı bekler. Bu, uzun ömürlü bir SQLite işlemi değil, bir ekleme sınırıdır: WAL yazarları ve kontrol noktaları, ağ beklemeleri sırasında serbest kalır. Mevcut satırların Updates/deletions bu sınır tarafından dondurulmaz.
 
-Kabul edilen her toplu işlemden sonra alt süreç bir onay bekler. Sunucu önce
-`advanceLogExportCursor` ile imleci kalıcı olarak kaydeder, ardından `ack` gönderir; bundan önce bir sonraki toplu işlem başlamaz.
-Gönderim hatası, çökme veya zaman aşımı, ilgili toplu işlemin imlecini ilerletmeden başarısızlık kaydı oluşturur. Önceden
-onaylanmış toplu işlemler kalıcı olarak kaydedilmiş durumda kalır; en fazla, onaylanmamış tek toplu işlem yeniden gönderilebilir.
-Başarı yalnızca `done` sonrasında ve alt süreç sorunsuz biçimde çıktıktan sonra kaydedilir. Başarısızlık durumunda alt süreç
-SIGTERM ile sonlandırılır; 500 ms sonra SIGKILL'e geçilir ve çalıştırıcı sürecin kapanmasını bekler.
+Kabul edilen her gruptan sonra çocuk bir onay bekler. Sunucu önce imleci `advanceLogExportCursor` ile tutar, ardından `ack` gönderir; bir sonraki parti ondan önce başlamıyor. Gönderim hatası, kilitlenme veya zaman aşımı kayıtları, söz konusu toplu işlemi ilerletmeden başarısız olur. Daha önce onaylanan gruplar bağlı kalır; en fazla bir onaylanmamış parti yeniden gönderilebilir. Başarı yalnızca `done` ve temiz bir çocuk çıkışından sonra kaydedilir. Başarısızlıklar çocuğu SIGTERM ile sonlandırır, 500 ms sonra SIGKILL yükselir ve çalıştırıcı işlemin kapanmasını bekler.
 
-| Ortam değişkeni                               | Varsayılan | Amaç                                         |
-| --------------------------------------------- | ---------- | -------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000     | Hedef başına geçen gerçek süre sınırı        |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024       | Alt sürecin MB cinsinden V8 old-space sınırı |
+| Ortam değişkeni                               | Varsayılan | Amaç                            |
+| --------------------------------------------- | ---------- | ------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000     | Hedef başına duvar saati sınırı |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024       | MB alt V8 eski alan sınırı      |
 
-Geçersiz/pozitif olmayan/tam sayı olmayan değerlerde varsayılanlar kullanılır. Yığın ayarı, toplam
-RSS sınırı değildir; çok büyük toplu işlemler yine de alt sürecin belleğini tüketebilir ve çalıştırmanın güvenli biçimde başarısız olmasına yol açabilir.
-1024 MB varsayılanı, gövdeler etkinleştirilmişken 512 KiB artefaktlardan oluşan varsayılan 500 satırlık toplu işlem için,
-BigQuery'nin bayt bazında parçalara ayrılmış JSON serileştirmesi de dâhil olmak üzere ek alan bırakır. Bu, gövde içeren
-10000 satırlık bir toplu işlemi güvenli hâle getirmez. V8 yığınının tükenmesi, çözüm adımı içeren bir hata kaydı oluşturur: toplu işlem
-boyutunu küçültün veya `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` değerini artırın; imleç son
-onaylanan toplu işlemde kalır. Geçmişten kalan satır içi/disk gövdeleri, modern artefakt boyut sınırının kapsamında değildir.
-Operatörler, özellikle bellek sınırı olan kapsayıcılarda RSS için ayrıca bütçe ayırmalıdır.
+Invalid/non-positive/non-integer değerleri varsayılanları kullanır. Yığın ayarı toplam RSS sınırı değildir; çok büyük gruplar yine de alt belleği tüketebilir ve çalıştırmayı güvenli bir şekilde başarısızlığa uğratabilir. 1024 MB varsayılanı, BigQuery'nin bayt parçalı JSON serileştirmesi de dahil olmak üzere, gövdelerin etkin olduğu 512 KiB yapıtlarından oluşan varsayılan 500 satırlık toplu iş için boşluk bırakır. 10.000 sıralı gövde grubunu güvenli hale getirmez. V8 yığın tükenmesi, eyleme geçirilebilir bir hatayı kaydeder: toplu iş boyutunu azaltın veya `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` artırın; imleç son onaylanan grupta kalır. Tarihi inline/disk bedenleri modern eser başlığı kapsamında değildir. Operatörler, özellikle hafızası sınırlı kapsayıcılar içinde olmak üzere RSS bütçesini ayrı olarak ayırmalıdır.
 
-Alt süreç yalnızca çözümlenmiş `DATA_DIR`, `NODE_ENV`, açıkça belirtilmiş `TZ` (eski dosya adı
-yerel saat çözümlemesi), mevcut olduğunda `ELECTRON_RUN_AS_NODE` ve şu dış bağlantı girdilerini devralır:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (ve bunların küçük harfli biçimleri),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Genel bir Undici dağıtıcısı, `NO_PROXY` dahil olmak üzere sunucunun yalnızca ortam değişkenlerine dayalı proxy çözümlemesini ve yerel ana bilgisayarlar için
-proxy'yi atlama kurallarını paylaşır; `proxyFetch.ts` dosyasını veya onun veritabanı/özellik bayraklarını içe aktarmaz.
-Proxy kimlik bilgileri, iletilen çıktılardan ve kaydedilen hatalardan çıkarılarak gizlenir. Hedef kimlik bilgileri
-yalnızca tek bir başlatma IPC iletisinde taşınır; asla argv veya ortam üzerinden aktarılmaz; çıktı/hata iletimine
-önek eklenir ve içerik temizlenir. Her cron çalıştırmasında Node'un SQLite uyarısının
-tekrarlanmasını önlemek için alt süreç yürütme argümanlarında yalnızca `ExperimentalWarning` devre dışı bırakılır; diğer uyarı türleri görünür kalır.
+Çocuk yalnızca çözümlenen `DATA_DIR`, `NODE_ENV`, açık `TZ` (eski dosya adı yerel zaman çözünürlüğü), varsa `ELECTRON_RUN_AS_NODE` ve şu giden girişleri miras alır: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (ve bunların küçük harf biçimleri), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Küresel bir Undici dağıtıcısı, `NO_PROXY` dahil olmak üzere sunucunun saf ortam proxy çözümlemesini ve yerel ana bilgisayar atlama kurallarını paylaşır; `proxyFetch.ts` veya DB/feature bayraklarını içe aktarmaz. Proxy kimlik bilgileri, iletilen çıktıdan ve kaydedilen hatalardan çıkarılır. Hedef kimlik bilgileri yalnızca tek bir başlangıç IPC mesajıyla seyahat eder; argv veya ortamda asla seyahat etmez; output/error iletme öneki eklenir ve sterilize edilir. Her cron çalıştırmasında Node'un SQLite uyarısının tekrarlanmasını önlemek için alt exec bağımsız değişkenlerinde yalnızca `ExperimentalWarning` devre dışı bırakılır; diğer uyarı türleri görünür durumda kalır.
 
-Hedef modülleri, Next.js/yalnızca sunucuya özgü bağımlılıklar olmadan içe aktarılabilir olmalıdır. Mevcut
-BigQuery uygulaması bu sözleşmeyi zaten karşılar. Erişim belirteci önbellekleri yalnızca alt sürecin
-çalışması boyunca geçerlidir, çalıştırmalar arasında korunmaz. Desteklenen çalışma zamanı Node'dur (`package.json` engines), ancak README'nin Bun
-kurulum bölümü ve `Dockerfile.bun`, `bun:sqlite` (`src/lib/db/core.ts` / bağdaştırıcılar) kullanan bir üretim uyumluluğu yolunu da
-duyurur. Bu nedenle Bun altında dışa aktarımlar önceki
-süreç içi yolu korur ve bir defalık uyarı verir: alt süreç yığın belleği/zaman aşımı yalıtımı kullanılamaz.
-Olay döngüsü ve OOM yalıtımı için Node kullanın; burada Bun yalnızca geliştirmeye yönelik olarak değerlendirilmez.
+Hedef modüller Next.js/server-only bağımlılıkları olmadan içe aktarılabilir olmalıdır. Mevcut BigQuery uygulaması zaten bu sözleşmeyi karşılamaktadır. Erişim belirteci önbellekleri yalnızca alt çalıştırma için geçerlidir, çalıştırmalar arasında geçerli değildir. Düğüm desteklenen çalışma zamanıdır (`package.json` motorları). En iyi çaba gerektiren, desteklenmeyen bir Bun uyumluluk yolu mevcuttur ( `src/lib/db/core.ts` / adaptörlerde `bun:sqlite` ve `Dockerfile.bun`), dolayısıyla dışa aktarımların bu yolun altında kalmaması gerekir. Bun altında, dışa aktarmalar önceki işlem içi yolu korur ve tek seferlik bir uyarı verir: alt heap/timeout yalıtımı kullanılamıyor. Olay döngüsü ve OOM izolasyonu için Node'u kullanın.
 
-`includeBodies` etkinleştirildiğinde, saatlik bir veri yükü birikimi oluşturmak yerine
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` gibi dakika düzeyinde bir çalışma sıklığını tercih edin.
-Toplu işlem ve satır sınırları yine de her çalıştırmayı sınırlar. Süreç başlatma maliyeti, her çalıştırmada her hedef için ödenir;
-bu, toplam CPU kullanımını azaltmak yerine küçük bir başlatma maliyeti karşılığında sunucunun olay döngüsünü yalıtır.
+`includeBodies` etkinleştirildiğinde, saatlik yük biriktirme listesi biriktirmek yerine `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` gibi dakika düzeyinde bir ritmi tercih edin. Parti ve satır sınırları hâlâ her çalıştırmayı sınırlıyor. İşlem başlangıcı, çalıştırma başına hedef başına ödenir; bu, sunucu olay döngüsü izolasyonu için küçük bir başlangıç maliyeti sağlar, toplam CPU kullanımını azaltmaz.
 
-### Veri yükleri (istemler ve tamamlamalar)
+### Yükler (istemler ve tamamlamalar)
 
-Varsayılan olarak dışa aktarım yalnızca Günlükler **listesinin** gösterdiği özet alanlarını taşır.
-**İstemleri ve yanıtları dışa aktar** (`includeBodies`) seçeneğini açmak, Günlükler **ayrıntı**
-bölmesinin her çağrı için gösterdiklerini de gönderir:
+Varsayılan olarak dışa aktarma yalnızca Günlüklerin özet alanlarını taşır.** liste** gösterir. Açılıyor** İstemleri ve yanıtları dışa aktar** (`includeBodies`) ayrıca Günlüklerin gönderdiklerini de gönderir** detay** her arama için bölme gösterilir:
 
-| Alan                             | İçerdiği bilgi                                                                |
-| -------------------------------- | ----------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Çağrı veri yükleri, panoda görüntülendikleri biçimde                          |
-| `pipeline_route_decision`        | Yönlendiricinin seçtiği hedef ve model                                        |
-| `pipeline_client_request`        | İstemcinin gönderdiği biçimiyle ham istek                                     |
-| `pipeline_openai_request`        | Dahili OpenAI biçimine dönüştürüldükten sonraki hali                          |
-| `pipeline_provider_request`      | Üst sisteme gerçekten gönderildiği biçimde, sağlayıcının formatında           |
-| `pipeline_provider_response`     | Üst sistemden gelen ham yanıt                                                 |
-| `pipeline_client_response`       | Çağrıyı yapana geri iletilen içerik                                           |
-| `pipeline_error`                 | Başarısız bir çağrı için işlem hattı düzeyindeki hata ayrıntısı               |
-| `bodies_truncated`               | Yukarıdaki alanlardan herhangi biri `maxBodyBytes` sınırına ulaştığında doğru |
+| Alan                             | Ne tutar                                                          |
+| -------------------------------- | ----------------------------------------------------------------- |
+| `request_body` / `response_body` | Kontrol paneli bunları oluştururken çağrı verileri                |
+| `pipeline_route_decision`        | Yönlendiricinin hangi hedefi ve modeli seçtiği                    |
+| `pipeline_client_request`        | Ham istek tam olarak müşterinin gönderdiği şekilde                |
+| `pipeline_openai_request`        | Dahili OpenAI şekline çevrildikten sonra                          |
+| `pipeline_provider_request`      | Gerçekte yukarı yönde gönderildiği şekliyle, sağlayıcı lehçesinde |
+| `pipeline_provider_response`     | Ham yukarı akış yanıtı                                            |
+| `pipeline_client_response`       | Arayan kişiye ne geri verildi?                                    |
+| `pipeline_error`                 | Başarısız bir çağrı için ardışık düzen düzeyinde hata ayrıntısı   |
+| `bodies_truncated`               | Yukarıdaki herhangi bir alan `maxBodyBytes` çarptığında doğrudur  |
 
-Bu, istem içeriğidir; dolayısıyla **varsayılan olarak kapalıdır** ve bilinçli olarak hedef başına seçilir.
-Gönderilen içerik, panonun gösterdiği içeriktir; çünkü dışa aktarım ve `getCallLogById` aynı ayrıntı
-çözümlemesini paylaşır: veri yükleri
-yazıldıklarında zaten kişisel olarak tanımlanabilir bilgilerden arındırılmış ve gizli bilgileri maskelenmiştir; ayrıca
-`noLog` API anahtarıyla yapılan bir çağrı hiçbir veri yükü saklamaz, dolayısıyla dışa aktarılacak bir şey yoktur.
+Bu hızlı içeriktir, dolayısıyla** varsayılan olarak kapalı** ve kasıtlı olarak varış noktasına göre bir seçim. Dışa aktarma ve `getCallLogById` ayrıntı çözümünü paylaştığından, gönderilenler kontrol panelinde gösterilir: yükler zaten PII açısından temizlenir ve yazıldığında gizli olarak düzenlenir ve `noLog` API anahtarıyla yapılan bir çağrı hiçbir yük depolamaz, dolayısıyla dışa aktarılacak hiçbir şey yoktur.
 
-Veri yükleri, dosya sistemindeki çıktı dosyasından satır başına okunur; dolayısıyla ayrıntıların yüklenmesi yalnızca
-bunu isteyen hedefler için gerçekleştirilir. Eksik veya bozuk bir çıktı dosyası, toplu işlemin başarısız olmasına ve imlecin ilerleyememesine
-neden olmak yerine özetinin null veri yükleriyle dışa aktarılmasını sağlar.
+Yükler, dosya sistemi yapısından satır başına okunur, bu nedenle nemlendirme yalnızca onu isteyen hedefler için çalışır. Eksik veya bozuk bir yapıt, toplu işlemin başarısız olması ve imlecin zor durumda kalması yerine özetini boş verilerle dışarı aktarır.
 
-`maxBodyBytes` (varsayılan 262144) her alanı sınırlar. Daha uzun veri yükleri **atılmak yerine
-kısaltılır** — kısaltılmış bir istem bile "ne soruldu" sorusunu yanıtlar — ve satır
-`bodies_truncated` ile işaretlenir. Akış halinde parça parça gelen farklar dışa aktarılmaz; birleştirilmiş yanıt
-zaten `pipeline_provider_response` ve `pipeline_client_response` içinde bulunur.
+`maxBodyBytes` (varsayılan 262144) her alanı kapatır. Daha uzun yükler** düşürülmek yerine kısaltıldı** — kırpılmış bir istem hala "ne soruldu" — yanıtını veriyor ve satır `bodies_truncated` ile işaretleniyor. Parça parça aktarılan deltalar dışa aktarılmaz; birleştirilmiş yanıt zaten `pipeline_provider_response` ve `pipeline_client_response`.
 
 ---
 

@@ -10,19 +10,20 @@
 
 - [Rith Thapa](#quick-run)
 - [Le Comhad Timpeallachta](#with-environment-file)
-- [Docker Compose](#docker-compose)
-- [Próifílí atá ar Fáil](#available-profiles)
-- [Uirlisí CLI an óstríomhaire a chumrú nuair a ritheann OmniRoute in Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Taobh-choimeádán Redis](#redis-sidecar)
-- [Compose Táirgthe](#production-compose)
+- [Docker Cum](#docker-compose)
+- [Próifílí ar Fáil](#available-profiles)
+- [Coimeádán hardening](#container-hardening)
+- [Uirlisí CLI óstach a chumrú nuair a ritheann OmniRoute i Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Taobhcharr](#redis-sidecar)
+- [Táirgeadh Cum](#production-compose)
 - [Céimeanna Dockerfile](#dockerfile-stages)
-- [Athróga Timpeallachta Ríthábhachtacha](#critical-environment-variables)
-- [Docker Compose le Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Tollán Tapa Cloudflare](#cloudflare-quick-tunnel)
+- [Athróga Timpeallachta Criticiúil](#critical-environment-variables)
+- [Docker Cum le Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Tollán Tapa](#cloudflare-quick-tunnel)
 - [Clibeanna Íomhá](#image-tags)
-- [Nuashonruithe deais in Docker](#dashboard-updates-in-docker)
-- [Infhaighteacht: is macasamhail aonair é SQLite de réir réamhshocraithe](#availability-default-sqlite-is-single-replica)
-- [Earráidí réigiúnacha Gemini laistigh de Docker](#gemini-regional-errors-inside-docker)
+- [Nuashonruithe ar an bpainéal i Docker](#dashboard-updates-in-docker)
+- [Infhaighteacht: is macasamhail singil é SQLite réamhshocraithe](#availability-default-sqlite-is-single-replica)
+- [earráidí réigiúnacha Gemini taobh istigh de Docker](#gemini-regional-errors-inside-docker)
 - [Nótaí Tábhachtacha](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ Tagann OmniRoute le próifílí Compose do na príomhleaganacha imscartha. Roghn
 | `web`                | `omniroute-web`  | Soláthraithe seisiún gréasáin a dteastaíonn brabhsálaí uathu: `gemini-web`, `claude-web`, `claude-turnstile` (tógann sé `runner-web`, Chromium san áireamh)                 | `docker compose --profile web up -d`         |
 
 > Is féidir próifílí iomadúla a chomhcheangal: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Coimeádán hardening
+
+Úsáideann na seirbhísí aip `base`, `web`, `cli`, agus `host` i `docker-compose.yml` `cap_drop: [ALL]` agus an rogha slándála `no-new-privileges:true`. Ritheann an íomhá mar an t-úsáideoir neamh-fhréamh `node` agus éisteann sé ar chalafoirt arda, mar sin ní mór dó aon cumais Linux. Cuireann an rogha slándála cosc ar phróisis ó phribhléidí a fháil trí dhénártha socraithe.
+
+Is í an phróifíl `cli` amháin a ghairfidh an soicéad Docker don nuashonrú uathoibríoch. Féach [Escape Hatch: cumraigh CLIs an choimeádáin féin](#escape-hatch-configure-the-containers-own-clis-use-sparingly) le haghaidh na n-impleachtaí slándála.
+
+Fanann an córas fréimhe inscríofa de réir réamhshocraithe. Scríobhann an phróifíl `cli` cumraíocht CLI agus caches in eolaire baile an choimeádáin, stórálann an phróifíl `web` staid seisiúin Cróimiam, agus is féidir leis an am rite Next.js caches a scríobh lasmuigh `/app/data`.
+
+Chun triail a bhaint as córas fréimhe comhaid inléite amháin leis an bpróifíl `base`, sábháil é seo mar `docker-compose.override.yml` in aice le `docker-compose.yml`. Léann Compose an sáraíocht go huathoibríoch.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Fanann an gléas `/app/data` reatha inscríofa. Déan d'ualach oibre a thástáil sula n-úsáideann tú an sáraíocht seo i dtáirgeadh, mar b'fhéidir go mbeadh ort scríobh chuig cosáin eile.
 
 ## Uirlisí CLI an óstaigh a chumrú nuair a ritheann OmniRoute in Docker
 
@@ -297,7 +322,7 @@ Iompar cuimhne i Docker:
 
 ### Runtime RAM le haghaidh gníomhairí códaithe
 
-Is é an réamhshocrú 1 GiB Docker urlár dashboard/light-chat, ní méid táirgeachta. Coinníonn comhlachtaí fada `POST /v1/responses` (na céadta teachtaireachtaí, na mílte uirlisí) graif ilchuimhne le linn comhbhrú. Tá deireadh tagtha le dhá iarratas forluiteacha ~ 3 MiB / ~ 750k-chomhartha V8 ag a** 12 GiB** sean-spás (`FATAL ERROR: Reached heap limit`) agus freisin bhuail 16 GiB cgroup OOM. Féach [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Is é an réamhshocrú 1 GiB Docker urlár dashboard/light-chat, ní méid táirgeachta. Coinníonn comhlachtaí fada `POST /v1/responses` (na céadta teachtaireachtaí, na mílte uirlisí) graif ilchuimhne le linn comhbhrú. Tá deireadh tagtha le dhá iarratas forluiteacha ~ 3 MiB / ~ 750k-chomhartha V8 ag a** 12 GiB** sean-spás (`FATAL ERROR: Reached heap limit`) agus freisin bhuail 16 GiB cgroup OOM. Féach [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Méid** cgroup `--memory` os cionn an chairn** suíonn maoláin dhúchasacha —, SQLite, agus idirmheánacha comhbhrú lasmuigh de V8.
 
@@ -417,7 +442,7 @@ volumes:
   omniroute-data:
 ```
 
-Socraíonn Caddy na ceanntásca caighdeánacha seolta ar aghaidh don choimeádán in aghaidh an tsrutha. úsáideann OmniRoute `NEXT_PUBLIC_BASE_URL` mar bhunús canónach poiblí le haghaidh aisghlaonna OAuth agus naisc phoiblí ginte; scríobhann painéal fíordheimhnithe úsáideann iarratais den bhunadh céanna móide cosaint CSRF atá faoi cheangal seisiúin. Ná cumasaigh `OMNIROUTE_TRUST_PROXY` ach le haghaidh ard-imlonnaithe nuair is mian leat d'aon ghnó OmniRoute an tionscnamh poiblí a dhíorthú ó cheanntásca iontaofa ar aghaidh seachas cumraíocht shainráite.
+Socraíonn Caddy na ceanntásca caighdeánacha seolta ar aghaidh don choimeádán in aghaidh an tsrutha. úsáideann OmniRoute `NEXT_PUBLIC_BASE_URL` mar bhunús canónach poiblí le haghaidh aisghlaonna OAuth agus naisc phoiblí ginte; scríobhann painéal fíordheimhnithe úsáideann iarratais den bhunadh céanna móide cosaint CSRF atá faoi cheangal seisiúin. Ná cumasaigh `OMNIROUTE_TRUST_PROXY` ach amháin le haghaidh ard-imlonnaithe nuair is mian leat d'aon ghnó OmniRoute an tionscnamh poiblí a dhíorthú ó cheanntásca iontaofa ar aghaidh seachas cumraíocht shainráite.
 
 ## Tollán Tapa Cloudflare
 
@@ -593,11 +618,11 @@ Baineann an tseirbhís an t-iarratas sula dtarraingíonn sí, ionas nach lúbfai
 
 Tá stoc Docker / Kubernetes OmniRoute** próiseas Nód amháin + scríbhneoir SQLite amháin** . Tá infhaighteacht ard** gan tacaíocht** ar an topology sin.
 
-| Srian                                     | Iarmhairt                                                                                                                                                                                                                                                                                                                                     |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Scríbhneoir aonair                        | Déan** nach bhfuil** rith macasamhla iolracha i gcoinne an chomhaid SQLite céanna. Éillíonn sé sin an DB.                                                                                                                                                                                                                                     |
-| Athchruthaigh / atosú / HEALTHCHECK mharú | **Briseadh iomlán** de SSE san eitilt , seisiúin deais, agus staid cuimhneacháin. Titeann gach cliant nasctha. Faigheann iarratais nua le linn na fuinneoige críochphointe folamh seachfhreastalaí droim ar ais**`502 Bad Gateway: Unknown error`** , ní OmniRoute JSON — ní féidir le cliaint é seo a idirdhealú ó theip soláthraí (#11015). |
-| Lúb an imeachta céanna agus `/healthz`    | Is féidir le catalóg ghnóthach nó tic comhbhrú moill a chur ar thaiscéalaithe; atosú gearr ansin an** amháin** macasamhail.                                                                                                                                                                                                                   |
+| Srian                                     | Iarmhairt                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scríbhneoir aonair                        | Déan** nach bhfuil** rith macasamhla iolracha i gcoinne an chomhaid SQLite céanna. Éillíonn sé sin an DB.                                                                                                                                                                                                                                                     |
+| Athchruthaigh / atosú / HEALTHCHECK mharú | **Briseadh iomlán** de SSE san eitilt , seisiúin deais, agus staid cuimhneacháin. Titeann gach cliant nasctha. Faigheann iarratais nua le linn na fuinneoige críochphointe folamh seachfhreastalaí droim ar ais**`502 Bad Gateway: Unknown error`** , ní OmniRoute JSON — ní féidir le cliaint idirdhealú a dhéanamh idir é seo agus teip soláthraí (#11015). |
+| Lúb an imeachta céanna agus `/healthz`    | Is féidir le catalóg ghnóthach nó tic comhbhrú moill a chur ar thaiscéalaithe; atosú gearr ansin an** amháin** macasamhail.                                                                                                                                                                                                                                   |
 
 **Maitrís taiscéalaithe** (féach freisin [moltaí probe Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -607,7 +632,7 @@ Tá stoc Docker / Kubernetes OmniRoute** próiseas Nód amháin + scríbhneoir S
 | ullmhacht        | HTTP `GET /healthz`                                              | Teorainneacha ama daingean a dhéileálann le lúb imeachta gnóthach mar rud marbh |
 | Doimhne / daoine | `/api/monitoring/health`                                         | beocht cubelet uathoibrithe                                                     |
 
-**Uasghráduithe:** ag súil go dtitfidh gach seisiún. Taosc cliaint más féidir leat; níl aon nuashonrú rollach ar SQLite réamhshocraithe . Beidh Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` freisin in ionad an phróisis amháin nuair a bhíonn an coimeádán Míshláintiúil - ga soinneáin céanna.
+**Uasghráduithe:** ag súil go dtitfidh gach seisiún. Taosc cliaint más féidir leat; níl aon nuashonrú rollach ar SQLite réamhshocraithe . Beidh Compose `restart: unless-stopped` móide Docker `HEALTHCHECK` freisin in ionad an phróisis ach amháin nuair a bhíonn an coimeádán unhealthy — ga soinneáin céanna.
 
 Tá manifests réamhdhéanta agus cairt Helm beo i `deploy/kubernetes/` agus `deploy/helm/omniroute/` — féach [treoir imscartha Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
@@ -638,9 +663,9 @@ spec:
             periodSeconds: 20
 ```
 
-Ligeann codlata `preStop` do kube críochphointí na Seirbhíse a laghdú roimh SIGTERM mar sin** nua** stopann trácht ag bualadh leis an bpróiseas ag fáil bháis. Déantar `/v1/responses` SSE san eitilt a dhraenáil suas go `SHUTDOWN_TIMEOUT_MS` (30idí réamhshocraithe) trí léasanna iontrála trom-mheáchain (#11015). Faigheann iarratais nua a shroicheann an próiseas fós `503` + `Retry-After: 5`. Is briseadh crua fós é an bhearna chríochphointe Recreate folamh go dtí go bhfuil an t-athsholáthar Réidh - is é sin topology SQLite, ní misconfig taiscéalaithe.
+Ligeann codlata `preStop` do kube críochphointí na Seirbhíse a laghdú roimh SIGTERM mar sin** nua** stopann trácht ag bualadh leis an bpróiseas ag fáil bháis. Déantar `/v1/responses` SSE san eitilt a dhraenáil suas go dtí `SHUTDOWN_TIMEOUT_MS` (30idí réamhshocraithe) trí léasanna iontrála trom-mheáchain (#11015). Faigheann iarratais nua a shroicheann an próiseas fós `503` + `Retry-After: 5`. Tá an bhearna chríochphointe Recreate folamh go dtí go bhfuil an t-athsholáthar Réidh fós ina — briste crua is é sin topology SQLite, ní misconfig taiscéalaithe.
 
-Tá Postgres seachtrach / il-scríbhneoir HA** nach bhfuil** cosán stoc doiciméadaithe. Más gá duit HA, coinnigh macasamhail amháin nó rith topology a ndearna an tionscadal tástáil air agus doiciméadaithe ar leithligh. Tá cónaí ar an obair Postgres/MySQL i [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Go dtí go long, an t-aon bhealach tacaithe a iolrú** mór** Is éard atá in acmhainn `/v1/responses` ná N próisis neamhspleácha (an chéad chuid eile), ní `replicas > 1` ar imleabhar amháin.
+Tá Postgres seachtrach / il-scríbhneoir HA** nach bhfuil** cosán stoc doiciméadaithe. Más gá duit HA, coinnigh macasamhail amháin nó rith topology a ndearna an tionscadal tástáil air agus doiciméadaithe ar leithligh. Cónaíonn an obair Postgres/MySQL i [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Go dtí go long, an t-aon bhealach tacaithe a iolrú** mór** Is éard atá in acmhainn `/v1/responses` ná N próisis neamhspleácha (an chéad chuid eile), ní `replicas > 1` ar imleabhar amháin.
 
 ## Scála amach: N próisis neamhspleácha
 
@@ -650,11 +675,11 @@ Ní ceadmhach cóipeanna de chuntas Codex amháin a chomhartha athnuachana aonú
 
 Athléann an cás éighníomhach an nasc nuair a bhíonn gá le hathnuachan agus ní ghlacann sé ach comhartha rochtana eile nach bhfuil caite. Seachas sin díchumasaítear athnuachan gan an nasc a dhul in éag nó a dhíghníomhachtú nó teip athnuachana a chur san áireamh. Úsáideann teipeanna fíordheimhnithe réamhtheachtacha fós gnáthchuntas teip, fuarú easpónantúil agus gnáthearráid an chliaint; tá díghníomhachtú cuntais fós buan. Sioncrónaigh comharthaí rothlaithe an úinéara sula dtéann na comharthaí rochtana in éag (cúig nóiméad an treoir athnuachana réamhghníomhach réamhshocraithe), nó athiompórtáil an comhad Codex auth arís. Stórálann allmhairí éighníomhacha na comharthaí soláthraithe gan iad a bhailíochtú ag críochphointe an chomharthaí. Tuairisceáin athnuachana dashboard/API láimhe `409 refresh_disabled`; níl aon athrú ar logáil isteach nua OAuth. Féach [tagairt don chomhshaol](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Is próiseas Nód amháin** gcarn amháin V8** . Toirmeascann dhá ghníomhaire códaithe ~ 3 MiB / ~ 750k-token `POST /v1/responses` (RTK + Caveman) an gcarn sin ag ~ 12 Gi (`FATAL ERROR: Reached heap limit`) agus is féidir leo OOM a 16 Gi cgroup. Féach [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Is é an tomhas sin a** buiséad cuimhne** rabhadh, ní táirge crua-uas de dhá `/v1/responses` fada comhthráthach . Tá iontráil comhrá trom-mheáchain faoi réir ag buiséad beart ingest uathdhíorthaithe (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) meánmhéide ón uasteorainn V8/cgroup céanna sin — á shárú aníos (nó ag socrú an chaipín iarratais ar chomhaireamh `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` oidhreachta) ar phróiseas atá ar mhéid cheana féin a thugann an ginmhilleadh isteach arís. Tá comhráite beaga, `/healthz`, `/v1/models`, agus MCP** nach bhfuil** sa chaipín sin.
+Is próiseas Nód amháin** gcarn amháin V8** . Toirmeascann dhá ghníomhaire códaithe ~ 3 MiB / ~ 750k-token `POST /v1/responses` (RTK + Caveman) an gcarn sin ag ~ 12 Gi (`FATAL ERROR: Reached heap limit`) agus is féidir leo OOM a 16 Gi cgroup. Féach [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Is é an tomhas sin a** buiséad cuimhne** rabhadh, ní táirge crua-uas de dhá `/v1/responses` fada comhthráthach . Tá iontráil comhrá trom-mheáchan faoi réir ag buiséad beart ingest uathdhíorthaithe (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) meánmhéide ón uasteorainn V8/cgroup céanna sin — á shárú aníos (nó ag socrú caipín iarratais comhairimh oidhreacht `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) ar phróiseas atá ar mhéid cheana féin a thugann an ginmhilleadh isteach arís. Tá comhráite beaga, `/healthz`, `/v1/models`, agus MCP** nach bhfuil** sa chaipín sin.
 
 ### Próiseas amháin: níos mó ná dhá `/v1/responses` fada
 
-A** sláintiúil** próiseas (carn thíos `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` réamhshocraithe )** féadfaidh** níos mó ná dhá `POST /v1/responses` fada comhthráthach a reáchtáil nuair a bhíonn spás fós sa bhuiséad inflight-byte ar fud an phróisis (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110). Tógann comhlachtaí ag `OMNIROUTE_CHAT_LARGE_BODY_BYTES` nó os a chionn (réamhshocraithe 256 KiB) an léas trom-mheáchain céanna agus a thógann iarratais ar struchtúir throma agus úsáideann siad an t-éalú céanna [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Na mílte cliant SSE comhthráthach fada (ní mór oibritheoirí go minic 40-50) is a** buiséad cuimhne** ceist — méid gcarn + sliotáin primary/headroom + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ní teorainn táirge chrua “uasmhéid 2”. Cailleann carn faoi bhrú fós le `503` in-athraithe ionas nach bhfilleann #7849.
+A** sláintiúil** próiseas (carn thíos `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` réamhshocraithe )** féadfaidh** rith níos mó ná dhá `POST /v1/responses` fada comhthráthach nuair a bhíonn spás fós sa bhuiséad inflight-byte (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) ar fud an phróisis. Tógann comhlachtaí ag `OMNIROUTE_CHAT_LARGE_BODY_BYTES` nó os a chionn (réamhshocraithe 256 KiB) an léas trom-mheáchain céanna agus a dhéanann iarratais trom struchtúir agus úsáideann siad an t-éalú [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` céanna (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Na mílte cliant SSE comhthráthach fada (is minic a bhíonn 40-50 ag teastáil ó oibreoirí) is a** buiséad cuimhne** ceist — méid gcarn + primary/headroom + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nach teorainn crua táirge “uas 2”. Cailleann carn faoi bhrú fós le `503` in-athraithe ionas nach bhfilleann #7849.
 
 Chuig** heaps iolrú** (seanspásanna neamhspleácha V8)** inniu** :
 
@@ -666,9 +691,9 @@ Chuig** heaps iolrú** (seanspásanna neamhspleácha V8)** inniu** :
 | Déan rúin an tsoláthraí a dhúbailt i ngach cás (nó glac le deais deighilte)                                                                    | Bí ag súil le painéal amháin / logáil glaonna amháin trasna cásanna |
 | Tosaigh le haon chothromóir ualaigh; Is leor greamaitheach le heochair nó seisiún API                                                          | Teastaíonn meánearraí atá feasach ar mhéid an díoltóra              |
 
-Is féidir cleamhnas seisiún le cuntas a roinnt freisin trí Redis: socraigh `OMNIROUTE_SESSION_AFFINITY_STORE=redis` agus `REDIS_URL` ar gach próiseas, leis an `REDIS_KEY_PREFIX` céanna agus suíomh dearfach `sessionAffinityTtlMs`. Réitíonn pionnaí féiniúlachtaí úsáide-chuntais hashed chuig nasc áitiúil incháilithe gach próiseas, mar sin ní gá go mbeadh nasc meaitseála IDs ag cuntais OAuth le meiteashonraí aitheantais meaitseála. Bíonn tosaíocht ag sainaitheanta cuntais ar IDs áitiúil contrártha maidir le taifeach bioráin agus díshealbhú cosanta; coinníonn taifid gan aitheantas (nó glaoiteoirí díshealbhaithe gan aitheantas) an garda ID oidhreacht. Teastaíonn IDs a mheaitseáil le cuntais nach bhfuil aitheantas úsáide cobhsaí acu fós. Titeann earráidí Redis nó glaonna os cionn 100 ms ar ais go SQLite áitiúil . Cuireann gach siopa cleamhnais Redis teorainn le hoibríochtaí gan íoc ag 8, seachnaíonn sé Redis láithreach nuair a bhíonn sé lán, agus ní scaoileann sé sliotáin ach amháin nuair a shocraíonn an obair bhunúsach, ní ag spriocdháta an ghlaoiteora. Le linn briseadh Redis níl aon fhírinne roinnte: titeann gach cás ar ais go dtí a cleamhnas áitiúil féin, féadfaidh seisiúin athphionáil uair amháin in aghaidh na huaire, agus d'fhéadfadh cásanna éagsúla a bheith eatarthu. Tagann greamaitheacht le chéile arís trí Redis nuair a thagann sé ar ais. Níl teorainn leis an teorainn ama ag fanacht, ní EVAL seolta , a d'fhéadfadh teacht i dtír tar éis titim siar. Scríobhann ródú déan comparáid idir an luach beacht a bhreathnaítear leis an gcinneadh ródaithe, ní léamh úr sóchán; déantar comparáid idir easnamh breathnaithe nó breathnóireacht chúltaca SQLite agus eochair Redis as láthair. Athsholáthraítear bioráin as feidhm in aon CAS, mar sin ní féidir le hordú déanach bioráin eile a athsholáthar nó a scriosadh. léann Redis adamhach ar ais ar an luach agus an freastalaí atá fágtha TTL; PTTL dearfach (nó gan éaga) a chinneann beocht, ní stampa ama JSON an scríbhneora nó clog an léitheora. Léarscáil na ngióga áitiúla a fhanann TTL de réir spriocdháta áitiúil; fanann na heochracha JSON reatha inléite agus coinnítear a mbearta amh le haghaidh CAS. Is é Redis an t-aon fhoinse fírinne cé go bhfreagraíonn sé. Baineann upserts, tadhaill agus scriosta comhroinnte deimhnithe an iontráil áitiúil, ná suiteáil ná athnuachan riamh é. Ní choinníonn SQLite ar chosán Redis ach na cinntí cúl-teagmhála seo féin ó earráidí Redis, teorainn ama nó sáithiú iontrála, TTL-teoranta mar a rinneadh cheana. Cosnaíonn bioráin áitiúil a bhíonn ar iarraidh ar bhriseadh níos déanaí pioc úr amháin (caillteanas leid amháin), ní cuntas mícheart nó díshealbhaithe. Tugann na hionsaitheoirí diúltaithe an buaiteoir roinnte agus TTL atá fágtha ar ais go adamhach: déanann gnáthroghnú athsheiceáil ar an spriocdháta áitiúil mapáilte agus úsáideann buaiteoir incháilithe atá fós beo, ag baint úsáide as agus ag logáil don chuntas sin gan scríobh comhroinnte eile. Mura bhfuil sé ar fáil, coinníonn an roghnú an t-iarrthóir áitiúil, fágtar an biorán roinnte gan athrú agus scaoileann sé teachtaireacht dífhabhtaithe amháin. Ní scríobhann CAS diúltaithe SQLite; cuireann earráidí Redis, am istigh nó sáithiú iontrála an oibríocht áitiúil reatha i bhfeidhm ina ionad sin. Má thagann freagra sóchán seolta isteach tar éis teorainn ama (ghlactha, diúltaithe nó earráid), ní bhainfidh ríomhluach srathach sioncronach comparáideach-agus-scrios ach an tsraith chúl-ama atá comhionann le beart-am istigh. Níl aon fanacht idir an chomparáid sin agus an scriosadh; caomhnaítear scríobh briste níos nuaí. Baineann díshealbhú cosanta amach biorán áitiúil an chuntais theipthe fiú nuair a bhíonn Redis síos, agus glanann sé arís é tar éis díshealbhú comhroinnte deimhnithe. Ní féidir biorán áitiúil díshealbhaithe a aischur ar feitheamh freagraí comhroinnte níos luaithe mar ní scríobhann rath roinnte SQLite riamh . Is féidir cuntas a athphéinteáil nuair a bhíonn briseadh siar níos déanaí; tá scríobh comhroinnte a nglactar leis níos déanaí i Redis amháin. Ní théann misses Redis i gcomhairle leis an stát áitiúil cúltaca. Agus an tiománaí ar ceal, coinníonn bioráin nua-roghnaithe an oidhreacht ceithre-réimse cruth SQLite JSON ; ní chuireann ach ródú Redis céannacht an chuntais hashed leis. Déantar bioráin réamhfheistithe a athsheiceáil ag a dteorainn éaga. Athléann roghnú neamh-léas Redis an stór, ach is féidir le pleanáil léasa sioncrónach fós úsáid a bhaint as bioráin a dhíshealbhaítear idir an réamhbheart agus an phleanáil (fuinneog a nglactar leis an iarracht is fearr). Ní féidir le léas-gealltanas cuntais a aistriú tar éis éilimh bhuan: má dhiúltaítear cur isteach coinníonn sé an t-iarrthóir éilithe don iarratas sin amháin agus fágtar an comhbhuaiteoir gan teagmháil, agus mar sin tá comhaontú trasna cásanna teoranta don chosán sin. Tá feidhm fós ag an gcuid eile den tábla: ní roinneann sé seo greamaitheacht seisiúin teaglama, bioráin casa Codex dúchais, semaphores cuntais, frithdhúnadh, teorainneacha caiteachais, cumraíocht nó logaí glaonna.
+Is féidir cleamhnas seisiún le cuntas a roinnt freisin trí Redis: socraigh `OMNIROUTE_SESSION_AFFINITY_STORE=redis` agus `REDIS_URL` ar gach próiseas, leis an `REDIS_KEY_PREFIX` céanna agus suíomh dearfach `sessionAffinityTtlMs`. Réitíonn pionnaí féiniúlachtaí úsáide-chuntais hashed chuig nasc áitiúil incháilithe gach próiseas, mar sin ní gá go mbeadh nasc meaitseála IDs ag cuntais OAuth le meiteashonraí aitheantais meaitseála. Bíonn tosaíocht ag sainaitheanta cuntais ar IDs áitiúil contrártha maidir le taifeach bioráin agus díshealbhú cosanta; coinníonn taifid gan aitheantas (nó glaoiteoirí díshealbhaithe gan aitheantas) an garda ID oidhreacht. Teastaíonn IDs a mheaitseáil le cuntais nach bhfuil aitheantas úsáide cobhsaí acu fós. Titeann earráidí Redis nó glaonna os cionn 100 ms ar ais go SQLite áitiúil . Cuireann gach siopa cleamhnais Redis teorainn le hoibríochtaí gan íoc ag 8, seachnaíonn sé Redis láithreach nuair a bhíonn sé lán, agus ní scaoileann sé sliotáin ach amháin nuair a shocraíonn an obair bhunúsach, ní ag spriocdháta an ghlaoiteora. Le linn briseadh Redis níl aon fhírinne roinnte: titeann gach cás ar ais go dtí a cleamhnas áitiúil féin, féadfaidh seisiúin athphionáil uair amháin in aghaidh na huaire, agus d'fhéadfadh cásanna éagsúla a bheith eatarthu. Tagann greamaitheacht le chéile arís trí Redis nuair a thagann sé ar ais. Níl teorainn leis an teorainn ama ag fanacht, ní EVAL seolta , a d'fhéadfadh teacht i dtír tar éis cúlpháirtí. Scríobhann ródú déan comparáid idir an luach beacht a bhreathnaítear leis an gcinneadh ródaithe, ní léamh úr sóchán; déantar comparáid idir easnamh breathnaithe nó breathnóireacht chúltaca SQLite agus eochair Redis as láthair. Athsholáthraítear bioráin as feidhm in aon CAS, mar sin ní féidir le hordú déanach bioráin eile a athsholáthar nó a scriosadh. léann Redis adamhach ar ais ar an luach agus an freastalaí atá fágtha TTL; PTTL dearfach (nó gan éaga) a chinneann beocht, ní stampa ama JSON an scríbhneora nó clog an léitheora. Léarscáil na ngióga áitiúla a fhanann TTL de réir spriocdháta áitiúil; fanann na heochracha JSON reatha inléite agus coinnítear a mbearta amh le haghaidh CAS. Is é Redis an t-aon fhoinse fírinne cé go bhfreagraíonn sé. Baineann upserts, tadhaill agus scriosta comhroinnte deimhnithe an iontráil áitiúil, ná suiteáil ná athnuachan riamh é. Ní choinníonn SQLite ar chosán Redis ach na cinntí cúl-teagmhála seo féin ó earráidí Redis, teorainn ama nó sáithiú iontrála, TTL-teoranta mar a rinneadh cheana. Cosnaíonn bioráin áitiúil a bhíonn ar iarraidh ar bhriseadh níos déanaí pioc úr amháin (caillteanas leid amháin), ní cuntas mícheart nó díshealbhaithe. Tugann na hionsaitheoirí diúltaithe an buaiteoir roinnte agus TTL atá fágtha ar ais go adamhach: déanann gnáthroghnú athsheiceáil ar an spriocdháta áitiúil mapáilte agus úsáideann buaiteoir incháilithe atá fós beo, ag baint úsáide as agus ag logáil don chuntas sin gan scríobh comhroinnte eile. Mura bhfuil sé ar fáil, coinníonn an roghnú an t-iarrthóir áitiúil, fágtar an biorán roinnte gan athrú agus scaoileann sé teachtaireacht dífhabhtaithe amháin. Ní scríobhann CAS diúltaithe SQLite; cuireann earráidí Redis, am istigh nó sáithiú iontrála an oibríocht áitiúil reatha i bhfeidhm ina ionad sin. Má thagann freagra sóchán seolta isteach tar éis teorainn ama (ghlactha, diúltaithe nó earráid), ní bhainfidh ríomhluach srathach sioncronach comparáideach-agus-scrios ach an tsraith chúl-ama atá comhionann le beart-am istigh. Níl aon fanacht idir an chomparáid sin agus an scriosadh; caomhnaítear scríobh briste níos nuaí. Baineann díshealbhú cosanta amach biorán áitiúil an chuntais theipthe fiú nuair a bhíonn Redis síos, agus glanann sé arís é tar éis díshealbhú comhroinnte deimhnithe. Ní féidir biorán áitiúil díshealbhaithe a aischur ar feitheamh freagraí comhroinnte níos luaithe mar ní scríobhann rath roinnte SQLite riamh . Is féidir cuntas a athphéinteáil nuair a bhíonn briseadh siar níos déanaí; tá scríobh comhroinnte a nglactar leis níos déanaí i Redis amháin. Ní théann misses Redis i gcomhairle leis an stát áitiúil cúltaca. Agus an tiománaí ar ceal, coinníonn bioráin nua-roghnaithe an oidhreacht ceithre-réimse cruth SQLite JSON ; ní chuireann ach ródú Redis céannacht an chuntais hashed leis. Déantar bioráin réamhfheistithe a athsheiceáil ag a dteorainn éaga. Athléann roghnú neamh-léas Redis an stór, ach is féidir le pleanáil léasa sioncrónach fós úsáid a bhaint as bioráin a dhíshealbhaítear idir an réamhbheart agus an phleanáil (fuinneog a nglactar leis an iarracht is fearr). Ní féidir le léas-gealltanas cuntais a aistriú tar éis éilimh bhuan: má dhiúltaítear cur isteach coinníonn sé an t-iarrthóir éilithe don iarratas sin amháin agus fágtar an comhbhuaiteoir gan teagmháil, agus mar sin tá comhaontú trasna cásanna teoranta don chosán sin. Tá feidhm fós ag an gcuid eile den tábla: ní roinneann sé seo greamaitheacht seisiúin teaglama, bioráin casa Codex dúchais, semaphores cuntais, frithdhúnadh, teorainneacha caiteachais, cumraíocht nó logaí glaonna.
 
-Crua-earraí: in aghaidh na huaire tá `/v1/responses` fada comhthráthach a** buiséad cuimhne** ceist (carn + inflight-byte / #10110). `N` neamhspleách `DATA_DIR` s a iolrú fós: caithfidh an t-óstach RAM `N × cgroup` a chlúdach, ní “pod 16 Gi amháin le N = 8.” Ná `replicas > 1` riamh ar chomhad SQLite amháin.
+Crua-earraí: in aghaidh na huaire tá `/v1/responses` fada comhthráthach a** buiséad cuimhne** ceist (carn + inflight-byte / #10110). `N` neamhspleách `DATA_DIR` s fós ag méadú carn: caithfidh an t-óstach RAM `N × cgroup` a chlúdach , ní “pod 16 Gi amháin le N = 8.” Ná `replicas > 1` ar chomhad SQLite amháin.
 
 Scríobh sceitse (dhá charn, dhá imleabhar — ní `deploy.replicas: 2`):
 
@@ -697,55 +722,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Is é [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) an dlús inphróisis (comhbhrú as an leithlis HTTP ). Is é [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) braisle loighciúil amháin ar staid marthanach roinnte.
+Is é [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) dlúis inphróisis (comhbhrú as an leithlis HTTP ). Is é [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) braisle loighciúil amháin ar staid marthanach roinnte.
 
-## Earráidí réigiúnacha Gemini taobh istigh de Docker
+## earráidí réigiúnacha Gemini taobh istigh de Docker
 
-Is féidir le Google AI Studio / Gemini API HTTP 400 le FAILED_PRECONDITION agus
-`User location is not supported for the API use.` a chur ar ais. Ní chruthaíonn iarratas rathúil ar an óstach
-go n-úsáideann an coimeádán an bealach amach céanna. D’fhéadfadh ord DNS,
-nascacht IPv4/IPv6, ródú VPN agus seachfhreastalaithe cumraithe a bheith éagsúil. Seiceáil
-[réigiúin tacaithe Google](https://ai.google.dev/gemini-api/docs/available-regions)
-chomh maith leis an mbealach ceangail iarbhír; ní thugann an earráid seo amháin le fios go bhfuil an eochair API lochtach.
+Is féidir le Google AI Studio / Gemini API ar ais HTTP 400 le FAILED_PRECONDITION agus `User location is not supported for the API use.` Ní chruthaíonn iarratas rathúil ar an óstach go n-úsáideann an coimeádán an bealach amach céanna. Is féidir le hordú DNS, nascacht IPv4/IPv6, ródú VPN agus seachfhreastalaí cumraithe a bheith difriúil. Seiceáil [na réigiúin thacaithe Google](https://ai.google.dev/gemini-api/docs/available-regions) chomh maith leis an mbealach nasc iarbhír; ní shainaithníonn an earráid seo amháin eochair API olc.
 
-### Tabhair tús áite do sheachfhreastalaí atá sonrach don cheangal
+### Is fearr seachfhreastalaí a bhaineann go sonrach leis
 
-Úsáid [cumraíocht seachfhreastalaí in aghaidh an cheangail](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-de chuid OmniRoute don cheangal Gemini lena mbaineann, ansin déan **Test Connection** arís agus seol iarratas beag
-leis an tsamhail chéanna. Coinníonn sé seo an t-athrú ródaithe teoranta don cheangal sin. Deimhnigh
-gur féidir an seachfhreastalaí a rochtain ón gcoimeádán, agus go roghnaíonn an ceangal
-é i ndáiríre. Ní ráthaíonn athrú an bhealaigh incháilitheacht réigiúnach ag an soláthraí réamhtheachtach.
+Úsáid [cumraíocht seachfhreastalaí in aghaidh an naisc](../ops/PROXY_GUIDE.md#4-level-proxy-system) OmniRoute don nasc Gemini lena mbaineann, ansin déan arís** Ceangal Tástála** agus iarratas beag leis an múnla céanna. Coinníonn sé seo an t-athrú ródaithe scóipe don nasc sin. Fíoraigh go bhfuil an seachfhreastalaí insroichte ón gcoimeádán, agus go roghnaíonn an nasc é i ndáiríre. Ní ráthaíonn athrú an bhealaigh incháilitheacht réigiúnach réamhtheachtacha.
 
-### Déan comparáid idir líonrú an óstaigh agus líonrú an choimeádáin
+### Déan comparáid idir líonrú óstaigh agus coimeádán
 
-Coinnigh an eochair, an tsamhail agus an t-iarratas mar an gcéanna agus torthaí fíordheimhnithe á gcur i gcomparáid; ná greamaigh
-dintiúir, pasfhocail seachfhreastalaí ná ceanntásca údaraithe iomlána in eagrán riamh.
-Ar dtús, scrúdaigh na teaghlaigh seoltaí a thairgeann réiteoir an OS, agus an t-ordú céanna á úsáid
-ar an óstach agus taobh istigh den choimeádán:
+Coinnigh an eochair, an múnla agus an t-iarratas mar an gcéanna agus tú ag déanamh comparáide idir torthaí fíordheimhnithe; Ná greamaigh dintiúir, pasfhocail seachfhreastalaí ná ceanntásca údaraithe iomlán i saincheist. Déan iniúchadh ar dtús ar a sheolann teaghlaigh a thairgeann an réititheoir OS, ag baint úsáide as an ordú céanna ar an óstaigh agus taobh istigh den choimeádán:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Cuir an tseirbhís a ritheann tú in ionad `omniroute` (mar shampla, `omniroute-web`). Priontálann na
-horduithe seo teaghlaigh seoltaí gan dintiúir ná seoltaí IP. Ní léiríonn `6`
-a chuirtear ar ais ach toradh DNS IPv6: ní chruthaíonn sé bealach IPv6 inúsáidte ná rochtain API.
-Nuair atá `curl` suiteáilte, déan comparáid idir `curl -4 -I https://generativelanguage.googleapis.com`
-agus `curl -6 -I https://generativelanguage.googleapis.com` sa dá thimpeallacht.
-Cruthaíonn freagra HTTP nascacht don taiscéalaí sin, fiú más earráid neamhfhíordheimhnithe
-é; is é an t-iarratas fíordheimhnithe ar an tsamhail amháin a thástálann incháilitheacht Gemini.
+Cuir an tseirbhís a ritheann tú in ionad `omniroute` (mar shampla, `omniroute-web`). Priontálann na horduithe seo teaghlaigh seoltaí gan dintiúir nó seoltaí IP. Ní léiríonn `6` ar ais ach toradh IPv6 DNS : déanann sé** nach bhfuil** bealach inúsáidte IPv6 nó rochtain API a chruthú. I gcás ina bhfuil `curl` suiteáilte, déan comparáid idir `curl -4 -I https://generativelanguage.googleapis.com` agus `curl -6 -I https://generativelanguage.googleapis.com` sa dá thimpeallacht. Cruthaíonn freagra HTTP nascacht don taiscéalaí sin, fiú más earráid neamhdheimhnithe í; ní dhéanann an t-iarratas ar shamhail fhíordheimhnithe ach tástáil ar incháilitheacht Gemini.
 
-### Rogha eile ar leibhéal an óstaigh: IPv6 oibríoch agus beartas réiteora
+### Rogha eile ar leibhéal an óstaigh: IPv6 ag obair agus beartas réititheora
 
-D’athchóirigh tuairisceoir [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762)
-rochtain ina dtimpeallacht trí IPv6 coimeádáin a chumasú agus roghnú seoltaí glibc
-a athrú. Caith leis seo mar rogha eile a bhaineann go sonrach leis an timpeallacht. Deimhnigh IPv6 oibríoch ar an óstach,
-imeacht/ródú an choimeádáin agus rialacha an bhalla dóiteáin sula n-athraítear sainroghanna an réiteora.
-Ní dheimhníonn seoladh príobháideach ULA ann féin nascacht phoiblí IPv6.
+D'athchóirigh tuairisceoir [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) rochtain ina dtimpeallacht trí choimeádán IPv6 a chumasú agus roghnú seoltaí glibc a athrú. Déan é seo mar rogha eile a bhaineann go sonrach leis an gcomhshaol. Deimhnigh an t-óstach oibre IPv6, coimeádán egress/routing agus rialacha balla dóiteáin sula n-athraítear roghanna réititheora. Ní bhunaíonn seoladh príobháideach ULA ann féin nascacht phoiblí IPv6.
 
-I gcás seirbhísí atá ceangailte cheana féin le líonra réamhshocraithe Compose, cumasaíonn an blúire seo
-IPv6 ar an líonra sin; coinnigh an chuid eile de do sheirbhís, calafoirt, imleabhair agus cumraíocht:
+Maidir le seirbhísí atá ceangailte le líonra réamhshocraithe Compose cheana féin, cuireann an blúire seo ar chumas IPv6 ar an líonra sin; coinnigh an chuid eile de do sheirbhís, poirt, toirteanna agus cumraíocht:
 
 ```yaml
 networks:
@@ -753,30 +755,13 @@ networks:
     enable_ipv6: true
 ```
 
-I gcás líonra ainmnithe, cumasaigh é ar an líonra a dtéann an tseirbhís isteach ann i ndáiríre. Is féidir le Docker
-folíon ULA a leithdháileadh; ná roghnaigh folíon sainráite nach bhfuil ag forluí ach amháin nuair a éilíonn do líonra
-é. Féach [líonrú IPv6 Docker](https://docs.docker.com/engine/daemon/ipv6/)
-agus [roghanna líonra Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Le haghaidh líonra ainmnithe, cumasaigh é ar an líonra a nascann an tseirbhís leis. is féidir le Docker subnet ULA a leithdháileadh; roghnaigh folíon follasach, neamh-forluiteach ach amháin nuair a éilíonn do líonra é. Féach [líonrú Docker IPv6](https://docs.docker.com/engine/daemon/ipv6/) agus [Cum roghanna líonra](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Ar **íomhá atá bunaithe ar glibc**, is féidir le `/etc/gai.conf` roghnú seoltaí a athrú. Úsáideann Dockerfile
-reatha na stórtha Debian; ní úsáideann íomhánna saincheaptha atá bunaithe ar musl an mheicníocht seo.
-Athraíonn an coigeartú a tuairiscíodh lipéad ULA ó `label fc00::/7 6` go
-`label fc00::/7 1`. Tosaigh le tábla beartais iomlán na híomhá agus caomhnaigh a chuid iontrálacha
-eile: cuirtear tábla réamhshocraithe eile in ionad an tábla sin nuair a chuirtear iontráil `label` nó `precedence` leis, mar sin ní leor comhad
-nach bhfuil ann ach an líne athraithe. Déantar na séimeantaicí sin a dhoiciméadú i
-[dtagairt chumraíochta glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf).
-Feistigh an comhad athbhreithnithe mar ghléas ceangailte inléite amháin ag `/etc/gai.conf`
-agus athchruthaigh an tseirbhís chun é a chur i bhfeidhm.
+Ar a** íomhá glibc-bhunaithe** , is féidir le `/etc/gai.conf` roghnú seoltaí a athrú. Úsáideann an stór reatha Dockerfile Debian; ní roinneann íomhánna saincheaptha musla-bhunaithe an mheicníocht seo. Athraíonn an coigeartú tuairiscithe an lipéad ULA ó `label fc00::/7 6` go `label fc00::/7 1`. Tosaigh ó thábla polasaí iomlán na híomhá agus caomhnaigh a hiontrálacha eile: nuair a chuirtear iontráil `label` nó `precedence` leis cuirfear in ionad an tábla réamhshocraithe sin, mar sin ní leor comhad nach bhfuil ann ach an líne athraithe. Déanann an [chumraíocht glibc tagairt](https://github.com/bminor/glibc/blob/master/posix/gai.conf) do na séimeantaic sin. Ceangail an comhad athbhreithnithe inléite amháin ag `/etc/gai.conf` agus athchruthaigh an tseirbhís chun é a chur i bhfeidhm.
 
-Athraíonn sé seo roghnú seoltaí an OS don **trácht amach ar fad sa choimeádán sin**.
-Ní chuireann sé iallach ar gach feidhmchlár IPv6 a roghnú: tá tábhacht freisin le hord DNS agus roghnú
-ceangail Node. Go háirithe, tugann `--dns-result-order=ipv4first` tús áite do IPv4 agus
-ní réiteach é ar theip IPv4 amháin. Féach [ord DNS Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Athraíonn sé seo roghnú seoltaí OS le haghaidh** gach trácht amach sa choimeádán sin** . Ní chuireann sé iallach ar gach feidhmchlár IPv6 a roghnú : Is cuma le hordú DNS Nód agus roghnú nasc freisin. Go háirithe, is fearr le `--dns-result-order=ipv4first` IPv4 agus ní leigheas é ar mhainneachtain IPv4-only. Féach [ordú Nód DNS](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Déan Gemini agus do sholáthraithe eile a atástáil tar éis aon athrú ar leibhéal an óstaigh. Chun an t-athrú a chealú,
-bain feistiú saincheaptha `gai.conf`, athchóirigh cumraíocht an líonra roimhe seo agus
-athchruthaigh an tseirbhís/líonra lena mbaineann le linn tréimhse chothabhála. D’fhéadfadh athchruthú líonra
-cur isteach ar choimeádáin eile atá ceangailte leis; ná scrios an t-imleabhar sonraí seasmhacha.
+Déan tástáil arís Gemini agus ar do sholáthraithe eile tar éis aon athrú ar leibhéal an óstaigh. Chun rolladh ar ais, bain an saincheaptha `gai.conf` mount, cuir ar ais an chumraíocht líonra roimhe seo agus athchruthaigh an service/network difear le linn fuinneog cothabhála. Má dhéantar líonra a athchruthú, féadtar cur isteach ar choimeádáin eile a ghabhann leis; ná scrios an méid sonraí leanúnach.
 
 ## Nótaí Tábhachtacha
 

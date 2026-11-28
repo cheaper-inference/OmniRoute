@@ -314,38 +314,26 @@ RTK-modus er inspirert av **[RTK - Rust Token Killer](https://github.com/rtk-ai/
 
 ---
 
-## Avanserte komprimeringssystemer
+## Avanserte kompresjonssystemer
 
-I tillegg til de 7 modusene som er beskrevet ovenfor (kilden godtar også modusene `codex-responses` og
-`omniglyph`, som denne veiledningen ikke dekker), beskriver avsnittene nedenfor funksjoner
-som fungerer i eller sammen med disse modusene: Komprimering av verktøyresultater og progressiv aldring
-er trinn 1 og 2 i den aggressive motoren (Aggressiv-modus og et `aggressive`-trinn i en
-stablet pipeline), Stablet pipeline er måten Stablet-modus kjøres på, hurtigbufferbevisst komprimering
-nedgraderer `aggressive` og `ultra` til `standard` for leverandører med hurtigbufring når komprimering
-er aktivert, og Caveman-utdatamodus og utdatastiler er valgfrie systempromptinstruksjoner,
-deaktivert som standard, som former modellens utdata i stedet for å komprimere forespørselen.
+Utover de 7 modusene beskrevet ovenfor (kilden aksepterer også `codex-responses` og `omniglyph` -moduser, som denne veiledningen ikke dekker), dekker delene nedenfor funksjoner som fungerer inne i eller ved siden av disse modusene: Verktøyresultatkomprimering og progressiv aldring er trinn 1 og 2 i den aggressive motoren (aggressiv modus og et `aggressive` trinn i en stablet rørledning), er Stacked-A-nedkjøringen. `aggressive` og `ultra` til `standard` for caching-leverandører mens komprimering er på, og Caveman Output Mode og Output Styles er opt-in system-prompt-instruksjoner, av som standard, som former modellens utdata i stedet for å komprimere forespørselen.
 
-### Hurtigbufferbevisst komprimering
+### Cache-bevisst komprimering
 
-Enkelte leverandører (som Anthropic med promptbufring) støtter **promptbufring**,
-som gjør at de kan hurtigbufre deler av prompten for å redusere kostnader og ventetid. Når
-hurtigbufring er aktivert, kan aggressiv komprimering faktisk **svekke** ytelsen
-fordi den endrer de hurtigbufrede tokenene og dermed ugyldiggjør hurtigbufferen.
+Noen leverandører (som Anthropic med hurtigbufring) støtter** hurtigbufring** , som lar dem bufre deler av forespørselen for å redusere kostnader og ventetid. Når caching er aktivert, kan aggressiv komprimering faktisk** skade** ytelse fordi den endrer de bufrede tokenene, og ugyldiggjør cachen.
 
-Modulen `cachingAware.ts` løser dette ved å **oppdage hurtigbufringskonteksten** og
-**justere komprimeringsstrategien** tilsvarende.
+`cachingAware.ts` modulen løser dette ved** oppdage hurtigbufferkontekst** og** justere kompresjonsstrategien** deretter.
 
-#### Slik fungerer det
+#### Hvordan det fungerer
 
-1. **Oppdag hurtigbufringskonteksten** — Søker gjennom forespørselskroppen etter `cache_control`-markører
-2. **Identifiser leverandører med hurtigbufring** — Kontrollerer om målleverandøren støtter hurtigbufring
-3. **Juster strategien** — Nedgraderer `aggressive`/`ultra` til `standard` for leverandører med hurtigbufring
-4. **Hopp over systemprompten** — Systemprompter blir vanligvis hurtigbufret, så ikke komprimer dem
+1. **Oppdag bufringskontekst** — Skanner forespørselsteksten for `cache_control` markører
+2. **Identifiser caching-leverandører** — Sjekker om målleverandøren støtter caching
+3. **Juster strategi** — Nedgraderer `aggressive`/`ultra` til `standard` for caching-leverandører
+4. **Hopp over systemmeldingen** — Systemmeldinger er vanligvis bufret, så ikke komprimer dem
 
-Strategihjelperen returnerer også et `deterministicOnly`-flagg, men planbyggeren bruker
-bare strategien — ingenting nedstrøms leser flagget i dag.
+Strategihjelperen returnerer også et `deterministicOnly` flagg, men planbyggeren bruker bare strategien — ingenting nedstrøms leser flagget i dag.
 
-#### Kodeeksempel
+#### Kode eksempel
 
 ```ts
 import {
@@ -356,7 +344,7 @@ import {
 const body = {
   model: "anthropic/claude-sonnet-4.5",
   messages: [{ role: "user", content: "Hello" }],
-  cache_control: { type: "ephemeral" }, // ← Hurtigbuffermarkør
+  cache_control: { type: "ephemeral" }, // ← Cache marker
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
@@ -366,30 +354,21 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 // → { strategy: "standard", skipSystemPrompt: true, deterministicOnly: true }
 ```
 
-#### Når det bør brukes
+#### Når du skal bruke
 
-Hurtigbufferbevisst komprimering er **alltid aktivert** — ingen konfigurasjon er nødvendig. Den trer i kraft når
-komprimering er aktivert og målleverandøren støtter promptbufring (Anthropic, OpenAI,
-osv.); eksplisitte `cache_control`-markører er ikke påkrevd — en leverandør med hurtigbufring alene
-utløser nedgraderingen, mens markører alene aldri gjør det (markørdeteksjon leverer data til
-hurtigbuffertelemetri, ikke strategibeslutningen).
+Cache-bevisst komprimering er** alltid på** — ingen konfigurasjon nødvendig. Den starter når komprimering er på og målleverandøren støtter hurtigbufring (Anthropic, OpenAI, etc.); eksplisitte `cache_control` markører er ikke nødvendig — en caching-leverandør alene utløser nedgraderingen, og markører alene gjør det aldri (markørdeteksjon mater cache-telemetri, ikke strategibeslutningen).
+
+OpenRouter teller som en hurtigbufferleverandør bare for `anthropic/*` modeller: Claude -kodeforespørsler beholder sine `cache_control` bruddpunkter (maks. 4) og guarden beskytter prefikset, mens annenhver OpenRouter familie (`openai/`, `google/`, `qwen/`, ...) forblir strippet og ubevoktet.
 
 ### Progressiv aldring
 
-Lange samtaler samler opp mange meldingsrunder, men eldre runder blir mindre
-relevante. Modulen `progressiveAging.ts` **forenkler meldinger basert på avstanden i antall runder**
-(avstanden måles fra slutten av samtalen). Med standardinnstillingene som leveres
-(`verbatim: 2, light: 2, moderate: 3`):
+Lange samtaler samler mange meldingsvendinger, men eldre svinger blir mindre relevante. `progressiveAging.ts` -modulen** forringer meldinger etter svingavstand** (avstand målt fra slutten av samtalen). Med de leverte standardinnstillingene (`verbatim: 2, light: 2, moderate: 3`):
 
-- **De siste 2 rundene (avstand ≤ 2)**: Beholdes ordrett
-- **Avstand 3**: Caveman-komprimering (fjerning av fyllord)
-- **Avstand 4+**: Assistentmeldinger oppsummeres; brukermeldinger reduseres til sin første
-  linje, begrenset til 120 tegn; andre roller forblir urørt. Systemprompter, allerede aldrede
-  meldinger og den nyeste brukermeldingen beholdes alltid ordrett uansett avstand.
-  Ingenting fjernes fullstendig, og `light`-intervallet
-  kan ikke nås med standardinnstillingene som leveres (`light` er lik `verbatim`).
+- **Siste 2 svinger (avstand ≤ 2)** : Holdes ordrett
+- **Avstand 3** : Caveman-komprimering (fjerning av fyllstoff)
+- **Avstand 4 +** : Assistentmeldinger oppsummert; brukermeldinger redusert til første linje, begrenset til 120 tegn; andre roller urørt. Systemmeldinger, meldinger som allerede er eldre og siste brukermelding holdes alltid ordrett uavhengig av avstand. Ingenting blir droppet direkte, og `light` båndet er utilgjengelig med de leverte standardinnstillingene (`light` er lik `verbatim`).
 
-#### Kodeeksempel
+#### Kode eksempel
 
 ```ts
 import { applyAging } from "@omniroute/open-sse/services/compression/progressiveAging";
@@ -398,68 +377,47 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... 50 runder til ...
+  // ... 50 more turns ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // siste 3 runder: ordrett
-  light: 8, // avstand <= 8: lett komprimering
-  moderate: 20, // avstand <= 20: caveman-komprimering
-  fullSummary: 5, // påkrevd av typen, leses ikke av inndelingskoden
-  // avstand > 20: oppsummert (assistent) / første linje beholdes (bruker)
+  verbatim: 3, // last 3 turns: verbatim
+  light: 8, // distance <= 8: lite compression
+  moderate: 20, // distance <= 20: caveman compression
+  fullSummary: 5, // required by the type, not read by the banding code
+  // distance > 20: summarized (assistant) / first line kept (user)
 });
 
-// saved = antall token som er spart
+// saved = number of tokens saved
 ```
 
-#### Når det bør brukes
+#### Når du skal bruke
 
-Progressiv aldring er **alltid aktivert** for `aggressive`-modus — det er trinn 2 i
-`compressAggressive()`. Ultra-modus kjører det ikke. Det er
-spesielt effektivt for:
+Progressiv aldring er** alltid på** for `aggressive` modus — er det trinn 2 av `compressAggressive()`. Ultra-modus kjører den ikke. Det er spesielt effektivt for:
 
 - Langvarige kodeøkter
-- Samtaler som varer i flere dager
-- Agentbaserte arbeidsflyter med mange verktøykall
+- Flerdagers samtaler
+- Agentarbeidsflyter med mange verktøykall
 
-### Caveman-utdatamodus
+### Caveman utgangsmodus
 
-Caveman-utdatamodus legger til **systempromptinstruksjoner** som ber modellen selv om
-kortfattede utdata — nivået `lite` ber om konsise svar som beholder fullstendige setninger, `full`
-ber den om å «svare kortfattet som en smart huleboer», og `ultra` ber om telegrafiske utdata;
-instruksjonene kan bare be om dette, de kan ikke garantere det. Forespørsler mottar dem gjennom
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
-`open-sse/handlers/chatCore.ts` løser først valget med bakoverkompatibilitetsmellomlaget
-(`resolveOutputStyleSelection()` i
-`open-sse/services/compression/outputStyles/backCompat.ts`), som, når `outputStyles`
-er tom, tilordner en aktivert `cavemanOutputMode` til utdatastilen `terse-prose` med
-`cavemanOutputMode.intensity` (se Bakoverkompatibilitet nedenfor); et ikke-tomt `outputStyles`-valg
-brukes som det er, og `cavemanOutputMode.enabled` og `intensity` har da ingen
-effekt, mens `autoClarity`-bryteren fortsatt gjelder. `outputMode.ts` inneholder
-instruksjonstekstene (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), innholdsomgåelsen og
-plasseringshjelperen som innsettingen bruker; dens egen `applyCavemanOutputMode()`-innsettingsfunksjon har ingen
-kaller i produksjon.
+Caveman utgangsmodus legger til** instruksjoner for systemet** som ber selve modellen om kortfattet utgang — `lite` nivået ber om kortfattede svar som beholder hele setninger, `full` ber den om å "svare kortfattet som smart hulemann", og `ultra` ber om telegrafisk utdata; instruksjoner bare spør, de kan ikke garantere det. Forespørsler mottar dem gjennom `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`): `open-sse/handlers/chatCore.ts` løser først valget med back-compat shim (`resolveOutputStyleSelection()` in `open-sse/services/compression/outputStyles/backCompat.ts`), som, mens `outputStyles` er tom, tilordner en aktivert `cavemanOutputMode` til `terse-prose` -utdatastilen ved `cavemanOutputMode.intensity` (se Back-compat nedenfor); et ikke-tomt `outputStyles` -valg brukes som det er, og `cavemanOutputMode.enabled` og `intensity` har da ingen effekt, mens `autoClarity` vekslingen fortsatt gjelder. `outputMode.ts` inneholder instruksjonstekstene (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), innholdsforløpet og plasseringshjelperen som injeksjonen bruker; sin egen `applyCavemanOutputMode()` injektor har ingen produksjonsanrop.
 
-#### Slik fungerer det
+#### Hvordan det fungerer
 
-Denne modusen komprimerer ikke inndataene. Den legger til en instruksjonsblokk i systemprompten
-(se Hvordan injisering fungerer nedenfor), og eventuell inndatakomprimeringsmodus som er valgt for forespørselen,
-kjøres fortsatt etterpå på innholdet som nå inneholder blokken. Før den delte
-begrensningsklausulen som hvert nivå avsluttes med, lyder det engelske `full`-nivået:
+Denne modusen komprimerer ikke inngangen. Den legger til en instruksjonsblokk til systemprompten (se Hvordan injeksjon fungerer nedenfor), og enhver inngangskomprimeringsmodus valgt for forespørselen kjører fortsatt etterpå, på kroppen som nå bærer blokken. I forkant av delte grenser-klausulen som hvert nivå slutter med, lyder det engelske `full` nivået:
 
-> "Svar kortfattet som smart huleboer. Dropp artikler (a/an/the), fyllord (just/really/basically/actually/simply), høflighetsfraser, forbehold. Fragmenter OK. Korte synonymer (big, ikke extensive; fix, ikke implement). Behold alt teknisk innhold, kode, feil, URL-er og identifikatorer nøyaktig."
+> "Svar kortfattet som en smart hulemann. Slipp artikler (a/an/the), filler (just/really/basically/actually/simply), hyggelige ting, sikring. Fragmenter OK. Korte synonymer (store ikke omfattende, fiks ikke implementer). Hold all teknisk substans, kode, feil, URLs, identifikatorer nøyaktige."
 
 Dette fungerer spesielt godt for:
 
-- Kodegenerering (kortere utdata = færre tokener)
-- Raske spørsmål og svar (ikke behov for utførlige forklaringer)
+- Kodegenerering (terser-utgang = færre tokens)
+- Rask spørsmål og svar (ikke behov for detaljerte forklaringer)
 - Batchbehandling (maksimer gjennomstrømning)
 
-#### Når den bør brukes
+#### Når du skal bruke
 
-Huleboermodus for utdata er **valgfri**. Når komprimering er på (`enabled: true`, hovedbryteren
-på siden Compression Settings), slår du den på med `cavemanOutputMode.enabled`; `intensity`
-velger `lite`, `full` eller `ultra`:
+Caveman utgangsmodus er** melde deg på** . Med komprimering på (`enabled: true`, hovedbryteren på siden for komprimeringsinnstillinger), slå den på med `cavemanOutputMode.enabled`; `intensity` velger `lite`, `full` eller `ultra`:
 
 ```json
 {
@@ -471,100 +429,44 @@ velger `lite`, `full` eller `ultra`:
 }
 ```
 
-En komprimeringskombinasjons **Output Mode**-bryter (`outputMode`, med nivå i `outputModeIntensity`)
-angir den samme innstillingen for forespørslene kombinasjonen gjelder for, og MCP-verktøyet
-`omniroute_set_compression_engine` skriver den via sitt boolske `outputMode`-argument.
-Et ikke-tomt `outputStyles`-valg har forrang over denne bryteren. I kontrollpanelet injiserer
-aktivering av utdatastilen **Terse prose** den samme blokken (se Output Styles nedenfor).
+En kompresjonskombinasjon** Utgangsmodus** toggle (`outputMode`, nivå i `outputModeIntensity`) setter den samme bryteren for forespørslene som kombinasjonen gjelder for, og `omniroute_set_compression_engine` MCP verktøyet skriver det gjennom det boolske `outputMode` argumentet. Et ikke-tomt `outputStyles` -valg har forrang over denne bryteren. I dashbordet aktiverer du** Terse prosa** output style injiserer den samme blokken (se Output Styles nedenfor).
 
 ### Utdatastiler (katalog)
 
-Huleboermodusen for utdata ovenfor er den **eldre enkeltstilbanen**. Fase 4 generaliserte den
-til en katalog med kombinerbare utdatastiler: `OUTPUT_STYLE_CATALOG` i
-`open-sse/services/compression/outputStyles/catalog.ts`. Hver stil er en systempromptinstruksjon
-som ber modellen selv om mer kostnadseffektive utdata. Stiler kan aktiveres
-sammen og injiseres i katalogrekkefølge.
+Caveman utgangsmodus ovenfor er** eldre sti i én stil** . Fase 4 generaliserte det til en katalog med komponerbare utdatastiler: `OUTPUT_STYLE_CATALOG` i `open-sse/services/compression/outputStyles/catalog.ts`. Hver stil er en systeminstruksjon som ber selve modellen om billigere produksjon; stiler kan aktiveres sammen og injiseres i katalogrekkefølge.
 
-| Stil                                   | `id`            | Hva den gjør                                                                                                                                                                                                                                             | Instruksjonsspråk                             |
-| -------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Kortfattet prosa                       | `terse-prose`   | Dropp fyllord/artikler/forbehold; behold teknisk innhold nøyaktig. Samme tekst som den eldre huleboermodusen for utdata (referert til, ikke skrevet på nytt).                                                                                            | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Mindre kode                            | `less-code`     | YAGNI-stige: minste fungerende endring, ingen abstraksjoner som ikke er etterspurt.                                                                                                                                                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Hestehale (lat seniorutvikler)         | `ponytail`      | «Den beste koden er koden som aldri ble skrevet»: gjenbruk > omskriving, rotårsak > symptom, kortest fungerende diff.                                                                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Jeg har ADHD (handling først)          | `i-have-adhd`   | Handling først (kommando/bane/kodebit før prosa), nummererte og avgrensede trinn, ETT konkret neste trinn, ingen innledning/oppsummering/avslutningsfraser. Tilpasset fra [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Antislop-filter for brukergrensesnitt  | `antislop-ui`   | Hver visuell teknikk må bestå en formålstest (hierarki, identitet, lesbarhet); ingen standardgraderinger/glass/glød, begrenset palett, ingen malbaserte oppsett. Begge antislop-stilene legger til en grense mot døde kontroller / oppdiktede påstander. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Antislop-filter for tekst og mennesker | `antislop-copy` | Konkret tekst (ingen tankestrek, generiske handlingsoppfordringer, moteord, chatbot-avslutninger eller oppdiktede fakta), pluss regler for mennesker: WCAG AA-kontrast, synlig fokus, tastaturtilgang, tom-/laste-/feiltilstander, mobil omflytning.     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Kortfattet CJK (文言)                  | `terse-cjk`     | `full`/`ultra` svarer på klassisk kinesisk (文言); `lite` ber bare om korte svar uten funksjonsord, høflighetsfraser eller utsmykning.                                                                                                                   | zh (språkområdebegrenset, se nedenfor)        |
+| Stil                                | `id`            | Hva den gjør                                                                                                                                                                                                                                    | Instruksjonsspråk                             |
+| ----------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Terse prosa                         | `terse-prose`   | Slipp filler/articles/hedging; holde teknisk stoff nøyaktig. Samme tekst som den gamle hulemannens utdatamodus (referert til, ikke skrevet på nytt).                                                                                            | no, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Mindre kode                         | `less-code`     | YAGNI -stige: minste arbeidsforandring, ingen uønskede abstraksjoner.                                                                                                                                                                           | no, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Hestehale (lat seniorutvikler)      | `ponytail`      | "Den beste koden er koden som aldri er skrevet": gjenbruk > omskriving, rotårsak > symptom, korteste arbeidsdiff.                                                                                                                               | no, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Jeg har ADHD (action-first)         | `i-have-adhd`   | Handling først (command/path/snippet før prosa), nummererte avgrensede trinn, ONE konkrete neste trinn, ingen preamble/recap/closers. Tilpasset fra [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                          | no, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop UI filter                  | `antislop-ui`   | Hver visuell teknikk må bestå en formålstest (hierarki, identitet, lesbarhet); ingen standard gradients/glass/glow, avkortet palett, ingen maloppsett. Begge antislop-stilene legger til en grense uten-døde-kontroller / ikke-fabrikerte krav. | no, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop kopi og menneskelig filter | `antislop-copy` | Spesifikk kopi (ingen em dash, generisk CTAs, buzzwords, chatbot closers, oppfunnet fakta) pluss folksregler: WCAG AA kontrast, synlig fokus, tastaturrekkevidde, empty/loading/error tilstander, mobil reflow.                                 | no, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Terse CJK (文言)                    | `terse-cjk`     | `full`/`ultra` svar på klassisk kinesisk (文言); `lite` ber bare om korte svar uten funksjonsord, hygge eller pynt.                                                                                                                             | zh (lokale gated, se nedenfor)                |
 
-Hver stil leveres med tre intensitetsnivåer — `lite`, `full`, `ultra` — og hvert nivå
-avsluttes med den delte begrensningsklausulen (`SHARED_BOUNDARIES` i `outputMode.ts`), som
-beholder kodeblokker, filbaner, kommandoer, feil og URL-er nøyaktig. Nivåtekstene for `terse-prose` og
-`terse-cjk` legger til identifikatorer i denne listen.
+Hver stil sender tre intensitetsnivåer — `lite`, `full`, `ultra` — og hvert nivå slutter med delte grenser-klausulen (`SHARED_BOUNDARIES` i `outputMode.ts`), som holder kodeblokker, filstier, kommandoer, feil og URLs nøyaktige. `terse-prose` og `terse-cjk` nivåtekstene legger til identifikatorer til den listen.
 
-`terse-cjk` er begrenset til språkområdet `zh` på to steder. Siden Compression Settings viser
-raden bare når språket i kontrollpanelets brukergrensesnitt er kinesisk (`zh-CN` eller `zh-TW`), og
-`applyOutputStyles()` injiserer den bare når forespørselens fastsatte språk (se Språkvalg
-nedenfor) er `zh`. Å skjule raden fjerner ikke et lagret `terse-cjk`-valg:
-innstillings-API-et godtar enhver stil-ID, og lagring av andre stiler på siden beholder det. På
-forespørselstidspunktet er språkkontrollen i `applyOutputStyles()` den eneste språkområdebegrensningen.
+`terse-cjk` er lokalisert til `zh` på to steder. Komprimeringsinnstillinger-siden viser raden bare når UI språket i dashbordet er kinesisk (`zh-CN` eller `zh-TW`), og `applyOutputStyles()` injiserer det bare når forespørselens løste språk (se Språkvalg nedenfor) er `zh`. Å skjule raden sletter ikke et lagret `terse-cjk` valg: innstillingene API godtar enhver stil-ID, og lagring av andre stiler på siden beholder den. På forespørselstidspunktet er `applyOutputStyles()` språkkontrollen den eneste lokale porten.
 
-#### Hvordan injisering fungerer
+#### Hvordan injeksjon fungerer
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) sammenholder
-utvalget med katalogen (ukjente ID-er og stiler som ikke samsvarer med språkinnstillingen,
-utelates og fører aldri til feil; et utvalg som ikke gir noen stil, lar innholdet forbli
-uendret og hoppes over som `no_styles`), slår sammen de valgte instruksjonene i katalogens
-rekkefølge,
-legger til avgrensningsklausulen **én gang** (samt sikkerhetsklausulen, `SAFETY_BOUNDARIES`
-eller oversettelsen av den, når `less-code` eller `ponytail` er valgt), og starter blokken
-med én enkelt idempotensmarkør (`[OmniRoute Output Styles]`), slik at en ny anvendelse
-ikke gjør noe. Når det løste språket (se Språkvalg nedenfor) har en oversettelse, settes
-den lokaliserte instruksjonen inn i stedet for den engelske.
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) løser utvalget mot katalogen (ukjente id-er og stiler som ikke samsvarer med lokaliteter blir slettet, aldri en feil; et valg som løser seg til ingen stil forlater kroppen uendret, hoppet over som `no_styles`), setter sammen de valgte instruksjonene i katalogrekkefølge, legger til grensesetningen** en gang** (pluss sikkerhetsklausulen, `SAFETY_BOUNDARIES` eller dens oversettelse, når `less-code` eller `ponytail` er valgt), og starter blokken med en enkelt idempotensmarkør (`[OmniRoute Output Styles]`), så re-søking er en no-op. Når det løste språket (se Språkvalg nedenfor) har en oversettelse, injiseres den lokaliserte instruksjonen i stedet for engelsk.
 
-For et innhold med en ikke-tom `messages`-matrise utføres idempotenskontrollen før
-innholdsforbikoblingen: Når markøren `[OmniRoute Output Styles]` allerede finnes i
-`system`-feltet på toppnivå (en streng eller en matrise med innholdsblokker) eller i en
-systemmelding med strenginnhold, forblir innholdet uendret som `already_applied`, og
-ingen nøkkelordkontroll utføres. Ellers kontrollerer en innholdsforbikobling
-(`shouldBypassCavemanOutputMode()` i
-`open-sse/services/compression/outputMode.ts`) teksten i de tre siste meldingene,
-uavhengig av rollen deres, og hopper over stilene for hele runden når teksten samsvarer
-med nøkkelordene for sikkerhet, irreversible handlinger eller avklaringer, eller med en
-rekkefølgefølsom sekvens: `first`, `then`, `after that`, `before`, `rollback` eller
-`backup` etterfulgt innen 240 tegn av `delete`, `drop`, `migrate`, `deploy` eller
-`release`. Forbikoblingen kjøres så lenge bryteren **Auto-Clarity Bypass**
-(`cavemanOutputMode.autoClarity`, på som standard) er på; hvis bryteren slås av, hoppes
-nøkkelordkontrollen over.
+On a body with a non-empty `messages` array, the idempotency check runs before the content bypass: when the `[OmniRoute Output Styles]` marker is already in the top-level `system` field (a string or a content-block array) or in a system message with string content, the body is left unchanged as `already_applied` and no keyword check runs. Otherwise a content bypass (`shouldBypassCavemanOutputMode()` in `open-sse/services/compression/outputMode.ts`) checks the text of the last three messages, whatever their role, and skips the styles for the whole turn when that text matches its security, irreversible-action or clarification keywords, or an order-sensitive sequence: `first`, `then`, `after that`, `before`, `rollback` or `backup` followed within 240 characters by `delete`, `drop`, `migrate`, `deploy` or `release`. The bypass runs while the** Auto-Clarity Bypass** toggle (`cavemanOutputMode.autoClarity`, on by default) is on; turning the toggle off skips the keyword check.
 
-Når forbikoblingen slipper runden gjennom, plasserer `placeSystemInstruction()` (samme
-fil), som aldri oppretter en ny `messages[0]`, blokken på det første av disse stedene den
-finner:
+Når bypass slipper svingen gjennom, plasserer `placeSystemInstruction()` (samme fil), som aldri lager en ny `messages[0]`, blokken i den første av disse den finner:
 
-1. En innledende systemmelding med strenginnhold: Blokken legges til etter teksten.
-2. `system`-feltet på toppnivå: Blokken legges til etter teksten i en streng, eller
-   legges til som en ny tekstblokk i en matrise med innholdsblokker.
-3. Den første senere systemmeldingen med strenginnhold: Blokken legges til etter
-   teksten.
-4. Ingen av alternativene ovenfor: Blokken legges i en ny systemmelding på slutten av
-   `messages`.
+1. En ledende systemmelding med strenginnhold: blokken legges til etter teksten.
+2. `system` feltet på øverste nivå: blokken legges til etter teksten til en streng, eller legges til som en ny tekstblokk i en innholdsblokk-array.
+3. Den første senere systemmeldingen med strenginnhold: blokken legges til etter teksten.
+4. Ingen av de ovennevnte: blokken går inn i en ny systemmelding på slutten av `messages`.
 
-For et innhold uten en `messages`-matrise (eller med en tom matrise) utføres ingen
-innholdsforbikobling, og et `system`-felt på toppnivå tas ikke i betraktning. Blokken
-legges til etter teksten i et `instructions`-felt av typen streng, med mindre feltet
-allerede inneholder markøren `[OmniRoute Output Styles]`. I så fall forblir innholdet
-uendret som `already_applied`. Når innholdet ikke har et `instructions`-felt av typen
-streng, men inneholder `input` (en streng eller en matrise), blir blokken til
-`instructions` og erstatter en eventuell verdi som ikke er en streng, i dette feltet.
-Et innhold uten både et `instructions`-felt av typen streng og en `input`-verdi som er en
-streng eller matrise, forblir uendret og hoppes over som `no_messages`.
+På en body uten en `messages` matrise (eller med en tom en), kjører ingen innholdsforbikoblinger, og et `system` -felt på toppnivå blir ikke konsultert. Blokken legges til etter teksten i et streng `instructions` felt, med mindre det feltet allerede inneholder `[OmniRoute Output Styles]` markøren, i hvilket tilfelle kroppen forblir uendret som `already_applied`. Når kroppen ikke har noe streng `instructions` felt, men bærer `input` (en streng eller en matrise), blir blokken `instructions`, og erstatter enhver ikke-strengverdi som feltet hadde. En kropp med verken et streng `instructions` felt eller en streng eller matrise `input` blir stående uendret og hoppet over som `no_messages`.
 
-#### Slik aktiverer du det
+#### Hvordan aktivere
 
-I kontrollpanelet: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), delen Output styles: én rad per stil med en
-av/på-bryter og en nivåvelger. Stiler settes inn mens selve komprimeringen er på
-(sidens hovedbryter, `enabled`). Bryteren **Auto-Clarity Bypass** finnes på
-**Caveman**-siden (`/dashboard/context/caveman`), i kortet **Output Mode**.
-Programmatisk lagrer komprimeringskonfigurasjonen utvalget som:
+I dashbordet:** Compression Context → Compression Settings** (`/dashboard/context/settings`), Output styles section: one row per style with an on/off toggle and a level selector. Styles inject while compression itself is on (the page's master toggle, `enabled`). De** Auto-Clarity Bypass** bryteren er på** Hulemann** page (`/dashboard/context/caveman`), in its** Utgangsmodus** kort. Programmatisk vedvarer komprimeringskonfigurasjonen valget som:
 
 ```json
 {
@@ -575,135 +477,50 @@ Programmatisk lagrer komprimeringskonfigurasjonen utvalget som:
 }
 ```
 
-Bakoverkompatibilitet: Så lenge `outputStyles` er tom, tilordnes den eldre innstillingen
-`cavemanOutputMode.enabled` til `terse-prose` med `cavemanOutputMode.intensity`. Blokken
-starter da med markøren `[OmniRoute Output Styles]`, mens den eldre injektoren
-`applyCavemanOutputMode()` skrev `[OmniRoute Caveman Output Mode]`. Under markøren
-samsvarer teksten med den eldre innsettingen på en, pt-BR, es, de, fr, it, ru, id og vi;
-på ja og zh inneholder den ett ekstra mellomrom før avgrensningsklausulen. `terse-prose`
-er oversatt til pt-BR, es, de, fr, it, ru, zh, ja, id og vi, så en forespørsel med `hu`
-som løst språk får den engelske teksten der den eldre injektoren brukte den ungarske.
+Back-compat: mens `outputStyles` er tom, kartlegges den eldre `cavemanOutputMode.enabled` -innstillingen til `terse-prose` ved `cavemanOutputMode.intensity`. Blokken starter så med `[OmniRoute Output Styles]` -markøren, der den eldre `applyCavemanOutputMode()` injektoren skrev `[OmniRoute Caveman Output Mode]`. Under markøren samsvarer teksten med den gamle injeksjonen i en, pt-BR, es, de, fr, it, ru, id og vi; i ja og zh har den ett ekstra mellomrom før grensesetningen. `terse-prose` oversettes til pt-BR, es, de, fr, it, ru, zh, ja, id og vi, så en forespørsel hvis løste språk er `hu` får den engelske teksten der den gamle injektoren brukte sin ungarske.
 
-Språkvalg for utdatastiler (`resolveOutputStyleLanguage()` i
-`outputStyles/apply.ts`): Når `languageConfig.enabled` er på, henter `autoDetect` et
-utdrag fra den nyeste brukermeldingen i forespørselens `messages`-matrise som inneholder
-tekst (strenginnhold eller `text` fra innholdsdelene), og kjører Caveman-motorens
-detektor (`detectCompressionLanguage()`) på det. Detektoren returnerer `zh` for tekst med
-Han-tegn og ingen kana; ellers returnerer den det av `it`, `pt-BR`, `es`, `de`, `fr`,
-`ru`, `ja`, `hu` og `id` som har flest samsvarende indikasjoner, og `en` når ingen
-samsvarer — tekst den ikke kan klassifisere, får engelsk, aldri `defaultLanguage`, og
-`vi` oppdages aldri selv om stilene leveres med tekst på `vi`. Et Responses API-innhold
-oppbevarer rundene sine i `input`, som ikke analyseres, og får derfor
-`defaultLanguage`, deretter engelsk. Når ingen brukermelding i `messages` inneholder
-tekst, eller når `autoDetect` er av, brukes `defaultLanguage`, deretter engelsk. Når
-`languageConfig.enabled` er av, er språket engelsk — med mindre en
-komprimeringskombinasjon gjelder for forespørselen (en kombinasjon tilordnet
-forespørselens rutingskombinasjon, eller standardkombinasjonen for komprimering som
-chatCore faller tilbake på for den innebygde stablede behandlingskjeden): Når en
-kombinasjon brukes, slås `languageConfig.enabled` på for den aktuelle forespørselen, og
-`defaultLanguage` angis fra kombinasjonens språkpakker (den lagrede verdien hvis den er
-en av kombinasjonens pakker, ellers kombinasjonens første pakke, som som standard er
-`en`), mens den lagrede `autoDetect`-innstillingen (på som standard) fortsatt gjelder.
-Caveman-inndatamotoren velger språk for regelpakken på en annen måte — per tekstdel og,
-når automatisk gjenkjenning er av, begrenset av `enabledPacks`.
+Valg av utdatastil (`resolveOutputStyleLanguage()` in `outputStyles/apply.ts`): med `languageConfig.enabled` på, prøver `autoDetect` den siste brukermeldingen i forespørselens `messages` array som har tekst (strenginnhold, eller `text` av innholdsdelene) og kjører Caveman-motorens detektor (`detectCompressionLanguage()`) på den. Detektoren returnerer `zh` for tekst med Han-tegn og ingen kana; ellers returnerer den den av `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` og `id` som har flest hintmatcher, og `en` når ingen samsvarer med — teksten den ikke kan klassifisere får engelsk, aldri `defaultLanguage`, og `vi` blir aldri oppdaget selv om stilene sendes `vi`. En Responses API body beholder sine svinger i `input`, som ikke er samplet, så den får `defaultLanguage`, deretter engelsk. Når ingen brukermeldinger i `messages` har tekst, eller med `autoDetect` av, gjelder `defaultLanguage`, deretter engelsk. Med `languageConfig.enabled` av, er språket engelsk — med mindre en kompresjonskombinasjon gjelder for forespørselen (en kombinasjon som er tildelt forespørselens rutingkombinasjon, eller standard kompresjonskombinasjon chatCore faller tilbake til for den innebygde stablede pipelinen): bruk av en kombinasjon slår på `languageConfig.enabled` for den forespørselen og setter pakken `defaultLanguage` den er lagret fra den ene (scom's) av kombinasjonens pakker, ellers komboens første pakke, som er standard til `en`), mens den lagrede `autoDetect` (på som standard) fortsatt gjelder. Caveman-inndatamotoren velger regelpakken forskjellig — per tekstdel og, med auto-detect av, gated på `enabledPacks`.
 
-Stil × språk-matrisen er fastsatt av
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`: hver katalogstil må ha en
-oppføring i testens `BASELINE_LANGUAGES`; en stil som ikke er avgrenset etter språkinnstilling, må leveres med en
-pt-BR-oversettelse (den språkavgrensede `terse-cjk` er unntatt fra denne regelen), med mindre den er
-oppført i `KNOWN_ENGLISH_ONLY`, som bare kan inneholde stiler helt uten oversettelser —
-en oppført stil som har en oversettelse, får testen til å feile; og en stil får testen til å feile når
-den mister et språk som er oppført i dens `BASELINE_LANGUAGES`-oppføring. For å legge til en stil, se
-[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
+Stilen × språkmatrisen er festet av `tests/unit/compression/output-styles-i18n-matrix.test.ts`: hver katalogstil trenger en oppføring i testens `BASELINE_LANGUAGES`; en stil som ikke er lokalisert, må sende en pt-BR-oversettelse (den lokaliserte `terse-cjk` er unntatt fra denne regelen) med mindre den er oppført i `KNOWN_ENGLISH_ONLY`, som kan inneholde bare stiler uten oversettelser i det hele tatt — en oppført stil som har noen oversettelse mislykkes i testen; og en stil mislykkes i testen når den mister et språk som dens `BASELINE_LANGUAGES` oppføring viser. For å legge til en stil, se [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
-### Komprimering av verktøyresultater
+### Verktøyresultatkomprimering
 
-`compressToolResult()` i `open-sse/services/compression/toolResultCompressor.ts`
-komprimerer tekst fra verktøyresultater med **5 strategier**. Den prøver dem i denne rekkefølgen, og den
-første aktiverte strategien der kontrollen samsvarer med innholdet, bestemmer resultatet:
+`compressToolResult()` i `open-sse/services/compression/toolResultCompressor.ts` komprimerer verktøyresultattekst med** 5 strategier** . Den prøver dem i denne rekkefølgen, og den første aktiverte strategien hvis sjekk samsvarer med innholdet avgjør resultatet:
 
-1. **`fileContent`**: innhold på 3 eller flere linjer der minst én linje, når
-   innledende innrykk ignoreres, begynner med `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` eller `return ` (nøkkelordet pluss et mellomrom), eller med `if`,
-   `for` eller `while` etterfulgt av `(` eller ` (`, beholder de første 20 og siste 5 linjene, med
-   den utelatte midtdelen markert.
-2. **`grepSearch`**: innhold med minst én linje på formen `<path>:<digits>:`,
-   der teksten før det første kolonnet ikke har mellomrom, beholder bare disse linjene, opptil
-   30, etterfulgt av antallet eventuelle ytterligere treff og listen over filer med treff;
-   alle andre linjer fjernes. Én slik linje er nok til å utløse strategien, så en
-   logglinje som begynner med et tidsstempel som `12:30:45`, teller også.
-3. **`shellOutput`**: utdata som inneholder en ANSI CSI-sekvens (`ESC[` etterfulgt av sifre eller
-   semikolon og deretter en bokstav, som i fargekoder) eller et `$` etterfulgt av mellomrom
-   hvor som helst i teksten, mister disse sekvensene (andre escape-sekvenser, som `ESC[?25l` eller en
-   OSC-sekvens for vindustittel, beholdes) og beholder de siste 50 linjene, med sammenhengende
-   gjentatte linjer slått sammen. Fordi denne kontrollen kjøres før `json` og `errorMessage`,
-   når JSON- eller feilutdata som inneholder et slikt `$`, aldri frem til dem mens
-   `shellOutput` er aktivert.
-4. **`json`**: en JSON-nyttelast på over 2 000 tegn som begynner med `{` eller `[` (etter
-   eventuelle mellomrom) og kan analyseres, oppsummeres: en matrise med mer enn 7 elementer beholder
-   de første 5 og siste 2 elementene og det totale antallet, og et objekt beholder sine første 20
-   nøkler, der hver nestede objekt- eller matriseverdi erstattes av en `{…N keys}`-plassholder
-   (for en matrise er N lengden) og en `_remaining_<N>_keys`-markør som teller nøklene
-   som ble fjernet etter de første 20. Skalarverdier kopieres i sin helhet, så et objekt med 20 nøkler
-   eller færre uten nestede verdier får bare ny innrykkformatering — et minifisert objekt får flere tegn
-   og forblir uendret.
-5. **`errorMessage`**: utdata som inneholder, hvor som helst og uavhengig av store og små bokstaver, `error:`,
-   `error ` (ordet etterfulgt av et mellomrom, som i `no error found`), `[error]`,
-   `exception:`, `exception `, `[exception]` eller `traceback`, beholder den første linjen, de
-   neste 10 linjene og de siste 3, med en `… [N frames elided] …`-markør i stedet for
-   linjene mellom dem. Markøren vises bare når mer enn 13 linjer følger etter den første
-   linjen, så feilutdata på 14 linjer eller færre forkortes ikke (ved 12 eller 13 linjer
-   gjentar de siste 3 linjer som allerede er beholdt).
+1. **`fileContent`** : innhold av 3 eller flere linjer der minst én linje, ignorerer innledende innrykk, starter med `import `, `export `, `function `, `class `, `const `, `let `, `var ` eller `return ` (nøkkelordet pluss et mellomrom), eller med `if`, `for` eller `while` etterfulgt av `(` ` (` dens siste 5e 20, behold lokket med 5 første linjer. midt merket.
+2. **`grepSearch`** : innhold med minst én linje av formen `<path>:<digits>:`, der teksten før det første kolonet ikke har mellomrom, beholder bare disse linjene, maksimalt 30, etterfulgt av en telling av eventuelle ytterligere treff og listen over samsvarende filer; annenhver linje droppes. En slik linje er nok til å trigge strategien, så en logglinje som starter med et tidsstempel som `12:30:45` teller også.
+3. **`shellOutput`** : utdata som inneholder en ANSI CSI sekvens (`ESC[` deretter sifre eller semikolon og deretter en bokstav, som i fargekoder) eller en `$` etterfulgt av mellomrom hvor som helst i teksten mister disse sekvensene (andre escapes, som `ESC[?25l` eller en OSC -vindustittelsekvens, beholdes) og beholder sine siste 50 kollapslinjer gjentatt, med consecutive linjer. Fordi denne sjekken kjører før `json` og `errorMessage`, JSON eller feilutgang som inneholder en slik `$` aldri når dem mens `shellOutput` er på.
+4. **`json`** : en JSON nyttelast på over 2000 tegn som starter med `{` eller `[` (etter valgfri mellomrom) og analyser oppsummeres: en matrise med mer enn 7 elementer beholder sine første 5 og siste 2 elementer og det totale antallet, og et objekt beholder sine første 20 nøkler, med hvert nestet objekt eller en matriseverdi erstattet av en `{…N keys}` plassholder og (for en zq-verdiplassholder) `_remaining_<N>_keys` markør som teller nøklene som er falt forbi de første 20. Skalarverdier kopieres hele, så et objekt med 20 nøkler eller færre uten nestede verdier blir bare rykket inn igjen — en minifisert får tegn og forblir uendret.
+5. **`errorMessage`** : utdata som inneholder, hvor som helst og uansett store og små bokstaver, `error:`, `error ` (ordet etterfulgt av et mellomrom, som i `no error found`), `[error]`, `exception:`, `exception `, `[exception]` eller `traceback` beholder sin første linje, de neste 10 linjene og de siste 3, med en `… [N frames elided] …` markør i stedet for linjene mellom dem. Markøren vises bare når mer enn 13 linjer følger den første linjen, så feilutgang på 14 linjer eller færre forkortes ikke (ved 12 eller 13 linjer er de siste 3 repeterende linjene allerede holdt).
 
-Etter at en strategi har gitt treff, prøves ikke de senere strategiene, selv om den ikke
-sparer noe. Når strategien som gir treff, ikke sparer noen estimerte tokener (lengde ÷ 4, rundet opp) —
-for eksempel en kodelignende fil på 25 linjer eller færre, eller en JSON-matrise på over 2 000
-tegn med 7 elementer eller færre — beholder den aggressive motoren det opprinnelige
-verktøyresultatet: begge kallere (`compressAggressive()` og `compressAnthropicToolResultBlock()`)
-beholder originalen når `saved` er 0 eller mindre, mens `compressToolResult()` selv fortsatt
-returnerer strategiens utdata. Trinnet for verktøyresultater er ikke siste instans:
-motorens reserveoppsummerer kan fortsatt forkorte en `tool`- eller `function`-melding som er lengre
-enn 8 192 tegn (`maxTokensPerMessage`, 2 048, ganger 4).
+Etter at en strategi matcher, selv en som ikke sparer noe, blir ikke de senere strategiene prøvd. Når matchingsstrategien ikke lagrer noen estimerte tokens (lengde ÷ 4, rundet opp) — for eksempel en kodelignende fil på 25 linjer eller færre, eller en JSON array på over 2000 tegn med 7 elementer eller færre — beholder den aggressive motoren det opprinnelige verktøyresultatet: begge oppringere (`compressAggressive()` og `compressAnthropicToolResultBlock()` er stille når `saved` er under `compressToolResult()` ) returnerer den strategiens utgang. Verktøy-resultat-trinnet er ikke det siste ordet: motorens fallback summarizer kan fortsatt forkorte en `tool` eller `function` melding med mer enn 8 192 tegn (`maxTokensPerMessage`, 2 048, ganger 4).
 
-#### Når det bør brukes
+#### Når du skal bruke
 
-Komprimering av verktøyresultater er trinn 1 i den aggressive motoren (`compressAggressive()` i
-`open-sse/services/compression/aggressive.ts`), så den kjøres i Aggressive-modus og i et
-`aggressive`-trinn i en stablet pipeline. Den komprimerer `tool`- og `function`-meldinger i
-OpenAI-format og teksten inne i Anthropic-`tool_result`-blokker. Hver strategi har sin egen
-bryter under `aggressive.toolStrategies`, og alle er aktivert som standard. I kontrollpanelet
-finnes bryterne i **Advanced**-visningen på Caveman-siden når komprimering er aktivert og
-standardmodusen er Aggressive.
+Verktøyresultatkomprimering er trinn 1 i den aggressive motoren (`compressAggressive()` i `open-sse/services/compression/aggressive.ts`), så den kjører i aggressiv modus og i et `aggressive` trinn i en stablet rørledning. Den komprimerer `tool` og `function` meldinger i OpenAI-form og teksten i Anthropic `tool_result` blokker. Hver strategi har sin egen bryter under `aggressive.toolStrategies`, alt på som standard. I dashbordet er bryterne på Caveman-siden** Avansert** vis mens komprimering er på og standardmodus er Aggressiv.
 
-### Stablet pipeline
+### Stablet rørledning
 
-Stablet modus kjører **flere motorer i rekkefølge** — vanligvis RTK først
-(60–90 % besparelse på verktøyutdata), deretter Caveman på den gjenværende teksten (~46 % besparelse
-på inndata). Kombinert gir dette det **kvalifiserte området på 78–95 %** (se beregningen av
-oppstrømsbesparelser ovenfor): `1 - (1 - 0.60..0.90) × (1 - 0.46)` gir i gjennomsnitt ≈89 %.
+Den stablede modusen kjører** flere motorer i rekkefølge** — vanligvis RTK først (60-90 % besparelse på verktøyutgang), deretter Caveman på den gjenværende teksten (~ 46 % besparelse på input). Sammensatt, det er** 78–95 % kvalifisert rekkevidde** (se Upstream Savings Math ovenfor): `1 - (1 - 0.60..0.90) × (1 - 0.46)` er i gjennomsnitt ≈ 89%.
 
-#### Slik fungerer det
+#### Hvordan det fungerer
 
 ```
-Inndata (1000 tokener)
-  → RTK (kommandobevisst filter) → 200 tokener
-    → Caveman (fjerning av fyllstoff) → 108 tokener
-  → Utdata (108 tokener, ~89 % besparelse)
+Input (1000 tokens)
+  → RTK (command-aware filter) → 200 tokens
+    → Caveman (filler removal) → 108 tokens
+  → Output (108 tokens, ~89% savings)
 ```
 
-#### Når det bør brukes
+#### Når du skal bruke
 
 Bruk stablet modus for:
 
-- Verktøytunge arbeidsflyter (agentbasert programmering, forskning)
-- Kostnadssensitiv satsvis behandling
-- Når du trenger maksimal tokenbesparelse
+- Verktøytunge arbeidsflyter (agentisk koding, forskning)
+- Kostnadssensitiv batchbehandling
+- Når du trenger maksimale symbolbesparelser
 
-Stablede pipelines konfigureres gjennom den globale komprimeringsinnstillingen
-`stackedPipeline`, eller gjennom en navngitt komprimeringskombinasjon som er tilordnet en
-rutingskombinasjon (se overstyring per kombinasjon ovenfor) — ikke gjennom en automatisk kombinasjons
-`modePack` (dette feltet omvekter bare modellvalget for automatiske kombinasjoner, og `stacked`
-er ikke et gyldig pakkenavn).
+Stablede rørledninger konfigureres gjennom den globale `stackedPipeline` komprimeringsinnstillingen, eller gjennom en navngitt kompresjonskombinasjon tilordnet en rutingkombinasjon (se Per-Combo Override ovenfor) — ikke gjennom en auto-combo `modePack` (det feltet vekter kun auto-combo modellvalg på nytt, og `stacked` er ikke et gyldig pakkenavn).
 
 ---
 

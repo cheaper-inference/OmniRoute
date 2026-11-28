@@ -8,29 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Configuração do Desenvolvimento
+## Configuração de desenvolvimento
 
 ### Pré-requisitos
 
-- **Node.js** `>=22.22.2 <23`, ou `>=24.0.0 <27` (recomendado: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` ou `>=24.0.0 <27` (recomendado: 24 LTS)
+- **npm** 10 +
 
-> **Windows com Node 24:** utilize a versão de patch atual do 24 LTS (pelo menos 24.20.0).
-> As versões anteriores podem terminar abruptamente após testes bem-sucedidos quando `--test-force-exit` fecha o
-> processo. A [correção do libuv para Windows](https://github.com/nodejs/node/pull/61999) do Node resolve
-> este erro de execução; mantenha as asserções dos testes e as verificações de saída do executor ativadas.
+> **Windows com Nó 24:** utilize a versão atual do patch 24 LTS (pelo menos 24.20.0). As versões anteriores podem ser abortadas após testes bem-sucedidos quando `--test-force-exit` fecha o processo. [A correção Windows libuv](https://github.com/nodejs/node/pull/61999) do Node resolve esta falha de tempo de execução; mantenha as asserções de teste e as verificações de saída do executor ativadas.
 
-> **Utilizadores do npm v11+ (Node 24+):** após `npm install`, verifique se os módulos nativos foram instalados:
-> `node -e "require('better-sqlite3')"`. Se falhar com `MODULE_NOT_FOUND`,
-> execute `npm approve-scripts better-sqlite3 && npm install`. Consulte
-> [Resolução de problemas](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Utilizadores npm v11 + (nó 24 +):** Após `npm install`, verifique se os módulos nativos foram instalados: `node -e "require('better-sqlite3')"`. Se falhar com `MODULE_NOT_FOUND`, execute `npm approve-scripts better-sqlite3 && npm install`. Consulte [Resolução de problemas](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
 ### Clonar e instalar
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,91 +32,83 @@ npm install
 ### Variáveis de ambiente
 
 ```bash
-# Crie o seu .env a partir do modelo
+# Create your .env from the template
 cp .env.example .env
 
-# Gere os segredos necessários
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Variáveis principais para o desenvolvimento:
+Variáveis-chave para o desenvolvimento:
 
-| Variável               | Predefinição de desenvolvimento | Descrição                                  |
-| ---------------------- | ------------------------------- | ------------------------------------------ |
-| `PORT`                 | `20128`                         | Porta do servidor                          |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`        | URL base do frontend                       |
-| `JWT_SECRET`           | (gerar acima)                   | Segredo de assinatura JWT                  |
-| `INITIAL_PASSWORD`     | `CHANGEME`                      | Palavra-passe do primeiro início de sessão |
-| `APP_LOG_LEVEL`        | `info`                          | Nível de verbosidade dos registos          |
+| Variável               | Padrão de desenvolvimento | Descrição                       |
+| ---------------------- | ------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                   | Porta do servidor               |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | Base URL para front-end         |
+| `JWT_SECRET`           | (gerar acima)             | segredo de assinatura JWT       |
+| `INITIAL_PASSWORD`     | `CHANGEME`                | Palavra-passe do primeiro login |
+| `APP_LOG_LEVEL`        | `info`                    | Nível de detalhe do registo     |
 
-### Definições do dashboard
+### Configurações do painel
 
-O dashboard disponibiliza opções na interface para funcionalidades que também podem ser configuradas através de variáveis de ambiente:
+O painel fornece alternâncias UI para recursos que também podem ser configurados através de variáveis de ambiente:
 
-| Localização da definição | Opção                         | Descrição                                    |
-| ------------------------ | ----------------------------- | -------------------------------------------- |
-| Definições → Avançadas   | Modo de depuração             | Ativar registos de pedidos de depuração (IU) |
-| Definições → Geral       | Visibilidade da barra lateral | Mostrar/ocultar secções da barra lateral     |
+| Definir localização       | Alternar                      | Descrição                                        |
+| ------------------------- | ----------------------------- | ------------------------------------------------ |
+| Configurações avançadas → | Modo de depuração             | Ativar registos de solicitação de depuração (UI) |
+| Configurações → Geral     | Visibilidade da barra lateral | secções da barra lateral Show/hide               |
 
-Estas definições são armazenadas na base de dados e persistem após reinícios, substituindo as predefinições das variáveis de ambiente quando definidas.
+Estas definições são armazenadas na base de dados e persistem durante as reinicializações, substituindo os padrões env var quando definidos.
 
-### Executar localmente
+### Executando localmente
 
 ```bash
-# Modo de desenvolvimento (atualização automática)
+# Development mode (hot reload)
 npm run dev
 
-# Compilação de produção
-npm run build    # next build → .build/next/ e depois assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Compilação rápida apenas do backend/API para alterações de contribuidores
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Compilação de lançamento (compilação limpa + sentinela HEAD — necessária para a implementação)
-npm run build:release   # rm -rf .build dist e depois build + escreve dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Configuração comum da porta
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-A compilação de contribuidores executa uma validação apenas de compilação: não monta a
-distribuição autónoma nem compila recursos opcionais de empacotamento nativo. Utilize a compilação
-de produção normal quando precisar de validar o pacote pronto para distribuição.
+A compilação do contribuidor executa a validação apenas de compilação: não monta a distribuição autónoma nem cria ativos de empacotamento nativos opcionais. Utilize a compilação de produção regular quando necessitar de validar o pacote entregável.
 
-### Estrutura do resultado da compilação
+### Construir layout de saída
 
-| Diretório | Conteúdo                                                                               | Rastreado |
-| --------- | -------------------------------------------------------------------------------------- | --------- |
-| `src/`    | Código-fonte da aplicação (TypeScript / TSX)                                           | Sim       |
-| `.build/` | Intermédios — resultado de `next build` (ignorado pelo git, `distDir = .build/next`)   | Não       |
-| `dist/`   | Pacote pronto para distribuição — montado por `assembleStandalone` (ignorado pelo git) | Não       |
+| Diretório | Conteúdo                                                              | Rastreado |
+| --------- | --------------------------------------------------------------------- | --------- |
+| `src/`    | Fonte da aplicação (TypeScript / TSX)                                 | Sim       |
+| `.build/` | Saída intermédia — `next build` (gitignored, `distDir = .build/next`) | Não       |
+| `dist/`   | Pacote entregável — montado por `assembleStandalone` (gitignored)     | Não       |
 
-O pipeline de compilação é executado numa única passagem:
+O pipeline de build é uma passagem única:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (resultado do Next.js)
-  └─ assembleStandalone()                 (copia standalone + static + public + recursos nativos)
-       └─ resultado: dist/                (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` limpa adicionalmente ambos os diretórios primeiro e escreve
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) como sentinela de integridade da implementação.
+Além disso,`npm run build:release` limpa primeiro ambos os diretórios e escreve `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) como um sentinela de integridade de implantação.
 
-`npm run build:contributor` utiliza o perfil de compilação apenas do backend. Cria temporariamente stubs
-para os ficheiros da IU do dashboard durante a compilação, mantém os processadores de rotas da API
-e repõe os ficheiros originais após a compilação. Utilize `npm run build` para alterações que afetem a IU
-do dashboard ou para a validação completa de uma versão; o perfil de contribuidores não substitui a compilação de lançamento.
+`npm run build:contributor` utiliza o perfil de construção apenas backend. Faz stubs temporariamente dos ficheiros UI do painel durante a construção, mantém os manipuladores de rotas API e restaura os ficheiros originais após a construção. Utilize `npm run build` para alterações que afetem o painel UI ou para validação completa da versão; o perfil do contribuidor não substitui a versão de lançamento.
 
-> **Nota sobre a implementação no VPS:** o diretório de imagens remoto `/usr/lib/node_modules/omniroute/app/`
-> não é alterado. As ferramentas de implementação sincronizam através de rsync o conteúdo de `dist/` para esse diretório.
-> Apenas o caminho do resultado da compilação no repositório foi alterado (`app/` → `dist/`).
+> **Nota de implementação VPS :** o diretório de imagem remota `/usr/lib/node_modules/omniroute/app/` permanece inalterado. As competências de implantação sincronizam novamente o conteúdo do `dist/` nele. Apenas o caminho de saída da compilação no repositório foi movido (`app/` → `dist/`).
 
-URLs predefinidos:
+URLs padrão:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **Painel** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -429,10 +415,10 @@ Em seguida, utilize as skills `/deploy-vps-*-cc`, que sincronizam `dist/` atrav�
 
 ---
 
-## Obter Ajuda
+## Obtendo ajuda
 
-- **Arquitetura**: Consulte [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Referência da API**: Consulte [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Documentação de segurança**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Documentação de operações**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Problemas**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arquitetura** : Ver [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **Referência API** : Ver [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Documentos de segurança** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Documentos de operações** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Problemas** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

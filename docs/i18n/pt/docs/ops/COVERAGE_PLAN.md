@@ -151,30 +151,30 @@ Temas para as Fases 6-7:
 - [ ] Adicionar testes de regressão para todos os erros em produção corrigidos durante o avanço até aos 90%
 - [ ] Aumentar o limite mínimo de cobertura na CI apenas depois de a referência local permanecer estável durante, pelo menos, duas execuções consecutivas
 
-## Política de ratchet
+## Política de torniquetes
 
-Atualize os limiares de `npm run test:coverage` apenas depois de o projeto ultrapassar efetivamente o marco seguinte com uma margem confortável.
+Atualize os limites `npm run test:coverage` apenas depois de o projeto exceder realmente o próximo marco com um buffer confortável.
 
-**Limite atual:** `npm run test:coverage` impõe **60 instruções / 60 linhas / 60 funções / 60 ramificações** (a métrica foi recalibrada na Fase 6A.1 das Quality-Gates — o valor de referência anterior de 82,58% estava inflacionado porque contabilizava os ficheiros de teste e excluía `open-sse`). O comando `test:coverage:legacy` preserva a antiga métrica 50/50/50 para comparação histórica.
+**Portão atual:** `npm run test:coverage` impõe** 60 instruções/60 linhas/60 funções/60 ramificações** (a métrica foi rebaseada no Quality-Gates Fase 6A.1 — a linha de base anterior de 82,58% foi inflacionada porque contava os ficheiros de teste e excluía `open-sse`). O comando `test:coverage:legacy` preserva a antiga métrica 50/50/50 para comparação histórica.
 
-Para verificações pontuais dos limiares com base no relatório mais recente, utilize:
+Para verificações de limites ad hoc em relação ao relatório mais recente, utilize:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Sequência de ratchet recomendada (a ordem é `instruções-linhas / ramificações / funções`):
+Sequência de roquete recomendada (a ordem é `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- limite atual (75/70/75)
+5. 75/70/72 <-- porta actual (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-O próximo objetivo do ratchet é `80/75/78`, assim que a cobertura de ramificações se mantiver acima de 78% em duas execuções consecutivas.
+O próximo objetivo de torniquetes é `80/75/78` uma vez que a cobertura das agências se mantenha acima dos 78% durante duas execuções consecutivas.
 
 ## Lacuna conhecida
 

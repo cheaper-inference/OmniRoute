@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**すべてのプロジェクトルールは [`AGENTS.md`](AGENTS.md) にあります** — これは、すべての AI
-アシスタントにとっての唯一の信頼できる情報源です（アーキテクチャ、規約、テスト、品質ゲート、git ワークフロー、23 個のハードルール、
-PII に関する知見）。全文を読み、ここにプロジェクトルールを再記載しないでください。以下の内容はすべて
-Claude Code にのみ適用されます — `AGENTS.md` ですでに定義されているルールを運用面で補足するものです。
+**すべてのプロジェクト ルールは[`AGENTS.md`](AGENTS.md)に存在します**—すべてのAIアシスタントにとって唯一の信頼できる情報源です。上記のインポートではすでにロードされています。ここでプロジェクト ルールを再追加しないでください。以下のすべては、 ONLY Claudeコードに適用します。 `AGENTS.md`ですでに定義されているルールの—操作上の改良です。
 
-## Worktree 分離 — Claude Code 固有の事項
+## ワークツリーの分離— Claudeコードの詳細
 
-必須の worktree プロトコル全体(ベースブランチの確認、正規パス `.claude/worktrees/`、
-`cp -al` による node_modules、ティアダウンルール)は
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) に記載されています(`AGENTS.md` →
-Git Workflow → "Worktree isolation" に要約あり)。Claude Code 固有のポイント:
+- オペレーターから既に指示されていない限り、 `AskUserQuestion` (ハード ルール#19) 経由でオペレーターにベース ブランチを確認してください。
+- `scripts/dev/new-worktree.sh <branch> <confirmed-base>`を使用してワークツリーを作成し ( `.claude/worktrees/`の下に配置され、 `node_modules`ハードリンクし、 `.husky/_`をコピーします)、その`path`を使用して`EnterWorktree`を呼び出します。常にベースを渡します。ベースがないと、スクリプトは最も高い`release/*`を選択しますが、これはオペレーターが確認したものではない可能性があります。 `EnterWorktree`独自に作成するワークツリーにはハード リンクもフックもないため、その中でプリコミット ゲートは実行されません。
 
-- オペレーターがすでに指示していない限り、`AskUserQuestion` を通じてオペレーターにベースブランチを
-  確認すること(Hard Rule #19)。
-- ネイティブの `EnterWorktree` ツールを優先すること — このツールは `.claude/worktrees/`(正規パス)
-  配下に worktree をすでに作成します。ドキュメントに記載されている `git
-worktree add` コマンドで worktree を作成し、その `path` を指定して `EnterWorktree` を呼び出してください。
+## サブエージェントとgit
 
-## セッション間の安全性 — Claude Code 固有事項
+git (エージェント ツールまたはワークフロー スクリプト) に触れるすべてのサブエージェントには、プロンプト—で、サブエージェント経由で記録されたスタッシュ インシデントの再発を示すハード ルール#22 a の`git stash`禁止が逐語的に適用されます。
 
-ハードルール #19/#21/#22（`AGENTS.md` 内）は並列セッションを管理します。この
-ハーネスに関する運用上の注意事項：
+## 計画アーティファクト—スーパーパワー パス オーバーライド
 
-- **git を操作するすべてのサブエージェントのプロンプトに、`git stash` の禁止事項を一字一句そのまま複製してください**
-  （Agent ツール / Workflow スクリプト）— サブエージェントはこのファイルを継承せず、記録されている
-  stash インシデントの再発はサブエージェントを経由して発生しました。
-- _このセッションで_作成していない PR にマージまたは push する前に、`git worktree list`
-  を実行し、`gh pr view <N> --json state,headRefOid` を再確認してください（ハードルール #22b）。
-- すべてのセッション終了時に、メインチェックアウトを開始時のブランチへ戻してください。
+スーパーパワーのスキルは`docs/superpowers/plans/`、 `docs/superpowers/specs/`および`docs/research/`でデフォルトを通知します。書き込む前に、それぞれを`AGENTS.md` → "Planning & Research Artifacts" で`_tasks/`に相当するものに書き換え、メイン リポジトリではなく`git -C _tasks …`を使用してコミットします。
 
-## Superpowers / 計画成果物 — パスのオーバーライド
+## スクラッチ ファイル—ではなく`_artifacts/` `/tmp`
 
-`_tasks/` の規約は `AGENTS.md` → "Planning & Research Artifacts" で定義されています。
-superpowers スキルには `docs/…` を指すデフォルト設定が含まれていますが、それらのデフォルトは**ここでオーバーライド
-されます**。superpowers スキルが "saved to `docs/superpowers/plans/…`" のようなパスを示した場合、
-書き込む前に、それを対応する `_tasks/…` のパスへ書き換えてください：
+このプロジェクトは、ハーネスのセッション スクラッチパッド (`/tmp/claude-*/…`) をオーバーライドします。一時ファイル—エクスポート、生成された zip、1 回限りの中間出力—から`/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`への書き込み: gitignored ルート`_*`パス。これにより、オペレーターはすべてのスクラッチを 1 か所で見つけて削除します。耐久性のある計画、仕様、研究、引き継ぎは、代わりに`_tasks/`に送られます (ハード ルール#23)。
 
-| 成果物（スキル）                    | デフォルト（使用禁止）    | 代わりにここへ保存                                            |
-| ----------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| 計画（`writing-plans`）             | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| 仕様 / 設計（`brainstorming`）      | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| 調査（`deep-research`、アドホック） | `docs/research/`          | `_tasks/research/…`                                           |
-| 引き継ぎ（`/handoff`）              | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## レッドベース
 
-これらの成果物はメインリポジトリではなく、`_tasks/` リポジトリ内でコミットしてください（`git -C _tasks …`）。
-
-## スクラッチ / 一時ファイル — `/tmp` ではなく `_artifacts/` を使用
-
-このプロジェクトでは、ハーネスのデフォルトのセッション用スクラッチパッド（`/tmp/claude-*/…`）をオーバーライドします。
-一時ファイルや作業ファイル — エクスポート、生成した zip、一度限りの中間出力、および通常なら
-`/tmp` に置くあらゆるもの — は、代わりに `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` へ書き込んでください。
-
-- `_artifacts/` はルートの `_*` パスです。すでに gitignore の対象であり（`AGENTS.md` → "Root `_*` paths"）、
-  ディスク上にのみ存在し、追跡されることはありません。
-- 理由：スクラッチ出力をプロジェクト内（`/tmp` ではなく）に保持することで、消失したり未追跡のまま蓄積したりする
-  セッション固有の一時的な `/tmp` ディレクトリを探し回ることなく、オペレーターが
-  すべての一時ファイルを一か所で簡単に見つけて削除できます。
-- これを `_tasks/`（ハードルール #23、永続的な
-  計画/仕様/調査/引き継ぎ用の独立したプライベート git リポジトリ）と混同しないでください — `_artifacts/` は破棄可能な作業ファイル専用であり、ここにあるものは
-  永続化やバージョン管理を必要としません。
-
-## PR を開く前にベースがグリーンであることを確認
-
-ブランチを切るか PR を開く前に、ベースグリーンチェックを実行してください（`AGENTS.md` → Git Workflow →
-"Base-green check"。プロジェクトスキルでは `.agents/skills/_shared/base-green.md` として参照されています）。ベースの先端がレッドの状態で
-開かれた PR は、本文に `⚠️ base-red inherited: #<issue>` を含める必要があります。蓄積したレッド状態（ベースの先端 + レッドの PR）を
-解消するには、`/sweep-reds` スキルを使用してください。
+蓄積された赤の状態 (ベースチップ+赤PRs) を排出するには、 `/sweep-reds`スキルを使用します。

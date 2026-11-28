@@ -55,23 +55,23 @@ OmniRoute প্রতিটি API কী-এর অনুরোধকে গ�
 
 কোন ক্লায়েন্ট সেটআপ ছাড়া কি রেকর্ড করা হয়:
 
-| মাঠ        | উৎস                                                                                                                                               |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| অধিবেশন    | `x-claude-code-session-id` হেডার ( `metadata.user_id.session_id` এর মতো একই মান), প্রতি সেশনে স্থিতিশীল                                           |
-| প্রকল্প    | `Primary working directory:` লাইন Claude কোড তার পরিবেশ বার্তা পাঠায়; `.claude/worktrees/` অধীনে worktree ফোল্ডারগুলি রিপোজিটরির নামে সমাধান করে |
-| শাখা       | গিট স্ট্যাটাস থেকে`Current branch:` Claude কোড প্রথম বার্তার সাথে পাঠায়                                                                          |
-| ক্লায়েন্ট | `user-agent` (`claude-cli/<version>`)                                                                                                             |
+| মাঠ        | উৎস                                                                                                                                                |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| অধিবেশন    | `x-claude-code-session-id` হেডার ( `metadata.user_id.session_id` এর মতো একই মান), প্রতি সেশনে স্থিতিশীল                                            |
+| প্রকল্প    | `Primary working directory:` লাইন Claude কোড তার পরিবেশ বার্তা পাঠায়; `.claude/worktrees/` অধীনে worktree ফোল্ডারগুলি রিপোজিটরির নাম নির্ধারণ করে |
+| শাখা       | গিট স্ট্যাটাস থেকে`Current branch:` Claude কোড প্রথম বার্তার সাথে পাঠায়                                                                           |
+| ক্লায়েন্ট | `user-agent` (`claude-cli/<version>`)                                                                                                              |
 
 Codex (`<environment_context><cwd>`) এবং OpenCode (`x-opencode-session`) একইভাবে স্বীকৃত। সঙ্গে চাবি** কোন লগ** শুধুমাত্র সেশন আইডি এবং শিরোনাম সরবরাহকৃত প্রকল্প ক্ষেত্রগুলি রাখা সক্ষম করা হয়েছে; প্রম্পট (পথ, শাখা) থেকে পড়া কিছুই সংরক্ষণ করা হয় না।
 
 ### স্পষ্টভাবে প্রকল্পের নামকরণ (প্রস্তাবিত)
 
-ওয়ার্কিং ডাইরেক্টরি মেশিনের মধ্যে আলাদা, তাই একই রিপোজিটরি বিভিন্ন পাথের অধীনে দেখাতে পারে। পরিবর্তে প্রজেক্টটি স্পষ্টভাবে পাঠান: Claude কোড প্রতিটি মডেল অনুরোধে `ANTHROPIC_CUSTOM_HEADERS` তে তালিকাভুক্ত যেকোনো শিরোনাম যোগ করে, এবং OmniRoute তাদের দুটি পড়ে:
+ওয়ার্কিং ডাইরেক্টরি মেশিনের মধ্যে আলাদা, তাই একই রিপোজিটরি বিভিন্ন পাথের অধীনে দেখাতে পারে। পরিবর্তে প্রজেক্টটি স্পষ্টভাবে পাঠান: Claude কোড প্রতিটি মডেল অনুরোধে `ANTHROPIC_CUSTOM_HEADERS` তে তালিকাভুক্ত যেকোন শিরোনাম যোগ করে এবং OmniRoute তাদের দুটি পড়ে:
 
-| হেডার                      | মান                                                           |
-| -------------------------- | ------------------------------------------------------------- |
-| `x-omniroute-project`      | প্রকল্পের নাম, যেমন `omniroute`                               |
-| `x-omniroute-project-repo` | সাধারণীকৃত দূরবর্তী, যেমন `github.com/diegosouzapw/OmniRoute` |
+| হেডার                      | মান                                                                |
+| -------------------------- | ------------------------------------------------------------------ |
+| `x-omniroute-project`      | প্রকল্পের নাম, যেমন `omniroute`                                    |
+| `x-omniroute-project-repo` | সাধারণীকৃত দূরবর্তী, যেমন `github.com/cheaper-inference/OmniRoute` |
 
 উভয়ই শুধুমাত্র অ্যাট্রিবিউশনের জন্য পড়া হয়; সেগুলি কখনই আপস্ট্রিম প্রদানকারীর কাছে পাঠানো হয় না।
 
@@ -275,28 +275,20 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm/glm-4.7-flash"
 
 ## সমস্যা সমাধান
 
-**Claude Code গেটওয়ে উপেক্ষা করে** — নিশ্চিত করুন `ANTHROPIC_BASE_URL`-এ **কোনো
-`/v1` নেই** এবং `claude` পুনরায় চালু করুন (স্টার্টআপের সময় env একবারই পড়া হয়)। `omniroute launch`
-আপনার হয়ে এটি পরিচালনা করে।
+**Claude কোড গেটওয়ে উপেক্ষা করে** — নিশ্চিত `ANTHROPIC_BASE_URL` আছে** কোন `/v1`** এবং `claude` পুনরায় চালু করুন (এনভি একবার স্টার্টআপে পড়া হয়)। `omniroute launch` আপনার জন্য এটি পরিচালনা করে।
 
-**`/model` পিকার খালি / গেটওয়ে মডেল অনুপস্থিত** — Claude Code
-v2.1.219+ এবং `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` প্রয়োজন। পিকারে কেবল `claude*` /
-`anthropic*` মডেল ID দেখা যায়; অন্য যেকোনো মডেল `ANTHROPIC_MODEL=<id>` দিয়ে
-জোরপূর্বক ব্যবহার করুন (প্রোফাইলগুলো এভাবেই কাজ করে)।
+**`/model` পিকার খালি/অনুপস্থিত গেটওয়ে মডেল** — Claude কোড v2.1.219 + এবং `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` প্রয়োজন। শুধুমাত্র `claude*` / `anthropic*` মডেল IDs পিকারে উপস্থিত হয়; `ANTHROPIC_MODEL=<id>` এর সাথে অন্য কোন মডেলকে জোর করুন (প্রোফাইলগুলি এটিই করে)।
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code সর্বদা **প্রিফিক্সবিহীন**
-মডেল ID পাঠায় (যেমন `claude-opus-4-8`), তাই Claude Code (`cc/…`) এবং
-Claude (`claude/…`) উভয় প্রদানকারী সংযুক্ত থাকলে প্রিফিক্সবিহীন ID দুটি রুটের সঙ্গে মিলে যায় এবং
-OmniRoute অনুমান করতে অস্বীকার করে। যেকোনো একভাবে এটি ঠিক করুন: `ANTHROPIC_MODEL=cc/claude-opus-4-8`
-দিয়ে একটি প্রিফিক্সযুক্ত ID পিন করুন, অথবা **প্রিফিক্সবিহীন Claude মডেলের জন্য Claude Code-কে
-অগ্রাধিকার দিন** সক্ষম করুন — Claude প্রদানকারী পৃষ্ঠার টগলটি, অথবা
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (ডিফল্টরূপে বন্ধ;
-দেখুন [পরিবেশ](../reference/ENVIRONMENT.md)) — যা প্রিফিক্সবিহীন `claude-*`
-ID-গুলোকে পরিবর্তে Claude Code-এ রুট করে। স্পষ্ট প্রদানকারী প্রিফিক্স সবসময় অগ্রাধিকার পায়।
+**`400 Ambiguous model 'claude-…'`** — Claude Code always sends **unprefixed** model IDs (e.g. `claude-opus-4-8`), so when both the Claude Code (`cc/…`) and Claude (`claude/…`) providers are connected the bare id matches two routes and OmniRoute refuses to guess. Fix it either way: pin a prefixed id with `ANTHROPIC_MODEL=cc/claude-opus-4-8`, or enable **Prefer Claude Code for unprefixed Claude models** — the toggle on the Claude provider page, or `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (default off; see [Environment](../reference/ENVIRONMENT.md)) — which routes bare `claude-*` IDs to Claude Code instead. Explicit provider prefixes always win.
 
-**প্রমাণীকরণ ত্রুটি** — প্রোফাইলে কোনো টোকেন থাকে না। `omniroute launch --profile`
-ব্যবহার করুন (এটি টোকেন ইনজেক্ট করে) অথবা `ANTHROPIC_AUTH_TOKEN` এক্সপোর্ট করুন।
+**"স্বয়ংক্রিয় মোড … এই সেশনটি যোগ্য নয়" (শ্রেণীবিভাগের অনুরোধের বিল করা হয়েছে)** স্বয়ংক্রিয় মোডে — Claude কোড সার্ভারকে তার নিজস্ব মডেল অনুরোধের ( [Anthropic ডক্স](https://code.claude.com/docs/en/auto-mode-classifier-billing) ) মধ্যে ক্রিয়া পর্যালোচনা করতে বলে। এটি একটি জোড়া হিসাবে Anthropic পৌঁছানোর জন্য `anthropic-beta` মান `dangerous-tool-use-2026-09-03` এবং `safeguards` বডি ফিল্ড প্রয়োজন এবং `safeguard_results` প্লাস আপস্ট্রিম টুল- অপরিবর্তিত ফিরে আসার জন্য IDs ব্যবহার করুন। OmniRoute এটি করে যখন অনুরোধটি নেটিভ `claude` প্রদানকারীর কাছে বা একটি `anthropic-compatible-*` নোডে পাঠানো হয়, স্ট্রিম করা হয় বা না হয় (রিগ্রেশন গার্ড: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`)। অন্যান্য লক্ষ্যগুলি পর্যালোচনাটি ফেরত দিতে পারে না, তাই Claude কোডটি তার নিজস্ব শ্রেণিবদ্ধ অনুরোধে ফিরে আসে এবং বিজ্ঞপ্তিটি দেখায়:
 
-**প্রোফাইলগুলো বিচ্ছিন্ন থাকে না** — প্রতিটি প্রোফাইল একটি স্বতন্ত্র `CLAUDE_CONFIG_DIR`;
-সেশনের ভেতরে `echo $CLAUDE_CONFIG_DIR` চালিয়ে যাচাই করুন যে এটি
-`~/.claude/profiles/<name>` নির্দেশ করছে।
+- একটি নন-অ্যানথ্রপিক প্রদানকারীর একটি মডেল, বা একটি কম্বো যা একটিতে অবতরণ করে;
+- একটি ক্লড-কোড-সামঞ্জস্যপূর্ণ রিলে নোড (`anthropic-compatible-cc-*`), যা রিকোয়েস্ট বডি পুনর্নির্মাণ করে এবং `safeguards` বহন করে না;
+- একটি পুরানো OmniRoute যা অনুমোদিত বিটাগুলির পূর্ববর্তী, বা গেটওয়ে সেশনের জন্য Anthropic পৃষ্ঠা তালিকার নীচে একটি Claude কোড সংস্করণ।
+
+Claude কোডে `/status` চালান: the** অটো মোড সার্ভার** সার্ভারের পর্যালোচনা সক্রিয় থাকাকালীন সারি `Enabled` পড়ে। এই অনুরোধগুলি বিল করা হবে কিনা তা Anthropic দ্বারা নির্ধারিত হয়, OmniRoute দ্বারা নয়।
+
+**প্রমাণীকরণ ত্রুটি** — প্রোফাইলে কোন টোকেন নেই। `omniroute launch --profile` ব্যবহার করুন (এটি ইনজেক্ট করুন) বা `ANTHROPIC_AUTH_TOKEN` রপ্তানি করুন।
+
+**প্রোফাইল বিচ্ছিন্ন না** — প্রতিটি প্রোফাইল একটি স্বতন্ত্র `CLAUDE_CONFIG_DIR`; `~/.claude/profiles/<name>` এ সেশন পয়েন্টের ভিতরে `echo $CLAUDE_CONFIG_DIR` যাচাই করুন।

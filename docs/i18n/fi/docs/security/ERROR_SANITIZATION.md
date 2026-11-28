@@ -4,13 +4,7 @@
 
 ---
 
-> **Totuuden lähde:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` ja julkiset rakentajat tiedostossa `open-sse/utils/error.ts`
-> **Testit:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Viimeksi päivitetty:** 2026-09-02 — v3.8.51
-> **Kohderyhmä:** Kaikki virhevastauksia käsittelevät kehittäjät (HTTP-reitit, SSE-virrat, suorittajat, MCP-käsittelijät).
-> **Tila:** **PAKOLLINEN** jokaiselle koodipolulle, joka palauttaa virheilmoituksen asiakkaalle.
+> **Totuuden lähde:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` ja julkiset rakentajat `open-sse/utils/error.ts` ssä** Testit:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Yleisö:** Kaikki insinöörit, jotka koskettavat virhevastauksia (HTTP reitit, SSE virrat, toteuttajat, MCP -käsittelijät).** Status:****MANDATORY** jokaiselle koodipolulle, joka palauttaa virheilmoituksen asiakkaalle.
 
 ## Miksi tämä on olemassa
 

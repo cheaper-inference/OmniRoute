@@ -99,37 +99,37 @@ OmniRoute には **3 層のモニタリング**があります。
 
 ---
 
-## ヘルスチェック API
+## ヘルスチェックAPI
 
-OmniRoute は **2 つ**の HTTP ヘルスチェックインターフェースを公開しています。これらはオーケストレーターでは相互に置き換えられません。
+OmniRouteが公開します**二**HTTP健康面。これらはオーケストレーターにとって交換可能ではありません。
 
-| パス                         | 目的                                                               | 負荷                                 | 用途                                                                              |
-| ---------------------------- | ------------------------------------------------------------------ | ------------------------------------ | --------------------------------------------------------------------------------- |
-| `GET /healthz`               | ライフサイクルの生存性/準備状態（`ok` / `starting` / `stopping`）  | 軽微（フェーズフラグのみ）           | Kubernetes の **readiness**、HTTP を使用する必要がある場合の緩やかな **liveness** |
-| `GET /api/monitoring/health` | システムとプロバイダーの詳細な概要（DB、ヒープ、カタログ件数など） | 高負荷（同期 DB / モニタリング処理） | ダッシュボード、ブラックボックスによる詳細チェック、Docker 組み込みの healthcheck |
+| パス                         | 目的                                                              | 重さ                     | 用途                                                                              |
+| ---------------------------- | ----------------------------------------------------------------- | ------------------------ | --------------------------------------------------------------------------------- |
+| `GET /healthz`               | ライフサイクルliveness/readiness (`ok` / `starting` / `stopping`) | Trivial (位相フラグのみ) | Kubernetes**準備**;柔らかい**活気**HTTPを使用する必要がある場合                   |
+| `GET /api/monitoring/health` | ディープシステム+プロバイダーの概要 (DB、ヒープ、カタログ数など)  | 重い（同期DB /監視作業） | ダッシュボード、ブラックボックスの詳細なチェック、 Dockerの組み込みヘルスチェック |
 
-> **注:** プロバイダーのヘルスマトリクス、autopilot の問題、クォータモニター、トークンの健全性、および `/api/monitoring/health` を超えるレイテンシーの詳細は、**MCP ツール** `observability_snapshot` または**ダッシュボード**ページから利用できます。これら専用の REST ルートはありません。
+> **注記：**プロバイダーの健全性マトリックス、オートパイロットの問題、クォータ モニター、トークンの健全性、 `/api/monitoring/health`超える遅延の詳細は、**MCPツール**`observability_snapshot`または**ダッシュボード**ページ—専用のRESTルートはありません。
 
-どちらのルートも、リクエスト処理と**同じ Node イベントループ**上で実行されます。CPU バウンドなパス（大規模な `GET /v1/models` カタログ処理、長いコンテキストの圧縮 / トークン数の計算）は、`/healthz` を含む**すべての** HTTP ハンドラーを遅延させる可能性があります。イベントループがビジーであること ≠ プロセスが停止していることです。負荷の原因を修正することを優先してください。プローブの調整は誤った強制終了を減らすだけです。
+どちらのルートも**同じノードのイベントループ**リクエスト処理として。 CPU バウンドのパス (大規模な`GET /v1/models`カタログ作業、長いコンテキストの圧縮/トークンのカウント) により遅延が発生する可能性があります**全て**HTTPハンドラー ( `/healthz`を含む)。イベント ループ ビジーの≠プロセスが停止しました。豚を直すことを好みます。プローブのチューニングは誤ったキルを減らすだけです。
 
-### 軽量なオーケストレータープローブ
+### 軽量のオーケストレーター プローブ
 
 ```bash
 GET /healthz
-# または HEAD /healthz
+# or HEAD /healthz
 ```
 
-- サーバーのライフサイクルフェーズが準備完了の場合は、**200** + 本文 `ok`
-- 起動中またはシャットダウン中は、**503** + `starting` / `stopping`
-- 実装: `src/app/healthz/route.ts`（DB ping なし）
+- **200** + body `ok` (サーバーのライフサイクル フェーズの準備が完了したとき)
+- **503**ブート時またはシャットダウン時の+ `starting` / `stopping`
+- 実装: `src/app/healthz/route.ts` ( DB ping なし)
 
-### システムヘルス（詳細）
+### システムの健全性 (詳細)
 
 ```bash
 GET /api/monitoring/health
 ```
 
-レスポンス:
+応答：
 
 ```json
 {
@@ -153,42 +153,35 @@ GET /api/monitoring/health
 }
 ```
 
-#### `credentialHealth`: プローブキャッシュと SQLite の `test_status` の比較
+#### `credentialHealth`: プローブキャッシュとSQLite `test_status`比較
 
-`GET /api/monitoring/health` → `credentialHealth` は、`provider_connections.test_status` のライブダンプではなく、**インメモリのプローブキャッシュ
-ゲージ**です。#12532 以降、リクエストパスは `getCachedCredentialHealthSummary()` のみを読み取ります。バックグラウンドプローブは、イベントループ外でキャッシュを
-更新します。
+`GET /api/monitoring/health` → `credentialHealth`は、**インメモリプローブキャッシュゲージ**`provider_connections.test_status`のライブダンプではありません。 #12532の後は、リクエスト パスは`getCachedCredentialHealthSummary()`のみを読み取ります。バックグラウンド プローブは、イベント ループからキャッシュを更新します。
 
-| レイヤー                        | 場所                                                                  | 意味                                                                                                                                                                                                                                                   |
-| ------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| プローブキャッシュゲージ        | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | プロセスメモリに保持されている、直近の認証情報ヘルスプローブ結果。`source` は常に `probe-cache` です。                                                                                                                                                 |
-| 失敗した接続の詳細              | `credentialHealth.failedConnections`                                  | **`failed > 0` の場合にのみ**存在します。`status=error` のキャッシュ行を格納した上限付きリスト（`connectionId`、`status`、サニタイズ済みの `lastError` / `lastErrorType`）。リストが上限に達して切り詰められた場合は、`failedOmitted` が設定されます。 |
-| SQLite のスティッキーステータス | `credentialHealth.staleDbNonOkCount`                                  | 永続化された `test_status` が既知の非正常値（`error`、`expired`、`credits_exhausted`、`banned`、`deactivated`、`unavailable`）である、**アクティブ**（`is_active=1`）な接続行の数。                                                                    |
+| 層                            | どこ                                                                  | それが何を意味するか                                                                                                                                                                                                             |
+| ----------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| プローブキャッシュゲージ      | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | 最後の認証情報の健全性プローブの結果はプロセス メモリに保持されたままです。 `source`は常に`probe-cache`です。                                                                                                                    |
+| 失敗した接続の詳細            | `credentialHealth.failedConnections`                                  | 現在**`failed > 0`の場合のみ**。 `status=error`を使用したキャッシュ行の境界付きリスト (`connectionId`、 `status`、サニタイズされた`lastError` / `lastErrorType`)。 `failedOmitted`は、リストがキャップされたときに設定されます。 |
+| SQLiteスティッキー ステータス | `credentialHealth.staleDbNonOkCount`                                  | の数**アクティブ**(`is_active=1`) 永続化された`test_status`が既知の非 OK である接続行 (`error`、 `expired`、 `credits_exhausted`、 `banned`、 `deactivated`、 `unavailable`)。                                                   |
 
-2 つのレイヤーは、意図的に一致しないことがあります。
+2 つの層は意図的に一致しない場合があります。
 
-- ゲージが `failed=0` である一方、`staleDbNonOkCount>0` — SQLite には依然としてスティッキーな
-  `test_status`（例: `expired` または `credits_exhausted`）が残っていますが、最新の
-  プローブキャッシュスナップショットでは、それを `status=error` としてカウントしていません。
-- ゲージが `failed>0` である一方、SQLite は正常に見える — 最近のプローブが失敗して
-  キャッシュされていますが、DB 行がまだ更新されていないか、後からクリアされています。
+- `failed=0`をゲージしますが、 `staleDbNonOkCount>0` — SQLiteにはスティッキー`test_status` (たとえば`expired`または`credits_exhausted`) がまだあり、最新のプローブ キャッシュ スナップショットは`status=error`としてカウントされません。
+- SQLite正常に見える間に`failed>0`ゲージします。 —最近のプローブが失敗し、キャッシュされています。 DB行が更新されていないか、後でクリアされました。
 
-このエンドポイントをスクレイピングする際は、`provider_connections.test_status` のみを根拠にアラートを発報しないでください。
-現在のプローブ失敗には `failed` + `failedConnections` を使用し、
-永続化されたスティッキーステータスの件数が必要な場合は `staleDbNonOkCount` を使用してください。
+このエンドポイントをスクレイピングするときに、 `provider_connections.test_status`のみでアラートを生成しないでください。ライブ プローブの失敗には`failed` + `failedConnections`を使用し、永続的なスティッキー ステータスのカウントが必要な場合は`staleDbNonOkCount`使用します。
 
 ### Kubernetes プローブの推奨事項
 
-OmniRoute は**単一の Node プロセス**（1 つのイベントループ）です。標準の Docker `HEALTHCHECK` は軽量な `/healthz` を対象とします。`/api/monitoring/health` は、kubelet の liveness チェック間隔で使用するには**負荷が高すぎます**。
+OmniRouteは**単一ノードのプロセス**(1 つのイベント ループ)。ストックDocker `HEALTHCHECK`軽量`/healthz`をターゲットとしています。 `/api/monitoring/health`は**重すぎる**kubelet の活性化間隔用。
 
-| プローブ                 | 推奨ターゲット                                                                              | 注記                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------------------ | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **起動**                 | 長い `failureThreshold`（または大きな `startPeriod`）を設定した HTTP `GET /healthz`         | コールドスタート + SQLite マイグレーションには数秒以上かかる場合があります                                                                                                                                                                                                                                                                                                                                 |
-| **準備状態**             | HTTP `GET /healthz`                                                                         | ライフサイクルは `ok` / `starting` / `stopping`（200 と 503）。ループが CPU によってブロックされている場合は、依然として状態が頻繁に変動します。**応答に数秒かかる 200 は正常ではありません**（#10303）— これは、3 バイトのハンドラーが実行される前にイベントループが処理できない状態になっていたことを意味します                                                                                          |
-| **生存状態**             | HTTP `GET /livez`、**またはメインサービスのポート（`PORT`、デフォルトは `20128`）への TCP** | `/livez` はプロセスが稼働中かどうかだけを示します（ハンドラーが実行されれば常に 200）。これもイベントループを共有します — ビジー ≠ 停止であり、イベントループの処理停滞（#10303）を検出する能力は TCP と変わりません。カタログ処理や圧縮処理の負荷によって HTTP プローブがタイムアウトする場合は **TCP** を推奨します。いずれの場合も、イベントループの短時間の停滞を理由に Pod を強制終了しないでください |
-| **詳細なヘルスチェック** | 外部チェッカーからの `GET /api/monitoring/health`                                           | kubelet の `livenessProbe` や短い間隔の `readinessProbe` には使用しないでください                                                                                                                                                                                                                                                                                                                          |
+| プローブ     | 推奨ターゲット                                                                     | 注意事項                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------ | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **起動する** | HTTP `GET /healthz`と長い`failureThreshold` (または大きな`startPeriod`)            | コールド スタート+ SQLite移行には数秒を超える場合があります                                                                                                                                                                                                                                                                                                                 |
+| **準備完了** | HTTP `GET /healthz`                                                                | ライフサイクル`ok` / `starting` / `stopping` (200 vs 503)。ループが CPU でブロックされている場合でもフラップは発生します。あ**複数秒で 200 は健全ではありません**(#10303) —は、3 バイトのハンドラーが実行される前にイベント ループが枯渇したことを意味します。                                                                                                              |
+| **活気**     | HTTP `GET /livez`、**またはTCP**メインサービスポート上 (`PORT`、デフォルト`20128`) | `/livez`はプロセスアライブのみです (ハンドラーが実行されている場合は常に 200)。これは依然としてイベント ループ—ビジー≠ Dead を共有しており、イベント ループの枯渇 (#10303) をTCPよりも検出しにくくなっています。好む**TCP** catalog/compressionロード時にHTTPプローブがタイムアウトした場合。する**ない**いずれにしても短いイベントループのストールでポッドを強制終了します |
+| **深い健康** | 外部チェッカーからの`GET /api/monitoring/health`                                   | kubelet `livenessProbe` /tight `readinessProbe`には非対応                                                                                                                                                                                                                                                                                                                   |
 
-設定例（コールドスタートと圧縮処理の負荷に合わせてしきい値を調整してください）：
+形状の例 (コールドスタートと圧縮負荷に合わせてしきい値を調整):
 
 ```yaml
 ports:
@@ -214,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # イベントループが停滞すると、HTTP /livez もタイムアウトする可能性があります。TCP は
-  # より保守的な代替手段です：
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-kubelet の **liveness** に `/api/monitoring/health` を指定しては**いけません**。このパスでは実際の DB／監視処理が実行されるため、高負荷時に誤検知します。
+**しないでください**ポイントキュベレット**活気**`/api/monitoring/health`で。このパスは実際のDB/monitoring作業を実行し、負荷がかかると誤検知が発生します。
 
-関連：[№10052](https://github.com/diegosouzapw/OmniRoute/issues/10052)（イベントループがビジーな間のプローブ）、[#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055)（カタログ価格処理による占有）、[#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117)（圧縮処理のトークン数計算による占有）。
+関連: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (イベント ループがビジー状態の間のプローブ)、 [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (カタログ価格の高騰)、 [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (圧縮トークン数の高騰)。
 
-### systemd ウォッチドッグ（イベントループのフリーズ）
+### systemd ウォッチドッグ (凍結されたイベント ループ)
 
-systemd ホストでは、OmniRoute は準備完了時にサービスマネージャーへ通知し、その後も定期的に ping を送信します。これにより、イベントループが停止したサーバーが稼働状態のまま応答しなくなる代わりに、強制終了されて再起動されます。ping はサーバー自身のイベントループから送信されます。イベントループがブロックされると ping が止まり、`WatchdogSec` の期間内に ping が届かなければ systemd がサービスを再起動します。
+systemd ホストでは、 OmniRouteサービス マネージャーに準備ができたことを通知し、ping を送信し続けるため、イベント ループがスタックしたサーバーは稼働したままサイレント状態を維持するのではなく、強制終了されて再起動されます。 ping はサーバー自体のイベント ループから送信されます。ping がブロックされると停止し、 `WatchdogSec`存在しないまま時間が経過すると、systemd がサービスを再起動します。
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) は、この設定を含むユーザーユニットをすでに作成します。自分で作成するユニット（デフォルトは `Type=simple`）にはウォッチドッグがないため、その `[Service]` セクションに次の行を追加してください：
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs)すでにこれでユーザーユニットを書き込んでいます。自分で作成したユニット (デフォルトの`Type=simple`) はウォッチドッグを取得しないため、次の行をその`[Service]`セクションに追加します。
 
 ```ini
 [Service]
@@ -238,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-生成されるユニットには `Restart=on-failure` が設定されるため、この行も追加してください。この設定がない場合、ウォッチドッグは停止したサービスを強制終了するだけで、再起動しません。
+生成されたユニットは`Restart=on-failure`を設定するので、その行も追加します—これがないと、ウォッチドッグは停止したサービスを再起動せずに強制終了するだけです。
 
-- `Type=notify`：サービスが「起動済み」になるのは、プロセスがフォークした時点ではなく、サーバーが `READY=1` を送信した時点です。`TimeoutStartSec` は、起動が遅い場合の上限時間を設定します。
-- `NotifyAccess=all`：ping は、`omniroute serve` スーパーバイザーの子プロセスであるサーバープロセスから送信されます。
-- `WatchdogSec`：ping は 60 秒ごとに送信されるため、**120 以上**を使用してください。それより小さい値では、正常なサーバーが再起動されてしまいます。
-- `omniroute serve` はフォアグラウンドで実行してください。`--daemon` を指定するとサーバーがユニットの cgroup から切り離され、通知ハンドシェイクが完了しません。
+- `Type=notify`: サービスは、プロセスがフォークしたときではなく、サーバーが`READY=1`送信したときに「開始」されます。 `TimeoutStartSec`スロースタートに限界があります。
+- `NotifyAccess=all`: ping は、 `omniroute serve`スーパーバイザーの子であるサーバー プロセスによって送信されます。
+- `WatchdogSec`: ping は 60 秒ごとに発信されるため、次を使用します。** 120以上**。値を小さくすると、正常なサーバーが再起動されます。
+- `omniroute serve`フォアグラウンドで実行します。 `--daemon`ユニットの cgroup からサーバーを切り離しますが、通知ハンドシェイクは完了しません。
 
-再起動後に有効になっていることを確認します：
+再起動後にアクティブであることを確認します。
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` は設定された遅延時間を示し、`WatchdogTimestamp` は毎分更新されます。ウォッチドッグによる再起動は `Result=watchdog` として記録されます。ユニットの設定を維持したまま ping を無効にするには、`OMNIROUTE_DISABLE_SD_NOTIFY=1` を設定します。`NOTIFY_SOCKET` がない環境（ターミナル、Docker、Electron、Windows）では何も送信されません。
+`WatchdogUSec`設定された遅延を示し、 `WatchdogTimestamp` 1 分ごとに進みます。ウォッチドッグによる再起動は`Result=watchdog`として記録されます。ユニットをそのままにして ping をオフにするには、 `OMNIROUTE_DISABLE_SD_NOTIFY=1`を設定します。 `NOTIFY_SOCKET` (端末、 Docker、 Electron、 Windows) がないと、何も送信されません。
 
-ウォッチドッグが確認するのは、イベントループが実行され続けていることだけです。処理は遅くてもイベントループが動き続けているサーバーは再起動されません。
+ウォッチドッグは、イベント ループが実行され続けることをチェックするだけです。速度が遅いにもかかわらず回転しているサーバーは再起動されません。
 
-### オプションのリクエストパス処理（メモリ、スキル、トークン更新）
+### オプションのリクエストパス作業 (メモリ、スキル、トークンリフレッシュ)
 
-メモリ抽出、スキル注入、OAuth トークン更新は、`/healthz` と同じ **Node のメインイベントループ**を共有します。これらはダッシュボードで切り替え可能な機能（`memoryEnabled`、`skillsEnabled`）であり、ワーカープールではありません。[環境 — イベントループのコスト](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349)を参照してください。
+メモリ抽出、スキル挿入、 OAuthトークンのリフレッシュは、**メインノードのイベントループ**`/healthz`を使用して。これらはダッシュボード切り替え機能 (`memoryEnabled`、 `skillsEnabled`) であり、ワーカー プールではありません。 [「環境—イベント ループ コスト」](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349)を参照してください。
 
-### プロバイダーの稼働状態
+### プロバイダーの健康状態
 
-> **REST エンドポイントはありません。** プロバイダーの稼働状態データは、MCP ツール `observability_snapshot` またはダッシュボードの `/dashboard/providers` ページから確認できます。
+> **RESTエンドポイントがありません。**プロバイダーの正常性データは、 MCPツール`observability_snapshot`またはダッシュボード`/dashboard/providers`ページから入手できます。
 
 ### プロバイダーの詳細
 
-> **REST エンドポイントはありません。** プロバイダーごとの詳細は、ダッシュボードの `/dashboard/providers` ページから確認できます。
+> **RESTエンドポイントがありません。**プロバイダーごとの詳細は、ダッシュボードの`/dashboard/providers`ページから入手できます。
 
 ---
 

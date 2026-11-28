@@ -247,33 +247,41 @@ OmniRoute వెలుపల వినియోగం దీనిని మి�
 
 ---
 
-## 🎨 కాంబోలు
+## 🎨 కాంబోస్
 
-ప్రతి కార్డ్పై ఉన్న హ్యాండిల్ను డ్రాగ్ చేయడం ద్వారా మీరు నేరుగా **Dashboard → Combos**లో కాంబో కార్డ్ల క్రమాన్ని మార్చవచ్చు. ఆ క్రమం SQLiteలో నిల్వ చేయబడుతుంది మరియు రీలోడ్ చేసినప్పుడు పునరుద్ధరించబడుతుంది.
+మీరు నేరుగా కాంబో కార్డ్లను మళ్లీ ఆర్డర్ చేయవచ్చు** డాష్బోర్డ్ → కాంబోస్** ప్రతి కార్డుపై హ్యాండిల్ని లాగడం ద్వారా. ఆర్డర్ SQLite లో నిల్వ చేయబడుతుంది మరియు రీలోడ్లో పునరుద్ధరించబడుతుంది.
 
-### ఉదాహరణ 1: సబ్స్క్రిప్షన్ను గరిష్ఠంగా వినియోగించడం → చౌకైన బ్యాకప్
+### ప్రొవైడర్, మోడల్ లేదా ఖాతాను కనుగొనండి
+
+కాంబోను సృష్టించండి లేదా సవరించండి, దశల వారీ ప్రొవైడర్, మోడల్, ఖాతా మరియు కాంబో-రిఫరెన్స్ పికర్లు స్థానిక శోధన ఫీల్డ్ను కలిగి ఉంటాయి. ప్రదర్శించబడిన పేరు, ఐడెంటిఫైయర్, ప్రొవైడర్ అలియాస్ లేదా మోడల్ సోర్స్ ద్వారా శోధించండి, ఆపై ఫలితాన్ని క్లిక్ చేయండి లేదా బాణం కీలను ఉపయోగించండి మరియు ఎంటర్ చేయండి. బహుళ శోధన పదాలు అన్నీ సరిపోలాలి. శోధనను క్లియర్ చేయడం లేదా Escape నొక్కడం వలన ఎంచుకున్న విలువ మారదు.
+
+శోధిస్తున్నప్పుడు ఆటోమేటిక్ ఖాతా ఎంపిక కనిపిస్తుంది. దీని ఐచ్ఛిక ఖాతా పరిమితి జాబితా ప్రత్యేక ఫిల్టర్ను కలిగి ఉంది: కనిపించే ఫలితాల వెలుపల ఎంచుకున్న ఖాతాలు ఎంపిక చేయబడి ఉంటాయి మరియు గణన వాటిని కలిగి ఉంటుంది. ఇమెయిల్ గోప్యత ఆన్లో ఉన్నప్పుడు దాచబడిన ఇమెయిల్ శకలాలు శోధించబడవు. దశను జోడించి, కాంబోను యధావిధిగా సేవ్ చేయండి; ప్రశ్నను టైప్ చేయడం దేనినీ సేవ్ చేయదు లేదా పరీక్షించదు.
+
+కనెక్షన్-టెస్ట్ మోడల్లు, కస్టమ్ CLI డిఫాల్ట్ మరియు అలియాస్ మోడల్లు మరియు సేవ్ చేసిన-ప్రాక్సీ ఎంపికల కోసం అదే స్థానిక శోధన అందుబాటులో ఉంది. ఇప్పటికే ఉన్న సేవ్, వర్తింపజేయడం మరియు పరీక్ష చర్యలు వేరుగా ఉంటాయి.
+
+### ఉదాహరణ 1: సబ్స్క్రిప్షన్ → చౌక బ్యాకప్ను గరిష్టీకరించండి
 
 ```
 Dashboard → Combos → Create New
 
-పేరు: premium-coding
-మోడల్లు:
-  1. cc/claude-opus-4-7 (ప్రధాన సబ్స్క్రిప్షన్)
-  2. glm/glm-4.7 (చౌకైన బ్యాకప్, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (అత్యంత చౌకైన ఫాల్బ్యాక్, $0.3/1M)
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
 
-CLIలో ఉపయోగించండి: premium-coding
+Use in CLI: premium-coding
 ```
 
-### ఉదాహరణ 2: ఉచితమైనవి మాత్రమే (సున్నా ఖర్చు)
+### ఉదాహరణ 2: ఉచితం-మాత్రమే (సున్నా ధర)
 
 ```
-పేరు: free-combo
-మోడల్లు:
-  1. if/kimi-k2.7-code (ఉచిత యాక్సెస్గా జాబితా చేయబడింది; ప్రొవైడర్ పరిమితులు వర్తించవచ్చు)
-  2. kr/qwen3-coder-next (Kiro ఉచిత ఫాల్బ్యాక్)
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
 
-ఖర్చు: ప్రస్తుతం $0గా జాబితా చేయబడింది; నిబంధనలు మరియు లభ్యత మారవచ్చు
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -374,7 +382,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI స్వయంచాలకంగా `~/.omniroute/.env` లేదా `./.env` నుండి `.env` ని లోడ్ చేస్తుంది. వర్కింగ్ డైరెక్టరీలోని `./.env` కీల యొక్క చిన్న అనుమతి జాబితాను మాత్రమే సెట్ చేయవచ్చు (`REQUIRE_API_KEY`, లొకేల్, టైమ్ జోన్ మరియు కలర్ సెట్టింగ్లు, పోర్ట్లు కాదు); మిగతావన్నీ `~/.omniroute/.env` లో ఉంచండి. [CLI ప్రయోగ ఒప్పందాలను](CLI-LAUNCH-CONTRACTS.md#working-directory-env) చూడండి.
+CLI స్వయంచాలకంగా `~/.omniroute/.env` లేదా `./.env` నుండి `.env` ని లోడ్ చేస్తుంది. వర్కింగ్ డైరెక్టరీలోని `./.env` కీల యొక్క చిన్న అనుమతి జాబితాను మాత్రమే సెట్ చేయవచ్చు (`REQUIRE_API_KEY`, లొకేల్, టైమ్ జోన్ మరియు రంగు సెట్టింగ్లు, పోర్ట్లు కాదు); మిగతావన్నీ `~/.omniroute/.env` లో ఉంచండి. [CLI ప్రయోగ ఒప్పందాలను](CLI-LAUNCH-CONTRACTS.md#working-directory-env) చూడండి.
 
 ### ట్రే మోడ్
 
@@ -433,7 +441,7 @@ omniroute autostart disable
 ### VPS విస్తరణ
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -515,8 +523,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -772,7 +780,7 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-స్పష్టంగా అనుమతించబడిన పీర్ URL కి పంపిన అభ్యర్థనలు మాత్రమే `X-OmniRoute-Peer-Trace` హెడర్ను స్వీకరిస్తాయి. HTTP `508 Loop Detected` తో పునరావృతమయ్యే ID లేదా అయిపోయిన హాప్ బడ్జెట్ను గేట్వే తిరస్కరిస్తుంది; సాధారణ అప్స్ట్రీమ్ ప్రొవైడర్లు పీర్ మెటాడేటాను స్వీకరించరు.
+స్పష్టంగా అనుమతించబడిన పీర్ URL కి పంపిన అభ్యర్థనలు మాత్రమే `X-OmniRoute-Peer-Trace` హెడర్ను స్వీకరిస్తాయి. HTTP `508 Loop Detected` తో పునరావృతమైన ID లేదా అయిపోయిన హాప్ బడ్జెట్ను గేట్వే తిరస్కరిస్తుంది; సాధారణ అప్స్ట్రీమ్ ప్రొవైడర్లు పీర్ మెటాడేటాను స్వీకరించరు.
 
 పీర్ చైనింగ్ అనేది డేటాబేస్ రెప్లికేషన్ లేదా హోస్ట్ ఫెయిల్ఓవర్ కాదు. ప్రతి గేట్వే స్వతంత్ర SQLite స్థితి, కాష్లు, రేట్ కౌంటర్లు మరియు సెషన్లను ఉంచుతుంది. active/passive లేదా active/active లభ్యత కోసం ఆరోగ్య తనిఖీ చేసిన రివర్స్ ప్రాక్సీ లేదా క్లయింట్ ఫెయిల్ఓవర్ని ఉపయోగించండి మరియు ఒక SQLite డేటాబేస్ను బహుళ రన్నింగ్ OmniRoute ఇన్స్టాన్స్లలోకి మౌంట్ చేయవద్దు.
 
@@ -884,8 +892,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` మరియు `cost-optimized`
 - అభ్యర్థులందరిలో`auto` — స్కోర్-నడపబడుతుంది
 - `lkgp` (చివరిగా తెలిసిన మంచి ప్రొవైడర్) — చివరి విజయవంతమైన ప్రొవైడర్కు పిన్స్ చేసి, ఆపై నిబంధనలకు తిరిగి వస్తుంది
-- `context-optimized` — అతిపెద్ద ఉచిత సందర్భ విండోతో మోడల్ను ఎంచుకుంటుంది
-- తదుపరి మలుపుల కోసం`context-relay` — గొలుసు దీర్ఘ-సందర్భ నమూనాలు
+- `context-optimized` — ముందుగా తెలిసిన అతిపెద్ద సందర్భ విండోతో మోడల్ను ప్రయత్నిస్తుంది
+- సంభాషణ మరొక ఖాతాకు మారినప్పుడు`context-relay` — ప్రాధాన్యతా క్రమం మరియు హ్యాండ్ఆఫ్ సారాంశం
 
 #### బాహ్య అంటుకునే సెషన్ హెడర్
 
@@ -933,7 +941,7 @@ Chain: production-fallback
 
 #### 1. కోడింగ్ ఏజెంట్ కాంబో: Cost/Speed ఫాల్బ్యాక్తో హై-ఎండ్ రీజనింగ్
 
-కోడింగ్ ఏజెంట్లకు అనువైనది (OpenCode, Claude కోడ్, Cursor, Cline). కోటా ఎగ్జాషన్ లేదా ఎర్రర్ల కారణంగా శీఘ్ర కోడింగ్ మోడల్లకు తిరిగి పడిపోవడం, సరిహద్దు రీజనింగ్ మోడల్లకు మొదట్లో రూట్లు.
+కోడింగ్ ఏజెంట్లకు అనువైనది (OpenCode, Claude కోడ్, Cursor, Cline). ముందుగా సరిహద్దు రీజనింగ్ మోడల్లకు రూట్లు, కోటా ఎగ్జాషన్ లేదా ఎర్రర్ల కారణంగా ఫాస్ట్ కోడింగ్ మోడల్లకు తిరిగి వస్తాయి.
 
 - **డాష్బోర్డ్** : కాంబోస్ → కొత్త కాంబో → పేరు: `agent-coding` → వ్యూహం: `Priority`
 - **మోడల్స్** :
@@ -997,7 +1005,7 @@ OmniRoute ఐదు భాగాలతో ప్రొవైడర్-స్థ�
    - **అభ్యర్థనల మధ్య కనీస సమయం** — అభ్యర్థనల మధ్య మిల్లీసెకన్లలో కనీస గ్యాప్
    - **గరిష్ట ఏకకాల అభ్యర్థనలు** — ఒక్కో ఖాతాకు గరిష్ట ఏకకాల అభ్యర్థనలు
 
-2. **కనెక్షన్ కూల్డౌన్** మళ్లీ ప్రయత్నించదగిన వైఫల్యాల తర్వాత ఒకే కనెక్షన్ కోసం — పర్-ఆత్-టైప్ కాన్ఫిగరేషన్:
+2. **కనెక్షన్ కూల్డౌన్** మళ్లీ ప్రయత్నించదగిన వైఫల్యాల తర్వాత ఒకే కనెక్షన్ కోసం — పర్-ఆత్-రకం కాన్ఫిగరేషన్:
    - **బేస్ కూల్డౌన్** మళ్లీ ప్రయత్నించదగిన అప్స్ట్రీమ్ వైఫల్యాల కోసం — డిఫాల్ట్ కూల్డౌన్ విండో
    - **అప్స్ట్రీమ్ మళ్లీ ప్రయత్నించు సూచనలను ఉపయోగించండి** — అధికారిక `Retry-After` ని గౌరవిస్తుంది లేదా అందించినప్పుడు సూచనలను రీసెట్ చేస్తుంది
    - **గరిష్ట బ్యాక్ఆఫ్ దశలు** — పునరావృత వైఫల్యాల కోసం గరిష్ట ఎక్స్పోనెన్షియల్ బ్యాక్ఆఫ్ స్థాయి
@@ -1027,11 +1035,11 @@ OmniRoute ఐదు భాగాలతో ప్రొవైడర్-స్థ�
 
 డేటాబేస్ బ్యాకప్లను నిర్వహించండి** డాష్బోర్డ్ → సెట్టింగ్లు → సిస్టమ్ & నిల్వ** .
 
-| చర్య                                   | వివరణ                                                                                                                                                               |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ఎగుమతి డేటాబేస్**                    | ప్రస్తుత SQLite డేటాబేస్ను `.sqlite` ఫైల్గా డౌన్లోడ్ చేస్తుంది                                                                                                      |
-| **అన్నింటినీ ఎగుమతి చేయండి (.tar.gz)** | పూర్తి బ్యాకప్ ఆర్కైవ్ను డౌన్లోడ్ చేస్తుంది: డేటాబేస్, సెట్టింగ్లు, కాంబోలు, ప్రొవైడర్ కనెక్షన్లు (క్రెడెన్షియల్స్ లేవు), API కీ మెటాడేటా                           |
-| **దిగుమతి డేటాబేస్**                   | ప్రస్తుత డేటాబేస్ను భర్తీ చేయడానికి `.sqlite` ఫైల్ను అప్లోడ్ చేయండి. `DISABLE_SQLITE_AUTO_BACKUP=true` తప్ప, ముందస్తు దిగుమతి బ్యాకప్ స్వయంచాలకంగా సృష్టించబడుతుంది |
+| చర్య                                   | వివరణ                                                                                                                                                             |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ఎగుమతి డేటాబేస్**                    | ప్రస్తుత SQLite డేటాబేస్ను `.sqlite` ఫైల్గా డౌన్లోడ్ చేస్తుంది                                                                                                    |
+| **అన్నింటినీ ఎగుమతి చేయండి (.tar.gz)** | పూర్తి బ్యాకప్ ఆర్కైవ్ను డౌన్లోడ్ చేస్తుంది: డేటాబేస్, సెట్టింగ్లు, కాంబోలు, ప్రొవైడర్ కనెక్షన్లు (క్రెడెన్షియల్స్ లేవు), API కీ మెటాడేటా                         |
+| **దిగుమతి డేటాబేస్**                   | ప్రస్తుత డేటాబేస్ భర్తీ చేయడానికి `.sqlite` ఫైల్ను అప్లోడ్ చేయండి. `DISABLE_SQLITE_AUTO_BACKUP=true` తప్ప, ముందస్తు దిగుమతి బ్యాకప్ స్వయంచాలకంగా సృష్టించబడుతుంది |
 
 ```bash
 # API: Export database
@@ -1334,32 +1342,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 అంతర్గత CLI
 
-సెటప్, డయాగ్నస్టిక్స్ మరియు రన్టైమ్ నియంత్రణ కోసం OmniRoute అంతర్గత CLI (`omniroute …`)తో వస్తుంది. ఇది **డ్యాష్బోర్డ్లోని "CLI సాధనాలు" పేజీకి భిన్నమైనది**; ఆ పేజీ మూడవ పక్ష CLIలను (Claude Code, Cursor, Codex, Cline, …) కాన్ఫిగర్ చేసి, అవి OmniRouteతో కమ్యూనికేట్ చేయగలిగేలా చేస్తుంది.
+OmniRoute సెటప్, డయాగ్నస్టిక్స్ మరియు రన్టైమ్ నియంత్రణ కోసం అంతర్గత CLI (`omniroute …`)ని పంపుతుంది. ఇది** డాష్బోర్డ్లోని "CLI సాధనాలు" పేజీ నుండి వేరు చేయండి** , ఇది మూడవ పక్షం CLIs (Claude కోడ్, Cursor, Codex, Cline, …)ని కాన్ఫిగర్ చేస్తుంది కాబట్టి వారు OmniRoute తో మాట్లాడగలరు.
 
 ```bash
-omniroute setup                    # ఇంటరాక్టివ్ విజార్డ్ (పాస్వర్డ్, ప్రొవైడర్లు, కాంబోలు)
-omniroute setup --non-interactive  # CIకి అనుకూలమైనది
-omniroute doctor                   # ఆరోగ్య డయాగ్నస్టిక్స్ (డేటా డైరెక్టరీ, DB, ప్రొవైడర్లు, పోర్టులు)
-omniroute providers available      # మద్దతు ఉన్న ప్రొవైడర్లను జాబితా చేయండి
-omniroute providers list           # కాన్ఫిగర్ చేసిన కనెక్షన్లను జాబితా చేయండి
-omniroute providers test <id>      # ప్రొవైడర్ కనెక్షన్ను ప్రత్యక్షంగా పరీక్షించండి
-omniroute combos list              # కాంబోలను జాబితా చేయండి
-omniroute combos switch <name>     # డిఫాల్ట్ కాంబోను సెట్ చేయండి
-omniroute models                   # అందుబాటులో ఉన్న మోడళ్లను జాబితా చేయండి (--json, --search)
-omniroute keys add | list | remove # టెర్మినల్ నుండి API కీలను నిర్వహించండి
-omniroute backup                   # కాన్ఫిగరేషన్ + DB స్నాప్షాట్
-omniroute restore [<timestamp>]    # స్నాప్షాట్ నుండి పునరుద్ధరించండి
-omniroute health                   # వివరణాత్మక ఆరోగ్య స్థితి (బ్రేకర్లు, కాష్, మెమరీ)
-omniroute quota                    # ప్రొవైడర్ కోటా వినియోగం
-omniroute mcp status               # MCP సర్వర్ స్థితి
-omniroute a2a status               # A2A సర్వర్ స్థితి
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok టన్నెల్లు
-omniroute reset-password           # అడ్మిన్ పాస్వర్డ్ను రీసెట్ చేయండి
-omniroute --mcp                    # stdio ద్వారా MCP సర్వర్ను ప్రారంభించండి
-omniroute --port 3000              # అనుకూల పోర్టులో సర్వర్ను ప్రారంభించండి
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-చిట్కా: అనారోగ్యకరమైన ప్రొవైడర్ కనెక్షన్లపై హెచ్చరికలు పొందడానికి `omniroute doctor --json`ను మీ మానిటరింగ్ సాధనంతో జత చేయండి.
+చిట్కా: విరిగిన స్థానిక ఇన్స్టాల్పై అప్రమత్తం చేయడానికి మీ పర్యవేక్షణ సాధనంతో `omniroute doctor --json` జత చేయండి. `doctor` ప్రొవైడర్ కనెక్షన్లను పరీక్షించదు; దాని కోసం `omniroute providers test <id>` ఉపయోగించండి.
 
 ---
 

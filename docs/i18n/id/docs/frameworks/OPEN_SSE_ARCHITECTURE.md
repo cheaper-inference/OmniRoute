@@ -205,7 +205,7 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-Meskipun merupakan salah satu fungsi raksasa, namun diorganisasikan menjadi** bagian yang dikomentari** yang dipetakan ke pipeline 5 tahap.
+Meskipun merupakan salah satu fungsi besar, fungsi ini diorganisasikan menjadi** bagian yang dikomentari** yang dipetakan ke pipeline 5 tahap.
 
 ### combo.ts (4456 LOC)
 
@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Mendukung** 22 strategi perutean** (lihat `src/shared/constants/routingStrategies.ts`):
 
-| Strategi            | Perilaku                                                                                         |
-| ------------------- | ------------------------------------------------------------------------------------------------ |
-| `priority`          | Daftar pesanan target pertama                                                                    |
-| `weighted`          | Probabilistik berdasarkan berat per target                                                       |
-| `round-robin`       | Telusuri target secara berurutan                                                                 |
-| `context-relay`     | Menyerahkan konteks ke seluruh target                                                            |
-| `fill-first`        | Isi kuota sebelum melanjutkan ke berikutnya                                                      |
-| `p2c`               | Kekuatan dua pilihan                                                                             |
-| `random`            | Seragam acak                                                                                     |
-| `least-used`        | Pilih salah satu yang penggunaan terkininya paling sedikit                                       |
-| `cost-optimized`    | Target sehat termurah dulu                                                                       |
-| `reset-aware`       | Sadar akan jendela pengaturan ulang penyedia                                                     |
-| `reset-window`      | Setel ulang perutean berbasis jendela                                                            |
-| `expiry-first`      | Belanjakan akun yang kuotanya akan habis belum terpakai terlebih dahulu                          |
-| `headroom`          | Sebagian besar sisa kuota headroom terlebih dahulu                                               |
-| `quota-weighted`    | Lewati akun yang habis, lalu gunakan sisa kuota ÷ muatan dalam penerbangan                       |
-| `strict-random`     | Benar-benar seragam (tidak ada bobot kualitas)                                                   |
-| `auto`              | Gunakan penilaian 16 faktor (`autoCombo/`)                                                       |
-| `lkgp`              | Penyedia baik yang terakhir diketahui terlebih dahulu                                            |
-| `context-optimized` | Terbaik untuk permintaan konteks panjang                                                         |
-| `cache-optimized`   | Sematkan setiap awalan prompt yang dapat digunakan kembali ke akun yang sama (prompt-cache hits) |
-| `fusion`            | Keluarkan ke panel secara paralel, lalu sintesis melalui juri (`fusion.ts`)                      |
-| `pipeline`          | Langkah berantai — keluaran setiap target diumpankan ke keluaran berikutnya                      |
-| `jev`               | Keikutsertaan: TypeSafe Jev mengakui entri peringkat mana yang dijalankan; lain pesanan Anda     |
+| Strategi            | Perilaku                                                                                     |
+| ------------------- | -------------------------------------------------------------------------------------------- |
+| `priority`          | Daftar pesanan target pertama                                                                |
+| `weighted`          | Probabilistik berdasarkan berat per target                                                   |
+| `round-robin`       | Telusuri target secara berurutan                                                             |
+| `context-relay`     | Menyerahkan konteks ke seluruh target                                                        |
+| `fill-first`        | Isi kuota sebelum melanjutkan ke berikutnya                                                  |
+| `p2c`               | Kekuatan dua pilihan                                                                         |
+| `random`            | Acak segar per permintaan                                                                    |
+| `least-used`        | Pilih salah satu dengan permintaan tercatat paling sedikit                                   |
+| `cost-optimized`    | Harga masukan katalog terendah terlebih dahulu                                               |
+| `reset-aware`       | Sisa kuota + urgensi reset                                                                   |
+| `reset-window`      | Jendela kuota yang paling cepat direset terlebih dahulu                                      |
+| `expiry-first`      | Belanjakan akun yang kuotanya akan habis belum terpakai terlebih dahulu                      |
+| `headroom`          | Sebagian besar sisa kuota headroom terlebih dahulu                                           |
+| `quota-weighted`    | Lewati akun yang habis, lalu gunakan sisa kuota ÷ muatan dalam penerbangan                   |
+| `strict-random`     | Dek yang dikocok: setiap target satu kali sebelum diulang                                    |
+| `auto`              | Gunakan penilaian 16 faktor (`autoCombo/`)                                                   |
+| `lkgp`              | Penyedia baik yang terakhir diketahui terlebih dahulu                                        |
+| `context-optimized` | Jendela konteks terbesar yang diketahui terlebih dahulu                                      |
+| `cache-optimized`   | Lebih suka akun yang cenderung menyimpan awalan prompt di cache                              |
+| `fusion`            | Keluarkan ke panel secara paralel, lalu sintesis melalui juri (`fusion.ts`)                  |
+| `pipeline`          | Langkah berantai — keluaran setiap target diumpankan ke keluaran berikutnya                  |
+| `jev`               | Keikutsertaan: TypeSafe Jev mengakui entri peringkat mana yang dijalankan; lain pesanan Anda |
 
 ### base.ts (1170 LOC)
 

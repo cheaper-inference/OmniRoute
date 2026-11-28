@@ -5,9 +5,8 @@
 ---
 
 > **உண்மையின் ஆதாரம்:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **கடைசியாகப் புதுப்பிக்கப்பட்டது:** 2026-09-22 — ஸ்கோப் நேம்ஸ்பேஸ்கள் MCP-SERVER.md ஐக் குறிக்கின்றன
 
-OmniRoute ஆனது ஒவ்வொரு API கோரிக்கையையும் கட்டுப்படுத்தும் ஒரு வழித்தட-அறிந்த அங்கீகாரப் பைப்லைனைக் கொண்டுள்ளது. வகைப்பாடு **நிர்ணயிக்கக்கூடியது** மற்றும் **தோல்வியுற்றால் மூடும்** — வகைப்படுத்த முடியாத எதுவும் `MANAGEMENT` ஆக முடிவடைகிறது மற்றும் ஒரு அமர்வு அல்லது மேலாண்மை-தர டோக்கனைக் கோருகிறது. இந்த பக்கம் வழித்தடங்களை பராமரிக்கும் அல்லது புதிய இறுதிப்புள்ளிகளை வடிவமைக்கும் பொறியாளர்களுக்கான மாதிரியை விளக்குகிறது.
+OmniRoute ஒவ்வொரு API கோரிக்கையையும் அணுகும் பாதை-அறிமுக அங்கீகார பைப்லைனைக் கொண்டுள்ளது. வகைப்பாடு ஆகும்** தீர்மானிக்கும்** மற்றும்** தோல்வி-மூடப்பட்டது** — வகைப்படுத்த முடியாத எதுவும் `MANAGEMENT` ஆக முடிவடைகிறது மற்றும் ஒரு அமர்வு அல்லது மேலாண்மை-தர டோக்கனைக் கோருகிறது. இந்தப் பக்கம் பாதைகளை பராமரிக்கும் அல்லது புதிய முனைப்புள்ளிகளை வடிவமைக்கும் பொறியாளர்களுக்கான மாதிரியை விளக்குகிறது.
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
@@ -185,7 +184,7 @@ Incoming request → src/proxy.ts
        - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-நம்பகமான உள் தலைப்புகள் ( `src/server/authz/headers.ts` இல் வரையறுக்கப்பட்டுள்ளன)** உள்வரும் கோரிக்கைகளிலிருந்து அகற்றப்பட்டது** — வகைப்பாட்டிற்கு முன் கிளையண்டுகள் ஒரு விஷயத்தைப் போல ஆள்மாறாட்டம் செய்ய `x-omniroute-auth-*` முன் நிரப்ப முடியாது.
+நம்பகமான உள் தலைப்புகள் ( `src/server/authz/headers.ts` இல் வரையறுக்கப்பட்டுள்ளது)** உள்வரும் கோரிக்கைகளிலிருந்து அகற்றப்பட்டது** — வகைப்பாட்டிற்கு முன் கிளையண்டுகள் ஒரு விஷயத்தைப் போல ஆள்மாறாட்டம் செய்ய `x-omniroute-auth-*` முன் நிரப்ப முடியாது.
 
 ### கொள்கை ஒப்பந்தங்கள்
 
@@ -193,9 +192,9 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — எப்போதும் `allow({ kind: "anonymous", id: "anonymous" })` வழங்கும்.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — பிரித்தெடுத்தல் தாங்கி, `validateApiKey()` வழியாக சரிபார்க்கிறது. பயனுள்ள `REQUIRE_API_KEY` அம்சக் கொடி முடக்கப்பட்டிருக்கும் போது மட்டுமே அநாமதேயமாக மாறும். பயனுள்ள கொடியானது `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) மூலம் தீர்க்கப்படுகிறது, எனவே டாஷ்போர்டு அம்சம் கொடிகள் மற்றும் சூழல் மாறிகள் `/api/v1/*`, `/api/v1beta/*` மற்றும் மாற்றுப்பெயர்களை தொடர்ந்து நிர்வகிக்கின்றன; தீர்க்கும் தோல்விகள் தோல்வி அடைகின்றன. கிளையன்ட் API வழிகளில் டேஷ்போர்டு-அமர்வு கோரிக்கைகளை அனுமதிக்கிறது ( `/api/v1/models`, டாஷ்போர்டு மாதிரி அட்டவணையால் பயன்படுத்தப்படுகிறது). Entra ID SSO இயக்கப்பட்டால், கட்டமைப்பு ரீதியாக என்ட்ரா டோக்கனாக இருக்கும் ஒரு தாங்கி (மூன்று base64url பிரிவுகள், `RS*` alg, `kid`) SSO கிளையால் கையாளப்படுகிறது.** முன்** `validateApiKey()` மற்றும் அதன் தீர்ப்பு இறுதி — ஆகும், இது ஒருபோதும் API-கீ பாதை அல்லது சிதைவிலிருந்து அநாமதேய கிளைக்கு வராது, எனவே அடையாள-வழங்குபவர் செயலிழப்பு திறந்த அணுகலாக மாற முடியாது. நிலையான API விசைகள் பாதிக்கப்படாது. [Entra ID SSO](../security/ENTRA_SSO.md) ஐப் பார்க்கவும்.
-- **`managementPolicy`** (`policies/management.ts`) — டாஷ்போர்டு அமர்வு, உள் மாதிரி-ஒத்திசைவு கோரிக்கைகளை ( `/api/providers/[name]/(sync-models|models)` க்கு எதிராகப் பொருந்துகிறது) ஏற்றுக்கொள்கிறது அல்லது `isAuthRequired()` தவறு எனத் திரும்பினால் முழுவதுமாகத் தவிர்க்கிறது. ஒரு தாங்கி டோக்கன் இருக்கும் போது 403 (`AUTH_001`) ஐ வழங்குகிறது ஆனால் செல்லாது, இல்லையெனில் 401. மேலும் வழி — காவலர் [அடுக்குகளை](../security/ROUTE_GUARD_TIERS.md) (LOCAL_ONLY / ALWAYS_PROTECTED) செயல்படுத்துகிறது. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` இல் உள்ள LOCAL_ONLY பாதைகள் (இன்று: `/api/mcp/`) பியரர் விசை `manage` ஸ்கோப்பைக் கொண்டிருக்கும் போது லூப்பேக் அல்லாதவற்றிலிருந்து அணுகலாம்; மற்ற அனைத்து LOCAL_ONLY பாதைகளும் ஸ்கோப்பைப் பொருட்படுத்தாமல் கண்டிப்பான-லூப்பேக்காக இருக்கும்.
+- **`managementPolicy`** (`policies/management.ts`) — டாஷ்போர்டு அமர்வு, உள் மாதிரி-ஒத்திசைவு கோரிக்கைகளை ( `/api/providers/[name]/(sync-models|models)` க்கு எதிராகப் பொருந்துகிறது) ஏற்றுக்கொள்கிறது அல்லது `isAuthRequired()` தவறு எனத் திரும்பினால் முழுவதுமாகத் தவிர்க்கிறது. ஒரு தாங்கி டோக்கன் இருக்கும் போது 403 (`AUTH_001`) ஐ வழங்குகிறது ஆனால் செல்லாது, இல்லையெனில் 401. மேலும் வழி — காவலர் [அடுக்குகளை](../security/ROUTE_GUARD_TIERS.md) (LOCAL_ONLY / ALWAYS_PROTECTED) செயல்படுத்துகிறது. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` இல் உள்ள LOCAL_ONLY பாதைகள் (இன்று: `/api/mcp/`) பியரர் விசை `manage`/`admin` ஸ்கோப் அல்லது குறுகிய `mcp:connect` ஸ்கோப் (`hasMcpConnectOrManageScope`) அல்லது அங்கீகரிக்கப்பட்ட டாஷ்போர்டு அமர்வைக் கொண்டு செல்லும் போது லூப்பேக் அல்லாதவற்றிலிருந்து அணுகப்படலாம்; மற்ற அனைத்து LOCAL_ONLY பாதைகளும் ஸ்கோப்பைப் பொருட்படுத்தாமல் கண்டிப்பான-லூப்பேக்காக இருக்கும்.
 
-வெற்றிகரமான கொள்கையானது `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` உடன் வழங்கும். கீழ்நிலை கையாளுபவர்கள் அங்கீகார தர்க்கத்தை மீண்டும் இயக்குவதற்குப் பதிலாக `src/server/authz/assertAuth.ts` இல் `assertAuth(request, "CLIENT_API")` வழியாகப் படிக்கலாம்.
+ஒரு வெற்றிகரமான கொள்கையானது `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` உடன் வழங்கும். கீழ்நிலை கையாளுபவர்கள் அங்கீகார தர்க்கத்தை மீண்டும் இயக்குவதற்குப் பதிலாக `src/server/authz/assertAuth.ts` இல் `assertAuth(request, "CLIENT_API")` வழியாகப் படிக்கலாம்.
 
 ## பொது வழிகள் பட்டியல்
 
@@ -284,24 +283,24 @@ export async function POST(request: Request) {
 
 வசதியின் அடிப்படையில் அல்லாமல், வடிவத்தின் அடிப்படையில் set-ஐத் தேர்ந்தெடுக்கவும். ஒரு route, `PUBLIC_API_ROUTES_EXACT`-இல் (அல்லது GET-only எனில் `PUBLIC_READONLY_CORS_API_ROUTES`-இல்) சேர்க்கப்பட வேண்டும்; உண்மையான subtree மட்டுமே `PUBLIC_API_ROUTE_PREFIXES`-இல் சேர்க்கப்பட வேண்டும், மேலும் அது **`/`-இல் முடிய வேண்டும்**. ஒரு தனிப்பட்ட route-ஐ prefix பட்டியலில் சேர்ப்பது, அதன் தொடக்க எழுத்துகளைப் பகிரும் அருகிலுள்ள ஒவ்வொரு path-ஐயும் பொது அணுகலுக்கு வெளியிடும் — பின்னர் சேர்க்கப்படும் dynamic-segment sibling routes உட்பட (GHSA-74g9-q8f6-793h). `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` மற்றும் `tests/unit/authz/classify.test.ts` ஆகியவற்றிலுள்ள unit tests-ஐப் புதுப்பிக்கவும்.
 
-## ஸ்கோப்கள்
+## நோக்கங்கள்
 
-மூன்று நேம்ஸ்பேஸ்கள். ஒவ்வொரு செக்கரும் அதன் சொந்த ஸ்ட்ரிங்குகளை மட்டுமே படிக்கிறது. `manage` ஏன் `read:compression` க்கான `scopeMatches` ஐத் தவறவிடுகிறது மற்றும் ஒரு `read` அணுகல் டோக்கன் ஏன் `PATCH /api/keys/{id}` ஐச் செய்ய முடியாது என்பது உட்பட, பக்கவாட்டு ஒப்பீடு [மூன்று ஸ்கோப் நேம்ஸ்பேஸ்கள்](../frameworks/MCP-SERVER.md#three-scope-namespaces) ஆகும்.
+மூன்று பெயர்வெளிகள். ஒவ்வொரு சரிபார்ப்பும் அதன் சொந்த சரங்களை மட்டுமே படிக்கிறது. `read:compression` க்கு `manage` ஏன் `scopeMatches` தோல்வியடைகிறது மற்றும் `read` அணுகல் டோக்கன் ஏன் `PATCH /api/keys/{id}` செய்ய முடியாது என்பது உட்பட, பக்கவாட்டில் [மூன்று ஸ்கோப் பெயர்வெளிகள்](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API கீகள் ஒரு `scopes` வரிசையைக் கொண்டுள்ளன (`api_keys.scopes` இல் JSON ஆக சேமிக்கப்படும், `src/lib/db/apiKeys.ts` ஐப் பார்க்கவும்).
+API விசைகள் ஒரு `scopes` வரிசையைக் கொண்டுள்ளன ( `api_keys.scopes` இல் JSON ஆக சேமிக்கப்படும், `src/lib/db/apiKeys.ts` பார்க்கவும்).
 
-### மேலாண்மை ஸ்கோப்
+### மேலாண்மை நோக்கம்
 
-- `manage` / `admin` — `hasManageScope`. மேலாண்மை API ரூட்டுகளுக்கான பியரர் அணுகல்.
-- `mcp:connect`, `self:usage`, `self:account-quota`, மற்றும் `policy:bypass-provider-quota` ஆகியவை சேர்க்கக்கூடிய துல்லியமான-பொருந்தும் ஸ்கோப்கள் ஆகும். அவை `MANAGEMENT_API_KEY_SCOPES` க்கு வெளியே உள்ளன. `mcp:connect` ஆனது `/api/mcp/` நான்-லூப் பேக் கார்வ்-அவுட்டை மட்டுமே திறக்கிறது.
+- `manage` / `admin` — `hasManageScope`. மேலாண்மை API வழிகளுக்கான தாங்கி அணுகல்.
+- `mcp:connect`, `self:usage`, `self:account-quota`, மற்றும் `policy:bypass-provider-quota` ஆகியவை கூடுதல் துல்லியமான பொருத்த நோக்கங்கள். அவர்கள் `MANAGEMENT_API_KEY_SCOPES` வெளியே அமர்ந்துள்ளனர். `mcp:connect` `/api/mcp/` அல்லாத லூப்பேக் கார்வ்-அவுட்டை மட்டும் திறக்கிறது.
 
-### MCP கருவி ஸ்கோப்கள்
+### MCP கருவி நோக்கங்கள்
 
-கேட்டலாக் மற்றும் பொருந்தும் விதிகள் (ஒரே மாதிரியான ஸ்ட்ரிங், அல்லது `*` இல் முடிவடையும் ஒரு வழங்கப்பட்ட ஸ்கோப்): [MCP கருவி ஸ்கோப்கள்](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` இல் உள்ள `MCP_SCOPE_LIST` என்பது அசல் டைப் செய்யப்பட்ட துணைக்குழு ஆகும், முழு கேட்டலாக் அல்ல. MCP அங்கீகாரத் தகவல், கோரிக்கை மெட்டாடேட்டா அல்லது `OMNIROUTE_MCP_SCOPES` இலிருந்து ஸ்கோப்களை `resolveCallerScopeContext()` தீர்த்த பிறகு, `open-sse/mcp-server/scopeEnforcement.ts` இல் அமலாக்கம் செயல்படுகிறது. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ஆக இல்லாவிட்டால் அது அணைக்கப்படும்.
+பட்டியல் மற்றும் பொருத்துதல் விதிகள் (ஒத்த சரம், அல்லது `*` இல் முடிவடையும் மானிய நோக்கம்): [MCP கருவி நோக்கங்கள்](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` இல் உள்ள `MCP_SCOPE_LIST` என்பது அசல் தட்டச்சு செய்யப்பட்ட துணைக்குழு ஆகும், அது முழு பட்டியல் அல்ல. MCP அங்கீகாரத் தகவல், கோரிக்கை மெட்டாடேட்டா அல்லது `OMNIROUTE_MCP_SCOPES` ஆகியவற்றிலிருந்து ஸ்கோப்களை `resolveCallerScopeContext()` தீர்த்த பிறகு `open-sse/mcp-server/scopeEnforcement.ts` இல் அமலாக்கம் இயங்கும். `OMNIROUTE_MCP_ENFORCE_SCOPES=true` அதை உலகளவில் இயக்குகிறது (இயல்புநிலை `false`), ஆனால் கொடியைப் பொருட்படுத்தாமல் API விசையில் `manage`/`admin` இல்லாத HTTP/SSE அழைப்பாளருக்கு இது எப்போதும் செயல்படுத்தப்படுகிறது ( `open-sse/mcp-server/scopeEnforcement.ts` இல் `shouldForceScopeEnforcement()` பார்க்கவும்).
 
-### அணுகல்-டோக்கன் ஸ்கோப்கள்
+### அணுகல்-டோக்கன் நோக்கங்கள்
 
-`oma_live_…` டோக்கன்களில் `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) மூலம் தரவரிசைப்படுத்தப்பட்டுள்ளது. இந்த தரவரிசை அணுகல்-டோக்கன் நற்சான்றிதழுக்கு மட்டுமே பொருந்தும். [மேலாண்மை அங்கீகாரம்](../guides/MANAGEMENT-AUTH.md) ஐப் பார்க்கவும்.
+`oma_live_…` டோக்கன்களில்`read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) ஆல் தரப்படுத்தப்பட்டது. இந்த தரவரிசை அணுகல்-டோக்கன் நற்சான்றிதழுக்கு மட்டுமே பொருந்தும். [மேலாண்மை அங்கீகாரத்தைப்](../guides/MANAGEMENT-AUTH.md) பார்க்கவும்.
 
 ## அங்கீகாரம் தேவை மாற்று
 

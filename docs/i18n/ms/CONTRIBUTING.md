@@ -13,93 +13,85 @@ Thank you for your interest in contributing! This guide covers everything you ne
 ### Prasyarat
 
 - **Node.js** `>=22.22.2 <23`, atau `>=24.0.0 <27` (disyorkan: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows dengan Node 24:** gunakan keluaran tampalan 24 LTS semasa (sekurang-kurangnya 24.20.0).
-> Keluaran terdahulu boleh berhenti selepas ujian berjaya apabila `--test-force-exit` menutup
-> proses. [Pembetulan libuv Windows](https://github.com/nodejs/node/pull/61999) Node menangani
-> ranap masa jalan ini; kekalkan penegasan ujian dan pemeriksaan keluar pelaksana didayakan.
+> **Windows dengan Nod 24:** gunakan keluaran patch 24 LTS semasa (sekurang-kurangnya 24.20.0). Keluaran lebih awal boleh dibatalkan selepas ujian berjaya apabila `--test-force-exit` menutup proses. [Pembetulan Windows libuv](https://github.com/nodejs/node/pull/61999) node menangani ranap masa jalan ini; pastikan pernyataan ujian dan semakan keluar pelari didayakan.
 
-> **Pengguna npm v11+ (Node 24+):** Selepas `npm install`, sahkan modul natif telah dipasang:
-> `node -e "require('better-sqlite3')"`. Jika gagal dengan `MODULE_NOT_FOUND`,
-> jalankan `npm approve-scripts better-sqlite3 && npm install`. Lihat
-> [Penyelesaian Masalah](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **pengguna npm v11 + (Nod 24 +):** Selepas `npm install`, sahkan modul asli telah dipasang: `node -e "require('better-sqlite3')"`. Jika ia gagal dengan `MODULE_NOT_FOUND`, jalankan `npm approve-scripts better-sqlite3 && npm install`. Lihat [Penyelesaian masalah](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
 ### Klon & Pasang
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Pemboleh Ubah Persekitaran
+### Pembolehubah Persekitaran
 
 ```bash
-# Cipta .env anda daripada templat
+# Create your .env from the template
 cp .env.example .env
 
-# Jana rahsia yang diperlukan
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Pemboleh ubah utama untuk pembangunan:
+Pembolehubah utama untuk pembangunan:
 
-| Pemboleh ubah          | Lalai Pembangunan        | Perihalan                     |
+| Pembolehubah           | Lalai Pembangunan        | Penerangan                    |
 | ---------------------- | ------------------------ | ----------------------------- |
 | `PORT`                 | `20128`                  | Port pelayan                  |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL asas untuk frontend       |
-| `JWT_SECRET`           | (jana di atas)           | Rahsia penandatanganan JWT    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL untuk frontend       |
+| `JWT_SECRET`           | (jana di atas)           | rahsia tandatangan JWT        |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | Kata laluan log masuk pertama |
-| `APP_LOG_LEVEL`        | `info`                   | Tahap keterperincian log      |
+| `APP_LOG_LEVEL`        | `info`                   | Tahap verbositi log           |
 
 ### Tetapan Papan Pemuka
 
-Papan pemuka menyediakan togol UI untuk ciri yang juga boleh dikonfigurasikan melalui pemboleh ubah persekitaran:
+Papan pemuka menyediakan togol UI untuk ciri yang juga boleh dikonfigurasikan melalui pembolehubah persekitaran:
 
-| Lokasi Tetapan      | Togol              | Perihalan                               |
-| ------------------- | ------------------ | --------------------------------------- |
-| Settings → Advanced | Debug Mode         | Dayakan log permintaan nyahpepijat (UI) |
-| Settings → General  | Sidebar Visibility | Tunjukkan/sembunyikan bahagian bar sisi |
+| Menetapkan Lokasi  | Togol                 | Penerangan                              |
+| ------------------ | --------------------- | --------------------------------------- |
+| Tetapan → Lanjutan | Mod Nyahpepijat       | Dayakan log permintaan nyahpepijat (UI) |
+| Tetapan → Umum     | Keterlihatan Bar Sisi | bahagian bar sisi Show/hide             |
 
-Tetapan ini disimpan dalam pangkalan data dan kekal selepas mula semula, mengatasi lalai pemboleh ubah persekitaran apabila ditetapkan.
+Tetapan ini disimpan dalam pangkalan data dan berterusan sepanjang permulaan semula, mengatasi lalai env var apabila ditetapkan.
 
-### Menjalankan Secara Tempatan
+### Berjalan Secara Tempatan
 
 ```bash
-# Mod pembangunan (muat semula panas)
+# Development mode (hot reload)
 npm run dev
 
-# Binaan pengeluaran
-npm run build    # next build → .build/next/ kemudian assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Kompilasi backend/API sahaja yang pantas untuk perubahan penyumbang
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Binaan keluaran (binaan semula bersih + sentinel HEAD — diperlukan untuk penggunaan)
-npm run build:release   # rm -rf .build dist kemudian bina + tulis dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Konfigurasi port biasa
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Binaan penyumbang melaksanakan pengesahan kompilasi sahaja: ia tidak memasang edaran kendiri
-atau membina aset pembungkusan natif pilihan. Gunakan binaan pengeluaran biasa apabila
-anda perlu mengesahkan pakej yang sedia dihantar.
+Binaan penyumbang melakukan pengesahan kompilasi sahaja: ia tidak memasang pengedaran kendiri atau membina aset pembungkusan asli pilihan. Gunakan binaan pengeluaran biasa apabila anda perlu mengesahkan berkas boleh hantar.
 
-### Susun Atur Output Binaan
+### Bina Susun Atur Output
 
-| Direktori | Kandungan                                                               | Dijejaki |
-| --------- | ----------------------------------------------------------------------- | -------- |
-| `src/`    | Sumber aplikasi (TypeScript / TSX)                                      | Ya       |
-| `.build/` | Perantaraan — output `next build` (gitignored, `distDir = .build/next`) | Tidak    |
-| `dist/`   | Pakej sedia dihantar — dipasang oleh `assembleStandalone` (gitignored)  | Tidak    |
+| Direktori | Kandungan                                                                     | Dijejaki |
+| --------- | ----------------------------------------------------------------------------- | -------- |
+| `src/`    | Sumber aplikasi (TypeScript / TSX)                                            | ya       |
+| `.build/` | Perantaraan — `next build` output (diabaikan, `distDir = .build/next`)        | Tidak    |
+| `dist/`   | — himpunan boleh dihantar yang dipasang oleh `assembleStandalone` (diabaikan) | Tidak    |
 
-Saluran binaan ialah satu laluan:
+Saluran paip binaan ialah satu laluan:
 
 ```
 npm run build
@@ -108,21 +100,15 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` turut membersihkan kedua-dua direktori terlebih dahulu dan menulis
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) sebagai sentinel integriti penggunaan.
+`npm run build:release` juga membersihkan kedua-dua direktori terlebih dahulu dan menulis `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) sebagai sentinel integriti yang digunakan.
 
-`npm run build:contributor` menggunakan profil binaan backend sahaja. Ia mengstup fail UI
-papan pemuka buat sementara semasa membina, mengekalkan pengendali laluan API, dan memulihkan fail asal
-selepas binaan. Gunakan `npm run build` untuk perubahan yang mempengaruhi UI papan pemuka atau untuk
-pengesahan keluaran penuh; profil penyumbang bukan pengganti binaan keluaran.
+`npm run build:contributor` menggunakan profil binaan hujung belakang sahaja. Ia membuat seketika fail UI papan pemuka semasa membina, mengekalkan pengendali laluan API dan memulihkan fail asal selepas binaan. Gunakan `npm run build` untuk perubahan yang menjejaskan UI papan pemuka atau untuk pengesahan keluaran penuh; profil penyumbang bukan pengganti untuk binaan keluaran.
 
-> **Nota penggunaan VPS:** direktori imej jauh `/usr/lib/node_modules/omniroute/app/`
-> tidak berubah. Kemahiran penggunaan menyegerakkan kandungan `dist/` ke dalamnya.
-> Hanya laluan output binaan dalam repositori berubah (`app/` → `dist/`).
+> **VPS menggunakan nota:** direktori imej jauh `/usr/lib/node_modules/omniroute/app/` tidak berubah. Kemahiran menggunakan menyegerakkan kandungan `dist/` ke dalamnya. Hanya laluan output binaan dalam repo yang dialihkan (`app/` → `dist/`).
 
-URL lalai:
+URLs lalai :
 
-- **Papan pemuka**: `http://localhost:20128/dashboard`
+- **Papan pemuka** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -429,8 +415,8 @@ Kemudian gunakan kemahiran `/deploy-vps-*-cc` yang menyegerakkan `dist/` melalui
 
 ## Mendapatkan Bantuan
 
-- **Seni bina**: Lihat [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Rujukan API**: Lihat [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Dokumentasi keselamatan**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Dokumentasi operasi**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Isu**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Seni bina** : Tengok [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Rujukan** : Lihat [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Dokumen keselamatan** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops docs** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Isu** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

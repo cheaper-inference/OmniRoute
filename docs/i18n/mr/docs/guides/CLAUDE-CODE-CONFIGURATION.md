@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) आणि OpenCode (`x-opencode-session`) �
 
 कार्यरत डिरेक्टरी मशीन्समध्ये भिन्न असते, म्हणून समान रेपॉजिटरी वेगवेगळ्या मार्गांखाली दर्शवू शकते. त्याऐवजी प्रोजेक्ट स्पष्टपणे पाठवा: Claude कोड प्रत्येक मॉडेल विनंतीवर `ANTHROPIC_CUSTOM_HEADERS` मध्ये सूचीबद्ध केलेले कोणतेही शीर्षलेख जोडतो आणि OmniRoute त्यापैकी दोन वाचतो:
 
-| शीर्षलेख                   | मूल्य                                                       |
-| -------------------------- | ----------------------------------------------------------- |
-| `x-omniroute-project`      | प्रकल्पाचे नाव, उदा. `omniroute`                            |
-| `x-omniroute-project-repo` | सामान्यीकृत रिमोट, उदा. `github.com/diegosouzapw/OmniRoute` |
+| शीर्षलेख                   | मूल्य                                                            |
+| -------------------------- | ---------------------------------------------------------------- |
+| `x-omniroute-project`      | प्रकल्पाचे नाव, उदा. `omniroute`                                 |
+| `x-omniroute-project-repo` | सामान्यीकृत रिमोट, उदा. `github.com/cheaper-inference/OmniRoute` |
 
 दोन्ही केवळ विशेषतासाठी वाचले जातात; ते अपस्ट्रीम प्रदात्याकडे कधीही पाठवले जात नाहीत.
 
@@ -259,30 +259,22 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm/glm-4.7-flash"
 
 ---
 
-## समस्या निवारण
+## समस्यानिवारण
 
-**Claude Code गेटवेकडे दुर्लक्ष करते** — `ANTHROPIC_BASE_URL` मध्ये **`/v1`
-नाही** याची खात्री करा आणि `claude` रीस्टार्ट करा (env स्टार्टअपवेळी एकदाच वाचले जाते). `omniroute launch`
-हे तुमच्यासाठी हाताळते.
+**Claude कोड गेटवेकडे दुर्लक्ष करतो** — पुष्टी `ANTHROPIC_BASE_URL` आहे** `/v1` नाही** आणि `claude` रीस्टार्ट करा (env एकदा स्टार्टअपवर वाचले जाते). `omniroute launch` तुमच्यासाठी हे हाताळते.
 
-**`/model` निवडक रिकामा आहे / गेटवे मॉडेल्स दिसत नाहीत** — Claude Code
-v2.1.219+ आणि `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` आवश्यक आहेत. निवडकमध्ये फक्त `claude*` /
-`anthropic*` मॉडेल IDs दिसतात; इतर कोणतेही मॉडेल वापरणे सक्तीचे करण्यासाठी
-`ANTHROPIC_MODEL=<id>` वापरा (प्रोफाइल्स हेच करतात).
+**`/model` पिकर रिक्त / गहाळ गेटवे मॉडेल आहे** — Claude कोड v2.1.219 + आणि `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` आवश्यक आहे. पिकरमध्ये फक्त `claude*` / `anthropic*` मॉडेल IDs दिसतात; `ANTHROPIC_MODEL=<id>` सह इतर कोणत्याही मॉडेलची सक्ती करा (प्रोफाइल हेच करतात).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code नेहमी **उपसर्ग नसलेले**
-मॉडेल IDs (उदा. `claude-opus-4-8`) पाठवते, त्यामुळे Claude Code (`cc/…`) आणि
-Claude (`claude/…`) हे दोन्ही प्रदाते कनेक्ट केलेले असताना, साधा id दोन रूट्सशी जुळतो आणि
-OmniRoute अंदाज लावण्यास नकार देते. यापैकी कोणत्याही प्रकारे ते दुरुस्त करा: उपसर्ग असलेला id
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` वापरून पिन करा, किंवा **उपसर्ग नसलेल्या Claude मॉडेल्ससाठी Claude Code ला
-प्राधान्य द्या** सक्षम करा — Claude प्रदाता पृष्ठावरील टॉगल, किंवा
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (डीफॉल्टनुसार बंद;
-[पर्यावरण](../reference/ENVIRONMENT.md) पहा) — यामुळे साधे `claude-*`
-IDs त्याऐवजी Claude Code कडे रूट केले जातात. स्पष्ट प्रदाता उपसर्गांना नेहमीच प्राधान्य मिळते.
+**`400 Ambiguous model 'claude-…'`** — Claude Code always sends **unprefixed** model IDs (e.g. `claude-opus-4-8`), so when both the Claude Code (`cc/…`) and Claude (`claude/…`) providers are connected the bare id matches two routes and OmniRoute refuses to guess. Fix it either way: pin a prefixed id with `ANTHROPIC_MODEL=cc/claude-opus-4-8`, or enable **Prefer Claude Code for unprefixed Claude models** — the toggle on the Claude provider page, or `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (default off; see [Environment](../reference/ENVIRONMENT.md)) — which routes bare `claude-*` IDs to Claude Code instead. Explicit provider prefixes always win.
 
-**प्रमाणीकरण त्रुटी** — प्रोफाइलमध्ये कोणतेही टोकन नसते. `omniroute launch --profile`
-वापरा (ते टोकन अंतःक्षेपित करते) किंवा `ANTHROPIC_AUTH_TOKEN` एक्सपोर्ट करा.
+**"स्वयं मोड … हे सत्र पात्र नाही" (वर्गीकरण विनंत्या बिल केल्या आहेत)** — ऑटो मोडमध्ये Claude कोड सर्व्हरला त्याच्या स्वतःच्या मॉडेल विनंत्यांच्या अंतर्गत क्रियांचे पुनरावलोकन करण्यास सांगतो ( [Anthropic डॉक्स](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). यासाठी `anthropic-beta` व्हॅल्यू `dangerous-tool-use-2026-09-03` आणि `safeguards` बॉडी फील्ड Anthropic पर्यंत जोडी म्हणून पोहोचणे आवश्यक आहे आणि `safeguard_results` शिवाय अपस्ट्रीम टूल वापरा-अपरिवर्तित परत येण्यासाठी IDs वापरा. OmniRoute हे करते जेव्हा विनंती मूळ `claude` प्रदात्याकडे किंवा `anthropic-compatible-*` नोडकडे पाठविली जाते, प्रवाहित केली जाते किंवा नाही (रिग्रेशन गार्ड: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). इतर लक्ष्ये पुनरावलोकन परत करू शकत नाहीत, म्हणून Claude कोड त्याच्या स्वतःच्या वर्गीकरण विनंत्यांकडे परत येतो आणि सूचना दर्शवतो:
 
-**प्रोफाइल्स विलगीकरण करत नाहीत** — प्रत्येक प्रोफाइल एक स्वतंत्र `CLAUDE_CONFIG_DIR` आहे;
-सत्रामध्ये `echo $CLAUDE_CONFIG_DIR` चालवून ते
-`~/.claude/profiles/<name>` कडे निर्देश करत असल्याची खात्री करा.
+- नॉन-एन्थ्रोपिक प्रदात्यावरील मॉडेल, किंवा कॉम्बो जे एकावर उतरते;
+- क्लॉड-कोड-कंपॅटिबल रिले नोड (`anthropic-compatible-cc-*`), जे विनंतीचे मुख्य भाग पुन्हा तयार करते आणि `safeguards` घेऊन जात नाही;
+- गेटवे सत्रांसाठी Anthropic पृष्ठ सूचीत असल्याच्या खाली अनुमत सूचिबद्ध बीटा किंवा Claude कोड आवृत्तीची अगोदरची जुनी OmniRoute.
+
+Claude कोडमध्ये `/status` चालवा: द** ऑटो मोड सर्व्हर** सर्व्हरचे पुनरावलोकन सक्रिय असताना row `Enabled` वाचते. त्या विनंत्यांना बिल दिले जाते की नाही हे Anthropic द्वारे ठरवले जाते, OmniRoute द्वारे नाही.
+
+**प्रमाणिकरण त्रुटी** — प्रोफाइलमध्ये कोणतेही टोकन नाही. `omniroute launch --profile` वापरा (इंजेक्ट करा) किंवा `ANTHROPIC_AUTH_TOKEN` निर्यात करा.
+
+**प्रोफाइल वेगळे करत नाहीत** — प्रत्येक प्रोफाइल एक वेगळे `CLAUDE_CONFIG_DIR` आहे; `~/.claude/profiles/<name>` येथे सत्र बिंदूंच्या आत `echo $CLAUDE_CONFIG_DIR` सत्यापित करा.

@@ -334,38 +334,26 @@ RTK rejimi **[RTK AI](https://github.com/rtk-ai)** tomonidan yaratilgan **[RTK -
 
 ---
 
-## Kengaytirilgan siqish tizimlari
+## Murakkab siqish tizimlari
 
-Yuqorida tavsiflangan 7 ta rejimdan tashqari (manba `codex-responses` va
-`omniglyph` rejimlarini ham qabul qiladi, ammo ushbu qoʻllanmada ular yoritilmaydi), quyidagi boʻlimlarda
-shu rejimlar ichida yoki ular bilan birga ishlaydigan imkoniyatlar yoritiladi: Tool Result Compression va Progressive Aging
-agressiv mexanizmning 1- va 2-bosqichlaridir (Aggressive rejimi va
-qatlamlangan konveyerning `aggressive` bosqichi), Stacked Pipeline — Stacked rejimining ishlash usuli, Cache-Aware Compression
-keshlash provayderlari uchun siqish yoqilgan paytda `aggressive` va `ultra` rejimlarini `standard` darajasiga
-pasaytiradi, Caveman Output Mode va Output Styles esa sukut boʻyicha oʻchirilgan, alohida yoqiladigan tizim prompti koʻrsatmalari boʻlib,
-ular soʻrovni siqish oʻrniga model chiqishini shakllantiradi.
+Yuqorida tavsiflangan 7 ta rejimdan tashqari (manba `codex-responses` va `omniglyph` rejimlarini ham qabul qiladi, bu yoʻriqnomada ularga yoʻl qoʻyilmaydi), quyidagi boʻlimlar ushbu rejimlar ichida yoki yonida ishlaydigan funksiyalarni qamrab oladi: Asbob natijalarini siqish va progressiv qarish agressiv dvigatelning 1 va 2-bosqichlaridir (Agressiv rejim va stacked pipelinening `aggressive` qadami), Siqish yoqilgan paytda keshlash provayderlari uchun keshlash `aggressive` va `ultra` ni `standard` ga pasaytiradi va Caveman Chiqish rejimi va Chiqish uslublari sukut bo‘yicha o‘chirib qo‘yiladigan tizimga oid ko‘rsatmalar bo‘lib, so‘rovni siqish o‘rniga modelning chiqishini shakllantiradi.
 
-### Keshni hisobga oluvchi siqish
+### Keshdan xabardor siqish
 
-Ayrim provayderlar (masalan, promptlarni keshlaydigan Anthropic) **promptlarni keshlash**ni
-qoʻllab-quvvatlaydi, bu ularga xarajatlar va kechikishni kamaytirish uchun promptning ayrim qismlarini keshlash
-imkonini beradi. Keshlash yoqilganida agressiv siqish aslida unumdorlikka **zarar yetkazishi**
-mumkin, chunki u keshlangan tokenlarni oʻzgartirib, keshni yaroqsiz holga keltiradi.
+Ba'zi provayderlar (masalan, tezkor keshlash bilan Anthropic ) qo'llab-quvvatlaydi** tezkor keshlash** , bu esa xarajatlar va kechikishni kamaytirish uchun taklif qismlarini keshlash imkonini beradi. Keshlash yoqilganda, tajovuzkor siqish aslida mumkin** og'riydi** ishlash, chunki u keshlangan tokenlarni o'zgartirib, keshni bekor qiladi.
 
-`cachingAware.ts` moduli buni **keshlash kontekstini aniqlash** va
-**siqish strategiyasini mos ravishda sozlash** orqali hal qiladi.
+`cachingAware.ts` moduli buni hal qiladi** keshlash kontekstini aniqlash** va** siqish strategiyasini sozlash** mos ravishda.
 
-#### U qanday ishlaydi
+#### Bu qanday ishlaydi
 
-1. **Keshlash kontekstini aniqlash** — Soʻrov tanasida `cache_control` belgilarini qidiradi
-2. **Keshlash provayderlarini aniqlash** — Maqsad provayder keshlashni qoʻllab-quvvatlashini tekshiradi
-3. **Strategiyani sozlash** — Keshlash provayderlari uchun `aggressive`/`ultra` rejimlarini `standard` darajasiga pasaytiradi
-4. **Tizim promptini oʻtkazib yuborish** — Tizim promptlari odatda keshlanadi, shuning uchun ularni siqmaydi
+1. **Keshlash kontekstini aniqlash** — `cache_control` markerlari uchun so‘rov tanasini skanerlaydi
+2. **Keshlash provayderlarini aniqlang** — Maqsadli provayder keshlashni qo'llab-quvvatlashini tekshiradi
+3. **Strategiyani sozlash** — keshlash provayderlari uchun `aggressive`/`ultra` versiyasini `standard` ga pasaytiradi
+4. **Tizim soʻrovini oʻtkazib yuborish** — Tizim takliflari odatda keshlanadi, shuning uchun ularni siqmang
 
-Strategiya yordamchisi `deterministicOnly` bayrogʻini ham qaytaradi, ammo reja tuzuvchisi
-faqat strategiyadan foydalanadi — hozirda quyi oqimdagi hech narsa bu bayroqni oʻqimaydi.
+Strategiya yordamchisi ham `deterministicOnly` bayrog'ini qaytaradi, lekin reja tuzuvchisi faqat strategiyani iste'mol qiladi — quyi oqimda hech narsa bugun bayroqni o'qimaydi.
 
-#### Kod namunasi
+#### Kod misoli
 
 ```ts
 import {
@@ -376,7 +364,7 @@ import {
 const body = {
   model: "anthropic/claude-sonnet-4.5",
   messages: [{ role: "user", content: "Hello" }],
-  cache_control: { type: "ephemeral" }, // ← Kesh belgisi
+  cache_control: { type: "ephemeral" }, // ← Cache marker
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
@@ -388,28 +376,19 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### Qachon foydalanish kerak
 
-Keshni hisobga oluvchi siqish **har doim yoqilgan** — hech qanday sozlash talab qilinmaydi. U
-siqish yoqilganida va maqsad provayder promptlarni keshlashni qoʻllab-quvvatlaganida (Anthropic, OpenAI
-va boshqalar) ishga tushadi; aniq `cache_control` belgilari talab qilinmaydi — faqat keshlash provayderining oʻzi
-darajani pasaytirishni ishga tushiradi, faqat belgilar esa buni hech qachon amalga oshirmaydi (belgilarni aniqlash strategik
-qarorga emas, kesh telemetriyasiga maʼlumot yetkazadi).
+Kesh-xabarli siqish** doim yoniq** — hech qanday konfiguratsiya kerak emas. U har doim siqish yoqilganda ishga tushadi va maqsadli provayder tezkor keshlashni qo'llab-quvvatlaydi (Anthropic, OpenAI va boshqalar); aniq `cache_control` markerlari talab qilinmaydi — faqat keshlash provayderi pasaytirishni ishga tushiradi va faqat markerlar hech qachon bunday qilmaydi (markerni aniqlash strategiya qarorini emas, kesh telemetriyasini ta'minlaydi).
 
-### Bosqichma-bosqich eskirish
+OpenRouter faqat `anthropic/*` modellari uchun keshlash provayderi sifatida hisoblanadi: Claude Code so‘rovlari `cache_control` to‘xtash nuqtalarini (ko‘pi bilan 4 ta) saqlaydi va qo‘riqchi prefiksni himoya qiladi, boshqa har bir OpenRouter oilasi (`openai/`, `google/`, `qwen/`, …) tozalangan va himoyalanmagan holda qoladi.
 
-Uzoq suhbatlarda koʻplab xabar navbatlari toʻplanadi, ammo eski navbatlarning
-dolzarbligi kamayib boradi. `progressiveAging.ts` moduli **xabarlarni navbat masofasi boʻyicha soddalashtiradi**
-(masofa suhbat oxiridan boshlab oʻlchanadi). Taqdim etilgan standart sozlamalar bilan
-(`verbatim: 2, light: 2, moderate: 3`):
+### Progressiv qarish
 
-- **Oxirgi 2 ta navbat (masofa ≤ 2)**: Oʻzgarishsiz saqlanadi
-- **Masofa 3**: Gʻor odami uslubida siqish (ortiqcha soʻzlarni olib tashlash)
-- **Masofa 4+**: Assistent xabarlari umumlashtiriladi; foydalanuvchi xabarlari dastlabki
-  qatorigacha qisqartirilib, 120 ta belgi bilan cheklanadi; boshqa rollarga tegilmaydi. Tizim promptlari, allaqachon eskirtirilgan
-  xabarlar va eng soʻnggi foydalanuvchi xabari masofadan qatʼi nazar har doim oʻzgarishsiz saqlanadi.
-  Hech narsa butunlay tashlab yuborilmaydi va taqdim etilgan standart sozlamalarda `light`
-  oraligʻiga erishib boʻlmaydi (`light` qiymati `verbatim` qiymatiga teng).
+Uzoq suhbatlarda ko'plab xabarlar to'planadi, lekin eski navbatlar ahamiyatsiz bo'lib qoladi. `progressiveAging.ts` moduli** burilish masofasi bo'yicha xabarlarni yomonlashtiradi** (suhbat oxiridan o'lchanadigan masofa). Yuborilgan standart sozlamalar bilan (`verbatim: 2, light: 2, moderate: 3`):
 
-#### Kod namunasi
+- **Oxirgi 2 burilish (masofa ≤ 2)** : So'zma-so'z saqlanadi
+- **Masofa 3** : Caveman siqish (plomba olib tashlash)
+- **Masofa 4 +** : Yordamchi xabarlari umumlashtiriladi; foydalanuvchi xabarlari birinchi qatorga qisqartirildi, 120 belgi bilan cheklandi; boshqa rollar tegmagan. Tizim ko'rsatmalari, allaqachon eskirgan xabarlar va oxirgi foydalanuvchi xabari masofadan qat'iy nazar har doim so'zma-so'z saqlanadi. Hech narsa to'g'ridan-to'g'ri tashlab qo'yilmaydi va `light` diapazoni jo'natilgan standart sozlamalar bilan bog'lanib bo'lmaydi (`light` `verbatim` teng).
+
+#### Kod misoli
 
 ```ts
 import { applyAging } from "@omniroute/open-sse/services/compression/progressiveAging";
@@ -418,69 +397,47 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... yana 50 ta navbat ...
+  // ... 50 more turns ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // oxirgi 3 ta navbat: o‘zgartirilmaydi
-  light: 8, // masofa <= 8: yengil siqish
-  moderate: 20, // masofa <= 20: g‘or odami uslubida siqish
-  fullSummary: 5, // tur talab qiladi, oraliqlarga ajratish kodi tomonidan o‘qilmaydi
-  // masofa > 20: umumlashtiriladi (assistent) / birinchi qator saqlanadi (foydalanuvchi)
+  verbatim: 3, // last 3 turns: verbatim
+  light: 8, // distance <= 8: lite compression
+  moderate: 20, // distance <= 20: caveman compression
+  fullSummary: 5, // required by the type, not read by the banding code
+  // distance > 20: summarized (assistant) / first line kept (user)
 });
 
-// saved = tejalgan tokenlar soni
+// saved = number of tokens saved
 ```
 
 #### Qachon foydalanish kerak
 
-Bosqichma-bosqich eskirish `aggressive` rejimi uchun **har doim yoqilgan** — bu
-`compressAggressive()` funksiyasining 2-bosqichidir. Ultra rejimi uni ishga tushirmaydi. U
-ayniqsa quyidagilar uchun samarali:
+Progressiv qarish** doim yoniq** `aggressive` rejimi — uchun bu `compressAggressive()` ning 2-bosqichidir. Ultra rejimi uni ishga tushirmaydi. Bu, ayniqsa, samarali:
 
-- Uzoq davom etuvchi dasturlash seanslari
-- Bir necha kunlik suhbatlar
-- Koʻplab vosita chaqiruvlariga ega agentli ish jarayonlari
+- Uzoq muddatli kodlash seanslari
+- Ko'p kunlik suhbatlar
+- Ko'p vosita chaqiruvlari bilan agentlik ish oqimlari
 
-### Gʻor odami chiqish rejimi
+### G'or odamining chiqish rejimi
 
-Gʻor odami chiqish rejimi modelning oʻzidan qisqa chiqish soʻraydigan **tizim prompti koʻrsatmalarini**
-qoʻshadi — `lite` darajasi toʻliq gaplarni saqlagan holda ixcham javoblarni soʻraydi, `full`
-undan «aqlli gʻor odamidek qisqa javob berish»ni soʻraydi, `ultra` esa telegraf uslubidagi chiqishni soʻraydi;
-koʻrsatmalar faqat soʻraydi, bunga kafolat bera olmaydi. Soʻrovlar ularni
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) orqali oladi:
-`open-sse/handlers/chatCore.ts` avval tanlovni orqaga moslik moslashtirgichi
-(`resolveOutputStyleSelection()` funksiyasi
-`open-sse/services/compression/outputStyles/backCompat.ts` ichida) yordamida aniqlaydi; `outputStyles`
-boʻsh boʻlganda, u yoqilgan `cavemanOutputMode` qiymatini
-`cavemanOutputMode.intensity` darajasidagi `terse-prose` chiqish uslubiga moslaydi
-(quyidagi Orqaga moslik boʻlimiga qarang); boʻsh boʻlmagan `outputStyles`
-tanlovi oʻz holicha ishlatiladi va shundan keyin `cavemanOutputMode.enabled` hamda `intensity` hech qanday
-taʼsir koʻrsatmaydi, biroq uning `autoClarity` almashtirgichi qoʻllanishda davom etadi. `outputMode.ts`
-koʻrsatma matnlarini (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), kontentni chetlab oʻtish mexanizmini va
-kiritish jarayoni ishlatadigan joylashtirish yordamchisini oʻz ichiga oladi; uning `applyCavemanOutputMode()` injektorini
-ishlab chiqarish muhitidagi hech bir chaqiruvchi ishlatmaydi.
+Caveman chiqish rejimi qo'shiladi** tizimning tezkor ko'rsatmalari** that modelning o'zidan qisqacha chiqishni so'raydi — `lite` darajasi to'liq jumlalarni saqlaydigan qisqa javoblarni so'raydi, `full` undan "aqlli g'or odami kabi qisqacha javob berishni" so'raydi va `ultra` telegraf chiqishini so'raydi; ko'rsatmalar faqat so'raydi, ular bunga kafolat bera olmaydi. So'rovlar ularni `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) orqali qabul qiladi: `open-sse/handlers/chatCore.ts` birinchi navbatda tanlovni back-compat shim (`resolveOutputStyleSelection()` in `open-sse/services/compression/outputStyles/backCompat.ts`) bilan hal qiladi, u `outputStyles` bo'sh bo'lsa, yoqilgan `cavemanOutputMode` `cavemanOutputMode.intensity` da `terse-prose` chiqish uslubiga moslashtiradi (quyida Back-compat-ga qarang); bo'sh bo'lmagan `outputStyles` tanlovi avvalgidek ishlatiladi va `cavemanOutputMode.enabled` va `intensity` keyin hech qanday ta'sir ko'rsatmaydi, shu bilan birga uning `autoClarity` o'tish tugmasi amal qiladi. `outputMode.ts` ko'rsatma matnlarini (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), kontentni aylanib o'tishni va in'ektsiya ishlatadigan joylashtirish yordamchisini o'z ichiga oladi; o'zining `applyCavemanOutputMode()` injektorida ishlab chiqarish chaqiruvchisi yo'q.
 
-#### U qanday ishlaydi
+#### Bu qanday ishlaydi
 
-Bu rejim kirishni siqmaydi. U tizim promptiga ko‘rsatmalar blokini qo‘shadi
-(quyidagi Kiritish qanday ishlaydi bo‘limiga qarang), so‘rov uchun tanlangan har qanday kirishni siqish rejimi
-esa blokni o‘z ichiga olgan matn ustida keyin ham ishlaydi. Har bir daraja oxirida keladigan umumiy
-chegaralar bandidan oldin ingliz tilidagi `full` darajasi quyidagicha yozilgan:
+Ushbu rejim kirishni siqmaydi. U tizim soʻroviga koʻrsatma blokini qoʻshadi (quyida inyeksiya qanday ishlaydi) va soʻrov uchun tanlangan har qanday kirishni siqish rejimi blokni olib yuruvchi korpusda hamon keyin ishlaydi. Har bir daraja tugaydigan umumiy chegaralar bandidan oldin inglizcha `full` darajasida shunday deyiladi:
 
-> "Aqlli g‘or odamidek qisqa javob ber. Artikllar (a/an/the), ortiqcha so‘zlar (just/really/basically/actually/simply), xushmuomalalik iboralari va ikkilanishni tashla. Gap bo‘laklari mumkin. Qisqa sinonimlardan foydalan (extensive emas, big; implement emas, fix). Barcha texnik mazmun, kod, xatolar, URL manzillar va identifikatorlarni aynan saqla."
+> "Aqlli g'or odamiga o'xshab qisqacha javob bering. Qoldirish maqolalari (a/an/the), to'ldiruvchi (just/really/basically/actually/simply), yoqimli narsalar, to'siqlar. Fragmentlar OK. Qisqa sinonimlar (katta keng emas, tuzatish amalga oshirilmaydi. Barcha texnik mazmun, kod, xatolar, URLs, identifikatorlarni aniq saqlang."
 
 Bu, ayniqsa, quyidagilar uchun yaxshi ishlaydi:
 
-- Kod yaratish (qisqaroq natija = kamroq token)
-- Tezkor savol-javob (batafsil tushuntirishlarga hojat yo‘q)
-- Ommaviy qayta ishlash (o‘tkazuvchanlikni maksimal darajaga oshirish)
+- Kod yaratish (terser chiqishi = kamroq tokenlar)
+- Tez savol-javob (batafsil tushuntirishlar kerak emas)
+- To'plamli ishlov berish (o'tkazish qobiliyatini maksimal darajada oshirish)
 
 #### Qachon foydalanish kerak
 
-G‘or odami uslubidagi chiqish rejimi **ixtiyoriy ravishda yoqiladi**. Siqish yoqilganida (`enabled: true`, Compression Settings sahifasidagi asosiy almashtirgich
-yoqilgan), uni `cavemanOutputMode.enabled` orqali yoqing; `intensity`
-`lite`, `full` yoki `ultra` qiymatini tanlaydi:
+G'or odamining chiqish rejimi** ro'yxatdan o'tish** . Siqish yoqilgan holda (`enabled: true`, Siqish sozlamalari sahifasida asosiy o'tish-o'tish), uni `cavemanOutputMode.enabled` bilan yoqing; `intensity` `lite`, `full` yoki `ultra` tanlaydi:
 
 ```json
 {
@@ -492,103 +449,44 @@ yoqilgan), uni `cavemanOutputMode.enabled` orqali yoqing; `intensity`
 }
 ```
 
-Siqish kombinatsiyasining **Chiqish rejimi** almashtirgichi (`outputMode`, darajasi `outputModeIntensity`da)
-shu kombinatsiya qo‘llanadigan so‘rovlar uchun ayni almashtirgichni o‘rnatadi,
-`omniroute_set_compression_engine` MCP vositasi esa uni o‘zining mantiqiy `outputMode`
-argumenti orqali yozadi. Bo‘sh bo‘lmagan `outputStyles` tanlovi bu almashtirgichdan ustun turadi. Boshqaruv
-panelida **Qisqa nasr** chiqish uslubini yoqish ayni blokni kiritadi (quyidagi Chiqish
-uslublari bo‘limiga qarang).
+Siqish kombinatsiyasi** Chiqish rejimi** toggle (`outputMode`, `outputModeIntensity` darajasida ) kombinatsion qo'llaniladigan so'rovlar uchun bir xil kalitni o'rnatadi va `omniroute_set_compression_engine` MCP vositasi uni mantiqiy `outputMode` argumenti orqali yozadi. Bo'sh bo'lmagan `outputStyles` tanlovi ushbu kalitdan ustun turadi. Boshqaruv panelida yoqish** Aniq nasr** chiqish uslubi bir xil blokni kiritadi (quyida Chiqish uslublariga qarang).
 
 ### Chiqish uslublari (katalog)
 
-Yuqoridagi g‘or odami uslubidagi chiqish rejimi — **eski yagona uslub yo‘li**. 4-bosqich uni
-birgalikda ishlatiladigan chiqish uslublari katalogiga umumlashtirdi: `open-sse/services/compression/outputStyles/catalog.ts` ichidagi
-`OUTPUT_STYLE_CATALOG`. Har bir uslub modelning o‘zidan tejamkorroq chiqish yaratishni
-so‘raydigan tizim prompti ko‘rsatmasidir; uslublarni birga yoqish mumkin
-va ular katalog tartibida kiritiladi.
+Yuqoridagi Caveman chiqish rejimi** eski yagona uslubli yo'l** . 4-bosqich uni kompozitsion chiqish uslublari katalogiga umumlashtirdi: `OUTPUT_STYLE_CATALOG` in `open-sse/services/compression/outputStyles/catalog.ts`. Har bir uslub - bu modelning o'zidan arzonroq chiqishni so'raydigan tizimli ko'rsatma; uslublar birgalikda yoqilishi mumkin va katalog tartibida kiritiladi.
 
-| Uslub                              | `id`            | Nima qiladi                                                                                                                                                                                                                                                                                                           | Ko‘rsatma tillari                             |
-| ---------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Qisqa nasr                         | `terse-prose`   | Ortiqcha so‘zlar/artikllar/ikkilanishni tashlaydi; texnik mazmunni aynan saqlaydi. Eski g‘or odami uslubidagi chiqish rejimi bilan bir xil matn (qayta yozilmaydi, unga havola qilinadi).                                                                                                                             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Kamroq kod                         | `less-code`     | YAGNI zinapoyasi: ishlaydigan eng kichik o‘zgarish, so‘ralmagan abstraksiyalarsiz.                                                                                                                                                                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ot dumi (dangasa katta dasturchi)  | `ponytail`      | "Eng yaxshi kod — hech qachon yozilmagan kod": qayta foydalanish > qayta yozish, asosiy sabab > alomat, ishlaydigan eng qisqa farq.                                                                                                                                                                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Menda ADHD bor (avval amal)        | `i-have-adhd`   | Avval amal (nasrdan oldin buyruq/yo‘l/parcha), raqamlangan va cheklangan qadamlar, BITTA aniq keyingi qadam, kirish/xulosa/yakunlovchi iboralarsiz. [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT) asosida moslashtirilgan.                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Antislop UI filtri                 | `antislop-ui`   | Har bir vizual usul maqsad sinovidan o‘tishi kerak (ierarxiya, o‘ziga xoslik, o‘qish qulayligi); standart gradientlar/shisha/yorqinlik yo‘q, ranglar palitrasi cheklangan, shablon maketlari yo‘q. Har ikki antislop uslubi ishlamaydigan boshqaruv elementlari va uydirma da’volarni taqiqlovchi chegarani qo‘shadi. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Antislop matn va insoniylik filtri | `antislop-copy` | Aniq matn (uzun tirelar, umumiy CTA’lar, urfdagi iboralar, chatbot yakunlari va uydirma faktlarsiz), shuningdek, insonlarga oid qoidalar: WCAG AA kontrasti, ko‘rinadigan fokus, klaviatura orqali foydalanish, bo‘sh/yuklanish/xato holatlari, mobil qayta joylashuv.                                                | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Qisqa CJK (文言)                   | `terse-cjk`     | `full`/`ultra` javobi klassik xitoy tilida (文言); `lite` faqat yordamchi so‘zlar, xushmuomalalik iboralari yoki bezaklarsiz qisqa javoblarni so‘raydi.                                                                                                                                                               | zh (lokal bilan cheklangan, quyiga qarang)    |
+| Uslub                                       | `id`            | Nima qiladi                                                                                                                                                                                                                                                          | Ta'lim tillari                                |
+| ------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Aniq nasr                                   | `terse-prose`   | filler/articles/hedging tushiring; texnik moddani aniq saqlang. Qadimgi g'or odamining chiqish rejimi bilan bir xil matn (ma'lumot berilgan, qayta yozilmagan).                                                                                                      | uz, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Kamroq kod                                  | `less-code`     | YAGNI narvon: eng kichik ish o'zgarishi, so'ralmagan abstraktsiyalar yo'q.                                                                                                                                                                                           | uz, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Ponytail (dangasa katta ishlab chiqaruvchi) | `ponytail`      | "Eng yaxshi kod hech qachon yozilmagan koddir": > qayta yozishni qayta ishlatish, ildiz sababi > simptomi, eng qisqa ish farqi.                                                                                                                                      | uz, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Menda ADHD bor (birinchi harakat)           | `i-have-adhd`   | Harakat avval (nasrdan oldin command/path/snippet ), raqamlangan chegaralangan qadamlar, ONE konkret keyingi qadam, preamble/recap/closers. yo'q [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT) dan moslashtirilgan.                              | uz, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop UI filtri                          | `antislop-ui`   | Har bir vizual texnika maqsadli sinovdan o'tishi kerak (ierarxiya, o'ziga xoslik, o'qilishi); standart gradients/glass/glow yo'q, yopilgan palitrasi, shablon tartibi yo'q. Har ikki antislop uslublari no-o'lik-nazorat / no-fabricated-da'vo chegarasini qo'shadi. | uz, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop nusxasi va inson filtri            | `antislop-copy` | Maxsus nusxa (em tiresiz, umumiy CTAs, buzzwords, chatbot yopuvchilar, ixtiro qilingan faktlar) va odamlar qoidalari: WCAG AA kontrasti, ko‘rinadigan fokus, klaviatura masofasi, empty/loading/error holatlari, mobil qayta o‘tkazish.                              | uz, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Terse CJK (māngī)                           | `terse-cjk`     | Klassik xitoy tilida `full`/`ultra` javobi (mángī); `lite` funktsiyali so'zlar, yoqimli narsalar yoki bezaklarsiz faqat qisqa javoblarni so'raydi.                                                                                                                   | zh (mahalliy chegaralangan, pastga qarang)    |
 
-Har bir uslub uchta intensivlik darajasi bilan keladi — `lite`, `full`, `ultra` — va har bir daraja
-umumiy chegaralar bandi (`outputMode.ts` ichidagi `SHARED_BOUNDARIES`) bilan tugaydi; bu band
-kod bloklari, fayl yo‘llari, buyruqlar, xatolar va URL manzillarni aynan saqlaydi. `terse-prose` va
-`terse-cjk` daraja matnlari bu ro‘yxatga identifikatorlarni ham qo‘shadi.
+Har bir uslub uchta intensivlik darajasi — `lite`, `full`, `ultra` — yuboradi va har bir daraja kod bloklarini, fayl yo'llarini, buyruqlarni, xatolarni va URLs aniq saqlaydigan umumiy chegaralar bandi ( `outputMode.ts` da `SHARED_BOUNDARIES` ) bilan tugaydi. `terse-prose` va `terse-cjk` darajasidagi matnlar ushbu ro'yxatga identifikatorlarni qo'shadi.
 
-`terse-cjk` ikki joyda `zh` lokali bilan cheklangan. Compression Settings sahifasi
-uning qatorini faqat boshqaruv paneli UI tili xitoycha (`zh-CN` yoki `zh-TW`) bo‘lganida ko‘rsatadi,
-`applyOutputStyles()` esa uni faqat so‘rovning aniqlangan tili (quyidagi Til
-tanlash bo‘limiga qarang) `zh` bo‘lganida kiritadi. Qatorni yashirish saqlangan `terse-cjk` tanlovini
-tozalamaydi: sozlamalar API’si har qanday uslub identifikatorini qabul qiladi va sahifada boshqa uslublarni
-saqlash uni saqlab qoladi. So‘rov vaqtida `applyOutputStyles()` til tekshiruvi yagona lokal cheklovidir.
+`terse-cjk` ikki joyda `zh` uchun mahalliylashtirilgan. Siqish sozlamalari sahifasida uning qatori faqat asboblar panelidagi UI tili xitoycha (`zh-CN` yoki `zh-TW`) bo‘lganda ko‘rsatiladi va `applyOutputStyles()` uni faqat so‘rovning hal qilingan tili (quyida Til tanlash bo‘limiga qarang) `zh` bo‘lganda kiritadi. Qatorni yashirish saqlangan `terse-cjk` tanlovini tozalamaydi: API sozlamalari istalgan uslub identifikatorini qabul qiladi va sahifadagi boshqa uslublarni saqlash uni saqlab qoladi. So'rov vaqtida `applyOutputStyles()` tilini tekshirish yagona mahalliy eshikdir.
 
-#### Kiritish qanday ishlaydi
+#### Inyeksiya qanday ishlaydi
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) tanlovni
-katalogga nisbatan aniqlaydi (nomaʼlum idʼlar va lokalga mos kelmaydigan uslublar
-olib tashlanadi, bu hech qachon xato hisoblanmaydi; hech qanday uslubga mos kelmaydigan
-tanlov tana qismini o‘zgartirmaydi va `no_styles` sifatida o‘tkazib yuboriladi), tanlangan
-ko‘rsatmalarni katalogdagi tartibda birlashtiradi,
-chegaralar bandini **bir marta** qo‘shadi (shuningdek, `less-code` yoki `ponytail`
-tanlanganida xavfsizlik bandini, `SAFETY_BOUNDARIES` yoki uning tarjimasini qo‘shadi) va
-blokni bitta idempotentlik belgisi (`[OmniRoute Output Styles]`) bilan boshlaydi, shu
-sababli uni qayta qo‘llash hech qanday amal bajarmaydi. Aniqlangan tilning (quyidagi Til
-tanlovi bo‘limiga qarang) tarjimasi mavjud bo‘lsa, inglizcha ko‘rsatma o‘rniga
-mahalliylashtirilgan ko‘rsatma kiritiladi.
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) katalogga qarshi tanlovni hal qiladi (noma'lum identifikatorlar va tilga mos kelmaydigan uslublar o'chiriladi, hech qachon xato bo'lmaydi; hech qanday uslubni hal qiladigan tanlov tanani o'zgarishsiz qoldiradi, `no_styles` sifatida o'tkazib yuboriladi), tanlangan ko'rsatmalarni katalog tartibida birlashtiradi, chegaralar bandini qo'shadi** bir marta** (plyus xavfsizlik bandi, `SAFETY_BOUNDARIES` yoki uning tarjimasi, `less-code` yoki `ponytail` tanlanganda) va blokni bitta idempotentlik belgisi (`[OmniRoute Output Styles]`) bilan boshlaydi, shuning uchun qayta murojaat qilish no-op hisoblanadi. Yechilgan tilda (quyida Til tanlash boʻlimiga qarang) tarjima boʻlsa, ingliz tili oʻrniga mahalliylashtirilgan yoʻriqnoma kiritiladi.
 
-Bo‘sh bo‘lmagan `messages` massiviga ega tana qismida idempotentlik tekshiruvi kontentni
-chetlab o‘tishdan oldin bajariladi: `[OmniRoute Output Styles]` belgisi yuqori darajadagi
-`system` maydonida (satr yoki kontent bloklari massivi) yoxud satrli kontentga ega tizim
-xabarida allaqachon mavjud bo‘lsa, tana qismi `already_applied` sifatida o‘zgartirilmaydi
-va kalit so‘zlar tekshiruvi bajarilmaydi. Aks holda, kontentni chetlab o‘tish
-(`open-sse/services/compression/outputMode.ts` ichidagi
-`shouldBypassCavemanOutputMode()`) rollaridan qatʼi nazar, oxirgi uchta xabarning matnini
-tekshiradi va ushbu matn xavfsizlik, qaytarib bo‘lmaydigan amal yoki aniqlashtirishga oid
-kalit so‘zlarga yoxud tartibga bog‘liq ketma-ketlikka mos kelsa, butun navbat uchun
-uslublarni o‘tkazib yuboradi: `first`, `then`, `after that`, `before`, `rollback` yoki
-`backup` so‘zidan keyin 240 ta belgi ichida `delete`, `drop`, `migrate`, `deploy` yoki
-`release` kelishi. Chetlab o‘tish **Auto-Clarity Bypass** almashtirgichi
-(`cavemanOutputMode.autoClarity`, standart holatda yoqilgan) yoqilganida ishlaydi;
-almashtirgichni o‘chirish kalit so‘zlar tekshiruvini o‘tkazib yuboradi.
+Bo'sh bo'lmagan `messages` massiviga ega bo'lgan jismda idempotentlik tekshiruvi kontentni aylanib o'tishdan oldin amalga oshiriladi: `[OmniRoute Output Styles]` markeri allaqachon yuqori darajadagi `system` maydonida (satr yoki kontent-blok massivi) yoki string mazmuniga ega tizim xabarida bo'lsa, korpus `already_applied` sifatida o'zgarishsiz qoladi va kalit so'z tekshiruvi bajarilmaydi. Aks holda kontentni aylanib o‘tish ( `open-sse/services/compression/outputMode.ts` da `shouldBypassCavemanOutputMode()` ) oxirgi uchta xabarning matnini, ularning roli qanday bo‘lishidan qat’iy nazar tekshiradi va agar matn xavfsizlik, qaytarilmas harakat yoki tushuntirish kalit so‘zlari yoki tartib sezgir ketma-ketlikka mos kelganda, butun navbat uchun uslublarni o‘tkazib yuboradi: `first`, `then`, `after that`, `before`, `rollback` ichida yoki quyidagi ketma-ketlikda. `delete`, `drop`, `migrate`, `deploy` yoki `backup` bo'yicha 240 `release`. Aylanma yo'l harakatlanayotganda ishlaydi** Avtomatik aniqlikni aylanib o'tish** almashtirish (`cavemanOutputMode.autoClarity`, sukut bo'yicha yoqilgan) yoqilgan; o'chirish tugmachasini o'chirish kalit so'zni tekshirishni o'tkazib yuboradi.
 
-Chetlab o‘tish navbatni davom ettirishga ruxsat berganda, `placeSystemInstruction()`
-(xuddi shu faylda), hech qachon yangi `messages[0]` yaratmasdan, blokni quyidagi
-variantlardan birinchi topilganiga joylashtiradi:
+Bypass burilishga ruxsat berganida, hech qachon yangi `messages[0]` yaratmaydigan `placeSystemInstruction()` (bir xil fayl), blokni topadigan birinchisiga joylashtiradi:
 
-1. Satrli kontentga ega boshlang‘ich tizim xabari: blok uning matnidan keyin qo‘shiladi.
-2. Yuqori darajadagi `system` maydoni: blok satr matnidan keyin qo‘shiladi yoki kontent
-   bloklari massiviga yangi matn bloki sifatida qo‘shiladi.
-3. Keyinroq kelgan, satrli kontentga ega birinchi tizim xabari: blok uning matnidan
-   keyin qo‘shiladi.
-4. Yuqoridagilarning hech biri mavjud bo‘lmasa: blok `messages` oxiridagi yangi tizim
-   xabariga joylashtiriladi.
+1. String tarkibiga ega yetakchi tizim xabari: blok uning matnidan keyin qo‘shiladi.
+2. Yuqori darajadagi `system` maydoni: blok satr matnidan keyin qo'shiladi yoki kontent-blok massiviga yangi matn bloki sifatida qo'shiladi.
+3. Satr mazmuniga ega birinchi keyingi tizim xabari: blok uning matnidan keyin qo'shiladi.
+4. Yuqoridagilarning hech biri: blok `messages` oxirida yangi tizim xabariga o'tadi.
 
-`messages` massivi bo‘lmagan (yoki u bo‘sh bo‘lgan) tana qismida kontentni chetlab
-o‘tish bajarilmaydi va yuqori darajadagi `system` maydoni hisobga olinmaydi. Blok satrli
-`instructions` maydoni matnidan keyin qo‘shiladi, bu maydon
-`[OmniRoute Output Styles]` belgisini allaqachon o‘z ichiga olgan holat bundan mustasno;
-bunday holda tana qismi `already_applied` sifatida o‘zgartirilmaydi. Tana qismida satrli
-`instructions` maydoni bo‘lmasa, ammo `input` (satr yoki massiv) mavjud bo‘lsa, blok
-`instructions` qiymatiga aylanib, ushbu maydondagi har qanday satr bo‘lmagan qiymatni
-almashtiradi. Satrli `instructions` maydoni ham, satr yoki massiv ko‘rinishidagi `input`
-ham bo‘lmagan tana qismi o‘zgartirilmaydi va `no_messages` sifatida o‘tkazib yuboriladi.
+`messages` massivi bo'lmagan (yoki bo'sh bo'lgan) tanada kontentni aylanib o'tish bajarilmaydi va yuqori darajadagi `system` maydoniga maslahat berilmaydi. Blok `instructions` satr matnidan keyin qo'shiladi, agar bu maydonda `[OmniRoute Output Styles]` belgisi mavjud bo'lmasa, u holda korpus `already_applied` sifatida o'zgarishsiz qoladi. Agar tanada `instructions` satr maydoni bo'lmasa, lekin `input` (satr yoki massiv) ga ega bo'lsa, blok `instructions` aylanadi va bu maydon ushlab turilgan har qanday satr bo'lmagan qiymatni almashtiradi. Satr `instructions` maydoni ham, `input` qatori yoki massivi bo'lmagan tana o'zgarishsiz qoldiriladi va `no_messages` sifatida o'tkazib yuboriladi.
 
-#### Qanday yoqiladi
+#### Qanday yoqish kerak
 
-Boshqaruv panelida: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), Output styles bo‘limi: har bir uslub uchun yoqish/o‘chirish
-almashtirgichi va daraja tanlagichiga ega alohida qator mavjud. Uslublar siqishning o‘zi
-yoqilganida (sahifadagi asosiy `enabled` almashtirgichi) kiritiladi. **Auto-Clarity
-Bypass** almashtirgichi **Caveman** sahifasidagi
-(`/dashboard/context/caveman`) **Output Mode** kartasida joylashgan. Dasturiy usulda
-siqish konfiguratsiyasi tanlovni quyidagicha saqlaydi:
+Boshqaruv panelida:** Siqish konteksti → Siqish sozlamalari** (`/dashboard/context/settings`), Chiqish uslublari boʻlimi: on/off oʻzgartirish tugmasi va daraja selektori bilan har bir uslub uchun bitta qator. Uslublar siqishni o'zi yoqilgan paytda kiritiladi (sahifaning asosiy tugmasi, `enabled`). The** Avtomatik aniqlikni aylanib o'tish** o'zgartirish tugmasi ustida** G'or odami** sahifa (`/dashboard/context/caveman`), uning ichida** Chiqish rejimi** karta. Dasturiy jihatdan siqish konfiguratsiyasi tanlovni quyidagicha davom ettiradi:
 
 ```json
 {
@@ -599,92 +497,50 @@ siqish konfiguratsiyasi tanlovni quyidagicha saqlaydi:
 }
 ```
 
-Orqaga muvofiqlik: `outputStyles` bo‘sh bo‘lib turganida, eski
-`cavemanOutputMode.enabled` sozlamasi `cavemanOutputMode.intensity` darajasidagi
-`terse-prose` bilan moslashtiriladi. Shundan so‘ng blok `[OmniRoute Output Styles]`
-belgisi bilan boshlanadi, eski `applyCavemanOutputMode()` kirituvchisi esa
-`[OmniRoute Caveman Output Mode]` belgisini yozgan. Belgi ostidagi matn en, pt-BR, es,
-de, fr, it, ru, id va vi tillarida eski kiritma bilan bir xil; ja va zh tillarida
-chegaralar bandidan oldin bitta qo‘shimcha bo‘shliq mavjud. `terse-prose` pt-BR, es, de,
-fr, it, ru, zh, ja, id va vi tillariga tarjima qilinadi, shu sababli aniqlangan tili
-`hu` bo‘lgan so‘rov eski kirituvchi ishlatgan vengercha matn o‘rniga inglizcha matnni
-oladi.
+Orqaga moslashish: `outputStyles` bo'sh bo'lsa, eski `cavemanOutputMode.enabled` sozlamasi `cavemanOutputMode.intensity` da `terse-prose` ga o'rnatiladi. Keyin blok `[OmniRoute Output Styles]` belgisi bilan boshlanadi, bu erda eski `applyCavemanOutputMode()` injektori `[OmniRoute Caveman Output Mode]` yozgan. Marker ostidagi matn en, pt-BR, es, de, fr, it, ru, id va vidagi eski inyeksiyaga mos keladi; ja va zh da chegaralar bandidan oldin bitta qo'shimcha joy oladi. `terse-prose` pt-BR, es, de, fr, it, ru, zh, ja, id va vi ga tarjima qilinadi, shuning uchun hal qilingan tili `hu` boʻlgan soʻrov inglizcha matnni oladi, bu yerda eski injektor oʻzining venger tilidan foydalangan.
 
-Output uslubi tilini tanlash (`outputStyles/apply.ts` ichidagi
-`resolveOutputStyleLanguage()`): `languageConfig.enabled` yoqilgan bo‘lsa, `autoDetect`
-so‘rovning `messages` massividagi matnga ega eng so‘nggi foydalanuvchi xabaridan namuna
-oladi (satrli kontent yoki uning kontent qismlaridagi `text`) va unda Caveman
-mexanizmining aniqlagichini (`detectCompressionLanguage()`) ishga tushiradi. Matnda Han
-belgilari mavjud va kana mavjud bo‘lmasa, aniqlagich `zh` qaytaradi; aks holda, `it`,
-`pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` va `id` orasidan eng ko‘p ishora mosligi
-topilganini, hech biri mos kelmasa esa `en` qaytaradi — tasniflay olmaydigan matn
-`defaultLanguage` emas, har doim ingliz tilini oladi va uslublar `vi` matni bilan
-taqdim etilsa ham, `vi` hech qachon aniqlanmaydi. Responses API tana qismi o‘z
-navbatlarini `input` ichida saqlaydi, undan namuna olinmaydi, shu sababli u avval
-`defaultLanguage`, keyin esa ingliz tilini oladi. `messages` ichidagi hech bir
-foydalanuvchi xabarida matn bo‘lmasa yoki `autoDetect` o‘chirilgan bo‘lsa, avval
-`defaultLanguage`, keyin esa ingliz tili qo‘llanadi. `languageConfig.enabled`
-o‘chirilgan bo‘lsa, til inglizcha bo‘ladi — so‘rovga siqish kombinatsiyasi qo‘llanadigan
-holat bundan mustasno (so‘rovning marshrutlash kombinatsiyasiga tayinlangan kombinatsiya
-yoki ichki o‘rnatilgan stacked pipeline uchun chatCore qaytadigan standart siqish
-kombinatsiyasi): kombinatsiyani qo‘llash ushbu so‘rov uchun `languageConfig.enabled`
-qiymatini yoqadi va `defaultLanguage` qiymatini kombinatsiyaning til paketlaridan
-o‘rnatadi (agar saqlangan qiymat kombinatsiya paketlaridan biri bo‘lsa, o‘sha qiymat;
-aks holda, standart qiymati `en` bo‘lgan kombinatsiyaning birinchi paketi), bunda
-saqlangan `autoDetect` qiymati (standart holatda yoqilgan) qo‘llanishda davom etadi.
-Caveman kiritish mexanizmi qoida paketi tilini boshqacha tanlaydi — har bir matn qismi
-uchun alohida va avtomatik aniqlash o‘chirilganida `enabledPacks` asosida cheklangan
-holda.
+Chiqish uslubidagi tilni tanlash (`resolveOutputStyleLanguage()` in `outputStyles/apply.ts`): `languageConfig.enabled` yoqilgan holda, `autoDetect` so‘rovning `messages` massivida matnga ega bo‘lgan so‘nggi foydalanuvchi xabarini (string mazmuni yoki uning tarkibiy qismlarining `text` ) namuna oladi va Caveman dvigatelining detektorini (`detectCompressionLanguage()`) ishga tushiradi. Detektor Han belgilarli va kanasiz matn uchun `zh` qaytaradi; aks holda u `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` va `id` dan qaysi biri eng koʻp ishora mosligini qaytaradi va `en` hech biri — matniga mos kelmasa, u tasniflay olmagan matn ingliz tilini oladi, hech qachon `defaultLanguage`, va `vi` qachon `vi` uslubi aniqlanmaydi. Responses API tanasi navbatlarini `input` da saqlaydi, u namunalanmagan, shuning uchun u `defaultLanguage`, keyin inglizchani oladi. Agar `messages` dagi hech qanday foydalanuvchi xabarida matn bo'lmasa yoki `autoDetect` o'chirilgan bo'lsa, `defaultLanguage`, keyin ingliz tili qo'llaniladi. Agar `languageConfig.enabled` o'chirilgan bo'lsa, so'rovga siqish kombinatsiyasi qo'llanilmasa, til inglizcha — bo'ladi (so'rovning marshrutlash kombinatsiyasiga tayinlangan kombinatsiya yoki o'rnatilgan stacked quvur liniyasi uchun birlamchi siqish kombinatsiyasi chatCore ga qaytarilsa): kombinatsiyani qo'llash ushbu so'rov uchun `languageConfig.enabled` yoqadi va `defaultLanguage` paketidan bitta qiymatni o'rnatadi (zsqb to'plamidan bitta qiymatni o'rnatadi). `en` ga o'rnatiladigan kombinatsiyaning birinchi to'plami, aks holda saqlangan `autoDetect` (sukut bo'yicha yoqilgan) hali ham amal qiladi. Caveman kiritish mexanizmi har bir matn qismi uchun oʻzining qoida toʻplami tilini har xil — tanlaydi va avtomatik aniqlash oʻchirilgan holda `enabledPacks` ga oʻrnatilgan.
 
-Uslub × til matritsasi
-`tests/unit/compression/output-styles-i18n-matrix.test.ts` orqali qatʼiy belgilanadi: katalogdagi har bir uslub testning `BASELINE_LANGUAGES` roʻyxatida yozuvga ega boʻlishi kerak; lokal bilan cheklanmagan uslub pt-BR tarjimasi bilan taqdim etilishi kerak (lokal bilan cheklangan `terse-cjk` bu qoidadan ozod), agar u `KNOWN_ENGLISH_ONLY` roʻyxatida boʻlmasa. Bu roʻyxatda faqat umuman tarjimasi boʻlmagan uslublar boʻlishi mumkin — roʻyxatdagi uslubning biror tarjimasi mavjud boʻlsa, test muvaffaqiyatsiz yakunlanadi; shuningdek, uslub oʻzining `BASELINE_LANGUAGES` yozuvida keltirilgan tilni yoʻqotsa, testdan oʻta olmaydi. Uslub qoʻshish uchun
-[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style) fayliga qarang.
+Uslub × tili matritsasi `tests/unit/compression/output-styles-i18n-matrix.test.ts` tomonidan mahkamlangan: har bir katalog uslubi testning `BASELINE_LANGUAGES` ga yozuvi kerak; mahalliy chegaralanmagan uslub pt-BR tarjimasini jo‘natishi kerak (mahalliy chegaralangan `terse-cjk` bu qoidadan ozod qilingan), agar u `KNOWN_ENGLISH_ONLY` ro‘yxatida ko‘rsatilmagan bo‘lsa, u faqat tarjimasi bo‘lmagan uslublarni o‘z ichiga olishi mumkin — har qanday tarjimasi bo‘lgan sanab o‘tilgan uslub sinovdan o‘ta olmaydi; va uslub o'zining `BASELINE_LANGUAGES` yozuvi ro'yxatida ko'rsatilgan tilni yo'qotganda testdan o'tolmaydi. Uslub qo'shish uchun [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style) ga qarang.
 
-### Vosita natijasini siqish
+### Asbob natijalarini siqish
 
-`open-sse/services/compression/toolResultCompressor.ts` faylidagi `compressToolResult()`
-vosita natijasi matnini **5 ta strategiya** yordamida siqadi. U ularni quyidagi tartibda sinab koʻradi va tekshiruvi kontentga mos kelgan birinchi yoqilgan strategiya natijani belgilaydi:
+`open-sse/services/compression/toolResultCompressor.ts` -dagi `compressToolResult()` asbob-natija matnini yordamida siqadi** 5 ta strategiya** . U ularni shu tartibda sinab ko'radi va tekshiruvi kontentga mos keladigan birinchi yoqilgan strategiya natijani hal qiladi:
 
-1. **`fileContent`**: 3 yoki undan ortiq qatordan iborat kontentda kamida bitta qator, boshlangʻich chekinish hisobga olinmaganda, `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` yoki `return ` bilan (kalit soʻz va undan keyingi boʻshliq), yoxud `if`,
-   `for` yoki `while` dan keyin `(` yoki ` (` bilan boshlansa, dastlabki 20 va oxirgi 5 qatorni saqlab, olib tashlangan oʻrta qismni belgilaydi.
-2. **`grepSearch`**: `<path>:<digits>:` shaklidagi kamida bitta qatorga ega kontentda birinchi ikki nuqtadan oldingi matnda boʻshliq boʻlmasa, faqat shunday qatorlarni saqlaydi, koʻpi bilan 30 tasini, undan keyin qolgan mosliklar soni va mos kelgan fayllar roʻyxatini beradi; boshqa barcha qatorlar olib tashlanadi. Strategiyani ishga tushirish uchun shunday bitta qatorning oʻzi yetarli, shu sababli `12:30:45` kabi vaqt tamgʻasi bilan boshlangan jurnal qatori ham hisobga olinadi.
-3. **`shellOutput`**: ANSI CSI ketma-ketligini (`ESC[` dan keyin raqamlar yoki nuqtali vergullar va soʻng harf, rang kodlaridagi kabi) yoki matnning istalgan joyida keyin boʻshliq keladigan `$` belgisini oʻz ichiga olgan chiqish bu ketma-ketliklarni yoʻqotadi (boshqa escape ketma-ketliklari, masalan `ESC[?25l` yoki OSC oyna sarlavhasi ketma-ketligi saqlanadi) va ketma-ket takrorlangan qatorlarni birlashtirgan holda oxirgi 50 qatorni saqlaydi. Bu tekshiruv `json` va `errorMessage` dan oldin bajarilgani sababli, shunday `$` belgisini oʻz ichiga olgan JSON yoki xato chiqishi `shellOutput` yoqilgan paytda ulargacha hech qachon yetib bormaydi.
-4. **`json`**: ixtiyoriy boʻshliqdan keyin `{` yoki `[` bilan boshlanadigan, tahlildan muvaffaqiyatli oʻtadigan va 2 000 belgidan uzun JSON foydali yuki qisqacha jamlanadi: 7 tadan ortiq elementli massiv dastlabki 5 va oxirgi 2 elementini hamda umumiy sonini saqlaydi; obyekt esa dastlabki 20 kalitini saqlaydi, har bir ichki obyekt yoki massiv qiymati `{…N keys}` toʻldiruvchisi bilan almashtiriladi (massiv uchun N uning uzunligidir) va dastlabki 20 tadan keyin olib tashlangan kalitlar sonini koʻrsatuvchi `_remaining_<N>_keys` belgisi qoʻshiladi. Skalyar qiymatlar toʻliq koʻchiriladi, shu sababli ichki qiymatlarsiz 20 yoki undan kam kalitli obyekt faqat qayta chekinish bilan formatlanadi — minimallashtirilgan obyektga belgilar qoʻshiladi va u oʻzgarishsiz qoladi.
-5. **`errorMessage`**: istalgan joyda va harflarning katta-kichikligidan qatʼi nazar `error:`,
-   `error ` (`no error found` dagidek soʻzdan keyin boʻshliq), `[error]`,
-   `exception:`, `exception `, `[exception]` yoki `traceback` boʻlgan chiqish birinchi qatorni, keyingi 10 qatorni va oxirgi 3 qatorni saqlaydi hamda ular orasidagi qatorlar oʻrniga `… [N frames elided] …` belgisini qoʻyadi. Bu belgi faqat birinchi qatordan keyin 13 tadan ortiq qator boʻlganda paydo boʻladi, shu sababli 14 yoki undan kam qatorli xato chiqishi qisqartirilmaydi (12 yoki 13 qatorda oxirgi 3 qator allaqachon saqlangan qatorlarni takrorlaydi).
+1. **`fileContent`** : 3 yoki undan ortiq satrdan iborat boʻlib, unda hech boʻlmaganda bitta satr bosh chekinishga eʼtibor bermay, `import `, `export `, `function `, `class `, `const `, `let `, `var ` yoki `return ` (kalit soʻz va boʻsh joy) bilan boshlanadigan yoki `if`, `for` yoki `while` `(` ` (` keyin saqlanadi va oxirgi 5 satr, o'rtasi qoplangan.
+2. **`grepSearch`** : `<path>:<digits>:` shaklidagi kamida bitta satrdan iborat tarkib, bunda birinchi ikki nuqta oldidagi matnda boʻsh joy yoʻq, faqat oʻsha satrlarni saqlaydi, koʻpi bilan 30 tadan soʻng keyingi mosliklar soni va mos keladigan fayllar roʻyxati; boshqa har bir qator o'chiriladi. Strategiyani ishga tushirish uchun shunday qatorlardan biri kifoya qiladi, shuning uchun `12:30:45` kabi vaqt tamg'asi bilan boshlanadigan jurnal qatori ham hisobga olinadi.
+3. **`shellOutput`** : ANSI CSI ketma-ketligini (`ESC[` keyin raqamlar yoki nuqta-vergul, keyin harf, rang kodlarida bo‘lgani kabi) yoki matnning istalgan joyida bo‘sh joy qo‘yiladigan `$` o‘z ichiga olgan chiqish o‘sha ketma-ketlikni yo‘qotadi (boshqa qochishlar, masalan, `ESC[?25l` yoki OSC oyna sarlavhasi ketma-ketligi uning oxirgi satrlari bilan saqlanadi) va ketma-ket 50 davom etadi. qulab tushdi. Ushbu tekshirish `json` va `errorMessage` oldin bajarilganligi sababli, JSON yoki bunday `$` o'z ichiga olgan xato chiqishi `shellOutput` yoqilganda ularga hech qachon etib bormaydi.
+4. **`json`** : `{` yoki `[` (ixtiyoriy boʻshliqdan keyin) bilan boshlanadigan 2000 dan ortiq belgidan iborat JSON foydali yuki va tahlillar umumlashtiriladi: 7 dan ortiq elementdan iborat massiv oʻzining birinchi 5 va oxirgi 2 ta elementini va umumiy sonini saqlaydi, obʼyekt esa oʻzining dastlabki 20 ta kalitini saqlaydi, har bir ichki kiritilgan obʼyektning oʻrniga qoʻyilgan qiymat yoki `{…N keys}` bilan almashtiriladi. massiv, N - uning uzunligi) va dastlabki 20 dan keyin tushirilgan kalitlarni sanaydigan `_remaining_<N>_keys` markeri. Skalar qiymatlar to‘liq ko‘chiriladi, shuning uchun 20 yoki undan kam kalitdan iborat bo‘lgan ob’ekt ichki qiymatlari bo‘lmagan holda faqat qayta chekintiriladi — kichraytirilgani belgilar oladi va o‘zgarishsiz qoladi.
+5. **`errorMessage`** : istalgan joyda va har qanday harf holatida `error:`, `error ` ( `no error found` dagi kabi boʻshliqdan keyin boʻsh joy qoʻyiladigan soʻz), `[error]`, `exception:`, `exception `, `[exception]` yoki `traceback` oʻz ichiga olgan chiqish oʻzining birinchi qatorini, keyingi 10 qatorni va oxirgi 3 tasini oʻz ichiga oladi, ular orasida `… [N frames elided] …` belgisi qoʻyiladi. Marker faqat birinchi qatorni 13 dan ortiq satrdan keyin paydo bo'ladi, shuning uchun 14 yoki undan kam satrning xato chiqishi qisqartirilmaydi (12 yoki 13 satrda oxirgi 3 ta takroriy satr allaqachon saqlanib qolgan).
 
-Strategiya mos kelgach, hatto u hech narsani tejamasa ham, keyingi strategiyalar sinab koʻrilmaydi. Mos kelgan strategiya hisoblangan tokenlarni (uzunlik ÷ 4, yuqoriga yaxlitlanadi) tejamasa — masalan, kodga oʻxshash 25 yoki undan kam qatorli fayl yoxud 7 yoki undan kam elementga ega, 2 000 belgidan uzun JSON massivi — agressiv mexanizm asl vosita natijasini saqlab qoladi: har ikkala chaqiruvchi (`compressAggressive()` va `compressAnthropicToolResultBlock()`) `saved` 0 yoki undan kichik boʻlganda asl nusxani saqlaydi, `compressToolResult()` ning oʻzi esa baribir shu strategiyaning chiqishini qaytaradi. Vosita natijasi bosqichi yakuniy qaror emas: mexanizmning zaxira jamlovchisi 8 192 belgidan uzun `tool` yoki `function` xabarini hamon qisqartirishi mumkin (`maxTokensPerMessage`, 2 048, 4 ga koʻpaytiriladi).
+Strategiya mos kelgandan so'ng, hatto hech narsani saqlamasa ham, keyingi strategiyalar sinab ko'rilmaydi. Mos strategiya hech qanday taxminiy tokenlarni (uzunligi ÷ 4, yaxlitlangan) — saqlamasa, masalan, 25 satr yoki undan kam kodga o‘xshash fayl yoki 7 element yoki undan kam — bo‘lgan 2000 belgidan ortiq JSON massivida agressiv vosita asl vosita natijasini saqlab qoladi: har ikkala qo‘ng‘iroq qiluvchi (`compressAggressive()`, `compressAnthropicToolResultBlock()` `saved` 0 yoki undan past bo'lsa, `compressToolResult()` o'zi hali ham ushbu strategiyaning natijasini qaytaradi. Asbob-natija bosqichi oxirgi so'z emas: dvigatelning zaxira xulosasi hali ham `tool` yoki `function` xabarini 8192 belgidan (`maxTokensPerMessage`, 2048, 4 marta) qisqartirishi mumkin.
 
 #### Qachon foydalanish kerak
 
-Vosita natijasini siqish agressiv mexanizmning 1-bosqichidir (`open-sse/services/compression/aggressive.ts` faylidagi `compressAggressive()`), shu sababli u Aggressive rejimida va qatlamlangan konveyerning `aggressive` bosqichida ishlaydi. U OpenAI shaklidagi `tool` va `function` xabarlarini hamda Anthropic `tool_result` bloklari ichidagi matnni siqadi. Har bir strategiyaning `aggressive.toolStrategies` ostida oʻz almashtirgichi mavjud va ularning barchasi standart holatda yoqilgan. Boshqaruv panelida siqish yoqilgan va standart rejim Aggressive boʻlganda, almashtirgichlar Caveman sahifasining **Advanced** koʻrinishida joylashgan.
+Asbob natijasini siqish agressiv dvigatelning 1-bosqichi ( `open-sse/services/compression/aggressive.ts` da `compressAggressive()` ), shuning uchun u Agressiv rejimda va stacked quvur liniyasining `aggressive` bosqichida ishlaydi. U OpenAI shaklidagi `tool` va `function` xabarlarini hamda Anthropic `tool_result` bloklari ichidagi matnni siqib chiqaradi. Har bir strategiya `aggressive.toolStrategies` ostida o'z kalitiga ega, barchasi sukut bo'yicha yoqilgan. Boshqaruv panelida kalitlar Caveman sahifasida joylashgan** Murakkab** siqish yoqilgan paytda ko'ring va standart rejim Agressiv.
 
-### Qatlamlangan konveyer
+### Yig'ilgan quvur liniyasi
 
-Qatlamlangan rejim **bir nechta mexanizmni ketma-ket** ishga tushiradi — odatda avval RTK
-(vosita chiqishida 60–90% tejash), soʻng qolgan matnda Caveman (~46% kirish
-tejalishi). Birlashtirilganda bu **78–95% mos diapazonni** beradi (yuqoridagi Upstream Savings Math boʻlimiga qarang): `1 - (1 - 0.60..0.90) × (1 - 0.46)` oʻrtacha ≈89%.
+Stacked rejimi ishlaydi** ketma-ket bir nechta dvigatellar** — odatda birinchi RTK (asbob chiqishida 60-90% tejash), keyin qolgan matnda Caveman (~ 46% kiritish tejamkorligi). tuzilgan, ya'ni** 78-95% muvofiq diapazon** (yuqoridagi tejamkorlik matematikasiga qarang): `1 - (1 - 0.60..0.90) × (1 - 0.46)` o'rtacha ≈ 89%.
 
-#### U qanday ishlaydi
+#### Bu qanday ishlaydi
 
 ```
-Kirish (1000 token)
-  → RTK (buyruqni hisobga oluvchi filtr) → 200 token
-    → Caveman (ortiqcha qismlarni olib tashlash) → 108 token
-  → Chiqish (108 token, ~89% tejash)
+Input (1000 tokens)
+  → RTK (command-aware filter) → 200 tokens
+    → Caveman (filler removal) → 108 tokens
+  → Output (108 tokens, ~89% savings)
 ```
 
 #### Qachon foydalanish kerak
 
-Qatlamlangan rejimdan quyidagilar uchun foydalaning:
+Quyidagilar uchun stacked rejimidan foydalaning:
 
-- Vositalar koʻp ishlatiladigan ish jarayonlari (agentli dasturlash, tadqiqot)
-- Xarajatga sezgir paketli qayta ishlash
-- Maksimal token tejash kerak boʻlganda
+- Asbob-og'ir ish oqimlari (agent kodlash, tadqiqot)
+- Narxga sezgir bo'lgan partiyalarni qayta ishlash
+- Sizga maksimal token tejash kerak bo'lganda
 
-Qatlamlangan konveyerlar global `stackedPipeline` siqish sozlamasi orqali yoki marshrutlash kombinatsiyasiga biriktirilgan nomlangan siqish kombinatsiyasi orqali sozlanadi (yuqoridagi Per-Combo Override boʻlimiga qarang) — auto-combo `modePack` orqali emas (bu maydon faqat auto-combo model tanlovining vaznlarini qayta taqsimlaydi va `stacked` yaroqli paket nomi emas).
+Yig'ilgan quvurlar global `stackedPipeline` siqish sozlamalari orqali yoki marshrutlash kombinatsiyasiga tayinlangan nomli siqish kombinatsiyasi orqali (yuqoridagi Har bir kombinatsiyani bekor qilish bo'limiga qarang) — avtomatik kombinatsiyalangan `modePack` orqali emas (bu maydon faqat avtomatik kombinatsiyalangan model tanlashni qayta tortadi va `stacked` yaroqli paket nomi emas) orqali sozlanadi.
 
 ---
 

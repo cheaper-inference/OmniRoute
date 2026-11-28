@@ -18,28 +18,24 @@ həmin CLI-də **sessiya açılmış** olmalıdır.
 
 ---
 
-## 1. Arxitektura
+## 1. Memarlıq
 
 ```
-┌─ OmniRoute tətbiqi ──────────────┐        ┌─ codex-app-server köməkçi konteyneri ─┐
-│  CodexAppServerExecutor          │  WS    │  codex app-server                      │
-│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456            │
-│  (+ imkan tokeni)                │  JSON  │  --ws-auth capability-token            │
-│                                  │  RPC   │  OpenAI OAuth-u özü idarə edir          │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, avtomatik yenilənmə) │
-        │ paylaşır (compose volume-ları)     └────────────────────────────────────────┘
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+│  CodexAppServerExecutor          │  WS    │  codex app-server                   │
+│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS imkan tokeni (hər ikisi onu mount edir)
-  codex-appserver-home    → ~/.codex (auth.json idarəetmə paneli tərəfindən yazılır,
-                             köməkçi konteynerin codex app-server xidməti tərəfindən oxunur)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Köməkçi konteyner imkan tokeni arxasında **yalnız** daxili compose şəbəkəsində
-  (`ws://codex-app-server:1456`) dinləyir. O, hostda və ya internetdə **heç vaxt**
-  yayımlanmır.
-- Codex CLI `omniroute:base` daxilində əvvəlcədən yerləşdirilib, buna görə də
-  köməkçi konteyneri işə salarkən hostda və ya istifadəçinin kompüterində codex
-  quraşdırmağa ehtiyac yoxdur.
+- Yan araba qulaq asır** yalnız** qabiliyyət nişanının arxasında daxili tərtib şəbəkəsində (`ws://codex-app-server:1456`). elədir** heç vaxt** hostda və ya internetdə yayımlanır.
+- Yan arabada Codex CLI daxil olan `runner-cli-no-docker` hədəfindən tikilmiş `omniroute:cli-no-docker` istifadə olunur.
 
 ## 2. İşə salın
 

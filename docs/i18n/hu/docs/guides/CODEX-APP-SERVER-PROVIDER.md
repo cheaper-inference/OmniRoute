@@ -18,27 +18,24 @@ amelybe **be kell jelentkezni**.
 
 ---
 
-## 1. Architektúra
+## 1. Építészet
 
 ```
-┌─ OmniRoute alkalmazás ───────────┐        ┌─ codex-app-server segédkonténer ───┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ képességtoken)               │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  önállóan kezeli az OpenAI OAuth-ot │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, autom. friss.)│
-        │ megosztás (compose-kötetek)        └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → a WS-képességtoken (mindkettő csatolja)
-  codex-appserver-home    → ~/.codex (az auth.json fájlt a vezérlőpult írja,
-                             a segédkonténer codex app-server folyamata olvassa)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- A segédkonténer **kizárólag** a belső compose-hálózaton figyel
-  (`ws://codex-app-server:1456`), egy képességtoken védelme mögött. A szolgáltatás
-  **soha** nincs közzétéve a gazdagépen vagy az interneten.
-- A Codex CLI az `omniroute:base` lemezkép része, így a segédkonténer futtatásakor
-  sem a gazdagépen, sem a felhasználó gépén nem szükséges telepíteni a codexet.
+- Az oldalkocsi hallgat** csak** a belső írási hálózaton (`ws://codex-app-server:1456`) egy képességjogkivonat mögött. Ez az** soha** közzétesszük a gazdagépen vagy az interneten.
+- Az oldalkocsi `omniroute:cli-no-docker` használja, amely a `runner-cli-no-docker` targetből épül fel, amely magában foglalja a Codex CLI is.
 
 ## 2. Elindítás
 

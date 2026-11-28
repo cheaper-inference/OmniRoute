@@ -5,29 +5,12 @@
 ---
 
 > **Izvor istine:** `src/lib/memory/` i `src/app/api/memory/`
-> **Posljednje ažuriranje:** 2026-06-28 — v3.8.40 (prema zadanim postavkama isključeno + naknadna int8 kvantizacija)
 
-OmniRoute pruža trajnu konverzacijsku memoriju vezanu uz API ključ (i
-neobavezno ID sesije). Stavke memorije automatski se izdvajaju iz odgovora LLM-a
-pomoću jednostavnog podudaranja regex uzoraka te se ponovno umeću u sljedeće
-zahtjeve kao početna sistemska poruka (ili prva korisnička poruka za pružatelje
-koji odbijaju sistemsku ulogu).
+OmniRoute pruža trajnu razgovornu memoriju ključanu ključem API (i izborno id-om sesije). Memorije se automatski izdvajaju iz odgovora LLM putem laganog podudaranja uzoraka regularnih izraza i ubacuju se natrag u sljedeće zahtjeve kao vodeća poruka sustava (ili prva korisnička poruka za pružatelje koji odbiju ulogu sustava).
 
-> **Memorija je prema zadanim postavkama ISKLJUČENA (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> sada je `false` (`src/lib/memory/settings.ts`). Omogućavanje memorije umeće do
-> `maxTokens` (~2k) dohvaćenog konteksta u **svaki** zahtjev za razgovor, što se
-> naplaćuje — neočekivan trošak za nove instalacije i klijente koji upravljaju
-> vlastitim kontekstom. Izričito je uključite pod **Postavke → Memorija** (kartica
-> `MemorySkillsTab` prikazuje upozorenje o trošku tokena kada je memorija omogućena).
-> Klijent može isključiti memoriju za pojedinačni zahtjev pomoću zaglavlja zahtjeva
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — pogledajte tablicu zaglavlja zahtjeva u
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Zahtjev bez memorije postavlja
-> `memoryOwnerId = null`, čime se za taj zahtjev onemogućuju **i** umetanje memorije
-> **i** umetanje vještina (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Memorija je OFF prema zadanim postavkama (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` je sada `false` (`src/lib/memory/settings.ts`). Omogućavanje memorije ubacuje do `maxTokens` (~ 2k) dohvaćenog konteksta u** svaki** zahtjev za chat, koji se naplaćuje — što je iznenađujuća cijena za nove instalacije i za klijente koji upravljaju vlastitim kontekstom. Uključite se izričito pod** Postavke → Memorija** ( `MemorySkillsTab` prikazuje oblačić s upozorenjem o trošku tokena kada je memorija omogućena). Klijent može isključiti jedan zahtjev sa `x-omniroute-no-memory` zaglavljem zahtjeva (`true`/`1`/`yes`) — pogledajte tablicu zaglavlja zahtjeva u [API_REFERENCE.md](../reference/API_REFERENCE.md). Zahtjev bez memorije postavlja `memoryOwnerId = null`, koji onemogućuje** oba** ubrizgavanje memorije i vještina za taj zahtjev (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Memorija je **ograničena na pojedinačni API ključ**, a ne na pojedinačnog
-korisnika — svaki zahtjev autentificiran istim API ključem dijeli isti skup
-memorije, uz neobavezno dodatno ograničavanje putem `sessionId`.
+Sjećanje je** opseg po API ključu** , ne po korisniku — svaki zahtjev autentificiran s istim API ključem dijeli isto memorijsko spremište, s izbornim daljnjim opsegom pomoću `sessionId`.
 
 ## Arhitektura
 
@@ -715,22 +698,22 @@ Referentno mjerenje na tipičnom 4-jezgrenom x86 poslužitelju (tekstovi od ~100
 
 ---
 
-## Obrasci izdvajanja činjenica (v3.8.16+)
+## Obrasci izdvajanja činjenica (v3.8.16 +)
 
-Modul `extraction.ts` (`src/lib/memory/extraction.ts`) koristi **podudaranje obrazaca regularnih izraza** za izdvajanje strukturiranih činjenica iz poruka razgovora. Razumijevanje ovih obrazaca pomaže vam prilagoditi kvalitetu izdvajanja svojem slučaju uporabe.
+Modul `extraction.ts` (`src/lib/memory/extraction.ts`) koristi** podudaranje uzorka regularnog izraza** izvući strukturirane činjenice iz poruka razgovora. Razumijevanje ovih uzoraka pomaže vam u podešavanju kvalitete ekstrakcije za vaš slučaj upotrebe.
 
-### Zadane kategorije obrazaca
+### Zadane kategorije uzoraka
 
-| Kategorija          | Primjer obrasca                                               | Izdvaja                        |
-| ------------------- | ------------------------------------------------------------- | ------------------------------ |
-| PREFERENCE_PATTERNS | `"Preferiram <X>"`, `"Sviđa mi se <X>"`, `"Mrzim <X>"`        | Korisničke preferencije        |
-| DECISION_PATTERNS   | `"Koristit ću <X>"`, `"Odlučio sam <X>"`, `"Odabrao sam <X>"` | Korisničke odluke (epizodičke) |
-| PATTERN_PATTERNS    | `"Obično <X>"`, `"Uvijek <X>"`, `"Nikad <X>"`                 | Trajni obrasci ponašanja       |
+| Kategorija          | Primjer uzorka                                              | Hvata                       |
+| ------------------- | ----------------------------------------------------------- | --------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Korisničke postavke         |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Odluke korisnika (epizodno) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Postojani obrasci ponašanja |
 
-### Primjeri obrazaca (pojednostavljeno)
+### Primjeri uzoraka (pojednostavljeno)
 
 ```ts
-// Iz src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -743,36 +726,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Što se izdvaja
+### Što se izvlači
 
 Kada korisnik kaže:
 
-> "Preferiram TypeScript. Koristit ću Postgres za ovaj projekt. Uvijek izvršim commit prije slanja. Ne sviđa mi se Python."
-> Izdvajanje stvara 4 memorije:
+> "Više volim TypeScript. Koristit ću Postgres za ovaj projekt. Uvijek se obvežem prije guranja. Ne volim Python." Ekstrakcija proizvodi 4 sjećanja:
 >
-> | Ključ                                | Kategorija   | Vrsta      | Sadržaj                    |
-> | ------------------------------------ | ------------ | ---------- | -------------------------- |
-> | `preference:typescript`              | preferencija | činjenična | "TypeScript"               |
-> | `decision:postgres_for_this_project` | odluka       | epizodička | "Postgres za ovaj projekt" |
-> | `pattern:commit_before_pushing`      | obrazac      | činjenična | "commit prije slanja"      |
-> | `preference:python`                  | preferencija | činjenična | "Python"                   |
+> | Ključ | Kategorija | Vrsta | Sadržaj | | ------------------------------------ | ---------- | -------- | --------------------------- | | `preference:typescript` | preferencija | činjenica | "TypeScript" | | `decision:postgres_for_this_project` | odluka | epizodno | "Postgres za ovaj projekt" | | `pattern:commit_before_pushing` | uzorak | činjenično | "učini prije guranja" | | `preference:python` | preferencija | činjenično | "Python" |
 
-### Ograničenja izdvajanja
+### Granice ekstrakcije
 
-Kako bi se spriječilo nekontrolirano izdvajanje, primjenjuju se sljedeća ograničenja:
+Kako bi se spriječilo nekontrolirano izvlačenje, primjenjuju se sljedeća ograničenja:
 
-| Minimalna duljina sadržaja | 3 znaka |
+| Min. duljina sadržaja | 3 znaka |
 | Maksimalna duljina sadržaja | 500 znakova |
 
-### Kada onemogućiti izdvajanje
+### Kada onemogućiti ekstrakciju
 
-Izdvajanje se automatski pokreće kad god je memorija omogućena; ne postoji zaseban
-prekidač samo za izdvajanje. Da biste ga isključili, u potpunosti onemogućite memoriju (`enabled: false`
-putem `PUT /api/settings/memory`). Razmotrite to u sljedećim slučajevima:
+Ekstrakcija se pokreće automatski kad god je memorija omogućena; nema zasebnog prekidača samo za vađenje. Da biste ga isključili, potpuno onemogućite memoriju (`enabled: false` preko `PUT /api/settings/memory`). Razmislite o tome kada:
 
-- Imate velik broj poruka, a trošak izdvajanja nije zanemariv
-- Vaši su razgovori uglavnom privremeni (razgovor, otklanjanje pogrešaka) i nemaju dugoročnu vrijednost
-- Već bilježite kontekst putem prilagođenih dodataka
+- Imate veliku količinu poruka i trošak ekstrakcije nije trivijalan
+- Vaši su razgovori uglavnom prolazni (chat, otklanjanje pogrešaka) bez dugoročne vrijednosti
+- Već hvatate kontekst putem prilagođenih dodataka
 
 ---
 

@@ -4,31 +4,13 @@
 
 ---
 
-> **Nguồn chuẩn:** `src/lib/memory/` và `src/app/api/memory/`
-> **Cập nhật lần cuối:** 2026-06-28 — v3.8.40 (mặc định tắt + bổ sung lượng tử hóa int8)
+> **Nguồn của sự thật:** `src/lib/memory/` và `src/app/api/memory/`
 
-OmniRoute cung cấp bộ nhớ hội thoại liên tục được phân vùng theo khóa API (và
-tùy chọn theo ID phiên). Các ký ức được tự động trích xuất từ phản hồi của LLM
-thông qua cơ chế khớp mẫu regex nhẹ và được chèn trở lại vào các yêu cầu tiếp
-theo dưới dạng thông báo hệ thống ở đầu (hoặc thông báo người dùng đầu tiên đối
-với các nhà cung cấp từ chối vai trò hệ thống).
+OmniRoute cung cấp bộ nhớ đàm thoại liên tục được khóa bằng khóa API (và id phiên tùy chọn). Bộ nhớ được trích xuất tự động từ các phản hồi LLM thông qua việc so khớp mẫu biểu thức chính quy nhẹ và được đưa trở lại vào các yêu cầu tiếp theo dưới dạng thông báo hệ thống hàng đầu (hoặc thông báo người dùng đầu tiên dành cho nhà cung cấp từ chối vai trò hệ thống).
 
-> **Bộ nhớ mặc định được TẮT (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> hiện là `false` (`src/lib/memory/settings.ts`). Việc bật bộ nhớ sẽ chèn tối đa
-> `maxTokens` (~2k) ngữ cảnh đã truy xuất vào **mọi** yêu cầu trò chuyện, và
-> phần này sẽ bị tính phí — một chi phí bất ngờ đối với các bản cài đặt mới và
-> các máy khách tự quản lý ngữ cảnh. Hãy chủ động bật tại **Settings → Memory**
-> (`MemorySkillsTab` hiển thị cảnh báo về chi phí token khi bộ nhớ được bật).
-> Máy khách có thể tắt bộ nhớ cho một yêu cầu riêng lẻ bằng header yêu cầu
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — xem bảng header yêu cầu trong
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Một yêu cầu không dùng bộ
-> nhớ sẽ đặt `memoryOwnerId = null`, qua đó vô hiệu hóa **cả** việc chèn bộ nhớ
-> lẫn kỹ năng cho yêu cầu đó
-> (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Bộ nhớ mặc định là OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` bây giờ là `false` (`src/lib/memory/settings.ts`). Việc kích hoạt bộ nhớ sẽ đưa tối đa `maxTokens` (~ 2k) ngữ cảnh được truy xuất vào** mọi** yêu cầu trò chuyện, được tính phí — một khoản chi phí đáng ngạc nhiên cho các lượt cài đặt mới và cho các khách hàng tự quản lý bối cảnh của riêng họ. Chọn tham gia một cách rõ ràng trong** Cài đặt bộ nhớ →** ( `MemorySkillsTab` hiển thị chú thích cảnh báo chi phí mã thông báo khi bộ nhớ được bật). Khách hàng có thể từ chối một yêu cầu duy nhất với tiêu đề yêu cầu `x-omniroute-no-memory` (`true`/`1`/`yes`) — xem bảng tiêu đề yêu cầu trong [API_REFERENCE.md](../reference/API_REFERENCE.md). Yêu cầu không có bộ nhớ đặt `memoryOwnerId = null`, điều này sẽ vô hiệu hóa** cả hai** bộ nhớ và kỹ năng tiêm cho yêu cầu đó (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Bộ nhớ được **phân vùng theo từng khóa API**, không phải theo từng người dùng —
-mọi yêu cầu được xác thực bằng cùng một khóa API đều dùng chung một nhóm bộ nhớ,
-với khả năng phân vùng thêm theo `sessionId`.
+Trí nhớ là** phạm vi mỗi khóa API** , không phải mỗi người dùng — mọi yêu cầu được xác thực bằng cùng một khóa API sẽ chia sẻ cùng một nhóm bộ nhớ, với phạm vi bổ sung tùy chọn theo `sessionId`.
 
 ## Kiến trúc
 
@@ -302,27 +284,17 @@ Chiến lược truy xuất của `MemoryConfig` là một trong `exact`, `seman
 và phạm vi là một trong `session`, `apiKey` hoặc `global`. Phạm vi mặc định từ
 `getMemorySettings()` là `apiKey`.
 
-## Trích xuất dữ kiện (`extraction.ts`)
+## Khai thác sự thật (`extraction.ts`)
 
-Quá trình trích xuất **dựa trên biểu thức chính quy**, không dựa trên LLM — nó chạy trong tiến trình bằng
-`setImmediate()` nên không bao giờ chặn luồng phản hồi:
+Khai thác là** dựa trên biểu thức chính quy** , không phải — dựa trên LLM, nó chạy trong quá trình với `setImmediate()` nên nó không bao giờ chặn luồng phản hồi:
 
-- **Các mẫu sở thích** → `MemoryType.FACTUAL`
-  (ví dụ: `Tôi thích …`, `Tôi thực sự thích …`, `món yêu thích của tôi là …`, `Tôi ghét …`)
-- **Các mẫu quyết định** → `MemoryType.EPISODIC`
-  (ví dụ: `Tôi sẽ dùng …`, `Tôi đã chọn …`, `Tôi quyết định dùng …`, `Tôi sẽ áp dụng …`)
-- **Các mẫu hành vi** → `MemoryType.FACTUAL`
-  (ví dụ: `Tôi thường …`, `Tôi luôn …`, `Tôi có xu hướng …`)
+- **Mẫu ưu tiên** → `MemoryType.FACTUAL` (ví dụ `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Mẫu quyết định** → `MemoryType.EPISODIC` (ví dụ `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **mẫu hoa văn** → `MemoryType.FACTUAL` (ví dụ `I usually …`, `I always …`, `I tend to …`)
 
-Mỗi kết quả khớp được làm sạch (`trim`, thu gọn khoảng trắng, giới hạn ở 500 ký tự),
-được loại bỏ trùng lặp trong lô thông qua `factKey(category, content)` ổn định, và
-được lưu bằng `createMemory()` với siêu dữ liệu
-`{category, extractedAt, source: "llm_response"}`. Văn bản đầu vào được giới hạn ở
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — khi dài hơn, **phần cuối** của văn bản
-được sử dụng để nội dung gần đây nhất của trợ lý luôn được đưa vào xử lý.
+Mỗi kết quả trùng khớp đều được khử trùng (`trim`, thu gọn khoảng trắng, giới hạn ở 500 ký tự), được loại bỏ trùng lặp trong lô thông qua `factKey(category, content)` ổn định và được lưu trữ qua `createMemory()` với siêu dữ liệu `{category, extractedAt, source: "llm_response"}`. Văn bản đầu vào được giới hạn ở mức 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — khi dài hơn,** đuôi** của văn bản được sử dụng để nội dung trợ lý gần đây nhất luôn tham gia.
 
-`extractFactsFromText(text)` được xuất để phục vụ kiểm thử và trả về các dữ kiện có cấu trúc
-mà không lưu chúng.
+`extractFactsFromText(text)` được xuất để kiểm tra và trả về các sự kiện có cấu trúc mà không lưu trữ chúng.
 
 ## Truy xuất (`retrieval.ts`)
 
@@ -668,22 +640,22 @@ MEMORY_EMBEDDING_CACHE_TTL_MS=300000               # TTL (5 phút)
 
 ---
 
-## Các mẫu trích xuất dữ kiện (v3.8.16+)
+## Các mẫu trích xuất thực tế (v3.8.16 +)
 
-Mô-đun `extraction.ts` (`src/lib/memory/extraction.ts`) sử dụng **đối sánh mẫu biểu thức chính quy** để trích xuất các dữ kiện có cấu trúc từ tin nhắn hội thoại. Việc hiểu các mẫu này giúp bạn tinh chỉnh chất lượng trích xuất cho trường hợp sử dụng của mình.
+Mô-đun `extraction.ts` (`src/lib/memory/extraction.ts`) sử dụng** khớp mẫu biểu thức chính quy** để trích xuất các sự kiện có cấu trúc từ các tin nhắn hội thoại. Việc hiểu các mẫu này giúp bạn điều chỉnh chất lượng trích xuất cho trường hợp sử dụng của mình.
 
-### Các danh mục mẫu mặc định
+### Danh mục mẫu mặc định
 
-| Danh mục            | Mẫu ví dụ                                                        | Nội dung thu thập                     |
-| ------------------- | ---------------------------------------------------------------- | ------------------------------------- |
-| PREFERENCE_PATTERNS | `"Tôi thích <X> hơn"`, `"Tôi thích <X>"`, `"Tôi ghét <X>"`       | Sở thích của người dùng               |
-| DECISION_PATTERNS   | `"Tôi sẽ dùng <X>"`, `"Tôi đã quyết định <X>"`, `"Tôi chọn <X>"` | Quyết định của người dùng (tình tiết) |
-| PATTERN_PATTERNS    | `"Tôi thường <X>"`, `"Tôi luôn <X>"`, `"Tôi không bao giờ <X>"`  | Các mẫu hành vi lâu dài               |
+| Loại                | Mẫu ví dụ                                                   | Ảnh chụp                        |
+| ------------------- | ----------------------------------------------------------- | ------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Tùy chọn người dùng             |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Quyết định của người dùng (tập) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Mô hình hành vi dai dẳng        |
 
-### Các mẫu ví dụ (Đã đơn giản hóa)
+### Các mẫu ví dụ (Đơn giản hóa)
 
 ```ts
-// Từ src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -696,35 +668,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Nội dung được trích xuất
+### Những gì được trích xuất
 
 Khi người dùng nói:
 
-> "Tôi thích TypeScript hơn. Tôi sẽ dùng Postgres cho dự án này. Tôi luôn commit trước khi push. Tôi không thích Python."
-> Quá trình trích xuất tạo ra 4 mục bộ nhớ:
+> "Tôi thích TypeScript hơn. Tôi sẽ sử dụng Postgres cho dự án này. Tôi luôn cam kết trước khi thực hiện. Tôi không thích Python." Quá trình trích xuất tạo ra 4 bộ nhớ:
 >
-> | Khóa                                 | Danh mục   | Loại      | Nội dung                 |
-> | ------------------------------------ | ---------- | --------- | ------------------------ |
-> | `preference:typescript`              | sở thích   | dữ kiện   | "TypeScript"             |
-> | `decision:postgres_for_this_project` | quyết định | tình tiết | "Postgres cho dự án này" |
-> | `pattern:commit_before_pushing`      | mẫu        | dữ kiện   | "commit trước khi push"  |
-> | `preference:python`                  | sở thích   | dữ kiện   | "Python"                 |
+> | Khóa | Danh mục | Loại | Nội dung | | ------------------------------------ | ---------- | -------- | -------------------------- | | `preference:typescript` | ưu tiên | Factual | "TypeScript" | | `decision:postgres_for_this_project` | quyết định | episodic | "Postgres cho dự án này" | | | `pattern:commit_before_pushing` | Factual | "cam kết trước khi đẩy" | | `preference:python` | ưu tiên | Factual | "Python" |
 
 ### Giới hạn trích xuất
 
-Để ngăn việc trích xuất mất kiểm soát, các giới hạn sau được áp dụng:
+Để ngăn chặn việc trích xuất chạy trốn, các giới hạn sau được áp dụng:
 
 | Độ dài nội dung tối thiểu | 3 ký tự |
 | Độ dài nội dung tối đa | 500 ký tự |
 
 ### Khi nào nên tắt tính năng trích xuất
 
-Quá trình trích xuất tự động chạy bất cứ khi nào bộ nhớ được bật; không có tùy chọn riêng chỉ dành cho việc trích xuất. Để tắt tính năng này, hãy tắt hoàn toàn bộ nhớ (`enabled: false`
-thông qua `PUT /api/settings/memory`). Hãy cân nhắc làm như vậy khi:
+Quá trình trích xuất sẽ tự động chạy bất cứ khi nào bộ nhớ được bật; không có chuyển đổi chỉ trích xuất riêng biệt. Để tắt nó, hãy tắt hoàn toàn bộ nhớ (`enabled: false` via `PUT /api/settings/memory`). Hãy cân nhắc làm như vậy khi:
 
-- Bạn có lượng tin nhắn lớn và chi phí trích xuất là đáng kể
-- Các cuộc hội thoại của bạn chủ yếu mang tính tạm thời (trò chuyện, gỡ lỗi) và không có giá trị lâu dài
-- Bạn đã thu thập ngữ cảnh thông qua các plugin tùy chỉnh
+- Bạn có lượng tin nhắn lớn và chi phí trích xuất không hề nhỏ
+- Các cuộc trò chuyện của bạn hầu hết chỉ mang tính tạm thời (trò chuyện, gỡ lỗi) không có giá trị lâu dài
+- Bạn đã nắm bắt được bối cảnh thông qua các plugin tùy chỉnh
 
 ---
 

@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute tiek piedāvāts kā pilnībā instalējama progresīvā tīmekļa lietotne. Piekļūstot informācijas panelim no jebkuras mobilās pārlūkprogrammas — Android (Chrome) vai iOS (Safari) —, varat izvēlēties opciju „Pievienot sākuma ekrānam” un iegūt vietējai lietotnei līdzīgu pieredzi bez nepieciešamības izmantot lietotņu veikalu.
+Instalējiet OmniRoute informācijas paneli kā progresīvo tīmekļa lietotni, lai atvērtu to no sākuma ekrāna vai darbvirsmas atsevišķā logā. Instalētajai lietotnei joprojām ir nepieciešams savienojums ar jūsu OmniRoute serveri, lai veiktu navigāciju, informācijas paneļa datus un API pieprasījumus. Kešatmiņā saglabātie statiskie līdzekļi nenodrošina bezsaistes vārteju vai bezsaistes informācijas paneli.
 
 ## Kas ir PWA?
 
-Progresīvā tīmekļa lietotne pārvērš OmniRoute tīmekļa informācijas paneli par risinājumu, kas izskatās un darbojas kā vietējā mobilā lietotne. Pēc instalēšanas tā:
+Progresīvā tīmekļa lietotne izmanto tīmekļa informācijas paneli ar lietotnes ikonu un atsevišķu logu. Pēc instalēšanas OmniRoute:
 
-- Tiek palaista no sākuma ekrāna, izmantojot savu ikonu
-- Tiek atvērta pilnekrāna režīmā — bez pārlūkprogrammas adreses joslas vai ciļņu saskarnes
-- Darbojas bezsaistē, izmantojot īpašu savienojamības lapu
-- Kešatmiņā saglabā statiskos resursus ātrākai ielādei
-- Atbalsta gan portreta, gan ainavas orientāciju
+- Tiek palaists no sākuma ekrāna vai darbvirsmas
+- Tiek atvērts savrupajā režīmā bez pārlūkprogrammas parastās adreses joslas un cilnēm
+- Kešatmiņā saglabā atlasītos statiskos līdzekļus
+- Atbalsta portreta un ainavas orientācijas
 
-## Instalēšana
+## Uzstādīšana
+
+Izmantojiet HTTPS adresi serverim citā ierīcē. Kad serveris darbojas tajā pašā ierīcē, `http://localhost:20128` atbilst arī pārlūkprogrammas instalēšanas prasībām. Vienkārša `http://YOUR_IP:20128` adrese neatbilst šīm prasībām. Instalēšanas izvēlnes un uzvednes ir atkarīgas no pārlūkprogrammas un operētājsistēmas. Skatiet [MDNPWA uzstādīšanas prasības](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
 
 ### Android (Chrome)
 
-1. Atveriet OmniRoute informācijas paneli pārlūkprogrammā Chrome: `http://YOUR_IP:20128`
-2. Chrome automātiski parādīs reklāmkarogu **„Pievienot OmniRoute sākuma ekrānam”**, vai:
-   - Pieskarieties izvēlnei **⋮** (trīs punkti) → **„Pievienot sākuma ekrānam”** vai **„Instalēt lietotni”**
-3. Apstipriniet uzvedni
-4. OmniRoute sākuma ekrānā tiek parādīts kā patstāvīga lietotne
+1. Atveriet savu OmniRoute HTTPS adresi vai `http://localhost:20128` serverim tajā pašā tālrunī.
+2. Atveriet**⋮** izvēlni un izvēlieties** Instalējiet lietotni** vai** Pievienot sākuma ekrānam** , ja tiek piedāvāts.
+3. Apstipriniet uzvedni.
+4. Sākuma ekrānā atveriet OmniRoute.
 
 ### iOS (Safari)
 
-1. Atveriet OmniRoute informācijas paneli pārlūkprogrammā Safari: `http://YOUR_IP:20128`
-2. Pieskarieties pogai **Kopīgot** (lodziņš ar bultiņu)
-3. Ritiniet lejup un pieskarieties opcijai **„Pievienot sākuma ekrānam”**
-4. Piešķiriet nosaukumu (pēc noklusējuma „OmniRoute”) un pieskarieties pogai **Pievienot**
-5. OmniRoute sākuma ekrānā tiek parādīts ar lietotnes ikonu
+1. Safari atveriet savu OmniRoute HTTPS adresi.
+2. Pieskarieties** Dalīties** →** Pievienot sākuma ekrānam** .
+3. Apstipriniet nosaukumu un pieskarieties** Pievienot** .
+4. Sākuma ekrānā atveriet OmniRoute.
 
-### Dators (Chrome / Edge)
+### Darbvirsma (Chrome/Edge)
 
-1. Atveriet OmniRoute informācijas paneli
-2. Adreses joslā noklikšķiniet uz **instalēšanas ikonas** (vai ⋮ → „Instalēt OmniRoute...”)
-3. Apstipriniet uzvedni
-4. OmniRoute tiek atvērts kā patstāvīgs logs — bez cilnēm un adreses joslas
+1. Atveriet savu OmniRoute informācijas paneli.
+2. Izmantojiet pārlūkprogrammas instalēšanas ikonu vai** Instalējiet lietotni** izvēlnes ieraksts, ja tiek piedāvāts.
+3. Apstipriniet uzvedni, lai atvērtu OmniRoute savā logā.
 
 ## Funkcijas
 
-### Pilnekrāna režīms
+### Atsevišķs logs
 
-Manifests ir konfigurēts ar `display: "fullscreen"`, kas nozīmē, ka instalētā lietotne izmanto visu ekrānu — bez pārlūkprogrammas saskarnes un statusa joslas pārklāšanās. Tādējādi informācijas panelis patiešām rada vietējās lietotnes iespaidu.
+Manifestā ir iestatīti `display: "standalone"` un `start_url: "/dashboard"`. Instalētā lietotne programmas logā atver informācijas paneli. Joprojām var parādīties pārlūkprogrammas un operētājsistēmas vadīklas; manifests nepieprasa pilnekrāna režīmu.
 
-### Bezsaistes atbalsts
+### Kešatmiņā esošie līdzekļi un tīkla prasības
 
-OmniRoute ietver servisa darbinieku (`sw.js`), kas nodrošina viedu kešošanu:
+[Apkalpošanas darbinieks](../../public/sw.js) kešatmiņā saglabā atlasītos vienas izcelsmes resursus:
 
-| Resursa veids                                                                                                                                                                                                                                      | Stratēģija                                  | Darbība                                                                                                      |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Lietotnes čaula**                                                                                                                                                                                                                                | Vispirms kešatmiņa                          | `/`, `/offline`, manifests un ikonas instalēšanas laikā tiek iepriekš saglabātas kešatmiņā                   |
-| **Statiskie resursi** (CSS, JS, attēli, fonti)                                                                                                                                                                                                     | Vispirms tīkls, atkāpjoties uz kešatmiņu    | Iegūst jaunāko versiju no tīkla; bezsaistē izmanto kešatmiņu                                                 |
-| **Next.js komplekti** (`/_next/`)                                                                                                                                                                                                                  | Vispirms tīkls ar kešatmiņas atjaunināšanu  | Iegūst no tīkla un atjaunina kešatmiņu; bezsaistē nodrošina kešatmiņā saglabāto versiju                      |
-| **Navigācijas pieprasījumi**                                                                                                                                                                                                                       | Apiešana (nekad netiek pārtverti)           | Pārlūkprogramma pārvalda HTTP/3→HTTP/2 atkāpšanos; neaktīva QUIC ligzda nedrīkst kļūt par `Response.error()` |
-| **API / informācijas paneļa maršruti** (`/api/`, `/a2a`, `/dashboard`, klienta API aizstājvārdi `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, kā arī `/callback`, `/login`; tiek salīdzināti, neņemot vērā lielos un mazos burtus) | Apiešana (nekad netiek saglabāti kešatmiņā) | Vienmēr tiek nosūtīti tieši serverim — servisa darbinieks tos nekad nepārtver                                |
+| Pieprasījums vai īpašums                               | stratēģija            | Uzvedība                                                                                                                              |
+| ------------------------------------------------------ | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Instalēšanas laika resursi                             | Iepriekšēja kešatmiņa | `/`, `/manifest.webmanifest`, `/icon-512.png` un `/apple-touch-icon.png` tiek saglabāti kešatmiņā darbinieka instalēšanas laikā       |
+| Next.js static aktīvi (`/_next/`)                      | Vispirms tīkls        | Veiksmīgas atbildes atjaunina kešatmiņu; tīkla kļūda atgriežas esošajā kešatmiņā esošajā atbildē                                      |
+| Citi statiski CSS, JS, attēli un fonti                 | Vispirms kešatmiņa    | Esošā kešatmiņā saglabātā atbilde tiek izmantota atkārtoti; sekmīgas tīkla atbildes tiek saglabātas kešatmiņā, ja tiek palaista garām |
+| Lapas navigācija                                       | Apvedceļš             | Pārlūkprogramma ienes lapu tieši; bezsaistes atkāpšanās netiek nodrošināta                                                            |
+| API, informācijas panelis un autentifikācijas maršruti | Apvedceļš             | Darbinieks nepārtver un neglabā šos pieprasījumus                                                                                     |
+| Citi nestatiski pieprasījumi                           | Tīkls                 | Nav meklēšanas kešatmiņā vai krātuves                                                                                                 |
 
-### Bezsaistes lapa
+Izslēgtie maršruti ir `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` un `/login`, maršruta robežās ir saskaņoti ar reģistru nejutīgi. Vairākas izcelsmes un ne-GET pieprasījumi arī apiet darbinieku.
 
-Ja tīkls nav pieejams un lietotājs pāriet uz jaunu lapu, servisa darbinieks nodrošina īpašu `/offline` lapu, kas:
+### Savienojamības lapa
 
-- Parāda skaidru ziņojumu **„Savienojamības problēma”**
-- Parāda aktuālu **tiešsaistes/bezsaistes statusa indikatoru**, kas tiek atjaunināts reāllaikā
-- Nodrošina pogu **„Mēģināt izveidot savienojumu vēlreiz”**, lai atkārtoti ielādētu lapu, kad savienojums ir atjaunots
-- Nodrošina saiti uz **Statusa lapu** diagnostikai
+`/offline` lapa nodrošina savienojamības ziņojumu, online/offline indikatoru, a** Mēģiniet vēlreiz izveidot savienojumu** pogu un saiti uz statusa lapu. Tā ir** nav iepriekš saglabāts kešatmiņā** un apkalpojošais darbinieks to dara** nē** novirzīt uz to neveiksmīgās navigācijas. Tā esamība nepadara jaunas lapas pieejamas bez servera.
 
-### Lietotnes ikonas
+### Lietotņu ikonas
 
-OmniRoute nodrošina katrai platformai optimizētas ikonas:
+Manifestā tiek reklamētas šīs PNG ikonas:
 
-| Fails                  | Izmērs            | Izmanto                                     |
-| ---------------------- | ----------------- | ------------------------------------------- |
-| `icon-512.png`         | 512×512           | Android instalēšanas uzvedne, sākuma ekrāns |
-| `apple-touch-icon.png` | 180×180           | iOS sākuma ekrāna ikona                     |
-| `icon-192.svg`         | 192×192 (vektors) | Android adaptīvā ikona                      |
-| `apple-touch-icon.svg` | 180×180 (vektors) | Apple rezerves variants                     |
-| `favicon.svg`          | Vektors           | Pārlūkprogrammas cilnes                     |
-| `favicon.ico`          | Vairāki izmēri    | Mantotās pārlūkprogrammas                   |
+| Fails                  | Izmērs  | Izmantot                               |
+| ---------------------- | ------- | -------------------------------------- |
+| `icon-192.png`         | 192×192 | Vispārīga lietotnes ikona              |
+| `icon-512.png`         | 512×512 | Vispārīga un maskējama lietotnes ikona |
+| `apple-touch-icon.png` | 180×180 | Apple sākuma ekrāna ikona              |
 
-### Automātiska reģistrācija
+Pārlūkprogramma atlasa atbilstošo ikonu instalācijas mērķim.
 
-Servisa darbinieks tiek automātiski reģistrēts, izmantojot komponentu `<PwaRegister />` saknes izkārtojumā. Lietotājam nav jāveic nekādas darbības — lietotni var instalēt, tiklīdz pārlūkprogramma konstatē derīgu manifestu un servisa darbinieku.
+### Automātiskā reģistrācija
+
+`PwaRegister` reģistrē darbinieku ražošanā, kad pārlūkprogramma atbalsta pakalpojumu darbiniekus. Izstrādes režīmā tiek atcelta darbinieku reģistrācija un notīrīta kešatmiņa, lai izvairītos no novecojušiem līdzekļiem, kas traucē karstu pārlādēšanu. Instalēšanas uzvednes joprojām ir pārlūkprogrammas lēmums.
 
 ## Tehniskā arhitektūra
 
-### Tīmekļa lietotnes manifests (`manifest.webmanifest`)
+### Tīmekļa lietotņu manifests
 
-Next.js to ģenerē, izmantojot `src/app/manifest.ts`:
+Next.js ģenerē `/manifest.webmanifest` no [`src/app/manifest.ts`](../../src/app/manifest.ts). Tās galvenie iestatījumi ir:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Iestatījums          | Vērtība                                          |
+| -------------------- | ------------------------------------------------ |
+| `short_name`         | `OmniRoute`                                      |
+| `start_url`          | `/dashboard`                                     |
+| `scope`              | `/`                                              |
+| `display`            | `standalone`                                     |
+| `orientation`        | `any`                                            |
+| Fona un tēmas krāsas | Noklusējuma gaismas palete no `PWA_THEME_COLORS` |
 
-### Servisa darbinieks (`public/sw.js`)
+Manifesta nosaukums un apraksts ir statiskas vērtības šajā avota failā. Instalētais manifests katrā apmeklējumā neseko instances nosaukuma iestatījumam vai aktīvajai paletei.
 
-Vienkāršs servisa darbinieks (bez ietvara atkarībām), kas nodrošina:
+### Servisa darbinieks
 
-- **Instalēšanas posms**: Iepriekš saglabā kešatmiņā lietotnes čaulu (saknes lapu, bezsaistes lapu, manifestu un ikonas)
-- **Aktivizēšanas posms**: Notīra vecās kešatmiņas versijas un pārņem visus klientus
-- **Pieprasījumu apstrādes posms**: Vieda maršrutēšana atkarībā no pieprasījuma veida (navigācija, statiskais resurss, API)
-- **Kešatmiņas versiju pārvaldība**: `omniroute-pwa-v3` — palieliniet šo versiju, lai pēc atjaunināšanas piespiestu izveidot jaunu kešatmiņu
+[`public/sw.js`](../../public/sw.js) nav pakalpojumu darbinieka ietvara atkarības:
 
-### Izkārtojuma metadati (`src/app/layout.tsx`)
+- **Instalēt:** iepriekš kešatmiņā saglabā četrus iepriekš uzskaitītos resursus un aktivizē jauno darbinieku.
+- **Aktivizēt:** noņem vecās kešatmiņas paaudzes un pretenziju klientus.
+- **Atnest:** piemēro iepriekš minētās statisko līdzekļu stratēģijas un maršrutu izslēgšanu.
+- **Versionēšana:** avota kešatmiņas nosaukums ir `omniroute-pwa-v3`; ražošanas būvējums apzīmogo kešatmiņas identitāti.
+- **Paziņojumi:** apstrādā ienākošos `push` notikumus un fokusē vai atver logu, kad tiek noklikšķināts uz paziņojuma.
 
-Saknes izkārtojums nodrošina visus PWA prasībām nepieciešamos metatagus:
+Push notikumu apstrādātāji vien neizveido aktīvu pašpiegādes abonementu vai konfigurētu servera piegādi. Nedomājiet, ka paziņojumi ir iespējoti tikai tāpēc, ka ir instalēts PWA.
 
-- `manifest` saite uz `/manifest.webmanifest`
-- `apple-web-app-capable: true` iOS savrupajam režīmam
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` Android pārlūkam Chrome
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` attēlošanai no malas līdz malai
+### Izkārtojuma metadati un reģistrācija
 
-### Komponents: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) nodrošina manifesta saiti, Apple atsevišķus metadatus, motīvu krāsas un `viewport-fit: cover`. Lapas nosaukumā un Apple tīmekļa lietotnes nosaukumā tiek izmantots instances nosaukums. Tiešā pārlūkprogrammas motīva krāsa atbilst paletei; instalēšanas manifestā tiek izmantota noklusējuma gaismas krāsa.
 
-Šis klienta komponents atrodas failā `src/shared/components/PwaRegister.tsx` un:
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) darbojas uz klienta un reģistrē `/sw.js` ar būvējumu ID savā URL. Tas atklāj neatbilstošas kešatmiņas paaudzes un var atiestatīt darbinieku un vienreiz atkārtoti ielādēt, lai atgūtu no vecākas instalācijas. Reģistrācijas kļūme nebloķē informācijas paneli.
 
-1. Tiek izpildīts montēšanas laikā (tikai klienta pusē)
-2. Pārbauda `serviceWorker` atbalstu pārlūkprogrammā
-3. Klusi reģistrē `/sw.js` (kļūdas tiek ignorētas, lai nebloķētu lietotni)
-4. Neko neatveido (`return null`) — tas ir komponents, kas paredzēts tikai blakusefekta izpildei
+## Izmantot ar Termux (Android)
 
-## Izmantošana ar Termux (Android)
+1. Sāciet OmniRoute programmā Termux: `npx -y omniroute@latest`.
+2. Atveriet pārlūku Chrome tajā pašā tālrunī: `http://localhost:20128`.
+3. Instalējiet PWA, izmantojot pārlūkprogrammas instalēšanas izvēlni.
+4. Izmantojiet informācijas paneli, lai Termux serveris darbotos.
 
-Palaižot OmniRoute Android ierīcē, izmantojot Termux, PWA darbojas nevainojami:
+Tālrunī ir gan vārteja, gan tā informācijas panelis. Pieprasījumiem attāliem AI pakalpojumu sniedzējiem joprojām ir nepieciešama piekļuve tīklam. Skatiet [Termux rokasgrāmatu](TERMUX_GUIDE.md), lai uzzinātu par iestatīšanas un Android procesa darbības laika apsvērumiem.
 
-1. Palaidiet OmniRoute lietotnē Termux: `npx omniroute`
-2. Tajā pašā tālrunī atveriet Chrome: `http://localhost:20128`
-3. Instalējiet PWA, izmantojot opciju „Pievienot sākuma ekrānam”
-4. PWA izveido savienojumu ar lokālo Termux serveri — viss darbojas pašā ierīcē
+## Izmantojiet no citām ierīcēm
 
-Šī kombinācija nozīmē, ka jūsu Android tālrunis vienlaikus ir gan **serveris** (Termux), gan **klients** (PWA) — pilnībā autonoma MI vārteja.
-
-## Izmantošana no citām ierīcēm
-
-Instalējiet PWA jebkurā ierīcē, kuras pārlūkprogramma var piekļūt jūsu OmniRoute serverim:
-
-- **Cits tālrunis/planšetdators**: Atveriet `http://PHONE_IP:20128` un instalējiet PWA
-- **Klēpjdators**: Atveriet Chrome/Edge un instalējiet to kā darbvirsmas PWA
-- **Viedtelevizors ar pārlūkprogrammu**: Piekļūstiet informācijas panelim pilnekrāna režīmā
+Tālrunī, planšetdatorā vai galddatorā atveriet servera HTTPS adresi un pēc tam sekojiet šīs pārlūkprogrammas instalēšanas plūsmai. Serverim ir jāpaliek sasniedzamam no katras ierīces. Skatiet [tuneļa rokasgrāmatu](../ops/TUNNELS_GUIDE.md) par attālās piekļuves iespējām.
 
 ## Pielāgošana
 
-### Instances nosaukums
+### Gadījuma nosaukums
 
-PWA virsrakstā tiek izmantots iestatījums **Instances nosaukums** no `Informācijas panelis → Iestatījumi`. Ja pārdēvēsiet savu instanci par „Mana MI vārteja”, instalētajā PWA tiks rādīts šis nosaukums.
+The** Gadījuma nosaukums** iestatījums maina informācijas paneļa metadatus, tostarp lapas nosaukumu un Apple tīmekļa lietotnes nosaukumu. Ģenerētajā manifestā tiek izmantots statisks nosaukums, tāpēc šis iestatījums negarantē, ka jau instalēta lietotne tiek pārdēvēta.
 
-### Pielāgota izlases ikona
+### Pielāgots Favicon
 
-Ja augšupielādēsiet pielāgotu izlases ikonu, izmantojot `Informācijas panelis → Iestatījumi`, darbvirsmas PWA ikonā tiks izmantota šī pielāgotā ikona. Mobilā sākuma ekrāna ikonām tiek izmantoti iepriekš izveidotie faili `icon-512.png` un `apple-touch-icon.png`.
+Pielāgota izlases ikona maina pārlūkprogrammas favicon. Instalēšanas manifestā joprojām tiek reklamēti iepriekš minētie PNG faili; Favicon maiņa neaizstāj šīs sākuma ekrāna ikonas.
 
 ## Ierobežojumi
 
-- **Nav pašpiegādes paziņojumu** — Servisa darbinis neīsteno Push API. Tā vietā paziņojumus apstrādā Electron lietotne.
-- **Nav fona sinhronizācijas** — Bezsaistes darbības netiek ievietotas rindā vēlākai atkārtotai izpildei. PWA galvenokārt ir informācijas paneļa skatītājs.
-- **iOS ierobežojumi** — Safari pārlūkprogramma operētājsistēmā iOS neatbalsta visas PWA funkcijas (piemēram, instalēšanas uzvednes ir jāizsauc manuāli, un servisa darbinieku darbība fonā ir ierobežota).
-- **Kešatmiņas lielums** — Servisa darbinis kešatmiņā saglabā tikai statiskos resursus. Lielas atbilžu datu slodzes no `/api/` maršrutiem nekad netiek saglabātas kešatmiņā.
-- **Pielāgotas ikonas mobilajās ierīcēs** — Favikona maiņa iestatījumos neatjaunina sākuma ekrāna ikonu mobilajās ierīcēs (tam nepieciešama PWA ikonu atkārtota ģenerēšana).
+- **Nepieciešams servera savienojums:** lapas navigācijai, informācijas paneļa stāvoklim un API pieprasījumiem nav atkāpšanās bezsaistē.
+- **Nav fona sinhronizācijas:** bezsaistes darbības netiek ievietotas atkārtošanas rindā.
+- **Pārlūkprogrammu atšķirības:** instalēšanas izvēlnes, logu prezentācijas un paziņojumu atbalsts atšķiras atkarībā no platformas.
+- **Nav API atbildes kešatmiņas:** darbinieks izslēdz API, informācijas paneli un autentifikācijas ceļus.
+- **Statiskās instalēšanas ikonas:** lai atjauninātu šīs ikonas, ir jāmaina reklamētie līdzekļi; pārlūkprogrammas var saglabāt instalētos metadatus.
 
-## Failu uzziņa
+## Failu atsauce
 
-| Fails                                   | Nolūks                                                                 |
-| --------------------------------------- | ---------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Next.js manifesta maršruts (ģenerē `manifest.webmanifest`)             |
-| `public/sw.js`                          | Servisa darbinis ar kešatmiņas loģiku                                  |
-| `src/shared/components/PwaRegister.tsx` | Klienta komponents, kas reģistrē servisa darbini                       |
-| `src/app/offline/page.tsx`              | Bezsaistes rezerves lapa ar reāllaika statusa indikatoru               |
-| `src/app/layout.tsx`                    | Saknes izkārtojums ar PWA metadatiem (apple-web-app, theme-color utt.) |
-| `public/icon-512.png`                   | 512×512 PNG ikona (Android, uzplaiksnījuma ekrāns)                     |
-| `public/apple-touch-icon.png`           | 180×180 PNG ikona (iOS sākuma ekrāns)                                  |
-| `public/icon-192.svg`                   | 192×192 SVG ikona (Android adaptīvā ikona)                             |
-| `public/apple-touch-icon.svg`           | 180×180 SVG ikona (Apple rezerves variants)                            |
+| Fails                                                                                  | Mērķis                                                      |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Ģenerēts tīmekļa lietotnes manifests                        |
+| [public/sw.js](../../public/sw.js)                                                     | Kešatmiņas, izslēgšanas un paziņojumu notikumu apstrādātāji |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Ražošanas reģistrācija un novecojušās kešatmiņas atkopšana  |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Savienojamības lapa, nevis automātiska atkāpšanās bezsaistē |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Lapas metadati un skatvietas iestatījumi                    |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Koplietojamās tēmas-krāsu vērtības                          |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 lietotnes ikona                                   |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple ikona                                       |

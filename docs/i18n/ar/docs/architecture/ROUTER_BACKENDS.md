@@ -41,48 +41,31 @@
 
 تتيح `capabilities` (`chat` و`responses` و`streaming` و`tools` و`vision` و`oauth-backed` و`dashboard-embed` و`model-sync` و`native-hot-path`) للجهات المستدعية التصفية استنادًا إلى ما يستطيع المحرك فعله فعليًا، بدلًا من الترميز الثابت لفروع خاصة بكل معرّف.
 
-## المحور A — الخدمات المضمّنة (جانب العمليات الخاضعة للإشراف)
+## المحور أ — الخدمات المدمجة (جانب العملية الخاضعة للإشراف)
 
-- **سجل العمليات الخاضعة للإشراف:** `src/lib/services/bootstrap.ts` ‏`SERVICES[]`
-  (حاليًا: `9router`، و`cliproxy`).
-- **المالك المسؤول عن دورة الحياة:** `src/lib/services/ServiceSupervisor.ts` — تنشئ `start()`
-  العملية الفرعية، ولا تتابع إلا بعد نجاح `waitForHealthy()`، وتلتقط stdout/stderr في مخزن مؤقت حلقي؛
-  وترسل `stop()` الإشارة SIGTERM ثم SIGKILL؛ وتُسلسل جميع العمليات تحت قفل.
-- **اتحاد الحالات** (`src/lib/services/types.ts`):
-  ‏`not_installed | stopped | starting | running | stopping | error`، بالإضافة إلى
-  ‏`HealthState = healthy | unhealthy | unknown` المتعامدة معها.
-- **لماذا عملية منفصلة (وليس SDK داخل العملية)؟** عزل العمليات هو ما يجعل
-  التثبيت/التشغيل/الإيقاف/التحقق من الصحة/السجلات قابلة للتحكم بشكل مستقل لكل عملية جانبية، ويسمح
-  بتطبيق حارس الإنشاء عبر loopback. تُعد نمذجة موائم داخل العملية عملًا مستقبليًا —
-  وعلامة الإمكانية `native-hot-path` هي الموضع الذي سيُعبَّر فيه عن ذلك.
+- **سجل العمليات الخاضعة للإشراف:** `src/lib/services/bootstrap.ts` `SERVICES[]` (اليوم: `9router`، `cliproxy`).
+- **مالك دورة الحياة:** `src/lib/services/ServiceSupervisor.ts` — `start()` يولد الطفل، ويدخل على `waitForHealthy()`، وينقر stdout/stderr في المخزن المؤقت الحلقي؛ `stop()` SIGTERM→SIGKILL; جميعها متسلسلة تحت القفل.
+- **اتحاد الدولة** (`src/lib/services/types.ts`) : `not_installed | stopped | starting | running | stopping | error`، بالإضافة إلى `HealthState = healthy | unhealthy | unknown` المتعامد .
+- **لماذا عملية منفصلة (وليست في proc SDK)؟** عزل العملية هو ما يجعل install/start/stop/health/logs قابلاً للتحكم بشكل مستقل لكل عربة جانبية ويتيح تطبيق حماية ظهور الاسترجاع. إن نمذجة محول in-proc هو العمل المستقبلي — وعلامة قدرة `native-hot-path` هي المكان الذي سيتم التعبير عن ذلك.
 
-### عقد مسارات دورة الحياة (`/api/services/<tool>/…`)
+### عقد مسار دورة الحياة (`/api/services/<tool>/…`)
 
-رموز الحالة **خاصة بالحالة/الفعل/المسار حسب التصميم** — هذا هو العقد، وليس
-عدم اتساق:
+رموز الحالة هي**state/verb/path-specific حسب التصميم** — هذا هو العقد وليس التعارض:
 
-| الاستدعاء                    | الشرط                                  | الحالة                               |
-| ---------------------------- | -------------------------------------- | ------------------------------------ |
-| `POST .../start`             | الخدمة في حالة `not_installed`         | **409** (شرط مسبق)                   |
-| `POST .../stop`              | متوقفة بالفعل                          | **200** (لا إجراء متكرر)             |
-| `GET .../status`             | سليم                                   | **200** (`live ?? row ?? "unknown"`) |
-| `POST .../start`             | فشل إنشاء العملية                      | **503** (مؤقت)                       |
-| `GET .../status`, `.../stop` | خطأ غير ملتقط                          | **500**                              |
-| `GET /api/services/<x>/logs` | الأداة `<x>` غير معروفة                | **404** `Service '<x>' not found`    |
-| `GET .../status?reveal=key`  | غياب `X-Reveal-Confirm: yes`           | **403** (خاص بـ9router فقط)          |
-| **أي** `/api/services/*`     | المستدعي ليس من loopback/شبكة LAN خاصة | **403 LOCAL_ONLY**                   |
+| يتصل                         | حالة                            | حالة                                 |
+| ---------------------------- | ------------------------------- | ------------------------------------ |
+| `POST .../start`             | خدمة `not_installed`            | **409** (شرط مسبق)                   |
+| `POST .../stop`              | توقفت بالفعل                    | **200** (عاجز لا المرجع)             |
+| `GET .../status`             | OK                              | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`             | فشل تفرخ                        | **503** (عابر)                       |
+| `GET .../status`, `.../stop` | خطأ لم يتم اكتشافه              | **500**                              |
+| `GET /api/services/<x>/logs` | أداة غير معروفة `<x>`           | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`  | `X-Reveal-Confirm: yes` مفقود   | **403** (9جهاز التوجيه فقط)          |
+| **أي** `/api/services/*`     | المتصل ليس loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-تُنسَّق جميع أجسام الأخطاء بواسطة `createErrorResponse()` بالشكل التالي →
-`{ error: { message, type }, requestId }`، حيث تُشتق قيمة `type` من رمز الحالة
-(`500→server_error`، و`404→not_found`، و`409→conflict`، وإلا `invalid_request`)، وهي
-المميّز القابل للمعالجة آليًا. تُنقَّح الرسائل مسبقًا
-(`sanitizeErrorMessage()`، القاعدة الصارمة رقم 12).
+يتم تشكيل جميع أجسام الأخطاء بواسطة `createErrorResponse()` → `{ error: { message, type }, requestId }`، حيث يتم اشتقاق `type` من الحالة (`500→server_error`، `404→not_found`، `409→conflict`، else `invalid_request`) وهو أداة التمييز القابلة للتنفيذ آليًا. تم تعقيم الرسائل مسبقًا (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**حارس loopback** هو المصدر الأكثر شيوعًا لرمز `403`: يقع `/api/services/` ضمن
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`)، وترفض
-`src/server/authz/policies/management.ts` أي مستدعٍ ليس من loopback أو شبكة LAN خاصة
-**قبل المصادقة**، لأن هذه المسارات تنشئ عمليات فرعية (القاعدتان الصارمتان 15
-و17). الوصول إليها عبر نفق عام يُرجع `403` حسب التصميم.
+**حارس الاسترجاع** هو المصدر الأكثر شيوعًا لـ `403`: `/api/services/` موجود في `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) ويرفض `src/server/authz/policies/management.ts` أي متصل غير استرجاعي / غير خاص بشبكة LAN** قبل المصادقة** لأن هذه المسارات تولد عمليات فرعية (القاعدتان الصارمتان 15 و17). إن الوصول إليهم عبر نفق عام هو `403` حسب التصميم.
 
 ## المحور B — الواجهة الخلفية لتوجيه الترحيل (جانب الإرسال)
 

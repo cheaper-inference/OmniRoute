@@ -4,13 +4,7 @@
 
 ---
 
-> **Hiteles forrás:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, valamint az `open-sse/utils/error.ts` nyilvános builder függvényei
-> **Tesztek:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Legutóbbi frissítés:** 2026-09-02 — v3.8.51
-> **Célközönség:** Minden olyan mérnök, aki hibaválaszokkal foglalkozik (HTTP-útvonalak, SSE-streamek, végrehajtók, MCP-kezelők).
-> **Állapot:** **KÖTELEZŐ** minden olyan kódútvonalon, amely hibaüzenetet küld vissza egy kliensnek.
+> **Az igazság forrása:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, és a `open-sse/utils/error.ts` ben lévő középítők** Tesztek:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Közönség:** Bármely mérnök, aki megérinti a hibaválaszokat (HTTP útvonalak, SSE folyamok, végrehajtók, MCP kezelők).** Állapot:****MANDATORY** minden olyan kódútra, amely hibaüzenetet ad vissza az ügyfélnek.
 
 ## Miért van erre szükség?
 

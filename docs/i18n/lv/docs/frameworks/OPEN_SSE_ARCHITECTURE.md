@@ -226,32 +226,32 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-Atbalsta** 22 maršrutēšanas stratēģijas** (skatīt `src/shared/constants/routingStrategies.ts`):
+Atbalsta** 22 maršrutēšanas stratēģijas** (skat. `src/shared/constants/routingStrategies.ts`):
 
-| stratēģija          | Uzvedība                                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------------------------ |
-| `priority`          | Pirmā mērķa sakārtotais saraksts                                                                       |
-| `weighted`          | Varbūtība pēc mērķa svara                                                                              |
-| `round-robin`       | Pārejiet cauri mērķiem secībā                                                                          |
-| `context-relay`     | Nododiet kontekstu starp mērķiem                                                                       |
-| `fill-first`        | Aizpildiet kvotu, pirms pāriet uz nākamo                                                               |
-| `p2c`               | Divu izvēļu spēks                                                                                      |
-| `random`            | Vienots nejaušs                                                                                        |
-| `least-used`        | Izvēlieties to, kas nesen izmantots vismazāk                                                           |
-| `cost-optimized`    | Vispirms lētākais veselīgais mērķis                                                                    |
-| `reset-aware`       | Apzinās pakalpojumu sniedzēja atiestatīšanas logus                                                     |
-| `reset-window`      | Atiestatīt uz logiem balstītu maršrutēšanu                                                             |
-| `expiry-first`      | Vispirms iztērējiet kontu, kura kvotas termiņš beigtos neizmantots                                     |
-| `headroom`          | Vispirms lielākā daļa atlikušo kvotu                                                                   |
-| `quota-weighted`    | Izlaidiet izsmeltos kontus, pēc tam izmantojiet atlikušo kvotu ÷ lidojuma laikā                        |
-| `strict-random`     | Patiesi viendabīga (bez kvalitātes svara)                                                              |
-| `auto`              | Izmantojiet 16 faktoru punktu skaitu (`autoCombo/`)                                                    |
-| `lkgp`              | Vispirms pēdējais zināmais labais pakalpojumu sniedzējs                                                |
-| `context-optimized` | Vispiemērotākais ilgstoša konteksta pieprasījumiem                                                     |
-| `cache-optimized`   | Piespraudiet katru atkārtoti lietojamo uzvednes prefiksu vienam kontam (uzvednes kešatmiņas trāpījumi) |
-| `fusion`            | Paralēli velciet uz paneli, pēc tam sintezējiet, izmantojot tiesnesi (`fusion.ts`)                     |
-| `pipeline`          | Ķēdes soļi — katra mērķa izvade baro nākamo                                                            |
-| `jev`               | Pieteikšanās: TypeSafe Jev atzīst, kuri sarindotie ieraksti tiek izpildīti; citādi jūsu pasūtījums     |
+| stratēģija          | Uzvedība                                                                                           |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| `priority`          | Pirmā mērķa sakārtotais saraksts                                                                   |
+| `weighted`          | Varbūtība pēc mērķa svara                                                                          |
+| `round-robin`       | Pārejiet cauri mērķiem secībā                                                                      |
+| `context-relay`     | Nododiet kontekstu starp mērķiem                                                                   |
+| `fill-first`        | Aizpildiet kvotu, pirms pāriet uz nākamo                                                           |
+| `p2c`               | Divu izvēļu spēks                                                                                  |
+| `random`            | Svaigi jaukts pēc pieprasījuma                                                                     |
+| `least-used`        | Izvēlieties to, kuram ir vismazāk reģistrēto pieprasījumu                                          |
+| `cost-optimized`    | Vispirms zemākā kataloga ievades cena                                                              |
+| `reset-aware`       | Atlikušās kvotas + atiestatīšanas steidzamība                                                      |
+| `reset-window`      | Kvotas logs, kas vispirms tiek atiestatīts ātrāk                                                   |
+| `expiry-first`      | Vispirms iztērējiet kontu, kura kvotas termiņš beigtos neizmantots                                 |
+| `headroom`          | Vispirms lielākā daļa atlikušo kvotu                                                               |
+| `quota-weighted`    | Izlaidiet izsmeltos kontus, pēc tam izmantojiet atlikušo kvotu ÷ lidojuma laikā                    |
+| `strict-random`     | Sajaukts klājs: katrs mērķis vienu reizi pirms atkārtošanas                                        |
+| `auto`              | Izmantojiet 16 faktoru punktu skaitu (`autoCombo/`)                                                |
+| `lkgp`              | Vispirms pēdējais zināmais labais pakalpojumu sniedzējs                                            |
+| `context-optimized` | Vispirms lielākais zināmais konteksta logs                                                         |
+| `cache-optimized`   | Dodiet priekšroku kontam, kurā kešatmiņā varētu būt uzvednes prefikss                              |
+| `fusion`            | Paralēli ventilējiet paneli, pēc tam sintezējiet, izmantojot tiesnesi (`fusion.ts`)                |
+| `pipeline`          | Ķēdes soļi — katra mērķa izvade baro nākamo                                                        |
+| `jev`               | Pieteikšanās: TypeSafe Jev atzīst, kuri sarindotie ieraksti tiek izpildīti; citādi jūsu pasūtījums |
 
 ### base.ts (1170 LOC)
 
@@ -270,7 +270,7 @@ export class DefaultExecutor extends BaseExecutor {
 }
 ```
 
-Pakalpojumu sniedzējam raksturīgā darbība (autentēšanas galvenes, bāzes URL, versiju galvenes) tiek konfigurēta, izmantojot nodrošinātāja reģistru, nevis atsevišķas izpildītāju klases.
+Pakalpojumu sniedzēja darbība (auth headers, base URL, versiju galvenes) tiek konfigurēta, izmantojot nodrošinātāja reģistru, nevis atsevišķas izpildītāju klases.
 
 ````
 

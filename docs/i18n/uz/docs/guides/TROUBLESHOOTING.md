@@ -185,70 +185,49 @@ ular mavjud emas.
 
 ---
 
-## Antivirusning notoʻgʻri ijobiy aniqlashlari
+## Antivirus noto'g'ri ijobiy
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG `README.md` faylini `MD:HttpRequest-inf[Susp]` sifatida karantinga oladi
+### Avast/AVG karantin `README.md` `MD:HttpRequest-inf[Susp]` bilan
 
-**Bu notoʻgʻri ijobiy aniqlash. Hech narsa zararlanmagan va hech qanday chora koʻrish talab etilmaydi.**
+**Bu noto'g'ri ijobiy. Hech narsa yuqmaydi va hech qanday harakat talab etilmaydi.**
 
-Avast va AVG koʻplab HTTP soʻroviga oʻxshash havolalarni oʻz ichiga olgan oddiy matnli/Markdown fayllarni belgilaydigan evristik tekshiruvni ishga tushiradi. OmniRoute’ning `README.md` fayli npm paketi tarkibida yetkaziladi (u `package.json` → `files` roʻyxatida mavjud), shu sababli global oʻrnatishda `node_modules/omniroute/README.md` manziliga joylashadi — va u taxminan 15 ta `http://localhost:20128/...` misolini oʻz ichiga oladi (MCP HTTP/SSE endpointlari, A2A `.well-known` URL manzili va `curl` parchalari). Bunday havolalar zichligi evristikani ishga tushirish uchun yetarli.
+Avast and AVG run a heuristic that flags plain-text/Markdown files containing many HTTP-request-looking links. OmniRoute's `README.md` ships inside the npm package (it is listed in `package.json` → `files`), so it lands at `node_modules/omniroute/README.md` on a global install — and it contains ~15 `http://localhost:20128/...` examples (the MCP HTTP/SSE endpoints, the A2A `.well-known` URL, and `curl` snippets). That link density is enough to trip the heuristic.
 
-Agar bu holat yaqindagina boshlangan boʻlsa: faylning turi oʻzgarmagan. README ichidagi endpointlar jadvali kengaytirildi (MCP HTTP + SSE + A2A qoʻshildi) va koʻproq `curl` misollari kiritildi, natijada u chegara qiymatidan oshdi.
+Agar bu yaqinda boshlangan bo'lsa: fayl o'zgarmagan. README o'zining so'nggi nuqtalari jadvalini (MCP HTTP + SSE + A2A qo'shildi) va ko'proq `curl` misollarini o'stirdi, bu esa uni chegaradan oshib ketdi.
 
-Bu bajariladigan tarkibga ega boʻlmagan, faol boʻlmagan hujjat faylidir. Uni karantindan xavfsiz tiklashingiz mumkin.
+Fayl nol bajariladigan tarkibga ega inert hujjatdir. Siz uni karantindan xavfsiz tiklashingiz mumkin.
 
-**Nima qilish kerak:**
+**Nima qilsa bo'ladi:**
 
-1. **Bildirishnomalarni toʻxtating** — antivirus dasturingizda oʻrnatish katalogini istisnolar roʻyxatiga qoʻshing
-   (Avast: Settings → Exceptions), global `node_modules` yoʻlingizni va/yoki
-   OmniRoute maʼlumotlar katalogini (`~/.omniroute/`) kiriting.
-2. **Notoʻgʻri ijobiy aniqlash haqida xabar bering** — <https://www.avast.com/false-positive-file-form.php>,
-   karantinga olingan `README.md` faylini ilova qiling. Bu hammaga yordam beradigan yechimdir, chunki
-   muammo ishlab chiqaruvchining matn fayliga haddan tashqari keskin munosabat bildirayotgan evristikasidadir.
+1. **Bildirishnomalarni to'xtating** — antivirusingizdagi o'rnatish katalogini istisno qiling (Avast: Sozlamalar → Istisnolar), global `node_modules` yo'lingizni and/or OmniRoute ma'lumotlar direktoriga (`~/.omniroute/`) qo'shing.
+2. **Noto'g'ri pozitiv haqida xabar bering** — <https://www.avast.com/false-positive-file-form.php>, karantindagi `README.md` biriktirish. Bu hammaga yordam beradigan tuzatish, chunki bu sotuvchining matnli faylga haddan tashqari evristik munosabati.
 
-**Nega biz buni oʻz tomonimizda “tuzatmaymiz”:** barcha misollar `http://localhost` manzilidan foydalanadi,
-localhost esa oʻzi imzolagan sertifikatlar bilan bogʻliq noqulayliklarsiz `https` boʻla olmaydi. Bitta ishlab
-chiqaruvchining evristikasini chetlab oʻtish uchun hujjatlarni buzib oʻzgartirish skaner xatosini qondirish evaziga
-barcha oʻquvchilarga zarar yetkazadi.
+**Nega biz buni o'z tomonimizdan "tuzatmayapmiz":** misollar hammasi `http://localhost`, va localhost o'z-o'zidan imzolangan sertifikat ishqalanishisiz `https` bo'lishi mumkin emas. Bitta sotuvchining evristikasidan qochish uchun hujjatlarni o'zgartirish skaner xatosini qondirish uchun har bir o'quvchiga zarar etkazadi.
 
-### Kaspersky Desktop ilovasini `PDM:Trojan.Win32.Generic` sifatida belgilaydi
+### Kasperskiy ish stoli ilovasini `PDM:Trojan.Win32.Generic` deb belgilaydi
 
-**Bu xulq-atvor evristikasi sababli yuzaga keladigan notoʻgʻri ijobiy aniqlashdir. Hech narsa zararlanmagan.** Kaspersky’dagi
-`PDM:` prefiksi xulosa maʼlum zararli dastur bilan moslikni aniqlashdan emas, balki oʻrnatuvchi _nima qilishini_ baholaydigan Proactive Defense Module (System Watcher) modulidan kelganini anglatadi. U ishga tushganda, Kaspersky butun oʻrnatishni “orqaga qaytaradi” — avval yozib boʻlingan fayllarni oʻchiradi — natijada ilova buzilgan yoki yoʻq holatda qoladi.
+**Bu xatti-harakat evristikasidan noto'g'ri ijobiydir. Hech narsa yuqmagan.** Kasperskiyning `PDM:` prefiksi hukm uning proaktiv mudofaa modulidan (tizim kuzatuvchisi) olinganligini bildiradi, u o'rnatuvchining ma'lum zararli dasturlarga mos kelishidan ko'ra, nima qilayotganini baholaydi. U ishga tushganda, Kasperskiy butun o'rnatishni "orqaga qaytaradi" — allaqachon yozgan — fayllarini o'chirib tashlaydi, shuning uchun dastur buziladi yoki yo'qoladi.
 
-U belgilaydigan fayllar Desktop ilovasi bilan birga toʻplangan, eʼlon qilingan ochiq manbali bogʻliqliklarning standart qismlaridir, masalan:
+U belgilagan fayllar ish stoli ilovasi bilan birlashtirilgan e'lon qilingan, ochiq manbali bog'liqliklarning bir qismidir, masalan:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` va
-  `workerProcessEntry.js` — ilova ichida provayder hisobiga kirish va brauzer asosidagi chat uchun ishlatiladigan brauzerni avtomatlashtirish kutubxonasi [Playwright](https://playwright.dev).
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — veb-kuki provayderlarida brauzerga xos raqamli iz bilan HTTP soʻrovlarini yuborish uchun ishlatiladigan, versiyasi qatʼiy belgilangan `wreq-js` mahalliy bogʻlanmasi
-  (`<arch>` — `x64` yoki `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` va `workerProcessEntry.js` — [Playwright](https://playwright.dev), ilova ichidagi provayderga kirish va brauzer tomonidan qo‘llab-quvvatlanadigan chat uchun foydalaniladigan brauzer-avtomatlashtirish kutubxonasi.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — veb-cookie provayderlarida brauzer barmoq izi bilan HTTP uchun ishlatiladigan `wreq-js` mahalliy bog‘lanishi (`<arch>` `x64` yoki `arm64`).
 
-**Nega u ishga tushadi:** Windows oʻrnatuvchisi **hali kod imzosi bilan imzolanmagan**, shuning uchun imzolanmagan NSIS
-oʻrnatuvchisi hech qanday obroʻga ega emas va xulq-atvor evristikalari maksimal tajovuzkorlik bilan ishlaydi. Bunga toʻplam tarkibidagi mahalliy DLL hamda
-`%LOCALAPPDATA%\Programs\OmniRoute` ichiga yoziladigan yuzlab `.js` fayllari (jumladan,
-Next.js mustaqil yigʻmasidagi hash qoʻshimchali paket kataloglari) qoʻshilsa, bu evristikani ishga tushirish uchun yetarli boʻladi. Kodni imzolash rejalashtirilgan;
-u joriy etilguniga qadar yangi relizlarda bu holat takrorlanishi mumkin.
+**Nima uchun u yonadi:** Windows o'rnatuvchisi** hali kod imzolanmagan** , shuning uchun imzosiz NSIS o'rnatuvchisi nol obro'ga ega va xatti-harakat evristikasi maksimal tajovuzkorlikda ishlaydi. To'plamli mahalliy DLL va `%LOCALAPPDATA%\Programs\OmniRoute` ostida yozilgan yuzlab `.js` fayllari (jumladan, Next.js mustaqil tuzilmasidan xesh-suffiksli paket kataloglari) bilan birgalikda bu evristik jarayonni o'zgartirish uchun etarli. Kodni imzolash rejalashtirilgan; u erga tushmaguncha, yangi nashrlar buni takrorlashi mumkin.
 
-**Nima qilish kerak:**
+**Nima qilsa bo'ladi:**
 
-1. **Avval yuklab olingan faylingizni tekshiring** (bu fayl oʻzgartirilgan boʻlishi ehtimolini istisno qiladi). Har bir reliz
-   `latest.yml` faylini eʼlon qiladi, undagi `sha512` maydoni (base64) `OmniRoute.Setup.<version>.exe`
-   oʻrnatuvchisini qamrab oladi. PowerShell’da oʻrnatuvchi joylashgan jilddan:
+1. **Avval yuklab olishingizni tasdiqlang** (buzilgan faylni istisno qiladi). Har bir nashr `latest.yml` nashr etadi, uning `sha512` maydoni (base64) `OmniRoute.Setup.<version>.exe` o'rnatuvchisini qamrab oladi. PowerShell da, o'rnatuvchini o'z ichiga olgan papkadan:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Natija `latest.yml` → `sha512` qiymatiga mos kelishi kerak. Agar mos kelmasa, faylni oʻchiring va
-   faqat [GitHub relizlar sahifasi](https://github.com/diegosouzapw/OmniRoute/releases) orqali qayta yuklab oling.
-2. **Tiklang + istisnoga qoʻshing** — orqaga qaytarish jarayonida oʻchirilgan elementlarni karantindan tiklang va
-   `%LOCALAPPDATA%\Programs\OmniRoute` uchun istisno qoʻshing (Kaspersky → Settings → Threats and Exclusions),
-   soʻng qayta oʻrnating.
-3. **Notoʻgʻri ijobiy aniqlash haqida xabar bering** — <https://opentip.kaspersky.com/>. Foydalanuvchilar yuborgan notoʻgʻri ijobiy aniqlash haqidagi
-   hisobotlar ruxsat etilganlar roʻyxatiga qoʻshish jarayonini haqiqatan ham tezlashtiradi.
+   Chiqish `latest.yml` → `sha512` mos kelishi kerak. Agar shunday bo'lmasa, faylni o'chiring va faqat [GitHub relizlar sahifasidan](https://github.com/cheaper-inference/OmniRoute/releases) qayta yuklab oling.
+2. **Qayta tiklash + istisno** — qaytarib olingan narsalarni karantindan tiklang va `%LOCALAPPDATA%\Programs\OmniRoute` uchun istisno qo‘shing (Kaspersky → Settings → Threats and Exclusions), so‘ng qayta o‘rnating.
+3. **Noto'g'ri pozitiv haqida xabar bering** — <https://opentip.kaspersky.com/>. Foydalanuvchi tomonidan taqdim etilgan FP hisobotlari ruxsat etilgan roʻyxatni tezlashtiradi.
 
 ---
 
@@ -860,10 +839,10 @@ Ko'proq alomatlar:
 
 ---
 
-## Hali ham muammo hal boʻlmadimi?
+## Hali ham qotib qoldingizmi?
 
-- **GitHub muammolari**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Arxitektura**: Ichki tafsilotlar uchun [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) fayliga qarang
-- **API maʼlumotnomasi**: Barcha endpointlar uchun [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) fayliga qarang
-- **Holat boshqaruv paneli**: Tizim holatini real vaqtda koʻrish uchun **Boshqaruv paneli → Holat** boʻlimini tekshiring
-- **Tarjimon**: Format bilan bogʻliq muammolarni tuzatish uchun **Boshqaruv paneli → Tarjimon** boʻlimidan foydalaning
+- **GitHub muammolari** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Arxitektura** : Ichki tafsilotlar uchun [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) qarang
+- **API havolasi** : Barcha oxirgi nuqtalar uchun [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) qarang
+- **Salomatlik boshqaruv paneli** : Tekshiring** Boshqarish paneli → Health** real vaqtda tizim holati uchun
+- **Tarjimon** : Foydalanish** Boshqaruv paneli → tarjimon** formatlash muammolarini tuzatish uchun

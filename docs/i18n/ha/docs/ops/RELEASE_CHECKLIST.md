@@ -4,12 +4,9 @@
 
 ---
 
-> **Sabuntawa ta ƙarshe:** 2026-08-28 — v3.8.51
-> Sauƙaƙaƙƙen tsarin fitarwa wanda ke amfani da ƙwarewar Claude Code don sarrafa aiki ta atomatik.
+> Sauƙaƙe kwararar fitarwa wanda ke ba da damar ƙwarewar lambar Claude don sarrafa kansa.
 >
-> **Kiyaye layin jira/reshe cikin yanayi mai kyau tsakanin fitowa:** duba [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (dangin `/green-prs` + `npm run check:release-green` + `/babysit` + aikin dare). Gudanar da
-> wannan lokaci-lokaci — musamman kuma **kafin** wannan jerin dubawa — yana sa PR ɗin fitowa ya fara cikin yanayi mai kyau.
+> **A kiyaye queue/branch kore tsakanin abubuwan da aka saki:** duba [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` iyali + `npm run check:release-green` + `/babysit` + dare). Gudun wannan lokaci-lokaci — kuma musamman** kafin** wannan lissafin — ya sa sakin PR ya fara kore.
 
 ## A taƙaice
 
@@ -60,7 +57,9 @@ Gudun aiki na npm-buga ba ya bugawa kai tsaye: yana yin takalmin ƙwallon ƙwall
 
 **Docker Hub `latest` (da ake buƙata akan kowane tsayayye SemVer buga):** aikin `docker-publish` dole ne ya sanya alama** duka biyu** `X.Y.Z` kuma, lokacin da `should-promote-latest.sh` ya yarda wannan shine mafi girman tsayayyen SemVer, `:latest` tare da** iri guda** . Bayan aikin: Hub `latest` narkewa yayi daidai da sabon narkar SemVer kuma `last_updated` ya motsa. Kar a bar `:latest` akan ginin da aka dade yayin sakin bayanan suna magana game da gyare-gyare waɗanda kawai ke kan git. Rubuta saurin farawa amfani da `:latest`; GitOps ya kamata ya ci gaba da pinning `X.Y.Z`. Duba [tashoshin sakin Docker](../guides/DOCKER_GUIDE.md#release-channels) da #10317.
 
-**ma'ajiyar kungiyar Docker Hub (`cheaperinference/omniroute`):** Docker Hub ba zai iya motsa wurin ajiya tsakanin wuraren suna ba, don haka `diegosouzapw/omniroute` yana adana tarihin ja da kowane saki, da aikin `mirror-org-dockerhub` na `docker-publish` kowace sigar da aka fitar (da `:latest` lokacin da aka inganta) daga `ghcr.io/cheaper-inference/omniroute` zuwa ma'ajiyar kungiya. Yana buƙatar asirin `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; ba tare da su ba aikin yana tsayawa kore tare da "Docker Hub org madubi ya tsallake" gargadi kuma sauran rajista suna bugawa akai-akai. Don buga sigar da aka saki a can daga baya, gudu** Ayyukan → Mirror Docker hoto zuwa Docker Hub org → Gudun aikin aiki** tare da `version=X.Y.Z` (da `promote_latest` don mafi girman juzu'i): yana kwafin hotunan da ke akwai, babu sake ginawa.
+**ma'ajiyar kungiyar Docker Hub (`cheaperinference/omniroute`):** Docker Hub ba zai iya matsar da ma'aji tsakanin wuraren suna ba, don haka `diegosouzapw/omniroute` yana adana tarihin ja da kowane saki, da aikin `mirror-org-dockerhub` na `docker-publish` kowace sigar da aka fitar (da `:latest` lokacin da aka haɓaka) daga `ghcr.io/cheaper-inference/omniroute` zuwa ma'ajiyar kungiya. Yana buƙatar asirin `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; ba tare da su ba aikin yana tsayawa kore tare da gargadin "Docker Hub org" kuma sauran masu yin rajista suna bugawa akai-akai. Don buga sigar da aka saki a can daga baya, gudu** Ayyukan → Mirror Docker hoto zuwa Docker Hub org → Gudun aikin aiki** tare da `version=X.Y.Z` (da `promote_latest` don mafi girman juzu'i): yana kwafin hotunan da ke akwai, babu sake ginawa. An saita wannan bayyani na Docker Hub da hannu: API da ke gyara shi ya ƙi Alamar Samun Ƙungiya.
+
+Gudun aiki iri ɗaya kuma yana kwafin kowane saki zuwa gadar GHCR kunshin `ghcr.io/diegosouzapw/omniroute` har zuwa 2027-06-30, don haka shigar da har yanzu yana rataye shi a ci gaba da sabuntawa; Fihirisar sa tana ɗauke da bayanin "motsawa zuwa `ghcr.io/cheaper-inference/omniroute`". Yana buƙatar sirrin `GHCR_LEGACY_TOKEN` (alamar samun dama ta sirri na `diegosouzapw` tare da `write:packages`); ba tare da shi ba aikin ya tsallake tare da gargadin "Legacy GHCR madubi ya tsallake".
 
 ## Hanyar Gaggawa ta Hotfix (lakabi `hotfix`)
 
@@ -144,21 +143,21 @@ Duk ayyukan da aka ɗaure dole ne su bi tsarin `type(scope): subject`.
 
 **Iri masu inganci:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Ingantattun iyakoki:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `a2a` `memory` `skills`, `cloud-agent` `mcp` `guardrails` `translator` `compression` `resilience` `auto-combo`, `providers`, `executors`, `domain`
+**Ingantattun iyakoki:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `a2a` `memory` `skills` `translator` `cloud-agent` `mcp` `guardrails` `resilience` `compression` `auto-combo`, `providers`, `executors`, `domain`
 
 Canje-canje masu karya: ƙara ƙafar `BREAKING CHANGE:` ko `!` bayan iyakar (misali `feat(api)!: drop /v0`).
 
 ### Takaddun bayanai
 
 - [ ] `npm run check:docs-sync` wucewa (aiki ta atomatik ta hanyar ƙaddamarwa)
-- [ ] `npm run check:docs-all` wucewa (laima: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` wuce. Shawarwarinsa `check:deprecated-versions` yana fitar da sifofin tutocin da aka danganta ga OmniRoute (3.6.x da baya) kuma yayi watsi da kwanan wata.
 - [ ] `npm run check:env-doc-sync` fita 0 — code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` kwangilar env ba ta cika ba
 - [ ] `npm run check:doc-links` yana fita 0 — babu tsinkayyar nassoshin alamar ciki bayan an sake fasalin
 - [ ] `docs/architecture/ARCHITECTURE.md` aka bita don drift na storage/runtime
 - [ ] `docs/guides/TROUBLESHOOTING.md` yayi bita don env var da drift mai aiki
 - [ ] Idan `.env.example` ya canza: `docs/reference/ENVIRONMENT.md` updated
 - [ ] Idan sabon fasali yana da UI: `docs/guides/USER_GUIDE.md` ya ambace shi
-- [ ] Idan sabon fasali yana da API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` an sabunta shi
+- [ ] Idan sabon fasalin yana da API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` an sabunta shi
 - [ ] Idan sabon siffa wani tsari ne: sadaukarwar `docs/<MODULE>.md` ta wanzu
 - [ ] Idan canje-canje mai raguwa: `docs/guides/TROUBLESHOOTING.md` yana da bayanin ƙaura
 
@@ -399,7 +398,7 @@ An gina ƙaƙƙarfan ƙaddamarwa tare da git plumbing (ba a taɓa bishiyar mai a
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

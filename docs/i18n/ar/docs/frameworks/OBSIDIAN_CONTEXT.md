@@ -110,58 +110,48 @@ stdio عبر `OMNIROUTE_API_KEY` أو `ROUTER_API_KEY`. لا يمكن لمستد
 تحتفظ المفاتيح التي تمت مصادقتها ولا تملك إعداد Obsidian خاصًا بكل مفتاح بالخيار الاحتياطي العام.
 وتحتفظ الأدوات الأربع `obsidian_sync_*` بسلوكها المنفصل الخاص برمز المزامنة.
 
-## أدوات MCP ‏(22)
+## أدوات MCP (22)
 
-مُعرَّفة في `open-sse/mcp-server/tools/obsidianTools.ts`. يتم تحديد الرمز المميز/عنوان URL الأساسي
-لكل استدعاء (مفتاح API أولًا، ثم الإعداد العام). تتطلب الأدوات التي تتصل بـ **خادم المزامنة**
-الخاص بـ OmniRoute (أدوات `obsidian_sync_*` الأربع) أيضًا رمز مصادقة المزامنة المهيأ
-في إعدادات OmniRoute.
+محددة في `open-sse/mcp-server/tools/obsidianTools.ts`. يتم حل token/base-URL لكل مكالمة (لكل مفتاح API أولاً، ثم عالمي). الأدوات التي ضربت OmniRoute** خادم المزامنة** (أدوات `obsidian_sync_*` الأربعة) تتطلب أيضًا رمز مصادقة المزامنة الذي تم تكوينه في إعدادات OmniRoute.
 
 ### أدوات القراءة (`read:obsidian`)
 
-| الأداة                       | الوصف                                                                                  |
+| أداة                         | وصف                                                                                    |
 | ---------------------------- | -------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | التحقق مما إذا كانت Local REST API قابلة للوصول ومصادقًا عليها.                        |
-| `obsidian_search_simple`     | البحث بالنص الكامل في محتوى الملاحظات؛ يعيد مقتطفات مع مسارات الملفات.                 |
-| `obsidian_search_structured` | البحث باستخدام تعبير JSON Logic (مرشحات and/or/regex/path).                            |
-| `obsidian_read_note`         | قراءة ملاحظة حسب المسار النسبي للخزنة؛ مع إمكانية تحديد عنوان/كتلة/frontmatter بعينها. |
-| `obsidian_list_vault`        | سرد الملفات والمجلدات في الخزنة (شجرة من الإدخالات).                                   |
-| `obsidian_get_document_map`  | الحصول على بنية عناوين الملاحظة في صورة خريطة من العناوين ← أرقام الأسطر.              |
-| `obsidian_get_note_metadata` | الحصول على frontmatter والوسوم والروابط وعدد الأحرف/الكلمات دون المحتوى الكامل.        |
-| `obsidian_get_active_file`   | الحصول على المسار + محتوى الملف النشط حاليًا في Obsidian.                              |
-| `obsidian_get_periodic_note` | الحصول على الملاحظة الدورية اليومية/الأسبوعية/الشهرية لتاريخ ما (اليوم إذا لم يُحدد).  |
-| `obsidian_get_tags`          | سرد جميع وسوم الخزنة مع تكراراتها.                                                     |
-| `obsidian_list_commands`     | سرد معرّفات أوامر Obsidian المتاحة (للاستخدام مع `obsidian_execute_command`).          |
-| `obsidian_sync_status`       | حالة خادم مزامنة OmniRoute: التشغيل، واسم الخزنة، والمنفذ، ومدة التشغيل، وآخر مزامنة.  |
-| `obsidian_sync_conflicts`    | سرد تعارضات المزامنة غير المحلولة (المسار، ومسار التعارض، ووقت الاكتشاف).              |
+| `obsidian_check_status`      | تحقق مما إذا كان يمكن الوصول إلى REST API المحلي ومصادقته.                             |
+| `obsidian_search_simple`     | البحث عن النص الكامل لمحتوى الملاحظة؛ إرجاع مقتطفات مع مسارات الملفات.                 |
+| `obsidian_search_structured` | البحث باستخدام تعبير منطقي JSON (مرشحات and/or/regex/path ).                           |
+| `obsidian_read_note`         | قراءة ملاحظة حسب المسار النسبي للقبو؛ اختياريا heading/block/frontmatter. محددة        |
+| `obsidian_list_vault`        | قم بإدراج الملفات والدلائل في المخزن (شجرة الإدخالات).                                 |
+| `obsidian_get_document_map`  | احصل على هيكل عنوان الملاحظة كخريطة للعناوين وأرقام الأسطر →.                          |
+| `obsidian_get_note_metadata` | احصل على المادة الأمامية والعلامات والروابط وعدد char/word بدون المحتوى الكامل.        |
+| `obsidian_get_active_file`   | احصل على محتوى مسار + للملف النشط حاليًا في Obsidian.                                  |
+| `obsidian_get_periodic_note` | احصل على مذكرة daily/weekly/monthly الدورية للتاريخ (اليوم إذا تم حذفه).               |
+| `obsidian_get_tags`          | قم بإدراج جميع علامات الخزنة مع تردداتها.                                              |
+| `obsidian_list_commands`     | قم بإدراج أمر Obsidian IDs المتاح (استخدمه مع `obsidian_execute_command`).             |
+| `obsidian_sync_status`       | حالة خادم مزامنة OmniRoute : قيد التشغيل، اسم المخزن، المنفذ، وقت التشغيل، آخر مزامنة. |
+| `obsidian_sync_conflicts`    | قم بإدراج تعارضات المزامنة التي لم يتم حلها (المسار، مسار التعارض، تم اكتشافها).       |
 
 ### أدوات الكتابة (`write:obsidian`)
 
-| الأداة                           | الوصف                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `obsidian_write_note`            | إنشاء ملاحظة أو الكتابة فوقها بمحتوى Markdown المحدد.                                            |
-| `obsidian_append_note`           | إلحاق محتوى بملاحظة؛ مع إمكانية إلحاقه بعنوان/كتلة محددة.                                        |
-| `obsidian_patch_note`            | إلحاق/إضافة في البداية/استبدال بشكل دقيق عند عنوان أو كتلة أو حقل frontmatter.                   |
-| `obsidian_delete_note`           | حذف ملاحظة نهائيًا من الخزنة.                                                                    |
-| `obsidian_move_note`             | نقل ملاحظة أو إعادة تسميتها داخل الخزنة.                                                         |
-| `obsidian_execute_command`       | تنفيذ أمر Obsidian باستخدام معرّف الأمر الخاص به.                                                |
-| `obsidian_open_file`             | فتح ملف في Obsidian (ينشئه إذا لم يكن موجودًا).                                                  |
-| `obsidian_sync_trigger`          | تشغيل مزامنة ثنائية الاتجاه وفورية للخزنة بين سطح المكتب↔الهاتف المحمول.                         |
-| `obsidian_sync_resolve_conflict` | حل تعارض مزامنة: الاحتفاظ بـ `local` (الهاتف المحمول)، أو `remote` (سطح المكتب)، أو `keep-both`. |
+| أداة                             | وصف                                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | قم بإنشاء ملاحظة أو الكتابة فوقها باستخدام محتوى Markdown المحدد.                     |
+| `obsidian_append_note`           | إلحاق محتوى بملاحظة؛ اختياريا إلى heading/block. محددة                                |
+| `obsidian_patch_note`            | append/prepend/replace جراحيا في العنوان أو الكتلة أو حقل المادة الأمامية.            |
+| `obsidian_delete_note`           | حذف ملاحظة من المخزن نهائيًا.                                                         |
+| `obsidian_move_note`             | نقل ملاحظة أو إعادة تسميتها داخل المخزن.                                              |
+| `obsidian_execute_command`       | قم بتنفيذ أمر Obsidian من خلال الأمر ID.                                              |
+| `obsidian_open_file`             | افتح ملفًا في Obsidian (يقوم بإنشائه إذا لم يكن موجودًا).                             |
+| `obsidian_sync_trigger`          | قم بتشغيل مزامنة ↔ mobile vault لسطح المكتب ثنائية الاتجاه بشكل فوري.                 |
+| `obsidian_sync_resolve_conflict` | حل تعارض المزامنة: احتفظ بـ `local` (الجوال) أو `remote` (سطح المكتب) أو `keep-both`. |
 
 > [!NOTE]
-> تقبل أهداف `obsidian_patch_note` قيمة `targetType` من `heading | block | frontmatter`
-> وقيمة `operation` من `append | prepend | replace`، مع
-> `createTargetIfMissing` اختياري. تتصل أدوات `obsidian_sync_*` الأربع بخادم المزامنة المحلي
-> (`http://127.0.0.1:27781` افتراضيًا) وتتطلب رمز المزامنة.
+> تقبل أهداف `obsidian_patch_note` `targetType` من `heading | block | frontmatter` و `operation` من `append | prepend | replace`، مع `createTargetIfMissing` اختياري. تتحدث أدوات `obsidian_sync_*` الأربعة مع خادم المزامنة المحلي (`http://127.0.0.1:27781` افتراضيًا) وتتطلب رمز المزامنة.
 
 ### النطاقات
 
-تتطلب أدوات القراءة `read:obsidian`؛ وتتطلب أدوات الكتابة `write:obsidian`. ويكون الإنفاذ
-مطابقًا لـ Notion — إذ تتولاه `withScopeEnforcement()` في
-`open-sse/mcp-server/server.ts`، ويكون مشروطًا بأن تكون قيمة `OMNIROUTE_MCP_ENFORCE_SCOPES=true`، مع
-استخلاص النطاقات المسموح بها من `OMNIROUTE_MCP_SCOPES` أو سياق نطاق مفتاح API. راجع
-[MCP-SERVER.md](./MCP-SERVER.md).
+تتطلب أدوات القراءة `read:obsidian`؛ أدوات الكتابة تتطلب `write:obsidian`. التنفيذ مطابق لـ Notion — الذي تتم معالجته بواسطة `withScopeEnforcement()` في `open-sse/mcp-server/server.ts`، وبوابة على `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ويتم فرضه على المتصلين HTTP/SSE الذين يفتقر مفتاح API الخاص بهم إلى `manage`/`admin`، مع النطاقات المسموح بها مصدرها `OMNIROUTE_MCP_SCOPES` أو سياق نطاق مفتاح API. انظر [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## نقاط النهاية
 

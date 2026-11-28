@@ -506,27 +506,27 @@ ja līderu tabulas dati kopš pēdējās nosūtīšanas ir faktiski mainījušie
 
 ---
 
-## Tokenu kopīgošana
+## Žetonu koplietošana
 
 **Fails:** `src/lib/gamification/sharing.ts`
 
 ### Divkāršā ieraksta virsgrāmata
 
-Katrs pārskaitījums izveido divas rindas tabulā `token_ledger`:
+Katrs pārsūtījums `token_ledger` veido divas rindas:
 
 | Rinda   | `from_key_id` | `to_key_id` | `amount` |
 | ------- | ------------- | ----------- | -------- |
-| Debets  | sūtītājs      | saņēmējs    | +summa   |
-| Kredīts | saņēmējs      | sūtītājs    | -summa   |
+| Debets  | sūtītājs      | uztvērējs   | + summa  |
+| Kredīts | uztvērējs     | sūtītājs    | -amount  |
 
-Pagaidiet — izmantotā pieeja ir šāda:
+Pagaidiet — konvencija ir:
 
-| Rinda   | `from_key_id` | `to_key_id` | `amount` | Nozīme               |
-| ------- | ------------- | ----------- | -------- | -------------------- |
-| Nosūtīt | sūtītājs      | saņēmējs    | +summa   | Aizplūde no sūtītāja |
-| Saņemt  | saņēmējs      | sūtītājs    | +summa   | Ieplūde saņēmējam    |
+| Rinda  | `from_key_id` | `to_key_id` | `amount` | Nozīme              |
+| ------ | ------------- | ----------- | -------- | ------------------- |
+| Sūtīt  | sūtītājs      | uztvērējs   | + summa  | Izplūde no sūtītāja |
+| Saņemt | uztvērējs     | sūtītājs    | + summa  | Pieplūde uztvērējam |
 
-Atlikums tiek aprēķināts šādi:
+Bilance tiek aprēķināta šādi:
 
 ```sql
 SELECT
@@ -537,7 +537,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Pārskaitījuma plūsma
+### Pārsūtīšanas plūsma
 
 ```typescript
 export async function transferTokens(
@@ -548,19 +548,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Validācija**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotence**: pārbaudīt, vai `idempotency_key` jau pastāv virsgrāmatā.
-   Ja pastāv, atgriezt kešoto rezultātu.
-3. **Transakcija** (viena SQLite transakcija):
-   a. Aprēķināt sūtītāja atlikumu.
-   b. Ja `balance < amount`, pārtraukt darbību (nepietiek līdzekļu).
-   c. Ievietot nosūtīšanas rindu (`from=sūtītājs,`.
+1. **Apstiprināt** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotence** : pārbaudiet, vai `idempotency_key` jau pastāv virsgrāmatā. Ja jā, atgrieziet kešatmiņā saglabāto rezultātu.
+3. **Darījums** (viens SQLite darījums): a. Aprēķināt sūtītāja bilanci. b. Ja `balance < amount`, pārtrauciet (nepietiekami līdzekļi). c. Ievietot sūtīšanas rindu (`from=sender, to=receiver, amount`). d. Ievietot saņemšanas rindu (`from=receiver, to=sender, amount`).
+4. **Likmes ierobežojums** : pārbaudiet pārsūtīšanas ātrumu sūtītājam (maks. 10 transfers/min).
+5. **Pasākums** : izstaro `token_share` gamification notikumu XP + emblēmas novērtēšanai.
+6. Atgriezties `{ success: true, balance: newBalance }`.
 
-### Biežuma ierobežošana
+### Likmes ierobežojums
 
-- Ne vairāk kā 10 pārskaitījumi minūtē katrai API atslēgai.
-- Ne vairāk kā 10 000 tokenu vienā pārskaitījumā.
-- Ne vairāk kā 100 000 pārskaitītu tokenu dienā katrai API atslēgai.
+- Maksimāli 10 pārsūtīšanas minūtē uz vienu API taustiņu.
+- Maksimāli 10 000 žetonu vienā pārskaitījumā.
+- Maksimāli 100 000 žetonu pārsūtīti dienā uz API atslēgu.
 
 ---
 

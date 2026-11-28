@@ -5,29 +5,12 @@
 ---
 
 > **Totuuden lähde:** `src/lib/memory/` ja `src/app/api/memory/`
-> **Päivitetty viimeksi:** 2026-06-28 — v3.8.40 (oletusarvoisesti pois käytöstä + int8-kvantisoinnin päivitys)
 
-OmniRoute tarjoaa pysyvän keskustelumuistin, joka on sidottu API-avaimeen (ja
-valinnaisesti istuntotunnukseen). Muistot poimitaan automaattisesti LLM-vastauksista
-kevyellä regex-hahmontunnistuksella ja lisätään takaisin myöhempiin
-pyyntöihin ensimmäisenä järjestelmäviestinä (tai ensimmäisenä käyttäjäviestinä
-palveluntarjoajille, jotka eivät hyväksy järjestelmäroolia).
+OmniRoute tarjoaa jatkuvan keskustelumuistin, joka on näppäilty API -näppäimellä (ja valinnaisesti istuntotunnuksella). Muistot poimitaan automaattisesti LLM -vastauksista kevyen regex-kuvion sovituksen avulla ja syötetään takaisin seuraaviin pyyntöihin johtavana järjestelmäviestinä (tai ensimmäisenä käyttäjäviestinä palveluntarjoajille, jotka hylkäävät järjestelmäroolin).
 
-> **Muisti on oletusarvoisesti POIS käytöstä (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled` on
-> nyt `false` (`src/lib/memory/settings.ts`). Muistin käyttöönotto lisää enintään
-> `maxTokens` (~2k) haettua kontekstia **jokaiseen** chat-pyyntöön, mistä
-> laskutetaan — tämä voi aiheuttaa odottamattomia kustannuksia uusissa asennuksissa ja asiakkaille, jotka hallitsevat
-> omaa kontekstiaan. Ota ominaisuus erikseen käyttöön kohdassa **Asetukset → Muisti** (`MemorySkillsTab`
-> näyttää varoituksen token-kustannuksista, kun muisti on käytössä).
-> Asiakas voi poistaa muistin käytöstä yksittäisessä pyynnössä
-> `x-omniroute-no-memory`-pyyntöotsakkeella (`true`/`1`/`yes`) — katso pyyntöotsakkeiden taulukko
-> tiedostosta [API_REFERENCE.md](../reference/API_REFERENCE.md). Muistittomassa pyynnössä
-> asetetaan `memoryOwnerId = null`, mikä poistaa käytöstä **sekä** muistin että taitojen lisäämisen
-> kyseisessä pyynnössä (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Muisti on oletuksena OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` on nyt `false` (`src/lib/memory/settings.ts`). Muistin salliminen lisää jopa `maxTokens` (~ 2k) haettua kontekstia** joka** chat-pyyntö, josta — yllättävä hinta uusista asennuksista ja asiakkaille, jotka hallitsevat omaa kontekstiaan. Valitse nimenomaisesti alla** Asetukset → Muisti** ( `MemorySkillsTab` näyttää token-kustannusvaroituksen, kun muisti on käytössä). Asiakas voi poistaa yksittäisen pyynnön käytöstä `x-omniroute-no-memory` -pyynnön otsikolla (`true`/`1`/`yes`) — katso pyyntöotsikkotaulukko [API_REFERENCE.md](../reference/API_REFERENCE.md) -muodossa. Ei muistia -pyyntö asettaa `memoryOwnerId = null`, joka poistaa käytöstä** molemmat** muistin ja taitojen lisäys kyseiselle pyynnölle (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Muisti on **rajattu API-avainkohtaisesti**, ei käyttäjäkohtaisesti — kaikki samalla
-API-avaimella todennetut pyynnöt käyttävät samaa muistivarantoa, jota voidaan lisäksi
-rajata valinnaisesti `sessionId`-arvolla.
+Muisti on** API -avaimen mukaan** , ei käyttäjää kohden — jokainen samalla API -avaimella todennettu pyyntö jakaa saman muistivarannon, ja valinnainen lisäalue `sessionId`:llä.
 
 ## Arkkitehtuuri
 
@@ -345,27 +328,17 @@ kvantisointia oteta erikseen käyttöön.
 ja laajuus on jokin arvoista `session`, `apiKey` tai `global`. Funktion
 `getMemorySettings()` oletuslaajuus on `apiKey`.
 
-## Faktojen poiminta (`extraction.ts`)
+## Faktan erottaminen (`extraction.ts`)
 
-Poiminta on **säännöllisiin lausekkeisiin perustuvaa**, ei LLM-pohjaista — se suoritetaan prosessin sisällä
-`setImmediate()`-funktion avulla, joten se ei koskaan estä vastausvirtaa:
+Poisto on** regex-pohjainen** , ei LLM-pohjainen —, se toimii prosessin aikana `setImmediate()` kanssa, joten se ei koskaan estä vastausvirtaa:
 
-- **Mieltymysmallit** → `MemoryType.FACTUAL`
-  (esim. `Pidän enemmän …`, `Pidän todella paljon …`, `suosikkini on …`, `Vihaan …`)
-- **Päätösmallit** → `MemoryType.EPISODIC`
-  (esim. `Käytän …`, `Valitsin …`, `Päädyin …`, `Aion ottaa käyttöön …`)
-- **Toimintamallit** → `MemoryType.FACTUAL`
-  (esim. `Yleensä …`, `Aina …`, `Minulla on tapana …`)
+- **Suosituskuviot** → `MemoryType.FACTUAL` (esim. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Päätösmallit** → `MemoryType.EPISODIC` (esim. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Kuvio kuvioita** → `MemoryType.FACTUAL` (esim. `I usually …`, `I always …`, `I tend to …`)
 
-Jokainen osuma siistitään (`trim`, välilyöntien yhdistäminen, enimmäispituus 500 merkkiä),
-kaksoiskappaleet poistetaan erän sisällä vakaan `factKey(category, content)`-avaimen avulla, ja
-osuma tallennetaan `createMemory()`-funktiolla metatiedoilla
-`{category, extractedAt, source: "llm_response"}`. Syöteteksi on rajattu
-64 KiB:iin (`MAX_EXTRACTION_TEXT_LENGTH`) — kun teksti on pidempi, käytetään tekstin
-**loppuosaa**, jotta avustajan uusin sisältö otetaan aina huomioon.
+Jokainen osuma desinfioidaan (`trim`, välilyöntien tiivistys, rajattu 500 merkkiin), kopiointi poistetaan erästä vakaan `factKey(category, content)` kautta ja tallennetaan `createMemory()` kautta metatiedon `{category, extractedAt, source: "llm_response"}` kanssa. Syötetyn tekstin yläraja on 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) —, kun se on pidempi,** häntää** tekstiä käytetään, joten viimeisin avustajasisältö on aina mukana.
 
-`extractFactsFromText(text)` viedään testejä varten ja palauttaa jäsennellyt
-faktat tallentamatta niitä.
+`extractFactsFromText(text)` viedään testejä varten ja palauttaa jäsennellyt faktat tallentamatta niitä.
 
 ## Haku (`retrieval.ts`)
 
@@ -720,22 +693,22 @@ Vertailutesti tyypillisellä 4-ytimisellä x86-palvelimella (tekstit noin 100 to
 
 ---
 
-## Faktojen poimintamallit (v3.8.16+)
+## Faktanpoimintamallit (v3.8.16 +)
 
-`extraction.ts`-moduuli (`src/lib/memory/extraction.ts`) käyttää **säännöllisten lausekkeiden mallinhakua** jäsenneltyjen faktojen poimimiseen keskusteluviesteistä. Näiden mallien ymmärtäminen auttaa säätämään poiminnan laatua käyttötarkoitukseesi sopivaksi.
+`extraction.ts` -moduuli (`src/lib/memory/extraction.ts`) käyttää** regex-mallin sovitus** poimimaan jäsenneltyjä faktoja keskusteluviesteistä. Näiden kuvioiden ymmärtäminen auttaa sinua säätämään erotuslaadun käyttötapauksesi mukaan.
 
-### Oletusarvoiset malliluokat
+### Oletuskuvioluokat
 
-| Luokka              | Esimerkkimalli                                                  | Poimii                           |
-| ------------------- | --------------------------------------------------------------- | -------------------------------- |
-| PREFERENCE_PATTERNS | `"Pidän enemmän <X>:stä"`, `"Pidän <X>:stä"`, `"Vihaan <X>:ää"` | Käyttäjän mieltymykset           |
-| DECISION_PATTERNS   | `"Käytän <X>:ää"`, `"Päätin <X>"`, `"Valitsin <X>:n"`           | Käyttäjän päätökset (episodiset) |
-| PATTERN_PATTERNS    | `"Yleensä <X>"`, `"Aina <X>"`, `"En koskaan <X>"`               | Pysyvät käyttäytymismallit       |
+| Luokka              | Esimerkkikuvio                                              | Kaappaa                            |
+| ------------------- | ----------------------------------------------------------- | ---------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Käyttäjäasetukset                  |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Käyttäjien päätökset (jaksoittain) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Pysyvät käyttäytymismallit         |
 
-### Esimerkkimallit (yksinkertaistettu)
+### Esimerkkikuvioita (yksinkertaistettu)
 
 ```ts
-// Tiedostosta src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -748,36 +721,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Mitä poimitaan
+### Mitä uutetaan
 
 Kun käyttäjä sanoo:
 
-> "Pidän enemmän TypeScriptistä. Käytän tässä projektissa Postgresia. Teen aina commitin ennen push-toimintoa. En pidä Pythonista."
-> Poiminta tuottaa neljä muistia:
+> "Pidän parempana TypeScript. Käytän Postgres tässä projektissa. Sitoudun aina ennen työntämistä. En pidä Pythonista." Purkaminen tuottaa 4 muistia:
 >
-> | Avain                                | Luokka    | Tyyppi     | Sisältö                       |
-> | ------------------------------------ | --------- | ---------- | ----------------------------- |
-> | `preference:typescript`              | mieltymys | fakta      | "TypeScript"                  |
-> | `decision:postgres_for_this_project` | päätös    | episodinen | "Postgres tässä projektissa"  |
-> | `pattern:commit_before_pushing`      | malli     | fakta      | "commit ennen push-toimintoa" |
-> | `preference:python`                  | mieltymys | fakta      | "Python"                      |
+> | -avain | -luokka | tyyppi | -sisältö | | --------------------------------------------------------------------- | --------- | | | | `preference:typescript` | preferenssi | tosiasiallinen | "TypeScript" | | `decision:postgres_for_this_project` | päätös | episodinen | "Postgres | | `pattern:commit_before_pushing` | tosiasiallinen | | sitoudu ennen työntämistä" | | `preference:python` | etusija | tosiasiallinen | "Python" |
 
-### Poiminnan rajat
+### Poistorajat
 
-Hallitsemattoman poiminnan estämiseksi käytössä ovat seuraavat rajat:
+Seuraavia rajoituksia noudatetaan, jotta vältetään karkaava poisto:
 
 | Sisällön vähimmäispituus | 3 merkkiä |
 | Sisällön enimmäispituus | 500 merkkiä |
 
-### Milloin poiminta kannattaa poistaa käytöstä
+### Milloin poistaminen poistetaan käytöstä
 
-Poiminta suoritetaan automaattisesti aina, kun muisti on käytössä; erillistä
-vain poimintaa koskevaa valintaa ei ole. Voit poistaa sen käytöstä poistamalla muistin kokonaan käytöstä (`enabled: false`
-`PUT /api/settings/memory`-pyynnöllä). Tätä kannattaa harkita, kun:
+Purkaminen suoritetaan automaattisesti aina, kun muisti on käytössä; ei ole erillistä vain poistoa varten tarkoitettua kytkintä. Poistaaksesi sen käytöstä poistamalla muisti kokonaan (`enabled: false` kautta `PUT /api/settings/memory`). Harkitse sen tekemistä, kun:
 
-- Viestimäärä on suuri ja poiminnan kustannukset ovat merkittäviä
-- Keskustelut ovat enimmäkseen tilapäisiä (keskustelu, virheenkorjaus) eikä niillä ole pitkäaikaista arvoa
-- Keräät kontekstin jo mukautetuilla liitännäisillä
+- Sinulla on suuri viestimäärä ja poimintakustannukset eivät ole vähäpätöisiä
+- Keskustelusi ovat enimmäkseen ohimeneviä (chat, virheenkorjaus), joilla ei ole pitkäaikaista arvoa
+- Tallennat jo kontekstia mukautettujen laajennusten avulla
 
 ---
 

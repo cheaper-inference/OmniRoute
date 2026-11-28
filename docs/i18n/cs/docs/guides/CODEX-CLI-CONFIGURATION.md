@@ -472,107 +472,107 @@ V interaktivní relaci:
 
 ---
 
-## Dlouhotrvající úlohy
+## Dlouhotrvající úkoly
 
-Dvě výchozí hodnoty OmniRoute mohou nenápadně narušit několikahodinové relace Codex CLI. Ani jedna není nastavením Codex CLI — obě se nacházejí na straně OmniRoute. Uživatelé, kteří migrují konfiguraci z upstream proxy serverů, jež připínají účty a vypínají limity nečinnosti, často narazí na oba problémy a dojdou k závěru, že OmniRoute „nedokáže udržet dlouhou relaci“.
+Dvě výchozí hodnoty OmniRoute mohou tiše sabotovat vícehodinové relace Codex CLI. Ani nastavení Codex CLI — není živé na straně OmniRoute. Uživatelé, kteří migrují konfiguraci z upstream proxy, které připojují účty a deaktivují přerušení nečinnosti, často zasahují do obou a dochází k závěru, OmniRoute „nemůže udržet dlouhou relaci“.
 
-| Příznak                                                                          | Pravděpodobná příčina                                                  | Nastavení                |
-| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------ |
-| Relace neustále přepíná účty / mezi tahy se ztrácí kontinuita mezipaměti promptů | TTL afinity relace je `0` (vypnuto)                                    | `sessionAffinityTtlMs`   |
-| Připojení se přeruší během uvažování bez upozornění zobrazeného klientovi        | Hlídač nečinnosti streamu se spustil po 10 minutách bez upstream části | `STREAM_IDLE_TIMEOUT_MS` |
+| Příznak                                                                          | Pravděpodobná příčina                                                         | Knoflík                  |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------ |
+| Session neustále přepíná účty / mezi tahy se ztrácí kontinuita rychlé mezipaměti | Afinita relace TTL je `0` (vypnuto)                                           | `sessionAffinityTtlMs`   |
+| Připojení zanikne uprostřed důvodu bez výzvy na straně klienta                   | Sledování nečinnosti streamu se spustilo po 10 minutách bez žádného upstreamu | `STREAM_IDLE_TIMEOUT_MS` |
 
-Související diskuse: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (výpadky dlouhých úloh), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (proč je afinita ve výchozím nastavení vypnutá). Sledování: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Související diskuse: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (dlouhá úloha klesá), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (proč je afinita ve výchozím nastavení vypnuta). Sledování: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Afinita relace — připnutí jedné konverzace k jednomu účtu
+### 1. Session affinity — připnout jednu konverzaci k jednomu účtu
 
-**Výchozí hodnota:** `sessionAffinityTtlMs = 0` (vypnuto).
+**Výchozí:** `sessionAffinityTtlMs = 0` (zakázáno).
 
-**Kde ji nastavit**
+**Kde to nastavit**
 
-- Řídicí panel → **Nastavení → Směrování** → **Afinita relace** → **TTL afinity (sekundy)** (`ComboDefaultsTab`)
-- Nebo aktualizujte nastavení metodou PATCH s `sessionAffinityTtlMs` v **milisekundách** (rozsah Zod `0`–`86_400_000`, tj. až 24 hodin)
+- Palubní deska →** Nastavení směrování →** →** Afinita relace** →** Afinita TTL (sekundy)** (`ComboDefaultsTab`)
+- Nebo nastavení PATCH se vstupem `sessionAffinityTtlMs`** milisekundy** ( rozsah Zod `0`–`86_400_000`, tj. až 24 hodin)
 
-> V #7274 přejmenováno z `codexSessionAffinityTtlMs`, které bylo určeno pouze pro Codex. Původní klíč je stále přijímán jako alias pouze pro čtení; nové konfigurace by měly používat `sessionAffinityTtlMs`. Afinita se nyní vztahuje na **libovolného** poskytovatele, jakmile je TTL vyšší než `0`, nejen na Codex — viz [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Afinita relace.
+> Přejmenováno v #7274 z Codex-only `codexSessionAffinityTtlMs`. Starší klíč je stále přijímán jako alias pouze pro čtení; nové konfigurace by měly používat `sessionAffinityTtlMs`. Afinita se nyní vztahuje na** žádný** poskytovatel, jakmile je TTL nad `0`, nejen Codex — viz [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → afinita relace.
 
-**Co přestane fungovat, když hodnota zůstane 0**
+**Co se zlomí, když zůstane na 0**
 
-Každý tah vícekolové konverzace Codex je směrován nezávisle podle aktivní kombinované strategie a při každém tahu může skončit na **jiném účtu**. Tím se naruší kontinuita upstream relace / mezipaměti promptů. OmniRoute kontroluje hlavičky relace Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) a pole těla, například `prompt_cache_key` / `session_id`, pouze tehdy, když je TTL větší než `0` (`extractSessionAffinityKey` v `src/sse/services/auth.ts`).
+Každé kolo víceotáčkové konverzace Codex je směrováno nezávisle aktivní kombinovanou strategií a může přistát na a** jiný účet za kolo** . To přeruší kontinuitu upstream relace / prompt-cache. OmniRoute konzultuje pouze záhlaví relace Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) a pole těla, jako je `prompt_cache_key` / `session_id` když je TTL větší než `0` (`extractSessionAffinityKey` v `src/sse/services/auth.ts`).
 
-**Doporučení pro několikahodinovou samostatnou úlohu**
+**Doporučeno pro vícehodinový jednotlivý úkol**
 
-Nastavte TTL **nad očekávanou dobu trvání úlohy podle hodin** (maximum v uživatelském rozhraní je **86400 sekund** = 24 hodin):
+Nastavte TTL** nad očekávanou délkou úkolu podle nástěnných hodin** (max UI je** 86 400 sekund** = 24 hodin):
 
-| Očekávaná délka úlohy | TTL afinity (UI, sekundy) | `sessionAffinityTtlMs` |
-| --------------------- | ------------------------- | ---------------------- |
-| Několik hodin         | `14400` (4 h)             | `14400000`             |
-| Přes noc / ~12 h      | `43200` (12 h)            | `43200000`             |
-| Celý den              | `86400` (24 h, maximum)   | `86400000`             |
+| Očekávaná délka úkolu | Afinita TTL (UI, sekundy)     | `sessionAffinityTtlMs` |
+| --------------------- | ----------------------------- | ---------------------- |
+| Několik hodin         | `14400` (4h)                  | `14400000`             |
+| Přenocování / ~ 12h   | `43200` (12h)                 | `43200000`             |
+| Celý den              | `86400` (24 hodin, maximálně) | `86400000`             |
 
-Výslovné povolení je záměrné: vypnutí afinity upřednostňuje vyvažování zátěže mezi účty; její zapnutí upřednostňuje kontinuitu jedné dlouhé relace agenta. Tato příručka výchozí hodnotu **nemění** — provozovatelé spouštějící dlouhé úlohy Codex musí tuto funkci výslovně povolit.
+Přihlášení je záměrné: deaktivace afinity upřednostňuje vyrovnávání zatížení napříč účty; jeho aktivace upřednostňuje kontinuitu pro jednu dlouhou relaci agenta. Tento průvodce ano** ne** změnit výchozí —, kterou se musejí přihlásit operátoři s dlouhými úlohami Codex.
 
-### 2. Časový limit nečinnosti streamu — neukončujte tiché tahy uvažování
+### 2. Časový limit nečinnosti streamu — nezabíjí tiché uvažování
 
-**Výchozí hodnota:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minut). Pokud není nastavena, dědí hodnotu z `REQUEST_TIMEOUT_MS`; sdílená výchozí hodnota je rovněž 600000. Viz [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Časové limity.
+**Výchozí:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minut). Když není nastaveno, dědí se z `REQUEST_TIMEOUT_MS` ; sdílená základní linie je také 600 000. Viz časové limity [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) →.
 
-**Co přestane fungovat při výchozí hodnotě**
+**Co se ve výchozím nastavení rozbije**
 
-Tah uvažování / nástroje Codexu, který zůstane potichu déle než 10 minut a nepřijde během něj **žádný skutečný datový blok z upstreamu**, je násilně ukončen hlídačem nečinnosti SSE (`open-sse/utils/stream.ts`). Klient často zaznamená pouze náhlé přerušení připojení — což odpovídá hlášení „automaticky se zastavilo bez jakéhokoli upozornění“.
+Codex uvažování / otáčení nástroje, které zůstává tiché déle než 10 minut** žádný skutečný upstream kus** je násilně uzavřen hlídačem nečinnosti SSE (`open-sse/utils/stream.ts`). Klient často vidí, že spojení — se „zastaví automaticky bez jakéhokoli upozornění“.
 
-Kritický detail: syntetický SSE **heartbeat OmniRoute časovač nečinnosti neresetuje**. Hodnotu `lastChunkTime` aktualizuje pouze skutečný blok těla odpovědi z upstreamu. Tichý model, který stále „přemýšlí“, vypadá z pohledu hlídače stejně jako zablokovaný upstream.
+Kritický detail: syntetický SSE OmniRoute** tep se neresetuje** nečinné hodiny. Pouze skutečný upstream tělo chunk aktualizuje `lastChunkTime`. Tichý model, který stále „přemýšlí“, vypadá z pohledu hlídače identicky se zastaveným proti proudu.
 
-Související nečinnost těla odpovědi Undici: `FETCH_BODY_TIMEOUT_MS` (ve výchozím nastavení používá stejný základ 10 minut; hodnota `0` ji vypne). U streamování pokrývá `FETCH_TIMEOUT_MS` pouze navázání připojení / první hlavičky — po aktivaci streamu se prodlevy řídí pomocí `STREAM_IDLE_TIMEOUT_MS` a `FETCH_BODY_TIMEOUT_MS`.
+Související nečinnost těla Undici: `FETCH_BODY_TIMEOUT_MS` (také výchozí na stejnou 10minutovou základní linii; `0` ji deaktivuje). U streamování `FETCH_TIMEOUT_MS` pokrývá pouze nastavení připojení / první hlavičky — jakmile je stream aktivní, zastavení se řídí `STREAM_IDLE_TIMEOUT_MS` a `FETCH_BODY_TIMEOUT_MS`.
 
-**Doporučení pro jednu několikahodinovou úlohu**
+**Doporučeno pro vícehodinový jednotlivý úkol**
 
 V prostředí procesu OmniRoute (`.env` / compose / systemd):
 
 ```bash
-# Vypnutí limitů nečinnosti streamu a těla odpovědi pro dlouhé tahy uvažování
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Nebo je zvyšte nad nejdelší očekávanou dobu bez aktivity (hodnoty jsou v milisekundách):
+Nebo je zvyšte nad nejdelší tichou mezeru, kterou očekáváte (hodnoty jsou milisekundy):
 
 ```bash
-# Příklad: povolit až 2 hodiny bez aktivity mezi bloky z upstreamu
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Po změně těchto proměnných prostředí OmniRoute restartujte.
+Po změně těchto proměnných env restartujte OmniRoute.
 
-### Konkrétní postup — několikahodinová úloha Codexu
+### Konkrétní recept — vícehodinový úkol Codex
 
-1. **Připněte účet:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12 h) nebo `86400` (maximum 24 h).
-2. **Zvyšte / vypněte limity nečinnosti** v prostředí OmniRoute:
+1. **Připnout účet:** Ovládací panel → Nastavení → Směrování → Afinita relace → Afinita TTL = `43200` (12h) nebo `86400` (max. 24h).
+2. **Zvyšte / deaktivujte přerušení chodu naprázdno** v prostředí OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Zachovejte obvyklý soubor `config.toml` Codexu (`wire_api = "responses"`, správná hodnota `base_url`, `OMNIROUTE_API_KEY`) — pro tato dvě chování neexistují na straně Codexu žádná nastavení afinity ani nečinnosti.
-4. Restartujte OmniRoute a poté spusťte dlouhou úlohu Codexu.
+3. Zachovejte obvyklé Codex `config.toml` (`wire_api = "responses"`, správné `base_url`, `OMNIROUTE_API_KEY`) — pro tato dvě chování neexistují žádné knoflíky affinity/idle na straně Codexu.
+4. Restartujte OmniRoute a poté spusťte dlouhou úlohu Codex.
 
-### Rozhodnutí o výchozích hodnotách (#7287)
+### Výchozí rozhodnutí (#7287)
 
-| Nastavení                | Dodávaná výchozí hodnota | Změnit v tomto průvodci?                                                                             |
-| ------------------------ | ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (vypnuto)            | **Ne** — zůstává volitelné (vyvažování zátěže vs. kontinuita; viz Discussion #5718)                  |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)        | **Ne** — pro běžný provoz zůstává 10 minut; provozovatelé dlouhých úloh Codexu jej zvýší nebo vypnou |
+| Knoflík                  | Výchozí odeslání    | Změnit tuto příručku?                                                                            |
+| ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------ |
+| `sessionAffinityTtlMs`   | `0` (vypnuto)       | **Žádný** — zůstává opt-in (vyrovnávání zátěže versus kontinuita; viz diskuse #5718)             |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 minut) | **Žádný** — zůstává 10 minut pro obecný provoz; Operátoři long Codex jej zvyšují nebo deaktivují |
 
-Globální změna kterékoli výchozí hodnoty by změnila chování pro každého klienta dané instance, nejen pro Codex. Nastavení zdokumentujte; výchozí hodnoty ponechte beze změny, dokud explicitní rozhodnutí provozovatele neurčí jinak.
+Globální převrácení obou výchozích hodnot by změnilo chování každého klienta instance, nejen Codex. Zdokumentujte knoflíky; ponechte výchozí hodnoty na pokoji, dokud výslovné rozhodnutí operátora neřekne jinak.
 
-### Diagnostika ukončení kvůli nečinnosti
+### Diagnostika volnoběhu
 
-Když se aktivuje hlídač nečinnosti, OmniRoute zaznamená řádek v následujícím tvaru:
+Když se spustí hlídací pes nečinnosti, OmniRoute zaznamená čáru ve tvaru:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Vyhledejte pomocí grep řetězec `Idle timeout: no data from` (nebo kód `stream_idle_timeout` / název chyby `StreamIdleTimeoutError`). Segment poskytovatele odpovídá tomu, co OmniRoute použil pro daný požadavek (`codex`, ID jiného poskytovatele nebo `provider`, pokud není znám) — nejde vždy doslova o řetězec `codex`.
+Grep pro `Idle timeout: no data from` (nebo kód `stream_idle_timeout` / název chyby `StreamIdleTimeoutError`). Segment poskytovatele je jakékoli OmniRoute použité pro tento požadavek (`codex`, id jiného poskytovatele nebo `provider`, pokud není známo) — to není vždy doslovný řetězec `codex`.
 
 ---
 

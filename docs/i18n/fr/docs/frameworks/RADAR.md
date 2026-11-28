@@ -93,52 +93,30 @@ ni le routage ni la sélection du modèle — consultez l’activation distincte
 
 ---
 
-## La synchronisation des données est une activation DISTINCTE — la promesse de confidentialité
+## La synchronisation des données est un opt-in SEPARATE — la promesse de confidentialité
 
-L’activation de `RADAR_ENABLED` déverrouille uniquement l’interface utilisateur. La synchronisation du flux nécessite une seconde
-activation indépendante, stockée dans `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migration `136_radar_cache_settings.sql`). `syncRadar()` vérifie le flag _et_ l’activation
-avant d’effectuer tout appel réseau :
+L'activation `RADAR_ENABLED` déverrouille uniquement le UI. La synchronisation du flux nécessite un deuxième opt-in indépendant stocké dans `radar_settings.opt_in` (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`). `syncRadar()` vérifie le drapeau _et_ l'opt-in avant de passer un appel réseau :
 
 ```
-Flag désactivé    → { status: "disabled" }   — aucun appel réseau
-Activation absente → { status: "opt_out" }    — aucun appel réseau
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Lorsque les deux sont activés, le processus de synchronisation est le suivant :
+Lorsque les deux sont activés, le chemin de synchronisation est :
 
-1. `GET <URL de base du flux>/v1/catalog/latest` avec `x-omniroute-radar-schema: 2` et un en-tête
-   facultatif `Authorization: Bearer <clé de soutien>` (voir ci-dessous). En l’absence de l’en-tête de schéma, les serveurs utilisent par défaut
-   l’artefact de transition v1 signé séparément, afin que les anciens clients installés continuent de
-   recevoir les mises à jour.
-2. Il s’agit d’un flux applicatif de téléchargement uniquement, mais il repose tout de même sur une requête HTTPS. L’infrastructure
-   hébergée reçoit les métadonnées de connexion ordinaires, telles que l’adresse IP source. Lorsqu’une clé de soutien
-   est configurée, la synchronisation envoie également cette clé dans l’en-tête Bearer afin que le service puisse déterminer
-   les droits associés. À la révision exacte du serveur privé identifiée dans la limite des éléments probants ci-dessus,
-   la comptabilisation des requêtes du flux utilise les hachages de clés, des données d’utilisation agrégées et un HMAC tronqué
-   de l’adresse IP avec rotation quotidienne pour l’examen manuel des abus ; ces tables ne conservent ni la clé ni l’adresse IP sous forme brute.
-   Les journaux d’accès de l’infrastructure et la boîte d’envoi chiffrée constituent des périmètres opérationnels
-   distincts.
-3. OmniRoute n’envoie jamais au service Radar les prompts, les réponses, les conversations, les identifiants des fournisseurs, le trafic des modèles,
-   la disponibilité, la latence ni la configuration locale des fournisseurs.
-4. La réponse est vérifiée, validée et mise en cache localement (voir
-   [Modèle de sécurité](#security-model)). Radar dispose exactement de quatre chemins réseau côté serveur :
-   `syncRadar()` pour le catalogue, `syncRadarReferrals()` pour les parrainages et
-   `syncRadarOffers()` / `syncRadarIntel()` pour les offres et les renseignements réservés aux soutiens.
+1. `GET <feed base URL>/v1/catalog/latest` avec `x-omniroute-radar-schema: 2` et un en-tête `Authorization: Bearer <supporter key>` facultatif (voir ci-dessous). Les serveurs utilisent par défaut l'artefact de transition v1 signé séparément lorsque l'en-tête de schéma est absent, de sorte que les anciens clients installés continuent de recevoir des mises à jour.
+2. Il s'agit d'un flux d'application en téléchargement uniquement, mais il s'agit toujours d'une requête HTTPS. L'infrastructure hébergée reçoit des métadonnées de connexion ordinaires telles que la source IP. Lorsqu'une clé de supporteur est configurée, la synchronisation envoie également cette clé dans l'en-tête Bearer afin que le service puisse résoudre le droit. Lors de la révision exacte du serveur privé identifiée dans la limite des preuves ci-dessus, la comptabilité des demandes de flux utilise des hachages de clés, une utilisation globale et un HMAC tronqué en rotation quotidienne du IP pour l'examen manuel des abus ; ces tables ne conservent ni la clé ni le IP sous forme brute. Les journaux d’accès à l’infrastructure et la boîte d’envoi de livraison chiffrée constituent des limites opérationnelles distinctes.
+3. OmniRoute n'envoie jamais d'invites, de réponses, de conversations, d'informations d'identification du fournisseur, de modèle de trafic, de disponibilité, de latence ou de configuration du fournisseur local au service Radar.
+4. La réponse est vérifiée, validée et mise en cache localement (voir [Modèle de sécurité](#security-model) ). Radar dispose d'exactement quatre chemins réseau côté serveur : `syncRadar()` pour le catalogue, `syncRadarReferrals()` pour les références et `syncRadarOffers()` / `syncRadarIntel()` pour les offres réservées aux supporters et Intel.
 
-La **clé de soutien** est un jeton Bearer facultatif (`radar_settings.supporter_key`)
-qui permet au service de flux de déterminer le niveau à fournir (voir
-[Niveaux](#tiers-community-and-live)). Elle est :
+La vérification du catalogue s'effectue toutes les 24 heures. Lorsque le flux vérifié contient toujours la version et le niveau mis en cache, la synchronisation conserve la charge utile mise en cache, renouvelle `fetchedAt` et la prochaine vérification intervient 24 heures plus tard au lieu de la prochaine tique horaire.
 
-- Stockée **chiffrée au repos** avec les mêmes fonctions d’assistance AES-256-GCM `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`) que celles utilisées pour les identifiants des fournisseurs.
-- Définie via `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) et
-  **jamais renvoyée telle quelle** — la réponse retourne une forme masquée (`omr_****abcd`).
-- Sa modification ou sa suppression invalide de manière atomique les caches du catalogue, des parrainages, des offres et d’Intel. La
-  synchronisation ou lecture suivante détermine les nouveaux droits côté serveur ; l’enregistrement d’une clé ne déclenche pas en lui-même
-  de requête réseau et ne consomme aucune clé d’activation à usage unique.
-- Envoyée au service de flux sous forme de jeton Bearer lors de la requête GET de synchronisation — aucune autre information concernant la
-  clé ne quitte jamais le client.
+Le** clé du supporter** est un jeton Bearer facultatif (`radar_settings.supporter_key`) qui permet au service de flux de décider quel niveau servir (voir [Tiers](#tiers-community-and-live) ). C'est:
+
+- Stocké** chiffré au repos** avec les mêmes assistants AES-256-GCM `encrypt()`/`decrypt()` (`src/lib/db/encryption.ts`) utilisés pour les informations d'identification du fournisseur.
+- Réglé via `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) et** Je n'ai jamais répondu** — la réponse renvoie une forme masquée (`omr_****abcd`).
+- Le modifier ou l’effacer invalide atomiquement le catalogue, les références, les offres et les caches Intel. Le prochain sync/read résout le nouveau droit côté serveur ; l’enregistrement d’une clé ne fait pas lui-même de requête réseau ni ne consomme de clé d’activation à usage unique.
+- Envoyé au service de flux en tant que jeton Bearer sur la synchronisation GET — rien d'autre sur la clé ne quitte jamais le client.
 
 ---
 
@@ -398,95 +376,45 @@ qui détermine le niveau auquel un client doit faire confiance :
 
 ---
 
-## Règles de fusion de la surcouche lors de la lecture
+## Règles de fusion de superposition de temps de lecture
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) fusionne le flux mis en cache **par-dessus** la
-base statique **au moment de la lecture**, dans `getRadarCatalog()`. Le tableau de référence
-(`FREE_MODEL_BUDGETS`) n’est jamais modifié — un nouveau `MergedEntry[]` est calculé à chaque
-appel.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) fusionne le flux mis en cache** sur** la ligne de base statique à** lire l'heure** , à l'intérieur `getRadarCatalog()`. Le tableau de base (`FREE_MODEL_BUDGETS`) n'est jamais muté — un `MergedEntry[]` est calculé à nouveau à chaque appel.
 
 Quatre règles, par ordre de priorité :
 
-1. **Le flux ne remplace jamais une substitution locale.** Pour chaque champ : si l’opérateur a
-   personnalisé un champ d’une entrée (dans la map `localOverrides`, indexée par
-   `provider:modelId`), la valeur du flux pour ce champ précis est ignorée — la valeur de
-   l’opérateur prévaut.
-2. **`enabled: false` désactive l’entrée, avec indication de provenance.** Une entrée du flux qui
-   désactive une entrée définit `enabled: false` et `disabledBy: "radar"` dans le résultat fusionné,
-   afin que l’interface puisse expliquer _pourquoi_ une entrée est passée de disponible à désactivée.
-3. **Une entrée ajoutée par l’utilisateur et absente du flux est conservée sans modification.**
-   Les entrées qui existent uniquement dans la base de référence (ou qui ont été ajoutées localement)
-   et qui n’ont aucune entrée correspondante dans le flux sont conservées telles quelles.
-4. **Une entrée marquée par une pierre tombale n’est jamais ressuscitée.** Si l’opérateur a
-   explicitement supprimé une entrée (ensemble `tombstones`), le fait que le flux ajoute à nouveau
-   ce `provider:modelId` dans une version ultérieure ne la rétablit pas.
+1. **Feed n’écrase jamais un remplacement local.** Par champ : si l'opérateur a personnalisé un champ sur une entrée (`localOverrides` map, keyed `provider:modelId`), la valeur du flux pour ce champ spécifique est ignorée — la valeur de l'opérateur l'emporte.
+2. **`enabled: false` désactive l'entrée, avec provenance.** Une entrée de flux qui désactive une entrée définit `enabled: false` et `disabledBy: "radar"` sur le résultat fusionné, afin que UI puisse expliquer _pourquoi_ une entrée est passée de disponible à désactivée.
+3. **Une entrée ajoutée par l'utilisateur et non présente dans le flux survit intacte.** Les entrées qui n'existent que dans la ligne de base (ou ont été ajoutées localement) et qui n'ont aucune entrée de flux correspondante sont transmises sans modification.
+4. **Une entrée tombstone n’est jamais ressuscitée.** Si l'opérateur a explicitement supprimé une entrée (`tombstones` set), le flux rajoutant ce `provider:modelId` dans une version ultérieure ne le ramène pas.
 
-Les champs modifiables et les pierres tombales sont conservés dans
-`radar_local_model_state` (migration `153_radar_local_model_state.sql`). L’adaptateur de base de
-données public (`src/lib/db/radar.ts`) convertit ces lignes en map `localOverrides` et en ensemble
-`tombstones` utilisés par `applyFeed()` ; en production, `getRadarCatalog()` charge cet état une fois
-les contrôles du drapeau, du cache et du schéma validés. Seuls `displayName` et `enabled` peuvent
-être modifiés par l’opérateur. L’identité du fournisseur et du modèle, la provenance du flux, le
-quota, les capacités, les conditions d’utilisation et les données de configuration ne peuvent pas
-être modifiés par cette interface.
+Les champs modifiables et les pierres tombales sont conservés dans `radar_local_model_state` (migration `153_radar_local_model_state.sql`). L'adaptateur public DB (`src/lib/db/radar.ts`) convertit ces lignes en la carte `localOverrides` et l'ensemble `tombstones` utilisés par `applyFeed()`; production `getRadarCatalog()` charge cet état après le passage des portes d'indicateur, de cache et de schéma. Seuls `displayName` et `enabled` sont modifiables par l'opérateur. L'identité Provider/model, la provenance du flux, le quota, les capacités, ToS et les données de configuration ne peuvent pas être écrits via cette surface.
 
-Le tableau de bord propose quatre actions locales :
+Le tableau de bord expose quatre actions locales :
 
-- **Modifier** change le nom d’affichage local et l’état d’activation.
-- **Réinitialiser les modifications locales** efface les deux champs modifiables sans changer
-  une pierre tombale.
-- **Masquer** crée une pierre tombale afin que les mises à jour ultérieures du flux ne puissent
-  pas recréer la ligne.
-- **Restaurer** supprime la pierre tombale ; toute substitution enregistrée séparément reste
-  applicable.
+- **Modifier** modifie le nom d'affichage local et l'état activé.
+- **Réinitialiser les modifications locales** efface les deux champs modifiables sans modifier une pierre tombale.
+- **Cacher** crée une pierre tombale, de sorte que les mises à jour ultérieures du flux ne peuvent pas recréer la ligne.
+- **Restaurer** enlève la pierre tombale ; tout remplacement enregistré séparément reste en vigueur.
 
-Une valeur `enabled: false` provenant du flux demeure l’exception de sécurité : elle prévaut sur
-une valeur locale obsolète `enabled: true`, maintient l’entrée fusionnée désactivée et enregistre
-`disabledBy: "radar"`.
+Un flux `enabled: false` reste l'exception de sécurité : il l'emporte sur un `enabled: true` local obsolète, maintient l'entrée fusionnée désactivée et enregistre `disabledBy: "radar"`.
 
-Les publications du catalogue utilisent `schemaVersion: 2`. `contextWindow` ainsi que chacun des
-champs `tools`, `vision` et `thinking` sont indépendamment de type `number | null` /
-`boolean | null` : `null` signifie « inconnu », tandis que `false` signifie qu’une source officielle
-du fournisseur, confirmée selon D16, indique explicitement que la capacité est absente. Les drapeaux
-internes du registre ou des spécifications de modèles d’OmniRoute ne sont jamais directement promus
-au rang de faits du flux. Le client accepte toujours les instantanés v1 ; comme l’ancien générateur
-utilisait `false` comme valeur de remplacement en cas d’absence, une valeur v1 `false` est normalisée
-en « inconnu », tandis qu’une valeur v1 `true` reste factuelle. Les versions de schéma inconnues
-échouent de manière sécurisée et le dernier cache valide reste disponible. Chaque modèle v2 doté
-d’un contexte ou d’une capacité non nul doit comporter un tableau `metadataEvidenceUrls[]` contenant
-des URL HTTPS ne nécessitant aucun identifiant ; sinon, la validation du schéma échoue et le cache
-n’est pas remplacé. Le tableau du catalogue affiche les trois états sous la forme `✓`, `✕` et `?`.
+Les publications du catalogue utilisent `schemaVersion: 2`. `contextWindow` et chacun des `tools`, `vision` et `thinking` sont indépendamment `number | null` / `boolean | null`: `null` signifie inconnu, tandis que `false` signifie qu'une source officielle du fournisseur D16-confirmed indique explicitement que la fonctionnalité est absente. Les indicateurs OmniRoute registry/model-spec internes ne sont jamais promus directement pour alimenter les faits. Le client accepte toujours les instantanés v1 ; parce que l'ancien constructeur utilisait `false` comme espace réservé d'absence, v1 `false` est normalisé à inconnu tandis que v1 `true` reste factuel. Les versions de schéma inconnues échouent et le dernier cache valide reste disponible. Chaque modèle v2 avec un context/capability non nul doit porter un HTTPS `metadataEvidenceUrls[]` sans identifiants ; sinon, la validation du schéma échoue et le cache n'est pas remplacé. La table du catalogue affiche les trois états sous la forme `✓`, `✕` et `?`.
 
-### Combinaisons guidées et accès MCP
+### Combos guidés et accès MCP
 
-Les valeurs `familyId` confirmées sont conservées dans la surcouche appliquée lors de la lecture et
-pilotent le module pur `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Une
-famille n’est suggérée que lorsque les connexions d’au moins deux fournisseurs distincts sont actives
-et que ceux-ci exposent l’identifiant exact du modèle sélectionné. Les modèles désactivés, les
-fournisseurs inactifs, les identifiants de modèle manquants, les familles à membre unique et les
-correspondances ambiguës d’alias ou de préfixes échouent de manière sécurisée. Les suggestions
-utilisent la stratégie `priority` existante, en classant d’abord le budget mensuel récurrent le plus
-élevé ; l’interface les crée uniquement via `POST /api/combos`.
+Les valeurs `familyId` confirmées survivent à la superposition du temps de lecture et pilotent le module `buildRadarComboSuggestions()` pur (`src/lib/radar/comboSuggestions.ts`). Une famille n'est suggérée que lorsqu'au moins deux fournisseurs distincts ont des connexions actives et exposent le modèle exact sélectionné ID. Les modèles désactivés, les fournisseurs inactifs, le modèle IDs manquant, les familles singleton et les correspondances alias/prefix ambiguës échouent. Les suggestions utilisent la stratégie `priority` existante, en commençant par le budget mensuel récurrent le plus important ; le UI les crée uniquement via `POST /api/combos`.
 
-L’interface utilisateur guidée se trouve à l’emplacement `/dashboard/radar/combos`. Elle lit uniquement les points de terminaison locaux
-`GET /api/radar/catalog` et `GET /api/combos/builder/options`. Elle ne déclenche jamais de synchronisation Radar,
-ne lit pas les identifiants du fournisseur et n’écrit pas directement dans la base de données des combos.
+Le UI guidé vit au `/dashboard/radar/combos`. Il lit uniquement les points de terminaison locaux `GET /api/radar/catalog` et `GET /api/combos/builder/options`. Il ne déclenche jamais la synchronisation Radar, ne lit jamais les informations d'identification du fournisseur ou n'écrit jamais directement dans la base de données combinée.
 
-Les clients MCP peuvent lire la même projection locale avec `omniroute_radar_catalog` (`read:radar`). Les
-filtres facultatifs `provider`, `familyId` et `enabledOnly` sont évalués après une lecture locale unique via
-`GET /api/radar/catalog`. Sa sortie fermée inclut les métadonnées du catalogue ainsi que le fournisseur/modèle,
-le nom d’affichage, `familyId`, le quota, les fonctionnalités, l’état d’activation, l’origine et `disabledBy` ; les URL de configuration,
-les étapes, les connexions, les adresses e-mail, les clés et les données de parrainage ne sont jamais renvoyées. Cet outil est
-en lecture seule et n’appelle jamais `/api/radar/sync`.
+Les clients MCP peuvent lire la même projection locale avec `omniroute_radar_catalog` (`read:radar`). Les filtres facultatifs `provider`, `familyId` et `enabledOnly` sont évalués après une lecture `GET /api/radar/catalog` locale. Sa sortie fermée comprend les métadonnées du catalogue plus provider/model, le nom d'affichage, `familyId`, le quota, les capacités, l'état activé, l'origine et `disabledBy`; setup URLs, les étapes, les connexions, les adresses e-mail, les clés et les données de référence ne sont jamais renvoyées. Cet outil est en lecture seule et n'appelle jamais `/api/radar/sync`. Lorsque le flux mis en cache est antérieur au catalogue installé, `meta.olderThanRelease` est `true` et l'outil renvoie les modèles du catalogue installé avec les remplacements locaux et les pierres tombales appliquées.
 
 ### Marqueurs de provenance
 
-Chaque entrée fusionnée comporte un champ `origin` que l’interface utilisateur affiche sous forme de badge :
+Chaque entrée fusionnée comporte un champ `origin` que le UI affiche sous forme de badge :
 
-- `"baseline"` — inchangée par rapport au catalogue statique de la version.
-- `"radar"` — un ou plusieurs champs ont été actualisés par le flux.
-- `"local"` — l’opérateur a défini au moins une substitution locale pour cette entrée (les
-  substitutions locales prévalent toujours sur le flux conformément à la règle 1, indépendamment de ce qu’indique le flux).
+- `"baseline"` — intact du catalogue de versions statiques.
+- `"radar"` — un ou plusieurs champs ont été rafraîchis par le flux.
+- `"local"` — l'opérateur a au moins un remplacement local sur cette entrée (les remplacements locaux l'emportent toujours sur le flux selon la règle 1, indépendamment de ce que dit le flux).
 
 ---
 

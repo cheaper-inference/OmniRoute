@@ -55,12 +55,12 @@ OmniRoute her API anahtarının isteklerini şu şekilde gruplandırır:** temsi
 
 Herhangi bir istemci kurulumu olmadan kaydedilenler:
 
-| Alan    | Kaynak                                                                                                                                                        |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Oturum  | `x-claude-code-session-id` başlığı ( `metadata.user_id.session_id` ile aynı değer), oturum başına kararlı                                                     |
-| Proje   | `Primary working directory:` satırı Claude Kodu, kendi ortamına mesaj gönderir; `.claude/worktrees/` altındaki çalışma ağacı klasörleri depo adına çözümlenir |
-| Dal     | git durumundan `Current branch:` Claude Kodu ilk mesajla birlikte gönderilir                                                                                  |
-| Müşteri | `user-agent` (`claude-cli/<version>`)                                                                                                                         |
+| Alan    | Kaynak                                                                                                                                                         |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Oturum  | `x-claude-code-session-id` başlığı ( `metadata.user_id.session_id` ile aynı değer), oturum başına kararlı                                                      |
+| Proje   | `Primary working directory:` satırı Claude Kodu, kendi ortamında mesaj gönderir; `.claude/worktrees/` altındaki çalışma ağacı klasörleri depo adına çözümlenir |
+| Dal     | git durumundan `Current branch:` Claude Kodu ilk mesajla birlikte gönderilir                                                                                   |
+| Müşteri | `user-agent` (`claude-cli/<version>`)                                                                                                                          |
 
 Codex (`<environment_context><cwd>`) ve OpenCode (`x-opencode-session`) aynı şekilde tanınır. Tuşlar** kayıt yok** etkin yalnızca oturum kimliğini ve başlık tarafından sağlanan proje alanlarını korur; İstemden okunan hiçbir şey (yol, dal) saklanmaz.
 
@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) ve OpenCode (`x-opencode-session`) aynı ş
 
 Çalışma dizini makineler arasında farklılık gösterdiğinden aynı depo farklı yollarda görünebilir. Bunun yerine projeyi açıkça gönderin: Claude Code, `ANTHROPIC_CUSTOM_HEADERS` listelenen başlıkları her model isteğine ekler ve OmniRoute bunlardan ikisini okur:
 
-| Başlık                     | Değer                                                                          |
-| -------------------------- | ------------------------------------------------------------------------------ |
-| `x-omniroute-project`      | Proje adı, örneğin `omniroute`                                                 |
-| `x-omniroute-project-repo` | Normalleştirilmiş uzaktan kumanda, örneğin `github.com/diegosouzapw/OmniRoute` |
+| Başlık                     | Değer                                                                               |
+| -------------------------- | ----------------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Proje adı, örneğin `omniroute`                                                      |
+| `x-omniroute-project-repo` | Normalleştirilmiş uzaktan kumanda, örneğin `github.com/cheaper-inference/OmniRoute` |
 
 Her ikisi de yalnızca atıfta bulunmak için okunur; hiçbir zaman yukarı akış sağlayıcısına iletilmezler.
 
@@ -280,28 +280,20 @@ bayrak gerekmez. Her çağrı için `--remote` / `--api-key` ile geçersiz kıla
 
 ## Sorun giderme
 
-**Claude Code ağ geçidini yok sayıyor** — `ANTHROPIC_BASE_URL` değerinin
-`/v1` **içermediğini** doğrulayın ve `claude` uygulamasını yeniden başlatın (env yalnızca başlangıçta bir kez okunur). `omniroute launch`
-bunu sizin için halleder.
+**Claude Kodu ağ geçidini yok sayar** — `ANTHROPIC_BASE_URL` sahip olduğunu doğruladı** hayır `/v1`** ve `claude` yeniden başlatın (env başlangıçta bir kez okunur). `omniroute launch` bunu sizin için halleder.
 
-**`/model` seçicisi boş / ağ geçidi modelleri eksik** — Claude Code
-v2.1.219+ ve `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` gerekir. Seçicide yalnızca `claude*` /
-`anthropic*` model kimlikleri görünür; diğer modelleri
-`ANTHROPIC_MODEL=<id>` ile zorlayın (profiller bunu yapar).
+**`/model` seçici boş / ağ geçidi modelleri eksik** — Claude Code v2.1.219 + ve `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ihtiyacı var. Seçicide yalnızca `claude*` / `anthropic*` modeli IDs görünür; `ANTHROPIC_MODEL=<id>` ile başka herhangi bir modeli zorlayın (profillerin yaptığı budur).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code her zaman **ön eksiz**
-model kimlikleri (ör. `claude-opus-4-8`) gönderir; bu nedenle hem Claude Code (`cc/…`) hem de
-Claude (`claude/…`) sağlayıcıları bağlı olduğunda yalın kimlik iki rotayla eşleşir ve
-OmniRoute tahminde bulunmayı reddeder. Bunu iki şekilde düzeltebilirsiniz: ön ekli bir kimliği
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` ile sabitleyin veya **Ön eksiz Claude modelleri için Claude Code'u tercih et**
-seçeneğini etkinleştirin — Claude sağlayıcı sayfasındaki anahtar ya da
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (varsayılan olarak kapalıdır;
-bkz. [Ortam](../reference/ENVIRONMENT.md)) — bu seçenek yalın `claude-*`
-kimliklerini bunun yerine Claude Code'a yönlendirir. Açık sağlayıcı ön ekleri her zaman önceliklidir.
+**`400 Ambiguous model 'claude-…'`** — Claude Kodu her zaman gönderir** öneksiz** IDs modeli (örn. `claude-opus-4-8`), yani hem Claude Kodu (`cc/…`) hem de Claude (`claude/…`) sağlayıcıları bağlandığında çıplak kimlik iki yolla eşleşir ve OmniRoute tahmin etmeyi reddeder. Her iki şekilde de düzeltin: ön ekli bir kimliği `ANTHROPIC_MODEL=cc/claude-opus-4-8` ile sabitleyin veya etkinleştirin** Öneksiz Claude modelleri için Claude Kodunu tercih edin** Claude sağlayıcı sayfasındaki geçiş — veya bunun yerine çıplak `claude-*` IDs Claude Koduna yönlendiren `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (varsayılan olarak kapalı; bkz. [Environment](../reference/ENVIRONMENT.md) ) —. Açık sağlayıcı önekleri her zaman kazanır.
 
-**Kimlik doğrulama hataları** — profil herhangi bir belirteç içermez. `omniroute launch --profile`
-kullanın (belirteci ekler) veya `ANTHROPIC_AUTH_TOKEN` değişkenini dışa aktarın.
+**"otomatik mod… bu oturum uygun değil" (sınıflandırıcı istekleri faturalandırılır)** — otomatik modda Claude Code, sunucudan kendi model istekleri ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ) içindeki eylemleri incelemesini ister. Bu, bir çift olarak Anthropic ulaşmak için `anthropic-beta` değeri `dangerous-tool-use-2026-09-03` ve `safeguards` gövde alanına ve değişmeden geri dönmek için `safeguard_results` artı yukarı akış araç kullanımı IDs ihtiyaç duyar. OmniRoute bunu, istek yerel `claude` sağlayıcısına veya akışlı olsun ya da olmasın bir `anthropic-compatible-*` düğümüne yönlendirildiğinde yapar (regresyon koruması: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Diğer hedefler incelemeyi geri gönderemez, bu nedenle Claude Code kendi sınıflandırıcı isteklerine geri döner ve şu bildirimi gösterir:
 
-**Profiller birbirinden yalıtılmıyor** — her profil farklı bir `CLAUDE_CONFIG_DIR` kullanır;
-oturum içinde `echo $CLAUDE_CONFIG_DIR` çıktısının
-`~/.claude/profiles/<name>` konumunu gösterdiğini doğrulayın.
+- Antropik olmayan bir sağlayıcıya dayalı bir model veya bunlardan birine uyan bir kombinasyon;
+- istek gövdesini yeniden oluşturan ve `safeguards` taşımayan Claude Kodu uyumlu bir geçiş düğümü (`anthropic-compatible-cc-*`);
+- İzin verilenler listesindeki betalardan önceki eski bir OmniRoute veya ağ geçidi oturumları için Anthropic sayfasının listelediği sürümün altındaki bir Claude Kodu sürümü.
+
+`/status` Claude Kodunda çalıştırın:** Otomatik mod sunucusu** satır, sunucunun incelemesi etkinken `Enabled` okur. Bu isteklerin faturalandırılıp faturalandırılmayacağına Anthropic değil OmniRoute karar verir.
+
+**Kimlik doğrulama hataları** — profilde belirteç bulunmuyor. `omniroute launch --profile` kullanın (enjekte eder) veya `ANTHROPIC_AUTH_TOKEN` dosyasını dışa aktarın.
+
+**Profiller izolasyon sağlamaz** — her profil ayrı bir `CLAUDE_CONFIG_DIR`; `~/.claude/profiles/<name>` adresindeki oturum noktalarının içindeki `echo $CLAUDE_CONFIG_DIR` doğrulayın.

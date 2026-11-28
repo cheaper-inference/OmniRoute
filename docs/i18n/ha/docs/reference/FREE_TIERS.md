@@ -4,10 +4,9 @@
 
 ---
 
-> **Ga Masu Amfani**: Kuna neman jagora mai sauƙi? Duba [Jagorar Matakan Kyauta](../getting-started/FREE-TIERS-GUIDE.md) don umarnin mataki-mataki kan yadda ake samun AI kyauta.
+> **Ga Masu Amfani** : Neman jagora mai sauƙi? Duba [Jagoran Tiers Kyauta](../getting-started/FREE-TIERS-GUIDE.md) don umarnin mataki-mataki akan samun AI kyauta.
 
-> **Bincike na ƙarshe:** 2026-06-17 — binciken yanar gizo na kowane mai samarwa (takardun hukuma + labaran kwanaki 7 na ƙarshe, zagayen wakilai 50 tare da tantancewar adawa) wanda ya sabunta kowace ƙimar amfani ta matakin kyauta + ToS. **Sake-bincike na ɓangare 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — duba bayanin mai kwanan wata a ƙasa).
-> **Madogarar gaskiya (kundin):** `open-sse/config/freeModelCatalog.ts` (kasafin kuɗi na kowane MODEL, an cire maimaitawa bisa tafki). Lambobin kasafin token da ke ƙasa sun fito ne daga binciken yanar gizo kai tsaye kuma **kimantawa** ne — duba [Hanyar bincike da abubuwan lura](#methodology--caveats).
+> **Dubawa na ƙarshe:** 2026-11-23. Kowane layi tare da adadin kuɗi, kowane tayin da aka yi ritaya da kowane ƙofar kati an sake buɗe su akan shafin mai bayarwa a ranar (`config/quality/free-catalog-evidence.json`). Tun da farko ya wuce: 2026-06-17 binciken kowane mai bayarwa da 2026-09-02 sake duba bayanan.** Tushen gaskiya (katalogi):** `open-sse/config/freeModelCatalog.ts` (kudin-kudiddigar MODEL, an cire ruwa). Lambobin kasafin kuɗi na ƙasa sun fito ne daga binciken gidan yanar gizo kai tsaye kuma sune** kimanin** — duba [Hanyar & caveats](#methodology--caveats).
 
 ## TL;DR — nawa ne ainihin ƙimar ƙima a zahirin OmniRoute ?
 
@@ -17,20 +16,21 @@ Waɗannan alkalumman sun bayyana keɓancewar asusun ɓangare na uku da yanayin c
 
 | Ma'auni                                          | Alamu / wata           | Ma'ana                                                                                                                                                                                                                                                            |
 | ------------------------------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Taimako mai maimaitawa da aka rubuta (tsaye)** | **~ 1.62B**            | Matsayin kyauta** wuraren waha** (Katalojin kowane samfuri), kowane tafkin da aka raba yana ƙidaya** sau ɗaya** . Madogara mai rai a bayan `/api/free-tier/summary` da dashboard's Free-Tier Budget page.** Yi amfani da wannan lambar.**                         |
-| **+ watan farko tare da ƙimar rajista**          | **~ 2.22B**            | Tsayayye + ƙididdige ƙididdiga na lokaci ɗaya (Z.AI 20M, DeepSeek 5M, …), cirewa kowane asusu.** Watan farko kawai** — baya maimaitawa.                                                                                                                           |
+| **Taimako mai maimaitawa da aka rubuta (tsaye)** | **~**                  | Matsayin kyauta** wuraren waha** (Katalojin kowane samfuri), kowane tafkin da aka raba yana ƙidaya** sau ɗaya** . Madogara mai rai a bayan `/api/free-tier/summary` da dashboard's Free-Tier Budget page.** Yi amfani da wannan lambar.**                         |
+| **+ watan farko tare da ƙimar rajista**          | **~ 153M**             | Tsayayye + ƙididdige ƙididdiga na lokaci ɗaya (Z.AI 20M, DeepSeek 5M, …), cirewa kowane asusu.** Watan farko kawai** — baya maimaitawa.                                                                                                                           |
 | **+ kyauta ta dindindin, babu bugu da aka buga** | _ba a iya ƙididdigewa_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — na gaske mai maimaitawa, rate/concurrency-limited,** babu hular alama don ƙidaya** . An jera, ba a taƙaice ba (ƙidaya su a `RPM×24/7` shine hauhawar farashin da muka ƙi). |
 | **+ ajiya-buɗe haɓaka**                          | **+~ 24M**             | A lokaci guda** $10** OpenRouter top-up yana ɗaga tafkinsa kyauta daga 50 → 1000 req/day. An ruwaito daban don haka ba zai taɓa ƙara tsayayyen lamba ba.                                                                                                          |
 | **+ a bayan binciken sanin yanki**               | **+~ 6m**              | `modelscope` (Alibaba Cloud daure + babban yankin-China tabbataccen suna). Ƙidaya mai maimaita gaske, fallasa azaman `gatedRecurringTokens` / `gatedProviders` kuma akan dashboard. Kada a taƙaice cikin kanun labarai: +~ 6M bayan tabbatar da asalin yanki.     |
-| Rufin ka'idar (duk iyakoki, 24/7)                | ~ 10 B                 | Jimlar ƙimar kowane mai bayarwa da aka kera zuwa amfani mara tsayawa.** Ba garanti ba** — ba kanun labarai wannan.                                                                                                                                                |
 
-**Kanun labarai na gaskiya:** _Aggregates OmniRoute**~ 1.62B an rubuta alamun kyauta kowane wata** (har zuwa ~ 2.22B a cikin watan ku na farko tare da ƙididdige rajista) a cikin wuraren shakatawa na kyauta 26 — tare da dogon wutsiya na kyauta na dindindin, masu ba da hular — da RTK + Caveman matsawa (15-95% token tanadi) ya shimfiɗa hakan._
+**Kanun labarai na gaskiya:** _Kataloji na OmniRoute**~ 90M alamun kyauta** wata guda da za ku iya amfani da shi a zahiri (har zuwa ~ 153M a cikin watanku na farko tare da ƙididdige rajista), daga wuraren tafki 12 tare da adadin da aka buga, da dogon wutsiya na masu ba da kyauta na dindindin. RTK + Caveman matsawa (15-95% ajiyar alamar alama) yana kara hakan._
 
-> **Me yasa wannan ya ragu daga ~ na baya 1.94B.** Wartsakarwa ta 2026-06-17 gyara ce ta gaskiya, ba asara ba: `gemini` yanzu an cire ruwa (an ƙirga kowane bambance-bambancen Flash daban, 462M → 60M), `cloudflare-ai` ya gyara zuwa ainihin 10k-Neurons/day (122M → 30M), `doubao` -maimaitawa a matsayin mai ƙididdigewa (ba a sake cirewa ba)`chutes`/`phind`/`kluster` daina). Wani ɓangare na `llm7` (daidai 5M/day → 150M) da sabbin masu samarwa kyauta (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Labaran tarihi. Alƙaluman da ke ƙasa sun bayyana kasida a lokacin; ba lambobin yau bane._
 >
-> **An ƙara gyara zuwa ~ 1.37B a cikin v3.8.42:** An sake rarraba `longcat` daga tallafin 150M/mo mai maimaitawa zuwa ƙimar rajista na lokaci ɗaya na 10M bayan an gama samfotin sa na kyauta. Haka tsarin gaskiya — babu wani mai bada da aka sauke bisa kuskure.
+> **Me yasa wannan ya ragu daga biliyan 1.94 da suka gabata.** Wartsakarwa ta 2026-06-17 gyara ce ta gaskiya, ba asara ba: yanzu `gemini` ta kasance tafki-deduped (an ƙirga kowane bambance-bambancen Flash daban, 462M → 60M), `cloudflare-ai` ya gyara zuwa ainihin 10k-Neurons/day ɗinsa (122M → 30M), `doubao` reclassified as a (ba a sake buɗewa ba)`chutes`/`phind`/`kluster` daina). Wani ɓangare na `llm7` (daidai 5M/day → 150M) da sabbin masu samarwa kyauta (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **An sabunta shi akan 2026-08-26 bayan ritayar Felo Web:** An cire Felo Web yayin da GPL wanda aka samu provenance/licensing ya kasance akan HOLD; Majiyar ta ruwaito makullin tafkin 38 a lokacin. Ƙididdiga na tafkin yana raye kuma CI-gated (`check:docs-counts` ya gaza ginin idan lambobin da ke sama suna tafiya daga `computeFreeModelTotals()`).
+> **An ƙara gyara zuwa biliyan 1.37 a v3.8.42:** An sake keɓance `longcat` daga tallafin mai-maitawa 150M/mo zuwa ƙimar rajista na lokaci ɗaya na 10M bayan kammala samfotin sa na kyauta. Tsarin gaskiya guda — babu mai bayarwa da aka jefar da kuskure.
+>
+> **An sabunta shi akan 2026-08-26 bayan ritayar Felo Web:** An cire Felo Web yayin da GPL wanda aka samu provenance/licensing ya kasance akan HOLD; Majiyar ta ruwaito makullin tafkin 38 a lokacin.
 >
 > **An sake yin nazari akan 2026-09-02 akan shafukan masu samarwa** (Madogararsa: sharhin `// evidence:` kusa da kowane shigarwar da aka sake duba cikin `open-sse/config/freeModelCatalog.data.ts`): `gemini` da `ollama-cloud` ba su sake buga alamar alama ba (Google cire teburin kyauta na kowane samfuri akan 2025-12-23; Tsarin kyauta na Ollama shine "ƙididdigar amfani da farawa") kuma yanzu an jera su azaman** wanda ba a rufe ba** , ba a taƙaice ba (− 80M); `groq` biyar ne** kowane samfurin** 200K-TPD iyakoki (6M kowannensu, + 15M) tare da IDs mai ritaya uku ya ragu; `nara` guga 7M/day daya ne (+ 60M, 210M). `mistral`'s 1B ana iya gani kawai a cikin na'ura mai ba da hanya tsakanin hanyoyin sadarwa — duba _Darussan Hujja_ a ƙarƙashin Hanyar.
 >
@@ -38,26 +38,114 @@ Waɗannan alkalumman sun bayyana keɓancewar asusun ɓangare na uku da yanayin c
 >
 > **An sabunta ta 2026-09-03 (#11773):** An sake rarraba `cerebras` daga tallafin 30M/mo mai maimaitawa (gwajin ba-kati 1M tokens/day ) zuwa kiredit na rajista na lokaci guda $5 wanda ke buƙatar hanyar biyan kuɗi. Tsarin gaskiya ɗaya kamar LongCat.
 >
-> **Plus xKiro (2026-09-03):** sabon tafkin `xkiro-free` (150M/mo) yana ƙara maɓallin tafkin mai maimaitawa na 35. Felo Web yana tsayawa yayin da provenance/licensing sa na GPL ya kasance akan HOLD. Majiyar ta ruwaito** 26 maɓallan tafkin mai maimaituwa** kuma**~ 1.62B tsayayye** — mai rai, lambar CI-gated (`check:docs-counts` ya kasa ginin idan wannan ya fita daga `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** sabon tafkin `xkiro-free` (150M/mo) yana ƙara maɓallin tafkin mai maimaitawa na 35. Felo Web yana tsayawa yayin da provenance/licensing sa na GPL ya kasance akan HOLD. A lokacin majiyar ta ba da rahoton makullin tafkin 34 da alamun biliyan 1.62 a wata (a tsaye).
 
-Mafi girma** rubuce** masu ba da gudummawa: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (manfuna biyar na kowane samfurin), `cloudflare-ai` 30M, `api-airforce` 24M. (An cire `longcat` — tallafinsa na 10M LongCat-2.0 shine lokaci ɗaya, KYC-gated creditup credit, ba kasafin kuɗi na wata-wata mai maimaitawa ba.)
+Mafi girma** rubuce** masu ba da gudummawa ga adadi na gaske a yau: `groq` 24M (4 ga kowane nau'i), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (An cire `longcat` — kyautar 10M LongCat-2.0 shine lokaci ɗaya, KYC-gated kredit, ba kasafin kuɗi na wata-wata ba.)
 
-> ⚠️ Rufin ka'idar (~ 10B) yana haɓaka ta hanyar masu samar da iyaka-ƙididdigewa tare da** babu bugun alamar da aka buga** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`) waɗanda ƙididdigansu za su kasance `RPM/TPM × 24/7 × 30d` — ƙayyadaddun ƙayyadaddun ƙididdiga ba wani asusu ɗaya da zai dore. Su ne** cire** daga lambar kariya (wanda aka nuna a cikin "free dindindin, babu hula" jere maimakon). Wannan shi ne hauhawar hauhawar farashin kayayyaki wanda ya sa ikirarin biliyoyin fafatawa ba su da tabbas.
+## Gyara, Nuwamba 2026
+
+Har zuwa wannan sakin, wannan shafi da README sun ce alamun kyauta biliyan 1.62 a wata. Wannan ba daidai ba ne. Wuraren ruwa guda huɗu sun ɗauki kashi 93% na shi, kuma duk huɗun sun canza a mai bayarwa yayin da kasidarmu ta kasance iri ɗaya. Ainihin adadi a yau shine ~ 90M alamun kyauta a wata. Tebur yana sanya abin da ya canza a kowane mai bayarwa kusa da abin da muka samu ba daidai ba.
+
+| Abin da ya canza a mai bayarwa (kwanan wata, tushe)                                                                     | Abin da muka samu kuskure (menene, tun yaushe)                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Mistral: yanayin kyauta baya haɗa da samun damar API (docs.mistral.ai, karanta ranar 2026-11-18)                        | Mun ci gaba da kirga alamun biliyan 1 kowane wata daga karatun wasan bidiyo na 2026-09-02 kuma ba mu sake duba shi ba. |
+| Nara: Shirin Kyauta ya lissafa babu samfura ( `router.bynara.id/api/plans` mai bayarwa, karanta a 2026-11-18)           | Mun kirga alamu miliyan 210 a wata                                                                                     |
+| xKiro: Alamu 500k a kowace rana a kowane asusu (xkiro.com, karanta a 2026-11-18)                                        | IDs 30 samfurin da ba ya wanzu ya kasance a cikin kundin                                                               |
+| LLM7: shafin iyakoki ya tafi kuma babu wani shafi na hukuma da ya buga keɓaɓɓen keɓaɓɓen kyauta (2026-11-23)            | Mun kirga alamu miliyan 150 a wata ba tare da kwanan wata shaida ba                                                    |
+| Groq: samfurin daya a cikin tafkin kyauta ya yi ritaya (2026-09-14)                                                     | Tafkin ya kiyaye tsohon girmansa                                                                                       |
+| AgentRouter: mai bada lissafin kuɗin shiga $25 kowace rana da ƙarin $50 don rajistar gayyata (karanta a kan 2026-11-23) | Mun jera kiredit ɗin rajista na $200                                                                                   |
+| Predibase: samfurin ya ƙare                                                                                             | Har yanzu muna ƙididdige ƙimar rajistar sa a cikin watan farko                                                         |
+| (babu)                                                                                                                  | Masu samarwa 16 sun kiyaye tutar tayin kyauta bayan tayin ta ya ƙare                                                   |
+| (babu)                                                                                                                  | README ta yi alkawarin sake tantancewa duk bayan mako biyu. Na ƙarshe kafin wannan shine 2026-09-02                    |
+| (babu)                                                                                                                  | Binciken takaddun ya ba da izinin 0.05B kuma ya kasa karanta adadi a cikin miliyoyin                                   |
+
+Ƙirƙirar kaso ɗaya a kowane jere yana haɓaka kowane kasida, namu ya haɗa. Shi ya sa adadi na jere yana ɗauke da lakabin sa kuma na ainihi yana zaune a ƙarƙashinsa.
+
+## Abin da ke da muhimmanci
+
+Jeri yana ƙirga zuwa alkaluman kyauta lokacin da duk wannan yana riƙe:
+
+- Ƙididdigar ƙididdiga ta sake dawowa kuma an buga shi a kan shafin mai bayarwa, tare da kwanan wata shaida kusa da jere a cikin kasidar.
+- Asusu ɗaya ga kowane mai bayarwa. Babu wani abu da ke buƙatar biyan kuɗi, kati, ajiya ko rajistan shaida (KYC). Ƙididdigar da ke buƙatar lambar waya, Telegram ko Discord don yin rajista an jera su daban, kamar "tare da rajistar zamantakewa", ba a cikin ainihin adadi ba.
+- Babu wani mai bada da ya nuna alamar `tos: "avoid"`, kuma kawai jami'in mai bayarwa API.
+- Kididdigar rajista na lokaci ɗaya ƙidaya kawai a cikin adadi na watan farko, kuma kawai lokacin da ba a nemi katin ba. Adadin ajiya na lokaci ɗaya wanda ke haɓaka ƙima shine haɓaka daban. Ba a taɓa ƙididdige haɓakawa a ainihin adadi ba.
+- Bincika, murya da masu samar da kafofin watsa labaru sun daina ƙidaya ta nau'in samun dama kuma daga kowane adadi mai alama. Suna samun nasu ƙididdiga, a cikin nasu raka'a (sakamako, haruffa, hotuna), a wannan shafin idan sake ƙidaya ya ƙara su; wadanda ba a kara wa junansu ko kuma su zama alamu.
+
+Abin da kowace jama'a ke nufi:
+
+- **Masu ba da damar shiga kyauta** (50 yau: 43 tare da maɓallin API, 6 ba tare da maɓalli ba, 1 ta hanyar asusun kayan aiki): masu samar da aƙalla jeri ɗaya na kasida wanda ke ba da damar shiga kyauta, ta yadda kuka isa gare shi.
+- **Layukan kasida tare da shiga kyauta** (214 a yau): jere ɗaya ga kowane mai bayarwa da samfuri.
+- **Pools tare da adadin da aka buga** (12 a yau): rabon da aka raba a bayan ainihin adadi, kowanne an ƙidaya sau ɗaya.
+- **Samfuran kyauta masu bambanta** (185 a yau): Layukan da aka haɗa ta hanyar ƙirar ID.
+- **Tuta tare da tayin kyauta** (140 + a yau): kowane mai bada wanda shigarwar rajista ke ɗauke da `hasFree`, gami da bincike, masu samar da murya da kafofin watsa labarai, gwaji da ƙimar rajista.
+
+Kowane ƙididdiga ana ƙididdige shi, ba a gwada kowane kira ba: yana faɗi abin da kasidar ta jera, ba kowace hanya tana amsawa a yanzu ba.
+
+## Yadda muke ƙidaya
+
+Lambobi uku sun fito daga kasidar guda ɗaya, waɗanda aka duba akan 2026-11-23:
+
+- **Ainihin adadi, ~ 90M alamun kyauta a wata.** Ana ƙidaya kowace adadin da aka raba sau ɗaya, don haka samfura biyar a bayan alawus ɗaya na yau da kullun shine alawus ɗaya. Wannan shine abin da asusun ɗaya a kowane mai badawa zai iya amfani da shi. Tare da ƙididdigar rajista na lokaci ɗaya, ~ 153M a cikin watan ku na farko.
+- **Babban adadi, ~ 11.3B an tattara shi a jere** , ƙare tayin hada. Wannan ita ce hanyar da sauran kasidu ke ƙidaya. Kusan duka tarihi ne: 98.6% daga tayin da ba ya wanzu. Muna buga shi kawai tare da lakabin sa kuma tare da ainihin adadi kusa da shi.
+- **Katalogi mai rai, ~ 159M wanda aka taƙaita kowane jere na kai tsaye** : jimlar jere-bi-jeri ɗaya ba tare da ƙarewar tayi ba.
+
+Hanyar jere-bi-jere (`row-sum-v1`) tana biye da dokoki huɗu:
+
+1. Ana ƙara kowane jeri da aka jera yadda yake, ba tare da haɗa layuka waɗanda ke raba tafki ɗaya ba.
+2. Ƙidaya kawai da aka buga a cikin alamun ana ƙarawa. Ƙididdigar da aka buga a cikin buƙatun, ƙididdigewa ko ƙididdiga na neurons suna ƙidaya a matsayin sifili (`FREE_QUOTA_UNIT` a `open-sse/config/freeModelCatalog.ts`).
+3. Kiredit ɗin rajista, haɓaka ajiya da layuka a kashe (`enabled: false`) ba a barin su.
+4. Babban adadi yana ƙara lissafin tayin da aka ƙare (`open-sse/config/freeModelCatalog.retired.data.ts`) a ƙashin ƙarshe na kowane jere da aka jera. Layuka ne kawai suka yi ritaya tun lokacin da `RETIRED_LEDGER_SINCE` suka shigar da shi, kuma kowane jere yana barin watanni 12 bayan ya ƙare.
+
+Idan hanyar jere-bi-jere ta kidayar ta daina zama gama gari, ko mai kula da shi ya yanke shawarar haka, babban adadi ya bar kowane shafi kuma ainihin adadi ne kawai ya tsaya.
+
+## Cire / babu matakin kyauta
+
+Masu ba da kyauta waɗanda tayin su ya ƙare ko ba za a iya tabbatar da su ba. Suna zama a cikin wurin yin rajista tare da `hasFree: false` (ko kuma sun yi ritaya daga kundin kundin kyauta) kuma ba za su taɓa ƙidaya a cikin kowane adadi na kyauta ba. Wannan ba jerin sunayen masu samarwa ba ne da aka cire daga OmniRoute akan buƙata (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Mai bayarwa              | Tunda      | Me yasa                                                                              | Source                                      |
+| ------------------------ | ---------- | ------------------------------------------------------------------------------------ | ------------------------------------------- |
+| `mistral`                | 2026-11-23 | Yanayin kyauta baya haɗa da shiga API                                                | docs.mistral.ai (iyakan amfani)             |
+| `nara`                   | 2026-11-23 | Shirin kyauta ya lissafa babu samfuri                                                | `router.bynara.id/api/plans`                |
+| `llm7`                   | 2026-11-23 | Babu wani shafi na hukuma da ya buga adadin kyauta                                   | shafin mai badawa                           |
+| `navy`                   | 2026-11-23 | Ba za a iya tabbatar da adadin kyauta a kan shafukan hukuma ba                       | api.navy                                    |
+| `bluesminds`             | 2026-11-23 | Amfani yana buƙatar ƙira da aka siya daga mai bayarwa                                | `api.bluesminds.com/api/status`             |
+| `arcee-ai`               | 2026-11-23 | Farashin da aka biya kawai                                                           | docs.arcee.ai (farashi)                     |
+| `huggingface`            | 2026-11-23 | Dole ne asusu kyauta su sayi kiredit ko haɓaka zuwa PRO                              | huggingface.co (Farashin Masu Ba da Shaida) |
+| `huggingchat`            | 2026-11-23 | Rungumar fuska tana buƙatar sayan ƙididdiga ko PRO                                   | huggingface.co (Farashin Masu Ba da Shaida) |
+| `ainative`               | 2026-11-23 | Ana biyan shirin Hobbyist bayan gwaji na kwanaki 3                                   | shafi farashin mai bayarwa                  |
+| `stepfun`                | 2026-11-23 | Farashin biyan-kowa-amfani kawai                                                     | shafi farashin mai bayarwa                  |
+| `predibase`              | 2026-11-23 | An daina samfur                                                                      | predibase.com                               |
+| `poolside`               | 2026-10-31 | An rufe bayanin kai tsaye                                                            | dandamali.poolside.ai                       |
+| `amazon-q`               | 2026-05-15 | Babu sabon rajistan Tier na Kyauta                                                   | shafi mai bayarwa                           |
+| `chat-oripe`             | 2026-11-23 | Mai masaukin API ya amsa HTTP 530                                                    | API mai gida                                |
+| `naga-ai`                | 2026-11-23 | Kwafi na mai bada Naga.ac                                                            | api.naga.ac                                 |
+| `dxnt`                   | 2026-11-23 | Kyautar rajista ta wanzu, amma babu samfurin da ya karɓi sa                          | dxnt.com                                    |
+| `ollama-cloud`           | 2026-11-09 | Samfuran gajimare ana biyan su kowace alama ko tsare-tsaren da aka biya suna rufe su | ollama.com (#19334)                         |
+| `chutes`                 | 2026-03    | Free matakin ya ƙare                                                                 | shafi mai bayarwa                           |
+| `phind`                  | 2026-01    | Kamfanin ya rufe                                                                     | shafi mai bayarwa                           |
+| `kluster`                | 2026-06-09 | Faɗuwar rana (an ƙaura zuwa MITO)                                                    | shafi mai bayarwa                           |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo free soke; Ci gaban Nemotron ya ƙare 2026-06 (sake tabbatarwa 2026-06-18)       | shafi mai bayarwa                           |
+| `aimlapi`                | 2026-06-18 | An dakatar da matakin kyauta                                                         | shafi mai bayarwa                           |
+| `yi`                     | 2026-06-18 | Yi-Light yayi ritaya, biya-kamar yadda kuke tafiya                                   | shafi mai bayarwa                           |
+| `featherless-ai`         | 2026-06    | Babu matakin kyauta na yanzu                                                         | shafi mai bayarwa                           |
+| `chipotle`               | 2026-09-15 | Widget din taɗi a bayansa yana amsa 404 akan kowace hanya (#13131, #4037)            | amelia.chipotle.com                         |
+
+`iflytek` / `sparkdesk` da aka jera tare da bayanin kula na ToS: Spark Lite kyauta ne, amma ToS yana hana wakili da amfani da relay.
 
 ---
 
-## 2026-06-17 sabuntawa — abin da ya canza tun 2026-06-05
+## 2026-06-17 sabunta — me ya canza tun 2026-06-05
 
-Wani zagayen binciken yanar gizo da wakilai 50 (takardun hukuma + labaran kwanaki 7 da suka gabata, an tantance ta hanyar bincike mai tsanani) ya sabunta dukkan katalog. Fitattun abubuwa:
+Ƙimar binciken yanar gizo mai wakilai 50 (takardun docs + last-7-days labarai, tabbataccen ƙiyayya) ya wartsake dukan kasida. Bambance-bambance:
 
-- **An cire / babu matakin kyauta (2026):** `chutes` (matakin kyauta ya ƙare 2026-03), `phind` (kamfanin ya rufe 2026-01), `kluster` (an ƙare shi 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (an soke kyautar MiMo 2026-05-24, tallan Nemotron ya ƙare 2026-06 — an sake tabbatarwa 2026-06-18), `aimlapi` (an dakatar da matakin kyauta — an sake tabbatarwa 2026-06-18), `yi` (an janye Yi-Light, biya-yadda-ka-yi-amfani — an sake tabbatarwa 2026-06-18), `featherless-ai` (babu matakin kyauta a yanzu), `chipotle` ("Pepper AI" na Chipotle — widget ɗin hira na Amelia na `amelia.chipotle.com` da aka yi reverse-engineering wanda mai samarwa ke magana da shi yanzu yana ba da 404 a kowace hanya, har da tushe; an cire/matsar da backend, an tabbatar 2026-09-15 — an cire shi gaba ɗaya daga katalog, #13131/#4037). `iflytek` / `sparkdesk` suna ci gaba da kasancewa a jerin amma suna ɗauke da bayanin gargadi kan ToS (Spark Lite kyauta ne; ToS yana hana amfani da proxy/relay).
-- **Gemini** — an rufe `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01 kuma `2.5 Pro` ya bar matakin kyauta (2026-04); matakin kyauta yanzu **iyalin Flash kawai** (2.5/3/3.1/3.5 Flash + Gemma). Katalog yanzu yana **tattara** iyalin Flash tare (a da yana wuce girma ta hanyar ƙidaya kowace bambancewa daban: 462M → 60M).
-- **Lambobi da aka gyara:** `cloudflare-ai` 122M → **30M** (10k-Neurons/rana na gaske), `doubao` an sake rarraba shi a matsayin bashin rajista na sau ɗaya (ba mai maimaitawa ba), `llm7` 4M → **150M** (5M tokens/rana da aka rubuta a takarda), `together` an dakatar da endpoints "-Free" → an kuma cire bashin rajista na $25 (yana buƙatar ƙaramin sayayya na $5, babu gwaji na kyauta), `longcat` Preview ya ƙare + an janye Flash models → **LongCat-2.0** kawai, an sake rarraba shi a matsayin bashin rajista na **10M**-token na sau ɗaya (yana buƙatar KYC, ba mai maimaitawa ba).
-- **Ƙarewar inference na kai tsaye na Poolside (an tabbatar 2026-10-20):** [dandalin hukuma](https://platform.poolside.ai/) yana sanar da rufewa a **2026-10-31** kuma yana neman masu amfani su sauke models ɗinsa daga Hugging Face don self-hosting. Mai samarwa na kai tsaye `poolside` yana ɗauke da wannan gargadi. Katalog na kyauta da aka tsara da hannu ba shi da shigarwar Poolside ta kai tsaye; shigarwarsa masu sunan Poolside na `kilo-gateway` ne. Wannan sanarwa ba ta tabbatar da samuwar models da Kilo, Cline, NVIDIA ko wasu gateways ke hidima, don haka ba a janye waɗannan jerin bisa wannan dalili.
-- **Sabbin masu samarwa na kyauta da aka gano:** ⭐ **Kilo Code** (`kilo-gateway` — saitin "Auto Free" mai jujjuyawa: iyalin NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — models 10 na coding na kyauta masu jujjuyawa, an sabunta 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash kyauta har abada + 20M kyautar rajista), da `arcee-ai` Trinity Large Preview.
-- **Sabbin matakai na gaskiya** (dubi Methodology): rukuni na _kyauta-har-abada-amma-babu-iyaka_ (damar yin amfani ta gaske mai maimaitawa, babu iyakar token da za a ƙidaya) da _deposit-unlock boost_ (OpenRouter $10 → +24M/wata), dukkansu an bayyana su **daban** don kada su taɓa ƙara girman babban jigo.
+- **An cire / babu matakin kyauta:** ya koma [sashinsa](#removed--no-free-tier).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` ya rufe 2026-06-01 kuma `2.5 Pro` ya bar matakin kyauta (2026-04); matakin kyauta yanzu** Flash-iyali kawai** (2.5/3/3.1/3.5 Flash + Gemma). Katalogi yanzu** wuraren waha** Iyalin Flash (an ƙidaya kowane bambance-bambance daban: 462M → 60M).
+- **Lambobin da aka gyara:** `cloudflare-ai` 122M →** 30M** (na gaske 10k-Neurons/day), `doubao` sake rarraba shi azaman ƙimar rajista na lokaci ɗaya (ba maimaituwa ba), `llm7` 4M →** 150M** (rubutun 5M tokens/day), `together` "-Free" ƙarshen maki an dakatar da → $25 kiredit ɗin rajista kuma an cire (yana buƙatar $5 mafi ƙarancin siyan, babu gwaji kyauta), `longcat` Preview ya ƙare + Flash model sun yi ritaya →**LongCat-2** kawai, sake classified a matsayin lokaci daya** 10M**-token rajista credit (KYC-gated, ba maimaituwa ba).
+- **Ƙarshen bayanin kai tsaye Poolside (tabbatar 2026-10-20):** [dandalin hukuma](https://platform.poolside.ai/) ya ba da sanarwar rufewa** 2026-10-31** kuma ya umurci masu amfani da su zazzage samfuran sa daga Hugging Face don ɗaukar nauyin kai. Mai bada `poolside` kai tsaye yana ɗaukar wannan gargaɗin. Kas ɗin kyauta na hannun hannu bashi da shigarwar Poolside kai tsaye; shigarwar sa mai suna Poolside na `kilo-gateway` ne. Wannan sanarwar ba ta tabbatar da samun samfuran Kilo, Cline, NVIDIA ko wasu ƙofofin ba, don haka waɗannan jerin ba a yi ritaya a kan haka ba.
+- **An gano sabbin masu samar da kyauta:** ⭐** Kilo Code** (`kilo-gateway` — mai juyawa "Auto Free" saitin: NVIDIA Nemotron 3 iyali, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — 10 samfurin coding kyauta, an sabunta 2026-10-20), ⭐** Z.AI /Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash na dindindin kyauta + 20M bonus na rajista), da `arcee-ai` Trinity Large Preview.
+- **Sabbin matakan gaskiya** (duba Hanyar): nau'in _free-free-but-uncappped_ (sama mai maimaitawa ta gaske, babu alamar da za a ƙirga) da haɓakar _deposit-buɗewa_ (OpenRouter $10 → +24M/mo), duka sun fito.** daban** don haka ba za su taɓa buga kanun labarai ba.
 
-> Teburin cikakken bayani na kowane mai samarwa a ƙasa shine **hoton yanayi na 2026-06-05**; canje-canjen da ke sama sun maye gurbinsa. Tushen rayayyu na hukuma shine katalog na kowane model `open-sse/config/freeModelCatalog.ts`.
+> Cikakkun tebur na kowane mai bayarwa gaba ƙasa shine** 2026-06-05 hotuna** ; deltas na sama sun wuce shi. Rayayyun, tushen canonical shine kundin tsarin kowane-samfurin `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -112,26 +200,26 @@ da gangan.
 
 ## Hanyar & faɗakarwa
 
-- Lambobi ne** kimomi na sama** daga kowane ma'auni na iyakoki na kyauta na kowane mai bayarwa kamar na** 2026-06-17** , wanda aka tattara ta binciken yanar gizo. Matakan kyauta suna canzawa koyaushe — sake tabbatarwa kafin dogaro da adadi.
+- Lambobi ne** kimomi na sama** daga kowane ma'auni na iyakoki na kyauta na kowane mai bayarwa, an bincika ƙarshe** 2026-11-23** ga kowane layi tare da rabo. Matakan kyauta suna canzawa koyaushe — sake tabbatarwa kafin dogaro da adadi.
 - **Abin da shigarwa a zahiri vouches domin.** Babu shigarwar da ke ɗauke da ƙimar amincewar kowane jeri, kuma API ba ta yin amfani da — da ke kula da kowane adadi a sama a matsayin ƙididdigewa iri ɗaya, ingancin da ba a bayyana ba. Gaskiya guda biyu sun bambanta, saboda ana sarrafa su da hannu maimakon a fayyace su: shigarwar 44 suna ɗauke da tasha mai ƙarfi (39 daga cikinsu layuka xKiro, waɗanda duk ke raba izinin yau da kullun), shigarwar 22 suna ɗauke da sanarwar horon gaggawa. An saita `hardStopGuaranteed` ne kawai lokacin da sharuɗɗan mai bayarwa suka faɗi cewa wuce gona da iri na kyauta ya ƙi buƙatar maimakon yin shiru da fara lissafin ku, tare da tushen a cikin sharhi kusa da shigarwar; ba a taɓa ƙetare shi zuwa `true` ba, kuma shigarwar ba wanda ya tabbatar ya tsaya ba a saita ba. Don haka tuta mai wuyar tsayawa tana nufin "ba a kafa ba", ba "an san ku ba".** yanayin STRICT** (mai gadi na zaɓen `freeAccessPolicy=strict` ) yana dogara ne kawai da shigarwar da ke ɗauke da tuta; kowane matakin kyauta an cire shi azaman `no-hard-stop` (duba `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Lokacin da mai gadi ya tace tafki, gunkin ganuwa mai aiki yana ba da rahoton ƙididdiga na keɓancewa da rabonsa `no-hard-stop`.
 - `estMonthlyFreeTokens` = alamu na kowane wata kawai.** Ƙididdigar rajista na lokaci ɗaya ba sa maimaitawa** kuma a ƙidaya kamar 0. Tiers ɗin da aka dakatar su ma 0 ne.
 - Daily token cap → `monthly = daily × 30`. RPD kawai an rubuta → `RPD × ~800 output tokens × 30`. RPM/TPM kawai (babu kullun yau da kullun) →** wanda ba a rufe ba** (duba ƙasa).
 - **Samun damar kyauta, amma babu alamar alamar da aka buga** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `nvidia`): Waɗannan su ne rate/concurrency-limited. Mukan rarraba su `recurring-uncapped` da** kar a taqaita su** — ninka `RPM × 24/7 × 30d` zai haifar da rufin fantasy (farashin farashin da muka ƙi). NVIDIA's API gwaji-amfani ne kawai; duba ta ToS caveat a kasa.
 - **Haɓaka buɗe ajiya:** ƙaramin ƙarami na lokaci ɗaya wanda ke ɗaga adadin kyauta (OpenRouter: $10 → 1000 req/day ≈ +24M/mo). An ba da rahoto azaman adadi daban, an kiyaye shi daga kanun labarai masu tsayi.
 - **Ƙididdigar cancanta** (`eligibilityGate: "regional-identity"`): ƙa'ida ta gaske mai maimaitawa wacce ke buɗewa kawai bayan an bincika ainihin yankin da ke da alaƙa (tabbacin suna na ainihi na ƙasar Sin a yau). Ƙididdigewa tare da ƙa'idar tazarar tafki ɗaya zuwa wani adadi daban (`gatedRecurringTokens`), ba a taɓa shiga cikin kanun labarai tsayayye ba. Tsarin tsarin (`freeType`) ba ya canzawa, don haka hanyar ba ta canzawa.
-- **Darussan shaida.** Ka'idar: lamba a cikin kasidar ta buga tushenta a cikin sharhin `// evidence:` kusa da shigarwar — `public-page` (shafin mai ba da sabis wanda kowa zai iya karantawa), `api-public` (madaidaicin ƙarshen mai bayarwa, misali NaraRouter's tsare-tsaren jama'a na ƙarshe a router.bynara.id), ko `console-verified <date> por <who>` ( adadi yana bayyane ne kawai a cikin na'ura mai ba da hanya tsakanin hanyoyin sadarwa; sharhin ya rubuta bayanan da suka gan shi da kuma lokacin da jama'a ke faɗi). Jihar a yau: tubalan biyar da aka sake tantance su a kan 2026-09-02 suna ɗauke da shi (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); abubuwan da suka gabata kafin sake duba 2026-09-02 sun gaji binciken farko har sai an taba su; kowane** sabo ko canza** lamba ba tare da sharhin shaida ba kwaro ne. Yau `mistral` ne kawai aka tabbatar.
+- **Darussan shaida.** Ka'idar: lamba a cikin kasidar ta buga tushenta a cikin sharhin `// evidence:` kusa da shigarwar — `public-page` (shafin mai ba da sabis wanda kowa zai iya karantawa), `api-public` (madaidaicin ƙarshen mai bayarwa, misali NaraRouter's tsare-tsaren jama'a na ƙarshe a router.bynara.id), ko `console-verified <date> por <who>` ( adadi yana bayyane ne kawai a cikin na'ura mai ba da hanya tsakanin hanyoyin sadarwa; sharhin ya rubuta bayanan da suka gan shi da kuma lokacin da jama'a ke faɗi). Jihar a yau: tubalan biyar da aka sake tantance su a kan 2026-09-02 suna ɗauke da shi (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); abubuwan da suka gabata kafin sake duba 2026-09-02 sun gaji binciken farko har sai an taba su; kowane** sabo ko canza** lamba ba tare da bayanin shaida ba bug ne. Yau `mistral` ne kawai aka tabbatar.
 
 ---
 
-## Me ya sa adadinmu ya fi na sauran masu tarawa ƙanƙanta
+## Me yasa lambar mu ta yi ƙasa da sauran masu tarawa'
 
-Yawancin alkaluman "free tokens per month" a wannan fanni jimillar lambobin da aka ware wa kowane model ne. Namu ba haka yake ba, kuma da gangan muka yi hakan:
+Yawancin "alamu na kyauta a kowane wata" a cikin wannan sarari jimillar alamomin kowane samfuri ne. Ba namu bane, da gangan:
 
-- **Ana ƙirga kowane shared pool sau ɗaya ne kawai.** Tsarin kyauta na Mistral yana da kaso guda na 1B/wata ga kowace ƙungiya; jera shi a ƙarƙashin model guda biyar ba ya sa ya zama 5B. Idan aka tara bisa kowane model, catalog ɗinmu zai nuna **~7.4B** (an sake lissafawa a 2026-09-03; wannan adadi ba ya ƙarƙashin kulawar CI — a sake auna shi duk lokacin da catalog ya canza) — babban taken yana cewa **~1.47B** domin wannan ne ainihin abin da account guda na kowane provider zai iya amfani da shi.
-- **Ana sauya daily caps zuwa na wata, amma ba rates ba.** Iyakar tokens/day da aka rubuta tana zama `× 30`; iyakar requests/day da aka rubuta tana zama `RPD × ~800 tokens × 30`; provider da ke wallafa requests-per-minute kawai ba shi da adadin wata kuma ana jera shi a matsayin _ba shi da iyaka_, ba a taɓa haɗa shi cikin jimilla ba. Ninka rate limit da 24/7 shi ne ƙarin da ba mu yarda da shi ba.
-- **Ana nuna quotas da ke buƙatar tantance asalin yanki dabam** (`+~6M behind regional identity verification`), domin yawancin masu karatu ba za su iya amfani da su ba.
-- **Signup credits na watan farko ne kawai** kuma ana nuna su a matsayin adadi na biyu, ba a taɓa haɗa su da adadin dindindin ba.
-- **CI ne ke tabbatar da adadin.** `npm run check:docs-counts` yana sake lissafa jimillar daga catalog kuma yana hana build ɗin kammalawa idan wannan fayil, README ko budget card sun saɓa da ita.
+- **Ana ƙidaya kowane tafkin da aka raba sau ɗaya.** Samfura biyar a bayan alawus ɗaya alawus ɗaya ne, ba biyar ba. Karatun layi-bi-jere na kasida ɗaya, da dalilin da yasa muke buga shi, yana kan [Yadda muke ƙirga](#how-we-count).
+- **Ana canza ma'auni na yau da kullun, farashin ba sa.** Rubutun tokens/day hula ya zama `× 30`; kwafin requests/day da aka rubuta ya zama `RPD × ~800 tokens × 30`; mai badawa wanda ke buga buƙatun-da-minti kawai yana da** a'a** adadi na wata-wata kuma an jera shi azaman _uncapped_, ba a taƙaita shi ba. Rarraba iyaka ta hanyar 24/7 shine hauhawar farashin da muka ƙi.
+- **Ana nuna ƙididdiga a bayan binciken tantance asalin yanki** (`+~6M behind regional identity verification`), domin yawancin masu karatu ba za su iya amfani da su ba.
+- **Ƙididdigar rajista na farkon watan ne kawai** kuma an ruwaito shi azaman adadi na biyu, bai taɓa haɗawa cikin tsayayyen lamba ba.
+- **Abin da docs check yayi.** `npm run check:docs-counts` (yanayin saki) yana ƙididdige adadi na ainihi, adadi na wata na farko da jimlar jere-bi-biyu daga cikin kasidar, kuma ta kasa lokacin da README, wannan shafi ko Jagoran Tiers Free buga wata ƙima daban ko buga babban adadi ba tare da lakabin sa ba da kuma ainihin ɗaya. An sake zana katin kasafin kuɗi daga ainihin gaskiyar lokacin saki.
 
 ---
 
@@ -240,74 +328,74 @@ Yawancin alkaluman "free tokens per month" a wannan fanni jimillar lambobin da a
 
 ---
 
-## Kowane mai ba da kyauta (Bytez/Nous duba 2026-10-15; sake duba layuka 2026-09-02; wasu 2026-06-17)
+## Matsayi na kyauta na kowane mai bayarwa (wanda aka duba kundin adireshi 2026-11-23)
 
-> An sabunta shi daga kundin tsarin kowane nau'i (`open-sse/config/freeModelCatalog.ts`), wanda aka cire daga tafkin. An ware ta ta maimaita tokens/mo. `uncapped*` = kyauta na dindindin amma ba a buga alamar alamar (rate/concurrency-limited) — isa ga gaske,** ba** a takaice cikin kanun labarai. `—` = bashi-kawai / maɓalli / ba alamar-ƙididdigewa.
+> Ana kiyaye ta da hannu daga kundin tsarin kowane nau'i (`open-sse/config/freeModelCatalog.data.ts`); dubawa na ƙarshe 2026-11-23. An tsara shi ta ainihin alamun kowane wata na kowane tafkin (kowane tafkin da aka raba an ƙidaya sau ɗaya). `uncapped*` = kyauta na dindindin amma babu buga alamar alamar (rate/concurrency-limited): samun dama ta gaske,** ba** aka taƙaita cikin ainihin adadi. `not counted` = rabo mai maimaitawa wanda ainihin adadi ya fita (`avoid`, ko bayan binciken tantance asalin yanki). Masu bayarwa waɗanda tayin su ya ƙare suna cikin [Cire / babu matakin kyauta](#removed--no-free-tier). `—` = bashi-kawai / maɓalli / ba alamar-ƙididdigewa.
 
-| Mai bayarwa      | Nau'in kyauta      | Tsayuwar tokens/mo | Kiredit na watan farko | ToS                | Samfura |
-| ---------------- | ------------------ | ------------------ | ---------------------- | ------------------ | ------- |
-| `mistral`        | maimaituwa         | ~ 1.00B            | —                      | taka tsantsan      | 5       |
-| `nara`           | maimaituwa         | ~ 210M             | —                      | taka tsantsan      | 8       |
-| `llm7`           | maimaituwa         | ~ 150M             | —                      | taka tsantsan      | 4       |
-| `xkiro`          | maimaituwa         | ~ 150M             | —                      | taka tsantsan      | 39      |
-| `longcat`        | lokaci daya        | —                  | 10M                    | taka tsantsan      | 1       |
-| `cerebras`       | lokaci daya        | —                  | $5 bashi               | taka tsantsan      | 2       |
-| `cloudflare-ai`  | maimaituwa         | ~ 30M              | —                      | taka tsantsan      | 9       |
-| `groq`           | maimaituwa         | ~ 30M              | —                      | taka tsantsan      | 5       |
-| `api-airforce`   | maimaituwa         | ~ 24M              | —                      | taka tsantsan      | 7       |
-| `bluesminds`     | maimaituwa         | ~ 7m               | —                      | m                  | 22      |
-| `sambanova`      | maimaituwa         | ~ 6m               | —                      | taka tsantsan      | 5       |
-| `arcee-ai`       | maimaituwa         | ~ 5m               | —                      | taka tsantsan      | 1       |
-| `bazaarlink`     | maimaituwa         | ~ 4M               | —                      | taka tsantsan      | 32      |
-| `openrouter`     | maimaituwa         | ~ 1M               | —                      | taka tsantsan      | 1       |
-| `cohere`         | maimaituwa         | ~ 800k             | —                      | taka tsantsan      | 6       |
-| `huggingchat`    | maimaituwa         | ~ 500k             | —                      | taka tsantsan      | 4       |
-| `morph`          | maimaituwa         | ~ 400k             | —                      | ko                 | 2       |
-| `huggingface`    | maimaituwa         | ~ 200k             | —                      | taka tsantsan      | 6       |
-| `kiro`           | maimaituwa         | ~ 25k              | —                      | kauce              | 12      |
-| `glm-cn`         | wanda ba a rufe ba | ba a rufe ba\*     | ~ 20M                  | ko                 | 4       |
-| `baidu`          | wanda ba a rufe ba | ba a rufe ba\*     | —                      | taka tsantsan      | 1       |
-| `gemini`         | wanda ba a rufe ba | ba a rufe ba\*     | —                      | taka tsantsan      | 4       |
-| `kilo-gateway`   | wanda ba a rufe ba | ba a rufe ba\*     | —                      | taka tsantsan      | 7       |
-| `opencode-zen`   | wanda ba a rufe ba | ba a rufe ba\*     | —                      | taka tsantsan      | 10      |
-| `tencent`        | wanda ba a rufe ba | ba a rufe ba\*     | —                      | taka tsantsan      | 1       |
-| `vertex`         | rajista bashi      | —                  | ~ 300M                 | taka tsantsan      | 10      |
-| `agentrouter`    | rajista bashi      | —                  | ~ 200M                 | taka tsantsan      | 4       |
-| `predibase`      | rajista bashi      | —                  | ~ 25M                  | taka tsantsan      | 1       |
-| `doubao`         | rajista bashi      | —                  | ~ 15M                  | m                  | 1       |
-| `ai21`           | rajista bashi      | —                  | ~ 10M                  | kauce              | 2       |
-| `deepseek`       | rajista bashi      | —                  | ~ 5m                   | ko                 | 2       |
-| `hyperbolic`     | rajista bashi      | —                  | ~ 5m                   | ko                 | 8       |
-| `nscale`         | rajista bashi      | —                  | ~ 5m                   | taka tsantsan      | 6       |
-| `bytez`          | bashi (rec.)       | —                  | wanda ba a sani ba     | m                  | 1       |
-| `deepinfra`      | rajista bashi      | —                  | ~ 1M                   | taka tsantsan      | 22      |
-| `fireworks`      | rajista bashi      | —                  | ~ 1M                   | kauce              | 10      |
-| `nebius`         | rajista bashi      | —                  | ~ 1M                   | taka tsantsan      | 1       |
-| `qoder`          | rajista bashi      | —                  | ~ 1M                   | taka tsantsan      | 14      |
-| `scaleway`       | rajista bashi      | —                  | ~ 1M                   | ko                 | 6       |
-| `novita`         | rajista bashi      | —                  | ~ 500k                 | taka tsantsan      | 1       |
-| `agy`            | mara key           | —                  | —                      | kauce              | 16      |
-| `baichuan`       | mara key           | —                  | —                      | m                  | 1       |
-| `blackbox`       | mara key           | —                  | —                      | kauce              | 6       |
-| `coze`           | mara key           | —                  | —                      | kauce              | 1       |
-| `duckduckgo-web` | mara key           | —                  | —                      | kauce              | 6       |
-| `freemodel-dev`  | mara key           | —                  | —                      | wanda ba a sani ba | 4       |
-| `friendliai`     | mara key           | —                  | —                      | kauce              | 2       |
-| `iflytek`        | mara key           | —                  | —                      | kauce              | 1       |
-| `inference-net`  | mara key           | —                  | —                      | taka tsantsan      | 3       |
-| `liquid`         | mara key           | —                  | —                      | wanda ba a sani ba | 1       |
-| `monsterapi`     | mara key           | —                  | —                      | m                  | 1       |
-| `muse-spark-web` | mara key           | —                  | —                      | kauce              | 3       |
-| `nlpcloud`       | mara key           | —                  | —                      | kauce              | 1       |
-| `nvidia`         | wanda ba a rufe ba | ba a rufe ba\*     | —                      | taka tsantsan      | 3       |
-| `pollinations`   | mara key           | —                  | —                      | taka tsantsan      | 31      |
-| `publicai`       | mara key           | —                  | —                      | taka tsantsan      | 3       |
-| `reka`           | mara key           | —                  | —                      | taka tsantsan      | 2       |
-| `sensenova`      | mara key           | —                  | —                      | taka tsantsan      | 1       |
-| `sparkdesk`      | mara key           | —                  | —                      | taka tsantsan      | 1       |
-| `stepfun`        | mara key           | —                  | —                      | ko                 | 1       |
-| `t3-web`         | mara key           | —                  | —                      | kauce              | 23      |
-| `uncloseai`      | mara key           | —                  | —                      | taka tsantsan      | 3       |
+| Mai bayarwa      | Nau'in kyauta      | Real tokens/mo                 | Kiredit na watan farko | ToS                | Samfura |
+| ---------------- | ------------------ | ------------------------------ | ---------------------- | ------------------ | ------- |
+| `api-airforce`   | maimaituwa         | ~ 24M                          | —                      | taka tsantsan      | 5       |
+| `groq`           | maimaituwa         | ~ 24M (4 per-model iyakoki)    | —                      | taka tsantsan      | 4       |
+| `cloudflare-ai`  | maimaituwa         | ~ 23M                          | —                      | taka tsantsan      | 8       |
+| `xkiro`          | maimaituwa         | ~ 15M                          | —                      | taka tsantsan      | 9       |
+| `bazaarlink`     | maimaituwa         | ~ 1.4M                         | —                      | taka tsantsan      | 1       |
+| `openrouter`     | maimaituwa         | ~ 1.2M                         | —                      | taka tsantsan      | 1       |
+| `cohere`         | maimaituwa         | ~ 800k                         | —                      | taka tsantsan      | 6       |
+| `sambanova`      | maimaituwa         | ~ 480k                         | —                      | taka tsantsan      | 2       |
+| `morph`          | maimaituwa         | ~ 160k                         | —                      | ko                 | 2       |
+| `glm-cn`         | wanda ba a rufe ba | ba a rufe ba\*                 | 20M                    | ko                 | 4       |
+| `agnes`          | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | ko                 | 3       |
+| `agnes-cn`       | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | ko                 | 3       |
+| `aion`           | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | ko                 | 4       |
+| `baidu`          | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | taka tsantsan      | 1       |
+| `gemini`         | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | taka tsantsan      | 4       |
+| `glm`            | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | ko                 | 2       |
+| `kilo-gateway`   | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | taka tsantsan      | 12      |
+| `nvidia`         | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | taka tsantsan      | 3       |
+| `onomeo`         | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | taka tsantsan      | 2       |
+| `requesty`       | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | taka tsantsan      | 2       |
+| `sealion`        | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | ko                 | 5       |
+| `tokenharbor`    | wanda ba a rufe ba | ba a rufe ba\*                 | —                      | taka tsantsan      | 2       |
+| `coze`           | maimaituwa         | ba a ƙidaya (`avoid`)          | —                      | kauce              | 1       |
+| `inference-net`  | maimaituwa         | ba a kirga                     | —                      | taka tsantsan      | 3       |
+| `kiro`           | maimaituwa         | ba a ƙidaya (`avoid`)          | —                      | kauce              | 7       |
+| `modelscope`     | maimaituwa         | a bayan binciken shaidar yanki | —                      | taka tsantsan      | 2       |
+| `nlpcloud`       | maimaituwa         | ba a ƙidaya (`avoid`)          | —                      | kauce              | 1       |
+| `reka`           | maimaituwa         | ba a kirga                     | —                      | taka tsantsan      | 2       |
+| `t3-web`         | maimaituwa         | ba a ƙidaya (`avoid`)          | —                      | kauce              | 23      |
+| `bytez`          | bashi (rec.)       | —                              | —                      | m                  | 1       |
+| `doubao`         | rajista bashi      | —                              | 15M                    | m                  | 1       |
+| `longcat`        | rajista bashi      | —                              | 10M                    | taka tsantsan      | 1       |
+| `deepseek`       | rajista bashi      | —                              | 5M                     | ko                 | 2       |
+| `hyperbolic`     | rajista bashi      | —                              | 5M                     | ko                 | 8       |
+| `nscale`         | rajista bashi      | —                              | 5M                     | taka tsantsan      | 6       |
+| `deepinfra`      | rajista bashi      | —                              | 1M                     | taka tsantsan      | 22      |
+| `qoder`          | rajista bashi      | —                              | 1M                     | taka tsantsan      | 9       |
+| `scaleway`       | rajista bashi      | —                              | 1M                     | ko                 | 6       |
+| `novita`         | rajista bashi      | —                              | 500K                   | taka tsantsan      | 1       |
+| `agentrouter`    | rajista bashi      | —                              | —                      | taka tsantsan      | 1       |
+| `ai21`           | rajista bashi      | —                              | —                      | kauce              | 2       |
+| `baichuan`       | rajista bashi      | —                              | —                      | m                  | 1       |
+| `cerebras`       | rajista bashi      | —                              | —                      | taka tsantsan      | 2       |
+| `fireworks`      | rajista bashi      | —                              | —                      | kauce              | 10      |
+| `freemodel-dev`  | rajista bashi      | —                              | —                      | wanda ba a sani ba | 4       |
+| `monsterapi`     | rajista bashi      | —                              | —                      | m                  | 1       |
+| `nebius`         | rajista bashi      | —                              | —                      | taka tsantsan      | 1       |
+| `publicai`       | rajista bashi      | —                              | —                      | taka tsantsan      | 3       |
+| `sensenova`      | rajista bashi      | —                              | —                      | taka tsantsan      | 1       |
+| `vertex`         | rajista bashi      | —                              | —                      | taka tsantsan      | 16      |
+| `agy`            | mara key           | —                              | —                      | kauce              | 9       |
+| `aihorde`        | mara key           | —                              | —                      | ko                 | 3       |
+| `blackbox`       | mara key           | —                              | —                      | kauce              | 6       |
+| `duckduckgo-web` | mara key           | —                              | —                      | kauce              | 6       |
+| `friendliai`     | mara key           | —                              | —                      | kauce              | 2       |
+| `iflytek`        | mara key           | —                              | —                      | kauce              | 1       |
+| `liquid`         | mara key           | —                              | —                      | wanda ba a sani ba | 1       |
+| `muse-spark-web` | mara key           | —                              | —                      | kauce              | 3       |
+| `ovhcloud`       | mara key           | —                              | —                      | ko                 | 5       |
+| `pollinations`   | mara key           | —                              | —                      | taka tsantsan      | 24      |
+| `sparkdesk`      | mara key           | —                              | —                      | taka tsantsan      | 1       |
+| `uncloseai`      | mara key           | —                              | —                      | taka tsantsan      | 1       |
 
 ---
 

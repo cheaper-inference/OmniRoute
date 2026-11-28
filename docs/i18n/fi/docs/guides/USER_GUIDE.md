@@ -246,33 +246,41 @@ Mallit: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Yhdistelmät
+## 🎨 yhdistelmät
 
-Voit järjestää yhdistelmäkortit uudelleen suoraan kohdassa **Hallintapaneeli → Yhdistelmät** vetämällä kunkin kortin kahvasta. Järjestys tallennetaan SQLite-tietokantaan ja palautetaan uudelleenlatauksen yhteydessä.
+Voit tilata yhdistelmäkortit uudelleen suoraan sisään** Kojelauta → Combos** vetämällä kunkin kortin kahvasta. Tilaus tallennetaan SQLite hen ja palautetaan uudelleenlatauksen yhteydessä.
 
-### Esimerkki 1: Maksimoi tilauksen käyttö → Edullinen varamalli
+### Etsi palveluntarjoaja, malli tai tili
 
-```
-Hallintapaneeli → Yhdistelmät → Luo uusi
+Luo tai muokkaa yhdistelmää -kohdassa vaiheittaiset palveluntarjoajan, mallin, tilin ja yhdistelmäviitteiden valitsimet sisältävät paikallisen hakukentän. Hae näytetyn nimen, tunnisteen, toimittajan aliaksen tai mallilähteen mukaan ja napsauta sitten tulosta tai käytä nuolinäppäimiä ja Enter. Useiden hakutermien on vastattava kaikkia. Haun tyhjentäminen tai Esc-näppäimen painaminen jättää valitun arvon ennalleen.
 
-Nimi: premium-coding
-Mallit:
-  1. cc/claude-opus-4-7 (Ensisijainen tilausmalli)
-  2. glm/glm-4.7 (Edullinen varamalli, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Halvin varavaihtoehto, $0.3/1M)
+Automaattinen tilin valinta jää näkyviin haun aikana. Sen valinnaisessa tilirajoitusluettelossa on erillinen suodatin: valitut tilit näkyvien tulosten ulkopuolella pysyvät valittuina, ja määrä sisältää ne. Piilotetut sähköpostiosat eivät ole haettavissa, kun sähköpostin tietosuoja on käytössä. Lisää vaihe ja tallenna yhdistelmä tavalliseen tapaan; kyselyn kirjoittaminen ei tallenna tai testaa mitään.
 
-Käyttö CLI:ssä: premium-coding
-```
+Sama paikallinen haku on saatavilla yhteystestausmalleille, mukautetuille CLI oletus- ja aliasmalleille sekä tallennettujen välityspalvelinten vaihtoehdoille. Olemassa olevat tallennus-, käyttö- ja testaustoiminnot pysyvät erillään.
 
-### Esimerkki 2: Vain ilmaiset (ei kustannuksia)
+### Esimerkki 1: Maksimoi tilaus → halpa varmuuskopio
 
 ```
-Nimi: free-combo
-Mallit:
-  1. if/kimi-k2.7-code (ilmoitettu maksuton käyttöoikeus; palveluntarjoajan rajoituksia voidaan soveltaa)
-  2. kr/qwen3-coder-next (Kiron maksuton varavaihtoehto)
+Dashboard → Combos → Create New
 
-Kustannus: ilmoitettu tällä hetkellä arvoksi $0; ehdot ja saatavuus voivat muuttua
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### Esimerkki 2: Vain ilmainen (nollahinta)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -432,7 +440,7 @@ Kun et enää tarvitse OmniRoute, tarjoamme kaksi nopeaa skriptiä puhtaaseen po
 ### VPS käyttöönotto
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -514,8 +522,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -833,7 +841,7 @@ Palauttaa mallit ryhmiteltyinä tarjoajan mukaan tyypeillä (`chat`, `embedding`
 
 ### LLM Gateway Intelligence (vaihe 9)
 
-- **Semanttinen välimuisti** — Tallentaa automaattisesti välimuistiin ei-suoratoiston, lämpötila = 0 -vastaukset (ohita `X-OmniRoute-No-Cache: true`:llä)
+- **Semanttinen välimuisti** — Tallentaa automaattisesti välimuistiin ei-suoratoiston, lämpötilan = 0 -vastaukset (ohita `X-OmniRoute-No-Cache: true`:llä)
 - **Pyydä Idempotenssia** — Poistaa pyynnöt 5 sekunnissa `Idempotency-Key` tai `X-Request-Id` otsikon kautta
 - **Edistyksen seuranta** — Ota SSE `event: progress` -tapahtumat käyttöön `X-OmniRoute-Progress: true` otsikon kautta
 
@@ -882,9 +890,9 @@ Määritä kautta** Dashboard → Asetukset → Reititys** . Kojelauta näyttä�
 - `p2c` (Kahden valinnan voima)
 - `least-used` ja `cost-optimized`
 - `auto` — tulosperusteinen kaikkien ehdokkaiden osalta
-- `lkgp` (Last Known Good Provider) — kiinnittää viimeiseen onnistuneeseen tarjoajaan ja palaa sitten sääntöihin
-- `context-optimized` — valitsee mallin, jolla on suurin vapaa konteksti-ikkuna
-- `context-relay` — ketjuttaa pitkän kontekstin malleja seurantakäännöksiin
+- `lkgp` (Last Known Good Provider) — kiinnittää viimeiseen onnistuneeseen palveluntarjoajaan ja palaa sitten sääntöihin
+- `context-optimized` — yrittää ensin mallia, jossa on suurin tunnettu kontekstiikkuna
+- `context-relay` — prioriteettijärjestys sekä yhteysvastuun yhteenveto, kun keskustelu siirtyy toiselle tilille
 
 #### Ulkoinen Sticky Session Header
 
@@ -1169,14 +1177,14 @@ Poista käytöstä** Päättelytunnistepuskuri** kun alkupään palveluntarjoaja
 
 Pääsy kautta** Kojelauta → Health** . Reaaliaikainen järjestelmän kunnon yleiskatsaus 6 kortilla:
 
-| Kortti                        | Mitä se näyttää                                                                      |
-| ----------------------------- | ------------------------------------------------------------------------------------ |
-| **Järjestelmän tila**         | Käyttöaika, versio, muistin käyttö, tietohakemisto                                   |
-| **Palveluntarjoajan terveys** | Globaalin palveluntarjoajan katkaisijan ajonaikainen tila                            |
-| **Rate Limits**               | Aktiiviset yhteyden jäädytykset tiliä kohden jäljellä olevan ajan kanssa             |
-| **Aktiiviset lukitukset**     | Aktiiviset mallikohtaiset lukitukset ja väliaikaiset poissulkemiset                  |
-| **Allekirjoitusvälimuisti**   | Päällekkäisyyden poistamisen välimuistitilastot (aktiiviset avaimet, osumaprosentti) |
-| **Latenssi-telemetria**       | p50/p95/p99 viiveen yhdistäminen palveluntarjoajaa kohti                             |
+| Kortti                        | Mitä se näyttää                                                          |
+| ----------------------------- | ------------------------------------------------------------------------ |
+| **Järjestelmän tila**         | Käyttöaika, versio, muistin käyttö, tietohakemisto                       |
+| **Palveluntarjoajan terveys** | Globaalin palveluntarjoajan katkaisijan ajonaikainen tila                |
+| **Rate Limits**               | Aktiiviset yhteyden jäädytykset tiliä kohden jäljellä olevan ajan kanssa |
+| **Aktiiviset lukitukset**     | Aktiiviset mallikohtaiset lukitukset ja väliaikaiset poissulkemiset      |
+| **Allekirjoitusvälimuisti**   | Päällekkäisten välimuistin tilastot (aktiiviset avaimet, osumaprosentti) |
+| **Latenssi-telemetria**       | p50/p95/p99 viiveen yhdistäminen palveluntarjoajaa kohti                 |
 
 **Provinkki:** Terveyssivu päivittyy automaattisesti 10 sekunnin välein. Käytä katkaisijakorttia tunnistaaksesi, millä palveluntarjoajilla on ongelmia.
 
@@ -1333,32 +1341,34 @@ Täydellinen päätepisteluettelo sekä pyyntö- ja vastausskeemat ovat tiedosto
 
 ## 💻 Sisäinen CLI
 
-OmniRoute sisältää sisäisen CLI:n (`omniroute …`) määritystä, diagnostiikkaa ja suorituksenaikaista hallintaa varten. Tämä on **erillinen hallintapaneelin CLI-työkalut-sivusta**, jolla määritetään kolmansien osapuolten CLI-työkaluja (Claude Code, Cursor, Codex, Cline, …), jotta ne voivat viestiä OmniRouten kanssa.
+OmniRoute toimittaa sisäisen CLI (`omniroute …`) asennukseen, diagnostiikkaan ja ajonaikaiseen hallintaan. Tämä on** erillään kojelaudan "CLI Tools" -sivulta** , joka määrittää kolmannen osapuolen CLIs (Claude Code, Cursor, Codex, Cline, …), jotta he voivat keskustella OmniRoute kanssa.
 
 ```bash
-omniroute setup                    # Ohjattu interaktiivinen määritys (salasana, palveluntarjoajat, yhdistelmät)
-omniroute setup --non-interactive  # Soveltuu CI-ympäristöihin
-omniroute doctor                   # Kuntodiagnostiikka (datahakemisto, tietokanta, palveluntarjoajat, portit)
-omniroute providers available      # Luettele tuetut palveluntarjoajat
-omniroute providers list           # Luettele määritetyt yhteydet
-omniroute providers test <id>      # Testaa palveluntarjoajayhteys reaaliaikaisesti
-omniroute combos list              # Luettele yhdistelmät
-omniroute combos switch <name>     # Aseta oletusyhdistelmä
-omniroute models                   # Luettele käytettävissä olevat mallit (--json, --search)
-omniroute keys add | list | remove # Hallitse API-avaimia päätteestä
-omniroute backup                   # Luo tilannevedos määrityksistä ja tietokannasta
-omniroute restore [<timestamp>]    # Palauta tilannevedoksesta
-omniroute health                   # Yksityiskohtaiset kuntotiedot (katkaisimet, välimuisti, muisti)
-omniroute quota                    # Palveluntarjoajien kiintiöiden käyttö
-omniroute mcp status               # MCP-palvelimen tila
-omniroute a2a status               # A2A-palvelimen tila
-omniroute tunnel list|create|stop  # Cloudflare-/Tailscale-/ngrok-tunnelit
-omniroute reset-password           # Nollaa järjestelmänvalvojan salasana
-omniroute --mcp                    # Käynnistä MCP-palvelin stdio-yhteydellä
-omniroute --port 3000              # Käynnistä palvelin mukautetussa portissa
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Vinkki: yhdistä `omniroute doctor --json` valvontatyökaluusi, jotta saat hälytyksen epäkuntoisista palveluntarjoajayhteyksistä.
+Vinkki: yhdistä `omniroute doctor --json` valvontatyökaluun varoittaaksesi viallisesta paikallisesta asennuksesta. `doctor` ei testaa palveluntarjoajan yhteyksiä; käytä siihen `omniroute providers test <id>` tä.
 
 ---
 

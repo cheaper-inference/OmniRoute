@@ -270,150 +270,150 @@ K tomu dojde jednou při prvním spuštění po upgradu. Pro opětovné spuště
 
 ---
 
-## 1proxy Tržiště bezplatných proxy serverů
+## 1proxy Free Proxy Marketplace
 
-> 🆕 **Přispěl [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Problém [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Přispěl [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (vydání [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute se integruje s komunitní platformou **[1proxy](https://1proxy-api.aitradepulse.com)** a poskytuje přístup ke **stovkám bezplatných, ověřených proxy serverů** z celého světa. To je ideální pro uživatele, kteří nemají vlastní proxy infrastrukturu.
+OmniRoute se integruje s** [1 proxy](https://1proxy-api.aitradepulse.com)** komunitní platforma, ke které bude přístup** stovky bezplatných, ověřených proxy** z celého světa. To je ideální pro uživatele, kteří nemají vlastní infrastrukturu proxy.
 
 ### Jak to funguje
 
 ```
-┌─────────────┐  Synchronizace  ┌─────────────────┐    Rotace     ┌──────────┐
-│  1proxy API │ ───────────────▶ │  proxy_registry  │ ────────────▶ │ Poskytov.│
-│  (externí)  │   až 500 proxy   │  source=oneproxy │  dle kvality │   API    │
-└─────────────┘                  └─────────────────┘               └──────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Synchronizace** — OmniRoute načítá ověřené proxy servery z API 1proxy
-2. **Uložení** — Proxy servery se ukládají do stejné tabulky `proxy_registry` s hodnotou `source = 'oneproxy'`
-3. **Filtrování** — Filtrování podle protokolu, země a skóre kvality
-4. **Rotace** — Výběr nejlepšího proxy serveru pomocí strategie založené na kvalitě, náhodném nebo sekvenčním výběru
-5. **Automatické snížení hodnocení** — Neúspěšným proxy serverům se sníží skóre kvality; při poklesu pod prahovou hodnotu → jsou označeny jako neaktivní
+1. **Synchronizovat** — OmniRoute načte ověřené proxy z 1 proxy API
+2. **Obchod** — Proxy jsou uloženy ve stejné tabulce `proxy_registry` jako `source = 'oneproxy'`
+3. **Filtr** — Filtrujte podle protokolu, země, skóre kvality
+4. **Střídat** — Vyberte nejlepší proxy pomocí kvalitních, náhodných nebo sekvenčních strategií
+5. **Autodegradace** — Neúspěšným proxy se sníží skóre kvality; pod prahem → označeno jako neaktivní
 
-### Synchronizace proxy serverů
+### Synchronizace proxy
 
-**Prostřednictvím ovládacího panelu:**
+**Prostřednictvím řídicího panelu:**
 
-1. Přejděte na kartu **Nastavení → 1proxy**
-2. Klikněte na **„Synchronizovat nyní“**
-3. Zobrazte statistiky: celkový počet proxy serverů, počet aktivních, průměrná kvalita a rozdělení podle zemí
+1. Přejít na** Nastavení → 1proxy** tab
+2. Klikněte** "Synchronizovat nyní"**
+3. Zobrazit statistiky: celkový počet proxy, aktivní počet, průměrná kvalita, rozdělení podle zemí
 
-**Prostřednictvím API:**
+**Přes API:**
 
 ```bash
-# Spuštění synchronizace
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Odpověď:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
-### Filtrování proxy serverů
+### Filtrování proxy
 
 ```bash
-# Filtrování podle protokolu
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Filtrování podle země
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Filtrování podle minimálního skóre kvality
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Kombinace filtrů
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### Skóre kvality proxy serverů
+### Skóre kvality proxy
 
-Každý proxy server 1proxy obsahuje metadata:
+Každý 1 proxy server je dodáván s metadaty:
 
-| Pole            | Popis                                    |
-| --------------- | ---------------------------------------- |
-| `qualityScore`  | Hodnocení 0–100 z ověření službou 1proxy |
-| `latencyMs`     | Naměřená latence sítě                    |
-| `anonymity`     | `transparent`, `anonymous` nebo `elite`  |
-| `googleAccess`  | Zda má proxy přístup ke službám Google   |
-| `countryCode`   | Dvoupísmenný kód země ISO                |
-| `lastValidated` | Časové razítko posledního ověření        |
+| Pole            | Popis                                        |
+| --------------- | -------------------------------------------- |
+| `qualityScore`  | Hodnocení 0-100 od ověření 1 proxy           |
+| `latencyMs`     | Změřená latence sítě                         |
+| `anonymity`     | `transparent`, `anonymous` nebo `elite`      |
+| `googleAccess`  | Zda může proxy přistupovat ke službám Google |
+| `countryCode`   | Dvoupísmenný kód země ISO                    |
+| `lastValidated` | Časové razítko posledního ověření            |
 
-Skóre kvality se dynamicky upravuje:
+Skóre kvality se dynamicky upravují:
 
-- **Neúspěšné požadavky** snižují skóre o 10 bodů
-- **Skóre klesne na ≤10** → proxy server je označen jako `inactive`
-- Neaktivní proxy servery jsou z rotace vyloučeny
+- **Neúspěšné požadavky** snížit skóre o 10 bodů
+- **Skóre klesá na ≤ 10** → proxy je označena `inactive`
+- Neaktivní proxy jsou z rotace vyloučeny
 
 ### Strategie rotace
 
 ```bash
-# Rotace podle kvality (nejlepší proxy jako první) — výchozí
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Náhodná rotace
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Sekvenční rotace (nejdříve nejdéle neověřený proxy server)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
 ### Jistič
 
-Synchronizace 1proxy obsahuje integrovaný jistič:
+1proxy synchronizace má vestavěný jistič:
 
-- Po **5 po sobě jdoucích selháních synchronizace** jsou další pokusy o synchronizaci zablokovány
-- Resetujte jej pomocí `resetOneproxyCircuitBreaker()` nebo restartujte server
-- Stav synchronizace je dostupný na adrese `GET /api/settings/oneproxy?action=status`
+- Po** 5 po sobě jdoucích selhání synchronizace** , další pokusy o synchronizaci jsou blokovány
+- Resetujte pomocí: `resetOneproxyCircuitBreaker()` nebo restartujte server
+- Stav synchronizace je k dispozici na `GET /api/settings/oneproxy?action=status`
 
-### Vymazání proxy serverů 1proxy
+### Vymazání 1 proxy proxy
 
 ```bash
-# Odstranění jednoho proxy serveru 1proxy
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# Vymazání VŠECH proxy serverů 1proxy (ručně přidané proxy zůstanou nedotčeny)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
 ---
 
-## Ochrana proti detekci a utajení
+## Anti-Detection & Stealth
 
-OmniRoute nesměruje provoz pouze přes proxy — zároveň zajišťuje, aby provoz vypadal legitimně:
+OmniRoute nejen směruje provoz přes proxy — ale provoz vypadá legitimně:
 
-### Napodobení otisku TLS
+### TLS Falšování otisků prstů
 
-Používá `wreq-js` ke generování otisků TLS podobných prohlížečům, čímž obchází systémy detekce botů, které označují navazování spojení TLS nepocházející z prohlížečů.
+Využívá `wreq-js` ke generování otisků prstů TLS podobných prohlížeči, čímž obchází systémy detekce botů, které signalizují handshake TLS bez prohlížeče.
 
-### Napodobení otisku CLI
+### CLI Porovnání otisků prstů
 
-**Přepínač otisku CLI** (`Nastavení → Zabezpečení`) mění pořadí hlaviček HTTP a polí v těle JSON tak, aby přesně odpovídalo signatuře nativních binárních souborů CLI (Claude Code, Codex atd.). Tato funkce pracuje **nad rámec** proxy:
+The**CLI Přepínání otisků prstů** (`Settings → Security`) změní pořadí hlaviček HTTP a těles těla JSON tak, aby odpovídaly přesnému podpisu nativních binárních souborů CLI (kód Claude, Codex atd.). Tohle funguje** na vrcholu** proxy:
 
 ```
-Vaše IP (blokovaná) → IP proxy (USA) → API poskytovatele
-                       + napodobení TLS
-                       + otisk CLI
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-Získáte tak současně **maskování IP adresy** i **autenticitu požadavků**.
+Dostanete obojí**IP maskování** a** požadovat pravost** zároveň.
 
-### Zachování IP adresy proxy
+### Zachování proxy IP
 
-Barevně odlišené štítky na řídicím panelu ukazují, která úroveň proxy je aktivní:
+Barevně odlišené odznaky na řídicím panelu ukazují, která úroveň proxy je aktivní:
 
-| Štítek | Úroveň       | Význam                                                |
-| ------ | ------------ | ----------------------------------------------------- |
-| 🟢     | Globální     | Veškerý provoz prochází přes tuto proxy               |
-| 🟡     | Poskytovatel | Přes proxy prochází pouze provoz tohoto poskytovatele |
-| 🔵     | Připojení    | Tuto proxy používá konkrétní klíč nebo účet           |
+| Odznak | Úroveň       | Význam                                                  |
+| ------ | ------------ | ------------------------------------------------------- |
+| 🟢     | Globální     | Veškerý provoz prochází tímto proxy serverem            |
+| 🟡     | Poskytovatel | Přes proxy se používá pouze provoz tohoto poskytovatele |
+| 🔵     | Spojení      | Tento konkrétní key/account používá tento proxy         |
 
-Štítek pro ověření zobrazuje také zjištěnou IP adresu proxy.
+Odznak také zobrazuje vyřešený proxy IP pro ověření.
 
 ---
 
@@ -778,52 +778,28 @@ Použijte `random`
 rozloží zátěž)
 ```
 
-## Automatické vyřazování vlastních nefunkčních proxy serverů
+## Automatické vyloučení selhání pro vaše vlastní proxy
 
-Fond tržiště 1proxy již sám automaticky snižuje hodnocení nefunkčních proxy serverů (viz
-[Skóre kvality proxy serverů](#proxy-quality-scores)). Pro proxy servery, které jste
-do registru přidali **vy**, poskytuje plánovač kontrol na pozadí
-(`src/lib/proxyHealth/scheduler.ts`) stejné chování spočívající v „automatickém
-vyřazení nefunkčního člena z řetězce“, aniž by cokoli odstraňoval:
+Fond tržiště 1proxy již sám o sobě automaticky degraduje neúspěšné proxy (viz [Skóre kvality proxy](#proxy-quality-scores) ). Pro proxy** Vy** přidaný do registru, plánovač stavu na pozadí (`src/lib/proxyHealth/scheduler.ts`) poskytuje stejné chování „vyloučit mrtvého člena z řetězce automaticky“, aniž by se cokoli smazalo:
 
 ```bash
-# .env — po 3 po sobě jdoucích neúspěšných kontrolách proxy server dočasně deaktivuje
-# a automaticky jej znovu aktivuje, jakmile začne na kontroly opět odpovídat.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Jak to funguje v řetězci více proxy serverů:
+Jak to zapadá do multi-proxy řetězce:
 
-1. Plánovač kontroluje každý registrovaný proxy server každých
-   `PROXY_HEALTH_INTERVAL_MS` (výchozí hodnota je 10 min; minimum je 1 min).
-2. Po `PROXY_AUTO_REMOVE_AFTER` po sobě jdoucích **průkazných** selháních (skutečné
-   selhání připojení — časový limit ani vlastní odpověď 5xx cíle kontroly se nikdy
-   nezapočítávají, viz [Kontrola stavu proxy serverů](#proxy-health-checking-v3816))
-   se `status` proxy serveru nastaví na `dead`.
-3. `dead` je jedním ze stavů, které filtr aktivních stavů používaný při vyhodnocování
-   fondu/rotace vyřazuje, takže rotace daného rozsahu (round-robin / náhodná / sticky /
-   podle latence — viz [Rozhodovací strom strategie rotace](#rotation-strategy-decision-tree))
-   okamžitě přestane tento proxy server přidělovat novým požadavkům. Ostatní proxy
-   servery ve fondu nejsou nijak ovlivněny a celý fond nikdy bez upozornění nepřejde
-   na přímé připojení — viz pojistka fail-closed v
-   [4úrovňovém systému proxy serverů](#4-level-proxy-system).
-4. Plánovač pokračuje v kontrolování proxy serverů se stavem `dead` ve stejném
-   intervalu. Při další úspěšné kontrole přepne `status` zpět na `active` a proxy
-   server se znovu zařadí do rotace — není nutné jej ručně znovu přidávat.
+1. Plánovač testuje každý registrovaný proxy každých `PROXY_HEALTH_INTERVAL_MS` (výchozí 10 min; minimálně 1 min).
+2. Po `PROXY_AUTO_REMOVE_AFTER` po sobě** přesvědčivé** selhání (skutečné selhání připojení — časový limit nebo vlastní 5xx cíle sondy se nikdy nepočítá, viz [Kontrola stavu proxy](#proxy-health-checking-v3816) ), `status` proxy je nastaveno na `dead`.
+3. `dead` je jedním ze stavů, které filtr živého stavu používaný rozlišením pool/rotation vylučuje, takže rotace rozsahu (cyklus/náhodné / lepivé / latence / relace — viz [strom rozhodnutí o strategii rotace](#rotation-strategy-decision-tree) ) okamžitě zastaví předávání tohoto proxy novým požadavkům. Nejsou ovlivněny žádné další proxy ve fondu a celý fond se nikdy tiše nevrátí zpět k přímému připojení — viz [4úrovňový systém proxy](#4-level-proxy-system) proti selhání zavření.
+4. Plánovač udržuje sondování `dead` proxy ve stejném intervalu. Další úspěšná sonda převrátí `status` zpět na `active` a znovu vstoupí do rotace — bez nutnosti ručního opětovného přidání.
 
-Tato funkce je záměrně **volitelná a nedestruktivní**: ve výchozím nastavení
-plánovač selhání pouze počítá a zaznamenává (viz zásada C v `decision.ts`) a
-`PROXY_AUTO_DISABLE` nikdy neodstraní žádný řádek — k tomu slouží samostatný,
-agresivnější příznak `PROXY_AUTO_REMOVE`. Pokud jsou oba nastaveny na `true`,
-má přednost `PROXY_AUTO_REMOVE` (u proxy serveru, který má být odstraněn, nemá
-mezilehlá dočasná deaktivace smysl). Úplný seznam proměnných naleznete v referenční
-dokumentaci [Konfigurace prostředí](../reference/ENVIRONMENT.md).
+To je schválně** opt-in a nedestruktivní** : ve výchozím nastavení plánovač počítá a zaznamenává pouze selhání (viz zásada C v `decision.ts`) a `PROXY_AUTO_DISABLE` nikdy neodstraní řádek — k čemuž slouží samostatný agresivnější příznak `PROXY_AUTO_REMOVE`. Pokud jsou oba nastaveny na `true`, vyhraje `PROXY_AUTO_REMOVE` (proxy, který má být smazán, nemá využití pro měkké vypnutí mezi tím). Úplný seznam proměnných naleznete v Referenční příručce [konfigurace prostředí](../reference/ENVIRONMENT.md).
 
 ---
 
-> 📖 **Související dokumentace:**
+> 📖** Související dokumentace:**
 >
-> - [Uživatelská příručka](../guides/USER_GUIDE.md) — Obecné nastavení a konfigurace
-> - [Referenční příručka API](../reference/API_REFERENCE.md) — Úplná dokumentace API
-> - [Konfigurace prostředí](../reference/ENVIRONMENT.md) — Všechny proměnné prostředí
+> - [Uživatelská příručka](../guides/USER_GUIDE.md) — Obecné nastavení a konfigurace - [API Reference](../reference/API_REFERENCE.md) — Úplná dokumentace API - [Konfigurace prostředí](../reference/ENVIRONMENT.md) — Všechny proměnné prostředí

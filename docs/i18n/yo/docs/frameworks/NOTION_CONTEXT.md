@@ -63,42 +63,31 @@ Gbogbo method mẹ́tẹ̀ẹ̀ta nílò ìfàṣẹsí dashboard (`isAuthentica
 OmniRoute yóò fi token náà pamọ́, yóò sì ṣe ìṣàwárí ìdánwò ol èsì kan lẹ́sẹ̀kẹsẹ̀; bí Notion
 bá dá object error padà, a ó pa token náà rẹ́, call náà yóò sì kùnà pẹ̀lú `400`.
 
-## Àwọn irinṣẹ́ MCP (6)
+## irinṣẹ MCP (6)
 
-A ṣàlàyé wọn nínú `open-sse/mcp-server/tools/notionTools.ts`. A máa ń yanjú token náà
-ní àkókò call nípasẹ̀ `getNotionToken()`; bí a kò bá ṣètò ọ̀kan, irinṣẹ́ náà yóò ju
-`"A kò tíì ṣètò token integration Notion. Ṣètò rẹ̀ ní Settings > Context Sources."`
+Ti tumọ si ni `open-sse/mcp-server/tools/notionTools.ts`. Aami ti wa ni ipinnu ni akoko ipe nipasẹ `getNotionToken()`; ti ko ba si ni tunto awọn ọpa ju `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Irinṣẹ́                       | Scope          | Àpèjúwe                                                                                     |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Ṣàwárí àwọn page àti database pẹ̀lú query ọ̀rọ̀ (ó dá title, ID, URL padà). Ó ní pagination.   |
-| `notion_get_page`            | `read:notion`  | Gba àkóónú àti metadata page kan nípasẹ̀ ID rẹ̀.                                              |
-| `notion_list_block_children` | `read:notion`  | Ṣe àtòjọ gbogbo block ọmọ ti block tàbí page kan (igi block náà). Ó ní pagination.          |
-| `notion_query_database`      | `read:notion`  | Ṣe query sí database pẹ̀lú `filter` + `sorts` àṣàyàn (ọ̀nà-kíkó API Notion). Ó ní pagination. |
-| `notion_get_database`        | `read:notion`  | Gba schema/metadata database kan nípasẹ̀ ID.                                                 |
-| `notion_append_blocks`       | `write:notion` | Fi àwọn block ọmọ kún block tàbí page tó wà tẹ́lẹ̀ (block 100 ó pọ̀jù fún ìbéèrè kọ̀ọ̀kan).      |
+| Irinṣẹ                       | Ààlà           | Apejuwe                                                                                         |
+| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Ṣewadii awọn oju-iwe ati data data nipasẹ ibeere ọrọ (dapada awọn akọle, IDs, URLs). Paginated. |
+| `notion_get_page`            | `read:notion`  | Gba akoonu ati metadata ti oju-iwe nipasẹ ID rẹ.                                                |
+| `notion_list_block_children` | `read:notion`  | Ṣe atokọ gbogbo awọn ọmọ bulọọki ti bulọọki tabi oju-iwe (igi idina). Paginated.                |
+| `notion_query_database`      | `read:notion`  | Beere aaye data pẹlu aṣayan `filter` + `sorts` ( ọna kika Notion API ). Paginated.              |
+| `notion_get_database`        | `read:notion`  | Gba schema/metadata ti aaye data nipasẹ ID.                                                     |
+| `notion_append_blocks`       | `write:notion` | Fi awọn ọmọde kun si bulọki tabi oju-iwe ti o wa tẹlẹ (awọn bulọọki 100 ti o pọju fun ibeere).  |
 
-### Àwọn parameter input
+### Awọn paramita igbewọle
 
-- `notion_search` — `query` (lẹ́tà 1–500), `pageSize` (1–100, àkọ́kọ́ 20),
-  `startCursor` (àṣàyàn).
-- `notion_get_page` — `pageId` (hex onílẹ́tà 32 tàbí UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, àkọ́kọ́ 50),
-  `startCursor` (àṣàyàn).
-- `notion_query_database` — `databaseId`, `filter` (àṣàyàn, ọ̀nà-kíkó filter Notion),
-  `sorts` (array àṣàyàn), `pageSize` (1–100, àkọ́kọ́ 50), `startCursor` (àṣàyàn).
+- `notion_search` — `query` (1-500 chars), `pageSize` (1-100, aiyipada 20), `startCursor` (aṣayan).
+- `notion_get_page` — `pageId` (32-char hex tabi UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, aiyipada 50), `startCursor` (aṣayan).
+- `notion_query_database` — `databaseId`, `filter` (aṣayan, ọna kika àlẹmọ Notion ), `sorts` (aṣayan yiyan), `pageSize` (1–100, aiyipada 50), `startCursor` (aṣayan).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (array àwọn object block),
-  `after` (ipò àṣàyàn).
+- `notion_append_blocks` — `blockId`, `children` (opo ti awọn ohun idina), `after` (ipo aṣayan).
 
-### Àwọn scope
+### Awọn aaye
 
-Àwọn irinṣẹ́ kíkà nílò `read:notion`, irinṣẹ́ kíkọ sì nílò `write:notion`.
-`withScopeEnforcement()` inú `open-sse/mcp-server/server.ts` ni ó ń fipá mú àwọn scope
-nígbà tí `OMNIROUTE_MCP_ENFORCE_SCOPES=true` nìkan; àwọn scope tí a fàyè gba fún caller
-wá láti `OMNIROUTE_MCP_SCOPES` (tí comma yà sọ́tọ̀) tàbí àyíká scope ti API key tí a
-ti fìdí ìdánimọ̀ rẹ̀ múlẹ̀. Wo [MCP-SERVER.md](./MCP-SERVER.md) fún àwòṣe scope
-ní ẹ̀kúnrẹ́rẹ́.
+Awọn irinṣẹ kika nilo `read:notion` ati ohun elo kikọ nilo `write:notion`. Awọn aaye ti a fi agbara mu nipasẹ `withScopeEnforcement()` ni `open-sse/mcp-server/server.ts` nigbati `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, ati nigbagbogbo fun olupe HTTP/SSE ti bọtini API ko ni `manage`/`admin`; Awọn aaye idasilẹ ti olupe wa lati `OMNIROUTE_MCP_SCOPES` (iyasọtọ-koma-yapa) tabi aaye aaye aaye bọtini API ti o jẹri. Wo [MCP-SERVER.md](./MCP-SERVER.md) fun awoṣe iwọn kikun.
 
 ## Àwọn Endpoint
 

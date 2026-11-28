@@ -168,9 +168,9 @@ Microsoft 365 প্রদানকারীর মধ্যে** সংযো�
 
 ## তথ্যসূত্র
 
-- ইস্যু: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- আলোচনা: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- সোর্স: `src/shared/constants/providers/web-cookie.ts` (প্রোভাইডারের সংজ্ঞা)
-- HAR ইমপোর্ট: `src/shared/utils/m365HarImport.ts`
-- ক্রেডেনশিয়াল ফিল্ডসমূহ: `src/shared/providers/webSessionCredentials.ts`
-- টিয়ার মোডাল: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- ইস্যু: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- আলোচনা: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- উত্স: `src/shared/constants/providers/web-cookie.ts` (প্রদানকারীর সংজ্ঞা)
+- HAR আমদানি: `src/shared/utils/m365HarImport.ts`
+- শংসাপত্র ক্ষেত্র: `src/shared/providers/webSessionCredentials.ts`
+- স্তর মডেল: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

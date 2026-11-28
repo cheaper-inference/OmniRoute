@@ -4,12 +4,11 @@
 
 ---
 
-> **신뢰할 수 있는 원본:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **마지막 업데이트:** 2026-06-28 — v3.8.40
+> **진실의 출처:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute는 관리 작업, 인증 이벤트, 제공자 자격 증명 수명 주기 변경 사항 및 MCP 도구 호출을 SQLite 기반 감사 테이블에 기록합니다. 이 페이지에서는 기록되는 항목, 저장 위치, 보존 기간, API 키의 로깅 제외 방법 및 데이터 조회 방법을 설명합니다.
+OmniRoute 관리 작업, 인증 이벤트, 공급자 자격 증명 수명 주기 변경 및 MCP 도구 호출을 SQLite 지원 감사 테이블에 기록합니다. 이 페이지에서는 기록되는 내용, 보관 위치, 보관 기간, API 키를 옵트아웃하는 방법 및 데이터 쿼리 방법을 다룹니다.
 
-구현은 `src/lib/compliance/index.ts`(T-43 — "규정 준수 제어") 및 `src/lib/compliance/providerAudit.ts`에 있습니다. 감사 쓰기는 예외를 발생시키지 않습니다. 실패가 발생하면 호출이 조용히 무시되므로 감사 로깅이 기본 요청 흐름을 중단하지 않습니다.
+구현은 `src/lib/compliance/index.ts` (T-43 — "Compliance Controls") 및 `src/lib/compliance/providerAudit.ts` 에 있습니다. 감사 쓰기는 발생하지 않습니다. 오류가 발생하면 호출이 자동으로 무시되므로 감사 로깅이 기본 요청 흐름을 중단할 수 없습니다.
 
 ## 기록되는 항목
 
@@ -115,12 +114,12 @@ CREATE TABLE IF NOT EXISTS audit_log (
 기본값은 `src/lib/logEnv.ts`에 정의되어 있습니다
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## `noLog` 로그 제외 설정(API 키별)
+## `noLog` 옵트아웃( API 키당)
 
-API 키에 플래그를 설정하여 해당 키의 다운스트림 호출 트래픽이 기록되지 않도록 할 수 있습니다. 이 플래그는 `api_keys` 테이블(`no_log INTEGER DEFAULT 0`)에 저장되며, 빠른 경로 조회를 위해 인메모리 세트에도 반영됩니다.
+다운스트림 통화 트래픽이 기록되지 않도록 API 키에 플래그를 지정할 수 있습니다. 플래그는 `api_keys` 테이블(`no_log INTEGER DEFAULT 0`)에 있으며 핫 경로 조회를 위해 메모리 내 세트에 미러링됩니다.
 
 ```bash
-# 로그를 기록하지 않는 키 생성(관리자 인증 필요)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
@@ -129,11 +128,19 @@ curl -X POST http://localhost:20128/api/keys \
 
 도우미(`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — 인메모리 항목 설정 또는 해제
-- `isNoLog(apiKeyId)` — 요청 경로에서 확인하며, 항목이 없으면 30초 동안 캐시되는 `api_keys.no_log` 조회로 대체
-- `NO_LOG_API_KEY_IDS`(환경 변수, 쉼표로 구분) — 부팅 시 인메모리 세트에 미리 로드됩니다. 열을 직접 변경할 수 없을 때 유용합니다.
+- `setNoLog(apiKeyId, true|false)` — 메모리 내 항목을 토글합니다.
+- 요청 경로에서 `isNoLog(apiKeyId)` — 확인되었습니다. `api_keys.no_log` 에서 30초 동안 캐시된 읽기로 대체됩니다.
+- `NO_LOG_API_KEY_IDS` (env, 쉼표로 구분) — 부팅 시 인메모리 세트에 미리 로드됩니다. 열을 직접 전환할 수 없을 때 유용합니다.
 
-관리 감사 이벤트(로그인, 공급자 변경, MCP 도구 호출 등)는 `noLog`의 영향을 **받지 않습니다**. 제외되는 것은 요청별 트래픽 로깅뿐입니다.
+관리 감사 이벤트(로그인, 공급자 변경, MCP 도구 호출 등)는** ~ 아니다** `noLog` 의 영향을 받습니다. — 요청별 트래픽 로깅만 옵트아웃됩니다.
+
+### 요청별 옵트아웃(`x-omniroute-no-log`)
+
+클라이언트는 전용 키를 생성하지 않고도 페이로드 지속성에서 단일 추론 요청을 선택할 수 있습니다. 요청 시 `x-omniroute-no-log: true` 보냅니다(`1` 및 `yes` 도 허용되며 대소문자를 구분하지 않음). 이는 채팅 처리기를 통해 실행되는 모든 채팅 제품군 경로(채팅 완료, 응답, 메시지, 완료 및 Gemini 호환 경로)에 적용됩니다. 콜 로그 행은 여전히 타임스탬프, 모델, 공급자, 상태, 기간 및 토큰 수와 함께 기록되지만 `request_body`, `response_body`, 요청 요약 및 파이프라인 아티팩트는 생략됩니다.
+
+헤더는 키 플래그가 있는 ORed 입니다. 로그 없는 키는 헤더에 관계없이 로그 없는 상태를 유지하며 헤더는 로그 없는 키에 대한 로깅을 다시 활성화할 수 없습니다. 요청이 업스트림으로 전달되기 전에 헤더가 제거됩니다.
+
+이 헤더는** ~ 아니다** 메모리 추출 또는 의미론적 캐시를 비활성화합니다. 요청이 해당 하위 시스템의 콘텐츠를 유지해서는 안 되는 경우 `x-omniroute-no-memory: true` 및 `x-omniroute-no-cache: true` 함께 보냅니다.
 
 ## REST API
 

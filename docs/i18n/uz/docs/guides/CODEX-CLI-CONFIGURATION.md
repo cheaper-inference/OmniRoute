@@ -414,7 +414,7 @@ region  = "us-east-1"
 
 ---
 
-## Bir nechta server
+## Bir nechta serverlar
 
 ```toml
 [model_providers.omniroute-main]
@@ -474,107 +474,107 @@ Interaktiv seans ichida:
 
 ---
 
-## Uzoq davom etuvchi vazifalar
+## Uzoq muddatli vazifalar
 
-OmniRoute’ning ikkita standart sozlamasi bir necha soat davom etadigan Codex CLI seanslariga sezdirmasdan xalal berishi mumkin. Ularning hech biri Codex CLI sozlamasi emas — ikkalasi ham OmniRoute tomonida joylashgan. Hisoblarni biriktirib qo‘yadigan va faolsizlik bo‘yicha uzilishlarni o‘chiradigan yuqori oqim proksilaridan konfiguratsiyani ko‘chirayotgan foydalanuvchilar ko‘pincha har ikkala muammoga duch kelib, OmniRoute «uzoq seansni ushlab tura olmaydi» degan xulosaga kelishadi.
+Ikkita OmniRoute sukut bo'yicha ko'p soatlik Codex CLI seanslarini jimgina sabotaj qilishi mumkin. Na Codex CLI sozlamasi — ikkalasi ham OmniRoute tomonida yashaydi. Hisob qaydnomalarini o'rnatadigan va bo'sh turgan uzilishlarni o'chirib qo'yadigan yuqori oqim proksi-serverlaridan konfiguratsiyani ko'chiradigan foydalanuvchilar ko'pincha ikkalasini ham urishadi va OmniRoute "uzoq seansni ushlab turolmaydi" degan xulosaga kelishadi.
 
-| Alomat                                                                                              | Ehtimoliy sabab                                                                                         | Sozlama                  |
-| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------ |
-| Seans hisoblarni almashtirishda davom etadi / navbatlar orasida prompt keshi uzluksizligi yo‘qoladi | Seansga bog‘liqlik TTL qiymati `0` (o‘chirilgan)                                                        | `sessionAffinityTtlMs`   |
-| Mijozga hech qanday so‘rov ko‘rsatilmasdan, mulohaza yuritish o‘rtasida ulanish uziladi             | Yuqori oqimdan 10 daqiqa davomida bo‘lak kelmagani uchun oqimning faolsizlik nazoratchisi ishga tushgan | `STREAM_IDLE_TIMEOUT_MS` |
+| Alomat                                                                                                  | Mumkin sabab                                                                          | Tugma                    |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------ |
+| Seans hisoblarni almashtirishni davom ettiradi / burilishlar orasida tezkor kesh uzluksizligi yo'qoladi | Seansga yaqinlik TTL `0` (o‘chirilgan)                                                | `sessionAffinityTtlMs`   |
+| Ulanish o'rta hisobda uzilib qoladi va mijozga murojaat qilmaydi                                        | 10 daqiqadan so‘ng yuqori oqim bo‘laklarisiz oqim bo‘sh kuzatuvchisi ishga tushirildi | `STREAM_IDLE_TIMEOUT_MS` |
 
-Tegishli muhokamalar: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (uzoq vazifalarning uzilishi), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (bog‘liqlik nega standart holatda o‘chiq). Kuzatuv: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Tegishli munozaralar: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (uzoq vazifa tushishi), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (nega yaqinlik sukut bo'yicha o'chirilgan). Kuzatuv: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Seansga bog‘liqlik — bitta suhbatni bitta hisobga biriktirish
+### 1. Seansga affinity — bitta suhbatni bitta hisobga qo'ying
 
-**Standart:** `sessionAffinityTtlMs = 0` (o‘chirilgan).
+**Standart:** `sessionAffinityTtlMs = 0` (nogiron).
 
-**Uni qayerda sozlash kerak**
+**Uni qayerga o'rnatish kerak**
 
-- Boshqaruv paneli → **Sozlamalar → Yo‘naltirish** → **Seansga bog‘liqlik** → **Bog‘liqlik TTL (soniyalarda)** (`ComboDefaultsTab`)
-- Yoki **millisoniyalarda** ko‘rsatilgan `sessionAffinityTtlMs` bilan sozlamalarni PATCH qiling (Zod oralig‘i `0`–`86_400_000`, ya’ni 24 soatgacha)
+- Boshqaruv paneli →** → Routing sozlamalari** →** Sessiyaga yaqinlik** →** Yaqinlik TTL (sekundlar)** (`ComboDefaultsTab`)
+- Yoki `sessionAffinityTtlMs` bilan PATCH sozlamalari** millisekundlar** (Zod diapazoni `0`–`86_400_000`, ya'ni 24 soatgacha)
 
-> #7274 da faqat Codex uchun mo‘ljallangan `codexSessionAffinityTtlMs` nomidan o‘zgartirilgan. Eski kalit hali ham faqat o‘qish uchun taxallus sifatida qabul qilinadi; yangi konfiguratsiyalar `sessionAffinityTtlMs` dan foydalanishi kerak. Endi TTL `0` dan yuqori bo‘lsa, bog‘liqlik faqat Codex uchun emas, **istalgan** provayderga qo‘llanadi — [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Seansga bog‘liqlik bo‘limiga qarang.
+> Faqat Kodeks `codexSessionAffinityTtlMs` dan #7274 bilan qayta nomlandi. Eski kalit hali ham faqat o'qish uchun taxallus sifatida qabul qilinadi; yangi konfiguratsiyalar `sessionAffinityTtlMs` foydalanishi kerak. Yaqinlik endi tegishli** har qanday** provayder bir marta TTL yuqorida `0`, emas, balki faqat Codex — qarang [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Sessiya yaqinligi.
 
-**Qiymat 0 bo‘lib qolsa, nima buziladi**
+**0 da qolganda nima buziladi**
 
-Ko‘p navbatli Codex suhbatining har bir navbati faol kombinatsiya strategiyasi orqali mustaqil yo‘naltiriladi va **har bir navbatda boshqa hisobga** tushishi mumkin. Bu yuqori oqim seansi / prompt keshi uzluksizligini buzadi. OmniRoute faqat TTL qiymati `0` dan katta bo‘lgandagina Codex seans sarlavhalari (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) va `prompt_cache_key` / `session_id` kabi tana maydonlarini tekshiradi (`src/sse/services/auth.ts` ichidagi `extractSessionAffinityKey`).
+Ko'p burilishli Codex suhbatining har bir navbati faol kombinatsiyalangan strategiya tomonidan mustaqil ravishda yo'naltiriladi va bir joyga tushishi mumkin.** har bir burilish uchun turli xil hisob** . Bu yuqori oqim sessiyasi/kesh-kesh uzluksizligini buzadi. OmniRoute faqat Codex sessiya sarlavhalariga (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) va `prompt_cache_key` / `session_id` kabi tana maydonlariga TTL `0` (`extractSessionAffinityKey` da `src/sse/services/auth.ts`) dan katta bo'lganda maslahat beradi.
 
-**Bir necha soatlik yagona vazifa uchun tavsiya**
+**Bir necha soatlik bitta vazifa uchun tavsiya etiladi**
 
-TTL qiymatini **vazifaning kutilayotgan real vaqt davomiyligidan yuqori** qilib belgilang (UI dagi maksimum — **86400 soniya** = 24 soat):
+TTL ni o'rnating** vazifaning kutilgan devor soati uzunligidan yuqori** (UI maks** 86400 soniya** = 24 soat):
 
-| Kutilayotgan vazifa davomiyligi | Bog‘liqlik TTL (UI, soniyalarda) | `sessionAffinityTtlMs` |
-| ------------------------------- | -------------------------------- | ---------------------- |
-| Bir necha soat                  | `14400` (4 soat)                 | `14400000`             |
-| Tun davomida / ~12 soat         | `43200` (12 soat)                | `43200000`             |
-| To‘liq kun                      | `86400` (24 soat, maksimum)      | `86400000`             |
+| Ishning kutilgan uzunligi | Yaqinlik TTL (UI, soniya)   | `sessionAffinityTtlMs` |
+| ------------------------- | --------------------------- | ---------------------- |
+| Bir necha soat            | `14400` (4 soat)            | `14400000`             |
+| Kecha / ~ 12 soat         | `43200` (12 soat)           | `43200000`             |
+| To'liq kun                | `86400` (24 soat, maksimal) | `86400000`             |
 
-Ixtiyoriy yoqish ataylab tanlangan: bog‘liqlikni o‘chirish hisoblar orasida yukni muvozanatlashga ustunlik beradi; uni yoqish esa bitta uzoq agent seansi uchun uzluksizlikka ustunlik beradi. Ushbu qo‘llanma standart qiymatni **o‘zgartirmaydi** — uzoq Codex vazifalarini bajarayotgan operatorlar bu imkoniyatni o‘zlari yoqishlari kerak.
+Ro'yxatdan o'tish qasddan qilingan: affinityni o'chirib qo'yish hisoblar bo'ylab yuk balansini qo'llab-quvvatlaydi; uni yoqish, bitta uzoq agent seansi uchun uzluksizlikni ta'minlaydi. Bu qo'llanma** emas** uzoq Codex vazifalarini bajaradigan standart — operatorlarini o'zgartirish uchun ro'yxatdan o'tish kerak.
 
-### 2. Oqimning faolsizlik taymauti — sokin mulohaza yuritish navbatlarini to‘xtatmang
+### 2. Stream bo'sh vaqt tugashi — sokin fikrlash navbatlarini o'ldirmang
 
-**Standart:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 daqiqa). Agar belgilanmagan bo‘lsa, u `REQUEST_TIMEOUT_MS` qiymatini meros qilib oladi; umumiy boshlang‘ich qiymat ham 600000. [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Taymautlar bo‘limiga qarang.
+**Standart:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 daqiqa). O'rnatilmaganda `REQUEST_TIMEOUT_MS` dan meros oladi; umumiy bazaviy chiziq ham 600000. Qarang: [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Standart qiymatda nima buziladi**
+**Standart holatda nima buziladi**
 
-10 daqiqadan ortiq jim qoladigan, **yuqori oqimdan hech qanday haqiqiy boʻlak kelmaydigan** Codex reasoning / vosita bosqichi SSE bekor turish kuzatuvchisi (`open-sse/utils/stream.ts`) tomonidan majburan yopiladi. Mijoz koʻpincha ulanishning hech qanday izohsiz uzilganini koʻradi — bu “hech qanday bildirishnomasiz avtomatik toʻxtadi” holatiga mos keladi.
+10 daqiqadan ko'proq vaqt davomida jim turadigan Codex mulohaza / asbob burilish** haqiqiy yuqori oqim qismi yo'q** SSE idle watchdog (`open-sse/utils/stream.ts`) tomonidan kuch bilan yopiladi. Mijoz ko'pincha "hech qanday bildirishnomasiz avtomatik ravishda to'xtatilgan" — mos keladigan yalang'och ulanish tushishini ko'radi.
 
-Muhim tafsilot: OmniRoute’ning sintetik SSE **heartbeat signali bekor turish taymerini qayta boshlamaydi**. Faqat yuqori oqim tanasining haqiqiy boʻlagi `lastChunkTime` qiymatini yangilaydi. Hali ham “oʻylayotgan” jim model kuzatuvchi nuqtayi nazaridan toʻxtab qolgan yuqori oqim bilan bir xil koʻrinadi.
+Muhim tafsilot: OmniRoute ning sintetik SSE** yurak urishi tiklanmaydi** bo'sh soat. Faqat haqiqiy yuqori oqim tanasi chunk yangilanadi `lastChunkTime`. Hali ham "o'ylayotgan" sokin model qo'riqchi nuqtai nazaridan to'xtab qolgan yuqori oqim bilan bir xil ko'rinadi.
 
-Undici tanasining harakatsizlik sozlamasi ham tegishli: `FETCH_BODY_TIMEOUT_MS` (u ham sukut boʻyicha ayni 10 daqiqalik asosiy qiymatdan foydalanadi; `0` uni oʻchiradi). Oqimli uzatishda `FETCH_TIMEOUT_MS` faqat ulanishni oʻrnatish / dastlabki sarlavhalarni qamrab oladi — oqim faollashgach, toʻxtab qolishlar `STREAM_IDLE_TIMEOUT_MS` va `FETCH_BODY_TIMEOUT_MS` orqali boshqariladi.
+Tegishli Undici tanasining harakatsizligi: `FETCH_BODY_TIMEOUT_MS` (shuningdek, bir xil 10 daqiqalik asosiy chiziqqa sukut bo'yicha; `0` uni o'chiradi). Oqim uchun `FETCH_TIMEOUT_MS` faqat ulanishni sozlashni qamrab oladi / oqim faol bo'lgandan keyin — birinchi sarlavhalarini qamrab oladi, to'xtash joylari `STREAM_IDLE_TIMEOUT_MS` va `FETCH_BODY_TIMEOUT_MS` tomonidan boshqariladi.
 
-**Bir necha soatlik yagona vazifa uchun tavsiya**
+**Bir necha soatlik bitta vazifa uchun tavsiya etiladi**
 
 OmniRoute jarayoni muhitida (`.env` / compose / systemd):
 
 ```bash
-# Uzoq reasoning bosqichlari uchun oqimning bekor turishi va tana harakatsizligi cheklovlarini o‘chirish
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Yoki ularni kutilayotgan eng uzoq jimlik oraligʻidan yuqoriroq qiymatga oshiring (qiymatlar millisekundlarda):
+Yoki ularni siz kutgan eng uzun jim bo'shliqdan yuqoriga ko'taring (qiymatlar millisekundlar):
 
 ```bash
-# Misol: yuqori oqim bo‘laklari orasida 2 soatgacha jimlikka ruxsat berish
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Ushbu muhit oʻzgaruvchilarini oʻzgartirgandan soʻng OmniRoute’ni qayta ishga tushiring.
+Ushbu env parametrlarini o'zgartirgandan so'ng OmniRoute qayta ishga tushiring.
 
-### Aniq yoʻriqnoma — bir necha soatlik Codex vazifasi
+### Beton retsepti — ko'p soatlik Codex vazifasi
 
-1. **Hisobni biriktiring:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12 soat) yoki `86400` (maksimal 24 soat).
-2. OmniRoute muhitida **bekor turish cheklovlarini oshiring / oʻchiring**:
+1. **Hisobni mahkamlang:** Boshqaruv paneli → sozlamalari → Marshrutlash → Seansga yaqinlik → Affinity TTL = `43200` (12 soat) yoki `86400` (maks. 24 soat).
+2. **Bo'sh vaqtni ko'tarish / o'chirish** OmniRoute muhitida:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Odatdagi Codex `config.toml` sozlamalarini (`wire_api = "responses"`, toʻgʻri `base_url`, `OMNIROUTE_API_KEY`) saqlang — ushbu ikki xatti-harakat uchun Codex tomonida affinity/bekor turish sozlamalari mavjud emas.
-4. OmniRoute’ni qayta ishga tushiring, soʻng uzoq davom etuvchi Codex vazifasini boshlang.
+3. Odatdagi Codex `config.toml` (`wire_api = "responses"`, to'g'ri `base_url`, `OMNIROUTE_API_KEY`) — saqlang, bu ikki xatti-harakatlar uchun Kodeks tomonidagi affinity/idle tugmalari mavjud emas.
+4. OmniRoute qayta ishga tushiring, so'ngra uzoq Codex vazifasini boshlang.
 
-### Standart qiymatlar boʻyicha qaror (#7287)
+### Birlamchi qaror (#7287)
 
-| Sozlama                  | Yetkazib beriladigan standart qiymat | Ushbu qoʻllanmada oʻzgartirilsinmi?                                                                                    |
-| ------------------------ | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (oʻchirilgan)                    | **Yoʻq** — ixtiyoriy boʻlib qoladi (yuklamani muvozanatlash va uzluksizlik; Discussion #5718 ga qarang)                |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 daqiqa)                 | **Yoʻq** — umumiy trafik uchun 10 daqiqa boʻlib qoladi; uzoq Codex vazifalari operatorlari uni oshiradi yoki oʻchiradi |
+| Tugma                    | Kema standarti       | Ushbu qoʻllanmada oʻzgarish bormi?                                                                   |
+| ------------------------ | -------------------- | ---------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (o'chirilgan)    | **Yo'q** — qo‘shilgan bo‘lib qoladi (yuk balanslash va uzluksizlik; #5718 muhokamasiga qarang)       |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 daqiqa) | **Yo'q** — umumiy trafik uchun 10 daqiqa qoladi; long Codex operatorlari uni oshiradi yoki o'chiradi |
 
-Har ikkala standart qiymatdan birini global tarzda oʻzgartirish faqat Codex emas, instansning har bir mijozi uchun xatti-harakatni oʻzgartiradi. Sozlamalarni hujjatlashtiring; operatorning aniq qarori boshqacha koʻrsatma bermaguncha standart qiymatlarni oʻz holicha qoldiring.
+Birorta standartni global miqyosda aylantirish nafaqat Codex emas, balki misolning har bir mijozi uchun xatti-harakatni o'zgartiradi. Tugmalarni hujjatlash; aniq operator qarori boshqacha aytilmaguncha standart sozlamalarni qoldiring.
 
-### Bekor turish sababli uzilishlarni diagnostika qilish
+### Bo'sh kesilganlarni diagnostika qilish
 
-Bekor turish kuzatuvchisi ishga tushganda, OmniRoute quyidagi shakldagi qatorni jurnalga yozadi:
+Bo'sh turgan qo'riqchi ishga tushganda, OmniRoute quyidagi shakldagi chiziqni qayd qiladi:
 
 ```text
-[STREAM] Bekor turish taym-auti: codex xizmatidan 600000ms davomida ma’lumot kelmadi (model: cx/gpt-5.5)
+[STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-`Idle timeout: no data from` iborasini (yoki `stream_idle_timeout` kodini / `StreamIdleTimeoutError` xato nomini) grep orqali qidiring. Provayder segmenti OmniRoute ushbu soʻrov uchun foydalangan qiymatdir (`codex`, boshqa provayder identifikatori yoki nomaʼlum boʻlsa `provider`) — u har doim ham aynan `codex` satri boʻlavermaydi.
+`Idle timeout: no data from` uchun Grep (yoki `stream_idle_timeout` kodi / xato nomi `StreamIdleTimeoutError`). Provayder segmenti ushbu so'rov uchun ishlatiladigan OmniRoute bo'lishidan qat'i nazar (`codex`, boshqa provayder identifikatori yoki `provider` noma'lum bo'lsa) — u har doim ham so'zma-so'z `codex` qatori emas.
 
 ---
 

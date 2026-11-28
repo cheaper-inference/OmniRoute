@@ -151,30 +151,30 @@ Thema's voor fasen 6-7:
 - [ ] Regressietests toevoegen voor elke niet-afgedekte productiefout die tijdens het traject naar 90% wordt opgelost
 - [ ] De dekkingsdrempel in CI pas verhogen nadat de lokale nulmeting gedurende minstens twee opeenvolgende uitvoeringen stabiel is
 
-## Ratchetbeleid
+## Ratelbeleid
 
-Werk de drempelwaarden voor `npm run test:coverage` alleen bij nadat het project de volgende mijlpaal daadwerkelijk met een comfortabele marge overschrijdt.
+Update `npm run test:coverage` -drempels pas nadat het project daadwerkelijk de volgende mijlpaal overschrijdt met een comfortabele buffer.
 
-**Huidige grens:** `npm run test:coverage` vereist **60 statements / 60 regels / 60 functies / 60 vertakkingen** (de metriek is in Quality-Gates Fase 6A.1 opnieuw vastgesteld — de eerdere uitgangswaarde van 82,58% was kunstmatig hoog omdat testbestanden werden meegeteld en `open-sse` werd uitgesloten). De opdracht `test:coverage:legacy` behoudt de oude 50/50/50-metriek voor historische vergelijking.
+**Huidige poort:** `npm run test:coverage` handhaaft** 60 afschriften / 60 regels / 60 functies / 60 vertakkingen** (de metriek werd opnieuw gebaseerd in Quality-Gates Fase 6A.1 — de eerdere basislijn van 82,58% was opgeblazen omdat testbestanden werden geteld en `open-sse` werd uitgesloten). Het `test:coverage:legacy` commando behoudt de oude 50/50/50 metriek voor historische vergelijking.
 
-Gebruik voor ad-hoccontroles van drempelwaarden op basis van het meest recente rapport:
+Gebruik voor ad-hocdrempelcontroles ten opzichte van het laatste rapport:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Aanbevolen ratchetvolgorde (de volgorde is `statements-regels / vertakkingen / functies`):
+Aanbevolen ratelvolgorde (volgorde is `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- huidige grens (75/70/75)
+5. 75/70/72 <-- huidige poort (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Het volgende ratchetdoel is `80/75/78` zodra de vertakkingsdekking gedurende twee opeenvolgende uitvoeringen boven 78% blijft.
+Het volgende doel is `80/75/78` zodra de dekking van de vestigingen gedurende twee opeenvolgende runs boven de 78% blijft.
 
 ## Bekende lacune
 

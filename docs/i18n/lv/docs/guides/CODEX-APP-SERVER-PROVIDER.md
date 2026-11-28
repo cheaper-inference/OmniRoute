@@ -21,24 +21,21 @@ pierakstīšanai**.
 ## 1. Arhitektūra
 
 ```
-┌─ OmniRoute lietotne ─────────────┐        ┌─ codex-app-server blakusprocess ────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ iespēju pilnvara)             │  JSON  │  --ws-auth iespēju-pilnvara         │
-│                                  │  RPC   │  patstāvīgi pārvalda OpenAI OAuth   │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, autom. atsvaidz.)│
-        │ koplietots (compose sējumi)        └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS iespēju pilnvara (to montē abi)
-  codex-appserver-home    → ~/.codex (auth.json ieraksta informācijas panelis,
-                             bet lasa blakusprocesa codex app-server)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Blakusprocess klausās **tikai** iekšējā compose tīklā
-  (`ws://codex-app-server:1456`), aizsargāts ar iespēju pilnvaru. Tas **nekad**
-  netiek publicēts resursdatorā vai internetā.
-- Codex CLI ir iekļauts `omniroute:base`, tāpēc, palaižot blakusprocesu,
-  resursdatorā vai lietotāja ierīcē nav jāinstalē codex.
+- Blakusvāģis klausās** tikai** iekšējā rakstīšanas tīklā (`ws://codex-app-server:1456`), kas atrodas aiz spēju pilnvaras. Tā ir** nekad** publicēts resursdatorā vai internetā.
+- Blakusvāģī tiek izmantots `omniroute:cli-no-docker`, kas veidots no `runner-cli-no-docker` mērķa, kurā ietilpst Codex CLI.
 
 ## 2. Palaišana
 

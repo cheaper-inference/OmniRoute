@@ -13,97 +13,90 @@ UI/UX, i18n, CLI, database, ଏବଂ build/deploy ପରିବର୍ତ୍ତ�
 
 ---
 
-## ବିକାଶ ସେଟଅପ୍
+## ବିକାଶ ସେଟଅପ୍।
 
-### ପୂର୍ବାପେକ୍ଷିତା
+### ପ୍ରାଥମିକତା
 
-- **Node.js** `>=22.22.2 <23`, କିମ୍ବା `>=24.0.0 <27` (ସୁପାରିଶ: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`, କିମ୍ବା `>=24.0.0 <27` (ପରାମର୍ଶିତ: 24 LTS)
+- **npm** 10 +
 
-> **Node 24 ସହିତ Windows:** ବର୍ତ୍ତମାନର 24 LTS ପ୍ୟାଚ୍ ରିଲିଜ୍ (ଅତି କମରେ 24.20.0) ବ୍ୟବହାର କରନ୍ତୁ।
-> ପୂର୍ବରୁ ଥିବା ରିଲିଜ୍ଗୁଡ଼ିକ `--test-force-exit` ପ୍ରକ୍ରିୟା ବନ୍ଦ କରିବା ପରେ ସଫଳ ପରୀକ୍ଷଣଗୁଡ଼ିକ ପରେ
-> ବନ୍ଦ ହୋଇପାରେ। Node ର [Windows libuv ସମାଧାନ](https://github.com/nodejs/node/pull/61999) ଏହି
-> ରନ୍ଟାଇମ୍ କ୍ରାଶ୍ର ସମାଧାନ କରେ; ପରୀକ୍ଷଣ ଅସର୍ସନ୍ଗୁଡ଼ିକ ଏବଂ ରନର୍ ଏକ୍ଜିଟ୍ ଯାଞ୍ଚଗୁଡ଼ିକ ସକ୍ରିୟ ରଖନ୍ତୁ।
+> **ନୋଡ୍ 24 ସହିତ Windows :** ସାମ୍ପ୍ରତିକ 24 LTS ପ୍ୟାଚ୍ ରିଲିଜ୍ ବ୍ୟବହାର କରନ୍ତୁ (ଅତିକମରେ 24.20.0)। `--test-force-exit` ପ୍ରକ୍ରିୟା ବନ୍ଦ କଲାବେଳେ ସଫଳ ପରୀକ୍ଷଣ ପରେ ପୂର୍ବ ପ୍ରକାଶନଗୁଡ଼ିକ ପରିତ୍ୟାଗ କରିପାରେ। ନୋଡର [Windows libuv ଫିକ୍ସ](https://github.com/nodejs/node/pull/61999) ଏହି ଚାଲିବା ସମୟ ଦୁର୍ଘଟଣାକୁ ଠିକଣା କରେ; ପରୀକ୍ଷା ଧାରଣା ଏବଂ ରନର୍ ଏକ୍ଜିଟ୍ ଚେକ୍ ସକ୍ଷମ ରଖନ୍ତୁ।
 
-> **npm v11+ ବ୍ୟବହାରକାରୀମାନେ (Node 24+):** `npm install` ପରେ, ନେଟିଭ୍ ମଡ୍ୟୁଲ୍ଗୁଡ଼ିକ ସ୍ଥାପିତ ହୋଇଛି କି ଯାଞ୍ଚ କରନ୍ତୁ:
-> `node -e "require('better-sqlite3')"`। ଯଦି ଏହା `MODULE_NOT_FOUND` ସହିତ ବିଫଳ ହୁଏ,
-> `npm approve-scripts better-sqlite3 && npm install` ଚଲାନ୍ତୁ। [ସମସ୍ୟା ସମାଧାନ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ଦେଖନ୍ତୁ।
+> **npm v11 + ବ୍ୟବହାରକାରୀ (ନୋଡ୍ 24 +):** `npm install` ପରେ, ସ୍ଥାନୀୟ ମଡ୍ୟୁଲଗୁଡ଼ିକୁ ଯା ify ୍ଚ କରନ୍ତୁ: `node -e "require('better-sqlite3')"`। ଯଦି ଏହା `MODULE_NOT_FOUND` ସହିତ ବିଫଳ ହୁଏ, `npm approve-scripts better-sqlite3 && npm install` ଚଲାନ୍ତୁ। [ତ୍ରୁଟି ନିବାରଣ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ଦେଖନ୍ତୁ।
 
-- **Git**
+- **ଗିଟ୍**
 
-### କ୍ଲୋନ୍ ଏବଂ ସ୍ଥାପନ
+### କ୍ଲୋନ୍ ଏବଂ ସଂସ୍ଥାପନ କରନ୍ତୁ।
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ
+### ପରିବେଶ ଭେରିଏବଲ୍।
 
 ```bash
-# ଟେମ୍ପଲେଟ୍ରୁ ଆପଣଙ୍କ .env ସୃଷ୍ଟି କରନ୍ତୁ
+# Create your .env from the template
 cp .env.example .env
 
-# ଆବଶ୍ୟକ ସିକ୍ରେଟ୍ଗୁଡ଼ିକ ସୃଷ୍ଟି କରନ୍ତୁ
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ବିକାଶ ପାଇଁ ମୁଖ୍ୟ ଭେରିଏବଲ୍ଗୁଡ଼ିକ:
+ବିକାଶ ପାଇଁ ମୁଖ୍ୟ ଭେରିଏବଲ୍:
 
-| ଭେରିଏବଲ୍               | ବିକାଶ ଡିଫଲ୍ଟ             | ବର୍ଣ୍ଣନା                 |
+| ଭେରିଏବଲ୍               | ବିକାଶ ଡିଫଲ୍ଟ।            | ବର୍ଣ୍ଣନା                 |
 | ---------------------- | ------------------------ | ------------------------ |
-| `PORT`                 | `20128`                  | ସର୍ଭର୍ ପୋର୍ଟ             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ଫ୍ରଣ୍ଟଏଣ୍ଡ ପାଇଁ ବେସ୍ URL |
-| `JWT_SECRET`           | (ଉପରେ ସୃଷ୍ଟି କରନ୍ତୁ)     | JWT ସାଇନିଂ ସିକ୍ରେଟ୍      |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | ପ୍ରଥମ ଲଗଇନ୍ ପାସୱାର୍ଡ     |
-| `APP_LOG_LEVEL`        | `info`                   | ଲଗ୍ ବିସ୍ତୃତତା ସ୍ତର       |
+| `PORT`                 | `20128`                  | ସର୍ଭର ପୋର୍ଟ।             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ଫ୍ରଣ୍ଟେଣ୍ଡ ପାଇଁ ଆଧାର URL |
+| `JWT_SECRET`           | (ଉପରେ ସୃଷ୍ଟି କରନ୍ତୁ)     | JWT ଦସ୍ତଖତ ରହସ୍ୟ।        |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | ପ୍ରଥମେ ଲଗଇନ୍ ପାସୱାର୍ଡ।   |
+| `APP_LOG_LEVEL`        | `info`                   | ଲଗ୍ ଭର୍ବୋସିଟି ସ୍ତର।      |
 
-### ଡ୍ୟାସବୋର୍ଡ ସେଟିଂସ୍
+### ଡ୍ୟାସବୋର୍ଡ ସେଟିଂସମୂହ।
 
-ଡ୍ୟାସବୋର୍ଡରେ ଏପରି ବୈଶିଷ୍ଟ୍ୟ ପାଇଁ UI ଟଗଲ୍ଗୁଡ଼ିକ ରହିଛି, ଯାହାକୁ ପରିବେଶ ଭେରିଏବଲ୍ ମାଧ୍ୟମରେ ମଧ୍ୟ ବିନ୍ୟାସ କରାଯାଇପାରେ:
+ବ features ଶିଷ୍ଟ୍ୟଗୁଡିକ ପାଇଁ ଡ୍ୟାସବୋର୍ଡ UI ଟୋଗଲ୍ ପ୍ରଦାନ କରେ ଯାହା ପରିବେଶ ଭେରିଏବଲ୍ ମାଧ୍ୟମରେ ବିନ୍ୟାସ ହୋଇପାରିବ:
 
-| ସେଟିଂ ସ୍ଥାନ         | ଟଗଲ୍                | ବର୍ଣ୍ଣନା                               |
-| ------------------- | ------------------- | -------------------------------------- |
-| ସେଟିଂସ୍ → ଅଡଭାନ୍ସ୍ଡ | ଡିବଗ୍ ମୋଡ୍          | ଡିବଗ୍ ରିକ୍ୱେଷ୍ଟ ଲଗ୍ ସକ୍ରିୟ କରନ୍ତୁ (UI) |
-| ସେଟିଂସ୍ → ସାଧାରଣ    | ସାଇଡବାର୍ ଦୃଶ୍ୟମାନତା | ସାଇଡବାର୍ ବିଭାଗଗୁଡ଼ିକ ଦେଖାନ୍ତୁ/ଲୁଚାନ୍ତୁ |
+| ଅବସ୍ଥାନ ସେଟିଂ         | ଟୋଗଲ୍ କରନ୍ତୁ।           | ବର୍ଣ୍ଣନା                                          |
+| --------------------- | ----------------------- | ------------------------------------------------- |
+| ସେଟିଂସମୂହ → ଉନ୍ନତ।    | ତ୍ରୁଟି ନିବାରଣ ଧାରା      | ତ୍ରୁଟି ନିବାରଣ ଅନୁରୋଧ ଲଗଗୁଡ଼ିକୁ ସକ୍ରିୟ କରନ୍ତୁ (UI) |
+| ସେଟିଂସମୂହ → ଜେନେରାଲ୍। | ପାର୍ଶ୍ୱ ପଟି ଦୃଶ୍ୟମାନତା। | Show/hide ପାର୍ଶ୍ୱ ପଟି ବିଭାଗଗୁଡିକ।                 |
 
-ଏହି ସେଟିଂସ୍ଗୁଡ଼ିକ ଡାଟାବେସ୍ରେ ସଂରକ୍ଷିତ ହୁଏ ଏବଂ ପୁନଃଆରମ୍ଭ ପରେ ମଧ୍ୟ ରହିଥାଏ; ସେଗୁଡ଼ିକ ସେଟ୍ ହୋଇଥିଲେ env var ଡିଫଲ୍ଟଗୁଡ଼ିକୁ ଅତିକ୍ରମ କରେ।
+ଏହି ସେଟିଂସମୂହ ଡାଟାବେସରେ ଗଚ୍ଛିତ ଅଛି ଏବଂ ପୁନ rest ଆରମ୍ଭରେ ରହିଥାଏ, ସେଟ୍ ହେବା ସମୟରେ env var ଡିଫଲ୍ଟକୁ ନବଲିଖନ କରିଥାଏ।
 
-### ସ୍ଥାନୀୟ ଭାବେ ଚଲାଇବା
+### ସ୍ଥାନୀୟ ଭାବରେ ଚାଲୁଛି।
 
 ```bash
-# ବିକାଶ ମୋଡ୍ (ହଟ୍ ରିଲୋଡ୍)
+# Development mode (hot reload)
 npm run dev
 
-# ପ୍ରଡକ୍ସନ୍ ବିଲ୍ଡ
-npm run build    # next build → .build/next/ ତାପରେ assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# ଯୋଗଦାନକାରୀ ପରିବର୍ତ୍ତନ ପାଇଁ ଦ୍ରୁତ ବ୍ୟାକଏଣ୍ଡ/API-କେବଳ କମ୍ପାଇଲ୍
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# ରିଲିଜ୍ ବିଲ୍ଡ (ପରିଷ୍କାର ପୁନଃବିଲ୍ଡ + HEAD ସେଣ୍ଟିନେଲ୍ — ଡିପ୍ଲୟ ପାଇଁ ଆବଶ୍ୟକ)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ଲେଖେ
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# ସାଧାରଣ ପୋର୍ଟ ବିନ୍ୟାସ
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ଯୋଗଦାନକାରୀ ବିଲ୍ଡ କେବଳ କମ୍ପାଇଲ୍-ଭିତ୍ତିକ ଯାଞ୍ଚ କରେ: ଏହା standalone
-ଡିଷ୍ଟ୍ରିବ୍ୟୁସନ୍ ଏକତ୍ର କରେ ନାହିଁ କିମ୍ବା ଐଚ୍ଛିକ ନେଟିଭ୍ ପ୍ୟାକେଜିଂ ଆସେଟ୍ଗୁଡ଼ିକୁ ବିଲ୍ଡ କରେ ନାହିଁ। ଯେତେବେଳେ
-ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ ଯାଞ୍ଚ କରିବାକୁ ଆବଶ୍ୟକ ହୁଏ, ସାଧାରଣ ପ୍ରଡକ୍ସନ୍ ବିଲ୍ଡ ବ୍ୟବହାର କରନ୍ତୁ।
+ସହଯୋଗୀ ବିଲ୍ଡ କେବଳ କମ୍ପାଇଲ୍-ବ valid ଧତା କାର୍ଯ୍ୟ କରିଥାଏ: ଏହା ସ୍ୱତନ୍ତ୍ର ବଣ୍ଟନକୁ ଏକତ୍ର କରେ ନାହିଁ କିମ୍ବା ଇଚ୍ଛାଧୀନ ଦେଶୀ ପ୍ୟାକେଜିଂ ସମ୍ପତ୍ତି ଗଠନ କରେ ନାହିଁ। ଯେତେବେଳେ ତୁମେ ପଠାଯାଉଥିବା ବଣ୍ଡଲକୁ ବ valid ଧ କରିବାକୁ ପଡିବ, ନିୟମିତ ଉତ୍ପାଦନ ନିର୍ମାଣ ବ୍ୟବହାର କର।
 
-### ବିଲ୍ଡ ଆଉଟପୁଟ୍ ଲେଆଉଟ୍
+### ଆଉଟପୁଟ୍ ଲେଆଉଟ୍ ନିର୍ମାଣ କରନ୍ତୁ।
 
-| ଡିରେକ୍ଟୋରୀ | ବିଷୟବସ୍ତୁ                                                                      | ଟ୍ରାକ୍ କରାଯାଇଛି |
-| ---------- | ------------------------------------------------------------------------------ | --------------- |
-| `src/`     | ଆପ୍ଲିକେସନ୍ ସୋର୍ସ (TypeScript / TSX)                                            | ହଁ              |
-| `.build/`  | ମଧ୍ୟବର୍ତ୍ତୀଗୁଡ଼ିକ — `next build` ଆଉଟପୁଟ୍ (gitignored, `distDir = .build/next`) | ନା              |
-| `dist/`    | ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ — `assembleStandalone` ଦ୍ୱାରା ଏକତ୍ରିତ (gitignored)             | ନା              |
+| ଡିରେକ୍ଟୋରୀ | ବିଷୟବସ୍ତୁ                                                                | ଟ୍ରାକ୍ ହୋଇଛି। |
+| ---------- | ------------------------------------------------------------------------ | ------------- |
+| `src/`     | ପ୍ରୟୋଗ ଉତ୍ସ (TypeScript / TSX)                                           | ହଁ            |
+| `.build/`  | ମଧ୍ୟବର୍ତ୍ତୀ — `next build` ଆଉଟପୁଟ୍ (gitignored, `distDir = .build/next`) | ନା            |
+| `dist/`    | `assembleStandalone` (gitignored) ଦ୍ୱାରା ଏକତ୍ରିତ ଶିପପେବଲ୍ ବଣ୍ଡଲ୍ —       | ନା            |
 
-ବିଲ୍ଡ ପାଇପଲାଇନ୍ ଏକକ ପାସ୍ରେ ଚାଲେ:
+ବିଲ୍ଡ ପାଇପଲାଇନ ହେଉଛି ଗୋଟିଏ ପାସ୍:
 
 ```
 npm run build
@@ -112,21 +105,15 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ଅତିରିକ୍ତ ଭାବେ ପ୍ରଥମେ ଉଭୟ ଡିରେକ୍ଟୋରୀକୁ ପରିଷ୍କାର କରେ ଏବଂ
-ଡିପ୍ଲୟ ଇଣ୍ଟେଗ୍ରିଟି ସେଣ୍ଟିନେଲ୍ ଭାବେ `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ଲେଖେ।
+`npm run build:release` ଅତିରିକ୍ତ ଭାବରେ ପ୍ରଥମେ ଉଭୟ ଡିରେକ୍ଟୋରୀକୁ ସଫା କରେ ଏବଂ `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ଏକ ନିୟୋଜନ ଅଖଣ୍ଡତା ସେଣ୍ଟିନେଲ ଭାବରେ ଲେଖେ।
 
-`npm run build:contributor` ବ୍ୟାକଏଣ୍ଡ-କେବଳ ବିଲ୍ଡ ପ୍ରୋଫାଇଲ୍ ବ୍ୟବହାର କରେ। ବିଲ୍ଡ ସମୟରେ ଏହା
-ଡ୍ୟାସବୋର୍ଡ UI ଫାଇଲ୍ଗୁଡ଼ିକୁ ସାମୟିକ ଭାବେ ଷ୍ଟବ୍ କରେ, API ରୁଟ୍ ହ୍ୟାଣ୍ଡଲର୍ଗୁଡ଼ିକୁ ରଖେ ଏବଂ ବିଲ୍ଡ ପରେ
-ମୂଳ ଫାଇଲ୍ଗୁଡ଼ିକୁ ପୁନଃସ୍ଥାପନ କରେ। ଡ୍ୟାସବୋର୍ଡ UI ପ୍ରଭାବିତ କରୁଥିବା ପରିବର୍ତ୍ତନ ପାଇଁ କିମ୍ବା ସମ୍ପୂର୍ଣ୍ଣ
-ରିଲିଜ୍ ଯାଞ୍ଚ ପାଇଁ `npm run build` ବ୍ୟବହାର କରନ୍ତୁ; ଯୋଗଦାନକାରୀ ପ୍ରୋଫାଇଲ୍ ରିଲିଜ୍ ବିଲ୍ଡର ପରିବର୍ତ୍ତେ ବ୍ୟବହାରଯୋଗ୍ୟ ନୁହେଁ।
+`npm run build:contributor` କେବଳ ବ୍ୟାକେଣ୍ଡ-ନିର୍ମାଣ ପ୍ରୋଫାଇଲ୍ ବ୍ୟବହାର କରେ। ନିର୍ମାଣ ସମୟରେ ଏହା ସାମୟିକ ଭାବରେ ଡ୍ୟାସବୋର୍ଡ UI ଫାଇଲଗୁଡ଼ିକୁ ଷ୍ଟବ୍ କରିଥାଏ, API ରୁଟ୍ ହ୍ୟାଣ୍ଡେଲର୍ଗୁଡ଼ିକୁ ରଖେ ଏବଂ ନିର୍ମାଣ ପରେ ମୂଳ ଫାଇଲଗୁଡ଼ିକୁ ପୁନ ores ସ୍ଥାପନ କରେ। ପରିବର୍ତ୍ତନଗୁଡ଼ିକ ପାଇଁ `npm run build` ବ୍ୟବହାର କରନ୍ତୁ ଯାହା ଡ୍ୟାସବୋର୍ଡ UI ପ୍ରଭାବିତ କରେ କିମ୍ବା ସମ୍ପୂର୍ଣ୍ଣ ପ୍ରକାଶନ ବ valid ଧତା ପାଇଁ; ଅବଦାନକାରୀ ପ୍ରୋଫାଇଲ୍ ରିଲିଜ୍ ବିଲ୍ଡ ପାଇଁ ଏକ ବଦଳ ନୁହେଁ।
 
-> **VPS ଡିପ୍ଲୟ ଟିପ୍ପଣୀ:** ରିମୋଟ୍ ଇମେଜ୍ ଡିରେକ୍ଟୋରୀ `/usr/lib/node_modules/omniroute/app/`
-> ଅପରିବର୍ତ୍ତିତ ରହେ। ଡିପ୍ଲୟ ସ୍କିଲ୍ଗୁଡ଼ିକ `dist/` ର ବିଷୟବସ୍ତୁକୁ ଏଥିରେ rsync କରେ।
-> କେବଳ ରିପୋଜିଟୋରୀ ଭିତରର ବିଲ୍ଡ ଆଉଟପୁଟ୍ ପଥ ବଦଳିଛି (`app/` → `dist/`)।
+> **VPS ନିୟୋଜନ ଟିପ୍ପଣୀ:** ସୁଦୂର ପ୍ରତିଛବି ଡିରେକ୍ଟୋରୀ `/usr/lib/node_modules/omniroute/app/` ଅପରିବର୍ତ୍ତିତ। ନିୟୋଜନ କ skills ଶଳ ଏଥିରେ `dist/` ର ବିଷୟବସ୍ତୁ rsync। କେବଳ ଇନ-ରେପୋ ବିଲ୍ଡ ଆଉଟପୁଟ୍ ପଥ ଘୁଞ୍ଚିଗଲା (`app/` → `dist/`)।
 
-ଡିଫଲ୍ଟ URLଗୁଡ଼ିକ:
+ଡିଫଲ୍ଟ URLs:
 
-- **ଡ୍ୟାସବୋର୍ଡ**: `http://localhost:20128/dashboard`
+- **ଡ୍ୟାସବୋର୍ଡ।** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -433,8 +420,8 @@ VPS ଡିପ୍ଲୟମେଣ୍ଟ ପାଇଁ, `npm run build` ପରିବ
 
 ## ସହାୟତା ପାଇବା
 
-- **ଆର୍କିଟେକ୍ଚର୍**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) ଦେଖନ୍ତୁ
-- **API ସନ୍ଦର୍ଭ**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) ଦେଖନ୍ତୁ
-- **ସୁରକ୍ଷା ଡକ୍ୟୁମେଣ୍ଟଗୁଡ଼ିକ**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **ଅପରେସନ୍ସ ଡକ୍ୟୁମେଣ୍ଟଗୁଡ଼ିକ**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **ସମସ୍ୟାଗୁଡ଼ିକ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **ସ୍ଥାପତ୍ୟ** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) ଦେଖନ୍ତୁ।
+- **API ସନ୍ଦର୍ଭ** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) ଦେଖନ୍ତୁ।
+- **ସୁରକ୍ଷା ଡକସ୍** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **ଓପ୍ସ ଡକସ୍।** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **ସମସ୍ୟାଗୁଡିକ** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

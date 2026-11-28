@@ -5,29 +5,12 @@
 ---
 
 > **Foinse na fírinne:** `src/lib/memory/` agus `src/app/api/memory/`
-> **Nuashonraithe an uair dheireanach:** 2026-06-28 — v3.8.40 (díchumasaithe de réir réamhshocraithe + cúiteamh cainníochtaithe int8)
 
-Soláthraíonn OmniRoute cuimhne chomhrá mharthanach atá eochraithe de réir eochair API
-(agus, go roghnach, de réir aitheantas seisiúin). Baintear cuimhní go huathoibríoch as freagraí LLM
-trí mheaitseáil éadrom patrún le sloinn rialta agus instealltar ar ais iad in iarratais
-ina dhiaidh sin mar theachtaireacht tosaigh córais (nó mar an chéad teachtaireacht úsáideora i gcás soláthraithe a
-dhiúltaíonn do ról an chórais).
+Soláthraíonn OmniRoute cuimhne chomhrá mharthanach arna heochrú le heochair API (agus go roghnach id seisiúin). Baintear cuimhní cinn go huathoibríoch ó fhreagraí LLM trí mheaitseáil phátrúin regex éadrom agus déantar iad a instealladh ar ais in iarratais ina dhiaidh sin mar phríomhtheachtaireacht chórais (nó an chéad teachtaireacht úsáideora do sholáthraithe a dhiúltaíonn ról an chórais).
 
-> **Tá an chuimhne MÚCHTA de réir réamhshocraithe (v3.8.30+).** Tá `DEFAULT_MEMORY_SETTINGS.enabled`
-> anois `false` (`src/lib/memory/settings.ts`). Nuair a chumasaítear an chuimhne, instealltar suas le
-> `maxTokens` (~2k) de chomhthéacs aisghafa isteach i **ngach** iarratas comhrá, agus
-> gearrtar táille air sin — costas gan choinne do shuiteálacha nua agus do chliaint a bhainistíonn a
-> gcomhthéacs féin. Roghnaigh é go sainráite faoi **Socruithe → Cuimhne** (taispeánann
-> `MemorySkillsTab` glao amach rabhaidh faoi chostas comharthaí nuair atá an chuimhne cumasaithe).
-> Is féidir le cliant roghnú gan cuimhne a úsáid d'iarratas aonair leis an gceanntásc iarratais
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — féach an tábla ceanntásca iarratais in
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Socraíonn iarratas gan chuimhne
-> `memoryOwnerId = null`, rud a dhíchumasaíonn instealladh **cuimhne agus scileanna araon** don
-> iarratas sin (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Is é an chuimhne OFF de réir réamhshocraithe (v3.8.30 +).** Tá `DEFAULT_MEMORY_SETTINGS.enabled` anois `false` (`src/lib/memory/settings.ts`). Instealladh cuimhne cumasaithe suas go dtí `maxTokens` (~ 2k) den chomhthéacs aisghafa isteach** gach** iarratas comhrá, a ngearrtar costas iontasach — air le haghaidh suiteálacha nua agus do chliaint a bhainistíonn a gcomhthéacs féin. Liostáil go sainráite faoi** Socruithe Cuimhne →** (Taispeánann an `MemorySkillsTab` glao amach rabhaidh chomhartha-chostas nuair a bhíonn cuimhne cumasaithe). Is féidir le cliant iarratas amháin a roghnú leis an gceanntásc iarratais `x-omniroute-no-memory` (`true`/`1`/`yes`) — féach an tábla ceanntásca iarratais i [API_REFERENCE.md](../reference/API_REFERENCE.md). Socraíonn iarratas gan chuimhne `memoryOwnerId = null`, rud a dhíchumasaítear** araon** instealladh cuimhne agus scile don iarratas sin (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Tá an chuimhne **scópáilte de réir eochair API**, ní de réir úsáideora — roinneann gach iarratas atá fíordheimhnithe
-leis an eochair API chéanna an linn chuimhne chéanna, agus is féidir í a scóipeáil tuilleadh go roghnach
-de réir `sessionId`.
+Tá cuimhne** scoped in aghaidh API eochair** , ní in aghaidh an úsáideora — roinneann gach iarratas atá fíordheimhnithe leis an eochair API céanna an linn cuimhne céanna, le scóip bhreise roghnach ag `sessionId`.
 
 ## Ailtireacht
 
@@ -542,54 +525,40 @@ Féach [MCP-SERVER.md](./MCP-SERVER.md) le haghaidh sonraí iompair agus scóipe
 
 ## Deais (Stiúideo Cuimhne)
 
-Is **Stiúideo 3 chluaisín** anois é `src/app/(dashboard)/dashboard/memory/page.tsx`:
+Tá `src/app/(dashboard)/dashboard/memory/page.tsx` anois a** Stiúideo 3-tab** :
 
-### Cluaisín: Cuimhní
+### Cluaisín: Cuimhní cinn
 
-- Cárta coincheapa (míniú infhillte "Conas a oibríonn sé").
-- Liosta fíor-ama, cuardach agus uimhriú leathanach (moill mhaolaithe 300 ms).
-- Scagaire cineáil (`factual` / `episodic` / `procedural` / `semantic` / uile).
-- Mód- dialóg chun cuimhne a chur leis (eochair, ábhar, cineál).
+- Cárta coincheap (mínitheoir infhillte "Conas a oibríonn sé").
+- Liosta fíor-ama, cuardach agus uimhriú (300 ms).
+- Cineál scagaire (`factual` / `episodic` / `procedural` / `semantic` / uile).
+- Módúil add-chuimhne (eochair, ábhar, cineál).
 - Eagarthóireacht inlíne (cnaipe peann luaidhe → `PUT /api/memory/[id]`).
-- Scriosadh de réir ró (le dialóg deimhnithe).
-- Easpórtáil JSON den leathanach reatha; iompórtáil JSON trí roghnóir comhaid.
-- Cártaí staitisticí: `totalEntries`, `tokensUsed`, `hitRate`.
-- Cnaipe "Dlúthaigh na seanchinn" → `POST /api/memory/summarize` (taispeánann
-  an rith tástála líon na n-iarrthóirí ar dtús, agus deimhnítear ansin é).
-- Ponc sláinte glas/dearg atá á thiomáint ag `GET /api/memory/health`.
+- Scrios in aghaidh an tsraith (le dialóg deimhnithe).
+- onnmhairiú JSON an leathanaigh reatha; JSON allmhairiú tríd an roghnóir comhad.
+- Cártaí stat: `totalEntries`, `tokensUsed`, `hitRate`.
+- "Dlúth d'aois" a bhrú → `POST /api/memory/summarize` (triom-reáchtáil ar dtús taispeánann comhaireamh iarrthóra, ansin deimhníonn).
+- Ponc sláinte green/red tiomáinte ag `GET /api/memory/health`.
 
 ### Cluaisín: Clós Súgartha
 
-- Ionchur iarratais + roghnóir straitéise (Beacht / Séimeantach / Hibrid) +
-  buiséad comharthaí.
-- "Insamhail" → `POST /api/memory/retrieve-preview` — taispeánann sé torthaí
-  rangaithe ina bhfuil `score`, `tier`, `tokens`, `vecScore`, `ftsScore`.
-- Painéal réitigh a thaispeánann cén fhoinse leabaithe / stór veicteoirí a
-  úsáideadh agus ar tharla cúlú.
+- Ceist ionchur straitéis roghnóir + (Beacht / Séimeantach / Hibrid) buiséad comhartha +.
+- Léiríonn "Insamhail" → `POST /api/memory/retrieve-preview` — torthaí rangaithe le `score`, `tier`, `tokens`, `vecScore`, `ftsScore`.
+- Painéal réitigh a thaispeánann cén fhoinse leabaithe / stór veicteora a úsáideadh agus cé acu ar tharla cúl-tiontú.
 
 ### Cluaisín: Inneall
 
-- Painéal stádais innill (slis FTS5 eochairfhocal, slis leabaithe, slis stór
-  veicteoirí, slis sláinte Qdrant, slis athrangaithe).
-- Cnaipe "Athinnéacsaigh Anois" → `POST /api/memory/reindex`.
-- Roghnóir foinse leabaithe (uathoibríoch / cianda / statach / claochladáin +
-  lascáin).
-- Cárta cumraíochta Qdrant (lasc cumasaithe, óstach/port/bailiúchán/eochair,
-  tástáil naisc, tástáil chuardaigh shéimeantaigh, glantachán).
-- Cárta cumraíochta athrangaithe (lasc cumasaithe, roghnóir soláthraí/samhla).
+- Painéal stádais innill (sliseanna FTS5 eochairfhocal, sliseanna leabú, sliseanna siopa veicteora, sliseanna sláinte Qdrant, sliseanna rerank).
+- Cnaipe "Reindex Now" → `POST /api/memory/reindex`.
+- Roghnóir foinse a neadú (scornán uathoibríoch / iargúlta / statach / claochladáin + ).
+- cárta cumraíochta Qdrant (cumasaigh scoránaigh, host/port/collection/key, nasc tástála, tástáil cuardaigh shéimeantach, glanta).
+- Cárta cumraíochta athrank (cumasaigh scoránaigh, roghnóir provider/model ).
 
-Tá socruithe Cuimhne agus Qdrant ar fáil freisin faoi
-`/dashboard/settings → Cuimhne & Scileanna` (`MemorySkillsTab.tsx`) don
-chomhéadan socruithe oidhreachta/domhandaithe.
+Tá socruithe cuimhne agus Qdrant beo freisin faoi `/dashboard/settings → Memory & Skills` (`MemorySkillsTab.tsx`) don dromchla socruithe legacy/global.
 
-## Taisceadh
+## Taisce
 
-Coinníonn `src/lib/memory/store.ts` taisce ar nós LRU laistigh den phróiseas
-(`MEMORY_CACHE_TTL = 1 nóim`, `MEMORY_MAX_CACHE_SIZE = 500`, agus díshealbhú
-an 20 % is sine) do léamha `getMemory(id)`, chomh maith le sraith ghinearálta
-eochrach/luacha `memoryCache` (`src/lib/memory/cache.ts`) ina bhfuil modhanna
-`get`/`set`/`invalidate`, a úsáideann glaoiteoirí ar mian leo a dtaisce
-scóipithe féin a bheith acu (LRU 1 000 iontráil, TTL réamhshocraithe 5 nóim).
+Coinníonn `src/lib/memory/store.ts` taisce LRU-ish in-phróiseas (`MEMORY_CACHE_TTL = 1 min`, `MEMORY_MAX_CACHE_SIZE = 500`, leis an díshealbhú 20 % is sine) le haghaidh léite `getMemory(id)`, chomh maith le ciseal cineálach key/value `memoryCache` (`src/lib/memory/cache.ts`) le modhanna `get`/`set`/`invalidate` a úsáideann glaoiteoirí ar mian leo a dtaisce scoped féin (1 000-iontráil LRU mintry TTL ).
 
 ## Príobháideachas & Saolré
 
@@ -718,22 +687,22 @@ Tagarmharc ar ghnáthfhreastalaí x86 4 chroí (téacsanna ~100 comhartha an cea
 
 ---
 
-## Patrúin Eastósctha Fíoras (v3.8.16+)
+## Patrúin Eastósctha Fíricí (v3.8.16 +)
 
-Úsáideann an modúl `extraction.ts` (`src/lib/memory/extraction.ts`) **meaitseáil patrún le sloinn ionadaíochta** chun fíorais struchtúrtha a eastóscadh as teachtaireachtaí comhrá. Má thuigeann tú na patrúin seo, cabhróidh sé leat cáilíocht an eastósctha a choigeartú do do chás úsáide.
+Úsáideann an modúl `extraction.ts` (`src/lib/memory/extraction.ts`).** Meaitseáil patrún regex** chun fíricí struchtúrtha a bhaint as teachtaireachtaí comhrá. Cuidíonn tuiscint ar na patrúin seo leat cáilíocht eastósctha a fheabhsú do do chás úsáide.
 
-### Catagóirí Réamhshocraithe Patrún
+### Catagóirí Patrún Réamhshocraithe
 
-| Catagóir            | Patrún samplach                                                                | A ngabhann sé                    |
-| ------------------- | ------------------------------------------------------------------------------ | -------------------------------- |
-| PREFERENCE_PATTERNS | `"Is fearr liom <X>"`, `"Is maith liom <X>"`, `"Is fuath liom <X>"`            | Sainroghanna úsáideora           |
-| DECISION_PATTERNS   | `"Úsáidfidh mé <X>"`, `"Chinn mé <X> a dhéanamh"`, `"Roghnaigh mé <X>"`        | Cinntí úsáideora (eipeasóideach) |
-| PATTERN_PATTERNS    | `"De ghnáth déanaim <X>"`, `"Déanaim <X> i gcónaí"`, `"Ní dhéanaim <X> riamh"` | Patrúin iompraíochta bhuana      |
+| Catagóir            | Patrún samplach                                             | Gabhálacha                       |
+| ------------------- | ----------------------------------------------------------- | -------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Sainroghanna úsáideora           |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Cinntí úsáideora (eipeasóid)     |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Patrúin iompraíochta marthanacha |
 
-### Patrúin Shamplacha (Simplithe)
+### Patrúin Samplacha (Simplithe)
 
 ```ts
-// Ó src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -746,35 +715,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### An Méid a Eastósctar
+### Cad a Bhaintear as
 
 Nuair a deir úsáideoir:
 
-> "Is fearr liom TypeScript. Úsáidfidh mé Postgres don tionscadal seo. Déanaim commit i gcónaí sula ndéanaim push. Ní maith liom Python."
-> Cruthaíonn an t-eastóscadh 4 chuimhne:
+> "Is fearr liom TypeScript. Bainfidh mé úsáid as Postgres don tionscadal seo. Déanaim gealltanas i gcónaí roimh bhrú. Ní maith liom Python." Táirgeann eastóscadh 4 chuimhní cinn:
 >
-> | Eochair                              | Catagóir  | Cineál        | Ábhar                         |
-> | ------------------------------------ | --------- | ------------- | ----------------------------- |
-> | `preference:typescript`              | sainrogha | fíorasach     | "TypeScript"                  |
-> | `decision:postgres_for_this_project` | cinneadh  | eipeasóideach | "Postgres don tionscadal seo" |
-> | `pattern:commit_before_pushing`      | patrún    | fíorasach     | "commit sula ndéantar push"   |
-> | `preference:python`                  | sainrogha | fíorasach     | "Python"                      |
+> | Eochair | Catagóir | Cineál | Ábhar | | ---------------------------------- | | | | | `preference:typescript` | " | || TypeScript| | cinneadh | | `decision:postgres_for_this_project` | Postgres tionscadal seo" | | `pattern:commit_before_pushing` | patrún | fíorasach | "geall roimh bhrú" | | `preference:python` | preference | " |
 
-### Teorainneacha Eastósctha
+### Teorainneacha Astarraingthe
 
-Chun eastóscadh gan srian a chosc, tá feidhm ag na teorainneacha seo a leanas:
+Chun eastóscadh runaway a chosc, tá feidhm ag na teorainneacha seo a leanas:
 
-| Íosfhad ábhair | 3 charachtar |
-| Uasfhad ábhair | 500 carachtar |
+| Fad ábhar íosta | 3 charachtair |
+| Fad ábhar uasta | 500 charachtair |
 
-### Cathain is Ceart Eastóscadh a Dhíchumasú
+### Cathain a Dhíchumasú Eastóscadh
 
-Ritear an t-eastóscadh go huathoibríoch aon uair a bhíonn an chuimhne cumasaithe; níl aon scorán ar leith ann don eastóscadh amháin. Chun é a mhúchadh, díchumasaigh an chuimhne go hiomlán (`enabled: false`
-trí `PUT /api/settings/memory`). Smaoinigh ar é sin a dhéanamh sna cásanna seo:
+Ritheann eastóscadh go huathoibríoch nuair a bhíonn cuimhne cumasaithe; níl aon scorán eastósctha ar leith ann. Chun é a mhúchadh, díchumasaigh an chuimhne go hiomlán (`enabled: false` via `PUT /api/settings/memory`). Smaoinigh ar é sin a dhéanamh nuair:
 
-- Tá líon mór teachtaireachtaí agat agus níl costas an eastósctha beag
-- Is comhráite neamhbhuana den chuid is mó atá agat (comhrá, dífhabhtú), gan luach fadtéarmach
-- Tá comhthéacs á ghabháil agat cheana féin trí bhreiseáin shaincheaptha
+- Tá líon ard teachtaireachta agat agus ní beag an costas asbhainte
+- Tá do chuid comhráite neamhbhuan den chuid is mó (comhrá, dífhabhtaithe) gan aon luach fadtéarmach
+- Tá comhthéacs á ghabháil agat cheana féin trí fhorlíontáin saincheaptha
 
 ---
 

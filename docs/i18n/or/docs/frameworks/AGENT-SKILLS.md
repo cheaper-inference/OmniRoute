@@ -11,14 +11,14 @@ Agent Skills ହେଉଛି ସଂରଚିତ SKILL.md ଫାଇଲ୍, ଯା
 
 ---
 
-## ସାରାଂଶ
+## ସମୀକ୍ଷା
 
-ଏହି କ୍ୟାଟାଲଗ୍ରେ **45ଟି Agent Skills** (23ଟି REST API + 21ଟି CLI + 1ଟି କନଫିଗରେସନ୍ ୱର୍କଫ୍ଲୋ) ରହିଛି। ପ୍ରତ୍ୟେକ ସ୍କିଲ୍ରେ ରହିଛି:
+କାଟାଲଗ୍ ଧାରଣ କରେ।** 45 ଏଜେଣ୍ଟ କ ills ଶଳ।** (23 REST API + 21 CLI + 1 ବିନ୍ୟାସ କାର୍ଯ୍ୟ ପ୍ରବାହ)। ପ୍ରତ୍ୟେକ କ ill ଶଳ ଅଛି:
 
-- ଏକ **କ୍ୟାନୋନିକାଲ୍ ID** (`omni-auth`, `cli-serve`, ଇତ୍ୟାଦି)
-- `skills/{id}/SKILL.md`ରେ ଏକ **SKILL.md** ଫାଇଲ୍, ଯେଉଁଥିରେ YAML ଫ୍ରଣ୍ଟମ୍ୟାଟର୍ (`name`, `description`) + ସମୃଦ୍ଧ markdown ବଡି ରହିଛି
-- OpenAPI ସ୍ପେକ୍ ଏବଂ CLI ରେଜିଷ୍ଟ୍ରିରୁ ବ୍ୟୁତ୍ପନ୍ନ **REST ଏଣ୍ଡପଏଣ୍ଟଗୁଡ଼ିକ** (API ସ୍କିଲ୍) କିମ୍ବା **CLI ସବ୍କମାଣ୍ଡଗୁଡ଼ିକ** (CLI ସ୍କିଲ୍)
-- ଲାଇଭ୍ ଫେଚ୍ ପାଇଁ ଏକ **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- କ** କାନୋନିକାଲ୍ ID** (`omni-auth`, `cli-serve`, ଇତ୍ୟାଦି)
+- କ**SKILL.md** `skills/{id}/SKILL.md` ରେ YAML ଫ୍ରଣ୍ଟମାଟର୍ (`name`, `description`) + ରିଚ୍ ମାର୍କଡାଉନ୍ ବଡି ସହିତ ଫାଇଲ୍।
+- **REST ଶେଷ ବିନ୍ଦୁ।** (API କ skills ଶଳ) କିମ୍ବା**CLI ଉପକମାଣ୍ଡ।** (CLI skills ଶଳ) OpenAPI spec ଏବଂ CLI ରେଜିଷ୍ଟ୍ରିରୁ ଉତ୍ପନ୍ନ।
+- କ**GitHub କଞ୍ଚା URL** ଜୀବନ୍ତ ଆଣିବା ପାଇଁ: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 

@@ -6,9 +6,20 @@
 
 Để biết tệp kê khai thực thi được chia sẻ, môi trường con bị hạn chế và thiết lập Gemini liên tục, hãy xem [hợp đồng khởi chạy CLI](./CLI-LAUNCH-CONTRACTS.md).
 
-OmniRoute gửi một nhóm lệnh `setup-*` cấu hình CLI mã hóa (Codex, Claude Code, OpenCode, Cline, …) để sử dụng OmniRoute làm phần phụ trợ của nó — vì vậy công cụ này sẽ giao tiếp với** một** định tuyến điểm cuối và OmniRoute đến nhà cung cấp phù hợp với tính năng tự động dự phòng. Mỗi lệnh đọc** sống** danh mục mô hình từ một OmniRoute đang chạy (cục bộ hoặc từ xa) và ghi tệp cấu hình của chính công cụ đó vào** của bạn** máy móc. Khóa API được tham chiếu bởi một biến môi trường ở bất cứ nơi nào công cụ hỗ trợ nó. Các lệnh duy trì tệp môi trường công cụ cục bộ được ghi chú bên dưới.
+OmniRoute gửi một nhóm lệnh `setup-*` cấu hình CLI mã hóa (Codex, Claude Code, OpenCode, Cline, …) để sử dụng OmniRoute làm — phụ trợ của nó để công cụ này giao tiếp với** một** điểm cuối và OmniRoute định tuyến đến nhà cung cấp phù hợp với tính năng tự động dự phòng. Các lệnh thiết lập sử dụng ngữ cảnh OmniRoute cục bộ hoặc từ xa đang hoạt động của bạn và định cấu hình công cụ trên** của bạn** máy móc. Công thức nấu ăn dựa trên danh mục tìm nạp mô hình từ máy chủ; công thức nấu ăn một mô hình chấp nhận `--model` hoặc lời nhắc cho mô hình ID. Khóa API được tham chiếu bởi một biến môi trường ở bất kỳ nơi nào công cụ hỗ trợ nó. Các lệnh duy trì tệp môi trường công cụ cục bộ được ghi chú bên dưới.
 
-Ngoài ra còn có một trình khởi chạy chung — `omniroute run <target>` — sinh ra `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` hoặc `whycodes` với env bên phải được chèn mà không cần viết bất kỳ cấu hình nào cả. Các mục tiêu và bí danh của chúng đến từ bảng kê khai chuẩn `bin/cli/cli-manifest.mjs` (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`) và `omniroute completion` cung cấp các từ mục tiêu có nguồn gốc từ bảng kê khai tương tự. Trình khởi chạy cho mỗi công cụ cũ — `omniroute launch` (Claude Code) và `omniroute launch-codex` (Codex) — vẫn khả dụng.
+Danh mục và các lệnh tự động hóa bao gồm các bộ công cụ khác nhau:
+
+| Bề mặt                         | Đếm | Nó có nghĩa là gì                                                                    |
+| ------------------------------ | --- | ------------------------------------------------------------------------------------ |
+| Danh mục công cụ               | 39  | Các công cụ và tác nhân mã hóa được ghi lại, bao gồm tích hợp thủ công và IDE        |
+| `omniroute run <target>`       | 8   | Khởi chạy bộ điều hợp cung cấp điểm cuối, thông tin xác thực và mô hình của mục tiêu |
+| `omniroute configure <target>` | 12  | Công thức cấu hình tương tác được hỗ trợ bởi các lệnh `setup-*`                      |
+| lệnh `setup-*`                 | 16  | Các lệnh thiết lập đã đăng ký, bao gồm thiết lập trình soạn thảo guided/manual       |
+
+Số lượng phản ánh [bảng kê khai công cụ](../../config/cli-tools-manifest.json) và [sổ đăng ký lệnh](../../bin/cli/commands/registry.mjs) vào ngày 17 tháng 11 năm 2026. Mục nhập danh mục không ngụ ý bộ điều hợp khởi chạy. Xem [danh mục công cụ CLI](../reference/CLI-TOOLS.md) để biết toàn bộ kho công cụ.
+
+Ngoài ra còn có một trình khởi chạy chung — `omniroute run <target>` — sinh ra `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` hoặc `whycodes` với env bên phải được chèn mà không cần viết bất kỳ cấu hình nào cả. Các mục tiêu và bí danh của chúng đến từ bảng kê khai chuẩn `bin/cli/cli-manifest.mjs` (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`) và `omniroute completion` cung cấp các từ mục tiêu có nguồn gốc từ bảng kê khai tương tự. `omniroute launch <tool>` khởi động một công cụ mã hóa được hỗ trợ với mã thông báo phiên mỗi lần khởi chạy và danh sách mô hình được xây dựng từ các nhà cung cấp mà bạn đã kết nối, đồng thời tự động khởi động một cổng cục bộ khi không có cổng nào chạy (xem [LAUNCH.md](./LAUNCH.md) ). Các trình khởi chạy trên mỗi công cụ cũ — `omniroute launch` không có tên công cụ (Claude Code) và `omniroute launch-codex` (Codex) — vẫn có sẵn.
 
 Việc giới thiệu nhà cung cấp có sẵn từ cùng một bối cảnh local/remote. Các lệnh ưu tiên API bên dưới tách biệt xác thực quản lý với thông tin xác thực của nhà cung cấp và không bao giờ in thông tin xác thực ở đầu ra có cấu trúc:
 
@@ -28,44 +39,46 @@ Bộ chọn nhà cung cấp từ chối các tiền tố, tên hoặc tên nhà 
 
 - [Cấu hình mã Claude](./CLAUDE-CODE-CONFIGURATION.md)
 - [cấu hình Codex CLI](./CODEX-CLI-CONFIGURATION.md)
-- [Chế độ từ xa](./REMOTE-MODE.md) - điều khiển OmniRoute từ xa (VPS / Tailnet) từ máy tính xách tay của bạn
-- [Mã VS Copilot Trò chuyện](./VSCODE-COPILOT.md) — phần mở rộng OmniCopilot ; nó cũng có thể chạy các lệnh `setup-*` này cho bạn từ bên trong trình soạn thảo
+- [Chế độ từ xa](./REMOTE-MODE.md) — điều khiển OmniRoute từ xa (VPS / Tailnet) từ máy tính xách tay của bạn
+- [VS Mã Copilot Trò chuyện](./VSCODE-COPILOT.md) — phần mở rộng OmniCopilot ; nó cũng có thể chạy các lệnh `setup-*` này cho bạn từ bên trong trình soạn thảo
 
 ---
 
 ## Bảng chính
 
-Mọi mệnh lệnh đều tôn vinh** bối cảnh hoạt động** (được đặt bằng `omniroute connect`, xem [Chế độ từ xa](./REMOTE-MODE.md) ) hoặc cờ `--remote <url> --api-key <key>` rõ ràng. "Cục bộ và từ xa" bên dưới có nghĩa là: không có cờ, nó nhắm mục tiêu `http://localhost:20128`; với `--remote` (hoặc bối cảnh từ xa đang hoạt động), nó sẽ tìm nạp danh mục từ máy chủ đó và ghi cấu hình cục bộ.
+Mọi mệnh lệnh đều tôn vinh** bối cảnh hoạt động** (được đặt bằng `omniroute connect`, xem [Chế độ từ xa](./REMOTE-MODE.md) ) hoặc cờ `--remote <url> --api-key <key>` rõ ràng. "Cục bộ và từ xa" bên dưới có nghĩa là: không có cờ, nó nhắm mục tiêu `http://localhost:20128`; với `--remote` (hoặc bối cảnh từ xa đang hoạt động), nó sẽ định cấu hình máy chủ đó làm phụ trợ và ghi cấu hình cục bộ. Công thức nấu ăn dựa trên danh mục cũng lấy các mô hình từ máy chủ đó.
 
-| Yêu cầu                    | Dụng cụ                           | Nó viết gì                                                                                                                                                         | Cờ chính                                                                                                                                   | Địa phương và từ xa |
-| -------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| `omniroute setup-codex`    | OpenAI Codex CLI                  | `~/.codex/<name>.config.toml` - một cấu hình cho mỗi mẫu văn bản tương thích (`codex --profile <name>`)                                                            | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Cả hai              |
-| `omniroute setup-claude`   | Claude                            | `~/.claude/profiles/<name>/settings.json` - một hồ sơ cho mỗi mô hình phù hợp (`CLAUDE_CONFIG_DIR`)                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Cả hai              |
-| `omniroute setup-opencode` | OpenCode (tương thích với openai) | `~/.config/opencode/opencode.json` - nhà cung cấp `omniroute` với mọi mô hình danh mục (`opencode -m omniroute/<model>`)                                           | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Cả hai              |
-| `omniroute setup-cline`    | Cline                             | `~/.cline/data/{globalState,secrets}.json` ( chế độ CLI ) + in VS Cài đặt tiện ích mở rộng mã                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Cả hai              |
-| `omniroute setup-kilo`     | Mã Kilo                           | `~/.local/share/kilo/auth.json` (CLI) + hợp nhất `kilocode.*` vào VS Mã `settings.json` nếu có                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Cả hai              |
-| `omniroute setup-continue` | Tiếp tục / `cn` CLI               | `~/.continue/config.yaml` - mô hình `provider: openai`, khóa qua `${{ secrets.OMNIROUTE_API_KEY }}`                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Cả hai              |
-| `omniroute setup-cursor`   | Cursor                            | Không có gì - in các bước trong ứng dụng ( cấu hình Cursor mờ SQLite)                                                                                              | `--remote` `--api-key` `--only` `--port`                                                                                                   | Cả hai              |
-| `omniroute setup-roo`      | Mã Roo                            | `~/.omniroute/roo-settings.json` (tài liệu nhập khẩu) + đặt `roo-cline.autoImportSettingsPath` nếu Mã VS `settings.json` tồn tại                                   | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Cả hai              |
-| `omniroute setup-crush`    | Người mình thích                  | `~/.config/crush/crush.json` - nhà cung cấp `openai-compat`, khóa qua `$OMNIROUTE_API_KEY`                                                                         | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Cả hai              |
-| `omniroute setup-zed`      | Zed                               | `~/.config/zed/settings.json` - nhà cung cấp `openai_compatible.omniroute` (các mẫu có khả năng công cụ ≤ 25), khóa qua `$OMNIROUTE_API_KEY`                       | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | Cả hai              |
-| `omniroute setup-goose`    | Ngỗng                             | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + in công thức env                                                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Cả hai              |
-| `omniroute setup-aider`    | Người trợ giúp                    | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + công thức env                                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Cả hai              |
-| `omniroute setup-qwen`     | Qwen                              | `~/.qwen/settings.json` — V4 mảng `modelProviders.openai` + `OMNIROUTE_API_KEY` trong `~/.qwen/.env`                                                               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Cả hai              |
-| `omniroute setup-5dive`    | 5dive (đội đại lý)                | Không có gì dưới `$HOME` — viết 5dive** hồ sơ xác thực** (`/var/lib/5dive/auth-profiles/<name>/`) qua `5dive agent auth set`; chỉ root, chạy trên máy chủ hạm đội  | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Cả hai              |
-| `omniroute setup-whycodes` | WhyCodes                          | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); đường dẫn là `$WHYCODES_HOME/config.toml` hoặc `~/.whycodes/config.toml`                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Cả hai              |
-| `omniroute run <target>`   | Khởi chạy thời gian chạy (chung)  | Không có gì - sinh ra `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` với env và args bên phải; Qwen và Gemini sử dụng nhà cách ly tạm thời | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Cả hai              |
-| `omniroute launch`         | Claude                            | Không có gì - sinh ra `claude` với `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` được chèn                                                                           | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Cả hai              |
-| `omniroute launch-codex`   | OpenAI Codex CLI                  | Không có gì - sinh ra `codex` với nhà cung cấp `omniroute` được chèn qua cờ `-c`                                                                                   | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Cả hai              |
+| Yêu cầu                    | Dụng cụ                             | Nó viết gì                                                                                                                                                        | Cờ chính                                                                                                                                   | Địa phương và từ xa |
+| -------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| `omniroute setup-codex`    | OpenAI Codex CLI                    | `~/.codex/<name>.config.toml` — một cấu hình cho mỗi mô hình văn bản tương thích (`codex --profile <name>`)                                                       | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Cả hai              |
+| `omniroute setup-claude`   | Claude                              | `~/.claude/profiles/<name>/settings.json` — một hồ sơ cho mỗi mô hình phù hợp (`CLAUDE_CONFIG_DIR`)                                                               | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Cả hai              |
+| `omniroute setup-opencode` | OpenCode (tương thích với openai)   | nhà cung cấp `~/.config/opencode/opencode.json` — `omniroute` với mọi mô hình danh mục (`opencode -m omniroute/<model>`)                                          | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Cả hai              |
+| `omniroute setup-cline`    | Cline                               | `~/.cline/data/{globalState,secrets}.json` ( chế độ CLI ) + in VS Cài đặt tiện ích mở rộng mã                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Cả hai              |
+| `omniroute setup-kilo`     | Mã Kilo                             | `~/.local/share/kilo/auth.json` (CLI) + hợp nhất `kilocode.*` vào VS Mã `settings.json` nếu có                                                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Cả hai              |
+| `omniroute setup-continue` | Tiếp tục / `cn` CLI                 | mô hình `~/.continue/config.yaml` — `provider: openai`, khóa qua `${{ secrets.OMNIROUTE_API_KEY }}`                                                               | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Cả hai              |
+| `omniroute setup-cursor`   | Cursor                              | Không có gì — in các bước trong ứng dụng (cấu hình Cursor mờ SQLite)                                                                                              | `--remote` `--api-key` `--only` `--port`                                                                                                   | Cả hai              |
+| `omniroute setup-roo`      | Mã Roo                              | `~/.omniroute/roo-settings.json` (tài liệu nhập khẩu) + đặt `roo-cline.autoImportSettingsPath` nếu Mã VS `settings.json` tồn tại                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Cả hai              |
+| `omniroute setup-crush`    | Người mình thích                    | `~/.config/crush/crush.json` — nhà cung cấp `openai-compat`, khóa qua `$OMNIROUTE_API_KEY`                                                                        | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Cả hai              |
+| `omniroute setup-zed`      | Zed                                 | `~/.config/zed/settings.json` — nhà cung cấp `openai_compatible.omniroute` (kiểu máy có khả năng sử dụng công cụ ≤ 25), khóa qua `$OMNIROUTE_API_KEY`             | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | Cả hai              |
+| `omniroute setup-goose`    | Ngỗng                               | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + in công thức env                                                                   | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Cả hai              |
+| `omniroute setup-aider`    | Người trợ giúp                      | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + công thức env                                                                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Cả hai              |
+| `omniroute setup-qwen`     | Qwen                                | `~/.qwen/settings.json` — V4 `modelProviders.openai` mảng + `OMNIROUTE_API_KEY` trong `~/.qwen/.env`                                                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Cả hai              |
+| `omniroute setup-gemini`   | Gemini CLI (bản địa Gemini API)     | lựa chọn và mô hình xác thực `~/.gemini/settings.json` — ; Khóa `~/.gemini/.env` —, root máy chủ và môi trường Gemini                                             | `--remote` `--context` `--api-key` `--model` `--yes` `--dry-run` `--port` `--gemini-home` `--settings-path` `--env-path`                   | Cả hai              |
+| `omniroute setup-5dive`    | 5dive (đội đại lý)                  | Không có gì dưới `$HOME` — viết 5dive** hồ sơ xác thực** (`/var/lib/5dive/auth-profiles/<name>/`) qua `5dive agent auth set`; chỉ root, chạy trên máy chủ hạm đội | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Cả hai              |
+| `omniroute setup-whycodes` | WhyCodes                            | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); đường dẫn là `$WHYCODES_HOME/config.toml` hoặc `~/.whycodes/config.toml`                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Cả hai              |
+| `omniroute run <target>`   | Khởi chạy thời gian chạy (chung)    | Không có gì — sinh ra `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` với env và args phù hợp; Qwen và Gemini sử dụng nhà cách ly tạm thời | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Cả hai              |
+| `omniroute launch`         | Claude                              | Không có gì — sinh ra `claude` khi tiêm `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                               | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Cả hai              |
+| `omniroute launch <tool>`  | Bất kỳ công cụ có thể khởi chạy nào | Không có gì trong cấu hình của riêng bạn: cấu hình mỗi lần khởi chạy trong thư mục tạm thời riêng tư, mã thông báo phiên                                          | `--model` `--all-models` `--list` `--remote` `--port` `--api-key` `--profile` `--dry-run` `--json`                                         | Cả hai              |
+| `omniroute launch-codex`   | OpenAI Codex CLI                    | Không có gì — sinh ra `codex` với nhà cung cấp `omniroute` được chèn qua cờ `-c`                                                                                  | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Cả hai              |
 
 Ghi chú về cờ (được xác minh trong nguồn lệnh):
 
-- `--remote <url>` - tìm nạp danh mục từ OmniRoute từ xa (ghi đè `--port` và ngữ cảnh hoạt động). `--api-key <key>` cung cấp thông tin xác thực cho máy chủ đó (mặc định là `OMNIROUTE_API_KEY` env var hoặc mã thông báo của ngữ cảnh hoạt động).
-- `--only <patterns>` - chuỗi con được phân tách bằng dấu phẩy; chỉ giữ lại mô hình IDs phù hợp (ví dụ `--only glm,kimi`). Có sẵn trên `setup-codex`, `setup-claude`, `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed`.
-- `--dry-run` - in chính xác những gì sẽ được viết mà không cần chạm vào hệ thống tập tin. Có sẵn trên mọi lệnh `setup-*`** ngoại trừ** `setup-cursor` (không bao giờ ghi tệp).
-- `--model <id>` — bắt buộc (hoặc được chọn tương tác) đối với các công cụ không có tính năng tự động phát hiện mô hình: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Những công cụ đó cũng chấp nhận `--yes` cho các lần chạy không tương tác (sau đó yêu cầu `--model`). `setup-opencode` lấy `--model` để đặt mô hình cấp cao nhất mặc định.
+- `--remote <url>` — sử dụng OmniRoute từ xa (ghi đè `--port` và ngữ cảnh hoạt động). `--api-key <key>` cung cấp thông tin xác thực cho máy chủ đó (mặc định là `OMNIROUTE_API_KEY` env var hoặc mã thông báo của ngữ cảnh hoạt động).
+- `--only <patterns>` — chuỗi con được phân tách bằng dấu phẩy; chỉ giữ lại mô hình IDs phù hợp (ví dụ `--only glm,kimi`). Có sẵn trên `setup-codex`, `setup-claude`, `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed`.
+- `--dry-run` — in chính xác những gì sẽ được viết mà không cần chạm vào hệ thống tập tin. Có sẵn trên mọi lệnh `setup-*`** ngoại trừ** `setup-cursor` (không bao giờ ghi tệp).
+- `--model <id>` — được yêu cầu (hoặc được chọn tương tác) cho các công cụ không có tính năng tự động phát hiện mô hình: Cline, Kilo, Roo, Goose, Qwen, Gemini, Aider, 5dive, WhyCodes. Những công cụ đó cũng chấp nhận `--yes` cho các lần chạy không tương tác (sau đó yêu cầu `--model`). `setup-opencode` lấy `--model` để đặt mô hình cấp cao nhất mặc định.
 - `--model <id>` trên `omniroute run` tuân theo hệ thống dây cho mỗi mục tiêu của tệp kê khai (`bin/cli/cli-manifest.mjs`):** người giúp việc** nhận `--model openai/<id>` và** mã mở** `--model omniroute/<id>` (tiền tố chỉ được thêm khi id chưa mang nó);** qwen** Và** song tử** nhận id nguyên văn;** Claude** lấy nó thông qua `ANTHROPIC_MODEL`,** ngỗng** thông qua `GOOSE_MODEL`,** tại sao mã** qua `-P omniroute -m <id>` và** mật mã** thông qua `-c model_providers.omniroute.*` args.**Qwen là mục tiêu chạy duy nhất yêu cầu `--model`** — `omniroute run qwen` không có nó sẽ thoát `2` với một lỗi rõ ràng.
-- `--port <port>` - cổng OmniRoute cục bộ ( `20128` mặc định, bị bỏ qua khi `--remote` được đặt). Có mặt trên tất cả `setup-*` và cả hai launcher.
+- `--port <port>` — cổng OmniRoute cục bộ ( `20128` mặc định, bị bỏ qua khi `--remote` được đặt). Có mặt trên tất cả `setup-*` và cả hai launcher.
 - mã thoát `omniroute run` : mã thoát riêng của CLI con được truyền bá nguyên văn; `2` = đối số không hợp lệ (mục tiêu không được hỗ trợ, thiếu `--model` bắt buộc, bảo vệ vùng chứa); `127` = nhị phân đích không có trong `PATH`; `130`/`143`/`129` khi quá trình phóng kết thúc bởi `SIGINT`/`SIGTERM`/`SIGHUP`; `1` = lỗi khởi chạy thời gian chạy khác.
 - Hai trình khởi chạy (`launch`, `launch-codex`) chấp nhận `--profile <name>` để chọn cấu hình được viết bởi `setup-claude` / `setup-codex`, cộng với các đối số chuyển tiếp cho nhị phân `claude` / `codex` cơ bản.
 
@@ -76,13 +89,15 @@ Bộ chọn tương tác cũng được chia sẻ bởi các công thức thiế
 omniroute configure claude
 omniroute configure opencode --provider glm
 omniroute configure qwen --model qwen/qwen3.8-max-preview --yes
+omniroute configure gemini
+omniroute configure whycodes
 ```
 
-`configure` hiện ủy quyền cho các công thức đã được thử nghiệm cho `codex`, `claude`, `opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo` và `5dive`. Các mục nhập danh mục chỉ dành cho IDE, MITM và chỉ hướng dẫn vẫn duy trì các luồng `setup-*`/thủ công rõ ràng và không được trình bày dưới dạng mục tiêu có thể khởi chạy.
+`configure` hiện ủy quyền cho các công thức đã được thử nghiệm cho `codex`, `claude`, `opencode`, `qwen`, `gemini`, `aider`, `goose`, `cline`, `continue`, `kilo`, `5dive` và `whycodes`. Các mục nhập danh mục chỉ dành cho IDE, MITM và chỉ hướng dẫn vẫn duy trì các luồng `setup-*`/thủ công rõ ràng và không được trình bày dưới dạng mục tiêu có thể khởi chạy.
 
-> `setup-opencode` là** tương thích openai nhẹ** tích hợp OpenCode. Ngoài ra còn có sự tích hợp plugin phong phú hơn — `omniroute setup opencode` — cài đặt `@omniroute/opencode-plugin`. Chúng là những lệnh khác nhau; bảng trên tài liệu `setup-opencode`.
+> `setup-opencode` là** tương thích openai nhẹ** tích hợp OpenCode. Ngoài ra còn có một plugin tích hợp — `omniroute setup opencode` — phong phú hơn để cài đặt `@omniroute/opencode-plugin`. Chúng là những lệnh khác nhau; bảng trên tài liệu `setup-opencode`.
 >
-> Plugin có hai gói, một gói cho mỗi OpenCode chính, vì hai trình tải yêu cầu các điểm vào khác nhau: `@omniroute/opencode-plugin` cho OpenCode v1 và `@omniroute/opencode-plugin-v2` cho OpenCode v2. Gói v2 là gói mới (`0.1.0`) và tuân theo hợp đồng máy chủ vẫn đang hoạt động, do đó, nó đọc các hạt hình dạng OpenCode vào bản nháp danh mục thay vì giả định một. Cài đặt nó bằng cách thêm mục `plugins` vào `opencode.json`; `omniroute setup opencode` vẫn cài đặt gói v1. Các tùy chọn và thứ tự tra cứu thông tin xác thực có trong gói README.
+> Plugin có hai gói, một gói cho mỗi OpenCode chính, vì hai trình tải yêu cầu các điểm vào khác nhau: `@omniroute/opencode-plugin` cho OpenCode v1 và `@omniroute/opencode-plugin-v2` cho OpenCode v2. Gói v2 là gói mới (`0.1.0`) và tuân theo hợp đồng máy chủ vẫn đang hoạt động, do đó, nó đọc các hạt hình dạng OpenCode vào bản nháp danh mục thay vì giả định một. Cài đặt nó bằng cách thêm mục nhập `plugins` vào `opencode.json`; `omniroute setup opencode` vẫn cài đặt gói v1. Các tùy chọn và thứ tự tra cứu thông tin xác thực có trong gói README.
 
 ---
 
@@ -166,43 +181,24 @@ Xem [Chế độ từ xa](./REMOTE-MODE.md) để biết về ngữ cảnh, ph�
 
 ---
 
-## Các đội agent 5dive
+## Đội tàu đại lý 5dive
 
-[5dive](https://5dive.ai) vận hành một đội gồm các agent lập trình chạy dài hạn, mỗi
-agent là một unit systemd dưới tài khoản người dùng Unix riêng. Bản thân nó không
-phải là một CLI lập trình, vì vậy không có gì để `omniroute run` khởi chạy —
-`5dive` là một đích **chỉ dành cho cấu hình**.
+[5dive](https://5dive.ai) điều hành một nhóm tác nhân mã hóa hoạt động lâu dài, mỗi tác nhân là một đơn vị hệ thống dưới sự quản lý của người dùng Unix riêng. Bản thân nó không phải là một CLI mã hóa, vì vậy `omniroute run` không có gì để khởi chạy — `5dive` là một** chỉ cấu hình** mục tiêu.
 
 ```bash
 omniroute configure 5dive --model failover-demo --yes
 omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent worker1
 ```
 
-Cả hai dạng đều ghi một **profile xác thực** 5dive, và sau đó mọi seat `claude` được
-liên kết với profile đó sẽ giao tiếp với OmniRoute. Có ba điểm riêng biệt đối với
-đích này:
+Cả hai biểu mẫu đều viết một 5dive** hồ sơ xác thực** , và mọi ghế `claude` được liên kết với hồ sơ đó sẽ nói chuyện với OmniRoute. Ba điều cụ thể cho mục tiêu này:
 
-- **Nó chạy trên máy chủ của đội agent với quyền root.** Các động từ của 5dive tác
-  động lên các unit systemd cục bộ và một thư mục trạng thái thuộc sở hữu của root;
-  không có chế độ từ xa. Quy trình sẽ tự thực thi lại thông qua `sudo` khi chưa chạy
-  với quyền root (`--no-sudo` sẽ tắt hành vi đó và in lệnh ra thay thế).
-- **Endpoint phải dùng `https://` trừ khi đó là địa chỉ loopback.** API key của agent
-  được gửi qua URL đó trong mọi yêu cầu, và 5dive từ chối endpoint không mã hóa nằm
-  ngoài máy. Địa chỉ LAN riêng cũng không phải ngoại lệ.
-- **Model được ghim riêng cho từng seat có mức ưu tiên cao hơn profile.** Profile
-  chứa `ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU}_MODEL`, nhưng một seat vẫn được ghim
-  vào model id mặc định sẽ thất bại ngay ở lượt đầu tiên với thông báo _"Có vấn đề
-  với model đã chọn"_. Truyền `--agent <name>` (có thể lặp lại) để ghim cả các seat;
-  quy trình sẽ in lệnh ra khi bạn không làm như vậy.
+- **Nó chạy trên máy chủ hạm đội, với quyền root.** Các động từ của 5dive hoạt động trên các đơn vị hệ thống cục bộ và thư mục trạng thái thuộc sở hữu gốc; không có chế độ từ xa. Công thức thực hiện lại thông qua `sudo` khi nó chưa được root (`--no-sudo` tắt tính năng đó và thay vào đó in lệnh).
+- **Điểm cuối phải là `https://` trừ khi nó là loopback.** Khóa API của tác nhân sẽ sử dụng URL đó theo mọi yêu cầu và 5dive từ chối điểm cuối ngoài hộp văn bản gốc. Địa chỉ LAN riêng không phải là ngoại lệ.
+- **Ghim mẫu riêng của mỗi ghế đều xếp hạng cao hơn hồ sơ.** Hồ sơ mang `ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU}_MODEL`, nhưng ghế vẫn được ghim vào id mẫu gốc không thành công ở lượt đầu tiên với _"Có vấn đề với mẫu đã chọn"_. Vượt qua `--agent <name>` (có thể lặp lại) để ghim ghế; công thức in lệnh khi bạn không làm như vậy.
 
-API key được chuyển cho 5dive qua **stdin** (`--api-key=-`), vì vậy nó không bao giờ
-xuất hiện trong đầu ra của `ps`.
+Chìa khóa API được giao cho 5dive vào** stdin** (`--api-key=-`), vì vậy nó không bao giờ xuất hiện trong đầu ra `ps`.
 
-Việc trỏ profile đến một **combo** OmniRoute thay vì một model đơn lẻ chính là cách
-đội agent có được khả năng chuyển đổi dự phòng giữa các provider: khi endpoint
-chính ngừng hoạt động hoàn toàn giữa chừng trong lượt chạy được ghi lại tại
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), agent đã hoàn tất
-các bước còn lại trên phương án dự phòng mà không để sự cố gián đoạn lộ ra ngoài.
+Trỏ hồ sơ vào một OmniRoute** kết hợp** thay vì một mô hình duy nhất khiến nhà cung cấp nhóm chuyển đổi dự phòng: khi điểm cuối chính gặp khó khăn giữa chừng trong quá trình chạy được ghi trên [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), tác nhân đã hoàn thành các bước còn lại của mình trong dự phòng và không bao giờ xuất hiện tình trạng ngừng hoạt động.
 
 ---
 

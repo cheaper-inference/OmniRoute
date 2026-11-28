@@ -151,30 +151,30 @@ Teme za Faze 6-7:
 - [ ] Dodati regresijske testove za svaku nepokriven grešku u produkciji ispravljen tijekom puta prema 90%
 - [ ] Podići prag pokrivenosti u CI-ju tek nakon što je lokalna osnovna razina stabilna najmanje dva uzastopna pokretanja
 
-## Ratchet pravilo
+## Ratchet politika
 
-Ažurirajte pragove `npm run test:coverage` samo nakon što projekt stvarno prijeđe sljedeći milestone s udobnim odmakom.
+Ažurirajte `npm run test:coverage` pragove tek nakon što projekt stvarno prijeđe sljedeću prekretnicu s ugodnim međuspremnikom.
 
-**Trenutna granica:** `npm run test:coverage` nameće **60 iskaza / 60 redaka / 60 funkcija / 60 grana** (metrika je rebaziranana u Quality-Gates Faza 6A.1 — ranija osnovna vrijednost od 82,58% bila je napuhana jer je uključivala testne datoteke i isključivala `open-sse`). Naredba `test:coverage:legacy` čuva staru metriku 50/50/50 za povijesnu usporedbu.
+**Trenutačna vrata:** `npm run test:coverage` provodi** 60 izjava / 60 linija / 60 funkcija / 60 grana** (metrika je preinačena u Quality-Gates Fase 6A.1 — ranija osnovna vrijednost od 82,58% bila je napuhana jer je brojala testne datoteke i isključivala `open-sse`). Naredba `test:coverage:legacy` čuva staru 50/50/50 metriku za povijesnu usporedbu.
 
-Za ad-hoc provjere praga na temelju najnovijeg izvješća koristite:
+Za ad hoc provjere praga prema najnovijem izvješću koristite:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Preporučeni redoslijed ratchet koraka (redoslijed je `iskazi-reci / grane / funkcije`):
+Preporučeni redoslijed čegrtaljki (redoslijed je `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- trenutna granica (75/70/75)
+5. 75/70/72 <-- strujna vrata (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Sljedeći ratchet cilj je `80/75/78` kada pokrivenost grana bude iznad 78% u dva uzastopna pokretanja.
+Sljedeći cilj je `80/75/78` kada se pokrivenost grane održi iznad 78% u dva uzastopna rada.
 
 ## Poznati nedostatak
 

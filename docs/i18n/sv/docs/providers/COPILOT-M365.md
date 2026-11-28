@@ -168,9 +168,9 @@ Se till att `copilot-m365-web` är aktiverat** Dashboard → leverantörer** . L
 
 ## Referenser
 
-- Ärende: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Diskussion: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Problem: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Diskussion: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Källa: `src/shared/constants/providers/web-cookie.ts` (leverantörsdefinition)
-- HAR-import: `src/shared/utils/m365HarImport.ts`
-- Fält för autentiseringsuppgifter: `src/shared/providers/webSessionCredentials.ts`
-- Nivådialogruta: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- HAR import: `src/shared/utils/m365HarImport.ts`
+- Autentiseringsfält: `src/shared/providers/webSessionCredentials.ts`
+- Tiermodal: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

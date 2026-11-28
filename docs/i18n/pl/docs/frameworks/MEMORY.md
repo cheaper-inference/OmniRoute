@@ -5,34 +5,12 @@
 ---
 
 > **Źródło prawdy:** `src/lib/memory/` i `src/app/api/memory/`
-> **Ostatnia aktualizacja:** 2026-06-28 — v3.8.40 (domyślnie wyłączona + uzupełnienie kwantyzacji int8)
 
-OmniRoute zapewnia trwałą pamięć konwersacji powiązaną z kluczem API (oraz
-opcjonalnie identyfikatorem sesji). Wspomnienia są automatycznie wyodrębniane
-z odpowiedzi LLM za pomocą lekkiego dopasowywania wzorców opartego na
-wyrażeniach regularnych i ponownie wstrzykiwane do kolejnych żądań jako
-początkowa wiadomość systemowa (lub pierwsza wiadomość użytkownika w przypadku
-dostawców, którzy odrzucają rolę systemową).
+OmniRoute zapewnia trwałą pamięć konwersacyjną kluczowaną kluczem API (i opcjonalnie identyfikatorem sesji). Wspomnienia są automatycznie wyodrębniane z odpowiedzi LLM za pomocą lekkiego dopasowywania wzorców wyrażeń regularnych i wstrzykiwane z powrotem do kolejnych żądań jako wiodący komunikat systemowy (lub pierwszy komunikat użytkownika w przypadku dostawców, którzy odrzucają rolę systemową).
 
-> **Pamięć jest domyślnie WYŁĄCZONA (v3.8.30+).** Wartość
-> `DEFAULT_MEMORY_SETTINGS.enabled` wynosi teraz `false`
-> (`src/lib/memory/settings.ts`). Włączenie pamięci powoduje wstrzykiwanie do
-> **każdego** żądania czatu maksymalnie `maxTokens` (~2k) pobranego kontekstu,
-> co podlega opłacie — jest to nieoczekiwany koszt w przypadku nowych instalacji
-> oraz klientów zarządzających własnym kontekstem. Włącz ją jawnie w sekcji
-> **Ustawienia → Pamięć** (`MemorySkillsTab` wyświetla ostrzeżenie o kosztach
-> tokenów, gdy pamięć jest włączona). Klient może zrezygnować z użycia pamięci
-> dla pojedynczego żądania za pomocą nagłówka `x-omniroute-no-memory`
-> (`true`/`1`/`yes`) — zobacz tabelę nagłówków żądań w
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Żądanie bez pamięci ustawia
-> `memoryOwnerId = null`, co wyłącza **zarówno** wstrzykiwanie pamięci, jak
-> i umiejętności dla tego żądania
-> (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Domyślnie pamięć to OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` to teraz `false` (`src/lib/memory/settings.ts`). Włączenie pamięci powoduje wstrzyknięcie do `maxTokens` (~ 2k) pobranego kontekstu** każdy** żądanie czatu, które jest naliczane — zaskakującym kosztem w przypadku nowych instalacji i klientów, którzy zarządzają własnym kontekstem. Wyraź zgodę pod** Ustawienia pamięci →** ( `MemorySkillsTab` pokazuje ostrzeżenie o koszcie tokenu, gdy pamięć jest włączona). Klient może zrezygnować z pojedynczego żądania za pomocą nagłówka żądania `x-omniroute-no-memory` (`true`/`1`/`yes`). — zobacz tabelę nagłówków żądań w [API_REFERENCE.md](../reference/API_REFERENCE.md). Żądanie braku pamięci ustawia `memoryOwnerId = null`, co wyłącza** Zarówno** zastrzyk pamięci i umiejętności dla tego żądania (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Pamięć jest **ograniczona do konkretnego klucza API**, a nie użytkownika —
-każde żądanie uwierzytelnione przy użyciu tego samego klucza API korzysta
-z tej samej puli pamięci, z opcjonalnym dodatkowym zakresem określonym przez
-`sessionId`.
+Pamięć jest** w zakresie na klucz API** , nie na użytkownika — każde żądanie uwierzytelnione tym samym kluczem API korzysta z tej samej puli pamięci, z opcjonalnym dalszym zakresem przez `sessionId`.
 
 ## Architektura
 
@@ -464,19 +442,11 @@ Sześć opcjonalnych zmiennych środowiskowych dostosowuje zachowanie silnika po
 | `MEMORY_RRF_K`                  | `60`                       | Stała k algorytmu RRF dla wyszukiwania hybrydowego                                                                                                                |
 | `MEMORY_VEC_QUANTIZATION`       | `none`                     | Ustaw na `int8`, aby przechowywać lokalne wektory sqlite-vec w postaci skwantyzowanej (około 4× mniejsze; opcjonalne). Zmiana trybu wymusza ponowne indeksowanie. |
 
-## Podsumowywanie (`summarization.ts`)
+## Podsumowanie (`summarization.ts`)
 
-`summarizeMemories(apiKeyId, sessionId?, maxTokens = 4000)` kompresuje starszą
-zawartość, gdy bieżąca łączna liczba tokenów w pamięciach klucza przekracza
-budżet. Funkcja iteruje po wierszach malejąco według `created_at`, zachowuje
-wiersze mieszczące się w limicie, a w pozostałych zastępuje `content`
-pierwszymi trzema zdaniami oryginału. `tokensSaved` to różnica wartości
-`estimateTokens` między starą a nową zawartością.
+`summarizeMemories(apiKeyId, sessionId?, maxTokens = 4000)` kompaktuje starszą zawartość, gdy łączna liczba tokenów bieżących w pamięci klucza przekracza budżet. Iteruje wiersze DESC przez `created_at`, utrzymuje pasujące wiersze, a resztę zastępuje `content` pierwszymi trzema zdaniami oryginału. `tokensSaved` to różnica w `estimateTokens` pomiędzy starą i nową treścią.
 
-Ta procedura jest **dostępna, ale nie jest wywoływana automatycznie** w bieżącym
-potoku czatu — jeśli potrzebujesz ciągłej kompresji, wywołuj ją z zadania cron,
-akcji administratora lub kodu integrującego `MemoryConfig.autoSummarize.`
-Utrata danych jest nieodwracalna: oryginalny tekst zostaje nadpisany.
+Ta rutyna jest** dostępny, ale nie wywoływany automatycznie** w bieżącym potoku czatu — wywołaj go z cron, akcji administratora lub kleju `MemoryConfig.autoSummarize`, jeśli potrzebujesz ciągłego zagęszczania. Utrata danych jest jednokierunkowa: oryginalny tekst zostaje nadpisany.
 
 ## REST API
 
@@ -540,49 +510,38 @@ metadata?}` → opakowuje `createMemory()`. Akceptuje tylko 4 kanoniczne typy:
 
 Szczegóły dotyczące transportu i zakresu znajdują się w pliku [MCP-SERVER.md](./MCP-SERVER.md).
 
-## Panel (Studio pamięci)
+## Panel kontrolny (Studio pamięci)
 
-`src/app/(dashboard)/dashboard/memory/page.tsx` jest teraz **Studiem z 3 kartami**:
+`src/app/(dashboard)/dashboard/memory/page.tsx` jest teraz a** Studio z trzema zakładkami** :
 
-### Karta: Pamięci
+### Zakładka: Wspomnienia
 
-- Karta koncepcyjna (zwijane objaśnienie „Jak to działa”).
-- Lista w czasie rzeczywistym, wyszukiwanie i paginacja (opóźnienie 300 ms).
-- Filtr typów (`factual` / `episodic` / `procedural` / `semantic` / wszystkie).
-- Okno modalne dodawania pamięci (klucz, zawartość, typ).
-- Edycja w wierszu (przycisk ołówka → `PUT /api/memory/[id]`).
-- Usuwanie poszczególnych wierszy (z oknem dialogowym potwierdzenia).
-- Eksport bieżącej strony do JSON; import JSON za pomocą selektora plików.
+- Karta koncepcyjna (zwijany objaśnienie „Jak to działa”).
+- Lista, wyszukiwanie i paginacja w czasie rzeczywistym (odbijanie 300 ms).
+- Filtr typu (`factual` / `episodic` / `procedural` / `semantic` / all).
+- Modal dodawania pamięci (klucz, treść, typ).
+- Edycja bezpośrednia (przycisk ołówka → `PUT /api/memory/[id]`).
+- Usuń według wiersza (z oknem dialogowym potwierdzenia).
+- JSON eksport bieżącej strony; import JSON poprzez selektor plików.
 - Karty statystyk: `totalEntries`, `tokensUsed`, `hitRate`.
-- Przycisk „Kompaktuj stare” → `POST /api/memory/summarize` (najpierw próbne
-  uruchomienie pokazuje liczbę kandydatów, a następnie prosi o potwierdzenie).
-- Zielony/czerwony wskaźnik kondycji sterowany przez `GET /api/memory/health`.
+- Przycisk „Kompaktowy stary” → `POST /api/memory/summarize` (próba próbna najpierw pokazuje liczbę kandydatów, a następnie potwierdza).
+- Kropka zdrowia green/red sterowana przez `GET /api/memory/health`.
 
-### Karta: Plac zabaw
+### Zakładka: Plac zabaw
 
-- Pole zapytania + selektor strategii (Dokładna / Semantyczna / Hybrydowa) +
-  budżet tokenów.
-- „Symuluj” → `POST /api/memory/retrieve-preview` — wyświetla uszeregowane wyniki
-  z wartościami `score`, `tier`, `tokens`, `vecScore`, `ftsScore`.
-- Panel rozstrzygnięcia pokazujący, które źródło osadzania / magazyn wektorowy
-  zostały użyte oraz czy nastąpiło przełączenie awaryjne.
+- Zapytanie o selektor strategii + (dokładny / semantyczny / hybrydowy) budżet tokena +.
+- „Symulacja” → `POST /api/memory/retrieve-preview` — pokazuje wyniki rankingowe z `score`, `tier`, `tokens`, `vecScore`, `ftsScore`.
+- Panel rozdzielczości pokazujący, które źródło osadzania/magazyn wektorów zostało użyte i czy wystąpiła awaria.
 
-### Karta: Silnik
+### Zakładka: Silnik
 
-- Panel stanu silnika (znacznik słów kluczowych FTS5, znacznik osadzania,
-  znacznik magazynu wektorowego, znacznik kondycji Qdrant, znacznik ponownego
-  szeregowania).
-- Przycisk „Reindeksuj teraz” → `POST /api/memory/reindex`.
-- Selektor źródła osadzania (automatyczne / zdalne / statyczne / transformers +
-  przełączniki).
-- Karta konfiguracji Qdrant (przełącznik włączenia, host/port/kolekcja/klucz,
-  test połączenia, test wyszukiwania semantycznego, czyszczenie).
-- Karta konfiguracji ponownego szeregowania (przełącznik włączenia, selektor
-  dostawcy/modelu).
+- Panel stanu silnika (chip słowa kluczowego FTS5, chip osadzania, chip magazynu wektorów, chip zdrowia Qdrant, chip rerankingu).
+- Przycisk „Indeksuj ponownie teraz” → `POST /api/memory/reindex`.
+- Selektor źródła osadzania (przełączniki automatyczne / zdalne / statyczne / transformatory + ).
+- Karta konfiguracyjna Qdrant (włącz przełączanie, host/port/collection/key, połączenie testowe, test wyszukiwania semantycznego, czyszczenie).
+- Zmień rangę karty konfiguracyjnej (włącz przełącznik, selektor provider/model ).
 
-Ustawienia pamięci i Qdrant są również dostępne w sekcji
-`/dashboard/settings → Pamięć i umiejętności` (`MemorySkillsTab.tsx`) jako
-starszy/globalny interfejs ustawień.
+Ustawienia pamięci i Qdrant również znajdują się w obszarze `/dashboard/settings → Memory & Skills` (`MemorySkillsTab.tsx`) dla powierzchni ustawień legacy/global.
 
 ## Buforowanie
 

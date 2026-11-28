@@ -5,14 +5,10 @@
 ---
 
 > **Source de vérité :** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Dernière mise à jour :** 2026-06-28 — v3.8.40
 
-OmniRoute peut déclencher des webhooks HTTP lors d’événements de la plateforme. Utilisez-les pour intégrer
-Slack, PagerDuty, Datadog, des services d’alerte internes ou tout autre récepteur HTTP.
+OmniRoute peut déclencher des webhooks HTTP sur les événements de la plateforme. Utilisez-les pour les intégrer à Slack, PagerDuty, Datadog, aux services d'alerte internes ou à tout récepteur HTTP.
 
-Le répartiteur signe chaque livraison avec HMAC-SHA256, effectue de nouvelles tentatives en cas
-d’échecs transitoires, suit l’état des livraisons pour chaque webhook et désactive automatiquement les points de terminaison qui
-échouent de manière répétée.
+Le répartiteur signe chaque livraison avec HMAC-SHA256, réessaye en cas d'échecs transitoires, suit l'état de livraison par webhook et désactive automatiquement les points de terminaison qui continuent d'échouer.
 
 ## Événements pris en charge
 

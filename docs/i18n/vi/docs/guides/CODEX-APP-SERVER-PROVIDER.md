@@ -20,24 +20,21 @@ có thể truy cập được tại URL app-server đã cấu hình**, và CLI �
 ## 1. Kiến trúc
 
 ```
-┌─ Ứng dụng OmniRoute ─────────────┐        ┌─ Sidecar codex-app-server ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ token khả năng truy cập)      │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  tự quản lý OpenAI OAuth            │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, tự động làm mới)│
-        │ được chia sẻ (volume compose)      └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → token khả năng truy cập WS (cả hai đều gắn volume này)
-  codex-appserver-home    → ~/.codex (auth.json do dashboard ghi,
-                             được codex app-server của sidecar đọc)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidecar **chỉ** lắng nghe trên mạng compose nội bộ
-  (`ws://codex-app-server:1456`) và được bảo vệ bằng token khả năng truy cập. Nó **không bao giờ**
-  được công bố ra máy chủ host hoặc internet.
-- Codex CLI được tích hợp sẵn trong `omniroute:base`, vì vậy không cần cài đặt codex trên
-  host hoặc máy của người dùng khi chạy sidecar.
+- Xe sidecar lắng nghe** chỉ một** trên mạng soạn thư nội bộ (`ws://codex-app-server:1456`) đằng sau mã thông báo khả năng. Đó là** không bao giờ** được xuất bản lên máy chủ hoặc internet.
+- Xe sidecar sử dụng `omniroute:cli-no-docker`, được xây dựng từ mục tiêu `runner-cli-no-docker`, bao gồm Codex CLI.
 
 ## 2. Khởi chạy
 

@@ -4,214 +4,213 @@
 
 ---
 
-> **Kort fortalt**: Medbring dine egne kvalificerede udbyderkonti. OmniRoute kombinerer de forbindelser, du konfigurerer; tjenesten tildeler ikke det annoncerede samlede tokenbudget. Gratis adgang kan kræve tilmelding, en API-nøgle, godkendelse eller en betalingsmetode. Udbydernes begrænsninger, privatlivspolitikker og vilkår gælder stadig.
+> **TL;DR** : Medbring dine egne kvalificerede udbyderkonti. OmniRoute kombinerer de forbindelser, du konfigurerer; den udsteder ikke det annoncerede samlede token-budget. Gratis adgang kan kræve tilmelding, en API nøgle, godkendelse eller en betalingsmetode. Udbydergrænser, privatlivspolitikker og vilkår gælder stadig.
 
 ---
 
 ## Hvad er gratis niveauer?
 
-Mange AI-udbydere tilbyder en form for **gratis adgang**. Afhængigt af udbyderen kan det
-betyde et slutpunkt uden godkendelse, en tilbagevendende kvote, ubegrænset adgang med hastighedsbegrænsning, en tilmeldingsbonus,
-manuel godkendelse eller en midlertidig kampagne. Nogle muligheder kræver en konto, API-nøgle,
-kreditkort, KYC eller accept af udbyderspecifikke vilkår.
+Mange AI udbydere tilbyder en form for** fri adgang** . Afhængigt af udbyderen kan det betyde et slutpunkt uden godkendelse, tilbagevendende kvote, hastighedsbegrænset ubegrænset adgang, en tilmeldingsbevilling, manuel godkendelse eller en midlertidig kampagne. Nogle muligheder kræver en konto, API nøgle, kreditkort, KYC eller accept af udbyderspecifikke vilkår.
 
-OmniRoute **samler** konfigurerede forbindelser i ét slutpunkt. Du skal stadig tilmelde dig separat hos hver udbyder, der kræver en konto. Forbind disse konti, og brug `model: "auto"` til at dirigere mellem kvalificerede mål. En ny installation har muligvis ikke noget kvalificeret mål uden nøgle. Installation af OmniRoute alene garanterer ikke et vellykket chatsvar.
+OmniRoute** aggregater** konfigurerede forbindelser til ét slutpunkt. Du tilmelder dig stadig separat for hver udbyder, der kræver en konto. Tilslut disse konti, og brug `model: "auto"` til at rute mellem kvalificerede mål. En ny installation kan ikke have noget kvalificeret nøglefrit mål; installation af OmniRoute alene garanterer ikke et vellykket chatsvar.
 
 ---
 
-## Repræsentative udbydere med gratis adgang
+## Repræsentative udbydere af fri adgang
 
 ### Tilbagevendende, nøglefri eller ubegrænset adgang
 
-Disse udbydere har en tilbagevendende, nøglefri eller ubegrænset vej til gratis adgang i det reviderede katalog. “Ubegrænset” betyder, at der ikke er offentliggjort noget tokenloft; begrænsninger for hastighed, samtidighed, konto, region og politik kan stadig være gældende:
+Disse udbydere har en tilbagevendende, nøglefri eller ubegrænset fri adgangssti i det reviderede katalog. "Uncapped" betyder ingen offentliggjort token cap; sats-, samtidigheds-, konto-, regionale- og politikgrænser kan stadig gælde:
 
-| Udbyder           | Modeller                                                                          | Kvote                                                                                                                                   | Sådan opretter du forbindelse                                                                                              |
-| ----------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 og andre                              | Det reviderede katalog anslår en delt månedlig pulje på 25K tokens                                                                      | OAuth-/kontoflow; brugsvilkårene er markeret som `avoid` i kataloget                                                       |
-| **Pollinations**  | Aktuelt nøglefrit modelsæt; nogle tidligere modeller er udgået eller kræver nøgle | Nøglefri; intet offentliggjort tokenloft                                                                                                | Ingen udbyderlegitimationsoplysninger til de nøglefri modeller                                                             |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 og flere              | Gratis API-nøgle (ingen hastighedsbegrænsninger, intet kort); **alle anmodninger logges** til forskning (fravælg på logfare.ai/consent) | Få en nøgle med det samme på logfare.ai/register; brugsvilkår og privatlivspolitik på logfare.ai/tos og logfare.ai/privacy |
-| **Cloudflare AI** | Workers AI-katalog                                                                | Den reviderede pulje anslår ~30M tokens/måned ud fra offentliggjorte forbrugsenheder                                                    | Cloudflare-konto og API-legitimationsoplysninger                                                                           |
-| **Gemini**        | Gemini Flash-familien                                                             | Variable hastighedsgrænser pr. projekt/model; ingen fast månedlig tokentildeling er inkluderet i oversigten                             | Google AI Studio-API-nøgle; kontrollér projektets aktive grænser                                                           |
-| **Groq**          | Llama-, GPT-OSS- og Qwen-modeller                                                 | Den reviderede pulje anslår ~15M tokens/måned                                                                                           | Groq-API-nøgle; hastighedsgrænser er gældende                                                                              |
+| Udbyder           | Modeller                                                                           | Kvota                                                                                                                     | Sådan forbinder du                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 og andre                               | Revideret katalog anslår en delt månedlig pulje på 25.000 tokens                                                          | OAuth/account flow; ToS har markeret `avoid` i kataloget                                         |
+| **Bestøvninger**  | Nuværende nøglefri modelsæt; nogle tidligere modeller er udgået eller kræves nøgle | Nøglefri; ingen offentliggjort token cap                                                                                  | Ingen udbyderoplysninger for de nøgleløse modeller                                               |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 og mere                | Gratis API nøgle (ingen satsgrænser, intet kort);** hver anmodning logges** til forskning (opt out på logfare.ai/consent) | Øjeblikkelig nøgle ved logfare.ai/register; ToS/privacy ved logfare.ai/tos og logfare.ai/privacy |
+| **Cloudflare AI** | Arbejder AI katalog                                                                | Revideret pulje estimerer ~ 23M tokens/month fra offentliggjorte brugsenheder (katalog revideret 2026-11-23)              | Cloudflare konto og API -legitimationsoplysninger                                                |
+| **Gemini**        | Gemini Flash familie                                                               | Variable project/model -hastighedsgrænser; ingen fast månedlig symbolsk bevilling indgår i overskriften                   | Google AI Studio API nøgle; kontrollere projektets aktive grænser                                |
+| **Groq**          | Llama, GPT-OSS og Qwen modeller                                                    | Revideret pulje estimerer ~ 24M tokens/month (4 pr. model caps, katalog revideret 2026-11-23)                             | Groq API nøgle; satsgrænser gælder                                                               |
 
-### Oprettelsestildelinger og udbyderspecifikke kreditter
+### Tilmeldingstilskud og udbyderspecifikke kreditter
 
-Disse udbydere tilbyder oprettelsestildelinger eller kampagnekreditter i henhold til deres kvalifikationsregler. Som bekræftet den 2026-10-08 kræver [Cerebras' priser](https://www.cerebras.ai/pricing) en betalingsmetode for en engangskredit på $5, der udløber efter 30 dage; det er ikke en tilbagevendende tokenkvote. [Geminis hastighedsgrænser](https://ai.google.dev/gemini-api/docs/rate-limits) varierer efter projekt, model og niveau, så de omregnes ikke til en garanteret månedlig tokentildeling.
+Disse udbydere tilbyder tilmeldingstilskud eller salgsfremmende kreditter, underlagt deres berettigelsesregler. Som bekræftet den 2026-10-08, kræver [Cerebras priser](https://www.cerebras.ai/pricing) en betalingsmetode for en engangskredit på 5 USD, der udløber efter 30 dage; det er ikke en tilbagevendende token-kvote. [Gemini -satsgrænser](https://ai.google.dev/gemini-api/docs/rate-limits) varierer efter projekt, model og niveau, så de konverteres ikke til en garanteret månedlig token-bevilling.
 
-| Udbyder       | Gratis kreditter                                                           | Modeller                   | Sådan får du adgang                                                     |
-| ------------- | -------------------------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------------- |
-| **Cerebras**  | Engangskampagnekredit på $5; udløber efter 30 dage                         | Aktuelt inferenskatalog    | Konto og gyldig betalingsmetode                                         |
-| **DeepSeek**  | 5M gratis tokens                                                           | DeepSeek V4                | Tilmeld dig på platform.deepseek.com                                    |
-| **LongCat**   | Engangstildeling på 10M tokens                                             | LongCat 2.0                | API-nøgle + KYC; løbende betaling efter tildelingen                     |
-| **Vertex AI** | Oprettelseskredit på $300, repræsenteret som ~300M tokens i budgetmodellen | Gemini- og partnermodeller | Google Cloud-konto; regler for fakturering og kvalifikation er gældende |
+| Udbyder       | Gratis kreditter                                                        | Modeller                   | Sådan får du                                                      |
+| ------------- | ----------------------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------- |
+| **Cerebras**  | Engangskredit på 5 USD; udløber efter 30 dage                           | Aktuelt slutningskatalog   | Konto og gyldig betalingsmetode                                   |
+| **DeepSeek**  | 5M gratis tokens                                                        | DeepSeek V4                | Tilmeld dig på platform.deepseek.com                              |
+| **LongCat**   | 10M-token engangsbevilling                                              | LongCat 2.0                | API nøgle + KYC; pay-as-you-go efter bevillingen                  |
+| **Vertex AI** | $300 tilmeldingskredit repræsenteret som ~ 300M tokens i budgetmodellen | Gemini og partner modeller | Google Cloud-konto; Regler for fakturering og berettigelse gælder |
 
 ### Anden begrænset adgang
 
-Disse udbydere har **gratis niveauer** med specifikke begrænsninger:
+Disse udbydere har** gratis etager** med specifikke grænser:
 
-| Udbyder                    | Gratis grænse                                                                                        | Modeller                             | Bedst til |
-| -------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------ | --------- |
-| **GitHub Models**          | Den reviderede delte pulje anslår ~18M tokens/måned                                                  | Bred modelevaluering                 |
-| **Hugging Face**           | Lille tilbagevendende månedlig pulje                                                                 | Eksperimenter og modelvariation      |
-| **OpenRouter free models** | Delt pulje med begrænset antal anmodninger; valgfri engangsoptankning øger den tilbagevendende kvote | Bredt reservekatalog                 |
-| **AI Horde**               | Nøglefri fællesskabskapacitet; tilgængeligheden varierer                                             | Opportunistisk distribueret inferens |
+| Udbyder                        | Gratis grænse                                                                            | Modeller                             | Bedst til |
+| ------------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------ | --------- |
+| **GitHub modeller**            | Revideret delt pulje anslår ~ 18M tokens/month                                           | Bred modelvurdering                  |
+| **Krammer ansigt**             | Lille tilbagevendende månedlig pulje                                                     | Eksperimenter og modelvariation      |
+| **OpenRouter gratis modeller** | Delt anmodningsbegrænset pool; valgfri engangsopfyldning øger det tilbagevendende tillæg | Bredt reservekatalog                 |
+| **AI Horde**                   | Nøglefri samfundskapacitet; tilgængeligheden varierer                                    | Opportunistisk distribueret slutning |
 
 ---
 
-## Sådan kombinerer du gratisniveauer
+## Sådan stables gratis niveauer
 
-Det smarte ved OmniRoute er **kombinationen af gratisniveauer**. I stedet for at være afhængig af én udbyder forbinder du flere gratis udbydere og lader OmniRoute automatisk vælge den bedste til hver anmodning.
+Magien ved OmniRoute er** stabling af frie etager** . I stedet for at stole på én udbyder, forbinder du flere gratis udbydere og lader OmniRoute automatisk vælge den bedste for hver anmodning.
 
-### Eksempel: Bredere dækning med gratisniveauer
+### Eksempel: Bredere Free-Tier-dækning
 
-Forbind flere udbydere for at mindske afhængigheden af en enkelt kvote:
+Forbind flere udbydere for at reducere afhængigheden af en enkelt kvote:
 
 1. **Gemini** — tilbagevendende API-nøglekvote
 2. **Groq** — tilbagevendende API-nøglekvote
-3. **Pollinations** — nøglefri, hastighedsbegrænset adgang
-4. **LongCat** — engangstildeling ved tilmelding (kræver KYC)
+3. **Bestøvninger** — nøglefri, takstbegrænset adgang
+4. **LongCat** — engangstilmeldingsbevilling (kræver KYC)
 
-Brug derefter `model: "auto"`, hvorefter OmniRoute vil:
+Brug derefter `model: "auto"` og OmniRoute vil:
 
-- Først prøve den højest rangerede kvalificerede forbindelse
-- Hvis dens kvote eller sundhedskontrol mislykkes → prøve den næste konfigurerede udbyder
-- Hvis den nøglefri udbyder ikke er tilgængelig → fortsætte gennem de resterende mål
-- Hvis ingen kvalificeret forbindelse lykkes → returnere en fejl; tilmeldingskreditter kan kun bruges, så længe de er gyldige og tilgængelige
+- Prøv først den højest rangerede kvalificerede forbindelse
+- Hvis dets kvote eller sundhedstjek mislykkes → prøv den næste konfigurerede udbyder
+- Hvis den nøglefri udbyder ikke er tilgængelig → fortsæt gennem de resterende mål
+- Hvis ingen kvalificeret forbindelse lykkes → returnere en fejl; tilmeldingskreditter er kun brugbare, mens de er gyldige og tilgængelige
 
-**Resultat**: bredere dækning med gratisniveauer og automatisk fallback — ikke en garanti for ubegrænset kapacitet.
+**Resultat** : bredere free-tier dækning med automatisk fallback — ikke en garanti for ubegrænset kapacitet.
 
 ---
 
 ## Sådan forbinder du gratis udbydere
 
-### Trin 1: Åbn kontrolpanelet
+### Trin 1: Åbn Dashboard
 
 Gå til `http://localhost:20128` i din browser.
 
 ### Trin 2: Gå til Udbydere
 
-Klik på **Udbydere** i sidebjælken.
+Klik** Udbydere** i sidebjælken.
 
 ### Trin 3: Klik på Tilføj udbyder
 
-Klik på knappen **+ Tilføj udbyder**.
+Klik på**+ Tilføj udbyder** knap.
 
 ### Trin 4: Vælg en gratis udbyder
 
-Gennemse kataloget, og undersøg hver udbyders aktuelle metadata for `hasFree`, godkendelse, kvote, privatliv
-og servicevilkår. Udbyderkortet og
-[Referencen for gratis niveauer](../reference/FREE_TIERS.md) skelner mellem tilbagevendende puljer,
-ubegrænset/nøglefri adgang, tilmeldingskreditter, udgåede poster og kilder med højere risiko.
+Gennemse kataloget og inspicér hver udbyders aktuelle `hasFree`, auth, quota, privacy og ToS metadata. Udbyderkortet og [Free Tiers-referencen](../reference/FREE_TIERS.md) skelner mellem tilbagevendende puljer, uncapped/keyless adgang, tilmeldingskreditter, afbrudte poster og kilder med højere risiko.
 
-### Trin 5: Klik på Forbind
+### Trin 5: Klik på Opret forbindelse
 
-For en `NOAUTH`-udbyder anmoder OmniRoute ikke om legitimationsoplysninger til upstream-tjenesten. Dette garanterer ikke, at upstream-tjenesten accepterer tredjepartsklienter eller har ledig kapacitet. OAuth- og API-nøgleudbydere skal forbindes via deres dokumenterede kontoprocedure. Din klient bruger stadig den OmniRoute-API-nøgle, der vises under **Kontrolpanel → Slutpunkter**, når routergodkendelse er aktiveret.
+For en `NOAUTH` udbyder anmoder OmniRoute ikke om en upstream-legitimationsoplysninger. Dette garanterer ikke, at upstream accepterer tredjepartsklienter eller har ledig kapacitet. OAuth og API-nøgleudbydere skal være forbundet via deres dokumenterede kontoflow. Din klient bruger stadig en OmniRoute API -nøgle oprettet i** Dashboard → API nøgler** (vises kun én gang ved oprettelse), når routergodkendelse er aktiveret.
 
 ### Trin 6: Gentag
 
-Forbind flere udbydere, hvis vilkår og privatlivsmodel passer til dit anvendelsestilfælde.
+Forbind flere udbydere, hvis vilkår og privatlivsmodel passer til din brugssag.
 
 ---
 
-## Sådan læses kataloget korrekt
+## Kommer fra dsh "Vores gratis model"
 
-- `NOAUTH` betyder, at OmniRoute ikke beder dig om legitimationsoplysninger til en udbyder; det
-  garanterer ikke oppetid, privatliv eller ubegrænset kapacitet.
-- `hasFree` er metadata til opdagelse. Det kan repræsentere en tilbagevendende kvote, nøglefri adgang,
-  tilmeldingskredit, et godkendelsesprogram eller en kampagne.
-- `recurring-uncapped` betyder, at der ikke var nogen offentliggjort token-grænse; begrænsninger for hastighed og
-  samtidighed gælder stadig.
-- `one-time-initial` gentages ikke, når tilmeldingstildelingen er opbrugt.
-- Udbydere med `tos: avoid` udelukkes som standard fra automatisk routing (`excludeTosAvoid`). Tilslutning af en konto omgår ikke dette filter. Enhver operatørtilsidesættelse bør ske efter en gennemgang af udbyderens vilkår og kontorisikoen.
-- Poster markeret med `discontinued` bevares som historisk dokumentation og må ikke præsenteres som
-  aktuelt gratis.
+[Dsh-vores-fri-model](https://github.com/Ebony-Vinyl/dsh-our-free-model) -pluginet til dsh-agentværten når to opstrøms. OmniRoute har allerede en udbyder til hver, men kun én af dem er en gratis sti i OmniRoute:
+
+| Plugin bane | Opstrøms                                    | OmniRoute udbyder           | Gratis i OmniRoute? | Sådan forbinder du                                                         |
+| ----------- | ------------------------------------------- | --------------------------- | ------------------- | -------------------------------------------------------------------------- |
+| Kilo kanal  | Kilo AI gateway (`api.kilo.ai/api/gateway`) | `kilo-gateway` (alias `kg`) | Ja                  | API -nøgle valgfri: Lad den være tom for at bruge gatewayens gratis pulje  |
+| Fri bane    | OpenCode Zen (`opencode.ai`)                | `opencode-zen`              | Ingen               | Din egen OpenCode API nøgle fra [opencode.ai/zen](https://opencode.ai/zen) |
+
+**Kilo.** Kald den gratis pulje som `kilo-gateway/<model>` eller `kg/<model>`, for eksempel `kg/kilo-auto/free` (Kilos gratis auto-router) eller en af gatewayens `:free` modeller. Det frie sæt roterer; `kilo-gateway` passerer gennem model-id'er, der ikke er i OmniRoute's indbyggede liste, så en model, som gatewayen viser i dag, kan kaldes, før kataloget inkluderer den. Kilos gratis modelkort siger, at prompter kan logges af upstream-udbyderen og bruges til at forbedre dens tjenester, så send ikke følsomme data.
+
+**OpenCode.** Pluginnets gratis bane er OpenCode nøglefri tilbud. OmniRoute giver ikke dette tilbud som gratis adgang:
+
+- OmniRoute nøglefri OpenCode udbyder blev fjernet efter anmodning fra OpenCode operatør (se [Fjernede udbydere](../reference/REMOVED_PROVIDERS.md) ).
+- OpenCode[slutpunktsdokumentation](https://opencode.ai/v2/docs/console/models/#endpoints) knytter dets gratis chattilbud til OpenCode egen klient, så OmniRoute tæller eller mærker dem ikke som gratis.
+
+Model-id'erne, som plugin'et viser, såsom `deepseek-v4.1-flash-free`, `mimo-v2.6-flash-free` og `nemotron-3.5-lightning-free`, er i `opencode-zen` kataloget. Forbind `opencode-zen` med din egen OpenCode nøgle for at bruge dem under din OpenCode -kontos vilkår.
+
+**Pluginnets lokale port.** Pluginnet kan eksponere sine modeller på en lokal OpenAI-kompatibel port (standard `18899`). Ethvert sådant slutpunkt kan tilføjes som en [brugerdefineret OpenAI-kompatibel udbyder](../guides/USER_GUIDE.md#custom-openai-compatible-providers), men OmniRoute installerer, starter eller opdaterer ikke pluginnet, og plugin'et bestemmer, hvilken upstream der tjener hver anmodning. OpenCode -begrænsningerne ovenfor gælder for OpenCode tilbud, uanset hvilken klient der sender anmodningen.
 
 ---
 
-## Sådan gør OmniRoute gratisniveauer bedre
+## At læse kataloget korrekt
 
-### 1. Automatisk fallback
+- `NOAUTH` betyder, at OmniRoute ikke beder dig om en udbyderoplysninger; det garanterer ikke oppetid, privatliv eller ubegrænset kapacitet.
+- `hasFree` er opdagelsesmetadata. Det kan repræsentere en tilbagevendende kvote, nøglefri adgang, tilmeldingskredit, godkendelsesprogram eller promovering.
+- `recurring-uncapped` betyder, at intet offentliggjort tokenloft var tilgængeligt; sats- og samtidighedsgrænser gælder stadig.
+- `one-time-initial` gentager sig ikke efter tilmeldingstilskuddet er brugt.
+- `tos: avoid` -udbydere er som standard udelukket fra automatisk routing (`excludeTosAvoid`). Tilslutning af en konto omgår ikke dette filter. Enhver operatørtilsidesættelse bør følge en gennemgang af udbyderens vilkår og kontorisiko.
+- Indlæg markeret `discontinued` forbliver historisk bevis og må ikke præsenteres som aktuelt gratis.
 
-Hvis en gratis udbyder er overbelastet eller nede, prøver OmniRoute automatisk den næste. Du behøver ikke at gøre noget.
+---
 
-### 2. Intelligent routing
+## Hvordan OmniRoute gør gratis niveauer bedre
 
-OmniRoute vælger den **bedste gratis udbyder** til hver anmodning baseret på:
+### 1. Automatisk Fallback
+
+Hvis en gratis udbyder er optaget eller nede, prøver OmniRoute automatisk den næste. Du behøver ikke at gøre noget.
+
+### 2. Smart Routing
+
+OmniRoute vælger** bedste gratis udbyder** for hver anmodning baseret på:
 
 - Hastighed — Hvilken udbyder er hurtigst lige nu?
 - Kvalitet — Hvilken udbyder er bedst til denne opgave?
-- Kapacitet — Hvilken udbyder har resterende kvote?
+- Kapacitet — Hvilken udbyder har kvote tilbage?
 
 ### 3. Tokenbesparelser
 
-OmniRoutes komprimeringspipeline kan reducere antallet af kvalificerede tokens i prompts og værktøjsoutput. De
-faktiske besparelser afhænger af indhold, valgte engines, udbyderens opgørelsesmetode og indstillinger
-for nøjagtighed; komprimering multiplicerer ikke alle udbyderkvoter med en fast faktor.
+OmniRoute kompressionspipeline kan reducere kvalificerede prompt- og værktøjsoutput-tokens. De faktiske besparelser afhænger af indhold, udvalgte motorer, udbyderregnskab og loyalitetsindstillinger; komprimering multiplicerer ikke hver udbyderkvote med et fast beløb.
 
-### 4. Understøttelse af flere konti
+### 4. Multi-Account Support
 
-Hvis udbyderens vilkår tillader flere konti eller legitimationsoplysninger, kan OmniRoute behandle hver
-forbindelse som en separat routingkandidat. Opret ikke ekstra konti for at omgå en
-udbyders kvote- eller adgangspolitik.
+Hvis udbydervilkårene tillader flere konti eller legitimationsoplysninger, kan OmniRoute behandle hver forbindelse som en separat routingkandidat. Opret ikke ekstra konti for at omgå en udbyders kvote eller adgangspolitik.
 
 ---
 
-## Matematik for gratisniveauet
+## Gratis niveau matematik
 
-Det aktive, pool-deduplikerede katalog rapporterer i øjeblikket:
+Det levende, pool-deduplikerede katalog rapporterer i øjeblikket:
 
-| Målepunkt                               |  Aktuel revideret værdi | Fortolkning                                                              |
-| --------------------------------------- | ----------------------: | ------------------------------------------------------------------------ |
-| Tilbagevendende kvantificeret tildeling | **~1.62B tokens/måned** | Delte pools tælles én gang; udbydere uden loft er udeladt fra summen     |
-| Første måned med oprettelseskreditter   |       **~2.22B tokens** | Tilbagevendende total plus engangskreditter og tilbagevendende kreditter |
+| Metrisk                               |        Aktuel revideret værdi | Fortolkning                                                           |
+| ------------------------------------- | ----------------------------: | --------------------------------------------------------------------- |
+| Tilbagevendende kvantificeret tilskud | **~ 90M gratis tokens/month** | Fælles puljer tælles én gang; udelukker udbydere uden loft fra summen |
+| Første måned med tilmeldingstilskud   | **~ 153M i din første måned** | Tilbagevendende total plus engangs- og tilbagevendende kreditter      |
 
-Dette er estimater for hele kataloget på tværs af separate kvalificerede konti, ikke en kvote leveret af OmniRoute eller en prognose for en ny installation. Din anvendelige kapacitet afhænger af de udbydere, du forbinder, og deres aktuelle vilkår. Værdierne beregnes ud fra `open-sse/config/freeModelCatalog.ts`; se
-[Reference til gratisniveauer](../reference/FREE_TIERS.md) for deduplikering af pools, markeringer vedrørende brugsvilkår,
-udgåede poster og metodologien for oprettelseskreditter.
+Disse er estimater for hele kataloget på tværs af separate kvalificerede konti, ikke en kvote leveret af OmniRoute eller en forudsigelse for en ny installation. Din brugbare kapacitet afhænger af de udbydere, du tilslutter, og deres aktuelle forhold. Værdierne er beregnet ud fra `open-sse/config/freeModelCatalog.ts`; se [Free Tiers Reference](../reference/FREE_TIERS.md) for puljededuplikering, ToS flag, afbrudte poster og tilmeldingskreditmetoder.
 
 ---
 
-## Ofte stillede spørgsmål
+## Almindelige spørgsmål
 
-### "Er dette virkelig gratis?"
+### "Er det her virkelig gratis?"
 
-Kataloget registrerer udbydernes offentliggjorte vilkår og projektets research, men tilbud kan ændre sig.
-Kontrollér udbyderens aktuelle priser, kvote, privatlivspolitik og adgangskrav før brug.
+Kataloget registrerer udbyder-publicerede vilkår og projektundersøgelser, men tilbud kan ændres. Bekræft udbyderens aktuelle priser, kvote, privatlivspolitik og berettigelse før brug.
 
-### "Bliver gratisniveauet opbrugt?"
+### "Vil den gratis tier løbe ud?"
 
-Alle udbydere kan begrænse hastigheden, ændre modeller, suspendere adgang eller gå offline. Flere
-forbindelser forbedrer mulighederne for reserveadgang, men garanterer ikke en tilgængelig gratis rute.
+Hver udbyder kan satsbegrænse, ændre modeller, suspendere adgang eller gå offline. Flere forbindelser forbedrer reservedækningen, men garanterer ikke en tilgængelig gratis rute.
 
-### "Kan jeg bruge gratisudbydere i produktion?"
+### "Kan jeg bruge gratis udbydere til produktion?"
 
-Kun hvis udbyderens SLA, databehandling, begrænsninger og vilkår opfylder dine krav til produktion.
-Kritiske arbejdsbelastninger bør have overvåget reservekapacitet, der er kontraktligt egnet.
+Kun hvis udbyderens SLA, datahåndtering, grænser og vilkår opfylder dine produktionskrav. Kritiske arbejdsbyrder bør have overvåget, kontraktligt passende reserve.
 
-### "Hvad er hagen?"
+### "Hvad er fangsten?"
 
-Kompromiser kan omfatte strenge begrænsninger, ventelister, KYC, bekræftelse med kreditkort, træning på
-prompter, ringere privatliv, ingen SLA, hyppige modelændringer, geografiske begrænsninger, betalt overforbrug eller
-risici forbundet med kontopolitikker. OmniRoute viser de tilgængelige metadata; du vælger, hvad der skal aktiveres.
+Afvejninger kan omfatte strenge grænser, ventelister, KYC, kreditkortverifikation, træning i prompter, svagere privatliv, ingen SLA, modelafgang, geografiske begrænsninger, betalt overskud eller risiko for kontopolitikker. OmniRoute viser de tilgængelige metadata; du vælger, hvad du vil aktivere.
 
-### "Hvordan får jeg en større gratis kvote?"
+### "Hvordan får jeg mere gratis kvote?"
 
-1. Forbind flere gratisudbydere
-2. Aktivér relevante komprimeringsmotorer, og mål besparelserne for din arbejdsbelastning
-3. Brug `auto/cheap` til at prioritere gratis/billige udbydere
-4. Tilføj yderligere tilladte udbydere eller legitimationsoplysninger uden at overtræde udbydernes vilkår
+1. Tilslut flere gratis udbydere
+2. Aktiver passende kompressionsmotorer og mål besparelser for din arbejdsbyrde
+3. Brug `auto/cheap` til at prioritere free/cheap udbydere
+4. Tilføj yderligere tilladte udbydere eller loginoplysninger uden at overtræde udbyderens vilkår
 
-### "Har gratisudbydere dårligere kvalitet?"
+### "Har gratis udbydere dårligere kvalitet?"
 
-Ikke nødvendigvis. Nogle udbydere giver adgang til de samme modelfamilier, som er tilgængelige via betalte
-ruter, men begrænsninger, latenstid, privatliv, driftssikkerhed og modelversioner kan variere. Brug siden
-Rangering af gratisudbydere som en kvalitetsindikator, og kontrollér den model, der faktisk leveres.
+Ikke nødvendigvis. Nogle udbydere afslører de samme modelfamilier, der er tilgængelige via betalte ruter, men begrænsninger, latens, privatliv, pålidelighed og modelversioner kan variere. Brug siden med gratis udbyderrangeringer som et kvalitetssignal og bekræft den faktiske model, der serveres.
 
 ---
 
 ## Hvad er det næste?
 
-- **[Guide til Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Lad OmniRoute vælge den bedste AI til dig
-- **[Guide til udbydere](./PROVIDERS-GUIDE.md)** — Tilslut flere udbydere
+- **[Auto-kombinationsguide](./AUTO-COMBO-GUIDE.md)** — Lad OmniRoute vælge den bedste AI til dig
+- **[Udbydervejledning](./PROVIDERS-GUIDE.md)** — Tilslut flere udbydere
 - **[Fejlfinding](../guides/TROUBLESHOOTING.md)** — Løs almindelige problemer
-- **[Oversigt over gratis niveauer](../reference/FREE_TIERS.md)** — Komplet liste over gratis niveauer
+- **[Gratis niveaureference](../reference/FREE_TIERS.md)** — Fuld liste over gratis niveauer

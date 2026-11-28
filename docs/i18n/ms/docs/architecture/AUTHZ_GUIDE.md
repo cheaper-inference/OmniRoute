@@ -5,9 +5,8 @@
 ---
 
 > **Sumber kebenaran:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Terakhir dikemas kini:** 2026-09-22 — ruang lingkup nama ruang merujuk kepada MCP-SERVER.md
 
-OmniRoute mempunyai saluran paip kebenaran yang peka laluan yang mengawal setiap permintaan API. Pengelasan adalah **deterministik** dan **gagal-tertutup** — apa-apa yang tidak dapat dikelaskan akan berakhir sebagai `MANAGEMENT` dan memerlukan sesi atau token gred pengurusan. Halaman ini menerangkan model untuk jurutera yang menyelenggara laluan atau mereka bentuk titik akhir baharu.
+OmniRoute mempunyai saluran paip kebenaran mengetahui laluan yang mengawal setiap permintaan API. Klasifikasi ialah** deterministik** dan** gagal-ditutup** — apa-apa yang tidak boleh diklasifikasikan berakhir sebagai `MANAGEMENT` dan menuntut sesi atau token gred pengurusan. Halaman ini menerangkan model untuk jurutera yang mengekalkan laluan atau mereka bentuk titik akhir baharu.
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
@@ -207,7 +206,7 @@ Setiap kelas laluan mempunyai dasar dalam `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — sentiasa mengembalikan `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — ekstrak Pembawa, mengesahkan melalui `validateApiKey()`. Terjadi tanpa nama hanya apabila bendera ciri `REQUIRE_API_KEY` yang berkesan dilumpuhkan. Bendera berkesan diselesaikan melalui `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) jadi Bendera Ciri Papan Pemuka dan pembolehubah persekitaran mengawal `/api/v1/*`, `/api/v1beta/*` dan alias secara konsisten; kegagalan penyelesai gagal ditutup. Membenarkan permintaan sesi papan pemuka pada laluan API pelanggan (termasuk `/api/v1/models`, digunakan oleh katalog model papan pemuka). Apabila Entra ID SSO didayakan, Pembawa yang secara struktur ialah token Entra (tiga segmen base64url, `RS*` alg, `kid`) dikendalikan oleh cawangan SSO** sebelum ini** `validateApiKey()` dan keputusannya adalah — muktamad ia tidak pernah jatuh ke laluan kunci API atau cawangan merendahkan kepada tanpa nama, jadi gangguan pembekal identiti tidak boleh menjadi akses terbuka. Kekunci API statik tidak terjejas. Lihat [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — menerima sesi papan pemuka, permintaan penyegerakan model dalaman (dipadanan dengan `/api/providers/[name]/(sync-models|models)`), atau melangkau sepenuhnya jika `isAuthRequired()` mengembalikan palsu. Mengembalikan 403 (`AUTH_001`) apabila token Pembawa hadir tetapi tidak sah, 401 sebaliknya. Juga menguatkuasakan peringkat pengawal laluan (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum mana-mana cawangan pengesahan — lihat [Peringkat Pengawal Laluan](../security/ROUTE_GUARD_TIERS.md). laluan LOCAL_ONLY dalam `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hari ini: `/api/mcp/`) boleh diakses daripada bukan gelung apabila kunci Pembawa membawa skop `manage` ; semua laluan LOCAL_ONLY lain kekal strict-loopback tanpa mengira skop.
+- **`managementPolicy`** (`policies/management.ts`) — menerima sesi papan pemuka, permintaan penyegerakan model dalaman (dipadanan dengan `/api/providers/[name]/(sync-models|models)`), atau melangkau sepenuhnya jika `isAuthRequired()` mengembalikan palsu. Mengembalikan 403 (`AUTH_001`) apabila token Pembawa hadir tetapi tidak sah, 401 sebaliknya. Juga menguatkuasakan peringkat pengawal laluan (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum mana-mana cawangan pengesahan — lihat [Peringkat Pengawal Laluan](../security/ROUTE_GUARD_TIERS.md). laluan LOCAL_ONLY dalam `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hari ini: `/api/mcp/`) boleh diakses daripada bukan gelung apabila kekunci Pembawa membawa skop `manage`/`admin` atau skop `mcp:connect` sempit (`hasMcpConnectOrManageScope`), atau dengan sesi papan pemuka yang disahkan; semua laluan LOCAL_ONLY lain kekal strict-loopback tanpa mengira skop.
 
 Polisi yang berjaya mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Pengendali hiliran boleh membacanya melalui `assertAuth(request, "CLIENT_API")` dalam `src/server/authz/assertAuth.ts` dan bukannya menjalankan semula logik auth.
 
@@ -301,35 +300,22 @@ Pilih set berdasarkan bentuk, bukan kemudahan. Satu laluan dimasukkan ke dalam `
 
 ## Skop
 
-Tiga ruang nama. Setiap penyemak hanya membaca rentetan sendiri. Perbandingan bersebelahan,
-termasuk mengapa `manage` gagal `scopeMatches` untuk `read:compression` dan mengapa token akses `read` tidak boleh `PATCH /api/keys/{id}`, adalah
-[Tiga ruang nama skop](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Tiga ruang nama. Setiap penyemak hanya membaca rentetannya sendiri. Bersebelahan, termasuk sebab `manage` gagal `scopeMatches` untuk `read:compression` dan sebab token akses `read` tidak boleh `PATCH /api/keys/{id}`, ialah [Three skop ruang nama](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Kunci API membawa tatasusunan `scopes` (disimpan sebagai JSON dalam `api_keys.scopes`, lihat `src/lib/db/apiKeys.ts`).
+kunci API membawa tatasusunan `scopes` (disimpan sebagai JSON dalam `api_keys.scopes`, lihat `src/lib/db/apiKeys.ts`).
 
 ### Skop pengurusan
 
-- `manage` / `admin` — `hasManageScope`. Akses pembawa ke laluan API pengurusan.
-- `mcp:connect`, `self:usage`, `self:account-quota`, dan
-  `policy:bypass-provider-quota` adalah skop padanan tepat tambahan. Ia berada
-  di luar `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` hanya membuka laluan
-  `/api/mcp/` yang bukan gelung balik.
+- `manage` / `admin` — `hasManageScope`. Akses pembawa kepada laluan API pengurusan.
+- `mcp:connect`, `self:usage`, `self:account-quota` dan `policy:bypass-provider-quota` ialah skop padanan tepat tambahan. Mereka duduk di luar `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` hanya membuka ukiran `/api/mcp/` bukan gelung belakang.
 
-### Skop alat MCP
+### skop alat MCP
 
-Katalog dan peraturan padanan (rentetan yang sama, atau skop yang diberikan berakhir dengan `*`):
-[Skop alat MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` dalam `src/shared/constants/mcpScopes.ts` adalah subset bertaip asal,
-bukan katalog penuh itu. Penguatkuasaan berjalan dalam
-`open-sse/mcp-server/scopeEnforcement.ts` selepas `resolveCallerScopeContext()`
-menyelesaikan skop daripada maklumat pengesahan MCP, metadata permintaan, atau `OMNIROUTE_MCP_SCOPES`.
-Ia kekal tidak aktif melainkan `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Katalog dan peraturan padanan (rentetan yang sama, atau skop yang diberikan berakhir dengan `*`): [skop alat MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` dalam `src/shared/constants/mcpScopes.ts` ialah subset ditaip asal, bukan katalog penuh itu. Penguatkuasaan dijalankan dalam `open-sse/mcp-server/scopeEnforcement.ts` selepas `resolveCallerScopeContext()` menyelesaikan skop daripada maklumat pengesahan MCP, metadata permintaan atau `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` menghidupkannya secara global ( lalai `false`), tetapi ia sentiasa dikuatkuasakan untuk pemanggil HTTP/SSE yang kunci API tidak mempunyai `manage`/`admin` (lihat `shouldForceScopeEnforcement()` dalam `open-sse/mcp-server/scopeEnforcement.ts`), tanpa mengira bendera.
 
 ### Skop token akses
 
-`read` / `write` / `admin` pada token `oma_live_…`, disenaraikan mengikut `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Peringkat ini hanya terpakai pada
-kelayakan token akses. Lihat [Pengesahan Pengurusan](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` pada token `oma_live_…`, disusun mengikut `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Kedudukan ini digunakan pada kelayakan token akses sahaja. Lihat [Pengesahan Pengurusan](../guides/MANAGEMENT-AUTH.md).
 
 ## Togol Keperluan Pengesahan
 

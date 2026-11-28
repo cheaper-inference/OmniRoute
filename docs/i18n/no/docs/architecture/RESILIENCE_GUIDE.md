@@ -12,63 +12,53 @@ OmniRoute har tre distinkte, men relaterte motstandsmekanismer. Hver har et anne
 
 > **Env-vs-dashboard-prioritet for spenstvekslinger.** Den opt-in-resiliens veksler fra omgivelsene `QUOTA_PREFLIGHT_CUTOFF_ENABLED` — `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — leverer kun _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). En boolsk vedvarte i `resilienceSettings` (Dashboard →** Innstillinger → Resilience** / `PATCH /api/resilience`, lagret i `key_value`) vinner over env-verdien: normalisering (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) beholder den lagrede boolske verdien når en eksisterer. Å sette en slik env var til `true` på en distribusjon der dashbordet allerede har lagret `false` endrer derfor ingenting — snu bryteren inn** Innstillinger → Resilience** (eller tøm det lagrede feltet) i stedet.
 
-## 1. Leverandør-circuit breaker
+## 1. Leverandørs strømbryter
 
 **Omfang:** hele leverandøren (f.eks. `glm`, `openai`, `anthropic`).
 
-**Formål:** slutte å sende trafikk til en leverandør som gjentatte ganger feiler på upstream-/tjenestenivå.
+**Hensikt:** slutte å sende trafikk til en leverandør som gjentatte ganger svikter på upstream/service nivået.
 
-**Implementasjon:**
+**Implementering:**
 
 - Kjerneklasse: `src/shared/utils/circuitBreaker.ts`
-- Tilkobling: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Status-API: `GET /api/monitoring/health`
-- Tilbakestillings-API: `POST /api/resilience/reset`
-- Wrappere: `open-sse/services/accountFallback.ts`
-- DB-tabell: `domain_circuit_breakers`
+- Kabling: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Status API: `GET /api/monitoring/health`
+- Tilbakestill API: `POST /api/resilience/reset`
+- Innpakninger: `open-sse/services/accountFallback.ts`
+- DB tabell: `domain_circuit_breakers`
 
-**Tilstander:**
+**Stater:**
 
 - `CLOSED` — normal trafikk tillatt
-- `DEGRADED` — trafikk er fortsatt tillatt, men forhøyede leverandørfeil spores; går tilbake til `CLOSED` ved tilstrekkelig mange vellykkede forespørsler, ved en gyldig tilkoblingstest, eller etter det lengste `OPEN`-holdet for siste feiltype (dens `cooldownByKind`-verdi, ellers `resetTimeout`, × `maxBackoffMultiplier`, minst én nedkjølingsperiode) uten en ny feil
-- `OPEN` — leverandøren er midlertidig blokkert; combo-ruting hopper over den
-- `HALF_OPEN` — tilbakestillingstidsavbruddet er utløpt; en prøveforespørsel tillates
+- `DEGRADED` — -trafikk fortsatt tillatt, men forhøyede leverandørfeil spores; går tilbake til `CLOSED` ved nok suksesser, på en gyldig tilkoblingstest, eller etter den lengste `OPEN` -holdingen for den siste feiltypen (dens `cooldownByKind` verdi, ellers `resetTimeout`, × `maxBackoffMultiplier`, minst én nedkjøling) uten en ny feil
+- `OPEN` — leverandør midlertidig blokkert; combo routing hopper over det
+- `HALF_OPEN` — tidsavbrudd for tilbakestilling er utløpt; sondeforespørsel tillatt
 
-**Konfigurerbare standardverdier (`open-sse/config/constants.ts`, eksponert i Dashboard → Innstillinger → Resiliens):**
+**Konfigurerbare standarder (`open-sse/config/constants.ts`, eksponert i Dashboard → Settings → Resilience):**
 
-| Klasse     | Degradert ved | Åpnes ved | Tilbakestillingstidsavbrudd |
-| ---------- | ------------- | --------- | --------------------------- |
-| OAuth      | 5 feil        | 8 feil    | 60s                         |
-| API-nøkkel | 7 feil        | 12 feil   | 30s                         |
-| Lokal      | avledet       | 2 feil    | 15s                         |
+| Klasse     | Degradert kl | Åpner kl | Tilbakestill tidsavbrudd |
+| ---------- | ------------ | -------- | ------------------------ |
+| OAuth      | 5 feil       | 8 feil   | 60-tallet                |
+| API-nøkkel | 7 feil       | 12 feil  | 30-årene                 |
 
-`degradationThreshold` styrer når en leverandør går inn i `DEGRADED`; `failureThreshold` styrer når den åpnes og hoppes over. Lokale leverandørprofiler eksponeres ikke på innstillingssiden for resiliens ennå.
+`degradationThreshold` kontrollerer når en leverandør går inn i `DEGRADED`; `failureThreshold` kontrollerer når den åpnes og hoppes over. `PROVIDER_PROFILES.local` (2 feil / 15s) er definert i `open-sse/config/constants.ts` men** ikke kablet ennå** : `getProviderCategory()` returnerer bare `oauth` eller `apikey`, så lokale leverandører bruker OAuth eller API-nøkkelprofilen.
 
-**Utløserkoder:** kun statuskoder på leverandørnivå `[408, 500, 502, 503, 504]`. Skal IKKE utløses for feil på kontonivå (de fleste 401/403/429 — disse tilhører nedkjøling eller utestenging).
+**Reisekoder:** bare statuser på leverandørnivå `[408, 500, 502, 503, 504]`. Gjør NOT tur for feil på kontonivå (de fleste 401/403/429 — som tilhører nedkjøling eller lockout).
 
-**Lat gjenoppretting:** når `OPEN` utløper, oppdaterer `getStatus()`, `canExecute()`, `getRetryAfterMs()` tilstanden til `HALF_OPEN`. De samme avlesningene (og neste feil) fører en foreldet `DEGRADED` tilbake til `CLOSED`. Ingen bakgrunnstimer er nødvendig.
+**Lat bedring:** når `OPEN` utløper, oppdaterer `getStatus()`, `canExecute()`, `getRetryAfterMs()` tilstanden til `HALF_OPEN`. Det samme leser (og neste feil) forfalle en gammel `DEGRADED` tilbake til `CLOSED`. Ingen bakgrunnstidtaker nødvendig.
 
 ---
 
-### Valgfri global leverandør-nedkjøling (vindusport)
+### Meld deg på global leverandørkjøling (vindusport)
 
-Et fjerde, **valgfritt** lag (`PROVIDER_COOLDOWN_ENABLED`, standard **av**) holder
-et minne på tvers av forespørsler om leverandører som feiler, i
-`open-sse/services/providerCooldownTracker.ts`. Dette konsulteres av combo-måloppløsningen,
-slik at påfølgende combo-forespørsler slutter å prøve på nytt en leverandør som nettopp
-feilet. Oppføringer på leverandørnivå følger `PROVIDER_PROFILES`-vindusporten:
+En fjerde,** melde deg på** lag (`PROVIDER_COOLDOWN_ENABLED`, standard** av** ) beholder et kryssforespørselsminne over sviktende leverandører i `open-sse/services/providerCooldownTracker.ts`, konsultert av kombinasjonsmåloppløsning, slik at påfølgende kombinasjonsforespørsler slutter å gå tilbake til en leverandør som nettopp mislyktes. Oppføringer på leverandørnivå respekterer `PROVIDER_PROFILES` vindusporten:
 
-| Profil     | utløses etter (`providerFailureThreshold`) | innenfor (`providerFailureWindowMs`) | kjøles ned i (`providerCooldownMs`) |
-| ---------- | -----------------------------------------: | -----------------------------------: | ----------------------------------: |
-| OAuth      |                                       `10` |                              `15min` |                              `5min` |
-| API-nøkkel |                                       `15` |                              `30min` |                             `10min` |
+| Profil     | turer etter (`providerFailureThreshold`) | inne (`providerFailureWindowMs`) | avkjøles for (`providerCooldownMs`) |
+| ---------- | ---------------------------------------: | -------------------------------: | ----------------------------------: |
+| OAuth      |                                     `10` |                          `15min` |                              `5min` |
+| API nøkkel |                                     `15` |                          `30min` |                             `10min` |
 
-Under terskelen anses leverandøren **ikke** for å være i nedkjøling; et vellykket
-resultat nullstiller vinduet. Oppføringer på tilkoblingsnivå (`provider:connectionId`)
-beholder i stedet den eksponentielle `minRetryCooldownMs → maxRetryCooldownMs`-backoffen.
-Overstyringer:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Regresjonsvakt: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Under terskelen er leverandøren** ikke** betraktet som kjøling; en suksess rydder vinduet. Oppføringer på tilkoblingsnivå (`provider:connectionId`) holder den eksponentielle `minRetryCooldownMs → maxRetryCooldownMs` backoffen i stedet. Overstyringer: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regresjonsvakt: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Tilkobling Nedkjøling
 
@@ -836,6 +826,21 @@ begrensninger:
 
 ---
 
+## Når OmniRoute i seg selv er uoppnåelig
+
+Leverandørens strømbryter, tilkoblingsavkjøling og modellsperre kjører alle inne i gatewayen. Hvis klienten ikke kan nå gatewayen, får den en tilkoblingsfeil. OmniRoute kan ikke avskjære den feilen. Klienten bestemmer om den skal prøve på nytt og hvilken melding som skal vises.
+
+OmniRoute gir for øyeblikket ingen fallback på klientsiden og definerer ingen retningslinjer for det. Konfigurer en alternativ rute i klienten eller foran gatewayen.
+
+- `GET /api/health` sjekker livlighet uten autentisering.
+- `GET /api/health/ping` sjekker beredskapen, inkludert om databasen svarer.
+- `GET /api/monitoring/health` gir autentiserte innringere en dypere helseoversikt.
+- `omniroute launch <tool>` sonderer `/api/monitoring/health` før du starter klienten. Den kan starte en lokal gateway automatisk. Med `--no-start` resulterer en uoppnåelig gateway i `GatewayUnreachable` og exit-kode `69`.
+
+For å koble fra en klient fra OmniRoute, følg [Tilbakestill klientkonfigurasjon](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Feilsøking
 
 - Vektet kombo svarer `503 all_targets_cooling_down` (`Retry-After` satt, `diagnostics.excluded` lister hvert mål med `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → poolen er konfigurert og tilkoblet, hvert mål er bare utelukket av en feiltoleranse-timer; advarselen `[COMBO] Weighted selection: every target excluded before dispatch — …` oppgir årsakene og gjenværende sekunder. En `404 no_executable_targets` fra samme kombo betyr at ingen feiltoleranse-timer var involvert (ingenting å kjøre, eller hver konto feilet tilgjengelighetssonden). Bygget i `open-sse/services/combo/pinRecovery.ts` fra utelukkelsene samlet i `targetResolution.ts`.
@@ -847,98 +852,68 @@ begrensninger:
 
 ---
 
-## Kjøretidstilstand — hurtigreferanse for agent
+## Runtime state — agent hurtigreferanse
 
-> Flyttet ordrett fra `AGENTS.md` → "Resilience Runtime State" (PR #12743) slik at
-> agentveiledningen holder seg under kontekstbudsjettet på 40k. Det er den kondenserte,
-> agentrettede visningen av seksjonene ovenfor; de nummererte seksjonene forblir den
-> fullstendige referansen.
+> Flyttet ordrett fra `AGENTS.md` → "Resilience Runtime State" (PR #12743) slik at agentguiden holder seg under kontekstbudsjettet på 40k. Det er den fortettede, agent-vendte visningen av seksjonene ovenfor; de nummererte delene forblir den fullstendige referansen.
 
-OmniRoute har tre beslektede, men distinkte mekanismer for midlertidige feil. Hold
-omfanget deres adskilt ved feilsøking av rutingsatferd. Se
-[diagram over 3-lags feiltoleranse](../diagrams/exported/resilience-3layers.svg)
-(kilde: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-for et oversiktskart.
+OmniRoute har tre relaterte, men distinkte midlertidige sviktmekanismer. Hold omfanget atskilt når du feilsøker rutingatferd. Se [3-lags resiliensdiagrammet](../diagrams/exported/resilience-3layers.svg) (kilde: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) for et raskt kart.
 
-### Circuit breaker for tilbyder
+### Leverandørs strømbryter
 
-**Omfang**: hele tilbyderen, f.eks. `glm`, `openai`, `anthropic`.
+**Omfang** : hele leverandøren, f.eks. `glm`, `openai`, `anthropic`.
 
-**Formål**: slutte å sende trafikk til en tilbyder som gjentatte ganger feiler på
-oppstrøms-/tjenestenivå, slik at én usunn tilbyder ikke bremser hver forespørsel.
+**Hensikt** : slutte å sende trafikk til en leverandør som gjentatte ganger feiler på upstream/service nivået, slik at en usunn leverandør ikke bremser hver forespørsel.
 
-**Implementasjon**:
+**Implementering** :
 
 - Kjerneklasse: `src/shared/utils/circuitBreaker.ts`
-- Kabling av chat-gate/kjøring: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API for kjøretidsstatus: `src/app/api/monitoring/health/route.ts`
-- Delte wrappere: `open-sse/services/accountFallback.ts`
-- Persistert tilstandstabell: `domain_circuit_breakers`
+- Chat gate/execution ledninger: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Kjøretidsstatus API: `src/app/api/monitoring/health/route.ts`
+- Delte innpakninger: `open-sse/services/accountFallback.ts`
+- Vedvarende tilstandstabell: `domain_circuit_breakers`
 
-**Tilstander** (4 — `src/shared/utils/circuitBreaker.ts`):
+**stater** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: normal trafikk tillates.
-- `DEGRADED`: tidligvarslingsbånd — feilene krysset degraderingsterskelen, men ikke
-  breaker-terskelen ennå; trafikken flyter fortsatt, dashbord viser advarselen. En gyldig
-  tilkoblingstest eller et rolig vindu uten nye feil returnerer den til `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` har vinduet).
-- `OPEN`: tilbyderen er midlertidig blokkert; kallere får et provider-circuit-open-svar,
-  eller komboruting hopper til et annet mål.
-- `HALF_OPEN`: tilbakestillingens tidsavbrudd er utløpt; tillat en prøveforespørsel.
-  Vellykket lukker breakeren, feil åpner den igjen.
+- `CLOSED`: normal trafikk er tillatt.
+- `DEGRADED`: tidlig varslingsbånd — -feil passerte nedbrytningsterskelen, men ikke bryterterskelen ennå; trafikken flyter fortsatt, dashbord viser advarselen. En gyldig tilkoblingstest eller et stille vindu uten ny feil returnerer det til `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` har vinduet).
+- `OPEN`: leverandøren er midlertidig blokkert; innringere får et svar fra leverandør-kretsen eller kombinasjonsruting hopper til et annet mål.
+- `HALF_OPEN`: tidsavbrudd for tilbakestilling har utløpt; tillate en sondeforespørsel. Suksess lukker bryteren, feil åpner den igjen.
 
-**Standardverdier** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, forbrukt via
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` i `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` i `src/sse/handlers/chatHelpers.ts`). Breakeren for hele
-tilbyderen kjører på `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Standarder** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, konsumert via `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` i `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` i `src/sse/handlers/chatHelpers.ts`). Helleverandørbryteren kjører på `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profil     | degraderes ved | åpner ved (`circuitBreakerThreshold`) | tilbakestilling (`circuitBreakerReset`) |
-| ---------- | -------------: | ------------------------------------: | --------------------------------------: |
-| OAuth      |            `5` |                                   `8` |                                   `60s` |
-| API-nøkkel |            `7` |                                  `12` |                                   `30s` |
-| Lokal      |      (utledet) |                                   `2` |                                   `15s` |
+| Profil     | degraderer kl | åpner kl (`circuitBreakerThreshold`) | tilbakestill (`circuitBreakerReset`) |
+| ---------- | ------------: | -----------------------------------: | -----------------------------------: |
+| OAuth      |           `5` |                                  `8` |                                `60s` |
+| API nøkkel |           `7` |                                 `12` |                                `30s` |
 
-`PROVIDER_PROFILES` definerer også `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) og `providerCooldownMs` (5/10/1 min): disse driver
-**vindusporten til den globale tilbydernedkjølingen som må slås på** (`PROVIDER_COOLDOWN_ENABLED`, av
-som standard) — en oppføring på tilbydernivå i `open-sse/services/providerCooldownTracker.ts` regnes
-bare som nedkjølende etter `providerFailureThreshold` feil innenfor `providerFailureWindowMs`, og
-kjøles deretter ned i `providerCooldownMs`. De er IKKE tersklene til den aktive breakeren — ikke
-still dem inn i forventning om breaker-atferd. Hver standardverdi kan overstyres via
-miljøvariablene `OMNIROUTE_PROVIDER_BREAKER_*` og `OMNIROUTE_CIRCUIT_BREAKER_*`;
-referansetabellen som er nøyaktig for kjøretiden ligger i `docs/architecture/RESILIENCE_GUIDE.md`.
+En `local` profil (`2` feil / `15s`) finnes også i `PROVIDER_PROFILES`, men den er ikke koblet til bryteren: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) aksepterer bare `oauth` eller `apikey`, og `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) returnerer en av disse to (uregistrerte tilbydere får `apikey`).
 
-Bare feilstatuser på tilbydernivå skal utløse tilbyderbreakeren:
+`PROVIDER_PROFILES` definerer også `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) og `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, hvor de lokale verdiene er inerte av samme grunn som ovenfor: disse gir** vindusporten til den globale leverandørens avkjøling** (`PROVIDER_COOLDOWN_ENABLED`, standard av) — en oppføring på leverandørnivå i `open-sse/services/providerCooldownTracker.ts` teller bare som avkjøling etter `providerFailureThreshold` feil inne i `providerFailureWindowMs`, og avkjøles deretter for `providerCooldownMs`. De er NOT live-bryterens terskler — ikke tuner dem forventer breaker-adferd. Hver standard kan overstyres gjennom `OMNIROUTE_PROVIDER_BREAKER_*` og `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; den kjøretidsnøyaktige referansetabellen lever i `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Bare feilstatuser på leverandørnivå bør utløse leverandørbryteren:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Ikke utløs breakeren for hele tilbyderen ved normale konto-/nøkkel-/modellfeil som de fleste
-tilfeller av `401`, `403` eller `429`. Disse hører vanligvis til tilkoblingsnedkjøling eller
-modellutelåsing. En generisk `403` fra en API-nøkkel-tilbyder skal være gjenopprettbar med mindre
-den klassifiseres som en endelig tilbyder-/kontofeil.
+Ikke utløs bryteren for hele leverandøren for normale account/key/model feil som de fleste `401`, `403`, eller `429` tilfeller. De tilhører vanligvis tilkoblingsavkjøling eller modellsperre. En generisk API-nøkkelleverandør `403` bør kunne gjenopprettes med mindre den er klassifisert som en terminal provider/account feil.
 
-Bryteren bruker lat gjenoppretting, ikke en bakgrunnstimer. Når `OPEN` utløper,
-oppdaterer lesinger som `getStatus()`, `canExecute()` og `getRetryAfterMs()`
-tilstanden til `HALF_OPEN`, slik at dashbord og kombinasjonskandidatbyggere ikke
-fortsetter å ekskludere en utløpt leverandør for alltid.
+Brekkeren bruker lat gjenoppretting, ikke en bakgrunnstidtaker. Når `OPEN` utløper, oppdaterer lesinger som `getStatus()`, `canExecute()` og `getRetryAfterMs()` tilstanden til `HALF_OPEN`, slik at dashbord og kombinasjonskandidatbyggere ikke fortsetter å ekskludere en utløpt leverandør for alltid.
 
-### Nedkjøling av tilkobling
+### Tilkobling Nedkjøling
 
-**Omfang**: én leverandørtilkobling/konto/nøkkel.
+**Omfang** : én leverandør connection/account/key.
 
-**Formål**: midlertidig hoppe over én dårlig nøkkel/konto mens andre tilkoblinger for
-samme leverandør kan fortsette å betjene forespørsler.
+**Hensikt** : hopper midlertidig over én dårlig key/account mens du lar andre tilkoblinger for samme leverandør fortsette å betjene forespørsler.
 
-**Implementasjon**:
+**Implementering** :
 
-- Skrive-/oppdateringssti: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Kontovalg/filtrering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Write/update bane: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Konto selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
 - Nedkjølingsberegning: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Innstillinger: `src/lib/resilience/settings.ts`
 
-Viktige felt på leverandørtilkoblinger:
+Viktige felt for leverandørforbindelser:
 
 ```ts
 rateLimitedUntil;
@@ -955,62 +930,44 @@ Under kontovalg hoppes en tilkobling over mens:
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Nedkjølinger er også late: når `rateLimitedUntil` er i fortiden, blir tilkoblingen
-kvalifisert igjen. Ved vellykket bruk tømmer `clearAccountError()` `testStatus`,
-`rateLimitedUntil`, feilfeltene og `backoffLevel`.
+Nedkjøling er også late: når `rateLimitedUntil` er i fortiden, blir tilkoblingen kvalifisert igjen. Ved vellykket bruk sletter `clearAccountError()` `testStatus`, `rateLimitedUntil`, feilfelt og `backoffLevel`.
 
-Standard oppførsel for tilkoblingsnedkjøling:
+Standard oppførsel for nedkjøling av tilkobling:
 
-- OAuth-grunnnedkjøling: `5s`.
-- Grunnnedkjøling for API-nøkkel: `3s`.
-- API-nøkkel `429` bør foretrekke oppstrøms hint om nye forsøk (`Retry-After`,
-  reset-headere eller parserbar reset-tekst) når de er tilgjengelige.
-- Gjentatte gjenopprettbare feil bruker eksponentiell backoff:
+- OAuth base nedkjøling: `5s`.
+- API-nøkkel nedkjøling: `3s`.
+- API-nøkkel `429` bør foretrekke oppstrøms gjenforsøk hint (`Retry-After`, tilbakestillingshoder eller analyserbar tilbakestillingstekst) når tilgjengelig.
+- Gjentatte utvinnbare feil bruker eksponentiell backoff:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Beskyttelsen mot «thundering herd» forhindrer at samtidige feil på samme tilkobling
-gjentatte ganger forlenger nedkjølingen eller dobbeltinkrementerer `backoffLevel`.
+Anti-torden-besetningsvakten forhindrer samtidige feil på samme tilkobling fra å gjentatte ganger forlenge nedkjølingen eller dobbel inkrementering `backoffLevel`.
 
-Terminale tilstander er ikke nedkjølinger. `banned`, `expired` (som bare blir terminal
-etter N begrensede nye forsøk via `EXPIRED_RETRY_MAX`) og `credits_exhausted` er
-ment å forbli utilgjengelige inntil legitimasjon/innstillinger endres eller en
-operator tilbakestiller dem. Ikke overskriv terminale tilstander med forbigående
-nedkjølingstilstand.
+Terminaltilstander er ikke nedkjøling. `banned`, `expired` (som blir terminal bare etter N avgrensede forsøk via `EXPIRED_RETRY_MAX`), og `credits_exhausted` er ment å forbli utilgjengelige inntil credentials/settings endres eller en operatør tilbakestiller dem. Ikke overskriv terminaltilstander med transient nedkjølingstilstand.
 
-### Modellutestenging
+### Modellsperre
 
-**Omfang**: leverandør + tilkobling + modell.
+**Omfang** : leverandør + tilkobling + modell.
 
-**Formål**: unngå å deaktivere en hel tilkobling når bare én modell er utilgjengelig
-eller kvotebegrenset for den tilkoblingen.
+**Hensikt** : unngå å deaktivere en hel tilkobling når bare én modell er utilgjengelig eller kvotebegrenset for den tilkoblingen.
 
 Eksempler:
 
-- Leverandører med kvote per modell som returnerer `429`.
-- Lokale leverandører som returnerer `404` for én manglende modell.
-- Leverandørspesifikke modus-/modelltillatelsesfeil, som utvalgte Grok-moduser.
+- Kvoteleverandører per modell som returnerer `429`.
+- Lokale leverandører returnerer `404` for én manglende modell.
+- Leverandørspesifikke mode/model -tillatelsesfeil, for eksempel valgte Grok moduser.
 
-Modellutestenging ligger i `open-sse/services/accountFallback.ts` og lar samme
-tilkobling fortsette å betjene andre modeller.
+Modell lockout bor i `open-sse/services/accountFallback.ts` og lar den samme forbindelsen fortsette å betjene andre modeller.
 
-### Veiledning for feilsøking
+### Feilsøkingsveiledning
 
-- Hvis alle nøkler for en leverandør hoppes over, undersøk både leverandørens
-  brytertilstand og hver tilkoblings `rateLimitedUntil`/`testStatus`.
-- Hvis en leverandør ser ut til å være permanent ekskludert etter
-  tilbakestillingsvinduet, sjekk om koden leser rå `state` i stedet for å bruke
-  `getStatus()`/`canExecute()`.
-- Hvis én leverandørnøkkel feiler, men andre skulle fungert, foretrekk
-  tilkoblingsnedkjøling fremfor leverandørbryter.
-- Hvis bare én modell feiler, foretrekk modellutestenging fremfor
-  tilkoblingsnedkjøling.
-- Hvis en tilstand skal gjenopprette seg selv, bør den ha et fremtidig
-  tidsstempel/tidsavbrudd for tilbakestilling og en lesesti som oppdaterer utløpt
-  tilstand. Permanente statuser krever manuelle endringer av legitimasjon eller
-  konfigurasjon.
+- Hvis alle nøklene for en leverandør hoppes over, inspiser både leverandørens bryterstatus og hver tilkoblings `rateLimitedUntil`/`testStatus`.
+- Hvis en leverandør vises permanent ekskludert etter tilbakestillingsvinduet, sjekk om koden leser rå `state` i stedet for å bruke `getStatus()`/`canExecute()`.
+- Hvis en leverandørnøkkel mislykkes, men andre skulle fungere, foretrekker du tilkoblingsavkjøling fremfor leverandørbryter.
+- Hvis bare én modell svikter, foretrekk modellsperre fremfor tilkoblingsavkjøling.
+- Hvis en tilstand skulle gjenopprette seg selv, bør den ha en fremtidig timestamp/reset tidsavbrudd og en lesebane som oppdaterer utløpt tilstand. Permanente statuser krever manuelle påloggings- eller konfigurasjonsendringer.
 
 ---
 

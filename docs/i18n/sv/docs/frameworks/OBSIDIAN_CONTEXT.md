@@ -112,58 +112,48 @@ till åtkomst; en giltig miljöautentiseringsuppgift som matchar `env-key` stöd
 Autentiserade nycklar utan Obsidian-konfiguration per nyckel behåller den globala reservlösningen.
 De fyra `obsidian_sync_*`-verktygen behåller sitt separata beteende för synkningstoken.
 
-## MCP-verktyg (22)
+## MCP verktyg (22)
 
-Definieras i `open-sse/mcp-server/tools/obsidianTools.ts`. Token/bas-URL löses
-per anrop (först per API-nyckel, därefter globalt). Verktyg som anropar OmniRoutes **synkroniseringsserver**
-(de fyra `obsidian_sync_*`-verktygen) kräver dessutom den autentiseringstoken för synkronisering som konfigurerats
-i OmniRoute-inställningarna.
+Definierat i `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL löses per samtal (per API-nyckel först, sedan globalt). Verktyg som träffar OmniRoute** synkroniseringsserver** (de fyra `obsidian_sync_*` verktygen) kräver dessutom sync auth token som konfigurerats i OmniRoute inställningarna.
 
 ### Läsverktyg (`read:obsidian`)
 
-| Verktyg                      | Beskrivning                                                                                          |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Kontrollera om Local REST API är nåbart och autentiserat.                                            |
-| `obsidian_search_simple`     | Fulltextsökning i anteckningsinnehåll; returnerar utdrag med filsökvägar.                            |
-| `obsidian_search_structured` | Sök med ett JSON Logic-uttryck (and/or/regex/path-filter).                                           |
-| `obsidian_read_note`         | Läs en anteckning via en valvrelativ sökväg; valfritt en specifik rubrik/block/frontmatter.          |
-| `obsidian_list_vault`        | Lista filer och kataloger i valvet (träd med poster).                                                |
-| `obsidian_get_document_map`  | Hämta anteckningens rubrikstruktur som en mappning av rubriker → radnummer.                          |
-| `obsidian_get_note_metadata` | Hämta frontmatter, taggar, länkar samt tecken-/ordantal utan hela innehållet.                        |
-| `obsidian_get_active_file`   | Hämta sökväg + innehåll för den fil som för närvarande är aktiv i Obsidian.                          |
-| `obsidian_get_periodic_note` | Hämta den dagliga/veckovisa/månatliga periodiska anteckningen för ett datum (idag om det utelämnas). |
-| `obsidian_get_tags`          | Lista alla valvtaggar med deras frekvenser.                                                          |
-| `obsidian_list_commands`     | Lista tillgängliga Obsidian-kommando-ID:n (använd med `obsidian_execute_command`).                   |
-| `obsidian_sync_status`       | Status för OmniRoutes synkroniseringsserver: körs, valvnamn, port, drifttid, senaste synkronisering. |
-| `obsidian_sync_conflicts`    | Lista olösta synkroniseringskonflikter (sökväg, konfliktsökväg, tidpunkt då de upptäcktes).          |
+| Verktyg                      | Beskrivning                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Kontrollera om den lokala REST API är tillgänglig och autentiserad.                         |
+| `obsidian_search_simple`     | Fulltextsökning av anteckningsinnehåll; returnerar utdrag med filsökvägar.                  |
+| `obsidian_search_structured` | Sök med hjälp av ett JSON Logic-uttryck (and/or/regex/path -filter).                        |
+| `obsidian_read_note`         | Läs en anteckning efter valv-relativ väg; eventuellt en specifik heading/block/frontmatter. |
+| `obsidian_list_vault`        | Lista filer och kataloger i valvet (trädet med poster).                                     |
+| `obsidian_get_document_map`  | Få anteckningens rubrikstruktur som en karta över rubriker → radnummer.                     |
+| `obsidian_get_note_metadata` | Få frontmatter, taggar, länkar, char/word count utan hela innehållet.                       |
+| `obsidian_get_active_file`   | Hämta sökvägen till + innehållet för den för närvarande aktiva filen i Obsidian.            |
+| `obsidian_get_periodic_note` | Få den periodiska anteckningen daily/weekly/monthly för ett datum (idag om den utelämnas).  |
+| `obsidian_get_tags`          | Lista alla valvtaggar med deras frekvenser.                                                 |
+| `obsidian_list_commands`     | Lista tillgängliga Obsidian -kommando IDs (använd med `obsidian_execute_command`).          |
+| `obsidian_sync_status`       | OmniRoute sync-serverstatus: kör, valvnamn, port, drifttid, senaste synkronisering.         |
+| `obsidian_sync_conflicts`    | Lista olösta synkroniseringskonflikter (sökväg, konfliktsökväg, upptäckt-vid).              |
 
 ### Skrivverktyg (`write:obsidian`)
 
-| Verktyg                          | Beskrivning                                                                                      |
-| -------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `obsidian_write_note`            | Skapa eller skriv över en anteckning med angivet Markdown-innehåll.                              |
-| `obsidian_append_note`           | Lägg till innehåll i en anteckning; valfritt under en specifik rubrik/ett specifikt block.       |
-| `obsidian_patch_note`            | Lägg selektivt till före/efter eller ersätt vid en rubrik, ett block eller ett frontmatter-fält. |
-| `obsidian_delete_note`           | Ta bort en anteckning permanent från valvet.                                                     |
-| `obsidian_move_note`             | Flytta eller byt namn på en anteckning i valvet.                                                 |
-| `obsidian_execute_command`       | Kör ett Obsidian-kommando via dess kommando-ID.                                                  |
-| `obsidian_open_file`             | Öppna en fil i Obsidian (skapar den om den inte finns).                                          |
-| `obsidian_sync_trigger`          | Utlös omedelbar dubbelriktad synkronisering av valvet mellan dator↔mobil.                        |
-| `obsidian_sync_resolve_conflict` | Lös en synkroniseringskonflikt: behåll `local` (mobil), `remote` (dator) eller `keep-both`.      |
+| Verktyg                          | Beskrivning                                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Skapa eller skriv över en anteckning med givet Markdown-innehåll.                           |
+| `obsidian_append_note`           | Lägg till innehåll till en anteckning; valfritt till en specifik heading/block.             |
+| `obsidian_patch_note`            | append/prepend/replace kirurgiskt vid ett rubrik-, block- eller frontmatter-fält.           |
+| `obsidian_delete_note`           | Ta bort en anteckning permanent från valvet.                                                |
+| `obsidian_move_note`             | Flytta eller byt namn på en anteckning i valvet.                                            |
+| `obsidian_execute_command`       | Utför ett Obsidian -kommando med dess kommando ID.                                          |
+| `obsidian_open_file`             | Öppna en fil i Obsidian (skapar den om den inte finns).                                     |
+| `obsidian_sync_trigger`          | Utlös en omedelbar dubbelriktad stationär ↔ mobilvalvsynkronisering.                        |
+| `obsidian_sync_resolve_conflict` | Lös en synkroniseringskonflikt: behåll `local` (mobil), `remote` (dator) eller `keep-both`. |
 
 > [!NOTE]
-> Mål för `obsidian_patch_note` accepterar `targetType` av typen `heading | block | frontmatter`
-> och `operation` av typen `append | prepend | replace`, med en valfri
-> `createTargetIfMissing`. De fyra `obsidian_sync_*`-verktygen kommunicerar med den lokala synkroniseringsservern
-> (`http://127.0.0.1:27781` som standard) och kräver synkroniseringstoken.
+> `obsidian_patch_note` mål accepterar `targetType` av `heading | block | frontmatter` och `operation` av `append | prepend | replace`, med en valfri `createTargetIfMissing`. De fyra `obsidian_sync_*` verktygen pratar med den lokala synkroniseringsservern (`http://127.0.0.1:27781` som standard) och kräver synkroniseringstoken.
 
-### Behörighetsomfång
+### Omfattningar
 
-Läsverktyg kräver `read:obsidian`; skrivverktyg kräver `write:obsidian`. Tillämpningen
-är identisk med Notion — hanteras av `withScopeEnforcement()` i
-`open-sse/mcp-server/server.ts`, styrs av `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, med
-tillåtna behörighetsomfång hämtade från `OMNIROUTE_MCP_SCOPES` eller API-nyckelns kontext för behörighetsomfång. Se
-[MCP-SERVER.md](./MCP-SERVER.md).
+Läsverktyg kräver `read:obsidian`; skrivverktyg kräver `write:obsidian`. Tillämpningen är identisk med Notion — som hanteras av `withScopeEnforcement()` i `open-sse/mcp-server/server.ts`, gated på `OMNIROUTE_MCP_ENFORCE_SCOPES=true` och framtvingad för HTTP/SSE anropare vars API nyckel saknar `manage`/`admin`, med tillåtna scopes hämtade från `OMNIROUTE_MCP_SCOPES` eller API -nyckelns scope-kontext. Se [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Slutpunkter
 

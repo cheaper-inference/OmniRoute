@@ -4,9 +4,9 @@
 
 ---
 
-> **సత్యానికి మూలం:** `electron/` కార్యస్థలం** చివరిగా నవీకరించబడింది:** 2026-06-28 — v3.8.40
+> **సత్యానికి మూలం:** `electron/` కార్యస్థలం
 
-OmniRoute ఒక క్రాస్-ప్లాట్ఫారమ్ డెస్క్టాప్ యాప్ను (Windows / macOS / Linux) నిర్మించింది**Electron 41** +** ఎలక్ట్రాన్-బిల్డర్ 26.10** . డెస్క్టాప్ యాప్ Next.js స్వతంత్ర సర్వర్ను చైల్డ్ ప్రాసెస్గా రూపొందిస్తుంది, దానిపై `BrowserWindow` ని చూపుతుంది మరియు సిస్టమ్ ట్రే, ఆటో-అప్డేటర్, IPC బ్రిడ్జ్ మరియు జీరో-కాన్ఫిగర్ రహస్య బూట్స్ట్రాప్ను జోడిస్తుంది.
+OmniRoute ఒక క్రాస్-ప్లాట్ఫారమ్ డెస్క్టాప్ యాప్ను (Windows / macOS / Linux) నిర్మించింది**Electron 41** +** ఎలక్ట్రాన్-బిల్డర్ 26.10** . డెస్క్టాప్ యాప్ Next.js స్వతంత్ర సర్వర్ను చైల్డ్ ప్రాసెస్గా రూపొందిస్తుంది, దాని వద్ద `BrowserWindow` ని చూపుతుంది మరియు సిస్టమ్ ట్రే, ఆటో-అప్డేటర్, IPC బ్రిడ్జ్ మరియు జీరో-కాన్ఫిగర్ రహస్య బూట్స్ట్రాప్ను జోడిస్తుంది.
 
 ## ఆర్కిటెక్చర్
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## స్వీయ-నవీకరణ
 
-GitHub ప్రొవైడర్ (`diegosouzapw/OmniRoute`)తో `electron-updater` ఉపయోగిస్తుంది.
+GitHub ప్రొవైడర్ (`cheaper-inference/OmniRoute`)తో `electron-updater` ఉపయోగిస్తుంది.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - ఈవెంట్లు `update-status` IPC ద్వారా రెండరర్కు ఫార్వార్డ్ చేయబడ్డాయి: `checking`, `available`, `not-available`, `downloading` ( `percent` తో), `downloaded`, `error`
@@ -273,7 +273,7 @@ npm run electron:build:win
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-విడుదలలు GitHub విడుదలలకు ప్రచురించబడతాయి (`diegosouzapw/OmniRoute`), ఇక్కడ కూడా `electron-updater` కొత్త సంస్కరణల కోసం తనిఖీ చేస్తుంది.
+విడుదలలు GitHub విడుదలలకు (`cheaper-inference/OmniRoute`) ప్రచురించబడతాయి, ఇక్కడ కూడా `electron-updater` కొత్త సంస్కరణల కోసం తనిఖీ చేస్తుంది.
 
 ## ట్రబుల్షూటింగ్
 

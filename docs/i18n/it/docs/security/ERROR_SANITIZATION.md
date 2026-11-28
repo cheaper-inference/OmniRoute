@@ -4,13 +4,7 @@
 
 ---
 
-> **Fonte autorevole:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` e i builder pubblici in `open-sse/utils/error.ts`
-> **Test:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Ultimo aggiornamento:** 2026-09-02 — v3.8.51
-> **Destinatari:** qualsiasi ingegnere che intervenga sulle risposte di errore (route HTTP, stream SSE, executor, gestori MCP).
-> **Stato:** **OBBLIGATORIO** per ogni percorso di codice che restituisce un messaggio di errore a un client.
+> **Fonte della verità:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` e i costruttori pubblici in `open-sse/utils/error.ts`** Test:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Pubblico:** Qualsiasi ingegnere che tocca le risposte agli errori (percorsi HTTP, flussi SSE, esecutori, gestori MCP ).** Stato:****MANDATORY** per ogni percorso del codice che restituisce un messaggio di errore a un client.
 
 ## Perché esiste
 

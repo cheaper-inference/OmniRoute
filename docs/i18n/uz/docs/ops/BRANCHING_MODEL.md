@@ -37,7 +37,7 @@ flowchart LR
 `main` kundalik integratsiya shoxi emas. `main`ga qarshi ochilgan PRlar
 odatda birlashtirishdan oldin boshqa shoxga qayta yoʻnaltirilishi kerak.
 
-## Muzlatish (parallel sikllar)
+## Muzlatishni bo'shating (parallel tsikllar)
 
 Chiqarish moslashtirilayotganda, `release-freeze` deb nomlangan marker muammosi ochiladi. Bu** rivojlanishini to'xtatmaydi** :
 
@@ -48,7 +48,7 @@ Chiqarish moslashtirilayotganda, `release-freeze` deb nomlangan marker muammosi 
 Siz xohlagan filialni birlashtirish mumkin deb hisoblashdan oldin ochiq muzlatish mavjudligini tekshiring:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Birlashtirish mexanikasi (egasi `queue` label → Mergify) [MERGE_TRAIN.md](./MERGE_TRAIN.md) da hujjatlashtirilgan.

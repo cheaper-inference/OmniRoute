@@ -59,41 +59,29 @@ xato obyektini qaytarsa, token tozalanadi va chaqiruv `400` bilan muvaffaqiyatsi
 
 ## MCP vositalari (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` ichida belgilangan. Token chaqiruv vaqtida
-`getNotionToken()` orqali aniqlanadi; agar hech qanday token sozlanmagan boʻlsa, vosita
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
-xatosini chiqaradi.
+`open-sse/mcp-server/tools/notionTools.ts` belgilangan. Token qo'ng'iroq vaqtida `getNotionToken()` orqali hal qilinadi; agar hech biri sozlanmagan bo'lsa, asbob `"Notion integration token not configured. Set it in Settings > Context Sources."` chiqaradi
 
-| Vosita                       | Qamrov         | Tavsif                                                                                                                          |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Sahifalar va maʼlumotlar bazalarini matnli soʻrov boʻyicha qidiradi (sarlavhalar, ID-lar va URL-larni qaytaradi). Sahifalangan. |
-| `notion_get_page`            | `read:notion`  | Sahifaning ID-si orqali uning tarkibi va metamaʼlumotlarini oladi.                                                              |
-| `notion_list_block_children` | `read:notion`  | Blok yoki sahifaning barcha ichki bloklarini (bloklar daraxtini) roʻyxatlaydi. Sahifalangan.                                    |
-| `notion_query_database`      | `read:notion`  | Ixtiyoriy `filter` + `sorts` bilan maʼlumotlar bazasiga soʻrov yuboradi (Notion API formati). Sahifalangan.                     |
-| `notion_get_database`        | `read:notion`  | Maʼlumotlar bazasining sxemasi/metamaʼlumotlarini ID orqali oladi.                                                              |
-| `notion_append_blocks`       | `write:notion` | Mavjud blok yoki sahifaga ichki bloklarni qoʻshadi (har bir soʻrovda koʻpi bilan 100 ta blok).                                  |
+| Asbob                        | Qo'llash doirasi | Tavsif                                                                                                                 |
+| ---------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`    | Sahifalar va ma'lumotlar bazalarini matn so'rovi bo'yicha qidiring (sarlavhalarni qaytaradi, IDs, URLs). Sahifalangan. |
+| `notion_get_page`            | `read:notion`    | Sahifaning mazmuni va metamaʼlumotlarini ID orqali oling.                                                              |
+| `notion_list_block_children` | `read:notion`    | Blok yoki sahifaning barcha bloklangan bolalarini sanab bering (blok daraxti). Sahifalangan.                           |
+| `notion_query_database`      | `read:notion`    | Maʼlumotlar bazasiga ixtiyoriy `filter` + `sorts` (Notion API formati) bilan soʻrov yuboring. Sahifalangan.            |
+| `notion_get_database`        | `read:notion`    | ID orqali ma'lumotlar bazasining schema/metadata oling.                                                                |
+| `notion_append_blocks`       | `write:notion`   | Mavjud blok yoki sahifaga bloklangan bolalarni qo'shing (har bir so'rov uchun maksimal 100 blok).                      |
 
 ### Kirish parametrlari
 
-- `notion_search` — `query` (1–500 ta belgi), `pageSize` (1–100, standart qiymat 20),
-  `startCursor` (ixtiyoriy).
-- `notion_get_page` — `pageId` (32 belgili hex yoki UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, standart qiymat 50),
-  `startCursor` (ixtiyoriy).
-- `notion_query_database` — `databaseId`, `filter` (ixtiyoriy, Notion filtri formati),
-  `sorts` (ixtiyoriy massiv), `pageSize` (1–100, standart qiymat 50), `startCursor` (ixtiyoriy).
+- `notion_search` — `query` (1–500 belgi), `pageSize` (1–100, standart 20), `startCursor` (ixtiyoriy).
+- `notion_get_page` — `pageId` (32-char hex yoki UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, standart 50), `startCursor` (ixtiyoriy).
+- `notion_query_database` — `databaseId`, `filter` (ixtiyoriy, Notion filtr formati), `sorts` (ixtiyoriy massiv), `pageSize` (1–100, standart 50), `startCursor` (ixtiyoriy).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (blok obyektlari massivi),
-  `after` (ixtiyoriy joylashuv).
+- `notion_append_blocks` — `blockId`, `children` (blok obyektlari massivi), `after` (ixtiyoriy pozitsiya).
 
-### Qamrovlar
+### Qo'llash sohalari
 
-Oʻqish vositalari `read:notion`, yozish vositasi esa `write:notion` qamrovini talab qiladi.
-Qamrovlar `open-sse/mcp-server/server.ts` ichidagi `withScopeEnforcement()` tomonidan faqat
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` boʻlganda majburiy tekshiriladi; chaqiruvchiga ruxsat berilgan
-qamrovlar `OMNIROUTE_MCP_SCOPES` (vergul bilan ajratilgan) yoki autentifikatsiya qilingan API
-kalitining qamrov kontekstidan olinadi. Toʻliq qamrov modeli uchun
-[MCP-SERVER.md](./MCP-SERVER.md) fayliga qarang.
+O'qish vositalari `read:notion`, yozish uchun esa `write:notion` talab qiladi. Scopes `withScopeEnforcement()` tomonidan `OMNIROUTE_MCP_ENFORCE_SCOPES=true` bo'lganda `open-sse/mcp-server/server.ts` tomonidan amalga oshiriladi va har doim API kalitida `manage`/`admin` bo'lmagan HTTP/SSE chaqiruvchisi uchun; qo'ng'iroq qiluvchining ruxsat etilgan doiralari `OMNIROUTE_MCP_SCOPES` (vergul bilan ajratilgan) yoki autentifikatsiya qilingan API kaliti doirasi kontekstidan keladi. To'liq ko'lamli model uchun [MCP-SERVER.md](./MCP-SERVER.md) ga qarang.
 
 ## Endpointlar
 

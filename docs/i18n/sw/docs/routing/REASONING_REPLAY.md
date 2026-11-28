@@ -4,7 +4,7 @@
 
 ---
 
-> **Chanzo cha ukweli:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Mara ya mwisho kusasishwa:** 2026-06-28 — v3.8.40
+> **Chanzo cha ukweli:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute hunasa `reasoning_content` msaidizi inayotolewa na miundo ya modi ya kufikiri na kuirudisha kwa uwazi kwenye maombi ya zamu nyingi wakati mtoaji wa huduma ya juu anapohitaji. Hii huondoa hitilafu za HTTP 400 ambazo watoa huduma kali huibua wakati historia ya mazungumzo ya mteja inakosa hoja za zamu ya awali.
 

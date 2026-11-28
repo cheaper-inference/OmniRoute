@@ -4,14 +4,11 @@
 
 ---
 
-# Usklađenost i revizija
-
 > **Izvor istine:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Posljednje ažurirano:** 2026-06-28 — v3.8.40
 
-OmniRoute bilježi administrativne radnje, događaje autentifikacije, promjene životnog ciklusa vjerodajnica provajdera i pozive MCP alata u revizijske tabele zasnovane na SQLite-u. Ova stranica obuhvata šta se bilježi, gdje se podaci nalaze, koliko dugo se čuvaju, kako API ključevi mogu isključiti bilježenje i kako pretraživati podatke.
+OmniRoute bilježi administrativne radnje, događaje provjere autentičnosti, promjene životnog ciklusa vjerodajnica dobavljača i pozivanje MCP alata u tablice revizije podržane SQLite. Ova stranica pokriva ono što se bilježi, gdje živi, koliko dugo se čuva, kako API ključevi mogu isključiti i kako tražiti podatke.
 
-Implementacija se nalazi u `src/lib/compliance/index.ts` (T-43 — "Kontrole usklađenosti") i `src/lib/compliance/providerAudit.ts`. Zapisivanje revizije nikada ne baca izuzetak: u slučaju bilo kakvog neuspjeha, poziv se tiho zanemaruje kako revizijsko bilježenje ne bi prekinulo glavni tok zahtjeva.
+Implementacija živi u `src/lib/compliance/index.ts` (T-43 — "Kontrole usklađenosti") i `src/lib/compliance/providerAudit.ts`. Revizijski zapisi nikada ne bacaju: u slučaju bilo kakvog neuspjeha poziv se tiho proguta tako da evidencija revizije ne može prekinuti glavni tok zahtjeva.
 
 ## Šta se evidentira
 
@@ -120,25 +117,33 @@ Ručno čišćenje historije zahtjeva je odvojeno od zadržavanja. Stranica Requ
 
 Zadane vrijednosti su definisane u `src/lib/logEnv.ts` (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## `noLog` isključenje (po API ključu)
+## `noLog` Opt-Out (po API ključu)
 
-API ključevi mogu biti označeni tako da se njihov nizvodni saobraćaj poziva ne bilježi. Oznaka se nalazi u tabeli `api_keys` (`no_log INTEGER DEFAULT 0`) i preslikava se u in-memory skup za pretrage na kritičnoj putanji.
+API ključevi mogu biti označeni tako da se njihov nizvodni promet poziva ne evidentira. Zastavica živi na tablici `api_keys` (`no_log INTEGER DEFAULT 0`) i preslikava se u skup u memoriji za traženje vruće staze.
 
 ```bash
-# Kreirajte no-log ključ (potrebna upravljačka autorizacija)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Pomoćne funkcije (`src/lib/compliance/index.ts`):
+Pomagači (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — prebacivanje in-memory unosa
-- `isNoLog(apiKeyId)` — provjerava se na putanji zahtjeva; vraća se na keširano čitanje od 30 s iz `api_keys.no_log`
-- `NO_LOG_API_KEY_IDS` (env, razdvojeno zarezima) — unaprijed učitano u in-memory skup pri pokretanju; korisno kada ne možete direktno prebaciti kolonu
+- `setNoLog(apiKeyId, true|false)` — prebacuje unos u memoriji
+- `isNoLog(apiKeyId)` — provjereno na stazi zahtjeva; vraća se na 30 s keširano čitanje iz `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, odvojeno zarezima) — unaprijed učitan u memorijski skup pri pokretanju; korisno kada ne možete direktno prebaciti kolonu
 
-Administrativni revizijski događaji (prijava, promjene provajdera, pozivi MCP alata, itd.) **nisu** pogođeni sa `noLog` — samo se bilježenje saobraćaja po zahtjevu isključuje.
+Događaji administrativne revizije (prijava, promjene provajdera, pozivi MCP alata, itd.) su** ne** na koje utiče `noLog` — samo evidentiranje saobraćaja po zahtjevu je isključeno.
+
+### Odbijanje po zahtjevu (`x-omniroute-no-log`)
+
+Klijent može odabrati jedan zahtjev za zaključivanje iz postojanosti korisnog opterećenja bez kreiranja namjenskog ključa. Pošaljite `x-omniroute-no-log: true` na zahtjev (`1` i `yes` su također prihvaćeni, bez obzira na velika i mala slova). Primjenjuje se na svaku rutu porodice ćaskanja koja prolazi kroz rukovaoče ćaskanjem: Završetak ćaskanja, Odgovori, Poruke, Završeci i putanja kompatibilna sa Blizancima. Red evidencije poziva je i dalje napisan sa svojom vremenskom oznakom, modelom, dobavljačem, statusom, trajanjem i brojem tokena, ali `request_body`, `response_body`, sažetci zahtjeva i artefakti cjevovoda su izostavljeni.
+
+Zaglavlje je ORed sa zastavicom ključa: ključ bez evidencije ostaje bez evidencije bez obzira na zaglavlje, a zaglavlje ne može ponovo omogućiti evidentiranje za ključ bez dnevnika. Zaglavlje se uklanja prije nego što se zahtjev prosljeđuje uzvodno.
+
+Ovo zaglavlje radi** ne** onemogućite ekstrakciju memorije ili semantičku keš memoriju. Pošaljite `x-omniroute-no-memory: true` i `x-omniroute-no-cache: true` pored njega kada zahtjev ne smije postojati sadržaj u tim podsistemima.
 
 ## REST API
 

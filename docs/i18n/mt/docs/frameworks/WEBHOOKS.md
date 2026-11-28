@@ -4,15 +4,11 @@
 
 ---
 
-> **Sors awtorevoli:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Aġġornat l-aħħar:** 2026-06-28 — v3.8.40
+> **Sors tal-verità:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-OmniRoute jista’ jattiva webhooks HTTP meta jseħħu avvenimenti tal-pjattaforma. Użahom biex tintegra ma’
-Slack, PagerDuty, Datadog, servizzi interni ta’ twissijiet, jew kwalunkwe riċevitur HTTP.
+OmniRoute jista' jispara HTTP webhooks fuq avvenimenti tal-pjattaforma. Użahom biex tintegra ma' Slack, PagerDuty, Datadog, servizzi interni ta' twissija, jew kwalunkwe riċevitur HTTP.
 
-Id-dispatcher jiffirma kull konsenja b’HMAC-SHA256, jerġa’ jipprova f’każ ta’
-fallimenti temporanji, isegwi l-istat tal-konsenji għal kull webhook, u jiddiżattiva awtomatikament endpoints li
-jibqgħu jfallu.
+Id-dispaċċ jiffirma kull konsenja HMAC-SHA256, jerġa' jipprova fuq fallimenti temporanji, isegwi s-saħħa tal-kunsinna għal kull webhook, u jiddiżattiva awtomatikament l-endpoints li jibqgħu jonqsu.
 
 ## Avvenimenti Appoġġjati
 

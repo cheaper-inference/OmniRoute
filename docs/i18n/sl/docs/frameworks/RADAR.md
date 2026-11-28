@@ -93,52 +93,30 @@ usmerjanja ali izbire modela — glejte ločeno privolitev spodaj.
 
 ---
 
-## Sinhronizacija podatkov je LOČENA privolitev — obljuba glede zasebnosti
+## Sinhronizacija podatkov je SEPARATE opt-in — obljuba zasebnosti
 
-Vklop `RADAR_ENABLED` samo odklene uporabniški vmesnik. Sinhronizacija vira zahteva drugo,
-neodvisno privolitev, shranjeno v `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-selitev `136_radar_cache_settings.sql`). `syncRadar()` preveri zastavico _in_
-privolitev, preden izvede kakršen koli omrežni klic:
+Če vklopite `RADAR_ENABLED`, odklenete samo UI. Sinhronizacija vira zahteva drugo, neodvisno privolitev, shranjeno v `radar_settings.opt_in` (`src/lib/db/radar.ts`, migracija `136_radar_cache_settings.sql`). `syncRadar()` preveri zastavico _in_ opt-in pred kakršnim koli omrežnim klicem:
 
 ```
-Zastavica izklopljena → { status: "disabled" } — brez omrežnega klica
-Brez privolitve       → { status: "opt_out" }  — brez omrežnega klica
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Ko sta obe vklopljeni, je pot sinhronizacije naslednja:
+Ko sta oba vklopljena, je pot sinhronizacije:
 
-1. `GET <osnovni URL vira>/v1/catalog/latest` z `x-omniroute-radar-schema: 2` in neobvezno
-   glavo `Authorization: Bearer <ključ podpornika>` (glejte spodaj). Če glava sheme ni prisotna,
-   strežniki privzeto uporabijo ločeno podpisani prehodni artefakt v1, zato starejši nameščeni odjemalci še naprej
-   prejemajo posodobitve.
-2. To je aplikacijski tok samo za prenos, vendar gre še vedno za zahtevo HTTPS. Gostovana
-   infrastruktura prejme običajne metapodatke povezave, kot je izvorni naslov IP. Ko je konfiguriran ključ podpornika,
-   sinhronizacija pošlje tudi ta ključ v glavi Bearer, da lahko storitev določi
-   upravičenost. Pri natančni reviziji zasebnega strežnika, navedeni v zgornji meji dokazov,
-   obračunavanje zahtev za vir uporablja zgoščene vrednosti ključev, agregirano uporabo in dnevno menjavan okrnjen HMAC
-   naslova IP za ročni pregled zlorab; te tabele ne hranijo niti ključa niti naslova IP v neobdelani obliki.
-   Dnevniki dostopa do infrastrukture in šifrirana odhodna vrsta za dostavo so ločene operativne
-   meje.
-3. OmniRoute storitvi Radar nikoli ne pošilja pozivov, odgovorov, pogovorov, poverilnic ponudnikov, prometa modelov,
-   časa delovanja, zakasnitve ali lokalne konfiguracije ponudnika.
-4. Odgovor se preveri, validira in lokalno shrani v predpomnilnik (glejte
-   [Varnostni model](#security-model)). Radar ima natanko štiri omrežne poti na strani strežnika:
-   `syncRadar()` za katalog, `syncRadarReferrals()` za napotitve ter
-   `syncRadarOffers()` / `syncRadarIntel()` za ponudbe in Intel, namenjene samo podpornikom.
+1. `GET <feed base URL>/v1/catalog/latest` z `x-omniroute-radar-schema: 2` in neobvezno glavo `Authorization: Bearer <supporter key>` (glejte spodaj). Strežniki privzeto uporabljajo ločeno podpisan artefakt prehoda v1, ko je glava sheme odsotna, tako da starejši nameščeni odjemalci še naprej prejemajo posodobitve.
+2. To je potek aplikacije samo za prenos, vendar je še vedno zahteva HTTPS. Gostujoča infrastruktura prejme navadne metapodatke o povezavi, kot je vir IP. Ko je ključ podpornika konfiguriran, sinhronizacija ta ključ pošlje tudi v glavi nosilca, tako da lahko storitev razreši upravičenost. Pri natančni reviziji zasebnega strežnika, opredeljeni v zgornji meji dokazov, obračunavanje zahtev po virih uporablja zgoščene vrednosti ključev, skupno uporabo in dnevno vrteče se okrnjeno HMAC IP za ročni pregled zlorabe; te tabele ne ohranjajo niti ključa niti IP v neobdelani obliki. Dnevniki dostopa do infrastrukture in šifrirana odhodna mapa za dostavo so ločene operativne meje.
+3. OmniRoute storitvi Radar nikoli ne pošilja pozivov, odgovorov, pogovorov, poverilnic ponudnika, modela prometa, časa delovanja, zakasnitve ali konfiguracije lokalnega ponudnika.
+4. Odgovor je preverjen, potrjen in lokalno predpomnjen (glejte [Varnostni model](#security-model) ). Radar ima natanko štiri omrežne poti na strani strežnika: `syncRadar()` za katalog, `syncRadarReferrals()` za napotitve in `syncRadarOffers()` / `syncRadarIntel()` za ponudbe samo za podpornike in Intel.
 
-**Ključ podpornika** je neobvezen žeton Bearer (`radar_settings.supporter_key`),
-ki storitvi vira omogoča odločitev, katero raven naj ponudi (glejte
-[Ravni](#tiers-community-and-live)). Ključ je:
+Pregled kataloga poteka vsakih 24 ur. Ko preverjeni vir še vedno vsebuje predpomnjeno različico in raven, sinhronizacija obdrži predpomnjeno koristno obremenitev, obnovi `fetchedAt` in naslednje preverjanje pride 24 ur pozneje namesto ob naslednji urni uri.
 
-- **Šifrirano shranjen** z istimi pomožnimi funkcijami AES-256-GCM `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`), ki se uporabljajo za poverilnice ponudnikov.
-- Nastavljen prek `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) in
-  **nikoli vrnjen v odgovoru** — odgovor vrne zakrito obliko (`omr_****abcd`).
-- Njegova sprememba ali odstranitev atomsko razveljavi predpomnilnike kataloga, napotitev, ponudb in Intel. Naslednja
-  sinhronizacija oziroma branje na strani strežnika določi novo upravičenost; shranjevanje ključa samo po sebi ne izvede
-  omrežne zahteve in ne porabi aktivacijskega ključa za enkratno uporabo.
-- Poslan storitvi vira kot žeton Bearer v sinhronizacijski zahtevi GET — nič drugega o
-  ključu nikoli ne zapusti odjemalca.
+The** ključ navijača** je izbirni nosilni žeton (`radar_settings.supporter_key`), ki omogoča storitvi podajanja, da se odloči, katero raven naj služi (glejte [Stopnje](#tiers-community-and-live) ). Je:
+
+- Shranjeno** šifrirano v mirovanju** z istimi pomočniki AES-256-GCM `encrypt()`/`decrypt()` (`src/lib/db/encryption.ts`), ki se uporabljajo za poverilnice ponudnika.
+- Nastavite prek `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) in** nikoli ni odmevalo nazaj** — odgovor vrne maskirano obliko (`omr_****abcd`).
+- Spreminjanje ali brisanje atomsko razveljavi katalog, napotitve, ponudbe in predpomnilnike Intel. Naslednji sync/read razreši novo pooblastilo na strani strežnika; shranjevanje ključa samo po sebi ne naredi omrežne zahteve ali porabi aktivacijskega ključa za enkratno uporabo.
+- Poslano v storitev podajanja kot žeton nosilca na sinhronizaciji GET — nič drugega o ključu ne zapusti odjemalca.
 
 ---
 
@@ -399,91 +377,45 @@ version, tier }` — nadzorna plošča prikazuje to vrednost, nikoli neobdelaneg
 
 ---
 
-## Pravila združevanja prekrivne plasti ob branju
+## Pravila spajanja prekrivanja v času branja
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) združi predpomnjeni vir **prek**
-statičnega izhodišča **ob branju** znotraj `getRadarCatalog()`. Izhodiščna tabela
-(`FREE_MODEL_BUDGETS`) se nikoli ne spremeni — ob vsakem klicu se na novo izračuna
-`MergedEntry[]`.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) združi predpomnjeni vir** čez** statična osnovna črta pri** čas branja** , znotraj `getRadarCatalog()`. Niz osnovne linije (`FREE_MODEL_BUDGETS`) se nikoli ne spremeni — a `MergedEntry[]` se izračuna na novo ob vsakem klicu.
 
 Štiri pravila po prednostnem vrstnem redu:
 
-1. **Vir nikoli ne prepiše lokalne preglasitve.** Za vsako polje posebej: če je
-   operater prilagodil polje vnosa (zemljevid `localOverrides`, indeksiran z
-   `provider:modelId`), se vrednost vira za to specifično polje preskoči — prevlada
-   operaterjeva vrednost.
-2. **`enabled: false` onemogoči vnos in zabeleži izvor.** Vnos vira, ki izklopi
-   vnos, v združenem rezultatu nastavi `enabled: false` in `disabledBy: "radar"`,
-   da lahko uporabniški vmesnik pojasni, _zakaj_ se je vnos iz razpoložljivega
-   spremenil v onemogočenega.
-3. **Vnos, ki ga je dodal uporabnik in ga ni v viru, ostane nespremenjen.** Vnosi,
-   ki obstajajo samo v izhodišču (ali so bili dodani lokalno) in nimajo ustreznega
-   vnosa v viru, ostanejo nespremenjeni.
-4. **Označeni izbrisani vnos ni nikoli obnovljen.** Če je operater izrecno izbrisal
-   vnos (množica `tombstones`), ga vir s ponovno dodanim `provider:modelId` v poznejši
-   različici ne obnovi.
+1. **Vir nikoli ne prepiše lokalne preglasitve.** Na polje: če je operater prilagodil polje na vnosu ( zemljevid `localOverrides`, s ključem `provider:modelId`), se vrednost vira za to specifično polje preskoči — zmaga vrednost operaterja.
+2. **`enabled: false` onemogoči vnos z izvorom.** Vnos vira, ki izklopi vnos, nastavi `enabled: false` in `disabledBy: "radar"` na združeni rezultat, tako da lahko UI pojasni, _zakaj_ je vnos iz razpoložljivega postal onemogočen.
+3. **Vnos, ki ga je dodal uporabnik in ni v viru, ostane nedotaknjen.** Vnosi, ki obstajajo samo v osnovni liniji (ali so bili dodani lokalno) in nimajo ustreznega vnosa vira, gredo skozi nespremenjeni.
+4. **Nagrobnik ni nikoli obujen.** Če je operater izrecno izbrisal vnos (`tombstones` set), vir, ki ga znova doda `provider:modelId` v kasnejši različici, tega ne vrne.
 
-Polja, ki jih je mogoče urejati, in oznake izbrisa so trajno shranjeni v
-`radar_local_model_state` (migracija `153_radar_local_model_state.sql`). Javni vmesnik
-za podatkovno zbirko (`src/lib/db/radar.ts`) pretvori te vrstice v zemljevid
-`localOverrides` in množico `tombstones`, ki ju uporablja `applyFeed()`; produkcijski
-`getRadarCatalog()` naloži to stanje po uspešnem prehodu preverjanj zastavice,
-predpomnilnika in sheme. Operater lahko ureja samo `displayName` in `enabled`.
-Identitete ponudnika/modela, izvora vira, kvote, zmožnosti, pogojev uporabe in podatkov
-za nastavitev ni mogoče zapisovati prek tega vmesnika.
+Polja, ki jih je mogoče urejati, in nagrobniki so ohranjeni v `radar_local_model_state` (migracija `153_radar_local_model_state.sql`). Javni adapter DB (`src/lib/db/radar.ts`) pretvori te vrstice v zemljevid `localOverrides` in niz `tombstones` ki ju uporablja `applyFeed()`; proizvodni `getRadarCatalog()` naloži to stanje po prehodu vrat zastavice, predpomnilnika in sheme. Samo `displayName` in `enabled` lahko ureja operater. Identitete Provider/model, porekla vira, kvote, zmogljivosti, ToS in podatkov o nastavitvah ni mogoče zapisati skozi to površino.
 
-Nadzorna plošča ponuja štiri lokalna dejanja:
+Nadzorna plošča razkriva štiri lokalna dejanja:
 
-- **Uredi** spremeni lokalno prikazno ime in stanje omogočenosti.
-- **Ponastavi lokalne spremembe** počisti obe polji, ki ju je mogoče urejati, ne da bi
-  spremenil oznako izbrisa.
-- **Skrij** ustvari oznako izbrisa, zato poznejše posodobitve vira ne morejo znova
-  ustvariti vrstice.
-- **Obnovi** odstrani oznako izbrisa; vsaka ločeno shranjena preglasitev ostane
-  veljavna.
+- **Uredi** spremeni lokalno prikazno ime in omogočeno stanje.
+- **Ponastavi lokalne spremembe** počisti obe polji za urejanje, ne da bi spremenil nagrobnik.
+- **Skrij se** ustvari nagrobnik, tako da poznejše posodobitve vira ne morejo znova ustvariti vrstice.
+- **Obnovi** odstrani nagrobnik; vsaka ločeno shranjena preglasitev ostane v veljavi.
 
-Nastavitev vira `enabled: false` ostaja varnostna izjema: prevlada nad zastarelo lokalno
-nastavitvijo `enabled: true`, ohrani združeni vnos onemogočen in zabeleži
-`disabledBy: "radar"`.
+Vir `enabled: false` ostaja varnostna izjema: zmaga nad zastarelim lokalnim `enabled: true`, ohranja združeni vnos onemogočen in beleži `disabledBy: "radar"`.
 
-Objave kataloga uporabljajo `schemaVersion: 2`. `contextWindow` ter vsako izmed polj `tools`, `vision` in
-`thinking` so neodvisno `number | null` / `boolean | null`: `null` pomeni neznano, medtem ko
-`false` pomeni, da uradni vir ponudnika, potrjen z D16, izrecno navaja, da zmožnost ni na voljo.
-Notranje zastavice registra/specifikacij modelov OmniRoute se nikoli neposredno ne pretvorijo v dejstva vira. Odjemalec
-še vedno sprejema posnetke v1; ker je stari gradnik uporabljal `false` kot označevalnik odsotnosti, se vrednost v1 `false`
-normalizira v neznano, medtem ko v1 `true` ostane dejstvo. Neznane različice sheme se varno zavrnejo, zadnji
-veljavni predpomnilnik pa ostane na voljo. Vsak model v2 z neničelno vrednostjo konteksta/zmožnosti mora vsebovati
-`metadataEvidenceUrls[]` HTTPS brez poverilnic; sicer preverjanje veljavnosti sheme ne uspe in predpomnilnik
-se ne zamenja. Tabela kataloga prikazuje vsa tri stanja kot `✓`, `✕` in `?`.
+Kataloške objave uporabljajo `schemaVersion: 2`. `contextWindow` in vsak od `tools`, `vision` in `thinking` sta neodvisno `number | null` / `boolean | null`: `null` pomeni neznano, medtem ko `false` pomeni, da uradni vir ponudnika D16-confirmed izrecno pravi, da zmožnosti ni. Notranje zastavice OmniRoute registry/model-spec se nikoli ne oglašujejo neposredno za podajanje dejstev. Odjemalec še vedno sprejema posnetke v1; ker je stari graditelj uporabljal `false` kot ogrado za odsotnost, je v1 `false` normaliziran na neznano, medtem ko v1 `true` ostaja dejanski. Neznane različice sheme se ne zaprejo in zadnji veljavni predpomnilnik ostane na voljo. Vsak model v2 z neničelnim context/capability mora nositi HTTPS `metadataEvidenceUrls[]` brez poverilnic; sicer preverjanje veljavnosti sheme ne uspe in predpomnilnik ni zamenjan. Tabela kataloga upodobi vsa tri stanja kot `✓`, `✕` in `?`.
 
 ### Vodene kombinacije in dostop MCP
 
-Potrjene vrednosti `familyId` se ohranijo skozi prekrivanje ob branju in poganjajo čisti
-modul `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Družina je predlagana
-samo, če imata vsaj dva različna ponudnika aktivne povezave in ponujata natančno določen, skrbno izbran ID modela.
-Onemogočeni modeli, neaktivni ponudniki, manjkajoči ID-ji modelov, družine z enim članom in dvoumna
-ujemanja vzdevkov/predpon se varno zavrnejo. Predlogi uporabljajo obstoječo strategijo `priority`, pri čemer je
-največji ponavljajoči se mesečni proračun naveden prvi; uporabniški vmesnik jih ustvari samo prek `POST /api/combos`.
+Potrjene vrednosti `familyId` preživijo prekrivanje časa branja in poganjajo čisti modul `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Družina je predlagana le, če imata vsaj dva različna ponudnika aktivne povezave in izpostavita natančen izbrani model ID. Onemogočeni modeli, nedejavni ponudniki, manjkajoči model IDs, enojne družine in dvoumna ujemanja alias/prefix se ne zaprejo. Predlogi uporabljajo obstoječo strategijo `priority`, pri čemer najprej naročijo največji ponavljajoči se mesečni proračun; UI jih ustvari samo prek `POST /api/combos`.
 
-Vodeni uporabniški vmesnik je na voljo na poti `/dashboard/radar/combos`. Bere samo lokalni
-končni točki `GET /api/radar/catalog` in `GET /api/combos/builder/options`. Nikoli ne sproži sinhronizacije Radar,
-ne bere poverilnic ponudnika in ne zapisuje neposredno v podatkovno zbirko kombinacij.
+Vodeni UI živi pri `/dashboard/radar/combos`. Bere samo lokalni končni točki `GET /api/radar/catalog` in `GET /api/combos/builder/options`. Nikoli ne sproži radarske sinhronizacije, ne bere poverilnic ponudnika ali piše neposredno v kombinirano bazo podatkov.
 
-Odjemalci MCP lahko berejo isto lokalno projekcijo z `omniroute_radar_catalog` (`read:radar`). Izbirni
-filtri `provider`, `familyId` in `enabledOnly` se ovrednotijo po enem lokalnem branju
-`GET /api/radar/catalog`. Njegov omejeni izhod vključuje metapodatke kataloga ter ponudnika/model,
-prikazno ime, `familyId`, kvoto, zmogljivosti, stanje omogočenosti, izvor in `disabledBy`; URL-ji za nastavitev,
-koraki, povezave, e-poštni naslovi, ključi in napotitveni podatki niso nikoli vrnjeni. To orodje je
-samo za branje in nikoli ne prikliče `/api/radar/sync`.
+odjemalci MCP lahko berejo isto lokalno projekcijo z `omniroute_radar_catalog` (`read:radar`). Izbirni filtri `provider`, `familyId` in `enabledOnly` se ovrednotijo po enem lokalnem branju `GET /api/radar/catalog`. Njegov zaprt izhod vključuje metapodatke kataloga in provider/model, prikazno ime, `familyId`, kvoto, zmogljivosti, omogočeno stanje, izvor in `disabledBy`; setup URLs, koraki, povezave, e-poštni naslovi, ključi in napotitveni podatki niso nikoli vrnjeni. To orodje je samo za branje in nikoli ne kliče `/api/radar/sync`. Ko je predpomnjeni vir pred nameščenim katalogom, je `meta.olderThanRelease` `true` in orodje vrne modele iz nameščenega kataloga z lokalnimi preglasitvami in uporabljenimi nagrobniki.
 
-### Oznake izvora
+### Označevalci porekla
 
-Vsak združeni vnos vsebuje polje `origin`, ki ga uporabniški vmesnik prikaže kot značko:
+Vsak združeni vnos nosi polje `origin`, ki ga UI prikaže kot značko:
 
-- `"baseline"` — nespremenjeno glede na statični katalog izdaje.
-- `"radar"` — eno ali več polj je bilo osveženih iz vira.
-- `"local"` — upravljavec ima za ta vnos vsaj eno lokalno preglasitev (lokalne
-  preglasitve imajo v skladu s pravilom 1 vedno prednost pred virom, ne glede na to, kaj navaja vir).
+- `"baseline"` — nedotaknjen iz kataloga statičnih izdaj.
+- `"radar"` — eno ali več polj je osvežil vir.
+- `"local"` — operater ima vsaj eno lokalno preglasitev tega vnosa (lokalne preglasitve vedno prevladajo nad virom po pravilu 1, ne glede na to, kaj pravi vir).
 
 ---
 

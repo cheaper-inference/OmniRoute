@@ -185,87 +185,49 @@ baziniame atvaizde jų nėra.
 
 ---
 
-## Klaidingi antivirusinės programos aptikimai
+## Antivirusiniai klaidingi teigiami rezultatai
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG perkelia `README.md` į karantiną dėl `MD:HttpRequest-inf[Susp]`
+### Avast/AVG karantinas `README.md` su `MD:HttpRequest-inf[Susp]`
 
-**Tai klaidingas aptikimas. Niekas neužkrėsta ir nereikia imtis jokių veiksmų.**
+**Tai klaidingas teigiamas rezultatas. Niekas nėra užkrėstas ir nereikia imtis jokių veiksmų.**
 
-Avast ir AVG naudoja euristinį tikrinimą, kuris pažymi paprastojo teksto / Markdown failus,
-turinčius daug į HTTP užklausas panašių nuorodų. OmniRoute `README.md` pateikiamas npm pakete
-(jis nurodytas `package.json` → `files`), todėl visuotinai diegiant patenka į
-`node_modules/omniroute/README.md` — jame yra apie 15 `http://localhost:20128/...` pavyzdžių
-(MCP HTTP/SSE galiniai taškai, A2A `.well-known` URL ir `curl` fragmentai). Tokio nuorodų
-tankio pakanka euristiniam tikrinimui suaktyvinti.
+Avast ir AVG vykdo euristiką, kuri pažymi plain-text/Markdown failus, kuriuose yra daug HTTP užklausą primenančių nuorodų. OmniRoute `README.md` pristatomas npm paketo viduje (jis nurodytas `package.json` → `files`), todėl jis patenka į `node_modules/omniroute/README.md` visuotiniame diegime — ir jame yra ~ 15 `http://localhost:20128/...` pavyzdžių ( MCP HTTP/SSE galutiniai taškai, A2A `.well-known` URL ir `curl` ). To nuorodos tankio pakanka euristikai išjungti.
 
-Jei tai prasidėjo tik neseniai: failo pobūdis nepasikeitė. README buvo papildytas galinių
-taškų lentele (pridėti MCP HTTP + SSE + A2A) ir daugiau `curl` pavyzdžių, todėl buvo
-viršyta ribinė vertė.
+Jei tai prasidėjo neseniai: failas nepasikeitė natūra. README padidino savo galinių taškų lentelę (buvo pridėta MCP HTTP + SSE + A2A ) ir daugiau `curl` pavyzdžių, dėl kurių jis viršijo slenkstį.
 
-Šis failas yra pasyvi dokumentacija, kurioje nėra jokio vykdomojo turinio. Galite saugiai
-atkurti jį iš karantino.
+Failas yra inertiška dokumentacija, kurioje nėra vykdomojo turinio. Galite saugiai atkurti jį iš karantino.
 
 **Ką daryti:**
 
-1. **Sustabdykite pranešimus** — antivirusinėje programoje išimčių sąraše nurodykite diegimo
-   katalogą (Avast: Settings → Exceptions), pridėdami visuotinį `node_modules` kelią ir (arba)
-   OmniRoute duomenų katalogą (`~/.omniroute/`).
-2. **Praneškite apie klaidingą aptikimą** — <https://www.avast.com/false-positive-file-form.php>,
-   pridėdami į karantiną perkeltą `README.md`. Tai visiems padedantis sprendimas, nes šiuo
-   atveju gamintojo euristinis tikrinimas pernelyg jautriai reaguoja į tekstinį failą.
+1. **Sustabdykite pranešimus** — neįtraukite diegimo katalogo į savo antivirusinę programą (Avast: Settings → Exceptions), pridėkite savo visuotinį `node_modules` kelią and/or the OmniRoute data dir (`~/.omniroute/`).
+2. **Praneškite apie klaidingą teigiamą rezultatą** — <https://www.avast.com/false-positive-file-form.php>, pridedant karantinuotą `README.md`. Tai yra pataisymas, kuris padeda visiems, nes tai yra pardavėjo euristinis perdėtas reagavimas į tekstinį failą.
 
-**Kodėl to „netaisome“ savo pusėje:** visuose pavyzdžiuose naudojamas `http://localhost`, o
-localhost negali naudoti `https` nesukeldamas nepatogumų dėl savarankiškai pasirašytų
-sertifikatų. Dokumentacijos iškraipymas siekiant išvengti vieno gamintojo euristinio
-tikrinimo pakenktų kiekvienam skaitytojui vien tam, kad būtų apeita skaitytuvo klaida.
+**Kodėl mes to „nepataisome“ savo pusėje:** visi pavyzdžiai yra `http://localhost`, o localhost negali būti `https` be savarankiškai pasirašyto sertifikato trinties. Sutvarkius dokumentus, siekiant išvengti vieno pardavėjo euristikos, kiekvienas skaitytojas pakenktų skaitytuvo klaidai.
 
 ### Kaspersky pažymi darbalaukio programą kaip `PDM:Trojan.Win32.Generic`
 
-**Tai klaidingas elgsenos euristikos aptikimas. Niekas neužkrėsta.** Kaspersky priešdėlis
-`PDM:` reiškia, kad verdiktą pateikė jos Proactive Defense Module (System Watcher), kuris
-vertina, ką diegimo programa _daro_, užuot lyginęs ją su žinomomis kenkėjiškomis programomis.
-Suveikus apsaugai, Kaspersky „atšaukia“ visą diegimą — ištrina failus, kuriuos jau buvo
-įrašiusi, — todėl programa tampa sugadinta arba dingsta.
+**Tai klaidingai teigiamas elgsenos euristikos rezultatas. Niekas nėra užkrėstas.** „Kaspersky“ `PDM:` priešdėlis reiškia, kad nuosprendį priima jo iniciatyvios gynybos modulis (sistemos stebėtojas), kuris sprendžia, ką diegimo programa _daro_, o ne suderina su žinoma kenkėjiška programa. Kai ji įsijungia, „Kaspersky“ „atšaukia“ visą diegimo procesą —, ištrindama failus, kuriuos jau parašė — todėl programa sugenda arba jos trūksta.
 
-Pažymimi failai yra standartinės deklaruotų atvirojo kodo priklausomybių, pateikiamų kartu
-su darbalaukio programa, dalys, pavyzdžiui:
+Failai, kuriuos ji pažymi, yra deklaruotų atvirojo kodo priklausomybių atsarginės dalys, susietos su darbalaukio programa, pavyzdžiui:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` ir
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), naršyklės automatizavimo
-  biblioteka, naudojama programoje prisijungti prie paslaugų teikėjų ir naršykle
-  grindžiamiems pokalbiams.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — fiksuotos versijos vietinis `wreq-js` susiejimas, naudojamas naršyklės požymiais
-  identifikuojamam HTTP ryšiui su žiniatinklio slapukus naudojančiais paslaugų teikėjais
-  (`<arch>` yra `x64` arba `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` ir `workerProcessEntry.js` — [Playwright](https://playwright.dev), naršyklės automatizavimo biblioteka, naudojama programėlės teikėjo prisijungimui ir naršyklės palaikomam pokalbiui.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — prisegtas `wreq-js` savasis susiejimas, naudojamas žiniatinklio slapukų teikėjų naršyklės pirštų atspaudams HTTP (`<arch>` yra `x64` arba `arm64`).
 
-**Kodėl apsauga suveikia:** Windows diegimo programa **dar nepasirašyta kodu**, todėl
-nepasirašyta NSIS diegimo programa neturi jokios reputacijos, o elgsenos euristika veikia
-maksimaliu jautrumu. To, kartu su pateikiama vietine DLL biblioteka ir šimtais `.js` failų,
-įrašomų į `%LOCALAPPDATA%\Programs\OmniRoute` (įskaitant Next.js autonominio komponavimo
-paketų katalogus su maišos priesagomis), pakanka euristiniam tikrinimui suaktyvinti. Kodą
-planuojama pasirašyti; kol tai neįgyvendinta, naujose laidose problema gali pasikartoti.
+**Kodėl užsidega:** Windows montuotojas yra** dar nepasirašytas kodu** , todėl nepasirašytas NSIS diegimo programos reputacija yra nulinė, o elgsenos euristika veikia esant maksimaliai agresijai. Kartu su susietu vietiniu DLL ir šimtais `.js` failų, parašytų `%LOCALAPPDATA%\Programs\OmniRoute` (įskaitant maišos priesaga paketų katalogus iš atskiros Next.js versijos), to pakanka, kad suveiktų euristika. Planuojamas kodo pasirašymas; kol jis nusileis, nauji leidimai gali tai pakartoti.
 
 **Ką daryti:**
 
-1. **Pirmiausia patikrinkite atsisiųstą failą** (taip atmetama failo modifikavimo galimybė).
-   Su kiekviena laida skelbiamas `latest.yml`, kurio laukas `sha512` (base64 formatu) apima
-   diegimo programą `OmniRoute.Setup.<version>.exe`. PowerShell lange, aplanke, kuriame yra
-   diegimo programa, vykdykite:
+1. **Pirmiausia patvirtinkite atsisiuntimą** (atmeta sugadintą failą). Kiekvienas leidimas skelbia `latest.yml`, kurio `sha512` laukas (base64) apima `OmniRoute.Setup.<version>.exe` diegimo programą. PowerShell iš aplanko, kuriame yra diegimo programa:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Išvestis turi sutapti su `latest.yml` → `sha512`. Jei nesutampa, ištrinkite failą ir
-   atsisiųskite jį iš naujo tik iš [GitHub laidų puslapio](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Atkurkite + pridėkite išimtį** — atkurkite iš karantino atšaukiant diegimą pašalintus
-   elementus ir pridėkite išimtį katalogui `%LOCALAPPDATA%\Programs\OmniRoute`
-   (Kaspersky → Settings → Threats and Exclusions), tada įdiekite iš naujo.
-3. **Praneškite apie klaidingą aptikimą** — <https://opentip.kaspersky.com/>. Naudotojų
-   pateiktos klaidingų aptikimų ataskaitos iš tiesų paspartina įtraukimą į leidžiamųjų sąrašą.
+   Išvestis turi atitikti `latest.yml` → `sha512`. Jei ne, ištrinkite failą ir iš naujo atsisiųskite tik iš [GitHub leidimų puslapio](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Atkurti + išskirti** — atkurkite atšauktus elementus iš karantino ir pridėkite `%LOCALAPPDATA%\Programs\OmniRoute` išskyrimą (Kaspersky → Settings → Threats and Exclusions), tada įdiekite iš naujo.
+3. **Praneškite apie klaidingą teigiamą rezultatą** — <https://opentip.kaspersky.com/>. Vartotojų pateiktos FP ataskaitos tikrai pagreitina įtraukimą į leidžiamus sąrašus.
 
 ---
 
@@ -874,10 +836,10 @@ Daugiau simptomų:
 
 ---
 
-## Vis dar nepavyksta?
+## Vis dar įstrigo?
 
-- **GitHub problemos**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Architektūra**: Vidinę informaciją žr. [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
-- **API žinynas**: Visų galinių taškų sąrašą žr. [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
-- **Būklės skydelis**: Norėdami realiuoju laiku peržiūrėti sistemos būseną, atverkite **Skydelis → Būklė**
-- **Vertimo priemonė**: Norėdami diagnozuoti formato problemas, naudokite **Skydelis → Vertimo priemonė**
+- **GitHub problemos** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Architektūra** : Vidinės informacijos ieškokite [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
+- **API nuoroda** : Žr. [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) apie visus galutinius taškus
+- **Sveikatos prietaisų skydelis** : Patikrinkite** Prietaisų skydelis → Health** sistemos būsenai realiuoju laiku
+- **Vertėjas** : Naudokite** Prietaisų skydelio → vertėjas** formato problemoms derinti

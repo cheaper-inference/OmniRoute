@@ -4,9 +4,9 @@
 
 ---
 
-> **Pinagmulan ng katotohanan:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Huling na-update:** 2026-06-28 — v3.8.40
+> **Pinagmulan ng katotohanan:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
-Kinukuha ng OmniRoute ang assistant `reasoning_content` na ginawa ng mga modelo ng thinking-mode at malinaw na ipinapalabas ito sa mga kahilingang multi-turn kapag kailangan ito ng upstream provider. Inaalis nito ang HTTP 400 na mga error na itinataas ng mga mahigpit na provider kapag ang kasaysayan ng pag-uusap ng isang kliyente ay nawawala ang pangangatwiran ng naunang pagliko.
+Kinukuha ng OmniRoute ang assistant `reasoning_content` na ginawa ng mga modelo ng thinking-mode at malinaw na ipinapalabas ito sa mga kahilingang multi-turn kapag kailangan ito ng upstream provider. Inaalis nito ang HTTP 400 na mga error na itinataas ng mga mahigpit na provider kapag ang kasaysayan ng pag-uusap ng isang kliyente ay nawawala ang pangangatwiran ng naunang turn.
 
 ## Bakit Ito Umiiral
 

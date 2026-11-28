@@ -11,14 +11,14 @@ Agent Skills-ը կառուցվածքավորված SKILL.md ֆայլեր են, �
 
 ---
 
-## Ընդհանուր նկարագրություն
+## Ընդհանուր ակնարկ
 
-Կատալոգը պարունակում է **45 Agent Skills** (23 REST API + 21 CLI + 1 կազմաձևման աշխատանքային հոսք)։ Յուրաքանչյուր skill ունի՝
+Կատալոգը պարունակում է** 45 Գործակալի հմտություններ** (23 REST API + 21 CLI + 1 կազմաձևման աշխատանքային հոսք): Յուրաքանչյուր հմտություն ունի.
 
-- **Կանոնական ID** (`omni-auth`, `cli-serve` և այլն)
-- **SKILL.md** ֆայլ՝ `skills/{id}/SKILL.md`-ում, YAML frontmatter-ով (`name`, `description`) + բովանդակությամբ հարուստ markdown մարմին
-- OpenAPI սպեցիֆիկացիայից և CLI ռեեստրից ստացված **REST վերջնակետեր** (API skills) կամ **CLI ենթահրամաններ** (CLI skills)
-- Ուղիղ ներբեռնման համար նախատեսված **GitHub raw URL**՝ `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Ա** կանոնական ID** (`omni-auth`, `cli-serve` և այլն)
+- Ա**SKILL.md** ֆայլ `skills/{id}/SKILL.md` ում YAML frontmatter-ով (`name`, `description`) + հարուստ նիշերի բովանդակությամբ
+- **REST վերջնակետեր** (API հմտություններ) կամ**CLI ենթահրամաններ** (CLI skills) ստացված OpenAPI spec և CLI ռեեստրից
+- Ա**GitHub հում URL** կենդանի բեռնման համար՝ `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## Ծածկույթի API
+## Ծածկույթ API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

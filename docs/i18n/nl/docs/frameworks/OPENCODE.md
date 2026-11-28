@@ -4,14 +4,11 @@
 
 ---
 
-> **Status:** Algemeen beschikbaar.
-> **Doelgroep:** Beheerders die OpenCode koppelen aan een OmniRoute-implementatie.
-> **Bron van waarheid (configuratieschema):** `src/shared/services/opencodeConfig.ts`
-> **Bron van waarheid (npm-pakket):** `@omniroute/opencode-provider/` (publiceerbare workspace)
+> **Status:** Algemeen beschikbaar.** Publiek:** Operators die OpenCode aansluiten op een OmniRoute implementatie.** Bron van waarheid (configuratieschema):** `src/shared/services/opencodeConfig.ts`** Aanbevolen npm-pakketten:** `@omniroute/opencode-plugin/` (OpenCode v1, geïnstalleerd door `omniroute setup opencode`) en `@omniroute/opencode-plugin-v2/` (OpenCode v2). Het oudere `@omniroute/opencode-provider/` -pakket is** verouderd** (zie Pad 2).
 
-[OpenCode](https://opencode.ai) is een agentische AI-client voor de CLI en desktop. Het leest zijn providercatalogus uit `~/.config/opencode/opencode.json` (of `opencode.jsonc`) en volgt het schema op `https://opencode.ai/config.json`. OmniRoute stelt zichzelf beschikbaar aan OpenCode als een van die providers — elk verzoek loopt via OmniRoutes standaard OpenAI-compatibele `/v1`-interface, zodat OpenCode automatisch profiteert van Auto-Combo-routering, circuitbreakers, sleutelbeleid, observeerbaarheid enzovoort.
+[OpenCode](https://opencode.ai) is een agentische CLI/desktop AI client. Het leest zijn providercatalogus van `~/.config/opencode/opencode.json` (of `opencode.jsonc`) en volgt het schema op `https://opencode.ai/config.json`. OmniRoute stelt zichzelf bloot aan OpenCode als een van die providers — elk verzoek stroomt door OmniRoute's standaard OpenAI-compatibele `/v1` oppervlak, dus OpenCode profiteert automatisch van Auto-Combo-routing, stroomonderbrekers, sleutelbeleid, observatie, enz.
 
-Er zijn **twee ondersteunde integratiemethoden**. Kies er één — ze genereren dezelfde configuratie.
+Deze pagina documenteert de twee onderstaande static-config-paden; beide genereren dezelfde configuratie. Voor een modellijst die uw live catalogus volgt, gebruikt u in plaats daarvan de plug-in: `omniroute setup opencode` installeert `@omniroute/opencode-plugin` (OpenCode v1) en `@omniroute/opencode-plugin-v2` richt zich op OpenCode v2 (zie [CLI integraties](../guides/CLI-INTEGRATIONS.md) en de [OpenCode v2-plug-inhandleiding](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ Resulterend bestand (standaardmodelcatalogus):
 
 ---
 
-## Methode 2 — npm-pakket `@omniroute/opencode-provider`
+## Pad 2 — npm-pakket `@omniroute/opencode-provider` (verouderd)
 
-Aanbevolen wanneer u de configuratie vanuit Node/TS scriptmatig genereert (CI-pipelines, monorepo's, aangepaste installatiestromen).
+> **Afgekeurd.** Het pakket schrijft een statische modellijst die achter uw live OmniRoute catalogus zweeft. De README raadt aan om naar `@omniroute/opencode-plugin` te migreren (of `@omniroute/opencode-plugin-v2` op OpenCode v2). De onderstaande API wordt alleen voor bestaande scripts bewaard.
+
+Wordt gebruikt bij het scripten van de configuratie van Node/TS (CI pijplijnen, monorepos, aangepaste installatiestromen).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Optioneel: overschrijf de modelcatalogus die aan OpenCode wordt aangeboden
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Voor een niet-destructieve samenvoeging met een bestaand bestand kunt u `mergeOpenCodeConfigText()` uit `opencodeConfig.ts` overnemen of de CLI-generator aanroepen.
+Voor een niet-destructieve samenvoeging van een bestaand bestand repliceert u `mergeOpenCodeConfigText()` vanuit `opencodeConfig.ts` of roept u de CLI generator aan.
 
-Zie de [README van het pakket](../../@omniroute/opencode-provider/README.md) voor de volledige API.
+Zie het [pakket README](../../@omniroute/opencode-provider/README.md) voor de volledige API.
 
 ---
 
@@ -157,7 +156,9 @@ Voor clients in Anthropic-stijl die `x-api-key` + `anthropic-version` verzenden,
 
 ## Zie ook
 
-- [API-referentie](../reference/API_REFERENCE.md) — volledige OmniRoute REST-interface
+- [API referentie](../reference/API_REFERENCE.md) — volledig OmniRoute REST oppervlak
 - [Auto-Combo](../routing/AUTO-COMBO.md) — wat `model: "auto"` betekent
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (aanbevolen)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (verouderd)
 - Bron: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

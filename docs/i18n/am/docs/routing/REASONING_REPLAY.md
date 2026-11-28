@@ -4,9 +4,9 @@
 
 ---
 
-> **የእውነት ምንጭ፡-** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** መጨረሻ የዘመነው፡-** 2026-06-28 — v3.8.40
+> **የእውነት ምንጭ፡-** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
-OmniRoute በአስተሳሰብ ሞድ ሞዴሎች የተሰራውን ረዳት `reasoning_content` ይይዛል እና የላይ ዥረት አቅራቢው ሲፈልግ በግልፅነት በበርካታ ዙር ጥያቄዎች ይደግመዋል። ይህ የደንበኛ የውይይት ታሪክ የቀደመው ተራ ምክንያት ሲጎድል ጥብቅ አቅራቢዎች የሚያነሷቸውን HTTP 400 ስህተቶች ያስወግዳል።
+OmniRoute በአስተሳሰብ ሞድ ሞዴሎች የተሰራውን ረዳት `reasoning_content` ይይዛል እና የላይኛው ዥረት አቅራቢው በሚፈልገው ጊዜ በብዝሃ-ዙር ጥያቄዎች ላይ በግልፅ ይደግመዋል። ይህ የደንበኛ የውይይት ታሪክ የቀደመው ተራ ምክንያት ሲጎድል ጥብቅ አቅራቢዎች የሚያነሷቸውን HTTP 400 ስህተቶች ያስወግዳል።
 
 ## ይህ ለምን አለ?
 

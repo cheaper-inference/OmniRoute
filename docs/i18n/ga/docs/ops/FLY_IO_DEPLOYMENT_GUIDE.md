@@ -84,24 +84,24 @@ flyctl version
 
 ---
 
-## 4. Imscartha an Chéad Uair don Tionscadal Reatha
+## 4. Imlonnú Céaduaire an Tionscadail Reatha
 
-### 4.1 Clónáil an Cód agus Déan Seiceáil ar an Eolaire
+### 4.1 Clón an Cód agus Iontráil an Eolaire
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
-### 4.2 Deimhnigh Ainm an Fheidhmchláir
+### 4.2 Deimhnigh Ainm an Iarratais
 
-Oscail `fly.toml` agus seiceáil an líne seo a leanas:
+Oscail `fly.toml` agus fíoraigh an líne seo a leanas:
 
 ```toml
 app = 'omniroute'
 ```
 
-Má tá tú ag imscartha chuig feidhmchlár nua pearsanta, is féidir leat é a athrú go hainm uathúil domhanda, mar shampla:
+Má tá tú ag imscaradh chuig d’fheidhmchlár nua féin, is féidir leat é a athrú go hainm uathúil domhanda, mar shampla:
 
 ```toml
 app = 'omniroute-yourname'
@@ -109,20 +109,20 @@ app = 'omniroute-yourname'
 
 Nóta:
 
-- Cinntigh go bhfuil an feidhmchlár atá le feiceáil sa chonsól ag teacht le luach an `app` i `fly.toml`
-- Má d'úsáid tú ainm éigin eile roimhe seo, cosúil le `oroute, ná déan é a mheascadh le `omniroute`
+- Cinntigh go dtagann an feidhmchlár a fheiceann tú sa chonsól leis an luach `app` in `fly.toml`
+- Má d'úsáid tú ainm eile roimhe seo, mar `oroute`, ná cuir amú é agus `omniroute`
 
 ### 4.3 Cruthaigh an Feidhmchlár
 
-Más rud é nach bhfuil an feidhmchlár ann fós:
+Mura bhfuil an t-iarratas ann fós:
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-Mhí athraigh tú ainm an fheidhmchláir, cuir `omniroute` ina ionad leis an ainm a roghnaigh tú.
+Má d’athraigh tú ainm an fheidhmchláir, cuir d’ainm roghnaithe in ionad `omniroute`.
 
-### 4.4 Imscartha den Chéad Uair
+### 4.4 An Chéad Imscaradh
 
 ```powershell
 flyctl deploy
@@ -130,34 +130,36 @@ flyctl deploy
 
 ---
 
-## 5. Paraiméadair Riachtanacha
+## 5. Paraiméadair Riachtanach
 
-Moltar don tionscadal seo na paraiméadair seo a leanas a chur ar bun ar Fly.io.
+Molann an tionscadal seo na paraiméadair seo a leanas ar a laghad a chumrú ar Fly.io.
 
-### 5.1 Paraiméadair Cruthaithe
+### 5.1 Paraiméadair Fhíoraithe
 
-Úsáíodh na paraiméadair seo in imscarthaí iarbhír ar an bhfeidhmchlár reatha `omniroute`:
+Baineadh úsáid as na paraiméadair seo in imscaradh iarbhír ar an bhfeidhmchlár `omniroute` reatha:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (riachtanach sa táirge — úsáidte le haghaidh fíordheimhniú droichid WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (riachtanach i dtáirgeadh — a úsáidtear le haghaidh fíordheimhniú droichead WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 Maidir le `INITIAL_PASSWORD`
 
-Ní shocraíonn an tionscadal reatha `INITIAL_PASSWORD` toisc nach gá é don imscaradh seo.
+Ní shocraíonn an tionscadal reatha `INITIAL_PASSWORD` mar ní éilíonn an t-imscaradh seo é.
 
-Más rud é nach bhfuil sé socraithe:
+Mura bhfuil sé socraithe:
 
-- Taispeánfaidh an logáil túsaimhsearach go bhfuil an pasfhocal réamhshocraithe ina `CHANGEME`
-- Ba cheart duit pasfhocal logála a athrú i socruithe an chórais chomh luath agus is féidir tar éis an imscartha
+- Cruthaíonn tú pasfhocal an deais sa draoi bordála ar an gcéad chuairt. Críochnaigh an chéim pasfhocail: má dhéantar é a scipeáil, múchfar logáil isteach an deais, rud a fhágann go mbeidh an painéal ar oscailt do dhuine ar bith atá in ann an app URL a bhaint amach
+- Sroicheann seachfhreastalaí Fly an aip ó sheoladh neamh-lúbtha, mar sin tar éis duit an focal faire a chur isteach iarrann an draoi comhartha bootstrap aon-uaire, a phriontálann an app chuig a logáil ag an nóiméad sin: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Má tá an líne sin scrollaithe amach as an logáil, atosú ar an app agus cuir isteach an draoi arís a phriontáil comhartha nua
 
-Más mian leat pasfhocal an chúlra a thúsú gan teagmháil, is féidir leat é a chur leis ina dhiaidh sin:
+Chun an focal faire a shocrú ina ionad sin, cuir leis é roimh an gcéad chuairt ar an deais (a luaithe a shábhálfar pasfhocal, ní thugtar aird ar `INITIAL_PASSWORD` ):
 
 - `INITIAL_PASSWORD`
+
+---
 
 ## 6. Paraiméar molta
 
@@ -259,41 +261,41 @@ flyctl secrets set INITIAL_PASSWORD=your-strong-password -a omniroute
 
 ---
 
-## 8. Ag amharc ar pharaiméirí reatha
+## 8. Ag Breathnú ar Pharaiméadair Reatha
 
 ```powershell
 flyctl secrets list -a omniroute
 ```
 
-Má thaispeáin leathanach na `Rúndiamhracha` sa chonsól na hathróga a bhfuiltear ag súil leo, seiceáil:
+Mura dtaispeánann an leathanach `Secrets` sa chonsól na hathróga ionchais, seiceáil:
 
-- Go bhfuil tú ag amharc ar an bhfeidhmchlár `omniroute`
+- Go bhfuil tú ag féachaint ar an bhfeidhmchlár `omniroute`
 - Go bhfuil an luach `app` i `fly.toml` ag teacht leis an bhfeidhmchlár sa chonsól
 
 ---
 
-## 9. Nuashonruithe agus Scaoileadh ina dhiaidh sin
+## 9. Nuashonruithe agus Eisiúintí ina dhiaidh sin
 
-Tar éis nuashonruithe cóid, is simplí an próiseas scaoiladh:
+Tar éis nuashonruithe cód, tá an próiseas scaoileadh simplí:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Má theastaíonn uait paraiméirí a nuashonrú gan cód a athrú:
+Más gá duit ach paraiméadair a nuashonrú gan cód a athrú:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Déanfaidh Fly uasghrádú rollaigh ar na meaisíní go huathoibríoch.
+Déanfaidh Fly nuashonrú rollach ar mheaisíní go huathoibríoch.
 
-### 9.1 Ag Rianú Nuashonruithe stór上游 Ag Coinneáil `fly.toml` do Fhorc
+### 9.1 Nuashonruithe Stórála In aghaidh an tSrutha a Rianú agus Do Forc á `fly.toml`
 
-Má tá an stór reatha ina fhorc agus más mian leat nuashonruithe a shioncronú ón stór上游 `https://github.com/diegosouzapw/OmniRoute`, lean an sreabhadh oibre seo a leanas.
+Más forc é an stór reatha agus más mian leat nuashonruithe a shioncronú ón `https://github.com/cheaper-inference/OmniRoute` in aghaidh an tsrutha , lean an sreabhadh oibre thíos.
 
-Ar dtús, dearbhaigh do remotes:
+Ar dtús, fíoraigh do chianrialtáin:
 
 ```powershell
 git remote -v
@@ -301,32 +303,31 @@ git remote -v
 
 Ba cheart duit a fheiceáil ar a laghad:
 
-- `origin` ag cur in iúl do do fhorc féin
-- `upstream` ag cur in iúl don bhunstór
+- `origin` dírithe ar do fhorc féin
+- `upstream` dírithe ar an stór bunaidh
 
-Má `upstream` gan cumrú, cuir é leis:
+Mura bhfuil `upstream` cumraithe, cuir leis:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git`
-
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Sula sioncrónú leis an stór上游, faigh na tiomantaí is déanaí agus na clibeanna:
+Sula ndéanann tú sioncronú le sruth, faigh na gealltanais agus na clibeanna is déanaí:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Seiceáil an leagan reatha agus na clibeanna upstream:
+Seiceáil an leagan reatha agus na clibeanna in aghaidh an tsrutha:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Nóta: Is é leagan reatha an tionscadail ná `v3.8.0`. Coinnítear na tagairtí `v3.4.7` thíos mar shamlanna stairiúla amháin. Le haghaidh scaoilteanna fíor, úsáid `:latest` nó an clib leagan reatha (m.sh. `:v3.8.0`).
+> Nóta: Is é leagan reatha an tionscadail `v3.8.0`. Coimeádtar na tagairtí `v3.4.7` thíos mar shamplaí stairiúla amháin. Le haghaidh eisiúintí iarbhír, úsáid `:latest` nó an chlib leagan reatha (m.sh. `:v3.8.0`).
 
-Más mian leat an príomhchuid is déanaí upstream a chumasc agus `fly.toml` do fhorc a choinneáil go forlúiteach, lean an sreabhadh oibre seo:
+Más mian leat an `main` in aghaidh an tsrutha is déanaí a chumasc agus `fly.toml` do fhorc á choinneáil go láidir agat, lean an sreabhadh oibre seo:
 
 ```powershell
 git merge upstream/main
@@ -338,32 +339,32 @@ git push origin main
 
 Nótaí:
 
-- Sioncrónóidh `git merge upstream/main` an chód is déanaí ón bhunstór
-- Athshlánóidh `git checkout HEAD~1 -- fly.toml` `fly.toml` do fhorc féin ó roimh an chumasc
-- Muna ndearna an stór上游 aon athrú ar `fly.toml`, ní thabharfaidh an chéim seo aon difríochtaí isteach
-- Mura ndearna an stór上游 aon athrú ar `fly.toml`, cinnteoidh an chéim seo nach ndéanfar ainm d'fheidhmchlár Fly, mount an vol, réigiún, agus cumraíocht scaoilte eile atá ar leith le do fhorc ascríobh
+- Sioncrónaíonn `git merge upstream/main` an cód is déanaí ón stór bunaidh
+- Déanann `git checkout HEAD~1 -- fly.toml` do chuid `fly.toml` féin a athchóiriú ó roimh an cumasc
+- Más rud é nach raibh in aghaidh srutha mhodhnú `fly.toml`, ní bheidh an chéim seo a thabhairt isteach aon difríochtaí
+- Má d'athraigh in aghaidh an tsrutha `fly.toml`, cinntíonn an chéim seo nach bhfuil ainm do fheidhmchláir Fly, gléas toirte, réigiún agus cumraíocht imlonnaithe forc-shonrach eile forscríofa
 
-Más mian leat ailíniú le clib scaoilte ar leith (m.sh. `v3.4.7`), dearbhaigh ar dtús go bhfuil an chlib san áireamh cheana féin i `upstream/main`:
+Más mian leat ailíniú le clib scaoileadh ar leith (m.sh. `v3.4.7`), deimhnigh ar dtús go bhfuil an chlib san áireamh cheana féin i `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Is éard is comhartha rathúil ann ná go bhfuil an leagan sin san áireamh cheana féin ag `upstream/main`; is féidir leat simplí `upstream/main` a chumasc.
+Ciallaíonn tuairisceán rathúil go bhfuil an leagan sin ag `upstream/main` cheana féin; is féidir leat `upstream/main` a chumasc go simplí.
 
-### 9. 2 Seqencing scaoilte chaighdeánach tar éis sioncrónú leis an stór上游
+### 9.2 Seicheamh Caighdeánach Eisiúna Tar éis Sioncronú In Aghaidh an tSrutha
 
-Tar éis sioncrónú leis an bhunstór, lean an t-ord scaoilte molta seo:
+Tar éis sioncronaithe leis an stór bunaidh, lean an t-ordú scaoileadh molta seo:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Athshlán `fly.toml` na forca
+3. Athchóirigh `fly.toml` an fhorc
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Is é seo an sreabhadh oibre fíor a úsáideadh agus an tionscadal reatha á uasghrádú go `v3.4.7` (dtagraíonn an sampla do leagan stairiúil; is é an leagan reatha fíor ná `v3.8.0`).
+Is é seo an sreabhadh oibre iarbhír a úsáidtear chun an tionscadal reatha a uasghrádú go `v3.4.7` (tagraíonn an sampla do leagan stairiúil; is é an leagan reatha iarbhír `v3.8.0`).
 
 ---
 
@@ -419,14 +420,14 @@ Mais amharcann tú `/app/data/...` ina ionad, tá `DATA_DIR` cumraithe go míche
 
 ## 12. Saincheisteanna Coitianta
 
-### 12.1 Tá an Leathanach `Secrets` Folamh
+### 12.1 `Secrets` Tá an Leathanach Folamh
 
-De ghnáth, tá dhá chúis:
+De ghnáth bíonn dhá chúis ann:
 
-- Níl tú tar éis `flyctl secrets set` a rith fós
-- Tá tú ag breathnú ar fheidhmchlár difriúil (m.sh. `oroute` seachas `omniroute`)
+- Níor rith tú `flyctl secrets set` fós
+- Tá tú ag féachaint ar fheidhmchlár eile (m.sh. `oroute` in ionad `omniroute`)
 
-### 12.2 Tuairiscíonn `flyctl deploy` `app not found`
+### 12.2 Tuairiscí `flyctl deploy` `app not found`
 
 Cruthaigh an feidhmchlár ar dtús:
 
@@ -434,23 +435,23 @@ Cruthaigh an feidhmchlár ar dtús:
 flyctl apps create omniroute
 ```
 
-### 12.3 Theipeann ar Pharsáil `fly.toml`
+### 12.3 `fly.toml` Theipeann ar Pharsáil
 
-Seiceáil an méid seo a leanas:
+Seiceáil na rudaí seo a leanas:
 
-- An bhfuil carachtair mhíthuiscinte sna nótaí
-- An bhfuil athfhriotal agus eangú TOML ceart
+- Cibé an bhfuil carachtair garbled i dtuairimí
+- Cibé an bhfuil an lua TOML agus an eangú ceart
 
-### 12.4 Níl an Sonraí á Sábháil
+### 12.4 Nach bhfuil Sonraí Marthanach
 
-Fíoraigh an dá rud seo a leanas:
+Fíoraigh an dá cheann seo a leanas:
 
-- Go bhfuil `destination = '/data'` san `fly.toml`
-- Go bhfuil `DATA_DIR` socraithe go `/data`
+- `fly.toml` tá `destination = '/data'`
+- Tá `DATA_DIR` socraithe go `/data`
 
-### 12.5 An Féidir Leis Seimhneadh gan `INITIAL_PASSWORD`?
+### 12.5 An Féidir É Rith Gan `INITIAL_PASSWORD`?
 
-Is féidir, sí. Rithfidh sé leis an pasfhocal réamhshocraithe `CHAGNAIGHME`. Moladh pasfhocal an chúlra a athrú chomh luath agus is féidir i dtáirgeadh.
+Tá. Le `INITIAL_PASSWORD` unset, cruthaíonn tú pasfhocal an deais sa draoi bordála ar an gcéad chuairt (clúdaíonn cuid 5.2 an comhartha bootstrap aonuaire agus céim an phasfhocail).
 
 ---
 

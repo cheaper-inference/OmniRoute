@@ -4,11 +4,9 @@
 
 ---
 
-> **Fonte de referência:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Última atualização:** 2026-09-02 — v3.8.51
-> **Público-alvo:** Engenheiros responsáveis pela manutenção de integrações furtivas específicas de fornecedores.
+> **Fonte da verdade:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Audiência:** Engenheiros que mantêm integrações furtivas específicas do fornecedor.
 
-O OmniRoute integra-se com fornecedores cujos pontos de acesso identificam ativamente clientes não oficiais através de impressões digitais (TLS JA3/JA4, ordenação de cabeçalhos, estrutura do corpo JSON, tokens de integridade). Esta página documenta as superfícies de ocultação disponibilizadas pelo OmniRoute e os locais onde são implementadas.
+OmniRoute integra-se com fornecedores cujas arestas identificam ativamente clientes não oficiais (TLS JA3/JA4, ordenação de cabeçalhos, formato do corpo JSON, tokens de integridade). Esta página documenta as superfícies furtivas OmniRoute expõe e onde são implementadas.
 
 ## Aviso Legal e Ético
 
@@ -77,9 +75,9 @@ antes de alegar paridade com um browser upstream.
 
 ---
 
-## Pacote de Ocultação do Claude Code
+## Pacote furtivo de código Claude
 
-Quando `cliCompatMode` está ativado, o OmniRoute reformata os pedidos Claude enviados para que sejam indistinguíveis do tráfego do `claude-cli`. Três módulos colaboram:
+Quando `cliCompatMode` está ativado, OmniRoute remodela os pedidos Claude de saída para que sejam indistinguíveis do tráfego `claude-cli`. Três módulos colaboram:
 
 ### `claudeCodeFingerprint.ts`
 
@@ -89,53 +87,56 @@ Calcula a impressão digital `cc_version` de 3 caracteres incorporada no cabeça
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (codificado diretamente; corresponde ao cliente oficial)
-- Entradas: caracteres nos índices 4, 7 e 20 do texto da primeira mensagem do utilizador + cadeia da versão
+- `FINGERPRINT_SALT = "59cf53e54c78"` (codificado; corresponde ao cliente oficial)
+- Entradas: caracteres no índice 4, 7, 20 do texto da primeira mensagem do utilizador + versão string
 - Saída: prefixo hexadecimal de 3 caracteres
 
-### `claudeCodeCCH.ts` (Hash de Conteúdo do Cliente)
+### `claudeCodeCCH.ts` (hash de conteúdo do cliente)
 
-Verificação de integridade do lado do servidor que a CLI oficial do Claude Code calcula através de Bun/Zig. O OmniRoute volta a implementá-la com `xxhash-wasm`:
+A integridade do lado do servidor verifica o código Claude oficial CLI calcula através de Bun/Zig. OmniRoute reimplementações com `xxhash-wasm`:
 
-1. Serializar o corpo com o marcador de posição `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Valor hexadecimal em minúsculas de 5 caracteres, preenchido com zeros
-4. Substituir `cch=00000;` pelo token calculado
+1. Serializar o corpo com espaço reservado `cch=00000;`
+2. Crie a vista de hash com duas substituições de texto simples, por esta ordem (`hashView()`):
+   - cada correspondência de `/"model":"[^"]*"/g` passa a ser `"model":""` — a correspondência para no primeiro `"`, pelo que um valor com uma aspa de escape (`"model":"a\"b"`) é esvaziado apenas até essa cotação, como o cliente faz
+   - cada correspondência de `/"max_tokens":\d+,|,?"max_tokens":\d+/g` é removida — apenas valores numéricos, a qualquer profundidade
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Hexadecimal minúsculo de 5 caracteres com preenchimento de zero
+5. Substitua `cch=00000;` pelo token computado
 
 Constantes:
 
-- Seed: `0x6e52736ac806831e`
+- Semente: `0x4d659218e32a3268` (corresponde às capturas de loopback do código Claude 2.1.252 e 2.1.322)
 - Padrão: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Insere um **ligador de largura zero** Unicode (`U+200D`) após o primeiro carácter de nomes de clientes "sensíveis", para que os filtros a montante não os consigam localizar através de grep. Lista de palavras predefinida:
+Insere um Unicode** marceneiro de largura zero** (`U+200D`) após o primeiro caractere dos nomes de clientes "confidenciais", para que os filtros upstream não os possam receber. Lista de palavras padrão:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Aplicado a: blocos `system`, todo o `messages[].content` e `tools[].description` / `tools[].function.description`. Pode ser substituído pelo operador através de `setSensitiveWords()`.
+Aplicado a: blocos `system`, todos `messages[].content` e `tools[].description` / `tools[].function.description`. Substituível pelo operador através de `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — fornecedores `anthropic-compatible-cc-*`
+### fornecedores `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-Para relays Anthropic de terceiros que apenas aceitam tráfego do "Claude Code real":
+Para relés Anthropic de terceiros que apenas aceitam tráfego de "código Claude real":
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` por predefinição
-- A opção "Ativar beta de redação do raciocínio" por ligação adiciona `redact-thinking-2026-02-12` quando um serviço a montante Compatível com CC requer especificamente fluxos de raciocínio redigidos
-- A opção "Ativar apresentação de raciocínio resumido" por ligação armazena `providerSpecificData.requestDefaults.summarizeThinking` e adiciona `display: "summarized"` aos pedidos de raciocínio Compatíveis com CC que ainda não tenham definido um modo de apresentação
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (família Opus/Sonnet 4.x)
-- Caminho predefinido: `/v1/messages?beta=true`
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` por defeito
+- A alternância "Ativar beta de pensamento redigido" por ligação adiciona `redact-thinking-2026-02-12` quando um upstream compatível CC requer especificamente fluxos de pensamento redigidos
+- A alternância "Ativar visualização de pensamento resumido" por ligação armazena `providerSpecificData.requestDefaults.summarizeThinking` e adiciona `display: "summarized"` a CC Pedidos de pensamento compatíveis que ainda não definiram um modo de visualização
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (família Opus/Sonnet 4. x)
+- Caminho padrão: `/v1/messages?beta=true`
 
-Módulos relacionados no mesmo pacote:
+Módulos irmãos no mesmo pacote:
 
-- `claudeCodeConstraints.ts` — regras de temperatura + controlo de cache
-- `claudeCodeToolRemapper.ts` — remapeamento de nomes de ferramentas
-- `claudeCodeExtraRemap.ts` — normalização adicional da carga útil
+- regras de controlo da cache `claudeCodeConstraints.ts` — temperatura +
+- remapeamento do nome da ferramenta `claudeCodeToolRemapper.ts` —
+- normalização de carga extra `claudeCodeExtraRemap.ts` —
 
 ---
 
@@ -167,7 +168,7 @@ A aplicação upstream está ativada** lado de Google** , nada que OmniRoute pos
 4. **Utilizar rede upstream estável e controlada pelo operador** e evite partilhar uma conta com utilizadores ou cargas de trabalho não relacionadas.
 5. **Se banido** : recurso via `support.google.com` → "Restaurar acesso Workspace/Account " com o corpo de resposta `quota_exceeded` / `service disabled` exacto Google enviado. A restauração não é garantida.
 
-A referência ambiental documenta as implicações de conta e gastos de cada modo de créditos.
+A referência ambiental documenta as implicações da conta e dos gastos de cada modo de créditos.
 
 #### Não apenas `=always`: Antigravity OAuth encaminhamento em geral
 
@@ -195,7 +196,7 @@ Pontos de toque:
 
 - `open-sse/executors/antigravity.ts` — lê `process.env.ANTIGRAVITY_CREDITS`
 - canalização de credenciais `src/lib/oauth/providers/antigravity.ts` —
-- Relatório original do incidente: Discussão [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Relatório original do incidente: Discussão [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

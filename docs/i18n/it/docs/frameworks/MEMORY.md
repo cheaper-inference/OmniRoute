@@ -4,30 +4,13 @@
 
 ---
 
-> **Fonte autorevole:** `src/lib/memory/` e `src/app/api/memory/`
-> **Ultimo aggiornamento:** 2026-06-28 — v3.8.40 (disattivata per impostazione predefinita + aggiornamento della quantizzazione int8)
+> **Fonte della verità:** `src/lib/memory/` e `src/app/api/memory/`
 
-OmniRoute fornisce una memoria conversazionale persistente associata alla chiave API (e
-facoltativamente all'ID di sessione). I ricordi vengono estratti automaticamente dalle risposte dell'LLM
-tramite un leggero sistema di corrispondenza basato su espressioni regolari e reinseriti nelle richieste
-successive come messaggio di sistema iniziale (o come primo messaggio utente per i provider che
-rifiutano il ruolo di sistema).
+OmniRoute fornisce memoria conversazionale persistente codificata dalla chiave API (e facoltativamente dall'ID di sessione). Le memorie vengono estratte automaticamente dalle risposte LLM tramite la corrispondenza di modelli regex leggeri e reinserite nelle richieste successive come messaggio di sistema principale (o primo messaggio utente per i fornitori che rifiutano il ruolo di sistema).
 
-> **La memoria è DISATTIVATA per impostazione predefinita (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> ora è `false` (`src/lib/memory/settings.ts`). L'abilitazione della memoria inserisce fino a
-> `maxTokens` (~2k) di contesto recuperato in **ogni** richiesta di chat, con conseguenti
-> costi — una spesa inaspettata per le nuove installazioni e per i client che gestiscono
-> autonomamente il proprio contesto. Attivala esplicitamente in **Impostazioni → Memoria** (la
-> scheda `MemorySkillsTab` mostra un avviso relativo al costo in token quando la memoria è abilitata).
-> Un client può escludere dalla memoria una singola richiesta tramite l'header di richiesta
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — consulta la tabella degli header di richiesta in
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Una richiesta senza memoria imposta
-> `memoryOwnerId = null`, disabilitando **sia** l'inserimento della memoria **sia** quello delle skill
-> per tale richiesta (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **La memoria è OFF per impostazione predefinita (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` ora è `false` (`src/lib/memory/settings.ts`). L'abilitazione della memoria inserisce fino a `maxTokens` (~ 2k) del contesto recuperato** ogni** richiesta di chat, a cui viene — un costo sorprendente per le nuove installazioni e per i clienti che gestiscono il proprio contesto. Accettare esplicitamente sotto** Impostazioni → Memoria** ( `MemorySkillsTab` mostra un avviso di avviso sul costo del token quando la memoria è abilitata). Un client può disattivare una singola richiesta con l'intestazione della richiesta `x-omniroute-no-memory` (`true`/`1`/`yes`) — vedere la tabella dell'intestazione della richiesta in [API_REFERENCE.md](../reference/API_REFERENCE.md). Una richiesta senza memoria imposta `memoryOwnerId = null`, che disabilita** Entrambi** iniezione di memoria e abilità per quella richiesta (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-La memoria è **circoscritta a ciascuna chiave API**, non a ciascun utente: ogni richiesta autenticata
-con la stessa chiave API condivide lo stesso pool di memoria, con un'ulteriore
-segmentazione facoltativa tramite `sessionId`.
+La memoria è** ambito per chiave API** , non per utente — ogni richiesta autenticata con la stessa chiave API condivide lo stesso pool di memoria, con ulteriore ambito facoltativo da parte di `sessionId`.
 
 ## Architettura
 
@@ -345,25 +328,15 @@ mentre l'ambito è uno tra `session`, `apiKey` o `global`. L'ambito predefinito 
 
 ## Estrazione dei fatti (`extraction.ts`)
 
-L'estrazione è **basata su espressioni regolari**, non su LLM: viene eseguita nello stesso processo con
-`setImmediate()`, quindi non blocca mai il flusso della risposta:
+L'estrazione è** basato su regex** , non — basato su LLM, viene eseguito in-process con `setImmediate()`, quindi non blocca mai il flusso di risposta:
 
-- **Pattern di preferenza** → `MemoryType.FACTUAL`
-  (ad es. `Preferisco …`, `Mi piace molto …`, `il mio preferito è …`, `Odio …`)
-- **Pattern decisionali** → `MemoryType.EPISODIC`
-  (ad es. `Userò …`, `Ho scelto …`, `Ho optato per …`, `Adotterò …`)
-- **Pattern comportamentali** → `MemoryType.FACTUAL`
-  (ad es. `Di solito …`, `Faccio sempre …`, `Tendo a …`)
+- **Modelli di preferenza** → `MemoryType.FACTUAL` (ad esempio `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Modelli decisionali** → `MemoryType.EPISODIC` (ad esempio `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Modelli di motivi** → `MemoryType.FACTUAL` (ad esempio `I usually …`, `I always …`, `I tend to …`)
 
-Ogni corrispondenza viene sanificata (`trim`, compressione degli spazi vuoti, limite di 500 caratteri),
-deduplicata all'interno del batch tramite una chiave stabile `factKey(category, content)` e
-archiviata tramite `createMemory()` con i metadati
-`{category, extractedAt, source: "llm_response"}`. Il testo di input è limitato a
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`): quando è più lungo, viene usata la **parte finale** del testo,
-in modo che il contenuto più recente dell'assistente venga sempre considerato.
+Ogni corrispondenza viene ripulita (`trim`, compressione degli spazi bianchi, limitata a 500 caratteri), deduplicata all'interno del batch tramite un `factKey(category, content)` stabile e archiviata tramite `createMemory()` con metadati `{category, extractedAt, source: "llm_response"}`. Il testo immesso è limitato a 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — quando è più lungo, il** coda** del testo viene utilizzato in modo che partecipi sempre il contenuto dell'assistente più recente.
 
-`extractFactsFromText(text)` viene esportata per i test e restituisce i fatti strutturati
-senza archiviarli.
+`extractFactsFromText(text)` viene esportato per i test e restituisce i fatti strutturati senza memorizzarli.
 
 ## Recupero (`retrieval.ts`)
 
@@ -721,22 +694,22 @@ Benchmark su un tipico server x86 a 4 core (testi di circa 100 token ciascuno):
 
 ---
 
-## Pattern di estrazione dei fatti (v3.8.16+)
+## Modelli di estrazione dei fatti (v3.8.16 +)
 
-Il modulo `extraction.ts` (`src/lib/memory/extraction.ts`) utilizza la **corrispondenza tramite espressioni regolari** per estrarre fatti strutturati dai messaggi delle conversazioni. Comprendere questi pattern aiuta a ottimizzare la qualità dell'estrazione per il proprio caso d'uso.
+Il modulo `extraction.ts` (`src/lib/memory/extraction.ts`) utilizza** corrispondenza di modelli regex** per estrarre fatti strutturati dai messaggi di conversazione. Comprendere questi modelli ti aiuta a ottimizzare la qualità di estrazione per il tuo caso d'uso.
 
-### Categorie di pattern predefinite
+### Categorie di modelli predefiniti
 
-| Categoria           | Pattern di esempio                                               | Dati acquisiti                      |
-| ------------------- | ---------------------------------------------------------------- | ----------------------------------- |
-| PREFERENCE_PATTERNS | `"Preferisco <X>"`, `"Mi piace <X>"`, `"Odio <X>"`               | Preferenze dell'utente              |
-| DECISION_PATTERNS   | `"Userò <X>"`, `"Ho deciso di <X>"`, `"Ho scelto <X>"`           | Decisioni dell'utente (episodiche)  |
-| PATTERN_PATTERNS    | `"Di solito <X>"`, `"Faccio sempre <X>"`, `"Non faccio mai <X>"` | Pattern comportamentali persistenti |
+| Categoria           | Modello di esempio                                          | Cattura                             |
+| ------------------- | ----------------------------------------------------------- | ----------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Preferenze dell'utente              |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Decisioni dell'utente (episodico)   |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Modelli comportamentali persistenti |
 
-### Pattern di esempio (semplificati)
+### Modelli di esempio (semplificati)
 
 ```ts
-// Da src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -753,30 +726,24 @@ const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\
 
 Quando un utente dice:
 
-> "Preferisco TypeScript. Userò Postgres per questo progetto. Eseguo sempre il commit prima del push. Python non mi piace."
-> L'estrazione produce 4 ricordi:
+> "Preferisco TypeScript. Utilizzerò Postgres per questo progetto. Mi impegno sempre prima di eseguire il push. Non mi piace Python." L'estrazione produce 4 memorie:
 >
-> | Chiave                               | Categoria  | Tipo      | Contenuto                      |
-> | ------------------------------------ | ---------- | --------- | ------------------------------ |
-> | `preference:typescript`              | preferenza | fattuale  | "TypeScript"                   |
-> | `decision:postgres_for_this_project` | decisione  | episodico | "Postgres per questo progetto" |
-> | `pattern:commit_before_pushing`      | pattern    | fattuale  | "commit prima del push"        |
-> | `preference:python`                  | preferenza | fattuale  | "Python"                       |
+> | Chiave | Categoria | Tipo | Contenuto | | ------------------------------------- | ---------- | -------- | --------------------------- | | `preference:typescript` | preferenza | fattuale | "TypeScript" | | `decision:postgres_for_this_project` | decisione | episodico | "Postgres per questo progetto" | | `pattern:commit_before_pushing` | modello | fattuale | "commit before push" | | `preference:python` | preferenza | fattuale | "Python" |
 
-### Limiti dell'estrazione
+### Limiti di estrazione
 
-Per evitare un'estrazione incontrollata, si applicano i seguenti limiti:
+Per evitare estrazioni incontrollate, si applicano i seguenti limiti:
 
 | Lunghezza minima del contenuto | 3 caratteri |
-| Lunghezza massima del contenuto| 500 caratteri |
+| Lunghezza massima del contenuto | 500 caratteri |
 
 ### Quando disabilitare l'estrazione
 
-L'estrazione viene eseguita automaticamente ogni volta che la memoria è abilitata; non esiste un'opzione separata per la sola estrazione. Per disattivarla, disabilitare completamente la memoria (`enabled: false` tramite `PUT /api/settings/memory`). È opportuno farlo quando:
+L'estrazione viene eseguita automaticamente ogni volta che la memoria è abilitata; non esiste un interruttore separato di sola estrazione. Per disattivarlo, disabilitare completamente la memoria (`enabled: false` tramite `PUT /api/settings/memory`). Considera di farlo quando:
 
-- Il volume dei messaggi è elevato e il costo dell'estrazione non è trascurabile
-- Le conversazioni sono prevalentemente transitorie (chat, debug) e non hanno valore a lungo termine
-- Il contesto viene già acquisito tramite plugin personalizzati
+- Hai un volume di messaggi elevato e il costo di estrazione non è banale
+- Le tue conversazioni sono per lo più transitorie (chat, debug) senza valore a lungo termine
+- Stai già catturando il contesto tramite plugin personalizzati
 
 ---
 

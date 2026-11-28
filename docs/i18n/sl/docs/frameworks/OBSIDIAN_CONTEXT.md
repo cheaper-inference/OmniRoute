@@ -112,58 +112,48 @@ dostopa; veljavna okoljska poverilnica, ki se razreši v `env-key`, ostaja podpr
 Preverjeni ključi brez konfiguracije Obsidian za posamezni ključ ohranijo globalno nadomestno konfiguracijo.
 Štiri orodja `obsidian_sync_*` ohranijo ločeno vedenje žetonov za sinhronizacijo.
 
-## Orodja MCP (22)
+## orodja MCP (22)
 
-Opredeljena so v `open-sse/mcp-server/tools/obsidianTools.ts`. Žeton/osnovni URL se razrešita
-pri vsakem klicu (najprej za posamezni ključ API, nato globalno). Orodja, ki dostopajo do **sinhronizacijskega strežnika**
-OmniRoute (štiri orodja `obsidian_sync_*`), dodatno zahtevajo žeton za preverjanje pristnosti pri sinhronizaciji, konfiguriran
-v nastavitvah OmniRoute.
+Definirano v `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL se razrešijo na klic (najprej na ključ API, nato globalno). Orodja, ki zadenejo OmniRoute** sinhronizacijski strežnik** (štiri orodja `obsidian_sync_*` ) poleg tega zahtevajo žeton za avtificiranje sinhronizacije, konfiguriran v nastavitvah OmniRoute.
 
 ### Orodja za branje (`read:obsidian`)
 
-| Orodje                       | Opis                                                                                                                   |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Preveri, ali je lokalni REST API dosegljiv in ali je preverjanje pristnosti uspešno.                                   |
-| `obsidian_search_simple`     | Iskanje po celotnem besedilu vsebine zapiskov; vrne odlomke s potmi do datotek.                                        |
-| `obsidian_search_structured` | Iskanje z izrazom JSON Logic (filtri and/or/regex/path).                                                               |
-| `obsidian_read_note`         | Prebere zapisek glede na pot, relativno na trezor; po želji določen naslov/blok/frontmatter.                           |
-| `obsidian_list_vault`        | Navede datoteke in imenike v trezorju (drevo vnosov).                                                                  |
-| `obsidian_get_document_map`  | Pridobi strukturo naslovov zapiska kot preslikavo naslovov → številke vrstic.                                          |
-| `obsidian_get_note_metadata` | Pridobi frontmatter, oznake, povezave ter število znakov/besed brez celotne vsebine.                                   |
-| `obsidian_get_active_file`   | Pridobi pot in vsebino trenutno aktivne datoteke v Obsidianu.                                                          |
-| `obsidian_get_periodic_note` | Pridobi dnevni/tedenski/mesečni periodični zapisek za datum (če je izpuščen, za danes).                                |
-| `obsidian_get_tags`          | Navede vse oznake v trezorju in pogostost njihove uporabe.                                                             |
-| `obsidian_list_commands`     | Navede razpoložljive ID-je ukazov Obsidian (za uporabo z `obsidian_execute_command`).                                  |
-| `obsidian_sync_status`       | Stanje sinhronizacijskega strežnika OmniRoute: delovanje, ime trezorja, vrata, čas delovanja in zadnja sinhronizacija. |
-| `obsidian_sync_conflicts`    | Navede nerešena sinhronizacijska navzkrižja (pot, pot navzkrižja, čas zaznave).                                        |
+| Orodje                       | Opis                                                                                                              |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Preverite, ali je lokalni REST API dosegljiv in preverjen.                                                        |
+| `obsidian_search_simple`     | Iskanje po celotnem besedilu vsebine zapiska; vrne izrezke s potmi do datotek.                                    |
+| `obsidian_search_structured` | Iskanje z uporabo logičnega izraza JSON (filtri and/or/regex/path ).                                              |
+| `obsidian_read_note`         | Preberite opombo po relativni poti trezorja; po želji določen heading/block/frontmatter.                          |
+| `obsidian_list_vault`        | Seznam datotek in imenikov v trezorju (drevo vnosov).                                                             |
+| `obsidian_get_document_map`  | Pridobite strukturo naslovov zapiska kot zemljevid naslovov → številk vrstic.                                     |
+| `obsidian_get_note_metadata` | Pridobite frontmatter, oznake, povezave, število char/word brez celotne vsebine.                                  |
+| `obsidian_get_active_file`   | Pridobite vsebino poti + trenutno aktivne datoteke v Obsidian.                                                    |
+| `obsidian_get_periodic_note` | Pridobite periodično beležko daily/weekly/monthly za datum (danes, če je izpuščen).                               |
+| `obsidian_get_tags`          | Seznam vseh oznak trezorja z njihovimi frekvencami.                                                               |
+| `obsidian_list_commands`     | Seznam razpoložljivih ukazov Obsidian IDs (uporabite z `obsidian_execute_command`).                               |
+| `obsidian_sync_status`       | stanje strežnika za sinhronizacijo OmniRoute : deluje, ime trezorja, vrata, čas delovanja, zadnja sinhronizacija. |
+| `obsidian_sync_conflicts`    | Seznam nerazrešenih sinhronizacijskih sporov (pot, pot spora, zaznano pri).                                       |
 
 ### Orodja za pisanje (`write:obsidian`)
 
 | Orodje                           | Opis                                                                                               |
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Ustvari ali prepiše zapisek z dano vsebino Markdown.                                               |
-| `obsidian_append_note`           | Doda vsebino zapisku; po želji pod določen naslov/blok.                                            |
-| `obsidian_patch_note`            | Natančno doda pred/za ali zamenja vsebino pri naslovu, bloku ali polju frontmatter.                |
-| `obsidian_delete_note`           | Trajno izbriše zapisek iz trezorja.                                                                |
-| `obsidian_move_note`             | Premakne ali preimenuje zapisek znotraj trezorja.                                                  |
-| `obsidian_execute_command`       | Izvede ukaz Obsidian glede na njegov ID ukaza.                                                     |
-| `obsidian_open_file`             | Odpre datoteko v Obsidianu (ustvari jo, če ne obstaja).                                            |
-| `obsidian_sync_trigger`          | Sproži takojšnjo dvosmerno sinhronizacijo trezorja med namizno in mobilno napravo.                 |
-| `obsidian_sync_resolve_conflict` | Razreši sinhronizacijsko navzkrižje: ohrani `local` (mobilno), `remote` (namizno) ali `keep-both`. |
+| `obsidian_write_note`            | Ustvarite ali prepišite zapisek z dano vsebino Markdown.                                           |
+| `obsidian_append_note`           | Dodajanje vsebine zapisku; neobvezno na določeno heading/block.                                    |
+| `obsidian_patch_note`            | Kirurško append/prepend/replace na naslovnem, blokovnem ali sprednjem polju.                       |
+| `obsidian_delete_note`           | Trajno izbrišite opombo iz trezorja.                                                               |
+| `obsidian_move_note`             | Premaknite ali preimenujte zapisek znotraj trezorja.                                               |
+| `obsidian_execute_command`       | Izvedite ukaz Obsidian z njegovim ukazom ID.                                                       |
+| `obsidian_open_file`             | Odpri datoteko v Obsidian (ustvari jo, če ne obstaja).                                             |
+| `obsidian_sync_trigger`          | Sprožite takojšnjo dvosmerno namizno sinhronizacijo mobilnega trezorja ↔.                          |
+| `obsidian_sync_resolve_conflict` | Razrešite spor pri sinhronizaciji: obdržite `local` (mobilno), `remote` (namizno) ali `keep-both`. |
 
 > [!NOTE]
-> Cilji za `obsidian_patch_note` sprejemajo `targetType` z vrednostjo `heading | block | frontmatter`
-> in `operation` z vrednostjo `append | prepend | replace` ter neobvezni
-> `createTargetIfMissing`. Štiri orodja `obsidian_sync_*` komunicirajo z lokalnim sinhronizacijskim
-> strežnikom (privzeto `http://127.0.0.1:27781`) in zahtevajo sinhronizacijski žeton.
+> cilji `obsidian_patch_note` sprejemajo `targetType` od `heading | block | frontmatter` in `operation` od `append | prepend | replace`, z neobveznim `createTargetIfMissing`. Štiri orodja `obsidian_sync_*` komunicirajo z lokalnim sinhronizacijskim strežnikom (`http://127.0.0.1:27781` privzeto) in zahtevajo sinhronizacijski žeton.
 
-### Obsegi
+### Območja
 
-Orodja za branje zahtevajo `read:obsidian`; orodja za pisanje zahtevajo `write:obsidian`. Uveljavljanje
-je enako kot pri Notionu — obravnava ga `withScopeEnforcement()` v
-`open-sse/mcp-server/server.ts`, pogojeno z `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, pri čemer
-dovoljeni obsegi izvirajo iz `OMNIROUTE_MCP_SCOPES` ali konteksta obsegov ključa API. Glejte
-[MCP-SERVER.md](./MCP-SERVER.md).
+Orodja za branje zahtevajo `read:obsidian`; orodja za pisanje zahtevajo `write:obsidian`. Uveljavljanje je enako kot Notion — ki ga obravnava `withScopeEnforcement()` v `open-sse/mcp-server/server.ts`, zaporno na `OMNIROUTE_MCP_ENFORCE_SCOPES=true` in vsiljeno za klicatelje HTTP/SSE, katerih ključ API nima `manage`/`admin`, z dovoljenimi obsegi, pridobljenimi iz `OMNIROUTE_MCP_SCOPES` ali konteksta obsega ključa API. Glej [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Končne točke
 

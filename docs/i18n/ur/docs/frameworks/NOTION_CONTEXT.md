@@ -63,42 +63,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute ٹوکن محفوظ کرتا ہے اور فوراً 1 نتیجے والی آزمائشی تلاش چلاتا ہے؛ اگر Notion
 ایک خرابی آبجیکٹ واپس کرے تو ٹوکن صاف کر دیا جاتا ہے اور کال `400` کے ساتھ ناکام ہو جاتی ہے۔
 
-## MCP ٹولز (6)
+## MCP اوزار (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` میں متعین ہیں۔ ٹوکن کو کال
-کے وقت `getNotionToken()` کے ذریعے حاصل کیا جاتا ہے؛ اگر کوئی ٹوکن کنفیگر نہ ہو تو ٹول
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
-خرابی پھینکتا ہے۔
+`open-sse/mcp-server/tools/notionTools.ts` میں بیان کیا گیا ہے۔ ٹوکن کو کال کے وقت `getNotionToken()` کے ذریعے حل کیا جاتا ہے۔ اگر کوئی بھی کنفیگر نہیں ہے تو ٹول `"Notion integration token not configured. Set it in Settings > Context Sources."` کو پھینک دیتا ہے۔
 
-| ٹول                          | اسکوپ          | تفصیل                                                                                       |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | متنی کوئری کے ذریعے صفحات اور ڈیٹابیسز تلاش کریں (عنوان، IDs، URLs واپس کرتا ہے)۔ صفحہ بند۔ |
-| `notion_get_page`            | `read:notion`  | کسی صفحے کی ID کے ذریعے اس کا مواد اور میٹا ڈیٹا حاصل کریں۔                                 |
-| `notion_list_block_children` | `read:notion`  | کسی بلاک یا صفحے کے تمام ذیلی بلاکس (بلاک ٹری) کی فہرست بنائیں۔ صفحہ بند۔                   |
-| `notion_query_database`      | `read:notion`  | اختیاری `filter` + `sorts` (Notion API فارمیٹ) کے ساتھ ڈیٹابیس کوئری کریں۔ صفحہ بند۔        |
-| `notion_get_database`        | `read:notion`  | ID کے ذریعے ڈیٹابیس کا اسکیما/میٹا ڈیٹا حاصل کریں۔                                          |
-| `notion_append_blocks`       | `write:notion` | موجودہ بلاک یا صفحے میں ذیلی بلاکس شامل کریں (فی ریکوئسٹ زیادہ سے زیادہ 100 بلاکس)۔         |
+| ٹول                          | دائرہ کار      | تفصیل                                                                                           |
+| ---------------------------- | -------------- | ----------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | متن کے استفسار کے ذریعہ صفحات اور ڈیٹا بیس تلاش کریں (عنوان، IDs، URLs واپس کرتا ہے)۔ صفحہ بندی |
+| `notion_get_page`            | `read:notion`  | کسی صفحہ کا مواد اور میٹا ڈیٹا اس کے ID کے ذریعے حاصل کریں۔                                     |
+| `notion_list_block_children` | `read:notion`  | کسی بلاک یا صفحہ (بلاک ٹری) کے تمام بلاک بچوں کی فہرست بنائیں۔ صفحہ بندی                        |
+| `notion_query_database`      | `read:notion`  | اختیاری `filter` + `sorts` (Notion API فارمیٹ) کے ساتھ ڈیٹا بیس سے استفسار کریں۔ صفحہ بندی      |
+| `notion_get_database`        | `read:notion`  | ID کے ذریعے ڈیٹا بیس کا schema/metadata حاصل کریں۔                                              |
+| `notion_append_blocks`       | `write:notion` | بلاک بچوں کو موجودہ بلاک یا صفحہ میں شامل کریں (فی درخواست زیادہ سے زیادہ 100 بلاکس)۔           |
 
 ### ان پٹ پیرامیٹرز
 
-- `notion_search` — `query` (1–500 حروف)، `pageSize` (1–100، ڈیفالٹ 20)،
-  `startCursor` (اختیاری)۔
-- `notion_get_page` — `pageId` (32 حروف پر مشتمل hex یا UUID)۔
-- `notion_list_block_children` — `blockId`، `pageSize` (1–100، ڈیفالٹ 50)،
-  `startCursor` (اختیاری)۔
-- `notion_query_database` — `databaseId`، `filter` (اختیاری، Notion فلٹر فارمیٹ)،
-  `sorts` (اختیاری ارے)، `pageSize` (1–100، ڈیفالٹ 50)، `startCursor` (اختیاری)۔
-- `notion_get_database` — `databaseId`۔
-- `notion_append_blocks` — `blockId`، `children` (بلاک آبجیکٹس کی ارے)،
-  `after` (اختیاری پوزیشن)۔
+- `notion_search` — `query` (1–500 حروف)، `pageSize` (1–100، ڈیفالٹ 20)، `startCursor` (اختیاری)۔
+- `notion_get_page` — `pageId` (32-char hex یا UUID)۔
+- `notion_list_block_children` — `blockId`، `pageSize` (1–100، ڈیفالٹ 50)، `startCursor` (اختیاری)۔
+- `notion_query_database` — `databaseId`، `filter` (اختیاری، Notion فلٹر فارمیٹ)، `sorts` (اختیاری صف)، `pageSize` (1–100، ڈیفالٹ 50)، `startCursor` (اختیاری)۔
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`، `children` (بلاک اشیاء کی صف)، `after` (اختیاری پوزیشن)۔
 
-### اسکوپس
+### دائرہ کار
 
-پڑھنے والے ٹولز کے لیے `read:notion` اور لکھنے والے ٹول کے لیے `write:notion` درکار ہے۔
-اسکوپس کو `open-sse/mcp-server/server.ts` میں `withScopeEnforcement()` کے ذریعے صرف اس وقت
-نافذ کیا جاتا ہے جب `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ہو؛ کال کرنے والے کے مجاز اسکوپس
-`OMNIROUTE_MCP_SCOPES` (کاما سے علیحدہ) یا تصدیق شدہ API کلید کے اسکوپ سیاق سے حاصل ہوتے ہیں۔
-مکمل اسکوپ ماڈل کے لیے [MCP-SERVER.md](./MCP-SERVER.md) دیکھیں۔
+پڑھنے والے ٹولز کو `read:notion` کی ضرورت ہوتی ہے اور لکھنے کے ٹول کو `write:notion` کی ضرورت ہوتی ہے۔ دائرہ کار `open-sse/mcp-server/server.ts` میں `withScopeEnforcement()` کے ذریعے نافذ کیا جاتا ہے جب `OMNIROUTE_MCP_ENFORCE_SCOPES=true`، اور ہمیشہ HTTP/SSE کالر کے لیے جس کی API کلید میں `manage`/`admin` کمی ہوتی ہے؛ کال کرنے والے کی اجازت شدہ اسکوپس `OMNIROUTE_MCP_SCOPES` (کوما سے الگ کردہ) یا تصدیق شدہ API کلید کے دائرہ کار کے سیاق و سباق سے آتی ہیں۔ مکمل دائرہ کار کے ماڈل کے لیے [MCP-SERVER.md](./MCP-SERVER.md) دیکھیں۔
 
 ## اینڈ پوائنٹس
 

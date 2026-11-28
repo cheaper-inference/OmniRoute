@@ -4,9 +4,9 @@
 
 ---
 
-> **ਸੱਚ ਦਾ ਸਰੋਤ:** `electron/` ਵਰਕਸਪੇਸ** ਆਖਰੀ ਵਾਰ ਅੱਪਡੇਟ ਕੀਤਾ:** 2026-06-28 — v3.8.40
+> **ਸੱਚ ਦਾ ਸਰੋਤ:** `electron/` ਵਰਕਸਪੇਸ
 
-OmniRoute ਇੱਕ ਕਰਾਸ-ਪਲੇਟਫਾਰਮ ਡੈਸਕਟੌਪ ਐਪ (Windows / macOS / Linux) ਨੂੰ ਇਸ 'ਤੇ ਬਣਾਇਆ ਗਿਆ ਹੈ**Electron 41** +** ਇਲੈਕਟ੍ਰਾਨ-ਬਿਲਡਰ 26.10** . ਡੈਸਕਟੌਪ ਐਪ Next.js ਸਟੈਂਡਅਲੋਨ ਸਰਵਰ ਨੂੰ ਚਾਈਲਡ ਪ੍ਰਕਿਰਿਆ ਦੇ ਰੂਪ ਵਿੱਚ ਪੈਦਾ ਕਰਦੀ ਹੈ, ਇਸ 'ਤੇ ਇੱਕ `BrowserWindow` ਪੁਆਇੰਟ ਕਰਦੀ ਹੈ, ਅਤੇ ਇੱਕ ਸਿਸਟਮ ਟਰੇ, ਆਟੋ-ਅੱਪਡੇਟਰ, IPC ਬ੍ਰਿਜ, ਅਤੇ ਜ਼ੀਰੋ-ਕਨਫਿਗ ਸੀਕਰੇਟ ਬੂਟਸਟਰੈਪ ਜੋੜਦੀ ਹੈ।
+OmniRoute ਇੱਕ ਕਰਾਸ-ਪਲੇਟਫਾਰਮ ਡੈਸਕਟੌਪ ਐਪ (Windows / macOS / Linux) 'ਤੇ ਬਣਾਇਆ ਗਿਆ ਹੈ**Electron 41** +** ਇਲੈਕਟ੍ਰਾਨ-ਬਿਲਡਰ 26.10** . ਡੈਸਕਟੌਪ ਐਪ Next.js ਸਟੈਂਡਅਲੋਨ ਸਰਵਰ ਨੂੰ ਚਾਈਲਡ ਪ੍ਰਕਿਰਿਆ ਦੇ ਰੂਪ ਵਿੱਚ ਪੈਦਾ ਕਰਦੀ ਹੈ, ਇਸ 'ਤੇ ਇੱਕ `BrowserWindow` ਪੁਆਇੰਟ ਕਰਦੀ ਹੈ, ਅਤੇ ਇੱਕ ਸਿਸਟਮ ਟਰੇ, ਆਟੋ-ਅੱਪਡੇਟਰ, IPC ਬ੍ਰਿਜ, ਅਤੇ ਜ਼ੀਰੋ-ਕਨਫਿਗ ਸੀਕਰੇਟ ਬੂਟਸਟਰੈਪ ਜੋੜਦੀ ਹੈ।
 
 ## ਆਰਕੀਟੈਕਚਰ
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## ਆਟੋ-ਅੱਪਡੇਟ
 
-GitHub ਪ੍ਰਦਾਤਾ (`diegosouzapw/OmniRoute`) ਨਾਲ `electron-updater` ਵਰਤੋਂ ਕਰਦਾ ਹੈ।
+GitHub ਪ੍ਰਦਾਤਾ (`cheaper-inference/OmniRoute`) ਨਾਲ `electron-updater` ਵਰਤੋਂ ਕਰਦਾ ਹੈ।
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC ਦੁਆਰਾ ਰੈਂਡਰਰ ਨੂੰ ਅੱਗੇ ਭੇਜੇ ਗਏ ਇਵੈਂਟ: `checking`, `available`, `not-available`, `downloading` ( `percent` ਦੇ ਨਾਲ), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage ਦਸਤਖਤ ਕਰਨਾ ਵਿਕਲਪਿਕ — ਸੈੱਟ `LI
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ਰੀਲੀਜ਼ਾਂ ਨੂੰ GitHub ਰੀਲੀਜ਼ਾਂ (`diegosouzapw/OmniRoute`) ਵਿੱਚ ਪ੍ਰਕਾਸ਼ਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਇਹ ਉਹ ਥਾਂ ਹੈ ਜਿੱਥੇ `electron-updater` ਨਵੇਂ ਸੰਸਕਰਣਾਂ ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ।
+ਰੀਲੀਜ਼ਾਂ ਨੂੰ GitHub ਰੀਲੀਜ਼ਾਂ (`cheaper-inference/OmniRoute`) ਵਿੱਚ ਪ੍ਰਕਾਸ਼ਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਇਹ ਉਹ ਥਾਂ ਹੈ ਜਿੱਥੇ `electron-updater` ਨਵੇਂ ਸੰਸਕਰਣਾਂ ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ।
 
 ## ਸਮੱਸਿਆ ਨਿਪਟਾਰਾ
 

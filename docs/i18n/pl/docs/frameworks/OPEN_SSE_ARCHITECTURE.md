@@ -235,30 +235,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Obsługuje** 22 strategie routingu** (patrz `src/shared/constants/routingStrategies.ts`):
 
-| Strategia           | Zachowanie                                                                                                                |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Lista uporządkowana pierwszego celu                                                                                       |
-| `weighted`          | Probabilistyczne według wagi docelowej                                                                                    |
-| `round-robin`       | Cyklicznie przeglądaj cele w określonej kolejności                                                                        |
-| `context-relay`     | Przekaż kontekst różnym celom                                                                                             |
-| `fill-first`        | Wypełnij limit przed przejściem do następnego                                                                             |
-| `p2c`               | Siła dwóch wyborów                                                                                                        |
-| `random`            | Jednolite losowe                                                                                                          |
-| `least-used`        | Wybierz ten, który ma najmniejszą liczbę ostatnich zastosowań                                                             |
-| `cost-optimized`    | Najpierw najtańszy zdrowy cel                                                                                             |
-| `reset-aware`       | Świadomość okien resetowania dostawcy                                                                                     |
-| `reset-window`      | Zresetuj routing oparty na oknach                                                                                         |
-| `expiry-first`      | Wydaj jako pierwsze niewykorzystane konto, którego limit wygaśnie                                                         |
-| `headroom`          | Najpierw większość pozostałego zapasu przydziału                                                                          |
-| `quota-weighted`    | Pomiń wyczerpane konta, a następnie skorzystaj z pozostałego limitu ÷ w locie                                             |
-| `strict-random`     | Naprawdę jednolite (bez ważenia jakości)                                                                                  |
-| `auto`              | Użyj punktacji 16-czynnikowej (`autoCombo/`)                                                                              |
-| `lkgp`              | Najpierw ostatni znany dobry dostawca                                                                                     |
-| `context-optimized` | Najlepsze w przypadku żądań o długim kontekście                                                                           |
-| `cache-optimized`   | Przypnij każdy prefiks podpowiedzi wielokrotnego użytku do tego samego konta (trafienia w pamięci podręcznej podpowiedzi) |
-| `fusion`            | Rozwiń równolegle do panelu, a następnie dokonaj syntezy za pomocą sędziego (`fusion.ts`)                                 |
-| `pipeline`          | Etapy łańcucha — Dane wyjściowe każdego celu zasilają następny                                                            |
-| `jev`               | Zapisz się: TypeSafe Jev przyznaje, które wpisy rankingowe są uruchamiane; inne twoje zamówienie                          |
+| Strategia           | Zachowanie                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------- |
+| `priority`          | Lista uporządkowana pierwszego celu                                                               |
+| `weighted`          | Probabilistyczne według wagi docelowej                                                            |
+| `round-robin`       | Cyklicznie przeglądaj cele w określonej kolejności                                                |
+| `context-relay`     | Przekaż kontekst różnym celom                                                                     |
+| `fill-first`        | Wypełnij limit przed przejściem do następnego                                                     |
+| `p2c`               | Siła dwóch wyborów                                                                                |
+| `random`            | Świeże przetasowanie na żądanie                                                                   |
+| `least-used`        | Wybierz ten z najmniejszą liczbą zarejestrowanych żądań                                           |
+| `cost-optimized`    | Najpierw najniższa cena wejściowa w katalogu                                                      |
+| `reset-aware`       | Pilne zresetowanie pozostałego limitu +                                                           |
+| `reset-window`      | Okno przydziału, które resetuje się najwcześniej                                                  |
+| `expiry-first`      | Wydaj jako pierwsze niewykorzystane konto, którego limit wygaśnie                                 |
+| `headroom`          | Najpierw większość pozostałego zapasu przydziału                                                  |
+| `quota-weighted`    | Pomiń wyczerpane konta, a następnie skorzystaj z pozostałego limitu ÷ w locie                     |
+| `strict-random`     | Potasowana talia: każdy cel raz przed powtórzeniem                                                |
+| `auto`              | Użyj punktacji 16-czynnikowej (`autoCombo/`)                                                      |
+| `lkgp`              | Najpierw ostatni znany dobry dostawca                                                             |
+| `context-optimized` | Najpierw największe znane okno kontekstowe                                                        |
+| `cache-optimized`   | Preferuj konto, które prawdopodobnie będzie przechowywać prefiks podpowiedzi w pamięci podręcznej |
+| `fusion`            | Rozwiń równolegle do panelu, a następnie dokonaj syntezy za pomocą sędziego (`fusion.ts`)         |
+| `pipeline`          | Etapy łańcucha — Dane wyjściowe każdego celu zasilają następny                                    |
+| `jev`               | Zapisz się: TypeSafe Jev przyznaje, które wpisy rankingowe są uruchamiane; inne twoje zamówienie  |
 
 ### base.ts (1170 LOC)
 
@@ -346,7 +346,7 @@ Przeważnie jeden plik na dostawcę. Wszystkie klasy executorów rozszerzają `B
 
 ### Typowe wzory
 
-Dostawcy są rozwiązywani przez `getExecutor(providerId)`, który zwraca skonfigurowany executor. Dostawcy OpenAI/Anthropic-compatible używają `DefaultExecutor` (`executors/default.ts`). Zachowanie specyficzne dla dostawcy (podstawowe URL, nagłówki uwierzytelniania, wersja API ) jest konfigurowane w `open-sse/config/providers/`, podczas gdy transformacje treści żądania są obsługiwane w `open-sse/translator/`.
+Dostawcy są rozwiązywani przez `getExecutor(providerId)`, który zwraca skonfigurowany executor. Dostawcy OpenAI/Anthropic-compatible używają `DefaultExecutor` (`executors/default.ts`). Zachowanie specyficzne dla dostawcy (podstawowe URL, nagłówki auth, wersja API ) jest konfigurowane w `open-sse/config/providers/`, podczas gdy transformacje treści żądania są obsługiwane w `open-sse/translator/`.
 
 **Niestandardowe URL** ustawia się poprzez konfigurację dostawcy:
 
@@ -378,7 +378,7 @@ const result = await executor.execute({
 });
 ````
 
-Rozwiązanie przechodzi przez `ExecutorRegistry` (`executors/registry.ts`): każdy wyspecjalizowany executor jest deklarowany we wbudowanej tabeli `executors/index.ts` i rejestrowany przez `registerExecutor(alias, instance)` podczas ładowania modułu; `getExecutor()` sprawdza rejestr i powraca do zapamiętanego `DefaultExecutor` dla dowolnego dostawcy bez specjalistycznego wpisu. Pełne mapowanie executora aliasu → charakteryzuje się złotym testem `tests/unit/executor-map-golden.test.ts`.
+Rozdzielczość przechodzi przez `ExecutorRegistry` (`executors/registry.ts`): każdy wyspecjalizowany executor jest deklarowany we wbudowanej tabeli `executors/index.ts` i rejestrowany przez `registerExecutor(alias, instance)` podczas ładowania modułu; `getExecutor()` sprawdza rejestr i powraca do zapamiętanego `DefaultExecutor` dla dowolnego dostawcy bez specjalistycznego wpisu. Pełne mapowanie executora aliasu → charakteryzuje się złotym testem `tests/unit/executor-map-golden.test.ts`.
 
 ---
 

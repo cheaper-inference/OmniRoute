@@ -178,51 +178,49 @@ npx playwright install chromium
 
 ---
 
-## 杀毒软件误报
+## 防病毒误报
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG 以 `MD:HttpRequest-inf[Susp]` 为由隔离 `README.md`
+### Avast/AVG检疫`README.md`与`MD:HttpRequest-inf[Susp]`
 
-**这是误报。没有任何内容受到感染，也无需采取任何操作。**
+**这是误报。没有任何内容被感染，并且无需采取任何操作。**
 
-Avast 和 AVG 会运行一种启发式检测，将包含大量类似 HTTP 请求链接的纯文本/Markdown 文件标记为可疑。OmniRoute 的 `README.md` 包含在 npm 包中（它列在 `package.json` → `files` 中），因此全局安装后会位于 `node_modules/omniroute/README.md`；其中包含约 15 个 `http://localhost:20128/...` 示例（MCP HTTP/SSE 端点、A2A `.well-known` URL 和 `curl` 代码片段）。这样的链接密度足以触发该启发式检测。
+Avast 和AVG运行启发式方法，标记包含许多 HTTP 请求链接的plain-text/Markdown文件。 OmniRoute的`README.md`包含在 npm 包中（它在`package.json` → `files`中列出），因此它在全局安装—时位于`node_modules/omniroute/README.md`处，并且包含~ 15 个`http://localhost:20128/...`示例（ MCP HTTP/SSE端点、 A2A `.well-known` URL和`curl`片段）。该链接密度足以触发启发式。
 
-如果此问题近期才开始出现：文件的性质并未发生变化。README 扩充了端点表（新增了 MCP HTTP + SSE + A2A）并加入了更多 `curl` 示例，从而超过了检测阈值。
+如果这只是最近才开始：文件没有发生实质性变化。 README扩大了其端点表（添加了MCP HTTP + SSE + A2A ）和更多`curl`示例，这将其推过了阈值。
 
-该文件只是静态文档，不包含任何可执行内容。您可以安全地将其从隔离区恢复。
+该文件是惰性文档，可执行内容为零。您可以安全地将其从隔离区恢复。
 
-**处理方法：**
+**该怎么办：**
 
-1. **停止通知** — 在杀毒软件中排除安装目录（Avast：设置 → 例外），添加全局 `node_modules` 路径和/或 OmniRoute 数据目录（`~/.omniroute/`）。
-2. **报告误报** — <https://www.avast.com/false-positive-file-form.php>，并附上被隔离的 `README.md`。这才是能帮助所有人的解决方式，因为问题在于厂商的启发式检测对文本文件反应过度。
+1. **停止通知**—排除防病毒软件中的安装目录（Avast：设置→例外），添加全局`node_modules`路径and/or OmniRoute数据目录 (`~/.omniroute/`)。
+2. **报告误报**— <https://www.avast.com/false-positive-file-form.php>，附加隔离的`README.md`。这是对每个人都有帮助的修复，因为这是供应商对文本文件的启发式反应过度。
 
-**为什么我们不在自身这一侧“修复”此问题：**所有示例都使用 `http://localhost`，而 localhost 若不引入自签名证书带来的麻烦，就无法使用 `https`。为了规避某一家厂商的启发式检测而篡改文档，会损害所有读者的体验，只为迁就扫描器的缺陷。
+**为什么我们不“解决”这个问题：**这些示例都是`http://localhost`，如果没有自签名证书摩擦， localhost 就不能是`https` 。为了躲避某个供应商的启发而修改文档会伤害每个读者以满足扫描仪错误。
 
-### Kaspersky 将桌面应用标记为 `PDM:Trojan.Win32.Generic`
+### 卡巴斯基将桌面应用程序标记为`PDM:Trojan.Win32.Generic`
 
-**这是行为启发式检测造成的误报。没有任何内容受到感染。** Kaspersky 的 `PDM:` 前缀表示该判定来自其主动防御模块（System Watcher），该模块会判断安装程序执行了哪些操作，而不是将其与已知恶意软件进行匹配。触发检测时，Kaspersky 会“回滚”整个安装过程，即删除已经写入的文件，导致应用损坏或缺失。
+**这是行为启发法的误报。什么都没有被感染。**卡巴斯基的`PDM:`前缀意味着判决来自其主动防御模块（系统观察器），该模块判断安装程序的行为，而不是将其与已知的恶意软件进行匹配。当它启动时，卡巴斯基“回滚”整个安装—删除它已经写入—文件，因此应用程序最终会损坏或丢失。
 
-被标记的文件是桌面应用所捆绑的、已声明的开源依赖项中的标准组成部分，例如：
+它标记的文件是与桌面应用程序捆绑在一起的声明的开源依赖项的库存部分，例如：
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` 和
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev)，用于应用内提供者登录和浏览器支持的聊天功能的浏览器自动化库。
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — 固定版本的 `wreq-js` 原生绑定，用于在基于 Web Cookie 的提供者中发送带有浏览器指纹的 HTTP 请求（`<arch>` 为 `x64` 或 `arm64`）。
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js`和`workerProcessEntry.js` — [Playwright](https://playwright.dev) ，用于应用内提供者登录和浏览器支持的聊天的浏览器自动化库。
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` —固定的`wreq-js`本机绑定，用于 Web cookie 提供者上的浏览器指纹HTTP （`<arch>`是`x64`或`arm64`）。
 
-**触发原因：**Windows 安装程序**尚未进行代码签名**，因此未签名的 NSIS 安装程序没有任何信誉记录，行为启发式检测会以最高强度运行。再加上捆绑的原生 DLL，以及写入 `%LOCALAPPDATA%\Programs\OmniRoute` 下的数百个 `.js` 文件（包括 Next.js 独立构建生成的、带哈希后缀的包目录），这些因素足以触发该启发式检测。代码签名已在计划中；在完成之前，新版本仍可能重复出现此问题。
+**为什么会火：** Windows安装程序是**尚未进行代码签名**，因此未签名的NSIS安装程序的声誉为零，并且行为启发法以最大攻击性运行。结合捆绑的本机DLL和在`%LOCALAPPDATA%\Programs\OmniRoute`下编写的数百个`.js`文件（包括来自Next.js独立构建的散列后缀的包目录），这足以触发启发式。已计划进行代码签名；在它落地之前，新版本可能会重复这一点。
 
-**处理方法：**
+**该怎么办：**
 
-1. **首先验证下载文件**（排除文件遭到篡改的可能）。每个发行版都会发布 `latest.yml`，其中的 `sha512` 字段（base64）涵盖 `OmniRoute.Setup.<version>.exe` 安装程序。在 PowerShell 中，从包含安装程序的文件夹运行：
+1. **首先验证您的下载**（排除文件被篡改的情况）。每个版本都会发布`latest.yml`，其`sha512`字段（base64）涵盖`OmniRoute.Setup.<version>.exe`安装程序。在PowerShell中，从包含安装程序的文件夹中：
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   输出必须与 `latest.yml` → `sha512` 一致。如果不一致，请删除该文件，并仅从 [GitHub 发行版页面](https://github.com/diegosouzapw/OmniRoute/releases)重新下载。
-2. **恢复并排除** — 从隔离区恢复被回滚的项目，并为 `%LOCALAPPDATA%\Programs\OmniRoute` 添加排除项（Kaspersky → 设置 → 威胁和排除项），然后重新安装。
-3. **报告误报** — <https://opentip.kaspersky.com/>。用户提交的误报报告确实能够加快加入允许列表的速度。
+   输出必须匹配`latest.yml` → `sha512`。如果没有，请删除该文件并仅从[GitHub发布页面](https://github.com/cheaper-inference/OmniRoute/releases)重新下载。
+2. **恢复+排除**—从隔离区恢复回滚的项目并添加`%LOCALAPPDATA%\Programs\OmniRoute`的排除项（Kaspersky →设置→威胁和排除项），然后重新安装。
+3. **报告误报**— <https://opentip.kaspersky.com/>。用户提交的FP报告真正加快了白名单的速度。
 
 ---
 
@@ -826,10 +824,10 @@ omniroute serve --ready-timeout 180000
 
 ---
 
-## 仍然无法解决？
+## 还卡住了吗？
 
-- **GitHub Issues**：[github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **架构**：有关内部实现的详细信息，请参阅 [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
-- **API 参考**：有关所有端点的信息，请参阅 [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
-- **健康状态仪表板**：查看 **Dashboard → Health** 以了解实时系统状态
-- **转换器**：使用 **Dashboard → Translator** 调试格式问题
+- **GitHub问题**： [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **建筑学**：内部详情参见[`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
+- **API参考**：所有端点请参见[`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
+- **健康仪表板**： 查看**仪表板→健康**实时系统状态
+- **翻译者**： 使用**仪表板→翻译器**调试格式问题

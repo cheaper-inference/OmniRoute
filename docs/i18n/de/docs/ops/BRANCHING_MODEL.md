@@ -48,7 +48,7 @@ Wenn ein Release abgeglichen wird, wird ein Markierungsproblem mit der Bezeichnu
 Überprüfen Sie, ob ein offenes Einfrieren vorliegt, bevor Sie davon ausgehen, dass der gewünschte Zweig zusammengeführt werden kann:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Merge-Mechaniken (Eigentümer `queue` label → Mergify) sind in [MERGE_TRAIN.md](./MERGE_TRAIN.md) dokumentiert.

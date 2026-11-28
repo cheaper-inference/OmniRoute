@@ -53,10 +53,10 @@ flowchart LR
 必要なブランチがマージ可能であると仮定する前に、オープン フリーズがないか確認してください。
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
-マージの仕組み (オーナー`queue`ラベル→ Mergify) は、 [MERGE_TRAIN.md](./MERGE_TRAIN.md)に文書化されています。
+マージの仕組み (所有者`queue`ラベル→ Mergify) は、 [MERGE_TRAIN.md](./MERGE_TRAIN.md)に文書化されています。
 
 > **2026-11-19: Mergify マージ キューが廃止されました**(オーナーの判断)。 `.mergify.yml`キューを定義しなくなり、プル リクエストをマージまたは書き換える Mergify コマンドを拒否します。リリースPRs 、omni-queue がライブ モードで実行されるまではリポジトリ ルールセット「アクティブなリリースにグリーン ゲートが必要」(`Gate / CI` + `Gate / Quality`) の下で手動でマージされ、その後はomni-queue を通じて ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) マージされます。 `queue`ラベルは何もマージしなくなりました。
 

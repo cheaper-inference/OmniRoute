@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute 以可完整安裝的漸進式網頁應用程式形式提供。當您從任何行動瀏覽器存取儀表板時——Android（Chrome）或 iOS（Safari）——您可以「加入主畫面」，無須透過應用程式商店即可獲得如原生應用程式般的體驗。
+將OmniRoute儀表板安裝為漸進式 Web 應用程序，以便從主畫面或桌面的獨立視窗中開啟它。安裝的應用程式仍需要連接到OmniRoute伺服器以進行導航、儀表板資料和API請求。快取的靜態資產不提供離線網關或離線儀表板。
 
-## 什麼是 PWA？
+## 什麼是PWA？
 
-漸進式網頁應用程式可將 OmniRoute 網頁儀表板轉換成外觀與操作體驗皆如同原生行動應用程式的形式。安裝後，它可以：
+漸進式 Web 應用程式使用帶有應用程式圖示和單獨視窗的 Web 儀表板。安裝後， OmniRoute：
 
-- 從主畫面透過專屬圖示啟動
-- 以全螢幕開啟——沒有瀏覽器網址列或分頁介面
-- 可離線運作，並提供專用的連線狀態頁面
-- 快取靜態資產以加快載入速度
-- 同時支援直向與橫向顯示
+- 從主畫面或桌面啟動
+- 以獨立模式打開，沒有瀏覽器常用的網址列和分頁
+- 快取選定的靜態資源
+- 支援縱向和橫向
 
 ## 安裝
 
-### Android（Chrome）
+使用另一台裝置上的伺服器的HTTPS位址。當伺服器運行在同一裝置上時， `http://localhost:20128`也滿足瀏覽器可安裝性要求。普通的`http://YOUR_IP:20128`位址不符合這些要求。安裝選單和提示取決於瀏覽器和作業系統。請參閱[MDN的PWA安裝要求](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required)。
 
-1. 在 Chrome 中開啟 OmniRoute 儀表板：`http://YOUR_IP:20128`
-2. Chrome 會自動顯示 **「將 OmniRoute 加入主畫面」** 橫幅，或者：
-   - 點選 **⋮** 選單（三個點）→ **「加入主畫面」** 或 **「安裝應用程式」**
-3. 確認提示
-4. OmniRoute 會以獨立應用程式的形式出現在您的主畫面上
+### 安卓（Chrome）
 
-### iOS（Safari）
+1. 在同一支手機上開啟您的OmniRoute HTTPS位址或伺服器的`http://localhost:20128` 。
+2. 打開**⋮**選單並選擇**安裝應用程式**或者**新增到主螢幕**，如果提供的話。
+3. 確認提示。
+4. 從主畫面開啟OmniRoute 。
 
-1. 在 Safari 中開啟 OmniRoute 儀表板：`http://YOUR_IP:20128`
-2. 點選 **分享** 按鈕（帶有箭頭的方框）
-3. 向下捲動並點選 **「加入主畫面」**
-4. 為其命名（預設為「OmniRoute」），然後點選 **加入**
-5. OmniRoute 會以應用程式圖示出現在您的主畫面上
+### iOS (Safari)
+
+1. 在 Safari 中開啟您的OmniRoute HTTPS位址。
+2. 輕敲**分享**→**新增到主螢幕**。
+3. 確認名稱並點擊**添加**。
+4. 從主畫面開啟OmniRoute 。
 
 ### 桌面版（Chrome / Edge）
 
-1. 開啟 OmniRoute 儀表板
-2. 按一下網址列中的 **安裝圖示**（或 ⋮ →「安裝 OmniRoute...」）
-3. 確認提示
-4. OmniRoute 會以獨立視窗開啟——沒有分頁，也沒有網址列
+1. 打開您的OmniRoute儀表板。
+2. 使用瀏覽器的安裝圖示或**安裝應用程式**選單條目（如果提供）。
+3. 確認提示在其自己的視窗中開啟OmniRoute 。
 
-## 功能
+## 特徵
 
-### 全螢幕體驗
+### 獨立視窗
 
-資訊清單已設定為 `display: "fullscreen"`，這表示安裝後的應用程式會使用整個螢幕——沒有瀏覽器介面，也不會與狀態列重疊。這可讓儀表板帶來真正如同原生應用程式般的體驗。
+清單設定`display: "standalone"`和`start_url: "/dashboard"`。安裝的應用程式會在應用程式視窗中開啟儀表板。瀏覽器和作業系統控制項仍然會出現；清單不請求全螢幕模式。
 
-### 離線支援
+### 快取資源和網路要求
 
-OmniRoute 包含一個提供智慧型快取功能的 Service Worker（`sw.js`）：
+[Service Worker](../../public/sw.js)快取選定的同源資源：
 
-| 資產類型                                                                                                                                                                           | 策略                   | 行為                                                                           |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------ |
-| **應用程式殼層**                                                                                                                                                                   | 快取優先               | 在安裝時預先快取 `/`、`/offline`、資訊清單與圖示                               |
-| **靜態資產**（CSS、JS、圖片、字型）                                                                                                                                                | 網路優先，快取作為備援 | 從網路擷取最新內容；離線時改用快取                                             |
-| **Next.js 套件組合**（`/_next/`）                                                                                                                                                  | 網路優先並更新快取     | 從網路擷取內容並更新快取；離線時提供快取版本                                   |
-| **導覽請求**                                                                                                                                                                       | 略過（絕不攔截）       | 由瀏覽器處理 HTTP/3→HTTP/2 備援；失效的 QUIC 通訊端不得變成 `Response.error()` |
-| **API／儀表板路由**（`/api/`、`/a2a`、`/dashboard`、用戶端 API 別名 `/v1`、`/v1beta`、`/models`、`/chat`、`/responses`、`/codex`，以及 `/callback`、`/login`；比對時不區分大小寫） | 略過（絕不快取）       | 一律直接連線至伺服器——絕不由 Service Worker 攔截                               |
+| 請求或資產                   | 策略     | 行為                                                                                         |
+| ---------------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| 安裝時資源                   | 預快取   | `/`、 `/manifest.webmanifest`、 `/icon-512.png`和`/apple-touch-icon.png`在工作器安裝期間快取 |
+| Next.js靜態資產（`/_next/`） | 網路優先 | 成功回應更新快取；網路錯誤回退到現有的快取回應                                               |
+| 其他靜態CSS、 JS、圖像和字體 | 快取優先 | 現有的快取回應被重複使用；成功的網路回應會在未命中時被快取                                   |
+| 頁面導航                     | 旁路     | 瀏覽器直接取得頁面；不提供離線後備服務                                                       |
+| API、儀表板和身份驗證路由    | 旁路     | Worker 不會攔截或快取這些要求                                                                |
+| 其他非靜態請求               | 網路     | 沒有快取查找或存儲                                                                           |
 
-### 離線頁面
+排除的路由有`/api`、 `/a2a`、 `/dashboard`、 `/v1`、 `/v1beta`、 `/models`、 `/chat`、 `/responses`、 `/codex`、 `/callback`和`/login`，在路径边界处不区分大小写进行匹配。跨域和非 GET 請求也會繞過工作執行緒。
 
-當網路無法使用，且使用者瀏覽至新頁面時，Service Worker 會提供專用的 `/offline` 頁面，其中：
+### 連線頁面
 
-- 顯示清楚的 **「連線問題」** 訊息
-- 顯示即時更新的 **線上／離線狀態指示器**
-- 提供 **「重試連線」** 按鈕，以便在連線恢復後重新載入
-- 提供前往 **狀態頁面** 的連結以進行診斷
+`/offline`頁面提供連線訊息、 online/offline指示符、**重試連接**按鈕和狀態頁面的連結。這是**未預先快取**而服務人員則這樣做**不是**將失敗的導航重定向到它。它的存在不會使新頁面無需伺服器即可存取。
 
-### 應用程式圖示
+### 應用程式圖標
 
-OmniRoute 提供針對各平台最佳化的圖示：
+清單宣傳了這些PNG圖示：
 
-| 檔案                   | 尺寸            | 使用平台                   |
-| ---------------------- | --------------- | -------------------------- |
-| `icon-512.png`         | 512×512         | Android 安裝提示、啟動畫面 |
-| `apple-touch-icon.png` | 180×180         | iOS 主畫面圖示             |
-| `icon-192.svg`         | 192×192（向量） | Android 自適應圖示         |
-| `apple-touch-icon.svg` | 180×180（向量） | Apple 備援                 |
-| `favicon.svg`          | 向量            | 瀏覽器分頁                 |
-| `favicon.ico`          | 多種尺寸        | 舊版瀏覽器                 |
+| 文件                   | 尺寸    | 使用                       |
+| ---------------------- | ------- | -------------------------- |
+| `icon-192.png`         | 192×192 | 通用應用程式圖標           |
+| `icon-512.png`         | 512×512 | 通用和可屏蔽的應用程式圖標 |
+| `apple-touch-icon.png` | 180×180 | 蘋果主螢幕圖標             |
+
+瀏覽器為安裝目標選擇適當的圖示。
 
 ### 自動註冊
 
-Service Worker 會透過根版面配置中的 `<PwaRegister />` 元件自動註冊。使用者無須採取任何動作——只要瀏覽器偵測到有效的資訊清單與 Service Worker，即可安裝此應用程式。
+當瀏覽器支援 Service Worker 時，`PwaRegister`會在生產環境中註冊 Worker。開發模式會取消註冊工作人員並清除快取，以避免過時的資產幹擾熱重載。安裝提示仍由瀏覽器決定。
 
 ## 技術架構
 
-### Web App Manifest（`manifest.webmanifest`）
+### Web 應用程式清單
 
-由 Next.js 透過 `src/app/manifest.ts` 產生：
+Next.js從[`src/app/manifest.ts`](../../src/app/manifest.ts)產生`/manifest.webmanifest` 。其關鍵設定為：
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute 是適用於多提供者 LLM 的 AI 閘道。只需一個端點，即可連接所有 AI 提供者。",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| 環境           | 價值                               |
+| -------------- | ---------------------------------- |
+| `short_name`   | `OmniRoute`                        |
+| `start_url`    | `/dashboard`                       |
+| `scope`        | `/`                                |
+| `display`      | `standalone`                       |
+| `orientation`  | `any`                              |
+| 背景和主題顏色 | `PWA_THEME_COLORS`的預設燈光調色板 |
 
-### Service Worker（`public/sw.js`）
+清單的名稱和描述是該來源檔案中的靜態值。安裝的清單不會在每次造訪時遵循實例名稱設定或活動調色板。
 
-一個原生 Service Worker（不依賴任何框架），具備：
+### 服務人員
 
-- **安裝階段**：預先快取應用程式外殼（根目錄、離線頁面、manifest、圖示）
-- **啟用階段**：清除舊版快取並接管所有用戶端
-- **擷取階段**：根據請求類型（導覽、靜態資源、API）進行智慧路由
-- **快取版本控制**：`omniroute-pwa-v3` — 更新時提高此版本號，以強制建立全新快取
+[`public/sw.js`](../../public/sw.js)沒有 service-worker 框架依賴性：
 
-### 版面配置中繼資料（`src/app/layout.tsx`）
+- **安裝：**預先快取上面列出的四個資源並啟動新的工作線程。
+- **啟用設定:**刪除較舊的快取代並聲明客戶端。
+- **拿來：**應用上面的靜態資產策略和路由排除。
+- **版本控制：**來源快取名稱是`omniroute-pwa-v3`；生產版本會標記快取標識。
+- **通知：**處理傳入的`push`事件並在點擊通知時對焦或開啟視窗。
 
-根版面配置提供符合 PWA 規範所需的所有 meta 標籤：
+單獨的推播事件處理程序不會建立活動的推播訂閱或配置的伺服器傳遞。不要假設僅僅因為安裝了PWA就啟用了通知。
 
-- 指向 `/manifest.webmanifest` 的 `manifest` 連結
-- `apple-web-app-capable: true`，用於 iOS 獨立模式
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes`，用於 Android Chrome
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover`，用於邊到邊顯示
+### 佈局元資料和註冊
 
-### 元件：`PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx)提供清單連結、Apple 獨立元資料、主題顏色和`viewport-fit: cover`。頁面標題和 Apple Web 應用程式標題使用實例名稱。即時瀏覽器主題顏色遵循調色板；安裝清單使用預設的淺色。
 
-位於 `src/shared/components/PwaRegister.tsx`，此用戶端元件會：
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx)在客戶端上運行，並在其URL中向建置ID註冊`/sw.js` 。它檢測不匹配的快取生成，並可以重置工作程序並重新加載一次以從舊安裝中恢復。註冊失敗不會阻止儀表板。
 
-1. 在掛載時執行（僅限用戶端）
-2. 檢查瀏覽器是否支援 `serviceWorker`
-3. 靜默註冊 `/sw.js`（錯誤會被忽略，以避免阻礙應用程式執行）
-4. 不渲染任何內容（`return null`）— 此元件僅用於執行副作用
+## 與 Termux 一起使用 (Android)
 
-## 搭配 Termux 使用（Android）
+1. 在 Termux 中啟動OmniRoute ： `npx -y omniroute@latest`。
+2. 在同一支手機上開啟 Chrome： `http://localhost:20128`。
+3. 透過瀏覽器的安裝選單安裝PWA 。
+4. 使用儀表板時保持 Termux 伺服器運作。
 
-透過 Termux 在 Android 上執行 OmniRoute 時，PWA 可無縫運作：
+電話託管網關及其儀表板。對遠端AI提供者的請求仍然需要網路存取。有關設定和 Android 進程生命週期注意事項，請參閱[Termux 指南](TERMUX_GUIDE.md)。
 
-1. 在 Termux 中啟動 OmniRoute：`npx omniroute`
-2. 在同一支手機上開啟 Chrome：`http://localhost:20128`
-3. 透過「新增至主畫面」安裝 PWA
-4. PWA 會連線至本機 Termux 伺服器 — 所有功能皆在裝置上執行
+## 從其他設備使用
 
-此組合意味著您的 Android 手機同時是**伺服器**（Termux）與**用戶端**（PWA）— 一套完整且自給自足的 AI 閘道。
+在手機、平板電腦或桌上型電腦上開啟伺服器的HTTPS位址，然後依照該瀏覽器的安裝流程進行操作。伺服器必須保持可從每個裝置存取。有關遠端存取選項，請參閱[隧道指南](../ops/TUNNELS_GUIDE.md)。
 
-## 從其他裝置使用
+## 客製化
 
-您可以在任何能透過瀏覽器存取 OmniRoute 伺服器的裝置上安裝 PWA：
+### 實例名稱
 
-- **另一支手機／平板電腦**：前往 `http://PHONE_IP:20128` 並安裝 PWA
-- **筆記型電腦**：開啟 Chrome/Edge，並將其安裝為桌面 PWA
-- **具備瀏覽器的智慧型電視**：以全螢幕模式存取儀表板
+這**實例名稱**設定更改儀表板元數據，包括頁面標題和 Apple Web 應用程式標題。產生的清單使用靜態名稱，因此此設定不能保證重新命名已安裝的應用程式。
 
-## 自訂
+### 自訂圖示
 
-### 執行個體名稱
-
-PWA 標題會採用 `Dashboard → Settings` 中的 **Instance Name** 設定。如果您將執行個體重新命名為「My AI Gateway」，已安裝的 PWA 將顯示該名稱。
-
-### 自訂 Favicon
-
-如果您透過 `Dashboard → Settings` 上傳自訂 favicon，桌面版 PWA 圖示將會反映該自訂圖示。行動裝置主畫面圖示則使用預先建立的 `icon-512.png` 與 `apple-touch-icon.png` 檔案。
+自訂圖示會變更瀏覽器圖示。安裝清單仍然公佈上面的PNG檔案；更改圖示不會取代那些主螢幕圖示。
 
 ## 限制
 
-- **不支援推播通知** — Service worker 未實作 Push API。通知改由 Electron 應用程式處理。
-- **不支援背景同步** — 離線操作不會排入佇列以供稍後重新執行。PWA 主要用作儀表板檢視器。
-- **iOS 限制** — iOS 上的 Safari 不支援所有 PWA 功能（例如，安裝提示需要手動操作，且背景 service worker 的功能受限）。
-- **快取大小** — Service worker 僅快取靜態資源。來自 `/api/` 路由的大型回應承載內容絕不會被快取。
-- **行動裝置上的自訂圖示** — 在設定中變更 favicon 不會更新行動裝置上的主畫面圖示（這需要重新產生 PWA 圖示）。
+- **需要連接伺服器：**頁面導航、儀表板狀態和API請求沒有離線回退。
+- **無後台同步：**離線操作不會排隊等待重播。
+- **瀏覽器差異：**安裝選單、視窗呈現和通知支援因平台而異。
+- **無API回應快取：**工作人員不包括API、儀表板和身份驗證路由。
+- **靜態安裝圖示：**更新這些圖示需要更改廣告資產；瀏覽器可能會保留已安裝的元資料。
 
-## 檔案參考
+## 文件參考
 
-| 檔案                                    | 用途                                                           |
-| --------------------------------------- | -------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Next.js manifest 路由（產生 `manifest.webmanifest`）           |
-| `public/sw.js`                          | 包含快取邏輯的 service worker                                  |
-| `src/shared/components/PwaRegister.tsx` | 用於註冊 service worker 的用戶端元件                           |
-| `src/app/offline/page.tsx`              | 包含即時狀態指示器的離線備援頁面                               |
-| `src/app/layout.tsx`                    | 包含 PWA 中繼資料（apple-web-app、theme-color 等）的根版面配置 |
-| `public/icon-512.png`                   | 512×512 PNG 圖示（Android、啟動畫面）                          |
-| `public/apple-touch-icon.png`           | 180×180 PNG 圖示（iOS 主畫面）                                 |
-| `public/icon-192.svg`                   | 192×192 SVG 圖示（Android 自適應）                             |
-| `public/apple-touch-icon.svg`           | 180×180 SVG 圖示（Apple 備援）                                 |
+| 文件                                                                                   | 目的                         |
+| -------------------------------------------------------------------------------------- | ---------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | 產生的 Web 應用程式清單      |
+| [public/sw.js](../../public/sw.js)                                                     | 快取、排除和通知事件處理程序 |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | 生產註冊和過時快取恢復       |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | 連線頁面，不是自動離線後備   |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | 頁面元數據和視口設置         |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | 共享主題顏色值               |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512應用程式圖標        |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 蘋果圖標           |

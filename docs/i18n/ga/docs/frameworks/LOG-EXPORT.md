@@ -16,128 +16,63 @@ clárlann í an phíblíne, mar sin is féidir cinn scríbe eile a chur léi.
 ## 1. Conas a oibríonn sé
 
 ```
-freastalaí (cumraíocht a dhíchriptiú + a bhailíochtú, cúrsóir a réiteach)
-  → IPC a thosú → próiseas OS leithlisithe exportChild
-    → storage.sqlite inléite amháin → fiosrú/mapáil chomhroinnte logaí glaonna
-      → hiodráitiú aisioncrónach déantán → prepare()/send() an chinn scríbe
-        → IPC baisce → buanaíonn an freastalaí an cúrsóir → IPC admhála
-          → an chéad bhaisc eile; IPC críochnaithe → taifeadann an freastalaí rath
+server (decrypt + validate config, reconcile cursor)
+  → start IPC → isolated exportChild OS process
+    → read-only storage.sqlite → shared call-log query/mapping
+      → async artifact hydration → destination prepare()/send()
+        → batch IPC → server persists cursor → ack IPC
+          → next batch; done IPC → server records success
 ```
 
-- **Sceideal** — tasc cron amháin de chuid `JobRegistry`, `log_export`, agus `0 * * * *` mar réamhshocrú aige (gach uair an chloig,
-  UTC). Cláraithe in `src/lib/initCloudSync.ts`; is féidir é a shárú le `OMNIROUTE_LOG_EXPORT_CRON`.
-  Próiseálann gach tic gach ceann scríbe atá **cumasaithe**, ceann i ndiaidh a chéile.
-- **Cúrsóir** — `call_logs.rowid` intuigthe SQLite, a bhuanaítear do gach ceann scríbe in
-  `log_export_destinations.cursor_row_id`. Ní hé `timestamp` an cúrsóir d'aon ghnó: féadfaidh glaoiteoirí
-  a luach féin a sholáthar, mar sin is féidir iarratas mall a scríobh i ndiaidh iarratas níos tapúla a thosaigh
-  níos déanaí, agus scipeálfadh cúrsóir stampa ama é.
-- **Baisceáil** — `batch_size` ró in aghaidh an iarratais (500 de réir réamhshocraithe), `max_rows_per_run` ró in aghaidh an rith
-  (10000 de réir réamhshocraithe) ionas go bpróiseáiltear riaráiste mór thar roinnt tic seachas ceann amháin a bhlocáil.
-- **Seachadadh** — ní théann an cúrsóir ar aghaidh go dtí go gcríochnaíonn `send()` go rathúil. Fágann baisc theipthe an
-  cúrsóir mar a bhí sé, mar sin baintear triail eile as na rónna céanna ar an gcéad rith eile. Is é an ráthaíocht ná
-  uair amháin ar a laghad móide dí-dhúbláil ar thaobh an chinn scríbe, seachas uair amháin go díreach i ndáiríre: úsáideann BigQuery
-  aitheantas an loga glaonna mar eochair do gach ró, agus cloíonn sé leis ar bhonn na hiarrachta is fearr laistigh dá fhuinneog dí-dhúblála féin.
-- **Cosaint ar fhorluí** — féadfaidh an tic cron agus `POST .../run` tosú le chéile. Scipeáiltear ceann scríbe
-  atá á phróiseáil cheana féin seachas é a phróiseáil faoi dhó (`skipped: true` i dtoradh an rith),
-  mar sin ní féidir le rith comhthráthach baisc a athsheoladh ná an cúrsóir a scríobh ar gcúl.
-- **Aisghabháil tar éis glanta** — má chríochnaíonn `cursor_row_id` os cionn `MAX(rowid)` (glanadh an tábla iomlán agus
-  atosaíodh na rowidanna), athchasann an riteoir go 0 seachas fanacht dall go buan.
+- **Sceideal** — one `JobRegistry` cron job, `log_export`, réamhshocraithe go `0 * * * *` (in aghaidh na huaire, UTC). Cláraithe i `src/lib/initCloudSync.ts`; inchurtha le `OMNIROUTE_LOG_EXPORT_CRON`. Taoscann gach tic gach** cumasaithe** ceann scríbe, go seicheamhach.
+- **Cursor** — SQLite's `call_logs.rowid` intuigthe, fós in aghaidh an chinn scríbe i `log_export_destinations.cursor_row_id`. Ní hé `timestamp` an cúrsóir d’aon ghnó: is féidir le glaoiteoirí a luach féin a sholáthar, mar sin is féidir iarratas mall a scríobh tar éis ceann níos tapúla a thosaigh níos déanaí, agus ní bheadh cúrsóir stampa ama ar fáil.
+- **Baisceáil** sraitheanna — `batch_size` in aghaidh an iarratais (réamhshocraithe 500), sraitheanna `max_rows_per_run` in aghaidh an rith (réamhshocraithe 10000) agus mar sin draenáiltear riaráiste mór thar roinnt sceartán seachas ceann amháin a bhlocáil.
+- **Seachadadh** — ní théann an cúrsóir chun cinn ach amháin tar éis `send()` a réiteach. Fágann baisc theipthe an cúrsóir san áit a raibh sé, mar sin baintear na sraitheanna céanna arís an chéad rith eile. Tá an ráthaíocht ar a laghad uair amháin móide dí-dhúbailt ar thaobh an chinn scríbe, ní fíor go díreach-aon uair amháin: eochracha BigQuery gach sraith ag an loga aitheantais glao, a onóraíonn sé ar bhonn iarracht is fearr laistigh dá fhuinneog díshealbhaithe féin.
+- **Garda forluí** Is féidir le — an tic cron agus `POST .../run` tine le chéile. Ní féidir ceann scríbe atá ag taoscadh cheana féin a dhéanamh seachas é a dhraenáil faoi dhó (`skipped: true` i dtoradh na rith), mar sin ní féidir le rith comhreathach baisc a athsheoladh ná an cúrsóir a scríobh ar gcúl.
+- **Aisghabháil purge** — má chríochnaíonn `cursor_row_id` suas os cionn `MAX(rowid)` (glaodh an tábla ar fad agus atosaíodh na róids), athchasann an reathaí go 0 seachas dul dall go buan.
 
-### Riteoir leithlisithe agus teorainneacha
+### Rádala scoite agus teorainneacha
 
-Tosaíonn gach rith cinn scríbe ar Node próiseas linbh OS ar leith, gearrshaolach (`child_process`
-le IPC, ní `worker_threads`). Tarlaíonn léamh corp, parsáil/sraithiú JSON an phálasta,
-`prepare()` an chinn scríbe agus I/O líonra an chinn scríbe ann, ní ar lúb imeachtaí an fhreastalaí.
-Ní théann ach cumraíocht agus teachtaireachtaí beaga dul chun cinn trí IPC; ní fhilleann taifid easpórtáilte ar
-an bhfreastalaí riamh. Coinníonn an tasc cron agus an bealach Rith anois an toradh poiblí céanna agus an chosaint chéanna ar fhorluí.
+Cuireann gach ceann scríbe a reáchtáiltear ar Nód tús le próiseas linbh OS gearrthréimhseach ar leith (`child_process` le IPC, ní `worker_threads`). Léann an comhlacht, pálasta JSON parsing/serialization, ceann scríbe `prepare()` agus líonra ceann scríbe I/O go léir ar siúl ann, ní ar lúb imeacht an fhreastalaí. Ní thrasnaíonn cumraíocht ach teachtaireachtaí beaga dul chun cinn IPC; ní fhilleann taifid easpórtáilte chuig an bhfreastalaí. Coinníonn an post cron agus an bealach Rith anois an toradh poiblí céanna agus garda forluí.
 
-Osclaíonn an próiseas linbh `DATA_DIR/storage.sqlite` réitithe an fhreastalaí i mód inléite amháin le `node:sqlite`,
-le `busy_timeout=5000` agus `query_only=ON`. Ní iompórtálann sé aon singilín bunachair sonraí agus ní dhéanann sé
-aon imirce, cúltaca ná nuashonrú SQLite. Fanann rianú déantán atá ar iarraidh nó truaillithe (lena n-áirítear
-an UPDATE do dhéantáin thruaillithe) i gconair sonraí an deais amháin. Roinneann an dá chonair
-réiteoir íon sonraí; úsáideann an easpórtáil léamh aisioncrónach ón gcóras comhad agus an t-ord réitigh céanna: déantán → seanfhormáid
-inlíne → seanfhormáid diosca → tada. Glacann rith léargas den rowid ionsáite uasta
-nuair a osclaíonn an próiseas linbh a léitheoir; fanann ionsáiteáin níos déanaí go dtí an chéad rith eile. Is teorainn
-ionsáite é seo, ní idirbheart SQLite fadtéarmach: fanann scríbhneoirí WAL agus seicphointí saor le linn
-fanacht líonra. Ní reoitear nuashonruithe/scriostaí rónna atá ann cheana leis an teorainn seo.
+Osclaíonn an páiste `DATA_DIR/storage.sqlite` réiteach inléite amháin an fhreastalaí ag baint úsáide as `node:sqlite`, le `busy_timeout=5000` agus `query_only=ON`. Ní allmhairíonn sé aon DB singleton agus ní dhéanann sé aon ascnaimh, cúltacaí nó nuashonruithe SQLite. Fanann leabharchoimeád déantán Missing/corrupt (lena n-áirítear an déantán truaillithe UPDATE) i gconair mhionsonraithe an deais amháin. Roinneann an dá chonair réiteach sonraí glan; Úsáideann onnmhairiú léann comhaid asincrónach agus an Déantán céanna → oidhreacht inlíne diosca oidhreacht → → ordú réitigh none. Déanann rith a ghrianghraif an t-ionchur uasta as a riocht nuair a osclaíonn an páiste a léitheoir; Ionsáigh níos déanaí fanacht ar an rith eile. Is teorainn ionsáite é seo, ní idirbheart SQLite a mhair le fada: fanann scríbhneoirí WAL agus seicphointí saor le linn fanacht líonra. Updates/deletions de na sraitheanna atá ann cheana féin nach bhfuil reoite ag an teorainn seo.
 
-Tar éis gach baisce a nglactar léi, fanann an próiseas linbh ar admháil. Buanaíonn an freastalaí
-an cúrsóir ar dtús le `advanceLogExportCursor`, ansin seolann sé `ack`; ní thosaíonn an chéad bhaisc eile roimhe sin.
-Taifeadtar teip má theipeann ar sheoladh, má tharlaíonn tuairteáil nó má théann an t-am in éag, gan an cúrsóir a chur ar aghaidh don bhaisc sin. Fanann baisceanna
-a admhaíodh cheana tiomanta; ní féidir ach an t-aon bhaisc neamhadmhaithe amháin a athsheoladh ar a mhéad.
-Ní thaifeadtar rath ach amháin tar éis `done` agus imeacht glan an phróisis linbh. Cuireann teipeanna deireadh leis an bpróiseas linbh
-le SIGTERM, ag ardú go SIGKILL tar éis 500 ms, agus fanann an riteoir go ndúnfar an próiseas.
+Tar éis gach baisce a nglactar leis, fanann an leanbh ar admháil. Leanann an freastalaí an cúrsóir le `advanceLogExportCursor` ar dtús, ansin seolann `ack`; ní thosaíonn aon bhaisc eile roimhe. Taifeadann teip seolta, tuairteála nó teorainn ama teip gan an bhaisc sin a chur ar aghaidh. Fanann na baisceanna a admhaíodh roimhe seo tiomanta; ar a mhéad is féidir baisc amháin nár aithníodh a athsheoladh. Ní thaifeadtar rath ach amháin tar éis `done` agus imeacht glan linbh. Cuireann mainneachtainí deireadh leis an leanbh le SIGTERM, ag méadú go SIGKILL tar éis 500 ms, agus fanann an rádala ar dhúnadh an phróisis.
 
-| Athróg timpeallachta                          | Réamhshocrú | Cuspóir                                         |
-| --------------------------------------------- | ----------- | ----------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000      | Teorainn ama iarbhír in aghaidh an chinn scríbe |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024        | Teorainn sheanspás V8 an phróisis linbh in MB   |
+| Athróg timpeallachta                          | Réamhshocrú | Cuspóir                                        |
+| --------------------------------------------- | ----------- | ---------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000      | Teorainn balla-clog in aghaidh an chinn scríbe |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024        | Teorainn sean-spáis do leanbh V8 i MB          |
 
-Úsáidtear na réamhshocruithe le haghaidh luachanna neamhbhailí/neamhdhearfacha/neamhshlánuimhriúla. Ní teorainn
-iomlán RSS é socrú an chairn; is féidir le baisceanna an-mhóra cuimhne an phróisis linbh a ídiú fós agus teip shábháilte a chur ar an rith.
-Fágann an réamhshocrú 1024 MB spás breise don bhaisc réamhshocraithe 500 ró de dhéantáin 512 KiB agus
-coirp cumasaithe, lena n-áirítear sraithiú JSON BigQuery ina smutáin bheart. Ní fhágann sé baisc
-10000 ró le coirp sábháilte. Taifeadann ídiú charn V8 teip ar féidir gníomhú uirthi: laghdaigh méid
-na baisce nó ardaigh `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; fanann an cúrsóir ag an mbaisc dheireanach
-a admhaíodh. Ní chlúdaítear coirp stairiúla inlíne/ar dhiosca leis an teorainn nua-aimseartha déantán.
-Ní mór d'oibreoirí buiséad RSS a phleanáil ar leithligh, go háirithe laistigh de choimeádáin a bhfuil cuimhne theoranta acu.
+Úsáideann luachanna Invalid/non-positive/non-integer na réamhshocruithe. Ní teorainn iomlán RSS é socrú an chairn; is féidir le baisceanna an-mhóra cuimhne an linbh a sceite go fóill agus teipeann orthu an rith go sábháilte. Fágann an réamhshocrú 1024 MB spás cloiginn don bhaisc réamhshocraithe 500 as a chéile de 512 déantán KiB le comhlachtaí cumasaithe, lena n-áirítear sraithiú beart-chunked JSON BigQuery. Ní dhéanann sé baisce coirp 10000-as a chéile sábháilte. Taifeadann ídiú gcarn V8 teip inchaingne: méid baisc níos ísle nó ardú `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; fanann an cúrsóir ag an mbaisc dheireanach a aithníodh. Níl comhlachtaí inline/disk stairiúla clúdaithe ag caipín na ndéantán nua-aimseartha. Caithfidh oibreoirí RSS a bhuiséadú ar leithligh, go háirithe taobh istigh de choimeádáin atá teoranta ó thaobh cuimhne.
 
-Ní fhaigheann an próiseas linbh le hoidhreacht ach an `DATA_DIR` réitithe, `NODE_ENV`, `TZ` sainráite (réiteach ama áitiúil
-d’ainmneacha comhaid oidhreachta), `ELECTRON_RUN_AS_NODE` nuair atá sé ann, agus na hionchuir amach seo a leanas:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (agus a bhfoirmeacha i gcás íochtair),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Comhroinneann seoltóir domhanda Undici réiteach seachfhreastalaí an fhreastalaí atá bunaithe go hiomlán ar an timpeallacht agus rialacha
-seachanta na n-óstach áitiúil, lena n-áirítear `NO_PROXY`; ní iompórtálann sé `proxyFetch.ts` ná a bhratacha bunachair sonraí/gnéithe.
-Déantar dintiúir an tseachfhreastalaí a cheilt san aschur a chuirtear ar aghaidh agus sna hearráidí a thaifeadtar. Ní sheoltar dintiúir an chinn scríbe
-ach in aon teachtaireacht IPC tosaithe amháin, riamh in argv ná sa timpeallacht; cuirtear réimír leis an aschur/na hearráidí a chuirtear ar aghaidh agus
-déantar iad a shláintiú. Ní dhíchumasaítear ach `ExperimentalWarning` in argóintí rite an phróisis linbh chun
-rabhadh SQLite Node a sheachaint ar gach rith cron; fanann cineálacha eile rabhaidh le feiceáil.
+Ní fhaigheann an leanbh ach an `DATA_DIR` réiteach , `NODE_ENV`, `TZ` sainráite (oidhreacht ainm comhaid réiteach áitiúil-ama), `ELECTRON_RUN_AS_NODE` nuair a bhíonn sé i láthair, agus na hionchuir amach seo a leanas: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (agus a bhfoirmeacha beaga), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Roinneann seoltaí Undici domhanda réiteach seachfhreastalaí timpeallachta íon agus rialacha seachbhóthar an ósta áitiúil, lena n-áirítear `NO_PROXY`; ní allmhairíonn sé `proxyFetch.ts` ná a bratacha DB/feature. Athraítear dintiúir seachfhreastalaí ó aschur a cuireadh ar aghaidh agus earráidí taifeadta. Ní thaistealaíonn dintiúirí cinn scríbe ach in aon teachtaireacht IPC tosaigh amháin, ní argv ná ar an gcomhshaol riamh; Déantar cur ar aghaidh output/error a réamhshocrú agus a shláintiú. Níl ach `ExperimentalWarning` díchumasaithe in argóintí linbh exec chun rabhadh SQLite Node a sheachaint do gach rith cron; tá cineálacha rabhaidh eile fós le feiceáil.
 
-Ní mór modúil cinn scríbe a bheith in-iompórtáilte gan spleáchais Next.js/server-only. Comhlíonann an cur chun feidhme
-BigQuery atá ann cheana an conradh sin cheana féin. Ní mhaireann taiscí comharthaí rochtana ach ar feadh rith an phróisis
-linbh, ní idir ritheanna. Is é Node an timpeallacht rite a dtacaítear léi (engines in `package.json`), ach fógraíonn rannán suiteála Bun
-sa README agus `Dockerfile.bun` conair chomhoiriúnachta táirgthe freisin trí úsáid a bhaint as
-`bun:sqlite` (`src/lib/db/core.ts` / cuibheoirí). Faoi Bun, coinníonn easpórtálacha an chonair
-laistigh den phróiseas a bhí ann roimhe seo agus eisíonn siad rabhadh aonuaire: níl leithlisiú charn cuimhne/am istigh an phróisis linbh ar fáil. Úsáid
-Node le haghaidh leithlisiú na lúibe imeachtaí agus OOM; ní chaitear le Bun mar rogha forbartha amháin anseo.
+Ní mór modúil cinn scríbe a bheith iompórtáilte gan spleáchais Next.js/server-only. Comhlíonann cur chun feidhme BigQuery reatha an conradh sin cheana féin. Ní mhaireann taisce comharthaí rochtana ach don leanbh-rith, ní thar rití. Is é Nód an t-am rite tacaithe (innill `package.json` ). Tá cosán comhoiriúnachta Bun is fearr gan tacaíocht ann (`bun:sqlite` in `src/lib/db/core.ts` / adapters, agus `Dockerfile.bun`), mar sin ní féidir le honnmhairí briseadh faoi. Faoi Bun, coinníonn onnmhairí an cosán in-phróiseas roimhe seo agus scaoileann siad rabhadh aonuaire: níl aonrú leanbh heap/timeout ar fáil. Úsáid Nód le haghaidh aonrú lúb imeachta agus OOM.
 
-Nuair atá `includeBodies` cumasaithe, is fearr minicíocht ar leibhéal nóiméid amhail
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` seachas riaráiste pálasta uair an chloig a charnadh.
-Cuireann teorainneacha baisce agus rónna teorainn le gach rith fós. Íoctar costas tosaithe próisis do gach ceann scríbe ar gach rith;
-malartaítear costas beag tosaithe ar leithlisiú lúibe imeachtaí an fhreastalaí leis seo, ní ar úsáid iomlán LAP níos ísle.
+Nuair a bhíonn `includeBodies` cumasaithe, b’fhearr leat deireadh nóiméad ar nós `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` seachas riaráiste párolla in aghaidh na huaire a charnadh. Tá teorainneacha baisc agus sraitheanna fós ag gabháil le gach rith. Íoctar tosaithe próisis in aghaidh an chinn scríbe in aghaidh an rith; trádálaíonn sé seo costas tosaithe beag le haghaidh leithlisiú lúb imeachta an fhreastalaí, ní laghdaítear úsáid iomlán CPU.
 
-### Pálastaí (leideanna agus comhlánuithe)
+### Ualaí pá (leideanna agus críochnú)
 
-De réir réamhshocraithe, ní iompraíonn an easpórtáil ach na réimsí achoimre a thaispeántar i **liosta** na Logaí. Má chumasaítear
-**Easpórtáil leideanna agus freagraí** (`includeBodies`), seoltar freisin an méid a thaispeántar i bpána **sonraí**
-na Logaí do gach glao:
+De réir réamhshocraithe ní iompraíonn an t-easpórtáil ach na réimsí achoimre, na Logchomhaid** liosta** seónna. Ag casadh ar** Easpórtáil leideanna agus freagraí** (`includeBodies`) chomh maith a sheolann an Logchomhaid** mion** seónna pána do gach glao:
 
-| Réimse                           | A bhfuil ann                                                       |
-| -------------------------------- | ------------------------------------------------------------------ |
-| `request_body` / `response_body` | Pálastaí an ghlao mar a thaispeánann an deais iad                  |
-| `pipeline_route_decision`        | An sprioc agus an tsamhail a roghnaigh an ródaire                  |
-| `pipeline_client_request`        | An t-iarratas amh díreach mar a sheol an cliant é                  |
-| `pipeline_openai_request`        | Tar éis é a aistriú go formáid inmheánach OpenAI                   |
-| `pipeline_provider_request`      | Mar a seoladh suas an sruth é i ndáiríre, i gcanúint an tsoláthraí |
-| `pipeline_provider_response`     | An freagra amh ón taobh thuas den sruth                            |
-| `pipeline_client_response`       | An méid a tugadh ar ais don ghlaoiteoir                            |
-| `pipeline_error`                 | Sonraí earráide ar leibhéal na píblíne do ghlao ar theip air       |
-| `bodies_truncated`               | Fíor nuair a shroich aon réimse thuas `maxBodyBytes`               |
+| Réimse                           | Cad a shealbhaíonn sé                                                       |
+| -------------------------------- | --------------------------------------------------------------------------- |
+| `request_body` / `response_body` | Íocann an glao de réir mar a dhéanann an painéal iad                        |
+| `pipeline_route_decision`        | Cén sprioc agus múnla a roghnaigh an ródaire                                |
+| `pipeline_client_request`        | An t-iarratas amh díreach mar a sheol an cliant é                           |
+| `pipeline_openai_request`        | Tar éis aistriúchán isteach sa chruth inmheánach OpenAI                     |
+| `pipeline_provider_request`      | Mar a chuirtear go hiarbhír in aghaidh an tsrutha, i gcanúint an tsoláthraí |
+| `pipeline_provider_response`     | An freagra amh in aghaidh srutha                                            |
+| `pipeline_client_response`       | Cad a tugadh ar ais don ghlaoiteoir                                         |
+| `pipeline_error`                 | Sonraí earráide ar leibhéal na píblíne maidir le glao ar theip air          |
+| `bodies_truncated`               | Fíor nuair a bhuaileann aon réimse thuas `maxBodyBytes`                     |
 
-Is ábhar leide é seo, mar sin tá sé **múchta de réir réamhshocraithe** agus is rogha in aghaidh an chinn scríbe é d’aon ghnó.
-Seoltar an méid a thaispeánann an deais, toisc go gcomhroinneann an easpórtáil agus `getCallLogById` réiteach
-sonraí: bíonn pálastaí
-sláintithe ó thaobh faisnéise inaitheanta pearsanta de agus bíonn rúin ceilte iontu cheana féin nuair a scríobhtar iad, agus ní stórálann glao a dhéantar le
-heochair API `noLog` aon phálasta ar chor ar bith, mar sin níl aon rud le heaspórtáil.
+Is ábhar pras é seo, mar sin tá sé** as de réir réamhshocraithe** agus rogha in aghaidh an chinn scríbe d'aon ghnó. Cad iad na longa a thaispeánann an painéal, mar gheall ar onnmhairiú agus réiteach sonraí sciar `getCallLogById` : tá ualaí pála sláintithe PII cheana féin agus rún-dearadh nuair a scríobhtar iad, agus ní stórálann glao a dhéantar le heochair `noLog` API aon phálasta ar chor ar bith, mar sin níl aon rud le heaspórtáil.
 
-Léitear pálastaí in aghaidh an ró ón déantán sa chóras comhad, mar sin ní dhéantar hiodráitiú ach do chinn scríbe
-a d’iarr é. Má tá déantán ar iarraidh nó truaillithe, easpórtáiltear a achoimre le pálastaí null seachas
-an bhaisc a chur ó rath agus an cúrsóir a fhágáil sáinnithe.
+Léitear ualaí pá in aghaidh an tsraith ó dhéantús an chórais comhad, mar sin ní ritheann hiodráitiú ach amháin do na cinn scríbe a d’iarr é. Easpórtálann Déantán atá in easnamh nó truaillithe a hachoimre le hualaí pálasta nialasach seachas an bhaisc a theipeann agus an cúrsóir a shnáthadh.
 
-Cuireann `maxBodyBytes` (262144 de réir réamhshocraithe) uasteorainn le gach réimse. Déantar pálastaí níos faide a **theascadh seachas
-a fhágáil ar lár** — freagraíonn leid ghearrtha “cad a fiafraíodh” fós — agus cuirtear bratach
-`bodies_truncated` leis an ró. Ní easpórtáiltear deilteanna a shruthaítear ina smutáin; tá an freagra cóimeáilte
-i `pipeline_provider_response` agus `pipeline_client_response` cheana féin.
+`maxBodyBytes` (réamhshocraithe 262144) caipín ar gach réimse. Tá ualaí pá níos faide** teasctha seachas báite** — leid clipped fós freagraíonn "cad a iarradh" — agus tá an tsraith bratach `bodies_truncated`. Ní onnmhairítear deltas smután ar smután sruthaithe; tá an freagra comhchruinnithe i `pipeline_provider_response` agus `pipeline_client_response` cheana féin.
 
 ---
 

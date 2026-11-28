@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** OmniRoute tərəfindən təqdim edilən bütün modelləri _birbaşa_ GitHub Copilot Chat-in
-model seçicisinə əlavə edir. İkinci yan panel və ayrıca söhbət interfeysi yoxdur — Copilot-un agent rejimi, alət çağırışları,
-MCP serverləri və fərdi təlimatları işləməyə davam edir, sadəcə seçdiyiniz modeldə çalışır.
+**OmniCopilot** OmniRoute söhbət modellərinizi və kombinlərinizi yerli Copilot Chat model seçicisinə əlavə edir. Seçilmiş model tərəfindən dəstəkləndikdə alət çağırışı və görmə ilə redaktorun mövcud söhbət və agent iş axınlarından istifadə edin.
 
-|                          |                                                                                                                                                 |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Quraşdırma (VS Code)** | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Quraşdırma (forklar)** | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Mənbə / problemlər**   | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Tələblər**             | VS Code 1.104+                                                                                                                                  |
+|                           |                                                                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Quraşdırın (VS Kodu)**  | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) |
+| **Quraşdırın (Açıq VSX)** | [Açıq VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — uyğun dil-model provayderi və APIs chat tələb edir |
+| **Mənbə / məsələlər**     | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                       |
+| **Tələb edir**            | VS Kodu 1.104 + ( GitHub girişi və ya Copilot planı olmadan istifadə etmək üçün 1.122 + )                                |
+| **Cari buraxılış**        | hər iki mağazada OmniCopilot v1.5.1 (buraxılış tarixi 24-11-2026)                                                        |
 
-> **Copilot abunəliyi tələb olunmur.** VS Code 1.122 versiyasından etibarən dil modeli provayderi
-> GitHub hesabına daxil olmadan və heç bir Copilot planı olmadan işləyir. Sətirdaxili tamamlamalar və
-> embedding əsaslı funksiyalar provayder API-sindən kənarda qalır və hələ də Copilot tələb edir.
+Snapshot aktivdir** 25-11-2026 (01:43 UTC)** , cari buraxılış:** 52,081 Marketplace quraşdırması** və** 20,989 açıq VSX yükləmələri** . Bunlar birləşmiş istifadəçi sayı deyil, fərqli mağaza ölçüləridir. Mənbələr: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) və [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Açıq VSX mövcudluğu öz-özünə həmin reyestrdən istifadə edən hər bir redaktorla uyğunluq yaratmır. Redaktorun söhbətini və dil modeli API dəstəyini yoxlayın.
+
+> **VS Code 1.122 +-də BYOK söhbəti üçün Copilot abunəsi tələb olunmur.** Microsoft provayder konfiqurasiya edildikdə GitHub girişi olmadan söhbəti, alətləri və MCP dəstəkləyir. VS Code 1.104–1.121-də genişləndirmə hələ də işləyir, lakin VS Code üçün imzalanmış Copilot planı tələb olunur. Daxili təkliflər və əlavələrə əsaslanan xüsusiyyətlər API provayderindən kənarda qalır və hələ də Copilot tələb edir; Copilot Business/Enterprise adminləri siyasətlə üçüncü tərəf model provayderlərini deaktiv edə bilər; çəngəl yalnız API chat-provayderini həyata keçirdikdə modelləri göstərir. Upstream provayder istifadəsi hələ də ödənişlərə məruz qala bilər. [VS Code 1.122 buraxılış qeydlərinə](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) və [dil modeli bələdçisinə](https://code.visualstudio.com/docs/agent-customization/language-models) baxın.
 
 ---
 
 ## Quraşdırma
 
-1. **OmniRoute-u işə salın** — `npm install -g omniroute && omniroute` (idarəetmə paneli `http://localhost:20128` ünvanındadır).
-2. **Genişlənməni quraşdırın** — Extensions görünüşündə "OmniRoute" axtarın.
-3. **Model seçin** — Copilot Chat → model seçicisi → **Manage Models…** → **OmniRoute**, sonra
-   istədiklərinizi işarələyin.
+1. **OmniRoute çalıştırın** — `npm install -g omniroute && omniroute` ( `http://localhost:20128`-də idarə paneli).
+2. **Uzatmanı quraşdırın** — Genişləndirmələr görünüşündə "OmniRoute" axtarın.
+3. **Qoşun** — defolt `http://localhost:20128` saxlayın və ya server URL və API açarını təyin edin**OmniRoute: Əlaqəni idarə et** .
+4. **Model seçin** — Copilot Chat → model seçici →** Modelləri idarə edin...** →**OmniRoute** , sonra istədiyinizi işarələyin.
 
-OmniRoute standart portda işləyərkən heç nə konfiqurasiya etməyə ehtiyac yoxdur. Uzaq instansiya üçün
-**Activity Bar-da OmniRoute ikonunu** açın (və ya `OmniRoute: Manage Connection` əmrini işlədin) və bunları təyin edin:
+Bağlantı parametrləri üçün açın** Fəaliyyət Panelində OmniRoute simvolu** (və ya `OmniRoute: Manage Connection` çalıştırın) və təyin edin:
 
-- **Server URL-i** — serverin kök ünvanı, məsələn, `http://192.168.0.15:20128`. `/v1` suffiksi
-  genişlənmə tərəfindən əlavə edilir; onu daxil etməyin.
-- **API açarı** — yalnız server `REQUIRE_API_KEY` təyin etdikdə. VS
-  Code SecretStorage vasitəsilə əməliyyat sisteminin açarlar zəncirində saxlanılır, heç vaxt `settings.json` daxilində saxlanılmır.
+- **Server URL** — server kökü, məsələn `http://omniroute.example.com:20128`. `/v1` şəkilçisi artırma ilə əlavə olunur; daxil etməyin.
+- **API açarı** — serverin çıxarış autentifikasiyası siyasəti tələb etdikdə tələb olunur. VS Code SecretStorage vasitəsilə saxlanılır, heç vaxt `settings.json` də deyil; iş sahəsi üçün xüsusi açarlar mövcuddur. Açmaq istədiyiniz modellər üçün icazə verilən açardan istifadə edin.
+
+Artırma həmçinin əlaqə göstəricisi, model yeniləməsi, model konteksti və qiymət metadatası (kombolar daxil olmaqla), axın əsasında əsaslandırma təmin edir.** Düşüncə səyi** VS Code 1.120 +-də menyu, status çubuğunun gündəlik limit göstəricisi və istifadə paneli (OmniRoute 3.8.50 +), CLI konfiqurasiyası və isteğe bağlı idarə paneli nişanı. Seçilmiş model və server siyasəti istifadə edə biləcəyiniz imkanları müəyyən edir.
 
 ---
 
@@ -112,23 +112,25 @@ Daxiletmənin aktiv olduğu yığma olmadan səhifə çərçivədə göstərilm�
 
 ---
 
-## Digər alətlərinizi VS Code daxilindən konfiqurasiya etmək
+## VS Code daxilində digər alətlərinizi konfiqurasiya edin
 
-**`OmniRoute: Configure Coding CLI`** Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo və Roo üçün istifadəyə hazır profillər yazmaq məqsədilə `omniroute` CLI alətini idarə edir — bunlar
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md) sənədində təsvir edilən eyni konfiqurasiyalardır. API açarı CLI alətinə heç vaxt əmr sətrində deyil, `OMNIROUTE_API_KEY` mühit dəyişəni vasitəsilə ötürülür.
+**`OmniRoute: Configure Coding CLI`** `omniroute` CLI 16 alət üçün istifadəyə hazır profillər yazmaq üçün idarə edir: Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed və WhyCodes. Artırma inteqrasiya edilmiş terminalda `setup-*` əmrlərini işə salır; seçilmiş əmri ehtiva edən OmniRoute CLI versiyasını quraşdırın. Hər bir reseptin istifadə etdiyi fayllar və bayraqlar və [genişlənmənin alət reyestrinə](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts) dair [CLI inteqrasiya təlimatına](CLI-INTEGRATIONS.md) baxın.
+
+API açarı `OMNIROUTE_API_KEY` vasitəsilə CLI -ə verilir, heç vaxt komanda xəttində deyil. Quraşdırma reseptləri hədəf alətin konfiqurasiyasında etimadnamələri saxlaya bilər. İş sahəsinə aid açarı alətin istifadəçi səviyyəli konfiqurasiyası ilə paylaşarkən, artırma əvvəlcə təsdiq tələb edir.
 
 ---
 
 ## Problemlərin aradan qaldırılması
 
-| Əlamət                                                     | Səbəb / həll                                                                                                                                                                                                                                                            |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Seçicidə OmniRoute modelləri yoxdur                        | Server əlçatan deyil. Status panelindəki nöqtə boz rəngə çevrilir; `OmniRoute: Check Connection` əmrini işə salın. Aşkarlama məqsədli şəkildə səssizdir və sorğu göstərmək əvəzinə heç bir model təqdim etmir.                                                          |
-| Hər model iki dəfə görünür                                 | OmniCopilot versiyanız 1.0.1-dən köhnədir — yeniləyin. Genişləndirmə artıq `?prefix=alias` tələb edir.                                                                                                                                                                  |
-| Əvvəllər siyahıda olan şəkil/audio modeli yoxa çıxıb       | Bu, 1.0.1 versiyasından etibarən qəsdən belədir — həmin model heç vaxt çat sorğusuna cavab verə bilmirdi.                                                                                                                                                               |
-| Panel Activity Bar-da yoxdur                               | VS Code əlavə görünüş konteynerlərini Activity Bar-ın aşağısındakı **"…"** daşma menyusuna köçürür və sağ kliklə gizlədilmiş konteyner gizli qalır. Activity Bar-a sağ klikləyin → **OmniRoute** seçimini işarələyin və ya onu `OmniRoute: Manage Connection` ilə açın. |
-| `editor` rejiminə baxmayaraq idarə paneli brauzerdə açılır | Server `DASHBOARD_ALLOW_EMBED=vscode` ilə **yığılmayıb** (yuxarıya baxın) — əvvəlcədən yığılmış quraşdırmada bunu işəsalma zamanı təyin etmək heç nəyi dəyişmir. Xarici brauzerə keçid məqsədlidir.                                                                     |
-| Provayderləri dəyişdikdən sonra model siyahısı köhnə qalır | `OmniRoute: Refresh Models` əmrini və ya paneldəki ↻ keçidini istifadə edin.                                                                                                                                                                                            |
+| Simptom                                                       | Səbəb / düzəliş                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seçicidə OmniRoute modeli yoxdur                              | Server əlçatmaz. Vəziyyət çubuğunun nöqtəsi boz olur; `OmniRoute: Check Connection` çalıştırın. Kəşf dizayn baxımından səssizdir və həvəsləndirmək əvəzinə heç bir modelə töhfə vermir.                                                                                     |
+| Hər model iki dəfə görünür                                    | Siz 1.0.1 — dən köhnə OmniCopilot yeniləməsindəsiniz. Artırma indi `?prefix=alias` tələb edir.                                                                                                                                                                              |
+| Bir image/audio modeli əvvəllər siyahıda idi və getdi         | 1.0.1 — dan bəri qəsdən o, heç vaxt söhbət sorğusuna cavab verə bilməz.                                                                                                                                                                                                     |
+| Fəaliyyət Panelində panel yoxdur                              | VS Kodu əlavə görünüş konteynerlərini içəriyə köçürür** "..."** Fəaliyyət Panelinin altındakı daşqın və sağ klik vasitəsilə gizlədilən konteyner gizli qalır. Fəaliyyət paneli → işarəsini sağ vurun**OmniRoute** , və ya `OmniRoute: Manage Connection` ilə açın.          |
+| Dashboard `editor` rejiminə baxmayaraq brauzerdə açılır       | Server yox idi** tikilmişdir** `DASHBOARD_ALLOW_EMBED=vscode` ilə (yuxarıya bax) — onu əvvəlcədən qurulmuş quraşdırmada işə saldıqda heç nə etmir. Geri dönüş qəsdəndir.                                                                                                    |
+| Provayderləri dəyişdirdikdən sonra modellər siyahısı köhnəlib | `OmniRoute: Refresh Models` və ya paneldəki ↻ linki.                                                                                                                                                                                                                        |
+| Panel _Onlayn (modellər bloklanıb)_ deyir, seçici boşdur      | Server açarı rədd edir. ilə sağ açarı qeyd edin** Saxla və Test et** . Əvəzində açar serverdə sabitlənmişsə (aktivləşdirilmiş və ya modellərə giriş verilmişdirsə), genişləndirmə öz-özünə fərq etmir: `OmniRoute: Refresh Models` işə salın və ya OmniRoute panelini açın. |
 
 ---
 

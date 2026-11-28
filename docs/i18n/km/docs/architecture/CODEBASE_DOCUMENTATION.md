@@ -4,18 +4,11 @@
 
 ---
 
-> **កំណែ៖** v3.8.51
-> **បានធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖** 2026-06-28
-> **អ្នកអានគោលដៅ៖** វិស្វករដែលរួមចំណែកដល់ OmniRoute ឬបង្កើតការរួមបញ្ចូលនៅលើវា។
+> **កំណែ៖** v3.8.51** ទស្សនិកជន៖** វិស្វករដែលរួមចំណែកដល់ OmniRoute ឬការរួមបញ្ចូលអគារនៅលើកំពូលរបស់វា។
 >
-> សម្រាប់ដ្យាក្រាមស្ថាបត្យកម្មកម្រិតខ្ពស់ និងហេតុផលនៅពីក្រោយប្រព័ន្ធរងនីមួយៗ សូមអាន
-> [ARCHITECTURE.md](./ARCHITECTURE.md)។ សម្រាប់ការសិក្សាស៊ីជម្រៅលើប្រព័ន្ធរងនីមួយៗ
-> (Auto Combo, ម៉ាស៊ីនមេ MCP, ម៉ាស៊ីនមេ A2A, Skills, Memory, Cloud Agents, Resilience,
-> Compression ជាដើម) សូមមើលឯកសារដែលផ្តោតជាក់លាក់លើប្រធានបទទាំងនោះនៅក្នុងថត `docs/` នេះ។
+> សម្រាប់ដ្យាក្រាមស្ថាបត្យកម្មកម្រិតខ្ពស់ និងហេតុផលនៅពីក្រោយប្រព័ន្ធរងនីមួយៗ សូមអាន [ARCHITECTURE.md](./ARCHITECTURE.md) ។ សម្រាប់ការជ្រមុជទឹកជ្រៅនៅលើប្រព័ន្ធរងនីមួយៗ (Auto Combo, MCP server, A2A server, Skills, Memory, Cloud Agents, Resilience, Compression, etc.) សូមមើលឯកសារដែលខិតខំប្រឹងប្រែងរបស់ពួកគេនៅក្នុងថត `docs/` នេះ។
 
-ឯកសារនេះពិពណ៌នាអំពី **អ្វីដែលមាននៅក្នុងឃ្លាំងកូដនាពេលបច្ចុប្បន្ន** ដើម្បីឱ្យវិស្វករថ្មី
-អាចស្វែងយល់ពីរចនាសម្ព័ន្ធថត យល់ពីការរៀបចំជាស្រទាប់នៅពេលដំណើរការ និងដឹងពីកន្លែងដែលត្រូវបន្ថែមកូដ
-ដោយមិនចាំបាច់បង្កើតម៉ូឌុលថ្មី។
+ឯកសារនេះពិពណ៌នា** អ្វីដែលមាននៅក្នុងឃ្លាំងថ្ងៃនេះ** ដើម្បីឱ្យវិស្វករថ្មីអាចរុករកមែកធាង ស្វែងយល់ពីការដាក់ស្រទាប់ពេលដំណើរការ និងដឹងពីកន្លែងដែលត្រូវបន្ថែមកូដដោយមិនចាំបាច់បង្កើតម៉ូឌុលថ្មី។
 
 ---
 
@@ -566,35 +559,14 @@ Command ដែលប្រើជាទូទៅ៖
 
 ## 8. `scripts/`
 
-ត្រូវបានរៀបចំជា 6 ថតរងតាមគោលបំណង។
+រៀបចំជា 6 ថតរងតាមគោលបំណង។
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`។
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs` ព្រមទាំងឧបករណ៍ជំនួយសម្រាប់តាមដាន PR ដែលអាចអានបានតែប៉ុណ្ណោះ
-  `ci-discriminate.sh` (បែងចែកហត្ថលេខានៃការត្រួតពិនិត្យដែលបរាជ័យរបស់ PR ទៅជា របស់ខ្លួន / ទទួលមរតក /
-  មិនស្គាល់ ដោយប្រៀបធៀបនឹង PR យោង ឬបញ្ហា base-red) និង `audit-worktree.sh`
-  (ឯកសារដែលបានកែប្រែមិនទាន់រក្សាទុក, ផ្នែកដែលបានការពារ, assert ដែលបានលុប, ចំនួនការទប់ស្កាត់, tsconfig បណ្ដោះអាសន្ន
-  ដែលនៅសេសសល់, ក្បាល PR ធៀបនឹង HEAD មូលដ្ឋាន — មុនពេល PR របស់ worker ត្រូវបានទទួលយក)។
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`។
-- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`។
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`។
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`។
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, បូកនឹងអ្នកជំនួយការមើលកូន PR បានតែអាន `ci-discriminate.sh` (តម្រៀប a PR's សញ្ញាប្រឆាំងនឹងការបរាជ័យ / PR ដែលមិនស្គាល់ បញ្ហាមូលដ្ឋាន-ក្រហម) និង `audit-worktree.sh` (ឯកសារកខ្វក់ ផ្ទៃដែលត្រូវបានការពារ ការអះអាងដែលបានដកចេញ ការទប់ស្កាត់ចំនួនសំណល់ tmp tsconfigs ក្បាល PR ទល់នឹង HEAD — មូលដ្ឋាន មុនពេល PR របស់កម្មករត្រូវបានទទួលយក)។
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`។ កំណែទង់ `check-deprecated-versions.mjs` ត្រូវបានកំណត់គុណលក្ខណៈយ៉ាងច្បាស់ទៅនឹង OmniRoute (3.6.x និងមុននេះ)។ មូលប្បទានប័ត្រមិនអើពើកាលបរិច្ឆេទ។
+- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

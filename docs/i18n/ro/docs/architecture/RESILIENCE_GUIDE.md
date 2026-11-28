@@ -12,57 +12,53 @@ OmniRoute are trei mecanisme de reziliență distincte, dar legate. Fiecare are 
 
 > **Prioritatea Env-vs-dashboard pentru comutările de reziliență.** Reziliența opt-in comută generată din mediu — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — furnizează doar _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Un boolean a persistat în `resilienceSettings` (Dashboard →** Setări → Reziliență** / `PATCH /api/resilience`, stocat în `key_value`) câștigă peste valoarea env: normalizarea (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) păstrează booleanul stocat ori de câte ori există unul. Setarea unui astfel de env var la `true` într-o implementare în care tabloul de bord deja salvat `false` prin urmare, nu schimbă nimic — răsturnați comutatorul** Setări → Reziliență** (sau ștergeți câmpul stocat).
 
-## 1. Circuit Breaker la nivel de furnizor
+## 1. Furnizor întrerupător de circuit
 
-**Domeniu de aplicare:** întregul furnizor (de ex., `glm`, `openai`, `anthropic`).
+**Domeniu de aplicare:** întregul furnizor (de exemplu, `glm`, `openai`, `anthropic`).
 
-**Scop:** oprirea trimiterii de trafic către un furnizor care eșuează în mod repetat la nivel de upstream/serviciu.
+**Scop:** opriți trimiterea de trafic către un furnizor care eșuează în mod repetat la nivelul upstream/service.
 
 **Implementare:**
 
 - Clasa de bază: `src/shared/utils/circuitBreaker.ts`
-- Cablare: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API de stare: `GET /api/monitoring/health`
-- API de resetare: `POST /api/resilience/reset`
-- Wrapper-e: `open-sse/services/accountFallback.ts`
-- Tabel în baza de date: `domain_circuit_breakers`
+- Cablaj: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Stare API: `GET /api/monitoring/health`
+- Resetează API: `POST /api/resilience/reset`
+- Ambalaje: `open-sse/services/accountFallback.ts`
+- masa DB : `domain_circuit_breakers`
 
-**Stări:**
+**State:**
 
-- `CLOSED` — traficul normal este permis
-- `DEGRADED` — traficul este încă permis, dar eșecurile ridicate ale furnizorului sunt urmărite; revine la `CLOSED` după suficiente succese, la un test de conexiune valid sau după cea mai lungă perioadă de menținere `OPEN` pentru ultimul tip de eșec (valoarea sa `cooldownByKind`, altfel `resetTimeout`, × `maxBackoffMultiplier`, cel puțin un cooldown) fără un nou eșec
-- `OPEN` — furnizorul este blocat temporar; rutarea combo îl omite
-- `HALF_OPEN` — timpul de resetare a expirat; este permisă o cerere de probă
+- `CLOSED` — trafic normal permis
+- traficul `DEGRADED` — încă este permis, dar erorile ridicate ale furnizorului sunt urmărite; revine la `CLOSED` la succese suficiente, la un test de conexiune valid sau după cea mai lungă reținere `OPEN` pentru ultimul tip de eșec (valoarea sa `cooldownByKind`, altfel `resetTimeout`, × `maxBackoffMultiplier`, cel puțin o perioadă de răcire) fără un nou eșec
+- furnizorul `OPEN` — blocat temporar; rutarea combinată îl omite
+- `HALF_OPEN` — reset timeout a expirat; cererea de sondă permisă
 
 **Valori implicite configurabile (`open-sse/config/constants.ts`, expuse în Dashboard → Settings → Resilience):**
 
-| Clasă   | Trece în DEGRADED la | Se deschide la | Timp de resetare |
-| ------- | -------------------- | -------------- | ---------------- |
-| OAuth   | 5 eșecuri            | 8 eșecuri      | 60s              |
-| API-key | 7 eșecuri            | 12 eșecuri     | 30s              |
-| Local   | derivat              | 2 eșecuri      | 15s              |
+| Clasă     | Degradat la | Se deschide la | Resetați timeout |
+| --------- | ----------- | -------------- | ---------------- |
+| OAuth     | 5 eșecuri   | 8 eșecuri      | anii 60          |
+| Cheie API | 7 eșecuri   | 12 eșecuri     | 30 de ani        |
 
-`degradationThreshold` controlează când un furnizor intră în `DEGRADED`; `failureThreshold` controlează când se deschide și este omis. Profilele furnizorilor locali nu sunt încă expuse pe pagina de setări Resilience.
+`degradationThreshold` controlează când un furnizor introduce `DEGRADED`; `failureThreshold` controlează când se deschide și este omis. `PROVIDER_PROFILES.local` (2 eșecuri / 15s) este definit în `open-sse/config/constants.ts` dar** încă neconectat** : `getProviderCategory()` returnează numai `oauth` sau `apikey`, astfel încât furnizorii locali folosesc profilul OAuth sau API-key.
 
-**Coduri de declanșare:** doar statusurile la nivel de furnizor `[408, 500, 502, 503, 504]`. NU se declanșează pentru erori la nivel de cont (majoritatea 401/403/429 — acestea țin de cooldown sau de lockout).
+**Coduri de călătorie:** numai stările la nivel de furnizor `[408, 500, 502, 503, 504]`. Efectuați NOT trip pentru erori la nivel de cont (majoritatea 401/403/429 — aparțin cooldown-ului sau blocării).
 
-**Recuperare leneșă (lazy):** când `OPEN` expiră, `getStatus()`, `canExecute()`, `getRetryAfterMs()` reîmprospătează starea la `HALF_OPEN`. Aceleași citiri (și următorul eșec) aduc un `DEGRADED` învechit înapoi la `CLOSED`. Nu este necesar un timer în fundal.
+**Recuperare leneșă:** când `OPEN` expiră, `getStatus()`, `canExecute()`, `getRetryAfterMs()` reîmprospătează starea la `HALF_OPEN`. Aceleași citiri (și următorul eșec) reduc un `DEGRADED` învechit înapoi la `CLOSED`. Nu este nevoie de temporizator de fundal.
 
 ---
 
-### Cooldown global opt-in la nivel de furnizor (window gate)
+### Înscrieți-vă pentru răcirea globală a furnizorului (poarta ferestrei)
 
-Un al patrulea strat, **opt-in** (`PROVIDER_COOLDOWN_ENABLED`, implicit **dezactivat**), păstrează o memorie între cereri a furnizorilor care eșuează în
-`open-sse/services/providerCooldownTracker.ts`, consultată de rezoluția țintelor combo, astfel încât cererile combo consecutive să nu mai parcurgă din nou un furnizor care tocmai a eșuat. Intrările la nivel de furnizor respectă filtrul de fereastră (window gate) din `PROVIDER_PROFILES`:
+Un al patrulea,** înscriere** strat (`PROVIDER_COOLDOWN_ENABLED`, implicit** oprit** ) păstrează o memorie de solicitări încrucișate a furnizorilor care nu au eșuat în `open-sse/services/providerCooldownTracker.ts`, consultată prin rezoluția țintei combo, astfel încât solicitările combo consecutive nu mai redirecționează un furnizor care tocmai a eșuat. Intrările la nivel de furnizor onorează poarta ferestrei `PROVIDER_PROFILES` :
 
-| Profil  | se declanșează după (`providerFailureThreshold`) | în intervalul (`providerFailureWindowMs`) | răcește timp de (`providerCooldownMs`) |
-| ------- | -----------------------------------------------: | ----------------------------------------: | -------------------------------------: |
-| OAuth   |                                             `10` |                                   `15min` |                                 `5min` |
-| API key |                                             `15` |                                   `30min` |                                `10min` |
+| Profil | călătorii după (`providerFailureThreshold`) | înăuntru (`providerFailureWindowMs`) | se răcește pentru (`providerCooldownMs`) |
+| ------ | ------------------------------------------: | -----------------------------------: | ---------------------------------------: |
+| OAuth  |                                        `10` |                              `15min` |                                   `5min` |
+| API    |                                        `15` |                              `30min` |                                  `10min` |
 
-Sub prag, furnizorul **nu** este considerat a fi în răcire; un succes golește fereastra. Intrările la nivel de conexiune (`provider:connectionId`) păstrează în schimb backoff-ul exponențial `minRetryCooldownMs → maxRetryCooldownMs`. Suprascrieri:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Test de regresie: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Sub pragul se află furnizorul** nu** considerată răcire; un succes curăță fereastra. Intrările la nivel de conexiune (`provider:connectionId`) păstrează în schimb `minRetryCooldownMs → maxRetryCooldownMs` exponențial. Anulează: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Garda de regresie: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Cooldown conexiune
 
@@ -726,6 +722,21 @@ IP` nu a fost niciodată testat) sau nicio înregistrare → conexiunea care a e
 
 ---
 
+## Când OmniRoute în sine este inaccesibil
+
+Întrerupătorul furnizorului, răcirea conexiunii și blocarea modelului rulează toate în interiorul gateway-ului. Dacă clientul nu poate ajunge la gateway, primește o eroare de conexiune. OmniRoute nu poate intercepta acel eșec. Clientul decide dacă să reîncerce și ce mesaj să afișeze.
+
+În prezent,OmniRoute nu oferă nicio rezervă la nivel de client și nu definește nicio politică pentru aceasta. Configurați orice rută alternativă în client sau în fața gateway-ului.
+
+- `GET /api/health` verifică vitalitatea fără autentificare.
+- `GET /api/health/ping` verifică pregătirea, inclusiv dacă baza de date răspunde.
+- `GET /api/monitoring/health` oferă apelanților autentificați o imagine de ansamblu mai profundă a stării de sănătate.
+- `omniroute launch <tool>` probează `/api/monitoring/health` înainte de a porni clientul. Poate porni automat un gateway local. Cu `--no-start`, un gateway inaccesibil are ca rezultat `GatewayUnreachable` și codul de ieșire `69`.
+
+Pentru a deconecta un client de la OmniRoute, urmați [Anulați configurația clientului](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Depanare
 
 - Combo-ul weighted răspunde cu `503 all_targets_cooling_down` (`Retry-After` setat, `diagnostics.excluded` listează fiecare țintă cu `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → pool-ul este configurat și conectat, fiecare țintă este doar exclusă de un temporizator de reziliență; avertismentul `[COMBO] Weighted selection: every target excluded before dispatch — …` menționează motivele și secundele rămase. Un `404 no_executable_targets` de la același combo înseamnă că niciun temporizator de reziliență nu a fost implicat (nimic de rulat sau fiecare cont a eșuat la proba de disponibilitate). Construit în `open-sse/services/combo/pinRecovery.ts` din excluziunile colectate în `targetResolution.ts`.
@@ -737,95 +748,68 @@ IP` nu a fost niciodată testat) sau nicio înregistrare → conexiunea care a e
 
 ---
 
-## Starea la runtime — referință rapidă pentru agenți
+## Starea de rulare a agentului — de referință rapidă
 
-> Mutat verbatim din `AGENTS.md` → „Resilience Runtime State" (PR #12743), astfel încât ghidul
-> pentru agenți să rămână sub bugetul de context de 40k. Este varianta condensată, destinată agenților, a
-> secțiunilor de mai sus; secțiunile numerotate rămân referința completă.
+> S-a mutat textual din `AGENTS.md` → „Resilience Runtime State” (PR #12743), astfel încât ghidul agentului să rămână sub bugetul de context de 40k. Este imaginea condensată, orientată către agent, a secțiunilor de mai sus; secțiunile numerotate rămân referința completă.
 
-OmniRoute are trei mecanisme de eșec temporar înrudite, dar distincte. Păstrați-le
-sferele de aplicare separate atunci când depanați comportamentul de rutare. Consultați
-[diagrama de reziliență pe 3 niveluri](../diagrams/exported/resilience-3layers.svg)
-(sursă: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-pentru o privire de ansamblu.
+OmniRoute are trei mecanisme de eșec temporare legate, dar distincte. Păstrați domeniul de aplicare separat atunci când depanați comportamentul de rutare. Consultați [diagrama de rezistență cu 3 straturi](../diagrams/exported/resilience-3layers.svg) (sursa: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) pentru o hartă dintr-o privire.
 
-### Circuit breaker la nivel de furnizor
+### Furnizor Circuit Breaker
 
-**Sferă**: întregul furnizor, de ex. `glm`, `openai`, `anthropic`.
+**Domeniul de aplicare** : furnizorul întreg, de exemplu `glm`, `openai`, `anthropic`.
 
-**Scop**: oprirea trimiterii de trafic către un furnizor care eșuează în mod repetat la
-nivel upstream/de serviciu, astfel încât un furnizor nesănătos să nu încetinească fiecare cerere.
+**Scop** : opriți trimiterea de trafic către un furnizor care eșuează în mod repetat la nivelul upstream/service, astfel încât un furnizor nesănătos să nu încetinească fiecare solicitare.
 
-**Implementare**:
+**Implementarea** :
 
 - Clasa de bază: `src/shared/utils/circuitBreaker.ts`
-- Integrarea porții (gate) și a execuției chat: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API de stare la runtime: `src/app/api/monitoring/health/route.ts`
-- Wrapper-e partajate: `open-sse/services/accountFallback.ts`
-- Tabelul de stare persistat: `domain_circuit_breakers`
+- Cablajul gate/execution chat: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Stare de rulare API: `src/app/api/monitoring/health/route.ts`
+- Învelișuri comune: `open-sse/services/accountFallback.ts`
+- Tabel cu stări persistente: `domain_circuit_breakers`
 
-**Stări** (4 — `src/shared/utils/circuitBreaker.ts`):
+**state** (4 — `src/shared/utils/circuitBreaker.ts`):
 
 - `CLOSED`: traficul normal este permis.
-- `DEGRADED`: bandă de avertizare timpurie — eșecurile au depășit pragul de degradare, dar încă nu și
-  pragul breaker-ului; traficul continuă să curgă, dashboard-urile afișează avertismentul. Un test de conexiune
-  valid sau o fereastră liniștită, fără eșecuri noi, îl readuce la `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` conține fereastra).
-- `OPEN`: furnizorul este blocat temporar; apelanții primesc un răspuns provider-circuit-open
-  sau rutarea combo sare la altă țintă.
-- `HALF_OPEN`: timeout-ul de resetare a expirat; se permite o cerere de probă. Succesul închide
-  breaker-ul, eșecul îl deschide din nou.
+- `DEGRADED`: eșecurile — ale benzii de avertizare timpurie au depășit pragul de degradare, dar nu încă pragul întrerupător; traficul încă curge, tablourile de bord arată avertismentul. Un test de conexiune valid sau o fereastră silențioasă fără eșec nou îl returnează la `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` are fereastra).
+- `OPEN`: furnizorul este blocat temporar; apelanții primesc un răspuns furnizor-circuit-deschis sau rutarea combinată trece către o altă țintă.
+- `HALF_OPEN`: a expirat timpul de resetare; permite o cerere de sondă. Succesul închide întrerupătorul, eșecul îl deschide din nou.
 
-**Valori implicite** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, consumate prin
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` în `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` în `src/sse/handlers/chatHelpers.ts`). Breaker-ul la nivel de
-întreg furnizor funcționează pe baza `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Valori implicite** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, consumat prin `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` în `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` în `src/sse/handlers/chatHelpers.ts`). Interruptorul întregului furnizor rulează pe `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profil  | se degradează la | se deschide la (`circuitBreakerThreshold`) | resetare (`circuitBreakerReset`) |
-| ------- | ---------------: | -----------------------------------------: | -------------------------------: |
-| OAuth   |              `5` |                                        `8` |                            `60s` |
-| API key |              `7` |                                       `12` |                            `30s` |
-| Local   |        (derivat) |                                        `2` |                            `15s` |
+| Profil | se degradează la | se deschide la (`circuitBreakerThreshold`) | resetare (`circuitBreakerReset`) |
+| ------ | ---------------: | -----------------------------------------: | -------------------------------: |
+| OAuth  |              `5` |                                        `8` |                            `60s` |
+| API    |              `7` |                                       `12` |                            `30s` |
 
-`PROVIDER_PROFILES` definește, de asemenea, `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) și `providerCooldownMs` (5/10/1 min): acestea alimentează
-**poarta de fereastră a mecanismului global opțional Provider Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, dezactivat
-implicit) — o intrare la nivel de furnizor în `open-sse/services/providerCooldownTracker.ts` contează drept
-„în cooldown" abia după `providerFailureThreshold` eșecuri în interiorul `providerFailureWindowMs`, iar apoi
-rămâne în cooldown timp de `providerCooldownMs`. Acestea NU sunt pragurile breaker-ului activ — nu le ajustați
-așteptându-vă la un comportament de breaker. Fiecare valoare implicită poate fi suprascrisă prin
-variabilele de mediu `OMNIROUTE_PROVIDER_BREAKER_*` și `OMNIROUTE_CIRCUIT_BREAKER_*`;
-tabelul de referință exact pentru runtime se află în `docs/architecture/RESILIENCE_GUIDE.md`.
+Un profil `local` (`2` failures / `15s`) există și în `PROVIDER_PROFILES`, dar nu este conectat la întrerupător: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) acceptă doar `oauth` sau `apikey`, iar `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) returnează unul dintre cei doi (furnizorii neînregistrați primesc `apikey`).
 
-Doar statusurile de eșec la nivel de furnizor ar trebui să declanșeze breaker-ul de furnizor:
+`PROVIDER_PROFILES` definește și `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) și `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, unde valorile locale sunt inerte din același motiv ca mai sus: acestea alimentează** poarta fereastră a opt-in-ul global de răcire a furnizorului** (`PROVIDER_COOLDOWN_ENABLED`, implicit dezactivat) — o intrare la nivel de furnizor în `open-sse/services/providerCooldownTracker.ts` contează doar ca răcire după eșecuri `providerFailureThreshold` în interiorul `providerFailureWindowMs`, iar apoi se răcește pentru `providerCooldownMs`. Ele sunt NOT pragurile întrerupătorului activ — nu le acordă așteptând comportamentul întreruptorului. Fiecare valoare implicită poate fi suprascrisă prin `OMNIROUTE_PROVIDER_BREAKER_*` și `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; tabelul de referință cu precizie de rulare locuiește în `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Numai stările de eșec la nivel de furnizor ar trebui să declanșeze întrerupătorul furnizorului:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Nu declanșați breaker-ul la nivel de întreg furnizor pentru erori normale de cont/cheie/model, precum majoritatea
-cazurilor `401`, `403` sau `429`. Acestea țin de obicei de cooldown-ul de conexiune sau de blocarea
-modelului (model lockout). Un `403` generic de la un furnizor cu cheie API ar trebui să fie recuperabil, cu excepția
-cazului în care este clasificat drept eroare terminală de furnizor/cont.
+Nu declanșați întrerupătorul întregului furnizor pentru erori normale account/key/model, cum ar fi majoritatea cazurilor `401`, `403` sau `429`. Acestea aparțin de obicei răcirii conexiunii sau blocării modelului. Un furnizor generic de chei API `403` ar trebui să fie recuperabil, cu excepția cazului în care este clasificat ca o eroare provider/account terminală.
 
-Breaker-ul folosește recuperare leneșă (lazy), nu un temporizator în fundal. Când starea `OPEN` expiră, citiri precum
-`getStatus()`, `canExecute()` și `getRetryAfterMs()` reîmprospătează starea la
-`HALF_OPEN`, astfel încât panourile de bord și constructorii de candidați combo nu continuă să excludă la nesfârșit un furnizor expirat.
+Disrupătorul folosește recuperarea leneșă, nu un temporizator de fundal. Când `OPEN` expiră, citirile precum `getStatus()`, `canExecute()` și `getRetryAfterMs()` reîmprospătează starea la `HALF_OPEN`, astfel încât tablourile de bord și generatorii de candidati combinați nu exclud pentru totdeauna un furnizor expirat.
 
 ### Răcirea conexiunii
 
-**Domeniu**: o conexiune/un cont/o cheie a furnizorului.
+**Domeniul de aplicare** : un furnizor connection/account/key.
 
-**Scop**: să sară temporar peste o cheie/un cont problematic, permițând în același timp celorlalte conexiuni ale aceluiași furnizor să continue să deservească cereri.
+**Scop** : omite temporar un key/account prost, permițând altor conexiuni pentru același furnizor să continue să servească cereri.
 
-**Implementare**:
+**Implementarea** :
 
-- Calea de scriere/actualizare: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Selectarea/filtrarea conturilor: `src/sse/services/auth.ts::getProviderCredentials...`
-- Calculul perioadei de răcire: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- calea Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- Cont selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Calcul de răcire: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Setări: `src/lib/resilience/settings.ts`
 
-Câmpuri importante pe conexiunile furnizorului:
+Câmpuri importante privind conexiunile la furnizor:
 
 ```ts
 rateLimitedUntil;
@@ -836,52 +820,50 @@ errorCode;
 backoffLevel;
 ```
 
-În timpul selectării contului, o conexiune este sărită atâta timp cât:
+În timpul selectării contului, o conexiune este omisă în timp ce:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Perioadele de răcire sunt, de asemenea, leneșe: când `rateLimitedUntil` este în trecut, conexiunea devine din nou eligibilă. La o utilizare reușită, `clearAccountError()` șterge `testStatus`,
-`rateLimitedUntil`, câmpurile de eroare și `backoffLevel`.
+De asemenea, perioadele de răcire sunt leneșe: când `rateLimitedUntil` este în trecut, conexiunea devine din nou eligibilă. La utilizarea cu succes, `clearAccountError()` șterge `testStatus`, `rateLimitedUntil`, câmpurile de eroare și `backoffLevel`.
 
-Comportamentul implicit al răcirii conexiunii:
+Comportamentul implicit de răcire a conexiunii:
 
-- Răcire de bază OAuth: `5s`.
-- Răcire de bază pentru chei API: `3s`.
-- Pentru `429` la chei API ar trebui preferate indicațiile de reîncercare de la upstream (`Retry-After`, headere de resetare sau
-  text de resetare interpretabil), atunci când sunt disponibile.
-- Eșecurile recuperabile repetate folosesc backoff exponențial:
+- cooldown de bază OAuth : `5s`.
+- Cooldown de bază pentru cheia API: `3s`.
+- API-key `429` ar trebui să prefere sugestiile de reîncercare în amonte (`Retry-After`, anteturi de resetare sau text de resetare analizabil) atunci când sunt disponibile.
+- Eșecurile repetate recuperabile folosesc retragerea exponențială:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Protecția anti-thundering-herd împiedică eșecurile concurente pe aceeași conexiune să prelungească în mod repetat perioada de răcire sau să incrementeze de două ori `backoffLevel`.
+Protecția anti-tunete previne defecțiunile concurente ale aceleiași conexiuni să extindă în mod repetat timpul de răcire sau să crească dublu `backoffLevel`.
 
-Stările terminale nu sunt perioade de răcire. `banned`, `expired` (care devine terminală abia după N reîncercări limitate prin `EXPIRED_RETRY_MAX`) și `credits_exhausted` sunt menite să rămână indisponibile până când acreditările/setările se schimbă sau un operator le resetează. Nu suprascrieți stările terminale cu o stare de răcire tranzitorie.
+Stările terminale nu sunt cooldown-uri. `banned`, `expired` (care devine terminal numai după N încercări limitate prin `EXPIRED_RETRY_MAX`) și `credits_exhausted` sunt destinate să rămână indisponibile până când credentials/settings se schimbă sau un operator le resetează. Nu suprascrieți stările terminale cu starea de răcire tranzitorie.
 
 ### Blocarea modelului
 
-**Domeniu**: furnizor + conexiune + model.
+**Domeniul de aplicare** : furnizor de conexiune + model +.
 
-**Scop**: evitarea dezactivării întregii conexiuni atunci când doar un model este indisponibil sau limitat de cotă pentru acea conexiune.
+**Scop** : evitați dezactivarea unei întregi conexiuni atunci când un singur model este indisponibil sau este limitat în cotă pentru acea conexiune.
 
 Exemple:
 
-- Furnizori cu cote per model care returnează `429`.
-- Furnizori locali care returnează `404` pentru un model lipsă.
-- Eșecuri de permisiune specifice furnizorului pentru moduri/modele, cum ar fi anumite moduri Grok.
+- Furnizorii de cote pe model care returnează `429`.
+- Furnizorii locali returnează `404` pentru un model lipsă.
+- Eșecuri ale permisiunii mode/model specifice furnizorului, cum ar fi modurile Grok selectate.
 
-Blocarea modelului se află în `open-sse/services/accountFallback.ts` și permite aceleiași conexiuni să continue să deservească alte modele.
+Blocarea modelului locuiește în `open-sse/services/accountFallback.ts` și permite aceeași conexiune să continue să servească alte modele.
 
 ### Ghid de depanare
 
-- Dacă toate cheile unui furnizor sunt sărite, inspectați atât starea breaker-ului furnizorului, cât și `rateLimitedUntil`/`testStatus` ale fiecărei conexiuni.
-- Dacă un furnizor pare exclus permanent după fereastra de resetare, verificați dacă codul citește direct `state` în loc să folosească `getStatus()`/`canExecute()`.
-- Dacă o cheie de furnizor eșuează, dar altele ar trebui să funcționeze, preferați răcirea conexiunii în locul breaker-ului de furnizor.
-- Dacă eșuează doar un singur model, preferați blocarea modelului în locul răcirii conexiunii.
-- Dacă o stare ar trebui să se auto-recupereze, aceasta trebuie să aibă un timestamp viitor/un timeout de resetare și o cale de citire care reîmprospătează starea expirată. Stările permanente necesită modificări manuale ale acreditărilor sau ale configurării.
+- Dacă toate cheile pentru un furnizor sunt omise, inspectați atât starea întreruptorului furnizorului, cât și `rateLimitedUntil`/`testStatus` ale fiecărei conexiuni.
+- Dacă un furnizor apare exclus definitiv după fereastra de resetare, verificați dacă codul citește `state` brut în loc să folosească `getStatus()`/`canExecute()`.
+- Dacă o cheie de furnizor eșuează, dar altele ar trebui să funcționeze, preferați răcirea conexiunii în locul întreruptorului furnizorului.
+- Dacă un singur model eșuează, preferați blocarea modelului în loc de răcire a conexiunii.
+- Dacă o stare ar trebui să se recupereze automat, ar trebui să aibă un viitor timeout timestamp/reset și o cale de citire care reîmprospătează starea expirată. Stările permanente necesită acreditări manuale sau modificări de configurare.
 
 ---
 

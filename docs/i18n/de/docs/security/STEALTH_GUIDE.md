@@ -4,11 +4,9 @@
 
 ---
 
-> **Quelle der Wahrheit:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Zuletzt aktualisiert:** 2026-09-02 — v3.8.51
-> **Zielgruppe:** Entwickler, die anbieterspezifische Stealth-Integrationen warten.
+> **Quelle der Wahrheit:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Publikum:** Ingenieure, die anbieterspezifische Stealth-Integrationen pflegen.
 
-OmniRoute integriert sich mit Anbietern, deren Edge-Systeme nicht offizielle Clients aktiv per Fingerprinting erkennen (TLS JA3/JA4, Header-Reihenfolge, JSON-Body-Struktur, Integritätstoken). Diese Seite dokumentiert die von OmniRoute bereitgestellten Stealth-Schnittstellen und deren Implementierungsorte.
+OmniRoute lässt sich mit Anbietern integrieren, deren Edges inoffizielle Clients aktiv mit Fingerabdrücken versehen (TLS JA3/JA4, Header-Reihenfolge, JSON Körperform, Integritätstoken). Auf dieser Seite werden die OmniRoute bereitgestellten Stealth-Oberflächen und deren Implementierung dokumentiert.
 
 ## Rechtlicher und ethischer Hinweis
 
@@ -77,65 +75,68 @@ bevor Sie Parität mit einem Upstream-Browser beanspruchen.
 
 ---
 
-## Claude-Code-Stealth-Bundle
+## Claude Code Stealth Bundle
 
-Wenn `cliCompatMode` aktiviert ist, formt OmniRoute ausgehende Claude-Anfragen so um, dass sie nicht von `claude-cli`-Datenverkehr zu unterscheiden sind. Drei Module arbeiten dabei zusammen:
+Wenn `cliCompatMode` aktiviert ist, formt OmniRoute ausgehende Claude -Anfragen so um, dass sie nicht vom `claude-cli` -Verkehr zu unterscheiden sind. Drei Module arbeiten zusammen:
 
 ### `claudeCodeFingerprint.ts`
 
-Berechnet den 3-stelligen `cc_version`-Fingerabdruck, der in den Abrechnungs-Header eingebettet wird:
+Berechnet den 3-stelligen `cc_version` Fingerabdruck, der im Abrechnungsheader eingebettet ist:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (fest codiert; entspricht dem offiziellen Client)
-- Eingaben: Zeichen an Index 4, 7 und 20 des Textes der ersten Benutzernachricht + Versionszeichenfolge
-- Ausgabe: 3-stelliges Hex-Präfix
+- `FINGERPRINT_SALT = "59cf53e54c78"` (hartcodiert; entspricht dem offiziellen Client)
+- Eingaben: Zeichen an Index 4, 7, 20 des ersten Benutzernachrichtentextes, + Versionszeichenfolge
+- Ausgabe: 3-stelliges Hexadezimalpräfix
 
 ### `claudeCodeCCH.ts` (Client Content Hash)
 
-Serverseitige Integritätsprüfung, die die offizielle Claude Code CLI über Bun/Zig berechnet. OmniRoute implementiert sie mit `xxhash-wasm` neu:
+Serverseitige Integritätsprüfung des offiziellen Claude Codes, CLI über Bun/Zig. berechnet OmniRoute Reimplementierungen mit `xxhash-wasm`:
 
-1. Body mit dem Platzhalter `cch=00000;` serialisieren
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Mit Nullen aufgefüllte, 5-stellige Hex-Zeichenfolge in Kleinbuchstaben
-4. `cch=00000;` durch das berechnete Token ersetzen
+1. Serialisieren Sie den Körper mit `cch=00000;` Platzhalter
+2. Erstellen Sie die Hash-Ansicht mit zwei Klartext-Ersetzungen in dieser Reihenfolge (`hashView()`):
+   - Jede Übereinstimmung von `/"model":"[^"]*"/g` wird zu `"model":""` — Die Übereinstimmung stoppt beim ersten `"`, sodass ein Wert mit einem maskierten Anführungszeichen (`"model":"a\"b"`) nur bis zu diesem Anführungszeichen geleert wird, wie es der Client tut
+   - Jede Übereinstimmung von `/"max_tokens":\d+,|,?"max_tokens":\d+/g` wird entfernt, — nur numerische Werte, in beliebiger Tiefe
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Mit Nullen aufgefülltes 5-stelliges Kleinbuchstaben-Hexadezimalzeichen
+5. Ersetzen Sie `cch=00000;` durch das berechnete Token
 
 Konstanten:
 
-- Seed: `0x6e52736ac806831e`
+- Seed: `0x4d659218e32a3268` (entspricht Loopback-Captures von Claude Code 2.1.252 und 2.1.322)
 - Muster: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Fügt nach dem ersten Zeichen „sensibler“ Clientnamen einen Unicode-**Zero-Width Joiner** (`U+200D`) ein, sodass vorgeschaltete Filter sie nicht per grep finden können. Standardwortliste:
+Fügt einen Unicode ein** Verbindungsstück mit Nullbreite** (`U+200D`) nach dem ersten Zeichen von „sensiblen“ Clientnamen, damit Upstream-Filter sie nicht erfassen können. Standardwortliste:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Angewendet auf: `system`-Blöcke, alle `messages[].content` sowie `tools[].description` / `tools[].function.description`. Kann vom Betreiber über `setSensitiveWords()` überschrieben werden.
+Angewendet auf: `system` Blöcke, alle `messages[].content` und `tools[].description` / `tools[].function.description`. Vom Operator über `setSensitiveWords()` überschreibbar.
 
-### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`-Provider
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` Anbieter
 
-Für Anthropic-Relays von Drittanbietern, die ausschließlich „echten Claude-Code“-Datenverkehr akzeptieren:
+Für Anthropic Relays von Drittanbietern, die nur Datenverkehr mit „echtem Claude -Code“ akzeptieren:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` standardmäßig
-- Der verbindungsspezifische Schalter „Enable redact-thinking beta“ fügt `redact-thinking-2026-02-12` hinzu, wenn ein CC-Compatible-Upstream ausdrücklich Streams mit redigiertem Thinking erfordert
-- Der verbindungsspezifische Schalter „Enable summarized thinking display“ speichert `providerSpecificData.requestDefaults.summarizeThinking` und fügt CC-Compatible-Thinking-Anfragen, für die noch kein Anzeigemodus festgelegt wurde, `display: "summarized"` hinzu
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus-/Sonnet-4.x-Familie)
+- standardmäßig `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
+- Der verbindungsspezifische Schalter „Redact-Thinking Beta aktivieren“ fügt `redact-thinking-2026-02-12` hinzu, wenn ein CC kompatibler Upstream speziell redigierte Thinking-Streams erfordert
+- Der verbindungsspezifische Schalter „Zusammengefasste Thinking-Anzeige aktivieren“ speichert `providerSpecificData.requestDefaults.summarizeThinking` und fügt `display: "summarized"` zu CC hinzu. Kompatible Thinking-Anfragen, die noch keinen Anzeigemodus festgelegt haben
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x-Familie)
 - Standardpfad: `/v1/messages?beta=true`
 
-Zugehörige Module im selben Bundle:
+Schwestermodule im selben Paket:
 
-- `claudeCodeConstraints.ts` — Regeln für Temperatur und Cache-Steuerung
-- `claudeCodeToolRemapper.ts` — Neuzuordnung von Toolnamen
-- `claudeCodeExtraRemap.ts` — zusätzliche Normalisierung der Nutzlast
+- `claudeCodeConstraints.ts` — Temperatur + Cache-Kontrollregeln
+- `claudeCodeToolRemapper.ts` — Werkzeugnamen-Neuzuordnung
+- `claudeCodeExtraRemap.ts` — Extra-Payload-Normalisierung
 
 ---
 
@@ -195,7 +196,7 @@ Berührungspunkte:
 
 - `open-sse/executors/antigravity.ts` — liest `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — -Anmeldeinformationen Sanitär
-- Ursprünglicher Vorfallbericht: Diskussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Ursprünglicher Vorfallbericht: Diskussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

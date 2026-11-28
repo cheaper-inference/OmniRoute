@@ -4,30 +4,13 @@
 
 ---
 
-> **Sumber acuan:** `src/lib/memory/` dan `src/app/api/memory/`
-> **Terakhir diperbarui:** 2026-06-28 — v3.8.40 (dinonaktifkan secara default + penyesuaian kuantisasi int8)
+> **Sumber kebenaran:** `src/lib/memory/` dan `src/app/api/memory/`
 
-OmniRoute menyediakan memori percakapan persisten yang diidentifikasi berdasarkan kunci API (dan
-secara opsional id sesi). Memori diekstraksi secara otomatis dari respons LLM
-melalui pencocokan pola regex ringan dan disuntikkan kembali ke permintaan
-berikutnya sebagai pesan sistem di awal (atau pesan pengguna pertama untuk penyedia yang
-menolak peran sistem).
+OmniRoute menyediakan memori percakapan persisten yang dikunci oleh kunci API (dan id sesi opsional). Memori diekstraksi secara otomatis dari respons LLM melalui pencocokan pola regex ringan dan dimasukkan kembali ke permintaan berikutnya sebagai pesan sistem utama (atau pesan pengguna pertama untuk penyedia yang menolak peran sistem).
 
-> **Memori NONAKTIF secara default (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> sekarang bernilai `false` (`src/lib/memory/settings.ts`). Mengaktifkan memori akan menyuntikkan hingga
-> `maxTokens` (~2k) konteks yang diambil ke dalam **setiap** permintaan percakapan, yang
-> dikenai biaya — biaya tak terduga bagi instalasi baru dan klien yang mengelola
-> konteksnya sendiri. Aktifkan secara eksplisit di **Settings → Memory** (
-> `MemorySkillsTab` menampilkan peringatan biaya token saat memori diaktifkan).
-> Klien dapat mengecualikan satu permintaan dengan header permintaan
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — lihat tabel header permintaan di
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Permintaan tanpa memori menetapkan
-> `memoryOwnerId = null`, yang menonaktifkan **baik** penyuntikan memori maupun keahlian untuk
-> permintaan tersebut (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Memori adalah OFF secara default (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` sekarang menjadi `false` (`src/lib/memory/settings.ts`). Mengaktifkan injeksi memori hingga `maxTokens` (~ 2k) dari konteks yang diambil ke dalamnya** setiap** permintaan obrolan, yang — biaya yang sangat besar untuk pemasangan baru dan untuk klien yang mengelola konteksnya sendiri. Ikut serta secara eksplisit di bawah** Pengaturan → Memori** ( `MemorySkillsTab` menampilkan pemanggilan peringatan biaya token ketika memori diaktifkan). Klien dapat membatalkan satu permintaan dengan header permintaan `x-omniroute-no-memory` (`true`/`1`/`yes`) — lihat tabel header permintaan di [API_REFERENCE.md](../reference/API_REFERENCE.md). Permintaan tanpa memori menyetel `memoryOwnerId = null`, yang menonaktifkan** keduanya** injeksi memori dan keterampilan untuk permintaan itu (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Memori **dicakup per kunci API**, bukan per pengguna — setiap permintaan yang diautentikasi
-dengan kunci API yang sama berbagi kumpulan memori yang sama, dengan pencakupan tambahan
-opsional berdasarkan `sessionId`.
+Memori adalah** dicakup per kunci API** , bukan per pengguna — setiap permintaan yang diautentikasi dengan kunci API yang sama berbagi kumpulan memori yang sama, dengan pelingkupan opsional lebih lanjut oleh `sessionId`.
 
 ## Arsitektur
 
@@ -334,25 +317,15 @@ dan cakupannya adalah salah satu dari `session`, `apiKey`, atau `global`. Cakupa
 
 ## Ekstraksi Fakta (`extraction.ts`)
 
-Ekstraksi **berbasis regex**, bukan berbasis LLM — proses ini berjalan secara internal dengan
-`setImmediate()` sehingga tidak pernah memblokir aliran respons:
+Ekstraksi adalah** berbasis regex** , bukan — berbasis LLM, ia berjalan dalam proses dengan `setImmediate()` sehingga tidak pernah memblokir aliran respons:
 
-- **Pola preferensi** → `MemoryType.FACTUAL`
-  (misalnya `Saya lebih suka …`, `Saya sangat menyukai …`, `favorit saya adalah …`, `Saya membenci …`)
-- **Pola keputusan** → `MemoryType.EPISODIC`
-  (misalnya `Saya akan menggunakan …`, `Saya memilih …`, `Saya memutuskan memakai …`, `Saya akan mengadopsi …`)
-- **Pola kebiasaan** → `MemoryType.FACTUAL`
-  (misalnya `Saya biasanya …`, `Saya selalu …`, `Saya cenderung …`)
+- **Pola preferensi** → `MemoryType.FACTUAL` (misalnya `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Pola keputusan** → `MemoryType.EPISODIC` (misalnya `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Pola pola** → `MemoryType.FACTUAL` (misalnya `I usually …`, `I always …`, `I tend to …`)
 
-Setiap kecocokan disanitasi (`trim`, penciutan spasi kosong, dibatasi hingga 500 karakter),
-dideduplikasi dalam batch melalui `factKey(category, content)` yang stabil, dan
-disimpan melalui `createMemory()` dengan metadata
-`{category, extractedAt, source: "llm_response"}`. Teks masukan dibatasi hingga
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — jika lebih panjang, bagian **akhir** teks
-digunakan agar konten asisten terbaru selalu disertakan.
+Setiap kecocokan dibersihkan (`trim`, whitespace-collapse, dibatasi hingga 500 karakter), dihapus duplikatnya dalam batch melalui `factKey(category, content)` yang stabil, dan disimpan melalui `createMemory()` dengan metadata `{category, extractedAt, source: "llm_response"}`. Teks masukan dibatasi hingga 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — bila lebih panjang, maka** ekor** teks digunakan sehingga konten asisten terbaru selalu berpartisipasi.
 
-`extractFactsFromText(text)` diekspor untuk pengujian dan mengembalikan fakta
-terstruktur tanpa menyimpannya.
+`extractFactsFromText(text)` diekspor untuk pengujian dan mengembalikan fakta terstruktur tanpa menyimpannya.
 
 ## Pengambilan (`retrieval.ts`)
 

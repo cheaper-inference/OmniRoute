@@ -4,7 +4,7 @@
 
 ---
 
-> **Tõe allikas:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Viimati värskendatud:** 2026-06-28 — v3.8.40
+> **Tõe allikas:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute jäädvustab mõtlemisrežiimi mudelite toodetud assistendi `reasoning_content` ja esitab selle läbipaistvalt uuesti mitme pöörde päringu korral, kui ülesvoolu pakkuja seda nõuab. See välistab HTTP 400 vead, mida ranged pakkujad tõstatavad, kui kliendi vestluste ajaloost puudub eelneva pöörde põhjendus.
 
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-Indeksid: `expires_at`, `provider`, `model`, `created_at`. `expires_at` salvestatakse Unixi ajastusekunditena; SELECT kiht normaliseerib pärandteksti väärtused `EXPIRES_AT_EPOCH_SQL` kaudu.
+Indeksid: `expires_at`, `provider`, `model`, `created_at`. `expires_at` salvestatakse Unixi ajastusekunditena; the SELECT layer normalizes legacy text values via `EXPIRES_AT_EPOCH_SQL`.
 
 ## Pakkuja/mudeli tuvastamine
 

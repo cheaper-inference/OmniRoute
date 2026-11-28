@@ -329,19 +329,16 @@ hurejesha onyesho la awali lililofichwa (`maskedApiKey`: hadi herufi 4 kila upan
 mfupi, na hakuna kwa ufunguo wenye herufi 8 au chache) pamoja na `projectId` ya muunganisho. Sehemu zote mbili
 huachwa nje ya jibu kwa ufunguo mwingine wowote.
 
-## Utatuzi wa Vitambulisho
+## Utatuzi wa Kitambulisho
 
 `getCloudAgentCredentials(providerId)` katika `src/lib/cloudAgent/api.ts`:
 
-1. Hupakia miunganisho hai ya watoa huduma kupitia `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Kwa kila muunganisho, hupendelea `apiKey` (iliyoondolewa nafasi za pembeni). Ikiwa haipatikani, hutumia `accessToken`.
-3. Hurudisha tokeni ya kwanza isiyo tupu ikiwa imefungwa kama `{ apiKey: token }`.
-4. Hurudisha `null` ikiwa hakuna tokeni inayoweza kutumiwa iliyopatikana — API hujibu `400` ikiwa na
-   `"Hakuna vitambulisho hai vilivyosanidiwa kwa mtoa huduma wa wakala wa cloud: <id>"`.
+1. Hupakia miunganisho ya watoa huduma amilifu kupitia `getProviderConnections({ provider: providerId, isActive: true })`.
+2. Kwa kila muunganisho, inapendelea `apiKey` (iliyopunguzwa). Inarudi kwa `accessToken`.
+3. Hurejesha tokeni ya kwanza isiyo tupu iliyofungwa kama `{ apiKey: token }`.
+4. Hurejesha `null` ikiwa hakuna tokeni inayoweza kutumika inayopatikana — API hujibu `400` kwa `"No active credentials configured for cloud agent provider: <id>"`.
 
-Hii inamaanisha kuwa Cloud Agents hutumia tena jedwali lilelile la Provider Connection kama watoa huduma
-wa kawaida wa LLM. Ili kuwezesha Jules, unda muunganisho hai wenye `provider: "jules"`
-na `apiKey` iliyojazwa.
+Hii inamaanisha kuwa Wakala wa Wingu hutumia tena jedwali lile lile la Muunganisho wa Mtoa Huduma kama watoa huduma wa kawaida LLM. Ili kuwezesha Jules, tengeneza muunganisho amilifu na `provider: "jules"` na `apiKey` iliyo na watu wengi.
 
 ## Dashibodi
 

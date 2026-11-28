@@ -12,54 +12,53 @@ OmniRouteは、3 つの異なる、しかし関連した復元メカニズムが
 
 > **復元力の切り替えにおける環境とダッシュボードの優先順位。**環境— `QUOTA_PREFLIGHT_CUTOFF_ENABLED`、 `PROVIDER_COOLDOWN_ENABLED`、 `STREAM_RECOVERY_ENABLED`、 `STREAM_RECOVERY_MIDSTREAM_ENABLED`、 `STREAM_THROUGHPUT_WATCHDOG_ENABLED` —からシードされたオプトイン復元力トグルは、 _default_ (`DEFAULT_RESILIENCE_SETTINGS`、 `src/lib/resilience/settings.ts`) のみを提供します。 `resilienceSettings`に保持されるブール値 (ダッシュボード→** →回復力の設定**/ `PATCH /api/resilience`、 `key_value`に格納されている) が env 値より優先されます。正規化 (`toBoolean`、 `src/lib/resilience/settings/normalize.ts`) は、ブール値が存在する場合は常に、格納されたブール値を保持します。ダッシュボードに既に`false`が保存されているデプロイメントでそのような環境変数を`true`に設定すると、何も変更されません—トグルを反転します。**設定→レジリエンス**(または保存されたフィールドをクリアします)。
 
-## 1. プロバイダーサーキットブレーカー
+## 1. プロバイダーのサーキットブレーカー
 
-**スコープ:** プロバイダー全体（例: `glm`、`openai`、`anthropic`）。
+**範囲：**プロバイダー全体 (例: `glm`、 `openai`、 `anthropic`)。
 
-**目的:** アップストリーム/サービスレベルで繰り返し失敗しているプロバイダーへのトラフィック送信を停止します。
+**目的：** upstream/serviceレベルで繰り返し失敗するプロバイダーへのトラフィックの送信を停止します。
 
-**実装:**
+**実装：**
 
 - コアクラス: `src/shared/utils/circuitBreaker.ts`
-- ワイヤリング: `src/sse/handlers/chatHelpers.ts`、`src/sse/handlers/chat.ts`
+- 配線： `src/sse/handlers/chatHelpers.ts`、 `src/sse/handlers/chat.ts`
 - ステータスAPI: `GET /api/monitoring/health`
-- リセットAPI: `POST /api/resilience/reset`
+- APIをリセット: `POST /api/resilience/reset`
 - ラッパー: `open-sse/services/accountFallback.ts`
 - DBテーブル: `domain_circuit_breakers`
 
-**状態:**
+**州:**
 
-- `CLOSED` — 通常のトラフィックが許可されます
-- `DEGRADED` — トラフィックは引き続き許可されますが、増加したプロバイダーの失敗が追跡されています。十分な回数の成功、有効な接続テスト、または最後の失敗種別に対する最長の `OPEN` 保持期間（その `cooldownByKind` 値、なければ `resetTimeout`、× `maxBackoffMultiplier`、最低1回分のクールダウン）が新たな失敗なく経過すると、`CLOSED` に戻ります
-- `OPEN` — プロバイダーが一時的にブロックされます。コンボルーティングはこれをスキップします
-- `HALF_OPEN` — リセットタイムアウトが経過しました。プローブリクエストが許可されます
+- `CLOSED` —通常のトラフィックは許可されます
+- `DEGRADED` — traffic still allowed, but elevated provider failures are being tracked; returns to `CLOSED` on enough successes, on a valid connection test, or after the longest `OPEN` hold for the last failure kind (its `cooldownByKind` value, else `resetTimeout`, × `maxBackoffMultiplier`, at least one cooldown) without a new failure
+- `OPEN` —プロバイダーが一時的にブロックされました。コンボルーティングはそれをスキップします
+- `HALF_OPEN` —リセットタイムアウトが経過しました。プローブリクエストは許可されています
 
-**設定可能なデフォルト値（`open-sse/config/constants.ts`、ダッシュボード → 設定 → レジリエンス で公開）:**
+**構成可能なデフォルト (`open-sse/config/constants.ts`、ダッシュボードで公開されます→設定→レジリエンス):**
 
-| クラス  | DEGRADED 移行 | OPEN 移行  | リセットタイムアウト |
-| ------- | ------------- | ---------- | -------------------- |
-| OAuth   | 5回の失敗     | 8回の失敗  | 60秒                 |
-| API-key | 7回の失敗     | 12回の失敗 | 30秒                 |
-| Local   | 派生          | 2回の失敗  | 15秒                 |
+| クラス  | で劣化    | 開店時間   | リセットタイムアウト |
+| ------- | --------- | ---------- | -------------------- |
+| OAuth   | 5回の失敗 | 8回の失敗  | 60年代               |
+| APIキー | 7回の失敗 | 12回の失敗 | 30代                 |
 
-`degradationThreshold` はプロバイダーが `DEGRADED` に移行するタイミングを制御し、`failureThreshold` はオープンしてスキップされるタイミングを制御します。ローカルプロバイダープロファイルは、まだレジリエンス設定ページでは公開されていません。
+`degradationThreshold` 、プロバイダーが`DEGRADED`に入るタイミングを制御します。 `failureThreshold` 、開くときとスキップするときを制御します。 `PROVIDER_PROFILES.local` (2 失敗 / 15 秒) は`open-sse/config/constants.ts`で定義されていますが、**まだ配線されていません**: `getProviderCategory()` `oauth`または`apikey`のみを返すため、ローカルプロバイダーはOAuthまたは API キープロファイルを使用します。
 
-**トリップコード:** プロバイダーレベルのステータス `[408, 500, 502, 503, 504]` のみです。アカウントレベルのエラー（ほとんどの 401/403/429 — これらはクールダウンまたはロックアウトに該当）ではトリップしません。
+**トリップコード:**プロバイダーレベルのステータス`[408, 500, 502, 503, 504]`のみ。アカウントレベルのエラーに対してNOTトリップを実行します (クールダウンまたはロックアウトに属するほとんどの401/403/429 — )。
 
-**遅延回復:** `OPEN` の期限が切れると、`getStatus()`、`canExecute()`、`getRetryAfterMs()` が状態を `HALF_OPEN` に更新します。同じ読み取り（および次の失敗）によって、古くなった `DEGRADED` は `CLOSED` へと減衰して戻ります。バックグラウンドタイマーは不要です。
+**遅延回復:** `OPEN`有効期限が切れると、 `getStatus()`、 `canExecute()`、 `getRetryAfterMs()`状態を`HALF_OPEN`に更新します。同じ読み取り (および次の失敗) により、古い`DEGRADED`は`CLOSED`に戻ります。バックグラウンドタイマーは必要ありません。
 
 ---
 
-### オプトインのグローバルプロバイダークールダウン（ウィンドウゲート）
+### オプトイン グローバル プロバイダー クールダウン (ウィンドウ ゲート)
 
-4つ目の **オプトイン** レイヤー（`PROVIDER_COOLDOWN_ENABLED`、デフォルト **オフ**）は、失敗したプロバイダーのリクエスト間メモリを `open-sse/services/providerCooldownTracker.ts` に保持します。これはコンボターゲット解決によって参照され、連続するコンボリクエストが直前に失敗したプロバイダーを再びたどらないようにします。プロバイダーレベルのエントリは `PROVIDER_PROFILES` ウィンドウゲートに従います:
+4番目、**オプトイン**レイヤー (`PROVIDER_COOLDOWN_ENABLED`、デフォルト**オフ**) は、失敗したプロバイダーのクロスリクエスト メモリを`open-sse/services/providerCooldownTracker.ts`に保持し、コンボ ターゲット解決によって参照されるため、連続したコンボ リクエストが失敗したばかりのプロバイダーの再ウォークを停止します。プロバイダー レベルのエントリは、 `PROVIDER_PROFILES`ウィンドウ ゲートを尊重します。
 
-| プロファイル | トリップ条件（`providerFailureThreshold`） | ウィンドウ期間（`providerFailureWindowMs`） | クールダウン時間（`providerCooldownMs`） |
-| ------------ | -----------------------------------------: | ------------------------------------------: | ---------------------------------------: |
-| OAuth        |                                       `10` |                                     `15min` |                                   `5min` |
-| API key      |                                       `15` |                                     `30min` |                                  `10min` |
+| プロフィール | 後の旅行 (`providerFailureThreshold`) | 内部 (`providerFailureWindowMs`) | クール (`providerCooldownMs`) |
+| ------------ | ------------------------------------: | -------------------------------: | ----------------------------: |
+| OAuth        |                                  `10` |                          `15min` |                        `5min` |
+| APIキー      |                                  `15` |                          `30min` |                       `10min` |
 
-閾値未満の場合、プロバイダーはクールダウン中とは **みなされません**。成功するとウィンドウはクリアされます。接続レベルのエントリ（`provider:connectionId`）は、代わりに指数関数的な `minRetryCooldownMs → maxRetryCooldownMs` バックオフを維持します。オーバーライド: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`。リグレッションガード: `tests/unit/provider-cooldown-window-gate.test.ts`。
+プロバイダーはしきい値を下回っています。**ない**冷却を考慮。成功するとウィンドウがクリアされます。接続レベルのエントリ (`provider:connectionId`) は、代わりに指数関数的な`minRetryCooldownMs → maxRetryCooldownMs`バックオフを維持します。オーバーライド: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`。リグレッションガード: `tests/unit/provider-cooldown-window-gate.test.ts`。
 
 ## 2. 接続のクールダウン
 
@@ -574,6 +573,21 @@ connectionId)`） — 通常のモデルリスト型コンボでは、兄弟タ�
 
 ---
 
+## OmniRoute自体にアクセスできない場合
+
+プロバイダーのサーキット ブレーカー、接続のクールダウン、モデルのロックアウトはすべてゲートウェイ内で実行されます。クライアントがゲートウェイに到達できない場合、接続エラーが発生します。 OmniRouteその障害をインターセプトできません。クライアントは、再試行するかどうか、およびどのようなメッセージを表示するかを決定します。
+
+OmniRoute現在、クライアント側のフォールバックを提供しておらず、そのためのポリシーも定義していません。クライアントまたはゲートウェイの前で代替ルートを構成します。
+
+- `GET /api/health`認証なしで生存性をチェックします。
+- `GET /api/health/ping` 、データベースが応答するかどうかを含む準備状況をチェックします。
+- `GET /api/monitoring/health`認証された発信者に健全性の詳細な概要を提供します。
+- `omniroute launch <tool>`クライアントを起動する前に`/api/monitoring/health`をプローブします。ローカルゲートウェイを自動的に起動できます。 `--no-start`では、ゲートウェイが到達不能になると`GatewayUnreachable`が発生し、終了コード`69`発生します。
+
+クライアントをOmniRouteから切断するには、 [「クライアント構成を元に戻す](../guides/UNINSTALL.md#revert-client-configuration)」に従ってください。
+
+---
+
 ## デバッグ
 
 - Weighted コンボが `503 all_targets_cooling_down` を返す(`Retry-After` が設定され、`diagnostics.excluded` に `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable` を含むすべてのターゲットが列挙される)→ プールは設定・接続済みであり、すべてのターゲットがレジリエンスタイマーによって除外されているだけです。`[COMBO] Weighted selection: every target excluded before dispatch — …` という警告に理由と残り秒数が示されます。同じコンボからの `404 no_executable_targets` は、レジリエンスタイマーが関与していないこと(実行するものがない、またはすべてのアカウントが可用性プローブに失敗した)を意味します。`targetResolution.ts` で収集された除外情報から `open-sse/services/combo/pinRecovery.ts` で構築されます。
@@ -585,93 +599,68 @@ connectionId)`） — 通常のモデルリスト型コンボでは、兄弟タ�
 
 ---
 
-## ランタイム状態 — エージェント向けクイックリファレンス
+## 実行時状態—エージェントのクイック リファレンス
 
-> エージェントガイドが 40k のコンテキスト予算内に収まるよう、`AGENTS.md` の「Resilience Runtime State」から
-> そのまま移動しました (PR #12743)。これは上記セクションの要約されたエージェント向けビューであり、
-> 番号付きセクションが完全なリファレンスのままです。
+> `AGENTS.md` → 「Resilience Runtime State」(PR #12743) から逐語的に移動したため、エージェント ガイドは 40k コンテキスト バジェット未満に留まります。これは、上記のセクションをエージェント側から見た図を要約したものです。番号付きセクションは完全な参照のままです。
 
-OmniRoute には、関連しつつも明確に異なる 3 つの一時的障害メカニズムがあります。ルーティング動作を
-デバッグする際は、それらのスコープを区別してください。一目でわかるマップについては
-[3 層レジリエンス図](../diagrams/exported/resilience-3layers.svg)
-(ソース: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-を参照してください。
+OmniRouteは、関連する 3 つの異なる一時障害メカニズムがあります。ルーティング動作をデバッグするときは、スコープを分離してください。一目でわかるマップについては、 [3 層の復元力図](../diagrams/exported/resilience-3layers.svg)(出典: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) を参照してください。
 
-### プロバイダーサーキットブレーカー
+### プロバイダーのサーキットブレーカー
 
-**スコープ**: プロバイダー全体、例: `glm`、`openai`、`anthropic`。
+**範囲**: プロバイダー全体 (例: `glm`、 `openai`、 `anthropic`)。
 
-**目的**: アップストリーム/サービスレベルで繰り返し障害を起こしているプロバイダーへのトラフィック送信を停止し、
-1 つの不健全なプロバイダーがすべてのリクエストを遅延させないようにします。
+**目的**: upstream/serviceレベルで繰り返し失敗しているプロバイダーへのトラフィックの送信を停止します。これにより、1 つの異常なプロバイダーによってすべてのリクエストが遅くなることがなくなります。
 
 **実装**:
 
 - コアクラス: `src/shared/utils/circuitBreaker.ts`
-- チャットゲート/実行の配線: `src/sse/handlers/chatHelpers.ts`、`src/sse/handlers/chat.ts`
-- ランタイムステータス API: `src/app/api/monitoring/health/route.ts`
+- チャットgate/execution配線: `src/sse/handlers/chatHelpers.ts`、 `src/sse/handlers/chat.ts`
+- 実行時ステータスAPI: `src/app/api/monitoring/health/route.ts`
 - 共有ラッパー: `open-sse/services/accountFallback.ts`
-- 永続化された状態テーブル: `domain_circuit_breakers`
+- 永続状態テーブル: `domain_circuit_breakers`
 
-**状態**(4 — `src/shared/utils/circuitBreaker.ts`):
+**州**(4 — `src/shared/utils/circuitBreaker.ts`):
 
 - `CLOSED`: 通常のトラフィックが許可されます。
-- `DEGRADED`: 早期警告帯 — 障害がデグレード閾値を超えましたが、ブレーカー閾値にはまだ達していません。
-  トラフィックは引き続き流れ、ダッシュボードに警告が表示されます。有効な接続テスト、または
-  新たな障害のない静寂なウィンドウにより `CLOSED` に戻ります
-  (ウィンドウについては `docs/architecture/RESILIENCE_GUIDE.md` を参照)。
-- `OPEN`: プロバイダーが一時的にブロックされます。呼び出し元は provider-circuit-open レスポンスを
-  受け取るか、コンボルーティングが別のターゲットにスキップします。
-- `HALF_OPEN`: リセットタイムアウトが経過しました。プローブリクエストを許可します。成功するとブレーカーが
-  閉じ、失敗すると再び開きます。
+- `DEGRADED`: 早期警告帯域—障害は劣化しきい値を超えましたが、まだブレーカーしきい値を超えていません。トラフィックは依然として流れており、ダッシュボードには警告が表示されます。有効な接続テスト、または新たな障害がない静かなウィンドウは、 `CLOSED`に戻ります (`docs/architecture/RESILIENCE_GUIDE.md`にはウィンドウがあります)。
+- `OPEN`: プロバイダーは一時的にブロックされています。呼び出し元はプロバイダー回線オープン応答を受け取るか、別のターゲットへのコンボ ルーティング スキップを受け取ります。
+- `HALF_OPEN`: リセットタイムアウトが経過しました。プローブリクエストを許可します。成功するとブレーカーが閉じ、失敗すると再びブレーカーが開きます。
 
-**デフォルト**(`open-sse/config/constants.ts` → `PROVIDER_PROFILES`、`src/lib/resilience/settings.ts` の
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` を介して消費され、
-`src/sse/handlers/chatHelpers.ts` の `getCircuitBreaker(provider, …)` に渡されます)。
-プロバイダー全体のブレーカーは `circuitBreakerThreshold` / `circuitBreakerReset` で動作します:
+**デフォルト**(`open-sse/config/constants.ts` → `PROVIDER_PROFILES`、 `src/lib/resilience/settings.ts` `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` → `getCircuitBreaker(provider, …)`を介して消費されます`src/sse/handlers/chatHelpers.ts`)。プロバイダー全体のブレーカーは`circuitBreakerThreshold` / `circuitBreakerReset`上で実行されます。
 
-| プロファイル | デグレード開始 | オープン (`circuitBreakerThreshold`) | リセット (`circuitBreakerReset`) |
-| ------------ | -------------: | -----------------------------------: | -------------------------------: |
-| OAuth        |            `5` |                                  `8` |                            `60s` |
-| API キー     |            `7` |                                 `12` |                            `30s` |
-| ローカル     |         (導出) |                                  `2` |                            `15s` |
+| プロフィール | で劣化します | (`circuitBreakerThreshold`) で開きます | リセット (`circuitBreakerReset`) |
+| ------------ | -----------: | -------------------------------------: | -------------------------------: |
+| OAuth        |          `5` |                                    `8` |                            `60s` |
+| APIキー      |          `7` |                                   `12` |                            `30s` |
 
-`PROVIDER_PROFILES` は `providerFailureThreshold`(10/15/2)、
-`providerFailureWindowMs`(15/30/5 分)、`providerCooldownMs`(5/10/1 分)も定義しています。これらは
-**オプトインのグローバルプロバイダークールダウンのウィンドウゲート**(`PROVIDER_COOLDOWN_ENABLED`、デフォルト
-オフ)を駆動します — `open-sse/services/providerCooldownTracker.ts` のプロバイダーレベルのエントリは、
-`providerFailureWindowMs` 以内に `providerFailureThreshold` 回の障害があった後にのみ
-クーリング中とみなされ、その後 `providerCooldownMs` の間クールダウンします。これらは稼働中のブレーカーの閾値
-ではありません — ブレーカーの動作を期待してこれらを調整しないでください。すべてのデフォルトは
-`OMNIROUTE_PROVIDER_BREAKER_*` および `OMNIROUTE_CIRCUIT_BREAKER_*` 環境変数で上書き可能です。
-ランタイムに正確なリファレンステーブルは `docs/architecture/RESILIENCE_GUIDE.md` にあります。
+`local`プロファイル (`2` Failure / `15s`) も`PROVIDER_PROFILES`に存在しますが、ブレーカーには接続されていません。 `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) は`oauth`または`apikey`のみを受け入れ、 `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) はこれら 2 つのうちの 1 つを返します (未登録のプロバイダーは`apikey`を取得します)。
 
-プロバイダーブレーカーをトリップすべきなのは、プロバイダーレベルの障害ステータスのみです:
+`PROVIDER_PROFILES` `providerFailureThreshold` (10/15/2)、 `providerFailureWindowMs` (15/30/5 min) 、および`providerCooldownMs` (5/10/1 min) — OAuth/API key/localも定義します。ここで、ローカル値は上記と同じ理由で不活性です。**オプトイン グローバル プロバイダー クールダウンのウィンドウ ゲート**(`PROVIDER_COOLDOWN_ENABLED`、デフォルトはオフ) — `open-sse/services/providerCooldownTracker.ts`のプロバイダー レベルのエントリは、 `providerFailureWindowMs`内の`providerFailureThreshold`障害後の冷却としてのみカウントされ、その後`providerCooldownMs`の冷却としてカウントされます。これらは、ライブ ブレーカーのしきい値NOTです—ブレーカーの動作を期待して調整しません。すべてのデフォルトは、 `OMNIROUTE_PROVIDER_BREAKER_*`および`OMNIROUTE_CIRCUIT_BREAKER_*`環境変数を通じてオーバーライドできます。実行時に正確な参照テーブルは`docs/architecture/RESILIENCE_GUIDE.md`にあります。
+
+プロバイダー レベルの障害ステータスのみがプロバイダー ブレーカーをトリップする必要があります。
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-ほとんどの `401`、`403`、`429` のような通常のアカウント/キー/モデルエラーでは、
-プロバイダー全体のブレーカーをトリップしないでください。それらは通常、接続クールダウンまたは
-モデルロックアウトに属します。汎用 API キープロバイダーの `403` は、終端的な
-プロバイダー/アカウントエラーとして分類されない限り、回復可能であるべきです。
+ほとんどの`401`、 `403`、または`429`の場合のような、通常のaccount/key/modelエラーの場合は、プロバイダー全体のブレーカーをトリップしないでください。これらは通常、接続のクールダウンまたはモデルのロックアウトに属します。汎用 API キープロバイダー`403` 、ターミナルprovider/accountエラーとして分類されない限り回復可能である必要があります。
 
-ブレーカーはバックグラウンドタイマーではなく、遅延（lazy）リカバリを使用します。`OPEN` の有効期限が切れると、`getStatus()`、`canExecute()`、`getRetryAfterMs()` などの読み取りによって状態が `HALF_OPEN` に更新されるため、ダッシュボードやコンボ候補ビルダーが期限切れのプロバイダーを永久に除外し続けることがありません。
+ブレーカーはバックグラウンド タイマーではなく、遅延回復を使用します。 `OPEN`有効期限が切れると、 `getStatus()`、 `canExecute()`、 `getRetryAfterMs()`などの読み取りによって状態が`HALF_OPEN`に更新されるため、ダッシュボードとコンボ候補ビルダーは期限切れのプロバイダーを永久に除外し続けることはありません。
 
-### コネクションクールダウン
+### 接続クールダウン
 
-**スコープ**: 1つのプロバイダーコネクション/アカウント/キー。
+**範囲**: 1 つのプロバイダーconnection/account/key.
 
-**目的**: 不良なキー/アカウントを一時的にスキップしつつ、同じプロバイダーの他のコネクションがリクエストの処理を継続できるようにします。
+**目的**: 1 つの不正なkey/account一時的にスキップし、同じプロバイダーの他の接続がリクエストの処理を継続できるようにします。
 
 **実装**:
 
-- 書き込み/更新パス: `src/sse/services/auth.ts::markAccountUnavailable()`
-- アカウントの選択/フィルタリング: `src/sse/services/auth.ts::getProviderCredentials...`
+- Write/updateパス: `src/sse/services/auth.ts::markAccountUnavailable()`
+- アカウントselection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
 - クールダウン計算: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - 設定: `src/lib/resilience/settings.ts`
 
-プロバイダーコネクションの重要なフィールド:
+プロバイダー接続の重要なフィールド:
 
 ```ts
 rateLimitedUntil;
@@ -682,50 +671,50 @@ errorCode;
 backoffLevel;
 ```
 
-アカウント選択中、次の条件が成り立つ間、コネクションはスキップされます:
+アカウントの選択中、次の場合は接続がスキップされます。
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-クールダウンも遅延（lazy）方式です: `rateLimitedUntil` が過去の時刻になると、そのコネクションは再び選択可能になります。使用に成功すると、`clearAccountError()` が `testStatus`、`rateLimitedUntil`、エラーフィールド、および `backoffLevel` をクリアします。
+Cooldowns are also lazy: when `rateLimitedUntil` is in the past, the connection becomes eligible again. On successful use, `clearAccountError()` clears `testStatus`, `rateLimitedUntil`, error fields, and `backoffLevel`.
 
-デフォルトのコネクションクールダウンの動作:
+デフォルトの接続クールダウン動作:
 
-- OAuth の基本クールダウン: `5s`。
-- APIキーの基本クールダウン: `3s`。
-- APIキーの `429` では、利用可能な場合、アップストリームのリトライヒント（`Retry-After`、リセットヘッダー、またはパース可能なリセットテキスト）を優先する必要があります。
-- 繰り返される回復可能な失敗には指数バックオフを使用します:
+- OAuth基本クールダウン: `5s`。
+- API キーの基本クールダウン: `3s`。
+- API キー`429` 、利用可能な場合はアップストリームの再試行ヒント (`Retry-After`、リセット ヘッダー、または解析可能なリセット テキスト) を優先する必要があります。
+- 回復可能な障害が繰り返される場合は、指数バックオフを使用します。
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-サンダリングハード対策ガードにより、同じコネクションでの同時発生した失敗がクールダウンを繰り返し延長したり、`backoffLevel` を二重にインクリメントしたりすることを防ぎます。
+アンチサンダー ハード ガードは、同じ接続での同時障害によってクールダウンが繰り返し延長されたり、 `backoffLevel` 2 倍増加したりすることを防ぎます。
 
-終端状態はクールダウンではありません。`banned`、`expired`（`EXPIRED_RETRY_MAX` による N 回の制限付きリトライの後にのみ終端となる）、および `credits_exhausted` は、認証情報/設定が変更されるか、オペレーターがリセットするまで利用不可のままとなることを意図しています。終端状態を一時的なクールダウン状態で上書きしないでください。
+ターミナル状態はクールダウンではありません。 `banned`、 `expired` ( `EXPIRED_RETRY_MAX`を介した N 回の制限付き再試行後にのみ端末になります)、および`credits_exhausted` 、 credentials/settings変更されるかオペレーターがリセットするまで使用できない状態になるように設計されています。ターミナル状態を一時的なクールダウン状態で上書きしないでください。
 
-### モデルロックアウト
+### モデルのロックアウト
 
-**スコープ**: プロバイダー + コネクション + モデル。
+**範囲**: プロバイダー+接続+モデル。
 
-**目的**: あるコネクションで1つのモデルだけが利用不可またはクォータ制限されている場合に、コネクション全体を無効化することを回避します。
+**目的**: 1 つのモデルだけが使用できない場合、またはその接続のクォータが制限されている場合に、接続全体を無効にすることは避けてください。
 
 例:
 
-- モデルごとのクォータを持つプロバイダーが `429` を返す場合。
-- ローカルプロバイダーが存在しない1つのモデルに対して `404` を返す場合。
-- 選択された Grok モードのような、プロバイダー固有のモード/モデル権限の失敗。
+- `429`を返すモデルごとのクォータ プロバイダー。
+- ローカル プロバイダーが 1 つの欠落モデルに対して`404`返します。
+- 選択されたGrokモードなど、プロバイダー固有のmode/model権限の失敗。
 
-モデルロックアウトは `open-sse/services/accountFallback.ts` に実装されており、同じコネクションが他のモデルの処理を継続できるようにします。
+モデル ロックアウトは`open-sse/services/accountFallback.ts`に存在し、同じ接続が他のモデルに引き続きサービスを提供できるようにします。
 
 ### デバッグガイダンス
 
-- プロバイダーのすべてのキーがスキップされる場合は、プロバイダーブレーカーの状態と各コネクションの `rateLimitedUntil`/`testStatus` の両方を確認してください。
-- リセットウィンドウの経過後もプロバイダーが永久に除外されているように見える場合は、コードが `getStatus()`/`canExecute()` を使わずに生の `state` を読み取っていないか確認してください。
-- 1つのプロバイダーキーが失敗しても他のキーが動作するはずの場合は、プロバイダーブレーカーよりもコネクションクールダウンを優先してください。
-- 1つのモデルだけが失敗する場合は、コネクションクールダウンよりもモデルロックアウトを優先してください。
-- 状態が自己回復すべき場合は、将来のタイムスタンプ/リセットタイムアウトと、期限切れの状態を更新する読み取りパスを持つ必要があります。永続的なステータスには、手動による認証情報または設定の変更が必要です。
+- プロバイダーのすべてのキーがスキップされた場合は、プロバイダー ブレーカーの状態と各接続の`rateLimitedUntil`/`testStatus`の両方を検査します。
+- リセット期間後にプロバイダーが永続的に除外されたように見える場合は、コードが`getStatus()`/`canExecute()`を使用する代わりに生の`state`を読み取っているかどうかを確認してください。
+- 1 つのプロバイダー キーが失敗しても、他のプロバイダー キーは機能するはずである場合は、プロバイダー ブレーカーよりも接続のクールダウンを優先します。
+- 1 つのモデルのみに障害が発生した場合は、接続のクールダウンよりもモデルのロックアウトを優先します。
+- 状態が自己回復する必要がある場合は、将来のtimestamp/resetタイムアウトと、期限切れの状態を更新する読み取りパスが必要です。永続的なステータスには、手動による認証情報または構成の変更が必要です。
 
 ---
 

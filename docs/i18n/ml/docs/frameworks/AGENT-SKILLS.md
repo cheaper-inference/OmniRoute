@@ -13,12 +13,12 @@ OmniRoute-ന്റെ REST API-യും CLI-യും എങ്ങനെ ഉ�
 
 ## അവലോകനം
 
-കാറ്റലോഗിൽ **45 Agent Skills** അടങ്ങിയിരിക്കുന്നു (23 REST API + 21 CLI + 1 കോൺഫിഗറേഷൻ വർക്ക്ഫ്ലോ). ഓരോ സ്കില്ലിലും ഇവയുണ്ട്:
+കാറ്റലോഗിൽ അടങ്ങിയിരിക്കുന്നു** 45 ഏജൻ്റ് കഴിവുകൾ** (23 REST API + 21 CLI + 1 കോൺഫിഗറേഷൻ വർക്ക്ഫ്ലോ). ഓരോ കഴിവിനും ഉണ്ട്:
 
-- ഒരു **കാനോണിക്കൽ ID** (`omni-auth`, `cli-serve` തുടങ്ങിയവ)
-- YAML ഫ്രണ്ട്മാറ്ററും (`name`, `description`) സമ്പന്നമായ മാർക്ക്ഡൗൺ ഉള്ളടക്കവുമുള്ള `skills/{id}/SKILL.md` എന്ന **SKILL.md** ഫയൽ
-- OpenAPI സ്പെക്കിൽ നിന്നും CLI രജിസ്ട്രിയിൽ നിന്നും ലഭ്യമാക്കുന്ന **REST എൻഡ്പോയിന്റുകൾ** (API സ്കില്ലുകൾ) അല്ലെങ്കിൽ **CLI സബ്കമാൻഡുകൾ** (CLI സ്കില്ലുകൾ)
-- തത്സമയം ലഭ്യമാക്കുന്നതിനുള്ള ഒരു **GitHub റോ URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- എ** കാനോനിക്കൽ ID** (`omni-auth`, `cli-serve`, മുതലായവ)
+- എ**SKILL.md** YAML ഫ്രണ്ട്മാറ്റർ (`name`, `description`) + റിച്ച് മാർക്ക്ഡൗൺ ബോഡി ഉപയോഗിച്ച് `skills/{id}/SKILL.md` ൽ ഫയൽ ചെയ്യുക
+- **REST അവസാന പോയിൻ്റുകൾ** (API കഴിവുകൾ) അല്ലെങ്കിൽ**CLI ഉപകമാൻഡുകൾ** (CLI കഴിവുകൾ) OpenAPI സ്പെക്കിൽ നിന്നും CLI രജിസ്ട്രിയിൽ നിന്നും ഉരുത്തിരിഞ്ഞത്
+- എ**GitHub റോ URL** തത്സമയം ലഭ്യമാക്കുന്നതിന്: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 

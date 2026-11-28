@@ -20,4 +20,6 @@ Standart provayderlar o‘rtasidagi siyosat provayderning uchtagacha urinishlari
   - Ulanishga (`x-omniroute-connection`) mahkamlangan so'rov unda qoladi.
   - Prefiksli identifikator (`provider/model`) hech qachon boshqa provayderga yo'naltirilmaydi.
 
-O'chirish holatlari `closed`, `open` va `half_open` dir. Sovutish vaqti chegaralangan zondni rejalashtiradi; muvaffaqiyatli zond zanjirni yopadi va muvaffaqiyatsiz zond uni qayta ochadi.
+O'chirish holatlari `closed`, `open` va `half_open` dir. Sovutish chegaralangan zondni rejalashtiradi; muvaffaqiyatli zond zanjirni yopadi va muvaffaqiyatsiz zond uni qayta ochadi.
+
+Provayderning uzilishi shlyuz ichida ishlaydi. Qarang: [Qachon OmniRoute o‘zi shlyuz uzilishi paytida mijoz xatti-harakati uchun ulanib bo‘lmaydi](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable).

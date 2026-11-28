@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Szükséges paraméterek
+## 5. Kötelező paraméterek
 
-Ehhez a projekthez ajánlott legalább az alábbi paramétereket konfigurálni a Fly.io platformon.
+Ez a projekt legalább a következő paraméterek konfigurálását javasolja a Fly.io oldalon.
 
 ### 5.1 Ellenőrzött paraméterek
 
-Ezeket a paramétereket tényleges telepítések során használták a jelenlegi `omniroute` alkalmazásban:
+Ezeket a paramétereket használták a jelenlegi `omniroute` alkalmazás tényleges telepítései során:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (éles környezetben kötelező — a WebSocket-híd hitelesítésére szolgál)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (szükséges — gyártási folyamatban, amelyet WebSocket híd hitelesítéshez használnak)
 - `STORAGE_ENCRYPTION_KEY`
 
-### 5.2 Az `INITIAL_PASSWORD` paraméterről
+### 5.2 A `INITIAL_PASSWORD`
 
-A jelenlegi projektben nincs beállítva az `INITIAL_PASSWORD`, mert ennél a telepítésnél nincs rá szükség.
+A jelenlegi projekt nem állítja be `INITIAL_PASSWORD`, mert ez a telepítés nem igényli.
 
 Ha nincs beállítva:
 
-- Az indítási napló jelzi, hogy az alapértelmezett jelszó `CHANGEME`
-- A telepítés után a lehető leghamarabb módosítsa a bejelentkezési jelszót a rendszerbeállításokban
+- Az irányítópult jelszavát az első látogatáskor hozza létre a bevezető varázslóban. Hajtsa végre a jelszó lépést: kihagyása kikapcsolja a műszerfali bejelentkezést, így az irányítópult nyitva marad mindenki számára, aki eléri a URL alkalmazást
+- A Fly proxyja nem loopback címről éri el az alkalmazást, így a jelszó elküldése után a varázsló egyszeri bootstrap tokent kér, amit az alkalmazás abban a pillanatban kinyomtat a naplójába: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Ha ez a sor kigördült a naplóból, indítsa újra az alkalmazást, és küldje el újra a varázslót egy új token nyomtatásához
 
-Ha felügyelet nélkül szeretné inicializálni a háttérrendszer jelszavát, később hozzáadhatja:
+Ha inkább felügyelet nélkül szeretné beállítani a jelszót, adja hozzá az irányítópult első látogatása előtt (a jelszó mentése után `INITIAL_PASSWORD` figyelmen kívül marad):
 
 - `INITIAL_PASSWORD`
 
@@ -276,43 +276,43 @@ Ha a konzol `Secrets` oldala nem jeleníti meg a várt változókat, ellenőrizz
 
 ## 9. Későbbi frissítések és kiadások
 
-A kód frissítése után a kiadási folyamat egyszerű:
+A kódfrissítések után a kiadási folyamat egyszerű:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Ha csak a paramétereket kell frissítenie a kód módosítása nélkül:
+Ha csak a paramétereket kell frissítenie a kód megváltoztatása nélkül:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-A Fly automatikusan végrehajtja a gépek fokozatos frissítését.
+A Fly automatikusan elvégzi a gépek folyamatos frissítését.
 
-### 9.1 A forrásrepozitórium frissítéseinek követése a fork `fly.toml` fájljának megőrzésével
+### 9.1 Az Upstream adattár frissítéseinek követése a Fork `fly.toml` megőrzése mellett
 
-Ha a jelenlegi repozitórium egy fork, és szinkronizálni szeretné a frissítéseket a `https://github.com/diegosouzapw/OmniRoute` forrásrepozitóriumból, kövesse az alábbi munkafolyamatot.
+Ha az aktuális tárhely egy elágazás, és szinkronizálni szeretné a frissítéseket az upstream `https://github.com/cheaper-inference/OmniRoute`, kövesse az alábbi munkafolyamatot.
 
-Először ellenőrizze a távoli repozitóriumokat:
+Először ellenőrizze a távirányítókat:
 
 ```powershell
 git remote -v
 ```
 
-Legalább a következőket kell látnia:
+Látnod kell legalább:
 
-- A saját forkjára mutató `origin`
-- Az eredeti repozitóriumra mutató `upstream`
+- `origin` a saját villájára mutat
+- `upstream` az eredeti tárolóra mutat
 
-Ha az `upstream` nincs konfigurálva, adja hozzá:
+Ha `upstream` nincs konfigurálva, adja hozzá:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Az upstream repozitóriummal való szinkronizálás előtt kérje le a legújabb commitokat és címkéket:
+Mielőtt szinkronizálna az upstream szolgáltatással, kérje le a legújabb véglegesítéseket és címkéket:
 
 ```powershell
 git fetch upstream --tags
@@ -325,9 +325,9 @@ git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Megjegyzés: A projekt aktuális verziója `v3.8.0`. Az alábbi `v3.4.7` hivatkozások kizárólag korábbi példaként maradtak meg. A tényleges kiadásokhoz használja a `:latest` címkét vagy az aktuális verziócímkét (például `:v3.8.0`).
+> Megjegyzés: A projekt jelenlegi verziója a `v3.8.0`. Az alábbi `v3.4.7` hivatkozások csak történelmi példákként szolgálnak. A tényleges kiadásokhoz használja `:latest` vagy az aktuális verzió címkéjét (pl. `:v3.8.0`).
 
-Ha az upstream legújabb `main` ágát úgy szeretné beolvasztani, hogy közben kényszerítetten megőrzi a fork `fly.toml` fájlját, kövesse ezt a munkafolyamatot:
+Ha egyesíteni szeretné a legújabb upstream `main` miközben erőteljesen megtartja a villa `fly.toml`, kövesse az alábbi munkafolyamatot:
 
 ```powershell
 git merge upstream/main
@@ -339,32 +339,32 @@ git push origin main
 
 Megjegyzések:
 
-- A `git merge upstream/main` szinkronizálja a legújabb kódot az eredeti repozitóriumból
-- A `git checkout HEAD~1 -- fly.toml` visszaállítja a fork saját `fly.toml` fájlját az összevonás előtti állapotból
-- Ha az upstream nem módosította a `fly.toml` fájlt, ez a lépés nem eredményez eltérést
-- Ha az upstream módosította a `fly.toml` fájlt, ez a lépés biztosítja, hogy a Fly-alkalmazás neve, a kötet csatolása, a régió és a forkra jellemző egyéb telepítési konfiguráció ne íródjon felül
+- `git merge upstream/main` szinkronizálja az eredeti tárhely legújabb kódját
+- `git checkout HEAD~1 -- fly.toml` visszaállítja a fork saját `fly.toml` az egyesítés előtti állapotról
+- Ha az upstream nem módosította `fly.toml`, ez a lépés nem okoz különbséget
+- Ha az upstream módosította `fly.toml`, ez a lépés biztosítja, hogy a Fly-alkalmazás neve, a kötetcsatlakoztatás, a régió és az egyéb, a fork-specifikus telepítési konfigurációk ne kerüljenek felülírásra.
 
-Ha egy adott kiadási címkéhez (például `v3.4.7`) szeretne igazodni, először ellenőrizze, hogy a címke már szerepel-e az `upstream/main` ágban:
+Ha egy adott kiadási címkéhez (pl. `v3.4.7`) szeretne igazodni, először ellenőrizze, hogy a címke már szerepel-e `upstream/main` ben:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-A sikeres visszatérési érték azt jelenti, hogy az `upstream/main` már tartalmazza ezt a verziót; így egyszerűen beolvaszthatja az `upstream/main` ágat.
+A sikeres visszatérés azt jelenti, hogy `upstream/main` már tartalmazza ezt a verziót; egyszerűen egyesítheti `upstream/main`.
 
-### 9.2 Szabványos kiadási sorrend az upstream szinkronizálása után
+### 9.2 Szabványos kiadási sorrend az upstream szinkronizálás után
 
-Az eredeti repozitóriummal való szinkronizálás után kövesse ezt az ajánlott kiadási sorrendet:
+Az eredeti tárhellyel való szinkronizálás után kövesse az alábbi javasolt kiadási sorrendet:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Állítsa vissza a fork `fly.toml` fájlját
+3. Állítsa vissza a villa `fly.toml`
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Ez a tényleges munkafolyamat, amelyet a jelenlegi projekt `v3.4.7` verzióra való frissítésekor használtak (a példa egy korábbi verzióra hivatkozik; a jelenlegi tényleges verzió `v3.8.0`).
+Ez a tényleges munkafolyamat, amelyet az aktuális projekt `v3.4.7` ra való frissítése során használnak (a példa egy korábbi verzióra vonatkozik; a jelenlegi tényleges verzió a `v3.8.0`).
 
 ---
 
@@ -418,16 +418,16 @@ Ha ehelyett `/app/data/...` útvonalat lát, akkor a `DATA_DIR` konfigurációja
 
 ---
 
-## 12. Gyakori problémák
+## 12. Gyakori kérdések
 
-### 12.1 A `Secrets` oldal üres
+### 12.1 `Secrets` oldal üres
 
-Ennek általában két oka lehet:
+Általában két oka van:
 
-- Még nem futtatta a `flyctl secrets set` parancsot
-- Egy másik alkalmazást tekint meg (például az `oroute` alkalmazást az `omniroute` helyett)
+- Még nem futtattad a `flyctl secrets set`
+- Ön egy másik alkalmazást néz (pl. `oroute` helyett `omniroute`)
 
-### 12.2 A `flyctl deploy` az `app not found` hibát jelzi
+### 12.2 `flyctl deploy` Jelentések `app not found`
 
 Először hozza létre az alkalmazást:
 
@@ -435,23 +435,23 @@ Először hozza létre az alkalmazást:
 flyctl apps create omniroute
 ```
 
-### 12.3 A `fly.toml` elemzése sikertelen
+### 12.3 `fly.toml` Az elemzés sikertelen
 
 Ellenőrizze a következőket:
 
-- Vannak-e hibás vagy értelmezhetetlen karakterek a megjegyzésekben
-- Helyesek-e a TOML-idézőjelek és a behúzások
+- Vannak-e elrontott karakterek a megjegyzésekben
+- TOML idézőjel és a behúzás helyes-e
 
-### 12.4 Az adatok nem maradnak meg
+### 12.4 Az adatok nem tartósak
 
-Ellenőrizze mindkét alábbi feltételt:
+Ellenőrizze mindkét következőt:
 
-- A `fly.toml` tartalmazza a `destination = '/data'` beállítást
-- A `DATA_DIR` értéke `/data`
+- `fly.toml` `destination = '/data'` tartalmaz
+- `DATA_DIR` `/data` van állítva
 
-### 12.5 Futtatható `INITIAL_PASSWORD` nélkül?
+### 12.5 Működhet `INITIAL_PASSWORD` nélkül?
 
-Igen, futtatható. Ilyenkor az alapértelmezett `CHANGEME` jelszót használja. Éles környezetben ajánlott a háttérrendszer jelszavát a lehető leghamarabb megváltoztatni.
+Igen. `INITIAL_PASSWORD` unset beállításával az irányítópult jelszavát az első látogatáskor hozza létre a bevezető varázslóban (az 5.2. szakasz az egyszeri rendszerindítási tokent és a jelszó lépést tárgyalja).
 
 ---
 

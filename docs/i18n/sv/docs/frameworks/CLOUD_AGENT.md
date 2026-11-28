@@ -329,19 +329,16 @@ en maskerad förhandsvisning (`maskedApiKey`: upp till 4 tecken i vardera änden
 nyckel och inga för nycklar med högst 8 tecken) samt anslutningens `projectId`. Båda fälten utelämnas
 från svaret för alla andra nycklar.
 
-## Matchning av autentiseringsuppgifter
+## Upplösning av inloggningsuppgifter
 
 `getCloudAgentCredentials(providerId)` i `src/lib/cloudAgent/api.ts`:
 
-1. Läser in aktiva leverantörsanslutningar via `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Föredrar `apiKey` (rensad från omgivande blanksteg) för varje anslutning. Använder annars `accessToken`.
-3. Returnerar den första icke-tomma token innesluten som `{ apiKey: token }`.
-4. Returnerar `null` om ingen användbar token hittas — API:t svarar med `400` och
-   `"Inga aktiva autentiseringsuppgifter har konfigurerats för molnagentleverantören: <id>"`.
+1. Laddar aktiva leverantörsanslutningar via `getProviderConnections({ provider: providerId, isActive: true })`.
+2. För varje anslutning, föredrar `apiKey` (trimmad). Faller tillbaka till `accessToken`.
+3. Returnerar den första icke-tomma token inslagen som `{ apiKey: token }`.
+4. Returnerar `null` om ingen användbar token hittas API — `400` med `"No active credentials configured for cloud agent provider: <id>"`.
 
-Det innebär att molnagenter återanvänder samma tabell för leverantörsanslutningar som vanliga LLM-
-leverantörer. För att aktivera Jules skapar du en aktiv anslutning med `provider: "jules"`
-och ett ifyllt `apiKey`.
+Detta innebär att molnagenter återanvänder samma leverantörsanslutningstabell som vanliga LLM leverantörer. För att aktivera Jules, skapa en aktiv anslutning med `provider: "jules"` och en ifylld `apiKey`.
 
 ## Kontrollpanel
 

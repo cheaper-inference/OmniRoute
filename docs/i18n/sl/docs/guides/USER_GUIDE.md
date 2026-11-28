@@ -233,33 +233,41 @@ Modeli: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Kombinacije
+## 🎨 kombinacije
 
-Kartice kombinacij lahko neposredno v razdelku **Nadzorna plošča → Kombinacije** prerazporedite tako, da povlečete ročico na posamezni kartici. Vrstni red se shrani v SQLite in obnovi ob ponovnem nalaganju.
+Kombinirane karte lahko prerazporedite neposredno v** → na armaturni plošči** tako, da povlečete ročaj na vsaki kartici. Naročilo je shranjeno v SQLite in obnovljeno ob ponovnem nalaganju.
 
-### Primer 1: Prednost naročnini → Cenovno ugodna rezerva
+### Poiščite ponudnika, model ali račun
+
+V možnosti Ustvari ali Uredi kombinacijo izbirniki ponudnika, modela, računa in kombiniranih sklicev po korakih vključujejo lokalno iskalno polje. Iščite po prikazanem imenu, identifikatorju, vzdevku ponudnika ali viru modela, nato kliknite rezultat ali uporabite puščične tipke in Enter. Več iskalnih izrazov se mora ujemati. Če izbrišete iskanje ali pritisnete Escape, ostane izbrana vrednost nespremenjena.
+
+Samodejna izbira računa ostane vidna med iskanjem. Njegov izbirni seznam omejitev računov ima ločen filter: izbrani računi zunaj vidnih rezultatov ostanejo izbrani in štetje jih vključuje. Skritih fragmentov e-pošte ni mogoče iskati, dokler je zasebnost e-pošte vklopljena. Dodajte korak in shranite kombinacijo kot običajno; vnos poizvedbe ne shrani ali preizkusi ničesar.
+
+Enako lokalno iskanje je na voljo za modele preizkusa povezave, privzete modele CLI in vzdevke po meri ter izbire shranjenega posrednika. Obstoječa dejanja shranjevanja, uporabe in preizkusa ostanejo ločena.
+
+### Primer 1: povečajte naročnino → poceni varnostno kopiranje
 
 ```
-Nadzorna plošča → Kombinacije → Ustvari novo
+Dashboard → Combos → Create New
 
-Ime: premium-coding
-Modeli:
-  1. cc/claude-opus-4-7 (Primarna naročnina)
-  2. glm/glm-4.7 (Cenovno ugodna rezerva, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Najcenejša nadomestna možnost, $0.3/1M)
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
 
-Uporaba v CLI: premium-coding
+Use in CLI: premium-coding
 ```
 
 ### Primer 2: Samo brezplačno (brez stroškov)
 
 ```
-Ime: free-combo
-Modeli:
-  1. if/kimi-k2.7-code (naveden brezplačni dostop; morda veljajo omejitve ponudnika)
-  2. kr/qwen3-coder-next (brezplačna nadomestna možnost Kiro)
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
 
-Cena: trenutno navedena kot $0; pogoji in razpoložljivost se lahko spremenijo
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -419,7 +427,7 @@ Ko OmniRoute ne potrebujete več, nudimo dva hitra skripta za čisto odstranitev
 ### VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -501,8 +509,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -851,14 +859,14 @@ Konfigurirajte prek** Nadzorna plošča → Nastavitve → Usmerjanje** . Nadzor
 
 **Strategije, vidne na nadzorni plošči (usmerjanje na ravni računa):**
 
-| strategija                  | Opis                                                                                                    |
-| --------------------------- | ------------------------------------------------------------------------------------------------------- |
-| **Najprej izpolnite**       | Uporablja račune v prednostnem vrstnem redu — primarni račun obravnava vse zahteve, dokler ni na voljo  |
-| **Round Robin**             | Kroži skozi vse račune z nastavljivo lepljivo omejitvijo (privzeto: 3 klici na račun)                   |
-| **P2C (Moč dveh izbir)**    | Izbere 2 naključna računa in usmeri poti do bolj zdravega — uravnava obremenitev z zavedanjem o zdravju |
-| **Naključno**               | Naključno izbere račun za vsako zahtevo s premešanjem Fisher-Yates                                      |
-| **Najmanj uporabljeno**     | Usmeri do računa z najstarejšim časovnim žigom `lastUsedAt` in enakomerno porazdeli promet              |
-| **Stroškovno optimizirano** | Usmerja do računa z najnižjo vrednostjo prioritete, optimizira za ponudnike z najcenejšimi stroški      |
+| Strategija                  | Opis                                                                                                     |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Najprej izpolnite**       | Uporablja račune v prednostnem vrstnem redu — primarni račun obravnava vse zahteve, dokler niso na voljo |
+| **Round Robin**             | Kroži skozi vse račune z nastavljivo lepljivo omejitvijo (privzeto: 3 klici na račun)                    |
+| **P2C (Moč dveh izbir)**    | Izbere 2 naključna računa in usmeri poti do bolj zdravega — uravnava obremenitev z zavedanjem o zdravju  |
+| **Naključno**               | Naključno izbere račun za vsako zahtevo s premešanjem Fisher-Yates                                       |
+| **Najmanj uporabljeno**     | Usmeri do računa z najstarejšim časovnim žigom `lastUsedAt` in enakomerno porazdeli promet               |
+| **Stroškovno optimizirano** | Usmerja do računa z najnižjo vrednostjo prioritete, optimizira za ponudnike z najcenejšimi stroški       |
 
 **Napredne kombinirane in samodejne strategije** (nastavljivo na kombinacijo ali prek predpon `auto/*` — glej [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
@@ -870,8 +878,8 @@ Konfigurirajte prek** Nadzorna plošča → Nastavitve → Usmerjanje** . Nadzor
 - `least-used` in `cost-optimized`
 - `auto` — na podlagi rezultatov vseh kandidatov
 - `lkgp` (zadnji znani dober ponudnik) — se pripne na zadnjega uspešnega ponudnika, nato pa se vrne k pravilom
-- `context-optimized` — izbere model z največjim prostim kontekstnim oknom
-- `context-relay` — veriži modele z dolgim kontekstom za nadaljnje zavoje
+- `context-optimized` — najprej preizkusi model z največjim znanim kontekstnim oknom
+- `context-relay` — prednostni vrstni red plus povzetek predaje, ko se pogovor premakne na drug račun
 
 #### Zunanja lepljiva glava seje
 
@@ -947,7 +955,7 @@ curl -X POST http://localhost:20128/api/combos \
 
 Verige več brezplačnih ponudnikov in ponudnikov brez ključa, da povečate čas delovanja brez stroškov API.
 
-- **strategija** : `Least Used` ali `Round Robin` (razporedi obremenitev po kvotah)
+- **Strategija** : `Least Used` ali `Round Robin` (razporedi obremenitev po kvotah)
 - **Modeli** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
@@ -988,7 +996,7 @@ OmniRoute implementira odpornost na ravni ponudnika s petimi komponentami:
    - **Uporabite namige za ponovni poskus navzgor** — Upošteva avtoritativne namige `Retry-After` ali ponastavitev, če so na voljo
    - **Največji koraki odmika** — Največja eksponentna stopnja odmika za ponavljajoče se okvare
 
-3. **Odklopnik ponudnika** — Sledi okvaram ponudnika od konca do konca, označi ponudnika, ki je degradiran pri konfiguriranem opozorilnem pragu, in odpre odklopnik, ko je dosežen konfigurirani prag napake:
+3. **Odklopnik ponudnika** — Sledi okvaram ponudnika od konca do konca, označi ponudnika, ki je degradiran pri konfiguriranem opozorilnem pragu, in odpre odklopnik, ko je dosežen konfigurirani prag odpovedi:
    - **Prag degradacije** — Zaporedne napake ponudnika pred vstopom v `DEGRADED`
    - **Prag napake** — Zaporedne napake ponudnika pred vstopom v `OPEN`
    - **Ponastavi časovno omejitev** — Časovno okno pred ponovnim testiranjem ponudnika
@@ -1048,14 +1056,14 @@ Stran z nastavitvami je organizirana v** 7 zavihkov** za enostavno navigacijo:
 | Tab            | Vsebina                                                                                                                                                                                               |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Splošno**    | Orodja za sistemsko shranjevanje, privzeto vedenje, vidnost tunela končne točke                                                                                                                       |
-| **Videz**      | Kontrolniki teme (light/dark/system), vidnost stranske vrstice, preklopi plošč za kartice tunela Cloudflare/Tailscale/ngrok                                                                           |
+| **Videz**      | Kontrolniki teme (light/dark/system), vidnost stranske vrstice, preklopi plošče za kartice tunela Cloudflare/Tailscale/ngrok                                                                          |
 | **AI**         | Razmišljanje proračuna (prehod / samodejno odstranjevanje / po meri / prilagodljiv — glejte [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globalni sistemski poziv, statistika predpomnilnika pozivov |
 | **Varnost**    | nastavitve Login/Password, nadzor dostopa IP, auth API za `/models`, blokiranje ponudnika, zaščita pred vstavljanjem                                                                                  |
 | **Usmerjanje** | Globalna strategija usmerjanja (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), vzdevki modela z nadomestnimi znaki, nadomestne verige, privzete kombinacije                  |
 | **Odpornost**  | Čakalna vrsta zahtev, ohlajanje povezave, konfiguracija prekinitve ponudnika in vedenje čakanja na ohlajanje                                                                                          |
 | **Napredno**   | Globalna konfiguracija proxyja (HTTP/SOCKS5), preglasitve proxyja za posameznega ponudnika                                                                                                            |
 
-Splošno ne podvaja več beležk samo za branje in predpomnilnika. Nastavitve hrambe in optimizacije baze podatkov se ohranjajo prek `/api/settings/database`; ročno brisanje predpomnilnika uporablja `DELETE /api/cache`. Omejitve vrstic dnevnika zahtev in proxyja nadzirata `CALL_LOGS_TABLE_MAX_ROWS` in `PROXY_LOGS_TABLE_MAX_ROWS`.
+Splošno ne podvaja več beležk samo za branje in predpomnilnika. Nastavitve hrambe podatkovne baze in optimizacije se ohranjajo prek `/api/settings/database`; ročno brisanje predpomnilnika uporablja `DELETE /api/cache`. Omejitve vrstic dnevnika zahtev in proxyja nadzirata `CALL_LOGS_TABLE_MAX_ROWS` in `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1078,7 +1086,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Sledenje stroškom:** Vsaka zahteva beleži uporabo žetonov in izračuna stroške z uporabo tabele cen. Oglejte si razčlenitve v** Uporaba nadzorne plošče →** po ponudniku, modelu in ključu API.
+**Sledenje stroškom:** Vsaka zahteva zabeleži uporabo žetona in izračuna stroške z uporabo tabele cen. Oglejte si razčlenitve v** Uporaba nadzorne plošče →** po ponudniku, modelu in ključu API.
 
 ---
 
@@ -1098,7 +1106,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` je izvirna pot Deepgram in potrebuje ključ Deepgram API. Če je konfiguriran samo OpenRouter, uporabite `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` je izvorna pot Deepgram in potrebuje ključ Deepgram API. Če je konfiguriran samo OpenRouter, uporabite `openrouter/deepgram/nova-3`.
 
 **Pretvorba govora v besedilo (transkripcija)** ponudniki:
 
@@ -1127,7 +1135,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Podprti zvočni formati za transkripcijo: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Izhodni formati TTS so odvisni od ponudnika (mp3, wav, opus, pcm, mulaw).
+Podprti zvočni formati za transkripcijo: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. izhodni formati TTS so odvisni od ponudnika (mp3, wav, opus, pcm, mulaw).
 
 ---
 
@@ -1135,7 +1143,7 @@ Podprti zvočni formati za transkripcijo: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `w
 
 Konfigurirajte uravnoteženje po kombinacijah** Nadzorna plošča → Combos → Create/Edit → strategija** .
 
-| strategija                  | Opis                                                                           |
+| Strategija                  | Opis                                                                           |
 | --------------------------- | ------------------------------------------------------------------------------ |
 | **Round-Robin**             | Vrti se skozi modele zaporedno                                                 |
 | **Prioriteta**              | Vedno poskusi prvi model; pade nazaj le ob napaki                              |
@@ -1148,7 +1156,7 @@ Nastavite lahko globalne privzete kombinacije** Nadzorna plošča Nastavitve →
 
 Kombinirane optimizacije brez zakasnitve so opt-in. Pusti** Optimizacije brez zakasnitve** onemogočeno, da se prepreči, da bi te funkcije zakasnitve tekmovale z nadomestnimi cilji, preskakovale cilje na podlagi zgodovine TTFT ali stiskale nadomestne zahteve; omogočanje omogoča konfigurirano varovanje pred tveganjem, napovedne preskoke TTFT in proaktivno nadomestno stiskanje za zamenjavo zvestobe routing/request za nižjo zakasnitev repa.
 
-Onemogoči** Reasoning token buffer** kadar navzgornji ponudniki zahtevajo stroge omejitve `max_tokens` / `maxOutputTokens`. Ko je omogočeno, kombinirano usmerjanje samo doda prostor za obrazložitveni model za modele z znano izhodno zgornjo mejo in pusti omejitev odjemalskega žetona nespremenjeno, ko bi vrednost varnega medpomnilnika presegla to zgornjo mejo. Če je omejitev odjemalca že nad znano omejitvijo, jo OmniRoute stisne do te omejitve, preden pošlje zahtevo navzgor.
+Onemogoči** Reasoning token buffer** ko navzgornji ponudniki zahtevajo stroge omejitve `max_tokens` / `maxOutputTokens`. Ko je omogočeno, kombinirano usmerjanje samo doda prostor za obrazložitveni model za modele z znano izhodno zgornjo mejo in pusti omejitev odjemalskega žetona nespremenjeno, ko bi varna medpomnilniška vrednost presegla to zgornjo mejo. Če je omejitev odjemalca že nad znano omejitvijo, jo OmniRoute stisne do te omejitve, preden pošlje zahtevo navzgor.
 
 ---
 
@@ -1318,34 +1326,36 @@ Celoten katalog končnih točk ter sheme zahtev in odgovorov so na voljo v [API_
 
 ---
 
-## 💻 Interni CLI
+## 💻 Notranji CLI
 
-OmniRoute vključuje interni CLI (`omniroute …`) za nastavitev, diagnostiko in nadzor izvajanja. Ta je **ločen od strani »Orodja CLI« na nadzorni plošči**, kjer konfigurirate CLI-je drugih ponudnikov (Claude Code, Cursor, Codex, Cline, …), da lahko komunicirajo z OmniRoute.
+OmniRoute pošilja notranji CLI (`omniroute …`) za nastavitev, diagnostiko in nadzor časa izvajanja. To je** ločeno od strani »Orodja CLI « na nadzorni plošči** , ki konfigurira CLIs tretje osebe (koda Claude, Cursor, Codex, Cline, …), tako da se lahko pogovarjajo z OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktivni čarovnik (geslo, ponudniki, kombinacije)
-omniroute setup --non-interactive  # Primerno za CI
-omniroute doctor                   # Diagnostika stanja (podatkovna mapa, zbirka podatkov, ponudniki, vrata)
-omniroute providers available      # Prikaži podprte ponudnike
-omniroute providers list           # Prikaži konfigurirane povezave
-omniroute providers test <id>      # Preizkusi povezavo s ponudnikom v živo
-omniroute combos list              # Prikaži kombinacije
-omniroute combos switch <name>     # Nastavi privzeto kombinacijo
-omniroute models                   # Prikaži razpoložljive modele (--json, --search)
-omniroute keys add | list | remove # Upravljaj ključe API iz terminala
-omniroute backup                   # Ustvari posnetek konfiguracije in zbirke podatkov
-omniroute restore [<timestamp>]    # Obnovi iz posnetka
-omniroute health                   # Podrobno stanje (odklopniki, predpomnilnik, pomnilnik)
-omniroute quota                    # Poraba kvote ponudnika
-omniroute mcp status               # Stanje strežnika MCP
-omniroute a2a status               # Stanje strežnika A2A
-omniroute tunnel list|create|stop  # Predori Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Ponastavi skrbniško geslo
-omniroute --mcp                    # Zaženi strežnik MCP prek stdio
-omniroute --port 3000              # Zaženi strežnik na vratih po meri
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Namig: povežite `omniroute doctor --json` s svojim orodjem za spremljanje, da vas opozori na nedelujoče povezave s ponudniki.
+Namig: združite `omniroute doctor --json` s svojim orodjem za spremljanje, da vas opozori na pokvarjeno lokalno namestitev. `doctor` ne testira povezav ponudnika; za to uporabite `omniroute providers test <id>`.
 
 ---
 

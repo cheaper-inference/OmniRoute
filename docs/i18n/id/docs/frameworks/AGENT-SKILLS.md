@@ -11,14 +11,14 @@ Agent Skills adalah file SKILL.md terstruktur yang mengajarkan agen eksternal, k
 
 ---
 
-## Ikhtisar
+## Ringkasan
 
-Katalog ini berisi **45 Agent Skills** (23 REST API + 21 CLI + 1 alur kerja konfigurasi). Setiap skill memiliki:
+Katalog berisi** 45 Keterampilan Agen** (23 REST API + 21 CLI + 1 alur kerja konfigurasi). Setiap keterampilan memiliki:
 
-- Sebuah **ID kanonis** (`omni-auth`, `cli-serve`, dll.)
-- Sebuah file **SKILL.md** di `skills/{id}/SKILL.md` dengan frontmatter YAML (`name`, `description`) + isi markdown yang kaya
-- **Endpoint REST** (skill API) atau **subperintah CLI** (skill CLI) yang diturunkan dari spesifikasi OpenAPI dan registri CLI
-- Sebuah **URL raw GitHub** untuk pengambilan langsung: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** ID kanonik** (`omni-auth`, `cli-serve`, dll.)
+- A**SKILL.md** file dalam `skills/{id}/SKILL.md` dengan YAML frontmatter (`name`, `description`) + rich markdown body
+- **titik akhir REST** (keterampilan API ) atau** subperintah CLI** (keterampilan CLI ) berasal dari spesifikasi OpenAPI dan registri CLI
+- A**GitHub mentah URL** untuk pengambilan langsung: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Respons generator adalah `GeneratorReport`:
 
 ---
 
-## API Cakupan
+## Cakupan API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

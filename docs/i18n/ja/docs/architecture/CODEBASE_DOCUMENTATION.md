@@ -4,18 +4,11 @@
 
 ---
 
-> **バージョン:** v3.8.51
-> **最終更新日:** 2026-06-28
-> **対象読者:** OmniRoute にコントリビュートするエンジニア、または OmniRoute 上にインテグレーションを構築するエンジニア。
+> **バージョン:** v3.8.51**観客：** OmniRouteに貢献する、またはその上に統合を構築するエンジニア。
 >
-> 高レベルのアーキテクチャ図と各サブシステムの設計理由については、
-> [ARCHITECTURE.md](./ARCHITECTURE.md) を参照してください。個々のサブシステム
-> （Auto Combo、MCP server、A2A server、Skills、Memory、Cloud Agents、Resilience、
-> Compression など）の詳細については、この `docs/` ディレクトリ内にある各専用ファイルを参照してください。
+> 高レベルのアーキテクチャ図と各サブシステムの背後にある理由については、 [ARCHITECTURE.md](./ARCHITECTURE.md)参照してください。個々のサブシステム (自動コンボ、 MCPサーバー、 A2Aサーバー、スキル、メモリ、クラウド エージェント、復元力、圧縮など) の詳細については、この`docs/`ディレクトリ内の専用ファイルを参照してください。
 
-このファイルでは、**現在リポジトリに存在するもの**について説明します。これにより、新しいエンジニアが
-ディレクトリツリーを把握し、ランタイムの階層構造を理解し、新しいモジュールを考案することなく
-コードを追加すべき場所を判断できるようになります。
+このファイルの説明は、**現在リポジトリに存在するもの**これにより、新しいエンジニアは、新しいモジュールを作成することなく、ツリーをナビゲートし、ランタイムの階層構造を理解し、コードを追加する場所を知ることができます。
 
 ---
 
@@ -681,35 +674,14 @@ bin/
 
 ## 8. `scripts/`
 
-目的別に6つのサブフォルダーに整理されています。
+目的別に6つのサブフォルダーに分類されています。
 
-- **`scripts/build/`** — `build-next-isolated.mjs`、`prepublish.ts`、
-  `prepare-electron-standalone.mjs`、`pack-artifact-policy.ts`、
-  `validate-pack-artifact.ts`、`postinstall.mjs`、`postinstallSupport.mjs`、
-  `uninstall.mjs`、`bootstrap-env.mjs`、`runtime-env.mjs`、
-  `native-binary-compat.mjs`。
-- **`scripts/dev/`** — `run-next.mjs`、`run-next-playwright.mjs`、
-  `run-standalone.mjs`、`standalone-server-ws.mjs`、`responses-ws-proxy.mjs`、
-  `v1-ws-bridge.mjs`、`smoke-electron-packaged.mjs`、
-  `run-playwright-tests.mjs`、`run-ecosystem-tests.mjs`、
-  `run-protocol-clients-tests.mjs`、`sync-env.mjs`、`healthcheck.mjs`、
-  `system-info.mjs`に加え、読み取り専用のPR監視用ヘルパーである
-  `ci-discriminate.sh`（PRで失敗したチェックのシグネチャを、参照PRまたはbase-red issueと比較して、
-  自身に起因するもの／継承されたもの／不明なものに分類）と`audit-worktree.sh`
-  （ワーカーのPRを受け入れる前に、変更のあるファイル、保護対象領域、削除されたassert、
-  抑制の数、残存する一時tsconfig、PRのheadとローカルHEADを確認）。
-- **`scripts/check/`** — `check-cycles.mjs`、`check-docs-sync.mjs`、
-  `check-docs-counts-sync.mjs`、`check-env-doc-sync.mjs`、
-  `check-deprecated-versions.mjs`、`check-route-validation.mjs`、
-  `check-t11-any-budget.mjs`、`check-pr-test-policy.mjs`、
-  `check-supported-node-runtime.ts`、`test-report-summary.mjs`。
-- **`scripts/docs/`** — `generate-docs-index.mjs`、`gen-provider-reference.ts`。
-- **`scripts/i18n/`** — `generate-multilang.mjs`、`run-visual-qa.mjs`、
-  `generate-qa-checklist.mjs`、`apply-priority-overrides.mjs`、
-  `validate_translation.py`、`check_translations.py`、
-  `untranslatable-keys.json`。
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`、`sync-cursor-models.mjs`、
-  `dbsetup.js`。
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`、 `run-next-playwright.mjs`、 `run-standalone.mjs`、 `standalone-server-ws.mjs`、 `responses-ws-proxy.mjs`、 `v1-ws-bridge.mjs`、 `smoke-electron-packaged.mjs`、 `run-playwright-tests.mjs`、 `run-ecosystem-tests.mjs`、 `run-protocol-clients-tests.mjs`、 `sync-env.mjs`、 `healthcheck.mjs`、 `system-info.mjs`、および読み取り専用のPRベビーシッター ヘルパー`ci-discriminate.sh` ( PRの失敗チェック署名を独自の署名にソートします) / 継承 / 参照PRまたはベースレッドの問題に対して不明) および`audit-worktree.sh` (ダーティ ファイル、保護されたサーフェス、削除されたアサート、抑制カウント、残りの tmp tsconfig、ワーカーのPRが受け入れられる前のPR head とローカルHEAD — )。
+- **`scripts/check/`** — `check-cycles.mjs`、 `check-docs-sync.mjs`、 `check-docs-counts-sync.mjs`、 `check-env-doc-sync.mjs`、 `check-deprecated-versions.mjs`、 `check-route-validation.mjs`、 `check-t11-any-budget.mjs`、 `check-pr-test-policy.mjs`、 `check-supported-node-runtime.ts`、 `test-report-summary.mjs`。 `check-deprecated-versions.mjs`明示的にOmniRouteに起因するバージョン (3.6.x 以前) にフラグを立てます。このチェックでは日付は無視されます。
+- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

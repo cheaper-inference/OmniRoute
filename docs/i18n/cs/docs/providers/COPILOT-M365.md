@@ -168,9 +168,9 @@ Ujistěte se, že `copilot-m365-web` je povoleno v** Poskytovatelé Dashboard �
 
 ## Reference
 
-- Problém: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Diskuse: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Vydání: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Diskuze: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Zdroj: `src/shared/constants/providers/web-cookie.ts` (definice poskytovatele)
-- Import HAR: `src/shared/utils/m365HarImport.ts`
-- Pole přihlašovacích údajů: `src/shared/providers/webSessionCredentials.ts`
-- Modální okno úrovně: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- HAR import: `src/shared/utils/m365HarImport.ts`
+- Pole pověření: `src/shared/providers/webSessionCredentials.ts`
+- Modální úrovně: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

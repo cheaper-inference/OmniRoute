@@ -307,7 +307,7 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 1. **Generator ilə fayl yaradın** : `npm run db:new-migration -- <description>` (məsələn, `npm run db:new-migration -- add combo priority`). O, cari UTC vaxtı və şərh başlığı ilə `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` yazır, həmin vaxt damğası götürülərsə, bir saniyə irəliləyir və heç vaxt faylın üzərinə yazmır. Nömrəni əl ilə seçməyin.
 2. **Təhlükəsiz DDL istifadə edin** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
 3. **Məlumatları diqqətlə doldurun** : mövcud sətirləri idarə etmək üçün `UPDATE ... WHERE ...` istifadə edin
-4. **Sifarişi və adını yoxlayın** : `npm run test:migrations:fresh` (boş verilənlər bazasında bütün köçürmələr) və `npm run check:migration-numbering`
+4. **Sifarişi və adını yoxlayın** : `npm run test:migrations:fresh` (boş verilənlər bazasında bütün köçürmələr) və `npm run check:migration-numbering`. `src/lib/db/migrations/` altında faylı səhnələşdirəndə husky pre-commit çəngəl öz-özünə `check:migration-numbering` işləyir, beləliklə, əl ilə seçilmiş və ya pis formalaşmış ad (məsələn `242_x.sql`) eyni CI çap mesajı ilə yerli icrada uğursuz olur. Qarmaq adları, dublikatları və yalnız dondurulmuş `001`–`241` seriyasını yoxlayır; PR bazası ilə müqayisə (silinmiş, adı dəyişdirilmiş və ya sıradan çıxmış köçlər) hələ də CI-də işləyir
 5. **Bir nüsxədə sınaq** : istehsalda heç vaxt sınaqdan keçirilməmiş miqrasiyaları həyata keçirməyin
 6. **Koddan yaradılmış cədvəlin də miqrasiyaya ehtiyacı var** : modul da cədvəli tənbəl şəkildə yaradırsa (`CREATE TABLE IF NOT EXISTS`, özünü sağaltma yolu kimi saxlanılır), köçürmə onu eyni DDL ilə yaratmalıdır. Əks halda, təmiz quraşdırma və təkmilləşdirilmiş quraşdırma, həmin kod yolunun keçib-keçməməsindən asılı olaraq müxtəlif sxemlərlə başa çatır. `tests/unit/db/lazy-table-migration-guard.test.ts` `src/` və `open-sse/` skan edir və köçürmə olmadan tənbəl `CREATE` də uğursuz olur (#20557). Misal: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
@@ -320,7 +320,7 @@ UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Geriyə uyğun olmayan dəyişikliklər** (məsələn, sütunları atmaq) çətin olur. OmniRoute miqrasiya tətbiq edildikdən sonra NOT — endirilməsini dəstəkləyir, sxem dəyişikliyi daimidir. Buna uyğun olaraq planlaşdırın.
+> **Geriyə uyğun olmayan dəyişikliklər** (məsələn, sütunları atmaq) çətin olur. OmniRoute NOT miqrasiya tətbiq edildikdən sonra — endirməyi dəstəkləyir, sxem dəyişikliyi qalıcıdır. Buna uyğun olaraq planlaşdırın.
 
 ---
 

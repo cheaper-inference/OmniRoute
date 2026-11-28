@@ -4,13 +4,7 @@
 
 ---
 
-> **Pagrindinis šaltinis:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` ir viešieji kūrimo metodai iš `open-sse/utils/error.ts`
-> **Testai:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Paskutinį kartą atnaujinta:** 2026-09-02 — v3.8.51
-> **Auditorija:** Visi inžinieriai, dirbantys su klaidų atsakymais (HTTP maršrutais, SSE srautais, vykdytojais, MCP apdorojimo funkcijomis).
-> **Būsena:** **PRIVALOMA** kiekvienam kodo keliui, grąžinančiam klientui klaidos pranešimą.
+> **Tiesos šaltinis:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` ir viešieji statybininkai `open-sse/utils/error.ts`** Testai:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Auditorija:** Bet kuris inžinierius, paliečiantis klaidų atsakymus (HTTP maršrutai, SSE srautai, vykdytojai, MCP tvarkytojai).** Būsena:****MANDATORY** kiekvienam kodo keliui, kuris klientui pateikia klaidos pranešimą.
 
 ## Kodėl tai reikalinga
 

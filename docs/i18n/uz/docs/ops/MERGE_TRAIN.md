@@ -4,75 +4,63 @@
 
 ---
 
-> **19.11.2026: Birlashtirish navbati tugatildi** (egasining qarori). `.mergify.yml` endi navbatni belgilamaydi va tortish so'rovini birlashtiruvchi yoki qayta yozuvchi Birlashtirish buyruqlarini rad etadi. Relizlar PRs qo'lda "Faol relizda yashil eshiklarni talab qilish" (`Gate / CI` + `Gate / Quality`) ombori qoidalari ostida omni navbat jonli rejimda ishlamaguncha va undan keyin omni navbat orqali birlashtiriladi ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Quyidagi Birlashtirish bo'limlari navbatni qanday bo'lsa, shunday tasvirlaydi.
+## Bo'shatish shoxiga qo'nish
 
-v3.8.49 ( quality/velocity rejasining WS3.2/WS3.4 ) versiyasidan beri ko'rib chiqilgan PRs `release/vX.Y.Z` ga birlashtirishning standart yo'li** Birlashtirish navbatini birlashtirish** (`.mergify.yml`); the** qo'lda birlashma-poezd** quyida hujjatlashtirilgan FALLBACK — hodisalari, versiyaning muzlashi yoki Merge Open Source rejasi har doim oʻzgarganda foydalaniladi.
+Omni navbat `release/vX.Y.Z` ga qo'nishlarni boshqaradi. PR qo'yishdan oldin standart bo'limda `config/merge-queue/config.json` da yuqori darajadagi `mode` o'qing. [Omni-Queue](OMNI_QUEUE.md) ga qarang.
 
-## Standart yoʻl: Birlashtirish navbati
+- **`shadow`** tekshirishni amalga oshiradi va qo'lda birlashtirishga qo'yadi. Yakuniy boshida tasdiqlangan PR ga `omni-queue` qo'llang. `npm run queue -- why <PR>` bilan muvofiqlikni tekshiring. `npm run queue -- history --base <branch>` o'sha boshning hukmini kuting. `would-land` bo'yicha davom eting. `culprit-found` yoki `would-dequeue` da birlashtirishni ushlab turing va sababni tuzating.
+- **Soya istisnolari.** Joriy tayanch uchiga qarshi yashil rangli to'liq CI bo'lgan poezd alohida navbat hukmisiz davom etishi mumkin. Xuddi shu istisno PR boshi allaqachon joriy tayanch uchini o'z ichiga olgan bo'lsa qo'llaniladi.
+- **`live`** qo'nishni boshlash uchun `omni-queue` yorlig'idan foydalanadi. Navbatning o'zi PR tushiradi. Birlashtirish buyruqlarini va navbatga to'g'ridan-to'g'ri surishlarni qoldiring.
 
-1. PR kampaniyalar tomonidan reviewed/greened hisoblanadi va egasining birlashtirishdan oldingi ⭐ darvozasi tomonidan tasdiqlanadi (hisobot + har bir element qarori — `/merge-prs` 0.75-bosqichga qarang).
-2. Egasi (yoki egasining qaroriga ko'ra ish yurituvchi sessiya) qo'llaydi**`queue`** yorliq. Yorliq IS birlashishni tasdiqlash; Birlashtirish faqat uni amalga oshiradi.
-3. Birlashtirish navbatda turgan PRs tasdiqlaydi** ketma-ket** (bir vaqtning o'zida) tezkor darvozalarga qarshi va birlashadi (qovoq). + avtomatik bisektsiyasini to'lash - bu pullik birlashtirish darajasidir (bepul rejada "Birlashtirish navbati to'plamidan foydalanib bo'lmaydi", #7220), shuning uchun `.mergify.yml` `batch_size` o'rnatmaydi; partiyalash quyida qo'lda birlashma-poezd ish bo'lib qoladi. `checks_timeout` (240 min = 2 × `quality.yml` ning oʻlchangan p95 i) dan keyin ham tekshiruvlari kutilayotgan PR navbatni toʻxtatib turish oʻrniga navbatdan chiqariladi.
-4. Birlashtirishdan so'ng, uzluksiz bo'shatish-yashil ish jarayoni push-da yangi maslahatni tasdiqlaydi va agar kombinatsiya regressiyalangan bo'lsa (hech qachon avtomatik ravishda qaytarilmasin) atribut muammosini ochadi.
+Har bir qo'nish egasining ruxsatini va tegishli tekshiruvlarni talab qiladi. `omni-queue` faqat egasi qo'nishga ruxsat berganidan keyin qo'llang. Himoyalangan yoʻllarga tegib turgan navbatda turgan PRs ham ushbu PR uchun egasining `protected-approved` qarorini talab qiladi.
 
-Guardrails (oyna `CLAUDE.md` Hard Rules #21/#22):
+"Faol versiyada yashil eshiklar talab qilinadi" qoidalar to'plamida yashil `Gate / CI` va `Gate / Quality` boshida bo'lishi kerak. Qizil darvozani chetlab o'tish uchun hech qachon `--admin` foydalanmang. Muzlatish bloklari muzlatilgan filialga birlashadi. [Qattiq qoida 21-ga](HARD_RULES_DETAIL.md) qarang. Hech qachon boshqa seans ishlayotganini belgilamang, birlashtirmang yoki tortish so'roviga surmang. [Qattiq qoida 22-ga](HARD_RULES_DETAIL.md) qarang.
 
-- **Muzlatgichni ochiq qo'ying** → do NOT label PRs muzlatilgan filialni nishonga olish; avval faol `release/vX+1` ga qayta yo'naltiring.
-- **Yana bir seansning parvozdagi PR** → hech qachon uni belgilamaydi; faqat egalik seansi o'z ishini navbatga qo'yadi.
-- Faqat sinovlar uchun farqlar va `hotfix` -labeled PRs allaqachon qisqartirilgan CI ishlaydi (qarang `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); navbat shartlari amalda bajarilgan har qanday tekshiruv to'plamini qabul qiladi (`#check-failure=0` + `#check-pending=0`).
+## Poezdni tortib olish so'rovi
 
-## Zaxira usul: qoʻlda boshqariladigan birlashtirish poyezdi
+1. Joriy reliz bazasi uchida poezd filialini ishga tushiring. Birlashtirish majburiyatlari yordamida aniq tasdiqlangan a'zolar rahbarlarini birlashtiring. Squash va rebasedan qochib, ularning sodir etilgan tarixini saqlang.
+2. Poyezd filiali uchun bitta tortish so‘rovini oching. Ushbu PR joriy asosiy uchida o'zining to'liq CI bilan tasdiqlang. Qo'nishdan oldin taglik uchini va tasdiqlangan element boshlarini qayta tekshiring. Tasdiqlangan nomzod o'zgarganda poezdni va uning CI yangilang.
+3. Tegishli navbat rejimida birlashma majburiyati bilan PR qo‘shing. Jonli rejimda navbatning `merge-ff` qo'nish usuli birlashma majburiyatlarini saqlab qoladi. Asl a'zo boshlariga reliz bo'limidan kirish mumkin bo'ladi. GitHub PRs a'zosini birlashtirilgan deb belgilaydi va majburiyatlar o'z mualliflarini saqlab qoladi.
 
-Navbat mavjud boʻlmaganda ishlatiladi. Bu v3.8.47 sikli davomida bir kunda 33 ta PRni
-yakunlash imkonini bergan amaliyotni rasmiylashtiradi:
+Ommaviy misol [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). U 18 a'zo PRs birlashtirdi va 2026-11-24 da birlashish majburiyati bilan qo'ndi.
 
-1. **Paketni yigʻing** (tekshirilgan+tasdiqlangan taxminan 10–30 ta PR). `linked:` toʻqnashuvlarini
-   (bir xil `tap.testFiles`, bir xil CHANGELOG qismlari) tekshiring va ularni ketma-ket bajaring.
-2. **BIR MARTA tekshiring**: reliz uchidan ajratilgan izolyatsiyalangan worktree ichida paketdagi barcha
-   headlarni lokal ravishda birlashtiring, soʻng relizga tenglashtirilgan toʻplamni ishga tushiring
-   (`npm run check:release-green`, relizdan oldin `--with-build` qoʻshing).
-   `scripts/release/merge-train.sh <base> <PR#>…` 1–2-qadamlarni avtomatlashtiradi (toʻqnashuvchi
-   PRlar chiqarib yuboriladi, poyezd davom etadi). Toʻliq rejim `npm run test:unit` ni — qurilmaga
-   moslangan runnerni (`--test-concurrency=20`) ishga tushiradi; **ikkita ketma-ket 4 yadroli CI
-   shardini emas**, chunki ular 16 yadroli qurilmada asosiy bosqichni taxminan 25% yuklanish bilan
-   ishlatgan (2026-07-18 da tuzatilgan). `--fast` (kun ichidagi yirik poyezdlarni yakunlash uchun,
-   egasi tomonidan 2026-07-18 da tasdiqlangan) barcha statik nazoratlar + vitest ni saqlab qoladi,
-   ammo faqat poyezdga qoʻshilgan PRlar oʻzgartirgan node:test fayllarini ishga tushiradi; TOʻLIQ
-   toʻplam jamlangan uchda kuniga kamida bir marta ishga tushirilishi shart (`--fast` siz bitta poyezd).
-3. **Yashil** → PRlarni ketma-ket birlashtiring (har biridan oldin `state,headRefOid` ni qayta tekshiring —
-   headi oʻzgargan PR qayta tekshiruvga kiradi). Har bir birlashtirishning yakuniy diffi
-   PRning oʻz oʻzgarishidan iborat ekanini isbotlang (avtomatik hal qilish natijasidagi qaytarishlarga yoʻl qoʻymang:
-   doiradan tashqaridagi oʻchirishlarni aniqlash uchun `git diff --stat` ni tekshiring).
-4. **Qizil** → bittadan qayta tekshirish oʻrniga paketni yarmiga boʻling (har bir yarmini tekshiring);
-   muammoli PRni dalillar bilan tekshiruv navbatiga qaytaring.
-5. **Hech qachon**: muzlatish davrida muzlatilgan shoxga birlashtirmang; hech qayerda `git stash`
-   ishlatmang; qizil holat yoʻqoladi degan umidda CIʼni yoppasiga qayta ishga tushirmang (qoida:
-   qizil holat — bu axborot).
+`main` dan keyingi reliz filialiga sinxronlash ham birlashma majburiyati orqali amalga oshiriladi. Keyingi sinxronlashlar uchun `main` nasl-nasabini saqlab qolish talab qilinadi. [Ish daraxti izolyatsiyasiga](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash) qarang.
 
-## Darajalash (nega navbat faqat tezkor nazoratlar bilan xavfsiz)
+## Mahalliy birlashma-poezd validatori
 
-- **Har bir PR uchun** (quality.yml tezkor nazoratlari): TIA taʼsiridagi testlar + toʻliq 4-shardli unit testlar +
-  vitest + lint toʻplami + typecheck + hujjatlar/changelog yaxlitligi.
-- **Har bir paket/uch uchun** (uzluksiz release-green): reliz shoxiga har bir pushda `--quick` QATʼIY
-  nazoratlari; kuniga 3 marta toʻliq `--with-build --full-ci` tekshiruvlari.
-- **Har bir reliz uchun** (reliz PRidagi ci.yml): toʻliq matritsa, jumladan E2E ×9,
-  package-artifact + tarball boot-smoke, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Hech narsa avvalgidan kamroq tekshirilmaydi — ogʻir tekshiruvlar qatlami shunchaki har bir PR uchun emas,
-har bir paket/uch uchun ishga tushiriladi va aynan shu O(N) qatnovlarini yoʻq qiladi.
+Validator taglik va PR boshlarini oladi va ularni bir martalik ishchi daraxtda birlashtiradi. Olingan daraxtda bir marta paritet to'plamini boshqaradi. Muvaffaqiyatsiz bosh olib kelish yoki birlashtirish nizosi bu PR chiqaradi va skript qolgan PRs bilan davom etadi.
 
-## `merge-train.sh` uchun yangi checkout talablari
+- **`--plan`** tanlangan rejim qadamlarini chop etadi va ishchi daraxtini yaratmasdan yoki masofadan boshqarish pultiga murojaat qilmasdan chiqadi. Tez rejani tekshirish uchun uni `--fast` bilan birlashtiring.
+- **`--fast`** umumiy statik eshiklarni, `tests/unit/` va `npm run test:vitest` ostida tanlangan o'zgartirilgan `node:test` fayllarini ishga tushiradi. Tez rejimdan foydalanganda to'plangan uchida kuniga kamida bir marta to'liq mahalliy tekshirishni bajaring.
+- **To'liq rejim** faqat to'liq statik eshiklarni qo'shadi va `npm run test:unit` va `npm run test:vitest` ishga tushiradi.
 
-Skript buzilgan oʻrnatish hech qachon qizil poyezd koʻrinishida namoyon boʻlmasligi uchun asosiy checkoutda
-(har qanday worktree ishidan oldin) xatoda darhol toʻxtaydigan **dastlabki tekshiruv**ni bajaradi:
+Agar asosiy zond mavjud bo'lsa, ishlamay qolgan statik eshik tegilmagan bazada qayta ishga tushiriladi. Skript meros qilib olingan nosozliklar haqida xabar beradi va har bir tan olingan qoidabuzarlik qatori bazada paydo bo'lganda va umumiy soni o'smaganda davom etadi.
 
-1. `npm ci`, soʻng npm bloklaydigan `bun` postinstall jarayonini ishga tushiring:
-   `(cd node_modules/bun && node install.js)` — aks holda `check:provider-consistency`
-   va `check:known-symbols` (ikkalasi ham `bun scripts/…`) poyezdda HAM, asosda HAM
-   qoidabuzarlik qatorisiz muvaffaqiyatsiz tugaydi.
-2. Ortiqcha `node_modules/node_modules` boʻlmasligi kerak (takroriy bogʻliqliklar daraxti; React ikki marta
-   yuklanadi va UI vitest toʻplamlari darhol muvaffaqiyatsiz tugaydi).
-3. `node_modules/.bin/tsc` mavjud va bajariladigan boʻlishi kerak (qisman oʻrnatishda u boʻlmaydi).
+| Chiqish | Ma'nosi                                                                                                                                                                           |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`     | Rejani chop etdi yoki to'plamni yakunladi. To'plamning xulosasida meros qilib olingan statik nosozliklar va chiqarilgan PRs ro'yxati keltirilgan.                                 |
+| `1`     | Argumentlar noto‘g‘ri, Git hisobi yo‘q, oldindan parvoz amalga oshmadi yoki PR bortiga kirmadi.                                                                                   |
+| `2`     | To'plam tekshiruvi muvaffaqiyatsiz tugadi va meros sifatida qabul qilinmadi. Operator to'plamni ikkiga bo'lishi, buzuvchi PR chiqarib tashlashi va qayta ishga tushirishi mumkin. |
 
-Poyezd bloklovchi `npm run check:cycles:ratchet` ni ishga tushiradi; oddiy `npm run check:cycles`
-faqat tavsiyaviydir (u SCC roʻyxatini chiqaradi va hatto sogʻlom asosda ham noldan farqli kod bilan yakunlanadi).
+Mahalliy ruxsatnoma faqat egasining ma'lumotlari uchun diagnostik dalillarni taqdim etadi. Har bir qo'nish uchun hali ham egasining ruxsati, o'zining zarur tekshiruvlari va tegishli bo'lsa, soya navbatining hukmi talab qilinadi.
+
+## Bog'lanish
+
+- **PR uchun.** CI va Sifat tanlovi o'zgartirilgan yo'llar asosida tekshiriladi. Kod PRs tez sifatli eshiklar va ta'sirli testlarni amalga oshiradi, CI ichida alohida birlik va Vitest ishlari bilan.
+- **Navbat bo'yicha nomzod.** CI va Sifat oʻz navbati boʻyicha tuzilgan nomzod uchun toʻliq profilni ishga tushiradi.
+- **Chiqarish uchun maslahat.** Release-Green o'zining yo'l filtrlariga mos keladigan surishlarda tezkor qattiq eshiklarni ishga tushiradi. Kuniga uchta rejalashtirilgan yugurish relizlar bo'limi uchun to'liq tekshirishdan foydalanadi.
+- **Chiqarish uchun.** To'liq CI matritsasi E2E shardlarini, paketlarni tekshirishni, tarball yuklash tutunini va qamrovni tekshirishni o'z ichiga oladi. [Chiqarish nazorat ro'yxatiga](RELEASE_CHECKLIST.md) qarang.
+
+## `merge-train.sh` uchun yangi hisob-kitob shartlari
+
+Preflight ishchi daraxtlarni yaratishdan oldin ishlaydi. `npm ci` bilan bog'liqliklarni o'rnating. `node_modules/.bin/tsc` bajariladigan va `node_modules/node_modules` mavjud emasligini tasdiqlang. `node_modules/.bin/bun --version` muvaffaqiyatli ekanligini tekshiring.
+
+Agar Bun keyingi o'rnatish o'tkazib yuborilgan bo'lsa, `(cd node_modules/bun && node install.js)` ishga tushiring. Provayderning muvofiqligi va ma'lum belgilar tekshiruvi Bun foydalanadi. Validator `npm run check:cycles:ratchet` blokirovka qiluvchi eshik sifatida ishlaydi. Mustaqil `npm run check:cycles` buyrug'i maslahatdir.
+
+## Tarix
+
+Birlashtirish navbati 2026-11-19 da tugatilgan.

@@ -4,35 +4,37 @@
 
 ---
 
-**OmniCopilot** placerar alla modeller som din OmniRoute tillhandahåller i den _inbyggda_ modellväljaren för GitHub Copilot Chat. Ingen extra sidopanel, inget separat chattgränssnitt — Copilots agentläge, verktygsanrop, MCP-servrar och anpassade instruktioner fortsätter att fungera, men körs med den modell du väljer.
+**OmniCopilot** lägger till dina OmniRoute -chattmodeller och -kombinationer till den inbyggda Copilot Chat-modellväljaren. Använd redaktörens befintliga chatt- och agentarbetsflöden, med verktygsanrop och vision när det stöds av den valda modellen.
 
-|                               |                                                                                                                                                 |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Installera (VS Code)**      | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Installera (förgreningar)** | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Källkod/problem**           | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Kräver**                    | VS Code 1.104+                                                                                                                                  |
+|                            |                                                                                                                              |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Installera (VS -kod)**   | [Marknadsplats → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)   |
+| **Installera (öppna VSX)** | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — kräver kompatibel språkmodellleverantör och chatt APIs |
+| **Källa / frågor**         | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                           |
+| **Kräver**                 | VS kod 1.104 + (1.122 + för att använda den utan en GitHub -inloggning eller Copilot plan)                                   |
+| **Nuvarande release**      | OmniCopilot v1.5.1 i båda butikerna (släppt 2026-11-24)                                                                      |
 
-> **Ingen Copilot-prenumeration behövs.** Sedan VS Code 1.122 fungerar en språkmodellsleverantör
-> utan GitHub-inloggning och utan någon Copilot-plan. Funktionen för infogade kompletteringar och
-> funktioner baserade på inbäddningar ligger utanför leverantörs-API:et och kräver fortfarande Copilot.
+Lagra ögonblicksbild på** 2026-11-25 (01:43 UTC)** , aktuell utgåva:** 52 081 Marketplace-installationer** och** 20 989 Öppna VSX -nedladdningar** . Det här är olika butiksstatistik, inte ett kombinerat antal användare. Källor: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) och [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Tillgänglighet för öppen VSX skapar inte i sig kompatibilitet med alla redigerare som använder det registret. Kontrollera redaktörens chatt och stöd för språkmodellen API.
+
+> **Ingen Copilot prenumeration behövs för BYOK chatt i VS -kod 1.122 +.** Microsoft stöder chatt, verktyg och MCP utan GitHub -inloggning när en leverantör är konfigurerad. På VS Code 1.104–1.121 fungerar tillägget fortfarande, men VS Code kräver en inloggad Copilot -plan. Inline-förslag och inbäddningsbaserade funktioner stannar utanför leverantören API och kräver fortfarande Copilot; Copilot Business/Enterprise administratörer kan inaktivera tredjepartsmodellleverantörer enligt policy; en gaffel visar modellerna endast om den implementerar chattleverantören API. Uppströmsleverantörsanvändning kan fortfarande medföra avgifter. Se [versionsinformationen för VS Code 1.122](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) och [språkmodellguiden](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
-## Konfiguration
+## Inställning
 
-1. **Kör OmniRoute** — `npm install -g omniroute && omniroute` (instrumentpanelen finns på `http://localhost:20128`).
-2. **Installera tillägget** — sök efter "OmniRoute" i tilläggsvyn.
-3. **Välj en modell** — Copilot Chat → modellväljaren → **Hantera modeller…** → **OmniRoute**, markera sedan
-   det du vill använda.
+1. **Kör OmniRoute** — `npm install -g omniroute && omniroute` (instrumentpanel på `http://localhost:20128`).
+2. **Installera tillägget** — sök "OmniRoute" i tilläggsvyn.
+3. **Ansluta** — behåll standard `http://localhost:20128` eller ställ in din server URL och API key**OmniRoute: Hantera anslutning** .
+4. **Välj en modell** — Copilot Chatt → modellväljare →** Hantera modeller...** →**OmniRoute** , markera sedan vad du vill.
 
-Inget behöver konfigureras när OmniRoute körs på standardporten. För en fjärrinstans öppnar du
-**OmniRoute-ikonen i aktivitetsfältet** (eller kör `OmniRoute: Manage Connection`) och anger:
+För anslutningsinställningar, öppna**OmniRoute -ikonen i aktivitetsfältet** (eller kör `OmniRoute: Manage Connection`) och ställ in:
 
-- **Server-URL** — serverns rotadress, t.ex. `http://192.168.0.15:20128`. Suffixet `/v1`
-  läggs till av tillägget; inkludera det inte.
-- **API-nyckel** — endast när servern ställer in `REQUIRE_API_KEY`. Lagras i operativsystemets nyckelring via VS
-  Code SecretStorage, aldrig i `settings.json`.
+- **Server URL** — serverroten, t.ex. `http://omniroute.example.com:20128`. Suffixet `/v1` läggs till av tillägget; inkludera det inte.
+- **API nyckel** — krävs när serverns princip för inferensautentisering kräver en. Lagrat genom VS Code SecretStorage, aldrig i `settings.json`; arbetsyta-specifika nycklar är tillgängliga. Använd en nyckel som är godkänd för de modeller du vill exponera.
+
+Tillägget ger också en anslutningsindikator, modelluppdatering, modellkontext och prissättningsmetadata (kombinationer ingår), strömmade resonemang med en** Tänkande ansträngning** meny på VS Code 1.120 +, en daglig gränsindikator i statusfältet och användningspanel (OmniRoute 3.8.50 +), CLI konfiguration och en valfri flik på instrumentpanelen. Den valda modellen och serverpolicyn avgör vilka funktioner du kan använda.
 
 ---
 
@@ -119,24 +121,23 @@ Se [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) och ärende
 
 ## Konfigurera dina andra verktyg inifrån VS Code
 
-**`OmniRoute: Configure Coding CLI`** använder kommandoradsverktyget `omniroute` för att skapa färdiga profiler
-för Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo och Roo – samma konfigurationer som beskrivs i
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). API-nyckeln överförs till kommandoradsverktyget via
-miljövariabeln `OMNIROUTE_API_KEY`, aldrig via kommandoraden.
+**`OmniRoute: Configure Coding CLI`** driver `omniroute` CLI för att skriva färdiga att använda profiler för 16 verktyg: Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes och 5dive. Tillägget anropar `setup-*` -kommandon i den integrerade terminalen; installera en version av OmniRoute CLI som innehåller det valda kommandot. Se [CLI integreringsguiden](CLI-INTEGRATIONS.md) för filerna och flaggorna som varje recept använder och [tilläggets verktygsregister](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+API nyckeln lämnas till CLI genom `OMNIROUTE_API_KEY`, aldrig på kommandoraden. Inställningsrecept kan bevara autentiseringsuppgifter i målverktygets konfiguration. När du delar en arbetsytespecifik nyckel med ett verktygs konfiguration på användarnivå, ber tillägget först om bekräftelse.
 
 ---
 
 ## Felsökning
 
-| Symptom                                                   | Orsak/åtgärd                                                                                                                                                                                                                                             |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Inga OmniRoute-modeller i väljaren                        | Servern kan inte nås. Punkten i statusfältet blir grå. Kör `OmniRoute: Check Connection`. Identifieringen är avsiktligt tyst och lägger inte till några modeller i stället för att visa en uppmaning.                                                    |
-| Varje modell visas två gånger                             | Du använder en version av OmniCopilot som är äldre än 1.0.1 – uppdatera. Tillägget begär nu `?prefix=alias`.                                                                                                                                             |
-| En bild-/ljudmodell som tidigare visades är borta         | Avsiktligt sedan 1.0.1 – den kunde aldrig svara på en chattförfrågan.                                                                                                                                                                                    |
-| Panelen saknas i aktivitetsfältet                         | VS Code flyttar extra vybehållare till menyn **"…"** längst ned i aktivitetsfältet, och en behållare som dolts via högerklick förblir dold. Högerklicka på aktivitetsfältet → markera **OmniRoute**, eller öppna den med `OmniRoute: Manage Connection`. |
-| Kontrollpanelen öppnas i webbläsaren trots läget `editor` | Servern **byggdes** inte med `DASHBOARD_ALLOW_EMBED=vscode` (se ovan) – att ange den vid start för en förbyggd installation har ingen effekt. Reservlösningen är avsiktlig.                                                                              |
-| Modellistan är inaktuell efter byte av leverantörer       | `OmniRoute: Refresh Models`, eller länken ↻ i panelen.                                                                                                                                                                                                   |
+| Symptom                                                    | Orsak/fix                                                                                                                                                                                                                                                      |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Inga OmniRoute modeller i plockaren                        | Servern går inte att nå. Statusfältspunkten blir grå; kör `OmniRoute: Check Connection`. Discovery är tyst till sin design och bidrar med inga modeller snarare än uppmaning.                                                                                  |
+| Varje modell dyker upp två gånger                          | Du har en OmniCopilot äldre än 1.0.1 — uppdatering. Tillägget begär nu `?prefix=alias`.                                                                                                                                                                        |
+| En image/audio modell brukade vara listad och är borta     | Med avsikt sedan 1.0.1 — kunde den aldrig svara på en chattförfrågan.                                                                                                                                                                                          |
+| Panel saknas i aktivitetsfältet                            | VS Code flyttar extra vybehållare till** "..."** svämmar över längst ned i aktivitetsfältet, och en behållare som döljs via högerklick förblir dold. Högerklicka på aktivitetsfältet → bock**OmniRoute** , eller öppna den med `OmniRoute: Manage Connection`. |
+| Dashboard öppnas i webbläsaren trots `editor` -läge        | Servern var inte** inbyggd** med `DASHBOARD_ALLOW_EMBED=vscode` (se ovan) att — ställer in den vid start på en förbyggd installation gör ingenting. Återgången är avsiktlig.                                                                                   |
+| Modelllistan är inaktuell efter byte av leverantör         | `OmniRoute: Refresh Models`, eller ↻ -länken i panelen.                                                                                                                                                                                                        |
+| Panelen säger _Online (modeller blockerade)_, väljaren tom | Servern avvisar nyckeln. Spara rätt nyckel med** Spara & Testa** . Om nyckeln istället fixades på servern (aktiverad eller gavs åtkomst till modellerna), märker inte tillägget av sig självt: kör `OmniRoute: Refresh Models` eller öppna OmniRoute panelen.  |
 
 ---
 

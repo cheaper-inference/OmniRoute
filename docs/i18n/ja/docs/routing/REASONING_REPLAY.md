@@ -4,7 +4,7 @@
 
 ---
 
-> **真実の情報源:** `src/lib/db/reasoningCache.ts`、 `open-sse/services/reasoningCache.ts`**最終更新日:** 2026-06-28 — v3.8.40
+> **真実の情報源:** `src/lib/db/reasoningCache.ts`、 `open-sse/services/reasoningCache.ts`
 
 OmniRoute 、思考モード モデルによって生成されたアシスタント`reasoning_content`をキャプチャし、上流のプロバイダーが要求したときにマルチターン リクエストで透過的に再生します。これにより、クライアントの会話履歴に前のターンの推論が欠けている場合に厳密なプロバイダーが発生させるHTTP 400 エラーが排除されます。
 
@@ -61,7 +61,7 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 
 ## データベーススキーマ
 
-Migration: `src/lib/db/migrations/033_create_reasoning_cache.sql`
+移行: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 
 ```sql
 CREATE TABLE IF NOT EXISTS reasoning_cache (
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-インデックス: `expires_at`、`provider`、`model`、`created_at`。`expires_at` は Unix エポック秒として保存されます。SELECT レイヤーでは、`EXPIRES_AT_EPOCH_SQL` を介して従来のテキスト値を正規化します。
+インデックス: `expires_at`、 `provider`、 `model`、 `created_at`。 `expires_at`は Unix エポック秒として保存されます。 SELECTレイヤーは、 `EXPIRES_AT_EPOCH_SQL`を介してレガシー テキスト値を正規化します。
 
 ## プロバイダー/モデルの検出
 

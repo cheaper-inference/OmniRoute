@@ -16,128 +16,63 @@ spracovateľský reťazec používa register, takže ďalšie ciele možno prieb
 ## 1. Ako to funguje
 
 ```
-server (dešifrovanie + overenie konfigurácie, zosúladenie kurzora)
-  → start IPC → izolovaný proces OS exportChild
-    → storage.sqlite iba na čítanie → zdieľané dotazovanie/mapovanie záznamov volaní
-      → asynchrónne načítanie artefaktov → prepare()/send() cieľa
-        → batch IPC → server uloží kurzor → ack IPC
-          → ďalšia dávka; done IPC → server zaznamená úspech
+server (decrypt + validate config, reconcile cursor)
+  → start IPC → isolated exportChild OS process
+    → read-only storage.sqlite → shared call-log query/mapping
+      → async artifact hydration → destination prepare()/send()
+        → batch IPC → server persists cursor → ack IPC
+          → next batch; done IPC → server records success
 ```
 
-- **Harmonogram** — jedna úloha cron v `JobRegistry`, `log_export`, s predvolenou hodnotou `0 * * * *` (každú hodinu,
-  UTC). Je zaregistrovaná v `src/lib/initCloudSync.ts`; možno ju prepísať pomocou `OMNIROUTE_LOG_EXPORT_CRON`.
-  Každé spustenie postupne vyexportuje čakajúce záznamy pre všetky **povolené** ciele.
-- **Kurzor** — implicitné `call_logs.rowid` v SQLite, ukladané pre každý cieľ v
-  `log_export_destinations.cursor_row_id`. `timestamp` zámerne nie je kurzorom: volajúci
-  môžu zadať vlastnú hodnotu, takže pomalá požiadavka sa môže zapísať až po rýchlejšej, ktorá začala
-  neskôr, a kurzor založený na časovej pečiatke by ju preskočil.
-- **Dávkovanie** — `batch_size` riadkov na požiadavku (predvolene 500), `max_rows_per_run` riadkov na spustenie
-  (predvolene 10000), aby sa veľké množstvo nahromadených záznamov spracovalo počas viacerých spustení namiesto blokovania jediného.
-- **Doručenie** — kurzor sa posunie až po úspešnom dokončení `send()`. Pri zlyhaní dávky zostane
-  kurzor na pôvodnom mieste, takže pri ďalšom spustení sa zopakuje odoslanie rovnakých riadkov. Zárukou je
-  doručenie aspoň raz spolu s odstraňovaním duplicít na strane cieľa, nie skutočné doručenie presne raz: BigQuery používa ako kľúč každého
-  riadka identifikátor záznamu volania, ktorý rešpektuje v rámci svojho deduplikačného okna bez úplnej záruky.
-- **Ochrana pred súbehom** — spustenie cronu a `POST .../run` môžu nastať súčasne. Cieľ,
-  ktorého export už prebieha, sa preskočí namiesto dvojitého exportu (`skipped: true` vo výsledku spustenia),
-  takže súbežné spustenie nemôže opätovne odoslať dávku ani posunúť kurzor dozadu.
-- **Obnova po vymazaní** — ak sa `cursor_row_id` ocitne nad `MAX(rowid)` (celá tabuľka bola
-  vymazaná a hodnoty rowid sa začali prideľovať odznova), vykonávací proces vráti kurzor na 0 namiesto toho, aby natrvalo prestal vidieť nové záznamy.
+- **Rozvrh** — jedna úloha cron `JobRegistry`, `log_export`, predvolená hodnota `0 * * * *` (hodinu, UTC). Registrované v `src/lib/initCloudSync.ts`; prepísať pomocou `OMNIROUTE_LOG_EXPORT_CRON`. Každý kliešť vyčerpá každý** povolené** cieľ, postupne.
+- **Cursor** — SQLite implicitné `call_logs.rowid`, pretrvávajúce na miesto určenia v `log_export_destinations.cursor_row_id`. `timestamp` schválne nie je kurzor: volajúci môžu zadať svoju vlastnú hodnotu, takže pomalú požiadavku možno zapísať za rýchlejšiu požiadavku, ktorá sa začala neskôr, a kurzor časovej pečiatky ju preskočí.
+- **Dávkovanie** — `batch_size` riadkov na požiadavku (predvolená hodnota 500), `max_rows_per_run` riadkov na spustenie (predvolená hodnota 10 000), takže veľké nevybavené položky sa vyčerpajú cez niekoľko kusov namiesto blokovania jedného.
+- **Doručenie** — kurzor sa posunie dopredu až po vyhodnotení `send()`. Neúspešná dávka ponechá kurzor tam, kde bola, takže rovnaké riadky sa zopakujú pri ďalšom spustení. Zárukou je aspoň raz plus deduplikácia na strane cieľa, nie presne raz: BigQuery označí každý riadok pomocou ID protokolu hovorov, ktoré rešpektuje na základe maximálneho úsilia v rámci vlastného okna na odstránenie duplicitných údajov.
+- **Ochrana proti prekrytiu** — cron tick a `POST .../run` môžu strieľať spolu. Cieľ, ktorý sa už vypúšťa, sa radšej preskočí ako vypustí dvakrát (`skipped: true` vo výsledku spustenia), takže súbežné spustenie nemôže znova odoslať dávku alebo zapísať kurzor dozadu.
+- **Obnova čistenia** — ak `cursor_row_id` skončí nad `MAX(rowid)` (celá tabuľka bola vyčistená a rowids reštartované), bežec sa pretočí späť na 0 namiesto toho, aby bol permanentne slepý.
 
-### Izolovaný vykonávací proces a limity
+### Izolovaný bežec a limity
 
-Každé spustenie exportu do cieľa v Node vytvorí samostatný, krátko žijúci podriadený proces OS (`child_process`
-s IPC, nie `worker_threads`). Čítanie tiel, parsovanie/serializácia dát JSON, `prepare()`
-cieľa a sieťové I/O cieľa prebiehajú v ňom, nie v slučke udalostí servera.
-Cez IPC sa prenáša iba konfigurácia a malé správy o priebehu; exportované záznamy sa nikdy nevracajú
-na server. Úloha cron aj trasa Spustiť teraz zachovávajú rovnaký verejný výsledok a ochranu pred súbehom.
+Každý cieľ spustený na Node spúšťa samostatný, krátkodobý OS podradený proces (`child_process` so IPC, nie `worker_threads`). Čítania tela, užitočné zaťaženie JSON parsing/serialization, cieľové `prepare()` a cieľová sieť I/O všetky bežia tam, nie v slučke udalostí servera. Iba konfigurácia a malé správy o priebehu prechádzajú cez IPC; exportované záznamy sa nikdy nevrátia na server. Úloha cron a trasa Spustiť teraz zachovávajú rovnaký verejný výsledok a ochranu proti prekrývaniu.
 
-Podriadený proces otvorí serverom určený súbor `DATA_DIR/storage.sqlite` iba na čítanie pomocou `node:sqlite`,
-s nastaveniami `busy_timeout=5000` a `query_only=ON`. Neimportuje žiadny databázový singleton a nevykonáva
-migrácie, zálohy ani aktualizácie SQLite. Evidencia chýbajúcich/poškodených artefaktov (vrátane
-príkazu UPDATE pre poškodený artefakt) zostáva výhradne v spracovaní detailu na riadiacom paneli. Obe vetvy zdieľajú čistý
-resolver detailov; export používa asynchrónne čítanie súborového systému a rovnaké poradie vyhľadávania artefakt → staršie
-vložené údaje → staršie údaje na disku → nič. Spustenie zachytí maximálne rowid vložených záznamov
-v okamihu, keď podriadený proces otvorí čítač; neskoršie vloženia počkajú na ďalšie spustenie. Ide o hranicu
-vkladania, nie o dlhotrvajúcu transakciu SQLite: zápisy do WAL a kontrolné body môžu počas
-čakania na sieť voľne pokračovať. Táto hranica nezmrazuje aktualizácie/odstránenia existujúcich riadkov.
+Dieťa otvorí vyriešené `DATA_DIR/storage.sqlite` servera len na čítanie pomocou `node:sqlite`, s `busy_timeout=5000` a `query_only=ON`. Neimportuje žiadne DB singleton a nevykonáva žiadne migrácie, zálohy ani aktualizácie SQLite. Účtovníctvo artefaktov Missing/corrupt (vrátane poškodeného artefaktu UPDATE) zostáva iba v ceste podrobností dashboardu. Obe cesty zdieľajú čistý rozkladač detailov; export používa asynchrónne čítanie súborového systému a rovnaký artefakt → legacy inline → legacy disk → žiadne poradie rozlíšenia. Spustenie zosníma maximálny riadok vloženia, keď dieťa otvorí svoju čítačku; neskoršie vložky čakajú na ďalší chod. Toto je hranica vloženia, nie dlhotrvajúca transakcia SQLite : zapisovače a kontrolné body WAL zostávajú počas čakania siete voľné. Updates/deletions existujúcich riadkov nie je zmrazené touto hranicou.
 
-Po každej prijatej dávke podriadený proces čaká na potvrdenie. Server najprv uloží
-kurzor pomocou `advanceLogExportCursor` a potom odošle `ack`; dovtedy sa ďalšia dávka nezačne.
-Zlyhanie odosielania, pád alebo prekročenie časového limitu zaznamená neúspech bez posunutia kurzora pre danú dávku. Predtým
-potvrdené dávky zostávajú uložené; opätovne sa môže odoslať najviac jedna nepotvrdená dávka.
-Úspech sa zaznamená až po `done` a riadnom ukončení podriadeného procesu. Pri zlyhaní sa podriadený proces ukončí
-signálom SIGTERM, po 500 ms sa prípadne použije SIGKILL a vykonávací proces počká na úplné ukončenie procesu.
+Po každej prijatej dávke dieťa čaká na potvrdenie. Server najprv udrží kurzor pomocou `advanceLogExportCursor`, potom odošle `ack`; žiadna ďalšia dávka nezačne pred ňou. Zlyhanie odosielania, zlyhanie alebo časový limit zaznamenáva zlyhanie bez presunutia tejto dávky. Predtým potvrdené dávky zostávajú záväzné; najviac jednu nepotvrdenú dávku možno znova odoslať. Úspech je zaznamenaný až po `done` a čistom detskom odchode. Zlyhania ukončia dieťa s SIGTERM, eskaláciou na SIGKILL po 500 ms a bežec čaká na ukončenie procesu.
 
-| Premenná prostredia                           | Predvolená hodnota | Účel                                                   |
-| --------------------------------------------- | ------------------ | ------------------------------------------------------ |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000             | Limit reálneho času pre každý cieľ                     |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024               | Limit priestoru old-space V8 podriadeného procesu v MB |
+| Premenná prostredia                           | Predvolené | Účel                                     |
+| --------------------------------------------- | ---------- | ---------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000     | Limit nástenných hodín na miesto určenia |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024       | Detský limit V8 pre starý priestor v MB  |
 
-Neplatné, nekladné alebo neceločíselné hodnoty sa nahradia predvolenými hodnotami. Nastavenie haldy nepredstavuje celkový
-limit RSS; veľmi veľké dávky môžu aj tak vyčerpať pamäť podriadeného procesu a bezpečne ukončiť spustenie neúspechom.
-Predvolená hodnota 1024 MB ponecháva rezervu pre predvolenú dávku 500 riadkov s artefaktmi s veľkosťou 512 KiB
-a povolenými telami vrátane serializácie JSON pre BigQuery rozdelenej do blokov podľa počtu bajtov. Neznamená to, že
-dávka 10000 riadkov s telami je bezpečná. Pri vyčerpaní haldy V8 sa zaznamená zlyhanie s odporúčaním nápravy: znížte veľkosť
-dávky alebo zvýšte `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kurzor zostane na poslednej
-potvrdenej dávke. Historické telá uložené priamo v záznamoch alebo na disku nepodliehajú modernému limitu veľkosti artefaktov.
-Prevádzkovatelia musia RSS plánovať samostatne, najmä v kontajneroch s obmedzenou pamäťou.
+hodnoty Invalid/non-positive/non-integer používajú predvolené hodnoty. Nastavenie haldy nie je celkovým limitom RSS ; veľmi veľké dávky môžu stále vyčerpať detskú pamäť a bezpečne zlyhať spustenie. Predvolená hodnota 1024 MB ponecháva priestor pre predvolenú 500-riadkovú dávku 512 KiB artefaktov s povolenými telami, vrátane BigQuery serializácie JSON po bajtoch. Nerobí to bezpečnú dávku 10 000-radových karosérií. Vyčerpanie haldy V8 zaznamenáva žalovateľné zlyhanie: znížte veľkosť dávky alebo zvýšte `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kurzor zostane na poslednej potvrdenej dávke. Historické telá inline/disk nie sú zakryté krytom moderného artefaktu. Operátori musia rozpočtovať RSS oddelene, najmä v kontajneroch s obmedzenou pamäťou.
 
-Podriadený proces dedí iba vyhodnotené `DATA_DIR`, `NODE_ENV`, explicitné `TZ` (starší spôsob
-vyhodnocovania miestneho času v názvoch súborov), `ELECTRON_RUN_AS_NODE`, ak je prítomné, a nasledujúce vstupy pre odchádzajúce spojenia:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (a ich varianty s malými písmenami),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Globálny dispečer Undici zdieľa so serverom vyhodnocovanie proxy výhradne z prostredia a pravidlá
-obchádzania proxy pre lokálnych hostiteľov vrátane `NO_PROXY`; neimportuje `proxyFetch.ts` ani jeho príznaky databázy či funkcií.
-Prihlasovacie údaje proxy sa odstraňujú z preposielaného výstupu a zaznamenaných chýb. Prihlasovacie údaje cieľa
-sa prenášajú iba v jednej úvodnej správe IPC, nikdy nie cez argv ani prostredie; preposielaný výstup a chyby
-dostávajú predponu a očisťujú sa. V argumentoch spustenia podriadeného procesu sa vypína iba `ExperimentalWarning`, aby sa
-upozornenie Node na SQLite neopakovalo pri každom spustení cron; ostatné typy upozornení zostávajú viditeľné.
+Dieťa zdedí iba vyriešené `DATA_DIR`, `NODE_ENV`, explicitné `TZ` (staré rozlíšenie súboru v lokálnom čase), `ELECTRON_RUN_AS_NODE` ak je prítomné, a nasledujúce výstupné vstupy: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (a ich malé písmená), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Globálny dispečer Undici zdieľa čisté rozlíšenie servera s proxy serverom a pravidlá obchádzania lokálneho hostiteľa, vrátane `NO_PROXY`; neimportuje `proxyFetch.ts` ani jeho príznaky DB/feature. Proxy poverenia sú redigované z preposlaného výstupu a zaznamenaných chýb. Cieľové poverenia putujú iba v jednej počiatočnej správe IPC, nikdy nie argv alebo prostredie; Preposielanie output/error je prednastavené a dezinfikované. V argumentoch potomka exec je zakázané iba `ExperimentalWarning`, aby sa predišlo opakovaniu varovania SQLite uzla pri každom spustení cronu; ostatné typy výstrah zostanú viditeľné.
 
-Moduly cieľov musia byť importovateľné bez závislostí od Next.js alebo závislostí určených iba pre server. Existujúca
-implementácia BigQuery už túto požiadavku spĺňa. Vyrovnávacie pamäte prístupových tokenov existujú iba počas behu podriadeného
-procesu, nie medzi jednotlivými behmi. Podporovaným behovým prostredím je Node (engines v `package.json`), ale sekcia inštalácie Bun
-v README a `Dockerfile.bun` tiež uvádzajú cestu ku kompatibilite v produkcii pomocou
-`bun:sqlite` (`src/lib/db/core.ts` / adaptéry). V prostredí Bun preto exporty zachovávajú predchádzajúci
-spôsob vykonávania v rámci procesu a jednorazovo vypíšu upozornenie: izolácia haldy a časového limitu podriadeného procesu nie je dostupná. Použite
-Node na izoláciu slučky udalostí a ochranu pred vyčerpaním pamäte; Bun sa tu nepovažuje za prostredie určené iba na vývoj.
+Cieľové moduly musia byť importovateľné bez závislostí Next.js/server-only. Existujúca implementácia BigQuery už túto zmluvu spĺňa. Vyrovnávacie pamäte prístupových tokenov trvajú iba pre podriadený beh, nie pre beh. Node je podporovaný runtime (`package.json` engine). Existuje nepodporovaná cesta kompatibility Bun s najlepším úsilím (`bun:sqlite` v `src/lib/db/core.ts` / adaptéroch a `Dockerfile.bun`), takže exporty sa pod ňou nesmú prerušiť. V rámci Bun si exporty zachovávajú predchádzajúcu procesnú cestu a vydávajú jednorazové upozornenie: izolácia podriadeného heap/timeout nie je k dispozícii. Použite Node na izoláciu slučky udalostí a OOM.
 
-Keď je zapnuté `includeBodies`, uprednostnite interval v ráde minút, napríklad
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, namiesto hromadenia dát čakajúcich na hodinový export.
-Limity dávok a riadkov naďalej obmedzujú každý beh. Náklady na spustenie procesu vznikajú pre každý cieľ pri každom behu;
-ide o výmenu malých nákladov na spustenie za izoláciu slučky udalostí servera, nie o zníženie celkového využitia CPU.
+Keď je povolená funkcia `includeBodies`, uprednostňujte kadenciu na úrovni minút, ako napríklad `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` pred hromadením hodinového nevybaveného zaťaženia. Limity dávok a riadkov sú stále viazané na každý cyklus. Spustenie procesu sa platí za miesto určenia a spustenie; toto vymieňa malé počiatočné náklady za izoláciu slučky udalostí servera, neznižuje celkové využitie CPU.
 
-### Prenášané dáta (prompty a dokončenia)
+### Užitočné zaťaženie (výzvy a dokončenia)
 
-Export predvolene obsahuje iba súhrnné polia, ktoré zobrazuje **zoznam** protokolov. Zapnutím možnosti
-**Exportovať prompty a odpovede** (`includeBodies`) sa navyše prenáša to, čo panel **detailov**
-protokolov zobrazuje pre každé volanie:
+V predvolenom nastavení export obsahuje iba súhrnné polia Protokoly** zoznam** ukazuje. Zapína sa** Exportujte výzvy a odpovede** (`includeBodies`) dodatočne odošle to, čo denníky** detail** panel zobrazuje pre každý hovor:
 
-| Pole                             | Čo obsahuje                                                                  |
-| -------------------------------- | ---------------------------------------------------------------------------- |
-| `request_body` / `response_body` | Dáta volania tak, ako ich vykresľuje informačný panel                        |
-| `pipeline_route_decision`        | Ktorý cieľ a model smerovač vybral                                           |
-| `pipeline_client_request`        | Nespracovaná požiadavka presne tak, ako ju odoslal klient                    |
-| `pipeline_openai_request`        | Po prevode do interného formátu OpenAI                                       |
-| `pipeline_provider_request`      | V podobe skutočne odoslanej poskytovateľovi, v jeho formáte                  |
-| `pipeline_provider_response`     | Nespracovaná odpoveď poskytovateľa                                           |
-| `pipeline_client_response`       | Čo bolo vrátené volajúcemu                                                   |
-| `pipeline_error`                 | Podrobnosti o chybe na úrovni spracovateľského reťazca pri neúspešnom volaní |
-| `bodies_truncated`               | Pravda, ak niektoré z uvedených polí dosiahlo `maxBodyBytes`                 |
+| Pole                             | Čo to drží                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `request_body` / `response_body` | Užitočné zaťaženie hovoru sa zobrazuje tak, ako ho zobrazuje prístrojová doska |
+| `pipeline_route_decision`        | Ktorý cieľ a model smerovač vybral                                             |
+| `pipeline_client_request`        | Surová požiadavka presne tak, ako ju klient poslal                             |
+| `pipeline_openai_request`        | Po preložení do vnútorného tvaru OpenAI                                        |
+| `pipeline_provider_request`      | Ako sa skutočne odoslalo proti prúdu, v dialekte poskytovateľa                 |
+| `pipeline_provider_response`     | Surová odozva proti prúdu                                                      |
+| `pipeline_client_response`       | Čo bolo vrátené volajúcemu                                                     |
+| `pipeline_error`                 | Podrobnosti o chybe na úrovni kanála pre neúspešné volanie                     |
+| `bodies_truncated`               | Pravda, keď ktorékoľvek pole vyššie zasiahne `maxBodyBytes`                    |
 
-Ide o obsah promptov, preto je táto možnosť **predvolene vypnutá** a zámerne sa volí pre každý cieľ osobitne.
-Odosiela sa to, čo zobrazuje informačný panel, pretože export a `getCallLogById` zdieľajú vyhodnocovanie
-detailov: z prenášaných dát
-sa už pri zápise odstraňujú osobné údaje a tajné informácie a volanie vykonané pomocou
-kľúča API s `noLog` neukladá žiadne dáta volania, takže nie je čo exportovať.
+Toto je rýchly obsah, tak to je** predvolene vypnuté** a zámerne výber podľa destinácie. To, čo sa dodáva, je to, čo ukazuje tabuľka, pretože export a `getCallLogById` zdieľajú rozlíšenie detailov: užitočné zaťaženia sú už pri písaní dezinfikované PII a upravené tajne a volanie uskutočnené pomocou kľúča `noLog` API neuchováva žiadne užitočné zaťaženie, takže nie je čo exportovať.
 
-Dáta volania sa načítavajú pre každý riadok z artefaktu v súborovom systéme, takže dopĺňanie dát prebieha iba pre ciele,
-ktoré o ne požiadali. Pri chýbajúcom alebo poškodenom artefakte sa exportuje jeho súhrn s hodnotami null namiesto dát volania,
-namiesto toho, aby zlyhala celá dávka a kurzor sa nemohol posunúť ďalej.
+Užitočné zaťaženia sa čítajú po riadkoch z artefaktu súborového systému, takže hydratácia prebieha len pre ciele, ktoré si to vyžiadali. Chýbajúci alebo poškodený artefakt exportuje svoj súhrn s nulovým užitočným zaťažením namiesto toho, aby zlyhal v dávke a uviaznul kurzor.
 
-`maxBodyBytes` (predvolene 262144) obmedzuje každé pole. Dlhšie dáta sa **skrátia namiesto
-zahodenia** — aj skrátený prompt stále odpovedá na otázku „čo sa požadovalo“ — a riadok sa označí príznakom
-`bodies_truncated`. Priebežné zmeny streamované po jednotlivých blokoch sa neexportujú; zostavená odpoveď je
-už v `pipeline_provider_response` a `pipeline_client_response`.
+`maxBodyBytes` (predvolená hodnota 262144) uzatvára každé pole. Dlhšie užitočné zaťaženia sú** skôr skrátené ako vypustené** — orezaná výzva stále odpovedá na otázku „čo bolo požiadané“ — a riadok je označený príznakom `bodies_truncated`. Streamované delty po kúskoch sa neexportujú; zostavená odpoveď je už v `pipeline_provider_response` a `pipeline_client_response`.
 
 ---
 

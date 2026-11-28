@@ -4,12 +4,9 @@
 
 ---
 
-> **עודכן לאחרונה:** 2026-08-28 — v3.8.51
-> תהליך הפצה יעיל הממנף את היכולות של Claude Code לצורך אוטומציה.
+> זרימת שחרור יעילה הממנפת את כישורי Claude Code לאוטומציה.
 >
-> **שמרו על התור/הענף ירוקים בין הפצות:** ראו [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (משפחת `/green-prs` +‏ `npm run check:release-green` +‏ `/babysit` + הרצה לילית). הרצה
-> תקופתית של התהליך הזה — ובמיוחד **לפני** רשימת הבדיקה הזו — מבטיחה שה-PR של ההפצה יתחיל במצב ירוק.
+> **השאר את ה- queue/branch ירוק בין מהדורות:** ראה [RELEASE_GREEN.md](./RELEASE_GREEN.md) (משפחת `/green-prs` + `npm run check:release-green` + `/babysit` + לילי). מפעיל את זה מעת לעת — ובמיוחד** לִפנֵי** רשימת הבדיקה הזו — הופכת את השחרור PR להתחיל ירוק.
 
 ## בקצרה
 
@@ -60,7 +57,9 @@ npm run test:e2e           # אופציונלי אך מומלץ
 
 **Docker Hub `latest` (נדרש בכל פרסום SemVer יציב):** זרימת העבודה `docker-publish` חייבת לתייג** שְׁנֵיהֶם** `X.Y.Z` וכאשר `should-promote-latest.sh` מסכים זהו SemVer היציב הגבוה ביותר, `:latest` עם ה** אותו עיכול** . לאחר העבודה: Hub `latest` digest שווה ל- SemVer digest החדש ו- `last_updated` עבר. אל תשאיר `:latest` במבנה ישן יותר בזמן שהערות שחרור מדברות על תיקונים שקיימים רק ב-git. חיבור התחלה מהירה השתמש `:latest`; GitOps צריך להמשיך להצמיד `X.Y.Z`. ראה [ערוצי שחרור Docker](../guides/DOCKER_GUIDE.md#release-channels) ו- #10317.
 
-**מאגר ארגוני Docker Hub (`cheaperinference/omniroute`):** Docker Hub לא יכול להעביר מאגר בין מרחבי שמות, אז `diegosouzapw/omniroute` שומר על היסטוריית המשיכה שלו וכל מהדורה, ועבודת `mirror-org-dockerhub` של `docker-publish` מעתיקה כל גרסה שפורסמה (ו- `:latest` כאשר היא מקודמת) מ- `ghcr.io/cheaper-inference/omniroute` למאגר הארגון. זה צריך את סודות `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; בלעדיהם העבודה נשארת ירוקה עם אזהרת "Docker Hub org mirror dispeded" והרישום האחרים מתפרסמים כרגיל. כדי לפרסם שם גרסה שפורסמה מאוחר יותר, הפעל** פעולות → שיקוף תמונת Docker ל- Docker Hub org → הפעל את זרימת העבודה** עם `version=X.Y.Z` (ו- `promote_latest` לגרסה היציבה הגבוהה ביותר): הוא מעתיק את התמונות הקיימות, ללא בנייה מחדש.
+**מאגר ארגוני Docker Hub (`cheaperinference/omniroute`):** Docker Hub לא יכול להעביר מאגר בין מרחבי שמות, אז `diegosouzapw/omniroute` שומר על היסטוריית המשיכה שלו וכל מהדורה, ועבודת `mirror-org-dockerhub` של `docker-publish` מעתיקה כל גרסה שפורסמה (ו- `:latest` כאשר היא מקודמת) מ- `ghcr.io/cheaper-inference/omniroute` למאגר הארגון. זה צריך את סודות `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; בלעדיהם העבודה נשארת ירוקה עם אזהרת "Docker Hub org mirror dispeded" והרישום האחרים מתפרסמים כרגיל. כדי לפרסם שם גרסה שפורסמה מאוחר יותר, הפעל** פעולות → שיקוף תמונת Docker ל- Docker Hub org → הפעל את זרימת העבודה** עם `version=X.Y.Z` (ו- `promote_latest` לגרסה היציבה הגבוהה ביותר): הוא מעתיק את התמונות הקיימות, ללא בנייה מחדש. סקירת Docker Hub של המאגר הזה מוגדרת באופן ידני: ה- API שעורכים אותו דוחים את אסימוני הגישה של הארגון.
+
+אותו זרימת עבודה גם מעתיקה כל מהדורה לחבילת GHCR הוותיקה `ghcr.io/diegosouzapw/omniroute` עד 2027-06-30, כך שהתקנות שעדיין מוצמדות אליה ממשיכות להתעדכן; האינדקס שלו נושא תיאור "הועבר ל- `ghcr.io/cheaper-inference/omniroute`". הוא צריך את סוד `GHCR_LEGACY_TOKEN` (אסימון גישה אישי קלאסי של `diegosouzapw` עם `write:packages`); בלעדיו, העבודה מדלגת עם אזהרת "Legacy GHCR mirror disped".
 
 ## מסלול מהיר לתיקון חם (התווית `hotfix`)
 
@@ -100,7 +99,7 @@ quality-gate, quality-extended) ומשאיר את שערי הבדיקה המהי
   - בליטות `package.json`, `electron/package.json`
   - מחדש `CHANGELOG.md` מ-git commits מאז התג האחרון
   - מעדכן את תגי README.md
-- [ ] בדוק באופן ידני CHANGELOG.md ונקה הודעות commit במידת הצורך
+- [ ] סקור באופן ידני CHANGELOG.md ונקה הודעות commit במידת הצורך
 - [ ] ודא שהסעיף האחרון ב- `CHANGELOG.md` שווה ל- `package.json`
 - [ ] שמור `## [Unreleased]` כקטע יומן השינויים הראשון לעבודה הקרובה
 - [ ] עדכון `docs/openapi.yaml` → `info.version` חייב להיות שווה לגרסת `package.json`
@@ -142,7 +141,7 @@ quality-gate, quality-extended) ומשאיר את שערי הבדיקה המהי
 
 כל ההתחייבויות הקשורות לשחרור חייבות להיות בפורמט `type(scope): subject`.
 
-**סוגים תקפים:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**סוגים חוקיים:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
 **היקפים תקפים:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain` `authz`
 
@@ -151,9 +150,9 @@ quality-gate, quality-extended) ומשאיר את שערי הבדיקה המהי
 ### תיעוד
 
 - [ ] אישורי `npm run check:docs-sync` (הפעלה אוטומטית על ידי התחייבות מראש)
-- [ ] `npm run check:docs-all` passers (מטריה: docs-sync + docs-counts + env-doc-sync + הוצא משימוש-גרסאות + doc-links)
+- [ ] `npm run check:docs-all` עובר. `check:deprecated-versions` המייעצת שלו מסמן גרסאות המיוחסות במפורש ל- OmniRoute (3.6.x ומעלה) ומתעלם מתאריכים.
 - [ ] `npm run check:env-doc-sync` exits 0 — code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env חוזה שלם
-- [ ] `npm run check:doc-links` יוצא מ-0 — ללא הפניות פנימיות שבורות לאחר ארגון מחדש
+- [ ] `npm run check:doc-links` יוצא מ-0 — ללא אזכורים פנימיים שבורים לאחר ארגון מחדש
 - [ ] `docs/architecture/ARCHITECTURE.md` נבדק עבור storage/runtime drift
 - [ ] `docs/guides/TROUBLESHOOTING.md` נבדק עבור env var וסחיפה תפעולית
 - [ ] אם `.env.example` השתנה: `docs/reference/ENVIRONMENT.md` עודכן
@@ -165,7 +164,7 @@ quality-gate, quality-extended) ומשאיר את שערי הבדיקה המהי
 ### i18n
 
 - [ ] `npm run i18n:check` יוצא ממצב תרגום — 0 (`.i18n-state.json`) בסנכרון עם מסמכי מקור (ללא מקורות נסחפים במצב קפדני; ייעוץ במצב אזהרה מקובל עבור טאצ'-אפים של מסמכים ברגע האחרון, אך צריך להיות 0 לפני התיוג)
-- [ ] `npm run i18n:check-ui-coverage` יוצא מ-0 — בכל אזור UI בקומה של 80% או מעל הכיסוי
+- [ ] `npm run i18n:check-ui-coverage` יוצא מ-0 — בכל אזור UI ברצפת הכיסוי של 80% או מעליה
 - [ ] `npm run i18n:sync-ui:dry` מדווח על 0 מפתחות חסרים בכל 66 אזורי היעד (כל אזור מלבד מקור `en` )
 - [ ] אם מסמכי המקור באנגלית השתנו, הפעל `npm run i18n:run` (דורש `OMNIROUTE_TRANSLATION_API_KEY` ב- `.env`) לפני התיוג
 - [ ] ניתן לדחות את תרומות התרגום למהדורה הבאה אם היא משנית (רצועה ב- CHANGELOG)
@@ -186,7 +185,7 @@ quality-gate, quality-extended) ומשאיר את שערי הבדיקה המהי
   - [ ] לכל הספקים יש שדות חובה (`id`, `label`, `kind`, וכו')
   - [ ] `freeNote` סיפק לספקים חדשים בחינם
   - [ ] לספקי OAuth יש `oauthConfig` רשומים ב- `src/lib/oauth/constants/oauth.ts`
-- [ ] אם ספק חדש נוסף: מבצע מקביל ב- `open-sse/executors/`
+- [ ] אם ספק חדש נוסף: executor מתאים ב- `open-sse/executors/`
 - [ ] אם לא בפורמט OpenAI: מתרגם ב- `open-sse/translator/`
 - [ ] דגמים רשומים ב- `open-sse/config/providerRegistry.ts`
 - [ ] בדיקות יחידות בסיווג ספק כיסוי `tests/unit/` וניתוב
@@ -398,11 +397,11 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-הריצה עושה `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, אורזת את ה-tarball, מפעילה `npm run check:pack-boot` (סודות מזויפים, ארעיית נתונים dir), אורזת מחדש ונכשלת אלא אם הדיג'סט זהה, ואז מתעדת `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, arch, node ABI ו-bundi attler the — מדיניות `scripts/release/artifact-identity.mjs` עבודה נפרדת. קידום תצוגה מקדימה פירושו התקנת הטרבול הזה: לעולם אל תבנה מחדש מהמקור.
+הריצה עושה `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, אורזת את ה-tarball, מפעילה `npm run check:pack-boot` (סודות מזויפים, ארעיית נתונים dir), אורזת מחדש ונכשלת אלא אם הדיג'סט זהה, ואז מתעדת `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, arch, node ABI ו-bundi attler the — מדיניות `scripts/release/artifact-identity.mjs` עבודה נפרדת. קידום תצוגה מקדימה פירושו התקנת הטרבול הזה: לעולם אל תבנה מחדש ממקור.
 
 ### החתך (3.9.0, אחרי GO)
 

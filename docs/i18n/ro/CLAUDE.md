@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Toate regulile proiectului se află în [`AGENTS.md`](AGENTS.md)** — sursa unică de adevăr pentru fiecare
-asistent AI (arhitectură, convenții, testare, praguri de calitate, flux de lucru git, cele 23 de Reguli stricte,
-învățăminte privind PII). Citiți-l integral; nu adăugați din nou regulile proiectului aici. Tot ce urmează se aplică NUMAI
-pentru Claude Code — îmbunătățiri operaționale ale regulilor deja definite în `AGENTS.md`.
+**Toate regulile proiectului locuiesc în [`AGENTS.md`](AGENTS.md)** — sursa unică de adevăr pentru fiecare asistent AI ; importul de mai sus îl încarcă deja. Nu adăugați din nou regulile proiectului aici. Totul de mai jos se aplică ONLY la Claude Cod — perfecționări operaționale ale regulilor deja definite în `AGENTS.md`.
 
-## Izolarea worktree-urilor — aspecte specifice Claude Code
+## Izolarea arborelui de lucru — Claude Specificații codului
 
-Protocolul complet obligatoriu privind worktree-urile (confirmarea branch-ului de bază, calea
-canonică `.claude/worktrees/`, `cp -al` node_modules, regulile de teardown) se află în
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (rezumat în `AGENTS.md` →
-Flux de lucru Git → „Izolarea worktree-urilor"). Aspecte specifice Claude Code:
+- Confirmați ramura de bază cu operatorul prin `AskUserQuestion` (Hard Rule #19) dacă nu v-a spus deja.
+- Creați arborele de lucru cu `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (aterizează sub `.claude/worktrees/`, hard-links `node_modules` și copiază `.husky/_`), apoi apelați `EnterWorktree` cu `path`. Treceți întotdeauna baza: fără ea, scriptul alege cel mai mare `release/*`, care poate să nu fie cel confirmat de operator. Un arbore de lucru pe care `EnterWorktree` îl creează de la sine nu are nici legăturile dure, nici cârligele, așa că nu rulează nicio poartă de pre-commit în el.
 
-- Confirmă branch-ul de bază cu operatorul prin `AskUserQuestion` (Regula strictă nr. 19), cu
-  excepția cazului în care ți-a spus deja.
-- Preferă instrumentul nativ `EnterWorktree` — acesta creează deja worktree-uri sub
-  `.claude/worktrees/` (calea canonică). Creează worktree-ul cu comanda documentată `git
-worktree add`, apoi apelează `EnterWorktree` cu parametrul său `path`.
+## Subagenți și git
 
-## Siguranță între sesiuni — particularități Claude Code
+Fiecare subagent care atinge git (instrumentul agentului sau scriptul fluxului de lucru) primește interdicția `git stash` a lui Hard Rule #22 a textului în promptul său — reapariția înregistrată a incidentului stash a venit printr-un subagent.
 
-Regulile stricte #19/#21/#22 (din `AGENTS.md`) guvernează sesiunile paralele. Mementouri operaționale pentru acest
-mediu:
+## Planificarea artefactelor superputeri — anulează calea
 
-- **Replicați textual interdicția privind `git stash` în promptul fiecărui subagent care interacționează cu git**
-  (instrumentul Agent / scripturi de flux de lucru) — subagenții nu moștenesc acest fișier, iar recurența
-  înregistrată a incidentului legat de stash a avut loc printr-un subagent.
-- Înainte de a face merge sau push către orice PR pe care nu l-ați creat _în această sesiune_, rulați `git worktree list`
-  și verificați din nou `gh pr view <N> --json state,headRefOid` (Regula strictă #22b).
-- Încheiați fiecare sesiune cu checkout-ul principal pe ramura pe care se afla la început.
+Abilitățile superputeri anunță valorile implicite sub `docs/superpowers/plans/`, `docs/superpowers/specs/` și `docs/research/`. Rescrieți fiecare la echivalentul său `_tasks/` în `AGENTS.md` → „Artefacte de planificare și cercetare” înainte de a scrie și comite-o cu `git -C _tasks …`, niciodată în depozitul principal.
 
-## Superpowers / artefacte de planificare — suprascrieri ale căilor
+## Fișiere scratch — `_artifacts/`, nu `/tmp`
 
-Convenția `_tasks/` este definită în `AGENTS.md` → „Artefacte de planificare și cercetare”. Abilitățile
-superpowers sunt livrate cu valori implicite care indică spre `docs/…` — aceste valori implicite sunt **suprascrise
-aici**. Când o abilitate superpowers anunță o cale precum „salvat în `docs/superpowers/plans/…`”,
-rescrieți-o cu echivalentul din `_tasks/…` înainte de scriere:
+Acest proiect suprascrie scratchpad-ul sesiunii hamului (`/tmp/claude-*/…`). Scrieți fișiere temporare — exporturi, zip-uri generate, ieșiri intermediare unice — la `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: o cale rădăcină `_*` ignorată, astfel încât operatorul să găsească și să ștergă toate scratch-urile într-un singur loc. Planurile durabile, specificațiile, cercetările și transferurile sunt trimise în schimb la `_tasks/` (Hard Rule #23).
 
-| Artefact (abilitate)                    | Valoare implicită (NU o utilizați) | Salvați aici în schimb                                        |
-| --------------------------------------- | ---------------------------------- | ------------------------------------------------------------- |
-| Planuri (`writing-plans`)               | `docs/superpowers/plans/`          | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Specificații / design (`brainstorming`) | `docs/superpowers/specs/`          | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Cercetare (`deep-research`, ad-hoc)     | `docs/research/`                   | `_tasks/research/…`                                           |
-| Predări (`/handoff`)                    | —                                  | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Bază roșie
 
-Faceți commit pentru aceste artefacte în repo-ul `_tasks/` (`git -C _tasks …`), niciodată în repo-ul principal.
-
-## Fișiere de lucru / temporare — utilizați `_artifacts/`, nu `/tmp`
-
-Acest proiect suprascrie spațiul de lucru temporar implicit al mediului pentru sesiuni (`/tmp/claude-*/…`). Scrieți
-fișierele temporare/de lucru — exporturi, arhive zip generate, rezultate intermediare de unică folosință, orice ați
-pune altfel în `/tmp` — în `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` este o cale rădăcină `_*`: este deja ignorată de git (`AGENTS.md` → „Căi rădăcină `_*`”), există
-  doar pe disc și nu este urmărită niciodată.
-- Motiv: păstrarea rezultatelor temporare în interiorul proiectului (în loc de `/tmp`) îi permite operatorului
-  să găsească și să șteargă cu ușurință tot ce este temporar într-un singur loc, în loc să caute prin directoare
-  `/tmp` efemere, specifice sesiunilor, care dispar sau acumulează fișiere neurmărite.
-- **Nu** confundați acest director cu `_tasks/` (Regula strictă #23, propriul său repo git privat pentru
-  planuri/specificații/cercetări/predări durabile) — `_artifacts/` este destinat exclusiv fișierelor de lucru de unică folosință; nimic
-  de aici nu trebuie păstrat sau versionat.
-
-## Bază verde înainte de deschiderea PR-urilor
-
-Înainte de a crea o ramură sau de a deschide un PR, rulați verificarea bazei verzi (`AGENTS.md` → Flux de lucru Git →
-„Verificarea bazei verzi”; abilitățile proiectului fac referire la aceasta drept `.agents/skills/_shared/base-green.md`). Un PR
-deschis în timp ce vârful bazei este roșu trebuie să includă `⚠️ base-red inherited: #<issue>` în corpul său. Pentru
-a remedia o stare roșie acumulată (vârful bazei + PR-uri roșii), utilizați abilitatea `/sweep-reds`.
+Pentru a scurge o stare roșie acumulată (base vârf + red PRs), utilizați skill-ul `/sweep-reds`.

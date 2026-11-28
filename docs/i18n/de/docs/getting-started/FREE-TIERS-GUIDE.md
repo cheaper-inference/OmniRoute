@@ -4,161 +4,176 @@
 
 ---
 
-> **Kurz gesagt**: Verwenden Sie Ihre eigenen berechtigten Anbieterkonten. OmniRoute kombiniert die von Ihnen konfigurierten Verbindungen; es stellt nicht das beworbene aggregierte Token-Budget bereit. Kostenloser Zugriff kann eine Registrierung, einen API-Schlüssel, eine Genehmigung oder eine Zahlungsmethode erfordern. Die Limits, Datenschutzrichtlinien und Nutzungsbedingungen der Anbieter gelten weiterhin.
+> **TL;DR** : Bringen Sie Ihre eigenen berechtigten Anbieterkonten mit. OmniRoute kombiniert die von Ihnen konfigurierten Verbindungen; Es wird nicht das angekündigte Gesamt-Token-Budget ausgegeben. Für den kostenlosen Zugang kann eine Anmeldung, ein API Schlüssel, eine Genehmigung oder eine Zahlungsmethode erforderlich sein. Es gelten weiterhin die Anbieterbeschränkungen, Datenschutzrichtlinien und Geschäftsbedingungen.
 
 ---
 
 ## Was sind kostenlose Kontingente?
 
-Viele KI-Anbieter bieten eine Form von **kostenlosem Zugang** an. Je nach Anbieter kann dies einen Endpunkt ohne Authentifizierung, ein regelmäßig erneuertes Kontingent, einen ratenbegrenzten unbegrenzten Zugang, ein Startguthaben bei der Registrierung, eine manuelle Freigabe oder eine zeitlich begrenzte Aktion bedeuten. Einige Optionen erfordern ein Konto, einen API-Schlüssel, eine Kreditkarte, eine KYC-Prüfung oder die Zustimmung zu anbieterspezifischen Bedingungen.
+Viele AI Anbieter bieten irgendeine Form davon an** freier Zugang** . Je nach Anbieter kann dies einen Endpunkt ohne Authentifizierung, ein wiederkehrendes Kontingent, einen ratenbegrenzten, unbegrenzten Zugriff, eine Anmeldegewährung, eine manuelle Genehmigung oder eine vorübergehende Werbeaktion bedeuten. Für einige Optionen ist ein Konto, API Schlüssel, eine Kreditkarte, KYC oder die Annahme anbieterspezifischer Bedingungen erforderlich.
 
-OmniRoute **bündelt** konfigurierte Verbindungen in einem Endpunkt. Für jeden Anbieter, der ein Konto voraussetzt, müssen Sie sich weiterhin separat registrieren. Verbinden Sie diese Konten und verwenden Sie `model: "auto"`, um Anfragen an geeignete Ziele weiterzuleiten. Bei einer Neuinstallation ist möglicherweise kein geeignetes Ziel ohne API-Schlüssel verfügbar; die alleinige Installation von OmniRoute garantiert keine erfolgreiche Chat-Antwort.
+OmniRoute** Aggregate** konfigurierte Verbindungen zu einem Endpunkt. Sie melden sich weiterhin für jeden Anbieter, für den ein Konto erforderlich ist, separat an. Verbinden Sie diese Konten und verwenden Sie `model: "auto"`, um zwischen geeigneten Zielen weiterzuleiten. Eine Neuinstallation kann kein geeignetes schlüsselloses Ziel haben; Die alleinige Installation OmniRoute garantiert keine erfolgreiche Chat-Antwort.
 
 ---
 
-## Repräsentative Anbieter mit kostenlosem Zugang
+## Repräsentative Free-Access-Anbieter
 
 ### Wiederkehrender, schlüsselloser oder unbegrenzter Zugang
 
-Diese Anbieter verfügen im geprüften Katalog über eine wiederkehrende, schlüssellose oder unbegrenzte Möglichkeit des kostenlosen Zugangs. „Unbegrenzt“ bedeutet, dass kein Token-Limit veröffentlicht ist; Beschränkungen hinsichtlich Rate, Parallelität, Konto, Region und Richtlinien können dennoch gelten:
+Diese Anbieter verfügen über einen wiederkehrenden, schlüssellosen oder unbeschränkten freien Zugriffspfad im geprüften Katalog. „Unbegrenzt“ bedeutet, dass keine veröffentlichte Token-Obergrenze vorliegt; Es können weiterhin Raten-, Parallelitäts-, Konto-, Regional- und Richtlinienbeschränkungen gelten:
 
-| Anbieter          | Modelle                                                                                                        | Kontingent                                                                                                                                                          | Verbindungsherstellung                                                                                                      |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 und weitere                                                        | Der geprüfte Katalog schätzt den gemeinsam genutzten monatlichen Pool auf 25K Token                                                                                 | OAuth-/Kontoverfahren; die Nutzungsbedingungen sind im Katalog mit `avoid` gekennzeichnet                                   |
-| **Pollinations**  | Aktuelle schlüssellose Modellauswahl; einige frühere Modelle wurden eingestellt oder erfordern einen Schlüssel | Schlüssellos; kein veröffentlichtes Token-Limit                                                                                                                     | Für die schlüssellosen Modelle sind keine Anbieterzugangsdaten erforderlich                                                 |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 und weitere                                        | Kostenloser API-Schlüssel (keine Ratenbegrenzung, keine Karte); **jede Anfrage wird** zu Forschungszwecken **protokolliert** (Widerspruch unter logfare.ai/consent) | Sofortiger Schlüssel unter logfare.ai/register; Nutzungsbedingungen/Datenschutz unter logfare.ai/tos und logfare.ai/privacy |
-| **Cloudflare AI** | Workers-AI-Katalog                                                                                             | Der geprüfte Pool wird anhand veröffentlichter Nutzungseinheiten auf ~30M Token/Monat geschätzt                                                                     | Cloudflare-Konto und API-Zugangsdaten                                                                                       |
-| **Gemini**        | Gemini-Flash-Familie                                                                                           | Variable Ratenbegrenzungen je nach Projekt/Modell; in der hervorgehobenen Angabe ist kein festes monatliches Token-Kontingent enthalten                             | Google-AI-Studio-API-Schlüssel; aktive Limits des Projekts prüfen                                                           |
-| **Groq**          | Llama-, GPT-OSS- und Qwen-Modelle                                                                              | Der geprüfte Pool wird auf ~15M Token/Monat geschätzt                                                                                                               | Groq-API-Schlüssel; Ratenbegrenzungen gelten                                                                                |
+| Anbieter          | Modelle                                                                                                               | Quote                                                                                                                                                      | So verbinden Sie sich                                                                          |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 und andere                                                                | Der geprüfte Katalog schätzt einen gemeinsamen monatlichen Pool mit 25.000 Token                                                                           | OAuth/account Fluss; ToS hat `avoid` im Katalog markiert                                       |
+| **Bestäubung**    | Aktuelles schlüsselloses Modellset; Einige frühere Modelle werden nicht mehr hergestellt oder sind schlüsselpflichtig | Schlüssellos; Keine veröffentlichte Token-Obergrenze                                                                                                       | Für die schlüssellosen Modelle ist kein Anbieterausweis erforderlich                           |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5, gpt-5-luna, minimax-m3 und mehr                                                      | Kostenloser API -Schlüssel (keine Tarifbegrenzung, keine Karte);** Jede Anfrage wird protokolliert** für Forschungszwecke (Opt-out bei logfare.ai/consent) | Sofortschlüssel bei logfare.ai/register; ToS/privacy bei logfare.ai/tos und logfare.ai/privacy |
+| **Cloudflare AI** | Arbeiter AI Katalog                                                                                                   | Geprüfter Pool schätzt ~ 23 Mio. tokens/month aus veröffentlichten Nutzungseinheiten (Katalog geprüft am 23.11.2026)                                       | Cloudflare -Konto und API -Anmeldeinformationen                                                |
+| **Gemini**        | Gemini Flash-Familie                                                                                                  | Variable project/model -Ratengrenzen; In der Überschrift ist kein fester monatlicher Token-Zuschuss enthalten                                              | Google AI Studio API -Schlüssel; Überprüfen Sie die aktiven Grenzen des Projekts               |
+| **Groq**          | Llama, GPT-OSS- und Qwen Modelle                                                                                      | Geprüfte Poolschätzungen ~ 24 Mio. tokens/month (4 Obergrenzen pro Modell, Katalog geprüft am 23.11.2026)                                                  | Groq API -Schlüssel; Es gelten Tarifbegrenzungen                                               |
 
-### Startguthaben und anbieterspezifische Gutschriften
+### Anmeldezuschüsse und anbieterspezifische Gutschriften
 
-Diese Anbieter bieten vorbehaltlich ihrer Berechtigungsregeln Startguthaben oder Aktionsgutschriften an. Wie am 2026-10-08 überprüft, erfordert die [Preisgestaltung von Cerebras](https://www.cerebras.ai/pricing) eine Zahlungsmethode für ein einmaliges Guthaben von $5, das nach 30 Tagen verfällt; es handelt sich nicht um ein wiederkehrendes Token-Kontingent. Die [Ratenbegrenzungen von Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) variieren je nach Projekt, Modell und Tarifstufe, weshalb sie nicht in ein garantiertes monatliches Token-Kontingent umgerechnet werden.
+Diese Anbieter bieten vorbehaltlich ihrer Teilnahmebedingungen Anmeldezuschüsse oder Werbegutschriften an. Wie am 08.10.2026 überprüft, erfordert [Cerebras Preisgestaltung](https://www.cerebras.ai/pricing) eine Zahlungsmethode für ein einmaliges Guthaben von 5 $, das nach 30 Tagen abläuft; Es handelt sich nicht um ein wiederkehrendes Token-Kontingent. [Gemini -Ratenlimits](https://ai.google.dev/gemini-api/docs/rate-limits) variieren je nach Projekt, Modell und Stufe und werden daher nicht in einen garantierten monatlichen Token-Zuschuss umgewandelt.
 
-| Anbieter      | Kostenloses Guthaben                                                | Modelle                    | So erhalten Sie es                                                               |
-| ------------- | ------------------------------------------------------------------- | -------------------------- | -------------------------------------------------------------------------------- |
-| **Cerebras**  | Einmaliges Aktionsguthaben von $5; verfällt nach 30 Tagen           | Aktueller Inferenzkatalog  | Konto und gültige Zahlungsmethode                                                |
-| **DeepSeek**  | 5M kostenlose Token                                                 | DeepSeek V4                | Unter platform.deepseek.com registrieren                                         |
-| **LongCat**   | Einmaliges Kontingent von 10M Token                                 | LongCat 2.0                | API-Schlüssel + KYC; nach Verbrauch des Kontingents nutzungsabhängige Abrechnung |
-| **Vertex AI** | Startguthaben von $300, im Budgetmodell als ~300M Token dargestellt | Gemini- und Partnermodelle | Google-Cloud-Konto; Abrechnungs- und Berechtigungsregeln gelten                  |
+| Anbieter             | Kostenlose Credits                                                           | Modelle                   | Wie kommt man?                                                          |
+| -------------------- | ---------------------------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------- |
+| **Cerebras**         | Einmalige Aktionsgutschrift in Höhe von 5 $; verfällt nach 30 Tagen          | Aktueller Inferenzkatalog | Konto und gültige Zahlungsmethode                                       |
+| **DeepSeek**         | 5 Millionen kostenlose Token                                                 | DeepSeek V4               | Melden Sie sich unter platform.deepseek.com an                          |
+| **LongCat**          | Einmalige Zuwendung von 10 Mio. Token                                        | LongCat 2.0               | API -Taste + KYC; Pay-as-you-go nach der Förderung                      |
+| **Scheitelpunkt AI** | 300 $ Anmeldeguthaben, dargestellt als ~ 300-Millionen-Token im Budgetmodell | Gemini und Partnermodelle | Google Cloud-Konto; Es gelten die Abrechnungs- und Teilnahmebedingungen |
 
-### Sonstiger begrenzter Zugang
+### Anderer eingeschränkter Zugang
 
-Diese Anbieter verfügen über **kostenlose Tarifstufen** mit bestimmten Limits:
+Diese Anbieter haben** kostenlose Stufen** mit bestimmten Grenzen:
 
-| Anbieter                          | Kostenloses Limit                                                                                                           | Modelle                             | Am besten geeignet für |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ---------------------- |
-| **GitHub Models**                 | Der geprüfte gemeinsam genutzte Pool wird auf ~18M Token/Monat geschätzt                                                    | Umfassende Modellbewertung          |
-| **Hugging Face**                  | Kleiner wiederkehrender monatlicher Pool                                                                                    | Experimente und Modellvielfalt      |
-| **Kostenlose OpenRouter-Modelle** | Gemeinsam genutzter, nach Anfragen begrenzter Pool; eine optionale einmalige Aufladung erhöht das wiederkehrende Kontingent | Umfangreicher Ausweichkatalog       |
-| **AI Horde**                      | Schlüssellose Community-Kapazität; Verfügbarkeit variiert                                                                   | Opportunistische verteilte Inferenz |
+| Anbieter                          | Kostenloses Limit                                                                                                 | Modelle                             | Am besten für |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------- |
+| **GitHub Modelle**                | Geprüfter gemeinsamer Pool schätzt ~ 18 Mio. tokens/month                                                         | Breite Modellbewertung              |
+| **Umarmendes Gesicht**            | Kleiner wiederkehrender monatlicher Pool                                                                          | Experimente und Modellvielfalt      |
+| **OpenRouter kostenlose Modelle** | Gemeinsamer, auf Anfragen begrenzter Pool; Eine optionale einmalige Aufstockung erhöht den wiederkehrenden Betrag | Umfangreicher Fallback-Katalog      |
+| **AI Horde**                      | Schlüssellose Gemeinschaftskapazität; Die Verfügbarkeit variiert                                                  | Opportunistische verteilte Inferenz |
 
 ---
 
-## So kombinieren Sie kostenlose Kontingente
+## So stapeln Sie kostenlose Stufen
 
-Das Besondere an OmniRoute ist das **Kombinieren kostenloser Kontingente**. Anstatt sich auf einen einzigen Anbieter zu verlassen, verbinden Sie mehrere kostenlose Anbieter und lassen OmniRoute automatisch den besten für jede Anfrage auswählen.
+Die Magie von OmniRoute ist** Kostenlose Ebenen stapeln** . Anstatt sich auf einen Anbieter zu verlassen, verbinden Sie mehrere kostenlose Anbieter und lassen OmniRoute für jede Anfrage automatisch den besten auswählen.
 
-### Beispiel: Breitere Abdeckung durch kostenlose Kontingente
+### Beispiel: Breitere Free-Tier-Abdeckung
 
 Verbinden Sie mehrere Anbieter, um die Abhängigkeit von einem einzelnen Kontingent zu verringern:
 
-1. **Gemini** — wiederkehrendes API-Key-Kontingent
-2. **Groq** — wiederkehrendes API-Key-Kontingent
-3. **Pollinations** — schlüsselloser, ratenbegrenzter Zugriff
-4. **LongCat** — einmaliges Startguthaben bei der Registrierung (erfordert KYC)
+1. **Gemini** — wiederkehrendes API-Schlüsselkontingent
+2. **Groq** — wiederkehrendes API-Schlüsselkontingent
+3. **Bestäubung** — schlüsselloser, preisbegrenzter Zugang
+4. **LongCat** einmaliges — -Anmeldestipendium (erfordert KYC)
 
-Verwenden Sie anschließend `model: "auto"`. OmniRoute wird dann:
+Dann verwenden Sie `model: "auto"` und OmniRoute :
 
-- Zuerst die am höchsten eingestufte geeignete Verbindung ausprobieren
-- Wenn deren Kontingent ausgeschöpft ist oder die Integritätsprüfung fehlschlägt → den nächsten konfigurierten Anbieter ausprobieren
-- Wenn der schlüssellose Anbieter nicht verfügbar ist → mit den verbleibenden Zielen fortfahren
-- Wenn keine geeignete Verbindung erfolgreich ist → einen Fehler zurückgeben; Startguthaben sind nur nutzbar, solange sie gültig und verfügbar sind
+- Probieren Sie zuerst die am höchsten bewertete geeignete Verbindung aus
+- Wenn die Kontingent- oder Integritätsprüfung fehlschlägt, versuchen Sie → mit dem nächsten konfigurierten Anbieter
+- Wenn der schlüssellose Anbieter nicht verfügbar ist, fahren → mit den verbleibenden Zielen fort
+- Wenn keine geeignete Verbindung erfolgreich ist, gibt → einen Fehler zurück. Anmeldeguthaben können nur verwendet werden, solange sie gültig und verfügbar sind
 
-**Ergebnis**: breitere Abdeckung durch kostenlose Kontingente mit automatischem Fallback — keine Garantie für unbegrenzte Kapazität.
+**Ergebnis** : Breitere Free-Tier-Abdeckung mit automatischem Fallback — keine Garantie für unbegrenzte Kapazität.
 
 ---
 
 ## So verbinden Sie kostenlose Anbieter
 
-### Schritt 1: Dashboard öffnen
+### Schritt 1: Öffnen Sie das Dashboard
 
-Rufen Sie `http://localhost:20128` in Ihrem Browser auf.
+Gehen Sie in Ihrem Browser zu `http://localhost:20128`.
 
-### Schritt 2: Zu „Anbieter“ wechseln
+### Schritt 2: Gehen Sie zu Anbieter
 
-Klicken Sie in der Seitenleiste auf **Anbieter**.
+Klicken** Anbieter** in der Seitenleiste.
 
-### Schritt 3: Auf „Anbieter hinzufügen“ klicken
+### Schritt 3: Klicken Sie auf Anbieter hinzufügen
 
-Klicken Sie auf die Schaltfläche **+ Anbieter hinzufügen**.
+Klicken Sie auf**+ Anbieter hinzufügen** Taste.
 
-### Schritt 4: Einen kostenlosen Anbieter auswählen
+### Schritt 4: Wählen Sie einen kostenlosen Anbieter aus
 
-Durchsuchen Sie den Katalog und prüfen Sie bei jedem Anbieter die aktuellen Metadaten zu `hasFree`, Authentifizierung, Kontingent, Datenschutz und Nutzungsbedingungen. Die Anbieterkarte und die
-[Referenz zu kostenlosen Tarifen](../reference/FREE_TIERS.md) unterscheiden zwischen wiederkehrenden Kontingenten,
-unbegrenztem bzw. schlüssellosem Zugriff, Startguthaben, eingestellten Angeboten und Quellen mit höherem Risiko.
+Durchsuchen Sie den Katalog und überprüfen Sie die aktuellen `hasFree`, Authentifizierungs-, Kontingent-, Datenschutz- und ToS Metadaten jedes Anbieters. Die Anbieterkarte und die [Referenz für kostenlose Kontingente](../reference/FREE_TIERS.md) unterscheiden zwischen wiederkehrenden Pools, uncapped/keyless Zugriff, Anmeldeguthaben, eingestellten Einträgen und Quellen mit höherem Risiko.
 
-### Schritt 5: Auf „Verbinden“ klicken
+### Schritt 5: Klicken Sie auf „Verbinden“.
 
-Bei einem `NOAUTH`-Anbieter fordert OmniRoute keine Zugangsdaten für den vorgelagerten Dienst an. Dies garantiert nicht, dass der vorgelagerte Dienst Drittanbieter-Clients akzeptiert oder über freie Kapazitäten verfügt. Anbieter mit OAuth- oder API-Schlüssel-Authentifizierung müssen über den jeweils dokumentierten Kontoablauf verbunden werden. Ihr Client verwendet weiterhin den unter **Dashboard → Endpunkte** angezeigten OmniRoute-API-Schlüssel, wenn die Router-Authentifizierung aktiviert ist.
+Für einen `NOAUTH` -Anbieter fordert OmniRoute keine Upstream-Anmeldeinformationen an. Dies garantiert nicht, dass der Upstream Drittanbieter-Clients akzeptiert oder über freie Kapazität verfügt. OAuth und API-Schlüsselanbieter müssen über ihren dokumentierten Kontofluss verbunden sein. Ihr Client verwendet weiterhin einen OmniRoute API Schlüssel, der in erstellt wurde** Dashboard → API Schlüssel** (wird nur einmal bei der Erstellung angezeigt), wenn die Router-Authentifizierung aktiviert ist.
 
 ### Schritt 6: Wiederholen
 
-Verbinden Sie mehrere Anbieter, deren Bedingungen und Datenschutzmodell zu Ihrem Anwendungsfall passen.
+Verbinden Sie mehrere Anbieter, deren Konditionen und Datenschutzmodell zu Ihrem Anwendungsfall passen.
+
+---
+
+## Von dsh „Unser kostenloses Modell“
+
+Das [dsh-our-free-model](https://github.com/Ebony-Vinyl/dsh-our-free-model) -Plugin für den dsh-Agent-Host erreicht zwei Upstreams. OmniRoute hat für jeden bereits einen Anbieter, aber nur einer davon ist ein freier Pfad in OmniRoute:
+
+| Plugin-Spur | Stromaufwärts                                 | OmniRoute Anbieter          | Kostenlos in OmniRoute? | So verbinden Sie sich                                                                      |
+| ----------- | --------------------------------------------- | --------------------------- | ----------------------- | ------------------------------------------------------------------------------------------ |
+| Kilo-Kanal  | Kilo- AI -Gateway (`api.kilo.ai/api/gateway`) | `kilo-gateway` (alias `kg`) | Ja                      | API -Schlüssel optional: Lassen Sie ihn leer, um den freien Pool des Gateways zu verwenden |
+| Freie Spur  | OpenCode Zen (`opencode.ai`)                  | `opencode-zen`              | NEIN                    | Ihr eigener OpenCode API Schlüssel von [opencode.ai/zen](https://opencode.ai/zen)          |
+
+**Kilo.** Rufen Sie den kostenlosen Pool als `kilo-gateway/<model>` oder `kg/<model>` auf, zum Beispiel `kg/kilo-auto/free` (Kilos kostenloser automatischer Router) oder eines der `:free` Modelle des Gateways. Das freie Set rotiert; `kilo-gateway` durchläuft Modell-IDs, die nicht in der integrierten Liste von OmniRoute enthalten sind, sodass ein Modell, das das Gateway heute auflistet, aufgerufen werden kann, bevor es in den Katalog aufgenommen wird. Auf den kostenlosen Modellkarten von Kilo heißt es, dass Eingabeaufforderungen möglicherweise vom Upstream-Anbieter protokolliert und zur Verbesserung seiner Dienste verwendet werden. Senden Sie daher keine sensiblen Daten.
+
+**OpenCode.** Die freie Spur des Plugins ist das schlüsselfreie Angebot von OpenCode. OmniRoute bietet dieses Angebot nicht als kostenlosen Zugang an:
+
+- Der schlüssellose OpenCode Anbieter von OmniRoute wurde auf Wunsch des Betreibers von OpenCode entfernt (siehe [Entfernte Anbieter](../reference/REMOVED_PROVIDERS.md) ).
+- [Die Endpunktdokumentation](https://opencode.ai/v2/docs/console/models/#endpoints) von OpenCode verknüpft seine kostenlosen Chat-Angebote mit dem eigenen Client von OpenCode, sodass OmniRoute sie nicht als kostenlos zählt oder kennzeichnet.
+
+Die vom Plugin angezeigten Modell-IDs, z. B. `deepseek-v4.1-flash-free`, `mimo-v2.6-flash-free` und `nemotron-3.5-lightning-free`, befinden sich im `opencode-zen` Katalog. Verbinden Sie `opencode-zen` mit Ihrem eigenen OpenCode -Schlüssel, um sie gemäß den Bedingungen Ihres OpenCode Kontos zu verwenden.
+
+**Der lokale Port des Plugins.** Das Plugin kann seine Modelle auf einem lokalen OpenAI-kompatiblen Port (Standard `18899`) verfügbar machen. Jeder dieser Endpunkte kann als [benutzerdefinierter OpenAI-kompatibler Anbieter](../guides/USER_GUIDE.md#custom-openai-compatible-providers) hinzugefügt werden, aber OmniRoute installiert, startet oder aktualisiert das Plugin nicht und das Plugin entscheidet, welcher Upstream jede Anfrage bedient. Die oben genannten OpenCode Einschränkungen gelten für das Angebot von OpenCode, unabhängig davon, welcher Client die Anfrage sendet.
 
 ---
 
 ## Den Katalog richtig lesen
 
-- `NOAUTH` bedeutet, dass OmniRoute keine Anbieterzugangsdaten von Ihnen anfordert; dies garantiert weder Verfügbarkeit noch Datenschutz oder unbegrenzte Kapazität.
-- `hasFree` sind Metadaten zur Erkennung. Sie können ein wiederkehrendes Kontingent, schlüssellosen Zugriff, Startguthaben, ein Genehmigungsprogramm oder eine Werbeaktion darstellen.
-- `recurring-uncapped` bedeutet, dass keine veröffentlichte Token-Obergrenze verfügbar war; Beschränkungen für Anfragerate und Parallelität gelten weiterhin.
-- `one-time-initial` wird nicht erneuert, nachdem das Startguthaben aufgebraucht wurde.
-- Anbieter mit `tos: avoid` werden standardmäßig vom automatischen Routing ausgeschlossen (`excludeTosAvoid`). Das Verbinden eines Kontos umgeht diesen Filter nicht. Jede manuelle Außerkraftsetzung durch den Betreiber sollte erst nach einer Prüfung der Anbieterbedingungen und des Kontorisikos erfolgen.
-- Als `discontinued` gekennzeichnete Einträge bleiben als historische Nachweise erhalten und dürfen nicht als derzeit kostenlos dargestellt werden.
+- `NOAUTH` bedeutet, dass OmniRoute Sie nicht nach den Anmeldeinformationen eines Anbieters fragt; Es garantiert keine Verfügbarkeit, Privatsphäre oder unbegrenzte Kapazität.
+- `hasFree` sind Discovery-Metadaten. Dabei kann es sich um ein wiederkehrendes Kontingent, einen schlüssellosen Zugang, ein Anmeldeguthaben, ein Genehmigungsprogramm oder eine Werbeaktion handeln.
+- `recurring-uncapped` bedeutet, dass keine veröffentlichte Token-Obergrenze verfügbar war; Es gelten weiterhin Raten- und Parallelitätsbeschränkungen.
+- `one-time-initial` tritt nicht erneut auf, nachdem der Anmeldezuschuss aufgebraucht ist.
+- `tos: avoid` -Anbieter sind standardmäßig vom automatischen Routing ausgeschlossen (`excludeTosAvoid`). Durch das Verbinden eines Kontos wird dieser Filter nicht umgangen. Jede Außerkraftsetzung durch den Betreiber sollte einer Überprüfung der Anbieterbedingungen und des Kontorisikos folgen.
+- Mit `discontinued` gekennzeichnete Einträge bleiben historische Belege und dürfen nicht als derzeit frei dargestellt werden.
 
 ---
 
-## So verbessert OmniRoute kostenlose Kontingente
+## Wie OmniRoute kostenlose Kontingente verbessert
 
-### 1. Automatische Ausweichfunktion
+### 1. Automatischer Fallback
 
-Wenn ein kostenloser Anbieter ausgelastet oder nicht verfügbar ist, probiert OmniRoute automatisch den nächsten aus. Sie müssen nichts unternehmen.
+Wenn ein kostenloser Anbieter ausgelastet oder ausgefallen ist, versucht OmniRoute automatisch den nächsten. Sie müssen nichts tun.
 
 ### 2. Intelligentes Routing
 
-OmniRoute wählt für jede Anfrage den **besten kostenlosen Anbieter** anhand folgender Kriterien aus:
+OmniRoute wählt das aus** bester kostenloser Anbieter** für jede Anfrage basierend auf:
 
 - Geschwindigkeit — Welcher Anbieter ist derzeit am schnellsten?
 - Qualität — Welcher Anbieter eignet sich am besten für diese Aufgabe?
-- Kapazität — Welcher Anbieter verfügt noch über Kontingent?
+- Kapazität — Welcher Anbieter hat noch Restkontingente?
 
 ### 3. Token-Einsparungen
 
-Die Komprimierungspipeline von OmniRoute kann die Anzahl geeigneter Prompt- und Tool-Ausgabe-Token reduzieren. Die
-tatsächliche Einsparung hängt von den Inhalten, den ausgewählten Engines, der Abrechnung des Anbieters und den Einstellungen
-zur Wiedergabetreue ab; durch Komprimierung wird nicht jedes Anbieterkontingent um einen festen Faktor vervielfacht.
+Die Komprimierungspipeline von OmniRoute kann geeignete Eingabeaufforderungs- und Tool-Ausgabetoken reduzieren. Die tatsächlichen Einsparungen hängen vom Inhalt, den ausgewählten Engines, der Anbieterabrechnung und den Wiedergabetreueeinstellungen ab. Bei der Komprimierung wird nicht jedes Anbieterkontingent mit einem festen Betrag multipliziert.
 
 ### 4. Unterstützung mehrerer Konten
 
-Wenn die Bedingungen des Anbieters mehrere Konten oder Anmeldedaten zulassen, kann OmniRoute jede
-Verbindung als separaten Routing-Kandidaten behandeln. Erstellen Sie keine zusätzlichen Konten, um das
-Kontingent oder die Zugriffsrichtlinien eines Anbieters zu umgehen.
+Wenn die Bedingungen des Anbieters mehrere Konten oder Anmeldeinformationen zulassen, kann OmniRoute jede Verbindung als separaten Routing-Kandidaten behandeln. Erstellen Sie keine zusätzlichen Konten, um das Kontingent oder die Zugriffsrichtlinie eines Anbieters zu umgehen.
 
 ---
 
-## Berechnung des kostenlosen Kontingents
+## Kostenloses Kontingent Mathematik
 
-Der aktuelle, live verfügbare und nach Pools deduplizierte Katalog weist Folgendes aus:
+Der per Pool deduplizierte Live-Katalog meldet derzeit Folgendes:
 
-| Metrik                                      | Aktueller geprüfter Wert | Interpretation                                                                                         |
-| ------------------------------------------- | -----------------------: | ------------------------------------------------------------------------------------------------------ |
-| Wiederkehrendes quantifiziertes Kontingent  |   **~1.62B Token/Monat** | Gemeinsam genutzte Pools werden einmal gezählt; unbegrenzte Anbieter sind von der Summe ausgeschlossen |
-| Erster Monat mit Registrierungsgutschriften |         **~2.22B Token** | Wiederkehrende Gesamtsumme zuzüglich einmaliger und wiederkehrender Gutschriften                       |
+| Metrisch                                 |             Aktueller geprüfter Wert | Interpretation                                                                                   |
+| ---------------------------------------- | -----------------------------------: | ------------------------------------------------------------------------------------------------ |
+| Wiederkehrender quantifizierter Zuschuss | **~ 90 Mio. tokens/month kostenlos** | Gemeinsam genutzte Pools werden einmal gezählt; schließt ungedeckelte Anbieter von der Summe aus |
+| Erster Monat mit Anmeldezuschüssen       |  **153 Mio.~ in Ihrem ersten Monat** | Wiederkehrende Gesamtsumme plus einmalige und wiederkehrende Gutschriften                        |
 
-Dabei handelt es sich um katalogweite Schätzungen für separate berechtigte Konten, nicht um ein von OmniRoute bereitgestelltes Kontingent oder eine Prognose für eine Neuinstallation. Ihre nutzbare Kapazität hängt von den verbundenen Anbietern und deren aktuellen Bedingungen ab. Die Werte werden aus `open-sse/config/freeModelCatalog.ts` berechnet; Informationen zur Pool-Deduplizierung, zu Kennzeichnungen bezüglich der Nutzungsbedingungen, zu eingestellten Einträgen und zur Methodik für Registrierungsgutschriften finden Sie in der
-[Referenz zu kostenlosen Kontingenten](../reference/FREE_TIERS.md).
+Hierbei handelt es sich um katalogweite Schätzungen für verschiedene berechtigte Konten, nicht um eine von OmniRoute bereitgestellte Vergütung oder eine Prognose für eine Neuinstallation. Ihre nutzbare Kapazität hängt von den von Ihnen angeschlossenen Anbietern und deren aktuellen Konditionen ab. Die Werte werden aus `open-sse/config/freeModelCatalog.ts` berechnet; Weitere Informationen zur Pool-Deduplizierung, ToS Flags, eingestellten Einträgen und der Anmeldegutschrift-Methode finden Sie in der [Referenz zu kostenlosen Kontingenten](../reference/FREE_TIERS.md).
 
 ---
 
@@ -166,43 +181,36 @@ Dabei handelt es sich um katalogweite Schätzungen für separate berechtigte Kon
 
 ### „Ist das wirklich kostenlos?“
 
-Der Katalog erfasst die von den Anbietern veröffentlichten Bedingungen sowie Projektrecherchen, aber Angebote können sich ändern.
-Prüfen Sie vor der Nutzung die aktuellen Preise, Kontingente, Datenschutzrichtlinien und Teilnahmevoraussetzungen des Anbieters.
+Der Katalog erfasst vom Anbieter veröffentlichte Konditionen und Projektrecherchen, Angebote können sich jedoch ändern. Überprüfen Sie vor der Nutzung die aktuellen Preise, Kontingente, Datenschutzrichtlinien und Berechtigung des Anbieters.
 
-### „Wird das kostenlose Kontingent aufgebraucht?“
+### „Wird das kostenlose Kontingent ablaufen?“
 
-Jeder Anbieter kann Ratenbegrenzungen anwenden, Modelle ändern, den Zugriff aussetzen oder offline gehen. Mehrere
-Verbindungen verbessern die Ausweichmöglichkeiten, garantieren jedoch keine verfügbare kostenlose Route.
+Jeder Anbieter kann die Tarife begrenzen, das Modell ändern, den Zugang sperren oder offline gehen. Mehrere Verbindungen verbessern die Fallback-Abdeckung, garantieren jedoch nicht, dass eine freie Route verfügbar ist.
 
-### „Kann ich kostenlose Anbieter in der Produktion verwenden?“
+### „Kann ich für die Produktion kostenlose Anbieter nutzen?“
 
-Nur wenn SLA, Datenverarbeitung, Limits und Bedingungen des Anbieters Ihre
-Produktionsanforderungen erfüllen. Für kritische Workloads sollten überwachte, vertraglich geeignete Ausweichoptionen vorhanden sein.
+Nur wenn die SLA, Datenverarbeitung, Beschränkungen und Bedingungen des Anbieters Ihren Produktionsanforderungen entsprechen. Kritische Workloads sollten über einen überwachten, vertraglich geeigneten Fallback verfügen.
 
-### „Wo ist der Haken?“
+### „Was ist der Haken?“
 
-Zu den möglichen Nachteilen gehören strenge Limits, Wartelisten, KYC-Prüfungen, Kreditkartenverifizierung, Training anhand von
-Prompts, schwächerer Datenschutz, kein SLA, häufige Modellwechsel, geografische Einschränkungen, kostenpflichtige Mehrnutzung oder
-Risiken aufgrund von Kontorichtlinien. OmniRoute stellt die verfügbaren Metadaten bereit; Sie entscheiden, was Sie aktivieren.
+Zu den Kompromissen können strenge Limits, Wartelisten, KYC, Kreditkartenverifizierung, Schulungen zu Eingabeaufforderungen, schwächere Privatsphäre, kein SLA, Modellabwanderung, geografische Einschränkungen, Überzahlung oder Kontorichtlinienrisiko gehören. OmniRoute zeigt die verfügbaren Metadaten an; Sie entscheiden, was Sie aktivieren möchten.
 
-### „Wie erhalte ich ein größeres kostenloses Kontingent?“
+### „Wie erhalte ich mehr Gratiskontingent?“
 
-1. Verbinden Sie weitere kostenlose Anbieter
-2. Aktivieren Sie geeignete Komprimierungs-Engines und messen Sie die Einsparungen für Ihren Workload
-3. Verwenden Sie `auto/cheap`, um kostenlose/günstige Anbieter zu priorisieren
-4. Fügen Sie weitere zulässige Anbieter oder Zugangsdaten hinzu, ohne gegen die Bedingungen der Anbieter zu verstoßen
+1. Weitere kostenlose Anbieter anbinden
+2. Aktivieren Sie geeignete Komprimierungs-Engines und messen Sie Einsparungen für Ihre Arbeitslast
+3. Verwenden Sie `auto/cheap`, um free/cheap -Anbieter zu priorisieren
+4. Fügen Sie zusätzliche zulässige Anbieter oder Anmeldeinformationen hinzu, ohne gegen die Anbieterbedingungen zu verstoßen
 
-### „Bieten kostenlose Anbieter eine schlechtere Qualität?“
+### „Haben kostenlose Anbieter eine schlechtere Qualität?“
 
-Nicht unbedingt. Einige Anbieter stellen dieselben Modellfamilien bereit, die auch über kostenpflichtige
-Routen verfügbar sind; Limits, Latenz, Datenschutz, Zuverlässigkeit und Modellversionen können sich jedoch unterscheiden. Nutzen Sie die
-Ranglistenseite für kostenlose Anbieter als Qualitätssignal und überprüfen Sie, welches Modell tatsächlich bereitgestellt wird.
+Nicht unbedingt. Einige Anbieter stellen dieselben Modellfamilien zur Verfügung, die über kostenpflichtige Routen verfügbar sind. Einschränkungen, Latenz, Datenschutz, Zuverlässigkeit und Modellversionen können jedoch unterschiedlich sein. Nutzen Sie die Seite „Free Provider Rankings“ als Qualitätssignal und überprüfen Sie das tatsächlich angebotene Modell.
 
 ---
 
-## Wie geht es weiter?
+## Was kommt als nächstes?
 
-- **[Auto-Combo-Anleitung](./AUTO-COMBO-GUIDE.md)** — Lassen Sie OmniRoute die beste KI für Sie auswählen
-- **[Anleitung zu Anbietern](./PROVIDERS-GUIDE.md)** — Verbinden Sie weitere Anbieter
+- **[Auto-Combo-Anleitung](./AUTO-COMBO-GUIDE.md)** — Lassen Sie OmniRoute den besten AI für Sie auswählen
+- **[Leitfaden für Anbieter](./PROVIDERS-GUIDE.md)** — Weitere Anbieter anbinden
 - **[Fehlerbehebung](../guides/TROUBLESHOOTING.md)** — Beheben Sie häufige Probleme
-- **[Übersicht der kostenlosen Tarife](../reference/FREE_TIERS.md)** — Vollständige Liste der kostenlosen Tarife
+- **[Referenz zu kostenlosen Kontingenten](../reference/FREE_TIERS.md)** — Vollständige Liste der kostenlosen Stufen

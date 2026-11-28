@@ -4,11 +4,9 @@
 
 ---
 
-> **ସତ୍ୟର ମୂଳ ଉତ୍ସ:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **ଶେଷ ଅଦ୍ୟତନ:** 2026-09-02 — v3.8.51
-> **ପାଠକବର୍ଗ:** ପ୍ରଦାନକାରୀ-ନିର୍ଦ୍ଦିଷ୍ଟ ଗୋପନୀୟ ସମନ୍ୱୟଗୁଡ଼ିକର ରକ୍ଷଣାବେକ୍ଷଣ କରୁଥିବା ଇଞ୍ଜିନିୟରମାନେ।
+> **ସତ୍ୟର ଉତ୍ସ:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** ଦର୍ଶକ:** ପ୍ରଦାନକାରୀ-ନିର୍ଦ୍ଦିଷ୍ଟ ଚୋରି ସଂଯୋଗକୁ ପରିଚାଳନା କରୁଥିବା ଇଞ୍ଜିନିୟର୍ମାନେ।
 
-OmniRoute ଏପରି ପ୍ରଦାନକାରୀଙ୍କ ସହ ସମନ୍ୱୟ କରେ, ଯାହାଙ୍କ ଏଜ୍ଗୁଡ଼ିକ ଅଣ-ଆଧିକାରିକ କ୍ଲାଏଣ୍ଟମାନଙ୍କୁ ସକ୍ରିୟ ଭାବେ ଫିଙ୍ଗରପ୍ରିଣ୍ଟ କରନ୍ତି (TLS JA3/JA4, ହେଡର୍ କ୍ରମ, JSON ବଡିର ଆକାର, ଅଖଣ୍ଡତା ଟୋକନ୍)। ଏହି ପୃଷ୍ଠାରେ OmniRoute ପ୍ରକାଶ କରୁଥିବା ଗୋପନୀୟତା ପୃଷ୍ଠଗୁଡ଼ିକ ଏବଂ ସେଗୁଡ଼ିକ କେଉଁଠାରେ ରୂପାୟିତ ହୋଇଛି ତାହା ଲିପିବଦ୍ଧ କରାଯାଇଛି।
+OmniRoute ପ୍ରଦାନକାରୀଙ୍କ ସହିତ ଏକୀଭୂତ ହୁଏ ଯାହାର ଧାରଗୁଡ଼ିକ ସକ୍ରିୟ ଭାବରେ ଫିଙ୍ଗର ପ୍ରିଣ୍ଟ ଅଣ-ଅଫିସିଆଲ୍ କ୍ଲାଏଣ୍ଟ (TLS JA3/JA4, ହେଡର୍ ଅର୍ଡର, JSON ଶରୀର ଆକୃତି, ଅଖଣ୍ଡତା ଟୋକେନ୍)। ଏହି ପୃଷ୍ଠା ଚୋରି ହୋଇଥିବା ପୃଷ୍ଠଭୂମି OmniRoute ଏକ୍ସପୋଜ୍ କରେ ଏବଂ ସେଗୁଡିକ କେଉଁଠାରେ କାର୍ଯ୍ୟକାରୀ ହୁଏ।
 
 ## ଆଇନଗତ ଏବଂ ନୈତିକ ସୂଚନା
 
@@ -77,65 +75,68 @@ OmniRoute ଏପରି ପ୍ରଦାନକାରୀଙ୍କ ସହ ସମନ�
 
 ---
 
-## Claude Code ଷ୍ଟେଲ୍ଥ ବଣ୍ଡଲ୍
+## Claude କୋଡ୍ ଚୋରି ବଣ୍ଡଲ୍।
 
-`cliCompatMode` ସକ୍ରିୟ ଥିବାବେଳେ, OmniRoute ବାହାରକୁ ଯାଉଥିବା Claude ଅନୁରୋଧଗୁଡ଼ିକୁ ଏପରି ପୁନର୍ଗଠିତ କରେ ଯେ ସେଗୁଡ଼ିକୁ `claude-cli` ଟ୍ରାଫିକ୍ଠାରୁ ପୃଥକ କରିହେବ ନାହିଁ। ତିନୋଟି ମଡ୍ୟୁଲ୍ ମିଳିତ ଭାବେ କାମ କରନ୍ତି:
+ଯେତେବେଳେ `cliCompatMode` ଅନ୍ ଅଛି, OmniRoute ବାହାରକୁ ଯାଉଥିବା Claude ଅନୁରୋଧକୁ ପୁନ h ଆକୃତି କରେ ତେଣୁ ସେଗୁଡିକ `claude-cli` ଟ୍ରାଫିକରୁ ଭିନ୍ନ ନୁହେଁ। ତିନୋଟି ମଡ୍ୟୁଲ୍ ସହଯୋଗ କରନ୍ତି:
 
 ### `claudeCodeFingerprint.ts`
 
-ବିଲିଂ ହେଡର୍ରେ ଏମ୍ବେଡ୍ ହୋଇଥିବା 3-ଅକ୍ଷରର `cc_version` ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଗଣନା କରେ:
+ବିଲିଂ ହେଡର୍ ରେ ଏମ୍ବେଡ୍ ହୋଇଥିବା 3-char `cc_version` ଫିଙ୍ଗର ପ୍ରିଣ୍ଟ ଗଣନା କରେ:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (ହାର୍ଡକୋଡ୍ କରାଯାଇଛି; ଆଧିକାରିକ କ୍ଲାଏଣ୍ଟ ସହ ମେଳ ଖାଏ)
-- ଇନ୍ପୁଟ୍: ପ୍ରଥମ ବ୍ୟବହାରକାରୀ ସନ୍ଦେଶ ଟେକ୍ସଟ୍ର ଇଣ୍ଡେକ୍ସ 4, 7, 20 ରେ ଥିବା ଅକ୍ଷରଗୁଡ଼ିକ + ଭର୍ସନ୍ ଷ୍ଟ୍ରିଙ୍ଗ୍
-- ଆଉଟ୍ପୁଟ୍: 3-ଅକ୍ଷରର ହେକ୍ସ ପ୍ରିଫିକ୍ସ
+- `FINGERPRINT_SALT = "59cf53e54c78"` (ହାର୍ଡକୋଡ୍; ଅଫିସିଆଲ୍ କ୍ଲାଏଣ୍ଟ ସହିତ ମେଳ ହୁଏ)
+- ଇନପୁଟ୍: ପ୍ରଥମ ବ୍ୟବହାରକାରୀ ବାର୍ତ୍ତା ପାଠ୍ୟ + ସଂସ୍କରଣ ଷ୍ଟ୍ରିଙ୍ଗର ଇଣ୍ଡେକ୍ସ 4, 7, 20 ରେ ଅକ୍ଷର।
+- ଆଉଟପୁଟ୍: 3-ଚାର୍ ହେକ୍ସ ଉପସର୍ଗ।
 
-### `claudeCodeCCH.ts` (କ୍ଲାଏଣ୍ଟ କଣ୍ଟେଣ୍ଟ ହ୍ୟାଶ୍)
+### `claudeCodeCCH.ts` (କ୍ଲାଏଣ୍ଟ ବିଷୟବସ୍ତୁ ହ୍ୟାସ୍)
 
-ଆଧିକାରିକ Claude Code CLI, Bun/Zig ମାଧ୍ୟମରେ ଗଣନା କରୁଥିବା ସର୍ଭର୍-ସାଇଡ୍ ଇଣ୍ଟେଗ୍ରିଟି ଯାଞ୍ଚ। OmniRoute ଏହାକୁ `xxhash-wasm` ସହ ପୁନଃକାର୍ଯ୍ୟକାରୀ କରେ:
+ସର୍ଭର-ପାର୍ଶ୍ୱ ଅଖଣ୍ଡତା `xxhash-wasm` ସହିତ Bun/Zig. OmniRoute ପୁନ im ନିର୍ମାଣ ମାଧ୍ୟମରେ ଅଫିସିଆଲ୍ Claude କୋଡ୍ CLI ଗଣନା ଯାଞ୍ଚ କରନ୍ତୁ:
 
-1. `cch=00000;` ପ୍ଲେସ୍ହୋଲ୍ଡର୍ ସହ ବଡିକୁ ସିରିଆଲାଇଜ୍ କରନ୍ତୁ
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. ଶୂନ୍ୟ ସହ ପ୍ୟାଡ୍ କରାଯାଇଥିବା 5-ଅକ୍ଷରର ଲୋୟର୍କେସ୍ ହେକ୍ସ
-4. `cch=00000;`କୁ ଗଣନା କରାଯାଇଥିବା ଟୋକନ୍ ସହ ବଦଳାନ୍ତୁ
+1. `cch=00000;` ପ୍ଲେସହୋଲ୍ଡର୍ ସହିତ ଶରୀରକୁ କ୍ରମିକ କରନ୍ତୁ।
+2. ଏହି କ୍ରମରେ (`hashView()`) ଦୁଇଟି ସାଧା ପାଠ୍ୟ ପ୍ରତିସ୍ଥାପନ ସହିତ ହ୍ୟାସ୍ ଦୃଶ୍ୟ ନିର୍ମାଣ କରନ୍ତୁ:
+   - `/"model":"[^"]*"/g` ର ପ୍ରତ୍ୟେକ ମ୍ୟାଚ୍ `"model":""` — ମ୍ୟାଚ୍ ପ୍ରଥମ `"` ରେ ଅଟକିଯାଏ, ତେଣୁ ଏକ ପଳାୟନ କୋଟ (`"model":"a\"b"`) ସହିତ ଏକ ମୂଲ୍ୟ କେବଳ ସେହି କୋଟ ପର୍ଯ୍ୟନ୍ତ ଖାଲି ହୋଇଯାଏ, ଯେପରି ଗ୍ରାହକ କରନ୍ତି।
+   - `/"max_tokens":\d+,|,?"max_tokens":\d+/g` ର ପ୍ରତ୍ୟେକ ମ୍ୟାଚ୍ — କେବଳ ସାଂଖ୍ୟିକ ମୂଲ୍ୟ, ଯେକ any ଣସି ଗଭୀରତାରେ ଅପସାରଣ କରାଯାଇଥାଏ।
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. ଜିରୋ-ପ୍ୟାଡ୍ 5-ଚାର୍ ଲୋୟର କେସ୍ ହେକ୍ସ।
+5. `cch=00000;` ଗଣିତ ଟୋକେନ୍ ସହିତ ବଦଳାନ୍ତୁ।
 
-କନ୍ଷ୍ଟାଣ୍ଟଗୁଡ଼ିକ:
+ସ୍ଥିର:
 
-- ସିଡ୍: `0x6e52736ac806831e`
-- ପ୍ୟାଟର୍ନ୍: `/\bcch=([0-9a-f]{5});/`
+- ବିହନ: `0x4d659218e32a3268` ( Claude କୋଡ୍ 2.1.252 ଏବଂ 2.1.322 ର ଲୁପବ୍ୟାକ୍ କ୍ୟାପଚର୍ ସହିତ ମେଳ ହୁଏ)
+- ନମୁନା: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-ଅପ୍ଷ୍ଟ୍ରିମ୍ ଫିଲ୍ଟର୍ଗୁଡ଼ିକ ଯେପରି ସେଗୁଡ଼ିକୁ grep କରିପାରିବେ ନାହିଁ, ସେଥିପାଇଁ "ସମ୍ବେଦନଶୀଳ" କ୍ଲାଏଣ୍ଟ ନାମଗୁଡ଼ିକର ପ୍ରଥମ ଅକ୍ଷର ପରେ ଏକ Unicode **ଶୂନ୍ୟ-ପ୍ରସ୍ଥ ଯୋଗକାରୀ** (`U+200D`) ସନ୍ନିବେଶ କରେ। ଡିଫଲ୍ଟ ଶବ୍ଦ ତାଲିକା:
+ଏକ ୟୁନିକୋଡ୍ ସନ୍ନିବେଶ କରନ୍ତୁ।** ଶୂନ-ପ୍ରସ୍ଥ ଯୋଗଦାନକାରୀ।** (`U+200D`) "ସମ୍ବେଦନଶୀଳ" କ୍ଲାଏଣ୍ଟ ନାମଗୁଡିକର ପ୍ରଥମ ଅକ୍ଷର ପରେ ଅପଷ୍ଟ୍ରିମ୍ ଫିଲ୍ଟର୍ ଗୁଡିକ ସେଗୁଡିକ ଧରି ପାରିବେ ନାହିଁ। ଡିଫଲ୍ଟ ଶବ୍ଦ ତାଲିକା:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-ଏଗୁଡ଼ିକରେ ପ୍ରୟୋଗ କରାଯାଏ: `system` ବ୍ଲକ୍ଗୁଡ଼ିକ, ସମସ୍ତ `messages[].content`, ଏବଂ `tools[].description` / `tools[].function.description`। `setSensitiveWords()` ମାଧ୍ୟମରେ ଅପରେଟର୍ ଏହାକୁ ଓଭର୍ରାଇଡ୍ କରିପାରିବେ।
+ପ୍ରଯୁଜ୍ୟ: `system` ବ୍ଲକଗୁଡିକ, ସମସ୍ତ `messages[].content`, ଏବଂ `tools[].description` / `tools[].function.description`। `setSensitiveWords()` ମାଧ୍ୟମରେ ଅପରେଟର୍-ଓଭରବ୍ରିଡେବଲ୍।
 
-### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` ପ୍ରଦାତା
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` ପ୍ରଦାନକାରୀ।
 
-କେବଳ "ପ୍ରକୃତ Claude Code" ଟ୍ରାଫିକ୍ ଗ୍ରହଣ କରୁଥିବା ତୃତୀୟ-ପକ୍ଷ Anthropic ରିଲେଗୁଡ଼ିକ ପାଇଁ:
+ତୃତୀୟ-ପକ୍ଷ Anthropic ରିଲେ ପାଇଁ ଯାହା କେବଳ "ପ୍ରକୃତ Claude କୋଡ୍" ଟ୍ରାଫିକ୍ ଗ୍ରହଣ କରେ:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- ଡିଫଲ୍ଟ ଭାବେ `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- ପ୍ରତି-ସଂଯୋଗ "Enable redact-thinking beta" ଟୋଗଲ୍, କୌଣସି CC Compatible ଅପ୍ଷ୍ଟ୍ରିମ୍କୁ ବିଶେଷ ଭାବରେ ରିଡାକ୍ଟ କରାଯାଇଥିବା ଥିଙ୍କିଂ ଷ୍ଟ୍ରିମ୍ ଆବଶ୍ୟକ ହେଲେ, `redact-thinking-2026-02-12` ଯୋଡ଼ିଥାଏ
-- ପ୍ରତି-ସଂଯୋଗ "Enable summarized thinking display" ଟୋଗଲ୍ `providerSpecificData.requestDefaults.summarizeThinking` ସଂରକ୍ଷଣ କରେ ଏବଂ ପୂର୍ବରୁ କୌଣସି ଡିସ୍ପ୍ଲେ ମୋଡ୍ ସେଟ୍ କରିନଥିବା CC Compatible ଥିଙ୍କିଂ ଅନୁରୋଧଗୁଡ଼ିକରେ `display: "summarized"` ଯୋଡ଼େ
+- ଡିଫଲ୍ଟ ଭାବରେ`anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
+- ପ୍ରତି-ସଂଯୋଗ "ରେଡାକ୍ଟ-ଚିନ୍ତାଧାରା ବିଟା ସକ୍ଷମ" ଟୋଗଲ୍ `redact-thinking-2026-02-12` ଯୋଗ କରେ ଯେତେବେଳେ ଏକ CC ସୁସଙ୍ଗତ ଅପଷ୍ଟ୍ରିମ୍ ନିର୍ଦ୍ଦିଷ୍ଟ ଭାବରେ ରିଡାକ୍ଟ ଚିନ୍ତାଧାରା ଆବଶ୍ୟକ କରେ।
+- ପ୍ରତି-ସଂଯୋଗ "ସଂକ୍ଷିପ୍ତ ଚିନ୍ତାଧାରା ପ୍ରଦର୍ଶନକୁ ସକ୍ଷମ କର" `providerSpecificData.requestDefaults.summarizeThinking` ଷ୍ଟୋର୍ଗୁଡ଼ିକୁ ଟୋଗଲ୍ କରେ ଏବଂ `display: "summarized"` କୁ CC ରେ ସୁସଙ୍ଗତ ଚିନ୍ତାଧାରା ଅନୁରୋଧ ଯୋଗ କରେ ଯାହା ଏକ ପ୍ରଦର୍ଶନ ମୋଡ୍ ସେଟ୍ କରିନାହିଁ।
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x ପରିବାର)
-- ଡିଫଲ୍ଟ ପାଥ୍: `/v1/messages?beta=true`
+- ଡିଫଲ୍ଟ ପଥ: `/v1/messages?beta=true`
 
-ସମାନ ବଣ୍ଡଲ୍ରେ ଥିବା ସହଯୋଗୀ ମଡ୍ୟୁଲ୍ଗୁଡ଼ିକ:
+ସମାନ ବଣ୍ଡଲରେ ଭଉଣୀ ମଡ୍ୟୁଲ୍:
 
-- `claudeCodeConstraints.ts` — ଟେମ୍ପରେଚର୍ + କ୍ୟାଶ୍-କଣ୍ଟ୍ରୋଲ୍ ନିୟମ
-- `claudeCodeToolRemapper.ts` — ଟୁଲ୍-ନାମ ରିମ୍ୟାପିଂ
-- `claudeCodeExtraRemap.ts` — ଅତିରିକ୍ତ ପେଲୋଡ୍ ନର୍ମାଲାଇଜେସନ୍
+- `claudeCodeConstraints.ts` — ତାପମାତ୍ରା + କ୍ୟାଶେ-ନିୟନ୍ତ୍ରଣ ନିୟମ।
+- `claudeCodeToolRemapper.ts` — ଟୁଲ୍-ନାମ ରିମାପିଙ୍ଗ୍।
+- `claudeCodeExtraRemap.ts` — ଅତିରିକ୍ତ ଦେୟ ଭାର ସାଧାରଣକରଣ।
 
 ---
 
@@ -195,7 +196,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — ପ read `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — ପରିଚୟ ପତ୍ର
-- ମୂଳ ଘଟଣା ରିପୋର୍ଟ: ଆଲୋଚନା [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- ମୂଳ ଘଟଣା ରିପୋର୍ଟ: ଆଲୋଚନା [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

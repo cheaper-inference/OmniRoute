@@ -88,19 +88,19 @@ Objekt `ctx`, posredovan funkciji `register(program, ctx)`:
 | `ctx.baseUrl`                | `string`         | Razrešen osnovni URL                                              |
 | `ctx.apiKey`                 | `string \| null` | Ključ API, če je naveden                                          |
 
-## Odkrivanje
+## Odkritje
 
-Vtičniki se odkrivajo na naslednjih mestih:
+Vtičniki so odkriti iz:
 
-1. `~/.omniroute/plugins/<name>/` — uporabniške lokalne namestitve
-2. Okoljska spremenljivka `OMNIROUTE_PLUGIN_PATH` — imenik po meri
+1. `~/.omniroute/plugins/node_modules/<name>/` — kamor `omniroute plugin install` postavlja pakete (npm `--prefix`, ne `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — ročno kopirani imeniki vtičnikov
+3. `OMNIROUTE_PLUGIN_PATH` env var — imenik po meri
 
-Oboje velja **samo za CLI**. Strežniško izvajalno okolje vtičnikov (tržnica oziroma vtičniki `plugin.json`, ki se izvajajo znotraj posredniškega strežnika) uporablja lasten pregledovalnik z lastno preglasitvijo,
-`OMNIROUTE_PLUGINS_DIR` — glejte
-[PLUGIN_MARKETPLACE.md → Imenik vtičnikov](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Nastavitev ene možnosti ne vpliva na drugo.
+Sledijo se simbolno povezani imeniki (kar npm ustvari za `plugin install ./dir`).
 
-Napake pri nalaganju so prestrežene in izpisane kot opozorila — nedelujoč vtičnik nikoli ne povzroči zrušitve CLI-ja.
+Oba sta** Samo CLI** . Izvajalno okolje vtičnika na strani strežnika (tržnica/vtičniki `plugin.json`, ki se izvajajo znotraj proxyja) ima lasten optični bralnik z lastno preglasitvijo, `OMNIROUTE_PLUGINS_DIR` — glejte [imenik vtičnikov PLUGIN_MARKETPLACE.md →](./PLUGIN_MARKETPLACE.md#plugin-directory). Nastavitev enega ne vpliva na drugega.
+
+Napake pri nalaganju so ujete in natisnjene kot opozorila — pokvarjen vtičnik nikoli ne zruši CLI.
 
 ## Varnost
 

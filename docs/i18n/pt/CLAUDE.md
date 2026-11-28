@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Todas as regras do projeto encontram-se em [`AGENTS.md`](AGENTS.md)** — a única fonte de verdade para todos os
-assistentes de IA (arquitetura, convenções, testes, critérios de qualidade, fluxo de trabalho git, as 23 Regras Rígidas,
-aprendizagens sobre PII). Leia-o na íntegra; não volte a adicionar aqui as regras do projeto. Tudo o que se segue aplica-se APENAS
-ao Claude Code — aperfeiçoamentos operacionais das regras já definidas em `AGENTS.md`.
+**Todas as regras do projeto residem em [`AGENTS.md`](AGENTS.md)** — a única fonte de verdade para cada assistente AI ; a importação acima já o carrega. Não volte a adicionar as regras do projeto aqui. Tudo o que está abaixo se aplica ONLY aos refinamentos operacionais do código Claude — de regras já definidas em `AGENTS.md`.
 
-## Isolamento de worktrees — especificidades do Claude Code
+## Isolamento da árvore de trabalho — Claude Especificações do código
 
-O protocolo completo e obrigatório de worktrees (confirmação do branch base, caminho canónico
-`.claude/worktrees/`, `cp -al` node_modules, regras de desmontagem) está em
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (resumido em `AGENTS.md` →
-Fluxo de trabalho Git → "Isolamento de worktrees"). Pontos específicos do Claude Code:
+- Confirme a ramificação base com a operadora através da `AskUserQuestion` (regra rígida #19), a menos que já o tenham informado.
+- Crie a árvore de trabalho com `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (chega a `.claude/worktrees/`, liga `node_modules` e copia `.husky/_`) e, em seguida, chame `EnterWorktree` com o seu `path`. Passe sempre a base: sem ela o script escolhe o maior `release/*`, que pode não ser o confirmado pelo operador. Uma árvore de trabalho que `EnterWorktree` cria por si só não tem ligações físicas nem ganchos, pelo que nenhuma porta de pré-confirmação é executada nela.
 
-- Confirme o branch base com o operador através de `AskUserQuestion` (Regra Rígida n.º 19), a
-  menos que já lho tenha indicado.
-- Prefira a ferramenta nativa `EnterWorktree` — esta já cria worktrees em
-  `.claude/worktrees/` (o caminho canónico). Crie a worktree com o comando documentado `git
-worktree add` e, em seguida, chame `EnterWorktree` com o respetivo `path`.
+## Subagentes e git
 
-## Segurança entre sessões — especificidades do Claude Code
+Cada subagente que toca no git (ferramenta de agente ou script de fluxo de trabalho) obtém a regra rígida #22 a `git stash` ban literalmente no seu prompt — a recorrência registada do incidente de stash veio através de um subagente.
 
-As Regras Rígidas n.º 19/21/22 (em `AGENTS.md`) regem as sessões paralelas. Lembretes operacionais para este
-ambiente:
+## Planeamento de substituições de caminho de superpoderes de artefactos —
 
-- **Replique literalmente a proibição de `git stash` no prompt de cada subagente que interaja com git**
-  (ferramenta Agent/scripts de Workflow) — os subagentes não herdam este ficheiro e a recorrência
-  registada do incidente com stash ocorreu através de um subagente.
-- Antes de fazer merge ou push para qualquer PR que não tenha criado _nesta sessão_, execute `git worktree list`
-  e volte a verificar `gh pr view <N> --json state,headRefOid` (Regra Rígida n.º 22b).
-- Termine todas as sessões com o checkout principal no ramo em que começou.
+As habilidades de superpoderes anunciam padrões em `docs/superpowers/plans/`, `docs/superpowers/specs/` e `docs/research/`. Reescreva cada um no seu `_tasks/` equivalente em `AGENTS.md` → "Planning & Research Artifacts" antes de escrever e envie-o com `git -C _tasks …`, nunca no repositório principal.
 
-## Superpowers/artefactos de planeamento — substituições de caminhos
+## Ficheiros de rascunho — `_artifacts/`, não `/tmp`
 
-A convenção `_tasks/` encontra-se definida em `AGENTS.md` → "Artefactos de Planeamento e Investigação". As
-skills de superpowers incluem predefinições que apontam para `docs/…` — essas predefinições são **substituídas
-aqui**. Quando uma skill de superpowers anunciar um caminho como "guardado em `docs/superpowers/plans/…`",
-reescreva-o para o equivalente em `_tasks/…` antes de escrever:
+Este projeto substitui o scratchpad da sessão do chicote (`/tmp/claude-*/…`). Escrever ficheiros temporários, exportações —, zips gerados, saídas intermédias únicas — para `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: um caminho `_*` raiz ignorado pelo git, para que o operador encontre e exclua todos os riscos num só local. Planos duráveis, especificações, pesquisas e transferências vão para `_tasks/` (regra rígida #23).
 
-| Artefacto (skill)                       | Predefinição (NÃO usar)   | Guardar aqui em alternativa                                   |
-| --------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Planos (`writing-plans`)                | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Especificações/design (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Investigação (`deep-research`, ad hoc)  | `docs/research/`          | `_tasks/research/…`                                           |
-| Transferências (`/handoff`)             | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Base vermelha
 
-Faça commit desses artefactos dentro do repositório `_tasks/` (`git -C _tasks …`), nunca no repositório principal.
-
-## Ficheiros de rascunho/temporários — utilize `_artifacts/`, não `/tmp`
-
-Este projeto substitui o bloco de notas temporário predefinido do ambiente (`/tmp/claude-*/…`). Escreva
-ficheiros temporários/de trabalho — exportações, ficheiros zip gerados, resultados intermédios pontuais, tudo o que
-de outro modo colocaria em `/tmp` — em `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` é um caminho `_*` na raiz: já é ignorado pelo git (`AGENTS.md` → "Caminhos `_*` na raiz"), existe
-  apenas no disco e nunca é controlado por versão.
-- Motivo: manter os resultados temporários dentro do projeto (em vez de `/tmp`) permite ao operador
-  encontrar e eliminar facilmente tudo o que é temporário num único local, em vez de procurar em
-  diretórios `/tmp` efémeros e específicos de cada sessão, que desaparecem ou acumulam ficheiros não controlados.
-- **Não** confunda isto com `_tasks/` (Regra Rígida n.º 23, o seu próprio repositório git privado para
-  planos/especificações/investigação/transferências duradouros) — `_artifacts/` destina-se apenas a ficheiros de trabalho descartáveis; nada
-  aqui precisa de persistir ou ser controlado por versão.
-
-## Base verde antes de abrir PRs
-
-Antes de criar um ramo ou abrir um PR, execute a verificação base-green (`AGENTS.md` → Fluxo de Trabalho Git →
-"Verificação base-green"; as skills do projeto referenciam-na como `.agents/skills/_shared/base-green.md`). Um PR
-aberto enquanto a ponta da base está vermelha deve incluir `⚠️ base-red inherited: #<issue>` no respetivo corpo. Para
-resolver um estado vermelho acumulado (ponta da base + PRs vermelhos), utilize a skill `/sweep-reds`.
+Para drenar um estado vermelho acumulado (ponta base + red PRs), utilize a habilidade `/sweep-reds`.

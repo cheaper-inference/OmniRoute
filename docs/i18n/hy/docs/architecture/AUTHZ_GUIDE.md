@@ -4,12 +4,11 @@
 
 ---
 
-> **Ճշմարտության աղբյուր.** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Վերջին թարմացումը.** 2026-09-22 — scope namespaces-ը ցույց են տալիս MCP-SERVER.md
+> **Ճշմարտության աղբյուրը.** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute-ն ունի երթուղիներին տեղյակ թույլտվության խողովակաշար, որը պաշտպանում է API-ի յուրաքանչյուր հարցում: Դասակարգումը **դետերմինիստական** է և **փակ-ձախողված** — այն ամենը, ինչը չի կարող դասակարգվել, դառնում է `MANAGEMENT` և պահանջում է նիստ կամ կառավարման մակարդակի թոքեն: Այս էջը բացատրում է մոդելը ինժեներների համար, ովքեր պահպանում են երթուղիներ կամ նախագծում նոր վերջնակետեր:
+OmniRoute ունի երթուղու մասին տեղեկացված թույլտվության խողովակաշար, որն ապահովում է API յուրաքանչյուր հարցում: Դասակարգումն է** դետերմինիստական** և** fail-փակված** — ամեն ինչ, որը չի կարող դասակարգվել, ավարտվում է որպես `MANAGEMENT` և պահանջում է նստաշրջան կամ կառավարման կարգի նշան: Այս էջը բացատրում է երթուղիները պահպանող կամ նոր վերջնակետեր նախագծող ինժեներների մոդելը:
 
-![AuthZ խողովակաշար (3 երթուղու դասեր + քաղաքականության գնահատում)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Աղբյուր՝ [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -187,7 +186,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — միշտ վերադարձնում է `allow({ kind: "anonymous", id: "anonymous" })`:
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — քաղվածքները կրող, վավերացվում է `validateApiKey()` միջոցով: Անանուն է դառնում միայն այն դեպքում, երբ արդյունավետ `REQUIRE_API_KEY` հատկանիշի դրոշակն անջատված է: Արդյունավետ դրոշը լուծվում է `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) միջոցով, այնպես որ վահանակի առանձնահատկությունների դրոշները և շրջակա միջավայրի փոփոխականները հետևողականորեն կառավարում են `/api/v1/*`, `/api/v1beta/*` և կեղծանունները. լուծիչի ձախողումները փակ են: Թույլ է տալիս dashboard-sesion հարցումներ կատարել հաճախորդի API երթուղիներում (ներառյալ `/api/v1/models`, որն օգտագործվում է վահանակի մոդելների կատալոգում): Երբ Entra ID SSO միացված է, կրողը, որը կառուցվածքային առումով Entra նշան է (երեք base64url հատվածներ, `RS*` alg, `kid`) մշակվում է SSO մասնաճյուղի կողմից:** առաջ** `validateApiKey()` և դրա վճիռը վերջնական է — այն երբեք չի անցնում API-բանալու ուղին կամ դեգրադացիայից մինչև անանուն ճյուղը, ուստի նույնականացման մատակարարի խափանումը չի կարող դառնալ բաց մուտք: Ստատիկ API ստեղները չեն ազդում: Տես [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — ընդունում է վահանակի նիստը, մոդելի համաժամացման ներքին հարցումները (համընկնում է `/api/providers/[name]/(sync-models|models)` հետ) կամ ամբողջությամբ բաց է թողնում, եթե `isAuthRequired()` վերադարձնում է false: Վերադարձնում է 403 (`AUTH_001`), երբ կրող նշանն առկա է, բայց անվավեր, հակառակ դեպքում՝ 401: Նաև պարտադրում է երթուղու պահպանության մակարդակները (LOCAL_ONLY / ALWAYS_PROTECTED) նախքան որևէ auth մասնաճյուղ — տես [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) : LOCAL_ONLY ուղիները `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ում (այսօր՝ `/api/mcp/`) կարող են մուտք գործել ոչ հանգույցից, երբ կրող ստեղնը կրում է `manage` շրջանակը; բոլոր մյուս LOCAL_ONLY ուղիները մնում են խիստ-loopback՝ անկախ շրջանակից:
+- **`managementPolicy`** (`policies/management.ts`) — ընդունում է վահանակի նիստը, մոդելի համաժամացման ներքին հարցումները (համընկնում է `/api/providers/[name]/(sync-models|models)` հետ) կամ ամբողջությամբ բաց է թողնում, եթե `isAuthRequired()` վերադարձնում է false: Վերադարձնում է 403 (`AUTH_001`), երբ կրող նշանն առկա է, բայց անվավեր, հակառակ դեպքում՝ 401: Նաև պարտադրում է երթուղու պահպանության մակարդակները (LOCAL_ONLY / ALWAYS_PROTECTED) նախքան որևէ auth մասնաճյուղ — տես [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) : LOCAL_ONLY ուղիները `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ում (այսօր՝ `/api/mcp/`) կարող են մուտք գործել ոչ հանգույցից, երբ կրող ստեղնը կրում է `manage`/`admin` տիրույթը կամ նեղ `mcp:connect` շրջանակը (`hasMcpConnectOrManageScope`), կամ վավերացված վահանակի նիստով. Բոլոր մյուս LOCAL_ONLY ուղիները մնում են խիստ-loopback՝ անկախ շրջանակից:
 
 Հաջող քաղաքականությունը `AuthSubject` ին վերադարձնում է `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ով: Ներքևում գտնվող կառավարիչները կարող են այն կարդալ `assertAuth(request, "CLIENT_API")` միջոցով `src/server/authz/assertAuth.ts` ում՝ վավերացման տրամաբանությունը նորից գործարկելու փոխարեն:
 
@@ -278,38 +277,24 @@ export async function POST(request: Request) {
 
 Ընտրեք հավաքածուն ըստ ձևի, ոչ թե հարմարության: Մեկ երթուղի մտնում է `PUBLIC_API_ROUTES_EXACT` (կամ `PUBLIC_READONLY_CORS_API_ROUTES` միայն GET-ի համար). միայն իսկական ենթածառ է մտնում `PUBLIC_API_ROUTE_PREFIXES`, և այն **պետք է ավարտվի `/` նշանով**: Միակ երթուղին նախածանցների ցուցակում տեղադրելը նաև հրապարակում է յուրաքանչյուր հարակից ուղի, որը կիսում է իր առաջատար նիշերը, ներառյալ ավելի ուշ ավելացված դինամիկ սեգմենտի քույրերը (GHSA-74g9-q8f6-793h): Թարմացրեք միավոր թեստերը `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` և `tests/unit/authz/classify.test.ts` հասցեներում:
 
-## Ծավալներ
+## Շրջանակներ
 
-Երեք անվանատարածք։ Յուրաքանչյուր ստուգիչ կարդում է միայն իր սեփական տողերը։ Կողք կողքի,
-ներառյալ, թե ինչու է `manage`-ը ձախողում `scopeMatches`-ը `read:compression`-ի համար, և ինչու է
-`read` մուտքի թոքենը չի կարող `PATCH /api/keys/{id}`, գտնվում է
-[Երեք ծավալի անվանատարածքներ](../frameworks/MCP-SERVER.md#three-scope-namespaces) հղումով։
+Երեք անվանատարածք. Յուրաքանչյուր խաղաքար կարդում է միայն իր տողերը: Կողք-կողքի, ներառյալ, թե ինչու `manage` ձախողում է `scopeMatches` `read:compression` համար, և ինչու `read` մուտքի նշանը չի կարող `PATCH /api/keys/{id}`, [երեք շրջանակի անվանատարածք](../frameworks/MCP-SERVER.md#three-scope-namespaces) է:
 
-API բանալիները կրում են `scopes` զանգված (պահվում է որպես JSON `api_keys.scopes`-ում, տես `src/lib/db/apiKeys.ts`)։
+API ստեղները կրում են `scopes` զանգված (պահվում է որպես JSON `api_keys.scopes` ում, տես `src/lib/db/apiKeys.ts`):
 
-### Կառավարման ծավալ
+### Կառավարման շրջանակը
 
-- `manage` / `admin` — `hasManageScope`։ Կառավարման API երթուղիների Bearer մուտք։
-- `mcp:connect`, `self:usage`, `self:account-quota` և
-  `policy:bypass-provider-quota` ավելացվող ճշգրիտ համընկնող ծավալներ են։ Դրանք գտնվում են
-  `MANAGEMENT_API_KEY_SCOPES`-ից դուրս։ `mcp:connect`-ը բացում է միայն
-  `/api/mcp/` ոչ-loopback հատվածը։
+- `manage` / `admin` — `hasManageScope`. Կրողի մուտք դեպի կառավարման API երթուղիներ:
+- `mcp:connect`, `self:usage`, `self:account-quota` և `policy:bypass-provider-quota` հավելյալ ճշգրիտ համընկնման շրջանակներ են: Նրանք նստում են դուրսը `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` բացում է միայն `/api/mcp/` ոչ օղակաձեւ փորագրումը:
 
-### MCP գործիքի ծավալներ
+### MCP գործիքների շրջանակներ
 
-Կատալոգ և համընկնող կանոններ (նույնական տող, կամ տրված ծավալ, որն ավարտվում է `*`-ով)։
-[MCP գործիքի ծավալներ](../frameworks/MCP-SERVER.md#mcp-tool-scopes)։
-`MCP_SCOPE_LIST`-ը `src/shared/constants/mcpScopes.ts`-ում սկզբնական տիպավորված
-ենթաբազմությունն է, ոչ թե ամբողջական կատալոգը։ Իրականացումը գործում է
-`open-sse/mcp-server/scopeEnforcement.ts`-ում այն բանից հետո, երբ `resolveCallerScopeContext()`-ը
-լուծում է ծավալները MCP աուտենտիֆիկացիայի տվյալներից, հարցման մետատվյալներից կամ `OMNIROUTE_MCP_SCOPES`-ից։
-Այն անջատված է մնում, եթե `OMNIROUTE_MCP_ENFORCE_SCOPES=true` չէ։
+Կատալոգ և համապատասխան կանոններ (նույն տող կամ `*` ով ավարտվող շնորհված շրջանակ). [MCP գործիքի շրջանակներ](../frameworks/MCP-SERVER.md#mcp-tool-scopes) : `MCP_SCOPE_LIST` ն `src/shared/constants/mcpScopes.ts` ում բնօրինակ տպագրված ենթաբազմություն է, ոչ թե ամբողջական կատալոգը: Կիրառումն իրականացվում է `open-sse/mcp-server/scopeEnforcement.ts` ում այն բանից հետո, երբ `resolveCallerScopeContext()` լուծում է շրջանակները MCP ի հաստատման տեղեկություններից, հարցումների մետատվյալներից կամ `OMNIROUTE_MCP_SCOPES`: `OMNIROUTE_MCP_ENFORCE_SCOPES=true` այն միացնում է գլոբալ (կանխադրված `false`), բայց այն միշտ ուժի մեջ է մտնում HTTP/SSE զանգահարողի համար, որի API ստեղնը զուրկ է `manage`/`admin` (տես `shouldForceScopeEnforcement()` `open-sse/mcp-server/scopeEnforcement.ts` ում), անկախ դրոշից:
 
-### Մուտքի թոքենի ծավալներ
+### Մուտքի նշանի շրջանակներ
 
-`read` / `write` / `admin` `oma_live_…` թոքենների վրա, դասակարգված ըստ `scopeSatisfies`-ի
-(`src/lib/accessTokens/scopes.ts`)։ Այս դասակարգումը վերաբերում է միայն մուտքի թոքենի
-հավատարմագրին։ Տես [Կառավարման աուտենտիֆիկացիա](../guides/MANAGEMENT-AUTH.md)։
+`read` / `write` / `admin` `oma_live_…` նշանների վրա, դասակարգված ըստ `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`): Այս վարկանիշը վերաբերում է միայն մուտքի նշանի հավատարմագրին: Տես [Կառավարման նույնականացում](../guides/MANAGEMENT-AUTH.md) :
 
 ## Auth Պահանջվում է Փոխարկել
 

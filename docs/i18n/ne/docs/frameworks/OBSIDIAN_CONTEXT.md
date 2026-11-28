@@ -114,57 +114,48 @@ authorize गर्दैनन्; `env-key` मा समाधान हु�
 प्रति-key Obsidian configuration नभएका प्रमाणीकृत keys ले global fallback कायम राख्छन्।
 चारवटा `obsidian_sync_*` tools ले आफ्ना छुट्टै sync-token behavior कायम राख्छन्।
 
-## MCP उपकरणहरू (22)
+## MCP उपकरण (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts` मा परिभाषित। टोकन/base-URL प्रत्येक कलका लागि समाधान गरिन्छ
-(पहिले प्रति-API-key, त्यसपछि ग्लोबल)। OmniRoute **sync server** प्रयोग गर्ने उपकरणहरू
-(चारवटा `obsidian_sync_*` उपकरणहरू) लाई थप रूपमा OmniRoute सेटिङहरूमा कन्फिगर गरिएको sync auth token आवश्यक पर्छ।
+`open-sse/mcp-server/tools/obsidianTools.ts` मा परिभाषित। token/base-URL प्रति कल समाधान गरिन्छ (प्रति-एपीआई-कुञ्जी पहिले, त्यसपछि विश्वव्यापी)। OmniRoute लाई हिट गर्ने उपकरणहरू** सिंक सर्भर** (चार `obsidian_sync_*` उपकरणहरू) थप रूपमा OmniRoute सेटिङहरूमा कन्फिगर गरिएको सिङ्क प्रमाणीकरण टोकन आवश्यक छ।
 
-### पढ्ने उपकरणहरू (`read:obsidian`)
+### पढ्ने उपकरण (`read:obsidian`)
 
-| उपकरण                        | विवरण                                                                                             |
-| ---------------------------- | ------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Local REST API पहुँचयोग्य र प्रमाणीकरण गरिएको छ कि छैन जाँच गर्नुहोस्।                            |
-| `obsidian_search_simple`     | नोट सामग्रीको पूर्ण-पाठ खोज; फाइल पाथसहित स्निपेटहरू फर्काउँछ।                                    |
-| `obsidian_search_structured` | JSON Logic अभिव्यक्ति (and/or/regex/path फिल्टरहरू) प्रयोग गरेर खोज्नुहोस्।                       |
-| `obsidian_read_note`         | vault-relative पाथद्वारा नोट पढ्नुहोस्; वैकल्पिक रूपमा कुनै विशिष्ट heading/block/frontmatter।    |
-| `obsidian_list_vault`        | vault भित्रका फाइल र डाइरेक्टरीहरू सूचीबद्ध गर्नुहोस् (प्रविष्टिहरूको ट्री)।                      |
-| `obsidian_get_document_map`  | नोटको heading संरचना headings → line numbers को म्यापका रूपमा प्राप्त गर्नुहोस्।                  |
-| `obsidian_get_note_metadata` | पूर्ण सामग्रीबिना frontmatter, tags, links, char/word count प्राप्त गर्नुहोस्।                    |
-| `obsidian_get_active_file`   | Obsidian मा हाल सक्रिय फाइलको पाथ + सामग्री प्राप्त गर्नुहोस्।                                    |
-| `obsidian_get_periodic_note` | कुनै मितिका लागि दैनिक/साप्ताहिक/मासिक periodic note प्राप्त गर्नुहोस् (नदिइएमा आजको)।            |
-| `obsidian_get_tags`          | सबै vault tags तिनको आवृत्तिसहित सूचीबद्ध गर्नुहोस्।                                              |
-| `obsidian_list_commands`     | उपलब्ध Obsidian command IDs सूचीबद्ध गर्नुहोस् (`obsidian_execute_command` सँग प्रयोग गर्नुहोस्)। |
-| `obsidian_sync_status`       | OmniRoute sync server को स्थिति: चलिरहेको अवस्था, vault नाम, port, uptime, पछिल्लो sync।          |
-| `obsidian_sync_conflicts`    | समाधान नगरिएका sync conflicts सूचीबद्ध गर्नुहोस् (path, conflict path, detected-at)।              |
+| उपकरण                        | विवरण                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| `obsidian_check_status`      | स्थानीय REST API पहुँचयोग्य र प्रमाणीकृत छ कि छैन जाँच गर्नुहोस्।                                |
+| `obsidian_search_simple`     | नोट सामग्रीको पूर्ण-पाठ खोज; फाईल मार्गहरूसँग स्निपेटहरू फर्काउँछ।                               |
+| `obsidian_search_structured` | JSON तर्क अभिव्यक्ति (and/or/regex/path फिल्टरहरू) प्रयोग गरेर खोज्नुहोस्।                       |
+| `obsidian_read_note`         | भल्ट-सापेक्ष मार्ग द्वारा एक नोट पढ्नुहोस्; वैकल्पिक रूपमा एक विशिष्ट heading/block/frontmatter. |
+| `obsidian_list_vault`        | भल्टमा फाइलहरू र डाइरेक्टरीहरू सूचीबद्ध गर्नुहोस् (प्रविष्टिहरूको रूख)।                          |
+| `obsidian_get_document_map`  | हेडिङ → लाइन नम्बरहरूको नक्साको रूपमा नोटको शीर्षक संरचना प्राप्त गर्नुहोस्।                     |
+| `obsidian_get_note_metadata` | पूर्ण सामग्री बिना फ्रन्टमेटर, ट्याग, लिङ्क, char/word गणना प्राप्त गर्नुहोस्।                   |
+| `obsidian_get_active_file`   | Obsidian मा हाल सक्रिय फाइलको पथ + सामग्री प्राप्त गर्नुहोस्।                                    |
+| `obsidian_get_periodic_note` | मितिको लागि daily/weekly/monthly आवधिक नोट प्राप्त गर्नुहोस् (आज छोडिएको छ भने)।                 |
+| `obsidian_get_tags`          | सबै भल्ट ट्यागहरूलाई तिनीहरूको फ्रिक्वेन्सीहरूसँग सूचीबद्ध गर्नुहोस्।                            |
+| `obsidian_list_commands`     | सूची उपलब्ध Obsidian आदेश IDs ( `obsidian_execute_command` को साथ प्रयोग गर्नुहोस्)।             |
+| `obsidian_sync_status`       | OmniRoute सिंक सर्भर स्थिति: चलिरहेको, भल्ट नाम, पोर्ट, अपटाइम, अन्तिम सिंक।                     |
+| `obsidian_sync_conflicts`    | समाधान नगरिएका सिंक विवादहरू (पथ, संघर्ष मार्ग, पत्ता लगाइएको-एट) सूचीबद्ध गर्नुहोस्।            |
 
-### लेख्ने उपकरणहरू (`write:obsidian`)
+### उपकरण लेख्नुहोस् (`write:obsidian`)
 
-| उपकरण                            | विवरण                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `obsidian_write_note`            | दिइएको Markdown सामग्रीसहित नोट सिर्जना गर्नुहोस् वा अधिलेखन गर्नुहोस्।                          |
-| `obsidian_append_note`           | नोटमा सामग्री थप्नुहोस्; वैकल्पिक रूपमा कुनै विशिष्ट heading/block मा।                           |
-| `obsidian_patch_note`            | heading, block, वा frontmatter field मा सटीक रूपमा append/prepend/replace गर्नुहोस्।             |
-| `obsidian_delete_note`           | vault बाट नोट स्थायी रूपमा मेटाउनुहोस्।                                                          |
-| `obsidian_move_note`             | vault भित्र नोट सार्नुहोस् वा पुनः नामकरण गर्नुहोस्।                                             |
-| `obsidian_execute_command`       | यसको command ID द्वारा Obsidian command कार्यान्वयन गर्नुहोस्।                                   |
-| `obsidian_open_file`             | Obsidian मा फाइल खोल्नुहोस् (अवस्थित नभएमा सिर्जना गर्छ)।                                        |
-| `obsidian_sync_trigger`          | तत्काल द्विदिशात्मक desktop↔mobile vault sync सुरु गर्नुहोस्।                                    |
-| `obsidian_sync_resolve_conflict` | sync conflict समाधान गर्नुहोस्: `local` (mobile), `remote` (desktop), वा `keep-both` राख्नुहोस्। |
+| उपकरण                            | विवरण                                                                                         |
+| -------------------------------- | --------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | दिइएको मार्कडाउन सामग्रीको साथ नोट सिर्जना वा अधिलेखन गर्नुहोस्।                              |
+| `obsidian_append_note`           | नोटमा सामग्री जोड्नुहोस्; वैकल्पिक रूपमा एक विशिष्ट heading/block. को लागी                    |
+| `obsidian_patch_note`            | हेडिङ, ब्लक, वा फ्रन्टमेटर फिल्डमा सर्जिकल रूपमा append/prepend/replace ।                     |
+| `obsidian_delete_note`           | स्थायी रूपमा भल्टबाट नोट मेटाउनुहोस्।                                                         |
+| `obsidian_move_note`             | भल्ट भित्र एउटा नोट सार्नुहोस् वा पुन: नामाकरण गर्नुहोस्।                                     |
+| `obsidian_execute_command`       | यसको आदेश ID द्वारा Obsidian आदेश कार्यान्वयन गर्नुहोस्।                                      |
+| `obsidian_open_file`             | Obsidian मा फाइल खोल्नुहोस् (यदि यो अवस्थित छैन भने सिर्जना गर्दछ)।                           |
+| `obsidian_sync_trigger`          | तत्काल द्विदिशात्मक डेस्कटप ↔ मोबाइल भल्ट सिंक ट्रिगर गर्नुहोस्।                              |
+| `obsidian_sync_resolve_conflict` | सिंक विवाद समाधान गर्नुहोस्: `local` (मोबाइल), `remote` (डेस्कटप), वा `keep-both` राख्नुहोस्। |
 
 > [!NOTE]
-> `obsidian_patch_note` का targets ले `heading | block | frontmatter` मध्ये `targetType`
-> र `append | prepend | replace` मध्ये `operation` स्वीकार गर्छन्, साथै वैकल्पिक
-> `createTargetIfMissing`। चारवटा `obsidian_sync_*` उपकरणहरूले स्थानीय sync
-> server (पूर्वनिर्धारित रूपमा `http://127.0.0.1:27781`) सँग सञ्चार गर्छन् र sync token आवश्यक पर्छ।
+> `obsidian_patch_note` लक्ष्यहरूले `heading | block | frontmatter` को `targetType` र `append | prepend | replace` को `operation` स्वीकार गर्दछ, वैकल्पिक `createTargetIfMissing` संग। चार `obsidian_sync_*` उपकरणहरूले स्थानीय सिङ्क सर्भरसँग कुरा गर्छ (पूर्वनिर्धारित रूपमा`http://127.0.0.1:27781` ) र सिङ्क टोकन आवश्यक छ।
 
 ### स्कोपहरू
 
-पढ्ने उपकरणहरूलाई `read:obsidian` आवश्यक पर्छ; लेख्ने उपकरणहरूलाई `write:obsidian` आवश्यक पर्छ। प्रवर्तन
-Notion सरह नै छ — `open-sse/mcp-server/server.ts` मा `withScopeEnforcement()` द्वारा सम्हालिन्छ,
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` हुँदा सक्रिय हुन्छ, र अनुमति दिइएका स्कोपहरू
-`OMNIROUTE_MCP_SCOPES` वा API key को scope context बाट लिइन्छन्। हेर्नुहोस्
-[MCP-SERVER.md](./MCP-SERVER.md)।
+पढ्ने उपकरणहरूलाई `read:obsidian` चाहिन्छ; लेखन उपकरणहरू `write:obsidian` चाहिन्छ। प्रवर्तन `open-sse/mcp-server/server.ts` मा `withScopeEnforcement()` द्वारा ह्यान्डल गरिएको Notion — सँग मिल्दोजुल्दो छ, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` मा गेट गरिएको छ र API कुञ्जीमा `manage`/`admin` छैन, `OMNIROUTE_MCP_SCOPES` वा API कुञ्जीको स्कोप सन्दर्भबाट प्राप्त अनुमति स्कोपहरू सहित HTTP/SSE कलरहरूका लागि जबरजस्ती। [MCP-SERVER.md](./MCP-SERVER.md) हेर्नुहोस्।
 
 ## एन्डपोइन्टहरू
 

@@ -245,33 +245,41 @@ Modelos: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Combinaciones
+## Combos 🎨
 
-Puedes reordenar las tarjetas de combinaciones directamente en **Panel → Combinaciones** arrastrando el control de cada tarjeta. El orden se almacena en SQLite y se restaura al recargar.
+Puedes reordenar las tarjetas combinadas directamente en** Combos de tablero →** arrastrando el asa de cada tarjeta. El pedido se almacena en SQLite y se restaura al recargar.
 
-### Ejemplo 1: Maximizar suscripción → Respaldo económico
+### Encuentre un proveedor, modelo o cuenta
 
-```
-Panel → Combinaciones → Crear nueva
+En Crear o Editar combo, los selectores paso a paso de Proveedor, Modelo, Cuenta y referencia combinada incluyen un campo de búsqueda local. Busque por nombre mostrado, identificador, alias de proveedor o fuente de modelo, luego haga clic en un resultado o use las teclas de flecha y Enter. Todos los términos de búsqueda deben coincidir. Borrar la búsqueda o presionar Escape deja el valor seleccionado sin cambios.
 
-Nombre: premium-coding
-Modelos:
-  1. cc/claude-opus-4-7 (Suscripción principal)
-  2. glm/glm-4.7 (Respaldo económico, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Alternativa más barata, $0.3/1M)
+La elección automática de cuenta permanece visible durante la búsqueda. Su lista de restricción de cuentas opcional tiene un filtro separado: las cuentas seleccionadas fuera de los resultados visibles permanecen seleccionadas y el recuento las incluye. No se pueden buscar fragmentos de correo electrónico ocultos mientras la privacidad del correo electrónico esté activada. Agrega el paso y guarda el combo como de costumbre; escribir una consulta no guarda ni prueba nada.
 
-Uso en la CLI: premium-coding
-```
+La misma búsqueda local está disponible para modelos de prueba de conexión, modelos de alias y predeterminados CLI personalizados y opciones de proxy guardado. Las acciones de guardar, aplicar y probar existentes permanecen separadas.
 
-### Ejemplo 2: Solo gratuitos (coste cero)
+### Ejemplo 1: Maximizar la suscripción → Cheap Backup
 
 ```
-Nombre: free-combo
-Modelos:
-  1. if/kimi-k2.7-code (acceso gratuito indicado; pueden aplicarse límites del proveedor)
-  2. kr/qwen3-coder-next (alternativa gratuita de Kiro)
+Dashboard → Combos → Create New
 
-Coste: actualmente figura como $0; los términos y la disponibilidad pueden cambiar
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### Ejemplo 2: Solo gratuito (costo cero)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -431,7 +439,7 @@ Cuando ya no necesites OmniRoute, te proporcionamos dos scripts rápidos para un
 ### Implementación VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +521,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -610,7 +618,7 @@ post_install() {
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`            | Base de punto final de sincronización en la nube URL (reemplaza `CLOUD_URL` heredado)                                                                                         |
 | `API_KEY_SECRET`                        | _(generado automáticamente)_       | Secreto HMAC para las claves API generadas. — se genera automáticamente en la primera ejecución y persiste en `server.env`                                                    |
 | `REQUIRE_API_KEY`                       | `false`                            | Aplicar la clave Bearer API en `/v1/*`                                                                                                                                        |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                            | Permitir que los usuarios autenticados del panel revelen los valores completos de las claves API almacenadas a pedido                                                         |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                            | Permitir que los usuarios autenticados del panel revelen los valores clave API almacenados completos a pedido                                                                 |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                               | Cadencia de actualización del lado del servidor para datos de límites de proveedor almacenados en caché; Los botones de actualización UI aún activan la sincronización manual |
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                            | Deshabilite las instantáneas automáticas SQLite antes de writes/import/restore; las copias de seguridad manuales todavía funcionan                                            |
 | `APP_LOG_TO_FILE`                       | `true`                             | Permite la salida de registros de auditoría y aplicaciones al disco                                                                                                           |
@@ -713,7 +721,7 @@ Cualquier puerta de enlace que hable OpenAI API (un proxy autohospedado, vLLM, u
 
 1. **Proveedores → Añadir OpenAI Compatible** .
 2. **Nombre** : una etiqueta de visualización para el nodo.
-3. **Prefijo** : el nombre de la ruta. Los clientes llaman a los modelos `<prefix>/<model>`, por lo que un nodo con prefijo `mygw` sirve `mygw/gpt-4o-mini`. Requerido; no hay restricción de caracteres.
+3. **Prefijo** : el nombre de la ruta. Los clientes llaman a los modelos como `<prefix>/<model>`, por lo que un nodo con prefijo `mygw` sirve `mygw/gpt-4o-mini`. Requerido; no hay restricción de caracteres.
 4. **Tipo API** : la familia de puntos finales a los que sirve la puerta de enlace (finalizaciones de chat, respuestas, incrustaciones, audio, imágenes).
 5. **base URL** : la raíz API, hasta `/v1` inclusive (por ejemplo `https://gateway.example.com/v1`), no la ruta completa `/chat/completions`. Las puertas de enlace con rutas no estándar las configuran en** Configuración avanzada** (ruta de chat, ruta de modelos).
 6. El** Clave API (para cheque)** El campo solo prueba la conexión. Después de crear el nodo, ábrelo y usa** Agregar conexión** para almacenar la clave que utilizarán las solicitudes.
@@ -882,8 +890,8 @@ Configurar mediante** Panel de control → Configuración → Enrutamiento** . E
 - `least-used` y `cost-optimized`
 - `auto` — basado en la puntuación de todos los candidatos
 - `lkgp` (Último buen proveedor conocido) — fija al último proveedor exitoso y luego recurre a las reglas
-- `context-optimized` — elige el modelo con la ventana de contexto libre más grande
-- `context-relay` — encadena modelos de contexto largo para turnos de seguimiento
+- `context-optimized` — prueba primero el modelo con la ventana de contexto más grande conocida
+- Orden de prioridad `context-relay` — más un resumen de transferencia cuando la conversación pasa a otra cuenta
 
 #### Encabezado de sesión fijo externo
 
@@ -1064,7 +1072,7 @@ La página de configuración está organizada en** 7 pestañas** para facilitar 
 | **AI**           | Pensando en el presupuesto (transferencia/auto-strip/ — personalizado/adaptativo ver [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), aviso del sistema global, aviso de estadísticas de caché              |
 | **Seguridad**    | Configuración Login/Password, control de acceso IP, autenticación API para `/models`, bloqueo de proveedor, protección de inyección rápida                                                               |
 | **Enrutamiento** | Estrategia de enrutamiento global (completar primero / Round Robin / P2C / Aleatorio / Menos usado / Costo optimizado), alias de modelo comodín, cadenas de respaldo, valores predeterminados combinados |
-| **Resiliencia**  | Cola de solicitudes, tiempo de reutilización de la conexión, configuración del disyuntor del proveedor y comportamiento de espera del tiempo de reutilización                                            |
+| **Resiliencia**  | Cola de solicitudes, tiempo de recuperación de la conexión, configuración del disyuntor del proveedor y comportamiento de espera de tiempo de recuperación                                               |
 | **Avanzado**     | Configuración de proxy global (HTTP/SOCKS5), anulaciones de proxy por proveedor                                                                                                                          |
 
 General ya no duplica registros de solo lectura y notas de caché. Las configuraciones de retención y optimización de la base de datos se conservan a través de `/api/settings/database`; El borrado manual de caché utiliza `DELETE /api/cache`. Los límites de las filas del registro de solicitudes y proxy están controlados por `CALL_LOGS_TABLE_MAX_ROWS` y `PROXY_LOGS_TABLE_MAX_ROWS`.
@@ -1330,34 +1338,36 @@ Consulta [API_REFERENCE.md](../reference/API_REFERENCE.md) para ver el catálogo
 
 ---
 
-## 💻 CLI interna
+## 💻 Interno CLI
 
-OmniRoute incluye una CLI interna (`omniroute …`) para la configuración, el diagnóstico y el control en tiempo de ejecución. Esta es **independiente de la página "Herramientas de CLI" del panel**, que configura CLI de terceros (Claude Code, Cursor, Codex, Cline, …) para que puedan comunicarse con OmniRoute.
+OmniRoute envía un CLI interno (`omniroute …`) para configuración, diagnóstico y control de tiempo de ejecución. Esto es** Separado de la página "Herramientas CLI " en el tablero.** , que configura CLIs de terceros (Claude Code, Cursor, Codex, Cline,…) para que puedan hablar con OmniRoute.
 
 ```bash
-omniroute setup                    # Asistente interactivo (contraseña, proveedores, combinaciones)
-omniroute setup --non-interactive  # Adecuado para CI
-omniroute doctor                   # Diagnósticos de estado (directorio de datos, BD, proveedores, puertos)
-omniroute providers available      # Enumera los proveedores compatibles
-omniroute providers list           # Enumera las conexiones configuradas
-omniroute providers test <id>      # Prueba en vivo una conexión de proveedor
-omniroute combos list              # Enumera las combinaciones
-omniroute combos switch <name>     # Establece la combinación predeterminada
-omniroute models                   # Enumera los modelos disponibles (--json, --search)
-omniroute keys add | list | remove # Administra las claves de API desde la terminal
-omniroute backup                   # Crea una instantánea de la configuración y la BD
-omniroute restore [<timestamp>]    # Restaura desde una instantánea
-omniroute health                   # Estado detallado (disyuntores, caché, memoria)
-omniroute quota                    # Uso de cuota de los proveedores
-omniroute mcp status               # Estado del servidor MCP
-omniroute a2a status               # Estado del servidor A2A
-omniroute tunnel list|create|stop  # Túneles de Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Restablece la contraseña de administrador
-omniroute --mcp                    # Inicia el servidor MCP mediante stdio
-omniroute --port 3000              # Inicia el servidor en un puerto personalizado
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Consejo: combina `omniroute doctor --json` con tu herramienta de monitorización para recibir alertas sobre conexiones de proveedores que no estén en buen estado.
+Consejo: empareje `omniroute doctor --json` con su herramienta de monitoreo para alertar sobre una instalación local defectuosa. `doctor` no prueba las conexiones del proveedor; usa `omniroute providers test <id>` para eso.
 
 ---
 

@@ -5,11 +5,10 @@
 ---
 
 > **სიმართლის წყარო:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **ბოლოს განახლდა:** 2026-09-22 — scope namespaces point at MCP-SERVER.md
 
-OmniRoute-ს აქვს მარშრუტის ამომცნობი ავტორიზაციის კონვეიერი, რომელიც ყველა API მოთხოვნას აკონტროლებს. კლასიფიკაცია არის **დეტერმინისტული** და **ჩავარდნისას იკეტება** — ყველაფერი, რისი კლასიფიცირებაც შეუძლებელია, ხვდება `MANAGEMENT` კატეგორიაში და მოითხოვს სესიას ან მენეჯმენტის დონის ტოკენს. ეს გვერდი განმარტავს მოდელს ინჟინრებისთვის, რომლებიც მარშრუტებს ინარჩუნებენ ან ახალ ენდპოინტებს აპროექტებენ.
+OmniRoute აქვს მარშრუტის შესახებ ავტორიზაციის მილსადენი, რომელიც ახორციელებს ყველა API მოთხოვნას. კლასიფიკაცია არის** განმსაზღვრელი** და** ჩავარდნა-დახურული** — ყველაფერი, რისი კლასიფიცირება შეუძლებელია, მთავრდება, როგორც `MANAGEMENT` და მოითხოვს სესიას ან მენეჯმენტის ხარისხის ჟეტონს. ეს გვერდი განმარტავს მოდელს ინჟინრებისთვის, რომლებიც მარშრუტებს ინარჩუნებენ ან ახალ საბოლოო წერტილებს ქმნიან.
 
-![AuthZ კონვეიერი (3 მარშრუტის კლასი + პოლიტიკის შეფასება)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > წყარო: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -190,7 +189,7 @@ Incoming request → src/proxy.ts
 
 - **`publicPolicy`** (`policies/public.ts`) — ყოველთვის აბრუნებს `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — ექსტრაქტები Bearer, ამოწმებს `validateApiKey()` მეშვეობით. ანონიმურად გადადის მხოლოდ მაშინ, როდესაც ეფექტური `REQUIRE_API_KEY` ფუნქციის დროშა გამორთულია. ეფექტური დროშა წყდება `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) მეშვეობით, ასე რომ, დაფის ფუნქციების დროშები და გარემოს ცვლადები მუდმივად მართავენ `/api/v1/*`, `/api/v1beta/*` და მეტსახელებს; გადამწყვეტის წარუმატებლობა ვერ დაიხურება. ნებას რთავს დაფის სესიის მოთხოვნას კლიენტის API მარშრუტებზე (მათ შორის, `/api/v1/models`, რომელსაც იყენებს დაფის მოდელების კატალოგი). როდესაც Entra ID SSO ჩართულია, Bearer, რომელიც სტრუქტურულად არის Entra ტოკენი (სამი base64url სეგმენტი, `RS*` alg, `kid`) განიხილება SSO ფილიალში.** ადრე** `validateApiKey()` და მისი ვერდიქტი საბოლოოა — ის არასოდეს გადადის API-გასაღების გზაზე ან დეგრადაციის ანონიმურ ფილიალში, ამიტომ პირადობის პროვაიდერის შეწყვეტა არ შეიძლება გახდეს ღია წვდომა. სტატიკური API კლავიშები არ იმოქმედებს. იხილეთ [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — იღებს დაფის სესიას, შიდა მოდელის სინქრონიზაციის მოთხოვნებს (შეესაბამება `/api/providers/[name]/(sync-models|models)`) ან მთლიანად გამოტოვებს, თუ `isAuthRequired()` დააბრუნებს false-ს. აბრუნებს 403-ს (`AUTH_001`), როდესაც არსებობს Bearer ჟეტონი, მაგრამ არასწორია, წინააღმდეგ შემთხვევაში 401. ასევე ახორციელებს მარშრუტის მცველი იარუსებს (LOCAL_ONLY / ALWAYS_PROTECTED) ნებისმიერი auth ფილიალამდე — იხ. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY ბილიკები `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ში (დღეს: `/api/mcp/`) შეიძლება იყოს წვდომა არა loopback-დან, როდესაც Bearer key ატარებს `manage` სკოპს; ყველა სხვა LOCAL_ONLY ბილიკი რჩება მკაცრი მარყუჟის გარეშე, მასშტაბის მიუხედავად.
+- **`managementPolicy`** (`policies/management.ts`) — იღებს დაფის სესიას, შიდა მოდელის სინქრონიზაციის მოთხოვნებს (შეესაბამება `/api/providers/[name]/(sync-models|models)`) ან მთლიანად გამოტოვებს, თუ `isAuthRequired()` დააბრუნებს false-ს. აბრუნებს 403-ს (`AUTH_001`), როდესაც არსებობს Bearer ჟეტონი, მაგრამ არასწორია, წინააღმდეგ შემთხვევაში 401. ასევე ახორციელებს მარშრუტის მცველი იარუსებს (LOCAL_ONLY / ALWAYS_PROTECTED) ნებისმიერი auth ფილიალამდე — იხ. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY ბილიკები `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ში (დღეს: `/api/mcp/`) შეიძლება იყოს წვდომა არა loopback-დან, როდესაც Bearer გასაღები ატარებს `manage`/`admin` სკოპს ან ვიწრო `mcp:connect` სკოპს (`hasMcpConnectOrManageScope`), ან დამოწმებული დაფის სესიით; ყველა სხვა LOCAL_ONLY ბილიკი რჩება მკაცრი მარყუჟის გარეშე, მასშტაბის მიუხედავად.
 
 წარმატებული პოლიტიკა აბრუნებს `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ით. ქვედა დინების დამმუშავებლებს შეუძლიათ მისი წაკითხვა `assertAuth(request, "CLIENT_API")` ით `src/server/authz/assertAuth.ts` ში, auth ლოგიკის ხელახლა გაშვების ნაცვლად.
 
@@ -283,27 +282,22 @@ export async function POST(request: Request) {
 
 ## ფარგლები
 
-სამი სახელთა სივრცე. თითოეული შემმოწმებელი კითხულობს მხოლოდ საკუთარ სტრიქონებს. გვერდიგვერდ შედარება, მათ შორის, თუ რატომ ვერ ახერხებს `manage` `scopeMatches`-ს `read:compression`-ისთვის და რატომ არ შეუძლია `read` წვდომის ტოკენს `PATCH /api/keys/{id}`-ის შესრულება, მოცემულია [სამი ფარგლის სახელთა სივრცეში](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+სამი სახელთა სივრცე. თითოეული გამშვები კითხულობს მხოლოდ საკუთარ სტრიქონებს. გვერდიგვერდ, მათ შორის, თუ რატომ ვერ ახერხებს `manage` `scopeMatches` `read:compression` სთვის და რატომ არ შეუძლია `read` წვდომის ჟეტონს `PATCH /api/keys/{id}`, არის [სამი არეალის სახელების სივრცე](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API გასაღებები შეიცავს `scopes` მასივს (შენახულია JSON ფორმატში `api_keys.scopes`-ში, იხილეთ `src/lib/db/apiKeys.ts`).
+API კლავიშებს აქვთ `scopes` მასივი (შენახულია JSON სახით `api_keys.scopes` ში, იხილეთ `src/lib/db/apiKeys.ts`).
 
-### მართვის ფარგლები
+### მართვის სფერო
 
-- `manage` / `admin` — `hasManageScope`. Bearer წვდომა მართვის API მარშრუტებზე.
-- `mcp:connect`, `self:usage`, `self:account-quota` და
-  `policy:bypass-provider-quota` არის დამატებითი ზუსტი შესატყვისობის ფარგლები. ისინი `MANAGEMENT_API_KEY_SCOPES`-ის გარეთ არიან. `mcp:connect` ხსნის მხოლოდ `/api/mcp/` არა-loopback ნაწილს.
+- `manage` / `admin` — `hasManageScope`. მენეჯმენტის წვდომა API მარშრუტებზე.
+- `mcp:connect`, `self:usage`, `self:account-quota` და `policy:bypass-provider-quota` არის დამატებითი ზუსტი შესატყვისი ფარგლები. გარეთ სხდებიან `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` ხსნის მხოლოდ `/api/mcp/` არა მარყუჟის ამოკვეთას.
 
-### MCP ხელსაწყოს ფარგლები
+### MCP ინსტრუმენტის ფარგლები
 
-კატალოგი და შესატყვისობის წესები (იდენტური სტრიქონი, ან მინიჭებული ფარგალი, რომელიც მთავრდება `*`-ით): [MCP ხელსაწყოს ფარგლები](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` `src/shared/constants/mcpScopes.ts`-ში არის ორიგინალური ტიპის ქვეჯგუფი და არა სრული კატალოგი. აღსრულება ხორციელდება
-`open-sse/mcp-server/scopeEnforcement.ts`-ში მას შემდეგ, რაც `resolveCallerScopeContext()` გადაწყვეტს ფარგლებს MCP ავთენტიფიკაციის ინფორმაციიდან, მოთხოვნის მეტამონაცემებიდან, ან `OMNIROUTE_MCP_SCOPES`-დან.
-ის გამორთული რჩება, თუ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` არ არის.
+კატალოგი და შესატყვისი წესები (იდენტური სტრიქონი, ან მინიჭებული ფარგლები, რომელიც მთავრდება `*` ზე): [MCP ინსტრუმენტის ფარგლები](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` `src/shared/constants/mcpScopes.ts` ში არის ორიგინალური აკრეფილი ქვეჯგუფი და არა სრული კატალოგი. Enforcement გადის `open-sse/mcp-server/scopeEnforcement.ts` ში მას შემდეგ, რაც `resolveCallerScopeContext()` გადაჭრის სფეროებს MCP auth ინფორმაციის, მეტამონაცემების მოთხოვნის ან `OMNIROUTE_MCP_SCOPES` დან. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ჩართავს მას გლობალურად (ნაგულისხმევი `false`), მაგრამ ის ყოველთვის ამოქმედდება HTTP/SSE აბონენტისთვის, რომლის API კლავიშს აკლია `manage`/`admin` (იხ. `shouldForceScopeEnforcement()` `open-sse/mcp-server/scopeEnforcement.ts` ში), დროშის მიუხედავად.
 
-### წვდომის ტოკენის ფარგლები
+### ხელმისაწვდომობის ნიშნების ფარგლები
 
-`read` / `write` / `admin` `oma_live_…` ტოკენებზე, რანჟირებული `scopeSatisfies`-ის მიხედვით
-(`src/lib/accessTokens/scopes.ts`). ეს რანგი ვრცელდება მხოლოდ წვდომის ტოკენის სერთიფიკატზე. იხილეთ [მართვის ავთენტიფიკაცია](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` `oma_live_…` ნიშნებზე, რეიტინგული `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) მიხედვით. ეს წოდება ეხება მხოლოდ წვდომის ნიშნის სერთიფიკატს. იხილეთ [მართვის ავთენტიფიკაცია](../guides/MANAGEMENT-AUTH.md).
 
 ## ავტორიზაციის საჭირო გადართვა
 

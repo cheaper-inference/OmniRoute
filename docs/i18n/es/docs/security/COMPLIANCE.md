@@ -4,12 +4,11 @@
 
 ---
 
-> **Fuente de verdad:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Última actualización:** 2026-06-28 — v3.8.40
+> **Fuente de la verdad:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute registra las acciones administrativas, los eventos de autenticación, los cambios en el ciclo de vida de las credenciales de proveedores y las invocaciones de herramientas MCP en tablas de auditoría respaldadas por SQLite. Esta página explica qué se registra, dónde se almacena, cuánto tiempo se conserva, cómo pueden excluirse las claves de API y cómo consultar los datos.
+OmniRoute registra acciones administrativas, eventos de autenticación, cambios en el ciclo de vida de las credenciales del proveedor e invocaciones de herramientas MCP en tablas de auditoría respaldadas por SQLite. Esta página cubre lo que se registra, dónde reside, cuánto tiempo se conserva, cómo las claves API pueden cancelar su suscripción y cómo consultar los datos.
 
-La implementación se encuentra en `src/lib/compliance/index.ts` (T-43 — «Controles de cumplimiento») y `src/lib/compliance/providerAudit.ts`. Las escrituras de auditoría nunca generan excepciones: ante cualquier fallo, la llamada se descarta silenciosamente para que el registro de auditoría no pueda interrumpir el flujo principal de la solicitud.
+La implementación se encuentra en `src/lib/compliance/index.ts` (T-43 — "Controles de cumplimiento") y `src/lib/compliance/providerAudit.ts`. Las escrituras de auditoría nunca se generan: ante cualquier falla, la llamada se procesa silenciosamente para que el registro de auditoría no pueda interrumpir el flujo de solicitudes principal.
 
 ## Qué se registra
 
@@ -129,31 +128,33 @@ el elemento heredado `request_detail_logs` y los artefactos de solicitudes local
 Los valores predeterminados se definen en `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Exclusión voluntaria mediante `noLog` (por clave de API)
+## Exclusión voluntaria `noLog` (por clave API )
 
-Las claves de API pueden marcarse para que no se registre el tráfico de sus llamadas posteriores. La
-marca se almacena en la tabla `api_keys` (`no_log INTEGER DEFAULT 0`) y se replica
-en un conjunto en memoria para realizar consultas en rutas críticas.
+Las claves API se pueden marcar para que no se registre su tráfico de llamadas descendentes. La bandera reside en la tabla `api_keys` (`no_log INTEGER DEFAULT 0`) y se refleja en un conjunto en memoria para búsquedas de rutas activas.
 
 ```bash
-# Crear una clave sin registro (se requiere autenticación de administración)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Funciones auxiliares (`src/lib/compliance/index.ts`):
+Ayudantes (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — activa o desactiva la entrada en memoria
-- `isNoLog(apiKeyId)` — se comprueba en la ruta de la solicitud; recurre a una lectura almacenada
-  en caché durante 30 s de `api_keys.no_log`
-- `NO_LOG_API_KEY_IDS` (variable de entorno, separada por comas) — se carga previamente en el conjunto
-  en memoria durante el arranque; resulta útil cuando no se puede modificar la columna directamente
+- `setNoLog(apiKeyId, true|false)` — alternar la entrada en memoria
+- `isNoLog(apiKeyId)` — verificado en la ruta de solicitud; recurre a una lectura en caché de 30 s desde `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, separado por comas) — precargado en la memoria configurada en el arranque; útil cuando no se puede alternar la columna directamente
 
-Los eventos de auditoría administrativos (inicio de sesión, cambios de proveedor, llamadas a herramientas MCP, etc.)
-**no** se ven afectados por `noLog`; únicamente se excluye del registro el tráfico
-por solicitud.
+Los eventos de auditoría administrativa (inicio de sesión, cambios de proveedor, llamadas a herramientas MCP, etc.) son** no** afectado por `noLog` — solo se excluye el registro de tráfico por solicitud.
+
+### Exclusión voluntaria por solicitud (`x-omniroute-no-log`)
+
+Un cliente puede optar por una única solicitud de inferencia fuera de la persistencia de la carga útil sin crear una clave dedicada. Envíe `x-omniroute-no-log: true` en la solicitud (`1` y `yes` también se aceptan, no distinguen entre mayúsculas y minúsculas). Se aplica a todas las rutas de la familia de chat que pasan por el controlador de chat: Finalizaciones de chat, Respuestas, Mensajes, Finalizaciones y la ruta compatible con Gemini. La fila del registro de llamadas todavía se escribe con su marca de tiempo, modelo, proveedor, estado, duración y recuento de tokens, pero se omiten `request_body`, `response_body`, resúmenes de solicitudes y artefactos de canalización.
+
+El encabezado es ORed con el indicador de clave: una clave sin registro permanece sin registro independientemente del encabezado, y el encabezado no puede volver a habilitar el registro para una clave sin registro. El encabezado se elimina antes de que la solicitud se reenvíe en sentido ascendente.
+
+Este encabezado hace** no** deshabilite la extracción de memoria o el caché semántico. Envíe `x-omniroute-no-memory: true` y `x-omniroute-no-cache: true` junto con él cuando la solicitud tampoco deba conservar el contenido en esos subsistemas.
 
 ## API REST
 

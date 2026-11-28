@@ -168,9 +168,9 @@ Microsoft 365 प्रदायकको मा** जडान थप्नु�
 
 ## सन्दर्भहरू
 
-- मुद्दा: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- छलफल: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- स्रोत: `src/shared/constants/providers/web-cookie.ts` (प्रदायकको परिभाषा)
+- मुद्दा: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- छलफल: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- स्रोत: `src/shared/constants/providers/web-cookie.ts` (प्रदायक परिभाषा)
 - HAR आयात: `src/shared/utils/m365HarImport.ts`
-- Credential का फिल्डहरू: `src/shared/providers/webSessionCredentials.ts`
-- Tier modal: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- प्रमाण क्षेत्रहरू: `src/shared/providers/webSessionCredentials.ts`
+- टियर मोडल: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

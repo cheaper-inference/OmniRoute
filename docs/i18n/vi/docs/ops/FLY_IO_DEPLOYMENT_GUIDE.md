@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Các tham số bắt buộc
+## 5. Thông số bắt buộc
 
-Dự án này khuyến nghị cấu hình ít nhất các tham số sau trên Fly.io.
+Dự án này khuyên bạn nên định cấu hình ít nhất các tham số sau trên Fly.io.
 
-### 5.1 Các tham số đã được xác minh
+### 5.1 Thông số đã được xác minh
 
-Các tham số này đã được sử dụng trong những lần triển khai thực tế trên ứng dụng `omniroute` hiện tại:
+Các tham số này đã được sử dụng trong triển khai thực tế trên ứng dụng `omniroute` hiện tại:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (bắt buộc trong môi trường production — được dùng để xác thực cầu nối WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (bắt buộc trong sản xuất — được sử dụng để xác thực cầu WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 Về `INITIAL_PASSWORD`
 
-Dự án hiện tại không đặt `INITIAL_PASSWORD` vì lần triển khai này không yêu cầu tham số đó.
+Dự án hiện tại không đặt `INITIAL_PASSWORD` vì việc triển khai này không yêu cầu.
 
-Nếu không được đặt:
+Nếu nó không được đặt:
 
-- Nhật ký khởi động sẽ cho biết mật khẩu mặc định là `CHANGEME`
-- Bạn nên thay đổi mật khẩu đăng nhập trong phần cài đặt hệ thống càng sớm càng tốt sau khi triển khai
+- Bạn tạo mật khẩu bảng điều khiển trong trình hướng dẫn cài đặt trong lần truy cập đầu tiên. Hoàn tất bước mật khẩu: bỏ qua bước này sẽ tắt đăng nhập trang tổng quan, điều này khiến trang tổng quan mở cho bất kỳ ai có thể truy cập ứng dụng URL
+- Proxy của Fly tiếp cận ứng dụng từ một địa chỉ không vòng lặp, vì vậy sau khi bạn gửi mật khẩu, trình hướng dẫn sẽ yêu cầu mã thông báo khởi động một lần mà ứng dụng sẽ in vào nhật ký của nó tại thời điểm đó: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Nếu dòng đó đã cuộn ra khỏi nhật ký, hãy khởi động lại ứng dụng và gửi lại trình hướng dẫn để in mã thông báo mới
 
-Nếu muốn khởi tạo mật khẩu backend mà không cần thao tác thủ công, bạn có thể thêm tham số này sau:
+Thay vào đó, để đặt mật khẩu không cần giám sát, hãy thêm mật khẩu đó trước lần truy cập trang tổng quan đầu tiên (sau khi lưu mật khẩu, `INITIAL_PASSWORD` sẽ bị bỏ qua):
 
 - `INITIAL_PASSWORD`
 
@@ -274,60 +274,60 @@ Nếu trang `Secrets` trong bảng điều khiển không hiển thị các bi�
 
 ---
 
-## 9. Các bản cập nhật và phát hành tiếp theo
+## 9. Cập nhật và phát hành tiếp theo
 
-Sau khi cập nhật mã nguồn, quy trình phát hành rất đơn giản:
+Sau khi cập nhật mã, quy trình phát hành rất đơn giản:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Nếu bạn chỉ cần cập nhật các tham số mà không thay đổi mã nguồn:
+Nếu bạn chỉ cần cập nhật thông số mà không thay đổi mã:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly sẽ tự động thực hiện cập nhật cuốn chiếu các máy.
+Fly sẽ tự động thực hiện cập nhật luân phiên các máy.
 
-### 9.1 Theo dõi các bản cập nhật từ kho lưu trữ thượng nguồn trong khi vẫn giữ nguyên `fly.toml` của bản fork
+### 9.1 Theo dõi các cập nhật kho lưu trữ ngược dòng trong khi bảo toàn `fly.toml` fork của bạn
 
-Nếu kho lưu trữ hiện tại là một bản fork và bạn muốn đồng bộ các bản cập nhật từ kho lưu trữ thượng nguồn `https://github.com/diegosouzapw/OmniRoute`, hãy làm theo quy trình dưới đây.
+Nếu kho lưu trữ hiện tại là một nhánh và bạn muốn đồng bộ hóa các bản cập nhật từ `https://github.com/cheaper-inference/OmniRoute` ngược dòng, hãy làm theo quy trình làm việc bên dưới.
 
-Trước tiên, hãy xác minh các kho lưu trữ từ xa:
+Trước tiên, hãy xác minh điều khiển từ xa của bạn:
 
 ```powershell
 git remote -v
 ```
 
-Bạn sẽ thấy ít nhất:
+Bạn nên xem ít nhất:
 
-- `origin` trỏ đến bản fork của riêng bạn
-- `upstream` trỏ đến kho lưu trữ gốc
+- `origin` chỉ vào ngã ba của riêng bạn
+- `upstream` trỏ đến kho lưu trữ ban đầu
 
-Nếu `upstream` chưa được cấu hình, hãy thêm nó:
+Nếu `upstream` chưa được định cấu hình, hãy thêm nó:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Trước khi đồng bộ với thượng nguồn, hãy tải về các commit và thẻ mới nhất:
+Trước khi đồng bộ hóa với thượng nguồn, hãy tìm nạp các thẻ và cam kết mới nhất:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Kiểm tra phiên bản hiện tại và các thẻ thượng nguồn:
+Kiểm tra phiên bản hiện tại và thẻ ngược dòng:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Lưu ý: Phiên bản hiện tại của dự án là `v3.8.0`. Các tham chiếu đến `v3.4.7` bên dưới chỉ được giữ lại làm ví dụ lịch sử. Đối với các bản phát hành thực tế, hãy sử dụng `:latest` hoặc thẻ phiên bản hiện tại (ví dụ: `:v3.8.0`).
+> Lưu ý: Phiên bản dự án hiện tại là `v3.8.0`. Các tài liệu tham khảo `v3.4.7` dưới đây chỉ được lưu giữ làm ví dụ lịch sử. Đối với các bản phát hành thực tế, hãy sử dụng `:latest` hoặc thẻ phiên bản hiện tại (ví dụ `:v3.8.0`).
 
-Nếu bạn muốn hợp nhất phiên bản `main` mới nhất từ thượng nguồn nhưng bắt buộc giữ lại `fly.toml` của bản fork, hãy làm theo quy trình sau:
+Nếu bạn muốn hợp nhất `main` ngược dòng mới nhất trong khi vẫn giữ `fly.toml` của nhánh của mình một cách mạnh mẽ, hãy làm theo quy trình làm việc sau:
 
 ```powershell
 git merge upstream/main
@@ -337,34 +337,34 @@ git commit -m "chore(deploy): keep fork fly.toml"
 git push origin main
 ```
 
-Lưu ý:
+Ghi chú:
 
-- `git merge upstream/main` đồng bộ mã nguồn mới nhất từ kho lưu trữ gốc
-- `git checkout HEAD~1 -- fly.toml` khôi phục tệp `fly.toml` riêng của bản fork từ trước khi hợp nhất
-- Nếu thượng nguồn không sửa đổi `fly.toml`, bước này sẽ không tạo ra bất kỳ khác biệt nào
-- Nếu thượng nguồn đã sửa đổi `fly.toml`, bước này đảm bảo tên ứng dụng Fly, điểm gắn kết ổ đĩa, khu vực và các cấu hình triển khai dành riêng cho bản fork không bị ghi đè
+- `git merge upstream/main` đồng bộ mã mới nhất từ kho lưu trữ gốc
+- `git checkout HEAD~1 -- fly.toml` khôi phục `fly.toml` của chính fork của bạn trước khi hợp nhất
+- Nếu ngược dòng không sửa đổi `fly.toml` thì bước này sẽ không đưa ra bất kỳ sự khác biệt nào
+- Nếu ngược dòng đã sửa đổi `fly.toml`, bước này đảm bảo tên ứng dụng Fly, ổ đĩa, khu vực và cấu hình triển khai dành riêng cho nhánh khác của bạn không bị ghi đè
 
-Nếu bạn muốn căn chỉnh theo một thẻ phát hành cụ thể (ví dụ: `v3.4.7`), trước tiên hãy xác minh rằng thẻ đó đã được bao gồm trong `upstream/main`:
+Nếu bạn muốn căn chỉnh với một thẻ phát hành cụ thể (ví dụ `v3.4.7`), trước tiên hãy xác minh rằng thẻ đó đã được bao gồm trong `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Nếu lệnh trả về thành công, điều đó có nghĩa là `upstream/main` đã chứa phiên bản đó; bạn chỉ cần hợp nhất `upstream/main`.
+Trả lại thành công có nghĩa là `upstream/main` đã chứa phiên bản đó; bạn chỉ có thể hợp nhất `upstream/main`.
 
-### 9.2 Trình tự phát hành tiêu chuẩn sau khi đồng bộ với thượng nguồn
+### 9.2 Trình tự phát hành tiêu chuẩn sau khi đồng bộ hóa ngược dòng
 
-Sau khi đồng bộ với kho lưu trữ gốc, hãy làm theo thứ tự phát hành được khuyến nghị sau:
+Sau khi đồng bộ hóa với kho lưu trữ gốc, hãy làm theo thứ tự phát hành được đề xuất sau:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Khôi phục `fly.toml` của bản fork
+3. Khôi phục `fly.toml` của fork
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Đây là quy trình thực tế đã được sử dụng khi nâng cấp dự án hiện tại lên `v3.4.7` (ví dụ này đề cập đến một phiên bản lịch sử; phiên bản thực tế hiện tại là `v3.8.0`).
+Đây là quy trình công việc thực tế được sử dụng khi nâng cấp dự án hiện tại lên `v3.4.7` (ví dụ đề cập đến phiên bản lịch sử; phiên bản thực tế hiện tại là `v3.8.0`).
 
 ---
 
@@ -418,40 +418,40 @@ Nếu bạn thấy `/app/data/...` thay vào đó, `DATA_DIR` đã bị cấu h�
 
 ---
 
-## 12. Các sự cố thường gặp
+## 12. Các vấn đề chung
 
-### 12.1 Trang `Secrets` trống
+### 12.1 trang `Secrets` trống
 
-Thường có hai nguyên nhân:
+Thường có hai lý do:
 
 - Bạn chưa chạy `flyctl secrets set`
-- Bạn đang xem một ứng dụng khác (ví dụ: `oroute` thay vì `omniroute`)
+- Bạn đang xem một ứng dụng khác (ví dụ `oroute` thay vì `omniroute`)
 
-### 12.2 `flyctl deploy` báo lỗi `app not found`
+### 12.2 `flyctl deploy` Báo cáo `app not found`
 
-Trước tiên, hãy tạo ứng dụng:
+Tạo ứng dụng đầu tiên:
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 Phân tích cú pháp `fly.toml` thất bại
+### 12.3 `fly.toml` Phân tích cú pháp không thành công
 
-Kiểm tra các mục sau:
+Kiểm tra những điều sau:
 
-- Có ký tự bị lỗi trong phần chú thích hay không
-- Cách đặt dấu ngoặc kép và thụt lề trong TOML có chính xác hay không
+- Liệu có ký tự bị cắt xén trong nhận xét hay không
+- Trích dẫn TOML và thụt lề có đúng không
 
-### 12.4 Dữ liệu không được lưu trữ bền vững
+### 12.4 Dữ liệu không tồn tại
 
-Xác minh cả hai mục sau:
+Xác minh cả hai điều sau:
 
 - `fly.toml` chứa `destination = '/data'`
 - `DATA_DIR` được đặt thành `/data`
 
-### 12.5 Có thể chạy mà không cần `INITIAL_PASSWORD` không?
+### 12.5 Nó có thể chạy mà không cần `INITIAL_PASSWORD` không?
 
-Có, ứng dụng vẫn có thể chạy. Ứng dụng sẽ dùng mật khẩu mặc định `CHANGEME`. Trong môi trường production, bạn nên thay đổi mật khẩu backend càng sớm càng tốt.
+Đúng. Khi chưa đặt `INITIAL_PASSWORD`, bạn sẽ tạo mật khẩu trang tổng quan trong trình hướng dẫn cài đặt trong lần truy cập đầu tiên (phần 5.2 bao gồm mã thông báo khởi động một lần và bước mật khẩu).
 
 ---
 

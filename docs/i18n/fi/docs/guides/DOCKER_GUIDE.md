@@ -8,22 +8,23 @@
 
 ## Sisällysluettelo
 
-- [Pikakäynnistys](#quick-run)
-- [Ympäristötiedoston käyttäminen](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Pikajuoksu](#quick-run)
+- [Ympäristötiedoston kanssa](#with-environment-file)
+- [Docker Kirjoita](#docker-compose)
 - [Käytettävissä olevat profiilit](#available-profiles)
-- [Isäntäjärjestelmän CLI-työkalujen määrittäminen, kun OmniRoute toimii Dockerissa](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redis-sivukontti](#redis-sidecar)
-- [Tuotantokäytön Compose](#production-compose)
+- [Säiliön kovettuminen](#container-hardening)
+- [Isäntä- CLI työkalujen määrittäminen, kun OmniRoute toimii Docker ssä](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Sivuvaunu](#redis-sidecar)
+- [Tuotanto Säveltää](#production-compose)
 - [Dockerfile-vaiheet](#dockerfile-stages)
 - [Kriittiset ympäristömuuttujat](#critical-environment-variables)
-- [Docker Compose ja Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Docker Säveltä Caddyn kanssa (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
 - [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
-- [Levykuvatunnisteet](#image-tags)
-- [Hallintapaneelin päivitykset Dockerissa](#dashboard-updates-in-docker)
-- [Saatavuus: oletusarvoinen SQLite tukee vain yhtä replikaa](#availability-default-sqlite-is-single-replica)
-- [Geminin alueelliset virheet Dockerissa](#gemini-regional-errors-inside-docker)
-- [Tärkeitä huomioita](#important-notes)
+- [Kuvatunnisteet](#image-tags)
+- [Kojelaudan päivitykset Docker](#dashboard-updates-in-docker)
+- [Saatavuus: oletus SQLite on yksikopio](#availability-default-sqlite-is-single-replica)
+- [Gemini alueellisia virheitä Docker sisällä](#gemini-regional-errors-inside-docker)
+- [Tärkeitä huomautuksia](#important-notes)
 
 ---
 
@@ -89,6 +90,30 @@ OmniRoute sisältää Compose-profiilit yleisimpiä käyttöönottotapoja varten
 | `web`           | `omniroute-web`  | Selainta tarvitsevat verkkoistuntopalveluntarjoajat: `gemini-web`, `claude-web`, `claude-turnstile` (koostaa `runner-web`-vaiheen, Chromium sisältyy)                          | `docker compose --profile web up -d`         |
 
 > Useita profiileja voi yhdistää: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Säiliön kovettuminen
+
+`docker-compose.yml` : `base`, `web`, `cli` ja `host` -sovelluspalvelut käyttävät `cap_drop: [ALL]` ja `no-new-privileges:true` -suojausvaihtoehtoa. Kuva toimii ei-root-käyttäjänä `node` ja kuuntelee korkeita portteja, joten se ei tarvitse Linux -ominaisuuksia. Suojausvaihtoehto estää prosesseja saamasta oikeuksia setuid-binäärien kautta.
+
+Vain `cli` profiili kiinnittää automaattisen päivityksen Docker -liittimen. Katso kohta [Escape Hatch: määritä säilön oma CLIs](#escape-hatch-configure-the-containers-own-clis-use-sparingly) tietoturvavaikutuksista.
+
+Päätiedostojärjestelmä pysyy oletusarvoisesti kirjoitettavana. `cli` profiili kirjoittaa CLI -määritykset ja välimuistit säilön kotihakemistoon, `web` profiili tallentaa Chromium-istunnon tilan ja Next.js ajoaika voi kirjoittaa välimuistia `/app/data` ulkopuolelle.
+
+Jos haluat kokeilla vain luku -tilassa olevaa juuritiedostojärjestelmää `base` profiililla, tallenna tämä nimellä `docker-compose.override.yml` kohdan `docker-compose.yml` viereen. Compose lukee ohituksen automaattisesti.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Nykyinen `/app/data` kiinnitys pysyy kirjoitettavana. Testaa työkuormasi ennen kuin käytät tätä ohitusta tuotannossa, koska se saattaa joutua kirjoittamaan muille poluille.
 
 ## Isäntäkoneen CLI-työkalujen määrittäminen, kun OmniRoute toimii Dockerissa
 
@@ -235,16 +260,16 @@ Tuotantopino toimii rinnakkain kehitysympäristön compose-pinon kanssa (eri sä
 
 ## Dockerfile-vaiheet
 
-Arkisto toimittaa monivaiheisen Docker-tiedoston (`Dockerfile`). Neljä vaihetta on esillä; pick the right `target` for your use case.
+Arkisto toimittaa monivaiheisen Docker-tiedoston (`Dockerfile`). Neljä vaihetta on esillä; Valitse oikea `target` käyttötapauksiisi.
 
-| Vaihe         | Peruskuva             | Tarkoitus                                                                                                                                                                                                                                                                           |
-| ------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Asentaa deps:n (`npm ci --legacy-peer-deps`) ja suorittaa `npm run build` (Turbopack oletuksena — katso rakennusaikaresurssit alla)                                                                                                                                                 |
-| `runner-base` | `node:26-trixie-slim` | Tuotannon suoritusaika erillisellä Next.js lähdöllä.** Ei palveluntarjoajan CLIs pakettia.**                                                                                                                                                                                        |
-| `runner-cli`  | `runner-base`         | Lisää `git`, `docker.io`, `docker-compose` ja globaalin CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Pick this for agentic workflows.**                                                                                                               |
-| `runner-web`  | `runner-base`         | Lisää Playwright + Chromium-selaimen (`--with-deps`) verkkoistuntojen tarjoajille: `gemini-web`, `claude-web`, `claude-turnstile`.** Pick this when you use those providers** — tavallinen kuva epäonnistuu pyynnöstä ilman sitä (katso `-web` huomautus kohdassa Julkaisukanavat). |
+| Vaihe         | Peruskuva             | Tarkoitus                                                                                                                                                                                                                                                                                     |
+| ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Asentaa deps:n (`npm ci --legacy-peer-deps`) ja suorittaa `npm run build` (Turbopack oletuksena — katso rakennusaikaresurssit alla)                                                                                                                                                           |
+| `runner-base` | `node:26-trixie-slim` | Tuotannon suoritusaika erillisellä Next.js lähdöllä.** Ei palveluntarjoajan CLIs pakettia.**                                                                                                                                                                                                  |
+| `runner-cli`  | `runner-base`         | Lisää `git`, `docker.io`, `docker-compose` ja globaalin CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Valitse tämä agenttityönkulkua varten.**                                                                                                                   |
+| `runner-web`  | `runner-base`         | Lisää Playwright + Chromium-selaimen (`--with-deps`) verkkoistuntojen tarjoajille: `gemini-web`, `claude-web`, `claude-turnstile`.** Valitse tämä, kun käytät näitä palveluntarjoajia** — tavallinen kuva epäonnistuu pyynnöstä ilman sitä (katso `-web` huomautus kohdassa Julkaisukanavat). |
 
-Build a specific target manually:
+Luo tietty kohde manuaalisesti:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,11 +281,11 @@ docker build --target runner-web  -t omniroute:web  .
 
 Kolme rakennusargumenttia hallitsee `builder` lavan hintaa. Ne ovat vain rakennusaikaisia. — `OMNIROUTE_MEMORY_MB` (alla) on erillinen ajonaikainen nuppi.
 
-| Rakenna arg                 | Oletus | Vaikutus                                                                                      |
-| --------------------------- | ------ | --------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` rakentaa verkkopaketin avulla: pienempi huippumuisti, hitaampi. `1` valitsee Turbopack:n. |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | V8 heap ceiling (`--max-old-space-size`) for the spawned `next build`.                        |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`    | Syötteet `CIRCLE_NODE_TOTAL`; Next derives `workers = N - 1` for page-data collection.        |
+| Rakenna arg                 | Oletus | Vaikutus                                                                                              |
+| --------------------------- | ------ | ----------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`    | `0` rakentaa verkkopaketin avulla: pienempi huippumuisti, hitaampi. `1` valitsee Turbopack:n.         |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144` | V8 kasan katto (`--max-old-space-size`) syntyneelle `next build`: lle .                               |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`    | Syötteet `CIRCLE_NODE_TOTAL`; Seuraavaksi johdetaan `workers = N - 1` sivutietojen keräämistä varten. |
 
 `OMNIROUTE_BUILD_WORKERS` on se, joka kasvattaa suuren rakentajan varassa ja joka epäilee, kun rajoitettu rakenne kuolee** jälkeen** `✓ Compiled successfully`. Jokainen sivutietotyöntekijä on oma prosessinsa, samoin kuin emo- `next build` itse; elävä VPS -toisto (ongelma #7518) mittasi kunkin prosessin huipun RSS arvolla ~ 4,5 GB riippumatta `NODE_OPTIONS` -keon lipusta (Turbopack kääntää native/Rust muistiin V8-keon ulkopuolella). Oletusarvo `2` (→ 1 työntekijä, yhteensä 2 prosessia) on mitoitettu julkaisuputken käyttämille 16 GB / 4 vCPU GitHub-isännöidylle juoksijalle. Kohdassa `8` (→ 7 työntekijää) tuon juoksijan muisti loppui ja buildkit epäonnistui vaiheessa `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 työntekijää) ei vieläkään sopinut, kun prosessikohtainen RSS mitattiin suoraan päätelmien sijaan. `tests/unit/docker-build-memory-budget.test.ts` suorittaa aritmeettisen laskennan mitattua lukua vastaan ja epäonnistuu, jos jompikumpi nuppi kasvaa juoksijan ulkopuolelle.
 
@@ -295,7 +320,7 @@ Muistin käyttäytyminen Docker:
 
 ### Ajonaikainen RAM koodausagenteille
 
-Oletusarvo 1 GiB Docker on dashboard/light-chat lattia, ei tuotantokoko. Pitkät `POST /v1/responses` kappaleet (satoja viestejä, kymmeniä työkaluja) säilyttävät useita muistissa olevia kuvaajia pakkauksen aikana. Kaksi päällekkäistä ~ 3 MiB / ~ 750k-token -pyyntöä on keskeyttänyt V8:n** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) ja osui myös 16 GiB cgroup OOM. Katso [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Oletusarvo 1 GiB Docker on dashboard/light-chat lattia, ei tuotantokoko. Pitkät `POST /v1/responses` kappaleet (satoja viestejä, kymmeniä työkaluja) säilyttävät useita muistissa olevia kuvaajia pakkauksen aikana. Kaksi päällekkäistä ~ 3 MiB / ~ 750k-token -pyyntöä on keskeyttänyt V8:n** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) ja osui myös 16 GiB cgroup OOM. Katso [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Koko** cgroup `--memory` kasan yläpuolella** — alkuperäiset puskurit, SQLite ja pakkausvälituotteet ovat V8:n ulkopuolella.
 
@@ -415,7 +440,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy asettaa normaalit edelleenlähetysotsikot ylävirran säilöön. OmniRoute käyttää `NEXT_PUBLIC_BASE_URL` OAuth takaisinkutsujen ja luotujen julkisten linkkien kanonisena julkisena alkuperänä; todennettu kojelautakirjoitus käyttää samaa alkuperää olevia pyyntöjä sekä istuntoon sidottua CSRF suojausta. Ota `OMNIROUTE_TRUST_PROXY` käyttöön vain kehittyneissä käyttöönotoissa, joissa haluat tarkoituksella OmniRoute johtavan julkisen alkuperän luotetuista edelleenlähetetyistä otsikoista nimenomaisen määrityksen sijaan.
+Caddy asettaa normaalit edelleenlähetysotsikot ylävirran säilöön. OmniRoute käyttää `NEXT_PUBLIC_BASE_URL` OAuth takaisinkutsujen ja luotujen julkisten linkkien kanonisena julkisena alkuperänä; todennettu kojelautakirjoitus käyttää samaa alkuperää olevia pyyntöjä sekä istuntoon sidottua CSRF suojausta. Ota `OMNIROUTE_TRUST_PROXY` käyttöön vain edistyneissä käyttöönotoissa, joissa haluat tarkoituksella OmniRoute johtavan julkisen alkuperän luotetuista edelleenlähetetyistä otsikoista nimenomaisen määrityksen sijaan.
 
 ## Cloudflare Quick Tunnel
 
@@ -595,7 +620,7 @@ Varasto Docker / Kubernetes OmniRoute on** yksi solmuprosessi + yksi SQLite -kir
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Yksinäinen kirjoittaja                                 | Tehdä** ei** suorittaa useita replikoita samaa SQLite tiedostoa vastaan. Se turmelee DB.                                                                                                                                                                                                                                 |
 | Luo uudelleen / käynnistä uudelleen / HEALTHCHECK kill | **Täysi katkos** lennon SSE, kojelautaistunnot ja muistitila. Jokainen yhdistetty asiakas putoaa. Uudet pyynnöt tyhjän päätepisteen ikkunan aikana saavat käänteisen välityspalvelimen**`502 Bad Gateway: Unknown error`** , ei OmniRoute JSON — -asiakkaat eivät voi erottaa tätä palveluntarjoajan virheestä (#11015). |
-| Sama tapahtumasilmukka kuin `/healthz`                 | Kiireinen luettelo tai pakkausrasti voi viivyttää koettimia; lyhyen aikakatkaisun ja käynnistää sitten uudelleen** vain** kopio.                                                                                                                                                                                         |
+| Sama tapahtumasilmukka kuin `/healthz`                 | Kiireinen luettelo tai pakkausrasti voi viivyttää koettimia; lyhyt aikakatkaisu ja käynnistää sitten uudelleen** vain** kopio.                                                                                                                                                                                           |
 
 **Anturin matriisi** (katso myös [Kubernetes-luotaimen suositukset](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -636,9 +661,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep antaa kuben pudottaa palvelun päätepisteet ennen SIGTERM tä niin** uusi** liikenne lakkaa koskettamasta kuolettavaa prosessia. Lennon aikana `/v1/responses` SSE tyhjennetään `SHUTDOWN_TIMEOUT_MS` asti (oletus 30s) raskaan sarjan sisäänpääsyvuokrasopimuksilla (#11015). Uudet pyynnöt, jotka edelleen saavuttavat prosessin, saavat `503` + `Retry-After: 5`. Luo tyhjän päätepisteen väli uudelleen, kunnes korvaaminen on Valmis, pysyy kovana katkos —, joka on SQLite -topologia, ei mittausvirhe.
+`preStop` sleep antaa kuben pudottaa palvelun päätepisteet ennen SIGTERM tä niin** uusi** liikenne lakkaa koskettamasta kuolettavaa prosessia. Lennon aikana `/v1/responses` SSE tyhjennetään `SHUTDOWN_TIMEOUT_MS` asti (oletus 30s) raskaan sarjan pääsymaksujen (#11015) kautta. Uudet pyynnöt, jotka edelleen saavuttavat prosessin, saavat `503` + `Retry-After: 5`. Luo tyhjän päätepisteen väli uudelleen, kunnes korvaaminen on Valmis, pysyy kovana katkos —, joka on SQLite -topologia, ei mittausvirhe.
 
-Ulkoinen Postgres / monikirjoitin HA on** ei** dokumentoitu osakepolku. Jos tarvitset HA, säilytä yksi replika tai suorita topologia, jonka projekti on testannut ja dokumentoinut erikseen. Postgres/MySQL -teos asuu [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kunnes se toimitetaan, ainoa tuettu tapa kertoa** suuri** `/v1/responses` kapasiteetti on N itsenäistä prosessia (seuraava osa), ei `replicas > 1` yhdellä taltiolla.
+Ulkoinen Postgres / monikirjoitin HA on** ei** dokumentoitu osakepolku. Jos tarvitset HA, säilytä yksi replika tai suorita topologia, jonka projekti on testannut ja dokumentoinut erikseen. Postgres/MySQL -teos asuu [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Kunnes se toimitetaan, ainoa tuettu tapa kertoa** suuri** `/v1/responses` kapasiteetti on N riippumatonta prosessia (seuraava osa), ei `replicas > 1` yhdellä taltiolla.
 
 ## Scale-out: N itsenäistä prosessia
 
@@ -648,11 +673,11 @@ Yhden Codex tilin kopiot eivät saa kuluttaa itsenäisesti sen kertakäyttöist�
 
 Passiivinen ilmentymä lukee yhteyden uudelleen, kun päivitystä tarvitaan, ja ottaa käyttöön vain erilaisen, vanhentumattoman käyttöoikeustunnuksen. Muussa tapauksessa päivitys poistetaan käytöstä ilman, että yhteys vanhenee tai deaktivoidaan tai lasketaan päivityksen katkaisijan vika. Todellisissa alkupään todennusvirheissä käytetään edelleen normaalia vikalaskentaa, eksponentiaalista jäähdytystä ja normaalia asiakasvirhettä; tilin deaktivointi pysyy pysyvänä. Synkronoi omistajan kierretyt tunnukset ennen kuin käyttöoikeudet vanhenevat (oletusarvoinen ennakoiva päivitysjohto on viisi minuuttia) tai tuo Codex auth-tiedosto uudelleen. Passiivinen tuonti tallentaa toimitetut tunnukset vahvistamatta niitä tunnuksen päätepisteessä. Manuaalinen dashboard/API refresh palauttaa `409 refresh_disabled`; uudet OAuth -kirjautumiset ovat ennallaan. Katso [ympäristöviite](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-One Node -prosessi on** yksi V8-kasa** . Kaksi päällekkäistä ~ 3 MiB / ~ 750k-tokenin koodausagenttia `POST /v1/responses` (RTK + Caveman) katkaisee keon ~ 12 Gi:ssä (`FATAL ERROR: Reached heap limit`) ja voi OOM 16 Gi:n c-ryhmän. Katso [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Tuo mitta on a** muisti-budjetti** varoitus, ei tuote hard-max kahdesta samanaikaisesta pitkästä `/v1/responses`. Raskaan keskustelun sisäänpääsy on aidattu automaattisesti johdetulla sisäänottotavubudjetilla (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), joka on mitattu samasta V8/cgroup katosta. — ohittaa sen ylöspäin (tai vanhan `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` -pyyntömäärärajan asettaminen) jo kokoiselle prosessille palauttaa keskeytyksen. Pienet chatit, `/healthz`, `/v1/models` ja MCP ovat** ei** tuossa korkissa.
+One Node -prosessi on** yksi V8-kasa** . Kaksi päällekkäistä ~ 3 MiB / ~ 750k-tokenin koodausagenttia `POST /v1/responses` (RTK + Caveman) katkaisee keon ~ 12 Gi:ssä (`FATAL ERROR: Reached heap limit`) ja voi OOM 16 Gi:n c-ryhmän. Katso [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Tuo mitta on a** muisti-budjetti** varoitus, ei tuote hard-max kahden samanaikaisen pitkän `/v1/responses`. Raskaan keskustelun sisäänpääsy on aidattu automaattisesti johdetulla sisäänottotavubudjetilla (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), joka on koottu samasta V8/cgroup katosta. — ohittaa sen ylöspäin (tai vanhan `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` -pyyntömäärärajan asettaminen) jo kokoiselle prosessille palauttaa keskeytyksen. Pienet chatit, `/healthz`, `/v1/models` ja MCP ovat** ei** tuossa korkissa.
 
 ### Yksi prosessi: yli kaksi pitkää `/v1/responses`
 
-A** terveitä** prosessi (kaso `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`:n alapuolella, oletus `0.75`)** voi** ajaa enemmän kuin kaksi yhtäaikaista pitkää `POST /v1/responses`, kun prosessin laajuisessa inflight-tavubudjetissa (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) on vielä tilaa. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (oletusarvo 256 KiB) tai sen yläpuolella olevat rungot ottavat saman raskaan sarjan vuokrasopimuksen kuin rakenteen vaativat pyynnöt ja käyttävät samaa [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape -poikkeamaa (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Kymmeniä samanaikaisia pitkiä SSE asiakkaita (operaattorit tarvitsevat usein 40–50) on a** muisti-budjetti** kysymys — koko kasa + primary/headroom paikat + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ei kova "max 2" tuoteraja. Painettu kasa irtoaa edelleen uudelleenyritettävästä `503`, joten #7849 ei palaa.
+A** terveitä** prosessi (kaso `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`:n alapuolella, oletus `0.75`)** voi** ajaa enemmän kuin kaksi yhtä aikaa pitkää `POST /v1/responses`, kun prosessin laajuisessa lentotavubudjetissa (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) on vielä tilaa. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (oletusarvo 256 KiB) tai sen yläpuolella olevat rungot ottavat saman raskaan vuokrasopimuksen kuin rakenteen vaativat pyynnöt ja käyttävät samaa [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` -pakoa (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Kymmeniä samanaikaisia pitkiä SSE asiakkaita (operaattorit tarvitsevat usein 40–50) on a** muisti-budjetti** kysymys — koko pino + primary/headroom paikat + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ei kova "max 2" tuoteraja. Painettu kasa irtoaa edelleen uudelleenyritettävästä `503`, joten #7849 ei palaa.
 
 Vastaanottaja** moninkertaistaa kasoja** (itsenäiset V8 vanhat tilat)** tänään** :
 
@@ -661,12 +686,12 @@ Vastaanottaja** moninkertaistaa kasoja** (itsenäiset V8 vanhat tilat)** tänä�
 | Juokse** N containers/pods** , jokaisella sen kanssa** oma** `DATA_DIR` / tilavuus                                                   | Aseta `replicas > 1` yhtä SQLite tiedostoa vastaan                 |
 | Koko raskas lennon aikana + terve päätila keon / lennon tavu budjetista; 1–2 on konservatiivinen #7849 oletusarvo, ei kova tuote max | Anna yhdelle prosessille 8 × RAM ja rajoittamaton määräraja        |
 | Valinnainen: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for** jaetut kiintiötaskurit**                                     | Käsittele Redis jaettuna SQLite — se ei ole sitä                   |
-| Kopioi palveluntarjoajan salaisuudet jokaiseen esiintymään (tai hyväksy osioidut kojelautat)                                         | Odotettavissa on yksi kojelauta / yksi puheluloki eri esiintymissä |
+| Kopioi palveluntarjoajan salaisuudet jokaiseen esiintymään (tai hyväksy osioidut kojelaudat)                                         | Odotettavissa on yksi kojelauta / yksi puheluloki eri esiintymissä |
 | Edessä millä tahansa kuormantasauslaitteella; sticky by API -näppäin tai istunto riittää                                             | Vaadi toimittajakohtaista kokotietoista väliohjelmistoa            |
 
-Istunnon ja tilin välinen affiniteetti voidaan jakaa myös Redis kautta: aseta `OMNIROUTE_SESSION_AFFINITY_STORE=redis` ja `REDIS_URL` jokaiselle prosessille samalla `REDIS_KEY_PREFIX` llä ja positiivisella `sessionAffinityTtlMs` asetuksella. Pin-koodit ratkaisevat tiivistetyt käyttötili-identiteetit kunkin prosessin kelvolliseen paikalliseen yhteyteen, joten OAuth -tileillä, joilla on vastaavat identiteetin metatiedot, ei tarvitse olla vastaavaa yhteyttä IDs. Tunnetut tili-identiteetit ovat etusijalla ristiriitaisiin paikallisiin IDs nähden nastan resoluutiossa ja vartioidussa häätössä; tietueet ilman henkilöllisyyttä (tai häätöpuhelut ilman henkilöllisyyttä) säilyttävät vanhan ID suojan. Tilit, joilla ei ole vakaata käyttöidentiteettiä, vaativat edelleen vastaavan IDs. Redis virheet tai 100 ms ylittävät puhelut palautuvat paikalliseen SQLite. Jokainen Redis -affiniteettikauppa rajoittaa erinomaiset toiminnot arvoon 8, ohittaa Redis heti, kun se on täynnä, ja vapauttaa paikat vain, kun taustalla oleva työ selviää, ei soittajan määräajan kuluessa. Redis -katkoksen aikana ei ole jaettua totuutta: jokainen ilmentymä palautuu omaan paikalliseen sukulaisuuteensa, istunnot voivat kiinnittyä uudelleen kerran ilmentymää kohti ja esiintymät voivat poiketa toisistaan. Tahmeus konvergoi uudelleen Redis kautta, kun se palautuu. Aikakatkaisu rajoittaa odottamista, ei lähetetty EVAL, joka voi laskeutua varauksen jälkeen. Reitityskirjoitukset vertaavat reitityspäätöksen havaitsemaa tarkkaa arvoa, eivät tuoretta mutaatioajan lukua; havaittu ohitus tai SQLite varahavainto verrataan puuttuvaksi Redis avaimeksi. Vanhentuneet nastat korvataan yhdessä CAS ssä, joten myöhäinen komento ei voi korvata tai poistaa uudempaa, erilaista nastaa. Redis lukee atomisesti palauttaa arvon ja jäljellä olevan palvelimen TTL; positiivinen PTTL (tai ei vanhenemista) määrittää elävyyden, ei kirjoittajan JSON aikaleima tai lukijan kello. Paikalliset tilannekuvat kartoittavat jäljellä olevan TTL paikalliseen määräaikaan; olemassa olevat JSON -avaimet pysyvät luettavissa ja niiden raakatavut säilytetään CAS lle. Redis on ainoa totuuden lähde, kun se vastaa. Vahvistetut jaetut virheet, kosketukset ja poistot poistavat paikallisen merkinnän, älä koskaan asenna tai päivitä sitä. SQLite Redis -polulla sisältää vain tämän ilmentymän omat varapäätökset Redis virheistä, aikakatkaisuista tai sisäänpääsyn kyllästymisestä, TTL-rajoitettuna kuten ennenkin. Puuttuva paikallinen PIN-koodi myöhemmän katkoksen yhteydessä maksaa yhden uuden valinnan (yksi välimuistin puuttuminen), ei väärästä tai häädystä tilistä. Hylätyt upserts palauttaa jaetun voittajan ja sen jäljellä olevan TTL atomimaisesti: tavallinen valinta tarkistaa uudelleen kartoitetun paikallisen määräajan ja käyttää edelleen elävää kelvollista voittajaa koskettaen kyseisen tilin käyttöä ja kirjaamista ilman toista jaettua kirjoitusta. Jos se ei ole käytettävissä, valinta säilyttää paikallisen ehdokkaan, jättää jaetun PIN-koodin ennalleen ja lähettää yhden virheenkorjausviestin. Hylätty CAS ei kirjoita SQLite; Redis virheet, aikakatkaisut tai pääsykylläisyys käyttävät sen sijaan olemassa olevaa paikallista toimintaa. Jos lähetetyn mutaation vastaus saapuu aikakatkaisun jälkeen (hyväksytty, hylätty tai virheellinen), synkroninen täsmällinen sarjoitetun arvon vertailu-ja-poisto poistaa vain tavuidenttisen aikakatkaisun vararivin. Tämän vertailun ja poistamisen välillä ei ole odottelua; uudempi katkoskirjoitus säilyy. Vartioitu häätö poistaa epäonnistuneen tilin oman paikallisen PIN-koodin, vaikka Redis on alhaalla, ja puhdistaa sen uudelleen vahvistetun jaetun häätön jälkeen. Odottavat aiemmat jaetut vastaukset eivät voi palauttaa häädettyä paikallista merkkiä, koska jaetut onnistumiset eivät koskaan kirjoita SQLite. Myöhempi käyttökatkos voi palauttaa tilin; myöhemmin hyväksytty jaettu kirjoitus on olemassa vain Redis ssä . Redis miss ei ota yhteyttä paikalliseen varatilaan. Kun ohjain on pois päältä, äskettäin valitut nastat säilyttävät vanhan nelikentän SQLite JSON -muodon; vain Redis reititys lisää tiivistetyn tilin identiteetin. Valmiiksi haetut nastat tarkistetaan uudelleen niiden vanhentumisrajalla. Redis ei-vuokrausvalinta lukee myymälän uudelleen, mutta synkronisessa vuokrasopimuksessa voidaan silti käyttää nastaa, joka on häädetty esihaun ja suunnittelun välillä (hyväksytty parhaan mahdollisen ikkuna). Vuokrasitoumus ei voi vaihtaa tiliä kestävän vaatimuksen jälkeen: hylätyssä lisäsitoumuksessa se säilyttää vain kyseisen pyynnön vaatiman ehdokkaan ja jättää jaetun voittajan koskemattomaksi, joten tapausten välinen sopimus on rajoitettu tälle polulle. Taulukon loput pätevät edelleen: tämä ei jaa yhdistelmäistunnon tarttuvuutta, alkuperäisiä Codex -käännösnastioita, tilin semaforeja, lukituksia, kulutusrajoja, konfiguraatioita tai puhelulokeja.
+Istunnon ja tilin välinen affiniteetti voidaan jakaa myös Redis kautta: aseta `OMNIROUTE_SESSION_AFFINITY_STORE=redis` ja `REDIS_URL` jokaiselle prosessille samalla `REDIS_KEY_PREFIX` llä ja positiivisella `sessionAffinityTtlMs` asetuksella. Pin-koodit ratkaisevat tiivistetyt käyttötili-identiteetit kunkin prosessin kelvolliseen paikalliseen yhteyteen, joten OAuth -tileillä, joilla on vastaavat identiteetin metatiedot, ei tarvitse olla vastaavaa yhteyttä IDs. Tunnetut tili-identiteetit ovat etusijalla ristiriitaisiin paikallisiin IDs nähden nastan resoluutiossa ja vartioidussa häätössä; tietueet ilman henkilöllisyyttä (tai häätöpuhelut ilman henkilöllisyyttä) säilyttävät vanhan ID suojan. Tilit, joilla ei ole vakaata käyttöidentiteettiä, vaativat edelleen vastaavan IDs. Redis virheet tai 100 ms ylittävät puhelut palautuvat paikalliseen SQLite. Jokainen Redis -affiniteettikauppa rajoittaa erinomaiset toiminnot arvoon 8, ohittaa Redis heti, kun se on täynnä, ja vapauttaa paikat vain, kun taustalla oleva työ selviää, ei soittajan määräajan kuluessa. Redis -katkoksen aikana ei ole jaettua totuutta: jokainen ilmentymä palautuu omaan paikalliseen sukulaisuuteensa, istunnot voivat kiinnittyä uudelleen kerran ilmentymää kohti ja esiintymät voivat poiketa toisistaan. Tahmeus konvergoi uudelleen Redis kautta, kun se palautuu. Aikakatkaisu rajoittaa odottamista, ei lähetetty EVAL, joka voi laskeutua varauksen jälkeen. Reitityskirjoitukset vertaavat reitityspäätöksen havaitsemaa tarkkaa arvoa, eivät tuoretta mutaatioajan lukua; havaittu ohitus tai SQLite varahavainto verrataan puuttuvaksi Redis avaimeksi. Vanhentuneet nastat korvataan yhdessä CAS ssä, joten myöhäinen komento ei voi korvata tai poistaa uudempaa, erilaista nastaa. Redis lukee atomisesti palauttaa arvon ja jäljellä olevan palvelimen TTL; positiivinen PTTL (tai ei vanhenemista) määrittää elävyyden, ei kirjoittajan JSON aikaleima tai lukijan kello. Paikalliset tilannekuvat kartoittavat jäljellä olevan TTL paikalliseen määräaikaan; olemassa olevat JSON -avaimet pysyvät luettavissa ja niiden raakatavut säilytetään CAS lle. Redis on ainoa totuuden lähde, kun se vastaa. Vahvistetut jaetut virheet, kosketukset ja poistot poistavat paikallisen merkinnän, älä koskaan asenna tai päivitä sitä. SQLite Redis -polulla sisältää vain tämän ilmentymän omat varapäätökset Redis virheistä, aikakatkaisuista tai sisäänpääsyn kyllästymisestä, TTL-rajoitettuna kuten ennenkin. Puuttuva paikallinen PIN-koodi myöhemmän katkoksen yhteydessä maksaa yhden uuden valinnan (yksi välimuistin puuttuminen), ei väärästä tai häädystä tilistä. Hylätyt upserts palauttaa jaetun voittajan ja sen jäljellä olevan TTL atomimaisesti: tavallinen valinta tarkistaa uudelleen kartoitetun paikallisen määräajan ja käyttää edelleen elävää kelvollista voittajaa koskettaen kyseisen tilin käyttöä ja kirjaamista ilman toista jaettua kirjoitusta. Jos se ei ole käytettävissä, valinta säilyttää paikallisen ehdokkaan, jättää jaetun PIN-koodin ennalleen ja lähettää yhden virheenkorjausviestin. Hylätty CAS ei kirjoita SQLite; Redis virheet, aikakatkaisut tai pääsykylläisyys käyttävät sen sijaan olemassa olevaa paikallista toimintaa. Jos lähetetyn mutaation vastaus saapuu aikakatkaisun jälkeen (hyväksytty, hylätty tai virheellinen), synkroninen täsmällinen sarjoitetun arvon vertailu-ja-poisto poistaa vain tavuidenttisen aikakatkaisun vararivin. Tämän vertailun ja poistamisen välillä ei ole odottelua; uudempi katkoskirjoitus säilyy. Vartioitu häätö poistaa epäonnistuneen tilin oman paikallisen PIN-koodin, vaikka Redis on alhaalla, ja puhdistaa sen uudelleen vahvistetun jaetun häätön jälkeen. Odottavat aiemmat jaetut vastaukset eivät voi palauttaa häädettyä paikallista merkkiä, koska jaetut onnistumiset eivät koskaan kirjoita SQLite. Myöhempi katkos voi palauttaa tilin; myöhemmin hyväksytty jaettu kirjoitus on olemassa vain Redis ssä . Redis miss ei ota yhteyttä paikalliseen varatilaan. Kun ohjain on pois päältä, äskettäin valitut nastat säilyttävät vanhan nelikentän SQLite JSON -muodon; vain Redis reititys lisää tiivistetyn tilin identiteetin. Valmiiksi haetut nastat tarkistetaan uudelleen niiden vanhentumisrajalla. Redis ei-vuokrausvalinta lukee myymälän uudelleen, mutta synkronisessa vuokrasopimuksessa voidaan silti käyttää nastaa, joka on häädetty esihaun ja suunnittelun välillä (hyväksytty parhaan mahdollisen ikkuna). Vuokrasitoumus ei voi vaihtaa tiliä kestävän vaatimuksen jälkeen: hylätyssä lisäsitoumuksessa se säilyttää vain kyseisen pyynnön vaatiman ehdokkaan ja jättää jaetun voittajan koskemattomaksi, joten tapausten välinen sopimus on rajoitettu tälle polulle. Taulukon loput pätevät edelleen: tämä ei jaa yhdistelmäistunnon tarttuvuutta, alkuperäisiä Codex -käännösnastioita, tilin semaforeja, lukituksia, kulutusrajoja, konfiguraatioita tai puhelulokeja.
 
-Laitteisto: esiintymää kohden samanaikainen pitkä `/v1/responses` on a** muisti-budjetti** kysymys (kasa + inflight-byte / #10110). `N` riippumattomat `DATA_DIR`:t kertovat edelleen kasoista: isäntä RAM on katettava `N × cgroup`, ei "yksi 16 Gi pod, jossa on N = 8". Älä koskaan `replicas > 1` yhdessä SQLite tiedostossa.
+Laitteisto: esiintymää kohden samanaikainen pitkä `/v1/responses` on a** muisti-budjetti** kysymys (heap + inflight-byte / #10110). `N` riippumattomat `DATA_DIR` luvut kertovat edelleen kasoista: isäntä RAM on katettava `N × cgroup`, ei "yksi 16 Gi pod, jossa on N = 8". Älä koskaan `replicas > 1` yhdessä SQLite tiedostossa.
 
 Luo luonnos (kaksi kasaa, kaksi osaa — ei `deploy.replicas: 2`):
 
@@ -695,55 +720,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Prosessinaikainen tiheys (puristus pois HTTP isolaatista) on [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Yksi looginen klusteri jaetussa kestävässä tilassa on [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Prosessinaikainen tiheys ( HTTP isolaatin puristus) on [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Yksi looginen klusteri jaetussa kestävässä tilassa on [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Geminin alueelliset virheet Dockerissa
+## Gemini alueellisia virheitä Docker sisällä
 
-Google AI Studio / Gemini API voi palauttaa HTTP 400 -virheen, jonka tunniste on FAILED_PRECONDITION ja viesti
-`User location is not supported for the API use.` Isäntäkoneella onnistuva pyyntö
-ei osoita, että säilö käyttää samaa ulospäin suuntautuvaa reittiä. DNS-järjestys,
-IPv4/IPv6-yhteydet, VPN-reititys ja määritetyt välityspalvelimet voivat poiketa toisistaan. Tarkista
-[Googlen tukemat alueet](https://ai.google.dev/gemini-api/docs/available-regions)
-sekä todellinen yhteysreitti; tämä virhe ei yksinään tarkoita virheellistä API-avainta.
+Google AI Studio / Gemini API voi palauttaa HTTP 400:n kanssa FAILED_PRECONDITION ja `User location is not supported for the API use.` Onnistunut pyyntö isännässä ei todista, että säilö käyttää samaa lähtevää reittiä. DNS -järjestys, IPv4/IPv6 -yhteys, VPN -reititys ja määritetyt välityspalvelimet voivat vaihdella. Tarkista [Google:n tuetut alueet](https://ai.google.dev/gemini-api/docs/available-regions) sekä todellinen yhteysreitti; tämä virhe ei yksin tunnista huonoa API avainta.
 
-### Suosi yhteyskohtaista välityspalvelinta
+### Valitse yhteyskohtainen välityspalvelin
 
-Käytä OmniRouten [yhteyskohtaista välityspalvelinmääritystä](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-kyseiselle Gemini-yhteydelle ja suorita sitten uudelleen **Test Connection** sekä pieni pyyntö
-samalla mallilla. Näin reititysmuutos rajataan kyseiseen yhteyteen. Varmista,
-että välityspalvelin on tavoitettavissa säilöstä ja että yhteys todella käyttää
-sitä. Reitin muuttaminen ei takaa, että vastapään alueelliset käyttöehdot täyttyvät.
+Käytä OmniRoute:n [yhteyskohtaista välityspalvelinkokoonpanoa](../ops/PROXY_GUIDE.md#4-level-proxy-system) kyseiselle Gemini yhteydelle ja toista sitten** Testaa yhteys** ja pieni pyyntö samasta mallista. Tämä pitää reitityksen muutoksen kohdistuvan kyseiseen yhteyteen. Varmista, että välityspalvelin on tavoitettavissa säilöstä ja että yhteys todella valitsee sen. Reitin muuttaminen ei takaa yläjuoksun alueellista kelpoisuutta.
 
-### Vertaa isäntäkoneen ja säilön verkkoyhteyksiä
+### Vertaa isäntä- ja konttiverkkoa
 
-Pidä avain, malli ja pyyntö samoina, kun vertaat todennettuja tuloksia; älä koskaan
-liitä tunnistetietoja, välityspalvelimen salasanoja tai täydellisiä valtuutusotsakkeita ongelmaraporttiin.
-Tarkista ensin, mitä osoiteperheitä käyttöjärjestelmän nimenselvitys tarjoaa, käyttämällä samaa komentoa
-isäntäkoneella ja säilössä:
+Pidä avain, malli ja pyyntö identtisinä verrattaessa todennettuja tuloksia; Älä koskaan liitä tunnistetietoja, välityspalvelimen salasanoja tai täydellisiä valtuutusotsikoita ongelmaan. Tarkista ensin, mitä osoiteperheitä OS resolver tarjoaa käyttämällä samaa komentoa isännässä ja säilön sisällä:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Korvaa `omniroute` käyttämälläsi palvelulla (esimerkiksi `omniroute-web`). Nämä
-komennot tulostavat osoiteperheet ilman tunnistetietoja tai IP-osoitteita. Palautettu `6`
-osoittaa vain IPv6 DNS -tuloksen: se **ei** todista, että käytettävissä on toimiva IPv6-reitti tai API-yhteys.
-Jos `curl` on asennettu, vertaa komentoa `curl -4 -I https://generativelanguage.googleapis.com`
-komentoon `curl -6 -I https://generativelanguage.googleapis.com` kummassakin ympäristössä.
-HTTP-vastaus osoittaa kyseisen testin yhteyden toimivan, vaikka kyseessä olisi todentamattoman
-pyynnön virhe; vain todennettu mallipyyntö testaa Geminin käytettävyyden.
+Korvaa `omniroute` suorittamallasi palvelulla (esimerkiksi `omniroute-web`). Nämä komennot tulostavat osoiteperheitä ilman valtuustietoja tai IP -osoitteita. Palautettu `6` näyttää vain IPv6 DNS -tuloksen: se näyttää** ei** todistaa käyttökelpoinen IPv6 reitti tai API yhteys. Jos `curl` on asennettu, vertaa `curl -4 -I https://generativelanguage.googleapis.com` :tä `curl -6 -I https://generativelanguage.googleapis.com` molemmissa ympäristöissä. HTTP vastaus todistaa kyseisen anturin liitettävyyden, vaikka kyseessä olisikin todentamaton virhe. vain todennettu mallipyyntö testaa Gemini -kelpoisuuden.
 
-### Isäntätason vaihtoehto: toimiva IPv6 ja nimenselvityskäytäntö
+### Isäntätason vaihtoehto: toimiva IPv6 ja ratkaistava käytäntö
 
-Raportin [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) tekijä palautti
-yhteyden omassa ympäristössään ottamalla IPv6:n käyttöön säilöissä ja muuttamalla glibc:n
-osoitteenvalintaa. Käsittele tätä ympäristökohtaisena vaihtoehtona. Varmista isäntäkoneen
-toimiva IPv6, säilön ulospäin suuntautuva yhteys ja reititys sekä palomuurisäännöt ennen nimenselvityksen asetusten muuttamista.
-Yksityinen ULA-osoite ei yksinään osoita julkisen IPv6-yhteyden toimivuutta.
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) toimittaja palautti pääsyn ympäristöönsä ottamalla käyttöön kontin IPv6 ja muuttamalla glibc-osoitteen valintaa. Käsittele tätä ympäristökohtaisena vaihtoehtona. Vahvista toimiva isäntä IPv6, kontti egress/routing ja palomuurisäännöt ennen kuin muutat ratkaisun asetuksia. Yksityinen ULA -osoite ei itsessään muodosta julkista IPv6 yhteyttä.
 
-Palveluille, jotka on jo liitetty Composen oletusverkkoon, tämä katkelma ottaa
-IPv6:n käyttöön kyseisessä verkossa; säilytä palvelusi muut asetukset, portit, taltiot ja määritykset:
+Palveluille, jotka on jo liitetty Composen oletusverkkoon, tämä fragmentti mahdollistaa IPv6 kyseisessä verkossa; Säilytä loput palveluistasi, porteistasi, volyymeistäsi ja kokoonpanostasi:
 
 ```yaml
 networks:
@@ -751,30 +753,13 @@ networks:
     enable_ipv6: true
 ```
 
-Jos käytössä on nimetty verkko, ota IPv6 käyttöön siinä verkossa, johon palvelu tosiasiassa liittyy. Docker voi
-varata ULA-aliverkon; valitse erikseen määritetty, muiden kanssa päällekkäisyydetön aliverkko vain, jos verkkosi
-edellyttää sitä. Katso [Dockerin IPv6-verkkoyhteydet](https://docs.docker.com/engine/daemon/ipv6/)
-ja [Composen verkkoasetukset](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Jos kyseessä on nimetty verkko, ota se käyttöön verkossa, johon palvelu todella liittyy. Docker voi varata ULA aliverkon; Valitse eksplisiittinen, ei-päällekkäinen aliverkko vain, kun verkkosi vaatii sitä. Katso [Docker IPv6 -verkko](https://docs.docker.com/engine/daemon/ipv6/) ja [Luo verkkoasetukset](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-**glibc-pohjaisessa levykuvassa** `/etc/gai.conf` voi muuttaa osoitteenvalintaa. Nykyisen
-tietovaraston Dockerfile käyttää Debiania; mukautetut musl-pohjaiset levykuvat eivät käytä samaa mekanismia.
-Raportoitu muutos vaihtaa ULA-tunnisteen arvosta `label fc00::/7 6` arvoon
-`label fc00::/7 1`. Käytä lähtökohtana levykuvan täydellistä käytäntötaulukkoa ja säilytä sen muut
-merkinnät: `label`- tai `precedence`-merkinnän lisääminen korvaa kyseisen oletustaulukon, joten vain
-muutetun rivin sisältävä tiedosto ei riitä.
-[glibc:n määritysviite](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-dokumentoi tämän toiminnan. Liitä tarkistettu tiedosto vain luku -tilassa polkuun `/etc/gai.conf`
-ja luo palvelu uudelleen, jotta muutos tulee voimaan.
+On a** glibc-pohjainen kuva** , `/etc/gai.conf` voi muuttaa osoitteen valintaa. Nykyinen arkisto Dockerfile käyttää Debiania; mukautetut muslipohjaiset kuvat eivät jaa tätä mekanismia. Raportoitu säätö muuttaa ULA tunnisteen `label fc00::/7 6` stä `label fc00::/7 1`:ksi. Aloita kuvan täydellisestä käytäntötaulukosta ja säilytä sen muut merkinnät: `label` tai `precedence` -merkinnän lisääminen korvaa oletustaulukon, joten vain muutetun rivin sisältävä tiedosto ei riitä. [glibc-konfiguraatioviite](https://github.com/bminor/glibc/blob/master/posix/gai.conf) dokumentoi nämä semantiikka. Liitä tarkistettu tiedosto vain luku -muotoon `/etc/gai.conf` :ssä ja luo palvelu uudelleen sen käyttämiseksi.
 
-Tämä muuttaa käyttöjärjestelmän osoitteenvalintaa **kaikelle kyseisestä säilöstä ulospäin suuntautuvalle liikenteelle**.
-Se ei pakota jokaista sovellusta valitsemaan IPv6:ta: myös Noden DNS-järjestyksellä ja yhteyden
-valinnalla on merkitystä. Erityisesti `--dns-result-order=ipv4first` suosii IPv4:ää eikä
-ratkaise IPv4:ään rajoittuvaa ongelmaa. Katso [Noden DNS-järjestys](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Tämä muuttaa OS -osoitteen valintaa** kaikki lähtevä liikenne kyseisessä säilössä** . Se ei pakota jokaista sovellusta valitsemaan IPv6:tä: Myös solmun DNS järjestys ja yhteysvalinta ovat tärkeitä. Erityisesti `--dns-result-order=ipv4first` suosii IPv4, eikä se ole lääke IPv4-only virheeseen. Katso [Node DNS tilaus](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Testaa Gemini ja muut palveluntarjoajasi uudelleen jokaisen isäntätason muutoksen jälkeen. Jos haluat palauttaa
-aiemmat asetukset, poista mukautetun `gai.conf`-tiedoston liitos, palauta aiempi verkkomääritys ja
-luo kyseinen palvelu tai verkko uudelleen huoltoikkunan aikana. Verkon luominen uudelleen
-voi keskeyttää muiden siihen liitettyjen säilöjen toiminnan; älä poista pysyvän datan taltiota.
+Testaa Gemini ja muut palveluntarjoajasi uudelleen minkä tahansa isäntätason muutoksen jälkeen. Peruuttaaksesi poista mukautettu `gai.conf` -kiinnitys, palauta edellinen verkkokokoonpano ja luo ongelmallinen service/network uudelleen huoltoikkunan aikana. Verkon uudelleenluominen voi keskeyttää muut siihen liitetyt kontit; älä poista pysyvää tietomäärää.
 
 ## Tärkeitä huomioita
 

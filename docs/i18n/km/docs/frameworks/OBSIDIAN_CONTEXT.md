@@ -111,58 +111,48 @@ key id ដែលបានផ្ទៀងផ្ទាត់អត្តសញ្�
 key ដែលបានផ្ទៀងផ្ទាត់អត្តសញ្ញាណ ប៉ុន្តែគ្មានការកំណត់រចនាសម្ព័ន្ធ Obsidian តាម key នឹងនៅតែប្រើការកំណត់សកលជំនួស។
 ឧបករណ៍ `obsidian_sync_*` ទាំងបួនរក្សាឥរិយាបថ sync-token ដាច់ដោយឡែករបស់ពួកវា។
 
-## ឧបករណ៍ MCP (22)
+## ឧបករណ៍MCP (22)
 
-កំណត់នៅក្នុង `open-sse/mcp-server/tools/obsidianTools.ts`។ Token/base-URL ត្រូវបានកំណត់
-សម្រាប់ការហៅនីមួយៗ (តាម API key ជាមុនសិន បន្ទាប់មកតាមការកំណត់សកល)។ ឧបករណ៍ដែលភ្ជាប់ទៅកាន់ **ម៉ាស៊ីនមេសមកាលកម្ម** OmniRoute
-(ឧបករណ៍ `obsidian_sync_*` ទាំងបួន) តម្រូវបន្ថែមឱ្យមាន token ផ្ទៀងផ្ទាត់សមកាលកម្មដែលបានកំណត់រចនាសម្ព័ន្ធ
-នៅក្នុងការកំណត់ OmniRoute។
+កំណត់ក្នុង `open-sse/mcp-server/tools/obsidianTools.ts`។ token/base-URL ត្រូវបានដោះស្រាយក្នុងមួយការហៅ (per-API-key ដំបូង បន្ទាប់មកជាសកល)។ ឧបករណ៍ដែលបុក OmniRoute** ម៉ាស៊ីនមេធ្វើសមកាលកម្ម** (ឧបករណ៍ `obsidian_sync_*` ទាំងបួន) លើសពីនេះទៀតតម្រូវឱ្យធ្វើសមកាលកម្មការផ្ទៀងផ្ទាត់សញ្ញាសម្ងាត់ដែលបានកំណត់រចនាសម្ព័ន្ធនៅក្នុងការកំណត់ OmniRoute ។
 
 ### ឧបករណ៍អាន (`read:obsidian`)
 
-| ឧបករណ៍                       | សេចក្ដីពិពណ៌នា                                                                                                     |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | ពិនិត្យថាតើ Local REST API អាចចូលប្រើបាន និងបានផ្ទៀងផ្ទាត់អត្តសញ្ញាណឬអត់។                                          |
-| `obsidian_search_simple`     | ស្វែងរកអត្ថបទពេញលេញក្នុងខ្លឹមសារកំណត់ត្រា; ត្រឡប់បំណែកអត្ថបទជាមួយផ្លូវឯកសារ។                                       |
-| `obsidian_search_structured` | ស្វែងរកដោយប្រើកន្សោម JSON Logic (តម្រង and/or/regex/path)។                                                         |
-| `obsidian_read_note`         | អានកំណត់ត្រាតាមផ្លូវដែលទាក់ទងនឹង vault; អាចកំណត់ចំណងជើង/ប្លុក/frontmatter ជាក់លាក់បាន។                             |
-| `obsidian_list_vault`        | រាយបញ្ជីឯកសារ និងថតនៅក្នុង vault (ជាមែកធាងនៃធាតុ)។                                                                 |
-| `obsidian_get_document_map`  | ទទួលបានរចនាសម្ព័ន្ធចំណងជើងរបស់កំណត់ត្រាជាផែនទីនៃចំណងជើង → លេខបន្ទាត់។                                              |
-| `obsidian_get_note_metadata` | ទទួលបាន frontmatter, ស្លាក, តំណ និងចំនួនតួអក្សរ/ពាក្យ ដោយមិនមានខ្លឹមសារពេញលេញ។                                     |
-| `obsidian_get_active_file`   | ទទួលបានផ្លូវ + ខ្លឹមសាររបស់ឯកសារដែលកំពុងសកម្មនៅក្នុង Obsidian។                                                     |
-| `obsidian_get_periodic_note` | ទទួលបានកំណត់ត្រាតាមកាលកំណត់ប្រចាំថ្ងៃ/ប្រចាំសប្ដាហ៍/ប្រចាំខែសម្រាប់កាលបរិច្ឆេទមួយ (ថ្ងៃនេះ ប្រសិនបើមិនបានបញ្ជាក់)។ |
-| `obsidian_get_tags`          | រាយបញ្ជីស្លាកទាំងអស់ក្នុង vault ជាមួយប្រេកង់របស់វា។                                                                |
-| `obsidian_list_commands`     | រាយបញ្ជី ID ពាក្យបញ្ជា Obsidian ដែលអាចប្រើបាន (ប្រើជាមួយ `obsidian_execute_command`)។                              |
-| `obsidian_sync_status`       | ស្ថានភាពម៉ាស៊ីនមេសមកាលកម្ម OmniRoute៖ កំពុងដំណើរការ ឈ្មោះ vault ច្រក រយៈពេលដំណើរការ និងការធ្វើសមកាលកម្មចុងក្រោយ។   |
-| `obsidian_sync_conflicts`    | រាយបញ្ជីការប៉ះទង្គិចសមកាលកម្មដែលមិនទាន់បានដោះស្រាយ (ផ្លូវ ផ្លូវប៉ះទង្គិច ពេលវេលាដែលបានរកឃើញ)។                      |
+| ឧបករណ៍                       | ការពិពណ៌នា                                                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | ពិនិត្យមើលថាតើ Local REST API អាចទៅដល់ និងផ្ទៀងផ្ទាត់បានដែរឬទេ។                                                   |
+| `obsidian_search_simple`     | ការស្វែងរកអត្ថបទពេញលេញនៃមាតិកាចំណាំ; ត្រឡប់ផ្នែកតូចៗជាមួយផ្លូវឯកសារ។                                              |
+| `obsidian_search_structured` | ស្វែងរកដោយប្រើកន្សោមតក្កវិជ្ជា JSON (តម្រង and/or/regex/path ) ។                                                  |
+| `obsidian_read_note`         | អានកំណត់ចំណាំដោយផ្លូវទាក់ទងតុដេក; ជាជម្រើស heading/block/frontmatter. ជាក់លាក់                                    |
+| `obsidian_list_vault`        | រាយបញ្ជីឯកសារ និងថតឯកសារនៅក្នុងតុដេក (មែកធាងនៃធាតុ)។                                                              |
+| `obsidian_get_document_map`  | ទទួលបានរចនាសម្ព័ន្ធក្បាលរបស់ចំណាំជាផែនទីនៃក្បាលលេខ → បន្ទាត់។                                                     |
+| `obsidian_get_note_metadata` | ទទួលបាន frontmatter, tags, links, char/word រាប់ដោយគ្មានមាតិកាពេញលេញ។                                             |
+| `obsidian_get_active_file`   | ទទួលបានមាតិកា + ផ្លូវនៃឯកសារសកម្មបច្ចុប្បន្ននៅក្នុង Obsidian។                                                     |
+| `obsidian_get_periodic_note` | ទទួលបានកំណត់ចំណាំតាមកាលកំណត់ daily/weekly/monthly សម្រាប់កាលបរិច្ឆេទមួយ (ថ្ងៃនេះប្រសិនបើលុបចោល) ។                 |
+| `obsidian_get_tags`          | រាយស្លាកតុដេកទាំងអស់ជាមួយនឹងប្រេកង់របស់វា។                                                                        |
+| `obsidian_list_commands`     | រាយពាក្យបញ្ជា Obsidian ដែលអាចប្រើបាន IDs (ប្រើជាមួយ `obsidian_execute_command`) ។                                 |
+| `obsidian_sync_status`       | ស្ថានភាពម៉ាស៊ីនមេOmniRoute ធ្វើសមកាលកម្ម៖ កំពុងដំណើរការ ឈ្មោះតុដេក ច្រក ពេលវេលាដំណើរការ ការធ្វើសមកាលកម្មចុងក្រោយ។ |
+| `obsidian_sync_conflicts`    | រាយបញ្ជីជម្លោះសមកាលកម្មដែលមិនបានដោះស្រាយ (ផ្លូវ ផ្លូវជម្លោះ បានរកឃើញ-នៅ)។                                         |
 
 ### ឧបករណ៍សរសេរ (`write:obsidian`)
 
-| ឧបករណ៍                           | សេចក្ដីពិពណ៌នា                                                                              |
-| -------------------------------- | ------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | បង្កើត ឬសរសេរជាន់លើកំណត់ត្រាមួយដោយប្រើខ្លឹមសារ Markdown ដែលបានផ្ដល់។                        |
-| `obsidian_append_note`           | បន្ថែមខ្លឹមសារទៅកំណត់ត្រា; អាចបន្ថែមទៅចំណងជើង/ប្លុកជាក់លាក់មួយ។                             |
-| `obsidian_patch_note`            | បន្ថែមនៅខាងចុង/ខាងដើម ឬជំនួសដោយចំគោលដៅនៅចំណងជើង ប្លុក ឬវាល frontmatter។                     |
-| `obsidian_delete_note`           | លុបកំណត់ត្រាចេញពី vault ជាអចិន្ត្រៃយ៍។                                                      |
-| `obsidian_move_note`             | ផ្លាស់ទី ឬប្ដូរឈ្មោះកំណត់ត្រានៅក្នុង vault។                                                 |
-| `obsidian_execute_command`       | ប្រតិបត្តិពាក្យបញ្ជា Obsidian តាម ID ពាក្យបញ្ជារបស់វា។                                      |
-| `obsidian_open_file`             | បើកឯកសារមួយក្នុង Obsidian (បង្កើតឯកសារនោះ ប្រសិនបើវាមិនមាន)។                                |
-| `obsidian_sync_trigger`          | ចាប់ផ្ដើមការធ្វើសមកាលកម្ម vault ទ្វេទិសរវាង desktop↔mobile ភ្លាមៗ។                          |
-| `obsidian_sync_resolve_conflict` | ដោះស្រាយការប៉ះទង្គិចសមកាលកម្ម៖ រក្សាទុក `local` (mobile), `remote` (desktop) ឬ `keep-both`។ |
+| ឧបករណ៍                           | ការពិពណ៌នា                                                                          |
+| -------------------------------- | ----------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | បង្កើត ឬសរសេរជាន់លើកំណត់ចំណាំជាមួយនឹងខ្លឹមសារ Markdown ដែលបានផ្តល់ឱ្យ។              |
+| `obsidian_append_note`           | បន្ថែមមាតិកាទៅចំណាំ; ជាជម្រើសទៅ heading/block. ជាក់លាក់មួយ។                         |
+| `obsidian_patch_note`            | វះកាត់ append/prepend/replace នៅផ្នែកក្បាល ប្លុក ឬផ្នែកខាងមុខ។                      |
+| `obsidian_delete_note`           | លុបចំណាំជាអចិន្ត្រៃយ៍ពីតុដេក។                                                       |
+| `obsidian_move_note`             | ផ្លាស់ទី ឬប្តូរឈ្មោះចំណាំនៅក្នុងតុដេក។                                              |
+| `obsidian_execute_command`       | ប្រតិបត្តិពាក្យបញ្ជា Obsidian ដោយពាក្យបញ្ជារបស់វា ID។                               |
+| `obsidian_open_file`             | បើកឯកសារនៅក្នុង Obsidian (បង្កើតវាប្រសិនបើវាមិនមាន) ។                               |
+| `obsidian_sync_trigger`          | ចាប់ផ្តើមការធ្វើសមកាលកម្មតុដេកចល័ត ↔ ផ្ទៃតុទ្វេទិសភ្លាមៗ។                           |
+| `obsidian_sync_resolve_conflict` | ដោះស្រាយជម្លោះសមកាលកម្ម៖ រក្សា `local` (ទូរស័ព្ទ), `remote` (ផ្ទៃតុ) ឬ `keep-both`។ |
 
 > [!NOTE]
-> គោលដៅរបស់ `obsidian_patch_note` ទទួលយក `targetType` ជា `heading | block | frontmatter`
-> និង `operation` ជា `append | prepend | replace` ដោយមាន `createTargetIfMissing`
-> ជាជម្រើស។ ឧបករណ៍ `obsidian_sync_*` ទាំងបួនទាក់ទងទៅកាន់ម៉ាស៊ីនមេសមកាលកម្មមូលដ្ឋាន
-> (`http://127.0.0.1:27781` តាមលំនាំដើម) និងតម្រូវឱ្យមាន sync token។
+> `obsidian_patch_note` គោលដៅទទួលយក `targetType` នៃ `heading | block | frontmatter` និង `operation` នៃ `append | prepend | replace` ជាមួយនឹង `createTargetIfMissing` ស្រេចចិត្ត។ ឧបករណ៍ `obsidian_sync_*` ទាំងបួននិយាយទៅកាន់ម៉ាស៊ីនមេធ្វើសមកាលកម្មមូលដ្ឋាន (`http://127.0.0.1:27781` តាមលំនាំដើម) ហើយទាមទារនិមិត្តសញ្ញាសមកាលកម្ម។
 
 ### វិសាលភាព
 
-ឧបករណ៍អានតម្រូវឱ្យមាន `read:obsidian`; ឧបករណ៍សរសេរតម្រូវឱ្យមាន `write:obsidian`។ ការអនុវត្ត
-គឺដូចគ្នានឹង Notion — គ្រប់គ្រងដោយ `withScopeEnforcement()` នៅក្នុង
-`open-sse/mcp-server/server.ts`, ដោយដំណើរការនៅពេល `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, ជាមួយ
-វិសាលភាពដែលអនុញ្ញាតបានមកពី `OMNIROUTE_MCP_SCOPES` ឬបរិបទវិសាលភាពរបស់ API key។ សូមមើល
-[MCP-SERVER.md](./MCP-SERVER.md)។
+ឧបករណ៍អានត្រូវការ `read:obsidian`; ឧបករណ៍សរសេរត្រូវការ `write:obsidian`។ ការអនុវត្តគឺដូចគ្នាបេះបិទទៅនឹង Notion — ដែលគ្រប់គ្រងដោយ `withScopeEnforcement()` ក្នុង `open-sse/mcp-server/server.ts` បិទភ្ជាប់នៅលើ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` និងបង្ខំឱ្យបើកសម្រាប់អ្នកហៅ HTTP/SSE ដែល API key ខ្វះ `manage`/`admin` ជាមួយនឹងវិសាលភាពអនុញ្ញាតដែលបានមកពី `OMNIROUTE_MCP_SCOPES` ឬបរិបទវិសាលភាពរបស់ API ។ សូមមើល [MCP-SERVER.md](./MCP-SERVER.md) ។
 
 ## ចំណុចបញ្ចប់
 

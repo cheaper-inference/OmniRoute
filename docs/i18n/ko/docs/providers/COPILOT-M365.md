@@ -166,11 +166,11 @@ Microsoft 365 공급자의 경우** 연결 추가** 또는** 연결 수정** 대
 
 `copilot-m365-web` 활성화되어 있는지 확인하세요** 대시보드 → 공급자** . 일부 계층에서는 기본적으로 공급자가 숨겨질 수 있습니다.
 
-## 참고 자료
+## 참고자료
 
-- 이슈: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- 토론: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- 소스: `src/shared/constants/providers/web-cookie.ts` (공급자 정의)
+- 문제: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- 토론: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- 출처: `src/shared/constants/providers/web-cookie.ts` (공급자 정의)
 - HAR 가져오기: `src/shared/utils/m365HarImport.ts`
 - 자격 증명 필드: `src/shared/providers/webSessionCredentials.ts`
-- 티어 모달: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- 계층 모달: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

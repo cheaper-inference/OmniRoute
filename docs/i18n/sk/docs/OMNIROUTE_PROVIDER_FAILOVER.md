@@ -21,3 +21,5 @@ Predvolená politika medzi poskytovateľmi umožňuje až tri pokusy poskytovate
   - Predpona id (`provider/model`) sa nikdy nepresmeruje k inému poskytovateľovi.
 
 Stavy obvodu sú `closed`, `open` a `half_open`. Ochladzovanie naplánuje ohraničenú sondu; úspešná sonda uzatvorí okruh a neúspešná sonda ho znovu otvorí.
+
+Zlyhanie poskytovateľa prebieha vo vnútri brány. Správanie klienta počas výpadku brány nájdete v [časti Keď je samotná OmniRoute nedostupná](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable).

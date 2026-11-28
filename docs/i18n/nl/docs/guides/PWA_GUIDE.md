@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute wordt geleverd als een volledig installeerbare Progressive Web App. Wanneer je het dashboard opent vanuit een mobiele browser — Android (Chrome) of iOS (Safari) — kun je het aan je beginscherm toevoegen en profiteren van een ervaring die aanvoelt als een native app, zonder dat een appstore nodig is.
+Installeer het OmniRoute dashboard als een Progressive Web App om het vanaf uw startscherm of desktop in een zelfstandig venster te openen. De geïnstalleerde app heeft nog steeds een verbinding met uw OmniRoute server nodig voor navigatie, dashboardgegevens en API verzoeken. In de cache opgeslagen statische assets bieden geen offline gateway of offline dashboard.
 
 ## Wat is een PWA?
 
-Een Progressive Web App verandert het OmniRoute-webdashboard in iets dat eruitziet en aanvoelt als een native mobiele app. Na installatie:
+Een Progressive Web App maakt gebruik van het webdashboard met een app-pictogram en een apart venster. Eenmaal geïnstalleerd, OmniRoute:
 
-- Start de app vanaf je beginscherm met een eigen pictogram
-- Opent de app op volledig scherm — zonder adresbalk of tabbladinterface van de browser
-- Werkt de app offline met een speciale verbindingspagina
-- Worden statische assets in de cache opgeslagen voor sneller laden
-- Worden zowel de staande als liggende schermstand ondersteund
+- Wordt gestart vanaf uw startscherm of bureaublad
+- Opent in de standalone-modus, zonder de gebruikelijke adresbalk en tabbladen van de browser
+- Slaat geselecteerde statische assets op in cache
+- Ondersteunt portret- en landschapsoriëntaties
 
 ## Installatie
 
-### Android (Chrome)
+Gebruik een HTTPS -adres voor een server op een ander apparaat. Wanneer de server op hetzelfde apparaat draait, voldoet `http://localhost:20128` ook aan de vereisten voor browserinstallatie. Een gewoon `http://YOUR_IP:20128` adres voldoet niet aan die eisen. Installatiemenu's en aanwijzingen zijn afhankelijk van de browser en het besturingssysteem. Zie [MDN's PWA installatievereisten](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
 
-1. Open het OmniRoute-dashboard in Chrome: `http://YOUR_IP:20128`
-2. Chrome toont automatisch een banner met **"OmniRoute toevoegen aan beginscherm"**, of:
-   - Tik op het menu **⋮** (drie puntjes) → **"Toevoegen aan beginscherm"** of **"App installeren"**
-3. Bevestig de melding
-4. OmniRoute verschijnt als zelfstandige app op je beginscherm
+### Android (Chroom)
+
+1. Open uw OmniRoute HTTPS adres of `http://localhost:20128` voor een server op dezelfde telefoon.
+2. Open de**⋮** menu en kies** Installeer app** of** Toevoegen aan startscherm** , indien aangeboden.
+3. Bevestig de vraag.
+4. Open OmniRoute vanuit het startscherm.
 
 ### iOS (Safari)
 
-1. Open het OmniRoute-dashboard in Safari: `http://YOUR_IP:20128`
-2. Tik op de knop **Delen** (vak met pijl)
-3. Scrol omlaag en tik op **"Zet op beginscherm"**
-4. Geef de app een naam (standaard "OmniRoute") en tik op **Voeg toe**
-5. OmniRoute verschijnt met het app-pictogram op je beginscherm
+1. Open uw OmniRoute HTTPS -adres in Safari.
+2. Kraan** Deel** →** Toevoegen aan startscherm** .
+3. Bevestig de naam en tik op** Toevoegen** .
+4. Open OmniRoute vanuit het startscherm.
 
-### Desktop (Chrome / Edge)
+### Bureaublad (Chrome/Edge)
 
-1. Open het OmniRoute-dashboard
-2. Klik op het **installatiepictogram** in de adresbalk (of ⋮ → "OmniRoute installeren...")
-3. Bevestig de melding
-4. OmniRoute wordt geopend als een zelfstandig venster — zonder tabbladen en zonder adresbalk
+1. Open uw OmniRoute dashboard.
+2. Gebruik het installatiepictogram van de browser of het** Installeer app** menu-item, indien aangeboden.
+3. Bevestig de prompt om OmniRoute in een eigen venster te openen.
 
 ## Functies
 
-### Ervaring op volledig scherm
+### Zelfstandig venster
 
-Het manifest is geconfigureerd met `display: "fullscreen"`. Dit betekent dat de geïnstalleerde app het volledige scherm gebruikt — zonder browserinterface en zonder overlap met de statusbalk. Hierdoor voelt het dashboard echt als een native app.
+Het manifest stelt `display: "standalone"` en `start_url: "/dashboard"`. De geïnstalleerde app opent het dashboard in een app-venster. Browser- en besturingssysteembedieningen kunnen nog steeds verschijnen; het manifest vraagt niet om de modus Volledig scherm.
 
-### Offlineondersteuning
+### In cache opgeslagen activa en netwerkvereisten
 
-OmniRoute bevat een serviceworker (`sw.js`) die intelligente caching biedt:
+De [servicemedewerker](../../public/sw.js) slaat geselecteerde bronnen van dezelfde oorsprong op in de cache:
 
-| Assettype                                                                                                                                                                                                   | Strategie                            | Gedrag                                                                                                            |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| **App-shell**                                                                                                                                                                                               | Cache eerst                          | `/`, `/offline`, het manifest en pictogrammen worden tijdens de installatie vooraf in de cache opgeslagen         |
-| **Statische assets** (CSS, JS, afbeeldingen, lettertypen)                                                                                                                                                   | Netwerk eerst met cache als fallback | Haalt een actuele versie op via het netwerk; gebruikt bij offlinegebruik de cache als fallback                    |
-| **Next.js-bundels** (`/_next/`)                                                                                                                                                                             | Netwerk eerst met cache-update       | Haalt gegevens op via het netwerk en werkt de cache bij; gebruikt bij offlinegebruik de versie in de cache        |
-| **Navigatieverzoeken**                                                                                                                                                                                      | Omzeilen (nooit onderschept)         | De browser beheert de HTTP/3→HTTP/2-fallback; een inactieve QUIC-socket mag niet resulteren in `Response.error()` |
-| **API-/dashboardroutes** (`/api/`, `/a2a`, `/dashboard`, de client-API-aliassen `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, plus `/callback`, `/login`; hoofdletterongevoelig vergeleken) | Omzeilen (nooit in de cache)         | Gaat altijd rechtstreeks naar de server — wordt nooit door de serviceworker onderschept                           |
+| Verzoek of bezit                                      | Strategie     | Gedrag                                                                                                                                      |
+| ----------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bronnen voor installatietijd                          | Pre-cache     | `/`, `/manifest.webmanifest`, `/icon-512.png` en `/apple-touch-icon.png` worden in de cache opgeslagen tijdens de installatie van de werker |
+| Next.js statische activa (`/_next/`)                  | Netwerk eerst | Succesvolle reacties updaten de cache; een netwerkfout valt terug op een bestaand in de cache opgeslagen antwoord                           |
+| Andere statische CSS, JS, afbeeldingen en lettertypen | Cache-eerst   | Een bestaand in de cache opgeslagen antwoord wordt hergebruikt; succesvolle netwerkreacties worden bij een misser in de cache opgeslagen    |
+| Paginanavigatie                                       | Omzeilen      | De browser haalt de pagina direct op; er wordt geen offline fallback aangeboden                                                             |
+| API, dashboard en authenticatieroutes                 | Omzeilen      | De werker onderschept deze verzoeken niet en slaat deze ook niet op in de cache                                                             |
+| Overige niet-statische verzoeken                      | Netwerk       | Geen cache opzoeken of opslag                                                                                                               |
 
-### Offlinepagina
+De uitgesloten routes zijn `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` en `/login`, hoofdletterongevoelig op padgrenzen afgestemd. Cross-origin- en niet-GET-aanvragen omzeilen ook de werker.
 
-Wanneer het netwerk niet beschikbaar is en een gebruiker naar een nieuwe pagina navigeert, toont de serviceworker een speciale pagina op `/offline` die:
+### Connectiviteitspagina
 
-- Een duidelijke melding **"Verbindingsprobleem"** weergeeft
-- Een live **online-/offline-statusindicator** toont die in realtime wordt bijgewerkt
-- Een knop **"Verbinding opnieuw proberen"** bevat om de pagina opnieuw te laden zodra de verbinding is hersteld
-- Naar de **statuspagina** verwijst voor diagnostiek
+De `/offline` pagina biedt een connectiviteitsbericht, een online/offline indicator, een** Probeer de verbinding opnieuw** knop en een link naar de statuspagina. Het is** niet vooraf in de cache opgeslagen** en de servicemedewerker doet dat ook** niet** stuur mislukte navigatie ernaar door. Het bestaan ervan maakt nieuwe pagina's niet toegankelijk zonder de server.
 
 ### App-pictogrammen
 
-OmniRoute biedt pictogrammen die voor elk platform zijn geoptimaliseerd:
+Het manifest maakt reclame voor deze PNG iconen:
 
-| Bestand                | Grootte           | Gebruikt door                             |
-| ---------------------- | ----------------- | ----------------------------------------- |
-| `icon-512.png`         | 512×512           | Android-installatiemelding, opstartscherm |
-| `apple-touch-icon.png` | 180×180           | iOS-beginschermpictogram                  |
-| `icon-192.svg`         | 192×192 (vector)  | Adaptief Android-pictogram                |
-| `apple-touch-icon.svg` | 180×180 (vector)  | Apple-fallback                            |
-| `favicon.svg`          | Vector            | Browsertabbladen                          |
-| `favicon.ico`          | Meerdere formaten | Oudere browsers                           |
+| Bestand                | Maat    | Gebruik                               |
+| ---------------------- | ------- | ------------------------------------- |
+| `icon-192.png`         | 192×192 | Algemeen app-pictogram                |
+| `icon-512.png`         | 512×512 | Algemeen en maskeerbaar app-pictogram |
+| `apple-touch-icon.png` | 180×180 | Apple-startschermpictogram            |
+
+De browser selecteert het juiste pictogram voor het installatiedoel.
 
 ### Automatische registratie
 
-De serviceworker wordt automatisch geregistreerd via de component `<PwaRegister />` in de hoofdlay-out. De gebruiker hoeft niets te doen — de app kan worden geïnstalleerd zodra de browser het geldige manifest en de serviceworker detecteert.
+`PwaRegister` registreert de medewerker in productie wanneer de browser servicemedewerkers ondersteunt. De ontwikkelingsmodus maakt de registratie van werknemers ongedaan en wist caches om te voorkomen dat verouderde assets het hot reload verstoren. Installatieprompts blijven een browserbeslissing.
 
-## Technische architectuur
+## Technische Architectuur
 
-### Webappmanifest (`manifest.webmanifest`)
+### Webapp-manifest
 
-Gegenereerd door Next.js via `src/app/manifest.ts`:
+Next.js genereert `/manifest.webmanifest` uit [`src/app/manifest.ts`](../../src/app/manifest.ts). De belangrijkste instellingen zijn:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Instelling                   | Waarde                                          |
+| ---------------------------- | ----------------------------------------------- |
+| `short_name`                 | `OmniRoute`                                     |
+| `start_url`                  | `/dashboard`                                    |
+| `scope`                      | `/`                                             |
+| `display`                    | `standalone`                                    |
+| `orientation`                | `any`                                           |
+| Achtergrond- en themakleuren | Het standaard lichtpalet van `PWA_THEME_COLORS` |
 
-### Serviceworker (`public/sw.js`)
+De naam en beschrijving van het manifest zijn statische waarden in dat bronbestand. Het geïnstalleerde manifest volgt niet bij elk bezoek de instelling van de instantienaam of het actieve palet.
 
-Een standaardserviceworker (zonder frameworkafhankelijkheden) met:
+### Servicemedewerker
 
-- **Installatiefase**: Slaat de app-shell vooraf op in de cache (hoofdpagina, offlinepagina, manifest en pictogrammen)
-- **Activeringsfase**: Ruimt oude cacheversies op en neemt alle clients over
-- **Ophaalfase**: Intelligente routering op basis van het aanvraagtype (navigatie, statische asset, API)
-- **Cacheversiebeheer**: `omniroute-pwa-v3` — verhoog dit om bij een update een volledig nieuwe cache af te dwingen
+[`public/sw.js`](../../public/sw.js) heeft geen raamwerkafhankelijkheid van servicemedewerkers:
 
-### Lay-outmetadata (`src/app/layout.tsx`)
+- **Installeren:** slaat de vier hierboven genoemde bronnen vooraf op in de cache en activeert de nieuwe werker.
+- **Activeren:** verwijdert oudere cachegeneraties en claimclients.
+- **Ophalen:** past de bovenstaande strategieën voor statische activa en route-uitsluitingen toe.
+- **Versiebeheer:** de naam van de broncache is `omniroute-pwa-v3`; de productiebuild stempelt de cache-identiteit.
+- **Meldingen:** verwerkt inkomende `push` -gebeurtenissen en focust of opent een venster wanneer op een melding wordt geklikt.
 
-De hoofdlay-out bevat alle metatags die vereist zijn voor PWA-conformiteit:
+Push-gebeurtenishandlers alleen brengen geen actief push-abonnement of geconfigureerde serverlevering tot stand. Ga er niet vanuit dat meldingen alleen maar zijn ingeschakeld omdat de PWA is geïnstalleerd.
 
-- `manifest`-link naar `/manifest.webmanifest`
-- `apple-web-app-capable: true` voor de zelfstandige modus op iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` voor Chrome op Android
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` voor schermvullende weergave van rand tot rand
+### Lay-outmetagegevens en registratie
 
-### Component: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) biedt de manifestlink, Apple standalone metadata, themakleuren en `viewport-fit: cover`. De paginatitel en de titel van de Apple web-app gebruiken de instantienaam. De kleur van het live browserthema volgt het palet; het installatiemanifest gebruikt de standaard lichte kleur.
 
-Dit clientcomponent bevindt zich in `src/shared/components/PwaRegister.tsx` en:
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) draait op de client en registreert `/sw.js` met de build ID in zijn URL. Het detecteert niet-overeenkomende cachegeneraties en kan de werker opnieuw instellen en één keer opnieuw laden om te herstellen van een oudere installatie. Een registratiefout blokkeert het dashboard niet.
 
-1. Wordt uitgevoerd bij het koppelen (alleen aan de clientzijde)
-2. Controleert of de browser `serviceWorker` ondersteunt
-3. Registreert `/sw.js` op de achtergrond (fouten worden genegeerd om te voorkomen dat de app wordt geblokkeerd)
-4. Rendert niets (`return null`) — het is een component dat uitsluitend neveneffecten uitvoert
+## Gebruik met Termux (Android)
 
-## Gebruiken met Termux (Android)
+1. Start OmniRoute in Termux: `npx -y omniroute@latest`.
+2. Open Chrome op dezelfde telefoon: `http://localhost:20128`.
+3. Installeer de PWA via het installatiemenu van de browser.
+4. Houd de Termux-server draaiende terwijl u het dashboard gebruikt.
 
-Wanneer OmniRoute via Termux op Android wordt uitgevoerd, werkt de PWA naadloos:
+De telefoon host zowel de gateway als het dashboard. Voor verzoeken aan AI aanbieders op afstand is nog steeds netwerktoegang nodig. Zie de [Termux-handleiding](TERMUX_GUIDE.md) voor overwegingen over installatie en Android-proceslevensduur.
 
-1. Start OmniRoute in Termux: `npx omniroute`
-2. Open Chrome op dezelfde telefoon: `http://localhost:20128`
-3. Installeer de PWA via "Toevoegen aan startscherm"
-4. De PWA maakt verbinding met de lokale Termux-server — alles wordt op het apparaat uitgevoerd
+## Gebruik vanaf andere apparaten
 
-Deze combinatie betekent dat je Android-telefoon zowel de **server** (Termux) als de **client** (PWA) is — een volledig zelfstandige AI-gateway.
+Open het HTTPS -adres van de server op een telefoon, tablet of desktop en volg vervolgens de installatiestroom van die browser. De server moet vanaf elk apparaat bereikbaar blijven. Zie de [tunnelgids](../ops/TUNNELS_GUIDE.md) voor opties voor externe toegang.
 
-## Gebruiken vanaf andere apparaten
-
-Installeer de PWA op elk apparaat dat via een browser toegang heeft tot je OmniRoute-server:
-
-- **Een andere telefoon/tablet**: Ga naar `http://PHONE_IP:20128` en installeer de PWA
-- **Laptop**: Open Chrome/Edge en installeer de app als desktop-PWA
-- **Smart-tv met browser**: Open het dashboard op volledig scherm
-
-## Aanpassing
+## Maatwerk
 
 ### Instantienaam
 
-De PWA-titel neemt de instelling **Instantienaam** over uit `Dashboard → Instellingen`. Als je de naam van je instantie wijzigt in "Mijn AI-gateway", wordt die naam weergegeven voor de geïnstalleerde PWA.
+De** Instantienaam** instelling wijzigt de metadata van het dashboard, inclusief de paginatitel en de titel van de Apple web-app. Het gegenereerde manifest gebruikt een statische naam, dus deze instelling garandeert niet dat de naam van een reeds geïnstalleerde app wordt gewijzigd.
 
-### Aangepast favicon
+### Aangepaste favicon
 
-Als je via `Dashboard → Instellingen` een aangepast favicon uploadt, gebruikt het PWA-pictogram op de desktop dit aangepaste pictogram. Voor pictogrammen op het startscherm van mobiele apparaten worden de vooraf gebouwde bestanden `icon-512.png` en `apple-touch-icon.png` gebruikt.
+Een aangepast favicon verandert het favicon van de browser. Het installatiemanifest maakt nog steeds reclame voor de bovenstaande PNG bestanden; het wijzigen van de favicon vervangt niet de pictogrammen op het startscherm.
 
 ## Beperkingen
 
-- **Geen pushmeldingen** — De serviceworker implementeert de Push API niet. Meldingen worden in plaats daarvan afgehandeld door de Electron-app.
-- **Geen achtergrondsynchronisatie** — Offlineacties worden niet in een wachtrij geplaatst om later opnieuw te worden uitgevoerd. De PWA is voornamelijk bedoeld als dashboardweergave.
-- **iOS-beperkingen** — Safari op iOS ondersteunt niet alle PWA-functies (installatieprompts moeten bijvoorbeeld handmatig worden gestart en serviceworkers op de achtergrond zijn beperkt).
-- **Cachegrootte** — De serviceworker cachet alleen statische assets. Grote responspayloads van `/api/`-routes worden nooit gecachet.
-- **Aangepaste pictogrammen op mobiele apparaten** — Als het favicon in de instellingen wordt gewijzigd, wordt het pictogram op het startscherm van mobiele apparaten niet bijgewerkt (hiervoor moeten de PWA-pictogrammen opnieuw worden gegenereerd).
+- **Serververbinding vereist:** paginanavigatie, dashboardstatus en API -verzoeken hebben geen offline fallback.
+- **Geen achtergrondsynchronisatie:** offline acties worden niet in de wachtrij geplaatst voor herhaling.
+- **Browserverschillen:** installatiemenu's, vensterpresentatie en ondersteuning voor meldingen variëren per platform.
+- **Geen API -antwoordcache:** de werknemer sluit API, dashboard- en authenticatieroutes uit.
+- **Statische installatiepictogrammen:** het bijwerken van deze pictogrammen vereist het wijzigen van de geadverteerde items; browsers kunnen geïnstalleerde metagegevens behouden.
 
-## Bestandsreferentie
+## Bestandenreferentie
 
-| Bestand                                 | Doel                                                                  |
-| --------------------------------------- | --------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Next.js-manifestroute (genereert `manifest.webmanifest`)              |
-| `public/sw.js`                          | Serviceworker met cachinglogica                                       |
-| `src/shared/components/PwaRegister.tsx` | Clientcomponent dat de serviceworker registreert                      |
-| `src/app/offline/page.tsx`              | Offlinefallbackpagina met live statusindicator                        |
-| `src/app/layout.tsx`                    | Hoofdlay-out met PWA-metadata (apple-web-app, theme-color, enzovoort) |
-| `public/icon-512.png`                   | PNG-pictogram van 512×512 (Android, opstartscherm)                    |
-| `public/apple-touch-icon.png`           | PNG-pictogram van 180×180 (iOS-startscherm)                           |
-| `public/icon-192.svg`                   | SVG-pictogram van 192×192 (adaptief Android-pictogram)                |
-| `public/apple-touch-icon.svg`           | SVG-pictogram van 180×180 (Apple-fallback)                            |
+| Bestand                                                                                | Doel                                                           |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Gegenereerd web-app-manifest                                   |
+| [public/sw.js](../../public/sw.js)                                                     | Caching, uitsluitingen en handlers voor meldingsgebeurtenissen |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Productieregistratie en herstel van verouderde caches          |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Connectiviteitspagina, geen automatische offline fallback      |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Paginametagegevens en viewport-instellingen                    |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Gedeelde themakleurwaarden                                     |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 app-pictogram                                        |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple-pictogram                                      |

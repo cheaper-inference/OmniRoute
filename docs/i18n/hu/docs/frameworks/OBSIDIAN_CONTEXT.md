@@ -120,60 +120,48 @@ Obsidian-konfigurációval nem rendelkező kulcsok továbbra is használhatják 
 tartalékkonfigurációt. A négy `obsidian_sync_*` eszköz megtartja a saját, különálló
 szinkronizálásitoken-kezelését.
 
-## MCP-eszközök (22)
+## MCP szerszámok (22)
 
-Az `open-sse/mcp-server/tools/obsidianTools.ts` fájlban vannak definiálva. A token/alap-URL feloldása
-hívásonként történik (először API-kulcsonkénti, majd globális). Az OmniRoute **szinkronizációs szerverét**
-használó eszközökhöz (a négy `obsidian_sync_*` eszközhöz) ezenkívül szükség van az OmniRoute
-beállításaiban konfigurált szinkronizációs hitelesítési tokenre.
+A `open-sse/mcp-server/tools/obsidianTools.ts` definíciója. A token/base-URL feloldása hívásonként történik (először API-kulcsonként, majd globálisan). Eszközök, amelyek elérik a OmniRoute** szinkronizáló szerver** (a négy `obsidian_sync_*` eszköz) emellett OmniRoute beállításaiban konfigurált szinkronizálási hitelesítési tokent is igényli.
 
 ### Olvasási eszközök (`read:obsidian`)
 
-| Eszköz                       | Leírás                                                                                                         |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Ellenőrzi, hogy a Local REST API elérhető-e, és megtörtént-e a hitelesítés.                                    |
-| `obsidian_search_simple`     | Teljes szöveges keresés a jegyzetek tartalmában; fájlelérési utakat tartalmazó részleteket ad vissza.          |
-| `obsidian_search_structured` | Keresés JSON Logic-kifejezéssel (and/or/regex/path szűrők).                                                    |
-| `obsidian_read_note`         | Jegyzet beolvasása tárolóhoz viszonyított elérési út alapján; opcionálisan egy adott címsor/blokk/frontmatter. |
-| `obsidian_list_vault`        | A tároló fájljainak és könyvtárainak listázása (bejegyzések fája).                                             |
-| `obsidian_get_document_map`  | A jegyzet címsorstruktúrájának lekérése címsorok → sorszámok leképezéseként.                                   |
-| `obsidian_get_note_metadata` | Frontmatter, címkék, hivatkozások, valamint karakter- és szószám lekérése a teljes tartalom nélkül.            |
-| `obsidian_get_active_file`   | Az Obsidianben jelenleg aktív fájl elérési útjának és tartalmának lekérése.                                    |
-| `obsidian_get_periodic_note` | Egy dátumhoz tartozó napi/heti/havi periodikus jegyzet lekérése (kihagyás esetén a mai).                       |
-| `obsidian_get_tags`          | A tároló összes címkéjének listázása az előfordulási gyakoriságukkal együtt.                                   |
-| `obsidian_list_commands`     | Az elérhető Obsidian-parancsazonosítók listázása (az `obsidian_execute_command` eszközzel használható).        |
-| `obsidian_sync_status`       | Az OmniRoute szinkronizációs szerverének állapota: futás, tárolónév, port, üzemidő, utolsó szinkronizáció.     |
-| `obsidian_sync_conflicts`    | A feloldatlan szinkronizációs ütközések listázása (elérési út, ütközési elérési út, észlelés időpontja).       |
+| Eszköz                       | Leírás                                                                                               |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Ellenőrizze, hogy a Local REST API elérhető és hitelesített-e.                                       |
+| `obsidian_search_simple`     | Jegyzettartalom teljes szöveges keresése; töredékeket ad vissza fájl elérési úttal.                  |
+| `obsidian_search_structured` | Keresés JSON Logic kifejezéssel (and/or/regex/path szűrők).                                          |
+| `obsidian_read_note`         | Jegyzet olvasása boltozat-relatív útvonal szerint; opcionálisan egy adott heading/block/frontmatter. |
+| `obsidian_list_vault`        | Fájlok és könyvtárak listázása a tárolóban (bejegyzések fája).                                       |
+| `obsidian_get_document_map`  | Szerezze meg a jegyzet címsorszerkezetét a címsorok → sorszámainak térképeként.                      |
+| `obsidian_get_note_metadata` | A teljes tartalom nélkül megkaphatja a frontanyagot, a címkéket, a linkeket és char/word számot.     |
+| `obsidian_get_active_file`   | Az aktuálisan aktív fájl + elérési útjának lekérése Obsidian ben.                                    |
+| `obsidian_get_periodic_note` | Szerezze meg a daily/weekly/monthly időszakos jegyzetet egy dátumhoz (ma, ha kihagyja).              |
+| `obsidian_get_tags`          | Sorolja fel az összes trezorcímkét a gyakoriságukkal együtt.                                         |
+| `obsidian_list_commands`     | Listázza ki az elérhető Obsidian parancsot IDs (használja `obsidian_execute_command`-vel).           |
+| `obsidian_sync_status`       | OmniRoute sync szerver állapota: fut, tároló neve, port, üzemidő, utolsó szinkronizálás.             |
+| `obsidian_sync_conflicts`    | Sorolja fel a feloldatlan szinkronizálási ütközéseket (útvonal, ütközési útvonal, észlelt-at).       |
 
-### Írási eszközök (`write:obsidian`)
+### Íróeszközök (`write:obsidian`)
 
-| Eszköz                           | Leírás                                                                                                  |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Jegyzet létrehozása vagy felülírása a megadott Markdown-tartalommal.                                    |
-| `obsidian_append_note`           | Tartalom hozzáfűzése egy jegyzethez; opcionálisan egy adott címsorhoz/blokkhoz.                         |
-| `obsidian_patch_note`            | Célzott hozzáfűzés/eléfűzés/csere egy címsornál, blokknál vagy frontmatter-mezőnél.                     |
-| `obsidian_delete_note`           | Jegyzet végleges törlése a tárolóból.                                                                   |
-| `obsidian_move_note`             | Jegyzet áthelyezése vagy átnevezése a tárolón belül.                                                    |
-| `obsidian_execute_command`       | Obsidian-parancs végrehajtása a parancsazonosítója alapján.                                             |
-| `obsidian_open_file`             | Fájl megnyitása az Obsidianben (létrehozza, ha nem létezik).                                            |
-| `obsidian_sync_trigger`          | Azonnali kétirányú asztali gép↔mobil tárolószinkronizáció indítása.                                     |
-| `obsidian_sync_resolve_conflict` | Szinkronizációs ütközés feloldása: `local` (mobil), `remote` (asztali gép) vagy `keep-both` megtartása. |
+| Eszköz                           | Leírás                                                                                                         |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Jegyzet létrehozása vagy felülírása adott Markdown tartalommal.                                                |
+| `obsidian_append_note`           | Tartalom hozzáfűzése jegyzethez; opcionálisan egy adott heading/block.-hoz                                     |
+| `obsidian_patch_note`            | Sebészileg append/prepend/replace egy fejlécben, blokkban vagy frontanyag mezőben.                             |
+| `obsidian_delete_note`           | Jegyzet végleges törlése a tárolóból.                                                                          |
+| `obsidian_move_note`             | Jegyzet áthelyezése vagy átnevezése a tárolón belül.                                                           |
+| `obsidian_execute_command`       | A Obsidian parancs végrehajtása a ID paranccsal.                                                               |
+| `obsidian_open_file`             | Nyisson meg egy fájlt Obsidian ban (ha nem létezik, létrehozza).                                               |
+| `obsidian_sync_trigger`          | Azonnali kétirányú asztali ↔ mobil trezor szinkronizálás elindítása.                                           |
+| `obsidian_sync_resolve_conflict` | Szinkronizálási ütközés feloldása: `local` (mobil), `remote` (asztali számítógép) vagy `keep-both` megtartása. |
 
 > [!NOTE]
-> Az `obsidian_patch_note` céljai a `heading | block | frontmatter` `targetType`
-> értékeket, a műveletei pedig az `append | prepend | replace` `operation` értékeket
-> fogadják el, opcionális `createTargetIfMissing` beállítással. A négy `obsidian_sync_*`
-> eszköz a helyi szinkronizációs szerverrel kommunikál (alapértelmezés szerint
-> `http://127.0.0.1:27781`), és szinkronizációs tokent igényel.
+> `obsidian_patch_note` célok elfogadják `heading | block | frontmatter` `targetType` és `append | prepend | replace`- ből `operation`, egy opcionális `createTargetIfMissing` vel . A négy `obsidian_sync_*` eszköz a helyi szinkronizálási kiszolgálóval kommunikál (alapértelmezés szerint `http://127.0.0.1:27781` ), és szükségük van a szinkronizálási tokenre.
 
-### Hatókörök
+### Hatókör
 
-Az olvasási eszközökhöz `read:obsidian`, az írási eszközökhöz pedig `write:obsidian`
-szükséges. A kikényszerítés megegyezik a Notionéval — ezt az
-`open-sse/mcp-server/server.ts` fájlban található `withScopeEnforcement()` kezeli,
-az `OMNIROUTE_MCP_ENFORCE_SCOPES=true` beállítás aktiválja, az engedélyezett hatókörök
-pedig az `OMNIROUTE_MCP_SCOPES` változóból vagy az API-kulcs hatóköri kontextusából
-származnak. Lásd: [MCP-SERVER.md](./MCP-SERVER.md).
+Read tools require `read:obsidian`; write tools require `write:obsidian`. Enforcement is identical to Notion — handled by `withScopeEnforcement()` in `open-sse/mcp-server/server.ts`, gated on `OMNIROUTE_MCP_ENFORCE_SCOPES=true` and forced on for HTTP/SSE callers whose API key lacks `manage`/`admin`, with allowed scopes sourced from `OMNIROUTE_MCP_SCOPES` or the API key's scope context. See [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Végpontok
 

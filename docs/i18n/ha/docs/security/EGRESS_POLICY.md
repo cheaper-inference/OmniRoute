@@ -67,37 +67,37 @@ Da gangan aka tsara umarnin ya kasance **ga kowane proxy**, ba na gaba ɗaya ba 
 
 ---
 
-## Ƙimomi Uku
+## Dabi'u Uku
 
-| Ƙima   | Lakabin UI                 | Halayya                                                                                                                                                                                               |
-| ------ | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `Na atomatik (dual-stack)` | OS ne ke zaɓar iyalin. Ga mai masaukin proxy da aka rubuta kai tsaye a matsayin IP, iyalin yana cikin wannan rubutun; ga sunan mai masauki, ana iya amfani da iyalan biyu. Wannan shi ne tsohon zaɓi. |
-| `ipv4` | `IPv4 kawai`               | Yana kayyade haɗin zuwa IPv4. Haɗin zai kasa idan mai masaukin proxy ba shi da rikodin IPv4 (A).                                                                                                      |
-| `ipv6` | `IPv6 kawai`               | Yana kayyade haɗin zuwa IPv6. Haɗin zai kasa idan mai masaukin proxy ba shi da rikodin IPv6 (AAAA).                                                                                                   |
+| Daraja | UI label            | Hali                                                                                                                                                              |
+| ------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS ta ɗauki iyali. Ga mai masaukin baki na zahiri na IP, dangi yana da mahimmanci ga zahiri; don sunan mai masauki, iyalai biyu sun cancanci. Wannan shine tsoho. |
+| `ipv4` | `IPv4 only`         | Sanya haɗi zuwa IPv4. Ya kasa rufe idan mai watsa shiri ba shi da rikodin IPv4 (A).                                                                               |
+| `ipv6` | `IPv6 only`         | Sanya haɗi zuwa IPv6. Ya kasa rufe idan mai watsa shiri ba shi da rikodin IPv6 (AAAA).                                                                            |
 
-Kalmomin UI suna cikin `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+igiyoyin UI suna rayuwa a cikin `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## Yadda Ake Saita Shi
+## Yadda Ake Daidaita Shi
 
 ### Dashboard
 
-Mai zaɓin yana cikin fom ɗin proxy na shafin **Proxy Pool**:
+Mai zaɓi yana cikin sigar wakili na** Wakilin Pool** tab:
 
-1. Buɗe **Dashboard → Settings → Proxy → Proxy Pool**
-2. Ƙara ko gyara proxy
-3. Saita jerin zaɓin **Iyalin IP** zuwa `Na atomatik (dual-stack)`, `IPv4 kawai`, ko `IPv6 kawai`
+1. Bude** Dashboard → Saitunan → Proxy → Wakilin Pool**
+2. Ƙara ko gyara wakili
+3. Saita** iyali IP** sauke zuwa `Auto (dual-stack)`, `IPv4 only`, ko `IPv6 only`
 4. Ajiye
 
-`ProxyRegistryManager.tsx` ne ke nuna wannan maɓallin sarrafawa (wanda aka ɗora a cikin `proxy/ProxyPoolTab.tsx`).
+Ana sarrafa sarrafawa ta hanyar `ProxyRegistryManager.tsx` (wanda aka saka a `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Filin `family` yana cikin bayanan da ake aikawa don ƙirƙira/sabunta rajistar proxy, waɗanda `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ke tantancewa, sannan `POST` / `PATCH /api/v1/management/proxies` ke sarrafa su:
+Filin `family` wani ɓangare ne na abubuwan da ake biya na rajista na create/update, wanda `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ya inganta kuma `POST` / `PATCH /api/v1/management/proxies` ke sarrafa shi:
 
 ```bash
-# Ƙirƙiri proxy mai amfani da IPv6 kawai
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Canja proxy da ke akwai zuwa mai amfani da IPv4 kawai
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Haka kuma, ana karɓar wannan filin a cikin abin saitin proxy na kai-tsaye da ake amfani da shi don shigarwar upstream-proxy (`upstream_proxy_config.family`, duba [Tsarin Bayanai](#data-model)).
+Hakanan ana karɓar filin iri ɗaya ta hanyar saitin wakili na layi da ake amfani dashi don shigarwar wakili na sama (`upstream_proxy_config.family`, duba [Model Data](#data-model) ).
 
-Don sauran API na CRUD/ƙayyade proxy, duba [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+Domin sauran wakilin CRUD/assignment API, duba [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

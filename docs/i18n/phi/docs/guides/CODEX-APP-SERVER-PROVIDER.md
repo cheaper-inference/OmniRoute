@@ -25,20 +25,17 @@ isang **Codex CLI na maaabot sa naka-configure na app-server URL**, at dapat
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
 │  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  kusang namamahala ng OpenAI OAuth  │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
 └──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
-        │ ibinabahagi (compose volumes)      └─────────────────────────────────────┘
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → ang WS capability token (pareho itong mino-mount)
-  codex-appserver-home    → ~/.codex (auth.json na isinusulat ng dashboard,
-                             binabasa ng codex app-server ng sidecar)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Nakikinig ang sidecar **lamang** sa internal compose network
-  (`ws://codex-app-server:1456`) sa likod ng isang capability token. **Hindi**
-  ito kailanman inilalantad sa host o internet.
-- Kasama na ang Codex CLI sa `omniroute:base`, kaya hindi kailangang mag-install
-  ng codex sa host o sa makina ng user kapag pinapatakbo mo ang sidecar.
+- Nakikinig ang sidecar** lamang** sa internal compose network (`ws://codex-app-server:1456`) sa likod ng isang capability token. Ito ay** hindi kailanman** na-publish sa host o internet.
+- Gumagamit ang sidecar `omniroute:cli-no-docker`, na binuo mula sa target `runner-cli-no-docker`, na kinabibilangan ng Codex CLI.
 
 ## 2. Patakbuhin ito
 

@@ -4,30 +4,13 @@
 
 ---
 
-> **Sanningskälla:** `src/lib/memory/` och `src/app/api/memory/`
-> **Senast uppdaterad:** 2026-06-28 — v3.8.40 (avstängt som standard + kompletterande int8-kvantisering)
+> **Sanningens källa:** `src/lib/memory/` och `src/app/api/memory/`
 
-OmniRoute tillhandahåller beständigt konversationsminne kopplat till API-nyckel (och
-valfritt sessions-id). Minnen extraheras automatiskt från LLM-svar
-via lättviktig regex-baserad mönstermatchning och infogas åter i efterföljande
-förfrågningar som ett inledande systemmeddelande (eller som det första användarmeddelandet för leverantörer som
-avvisar systemrollen).
+OmniRoute tillhandahåller beständigt konversationsminne med API -nyckel (och valfritt sessions-id). Minnen extraheras automatiskt från LLM -svar via lättviktsmatchning av regexmönster och injiceras tillbaka i efterföljande förfrågningar som ett ledande systemmeddelande (eller första användarmeddelande för leverantörer som avvisar systemrollen).
 
-> **Minne är AVSTÄNGT som standard (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled` är
-> nu `false` (`src/lib/memory/settings.ts`). När minne aktiveras infogas upp till
-> `maxTokens` (~2k) av hämtad kontext i **varje** chattförfrågan, vilket
-> debiteras — en oväntad kostnad för nya installationer och för klienter som hanterar sin
-> egen kontext. Aktivera det uttryckligen under **Inställningar → Minne** (`MemorySkillsTab`
-> visar en varningsruta om tokenkostnaden när minne är aktiverat).
-> En klient kan välja bort minne för en enskild förfrågan med request-headern
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — se tabellen över request-headers i
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). En förfrågan utan minne anger
-> `memoryOwnerId = null`, vilket inaktiverar **både** minnes- och skill-injektion för
-> den förfrågan (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Minnet är OFF som standard (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` är nu `false` (`src/lib/memory/settings.ts`). Aktivering av minne injicerar upp till `maxTokens` (~ 2k) av hämtad kontext** varje** chattförfrågan, som faktureras — en överraskande kostnad för nya installationer och för klienter som hanterar sitt eget sammanhang. Välj uttryckligen under** Inställningar → minne** ( `MemorySkillsTab` visar en token-kostnad varningstext när minnet är aktiverat). En klient kan välja bort en enstaka begäran med `x-omniroute-no-memory` förfrågningshuvudet (`true`/`1`/`yes`) — se tabellen för begäran-rubrik i [API_REFERENCE.md](../reference/API_REFERENCE.md). En begäran utan minne ställer in `memoryOwnerId = null`, vilket inaktiverar** både** minne och färdighetsinjektion för den begäran (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Minne är **avgränsat per API-nyckel**, inte per användare — varje förfrågan som autentiseras
-med samma API-nyckel delar samma minnespool, med valfri ytterligare
-avgränsning via `sessionId`.
+Minnet är** omfattning per API nyckel** , inte per användare — varje begäran som autentiserats med samma API nyckel delar samma minnespool, med valfri ytterligare scoping av `sessionId`.
 
 ## Arkitektur
 
@@ -331,27 +314,17 @@ Hämtningsstrategin för `MemoryConfig` är en av `exact`, `semantic` eller `hyb
 och omfattningen är en av `session`, `apiKey` eller `global`. Standardomfattningen från
 `getMemorySettings()` är `apiKey`.
 
-## Faktaextrahering (`extraction.ts`)
+## Faktaextraktion (`extraction.ts`)
 
-Extraheringen är **regex-baserad**, inte LLM-baserad – den körs i processen med
-`setImmediate()` så att den aldrig blockerar svarsströmmen:
+Extraktion är** regex-baserad** , inte LLM-baserad — den körs under process med `setImmediate()` så den blockerar aldrig svarsströmmen:
 
-- **Preferensmönster** → `MemoryType.FACTUAL`
-  (t.ex. `Jag föredrar …`, `Jag tycker verkligen om …`, `min favorit är …`, `Jag hatar …`)
-- **Beslutsmönster** → `MemoryType.EPISODIC`
-  (t.ex. `Jag kommer att använda …`, `Jag valde …`, `Jag bestämde mig för …`, `Jag kommer att börja använda …`)
-- **Beteendemönster** → `MemoryType.FACTUAL`
-  (t.ex. `Jag brukar …`, `Jag gör alltid …`, `Jag tenderar att …`)
+- **Preferensmönster** → `MemoryType.FACTUAL` (t.ex. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Beslutsmönster** → `MemoryType.EPISODIC` (t.ex. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Mönster mönster** → `MemoryType.FACTUAL` (t.ex. `I usually …`, `I always …`, `I tend to …`)
 
-Varje träff rensas (`trim`, komprimering av blanksteg, begränsning till 500 tecken),
-dedupliceras inom batchen via en stabil `factKey(category, content)` och
-lagras via `createMemory()` med metadata
-`{category, extractedAt, source: "llm_response"}`. Indatatexten begränsas till
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) – när den är längre används textens
-**slut**, så att det senaste assistentinnehållet alltid tas med.
+Varje match saneras (`trim`, blanksteg-kollaps, begränsat till 500 tecken), dedupliceras inom partiet via en stabil `factKey(category, content)` och lagras via `createMemory()` med metadata `{category, extractedAt, source: "llm_response"}`. Inmatad text är begränsad till 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — när den är längre** svans** av texten används så att det senaste assistentinnehållet alltid deltar.
 
-`extractFactsFromText(text)` exporteras för tester och returnerar strukturerade
-fakta utan att lagra dem.
+`extractFactsFromText(text)` exporteras för tester och returnerar de strukturerade fakta utan att lagra dem.
 
 ## Hämtning (`retrieval.ts`)
 

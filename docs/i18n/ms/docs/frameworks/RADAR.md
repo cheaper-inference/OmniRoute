@@ -93,52 +93,30 @@ penghalaan atau pemilihan model — lihat persetujuan berasingan di bawah.
 
 ---
 
-## Penyegerakan data ialah persetujuan BERASINGAN — janji privasi
+## Penyegerakan data ialah SEPARATE ikut serta — janji privasi
 
-Menghidupkan `RADAR_ENABLED` hanya membuka kunci UI. Penyegerakan suapan memerlukan persetujuan kedua
-yang bebas dan disimpan dalam `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migrasi `136_radar_cache_settings.sql`). `syncRadar()` menyemak bendera _dan_
-persetujuan sebelum membuat sebarang panggilan rangkaian:
+Menghidupkan `RADAR_ENABLED` hanya membuka kunci UI. Menyegerakkan suapan memerlukan ikut serta bebas kedua yang disimpan dalam `radar_settings.opt_in` (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`). `syncRadar()` menyemak bendera _dan_ ikut serta sebelum membuat sebarang panggilan rangkaian:
 
 ```
-Bendera dimatikan → { status: "disabled" }   — tiada panggilan rangkaian
-Persetujuan palsu → { status: "opt_out" }    — tiada panggilan rangkaian
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
 Apabila kedua-duanya dihidupkan, laluan penyegerakan ialah:
 
-1. `GET <URL asas suapan>/v1/catalog/latest` dengan `x-omniroute-radar-schema: 2` dan pengepala
-   `Authorization: Bearer <kunci penyokong>` pilihan (lihat di bawah). Pelayan menggunakan artifak
-   peralihan v1 yang ditandatangani secara berasingan secara lalai apabila pengepala skema tidak disertakan, supaya klien lama yang telah dipasang terus
-   menerima kemas kini.
-2. Ini ialah aliran aplikasi muat turun sahaja, tetapi ia masih merupakan permintaan HTTPS. Infrastruktur
-   yang dihoskan menerima metadata sambungan biasa seperti IP sumber. Apabila kunci penyokong
-   dikonfigurasikan, penyegerakan turut menghantar kunci tersebut dalam pengepala Bearer supaya perkhidmatan dapat menentukan
-   kelayakan. Pada semakan pelayan persendirian tepat yang dikenal pasti dalam sempadan bukti di atas,
-   perakaunan permintaan suapan menggunakan cincangan kunci, penggunaan agregat dan HMAC terpenggal
-   IP yang berputar setiap hari untuk semakan penyalahgunaan secara manual; jadual tersebut tidak menyimpan kunci mahupun IP dalam bentuk mentah.
-   Log akses infrastruktur dan peti keluar penghantaran yang disulitkan merupakan sempadan operasi
-   yang berasingan.
-3. OmniRoute tidak pernah menghantar gesaan, respons, perbualan, bukti kelayakan penyedia, trafik model,
-   masa aktif, kependaman atau konfigurasi penyedia setempat kepada perkhidmatan Radar.
-4. Respons disahkan, divalidasi dan dicache secara setempat (lihat
-   [Model keselamatan](#security-model)). Radar mempunyai tepat empat laluan rangkaian sisi pelayan:
-   `syncRadar()` untuk katalog, `syncRadarReferrals()` untuk rujukan dan
-   `syncRadarOffers()` / `syncRadarIntel()` untuk tawaran dan Intel khusus penyokong.
+1. `GET <feed base URL>/v1/catalog/latest` dengan `x-omniroute-radar-schema: 2` dan pengepala `Authorization: Bearer <supporter key>` pilihan (lihat di bawah). Pelayan lalai kepada artifak peralihan v1 yang ditandatangani secara berasingan apabila pengepala skema tiada, jadi pelanggan yang dipasang lebih lama terus menerima kemas kini.
+2. Ini ialah aliran aplikasi muat turun sahaja, tetapi ia masih merupakan permintaan HTTPS. Infrastruktur yang dihoskan menerima metadata sambungan biasa seperti sumber IP. Apabila kunci penyokong dikonfigurasikan, penyegerakan juga menghantar kunci itu dalam pengepala Pembawa supaya perkhidmatan boleh menyelesaikan kelayakan. Pada semakan pelayan peribadi tepat yang dikenal pasti dalam sempadan bukti di atas, perakaunan permintaan suapan menggunakan cincang utama, penggunaan agregat dan HMAC terpenggal berputar setiap hari bagi semakan penyalahgunaan IP ; jadual tersebut tidak kekal sama ada kunci mahupun IP dalam bentuk mentah. Log akses infrastruktur dan peti keluar penghantaran yang disulitkan adalah sempadan operasi yang berasingan.
+3. OmniRoute tidak sekali-kali menghantar gesaan, respons, perbualan, bukti kelayakan pembekal, trafik model, masa aktif, kependaman atau konfigurasi pembekal setempat kepada perkhidmatan Radar.
+4. Respons disahkan, disahkan dan dicache secara setempat (lihat [model Keselamatan](#security-model) ). Radar mempunyai empat laluan rangkaian sebelah pelayan: `syncRadar()` untuk katalog, `syncRadarReferrals()` untuk rujukan dan `syncRadarOffers()` / `syncRadarIntel()` untuk tawaran penyokong sahaja dan Intel.
 
-**Kunci penyokong** ialah token Bearer pilihan (`radar_settings.supporter_key`)
-yang membolehkan perkhidmatan suapan menentukan peringkat yang perlu diberikan (lihat
-[Peringkat](#tiers-community-and-live)). Kunci ini:
+Semakan katalog dijalankan setiap 24 jam. Apabila suapan yang disahkan masih membawa versi dan peringkat yang dicache, penyegerakan mengekalkan muatan cache, memperbaharui `fetchedAt`, dan semakan seterusnya datang 24 jam kemudian dan bukannya pada tanda setiap jam seterusnya.
 
-- Disimpan **dalam keadaan disulitkan ketika tidak digunakan** dengan pembantu AES-256-GCM `encrypt()`/`decrypt()`
-  yang sama (`src/lib/db/encryption.ts`) yang digunakan untuk bukti kelayakan penyedia.
-- Ditetapkan melalui `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 aksara perenambelasan }`) dan
-  **tidak pernah dikembalikan** — respons mengembalikan bentuk bertopeng (`omr_****abcd`).
-- Mengubah atau mengosongkannya akan membatalkan cache katalog, rujukan, tawaran dan Intel secara atomik. Penyegerakan/bacaan
-  seterusnya menentukan kelayakan baharu pada sisi pelayan; menyimpan kunci tidak dengan sendirinya membuat
-  permintaan rangkaian atau menggunakan kunci pengaktifan sekali guna.
-- Dihantar kepada perkhidmatan suapan sebagai token Bearer pada GET penyegerakan — tiada maklumat lain tentang
-  kunci tersebut pernah meninggalkan klien.
+The** kunci penyokong** ialah token Pembawa pilihan (`radar_settings.supporter_key`) yang membolehkan perkhidmatan suapan memutuskan peringkat mana yang hendak disampaikan (lihat [Tiers](#tiers-community-and-live) ). Ia adalah:
+
+- Disimpan** disulitkan semasa rehat** dengan AES-256-GCM `encrypt()`/`decrypt()` helpers (`src/lib/db/encryption.ts`) yang sama digunakan untuk kelayakan penyedia.
+- Tetapkan melalui `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) dan** tidak pernah bergema kembali** — respons mengembalikan bentuk bertopeng (`omr_****abcd`).
+- Menukar atau mengosongkannya secara atom akan membatalkan katalog, rujukan, tawaran dan cache Intel. sync/read seterusnya menyelesaikan bahagian pelayan kelayakan baharu; menyimpan kunci tidak dengan sendirinya membuat permintaan rangkaian atau menggunakan kunci pengaktifan sekali guna.
+- Dihantar ke perkhidmatan suapan sebagai token Pembawa pada penyegerakan GET — tiada apa-apa lagi tentang kunci yang pernah meninggalkan pelanggan.
 
 ---
 
@@ -424,84 +402,45 @@ version, tier }` — inilah nilai yang dipaparkan oleh papan pemuka, bukan medan
 
 ---
 
-## Peraturan penggabungan tindanan semasa pembacaan
+## Peraturan cantum tindanan masa baca
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) menggabungkan suapan yang dicache **di atas**
-garis dasar statik semasa **pembacaan**, dalam `getRadarCatalog()`. Tatasusunan garis dasar
-(`FREE_MODEL_BUDGETS`) tidak pernah diubah — `MergedEntry[]` dikira semula pada setiap
-panggilan.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) menggabungkan suapan cache** habis** garis dasar statik di** membaca masa** , dalam `getRadarCatalog()`. Tatasusunan garis dasar (`FREE_MODEL_BUDGETS`) tidak pernah bermutasi — a `MergedEntry[]` dikira baharu pada setiap panggilan.
 
 Empat peraturan, mengikut keutamaan:
 
-1. **Suapan tidak pernah menulis ganti pengubahsuaian setempat.** Bagi setiap medan: jika pengendali telah
-   menyesuaikan medan pada entri (`localOverrides` map, berkunci `provider:modelId`),
-   nilai suapan bagi medan tertentu itu dilangkau — nilai pengendali diutamakan.
-2. **`enabled: false` menyahdayakan entri, berserta asal usul.** Entri suapan yang mematikan
-   entri menetapkan `enabled: false` dan `disabledBy: "radar"` pada hasil gabungan,
-   supaya UI boleh menjelaskan _sebab_ sesuatu entri berubah daripada tersedia kepada dinyahdayakan.
-3. **Entri yang ditambahkan pengguna dan tiada dalam suapan kekal tanpa perubahan.** Entri yang
-   hanya wujud dalam garis dasar (atau ditambahkan secara setempat) dan tidak mempunyai entri suapan
-   yang sepadan akan diteruskan tanpa perubahan.
-4. **Entri yang ditandai sebagai dihapuskan tidak akan dihidupkan semula.** Jika pengendali memadamkan
-   entri secara jelas (`tombstones` set), tindakan suapan menambahkan semula `provider:modelId` tersebut dalam versi
-   kemudian tidak akan mengembalikannya.
+1. **Suapan tidak pernah menimpa penggantian setempat.** Per-medan: jika pengendali telah memperibadikan medan pada entri (`localOverrides` map, berkunci `provider:modelId`), nilai suapan untuk medan khusus itu dilangkau — nilai operator menang.
+2. **`enabled: false` melumpuhkan kemasukan, dengan asal.** Entri suapan yang mematikan entri menetapkan `enabled: false` dan `disabledBy: "radar"` pada hasil cantuman, jadi UI boleh menerangkan _mengapa_ entri daripada tersedia kepada dilumpuhkan.
+3. **Entri tambah pengguna yang tidak terdapat dalam suapan kekal tanpa disentuh.** Entri yang hanya wujud dalam garis dasar (atau telah ditambahkan secara setempat) dan tidak mempunyai masukan suapan yang sepadan melalui tidak berubah.
+4. **Kemasukan batu nisan tidak pernah dibangkitkan.** Jika pengendali secara eksplisit memadam masukan ( set `tombstones` ), suapan menambahkan semula `provider:modelId` itu dalam versi yang lebih baru tidak membawanya kembali.
 
-Medan yang boleh diedit dan penanda penghapusan disimpan secara berterusan dalam
-`radar_local_model_state` (migrasi `153_radar_local_model_state.sql`). Penyesuai DB awam
-(`src/lib/db/radar.ts`) menukar baris tersebut kepada `localOverrides` map dan
-`tombstones` set yang digunakan oleh `applyFeed()`; `getRadarCatalog()` pengeluaran memuatkan keadaan tersebut
-selepas semakan bendera, cache dan skema berjaya. Hanya `displayName` dan `enabled` boleh
-diedit oleh pengendali. Identiti penyedia/model, asal usul suapan, kuota, keupayaan, ToS,
-dan data persediaan tidak boleh ditulis melalui antara muka ini.
+Medan dan batu nisan yang boleh diedit dikekalkan dalam `radar_local_model_state` ( `153_radar_local_model_state.sql` penghijrahan). Penyesuai DB awam (`src/lib/db/radar.ts`) menukarkan baris tersebut ke dalam peta `localOverrides` dan set `tombstones` yang digunakan oleh `applyFeed()`; pengeluaran `getRadarCatalog()` memuatkan yang menyatakan selepas bendera, cache dan gerbang skema berlalu. Hanya `displayName` dan `enabled` boleh diedit pengendali. identiti Provider/model, sumber suapan, kuota, keupayaan, ToS dan data persediaan tidak boleh ditulis melalui permukaan ini.
 
-Papan pemuka menyediakan empat tindakan setempat:
+Papan pemuka mendedahkan empat tindakan tempatan:
 
-- **Edit** mengubah nama paparan dan keadaan didayakan setempat.
-- **Tetapkan semula perubahan setempat** mengosongkan kedua-dua medan yang boleh diedit tanpa mengubah penanda penghapusan.
-- **Sembunyikan** mencipta penanda penghapusan supaya kemas kini suapan kemudian tidak dapat mencipta semula baris tersebut.
-- **Pulihkan** membuang penanda penghapusan; sebarang pengubahsuaian yang disimpan secara berasingan kekal berkuat kuasa.
+- **Sunting** menukar nama paparan tempatan dan keadaan didayakan.
+- **Tetapkan semula perubahan setempat** mengosongkan kedua-dua medan boleh diedit tanpa menukar batu nisan.
+- **Sembunyi** mencipta batu nisan, jadi kemas kini suapan kemudian tidak boleh mencipta semula baris.
+- **Pulihkan** mengeluarkan batu nisan; sebarang penggantian yang disimpan secara berasingan kekal berkuat kuasa.
 
-`enabled: false` daripada suapan kekal sebagai pengecualian keselamatan: ia mengatasi
-`enabled: true` setempat yang lapuk, memastikan entri gabungan dinyahdayakan dan merekodkan `disabledBy: "radar"`.
+Suapan `enabled: false` kekal sebagai pengecualian keselamatan: ia menang ke atas `enabled: true` tempatan yang lapuk, mengekalkan entri yang digabungkan dilumpuhkan dan merekodkan `disabledBy: "radar"`.
 
-Penerbitan katalog menggunakan `schemaVersion: 2`. `contextWindow` serta setiap satu daripada `tools`, `vision`, dan
-`thinking` secara berasingan ialah `number | null` / `boolean | null`: `null` bermaksud tidak diketahui, manakala
-`false` bermaksud sumber rasmi penyedia yang disahkan D16 menyatakan secara jelas bahawa keupayaan tersebut tiada.
-Bendera pendaftaran/spesifikasi model OmniRoute dalaman tidak pernah dinaikkan secara langsung sebagai fakta suapan. Klien
-masih menerima syot kilat v1; kerana pembina lama menggunakan `false` sebagai pemegang tempat bagi ketiadaan, `false` v1
-dinormalkan kepada tidak diketahui manakala `true` v1 kekal sebagai fakta. Versi skema yang tidak diketahui ditolak secara selamat dan
-cache sah terakhir kekal tersedia. Setiap model v2 dengan konteks/keupayaan bukan null mesti membawa
-`metadataEvidenceUrls[]` HTTPS tanpa kelayakan; jika tidak, pengesahan skema gagal dan cache
-tidak digantikan. Jadual katalog memaparkan ketiga-tiga keadaan sebagai `✓`, `✕`, dan `?`.
+Penerbitan katalog menggunakan `schemaVersion: 2`. `contextWindow` dan setiap `tools`, `vision` dan `thinking` adalah secara bebas `number | null` / `boolean | null`: `null` bermaksud tidak diketahui, manakala `false` bermaksud sumber pembekal rasmi D16-confirmed secara jelas menyatakan keupayaan itu tiada. Bendera OmniRoute registry/model-spec dalaman tidak pernah dipromosikan secara langsung kepada fakta suapan. Pelanggan masih menerima syot kilat v1; kerana pembina lama menggunakan `false` sebagai ruang letak ketiadaan, v1 `false` dinormalkan kepada tidak diketahui manakala v1 `true` kekal fakta. Versi skema yang tidak diketahui gagal ditutup dan cache sah terakhir kekal tersedia. Setiap model v2 dengan context/capability bukan nol mesti membawa HTTPS `metadataEvidenceUrls[]` tanpa kelayakan; jika tidak, pengesahan skema gagal dan cache tidak diganti. Jadual katalog menjadikan ketiga-tiga keadaan sebagai `✓`, `✕` dan `?`.
 
-### Gabungan berpandu dan akses MCP
+### Kombo berpandu dan akses MCP
 
-Nilai `familyId` yang disahkan kekal selepas tindanan semasa pembacaan dan memacu modul tulen
-`buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`). Sesebuah keluarga hanya dicadangkan
-apabila sekurang-kurangnya dua penyedia berbeza mempunyai sambungan aktif dan menyediakan ID model terpilih yang tepat.
-Model yang dinyahdayakan, penyedia tidak aktif, ID model yang tiada, keluarga tunggal dan padanan
-alias/awalan yang meragukan akan ditolak secara selamat. Cadangan menggunakan strategi `priority` sedia ada, dengan mengisih
-belanjawan bulanan berulang terbesar terlebih dahulu; UI menciptanya hanya melalui `POST /api/combos`.
+Nilai `familyId` yang disahkan bertahan dalam tindanan masa baca dan memacu modul `buildRadarComboSuggestions()` tulen (`src/lib/radar/comboSuggestions.ts`). Keluarga dicadangkan hanya apabila sekurang-kurangnya dua penyedia berbeza mempunyai sambungan aktif dan mendedahkan model pilihan susun tepat ID. Model yang dilumpuhkan, penyedia tidak aktif, model IDs yang hilang, keluarga tunggal dan padanan alias/prefix samar-samar gagal ditutup. Cadangan menggunakan strategi `priority` sedia ada, memesan belanjawan bulanan berulang terbesar dahulu; UI mencipta mereka hanya melalui `POST /api/combos`.
 
-UI berpandu terletak di `/dashboard/radar/combos`. Ia hanya membaca titik akhir setempat
-`GET /api/radar/catalog` dan `GET /api/combos/builder/options`. Ia tidak pernah mencetuskan penyegerakan Radar,
-membaca kelayakan penyedia atau menulis secara langsung ke pangkalan data kombo.
+UI yang dibimbing tinggal di `/dashboard/radar/combos`. Ia hanya membaca titik akhir `GET /api/radar/catalog` dan `GET /api/combos/builder/options` tempatan. Ia tidak sekali-kali mencetuskan penyegerakan Radar, membaca bukti kelayakan pembekal atau menulis terus ke pangkalan data kombo.
 
-Klien MCP boleh membaca unjuran setempat yang sama dengan `omniroute_radar_catalog` (`read:radar`). Penapis
-pilihan `provider`, `familyId` dan `enabledOnly` dinilai selepas satu pembacaan setempat
-`GET /api/radar/catalog`. Output tertutupnya merangkumi metadata katalog serta penyedia/model,
-nama paparan, `familyId`, kuota, keupayaan, keadaan didayakan, asal dan `disabledBy`; URL persediaan,
-langkah, sambungan, alamat e-mel, kunci dan data rujukan tidak pernah dikembalikan. Alat ini
-adalah baca sahaja dan tidak pernah memanggil `/api/radar/sync`.
+pelanggan MCP boleh membaca unjuran tempatan yang sama dengan `omniroute_radar_catalog` (`read:radar`). Penapis `provider`, `familyId` dan `enabledOnly` pilihan dinilai selepas satu `GET /api/radar/catalog` tempatan dibaca. Output tertutupnya termasuk metadata katalog tambah provider/model, nama paparan, `familyId`, kuota, keupayaan, keadaan didayakan, asal dan `disabledBy`; setup URLs, langkah, sambungan, alamat e-mel, kunci dan data rujukan tidak pernah dikembalikan. Alat ini adalah baca sahaja dan tidak pernah menggunakan `/api/radar/sync`. Apabila suapan cache mendahului katalog yang dipasang, `meta.olderThanRelease` ialah `true` dan alat mengembalikan model daripada katalog yang dipasang dengan penggantian tempatan dan batu nisan digunakan.
 
-### Penanda asal-usul
+### Penanda asal
 
-Setiap entri yang digabungkan mempunyai medan `origin` yang dipaparkan oleh UI sebagai lencana:
+Setiap entri yang digabungkan membawa medan `origin` yang UI jadikan sebagai lencana:
 
-- `"baseline"` — tidak berubah daripada katalog keluaran statik.
-- `"radar"` — satu atau lebih medan telah disegarkan oleh suapan.
-- `"local"` — pengendali mempunyai sekurang-kurangnya satu penggantian setempat pada entri ini (penggantian
-  setempat sentiasa mengatasi suapan mengikut peraturan 1, tanpa mengira apa yang dinyatakan oleh suapan).
+- `"baseline"` — tidak disentuh daripada katalog keluaran statik.
+- `"radar"` — satu atau lebih medan telah dimuat semula oleh suapan.
+- `"local"` — pengendali mempunyai sekurang-kurangnya satu penggantian setempat pada entri ini (penggantian setempat sentiasa memenangi suapan setiap peraturan 1, tanpa mengira apa yang dinyatakan oleh suapan).
 
 ---
 

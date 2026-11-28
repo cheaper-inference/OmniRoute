@@ -151,30 +151,30 @@ Temas para las fases 6-7:
 - [ ] Añadir pruebas de regresión para cada error de producción no cubierto que se corrija durante el avance hacia el 90%
 - [ ] Aumentar el umbral de cobertura en CI solo después de que la línea base local se mantenga estable durante al menos dos ejecuciones consecutivas
 
-## Política de incremento progresivo
+## Política de trinquete
 
-Actualiza los umbrales de `npm run test:coverage` solo después de que el proyecto supere realmente el siguiente hito con un margen cómodo.
+Actualice los umbrales `npm run test:coverage` solo después de que el proyecto realmente supere el siguiente hito con un búfer cómodo.
 
-**Umbral actual:** `npm run test:coverage` exige **60 sentencias / 60 líneas / 60 funciones / 60 ramas** (la métrica se recalculó en Quality-Gates Fase 6A.1; la referencia anterior del 82.58% estaba inflada porque contabilizaba los archivos de prueba y excluía `open-sse`). El comando `test:coverage:legacy` conserva la métrica anterior de 50/50/50 para fines de comparación histórica.
+**Puerta actual:** `npm run test:coverage` hace cumplir** 60 declaraciones / 60 líneas / 60 funciones / 60 ramas** (La métrica se modificó en Quality-Gates Fase 6A.1 — la línea de base anterior del 82,58 % estaba inflada porque contaba los archivos de prueba y excluía `open-sse`). El comando `test:coverage:legacy` conserva la antigua métrica 50/50/50 para realizar comparaciones históricas.
 
-Para realizar comprobaciones puntuales de umbrales con el informe más reciente, usa:
+Para verificaciones de umbral ad hoc con respecto al informe más reciente, utilice:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Secuencia recomendada de incrementos (el orden es `sentencias-líneas / ramas / funciones`):
+Secuencia de trinquete recomendada (el orden es `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- umbral actual (75/70/75)
+5. 75/70/72 <- puerta actual (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-El siguiente objetivo de incremento es `80/75/78` una vez que la cobertura de ramas se mantenga por encima del 78% durante dos ejecuciones consecutivas.
+El siguiente objetivo de trinquete es `80/75/78` una vez que la cobertura de sucursales se mantenga por encima del 78 % durante dos ejecuciones consecutivas.
 
 ## Brecha conocida
 

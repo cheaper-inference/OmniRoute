@@ -59,15 +59,13 @@ Mifano ya kuiwakilisha jumuiya yetu ni pamoja na kutumia anwani rasmi ya barua p
 kuchapisha kupitia akaunti rasmi ya mitandao ya kijamii, au kutenda kama mwakilishi
 aliyeteuliwa katika tukio la mtandaoni au lisilo la mtandaoni.
 
-## Enforcement
+## Utekelezaji
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Matukio ya unyanyasaji, unyanyasaji, au tabia isiyokubalika inaweza kuripotiwa kwa viongozi wa jumuiya wanaohusika na utekelezaji kwa kufungua ushauri wa usalama wa kibinafsi kwenye
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+au kwa kutuma barua pepe kwa mtunza huduma kwa diegosouza.pw@outlook.com. Kwa matukio nyeti kwa usalama, tazama [`SECURITY.md`](SECURITY.md). Malalamiko yote yatapitiwa na kuchunguzwa mara moja na kwa haki.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Viongozi wote wa jumuiya wana wajibu wa kuheshimu faragha na usalama wa ripota wa tukio lolote.
 
 ## Miongozo ya Utekelezaji
 

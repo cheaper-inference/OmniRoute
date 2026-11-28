@@ -4,11 +4,22 @@
 
 ---
 
-Fun ifihan ti o ṣee ṣe pinpin, awọn agbegbe ọmọde ihamọ ati iṣeto Gemini ti o tẹpẹlẹ, wo [awọn adehun ifilọlẹ CLI](./CLI-LAUNCH-CONTRACTS.md).
+Fun ifihan ti o ṣee ṣe pinpin, awọn agbegbe ihamọ ọmọde ati iṣeto Gemini ti o tẹpẹlẹ, wo [awọn adehun ifilọlẹ CLI](./CLI-LAUNCH-CONTRACTS.md).
 
-OmniRoute gbe idile ti awọn pipaṣẹ `setup-*` kan ti o tunto koodu CLI kan (Codex, koodu Claude, OpenCode, Cline,…) lati lo OmniRoute bi ẹhin rẹ - nitorinaa ohun elo naa sọrọ si** ọkan** ipari ati awọn ọna OmniRoute si olupese ti o tọ pẹlu idapada-laifọwọyi. Kọọkan pipaṣẹ Say awọn** gbe** katalogi awoṣe lati OmniRoute ti nṣiṣẹ (agbegbe tabi latọna jijin) ati kọ faili atunto ti ara ẹrọ lori** tirẹ** ẹrọ. Bọtini API jẹ itọkasi nipasẹ oniyipada ayika nibikibi ti ohun elo ba ṣe atilẹyin. Awọn aṣẹ ti o tẹsiwaju faili agbegbe-irinṣẹ jẹ akiyesi ni isalẹ.
+OmniRoute gbe idile ti awọn pipaṣẹ `setup-*` kan ti o tunto koodu CLI kan (Codex, koodu Claude, OpenCode, Cline,…) lati lo OmniRoute bi — ẹhin rẹ nitorina ohun elo naa sọrọ si** ọkan** ipari ati awọn ọna OmniRoute si olupese ti o tọ pẹlu idapada-laifọwọyi. Awọn aṣẹ atunto lo agbegbe ti nṣiṣe lọwọ tabi ipo OmniRoute latọna jijin ati tunto irinṣẹ naa lori** tirẹ** ẹrọ. Awọn ilana ti o da lori katalogi gba awọn awoṣe lati olupin; Awọn ilana awoṣe ẹyọkan gba `--model` tabi tọ fun awoṣe ID kan. Bọtini API jẹ itọkasi nipasẹ oniyipada ayika nibikibi ti ohun elo ba ṣe atilẹyin. Awọn aṣẹ ti o tẹsiwaju faili agbegbe ohun-elo ni a ṣe akiyesi ni isalẹ.
 
-Ifilọlẹ jeneriki tun wa — `omniroute run <target>` — ti o nfa `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` tabi `whycodes` pẹlu itasi env ọtun, laisi kikọ eyikeyi atunto rara. Awọn ibi-afẹde ati awọn inagijẹ wọn wa lati inu aṣafihan `bin/cli/cli-manifest.mjs` (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), ati `omniroute completion` n funni ni awọn ọrọ ibi-afẹde ti o farahan. Awọn ifilọlẹ ohun-elo fun ohun-elo - `omniroute launch` (koodu Claude ) ati `omniroute launch-codex` (Codex) - wa.
+Iwe katalogi ati awọn aṣẹ adaṣe bo awọn oriṣiriṣi awọn irinṣẹ:
+
+| Dada                           | Ka  | Ohun ti o tumo si                                                                 |
+| ------------------------------ | --- | --------------------------------------------------------------------------------- |
+| Katalogi irinṣẹ                | 39  | Awọn irinṣẹ ifaminsi ti a gbasilẹ ati awọn aṣoju, pẹlu afọwọṣe ati awọn iṣọpọ IDE |
+| `omniroute run <target>`       | 8   | Ṣe ifilọlẹ awọn oluyipada ti o pese aaye ipari ibi-afẹde, awọn iwe-ẹri ati awoṣe  |
+| `omniroute configure <target>` | 12  | Awọn ilana atunto ibaraenisepo ṣe atilẹyin nipasẹ awọn aṣẹ `setup-*`              |
+| `setup-*` ase                  | 16  | Awọn aṣẹ iṣeto ti a forukọsilẹ, pẹlu iṣeto olootu guided/manual                   |
+
+Awọn iṣiro ṣe afihan [ifihan irinṣẹ](../../config/cli-tools-manifest.json) ati [iforukọsilẹ aṣẹ](../../bin/cli/commands/registry.mjs) ni 2026-11-17. Akọsilẹ katalogi ko tumọ si ohun ti nmu badọgba ifilọlẹ. Wo [atokọ irinṣẹ CLI](../reference/CLI-TOOLS.md) fun akojo oja ni kikun.
+
+Ifilọlẹ jeneriki tun wa — `omniroute run <target>` — ti o fa `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` tabi `whycodes` pẹlu env ọtun itasi, laisi kikọ eyikeyi atunto rara. Awọn ibi-afẹde ati awọn inagijẹ wọn wa lati inu aṣafihan `bin/cli/cli-manifest.mjs` (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), ati `omniroute completion` nfunni ni awọn ọrọ ibi-afẹde ti o farahan. `omniroute launch <tool>` bẹrẹ ohun elo ifaminsi ti o ni atilẹyin pẹlu ami ami igba ifilọlẹ-kọọkan ati atokọ awoṣe ti a ṣe lati ọdọ awọn olupese ti o sopọ, ati bẹrẹ laifọwọyi ẹnu-ọna agbegbe nigbati ko si ọkan ti o ṣiṣẹ (wo [LAUNCH.md](./LAUNCH.md) ). Awọn ifilọlẹ ohun-elo fun ohun-elo — `omniroute launch` laisi orukọ irinṣẹ (koodu Claude ) ati `omniroute launch-codex` (Codex) — wa.
 
 Olupese onboarding wa lati ipo local/remote kanna. Awọn pipaṣẹ API-akọkọ ti o wa ni isalẹ tọju ifitonileti iṣakoso lọtọ si awọn iwe-ẹri olupese ati ki o ma ṣe tẹjade iwe-ẹri kan ni iṣelọpọ iṣeto:
 
@@ -28,43 +39,45 @@ Fun akoko kan, iṣeto ipilẹ ti a fi ọwọ kọ ti awọn iṣọpọ ọl�
 
 - [Claude Code iṣeto ni](./CLAUDE-CODE-CONFIGURATION.md)
 - [Codex CLI iṣeto ni](./CODEX-CLI-CONFIGURATION.md)
-- [Ipo Latọna jijin](./REMOTE-MODE.md) - wakọ OmniRoute latọna jijin (VPS / Tailnet) lati kọǹpútà alágbèéká rẹ
-- [VS Code Copilot Chat](./VSCODE-COPILOT.md) — itẹsiwaju OmniCopilot ; o tun le ṣiṣe awọn aṣẹ `setup-*` wọnyi fun ọ lati inu olootu naa
+- [Ipo jijin](./REMOTE-MODE.md) — wakọ OmniRoute latọna jijin (VPS / Tailnet) lati kọǹpútà alágbèéká rẹ
+- [VS Code Copilot Wiregbe](./VSCODE-COPILOT.md) — itẹsiwaju OmniCopilot ; o tun le ṣiṣe awọn aṣẹ `setup-*` wọnyi fun ọ lati inu olootu naa
 
 ---
 
 ## Titunto tabili
 
-Gbogbo aṣẹ lola awọn** ti nṣiṣe lọwọ o tọ** (ṣeto pẹlu `omniroute connect`, wo [Ipo Latọna jijin](./REMOTE-MODE.md) ) tabi awọn asia `--remote <url> --api-key <key>` ti o fojuhan. "Agbegbe vs latọna jijin" ni isalẹ tumọ si: laisi awọn asia ti o fojusi `http://localhost:20128`; pẹlu `--remote` (tabi ipo isakoṣo latọna jijin ti nṣiṣe lọwọ) o mu katalogi lati ọdọ olupin yẹn ati kọ atunto ni agbegbe.
+Gbogbo aṣẹ lola awọn** ti nṣiṣe lọwọ o tọ** (ṣeto pẹlu `omniroute connect`, wo [Ipo Latọna jijin](./REMOTE-MODE.md) ) tabi awọn asia `--remote <url> --api-key <key>` ti o fojuhan. "Agbegbe vs latọna jijin" ni isalẹ tumọ si: laisi awọn asia ti o fojusi `http://localhost:20128`; pẹlu `--remote` (tabi ipo isakoṣo latọna jijin ti nṣiṣe lọwọ) o tunto olupin yẹn bi ẹhin ati kọ atunto ni agbegbe. Awọn ilana ti o da lori katalogi tun mu awọn awoṣe wa lati ọdọ olupin yẹn.
 
-| Òfin                       | Irinṣẹ                           | Ohun ti o kọ                                                                                                                                                             | Awọn asia bọtini                                                                                                                           | Agbegbe vs latọna jijin |
-| -------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
-| `omniroute setup-codex`    | OpenAI Codex CLI                 | `~/.codex/<name>.config.toml` - profaili kan fun awoṣe ọrọ ibaramu (`codex --profile <name>`)                                                                            | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Mejeeji                 |
-| `omniroute setup-claude`   | Claude koodu                     | `~/.claude/profiles/<name>/settings.json` - profaili kan fun awoṣe ti o baamu (`CLAUDE_CONFIG_DIR`)                                                                      | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Mejeeji                 |
-| `omniroute setup-opencode` | OpenCode (ibaramu ni gbangba)    | `~/.config/opencode/opencode.json` - olupese `omniroute` pẹlu gbogbo awoṣe katalogi (`opencode -m omniroute/<model>`)                                                    | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Mejeeji                 |
-| `omniroute setup-cline`    | Cline                            | `~/.cline/data/{globalState,secrets}.json` (ipo CLI ) + tẹ awọn eto itẹsiwaju koodu VS jade                                                                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Mejeeji                 |
-| `omniroute setup-kilo`     | Kilo koodu                       | `~/.local/share/kilo/auth.json` (CLI) + dapọ `kilocode.*` sinu VS Code `settings.json` o ba wa                                                                           | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Mejeeji                 |
-| `omniroute setup-continue` | Tesiwaju / `cn` CLI              | `~/.continue/config.yaml` - awọn awoṣe `provider: openai`, bọtini nipasẹ `${{ secrets.OMNIROUTE_API_KEY }}`                                                              | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Mejeeji                 |
-| `omniroute setup-cursor`   | Cursor                           | Ko si nkankan - tẹjade awọn igbesẹ inu-app ( atunto Cursor jẹ akomo SQLite)                                                                                              | `--remote` `--api-key` `--only` `--port`                                                                                                   | Mejeeji                 |
-| `omniroute setup-roo`      | Roo Code                         | `~/.omniroute/roo-settings.json` (doc gbe wọle) + ṣeto `roo-cline.autoImportSettingsPath` ti koodu VS `settings.json` ba wa                                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Mejeeji                 |
-| `omniroute setup-crush`    | Fifun pa                         | `~/.config/crush/crush.json` - olupese `openai-compat`, bọtini nipasẹ `$OMNIROUTE_API_KEY`                                                                               | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Mejeeji                 |
-| `omniroute setup-zed`      | Zed                              | `~/.config/zed/settings.json` - olupese `openai_compatible.omniroute` (awọn awoṣe ti o lagbara irinṣẹ ≤ 25), bọtini nipasẹ `$OMNIROUTE_API_KEY`                          | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | Mejeeji                 |
-| `omniroute setup-goose`    | Goose                            | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + tẹ jade env ohunelo                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Mejeeji                 |
-| `omniroute setup-aider`    | Oluranlowo                       | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + tẹ jade env ohunelo                                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Mejeeji                 |
-| `omniroute setup-qwen`     | Qwen koodu                       | `~/.qwen/settings.json` — V4 `modelProviders.openai` orun + `OMNIROUTE_API_KEY` ni `~/.qwen/.env`                                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Mejeeji                 |
-| `omniroute setup-5dive`    | 5dive (ọkọ oju-omi kekere aṣoju) | Ko si ohun labẹ `$HOME` - Levin a 5dive** profaili auth** (`/var/lib/5dive/auth-profiles/<name>/`) nipasẹ `5dive agent auth set`; root-nikan, nṣiṣẹ lori agbalejo titobi | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Mejeeji                 |
-| `omniroute setup-whycodes` | WhyCodes                         | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); ona ni `$WHYCODES_HOME/config.toml` tabi `~/.whycodes/config.toml`                                 | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Mejeeji                 |
-| `omniroute run <target>`   | Ifilọlẹ asiko ṣiṣe (gbogboogbo)  | Ko si ohun - spawn `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` pẹlu env ọtun ati args; Qwen ati Gemini lo ile ti o ya sọtọ fun igba diẹ       | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Mejeeji                 |
-| `omniroute launch`         | Claude koodu                     | Ko si ohun - spawns `claude` pẹlu `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` itasi                                                                                      | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Mejeeji                 |
-| `omniroute launch-codex`   | OpenAI Codex CLI                 | Ko si nkankan — spawns `codex` pẹlu olupese `omniroute` itasi nipasẹ `-c` awọn asia                                                                                      | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Mejeeji                 |
+| Òfin                       | Irinṣẹ                              | Ohun ti o kọ                                                                                                                                                            | Awọn asia bọtini                                                                                                                           | Agbegbe vs latọna jijin |
+| -------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| `omniroute setup-codex`    | OpenAI Codex CLI                    | `~/.codex/<name>.config.toml` — profaili kan fun awoṣe ọrọ ibaramu (`codex --profile <name>`)                                                                           | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Mejeeji                 |
+| `omniroute setup-claude`   | Claude koodu                        | `~/.claude/profiles/<name>/settings.json` — profaili kan fun awoṣe ti o baamu (`CLAUDE_CONFIG_DIR`)                                                                     | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Mejeeji                 |
+| `omniroute setup-opencode` | OpenCode (ibaramu ni gbangba)       | `~/.config/opencode/opencode.json` — `omniroute` olupese pẹlu gbogbo awoṣe katalogi (`opencode -m omniroute/<model>`)                                                   | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Mejeeji                 |
+| `omniroute setup-cline`    | Cline                               | `~/.cline/data/{globalState,secrets}.json` (ipo CLI ) + tẹ awọn eto itẹsiwaju koodu VS jade                                                                             | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Mejeeji                 |
+| `omniroute setup-kilo`     | Kilo koodu                          | `~/.local/share/kilo/auth.json` (CLI) + dapọ `kilocode.*` sinu VS Code `settings.json` o ba wa                                                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Mejeeji                 |
+| `omniroute setup-continue` | Tesiwaju / `cn` CLI                 | `~/.continue/config.yaml` — `provider: openai` dede, bọtini nipasẹ `${{ secrets.OMNIROUTE_API_KEY }}`                                                                   | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Mejeeji                 |
+| `omniroute setup-cursor`   | Cursor                              | Ko si ohun — tẹjade awọn igbesẹ inu-app ( atunto Cursor jẹ SQLite akomo)                                                                                                | `--remote` `--api-key` `--only` `--port`                                                                                                   | Mejeeji                 |
+| `omniroute setup-roo`      | Roo Code                            | `~/.omniroute/roo-settings.json` (doc gbe wọle) + ṣeto `roo-cline.autoImportSettingsPath` ti koodu VS `settings.json` ba wa                                             | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Mejeeji                 |
+| `omniroute setup-crush`    | Fifun pa                            | `~/.config/crush/crush.json` — `openai-compat` olupese, bọtini nipasẹ `$OMNIROUTE_API_KEY`                                                                              | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Mejeeji                 |
+| `omniroute setup-zed`      | Zed                                 | `~/.config/zed/settings.json` — `openai_compatible.omniroute` olupese (≤ 25 awọn awoṣe ti o lagbara irinṣẹ), bọtini nipasẹ `$OMNIROUTE_API_KEY`                         | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | Mejeeji                 |
+| `omniroute setup-goose`    | Goose                               | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + tẹ jade env ohunelo                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Mejeeji                 |
+| `omniroute setup-aider`    | Oluranlowo                          | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + tẹ jade env ohunelo                                                                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Mejeeji                 |
+| `omniroute setup-qwen`     | Qwen koodu                          | `~/.qwen/settings.json` — V4 `modelProviders.openai` orun + `OMNIROUTE_API_KEY` ni `~/.qwen/.env`                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Mejeeji                 |
+| `omniroute setup-gemini`   | Gemini CLI (ilu abinibi Gemini API) | `~/.gemini/settings.json` — auth yiyan ati awoṣe; bọtini `~/.gemini/.env` —, gbongbo olupin ati agbegbe Gemini                                                          | `--remote` `--context` `--api-key` `--model` `--yes` `--dry-run` `--port` `--gemini-home` `--settings-path` `--env-path`                   | Mejeeji                 |
+| `omniroute setup-5dive`    | 5dive (ọkọ oju-omi kekere aṣoju)    | Ko si ohun labẹ `$HOME` — kikọ a 5dive** profaili auth** (`/var/lib/5dive/auth-profiles/<name>/`) nipasẹ `5dive agent auth set`; root-nikan, nṣiṣẹ lori agbalejo titobi | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Mejeeji                 |
+| `omniroute setup-whycodes` | WhyCodes                            | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); ona ni `$WHYCODES_HOME/config.toml` tabi `~/.whycodes/config.toml`                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Mejeeji                 |
+| `omniroute run <target>`   | Ifilọlẹ asiko ṣiṣe (gbogboogbo)     | Ko si ohun — spawn `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` pẹlu awọn ọtun env ati args; Qwen ati Gemini lo ile ti o ya sọtọ fun igba diẹ | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Mejeeji                 |
+| `omniroute launch`         | Claude koodu                        | Ko si ohun — spawn `claude` pẹlu `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` itasi                                                                                      | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Mejeeji                 |
+| `omniroute launch <tool>`  | Eyikeyi ohun elo ifilọlẹ            | Ko si ohun ti o wa ninu atunto tirẹ: atunto ifilọlẹ fun igbakọọkan ni dir temp dir ikọkọ, ami igba kan                                                                  | `--model` `--all-models` `--list` `--remote` `--port` `--api-key` `--profile` `--dry-run` `--json`                                         | Mejeeji                 |
+| `omniroute launch-codex`   | OpenAI Codex CLI                    | Ko si ohun — spawn `codex` pẹlu olupese `omniroute` itasi nipasẹ `-c` awọn asia                                                                                         | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Mejeeji                 |
 
 Awọn akọsilẹ lori awọn asia (ti jẹri ni orisun aṣẹ):
 
-- `--remote <url>` — mu katalogi naa lati OmniRoute latọna jijin (foju `--port` ati ipo ti nṣiṣe lọwọ). `--api-key <key>` n pese iwe-ẹri fun olupin yẹn (awọn aifọwọyi si `OMNIROUTE_API_KEY` env var, tabi àmi ọgangan ti nṣiṣe lọwọ).
-- `--only <patterns>` - koma-ya awọn gbolohun ọrọ; tọju IDs awoṣe nikan ti o baamu (fun apẹẹrẹ `--only glm,kimi`). Wa lori `setup-codex`, `setup-claude`, `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed`.
-- `--dry-run` - tẹjade gangan ohun ti yoo kọ laisi fifọwọkan eto faili naa. Wa lori gbogbo aṣẹ `setup-*`** ayafi** `setup-cursor` (eyiti ko kọ faili rara).
-- `--model <id>` - nilo (tabi mu ibaraenisepo) fun awọn irinṣẹ ti ko ni aṣawari adaṣe awoṣe: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Awọn irinṣẹ wọnyẹn tun gba `--yes` fun awọn ṣiṣe ti kii ṣe ibaraenisepo (eyiti o nilo `--model`). `setup-opencode` gba `--model` lati ṣeto aiyipada ipele-oke.
-- `--model <id>` lori `omniroute run` n tẹle ọna ẹrọ onirin ibi-afẹde kọọkan (`bin/cli/cli-manifest.mjs`):** oluranlowo** gba `--model openai/<id>` ati** ṣii koodu** `--model omniroute/<id>` (ìpele ti wa ni afikun nikan nigbati id ko ba ti gbe e);** qwen** ati** gemini** gba id ni lọrọ ẹnu;** claude** gba nipasẹ `ANTHROPIC_MODEL`,** gussi** nipasẹ `GOOSE_MODEL`,** whycodes** nipasẹ `-P omniroute -m <id>`, ati** codex** nipasẹ `-c model_providers.omniroute.*` args.**Qwen nikan ni ibi-afẹde ṣiṣe ti lile-nbeere `--model`** - `omniroute run qwen` laisi rẹ jade `2` pẹlu aṣiṣe ti o fojuhan.
+- `--remote <url>` — lo OmniRoute latọna jijin (foju `--port` ati ipo ti nṣiṣe lọwọ). `--api-key <key>` n pese iwe-ẹri fun olupin yẹn (awọn aifọwọyi si `OMNIROUTE_API_KEY` env var, tabi ami-ọrọ ipo ti nṣiṣe lọwọ).
+- `--only <patterns>` — koma-ya awọn gbolohun ọrọ; tọju IDs awoṣe nikan ti o baamu (fun apẹẹrẹ `--only glm,kimi`). Wa lori `setup-codex`, `setup-claude`, `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed`.
+- `--dry-run` — tẹjade deede ohun ti yoo kọ laisi fifọwọkan eto faili naa. Wa lori gbogbo aṣẹ `setup-*`** ayafi** `setup-cursor` (eyiti ko kọ faili rara).
+- `--model <id>` — nilo (tabi mu ibaraenisepo) fun awọn irinṣẹ ti ko ni aṣawari adaṣe awoṣe: Cline, Kilo, Roo, Goose, Qwen, Gemini, Aider, 5dive, WhyCodes. Awọn irinṣẹ wọnyẹn tun gba `--yes` fun awọn ṣiṣe ti kii ṣe ibaraenisepo (eyiti o nilo `--model`). `setup-opencode` gba `--model` lati ṣeto aiyipada oke-ipele awoṣe.
+- `--model <id>` lori `omniroute run` n tẹle ọna ẹrọ onirin ibi-afẹde kọọkan (`bin/cli/cli-manifest.mjs`):** oluranlowo** gba `--model openai/<id>` ati** ṣii koodu** `--model omniroute/<id>` (ìpele ti wa ni afikun nikan nigbati id ko ba ti gbe e);** qwen** ati** gemini** gba id verbatim;** claude** gba nipasẹ `ANTHROPIC_MODEL`,** gussi** nipasẹ `GOOSE_MODEL`,** whycodes** nipasẹ `-P omniroute -m <id>`, ati** codex** nipasẹ `-c model_providers.omniroute.*` args.**Qwen nikan ni ibi-afẹde ṣiṣe ti lile-nbeere `--model`** — `omniroute run qwen` laisi rẹ jade `2` pẹlu aṣiṣe ti o fojuhan.
 - `--port <port>` — ibudo OmniRoute agbegbe (aiyipada `20128`, aibikita nigbati a ṣeto `--remote` ). Wa lori gbogbo `setup-*` ati awọn ifilọlẹ mejeeji.
 - awọn koodu ijade `omniroute run` : koodu ijade ti ọmọ ti CLI ti wa ni ikede ni ọrọ-ọrọ; `2` = awọn ariyanjiyan aitọ (afojusun ti ko ni atilẹyin, sonu `--model` ti o nilo, oluso apoti); `127` = alakomeji afojusun ko si ni `PATH`; `130`/`143`/`129` nigbati ifilọlẹ ba pari nipasẹ `SIGINT`/`SIGTERM`/`SIGHUP`; `1` = ikuna ifilọlẹ asiko asiko miiran.
 - Awọn ifilọlẹ meji naa (`launch`, `launch-codex`) gba `--profile <name>` lati yan profaili kan ti a kọ nipasẹ `setup-claude` / `setup-codex`, pẹlu pass-nipasẹ args fun alakomeji `claude` / `codex` labẹ.
@@ -76,13 +89,15 @@ Olumudani ibaraenisepo tun jẹ pinpin nipasẹ awọn ilana iṣeto:
 omniroute configure claude
 omniroute configure opencode --provider glm
 omniroute configure qwen --model qwen/qwen3.8-max-preview --yes
+omniroute configure gemini
+omniroute configure whycodes
 ```
 
-`configure` lọwọlọwọ ṣe aṣoju si awọn ilana idanwo fun `codex`, `claude`, `opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo`, ati `5dive`. IDE-nikan, MITM, ati awọn titẹ sii katalogi itọsọna-nikan duro `setup-*`/awọn ṣiṣan afọwọṣe ti o han gbangba ati pe ko ṣe afihan bi awọn ibi-afẹde ifilọlẹ.
+`configure` lọwọlọwọ ṣe aṣoju si awọn ilana idanwo fun `codex`, `claude`, `opencode`, `qwen`, `gemini`, `aider`, `goose`, `cline`, `continue`, `kilo`, `5dive`, ati `whycodes`. IDE-nikan, MITM, ati awọn titẹ sii katalogi itọsọna-nikan duro `setup-*`/awọn ṣiṣan afọwọṣe ti ko ṣe afihan ati pe ko ṣe afihan bi awọn ibi-afẹde ifilọlẹ.
 
-> `setup-opencode` ni** lightweight openai-ibaramu** OpenCode Integration. Isopọpọ ohun itanna kan tun wa - `omniroute setup opencode` — eyiti o fi `@omniroute/opencode-plugin` sori ẹrọ. Wọn ti wa ni orisirisi awọn ofin; tabili loke awọn iwe aṣẹ `setup-opencode`.
+> `setup-opencode` ni** lightweight openai-ibaramu** OpenCode Integration. Isopọpọ ohun itanna kan tun wa — `omniroute setup opencode` — eyiti o fi `@omniroute/opencode-plugin` sori ẹrọ. Wọn ti wa ni orisirisi awọn ofin; tabili loke awọn iwe aṣẹ `setup-opencode`.
 >
-> Ohun itanna naa wa ni awọn idii meji, ọkan fun OpenCode pataki, nitori awọn agberu meji n reti awọn aaye titẹsi oriṣiriṣi: `@omniroute/opencode-plugin` fun OpenCode v1 ati `@omniroute/opencode-plugin-v2` fun OpenCode v2. Apopọ v2 jẹ tuntun (`0.1.0`) ati tẹle iwe adehun agbalejo ti o tun nlọ, nitorinaa o ka apẹrẹ awọn irugbin OpenCode sinu iwe katalogi dipo ki o ro ọkan. Fi sii nipa fifi titẹ sii `plugins` kan kun si `opencode.json`; `omniroute setup opencode` tun fi sori ẹrọ package v1. Awọn aṣayan ati aṣẹ wiwa iwe-ẹri wa ninu package README.
+> Ohun itanna naa wa ni awọn idii meji, ọkan fun OpenCode pataki, nitori awọn agberu meji n reti awọn aaye iwọle oriṣiriṣi: `@omniroute/opencode-plugin` fun OpenCode v1 ati `@omniroute/opencode-plugin-v2` fun OpenCode v2. Apoti v2 jẹ tuntun (`0.1.0`) ati tẹle iwe adehun agbalejo ti o tun nlọ, nitorinaa o ka apẹrẹ awọn irugbin OpenCode sinu iwe katalogi dipo ki o ro ọkan. Fi sii nipa fifi titẹ sii `plugins` kan kun si `opencode.json`; `omniroute setup opencode` tun fi sori ẹrọ package v1. Awọn aṣayan ati aṣẹ wiwa iwe-ẹri wa ninu package README.
 
 ---
 
@@ -166,42 +181,24 @@ Wo [Ìpo Jíjìn](./REMOTE-MODE.md) fún àwọn àyíká, àwọn ààlà, àti
 
 ---
 
-## Àwọn ọ̀wọ́ aṣojú 5dive
+## 5dive oluranlowo fleets
 
-[5dive](https://5dive.ai) ń ṣiṣẹ́ pẹ̀lú ọ̀wọ́ àwọn aṣojú ìkọ-kóòdù tó ń ṣiṣẹ́ fún ìgbà
-pípẹ́, tí ọ̀kọ̀ọ̀kan jẹ́ ẹ̀ka systemd lábẹ́ aṣàmúlò Unix tirẹ̀. Kì í ṣe CLI ìkọ-kóòdù
-fúnra rẹ̀, nítorí náà kò sí ohun tí `omniroute run` yóò ṣe ìfilọ́lẹ̀ rẹ̀ — `5dive`
-jẹ́ ibi-àfojúsùn **fún ìṣètò nìkan**.
+[5dive](https://5dive.ai) nṣiṣẹ ọkọ oju-omi titobi ti awọn aṣoju ifaminsi ti n ṣiṣẹ pipẹ, ọkọọkan ni ẹyọ ti eto labẹ olumulo Unix tirẹ. Kii ṣe koodu koodu CLI funrararẹ, nitorinaa ko si nkankan fun `omniroute run` lati ṣe ifilọlẹ — `5dive` jẹ a** tunto-nikan** afojusun.
 
 ```bash
 omniroute configure 5dive --model failover-demo --yes
 omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent worker1
 ```
 
-Àwọn ọ̀nà méjèèjì kọ prófáìlì **ìfàṣẹsí** 5dive kan, gbogbo ìjókòó `claude` tí a
-so mọ́ prófáìlì náà yóò sì bá OmniRoute sọ̀rọ̀. Ohun mẹ́ta ló jẹ́ pàtó sí ibi-àfojúsùn yìí:
+Mejeeji fọọmu kọ ọkan 5dive** profaili auth** , ati gbogbo ijoko `claude` ti o so mọ profaili yẹn lẹhinna sọrọ si OmniRoute. Awọn nkan mẹta jẹ pato si ibi-afẹde yii:
 
-- **Ó ń ṣiṣẹ́ lórí ẹ̀rọ olùgbàlejò ọ̀wọ́ náà, gẹ́gẹ́ bí root.** Àwọn ọ̀rọ̀-àṣẹ 5dive
-  ń ṣiṣẹ́ lórí àwọn ẹ̀ka systemd abẹ́lé àti àpò ìpamọ́ ipò tí root ní; kò sí ìpo
-  jíjìn. Ìlànà náà tún ara rẹ̀ ṣiṣẹ́ nípasẹ̀ `sudo` nígbà tí kò tíì jẹ́ root
-  (`--no-sudo` yóò pa èyí, yóò sì tẹ àṣẹ náà jáde dípò rẹ̀).
-- **Ibi ìbáṣepọ̀ náà gbọ́dọ̀ jẹ́ `https://` àfi tí ó bá jẹ́ loopback.** Kọ́kọ́rọ́ API
-  aṣojú náà ń gba URL yẹn kọjá lórí gbogbo ìbéèrè, 5dive sì kọ ibi ìbáṣepọ̀ tí kò
-  ní ìfipamọ́ tó wà níta ẹ̀rọ. Àdírẹ́sì LAN aládàáni kì í ṣe ìyọkúrò.
-- **Àṣàyàn awoṣe ìjókòó kọ̀ọ̀kan ga ju ti prófáìlì lọ.** Prófáìlì náà ní
-  `ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU}_MODEL`, ṣùgbọ́n ìjókòó tí a ṣì so mọ́
-  model id àkànṣe yóò kùnà ní ìgbésẹ̀ àkọ́kọ́ rẹ̀ pẹ̀lú _"Ìṣòro kan wà pẹ̀lú awoṣe
-  tí a yàn"_. Fi `--agent <name>` ránṣẹ́ (o lè tún un ṣe) láti so àwọn ìjókòó
-  náà mọ́ bákan náà; ìlànà náà yóò tẹ àṣẹ náà jáde nígbà tí o kò bá ṣe bẹ́ẹ̀.
+- **O gbalaye lori agbalejo titobi, bi root.** Awọn ọrọ-ìse 5dive ṣiṣẹ lori awọn ẹya eto agbegbe ati dir ipinle ti o ni gbongbo; ko si isakoṣo latọna jijin mode. Ohunelo tun-execs nipasẹ `sudo` nigbati ko ba ti gbongbo tẹlẹ (`--no-sudo` wa ni pipa ati tẹ aṣẹ dipo).
+- **Aaye ipari gbọdọ jẹ `https://` ayafi ti o jẹ loopback.** Bọtini API aṣoju n gun ti o URL lori gbogbo ibeere, ati 5dive kọ aaye ipari-apoti ti o han gbangba. Adirẹsi LAN ikọkọ kii ṣe iyasọtọ.
+- **Pinni awoṣe ijoko kọọkan ju profaili lọ.** Profaili naa n gbe `ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU}_MODEL`, ṣugbọn ijoko kan ti o tun pin si id awoṣe ọja iṣura kuna titan akọkọ rẹ pẹlu _"Ọrọ kan wa pẹlu awoṣe ti a yan"_. Kọja `--agent <name>` (repeatable) lati pin awọn ijoko bi daradara; awọn ohunelo tẹjade pipaṣẹ nigbati o ko ba ṣe.
 
-A máa ń fi kọ́kọ́rọ́ API fún 5dive lórí **stdin** (`--api-key=-`), nítorí náà kò
-ní hàn nínú àbájáde `ps` láéláé.
+Bọtini API ti wa ni ọwọ si 5dive lori** stdin** (`--api-key=-`), nitorina ko han ni igbejade `ps`.
 
-Dídarí prófáìlì náà sí **àkójọpọ̀** OmniRoute dípò awoṣe kan ṣoṣo ni ohun tó ń fún
-ọ̀wọ́ náà ní ìyípadà sí olùpèsè mìíràn nígbà ìkùnà: nígbà tí ibi ìbáṣepọ̀ àkọ́kọ́
-dákẹ́ pátápátá láàárín ìgbésẹ̀ kan nínú ìṣiṣẹ́ tí a ṣe àkọsílẹ̀ rẹ̀ lórí
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), aṣojú náà parí
-àwọn ìgbésẹ̀ tó kù lórí èyí àfẹ́yìntì, kò sì fi ìdádúró náà hàn rárá.
+Ntọkasi profaili ni ohun OmniRoute** konbo** kuku ju awoṣe kan jẹ ohun ti n gba olupese ọkọ oju-omi ọkọ oju-omi kekere: nigbati aaye ipari akọkọ ti lọ lile-isalẹ aarin-tan ni ṣiṣe ti o gbasilẹ lori [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), aṣoju naa pari awọn igbesẹ ti o ku lori isubu ati pe ko jade kuro ni ita.
 
 ---
 

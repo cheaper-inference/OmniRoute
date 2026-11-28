@@ -4,207 +4,213 @@
 
 ---
 
-> **Stručne**: Použite vlastné účty u podporovaných poskytovateľov. OmniRoute kombinuje pripojenia, ktoré nakonfigurujete; neposkytuje propagovaný súhrnný limit tokenov. Bezplatný prístup môže vyžadovať registráciu, API kľúč, schválenie alebo platobnú metódu. Naďalej platia limity, zásady ochrany súkromia a podmienky poskytovateľov.
+> **TL;DR** : Prineste si vlastné účty vhodného poskytovateľa. OmniRoute kombinuje pripojenia, ktoré konfigurujete; nevydáva inzerovaný súhrnný symbolický rozpočet. Bezplatný prístup môže vyžadovať registráciu, kľúč API, schválenie alebo spôsob platby. Stále platia limity poskytovateľa, zásady ochrany osobných údajov a podmienky.
 
 ---
 
 ## Čo sú bezplatné úrovne?
 
-Mnohí poskytovatelia AI ponúkajú určitú formu **bezplatného prístupu**. V závislosti od poskytovateľa to môže znamenať koncový bod bez autentifikácie, pravidelne obnovovanú kvótu, neobmedzený prístup s obmedzenou frekvenciou požiadaviek, kredit za registráciu, manuálne schválenie alebo dočasnú promoakciu. Niektoré možnosti vyžadujú účet, API kľúč, kreditnú kartu, KYC alebo prijatie podmienok konkrétneho poskytovateľa.
+Mnoho poskytovateľov AI ponúka určitú formu** voľný prístup** . V závislosti od poskytovateľa to môže znamenať koncový bod bez autorizácie, opakujúcu sa kvótu, neobmedzený prístup s obmedzenou sadzbou, udelenie registrácie, manuálne schválenie alebo dočasnú propagáciu. Niektoré možnosti vyžadujú účet, kľúč API, kreditnú kartu, KYC alebo prijatie podmienok špecifických pre poskytovateľa.
 
-OmniRoute **združuje** nakonfigurované pripojenia do jedného koncového bodu. U každého poskytovateľa, ktorý vyžaduje účet, sa musíte aj naďalej zaregistrovať samostatne. Pripojte tieto účty a použite `model: "auto"` na smerovanie medzi dostupnými cieľmi. Nová inštalácia nemusí mať žiadny dostupný cieľ bez potreby kľúča; samotná inštalácia OmniRoute nezaručuje úspešnú odpoveď chatu.
+OmniRoute** agregátov** nakonfigurované pripojenia do jedného koncového bodu. Stále sa prihlasujete samostatne pre každého poskytovateľa, ktorý vyžaduje účet. Pripojte tieto účty a použite `model: "auto"` na smerovanie medzi vhodnými cieľmi. Nová inštalácia nemôže mať žiadny vhodný bezkľúčový cieľ; Inštalácia OmniRoute samotná nezaručuje úspešnú odpoveď na chat.
 
 ---
 
 ## Reprezentatívni poskytovatelia bezplatného prístupu
 
-### Opakovaný prístup, prístup bez kľúča alebo bez stanoveného limitu
+### Opakovaný, bezkľúčový alebo neobmedzený prístup
 
-Títo poskytovatelia ponúkajú v auditovanom katalógu opakovaný prístup, prístup bez kľúča alebo bez stanoveného limitu. „Bez stanoveného limitu“ znamená, že nie je zverejnený žiadny limit tokenov; naďalej sa však môžu uplatňovať obmedzenia frekvencie požiadaviek, súbežnosti, účtu, regiónu a zásad:
+Títo poskytovatelia majú v auditovanom katalógu opakujúcu sa, bezkľúčovú alebo neobmedzenú cestu voľného prístupu. „Uncapped“ znamená, že nie je zverejnený token cap; Stále môžu platiť limity sadzby, súbežnosti, účtu, regiónu a pravidiel:
 
-| Poskytovateľ      | Modely                                                                                        | Kvóta                                                                                                                                                          | Ako sa pripojiť                                                                                   |
-| ----------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 a ďalšie                                          | Auditovaný katalóg odhaduje zdieľaný mesačný fond na 25K tokenov                                                                                               | Postup cez OAuth/účet; ToS sú v katalógu označené ako `avoid`                                     |
-| **Pollinations**  | Aktuálna množina modelov bez kľúča; niektoré pôvodné modely boli ukončené alebo vyžadujú kľúč | Bez kľúča; bez zverejneného limitu tokenov                                                                                                                     | Pre modely bez kľúča sa nevyžadujú prihlasovacie údaje poskytovateľa                              |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 a ďalšie                          | Bezplatný API kľúč (bez obmedzenia frekvencie a bez platobnej karty); **každá požiadavka sa zaznamenáva** na výskumné účely (odhlásenie na logfare.ai/consent) | Okamžitý kľúč na logfare.ai/register; ToS/ochrana súkromia na logfare.ai/tos a logfare.ai/privacy |
-| **Cloudflare AI** | Katalóg Workers AI                                                                            | Auditovaný fond sa na základe zverejnených jednotiek používania odhaduje na ~30M tokenov/mesiac                                                                | Účet Cloudflare a prihlasovacie údaje API                                                         |
-| **Gemini**        | Rodina Gemini Flash                                                                           | Premenlivé limity frekvencie podľa projektu/modelu; uvádzaný údaj nezahŕňa pevnú mesačnú dotáciu tokenov                                                       | API kľúč Google AI Studio; skontrolujte aktívne limity projektu                                   |
-| **Groq**          | Modely Llama, GPT-OSS a Qwen                                                                  | Auditovaný fond sa odhaduje na ~15M tokenov/mesiac                                                                                                             | API kľúč Groq; uplatňujú sa limity frekvencie                                                     |
+| Poskytovateľ      | Modelky                                                                                             | Kvóta                                                                                                                                        | Ako sa pripojiť                                                                          |
+| ----------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 a ďalšie                                                | Auditovaný katalóg odhaduje zdieľaný mesačný fond 25 000 tokenov                                                                             | OAuth/account ; ToS označené `avoid` v katalógu                                          |
+| **Opeľovanie**    | Súčasná bezkľúčová modelová sada; niektoré predchádzajúce modely sú ukončené alebo sa vyžadujú kľúč | Bezkľúčový; žiadny zverejnený token cap                                                                                                      | Žiadne poverenia poskytovateľa pre bezkľúčové modely                                     |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 a ďalšie                                | Bezplatný kľúč API (bez obmedzenia sadzby, bez karty);** každá požiadavka je zaprotokolovaná** na výskum (odhlásiť sa na logfare.ai/consent) | Okamžitý kľúč na logfare.ai/register; ToS/privacy na logfare.ai/tos a logfare.ai/privacy |
+| **Cloudflare AI** | Katalóg pracovníkov AI                                                                              | Auditovaný fond odhaduje ~ 23 miliónov tokens/month zo zverejnených jednotiek využitia (katalóg auditovaný 23. 11. 2026)                     | Cloudflare účet a poverenia API                                                          |
+| **Gemini**        | Gemini Flash rodina                                                                                 | Variabilné limity sadzieb project/model ; v nadpise nie je zahrnutý žiadny pevný mesačný tokenový grant                                      | kláves Google AI Studio API ; skontrolujte aktívne limity projektu                       |
+| **Groq**          | modely Llama, GPT-OSS a Qwen                                                                        | Auditované odhady fondu ~ 24 miliónov tokens/month (4 kryty na model, auditovaný katalóg 23.11.2026)                                         | kľúč Groq API ; platia limity sadzieb                                                    |
 
-### Registračné dotácie a kredity špecifické pre poskytovateľov
+### Registračné granty a kredity špecifické pre poskytovateľa
 
-Títo poskytovatelia ponúkajú registračné dotácie alebo propagačné kredity, ktoré podliehajú ich pravidlám oprávnenosti. Podľa overenia k 2026-10-08 vyžaduje [cenník Cerebras](https://www.cerebras.ai/pricing) platobnú metódu na získanie jednorazového kreditu $5, ktorého platnosť vyprší po 30 dňoch; nejde o opakovanú kvótu tokenov. [Limity frekvencie Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) sa líšia podľa projektu, modelu a úrovne, preto nie sú prepočítané na garantovanú mesačnú dotáciu tokenov.
+Títo poskytovatelia ponúkajú registračné granty alebo propagačné kredity v súlade s ich pravidlami oprávnenosti. Ako bolo overené dňa 2026-10-08, [ceny Cerebras](https://www.cerebras.ai/pricing) vyžadujú spôsob platby pre jednorazový kredit 5 USD, ktorý vyprší po 30 dňoch; nie je to opakujúca sa kvóta tokenov. [Limity sadzieb Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) sa líšia podľa projektu, modelu a úrovne, takže nie sú prevedené na garantovaný mesačný tokenový grant.
 
-| Poskytovateľ  | Bezplatné kredity                                                                  | Modely                      | Ako ich získať                                                     |
-| ------------- | ---------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------ |
-| **Cerebras**  | Jednorazový propagačný kredit $5; platnosť vyprší po 30 dňoch                      | Aktuálny katalóg inferencie | Účet a platná platobná metóda                                      |
-| **DeepSeek**  | 5M bezplatných tokenov                                                             | DeepSeek V4                 | Zaregistrujte sa na platform.deepseek.com                          |
-| **LongCat**   | Jednorazová dotácia 10M tokenov                                                    | LongCat 2.0                 | API kľúč + KYC; po vyčerpaní dotácie platba podľa spotreby         |
-| **Vertex AI** | Registračný kredit $300, ktorý je v rozpočtovom modeli vyjadrený ako ~300M tokenov | Gemini a partnerské modely  | Účet Google Cloud; uplatňujú sa pravidlá fakturácie a oprávnenosti |
+| Poskytovateľ  | Bezplatné kredity                                                                     | Modelky                     | Ako získať                                                   |
+| ------------- | ------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------ |
+| **Cerebras**  | Jednorazový propagačný kredit 5 USD; vyprší po 30 dňoch                               | Aktuálny inferenčný katalóg | Účet a platný spôsob platby                                  |
+| **DeepSeek**  | 5 miliónov žetónov zadarmo                                                            | DeepSeek V4                 | Zaregistrujte sa na platform.deepseek.com                    |
+| **LongCat**   | Jednorazový grant vo výške 10 miliónov tokenov                                        | LongCat 2.0                 | kľúč API + KYC; priebežné platby po poskytnutí grantu        |
+| **Vertex AI** | Kredit na registráciu 300 USD v rozpočtovom modeli predstavuje 300 miliónov tokenov ~ | Gemini a partnerské modely  | Google Cloud účet; platia pravidlá fakturácie a oprávnenosti |
 
-### Ďalší obmedzený prístup
+### Iný obmedzený prístup
 
-Títo poskytovatelia majú **bezplatné úrovne** so špecifickými limitmi:
+Títo poskytovatelia majú** voľné úrovne** so špecifickými limitmi:
 
-| Poskytovateľ               | Bezplatný limit                                                                                       | Modely                                 | Najvhodnejšie na |
-| -------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------- | ---------------- |
-| **GitHub Models**          | Auditovaný zdieľaný fond sa odhaduje na ~18M tokenov/mesiac                                           | Vyhodnocovanie širokej škály modelov   |                  |
-| **Hugging Face**           | Malý opakovaný mesačný fond                                                                           | Experimenty a rozmanitosť modelov      |                  |
-| **OpenRouter free models** | Zdieľaný fond s obmedzeným počtom požiadaviek; voliteľné jednorazové dobitie zvyšuje opakovaný prídel | Široký katalóg záložných modelov       |                  |
-| **AI Horde**               | Komunitná kapacita bez kľúča; dostupnosť sa líši                                                      | Príležitostná distribuovaná inferencia |                  |
+| Poskytovateľ                    | Voľný limit                                                                                              | Modelky                                 | Najlepšie pre |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------- |
+| **GitHub modely**               | Auditovaný zdieľaný fond odhaduje ~ 18 miliónov tokens/month                                             | Široké hodnotenie modelu                |
+| **Objímajúca tvár**             | Malý opakujúci sa mesačný bazén                                                                          | Experimenty a modelová rozmanitosť      |
+| **bezplatné modely OpenRouter** | Zdieľaný fond s obmedzenými požiadavkami; voliteľné jednorazové doplnenie zvyšuje opakujúci sa príspevok | Široký záložný katalóg                  |
+| **AI Horda**                    | Bezkľúčová komunitná kapacita; dostupnosť sa líši                                                        | Oportunistická distribuovaná inferencia |
 
 ---
 
-## Ako kombinovať bezplatné úrovne
+## Ako naskladať bezplatné úrovne
 
-Čaro OmniRoute spočíva v **kombinovaní bezplatných úrovní**. Namiesto spoliehania sa na jedného poskytovateľa pripojíte viacerých bezplatných poskytovateľov a necháte OmniRoute automaticky vybrať toho najlepšieho pre každú požiadavku.
+Kúzlo OmniRoute je** stohovanie voľných vrstiev** . Namiesto spoliehania sa na jedného poskytovateľa pripojíte viacero bezplatných poskytovateľov a necháte OmniRoute automaticky vybrať toho najlepšieho pre každú požiadavku.
 
-### Príklad: Širšie pokrytie bezplatných úrovní
+### Príklad: Širšie bezplatné pokrytie
 
-Pripojte viacerých poskytovateľov, aby ste znížili závislosť od jednej kvóty:
+Pripojte niekoľko poskytovateľov, aby ste znížili závislosť od jednej kvóty:
 
 1. **Gemini** — opakujúca sa kvóta kľúča API
 2. **Groq** — opakujúca sa kvóta kľúča API
-3. **Pollinations** — prístup bez kľúča s obmedzenou frekvenciou požiadaviek
-4. **LongCat** — jednorazový bonus za registráciu (vyžaduje KYC)
+3. **Opeľovanie** — bezkľúčový prístup s obmedzenou sadzbou
+4. **LongCat** — jednorazový registračný grant (vyžaduje KYC)
 
-Potom použite `model: "auto"` a OmniRoute:
+Potom použite `model: "auto"` a OmniRoute :
 
-- Najprv vyskúša oprávnené pripojenie s najvyšším hodnotením
-- Ak jeho kvóta alebo kontrola stavu zlyhá → vyskúša ďalšieho nakonfigurovaného poskytovateľa
-- Ak poskytovateľ bez kľúča nie je dostupný → pokračuje cez zostávajúce ciele
-- Ak neuspeje žiadne oprávnené pripojenie → vráti chybu; registračné kredity možno použiť iba počas ich platnosti a dostupnosti
+- Najprv vyskúšajte najlepšie hodnotené vhodné pripojenie
+- Ak zlyhá jeho kvóta alebo kontrola stavu → skúste ďalšieho nakonfigurovaného poskytovateľa
+- Ak je bezkľúčový poskytovateľ nedostupný, → cez zostávajúce ciele
+- Ak sa nepodarí žiadne vhodné pripojenie, → vráti chybu; registračné kredity sú použiteľné len vtedy, keď sú platné a dostupné
 
-**Výsledok**: širšie pokrytie bezplatných úrovní s automatickým záložným riešením — nie záruka neobmedzenej kapacity.
+**Výsledok** : širšie pokrytie voľnej úrovne s automatickým záložným — nie je zárukou neobmedzenej kapacity.
 
 ---
 
 ## Ako pripojiť bezplatných poskytovateľov
 
-### Krok 1: Otvorte ovládací panel
+### Krok 1: Otvorte Dashboard
 
-V prehliadači prejdite na adresu `http://localhost:20128`.
+Prejdite na `http://localhost:20128` vo svojom prehliadači.
 
-### Krok 2: Prejdite na Poskytovateľov
+### Krok 2: Prejdite na položku Poskytovatelia
 
-Na bočnom paneli kliknite na položku **Poskytovatelia**.
+Kliknite** Poskytovatelia** v bočnom paneli.
 
 ### Krok 3: Kliknite na Pridať poskytovateľa
 
-Kliknite na tlačidlo **+ Pridať poskytovateľa**.
+Kliknite na**+ Pridať poskytovateľa** tlačidlo.
 
 ### Krok 4: Vyberte bezplatného poskytovateľa
 
-Prezrite si katalóg a pri každom poskytovateľovi skontrolujte aktuálne metadáta `hasFree`, overovanie, kvóty, ochranu súkromia
-a podmienky používania. Karta poskytovateľa a dokument
-[Prehľad bezplatných úrovní](../reference/FREE_TIERS.md) rozlišujú pravidelne obnovované limity,
-neobmedzený prístup alebo prístup bez kľúča, kredity za registráciu, ukončené ponuky a rizikovejšie zdroje.
+Prezrite si katalóg a skontrolujte aktuálne metadáta `hasFree`, auth, kvóty, súkromia a ToS každého poskytovateľa. Karta poskytovateľa a [Free Tiers Reference](../reference/FREE_TIERS.md) rozlišujú opakujúce sa fondy, uncapped/keyless prístup, registračné kredity, ukončené záznamy a zdroje s vyšším rizikom.
 
 ### Krok 5: Kliknite na Pripojiť
 
-V prípade poskytovateľa typu `NOAUTH` OmniRoute nevyžaduje prihlasovacie údaje pre nadradenú službu. Nezaručuje to, že nadradená služba akceptuje klientov tretích strán alebo má dostupnú kapacitu. Poskytovatelia využívajúci OAuth a API kľúč musia byť pripojení prostredníctvom zdokumentovaného postupu pre ich účet. Ak je povolené overovanie smerovača, váš klient naďalej používa API kľúč OmniRoute zobrazený v časti **Ovládací panel → Koncové body**.
+Pre poskytovateľa `NOAUTH` OmniRoute nepožaduje upstream poverenie. To nezaručuje, že upstream akceptuje klientov tretích strán alebo má dostupnú kapacitu. Poskytovatelia kľúčov OAuth a API musia byť prepojení prostredníctvom ich zdokumentovaného toku účtov. Váš klient stále používa kľúč OmniRoute API vytvorený v** Klávesy prístrojovej dosky → API** (zobrazené iba raz pri vytváraní), keď je povolená autentifikácia smerovača.
 
-### Krok 6: Zopakujte postup
+### Krok 6: Opakujte
 
-Pripojte niekoľkých poskytovateľov, ktorých podmienky a model ochrany súkromia vyhovujú vášmu prípadu použitia.
+Pripojte niekoľko poskytovateľov, ktorých podmienky a model ochrany osobných údajov zodpovedajú vášmu prípadu použitia.
+
+---
+
+## Pochádza z dsh „Náš bezplatný model“
+
+Doplnok [dsh-our-free-model](https://github.com/Ebony-Vinyl/dsh-our-free-model) pre hostiteľa agenta dsh dosahuje dva upstreamy. OmniRoute už má poskytovateľa pre každého, ale iba jeden z nich je voľná cesta v OmniRoute:
+
+| Zásuvný pruh | Proti prúdu                               | poskytovateľ OmniRoute      | Zadarmo v OmniRoute? | Ako sa pripojiť                                                               |
+| ------------ | ----------------------------------------- | --------------------------- | -------------------- | ----------------------------------------------------------------------------- |
+| Kilový kanál | Kilo AI brána (`api.kilo.ai/api/gateway`) | `kilo-gateway` (alias `kg`) | áno                  | Kľúč API je voliteľný: ak chcete použiť voľný fond brány, nechajte ho prázdny |
+| Voľný pruh   | OpenCode Zen (`opencode.ai`)              | `opencode-zen`              | Nie                  | Váš vlastný kľúč OpenCode API od [opencode.ai/zen](https://opencode.ai/zen)   |
+
+**Kilo.** Volajte bezplatný fond ako `kilo-gateway/<model>` alebo `kg/<model>`, napríklad `kg/kilo-auto/free` (bezplatný automatický smerovač Kilo) alebo jeden z modelov `:free` brány. Voľná sada sa otáča; `kilo-gateway` prechádza cez ID modelov, ktoré nie sú vo vstavanom zozname OmniRoute, takže model, ktorý brána dnes uvádza, možno zavolať skôr, ako ho zahrnie katalóg. Na bezplatných modelových kartách spoločnosti Kilo sa uvádza, že výzvy môže poskytovateľ upstream zaznamenať a použiť na zlepšenie svojich služieb, takže neposielajte citlivé údaje.
+
+**OpenCode.** Voľný pruh pluginu je bezkľúčová ponuka OpenCode. OmniRoute neposkytuje túto ponuku ako bezplatný prístup:
+
+- Bezkľúčový poskytovateľ OpenCode od OmniRoute bol odstránený na žiadosť operátora OpenCode(pozri [Odstránení poskytovatelia](../reference/REMOVED_PROVIDERS.md) ).
+- [Dokumentácia koncového bodu](https://opencode.ai/v2/docs/console/models/#endpoints)OpenCode spája svoje bezplatné chatové ponuky s vlastným klientom OpenCode, takže OmniRoute ich nepočíta ani neoznačuje ako bezplatné.
+
+ID modelu, ktorý doplnok zobrazuje, ako napríklad `deepseek-v4.1-flash-free`, `mimo-v2.6-flash-free` a `nemotron-3.5-lightning-free`, sú v katalógu `opencode-zen`. Prepojte `opencode-zen` s vlastným kľúčom OpenCode, aby ste ich mohli používať v súlade s podmienkami účtu OpenCode.
+
+**Lokálny port doplnku.** Doplnok môže vystaviť svoje modely na lokálnom porte kompatibilnom s OpenAI (predvolené `18899`). Akýkoľvek takýto koncový bod možno pridať ako [vlastného poskytovateľa kompatibilného s OpenAI](../guides/USER_GUIDE.md#custom-openai-compatible-providers), ale OmniRoute nenainštaluje, nespustí ani neaktualizuje doplnok a doplnok rozhodne, ktorý upstream splní každú požiadavku. Vyššie uvedené obmedzenia OpenCode sa vzťahujú na ponuku OpenCode bez ohľadu na to, ktorý klient odošle požiadavku.
 
 ---
 
 ## Správne čítanie katalógu
 
-- `NOAUTH` znamená, že OmniRoute od vás nepožaduje prihlasovací údaj poskytovateľa; nezaručuje však dostupnosť, ochranu súkromia ani neobmedzenú kapacitu.
-- `hasFree` sú metadáta na vyhľadávanie. Môžu predstavovať opakovanú kvótu, prístup bez kľúča, kredit za registráciu, schvaľovací program alebo propagačnú ponuku.
-- `recurring-uncapped` znamená, že nebol dostupný žiadny zverejnený limit počtu tokenov; naďalej však platia obmedzenia rýchlosti a súbežnosti.
-- `one-time-initial` sa po vyčerpaní kreditu udeleného pri registrácii neobnovuje.
-- Poskytovatelia s označením `tos: avoid` sú predvolene vylúčení z automatického smerovania (`excludeTosAvoid`). Pripojenie účtu tento filter neobíde. Akékoľvek manuálne prepísanie operátorom by malo nasledovať až po preskúmaní podmienok poskytovateľa a rizík spojených s účtom.
-- Záznamy označené ako `discontinued` zostávajú historickým dokladom a nesmú sa prezentovať ako aktuálne bezplatné.
+- `NOAUTH` znamená, že OmniRoute od vás nepožaduje poverenie poskytovateľa; nezaručuje dostupnosť, súkromie ani neobmedzenú kapacitu.
+- `hasFree` sú metadáta objavu. Môže predstavovať opakujúcu sa kvótu, bezkľúčový prístup, registračný kredit, schvaľovací program alebo propagáciu.
+- `recurring-uncapped` znamená, že nebol dostupný žiadny zverejnený strop tokenov; stále platia limity sadzby a súbežnosti.
+- `one-time-initial` sa po vyčerpaní registračného grantu neopakuje.
+- Poskytovatelia `tos: avoid` sú štandardne vylúčení z automatického smerovania (`excludeTosAvoid`). Pripojenie účtu neobíde tento filter. Akékoľvek prepísanie operátora by malo nasledovať po preskúmaní podmienok poskytovateľa a rizika účtu.
+- Záznamy označené `discontinued` zostávajú historickým dôkazom a nesmú byť prezentované ako aktuálne voľné.
 
 ---
 
-## Ako OmniRoute zlepšuje bezplatné úrovne
+## Ako OmniRoute robí bezplatné úrovne lepšími
 
-### 1. Automatické záložné riešenie
+### 1. Automatická záloha
 
-Ak je jeden bezplatný poskytovateľ zaneprázdnený alebo nedostupný, OmniRoute automaticky vyskúša ďalšieho. Nemusíte robiť nič.
+Ak je jeden bezplatný poskytovateľ zaneprázdnený alebo nefunkčný, OmniRoute automaticky vyskúša ďalšieho. Nemusíte robiť nič.
 
 ### 2. Inteligentné smerovanie
 
-OmniRoute vyberie **najlepšieho bezplatného poskytovateľa** pre každú požiadavku na základe týchto faktorov:
+OmniRoute vyberie** najlepší bezplatný poskytovateľ** pre každú žiadosť na základe:
 
-- Rýchlosť — Ktorý poskytovateľ je práve teraz najrýchlejší?
-- Kvalita — Ktorý poskytovateľ je najlepší pre túto úlohu?
-- Kapacita — Ktorému poskytovateľovi zostáva voľná kvóta?
+- Rýchlosť — Ktorý poskytovateľ je momentálne najrýchlejší?
+- Kvalita — Ktorý poskytovateľ je pre túto úlohu najlepší?
+- Kapacita — Ktorý poskytovateľ má zostávajúcu kvótu?
 
 ### 3. Úspora tokenov
 
-Kompresný proces OmniRoute môže znížiť počet vhodných tokenov výzvy a výstupu nástrojov. Skutočná
-úspora závisí od obsahu, vybraných mechanizmov, účtovania poskytovateľa a nastavení
-vernosti; kompresia nenásobí každú kvótu poskytovateľa pevne stanoveným koeficientom.
+Kompresný kanál OmniRoute môže znížiť vhodné tokeny výziev a výstupných nástrojov. Skutočné úspory závisia od obsahu, vybraných motorov, účtovníctva poskytovateľa a nastavení vernosti; kompresia nevynásobí kvótu každého poskytovateľa pevnou sumou.
 
 ### 4. Podpora viacerých účtov
 
-Ak podmienky poskytovateľa povoľujú viacero účtov alebo prihlasovacích údajov, OmniRoute môže každé
-pripojenie považovať za samostatného kandidáta na smerovanie. Nevytvárajte ďalšie účty s cieľom obísť
-kvótu alebo zásady prístupu poskytovateľa.
+Ak podmienky poskytovateľa povoľujú viacero účtov alebo poverení, OmniRoute môže každé pripojenie považovať za samostatného kandidáta na smerovanie. Nevytvárajte ďalšie účty, aby ste sa vyhli kvótam alebo pravidlám prístupu poskytovateľa.
 
 ---
 
-## Výpočet bezplatnej úrovne
+## Bezplatná matematika úrovní
 
-Aktuálny katalóg s deduplikáciou spoločných fondov momentálne uvádza:
+Živý katalóg s deduplikáciou fondu momentálne uvádza:
 
-| Metrika                               | Aktuálna auditovaná hodnota | Interpretácia                                                                                |
-| ------------------------------------- | --------------------------: | -------------------------------------------------------------------------------------------- |
-| Opakujúci sa kvantifikovaný prídel    |   **~1.62B tokenov/mesiac** | Zdieľané fondy sa započítavajú iba raz; súčet nezahŕňa poskytovateľov bez stanoveného limitu |
-| Prvý mesiac s kreditmi za registráciu |          **~2.22B tokenov** | Opakujúci sa celkový objem plus jednorazové a opakujúce sa kredity                           |
+| Metrické                             |                Aktuálna auditovaná hodnota | Výklad                                                                         |
+| ------------------------------------ | -----------------------------------------: | ------------------------------------------------------------------------------ |
+| Opakovaný vyčíslený grant            | **~ 90 miliónov bezplatných tokens/month** | Zdieľané fondy sa počítajú raz; nezahŕňa nelimitovaných poskytovateľov zo sumy |
+| Prvý mesiac s grantmi na registráciu |          **~ 153 miliónov za prvý mesiac** | Opakujúce sa celkové plus jednorazové a opakujúce sa kredity                   |
 
-Ide o odhady pre celý katalóg naprieč samostatnými oprávnenými účtami, nie o prídel poskytovaný službou OmniRoute ani o predpoveď pre novú inštaláciu. Využiteľná kapacita závisí od poskytovateľov, ktorých pripojíte, a od ich aktuálnych podmienok. Hodnoty sa vypočítavajú zo súboru `open-sse/config/freeModelCatalog.ts`; informácie o deduplikácii fondov, príznakoch ToS,
-ukončených položkách a metodike kreditov za registráciu nájdete v dokumente
-[Referenčné informácie o bezplatných úrovniach](../reference/FREE_TIERS.md).
+Ide o odhady z celého katalógu naprieč samostatnými oprávnenými účtami, nie o kvótu poskytnutú OmniRoute alebo predpoveď pre novú inštaláciu. Vaša využiteľná kapacita závisí od poskytovateľov, ku ktorým sa pripájate, a ich aktuálnych podmienok. Hodnoty sú vypočítané z `open-sse/config/freeModelCatalog.ts`; pozrite si [referenciu voľných úrovní](../reference/FREE_TIERS.md), kde nájdete deduplikáciu fondu, príznaky ToS, ukončené položky a metodiku prihlásenia a kreditu.
 
 ---
 
-## Časté otázky
+## Bežné otázky
 
-### „Je to naozaj bezplatné?“
+### "Je to naozaj zadarmo?"
 
-Katalóg zaznamenáva podmienky zverejnené poskytovateľmi a výsledky prieskumu projektu, ponuky sa však môžu meniť.
-Pred použitím si overte aktuálne ceny, kvóty, zásady ochrany súkromia a podmienky oprávnenosti daného poskytovateľa.
+Katalóg zaznamenáva podmienky zverejnené poskytovateľom a prieskum projektu, ale ponuky sa môžu meniť. Pred použitím si overte aktuálnu cenu poskytovateľa, kvótu, zásady ochrany osobných údajov a oprávnenosť.
 
-### „Vyčerpá sa bezplatná kvóta?“
+### "Vyčerpá sa voľná úroveň?"
 
-Každý poskytovateľ môže obmedziť frekvenciu požiadaviek, zmeniť modely, pozastaviť prístup alebo prestať fungovať. Viacero
-pripojení zlepšuje pokrytie záložnými možnosťami, ale nezaručuje dostupnosť bezplatnej trasy.
+Každý poskytovateľ môže obmedziť sadzby, zmeniť modely, pozastaviť prístup alebo prejsť do režimu offline. Viaceré pripojenia zlepšujú záložné pokrytie, ale nezaručujú dostupnú bezplatnú trasu.
 
-### „Môžem bezplatných poskytovateľov používať v produkcii?“
+### "Môžem na produkciu použiť bezplatných poskytovateľov?"
 
-Iba ak SLA, spracovanie údajov, limity a podmienky poskytovateľa spĺňajú vaše produkčné
-požiadavky. Kritické pracovné zaťaženia by mali mať monitorovanú a zmluvne vyhovujúcu záložnú možnosť.
+Iba ak SLA poskytovateľa, narábanie s údajmi, limity a podmienky spĺňajú vaše výrobné požiadavky. Kritické pracovné zaťaženie by malo mať monitorované, zmluvne vhodné núdzové riešenie.
 
-### „V čom je háčik?“
+### "Aký je háčik?"
 
-Kompromisy môžu zahŕňať prísne limity, čakacie zoznamy, KYC, overenie kreditnou kartou, trénovanie na
-promptoch, slabšiu ochranu súkromia, absenciu SLA, časté zmeny modelov, geografické obmedzenia, platené prekročenie limitu alebo
-riziká súvisiace so zásadami účtu. OmniRoute zobrazuje dostupné metadáta; vy rozhodujete, čo povolíte.
+Kompromisy môžu zahŕňať prísne limity, čakacie listiny, KYC, overenie kreditnej karty, školenie o výzvach, slabšie súkromie, žiadne SLA, opustenie modelu, geografické obmedzenia, platené nadbytočné množstvo alebo riziko spojené s pravidlami účtu. OmniRoute zobrazí dostupné metadáta; vyberiete, čo chcete povoliť.
 
-### „Ako môžem získať väčšiu bezplatnú kvótu?“
+### "Ako získam viac bezplatnej kvóty?"
 
 1. Pripojte viac bezplatných poskytovateľov
-2. Povoľte vhodné kompresné mechanizmy a zmerajte úspory pre svoje pracovné zaťaženie
-3. Použite `auto/cheap` na uprednostnenie bezplatných/lacných poskytovateľov
-4. Pridajte ďalších povolených poskytovateľov alebo prihlasovacie údaje bez porušenia podmienok poskytovateľa
+2. Povoľte vhodné kompresné motory a zmerajte úspory pre svoju pracovnú záťaž
+3. Použite `auto/cheap` na uprednostnenie poskytovateľov free/cheap
+4. Pridajte ďalších povolených poskytovateľov alebo poverenia bez porušenia podmienok poskytovateľa
 
-### „Majú bezplatní poskytovatelia horšiu kvalitu?“
+### "Majú bezplatní poskytovatelia horšiu kvalitu?"
 
-Nie nevyhnutne. Niektorí poskytovatelia sprístupňujú rovnaké rodiny modelov, aké sú dostupné prostredníctvom platených
-trás, no limity, latencia, súkromie, spoľahlivosť a verzie modelov sa môžu líšiť. Použite stránku
-rebríčka bezplatných poskytovateľov ako ukazovateľ kvality a overte si, aký model je v skutočnosti poskytovaný.
+Nie nevyhnutne. Niektorí poskytovatelia vystavujú rovnaké rodiny modelov dostupné prostredníctvom platených trás, ale limity, latencia, súkromie, spoľahlivosť a verzie modelov sa môžu líšiť. Použite stránku Free Provider Rankings ako signál kvality a overte si skutočne poskytovaný model.
 
 ---
 
-## Čo ďalej?
+## Čo bude ďalej?
 
-- **[Sprievodca Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Nechajte OmniRoute vybrať pre vás najlepšiu AI
-- **[Sprievodca poskytovateľmi](./PROVIDERS-GUIDE.md)** — Pripojte ďalších poskytovateľov
-- **[Riešenie problémov](../guides/TROUBLESHOOTING.md)** — Vyriešte bežné problémy
-- **[Prehľad bezplatných úrovní](../reference/FREE_TIERS.md)** — Úplný zoznam bezplatných úrovní
+- **[Sprievodca automatickým kombinovaním](./AUTO-COMBO-GUIDE.md)** — Nechajte OmniRoute vybrať pre vás to najlepšie AI
+- **[Sprievodca poskytovateľmi](./PROVIDERS-GUIDE.md)** — Pripojte viac poskytovateľov
+- **[Riešenie problémov](../guides/TROUBLESHOOTING.md)** — Opravte bežné problémy
+- **[Referencie bezplatných úrovní](../reference/FREE_TIERS.md)** — Úplný zoznam voľných úrovní

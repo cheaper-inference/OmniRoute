@@ -16,128 +16,63 @@ pipeline ini menggunakan registri, sehingga tujuan lain dapat ditambahkan.
 ## 1. Cara kerjanya
 
 ```
-server (dekripsi + validasi konfigurasi, rekonsiliasi kursor)
-  → mulai IPC → proses OS exportChild terisolasi
-    → storage.sqlite hanya-baca → kueri/pemetaan log panggilan bersama
-      → hidrasi artefak asinkron → prepare()/send() tujuan
-        → IPC batch → server menyimpan kursor secara persisten → IPC ack
-          → batch berikutnya; IPC done → server mencatat keberhasilan
+server (decrypt + validate config, reconcile cursor)
+  → start IPC → isolated exportChild OS process
+    → read-only storage.sqlite → shared call-log query/mapping
+      → async artifact hydration → destination prepare()/send()
+        → batch IPC → server persists cursor → ack IPC
+          → next batch; done IPC → server records success
 ```
 
-- **Jadwal** — satu tugas cron `JobRegistry`, `log_export`, dengan nilai default `0 * * * *` (setiap jam,
-  UTC). Didaftarkan di `src/lib/initCloudSync.ts`; dapat ditimpa dengan `OMNIROUTE_LOG_EXPORT_CRON`.
-  Setiap pemicu memproses seluruh data tertunda dari setiap tujuan yang **diaktifkan**, secara berurutan.
-- **Kursor** — `call_logs.rowid` implisit milik SQLite, disimpan secara persisten per tujuan di
-  `log_export_destinations.cursor_row_id`. `timestamp` sengaja tidak dijadikan kursor: pemanggil
-  dapat memberikan nilainya sendiri, sehingga permintaan yang lambat dapat ditulis setelah permintaan yang lebih cepat yang dimulai
-  belakangan, dan kursor berbasis stempel waktu akan melewatkannya.
-- **Pemrosesan batch** — `batch_size` baris per permintaan (default 500), `max_rows_per_run` baris per eksekusi
-  (default 10000) agar tumpukan data yang besar diproses dalam beberapa pemicu alih-alih memblokir satu pemicu.
-- **Pengiriman** — kursor hanya maju setelah `send()` selesai dengan sukses. Batch yang gagal membiarkan
-  kursor tetap di posisinya, sehingga baris yang sama dicoba ulang pada eksekusi berikutnya. Jaminannya adalah
-  pengiriman setidaknya sekali ditambah deduplikasi di sisi tujuan, bukan tepat sekali yang sesungguhnya: BigQuery menggunakan id log panggilan sebagai kunci setiap
-  baris, yang dipatuhinya sebatas upaya terbaik dalam rentang waktu deduplikasinya sendiri.
-- **Pencegah tumpang tindih** — pemicu cron dan `POST .../run` dapat berjalan bersamaan. Tujuan
-  yang sedang diproses akan dilewati alih-alih diproses dua kali (`skipped: true` dalam hasil eksekusi),
-  sehingga eksekusi serentak tidak dapat mengirim ulang batch atau memundurkan kursor.
-- **Pemulihan setelah penghapusan menyeluruh** — jika `cursor_row_id` menjadi lebih besar daripada `MAX(rowid)` (seluruh tabel telah
-  dihapus dan rowid dimulai ulang), runner mengembalikannya ke 0 alih-alih kehilangan kemampuan mendeteksi data secara permanen.
+- **Jadwal** — satu tugas cron `JobRegistry`, `log_export`, defaultnya adalah `0 * * * *` (setiap jam, UTC). Terdaftar di `src/lib/initCloudSync.ts`; dapat diganti dengan `OMNIROUTE_LOG_EXPORT_CRON`. Setiap kutu menguras semuanya** diaktifkan** tujuan, secara berurutan.
+- **Cursor** — SQLite implisit `call_logs.rowid`, bertahan per tujuan di `log_export_destinations.cursor_row_id`. `timestamp` sengaja bukan kursor: penelepon dapat memberikan nilainya sendiri, sehingga permintaan yang lambat dapat ditulis setelah permintaan yang lebih cepat yang dimulai kemudian, dan kursor stempel waktu akan melewatkannya.
+- **Pengelompokan** — `batch_size` baris per permintaan (default 500), `max_rows_per_run` baris per proses (default 10.000) sehingga simpanan besar terkuras pada beberapa tick alih-alih memblokir satu.
+- **Pengiriman** — kursor bergerak maju hanya setelah `send()` terselesaikan. Batch yang gagal meninggalkan kursor di tempatnya semula, sehingga baris yang sama dicoba lagi pada proses berikutnya. Jaminannya setidaknya satu kali ditambah de-duplikasi di sisi tujuan, tidak benar tepat sekali: BigQuery mengunci setiap baris dengan id log panggilan, yang dihormati berdasarkan upaya terbaik dalam jendela dedupnya sendiri.
+- **Penjaga yang tumpang tindih** — cron tick dan `POST .../run` dapat diaktifkan bersamaan. Tujuan yang sudah terkuras akan dilewati daripada terkuras dua kali (`skipped: true` dalam hasil proses), sehingga proses yang dilakukan secara bersamaan tidak dapat mengirim ulang batch atau menulis kursor mundur.
+- **Pemulihan pembersihan** — jika `cursor_row_id` berakhir di atas `MAX(rowid)` (seluruh tabel dibersihkan dan rowids dimulai ulang), pelari memutar ulang ke 0 daripada menjadi buta permanen.
 
-### Runner terisolasi dan batasan
+### Pelari dan batas yang terisolasi
 
-Setiap eksekusi tujuan di Node memulai proses anak OS terpisah yang berumur singkat (`child_process`
-dengan IPC, bukan `worker_threads`). Pembacaan isi, penguraian/serialisasi JSON payload,
-`prepare()` tujuan, dan I/O jaringan tujuan semuanya dijalankan di sana, bukan di event loop server.
-Hanya konfigurasi dan pesan progres kecil yang melintasi IPC; rekaman yang diekspor tidak pernah dikembalikan ke
-server. Tugas cron dan rute Run now mempertahankan hasil publik dan pencegah tumpang tindih yang sama.
+Setiap tujuan yang dijalankan di Node memulai proses turunan OS yang berumur pendek dan terpisah (`child_process` dengan IPC, bukan `worker_threads`). Pembacaan isi, payload JSON parsing/serialization, `prepare()` tujuan dan jaringan tujuan I/O semuanya berjalan di sana, bukan pada loop peristiwa server. Hanya pesan konfigurasi dan kemajuan kecil yang melintasi IPC; catatan yang diekspor tidak pernah kembali ke server. Tugas cron dan rute Jalankan sekarang mempertahankan hasil publik yang sama dan penjagaan yang tumpang tindih.
 
-Proses anak membuka `DATA_DIR/storage.sqlite` yang telah diresolusikan oleh server dalam mode hanya-baca menggunakan `node:sqlite`,
-dengan `busy_timeout=5000` dan `query_only=ON`. Proses ini tidak mengimpor singleton DB dan tidak melakukan
-migrasi, pencadangan, atau pembaruan SQLite. Pencatatan artefak yang hilang/rusak (termasuk
-UPDATE untuk artefak rusak) tetap hanya berada di jalur detail dasbor. Kedua jalur menggunakan resolver
-detail murni yang sama; ekspor menggunakan pembacaan sistem berkas asinkron dan urutan resolusi yang sama: artefak → inline
-lama → disk lama → tidak ada. Sebuah eksekusi mengambil snapshot rowid penyisipan maksimum
-saat proses anak membuka pembacanya; penyisipan berikutnya menunggu eksekusi berikutnya. Ini adalah batas
-penyisipan, bukan transaksi SQLite yang berumur panjang: penulis WAL dan checkpoint tetap dapat berjalan selama
-menunggu jaringan. Pembaruan/penghapusan baris yang sudah ada tidak dibekukan oleh batas ini.
+Anak membuka `DATA_DIR/storage.sqlite` read-only yang diselesaikan di server menggunakan `node:sqlite`, dengan `busy_timeout=5000` dan `query_only=ON`. Itu tidak mengimpor DB singleton dan tidak melakukan migrasi, pencadangan, atau pembaruan SQLite. pembukuan artefak Missing/corrupt (termasuk artefak yang rusak UPDATE) tetap berada di jalur detail dasbor saja. Kedua jalur berbagi penyelesaian detail murni; ekspor menggunakan pembacaan sistem file asinkron dan artefak yang sama → legacy inline → legacy disk → tidak ada urutan resolusi. Proses mengambil snapshot baris penyisipan maksimum saat anak membuka pembacanya; nanti masukkan tunggu proses berikutnya. Ini adalah batas penyisipan, bukan transaksi SQLite yang berumur panjang: penulis WAL dan pos pemeriksaan tetap bebas selama menunggu jaringan. Updates/deletions baris yang ada tidak dibekukan oleh batas ini.
 
-Setelah setiap batch diterima, proses anak menunggu konfirmasi. Server terlebih dahulu menyimpan
-kursor secara persisten dengan `advanceLogExportCursor`, lalu mengirim `ack`; batch berikutnya tidak dimulai sebelum itu.
-Kegagalan pengiriman, crash, atau batas waktu yang terlampaui akan mencatat kegagalan tanpa memajukan kursor untuk batch tersebut. Batch yang sebelumnya
-telah dikonfirmasi tetap tersimpan; paling banyak hanya satu batch yang belum dikonfirmasi yang dapat dikirim ulang.
-Keberhasilan dicatat hanya setelah `done` dan proses anak keluar secara normal. Kegagalan menghentikan proses anak
-dengan SIGTERM, lalu meningkatkannya ke SIGKILL setelah 500 ms, dan runner menunggu hingga proses ditutup.
+Setelah setiap batch diterima, anak tersebut menunggu pengakuan. Server pertama-tama menahan kursor dengan `advanceLogExportCursor`, lalu mengirimkan `ack`; tidak ada batch berikutnya yang dimulai sebelum itu. Kegagalan pengiriman, kerusakan, atau batas waktu mencatat kegagalan tanpa memajukan batch tersebut. Batch yang diakui sebelumnya tetap berkomitmen; paling banyak satu batch yang tidak diakui dapat dikirim ulang. Keberhasilan dicatat hanya setelah `done` dan keluarnya anak yang bersih. Kegagalan menghentikan anak dengan SIGTERM, meningkat menjadi SIGKILL setelah 500 ms, dan runner menunggu penutupan proses.
 
-| Variabel lingkungan                           | Default | Tujuan                                  |
-| --------------------------------------------- | ------- | --------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000  | Batas waktu aktual per tujuan           |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024    | Batas old-space V8 proses anak dalam MB |
+| Variabel lingkungan                           | Bawaan | Tujuan                         |
+| --------------------------------------------- | ------ | ------------------------------ |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | Batas jam dinding per tujuan   |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | Batas ruang lama anak V8 di MB |
 
-Nilai yang tidak valid/tidak positif/bukan bilangan bulat menggunakan nilai default. Pengaturan heap bukan batas
-RSS total; batch yang sangat besar masih dapat menghabiskan memori proses anak dan menggagalkan eksekusi dengan aman.
-Nilai default 1024 MB menyediakan ruang cadangan untuk batch default 500 baris artefak berukuran 512 KiB dengan
-isi diaktifkan, termasuk serialisasi JSON BigQuery yang dibagi menjadi potongan berdasarkan byte. Nilai ini tidak membuat
-batch 10000 baris dengan isi menjadi aman. Kehabisan heap V8 mencatat kegagalan yang disertai tindakan perbaikan: kurangi ukuran
-batch atau tingkatkan `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kursor tetap berada pada batch terakhir
-yang telah dikonfirmasi. Isi inline/disk historis tidak tercakup dalam batas artefak modern.
-Operator harus mengalokasikan anggaran RSS secara terpisah, terutama di dalam container dengan memori terbatas.
+nilai Invalid/non-positive/non-integer menggunakan default. Pengaturan heap bukanlah batas total RSS ; batch yang sangat besar masih dapat menghabiskan memori anak dan gagal dijalankan dengan aman. Default 1024 MB menyisakan ruang kepala untuk kumpulan 500 baris default yang terdiri dari 512 artefak KiB dengan isi diaktifkan, termasuk serialisasi JSON yang dipotong byte BigQuery. Itu tidak membuat batch 10.000 baris menjadi aman. Kelelahan heap V8 mencatat kegagalan yang dapat ditindaklanjuti: menurunkan ukuran batch atau menaikkan `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kursor tetap berada pada kumpulan terakhir yang diakui. Badan inline/disk bersejarah tidak tercakup dalam tutup artefak modern. Operator harus menganggarkan RSS secara terpisah, terutama di dalam wadah dengan memori terbatas.
 
-Proses anak hanya mewarisi `DATA_DIR` yang telah diresolusikan, `NODE_ENV`, `TZ` eksplisit (resolusi
-waktu lokal untuk nama file lama), `ELECTRON_RUN_AS_NODE` jika ada, serta input koneksi keluar berikut:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (dan bentuk huruf kecilnya),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Dispatcher Undici global menggunakan resolusi proksi berbasis lingkungan murni dan aturan
-pengecualian host lokal yang sama dengan server, termasuk `NO_PROXY`; dispatcher ini tidak mengimpor `proxyFetch.ts` ataupun flag DB/fiturnya.
-Kredensial proksi disamarkan dari keluaran yang diteruskan dan kesalahan yang dicatat. Kredensial tujuan
-hanya dikirim dalam satu pesan IPC saat mulai, tidak pernah melalui argv atau lingkungan; penerusan keluaran/kesalahan
-diberi prefiks dan disanitasi. Hanya `ExperimentalWarning` yang dinonaktifkan dalam argumen eksekusi proses anak untuk menghindari
-pengulangan peringatan SQLite Node setiap kali cron berjalan; jenis peringatan lain tetap ditampilkan.
+Anak hanya mewarisi `DATA_DIR`, `NODE_ENV`, `TZ` eksplisit (nama file lama resolusi waktu lokal), `ELECTRON_RUN_AS_NODE` jika ada, dan input keluar berikut: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (dan bentuk huruf kecilnya), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Operator global Undici membagikan resolusi proxy lingkungan murni dan aturan bypass host lokal, termasuk `NO_PROXY`; itu tidak mengimpor `proxyFetch.ts` atau flag DB/feature -nya. Kredensial proxy dihapus dari keluaran yang diteruskan dan kesalahan yang dicatat. Kredensial tujuan hanya dikirimkan dalam satu pesan IPC awal, tidak pernah argv atau lingkungan; penerusan output/error diawali dan dibersihkan. Hanya `ExperimentalWarning` yang dinonaktifkan dalam argumen exec anak untuk menghindari pengulangan peringatan SQLite Node setiap cron dijalankan; jenis peringatan lainnya tetap terlihat.
 
-Modul tujuan harus dapat diimpor tanpa dependensi Next.js/server-only. Implementasi
-BigQuery yang ada sudah memenuhi kontrak tersebut. Cache token akses hanya bertahan selama proses anak
-berjalan, bukan lintas eksekusi. Node adalah runtime yang didukung (`package.json` engines), tetapi bagian
-instalasi Bun di README dan `Dockerfile.bun` juga menawarkan jalur kompatibilitas produksi menggunakan
-`bun:sqlite` (`src/lib/db/core.ts` / adaptor). Oleh karena itu, di Bun, ekspor tetap menggunakan jalur
-dalam proses yang sebelumnya dan menampilkan peringatan satu kali: isolasi heap/batas waktu proses anak tidak tersedia. Gunakan
-Node untuk isolasi event loop dan OOM; Bun tidak diperlakukan sebagai runtime khusus pengembangan di sini.
+Modul tujuan harus dapat diimpor tanpa ketergantungan Next.js/server-only. Implementasi BigQuery yang ada sudah memenuhi kontrak tersebut. Cache token akses hanya bertahan untuk proses turunan, bukan untuk seluruh proses. Node adalah runtime yang didukung (mesin `package.json` ). Terdapat jalur kompatibilitas Bun dengan upaya terbaik dan tidak didukung (`bun:sqlite` di `src/lib/db/core.ts` / adapter, dan `Dockerfile.bun`), sehingga ekspor tidak boleh terhenti di bawahnya. Di bawah Bun, ekspor mempertahankan jalur dalam proses sebelumnya dan mengeluarkan peringatan satu kali: isolasi heap/timeout anak tidak tersedia. Gunakan Node untuk loop peristiwa dan isolasi OOM.
 
-Saat `includeBodies` diaktifkan, utamakan jadwal pada tingkat menit seperti
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` daripada menumpuk antrean payload per jam.
-Batas batch dan baris tetap membatasi setiap eksekusi. Biaya memulai proses ditanggung per tujuan per eksekusi;
-ini menukar sedikit biaya awal dengan isolasi event loop server, bukan mengurangi total penggunaan CPU.
+Saat `includeBodies` diaktifkan, pilih irama tingkat menit seperti `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` daripada mengumpulkan simpanan muatan per jam. Batas batch dan baris masih terikat pada setiap proses. Proses startup dibayar per tujuan per proses; ini memperdagangkan biaya awal yang kecil untuk isolasi loop peristiwa server, tidak mengurangi total penggunaan CPU.
 
-### Payload (prompt dan penyelesaian)
+### Muatan (perintah dan penyelesaian)
 
-Secara default, ekspor hanya memuat kolom ringkasan yang ditampilkan dalam **daftar** Log. Mengaktifkan
-**Ekspor prompt dan respons** (`includeBodies`) juga mengirimkan apa yang ditampilkan panel **detail**
-Log untuk setiap panggilan:
+Secara default, ekspor hanya membawa bidang ringkasan Log** daftar** menunjukkan. Menyalakan** Ekspor perintah dan tanggapan** (`includeBodies`) juga mengirimkan apa yang Log** detail** tampilan panel untuk setiap panggilan:
 
-| Kolom                            | Isinya                                                               |
-| -------------------------------- | -------------------------------------------------------------------- |
-| `request_body` / `response_body` | Payload panggilan sebagaimana ditampilkan dasbor                     |
-| `pipeline_route_decision`        | Tujuan dan model yang dipilih router                                 |
-| `pipeline_client_request`        | Permintaan mentah persis seperti yang dikirim klien                  |
-| `pipeline_openai_request`        | Setelah dikonversi ke format OpenAI internal                         |
-| `pipeline_provider_request`      | Sebagaimana dikirim ke upstream, dalam dialek penyedia               |
-| `pipeline_provider_response`     | Respons upstream mentah                                              |
-| `pipeline_client_response`       | Yang dikembalikan kepada pemanggil                                   |
-| `pipeline_error`                 | Detail kesalahan tingkat pipeline untuk panggilan yang gagal         |
-| `bodies_truncated`               | Bernilai benar jika salah satu kolom di atas mencapai `maxBodyBytes` |
+| Bidang                           | Apa yang dimilikinya                                           |
+| -------------------------------- | -------------------------------------------------------------- |
+| `request_body` / `response_body` | Payload panggilan saat dasbor merendernya                      |
+| `pipeline_route_decision`        | Target dan model mana yang dipilih router                      |
+| `pipeline_client_request`        | Permintaan mentah persis seperti yang dikirimkan klien         |
+| `pipeline_openai_request`        | Setelah diterjemahkan ke dalam bentuk OpenAI internal          |
+| `pipeline_provider_request`      | Seperti yang sebenarnya dikirim ke hulu, dalam dialek penyedia |
+| `pipeline_provider_response`     | Respons hulu yang mentah                                       |
+| `pipeline_client_response`       | Apa yang diserahkan kembali kepada penelepon                   |
+| `pipeline_error`                 | Detail kesalahan tingkat saluran untuk panggilan yang gagal    |
+| `bodies_truncated`               | Benar ketika bidang apa pun di atas mencapai `maxBodyBytes`    |
 
-Ini adalah konten prompt, sehingga **dinonaktifkan secara default** dan sengaja dijadikan pilihan per tujuan.
-Yang dikirim adalah yang ditampilkan dasbor, karena ekspor dan `getCallLogById` menggunakan resolusi
-detail yang sama: payload
-sudah disanitasi dari PII dan rahasianya disamarkan saat ditulis, dan panggilan yang dibuat dengan
-kunci API `noLog` tidak menyimpan payload sama sekali, sehingga tidak ada yang diekspor.
+Ini adalah konten yang cepat, memang begitu** mati secara default** dan sengaja menjadi pilihan per tujuan. Apa yang dikirim adalah apa yang ditampilkan dasbor, karena ekspor dan `getCallLogById` berbagi resolusi detail: muatan sudah disanitasi PII dan disunting secara rahasia saat ditulis, dan panggilan yang dilakukan dengan kunci `noLog` API tidak menyimpan muatan sama sekali, jadi tidak ada apa pun untuk diekspor.
 
-Payload dibaca per baris dari artefak sistem berkas, sehingga hidrasi hanya dijalankan untuk tujuan
-yang memintanya. Jika artefak hilang atau rusak, ringkasannya diekspor dengan payload null alih-alih
-menggagalkan batch dan membuat kursor terhenti.
+Payload dibaca per baris dari artefak sistem file, sehingga hidrasi hanya berjalan untuk tujuan yang memintanya. Artefak yang hilang atau rusak mengekspor ringkasannya dengan muatan nol daripada menggagalkan batch dan membuat kursor terdampar.
 
-`maxBodyBytes` (default 262144) membatasi setiap kolom. Payload yang lebih panjang **dipotong, bukan
-dibuang** — prompt yang terpotong tetap menjawab "apa yang ditanyakan" — dan baris tersebut ditandai dengan
-`bodies_truncated`. Delta yang dialirkan potongan demi potongan tidak diekspor; respons yang telah dirangkai
-sudah tersedia di `pipeline_provider_response` dan `pipeline_client_response`.
+`maxBodyBytes` (default 262144) membatasi setiap bidang. Muatan yang lebih panjang adalah** terpotong bukannya dijatuhkan** — prompt yang terpotong masih menjawab "apa yang ditanyakan" — dan baris tersebut ditandai dengan `bodies_truncated`. Delta potongan demi potongan yang dialirkan tidak diekspor; respons yang dikumpulkan sudah ada di `pipeline_provider_response` dan `pipeline_client_response`.
 
 ---
 

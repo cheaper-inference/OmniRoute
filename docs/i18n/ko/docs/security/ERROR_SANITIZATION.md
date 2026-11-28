@@ -4,13 +4,7 @@
 
 ---
 
-> **신뢰할 수 있는 원본:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` 및 `open-sse/utils/error.ts`의 공개 빌더
-> **테스트:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **최종 업데이트:** 2026-09-02 — v3.8.51
-> **대상:** 오류 응답을 다루는 모든 엔지니어(HTTP 라우트, SSE 스트림, 실행기, MCP 핸들러).
-> **상태:** 클라이언트에 오류 메시지를 반환하는 모든 코드 경로에서 **필수**입니다.
+> **진실의 출처:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` 및 `open-sse/utils/error.ts` 의 공개 빌더** 테스트:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** 청중:** 오류 응답(HTTP 경로, SSE 스트림, 실행자, MCP 처리기)을 건드리는 모든 엔지니어.** 상태:****MANDATORY** 클라이언트에 오류 메시지를 반환하는 모든 코드 경로에 대해.
 
 ## 이 문서가 존재하는 이유
 

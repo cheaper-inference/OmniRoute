@@ -5,11 +5,10 @@
 ---
 
 > **Quelle der Wahrheit:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Zuletzt aktualisiert:** 2026-06-28 — v3.8.40
 
-OmniRoute protokolliert administrative Aktionen, Authentifizierungsereignisse, Änderungen am Lebenszyklus von Anbieterzugangsdaten und Aufrufe von MCP-Tools in SQLite-gestützten Audit-Tabellen. Diese Seite beschreibt, was protokolliert wird, wo die Daten gespeichert werden, wie lange sie aufbewahrt werden, wie API-Schlüssel die Protokollierung deaktivieren können und wie die Daten abgefragt werden können.
+OmniRoute zeichnet Verwaltungsaktionen, Authentifizierungsereignisse, Änderungen im Lebenszyklus von Anbieteranmeldeinformationen und Aufrufe MCP Tools in SQLite-gestützten Prüftabellen auf. Auf dieser Seite erfahren Sie, was protokolliert wird, wo es gespeichert wird, wie lange es aufbewahrt wird, wie sich API Schlüssel abmelden können und wie die Daten abgefragt werden.
 
-Die Implementierung befindet sich in `src/lib/compliance/index.ts` (T-43 — „Compliance-Kontrollen“) und `src/lib/compliance/providerAudit.ts`. Audit-Schreibvorgänge lösen niemals Ausnahmen aus: Bei einem Fehler wird dieser stillschweigend abgefangen, damit die Audit-Protokollierung den eigentlichen Anfrageablauf nicht unterbrechen kann.
+Die Implementierung befindet sich in `src/lib/compliance/index.ts` (T-43 — „Compliance Controls“) und `src/lib/compliance/providerAudit.ts`. Audit-Schreibvorgänge lösen nie aus: Bei jedem Fehler wird der Aufruf stillschweigend verschluckt, sodass die Audit-Protokollierung den Hauptanforderungsfluss nicht unterbrechen kann.
 
 ## Was protokolliert wird
 
@@ -120,25 +119,33 @@ Die manuelle Bereinigung des Anfrageverlaufs erfolgt unabhängig von der Aufbewa
 
 Die Standardwerte sind in `src/lib/logEnv.ts` definiert (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## `noLog`-Opt-out (pro API-Schlüssel)
+## `noLog` -Opt-Out (pro API -Schlüssel)
 
-API-Schlüssel können so gekennzeichnet werden, dass der Datenverkehr ihrer nachgelagerten Aufrufe nicht protokolliert wird. Das Flag befindet sich in der Tabelle `api_keys` (`no_log INTEGER DEFAULT 0`) und wird für schnelle Abfragen im Verarbeitungspfad in eine In-Memory-Menge gespiegelt.
+API -Schlüssel können gekennzeichnet werden, sodass ihr Downstream-Anrufverkehr nicht protokolliert wird. Das Flag befindet sich in der `api_keys` Tabelle (`no_log INTEGER DEFAULT 0`) und wird in einen In-Memory-Satz für Hot-Path-Lookups gespiegelt.
 
 ```bash
-# Einen Schlüssel ohne Protokollierung erstellen (Verwaltungsauthentifizierung erforderlich)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Hilfsfunktionen (`src/lib/compliance/index.ts`):
+Helfer (`src/lib/compliance/index.ts`):
 
 - `setNoLog(apiKeyId, true|false)` — schaltet den In-Memory-Eintrag um
-- `isNoLog(apiKeyId)` — wird im Anfragepfad geprüft; greift ersatzweise auf einen für 30 s zwischengespeicherten Lesezugriff auf `api_keys.no_log` zurück
-- `NO_LOG_API_KEY_IDS` (Umgebungsvariable, kommagetrennt) — wird beim Start in die In-Memory-Menge vorgeladen; nützlich, wenn die Spalte nicht direkt geändert werden kann
+- `isNoLog(apiKeyId)` — überprüfte den Anforderungspfad; greift auf einen 30 s lang zwischengespeicherten Lesevorgang von `api_keys.no_log` zurück
+- `NO_LOG_API_KEY_IDS` (env, durch Kommas getrennt) — wird beim Booten vorab in den In-Memory-Satz geladen; nützlich, wenn Sie die Spalte nicht direkt umschalten können
 
-Administrative Audit-Ereignisse (Anmeldung, Anbieteränderungen, MCP-Tool-Aufrufe usw.) sind **nicht** von `noLog` betroffen — nur die Protokollierung des Datenverkehrs einzelner Anfragen wird deaktiviert.
+Administrative Prüfereignisse (Anmeldung, Anbieteränderungen, MCP Tool-Aufrufe usw.) sind** nicht** Von `noLog` — betroffen ist nur die Protokollierung des Datenverkehrs pro Anfrage deaktiviert.
+
+### Opt-out pro Anfrage (`x-omniroute-no-log`)
+
+Ein Client kann eine einzelne Inferenzanforderung aus der Nutzlastpersistenz ausschließen, ohne einen dedizierten Schlüssel zu erstellen. Senden Sie `x-omniroute-no-log: true` auf die Anfrage (`1` und `yes` werden ebenfalls akzeptiert, Groß- und Kleinschreibung wird nicht beachtet). Es gilt für jede Chat-Familienroute, die über den Chat-Handler verläuft: Chat-Abschlüsse, Antworten, Nachrichten, Abschlüsse und den Gemini-kompatiblen Pfad. Die Anrufprotokollzeile wird weiterhin mit Zeitstempel, Modell, Anbieter, Status, Dauer und Tokenanzahl geschrieben, aber `request_body`, `response_body`, Anforderungszusammenfassungen und Pipeline-Artefakte werden weggelassen.
+
+Der Header ist ORed mit dem Schlüsselflag: Ein No-Log-Schlüssel bleibt unabhängig vom Header No-Log, und der Header kann die Protokollierung für einen No-Log-Schlüssel nicht erneut aktivieren. Der Header wird entfernt, bevor die Anfrage stromaufwärts weitergeleitet wird.
+
+Dieser Header tut es** nicht** Deaktivieren Sie die Speicherextraktion oder den semantischen Cache. Senden Sie `x-omniroute-no-memory: true` und `x-omniroute-no-cache: true` daneben, wenn die Anforderung den Inhalt auch in diesen Subsystemen nicht beibehalten darf.
 
 ## REST-API
 

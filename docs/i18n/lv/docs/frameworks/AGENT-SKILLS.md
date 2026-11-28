@@ -13,12 +13,12 @@ Agentu prasmes ir strukturēti SKILL.md faili, kas ārējiem aģentiem, MCP klie
 
 ## Pārskats
 
-Katalogā ir **45 Agentu prasmes** (23 REST API + 21 CLI + 1 konfigurācijas darbplūsma). Katrai prasmei ir:
+Katalogs satur** 45 Aģenta prasmes** (23 REST API + 21 CLI + 1 konfigurācijas darbplūsma). Katrai prasmei ir:
 
-- **Kanoniskais ID** (`omni-auth`, `cli-serve` utt.)
-- **SKILL.md** fails direktorijā `skills/{id}/SKILL.md` ar YAML priekšdaļu (`name`, `description`) + bagātīgi formatētu markdown pamatdaļu
-- **REST galapunkti** (API prasmēm) vai **CLI apakškomandas** (CLI prasmēm), kas iegūtas no OpenAPI specifikācijas un CLI reģistra
-- **GitHub neapstrādātā satura URL** tiešai ielādei: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** kanoniskais ID** (`omni-auth`, `cli-serve` utt.)
+- A**SKILL.md** `skills/{id}/SKILL.md` fails ar YAML frontmatter (`name`, `description`) + rich markdown body
+- **REST galapunkti** (API prasmes) vai**CLI apakškomandas** (CLI prasmes), kas iegūti no OpenAPI spec un CLI reģistra
+- A**GitHub neapstrādāts URL** tiešraidei: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## Pārklājuma API
+## Pārklājums API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

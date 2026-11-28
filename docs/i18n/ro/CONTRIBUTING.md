@@ -8,30 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Configurarea mediului de dezvoltare
+## Configurare dezvoltare
 
 ### Cerințe preliminare
 
 - **Node.js** `>=22.22.2 <23` sau `>=24.0.0 <27` (recomandat: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows cu Node 24:** utilizați versiunea curentă de patch 24 LTS (cel puțin 24.20.0).
-> Versiunile anterioare se pot închide după teste reușite atunci când `--test-force-exit` închide
-> procesul. [Remedierea Windows libuv](https://github.com/nodejs/node/pull/61999) din Node
-> soluționează această eroare de execuție; păstrați activate aserțiunile testelor și verificările
-> de ieșire ale runnerului.
+> **Windows cu Nodul 24:** utilizați versiunea curentă de corecție 24 LTS (cel puțin 24.20.0). Versiunile anterioare se pot anula după teste de succes atunci când `--test-force-exit` închide procesul. [Remedierea Windows libuv](https://github.com/nodejs/node/pull/61999) de la Node abordează această prăbușire de rulare; păstrați aserțiunile de testare și verificările de ieșire ale alergătorului activate.
 
-> **Utilizatorii npm v11+ (Node 24+):** după `npm install`, verificați dacă modulele native au fost instalate:
-> `node -e "require('better-sqlite3')"`. Dacă eșuează cu `MODULE_NOT_FOUND`,
-> rulați `npm approve-scripts better-sqlite3 && npm install`. Consultați
-> [Depanarea](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Utilizatori npm v11 + (Nodul 24 +):** După `npm install`, verificați că modulele native au fost instalate: `node -e "require('better-sqlite3')"`. Dacă eșuează cu `MODULE_NOT_FOUND`, rulați `npm approve-scripts better-sqlite3 && npm install`. Consultați [Depanare](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Clonare și instalare
+### Clonează și instalează
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -39,91 +32,83 @@ npm install
 ### Variabile de mediu
 
 ```bash
-# Creați fișierul .env din șablon
+# Create your .env from the template
 cp .env.example .env
 
-# Generați secretele necesare
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Variabile importante pentru dezvoltare:
+Variabile cheie pentru dezvoltare:
 
-| Variabilă              | Valoare implicită pentru dezvoltare | Descriere                          |
-| ---------------------- | ----------------------------------- | ---------------------------------- |
-| `PORT`                 | `20128`                             | Portul serverului                  |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`            | URL de bază pentru interfața web   |
-| `JWT_SECRET`           | (generați mai sus)                  | Secretul de semnare JWT            |
-| `INITIAL_PASSWORD`     | `CHANGEME`                          | Parola pentru prima autentificare  |
-| `APP_LOG_LEVEL`        | `info`                              | Nivelul de detaliere al jurnalelor |
+| Variabilă              | Implicit de dezvoltare   | Descriere                        |
+| ---------------------- | ------------------------ | -------------------------------- |
+| `PORT`                 | `20128`                  | Port server                      |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Baza URL pentru frontend         |
+| `JWT_SECRET`           | (generați mai sus)       | secret de semnare JWT            |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Prima parolă de conectare        |
+| `APP_LOG_LEVEL`        | `info`                   | Nivelul de verbozitate în jurnal |
 
-### Setările tabloului de bord
+### Setări tablou de bord
 
-Tabloul de bord oferă comutatoare în interfața utilizatorului pentru funcții care pot fi configurate și prin variabile de mediu:
+Tabloul de bord oferă comutări UI pentru funcții care pot fi configurate și prin variabile de mediu:
 
-| Locația setării     | Comutator          | Descriere                                                                |
-| ------------------- | ------------------ | ------------------------------------------------------------------------ |
-| Settings → Advanced | Debug Mode         | Activează jurnalele de depanare ale cererilor (interfața utilizatorului) |
-| Settings → General  | Sidebar Visibility | Afișează/ascunde secțiunile barei laterale                               |
+| Setarea locației  | Comutați                     | Descriere                                         |
+| ----------------- | ---------------------------- | ------------------------------------------------- |
+| Setări → Advanced | Modul de depanare            | Activați jurnalele de solicitări de depanare (UI) |
+| Setări → General  | Vizibilitatea barei laterale | secțiunile barei laterale Show/hide               |
 
-Aceste setări sunt stocate în baza de date și persistă după reporniri, înlocuind valorile implicite ale variabilelor de mediu atunci când sunt definite.
+Aceste setări sunt stocate în baza de date și persistă la reporniri, suprascriind valorile implicite env var atunci când sunt setate.
 
-### Rularea locală
+### Rulează local
 
 ```bash
-# Modul de dezvoltare (reîncărcare automată)
+# Development mode (hot reload)
 npm run dev
 
-# Compilare pentru producție
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
+npm run start
 
-# Compilare rapidă doar pentru backend/API pentru modificările contribuitorilor
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Compilare pentru lansare (recompilare curată + sentinelă HEAD — necesară pentru implementare)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Configurarea uzuală a portului
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Compilarea pentru contribuitori efectuează validarea exclusivă a compilării: nu asamblează
-distribuția autonomă și nu compilează activele opționale pentru împachetarea nativă. Utilizați
-compilarea obișnuită pentru producție atunci când trebuie să validați pachetul pregătit pentru livrare.
+Compilarea contribuitorului efectuează validare numai prin compilare: nu asamblează distribuția autonomă și nu construiește active de ambalare native opționale. Utilizați versiunea obișnuită de producție atunci când trebuie să validați pachetul care poate fi expediat.
 
-### Structura rezultatului compilării
+### Creați aspectul de ieșire
 
-| Director  | Conținut                                                                           | Urmărit |
-| --------- | ---------------------------------------------------------------------------------- | ------- |
-| `src/`    | Codul sursă al aplicației (TypeScript / TSX)                                       | Da      |
-| `.build/` | Intermediare — rezultatul `next build` (ignorat de git, `distDir = .build/next`)   | Nu      |
-| `dist/`   | Pachet pregătit pentru livrare — asamblat de `assembleStandalone` (ignorat de git) | Nu      |
+| Director  | Cuprins                                                                  | Urmărit |
+| --------- | ------------------------------------------------------------------------ | ------- |
+| `src/`    | Sursa aplicației (TypeScript / TSX)                                      | Da      |
+| `.build/` | Ieșire intermediară — `next build` (gitignored, `distDir = .build/next`) | Nu      |
+| `dist/`   | Pachet expediabil — asamblat de `assembleStandalone` (gitignored)        | Nu      |
 
-Conducta de compilare are o singură trecere:
+Conducta de construcție este o singură trecere:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (rezultatul Next.js)
-  └─ assembleStandalone()                 (copiază standalone + static + public + active native)
-       └─ rezultat: dist/                 (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` curăță suplimentar ambele directoare mai întâi și scrie
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ca sentinelă pentru integritatea implementării.
+În plus,`npm run build:release` curăță mai întâi ambele directoare și scrie `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ca sentinelă de integritate a implementării.
 
-`npm run build:contributor` utilizează profilul de compilare exclusiv pentru backend. Înlocuiește temporar
-fișierele interfeței tabloului de bord în timpul compilării, păstrează gestionarele rutelor API și restaurează
-fișierele originale după compilare. Utilizați `npm run build` pentru modificări care afectează interfața
-tabloului de bord sau pentru validarea completă a lansării; profilul pentru contribuitori nu înlocuiește
-compilarea pentru lansare.
+`npm run build:contributor` utilizează profilul de compilare numai pentru backend. Acesta blochează temporar fișierele UI din tabloul de bord în timpul construirii, păstrează gestionatorii de rute API și restaurează fișierele originale după compilare. Utilizați `npm run build` pentru modificări care afectează tabloul de bord UI sau pentru validarea completă a versiunii; profilul de colaborator nu este un înlocuitor pentru versiunea de versiune.
 
-> **Notă privind implementarea pe VPS:** directorul imaginii la distanță `/usr/lib/node_modules/omniroute/app/`
-> rămâne neschimbat. Abilitățile de implementare sincronizează prin rsync conținutul `dist/` în acesta.
-> S-a mutat doar calea rezultatului compilării din depozit (`app/` → `dist/`).
+> **VPS deploy notă:** directorul de imagini la distanță `/usr/lib/node_modules/omniroute/app/` este neschimbat. Abilitățile de implementare rsync conținutul `dist/` în el. Doar calea de ieșire a compilației din repo a fost mutată (`app/` → `dist/`).
 
-URL-uri implicite:
+URLs implicit:
 
-- **Tablou de bord**: `http://localhost:20128/dashboard`
+- **Bord** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -430,10 +415,10 @@ Apoi utilizați abilitățile `/deploy-vps-*-cc`, care sincronizează prin rsync
 
 ---
 
-## Obținerea ajutorului
+## Obține ajutor
 
-- **Arhitectură**: Consultați [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Referință API**: Consultați [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Documentație de securitate**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Documentație operațională**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Probleme**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arhitectură** : Vezi [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Referință** : Vezi [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Documente de securitate** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Documente operaționale** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Probleme** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

@@ -21,24 +21,21 @@ odnosi ograničenje upotrebe povezano s ponovnim slanjem sesije. Zahtijeva
 ## 1. Arhitektura
 
 ```
-┌─ Aplikacija OmniRoute ───────────┐        ┌─ Pomoćni codex-app-server ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ token mogućnosti)            │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  samostalno upravlja OpenAI OAuthom │
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
 └──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
-        │ dijeli (compose volumeni)          └─────────────────────────────────────┘
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS token mogućnosti (oba ga montiraju)
-  codex-appserver-home    → ~/.codex (auth.json zapisuje nadzorna ploča,
-                             a čita ga pomoćni codex app-server)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Pomoćni servis sluša **samo** na internoj compose mreži
-  (`ws://codex-app-server:1456`), zaštićen tokenom mogućnosti. **Nikada** se ne
-  objavljuje na glavnom računalu ni internetu.
-- Codex CLI ugrađen je u `omniroute:base`, pa pri pokretanju pomoćnog servisa
-  nije potrebno instalirati codex na glavnom ili korisnikovu računalu.
+- Prikolica sluša** samo** na internoj mreži za sastavljanje (`ws://codex-app-server:1456`) iza tokena mogućnosti. jeste** nikada** published to the host or internet.
+- Bočna prikolica koristi `omniroute:cli-no-docker`, izgrađenu od cilja `runner-cli-no-docker`, koji uključuje Codex CLI.
 
 ## 2. Pokretanje
 

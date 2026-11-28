@@ -4,9 +4,9 @@
 
 ---
 
-> **版本：** v3.8.44**最後更新：** 2026-10-28**觀眾：**工程師新增、維護或除錯嵌入式服務（9Router、 CLIProxyAPI、Mux、Bifrost、open-wa、 LLMLingua、sing-box）。
+> **版本：** v3.8.44**觀眾：**工程師新增、維護或除錯嵌入式服務（9Router、 CLIProxyAPI、Mux、Bifrost、open-wa、 LLMLingua、sing-box）。
 
-嵌入式服務是本地安裝的進程邊車工具， OmniRoute將其安裝、監督並公開為一流的路由目標。與外部提供者（透過API金鑰透過網際網路存取）不同，嵌入式服務與OmniRoute運作在同一台機器上，並透過環回進行通訊。
+嵌入式服務是本地安裝的進程邊車工具， OmniRoute將其安裝、監督並公開為一流的路由目標。與外部提供者（透過API金鑰透過網路存取）不同，嵌入式服務與OmniRoute在同一台機器上運行，並透過環回進行通訊。
 
 ---
 

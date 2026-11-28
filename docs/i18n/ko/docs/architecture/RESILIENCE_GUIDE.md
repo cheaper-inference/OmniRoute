@@ -12,55 +12,53 @@ OmniRoute 에는 서로 다르지만 관련된 세 가지 탄력성 메커니즘
 
 > **복원력 토글에 대한 Env-vs-dashboard 우선 순위입니다.** — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — 환경에서 시드된 옵트인 복원력 토글은 _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`)만 제공합니다. `resilienceSettings` 에 부울이 지속되었습니다(대시보드 →** 설정 → 탄력성** / `PATCH /api/resilience`, `key_value` 에 저장됨)은 env 값보다 우선합니다. 정규화(`toBoolean`, `src/lib/resilience/settings/normalize.ts`)는 저장된 부울이 존재할 때마다 이를 유지합니다. 대시보드가 이미 `false` 저장한 배포에서 이러한 환경 변수를 `true` 로 설정하면 아무것도 변경되지 않습니다. — 토글을 뒤집습니다.** 설정 → 탄력성** (또는 저장된 필드를 지우는 것) 대신.
 
-## 1. 프로바이더 서킷 브레이커
+## 1. 공급자 회로 차단기
 
-**범위:** 프로바이더 전체(예: `glm`, `openai`, `anthropic`).
+**범위:** 전체 공급자(예: `glm`, `openai`, `anthropic`).
 
-**목적:** 업스트림/서비스 수준에서 반복적으로 실패하는 프로바이더로의 트래픽 전송을 중단합니다.
+**목적:** upstream/service 수준에서 반복적으로 실패하는 공급자에게 트래픽 전송을 중지합니다.
 
 **구현:**
 
 - 핵심 클래스: `src/shared/utils/circuitBreaker.ts`
-- 연결 지점: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- 배선: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
 - 상태 API: `GET /api/monitoring/health`
-- 리셋 API: `POST /api/resilience/reset`
+- API 재설정 : `POST /api/resilience/reset`
 - 래퍼: `open-sse/services/accountFallback.ts`
 - DB 테이블: `domain_circuit_breakers`
 
 **상태:**
 
-- `CLOSED` — 정상 트래픽 허용
-- `DEGRADED` — 트래픽은 여전히 허용되지만, 프로바이더 실패 증가가 추적되고 있는 상태. 충분한 성공이 누적되거나, 유효한 연결 테스트가 통과되거나, 마지막 실패 유형에 대한 가장 긴 `OPEN` 유지 시간(해당 `cooldownByKind` 값, 없으면 `resetTimeout`에 `maxBackoffMultiplier`를 곱한 값, 최소 한 번의 쿨다운) 동안 새로운 실패 없이 경과하면 `CLOSED`로 복귀
-- `OPEN` — 프로바이더가 일시적으로 차단됨. 콤보 라우팅에서 건너뜀
-- `HALF_OPEN` — 리셋 타임아웃이 경과됨. 프로브 요청 허용
+- `CLOSED` — 일반 트래픽 허용됨
+- `DEGRADED` — 트래픽은 여전히 허용되지만 증가된 공급자 오류가 추적되고 있습니다. 충분한 성공, 유효한 연결 테스트 또는 마지막 실패 종류(해당 `cooldownByKind` 값, 그렇지 않으면 `resetTimeout`, × `maxBackoffMultiplier`, 최소 하나의 쿨다운)에 대해 가장 긴 `OPEN` 보유 후 새로운 실패 없이 `CLOSED` 로 반환됩니다.
+- `OPEN` — 공급자가 일시적으로 차단되었습니다. 콤보 라우팅은 건너뜁니다.
+- `HALF_OPEN` — 재설정 시간 초과가 경과되었습니다. 프로브 요청이 허용됨
 
-**설정 가능한 기본값(`open-sse/config/constants.ts`, Dashboard → Settings → Resilience에서 노출됨):**
+**구성 가능한 기본값(`open-sse/config/constants.ts`, 대시보드 → 설정 → 복원력에 표시됨):**
 
-| 클래스  | Degraded 진입 | Open 진입 | 리셋 타임아웃 |
-| ------- | ------------- | --------- | ------------- |
-| OAuth   | 5회 실패      | 8회 실패  | 60초          |
-| API-key | 7회 실패      | 12회 실패 | 30초          |
-| Local   | 파생됨        | 2회 실패  | 15초          |
+| 수업   | 성능 저하 시간 | 다음 시간에 열립니다. | 시간 초과 재설정 |
+| ------ | -------------- | --------------------- | ---------------- |
+| OAuth  | 5개의 실패     | 8개의 실패            | 60년대           |
+| API 키 | 7개의 실패     | 12개의 실패           | 30대             |
 
-`degradationThreshold`는 프로바이더가 `DEGRADED`로 진입하는 시점을 제어하고, `failureThreshold`는 프로바이더가 열리고(open) 건너뛰어지는 시점을 제어합니다. Local 프로바이더 프로필은 아직 Resilience 설정 페이지에 노출되지 않습니다.
+`degradationThreshold` 공급자가 `DEGRADED` 에 들어갈 때를 제어합니다. `failureThreshold` 열릴 때와 건너뛸 때를 제어합니다. `PROVIDER_PROFILES.local` (2 실패/15초)는 `open-sse/config/constants.ts` 에 정의되어 있지만** 아직 연결되지 않았습니다** : `getProviderCategory()` `oauth` 또는 `apikey` 만 반환하므로 로컬 공급자는 OAuth 또는 API 키 프로필을 사용합니다.
 
-**트립 코드:** 프로바이더 수준 상태 코드 `[408, 500, 502, 503, 504]`에서만 트립됩니다. 계정 수준 오류(대부분의 401/403/429 — 이들은 쿨다운 또는 잠금에 해당)에서는 트립되지 **않습니다**.
+**여행 코드:** 공급자 수준 상태만 `[408, 500, 502, 503, 504]`. 계정 수준 오류에 대해 NOT 트립을 수행합니다(대부분의 401/403/429 — 는 쿨다운 또는 잠금에 속함).
 
-**지연 복구(lazy recovery):** `OPEN` 상태가 만료되면 `getStatus()`, `canExecute()`, `getRetryAfterMs()` 호출이 상태를 `HALF_OPEN`으로 갱신합니다. 동일한 읽기 호출(그리고 다음 실패)은 오래된 `DEGRADED` 상태를 `CLOSED`로 감쇠시킵니다. 백그라운드 타이머가 필요 없습니다.
+**게으른 회복:** `OPEN` 만료되면 `getStatus()`, `canExecute()`, `getRetryAfterMs()` 상태를 `HALF_OPEN` 로 새로 고칩니다. 동일한 읽기(및 다음 실패)는 오래된 `DEGRADED` 다시 `CLOSED` 로 분해합니다. 백그라운드 타이머가 필요하지 않습니다.
 
 ---
 
-### 옵트인 전역 프로바이더 쿨다운 (윈도우 게이트)
+### 옵트인 글로벌 공급자 쿨다운(창문)
 
-네 번째 **옵트인** 계층(`PROVIDER_COOLDOWN_ENABLED`, 기본값 **off**)은 실패한 프로바이더에 대한 요청 간 메모리를 `open-sse/services/providerCooldownTracker.ts`에 유지하며, 콤보 대상 결정(combo target resolution)에서 참조되어 연속적인 콤보 요청이 방금 실패한 프로바이더를 다시 탐색하지 않도록 합니다. 프로바이더 수준 항목은 `PROVIDER_PROFILES` 윈도우 게이트를 따릅니다:
+네번째,** 선택** 레이어(`PROVIDER_COOLDOWN_ENABLED`, 기본값** 끄다** )는 `open-sse/services/providerCooldownTracker.ts` 에서 실패한 공급자의 교차 요청 메모리를 유지하고 콤보 대상 확인을 통해 참조하여 연속적인 콤보 요청이 방금 실패한 공급자를 다시 탐색하는 것을 중지합니다. 공급자 수준 항목은 `PROVIDER_PROFILES` 창 게이트를 따릅니다.
 
-| 프로필  | 트립 조건 (`providerFailureThreshold`) | 윈도우 (`providerFailureWindowMs`) | 쿨다운 (`providerCooldownMs`) |
-| ------- | -------------------------------------: | ---------------------------------: | ----------------------------: |
-| OAuth   |                                   `10` |                            `15min` |                        `5min` |
-| API key |                                   `15` |                            `30min` |                       `10min` |
+| 윤곽   | 이후 여행(`providerFailureThreshold`) | 내부(`providerFailureWindowMs`) | (`providerCooldownMs`) 동안 냉각됨 |
+| ------ | ------------------------------------: | ------------------------------: | ---------------------------------: |
+| OAuth  |                                  `10` |                         `15min` |                             `5min` |
+| API 키 |                                  `15` |                         `30min` |                            `10min` |
 
-임계값 미만에서는 프로바이더가 쿨다운 중으로 간주되지 **않으며**, 성공하면 윈도우가 초기화됩니다. 연결 수준 항목(`provider:connectionId`)은 대신 지수적 `minRetryCooldownMs → maxRetryCooldownMs` 백오프를 유지합니다. 재정의: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-회귀 방지 테스트: `tests/unit/provider-cooldown-window-gate.test.ts`.
+임계값 미만의 공급자는 다음과 같습니다.** ~ 아니다** 냉각으로 간주됨; 성공하면 창이 지워집니다. 대신 연결 수준 항목(`provider:connectionId`)은 지수 `minRetryCooldownMs → maxRetryCooldownMs` 백오프를 유지합니다. 재정의: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. 회귀 가드: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. 연결 쿨타임
 
@@ -694,6 +692,21 @@ connectionId)`) — 일반적인 모델 목록 콤보에서는 형제 대상에 
 
 ---
 
+## OmniRoute 자체에 접근할 수 없는 경우
+
+공급자 회로 차단기, 연결 휴지 기간 및 모델 잠금은 모두 게이트웨이 내부에서 실행됩니다. 클라이언트가 게이트웨이에 연결할 수 없으면 연결 오류가 발생합니다. OmniRoute 해당 실패를 가로챌 수 없습니다. 클라이언트는 재시도 여부와 표시할 메시지를 결정합니다.
+
+OmniRoute 현재 클라이언트 측 대체 기능을 제공하지 않으며 이에 대한 정책을 정의하지 않습니다. 클라이언트 또는 게이트웨이 앞에 대체 경로를 구성합니다.
+
+- `GET /api/health` 인증 없이 활성 상태를 확인합니다.
+- `GET /api/health/ping` 데이터베이스 응답 여부를 포함하여 준비 상태를 확인합니다.
+- `GET /api/monitoring/health` 인증된 발신자에게 더 깊은 건강 개요를 제공합니다.
+- `omniroute launch <tool>` 클라이언트를 시작하기 전에 `/api/monitoring/health` 조사합니다. 로컬 게이트웨이를 자동으로 시작할 수 있습니다. `--no-start` 사용하면 연결할 수 없는 게이트웨이로 인해 `GatewayUnreachable` 및 종료 코드 `69` 가 발생합니다.
+
+OmniRoute 에서 클라이언트의 연결을 끊으려면 [클라이언트 구성 되돌리기를](../guides/UNINSTALL.md#revert-client-configuration) 따르십시오.
+
+---
+
 ## 디버깅
 
 - Weighted 콤보가 `503 all_targets_cooling_down`을 반환하는 경우 (`Retry-After`가 설정되고, `diagnostics.excluded`에 모든 대상이 `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`로 나열됨) → 풀은 구성되고 연결되어 있으며, 모든 대상이 복원력 타이머에 의해 제외된 것뿐입니다. `[COMBO] Weighted selection: every target excluded before dispatch — …` 경고에 이유와 남은 초가 표시됩니다. 같은 콤보에서 `404 no_executable_targets`는 복원력 타이머가 관여하지 않았음을 의미합니다 (실행할 대상이 없거나 모든 계정이 가용성 프로브에 실패한 경우). `targetResolution.ts`에서 수집된 제외 항목을 바탕으로 `open-sse/services/combo/pinRecovery.ts`에 구축되었습니다.
@@ -707,65 +720,66 @@ connectionId)`) — 일반적인 모델 목록 콤보에서는 형제 대상에 
 
 ## 런타임 상태 — 에이전트 빠른 참조
 
-> 에이전트 가이드가 40k 컨텍스트 예산을 넘지 않도록 `AGENTS.md` → "Resilience Runtime State"에서 그대로 이동되었습니다 (PR #12743). 이것은 위 섹션들을 압축한 에이전트용 뷰이며, 번호가 매겨진 섹션들이 전체 참조로 남아 있습니다.
+> 에이전트 가이드가 40,000 컨텍스트 예산 미만으로 유지되도록 `AGENTS.md` → "복원력 런타임 상태"(PR #12743)에서 그대로 이동했습니다. 위 섹션을 요약한 에이전트 방향 보기입니다. 번호가 매겨진 섹션은 전체 참조로 유지됩니다.
 
-OmniRoute에는 서로 관련되어 있지만 구분되는 세 가지 일시적 장애 메커니즘이 있습니다. 라우팅 동작을 디버깅할 때 이들의 범위를 구분해서 다루세요. 한눈에 파악할 수 있는 맵은 [3계층 복원력 다이어그램](../diagrams/exported/resilience-3layers.svg) (소스: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))을 참조하세요.
+OmniRoute 에는 서로 관련되어 있지만 서로 다른 세 가지 임시 오류 메커니즘이 있습니다. 라우팅 동작을 디버깅할 때 범위를 별도로 유지하세요. 한눈에 볼 수 있는 맵은 [3계층 탄력성 다이어그램](../diagrams/exported/resilience-3layers.svg) (출처: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) )을 참조하세요.
 
-### 프로바이더 서킷 브레이커
+### 공급자 회로 차단기
 
-**범위**: 전체 프로바이더, 예: `glm`, `openai`, `anthropic`.
+**범위** : 전체 공급자(예: `glm`, `openai`, `anthropic`)
 
-**목적**: 업스트림/서비스 수준에서 반복적으로 실패하는 프로바이더로 트래픽 전송을 중단하여, 하나의 비정상 프로바이더가 모든 요청을 느려지게 하지 않도록 합니다.
+**목적** : upstream/service 수준에서 반복적으로 실패하는 공급자에게 트래픽 전송을 중지합니다. 그러면 건강하지 않은 공급자가 모든 요청 속도를 늦추지 않습니다.
 
-**구현**:
+**구현** :
 
 - 핵심 클래스: `src/shared/utils/circuitBreaker.ts`
-- 채팅 게이트/실행 배선: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- 채팅 gate/execution 배선: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
 - 런타임 상태 API: `src/app/api/monitoring/health/route.ts`
 - 공유 래퍼: `open-sse/services/accountFallback.ts`
-- 영속 상태 테이블: `domain_circuit_breakers`
+- 지속 상태 테이블: `domain_circuit_breakers`
 
-**상태** (4개 — `src/shared/utils/circuitBreaker.ts`):
+**상태** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: 정상 트래픽이 허용됩니다.
-- `DEGRADED`: 조기 경고 구간 — 실패가 저하 임계값을 넘었지만 아직 브레이커 임계값에는 도달하지 않은 상태입니다. 트래픽은 계속 흐르고 대시보드에 경고가 표시됩니다. 유효한 연결 테스트가 성공하거나 새로운 실패가 없는 조용한 윈도우가 지나면 `CLOSED`로 돌아갑니다 (윈도우는 `docs/architecture/RESILIENCE_GUIDE.md`에 있음).
-- `OPEN`: 프로바이더가 일시적으로 차단됩니다. 호출자는 프로바이더 서킷 오픈 응답을 받거나, 콤보 라우팅이 다른 대상으로 건너뜁니다.
-- `HALF_OPEN`: 리셋 타임아웃이 경과했습니다. 프로브 요청을 허용합니다. 성공하면 브레이커가 닫히고, 실패하면 다시 열립니다.
+- `CLOSED`: 일반 트래픽이 허용됩니다.
+- `DEGRADED`: 조기 경고 대역 — 실패가 저하 임계값을 초과했지만 아직 차단기 임계값을 초과하지 않았습니다. 트래픽이 계속 흐르면 대시보드에 경고가 표시됩니다. 유효한 연결 테스트 또는 새로운 실패가 없는 조용한 창은 이를 `CLOSED` 로 반환합니다(`docs/architecture/RESILIENCE_GUIDE.md` 에는 창이 있습니다).
+- `OPEN`: 공급자가 일시적으로 차단되었습니다. 호출자는 공급자 회로 개방 응답을 받거나 콤보 라우팅을 다른 대상으로 건너뜁니다.
+- `HALF_OPEN`: 재설정 시간 초과가 경과했습니다. 프로브 요청을 허용합니다. 성공하면 차단기가 닫히고 실패하면 다시 열립니다.
 
-**기본값** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, `src/lib/resilience/settings.ts`의 `DEFAULT_RESILIENCE_SETTINGS.providerBreaker`를 통해 소비됨 → `src/sse/handlers/chatHelpers.ts`의 `getCircuitBreaker(provider, …)`). 전체 프로바이더 브레이커는 `circuitBreakerThreshold` / `circuitBreakerReset`으로 동작합니다:
+**기본값** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts` 에서 `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` 통해 소비됨) 전체 공급자 차단기는 `circuitBreakerThreshold` / `circuitBreakerReset` 에서 실행됩니다.
 
-| 프로필 | 저하 시점 | 개방 시점 (`circuitBreakerThreshold`) | 리셋 (`circuitBreakerReset`) |
-| ------ | --------: | ------------------------------------: | ---------------------------: |
-| OAuth  |       `5` |                                   `8` |                        `60s` |
-| API 키 |       `7` |                                  `12` |                        `30s` |
-| 로컬   |  (파생됨) |                                   `2` |                        `15s` |
+| 윤곽   | 에서 저하 | (`circuitBreakerThreshold`)에 열립니다 | 재설정(`circuitBreakerReset`) |
+| ------ | --------: | -------------------------------------: | ----------------------------: |
+| OAuth  |       `5` |                                    `8` |                         `60s` |
+| API 키 |       `7` |                                   `12` |                         `30s` |
 
-`PROVIDER_PROFILES`는 `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5분), `providerCooldownMs` (5/10/1분)도 정의합니다. 이들은 **옵트인 전역 Provider Cooldown의 윈도우 게이트**(`PROVIDER_COOLDOWN_ENABLED`, 기본값 꺼짐)를 구동합니다. `open-sse/services/providerCooldownTracker.ts`의 프로바이더 수준 항목은 `providerFailureWindowMs` 안에서 `providerFailureThreshold`회 실패한 후에야 쿨링 중으로 계산되며, 그 후 `providerCooldownMs` 동안 쿨링됩니다. 이들은 라이브 브레이커의 임계값이 아닙니다 — 브레이커 동작을 기대하며 이 값들을 튜닝하지 마세요. 모든 기본값은 `OMNIROUTE_PROVIDER_BREAKER_*` 및 `OMNIROUTE_CIRCUIT_BREAKER_*` 환경 변수로 재정의할 수 있으며, 런타임 기준으로 정확한 참조 표는 `docs/architecture/RESILIENCE_GUIDE.md`에 있습니다.
+`local` 프로필(`2` failures / `15s`)도 `PROVIDER_PROFILES` 에 존재하지만 차단기에 연결되어 있지 않습니다. `buildProviderProfile()` (`open-sse/services/accountFallback.ts`)는 `oauth` 또는 `apikey` 만 허용하고 `getProviderCategory()` (`open-sse/config/providerRegistry.ts`)는 둘 중 하나를 반환합니다(등록되지 않은 공급자는 `apikey` 를 얻음).
 
-프로바이더 수준의 실패 상태만 프로바이더 브레이커를 트립해야 합니다:
+`PROVIDER_PROFILES` 또한 `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) 및 `providerCooldownMs` (5/10/1 min) — OAuth/API key/local 정의합니다. 여기서 로컬 값은 위와 같은 이유로 비활성입니다.** 옵트인 글로벌 공급자 쿨다운의 창 게이트** (`PROVIDER_COOLDOWN_ENABLED`, 기본값은 꺼짐) — `open-sse/services/providerCooldownTracker.ts` 의 공급자 수준 항목은 `providerFailureWindowMs` 내부에서 `providerFailureThreshold` 발생한 후에만 냉각으로 계산되고 `providerCooldownMs` 에 대해서는 냉각됩니다. 그들은 NOT 입니다. 라이브 차단기의 임계값 — 차단기 동작을 예상하여 조정하지 않습니다. 모든 기본값은 `OMNIROUTE_PROVIDER_BREAKER_*` 및 `OMNIROUTE_CIRCUIT_BREAKER_*` env 변수를 통해 재정의 가능합니다. 런타임에 정확한 참조 테이블은 `docs/architecture/RESILIENCE_GUIDE.md` 에 있습니다.
+
+공급자 수준 오류 상태만 공급자 차단기를 트립해야 합니다.
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-대부분의 `401`, `403`, `429`와 같은 일반적인 계정/키/모델 오류에 대해서는 전체 프로바이더 브레이커를 트립하지 마세요. 이러한 오류는 일반적으로 연결 쿨다운 또는 모델 락아웃에 해당합니다. 일반적인 API 키 프로바이더의 `403`은 종결적인(terminal) 프로바이더/계정 오류로 분류되지 않는 한 복구 가능해야 합니다.
+대부분의 `401`, `403` 또는 `429` 사례와 같은 일반적인 account/key/model 오류에 대해 전체 공급자 차단기를 트립하지 마십시오. 이는 일반적으로 연결 쿨다운 또는 모델 잠금에 속합니다. 일반 API 키 제공자 `403` 터미널 provider/account 오류로 분류되지 않는 한 복구 가능해야 합니다.
 
-브레이커는 백그라운드 타이머가 아닌 지연 복구(lazy recovery)를 사용합니다. `OPEN` 상태가 만료되면 `getStatus()`, `canExecute()`, `getRetryAfterMs()` 같은 읽기 작업이 상태를 `HALF_OPEN`으로 갱신하므로, 대시보드와 콤보 후보 빌더가 만료된 프로바이더를 계속 제외하지 않습니다.
+차단기는 백그라운드 타이머가 아닌 지연 복구를 사용합니다. `OPEN` 만료되면 `getStatus()`, `canExecute()` 및 `getRetryAfterMs()` 와 같은 읽기는 상태를 `HALF_OPEN` 로 새로 고치므로 대시보드 및 콤보 후보 빌더는 만료된 공급자를 영원히 제외하지 않습니다.
 
 ### 연결 쿨다운
 
-**범위**: 프로바이더 연결/계정/키 하나.
+**범위** : 하나의 공급자 connection/account/key.
 
-**목적**: 문제가 있는 키/계정 하나를 일시적으로 건너뛰면서, 동일한 프로바이더의 다른 연결은 계속 요청을 처리할 수 있게 합니다.
+**목적** : 동일한 공급자에 대한 다른 연결이 요청을 계속 처리하도록 허용하면서 잘못된 key/account 하나를 일시적으로 건너뜁니다.
 
-**구현**:
+**구현** :
 
-- 쓰기/업데이트 경로: `src/sse/services/auth.ts::markAccountUnavailable()`
-- 계정 선택/필터링: `src/sse/services/auth.ts::getProviderCredentials...`
+- Write/update 경로: `src/sse/services/auth.ts::markAccountUnavailable()`
+- 계정 selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
 - 쿨다운 계산: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - 설정: `src/lib/resilience/settings.ts`
 
-프로바이더 연결의 중요 필드:
+공급자 연결에 대한 중요 필드:
 
 ```ts
 rateLimitedUntil;
@@ -776,50 +790,50 @@ errorCode;
 backoffLevel;
 ```
 
-계정 선택 중에는 다음 조건일 때 연결이 건너뛰어집니다:
+계정을 선택하는 동안 다음과 같은 경우 연결을 건너뜁니다.
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-쿨다운도 지연 방식입니다: `rateLimitedUntil`이 과거가 되면 연결은 다시 사용 가능해집니다. 성공적으로 사용되면 `clearAccountError()`가 `testStatus`, `rateLimitedUntil`, 오류 필드, `backoffLevel`을 지웁니다.
+쿨다운도 지연됩니다. `rateLimitedUntil` 과거가 되면 연결이 다시 가능해집니다. 성공적으로 사용되면 `clearAccountError()` `testStatus`, `rateLimitedUntil`, 오류 필드 및 `backoffLevel` 지웁니다.
 
-기본 연결 쿨다운 동작:
+기본 연결 휴지 동작:
 
 - OAuth 기본 쿨다운: `5s`.
 - API 키 기본 쿨다운: `3s`.
-- API 키 `429`는 가능한 경우 업스트림 재시도 힌트(`Retry-After`, 리셋 헤더, 또는 파싱 가능한 리셋 텍스트)를 우선해야 합니다.
-- 반복되는 복구 가능한 실패는 지수 백오프를 사용합니다:
+- API 키 `429` 사용 가능한 경우 업스트림 재시도 힌트(`Retry-After`, 헤더 재설정 또는 구문 분석 가능한 재설정 텍스트)를 선호해야 합니다.
+- 반복되는 복구 가능한 오류는 지수 백오프를 사용합니다.
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-썬더링 허드(thundering herd) 방지 가드는 동일한 연결에서의 동시 실패가 쿨다운을 반복적으로 연장하거나 `backoffLevel`을 이중으로 증가시키는 것을 방지합니다.
+천둥 방지 가드는 동일한 연결의 동시 실패로 인해 쿨타임이 반복적으로 연장되거나 `backoffLevel` 두 배로 증가하는 것을 방지합니다.
 
-터미널 상태는 쿨다운이 아닙니다. `banned`, `expired`(`EXPIRED_RETRY_MAX`를 통해 N회의 제한된 재시도 후에만 터미널 상태가 됨), `credits_exhausted`는 자격 증명/설정이 변경되거나 운영자가 재설정할 때까지 사용 불가 상태로 유지되도록 의도된 것입니다. 터미널 상태를 일시적인 쿨다운 상태로 덮어쓰지 마세요.
+종료 상태는 쿨다운이 아닙니다. `banned`, `expired` ( `EXPIRED_RETRY_MAX` 통한 N 제한 재시도 이후에만 터미널이 됨) 및 `credits_exhausted` credentials/settings 변경되거나 운영자가 재설정할 때까지 사용할 수 없는 상태로 유지됩니다. 일시적인 쿨다운 상태로 터미널 상태를 덮어쓰지 마십시오.
 
-### 모델 락아웃
+### 모델 잠금
 
-**범위**: 프로바이더 + 연결 + 모델.
+**범위** : 공급자 + 연결 + 모델.
 
-**목적**: 하나의 모델만 사용 불가능하거나 해당 연결에 대해 할당량 제한이 있는 경우 전체 연결을 비활성화하는 것을 방지합니다.
+**목적** : 하나의 모델만 사용할 수 없거나 해당 연결에 대한 할당량이 제한되어 있는 경우 전체 연결을 비활성화하지 마십시오.
 
-예시:
+예:
 
-- 모델별 할당량 프로바이더가 `429`를 반환하는 경우.
-- 로컬 프로바이더가 누락된 모델 하나에 대해 `404`를 반환하는 경우.
-- 선택된 Grok 모드와 같은 프로바이더별 모드/모델 권한 실패.
+- `429` 반환하는 모델별 할당량 공급자.
+- 하나의 누락된 모델에 대해 `404` 반환하는 지역 공급자.
+- 선택된 Grok 모드와 같은 공급자별 mode/model 권한 실패.
 
-모델 락아웃은 `open-sse/services/accountFallback.ts`에 있으며, 동일한 연결이 다른 모델을 계속 제공할 수 있게 합니다.
+모델 잠금은 `open-sse/services/accountFallback.ts` 에 있으며 동일한 연결이 다른 모델에 계속 제공될 수 있도록 합니다.
 
-### 디버깅 가이드
+### 디버깅 지침
 
-- 프로바이더의 모든 키가 건너뛰어지는 경우, 프로바이더 브레이커 상태와 각 연결의 `rateLimitedUntil`/`testStatus`를 모두 확인하세요.
-- 리셋 윈도우 이후에도 프로바이더가 영구적으로 제외된 것처럼 보이면, 코드가 `getStatus()`/`canExecute()`를 사용하는 대신 원시 `state`를 읽고 있는지 확인하세요.
-- 프로바이더 키 하나가 실패하지만 다른 키는 작동해야 하는 경우, 프로바이더 브레이커보다 연결 쿨다운을 우선하세요.
-- 하나의 모델만 실패하는 경우, 연결 쿨다운보다 모델 락아웃을 우선하세요.
-- 상태가 자체 복구되어야 한다면, 미래 타임스탬프/리셋 타임아웃과 만료된 상태를 갱신하는 읽기 경로가 있어야 합니다. 영구 상태는 수동으로 자격 증명 또는 설정을 변경해야 합니다.
+- 공급자의 모든 키를 건너뛴 경우 공급자 차단기 상태와 각 연결의 `rateLimitedUntil`/`testStatus` 를 모두 검사하세요.
+- 재설정 기간 이후 공급자가 영구적으로 제외된 것으로 나타나면 코드가 `getStatus()`/`canExecute()` 사용하는 대신 원시 `state` 읽고 있는지 확인하세요.
+- 한 공급자 키가 실패했지만 다른 공급자 키는 작동해야 하는 경우 공급자 차단기보다 연결 휴지 기간을 선호하세요.
+- 하나의 모델만 실패하는 경우 연결 휴지보다 모델 잠금을 선호합니다.
+- 상태가 자체 복구되어야 하는 경우 향후 timestamp/reset 시간 초과 및 만료된 상태를 새로 고치는 읽기 경로가 있어야 합니다. 영구 상태에는 수동 자격 증명 또는 구성 변경이 필요합니다.
 
 ---
 

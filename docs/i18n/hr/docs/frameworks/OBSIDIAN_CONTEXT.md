@@ -121,56 +121,46 @@ alata `obsidian_sync_*` zadržavaju svoje zasebno ponašanje tokena za sinkroniz
 
 ## MCP alati (22)
 
-Definirani su u `open-sse/mcp-server/tools/obsidianTools.ts`. Token/osnovni URL određuju se
-pri svakom pozivu (prvo prema API ključu, a zatim globalno). Alati koji pristupaju OmniRoute **poslužitelju za sinkronizaciju**
-(četiri alata `obsidian_sync_*`) dodatno zahtijevaju autentifikacijski token za sinkronizaciju konfiguriran
-u postavkama OmniRoutea.
+Definirano u `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL se rješavaju po pozivu (prvo po ključu API-ja, a zatim globalno). Alati koji pogađaju OmniRoute** poslužitelj za sinkronizaciju** (četiri `obsidian_sync_*` alata) dodatno zahtijevaju autentičan token za sinkronizaciju konfiguriran u OmniRoute postavkama.
 
 ### Alati za čitanje (`read:obsidian`)
 
-| Alat                         | Opis                                                                                                                          |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Provjerava je li lokalni REST API dostupan i autentificiran.                                                                  |
-| `obsidian_search_simple`     | Pretražuje puni tekst sadržaja bilješki; vraća isječke s putanjama datoteka.                                                  |
-| `obsidian_search_structured` | Pretražuje pomoću JSON Logic izraza (filtri and/or/regex/path).                                                               |
-| `obsidian_read_note`         | Čita bilješku prema putanji relativnoj u odnosu na trezor; po želji određeni naslov/blok/frontmatter.                         |
-| `obsidian_list_vault`        | Navodi datoteke i direktorije u trezoru (stablo stavki).                                                                      |
-| `obsidian_get_document_map`  | Dohvaća strukturu naslova bilješke kao mapu naslova → brojevi redaka.                                                         |
-| `obsidian_get_note_metadata` | Dohvaća frontmatter, oznake, poveznice te broj znakova/riječi bez punog sadržaja.                                             |
-| `obsidian_get_active_file`   | Dohvaća putanju i sadržaj trenutačno aktivne datoteke u Obsidianu.                                                            |
-| `obsidian_get_periodic_note` | Dohvaća dnevnu/tjednu/mjesečnu periodičnu bilješku za datum (danas ako je izostavljen).                                       |
-| `obsidian_get_tags`          | Navodi sve oznake trezora s njihovim učestalostima.                                                                           |
-| `obsidian_list_commands`     | Navodi dostupne ID-ove naredbi Obsidiana (upotrebljava se s `obsidian_execute_command`).                                      |
-| `obsidian_sync_status`       | Status OmniRoute poslužitelja za sinkronizaciju: radi li, naziv trezora, priključak, vrijeme rada, posljednja sinkronizacija. |
-| `obsidian_sync_conflicts`    | Navodi neriješene sukobe sinkronizacije (putanja, putanja sukoba, vrijeme otkrivanja).                                        |
+| Alat                         | Opis                                                                                                      |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Provjerite je li lokalni REST API dostupan i autentificiran.                                              |
+| `obsidian_search_simple`     | Pretraživanje cijelog teksta sadržaja bilješke; vraća isječke sa stazama datoteka.                        |
+| `obsidian_search_structured` | Pretraživanje pomoću JSON logičkog izraza (and/or/regex/path filtri).                                     |
+| `obsidian_read_note`         | Čitanje bilješke putem relativnog trezora; izborno određeni heading/block/frontmatter.                    |
+| `obsidian_list_vault`        | Popis datoteka i direktorija u trezoru (stablo unosa).                                                    |
+| `obsidian_get_document_map`  | Dobijte strukturu naslova bilješke kao mapu naslova → brojeva redaka.                                     |
+| `obsidian_get_note_metadata` | Dobijte frontmatter, oznake, veze, char/word broj bez punog sadržaja.                                     |
+| `obsidian_get_active_file`   | Dobijte stazu + sadržaja trenutno aktivne datoteke u Obsidian.                                            |
+| `obsidian_get_periodic_note` | Dobijte daily/weekly/monthly periodičnu bilješku za datum (današnji ako je izostavljen).                  |
+| `obsidian_get_tags`          | Navedite sve oznake trezora s njihovim učestalostima.                                                     |
+| `obsidian_list_commands`     | Popis dostupnih Obsidian naredbi IDs (koristite sa `obsidian_execute_command`).                           |
+| `obsidian_sync_status`       | status OmniRoute servera za sinkronizaciju: radi, ime trezora, port, vrijeme rada, zadnja sinkronizacija. |
+| `obsidian_sync_conflicts`    | Popis neriješenih sukoba sinkronizacije (put, put sukoba, detektirano-at).                                |
 
 ### Alati za pisanje (`write:obsidian`)
 
-| Alat                             | Opis                                                                                                     |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Stvara ili prepisuje bilješku zadanim Markdown sadržajem.                                                |
-| `obsidian_append_note`           | Dodaje sadržaj bilješci; po želji određenom naslovu/bloku.                                               |
-| `obsidian_patch_note`            | Precizno dodaje ispred/iza ili zamjenjuje sadržaj naslova, bloka ili polja frontmattera.                 |
-| `obsidian_delete_note`           | Trajno briše bilješku iz trezora.                                                                        |
-| `obsidian_move_note`             | Premješta ili preimenuje bilješku unutar trezora.                                                        |
-| `obsidian_execute_command`       | Izvršava naredbu Obsidiana prema njezinu ID-u naredbe.                                                   |
-| `obsidian_open_file`             | Otvara datoteku u Obsidianu (stvara je ako ne postoji).                                                  |
-| `obsidian_sync_trigger`          | Pokreće trenutačnu dvosmjernu sinkronizaciju trezora između računala i mobilnog uređaja.                 |
-| `obsidian_sync_resolve_conflict` | Razrješava sukob sinkronizacije: zadržava `local` (mobilni uređaj), `remote` (računalo) ili `keep-both`. |
+| Alat                             | Opis                                                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `obsidian_write_note`            | Stvorite ili prebrišite bilješku s danim Markdown sadržajem.                                           |
+| `obsidian_append_note`           | Dodavanje sadržaja bilješci; izborno na određeni heading/block.                                        |
+| `obsidian_patch_note`            | Kirurški append/prepend/replace na polju naslova, bloka ili prednjeg materijala.                       |
+| `obsidian_delete_note`           | Trajno brisanje bilješke iz trezora.                                                                   |
+| `obsidian_move_note`             | Premjestite ili preimenujte bilješku unutar trezora.                                                   |
+| `obsidian_execute_command`       | Izvršite Obsidian naredbu njenom naredbom ID.                                                          |
+| `obsidian_open_file`             | Otvorite datoteku u Obsidian (stvara je ako ne postoji).                                               |
+| `obsidian_sync_trigger`          | Pokreni trenutnu dvosmjernu sinkronizaciju ↔ mobilnog trezora za radnu površinu.                       |
+| `obsidian_sync_resolve_conflict` | Riješite sukob sinkronizacije: zadržite `local` (mobilno), `remote` (stolno računalo) ili `keep-both`. |
 
 > [!NOTE]
-> Ciljevi alata `obsidian_patch_note` prihvaćaju `targetType` vrijednosti `heading | block | frontmatter`
-> i `operation` vrijednosti `append | prepend | replace`, uz neobavezni
-> `createTargetIfMissing`. Četiri alata `obsidian_sync_*` komuniciraju s lokalnim
-> poslužiteljem za sinkronizaciju (`http://127.0.0.1:27781` prema zadanim postavkama) i zahtijevaju token za sinkronizaciju.
+> `obsidian_patch_note` ciljevi prihvaćaju `targetType` od `heading | block | frontmatter` i `operation` od `append | prepend | replace`, uz izborni `createTargetIfMissing`. Četiri `obsidian_sync_*` alata razgovaraju s lokalnim poslužiteljem za sinkronizaciju (`http://127.0.0.1:27781` prema zadanim postavkama) i zahtijevaju token za sinkronizaciju.
 
 ### Opsezi
 
-Alati za čitanje zahtijevaju `read:obsidian`; alati za pisanje zahtijevaju `write:obsidian`. Provedba
-je identična kao za Notion — obrađuje je `withScopeEnforcement()` u
-`open-sse/mcp-server/server.ts`, uvjetovana postavkom `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, pri čemu
-dopušteni opsezi dolaze iz `OMNIROUTE_MCP_SCOPES` ili konteksta opsega API ključa. Pogledajte
-[MCP-SERVER.md](./MCP-SERVER.md).
+Alati za čitanje zahtijevaju `read:obsidian`; alati za pisanje zahtijevaju `write:obsidian`. Provedba je identična Notion — kojom rukuje `withScopeEnforcement()` u `open-sse/mcp-server/server.ts`, zatvorena na `OMNIROUTE_MCP_ENFORCE_SCOPES=true` i prisilno uključena za HTTP/SSE pozivatelje čiji API ključ nema `manage`/`admin`, s dopuštenim opsezima izvorno iz `OMNIROUTE_MCP_SCOPES` ili konteksta opsega API ključa. Vidi [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Krajnje točke
 

@@ -4,12 +4,9 @@
 
 ---
 
-> **Ilisasishwa mwisho:** 2026-08-28 — v3.8.51
-> Mtiririko uliorahisishwa wa utoaji unaotumia ujuzi wa Claude Code kwa uendeshaji otomatiki.
+> Mtiririko uliorahisishwa wa uchapishaji ambao huongeza ujuzi wa Msimbo Claude kwa otomatiki.
 >
-> **Dumisha foleni/tawi katika hali nzuri kati ya matoleo:** tazama [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (familia ya `/green-prs` + `npm run check:release-green` + `/babysit` + utekelezaji wa kila usiku). Kutekeleza
-> hili mara kwa mara — na hasa **kabla ya** orodha hii ya ukaguzi — hufanya PR ya toleo ianze ikiwa katika hali nzuri.
+> **Weka queue/branch ya kijani kati ya matoleo:** tazama [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` family + `npm run check:release-green` + `/babysit` + usiku). Kuendesha hii mara kwa mara — na haswa** kabla** orodha hii — hufanya toleo PR kuanza kijani.
 
 ## Kwa ufupi
 
@@ -60,7 +57,9 @@ Mtiririko wa kazi wa npm-publish hauchapishi tena moja kwa moja: hupakia tarball
 
 **Docker Hub `latest` (inahitajika kwa kila uchapishaji SemVer thabiti):** mtiririko wa kazi `docker-publish` lazima uweke alama** zote mbili** `X.Y.Z` na, `should-promote-latest.sh` inapokubali hii ndiyo SemVer imara zaidi, `:latest` pamoja na** digest sawa** . Baada ya kazi: Muhtasari wa Hub `latest` unalingana na muhtasari mpya SemVer na `last_updated` kusogezwa. Usiache `:latest` kwenye muundo wa zamani wakati maelezo ya kutolewa yanazungumza juu ya marekebisho ambayo yanapatikana tu kwenye git. Tunga vianzio vya haraka tumia `:latest`; GitOps inapaswa kuendelea kubana `X.Y.Z`. Tazama [njia za kutolewa za Docker](../guides/DOCKER_GUIDE.md#release-channels) na #10317.
 
-**Docker Hub hazina ya shirika (`cheaperinference/omniroute`):** Docker Hub haiwezi kuhamisha hazina kati ya nafasi za majina, kwa hivyo `diegosouzapw/omniroute` huhifadhi historia yake ya kuvuta na kila toleo, na kazi ya `mirror-org-dockerhub` ya nakala za `docker-publish` kila toleo lililotolewa (na `:latest` linapokuzwa) kutoka `ghcr.io/cheaper-inference/omniroute` hadi hazina ya shirika. Inahitaji siri za `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; bila wao kazi inabaki kuwa ya kijani na onyo la "Docker Hub org mirror" na sajili zingine huchapisha kawaida. Ili kuchapisha toleo lililotolewa hapo baadaye, endesha** Vitendo → Vioo Docker picha kwa Docker Hub org → Endesha mtiririko wa kazi** na `version=X.Y.Z` (na `promote_latest` kwa toleo thabiti zaidi): inakili picha zilizopo, hakuna uundaji upya.
+**Docker Hub hazina ya shirika (`cheaperinference/omniroute`):** Docker Hub haiwezi kuhamisha hazina kati ya nafasi za majina, kwa hivyo `diegosouzapw/omniroute` huhifadhi historia yake ya kuvuta na kila toleo, na kazi ya `mirror-org-dockerhub` ya nakala za `docker-publish` kila toleo lililotolewa (na `:latest` linapokuzwa) kutoka `ghcr.io/cheaper-inference/omniroute` hadi hazina ya shirika. Inahitaji siri za `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; bila wao kazi inabaki kuwa ya kijani na onyo la "Docker Hub org mirror" na sajili zingine huchapisha kawaida. Ili kuchapisha toleo lililotolewa hapo baadaye, endesha** Vitendo → Vioo Docker picha kwa Docker Hub org → Endesha mtiririko wa kazi** na `version=X.Y.Z` (na `promote_latest` kwa toleo thabiti zaidi): inakili picha zilizopo, hakuna uundaji upya. Muhtasari wa Docker Hub ya hazina hiyo umewekwa kwa mkono: API ambazo huihariri hukataa Ishara za Ufikiaji wa Shirika.
+
+Mtiririko sawa wa kazi pia hunakili kila toleo kwenye kifurushi cha zamani cha GHCR `ghcr.io/diegosouzapw/omniroute` hadi 2027-06-30, kwa hivyo usakinishaji ambao bado umebandikwa uendelee kusasishwa; faharisi yake hubeba maelezo ya "kuhamishwa hadi `ghcr.io/cheaper-inference/omniroute`". Inahitaji siri `GHCR_LEGACY_TOKEN` (ishara ya kawaida ya ufikiaji wa kibinafsi ya `diegosouzapw` na `write:packages`); bila hiyo kazi hiyo inaruka na onyo la "Legacy GHCR rukaruka" onyo.
 
 ## Njia ya Haraka ya Hotfix (lebo `hotfix`)
 
@@ -121,7 +120,7 @@ kiotomatiki, bila lebo yoyote.
 - [ ] `npm run test:vitest` — kupita ( seva ya MCP, autoCombo, kache)
 - [ ] `npm run test:coverage` — lango 60/60/60/60 limeridhika (statements/lines/functions/branches)
 - [ ] `npm run test:integration` — kupita (ikiwa mabadiliko gusa DB / vidhibiti)
-- [ ] `npm run test:combo:matrix` — pass (matriki ya mkakati wa mchanganyiko: huthibitisha maamuzi yote 22 ya mikakati ya uelekezaji wa umma kwa kubainisha; endesha unapogusa uelekezaji wa mseto, utatuzi wa mkakati, au mantiki mbadala)
+- [ ] `npm run test:combo:matrix` — pass (matriki ya mkakati wa mchanganyiko: inathibitisha maamuzi yote 22 ya mikakati ya uelekezaji wa umma kwa kubainisha; endesha unapogusa uelekezaji wa mseto, utatuzi wa mkakati, au mantiki mbadala)
 - [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (moshi halisi wa juu wa mkondo; vyanzo vya muhtasari wa DB wa kusoma pekee kutoka VPS `root@192.168.0.15`; hugusa watoa huduma halisi, hugharimu mikopo; kamwe haifanyi kazi katika CI; kuruka kwa usafi bila lango)
 - [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS moshi wa moja kwa moja: matukio ya HTTP 7 dhidi ya seva `.15` ya moja kwa moja kupitia Node ESM; inahitaji `ssh root@192.168.0.15`; creates/deletes michanganyiko `__live_test__*` pekee; hugonga watoa huduma halisi; haitumiki kamwe katika CI)
 - [ ] kupita `npm run test:e2e` — ( mabadiliko UI )
@@ -151,7 +150,7 @@ Mabadiliko yanayovunja: ongeza `BREAKING CHANGE:` footer au `!` baada ya upeo (k
 ### Nyaraka
 
 - [ ] `npm run check:docs-sync` hupita (inaendeshwa otomatiki na ahadi ya awali)
-- [ ] `npm run check:docs-all` hupita (mwavuli: hati-sawazisha + -hesabu za hati + env-doc-sync + matoleo yaliyoacha kutumika + viungo vya hati)
+- [ ] `npm run check:docs-all` hupita. Matoleo yake ya ushauri `check:deprecated-versions` hualamisha yanayohusishwa kwa uwazi na OmniRoute (3.6.x na awali) na hupuuza tarehe.
 - [ ] `npm run check:env-doc-sync` inatoka 0 msimbo wa — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env mkataba haujakamilika
 - [ ] `npm run check:doc-links` inatoka kwa — 0 hakuna marejeleo ya alama ya ndani yaliyovunjika baada ya urekebishaji
 - [ ] `docs/architecture/ARCHITECTURE.md` ilipitiwa upya kwa storage/runtime drift
@@ -276,7 +275,7 @@ Ujuzi wa kupeleka tumia mtiririko mwepesi wa rsync — no `npm pack`, hakuna `np
 Tangazo la Rada limetolewa kwa makusudi na `active: false`. Uamilisho ni badiliko tofauti baada ya kila kitu hapa chini kuthibitishwa:
 
 - [ ] PRs zote za Rada zilizopangwa zimeunganishwa na ncha CI ya kutolewa ni ya kijani
-- [ ] Sambaza na ufute njia za OSS Rada na `RADAR_ENABLED` bado imezimwa kwa chaguo-msingi
+- [ ] Sambaza na ufute njia za OSS Rada na `RADAR_ENABLED` bado imezimwa kwa chaguomsingi
 - [ ] Moshi `GET /planos`, `/termos`, `/privacidade`, na `/reembolso` juu ya mwenyeji aitwaye Rada
 - [ ] Rekodi opereta identity/contact/address na ukaguzi wa kisheria ulioidhinishwa na mmiliki katika huduma ya kibinafsi
 - [ ] Zoezi la Malipo ya Mistari na kifaa cha wavuti kilichotiwa saini katika hali ya majaribio pekee
@@ -399,7 +398,7 @@ Ahadi ya kuendeleza bump imejengwa na git plumbing (hakuna mti unaofanya kazi un
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
@@ -409,7 +408,7 @@ Uendeshaji hufanya `npm ci`, `npm run build:release`, `npm run check:pack-artifa
 
 1. GO iliyorekodiwa katika [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` huchapa `RESULT: READY`.
-3. Unda matawi kwenye `origin` kwa mkono na maagizo dry-run chapa — hati inakataa kushinikiza `origin`. Ili kutumia tena ahadi ya usanidi iliyohakikiwa, endesha mazoezi `--execute` kwenye kidokezo cha 3.9.0 dhidi ya uma yako kwanza; inachapisha zote mbili SHAs, na ahadi zile zile zinaweza kusukumwa:
+3. Unda matawi kwenye `origin` kwa mkono na maagizo dry-run chapa — hati inakataa kusukuma kwa `origin`. Ili kutumia tena ahadi ya usanidi iliyohakikiwa, endesha mazoezi `--execute` kwenye kidokezo cha 3.9.0 dhidi ya uma yako kwanza; inachapisha zote mbili SHAs, na ahadi zile zile zinaweza kusukumwa:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop

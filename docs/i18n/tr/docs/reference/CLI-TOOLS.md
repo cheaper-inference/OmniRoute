@@ -4,8 +4,6 @@
 
 ---
 
-Son güncelleme: 2026-08-23
-
 OmniRoute üç özel kontrol paneli sayfasına yayılmış üç CLI aracı kategorisiyle entegre olur:
 
 | Sayfa                | Rota                    | Konsept                                                                               | Saymak                |

@@ -90,18 +90,17 @@ Ang object na `ctx` na ipinapasa sa `register(program, ctx)`:
 
 ## Pagtuklas
 
-Tinutuklas ang mga plugin mula sa:
+Ang mga plugin ay natuklasan mula sa:
 
-1. `~/.omniroute/plugins/<name>/` — mga install na lokal sa user
-2. `OMNIROUTE_PLUGIN_PATH` env var — custom na directory
+1. `~/.omniroute/plugins/node_modules/<name>/` — kung saan naglalagay `omniroute plugin install` ng mga pakete (isang npm `--prefix`, hindi `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — na kinopya ng kamay na mga direktoryo ng plugin
+3. `OMNIROUTE_PLUGIN_PATH` env var — custom na direktoryo
 
-Parehong **para lamang sa CLI** ang mga ito. Ang server-side plugin runtime (ang marketplace/mga `plugin.json`
-plugin na tumatakbo sa loob ng proxy) ay may sarili nitong scanner at sariling override,
-`OMNIROUTE_PLUGINS_DIR` — tingnan ang
-[PLUGIN_MARKETPLACE.md → Directory ng plugin](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Ang pagtatakda sa isa ay hindi nakaaapekto sa isa pa.
+Sinusundan ang mga naka-symlink na direktoryo (kung ano ang nilikha ng npm para sa `plugin install ./dir`).
 
-Sinasalo at ipinapakita bilang mga babala ang mga error sa pag-load — hindi kailanman pinapabagsak ng sirang plugin ang CLI.
+Parehong** CLI-lamang** . Ang server-side plugin runtime (ang marketplace/`plugin.json` plugins na tumatakbo sa loob ng proxy) ay may sariling scanner na may sarili nitong override, `OMNIROUTE_PLUGINS_DIR` — tingnan [PLUGIN_MARKETPLACE.md → Plugin directory](./PLUGIN_MARKETPLACE.md#plugin-directory). Ang pagtatakda ng isa ay hindi nakakaapekto sa isa pa.
+
+Ang mga error sa paglo-load ay nahuhuli at napi-print bilang mga babala — isang sirang plugin ay hindi kailanman nag-crash sa CLI.
 
 ## Seguridad
 

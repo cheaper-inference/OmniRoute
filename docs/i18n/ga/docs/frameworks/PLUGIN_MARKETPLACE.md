@@ -4,26 +4,13 @@
 
 ---
 
-> **Foinse na fírinne:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`,
-> `scanner.ts`, `loader.ts`), `src/app/api/plugins/`, agus
-> `src/app/(dashboard)/dashboard/plugins/`
-> **Nuashonraithe go deireanach:** 2026-06-28 — v3.8.40
+> **Foinse na fírinne:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`, `scanner.ts`, `loader.ts`), `src/app/api/plugins/`, agus `src/app/(dashboard)/dashboard/plugins/`
 
-Tagann OmniRoute le córas breiseán ar nós WordPress. Is eolairí féinchuimsitheacha
-iad na breiseáin — agus forléiriú `plugin.json` agus comhad iontrála ag gach ceann acu — a
-nascann leis an bpíblíne iarratais (`onRequest` / `onResponse` / `onError`) agus le
-teagmhais saolré (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`).
+Cuireann OmniRoute córas breiseán ar stíl WordPress ar fáil. Is eolairí féinchuimsitheacha iad na breiseáin — gach ceann acu le léiriú `plugin.json` agus comhad iontrála — a nascann isteach sa phíblíne iarratais (`onRequest` / `onResponse` / `onError`) agus isteach in imeachtaí saolré (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`).
 
-Is é **Margadh na mBreiseán** an tsraith aimsithe atá ar bharr an chórais sin. Cuireann sé
-catalóg inbhrabhsáilte de bhreiseáin insuiteáilte ar fáil. De réir réamhshocraithe, is
-clárlann síl bheag ionsuite í an chatalóg; is féidir le hoibreoir í a dhíriú ar URL clárlainne
-cianda saincheaptha, agus sa chás sin déantar an t-aisghabháil a chruachan le cosantóir SSRF
-a réitíonn DNS (féach [Slándáil](#security)).
+Tá an** Margadh Breiseán** an ciseal fionnachtana ar bharr an chórais sin. Nochtann sé catalóg inbhrabhsála de bhreiseáin inshuiteáilte. De réir réamhshocraithe is clárlann síolta ionsuite beag í an chatalóg; is féidir le hoibreoir é a chur in iúl do chianchláraitheoir saincheaptha URL, agus sa chás sin cruaíonn garda SSRF DNS-réiteach an beir (féach [Slándáil](#security) ).
 
-Is **don lúb siar amháin** gach bealach breiseáin (Sraith 1 — `LOCAL_ONLY`): lódálann
-agus ritheann breiseáin cód i bpróisis mhic, mar sin ní féidir na bealaí a bhaint amach ó
-fhoinse nach lúb siar í, beag beann ar fhíordheimhniú. Féach
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
+Tá gach bealach breiseán** loopback-amháin** (Sraith 1 — `LOCAL_ONLY`): déanann forlíontáin cód a luchtú agus a fhorghníomhú i bpróisis leanaí, mar sin ní féidir teacht ar na bealaí ó bhunús neamh-lúbtha beag beann ar an údarás. Féach [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
 ## Conas a oireann sé Together
 
@@ -83,20 +70,21 @@ ais chuig an liosta síl.
 
 Teastaíonn údarás bainistíochta (`requireManagementAuth`) ó gach críochphointe** agus** atá liostaithe in `/api/plugins` `src/server/authz/routeGuard.ts` `LOCAL_ONLY_API_PREFIXES` `/api/plugins/` — amháin.
 
-| Críochphointe                    | Modh   | Cur síos                                                             |
-| -------------------------------- | ------ | -------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Liostaigh breiseán suiteáilte (scagaire `?status=` roghnach)         |
-| `/api/plugins`                   | POST   | Suiteáil breiseán ón eolaire foinsí breiseán                         |
-| `/api/plugins/scan`              | POST   | Scan an t-eolaire breiseán agus cláraigh forlíontáin nua             |
-| `/api/plugins/marketplace`       | GET    | Liostaigh iontrálacha catalóg an mhargaidh                           |
-| `/api/plugins/[name]`            | GET    | Faigh sonraí breiseán suiteáilte                                     |
-| `/api/plugins/[name]`            | DELETE | Díshuiteáil breiseán                                                 |
-| `/api/plugins/[name]/activate`   | POST   | Gníomhachtaigh (luchtaigh crúcaí clár + )                            |
-| `/api/plugins/[name]/deactivate` | POST   | Díghníomhachtaigh (fire `onDeactivate`, crúcaí díchláraigh)          |
-| `/api/plugins/[name]/config`     | GET    | Faigh an breiseán config + config scéimre                            |
-| `/api/plugins/[name]/config`     | PUT    | Nuashonraigh cumraíocht an bhreiseáin (deimhnithe i gcoinne scéimre) |
+| Críochphointe                      | Modh   | Cur síos                                                             |
+| ---------------------------------- | ------ | -------------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Liostaigh breiseán suiteáilte (scagaire `?status=` roghnach)         |
+| `/api/plugins`                     | POST   | Suiteáil breiseán ón eolaire foinsí breiseán                         |
+| `/api/plugins/scan`                | POST   | Scan an t-eolaire breiseán agus cláraigh forlíontáin nua             |
+| `/api/plugins/marketplace`         | GET    | Liostaigh iontrálacha catalóg an mhargaidh                           |
+| `/api/plugins/marketplace/install` | POST   | Suiteáil breiseán margadh de réir ainm                               |
+| `/api/plugins/[name]`              | GET    | Faigh sonraí breiseán suiteáilte                                     |
+| `/api/plugins/[name]`              | DELETE | Díshuiteáil breiseán                                                 |
+| `/api/plugins/[name]/activate`     | POST   | Gníomhachtaigh (luchtaigh crúcaí clár + )                            |
+| `/api/plugins/[name]/deactivate`   | POST   | Díghníomhachtaigh (fire `onDeactivate`, crúcaí díchláraigh)          |
+| `/api/plugins/[name]/config`       | GET    | Faigh an breiseán config + config scéimre                            |
+| `/api/plugins/[name]/config`       | PUT    | Nuashonraigh cumraíocht an bhreiseáin (deimhnithe i gcoinne scéimre) |
 
-Glacann an scagaire `GET /api/plugins` `status` le ceann de `installed` / `active` / `inactive` / `error`. Filleann luach neamhbhailí `400`.
+Glacann an scagaire `GET /api/plugins` `status` le ceann amháin de `installed` / `active` / `inactive` / `error`. Filleann luach neamhbhailí `400`.
 
 ### Liosta breiseán suiteáilte
 
@@ -116,7 +104,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 Caithfidh an `path` a bheith ina** iomlán** cosán chuig eolaire** laistigh den eolaire foinsí breiseán** : `plugin-sources` in aice le fréamh an bhreiseáin, mar sin `~/.omniroute/plugin-sources/` de réir réamhshocraithe, nó `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` nuair a bhíonn an athróg sin socraithe (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Cóipeáil nó clónáil an breiseán ansin ar dtús. Diúltaítear don suiteáil le `400` nuair a bhíonn `..` nó beart null sa chonair, suite taobh amuigh den chomhadlann sin, réitíonn sé taobh amuigh de trí nasc simplí, nuair a bhíonn nasc nasc ann a bhfuil a sprioc lasmuigh de, nó nuair nach bhfuil an t-eolaire ann. Caithfidh `plugin.json` bailí (nó a bheith ina thuismitheoir ag duine amháin) a bheith san eolaire foinse. Nuair a éiríonn leis is é an freagra `201` leis an tsraith breiseán suiteáilte.
 
-Murab ionann agus na bealaí breiseán eile, éilíonn an ceann seo an dintiúr bainistíochta (seisiún deais nó eochair API le scóip bhainistiú) fiú nuair a bhíonn logáil isteach díchumasaithe (`requireLogin=false`): ní gníomh anaithnid é an cód a shuiteáil riamh.
+Murab ionann agus na bealaí breiseán eile, éilíonn an ceann seo an dintiúr bainistíochta (seisiún deais nó eochair API le scóip bhainistiú) fiú nuair a bhíonn logáil isteach díchumasaithe (`requireLogin=false`): ní gníomh anaithnid é an cód a shuiteáil riamh. Baineann an rud céanna le `POST /api/plugins/marketplace/install` ( comhlacht `{ "name": "<plugin>" }`).
 
 ### Brabhsáil an margadh
 
@@ -134,7 +122,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-Déanann `PUT .../config` gach luach soláthraithe a bhailíochtú i gcoinne `configSchema` an bhreiseáin (arna dhearbhú sa léiriú): réimsí `number` honor `min`/`max`, caithfidh réimsí `select` a bheith ag teacht leis an `enum` dearbhaithe . Ceadaítear eochracha nach bhfuil sa scéimre tríd.
+Déanann `PUT .../config` an comhlacht a bhailíochtú i gcoinne `configSchema` an bhreiseáin (arna dhearbhú sa léiriú) le `validatePluginConfig()` ó `src/lib/plugins/manifest.ts`: ní mór gach eochair a dhearbhú sa scéimre, ní mór luachanna a mheaitseáil leis an gcineál dearbhaithe, réimsí `number` honor `min`/`max`, agus ní mór do réimsí `select` mheaitseáil leis an `enum` dearbhaithe . Filleann aon sárú `400` agus ní stóráiltear aon rud. Níl aon eochracha inchumraithe ag breiseán a dhearbhaíonn nach bhfuil `configSchema` ann, mar sin diúltaítear don iarratas le `400` ("Ní dhearbhaíonn an breiseán aon eochracha inchumraithe").
 
 ## Cumraíocht
 
@@ -213,7 +201,7 @@ Ní chuireann URL a theipeann ar cheachtar ciseal deireadh leis an iarratas tite
 
 ### Leithlisiú forghníomhaithe breiseán
 
-> **Ní bosca gainimh iad na breiseáin.** Is gnáthphróiseas Node.js é an leanbh a ritheann mar úsáideoir OmniRoute, gan comhthéacs VM agus gan aon bhratacha cead Node.js, mar sin is féidir le cód breiseán aon chomhad is féidir leis an úsáideoir a léamh agus a scríobh, cláir a rith agus an líonra a bhaint amach. ní chinneann `requires.permissions` ach cé na hathróga timpeallachta a fhaigheann an leanbh; ní chuirtear na ceadanna eile i bhfeidhm. Suiteáil breiseán a bhfuil muinín agat astu. Tá tuairteanna agus crochta ag teorainn an phróisis thíos; ní teorainn slándála é.
+> **Ní sandboxed breiseán de réir réamhshocraithe.** Is gnáthphróiseas Node.js é an leanbh a ritheann mar úsáideoir OmniRoute, gan comhthéacs VM agus gan aon bhratacha cead Node.js, mar sin is féidir le cód breiseán aon chomhad is féidir leis an úsáideoir a léamh agus a scríobh, cláir a rith agus an líonra a bhaint amach. ní chinneann `requires.permissions` ach cé na hathróga timpeallachta a fhaigheann an leanbh; ní chuirtear na ceadanna eile i bhfeidhm. Ritheann an bhratach gné `PLUGIN_PERMISSION_MODEL_ENABLED` rogha an diúltaithe (amach de réir réamhshocraithe) gach breiseán faoin tsamhail cead Node.js a tógadh ó na ceadanna sin, seachas `network`, nach féidir le Node.js srian a chur air (féach [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Suiteáil breiseán a bhfuil muinín agat astu. Tá tuairteanna agus crochta ag teorainn an phróisis thíos; ní teorainn slándála é.
 
 - **Aonrú próisis** Scaipeann — `loadPlugin()` (`src/lib/plugins/loader.ts`) gach breiseán i bpróiseas páiste Node.js ar leith agus déanann sé cumarsáid thar IPC. Bíonn teorainn ama ag glaonna Hook le méadú `SIGTERM` → `SIGKILL`.
 - **Liosta ceadaithe clúdaigh** — ní fhaigheann an leanbh ach sraith cheadaithe d’athróga timpeallachta; ní dheonaítear an tacar níos leithne ach amháin nuair a iarrann an forléiriú cead `env`.

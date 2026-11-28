@@ -4,11 +4,9 @@
 
 ---
 
-> **신뢰할 수 있는 원본:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **마지막 업데이트:** 2026-09-02 — v3.8.51
-> **대상 독자:** 제공자별 스텔스 통합을 유지보수하는 엔지니어.
+> **진실의 출처:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** 청중:** 공급자별 스텔스 통합을 유지 관리하는 엔지니어.
 
-OmniRoute는 비공식 클라이언트를 능동적으로 지문 식별하는 엣지(TLS JA3/JA4, 헤더 순서, JSON 본문 형태, 무결성 토큰)를 사용하는 제공자와 통합됩니다. 이 페이지에서는 OmniRoute가 노출하는 스텔스 영역과 그 구현 위치를 설명합니다.
+OmniRoute 비공식 클라이언트(TLS JA3/JA4, 헤더 순서, JSON 본체 모양, 무결성 토큰)에 대한 지문을 적극적으로 수집하는 공급자와 통합됩니다. 이 페이지는 OmniRoute 가 노출하는 스텔스 표면과 구현 위치를 문서화합니다.
 
 ## 법적 및 윤리적 고지
 
@@ -53,64 +51,67 @@ OmniRoute는 비공식 클라이언트를 능동적으로 지문 식별하는 �
 
 ---
 
-## Claude Code 스텔스 번들
+## Claude 코드 스텔스 번들
 
-`cliCompatMode`가 켜져 있으면 OmniRoute는 발신 Claude 요청을 `claude-cli` 트래픽과 구별할 수 없도록 재구성합니다. 세 모듈이 함께 작동합니다.
+`cliCompatMode` 켜져 있으면 OmniRoute 나가는 Claude 요청을 `claude-cli` 트래픽과 구별할 수 없도록 재구성합니다. 세 가지 모듈이 협력합니다.
 
 ### `claudeCodeFingerprint.ts`
 
-결제 헤더에 포함되는 3자 `cc_version` 지문을 계산합니다.
+청구 헤더에 포함된 3자 `cc_version` 지문을 계산합니다.
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"`(하드코딩됨, 공식 클라이언트와 일치)
+- `FINGERPRINT_SALT = "59cf53e54c78"` (하드코딩됨, 공식 클라이언트와 일치)
 - 입력: 첫 번째 사용자 메시지 텍스트의 인덱스 4, 7, 20에 있는 문자 + 버전 문자열
-- 출력: 3자의 16진수 접두사
+- 출력: 3자 16진수 접두사
 
 ### `claudeCodeCCH.ts` (클라이언트 콘텐츠 해시)
 
-공식 Claude Code CLI가 Bun/Zig를 통해 계산하는 서버 측 무결성 검사입니다. OmniRoute는 이를 `xxhash-wasm`으로 재구현합니다.
+서버 측 무결성 검사 공식 Claude 코드 CLI Bun/Zig. 통해 계산합니다. OmniRoute 는 `xxhash-wasm` 로 재구현됩니다.
 
-1. `cch=00000;` 자리표시자를 사용하여 본문 직렬화
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. 0으로 채운 5자의 소문자 16진수
-4. `cch=00000;`을 계산된 토큰으로 교체
+1. `cch=00000;` 자리 표시자를 사용하여 본문 직렬화
+2. 다음 순서로 두 개의 일반 텍스트 대체 항목을 사용하여 해시 뷰를 빌드합니다(`hashView()`).
+   - `/"model":"[^"]*"/g` 의 모든 일치는 `"model":""` — 됩니다. 일치는 첫 번째 `"` 에서 중지되므로 이스케이프된 따옴표(`"model":"a\"b"`)가 있는 값은 클라이언트와 마찬가지로 해당 따옴표까지만 비워집니다.
+   - 모든 일치하는 `/"max_tokens":\d+,|,?"max_tokens":\d+/g` 는 모든 깊이에서 — 숫자 값만 제거됩니다.
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. 제로 패딩된 5자 소문자 16진수
+5. `cch=00000;` 계산된 토큰으로 교체
 
 상수:
 
-- 시드: `0x6e52736ac806831e`
+- 시드: `0x4d659218e32a3268` ( Claude 코드 2.1.252 및 2.1.322의 루프백 캡처와 일치)
 - 패턴: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-업스트림 필터가 "민감한" 클라이언트 이름을 grep으로 검색하지 못하도록 해당 이름의 첫 번째 문자 뒤에 유니코드 **폭 없는 결합자**(`U+200D`)를 삽입합니다. 기본 단어 목록:
+유니코드를 삽입합니다** 너비가 0인 조이너** (`U+200D`)는 "민감한" 클라이언트 이름의 첫 번째 문자 뒤에 있으므로 업스트림 필터가 해당 클라이언트 이름을 파악할 수 없습니다. 기본 단어 목록:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-적용 대상: `system` 블록, 모든 `messages[].content`, 그리고 `tools[].description` / `tools[].function.description`. 운영자는 `setSensitiveWords()`를 통해 재정의할 수 있습니다.
+적용 대상: `system` 블록, 모든 `messages[].content` 및 `tools[].description` / `tools[].function.description`. `setSensitiveWords()` 통해 연산자 재정의 가능.
 
-### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` 제공자
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` 공급자
 
-"실제 Claude Code" 트래픽만 허용하는 서드파티 Anthropic 릴레이용입니다.
+"실제 Claude 코드" 트래픽만 허용하는 타사 Anthropic 릴레이의 경우:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - 기본적으로 `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- 연결별 "Enable redact-thinking beta" 토글은 CC Compatible 업스트림에서 수정된 사고 스트림이 특별히 필요한 경우 `redact-thinking-2026-02-12`를 추가합니다.
-- 연결별 "Enable summarized thinking display" 토글은 `providerSpecificData.requestDefaults.summarizeThinking`을 저장하고, 아직 표시 모드가 설정되지 않은 CC Compatible 사고 요청에 `display: "summarized"`를 추가합니다.
-- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"`(Opus/Sonnet 4.x 제품군)
+- 연결별 "수정 사고 베타 활성화" 토글은 CC 호환 업스트림에 수정된 사고 스트림이 특별히 필요한 경우 `redact-thinking-2026-02-12` 추가합니다.
+- 연결별 "요약된 사고 표시 활성화" 토글은 `providerSpecificData.requestDefaults.summarizeThinking` 저장하고 CC 에 `display: "summarized"` 추가합니다. 아직 표시 모드를 설정하지 않은 호환 사고 요청
+- `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x 제품군)
 - 기본 경로: `/v1/messages?beta=true`
 
-동일한 번들에 포함된 관련 모듈:
+동일한 번들의 자매 모듈:
 
-- `claudeCodeConstraints.ts` — temperature + cache-control 규칙
-- `claudeCodeToolRemapper.ts` — 도구 이름 재매핑
+- `claudeCodeConstraints.ts` — 온도 + 캐시 제어 규칙
+- `claudeCodeToolRemapper.ts` — 도구 이름 다시 매핑
 - `claudeCodeExtraRemap.ts` — 추가 페이로드 정규화
 
 ---
@@ -125,7 +126,7 @@ Antigravity 요청은 호출자 텍스트를 바이트 단위로 보존합니다
 
 ### ⚠️ 위험: `ANTIGRAVITY_CREDITS=always` (계정 금지 핫스팟)
 
-`ANTIGRAVITY_CREDITS=always` ( `open-sse/executors/antigravity.ts` 에서 사용) 경로** 모든** Google 의 무료 계층 할당량을 제어하는 대신 Antigravity AI 크레딧 초과(유료 Google 크레딧)를 통해 요청하세요. 이는 기능으로 문서화되어 있지만** 우리가 볼 수 있는 가장 일반적인 ToS 위반 보고서** — 여러 Google Ultra 계정은 `=always` 로 몇 시간 동안 실행한 후 `403 / "service disabled for ToS violation" / insufficient_quota` 로 금지되었습니다.
+`ANTIGRAVITY_CREDITS=always` ( `open-sse/executors/antigravity.ts` 에서 사용) 경로** 모든** Google 의 무료 계층 할당량 제한을 허용하는 대신 Antigravity AI 크레딧 초과(유료 Google 크레딧)를 통해 요청하세요. 이는 기능으로 문서화되어 있지만** 우리가 볼 수 있는 가장 일반적인 ToS 위반 보고서** — 여러 Google Ultra 계정은 `=always` 로 몇 시간 동안 실행한 후 `403 / "service disabled for ToS violation" / insufficient_quota` 로 금지되었습니다.
 
 업스트림 시행이 켜져 있습니다.**Google 편** , OmniRoute 막을 수 있는 것은 아무것도 없습니다. env var 이름과 기존 문서를 보면 뒤집기에 안전한 손잡이처럼 들립니다. 그렇지 않습니다.
 
@@ -137,7 +138,7 @@ Antigravity 요청은 호출자 텍스트를 바이트 단위로 보존합니다
 
 **권장 자세:**
 
-1. 운영자가 유료 신용 및 계정 집행 위험을 명시적으로 수락하지 않는 한 기본 `ANTIGRAVITY_CREDITS=off` 유지합니다. `retry` 먼저 일반 요청을 보내고 적격 할당량 429 이후 최대 한 번 크레딧을 주입합니다. `always` 첫 번째 요청에 크레딧을 주입합니다.
+1. 운영자가 유료 신용 및 계정 집행 위험을 명시적으로 수락하지 않는 한 기본 `ANTIGRAVITY_CREDITS=off` 유지합니다. `retry` 먼저 일반 요청을 보내고 적격 할당량 429 후에 최대 한 번 크레딧을 주입합니다. `always` 첫 번째 요청에 크레딧을 주입합니다.
 2. **자동 콤보를 통해 공급자 간에 부하 분산** 단일 Antigravity 계정을 포화시키는 대신 (`model: "auto"` 또는 `kr/glm/etc` -combo).
 3. **연결당 RPM 제한 설정** Antigravity 공급자의 편집 페이지(대시보드 → 공급자 → Antigravity → 연결 → 속도 제한)에서. 30-60 RPM 는 지속적인 사용을 위한 방어 가능한 상한선입니다.
 4. **안정적인 운영자 제어 업스트림 네트워킹 사용** 관련 없는 사용자나 작업 부하 간에 하나의 계정을 공유하지 마세요.
@@ -171,7 +172,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — 는 `process.env.ANTIGRAVITY_CREDITS` 읽습니다.
 - `src/lib/oauth/providers/antigravity.ts` — 자격 증명 배관
-- 사건 보고서 원본: 토론 [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- 사건 보고서 원본: 토론 [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

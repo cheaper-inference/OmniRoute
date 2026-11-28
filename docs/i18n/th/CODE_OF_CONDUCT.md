@@ -43,15 +43,13 @@
 
 จรรยาบรรณนี้มีผลบังคับใช้ภายในพื้นที่ชุมชนทั้งหมด และยังมีผลเมื่อบุคคลใดบุคคลหนึ่งเป็นตัวแทนของชุมชนอย่างเป็นทางการในพื้นที่สาธารณะ ตัวอย่างของการเป็นตัวแทนชุมชนของเรา ได้แก่ การใช้ที่อยู่อีเมลอย่างเป็นทางการ การโพสต์ผ่านบัญชีโซเชียลมีเดียอย่างเป็นทางการ หรือการปฏิบัติหน้าที่ในฐานะตัวแทนที่ได้รับการแต่งตั้งในงานออนไลน์หรือออฟไลน์
 
-## Enforcement
+## การบังคับใช้
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+กรณีของพฤติกรรมที่ไม่เหมาะสม คุกคาม หรือไม่สามารถยอมรับได้อาจถูกรายงานต่อผู้นำชุมชนที่รับผิดชอบในการบังคับใช้ โดยเปิดที่ปรึกษาด้านความปลอดภัยส่วนตัวที่
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+หรือส่งอีเมลถึงผู้ดูแลที่ diegosouza.pw@outlook.com สำหรับเหตุการณ์ที่มีความละเอียดอ่อนด้านความปลอดภัย โปรดดู [`SECURITY.md`](SECURITY.md) ข้อร้องเรียนทั้งหมดจะได้รับการตรวจสอบและตรวจสอบอย่างรวดเร็วและยุติธรรม
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+ผู้นำชุมชนทุกคนมีหน้าที่ต้องเคารพความเป็นส่วนตัวและความปลอดภัยของผู้รายงานในทุกเหตุการณ์
 
 ## แนวทางการบังคับใช้
 

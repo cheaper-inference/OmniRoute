@@ -13,12 +13,12 @@ Agent Skills zijn gestructureerde SKILL.md-bestanden die externe agents, MCP-cli
 
 ## Overzicht
 
-De catalogus bevat **45 Agent Skills** (23 voor de REST API + 21 voor de CLI + 1 configuratieworkflow). Elke skill heeft:
+De catalogus bevat** 45 Agentvaardigheden** (23 REST API + 21 CLI + 1 configuratieworkflow). Elke vaardigheid heeft:
 
-- Een **canonieke ID** (`omni-auth`, `cli-serve`, enz.)
-- Een **SKILL.md**-bestand in `skills/{id}/SKILL.md` met YAML-frontmatter (`name`, `description`) + een uitgebreide markdown-inhoud
-- **REST-eindpunten** (API-skills) of **CLI-subcommando's** (CLI-skills), afgeleid van de OpenAPI-specificatie en het CLI-register
-- Een **onbewerkte GitHub-URL** om de actuele versie op te halen: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** canonieke ID** (`omni-auth`, `cli-serve`, enz.)
+- A**SKILL.md** bestand in `skills/{id}/SKILL.md` met YAML frontmatter (`name`, `description`) + rich markdown body
+- **REST -eindpunten** (API vaardigheden) of**CLI subopdrachten** (CLI vaardigheden) afgeleid van het OpenAPI spec- en CLI -register
+- A**GitHub rauwe URL** voor live ophalen: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Het antwoord van de generator is een `GeneratorReport`:
 
 ---
 
-## Dekkings-API
+## Dekking API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

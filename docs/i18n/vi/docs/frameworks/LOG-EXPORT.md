@@ -13,131 +13,66 @@ quy trình xử lý sử dụng cơ chế đăng ký, nên có thể bổ sung t
 
 ---
 
-## 1. Cách hoạt động
+## 1. Cách thức hoạt động
 
 ```
-máy chủ (giải mã + xác thực cấu hình, đối soát con trỏ)
-  → khởi động IPC → tiến trình HĐH exportChild biệt lập
-    → storage.sqlite chỉ đọc → truy vấn/ánh xạ nhật ký lệnh gọi dùng chung
-      → nạp dữ liệu hiện vật bất đồng bộ → prepare()/send() của đích đến
-        → IPC lô → máy chủ lưu con trỏ → IPC xác nhận
-          → lô tiếp theo; IPC hoàn tất → máy chủ ghi nhận thành công
+server (decrypt + validate config, reconcile cursor)
+  → start IPC → isolated exportChild OS process
+    → read-only storage.sqlite → shared call-log query/mapping
+      → async artifact hydration → destination prepare()/send()
+        → batch IPC → server persists cursor → ack IPC
+          → next batch; done IPC → server records success
 ```
 
-- **Lịch chạy** — một tác vụ cron `JobRegistry`, `log_export`, mặc định là `0 * * * *` (hằng giờ,
-  UTC). Được đăng ký trong `src/lib/initCloudSync.ts`; có thể ghi đè bằng `OMNIROUTE_LOG_EXPORT_CRON`.
-  Mỗi lần kích hoạt sẽ lần lượt xử lý hết dữ liệu của từng đích đến **đã bật**.
-- **Con trỏ** — `call_logs.rowid` ngầm định của SQLite, được lưu riêng cho từng đích đến trong
-  `log_export_destinations.cursor_row_id`. `timestamp` được chủ ý không dùng làm con trỏ: bên gọi
-  có thể cung cấp giá trị riêng, nên một yêu cầu chậm có thể được ghi sau một yêu cầu nhanh hơn nhưng bắt đầu
-  muộn hơn, và con trỏ dấu thời gian sẽ bỏ sót yêu cầu đó.
-- **Chia lô** — `batch_size` hàng cho mỗi yêu cầu (mặc định 500), `max_rows_per_run` hàng cho mỗi lần chạy
-  (mặc định 10000) để lượng dữ liệu tồn đọng lớn được xử lý qua nhiều lần kích hoạt thay vì chặn một lần.
-- **Phân phối** — con trỏ chỉ tiến lên sau khi `send()` hoàn tất thành công. Khi một lô thất bại,
-  con trỏ giữ nguyên vị trí, nên các hàng đó sẽ được thử lại vào lần chạy tiếp theo. Cơ chế bảo đảm là
-  ít nhất một lần kết hợp với loại bỏ trùng lặp ở phía đích đến, chứ không thực sự là đúng một lần: BigQuery dùng
-  id nhật ký lệnh gọi làm khóa cho từng hàng và xử lý khóa đó theo nguyên tắc nỗ lực tối đa trong cửa sổ loại bỏ trùng lặp của chính nó.
-- **Chống chạy chồng lấn** — lần kích hoạt cron và `POST .../run` có thể xảy ra cùng lúc. Một đích đến
-  đang được xử lý sẽ bị bỏ qua thay vì được xử lý hai lần (`skipped: true` trong kết quả chạy),
-  nên một lần chạy đồng thời không thể gửi lại một lô hoặc ghi lùi con trỏ.
-- **Khôi phục sau khi xóa sạch** — nếu `cursor_row_id` lớn hơn `MAX(rowid)` (toàn bộ bảng đã bị
-  xóa sạch và rowid bắt đầu lại), trình chạy sẽ đặt lại về 0 thay vì vĩnh viễn không nhận thấy dữ liệu.
+- **Lịch trình** — một `JobRegistry` cron job, `log_export`, mặc định là `0 * * * *` (hàng giờ, UTC). Đã đăng ký tại `src/lib/initCloudSync.ts`; có thể ghi đè bằng `OMNIROUTE_LOG_EXPORT_CRON`. Mỗi tích tắc làm cạn kiệt mọi** đã bật** đích một cách tuần tự.
+- **Cursor** — SQLite ngầm định của `call_logs.rowid`, tồn tại trên mỗi đích trong `log_export_destinations.cursor_row_id`. `timestamp` cố tình không phải là con trỏ: người gọi có thể cung cấp giá trị của riêng họ, do đó, một yêu cầu chậm có thể được viết sau một yêu cầu nhanh hơn bắt đầu sau đó và con trỏ dấu thời gian sẽ bỏ qua nó.
+- **trộn** — `batch_size` hàng cho mỗi yêu cầu (mặc định là 500), `max_rows_per_run` hàng cho mỗi lần chạy (mặc định là 10000), do đó, lượng tồn đọng lớn sẽ tiêu tốn trong một số tích tắc thay vì chặn một tích tắc.
+- **Vận chuyển** — con trỏ chỉ tiến lên sau khi `send()` được giải quyết. Một lô không thành công sẽ để lại con trỏ ở vị trí cũ nên các hàng tương tự sẽ được thử lại trong lần chạy tiếp theo. Bảo đảm ít nhất một lần cộng với việc loại bỏ trùng lặp phía đích, không đúng chính xác một lần: BigQuery khóa mỗi hàng theo id nhật ký cuộc gọi, được thực hiện trên cơ sở nỗ lực cao nhất trong cửa sổ khấu trừ của chính nó.
+- **Bảo vệ chồng chéo** — dấu cron và `POST .../run` có thể bắn cùng nhau. Một đích đã thoát sẽ bị bỏ qua thay vì thoát hai lần (`skipped: true` trong kết quả chạy), do đó, một lần chạy đồng thời không thể gửi lại một lô hoặc ghi ngược con trỏ.
+- **Phục hồi thanh lọc** — nếu `cursor_row_id` kết thúc ở trên `MAX(rowid)` (toàn bộ bảng đã bị xóa và các hàng được khởi động lại), người chạy sẽ tua lại về 0 thay vì bị mù vĩnh viễn.
 
-### Trình chạy biệt lập và các giới hạn
+### Á hậu bị cô lập và giới hạn
 
-Mỗi lần chạy cho một đích đến trên Node đều khởi động một tiến trình con HĐH riêng biệt, tồn tại ngắn hạn (`child_process`
-với IPC, không phải `worker_threads`). Việc đọc phần thân, phân tích cú pháp/tuần tự hóa JSON của tải dữ liệu,
-`prepare()` của đích đến và I/O mạng đến đích đều chạy tại đó, không chạy trên vòng lặp sự kiện của máy chủ.
-Chỉ cấu hình và các thông báo tiến độ nhỏ đi qua IPC; các bản ghi được xuất không bao giờ quay về
-máy chủ. Tác vụ cron và tuyến Chạy ngay vẫn giữ nguyên kết quả công khai và cơ chế chống chạy chồng lấn.
+Mỗi đích chạy trên Node đều bắt đầu một tiến trình con OS tồn tại trong thời gian ngắn (`child_process` với IPC, không phải `worker_threads`). Các lần đọc nội dung, tải trọng JSON parsing/serialization, `prepare()` đích và mạng đích I/O đều chạy ở đó chứ không phải trên vòng lặp sự kiện của máy chủ. Chỉ có thông báo cấu hình và tiến trình nhỏ mới đi qua IPC; bản ghi đã xuất không bao giờ quay trở lại máy chủ. Công việc định kỳ và tuyến Chạy ngay giữ nguyên kết quả công khai và bảo vệ chồng chéo.
 
-Tiến trình con mở `DATA_DIR/storage.sqlite` đã được máy chủ phân giải ở chế độ chỉ đọc bằng `node:sqlite`,
-với `busy_timeout=5000` và `query_only=ON`. Nó không nhập singleton cơ sở dữ liệu và không thực hiện
-di chuyển lược đồ, sao lưu hay cập nhật SQLite. Việc quản lý trạng thái hiện vật bị thiếu/hỏng (bao gồm
-thao tác UPDATE cho hiện vật hỏng) vẫn chỉ nằm trong luồng xử lý chi tiết của bảng điều khiển. Cả hai luồng dùng chung một
-bộ phân giải chi tiết thuần túy; tính năng xuất sử dụng các thao tác đọc hệ thống tệp bất đồng bộ và cùng thứ tự phân giải hiện vật → dữ liệu
-nội tuyến kiểu cũ → dữ liệu trên đĩa kiểu cũ → không có. Một lần chạy chụp lại rowid chèn lớn nhất
-khi tiến trình con mở bộ đọc; các bản ghi được chèn sau đó sẽ chờ lần chạy tiếp theo. Đây là ranh giới
-chèn dữ liệu, không phải giao dịch SQLite kéo dài: các bên ghi WAL và các điểm kiểm tra vẫn hoạt động tự do trong
-thời gian chờ mạng. Việc cập nhật/xóa các hàng hiện có không bị đóng băng bởi ranh giới này.
+Trẻ mở `DATA_DIR/storage.sqlite` chỉ đọc đã được giải quyết của máy chủ bằng cách sử dụng `node:sqlite`, với `busy_timeout=5000` và `query_only=ON`. Nó không nhập DB singleton và không thực hiện di chuyển, sao lưu hoặc cập nhật SQLite. Sổ sách kế toán tạo tác Missing/corrupt (bao gồm cả tạo tác bị hỏng UPDATE) chỉ còn trong đường dẫn chi tiết bảng điều khiển. Cả hai đường dẫn đều có chung một trình phân giải chi tiết thuần túy; xuất sử dụng các lần đọc hệ thống tệp không đồng bộ và cùng một tạo phẩm → kế thừa nội tuyến → đĩa kế thừa → không có thứ tự phân giải. Một lần chạy sẽ chụp nhanh hàng chèn tối đa khi trẻ mở đầu đọc của nó; chèn sau chờ lần chạy tiếp theo. Đây là ranh giới chèn, không phải là giao dịch SQLite tồn tại lâu dài: người viết WAL và điểm kiểm tra vẫn miễn phí trong thời gian chờ mạng. Updates/deletions của các hàng hiện có không bị đóng băng bởi ranh giới này.
 
-Sau mỗi lô được chấp nhận, tiến trình con chờ xác nhận. Trước tiên máy chủ lưu
-con trỏ bằng `advanceLogExportCursor`, rồi gửi `ack`; không lô tiếp theo nào bắt đầu trước bước đó.
-Lỗi gửi, sự cố hoặc hết thời gian chờ sẽ ghi nhận thất bại mà không tiến con trỏ cho lô đó. Các lô
-đã được xác nhận trước đó vẫn được lưu nhận; nhiều nhất chỉ một lô chưa được xác nhận có thể bị gửi lại.
-Thành công chỉ được ghi nhận sau `done` và khi tiến trình con thoát bình thường. Khi thất bại, tiến trình con bị chấm dứt
-bằng SIGTERM, nâng lên SIGKILL sau 500 ms, và trình chạy chờ tiến trình đóng hoàn toàn.
+Sau mỗi đợt được chấp nhận, đứa trẻ sẽ đợi một sự xác nhận. Trước tiên, máy chủ vẫn duy trì con trỏ bằng `advanceLogExportCursor`, sau đó gửi `ack`; không có đợt tiếp theo nào bắt đầu trước nó. Lỗi gửi, sự cố hoặc hết thời gian chờ ghi lại lỗi mà không tiến hành đợt đó. Các lô đã được xác nhận trước đó vẫn được cam kết; nhiều nhất một lô chưa được xác nhận có thể được gửi lại. Thành công chỉ được ghi nhận sau `done` và lối ra con sạch. Các lỗi kết thúc thành phần con bằng SIGTERM, tăng dần lên SIGKILL sau 500 ms và trình chạy chờ đóng quá trình.
 
-| Biến môi trường                               | Mặc định | Mục đích                                                      |
-| --------------------------------------------- | -------- | ------------------------------------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Giới hạn thời gian thực cho mỗi đích đến                      |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Giới hạn vùng old-space của V8 ở tiến trình con, tính bằng MB |
+| Biến môi trường                               | Mặc định | Mục đích                                     |
+| --------------------------------------------- | -------- | -------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Giới hạn đồng hồ treo tường tại mỗi điểm đến |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Giới hạn không gian cũ của V8 ở MB           |
 
-Các giá trị không hợp lệ/không dương/không phải số nguyên sẽ dùng giá trị mặc định. Thiết lập heap không phải là giới hạn
-tổng RSS; các lô rất lớn vẫn có thể làm cạn bộ nhớ của tiến trình con và khiến lần chạy thất bại an toàn.
-Giá trị mặc định 1024 MB chừa dung lượng dự phòng cho lô mặc định 500 hàng với các hiện vật 512 KiB khi
-bật phần thân, bao gồm cả việc tuần tự hóa JSON chia khối theo byte của BigQuery. Giá trị này không bảo đảm an toàn cho
-một lô 10000 hàng có phần thân. Khi heap V8 cạn, hệ thống ghi nhận lỗi kèm hướng xử lý: giảm kích thước
-lô hoặc tăng `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; con trỏ giữ nguyên tại lô
-được xác nhận gần nhất. Phần thân nội tuyến/trên đĩa từ trước không chịu giới hạn dung lượng hiện vật hiện đại.
-Người vận hành phải dự trù RSS riêng, đặc biệt trong các container bị giới hạn bộ nhớ.
+giá trị Invalid/non-positive/non-integer sử dụng giá trị mặc định. Cài đặt heap không phải là tổng giới hạn RSS ; các lô rất lớn vẫn có thể làm cạn kiệt bộ nhớ con và không chạy được một cách an toàn. Mặc định 1024 MB để lại khoảng trống cho lô 500 hàng mặc định gồm 512 tạo phẩm KiB có nội dung được bật, bao gồm cả tuần tự hóa JSON phân đoạn byte của BigQuery. Nó không làm cho lô 10000 hàng trở nên an toàn. Sự cạn kiệt của đống V8 ghi lại một lỗi có thể xử lý được: giảm kích thước lô hoặc tăng `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; con trỏ vẫn ở lô được xác nhận cuối cùng. Các vật thể inline/disk lịch sử không được bao phủ bởi nắp tạo tác hiện đại. Người vận hành phải lập ngân sách RSS riêng biệt, đặc biệt là bên trong các vùng chứa có bộ nhớ hạn chế.
 
-Tiến trình con chỉ kế thừa `DATA_DIR` đã được phân giải, `NODE_ENV`, `TZ` được chỉ định tường minh (phân giải
-giờ địa phương cho tên tệp kiểu cũ), `ELECTRON_RUN_AS_NODE` nếu có, và các đầu vào cho kết nối đi sau:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (và các dạng chữ thường tương ứng),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Một dispatcher Undici toàn cục dùng chung cơ chế phân giải proxy chỉ dựa trên biến môi trường và các quy tắc
-bỏ qua proxy cho máy chủ cục bộ của máy chủ, bao gồm `NO_PROXY`; nó không nhập `proxyFetch.ts` hay các cờ cơ sở dữ liệu/tính năng của mô-đun đó.
-Thông tin xác thực proxy được che khỏi đầu ra được chuyển tiếp và các lỗi được ghi lại. Thông tin xác thực đích
-chỉ được truyền trong một thông điệp IPC khởi động, không bao giờ qua argv hoặc biến môi trường; đầu ra/lỗi được chuyển tiếp
-đều được thêm tiền tố và làm sạch. Chỉ `ExperimentalWarning` bị tắt trong các đối số thực thi của tiến trình con để tránh
-lặp lại cảnh báo SQLite của Node mỗi lần cron chạy; các loại cảnh báo khác vẫn hiển thị.
+Đứa trẻ chỉ kế thừa `DATA_DIR`, `NODE_ENV`, `TZ` rõ ràng (độ phân giải thời gian cục bộ của tên tệp kế thừa), `ELECTRON_RUN_AS_NODE` khi có mặt và các đầu vào gửi đi sau đây: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (và các dạng chữ thường của chúng), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Bộ điều phối Undici toàn cầu chia sẻ độ phân giải proxy môi trường thuần túy của máy chủ và các quy tắc bỏ qua máy chủ cục bộ, bao gồm `NO_PROXY`; nó không nhập `proxyFetch.ts` hoặc cờ DB/feature của nó. Thông tin xác thực proxy được loại bỏ khỏi kết quả đầu ra được chuyển tiếp và các lỗi được ghi lại. Thông tin xác thực đích chỉ di chuyển trong một tin nhắn IPC bắt đầu, không bao giờ có argv hoặc môi trường; chuyển tiếp output/error được tiền tố hóa và khử trùng. Chỉ `ExperimentalWarning` bị vô hiệu hóa trong các đối số thực thi con để tránh lặp lại cảnh báo SQLite của Node mỗi lần chạy cron; các loại cảnh báo khác vẫn hiển thị.
 
-Các mô-đun đích phải có thể được nhập mà không cần các phần phụ thuộc Next.js/chỉ dành cho máy chủ. Triển khai
-BigQuery hiện tại đã đáp ứng yêu cầu đó. Bộ nhớ đệm token truy cập chỉ tồn tại trong lần chạy của tiến trình
-con, không được giữ lại giữa các lần chạy. Node là môi trường chạy được hỗ trợ (trường engines trong `package.json`), nhưng mục
-cài đặt Bun trong README và `Dockerfile.bun` cũng giới thiệu một phương án tương thích cho môi trường sản xuất sử dụng
-`bun:sqlite` (`src/lib/db/core.ts` / các adapter). Vì vậy, khi chạy trên Bun, các tác vụ xuất vẫn giữ
-cách xử lý trong cùng tiến trình như trước và phát cảnh báo một lần: không có cơ chế cô lập heap/thời gian chờ bằng tiến trình con. Hãy dùng
-Node để cô lập vòng lặp sự kiện và tình trạng hết bộ nhớ (OOM); ở đây Bun không được xem là chỉ dành cho phát triển.
+Các mô-đun đích phải có thể nhập được mà không phụ thuộc vào Next.js/server-only. Việc triển khai BigQuery hiện tại đã đáp ứng được hợp đồng đó. Bộ nhớ đệm mã thông báo truy cập chỉ tồn tại trong lần chạy con, không tồn tại trong các lần chạy. Nút là thời gian chạy được hỗ trợ ( động cơ `package.json` ). Tồn tại một đường dẫn tương thích Bun nỗ lực tốt nhất, không được hỗ trợ (`bun:sqlite` trong `src/lib/db/core.ts` / adapter và `Dockerfile.bun`), vì vậy việc xuất không được vi phạm nó. Theo Bun, các bản xuất sẽ giữ lại đường dẫn đang xử lý trước đó và đưa ra cảnh báo một lần: không có cách ly heap/timeout con. Sử dụng Node để cách ly vòng lặp sự kiện và OOM.
 
-Khi bật `includeBodies`, nên ưu tiên lịch chạy theo phút như
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` thay vì để tồn đọng tải dữ liệu theo giờ.
-Giới hạn lô và số hàng vẫn giới hạn mỗi lần chạy. Chi phí khởi động tiến trình phát sinh cho từng đích trong mỗi lần chạy;
-cách này đánh đổi một khoản chi phí khởi động nhỏ để cô lập vòng lặp sự kiện của máy chủ, chứ không giảm tổng mức sử dụng CPU.
+Khi `includeBodies` được bật, hãy ưu tiên nhịp ở mức độ phút như `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` thay vì tích lũy tải trọng tồn đọng hàng giờ. Giới hạn hàng loạt và hàng vẫn bị ràng buộc mỗi lần chạy. Quá trình khởi động được trả tiền cho mỗi đích trong mỗi lần chạy; điều này đánh đổi một chi phí khởi động nhỏ để cách ly vòng lặp sự kiện của máy chủ, không làm giảm tổng mức sử dụng CPU.
 
-### Tải dữ liệu (lời nhắc và nội dung hoàn thành)
+### Tải trọng (lời nhắc và hoàn thành)
 
-Theo mặc định, bản xuất chỉ chứa các trường tóm tắt mà **danh sách** Nhật ký hiển thị. Bật
-**Xuất lời nhắc và phản hồi** (`includeBodies`) sẽ xuất thêm những gì ngăn **chi tiết** Nhật ký
-hiển thị cho mỗi lệnh gọi:
+Theo mặc định, quá trình xuất chỉ mang các trường tóm tắt Nhật ký** danh sách** cho thấy. Đang bật** Xuất lời nhắc và phản hồi** (`includeBodies`) cũng vận chuyển những gì Nhật ký** chi tiết** khung hiển thị cho mỗi cuộc gọi:
 
-| Trường                           | Nội dung                                                               |
-| -------------------------------- | ---------------------------------------------------------------------- |
-| `request_body` / `response_body` | Tải dữ liệu của lệnh gọi như được hiển thị trên bảng điều khiển        |
-| `pipeline_route_decision`        | Đích và mô hình mà bộ định tuyến đã chọn                               |
-| `pipeline_client_request`        | Yêu cầu thô đúng như máy khách đã gửi                                  |
-| `pipeline_openai_request`        | Sau khi chuyển đổi sang định dạng OpenAI nội bộ                        |
-| `pipeline_provider_request`      | Dữ liệu thực tế được gửi lên nhà cung cấp, theo định dạng riêng của họ |
-| `pipeline_provider_response`     | Phản hồi thô từ nhà cung cấp                                           |
-| `pipeline_client_response`       | Nội dung được trả lại cho bên gọi                                      |
-| `pipeline_error`                 | Chi tiết lỗi ở cấp pipeline của một lệnh gọi thất bại                  |
-| `bodies_truncated`               | True khi bất kỳ trường nào ở trên chạm giới hạn `maxBodyBytes`         |
+| Cánh đồng                        | Nó chứa cái gì                                                     |
+| -------------------------------- | ------------------------------------------------------------------ |
+| `request_body` / `response_body` | Tải trọng cuộc gọi khi trang tổng quan hiển thị chúng              |
+| `pipeline_route_decision`        | Bộ định tuyến đã chọn mục tiêu và mô hình nào                      |
+| `pipeline_client_request`        | Yêu cầu thô chính xác như khách hàng đã gửi                        |
+| `pipeline_openai_request`        | Sau khi dịch sang hình dạng OpenAI bên trong                       |
+| `pipeline_provider_request`      | Như thực sự được gửi ngược dòng, trong phương ngữ của nhà cung cấp |
+| `pipeline_provider_response`     | Phản hồi ngược dòng thô                                            |
+| `pipeline_client_response`       | Những gì đã được trao lại cho người gọi                            |
+| `pipeline_error`                 | Chi tiết lỗi cấp quy trình cho cuộc gọi không thành công           |
+| `bodies_truncated`               | Đúng khi bất kỳ trường nào ở trên chạm vào `maxBodyBytes`          |
 
-Đây là nội dung lời nhắc, vì vậy tính năng này **mặc định bị tắt** và được chủ ý thiết kế để lựa chọn riêng cho từng đích.
-Nội dung được xuất chính là nội dung bảng điều khiển hiển thị, vì chức năng xuất và `getCallLogById` dùng chung cơ chế
-phân giải chi tiết: tải dữ liệu
-đã được làm sạch thông tin nhận dạng cá nhân (PII) và che thông tin bí mật ngay khi ghi, còn lệnh gọi dùng
-khóa API `noLog` hoàn toàn không lưu tải dữ liệu, nên không có gì để xuất.
+Đây là nội dung nhắc nhở, vì vậy nó là** tắt theo mặc định** và cố ý lựa chọn theo từng điểm đến. Những chuyến tàu nào là những gì bảng điều khiển hiển thị, bởi vì độ phân giải chi tiết về xuất và `getCallLogById` chia sẻ: tải trọng đã được khử trùng PII và biên tập lại bí mật khi chúng được viết và cuộc gọi được thực hiện bằng khóa `noLog` API sẽ không lưu trữ tải trọng nào cả, vì vậy không có gì để xuất.
 
-Tải dữ liệu được đọc theo từng hàng từ tệp dữ liệu trên hệ thống tệp, vì vậy việc nạp bổ sung chỉ chạy cho các đích
-đã yêu cầu. Nếu tệp dữ liệu bị thiếu hoặc hỏng, bản tóm tắt vẫn được xuất với tải dữ liệu null thay vì
-làm cả lô thất bại và khiến con trỏ bị kẹt.
+Tải trọng được đọc trên mỗi hàng từ tạo phẩm hệ thống tập tin, do đó quá trình hydrat hóa chỉ chạy cho các đích được yêu cầu. Một tạo phẩm bị thiếu hoặc bị hỏng xuất bản tóm tắt của nó với tải trọng rỗng thay vì không thực hiện được lô và khiến con trỏ bị mắc kẹt.
 
-`maxBodyBytes` (mặc định 262144) giới hạn kích thước từng trường. Tải dữ liệu dài hơn sẽ được **cắt ngắn thay vì
-loại bỏ** — lời nhắc bị cắt vẫn cho biết "đã hỏi gì" — và hàng đó được đánh dấu bằng
-`bodies_truncated`. Các phần thay đổi được truyền trực tuyến theo từng đoạn không được xuất; phản hồi đã ghép hoàn chỉnh
-đã có trong `pipeline_provider_response` và `pipeline_client_response`.
+`maxBodyBytes` (mặc định 262144) giới hạn mỗi trường. Tải trọng dài hơn là** cắt ngắn thay vì bỏ** — lời nhắc bị cắt bớt vẫn trả lời "những gì đã được hỏi" — và hàng được gắn cờ `bodies_truncated`. Các delta theo từng đoạn được truyền trực tuyến không được xuất; phản hồi được tập hợp đã có trong `pipeline_provider_response` và `pipeline_client_response`.
 
 ---
 

@@ -118,53 +118,46 @@ Obsidian कॉन्फिगरेशनला `api_key_context_sources` त�
 
 ## MCP साधने (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts` मध्ये परिभाषित केली आहेत. token/base-URL प्रत्येक कॉलसाठी निर्धारित केले जातात (प्रथम प्रति-API-key, त्यानंतर जागतिक). OmniRoute **sync server** वापरणाऱ्या साधनांना (चार `obsidian_sync_*` साधने) OmniRoute सेटिंग्जमध्ये कॉन्फिगर केलेले sync auth token देखील आवश्यक आहे.
+`open-sse/mcp-server/tools/obsidianTools.ts` मध्ये परिभाषित केले आहे. token/base-URL प्रति कॉल (प्रति-API-की प्रथम, नंतर जागतिक) निराकरण केले जातात. OmniRoute ला मारणारी साधने** सिंक सर्व्हर** (चार `obsidian_sync_*` टूल्स) याशिवाय OmniRoute सेटिंग्जमध्ये कॉन्फिगर केलेले सिंक ऑथ टोकन आवश्यक आहे.
 
-### वाचन साधने (`read:obsidian`)
+### वाचा टूल्स (`read:obsidian`)
 
-| साधन                         | वर्णन                                                                                |
-| ---------------------------- | ------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | Local REST API पोहोचण्यायोग्य आणि प्रमाणीकृत आहे का ते तपासा.                        |
-| `obsidian_search_simple`     | टिपांच्या मजकुराचा पूर्ण-मजकूर शोध; फाइल पथांसह उतारे परत करते.                      |
-| `obsidian_search_structured` | JSON Logic expression (and/or/regex/path filters) वापरून शोधा.                       |
-| `obsidian_read_note`         | vault-सापेक्ष पथाद्वारे टिपण वाचा; पर्यायाने विशिष्ट heading/block/frontmatter वाचा. |
-| `obsidian_list_vault`        | vault मधील फाइल्स आणि निर्देशिका सूचीबद्ध करा (नोंदींचे tree).                       |
-| `obsidian_get_document_map`  | टिपणाची heading संरचना headings → line numbers या नकाशाच्या स्वरूपात मिळवा.          |
-| `obsidian_get_note_metadata` | संपूर्ण मजकुराशिवाय frontmatter, tags, links, char/word count मिळवा.                 |
-| `obsidian_get_active_file`   | Obsidian मध्ये सध्या सक्रिय असलेल्या फाइलचा path + content मिळवा.                    |
-| `obsidian_get_periodic_note` | एखाद्या तारखेसाठी daily/weekly/monthly periodic note मिळवा (वगळल्यास आजची तारीख).    |
-| `obsidian_get_tags`          | vault मधील सर्व tags त्यांच्या वारंवारतेसह सूचीबद्ध करा.                             |
-| `obsidian_list_commands`     | उपलब्ध Obsidian command IDs सूचीबद्ध करा (`obsidian_execute_command` सोबत वापरा).    |
-| `obsidian_sync_status`       | OmniRoute sync server स्थिती: चालू आहे का, vault चे नाव, port, uptime, शेवटचा sync.  |
-| `obsidian_sync_conflicts`    | निराकरण न झालेले sync conflicts सूचीबद्ध करा (path, conflict path, detected-at).     |
+| साधन                         | वर्णन                                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------------------ |
+| `obsidian_check_status`      | स्थानिक REST API पोहोचण्यायोग्य आणि प्रमाणीकृत आहे का ते तपासा.                            |
+| `obsidian_search_simple`     | नोट सामग्रीचा पूर्ण-मजकूर शोध; फाइल पथांसह स्निपेट्स परत करते.                             |
+| `obsidian_search_structured` | JSON लॉजिक एक्सप्रेशन (and/or/regex/path फिल्टर) वापरून शोधा.                              |
+| `obsidian_read_note`         | वॉल्ट-रिलेटिव्ह मार्गाने एक टीप वाचा; वैकल्पिकरित्या एक विशिष्ट heading/block/frontmatter. |
+| `obsidian_list_vault`        | वॉल्टमध्ये फाईल्स आणि डिरेक्टरींची यादी करा (प्रवेशांचे झाड).                              |
+| `obsidian_get_document_map`  | → ओळ क्रमांकांच्या शीर्षकाचा नकाशा म्हणून नोटची शीर्षक रचना मिळवा.                         |
+| `obsidian_get_note_metadata` | संपूर्ण सामग्रीशिवाय फ्रंटमॅटर, टॅग, लिंक्स, char/word संख्या मिळवा.                       |
+| `obsidian_get_active_file`   | Obsidian मध्ये सध्या सक्रिय असलेल्या फाईलचा पथ + सामग्री मिळवा.                            |
+| `obsidian_get_periodic_note` | तारखेसाठी daily/weekly/monthly नियतकालिक नोट मिळवा (आज वगळल्यास).                          |
+| `obsidian_get_tags`          | सर्व व्हॉल्ट टॅग त्यांच्या फ्रिक्वेन्सीसह सूचीबद्ध करा.                                    |
+| `obsidian_list_commands`     | उपलब्ध Obsidian कमांड IDs सूचीबद्ध करा ( `obsidian_execute_command` सह वापरा).             |
+| `obsidian_sync_status`       | OmniRoute सिंक सर्व्हर स्थिती: चालू, वॉल्ट नाव, पोर्ट, अपटाइम, शेवटचे सिंक.                |
+| `obsidian_sync_conflicts`    | निराकरण न झालेल्या समक्रमण संघर्षांची यादी करा (पथ, संघर्ष मार्ग, आढळले-एट).               |
 
 ### लेखन साधने (`write:obsidian`)
 
-| साधन                             | वर्णन                                                                                      |
-| -------------------------------- | ------------------------------------------------------------------------------------------ |
-| `obsidian_write_note`            | दिलेल्या Markdown मजकुरासह टिपण तयार करा किंवा त्यावर अधिलेखन करा.                         |
-| `obsidian_append_note`           | टिपणात मजकूर जोडा; पर्यायाने विशिष्ट heading/block मध्ये.                                  |
-| `obsidian_patch_note`            | heading, block किंवा frontmatter field येथे नेमकेपणाने मजकूर जोडा/आधी जोडा/बदला.           |
-| `obsidian_delete_note`           | vault मधून टिपण कायमचे हटवा.                                                               |
-| `obsidian_move_note`             | vault मध्ये टिपण हलवा किंवा त्याचे नाव बदला.                                               |
-| `obsidian_execute_command`       | Obsidian command त्याच्या command ID द्वारे कार्यान्वित करा.                               |
-| `obsidian_open_file`             | Obsidian मध्ये फाइल उघडा (ती अस्तित्वात नसल्यास तयार करते).                                |
-| `obsidian_sync_trigger`          | तत्काळ द्विदिशात्मक desktop↔mobile vault sync सुरू करा.                                    |
-| `obsidian_sync_resolve_conflict` | sync conflict चे निराकरण करा: `local` (mobile), `remote` (desktop) किंवा `keep-both` ठेवा. |
+| साधन                             | वर्णन                                                                               |
+| -------------------------------- | ----------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | दिलेल्या मार्कडाउन सामग्रीसह टीप तयार करा किंवा अधिलिखित करा.                       |
+| `obsidian_append_note`           | टीपमध्ये सामग्री जोडा; वैकल्पिकरित्या विशिष्ट heading/block. ला                     |
+| `obsidian_patch_note`            | हेडिंग, ब्लॉक किंवा फ्रंटमॅटर फील्डवर शस्त्रक्रिया करून append/prepend/replace.     |
+| `obsidian_delete_note`           | वॉल्टमधून एक टीप कायमची हटवा.                                                       |
+| `obsidian_move_note`             | वॉल्टमध्ये टीप हलवा किंवा त्याचे नाव बदला.                                          |
+| `obsidian_execute_command`       | Obsidian कमांड ID या कमांडद्वारे कार्यान्वित करा.                                   |
+| `obsidian_open_file`             | Obsidian मध्ये फाइल उघडा (ती अस्तित्वात नसल्यास ती तयार करते).                      |
+| `obsidian_sync_trigger`          | त्वरित द्विदिशात्मक डेस्कटॉप ↔ मोबाइल व्हॉल्ट सिंक ट्रिगर करा.                      |
+| `obsidian_sync_resolve_conflict` | समक्रमण संघर्ष सोडवा: `local` (मोबाइल), `remote` (डेस्कटॉप) किंवा `keep-both` ठेवा. |
 
 > [!NOTE]
-> `obsidian_patch_note` targets मध्ये `targetType` म्हणून `heading | block | frontmatter`
-> आणि `operation` म्हणून `append | prepend | replace` स्वीकारले जातात, तसेच पर्यायी
-> `createTargetIfMissing` असते. चार `obsidian_sync_*` साधने स्थानिक sync
-> server शी संवाद साधतात (डीफॉल्टनुसार `http://127.0.0.1:27781`) आणि त्यांना sync token आवश्यक आहे.
+> `obsidian_patch_note` लक्ष्य वैकल्पिक `createTargetIfMissing` सह `heading | block | frontmatter` चे `targetType` आणि `append | prepend | replace` चे `operation` स्वीकारतात. चार `obsidian_sync_*` टूल्स स्थानिक सिंक सर्व्हरशी बोलतात ( डीफॉल्टनुसार `http://127.0.0.1:27781` ) आणि त्यांना सिंक टोकन आवश्यक आहे.
 
-### Scopes
+### व्याप्ती
 
-वाचन साधनांना `read:obsidian` आवश्यक आहे; लेखन साधनांना `write:obsidian` आवश्यक आहे. अंमलबजावणी
-Notion प्रमाणेच आहे — ती `open-sse/mcp-server/server.ts` मधील `withScopeEnforcement()` द्वारे
-हाताळली जाते, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` वर नियंत्रित केली जाते आणि अनुमत scopes
-`OMNIROUTE_MCP_SCOPES` किंवा API key च्या scope context मधून घेतले जातात. पहा
-[MCP-SERVER.md](./MCP-SERVER.md).
+वाचन साधनांना `read:obsidian` आवश्यक आहे; लेखन साधनांना `write:obsidian` आवश्यक आहे. अंमलबजावणी हे `open-sse/mcp-server/server.ts` मध्ये `withScopeEnforcement()` द्वारे हाताळलेल्या Notion — सारखेच आहे, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` वर गेट केलेले आणि HTTP/SSE कॉलरसाठी सक्तीने चालू आहे ज्यांच्या API की मध्ये `manage`/`admin` नाही, `OMNIROUTE_MCP_SCOPES` किंवा API कीच्या स्कोप संदर्भातून प्राप्त केलेल्या अनुमत स्कोपसह. [MCP-SERVER.md](./MCP-SERVER.md) पहा.
 
 ## एंडपॉइंट्स
 

@@ -17,27 +17,24 @@ URL na app-server da aka saita**, kuma dole ne a **shiga** wannan CLI.
 
 ---
 
-## 1. Tsarin gine-gine
+## 1. Gine-gine
 
 ```
-┌─ Manhajar OmniRoute ─────────────┐        ┌─ Sidecar na codex-app-server ───────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ token na damar aiki)         │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  yana sarrafa OpenAI OAuth da kansa │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, sabuntawa ta  │
-        │ yana rabawa (compose volumes)      │  atomatik)                          │
-        ▼                                   └─────────────────────────────────────┘
-  codex-appserver-token   → token na damar WS (dukansu suna mount ɗinsa)
-  codex-appserver-home    → ~/.codex (dashboard ne ke rubuta auth.json,
-                             codex app-server na sidecar ne ke karanta shi)
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
+        ▼
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidecar yana sauraro **kawai** a kan cibiyar compose ta ciki
-  (`ws://codex-app-server:1456`) a bayan token na damar aiki. **Ba a taɓa**
-  buɗe shi ga host ko intanet.
-- An riga an saka Codex CLI cikin `omniroute:base`, don haka ba a buƙatar shigar
-  da codex a kan host ko na'urar mai amfani lokacin da kake gudanar da sidecar.
+- Sidecar na saurara** kawai** a kan hanyar sadarwa ta ciki (`ws://codex-app-server:1456`) a bayan alamar iyawa. Yana da** taba** an buga shi ga mai watsa shiri ko intanet.
+- Motar gefe tana amfani da `omniroute:cli-no-docker`, wanda aka gina daga maƙasudin `runner-cli-no-docker`, wanda ya haɗa da Codex CLI.
 
 ## 2. Kaddamar da shi
 

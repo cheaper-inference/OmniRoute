@@ -4,13 +4,7 @@
 
 ---
 
-> **Foinse na fírinne:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, agus na tógálaithe poiblí in `open-sse/utils/error.ts`
-> **Tástálacha:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Nuashonraithe go deireanach:** 2026-09-02 — v3.8.51
-> **Lucht féachana:** Aon innealtóir a bhíonn ag plé le freagraí earráide (bealaí HTTP, sruthanna SSE, feidhmitheoirí, láimhseálaithe MCP).
-> **Stádas:** **ÉIGEANTACH** do gach conair chóid a sheolann teachtaireacht earráide ar ais chuig cliant.
+> **Foinse na fírinne:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, agus na tógálaithe poiblí i `open-sse/utils/error.ts`** Tástálacha:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Lucht Féachana:** Aon innealtóir ag baint le freagraí earráide (bealaí HTTP, sruthanna SSE, seiceadóirí, láimhseálaithe MCP ).** Stádas:****MANDATORY** do gach conair chóid a sheolann teachtaireacht earráide ar ais chuig cliant.
 
 ## Cén fáth a bhfuil sé seo ann
 

@@ -64,42 +64,31 @@ Alle tre metodene krever autentisering i kontrollpanelet (`isAuthenticated`). Ve
 `POST` lagrer OmniRoute tokenet og utfører umiddelbart et testsøk med 1 resultat.
 Hvis Notion returnerer et feilobjekt, slettes tokenet, og kallet mislykkes med `400`.
 
-## MCP-verktøy (6)
+## MCP verktøy (6)
 
-Definert i `open-sse/mcp-server/tools/notionTools.ts`. Tokenet hentes ved kall via
-`getNotionToken()`; hvis ingen token er konfigurert, kaster verktøyet feilen
-`"Integrasjonstoken for Notion er ikke konfigurert. Angi det under Innstillinger > Kontekstkilder."`
+Definert i `open-sse/mcp-server/tools/notionTools.ts`. Tokenet løses ved samtaletidspunkt via `getNotionToken()`; hvis ingen er konfigurert, kaster verktøyet `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Verktøy                      | Tilgangsområde | Beskrivelse                                                                                   |
-| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Søk etter sider og databaser med et tekstsøk (returnerer titler, ID-er og URL-er). Paginert.  |
-| `notion_get_page`            | `read:notion`  | Hent innholdet og metadataene til en side ved hjelp av side-ID-en.                            |
-| `notion_list_block_children` | `read:notion`  | Vis alle underblokker for en blokk eller side (blokktreet). Paginert.                         |
-| `notion_query_database`      | `read:notion`  | Spør en database med valgfrie `filter` + `sorts` (Notion API-format). Paginert.               |
-| `notion_get_database`        | `read:notion`  | Hent skjemaet/metadataene til en database ved hjelp av ID-en.                                 |
-| `notion_append_blocks`       | `write:notion` | Legg til underblokker i en eksisterende blokk eller side (maks. 100 blokker per forespørsel). |
+| Verktøy                      | Omfang         | Beskrivelse                                                                                 |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Søk etter sider og databaser etter tekstspørring (returnerer titler, IDs, URLs). Paginert.  |
+| `notion_get_page`            | `read:notion`  | Få innhold og metadata på en side etter ID.                                                 |
+| `notion_list_block_children` | `read:notion`  | List opp alle blokkunderordnede av en blokk eller side (blokktreet). Paginert.              |
+| `notion_query_database`      | `read:notion`  | Spør etter en database med valgfritt `filter` + `sorts` (Notion API format). Paginert.      |
+| `notion_get_database`        | `read:notion`  | Få schema/metadata til en database av ID.                                                   |
+| `notion_append_blocks`       | `write:notion` | Legg til blokker under en eksisterende blokk eller side (maks 100 blokker per forespørsel). |
 
 ### Inndataparametere
 
-- `notion_search` — `query` (1–500 tegn), `pageSize` (1–100, standardverdi 20),
-  `startCursor` (valgfri).
-- `notion_get_page` — `pageId` (32-tegns heksadesimal verdi eller UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, standardverdi 50),
-  `startCursor` (valgfri).
-- `notion_query_database` — `databaseId`, `filter` (valgfritt, Notion-filterformat),
-  `sorts` (valgfri matrise), `pageSize` (1–100, standardverdi 50), `startCursor` (valgfri).
+- `notion_search` — `query` (1–500 tegn), `pageSize` (1–100, standard 20), `startCursor` (valgfritt).
+- `notion_get_page` — `pageId` (32-char hex eller UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, standard 50), `startCursor` (valgfritt).
+- `notion_query_database` — `databaseId`, `filter` (valgfritt, Notion filterformat), `sorts` (valgfritt array), `pageSize` (1–100, standard 50), `startCursor` (valgfritt).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (matrise med blokkobjekter),
-  `after` (valgfri posisjon).
+- `notion_append_blocks` — `blockId`, `children` (array av blokkobjekter), `after` (valgfri posisjon).
 
-### Tilgangsområder
+### Omfang
 
-Leseverktøyene krever `read:notion`, og skriveverktøyet krever `write:notion`.
-Tilgangsområdene håndheves av `withScopeEnforcement()` i
-`open-sse/mcp-server/server.ts` bare når `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; de
-tillatte tilgangsområdene til den som utfører kallet, kommer fra
-`OMNIROUTE_MCP_SCOPES` (kommaseparert) eller tilgangskonteksten til den autentiserte
-API-nøkkelen. Se [MCP-SERVER.md](./MCP-SERVER.md) for hele tilgangsmodellen.
+Leseverktøyene krever `read:notion` og skriveverktøyet krever `write:notion`. Scopes håndheves av `withScopeEnforcement()` i `open-sse/mcp-server/server.ts` når `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, og alltid for en HTTP/SSE oppringer hvis API nøkkel mangler `manage`/`admin`; anroperens tillatte omfang kommer fra `OMNIROUTE_MCP_SCOPES` (kommaseparert) eller den autentiserte API -nøkkelens omfangskontekst. Se [MCP-SERVER.md](./MCP-SERVER.md) for hele omfangsmodellen.
 
 ## Endepunkter
 

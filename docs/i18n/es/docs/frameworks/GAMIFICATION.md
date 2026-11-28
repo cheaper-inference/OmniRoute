@@ -504,27 +504,27 @@ cuando los datos de la clasificación han cambiado realmente desde el último en
 
 ---
 
-## Compartición de tokens
+## Compartir tokens
 
 **Archivo:** `src/lib/gamification/sharing.ts`
 
-### Libro mayor de partida doble
+### Libro mayor de doble entrada
 
 Cada transferencia crea dos filas en `token_ledger`:
 
-| Fila    | `from_key_id` | `to_key_id`  | `amount`  |
-| ------- | ------------- | ------------ | --------- |
-| Débito  | remitente     | destinatario | +cantidad |
-| Crédito | destinatario  | remitente    | -cantidad |
+| Fila    | `from_key_id` | `to_key_id` | `amount`   |
+| ------- | ------------- | ----------- | ---------- |
+| Débito  | remitente     | receptor    | cantidad + |
+| Crédito | receptor      | remitente   | -amount    |
 
-Un momento: la convención es:
+Espera — la convención es:
 
-| Fila      | `from_key_id` | `to_key_id`  | `amount`  | Significado                       |
-| --------- | ------------- | ------------ | --------- | --------------------------------- |
-| Envío     | remitente     | destinatario | +cantidad | Salida de fondos del remitente    |
-| Recepción | destinatario  | remitente    | +cantidad | Entrada de fondos al destinatario |
+| Fila    | `from_key_id` | `to_key_id` | `amount`   | Significado          |
+| ------- | ------------- | ----------- | ---------- | -------------------- |
+| Enviar  | remitente     | receptor    | cantidad + | Salida del remitente |
+| Recibir | receptor      | remitente   | cantidad + | Entrada al receptor  |
 
-El saldo se calcula de la siguiente manera:
+El saldo se calcula como:
 
 ```sql
 SELECT
@@ -546,19 +546,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Validación**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotencia**: comprobar si `idempotency_key` ya existe en el libro mayor.
-   Si existe, devolver el resultado almacenado en caché.
-3. **Transacción** (una única transacción de SQLite):
-   a. Calcular el saldo del remitente.
-   b. Si `balance < amount`, cancelar la operación (fondos insuficientes).
-   c. Insertar la fila de envío (`from=sender,`.
+1. **Validar** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotencia** : compruebe si `idempotency_key` ya existe en el libro mayor. En caso afirmativo, devuelva el resultado almacenado en caché.
+3. **Transacción** (transacción única SQLite ): a. Calcular el saldo del remitente. b. Si `balance < amount`, abortar (fondos insuficientes). do. Insertar fila de envío (`from=sender, to=receiver, amount`). d. Inserte la fila de recepción (`from=receiver, to=sender, amount`).
+4. **Límite de tarifa** : comprobar la tasa de transferencia del remitente (máximo 10 transfers/min).
+5. **Evento** : emite un evento de gamificación `token_share` para la evaluación de la insignia XP +.
+6. Devuelve `{ success: true, balance: newBalance }`.
 
-### Limitación de frecuencia
+### Limitación de tasa
 
-- Máximo de 10 transferencias por minuto y por clave de API.
-- Máximo de 10 000 tokens por transferencia.
-- Máximo de 100 000 tokens transferidos al día por clave de API.
+- Máximo 10 transferencias por minuto por clave API.
+- Máximo 10.000 tokens por transferencia única.
+- Máximo 100.000 tokens transferidos por día por clave API.
 
 ---
 

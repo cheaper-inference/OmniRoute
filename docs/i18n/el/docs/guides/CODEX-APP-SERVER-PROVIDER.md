@@ -21,25 +21,21 @@
 ## 1. Αρχιτεκτονική
 
 ```
-┌─ Εφαρμογή OmniRoute ─────────────┐        ┌─ Sidecar codex-app-server ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ διακριτικό δυνατότητας)       │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  αυτοδιαχειρίζεται το OpenAI OAuth  │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, αυτόματη      │
-        │ κοινή χρήση (τόμοι compose)        │   ανανέωση)                          │
-        ▼                                    └─────────────────────────────────────┘
-  codex-appserver-token   → το διακριτικό δυνατότητας WS (προσαρτάται και στα δύο)
-  codex-appserver-home    → ~/.codex (το auth.json γράφεται από τον πίνακα ελέγχου
-                             και διαβάζεται από το codex app-server του sidecar)
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
+        ▼
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Το sidecar ακούει **μόνο** στο εσωτερικό δίκτυο compose
-  (`ws://codex-app-server:1456`), πίσω από ένα διακριτικό δυνατότητας. **Δεν**
-  δημοσιεύεται ποτέ στον κεντρικό υπολογιστή ή στο διαδίκτυο.
-- Το Codex CLI είναι ενσωματωμένο στο `omniroute:base`, επομένως δεν απαιτείται
-  εγκατάσταση του codex στον κεντρικό υπολογιστή ή στο μηχάνημα του χρήστη όταν
-  εκτελείτε το sidecar.
+- Το πλαϊνό αμάξι ακούει** μόνο** στο εσωτερικό δίκτυο σύνθεσης (`ws://codex-app-server:1456`) πίσω από ένα διακριτικό ικανότητας. Είναι** ποτέ** δημοσιευθεί στον οικοδεσπότη ή στο διαδίκτυο.
+- Το πλαϊνό αυτοκίνητο χρησιμοποιεί `omniroute:cli-no-docker`, κατασκευασμένο από τον στόχο `runner-cli-no-docker`, ο οποίος περιλαμβάνει το Codex CLI.
 
 ## 2. Εκκίνηση
 

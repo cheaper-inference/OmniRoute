@@ -4,14 +4,11 @@
 
 ---
 
-> **상태:** 일반 제공.
-> **대상:** OpenCode를 OmniRoute 배포 환경에 연결하는 운영자.
-> **신뢰할 수 있는 원본(config 스키마):** `src/shared/services/opencodeConfig.ts`
-> **신뢰할 수 있는 원본(npm package):** `@omniroute/opencode-provider/` (게시 가능한 workspace)
+> **상태:** 일반적으로 사용 가능합니다.** 청중:** OpenCode OmniRoute 배포에 연결하는 운영자.** 정보 소스(구성 스키마):** `src/shared/services/opencodeConfig.ts`** 권장 npm 패키지:** `@omniroute/opencode-plugin/` (OpenCode v1, `omniroute setup opencode` 로 설치) 및 `@omniroute/opencode-plugin-v2/` (OpenCode v2). 이전 `@omniroute/opencode-provider/` 패키지는 다음과 같습니다.** 더 이상 사용되지 않음** (경로 2 참조)
 
-[OpenCode](https://opencode.ai)는 에이전트형 CLI/데스크톱 AI 클라이언트입니다. `~/.config/opencode/opencode.json`(또는 `opencode.jsonc`)에서 provider 카탈로그를 읽으며 `https://opencode.ai/config.json`의 스키마를 따릅니다. OmniRoute는 이러한 provider 중 하나로 OpenCode에 노출됩니다. 모든 요청은 OmniRoute의 표준 OpenAI 호환 `/v1` 인터페이스를 통과하므로 OpenCode에서 Auto-Combo 라우팅, circuit breaker, 키 정책, observability 등의 기능을 자동으로 활용할 수 있습니다.
+[OpenCode](https://opencode.ai) 는 에이전트 CLI/desktop AI 클라이언트입니다. `~/.config/opencode/opencode.json` (또는 `opencode.jsonc`)에서 공급자 카탈로그를 읽고 `https://opencode.ai/config.json` 의 스키마를 따릅니다. OmniRoute 모든 요청이 OmniRoute 의 표준 OpenAI 호환 `/v1` 표면을 통해 흐르는 — 공급자 중 하나로 OpenCode 에 자신을 노출하므로 OpenCode 자동 콤보 라우팅, 회로 차단기, 주요 정책, 관찰 가능성 등의 이점을 자동으로 활용합니다.
 
-**두 가지 지원되는 통합 경로**가 있습니다. 하나를 선택하세요. 두 경로 모두 동일한 config를 생성합니다.
+이 페이지에는 아래의 두 가지 정적 구성 경로가 설명되어 있습니다. 둘 다 동일한 구성을 생성합니다. 라이브 카탈로그를 따르는 모델 목록의 경우 대신 플러그인을 사용하십시오. `omniroute setup opencode` `@omniroute/opencode-plugin` (OpenCode v1)를 설치하고 `@omniroute/opencode-plugin-v2` OpenCode v2를 대상으로 합니다( [CLI 통합](../guides/CLI-INTEGRATIONS.md) 및 [OpenCode v2 플러그인 가이드](../guides/OPENCODE-V2-PLUGIN.md) 참조).
 
 ---
 
@@ -54,9 +51,11 @@ omniroute config opencode \
 
 ---
 
-## 경로 2 — npm package `@omniroute/opencode-provider`
+## 경로 2 — npm 패키지 `@omniroute/opencode-provider` (더 이상 사용되지 않음)
 
-Node/TS에서 config를 스크립트로 생성하는 경우(CI pipeline, monorepo, 사용자 지정 installer flow) 권장됩니다.
+> **더 이상 사용되지 않습니다.** 패키지는 라이브 OmniRoute 카탈로그 뒤에 표류하는 정적 모델 목록을 작성합니다. README 에서는 `@omniroute/opencode-plugin` (또는 OpenCode v2의 `@omniroute/opencode-plugin-v2` )로 마이그레이션할 것을 권장합니다. 아래 API 기존 스크립트에 대해서만 유지됩니다.
+
+Node/TS (CI 파이프라인, 모노레포, 사용자 정의 설치 프로그램 흐름)에서 구성을 스크립팅할 때 사용됩니다.
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // 선택 사항: OpenCode에 노출되는 model 카탈로그 재정의
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-기존 파일에 비파괴 방식으로 병합하려면 `opencodeConfig.ts`의 `mergeOpenCodeConfigText()`를 재현하거나 CLI 생성기를 호출하세요.
+기존 파일을 비파괴적으로 병합하려면 `opencodeConfig.ts` 에서 `mergeOpenCodeConfigText()` 복제하거나 CLI 생성기를 호출하세요.
 
-전체 API는 [package README](../../@omniroute/opencode-provider/README.md)를 참조하세요.
+전체 API 에 대해서는 [README 패키지](../../@omniroute/opencode-provider/README.md) 를 참조하세요.
 
 ---
 
@@ -155,9 +154,11 @@ export const OMNIROUTE_DEFAULT_OPENCODE_MODELS = [
 
 ---
 
-## 함께 보기
+## 또한보십시오
 
-- [API 참조](../reference/API_REFERENCE.md) — OmniRoute REST 전체 범위
-- [Auto-Combo](../routing/AUTO-COMBO.md) — `model: "auto"`의 의미
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [API 참조](../reference/API_REFERENCE.md) — 전체 OmniRoute REST 표면
+- [자동 콤보](../routing/AUTO-COMBO.md) — `model: "auto"` 의 의미
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (권장)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (더 이상 사용되지 않음)
 - 소스: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

@@ -54,15 +54,13 @@
 பதிவிடுதல் அல்லது இணையவழி அல்லது நேரடி நிகழ்வில் நியமிக்கப்பட்ட பிரதிநிதியாகச்
 செயல்படுதல் ஆகியவை நமது சமூகத்தைப் பிரதிநிதித்துவப்படுத்துவதற்கான எடுத்துக்காட்டுகளாகும்.
 
-## Enforcement
+## அமலாக்கம்
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+துஷ்பிரயோகம், துன்புறுத்தல் அல்லது வேறுவிதமாக ஏற்றுக்கொள்ள முடியாத நடத்தை போன்ற நிகழ்வுகள் ஒரு தனியார் பாதுகாப்பு ஆலோசனையைத் திறப்பதன் மூலம் அமலாக்கத்திற்கு பொறுப்பான சமூகத் தலைவர்களிடம் புகாரளிக்கப்படலாம்.
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+அல்லது digosouza.pw@outlook.com இல் பராமரிப்பாளருக்கு மின்னஞ்சல் அனுப்புவதன் மூலம். பாதுகாப்பு-உணர்திறன் நிகழ்வுகளுக்கு, [`SECURITY.md`](SECURITY.md) பார்க்கவும். அனைத்து புகார்களும் உடனடியாகவும் நியாயமாகவும் மதிப்பாய்வு செய்யப்பட்டு விசாரிக்கப்படும்.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+எந்தவொரு சம்பவத்தின் செய்தியாளரின் தனியுரிமை மற்றும் பாதுகாப்பை மதிக்க அனைத்து சமூகத் தலைவர்களும் கடமைப்பட்டுள்ளனர்.
 
 ## அமலாக்க வழிகாட்டுதல்கள்
 

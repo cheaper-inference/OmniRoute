@@ -48,7 +48,7 @@ Claude 코드는**Anthropic 메시지 API** 환경 변수가 있는 사용자 �
 
 ---
 
-## 사용 속성: 세션 및 프로젝트
+## 사용 기여: 세션 및 프로젝트
 
 OmniRoute 각 API 키의 요청을 다음으로 그룹화합니다.** 에이전트 세션** 그리고 기록하는 것은** 프로젝트** 각 세션이 작업되었으므로(`agent_sessions` 테이블) 팀 구성원, 프로젝트 및 세션별로 사용량과 비용을 보고할 수 있습니다.
 
@@ -67,10 +67,10 @@ Codex (`<environment_context><cwd>`) 및 OpenCode (`x-opencode-session`)는 동�
 
 작업 디렉터리는 컴퓨터마다 다르므로 동일한 저장소가 다른 경로에 표시될 수 있습니다. 대신 명시적으로 프로젝트를 보냅니다. Claude 코드는 모든 모델 요청에 `ANTHROPIC_CUSTOM_HEADERS` 에 나열된 헤더를 추가하고 OmniRoute 그 중 두 개를 읽습니다.
 
-| 헤더                       | 값                                                    |
-| -------------------------- | ----------------------------------------------------- |
-| `x-omniroute-project`      | 프로젝트 이름(예: `omniroute`                         |
-| `x-omniroute-project-repo` | 정규화된 원격(예: `github.com/diegosouzapw/OmniRoute` |
+| 헤더                       | 값                                                         |
+| -------------------------- | ---------------------------------------------------------- |
+| `x-omniroute-project`      | 프로젝트 이름(예: `omniroute`                              |
+| `x-omniroute-project-repo` | 정규화된 원격(예: `github.com/cheaper-inference/OmniRoute` |
 
 둘 다 귀속을 위해서만 읽혀집니다. 업스트림 공급자에게 전달되지 않습니다.
 
@@ -248,12 +248,20 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm/glm-4.7-flash"
 
 ## 문제 해결
 
-**Claude Code가 게이트웨이를 무시함** — `ANTHROPIC_BASE_URL`에 **`/v1`이 포함되어 있지 않은지** 확인하고 `claude`를 다시 시작하세요(env는 시작 시 한 번만 읽습니다). `omniroute launch`는 이 작업을 자동으로 처리합니다.
+**Claude 코드는 게이트웨이를 무시합니다** — `ANTHROPIC_BASE_URL` 가지고 있는지 확인합니다** 아니 `/v1`** 그리고 `claude` 다시 시작하세요(env는 시작 시 한 번 읽혀집니다). `omniroute launch` 이를 처리합니다.
 
-**`/model` 선택기가 비어 있거나 게이트웨이 모델이 누락됨** — Claude Code v2.1.219+ 및 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`이 필요합니다. `claude*` / `anthropic*` 모델 ID만 선택기에 표시됩니다. 다른 모델은 `ANTHROPIC_MODEL=<id>`로 강제 지정하세요(프로필도 이 방식을 사용합니다).
+**`/model` 선택기가 비어 있거나 게이트웨이 모델이 누락되었습니다.** — Claude 코드 v2.1.219 + 및 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` 필요합니다. `claude*` / `anthropic*` 모델 IDs 만 선택기에 나타납니다. `ANTHROPIC_MODEL=<id>` 사용하여 다른 모델을 강제합니다(이것이 프로필의 역할입니다).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code는 항상 **접두사가 없는** 모델 ID(예: `claude-opus-4-8`)를 전송하므로, Claude Code(`cc/…`)와 Claude(`claude/…`) 제공자가 모두 연결되어 있으면 접두사가 없는 ID가 두 라우트와 일치하여 OmniRoute가 임의로 선택하지 않습니다. 다음 방법 중 하나로 해결하세요. `ANTHROPIC_MODEL=cc/claude-opus-4-8`로 접두사가 있는 ID를 고정하거나, **접두사가 없는 Claude 모델에 Claude Code 우선 적용**을 활성화하세요. Claude 제공자 페이지의 토글 또는 `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true`(기본값은 꺼짐, [환경](../reference/ENVIRONMENT.md) 참조)를 사용하면 접두사가 없는 `claude-*` ID가 대신 Claude Code로 라우팅됩니다. 명시적인 제공자 접두사가 항상 우선합니다.
+**`400 Ambiguous model 'claude-…'`** — Claude 코드는 항상 전송됩니다.** 접두어가 없는** 모델 IDs (예: `claude-opus-4-8`)이므로 Claude 코드(`cc/…`) 및 Claude (`claude/…`) 공급자가 모두 연결되면 기본 ID는 두 경로와 일치하고 OmniRoute 추측을 거부합니다. 어느 쪽이든 문제를 해결하세요. 접두사가 붙은 ID를 `ANTHROPIC_MODEL=cc/claude-opus-4-8` 로 고정하거나 활성화하세요.** 접두사가 없는 Claude 모델에는 Claude 코드를 선호합니다.** — Claude 공급자 페이지의 토글 또는 `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (기본값은 꺼짐, [환경](../reference/ENVIRONMENT.md) 참조) — 는 대신 베어 `claude-*` IDs Claude 코드로 라우팅합니다. 명시적인 공급자 접두사는 항상 승리합니다.
 
-**인증 오류** — 프로필에는 토큰이 저장되지 않습니다. `omniroute launch --profile`을 사용하거나(토큰 주입) `ANTHROPIC_AUTH_TOKEN`을 내보내세요.
+**"자동 모드… 이 세션은 자격이 없습니다."(분류자 요청이 청구됨)** 자동 모드의 — Claude 코드는 서버에게 자체 모델 요청 내의 작업을 검토하도록 요청합니다( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Anthropic 에 한 쌍으로 도달하려면 `anthropic-beta` 값 `dangerous-tool-use-2026-09-03` 와 `safeguards` 본문 필드가 필요하며, `safeguard_results` 와 업스트림 도구를 사용하여 IDs 변경 없이 다시 사용해야 합니다. OmniRoute 요청이 스트리밍 여부에 관계없이 기본 `claude` 공급자 또는 `anthropic-compatible-*` 노드로 라우팅될 때 이 작업을 수행합니다(회귀 보호: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). 다른 대상은 리뷰를 반환할 수 없으므로 Claude Code는 자체 분류자 요청으로 대체되고 다음 알림을 표시합니다.
 
-**프로필이 격리되지 않음** — 각 프로필은 서로 다른 `CLAUDE_CONFIG_DIR`을 사용합니다. 세션 내에서 `echo $CLAUDE_CONFIG_DIR`을 실행해 `~/.claude/profiles/<name>`을 가리키는지 확인하세요.
+- 비인류적 제공자에 대한 모델 또는 하나에 착지하는 콤보;
+- 요청 본문을 재구축하고 `safeguards` 전달하지 않는 클로드 코드 호환 중계 노드(`anthropic-compatible-cc-*`);
+- 허용 목록에 있는 베타보다 이전의 오래된 OmniRoute 또는 게이트웨이 세션에 대해 Anthropic 페이지에 나열된 것보다 낮은 Claude 코드 버전입니다.
+
+Claude 코드에서 `/status` 실행:** 자동 모드 서버** 서버 검토가 활성화된 동안 행은 `Enabled` 읽습니다. 해당 요청에 대한 비용이 청구되는지 여부는 Anthropic 아닌 OmniRoute 에 의해 결정됩니다.
+
+**인증 오류** — 프로필에 토큰이 없습니다. `omniroute launch --profile` 사용하거나(주입) `ANTHROPIC_AUTH_TOKEN` 내보냅니다.
+
+**프로필은 격리되지 않습니다.** — 각 프로필은 별개의 `CLAUDE_CONFIG_DIR` 입니다. `~/.claude/profiles/<name>` 의 세션 지점 내에서 `echo $CLAUDE_CONFIG_DIR` 확인하십시오.

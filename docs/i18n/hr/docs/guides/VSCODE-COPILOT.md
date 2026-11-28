@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** stavlja svaki model koji poslužuje vaš OmniRoute u _izvorni_ birač modela za GitHub Copilot Chat.
-Nema dodatne bočne trake ni zasebnog sučelja za razgovor — Copilotov agentski način rada, pozivanje alata,
-MCP poslužitelji i prilagođene upute nastavljaju raditi, samo na modelu koji odaberete.
+**OmniCopilot** dodaje vaše modele i kombinacije OmniRoute chata izvornom alatu za odabir modela Copilot chata. Upotrijebite uređivačke postojeće tijekove rada za chat i agente, s pozivanjem alata i vizijom ako to podržava odabrani model.
 
-|                            |                                                                                                                                                 |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Instalacija (VS Code)**  | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Instalacija (forkovi)**  | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Izvorni kod / problemi** | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Zahtijeva**              | VS Code 1.104+                                                                                                                                  |
+|                             |                                                                                                                                          |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Instaliraj (VS kod)**     | [Tržnica → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                     |
+| **Instaliraj (otvori VSX)** | [Otvoreni VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — zahtijeva kompatibilnog pružatelja jezičnog modela i chat APIs |
+| **Izvor / problemi**        | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                                       |
+| **Zahtijeva**               | VS kod 1.104 + (1.122 + za korištenje bez GitHub prijave ili Copilot plana)                                                              |
+| **Trenutno izdanje**        | OmniCopilot v1.5.1 na obje trgovine (objavljeno 24.11.2026.)                                                                             |
 
-> **Pretplata na Copilot nije potrebna.** Od verzije VS Code 1.122 pružatelj jezičnih modela radi
-> bez prijave na GitHub i bez ikakvog Copilot plana. Dovršavanje koda u retku i
-> značajke temeljene na ugradnjama nisu dio API-ja pružatelja i još uvijek zahtijevaju Copilot.
+Spremi snimku na** 2026-11-25 (01:43 UTC)** , trenutno izdanje:** 52.081 instaliranje na Marketplaceu** i** 20,989 Otvorena VSX preuzimanja** . Ovo su različite metrike trgovine, a ne kombinirani broj korisnika. Izvori: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) i [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Otvorena dostupnost VSX sama po sebi ne uspostavlja kompatibilnost sa svakim uređivačem koji koristi taj registar. Provjerite urednikov chat i API podršku za jezični model.
+
+> **Za BYOK chat u VS kodu 1.122 + nije potrebna Copilot pretplata.** Microsoft podržava chat, alate i MCP bez GitHub prijave kada je pružatelj konfiguriran. Na VS kodu 1.104–1.121 proširenje i dalje radi, ali VS kod zahtijeva prijavljeni Copilot plan. Inline prijedlozi i značajke temeljene na ugrađivanju ostaju izvan pružatelja API i još uvijek zahtijevaju Copilot; Copilot Business/Enterprise administratori mogu onemogućiti pružatelje modela trećih strana prema pravilima; fork prikazuje modele samo ako implementira chat-provider API. Upotreba uzlaznog davatelja i dalje može izazvati troškove. Pogledajte [napomene o izdanju VS koda 1.122](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) i [vodič za jezični model](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
 ## Postavljanje
 
-1. **Pokrenite OmniRoute** — `npm install -g omniroute && omniroute` (nadzorna ploča na `http://localhost:20128`).
-2. **Instalirajte proširenje** — potražite "OmniRoute" u prikazu Proširenja.
-3. **Odaberite model** — Copilot Chat → birač modela → **Upravljanje modelima…** → **OmniRoute**, a zatim označite
-   modele koje želite.
+1. **Pokrenite OmniRoute** — `npm install -g omniroute && omniroute` (kontrolna ploča na `http://localhost:20128`).
+2. **Instalirajte proširenje** — potražite "OmniRoute" u prikazu proširenja.
+3. **Poveži se** — zadržite zadani `http://localhost:20128` ili postavite URL i API ključ svog poslužitelja**OmniRoute: Upravljanje vezom** .
+4. **Odaberite model** — Copilot Chat → odabir modela →** Upravljanje modelima…** →**OmniRoute** , zatim označite što želite.
 
-Nije potrebno ništa konfigurirati kada OmniRoute radi na zadanom priključku. Za udaljenu instancu otvorite
-**ikonu OmniRoute na traci aktivnosti** (ili pokrenite `OmniRoute: Manage Connection`) i postavite:
+Za postavke veze otvorite**OmniRoute ikonu na traci aktivnosti** (ili pokrenite `OmniRoute: Manage Connection`) i postavite:
 
-- **URL poslužitelja** — korijenska adresa poslužitelja, npr. `http://192.168.0.15:20128`. Proširenje
-  dodaje sufiks `/v1`; nemojte ga uključiti.
-- **API ključ** — samo kada poslužitelj postavi `REQUIRE_API_KEY`. Pohranjuje se u privjesku ključeva OS-a putem
-  VS Code SecretStorage, nikada u `settings.json`.
+- **Poslužitelj URL** — korijen poslužitelja, npr. `http://omniroute.example.com:20128`. Sufiksu `/v1` dodaje se ekstenzija; nemojte ga uključiti.
+- **ključ API** — potreban kada ga zahtijeva poslužiteljeva politika provjere autentičnosti zaključivanja. Pohranjeno kroz VS kod SecretStorage, nikad u `settings.json`; dostupni su ključevi specifični za radni prostor. Koristite ključ ovlašten za modele koje želite izložiti.
+
+Proširenje također pruža indikator veze, osvježavanje modela, kontekst modela i metapodatke o cijenama (uključene kombinacije), strujanje obrazloženja s** Napor razmišljanja** izbornik na VS kodu 1.120 +, indikator dnevnog ograničenja na statusnoj traci i ploča za korištenje (OmniRoute 3.8.50 +), CLI konfiguracija i izborna kartica nadzorne ploče. Odabrani model i politika poslužitelja određuju mogućnosti koje možete koristiti.
 
 ---
 
@@ -118,26 +118,25 @@ Pogledajte [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) i problem
 
 ---
 
-## Konfiguriranje drugih alata unutar VS Codea
+## Konfiguriranje drugih alata unutar VS koda
 
-**`OmniRoute: Configure Coding CLI`** koristi `omniroute` CLI za zapisivanje profila spremnih za uporabu
-za Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo i Roo — istih konfiguracija koje su opisane u
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). API ključ prosljeđuje se CLI-ju putem
-varijable okruženja `OMNIROUTE_API_KEY`, nikada putem naredbenog retka.
+**`OmniRoute: Configure Coding CLI`** pokreće `omniroute` CLI za pisanje profila spremnih za korištenje za 16 alata: Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes i 5dive. Proširenje poziva `setup-*` naredbe u integriranom terminalu; instalirajte verziju OmniRoute CLI koja uključuje odabranu naredbu. Pogledajte [vodič za integraciju CLI](CLI-INTEGRATIONS.md) za datoteke i oznake koje koristi svaki recept i [registar alata proširenja](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+Ključ API predaje se CLI putem `OMNIROUTE_API_KEY`, nikad u naredbenom retku. Recepti za postavljanje mogu zadržati vjerodajnice u konfiguraciji ciljnog alata. Kada dijelite ključ specifičan za radni prostor s konfiguracijom alata na korisničkoj razini, proširenje prvo traži potvrdu.
 
 ---
 
 ## Rješavanje problema
 
-| Simptom                                                       | Uzrok / rješenje                                                                                                                                                                                                                                                               |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| U biraču nema modela OmniRoutea                               | Poslužitelj nije dostupan. Točka na statusnoj traci postaje siva; pokrenite `OmniRoute: Check Connection`. Otkrivanje je namjerno neprimjetno i ne dodaje modele umjesto prikazivanja upita.                                                                                   |
-| Svaki se model pojavljuje dvaput                              | Upotrebljavate verziju OmniCopilota stariju od 1.0.1 — ažurirajte je. Proširenje sada šalje zahtjev s `?prefix=alias`.                                                                                                                                                         |
-| Model za slike/zvuk prije je bio naveden, ali više nije       | Namjerno od verzije 1.0.1 — takav model nikada nije mogao odgovoriti na zahtjev za razgovor.                                                                                                                                                                                   |
-| Ploča nedostaje na traci aktivnosti                           | VS Code premješta dodatne spremnike prikaza u izbornik viška **"…"** pri dnu trake aktivnosti, a spremnik skriven desnim klikom ostaje skriven. Desnom tipkom miša kliknite traku aktivnosti → označite **OmniRoute** ili ga otvorite naredbom `OmniRoute: Manage Connection`. |
-| Nadzorna ploča otvara se u pregledniku unatoč načinu `editor` | Poslužitelj nije **izgrađen** s `DASHBOARD_ALLOW_EMBED=vscode` (pogledajte iznad) — postavljanje te varijable pri pokretanju unaprijed izgrađene instalacije ne čini ništa. Povratak na preglednik namjeran je.                                                                |
-| Popis modela zastario je nakon promjene pružatelja            | `OmniRoute: Refresh Models` ili poveznica ↻ na ploči.                                                                                                                                                                                                                          |
+| Simptom                                                            | Uzrok / popravak                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nema OmniRoute modela u biraču                                     | Poslužitelj nedostupan. Točka statusne trake postaje siva; pokrenuti `OmniRoute: Check Connection`. Discovery je po dizajnu tih i ne daje nikakve modele nego daje upute.                                                                                                     |
+| Svaki se model pojavljuje dva puta                                 | Vi ste na OmniCopilot starijem od 1.0.1 — ažuriranja. Proširenje sada zahtijeva `?prefix=alias`.                                                                                                                                                                              |
+| image/audio model bio je na popisu i više ga nema                  | Namjerno od 1.0.1 — nikada nije mogao odgovoriti na zahtjev za chat.                                                                                                                                                                                                          |
+| Nedostaje ploča na traci aktivnosti                                | VS kod premješta dodatne spremnike pogleda u** "…"** overflow na dnu trake aktivnosti, a spremnik skriven desnim klikom ostaje skriven. Desnom tipkom miša kliknite kvačicu trake aktivnosti →**OmniRoute** ili ga otvorite pomoću `OmniRoute: Manage Connection`.            |
+| Nadzorna ploča otvara se u pregledniku unatoč `editor` načinu rada | Poslužitelj nije bio** izgrađena** sa `DASHBOARD_ALLOW_EMBED=vscode` (vidi gore) — postavljanje pri pokretanju na unaprijed izgrađenoj instalaciji ne radi ništa. Zamjena je namjerna.                                                                                        |
+| Popis modela je zastario nakon promjene pružatelja usluga          | `OmniRoute: Refresh Models` ili vezu ↻ na ploči.                                                                                                                                                                                                                              |
+| Ploča kaže _Na mreži (modeli blokirani)_, alat za odabir prazan    | Poslužitelj odbija ključ. Spremite pravi ključ sa** Spremi i testiraj** . Ako je umjesto toga ključ fiksiran na poslužitelju (omogućen ili mu je dan pristup modelima), proširenje to ne primjećuje samo: pokrenite `OmniRoute: Refresh Models` ili otvorite OmniRoute ploču. |
 
 ---
 

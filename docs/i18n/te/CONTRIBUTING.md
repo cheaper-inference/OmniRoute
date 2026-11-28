@@ -10,118 +10,105 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ## అభివృద్ధి సెటప్
 
-### అవసరమైనవి
+### ముందస్తు అవసరాలు
 
-- **Node.js** `>=22.22.2 <23`, లేదా `>=24.0.0 <27` (సిఫార్సు: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23`, లేదా `>=24.0.0 <27` (సిఫార్సు చేయబడింది: 24 LTS)
+- **npm** 10 +
 
-> **Node 24తో Windows:** ప్రస్తుత 24 LTS ప్యాచ్ విడుదలను ఉపయోగించండి (కనీసం 24.20.0).
-> మునుపటి విడుదలలు `--test-force-exit` ప్రాసెస్ను మూసివేసినప్పుడు విజయవంతమైన పరీక్షల తర్వాత
-> నిలిచిపోవచ్చు. Node యొక్క [Windows libuv పరిష్కారం](https://github.com/nodejs/node/pull/61999) ఈ
-> రన్టైమ్ క్రాష్ను పరిష్కరిస్తుంది; పరీక్ష assertions మరియు runner exit checksను ప్రారంభించినట్లుగానే ఉంచండి.
+> **నోడ్ 24తోWindows :** ప్రస్తుత 24 LTS ప్యాచ్ విడుదలను ఉపయోగించండి (కనీసం 24.20.0). `--test-force-exit` ప్రక్రియను మూసివేసినప్పుడు విజయవంతమైన పరీక్షల తర్వాత మునుపటి విడుదలలు నిలిపివేయబడతాయి. నోడ్ యొక్క [Windows libuv పరిష్కారము](https://github.com/nodejs/node/pull/61999) ఈ రన్టైమ్ క్రాష్ను సూచిస్తుంది; పరీక్ష ప్రకటనలు మరియు రన్నర్ నిష్క్రమణ తనిఖీలను ప్రారంభించి ఉంచండి.
 
-> **npm v11+ వినియోగదారులు (Node 24+):** `npm install` తర్వాత, native modules ఇన్స్టాల్ అయ్యాయో ధృవీకరించండి:
-> `node -e "require('better-sqlite3')"`. ఇది `MODULE_NOT_FOUND`తో విఫలమైతే,
-> `npm approve-scripts better-sqlite3 && npm install` అమలు చేయండి. [ట్రబుల్షూటింగ్](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) చూడండి.
+> **npm v11 + వినియోగదారులు (నోడ్ 24 +):** `npm install` తర్వాత, స్థానిక మాడ్యూల్స్ ఇన్స్టాల్ చేయబడిందని ధృవీకరించండి: `node -e "require('better-sqlite3')"`. ఇది `MODULE_NOT_FOUND` తో విఫలమైతే, `npm approve-scripts better-sqlite3 && npm install` అమలు చేయండి. [ట్రబుల్షూటింగ్](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) చూడండి.
 
 - **Git**
 
-### క్లోన్ చేసి ఇన్స్టాల్ చేయడం
+### క్లోన్ & ఇన్స్టాల్ చేయండి
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### పర్యావరణ వేరియబుల్స్
+### ఎన్విరాన్మెంట్ వేరియబుల్స్
 
 ```bash
-# టెంప్లేట్ నుండి మీ .env ను సృష్టించండి
+# Create your .env from the template
 cp .env.example .env
 
-# అవసరమైన సీక్రెట్లను రూపొందించండి
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-అభివృద్ధి కోసం ప్రధాన వేరియబుల్స్:
+అభివృద్ధి కోసం కీలక వేరియబుల్స్:
 
-| వేరియబుల్              | అభివృద్ధి డిఫాల్ట్       | వివరణ                    |
-| ---------------------- | ------------------------ | ------------------------ |
-| `PORT`                 | `20128`                  | సర్వర్ పోర్ట్            |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ఫ్రంట్ఎండ్ కోసం బేస్ URL |
-| `JWT_SECRET`           | (పై విధంగా రూపొందించండి) | JWT సంతకం సీక్రెట్       |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | మొదటి లాగిన్ పాస్వర్డ్   |
-| `APP_LOG_LEVEL`        | `info`                   | లాగ్ వివరణాత్మకత స్థాయి  |
+| వేరియబుల్              | అభివృద్ధి డిఫాల్ట్       | వివరణ                   |
+| ---------------------- | ------------------------ | ----------------------- |
+| `PORT`                 | `20128`                  | సర్వర్ పోర్ట్           |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ఫ్రంటెండ్ కోసం బేస్ URL |
+| `JWT_SECRET`           | (పైన రూపొందించండి)       | JWT సంతకం రహస్యం        |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | మొదటి లాగిన్ పాస్వర్డ్  |
+| `APP_LOG_LEVEL`        | `info`                   | లాగ్ వెర్బోసిటీ స్థాయి  |
 
-### డ్యాష్బోర్డ్ సెట్టింగ్లు
+### డాష్బోర్డ్ సెట్టింగ్లు
 
-డ్యాష్బోర్డ్లో పర్యావరణ వేరియబుల్స్ ద్వారా కూడా కాన్ఫిగర్ చేయగల ఫీచర్ల కోసం UI టాగిళ్లు అందుబాటులో ఉంటాయి:
+ఎన్విరాన్మెంట్ వేరియబుల్స్ ద్వారా కూడా కాన్ఫిగర్ చేయగల ఫీచర్ల కోసం డాష్బోర్డ్ UI టోగుల్లను అందిస్తుంది:
 
-| సెట్టింగ్ స్థానం    | టాగిల్             | వివరణ                                       |
-| ------------------- | ------------------ | ------------------------------------------- |
-| Settings → Advanced | Debug Mode         | డీబగ్ రిక్వెస్ట్ లాగ్లను ప్రారంభించండి (UI) |
-| Settings → General  | Sidebar Visibility | సైడ్బార్ విభాగాలను చూపించండి/దాచండి         |
+| స్థానాన్ని సెట్ చేస్తోంది | టోగుల్ చేయండి      | వివరణ                                   |
+| ------------------------- | ------------------ | --------------------------------------- |
+| సెట్టింగులు → అధునాతన     | డీబగ్ మోడ్         | డీబగ్ అభ్యర్థన లాగ్లను ప్రారంభించు (UI) |
+| సెట్టింగులు → జనరల్       | సైడ్బార్ దృశ్యమానత | Show/hide సైడ్బార్ విభాగాలు             |
 
-ఈ సెట్టింగ్లు డేటాబేస్లో నిల్వ చేయబడతాయి మరియు పునఃప్రారంభాల మధ్య కొనసాగుతాయి. సెట్ చేసినప్పుడు, ఇవి env var డిఫాల్ట్లను అధిగమిస్తాయి.
+ఈ సెట్టింగ్లు డేటాబేస్లో నిల్వ చేయబడతాయి మరియు పునఃప్రారంభించబడే అంతటా కొనసాగుతాయి, సెట్ చేసినప్పుడు env var డిఫాల్ట్లను భర్తీ చేస్తాయి.
 
-### స్థానికంగా అమలు చేయడం
+### స్థానికంగా నడుస్తోంది
 
 ```bash
-# అభివృద్ధి మోడ్ (హాట్ రీలోడ్)
+# Development mode (hot reload)
 npm run dev
 
-# ప్రొడక్షన్ బిల్డ్
-npm run build    # next build → .build/next/ తర్వాత assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# కాంట్రిబ్యూటర్ మార్పుల కోసం వేగవంతమైన బ్యాకెండ్/API-మాత్రమే కంపైల్
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# విడుదల బిల్డ్ (క్లీన్ రీబిల్డ్ + HEAD సెంటినల్ — డిప్లాయ్కు అవసరం)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ను రాస్తుంది
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# సాధారణ పోర్ట్ కాన్ఫిగరేషన్
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-కాంట్రిబ్యూటర్ బిల్డ్ కంపైల్-మాత్రమే ధృవీకరణను నిర్వహిస్తుంది: ఇది standalone
-డిస్ట్రిబ్యూషన్ను అసెంబుల్ చేయదు లేదా ఐచ్ఛిక native ప్యాకేజింగ్ ఆస్తులను బిల్డ్ చేయదు. డిప్లాయ్ చేయగల బండిల్ను
-ధృవీకరించాల్సినప్పుడు సాధారణ ప్రొడక్షన్ బిల్డ్ను ఉపయోగించండి.
+కంట్రిబ్యూటర్ బిల్డ్ కంపైల్-మాత్రమే ధ్రువీకరణను నిర్వహిస్తుంది: ఇది స్వతంత్ర పంపిణీని సమీకరించదు లేదా ఐచ్ఛిక స్థానిక ప్యాకేజింగ్ ఆస్తులను నిర్మించదు. మీరు రవాణా చేయగల బండిల్ను ధృవీకరించాల్సిన అవసరం వచ్చినప్పుడు సాధారణ ఉత్పత్తి నిర్మాణాన్ని ఉపయోగించండి.
 
-### బిల్డ్ అవుట్పుట్ లేఅవుట్
+### అవుట్పుట్ లేఅవుట్ని రూపొందించండి
 
-| డైరెక్టరీ | విషయాలు                                                                               | ట్రాక్ చేయబడిందా |
-| --------- | ------------------------------------------------------------------------------------- | ---------------- |
-| `src/`    | అప్లికేషన్ సోర్స్ (TypeScript / TSX)                                                  | అవును            |
-| `.build/` | మధ్యంతర ఫైళ్లు — `next build` అవుట్పుట్ (gitignored, `distDir = .build/next`)         | కాదు             |
-| `dist/`   | డిప్లాయ్ చేయగల బండిల్ — `assembleStandalone` ద్వారా అసెంబుల్ చేయబడుతుంది (gitignored) | కాదు             |
+| డైరెక్టరీ | కంటెంట్లు                                                                      | ట్రాక్ చేయబడింది |
+| --------- | ------------------------------------------------------------------------------ | ---------------- |
+| `src/`    | అప్లికేషన్ మూలం (TypeScript / TSX)                                             | అవును            |
+| `.build/` | మధ్యవర్తులు — `next build` అవుట్పుట్ (gitignored, `distDir = .build/next`)     | నం               |
+| `dist/`   | రవాణా చేయగల బండిల్ — `assembleStandalone` ద్వారా సమీకరించబడింది (జిటిగ్నోర్డ్) | నం               |
 
-బిల్డ్ పైప్లైన్ ఒకే పాస్లో జరుగుతుంది:
+బిల్డ్ పైప్లైన్ ఒకే పాస్:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js అవుట్పుట్)
-  └─ assembleStandalone()                 (standalone + static + public + native assets ను కాపీ చేస్తుంది)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` అదనంగా ముందుగా రెండు డైరెక్టరీలను శుభ్రపరుస్తుంది మరియు
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`)ను డిప్లాయ్ సమగ్రత సెంటినల్గా రాస్తుంది.
+`npm run build:release` అదనంగా రెండు డైరెక్టరీలను ముందుగా క్లీన్ చేస్తుంది మరియు `dist/BUILD_SHA` (= `git rev-parse --short HEAD`)ని డిప్లాయ్ ఇంటెగ్రిటీ సెంటినల్గా వ్రాస్తుంది.
 
-`npm run build:contributor` బ్యాకెండ్-మాత్రమే బిల్డ్ ప్రొఫైల్ను ఉపయోగిస్తుంది. ఇది బిల్డ్ చేస్తున్నప్పుడు
-డ్యాష్బోర్డ్ UI ఫైళ్లకు తాత్కాలిక స్టబ్లను సృష్టిస్తుంది, API రూట్ హ్యాండ్లర్లను ఉంచుతుంది మరియు
-బిల్డ్ పూర్తయిన తర్వాత అసలు ఫైళ్లను పునరుద్ధరిస్తుంది. డ్యాష్బోర్డ్ UIపై ప్రభావం చూపే మార్పుల కోసం లేదా
-పూర్తి విడుదల ధృవీకరణ కోసం `npm run build` ఉపయోగించండి; కాంట్రిబ్యూటర్ ప్రొఫైల్ విడుదల బిల్డ్కు ప్రత్యామ్నాయం కాదు.
+`npm run build:contributor` బ్యాకెండ్-మాత్రమే బిల్డ్ ప్రొఫైల్ని ఉపయోగిస్తుంది. ఇది నిర్మించేటప్పుడు డాష్బోర్డ్ UI ఫైల్లను తాత్కాలికంగా స్టబ్ చేస్తుంది, API రూట్ హ్యాండ్లర్లను ఉంచుతుంది మరియు బిల్డ్ తర్వాత అసలు ఫైల్లను పునరుద్ధరిస్తుంది. డాష్బోర్డ్ UI ప్రభావితం చేసే మార్పుల కోసం లేదా పూర్తి విడుదల ధ్రువీకరణ కోసం `npm run build` ఉపయోగించండి; కంట్రిబ్యూటర్ ప్రొఫైల్ విడుదల బిల్డ్కు ప్రత్యామ్నాయం కాదు.
 
-> **VPS డిప్లాయ్ గమనిక:** రిమోట్ ఇమేజ్ డైరెక్టరీ `/usr/lib/node_modules/omniroute/app/`
-> మారదు. డిప్లాయ్ స్కిల్లు `dist/`లోని విషయాలను దీనిలోకి rsync చేస్తాయి.
-> రిపాజిటరీలోని బిల్డ్ అవుట్పుట్ పాత్ మాత్రమే మారింది (`app/` → `dist/`).
+> **VPS విస్తరణ గమనిక:** రిమోట్ ఇమేజ్ డైరెక్టరీ `/usr/lib/node_modules/omniroute/app/` మారదు. డిప్లాయ్ స్కిల్స్ `dist/` లోని కంటెంట్లను దానిలోకి rsync చేస్తుంది. ఇన్-రెపో బిల్డ్ అవుట్పుట్ పాత్ మాత్రమే తరలించబడింది (`app/` → `dist/`).
 
-డిఫాల్ట్ URLలు:
+డిఫాల్ట్ URLs:
 
-- **డ్యాష్బోర్డ్**: `http://localhost:20128/dashboard`
+- **డాష్బోర్డ్** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -421,10 +408,10 @@ VPS డిప్లాయ్మెంట్ల కోసం, `npm run build` క
 
 ---
 
-## సహాయం పొందడం
+## సహాయం పొందుతోంది
 
-- **ఆర్కిటెక్చర్**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) చూడండి
-- **API రిఫరెన్స్**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) చూడండి
-- **భద్రతా డాక్యుమెంటేషన్**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **ఆపరేషన్స్ డాక్యుమెంటేషన్**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **సమస్యలు**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **ఆర్కిటెక్చర్** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) చూడండి
+- **API సూచన** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) చూడండి
+- **భద్రతా పత్రాలు** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops డాక్స్** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **సమస్యలు** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

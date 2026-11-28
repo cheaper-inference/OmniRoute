@@ -90,18 +90,17 @@ El objeto `ctx` que se pasa a `register(program, ctx)`:
 
 ## Descubrimiento
 
-Los plugins se detectan en:
+Los complementos se descubren en:
 
-1. `~/.omniroute/plugins/<name>/` — instalaciones locales del usuario
-2. Variable de entorno `OMNIROUTE_PLUGIN_PATH` — directorio personalizado
+1. `~/.omniroute/plugins/node_modules/<name>/` — donde `omniroute plugin install` coloca los paquetes (un npm `--prefix`, no `npm -g`)
+2. directorios de complementos copiados a mano de `~/.omniroute/plugins/<name>/` —
+3. directorio personalizado `OMNIROUTE_PLUGIN_PATH` env var —
 
-Ambos son **exclusivos de la CLI**. El entorno de ejecución de plugins del lado del servidor (los plugins del marketplace/`plugin.json`
-que se ejecutan dentro del proxy) tiene su propio escáner con su propia configuración de sustitución,
-`OMNIROUTE_PLUGINS_DIR`; consulta
-[PLUGIN_MARKETPLACE.md → Directorio de plugins](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Configurar uno no afecta al otro.
+Se siguen los directorios con enlaces simbólicos (lo que npm crea para `plugin install ./dir`).
 
-Los errores de carga se capturan y se muestran como advertencias: un plugin defectuoso nunca bloquea la CLI.
+Ambos son** Solo CLI** . El tiempo de ejecución del complemento del lado del servidor (los complementos de Marketplace/`plugin.json` que se ejecutan dentro del proxy) tiene su propio escáner con su propia anulación, `OMNIROUTE_PLUGINS_DIR` — consulte [PLUGIN_MARKETPLACE.md directorio de complementos →](./PLUGIN_MARKETPLACE.md#plugin-directory). Configurar uno no afecta al otro.
+
+Los errores de carga se detectan y se imprimen como advertencias — Un complemento roto nunca bloquea el CLI.
 
 ## Seguridad
 

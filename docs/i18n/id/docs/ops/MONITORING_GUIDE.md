@@ -99,37 +99,37 @@ Per kombo:
 
 ---
 
-## API Pemeriksaan Kesehatan
+## Pemeriksaan Kesehatan API
 
-OmniRoute menyediakan **dua** endpoint kesehatan HTTP. Keduanya tidak dapat saling menggantikan untuk orkestrator.
+OmniRoute mengekspos** dua** permukaan kesehatan HTTP. Mereka tidak dapat dipertukarkan dengan orkestra.
 
-| Path                         | Tujuan                                                             | Beban                                     | Gunakan untuk                                                                 |
-| ---------------------------- | ------------------------------------------------------------------ | ----------------------------------------- | ----------------------------------------------------------------------------- |
-| `GET /healthz`               | Liveness/readiness siklus hidup (`ok` / `starting` / `stopping`)   | Ringan (hanya flag fase)                  | **Readiness** Kubernetes; **liveness** lunak jika Anda harus menggunakan HTTP |
-| `GET /api/monitoring/health` | Ringkasan mendalam sistem + penyedia (DB, heap, jumlah katalog, …) | Berat (pekerjaan DB / pemantauan sinkron) | Dasbor, pemeriksaan mendalam blackbox, healthcheck bawaan Docker              |
+| Jalur                        | Tujuan                                                           | Berat                                          | Gunakan untuk                                                                 |
+| ---------------------------- | ---------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| `GET /healthz`               | Siklus hidup liveness/readiness (`ok` / `starting` / `stopping`) | Sepele (hanya tanda fase)                      | Kubernet** kesiapan** ; lembut** keaktifan** jika Anda harus menggunakan HTTP |
+| `GET /api/monitoring/health` | Ringkasan penyedia + sistem dalam (DB, heap, jumlah katalog,…)   | Berat (sinkronisasi DB / pekerjaan pemantauan) | Dasbor, pemeriksaan mendalam blackbox, pemeriksaan kesehatan bawaan Docker    |
 
-> **Catatan:** Matriks kesehatan penyedia, masalah autopilot, monitor kuota, kesehatan token, dan detail latensi di luar `/api/monitoring/health` tersedia melalui **alat MCP** `observability_snapshot` atau halaman **dasbor** — tidak ada rute REST khusus untuk hal-hal tersebut.
+> **Catatan:** Matriks kesehatan penyedia, masalah autopilot, monitor kuota, kesehatan token, dan detail latensi di luar `/api/monitoring/health` tersedia melalui** alat MCP** `observability_snapshot` atau itu** dasbor** halaman — tidak ada rute REST khusus untuk itu.
 
-Kedua rute berjalan pada **event loop Node yang sama** dengan penanganan permintaan. Jalur yang terikat CPU (pekerjaan katalog `GET /v1/models` yang besar, kompresi konteks panjang / penghitungan token) dapat menunda **semua** handler HTTP, termasuk `/healthz`. Event loop sibuk ≠ proses mati. Sebaiknya perbaiki proses yang menghabiskan sumber daya; penyesuaian probe hanya mengurangi penghentian yang keliru.
+Kedua rute tersebut berjalan di** loop acara Node yang sama** sebagai penanganan permintaan. Jalur yang terikat CPU (katalog `GET /v1/models` besar, kompresi konteks panjang/penghitungan token) dapat tertunda** semua** penangan HTTP, termasuk `/healthz`. Proses ≠ sibuk loop acara mati. Lebih suka memperbaiki babi; penyetelan probe hanya mengurangi pembunuhan palsu.
 
-### Probe orkestrator ringan
+### Probe orkestrator yang ringan
 
 ```bash
 GET /healthz
-# atau HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + isi `ok` ketika fase siklus hidup server siap
-- **503** + `starting` / `stopping` selama proses mulai atau penghentian
-- Implementasi: `src/app/healthz/route.ts` (tanpa ping DB)
+- **200** + body `ok` ketika fase siklus hidup server siap
+- **503** + `starting` / `stopping` saat boot atau shutdown
+- Implementasi: `src/app/healthz/route.ts` (tidak ada ping DB )
 
-### Kesehatan Sistem (mendalam)
+### Kesehatan Sistem (dalam)
 
 ```bash
 GET /api/monitoring/health
 ```
 
-Respons:
+Tanggapan:
 
 ```json
 {
@@ -153,43 +153,35 @@ Respons:
 }
 ```
 
-#### `credentialHealth`: cache probe vs `test_status` SQLite
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth` adalah **gauge cache probe dalam memori**,
-bukan dump langsung dari `provider_connections.test_status`. Setelah #12532, jalur
-permintaan hanya membaca `getCachedCredentialHealthSummary()`; probe latar belakang
-memperbarui cache di luar event loop.
+`GET /api/monitoring/health` → `credentialHealth` adalah** pengukur probe-cache dalam memori** , bukan dump langsung dari `provider_connections.test_status`. Setelah #12532 jalur permintaan hanya membaca `getCachedCredentialHealthSummary()` ; pemeriksaan latar belakang menyegarkan cache dari loop peristiwa.
 
-| Lapisan              | Lokasi                                                                | Artinya                                                                                                                                                                                                                   |
-| -------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Gauge cache probe    | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Hasil probe kesehatan kredensial terakhir yang masih disimpan dalam memori proses. `source` selalu bernilai `probe-cache`.                                                                                                |
-| Detail koneksi gagal | `credentialHealth.failedConnections`                                  | Tersedia **hanya jika `failed > 0`**. Daftar terbatas baris cache dengan `status=error` (`connectionId`, `status`, `lastError` / `lastErrorType` yang telah disanitasi). `failedOmitted` ditetapkan jika daftar dibatasi. |
-| Status sticky SQLite | `credentialHealth.staleDbNonOkCount`                                  | Jumlah baris koneksi **aktif** (`is_active=1`) yang `test_status` tersimpannya merupakan nilai non-ok yang dikenal (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                     |
+| Lapisan               | Di mana                                                               | Apa artinya                                                                                                                                                                                                        |
+| --------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Pengukur probe-cache  | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Hasil pemeriksaan kesehatan kredensial terakhir masih disimpan dalam memori proses. `source` selalu `probe-cache`.                                                                                                 |
+| Detail koneksi gagal  | `credentialHealth.failedConnections`                                  | Hadiah** hanya ketika `failed > 0`** . Daftar baris cache yang dibatasi dengan `status=error` (`connectionId`, `status`, disanitasi `lastError` / `lastErrorType`). `failedOmitted` diatur ketika daftar dibatasi. |
+| status lengket SQLite | `credentialHealth.staleDbNonOkCount`                                  | Jumlah** aktif** (`is_active=1`) baris koneksi yang `test_status` -nya masih diketahui non-ok (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                                   |
 
-Kedua lapisan dapat sengaja memberikan hasil yang berbeda:
+Kedua lapisan tersebut dapat berbeda pendapat dengan sengaja:
 
-- Gauge `failed=0` sementara `staleDbNonOkCount>0` — SQLite masih memiliki
-  `test_status` sticky (misalnya `expired` atau `credits_exhausted`) yang tidak
-  dihitung sebagai `status=error` oleh snapshot cache probe terbaru.
-- Gauge `failed>0` sementara SQLite tampak sehat — probe terbaru gagal dan
-  disimpan dalam cache; baris DB belum diperbarui, atau kemudian telah dibersihkan.
+- Ukur `failed=0` saat `staleDbNonOkCount>0` — SQLite masih memiliki `test_status` yang lengket (misalnya `expired` atau `credits_exhausted`) sehingga snapshot probe-cache terbaru tidak dihitung sebagai `status=error`.
+- Mengukur `failed>0` sementara SQLite terlihat sehat — pemeriksaan terbaru gagal dan di-cache; baris DB belum diperbarui, atau kemudian dihapus.
 
-Jangan buat peringatan hanya berdasarkan `provider_connections.test_status` saat mengambil data dari
-endpoint ini. Gunakan `failed` + `failedConnections` untuk kegagalan probe langsung, dan
-`staleDbNonOkCount` ketika Anda memerlukan jumlah status sticky yang tersimpan.
+Jangan hanya waspada pada `provider_connections.test_status` saat menggores titik akhir ini. Gunakan `failed` + `failedConnections` untuk kegagalan pemeriksaan langsung, dan `staleDbNonOkCount` saat Anda memerlukan penghitungan status tempel yang bertahan.
 
-### Rekomendasi probe Kubernetes
+### Rekomendasi penyelidikan Kubernetes
 
-OmniRoute adalah **satu proses Node** (satu event loop). `HEALTHCHECK` Docker standar menargetkan `/healthz` yang ringan. `/api/monitoring/health` **terlalu berat** untuk interval liveness kubelet.
+OmniRoute adalah a** proses Node tunggal** (satu putaran peristiwa). Stok Docker `HEALTHCHECK` menargetkan `/healthz` yang ringan. `/api/monitoring/health` adalah** terlalu berat** untuk interval keaktifan kubelet.
 
-| Probe                    | Target yang direkomendasikan                                                               | Catatan                                                                                                                                                                                                                                                                                                                                                                                              |
-| ------------------------ | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Startup**              | HTTP `GET /healthz` dengan `failureThreshold` yang panjang (atau `startPeriod` yang besar) | Cold start + migrasi SQLite dapat memerlukan waktu lebih dari beberapa detik                                                                                                                                                                                                                                                                                                                         |
-| **Readiness**            | HTTP `GET /healthz`                                                                        | Siklus hidup `ok` / `starting` / `stopping` (200 vs 503). Tetap berubah-ubah jika loop terblokir CPU. Respons **200 yang memerlukan beberapa detik bukan berarti sehat** (#10303) — itu berarti event loop mengalami starvation sebelum handler 3 byte dijalankan                                                                                                                                    |
-| **Liveness**             | HTTP `GET /livez`, **atau TCP** pada port layanan utama (`PORT`, default `20128`)          | `/livez` hanya menunjukkan bahwa proses masih hidup (selalu 200 jika handler berjalan). Endpoint ini tetap menggunakan event loop yang sama — sibuk ≠ mati, dan tidak mendeteksi event-loop starvation (#10303) lebih baik daripada TCP. Pilih **TCP** jika probe HTTP mengalami timeout di bawah beban katalog/kompresi; dalam kedua kasus, **jangan** hentikan pod akibat event-loop stall singkat |
-| **Pemeriksaan mendalam** | `GET /api/monitoring/health` dari pemeriksa eksternal                                      | Bukan untuk `livenessProbe` kubelet / `readinessProbe` berinterval ketat                                                                                                                                                                                                                                                                                                                             |
+| Menguji                     | Sasaran yang direkomendasikan                                                     | Catatan                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Rintisan**                | HTTP `GET /healthz` dengan `failureThreshold` panjang (atau `startPeriod` besar)  | Migrasi + SQLite awal yang dingin dapat melebihi beberapa detik                                                                                                                                                                                                                                                                                                              |
+| **Kesiapan**                | HTTP `GET /healthz`                                                               | Siklus hidup `ok` / `starting` / `stopping` (200 vs 503). Masih mengepak jika loop diblokir CPU. A** 200 dalam beberapa detik tidak sehat** (#10303) — itu berarti loop peristiwa kelaparan sebelum penangan 3-byte dijalankan                                                                                                                                               |
+| **keaktifan**               | HTTP `GET /livez`,** atau TCP** pada port layanan utama (`PORT`, default `20128`) | `/livez` hanya proses yang hidup (selalu 200 jika handler dijalankan). Ia masih membagikan loop peristiwa — busy ≠ dead, dan tidak mendeteksi kelaparan loop peristiwa (#10303) lebih baik daripada TCP. Lebih menyukai**TCP** jika waktu pemeriksaan HTTP habis di bawah beban catalog/compression ; Mengerjakan** bukan** matikan pod pada event loop pendek yang terhenti |
+| **Kesehatan yang mendalam** | `GET /api/monitoring/health` dari pemeriksa eksternal                             | Bukan untuk kubelet `livenessProbe` / ketat `readinessProbe`                                                                                                                                                                                                                                                                                                                 |
 
-Contoh struktur (sesuaikan ambang batas dengan beban cold-start dan kompresi Anda):
+Contoh bentuk (sesuaikan ambang batas dengan start dingin dan beban kompresi):
 
 ```yaml
 ports:
@@ -215,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Saat event-loop stall, HTTP /livez masih dapat mengalami timeout. TCP adalah
-  # alternatif yang lebih konservatif:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-**Jangan** arahkan **liveness** kubelet ke `/api/monitoring/health`. Path tersebut melakukan pekerjaan DB/pemantauan yang nyata dan akan menghasilkan false positive saat berada di bawah beban.
+**Tidak** titik kubelet** keaktifan** di `/api/monitoring/health`. Jalur itu berfungsi DB/monitoring nyata dan akan menjadi positif palsu saat dimuat.
 
-Terkait: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (probe saat event loop sibuk), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (beban berat penetapan harga katalog), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (beban berat penghitungan token kompresi).
+Terkait: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (menyelidiki saat loop acara sedang sibuk), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (babi harga katalog), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (babi jumlah token kompresi).
 
-### Watchdog systemd (event loop yang membeku)
+### pengawas systemd (loop acara beku)
 
-Pada host systemd, OmniRoute memberi tahu manajer layanan ketika sudah siap dan terus mengirimkan ping, sehingga server dengan event loop yang macet akan dihentikan dan dimulai ulang alih-alih tetap berjalan tetapi tidak merespons. Ping berasal dari event loop milik server sendiri: ketika event loop terblokir, ping berhenti, lalu systemd memulai ulang layanan setelah `WatchdogSec` berlalu tanpa menerima ping.
+Pada host systemd, OmniRoute memberi tahu manajer layanan ketika sudah siap dan terus melakukan ping, sehingga server yang loop peristiwanya macet akan dimatikan dan dimulai ulang alih-alih tetap aktif dan diam. Ping berasal dari loop peristiwa server sendiri: ketika diblokir, ping tersebut berhenti, dan systemd memulai ulang layanan setelah `WatchdogSec` berlalu tanpa satu pun.
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) sudah menulis unit pengguna dengan konfigurasi ini. Unit yang Anda tulis sendiri (`Type=simple` secara default) tidak memiliki watchdog, jadi tambahkan baris berikut ke bagian `[Service]`:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) sudah menulis unit pengguna dengan ini. Unit yang Anda tulis sendiri (default `Type=simple`) tidak mendapat pengawas, jadi tambahkan baris ini ke bagian `[Service]` :
 
 ```ini
 [Service]
@@ -239,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-Unit yang dihasilkan menetapkan `Restart=on-failure`, jadi tambahkan juga baris tersebut — tanpanya, watchdog hanya menghentikan layanan yang macet dan tidak memulai ulang layanan tersebut.
+Unit yang dihasilkan menyetel `Restart=on-failure`, jadi tambahkan baris itu juga — tanpanya, pengawas hanya akan mematikan layanan yang macet alih-alih memulai ulang.
 
-- `Type=notify`: layanan dianggap "dimulai" ketika server mengirimkan `READY=1`, bukan ketika proses melakukan fork. `TimeoutStartSec` membatasi durasi startup yang lambat.
-- `NotifyAccess=all`: ping dikirim oleh proses server, yang merupakan proses anak dari supervisor `omniroute serve`.
-- `WatchdogSec`: ping dikirim setiap 60 detik, jadi gunakan **120 atau lebih**. Nilai yang lebih kecil akan memulai ulang server yang sebenarnya sehat.
-- Jalankan `omniroute serve` di foreground. `--daemon` memisahkan server dari cgroup unit dan handshake notifikasi tidak pernah selesai.
+- `Type=notify`: layanan "dimulai" saat server mengirimkan `READY=1`, bukan saat proses bercabang. `TimeoutStartSec` membatasi awal yang lambat.
+- `NotifyAccess=all`: ping dikirim oleh proses server, yang merupakan anak dari supervisor `omniroute serve`.
+- `WatchdogSec`: ping keluar setiap 60 detik, jadi gunakanlah** 120 atau lebih** . Nilai yang lebih kecil akan memulai ulang server yang sehat.
+- Jalankan `omniroute serve` di latar depan. `--daemon` melepaskan server dari cgroup unit dan jabat tangan pemberitahuan tidak pernah selesai.
 
-Periksa apakah watchdog aktif setelah layanan dimulai ulang:
+Periksa apakah itu aktif setelah restart:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` menampilkan jeda yang dikonfigurasi dan `WatchdogTimestamp` bergerak maju setiap menit. Mulai ulang yang disebabkan oleh watchdog dicatat sebagai `Result=watchdog`. Untuk menonaktifkan ping tanpa mengubah unit, tetapkan `OMNIROUTE_DISABLE_SD_NOTIFY=1`; tanpa `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows), tidak ada yang dikirim.
+`WatchdogUSec` menunjukkan penundaan yang dikonfigurasi dan `WatchdogTimestamp` bergerak maju setiap menit. Restart yang disebabkan oleh pengawas dicatat sebagai `Result=watchdog`. Untuk mematikan ping sambil menjaga unit tetap seperti semula, setel `OMNIROUTE_DISABLE_SD_NOTIFY=1`; tanpa `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) tidak ada yang dikirim.
 
-Watchdog hanya memeriksa apakah event loop terus berjalan. Server yang lambat tetapi masih terus berjalan tidak akan dimulai ulang.
+Pengawas hanya memeriksa apakah perulangan peristiwa terus berjalan. Server yang lambat tapi tetap berputar tidak di restart.
 
-### Pekerjaan opsional pada jalur permintaan (memori, skill, penyegaran token)
+### Pekerjaan jalur permintaan opsional (memori, keterampilan, penyegaran token)
 
-Ekstraksi memori, injeksi keterampilan, dan penyegaran token OAuth berbagi **event loop Node utama** dengan `/healthz`. Fitur-fitur tersebut dapat diaktifkan atau dinonaktifkan melalui dasbor (`memoryEnabled`, `skillsEnabled`), bukan merupakan worker pool. Lihat [Lingkungan — biaya event loop](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Ekstraksi memori, injeksi keterampilan, dan penyegaran token OAuth berbagi** loop acara Node utama** dengan `/healthz`. Itu adalah fitur dashboard-toggle (`memoryEnabled`, `skillsEnabled`), bukan kumpulan pekerja. Lihat [Biaya perulangan peristiwa Lingkungan —](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
 ### Kesehatan Penyedia
 
-> **Tidak ada endpoint REST.** Data kesehatan penyedia tersedia melalui alat MCP `observability_snapshot` atau halaman dasbor `/dashboard/providers`.
+> **Tidak ada titik akhir REST.** Data kesehatan penyedia tersedia melalui alat MCP `observability_snapshot` atau halaman dasbor `/dashboard/providers`.
 
-### Detail Penyedia
+### Detil Penyedia
 
-> **Tidak ada endpoint REST.** Detail per penyedia tersedia melalui halaman dasbor `/dashboard/providers`.
+> **Tidak ada titik akhir REST.** Detail per penyedia tersedia melalui halaman dasbor `/dashboard/providers`.
 
 ---
 

@@ -4,89 +4,63 @@
 
 ---
 
-> **19.11.2026: Mergify-yhdistämisjono on poistettu käytöstä** (omistajan päätös). `.mergify.yml` ei enää määritä jonoa ja hylkää yhdistämiskomennot, jotka yhdistävät tai kirjoittavat uudelleen vetopyynnön. Julkaisut PRs yhdistetään käsin arkiston sääntöjoukon "Vaadi vihreät portit aktiivisessa julkaisussa" (`Gate / CI` + `Gate / Quality`) mukaisesti, kunnes omni-queue toimii live-tilassa, ja omni-jonon kautta sen jälkeen ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Alla olevat Yhdistä-osiot kuvaavat jonoa sellaisena kuin se oli.
+## Laskeutuminen vapautushaaralle
 
-Koska versio 3.8.49 ( quality/velocity -suunnitelman WS3.2/WS3.4 ), oletusarvoinen yhdistämispolku tarkistetulle PRs :lle `release/vX.Y.Z` :hen on** Yhdistä yhdistämisjono** (`.mergify.yml`); the** manuaalinen yhdistämisjuna** alla on dokumentoitu FALLBACK — jota käytetään tapahtumien, julkaisujen jäätymisen tai yhdistämissuunnitelman muuttuessa.
+The omni-queue governs landings into `release/vX.Y.Z`. Read the top-level `mode` in `config/merge-queue/config.json` on the default branch before landing a PR. See [Omni-Queue](OMNI_QUEUE.md).
 
-## Oletuspolku: Mergify-jono
+- **`shadow`** suorittaa validoinnin ja jättää laskeutumisen manuaaliseen yhdistämiseen. Levitä `omni-queue` hyväksyttyyn PR :hen sen viimeisessä päässä. Tarkista kelpoisuus komennolla `npm run queue -- why <PR>`. Odota tuomiota `npm run queue -- history --base <branch>`-päälle. Jatka `would-land`:llä. Pidä yhdistäminen painettuna `culprit-found` tai `would-dequeue` kohdassa ja korjaa syy.
+- **Varjopoikkeukset.** Juna, jolla on vihreä full CI nykyistä pohjakärkeä vasten, voi edetä ilman erillistä jonopäätöstä. Sama poikkeus pätee, kun PR -pää sisältää jo nykyisen pohjakärjen.
+- **`live`** käyttää `omni-queue` -tunnistetta laukaisekseen laskeutumisen. Pelkästään jono laskee PR. Jätä yhdistämiskomennot ja suorat työnnät jonoon.
 
-1. Kampanjat tarkastavat PR:n ja varmistavat sen vihreän tilan, minkä jälkeen omistajan yhdistämistä edeltävä ⭐
-   portti hyväksyy sen (raportti + kohdekohtainen päätös — katso `/merge-prs`, vaihe 0.75).
-2. Omistaja (tai omistajan päätöksen perusteella toimiva istunto) lisää **`queue`**-tunnisteen.
-   Tunniste ON yhdistämishyväksyntä; Mergify vain toteuttaa sen.
-3. Mergify validoi jonossa olevat PR:t **sarjallisesti** (yhden kerrallaan) nopeita portteja
-   vasten ja yhdistää ne (squash). Eräkäsittely ja automaattinen puolitus edellyttävät maksullista
-   Mergify-tasoa ("Cannot use Merge Queue batch" ilmaisversiossa, #7220), joten `.mergify.yml`
-   ei määritä `batch_size`-asetusta; eräkäsittely jää alla olevan manuaalisen yhdistämisjunan
-   tehtäväksi. PR poistetaan jonosta sen sijaan, että se pysäyttäisi jonon, jos sen tarkistukset
-   ovat yhä kesken `checks_timeout`-ajan jälkeen (240 min = 2× tiedoston `quality.yml`
-   mitattu p95).
-4. Yhdistämisen jälkeen jatkuva julkaisun vihreän tilan työnkulku validoi uuden kärjen pushin
-   yhteydessä ja avaa attribuutiongelman, jos yhdistelmä aiheutti regression (ei koskaan
-   automaattista palautusta).
+Jokainen laskeutuminen vaatii omistajan luvan ja vaadittavat tarkastukset. Käytä `omni-queue` vasta, kun omistaja on antanut luvan laskeutumiseen. Jonossa oleva PRs joka koskettaa suojattuja polkuja, vaatii myös omistajan `protected-approved` päätöksen kyseiselle PR.
 
-Suojakaiteet (vastaavat tiedoston `CLAUDE.md` ehdottomia sääntöjä #21/#22):
+"Vaadi vihreät portit aktiivisessa julkaisussa" -säännöt edellyttävät vihreää `Gate / CI` ja `Gate / Quality` merkkiä päässä. Älä koskaan käytä `--admin` punaisen portin ohittamiseen. Irrotettavat jäädytyslohkot sulautuvat jäätyneeseen haaraan. Katso [kova sääntö 21](HARD_RULES_DETAIL.md). Älä koskaan merkitse, yhdistä tai paina vetopyyntöön, että toinen istunto toimii. Katso [kova sääntö 22](HARD_RULES_DETAIL.md).
 
-- **Julkaisujäädytys on voimassa** → ÄLÄ lisää tunnisteita jäädytettyyn haaraan kohdistuviin
-  PR:iin; kohdista ne ensin uudelleen aktiiviseen `release/vX+1`-haaraan.
-- **Toisen istunnon käsittelyssä oleva PR** → älä koskaan lisää siihen tunnistetta; vain
-  omistava istunto asettaa oman työnsä jonoon.
-- Vain testejä sisältävät muutokset ja `hotfix`-tunnisteella merkityt PR:t suorittavat jo
-  supistetun CI:n (katso `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); jonon ehdot hyväksyvät
-  minkä tahansa tosiasiassa suoritetun tarkistusjoukon (`#check-failure=0` +
-  `#check-pending=0`).
+## Junan vetopyyntö
 
-## Varajärjestely: manuaalinen yhdistämisjuna
+1. Aloita junan haara nykyisen vapautuspohjan kärjestä. Integroi tarkat hyväksytyt jäsenpäät yhdistämistoimitusten avulla. Säilytä heidän sitoutumishistoriansa välttämällä squashia ja rebasea.
+2. Avaa yksi vetopyyntö junahaaralle. Vahvista tämä PR omalla täydellä CI llä nykyisessä peruskärjessä. Tarkista alustan kärki ja hyväksytyt osat ennen laskeutumista. Päivitä juna ja sen CI kun validoitu ehdokas vaihtuu.
+3. Laske juna PR yhdistämissitoumuksella sovellettavaan jonotilaan. Live-tilassa jonon `merge-ff` laskutusmenetelmä säilyttää yhdistämistoimitukset. Alkuperäiset jäsenet ovat tavoitettavissa irrotushaaralta. GitHub merkitsee jäsenen PRs yhdistetyksi ja sitoumukset säilyttävät kirjoittajansa.
 
-Käytetään, kun jono ei ole käytettävissä. Tämä vakiinnuttaa käytännön, jolla käsiteltiin 33 PR:ää
-yhdessä päivässä v3.8.47-jakson aikana:
+Julkinen esimerkki on [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Se yhdisti 18 jäsentä PRs ja saavutti yhdistämissitoumuksen 24.11.2026.
 
-1. **Kokoa erä** (noin 10–30 katselmoitua ja hyväksyttyä PR:ää). Tarkista `linked:`-ristiriidat
-   (samat `tap.testFiles`-tiedostot, samat CHANGELOG-osiot) ja käsittele ne peräkkäin.
-2. **Validoi KERRAN**: yhdistä eristettyyn, julkaisuhaaran kärjestä luotuun worktreehen kaikki erän
-   kärkiversiot paikallisesti ja suorita sitten julkaisua vastaava testikokonaisuus
-   (`npm run check:release-green`; lisää `--with-build` ennen julkaisua).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatisoi vaiheet 1–2 (ristiriitaiset
-   PR:t poistetaan ja juna jatkaa). Täysi tila suorittaa komennon `npm run test:unit` — palvelimelle
-   viritetyn suorittimen (`--test-concurrency=20`), **ei** kahta peräkkäistä 4 ytimen CI-osuutta,
-   joiden vuoksi hallitseva vaihe käytti vain noin 25 % 16 ytimen palvelimesta (korjattu
-   2026-07-18). `--fast` (päivänsisäiset suurten junien purut, omistajan hyväksymä 2026-07-18)
-   säilyttää kaikki staattiset tarkistusportit + vitestin mutta suorittaa vain junaan otettujen
-   PR:ien muuttamat node:test-tiedostot; TÄYSI testikokonaisuus on silti suoritettava vähintään
-   kerran päivässä kertyneelle kärjelle (yksi juna ilman `--fast`-valitsinta).
-3. **Vihreä** → yhdistä PR:t järjestyksessä (tarkista `state,headRefOid` uudelleen ennen jokaista —
-   PR, jonka kärki on siirtynyt, palaa katselmointiin). Osoita, että kunkin yhdistämisen nettomuutos on
-   PR:n oma muutos (ei automaattisen ristiriidanratkaisun aiheuttamia palautuksia: tarkasta
-   `git diff --stat` laajuuden ulkopuolisten poistojen varalta).
-4. **Punainen** → puolita erä (validoi kumpikin puolikas) sen sijaan, että validoisit PR:t
-   yksitellen uudelleen; palauta ongelmallinen PR todisteineen katselmointijonoon.
-5. **Älä koskaan**: yhdistä jäädytyksen aikana jäädytettyyn haaraan; käytä `git stash`-komentoa missään;
-   suorita CI:tä summittaisesti uudelleen siinä toivossa, että punainen katoaa (sääntö: punainen on tietoa).
+Synkronointi takaisin `main` sta seuraavaan julkaisuhaaraan tapahtuu myös yhdistämistoimituksen kautta. `main` -perinnön säilyttäminen vaaditaan myöhempää synkronointia varten. Katso [Työpuun eristäminen](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Tasot (miksi jono on turvallinen pelkillä nopeilla tarkistusporteilla)
+## Paikallinen yhdistämis-juna-validaattori
 
-- **PR-kohtaisesti** (quality.yml:n nopeat tarkistusportit): TIA:n vaikutuspiiriin kuuluvat testit + täydet
-  yksikkötestit 4 osassa + vitest + lint-kokonaisuus + tyyppitarkistus + dokumentaation/CHANGELOGin eheys.
-- **Erä-/kärkikohtaisesti** (jatkuva julkaisun vihreys): `--quick`-tilan PAKOLLISET tarkistusportit jokaisella pushilla
-  julkaisuhaaraan; täydet `--with-build --full-ci`-ajot 3× päivässä.
-- **Julkaisukohtaisesti** (ci.yml julkaisu-PR:ssä): täydellinen matriisi, mukaan lukien E2E ×9,
-  pakettiartefakti + tarballin käynnistyksen savutesti, kattavuus/rajoittimet.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Mitään ei validoida aiempaa vähemmän — raskas kokonaisuus vain suoritetaan erä-/kärkikohtaisesti
-PR-kohtaisen suorittamisen sijaan, mikä poistaa O(N)-edestakaiskierrokset.
+Validaattori hakee pohjan ja PR -päät ja yhdistää ne kertakäyttöiseen työpuuhun. Se suorittaa pariteettisarjansa kerran tuloksena olevassa puussa. Epäonnistunut päähaku- tai yhdistämisristiriita poistaa kyseisen PR ja komentosarja jatkuu jäljellä olevalla PRs llä.
 
-## `merge-train.sh`-komentosarjan puhtaan checkoutin edellytykset
+- **`--plan`** tulostaa valitun tilan vaiheet ja poistuu luomatta työpuuta tai ottamalla yhteyttä kaukosäätimeen. Yhdistä se `--fast` kanssa tarkistaaksesi nopean suunnitelman.
+- **`--fast`** suorittaa yleiset staattiset portit, valitut muutetut `node:test` tiedostot hakemistossa `tests/unit/` ja `npm run test:vitest`. Suorita täydellinen paikallinen vahvistus vähintään kerran päivässä kertyneelle kärjelle, kun käytät pikatilaa.
+- **Täysi tila** lisää vain täysin staattiset portit ja suorittaa `npm run test:unit` ja `npm run test:vitest`.
 
-Komentosarja suorittaa juuricheckoutissa nopeasti keskeytyvän **ennakkotarkistuksen** (ennen mitään worktree-
-toimintoja), jotta rikkinäinen asennus ei koskaan voi näyttäytyä punaisena junana:
+Viallinen staattinen portti ajetaan uudelleen koskemattomalla alustalla, jos perusanturi on käytettävissä. Skripti raportoi perinnöllisistä virheistä ja jatkaa, kun jokainen tunnistettu rikkomusrivi näkyy myös pohjassa ja kokonaismäärä ei ole kasvanut.
 
-1. Suorita `npm ci` ja sitten `bun`-jälkiasennus, jonka npm estää:
-   `(cd node_modules/bun && node install.js)` — muuten `check:provider-consistency`
-   ja `check:known-symbols` (molemmat `bun scripts/…`) epäonnistuvat SEKÄ junassa ETTÄ pohjassa
-   ilman rikkomusriviä.
-2. Ylimääräistä `node_modules/node_modules`-hakemistoa ei saa olla (päällekkäinen riippuvuuspuu; React latautuu
-   kahdesti ja käyttöliittymän vitest-testikokonaisuudet epäonnistuvat välittömästi).
-3. Tiedoston `node_modules/.bin/tsc` on oltava olemassa ja suoritettavissa (osittaisesta asennuksesta se puuttuu).
+| Poistu | Merkitys                                                                                                                              |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`    | Tulosti suunnitelman tai viimeisteli sarjan. Sarjan yhteenvedossa luetellaan kaikki periytyneet staattiset viat ja poistetut PRs.     |
+| `1`    | Virheelliset argumentit, ei Git checkoutia, epäonnistunut esitarkastus tai ei PR.                                                     |
+| `2`    | Sarjan tarkistus epäonnistui, eikä sitä pidetty perinnöllisenä. Käyttäjä voi puolittaa erän, poistaa loukkaavan PR ja ajaa uudelleen. |
 
-Juna suorittaa estävän komennon `npm run check:cycles:ratchet`; pelkkä `npm run check:cycles`
-on neuvoa-antava (se luettelee SCC:t ja päättyy ei-nollakoodilla myös terveen pohjan tapauksessa).
+Paikallinen passi tarjoaa diagnostisia todisteita vain omistajan asiakirjoista. Jokainen laskeutuminen vaatii edelleen omistajan valtuutuksen, omat vaaditut tarkastukset ja tarvittaessa varjojonon päätöksen.
+
+## Tasoitus
+
+- **per PR.** CI ja Quality Select -tarkistukset muuttuneiden polkujen perusteella. Code PRs suorittaa nopeita laatuportteja ja vaikuttavia testejä erillisillä yksiköillä ja Vitest -töillä CI ssä.
+- **per jonoehdokas.** CI ja Quality suorittavat koko profiilin koostetulle ehdokkaalle sen jonossa viite.
+- **Vapautusvinkki mukaan.** Release-Green käyttää nopeita kovia portteja työntöillä, jotka vastaavat sen polkusuodattimia. Kolme ajoitettua ajoa päivässä käyttävät täyttä pyyhkäisyä julkaisuhaaralle.
+- **Julkaisukohtaisesti.** Täysi CI matriisi sisältää E2E sirpaleet, paketin vahvistuksen, tarball-käynnistyssavun ja kattavuuden tarkistukset. Katso [julkaisun tarkistuslista](RELEASE_CHECKLIST.md).
+
+## Tuoreen kassan edellytykset `merge-train.sh`
+
+Esitarkastus suoritetaan ennen työpuiden luomista. Asenna riippuvuudet `npm ci`:lla. Varmista, että `node_modules/.bin/tsc` on suoritettava ja että `node_modules/node_modules` puuttuu. Tarkista, että `node_modules/.bin/bun --version` onnistuu.
+
+Jos Bun jälkiasennus ohitettiin, suorita `(cd node_modules/bun && node install.js)`. Palveluntarjoajan johdonmukaisuus ja tunnettujen symbolien tarkistukset käyttävät Bun. Validaattori käyttää `npm run check:cycles:ratchet` :tä estoporttina. Itsenäinen `npm run check:cycles` komento on neuvoa-antava.
+
+## Historia
+
+Mergify-yhdistysjono poistettiin käytöstä 19.11.2026.

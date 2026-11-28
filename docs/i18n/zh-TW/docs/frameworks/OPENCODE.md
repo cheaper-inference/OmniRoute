@@ -4,14 +4,11 @@
 
 ---
 
-> **狀態：** 已正式發布。
-> **適用對象：** 將 OpenCode 連接至 OmniRoute 部署的維運人員。
-> **事實來源（設定結構描述）：** `src/shared/services/opencodeConfig.ts`
-> **事實來源（npm 套件）：** `@omniroute/opencode-provider/`（可發布的工作區）
+> **地位：**一般可用。**觀眾：** Operators wiring OpenCode to an OmniRoute deployment.** Source of truth (config schema):** `src/shared/services/opencodeConfig.ts`**推薦的 npm 套件：** `@omniroute/opencode-plugin/` （OpenCode v1，由`omniroute setup opencode`安裝）和`@omniroute/opencode-plugin-v2/` （OpenCode v2）。舊的`@omniroute/opencode-provider/`包是**已棄用**（參見路徑 2）。
 
-[OpenCode](https://opencode.ai) 是代理式 CLI／桌面 AI 用戶端。它會從 `~/.config/opencode/opencode.json`（或 `opencode.jsonc`）讀取提供者目錄，並遵循 `https://opencode.ai/config.json` 中的結構描述。OmniRoute 會以其中一個提供者的形式提供給 OpenCode——每個請求都會經由 OmniRoute 標準且相容 OpenAI 的 `/v1` 介面傳送，因此 OpenCode 可自動受益於 Auto-Combo 路由、斷路器、金鑰政策、可觀測性等功能。
+[OpenCode](https://opencode.ai)是一个代理CLI/desktop AI客户端。它從`~/.config/opencode/opencode.json` （或`opencode.jsonc`）讀取其提供者目錄並遵循`https://opencode.ai/config.json`的架構。 OmniRoute将自己暴露给OpenCode作为这些提供者之一—每个请求都流经OmniRoute的标准 OpenAI 兼容`/v1`表面，因此OpenCode自动受益于自动组合路由、断路器、关键策略、可观察性等。
 
-有**兩種支援的整合方式**。請擇一使用——兩者會產生相同的設定。
+此頁面記錄了以下兩個靜態配置路徑；兩者產生相同的配置。对于遵循实时目录的模型列表，请改用插件： `omniroute setup opencode`安装`@omniroute/opencode-plugin` (OpenCode v1)， `@omniroute/opencode-plugin-v2`面向OpenCode v2（请参阅[CLI集成](../guides/CLI-INTEGRATIONS.md)和[OpenCode v2 插件指南](../guides/OPENCODE-V2-PLUGIN.md)）。
 
 ---
 
@@ -54,9 +51,11 @@ CLI 會在幕後呼叫 `mergeOpenCodeConfigText()`（`src/shared/services/openco
 
 ---
 
-## 方式 2 — npm 套件 `@omniroute/opencode-provider`
+## 路徑 2 — npm 包`@omniroute/opencode-provider` （已棄用）
 
-建議透過 Node/TS 以程式方式產生設定時使用（CI 管線、monorepo、自訂安裝流程）。
+> **已棄用。**該套件編寫了一個靜態模型列表，該列表會漂移在您的即時OmniRoute目錄後面。其README建議遷移到`@omniroute/opencode-plugin` （或OpenCode v2 上的`@omniroute/opencode-plugin-v2` ）。下面的API僅為現有腳本保留。
+
+從Node/TS編寫設定腳本時使用（CI管道、monorepos、自訂安裝程式流程）。
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // 選用：覆寫公開給 OpenCode 的模型目錄
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-若要以非破壞性方式合併現有檔案，請複製 `opencodeConfig.ts` 中的 `mergeOpenCodeConfigText()`，或呼叫 CLI 產生器。
+若要對現有檔案進行非破壞性合併，請從`opencodeConfig.ts`複製`mergeOpenCodeConfigText()`或呼叫CLI產生器。
 
-完整 API 請參閱[套件 README](../../@omniroute/opencode-provider/README.md)。
+有關完整的API，請參閱[包README](../../@omniroute/opencode-provider/README.md) 。
 
 ---
 
@@ -155,9 +154,11 @@ export const OMNIROUTE_DEFAULT_OPENCODE_MODELS = [
 
 ---
 
-## 另請參閱
+## 參見
 
-- [API 參考文件](../reference/API_REFERENCE.md) — 完整的 OmniRoute REST API 介面
-- [Auto-Combo](../routing/AUTO-COMBO.md) — `model: "auto"` 的含義
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
-- 原始碼：`src/shared/services/opencodeConfig.ts`、`src/lib/cli-helper/config-generator/opencode.ts`、`@omniroute/opencode-provider/src/index.ts`
+- [API參考](../reference/API_REFERENCE.md)—完整OmniRoute REST表面
+- [自動組合](../routing/AUTO-COMBO.md)— `model: "auto"`是什麼意思
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) （建議）
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) （已棄用）
+- 來源： `src/shared/services/opencodeConfig.ts`、 `src/lib/cli-helper/config-generator/opencode.ts`、 `@omniroute/opencode-provider/src/index.ts`

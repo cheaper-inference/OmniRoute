@@ -69,13 +69,13 @@ Direktivet er med vilje **pr. proxy**, ikke globalt — forskellige proxyer i di
 
 ## De tre værdier
 
-| Værdi  | UI-etiket           | Adfærd                                                                                                                                                                                    |
-| ------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `Auto (dual-stack)` | Operativsystemet vælger familien. For en proxyvært angivet som en IP-literal er familien iboende i literalen; for et værtsnavn kan begge familier bruges. Dette er standardindstillingen. |
-| `ipv4` | `Kun IPv4`          | Låser forbindelsen til IPv4. Afviser forbindelsen, hvis proxyværten ikke har en IPv4-post (A).                                                                                            |
-| `ipv6` | `Kun IPv6`          | Låser forbindelsen til IPv6. Afviser forbindelsen, hvis proxyværten ikke har en IPv6-post (AAAA).                                                                                         |
+| Værdi  | UI etiket           | Opførsel                                                                                                                                                       |
+| ------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS vælger familien. For an IP-literal proxy host, the family is intrinsic to the literal; for et værtsnavn er begge familier kvalificerede. Dette er standard. |
+| `ipv4` | `IPv4 only`         | Fastgør forbindelsen til IPv4. Fails closed if the proxy host has no IPv4 (A) record.                                                                          |
+| `ipv6` | `IPv6 only`         | Fastgør forbindelsen til IPv6. Fails closed if the proxy host has no IPv6 (AAAA) record.                                                                       |
 
-UI-strengene findes i `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI strings live in `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
@@ -83,21 +83,21 @@ UI-strengene findes i `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, 
 
 ### Dashboard
 
-Vælgeren findes i proxyformularen på fanen **Proxy Pool**:
+Vælgeren er i fuldmagtsformen for** Proxy Pool** fane:
 
-1. Åbn **Dashboard → Settings → Proxy → Proxy Pool**
+1. Åben** Dashboard → Indstillinger → Proxy → Proxy Pool**
 2. Tilføj eller rediger en proxy
-3. Indstil rullemenuen **IP-familie** til `Auto (dual-stack)`, `Kun IPv4` eller `Kun IPv6`
-4. Gem
+3. Indstil**IP familie** dropdown til `Auto (dual-stack)`, `IPv4 only` eller `IPv6 only`
+4. Spare
 
-Kontrolelementet gengives af `ProxyRegistryManager.tsx` (monteret i `proxy/ProxyPoolTab.tsx`).
+Styringen er gengivet af `ProxyRegistryManager.tsx` (monteret i `proxy/ProxyPoolTab.tsx`).
 
 ### API
 
-Feltet `family` er en del af oprettelses-/opdateringspayloads for proxyregistret, valideres af `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) og håndteres af `POST` / `PATCH /api/v1/management/proxies`:
+`family` feltet er en del af proxy-registret create/update nyttelast, valideret af `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) og håndteret af `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# Opret en proxy, der kun bruger IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# Skift en eksisterende proxy til kun at bruge IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-Det samme felt accepteres også af det indlejrede proxykonfigurationsobjekt, der bruges til upstream-proxyposter (`upstream_proxy_config.family`, se [Datamodel](#data-model)).
+Det samme felt accepteres også af det inline proxy-konfigurationsobjekt, der bruges til upstream-proxy-indtastninger (`upstream_proxy_config.family`, se [Data Model](#data-model) ).
 
-Se [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) for resten af API'et til CRUD-handlinger og tildeling af proxyer.
+For resten af proxyen CRUD/assignment API, se [PROXY_GUIDE](../ops/PROXY_GUIDE.md)
 
 ---
 

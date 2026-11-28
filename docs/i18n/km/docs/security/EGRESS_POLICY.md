@@ -67,37 +67,37 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ---
 
-## តម្លៃទាំងបី
+## គុណតម្លៃទាំងបី
 
-| តម្លៃ  | ស្លាក UI                     | ឥរិយាបថ                                                                                                                                                                          |
-| ------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `ស្វ័យប្រវត្តិ (dual-stack)` | OS ជ្រើសរើស family។ សម្រាប់ម៉ាស៊ីនមេប្រូកស៊ីដែលជា IP-literal នោះ family ត្រូវបានកំណត់ដោយតម្លៃ literal ផ្ទាល់។ សម្រាប់ hostname វិញ family ទាំងពីរអាចប្រើបាន។ នេះជាតម្លៃលំនាំដើម។ |
-| `ipv4` | `តែ IPv4`                    | កំណត់ការតភ្ជាប់ឱ្យប្រើ IPv4។ ការតភ្ជាប់នឹងបរាជ័យដោយសុវត្ថិភាព ប្រសិនបើម៉ាស៊ីនមេប្រូកស៊ីមិនមានកំណត់ត្រា IPv4 (A)។                                                                 |
-| `ipv6` | `តែ IPv6`                    | កំណត់ការតភ្ជាប់ឱ្យប្រើ IPv6។ ការតភ្ជាប់នឹងបរាជ័យដោយសុវត្ថិភាព ប្រសិនបើម៉ាស៊ីនមេប្រូកស៊ីមិនមានកំណត់ត្រា IPv6 (AAAA)។                                                              |
+| តម្លៃ  | ស្លាក UI            | អាកប្បកិរិយា                                                                                                                                                |
+| ------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS ជ្រើសរើសគ្រួសារ។ សម្រាប់ម៉ាស៊ីនប្រូកស៊ីតាមព្យញ្ជនៈ IP ក្រុមគ្រួសារគឺខាងក្នុងនៃព្យញ្ជនៈ។ សម្រាប់ឈ្មោះម្ចាស់ផ្ទះ គ្រួសារទាំងពីរមានសិទ្ធិ។ នេះគឺជាលំនាំដើម។ |
+| `ipv4` | `IPv4 only`         | ខ្ទាស់ការតភ្ជាប់ទៅ IPv4។ បរាជ័យបិទ ប្រសិនបើម៉ាស៊ីនប្រូកស៊ីមិនមានកំណត់ត្រា IPv4 (A) ។                                                                        |
+| `ipv6` | `IPv6 only`         | ខ្ទាស់ការតភ្ជាប់ទៅ IPv6។ បរាជ័យបិទ ប្រសិនបើម៉ាស៊ីនប្រូកស៊ីមិនមានកំណត់ត្រា IPv6 (AAAA) ។                                                                     |
 
-ខ្សែអក្សរ UI ស្ថិតនៅក្នុង `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`)។
+ខ្សែអក្សរ UI រស់នៅក្នុង `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) ។
 
 ---
 
-## របៀបកំណត់រចនាសម្ព័ន្ធ
+## របៀបកំណត់វា។
 
 ### ផ្ទាំងគ្រប់គ្រង
 
-ឧបករណ៍ជ្រើសរើសស្ថិតនៅក្នុងសំណុំបែបបទប្រូកស៊ីនៃផ្ទាំង **ក្រុមប្រូកស៊ី**៖
+ឧបករណ៍ជ្រើសរើសគឺនៅក្នុងទម្រង់ប្រូកស៊ីរបស់** អាងប្រូកស៊ី** ផ្ទាំង៖
 
-1. បើក **ផ្ទាំងគ្រប់គ្រង → ការកំណត់ → ប្រូកស៊ី → ក្រុមប្រូកស៊ី**
+1. បើក** ផ្ទាំងគ្រប់គ្រង → ការកំណត់ → ប្រូកស៊ី → Proxy Pool**
 2. បន្ថែម ឬកែសម្រួលប្រូកស៊ី
-3. កំណត់បញ្ជីទម្លាក់ចុះ **IP family** ទៅជា `ស្វ័យប្រវត្តិ (dual-stack)`, `តែ IPv4` ឬ `តែ IPv6`
+3. កំណត់** គ្រួសារ IP** ទម្លាក់ចុះទៅ `Auto (dual-stack)`, `IPv4 only`, ឬ `IPv6 only`
 4. រក្សាទុក
 
-វត្ថុបញ្ជានេះត្រូវបាន render ដោយ `ProxyRegistryManager.tsx` (ត្រូវបាន mount ក្នុង `proxy/ProxyPoolTab.tsx`)។
+វត្ថុបញ្ជាត្រូវបានបង្ហាញដោយ `ProxyRegistryManager.tsx` (បានម៉ោននៅក្នុង `proxy/ProxyPoolTab.tsx`) ។
 
 ### API
 
-វាល `family` គឺជាផ្នែកមួយនៃ payload សម្រាប់បង្កើត/ធ្វើបច្ចុប្បន្នភាពបញ្ជីប្រូកស៊ី ដែលត្រូវបានផ្ទៀងផ្ទាត់ដោយ `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) និងដំណើរការដោយ `POST` / `PATCH /api/v1/management/proxies`៖
+វាល `family` គឺជាផ្នែកមួយនៃការចុះឈ្មោះប្រូកស៊ី create/update payloads ដែលត្រូវបានបញ្ជាក់ដោយ `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) និងគ្រប់គ្រងដោយ `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# បង្កើតប្រូកស៊ីដែលប្រើតែ IPv6
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# ប្តូរប្រូកស៊ីដែលមានស្រាប់ឱ្យប្រើតែ IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-វាលដូចគ្នានេះក៏ត្រូវបានទទួលយកដោយ object កំណត់រចនាសម្ព័ន្ធប្រូកស៊ី inline ដែលប្រើសម្រាប់ធាតុ upstream-proxy ផងដែរ (`upstream_proxy_config.family`, សូមមើល [គំរូទិន្នន័យ](#data-model))។
+វាលដូចគ្នាក៏ត្រូវបានទទួលយកដោយវត្ថុកំណត់រចនាសម្ព័ន្ធប្រូកស៊ីក្នុងបន្ទាត់ដែលប្រើសម្រាប់ធាតុប្រូកស៊ីខាងលើ (`upstream_proxy_config.family` សូមមើល [គំរូទិន្នន័យ](#data-model) ) ។
 
-សម្រាប់ API CRUD/ការកំណត់ប្រូកស៊ីផ្សេងទៀត សូមមើល [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md)។
+សម្រាប់ប្រូកស៊ី CRUD/assignment API ដែលនៅសល់ សូមមើល [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

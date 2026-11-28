@@ -236,19 +236,19 @@ Qo'llab-quvvatlaydi** 22 marshrutlash strategiyasi** (qarang: `src/shared/consta
 | `context-relay`     | Kontekstni maqsadlar bo'ylab tarqating                                                                           |
 | `fill-first`        | Keyingisiga o'tishdan oldin kvotani to'ldiring                                                                   |
 | `p2c`               | Ikki tanlovning kuchi                                                                                            |
-| `random`            | Yagona tasodifiy                                                                                                 |
-| `least-used`        | Eng so'nggi foydalanilganini tanlang                                                                             |
-| `cost-optimized`    | Eng arzon sog'lom maqsad birinchi                                                                                |
-| `reset-aware`       | Provayder oynalarini tiklashdan xabardor                                                                         |
-| `reset-window`      | Oynaga asoslangan marshrutlashni asl holatiga qaytaring                                                          |
+| `random`            | Har bir so'rov bo'yicha yangi aralash                                                                            |
+| `least-used`        | Eng kam soʻrov yozilgan birini tanlang                                                                           |
+| `cost-optimized`    | Katalogga kirish narxining eng pasti                                                                             |
+| `reset-aware`       | Qolgan kvota + qayta o'rnatish shoshilinch                                                                       |
+| `reset-window`      | Kvota oynasi birinchi bo'lib tezroq tiklanadi                                                                    |
 | `expiry-first`      | Kvota muddati tugaydigan hisobni avval foydalanilmagan holda sarflang                                            |
 | `headroom`          | Birinchi bo'lib qolgan kvotalar bo'sh joy                                                                        |
 | `quota-weighted`    | Tugagan hisoblarni o'tkazib yuboring, so'ngra parvoz paytida qolgan kvota ÷ bo'yicha chizib oling                |
-| `strict-random`     | Haqiqatan ham bir xil (sifatli vazn yo'q)                                                                        |
+| `strict-random`     | Aralashtirilgan pastki: har bir nishon takrorlashdan oldin bir marta                                             |
 | `auto`              | 16 faktorli balldan foydalaning (`autoCombo/`)                                                                   |
 | `lkgp`              | So'nggi ma'lum yaxshi provayder birinchi                                                                         |
-| `context-optimized` | Uzoq kontekstli so'rovlar uchun eng yaxshisi                                                                     |
-| `cache-optimized`   | Har bir qayta foydalanish mumkin bo'lgan so'rov prefiksini bir xil hisob qaydnomasiga mahkamlang (kesh-xitlar)   |
+| `context-optimized` | Avval ma'lum bo'lgan eng katta kontekst oynasi                                                                   |
+| `cache-optimized`   | Keshda tezkor prefiksni saqlashi mumkin bo'lgan hisobni afzal ko'ring                                            |
 | `fusion`            | Panelga parallel ravishda havola qiling, so'ngra sudya orqali sintez qiling (`fusion.ts`)                        |
 | `pipeline`          | Zanjir bosqichlari — har bir maqsadning chiqishi keyingisini ta'minlaydi                                         |
 | `jev`               | Ro'yxatdan o'tish: TypeSafe Jev qaysi reytingli yozuvlar bajarilganligini tan oladi; boshqa sizning buyurtmangiz |
@@ -260,7 +260,7 @@ The** mavhum ijrochi** har bir ijrochi sinfi (to'g'ridan-to'g'ri yoki `DefaultEx
 - `buildUrl()` — standart URL konstruktsiyasi (subklasslar maxsus uchun bekor qilinadi)
 - `buildHeaders()` — standart sarlavhalari (auth, kontent turi)
 - sukut bo'yicha `transformRequest()` — o'tish
-- `execute()` — retry/backoff/breaker bilan asosiy HTTP loop
+- `execute()` — retry/backoff/breaker bilan asosiy HTTP tsikli
 
 ```ts
 // open-sse/executors/default.ts

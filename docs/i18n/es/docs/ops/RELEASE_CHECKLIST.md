@@ -4,12 +4,9 @@
 
 ---
 
-> **Última actualización:** 2026-08-28 — v3.8.51
 > Flujo de lanzamiento optimizado que aprovecha las habilidades de Claude Code para la automatización.
 >
-> **Mantén la cola/rama en verde entre lanzamientos:** consulta [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (familia `/green-prs` + `npm run check:release-green` + `/babysit` + ejecución nocturna). Ejecutar
-> esto periódicamente —y especialmente **antes** de esta lista de comprobación— hace que el PR de lanzamiento comience en verde.
+> **Mantenga el queue/branch verde entre lanzamientos:** ver [RELEASE_GREEN.md](./RELEASE_GREEN.md) (familia `/green-prs` + `npm run check:release-green` + `/babysit` + todas las noches). Ejecutando esto periódicamente — y especialmente** antes** esta lista de verificación — hace que el lanzamiento PR comience en verde.
 
 ## Resumen
 
@@ -58,9 +55,11 @@ El flujo de trabajo npm-publish ya no publica directamente: arranca el tarball e
 
 **Libro de jugadas de artefactos rotos (sin cambios):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` como reflejo predeterminado (minutos, reversible); `npm unpublish` solo dentro de la ventana 72h/no-dependents y nunca como primer movimiento. Docker: nunca reescribir una etiqueta de versión — rollback está redireccionando `latest` al último buen resumen.
 
-**Docker Hub `latest` (requerido en cada publicación estable SemVer ):** el flujo de trabajo `docker-publish` debe etiquetar** ambos** `X.Y.Z` y, cuando `should-promote-latest.sh` concuerda, este es el SemVer estable más alto, `:latest` con el** mismo resumen** . Después del trabajo: Hub `latest` digest es igual al nuevo SemVer digest y `last_updated` movido. No deje `:latest` en una compilación anterior mientras las notas de la versión hablan sobre correcciones que solo existen en git. Redacte guías de inicio rápido use `:latest`; GitOps debería seguir fijando `X.Y.Z`. Consulte [los canales de lanzamiento Docker](../guides/DOCKER_GUIDE.md#release-channels) y #10317.
+**Docker Hub `latest` (requerido en cada publicación estable SemVer ):** el flujo de trabajo `docker-publish` debe etiquetar** ambos** `X.Y.Z` y, cuando `should-promote-latest.sh` concuerda, este es el SemVer estable más alto, `:latest` con el** mismo resumen** . Después del trabajo: el resumen Hub `latest` es igual al nuevo resumen SemVer y `last_updated` movido. No deje `:latest` en una compilación anterior mientras las notas de la versión hablan sobre correcciones que solo existen en git. Redacte guías de inicio rápido use `:latest`; GitOps debería seguir fijando `X.Y.Z`. Consulte [los canales de lanzamiento Docker](../guides/DOCKER_GUIDE.md#release-channels) y #10317.
 
-**Repositorio de organización Docker Hub (`cheaperinference/omniroute`):** Docker Hub no puede mover un repositorio entre espacios de nombres, por lo que `diegosouzapw/omniroute` mantiene su historial de extracción y cada lanzamiento, y el trabajo `mirror-org-dockerhub` de `docker-publish` copia cada versión publicada (y `:latest` cuando se promociona) de `ghcr.io/cheaper-inference/omniroute` al repositorio de la organización. Necesita los secretos `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; sin ellos, el trabajo permanece en verde con una advertencia de "Docker Hub org mirror saltado" y los demás registros se publican normalmente. Para publicar una versión publicada allí más adelante, ejecute** Acciones → Reflejar imagen Docker en Docker Hub org → Ejecutar flujo de trabajo** con `version=X.Y.Z` (y `promote_latest` para la versión estable más alta): copia las imágenes existentes, no las reconstruye.
+**Repositorio de organización Docker Hub (`cheaperinference/omniroute`):** Docker Hub no puede mover un repositorio entre espacios de nombres, por lo que `diegosouzapw/omniroute` mantiene su historial de extracción y cada lanzamiento, y el trabajo `mirror-org-dockerhub` de `docker-publish` copia cada versión publicada (y `:latest` cuando se promociona) de `ghcr.io/cheaper-inference/omniroute` al repositorio de la organización. Necesita los secretos `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; sin ellos, el trabajo permanece en verde con una advertencia de "Docker Hub org mirror saltado" y los demás registros se publican normalmente. Para publicar una versión publicada allí más adelante, ejecute** Acciones → Reflejar imagen Docker en Docker Hub org → Ejecutar flujo de trabajo** con `version=X.Y.Z` (y `promote_latest` para la versión estable más alta): copia las imágenes existentes, no las reconstruye. La descripción general de Docker Hub de ese repositorio se configura manualmente: el API que lo edita rechaza los tokens de acceso de la organización.
+
+El mismo flujo de trabajo también copia cada versión en el paquete GHCR heredado `ghcr.io/diegosouzapw/omniroute` hasta el 30 de junio de 2027, por lo que las instalaciones aún fijadas en él siguen actualizándose; su índice lleva una descripción "movido a `ghcr.io/cheaper-inference/omniroute`". Necesita el secreto `GHCR_LEGACY_TOKEN` (un token de acceso personal clásico de `diegosouzapw` con `write:packages`); sin él, el trabajo se salta con una advertencia de "Espejo GHCR heredado omitido".
 
 ## Vía rápida de hotfix (etiqueta `hotfix`)
 
@@ -102,7 +101,7 @@ E2E automáticamente, sin ninguna etiqueta.
   - Actualiza insignias README.md
 - [ ] Revise manualmente CHANGELOG.md y limpie los mensajes de confirmación si es necesario
 - [ ] Asegúrese de que la última sección semver en `CHANGELOG.md` sea igual a la versión `package.json`
-- [ ] Mantenga `## [Unreleased]` como la primera sección del registro de cambios para el próximo trabajo.
+- [ ] Mantenga `## [Unreleased]` como la primera sección del registro de cambios para próximos trabajos.
 - [ ] La actualización `docs/openapi.yaml` → `info.version` debe ser igual a la versión `package.json`
 
 ### Calidad del código
@@ -151,7 +150,7 @@ Cambios importantes: agregue `BREAKING CHANGE:` pie de página o `!` después de
 ### Documentación
 
 - [ ] pases `npm run check:docs-sync` (ejecución automática mediante confirmación previa)
-- [ ] pases `npm run check:docs-all` (paraguas: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] pasa `npm run check:docs-all`. Su aviso `check:deprecated-versions` marca las versiones atribuidas explícitamente a OmniRoute (3.6.x y anteriores) e ignora las fechas.
 - [ ] `npm run check:env-doc-sync` sale 0 código — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env el contrato está intacto
 - [ ] `npm run check:doc-links` sale de 0 — sin referencias de rebajas internas rotas después de la reestructuración
 - [ ] `docs/architecture/ARCHITECTURE.md` revisado para deriva storage/runtime
@@ -230,7 +229,7 @@ Haga NOT ejecute `npm run build` seguido de un `npm run build:cli` separado para
 - [ ] `npm run build:release` tiene éxito y `dist/BUILD_SHA` == `git rev-parse --short HEAD`
 - [ ] `npm run check:pack-artifact` clean — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json` u otros residuos locales
 - [ ] `dist/server.js` existe después de la compilación
-- [ ] Humo de tiempo de ejecución empaquetado local opcional: `npm run dev:candidate -- validate` después de que `npm run dev:candidate -- build` inicie el tarball empaquetado en un `DATA_DIR` aislado y verifique `/api/health` + `/v1/models` (consulte [Contribution Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) ).
+- [ ] Humo de tiempo de ejecución empaquetado local opcional: `npm run dev:candidate -- validate` después de que `npm run dev:candidate -- build` inicie el tarball empaquetado en un `DATA_DIR` aislado y verifique `/api/health` + `/v1/models` (consulte [Contribution Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
 ### Etiquetado y liberación
 
@@ -284,7 +283,7 @@ El anuncio de Radar está cometido intencionalmente con `active: false`. La acti
 - [ ] Demostrar la restauración de la copia de seguridad y una ejecución de investigación supervisada y con un presupuesto limitado
 - [ ] Aprobar la política de revisión BRL/PIX antes de aceptar evidencia de donación
 - [ ] Habilite el pago público solo después de las puertas anteriores, luego active el nuevo `news.json` ID
-- [ ] Verifique que el banner de inicio utilice una copia localizada y que reaparezca un nuevo ID después de descartar un ID anterior.
+- [ ] Verifique que el banner de Inicio utilice una copia localizada y que reaparezca un nuevo ID después de descartar un ID anterior.
 
 ## Prueba de humo de servicios integrados (v3.8.4+)
 
@@ -399,7 +398,7 @@ La confirmación de desarrollo se construye con git plumbing (no se toca ningún
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
@@ -409,13 +408,13 @@ La ejecución hace `npm ci`, `npm run build:release`, `npm run check:pack-artifa
 
 1. GO grabado en [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` imprime `RESULT: READY`.
-3. Cree las ramas en `origin` a mano con los comandos que el ensayo imprime — el script se niega a enviar a `origin`. Para reutilizar una confirmación de desarrollo revisada, primero ejecute el ensayo `--execute` en el consejo 3.9.0 contra su bifurcación; imprime ambos SHAs y se pueden enviar las mismas confirmaciones:
+3. Cree las ramas en `origin` a mano con los comandos que el ensayo imprime — el script se niega a enviar a `origin`. Para reutilizar una confirmación de desarrollo revisada, ejecute primero el ensayo `--execute` en el consejo 3.9.0 contra su bifurcación; imprime ambos SHAs y se pueden enviar las mismas confirmaciones:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Proteja `stable/v3` y `develop` (cola de fusión de conjuntos de reglas + ) antes de que llegue el primer PR.
+4. Proteja `stable/v3` y `develop` (colas de fusión de conjuntos de reglas + ) antes de que llegue el primer PR.
 5. Los flujos de trabajo inactivos se activan según la existencia de una rama: `forward-port.yml` (empujar a `stable/v3`), `validate-stable-pr.yml` (PRs a `stable/v3`) y `nightly-v4-build.yml` (compila `develop`). Antes de entrar en funcionamiento, establezca el secreto del repositorio `secrets.FORWARD_PORT_TOKEN` (para que CI se ejecute en el puerto directo PRs); La publicación nocturna permanece desactivada hasta que el propietario establece la variable del repositorio `vars.NIGHTLY_PUBLISH` en `true` y npm Trusted Publishing acepta `nightly-v4-build.yml`. La resolución del canal es `scripts/release/dist-tag.mjs`, el mismo solucionador que utiliza `npm-publish.yml`.
 6. Verifique los canales: `npm view omniroute dist-tags --json` muestra `latest` = 3.9.0 y no `next` / `nightly` hasta que se publique la versión 4.
 7. Revertir, si es necesario: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` y `npm dist-tag add omniroute@3.8.59 latest`.

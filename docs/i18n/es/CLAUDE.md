@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Todas las reglas del proyecto se encuentran en [`AGENTS.md`](AGENTS.md)** — la única fuente de verdad para cada asistente de IA
-(arquitectura, convenciones, pruebas, controles de calidad, flujo de trabajo de git, las 23 Reglas Estrictas,
-aprendizajes sobre PII). Léelo por completo; no vuelvas a añadir aquí las reglas del proyecto. Todo lo que aparece a continuación se aplica ÚNICAMENTE
-a Claude Code: ajustes operativos de las reglas ya definidas en `AGENTS.md`.
+**Todas las reglas del proyecto viven en [`AGENTS.md`](AGENTS.md)** — la única fuente de información para cada asistente AI ; la importación anterior ya lo carga. No vuelva a agregar reglas del proyecto aquí. Todo lo siguiente se aplica ONLY a Claude Código — refinamientos operativos de reglas ya definidas en `AGENTS.md`.
 
-## Aislamiento de worktrees — Aspectos específicos de Claude Code
+## Aislamiento del árbol de trabajo — Claude Detalles del código
 
-El protocolo obligatorio completo de worktrees (confirmación de la rama base, ruta canónica
-`.claude/worktrees/`, `cp -al` node_modules, reglas de desmantelamiento) se encuentra en
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (resumido en `AGENTS.md` →
-Flujo de trabajo de Git → "Aislamiento de worktrees"). Puntos específicos de Claude Code:
+- Confirma la sucursal base con el operador a través de `AskUserQuestion` (Hard Rule #19) a menos que ya te lo hayan dicho.
+- Cree el árbol de trabajo con `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (termina bajo `.claude/worktrees/`, vincula `node_modules` y copia `.husky/_`), luego llame `EnterWorktree` con su `path`. Pase siempre la base: sin ella, el script elige el `release/*` más alto, que puede no ser el que confirmó el operador. Un árbol de trabajo que `EnterWorktree` crea por sí mismo no tiene enlaces duros ni ganchos, por lo que no se ejecuta ninguna puerta de confirmación previa.
 
-- Confirma la rama base con el operador mediante `AskUserQuestion` (Regla estricta n.º 19), a menos
-  que ya te lo haya indicado.
-- Prefiere la herramienta nativa `EnterWorktree`: ya crea worktrees bajo
-  `.claude/worktrees/` (la ruta canónica). Crea el worktree con el comando documentado `git
-worktree add` y luego llama a `EnterWorktree` con su `path`.
+## Subagentes y git
 
-## Seguridad entre sesiones — aspectos específicos de Claude Code
+Cada subagente que toca git (herramienta de agente o secuencia de comandos de flujo de trabajo) obtiene `git stash` ban de la regla estricta #22 a palabra por palabra en su mensaje — la recurrencia registrada del incidente del alijo se produjo a través de un subagente.
 
-Las Reglas Estrictas #19/#21/#22 (en `AGENTS.md`) rigen las sesiones paralelas. Recordatorios operativos para este
-entorno:
+## Anulación de rutas de superpoderes — de artefactos de planificación
 
-- **Reproduce literalmente la prohibición de `git stash` en el prompt de cada subagente que interactúe con git**
-  (herramienta Agent / scripts de Workflow): los subagentes no heredan este archivo y la recurrencia
-  registrada del incidente con stash se produjo a través de un subagente.
-- Antes de fusionar o enviar cambios a cualquier PR que no hayas creado _en esta sesión_, ejecuta `git worktree list`
-  y vuelve a comprobar `gh pr view <N> --json state,headRefOid` (Regla Estricta #22b).
-- Finaliza cada sesión con el checkout principal en la rama en la que comenzó.
+Las habilidades de superpoderes anuncian valores predeterminados en `docs/superpowers/plans/`, `docs/superpowers/specs/` y `docs/research/`. Vuelva a escribir cada uno en su `_tasks/` equivalente en `AGENTS.md` → "Artefactos de planificación e investigación" antes de escribirlos y confírmelo con `git -C _tasks …`, nunca en el repositorio principal.
 
-## Superpowers / artefactos de planificación — sustituciones de rutas
+## Archivos borrador — `_artifacts/`, no `/tmp`
 
-La convención `_tasks/` se define en `AGENTS.md` → "Artefactos de planificación e investigación". Las
-skills de superpowers incluyen valores predeterminados que apuntan a `docs/…`; esos valores predeterminados quedan **sustituidos
-aquí**. Cuando una skill de superpowers anuncie una ruta como "guardado en `docs/superpowers/plans/…`",
-sustitúyela por el equivalente en `_tasks/…` antes de escribir:
+Este proyecto anula el área reutilizable de sesión del arnés (`/tmp/claude-*/…`). Escriba archivos temporales, exportaciones —, zips generados, salidas intermedias únicas — a `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: una ruta raíz `_*` ignorada por git, para que el operador encuentre y elimine todos los scratch en un solo lugar. Los planes duraderos, las especificaciones, la investigación y las transferencias van a `_tasks/` (regla estricta #23).
 
-| Artefacto (skill)                           | Valor predeterminado (NO usar) | Guardar aquí en su lugar                                      |
-| ------------------------------------------- | ------------------------------ | ------------------------------------------------------------- |
-| Planes (`writing-plans`)                    | `docs/superpowers/plans/`      | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Especificaciones / diseño (`brainstorming`) | `docs/superpowers/specs/`      | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Investigación (`deep-research`, ad hoc)     | `docs/research/`               | `_tasks/research/…`                                           |
-| Entregas (`/handoff`)                       | —                              | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## fondo rojo
 
-Confirma esos artefactos dentro del repositorio `_tasks/` (`git -C _tasks …`), nunca en el repositorio principal.
-
-## Archivos temporales / de trabajo — usa `_artifacts/`, no `/tmp`
-
-Este proyecto sustituye el bloc de notas temporal predeterminado de la sesión del entorno (`/tmp/claude-*/…`). Escribe
-los archivos temporales/de trabajo — exportaciones, zips generados, resultados intermedios de uso puntual y cualquier cosa que,
-de otro modo, colocarías en `/tmp` — en `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` es una ruta raíz `_*`: ya está ignorada por git (`AGENTS.md` → "Rutas raíz `_*`"), existe
-  únicamente en disco y nunca se versiona.
-- Motivo: mantener los resultados temporales dentro del proyecto (en lugar de `/tmp`) facilita al operador
-  encontrar y eliminar todo lo temporal en un único lugar, en vez de buscar en directorios efímeros
-  `/tmp` específicos de cada sesión que desaparecen o acumulan archivos sin seguimiento.
-- **No** confundas esto con `_tasks/` (Regla Estricta #23, su propio repositorio git privado para
-  planes/especificaciones/investigaciones/entregas duraderos): `_artifacts/` es únicamente para archivos de trabajo desechables; nada
-  de lo que haya aquí necesita conservarse ni versionarse.
-
-## Base en verde antes de abrir PRs
-
-Antes de crear una rama o abrir una PR, ejecuta la comprobación de base en verde (`AGENTS.md` → Flujo de trabajo de Git →
-"Comprobación de base en verde"; las skills del proyecto hacen referencia a ella como `.agents/skills/_shared/base-green.md`). Una PR
-abierta mientras el extremo de la base está en rojo debe incluir `⚠️ base-red inherited: #<issue>` en su cuerpo. Para
-resolver un estado rojo acumulado (extremo de la base + PRs en rojo), usa la skill `/sweep-reds`.
+Para drenar un estado rojo acumulado (punta base + red PRs), use la habilidad `/sweep-reds`.

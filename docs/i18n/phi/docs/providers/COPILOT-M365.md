@@ -168,9 +168,9 @@ Tiyaking naka-enable `copilot-m365-web`** Mga Provider ng Dashboard →** . Maaa
 
 ## Mga sanggunian
 
-- Isyu: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Talakayan: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Source: `src/shared/constants/providers/web-cookie.ts` (depinisyon ng provider)
-- Pag-import ng HAR: `src/shared/utils/m365HarImport.ts`
-- Mga field ng credential: `src/shared/providers/webSessionCredentials.ts`
-- Modal ng tier: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Isyu: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Pagtalakay: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Pinagmulan: `src/shared/constants/providers/web-cookie.ts` (kahulugan ng provider)
+- HAR import: `src/shared/utils/m365HarImport.ts`
+- Mga field ng kredensyal: `src/shared/providers/webSessionCredentials.ts`
+- Tier modal: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

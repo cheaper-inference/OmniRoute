@@ -88,19 +88,19 @@ Objekt `ctx` předaný funkci `register(program, ctx)`:
 | `ctx.baseUrl`                | `string`         | Výsledná základní adresa URL                                     |
 | `ctx.apiKey`                 | `string \| null` | Klíč API, pokud byl zadán                                        |
 
-## Vyhledávání
+## Objev
 
-Pluginy jsou vyhledávány v:
+Pluginy jsou objeveny z:
 
-1. `~/.omniroute/plugins/<name>/` — uživatelské lokální instalace
-2. Proměnná prostředí `OMNIROUTE_PLUGIN_PATH` — vlastní adresář
+1. `~/.omniroute/plugins/node_modules/<name>/` — kde `omniroute plugin install` vkládá balíčky (npm `--prefix`, nikoli `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — ručně zkopírované adresáře pluginů
+3. `OMNIROUTE_PLUGIN_PATH` env var — vlastní adresář
 
-Obě možnosti jsou určeny **pouze pro CLI**. Běhové prostředí pluginů na straně serveru (marketplace/pluginy `plugin.json`, které běží uvnitř proxy) používá vlastní skener s vlastním přepsáním konfigurace,
-`OMNIROUTE_PLUGINS_DIR` — viz
-[PLUGIN_MARKETPLACE.md → Adresář pluginů](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Nastavení jedné možnosti nemá vliv na druhou.
+Následuje symlinkované adresáře (co npm vytvoří pro `plugin install ./dir`).
 
-Chyby při načítání jsou zachyceny a vypsány jako upozornění — poškozený plugin nikdy nezpůsobí pád CLI.
+Oba jsou** Pouze CLI** . Runtime zásuvného modulu na straně serveru (tržiště/zásuvné moduly `plugin.json`, které běží uvnitř proxy) má svůj vlastní skener s vlastním přepsáním, `OMNIROUTE_PLUGINS_DIR` — viz [PLUGIN_MARKETPLACE.md → adresář zásuvných modulů](./PLUGIN_MARKETPLACE.md#plugin-directory). Nastavení jednoho nemá vliv na druhý.
+
+Chyby při načítání jsou zachyceny a vytištěny jako varování — poškozený plugin nikdy nezhroutí CLI.
 
 ## Zabezpečení
 

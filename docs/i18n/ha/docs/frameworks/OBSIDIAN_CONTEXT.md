@@ -112,58 +112,48 @@ samun dama; ingantaccen bayanin shaidar environment da ke kaiwa zuwa `env-key` h
 Maɓallan da aka tantance waɗanda ba su da saitin Obsidian na musamman ga maɓalli suna ci gaba da amfani da saitin gama-gari a matsayin madadi.
 Kayan aikin `obsidian_sync_*` guda huɗu suna ci gaba da amfani da halayen sync-token nasu na daban.
 
-## Kayan aikin MCP (22)
+## MCP aiki (22)
 
-An ayyana su a cikin `open-sse/mcp-server/tools/obsidianTools.ts`. Ana tantance token/base-URL
-ga kowane kira (na API key da farko, sannan na gama-gari). Kayan aikin da ke hulɗa da **sync server**
-na OmniRoute (kayan aikin `obsidian_sync_*` guda huɗu) suna kuma buƙatar sync auth token da aka saita
-a cikin saitunan OmniRoute.
+An bayyana a cikin `open-sse/mcp-server/tools/obsidianTools.ts`. Ana warware token/base-URL kowane kira (kowace-API-key na farko, sannan na duniya). Kayan aikin da suka buga OmniRoute** sync uwar garken** (kayan aikin `obsidian_sync_*` huɗu) kuma suna buƙatar alamar daidaitawa da aka saita a cikin saitunan OmniRoute.
 
-### Kayan aikin karantawa (`read:obsidian`)
+### Kayan aikin karanta (`read:obsidian`)
 
-| Kayan aiki                   | Bayani                                                                                           |
-| ---------------------------- | ------------------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | Duba ko ana iya isa ga Local REST API kuma an tabbatar da izinin shiga.                          |
-| `obsidian_search_simple`     | Binciken cikakken rubutu na bayanan rubutu; yana dawo da gutsattsarin rubutu tare da file paths. |
-| `obsidian_search_structured` | Bincike ta amfani da JSON Logic expression (matatun and/or/regex/path).                          |
-| `obsidian_read_note`         | Karanta bayanin rubutu ta vault-relative path; a zaɓe, takamaiman heading/block/frontmatter.     |
-| `obsidian_list_vault`        | Jera files da directories da ke cikin vault (bishiyar entries).                                  |
-| `obsidian_get_document_map`  | Sami tsarin headings na bayanin rubutu a matsayin taswirar headings → line numbers.              |
-| `obsidian_get_note_metadata` | Sami frontmatter, tags, links, da ƙididdigar haruffa/kalmomi ba tare da cikakken abun ciki ba.   |
-| `obsidian_get_active_file`   | Sami path + abun cikin file da ke aiki a halin yanzu a Obsidian.                                 |
-| `obsidian_get_periodic_note` | Sami bayanin rubutu na kullum/mako-wata-wata/wata-wata na wata rana (yau idan ba a bayar ba).    |
-| `obsidian_get_tags`          | Jera duk tags na vault tare da yawan bayyanarsu.                                                 |
-| `obsidian_list_commands`     | Jera IDs na commands na Obsidian da ake da su (a yi amfani da `obsidian_execute_command`).       |
-| `obsidian_sync_status`       | Matsayin sync server na OmniRoute: yana gudana, sunan vault, port, uptime, da sync na ƙarshe.    |
-| `obsidian_sync_conflicts`    | Jera rikice-rikicen sync da ba a warware ba (path, conflict path, detected-at).                  |
+| Kayan aiki                   | Bayani                                                                                                      |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Bincika ko Local REST API ana iya kaiwa kuma an inganta shi.                                                |
+| `obsidian_search_simple`     | Binciken cikakken rubutu na abun ciki na bayanin kula; yana dawo da snippets tare da hanyoyin fayil.        |
+| `obsidian_search_structured` | Bincika ta amfani da kalmar ma'ana ta JSON ( filtar and/or/regex/path ).                                    |
+| `obsidian_read_note`         | Karanta bayanin kula ta hanyar vault-dangi; na zaɓi takamaiman heading/block/frontmatter.                   |
+| `obsidian_list_vault`        | Yi lissafin fayiloli da kundayen adireshi a cikin vault (itacen shigarwa).                                  |
+| `obsidian_get_document_map`  | Samo tsarin taken bayanin kula azaman taswirar taken lambobi layin →.                                       |
+| `obsidian_get_note_metadata` | Sami gaba-gaba, tags, links, ƙidaya char/word ba tare da cikakken abun ciki ba.                             |
+| `obsidian_get_active_file`   | Samun hanyar + abun ciki na fayil mai aiki a halin yanzu a cikin Obsidian.                                  |
+| `obsidian_get_periodic_note` | Samu bayanin lokaci-lokaci daily/weekly/monthly na kwanan wata (yau idan an cire shi).                      |
+| `obsidian_get_tags`          | Lissafin duk alamun vault tare da mitocin su.                                                               |
+| `obsidian_list_commands`     | Jerin akwai umarnin Obsidian IDs (amfani da `obsidian_execute_command`).                                    |
+| `obsidian_sync_status`       | Matsayin sabar sync OmniRoute : Gudu, sunan vault, tashar jiragen ruwa, lokacin aiki, daidaitawa ta ƙarshe. |
+| `obsidian_sync_conflicts`    | Lissafin rikice-rikicen aiki tare da ba a warware su ba (hanya, hanyar rikici, gano-a).                     |
 
-### Kayan aikin rubutawa (`write:obsidian`)
+### Rubutun kayan aikin (`write:obsidian`)
 
-| Kayan aiki                       | Bayani                                                                           |
-| -------------------------------- | -------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | Ƙirƙira ko sake rubuta bayanin rubutu da abun cikin Markdown da aka bayar.       |
-| `obsidian_append_note`           | Ƙara abun ciki zuwa bayanin rubutu; a zaɓe, zuwa takamaiman heading/block.       |
-| `obsidian_patch_note`            | Ƙara a ƙarshe/farko ko sauya daidai a heading, block, ko filin frontmatter.      |
-| `obsidian_delete_note`           | Goge bayanin rubutu daga vault har abada.                                        |
-| `obsidian_move_note`             | Matsar ko sake wa bayanin rubutu suna a cikin vault.                             |
-| `obsidian_execute_command`       | Gudanar da command na Obsidian ta command ID ɗinsa.                              |
-| `obsidian_open_file`             | Buɗe file a Obsidian (yana ƙirƙirarsa idan babu shi).                            |
-| `obsidian_sync_trigger`          | Fara sync mai hanyoyi biyu na desktop↔mobile nan take.                           |
-| `obsidian_sync_resolve_conflict` | Warware rikicin sync: riƙe `local` (mobile), `remote` (desktop), ko `keep-both`. |
+| Kayan aiki                       | Bayani                                                                                    |
+| -------------------------------- | ----------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Ƙirƙiri ko sake rubuta bayanin kula tare da abun cikin Markdown da aka bayar.             |
+| `obsidian_append_note`           | Sanya abun ciki zuwa bayanin kula; na zaɓi zuwa takamaiman heading/block.                 |
+| `obsidian_patch_note`            | Tiyata append/prepend/replace a kan gaba, toshe, ko filin gaba.                           |
+| `obsidian_delete_note`           | Share rubutu na dindindin daga rumbun ajiya.                                              |
+| `obsidian_move_note`             | Matsar ko sake suna bayanin kula a cikin rumbun ajiya.                                    |
+| `obsidian_execute_command`       | Yi umarnin Obsidian ta umarninsa ID.                                                      |
+| `obsidian_open_file`             | Bude fayil a cikin Obsidian (yana ƙirƙira shi idan babu shi).                             |
+| `obsidian_sync_trigger`          | Ƙirƙirar aiki tare da ↔ ta hannu vault na tebur na biyu kai tsaye.                        |
+| `obsidian_sync_resolve_conflict` | Yanke rikicin daidaitawa: kiyaye `local` (wayar hannu), `remote` (tebur), ko `keep-both`. |
 
 > [!NOTE]
-> Targets na `obsidian_patch_note` suna karɓar `targetType` na `heading | block | frontmatter`
-> da `operation` na `append | prepend | replace`, tare da `createTargetIfMissing` na zaɓi.
-> Kayan aikin `obsidian_sync_*` guda huɗu suna sadarwa da local sync
-> server (`http://127.0.0.1:27781` ta tsohuwa) kuma suna buƙatar sync token.
+> Makasudin `obsidian_patch_note` sun karɓi `targetType` na `heading | block | frontmatter` da `operation` na `append | prepend | replace`, tare da `createTargetIfMissing` na zaɓi . Kayan aikin `obsidian_sync_*` guda huɗu suna magana da uwar garken daidaitawa na gida (`http://127.0.0.1:27781` ta tsohuwa) kuma suna buƙatar alamar daidaitawa.
 
-### Scopes
+### Iyaka
 
-Kayan aikin karantawa suna buƙatar `read:obsidian`; kayan aikin rubutawa suna buƙatar `write:obsidian`. Tilastawa
-daidai yake da na Notion — `withScopeEnforcement()` ne ke sarrafa shi a cikin
-`open-sse/mcp-server/server.ts`, ana kunna shi ta `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, tare da
-scopes da aka yarda da su daga `OMNIROUTE_MCP_SCOPES` ko scope context na API key. Duba
-[MCP-SERVER.md](./MCP-SERVER.md).
+Kayayyakin karatu suna buƙatar `read:obsidian`; kayan aikin rubuta suna buƙatar `write:obsidian`. Yin tilastawa yayi kama da Notion — wanda `withScopeEnforcement()` ke sarrafa shi a cikin `open-sse/mcp-server/server.ts`, wanda aka ɗora akan `OMNIROUTE_MCP_ENFORCE_SCOPES=true` kuma ana tilastawa ga masu kiran HTTP/SSE waɗanda maɓallan API basu da `manage`/`admin`, tare da iyakoki masu izini waɗanda aka samo daga `OMNIROUTE_MCP_SCOPES` ko mahallin mahallin maɓalli na API. Duba [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Wuraren Ƙarshe
 

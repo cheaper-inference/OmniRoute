@@ -13,12 +13,12 @@ Le Agent Skills sono file SKILL.md strutturati che insegnano agli agenti esterni
 
 ## Panoramica
 
-Il catalogo contiene **45 Agent Skills** (23 per l'API REST + 21 per la CLI + 1 flusso di lavoro di configurazione). Ogni skill dispone di:
+Il catalogo contiene** 45 abilità dell'agente** (flusso di lavoro di configurazione 23 REST API + 21 CLI + 1). Ogni abilità ha:
 
-- Un **ID canonico** (`omni-auth`, `cli-serve`, ecc.)
-- Un file **SKILL.md** in `skills/{id}/SKILL.md` con frontmatter YAML (`name`, `description`) + un corpo markdown dettagliato
-- **Endpoint REST** (skill API) o **sottocomandi CLI** (skill CLI) derivati dalla specifica OpenAPI e dal registro CLI
-- Un **URL raw di GitHub** per il recupero in tempo reale: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- UN** ID canonica** (`omni-auth`, `cli-serve`, ecc.)
+- UN**SKILL.md** file in `skills/{id}/SKILL.md` con YAML frontmatter (`name`, `description`) corpo + rich markdown
+- **endpoint REST** (abilità API ) o** sottocomandi CLI** (competenze CLI ) derivate dalle specifiche OpenAPI e dal registro CLI
+- UN**GitHub crudo URL** per il recupero dal vivo: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ La risposta del generatore è un `GeneratorReport`:
 
 ---
 
-## API di copertura
+## Copertura API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

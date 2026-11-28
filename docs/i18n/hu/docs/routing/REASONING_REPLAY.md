@@ -4,9 +4,9 @@
 
 ---
 
-> **Az igazság forrása:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Utolsó frissítés:** 2026-06-28 — v3.8.40
+> **Az igazság forrása:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
-OmniRoute rögzíti a gondolkodásmódú modellek által előállított asszisztens `reasoning_content`, és transzparensen lejátssza azt többfordulós kérések esetén, amikor az upstream szolgáltató megköveteli. Ez kiküszöböli azokat a HTTP 400 hibákat, amelyeket a szigorú szolgáltatók vetnek fel, ha az ügyfél beszélgetési előzményeiből hiányzik az előző kör indoklása.
+OmniRoute rögzíti a gondolkodásmódú modellek által előállított asszisztens `reasoning_content`, és transzparensen lejátssza azt többfordulós kérések esetén, amikor az upstream szolgáltató megköveteli. Ez kiküszöböli a HTTP 400-as hibákat, amelyeket a szigorú szolgáltatók vetnek fel, ha az ügyfél beszélgetési előzményeiből hiányzik az előző kör indoklása.
 
 ## Miért létezik ez
 
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-Indexek: `expires_at`, `provider`, `model`, `created_at`. `expires_at` Unix epocha másodpercként van tárolva; a SELECT réteg normalizálja a régi szövegértékeket `EXPIRES_AT_EPOCH_SQL` segítségével.
+Indexek: `expires_at`, `provider`, `model`, `created_at`. `expires_at` Unix epocha másodpercként van tárolva; a SELECT réteg normalizálja az örökölt szövegértékeket `EXPIRES_AT_EPOCH_SQL` segítségével.
 
 ## Szolgáltató/modellészlelés
 

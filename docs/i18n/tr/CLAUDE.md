@@ -6,50 +6,25 @@
 
 @AGENTS.md
 
-**Tüm proje kuralları [`AGENTS.md`](AGENTS.md) dosyasında yer almaktadır** — her yapay zeka asistanı için tek doğruluk kaynağıdır (mimari, kurallar, testler, kalite kapıları, git iş akışı, 23 Katı Kural, PII öğrenimleri). Tamamını okuyun; buraya yeniden proje kuralları eklemeyin. Aşağıdaki her şey YALNIZCA Claude Code için geçerlidir — `AGENTS.md` içinde zaten tanımlanmış kuralların operasyonel ayrıntılarıdır.
+**Tüm proje kuralları [`AGENTS.md`](AGENTS.md) yaşıyor** — her AI asistanı için tek gerçek kaynaktır; yukarıdaki içe aktarma işlemi zaten onu yüklüyor. Proje kurallarını buraya yeniden eklemeyin. Aşağıdaki her şey ONLY Claude Code — halihazırda `AGENTS.md` tanımlanmış olan kuralların operasyonel iyileştirmelerine uygular.
 
-## Worktree izolasyonu — Claude Code özelinde
+## Çalışma ağacı izolasyonu — Claude Kod özellikleri
 
-Zorunlu worktree protokolünün tamamı (temel dal onayı, `.claude/worktrees/` standart yolu,
-`cp -al` node_modules, kaldırma kuralları)
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) dosyasındadır (`AGENTS.md` →
-Git Workflow → "Worktree isolation" bölümünde özetlenmiştir). Claude Code'a özgü noktalar:
+- Operatör size daha önce söylemediği sürece ana dalı `AskUserQuestion` (Zor Kural #19) aracılığıyla operatörle onaylayın.
+- `scripts/dev/new-worktree.sh <branch> <confirmed-base>` ile çalışma ağacını oluşturun ( `.claude/worktrees/` altına girer, `node_modules` sabit bağlantılarını kurar ve `.husky/_` kopyalar), ardından `EnterWorktree` `path` ile çağırın. Her zaman tabanı iletin: bu olmadan komut dosyası en yüksek `release/*` seçer, bu da operatörün onayladığı olmayabilir. `EnterWorktree` kendi başına oluşturduğu bir çalışma ağacında ne sabit bağlantılar ne de kancalar bulunur, dolayısıyla içinde hiçbir ön işleme kapısı çalışmaz.
 
-- Operatör size önceden söylemediyse, temel dalı `AskUserQuestion` aracılığıyla operatörden
-  teyit edin (Katı Kural #19).
-- Yerleşik `EnterWorktree` aracını tercih edin — worktree'leri zaten
-  `.claude/worktrees/` altında (standart yol) oluşturur. Worktree'yi belgelenen `git
-worktree add` komutuyla oluşturun, ardından `EnterWorktree`'i onun `path` değeriyle çağırın.
+## Alt aracılar ve git
 
-## Oturumlar Arası Güvenlik — Claude Code Özel Notları
+Git'e (Ajan aracı veya İş Akışı betiği) dokunan her alt aracı, #22 a'nın `git stash` yasağını kelimesi kelimesine kendi komut isteminde alır — saklama olayının kaydedilen yinelemesi bir alt aracı aracılığıyla gelir.
 
-Katı Kurallar #19/#21/#22 (`AGENTS.md` içinde) paralel oturumları yönetir. Bu ortam için operasyonel hatırlatmalar:
+## Yapılar — süper güçlerinin yol geçersiz kılmalarını planlama
 
-- **Git'e dokunan her alt ajanın isteminde `git stash` yasağını kelimesi kelimesine tekrarlayın** (Agent tool / Workflow betikleri) — alt ajanlar bu dosyayı devralmaz ve kaydedilen stash olayı bir alt ajan aracılığıyla gerçekleşti.
-- _Bu oturumda_ oluşturmadığınız herhangi bir PR'ı birleştirmeden veya push etmeden önce `git worktree list` çalıştırın ve `gh pr view <N> --json state,headRefOid` kontrolü yapın (Katı Kural #22b).
-- Her oturumu, ana checkout başladığı dalda olacak şekilde sonlandırın.
+Süper güçlerin becerileri `docs/superpowers/plans/`, `docs/superpowers/specs/` ve `docs/research/` altındaki varsayılanları duyurur. Yazmadan önce her birini `AGENTS.md` → "Planlama ve Araştırma Eserleri" içindeki `_tasks/` eşdeğerine yeniden yazın ve bunu asla ana depoda değil `git -C _tasks …` ile işleyin.
 
-## Superpowers / Planlama Yapıtları — Yol Geçersiz Kılmaları
+## Dosyaları kazıyın `_artifacts/` değil — `/tmp`
 
-`_tasks/` kuralı `AGENTS.md` → "Planning & Research Artifacts" içinde tanımlanmıştır. Superpowers yetenekleri `docs/…` dizinini işaret eden varsayılanlarla gelir — bu varsayılanlar **burada geçersiz kılınmıştır**. Bir superpowers yeteneği "saved to `docs/superpowers/plans/…`" gibi bir yol duyurduğunda, yazmadan önce onu `_tasks/…` eşdeğerine yeniden yazın:
+Bu proje, koşumun oturum karalama defterini (`/tmp/claude-*/…`) geçersiz kılar. Geçici dosyalar — dışa aktarmaları, oluşturulan zip'ler, — `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` tek seferlik ara çıktılar yazın: gitignored kök `_*` yolu, böylece operatör tüm çizikleri tek bir yerde bulur ve siler. Dayanıklı planlar, spesifikasyonlar, araştırmalar ve devredilenler bunun yerine `_tasks/` (Zor Kural #23) gider.
 
-| Yapıt (Yetenek)                         | Varsayılan (KULLANMAYIN)  | Bunun yerine buraya kaydedin                                  |
-| --------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Planlar (`writing-plans`)               | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Şartnameler / tasarım (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Araştırma (`deep-research`, ad-hoc)     | `docs/research/`          | `_tasks/research/…`                                           |
-| Devirler (`/handoff`)                   | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Kırmızı taban
 
-Bu yapıtları `_tasks/` deposu içinde commit edin (`git -C _tasks …`), asla ana depoda değil.
-
-## Geçici Dosyalar — `/tmp` Değil `_artifacts/` Kullanın
-
-Bu proje, çalışma ortamının varsayılan oturum karalama alanını (`/tmp/claude-*/…`) geçersiz kılar. Geçici/çalışma dosyalarını — dışa aktarmaları, oluşturulan zip'leri, tek seferlik ara çıktıları, aksi halde `/tmp` içine koyacağınız her şeyi — bunun yerine `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` dizinine yazın.
-
-- `_artifacts/` bir kök `_*` yoludur: zaten gitignore edilmiştir (`AGENTS.md` → "Root `_*` paths"), yalnızca diskte yaşar, asla takip edilmez.
-- Gerekçe: karalama çıktılarını proje içinde tutmak (vs `/tmp`), operatörün geçici her şeyi tek bir yerde bulup silmesini kolaylaştırır.
-- Bunu `_tasks/` (Katı Kural #23, kalıcı planlar/şartnameler/araştırmalar için kendi özel git deposu) ile **karıştırmayın** — `_artifacts/` yalnızca tek kullanımlık çalışma dosyaları içindir.
-
-## PR Açmadan Önce Base-Green Kontrolü
-
-Bir dal açmadan veya PR oluşturmadan önce base-green kontrolünü çalıştırın (`AGENTS.md` → Git Workflow → "Base-green check"; proje yetenekleri bunu `.agents/skills/_shared/base-green.md` olarak referans alır). Temel uç (base tip) kırmızı iken açılan bir PR, gövdesinde `⚠️ base-red inherited: #<issue>` taşımalıdır. Birikmiş kırmızı durumu (temel uç + kırmızı PR'lar) boşaltmak için `/sweep-reds` yeteneğini kullanın.
+Birikmiş kırmızı durumu (taban ucu + kırmızı PRs) boşaltmak için `/sweep-reds` becerisini kullanın.

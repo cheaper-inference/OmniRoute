@@ -21,3 +21,5 @@
   - 접두사가 붙은 ID(`provider/model`)는 다른 공급자로 다시 라우팅되지 않습니다.
 
 회로 상태는 `closed`, `open` 및 `half_open` 입니다. 쿨다운은 제한된 프로브를 예약합니다. 성공적인 프로브는 회로를 닫고 실패한 프로브는 회로를 다시 엽니다.
+
+공급자 장애 조치는 게이트웨이 내부에서 실행됩니다. 게이트웨이 중단 중 클라이언트 동작에 대해서는 [OmniRoute 자체에 연결할 수 없는 경우를](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) 참조하세요.

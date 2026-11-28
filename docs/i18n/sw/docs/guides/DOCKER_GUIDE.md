@@ -6,24 +6,25 @@
 
 > Marejeleo kamili ya upelekaji kwa Docker. Kwa kuanza haraka, angalia [sehemu ya Docker katika README](../README.md#-docker).
 
-## Yaliyomo
+## Jedwali la Yaliyomo
 
-- [Uendeshaji wa Haraka](#quick-run)
-- [Kwa Kutumia Faili ya Mazingira](#with-environment-file)
-- [Docker Compose](#docker-compose)
-- [Wasifu Unaopatikana](#available-profiles)
-- [Kusanidi zana za CLI za mfumo mwenyeji wakati OmniRoute inaendeshwa katika Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Kukimbia Haraka](#quick-run)
+- [Na Faili ya Mazingira](#with-environment-file)
+- [Docker Tunga](#docker-compose)
+- [Profaili Zinazopatikana](#available-profiles)
+- [Ugumu wa chombo](#container-hardening)
+- [Inasanidi zana za mwenyeji CLI wakati OmniRoute inaendeshwa katika Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
 - [Redis Sidecar](#redis-sidecar)
-- [Compose ya Mazingira ya Uzalishaji](#production-compose)
+- [Uzalishaji Tunga](#production-compose)
 - [Hatua za Dockerfile](#dockerfile-stages)
 - [Vigezo Muhimu vya Mazingira](#critical-environment-variables)
-- [Docker Compose pamoja na Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Handaki la Haraka la Cloudflare](#cloudflare-quick-tunnel)
-- [Lebo za Image](#image-tags)
-- [Masasisho ya Dashibodi katika Docker](#dashboard-updates-in-docker)
-- [Upatikanaji: SQLite chaguomsingi ni nakala moja](#availability-default-sqlite-is-single-replica)
-- [Hitilafu za kikanda za Gemini ndani ya Docker](#gemini-regional-errors-inside-docker)
-- [Maelezo Muhimu](#important-notes)
+- [Docker Tunga na Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Haraka Tunnel](#cloudflare-quick-tunnel)
+- [Lebo za Picha](#image-tags)
+- [Masasisho ya dashibodi katika Docker](#dashboard-updates-in-docker)
+- [Upatikanaji: SQLite chaguo-msingi ni nakala moja](#availability-default-sqlite-is-single-replica)
+- [Gemini makosa ya kikanda ndani ya Docker](#gemini-regional-errors-inside-docker)
+- [Vidokezo Muhimu](#important-notes)
 
 ---
 
@@ -89,6 +90,30 @@ OmniRoute huja na wasifu wa Compose kwa miundo mikuu ya upelekaji. Chagua unaoli
 | `web`                 | `omniroute-web`  | Watoa huduma wa vipindi vya wavuti wanaohitaji kivinjari: `gemini-web`, `claude-web`, `claude-turnstile` (hujenga `runner-web`, Chromium imejumuishwa)                                    | `docker compose --profile web up -d`         |
 
 > Wasifu kadhaa unaweza kuunganishwa: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Ugumu wa chombo
+
+Huduma za programu za `base`, `web`, `cli`, na `host` katika `docker-compose.yml` hutumia `cap_drop: [ALL]` na chaguo la usalama `no-new-privileges:true`. Picha inaendeshwa kama `node` isiyo ya mizizi na inasikiza kwenye bandari za juu, kwa hivyo haihitaji uwezo wa Linux. Chaguo la usalama huzuia michakato kutoka kwa kupata marupurupu kupitia jozi za setuid.
+
+Wasifu wa `cli` pekee ndio huweka tundu la Docker kwa kiboreshaji otomatiki. Tazama [Escape hatch: sanidi CLIs ya chombo](#escape-hatch-configure-the-containers-own-clis-use-sparingly) kwa athari za usalama.
+
+Mfumo wa faili wa mizizi hubaki kuandikwa kwa chaguo-msingi. Wasifu `cli` huandika usanidi wa CLI na akiba katika saraka ya nyumbani ya chombo, wasifu wa `web` huhifadhi hali ya kipindi cha Chromium, na muda wa utekelezaji Next.js unaweza kuandika akiba nje ya `/app/data`.
+
+Ili kujaribu mfumo wa faili wa kusoma pekee na wasifu wa `base`, hifadhi hii kama `docker-compose.override.yml` karibu na `docker-compose.yml`. Tunga husoma ubatilishaji kiotomatiki.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Mlima wa `/app/data` uliopo unaendelea kuandikwa. Jaribu mzigo wako wa kazi kabla ya kutumia ubatilishaji huu katika toleo la umma, kwani inaweza kuhitaji kuandikia njia zingine.
 
 ## Kusanidi zana za CLI za hosti wakati OmniRoute inaendeshwa kwenye Docker
 
@@ -295,7 +320,7 @@ Tabia ya kumbukumbu katika Docker:
 
 ### Runtime RAM kwa mawakala wa usimbaji
 
-Chaguo-msingi la Docker GiB ni sakafu dashboard/light-chat, si saizi ya uzalishaji. Miili mirefu `POST /v1/responses` (mamia ya ujumbe, makumi ya zana) huhifadhi grafu nyingi za kumbukumbu wakati wa mbano. Maombi mawili yanayopishana ya ~ 3 MiB / ~ 750k-tokeni yamebatilisha V8 kwenye** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) na pia kugonga kikundi cha GiB 16 OOM. Angalia [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Chaguo-msingi la Docker GiB ni sakafu dashboard/light-chat, si saizi ya uzalishaji. Miili mirefu `POST /v1/responses` (mamia ya ujumbe, makumi ya zana) huhifadhi grafu nyingi za kumbukumbu wakati wa mbano. Maombi mawili yanayopishana ya ~ 3 MiB / ~ 750k-tokeni yamebatilisha V8 kwenye** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) na pia kugonga kikundi cha GiB 16 OOM. Angalia [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Ukubwa** cgroup `--memory` juu ya lundo** — bafa asili, SQLite, na vipatanishi vya mbano hukaa nje ya V8.
 
@@ -591,11 +616,11 @@ Huduma huondoa ombi kabla ya kufanya pull ili utekelezaji ulioshindwa usijirudie
 
 Hisa Docker / Kubernetes OmniRoute ni** Mchakato wa Node moja + SQLite mwandishi mmoja** . Upatikanaji wa juu ni** haijaungwa mkono** juu ya topolojia hiyo.
 
-| Kizuizi                                       | Matokeo                                                                                                                                                                                                                                                                                                                                         |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mwandishi mmoja                               | Fanya** sivyo** endesha nakala nyingi dhidi ya faili moja SQLite. Hiyo inaharibu DB.                                                                                                                                                                                                                                                            |
-| Tengeneza upya / anza upya / HEALTHCHECK kill | **Kukatika kabisa** ya ndani ya ndege SSE, vipindi vya dashibodi, na hali ya kumbukumbu. Kila mteja aliyeunganishwa huanguka. Maombi mapya wakati wa kidirisha cha mwisho-tupu hupata wakala wa kurudi nyuma**`502 Bad Gateway: Unknown error`** , si OmniRoute JSON — wateja hawawezi kutofautisha hili na kutofaulu kwa mtoa huduma (#11015). |
-| Kitanzi cha tukio sawa na `/healthz`          | Katalogi yenye shughuli nyingi au tiki ya kukandamiza inaweza kuchelewesha uchunguzi; muda mfupi wa kuisha kisha inaanza upya** pekee** nakala.                                                                                                                                                                                                 |
+| Kizuizi                                       | Matokeo                                                                                                                                                                                                                                                                                                                                            |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mwandishi mmoja                               | Fanya** sivyo** endesha nakala nyingi dhidi ya faili moja SQLite. Hiyo inaharibu DB.                                                                                                                                                                                                                                                               |
+| Tengeneza upya / anza upya / HEALTHCHECK kill | **Kukatika kabisa** ya ndani ya ndege SSE, vipindi vya dashibodi, na hali ya kumbukumbu. Kila mteja aliyeunganishwa huanguka. Maombi mapya wakati wa kidirisha cha mwisho-tupu hupata wakala wa kurudi nyuma**`502 Bad Gateway: Unknown error`** , si wateja wa OmniRoute JSON — hawawezi kutofautisha hili na kutofaulu kwa mtoa huduma (#11015). |
+| Kitanzi cha tukio sawa na `/healthz`          | Katalogi yenye shughuli nyingi au tiki ya kukandamiza inaweza kuchelewesha uchunguzi; muda mfupi wa kuisha kisha inaanza upya** pekee** nakala.                                                                                                                                                                                                    |
 
 **Matrix ya uchunguzi** (tazama pia [mapendekezo ya uchunguzi wa Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -605,9 +630,9 @@ Hisa Docker / Kubernetes OmniRoute ni** Mchakato wa Node moja + SQLite mwandishi
 | Utayari         | HTTP `GET /healthz`                                                 | Muda mgumu ambao hushughulikia shughuli ya kitanzi cha tukio kama iliyokufa |
 | Kina / wanadamu | `/api/monitoring/health`                                            | Utendaji wa kubelet otomatiki                                               |
 
-**Maboresho:** tarajia kila kikao kitashuka. Futa wateja ikiwa unaweza; hakuna sasisho linaloendelea kwenye chaguo-msingi SQLite. Tunga `restart: unless-stopped` pamoja na Docker `HEALTHCHECK` pia itachukua nafasi ya mchakato pekee wakati chombo hakina Afya - radius sawa ya mlipuko.
+**Maboresho:** tarajia kila kikao kitashuka. Futa wateja ikiwa unaweza; hakuna sasisho linaloendelea kwenye chaguo-msingi SQLite. Tunga `restart: unless-stopped` plus Docker `HEALTHCHECK` pia itachukua nafasi ya mchakato pekee wakati kontena halina afya — radius sawa ya mlipuko.
 
-Maonyesho yaliyo tayari na chati ya Helm inaishi katika `deploy/kubernetes/` na `deploy/helm/omniroute/` - angalia [mwongozo wa uwekaji wa Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+Maonyesho yaliyo tayari na chati ya Helm moja kwa moja katika `deploy/kubernetes/` na `deploy/helm/omniroute/` — tazama [mwongozo wa uwekaji wa Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
 Kijisehemu cha Kubernetes cha a** replica moja** (Uundaji upya unahitajika; usipandishe `replicas` dhidi ya faili moja SQLite ):
 
@@ -636,9 +661,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` kulala huruhusu kube kuacha Vituo vya huduma kabla ya SIGTERM hivyo** mpya** trafiki huacha kupiga mchakato wa kufa. `/v1/responses` SSE ndani ya ndege hutolewa hadi `SHUTDOWN_TIMEOUT_MS` (chaguo-msingi ya 30s) kupitia ukodishaji wa uandikishaji wa uzani mzito (#11015). Maombi mapya ambayo bado yanafikia mchakato huo pata `503` + `Retry-After: 5`. Tengeneza upya pengo la sehemu tupu hadi kibadilisho kiwe Tayari kinasalia kuwa tatizo kubwa - hiyo ni topolojia SQLite, si usanidi usiofaa wa uchunguzi.
+`preStop` kulala huruhusu kube kuacha Vituo vya huduma kabla ya SIGTERM hivyo** mpya** trafiki huacha kupiga mchakato wa kufa. `/v1/responses` SSE ndani ya ndege hutolewa hadi `SHUTDOWN_TIMEOUT_MS` (chaguo-msingi ya 30s) kupitia ukodishaji wa uandikishaji wa uzani mzito (#11015). Maombi mapya ambayo bado yanafikia mchakato huo pata `503` + `Retry-After: 5`. Tengeneza upya pengo la mwisho-tupu hadi uingizwaji uwe Tayari unasalia kuwa — ambayo ni SQLite topolojia, si usanidi usiofaa wa uchunguzi.
 
-Postgres ya nje / waandishi wengi HA ni** sivyo** njia ya hisa iliyoandikwa. Ikiwa unahitaji HA, weka nakala moja au endesha topolojia ambayo mradi umejaribu na kurekodi tofauti. Kazi ya Postgres/MySQL inaishi [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Hadi meli hizo, njia pekee inayotumika ya kuzidisha** kubwa** uwezo wa `/v1/responses` ni michakato inayojitegemea ya N (sehemu inayofuata), sio `replicas > 1` kwenye juzuu moja.
+Postgres ya nje / waandishi wengi HA ni** sivyo** njia ya hisa iliyoandikwa. Ikiwa unahitaji HA, weka nakala moja au endesha topolojia ambayo mradi umejaribu na kurekodi tofauti. Kazi ya Postgres/MySQL inaishi [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Hadi meli hizo, njia pekee inayotumika ya kuzidisha** kubwa** `/v1/responses` uwezo ni michakato N inayojitegemea (sehemu inayofuata), sio `replicas > 1` kwenye juzuu moja.
 
 ## Scale-out: N michakato huru
 
@@ -646,27 +671,27 @@ Postgres ya nje / waandishi wengi HA ni** sivyo** njia ya hisa iliyoandikwa. Iki
 
 Nakala za akaunti moja Codex lazima zisitumie tokeni yake ya kuonyesha upya ya matumizi moja pekee. Katika matukio ambayo hutumia tu vitambulisho vilivyosawazishwa, weka `OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` (pak `cx`). Iache ikiwa haijawekwa kwa mmiliki mmoja wa mzunguko. Kila mchakato bado unahitaji `DATA_DIR` yake; chaguo hili halishiriki SQLite wala kutoa ulandanishi wa tokeni au kufuli iliyosambazwa.
 
-Tukio la tuli husoma tena muunganisho wakati uonyeshaji upya unahitajika na huchukua tokeni tofauti ya ufikiaji ambayo haijaisha muda wake. Vinginevyo kuonyesha upya kunazimwa bila kuisha muda au kulemaza muunganisho au kuhesabu kutofaulu kwa kivunja onyesha. Hitilafu halisi za uthibitishaji wa mkondo wa juu bado zinatumia uhasibu wa kawaida wa kutofaulu, upunguzaji wa hali ya juu na hitilafu ya kawaida ya mteja; uzima wa akaunti unasalia kuwa wa kudumu. Sawazisha tokeni zilizozungushwa za mmiliki kabla ya tokeni za ufikiaji kuisha (kiongozi chaguo-msingi cha kuonyesha upya upya ni dakika tano), au leta tena faili ya Codex auth. Uagizaji wa kupita kiasi huhifadhi tokeni zilizotolewa bila kuzithibitisha kwenye sehemu ya mwisho ya tokeni. Uboreshaji wa dashboard/API kwa mwongozo unarudisha `409 refresh_disabled`; logi mpya OAuth hazijabadilishwa. Tazama [kumbukumbu ya mazingira](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
+Tukio la tuli husoma tena muunganisho wakati uonyeshaji upya unahitajika na huchukua tokeni tofauti ya ufikiaji ambayo muda wake haujaisha. Vinginevyo kuonyesha upya kunazimwa bila kuisha muda wa matumizi au kulemaza muunganisho au kuhesabu kutofaulu kwa kivunja onyesha. Hitilafu halisi za uthibitishaji wa mkondo wa juu bado zinatumia uhasibu wa kawaida wa kutofaulu, upunguzaji wa hali ya juu na hitilafu ya kawaida ya mteja; uzima wa akaunti unasalia kuwa wa kudumu. Sawazisha tokeni zilizozungushwa za mmiliki kabla ya tokeni za ufikiaji kuisha (kiongozi chaguo-msingi cha kuonyesha upya upya ni dakika tano), au leta tena faili ya Codex auth. Uagizaji wa kupita kiasi huhifadhi tokeni zilizotolewa bila kuzithibitisha kwenye sehemu ya mwisho ya tokeni. Uboreshaji wa dashboard/API kwa mwongozo unarudisha `409 refresh_disabled`; logi mpya OAuth hazijabadilishwa. Tazama [kumbukumbu ya mazingira](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Mchakato wa Node moja ni** lundo moja la V8** . ~ 3 MiB / ~ 750k-tokeni ya wakala wa kuweka msimbo `POST /v1/responses` (RTK + Caveman) zinazopishana huondoa rundo hilo kwa ~ 12 Gi (`FATAL ERROR: Reached heap limit`) na inaweza OOM a 16 Gi cgroup. Tazama [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Kipimo hicho ni a** kumbukumbu - bajeti** onyo, si bidhaa ngumu-max ya `/v1/responses` mbili zinazofanana. Uandikishaji wa gumzo la uzani mzito huchangiwa na bajeti ya baiti inayotokana na otomatiki (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) yenye ukubwa kutoka V8/cgroup hiyo hiyo dari — ikiipandisha juu (au kuweka kikomo cha hesabu ya ombi `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) kwenye mchakato wa ukubwa ambao tayari huleta uondoaji mimba. Soga ndogo, `/healthz`, `/v1/models`, na MCP ni** sivyo** katika kofia hiyo.
+Mchakato wa Node moja ni** lundo moja la V8** . ~ 3 MiB / ~ 750k-tokeni ya wakala wa kuweka msimbo `POST /v1/responses` (RTK + Caveman) zinazopishana huondoa rundo hilo kwa ~ 12 Gi (`FATAL ERROR: Reached heap limit`) na inaweza OOM a 16 Gi cgroup. Angalia [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Kipimo hicho ni a** kumbukumbu - bajeti** onyo, si bidhaa ngumu-max ya mbili kwa muda mrefu `/v1/responses`. Uandikishaji wa gumzo la uzani mzito unatokana na bajeti ya baiti inayotokana na kiotomatiki (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) yenye ukubwa kutoka V8/cgroup hiyo hiyo ya dari — kuipitisha kwenda juu (au kuweka kikomo cha hesabu ya ombi `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) kwenye mchakato wa ukubwa ambao tayari huleta uondoaji mimba. Soga ndogo, `/healthz`, `/v1/models`, na MCP ni** sivyo** katika kofia hiyo.
 
 ### Mchakato mmoja: zaidi ya `/v1/responses` mbili ndefu
 
-A **healthy** process (heap below `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`) **may** run more than two concurrent long `POST /v1/responses` when the process-wide inflight-byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) still has room. Bodies at or above `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) take the same heavyweight lease as structure-heavy requests and use the same [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Tens of concurrent long SSE clients (operators often need 40–50) is a **memory-budget** question — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — not a hard “max 2” product limit. A pressured heap still sheds with retryable `503` so #7849 does not return.
+A **healthy** process (heap below `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`) **may** run more than two concurrent long `POST /v1/responses` when the process-wide inflight-byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) still has room. Bodies at or above `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) take the same heavyweight lease as structure-heavy requests and use the same [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Tens of concurrent long SSE clients (operators often need 40–50) is a **memory-budget** question — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — not a hard “max 2” product limit. A pressured heap still sheds with retryable `503` so #7849 does not return.
 
 Kwa** kuzidisha chungu** (nafasi huru za V8)** leo** :
 
-| Fanya                                                                                                                                                                | Usifanye                                                            |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Kimbia** N containers/pods** , kila moja na yake** kumiliki** `DATA_DIR` / kiasi                                                                                     | Weka `replicas > 1` dhidi ya faili moja SQLite                      |
-| Ukubwa mzito ndani ya ndege + afya-headroom kutoka lundo / inflight-byte bajeti; 1–2 ndiyo chaguomsingi ya kihafidhina ya #7849, si kiwango cha juu cha bidhaa ngumu | Toa mchakato mmoja 8 × RAM na kikomo cha kuhesabu kisicho na kikomo |
-| Hiari: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` kwa** vihesabio vya mgawo ulioshirikiwa**                                                                | Ichukulie Redis kama — SQLite iliyoshirikiwa sivyo                  |
-| Rudufu siri za mtoa huduma katika kila mfano (au ukubali dashibodi zilizogawanywa)                                                                                   | Tarajia dashibodi moja / logi moja ya simu katika matukio yote      |
-| Mbele na mizani yoyote ya mzigo; kunata kwa ufunguo wa API au kikao kinatosha                                                                                        | Inahitaji kifaa cha kati kinachofahamu ukubwa mahususi kwa muuzaji  |
+| Fanya                                                                                                                                                 | Usifanye                                                            |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Kimbia** N containers/pods** , kila moja na yake** kumiliki** `DATA_DIR` / kiasi                                                                      | Weka `replicas > 1` dhidi ya faili moja SQLite                      |
+| Ukubwa mzito ndani ya ndege + afya-headroom kutoka lundo / inflight-byte bajeti; 1–2 ndiyo chaguomsingi ya kihafidhina #7849, si upeo wa bidhaa ngumu | Toa mchakato mmoja 8 × RAM na kikomo cha kuhesabu kisicho na kikomo |
+| Hiari: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` kwa** vihesabio vya mgawo ulioshirikiwa**                                                 | Ichukulie Redis kama — SQLite iliyoshirikiwa sivyo                  |
+| Rudufu siri za mtoa huduma katika kila mfano (au ukubali dashibodi zilizogawanywa)                                                                    | Tarajia dashibodi moja / logi moja ya simu katika matukio yote      |
+| Mbele na mizani yoyote ya mzigo; kunata kwa ufunguo wa API au kikao kinatosha                                                                         | Inahitaji kifaa cha kati kinachofahamu ukubwa mahususi kwa muuzaji  |
 
-Uhusiano wa kipindi hadi akaunti pia unaweza kushirikiwa kupitia Redis: weka `OMNIROUTE_SESSION_AFFINITY_STORE=redis` na `REDIS_URL` kwa kila mchakato, kwa `REDIS_KEY_PREFIX` sawa na mpangilio mzuri `sessionAffinityTtlMs`. Pini hutatua utambulisho wa haraka wa akaunti ya utumiaji kwa muunganisho wa ndani wa kila mchakato unaostahiki, kwa hivyo akaunti za OAuth zilizo na metadata ya utambulisho inayolingana hazihitaji kuwa na muunganisho unaolingana IDs. Utambulisho wa akaunti unaojulikana huchukua nafasi ya kwanza juu ya IDs kinzani ya ndani katika azimio la pini na kufukuzwa kwa ulinzi; rekodi bila utambulisho (au wapigaji wa kufukuza bila utambulisho) huhifadhi walinzi ID. Akaunti zisizo na utambulisho thabiti wa matumizi bado zinahitaji kulinganisha IDs. Redis hitilafu au simu zinazozidi 100 ms hurudi kwenye SQLite ya ndani . Kila duka la ushirika la Redis huhifadhi utendakazi bora saa 8, hupita Redis mara moja likijaa, na hutoa nafasi wakati tu kazi ya msingi imetatuliwa, si kwa tarehe ya mwisho ya mpigaji simu. Wakati wa kukatika kwa Redis hakuna ukweli ulioshirikiwa: kila mfano unarudi kwenye uhusiano wake wa ndani, vipindi vinaweza kubanwa tena mara moja kwa kila tukio, na matukio yanaweza kutofautiana. Kunata huungana tena kupitia Redis inapopona. Mipaka ya muda wa kuisha inangoja, sio EVAL iliyotumwa, ambayo inaweza kutua baada ya kurudi nyuma. Maandishi ya uelekezaji yanalinganisha thamani halisi iliyozingatiwa na uamuzi wa uelekezaji, sio usomaji mpya wa wakati wa mabadiliko; kosa lililozingatiwa au uchunguzi wa kurudi nyuma SQLite unalinganishwa na ufunguo Redis ambao haupo. Pini zilizopitwa na wakati hubadilishwa katika CAS moja, kwa hivyo amri iliyochelewa haiwezi kuchukua nafasi au kufuta pini mpya zaidi, tofauti. Redis inasoma kurudisha thamani na seva iliyobaki TTL; PTTL chanya (au kutoisha muda wake) huamua uhai, si muhuri wa saa wa JSON wa mwandishi au saa ya msomaji. Ramani ya vijipicha vya karibu ambayo imesalia TTL hadi tarehe ya mwisho ya ndani; vitufe JSON vilivyopo vinasalia kusomeka na baiti zao mbichi huhifadhiwa kwa CAS. Redis ndio chanzo pekee cha ukweli huku ikijibu. Kero zilizoshirikiwa, kuguswa na kufuta zilizothibitishwa, ondoa ingizo la ndani, usiwahi kusakinisha au kuonyeshwa upya. SQLite kwenye njia Redis inashikilia tu maamuzi mbadala ya mfano huu kutoka kwa hitilafu Redis, kuisha kwa muda au kueneza kwa uandikishaji, iliyo na mipaka ya TTL kama hapo awali. Pini ya ndani inayokosekana baada ya kukatika kwa baadaye hugharimu chaguo moja mpya (kukosa akiba moja ya papo hapo), sio akaunti mbaya au iliyofukuzwa. Kero zilizokataliwa hurejesha mshindi aliyeshirikiwa na TTL yake iliyosalia kiatomi: uteuzi wa kawaida hukagua tena tarehe ya mwisho iliyoonyeshwa kwenye ramani na hutumia mshindi ambaye bado yuko hai, matumizi yanayogusa na kuingia kwa akaunti hiyo bila maandishi mengine yaliyoshirikiwa. Ikiwa haipatikani, uteuzi huweka mgombeaji wa ndani, huacha pini iliyoshirikiwa bila kubadilishwa na kutoa ujumbe mmoja wa utatuzi. CAS iliyokataliwa haiandiki SQLite; hitilafu za Redis, muda wa kuisha au ujazo wa uandikishaji hutumika badala yake utendakazi uliopo wa ndani. Iwapo jibu la mabadiliko lililotumwa litafika baada ya muda kuisha (kukubaliwa, kukataliwa au hitilafu), ulinganishaji-na-kufuta wa thamani uliosawazishwa sawasawa huondoa tu safu mlalo mbadala ya kuisha kwa muda unaofanana. Hakuna kusubiri kati ya ulinganisho huo na ufutaji; uandishi mpya wa kukatika huhifadhiwa. Uhamishaji uliolindwa huondoa pin ya ndani ya akaunti iliyoshindwa hata ikiwa Redis chini, na kuitakasa tena baada ya kufukuzwa kwa pamoja kuthibitishwa. Majibu yaliyoshirikiwa yanayosubiri mapema hayawezi kurejesha pini ya ndani iliyoondolewa kwa sababu mafanikio yaliyoshirikiwa hayaandiki kamwe SQLite. Njia mbadala ya kukatika kwa baadaye inaweza kubana akaunti tena; uandishi ulioshirikiwa uliokubaliwa baadaye unapatikana Redis pekee. Redis misses haishauriani na hali ya eneo la nyuma. Kiendeshaji kikiwa kimezimwa, pini mpya zilizochaguliwa huhifadhi urithi wa uga wa nne wa umbo la SQLite JSON ; uelekezaji wa Redis pekee ndio unaoongeza utambulisho wa akaunti ya haraka. Pini zilizoletwa awali huangaliwa upya katika mpaka wake wa kuisha muda wake. Redis uteuzi usio wa kukodisha husoma tena duka, lakini upangaji wa upangaji sanjari bado unaweza kutumia pini iliyoondolewa kati ya kuleta mapema na kupanga (dirisha la juhudi bora linalokubalika). Ahadi ya ukodishaji haiwezi kubadili akaunti baada ya dai la kudumu: kwa kupinga kukataliwa huweka mgombea anayedaiwa kwa ombi hilo pekee na kumwacha mshindi aliyeshirikiwa bila kuguswa, kwa hivyo makubaliano katika matukio yote yanadhibitiwa kwenye njia hiyo. Jedwali lingine bado linatumika: hii haishiriki unata wa kipindi cha mseto, pini za kugeuza asili Codex, taswira za akaunti, kufunga nje, vikomo vya matumizi, usanidi au kumbukumbu za simu.
+Uhusiano wa kipindi hadi akaunti pia unaweza kushirikiwa kupitia Redis: weka `OMNIROUTE_SESSION_AFFINITY_STORE=redis` na `REDIS_URL` kwa kila mchakato, kwa `REDIS_KEY_PREFIX` sawa na mpangilio mzuri `sessionAffinityTtlMs`. Pini hutatua utambulisho wa haraka wa akaunti ya utumiaji kwa muunganisho wa ndani wa kila mchakato unaostahiki, kwa hivyo akaunti za OAuth zilizo na metadata ya utambulisho inayolingana hazihitaji kuwa na muunganisho unaolingana IDs. Utambulisho wa akaunti unaojulikana huchukua nafasi ya kwanza juu ya IDs kinzani ya ndani katika azimio la pini na kufukuzwa kwa ulinzi; rekodi bila utambulisho (au wapigaji wa kufukuza bila utambulisho) huhifadhi walinzi ID. Akaunti zisizo na utambulisho thabiti wa matumizi bado zinahitaji kulinganisha IDs. Redis hitilafu au simu zinazozidi 100 ms hurudi kwenye SQLite ya ndani . Kila duka la ushirika la Redis huhifadhi utendakazi bora saa 8, hupita Redis mara moja likijaa, na hutoa nafasi wakati tu kazi ya msingi imetatuliwa, si kwa tarehe ya mwisho ya mpigaji simu. Wakati wa kukatika kwa Redis hakuna ukweli ulioshirikiwa: kila mfano unarudi kwenye uhusiano wake wa ndani, vipindi vinaweza kubanwa tena mara moja kwa kila tukio, na matukio yanaweza kutofautiana. Kunata huungana tena kupitia Redis inapopona. Mipaka ya muda wa kuisha inangoja, sio EVAL iliyotumwa, ambayo inaweza kutua baada ya kurudi nyuma. Maandishi ya uelekezaji yanalinganisha thamani halisi iliyozingatiwa na uamuzi wa uelekezaji, sio usomaji mpya wa wakati wa mabadiliko; kosa lililozingatiwa au uchunguzi wa kurudi nyuma SQLite unalinganishwa na ufunguo Redis ambao haupo. Pini zilizopitwa na wakati hubadilishwa katika CAS moja, kwa hivyo amri iliyochelewa haiwezi kuchukua nafasi au kufuta pini mpya zaidi, tofauti. Redis inasoma kurudisha thamani na seva iliyobaki TTL; PTTL chanya (au kutoisha muda wake) huamua uhai, si muhuri wa saa wa JSON wa mwandishi au saa ya msomaji. Ramani ya vijipicha vya karibu ambayo imesalia TTL hadi tarehe ya mwisho ya ndani; vitufe JSON vilivyopo vinasalia kusomeka na baiti zao mbichi huhifadhiwa kwa CAS. Redis ndio chanzo pekee cha ukweli huku ikijibu. Kero zilizoshirikiwa, kuguswa na kufuta zilizothibitishwa, ondoa ingizo la ndani, usiwahi kusakinisha au kuonyeshwa upya. SQLite kwenye njia Redis inashikilia tu maamuzi mbadala ya mfano huu kutoka kwa hitilafu Redis, kuisha kwa muda au kueneza kwa uandikishaji, iliyo na mipaka ya TTL kama hapo awali. Pini ya ndani inayokosekana baada ya kukatika kwa baadaye hugharimu chaguo moja mpya (kukosa akiba moja ya papo hapo), sio akaunti mbaya au iliyofukuzwa. Kero zilizokataliwa hurejesha mshindi aliyeshirikiwa na TTL yake iliyosalia kiatomi: uteuzi wa kawaida hukagua tena tarehe ya mwisho iliyoonyeshwa kwenye ramani na hutumia mshindi ambaye bado yuko hai, matumizi yanayogusa na kuingia kwa akaunti hiyo bila maandishi mengine yaliyoshirikiwa. Ikiwa haipatikani, uteuzi huweka mgombeaji wa ndani, huacha pini iliyoshirikiwa bila kubadilishwa na kutoa ujumbe mmoja wa utatuzi. CAS iliyokataliwa haiandiki SQLite; hitilafu za Redis, muda wa kuisha au ujazo wa uandikishaji hutumika badala yake utendakazi uliopo wa ndani. Iwapo jibu la mabadiliko lililotumwa litafika baada ya muda kuisha (kukubaliwa, kukataliwa au hitilafu), ulinganishaji-na-kufuta wa thamani uliosawazishwa sawasawa huondoa tu safu mlalo mbadala ya kuisha kwa muda unaofanana. Hakuna kusubiri kati ya ulinganisho huo na ufutaji; uandishi mpya wa kukatika huhifadhiwa. Uhamishaji uliolindwa huondoa pin ya ndani ya akaunti iliyoshindwa hata ikiwa Redis chini, na kuitakasa tena baada ya kufukuzwa kwa pamoja kuthibitishwa. Majibu yaliyoshirikiwa yanayosubiri mapema hayawezi kurejesha pini ya ndani iliyoondolewa kwa sababu mafanikio yaliyoshirikiwa hayaandiki kamwe SQLite. Njia mbadala ya kukatika kwa baadaye inaweza kubana akaunti tena; uandishi ulioshirikiwa uliokubaliwa baadaye unapatikana tu Redis. Redis misses haishauriani na hali ya eneo la nyuma. Kiendeshaji kikiwa kimezimwa, pini mpya zilizochaguliwa huhifadhi urithi wa uga wa nne wa umbo la SQLite JSON ; uelekezaji wa Redis pekee ndio unaoongeza utambulisho wa akaunti ya haraka. Pini zilizoletwa awali huangaliwa upya katika mpaka wake wa kuisha muda wake. Redis uteuzi usio wa kukodisha husoma tena duka, lakini upangaji wa upangaji sanjari bado unaweza kutumia pini iliyoondolewa kati ya kuleta mapema na kupanga (dirisha la juhudi bora linalokubalika). Ahadi ya ukodishaji haiwezi kubadili akaunti baada ya dai la kudumu: kwa kupinga kukataliwa huweka mgombea anayedaiwa kwa ombi hilo pekee na kumwacha mshindi aliyeshirikiwa bila kuguswa, kwa hivyo makubaliano katika matukio yote yanadhibitiwa kwenye njia hiyo. Jedwali lingine bado linatumika: hii haishiriki unata wa kipindi cha mseto, pini za kugeuza asili Codex, taswira za akaunti, kufunga nje, vikomo vya matumizi, usanidi au kumbukumbu za simu.
 
-Maunzi: kwa mfano `/v1/responses` ndefu ni a** kumbukumbu - bajeti** swali (lundo + inflight-byte / #10110). `N` independent `DATA_DIR` s bado inazidisha lundo: mwenyeji RAM lazima afunike `N × cgroup`, si "pod moja ya 16 Gi yenye N = 8." Usiwahi `replicas > 1` kwenye faili moja SQLite.
+Maunzi: kwa mfano `/v1/responses` ndefu ni a** kumbukumbu - bajeti** swali (lundo + inflight-byte / #10110). `N` independent `DATA_DIR` s bado inazidisha lundo: mpangishi RAM lazima afunike `N × cgroup`, si "pod moja 16 Gi na N = 8." Usiwahi `replicas > 1` kwenye faili moja SQLite.
 
 Tunga mchoro (rundo mbili, juzuu mbili — si `deploy.replicas: 2`):
 
@@ -695,55 +720,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Msongamano wa mchakato (mgandamizo kutoka kwa HTTP pekee) ni [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Kundi moja la kimantiki kwenye hali ya kudumu ya pamoja ni [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Msongamano wa mchakato (mgandamizo kutoka kwa kutenganisha HTTP ) ni [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Kundi moja la kimantiki kwenye hali ya kudumu inayoshirikiwa ni [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Hitilafu za kikanda za Gemini ndani ya Docker
+## Gemini makosa ya kikanda ndani ya Docker
 
-Google AI Studio / Gemini API inaweza kurudisha HTTP 400 yenye FAILED_PRECONDITION na
-`User location is not supported for the API use.` Ombi lililofaulu kwenye host
-halithibitishi kuwa container inatumia njia ileile ya kutoka. Mpangilio wa DNS,
-muunganisho wa IPv4/IPv6, uelekezaji wa VPN na proxy zilizosanidiwa zinaweza kutofautiana. Angalia
-[maeneo yanayotumika ya Google](https://ai.google.dev/gemini-api/docs/available-regions)
-pamoja na njia halisi ya muunganisho; hitilafu hii pekee haimaanishi kuwa API key ni mbaya.
+Google AI Studio / Gemini API inaweza kurudisha HTTP 400 ikiwa na FAILED_PRECONDITION na `User location is not supported for the API use.` Ombi lililofaulu kwa seva pangishi halithibitishi kuwa chombo kinatumia njia sawa ya kwenda nje. kuagiza DNS, muunganisho wa IPv4/IPv6, uelekezaji wa VPN na proksi zilizosanidiwa zinaweza kutofautiana. Angalia [maeneo yanayotumika ya Google](https://ai.google.dev/gemini-api/docs/available-regions) pamoja na njia halisi ya muunganisho; kosa hili pekee halitambui ufunguo mbaya API.
 
-### Pendelea proxy mahususi kwa muunganisho
+### Pendelea proksi maalum ya muunganisho
 
-Tumia [usanidi wa proxy kwa kila muunganisho](../ops/PROXY_GUIDE.md#4-level-proxy-system) wa OmniRoute
-kwa muunganisho wa Gemini ulioathiriwa, kisha urudie **Jaribu Muunganisho** na ombi dogo
-kwa kutumia model ileile. Hii huweka mabadiliko ya uelekezaji ndani ya upeo wa muunganisho huo. Thibitisha
-kuwa proxy inaweza kufikiwa kutoka kwenye container, na kwamba muunganisho unaichagua
-kweli. Kubadilisha njia hakuhakikishi kuwa masharti ya kikanda ya huduma ya upstream yatatimizwa.
+Tumia [usanidi wa proksi kwa kila muunganisho](../ops/PROXY_GUIDE.md#4-level-proxy-system) wa OmniRoute kwa muunganisho ulioathiriwa Gemini, kisha urudie** Muunganisho wa Mtihani** na ombi ndogo na mfano sawa. Hii huweka mabadiliko ya uelekezaji kwa upeo wa muunganisho huo. Thibitisha kuwa seva mbadala inaweza kufikiwa kutoka kwa chombo, na kwamba muunganisho huichagua. Kubadilisha njia hakuhakikishii ustahiki wa eneo la juu.
 
-### Linganisha mtandao wa host na wa container
+### Linganisha mtandao wa mwenyeji na vyombo
 
-Dumisha key, model na ombi sawa unapolinganisha matokeo yaliyothibitishwa; usiwahi
-kubandika taarifa za kuingia, manenosiri ya proxy au authorization headers kamili kwenye issue.
-Kwanza kagua familia za anwani ambazo OS resolver inatoa, ukitumia command ileile
-kwenye host na ndani ya container:
+Weka ufunguo, muundo na ombi sawa wakati wa kulinganisha matokeo yaliyothibitishwa; kamwe usibandike kitambulisho, nenosiri la seva mbadala au vichwa vya uidhinishaji kamili kwenye suala. Kwanza kagua ni anwani zipi za familia ambazo kisuluhishi OS kinatoa, kwa kutumia amri sawa kwenye seva pangishi na ndani ya kontena:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Badilisha `omniroute` na service unayotumia (kwa mfano, `omniroute-web`). Commands hizi
-huchapisha familia za anwani bila taarifa za kuingia au IP addresses. Thamani `6`
-iliyorudishwa inaonyesha tu matokeo ya IPv6 DNS: **haithibitishi** kuwepo kwa njia inayoweza kutumika ya IPv6 au ufikiaji wa API.
-Pale ambapo `curl` imesakinishwa, linganisha `curl -4 -I https://generativelanguage.googleapis.com`
-na `curl -6 -I https://generativelanguage.googleapis.com` katika mazingira yote mawili.
-Jibu la HTTP linathibitisha muunganisho kwa ukaguzi huo, hata kama ni hitilafu
-isiyothibitishwa; ni ombi la model lililothibitishwa pekee linalojaribu ustahiki wa Gemini.
+Badilisha `omniroute` na huduma unayoendesha (kwa mfano, `omniroute-web`). Amri hizi huchapisha familia za anwani bila vitambulisho au anwani za IP. `6` iliyorejeshwa inaonyesha tu matokeo ya IPv6 DNS : inafanya** sivyo** thibitisha njia inayoweza kutumika IPv6 au ufikiaji API. Ambapo `curl` imewekwa, linganisha `curl -4 -I https://generativelanguage.googleapis.com` na `curl -6 -I https://generativelanguage.googleapis.com` katika mazingira yote mawili. Jibu HTTP linathibitisha kuunganishwa kwa uchunguzi huo, hata ikiwa ni kosa ambalo halijathibitishwa; ombi la kielelezo lililoidhinishwa pekee hujaribu kustahiki Gemini.
 
-### Njia mbadala ya kiwango cha host: IPv6 inayofanya kazi na sera ya resolver
+### Mbadala wa kiwango cha mwenyeji: IPv6 ya kufanya kazi na sera ya kisuluhishi
 
-Mtoa taarifa wa [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) alirejesha
-ufikiaji katika mazingira yake kwa kuwezesha IPv6 ya container na kubadilisha uteuzi wa anwani
-wa glibc. Ichukulie hii kama njia mbadala mahususi kwa mazingira. Thibitisha kuwa IPv6 ya host
-inafanya kazi, pamoja na egress/uelekezaji wa container na kanuni za firewall kabla ya kurekebisha mapendeleo ya resolver.
-Anwani binafsi ya ULA pekee haithibitishi muunganisho wa umma wa IPv6.
+Ripota wa [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) alirejesha ufikiaji katika mazingira yao kwa kuwezesha IPv6 ya kontena na kubadilisha uteuzi wa anwani ya glibc. Ichukulie hii kama mbadala wa mazingira mahususi. Thibitisha mpangishi anayefanya kazi IPv6, egress/routing ya kontena na sheria za ngome kabla ya kurekebisha mapendeleo ya kisuluhishi. Anwani ya ULA ya kibinafsi yenyewe haianzishi muunganisho IPv6 wa umma.
 
-Kwa services ambazo tayari zimeunganishwa kwenye network chaguomsingi ya Compose, kipande hiki huwezesha
-IPv6 kwenye network hiyo; hifadhi sehemu nyingine za service, ports, volumes na configuration yako:
+Kwa huduma ambazo tayari zimeambatishwa kwa mtandao chaguo-msingi wa Tunga, kipande hiki huwezesha IPv6 kwenye mtandao huo; hifadhi huduma yako, bandari, kiasi na usanidi wako uliosalia:
 
 ```yaml
 networks:
@@ -751,30 +753,13 @@ networks:
     enable_ipv6: true
 ```
 
-Kwa network yenye jina, iwezeshe kwenye network ambayo service inajiunga nayo. Docker inaweza
-kutenga subnet ya ULA; chagua subnet bayana, isiyopishana na nyingine pale tu ambapo network yako
-inaihitaji. Angalia [utumiaji wa mtandao wa IPv6 kwenye Docker](https://docs.docker.com/engine/daemon/ipv6/)
-na [chaguo za network za Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Kwa mtandao uliopewa jina, uwashe kwenye mtandao huduma inajiunga. Docker inaweza kutenga subnet ULA ; chagua subnet iliyo wazi, isiyoingiliana tu wakati mtandao wako unaihitaji. Tazama [mtandao wa Docker IPv6](https://docs.docker.com/engine/daemon/ipv6/) na [Unda chaguzi za mtandao](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Kwenye **image inayotegemea glibc**, `/etc/gai.conf` inaweza kubadilisha uteuzi wa anwani. Dockerfile ya sasa
-ya repository inatumia Debian; images maalum zinazotegemea musl hazitumii utaratibu huu.
-Marekebisho yaliyoripotiwa hubadilisha label ya ULA kutoka `label fc00::/7 6` hadi
-`label fc00::/7 1`. Anza na jedwali kamili la sera la image na uhifadhi entries zake nyingine:
-kuongeza entry ya `label` au `precedence` hubadilisha jedwali hilo chaguomsingi, kwa hivyo file
-iliyo na mstari uliobadilishwa pekee haitoshi.
-[Rejea ya usanidi wa glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-inafafanua semantiki hizo. Fanya bind-mount ya file iliyokaguliwa katika hali ya kusoma pekee kwenye `/etc/gai.conf`
-na uunde upya service ili kuitumia.
+Kwenye a** picha inayotokana na glibc** , `/etc/gai.conf` inaweza kubadilisha uteuzi wa anwani. Hifadhi ya sasa ya Dockerfile hutumia Debian; picha maalum zenye msingi wa musl hazishiriki utaratibu huu. Marekebisho yaliyoripotiwa hubadilisha lebo ya ULA kutoka `label fc00::/7 6` hadi `label fc00::/7 1`. Anza kutoka kwa jedwali kamili la sera la picha na uhifadhi maingizo yake mengine: kuongeza `label` au `precedence` ingizo huchukua nafasi ya jedwali hilo chaguo-msingi, kwa hivyo faili iliyo na laini iliyobadilishwa pekee haitoshi. [Rejeleo la usanidi wa glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) huandika semantiki hizo. Unganisha faili iliyokaguliwa inayosomwa tu kwenye `/etc/gai.conf` na uunde upya huduma ili kuitumia.
 
-Hii hubadilisha uteuzi wa anwani wa OS kwa **trafiki yote inayotoka kwenye container hiyo**.
-Hailazimishi kila application kuchagua IPv6: mpangilio wa DNS wa Node na uteuzi wa muunganisho
-pia ni muhimu. Hasa, `--dns-result-order=ipv4first` hupendelea IPv4 na
-si suluhisho kwa hitilafu ya IPv4 pekee. Angalia [mpangilio wa DNS wa Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Hii inabadilisha uteuzi wa anwani OS** trafiki yote ya nje katika kontena hilo** . Hailazimishi kila programu kuchagua IPv6: Agizo la DNS la Node na uteuzi wa muunganisho pia ni muhimu. Hasa, `--dns-result-order=ipv4first` inapendelea IPv4 na sio dawa ya kushindwa kwa IPv4-only. Tazama [kuagiza kwa Node DNS](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Jaribu tena Gemini na providers wako wengine baada ya mabadiliko yoyote ya kiwango cha host. Ili kurudisha hali ya awali,
-ondoa mount maalum ya `gai.conf`, rejesha configuration ya awali ya network na
-uunde upya service/network iliyoathiriwa wakati wa kipindi cha matengenezo. Kuunda upya network
-kunaweza kukatiza containers nyingine zilizounganishwa nayo; usifute persistent data volume.
+Jaribu tena Gemini na watoa huduma wako wengine baada ya mabadiliko yoyote ya kiwango cha mwenyeji. Ili kurejesha nyuma, ondoa kipandikizi maalum `gai.conf`, rudisha usanidi wa mtandao uliopita na uunde upya service/network iliyoathiriwa wakati wa dirisha la matengenezo. Kuunda upya mtandao kunaweza kukatiza vyombo vingine vilivyounganishwa nayo; usifute kiasi cha data kinachoendelea.
 
 ## Vidokezo Muhimu
 

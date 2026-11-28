@@ -4,17 +4,13 @@
 
 ---
 
-> **Əsas istinad mənbəyi:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`,
-> `scanner.ts`, `loader.ts`), `src/app/api/plugins/` və
-> `src/app/(dashboard)/dashboard/plugins/`
-> **Son yenilənmə:** 2026-06-28 — v3.8.40
+> **Həqiqətin mənbəyi:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`, `scanner.ts`, `loader.ts`), `src/app/api/plugins/` və `src/app/(dashboard)/dashboard/plugins/`
 
-OmniRoute WordPress üslublu plagin sistemi ilə təchiz olunur. Plaginlər sorğu emalı ardıcıllığına (`onRequest` / `onResponse` / `onError`) və həyat dövrü hadisələrinə (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`) qoşulan, hər birində `plugin.json` manifesti və giriş faylı olan müstəqil qovluqlardır.
+OmniRoute WordPress tipli plagin sistemini göndərir. Pluginlər sorğu kəmərinə (`onRequest` / `onResponse` / `onError`) və həyat dövrü hadisələrinə (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`) qoşulan hər biri `plugin.json` manifestinə və — giriş faylına malik — müstəqil kataloqlardır.
 
-**Plagin Marketpleysi** həmin sistemin üzərindəki aşkarlama qatıdır. O, quraşdırıla bilən plaginlərin nəzərdən keçirilə bilən kataloqunu təqdim edir. Standart olaraq kataloq kiçik, daxili ilkin reyestrdən ibarətdir; operator onu fərdi uzaq reyestr URL-inə yönəldə bilər. Bu halda sorğu DNS həllindən istifadə edən SSRF qoruyucusu ilə mühafizə olunur (bax: [Təhlükəsizlik](#security)).
+The** Plugin Marketplace** həmin sistemin üstündəki kəşf təbəqəsidir. Quraşdırıla bilən plaginlərin gözdən keçirilə bilən kataloqunu ifşa edir. Varsayılan olaraq, kataloq kiçik daxili toxum reyestridir; operator onu xüsusi uzaq reyestrdə göstərə bilər URL, bu halda gətirmə DNS həll edən SSRF qoruyucusu tərəfindən sərtləşdirilir (bax [Təhlükəsizlik](#security) ).
 
-Bütün plagin marşrutları **yalnız loopback üçün əlçatandır** (Səviyyə 1 — `LOCAL_ONLY`): plaginlər alt proseslərdə kod yükləyib icra etdiyinə görə, autentifikasiyadan asılı olmayaraq, marşrutlar loopback olmayan mənbələrdən əlçatmazdır. Bax:
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
+Hər bir plugin marşrutu** yalnız geri dönmə** (Tier 1 — `LOCAL_ONLY`): plaginlər uşaq proseslərdə kodu yükləyir və icra edir, ona görə də auth-dan asılı olmayaraq marşrutlar geri dönməyən mənbədən əlçatmazdır. [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) baxın.
 
 ## Necə Uyğundur Together
 
@@ -64,22 +60,23 @@ Fərdi reyestr URL-i konfiqurasiya edilmədikdə kataloq daxili `SEED_REGISTRY`-
 
 Bütün son nöqtələr idarəetmə auth (`requireManagementAuth`) tələb edir** və** yalnız loopback-dir — `/api/plugins` və `/api/plugins/` `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) siyahısında verilmişdir.
 
-| Son nöqtə                        | Metod  | Təsvir                                                                |
-| -------------------------------- | ------ | --------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Quraşdırılmış plaginlərin siyahısı (isteğe bağlı `?status=` filtri)   |
-| `/api/plugins`                   | POST   | Plugin mənbələri kataloqundan plagin quraşdırın                       |
-| `/api/plugins/scan`              | POST   | Plugin kataloqunu skan edin və yeni plaginləri qeyd edin              |
-| `/api/plugins/marketplace`       | GET    | Bazar kataloqu girişlərini siyahıya alın                              |
-| `/api/plugins/[name]`            | GET    | Quraşdırılmış plagin təfərrüatlarını əldə edin                        |
-| `/api/plugins/[name]`            | DELETE | Plugini silin                                                         |
-| `/api/plugins/[name]/activate`   | POST   | Aktivləşdirin ( + qeydiyyat qarmaqlarını yükləyin)                    |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktiv edin (yanğın `onDeactivate`, qarmaqları qeydiyyatdan çıxarın) |
-| `/api/plugins/[name]/config`     | GET    | Plugin konfiqurasiya + konfiqurasiya sxemini əldə edin                |
-| `/api/plugins/[name]/config`     | PUT    | Plugin konfiqurasiyasını güncəlləyin (sxemlə təsdiqlənib)             |
+| Son nöqtə                          | Metod  | Təsvir                                                                |
+| ---------------------------------- | ------ | --------------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Quraşdırılmış plaginlərin siyahısı (isteğe bağlı `?status=` filtri)   |
+| `/api/plugins`                     | POST   | Plugin mənbələri kataloqundan plagin quraşdırın                       |
+| `/api/plugins/scan`                | POST   | Plugin kataloqunu skan edin və yeni plaginləri qeyd edin              |
+| `/api/plugins/marketplace`         | GET    | Bazar kataloqu girişlərini siyahıya alın                              |
+| `/api/plugins/marketplace/install` | POST   | Adı ilə bazar plaginini quraşdırın                                    |
+| `/api/plugins/[name]`              | GET    | Quraşdırılmış plagin təfərrüatlarını əldə edin                        |
+| `/api/plugins/[name]`              | DELETE | Plugini silin                                                         |
+| `/api/plugins/[name]/activate`     | POST   | Aktivləşdirin ( + qeydiyyat qarmaqlarını yükləyin)                    |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktiv edin (yanğın `onDeactivate`, qarmaqları qeydiyyatdan çıxarın) |
+| `/api/plugins/[name]/config`       | GET    | Plugin konfiqurasiya + konfiqurasiya sxemini əldə edin                |
+| `/api/plugins/[name]/config`       | PUT    | Plugin konfiqurasiyasını güncəlləyin (sxemlə təsdiqlənib)             |
 
 `GET /api/plugins` `status` filtri `installed` / `active` / `inactive` / `error`-dan birini qəbul edir. Yanlış dəyər `400` qaytarır.
 
-### Quraşdırılmış plaginləri sadalayın
+### Quraşdırılmış plaginlərin siyahısı
 
 ```bash
 curl http://localhost:20128/api/plugins \
@@ -95,9 +92,9 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` bir olmalıdır** mütləq** qovluğa gedən yol** plugin mənbələri qovluğunda** : `plugin-sources` plugin kökünün yanındadır, buna görə defolt olaraq `~/.omniroute/plugin-sources/` və ya dəyişən təyin edildikdə `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Əvvəlcə plaqini kopyalayın və ya klonlayın. Yolda `..` və ya null bayt olduqda, həmin kataloqdan kənarda olduqda, simvolik keçid vasitəsilə onun xaricində həll edildikdə, hədəfi ondan kənarda olan simvolik əlaqə olduqda və ya kataloq mövcud olmadıqda quraşdırma `400` ilə rədd edilir. Mənbə kataloqunda etibarlı `plugin.json` olmalıdır (yaxud birinin valideyni olmalıdır). Uğurla cavab quraşdırılmış plagin sırası ilə `201` dir.
+`path` bir olmalıdır** mütləq** qovluğa gedən yol** plugin mənbələri qovluğunda** : `plugin-sources` plugin kökünün yanındadır, buna görə defolt olaraq `~/.omniroute/plugin-sources/` və ya həmin dəyişən təyin edildikdə `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` ( `src/lib/plugins/installSource.ts`-də `getPluginSourcesDir()` ). Əvvəlcə plaqini kopyalayın və ya klonlayın. Yolda `..` və ya null bayt olduqda, həmin kataloqdan kənarda olduqda, simvolik keçid vasitəsilə onun xaricində həll edildikdə, hədəfi ondan kənarda olan simvolik əlaqə olduqda və ya kataloq mövcud olmadıqda quraşdırma `400` ilə rədd edilir. Mənbə kataloqunda etibarlı `plugin.json` olmalıdır (yaxud birinin valideyni olmalıdır). Uğurla cavab quraşdırılmış plagin sırası ilə `201` dir.
 
-Digər plagin marşrutlarından fərqli olaraq, bu, giriş deaktiv olduqda belə idarəetmə etimadnaməsini (baxış paneli seansı və ya idarə olunan API açarı) tələb edir (`requireLogin=false`): kodu quraşdırmaq heç vaxt anonim əməliyyat deyil.
+Digər plagin marşrutlarından fərqli olaraq, bu, giriş deaktiv olduqda belə idarəetmə etimadnaməsini (baxış paneli seansı və ya idarə olunan API açarı) tələb edir (`requireLogin=false`): kodu quraşdırmaq heç vaxt anonim əməliyyat deyil. Eyni şey `POST /api/plugins/marketplace/install` (bədən `{ "name": "<plugin>" }`) üçün də keçərlidir.
 
 ### Bazara göz atın
 
@@ -115,7 +112,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` hər bir təqdim edilmiş dəyəri plaqinin `configSchema` (manifestdə elan edilmiş) ilə təsdiqləyir: `number` sahələri honor `min`/`max`, `select` sahələri elan edilmiş `enum` ilə uyğun olmalıdır. Sxemdə olmayan açarlara icazə verilir.
+`PUT .../config` gövdəni `src/lib/plugins/manifest.ts`-dən `validatePluginConfig()` ilə plaqinin `configSchema` (manifestdə elan edilmiş) ilə təsdiqləyir: hər bir açar sxemdə elan edilməlidir, dəyərlər elan edilmiş tipə uyğun olmalıdır, `number` sahələri `min`/`max` şərəfinə, `select` sahələri elan `enum` uyğun olmalıdır. Hər hansı bir pozuntu `400` qaytarır və heç bir şey saxlanılmır. `configSchema` olmadığını elan edən plaqinin konfiqurasiya edilə bilən açarları yoxdur, ona görə də sorğu `400` ilə rədd edilir (“Plugin heç bir konfiqurasiya edilə bilən açarı elan etmir”).
 
 ## Konfiqurasiya
 
@@ -179,7 +176,7 @@ Hər iki təbəqəni uğursuz edən URL sorğunu dayandırmır — bazar yeri s�
 
 ### Plugin icra izolyasiyası
 
-> **Pluginlər qum qutusuna daxil edilməyib.** Uşaq OmniRoute istifadəçisi kimi işləyən, VM konteksti və Node.js icazə bayraqları olmayan adi Node.js prosesidir, ona görə də plagin kodu istifadəçinin bacardığı istənilən faylı oxuya və yaza, proqramları işlədə və şəbəkəyə daxil ola bilər. `requires.permissions` yalnız uşağın hansı mühit dəyişənlərini alacağına qərar verir; digər icazələr tətbiq edilmir. Yalnız etibar etdiyiniz plaginləri quraşdırın. Aşağıdakı proses sərhədində qəzalar və asılmalar var; təhlükəsizlik sərhədi deyil.
+> **Plaginlər defolt olaraq sandboxa daxil edilmir.** Uşaq OmniRoute istifadəçisi kimi işləyən, VM konteksti və Node.js icazə bayraqları olmayan adi Node.js prosesidir, ona görə də plagin kodu istifadəçinin bacardığı istənilən faylı oxuya və yaza, proqramları işlədə və şəbəkəyə daxil ola bilər. `requires.permissions` yalnız uşağın hansı mühit dəyişənlərini alacağına qərar verir; digər icazələr tətbiq edilmir. Daxil olan `PLUGIN_PERMISSION_MODEL_ENABLED` funksiyasının bayrağı (defolt olaraq söndürülür) Node.js məhdudlaşdıra bilməyəcəyi `network` istisna olmaqla, həmin icazələrdən qurulmuş Node.js icazə modeli altında hər bir plaqini işə salır (bax: [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ). Yalnız etibar etdiyiniz plaginləri quraşdırın. Aşağıdakı proses sərhədində qəzalar və asılmalar var; təhlükəsizlik sərhədi deyil.
 
 - **Prosesin izolyasiyası** — `loadPlugin()` (`src/lib/plugins/loader.ts`) hər bir plaqini ayrıca Node.js uşaq prosesində yaradır və IPC üzərindən əlaqə qurur. Hook zənglərində `SIGTERM` → `SIGKILL` eskalasiyası ilə vaxt aşımı var.
 - **Env icazə siyahısı** — uşaq yalnız icazə verilmiş ətraf mühit dəyişənləri dəstini alır; daha geniş dəst yalnız manifest `env` icazəsi tələb etdikdə verilir.

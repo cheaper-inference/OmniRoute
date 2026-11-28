@@ -101,31 +101,31 @@ Katrai kombinācijai:
 - Nesenie pārslēgšanās uz rezerves variantu notikumi
 - Sekmīguma rādītājs (24 h, 7 d., 30 d.)
 
-## Veselības pārbaudes API
+## Veselības pārbaude API
 
-OmniRoute nodrošina **divas** HTTP veselības pārbaudes saskarnes. Orķestratoros tās nav savstarpēji aizvietojamas.
+OmniRoute atmasko** divi** HTTP veselības virsmas. Tie nav savstarpēji aizvietojami orķestrantiem.
 
-| Ceļš                         | Nolūks                                                                              | Slodze                                | Izmantošana                                                                                    |
-| ---------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `GET /healthz`               | Dzīves cikla darbspēja/gatavība (`ok` / `starting` / `stopping`)                    | Nenozīmīga (tikai fāzes karodziņš)    | Kubernetes **gatavības** pārbaudei; saudzīgai **darbspējas** pārbaudei, ja jāizmanto HTTP      |
-| `GET /api/monitoring/health` | Padziļināts sistēmas un nodrošinātāju kopsavilkums (DB, kaudze, kataloga skaits, …) | Liela (sinhrons DB/uzraudzības darbs) | Informācijas paneļiem, padziļinātām blackbox pārbaudēm, Docker iebūvētajai veselības pārbaudei |
+| Ceļš                         | Mērķis                                                                        | Svars                                          | Izmantot priekš                                                                         |
+| ---------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `GET /healthz`               | Dzīves cikls liveness/readiness (`ok` / `starting` / `stopping`)              | Triviāls (tikai fāzes karodziņš)               | Kubernetes** gatavību** ; mīksts** dzīvīgumu** ja jums ir jāizmanto HTTP                |
+| `GET /api/monitoring/health` | Dziļās sistēmas + nodrošinātāja kopsavilkums (DB, kaudze, katalogu skaits, …) | Smags (sinhronizācijas DB / uzraudzības darbs) | Informācijas paneļi, melnās kastes dziļās pārbaudes, Docker iebūvētā veselības pārbaude |
 
-> **Piezīme:** Nodrošinātāju veselības matricas, autopilota problēmas, kvotu monitori, pilnvaru veselība un detalizēta latentuma informācija papildus `/api/monitoring/health` ir pieejama, izmantojot **MCP rīku** `observability_snapshot` vai **informācijas paneļa** lapas — tiem nav atsevišķu REST maršrutu.
+> **Piezīme:** Pakalpojumu sniedzēja veselības matricas, autopilota problēmas, kvotu monitori, marķiera stāvoklis un latentuma informācija, kas pārsniedz `/api/monitoring/health` ir pieejamas, izmantojot**MCP rīks** `observability_snapshot` vai** informācijas panelis** — lapas tiem nav īpašu REST maršrutu.
 
-Abi maršruti darbojas tajā **pašā Node notikumu ciklā**, kurā tiek apstrādāti pieprasījumi. CPU intensīvs ceļš (apjomīga `GET /v1/models` kataloga apstrāde, gara konteksta saspiešana/pilnvaru skaitīšana) var aizkavēt **visus** HTTP apdarinātājus, tostarp `/healthz`. Noslogots notikumu cikls ≠ beigts process. Ieteicams novērst noslodzes cēloni; pārbaužu pielāgošana tikai samazina kļūdainas procesu apturēšanas gadījumus.
+Abi maršruti kursē uz** tā pati Node notikumu cilpa** kā pieprasījumu apstrāde. Ar CPU saistīts ceļš (liels `GET /v1/models` kataloga darbs, ilgstoša saspiešana / marķieru skaitīšana) var aizkavēt** visi** HTTP apstrādātāji, tostarp `/healthz`. Notikuma cilpas aizņemts ≠ process ir miris. Dod priekšroku cūkas nostiprināšanai; zondes regulēšana tikai samazina viltus nogalināšanu.
 
-### Viegla orķestratora pārbaude
+### Viegla orķestratora zonde
 
 ```bash
 GET /healthz
-# vai HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + pamatteksts `ok`, kad servera dzīves cikla fāze ir gatava
-- **503** + `starting` / `stopping` palaišanas vai izslēgšanas laikā
-- Implementācija: `src/app/healthz/route.ts` (bez DB pārbaudes)
+- **200** + body `ok` kad servera dzīves cikla fāze ir gatava
+- **503** + `starting` / `stopping` sāknēšanas vai izslēgšanas laikā
+- Ieviešana: `src/app/healthz/route.ts` (bez DB ping)
 
-### Sistēmas veselība (padziļināta)
+### Sistēmas veselība (dziļa)
 
 ```bash
 GET /api/monitoring/health
@@ -155,43 +155,35 @@ Atbilde:
 }
 ```
 
-#### `credentialHealth`: pārbaužu kešatmiņa pret SQLite `test_status`
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth` ir **atmiņā glabātās pārbaužu kešatmiņas
-rādītājs**, nevis aktuāla `provider_connections.test_status` izdruka. Pēc #12532
-pieprasījuma ceļš nolasa tikai `getCachedCredentialHealthSummary()`; fona pārbaudes
-atsvaidzina kešatmiņu ārpus notikumu cikla.
+`GET /api/monitoring/health` → `credentialHealth` ir** atmiņā esošais zondes kešatmiņas mērītājs** , nevis dzīva `provider_connections.test_status` izgāztuve . Pēc #12532 pieprasījuma ceļš nolasa tikai `getCachedCredentialHealthSummary()` ; fona zondes atsvaidzina kešatmiņu no notikumu cilpas.
 
-| Slānis                              | Kur                                                                   | Ko tas nozīmē                                                                                                                                                                                                                    |
-| ----------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pārbaužu kešatmiņas rādītājs        | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Pēdējie akreditācijas datu veselības pārbaužu rezultāti, kas joprojām tiek glabāti procesa atmiņā. `source` vienmēr ir `probe-cache`.                                                                                            |
-| Neizdevušos savienojumu informācija | `credentialHealth.failedConnections`                                  | Pieejama **tikai tad, ja `failed > 0`**. Ierobežots kešatmiņas rindu saraksts ar `status=error` (`connectionId`, `status`, attīrīts `lastError` / `lastErrorType`). `failedOmitted` tiek iestatīts, ja saraksts tika ierobežots. |
-| SQLite noturīgais statuss           | `credentialHealth.staleDbNonOkCount`                                  | **Aktīvo** (`is_active=1`) savienojumu rindu skaits, kuru saglabātais `test_status` ir zināma vērtība, kas nav `ok` (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                           |
+| Slānis                            | Kur                                                                   | Ko tas nozīmē                                                                                                                                                                                                                  |
+| --------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Zondes kešatmiņas mērītājs        | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Pēdējie akreditācijas datu veselības zondes rezultāti joprojām glabājas procesa atmiņā. `source` vienmēr ir `probe-cache`.                                                                                                     |
+| Neizdevās savienojuma informācija | `credentialHealth.failedConnections`                                  | Klāt** tikai tad, kad `failed > 0`** . Ierobežots kešatmiņas rindu saraksts ar `status=error` (`connectionId`, `status`, sanitized `lastError` / `lastErrorType`). `failedOmitted` ir iestatīts, kad saraksts tika ierobežots. |
+| SQLite lipīgs statuss             | `credentialHealth.staleDbNonOkCount`                                  | Skaits no** aktīvs** (`is_active=1`) savienojumu rindas, kuru pastāvīgā `test_status` ir zināma neatbilstība (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                                |
 
-Šie divi slāņi var apzināti atšķirties:
+Abi slāņi var ar nolūku nesakrist:
 
-- Rādītājs `failed=0`, kamēr `staleDbNonOkCount>0` — SQLite joprojām ir noturīgs
-  `test_status` (piemēram, `expired` vai `credits_exhausted`), ko jaunākais
-  pārbaužu kešatmiņas momentuzņēmums neuzskaita kā `status=error`.
-- Rādītājs `failed>0`, kamēr SQLite norāda, ka viss ir kārtībā — nesena pārbaude neizdevās un ir
-  saglabāta kešatmiņā; DB rinda vēl nav atjaunināta vai vēlāk tika notīrīta.
+- Izmēriet `failed=0` kamēr `staleDbNonOkCount>0` — SQLite joprojām ir lipīgs `test_status` (piemēram `expired` vai `credits_exhausted`), ka jaunākais pārbaudes kešatmiņas momentuzņēmums netiek uzskatīts par `status=error`.
+- Izmērīt `failed>0` kamēr SQLite izskatās vesels — nesen veiktā zonde neizdevās un tiek saglabāta kešatmiņā; DB rinda nav atjaunināta vai vēlāk tika notīrīta.
 
-Neradiet brīdinājumu, pamatojoties tikai uz `provider_connections.test_status`, kad iegūstat datus no šī
-galapunkta. Izmantojiet `failed` + `failedConnections` aktuālām pārbaužu kļūmēm un
-`staleDbNonOkCount`, ja nepieciešams saglabāto noturīgo statusu skaits.
+Nokasot šo galapunktu, nebrīdiniet tikai par `provider_connections.test_status`. Izmantojiet `failed` + `failedConnections` reāllaika zondes kļūmēm, un `staleDbNonOkCount` ja nepieciešams noturīgā fiksētā statusa skaitītājs.
 
-### Kubernetes pārbaužu ieteikumi
+### Kubernetes zondes ieteikumi
 
-OmniRoute ir **viens Node process** (viens notikumu cikls). Docker standarta `HEALTHCHECK` izmanto vieglo `/healthz`. `/api/monitoring/health` ir **pārāk smags** kubelet darbspējas pārbaudes intervāliem.
+OmniRoute ir a** viena mezgla process** (viena notikumu cilpa). Akciju Docker `HEALTHCHECK` mērķis ir viegls `/healthz`. `/api/monitoring/health` ir** pārāk smags** kubelet dzīvīguma intervāliem.
 
-| Pārbaude                           | Ieteicamais mērķis                                                                          | Piezīmes                                                                                                                                                                                                                                                                                                                                                                                               |
-| ---------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Palaišana**                      | HTTP `GET /healthz` ar lielu `failureThreshold` (vai lielu `startPeriod`)                   | Aukstā palaišana + SQLite migrācija var ilgt vairākas sekundes                                                                                                                                                                                                                                                                                                                                         |
-| **Gatavība**                       | HTTP `GET /healthz`                                                                         | Dzīves cikla stāvokļi `ok` / `starting` / `stopping` (200 pret 503). Joprojām svārstās, ja ciklu bloķē CPU. **200 atbilde pēc vairākām sekundēm nav veselīga stāvokļa pazīme** (#10303) — tas nozīmē, ka notikumu ciklam trūka resursu, pirms tika izpildīts 3 baitu apdarinātājs                                                                                                                      |
-| **Dzīvīgums**                      | HTTP `GET /livez` **vai TCP** galvenajā pakalpojuma portā (`PORT`, pēc noklusējuma `20128`) | `/livez` pārbauda tikai procesa darbību (vienmēr 200, ja apdarinātājs tiek izpildīts). Tā joprojām izmanto to pašu notikumu ciklu — aizņemts ≠ nedzīvs, un tā nekonstatē notikumu cikla resursu trūkumu (#10303) labāk par TCP. Dodiet priekšroku **TCP**, ja HTTP pārbaudes noilgst kataloga/saspiešanas slodzes laikā; jebkurā gadījumā **nenogaliniet** podu īslaicīgas notikumu cikla aiztures dēļ |
-| **Padziļināta veselības pārbaude** | `GET /api/monitoring/health` no ārēja pārbaudītāja                                          | Nav paredzēta kubelet `livenessProbe` / biežai `readinessProbe`                                                                                                                                                                                                                                                                                                                                        |
+| Zonde              | Ieteicamais mērķis                                                                   | Piezīmes                                                                                                                                                                                                                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Startēšana**     | HTTP `GET /healthz` ar garu `failureThreshold` (vai lielu `startPeriod`)             | Aukstā palaišanas + SQLite migrācija var pārsniegt dažas sekundes                                                                                                                                                                                                                                                                        |
+| **Gatavība**       | HTTP `GET /healthz`                                                                  | Dzīves cikls `ok` / `starting` / `stopping` (200 pret 503). Joprojām ir atloki, ja cilpa ir bloķēta ar centrālo procesoru. A** 200 vairākās sekundēs nav veselīgi** (#10303) — tas nozīmē, ka notikumu cilpa tika izsaldēta pirms 3 baitu apdarinātāja palaišanas                                                                        |
+| **Dzīvīgums**      | HTTP `GET /livez`,** vai TCP** galvenajā servisa portā (`PORT`, noklusējuma `20128`) | `/livez` ir process-alive tikai (vienmēr 200, ja apdarinātājs darbojas). Tas joprojām koplieto notikumu cilpu — busy ≠ dead, un tas nenosaka notikumu cilpas badu (#10303) labāk nekā TCP. Dod priekšroku**TCP** ja HTTP zondes taimauts zem catalog/compression slodzes; darīt** nē** nogaliniet potenciālu īsos notikumu cikla stendos |
+| **Dziļa veselība** | `GET /api/monitoring/health` no ārējā pārbaudītāja                                   | Nav paredzēts kubelet `livenessProbe` / saspringts `readinessProbe`                                                                                                                                                                                                                                                                      |
 
-Konfigurācijas piemērs (pielāgojiet sliekšņus savai aukstās palaišanas un saspiešanas slodzei):
+Formas piemērs (pielāgojiet sliekšņus aukstās palaišanas un kompresijas slodzei):
 
 ```yaml
 ports:
@@ -217,21 +209,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Notikumu cikla aiztures laikā HTTP /livez joprojām var iestāties noildze. TCP ir
-  # piesardzīgāka alternatīva:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-**Nenorādiet** kubelet **dzīvīguma** pārbaudei `/api/monitoring/health`. Šis ceļš veic reālu DB/pārraudzības darbu un slodzes apstākļos radīs kļūdaini pozitīvus rezultātus.
+**Nedrīkst** punkts kubelet** dzīvīgumu** pie `/api/monitoring/health`. Šis ceļš veic reālu DB/monitoring darbu, un slodzes gadījumā tas ir kļūdaini pozitīvs.
 
-Saistīts: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (pārbaudes, kamēr notikumu cikls ir aizņemts), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (kataloga cenu apstrādes radīta resursu pārslodze), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (saspiešanas marķieru skaitīšanas radīta resursu pārslodze).
+Saistīts: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (pārbaude, kamēr notikuma cilpa ir aizņemta), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (kataloga cenu noteikšana), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (saspiešanas marķiera skaitīšana).
 
-### systemd sargsuns (iesaldēts notikumu cikls)
+### systemd sargsuns (iesaldēta notikumu cilpa)
 
-systemd resursdatorā OmniRoute paziņo pakalpojumu pārvaldniekam, kad tas ir gatavs, un turpina regulāri sūtīt tam signālus, lai serveris, kura notikumu cikls ir iestrēdzis, tiktu nogalināts un restartēts, nevis turpinātu darboties bez reakcijas. Signāli nāk no paša servera notikumu cikla: kad tas tiek bloķēts, signāli apstājas, un systemd restartē pakalpojumu, tiklīdz `WatchdogSec` norādītais laiks paiet bez neviena signāla.
+Sistēmas resursdatorā OmniRoute paziņo pakalpojumu pārvaldniekam, kad tas ir gatavs, un turpina to pingot, tāpēc serveris, kura notikumu cilpa ir iestrēdzis, tiek nogalināts un tiek restartēts, nevis paliek nomodā un klusē. Ziņojumi nāk no paša servera notikumu cilpas: kad tas bloķē, tie apstājas, un systemd restartē pakalpojumu, tiklīdz `WatchdogSec` paiet bez tā.
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) jau izveido lietotāja vienību ar šo konfigurāciju. Paša izveidotai vienībai (ar noklusējuma `Type=simple`) sargsuņa nav, tāpēc pievienojiet šīs rindas tās sadaļai `[Service]`:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) jau raksta lietotāja vienību ar šo. Vienība, kuru rakstāt pats (noklusējuma `Type=simple`), nesaņem sargsuni, tāpēc pievienojiet šīs rindiņas tās `[Service]` sadaļai:
 
 ```ini
 [Service]
@@ -241,34 +233,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-Ģenerētā vienība iestata `Restart=on-failure`, tāpēc pievienojiet arī šo rindu — bez tās sargsuns tikai nogalina iestrēgušo pakalpojumu, nevis to restartē.
+Ģenerētā vienība iestata `Restart=on-failure`, tāpēc pievienojiet šo rindiņu, kā arī — bez tā sargsuns tikai nogalina iestrēgušo pakalpojumu, nevis to restartē.
 
-- `Type=notify`: pakalpojums tiek uzskatīts par „palaistu”, kad serveris nosūta `READY=1`, nevis tad, kad process izveido atvasināto procesu. `TimeoutStartSec` ierobežo lēnas palaišanas ilgumu.
-- `NotifyAccess=all`: signālus sūta servera process, kas ir `omniroute serve` pārrauga bērnprocess.
-- `WatchdogSec`: signāli tiek sūtīti ik pēc 60 sekundēm, tāpēc izmantojiet vērtību **120 vai vairāk**. Mazākas vērtības restartētu serveri, kas darbojas pareizi.
-- Palaidiet `omniroute serve` priekšplānā. `--daemon` atvieno serveri no vienības cgroup, un paziņošanas rokasspiediens nekad netiek pabeigts.
+- `Type=notify`: pakalpojums tiek "startēts", kad serveris nosūta `READY=1`, nevis tad, kad process tiek dakšas. `TimeoutStartSec` ierobežo lēnu sākumu.
+- `NotifyAccess=all`: ehotestus nosūta servera process, kas ir `omniroute serve` uzrauga atvasinājums.
+- `WatchdogSec`: pings pazūd ik pēc 60 sekundēm, tāpēc izmantojiet** 120 vai vairāk** . Mazākas vērtības restartētu veselīgu serveri.
+- Palaist `omniroute serve` priekšplānā. `--daemon` atdala serveri no vienības cgrupas, un paziņojuma rokasspiediens nekad netiek pabeigts.
 
-Pēc restartēšanas pārbaudiet, vai tas ir aktīvs:
+Pārbaudiet, vai tas ir aktīvs pēc restartēšanas:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` parāda konfigurēto aizkavi, un `WatchdogTimestamp` ik minūti tiek atjaunināts. Sargsuņa izraisīta restartēšana tiek reģistrēta kā `Result=watchdog`. Lai izslēgtu signālus, nemainot pašu vienību, iestatiet `OMNIROUTE_DISABLE_SD_NOTIFY=1`; ja nav `NOTIFY_SOCKET` (terminālī, Docker, Electron, Windows), nekas netiek nosūtīts.
+`WatchdogUSec` parāda konfigurēto aizkavi un `WatchdogTimestamp` virzās uz priekšu katru minūti. Restartēšana, ko izraisa sargsunis, tiek reģistrēta kā `Result=watchdog`. Lai izslēgtu ping, vienlaikus saglabājot ierīci tādu, kāda tā ir, iestatiet `OMNIROUTE_DISABLE_SD_NOTIFY=1`; bez `NOTIFY_SOCKET` (termināls, Docker, Electron, Windows) nekas netiek nosūtīts.
 
-Sargsuns pārbauda tikai to, vai notikumu cikls turpina darboties. Serveris, kas darbojas lēni, bet joprojām turpina apstrādi, netiek restartēts.
+Sargsuns tikai pārbauda, vai notikumu cilpa turpina darboties. Serveris, kas darbojas lēni, bet joprojām griežas, netiek restartēts.
 
-### Neobligāta pieprasījumu ceļa apstrāde (atmiņa, prasmes, marķiera atsvaidzināšana)
+### Izvēles pieprasījuma ceļa darbs (atmiņa, prasmes, marķiera atsvaidzināšana)
 
-Atmiņas izgūšana, prasmju injicēšana un OAuth marķieru atsvaidzināšana koplieto **galveno Node notikumu ciklu** ar `/healthz`. Tās ir informācijas paneļa pārslēdzamās funkcijas (`memoryEnabled`, `skillsEnabled`), nevis darbinieku pūls. Skatiet sadaļu [Vide — notikumu cikla izmaksas](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Atmiņas izvilkšana, prasmju ievadīšana un OAuth marķiera atsvaidzināšana kopīgo** galvenā Node notikumu cilpa** ar `/healthz`. Tie ir informācijas paneļa pārslēgšanas līdzekļi (`memoryEnabled`, `skillsEnabled`), nevis darbinieku kopa. Skatiet [sadaļu Vides — notikumu cikla izmaksas](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
-### Pakalpojumu sniedzēju darbspēja
+### Nodrošinātāja veselība
 
-> **Nav REST galapunkta.** Pakalpojumu sniedzēju darbspējas dati ir pieejami, izmantojot MCP rīku `observability_snapshot` vai informācijas paneļa lapu `/dashboard/providers`.
+> **Nav REST galapunkta.** Pakalpojumu sniedzēja veselības dati ir pieejami, izmantojot MCP rīku `observability_snapshot` vai informācijas paneļa `/dashboard/providers` lapu.
 
 ### Informācija par pakalpojumu sniedzēju
 
-> **Nav REST galapunkta.** Detalizēta informācija par katru pakalpojumu sniedzēju ir pieejama informācijas paneļa lapā `/dashboard/providers`.
+> **Nav REST galapunkta.** Informācija par pakalpojumu sniedzēju ir pieejama informācijas paneļa `/dashboard/providers` lapā.
 
 ---
 

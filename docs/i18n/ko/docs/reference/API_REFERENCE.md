@@ -49,7 +49,7 @@ OpenAI 호환 프로토콜과 제공업체 기능 매트릭스에 초점을 맞�
 
 ---
 
-## 채팅 완성
+## 채팅 완료
 
 ```bash
 POST /v1/chat/completions
@@ -65,35 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### 사용자 지정 헤더
+### 맞춤 헤더
 
-| Header                   | 방향 | 설명                                                                                                                                                                                 |
-| ------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `X-OmniRoute-No-Cache`   | 요청 | 캐시를 우회하려면 `true`로 설정                                                                                                                                                      |
-| `x-omniroute-no-memory`  | 요청 | 이 요청에 대한 메모리 + 스킬 주입을 건너뛰려면 `true`로 설정 (no-cache를 미러링하며 호출별 토큰/비용 오버헤드를 방지)                                                                |
-| `X-OmniRoute-Progress`   | 요청 | 진행률 이벤트를 사용하려면 `true`로 설정                                                                                                                                             |
-| `X-Session-Id`           | 요청 | 외부 세션 어피니티를 위한 고정 세션 키                                                                                                                                               |
-| `x_session_id`           | 요청 | 밑줄 변형도 허용됨 (직접 HTTP)                                                                                                                                                       |
-| `X-OmniRoute-Session-Id` | 요청 | 호출자가 제공하는 세션/대화 태그 (메모리에도 전달됨). 값이 있으면 세션별 비용 귀속을 위해 `call_logs.session_tag`에 있는 그대로 영속화됨 (#8249) — 값이 없을 때는 절대 생성되지 않음 |
-| `Idempotency-Key`        | 요청 | 중복 제거 키 (5초 윈도우)                                                                                                                                                            |
-| `X-Request-Id`           | 요청 | 대체 중복 제거 키                                                                                                                                                                    |
-| `x-omniroute-connection` | 요청 | ID를 기준으로 단일 모델 요청을 하나의 공급자 연결(계정)에 고정 — [요청별 계정 고정](#account-pinning-per-request) 참조                                                               |
-| `X-OmniRoute-Cache`      | 응답 | `HIT` 또는 `MISS` (스트리밍하지 않는 경우)                                                                                                                                           |
-| `X-OmniRoute-Idempotent` | 응답 | 중복 제거된 경우 `true`                                                                                                                                                              |
-| `X-OmniRoute-Progress`   | 응답 | 진행률 추적이 활성화된 경우 `enabled`                                                                                                                                                |
-| `X-OmniRoute-Session-Id` | 응답 | OmniRoute에서 사용한 유효 세션 ID                                                                                                                                                    |
-| `X-OmniRoute-Request-Id` | 응답 | 요청 상관관계 ID (확인 가능한 경우)                                                                                                                                                  |
-| `X-OmniRoute-Version`    | 응답 | OmniRoute 빌드 버전 (항상 포함됨)                                                                                                                                                    |
-| `X-OmniRoute-Cost-Saved` | 응답 | 캐시가 `HIT`일 때 캐시로 절감된 USD (캐시 적중 시에만)                                                                                                                               |
-| `X-OmniRoute-Decision`   | 응답 | 라우팅 추적: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>`은 조합 전략이며, 조합이 아닌 요청에서는 `single`) — 완료 응답에 항상 포함됨                               |
+| 헤더                     | 방향 | 설명                                                                                                                                                                                                                                                                                                      |
+| ------------------------ | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | 요구 | 캐시를 우회하려면 `true` 로 설정하세요.                                                                                                                                                                                                                                                                   |
+| `x-omniroute-no-memory`  | 요구 | 이 요청에 대한 메모리 + 기술 주입을 건너뛰려면 `true` 로 설정합니다(캐시 없음 미러링, 호출별 token/cost 오버헤드 방지).                                                                                                                                                                                   |
+| `x-omniroute-no-log`     | 요구 | 이 추론 요청에 대한 호출 로그에서 request/response 페이로드를 생략하려면 `true` 로 설정합니다(모든 채팅 계열 경로: 채팅 완료, 응답, 메시지, 완료, Gemini). 타임스탬프, 모델, 상태, 기간 및 토큰 개수는 계속 기록됩니다. 전체 콘텐츠 차단을 위해 `x-omniroute-no-memory` 및 `x-omniroute-no-cache` 와 결합 |
+| `X-OmniRoute-Progress`   | 요구 | 진행 이벤트를 위해 `true` 로 설정                                                                                                                                                                                                                                                                         |
+| `X-Session-Id`           | 요구 | 외부 세션 선호도를 위한 고정 세션 키                                                                                                                                                                                                                                                                      |
+| `x_session_id`           | 요구 | 밑줄 변형도 허용됩니다(직접 HTTP).                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Session-Id` | 요구 | 호출자가 제공하는 session/conversation 태그(메모리에도 공급) 존재하는 경우 세션당 비용 귀속을 위해 `call_logs.session_tag` 에 그대로 유지됩니다(#8249). — 부재 시 절대 합성되지 않습니다.                                                                                                                 |
+| `Idempotency-Key`        | 요구 | 중복 제거 키(5초 창)                                                                                                                                                                                                                                                                                      |
+| `X-Request-Id`           | 요구 | 대체 중복 제거 키                                                                                                                                                                                                                                                                                         |
+| `x-omniroute-connection` | 요구 | 단일 모델 요청을 하나의 공급자 연결(계정)에 ID — 로 고정합니다 [. 요청당 계정 고정을](#account-pinning-per-request) 참조하세요.                                                                                                                                                                           |
+| `X-OmniRoute-Cache`      | 응답 | `HIT` 또는 `MISS` (비스트리밍)                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Idempotent` | 응답 | 중복이 제거된 경우 `true`                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Progress`   | 응답 | 진행 상황 추적이 켜져 있는 경우 `enabled`                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Session-Id` | 응답 | OmniRoute 가 사용하는 효과적인 세션 ID                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Request-Id` | 응답 | 요청 상관 관계 ID(알려진 경우)                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Version`    | 응답 | OmniRoute 빌드 버전(항상 존재)                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Cost-Saved` | 응답 | USD HIT 에서 캐시를 피합니다(캐시 적중만 해당).                                                                                                                                                                                                                                                           |
+| `X-OmniRoute-Decision`   | 응답 | 라우팅 추적: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` 는 콤보 전략이거나 콤보가 아닌 요청의 경우 `single` ) — 항상 완료 응답에 나타납니다.                                                                                                                                           |
 
-> Nginx 참고: 밑줄이 포함된 헤더(예: `x_session_id`)에 의존하는 경우 `underscores_in_headers on;`을 활성화하세요.
+> Nginx 참고: 밑줄 헤더(예: `x_session_id`)를 사용하는 경우 `underscores_in_headers on;` 활성화하세요.
 
-#### 요청별 계정 고정
+#### 요청당 계정 고정
 
-공급자에 여러 연결(계정 또는 키)이 있는 경우 OmniRoute는 일반적으로 계정 선택 전략을
-통해 하나를 선택합니다. 대신 요청에서 `x-omniroute-connection` 헤더를 사용하여 특정 연결 하나를
-고정할 수 있습니다.
+공급자에 여러 연결(계정 또는 키)이 있는 경우 OmniRoute 일반적으로 계정 선택 전략을 통해 하나를 선택합니다. 대신 요청은 `x-omniroute-connection` 헤더를 사용하여 하나의 특정 연결을 고정할 수 있습니다.
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,16 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **id를 찾는 위치.** 대시보드의 프로바이더 페이지
-  (**대시보드 → 프로바이더 → <provider>**)를 열고 연결 행에서 `xxxxxxxx…` id 칩을 클릭하세요
-  — 전체 connection id가 복사됩니다.
-- **이를 적용하는 요청.** `/v1/chat/completions`, `/v1/messages` 및 `/v1/responses`의 단일 모델 요청(`provider/model`)입니다. 콤보는 헤더를 무시합니다. 대신 각 콤보 단계의 자체 connection을 통해 단계별로 계정을 고정하세요.
-- **고정은 선호가 아니라 엄격하게 적용됩니다.** 고정된 connection만 사용됩니다. 요청 내부에서 오류가 발생하면 해당 계정의 cooldown이 기록되지만, 같은 프로바이더의 다른 계정으로 전환하지는 않습니다.
-- **Cooldown과 quota가 고정을 해제합니다.** 고정된 connection이 cooldown 중이거나 quota를 모두 소진했거나 quota 정책에 의해 차단된 동안에는, 이후 요청이 고정되지 않은 트래픽과 동일하게 프로바이더의 다른 connection으로 fallback됩니다.
-- **알 수 없거나 비활성화된 id는 실패합니다.** 프로바이더의 활성 풀에 없는 id(삭제되었거나, 비활성화되었거나, 다른 프로바이더에 속한 id)는 사용 가능한 계정을 남기지 않으므로, 요청이 다른 곳으로 자동 라우팅되지 않고 실패합니다.
+- **아이디 찾는 곳.** 대시보드에서 공급자 페이지를 엽니다(** 대시보드 → 제공자 → <provider>** ) 연결 행 — 에서 `xxxxxxxx…` id 칩을 클릭하면 전체 연결 ID가 복사됩니다.
+- **그것을 존중하는 요청입니다.** `/v1/chat/completions`, `/v1/messages` 및 `/v1/responses` 에 대한 단일 모델 요청(`provider/model`). 콤보는 헤더를 무시합니다. 대신 단계 자체 연결을 통해 콤보 단계당 계정을 고정합니다.
+- **핀은 엄격한 것이지 선호하는 것은 아닙니다.** 고정 연결은 독점적으로 사용됩니다. 요청 내부의 실패는 계정의 쿨다운을 기록하지만** ~ 아니다** 동일한 제공업체의 형제 계정으로 교체하세요.
+- **쿨다운 및 할당량이 핀을 해제합니다.** 고정된 연결이 냉각되고, 할당량이 소진되거나 할당량 정책에 의해 차단되는 동안 이후 요청은 고정 해제된 트래픽과 마찬가지로 공급자의 다른 연결로 대체됩니다.
+- **알 수 없거나 비활성화된 ID는 실패합니다.** 공급자의 활성 풀에 없는 ID(삭제, 비활성화 또는 다른 공급자에 속함)는 적격 계정을 남기지 않으므로 자동으로 다른 곳으로 라우팅되는 대신 요청이 실패합니다.
 
-Claude Code는 `ANTHROPIC_CUSTOM_HEADERS`를 통해 사용자 지정 헤더를 전송합니다. 이를
-`~/.claude/settings.json`의 `env` 블록에 추가하거나, 프로젝트별로 다른 계정을 고정하려면 프로젝트 수준의 `.claude/settings.json`에 추가하세요:
+Claude 코드는 `ANTHROPIC_CUSTOM_HEADERS` 통해 사용자 정의 헤더를 보냅니다. `~/.claude/settings.json` 의 `env` 블록에 넣거나 프로젝트 수준 `.claude/settings.json` 에 넣어 프로젝트별로 다른 계정을 고정합니다.
 
 ```jsonc
 {
@@ -124,12 +120,11 @@ Claude Code는 `ANTHROPIC_CUSTOM_HEADERS`를 통해 사용자 지정 헤더를 �
 }
 ```
 
-소스: `src/sse/handlers/chat.ts` (헤더 읽기), `src/sse/services/auth.ts` 및
-`src/sse/services/sessionAffinityPin.ts` (고정 해제 및 풀에서 누락된 항목 확인).
+출처: `src/sse/handlers/chat.ts` (헤더 읽기), `src/sse/services/auth.ts` 및 `src/sse/services/sessionAffinityPin.ts` (핀 해제 및 풀에서 누락 확인).
 
-> **비용 텔레메트리 헤더:** 스트리밍하지 않는 성공 응답에도 `X-OmniRoute-*` 비용 텔레메트리 세트가 포함됩니다 — `X-OmniRoute-Response-Cost` (USD, 소수점 이하 10자리 고정; 무료/가격 미책정인 경우 `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, `X-OmniRoute-Fallback-Attempts` (0보다 큰 경우에만), 그리고 `X-OmniRoute-Request-Id` 및 `X-OmniRoute-Version`입니다. 이러한 헤더는 chat completions, `/v1/responses`, `/v1/messages`, **그리고 미디어 엔드포인트** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` 및 `/v1/moderations` (항상 비용 `0`) — 에서 생성됩니다. 미디어 비용은 가격 정보가 제공되는 경우 모달리티별(이미지당, 초당, 문자당, 검색 단위당)로 계산되며, 그렇지 않으면 `0`입니다(fail-open).
+> **비용 원격 분석 헤더:** 비스트리밍 성공 응답에는 `X-OmniRoute-*` 비용 원격 측정 세트 — `X-OmniRoute-Response-Cost` (USD, 고정 소수점 10자리; free/unpriced 의 경우 `0.0000000000` ), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, `X-OmniRoute-Fallback-Attempts` ( > 0인 경우에만), `X-OmniRoute-Request-Id` 및 `X-OmniRoute-Version` 포함됩니다. 이는 채팅 완료, `/v1/responses`, `/v1/messages` 에 의해 방출됩니다.** 미디어 엔드포인트** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` 및 `/v1/moderations` (항상 `0` 비용). 미디어 비용은 가격이 제공되는 경우 형식(이미지당, 초당, 문자당, 검색 단위당)별로 계산되며, 그렇지 않은 경우 `0` (페일오픈)입니다.
 
-> **캐시 적중 비용 의미:** 시맨틱 캐시 적중(`X-OmniRoute-Cache-Hit: true`)에서는 upstream 호출이 수행되지 않으므로 `X-OmniRoute-Response-Cost`는 `0.0000000000`입니다(적중 결과를 제공하는 데 드는 **증분** 비용). 원래 비용/발생했을 비용은 `X-OmniRoute-Cost-Saved`에 별도로 보고됩니다. 결제 처리 소비자는 `X-OmniRoute-Response-Cost`를 합산해야 하며(적중 비용은 없음), 캐시 분석에서는 `X-OmniRoute-Cost-Saved`를 집계할 수 있습니다.
+> **캐시 적중 비용 의미:** 시맨틱 캐시 HIT (`X-OmniRoute-Cache-Hit: true`)에서는 업스트림 호출이 이루어지지 않으므로 `X-OmniRoute-Response-Cost` 는 `0.0000000000` 입니다(** 증분** 조회수 제공 비용). original/would-have-been 비용은 `X-OmniRoute-Cost-Saved` 에 별도로 보고됩니다. 청구 소비자는 `X-OmniRoute-Response-Cost` 합산해야 합니다(조회수에는 비용이 발생하지 않음). 캐시 분석은 `X-OmniRoute-Cost-Saved` 집계할 수 있습니다.
 
 ## 독점 관리 세션 임대
 
@@ -349,6 +344,8 @@ Content-Type: application/json
 
 `n` `data[]` 에 `n` 이미지를 반환합니다. 업스트림 API 호출당 하나의 이미지를 반환하는 제공자(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI)는 최대 4개의 `n` 별도 업스트림 호출을 수신합니다. 고정된 `seed` 은 호출 인덱스(`seed`, `seed + 1`, …)에 의해 오프셋되므로 이미지는 다르지만 재현 가능합니다. `n` 는 10으로 제한됩니다. 호출이 실패하면 요청이 전체적으로 실패합니다. 팬아웃 형식 목록은 `open-sse/handlers/imageGeneration/fanOut.ts` 의 `SINGLE_IMAGE_FANOUT_FORMATS` 입니다.
 
+Codex GPT 이미지 모델(`codex/gpt-image-*`)은 PNG 만 반환합니다. 업스트림은 `jpeg` 또는 `webp` 요청된 경우에도 PNG 바이트로 `200` 응답합니다. 다른 `output_format` (`webp`, `jpeg`, ...)에 대한 요청은 자동으로 무시되는 대신 HTTP 400으로 거부됩니다. 생략하거나 `png` 보내세요. `output_compression` 전달되지 않습니다.
+
 ZenMux 기존 API 키 연결을 재사용하고 `zenmux/` 또는 `zm/` 접두사를 허용합니다.
 
 - `zenmux/openai/gpt-image-2` ZenMux 의 OpenAI 이미지 API 사용합니다. 옵션에는 `size`, `quality`, `n`, `output_format`, `output_compression`, `background` 및 `response_format` 포함됩니다.
@@ -382,17 +379,15 @@ Content-Type: application/json
 }
 ```
 
-`model`은 `provider/model` 접두사를 통해 OCR 제공업체를 선택합니다. 접두사가 없는 모델 ID(예:
-`mistral-ocr-latest`)는 등록된 제공업체로 확인되며, `model`을 생략하면 Mistral
-(`mistral-ocr-latest`)이 기본값으로 사용됩니다. 등록된 제공업체(`open-sse/config/ocrRegistry.ts`):
+`model` `provider/model` 접두사를 통해 OCR 공급자를 선택합니다. 베어 모델 ID(예: `mistral-ocr-latest`)는 등록된 공급자로 확인되고, 생략된 `model` 의 기본값은 Mistral (`mistral-ocr-latest`)입니다. 등록된 공급자(`open-sse/config/ocrRegistry.ts`):
 
-| 제공업체 ID                   | 모델 ID              | `model` 값                                                           | 참고                                                                                                   |
-| ----------------------------- | -------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (또는 접두사 없는 `mistral-ocr-latest`) | 동기식 — 단일 업스트림 호출의 응답이 직접 반환됩니다.                                                  |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                          | 비동기식 업스트림(`analyze` + 폴링) — 아래를 참조하세요.                                               |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                              | Vertex AI의 `openapi/chat/completions` 파트너 엔드포인트를 통한 동기식 — 인증/URL은 아래를 참조하세요. |
+| 제공자 ID                     | 모델 ID                   | `model` 값                                                    | 메모                                                                                                                                                                                                     |
+| ----------------------------- | ------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`      | `mistral/mistral-ocr-latest` (또는 베어 `mistral-ocr-latest`) | 동기식 — 응답은 단일 업스트림 호출에서 직접 반환됩니다.                                                                                                                                                  |
+| `azure-document-intelligence` | `prebuilt-read`           | `azure-document-intelligence/prebuilt-read`                   | 비동기 업스트림(`analyze` + 폴링) — 아래를 참조하세요.                                                                                                                                                   |
+| `vertex-deepseek-ocr`         | 자체 배포(내장 모델 없음) | `vertex-deepseek-ocr/<your-deployed-model-id>`                | 자체 Vertex AI Model Garden DeepSeek-OCR 엔드포인트(`openapi/chat/completions` 모양)를 통한 동기식 Google 2026년 10월 21일(#20423)에 관리형 `deepseek-ocr-maas` 폐기하여 id가 400을 반환하도록 했습니다. |
 
-세 제공업체 모두 동일한 Mistral 형식의 본문으로 응답합니다.
+세 공급자 모두 동일한 Mistral 모양의 본체에서 응답합니다.
 
 ```json
 {
@@ -404,26 +399,11 @@ Content-Type: application/json
 
 ### Azure Document Intelligence 폴링 흐름
 
-Azure Document Intelligence의 `analyze` API는 비동기식입니다. 초기 요청은 본문 대신
-`Operation-Location` 헤더를 반환하며, 결과를 폴링해야 합니다. 핸들러
-(`open-sse/handlers/ocr.ts`)는 최대 30회 시도 동안 매초 해당 URL을 폴링하고, `ok`가 아닌 폴링
-응답이나 `"failed"` 상태가 반환되면 즉시 실패하며(폴링을 계속하지 않음), 시도 예산이 소진된 후에도
-작업이 계속 실행 중이면 `504`를 반환합니다. 최종 Azure 응답은 호출자에게 반환되기 전에 Mistral에서
-사용하는 것과 동일한 `pages`/`markdown` 형식으로 정규화되므로, 클라이언트 코드는 제공업체별
-예외 처리를 별도로 수행할 필요가 없습니다.
+Azure Document Intelligence의 `analyze` API 는 비동기식입니다. 초기 요청은 본문 대신 `Operation-Location` 헤더를 반환하며 결과를 폴링해야 합니다. 핸들러(`open-sse/handlers/ocr.ts`)는 최대 30번의 시도에 대해 매초마다 URL 폴링하고,`ok` 아닌 폴링 응답이나 `"failed"` 상태에서 빠르게 실패하고(폴링을 유지하지 않음), 시도 예산이 소진된 후에도 작업이 계속 실행 중인 경우 `504` 반환합니다. 최종 Azure 응답은 호출자에게 반환되기 전에 Mistral 에서 사용하는 것과 동일한 `pages`/`markdown` 모양으로 정규화되므로 클라이언트 코드는 공급자를 특수한 경우로 처리할 필요가 없습니다.
 
 ### Vertex AI DeepSeek OCR 인증 및 엔드포인트 확인
 
-`vertex-deepseek-ocr`은 OmniRoute가 이미 채팅/이미지 트래픽에 지원하는 것과 동일한 Vertex AI 인증
-(`open-sse/executors/vertex.ts`)을 재사용합니다. 연결의 API 키는 서비스 계정 JSON 자격 증명일 수
-있으며(JWT 전달자 흐름을 통해 단기 OAuth 액세스 토큰으로 교환됨), 이미 발급된 OAuth 액세스 토큰일
-수도 있습니다. 이 경우 토큰을 그대로 사용합니다. 업스트림 엔드포인트 URL은 연결의 프로젝트와
-리전을 기반으로 구성되는 Vertex의 일반 `openapi/chat/completions` 파트너 엔드포인트입니다.
-명시적인 `providerSpecificData.project`/`providerSpecificData.region`이 항상 우선하며, 그렇지
-않으면 프로젝트는 서비스 계정 JSON의 `project_id`에서 파생되고 리전은 기본적으로
-`us-central1`로 설정됩니다. 두 확인 작업은 모두 `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`)에서 수행되며,
-`src/app/api/v1/ocr/route.ts`가 `handleOcr`로 디스패치하기 전에 이를 사용합니다.
+`vertex-deepseek-ocr` OmniRoute 이미 chat/image 트래픽(`open-sse/executors/vertex.ts`)을 지원하는 것과 동일한 Vertex AI 인증을 재사용합니다. 연결의 API 키는 서비스 계정 JSON 자격 증명(JWT-bearer 흐름을 통해 단기 OAuth 액세스 토큰으로 교환됨)이거나 있는 그대로 사용되는 이미 생성된 OAuth 액세스 토큰입니다. 업스트림 엔드포인트 URL 는 Vertex의 일반 `openapi/chat/completions` 파트너 엔드포인트이며, 연결 프로젝트 및 지역 — 에서 구축되었으며 명시적인 `providerSpecificData.project`/`providerSpecificData.region` 항상 승리합니다. 그렇지 않으면 프로젝트는 서비스 계정 JSON 의 `project_id` 에서 파생되고 지역의 기본값은 `us-central1` 입니다. 두 가지 해결 방법 모두 `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`)에서 발생하며 `handleOcr` 로 디스패치하기 전에 `src/app/api/v1/ocr/route.ts` 에서 사용됩니다.
 
 ---
 
@@ -675,79 +655,104 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
 
 ---
 
-## 호환성 엔드포인트
+## 호환성 끝점
 
-| 메서드 | 경로                                      | 형식                                     |
-| ------ | ----------------------------------------- | ---------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                   |
-| POST   | `/v1/messages`                            | Anthropic                                |
-| POST   | `/v1/responses`                           | OpenAI Responses                         |
-| POST   | `/v1/embeddings`                          | OpenAI                                   |
-| POST   | `/v1/images/generations`                  | OpenAI Images                            |
-| POST   | `/v1/images/edits`                        | OpenAI Images (편집/인페인팅)            |
-| POST   | `/v1/videos/generations`                  | OpenAI 스타일 동영상 생성                |
-| POST   | `/v1/music/generations`                   | OpenAI 스타일 음악 생성                  |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                       |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (오디오 본문 반환)            |
-| POST   | `/v1/rerank`                              | Cohere/Voyage 스타일 재순위 지정         |
-| POST   | `/v1/classify`                            | Jina 분류 (`api.jina.ai`)                |
-| POST   | `/v1/segment`                             | Jina 세그먼트 분할기 (`segment.jina.ai`) |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                       |
-| GET    | `/v1/models`                              | OpenAI                                   |
-| POST   | `/v1/models/query`                        | 필터링된 모델 후보 목록                  |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                                |
-| GET    | `/v1beta/models`                          | Gemini                                   |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                   |
-| POST   | `/v1/api/chat`                            | Ollama                                   |
-| GET    | `/api/v1/vscode/{token}/`                 | OpenAI 카탈로그 별칭                     |
-| GET    | `/api/v1/vscode/{token}/models`           | OpenAI 모델 별칭                         |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI 토큰화 별칭                       |
-| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses 토큰화 별칭             |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama 토큰화 별칭                       |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama 태그 토큰화 별칭                  |
+| 방법 | 길                                        | 체재                             |
+| ---- | ----------------------------------------- | -------------------------------- |
+| POST | `/v1/chat/completions`                    | OpenAI                           |
+| POST | `/v1/messages`                            | Anthropic                        |
+| POST | `/v1/responses`                           | OpenAI 응답                      |
+| POST | `/v1/embeddings`                          | OpenAI                           |
+| POST | `/v1/images/generations`                  | OpenAI 이미지                    |
+| POST | `/v1/images/edits`                        | OpenAI 이미지 (edit/inpaint)     |
+| POST | `/v1/videos/generations`                  | OpenAI 스타일 비디오 생성        |
+| POST | `/v1/music/generations`                   | OpenAI 스타일 음악 생성          |
+| POST | `/v1/audio/transcriptions`                | OpenAI 오디오(STT)               |
+| POST | `/v1/audio/speech`                        | OpenAI TTS (오디오 본문 반환)    |
+| POST | `/v1/rerank`                              | Cohere/Voyage-style 순위 변경    |
+| POST | `/v1/classify`                            | 지나 분류(`api.jina.ai`)         |
+| POST | `/v1/segment`                             | 지나 세그먼터(`segment.jina.ai`) |
+| POST | `/v1/moderations`                         | OpenAI 중재                      |
+| POST | `/v1/systemone`                           | System One 유형의 결정           |
+| POST | `/v1/decisions`                           | OpenAI 결정(기본)                |
+| GET  | `/v1/systemone/models`                    | 의사결정 모델 카탈로그           |
+| GET  | `/v1/models`                              | OpenAI                           |
+| POST | `/v1/models/query`                        | 필터링된 모델 후보 목록          |
+| POST | `/v1/messages/count_tokens`               | Anthropic                        |
+| GET  | `/v1beta/models`                          | Gemini                           |
+| POST | `/v1beta/models/{...path}`                | Gemini generateContent           |
+| POST | `/v1/api/chat`                            | Ollama                           |
+| GET  | `/api/v1/vscode/{token}/`                 | OpenAI 카탈로그 별칭             |
+| GET  | `/api/v1/vscode/{token}/models`           | OpenAI 모델 별칭                 |
+| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAI 토큰화된 별칭             |
+| POST | `/api/v1/vscode/{token}/responses`        | OpenAI 응답 토큰화된 별칭        |
+| POST | `/api/v1/vscode/{token}/api/chat`         | Ollama 토큰화된 별칭             |
+| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollama 태그 토큰화된 별칭        |
 
-모든 POST 경로는 동일한 형식을 따릅니다: `Bearer your-api-key` + Zod로 검증된 JSON 본문 (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` 등, `src/shared/validation/schemas.ts` 참조). 스키마 검증에 실패하면 4xx가 반환됩니다.
+모든 POST 경로는 동일한 형태를 따릅니다: `Bearer your-api-key` + Zod 검증 JSON 본문(`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` 등, `src/shared/validation/schemas.ts` 참조). 스키마 실패 시 4xx가 반환됩니다.
 
-`Authorization: Bearer ...`를 첨부할 수 없는 클라이언트의 경우, OmniRoute는 쿼리 문자열 호환 방식 (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) 또는 아래에 문서화된 전용 `/api/v1/vscode/{token}/...` 엔드포인트를 통해서도 URL에서 API 키를 허용합니다.
+`Authorization: Bearer ...` 연결할 수 없는 클라이언트의 경우 OmniRoute 쿼리 문자열 호환성(`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) 또는 아래 문서화된 전용 `/api/v1/vscode/{token}/...` 엔드포인트를 통해 URL 의 API 키도 허용합니다.
 
 ```bash
-# 재순위 지정 (클라우드 레지스트리 제공자 또는 "<prefix>/<model>" 형식의 OpenAI 호환 제공자 노드)
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina 분류 (Foundation API 자격 증명)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina 세그먼트 분할기
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina 검색 (s.jina.ai; 제공자 별칭: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# 조정
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg (또는 요청한 형식) 본문 반환
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS에는 언어와 음성이 필요합니다: `language`의 기본값은 "en"이며, 음성이 없거나
-# OpenAI 기본 음성 이름(alloy, nova, …)인 경우 "Adrian"이 됩니다.
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# 이미지 편집 (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# 동영상 / 음악 생성 (제공자 접두사가 포함된 모델 ID)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Provider 노드 재순위 지정:** `POST /v1/rerank`는 `<node-prefix>/<model>`로 지정된 OpenAI 호환 provider 노드(oMLX, vLLM, Infinity, 게이트웨이 뒤의 TEI 등)로도 라우팅됩니다. 루프백 노드(`localhost`, `127.0.0.1`, `172.16.0.0/12`)는 항상 사용 가능하며, 운영자가 `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`에 나열한 호스트 이름(예: `http://reranker:8080/v1`과 같은 Docker/Compose 서비스 이름)도 사용 가능합니다. 이러한 노드는 직접 호출되며 `HTTP(S)_PROXY` 또는 연결에 고정된 프록시를 절대 거치지 않습니다. 다른 호스트(예: LAN 장치 또는 Tailscale 피어)의 노드는 운영자가 `RERANK_REMOTE_PROVIDER_NODES` 기능 플래그를 활성화하고 해당 노드의 기본 URL이 provider 아웃바운드 URL 정책(`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`)을 통과하는 경우에만 사용할 수 있습니다. 메모리 엔진의 재순위 지정 단계는 루프백을 통해 이 경로를 호출하므로, Memory 설정의 `rerankProviderModel`에도 동일한 규칙이 적용됩니다.
+> **공급자 노드 순위를 다시 지정합니다.** `POST /v1/rerank` 또한 `<node-prefix>/<model>` 로 주소가 지정되는 OpenAI 호환 제공자 노드(oMLX, vLLM, Infinity, 게이트웨이 뒤의 TEI 등)로 라우팅합니다. 루프백 노드(`localhost`, `127.0.0.1`, `172.16.0.0/12`)는 항상 적격하며 운영자가 `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` 에 나열하는 호스트 이름도 마찬가지입니다(예: `http://reranker:8080/v1` 와 같은 Docker/Compose 서비스 이름. 이들은 `HTTP(S)_PROXY` 이나 연결의 고정 프록시를 통하지 않고 직접 호출됩니다). 다른 호스트 — a LAN box 또는 Tailscale 피어 — 의 노드는 운영자가 `RERANK_REMOTE_PROVIDER_NODES` 기능 플래그를 활성화한 경우에만 적격합니다.** 그리고** 노드의 기본 URL 공급자 아웃바운드 URL 정책(`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`)을 전달합니다. 메모리 엔진의 순위 재지정 단계에서는 루프백을 통해 이 경로를 호출하므로 동일한 규칙이 메모리 설정에서 `rerankProviderModel` 관리합니다.
 >
-> **로컬 서버 형식:** 노드는 `<base>/v1/rerank`에서 호출되며, 404가 반환되면 `<base>/rerank`(Infinity, TEI)에서 호출됩니다. 업스트림 본문에는 Cohere/OpenAI 표기(`documents`, `return_documents`)와 TEI 표기(`texts`, `return_text`)가 모두 포함됩니다. 또한 업스트림 응답은 Cohere 엔벌로프로 정규화됩니다. TEI의 단순 `[{index, score, text}]`, 얇은 게이트웨이의 `{results: [{index, score}]}`, Voyage 형식의 `{data: [...]}`는 모두 클라이언트에 `{results: [{index, relevance_score, document?}]}` 형식으로 반환되며, 점수순으로 정렬되고 `top_n`으로 제한됩니다.
+> **로컬 서버 형태:** 노드는 `<base>/v1/rerank` 에서 호출되고 404에서는 `<base>/rerank` (Infinity, TEI)에서 호출됩니다. 업스트림 본문은 Cohere/OpenAI 철자(`documents`, `return_documents`)와 TEI 철자(`texts`, `return_text`)를 모두 전달하며 업스트림 응답은 Cohere 봉투로 정규화됩니다. TEI 의 베어 `[{index, score, text}]`, 씬 게이트웨이의 `{results: [{index, score}]}` 및 Voyage 스타일 `{data: [...]}` 모두 점수별로 정렬되고 `top_n` 로 제한되어 `{results: [{index, relevance_score, document?}]}` 로 클라이언트에 돌아옵니다.
 
-> **Provider 노드 검색:** OpenAI 호환 provider 노드의 모델은 노드 접두사 아래의 `GET /v1/models`에 표시됩니다. 엔드포인트 메타데이터가 없는 행(일반적인 로컬 `/v1/models` 목록의 경우)은 노드의 `apiType`을 상속합니다. 따라서 `embeddings` 노드의 모델은 기본적으로 chat으로 처리되지 않고 `type: "embedding"`으로, `rerank` 노드의 모델은 `type: "rerank"`으로 처리됩니다. 동기화되었거나 수동으로 추가된 행에 `supportedEndpoints`가 명시되어 있으면 해당 값이 계속 우선합니다.
+> **공급자 노드 검색:** OpenAI 호환 공급자 노드의 모델은 노드 접두사 아래 `GET /v1/models` 에 나타납니다. 엔드포인트 메타데이터가 없는 행(로컬 `/v1/models` 목록의 경우 일반적)은 노드의 `apiType` 상속하므로 `embeddings` 노드의 모델은 `type: "embedding"` 이고 `rerank` 노드의 모델은 기본적으로 채팅이 아닌 `type: "rerank"` 입니다. 동기화되거나 수동으로 추가된 행의 명시적 `supportedEndpoints` 여전히 우선순위를 갖습니다.
 
-### 전용 Provider 경로
+### 유형화된 결정
+
+의사결정 모델은 텍스트를 생성하는 대신 보정된 확률로 입력된 질문에 답합니다. 이는 결코 채팅 모델이 아니며 두 개의 와이어 형식은 서로 변환되지 않습니다.
+
+- `POST /v1/systemone` — 시스템 1 `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter 결정, Cloudflare 작업자 AI, 로컬 Ollama).
+- `POST /v1/decisions` — 기본 OpenAI 결정 `{ model, input, questions: [...] }`, `openai` 연결을 통해 제공됩니다. 모델은 `openai/gpt-6-luna` 입니다(기본 `gpt-6-luna` 도 작동함). 답변은 그대로 질문 순서대로 돌아옵니다.
+- `GET /v1/systemone/models` — 두 종류의 카탈로그 중 하나; 각 행의 이름은 `api_format` (`systemone` 또는 `decisions`)로 지정됩니다. `limit` / `after` 페이지 최종 목록. `X-OmniRoute-Catalog-Status` 헤더는 `complete`, `partial` 또는 `unavailable` (503)를 읽습니다.
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` 에서는 API 키의 모델 허용 목록, `decisions` 엔드포인트 카테고리, 예산 및 연결 범위가 자격 증명을 읽기 전에 확인됩니다. 자격 증명은 키 범위 내에 저장된 `openai` 연결입니다(환경 키가 아님). 연결 기반 URL 이 OmniRoute 가리키지 않는 자격 증명, 쿼리 또는 조각이 없는 `http(s)` URL 인 경우에만 적용됩니다. 통화는 `decision` 자동 라우터( [AUTO-COMBO](../routing/AUTO-COMBO.md) )와 동일한 보호된 전송을 통해 나갑니다. 제공자 아웃바운드 가드, 재시도 없음, 리디렉션 없음, 5초 시간 제한 및 64 KB 응답 제한(더 큰 응답은 502)입니다. 요청 본문은 4 MiB 로 제한됩니다. 각 호출은 새로운 `Idempotency-Key` 보냅니다. 오류는 업스트림 상태만 전달하며 본문, URL, 키 또는 프롬프트는 전달하지 않습니다.
+
+### 전용 공급자 경로
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -755,7 +760,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Provider 접두사가 없으면 자동으로 추가됩니다. 일치하지 않는 모델은 `400`을 반환합니다.
+공급자 접두사가 누락된 경우 자동으로 추가됩니다. 일치하지 않는 모델은 `400` 반환합니다.
 
 ---
 
@@ -1709,10 +1714,10 @@ GET /api/telemetry/summary
 ## 예산
 
 ```bash
-# 모든 API 키의 예산 상태 가져오기
+# Get budget status for all API keys
 GET /api/usage/budget
 
-# 예산 설정 또는 업데이트
+# Set or update a budget
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1726,7 +1731,7 @@ Content-Type: application/json
 }
 ```
 
-> **스키마 참고** (`setBudgetSchema`): `apiKeyId`는 필수이며, `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd` 중 하나 이상이 0보다 커야 합니다. 선택적 필드: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). 기존 `{keyId, limit, period}` 형식은 `400 Bad Request`를 반환합니다.
+> **스키마 메모** (`setBudgetSchema`): `apiKeyId` 필요합니다. `dailyLimitUsd`, `weeklyLimitUsd` 또는 `monthlyLimitUsd` 중 적어도 하나는 0보다 커야 합니다. 선택 필드: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). 레거시 `{keyId, limit, period}` 형태는 `400 Bad Request` 반환합니다.
 
 ## 토큰 제한
 

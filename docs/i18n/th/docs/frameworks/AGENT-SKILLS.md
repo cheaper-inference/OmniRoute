@@ -13,12 +13,12 @@ Agent Skills คือไฟล์ SKILL.md ที่มีโครงสร้
 
 ## ภาพรวม
 
-แค็ตตาล็อกประกอบด้วย **Agent Skills 45 รายการ** (REST API 23 รายการ + CLI 21 รายการ + เวิร์กโฟลว์การกำหนดค่า 1 รายการ) แต่ละสกิลประกอบด้วย:
+ในแค็ตตาล็อกประกอบด้วย** 45 ทักษะตัวแทน** (23 REST API + 21 CLI + 1 เวิร์กโฟลว์การกำหนดค่า) แต่ละทักษะมี:
 
-- **ID มาตรฐาน** (`omni-auth`, `cli-serve` ฯลฯ)
-- ไฟล์ **SKILL.md** ใน `skills/{id}/SKILL.md` พร้อม YAML frontmatter (`name`, `description`) + เนื้อหา markdown โดยละเอียด
-- **REST endpoints** (สกิล API) หรือ **CLI subcommands** (สกิล CLI) ที่ได้มาจากข้อกำหนด OpenAPI และรีจิสทรี CLI
-- **GitHub raw URL** สำหรับดึงข้อมูลสด: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ก** ID ที่เป็นที่ยอมรับ** (`omni-auth`, `cli-serve` ฯลฯ )
+- ก**SKILL.md** ไฟล์ใน `skills/{id}/SKILL.md` พร้อมด้วย YAML frontmatter (`name`, `description`) + rich markdown body
+- **จุดสิ้นสุด REST** (ทักษะ API ) หรือ** คำสั่งย่อย CLI** (ทักษะ CLI ) มาจากข้อมูลจำเพาะ OpenAPI และรีจิสทรี CLI
+- ก**GitHub ดิบ URL** สำหรับการดึงข้อมูลสด: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## Coverage API
+## ความคุ้มครอง API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

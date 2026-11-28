@@ -4,9 +4,9 @@
 
 ---
 
-> **Tushen gaskiya:** `electron/` wurin aiki** An sabunta ta ƙarshe:** 2026-06-28 — v3.8.40
+> **Tushen gaskiya:** `electron/` wurin aiki
 
-OmniRoute tana jigilar ƙa'idar tebur ta giciye (Windows / macOS / Linux) wanda aka gina akansa**Electron 41** +** Mai ginin lantarki 26.10** . Aikace-aikacen tebur yana haifar da uwar garken Next.js na tsaye azaman tsari na yara, yana nuna `BrowserWindow` akansa, kuma yana ƙara tsarin tire, mai sabunta atomatik, gadar IPC, da sifili-config bootstrap.
+OmniRoute yana jigilar ƙa'idar tebur ta giciye (Windows / macOS / Linux) wanda aka gina akansa**Electron 41** +** Mai ginin lantarki 26.10** . Aikace-aikacen tebur yana haifar da uwar garken Next.js na tsaye azaman tsari na yara, yana nuna `BrowserWindow` akansa, kuma yana ƙara tsarin tire, mai sabunta atomatik, gadar IPC, da sifili-config bootstrap.
 
 ## Gine-gine
 
@@ -92,7 +92,7 @@ scripts/
     └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-Duk `main.js` da `preload.js` ne** `.js` CommonJS** , ba TypeScript. Buga-gefen mai yin rubutu suna rayuwa a cikin `electron/types.d.ts`.
+Duk `main.js` da `preload.js` ne** `.js` CommonJS** , ba TypeScript. Buga-gefen mawallafa suna rayuwa a cikin `electron/types.d.ts`.
 
 ## gadar IPC (`preload.js`)
 
@@ -198,10 +198,10 @@ Saita ta hanyar `session.defaultSession.webRequest.onHeadersReceived`. Sanannen 
 
 ## Sabuntawa ta atomatik
 
-Yana amfani da `electron-updater` tare da mai bada GitHub (`diegosouzapw/OmniRoute`).
+Yana amfani da `electron-updater` tare da mai bada GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Abubuwan da aka tura zuwa mai gabatarwa ta IPC `update-status` `checking` `available` `not-available`, `downloading` (tare da `percent`), `downloaded`, `error`
+- Abubuwan da aka tura zuwa mai gabatarwa ta hanyar `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (tare da `percent`), `downloaded`, `error`
 - `installUpdate()` ya kashe uwar garken sannan ya kira `autoUpdater.quitAndInstall()`
 - An tsallake shi cikin yanayin dev (`!app.isPackaged`)
 
@@ -273,7 +273,7 @@ Kayan kayan tarihi na ƙasa a cikin `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Ana buga fitowar zuwa GitHub Releases (`diegosouzapw/OmniRoute`), wanda kuma shine inda `electron-updater` ke bincika sabbin nau'ikan.
+Ana buga fitowar zuwa GitHub Releases (`cheaper-inference/OmniRoute`), wanda kuma shine inda `electron-updater` ke bincika sabbin nau'ikan.
 
 ## Shirya matsala
 

@@ -6,49 +6,25 @@
 
 @AGENTS.md
 
-**所有專案規則都位於 [`AGENTS.md`](AGENTS.md)**——這是每個 AI 助理在架構、慣例、測試、品質閘門、git 工作流程、23 條硬性規則及 PII 經驗方面的唯一事實來源。請完整閱讀；不要在此重新加入專案規則。以下所有內容**僅**適用於 Claude Code——也就是對 `AGENTS.md` 中既有規則的操作細化。
+**所有項目規則都在[`AGENTS.md`](AGENTS.md)中**—每個AI助理的單一事實來源；上面的導入已經加載了它。不要在此處重新新增項目規則。下面的所有內容都將ONLY應用於Claude程式碼—對`AGENTS.md`中已定義的規則進行操作細化。
 
-## Worktree 隔離 — Claude Code 專屬事項
+## 工作樹隔離— Claude程式碼細節
 
-完整的強制 worktree 協定(基底分支確認、`.claude/worktrees/` 標準路徑、`cp -al` node_modules、拆除規則)請參閱
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)(摘要見 `AGENTS.md` →
-Git 工作流程 →「Worktree 隔離」)。Claude Code 專屬事項:
+- 透過`AskUserQuestion` （硬規則#19）與操作員確認基本分支，除非他們已經告訴你了。
+- 使用`scripts/dev/new-worktree.sh <branch> <confirmed-base>`建立工作樹（它位於`.claude/worktrees/`下，硬連結`node_modules`並複製`.husky/_`），然後使用其`path`呼叫`EnterWorktree` 。始終傳遞基值：如果沒有它，腳本會選擇最高的`release/*`，這可能不是操作員確認的值。 `EnterWorktree`自己創建的工作樹既沒有硬連結也沒有鉤子，因此其中沒有預先提交門運行。
 
-- 透過 `AskUserQuestion` 向操作者確認基底分支(硬性規則 #19),除非對方
-  已經告知你。
-- 優先使用原生的 `EnterWorktree` 工具 — 它已經會在
-  `.claude/worktrees/`(標準路徑)下建立 worktree。請使用文件記載的 `git
-worktree add` 指令建立 worktree,然後以其 `path` 呼叫 `EnterWorktree`。
+## 子代理和 git
 
-## 跨工作階段安全——Claude Code 特定事項
+每個接觸 git（代理工具或工作流程腳本）的子代理都會在其提示符中逐字獲得硬規則#22 a 的`git stash`禁令—記錄的存儲事件的重複發生來自子代理。
 
-硬性規則 #19/#21/#22（位於 `AGENTS.md`）規範平行工作階段。此執行環境的操作提醒：
+## 規劃工件—超能力路徑覆蓋
 
-- **在每個會操作 git 的子代理程式提示中，逐字重述 `git stash` 禁令**（Agent 工具／Workflow 指令碼）——子代理程式不會繼承此檔案，而且有記錄的 stash 事故再次發生正是源自子代理程式。
-- 在合併或推送至任何並非由你在_本工作階段_建立的 PR 前，請執行 `git worktree list`，並重新檢查 `gh pr view <N> --json state,headRefOid`（硬性規則 #22b）。
-- 每個工作階段結束時，都要讓主要 checkout 回到其開始時所在的分支。
+超能力技能在`docs/superpowers/plans/`、 `docs/superpowers/specs/`和`docs/research/`下宣告預設值。在編寫之前，將每個重寫為`AGENTS.md` → “規劃和研究工件”中的`_tasks/`等效項，並使用`git -C _tasks …`提交，而不是在主存儲庫中提交。
 
-## Superpowers／規劃成品——路徑覆寫
+## 暫存檔案— `_artifacts/`，而不是`/tmp`
 
-`_tasks/` 慣例定義於 `AGENTS.md` →「Planning & Research Artifacts」。superpowers 技能隨附的預設值會指向 `docs/…`——這些預設值在此被**覆寫**。當 superpowers 技能宣告類似「saved to `docs/superpowers/plans/…`」的路徑時，請在寫入前將其改寫為對應的 `_tasks/…` 路徑：
+此項目會覆蓋線束的會話暫存器 (`/tmp/claude-*/…`)。寫入臨時檔案—導出、產生的 zip、一次性中間輸出—到`/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`：一個 gitignored 根`_*`路徑，因此操作員在一處找到並刪除所有暫存。持久的計劃、規格、研究和移交都交給`_tasks/` （硬規則#23）。
 
-| 成品（技能）                      | 預設值（請勿使用）        | 改存於此處                                                    |
-| --------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| 計畫（`writing-plans`）           | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| 規格／設計（`brainstorming`）     | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| 研究（`deep-research`、臨時研究） | `docs/research/`          | `_tasks/research/…`                                           |
-| 交接（`/handoff`）                | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## 紅底
 
-請在 `_tasks/` 儲存庫內提交這些成品（`git -C _tasks …`），絕不可提交至主要儲存庫。
-
-## 暫存／臨時檔案——使用 `_artifacts/`，不要使用 `/tmp`
-
-本專案覆寫了執行環境的預設工作階段暫存區（`/tmp/claude-*/…`）。請將臨時／工作檔案——匯出內容、產生的 zip、一次性中間輸出，以及任何原本會放入 `/tmp` 的內容——改寫入 `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`。
-
-- `_artifacts/` 是根目錄下的 `_*` 路徑：已被 git 忽略（`AGENTS.md` →「Root `_*` paths」），僅存在於磁碟上，絕不追蹤。
-- 原因：將暫存輸出保留在專案內（而非 `/tmp`），可讓操作員輕鬆找到所有臨時內容並集中刪除，而不必在稍縱即逝或持續累積未追蹤內容的工作階段專屬 `/tmp` 目錄中四處搜尋。
-- 請**不要**將其與 `_tasks/` 混淆（硬性規則 #23；這是獨立的私有 git 儲存庫，用於持久保存計畫／規格／研究／交接內容）——`_artifacts/` 僅供可丟棄的工作檔案使用，此處的任何內容都不需要保留或進行版本控制。
-
-## 開啟 PR 前確保基礎分支為綠燈
-
-在切出分支或開啟 PR 前，請執行基礎分支綠燈檢查（`AGENTS.md` → Git Workflow →「Base-green check」；專案技能將其參照為 `.agents/skills/_shared/base-green.md`）。若在基礎分支最新提交為紅燈時開啟 PR，其內文必須包含 `⚠️ base-red inherited: #<issue>`。若要清除累積的紅燈狀態（基礎分支最新提交及紅燈 PR），請使用 `/sweep-reds` 技能。
+若要排出累積的紅色狀態（基礎提示+紅色PRs），請使用`/sweep-reds`技能。

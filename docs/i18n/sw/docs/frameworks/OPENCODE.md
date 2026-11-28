@@ -4,14 +4,11 @@
 
 ---
 
-> **Hali:** Inapatikana kwa matumizi ya jumla.
-> **Walengwa:** Waendeshaji wanaounganisha OpenCode na usakinishaji wa OmniRoute.
-> **Chanzo rasmi (schema ya usanidi):** `src/shared/services/opencodeConfig.ts`
-> **Chanzo rasmi (kifurushi cha npm):** `@omniroute/opencode-provider/` (workspace inayoweza kuchapishwa)
+> **Hali:** Inapatikana kwa ujumla.** Hadhira:** Waendeshaji huweka waya OpenCode hadi uwekaji wa OmniRoute.** Chanzo cha ukweli (config schema):** `src/shared/services/opencodeConfig.ts`** Vifurushi vya npm vinavyopendekezwa:** `@omniroute/opencode-plugin/` (OpenCode v1, iliyosakinishwa na `omniroute setup opencode`) na `@omniroute/opencode-plugin-v2/` (OpenCode v2 ). Kifurushi cha zamani `@omniroute/opencode-provider/` ni** imeachwa** (angalia Njia ya 2).
 
-[OpenCode](https://opencode.ai) ni kiteja cha AI cha CLI/desktop kinachotumia mawakala. Husoma katalogi yake ya watoa huduma kutoka `~/.config/opencode/opencode.json` (au `opencode.jsonc`) na kufuata schema iliyo katika `https://opencode.ai/config.json`. OmniRoute hujitambulisha kwa OpenCode kama mmoja wa watoa huduma hao — kila ombi hupitia kiolesura cha kawaida cha OmniRoute kinachooana na OpenAI cha `/v1`, hivyo OpenCode hunufaika kiotomatiki na uelekezaji wa Auto-Combo, vivunja saketi, sera za funguo, uangalizi, n.k.
+[OpenCode](https://opencode.ai) ni mteja wa CLI/desktop AI. Husoma katalogi ya mtoaji wake kutoka `~/.config/opencode/opencode.json` (au `opencode.jsonc`) na kufuata schema katika `https://opencode.ai/config.json`. OmniRoute inajiweka wazi kwa OpenCode kama mmoja wa watoa huduma hao — kila ombi hupitia `/v1` ya kawaida ya OpenAI-sambamba ya uso wa OmniRoute, kwa hivyo OpenCode inanufaika kiotomatiki kutoka kwa uelekezaji wa Combo Kiotomatiki, vivunja saketi, sera muhimu, uangalizi, n.k.
 
-Kuna **njia mbili za ujumuishaji zinazotumika**. Chagua moja — zote hutengeneza usanidi sawa.
+Ukurasa huu unaandika njia mbili za usanidi tuli hapa chini; zote mbili hutoa usanidi sawa. Kwa orodha ya modeli inayofuata orodha yako ya moja kwa moja, tumia programu-jalizi badala yake: `omniroute setup opencode` husakinisha `@omniroute/opencode-plugin` (OpenCode v1), na `@omniroute/opencode-plugin-v2` inalenga OpenCode v2 (angalia [viunganishi vya CLI](../guides/CLI-INTEGRATIONS.md) na [mwongozo wa programu-jalizi wa OpenCode v2](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ Faili inayotokana (katalogi chaguomsingi ya modeli):
 
 ---
 
-## Njia ya 2 — Kifurushi cha npm `@omniroute/opencode-provider`
+## Njia ya 2 — npm kifurushi `@omniroute/opencode-provider` (imeacha kutumika)
 
-Inapendekezwa unapoandika hati ya usanidi kutoka Node/TS (mifumo ya CI, monorepo, mitiririko maalum ya kisakinishaji).
+> **Imeacha kutumika.** Kifurushi huandika orodha tuli ya kielelezo ambacho huteleza nyuma ya katalogi yako ya moja kwa moja OmniRoute. README yake inapendekeza kuhamia `@omniroute/opencode-plugin` (au `@omniroute/opencode-plugin-v2` kwenye OpenCode v2). API hapa chini inatunzwa kwa hati zilizopo pekee.
+
+Inatumika wakati wa kuandika usanidi kutoka kwa Node/TS ( mabomba ya CI, monorepos, mtiririko wa kisakinishi maalum).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Si lazima: badilisha katalogi ya modeli inayoonyeshwa kwa OpenCode
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Kwa muunganisho usioharibu faili iliyopo, nakili utendaji wa `mergeOpenCodeConfigText()` kutoka `opencodeConfig.ts` au tumia kizalishaji cha CLI.
+Kwa muunganisho usioharibu dhidi ya faili iliyopo, nakili `mergeOpenCodeConfigText()` kutoka `opencodeConfig.ts` au piga simu jenereta CLI.
 
-Angalia [README ya kifurushi](../../@omniroute/opencode-provider/README.md) kwa API kamili.
+Tazama [kifurushi README](../../@omniroute/opencode-provider/README.md) kwa API kamili.
 
 ---
 
@@ -157,7 +156,9 @@ Kwa viteja vya mtindo wa Anthropic vinavyotuma `x-api-key` + `anthropic-version`
 
 ## Tazama pia
 
-- [Marejeleo ya API](../reference/API_REFERENCE.md) — huduma zote za OmniRoute REST
-- [Auto-Combo](../routing/AUTO-COMBO.md) — maana ya `model: "auto"`
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [API rejeleo](../reference/API_REFERENCE.md) — kamili OmniRoute REST uso
+- [Mchanganyiko otomatiki](../routing/AUTO-COMBO.md) — maana ya `model: "auto"`
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (inapendekezwa)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (imeacha kutumika)
 - Chanzo: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

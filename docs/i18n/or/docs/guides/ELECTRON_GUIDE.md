@@ -4,9 +4,9 @@
 
 ---
 
-> **ସତ୍ୟର ଉତ୍ସ:** `electron/` କାର୍ଯ୍ୟକ୍ଷେତ୍ର \|** ଶେଷ ଅଦ୍ୟତନ:** 2026-06-28 — v3.8.40
+> **ସତ୍ୟର ଉତ୍ସ:** `electron/` କାର୍ଯ୍ୟକ୍ଷେତ୍ର।
 
-OmniRoute ଏକ କ୍ରସ୍ ପ୍ଲାଟଫର୍ମ ଡେସ୍କଟପ୍ ଆପ୍ (Windows / macOS / Linux) ଉପରେ ନିର୍ମିତ \|**Electron 41** +** ଇଲେକ୍ଟ୍ରୋନ-ନିର୍ମାଣକାରୀ 26.10** । ଡେସ୍କଟପ୍ ଆପ୍ Next.js ଷ୍ଟାଣ୍ଡାଲୋନ୍ ସର୍ଭରକୁ ଏକ ଶିଶୁ ପ୍ରକ୍ରିୟା ଭାବରେ ସ୍ପାଉନ୍ କରେ, ଏଥିରେ ଏକ `BrowserWindow` ସୂଚାଇଥାଏ, ଏବଂ ଏକ ସିଷ୍ଟମ୍ ଟ୍ରେ, ଅଟୋ-ଅପଡେଟର୍, IPC ବ୍ରିଜ୍ ଏବଂ ଶୂନ-ବିନ୍ୟାସ ଗୁପ୍ତ ବୁଟ୍ ଷ୍ଟ୍ରାପ୍ ଯୋଗ କରିଥାଏ \|
+OmniRoute ଏକ କ୍ରସ୍ ପ୍ଲାଟଫର୍ମ ଡେସ୍କଟପ୍ ଆପ୍ (Windows / macOS / Linux) ଉପରେ ନିର୍ମିତ।**Electron 41** +** ଇଲେକ୍ଟ୍ରୋନ-ନିର୍ମାଣକାରୀ 26.10** । ଡେସ୍କଟପ୍ ଆପ୍ Next.js ଷ୍ଟାଣ୍ଡାଲୋନ୍ ସର୍ଭରକୁ ଏକ ଶିଶୁ ପ୍ରକ୍ରିୟା ଭାବରେ ସ୍ପାଉନ୍ କରେ, ଏଥିରେ ଏକ `BrowserWindow` ସୂଚାଇଥାଏ, ଏବଂ ଏକ ସିଷ୍ଟମ୍ ଟ୍ରେ, ଅଟୋ-ଅପଡେଟର୍, IPC ବ୍ରିଜ୍ ଏବଂ ଶୂନ-ବିନ୍ୟାସ ଗୁପ୍ତ ବୁଟ୍ ଷ୍ଟ୍ରାପ୍ ଯୋଗ କରିଥାଏ।
 
 ## ସ୍ଥାପତ୍ୟ
 
@@ -29,7 +29,7 @@ OmniRoute ଏକ କ୍ରସ୍ ପ୍ଲାଟଫର୍ମ ଡେସ୍କଟ�
 └──────────────────────────────────────────────┘
 ```
 
-## ସଂସ୍କରଣ \|
+## ସଂସ୍କରଣ।
 
 `electron/package.json` ରୁ ନିଶ୍ଚିତ ହୋଇଛି:
 
@@ -39,25 +39,25 @@ OmniRoute ଏକ କ୍ରସ୍ ପ୍ଲାଟଫର୍ମ ଡେସ୍କଟ�
 | `electron-builder` | `^26.15.3`                                               |
 | `electron-updater` | `^6.8.9`                                                 |
 | `better-sqlite3`   | ମୂଳ `^13.0.2` (ନୋଡ- API — no Electron ପୁନ build ନିର୍ମାଣ) |
-| ଆପ୍ ସଂସ୍କରଣ \|     | `3.8.0`                                                  |
+| ଆପ୍ ସଂସ୍କରଣ।       | `3.8.0`                                                  |
 | ଆପ୍ id             | `online.omniroute.desktop`                               |
 | ଉତ୍ପାଦ ନାମ         | `OmniRoute`                                              |
 
 ## ସ୍କ୍ରିପ୍ଟ (ମୂଳ `package.json`)
 
-| ସ୍କ୍ରିପ୍ଟ                         | ଉଦ୍ଦେଶ୍ୟ                                                                                      |
-| --------------------------------- | --------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | `npm run dev` + ଆରମ୍ଭ କରେ `localhost:20128` + ଲଞ୍ଚ ପାଇଁ ଅପେକ୍ଷା କରେ Electron                  |
-| `npm run electron:build`          | Next.js ନିର୍ମାଣ କରେ ତାପରେ ସାମ୍ପ୍ରତିକ OS ପାଇଁ `electron-builder` ଚଲାଇଥାଏ \|                    |
-| `npm run electron:build:win`      | Windows NSIS ସଂସ୍ଥାପକ + ପୋର୍ଟେବଲ୍ (x64) ନିର୍ମାଣ କରେ \|                                        |
-| `npm run electron:build:mac`      | macOS DMG (Intel + ଆପଲ୍ ସିଲିକନ୍) ନିର୍ମାଣ କରେ \|                                               |
-| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) ନିର୍ମାଣ କରେ \|                                             |
-| `npm run electron:smoke:packaged` | HTTP 200 ପାଇଁ ପ୍ୟାକେଜ୍ ହୋଇଥିବା ବାଇନାରୀ ଏବଂ `/login` ଅନୁସନ୍ଧାନ ଆରମ୍ଭ କରେ, ତାପରେ ବନ୍ଦ ହୋଇଯାଏ \| |
+| ସ୍କ୍ରିପ୍ଟ                         | ଉଦ୍ଦେଶ୍ୟ                                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | `npm run dev` + ଆରମ୍ଭ କରେ `localhost:20128` + ଲଞ୍ଚ ପାଇଁ ଅପେକ୍ଷା କରେ Electron                |
+| `npm run electron:build`          | Next.js ନିର୍ମାଣ କରେ ତାପରେ ସାମ୍ପ୍ରତିକ OS ପାଇଁ `electron-builder` ଚଲାଇଥାଏ।                    |
+| `npm run electron:build:win`      | Windows NSIS ସଂସ୍ଥାପକ + ପୋର୍ଟେବଲ୍ (x64) ନିର୍ମାଣ କରେ।                                        |
+| `npm run electron:build:mac`      | macOS DMG (Intel + ଆପଲ୍ ସିଲିକନ୍) ନିର୍ମାଣ କରେ।                                               |
+| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) ନିର୍ମାଣ କରେ।                                             |
+| `npm run electron:smoke:packaged` | HTTP 200 ପାଇଁ ପ୍ୟାକେଜ୍ ହୋଇଥିବା ବାଇନାରୀ ଏବଂ `/login` ଅନୁସନ୍ଧାନ ଆରମ୍ଭ କରେ, ତାପରେ ବନ୍ଦ ହୋଇଯାଏ। |
 
 `electron/` କାର୍ଯ୍ୟକ୍ଷେତ୍ର ମଧ୍ୟ ପ୍ରକାଶ କରେ:
 
-- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` ଚଲାଇଥାଏ \|
-- `npm run build:mac-x64` / `build:mac-arm64` — ଏକକ-ଆର୍କ macOS ନିର୍ମାଣ କରେ \|
+- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` ଚଲାଇଥାଏ।
+- `npm run build:mac-x64` / `build:mac-arm64` — ଏକକ-ଆର୍କ macOS ନିର୍ମାଣ କରେ।
 - `npm run pack` — ଡିରେକ୍ଟୋରୀ-କେବଳ ସ୍ଥାନୀୟ ପରୀକ୍ଷଣ ପାଇଁ ନିର୍ମାଣ (କ inst ଣସି ସଂସ୍ଥାପକ ନାହିଁ)
 
 ## ଇଚ୍ଛାଧୀନ ଚାଲିବା ସମୟ ପ୍ୟାକ୍ \|
@@ -73,7 +73,7 @@ omniroute packs install browser-runtime --source /path/to/packs
 
 `packs list` ସ୍ଥାପନ ଏବଂ ଯା ification ୍ଚ ଅବସ୍ଥା ପ୍ରଦର୍ଶନ କରେ, ଆର୍କାଇଭ୍ ଫାଇଲନାମ ନୁହେଁ \| ବଣ୍ଡଲେଡ୍ ଇଣ୍ଡେକ୍ସ ଅଭିଲେଖକୁ ଚୟନ କରେ \| ସଂସ୍ଥାପିତ ପ୍ୟାକ୍ ବଦଳାଇବା ପୂର୍ବରୁ ସ୍ଥାପନ ଏହାର ଆର୍କାଇଭ୍ ଚେକ୍ସମ୍ ଏବଂ ଏହାର ପ୍ୟାକେଜ୍ ଚେକ୍ସମ୍ ଯାଞ୍ଚ କରେ \| ଏହା ସ୍ଥାନୀୟ ଫାଇଲ୍ ପ read େ; ଏହା ନିଖୋଜ ଅଭିଲେଖାଗୁଡ଼ିକୁ ଡାଉନଲୋଡ୍ କରେ ନାହିଁ \| ସଂସ୍ଥାପନ ପରେ ପ୍ରୟୋଗକୁ ପୁନ Rest ଆରମ୍ଭ କରନ୍ତୁ \| ଯଦି ପ୍ରକାଶନରେ କ match ଣସି ମେଳ ଖାଉଥିବା ସମ୍ପତ୍ତି ନାହିଁ, ସେହି ପ୍ରକାଶନର ସମ୍ପତ୍ତି ମାଧ୍ୟମରେ ବ pack କଳ୍ପିକ ପ୍ୟାକ୍ ଉପଲବ୍ଧ ନୁହେଁ \|
 
-## ଡିରେକ୍ଟୋରୀ ଲେଆଉଟ୍ \|
+## ଡିରେକ୍ଟୋରୀ ଲେଆଉଟ୍।
 
 ```
 electron/
@@ -92,11 +92,11 @@ scripts/
     └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-ଉଭୟ `main.js` ଏବଂ `preload.js` ହେଉଛି \|**CommonJS `.js` ଫାଇଲଗୁଡ଼ିକ \|** , TypeScript ନୁହେଁ \| ରେଣ୍ଡର୍-ସାଇଡ୍ ଟାଇପିଂଗୁଡ଼ିକ `electron/types.d.ts` ରେ ରୁହନ୍ତି \|
+ଉଭୟ `main.js` ଏବଂ `preload.js` ହେଉଛି।**CommonJS `.js` ଫାଇଲଗୁଡ଼ିକ।** , TypeScript ନୁହେଁ। ରେଣ୍ଡର୍-ସାଇଡ୍ ଟାଇପିଂ `electron/types.d.ts` ରେ ବାସ କରେ।
 
 ## IPC ବ୍ରିଜ୍ (`preload.js`)
 
-ପ୍ରୋଲୋଡ୍ `contextIsolation: true` ଏବଂ `nodeIntegration: false` ସହିତ `contextBridge` ବ୍ୟବହାର କରି `window.electronAPI` ଉପରେ ଏକ ଧଳା ତାଲିକାଭୁକ୍ତ API ପ୍ରକାଶ କରେ \|
+ପ୍ରୋଲୋଡ୍ `contextIsolation: true` ଏବଂ `nodeIntegration: false` ସହିତ `contextBridge` ବ୍ୟବହାର କରି `window.electronAPI` ଉପରେ ଏକ ଧଳା ତାଲିକାଭୁକ୍ତ API ପ୍ରକାଶ କରେ।
 
 ```javascript
 const VALID_CHANNELS = {
@@ -117,7 +117,7 @@ const VALID_CHANNELS = {
 
 ପ୍ରକାଶିତ ପଦ୍ଧତି:
 
-| ରେଣ୍ଡର କଲ୍ \|                                                     | ଟାଇପ୍ କରନ୍ତୁ \|        |
+| ରେଣ୍ଡର କଲ୍।                                                       | ଟାଇପ୍ କରନ୍ତୁ।          |
 | ----------------------------------------------------------------- | ---------------------- |
 | `getAppInfo()` → `{ name, version, platform, isDev, port }`       | ଡାକ                    |
 | `openExternal(url)`                                               | ଡାକ                    |
@@ -128,7 +128,7 @@ const VALID_CHANNELS = {
 | `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | ପଠାନ୍ତୁ                |
 | `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | ଗ୍ରହଣ (ରିଟର୍ନ ଡିସପୋଜର) |
 
-ପ୍ରାପ୍ତ ହେଲପରମାନେ ଫେରସ୍ତ କରନ୍ତି a** ଡିସପୋଜର୍ ଫଙ୍କସନ୍** `removeAllListeners` — ଉପରେ ନିର୍ଭର କରିବା ପରିବର୍ତ୍ତେ ଏହା React ଉପାଦାନଗୁଡ଼ିକ ରିମାଉଣ୍ଟ କଲାବେଳେ ଶ୍ରୋତା ଜମାକୁ ରୋକିଥାଏ \|
+ଗ୍ରହଣକାରୀ ସହାୟକମାନେ ଫେରସ୍ତ କରନ୍ତି a** ଡିସପୋଜର୍ ଫଙ୍କସନ୍** `removeAllListeners` — ଉପରେ ନିର୍ଭର କରିବା ପରିବର୍ତ୍ତେ ଏହା React ଉପାଦାନଗୁଡ଼ିକ ରିମାଉଣ୍ଟ କଲାବେଳେ ଶ୍ରୋତା ଜମାକୁ ରୋକିଥାଏ।
 
 ## ସର୍ଭର ଲାଇଫ୍ ସାଇକେଲ୍ \|
 
@@ -196,14 +196,14 @@ spawn(process.execPath, [serverScript], {
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
 - ଦେବ ମୋଡ୍ କେବଳ `script-src` ରେ `'unsafe-eval'` ଯୋଗ କରେ \|
 
-## ଅଟୋ-ଅପଡେଟ୍ \|
+## ଅଟୋ-ଅପଡେଟ୍।
 
-GitHub ପ୍ରଦାନକାରୀ (`diegosouzapw/OmniRoute`) ସହିତ `electron-updater` ବ୍ୟବହାର କରେ \|
+GitHub ପ୍ରଦାନକାରୀ (`cheaper-inference/OmniRoute`) ସହିତ `electron-updater` ବ୍ୟବହାର କରେ।
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- ଇଭେଣ୍ଟଗୁଡିକ `update-status` IPC ମାଧ୍ୟମରେ ରେଣ୍ଡରକୁ ପଠାଗଲା: `checking`, `available`, `not-available`, `downloading` ( `percent` ସହିତ), `downloaded`, `error`
-- `installUpdate()` ସର୍ଭରକୁ ମାରିଦିଏ ତାପରେ `autoUpdater.quitAndInstall()` କୁ ଡାକେ \|
-- Dev ମୋଡ୍ (`!app.isPackaged`) ରେ ଛାଡିଦେଲେ \|
+- `update-status` IPC: `checking`, `available`, `not-available`, `downloading` ( `percent` ସହିତ), `downloaded`, `error` ମାଧ୍ୟମରେ ରେଣ୍ଡରର୍ କୁ ଇଭେଣ୍ଟଗୁଡିକ ପଠାଗଲା।
+- `installUpdate()` ସର୍ଭରକୁ ମାରିଦିଏ ତାପରେ `autoUpdater.quitAndInstall()` କୁ ଡାକେ।
+- Dev ମୋଡ୍ (`!app.isPackaged`) ରେ ଛାଡିଦେଲେ।
 
 ## ପାଇପଲାଇନ ନିର୍ମାଣ କରନ୍ତୁ \|
 
@@ -273,18 +273,18 @@ AppImage ସାଇନ୍ କରିବା ଇଚ୍ଛାଧୀନ — ସେଟ�
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ପ୍ରକାଶନଗୁଡ଼ିକ GitHub ରିଲିଜ୍ (`diegosouzapw/OmniRoute`) ରେ ପ୍ରକାଶିତ ହୋଇଛି, ଯେଉଁଠାରେ `electron-updater` ନୂତନ ସଂସ୍କରଣ ପାଇଁ ଯାଞ୍ଚ କରିଥାଏ \|
+ପ୍ରକାଶନଗୁଡ଼ିକ GitHub ରିଲିଜ୍ (`cheaper-inference/OmniRoute`) ରେ ପ୍ରକାଶିତ ହୋଇଛି, ଯେଉଁଠାରେ `electron-updater` ନୂତନ ସଂସ୍କରଣ ପାଇଁ ଯାଞ୍ଚ କରିଥାଏ।
 
 ## ତ୍ରୁଟି ନିବାରଣ
 
-| ଲକ୍ଷଣ                                                           | ଠିକ କରନ୍ତୁ \|                                                                                                                                                 |
+| ଲକ୍ଷଣ                                                           | ଠିକ କରନ୍ତୁ।                                                                                                                                                   |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Electron ମୁଖ୍ୟ ump ୁଲା ପରେ`Cannot find module 'better-sqlite3'` | better-sqlite3 v13 ଜାହାଜଗୁଡ଼ିକ ନୋଡ- API — ମୂଳ ଏବଂ `prepare:bundle` ରେ `npm install` ପୁନ run ଚଲାଇଥାଏ (ଏହା ସାମ୍ପ୍ରତିକ ପ୍ଲାଟଫର୍ମ ପାଇଁ ପୂର୍ବ ନିର୍ମାଣକୁ ଯାଞ୍ଚ କରେ) |
-| ଦେଶୀ ମଡ୍ୟୁଲ୍ ପାଇଁ`ERR_DLOPEN_FAILED`                            | `prepare:bundle` — କୁ ପୁନ - ଚଲାନ୍ତୁ ଯେତେବେଳେ ସାମ୍ପ୍ରତିକ ପ୍ଲାଟଫର୍ମ ପାଇଁ ନୋଡ- API ପ୍ରିବିଲ୍ଡ ହଜିଯାଏ ଏହା ଶୀଘ୍ର ବିଫଳ ହୁଏ \|                                        |
-| Linux ରେ ୱିଣ୍ଡୋ ଖାଲି ଦେଖାଯାଏ \|                                 | Next.js ସର୍ଭର ପ୍ରକୃତରେ PORT ରେ ବନ୍ଧା ହୋଇଥିବା ନିଶ୍ଚିତ କରନ୍ତୁ ( `[Server]` ଲଗଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ)                                                              |
-| macOS ନୋଟାରୀକରଣ ଷ୍ଟଲ୍ \|                                        | ନିଶ୍ଚିତ କରନ୍ତୁ ଯେ କେବଳ `.env` ରେ ନୁହେଁ, `APPLE_*` vars ରପ୍ତାନି ହୋଇଛି \|                                                                                       |
-| Windows SmartScreen ଚେତାବନୀ \|                                  | EV ସାର୍ଟିଫିକେଟ୍ ସହିତ ସାଇନ୍ କରନ୍ତୁ, କିମ୍ବା ଉପଭୋକ୍ତାମାନେ → ରାଇଟ୍ କ୍ଲିକ୍ କରନ୍ତୁ "ଯାହା ବି ହେଉ ଚଲାନ୍ତୁ" \|                                                         |
-| ପୋର୍ଟ-ଇନ୍-ବ୍ୟବହାରରେ ଧୂଆଁ ପରୀକ୍ଷା ବିଫଳ ହୁଏ \|                    | `electron:smoke:packaged` ଚଳାଇବା ପୂର୍ବରୁ 20128 ରେ ଯେକ local ଣସି ସ୍ଥାନୀୟ dev ସର୍ଭରକୁ ବନ୍ଦ କରନ୍ତୁ \|                                                            |
+| ଦେଶୀ ମଡ୍ୟୁଲ୍ ପାଇଁ`ERR_DLOPEN_FAILED`                            | `prepare:bundle` — କୁ ପୁନ - ଚଲାନ୍ତୁ ଯେତେବେଳେ ସାମ୍ପ୍ରତିକ ପ୍ଲାଟଫର୍ମ ପାଇଁ ନୋଡ- API ପ୍ରିବିଲ୍ଡ ହଜିଯାଏ ଏହା ଶୀଘ୍ର ବିଫଳ ହୁଏ।                                          |
+| Linux ରେ ୱିଣ୍ଡୋ ଖାଲି ଦେଖାଯାଏ।                                   | Next.js ସର୍ଭର ପ୍ରକୃତରେ PORT ରେ ବନ୍ଧା ହୋଇଥିବା ନିଶ୍ଚିତ କରନ୍ତୁ ( `[Server]` ଲଗଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ)                                                              |
+| macOS ନୋଟାରୀକରଣ ଷ୍ଟଲ୍।                                          | ନିଶ୍ଚିତ କରନ୍ତୁ ଯେ କେବଳ `.env` ରେ ନୁହେଁ, `APPLE_*` vars ରପ୍ତାନି ହୋଇଛି।                                                                                         |
+| Windows SmartScreen ଚେତାବନୀ।                                    | EV ସାର୍ଟିଫିକେଟ୍ ସହିତ ସାଇନ୍ କରନ୍ତୁ, କିମ୍ବା ଉପଭୋକ୍ତାମାନେ → ରାଇଟ୍ କ୍ଲିକ୍ କରନ୍ତୁ "ଯାହା ବି ହେଉ ଚଲାନ୍ତୁ"।                                                           |
+| ପୋର୍ଟ-ଇନ୍-ବ୍ୟବହାରରେ ଧୂଆଁ ପରୀକ୍ଷା ବିଫଳ ହୁଏ।                      | `electron:smoke:packaged` ଚଳାଇବା ପୂର୍ବରୁ 20128 ରେ ଯେକ local ଣସି ସ୍ଥାନୀୟ dev ସର୍ଭରକୁ ବନ୍ଦ କରନ୍ତୁ।                                                              |
 
 ## ଆହୁରି ମଧ୍ୟ ଦେଖନ୍ତୁ \|
 

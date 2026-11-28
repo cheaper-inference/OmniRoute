@@ -4,18 +4,11 @@
 
 ---
 
-> **ସଂସ୍କରଣ:** v3.8.51
-> **ଶେଷ ଅଦ୍ୟତନ:** 2026-06-28
-> **ପାଠକବର୍ଗ:** OmniRouteରେ ଅବଦାନ ରଖୁଥିବା କିମ୍ବା ଏହା ଉପରେ ଇଣ୍ଟିଗ୍ରେସନ୍ ନିର୍ମାଣ କରୁଥିବା ଇଞ୍ଜିନିୟରମାନେ।
+> **ସଂସ୍କରଣ:** v3.8.51** ଦର୍ଶକ:** ଇଞ୍ଜିନିୟରମାନେ OmniRoute କିମ୍ବା ଏହା ଉପରେ ଏକୀକରଣ ନିର୍ମାଣରେ ସହଯୋଗ କରନ୍ତି।
 >
-> ଉଚ୍ଚ-ସ୍ତରୀୟ ଆର୍କିଟେକ୍ଚର୍ ଚିତ୍ର ଏବଂ ପ୍ରତ୍ୟେକ ସବ୍ସିଷ୍ଟମ୍ ପଛରେ ଥିବା ଯୁକ୍ତି ପାଇଁ,
-> [ARCHITECTURE.md](./ARCHITECTURE.md) ପଢ଼ନ୍ତୁ। ବ୍ୟକ୍ତିଗତ ସବ୍ସିଷ୍ଟମ୍ଗୁଡ଼ିକ
-> (Auto Combo, MCP ସର୍ଭର୍, A2A ସର୍ଭର୍, Skills, Memory, Cloud Agents, Resilience,
-> Compression ଇତ୍ୟାଦି) ବିଷୟରେ ଗଭୀର ତଥ୍ୟ ପାଇଁ ଏହି `docs/` ଡିରେକ୍ଟୋରିରେ ଥିବା ସେମାନଙ୍କର ଉତ୍ସର୍ଗୀକୃତ ଫାଇଲ୍ଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ।
+> ଉଚ୍ଚ ସ୍ତରୀୟ ସ୍ଥାପତ୍ୟ ଚିତ୍ର ଏବଂ ପ୍ରତ୍ୟେକ ଉପତନ୍ତ୍ର ପଛରେ ଥିବା କାରଣ ପାଇଁ, [ARCHITECTURE.md](./ARCHITECTURE.md) ପ read ଼ନ୍ତୁ। ବ୍ୟକ୍ତିଗତ ସବ୍ ସିଷ୍ଟମ୍ ଉପରେ ଗଭୀର ଡାଇଭ୍ ପାଇଁ (ଅଟୋ କମ୍ବୋ, MCP ସର୍ଭର, A2A ସର୍ଭର, କ ills ଶଳ, ମେମୋରୀ, କ୍ଲାଉଡ୍ ଏଜେଣ୍ଟ, ସ୍ଥିରତା, ସଙ୍କୋଚନ ଇତ୍ୟାଦି) ଏହି ଉତ୍ସର୍ଗୀକୃତ ଫାଇଲଗୁଡ଼ିକୁ ଏହି `docs/` ଡିରେକ୍ଟୋରୀରେ ଦେଖନ୍ତୁ।
 
-ଏହି ଫାଇଲ୍ଟି **ଆଜି ରିପୋଜିଟୋରିରେ କ’ଣ ଅଛି** ତାହା ବର୍ଣ୍ଣନା କରେ, ଯାହାଦ୍ୱାରା ଜଣେ ନୂଆ ଇଞ୍ଜିନିୟର୍
-ଟ୍ରି ମଧ୍ୟରେ ଦିଗନିର୍ଣ୍ଣୟ କରିପାରିବେ, ରନ୍ଟାଇମ୍ ସ୍ତରୀକରଣକୁ ବୁଝିପାରିବେ ଏବଂ ନୂଆ ମଡ୍ୟୁଲ୍
-ଉଦ୍ଭାବନ ନକରି କେଉଁଠାରେ କୋଡ୍ ଯୋଡ଼ିବେ ତାହା ଜାଣିପାରିବେ।
+ଏହି ଫାଇଲ୍ ବର୍ଣ୍ଣନା କରେ।** ଆଜି ସଂଗ୍ରହାଳୟରେ ଯାହା ଅଛି।** ଯାହାଫଳରେ ଜଣେ ନୂତନ ଇଞ୍ଜିନିୟର ଗଛକୁ ନେଭିଗେଟ୍ କରିପାରିବେ, ଚାଲିବା ସମୟ ସ୍ତର ବୁ understand ିପାରିବେ ଏବଂ ନୂତନ ମଡ୍ୟୁଲ୍ ଉଦ୍ଭାବନ ନକରି କୋଡ୍ ଯୋଡିବାକୁ ଜାଣିପାରିବେ।
 
 ---
 
@@ -566,35 +559,14 @@ bin/
 
 ## 8. `scripts/`
 
-ଉଦ୍ଦେଶ୍ୟ ଅନୁଯାୟୀ 6ଟି ଉପଫୋଲ୍ଡର୍ରେ ସଂଗଠିତ।
+ଉଦ୍ଦେଶ୍ୟ ଅନୁଯାୟୀ sub ଟି ସବଫୋଲ୍ଡରରେ ସଂଗଠିତ।
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`।
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, ଏବଂ କେବଳ-ପଠନୀୟ PR ତଦାରଖ ସହାୟକଗୁଡ଼ିକ
-  `ci-discriminate.sh` (ଏକ ରେଫରେନ୍ସ PR କିମ୍ବା base-red ସମସ୍ୟା ସହ ତୁଳନା କରି ଏକ PRର ବିଫଳ-ଯାଞ୍ଚ ସ୍ୱାକ୍ଷରଗୁଡ଼ିକୁ ନିଜସ୍ୱ / ଉତ୍ତରାଧିକାରରେ ପ୍ରାପ୍ତ /
-  ଅଜଣା ଭାବେ ବର୍ଗୀକୃତ କରେ) ଏବଂ `audit-worktree.sh`
-  (ପରିବର୍ତ୍ତିତ ଫାଇଲ୍, ସୁରକ୍ଷିତ ପୃଷ୍ଠତଳ, ଅପସାରିତ ଆସର୍ଟ, ଦମନ ଗଣନା, ବଳକା
-  ଅସ୍ଥାୟୀ tsconfigଗୁଡ଼ିକ, ସ୍ଥାନୀୟ HEAD ସହ PR headର ତୁଳନା — ଜଣେ କର୍ମୀଙ୍କ PR ଗ୍ରହଣ କରାଯିବା ପୂର୍ବରୁ)।
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`।
-- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`।
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`।
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`।
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `v1-ws-bridge.mjs` `responses-ws-proxy.mjs` `run-next.mjs` `run-next-playwright.mjs` `healthcheck.mjs` `system-info.mjs` `standalone-server-ws.mjs` ଅବଶିଷ୍ଟ `run-ecosystem-tests.mjs` PR `run-standalone.mjs` `ci-discriminate.sh` `run-protocol-clients-tests.mjs` `run-playwright-tests.mjs` HEAD PR PR `sync-env.mjs` `audit-worktree.sh` — PR ପୂର୍ବରୁ PR `smoke-electron-packaged.mjs`
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs` `check-deprecated-versions.mjs` ଫ୍ଲାଗ ସଂସ୍କରଣଗୁଡ଼ିକ ସ୍ପଷ୍ଟ ଭାବରେ OmniRoute (3.6.x ଏବଂ ଏହା ପୂର୍ବରୁ) କୁ ଦର୍ଶାଯାଇଛି। ଚେକ୍ ତାରିଖକୁ ଅଣଦେଖା କରେ।
+- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

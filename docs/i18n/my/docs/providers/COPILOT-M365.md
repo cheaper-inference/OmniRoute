@@ -166,11 +166,11 @@ Microsoft ပြန်ပေးသောအခါ မူရင်းအကော
 
 `copilot-m365-web` ကို ဖွင့်ထားကြောင်း သေချာပါစေ။** ဒက်ရှ်ဘုတ် → ဝန်ဆောင်မှုပေးသူများ** . အချို့သောအဆင့်များတွင် ဝန်ဆောင်မှုပေးသူကို ပုံသေအားဖြင့် ဝှက်ထားနိုင်သည်။
 
-## ကိုးကားချက်များ
+## ကိုးကား
 
-- Issue: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Discussion: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Source: `src/shared/constants/providers/web-cookie.ts` (provider အဓိပ္ပာယ်သတ်မှတ်ချက်)
-- HAR import: `src/shared/utils/m365HarImport.ts`
-- အထောက်အထား field များ: `src/shared/providers/webSessionCredentials.ts`
-- Tier modal: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- ပြဿနာ- [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- အရင်းအမြစ်- `src/shared/constants/providers/web-cookie.ts` (ဝန်ဆောင်မှုပေးသူ အဓိပ္ပါယ်)
+- HAR တင်သွင်းခြင်း- `src/shared/utils/m365HarImport.ts`
+- အထောက်အထားအကွက်များ- `src/shared/providers/webSessionCredentials.ts`
+- အဆင့်ပုံစံ- `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

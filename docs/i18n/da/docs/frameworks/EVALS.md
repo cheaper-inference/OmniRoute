@@ -4,18 +4,17 @@
 
 ---
 
-> **Sandhedskilde:** `src/lib/evals/`, `src/lib/db/evals.ts`, `src/app/api/evals/`
-> **Senest opdateret:** 2026-06-28 — v3.8.40
+> **Sandhedens kilde:** `src/lib/evals/`, `src/lib/db/evals.ts`, `src/app/api/evals/`
 
-OmniRoute leveres med et generisk evalueringsframework, som du kan bruge til at benchmarke routingkonfigurationer, individuelle udbydere/modeller eller de medfølgende "golden set"-suiter. Brug det til at verificere routingændringer, validere nye udbydere og kontrollere releases, før de sendes videre til produktionstrafik.
+OmniRoute leverer en generisk evalueringsramme, du kan bruge til at benchmarke routingkonfigurationer, enkelt providers/models eller de medfølgende "gyldne sæt"-suiter. Brug den til at verificere routingændringer, validere nye udbydere og gate-udgivelser, før du promoverer dem til produktionstrafik.
 
-Frameworket er implementeret som:
+Rammen implementeres som:
 
-- En ren runner (`src/lib/evals/evalRunner.ts`), der registrerer indbyggede suiter i hukommelsen, evaluerer output i forhold til forventede kriterier og aggregerer scorekort.
-- Et persistenslag (`src/lib/db/evals.ts`) til brugerdefinerede suiter og historiske kørsler i SQLite.
-- Et orkestreringslag (`src/lib/evals/runtime.ts`), der udfører hver case ved at sende faktiske kald til `POST /v1/chat/completions`, registrerer latenstid og output samt gemmer kørslen.
-- REST-endpoints under `/api/evals/*` (kun med administrationsgodkendelse).
-- En dashboardvisning under `Dashboard → Forbrug → Evalueringer` (`EvalsTab.tsx`).
+- En ren runner (`src/lib/evals/evalRunner.ts`), der registrerer indbyggede suiter i hukommelsen, evaluerer output i forhold til forventede kriterier og samler scorekort.
+- Et persistenslag (`src/lib/db/evals.ts`) til brugerdefinerede (brugerdefinerede) suiter og historiske kørsler i SQLite.
+- Et orkestreringslag (`src/lib/evals/runtime.ts`), der udfører hvert enkelt tilfælde ved at sende rigtige opkald til `POST /v1/chat/completions`, fanger latens og output og fortsætter kørslen.
+- REST endepunkter under `/api/evals/*` (kun management-auth).
+- En dashboard overflade ved `Dashboard → Usage → Evals` (`EvalsTab.tsx`).
 
 ## Begreber
 

@@ -13,12 +13,12 @@ Agent Skills ni faili za SKILL.md zilizopangwa ambazo hufundisha mawakala wa nje
 
 ## Muhtasari
 
-Katalogi ina **Agent Skills 45** (23 za REST API + 21 za CLI + 1 ya mtiririko wa usanidi). Kila skill ina:
+Katalogi ina** 45 Ujuzi wa Wakala** (23 REST API + 21 CLI + 1 mtiririko wa kazi ya usanidi). Kila ujuzi una:
 
-- **Kitambulisho rasmi** (`omni-auth`, `cli-serve`, n.k.)
-- Faili ya **SKILL.md** katika `skills/{id}/SKILL.md` yenye YAML frontmatter (`name`, `description`) + maudhui ya kina ya markdown
-- **Vituo vya REST** (skills za API) au **amri ndogo za CLI** (skills za CLI) vinavyotokana na vipimo vya OpenAPI na sajili ya CLI
-- **URL ghafi ya GitHub** kwa uchukuaji wa moja kwa moja: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** ID kisheria** (`omni-auth`, `cli-serve`, n.k.)
+- A**SKILL.md** faili katika `skills/{id}/SKILL.md` na YAML frontmatter (`name`, `description`) + tajiri wa alama mwili
+- **REST mwisho** (ujuzi wa API ) au** amri ndogo za CLI** (ujuzi wa CLI ) unaotokana na sajili ya OpenAPI spec na CLI
+- A**GitHub mbichi URL** kwa kuleta moja kwa moja: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Jibu la kizalishaji ni `GeneratorReport`:
 
 ---
 
-## API ya Ufunikaji
+## Chanjo API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

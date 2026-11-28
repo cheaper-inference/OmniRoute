@@ -4,30 +4,13 @@
 
 ---
 
-> **Tõeallikas:** `src/lib/memory/` ja `src/app/api/memory/`
-> **Viimati uuendatud:** 2026-06-28 — v3.8.40 (vaikimisi väljas + int8 kvantimise järelejõudmine)
+> **Tõe allikas:** `src/lib/memory/` `src/app/api/memory/`
 
-OmniRoute pakub püsivat vestlusmälu, mis on seotud API-võtmega (ja
-valikuliselt seansi ID-ga). Mälukirjed eraldatakse LLM-i vastustest automaatselt
-kergekaalulise regulaaravaldiste mustrisobituse abil ning lisatakse järgmistesse
-päringutesse juhtiva süsteemisõnumina (või esimese kasutajasõnumina teenusepakkujate
-puhul, kes süsteemirolli ei aktsepteeri).
+OmniRoute pakub püsivat vestlusmälu, mis on sisestatud API -klahviga (ja valikuliselt seansi ID-ga). Mälestused ekstraheeritakse automaatselt LLM -vastustest kerge regex-mustrite sobitamise abil ja sisestatakse tagasi järgmistesse päringutesse juhtiva süsteemisõnumina (või süsteemirolli tagasilükkamise korral esimese kasutajateatena).
 
-> **Mälu on vaikimisi VÄLJAS (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled` on
-> nüüd `false` (`src/lib/memory/settings.ts`). Mälu lubamisel lisatakse
-> **igasse** vestluspäringusse kuni `maxTokens` (~2k) ulatuses leitud konteksti,
-> mille eest esitatakse arve — see võib olla ootamatu kulu uute installide ja
-> oma konteksti haldavate klientide jaoks. Lubage see selgesõnaliselt jaotises
-> **Seaded → Mälu** (`MemorySkillsTab` kuvab mälu lubamisel hoiatuse tokenite
-> kulu kohta). Klient saab üksiku päringu mälukasutusest välistada päringupäisega
-> `x-omniroute-no-memory` (`true`/`1`/`yes`) — vaadake päringupäiste tabelit
-> failis [API_REFERENCE.md](../reference/API_REFERENCE.md). Mäluta päring määrab
-> `memoryOwnerId = null`, mis keelab selle päringu jaoks **nii** mälu kui ka
-> oskuste lisamise (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Mälu on vaikimisi OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` on nüüd `false` (`src/lib/memory/settings.ts`). Mälu lubamine sisestab allalaaditud konteksti kuni `maxTokens` (~ 2k)** iga** vestlustaotlus, mille eest — uute installide ja oma konteksti haldavate klientide puhul üllatav tasu. Luba selgesõnaliselt all** Seaded → Mälu** ( `MemorySkillsTab` näitab märgikulu hoiatust, kui mälu on lubatud). Klient saab `x-omniroute-no-memory` päringu päisega (`true`/`1`/`yes`) ühest päringust loobuda — päringu päise tabelit failis [API_REFERENCE.md](../reference/API_REFERENCE.md). Mälu puudumise päring määrab `memoryOwnerId = null`, mis keelab** mõlemad** mälu ja oskuste süstimine selle päringu jaoks (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Mälu on **piiritletud API-võtme, mitte kasutaja järgi** — kõik sama API-võtmega
-autenditud päringud jagavad sama mälukogumit, mida saab valikuliselt täiendavalt
-piiritleda `sessionId` järgi.
+Mälu on** ulatus API võtme kohta** , mitte kasutaja kohta — iga sama API võtmega autentitud päring jagab sama mälukogumit, valikulise täiendava ulatusega `sessionId` abil.
 
 ## Arhitektuur
 
@@ -717,22 +700,22 @@ Võrdlustest tüüpilisel 4-tuumalisel x86-serveril (tekstid ~100 tokenit igaük
 
 ---
 
-## Faktide eraldamise mustrid (v3.8.16+)
+## Fakti väljavõtte mustrid (v3.8.16 +)
 
-Moodul `extraction.ts` (`src/lib/memory/extraction.ts`) kasutab vestlussõnumitest struktureeritud faktide eraldamiseks **regulaaravaldiste mustrite sobitamist**. Nende mustrite mõistmine aitab kohandada eraldamise kvaliteeti oma kasutusjuhu jaoks.
+`extraction.ts` moodul (`src/lib/memory/extraction.ts`) kasutab** regex mustri sobitamine** vestlussõnumitest struktureeritud faktide eraldamiseks. Nende mustrite mõistmine aitab teil ekstraheerimiskvaliteeti vastavalt kasutusjuhtumile häälestada.
 
 ### Vaikimisi mustrikategooriad
 
-| Kategooria          | Näidismuster                                                     | Jäädvustab                       |
-| ------------------- | ---------------------------------------------------------------- | -------------------------------- |
-| PREFERENCE_PATTERNS | `"Ma eelistan <X>"`, `"Mulle meeldib <X>"`, `"Ma vihkan <X>"`    | Kasutaja eelistused              |
-| DECISION_PATTERNS   | `"Ma kasutan <X>"`, `"Otsustasin <X>"`, `"Valisin <X>"`          | Kasutaja otsused (episoodilised) |
-| PATTERN_PATTERNS    | `"Ma tavaliselt <X>"`, `"Ma alati <X>"`, `"Ma mitte kunagi <X>"` | Püsivad käitumismustrid          |
+| Kategooria          | Näidismuster                                                | Jäädvustab                      |
+| ------------------- | ----------------------------------------------------------- | ------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Kasutaja eelistused             |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Kasutaja otsused (episoodiline) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Püsivad käitumismustrid         |
 
 ### Näidismustrid (lihtsustatud)
 
 ```ts
-// Failist src/lib/memory/extraction.ts
+// From src/lib/memory/extraction.ts
 const PREFERENCE_PATTERNS = [
   /\bI\s+(?:really\s+)?prefer\s+([^.,\n]+)/gi,
   /\bI\s+(?:really\s+)?like\s+([^.,\n]+)/gi,
@@ -745,36 +728,28 @@ const DECISION_PATTERNS = [
 const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\n]+)/gi];
 ```
 
-### Mida eraldatakse
+### Mis ekstraheeritakse
 
 Kui kasutaja ütleb:
 
-> "Ma eelistan TypeScripti. Kasutan selle projekti jaoks Postgresi. Teen alati enne üleslükkamist commiti. Mulle ei meeldi Python."
-> Eraldamise tulemusena luuakse 4 mälukirjet:
+> "Ma eelistan TypeScript. Ma kasutan selle projekti jaoks Postgres. Pühendun end alati enne surumist. Python mulle ei meeldi." Ekstraheerimine loob 4 mälu:
 >
-> | Võti                                 | Kategooria | Tüüp         | Sisu                            |
-> | ------------------------------------ | ---------- | ------------ | ------------------------------- |
-> | `preference:typescript`              | eelistus   | faktiline    | "TypeScript"                    |
-> | `decision:postgres_for_this_project` | otsus      | episoodiline | "Postgres selle projekti jaoks" |
-> | `pattern:commit_before_pushing`      | muster     | faktiline    | "commit enne üleslükkamist"     |
-> | `preference:python`                  | eelistus   | faktiline    | "Python"                        |
+> | | kategooria | tüüp | sisu | | ------------------------------------- | ---------- | -------- | ---------------------------- | | `preference:typescript` | eelistus | faktiline | "TypeScript" | | `decision:postgres_for_this_project` | otsus | episoodiline | "Postgres | | `pattern:commit_before_pushing` faktiline | " | enne surumist" | | | `preference:python` eelistus | faktiline | | Python" |
 
-### Eraldamise piirangud
+### Ekstraheerimise piirangud
 
-Kontrollimatu eraldamise vältimiseks kehtivad järgmised piirangud:
+Põgenemise vältimiseks kehtivad järgmised piirangud:
 
-| Sisu minimaalne pikkus | 3 märki |
-| Sisu maksimaalne pikkus| 500 märki |
+| Minimaalne sisu pikkus | 3 tähemärki |
+| Maksimaalne sisu pikkus | 500 tähemärki |
 
-### Millal eraldamine keelata
+### Millal ekstraheerimine keelata
 
-Eraldamine käivitatakse automaatselt alati, kui mälu on lubatud; eraldi
-ainult eraldamise lülitit ei ole. Selle väljalülitamiseks keelake mälu täielikult (`enabled: false`
-päringu `PUT /api/settings/memory` kaudu). Kaaluge seda järgmistel juhtudel:
+Väljavõte käivitub automaatselt, kui mälu on lubatud; eraldi väljavõtmiseks mõeldud lülitit pole. Selle väljalülitamiseks keelake mälu täielikult (`enabled: false` `PUT /api/settings/memory` kaudu ). Kaaluge seda teha, kui:
 
-- Teil on suur sõnumimaht ja eraldamise kulu ei ole tühine
-- Teie vestlused on enamasti ajutised (vestlus, silumine) ega oma pikaajalist väärtust
-- Juba jäädvustate konteksti kohandatud pistikprogrammide kaudu
+- Teil on suur sõnumimaht ja ekstraheerimiskulud pole tühised
+- Teie vestlused on enamasti mööduvad (vestlus, silumine), millel pole pikaajalist väärtust
+- Jäädvustate juba konteksti kohandatud pistikprogrammide kaudu
 
 ---
 

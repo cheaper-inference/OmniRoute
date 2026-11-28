@@ -4,192 +4,157 @@
 
 ---
 
-„OmniRoute“ platinama kaip visiškai įdiegiama progresyvioji žiniatinklio programa. Atidarę valdymo skydą bet kurioje mobiliojoje naršyklėje — „Android“ („Chrome“) arba „iOS“ („Safari“) — galite pasirinkti „Pridėti prie pradžios ekrano“ ir naudotis į savąją programėlę panašia patirtimi be programėlių parduotuvės.
+Įdiekite OmniRoute prietaisų skydelį kaip progresyvią žiniatinklio programą, kad atidarytumėte ją iš pagrindinio ekrano arba darbalaukio atskirame lange. Įdiegtai programai vis tiek reikia prisijungti prie jūsų OmniRoute serverio, kad būtų galima naršyti, prietaisų skydelio duomenis ir API užklausas. Talpykloje saugomi statiniai ištekliai nesuteikia neprisijungus pasiekiamo šliuzo arba neprisijungus veikiančios informacijos suvestinės.
 
 ## Kas yra PWA?
 
-Progresyvioji žiniatinklio programa „OmniRoute“ žiniatinklio valdymo skydą paverčia priemone, kuri atrodo ir veikia kaip savoji mobilioji programėlė. Įdiegta ji:
+Progresyvi žiniatinklio programa naudoja žiniatinklio prietaisų skydelį su programos piktograma ir atskiru langu. Įdiegę OmniRoute:
 
-- Paleidžiama iš pradžios ekrano naudojant atskirą piktogramą
-- Atidaroma visame ekrane — be naršyklės adreso juostos ar kortelių sąsajos
-- Veikia neprisijungus, naudodama specialų ryšio būsenos puslapį
-- Podėlyje saugo statinius išteklius, kad jie būtų įkeliami greičiau
-- Palaiko vertikalią ir horizontalią ekrano padėtį
+- Paleidžiama iš pagrindinio ekrano arba darbalaukio
+- Atsidaro autonominiu režimu, be įprastos naršyklės adreso juostos ir skirtukų
+- Išsaugo pasirinktus statinius išteklius
+- Palaiko portreto ir kraštovaizdžio orientacijas
 
-## Diegimas
+## Montavimas
 
-### Android (Chrome)
+Naudokite HTTPS adresą serveriui kitame įrenginyje. Kai serveris veikia tame pačiame įrenginyje, `http://localhost:20128` taip pat atitinka naršyklės įdiegimo reikalavimus. Paprastas `http://YOUR_IP:20128` adresas šių reikalavimų neatitinka. Diegimo meniu ir raginimai priklauso nuo naršyklės ir operacinės sistemos. Žr. [MDNPWA diegimo reikalavimus](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
 
-1. Atidarykite „OmniRoute“ valdymo skydą naršyklėje „Chrome“: `http://YOUR_IP:20128`
-2. „Chrome“ automatiškai parodys reklamjuostę **„Pridėti „OmniRoute“ prie pradžios ekrano“**, arba:
-   - Bakstelėkite meniu **⋮** (tris taškus) → **„Pridėti prie pradžios ekrano“** arba **„Įdiegti programėlę“**
-3. Patvirtinkite raginimą
-4. „OmniRoute“ pradžios ekrane rodoma kaip atskira programėlė
+### „Android“ („Chrome“)
 
-### iOS (Safari)
+1. Tame pačiame telefone atidarykite savo OmniRoute HTTPS adresą arba `http://localhost:20128` serveriui.
+2. Atidarykite**⋮** meniu ir pasirinkite** Įdiegti programą** arba** Pridėti prie pagrindinio ekrano** , jei siūloma.
+3. Patvirtinkite raginimą.
+4. Pradiniame ekrane atidarykite OmniRoute.
 
-1. Atidarykite „OmniRoute“ valdymo skydą naršyklėje „Safari“: `http://YOUR_IP:20128`
-2. Bakstelėkite mygtuką **Bendrinti** (langelį su rodykle)
-3. Slinkite žemyn ir bakstelėkite **„Pridėti prie pradžios ekrano“**
-4. Suteikite pavadinimą (numatytasis — „OmniRoute“) ir bakstelėkite **Pridėti**
-5. „OmniRoute“ su programėlės piktograma rodoma pradžios ekrane
+### iOS („Safari“)
 
-### Kompiuteris (Chrome / Edge)
+1. Atidarykite savo OmniRoute HTTPS adresą „Safari“.
+2. Bakstelėkite** Dalintis** →** Pridėti prie pagrindinio ekrano** .
+3. Patvirtinkite pavadinimą ir bakstelėkite** Pridėti** .
+4. Pradiniame ekrane atidarykite OmniRoute.
 
-1. Atidarykite „OmniRoute“ valdymo skydą
-2. Adreso juostoje spustelėkite **diegimo piktogramą** (arba ⋮ → „Įdiegti „OmniRoute“...“)
-3. Patvirtinkite raginimą
-4. „OmniRoute“ atidaroma kaip atskiras langas — be kortelių ir adreso juostos
+### Stalinis kompiuteris („Chrome“ / „Edge“)
 
-## Funkcijos
+1. Atidarykite OmniRoute prietaisų skydelį.
+2. Naudokite naršyklės diegimo piktogramą arba** Įdiegti programą** meniu, jei siūloma.
+3. Patvirtinkite raginimą atidaryti OmniRoute atskirame lange.
 
-### Viso ekrano režimas
+## Savybės
 
-Manifestas sukonfigūruotas naudojant `display: "fullscreen"`, todėl įdiegta programėlė naudoja visą ekraną — be naršyklės sąsajos elementų ir nepersidengdama su būsenos juosta. Dėl to valdymo skydas iš tiesų primena savąją programėlę.
+### Atskiras langas
 
-### Veikimas neprisijungus
+Manifestas nustato `display: "standalone"` ir `start_url: "/dashboard"`. Įdiegta programa atidaro prietaisų skydelį programos lange. Naršyklės ir operacinės sistemos valdikliai vis tiek gali būti rodomi; manifestas neprašo viso ekrano režimo.
 
-„OmniRoute“ turi tarnybinę programą (`sw.js`), kuri išmaniai valdo podėlį:
+### Talpykloje saugomi ištekliai ir tinklo reikalavimai
 
-| Ištekliaus tipas                                                                                                                                                                                                                 | Strategija                             | Veikimas                                                                                                               |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **Programėlės karkasas**                                                                                                                                                                                                         | Pirmiausia podėlis                     | `/`, `/offline`, manifestas ir piktogramos iš anksto įrašomi į podėlį diegiant                                         |
-| **Statiniai ištekliai** (CSS, JS, vaizdai, šriftai)                                                                                                                                                                              | Pirmiausia tinklas, atsarginis podėlis | Iš tinklo gaunama naujausia versija; neprisijungus naudojamas podėlis                                                  |
-| **Next.js paketai** (`/_next/`)                                                                                                                                                                                                  | Pirmiausia tinklas, atnaujinant podėlį | Gaunama iš tinklo ir atnaujinamas podėlis; neprisijungus pateikiama podėlyje esanti versija                            |
-| **Naršymo užklausos**                                                                                                                                                                                                            | Apeinama (niekada neperimama)          | Naršyklė valdo HTTP/3→HTTP/2 atsarginį perjungimą; dėl neveikiančio QUIC lizdo neturi būti grąžinta `Response.error()` |
-| **API / valdymo skydo maršrutai** (`/api/`, `/a2a`, `/dashboard`, kliento API pseudonimai `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, taip pat `/callback`, `/login`; lyginama neatsižvelgiant į raidžių dydį) | Apeinama (niekada nelaikoma podėlyje)  | Visada siunčiama tiesiai į serverį — tarnybinė programa niekada neperima                                               |
+[Aptarnavimo darbuotojas](../../public/sw.js) talpykloje saugo pasirinktus tos pačios kilmės išteklius:
 
-### Neprisijungimo puslapis
+| Prašymas arba turtas                                 | strategija          | Elgesys                                                                                                                 |
+| ---------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Diegimo laiko ištekliai                              | Išankstinė talpykla | `/`, `/manifest.webmanifest`, `/icon-512.png` ir `/apple-touch-icon.png` yra saugomi talpykloje darbuotojo diegimo metu |
+| Next.js statinis turtas (`/_next/`)                  | Pirmiausia tinklas  | Sėkmingi atsakymai atnaujina talpyklą; tinklo klaida grįžta į esamą talpyklos atsakymą                                  |
+| Kiti statiniai CSS, JS, vaizdai ir šriftai           | Pirmoji talpykla    | Esamas talpykloje esantis atsakymas naudojamas pakartotinai; sėkmingi tinklo atsakymai į talpyklą įrašomi praleidus     |
+| Puslapio naršymas                                    | Apeiti              | Naršyklė tiesiogiai paima puslapį; Atsarginis režimas neprisijungus neteikiamas                                         |
+| API, prietaisų skydelis ir autentifikavimo maršrutai | Apeiti              | Darbuotojas šių užklausų neperima ir nelaiko talpykloje                                                                 |
+| Kiti nestatiniai prašymai                            | Tinklas             | Nėra talpyklos paieškos ar saugojimo                                                                                    |
 
-Kai tinklas nepasiekiamas ir naudotojas pereina į naują puslapį, tarnybinė programa pateikia specialų `/offline` puslapį, kuris:
+Išskirti maršrutai yra `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` ir `/login`, kelio ribose suderinti neskiriant didžiųjų ir mažųjų raidžių. Kryžminės kilmės ir ne GET užklausos taip pat apeina darbuotoją.
 
-- Rodo aiškų pranešimą **„Ryšio problema“**
-- Rodo tiesioginį **prisijungimo / neprisijungimo būsenos indikatorių**, kuris atnaujinamas realiuoju laiku
-- Pateikia mygtuką **„Bandyti prisijungti dar kartą“**, skirtą puslapiui įkelti iš naujo atkūrus ryšį
-- Pateikia nuorodą į **būsenos puslapį**, skirtą diagnostikai
+### Ryšio puslapis
 
-### Programėlės piktogramos
+`/offline` puslapyje pateikiamas ryšio pranešimas, online/offline indikatorius, a** Bandyti dar kartą prisijungti** mygtuką ir nuorodą į būsenos puslapį. Tai yra** nėra iš anksto išsaugotas talpykloje** o serviso darbuotojas tai daro** ne** nukreipti į jį nepavykusias navigacijas. Jo egzistavimas nepadaro naujų puslapių pasiekiamų be serverio.
 
-„OmniRoute“ pateikia kiekvienai platformai optimizuotas piktogramas:
+### Programų piktogramos
 
-| Failas                 | Dydis                | Naudojama                                    |
-| ---------------------- | -------------------- | -------------------------------------------- |
-| `icon-512.png`         | 512×512              | „Android“ diegimo raginime, paleidimo ekrane |
-| `apple-touch-icon.png` | 180×180              | „iOS“ pradžios ekrano piktogramai            |
-| `icon-192.svg`         | 192×192 (vektorinis) | „Android“ prisitaikančiajai piktogramai      |
-| `apple-touch-icon.svg` | 180×180 (vektorinis) | Kaip atsarginė „Apple“ piktograma            |
-| `favicon.svg`          | Vektorinis           | Naršyklės kortelėse                          |
-| `favicon.ico`          | Kelių dydžių         | Senesnėse naršyklėse                         |
+Manifeste reklamuojamos šios PNG piktogramos:
+
+| Failas                 | Dydis   | Naudokite                                     |
+| ---------------------- | ------- | --------------------------------------------- |
+| `icon-192.png`         | 192×192 | Bendroji programos piktograma                 |
+| `icon-512.png`         | 512×512 | Bendroji ir užmaskuojama programos piktograma |
+| `apple-touch-icon.png` | 180×180 | „Apple“ pagrindinio ekrano piktograma         |
+
+Naršyklė pasirenka atitinkamą diegimo tikslo piktogramą.
 
 ### Automatinė registracija
 
-Tarnybinė programa automatiškai registruojama šakniniame išdėstyme naudojant komponentą `<PwaRegister />`. Naudotojui nereikia atlikti jokių veiksmų — programėlę galima įdiegti iškart, kai naršyklė aptinka galiojantį manifestą ir tarnybinę programą.
+`PwaRegister` užregistruoja darbuotoją gamyboje, kai naršyklė palaiko paslaugų darbuotojus. Kūrimo režimas išregistruoja darbuotojus ir išvalo talpyklas, kad būtų išvengta pasenusio turto, kuris netrukdytų perkrauti iš naujo. Diegimo raginimai lieka naršyklės sprendimu.
 
 ## Techninė architektūra
 
-### Žiniatinklio programos manifestas (`manifest.webmanifest`)
+### Žiniatinklio programos manifestas
 
-Sugeneruojamas „Next.js“ naudojant `src/app/manifest.ts`:
+Next.js generuoja `/manifest.webmanifest` iš [`src/app/manifest.ts`](../../src/app/manifest.ts). Pagrindiniai jo nustatymai yra šie:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Nustatymas            | Vertė                                           |
+| --------------------- | ----------------------------------------------- |
+| `short_name`          | `OmniRoute`                                     |
+| `start_url`           | `/dashboard`                                    |
+| `scope`               | `/`                                             |
+| `display`             | `standalone`                                    |
+| `orientation`         | `any`                                           |
+| Fono ir temos spalvos | Numatytoji šviesos paletė iš `PWA_THEME_COLORS` |
 
-### Paslaugų darbininkas (`public/sw.js`)
+Aprašo pavadinimas ir aprašas yra statinės reikšmės tame šaltinio faile. Įdiegtas aprašas nesilaiko egzemplioriaus pavadinimo nustatymo arba aktyvios paletės kiekvieno apsilankymo metu.
 
-Standartinis paslaugų darbininkas (be priklausomybių nuo karkasų), turintis:
+### Aptarnavimo darbuotojas
 
-- **Diegimo etapą**: iš anksto talpykloje išsaugo programos pagrindą (šakninį puslapį, darbo neprisijungus puslapį, manifestą ir piktogramas)
-- **Aktyvinimo etapą**: pašalina senas talpyklos versijas ir perima visų klientų valdymą
-- **Užklausų etapą**: išmaniai nukreipia pagal užklausos tipą (naršymas, statinis išteklius, API)
-- **Talpyklos versijų valdymą**: `omniroute-pwa-v3` — padidinkite šią versiją, kad po atnaujinimo būtų priverstinai sukurta nauja talpykla
+[`public/sw.js`](../../public/sw.js) neturi paslaugų darbuotojo sistemos priklausomybės:
 
-### Išdėstymo metaduomenys (`src/app/layout.tsx`)
+- **Įdiegti:** iš anksto išsaugo keturis anksčiau išvardytus išteklius ir suaktyvina naują darbuotoją.
+- **Suaktyvinti:** pašalina senesnes talpyklos kartas ir pretenzijų klientus.
+- **Paimti:** taiko anksčiau nurodytas statinio turto strategijas ir maršruto išskyrimus.
+- **Versijų kūrimas:** šaltinio talpyklos pavadinimas yra `omniroute-pwa-v3`; gamybos versijoje antspauduojama talpyklos tapatybė.
+- **Pranešimai:** tvarko gaunamus `push` įvykius ir sufokusuoja arba atidaro langą spustelėjus pranešimą.
 
-Šakninis išdėstymas pateikia visas metaduomenų žymas, reikalingas PWA reikalavimams atitikti:
+Vien tik tiesioginių įvykių tvarkyklės nesukuria aktyvios tiesioginės prenumeratos ar sukonfigūruoto serverio pristatymo. Nemanykite, kad pranešimai įjungti tik todėl, kad PWA yra įdiegtas.
 
-- `manifest` nuoroda į `/manifest.webmanifest`
-- `apple-web-app-capable: true`, skirta autonominiam „iOS“ režimui
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes`, skirta „Android Chrome“
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover`, skirta atvaizdavimui nuo vieno ekrano krašto iki kito
+### Maketo metaduomenys ir registracija
 
-### Komponentas: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) pateikia manifesto nuorodą, atskirus Apple metaduomenis, temos spalvas ir `viewport-fit: cover`. Puslapio pavadinime ir „Apple“ žiniatinklio programos pavadinime naudojamas egzemplioriaus pavadinimas. Tiesioginės naršyklės temos spalva atitinka paletę; diegimo apraše naudojama numatytoji šviesos spalva.
 
-Šis kliento komponentas, esantis `src/shared/components/PwaRegister.tsx`:
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) veikia kliente ir užregistruoja `/sw.js` su build ID savo URL. Jis aptinka nesutampančias talpyklos kartas ir gali iš naujo nustatyti darbuotoją ir vieną kartą įkelti iš naujo, kad atkurtų senesnį įrenginį. Registracijos klaida neužblokuoja prietaisų skydelio.
 
-1. Paleidžiamas prijungimo metu (tik kliento pusėje)
-2. Patikrina, ar naršyklė palaiko `serviceWorker`
-3. Tyliai užregistruoja `/sw.js` (klaidos ignoruojamos, kad nebūtų blokuojama programa)
-4. Nieko neatvaizduoja (`return null`) — tai tik šalutinį poveikį atliekantis komponentas
+## Naudokite su „Terux“ („Android“)
 
-## Naudojimas su „Termux“ („Android“)
+1. Paleiskite OmniRoute „Terux“: `npx -y omniroute@latest`.
+2. Tame pačiame telefone atidarykite „Chrome“: `http://localhost:20128`.
+3. Įdiekite PWA per naršyklės diegimo meniu.
+4. Naudodami prietaisų skydelį palaikykite „Termux“ serverį veikiantį.
 
-Kai „OmniRoute“ paleidžiama „Android“ sistemoje per „Termux“, PWA veikia sklandžiai:
+Telefone yra ir šliuzas, ir prietaisų skydelis. Užklausoms nuotoliniams AI teikėjams vis tiek reikia prieigos prie tinklo. Žr. [„Termux“ vadovą](TERMUX_GUIDE.md), kad sužinotumėte apie sąranką ir „Android“ proceso trukmę.
 
-1. Paleiskite „OmniRoute“ programoje „Termux“: `npx omniroute`
-2. Tame pačiame telefone atidarykite „Chrome“: `http://localhost:20128`
-3. Įdiekite PWA naudodami parinktį „Pridėti prie pradžios ekrano“
-4. PWA prisijungia prie vietinio „Termux“ serverio — viskas veikia pačiame įrenginyje
+## Naudoti iš kitų įrenginių
 
-Šis derinys reiškia, kad jūsų „Android“ telefonas yra ir **serveris** („Termux“), ir **klientas** (PWA) — visiškai autonominis DI šliuzas.
-
-## Naudojimas iš kitų įrenginių
-
-Įdiekite PWA bet kuriame įrenginyje, kurio naršyklė gali pasiekti jūsų „OmniRoute“ serverį:
-
-- **Kitame telefone ar planšetiniame kompiuteryje**: eikite į `http://PHONE_IP:20128` ir įdiekite PWA
-- **Nešiojamajame kompiuteryje**: atidarykite „Chrome“ arba „Edge“ ir įdiekite ją kaip darbalaukio PWA
-- **Išmaniajame televizoriuje su naršykle**: atidarykite valdymo skydelį visame ekrane
+Atidarykite serverio HTTPS adresą telefone, planšetiniame kompiuteryje arba darbalaukyje, tada sekite tos naršyklės diegimo eigą. Serveris turi likti pasiekiamas iš kiekvieno įrenginio. Nuotolinės prieigos parinktis rasite [tunelio vadove](../ops/TUNNELS_GUIDE.md).
 
 ## Tinkinimas
 
-### Egzemplioriaus pavadinimas
+### Pavyzdžio pavadinimas
 
-PWA pavadinimui taikoma **Egzemplioriaus pavadinimo** nuostata iš `Valdymo skydelis → Nustatymai`. Jei pervadinsite egzempliorių į „Mano DI šliuzas“, įdiegtoje PWA bus rodomas šis pavadinimas.
+The** Pavyzdžio pavadinimas** nustatymas keičia prietaisų skydelio metaduomenis, įskaitant puslapio pavadinimą ir „Apple“ žiniatinklio programos pavadinimą. Sugeneruotame apraše naudojamas statinis pavadinimas, todėl šis nustatymas negarantuoja, kad jau įdiegta programa bus pervadinta.
 
-### Pasirinktinė svetainės piktograma
+### Pasirinktinis Favicon
 
-Jei įkelsite pasirinktinę svetainės piktogramą per `Valdymo skydelis → Nustatymai`, darbalaukio PWA piktograma atspindės pasirinktinę piktogramą. Mobiliųjų įrenginių pradžios ekrano piktogramoms naudojami iš anksto sukurti `icon-512.png` ir `apple-touch-icon.png` failai.
+Pasirinktinė adresyno piktograma pakeičia naršyklės adresyną. Diegimo manifestas vis dar reklamuoja aukščiau esančius PNG failus; Favicon pakeitimas nepakeičia tų pagrindinio ekrano piktogramų.
 
 ## Apribojimai
 
-- **Nėra „push“ pranešimų** — „Service worker“ neįgyvendina „Push API“. Vietoje to pranešimus tvarko „Electron“ programa.
-- **Nėra foninio sinchronizavimo** — Veiksmai neprisijungus nėra įtraukiami į eilę, kad būtų pakartoti vėliau. PWA pirmiausia skirta kaip suvestinės peržiūros priemonė.
-- **„iOS“ apribojimai** — „Safari“ naršyklė „iOS“ sistemoje nepalaiko visų PWA funkcijų (pvz., diegimo raginimai atliekami rankiniu būdu, o foninių „service worker“ procesų galimybės yra ribotos).
-- **Podėlio dydis** — „Service worker“ podėlyje saugo tik statinius išteklius. Dideli atsakymų duomenys iš `/api/` maršrutų niekada nėra saugomi podėlyje.
-- **Pasirinktinės piktogramos mobiliuosiuose įrenginiuose** — Pakeitus svetainės piktogramą nustatymuose, pagrindinio ekrano piktograma mobiliajame įrenginyje neatnaujinama (tam reikia iš naujo sugeneruoti PWA piktogramas).
+- **Reikalingas serverio ryšys:** puslapio naršymas, prietaisų skydelio būsena ir API užklausos neturi atsarginio režimo neprisijungus.
+- **Nėra fono sinchronizavimo:** neprisijungus atliekami veiksmai nėra pakartojami.
+- **Naršyklės skirtumai:** diegimo meniu, langų pateikimas ir pranešimų palaikymas skiriasi priklausomai nuo platformos.
+- **Nėra API atsakymo talpyklos:** darbuotojas neįtraukia API, prietaisų skydelio ir autentifikavimo maršrutų.
+- **Statinio diegimo piktogramos:** norint atnaujinti šias piktogramas, reikia pakeisti reklamuojamus išteklius; naršyklės gali išsaugoti įdiegtus metaduomenis.
 
-## Failų apžvalga
+## Failų nuoroda
 
-| Failas                                  | Paskirtis                                                                      |
-| --------------------------------------- | ------------------------------------------------------------------------------ |
-| `src/app/manifest.ts`                   | „Next.js“ manifesto maršrutas (generuoja `manifest.webmanifest`)               |
-| `public/sw.js`                          | „Service worker“ su podėlio logika                                             |
-| `src/shared/components/PwaRegister.tsx` | Kliento komponentas, registruojantis „service worker“                          |
-| `src/app/offline/page.tsx`              | Atsarginis neprisijungus rodomas puslapis su tiesioginiu būsenos indikatoriumi |
-| `src/app/layout.tsx`                    | Šakninis išdėstymas su PWA metaduomenimis (apple-web-app, theme-color ir kt.)  |
-| `public/icon-512.png`                   | 512×512 PNG piktograma („Android“, pradžios ekranas)                           |
-| `public/apple-touch-icon.png`           | 180×180 PNG piktograma („iOS“ pagrindinis ekranas)                             |
-| `public/icon-192.svg`                   | 192×192 SVG piktograma („Android“ adaptyvioji)                                 |
-| `public/apple-touch-icon.svg`           | 180×180 SVG piktograma (atsarginė „Apple“)                                     |
+| Failas                                                                                 | Tikslas                                                   |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Sugeneruotas žiniatinklio programos aprašas               |
+| [public/sw.js](../../public/sw.js)                                                     | Talpyklos, išskyrimų ir pranešimų įvykių tvarkyklės       |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Gamybos registracija ir pasenusios talpyklos atkūrimas    |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Ryšio puslapis, o ne automatinis atsarginis neprisijungus |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Puslapio metaduomenys ir peržiūros srities nustatymai     |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Bendrinamos temos ir spalvos reikšmės                     |
+| [public/icon-512.png](../../public/icon-512.png)                                       | 512 × 512 programos piktograma                            |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 Apple piktograma                                |

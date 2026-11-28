@@ -20,24 +20,21 @@ URL របស់ app-server ដែលបានកំណត់រចនាសម�
 ## 1. ស្ថាបត្យកម្ម
 
 ```
-┌─ កម្មវិធី OmniRoute ─────────────┐        ┌─ sidecar របស់ codex-app-server ─────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ ថូខឹនសមត្ថភាព)                │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  គ្រប់គ្រង OpenAI OAuth ដោយខ្លួនឯង  │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, ធ្វើឱ្យស្រស់ស្វ័យប្រវត្តិ) │
-        │ ចែករំលែក (volume របស់ compose)     └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → ថូខឹនសមត្ថភាព WS (ទាំងពីរភ្ជាប់វា)
-  codex-appserver-home    → ~/.codex (auth.json ត្រូវបានសរសេរដោយ dashboard
-                             និងអានដោយ codex app-server របស់ sidecar)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- sidecar ស្តាប់ **តែ** នៅលើបណ្តាញ compose ខាងក្នុង
-  (`ws://codex-app-server:1456`) ដែលការពារដោយថូខឹនសមត្ថភាព។ វា **មិនដែល**
-  ត្រូវបានបើកផ្សាយទៅ host ឬអ៊ីនធឺណិតទេ។
-- Codex CLI ត្រូវបានដាក់បញ្ចូលជាស្រេចក្នុង `omniroute:base` ដូច្នេះមិនចាំបាច់ដំឡើង codex លើ
-  host ឬម៉ាស៊ីនរបស់អ្នកប្រើទេ នៅពេលអ្នកដំណើរការ sidecar។
+- អ្នកបើកឡានស្តាប់** តែប៉ុណ្ណោះ** នៅលើបណ្តាញតែងខាងក្នុង (`ws://codex-app-server:1456`) នៅពីក្រោយសញ្ញាសម្គាល់សមត្ថភាព។ វាគឺ** មិនដែល** ផ្សព្វផ្សាយទៅកាន់ម៉ាស៊ីន ឬអ៊ីនធឺណិត។
+- ឡានចំហៀងប្រើ `omniroute:cli-no-docker` ដែលត្រូវបានបង្កើតឡើងពីគោលដៅ `runner-cli-no-docker` ដែលរួមមាន Codex CLI.
 
 ## 2. ដំណើរការវា
 

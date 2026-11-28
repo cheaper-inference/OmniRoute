@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Alle Projektregeln befinden sich in [`AGENTS.md`](AGENTS.md)** — der einzigen verbindlichen Quelle für jeden KI-
-Assistenten (Architektur, Konventionen, Tests, Qualitätsprüfungen, Git-Workflow, die 23 verbindlichen Regeln,
-Erkenntnisse zu personenbezogenen Daten). Lies sie vollständig; füge hier keine Projektregeln erneut hinzu. Alles Folgende gilt AUSSCHLIESSLICH
-für Claude Code — operative Präzisierungen der bereits in `AGENTS.md` definierten Regeln.
+**Alle Projektregeln leben in [`AGENTS.md`](AGENTS.md)** — die zentrale Informationsquelle für jeden AI Assistenten. Der obige Import lädt es bereits. Fügen Sie hier keine Projektregeln erneut hinzu. Alles Folgende gilt ONLY für Claude Code — operative Verfeinerungen von Regeln, die bereits in `AGENTS.md` definiert sind.
 
-## Worktree-Isolation — Besonderheiten bei Claude Code
+## Worktree-Isolation — Claude Code-Besonderheiten
 
-Das vollständige verbindliche Worktree-Protokoll (Bestätigung des Basis-Branches, kanonischer Pfad
-`.claude/worktrees/`, `cp -al` für node_modules, Regeln zum Aufräumen) befindet sich in
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (zusammengefasst in `AGENTS.md` →
-Git-Workflow → „Worktree-Isolation"). Claude-Code-spezifische Hinweise:
+- Bestätigen Sie den Basiszweig mit dem Operator über `AskUserQuestion` (Hard Rule #19), sofern er Ihnen dies nicht bereits mitgeteilt hat.
+- Erstellen Sie den Arbeitsbaum mit `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (er landet unter `.claude/worktrees/`, verknüpft `node_modules` fest und kopiert `.husky/_`) und rufen Sie dann `EnterWorktree` mit seinem `path` auf. Übergeben Sie immer die Basis: Ohne sie wählt das Skript den höchsten `release/*` aus, der möglicherweise nicht derjenige ist, der vom Operator bestätigt wurde. Ein Arbeitsbaum, den `EnterWorktree` selbst erstellt, verfügt weder über feste Links noch über Hooks, sodass darin kein Pre-Commit-Gate ausgeführt wird.
 
-- Bestätige den Basis-Branch über `AskUserQuestion` mit dem Operator (Harte Regel Nr. 19), es sei
-  denn, er hat ihn dir bereits genannt.
-- Bevorzuge das native `EnterWorktree`-Tool — es erstellt Worktrees bereits unter
-  `.claude/worktrees/` (dem kanonischen Pfad). Erstelle den Worktree mit dem dokumentierten Befehl
-  `git worktree add` und rufe anschließend `EnterWorktree` mit dessen `path` auf.
+## Subagenten und Git
 
-## Sitzungsübergreifende Sicherheit — Besonderheiten für Claude Code
+Jeder Subagent, der Git (Agent-Tool oder Workflow-Skript) berührt, erhält die harte Regel #22 a's `git stash` ban wörtlich in seiner Eingabeaufforderung — Die aufgezeichnete Wiederholung des Stash-Vorfalls kam durch einen Subagenten.
 
-Die verbindlichen Regeln Nr. 19/Nr. 21/Nr. 22 (in `AGENTS.md`) regeln parallele Sitzungen. Operative Hinweise für diese
-Ausführungsumgebung:
+## Planungsartefakte — Supermächte-Pfadüberschreibungen
 
-- **Übernimm das Verbot von `git stash` wortgetreu in den Prompt jedes Subagenten, der Git verwendet**
-  (Agent-Tool / Workflow-Skripte) — Subagenten erben diese Datei nicht, und der dokumentierte
-  erneute Stash-Vorfall wurde durch einen Subagenten verursacht.
-- Führe vor dem Zusammenführen oder Pushen in einen PR, den du nicht _in dieser Sitzung_ erstellt hast, `git worktree list`
-  aus und prüfe `gh pr view <N> --json state,headRefOid` erneut (verbindliche Regel Nr. 22b).
-- Beende jede Sitzung so, dass sich der Haupt-Checkout auf dem Branch befindet, auf dem er zu Sitzungsbeginn war.
+Superkräftefähigkeiten kündigen Standardeinstellungen unter `docs/superpowers/plans/`, `docs/superpowers/specs/` und `docs/research/` an. Schreiben Sie jedes vor dem Schreiben in sein `_tasks/` Äquivalent in `AGENTS.md` → „Planning & Research Artifacts“ um und schreiben Sie es mit `git -C _tasks …` fest, niemals im Haupt-Repo.
 
-## Superpowers-/Planungsartefakte — Pfadüberschreibungen
+## Scratch-Dateien — `_artifacts/`, nicht `/tmp`
 
-Die Konvention für `_tasks/` ist in `AGENTS.md` → „Planungs- und Rechercheartefakte“ definiert. Die
-Superpowers-Skills werden mit Standardwerten ausgeliefert, die auf `docs/…` verweisen — diese Standardwerte werden **hier
-überschrieben**. Wenn ein Superpowers-Skill einen Pfad wie „gespeichert unter `docs/superpowers/plans/…`“ ankündigt,
-ändere ihn vor dem Schreiben auf das entsprechende `_tasks/…`-Äquivalent:
+Dieses Projekt überschreibt das Sitzungs-Scratchpad (`/tmp/claude-*/…`) des Harness. Schreiben Sie temporäre Dateien, — Exporte, generierte ZIP-Dateien und einmalige Zwischenausgaben — nach `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: einen gitignorierten Root `_*` Pfad, damit der Operator alle Kratzer an einem Ort findet und löscht. Dauerhafte Pläne, Spezifikationen, Recherchen und Übergaben gehen stattdessen an `_tasks/` (harte Regel #23).
 
-| Artefakt (Skill)                           | Standard (NICHT verwenden) | Stattdessen hier speichern                                    |
-| ------------------------------------------ | -------------------------- | ------------------------------------------------------------- |
-| Pläne (`writing-plans`)                    | `docs/superpowers/plans/`  | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Spezifikationen / Design (`brainstorming`) | `docs/superpowers/specs/`  | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Recherche (`deep-research`, ad hoc)        | `docs/research/`           | `_tasks/research/…`                                           |
-| Übergaben (`/handoff`)                     | —                          | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Rote Basis
 
-Commite diese Artefakte innerhalb des `_tasks/`-Repositorys (`git -C _tasks …`), niemals im Haupt-Repository.
-
-## Scratch-/temporäre Dateien — `_artifacts/` statt `/tmp` verwenden
-
-Dieses Projekt überschreibt das standardmäßige Sitzungs-Scratchpad der Ausführungsumgebung (`/tmp/claude-*/…`). Schreibe
-temporäre/Arbeitsdateien — Exporte, generierte ZIP-Dateien, einmalige Zwischenergebnisse und alles, was du
-ansonsten unter `/tmp` ablegen würdest — stattdessen nach `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` ist ein `_*`-Pfad im Stammverzeichnis: bereits von Git ignoriert (`AGENTS.md` → „`_*`-Pfade im Stammverzeichnis“), nur
-  lokal auf dem Datenträger vorhanden und wird niemals versioniert.
-- Grund: Wenn Scratch-Ausgaben innerhalb des Projekts statt unter `/tmp` verbleiben, kann der Bediener
-  alle temporären Dateien problemlos an einem Ort finden und löschen, anstatt sie in flüchtigen,
-  sitzungsspezifischen `/tmp`-Verzeichnissen suchen zu müssen, die verschwinden oder nicht versionierte Dateien ansammeln.
-- Verwechsle dies **nicht** mit `_tasks/` (verbindliche Regel Nr. 23, ein eigenes privates Git-Repository für dauerhafte
-  Pläne/Spezifikationen/Recherchen/Übergaben) — `_artifacts/` ist ausschließlich für verwerfbare Arbeitsdateien bestimmt; nichts
-  hier muss erhalten oder versioniert werden.
-
-## Grüner Basisstand vor dem Öffnen von PRs
-
-Führe vor dem Erstellen eines Branches oder dem Öffnen eines PRs die Prüfung auf einen grünen Basisstand aus (`AGENTS.md` → Git-Workflow →
-„Prüfung auf grünen Basisstand“; Projekt-Skills referenzieren sie als `.agents/skills/_shared/base-green.md`). Ein PR,
-der geöffnet wird, während die Spitze des Basis-Branches rot ist, muss `⚠️ base-red inherited: #<issue>` in seinem Text enthalten. Um
-einen aufgelaufenen roten Zustand (Spitze des Basis-Branches + rote PRs) abzuarbeiten, verwende den Skill `/sweep-reds`.
+Um einen angesammelten roten Zustand (Basisspitze + rot PRs) zu entleeren, verwenden Sie die Fähigkeit `/sweep-reds`.

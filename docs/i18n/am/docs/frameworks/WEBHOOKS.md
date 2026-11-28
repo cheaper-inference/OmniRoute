@@ -4,15 +4,11 @@
 
 ---
 
-> **የእውነት ምንጭ:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **መጨረሻ የተዘመነው:** 2026-06-28 — v3.8.40
+> **የእውነት ምንጭ፡-** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-OmniRoute በመድረክ ክስተቶች ጊዜ HTTP webhooks ሊያስነሳ ይችላል። ከ
-Slack፣ PagerDuty፣ Datadog፣ ውስጣዊ የማንቂያ አገልግሎቶች ወይም ከማንኛውም HTTP ተቀባይ ጋር ለማዋሃድ ይጠቀሙባቸው።
+OmniRoute በመድረክ ዝግጅቶች ላይ HTTP webhooksን ማቃጠል ይችላል። Slack፣ PagerDuty፣ Datadog፣ የውስጥ ማንቂያ አገልግሎቶች፣ ወይም ከማንኛውም HTTP ተቀባይ ጋር ለማዋሃድ ይጠቀሙባቸው።
 
-አሰራጩ እያንዳንዱን ርክክብ በHMAC-SHA256 ይፈርማል፣ ጊዜያዊ
-ውድቀቶች ሲከሰቱ እንደገና ይሞክራል፣ ለእያንዳንዱ webhook የርክክብ ጤንነትን ይከታተላል፣ እና በተደጋጋሚ
-የሚወድቁ endpointsን በራስ-ሰር ያሰናክላል።
+ላኪው እያንዳንዱን መላኪያ በ HMAC-SHA256 ይፈርማል፣ ጊዜያዊ ውድቀቶችን እንደገና ይሞክራል፣ የመላኪያ ጤናን በዌብ መንጠቆ ይከታተላል፣ እና አለመሳካቱን የሚቀጥሉ የመጨረሻ ነጥቦችን በራስሰር ያሰናክላል።
 
 ## የሚደገፉ ክስተቶች
 

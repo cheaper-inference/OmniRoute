@@ -4,18 +4,11 @@
 
 ---
 
-> **ಆವೃತ್ತಿ:** v3.8.51
-> **ಕೊನೆಯ ನವೀಕರಣ:** 2026-06-28
-> **ಉದ್ದೇಶಿತ ಓದುಗರು:** OmniRouteಗೆ ಕೊಡುಗೆ ನೀಡುವ ಅಥವಾ ಅದರ ಮೇಲೆ ಏಕೀಕರಣಗಳನ್ನು ನಿರ್ಮಿಸುವ ಎಂಜಿನಿಯರ್ಗಳು.
+> **ಆವೃತ್ತಿ:** v3.8.51** ಪ್ರೇಕ್ಷಕರು:** ಇಂಜಿನಿಯರ್ಗಳು OmniRoute ಗೆ ಕೊಡುಗೆ ನೀಡುತ್ತಾರೆ ಅಥವಾ ಅದರ ಮೇಲೆ ಏಕೀಕರಣಗಳನ್ನು ನಿರ್ಮಿಸುತ್ತಾರೆ.
 >
-> ಉನ್ನತ ಮಟ್ಟದ ಆರ್ಕಿಟೆಕ್ಚರ್ ರೇಖಾಚಿತ್ರಗಳು ಮತ್ತು ಪ್ರತಿಯೊಂದು ಉಪವ್ಯವಸ್ಥೆಯ ಹಿಂದಿನ ತಾರ್ಕಿಕ ವಿವರಣೆಗಾಗಿ,
-> [ARCHITECTURE.md](./ARCHITECTURE.md) ಓದಿ. ಪ್ರತ್ಯೇಕ ಉಪವ್ಯವಸ್ಥೆಗಳ
-> (Auto Combo, MCP server, A2A server, Skills, Memory, Cloud Agents, Resilience,
-> Compression, ಇತ್ಯಾದಿ) ಆಳವಾದ ವಿವರಗಳಿಗಾಗಿ, ಈ `docs/` ಡೈರೆಕ್ಟರಿಯಲ್ಲಿರುವ ಅವುಗಳಿಗೆ ಮೀಸಲಾದ ಫೈಲ್ಗಳನ್ನು ನೋಡಿ.
+> ಉನ್ನತ ಮಟ್ಟದ ಆರ್ಕಿಟೆಕ್ಚರ್ ರೇಖಾಚಿತ್ರಗಳು ಮತ್ತು ಪ್ರತಿ ಉಪವ್ಯವಸ್ಥೆಯ ಹಿಂದಿನ ತಾರ್ಕಿಕತೆಗಾಗಿ, [ARCHITECTURE.md](./ARCHITECTURE.md) ಓದಿ. ಪ್ರತ್ಯೇಕ ಉಪವ್ಯವಸ್ಥೆಗಳಲ್ಲಿ ಆಳವಾದ ಡೈವ್ಗಳಿಗಾಗಿ (ಆಟೋ ಕಾಂಬೊ, MCP ಸರ್ವರ್, A2A ಸರ್ವರ್, ಕೌಶಲ್ಯಗಳು, ಮೆಮೊರಿ, ಕ್ಲೌಡ್ ಏಜೆಂಟ್ಗಳು, ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ, ಸಂಕೋಚನ, ಇತ್ಯಾದಿ.) ಈ `docs/` ಡೈರೆಕ್ಟರಿಯಲ್ಲಿ ಅವರ ಮೀಸಲಾದ ಫೈಲ್ಗಳನ್ನು ನೋಡಿ.
 
-ಈ ಫೈಲ್ **ಇಂದು ರೆಪೊಸಿಟರಿಯಲ್ಲಿ ಏನಿದೆ** ಎಂಬುದನ್ನು ವಿವರಿಸುತ್ತದೆ; ಇದರಿಂದ ಹೊಸ ಎಂಜಿನಿಯರ್
-ಟ್ರೀನಲ್ಲಿ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಬಹುದು, ರನ್ಟೈಮ್ ಲೇಯರಿಂಗ್ ಅನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬಹುದು ಮತ್ತು ಹೊಸ ಮಾಡ್ಯೂಲ್ಗಳನ್ನು
-ರಚಿಸದೆಯೇ ಕೋಡ್ ಅನ್ನು ಎಲ್ಲಿ ಸೇರಿಸಬೇಕು ಎಂಬುದನ್ನು ತಿಳಿದುಕೊಳ್ಳಬಹುದು.
+ಈ ಫೈಲ್ ವಿವರಿಸುತ್ತದೆ** ಇಂದು ರೆಪೊಸಿಟರಿಯಲ್ಲಿ ಏನು ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ** ಇದರಿಂದ ಹೊಸ ಇಂಜಿನಿಯರ್ ಮರವನ್ನು ನ್ಯಾವಿಗೇಟ್ ಮಾಡಬಹುದು, ರನ್ಟೈಮ್ ಲೇಯರಿಂಗ್ ಅನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬಹುದು ಮತ್ತು ಹೊಸ ಮಾಡ್ಯೂಲ್ಗಳನ್ನು ಆವಿಷ್ಕರಿಸದೆಯೇ ಕೋಡ್ ಅನ್ನು ಎಲ್ಲಿ ಸೇರಿಸಬೇಕೆಂದು ತಿಳಿಯಬಹುದು.
 
 ---
 
@@ -566,35 +559,14 @@ bin/
 
 ## 8. `scripts/`
 
-ಉದ್ದೇಶದ ಆಧಾರದ ಮೇಲೆ 6 ಉಪಫೋಲ್ಡರ್ಗಳಾಗಿ ಸಂಘಟಿಸಲಾಗಿದೆ.
+ಉದ್ದೇಶದಿಂದ 6 ಉಪ ಫೋಲ್ಡರ್ಗಳಾಗಿ ಆಯೋಜಿಸಲಾಗಿದೆ.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, ಜೊತೆಗೆ ಓದಲು-ಮಾತ್ರವಾದ PR ಮೇಲ್ವಿಚಾರಣಾ ಸಹಾಯಕಗಳು
-  `ci-discriminate.sh` (ಒಂದು ಉಲ್ಲೇಖ PR ಅಥವಾ base-red ಸಮಸ್ಯೆಯೊಂದಿಗೆ ಹೋಲಿಸಿ, PRನ ವಿಫಲವಾಗುತ್ತಿರುವ ಪರಿಶೀಲನೆಗಳ ಗುರುತುಗಳನ್ನು ಸ್ವಂತ / ಆನುವಂಶಿಕ /
-  ಅಜ್ಞಾತ ಎಂದು ವಿಂಗಡಿಸುತ್ತದೆ) ಮತ್ತು `audit-worktree.sh`
-  (ಡರ್ಟಿ ಫೈಲ್ಗಳು, ಸಂರಕ್ಷಿತ ಸರ್ಫೇಸ್ಗಳು, ತೆಗೆದುಹಾಕಿದ assertಗಳು, suppression ಎಣಿಕೆಗಳು, ಉಳಿದಿರುವ
-  ತಾತ್ಕಾಲಿಕ tsconfigಗಳು, PR head ಮತ್ತು ಸ್ಥಳೀಯ HEAD ನಡುವಿನ ಹೋಲಿಕೆ — ಕೆಲಸಗಾರನ PR ಅನ್ನು ಸ್ವೀಕರಿಸುವ ಮೊದಲು).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, ಜೊತೆಗೆ ಓದಲು-ಮಾತ್ರ PR PR ಉಲ್ಲೇಖ `ci-discriminate.sh` ಅಥವಾ ಮೂಲ-ಕೆಂಪು ಸಮಸ್ಯೆಯ ವಿರುದ್ಧ ಸ್ವಂತ/ಆನುವಂಶಿಕ/ಅಜ್ಞಾತ ಸಹಿಯನ್ನು ವಿಫಲವಾಗಿದೆ- PR ಮತ್ತು `audit-worktree.sh` (ಕೊಳಕು ಫೈಲ್ಗಳು, ಸಂರಕ್ಷಿತ ಮೇಲ್ಮೈಗಳು, ತೆಗೆದುಹಾಕಲಾದ ಸಮರ್ಥನೆಗಳು, ನಿಗ್ರಹ ಎಣಿಕೆಗಳು, ಉಳಿದ tmp tsconfigs, PR ಹೆಡ್ vs ಸ್ಥಳೀಯ HEAD — PR ಸ್ವೀಕರಿಸುವ ಮೊದಲು).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` ಫ್ಲ್ಯಾಗ್ಗಳ ಆವೃತ್ತಿಗಳು ಸ್ಪಷ್ಟವಾಗಿ OmniRoute ಗೆ (3.6.x ಮತ್ತು ಹಿಂದಿನದು) ಕಾರಣವಾಗಿವೆ. ಚೆಕ್ ದಿನಾಂಕಗಳನ್ನು ನಿರ್ಲಕ್ಷಿಸುತ್ತದೆ.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

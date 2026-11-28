@@ -4,13 +4,7 @@
 
 ---
 
-> **सत्याचा अधिकृत स्रोत:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, आणि `open-sse/utils/error.ts` मधील सार्वजनिक builders
-> **चाचण्या:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **शेवटचे अद्यतन:** 2026-09-02 — v3.8.51
-> **प्रेक्षक:** error responses हाताळणारे कोणतेही अभियंते (HTTP routes, SSE streams, executors, MCP handlers).
-> **स्थिती:** client ला error message परत करणाऱ्या प्रत्येक code path साठी **अनिवार्य**.
+> **सत्याचा स्रोत:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, आणि `open-sse/utils/error.ts` मधील सार्वजनिक बांधकाम व्यावसायिक** चाचण्या:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** प्रेक्षक:** कोणताही अभियंता टचिंग एरर प्रतिसाद (HTTP मार्ग, SSE प्रवाह, एक्झिक्युटर्स, MCP हँडलर).** स्थिती:****MANDATORY** क्लायंटला एरर मेसेज परत करणाऱ्या प्रत्येक कोड पाथसाठी.
 
 ## हे का अस्तित्वात आहे
 

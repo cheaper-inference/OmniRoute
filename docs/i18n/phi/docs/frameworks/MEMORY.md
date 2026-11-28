@@ -4,30 +4,13 @@
 
 ---
 
-> **Pinag-iisang sanggunian:** `src/lib/memory/` at `src/app/api/memory/`
-> **Huling na-update:** 2026-06-28 — v3.8.40 (naka-off bilang default + paghahabol sa int8 quantization)
+> **Pinagmulan ng katotohanan:** `src/lib/memory/` at `src/app/api/memory/`
 
-Nagbibigay ang OmniRoute ng persistent na memorya ng pag-uusap na tinutukoy ayon sa API key (at
-opsyonal na session id). Awtomatikong kinukuha ang mga memorya mula sa mga tugon ng LLM
-sa pamamagitan ng magaang regex pattern matching at muling ini-inject sa mga susunod na
-kahilingan bilang nangungunang system message (o unang user message para sa mga provider na
-tumatanggi sa system role).
+OmniRoute ay nagbibigay ng patuloy na memorya sa pakikipag-usap na naka-key ng API key (at opsyonal na session id). Awtomatikong kinukuha ang mga alaala mula sa mga tugon LLM sa pamamagitan ng lightweight regex pattern matching at ini-inject pabalik sa mga susunod na kahilingan bilang isang nangungunang mensahe ng system (o unang mensahe ng user para sa mga provider na tumatanggi sa papel ng system).
 
-> **Naka-OFF ang memorya bilang default (v3.8.30+).** Ang `DEFAULT_MEMORY_SETTINGS.enabled` ay
-> `false` na ngayon (`src/lib/memory/settings.ts`). Kapag pinagana ang memorya, nag-i-inject ito ng hanggang
-> `maxTokens` (~2k) ng nakuhang konteksto sa **bawat** chat request, na
-> sinisingil — isang di-inaasahang gastos para sa mga bagong installation at para sa mga client na namamahala ng
-> sarili nilang konteksto. Tahasang mag-opt in sa ilalim ng **Settings → Memory** (nagpapakita ang
-> `MemorySkillsTab` ng babala tungkol sa gastos sa token kapag pinagana ang memorya).
-> Maaaring mag-opt out ang isang client para sa isang kahilingan gamit ang `x-omniroute-no-memory`
-> request header (`true`/`1`/`yes`) — tingnan ang talahanayan ng request-header sa
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Itinatakda ng isang no-memory request ang
-> `memoryOwnerId = null`, na nagdi-disable sa **parehong** pag-inject ng memorya at skill para
-> sa kahilingang iyon (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Ang memory ay OFF bilang default (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` ay `false` (`src/lib/memory/settings.ts`). Ang pagpapagana ng memorya ay nag-iinject ng hanggang `maxTokens` (~ 2k) ng nakuhang konteksto sa** bawat** kahilingan sa chat, na sinisingil ng — na isang nakakagulat na halaga para sa mga bagong pag-install at para sa mga kliyenteng namamahala sa sarili nilang konteksto. Mag-opt in nang tahasan sa ilalim** Mga Setting → Memory** (ang `MemorySkillsTab` ay nagpapakita ng callout ng babala sa halaga ng token kapag naka-enable ang memory). Ang isang kliyente ay maaaring mag-opt out ng isang kahilingan gamit ang `x-omniroute-no-memory` request header (`true`/`1`/`yes`) — tingnan ang request-header table sa [API_REFERENCE.md](../reference/API_REFERENCE.md). Ang kahilingang walang memorya ay nagtatakda ng `memoryOwnerId = null`, na hindi pinapagana** pareho** memory at skill injection para sa kahilingang iyon (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Ang memorya ay **nakasaklaw sa bawat API key**, hindi sa bawat user — ang bawat kahilingang na-authenticate
-gamit ang parehong API key ay gumagamit ng parehong memory pool, na may opsyonal na karagdagang
-pagsasaklaw ayon sa `sessionId`.
+Ang memorya ay** saklaw sa bawat API key** , hindi bawat user — bawat kahilingang na-authenticate gamit ang parehong API key ay nagbabahagi ng parehong memory pool, na may opsyonal na karagdagang saklaw ng `sessionId`.
 
 ## Arkitektura
 
@@ -335,25 +318,15 @@ at ang scope ay isa sa `session`, `apiKey`, o `global`. Ang default na scope mul
 
 ## Pagkuha ng Katotohanan (`extraction.ts`)
 
-Ang extraction ay **nakabatay sa regex**, hindi sa LLM — tumatakbo ito sa loob ng proseso gamit ang
-`setImmediate()` kaya hindi nito kailanman bina-block ang response stream:
+Ang pagkuha ay** nakabatay sa regex** , hindi — na nakabatay sa LLM ito ay tumatakbo sa proseso sa `setImmediate()` kaya hindi nito hinaharangan ang stream ng tugon:
 
-- **Mga pattern ng kagustuhan** → `MemoryType.FACTUAL`
-  (hal. `Mas gusto ko ang …`, `Talagang gusto ko ang …`, `paborito ko ang …`, `ayaw ko sa …`)
-- **Mga pattern ng desisyon** → `MemoryType.EPISODIC`
-  (hal. `Gagamitin ko ang …`, `Pinili ko ang …`, `Nagpasya ako sa …`, `Gagamitin ko na ang …`)
-- **Mga pattern ng gawi** → `MemoryType.FACTUAL`
-  (hal. `Karaniwan kong …`, `Palagi akong …`, `Madalas akong …`)
+- **Mga pattern ng kagustuhan** → `MemoryType.FACTUAL` (hal. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+- **Mga pattern ng desisyon** → `MemoryType.EPISODIC` (hal. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+- **Mga pattern ng pattern** → `MemoryType.FACTUAL` (hal. `I usually …`, `I always …`, `I tend to …`)
 
-Ang bawat tugma ay nililinis (`trim`, pagsasama-sama ng whitespace, nililimitahan sa 500 character),
-inaalisan ng mga duplicate sa loob ng batch sa pamamagitan ng matatag na `factKey(category, content)`, at
-iniimbak sa pamamagitan ng `createMemory()` na may metadata na
-`{category, extractedAt, source: "llm_response"}`. Nililimitahan ang input text sa
-64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — kapag mas mahaba, ang **hulihang bahagi** ng text
-ang ginagamit upang palaging maisama ang pinakabagong content ng assistant.
+Ang bawat tugma ay na-sanitize (`trim`, whitespace-collapse, nilimitahan sa 500 chars), na-deduplicate sa loob ng batch sa pamamagitan ng stable `factKey(category, content)`, at iniimbak sa pamamagitan ng `createMemory()` na may metadata `{category, extractedAt, source: "llm_response"}`. Ang input text ay nililimitahan sa 64 KiB (`MAX_EXTRACTION_TEXT_LENGTH`) — kapag mas matagal, ang** buntot** ng teksto ay ginagamit upang ang pinakabagong nilalaman ng katulong ay palaging lumalahok.
 
-Ang `extractFactsFromText(text)` ay ini-export para sa mga test at ibinabalik nito ang mga nakabalangkas
-na katotohanan nang hindi iniimbak ang mga ito.
+`extractFactsFromText(text)` ay na-export para sa mga pagsubok at ibinabalik ang mga nakabalangkas na katotohanan nang hindi iniimbak ang mga ito.
 
 ## Retrieval (`retrieval.ts`)
 

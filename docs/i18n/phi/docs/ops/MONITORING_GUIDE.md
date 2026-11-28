@@ -104,29 +104,29 @@ Para sa bawat combo:
 
 ## Health Check API
 
-Naglalantad ang OmniRoute ng **dalawang** HTTP health endpoint. Hindi maaaring pagpalitin ang mga ito para sa mga orchestrator.
+inilalantad ni OmniRoute** dalawa** HTTP kalusugan surface. Hindi sila mapapalitan ng mga orkestra.
 
-| Path                         | Layunin                                                             | Bigat                                        | Gamitin para sa                                                                       |
-| ---------------------------- | ------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `GET /healthz`               | Lifecycle liveness/readiness (`ok` / `starting` / `stopping`)       | Magaan (phase flag lamang)                   | Kubernetes **readiness**; maluwag na **liveness** kung kailangan mong gumamit ng HTTP |
-| `GET /api/monitoring/health` | Masusing buod ng system + provider (DB, heap, bilang sa catalog, …) | Mabigat (sabayang gawain sa DB / monitoring) | Mga dashboard, masusing blackbox check, built-in healthcheck ng Docker                |
+| Daan                         | Layunin                                                                | Timbang                                     | Gamitin para sa                                                                    |
+| ---------------------------- | ---------------------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `GET /healthz`               | Lifecycle liveness/readiness (`ok` / `starting` / `stopping`)          | Trivial (phase flag lang)                   | Kubernetes** kahandaan** ; malambot** kabuhayan** kung kailangan mong gumamit HTTP |
+| `GET /api/monitoring/health` | Buod ng provider ng deep system + (DB, heap, mga bilang ng catalog, …) | Mabigat (i-sync DB / gawain sa pagsubaybay) | Mga dashboard, blackbox deep check, built-in na healthcheck ng Docker              |
 
-> **Tandaan:** Ang mga provider health matrix, isyu sa autopilot, quota monitor, token health, at detalye ng latency na lampas sa `/api/monitoring/health` ay makukuha sa pamamagitan ng **MCP tool** na `observability_snapshot` o ng mga pahina ng **dashboard** — walang nakalaang REST route para sa mga iyon.
+> **Tandaan:** Ang mga health matrice ng provider, mga isyu sa autopilot, mga monitor ng quota, kalusugan ng token, at detalye ng latency na lampas sa `/api/monitoring/health` ay available sa pamamagitan ng**MCP tool** `observability_snapshot` o ang** dashboard** mga pahina — walang nakatalagang mga ruta REST para sa mga iyon.
 
-Gumagana ang parehong route sa **iisang Node event loop** na ginagamit sa paghawak ng mga request. Maaaring maantala ng CPU-bound na path (malaking gawain sa catalog ng `GET /v1/models`, long-context compression / token counting) ang **lahat** ng HTTP handler, kabilang ang `/healthz`. Abala ang event loop ≠ patay ang proseso. Mas mainam na ayusin ang prosesong umuubos ng resource; binabawasan lamang ng pagsasaayos ng probe ang mga maling pagpatay sa proseso.
+Ang parehong ruta ay tumatakbo sa** parehong Node event loop** bilang paghawak ng kahilingan. Maaaring maantala ang isang CPU-bound path (malaking `GET /v1/models` catalog work, long-context compression / token counting)** lahat** mga humahawak HTTP, kasama ang `/healthz`. Event-loop busy ≠ process patay. Mas gusto ang pag-aayos ng baboy; Ang probe tuning ay binabawasan lamang ang mga maling pagpatay.
 
-### Magaan na probe para sa orchestrator
+### Magaan na probe ng orkestra
 
 ```bash
 GET /healthz
-# o HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + body na `ok` kapag handa na ang lifecycle phase ng server
-- **503** + `starting` / `stopping` habang nagsisimula o nagsasara
-- Implementasyon: `src/app/healthz/route.ts` (walang DB ping)
+- **200** + body `ok` kapag handa na ang yugto ng lifecycle ng server
+- **503** + `starting` / `stopping` sa panahon ng boot o shutdown
+- Pagpapatupad: `src/app/healthz/route.ts` (walang DB ping)
 
-### Kalusugan ng System (masusi)
+### Kalusugan ng System (malalim)
 
 ```bash
 GET /api/monitoring/health
@@ -158,41 +158,33 @@ Tugon:
 
 #### `credentialHealth`: probe-cache kumpara sa SQLite `test_status`
 
-Ang `GET /api/monitoring/health` → `credentialHealth` ay ang **in-memory probe-cache
-gauge**, hindi isang live dump ng `provider_connections.test_status`. Pagkatapos ng #12532,
-`getCachedCredentialHealthSummary()` lamang ang binabasa ng request path; nire-refresh ng mga
-background probe ang cache sa labas ng event loop.
+`GET /api/monitoring/health` → `credentialHealth` ay ang** in-memory probe-cache gauge** , hindi isang live dump ng `provider_connections.test_status`. Pagkatapos #12532 ang path ng kahilingan ay nagbabasa `getCachedCredentialHealthSummary()` lamang; ang mga pagsisiyasat sa background ay nagre-refresh ng cache mula sa loop ng kaganapan.
 
-| Layer                         | Saan                                                                  | Ano ang ibig sabihin nito                                                                                                                                                                                                                               |
-| ----------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Probe-cache gauge             | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Mga pinakahuling resulta ng credential-health probe na nananatili pa sa process memory. Palaging `probe-cache` ang `source`.                                                                                                                            |
-| Detalye ng nabigong koneksyon | `credentialHealth.failedConnections`                                  | Makikita **lamang kapag `failed > 0`**. Limitadong listahan ng mga cache row na may `status=error` (`connectionId`, `status`, na-sanitize na `lastError` / `lastErrorType`). Itinatakda ang `failedOmitted` kapag umabot na sa limitasyon ang listahan. |
-| SQLite sticky status          | `credentialHealth.staleDbNonOkCount`                                  | Bilang ng mga **aktibong** (`is_active=1`) connection row na ang naka-persist na `test_status` ay kilalang hindi ok (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                                                  |
+| Layer                         | saan                                                                  | Ano ang ibig sabihin nito                                                                                                                                                                                                          |
+| ----------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Probe-cache gauge             | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Ang huling credential-health probe na mga resulta ay hawak pa rin sa memorya ng proseso. `source` ay palaging `probe-cache`.                                                                                                       |
+| Nabigong detalye ng koneksyon | `credentialHealth.failedConnections`                                  | Present** kapag `failed > 0` lang** . Bounded na listahan ng mga cache row na may `status=error` (`connectionId`, `status`, sanitized `lastError` / `lastErrorType`). itinakda ang `failedOmitted` kapag nilimitahan ang listahan. |
+| SQLite sticky status          | `credentialHealth.staleDbNonOkCount`                                  | Bilang ng** aktibo** (`is_active=1`) na mga hilera ng koneksyon na ang patuloy na `test_status` ay kilalang hindi ok (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                            |
 
-Maaaring sadyang hindi magkatugma ang dalawang layer:
+Ang dalawang layer ay maaaring hindi magkasundo sa layunin:
 
-- Gauge na `failed=0` habang `staleDbNonOkCount>0` — mayroon pa ring sticky
-  `test_status` ang SQLite (halimbawa, `expired` o `credits_exhausted`) na hindi
-  binibilang bilang `status=error` ng pinakabagong probe-cache snapshot.
-- Gauge na `failed>0` habang mukhang healthy ang SQLite — nabigo ang isang kamakailang probe at
-  naka-cache ito; hindi pa naa-update ang DB row, o na-clear ito kalaunan.
+- Gauge `failed=0` habang `staleDbNonOkCount>0` — SQLite ay mayroon pa ring malagkit na `test_status` (halimbawa `expired` o `credits_exhausted`) na ang pinakabagong probe-cache snapshot ay hindi binibilang bilang `status=error`.
+- Sukatin `failed>0` habang SQLite ay mukhang malusog — isang kamakailang probe ay nabigo at naka-cache; ang DB row ay hindi na-update, o na-clear sa ibang pagkakataon.
 
-Huwag mag-alerto batay lamang sa `provider_connections.test_status` kapag sini-scrape ang
-endpoint na ito. Gamitin ang `failed` + `failedConnections` para sa mga kasalukuyang probe failure, at ang
-`staleDbNonOkCount` kapag kailangan mo ang naka-persist na bilang ng sticky status.
+Huwag alerto lamang sa `provider_connections.test_status` kapag kinukuskos ang endpoint na ito. Gamitin `failed` + `failedConnections` para sa mga live na probe failure, at `staleDbNonOkCount` kapag kailangan mo ng patuloy na bilang ng malagkit na katayuan.
 
-### Mga rekomendasyon sa Kubernetes probe
+### Mga rekomendasyon sa pagsisiyasat ng Kubernetes
 
-Ang OmniRoute ay isang **iisang Node process** (isang event loop). Tina-target ng karaniwang Docker `HEALTHCHECK` ang magaan na `/healthz`. **Masyadong mabigat** ang `/api/monitoring/health` para sa mga agwat ng kubelet liveness.
+OmniRoute ay a** solong proseso ng Node** (isang loop ng kaganapan). Ang stock Docker `HEALTHCHECK` ay nagta-target ng magaan `/healthz`. `/api/monitoring/health` ay** masyadong mabigat** para sa kubelet liveness interval.
 
-| Probe           | Inirerekomendang target                                                               | Mga tala                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Startup**     | HTTP `GET /healthz` na may mahabang `failureThreshold` (o malaking `startPeriod`)     | Maaaring lumampas nang ilang segundo ang cold start + SQLite migration                                                                                                                                                                                                                                                                                                                                                     |
-| **Readiness**   | HTTP `GET /healthz`                                                                   | Lifecycle na `ok` / `starting` / `stopping` (200 vs 503). Pabago-bago pa rin ito kung bina-block ng CPU ang loop. Ang **200 na tumatagal nang ilang segundo ay hindi healthy** (#10303) — nangangahulugan itong naubusan ng oras ang event loop bago tumakbo ang 3-byte handler                                                                                                                                            |
-| **Liveness**    | HTTP `GET /livez`, **o TCP** sa pangunahing service port (`PORT`, default na `20128`) | Para lamang sa process-alive ang `/livez` (palaging 200 kung tumatakbo ang handler). Nakikibahagi pa rin ito sa event loop — busy ≠ dead, at hindi nito nade-detect ang event-loop starvation (#10303) nang mas mahusay kaysa sa TCP. Mas piliin ang **TCP** kung nagta-timeout ang mga HTTP probe sa ilalim ng catalog/compression load; **huwag** patayin ang pod dahil sa maiikling event-loop stall sa alinmang paraan |
-| **Deep health** | `GET /api/monitoring/health` mula sa isang external checker                           | Hindi para sa kubelet `livenessProbe` / mahigpit na `readinessProbe`                                                                                                                                                                                                                                                                                                                                                       |
+| Probe                    | Inirerekomendang target                                                                | Mga Tala                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Startup**              | HTTP `GET /healthz` na may mahabang `failureThreshold` (o malaking `startPeriod`)      | Ang malamig na simula ng paglipat ng + SQLite ay maaaring lumampas sa ilang segundo                                                                                                                                                                                                                                                                                                  |
+| **Kahandaan**            | HTTP `GET /healthz`                                                                    | Lifecycle `ok` / `starting` / `stopping` (200 vs 503). Nag-flap pa rin kung ang loop ay naka-block sa CPU. A** 200 sa maraming segundo ay hindi malusog** (#10303) — nangangahulugan ito na ang event loop ay nagutom bago tumakbo ang 3-byte na handler                                                                                                                             |
+| **Kasiglahan**           | HTTP `GET /livez`,** o TCP** sa pangunahing port ng serbisyo (`PORT`, default `20128`) | `/livez` ay process-alive lang (laging 200 kung tatakbo ang handler). Ibinabahagi pa rin nito ang event loop — busy ≠ dead, at hindi nito nakikita ang event-loop starvation (#10303) na mas mahusay kaysa sa TCP. Mas gusto**TCP** kung HTTP probe time out sa ilalim ng catalog/compression load; gawin** hindi** patayin ang pod sa mga short event-loop stall sa alinmang paraan |
+| **Malalim na kalusugan** | `GET /api/monitoring/health` mula sa isang panlabas na checker                         | Hindi para sa kubelet `livenessProbe` / tight `readinessProbe`                                                                                                                                                                                                                                                                                                                       |
 
-Halimbawang anyo (i-adjust ang mga threshold ayon sa iyong cold-start at compression load):
+Halimbawang hugis (ayusin ang mga threshold sa iyong cold-start at compression load):
 
 ```yaml
 ports:
@@ -218,21 +210,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Sa event-loop stall, maaari pa ring mag-timeout ang HTTP /livez. Ang TCP ang
-  # mas konserbatibong alternatibo:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-**Huwag** ituro ang kubelet **liveness** sa `/api/monitoring/health`. Gumagawa ang path na iyon ng aktuwal na DB/monitoring work at magbibigay ng false positive kapag may load.
+**huwag** point kubelet** kabuhayan** sa `/api/monitoring/health`. Gumagana ang landas na iyon ng totoong DB/monitoring at magiging false-positive sa ilalim ng load.
 
-Kaugnay: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (mga probe habang busy ang event loop), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (catalog pricing hog), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (compression token-count hog).
+Kaugnay: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (probe habang abala ang event loop), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (catalog pricing hog), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (compression token-count hog).
 
-### systemd watchdog (naka-freeze na event loop)
+### systemd watchdog (frozen event loop)
 
-Sa isang systemd host, ipinapaalam ng OmniRoute sa service manager kapag handa na ito at patuloy itong nagpi-ping, upang patayin at i-restart ang isang server na na-stuck ang event loop sa halip na manatiling tumatakbo ngunit tahimik. Nagmumula ang mga ping sa sariling event loop ng server: kapag na-block ito, humihinto ang mga ito, at nire-restart ng systemd ang service kapag lumipas ang `WatchdogSec` nang walang natatanggap na ping.
+Sa isang systemd host, sasabihin ng OmniRoute sa tagapamahala ng serbisyo kapag handa na ito at patuloy itong ipi-ping, kaya ang isang server na ang loop ng kaganapan ay natigil ay papatayin at magre-restart sa halip na manatiling gising at tahimik. Ang mga ping ay nagmumula sa sariling event loop ng server: kapag nag-block ito, humihinto sila, at ire-restart ng systemd ang serbisyo sa sandaling lumipas `WatchdogSec` na wala nito.
 
-Ang [`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) ay nagsusulat na ng user unit na mayroon nito. Ang unit na ikaw mismo ang gumawa (na may default na `Type=simple`) ay walang watchdog, kaya idagdag ang mga linyang ito sa seksyon nitong `[Service]`:
+Nagsusulat na [`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) ng unit ng user gamit ito. Ang isang yunit na ikaw mismo ang sumulat (ang default `Type=simple`) ay hindi nakakakuha ng asong tagapagbantay, kaya idagdag ang mga linyang ito sa `[Service]` na seksyon nito:
 
 ```ini
 [Service]
@@ -242,34 +234,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-Itinatakda ng nabuong unit ang `Restart=on-failure`, kaya idagdag din ang linyang iyon — kung wala ito, papatayin lamang ng watchdog ang na-stuck na service sa halip na i-restart ito.
+Itinatakda ng nabuong unit `Restart=on-failure`, kaya idagdag din ang linyang iyon — kung wala ito pinapatay lang ng watchdog ang natigil na serbisyo sa halip na i-restart ito.
 
-- `Type=notify`: itinuturing na "started" ang service kapag nagpadala ang server ng `READY=1`, hindi kapag nag-fork ang process. Nililimitahan ng `TimeoutStartSec` ang mabagal na pagsisimula.
-- `NotifyAccess=all`: ipinapadala ang mga ping ng server process, na isang child ng `omniroute serve` supervisor.
-- `WatchdogSec`: ipinapadala ang mga ping kada 60 segundo, kaya gumamit ng **120 o higit pa**. Ire-restart ng mas mabababang value ang isang healthy na server.
-- Patakbuhin ang `omniroute serve` sa foreground. Inihihiwalay ng `--daemon` ang server mula sa cgroup ng unit at hindi kailanman nakukumpleto ang notify handshake.
+- `Type=notify`: ang serbisyo ay "nagsisimula" kapag ang server ay nagpadala `READY=1`, hindi kapag ang proseso ay huminto. Binibigyan `TimeoutStartSec` ang mabagal na pagsisimula.
+- `NotifyAccess=all`: ang mga ping ay ipinadala ng proseso ng server, na isang anak ng superbisor `omniroute serve`.
+- `WatchdogSec`: lumalabas ang mga ping tuwing 60 segundo, kaya gamitin** 120 o higit pa** . Ang mas maliliit na halaga ay magre-restart ng isang malusog na server.
+- Patakbuhin `omniroute serve` sa harapan. Inalis `--daemon` ang server mula sa cgroup ng unit at hindi natatapos ang notify handshake.
 
-Tiyaking aktibo ito pagkatapos ng restart:
+Suriin kung ito ay aktibo pagkatapos ng pag-restart:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-Ipinapakita ng `WatchdogUSec` ang naka-configure na delay at umuusad kada minuto ang `WatchdogTimestamp`. Itinatala bilang `Result=watchdog` ang restart na dulot ng watchdog. Upang i-off ang mga ping habang pinananatili ang unit sa kasalukuyang anyo nito, itakda ang `OMNIROUTE_DISABLE_SD_NOTIFY=1`; kapag walang `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows), walang ipinapadala.
+ipinapakita `WatchdogUSec` ang naka-configure na pagkaantala at `WatchdogTimestamp` ay sumusulong bawat minuto. Ang pag-restart na dulot ng watchdog ay naitala bilang `Result=watchdog`. Upang patayin ang mga ping habang pinapanatili ang unit kung ano ito, itakda ang `OMNIROUTE_DISABLE_SD_NOTIFY=1`; walang `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) walang ipinapadala.
 
-Sinusuri lamang ng watchdog kung patuloy na tumatakbo ang event loop. Hindi nire-restart ang isang server na mabagal ngunit patuloy pa ring umiikot.
+Tinitingnan lamang ng asong tagapagbantay kung patuloy na tumatakbo ang loop ng kaganapan. Ang isang server na mabagal ngunit lumiliko pa rin ay hindi na-restart.
 
-### Opsyonal na request-path work (memory, skills, token refresh)
+### Opsyonal na kahilingan-path work (memorya, kasanayan, pag-refresh ng token)
 
-Ang pagkuha ng memory, skills injection, at pag-refresh ng OAuth token ay magkakasalo sa **pangunahing Node event loop** kasama ng `/healthz`. Mga feature na maaaring i-toggle sa dashboard ang mga ito (`memoryEnabled`, `skillsEnabled`), at hindi isang worker pool. Tingnan ang [Environment — gastos sa event loop](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Memory extraction, skills injection, at OAuth token refresh ibahagi ang** pangunahing Node event loop** may `/healthz`. Ang mga ito ay mga feature ng dashboard-toggle (`memoryEnabled`, `skillsEnabled`), hindi isang worker pool. Tingnan [ang Environment — event-loop cost](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
-### Kalagayan ng Provider
+### Kalusugan ng Provider
 
-> **Walang REST endpoint.** Available ang data tungkol sa kalagayan ng provider sa pamamagitan ng MCP tool na `observability_snapshot` o sa dashboard page na `/dashboard/providers`.
+> **Walang REST endpoint.** Available ang data ng kalusugan ng provider sa pamamagitan ng MCP tool `observability_snapshot` o ang dashboard `/dashboard/providers` page.
 
-### Mga Detalye ng Provider
+### Detalye ng Provider
 
-> **Walang REST endpoint.** Available ang mga detalye para sa bawat provider sa dashboard page na `/dashboard/providers`.
+> **Walang REST endpoint.** Available ang detalye ng bawat provider sa pamamagitan ng dashboard `/dashboard/providers` page.
 
 ---
 

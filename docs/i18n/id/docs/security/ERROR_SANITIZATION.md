@@ -4,13 +4,7 @@
 
 ---
 
-> **Sumber acuan:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, dan builder publik di `open-sse/utils/error.ts`
-> **Pengujian:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Terakhir diperbarui:** 2026-09-02 — v3.8.51
-> **Audiens:** Setiap engineer yang menangani respons error (route HTTP, stream SSE, eksekutor, handler MCP).
-> **Status:** **WAJIB** untuk setiap jalur kode yang mengembalikan pesan error kepada klien.
+> **Sumber kebenaran:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, dan pembangun publik di `open-sse/utils/error.ts`** Tes:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Hadirin:** Insinyur mana pun yang menyentuh respons kesalahan (rute HTTP, aliran SSE, pelaksana, penangan MCP ).** Status:****MANDATORY** untuk setiap jalur kode yang mengembalikan pesan kesalahan ke klien.
 
 ## Mengapa ini diperlukan
 

@@ -93,52 +93,30 @@ ruting eller modellvalg — se det separate samtykket nedenfor.
 
 ---
 
-## Datasynkronisering er et SEPARAT samtykke — personvernløftet
+## Datasynkronisering er en SEPARATE -opt-in — personvernløftet
 
-Å slå på `RADAR_ENABLED` låser bare opp brukergrensesnittet. Synkronisering av feeden krever et annet,
-uavhengig samtykke lagret i `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migrering `136_radar_cache_settings.sql`). `syncRadar()` kontrollerer flagget _og_ samtykket
-før det utfører et nettverkskall:
+Å slå på `RADAR_ENABLED` låser bare opp UI. Synkronisering av feeden krever en andre, uavhengig opt-in lagret i `radar_settings.opt_in` (`src/lib/db/radar.ts`, migration `136_radar_cache_settings.sql`). `syncRadar()` sjekker flagget _og_ opt-in før du foretar et nettverksanrop:
 
 ```
-Flagg av       → { status: "disabled" }   — ingen nettverkskall
-Samtykke false → { status: "opt_out" }    — ingen nettverkskall
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Når begge er slått på, er synkroniseringsforløpet:
+Når begge er på, er synkroniseringsbanen:
 
-1. `GET <feed base URL>/v1/catalog/latest` med `x-omniroute-radar-schema: 2` og en valgfri
-   `Authorization: Bearer <supporter key>`-header (se nedenfor). Servere bruker som standard den separat
-   signerte v1-overgangsartefakten når skjemaheaderen mangler, slik at eldre installerte klienter fortsetter
-   å motta oppdateringer.
-2. Dette er en programflyt kun for nedlasting, men det er fortsatt en HTTPS-forespørsel. Den driftede
-   infrastrukturen mottar ordinære tilkoblingsmetadata, for eksempel kilde-IP-en. Når en støttenøkkel
-   er konfigurert, sender synkroniseringen også denne nøkkelen i Bearer-headeren, slik at tjenesten kan fastslå
-   rettigheten. Ved den nøyaktige private serverrevisjonen som er identifisert i evidensgrensen ovenfor,
-   bruker registreringen av feedforespørsler nøkkelhasher, aggregert bruk og en daglig roterende, avkortet HMAC
-   av IP-adressen for manuell misbruksgjennomgang; disse tabellene lagrer verken nøkkelen eller IP-adressen i råformat.
-   Tilgangslogger for infrastrukturen og den krypterte leveringsutboksen er separate driftsmessige
-   grenser.
-3. OmniRoute sender aldri ledetekster, svar, samtaler, leverandørlegitimasjon, modelltrafikk,
-   oppetid, ventetid eller den lokale leverandørkonfigurasjonen til Radar-tjenesten.
-4. Svaret verifiseres, valideres og bufres lokalt (se
-   [Sikkerhetsmodell](#security-model)). Radar har nøyaktig fire nettverksbaner på serversiden:
-   `syncRadar()` for katalogen, `syncRadarReferrals()` for henvisninger og
-   `syncRadarOffers()` / `syncRadarIntel()` for tilbud og Intel kun for støttespillere.
+1. `GET <feed base URL>/v1/catalog/latest` med `x-omniroute-radar-schema: 2` og en valgfri `Authorization: Bearer <supporter key>` header (se nedenfor). Servere bruker som standard den separat signerte v1-overgangsartefakten når skjemaoverskriften er fraværende, så eldre installerte klienter fortsetter å motta oppdateringer.
+2. Dette er en applikasjonsflyt som bare kan lastes ned, men det er fortsatt en HTTPS forespørsel. Den vertsbaserte infrastrukturen mottar vanlige tilkoblingsmetadata som kilden IP. Når en støttenøkkel er konfigurert, sender sync også denne nøkkelen i bærerhodet slik at tjenesten kan løse rettighetene. Ved den eksakte revisjonen av private tjenere som er identifisert i bevisgrensen ovenfor, bruker feed-request accounting nøkkelhasher, aggregert bruk og en daglig roterende avkortet HMAC av IP for manuell misbruksgjennomgang; disse tabellene vedvarer verken nøkkelen eller IP i rå form. Infrastrukturtilgangslogger og den krypterte leveringsutboksen er separate operasjonelle grenser.
+3. OmniRoute sender aldri spørsmål, svar, samtaler, leverandørlegitimasjon, modelltrafikk, oppetid, ventetid eller den lokale leverandørkonfigurasjonen til Radar-tjenesten.
+4. Svaret verifiseres, valideres og bufres lokalt (se [Sikkerhetsmodell](#security-model) ). Radar har nøyaktig fire nettverksbaner på serversiden: `syncRadar()` for katalogen, `syncRadarReferrals()` for henvisninger, og `syncRadarOffers()` / `syncRadarIntel()` for kun supportertilbud og Intel.
 
-**Støttenøkkelen** er et valgfritt Bearer-token (`radar_settings.supporter_key`)
-som lar feedtjenesten avgjøre hvilket nivå som skal leveres (se
-[Nivåer](#tiers-community-and-live)). Den:
+Katalogsjekken går hver 24. time. Når den bekreftede feeden fortsatt har den hurtigbufrede versjonen og nivået, beholder synkronisering den bufrede nyttelasten, fornyer `fetchedAt`, og neste sjekk kommer 24 timer senere i stedet for på den neste time-haken.
 
-- Lagres **kryptert i hvile** med de samme AES-256-GCM-`encrypt()`/`decrypt()`-
-  hjelpefunksjonene (`src/lib/db/encryption.ts`) som brukes for leverandørlegitimasjon.
-- Angis via `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) og
-  **returneres aldri** — svaret returnerer en maskert form (`omr_****abcd`).
-- Hvis den endres eller fjernes, ugyldiggjøres katalog-, henvisnings-, tilbuds- og Intel-bufferne atomisk. Den
-  neste synkroniseringen/lesingen fastslår den nye rettigheten på serversiden; lagring av en nøkkel utløser ikke i seg selv
-  noen nettverksforespørsel eller bruker opp en engangsaktiveringsnøkkel.
-- Sendes til feedtjenesten som et Bearer-token i synkroniseringens GET-forespørsel — ingenting annet om
-  nøkkelen forlater noensinne klienten.
+De** supporternøkkel** er en valgfri bærertoken (`radar_settings.supporter_key`) som lar feedtjenesten bestemme hvilket nivå som skal betjenes (se [nivåer](#tiers-community-and-live) ). Det er:
+
+- Lagret** kryptert i hvile** med de samme AES-256-GCM `encrypt()`/`decrypt()` hjelperne (`src/lib/db/encryption.ts`) som brukes for leverandørlegitimasjon.
+- Sett via `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) og** lød aldri tilbake** — svaret returnerer en maskert form (`omr_****abcd`).
+- Hvis du endrer eller sletter den, blir katalogen, henvisningene, tilbudene og Intel-cachene ugyldige. Den neste sync/read løser den nye rettighetsserversiden; lagring av en nøkkel gjør ikke i seg selv en nettverksforespørsel eller bruker en engangsaktiveringsnøkkel.
+- Sendt til feed-tjenesten som en bærer-token på sync GET — ingenting annet om nøkkelen forlater klienten.
 
 ---
 
@@ -398,84 +376,45 @@ version, tier }` — dette er verdien kontrollpanelet viser, aldri det ubehandle
 
 ---
 
-## Regler for overliggende sammenslåing ved lesing
+## Lesetidsoverleggssammenslåingsregler
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) slår sammen den bufrede feeden **over**
-det statiske utgangspunktet ved **lesing**, inne i `getRadarCatalog()`. Utgangstabellen
-(`FREE_MODEL_BUDGETS`) muteres aldri — en ny `MergedEntry[]` beregnes ved hvert
-kall.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) slår sammen den bufrede feeden** over** den statiske grunnlinjen kl** lesetid** , inne i `getRadarCatalog()`. Grunnlinjematrisen (`FREE_MODEL_BUDGETS`) er aldri mutert — en `MergedEntry[]` beregnes fersk på hver samtale.
 
-Fire regler, sortert etter prioritet:
+Fire regler, i prioritetsrekkefølge:
 
-1. **Feeden overskriver aldri en lokal overstyring.** Per felt: Hvis operatøren har
-   tilpasset et felt i en oppføring (`localOverrides`-kartet, med `provider:modelId` som nøkkel),
-   hoppes feedens verdi for akkurat dette feltet over — operatørens verdi vinner.
-2. **`enabled: false` deaktiverer oppføringen, med proveniens.** En feed-oppføring som slår
-   av en oppføring, setter `enabled: false` og `disabledBy: "radar"` i det sammenslåtte resultatet,
-   slik at brukergrensesnittet kan forklare _hvorfor_ en oppføring gikk fra tilgjengelig til deaktivert.
-3. **En brukeropprettet oppføring som ikke finnes i feeden, overlever urørt.** Oppføringer som
-   bare finnes i utgangspunktet (eller ble lagt til lokalt), og ikke har en tilsvarende feed-
-   oppføring, videreføres uendret.
-4. **En gravlagt oppføring gjenopprettes aldri.** Hvis operatøren eksplisitt slettet en
-   oppføring (`tombstones`-settet), vil ikke feeden hente den tilbake dersom den legger til samme
-   `provider:modelId` på nytt i en senere versjon.
+1. **Feed overskriver aldri en lokal overstyring.** Per felt: hvis operatøren har tilpasset et felt på en oppføring (`localOverrides` map, keyed `provider:modelId`), hoppes feedens verdi for det spesifikke feltet — operatørens verdi vinner.
+2. **`enabled: false` deaktiverer oppføringen, med herkomst.** En feedoppføring som slår av en oppføring setter `enabled: false` og `disabledBy: "radar"` på det sammenslåtte resultatet, slik at UI kan forklare _hvorfor_ en oppføring gikk fra tilgjengelig til deaktivert.
+3. **En brukertillagt oppføring som ikke finnes i feeden, overlever urørt.** Oppføringer som bare eksisterer i grunnlinjen (eller ble lagt til lokalt) og som ikke har noen tilsvarende innmating, passerer uendret.
+4. **En gravstensbelagt oppføring gjenoppstår aldri.** Hvis operatøren eksplisitt slettet en oppføring (`tombstones` set), vil feeden som legger til den `provider:modelId` på nytt i en senere versjon ikke bringe den tilbake.
 
-De redigerbare feltene og gravmarkørene lagres i
-`radar_local_model_state` (migrering `153_radar_local_model_state.sql`). Den offentlige DB-
-adapteren (`src/lib/db/radar.ts`) konverterer disse radene til `localOverrides`-kartet og
-`tombstones`-settet som brukes av `applyFeed()`; i produksjon laster `getRadarCatalog()` inn denne tilstanden
-etter at kontrollene for flagg, hurtigbuffer og skjema er bestått. Bare `displayName` og `enabled` kan
-redigeres av operatøren. Leverandør-/modellidentitet, feed-proveniens, kvote, funksjonalitet, bruksvilkår
-og konfigurasjonsdata kan ikke skrives gjennom denne flaten.
+De redigerbare feltene og gravsteinene er bevart i `radar_local_model_state` (migrering `153_radar_local_model_state.sql`). Den offentlige DB adapteren (`src/lib/db/radar.ts`) konverterer disse radene til `localOverrides` -kartet og `tombstones` settet som brukes av `applyFeed()`; produksjon `getRadarCatalog()` laster inn denne tilstanden etter at flagg-, hurtigbuffer- og skjemaportene passerer. Bare `displayName` og `enabled` er operatørredigerbare. Provider/model identitet, feed-herkomst, kvote, kapasiteter, ToS og oppsettdata kan ikke skrives gjennom denne overflaten.
 
-Kontrollpanelet tilbyr fire lokale handlinger:
+Dashbordet viser fire lokale handlinger:
 
-- **Rediger** endrer det lokale visningsnavnet og aktiveringsstatusen.
-- **Tilbakestill lokale endringer** tømmer begge de redigerbare feltene uten å endre en gravmarkør.
-- **Skjul** oppretter en gravmarkør, slik at senere feed-oppdateringer ikke kan gjenopprette raden.
-- **Gjenopprett** fjerner gravmarkøren; eventuelle separat lagrede overstyringer forblir gjeldende.
+- **Redigere** endrer det lokale visningsnavnet og aktivert tilstand.
+- **Tilbakestill lokale endringer** sletter begge redigerbare feltene uten å endre en gravstein.
+- **Gjemme** oppretter en gravstein, så senere feedoppdateringer kan ikke gjenskape raden.
+- **Restaurere** fjerner gravsteinen; Enhver separat lagret overstyring forblir i kraft.
 
-Feed-verdien `enabled: false` er fortsatt sikkerhetsunntaket: Den vinner over en foreldet lokal
-`enabled: true`, beholder den sammenslåtte oppføringen deaktivert og registrerer `disabledBy: "radar"`.
+En feed `enabled: false` forblir sikkerhetsunntaket: den vinner over en gammel lokal `enabled: true`, holder den sammenslåtte oppføringen deaktivert og registrerer `disabledBy: "radar"`.
 
-Katalogpubliseringer bruker `schemaVersion: 2`. `contextWindow` og hver av `tools`, `vision` og
-`thinking` er uavhengig av typen `number | null` / `boolean | null`: `null` betyr ukjent, mens
-`false` betyr at en D16-bekreftet offisiell leverandørkilde eksplisitt oppgir at funksjonen mangler.
-Interne flagg fra OmniRoute-registeret eller modellspesifikasjonen oppgraderes aldri direkte til feed-fakta. Klienten
-godtar fortsatt v1-øyeblikksbilder. Siden den gamle byggeren brukte `false` som plassholder for fravær, blir `false` i v1
-normalisert til ukjent, mens `true` i v1 fortsatt behandles som et faktum. Ukjente skjemaversjoner avvises sikkert, og den
-siste gyldige hurtigbufferen forblir tilgjengelig. Hver v2-modell med en kontekst-/funksjonsverdi som ikke er null, må ha en
-legitimasjonsfri HTTPS-`metadataEvidenceUrls[]`; ellers mislykkes skjemavalideringen, og hurtigbufferen
-erstattes ikke. Katalogtabellen viser alle tre tilstandene som `✓`, `✕` og `?`.
+Katalogpublikasjoner bruker `schemaVersion: 2`. `contextWindow` og hver av `tools`, `vision` og `thinking` er uavhengig `number | null` / `boolean | null`: `null` betyr ukjent, mens `false` betyr at en D16-confirmed offisiell leverandørkilde eksplisitt sier at muligheten er fraværende. Interne OmniRoute registry/model-spec -flagg promoteres aldri direkte for å mate fakta. Klienten godtar fortsatt v1-øyeblikksbilder; fordi den gamle byggeren brukte `false` som en fraværsplassholder, normaliseres v1 `false` til ukjent mens v1 `true` forblir fakta. Ukjente skjemaversjoner mislykkes lukket og den siste gyldige hurtigbufferen forblir tilgjengelig. Hver v2-modell med en ikke-null context/capability må ha en legitimasjonsfri HTTPS `metadataEvidenceUrls[]`; ellers mislykkes skjemavalideringen og hurtigbufferen erstattes ikke. Katalogtabellen gjengir alle tre tilstandene som `✓`, `✕` og `?`.
 
-### Veiledede kombinasjoner og MCP-tilgang
+### Guidede kombinasjoner og MCP -tilgang
 
-Bekreftede `familyId`-verdier overlever den overliggende sammenslåingen ved lesing og driver den rene
-`buildRadarComboSuggestions()`-modulen (`src/lib/radar/comboSuggestions.ts`). En familie foreslås
-bare når minst to ulike leverandører har aktive tilkoblinger og tilbyr den eksakte kuraterte modell-
-ID-en. Deaktiverte modeller, inaktive leverandører, manglende modell-ID-er, familier med bare ett medlem og tvetydige
-alias-/prefikstreff avvises sikkert. Forslag bruker den eksisterende `priority`-strategien og sorterer det
-største gjentakende månedsbudsjettet først; brukergrensesnittet oppretter dem bare gjennom `POST /api/combos`.
+Bekreftede `familyId` verdier overlever lesetidsoverlegget og driver den rene `buildRadarComboSuggestions()` modulen (`src/lib/radar/comboSuggestions.ts`). En familie foreslås bare når minst to forskjellige leverandører har aktive forbindelser og viser den nøyaktige kurerte modellen ID. Deaktiverte modeller, inaktive leverandører, manglende modell IDs, singleton-familier og tvetydige alias/prefix treff mislykkes. Forslag bruker den eksisterende `priority` strategien, og bestiller det største månedlige budsjettet først; UI skaper dem bare gjennom `POST /api/combos`.
 
-Det veiledede brukergrensesnittet finnes på `/dashboard/radar/combos`. Det leser bare de lokale
-endepunktene `GET /api/radar/catalog` og `GET /api/combos/builder/options`. Det utløser aldri Radar-synkronisering,
-leser leverandørlegitimasjon eller skriver direkte til combo-databasen.
+Den guidede UI bor på `/dashboard/radar/combos`. Den leser bare de lokale `GET /api/radar/catalog` og `GET /api/combos/builder/options` endepunktene. Den utløser aldri Radar-synkronisering, leser leverandørlegitimasjon eller skriver direkte til kombinasjonsdatabasen.
 
-MCP-klienter kan lese den samme lokale projeksjonen med `omniroute_radar_catalog` (`read:radar`). De
-valgfrie filtrene `provider`, `familyId` og `enabledOnly` evalueres etter én lokal
-`GET /api/radar/catalog`-lesing. Det avgrensede resultatet inkluderer katalogmetadata samt leverandør/modell,
-visningsnavn, `familyId`, kvote, funksjoner, aktivert status, opprinnelse og `disabledBy`; URL-er for oppsett,
-trinn, tilkoblinger, e-postadresser, nøkler og vervingsdata returneres aldri. Dette verktøyet er
-skrivebeskyttet og kaller aldri `/api/radar/sync`.
+MCP klienter kan lese den samme lokale projeksjonen med `omniroute_radar_catalog` (`read:radar`). De valgfrie `provider`, `familyId` og `enabledOnly` filtrene evalueres etter én lokal `GET /api/radar/catalog` lesing. Dens lukkede utgang inkluderer katalogmetadata pluss provider/model, visningsnavn, `familyId`, kvote, muligheter, aktivert tilstand, opprinnelse og `disabledBy`; oppsett URLs, trinn, tilkoblinger, e-postadresser, nøkler og henvisningsdata returneres aldri. Dette verktøyet er skrivebeskyttet og kaller aldri `/api/radar/sync`. Når den bufrede feeden går før den installerte katalogen, er `meta.olderThanRelease` `true` og verktøyet returnerer modeller fra den installerte katalogen med lokale overstyringer og gravsteiner brukt.
 
-### Opprinnelsesmarkører
+### Herkomstmarkører
 
-Hver sammenslåtte oppføring har et `origin`-felt som brukergrensesnittet viser som et merke:
+Hver sammenslått oppføring har et `origin` felt som UI gjengir som et merke:
 
-- `"baseline"` — uendret fra den statiske utgivelseskatalogen.
-- `"radar"` — ett eller flere felt ble oppdatert av datastrømmen.
-- `"local"` — operatøren har minst én lokal overstyring for denne oppføringen (lokale
-  overstyringer har alltid forrang over datastrømmen i henhold til regel 1, uansett hva datastrømmen angir).
+- `"baseline"` — urørt fra den statiske utgivelseskatalogen.
+- `"radar"` — ett eller flere felt ble oppdatert av feeden.
+- `"local"` — operatøren har minst én lokal overstyring på denne oppføringen (lokale overstyringer vinner alltid over feeden per regel 1, uavhengig av hva feeden sier).
 
 ---
 

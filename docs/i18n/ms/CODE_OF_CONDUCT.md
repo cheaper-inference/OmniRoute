@@ -54,15 +54,13 @@ Contoh mewakili komuniti kami termasuk menggunakan alamat e-mel rasmi,
 membuat hantaran melalui akaun media sosial rasmi, atau bertindak sebagai wakil
 yang dilantik dalam acara dalam talian atau luar talian.
 
-## Enforcement
+## Penguatkuasaan
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Kejadian kesat, mengganggu atau tingkah laku yang tidak boleh diterima boleh dilaporkan kepada ketua masyarakat yang bertanggungjawab untuk penguatkuasaan dengan membuka khidmat nasihat keselamatan peribadi di
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+atau dengan menghantar e-mel kepada penyelenggara di diegosouza.pw@outlook.com. Untuk insiden sensitif keselamatan, lihat [`SECURITY.md`](SECURITY.md). Semua aduan akan disemak dan disiasat dengan segera dan adil.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Semua ketua masyarakat bertanggungjawab untuk menghormati privasi dan keselamatan pelapor bagi sebarang kejadian.
 
 ## Garis Panduan Penguatkuasaan
 

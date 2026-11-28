@@ -20,25 +20,21 @@ seadistatud app-serveri URL-il kättesaadav**, ning CLI peab olema **sisse logit
 ## 1. Arhitektuur
 
 ```
-┌─ OmniRoute'i rakendus ───────────┐        ┌─ codex-app-server'i kõrvalkonteiner ─┐
-│  CodexAppServerExecutor          │  WS    │  codex app-server                    │
-│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456          │
-│  (+ võimekusluba)                │  JSON  │  --ws-auth capability-token          │
-│                                  │  RPC   │  haldab ise OpenAI OAuthi            │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, automaatvärskendus) │
-        │ jagab (compose'i andmeköited)      └───────────────────────────────────────┘
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+│  CodexAppServerExecutor          │  WS    │  codex app-server                   │
+│  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS-i võimekusluba (mõlemad haagivad selle)
-  codex-appserver-home    → ~/.codex (auth.json-i kirjutab juhtpaneel,
-                             seda loeb kõrvalkonteineri codex app-server)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Kõrvalkonteiner kuulab **ainult** sisemises compose'i võrgus
-  (`ws://codex-app-server:1456`) võimekusloa taga. Seda **ei avaldata kunagi**
-  hostile ega internetti.
-- Codex CLI on `omniroute:base` tõmmisesse sisse ehitatud, mistõttu pole
-  kõrvalkonteineri käitamisel vaja codex'it hostile ega kasutaja arvutisse
-  installida.
+- Külgkorv kuulab** ainult** sisemises koostamisvõrgus (`ws://codex-app-server:1456`) võimete märgi taga. On küll** mitte kunagi** avaldatakse hostile või Internetile.
+- Külgkorv kasutab `omniroute:cli-no-docker`, mis on ehitatud `runner-cli-no-docker` sihtmärgist, mis hõlmab ka Codex CLI.
 
 ## 2. Käivitamine
 

@@ -153,28 +153,28 @@ Quyidagi fayllar hozirda eng past satr qamroviga (< 60%) ega va 6–7-bosqichlar
 
 ## Ratchet siyosati
 
-`npm run test:coverage` chegaralarini faqat loyiha keyingi bosqichdan yetarlicha zaxira bilan amalda oshib o‘tgandan keyin yangilang.
+`npm run test:coverage` chegaralarini faqat loyiha qulay bufer bilan keyingi bosqichdan oshib ketgandan keyingina yangilang.
 
-**Joriy chegara:** `npm run test:coverage` **60 ta bayonot / 60 ta satr / 60 ta funksiya / 60 ta tarmoq** talabini qo‘llaydi (ko‘rsatkich Quality-Gates 6A.1-bosqichida qayta bazalangan — avvalgi 82.58% bazaviy ko‘rsatkichi test fayllarini hisobga olgani va `open-sse`ni istisno qilgani sababli sun’iy ravishda yuqori edi). `test:coverage:legacy` buyrug‘i tarixiy taqqoslash uchun eski 50/50/50 ko‘rsatkichini saqlab qoladi.
+**Joriy darvoza:** `npm run test:coverage` amalga oshiradi** 60 ta bayonot / 60 qator / 60 funktsiya / 60 ta filial** (ko'rsatkich Quality-Gates Fase 6A.1 — da qayta asoslangan edi, oldingi 82,58% bazaviy ko'rsatkich oshirilgan, chunki u sinov fayllarini hisoblagan va `open-sse` chiqarib tashlagan). `test:coverage:legacy` buyrug'i tarixiy taqqoslash uchun eski 50/50/50 ko'rsatkichini saqlaydi.
 
-Eng so‘nggi hisobot asosida maxsus chegara tekshiruvlari uchun quyidagidan foydalaning:
+Oxirgi hisobotga nisbatan vaqtinchalik chegarani tekshirish uchun:
 
 ```bash
 node scripts/check/test-report-summary.mjs --threshold 75
 ```
 
-Tavsiya etilgan ratchet ketma-ketligi (tartib: `bayonotlar-satrlar / tarmoqlar / funksiyalar`):
+Tavsiya etilgan mandal ketma-ketligi (tartibi `statements-lines / branches / functions`):
 
 1. 55/60/55
 2. 60/62/58
 3. 65/64/62
 4. 70/66/66
-5. 75/70/72 <-- joriy chegara (75/70/75)
+5. 75/70/72 <- joriy eshik (75/70/75)
 6. 80/75/78
 7. 85/80/84
 8. 90/85/88
 
-Tarmoqlar qamrovi ketma-ket ikki ishga tushirish davomida 78% dan yuqori bo‘lib turgach, keyingi ratchet maqsadi `80/75/78` bo‘ladi.
+Keyingi ratchet maqsadi - `80/75/78` bir marta filialning qamrovi ketma-ket ikkita yugurish uchun 78% dan yuqori.
 
 ## Ma’lum kamchilik
 

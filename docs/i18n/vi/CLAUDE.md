@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Tất cả quy tắc của dự án nằm trong [`AGENTS.md`](AGENTS.md)** — nguồn thông tin chính xác duy nhất cho mọi trợ lý AI
-(kiến trúc, quy ước, kiểm thử, các cổng chất lượng, quy trình git, 23 Quy tắc Cứng,
-các bài học về PII). Hãy đọc toàn bộ; không thêm lại các quy tắc của dự án tại đây. Mọi nội dung bên dưới CHỈ áp dụng
-cho Claude Code — các tinh chỉnh vận hành đối với những quy tắc đã được định nghĩa trong `AGENTS.md`.
+**Tất cả các quy tắc dự án đều có trong [`AGENTS.md`](AGENTS.md)** — nguồn sự thật duy nhất cho mọi trợ lý AI ; quá trình nhập ở trên đã tải nó. Không thêm lại các quy tắc dự án ở đây. Mọi thứ bên dưới áp dụng ONLY cho Claude Code — sàng lọc hoạt động của các quy tắc đã được xác định trong `AGENTS.md`.
 
-## Cách ly worktree — các điểm riêng của Claude Code
+## Cách ly Worktree — Claude Mã cụ thể
 
-Giao thức bắt buộc đầy đủ về worktree (xác nhận nhánh gốc, đường dẫn chuẩn
-`.claude/worktrees/`, `cp -al` node_modules, quy tắc dọn dẹp) nằm trong
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (được tóm tắt trong `AGENTS.md` →
-Git Workflow → "Worktree isolation"). Các điểm riêng của Claude Code:
+- Xác nhận nhánh cơ sở với nhà điều hành thông qua `AskUserQuestion` (Quy tắc cứng #19) trừ khi họ đã thông báo cho bạn.
+- Tạo cây làm việc với `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (nó nằm dưới `.claude/worktrees/`, liên kết cứng `node_modules` và sao chép `.husky/_`), sau đó gọi `EnterWorktree` bằng `path` của nó. Luôn vượt qua cơ sở: nếu không có nó, tập lệnh sẽ chọn `release/*` cao nhất, đây có thể không phải là giá trị mà nhà điều hành đã xác nhận. Một cây làm việc mà `EnterWorktree` tự tạo ra không có liên kết cứng cũng như không có móc nối, do đó không có cổng xác nhận trước nào chạy trong đó.
 
-- Xác nhận nhánh gốc với người vận hành qua `AskUserQuestion` (Quy tắc cứng #19) trừ khi họ
-  đã cho bạn biết.
-- Ưu tiên dùng công cụ gốc `EnterWorktree` — nó đã tạo worktree dưới
-  `.claude/worktrees/` (đường dẫn chuẩn). Tạo worktree bằng lệnh `git
-worktree add` đã được tài liệu hóa, sau đó gọi `EnterWorktree` với `path` của nó.
+## Các chất phụ và git
 
-## An toàn giữa các phiên — các chi tiết dành riêng cho Claude Code
+Mọi tác nhân phụ chạm vào git (Công cụ tác nhân hoặc tập lệnh Quy trình công việc) đều nhận được nguyên văn `git stash` cấm của Quy tắc cứng #22 a trong lời nhắc của nó — sự tái diễn được ghi lại của sự cố cất giấu đến từ một tác nhân phụ.
 
-Các Quy tắc Cứng #19/#21/#22 (trong `AGENTS.md`) chi phối các phiên song song. Lời nhắc vận hành cho môi trường
-này:
+## Lập kế hoạch tạo tác — siêu năng lực ghi đè đường dẫn
 
-- **Lặp lại nguyên văn lệnh cấm `git stash` trong prompt của mọi subagent có thao tác với git**
-  (công cụ Agent / tập lệnh Workflow) — các subagent không kế thừa tệp này, và sự cố stash được ghi nhận
-  đã tái diễn thông qua một subagent.
-- Trước khi hợp nhất hoặc đẩy lên bất kỳ PR nào mà bạn không tạo _trong phiên này_, hãy chạy `git worktree list`
-  và kiểm tra lại `gh pr view <N> --json state,headRefOid` (Quy tắc Cứng #22b).
-- Kết thúc mọi phiên với checkout chính ở đúng nhánh mà nó đã bắt đầu.
+Kỹ năng siêu năng lực thông báo mặc định theo `docs/superpowers/plans/`, `docs/superpowers/specs/` và `docs/research/`. Viết lại từng cái thành `_tasks/` tương đương với nó trong `AGENTS.md` → "Các hiện vật lập kế hoạch và nghiên cứu" trước khi viết và cam kết nó với `git -C _tasks …`, không bao giờ có trong repo chính.
 
-## Superpowers / hiện vật lập kế hoạch — ghi đè đường dẫn
+## Tập tin cào — `_artifacts/`, không phải `/tmp`
 
-Quy ước `_tasks/` được định nghĩa trong `AGENTS.md` → "Hiện vật Lập kế hoạch & Nghiên cứu". Các
-skill superpowers đi kèm với giá trị mặc định trỏ tới `docs/…` — những giá trị mặc định đó được **ghi đè
-tại đây**. Khi một skill superpowers thông báo đường dẫn như "đã lưu vào `docs/superpowers/plans/…`",
-hãy viết lại thành đường dẫn `_tasks/…` tương đương trước khi ghi:
+Dự án này ghi đè bảng ghi phiên của bộ khai thác (`/tmp/claude-*/…`). Viết các tệp tạm thời — xuất, zip được tạo, đầu ra trung gian một lần — đến `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: một đường dẫn `_*` gốc được gitignored, do đó người vận hành tìm và xóa tất cả vết xước ở một nơi. Thay vào đó, các kế hoạch, thông số kỹ thuật, nghiên cứu và bàn giao lâu dài sẽ được chuyển đến `_tasks/` (Quy tắc cứng #23).
 
-| Hiện vật (skill)                     | Mặc định (KHÔNG sử dụng)  | Thay vào đó, lưu tại đây                                      |
-| ------------------------------------ | ------------------------- | ------------------------------------------------------------- |
-| Kế hoạch (`writing-plans`)           | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Đặc tả / thiết kế (`brainstorming`)  | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Nghiên cứu (`deep-research`, ad-hoc) | `docs/research/`          | `_tasks/research/…`                                           |
-| Bàn giao (`/handoff`)                | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Đế đỏ
 
-Commit các hiện vật đó bên trong repo `_tasks/` (`git -C _tasks …`), không bao giờ trong repo chính.
-
-## Tệp nháp / tạm thời — sử dụng `_artifacts/`, không dùng `/tmp`
-
-Dự án này ghi đè vùng nháp phiên mặc định của môi trường (`/tmp/claude-*/…`). Ghi
-các tệp tạm thời/đang xử lý — bản xuất, tệp zip được tạo, đầu ra trung gian dùng một lần, bất kỳ thứ gì bạn
-thường đặt trong `/tmp` — vào `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` là một đường dẫn `_*` ở thư mục gốc: đã được git bỏ qua (`AGENTS.md` → "Các đường dẫn `_*` ở thư mục gốc"), chỉ tồn tại
-  trên đĩa và không bao giờ được theo dõi.
-- Lý do: giữ đầu ra tạm thời bên trong dự án (thay vì `/tmp`) giúp người vận hành dễ dàng
-  tìm và xóa mọi thứ tạm thời tại một nơi, thay vì phải tìm kiếm trong các thư mục `/tmp`
-  theo từng phiên vốn sẽ biến mất hoặc tích tụ các tệp không được theo dõi.
-- **Không** nhầm lẫn mục này với `_tasks/` (Quy tắc Cứng #23, repo git riêng tư độc lập dành cho
-  các kế hoạch/đặc tả/nghiên cứu/bàn giao bền vững) — `_artifacts/` chỉ dành cho các tệp làm việc có thể loại bỏ, không có nội dung nào
-  tại đây cần được duy trì hoặc quản lý phiên bản.
-
-## Đảm bảo nhánh cơ sở xanh trước khi mở PR
-
-Trước khi tách nhánh hoặc mở PR, hãy chạy kiểm tra trạng thái xanh của nhánh cơ sở (`AGENTS.md` → Quy trình Git →
-"Kiểm tra trạng thái xanh của nhánh cơ sở"; các skill của dự án tham chiếu kiểm tra này dưới dạng `.agents/skills/_shared/base-green.md`). Một PR
-được mở khi đầu nhánh cơ sở đang đỏ phải chứa `⚠️ base-red inherited: #<issue>` trong phần nội dung. Để
-xử lý hết trạng thái đỏ tích tụ (đầu nhánh cơ sở + các PR đỏ), hãy sử dụng skill `/sweep-reds`.
+Để tiêu hao trạng thái màu đỏ tích lũy (mũi cơ bản + đỏ PRs), hãy sử dụng kỹ năng `/sweep-reds`.

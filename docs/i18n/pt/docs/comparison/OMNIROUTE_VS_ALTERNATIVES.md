@@ -11,7 +11,7 @@ Comparação objetiva de características com routers AI de código aberto popul
 | Característica                                            |                  OmniRoute 3.8                  |     LiteLLM 1. x      | OpenRouter (SaaS) | Chave de portal |
 | --------------------------------------------------------- | :---------------------------------------------: | :-------------------: | :---------------: | :-------------: |
 | **Provedores**                                            |                     **329**                     |         ~100          |        ~50        |       ~30       |
-| **entradas do catálogo Free/no-auth**                     |                     **155**                     |          n/a          |     passagem      |       n/a       |
+| **Os fornecedores com acesso gratuito**                   |           **50 com acesso gratuito**            |          n/a          |     passagem      |       n/a       |
 | **Auto-hospedável**                                       |                       ✅                        |          ✅           |        ❌         |     ⚠ pago      |
 | **entradas do catálogo OAuth**                            |                     **23**                      |        parcial        |        ❌         |       ❌        |
 | **Combos de fallback automático**                         |               **22 estratégias**                | baseado na prioridade | baseado em níveis |    ponderado    |
@@ -38,7 +38,7 @@ Comparação objetiva de características com routers AI de código aberto popul
 
 ## Quando escolher OmniRoute
 
-- Você auto-hospeda-se e quer** cobertura máxima do prestador** (394 fornecedores, 155 entradas de catálogo free/no-auth )
+- Você auto-hospeda-se e quer** cobertura máxima do prestador** (394 prestadores, 50 com acesso gratuito)
 - Precisa de um** servidor MCP integrado** (ferramentas LLM, memória, competências expostas como ferramentas)
 - Você precisa** protocolo A2A** para fluxos de trabalho entre agentes
 - Você quer** furtividade de impressão digital** (JA3/JA4) para evitar a detecção pelo CAPTCHAs a montante
@@ -56,12 +56,12 @@ Comparação objetiva de características com routers AI de código aberto popul
 - Não se importa de pagar por token com a margem adicional do SaaS
 - Precisa de um **único método de pagamento** para todos os fornecedores
 
-## Quando escolher o Portkey
+## Quando escolher a chave de portal
 
-- Precisa de um **SLA comercial** com garantias de disponibilidade
-- Prefere um **painel de controlo gerido** sem sobrecarga operacional
-- Precisa de **funcionalidades de conformidade empresarial** prontas a utilizar
+- Precisa de um** SLA comercial** com garantias de tempo de atividade
+- Você prefere um** painel gerido** sem sobrecarga de operações
+- Você precisa** conformidade empresarial** recursos prontos a usar
 
 ---
 
-_Última atualização: 2026-08-02. Envie correções através de um PR para manter esta tabela exata._
+_Envie correções via PR para manter esta tabela precisa. _

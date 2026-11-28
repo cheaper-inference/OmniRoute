@@ -67,64 +67,63 @@ Je verbonden modellen zouden nu in de lijst moeten staan.
 
 ---
 
-## Stap 5: Je IDE of CLI naar OmniRoute verwijzen
+## Stap 5: Wijs uw IDE of CLI naar OmniRoute
 
-Stel in je IDE- of CLI-tool het volgende in:
+Stel in uw IDE of CLI tool het volgende in:
 
 ```
-Basis-URL: http://localhost:20128/v1
-API-sleutel:  [kopieer vanuit Dashboard → Endpoints]
+Base URL: http://localhost:20128/v1
+API Key:  [the key you created in Step 4 (Dashboard → API Keys)]
 Model:    auto
 ```
 
-Dat is alles! Je IDE gebruikt nu OmniRoute met automatische providerselectie.
+Dat is het! Uw IDE maakt nu gebruik van OmniRoute met automatische providerselectie.
 
-### IDE-voorbeeld: VSCode/Continue.dev
+### IDE Voorbeeld: VSCode/Continue.dev
 
 1. Installeer in VSCode de extensie [Continue.dev](https://marketplace.visualstudio.com/items?itemName=Continue.continue).
-2. Werk je `~/.continue/config.yaml` bij door de volgende regels toe te voegen:
+2. Update uw `~/.continue/config.yaml` om de volgende regels toe te voegen:
 
 ```
-  - name: OmniRoute - Automatisch
+  - name: OmniRoute - Auto
     provider: openai
     model: auto
     apiBase: http://localhost:20128/v1
     apiKey: <YOUR_KEY>
 ```
 
-3. Selecteer in het chatvenster van Continue.dev `OmniRoute - Automatisch`. Je verzoeken worden dan naar OmniRoute verzonden.
-4. (Optioneel) Oefening voor de lezer: laat je IDE het bestand `config.yaml` bijwerken met alle andere vooraf samengestelde configuraties 😊
+3. In het Continue.dev-chatvenster selecteert u `OmniRoute - Auto` en u dient verzoeken in bij OmniRoute.
+4. (Optioneel) Oefening voor de lezer - laat uw IDE de `config.yaml` bijwerken met alle andere vooraf gebouwde 😊-configuraties
 
-### CLI-voorbeeld: Codex CLI
+### CLI Voorbeeld: Codex CLI
 
-1. Stel de omgevingsvariabele permanent in op je besturingssysteem.
-   Voor macOS/Linux (voeg dit toe aan `~/.bashrc` of `~/.zshrc`):
+1. Stel in uw besturingssysteem de omgevingsvariabele permanent in. Voor macOS/Linux (voeg toe aan uw `~/.bashrc` of `~/.zshrc`):
 
 ```bash
 export OMNIROUTE_API_KEY="<YOUR_KEY>"
 ```
 
-Voor Windows (Opdrachtprompt):
+Voor Windows (opdrachtprompt):
 
 ```
 setx OMNIROUTE_API_KEY <YOUR_KEY>
 ```
 
-2. Nu starten we Codex, maar dan geconfigureerd voor OmniRoute. Voer het volgende uit:
+2. Laten we nu Codex starten, maar geconfigureerd voor OmniRoute. Loop:
 
 ```
 omniroute launch-codex --model auto
 ```
 
-Je kunt dit handmatig doen via `codex` en opdrachtregelparameters gebruiken om het endpoint en de API-sleutel op te geven, maar met de bovenstaande opdracht regelt OmniRoute alles voor je.
+U kunt dit handmatig doen via `codex` en opdrachtregelparameters om het eindpunt en de API-sleutel op te geven, maar met de bovenstaande opdracht regelt OmniRoute alles voor u.
 
-Dezelfde startmethode met één opdracht werkt voor andere CLI's via de generieke launcher — `omniroute run <target>` ondersteunt `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` en `gemini` (zie [CLI-integraties](../guides/CLI-INTEGRATIONS.md)).
+Dezelfde lancering met één opdracht werkt voor andere CLIs via de generieke launcher — `omniroute run <target>` ondersteunt `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` en `gemini` (zie [CLI Integraties](../guides/CLI-INTEGRATIONS.md) ).
 
-3. De CLI zou nu verzoeken naar OmniRoute moeten verzenden.
+3. De CLI zou nu verzoeken naar OmniRoute moeten sturen.
 
-### Controleren of je tool via OmniRoute routeert
+### Bevestig dat uw gereedschap naar OmniRoute routert
 
-Je kunt de details van het verzoek bekijken door in de linkerzijbalk op [Monitoring/logboeken](http://localhost:20128/dashboard/logs) te klikken. Door verder te klikken krijg je meer details te zien. Daarnaast kun je bekijken welke informatie vanuit je favoriete harness wordt verzonden. Dit is nuttig voor educatieve doeleinden en foutopsporing.
+U kunt de details van het verzoek bekijken door in de linkerzijbalk op [Monitoring/Logs](http://localhost:20128/dashboard/logs) te klikken. Als u doorklikt, ziet u meer details. Even terzijde: je kunt zien welke informatie er vanuit je favoriete harnas wordt verzonden. Dit is nuttig vanuit een educatief en foutopsporingsperspectief.
 
 ---
 

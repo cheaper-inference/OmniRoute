@@ -62,42 +62,31 @@ Nangangailangan ang lahat ng tatlong method ng authentication sa dashboard (`isA
 sine-save ng OmniRoute ang token at agad na nagpapatakbo ng test search na may 1 resulta; kung
 magbalik ang Notion ng error object, buburahin ang token at mabibigo ang call na may `400`.
 
-## Mga MCP tool (6)
+## MCP tools (6)
 
-Tinukoy sa `open-sse/mcp-server/tools/notionTools.ts`. Kinukuha ang token sa oras ng call
-sa pamamagitan ng `getNotionToken()`; kung walang naka-configure, magti-throw ang tool ng
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+Tinukoy sa `open-sse/mcp-server/tools/notionTools.ts`. Ang token ay naresolba sa oras ng tawag sa pamamagitan ng `getNotionToken()`; kung walang naka-configure ang tool ay nagtatapon ng `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Tool                         | Scope          | Paglalarawan                                                                                                  |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Maghanap ng mga page at database ayon sa text query (nagbabalik ng mga pamagat, ID, at URL). Naka-pagination. |
-| `notion_get_page`            | `read:notion`  | Kunin ang nilalaman at metadata ng isang page ayon sa ID nito.                                                |
-| `notion_list_block_children` | `read:notion`  | Ilista ang lahat ng child block ng isang block o page (ang block tree). Naka-pagination.                      |
-| `notion_query_database`      | `read:notion`  | Mag-query ng database gamit ang opsyonal na `filter` + `sorts` (format ng Notion API). Naka-pagination.       |
-| `notion_get_database`        | `read:notion`  | Kunin ang schema/metadata ng isang database ayon sa ID.                                                       |
-| `notion_append_blocks`       | `write:notion` | Magdagdag ng mga child block sa isang umiiral na block o page (maximum na 100 block bawat request).           |
+| Tool                         | Saklaw         | Paglalarawan                                                                                                           |
+| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Maghanap ng mga pahina at database sa pamamagitan ng text query (nagbabalik ng mga pamagat, IDs, URLs). Naka-paginate. |
+| `notion_get_page`            | `read:notion`  | Kumuha ng nilalaman at metadata ng isang pahina sa pamamagitan ng ID nito.                                             |
+| `notion_list_block_children` | `read:notion`  | Ilista ang lahat ng block children ng isang block o page (ang block tree). Naka-paginate.                              |
+| `notion_query_database`      | `read:notion`  | Mag-query ng database na may opsyonal na `filter` + `sorts` (Notion API format). Naka-paginate.                        |
+| `notion_get_database`        | `read:notion`  | Kunin ang schema/metadata ng isang database sa pamamagitan ng ID.                                                      |
+| `notion_append_blocks`       | `write:notion` | Idagdag ang mga block na bata sa isang umiiral na block o page (max 100 block bawat kahilingan).                       |
 
-### Mga input parameter
+### Mga parameter ng input
 
-- `notion_search` — `query` (1–500 character), `pageSize` (1–100, default na 20),
-  `startCursor` (opsyonal).
-- `notion_get_page` — `pageId` (32-character na hex o UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, default na 50),
-  `startCursor` (opsyonal).
-- `notion_query_database` — `databaseId`, `filter` (opsyonal, format ng Notion filter),
-  `sorts` (opsyonal na array), `pageSize` (1–100, default na 50), `startCursor` (opsyonal).
+- `notion_search` — `query` (1–500 character), `pageSize` (1–100, default 20), `startCursor` (opsyonal).
+- `notion_get_page` — `pageId` (32-char hex o UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, default 50), `startCursor` (opsyonal).
+- `notion_query_database` — `databaseId`, `filter` (opsyonal, Notion filter format), `sorts` (opsyonal na array), `pageSize` (1–100, default 50), `startCursor` (opsyonal).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (array ng mga block object),
-  `after` (opsyonal na posisyon).
+- `notion_append_blocks` — `blockId`, `children` (array ng mga block object), `after` (opsyonal na posisyon).
 
-### Mga scope
+### Saklaw
 
-Nangangailangan ang mga read tool ng `read:notion`, at nangangailangan ang write tool ng `write:notion`.
-Ipinapatupad ang mga scope ng `withScopeEnforcement()` sa
-`open-sse/mcp-server/server.ts` kapag `OMNIROUTE_MCP_ENFORCE_SCOPES=true` lamang; ang
-mga pinapayagang scope ng tumatawag ay nagmumula sa `OMNIROUTE_MCP_SCOPES` (pinaghihiwalay ng kuwit) o sa
-scope context ng na-authenticate na API key. Tingnan ang [MCP-SERVER.md](./MCP-SERVER.md) para sa
-kumpletong modelo ng scope.
+Ang read tool ay nangangailangan ng `read:notion` at ang write tool ay nangangailangan ng `write:notion`. Ang mga saklaw ay ipinapatupad ng `withScopeEnforcement()` sa `open-sse/mcp-server/server.ts` kapag `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, at palaging para sa isang HTTP/SSE na tumatawag na ang API key ay walang `manage`/`admin`; ang mga pinapayagang saklaw ng tumatawag ay nagmumula sa `OMNIROUTE_MCP_SCOPES` (comma-separated) o sa konteksto ng saklaw ng napatotohanang API key. Tingnan ang [MCP-SERVER.md](./MCP-SERVER.md) para sa buong saklaw na modelo.
 
 ## Mga Endpoint
 

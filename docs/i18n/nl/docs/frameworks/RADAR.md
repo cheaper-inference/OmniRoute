@@ -93,52 +93,30 @@ routering of modelselectie wordt niet gewijzigd — zie de afzonderlijke opt-in 
 
 ---
 
-## Gegevenssynchronisatie is een AFZONDERLIJKE opt-in — de privacybelofte
+## Gegevenssynchronisatie is een SEPARATE opt-in — de privacybelofte
 
-Het inschakelen van `RADAR_ENABLED` ontgrendelt alleen de gebruikersinterface. Voor het synchroniseren van de feed
-is een tweede, onafhankelijke opt-in vereist die is opgeslagen in `radar_settings.opt_in` (`src/lib/db/radar.ts`,
-migratie `136_radar_cache_settings.sql`). `syncRadar()` controleert de flag _en_ de
-opt-in voordat een netwerkaanroep wordt uitgevoerd:
+Als `RADAR_ENABLED` inschakelt, wordt alleen de UI ontgrendeld. Voor het synchroniseren van de feed is een tweede, onafhankelijke opt-in vereist, opgeslagen in `radar_settings.opt_in` (`src/lib/db/radar.ts`, migratie `136_radar_cache_settings.sql`). `syncRadar()` controleert de vlag _en_ de opt-in voordat hij een netwerkoproep doet:
 
 ```
-Flag uit       → { status: "disabled" }   — geen netwerkaanroep
-Opt-in false   → { status: "opt_out" }    — geen netwerkaanroep
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
-Wanneer beide zijn ingeschakeld, verloopt het synchronisatiepad als volgt:
+Als beide zijn ingeschakeld, is het synchronisatiepad:
 
-1. `GET <feed base URL>/v1/catalog/latest` met `x-omniroute-radar-schema: 2` en een optionele
-   `Authorization: Bearer <supporter key>`-header (zie hieronder). Servers gebruiken standaard het afzonderlijk
-   ondertekende v1-overgangsartefact wanneer de schemaheader ontbreekt, zodat oudere geïnstalleerde clients
-   updates blijven ontvangen.
-2. Dit is een uitsluitend downloadende applicatiestroom, maar het blijft een HTTPS-verzoek. De gehoste
-   infrastructuur ontvangt gebruikelijke verbindingsmetadata, zoals het bron-IP-adres. Wanneer een supporter-
-   sleutel is geconfigureerd, verzendt de synchronisatie die sleutel ook in de Bearer-header, zodat de service de
-   aanspraak kan bepalen. In de exacte revisie van de privéserver die binnen de bovenstaande bewijsgrens is geïdentificeerd,
-   gebruikt de registratie van feedverzoeken sleutelhashes, geaggregeerd gebruik en een dagelijks roterende, afgekorte HMAC
-   van het IP-adres voor handmatige controle op misbruik; deze tabellen slaan noch de sleutel, noch het IP-adres in onbewerkte vorm op.
-   Toegangslogboeken van de infrastructuur en de versleutelde uitvoerwachtrij voor levering vormen afzonderlijke operationele
-   grenzen.
-3. OmniRoute verzendt nooit prompts, antwoorden, gesprekken, providerinloggegevens, modelverkeer,
-   uptime, latentie of de lokale providerconfiguratie naar de Radar-service.
-4. Het antwoord wordt geverifieerd, gevalideerd en lokaal in de cache opgeslagen (zie
-   [Beveiligingsmodel](#security-model)). Radar heeft precies vier serverzijdige netwerkpaden:
-   `syncRadar()` voor de catalogus, `syncRadarReferrals()` voor verwijzingen en
-   `syncRadarOffers()` / `syncRadarIntel()` voor aanbiedingen en Intel die uitsluitend voor supporters beschikbaar zijn.
+1. `GET <feed base URL>/v1/catalog/latest` met `x-omniroute-radar-schema: 2` en een optionele `Authorization: Bearer <supporter key>` header (zie hieronder). Servers gebruiken standaard het afzonderlijk ondertekende v1-overgangsartefact wanneer de schemaheader ontbreekt, zodat oudere geïnstalleerde clients updates blijven ontvangen.
+2. Dit is een applicatiestroom die alleen kan worden gedownload, maar het is nog steeds een HTTPS verzoek. De gehoste infrastructuur ontvangt gewone verbindingsmetagegevens zoals de bron IP. Wanneer een supportersleutel is geconfigureerd, verzendt synchronisatie die sleutel ook in de Bearer-header, zodat de service het recht kan omzetten. Bij de exacte revisie van de privéserver die is geïdentificeerd in de bovenstaande bewijsgrens, maakt de boekhouding van feedverzoeken gebruik van sleutel-hashes, geaggregeerd gebruik en een dagelijks roterende, ingekorte HMAC van de IP voor handmatige beoordeling van misbruik; die tabellen bevatten noch de sleutel, noch de IP in ruwe vorm. Toegangslogboeken voor de infrastructuur en de gecodeerde postbus voor bezorging zijn afzonderlijke operationele grenzen.
+3. OmniRoute verzendt nooit aanwijzingen, antwoorden, gesprekken, providerreferenties, modelverkeer, uptime, latentie of de lokale providerconfiguratie naar de Radar-service.
+4. Het antwoord wordt lokaal geverifieerd, gevalideerd en in de cache opgeslagen (zie [Beveiligingsmodel](#security-model) ). Radar heeft precies vier netwerkpaden aan de serverzijde: `syncRadar()` voor de catalogus, `syncRadarReferrals()` voor verwijzingen, en `syncRadarOffers()` / `syncRadarIntel()` voor aanbiedingen die alleen voor supporters zijn en Intel.
 
-De **supportersleutel** is een optioneel Bearer-token (`radar_settings.supporter_key`)
-waarmee de feedservice kan bepalen welke laag moet worden aangeboden (zie
-[Lagen](#tiers-community-and-live)). Deze wordt:
+De cataloguscontrole vindt elke 24 uur plaats. Wanneer de geverifieerde feed nog steeds de in de cache opgeslagen versie en laag bevat, behoudt de synchronisatie de in de cache opgeslagen payload, wordt `fetchedAt` vernieuwd en komt de volgende controle 24 uur later in plaats van op het volgende uurlijkse vinkje.
 
-- **Versleuteld opgeslagen** met dezelfde AES-256-GCM-helpers `encrypt()`/`decrypt()`
-  (`src/lib/db/encryption.ts`) die voor providerinloggegevens worden gebruikt.
-- Ingesteld via `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) en
-  **nooit teruggestuurd** — het antwoord retourneert een gemaskeerde vorm (`omr_****abcd`).
-- Bij wijziging of verwijdering worden de caches voor de catalogus, verwijzingen, aanbiedingen en Intel atomair ongeldig gemaakt. De
-  volgende synchronisatie-/leesbewerking bepaalt de nieuwe aanspraak aan de serverzijde; het opslaan van een sleutel voert op zichzelf
-  geen netwerkverzoek uit en verbruikt geen activeringssleutel voor eenmalig gebruik.
-- Als Bearer-token naar de feedservice verzonden bij de synchronisatie-GET — verder verlaat niets over de
-  sleutel ooit de client.
+De** supporters sleutel** is een optioneel Bearer-token (`radar_settings.supporter_key`) waarmee de feedservice kan beslissen welk niveau moet worden aangeboden (zie [Tiers](#tiers-community-and-live) ). Het is:
+
+- Opgeslagen** in rust gecodeerd** met dezelfde AES-256-GCM `encrypt()`/`decrypt()` helpers (`src/lib/db/encryption.ts`) die worden gebruikt voor providerreferenties.
+- Instellen via `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) en** nooit meer teruggekaatst** — het antwoord retourneert een gemaskeerd formulier (`omr_****abcd`).
+- Als u dit wijzigt of opruimt, worden de catalogus, verwijzingen, aanbiedingen en Intel-caches atomair ongeldig. De volgende sync/read lost het nieuwe recht op de server op; Door een sleutel op te slaan, wordt er zelf geen netwerkverzoek gedaan en wordt er geen activeringssleutel voor eenmalig gebruik gebruikt.
+- Verzonden naar de feedservice als een Bearer-token op de synchronisatie GET — Niets anders over de sleutel verlaat ooit de client.
 
 ---
 
@@ -398,84 +376,45 @@ version, tier }` — dit is de waarde die het dashboard toont, nooit het onbewer
 
 ---
 
-## Samenvoegregels bij het lezen
+## Samenvoegregels voor overlay voor leestijd
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) voegt de gecachte feed **over** de
-statische basis heen samen **tijdens het lezen**, binnen `getRadarCatalog()`. De basisarray
-(`FREE_MODEL_BUDGETS`) wordt nooit gewijzigd — bij elke aanroep wordt een nieuwe `MergedEntry[]`
-berekend.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) voegt de in de cache opgeslagen feed samen** over** de statische basislijn op** lees tijd** , binnen `getRadarCatalog()`. De basislijnarray (`FREE_MODEL_BUDGETS`) wordt nooit gemuteerd. —, een `MergedEntry[]` wordt bij elke aanroep opnieuw berekend.
 
 Vier regels, in volgorde van prioriteit:
 
-1. **De feed overschrijft nooit een lokale aanpassing.** Per veld: als de beheerder
-   een veld van een item heeft aangepast (de map `localOverrides`, met als sleutel `provider:modelId`),
-   wordt de waarde van de feed voor dat specifieke veld overgeslagen — de waarde van de beheerder wint.
-2. **`enabled: false` schakelt het item uit, met herkomstinformatie.** Een feeditem dat
-   een item uitschakelt, stelt `enabled: false` en `disabledBy: "radar"` in op het samengevoegde resultaat,
-   zodat de UI kan uitleggen _waarom_ een item van beschikbaar naar uitgeschakeld ging.
-3. **Een door de gebruiker toegevoegd item dat niet in de feed voorkomt, blijft ongewijzigd bestaan.** Items die
-   alleen in de basis bestaan (of lokaal zijn toegevoegd) en waarvoor geen overeenkomstig feeditem
-   bestaat, worden ongewijzigd doorgegeven.
-4. **Een met een tombstone gemarkeerd item wordt nooit opnieuw tot leven gewekt.** Als de beheerder een
-   item expliciet heeft verwijderd (de set `tombstones`), zorgt het opnieuw toevoegen van die
-   `provider:modelId` door de feed in een latere versie er niet voor dat het terugkeert.
+1. **Feed overschrijft nooit een lokale overschrijving.** Per veld: als de operator een veld voor een item heeft aangepast (`localOverrides` map, ingetoetst `provider:modelId`), wordt de feedwaarde voor dat specifieke veld overgeslagen — wint de waarde van de operator.
+2. **`enabled: false` schakelt de invoer uit, met herkomst.** Een feeditem dat een item uitschakelt, stelt `enabled: false` en `disabledBy: "radar"` in op het samengevoegde resultaat, zodat de UI kan uitleggen waarom een item van beschikbaar naar uitgeschakeld is gegaan.
+3. **Een door de gebruiker toegevoegd item dat niet in de feed aanwezig is, blijft onaangeroerd.** Invoer die alleen in de basislijn bestaat (of lokaal is toegevoegd) en geen overeenkomstige feedinvoer heeft, wordt ongewijzigd doorgegeven.
+4. **Een grafsteeninzending wordt nooit weer tot leven gewekt.** Als de operator expliciet een item (`tombstones` set) heeft verwijderd, brengt de feed die die `provider:modelId` opnieuw toevoegt in een latere versie deze niet terug.
 
-De bewerkbare velden en tombstones worden opgeslagen in
-`radar_local_model_state` (migratie `153_radar_local_model_state.sql`). De openbare DB-adapter
-(`src/lib/db/radar.ts`) zet die rijen om in de map `localOverrides` en de set
-`tombstones` die door `applyFeed()` worden gebruikt; `getRadarCatalog()` laadt die status in productie
-nadat de controles voor de featureflag, cache en het schema zijn geslaagd. Alleen `displayName` en `enabled` kunnen
-door de beheerder worden bewerkt. De identiteit van provider/model, feedherkomst, quota, mogelijkheden, gebruiksvoorwaarden
-en configuratiegegevens kunnen niet via deze interface worden weggeschreven.
+De bewerkbare velden en grafstenen blijven behouden in `radar_local_model_state` (migratie `153_radar_local_model_state.sql`). De openbare DB adapter (`src/lib/db/radar.ts`) converteert deze rijen naar de `localOverrides` -kaart en `tombstones` set die door `applyFeed()` worden gebruikt; productie `getRadarCatalog()` laadt die status nadat de vlag-, cache- en schemapoorten zijn gepasseerd. Alleen `displayName` en `enabled` kunnen door een operator worden bewerkt. Provider/model identiteit, feed herkomst, quota, mogelijkheden, ToS en instellingsgegevens kunnen niet via dit oppervlak worden geschreven.
 
-Het dashboard biedt vier lokale acties:
+Het dashboard toont vier lokale acties:
 
-- **Bewerken** wijzigt de lokale weergavenaam en ingeschakelde status.
-- **Lokale wijzigingen resetten** wist beide bewerkbare velden zonder een tombstone te wijzigen.
-- **Verbergen** maakt een tombstone aan, zodat latere feedupdates de rij niet opnieuw kunnen aanmaken.
-- **Herstellen** verwijdert de tombstone; afzonderlijk opgeslagen aanpassingen blijven van kracht.
+- **Bewerking** wijzigt de lokale weergavenaam en de ingeschakelde status.
+- **Lokale wijzigingen resetten** wist beide bewerkbare velden zonder een tombstone te veranderen.
+- **Verbergen** maakt een tombstone, zodat latere feedupdates de rij niet opnieuw kunnen maken.
+- **Herstellen** verwijdert de grafsteen; elke afzonderlijk opgeslagen overschrijving blijft van kracht.
 
-Een `enabled: false` uit de feed blijft de veiligheidsuitzondering: deze heeft voorrang op een verouderde lokale
-`enabled: true`, houdt het samengevoegde item uitgeschakeld en registreert `disabledBy: "radar"`.
+Een feed `enabled: false` blijft de veiligheidsuitzondering: deze overwint een verouderde lokale `enabled: true`, houdt de samengevoegde invoer uitgeschakeld en registreert `disabledBy: "radar"`.
 
-Cataloguspublicaties gebruiken `schemaVersion: 2`. `contextWindow` en elk van `tools`, `vision` en
-`thinking` zijn onafhankelijk `number | null` / `boolean | null`: `null` betekent onbekend, terwijl
-`false` betekent dat een door D16 bevestigde officiële providerbron expliciet aangeeft dat de mogelijkheid ontbreekt.
-Interne register-/modelspecificatievlaggen van OmniRoute worden nooit rechtstreeks tot feedfeiten verheven. De client
-accepteert nog steeds v1-snapshots; omdat de oude builder `false` als tijdelijke aanduiding voor afwezigheid gebruikte, wordt `false` uit v1
-genormaliseerd naar onbekend, terwijl `true` uit v1 feitelijk blijft. Onbekende schemaversies worden standaard geweigerd en de
-laatste geldige cache blijft beschikbaar. Elk v2-model met een niet-null-context/-mogelijkheid moet een
-zonder aanmeldgegevens toegankelijke HTTPS-`metadataEvidenceUrls[]` bevatten; anders mislukt de schemavalidatie en wordt de cache
-niet vervangen. De catalogustabel geeft alle drie de statussen weer als `✓`, `✕` en `?`.
+Cataloguspublicaties gebruiken `schemaVersion: 2`. `contextWindow` en elk van `tools`, `vision` en `thinking` zijn onafhankelijk `number | null` / `boolean | null`: `null` betekent onbekend, terwijl `false` betekent dat een officiële D16-confirmed -providerbron expliciet zegt dat de mogelijkheid afwezig is. Interne OmniRoute registry/model-spec -vlaggen worden nooit rechtstreeks gepromoot om feiten te voeden. De client accepteert nog steeds v1-snapshots; omdat de oude bouwer `false` als tijdelijke aanduiding voor afwezigheid gebruikte, wordt v1 `false` genormaliseerd naar onbekend, terwijl v1 `true` feitelijk blijft. Onbekende schemaversies kunnen niet worden gesloten en de laatste geldige cache blijft beschikbaar. Elk v2-model met een context/capability die niet nul is, moet een HTTPS `metadataEvidenceUrls[]` zonder referenties hebben; anders mislukt de schemavalidatie en wordt de cache niet vervangen. De catalogustabel geeft alle drie de toestanden weer als `✓`, `✕` en `?`.
 
-### Begeleide combinaties en MCP-toegang
+### Begeleide combo's en MCP toegang
 
-Bevestigde `familyId`-waarden blijven behouden tijdens het samenvoegen bij het lezen en sturen de pure
-module `buildRadarComboSuggestions()` (`src/lib/radar/comboSuggestions.ts`) aan. Een familie wordt alleen voorgesteld
-wanneer ten minste twee verschillende providers actieve verbindingen hebben en exact de samengestelde model-ID
-beschikbaar stellen. Uitgeschakelde modellen, inactieve providers, ontbrekende model-ID's, families met één provider en ambigue
-alias-/prefixovereenkomsten worden standaard geweigerd. Suggesties gebruiken de bestaande `priority`-strategie, waarbij het
-grootste terugkerende maandbudget als eerste wordt geplaatst; de UI maakt ze uitsluitend aan via `POST /api/combos`.
+Bevestigde `familyId` waarden overleven de leestijd-overlay en sturen de pure `buildRadarComboSuggestions()` module (`src/lib/radar/comboSuggestions.ts`) aan. Een gezin wordt alleen voorgesteld als ten minste twee verschillende aanbieders actieve connecties hebben en het exacte samengestelde model ID blootleggen. Uitgeschakelde modellen, inactieve providers, ontbrekend model IDs, singleton-families en dubbelzinnige alias/prefix matches worden niet gesloten. Suggesties gebruiken de bestaande `priority` strategie, waarbij eerst het grootste terugkerende maandbudget wordt besteld; de UI creëert ze alleen via `POST /api/combos`.
 
-De begeleide UI bevindt zich op `/dashboard/radar/combos`. Deze leest uitsluitend de lokale
-eindpunten `GET /api/radar/catalog` en `GET /api/combos/builder/options`. De UI activeert nooit een Radar-synchronisatie,
-leest geen providerreferenties en schrijft niet rechtstreeks naar de combodatabase.
+De begeleide UI woont bij `/dashboard/radar/combos`. Het leest alleen de lokale `GET /api/radar/catalog` en `GET /api/combos/builder/options` -eindpunten. Het activeert nooit Radar-synchronisatie, leest nooit de inloggegevens van de provider of schrijft rechtstreeks naar de combo-database.
 
-MCP-clients kunnen dezelfde lokale projectie lezen met `omniroute_radar_catalog` (`read:radar`). De
-optionele filters `provider`, `familyId` en `enabledOnly` worden geëvalueerd na één lokale
-`GET /api/radar/catalog`-lezing. De gesloten uitvoer bevat catalogusmetadata plus provider/model,
-weergavenaam, `familyId`, quotum, mogelijkheden, ingeschakelde status, oorsprong en `disabledBy`; configuratie-URL's,
-stappen, verbindingen, e-mailadressen, sleutels en verwijzingsgegevens worden nooit geretourneerd. Deze tool is
-alleen-lezen en roept nooit `/api/radar/sync` aan.
+MCP clients kunnen dezelfde lokale projectie lezen met `omniroute_radar_catalog` (`read:radar`). De optionele `provider`, `familyId` en `enabledOnly` filters worden geëvalueerd na één lokale `GET /api/radar/catalog` lezing. De gesloten uitvoer omvat catalogusmetagegevens plus provider/model, weergavenaam, `familyId`, quota, mogelijkheden, ingeschakelde status, oorsprong en `disabledBy`; setup URLs, stappen, verbindingen, e-mailadressen, sleutels en verwijzingsgegevens worden nooit geretourneerd. Deze tool is alleen-lezen en roept nooit `/api/radar/sync` aan. Wanneer de in de cache opgeslagen feed dateert van vóór de geïnstalleerde catalogus, is `meta.olderThanRelease` `true` en retourneert de tool modellen uit de geïnstalleerde catalogus met lokale overschrijvingen en tombstones toegepast.
 
-### Herkomstmarkeringen
+### Herkomst markeringen
 
-Elke samengevoegde vermelding bevat een veld `origin` dat door de UI als badge wordt weergegeven:
+Elke samengevoegde vermelding heeft een `origin` veld dat de UI als een badge weergeeft:
 
-- `"baseline"` — ongewijzigd overgenomen uit de statische releasecatalogus.
-- `"radar"` — een of meer velden zijn door de feed bijgewerkt.
-- `"local"` — de beheerder heeft ten minste één lokale overschrijving voor deze vermelding (lokale
-  overschrijvingen hebben volgens regel 1 altijd voorrang op de feed, ongeacht wat de feed vermeldt).
+- `"baseline"` — onaangeroerd uit de statische releasecatalogus.
+- `"radar"` — een of meer velden zijn vernieuwd door de feed.
+- `"local"` — de operator heeft ten minste één lokale overschrijving voor deze invoer (lokale overschrijvingen winnen altijd de feed volgens regel 1, ongeacht wat de feed zegt).
 
 ---
 

@@ -12,18 +12,18 @@ OmniRoute 包含一个功能完备的代理管理系统，可让您通过 HTTP�
 
 ## 目录
 
-- [为什么使用代理？](#为什么使用代理)
-- [架构概览](#架构概览)
-- [四级代理系统](#四级代理系统)
-- [代理注册表（CRUD）](#代理注册表crud)
-- [1proxy 免费代理市场](#1proxy-免费代理市场)
-- [代理轮换](#代理轮换)
-- [反检测与隐匿](#反检测与隐匿)
-- [上游代理模式](#上游代理模式)
-- [控制面板 UI](#控制面板-ui)
-- [API 参考](#api-参考)
-- [环境变量](#环境变量)
-- [故障排除](#故障排除)
+- [为什么使用代理？](#why-use-proxies)
+- [架构概述](#architecture-overview)
+- [四级代理系统](#4-level-proxy-system)
+- [代理注册中心 (CRUD)](#proxy-registry-crud)
+- [1proxy 免费市场](#1proxy-free-proxy-marketplace)
+- [代理轮换](#proxy-rotation)
+- [反探测与隐身](#anti-detection--stealth)
+- [上游代理模式](#upstream-proxy-modes)
+- [仪表板UI](#dashboard-ui)
+- [API参考](#api-reference)
+- [环境变量](#environment-variables)
+- [故障排除](#troubleshooting)
 
 ---
 
@@ -271,148 +271,148 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy 免费代理市场
 
-> 🆕 **由 [@oyi77](https://github.com/oyi77) 贡献** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847)（Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788)）
+> 🆕**贡献者： [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) （问题[#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) ）
 
-OmniRoute 与 **[1proxy](https://1proxy-api.aitradepulse.com)** 社区平台集成，可使用来自世界各地的**数百个经过验证的免费代理**。这非常适合没有自有代理基础设施的用户。
+OmniRoute与**[1个代理](https://1proxy-api.aitradepulse.com)**社区平台提供访问**数百个免费且经过验证的代理**来自世界各地。这对于没有自己的代理基础设施的用户来说是完美的。
 
-### 工作原理
+### 它是如何运作的
 
 ```
-┌─────────────┐     同步      ┌─────────────────┐    轮换      ┌──────────┐
-│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ 供应商   │
-│   （外部）   │   最多 500 个  │  source=oneproxy │  按质量选择  │   API    │
-└─────────────┘     代理      └─────────────────┘               └──────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **同步** — OmniRoute 从 1proxy API 获取经过验证的代理
-2. **存储** — 代理保存在同一个 `proxy_registry` 表中，并设置 `source = 'oneproxy'`
-3. **筛选** — 按协议、国家/地区和质量评分进行筛选
-4. **轮换** — 使用质量优先、随机或顺序策略选择最佳代理
-5. **自动降级** — 失败代理的质量评分会降低；低于阈值时 → 标记为非活动状态
+1. **同步**— OmniRoute从 1proxy API获取经过验证的代理
+2. **店铺**—代理与`source = 'oneproxy'`保存在同一个`proxy_registry`表中
+3. **筛选**—按协议、国家/地区、质量得分过滤
+4. **旋转**—使用质量、随机或顺序策略选择最佳代理
+5. **自动降解**—失败的代理的质量分数会降低；低于阈值→标记为非活动状态
 
 ### 同步代理
 
 **通过仪表板：**
 
-1. 前往 **设置 → 1proxy** 选项卡
+1. 前往**设置→ 1proxy**选项卡
 2. 点击**“立即同步”**
-3. 查看统计信息：代理总数、活动代理数量、平均质量以及按国家/地区划分的明细
+3. 查看统计数据：代理总数、活跃数量、平均质量、按国家/地区细分
 
-**通过 API：**
+**通过API：**
 
 ```bash
-# 触发同步
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# 响应：
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
-### 筛选代理
+### 过滤代理
 
 ```bash
-# 按协议筛选
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# 按国家/地区筛选
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# 按最低质量评分筛选
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# 组合筛选条件
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### 代理质量评分
+### 代理质量得分
 
-每个 1proxy 代理都包含以下元数据：
+每个 1proxy 代理都带有元数据：
 
-| 字段            | 说明                                  |
-| --------------- | ------------------------------------- |
-| `qualityScore`  | 1proxy 验证给出的 0-100 评分          |
-| `latencyMs`     | 测得的网络延迟                        |
-| `anonymity`     | `transparent`、`anonymous` 或 `elite` |
-| `googleAccess`  | 代理能否访问 Google 服务              |
-| `countryCode`   | 两位 ISO 国家/地区代码                |
-| `lastValidated` | 上次验证的时间戳                      |
+| 场地            | 描述                                 |
+| --------------- | ------------------------------------ |
+| `qualityScore`  | 1proxy 验证的 0-100 评级             |
+| `latencyMs`     | 测量的网络延迟                       |
+| `anonymity`     | `transparent`、 `anonymous`或`elite` |
+| `googleAccess`  | proxy是否可以访问Google服务          |
+| `countryCode`   | 两个字母的ISO国家/地区代码           |
+| `lastValidated` | 上次验证的时间戳                     |
 
-质量评分会动态调整：
+质量分数动态调整：
 
-- **请求失败**会使评分降低 10 分
-- **评分降至 ≤10** → 代理将被标记为 `inactive`
-- 非活动代理不会参与轮换
+- **失败的请求**降低10分
+- **≤分数降至 10** →代理标记为`inactive`
+- 不活动的代理被排除在轮换之外
 
 ### 轮换策略
 
 ```bash
-# 按质量轮换（优先选择最佳代理）— 默认策略
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# 随机轮换
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# 顺序轮换（优先选择最久未验证的代理）
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
-### 熔断器
+### 断路器
 
-1proxy 同步功能内置了熔断器：
+1proxy 同步有一个内置断路器：
 
-- 在**连续 5 次同步失败**后，后续同步尝试将被阻止
-- 可通过 `resetOneproxyCircuitBreaker()` 重置，或重启服务器
-- 可通过 `GET /api/settings/oneproxy?action=status` 获取同步状态
+- 后**连续 5 次同步失败**，进一步的同步尝试被阻止
+- 重置： `resetOneproxyCircuitBreaker()`或重新启动服务器
+- 同步状态可在`GET /api/settings/oneproxy?action=status`上获取
 
-### 清除 1proxy 代理
+### 清除1proxy代理
 
 ```bash
-# 删除单个 1proxy 代理
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# 清除所有 1proxy 代理（手动添加的代理不受影响）
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
 ---
 
-## 反检测与隐匿
+## 反探测与隐身
 
-OmniRoute 不只是通过代理路由流量，还会让流量看起来合法：
+OmniRoute不仅仅通过代理—路由流量，它还使流量看起来合法：
 
-### TLS 指纹伪装
+### TLS指纹欺骗
 
-使用 `wreq-js` 生成类似浏览器的 TLS 指纹，从而绕过会标记非浏览器 TLS 握手的机器人检测系统。
+使用`wreq-js`生成类似浏览器的TLS指纹，绕过标记非浏览器TLS握手的机器人检测系统。
 
-### CLI 指纹匹配
+### CLI指纹比对
 
-**CLI 指纹开关**（`设置 → 安全`）会重新排列 HTTP 标头和 JSON 正文字段，以精确匹配原生 CLI 二进制文件（Claude Code、Codex 等）的特征。此功能在代理之上运行：
+这**CLI指纹切换**(`Settings → Security`) 重新排序HTTP标头和JSON正文字段以匹配本机CLI二进制文件的确切签名（Claude Code、 Codex等）。这有效**在上面**代理：
 
 ```
-您的 IP（被阻止）→ 代理 IP（美国）→ 提供者 API
-                   + TLS 伪装
-                   + CLI 指纹
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-您可以同时获得 **IP 隐藏**和**请求真实性**。
+你两者都得到**IP掩码**和**要求真实性**同时地。
 
-### 代理 IP 保留
+### 代理IP保存
 
-仪表板中的彩色徽章会显示当前生效的代理级别：
+仪表板中的颜色编码徽章显示哪个代理级别处于活动状态：
 
-| 徽章 | 级别   | 含义                      |
-| ---- | ------ | ------------------------- |
-| 🟢   | 全局   | 所有流量都通过此代理      |
-| 🟡   | 提供者 | 仅此提供者的流量通过代理  |
-| 🔵   | 连接   | 此特定密钥/账户使用此代理 |
+| 徽章 | 等级   | 意义                              |
+| ---- | ------ | --------------------------------- |
+| 🟢   | 全球的 | 所有流量都经过此代理              |
+| 🟡   | 提供者 | 仅代理该提供者的流量              |
+| 🔵   | 联系   | 这个特定的key/account使用这个代理 |
 
-徽章还会显示解析后的代理 IP，以供验证。
+徽章还显示已解析的代理IP以供验证。
 
 ---
 
@@ -775,49 +775,28 @@ ORDER BY latency_ms DESC;
 负载）
 ```
 
-## 自动排除您自己的故障代理
+## 自动排除您自己的代理故障
 
-1proxy 市场代理池已具备自动降级故障代理的能力（请参阅
-[代理质量评分](#proxy-quality-scores)）。对于由**您**添加到注册表中的
-代理，后台健康检查调度器
-(`src/lib/proxyHealth/scheduler.ts`) 可提供同样的“自动从链中排除故障成员”
-行为，且无需删除任何内容：
+1proxy 市场池已经自行自动降级失败的代理（请参阅[代理质量分数](#proxy-quality-scores)）。对于代理**你**添加到注册表后，后台运行状况调度程序（`src/lib/proxyHealth/scheduler.ts`）提供相同的“自动从链中排除失效成员”行为，而不删除任何内容：
 
 ```bash
-# .env — 在代理连续 3 次探测失败后将其软禁用，并在其重新响应探测后
-# 自动重新启用。
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-它在多代理链中的工作方式如下：
+它如何融入多代理链：
 
-1. 调度器每隔 `PROXY_HEALTH_INTERVAL_MS` 对每个已注册的代理进行探测
-   （默认 10 分钟；最短 1 分钟）。
-2. 在连续发生 `PROXY_AUTO_REMOVE_AFTER` 次**确定性**故障后（即真正的
-   连接故障——超时或探测目标自身的 5xx 均不计入，详见
-   [代理健康检查](#proxy-health-checking-v3816)），代理的 `status` 将被
-   设置为 `dead`。
-3. `dead` 是代理池/轮换解析所使用的存活状态过滤器会排除的状态之一，
-   因此作用域的轮换策略（轮询 / 随机 / 粘性 / 延迟——详见
-   [轮换策略决策树](#rotation-strategy-decision-tree)）会立即停止将该代理
-   分配给新请求。池中的其他代理不会受到影响，并且整个代理池绝不会
-   在未提示的情况下回退为直接连接——请参阅
-   [四级代理系统](#4-level-proxy-system)的故障关闭保护机制。
-4. 调度器会继续以相同的时间间隔探测 `dead` 代理。下一次成功探测会将
-   `status` 恢复为 `active`，并使其重新加入轮换——无需手动重新添加。
+1. 调度程序每个`PROXY_HEALTH_INTERVAL_MS`都会探测每个已注册的代理（默认 10 分钟；最少 1 分钟）。
+2. `PROXY_AUTO_REMOVE_AFTER`连续之后**确凿**失败（真正的连接失败—超时或探测目标自己的 5xx 永远不会计数，请参阅[代理运行状况检查](#proxy-health-checking-v3816)），代理的`status`设置为`dead`。
+3. `dead`是pool/rotation解析使用的活动状态过滤器排除的状态之一，因此作用域的轮换（循环/随机/粘性/延迟/会话—请参阅[轮换策略决策树](#rotation-strategy-decision-tree)）立即停止将该代理移交给新请求。池中的其他代理不会受到影响，并且整个池永远不会默默地回退到直接连接—看到[4 级代理系统](#4-level-proxy-system)故障关闭防护。
+4. 调度程序以相同的时间间隔不断探测`dead`代理。下一个成功的探测会将`status`翻转回`active` ，并重新进入旋转—无需手动重新添加。
 
-此功能特意设计为**可选且非破坏性**：默认情况下，调度器只会统计并记录
-故障（请参阅 `decision.ts` 中的策略 C），而 `PROXY_AUTO_DISABLE`
-绝不会删除记录——删除记录是单独且更激进的 `PROXY_AUTO_REMOVE`
-标志所负责的功能。如果两者均设置为 `true`，则以 `PROXY_AUTO_REMOVE`
-为准（即将被删除的代理无需在删除前先进行软禁用）。有关完整变量列表，
-请参阅[环境配置](../reference/ENVIRONMENT.md)参考文档。
+这是故意的**选择加入且非破坏性**：默认情况下，调度程序仅计算和记录失败（请参阅`decision.ts`中的策略 C），并且`PROXY_AUTO_DISABLE`永远不会删除行—这就是单独的、更积极的`PROXY_AUTO_REMOVE`标志的用途。如果两者都设置为`true`， `PROXY_AUTO_REMOVE`获胜（即将删除的代理对于中间的软禁用没有用处）。有关完整变量列表，请参阅[环境配置](../reference/ENVIRONMENT.md)参考。
 
 ---
 
-> 📖 **相关文档：**
+> 📖**相关文档：**
 >
-> - [用户指南](../guides/USER_GUIDE.md) — 常规设置与配置
-> - [API 参考](../reference/API_REFERENCE.md) — 完整的 API 文档
-> - [环境配置](../reference/ENVIRONMENT.md) — 所有环境变量
+> - [用户指南](../guides/USER_GUIDE.md)—常规设置和配置 - [API参考](../reference/API_REFERENCE.md)—完整的API文档 -[环境配置](../reference/ENVIRONMENT.md)—所有环境变量

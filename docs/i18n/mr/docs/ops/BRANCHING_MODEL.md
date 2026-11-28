@@ -52,7 +52,7 @@ flowchart LR
 तुम्हाला हवी असलेली शाखा विलीन करण्यायोग्य आहे असे मानण्यापूर्वी ओपन फ्रीझ तपासा:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 मर्ज मेकॅनिक्स (मालक `queue` लेबल → Mergify) [MERGE_TRAIN.md](./MERGE_TRAIN.md) मध्ये दस्तऐवजीकरण केलेले आहेत.

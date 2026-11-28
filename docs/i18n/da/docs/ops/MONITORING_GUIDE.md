@@ -99,31 +99,31 @@ Pr. kombination:
 
 ---
 
-## API til sundhedstjek
+## Sundhedstjek API
 
-OmniRoute eksponerer **to** HTTP-sundhedsflader. De kan ikke bruges i flæng af orkestratorer.
+OmniRoute afslører** to** HTTP sundhedsoverflader. De er ikke udskiftelige for orkestratorer.
 
-| Sti                          | Formål                                                              | Belastning                              | Brug til                                                                 |
-| ---------------------------- | ------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
-| `GET /healthz`               | Livscyklusstatus for live/parat (`ok` / `starting` / `stopping`)    | Minimal (kun faseflag)                  | Kubernetes-**parathed**; lempelig **live-status**, hvis HTTP skal bruges |
-| `GET /api/monitoring/health` | Dybdegående system- og provideroversigt (DB, heap, katalogantal, …) | Tung (synkront DB-/overvågningsarbejde) | Dashboards, dybdegående blackbox-tjek, Dockers indbyggede sundhedstjek   |
+| Sti                          | Formål                                                         | Vægt                                 | Brug til                                                              |
+| ---------------------------- | -------------------------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------- |
+| `GET /healthz`               | Livscyklus liveness/readiness (`ok` / `starting` / `stopping`) | Trivielt (kun faseflag)              | Kubernetes** beredskab** ; blød** livlighed** hvis du skal bruge HTTP |
+| `GET /api/monitoring/health` | Dyb system + udbyder oversigt (DB, heap, katalog optælling, …) | Tung (sync DB / overvågningsarbejde) | Dashboards, blackbox dybe tjek, Docker indbyggede sundhedstjek        |
 
-> **Bemærk:** Providersundhedsmatricer, autopilotproblemer, kvotemonitorer, tokensundhed og latensdetaljer ud over `/api/monitoring/health` er tilgængelige via **MCP-værktøjet** `observability_snapshot` eller **dashboardets** sider — der findes ingen dedikerede REST-ruter til disse.
+> **Note:** Udbydersundhedsmatricer, autopilotproblemer, kvotemonitorer, tokensundhed og latensdetaljer ud over `/api/monitoring/health` er tilgængelige via**MCP værktøj** `observability_snapshot` eller** dashboard** sider — der er ingen dedikerede REST ruter til dem.
 
-Begge ruter kører i den **samme Node-event-loop** som håndteringen af forespørgsler. En CPU-bundet sti (omfattende katalogarbejde for `GET /v1/models`, komprimering af lange kontekster/tokenoptælling) kan forsinke **alle** HTTP-handlere, herunder `/healthz`. En travl event-loop ≠ en død proces. Løs helst årsagen til belastningen; justering af probes reducerer kun fejlagtige termineringer.
+Begge ruter kører på** samme Node-hændelsesløkke** som anmodningsbehandling. En CPU-bundet sti (stort `GET /v1/models` katalog arbejde, lang kontekst komprimering / token optælling) kan forsinke** alle** HTTP handlere, inklusive `/healthz`. Event-loop optaget ≠ proces død. Foretrækker at fiksere svinet; sondetuning reducerer kun falske drab.
 
-### Letvægtsprobe til orkestrator
+### Letvægts orkestratorsonde
 
 ```bash
 GET /healthz
-# eller HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + body `ok`, når serverens livscyklusfase er klar
+- **200** + body `ok` når serverens livscyklusfase er klar
 - **503** + `starting` / `stopping` under opstart eller nedlukning
-- Implementering: `src/app/healthz/route.ts` (ingen DB-ping)
+- Implementering: `src/app/healthz/route.ts` (ingen DB ping)
 
-### Systemsundhed (dybdegående)
+### Systemsundhed (dyb)
 
 ```bash
 GET /api/monitoring/health
@@ -153,43 +153,35 @@ Svar:
 }
 ```
 
-#### `credentialHealth`: probe-cache kontra SQLite `test_status`
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth` er **måleværdien fra probe-cachen i
-hukommelsen**, ikke et live-dump af `provider_connections.test_status`. Efter #12532
-læser forespørgselsstien kun `getCachedCredentialHealthSummary()`; baggrundsprobes
-opdaterer cachen uden for event-loop'en.
+`GET /api/monitoring/health` → `credentialHealth` er den** in-memory probe-cache måler** , ikke en live dump af `provider_connections.test_status`. Efter #12532 læser anmodningsstien kun `getCachedCredentialHealthSummary()` ; baggrundsprober opdaterer cachen fra hændelsesløkken.
 
-| Lag                               | Hvor                                                                  | Hvad det betyder                                                                                                                                                                                                 |
-| --------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Måleværdi fra probe-cache         | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | De seneste resultater fra sundhedsprobes for legitimationsoplysninger, som stadig opbevares i proceshukommelsen. `source` er altid `probe-cache`.                                                                |
-| Detaljer om mislykket forbindelse | `credentialHealth.failedConnections`                                  | Findes **kun, når `failed > 0`**. Begrænset liste over cacherækker med `status=error` (`connectionId`, `status`, renset `lastError` / `lastErrorType`). `failedOmitted` angives, når listen er blevet begrænset. |
-| Vedvarende SQLite-status          | `credentialHealth.staleDbNonOkCount`                                  | Antal **aktive** (`is_active=1`) forbindelsesrækker, hvis gemte `test_status` er en kendt ikke-ok-status (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                      |
+| Lag                                  | Hvor                                                                  | Hvad det betyder                                                                                                                                                                                                        |
+| ------------------------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Probe-cache måler                    | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Sidste legitimations-sundhedsproberesultater opbevares stadig i proceshukommelsen. `source` er altid `probe-cache`.                                                                                                     |
+| Oplysninger om mislykket forbindelse | `credentialHealth.failedConnections`                                  | Nuværende** kun når `failed > 0`** . Afgrænset liste over cache-rækker med `status=error` (`connectionId`, `status`, sanitized `lastError` / `lastErrorType`). `failedOmitted` er indstillet, da listen blev begrænset. |
+| SQLite klæbrig status                | `credentialHealth.staleDbNonOkCount`                                  | Optælling af** aktiv** (`is_active=1`) forbindelsesrækker, hvis vedvarende `test_status` er en kendt ikke-ok (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                         |
 
-De to lag kan med vilje være uenige:
+De to lag kan være uenige med vilje:
 
-- Måleværdien er `failed=0`, mens `staleDbNonOkCount>0` — SQLite har stadig en vedvarende
-  `test_status` (f.eks. `expired` eller `credits_exhausted`), som det seneste
-  snapshot fra probe-cachen ikke tæller som `status=error`.
-- Måleværdien er `failed>0`, mens SQLite ser sund ud — en nylig probe mislykkedes og er
-  cachelagret; DB-rækken er ikke blevet opdateret eller blev senere nulstillet.
+- Mål `failed=0` mens `staleDbNonOkCount>0` — SQLite stadig har en sticky `test_status` (for eksempel `expired` eller `credits_exhausted`), at det seneste probe-cache-øjebliksbillede ikke tæller som `status=error`.
+- Mål `failed>0` mens SQLite ser sund ud — en nylig probe mislykkedes og er cachelagret; DB rækken er ikke blevet opdateret eller blev senere ryddet.
 
-Opret ikke en alarm udelukkende baseret på `provider_connections.test_status`, når dette
-slutpunkt scrapes. Brug `failed` + `failedConnections` til aktuelle probefejl og
-`staleDbNonOkCount`, når du har brug for antallet af gemte, vedvarende statusser.
+Alarm ikke kun på `provider_connections.test_status`, når du skraber dette endepunkt. Brug `failed` + `failedConnections` til live-probefejl, og `staleDbNonOkCount` når du har brug for den vedvarende sticky-status-tælling.
 
-### Anbefalinger til Kubernetes-probes
+### Kubernetes undersøger anbefalinger
 
-OmniRoute er en **enkelt Node-proces** (én event-loop). Dockers standard-`HEALTHCHECK` er rettet mod den lette `/healthz`. `/api/monitoring/health` er **for tung** til kubelets intervaller for live-status.
+OmniRoute er en** enkelt node proces** (én hændelsesløkke). Lager Docker `HEALTHCHECK` mål letvægts `/healthz`. `/api/monitoring/health` er** for tung** for kubelet liveness intervaller.
 
-| Probe                   | Anbefalet mål                                                                       | Bemærkninger                                                                                                                                                                                                                                                                                                                                                                |
-| ----------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Opstart**             | HTTP `GET /healthz` med en lang `failureThreshold` (eller stor `startPeriod`)       | Koldstart + SQLite-migrering kan tage mere end nogle få sekunder                                                                                                                                                                                                                                                                                                            |
-| **Klarhed**             | HTTP `GET /healthz`                                                                 | Livscyklus `ok` / `starting` / `stopping` (200 kontra 503). Flapper stadig, hvis løkken er CPU-blokeret. Et **200-svar efter flere sekunder er ikke sundt** (#10303) — det betyder, at hændelsesløkken blev udsultet, før handleren på 3 byte blev kørt                                                                                                                     |
-| **Livstegn**            | HTTP `GET /livez`, **eller TCP** på hovedtjenestens port (`PORT`, standard `20128`) | `/livez` angiver kun, om processen er i live (altid 200, hvis handleren kører). Den deler stadig hændelsesløkken — optaget ≠ død, og den registrerer ikke udsultning af hændelsesløkken (#10303) bedre end TCP. Foretræk **TCP**, hvis HTTP-prober får timeout under katalog-/komprimeringsbelastning; dræb **heller ikke** pod'en ved korte blokeringer af hændelsesløkken |
-| **Dybdegående sundhed** | `GET /api/monitoring/health` fra en ekstern kontrollør                              | Ikke til kubelets `livenessProbe` / stramme `readinessProbe`                                                                                                                                                                                                                                                                                                                |
+| sonde           | Anbefalet mål                                                                      | Noter                                                                                                                                                                                                                                                                                                                                   |
+| --------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Opstart**     | HTTP `GET /healthz` med en lang `failureThreshold` (eller stor `startPeriod`)      | Koldstart + SQLite -migrering kan overstige et par sekunder                                                                                                                                                                                                                                                                             |
+| **Beredskab**   | HTTP `GET /healthz`                                                                | Livscyklus `ok` / `starting` / `stopping` (200 vs 503). Flapper stadig, hvis løkken er CPU-blokeret. EN** 200 på flere sekunder er ikke sundt** (#10303) — det betyder, at hændelsesløkken blev udsultet, før 3-byte-handleren kørte                                                                                                    |
+| **Livlighed**   | HTTP `GET /livez`,** eller TCP** på hovedtjenesteporten (`PORT`, standard `20128`) | `/livez` er kun proces-levende (altid 200, hvis handleren kører). Den deler stadig begivenhedsløkken — busy ≠ dead, og den registrerer ikke event-loop sult (#10303) bedre end TCP gør. Foretrække**TCP** hvis HTTP -sonderne timeout under catalog/compression belastning; gør** ikke** dræb poden på korte event-loop-båse begge veje |
+| **Dyb sundhed** | `GET /api/monitoring/health` fra en ekstern checker                                | Ikke til kubelet `livenessProbe` / stramme `readinessProbe`                                                                                                                                                                                                                                                                             |
 
-Eksempel på struktur (tilpas tærsklerne til din koldstart og komprimeringsbelastning):
+Eksempel på form (tilpas tærskler til din koldstart og kompressionsbelastning):
 
 ```yaml
 ports:
@@ -215,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Ved blokering af hændelsesløkken kan HTTP /livez stadig få timeout. TCP er det
-  # konservative alternativ:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-Ret **ikke** kubelets **livstegnsprobe** mod `/api/monitoring/health`. Denne sti udfører reelt database-/overvågningsarbejde og vil give falske positiver under belastning.
+**Gør ikke** punkt kubelet** livlighed** på `/api/monitoring/health`. Den vej udfører rigtigt DB/monitoring -arbejde og vil være falsk-positiv under belastning.
 
-Relateret: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (prober, mens hændelsesløkken er optaget), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (katalogprisfastsættelse beslaglægger ressourcer), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (komprimeringens tokenoptælling beslaglægger ressourcer).
+Relateret: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sonder, mens hændelsesløkken er optaget), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (katalogprissvin), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (kompressionstoken-tæller).
 
-### systemd-watchdog (fastfrosset hændelsesløkke)
+### systemd vagthund (frossen hændelsesløkke)
 
-På en systemd-vært fortæller OmniRoute tjenestehåndteringen, når den er klar, og fortsætter med at sende ping til den, så en server, hvis hændelsesløkke sidder fast, bliver stoppet og genstartet i stedet for at forblive oppe og tavs. Pingene kommer fra serverens egen hændelsesløkke: Når den blokeres, stopper de, og systemd genstarter tjenesten, når `WatchdogSec` er forløbet uden et ping.
+På en systemd-vært fortæller OmniRoute serviceadministratoren, når den er klar, og bliver ved med at pinge den, så en server, hvis hændelsesløkke sidder fast, bliver dræbt og genstartet i stedet for at forblive oppe og stille. Pingene kommer fra serverens egen hændelsesløkke: når den blokerer, stopper de, og systemd genstarter tjenesten, når `WatchdogSec` udløber uden en.
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) opretter allerede en brugerenhed med dette. En enhed, du selv opretter (med standardindstillingen `Type=simple`), har ingen watchdog, så tilføj disse linjer i dens `[Service]`-sektion:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) skriver allerede en brugerenhed med dette. En enhed du selv skriver (standard `Type=simple`) får ingen vagthund, så føj disse linjer til dens `[Service]` sektion:
 
 ```ini
 [Service]
@@ -239,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-Den genererede enhed indstiller `Restart=on-failure`, så tilføj også denne linje — uden den stopper watchdog'en kun den fastlåste tjeneste i stedet for at genstarte den.
+Den genererede enhed sætter `Restart=on-failure`, så tilføj den linje også — uden den dræber vagthunden kun den fastlåste tjeneste i stedet for at genstarte den.
 
-- `Type=notify`: Tjenesten er "startet", når serveren sender `READY=1`, ikke når processen forker. `TimeoutStartSec` sætter en grænse for en langsom opstart.
-- `NotifyAccess=all`: Pingene sendes af serverprocessen, som er en underproces til `omniroute serve`-supervisoren.
-- `WatchdogSec`: Der sendes ping hvert 60. sekund, så brug **120 eller mere**. Lavere værdier ville genstarte en sund server.
-- Kør `omniroute serve` i forgrunden. `--daemon` frigør serveren fra enhedens cgroup, og notify-håndtrykket fuldføres aldrig.
+- `Type=notify`: tjenesten "startes", når serveren sender `READY=1`, ikke når processen gafler. `TimeoutStartSec` begrænser en langsom start.
+- `NotifyAccess=all`: Pingene sendes af serverprocessen, som er et barn af `omniroute serve` supervisoren.
+- `WatchdogSec`: ping går ud hvert 60. sekund, så brug** 120 eller mere** . Mindre værdier ville genstarte en sund server.
+- Kør `omniroute serve` i forgrunden. `--daemon` adskiller serveren fra enhedens cgroup, og underretningshåndtrykket fuldføres aldrig.
 
-Kontrollér, at den er aktiv efter en genstart:
+Tjek, at den er aktiv efter en genstart:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` viser den konfigurerede forsinkelse, og `WatchdogTimestamp` bevæger sig fremad hvert minut. En genstart forårsaget af watchdog'en registreres som `Result=watchdog`. Hvis du vil slå pingene fra uden at ændre enheden, skal du indstille `OMNIROUTE_DISABLE_SD_NOTIFY=1`; uden en `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) sendes der intet.
+`WatchdogUSec` viser den konfigurerede forsinkelse, og `WatchdogTimestamp` bevæger sig frem hvert minut. En genstart forårsaget af vagthunden registreres som `Result=watchdog`. Indstil `OMNIROUTE_DISABLE_SD_NOTIFY=1`; uden en `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) sendes intet.
 
-Watchdog'en kontrollerer kun, at hændelsesløkken fortsætter med at køre. En server, der er langsom, men stadig kører videre, genstartes ikke.
+Vagthunden kontrollerer kun, at hændelsesløkken bliver ved med at køre. En server, der er langsom, men stadig drejer, genstartes ikke.
 
-### Valgfrit arbejde i request-stien (hukommelse, færdigheder, tokenfornyelse)
+### Valgfri anmodningsstiarbejde (hukommelse, færdigheder, token-opdatering)
 
-Hukommelsesudtrækning, færdighedsinjektion og opdatering af OAuth-tokens deler **Node-hovedhændelsesløkken** med `/healthz`. De er funktioner, der kan slås til og fra i dashboardet (`memoryEnabled`, `skillsEnabled`), ikke en worker-pulje. Se [Miljø — belastning af hændelsesløkken](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Hukommelsesudtrækning, færdighedsindsprøjtning og OAuth token-opdatering deler** hovedknudehændelsesløkke** med `/healthz`. De er dashboard-skift-funktioner (`memoryEnabled`, `skillsEnabled`), ikke en arbejderpulje. Se [miljø — event-loop omkostninger](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
-### Udbyderstatus
+### Udbyder sundhed
 
-> **Intet REST-endpoint.** Data om udbyderstatus er tilgængelige via MCP-værktøjet `observability_snapshot` eller dashboardsiden `/dashboard/providers`.
+> **Intet REST endepunkt.** Udbyderens helbredsdata er tilgængelige via MCP -værktøjet `observability_snapshot` eller dashboard `/dashboard/providers` siden.
 
 ### Udbyderdetaljer
 
-> **Intet REST-endpoint.** Detaljer for hver udbyder er tilgængelige via dashboardsiden `/dashboard/providers`.
+> **Intet REST endepunkt.** Per-udbyder detaljer er tilgængelige via dashboard `/dashboard/providers` siden.
 
 ---
 

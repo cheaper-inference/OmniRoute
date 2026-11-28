@@ -13,28 +13,23 @@ UI/UX, i18n, CLI, ഡാറ്റാബേസ്, ബിൽഡ്/ഡിപ്�
 
 ---
 
-## വികസന സജ്ജീകരണം
+## വികസന ക്രമീകരണം
 
 ### മുൻവ്യവസ്ഥകൾ
 
 - **Node.js** `>=22.22.2 <23`, അല്ലെങ്കിൽ `>=24.0.0 <27` (ശുപാർശ ചെയ്യുന്നത്: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Node 24 ഉള്ള Windows:** നിലവിലെ 24 LTS പാച്ച് റിലീസ് ഉപയോഗിക്കുക (കുറഞ്ഞത് 24.20.0).
-> നേരത്തെയുള്ള റിലീസുകളിൽ `--test-force-exit` പ്രോസസ് അടയ്ക്കുമ്പോൾ വിജയകരമായ ടെസ്റ്റുകൾക്ക് ശേഷം
-> പ്രോസസ് അബോർട്ട് ചെയ്യാൻ സാധ്യതയുണ്ട്. Node-ന്റെ [Windows libuv പരിഹാരം](https://github.com/nodejs/node/pull/61999)
-> ഈ റൺടൈം ക്രാഷ് പരിഹരിക്കുന്നു; ടെസ്റ്റ് അസർഷനുകളും റണ്ണർ എക്സിറ്റ് പരിശോധനകളും പ്രവർത്തനക്ഷമമായി നിലനിർത്തുക.
+> **നോഡ് 24 ഉള്ള Windows :** നിലവിലെ 24 LTS പാച്ച് റിലീസ് ഉപയോഗിക്കുക (കുറഞ്ഞത് 24.20.0). `--test-force-exit` പ്രോസസ്സ് അവസാനിപ്പിക്കുമ്പോൾ വിജയകരമായ പരിശോധനകൾക്ക് ശേഷം മുമ്പത്തെ റിലീസുകൾ നിർത്തലാക്കാനാകും. നോഡിൻ്റെ [Windows libuv ഫിക്സ്](https://github.com/nodejs/node/pull/61999) ഈ റൺടൈം ക്രാഷിനെ അഭിസംബോധന ചെയ്യുന്നു; ടെസ്റ്റ് അസെർഷനുകളും റണ്ണർ എക്സിറ്റ് പരിശോധനകളും പ്രവർത്തനക്ഷമമാക്കി നിലനിർത്തുക.
 
-> **npm v11+ ഉപയോക്താക്കൾ (Node 24+):** `npm install` കഴിഞ്ഞ് നേറ്റീവ് മോഡ്യൂളുകൾ ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് പരിശോധിക്കുക:
-> `node -e "require('better-sqlite3')"`. ഇത് `MODULE_NOT_FOUND` ഉപയോഗിച്ച് പരാജയപ്പെടുകയാണെങ്കിൽ,
-> `npm approve-scripts better-sqlite3 && npm install` പ്രവർത്തിപ്പിക്കുക. [പ്രശ്നപരിഹാരം](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) കാണുക.
+> **npm v11 + ഉപയോക്താക്കൾ (നോഡ് 24 +):** `npm install` ന് ശേഷം, നേറ്റീവ് മൊഡ്യൂളുകൾ ഇൻസ്റ്റാൾ ചെയ്തുവെന്ന് പരിശോധിക്കുക: `node -e "require('better-sqlite3')"`. ഇത് `MODULE_NOT_FOUND` ൽ പരാജയപ്പെടുകയാണെങ്കിൽ, `npm approve-scripts better-sqlite3 && npm install` പ്രവർത്തിപ്പിക്കുക. [ട്രബിൾഷൂട്ടിംഗ്](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) കാണുക.
 
 - **Git**
 
-### ക്ലോൺ ചെയ്ത് ഇൻസ്റ്റാൾ ചെയ്യുക
+### ക്ലോൺ & ഇൻസ്റ്റാൾ ചെയ്യുക
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -42,91 +37,83 @@ npm install
 ### പരിസ്ഥിതി വേരിയബിളുകൾ
 
 ```bash
-# ടെംപ്ലേറ്റിൽ നിന്ന് നിങ്ങളുടെ .env സൃഷ്ടിക്കുക
+# Create your .env from the template
 cp .env.example .env
 
-# ആവശ്യമായ രഹസ്യങ്ങൾ സൃഷ്ടിക്കുക
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 വികസനത്തിനുള്ള പ്രധാന വേരിയബിളുകൾ:
 
-| Variable               | Development Default      | Description               |
-| ---------------------- | ------------------------ | ------------------------- |
-| `PORT`                 | `20128`                  | സെർവർ പോർട്ട്             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ഫ്രണ്ട്എൻഡിനുള്ള ബേസ് URL |
-| `JWT_SECRET`           | (മുകളിൽ സൃഷ്ടിക്കുക)     | JWT സൈനിംഗ് രഹസ്യം        |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | ആദ്യ ലോഗിൻ പാസ്വേഡ്       |
-| `APP_LOG_LEVEL`        | `info`                   | ലോഗ് വിശദതാ നില           |
+| വേരിയബിൾ               | ഡെവലപ്പ്മെൻ്റ് ഡിഫോൾട്ട് | വിവരണം                       |
+| ---------------------- | ------------------------ | ---------------------------- |
+| `PORT`                 | `20128`                  | സെർവർ പോർട്ട്                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | മുൻഭാഗത്തിനുള്ള അടിസ്ഥാന URL |
+| `JWT_SECRET`           | (മുകളിൽ സൃഷ്ടിക്കുക)     | JWT ഒപ്പിടൽ രഹസ്യം           |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | ആദ്യ ലോഗിൻ പാസ്സ്വേർഡ്       |
+| `APP_LOG_LEVEL`        | `info`                   | ലോഗ് വെർബോസിറ്റി ലെവൽ        |
 
 ### ഡാഷ്ബോർഡ് ക്രമീകരണങ്ങൾ
 
-പരിസ്ഥിതി വേരിയബിളുകൾ വഴി ക്രമീകരിക്കാനും കഴിയുന്ന സവിശേഷതകൾക്കായി ഡാഷ്ബോർഡ് UI ടോഗിളുകൾ നൽകുന്നു:
+എൻവയോൺമെൻ്റ് വേരിയബിളുകൾ വഴി കോൺഫിഗർ ചെയ്യാവുന്ന ഫീച്ചറുകൾക്കായി ഡാഷ്ബോർഡ് UI ടോഗിൾ നൽകുന്നു:
 
-| Setting Location    | Toggle             | Description                                       |
-| ------------------- | ------------------ | ------------------------------------------------- |
-| Settings → Advanced | Debug Mode         | ഡീബഗ് അഭ്യർത്ഥനാ ലോഗുകൾ പ്രവർത്തനക്ഷമമാക്കുക (UI) |
-| Settings → General  | Sidebar Visibility | സൈഡ്ബാർ വിഭാഗങ്ങൾ കാണിക്കുക/മറയ്ക്കുക             |
+| ലൊക്കേഷൻ ക്രമീകരിക്കുന്നു | ടോഗിൾ ചെയ്യുക    | വിവരണം                                           |
+| ------------------------- | ---------------- | ------------------------------------------------ |
+| ക്രമീകരണങ്ങൾ → വിപുലമായ   | ഡീബഗ് മോഡ്       | ഡീബഗ് അഭ്യർത്ഥന ലോഗുകൾ പ്രവർത്തനക്ഷമമാക്കുക (UI) |
+| ക്രമീകരണങ്ങൾ → പൊതുവായ    | സൈഡ്ബാർ ദൃശ്യപരത | Show/hide സൈഡ്ബാർ വിഭാഗങ്ങൾ                      |
 
-ഈ ക്രമീകരണങ്ങൾ ഡാറ്റാബേസിൽ സംഭരിക്കപ്പെടുകയും പുനരാരംഭിച്ചതിന് ശേഷവും നിലനിൽക്കുകയും ചെയ്യുന്നു; സജ്ജീകരിച്ചിരിക്കുമ്പോൾ അവ env var ഡിഫോൾട്ടുകളെ മറികടക്കുന്നു.
+ഈ ക്രമീകരണങ്ങൾ ഡാറ്റാബേസിൽ സംഭരിക്കുകയും പുനരാരംഭിക്കലിലുടനീളം നിലനിൽക്കുകയും ചെയ്യുന്നു, സജ്ജീകരിക്കുമ്പോൾ env var ഡിഫോൾട്ടുകളെ മറികടക്കുന്നു.
 
-### ലോക്കലായി പ്രവർത്തിപ്പിക്കൽ
+### പ്രാദേശികമായി പ്രവർത്തിക്കുന്നു
 
 ```bash
-# വികസന മോഡ് (ഹോട്ട് റീലോഡ്)
+# Development mode (hot reload)
 npm run dev
 
-# പ്രൊഡക്ഷൻ ബിൽഡ്
-npm run build    # next build → .build/next/ തുടർന്ന് assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# സംഭാവകരുടെ മാറ്റങ്ങൾക്കായുള്ള വേഗത്തിലുള്ള ബാക്ക്എൻഡ്/API-മാത്രം കംപൈൽ
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# റിലീസ് ബിൽഡ് (ക്ലീൻ റീബിൽഡ് + HEAD സെന്റിനൽ — ഡിപ്ലോയ്ക്ക് ആവശ്യമാണ്)
-npm run build:release   # rm -rf .build dist തുടർന്ന് build + dist/BUILD_SHA എഴുതുന്നു
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# സാധാരണ പോർട്ട് കോൺഫിഗറേഷൻ
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-സംഭാവക ബിൽഡ് കംപൈൽ-മാത്രം പരിശോധന നടത്തുന്നു: ഇത് സ്റ്റാൻഡലോൺ
-ഡിസ്ട്രിബ്യൂഷൻ അസംബിൾ ചെയ്യുകയോ ഓപ്ഷണൽ നേറ്റീവ് പാക്കേജിംഗ് ആസറ്റുകൾ ബിൽഡ് ചെയ്യുകയോ ചെയ്യുന്നില്ല.
-ഷിപ്പ് ചെയ്യാവുന്ന ബണ്ടിൽ സാധൂകരിക്കേണ്ടപ്പോൾ സാധാരണ പ്രൊഡക്ഷൻ ബിൽഡ് ഉപയോഗിക്കുക.
+കോൺട്രിബ്യൂട്ടർ ബിൽഡ് കംപൈൽ-മാത്രം മൂല്യനിർണ്ണയം നടത്തുന്നു: ഇത് ഒറ്റപ്പെട്ട വിതരണത്തെ കൂട്ടിച്ചേർക്കുകയോ ഓപ്ഷണൽ നേറ്റീവ് പാക്കേജിംഗ് അസറ്റുകൾ നിർമ്മിക്കുകയോ ചെയ്യുന്നില്ല. നിങ്ങൾക്ക് ഷിപ്പ് ചെയ്യാവുന്ന ബണ്ടിൽ സാധൂകരിക്കേണ്ടിവരുമ്പോൾ റെഗുലർ പ്രൊഡക്ഷൻ ബിൽഡ് ഉപയോഗിക്കുക.
 
-### ബിൽഡ് ഔട്ട്പുട്ട് ഘടന
+### ഔട്ട്പുട്ട് ലേഔട്ട് നിർമ്മിക്കുക
 
-| Directory | Contents                                                                         | Tracked |
-| --------- | -------------------------------------------------------------------------------- | ------- |
-| `src/`    | ആപ്ലിക്കേഷൻ സോഴ്സ് (TypeScript / TSX)                                            | അതെ     |
-| `.build/` | ഇടക്കാല ഫയലുകൾ — `next build` ഔട്ട്പുട്ട് (gitignored, `distDir = .build/next`)  | ഇല്ല    |
-| `dist/`   | ഷിപ്പ് ചെയ്യാവുന്ന ബണ്ടിൽ — `assembleStandalone` വഴി അസംബിൾ ചെയ്തത് (gitignored) | ഇല്ല    |
+| ഡയറക്ടറി  | ഉള്ളടക്കം                                                                         | ട്രാക്ക് ചെയ്തു |
+| --------- | --------------------------------------------------------------------------------- | --------------- |
+| `src/`    | ആപ്ലിക്കേഷൻ്റെ ഉറവിടം (TypeScript / TSX)                                          | അതെ             |
+| `.build/` | ഇൻ്റർമീഡിയറ്റുകൾ — `next build` ഔട്ട്പുട്ട് (gitignored, `distDir = .build/next`) | ഇല്ല            |
+| `dist/`   | `assembleStandalone` അസംബിൾ ചെയ്ത ഷിപ്പ് ചെയ്യാവുന്ന ബണ്ടിൽ — (ജിറ്റിനോർഡ്)       | ഇല്ല            |
 
-ബിൽഡ് പൈപ്പ്ലൈൻ ഒറ്റ പാസാണ്:
+ബിൽഡ് പൈപ്പ്ലൈൻ ഒരൊറ്റ പാസ് ആണ്:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js ഔട്ട്പുട്ട്)
-  └─ assembleStandalone()                 (standalone + static + public + native assets പകർത്തുന്നു)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` അധികമായി ആദ്യം രണ്ട് ഡയറക്ടറികളും ക്ലീൻ ചെയ്യുകയും
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ഒരു ഡിപ്ലോയ് ഇന്റഗ്രിറ്റി സെന്റിനലായി എഴുതുകയും ചെയ്യുന്നു.
+`npm run build:release` കൂടാതെ രണ്ട് ഡയറക്ടറികളും ആദ്യം വൃത്തിയാക്കുകയും `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ഒരു വിന്യസിക്കുന്ന ഇൻ്റഗ്രിറ്റി സെൻ്റിനൽ ആയി എഴുതുകയും ചെയ്യുന്നു.
 
-`npm run build:contributor` ബാക്ക്എൻഡ്-മാത്രമുള്ള ബിൽഡ് പ്രൊഫൈൽ ഉപയോഗിക്കുന്നു. ബിൽഡ് ചെയ്യുമ്പോൾ
-ഇത് ഡാഷ്ബോർഡ് UI ഫയലുകൾ താൽക്കാലികമായി സ്റ്റബ് ചെയ്യുകയും API റൂട്ട് ഹാൻഡ്ലറുകൾ നിലനിർത്തുകയും
-ബിൽഡിന് ശേഷം യഥാർത്ഥ ഫയലുകൾ പുനഃസ്ഥാപിക്കുകയും ചെയ്യുന്നു. ഡാഷ്ബോർഡ് UI-യെ ബാധിക്കുന്ന മാറ്റങ്ങൾക്കോ
-പൂർണ്ണ റിലീസ് സാധൂകരണത്തിനോ `npm run build` ഉപയോഗിക്കുക; സംഭാവക പ്രൊഫൈൽ റിലീസ് ബിൽഡിന് പകരമല്ല.
+`npm run build:contributor` ബാക്കെൻഡ്-ഒൺലി ബിൽഡ് പ്രൊഫൈൽ ഉപയോഗിക്കുന്നു. ഇത് നിർമ്മിക്കുമ്പോൾ ഡാഷ്ബോർഡ് UI ഫയലുകൾ താൽക്കാലികമായി നിർത്തുന്നു, API റൂട്ട് ഹാൻഡ്ലറുകൾ സൂക്ഷിക്കുന്നു, കൂടാതെ ബിൽഡിന് ശേഷം യഥാർത്ഥ ഫയലുകൾ പുനഃസ്ഥാപിക്കുന്നു. ഡാഷ്ബോർഡ് UI ബാധിക്കുന്ന മാറ്റങ്ങൾക്ക് അല്ലെങ്കിൽ പൂർണ്ണ റിലീസ് മൂല്യനിർണ്ണയത്തിനായി `npm run build` ഉപയോഗിക്കുക; കോൺട്രിബ്യൂട്ടർ പ്രൊഫൈൽ റിലീസ് ബിൽഡിന് പകരമല്ല.
 
-> **VPS ഡിപ്ലോയ് കുറിപ്പ്:** റിമോട്ട് ഇമേജ് ഡയറക്ടറി `/usr/lib/node_modules/omniroute/app/`
-> മാറ്റമില്ലാതെ തുടരും. ഡിപ്ലോയ് സ്കില്ലുകൾ `dist/`-ന്റെ ഉള്ളടക്കം അതിലേക്ക് rsync ചെയ്യുന്നു.
-> ഇൻ-റിപ്പോസിറ്ററി ബിൽഡ് ഔട്ട്പുട്ട് പാത മാത്രമാണ് മാറിയത് (`app/` → `dist/`).
+> **VPS വിന്യാസ കുറിപ്പ്:** റിമോട്ട് ഇമേജ് ഡയറക്ടറി `/usr/lib/node_modules/omniroute/app/` മാറ്റമില്ല. വിന്യസിക്കുന്നതിനുള്ള കഴിവുകൾ `dist/` യുടെ ഉള്ളടക്കങ്ങൾ അതിലേക്ക് സമന്വയിപ്പിക്കുന്നു. ഇൻ-റിപ്പോ ബിൽഡ് ഔട്ട്പുട്ട് പാത്ത് മാത്രം നീക്കി (`app/` → `dist/`).
 
-ഡിഫോൾട്ട് URL-കൾ:
+ഡിഫോൾട്ട് URLs:
 
-- **ഡാഷ്ബോർഡ്**: `http://localhost:20128/dashboard`
+- **ഡാഷ്ബോർഡ്** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -429,10 +416,10 @@ VPS വിന്യാസങ്ങൾക്കായി, `npm run build` എന�
 
 ---
 
-## സഹായം നേടൽ
+## സഹായം ലഭിക്കുന്നു
 
-- **ആർക്കിടെക്ചർ**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) കാണുക
-- **API റഫറൻസ്**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) കാണുക
-- **സുരക്ഷാ ഡോക്യുമെന്റേഷൻ**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **ഓപ്പറേഷൻസ് ഡോക്യുമെന്റേഷൻ**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **പ്രശ്നങ്ങൾ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **വാസ്തുവിദ്യ** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) കാണുക
+- **API റഫറൻസ്** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) കാണുക
+- **സുരക്ഷാ ഡോക്സ്** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops ഡോക്സ്** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **പ്രശ്നങ്ങൾ** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

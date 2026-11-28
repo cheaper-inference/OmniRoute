@@ -4,7 +4,7 @@
 
 ---
 
-> **Sumber kebenaran:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Terakhir diperbarui:** 28-06-2026 — v3.8.40
+> **Sumber kebenaran:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute menangkap asisten `reasoning_content` yang dihasilkan oleh model mode berpikir dan memutar ulang secara transparan pada permintaan multi-putaran ketika penyedia upstream memerlukannya. Hal ini menghilangkan kesalahan HTTP 400 yang dimunculkan oleh penyedia ketat ketika riwayat percakapan klien tidak ada dalam alasan giliran sebelumnya.
 

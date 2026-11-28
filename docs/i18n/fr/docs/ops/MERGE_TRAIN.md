@@ -4,86 +4,63 @@
 
 ---
 
-> **19/11/2026 : la file d'attente de fusion Mergify est supprimée** (décision du propriétaire). `.mergify.yml` ne définit plus de file d'attente et refuse les commandes Mergify qui fusionnent ou réécrivent une pull request. Les versions PRs sont fusionnées manuellement selon l'ensemble de règles du référentiel "Exiger des portes vertes sur la version active" (`Gate / CI` + `Gate / Quality`) jusqu'à ce que la file d'attente omni s'exécute en mode live, et via la file d'attente omni après cela ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Les sections Mergify ci-dessous décrivent la file d'attente telle qu'elle était.
+## Atterrissage sur une branche de release
 
-Depuis la v3.8.49 (WS3.2/WS3.4 du plan quality/velocity ), le chemin de fusion par défaut pour PRs révisé dans `release/vX.Y.Z` est le** Fusionner la file d'attente de fusion** (`.mergify.yml`); le** train de fusion manuel** documenté ci-dessous est le FALLBACK — utilisé lors d'incidents, de blocages de versions ou si le plan Mergify Open Source change un jour.
+L'omni-file d'attente régit les atterrissages dans `release/vX.Y.Z`. Lisez le `mode` de niveau supérieur dans `config/merge-queue/config.json` sur la branche par défaut avant d'atterrir un PR. Voir [Omni-Queue](OMNI_QUEUE.md).
 
-## Chemin par défaut : la file d’attente Mergify
+- **`shadow`** exécute la validation et laisse l'atterrissage à une fusion manuelle. Appliquez `omni-queue` sur le PR approuvé à sa tête finale. Vérifiez l'éligibilité avec `npm run queue -- why <PR>`. Attendez le verdict pour cette tête dans `npm run queue -- history --base <branch>`. Continuez sur `would-land`. Sur `culprit-found` ou `would-dequeue`, maintenez la fusion et corrigez la cause.
+- **Exceptions fantômes.** Un train avec CI vert complet par rapport à la pointe de base actuelle peut continuer sans verdict de file d'attente séparé. La même exception s'applique lorsque la tête PR contient déjà la pointe de base actuelle.
+- **`live`** utilise l'étiquette `omni-queue` pour déclencher l'atterrissage. La file d'attente seule obtient le PR. Laissez les commandes de fusion et dirigez les push vers la file d’attente.
 
-1. La PR est examinée/validée par les campagnes et approuvée par le garde-fou ⭐
-   de pré-fusion du propriétaire (le rapport + la décision pour chaque élément — voir l’étape 0.75 de `/merge-prs`).
-2. Le propriétaire (ou la session agissant conformément à la décision du propriétaire) applique le label **`queue`**.
-   Ce label CONSTITUE l’approbation de la fusion ; Mergify ne fait que l’exécuter.
-3. Mergify valide les PR en file d’attente **séquentiellement** (une à la fois) par rapport aux garde-fous rapides
-   et les fusionne (squash). Le traitement par lots + la bissection automatique nécessitent une offre Mergify payante
-   (« Cannot use Merge Queue batch » avec l’offre gratuite, #7220) ; `.mergify.yml` ne définit donc aucun
-   `batch_size` ; le traitement par lots reste du ressort du train de fusion manuel ci-dessous. Une PR dont
-   les vérifications sont toujours en attente après `checks_timeout` (240 min = 2× le p95 mesuré de
-   `quality.yml`) est retirée de la file d’attente au lieu de la bloquer.
-4. Après la fusion, le workflow continu de validation de release vérifie la nouvelle pointe lors du push
-   et ouvre une issue d’attribution si la combinaison introduit une régression (aucun retour en arrière automatique).
+Chaque atterrissage nécessite l'autorisation du propriétaire et les vérifications requises applicables. Appliquez `omni-queue` seulement après que le propriétaire a autorisé l'atterrissage. PRs en file d'attente touchant des chemins protégés nécessitent également la décision `protected-approved` du propriétaire pour ce PR.
 
-Garde-fous (reprennent les règles strictes #21/#22 de `CLAUDE.md`) :
+L'ensemble de règles « Exiger des portes vertes sur la version active » nécessite `Gate / CI` et `Gate / Quality` verts sur la tête. N'utilisez jamais `--admin` pour contourner une porte rouge. Une version gelée des blocs fusionne dans la branche gelée. Voir [la règle stricte 21](HARD_RULES_DETAIL.md). Ne jamais étiqueter, fusionner ou envoyer une demande d'extraction indiquant qu'une autre session fonctionne. Voir [la règle stricte 22](HARD_RULES_DETAIL.md).
 
-- **Gel de release en cours** → n’appliquez PAS de label aux PR ciblant la branche gelée ; reciblez-les d’abord vers
-  la branche `release/vX+1` active.
-- **PR en cours d’une autre session** → ne lui appliquez jamais de label ; seule la session propriétaire place
-  son propre travail dans la file d’attente.
-- Les diffs portant uniquement sur les tests et les PR portant le label `hotfix` exécutent déjà une CI réduite (voir
-  `RELEASE_CHECKLIST.md` → Voie rapide des correctifs) ; les conditions de la file d’attente acceptent tout
-  ensemble de vérifications effectivement exécuté (`#check-failure=0` + `#check-pending=0`).
+## La demande de tirage du train
 
-## Solution de repli : le train de fusion manuel
+1. Démarrez une branche de train à l'extrémité de la base de version actuelle. Intégrez les têtes de membres approuvées exactes à l’aide de validations de fusion. Préservez leur historique de validation en évitant les écrasements et les rebases.
+2. Ouvrez une pull request pour la branche train. Validez ce PR avec son propre CI complet sur la pointe de base actuelle. Revérifiez la pointe de la base et les têtes de membre approuvées avant l'atterrissage. Actualisez le train et son CI lorsque le candidat validé change.
+3. Atterrissez le train PR avec une validation de fusion dans le mode de file d'attente applicable. En mode live, la méthode d'atterrissage `merge-ff` de la file d'attente préserve les validations de fusion. Les têtes de membres d'origine deviennent accessibles depuis la branche de publication. GitHub marque le membre PRs comme fusionné et les commits conservent leurs auteurs.
 
-Utilisée lorsque la file n’est pas disponible. Cette procédure formalise la pratique qui a permis de traiter 33 PR
-en une journée pendant le cycle v3.8.47 :
+Un exemple public est [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Il a combiné 18 membres PRs et a atterri avec un engagement de fusion le 2026-11-24.
 
-1. **Constituez le lot** (environ 10 à 30 PR examinées et approuvées). Recherchez les collisions `linked:`
-   (mêmes `tap.testFiles`, mêmes sections du CHANGELOG) et traitez-les en série.
-2. **Validez UNE SEULE FOIS** : dans un worktree isolé créé à partir de la pointe de la branche de version, fusionnez localement toutes les
-   têtes du lot, puis exécutez la suite équivalente à celle de la version
-   (`npm run check:release-green`, ajoutez `--with-build` avant une publication).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatise les étapes 1 et 2 (les
-   PR en conflit sont éjectées, le train continue). Le mode complet exécute `npm run test:unit` — le
-   lanceur optimisé pour la machine (`--test-concurrency=20`), **et non** les deux fragments CI séquentiels
-   à 4 cœurs, qui maintenaient la phase dominante à environ 25 % d’utilisation d’une machine à 16 cœurs (corrigé
-   le 2026-07-18). `--fast` (traitement de méga-trains au cours d’une même journée, approuvé par le propriétaire le 2026-07-18)
-   conserve tous les contrôles statiques + vitest, mais n’exécute que les fichiers node:test modifiés par les
-   PR embarquées ; la suite COMPLÈTE doit néanmoins être exécutée au moins une fois par jour sur la
-   pointe cumulée (un train sans `--fast`).
-3. **Succès** → fusionnez les PR dans l’ordre (en revérifiant `state,headRefOid` avant chacune —
-   une PR dont la tête a changé doit être réexaminée). Vérifiez que le diff net de chaque fusion correspond
-   aux propres modifications de la PR (aucune réversion par résolution automatique : contrôlez `git diff --stat`
-   pour détecter les suppressions hors périmètre).
-4. **Échec** → divisez le lot par moitiés (validez chaque moitié) au lieu de revalider
-   chaque PR individuellement ; replacez la PR fautive dans la file d’examen, accompagnée des éléments probants.
-5. **Jamais** : effectuer une fusion vers la branche gelée pendant un gel ; utiliser `git stash` où que ce soit ;
-   relancer aveuglément la CI dans l’espoir qu’un échec disparaisse (règle : un échec est une information).
+Une synchronisation de `main` vers la branche de version suivante atterrit également via une validation de fusion. La préservation de l'ascendance `main` est requise pour les synchronisations ultérieures. Voir [Isolement de l'arbre de travail](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Niveaux (pourquoi la file est sûre avec uniquement les contrôles rapides)
+## Le validateur local de train de fusion
 
-- **Par PR** (contrôles rapides de quality.yml) : tests affectés selon la TIA + suite unitaire complète en 4 fragments +
-  vitest + ensemble de contrôles lint + vérification des types + intégrité de la documentation/du changelog.
-- **Par lot/pointe** (validation continue de la version) : contrôles STRICTS `--quick` à chaque push vers
-  la branche de version ; balayages complets `--with-build --full-ci` 3 fois par jour.
-- **Par version** (ci.yml sur la PR de version) : matrice complète, notamment E2E ×9,
-  artefact de package + test de démarrage sommaire de l’archive tar, couverture/seuils progressifs.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Rien n’est moins validé qu’auparavant — les contrôles lourds s’exécutent simplement par lot/pointe
-plutôt que par PR, ce qui supprime les allers-retours en O(N).
+Le validateur récupère les têtes de base et PR et les combine dans un arbre de travail jetable. Il exécute sa suite de parité une fois sur l'arborescence résultante. Un échec de récupération de tête ou de fusion éjecte ce PR et le script continue avec le PRs restant.
 
-## Prérequis pour `merge-train.sh` sur un checkout neuf
+- **`--plan`** imprime les étapes du mode sélectionné et quitte sans créer d'arbre de travail ni contacter la télécommande. Combinez-le avec `--fast` pour inspecter le plan rapide.
+- **`--fast`** exécute les portes statiques communes, les fichiers `node:test` modifiés sélectionnés sous `tests/unit/` et `npm run test:vitest`. Exécutez une validation locale complète au moins une fois par jour sur le pourboire accumulé lorsque vous utilisez le mode rapide.
+- **Mode complet** ajoute les portes statiques complètes uniquement et exécute `npm run test:unit` et `npm run test:vitest`.
 
-Le script exécute un **contrôle préalable** à arrêt immédiat en cas d’échec sur le checkout racine (avant toute opération
-sur un worktree), afin qu’une installation défectueuse ne puisse jamais se faire passer pour un train en échec :
+Une porte statique défaillante est réexécutée sur la base intacte si la sonde de base est disponible. Le script signale les échecs hérités et continue lorsque chaque ligne de violation reconnue apparaît également sur la base et que le nombre total n'a pas augmenté.
 
-1. Exécutez `npm ci`, puis le script postinstall de `bun` bloqué par npm :
-   `(cd node_modules/bun && node install.js)` — sinon `check:provider-consistency`
-   et `check:known-symbols` (tous deux via `bun scripts/…`) échouent sur le train ET sur la base,
-   sans ligne indiquant une violation.
-2. Aucun `node_modules/node_modules` parasite (un arbre de dépendances dupliqué ; React est chargé deux fois
-   et les suites vitest de l’interface utilisateur échouent immédiatement).
-3. `node_modules/.bin/tsc` doit être présent et exécutable (il manque dans une installation partielle).
+| Sortie | Signification                                                                                                                                               |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`    | Imprimé le plan ou complété la suite. Le résumé de la suite répertorie tous les échecs statiques hérités et PRs éjectés.                                    |
+| `1`    | Arguments invalides, pas de paiement Git, échec du contrôle en amont ou aucun PR embarqué.                                                                  |
+| `2`    | Une vérification de suite a échoué et n’a pas été considérée comme héritée. L'opérateur peut diviser le lot en deux, éjecter le PR incriminé et réexécuter. |
 
-Le train exécute la commande bloquante `npm run check:cycles:ratchet` ; la commande simple `npm run check:cycles`
-est informative (elle répertorie les SCC et renvoie un code différent de zéro même sur une base saine).
+Le laissez-passer local fournit un élément de diagnostic uniquement pour le dossier du propriétaire. Chaque atterrissage nécessite toujours l'autorisation du propriétaire, ses propres vérifications requises et le verdict de la file d'attente fantôme, le cas échéant.
+
+## Hiérarchisation
+
+- **Par PR.** CI et Quality sélectionnent les contrôles en fonction des chemins modifiés. Le code PRs exécute des portes de qualité rapides et des tests impactés, avec des tâches unitaires et Vitest séparées dans CI.
+- **Par candidat de file d'attente.** CI et Quality exécutent le profil complet du candidat composé sur sa file d'attente réf.
+- **Par conseil de version.** Release-Green exécute des portes dures et rapides sur les poussées qui correspondent à ses filtres de chemin. Trois exécutions planifiées par jour utilisent le balayage complet pour la branche de publication.
+- **Par version.** La matrice CI complète comprend les fragments E2E, la validation des packages, la fumée de démarrage de l'archive tar et les contrôles de couverture. Consultez la [liste de contrôle de sortie](RELEASE_CHECKLIST.md).
+
+## Conditions préalables au nouveau paiement pour `merge-train.sh`
+
+Le contrôle en amont s'exécute avant de créer les arbres de travail. Installez les dépendances avec `npm ci`. Confirmez que `node_modules/.bin/tsc` est exécutable et que `node_modules/node_modules` est absent. Vérifiez que `node_modules/.bin/bun --version` réussit.
+
+Si la post-installation Bun a été ignorée, exécutez `(cd node_modules/bun && node install.js)`. Les vérifications de cohérence du fournisseur et de symboles connus utilisent Bun. Le validateur exécute `npm run check:cycles:ratchet` comme porte de blocage. La commande `npm run check:cycles` autonome est consultative.
+
+## Histoire
+
+La file d'attente de fusion Mergify a été retirée le 19/11/2026.

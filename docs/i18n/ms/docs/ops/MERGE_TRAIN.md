@@ -4,91 +4,63 @@
 
 ---
 
-> **2026-11-19: baris gilir gabungan Mergify ditamatkan** (keputusan pemilik). `.mergify.yml` tidak lagi mentakrifkan baris gilir dan menolak perintah Mergify yang menggabungkan atau menulis semula permintaan tarik. Keluaran PRs digabungkan dengan tangan di bawah set peraturan repositori "Memerlukan gerbang hijau pada keluaran aktif" (`Gate / CI` + `Gate / Quality`) sehingga omni-queue berjalan dalam mod langsung, dan melalui omni-queue selepas itu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Bahagian Mergify di bawah menerangkan baris gilir seperti sedia ada.
+## Mendarat di cawangan pelepasan
 
-Sejak v3.8.49 (WS3.2/WS3.4 pelan quality/velocity ) laluan penggabungan lalai untuk PRs yang disemak menjadi `release/vX.Y.Z` ialah** Gabungkan baris gilir gabungan** (`.mergify.yml`); yang** kereta api gabungan manual** didokumenkan di bawah ialah FALLBACK — yang digunakan semasa insiden, keluaran terhenti atau jika pelan Sumber Terbuka Mergify pernah berubah.
+Baris gilir omni mengawal pendaratan ke `release/vX.Y.Z`. Baca `mode` peringkat atas dalam `config/merge-queue/config.json` pada cawangan lalai sebelum mendaratkan PR. Lihat [Omni-Queue](OMNI_QUEUE.md).
 
-## Laluan lalai: baris gilir Mergify
+- **`shadow`** menjalankan pengesahan dan meninggalkan pendaratan kepada gabungan manual. Sapukan `omni-queue` pada PR yang diluluskan di kepala terakhirnya. Semak kelayakan dengan `npm run queue -- why <PR>`. Tunggu keputusan untuk kepala itu di `npm run queue -- history --base <branch>`. Teruskan pada `would-land`. Pada `culprit-found` atau `would-dequeue`, tahan cantuman dan betulkan puncanya.
+- **Pengecualian bayangan.** Kereta api dengan CI penuh hijau terhadap hujung asas semasa boleh diteruskan tanpa keputusan baris gilir yang berasingan. Pengecualian yang sama berlaku apabila kepala PR sudah mengandungi hujung asas semasa.
+- **`live`** menggunakan label `omni-queue` untuk mencetuskan pendaratan. Barisan beratur sahaja mendarat PR. Tinggalkan arahan cantum dan tolakan terus ke baris gilir.
 
-1. PR disemak/diluluskan oleh kempen dan diluluskan oleh gerbang ⭐ prapenggabungan
-   pemilik (laporan + keputusan setiap item — lihat `/merge-prs` Langkah 0.75).
-2. Pemilik (atau sesi yang bertindak berdasarkan keputusan pemilik) menggunakan label
-   **`queue`**. Label tersebut MERUPAKAN kelulusan penggabungan; Mergify hanya
-   melaksanakannya.
-3. Mergify mengesahkan PR dalam baris gilir **secara bersiri** (satu demi satu)
-   berdasarkan gerbang pantas dan menggabungkannya (squash). Pengelompokan + pembahagian
-   dua automatik ialah ciri peringkat Mergify berbayar ("Cannot use Merge Queue batch"
-   pada pelan percuma, #7220), maka `.mergify.yml` tidak menetapkan `batch_size`;
-   pengelompokan kekal sebagai tugas tren penggabungan manual di bawah. PR yang
-   semakannya masih belum selesai selepas `checks_timeout` (240 min = 2× p95 terukur
-   bagi `quality.yml`) dikeluarkan daripada baris gilir dan bukannya menyekat baris
-   gilir.
-4. Selepas penggabungan, aliran kerja hijau keluaran berterusan mengesahkan tip baharu
-   ketika push dan membuka isu atribusi jika gabungan tersebut mengalami regresi
-   (tidak sekali-kali membuat pembalikan automatik).
+Setiap pendaratan memerlukan kebenaran pemilik dan pemeriksaan yang diperlukan. Gunakan `omni-queue` hanya selepas pemilik membenarkan pendaratan. Laluan terlindung yang menyentuh PRs beratur juga memerlukan keputusan `protected-approved` pemilik untuk PR itu.
 
-Langkah perlindungan (mencerminkan Peraturan Tegas #21/#22 dalam `CLAUDE.md`):
+Set peraturan "Memerlukan pagar hijau pada keluaran aktif" memerlukan `Gate / CI` dan `Gate / Quality` hijau di kepala. Jangan gunakan `--admin` untuk memintas pintu merah. Blok beku keluaran bergabung ke dalam cawangan beku. Lihat [Peraturan Keras 21](HARD_RULES_DETAIL.md). Jangan sekali-kali melabel, menggabungkan atau menolak permintaan tarik bahawa sesi lain berfungsi. Lihat [Peraturan Keras 22](HARD_RULES_DETAIL.md).
 
-- **Pembekuan keluaran sedang berkuat kuasa** → JANGAN labelkan PR yang menyasarkan
-  cabang beku; sasarkan semula kepada `release/vX+1` yang aktif terlebih dahulu.
-- **PR sedang diproses milik sesi lain** → jangan sekali-kali melabelkannya; hanya sesi
-  pemilik boleh memasukkan kerjanya sendiri ke dalam baris gilir.
-- Perbezaan yang melibatkan ujian sahaja dan PR berlabel `hotfix` telah pun menjalankan
-  CI terhad (lihat `RELEASE_CHECKLIST.md` → Laluan Pantas Hotfix); syarat baris gilir
-  menerima apa-apa set semakan yang benar-benar dijalankan (`#check-failure=0` +
-  `#check-pending=0`).
+## Permintaan tarik kereta api
 
-## Pilihan sandaran: tren gabungan manual
+1. Mulakan cawangan kereta api di hujung pangkalan keluaran semasa. Sepadukan ketua ahli yang diluluskan dengan tepat menggunakan komit gabungan. Kekalkan sejarah komitmen mereka dengan mengelakkan skuasy dan rebase.
+2. Buka satu permintaan tarik untuk cawangan kereta api. Sahkan PR itu dengan CI penuhnya sendiri pada hujung asas semasa. Periksa semula hujung pangkal dan kepala ahli yang diluluskan sebelum mendarat. Muat semula kereta api dan CI apabila calon yang disahkan bertukar.
+3. Daratkan PR kereta api dengan komit gabungan di bawah mod baris gilir yang berkenaan. Dalam mod langsung, kaedah pendaratan `merge-ff` baris gilir mengekalkan komitmen gabungan. Ketua ahli asal boleh dihubungi dari cawangan keluaran. GitHub menandakan ahli PRs sebagai digabungkan dan komit mengekalkan pengarangnya.
 
-Digunakan apabila baris gilir tidak tersedia. Ini memformalkan amalan yang menyelesaikan 33 PR dalam
-satu hari semasa kitaran v3.8.47:
+Contoh awam ialah [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Ia menggabungkan 18 ahli PRs dan mendarat dengan komit gabungan pada 2026-11-24.
 
-1. **Himpunkan kelompok** (~10–30 PR yang telah disemak+diluluskan). Semak pertembungan `linked:`
-   (`tap.testFiles` yang sama, bahagian CHANGELOG yang sama) dan proseskan perkara tersebut secara bersiri.
-2. **Sahkan SEKALI**: dalam worktree terpencil daripada tip keluaran, gabungkan semua head kelompok
-   secara setempat, kemudian jalankan suite yang setara dengan keluaran
-   (`npm run check:release-green`, tambah `--with-build` sebelum keluaran).
-   `scripts/release/merge-train.sh <base> <PR#>…` mengautomatikkan langkah 1–2 (PR yang bercanggah
-   dikeluarkan, tren diteruskan). Mod penuh menjalankan `npm run test:unit` — pelaksana yang
-   ditala untuk mesin (`--test-concurrency=20`), **bukan** dua serpihan CI 4-teras berjujukan,
-   yang menyebabkan fasa dominan menggunakan ~25% daripada mesin 16-teras (dibetulkan pada
-   2026-07-18). `--fast` (pengosongan tren mega dalam hari yang sama, diluluskan pemilik pada 2026-07-18)
-   mengekalkan setiap get statik + vitest tetapi hanya menjalankan fail node:test yang diubah oleh
-   PR yang menaiki tren; suite PENUH masih mesti dijalankan sekurang-kurangnya sekali sehari pada
-   tip terkumpul (satu tren tanpa `--fast`).
-3. **Hijau** → gabungkan PR secara berurutan (semak semula `state,headRefOid` sebelum setiap satu —
-   PR yang head-nya berubah akan kembali ke baris gilir semakan). Buktikan perbezaan bersih bagi setiap gabungan ialah
-   perubahan PR itu sendiri (tiada pengembalian auto-resolve: audit `git diff --stat` untuk
-   pemadaman di luar skop).
-4. **Merah** → bahagi dua kelompok tersebut (sahkan setiap separuh) dan bukannya mengesahkan semula
-   satu demi satu; kembalikan PR yang bermasalah ke baris gilir semakan berserta bukti.
-5. **Jangan sekali-kali**: gabungkan ke dalam cabang beku semasa pembekuan; gunakan `git stash` di mana-mana;
-   jalankan semula CI secara menyeluruh dengan harapan status merah hilang (peraturan: merah ialah maklumat).
+Penyegerakan kembali dari `main` ke cawangan keluaran seterusnya juga tiba melalui komit gabungan. Memelihara keturunan `main` diperlukan untuk penyegerakan kemudian. Lihat [Pengasingan Worktree](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Penentuan peringkat (sebab baris gilir selamat dengan get pantas sahaja)
+## Pengesah gabungan kereta api tempatan
 
-- **Setiap PR** (get pantas quality.yml): ujian yang terjejas oleh TIA + unit penuh 4 serpihan +
-  vitest + himpunan lint + typecheck + integriti dokumentasi/changelog.
-- **Setiap kelompok/tip** (release-green berterusan): get KERAS `--quick` pada setiap tolakan ke
-  cabang keluaran; sapuan penuh `--with-build --full-ci` 3×/hari.
-- **Setiap keluaran** (ci.yml pada PR keluaran): matriks lengkap termasuk E2E ×9,
-  artifak pakej + boot-smoke tarball, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Tiada apa-apa yang kurang disahkan berbanding sebelum ini — permukaan berat hanya dijalankan bagi setiap kelompok/tip
-dan bukannya bagi setiap PR, dan inilah yang menghapuskan perjalanan ulang-alik O(N).
+Pengesah mengambil kepala pangkalan dan PR dan menggabungkannya dalam pokok kerja pakai buang. Ia menjalankan suite paritinya sekali pada pokok yang terhasil. Konflik head fetch atau merge yang gagal mengeluarkan PR dan skrip itu diteruskan dengan PRs yang tinggal.
 
-## Prasyarat checkout baharu untuk `merge-train.sh`
+- **`--plan`** mencetak langkah dan keluar mod yang dipilih tanpa membuat worktree atau menghubungi alat kawalan jauh. Gabungkannya dengan `--fast` untuk memeriksa pelan pantas.
+- **`--fast`** menjalankan get statik biasa, fail `node:test` yang dipilih diubah di bawah `tests/unit/`, dan `npm run test:vitest`. Jalankan pengesahan tempatan penuh sekurang-kurangnya sekali sehari pada petua terkumpul apabila menggunakan mod pantas.
+- **Mod penuh** menambah gerbang statik penuh sahaja dan menjalankan `npm run test:unit` dan `npm run test:vitest`.
 
-Skrip menjalankan **prapenerbangan** gagal-pantas pada checkout akar (sebelum sebarang kerja worktree)
-supaya pemasangan yang rosak tidak sekali-kali boleh menyamar sebagai tren merah:
+Gerbang statik yang gagal dijalankan semula pada pangkalan yang tidak disentuh jika siasatan asas tersedia. Skrip melaporkan kegagalan yang diwarisi dan berterusan apabila setiap baris pelanggaran yang diiktiraf turut muncul di pangkalan dan jumlah kiraan tidak bertambah.
 
-1. `npm ci`, kemudian jalankan postinstall `bun` yang disekat oleh npm:
-   `(cd node_modules/bun && node install.js)` — jika tidak, `check:provider-consistency`
-   dan `check:known-symbols` (kedua-duanya `bun scripts/…`) gagal pada tren DAN pangkalan tanpa
-   baris pelanggaran.
-2. Tiada `node_modules/node_modules` yang tidak sepatutnya (pepohon kebergantungan pendua; React dimuatkan dua kali
-   dan suite vitest UI gagal serta-merta).
-3. `node_modules/.bin/tsc` wujud dan boleh dilaksanakan (pemasangan separa tidak memilikinya).
+| Keluar | Maknanya                                                                                                                                                 |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`    | Mencetak pelan atau menyiapkan suite. Ringkasan suite menyenaraikan sebarang kegagalan statik yang diwarisi dan PRs yang dikeluarkan.                    |
+| `1`    | Argumen tidak sah, tiada pembayaran Git, prapenerbangan gagal, atau tiada PR menaiki pesawat.                                                            |
+| `2`    | Semakan suite gagal dan tidak layak sebagai diwarisi. Pengendali boleh membelah kumpulan, mengeluarkan PR yang menyinggung perasaan dan jalankan semula. |
 
-Tren menjalankan `npm run check:cycles:ratchet` yang menyekat; `npm run check:cycles`
-semata-mata bersifat nasihat (ia menyenaraikan SCC dan keluar dengan kod bukan sifar walaupun pada pangkalan yang sihat).
+Pas tempatan membekalkan bukti diagnostik untuk dossier pemilik sahaja. Setiap pendaratan masih memerlukan kebenaran pemilik, semakan yang diperlukan sendiri dan keputusan baris gilir bayangan apabila berkenaan.
+
+## Pemeringkatan
+
+- **Per PR.** CI dan Kualiti pilih semakan berdasarkan laluan yang diubah. Kod PRs menjalankan gerbang kualiti yang pantas dan ujian terkesan, dengan tugas unit dan Vitest yang berasingan di CI.
+- **Setiap calon beratur.** CI dan Kualiti menjalankan profil penuh untuk calon yang terdiri pada rujukan baris gilirnya.
+- **Setiap petua keluaran.** Release-Green menjalankan pintu keras pantas pada tolakan yang sepadan dengan penapis laluannya. Tiga larian berjadual setiap hari menggunakan sapuan penuh untuk cawangan keluaran.
+- **Setiap keluaran.** Matriks CI penuh termasuk serpihan E2E, pengesahan pakej, asap but tarball dan semakan liputan. Lihat [Senarai Semak Keluaran](RELEASE_CHECKLIST.md).
+
+## Prasyarat daftar keluar baru untuk `merge-train.sh`
+
+Prapenerbangan berjalan sebelum mencipta worktrees. Pasang kebergantungan dengan `npm ci`. Sahkan bahawa `node_modules/.bin/tsc` boleh laku dan `node_modules/node_modules` tiada. Semak bahawa `node_modules/.bin/bun --version` berjaya.
+
+Jika pasca pemasangan Bun telah dilangkau, jalankan `(cd node_modules/bun && node install.js)`. Konsistensi pembekal dan semakan simbol yang diketahui menggunakan Bun. Pengesah menjalankan `npm run check:cycles:ratchet` sebagai get menyekat. Perintah `npm run check:cycles` kendiri adalah nasihat.
+
+## Sejarah
+
+Barisan gilir gabungan Mergify telah ditamatkan pada 2026-11-19.

@@ -45,10 +45,10 @@ Ko se izdaja usklajuje, se odpre težava označevalca z oznako `release-freeze`.
 - `release/vX+1` naslednjega cikla je odrezan z zamrznjene konice, tako da sodelujoči nadaljujejo z delom.
 - Odprti PRs, ki še vedno cilja na zamrznjeno vejo, bi moral biti** preusmerjen** na aktivno (najvišjo) vejo `release/v*`.
 
-Preden domnevate, da je veja, ki jo želite, združljiva, preverite odprto zamrznitev:
+Preden domnevate, da je želena veja združljiva, preverite odprto zamrznitev:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mehanika spajanja (lastnik `queue` oznaka → Mergify) je dokumentirana v [MERGE_TRAIN.md](./MERGE_TRAIN.md).

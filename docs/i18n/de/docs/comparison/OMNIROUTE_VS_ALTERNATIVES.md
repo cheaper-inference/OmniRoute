@@ -11,7 +11,7 @@ Objektiver Funktionsvergleich mit beliebten Open-Source AI Routern.
 | Besonderheit                                                |                OmniRoute 3.8                 |    LiteLLM 1.x    | OpenRouter (SaaS) | Portschlüssel |
 | ----------------------------------------------------------- | :------------------------------------------: | :---------------: | :---------------: | :-----------: |
 | **Anbieter**                                                |                   **329**                    |       ~100        |        ~50        |      ~30      |
-| **Free/no-auth -Katalogeinträge**                           |                   **155**                    |        n/a        |    Passthrough    |      n/a      |
+| **Anbieter mit kostenlosem Zugang**                         |           **50 mit freiem Zugang**           |        n/a        |    Passthrough    |      n/a      |
 | **Selbstveranstaltbar**                                     |                      ✅                      |        ✅         |        ❌         |   ⚠ bezahlt   |
 | **OAuth -Katalogeinträge**                                  |                    **23**                    |     teilweise     |        ❌         |      ❌       |
 | **Auto-Fallback-Kombinationen**                             |              **22 Strategien**               | prioritätsbasiert |   stufenbasiert   |   gewichtet   |
@@ -38,7 +38,7 @@ Objektiver Funktionsvergleich mit beliebten Open-Source AI Routern.
 
 ## Wann sollte man OmniRoute wählen?
 
-- Sie sind selbst Gastgeber und möchten** maximale Anbieterabdeckung** (394 Anbieter, 155 free/no-auth -Katalogeinträge)
+- Sie sind selbst Gastgeber und möchten** maximale Anbieterabdeckung** (394 Anbieter, 50 mit freiem Zugang)
 - Du brauchst ein** Integrierter MCP -Server** (LLM Werkzeuge, Gedächtnis, Fähigkeiten, die als Werkzeuge offengelegt werden)
 - Du brauchst**A2A -Protokoll** für Agent-zu-Agent-Workflows
 - Du willst** Fingerabdruck-Stealth** (JA3/JA4), um eine Erkennung durch vorgeschaltetes CAPTCHAs zu vermeiden
@@ -56,12 +56,12 @@ Objektiver Funktionsvergleich mit beliebten Open-Source AI Routern.
 - Sie sind bereit, pro Token einschließlich SaaS-Aufschlag zu bezahlen
 - Sie benötigen eine **einzige Zahlungsmethode** für alle Anbieter
 
-## Wann Sie Portkey wählen sollten
+## Wann sollte man den Portschlüssel wählen?
 
-- Sie benötigen ein **kommerzielles SLA** mit Verfügbarkeitsgarantien
-- Sie bevorzugen ein **verwaltetes Dashboard** ohne Betriebsaufwand
-- Sie benötigen sofort einsatzbereite **Enterprise-Compliance-Funktionen**
+- Du brauchst ein** kommerzielle SLA** mit Verfügbarkeitsgarantien
+- Sie bevorzugen ein** verwaltetes Dashboard** ohne Betriebsaufwand
+- Du brauchst** Unternehmenscompliance** Funktionen sofort einsatzbereit
 
 ---
 
-_Zuletzt aktualisiert: 2026-08-02. Reichen Sie Korrekturen per PR ein, damit diese Tabelle korrekt bleibt._
+_Senden Sie Korrekturen über PR, um diese Tabelle korrekt zu halten._

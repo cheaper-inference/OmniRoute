@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | Atrisinātais bāzes URL                                            |
 | `ctx.apiKey`                 | `string \| null` | API atslēga, ja tā ir norādīta                                    |
 
-## Atklāšana
+## Atklājums
 
-Spraudņi tiek atklāti šādās vietās:
+Spraudņi tiek atklāti no:
 
-1. `~/.omniroute/plugins/<name>/` — lietotāja lokālās instalācijas
-2. `OMNIROUTE_PLUGIN_PATH` vides mainīgais — pielāgots direktorijs
+1. `~/.omniroute/plugins/node_modules/<name>/` — kur `omniroute plugin install` ievieto pakotnes (npm `--prefix`, nevis `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — ar roku kopēti spraudņu direktoriji
+3. `OMNIROUTE_PLUGIN_PATH` env var — pielāgotais direktorijs
 
-Abi attiecas **tikai uz CLI**. Servera puses spraudņu izpildvidei (tirgus/`plugin.json`
-spraudņiem, kas darbojas starpniekserverī) ir savs skeneris ar atsevišķu pārrakstīšanas iestatījumu
-`OMNIROUTE_PLUGINS_DIR` — skatiet
-[PLUGIN_MARKETPLACE.md → Spraudņu direktorijs](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Viena iestatīšana neietekmē otru.
+Tiek ievēroti simlinked direktoriji (ko npm izveido priekš `plugin install ./dir`).
 
-Ielādes kļūdas tiek pārtvertas un izdrukātas kā brīdinājumi — bojāts spraudnis nekad neizraisa CLI avāriju.
+Abi ir** Tikai CLI** . Servera puses spraudņa izpildlaikam (marketplace/`plugin.json` spraudņiem, kas darbojas starpniekserverī) ir savs skeneris ar savu ignorēšanu, `OMNIROUTE_PLUGINS_DIR` — skatiet [PLUGIN_MARKETPLACE.md → spraudņu direktoriju](./PLUGIN_MARKETPLACE.md#plugin-directory). Viena iestatīšana neietekmē otru.
+
+Ielādes kļūdas tiek uztvertas un izdrukātas kā brīdinājumi — bojāts spraudnis nekad nesabojā CLI.
 
 ## Drošība
 

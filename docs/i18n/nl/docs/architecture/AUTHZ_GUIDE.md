@@ -5,9 +5,8 @@
 ---
 
 > **Bron van waarheid:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Laatst bijgewerkt:** 2026-09-22 — scope-namespaces verwijzen naar MCP-SERVER.md
 
-OmniRoute heeft een route-bewuste autorisatiepipeline die elke API-aanvraag afschermt. Classificatie is **deterministisch** en **fail-closed** — alles wat niet geclassificeerd kan worden, eindigt als `MANAGEMENT` en vereist een sessie of een token van managementkwaliteit. Deze pagina legt het model uit voor engineers die routes onderhouden of nieuwe endpoints ontwerpen.
+OmniRoute heeft een routebewuste autorisatiepijplijn die elk API verzoek afhandelt. Classificatie is** deterministisch** En** mislukt gesloten** — alles dat niet kan worden geclassificeerd, eindigt als `MANAGEMENT` en vereist een token van sessie- of managementkwaliteit. Op deze pagina wordt het model uitgelegd voor ingenieurs die routes onderhouden of nieuwe eindpunten ontwerpen.
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
@@ -191,7 +190,7 @@ Elke routeklasse heeft een beleid in `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — retourneert altijd `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extraheert Bearer, valideert via `validateApiKey()`. Valt alleen door naar anoniem wanneer de effectieve `REQUIRE_API_KEY` functievlag is uitgeschakeld. De effectieve vlag wordt opgelost via `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), zodat Dashboard Feature Flags en omgevingsvariabelen `/api/v1/*`, `/api/v1beta/*` en aliassen consistent beheren; fouten in de oplosser zijn mislukt. Staat dashboardsessieverzoeken toe op client API routes (inclusief `/api/v1/models`, gebruikt door de dashboardmodelcatalogus). Wanneer Entra ID SSO is ingeschakeld, wordt een Bearer die structureel een Entra-token is (drie base64url-segmenten, `RS*` alg, `kid`) afgehandeld door de SSO vertakking** voor** `validateApiKey()` en zijn oordeel is definitief. — valt nooit door naar het API-sleutelpad of de degrade-naar-anonieme vertakking, dus een storing van de identiteitsprovider kan geen open toegang worden. Statische API sleutels worden niet beïnvloed. Zie [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — accepteert dashboardsessies, interne modelsynchronisatieverzoeken (gematcht met `/api/providers/[name]/(sync-models|models)`), of slaat deze volledig over als `isAuthRequired()` false retourneert. Retourneert 403 (`AUTH_001`) wanneer een Bearer-token aanwezig is maar ongeldig, anders 401. Dwingt ook de route-guard-niveaus (LOCAL_ONLY / ALWAYS_PROTECTED) af vóór elke auth-vertakking — zie [Route Guard-niveaus](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY paden in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (vandaag: `/api/mcp/`) zijn toegankelijk vanuit niet-loopback wanneer de Bearer-sleutel de `manage` scope draagt; alle andere LOCAL_ONLY paden blijven strikte loopback, ongeacht de reikwijdte.
+- **`managementPolicy`** (`policies/management.ts`) — accepteert dashboardsessies, interne modelsynchronisatieverzoeken (gematcht met `/api/providers/[name]/(sync-models|models)`), of slaat deze volledig over als `isAuthRequired()` false retourneert. Retourneert 403 (`AUTH_001`) wanneer een Bearer-token aanwezig is maar ongeldig, anders 401. Dwingt ook de route-guard-niveaus (LOCAL_ONLY / ALWAYS_PROTECTED) af vóór elke auth-vertakking — zie [Route Guard-niveaus](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY paden in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (vandaag: `/api/mcp/`) zijn toegankelijk vanuit niet-loopback wanneer de Bearer-sleutel de `manage`/`admin` scope of de smalle `mcp:connect` scope (`hasMcpConnectOrManageScope`) draagt, of met een geverifieerde dashboardsessie; alle andere LOCAL_ONLY paden blijven strikte loopback, ongeacht de reikwijdte.
 
 Een succesvol beleid retourneert `AuthSubject` met `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Stroomafwaartse handlers kunnen het lezen via `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` in plaats van de auth-logica opnieuw uit te voeren.
 
@@ -237,7 +236,7 @@ PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Alleen-lezen routes zijn openbaar** alleen** voor veilige methoden. Opmerking: `classifyRoute()` sluit `/api/v1/*` en `/api/v1beta/*` uit van de PUBLIC fall-through — Deze zijn altijd `CLIENT_API` dus het Bearer-key-beleid is nog steeds van toepassing.
+Alleen-lezen routes zijn openbaar** alleen** voor veilige methoden. Opmerking: `classifyRoute()` sluit `/api/v1/*` en `/api/v1beta/*` uit van de PUBLIC fall-through — deze zijn altijd `CLIENT_API` dus het Bearer-key-beleid is nog steeds van toepassing.
 
 ## Een nieuwe route toevoegen
 
@@ -282,38 +281,24 @@ export async function POST(request: Request) {
 
 Kies de verzameling op basis van de vorm, niet op basis van gemak. Eén route hoort in `PUBLIC_API_ROUTES_EXACT` (of in `PUBLIC_READONLY_CORS_API_ROUTES` als deze alleen GET ondersteunt); alleen een echte substructuur hoort in `PUBLIC_API_ROUTE_PREFIXES`, en deze **moet eindigen op `/`**. Door één route in de prefixlijst te plaatsen, worden ook alle aangrenzende paden met dezelfde begintekens openbaar gemaakt — inclusief later toegevoegde siblings met dynamische segmenten (GHSA-74g9-q8f6-793h). Werk de unit-tests bij in `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` en `tests/unit/authz/classify.test.ts`.
 
-## Scopes
+## Bereik
 
-Drie namespaces. Elke checker leest alleen zijn eigen strings. De vergelijking,
-inclusief waarom `manage` faalt bij `scopeMatches` voor `read:compression` en waarom een
-`read` access token geen `PATCH /api/keys/{id}` kan uitvoeren, is
-[Drie scope namespaces](../frameworks/MCP-SERVER.md#drie-scope-namespaces).
+Drie naamruimten. Elke checker leest alleen zijn eigen strings. De side-by-side, inclusief waarom `manage` faalt `scopeMatches` voor `read:compression` en waarom een `read` toegangstoken niet `PATCH /api/keys/{id}` kan zijn, is [Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API-sleutels bevatten een `scopes` array (opgeslagen als JSON in `api_keys.scopes`, zie `src/lib/db/apiKeys.ts`).
+API sleutels bevatten een `scopes` array (opgeslagen als JSON in `api_keys.scopes`, zie `src/lib/db/apiKeys.ts`).
 
-### Management scope
+### Beheersbereik
 
-- `manage` / `admin` — `hasManageScope`. Bearer-toegang tot management API-routes.
-- `mcp:connect`, `self:usage`, `self:account-quota`, en
-  `policy:bypass-provider-quota` zijn additieve exact-match scopes. Ze vallen
-  buiten `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` opent alleen de
-  `/api/mcp/` non-loopback carve-out.
+- `manage` / `admin` — `hasManageScope`. Dragertoegang tot beheer- API -routes.
+- `mcp:connect`, `self:usage`, `self:account-quota` en `policy:bypass-provider-quota` zijn additieve scopes voor exacte overeenkomsten. Ze zitten buiten `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` opent alleen de `/api/mcp/` non-loopback carve-out.
 
-### MCP tool scopes
+### MCP gereedschapsscopes
 
-Catalogus en matchingregels (identieke string, of een toegekende scope eindigend op `*`):
-[MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` is de originele getypeerde
-subset, niet die volledige catalogus. Handhaving vindt plaats in
-`open-sse/mcp-server/scopeEnforcement.ts` nadat `resolveCallerScopeContext()`
-scopes oplost uit MCP auth info, request metadata, of `OMNIROUTE_MCP_SCOPES`.
-Het blijft uitgeschakeld tenzij `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Catalogus- en matchingregels (identieke tekenreeks, of een toegekend bereik dat eindigt op `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` is de origineel getypte subset, niet die volledige catalogus. De handhaving wordt uitgevoerd in `open-sse/mcp-server/scopeEnforcement.ts` nadat `resolveCallerScopeContext()` bereiken van MCP auth info heeft opgelost, metagegevens heeft aangevraagd of `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` schakelt het globaal in (standaard `false`), maar het wordt altijd afgedwongen voor een HTTP/SSE beller wiens API sleutel `manage`/`admin` mist (zie `shouldForceScopeEnforcement()` in `open-sse/mcp-server/scopeEnforcement.ts`), ongeacht de vlag.
 
-### Access-token scopes
+### Toegangstokenbereiken
 
-`read` / `write` / `admin` op `oma_live_…` tokens, gerangschikt door `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Deze rangschikking is alleen van toepassing op de
-access-token credential. Zie [Management Authenticatie](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` op `oma_live_…` tokens, gerangschikt op `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Deze rang geldt alleen voor de toegangstokenreferentie. Zie [Beheerauthenticatie](../guides/MANAGEMENT-AUTH.md).
 
 ## Verificatie vereist schakelen
 

@@ -4,192 +4,157 @@
 
 ---
 
-OmniRoute sa dodáva ako plne inštalovateľná progresívna webová aplikácia. Keď otvoríte ovládací panel z ľubovoľného mobilného prehliadača — Android (Chrome) alebo iOS (Safari) — môžete použiť možnosť „Pridať na plochu“ a získať používateľský zážitok podobný natívnej aplikácii bez potreby obchodu s aplikáciami.
+Nainštalujte si ovládací panel OmniRoute ako progresívnu webovú aplikáciu, aby ste ho otvorili z domovskej obrazovky alebo pracovnej plochy v samostatnom okne. Nainštalovaná aplikácia stále potrebuje pripojenie k vášmu serveru OmniRoute na navigáciu, údaje z palubnej dosky a požiadavky API. Statické aktíva uložené vo vyrovnávacej pamäti neposkytujú offline bránu ani offline informačný panel.
 
-## Čo je PWA?
+## Čo je to PWA?
 
-Progresívna webová aplikácia zmení webový ovládací panel OmniRoute na aplikáciu, ktorá vyzerá a funguje ako natívna mobilná aplikácia. Po nainštalovaní:
+Progresívna webová aplikácia používa webový panel s ikonou aplikácie a samostatným oknom. Po nainštalovaní OmniRoute:
 
-- Spúšťa sa z plochy pomocou vlastnej ikony
-- Otvára sa na celú obrazovku — bez panela s adresou alebo rozhrania kariet prehliadača
-- Funguje offline pomocou vyhradenej stránky pripojenia
-- Ukladá statické prostriedky do vyrovnávacej pamäte na rýchlejšie načítanie
-- Podporuje orientáciu na výšku aj na šírku
+- Spustí sa z vašej domovskej obrazovky alebo pracovnej plochy
+- Otvára sa v samostatnom režime bez obvyklého panela s adresou a kariet prehliadača
+- Ukladá vybrané statické aktíva do vyrovnávacej pamäte
+- Podporuje orientáciu na výšku a na šírku
 
 ## Inštalácia
 
+Použite adresu HTTPS pre server na inom zariadení. Keď server beží na rovnakom zariadení, `http://localhost:20128` tiež spĺňa požiadavky na inštaláciu prehliadača. Obyčajná adresa `http://YOUR_IP:20128` nespĺňa tieto požiadavky. Inštalačné ponuky a výzvy závisia od prehliadača a operačného systému. Pozrite si [požiadavky na inštaláciu PWA MDN](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#https_localhost_or_loopback_are_required).
+
 ### Android (Chrome)
 
-1. Otvorte ovládací panel OmniRoute v prehliadači Chrome: `http://YOUR_IP:20128`
-2. Chrome automaticky zobrazí banner **„Pridať OmniRoute na plochu“**, prípadne:
-   - Ťuknite na ponuku **⋮** (tri bodky) → **„Pridať na plochu“** alebo **„Nainštalovať aplikáciu“**
-3. Potvrďte výzvu
-4. OmniRoute sa zobrazí na ploche ako samostatná aplikácia
+1. Otvorte svoju adresu OmniRoute HTTPS alebo `http://localhost:20128` pre server na tom istom telefóne.
+2. Otvorte**⋮** menu a vyberte si** Nainštalujte aplikáciu** alebo** Pridať na plochu** , ak je ponúkaný.
+3. Potvrďte výzvu.
+4. Otvorte OmniRoute z domovskej obrazovky.
 
-### iOS (Safari)
+### iOS (safari)
 
-1. Otvorte ovládací panel OmniRoute v prehliadači Safari: `http://YOUR_IP:20128`
-2. Ťuknite na tlačidlo **Zdieľať** (štvorec so šípkou)
-3. Posuňte sa nadol a ťuknite na **„Pridať na plochu“**
-4. Pomenujte aplikáciu (predvolený názov je „OmniRoute“) a ťuknite na **Pridať**
-5. OmniRoute sa zobrazí na ploche s ikonou aplikácie
+1. Otvorte svoju adresu OmniRoute HTTPS v Safari.
+2. Klepnite** zdieľať** →** Pridať na domovskú obrazovku** .
+3. Potvrďte názov a klepnite na** Pridať** .
+4. Otvorte OmniRoute z domovskej obrazovky.
 
-### Počítač (Chrome / Edge)
+### Desktop (Chrome / Edge)
 
-1. Otvorte ovládací panel OmniRoute
-2. Kliknite na **ikonu inštalácie** v paneli s adresou (alebo ⋮ → „Nainštalovať OmniRoute...“)
-3. Potvrďte výzvu
-4. OmniRoute sa otvorí ako samostatné okno — bez kariet a panela s adresou
+1. Otvorte hlavný panel OmniRoute.
+2. Použite inštalačnú ikonu prehliadača alebo** Nainštalujte aplikáciu** vstup do menu, ak je ponúkaný.
+3. Potvrďte výzvu na otvorenie OmniRoute v jeho vlastnom okne.
 
-## Funkcie
+## Vlastnosti
 
-### Zobrazenie na celú obrazovku
+### Samostatné okno
 
-Manifest je nakonfigurovaný pomocou `display: "fullscreen"`, čo znamená, že nainštalovaná aplikácia využíva celú obrazovku — bez ovládacích prvkov prehliadača a bez prekrývania stavového riadka. Vďaka tomu pôsobí ovládací panel ako skutočne natívna aplikácia.
+Manifest nastavuje `display: "standalone"` a `start_url: "/dashboard"`. Nainštalovaná aplikácia otvorí ovládací panel v okne aplikácie. Stále sa môžu zobrazovať ovládacie prvky prehliadača a operačného systému; manifest nevyžaduje režim celej obrazovky.
 
-### Podpora režimu offline
+### Aktíva vo vyrovnávacej pamäti a požiadavky na sieť
 
-OmniRoute obsahuje service worker (`sw.js`), ktorý poskytuje inteligentné ukladanie do vyrovnávacej pamäte:
+[Servisný pracovník](../../public/sw.js) ukladá do vyrovnávacej pamäte vybraté zdroje rovnakého pôvodu:
 
-| Typ prostriedku                                                                                                                                                                                                                 | Stratégia                                             | Správanie                                                                                                      |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Základ aplikácie**                                                                                                                                                                                                            | Najprv vyrovnávacia pamäť                             | `/`, `/offline`, manifest a ikony sa počas inštalácie vopred uložia do vyrovnávacej pamäte                     |
-| **Statické prostriedky** (CSS, JS, obrázky, písma)                                                                                                                                                                              | Najprv sieť, potom vyrovnávacia pamäť                 | Načíta aktuálne údaje zo siete; v režime offline použije vyrovnávaciu pamäť                                    |
-| **Balíky Next.js** (`/_next/`)                                                                                                                                                                                                  | Najprv sieť s aktualizáciou vyrovnávacej pamäte       | Načíta údaje zo siete a aktualizuje vyrovnávaciu pamäť; v režime offline poskytne verziu z vyrovnávacej pamäte |
-| **Požiadavky navigácie**                                                                                                                                                                                                        | Obídenie (nikdy sa nezachytávajú)                     | Prehliadač riadi prechod z HTTP/3 na HTTP/2; nefunkčný soket QUIC sa nesmie zmeniť na `Response.error()`       |
-| **Trasy API/ovládacieho panela** (`/api/`, `/a2a`, `/dashboard`, aliasy klientského API `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex` a tiež `/callback`, `/login`; porovnávajú sa bez ohľadu na veľkosť písmen) | Obídenie (nikdy sa neukladajú do vyrovnávacej pamäte) | Vždy smerujú priamo na server — service worker ich nikdy nezachytáva                                           |
+| Žiadosť alebo aktívum                     | Stratégia                    | Správanie                                                                                                                             |
+| ----------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Zdroje v čase inštalácie                  | Predbežná vyrovnávacia pamäť | `/`, `/manifest.webmanifest`, `/icon-512.png` a `/apple-touch-icon.png` sa ukladajú do vyrovnávacej pamäte počas pracovnej inštalácie |
+| statické aktíva Next.js (`/_next/`)       | Najprv sieť                  | Úspešné odpovede aktualizujú vyrovnávaciu pamäť; chyba siete sa vráti k existujúcej odpovedi uloženej vo vyrovnávacej pamäti          |
+| Ostatné statické CSS, JS, obrázky a fonty | Cache-first                  | Existujúca odpoveď uložená vo vyrovnávacej pamäti sa znova použije; úspešné sieťové odpovede sa ukladajú do vyrovnávacej pamäte       |
+| Navigácia na stránke                      | Obchvat                      | Prehliadač načíta stránku priamo; nezobrazuje sa žiadna offline záloha                                                                |
+| API, dashboard a autentifikačné cesty     | Obchvat                      | Pracovník tieto požiadavky nezachytáva ani ich neukladá do vyrovnávacej pamäte                                                        |
+| Iné nestatické požiadavky                 | sieť                         | Žiadne vyhľadávanie ani ukladanie do vyrovnávacej pamäte                                                                              |
 
-### Stránka režimu offline
+Vylúčené trasy sú `/api`, `/a2a`, `/dashboard`, `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, `/callback` a `/login`, pričom na hraniciach cesty sa nerozlišujú veľké a malé písmená. Požiadavky krížového pôvodu a požiadavky bez GET tiež obchádzajú pracovníka.
 
-Keď sieť nie je dostupná a používateľ prejde na novú stránku, service worker zobrazí vyhradenú stránku `/offline`, ktorá:
+### Stránka pripojenia
 
-- Zobrazuje zreteľnú správu **„Problém s pripojením“**
-- Zobrazuje živý **indikátor stavu online/offline**, ktorý sa aktualizuje v reálnom čase
-- Poskytuje tlačidlo **„Znova skúsiť pripojenie“** na opätovné načítanie po obnovení pripojenia
-- Obsahuje odkaz na **stavovú stránku** na diagnostiku
+Stránka `/offline` poskytuje správu o pripojení, indikátor online/offline, a** Znova skúsiť pripojenie** tlačidlo a odkaz na stavovú stránku. je to tak** nie sú vopred uložené do vyrovnávacej pamäte** a servisný pracovník áno** nie** presmerovať neúspešné navigácie naň. Jeho existencia nesprístupňuje nové stránky bez servera.
 
-### Ikony aplikácie
+### Ikony aplikácií
 
-OmniRoute poskytuje ikony optimalizované pre jednotlivé platformy:
+Manifest inzeruje tieto ikony PNG :
 
-| Súbor                  | Veľkosť          | Použitie                                                |
-| ---------------------- | ---------------- | ------------------------------------------------------- |
-| `icon-512.png`         | 512×512          | Výzva na inštaláciu v systéme Android, úvodná obrazovka |
-| `apple-touch-icon.png` | 180×180          | Ikona na ploche systému iOS                             |
-| `icon-192.svg`         | 192×192 (vektor) | Adaptívna ikona systému Android                         |
-| `apple-touch-icon.svg` | 180×180 (vektor) | Záložná ikona pre Apple                                 |
-| `favicon.svg`          | Vektor           | Karty prehliadača                                       |
-| `favicon.ico`          | Viacero veľkostí | Staršie prehliadače                                     |
+| Súbor                  | Veľkosť | Použite                                    |
+| ---------------------- | ------- | ------------------------------------------ |
+| `icon-192.png`         | 192×192 | Ikona všeobecnej aplikácie                 |
+| `icon-512.png`         | 512×512 | Ikona všeobecnej a maskovateľnej aplikácie |
+| `apple-touch-icon.png` | 180×180 | Ikona domovskej obrazovky Apple            |
+
+Prehliadač vyberie príslušnú ikonu pre cieľ inštalácie.
 
 ### Automatická registrácia
 
-Service worker sa automaticky registruje prostredníctvom komponentu `<PwaRegister />` v koreňovom rozložení. Nie je potrebná žiadna akcia používateľa — aplikáciu možno nainštalovať hneď, ako prehliadač rozpozná platný manifest a service worker.
+`PwaRegister` zaregistruje pracovníka vo výrobe, keď prehliadač podporuje servisných pracovníkov. Vývojový režim zruší registráciu pracovníkov a vymaže vyrovnávaciu pamäť, aby sa predišlo tomu, že zastarané prostriedky narúšajú opätovné načítanie. Výzvy na inštaláciu zostávajú rozhodnutím prehliadača.
 
 ## Technická architektúra
 
-### Manifest webovej aplikácie (`manifest.webmanifest`)
+### Manifest webovej aplikácie
 
-Generovaný systémom Next.js prostredníctvom súboru `src/app/manifest.ts`:
+Next.js generuje `/manifest.webmanifest` z [`src/app/manifest.ts`](../../src/app/manifest.ts). Jeho kľúčové nastavenia sú:
 
-```json
-{
-  "name": "OmniRoute",
-  "short_name": "OmniRoute",
-  "description": "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "orientation": "any",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ]
-}
-```
+| Nastavenie             | Hodnota                                          |
+| ---------------------- | ------------------------------------------------ |
+| `short_name`           | `OmniRoute`                                      |
+| `start_url`            | `/dashboard`                                     |
+| `scope`                | `/`                                              |
+| `display`              | `standalone`                                     |
+| `orientation`          | `any`                                            |
+| Farby pozadia a motívu | Predvolená svetelná paleta zo `PWA_THEME_COLORS` |
 
-### Service worker (`public/sw.js`)
+Názov a popis manifestu sú statické hodnoty v tomto zdrojovom súbore. Nainštalovaný manifest sa pri každej návšteve neriadi nastavením názvu inštancie alebo aktívnou paletou.
 
-Štandardný service worker (bez závislostí od frameworkov), ktorý obsahuje:
+### Servisný pracovník
 
-- **Fázu inštalácie**: Vopred ukladá do vyrovnávacej pamäte základné súbory aplikácie (koreňovú stránku, offline stránku, manifest a ikony)
-- **Fázu aktivácie**: Odstraňuje staré verzie vyrovnávacej pamäte a preberá kontrolu nad všetkými klientmi
-- **Fázu načítania**: Inteligentne smeruje požiadavky podľa ich typu (navigácia, statický prostriedok, API)
-- **Verziovanie vyrovnávacej pamäte**: `omniroute-pwa-v3` — zvýšením tejto verzie vynútite pri aktualizácii vytvorenie novej vyrovnávacej pamäte
+[`public/sw.js`](../../public/sw.js) nemá žiadnu závislosť na frameworku service-worker:
 
-### Metadáta rozloženia (`src/app/layout.tsx`)
+- **Inštalovať:** predbežne ukladá štyri zdroje uvedené vyššie a aktivuje nového pracovníka.
+- **Aktivovať:** odstraňuje staršie generácie vyrovnávacej pamäte a klientov nárokov.
+- **Načítať:** uplatňuje vyššie uvedené stratégie statických aktív a vylúčenia trás.
+- **Verzia:** názov zdrojovej cache je `omniroute-pwa-v3`; produkčná zostava označí identitu vyrovnávacej pamäte.
+- **Upozornenia:** spracováva prichádzajúce udalosti `push` a po kliknutí na upozornenie zaostrí alebo otvorí okno.
 
-Koreňové rozloženie poskytuje všetky metaznačky potrebné na splnenie požiadaviek PWA:
+Samotné obslužné nástroje push udalosti nevytvoria aktívne predplatné push alebo nakonfigurované doručenie servera. Nepredpokladajte, že upozornenia sú povolené len preto, že je nainštalovaný PWA.
 
-- Odkaz `manifest` na `/manifest.webmanifest`
-- `apple-web-app-capable: true` pre samostatný režim v systéme iOS
-- `apple-web-app-status-bar-style: black-translucent`
-- `mobile-web-app-capable: yes` pre Chrome v systéme Android
-- `theme-color: #0b0f1a`
-- `viewport-fit: cover` pre vykresľovanie od okraja po okraj
+### Metaúdaje rozloženia a registrácia
 
-### Komponent: `PwaRegister`
+[`src/app/layout.tsx`](../../src/app/layout.tsx) poskytuje odkaz na manifest, samostatné metadáta Apple, farby motívu a `viewport-fit: cover`. Názov stránky a názov webovej aplikácie Apple používajú názov inštancie. Živá farba témy prehliadača sleduje paletu; Inštalačný manifest používa predvolenú farbu svetla.
 
-Tento klientsky komponent, ktorý sa nachádza v súbore `src/shared/components/PwaRegister.tsx`:
-
-1. Spustí sa pri pripojení komponentu (iba na strane klienta)
-2. Overí podporu `serviceWorker` v prehliadači
-3. Bez upozornenia zaregistruje `/sw.js` (chyby sa ignorujú, aby neblokovali aplikáciu)
-4. Nič nevykresľuje (`return null`) — ide o komponent určený výhradne na vykonanie vedľajšieho efektu
+[`PwaRegister`](../../src/shared/components/PwaRegister.tsx) beží na klientovi a registruje `/sw.js` so zostavou ID vo svojom URL. Zisťuje nezhodné generácie vyrovnávacej pamäte a môže resetovať pracovníka a znova načítať, aby sa obnovil zo staršej inštalácie. Zlyhanie registrácie neblokuje palubnú dosku.
 
 ## Použitie s Termuxom (Android)
 
-Pri spustení OmniRoute v systéme Android prostredníctvom Termuxu funguje PWA bezproblémovo:
+1. Spustite OmniRoute v Termux: `npx -y omniroute@latest`.
+2. Otvorte Chrome na tom istom telefóne: `http://localhost:20128`.
+3. Nainštalujte PWA cez inštalačné menu prehliadača.
+4. Počas používania dashboardu nechajte server Termux spustený.
 
-1. Spustite OmniRoute v Termuxe: `npx omniroute`
-2. Otvorte Chrome v rovnakom telefóne: `http://localhost:20128`
-3. Nainštalujte PWA prostredníctvom možnosti „Pridať na plochu“
-4. PWA sa pripojí k lokálnemu serveru Termux — všetko sa spúšťa priamo v zariadení
-
-Táto kombinácia znamená, že váš telefón s Androidom je zároveň **serverom** (Termux) aj **klientom** (PWA) — ide o úplne samostatnú AI bránu.
+Telefón je hostiteľom brány aj jej palubnej dosky. Požiadavky na vzdialených poskytovateľov AI stále potrebujú prístup k sieti. Pozrite si [príručku Termux](TERMUX_GUIDE.md), kde nájdete informácie o nastavení a životnosti procesu Android.
 
 ## Použitie z iných zariadení
 
-Nainštalujte PWA na ľubovoľnom zariadení, ktorého prehliadač má prístup k vášmu serveru OmniRoute:
-
-- **Iný telefón/tablet**: Prejdite na `http://PHONE_IP:20128` a nainštalujte PWA
-- **Notebook**: Otvorte Chrome/Edge a nainštalujte ju ako desktopovú PWA
-- **Smart TV s prehliadačom**: Zobrazte ovládací panel na celej obrazovke
+Otvorte adresu HTTPS servera na telefóne, tablete alebo počítači a potom postupujte podľa inštalačného postupu prehliadača. Server musí zostať dostupný z každého zariadenia. Možnosti vzdialeného prístupu nájdete [v sprievodcovi tunelom](../ops/TUNNELS_GUIDE.md).
 
 ## Prispôsobenie
 
 ### Názov inštancie
 
-Názov PWA rešpektuje nastavenie **Názov inštancie** v časti `Ovládací panel → Nastavenia`. Ak svoju inštanciu premenujete na „Moja AI brána“, nainštalovaná PWA bude zobrazovať tento názov.
+The** Názov inštancie** nastavenie zmení metadáta hlavného panela vrátane názvu stránky a názvu webovej aplikácie Apple. Vygenerovaný manifest používa statický názov, takže toto nastavenie nezaručuje, že už nainštalovaná aplikácia bude premenovaná.
 
-### Vlastná ikona favicon
+### Vlastná ikona Favicon
 
-Ak prostredníctvom časti `Ovládací panel → Nastavenia` nahráte vlastnú ikonu favicon, ikona PWA na počítači sa aktualizuje podľa vlastnej ikony. Ikony na domovskej obrazovke mobilných zariadení používajú vopred vytvorené súbory `icon-512.png` a `apple-touch-icon.png`.
+Vlastná favicon zmení ikonu prehliadača. Inštalačný manifest stále inzeruje vyššie uvedené súbory PNG ; zmena favicon nenahrádza tieto ikony na domovskej obrazovke.
 
 ## Obmedzenia
 
-- **Žiadne push notifikácie** — Service worker neimplementuje Push API. Notifikácie namiesto toho spracúva aplikácia Electron.
-- **Žiadna synchronizácia na pozadí** — Offline akcie sa nezaraďujú do frontu na neskoršie opätovné vykonanie. PWA slúži primárne na zobrazovanie ovládacieho panela.
-- **Obmedzenia systému iOS** — Safari v systéme iOS nepodporuje všetky funkcie PWA (napr. výzvy na inštaláciu sú manuálne a service workery na pozadí sú obmedzené).
-- **Veľkosť vyrovnávacej pamäte** — Service worker ukladá do vyrovnávacej pamäte iba statické prostriedky. Veľké dátové časti odpovedí z trás `/api/` sa nikdy neukladajú do vyrovnávacej pamäte.
-- **Vlastné ikony v mobilných zariadeniach** — Zmena faviconu v nastaveniach neaktualizuje ikonu na domovskej obrazovke mobilného zariadenia (vyžaduje si to opätovné vygenerovanie ikon PWA).
+- **Vyžaduje sa pripojenie k serveru:** navigácia na stránke, stav panela a požiadavky API nemajú núdzový režim offline.
+- **Žiadna synchronizácia na pozadí:** offline akcie nie sú zaradené do poradia na prehratie.
+- **Rozdiely v prehliadači:** inštalačné ponuky, prezentácia v okne a podpora upozornení sa líšia podľa platformy.
+- **Žiadna vyrovnávacia pamäť odpovede API :** pracovník vylúči API, dashboard a autentifikačné cesty.
+- **Ikony statickej inštalácie:** aktualizácia týchto ikon vyžaduje zmenu inzerovaných aktív; prehliadače si môžu ponechať nainštalované metadáta.
 
-## Prehľad súborov
+## Odkaz na súbory
 
-| Súbor                                   | Účel                                                                   |
-| --------------------------------------- | ---------------------------------------------------------------------- |
-| `src/app/manifest.ts`                   | Trasa manifestu Next.js (generuje `manifest.webmanifest`)              |
-| `public/sw.js`                          | Service worker s logikou ukladania do vyrovnávacej pamäte              |
-| `src/shared/components/PwaRegister.tsx` | Klientsky komponent, ktorý registruje service worker                   |
-| `src/app/offline/page.tsx`              | Záložná offline stránka so živým indikátorom stavu                     |
-| `src/app/layout.tsx`                    | Koreňové rozloženie s metadátami PWA (apple-web-app, theme-color atď.) |
-| `public/icon-512.png`                   | Ikona PNG s rozmermi 512×512 (Android, úvodná obrazovka)               |
-| `public/apple-touch-icon.png`           | Ikona PNG s rozmermi 180×180 (domovská obrazovka iOS)                  |
-| `public/icon-192.svg`                   | Ikona SVG s rozmermi 192×192 (adaptívna ikona systému Android)         |
-| `public/apple-touch-icon.svg`           | Ikona SVG s rozmermi 180×180 (záložná ikona pre zariadenia Apple)      |
+| Súbor                                                                                  | Účel                                                                      |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [src/app/manifest.ts](../../src/app/manifest.ts)                                       | Vygenerovaný manifest webovej aplikácie                                   |
+| [public/sw.js](../../public/sw.js)                                                     | Ukladanie do vyrovnávacej pamäte, vylúčenia a obsluhy udalostí upozornení |
+| [src/shared/components/PwaRegister.tsx](../../src/shared/components/PwaRegister.tsx)   | Registrácia produkcie a obnova zastaranej vyrovnávacej pamäte             |
+| [src/app/offline/page.tsx](../../src/app/offline/page.tsx)                             | Stránka pripojenia, nie automatická offline núdzová reklama               |
+| [src/app/layout.tsx](../../src/app/layout.tsx)                                         | Metadáta stránky a nastavenia výrezu                                      |
+| [src/shared/constants/pwaThemeColors.ts](../../src/shared/constants/pwaThemeColors.ts) | Zdieľané hodnoty farby témy                                               |
+| [public/icon-512.png](../../public/icon-512.png)                                       | Ikona aplikácie 512 × 512                                                 |
+| [public/apple-touch-icon.png](../../public/apple-touch-icon.png)                       | 180 × 180 ikona Apple                                                     |

@@ -4,7 +4,7 @@
 
 ---
 
-> **Version:** v3.8.44** Letzte Aktualisierung:** 28.10.2026** Publikum:** Ingenieure, die eingebettete Dienste hinzufügen, warten oder debuggen (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Version:** v3.8.44** Publikum:** Ingenieure, die eingebettete Dienste hinzufügen, warten oder debuggen (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Eingebettete Dienste sind lokal installierte Prozess-Sidecar-Tools, die OmniRoute installiert, überwacht und als erstklassige Routing-Ziele verfügbar macht. Im Gegensatz zu externen Anbietern (die über das Internet über API -Schlüssel erreicht werden) laufen eingebettete Dienste auf demselben Computer wie OmniRoute und kommunizieren über Loopback.
 
@@ -45,7 +45,7 @@ Alle acht folgen dem gleichen Aufsichtsmodell:
 - OmniRoute installiert sie unter `DATA_DIR/services/{name}/` (isoliert von OmniRoute eigenem `package.json`)
 - OmniRoute erzeugt und überwacht sie als untergeordnete Prozesse
 - OmniRoute fügt einen kurzlebigen API Schlüssel in die Umgebung des Kindes ein und rotiert ihn ohne Ausfallzeit (sofern zutreffend).
-- Alle Verwaltungsrouten (`/api/services/*`) sind**LOCAL_ONLY** — nur über Loopback zugänglich (harte Regel Nr. 17)
+- Alle Verwaltungsrouten (`/api/services/*`) sind**LOCAL_ONLY** — nur über Loopback zugänglich (harte Regel #17)
 
 ### Wichtige Entscheidungen (aus dem Entwurfsplan)
 
@@ -209,7 +209,7 @@ Race Conditions, wenn beispielsweise der automatische Start und eine UI-Schaltfl
 
 ## 4. API -Referenz
 
-Alle Routen unter `/api/services/` sind**LOCAL_ONLY** (Nur Loopback, harte Regel Nr. 17). Nicht-Loopback-Anfragen erhalten `403 LOCAL_ONLY` unabhängig vom Authentifizierungstoken.
+Alle Routen unter `/api/services/` sind**LOCAL_ONLY** (Nur Loopback, harte Regel #17). Nicht-Loopback-Anfragen erhalten `403 LOCAL_ONLY` unabhängig vom Authentifizierungstoken.
 
 ### 4.1 9Router-Endpunkte (11 Routen)
 
@@ -236,7 +236,7 @@ Installieren Sie 9Router von npm. Erstellt `DATA_DIR/services/9router/` mit sein
 | `409`  | Wird bereits installiert (Sperre gehalten)                                 |
 | `500`  | npm-Installation fehlgeschlagen. — siehe `message` für freundlichen Fehler |
 
-**Hinweise:** Verwendet `execFile('npm', [...])` — keine Shell, keine Interpolation (harte Regel Nr. 13). EACCES Fehler werden als freundliche Nachrichten angezeigt.
+**Hinweise:** Verwendet `execFile('npm', [...])` — keine Shell, keine Interpolation (harte Regel #13). EACCES Fehler werden als freundliche Nachrichten angezeigt.
 
 ---
 
@@ -555,9 +555,7 @@ Dieser Proxy:
 - Entfernt `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` aus der Antwort
 - Schreibt HTML Antworten um, um `<base href>` einzufügen und absolute Pfade zu normalisieren (`/foo` → `/dashboard/.../embed/foo`).
 
-WebSocket Upgrades für das eingebettete Dashboard werden von einem Begleitserver an einem dedizierten Port verwaltet (siehe `src/lib/services/embedWsProxy.ts`).
-
-Jedes Upgrade wird autorisiert, bevor der Tunnel geöffnet wird, mit den gleichen Regeln wie bei der HTTP Einbettungsroute: Der Peer muss ein Loopback ohne Reverse-Proxy-Weiterleitungsheader sein, ein Browser- `Origin` muss ein Dashboard-Ursprung sein (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` erweitern die Loopback-Standardeinstellungen), und der Aufrufer benötigt eine Dashboard-Sitzung oder einen API -Schlüssel für den Verwaltungsbereich, es sei denn, die Dashboard-Anmeldung ist deaktiviert.
+WebSocket Upgrades für das eingebettete Dashboard werden von einem Begleitserver an einem dedizierten Port verwaltet (siehe `src/lib/services/embedWsProxy.ts`). Jedes Upgrade wird autorisiert, bevor der Tunnel geöffnet wird, mit den gleichen Regeln wie die HTTP Einbettungsroute: Der Peer muss ein Loopback ohne Reverse-Proxy-Weiterleitungsheader sein, ein Browser- `Origin` muss ein Dashboard-Ursprung sein (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` erweitern die Loopback-Standardeinstellungen), und der Aufrufer benötigt eine Dashboard-Sitzung oder einen API -Schlüssel für den Verwaltungsbereich, es sei denn, die Dashboard-Anmeldung ist deaktiviert.
 
 **Sicherheit:** Die eingebetteten Proxy-Routen sind unter `LOCAL_ONLY_API_PREFIXES` klassifiziert und können nur über Loopback erreicht werden. Ein Angreifer, der ein JWT über einen Cloudflare/Ngrok Tunnel erhält, kann keine Proxy-Verbindung zu eingebetteten Diensten herstellen.
 

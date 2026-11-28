@@ -43,15 +43,13 @@ dirección de correo electrónico oficial, la publicación mediante una cuenta o
 en redes sociales o la actuación como representante designado en un evento
 en línea o presencial.
 
-## Enforcement
+## Aplicación
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+Los casos de comportamiento abusivo, acosador o de otro modo inaceptable se pueden informar a los líderes comunitarios responsables de hacer cumplir la ley abriendo un asesor de seguridad privado en
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+o enviando un correo electrónico al responsable de mantenimiento a diegosouza.pw@outlook.com. Para incidentes sensibles a la seguridad, consulte [`SECURITY.md`](SECURITY.md). Todas las quejas serán revisadas e investigadas de manera rápida y justa.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Todos los líderes comunitarios están obligados a respetar la privacidad y seguridad de quien reporta cualquier incidente.
 
 ## Directrices de aplicación
 

@@ -13,29 +13,23 @@ UI/UX, i18n, CLI, មូលដ្ឋានទិន្នន័យ និង bui
 
 ---
 
-## ការរៀបចំបរិស្ថានអភិវឌ្ឍន៍
+## ការរៀបចំការអភិវឌ្ឍន៍
 
 ### តម្រូវការជាមុន
 
-- **Node.js** `>=22.22.2 <23`, ឬ `>=24.0.0 <27` (ណែនាំ៖ 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` ឬ `>=24.0.0 <27` (បានណែនាំ៖ 24 LTS)
+- **npm** 10 +
 
-> **Windows ជាមួយ Node 24៖** ប្រើ patch release បច្ចុប្បន្នរបស់ 24 LTS (យ៉ាងហោចណាស់ 24.20.0)។
-> Release ចាស់ៗអាចបញ្ឈប់ដំណើរការបន្ទាប់ពីការធ្វើតេស្តជោគជ័យ នៅពេល `--test-force-exit` បិទ
-> process។ [Windows libuv fix](https://github.com/nodejs/node/pull/61999) របស់ Node ដោះស្រាយ
-> runtime crash នេះ។ សូមរក្សាការអះអាងក្នុងការធ្វើតេស្ត និងការត្រួតពិនិត្យការចាកចេញរបស់ runner ឱ្យបានបើកដំណើរការ។
+> **Windows ជាមួយ Node 24:** ប្រើការចេញផ្សាយបំណះ 24 LTS បច្ចុប្បន្ន (យ៉ាងហោចណាស់ 24.20.0) ។ ការចេញផ្សាយមុននេះអាចបោះបង់បន្ទាប់ពីការធ្វើតេស្តជោគជ័យនៅពេលដែល `--test-force-exit` បិទដំណើរការ។ [Windows libuv fix](https://github.com/nodejs/node/pull/61999) របស់ Node ដោះស្រាយការគាំងដំណើរការនេះ; រក្សាការអះអាងសាកល្បង និងការត្រួតពិនិត្យការចាកចេញរបស់អ្នករត់ត្រូវបានបើក។
 
-> **អ្នកប្រើប្រាស់ npm v11+ (Node 24+)៖** បន្ទាប់ពី `npm install` សូមផ្ទៀងផ្ទាត់ថា native modules ត្រូវបានដំឡើង៖
-> `node -e "require('better-sqlite3')"`. ប្រសិនបើវាបរាជ័យដោយមាន `MODULE_NOT_FOUND`,
-> ដំណើរការ `npm approve-scripts better-sqlite3 && npm install`។ សូមមើល
-> [ការដោះស្រាយបញ្ហា](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)។
+> **npm v11 + អ្នកប្រើប្រាស់ (Node 24 +):** បន្ទាប់ពី `npm install` ផ្ទៀងផ្ទាត់ម៉ូឌុលដើមត្រូវបានដំឡើង៖ `node -e "require('better-sqlite3')"`. ប្រសិនបើវាបរាជ័យជាមួយ `MODULE_NOT_FOUND` សូមដំណើរការ `npm approve-scripts better-sqlite3 && npm install`។ សូមមើល [ការដោះស្រាយបញ្ហា](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ។
 
-- **Git**
+- **ហ្គីត**
 
 ### ក្លូន និងដំឡើង
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -43,92 +37,84 @@ npm install
 ### អថេរបរិស្ថាន
 
 ```bash
-# បង្កើត .env របស់អ្នកពីគំរូ
+# Create your .env from the template
 cp .env.example .env
 
-# បង្កើត secrets ដែលត្រូវការ
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 អថេរសំខាន់ៗសម្រាប់ការអភិវឌ្ឍន៍៖
 
-| អថេរ                   | តម្លៃលំនាំដើមសម្រាប់ការអភិវឌ្ឍន៍ | សេចក្ដីពិពណ៌នា                 |
-| ---------------------- | -------------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                          | ច្រក server                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | URL មូលដ្ឋានសម្រាប់ frontend   |
-| `JWT_SECRET`           | (បង្កើតខាងលើ)                    | secret សម្រាប់ចុះហត្ថលេខា JWT  |
-| `INITIAL_PASSWORD`     | `CHANGEME`                       | ពាក្យសម្ងាត់សម្រាប់ការចូលដំបូង |
-| `APP_LOG_LEVEL`        | `info`                           | កម្រិតលម្អិតនៃ log             |
+| អថេរ                   | លំនាំដើមនៃការអភិវឌ្ឍន៍   | ការពិពណ៌នា                      |
+| ---------------------- | ------------------------ | ------------------------------- |
+| `PORT`                 | `20128`                  | ច្រកម៉ាស៊ីនមេ                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | មូលដ្ឋាន URL សម្រាប់ផ្នែកខាងមុខ |
+| `JWT_SECRET`           | (បង្កើតខាងលើ)            | JWT ចុះហត្ថលេខាសម្ងាត់          |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | ពាក្យសម្ងាត់ចូលដំបូង            |
+| `APP_LOG_LEVEL`        | `info`                   | កំណត់ហេតុកម្រិតពាក្យសំដី        |
 
 ### ការកំណត់ផ្ទាំងគ្រប់គ្រង
 
-ផ្ទាំងគ្រប់គ្រងផ្ដល់ toggle ក្នុង UI សម្រាប់មុខងារដែលអាចកំណត់តាមរយៈអថេរបរិស្ថានផងដែរ៖
+ផ្ទាំងគ្រប់គ្រងផ្តល់នូវការបិទបើក UI សម្រាប់លក្ខណៈពិសេសដែលអាចត្រូវបានកំណត់រចនាសម្ព័ន្ធតាមរយៈអថេរបរិស្ថានផងដែរ៖
 
-| ទីតាំងការកំណត់      | Toggle             | សេចក្ដីពិពណ៌នា              |
-| ------------------- | ------------------ | --------------------------- |
-| Settings → Advanced | Debug Mode         | បើក debug request logs (UI) |
-| Settings → General  | Sidebar Visibility | បង្ហាញ/លាក់ផ្នែក sidebar    |
+| ការកំណត់ទីតាំង | បិទបើក             | ការពិពណ៌នា                               |
+| -------------- | ------------------ | ---------------------------------------- |
+| ការកំណត់ →     | របៀបបំបាត់កំហុស    | បើកដំណើរការកំណត់ហេតុសំណើបំបាត់កំហុស (UI) |
+| ការកំណត់ →     | ភាពមើលឃើញរបារចំហៀង | ផ្នែករបារចំហៀង Show/hide                 |
 
-ការកំណត់ទាំងនេះត្រូវបានរក្សាទុកក្នុង database ហើយនៅតែមានបន្ទាប់ពីចាប់ផ្ដើមឡើងវិញ ដោយបដិសេធតម្លៃលំនាំដើមរបស់ env var នៅពេលបានកំណត់។
+ការកំណត់ទាំងនេះត្រូវបានរក្សាទុកក្នុងមូលដ្ឋានទិន្នន័យ ហើយបន្តនៅទូទាំងការចាប់ផ្តើមឡើងវិញ ដោយបដិសេធ env var defaults នៅពេលកំណត់។
 
-### ដំណើរការក្នុងមូលដ្ឋាន
+### ដំណើរការក្នុងស្រុក
 
 ```bash
-# របៀបអភិវឌ្ឍន៍ (ផ្ទុកឡើងវិញដោយស្វ័យប្រវត្តិ)
+# Development mode (hot reload)
 npm run dev
 
-# បង្កើត production
-npm run build    # next build → .build/next/ បន្ទាប់មក assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Compile លឿនសម្រាប់ backend/API តែប៉ុណ្ណោះ សម្រាប់ការផ្លាស់ប្ដូររបស់អ្នកចូលរួម
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# បង្កើត release (បង្កើតឡើងវិញស្អាត + HEAD sentinel — តម្រូវសម្រាប់ deploy)
-npm run build:release   # rm -rf .build dist ហើយ build + សរសេរ dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# ការកំណត់ច្រកទូទៅ
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Contributor build ធ្វើការផ្ទៀងផ្ទាត់តែការចងក្រងប៉ុណ្ណោះ៖ វាមិន assemble standalone
-distribution ឬ build optional native packaging assets ទេ។ ប្រើ production build ធម្មតា នៅពេលអ្នក
-ត្រូវការផ្ទៀងផ្ទាត់ shippable bundle។
+ការស្ថាបនាអ្នករួមចំណែកអនុវត្តការបញ្ជាក់តែការចងក្រងប៉ុណ្ណោះ៖ វាមិនប្រមូលផ្តុំការចែកចាយដាច់ដោយឡែក ឬបង្កើតទ្រព្យសម្បត្តិវេចខ្ចប់ដើមជាជម្រើសទេ។ ប្រើការបង្កើតផលិតកម្មធម្មតានៅពេលដែលអ្នកត្រូវការធ្វើឱ្យមានសុពលភាពនៃកញ្ចប់ដែលអាចបញ្ជូនបាន។
 
-### ប្លង់លទ្ធផល Build
+### បង្កើតប្លង់លទ្ធផល
 
-| ថត        | មាតិកា                                                                     | បានតាមដាន |
-| --------- | -------------------------------------------------------------------------- | --------- |
-| `src/`    | ប្រភពកម្មវិធី (TypeScript / TSX)                                           | បាទ/ចាស   |
-| `.build/` | ឯកសារកណ្ដាល — លទ្ធផល `next build` (gitignored, `distDir = .build/next`)    | ទេ        |
-| `dist/`   | bundle ដែលអាចដឹកជញ្ជូនបាន — assemble ដោយ `assembleStandalone` (gitignored) | ទេ        |
+| ថតឯកសារ   | មាតិកា                                                                      | បានតាមដាន |
+| --------- | --------------------------------------------------------------------------- | --------- |
+| `src/`    | ប្រភពកម្មវិធី (TypeScript / TSX)                                            | បាទ       |
+| `.build/` | កម្រិតមធ្យមទិន្នផល — `next build` (gitignored, `distDir = .build/next`)     | ទេ        |
+| `dist/`   | បណ្តុំ — ដែលអាចដឹកជញ្ជូនបានប្រមូលផ្តុំដោយ `assembleStandalone` (gitignored) | ទេ        |
 
-បំពង់ Build ដំណើរការតែមួយជំហាន៖
+ការសាងសង់បំពង់គឺជាច្រកតែមួយ៖
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (លទ្ធផល Next.js)
-  └─ assembleStandalone()                 (ចម្លង standalone + static + public + native assets)
-       └─ លទ្ធផល៖ dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` នឹងសម្អាតថតទាំងពីរជាមុនសិន ហើយសរសេរ
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ជា deploy integrity sentinel។
+`npm run build:release` បន្ថែមទៀតសម្អាតថតទាំងពីរជាមុនហើយសរសេរ `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ជាការដាក់ពង្រាយបញ្ជូនភាពសុចរិត។
 
-`npm run build:contributor` ប្រើ backend-only build profile។ វាប្ដូរ dashboard UI files ជាបណ្ដោះអាសន្ន
-ខណៈពេលកំពុង build រក្សាទុក API route handlers ហើយស្ដារឯកសារដើមឡើងវិញបន្ទាប់ពី build។ ប្រើ `npm run build`
-សម្រាប់ការផ្លាស់ប្ដូរដែលប៉ះពាល់ដល់ dashboard UI ឬសម្រាប់ full release validation; contributor profile
-មិនមែនជាការជំនួស release build ទេ។
+`npm run build:contributor` ប្រើទម្រង់ស្ថាបនាសម្រាប់តែផ្នែកខាងក្រោយប៉ុណ្ណោះ។ វារារាំងឯកសារ UI ផ្ទាំងគ្រប់គ្រងជាបណ្ដោះអាសន្ន ខណៈពេលកំពុងសាងសង់ រក្សាឧបករណ៍ដោះស្រាយផ្លូវ API និងស្ដារឯកសារដើមឡើងវិញបន្ទាប់ពីការស្ថាបនា។ ប្រើ `npm run build` សម្រាប់ការផ្លាស់ប្តូរដែលប៉ះពាល់ដល់ផ្ទាំងគ្រប់គ្រង UI ឬសម្រាប់សុពលភាពនៃការចេញផ្សាយពេញលេញ។ កម្រងព័ត៌មានអ្នករួមចំណែកមិនមែនជាការជំនួសសម្រាប់ការបង្កើតការចេញផ្សាយនោះទេ។
 
-> **ចំណាំអំពី VPS deploy៖** remote image directory `/usr/lib/node_modules/omniroute/app/`
-> មិនត្រូវបានផ្លាស់ប្ដូរទេ។ deploy skills ធ្វើ rsync មាតិកានៃ `dist/` ទៅក្នុងវា។
-> មានតែ build output path ក្នុង repository ប៉ុណ្ណោះដែលបានផ្លាស់ទី (`app/` → `dist/`)។
+> **VPS ដាក់ពង្រាយចំណាំ៖** ថតរូបភាពពីចម្ងាយ `/usr/lib/node_modules/omniroute/app/` មិនផ្លាស់ប្តូរទេ។ ជំនាញដាក់ពង្រាយ rsync មាតិកានៃ `dist/` ចូលទៅក្នុងវា។ មានតែផ្លូវលទ្ធផលបង្កើត in-repo ប៉ុណ្ណោះដែលត្រូវបានផ្លាស់ប្តូរ (`app/` → `dist/`) ។
 
-URL លំនាំដើម៖
+URLs លំនាំដើម៖
 
-- **ផ្ទាំងគ្រប់គ្រង**៖ `http://localhost:20128/dashboard`
-- **API**៖ `http://localhost:20128/v1`
+- **ផ្ទាំងគ្រប់គ្រង** : `http://localhost:20128/dashboard`
+- **API**: `http://localhost:20128/v1`
 
 ---
 
@@ -433,10 +419,10 @@ docs/
 
 ---
 
-## ការទទួលជំនួយ
+## ការទទួលបានជំនួយ
 
-- **ស្ថាបត្យកម្ម**៖ សូមមើល [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **ឯកសារយោង API**៖ សូមមើល [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **ឯកសារសុវត្ថិភាព**៖ [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **ឯកសារប្រតិបត្តិការ**៖ [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **បញ្ហា**៖ [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **ស្ថាបត្យកម្ម** ៖ សូមមើល [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API ឯកសារយោង** ៖ សូមមើល [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **ឯកសារសុវត្ថិភាព** ៖ [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **ឯកសារ Ops** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **បញ្ហា** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

@@ -245,33 +245,41 @@ Claude এবং Claude Code-সামঞ্জস্যপূর্ণ রু�
 
 ---
 
-## 🎨 କମ୍ବୋଗୁଡ଼ିକ
+## 🎨 କମ୍ବୋସ୍।
 
-ପ୍ରତ୍ୟେକ କାର୍ଡର ହ୍ୟାଣ୍ଡଲ୍‌କୁ ଡ୍ରାଗ୍ କରି ଆପଣ ସିଧାସଳଖ **ଡ୍ୟାଶବୋର୍ଡ → କମ୍ବୋଗୁଡ଼ିକ**ରେ କମ୍ବୋ କାର୍ଡଗୁଡ଼ିକୁ ପୁନଃକ୍ରମବଦ୍ଧ କରିପାରିବେ। କ୍ରମଟି SQLiteରେ ସଂରକ୍ଷିତ ହୁଏ ଏବଂ ପୁନଃଲୋଡ୍ କଲେ ପୁନଃସ୍ଥାପିତ ହୁଏ।
+ଆପଣ ସିଧାସଳଖ କମ୍ବୋ କାର୍ଡଗୁଡ଼ିକୁ ରେକର୍ଡ କରିପାରିବେ।** ଡ୍ୟାସବୋର୍ଡ → କମ୍ବୋସ୍।** ପ୍ରତ୍ୟେକ କାର୍ଡରେ ହ୍ୟାଣ୍ଡେଲକୁ ଡ୍ରାଗ୍ କରି। କ୍ରମଟି SQLite ରେ ଗଚ୍ଛିତ ହୋଇଛି ଏବଂ ପୁନ o ଲୋଡ୍ ରେ ପୁନ restored ସ୍ଥାପିତ ହୋଇଛି।
 
-### ଉଦାହରଣ 1: ସବ୍‌ସ୍କ୍ରିପ୍ସନ୍‌ର ସର୍ବାଧିକ ବ୍ୟବହାର → ଶସ୍ତା ବ୍ୟାକଅପ୍
+### ଏକ ପ୍ରଦାନକାରୀ, ମଡେଲ, କିମ୍ବା ଖାତା ଖୋଜ।
 
-```
-ଡ୍ୟାଶବୋର୍ଡ → କମ୍ବୋଗୁଡ଼ିକ → ନୂଆ ସୃଷ୍ଟି କରନ୍ତୁ
+କମ୍ବୋ ସୃଷ୍ଟି କିମ୍ବା ସଂପାଦନରେ, ଷ୍ଟେପ୍-ଷ୍ଟେପ୍ ପ୍ରଦାନକାରୀ, ମଡେଲ୍, ଆକାଉଣ୍ଟ୍, ଏବଂ କମ୍ବୋ-ରେଫରେନ୍ସ ଚୟନକାରୀମାନେ ଏକ ସ୍ଥାନୀୟ ସନ୍ଧାନ କ୍ଷେତ୍ର ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତି। ଏକ ପ୍ରଦର୍ଶିତ ନାମ, ପରିଚାୟକ, ପ୍ରଦାନକାରୀ ଛଦ୍ମନାମ, କିମ୍ବା ମଡେଲ ଉତ୍ସ ଦ୍ୱାରା ସନ୍ଧାନ କରନ୍ତୁ, ତାପରେ ଏକ ଫଳାଫଳ କ୍ଲିକ୍ କରନ୍ତୁ କିମ୍ବା ତୀର କି ବ୍ୟବହାର କରନ୍ତୁ ଏବଂ ଏଣ୍ଟର୍ କରନ୍ତୁ। ଏକାଧିକ ସନ୍ଧାନ ସର୍ତ୍ତାବଳୀ ସମସ୍ତ ମେଳ ହେବା ଜରୁରୀ। ସନ୍ଧାନକୁ ସଫା କରିବା କିମ୍ବା ଏସ୍କେପ୍ ଦବାଇବା ଦ୍ୱାରା ମନୋନୀତ ମୂଲ୍ୟ ଅପରିବର୍ତ୍ତିତ ରହିଥାଏ।
 
-ନାମ: premium-coding
-ମଡେଲଗୁଡ଼ିକ:
-  1. cc/claude-opus-4-7 (ପ୍ରାଥମିକ ସବ୍‌ସ୍କ୍ରିପ୍ସନ୍)
-  2. glm/glm-4.7 (ଶସ୍ତା ବ୍ୟାକଅପ୍, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (ସବୁଠାରୁ ଶସ୍ତା ଫଲ୍‌ବ୍ୟାକ୍, $0.3/1M)
+ସନ୍ଧାନ କରିବା ସମୟରେ ସ୍ୱୟଂଚାଳିତ ଆକାଉଣ୍ଟ ପସନ୍ଦ ଦୃଶ୍ୟମାନ ରହିଥାଏ। ଏହାର ବ account କଳ୍ପିକ ଆକାଉଣ୍ଟ୍ ପ୍ରତିବନ୍ଧକ ତାଲିକାରେ ଏକ ପୃଥକ ଫିଲ୍ଟର୍ ଅଛି: ଦୃଶ୍ୟମାନ ଫଳାଫଳ ବାହାରେ ମନୋନୀତ ଖାତା ଚୟନ ହୋଇ ରହିଥାଏ, ଏବଂ ଗଣନା ସେଗୁଡ଼ିକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ। ଇମେଲ ଗୋପନୀୟତା ଚାଲୁଥିବାବେଳେ ଲୁକ୍କାୟିତ ଇମେଲ ଖଣ୍ଡଗୁଡିକ ସନ୍ଧାନଯୋଗ୍ୟ ନୁହେଁ। ଷ୍ଟେପ୍ ଯୋଡନ୍ତୁ ଏବଂ ପୂର୍ବପରି କମ୍ବୋକୁ ସେଭ୍ କରନ୍ତୁ। ଏକ ଜିଜ୍ଞାସା ଟାଇପ୍ କରିବା କିଛି ସଞ୍ଚୟ କରେ ନାହିଁ କିମ୍ବା ପରୀକ୍ଷା କରେ ନାହିଁ।
 
-CLIରେ ବ୍ୟବହାର କରନ୍ତୁ: premium-coding
-```
+ସମାନ ସ୍ଥାନୀୟ ସନ୍ଧାନ ସଂଯୋଗ-ପରୀକ୍ଷଣ ମଡେଲ, କଷ୍ଟମ CLI ଡିଫଲ୍ଟ ଏବଂ ଛଦ୍ମନାମ ମଡେଲ ଏବଂ ସେଭ୍-ପ୍ରକ୍ସି ପସନ୍ଦ ପାଇଁ ଉପଲବ୍ଧ। ବିଦ୍ୟମାନ ସଞ୍ଚୟ, ପ୍ରୟୋଗ, ଏବଂ ପରୀକ୍ଷା କାର୍ଯ୍ୟଗୁଡ଼ିକ ଅଲଗା ରହିଥାଏ।
 
-### ଉଦାହରଣ 2: କେବଳ ମାଗଣା (ଶୂନ୍ୟ ଖର୍ଚ୍ଚ)
+### ଉଦାହରଣ 1: ସବସ୍କ୍ରିପସନ୍ ସର୍ବାଧିକ କରନ୍ତୁ → ଶସ୍ତା ବ୍ୟାକଅପ୍।
 
 ```
-ନାମ: free-combo
-ମଡେଲଗୁଡ଼ିକ:
-  1. if/kimi-k2.7-code (ମାଗଣା ଆକ୍ସେସ୍ ଭାବେ ତାଲିକାଭୁକ୍ତ; ପ୍ରଦାନକାରୀଙ୍କ ସୀମା ପ୍ରଯୁଜ୍ୟ ହୋଇପାରେ)
-  2. kr/qwen3-coder-next (Kiroର ମାଗଣା ଫଲ୍‌ବ୍ୟାକ୍)
+Dashboard → Combos → Create New
 
-ଖର୍ଚ୍ଚ: ବର୍ତ୍ତମାନ $0 ଭାବେ ତାଲିକାଭୁକ୍ତ; ସର୍ତ୍ତାବଳୀ ଏବଂ ଉପଲବ୍ଧତା ପରିବର୍ତ୍ତିତ ହୋଇପାରେ
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### ଉଦାହରଣ ୨: ମାଗଣା-କେବଳ (ଶୂନ ମୂଲ୍ୟ)
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -431,7 +439,7 @@ omniroute autostart disable
 ### VPS ନିୟୋଜନ।
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +521,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -688,7 +696,7 @@ post_install() {
 
 ### କଷ୍ଟମ୍ ମଡେଲଗୁଡିକ।
 
-ଏକ ଆପ୍ ଅପଡେଟ୍ ଅପେକ୍ଷା ନକରି ଯେକ any ଣସି ପ୍ରଦାନକାରୀଙ୍କୁ ଯେକ any ଣସି ମଡେଲ୍ ID ଯୋଡନ୍ତୁ:
+ଏକ ଆପ୍ ଅଦ୍ୟତନକୁ ଅପେକ୍ଷା ନକରି ଯେକ any ଣସି ପ୍ରଦାନକାରୀକୁ ଯେକ any ଣସି ମଡେଲ୍ ID ଯୋଡନ୍ତୁ:
 
 ```bash
 # Via API
@@ -704,12 +712,12 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 ଟିପ୍ପଣୀ:
 
-- OpenRouter ଏବଂ OpenAI/Anthropic-compatible ପ୍ରଦାନକାରୀମାନେ ଏଥିରୁ ପରିଚାଳିତ।** ଉପଲବ୍ଧ ମଡେଲଗୁଡିକ।** କେବଳ ସମାନ ଉପଲବ୍ଧ-ମଡେଲ ତାଲିକାରେ ସମସ୍ତ ଜମି ମାନୁଆଲ ଯୋଗ, ଆମଦାନୀ, ଏବଂ ଅଟୋ-ସିଙ୍କ, ତେଣୁ ସେହି ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ କ separate ଣସି ପୃଥକ କଷ୍ଟମ ମଡେଲ ବିଭାଗ ନାହିଁ।
+- OpenRouter ଏବଂ OpenAI/Anthropic-compatible ପ୍ରଦାନକାରୀମାନେ ଏଥିରୁ ପରିଚାଳିତ।** ଉପଲବ୍ଧ ମଡେଲଗୁଡିକ।** କେବଳ ସମାନ ଉପଲବ୍ଧ-ମଡେଲ ତାଲିକାରେ ସମସ୍ତ ଜମି ମାନୁଆଲ ଯୋଗ, ଆମଦାନୀ ଏବଂ ଅଟୋ-ସିଙ୍କ, ତେଣୁ ସେହି ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ କ separate ଣସି ପୃଥକ କଷ୍ଟମ ମଡେଲ ବିଭାଗ ନାହିଁ।
 - The** କଷ୍ଟମ୍ ମଡେଲଗୁଡିକ।** ବିଭାଗ ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ ଉଦ୍ଦିଷ୍ଟ ଯାହା ପରିଚାଳିତ ଉପଲବ୍ଧ-ମଡେଲ ଆମଦାନୀକୁ ପ୍ରକାଶ କରେ ନାହିଁ।
 
 ### କଷ୍ଟମ୍ OpenAI- ସୁସଙ୍ଗତ ପ୍ରଦାନକାରୀ।
 
-ଯେକ Any ଣସି ଗେଟୱେ ଯାହାକି OpenAI API (ଏକ ସ୍ୱ-ହୋଷ୍ଟ ପ୍ରକ୍ସି, vLLM, ଏକ ତୃତୀୟ-ପକ୍ଷ ଏଗ୍ରିଗେଟର୍) କୁ କହିଥାଏ ଏହାର ନିଜସ୍ୱ ପ୍ରଦାନକାରୀ ନୋଡ୍ ଭାବରେ ଯୋଗ କରାଯାଇପାରିବ:
+ଯେକ Any ଣସି ଗେଟୱେ ଯାହା OpenAI API (ଏକ ସ୍ୱ-ହୋଷ୍ଟ ପ୍ରକ୍ସି, vLLM, ଏକ ତୃତୀୟ-ପକ୍ଷ ଏଗ୍ରିଗେଟର୍) କୁ କହିଥାଏ, ଏହାର ନିଜସ୍ୱ ପ୍ରଦାନକାରୀ ନୋଡ୍ ଭାବରେ ଯୋଗ କରାଯାଇପାରିବ:
 
 1. **ପ୍ରଦାନକାରୀ → OpenAI ସୁସଙ୍ଗତ ଯୋଗ କରନ୍ତୁ।** ।
 2. **ନାମ** : ନୋଡ୍ ପାଇଁ ଏକ ପ୍ରଦର୍ଶନ ଲେବଲ୍।
@@ -718,11 +726,11 @@ curl -X POST http://localhost:20128/api/provider-models \
 5. **ଆଧାର URL** : API ମୂଳ, `/v1` ପର୍ଯ୍ୟନ୍ତ ଏବଂ ଅନ୍ତର୍ଭୂକ୍ତ କରି (ଉଦାହରଣ ସ୍ୱରୂପ `https://gateway.example.com/v1`), ସମ୍ପୂର୍ଣ୍ଣ `/chat/completions` ପଥ ନୁହେଁ। ଅଣ-ମାନକ ପଥ ସହିତ ଗେଟୱେଗୁଡିକ ସେଗୁଡିକୁ ସେଟ୍ କରେ।** ଉନ୍ନତ ସେଟିଂସମୂହ।** (ଚାଟ୍ ପଥ, ମଡେଲ୍ ପଥ)।
 6. The**API କି (ଯାଞ୍ଚ ପାଇଁ)** କ୍ଷେତ୍ର କେବଳ ସଂଯୋଗକୁ ପରୀକ୍ଷା କରେ। ନୋଡ୍ ତିଆରି କରିବା ପରେ ଏହାକୁ ଖୋଲ ଏବଂ ବ୍ୟବହାର କର।** ସଂଯୋଗ ଯୋଡନ୍ତୁ।** ଅନୁରୋଧ ବ୍ୟବହାର କରୁଥିବା ଚାବିକୁ ସଂରକ୍ଷଣ କରିବା ପାଇଁ।
 
-ନୋଡ୍ `openai-compatible-<apiType>-<uuid>` ଫର୍ମର ଏକ ଆଭ୍ୟନ୍ତରୀଣ id ପାଇଥାଏ। ଆପଣ ଏହାକୁ କେବେବି ଟାଇପ୍ କରିବା ଆବଶ୍ୟକ କରନ୍ତି ନାହିଁ, ଉପସର୍ଗ ହେଉଛି ସର୍ବସାଧାରଣ ନାମ।
+ନୋଡ୍ `openai-compatible-<apiType>-<uuid>` ଫର୍ମର ଏକ ଆଭ୍ୟନ୍ତରୀଣ id ପାଇଥାଏ। ଆପଣ ଏହାକୁ ଟାଇପ୍ କରିବା ଆବଶ୍ୟକ କରନ୍ତି ନାହିଁ, ଉପସର୍ଗ ହେଉଛି ସର୍ବସାଧାରଣ ନାମ।
 
 #### ସଂରକ୍ଷିତ ଉପସର୍ଗ।
 
-ଏକ ଉପସର୍ଗ ଏକ ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀଙ୍କ id କିମ୍ବା ଛଦ୍ମନାମ ହୋଇପାରିବ ନାହିଁ (ଉଦାହରଣ ସ୍ୱରୂପ `openai`, `cf`), କିମ୍ବା ଅବସରପ୍ରାପ୍ତ ପ୍ରଦାନକାରୀଙ୍କ id। ମଡେଲ୍ ରିଜୋଲଭର କଷ୍ଟମ୍ ନୋଡ୍ ପୂର୍ବରୁ ବିଲ୍ଟ-ଇନ୍ ଏବଂ ଛଦ୍ମନାମ ଯାଞ୍ଚ କରିଥାଏ, ତେଣୁ ସେହି ଉପସର୍ଗଗୁଡ଼ିକ ମଧ୍ୟରୁ ଗୋଟିଏ ବ୍ୟବହାର କରୁଥିବା ନୋଡ୍ କଦାପି ଟ୍ରାଫିକ୍ ଗ୍ରହଣ କରିବ ନାହିଁ: `<prefix>/model` ଏହା ବଦଳରେ ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀଙ୍କୁ ଯିବ, କିମ୍ବା ଯଦି ସେହି ପ୍ରଦାନକାରୀ ଅବସର ନେଇଥିବେ ତେବେ ବନ୍ଦ ହୋଇଯିବ। ଏହିପରି ଉପସର୍ଗ ସହିତ ଏକ ନୋଡ୍ ସୃଷ୍ଟି କିମ୍ବା ଏଡିଟ୍ କରିବା ସହିତ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଇଛି:
+ଏକ ଉପସର୍ଗ ଏକ ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀଙ୍କ ID କିମ୍ବା ଛଦ୍ମନାମ ହୋଇପାରିବ ନାହିଁ (ଉଦାହରଣ ସ୍ୱରୂପ `openai`, `cf`), କିମ୍ବା ଅବସରପ୍ରାପ୍ତ ପ୍ରଦାନକାରୀଙ୍କ id। ମଡେଲ୍ ରିଜୋଲଭର କଷ୍ଟମ୍ ନୋଡ୍ ପୂର୍ବରୁ ବିଲ୍ଟ-ଇନ୍ ଏବଂ ଛଦ୍ମନାମ ଯାଞ୍ଚ କରିଥାଏ, ତେଣୁ ସେହି ଉପସର୍ଗଗୁଡ଼ିକ ମଧ୍ୟରୁ ଗୋଟିଏ ବ୍ୟବହାର କରୁଥିବା ନୋଡ୍ କଦାପି ଟ୍ରାଫିକ୍ ଗ୍ରହଣ କରିବ ନାହିଁ: `<prefix>/model` ଏହା ବଦଳରେ ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାନକାରୀଙ୍କୁ ଯିବ, କିମ୍ବା ଯଦି ସେହି ପ୍ରଦାନକାରୀ ଅବସର ନେଇଥିବେ ତେବେ ବନ୍ଦ ହୋଇଯିବ। ଏହିପରି ଉପସର୍ଗ ସହିତ ଏକ ନୋଡ୍ ସୃଷ୍ଟି କିମ୍ବା ଏଡିଟ୍ କରିବା ସହିତ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଇଛି:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
@@ -732,7 +740,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 #### ପ୍ରତି-ସଂଯୋଗ ଗେଟୱେ ବିକଳ୍ପଗୁଡ଼ିକ।
 
-ଏହି କିଗୁଡ଼ିକ ଏକ ସଂଯୋଗର `providerSpecificData` କୁ ଯାଇଥାଏ (ଉଦାହରଣ ସ୍ୱରୂପ `PUT /api/providers/{id}` ମାଧ୍ୟମରେ):
+ଏହି ଚାବିଗୁଡ଼ିକ ଏକ ସଂଯୋଗର `providerSpecificData` କୁ ଯାଇଥାଏ (ଉଦାହରଣ ସ୍ୱରୂପ `PUT /api/providers/{id}` ମାଧ୍ୟମରେ):
 
 - OpenAI ଚାଟ୍-ଫର୍ମାଟ୍ ସୁସଙ୍ଗତ ସଂଯୋଗ ପାଇଁ`toolNameMaxLength` (ଇଣ୍ଟିଜର୍, 1-1024) — ଯାହାର ଗେଟୱେ ଲମ୍ବା ଉପକରଣ ନାମକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ। ଲମ୍ବା ନାମଗୁଡିକ କ୍ଷୁଦ୍ର ଛଦ୍ମନାମ ଭାବରେ ପଠାଯାଏ ଏବଂ ପ୍ରତିକ୍ରିୟାରେ ପୁନ restored ସ୍ଥାପିତ ହୁଏ। OpenAI, Azure OpenAI, Azure AI ଫାଉଣ୍ଡ୍ରି, Mistral, NVIDIA, OpenCode Zen/Go ଏବଂ ମ୍ୟୁଜ୍ କୋଡ୍ ପୂର୍ବରୁ 64 ଅକ୍ଷରରୁ ଅଧିକ ଛଦ୍ମନାମ ନାମ ବିନା ସେଟିଂରେ ଅଛି। ଏକ ସଂଯୋଗ ମୂଲ୍ୟ Azure OpenAI / Azure AI ଫାଉଣ୍ଡ୍ରି ଡିଫଲ୍ଟକୁ ବଦଳାଇଥାଏ (ଏକ କଠିନ ଗେଟୱେ ପଛରେ ଏକ ଆଜୁର୍ ସଂଯୋଗ) ଏବଂ ଏକ କଷ୍ଟମ୍ ସୁସଙ୍ଗତ ନୋଡ୍ ପାଇଁ ସୀମା ସ୍ଥିର କରେ। OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ଏବଂ ମ୍ୟୁଜ୍ କୋଡ୍ ସେମାନଙ୍କର ରେଜିଷ୍ଟ୍ରି ସୀମା ରଖନ୍ତି ଏବଂ ଏହାକୁ ଅଣଦେଖା କରନ୍ତି।
 - `quotaEndpoint` — ଗେଟୱେ ର quota/credits ଶେଷ ପଏଣ୍ଟ, ଡ୍ୟାସବୋର୍ଡ କୋଟା ଷ୍ଟ୍ରିପ୍ ଏବଂ କୋଟା-ସଚେତନ ମାର୍ଗ ପାଇଁ ପ read ନ୍ତୁ। ଉଭୟ OpenAI- ଏବଂ ଆନ୍ଥ୍ରୋପିକ୍-ସୁସଙ୍ଗତ ସଂଯୋଗ ଉପରେ କାର୍ଯ୍ୟ କରେ। ସମ୍ପୂର୍ଣ୍ଣ ଆକୃତି `open-sse/services/usage/openaiCompatible.ts` ରେ ଡକ୍ୟୁମେଣ୍ଟ୍ ହୋଇଛି।
@@ -752,7 +760,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 ### OmniRoute ସାଥୀମାନଙ୍କୁ ଶୃଙ୍ଖଳା।
 
-ଅନ୍ୟ ଏକ OmniRoute ଗେଟୱେକୁ a ଭାବରେ ଯୋଗ କରାଯାଇପାରିବ।** କଷ୍ଟମ୍ OpenAI- ସୁସଙ୍ଗତ।** ପ୍ରଦାନକାରୀ। ସାଥିଙ୍କ `/v1` ଆଧାର URL ଏବଂ ସେହି ସାଥି ଦ୍ୱାରା ଜାରି କରାଯାଇଥିବା ଏକ ଉତ୍ସର୍ଗୀକୃତ, ସର୍ବନିମ୍ନ-ସୁବିଧା API କି ବ୍ୟବହାର କରନ୍ତୁ।
+ଅନ୍ୟ ଏକ OmniRoute ଗେଟୱେକୁ a ଭାବରେ ଯୋଗ କରାଯାଇପାରିବ।** କଷ୍ଟମ୍ OpenAI- ସୁସଙ୍ଗତ।** ପ୍ରଦାନକାରୀ। ସାଥିଙ୍କ `/v1` ଆଧାର URL ଏବଂ ସେହି ସାଥି ଦ୍ୱାରା ପ୍ରଦତ୍ତ ଏକ ଉତ୍ସର୍ଗୀକୃତ, ସର୍ବନିମ୍ନ-ସୁବିଧା API କି ବ୍ୟବହାର କରନ୍ତୁ।
 
 ପାରସ୍ପରିକ କିମ୍ବା ମଲ୍ଟି-ହପ୍ ଶୃଙ୍ଖଳା ପାଇଁ, ପ୍ରତ୍ୟେକ ଗେଟୱେରେ ଅପ୍ଟ-ଇନ୍ ଲୁପ୍ ଗାର୍ଡକୁ ସକ୍ଷମ କରନ୍ତୁ:
 
@@ -776,7 +784,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 ### ଉତ୍ସର୍ଗୀକୃତ ପ୍ରଦାନକାରୀ ମାର୍ଗ।
 
-ମଡେଲ୍ ବ valid ଧତା ସହିତ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ପ୍ରଦାନକାରୀଙ୍କୁ ସିଧାସଳଖ ମାର୍ଗ ଅନୁରୋଧ:
+ମଡେଲ୍ ବ valid ଧତା ସହିତ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ପ୍ରଦାନକାରୀଙ୍କୁ ମାର୍ଗ ଅନୁରୋଧ:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -867,7 +875,7 @@ curl http://localhost:20128/api/models/catalog
 | ---------------------------- | ------------------------------------------------------------------------------------------------------- |
 | **ପ୍ରଥମେ ପୁରଣ କର।**          | ଅଗ୍ରାଧିକାର କ୍ରମରେ ଖାତା ବ୍ୟବହାର କରେ — ପ୍ରାଥମିକ ଆକାଉଣ୍ଟ ଉପଲବ୍ଧ ନହେବା ପର୍ଯ୍ୟନ୍ତ ସମସ୍ତ ଅନୁରୋଧ ପରିଚାଳନା କରେ। |
 | **ରାଉଣ୍ଡ ରବିନ୍।**            | ଏକ ବିନ୍ୟାସଯୋଗ୍ୟ ଷ୍ଟିକି ସୀମା ସହିତ ସମସ୍ତ ଆକାଉଣ୍ଟ୍ ମାଧ୍ୟମରେ ଚକ୍ରଗୁଡିକ (ଡିଫଲ୍ଟ: ପ୍ରତି ଆକାଉଣ୍ଟରେ 3 କଲ୍)।     |
-| **P2C (ଦୁଇଟି ପସନ୍ଦର ଶକ୍ତି)** | ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବନ୍ଧୀୟ ସଚେତନତା ସହିତ 2 ଟି ରାଣ୍ଡମ୍ ଆକାଉଣ୍ଟ୍ ଏବଂ ସ୍ୱାସ୍ଥ୍ୟକର ଏକ — ସନ୍ତୁଳନ ଭାର ବାଛନ୍ତୁ।        |
+| **P2C (ଦୁଇଟି ପସନ୍ଦର ଶକ୍ତି)** | ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବନ୍ଧୀୟ ସଚେତନତା ସହିତ 2 ଟି ରାଣ୍ଡମ ଆକାଉଣ୍ଟ୍ ଏବଂ ସ୍ୱାସ୍ଥ୍ୟକର ଏକ — ସନ୍ତୁଳନ ଭାର ବାଛନ୍ତୁ।         |
 | **ଅନିୟମିତ।**                 | ଫିସର-ୟେଟସ୍ ଶଫଲ୍ ବ୍ୟବହାର କରି ପ୍ରତ୍ୟେକ ଅନୁରୋଧ ପାଇଁ ମନଇଚ୍ଛା ଏକ ଆକାଉଣ୍ଟ୍ ଚୟନ କରେ।                           |
 | **ସର୍ବନିମ୍ନ ବ୍ୟବହୃତ।**       | ପୁରାତନ `lastUsedAt` ଟାଇମଷ୍ଟ୍ୟାମ୍ପ ସହିତ ଆକାଉଣ୍ଟକୁ ମାର୍ଗ, ସମାନ ଭାବରେ ଟ୍ରାଫିକ୍ ବଣ୍ଟନ କରେ।                  |
 | **ମୂଲ୍ୟ ଅପ୍ଟିମାଇଜ୍**         | ସର୍ବନିମ୍ନ ଅଗ୍ରାଧିକାର ମୂଲ୍ୟ ସହିତ ଖାତାକୁ ମାର୍ଗ, ସର୍ବନିମ୍ନ ମୂଲ୍ୟର ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ ଅପ୍ଟିମାଇଜ୍।           |
@@ -881,9 +889,9 @@ curl http://localhost:20128/api/models/catalog
 - `p2c` (ଦୁଇଟି ପସନ୍ଦର ଶକ୍ତି)
 - `least-used` ଏବଂ `cost-optimized`
 - ସମସ୍ତ ପ୍ରାର୍ଥୀଙ୍କ ମଧ୍ୟରେ`auto` — ସ୍କୋର-ଚାଳିତ।
-- `lkgp` (ଶେଷ ଜଣାଶୁଣା ଉତ୍ତମ ପ୍ରଦାନକାରୀ) — ପିନଗୁଡିକ ଶେଷ ସଫଳ ପ୍ରଦାନକାରୀଙ୍କୁ, ତାପରେ ନିୟମକୁ ଫେରିଯାଏ।
-- `context-optimized` — ସର୍ବ ବୃହତ ମାଗଣା ପ୍ରସଙ୍ଗ ୱିଣ୍ଡୋ ସହିତ ମଡେଲକୁ ବାଛିଥାଏ।
-- `context-relay` — ଅନୁସରଣ ଟର୍ନ ପାଇଁ ଲମ୍ବା ପ୍ରସଙ୍ଗ ମଡେଲଗୁଡିକ।
+- `lkgp` (ଶେଷ ଜଣାଶୁଣା ଭଲ ପ୍ରଦାନକାରୀ) — ପିନଗୁଡିକ ଶେଷ ସଫଳ ପ୍ରଦାନକାରୀଙ୍କୁ, ତାପରେ ନିୟମକୁ ଫେରିଯାଏ।
+- `context-optimized` — ପ୍ରଥମେ ସର୍ବ ବୃହତ ଜଣାଶୁଣା ପ୍ରସଙ୍ଗ ୱିଣ୍ଡୋ ସହିତ ମଡେଲକୁ ଚେଷ୍ଟା କରେ।
+- `context-relay` — ଅଗ୍ରାଧିକାର କ୍ରମ ଏବଂ ବାର୍ତ୍ତାଳାପ ଅନ୍ୟ ଏକ ଆକାଉଣ୍ଟକୁ ଯିବାବେଳେ ଏକ ହ୍ୟାଣ୍ଡଫ୍ ସାରାଂଶ।
 
 #### ବାହ୍ୟ ଷ୍ଟିକି ଅଧିବେଶନ ହେଡର୍।
 
@@ -1149,7 +1157,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 | ରଣନୀତି                 | ବର୍ଣ୍ଣନା                                                            |
 | ---------------------- | ------------------------------------------------------------------- |
-| **ରାଉଣ୍ଡ-ରବିନ୍।**      | କ୍ରମାନ୍ୱୟରେ ମଡେଲଗୁଡିକ ମାଧ୍ୟମରେ ଘୂର୍ଣ୍ଣନ କରେ।                        |
+| **ରାଉଣ୍ଡ-ରବିନ୍।**      | କ୍ରମାଗତ ଭାବରେ ମଡେଲଗୁଡିକ ମାଧ୍ୟମରେ ଘୂର୍ଣ୍ଣନ କରେ।                      |
 | **ପ୍ରାଥମିକତା।**        | ସର୍ବଦା ପ୍ରଥମ ମଡେଲକୁ ଚେଷ୍ଟା କରେ; କେବଳ ତ୍ରୁଟି ଉପରେ ପଡ଼େ।              |
 | **ଅନିୟମିତ।**           | ପ୍ରତ୍ୟେକ ଅନୁରୋଧ ପାଇଁ କମ୍ବୋରୁ ଏକ ଅନିୟମିତ ମଡେଲ୍ ବାଛନ୍ତୁ।              |
 | **ଓଜନ**                | ମଡେଲ ପ୍ରତି ନିର୍ଦ୍ଦିଷ୍ଟ ଓଜନ ଉପରେ ଆଧାର କରି ଆନୁପାତିକ ଭାବରେ ମାର୍ଗଗୁଡିକ। |
@@ -1332,32 +1340,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 ଆଭ୍ୟନ୍ତରୀଣ CLI
 
-ସେଟଅପ୍, ନିଦାନ ଏବଂ ରନ୍‌ଟାଇମ୍ ନିୟନ୍ତ୍ରଣ ପାଇଁ OmniRoute ଏକ ଆଭ୍ୟନ୍ତରୀଣ CLI (`omniroute …`) ସହିତ ଆସେ। ଏହା **ଡ୍ୟାସ୍‌ବୋର୍ଡରେ ଥିବା "CLI ଟୁଲ୍ସ" ପୃଷ୍ଠାଠାରୁ ଅଲଗା**, ଯାହା ତୃତୀୟ-ପକ୍ଷ CLIଗୁଡ଼ିକୁ (Claude Code, Cursor, Codex, Cline, …) ବିନ୍ୟାସ କରେ, ଯାହାଦ୍ୱାରା ସେଗୁଡ଼ିକ OmniRoute ସହିତ ଯୋଗାଯୋଗ କରିପାରିବେ।
+OmniRoute ସେଟଅପ୍, ଡାଇଗ୍ନୋଷ୍ଟିକ୍ ଏବଂ ଚାଲିବା ସମୟ ନିୟନ୍ତ୍ରଣ ପାଇଁ ଏକ ଆଭ୍ୟନ୍ତରୀଣ CLI (`omniroute …`) ପଠାଇଥାଏ। ଏହା ହେଉଛି** ଡ୍ୟାସବୋର୍ଡରେ ଥିବା "CLI ଉପକରଣଗୁଡିକ" ପୃଷ୍ଠାରୁ ଅଲଗା।** , ଯାହା ତୃତୀୟ-ପକ୍ଷ CLIs (Claude କୋଡ୍, Cursor, Codex, Cline,…) କୁ ବିନ୍ୟାସ କରେ ତେଣୁ ସେମାନେ OmniRoute ସହିତ କଥା ହୋଇପାରିବେ।
 
 ```bash
-omniroute setup                    # ଇଣ୍ଟରାକ୍ଟିଭ୍ ୱିଜାର୍ଡ (ପାସ୍‌ୱାର୍ଡ, ପ୍ରଦାନକାରୀ, କମ୍ବୋ)
-omniroute setup --non-interactive  # CI-ଅନୁକୂଳ
-omniroute doctor                   # ସ୍ୱାସ୍ଥ୍ୟ ନିଦାନ (ଡାଟା ଡିରେକ୍ଟୋରୀ, DB, ପ୍ରଦାନକାରୀ, ପୋର୍ଟ)
-omniroute providers available      # ସମର୍ଥିତ ପ୍ରଦାନକାରୀଗୁଡ଼ିକର ତାଲିକା
-omniroute providers list           # ବିନ୍ୟାସିତ ସଂଯୋଗଗୁଡ଼ିକର ତାଲିକା
-omniroute providers test <id>      # ଏକ ପ୍ରଦାନକାରୀ ସଂଯୋଗର ଲାଇଭ୍ ପରୀକ୍ଷା
-omniroute combos list              # କମ୍ବୋଗୁଡ଼ିକର ତାଲିକା
-omniroute combos switch <name>     # ଡିଫଲ୍ଟ କମ୍ବୋ ସେଟ୍ କରନ୍ତୁ
-omniroute models                   # ଉପଲବ୍ଧ ମଡେଲ୍‌ଗୁଡ଼ିକର ତାଲିକା (--json, --search)
-omniroute keys add | list | remove # ଟର୍ମିନାଲ୍‌ରୁ API କୀଗୁଡ଼ିକ ପରିଚାଳନା କରନ୍ତୁ
-omniroute backup                   # ବିନ୍ୟାସ + DBର ସ୍ନାପ୍‌ଶଟ୍
-omniroute restore [<timestamp>]    # ଏକ ସ୍ନାପ୍‌ଶଟ୍‌ରୁ ପୁନରୁଦ୍ଧାର କରନ୍ତୁ
-omniroute health                   # ବିସ୍ତୃତ ସ୍ୱାସ୍ଥ୍ୟ ସୂଚନା (ବ୍ରେକର୍, କ୍ୟାଶ୍, ମେମୋରୀ)
-omniroute quota                    # ପ୍ରଦାନକାରୀ କୋଟା ବ୍ୟବହାର
-omniroute mcp status               # MCP ସର୍ଭର ସ୍ଥିତି
-omniroute a2a status               # A2A ସର୍ଭର ସ୍ଥିତି
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok ଟନେଲ୍‌ଗୁଡ଼ିକ
-omniroute reset-password           # ଆଡ୍‌ମିନ୍ ପାସ୍‌ୱାର୍ଡ ରିସେଟ୍ କରନ୍ତୁ
-omniroute --mcp                    # stdio ମାଧ୍ୟମରେ MCP ସର୍ଭର ଆରମ୍ଭ କରନ୍ତୁ
-omniroute --port 3000              # ଏକ କଷ୍ଟମ୍ ପୋର୍ଟରେ ସର୍ଭର ଆରମ୍ଭ କରନ୍ତୁ
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-ପରାମର୍ଶ: ଅସ୍ୱାସ୍ଥ୍ୟକର ପ୍ରଦାନକାରୀ ସଂଯୋଗଗୁଡ଼ିକ ବିଷୟରେ ସତର୍କତା ପାଇବାକୁ ଆପଣଙ୍କ ନିରୀକ୍ଷଣ ଟୁଲ୍ ସହିତ `omniroute doctor --json` ବ୍ୟବହାର କରନ୍ତୁ।
+ଟିପ୍ପଣୀ: ଏକ ଭଙ୍ଗା ସ୍ଥାନୀୟ ସଂସ୍ଥାପନ ବିଷୟରେ ସତର୍କ କରିବା ପାଇଁ `omniroute doctor --json` ଆପଣଙ୍କର ମନିଟରିଂ ଉପକରଣ ସହିତ ଯୋଡନ୍ତୁ। `doctor` ପ୍ରଦାନକାରୀ ସଂଯୋଗଗୁଡ଼ିକୁ ପରୀକ୍ଷା କରେ ନାହିଁ; ଏଥିପାଇଁ `omniroute providers test <id>` ବ୍ୟବହାର କରନ୍ତୁ।
 
 ---
 

@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Obavezni Parametri
+## 5. Potrebni parametri
 
 Ovaj projekt preporučuje konfiguriranje barem sljedećih parametara na Fly.io.
 
-### 5.1 Provjereni Parametri
+### 5.1 Provjereni parametri
 
-Ovi parametri korišteni su u stvarnim postavljanjima na trenutnoj `omniroute` aplikaciji:
+Ovi parametri korišteni su u stvarnim implementacijama na trenutnoj `omniroute` aplikaciji:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (obavezno u produkciji — koristi se za autentifikaciju WebSocket mosta)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (potreban u proizvodnji — koji se koristi za autentifikaciju WebSocket mosta)
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 O `INITIAL_PASSWORD`
 
-Trenutni projekt ne postavlja `INITIAL_PASSWORD` jer ovo postavljanje to ne zahtijeva.
+Trenutačni projekt ne postavlja `INITIAL_PASSWORD` jer ga ova implementacija ne zahtijeva.
 
 Ako nije postavljeno:
 
-- Startup zapisnik će naznačiti da je zadana lozinka `CHANGEME`
-- Trebate promijeniti lozinku za prijavu u postavkama sustava što je prije moguće nakon postavljanja
+- Zaporku nadzorne ploče stvarate u čarobnjaku za integraciju prilikom prvog posjeta. Dovršite korak unosa lozinke: ako ga preskočite, isključuje se prijava na nadzornu ploču, što nadzornu ploču ostavlja otvorenom svima koji mogu pristupiti aplikaciji URL
+- Flyjev proxy dopire do aplikacije s adrese bez povratne petlje, pa nakon što pošaljete lozinku, čarobnjak traži jednokratni token za pokretanje, koji aplikacija u tom trenutku ispisuje u svoj dnevnik: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Ako se taj redak pomaknuo iz dnevnika, ponovno pokrenite aplikaciju i ponovno pošaljite čarobnjaku za ispis novog tokena
 
-Ako želite inicijalizirati lozinku pozadinskog sustava bez nadzora, možete ga dodati kasnije:
+Da biste umjesto toga postavili lozinku bez nadzora, dodajte je prije prvog posjeta nadzornoj ploči (nakon što se lozinka spremi, `INITIAL_PASSWORD` se zanemaruje):
 
 - `INITIAL_PASSWORD`
 
@@ -274,45 +274,45 @@ Ako stranica `Secrets` u konzoli ne prikazuje očekivane varijable, provjerite:
 
 ---
 
-## 9. Naknadna ažuriranja i objave
+## 9. Naknadna ažuriranja i izdanja
 
-Nakon ažuriranja koda, proces objave je jednostavan:
+Nakon ažuriranja koda, postupak izdavanja je jednostavan:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Ako trebate samo ažurirati parametre bez promjene koda:
+Ako samo trebate ažurirati parametre bez promjene koda:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly će automatski izvršiti postupno ažuriranje strojeva.
+Fly će automatski izvršiti tekuće ažuriranje strojeva.
 
-### 9.1 Praćenje ažuriranja uzvodnog repozitorija uz čuvanje `fly.toml` vašeg forka
+### 9.1 Praćenje ažuriranja uzvodnog repozitorija uz očuvanje `fly.toml` vaše vilice
 
-Ako je trenutni repozitorij fork i želite sinkronizirati ažuriranja iz uzvodnog `https://github.com/diegosouzapw/OmniRoute`, slijedite sljedeći tijek rada.
+Ako je trenutno spremište fork i želite sinkronizirati ažuriranja iz uzvodnog `https://github.com/cheaper-inference/OmniRoute`, slijedite tijek rada u nastavku.
 
-Prvo provjerite svoje remote veze:
+Prvo provjerite svoje daljinske upravljače:
 
 ```powershell
 git remote -v
 ```
 
-Trebali biste vidjeti najmanje:
+Trebali biste vidjeti barem:
 
-- `origin` koji upućuje na vaš vlastiti fork
-- `upstream` koji upućuje na izvorni repozitorij
+- `origin` pokazujući na vlastitu vilicu
+- `upstream` koji pokazuje na originalno spremište
 
 Ako `upstream` nije konfiguriran, dodajte ga:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Prije sinkronizacije s uzvodom, dohvatite najnovije commitove i oznake:
+Prije sinkronizacije s upstreamom, dohvatite najnovije obveze i oznake:
 
 ```powershell
 git fetch upstream --tags
@@ -325,9 +325,9 @@ git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Napomena: Trenutna verzija projekta je `v3.8.0`. Reference na `v3.4.7` u nastavku zadržane su samo kao povijesni primjeri. Za stvarne objave koristite `:latest` ili oznaku trenutne verzije (npr. `:v3.8.0`).
+> Napomena: trenutna verzija projekta je `v3.8.0`. `v3.4.7` reference u nastavku čuvaju se samo kao povijesni primjeri. Za stvarna izdanja koristite `:latest` ili oznaku trenutne verzije (npr. `:v3.8.0`).
 
-Ako želite spojiti najnoviji uzvodni `main` uz prisilno zadržavanje `fly.toml` vašeg forka, slijedite ovaj tijek rada:
+Ako želite spojiti najnoviji uzvodni `main` uz snažno zadržavanje `fly.toml` svoje vilice, slijedite ovaj tijek rada:
 
 ```powershell
 git merge upstream/main
@@ -337,34 +337,34 @@ git commit -m "chore(deploy): keep fork fly.toml"
 git push origin main
 ```
 
-Napomene:
+Bilješke:
 
-- `git merge upstream/main` sinkronizira najnoviji kod iz izvornog repozitorija
-- `git checkout HEAD~1 -- fly.toml` vraća vlastiti `fly.toml` vašeg forka iz stanja prije spajanja
-- Ako uzvodni repozitorij nije izmijenio `fly.toml`, ovaj korak neće uvesti nikakve razlike
-- Ako je uzvodni repozitorij izmijenio `fly.toml`, ovaj korak osigurava da naziv vaše Fly aplikacije, montiranje volumena, regija i ostale konfiguracije implementacije specifične za fork neće biti prepisane
+- `git merge upstream/main` sinkronizira najnoviji kod iz originalnog repozitorija
+- `git checkout HEAD~1 -- fly.toml` vraća vlastiti `fly.toml` vaše vilice od prije spajanja
+- Ako uzvodno nije modificirao `fly.toml`, ovaj korak neće uvesti nikakve razlike
+- Ako je uzvodno promijenio `fly.toml`, ovaj korak osigurava da naziv vaše Fly aplikacije, montiranje volumena, regija i druga konfiguracija postavljanja specifična za fork nisu prebrisani
 
-Ako se želite uskladiti s određenom oznakom izdanja (npr. `v3.4.7`), prvo provjerite je li ta oznaka već uključena u `upstream/main`:
+Ako se želite uskladiti s određenom oznakom izdanja (npr. `v3.4.7`), prvo provjerite je li oznaka već uključena u `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Uspješan povrat znači da `upstream/main` već sadrži tu verziju; možete jednostavno spojiti `upstream/main`.
+Uspješan povratak znači `upstream/main` već sadrži tu verziju; možete jednostavno spojiti `upstream/main`.
 
-### 9.2 Standardni redoslijed objave nakon sinkronizacije s uzvodom
+### 9.2 Standardni slijed izdanja nakon sinkronizacije uzvodno
 
-Nakon sinkronizacije s izvornim repozitorijem, slijedite ovaj preporučeni redoslijed objave:
+Nakon sinkronizacije s izvornim spremištem, slijedite ovaj preporučeni redoslijed izdavanja:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Obnovite `fly.toml` forka
+3. Vratite `fly.toml`
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Ovo je stvarni tijek rada korišten pri nadogradnji trenutnog projekta na `v3.4.7` (primjer se odnosi na povijesnu verziju; stvarna trenutna verzija je `v3.8.0`).
+Ovo je stvarni tijek rada koji se koristi prilikom nadogradnje trenutnog projekta na `v3.4.7` (primjer se odnosi na povijesnu verziju; trenutna stvarna verzija je `v3.8.0`).
 
 ---
 
@@ -420,38 +420,38 @@ Ako umjesto toga vidite `/app/data/...`, `DATA_DIR` je pogrešno konfiguriran i 
 
 ## 12. Uobičajeni problemi
 
-### 12.1 Stranica `Secrets` je prazna
+### 12.1 `Secrets` Stranica je prazna
 
 Obično postoje dva razloga:
 
 - Još niste pokrenuli `flyctl secrets set`
-- Pregledavate drugu aplikaciju (npr. `oroute` umjesto `omniroute`)
+- Gledate drugu aplikaciju (npr. `oroute` umjesto `omniroute`)
 
-### 12.2 `flyctl deploy` prijavljuje `app not found`
+### 12.2 `flyctl deploy` Izvješća `app not found`
 
-Prvo stvorite aplikaciju:
+Najprije izradite aplikaciju:
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 Parsiranje `fly.toml` ne uspijeva
+### 12.3 `fly.toml` Raščlanjivanje nije uspjelo
 
 Provjerite sljedeće:
 
-- Postoje li iskrivljeni znakovi u komentarima
-- Jesu li TOML navodnici i uvlačenje ispravni
+- Ima li iskrivljenih znakova u komentarima
+- Jesu li TOML citati i uvlake točni
 
-### 12.4 Podaci se ne zadržavaju
+### 12.4 Podaci nisu postojani
 
-Provjerite oboje od sljedećeg:
+Provjerite oba od sljedećeg:
 
 - `fly.toml` sadrži `destination = '/data'`
 - `DATA_DIR` je postavljen na `/data`
 
-### 12.5 Može li se pokrenuti bez `INITIAL_PASSWORD`?
+### 12.5 Može li raditi bez `INITIAL_PASSWORD`?
 
-Da, može se pokrenuti. Koristit će zadanu lozinku `CHANGEME`. Preporučuje se što prije promijeniti lozinku pozadinskog sustava u produkciji.
+Da. Ako `INITIAL_PASSWORD` nije postavljen, kreirate lozinku nadzorne ploče u čarobnjaku za integraciju pri prvom posjetu (odjeljak 5.2 pokriva jednokratni token za pokretanje i korak za lozinku).
 
 ---
 

@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Nasa [`AGENTS.md`](AGENTS.md) ang lahat ng tuntunin ng proyekto** — ang nag-iisang mapagkukunan ng katotohanan para sa bawat AI
-assistant (arkitektura, mga kumbensiyon, pagsubok, mga quality gate, git workflow, ang 23 Hard Rules,
-mga natutunan tungkol sa PII). Basahin ito nang buo; huwag muling idagdag dito ang mga tuntunin ng proyekto. Ang lahat ng nasa ibaba ay nalalapat LAMANG
-sa Claude Code — mga operasyonal na pagpipino ng mga tuntuning tinukoy na sa `AGENTS.md`.
+**Ang lahat ng mga patakaran ng proyekto ay nakatira sa [`AGENTS.md`](AGENTS.md)** — ang nag-iisang pinagmumulan ng katotohanan para sa bawat katulong AI ; nilo-load na ito ng import sa itaas. Huwag muling magdagdag ng mga panuntunan ng proyekto dito. Lahat ng nasa ibaba ay nalalapat ONLY sa Claude Code — operational refinements ng mga panuntunang tinukoy na sa `AGENTS.md`.
 
-## Paghihiwalay ng worktree — mga detalyeng partikular sa Claude Code
+## Worktree isolation — Claude Mga detalye ng code
 
-Ang buong sapilitang protocol ng worktree (pagkumpirma ng base branch, ang kanonikal na path na `.claude/worktrees/`, `cp -al` node_modules, mga tuntunin sa teardown) ay nasa
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (may buod sa `AGENTS.md` →
-Git Workflow → "Worktree isolation"). Mga puntong partikular sa Claude Code:
+- Kumpirmahin ang base branch sa operator sa pamamagitan ng `AskUserQuestion` (Hard Rule #19) maliban kung sinabi na nila sa iyo.
+- Gawin ang worktree na may `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (ito ay dumarating sa ilalim `.claude/worktrees/`, mga hard-link `node_modules` at mga kopya `.husky/_`), pagkatapos ay tawagan `EnterWorktree` gamit ang `path` nito. Palaging ipasa ang base: kung wala ito, pinipili ng script ang pinakamataas na `release/*`, na maaaring hindi ang kinumpirma ng operator. Ang worktree na mismong nililikha `EnterWorktree` ay walang hard link o hook, kaya walang pre-commit gate na tumatakbo dito.
 
-- Kumpirmahin ang base branch sa operator gamit ang `AskUserQuestion` (Hard Rule #19) maliban kung
-  sinabi na nila ito sa iyo.
-- Mas mainam na gamitin ang native na `EnterWorktree` tool — lumilikha na ito ng mga worktree sa
-  ilalim ng `.claude/worktrees/` (ang kanonikal na path). Likhain ang worktree gamit ang
-  nakadokumentong command na `git worktree add`, pagkatapos ay tawagan ang `EnterWorktree` kasama
-  ang `path` nito.
+## Mga subagents at git
 
-## Kaligtasan sa iba't ibang session — mga partikular na tagubilin para sa Claude Code
+Ang bawat subagent na pumipindot sa git (Agent tool o Workflow script) ay nakakakuha ng Hard Rule #22 a's `git stash` ban verbatim sa prompt nito — ang naitalang pag-ulit ng insidente ng pagtatago ay dumating sa pamamagitan ng isang subagent.
 
-Pinamamahalaan ng Hard Rules #19/#21/#22 (sa `AGENTS.md`) ang mga magkakasabay na session. Mga operasyonal na paalala para sa
-harness na ito:
+## Pagpaplano ng mga artifact — superpowers path overrides
 
-- **Kopyahin nang eksakto ang pagbabawal sa `git stash` sa prompt ng bawat subagent na gumagamit ng git**
-  (Agent tool / Workflow scripts) — hindi namamana ng mga subagent ang file na ito, at ang naitalang
-  pag-ulit ng insidente sa stash ay nagmula sa isang subagent.
-- Bago mag-merge o mag-push sa anumang PR na hindi mo ginawa _sa session na ito_, patakbuhin ang `git worktree list`
-  at muling suriin ang `gh pr view <N> --json state,headRefOid` (Hard Rule #22b).
-- Tapusin ang bawat session nang ang pangunahing checkout ay nasa branch kung saan ito nagsimula.
+Ang mga kasanayan sa superpower ay nag-aanunsyo ng mga default sa ilalim ng `docs/superpowers/plans/`, `docs/superpowers/specs/` at `docs/research/`. Isulat muli ang bawat isa sa katumbas nitong `_tasks/` sa `AGENTS.md` → "Mga Artifact sa Pagpaplano at Pananaliksik" bago isulat, at i-commit ito sa `git -C _tasks …`, hindi kailanman sa pangunahing repo.
 
-## Superpowers / mga artifact sa pagpaplano — mga override sa path
+## Scratch file — `_artifacts/`, hindi `/tmp`
 
-Ang kumbensiyong `_tasks/` ay tinukoy sa `AGENTS.md` → "Planning & Research Artifacts". Ang
-mga superpowers skill ay may kasamang mga default na tumutukoy sa `docs/…` — ang mga default na iyon ay **ino-override
-dito**. Kapag nag-anunsiyo ang isang superpowers skill ng path na gaya ng "saved to `docs/superpowers/plans/…`",
-palitan ito ng katumbas na `_tasks/…` bago magsulat:
+Ino-override ng proyektong ito ang scratchpad ng session ng harness (`/tmp/claude-*/…`). Sumulat ng mga pansamantalang file — export, nabuong mga zip, one-off intermediate na output — hanggang `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: isang gitignored root `_*` path, para mahanap at matanggal ng operator ang lahat ng scratch sa isang lugar. Ang mga matibay na plano, spec, pananaliksik at hand-off ay napupunta sa `_tasks/` sa halip (Hard Rule #23).
 
-| Artifact (skill)                       | Default (HUWAG gamitin)   | Sa halip, i-save rito                                         |
-| -------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Mga plano (`writing-plans`)            | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Mga spec / disenyo (`brainstorming`)   | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Pananaliksik (`deep-research`, ad-hoc) | `docs/research/`          | `_tasks/research/…`                                           |
-| Mga hand-off (`/handoff`)              | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Pulang base
 
-I-commit ang mga artifact na iyon sa loob ng `_tasks/` repo (`git -C _tasks …`), hindi kailanman sa pangunahing repo.
-
-## Mga scratch / pansamantalang file — gamitin ang `_artifacts/`, hindi ang `/tmp`
-
-Ino-override ng proyektong ito ang default na session scratchpad ng harness (`/tmp/claude-*/…`). Isulat
-ang mga pansamantala/ginagawang file — mga export, nabuong zip, minsanang intermediate output, anumang
-karaniwan mong ilalagay sa `/tmp` — sa `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` sa halip.
-
-- Ang `_artifacts/` ay isang root `_*` path: naka-gitignore na (`AGENTS.md` → "Root `_*` paths"), nasa
-  disk lamang, at hindi kailanman tina-track.
-- Dahilan: ang pagpapanatili ng scratch output sa loob ng proyekto (sa halip na `/tmp`) ay nagpapadali para sa operator
-  na mahanap at tanggalin ang lahat ng pansamantalang bagay sa iisang lugar, sa halip na hanapin ang mga ito sa iba't ibang ephemeral
-  at session-specific na `/tmp` directory na nawawala o naiipon nang hindi nata-track.
-- **Huwag** itong ipagkamali sa `_tasks/` (Hard Rule #23, na may sarili nitong pribadong git repo para sa pangmatagalang
-  mga plano/spec/pananaliksik/hand-off) — ang `_artifacts/` ay para lamang sa mga disposable na working file; walang
-  anumang narito ang kailangang manatili o ma-version.
-
-## Base-green bago magbukas ng mga PR
-
-Bago gumawa ng branch o magbukas ng PR, patakbuhin ang base-green check (`AGENTS.md` → Git Workflow →
-"Base-green check"; tinutukoy ito ng mga project skill bilang `.agents/skills/_shared/base-green.md`). Ang isang PR
-na binuksan habang red ang base tip ay dapat maglaman ng `⚠️ base-red inherited: #<issue>` sa body nito. Upang
-linisin ang naipong red state (base tip + mga red na PR), gamitin ang skill na `/sweep-reds`.
+Para maubos ang naipon na pulang estado (base tip + red PRs), gamitin ang `/sweep-reds` skill.

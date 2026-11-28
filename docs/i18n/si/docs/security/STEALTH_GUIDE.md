@@ -4,11 +4,9 @@
 
 ---
 
-> **සත්යයේ මූලාශ්රය:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **අවසන් වරට යාවත්කාලීන කළේ:** 2026-09-02 — v3.8.51
-> **ඉලක්කගත පාඨකයින්:** සැපයුම්කරු-විශේෂිත රහසිගත අනුකලන නඩත්තු කරන ඉංජිනේරුවන්.
+> **සත්‍ය මූලාශ්‍රය:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** ප්‍රේක්ෂක:** සැපයුම්කරු-විශේෂිත රහසිගත ඒකාබද්ධතා පවත්වාගෙන යන ඉංජිනේරුවන්.
 
-නිල නොවන සේවාලාභීන් සක්රියව fingerprint කරන edges සහිත සැපයුම්කරුවන් සමඟ OmniRoute අනුකලනය වේ (TLS JA3/JA4, header අනුපිළිවෙළ, JSON body හැඩය, integrity tokens). මෙම පිටුව OmniRoute මඟින් නිරාවරණය කරන රහසිගත මතුපිට සහ ඒවා ක්රියාත්මක කර ඇති ස්ථාන ලේඛනගත කරයි.
+OmniRoute නිල නොවන සේවාලාභීන්ගේ (TLS JA3/JA4, ශීර්ෂක අනුපිළිවෙල, JSON ශරීර හැඩය, අඛණ්ඩතා ටෝකන) සක්‍රියව ඇඟිලි සලකුණු කරන සැපයුම්කරුවන් සමඟ ඒකාබද්ධ වේ. මෙම පිටුව OmniRoute හෙළිදරව් කරන රහසිගත පෘෂ්ඨයන් සහ ඒවා ක්‍රියාත්මක කරන ස්ථාන ලේඛනගත කරයි.
 
 ## නීතිමය සහ ආචාරධාර්මික නිවේදනය
 
@@ -65,65 +63,68 @@ Profiles, pin කළ package එක මඟින් සහාය දක්වන
 
 ---
 
-## Claude Code රහස්යතා බණ්ඩලය
+## Claude Code Stealth Bundle
 
-`cliCompatMode` සක්රිය කර ඇති විට, පිටතට යවන Claude ඉල්ලීම් `claude-cli` ගමනාගමනයෙන් වෙන්කර හඳුනාගත නොහැකි වන පරිදි OmniRoute ඒවා නැවත හැඩගස්වයි. මොඩියුල තුනක් එක්ව ක්රියා කරයි:
+`cliCompatMode` ක්‍රියාත්මක වන විට, OmniRoute පිටතට යන Claude ඉල්ලීම් නැවත හැඩගස්වයි, එබැවින් ඒවා `claude-cli` ගමනාගමනයෙන් වෙන්කර හඳුනාගත නොහැක. මොඩියුල තුනක් සහයෝගී වේ:
 
 ### `claudeCodeFingerprint.ts`
 
-බිල්පත් ශීර්ෂකය තුළ අන්තර්ගත කර ඇති අක්ෂර 3ක `cc_version` ඇඟිලි සලකුණ ගණනය කරයි:
+බිල්පත් ශීර්ෂයේ තැන්පත් කර ඇති 3-char `cc_version` ඇඟිලි සලකුණ ගණනය කරයි:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (කේතය තුළ ස්ථිරව අන්තර්ගත කර ඇත; නිල සේවාදායකයට ගැළපේ)
-- ආදාන: පළමු පරිශීලක පණිවිඩ පෙළෙහි 4, 7, 20 යන දර්ශකවල අක්ෂර + අනුවාද තන්තුව
-- ප්රතිදානය: අක්ෂර 3ක හෙක්ස් උපසර්ගය
+- `FINGERPRINT_SALT = "59cf53e54c78"` (දෘඪ කේතය; නිල සේවාදායකයාට ගැලපේ)
+- ආදාන: පළමු පරිශීලක පණිවිඩ පෙළ + අනුවාද තන්තුවෙහි දර්ශක 4, 7, 20 හි අකුරු
+- ප්රතිදානය: 3-char hex උපසර්ගය
 
-### `claudeCodeCCH.ts` (සේවාදායක අන්තර්ගත හැෂ්)
+### `claudeCodeCCH.ts` (සේවාදායක අන්තර්ගතය හෑෂ්)
 
-නිල Claude Code CLI එක Bun/Zig හරහා ගණනය කරන සේවාදායක-පාර්ශ්ව අඛණ්ඩතා පරීක්ෂාවකි. OmniRoute එය `xxhash-wasm` භාවිතයෙන් නැවත ක්රියාත්මක කරයි:
+`xxhash-wasm` සමඟ Bun/Zig. OmniRoute reimplements හරහා නිල Claude කේතය CLI ගණනය කිරීම් සේවාදායක පාර්ශ්ව අඛණ්ඩතාව පරීක්ෂා කරන්න:
 
-1. `cch=00000;` ස්ථානධාරකය සමඟ body එක අනුක්රමිකරණය කරන්න
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. ශුන්යවලින් පූරණය කළ අක්ෂර 5ක කුඩා අකුරු හෙක්ස් අගය
-4. `cch=00000;` වෙනුවට ගණනය කළ ටෝකනය යොදන්න
+1. `cch=00000;` තැන් දරන්නා සමඟ ශරීරය අනුක්‍රමික කරන්න
+2. මෙම අනුපිළිවෙලෙහි (`hashView()`) සරල-පෙළ ප්‍රතිස්ථාපන දෙකක් සමඟ හැෂ් දසුන ගොඩනඟන්න:
+   - `/"model":"[^"]*"/g` හි සෑම ගැලපීමක්ම `"model":""` — බවට පත් වේ, තරඟය පළමු `"` හි නතර වේ, එබැවින් ගැලවූ උද්ධෘතයක් සහිත අගයක් (`"model":"a\"b"`) හිස් වන්නේ සේවාදායකයා කරන පරිදි එම උද්ධෘතය දක්වා පමණි
+   - `/"max_tokens":\d+,|,?"max_tokens":\d+/g` හි සෑම ගැලපීමක්ම — ඕනෑම ගැඹුරකදී සංඛ්‍යාත්මක අගයන් පමණක් ඉවත් කරනු ලැබේ
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Zero-padded 5-char කුඩා අකුරු හෙක්ස්
+5. `cch=00000;` ගණනය කළ ටෝකනය සමඟ ප්‍රතිස්ථාපනය කරන්න
 
-නියතයන්:
+නියත:
 
-- Seed: `0x6e52736ac806831e`
-- Pattern: `/\bcch=([0-9a-f]{5});/`
+- බීජ: `0x4d659218e32a3268` ( Claude කේතය 2.1.252 සහ 2.1.322 ලූප්බැක් ග්‍රහණවලට ගැලපේ)
+- රටාව: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-ඉහළ ධාරාවේ පෙරහන්වලට ඒවා grep කළ නොහැකි වන පරිදි, "සංවේදී" සේවාදායක නාමවල පළමු අක්ෂරයට පසුව Unicode **ශුන්ය-පළල සම්බන්ධකයක්** (`U+200D`) ඇතුළත් කරයි. පෙරනිමි වචන ලැයිස්තුව:
+යුනිකෝඩ් ඇතුල් කරයි** ශුන්ය පළල සම්බන්ධකය** (`U+200D`) "සංවේදී" සේවාලාභීන්ගේ නම්වල පළමු අක්ෂරයෙන් පසුව උඩුගංගත පෙරහන් වලට ඒවා ග්‍රෙප් කළ නොහැක. පෙරනිමි වචන ලැයිස්තුව:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-යොදනු ලබන්නේ: `system` කොටස්, සියලු `messages[].content`, සහ `tools[].description` / `tools[].function.description` සඳහාය. ක්රියාකරුට `setSensitiveWords()` හරහා එය අභිබවා සැකසිය හැක.
+අදාළ වන්නේ: `system` කුට්ටි, සියලු `messages[].content`, සහ `tools[].description` / `tools[].function.description`. `setSensitiveWords()` හරහා ක්‍රියාකරු-ප්‍රතික්‍ෂේප කළ හැකිය.
 
-### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` සැපයුම්කරුවන්
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` සපයන්නන්
 
-"සැබෑ Claude Code" ගමනාගමනය පමණක් පිළිගන්නා තෙවන පාර්ශ්ව Anthropic රිලේ සඳහා:
+"සැබෑ Claude කේතය" ගමනාගමනය පමණක් පිළිගන්නා තෙවන පාර්ශවීය Anthropic රිලේ සඳහා:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- පෙරනිමියෙන් `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- CC Compatible ඉහළ ධාරාවකට විශේෂයෙන් සංස්කරණය කළ thinking streams අවශ්ය වූ විට, සම්බන්ධතාවයකට වෙන්ව ඇති "Enable redact-thinking beta" ටොගලය `redact-thinking-2026-02-12` එක් කරයි
-- සම්බන්ධතාවයකට වෙන්ව ඇති "Enable summarized thinking display" ටොගලය `providerSpecificData.requestDefaults.summarizeThinking` ගබඩා කරන අතර, දැනටමත් display mode එකක් සකසා නොමැති CC Compatible thinking ඉල්ලීම්වලට `display: "summarized"` එක් කරයි
+- පෙරනිමියෙන්`anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
+- CC ගැළපෙන උඩු ප්‍රවාහයකට විශේෂයෙන් නැවත සකස් කළ චින්තන ප්‍රවාහයන් අවශ්‍ය වූ විට එක් සම්බන්ධතාවකට "Redact-thinking beta සබල කරන්න" ටොගලය `redact-thinking-2026-02-12` එක් කරයි.
+- එක් සම්බන්ධකයකට "සාරාංශගත චින්තන සංදර්ශකය සබල කරන්න" ටොගල `providerSpecificData.requestDefaults.summarizeThinking` ගබඩා කරන අතර CC වෙත `display: "summarized"` එකතු කරයි, දැනටමත් සංදර්ශක මාදිලියක් සකසා නොමැති අනුකූල චින්තන ඉල්ලීම්
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x පවුල)
 - පෙරනිමි මාර්ගය: `/v1/messages?beta=true`
 
-එම බණ්ඩලයේම සහෝදර මොඩියුල:
+එකම බණ්ඩලයේ සහෝදර මොඩියුල:
 
-- `claudeCodeConstraints.ts` — temperature + cache-control නීති
-- `claudeCodeToolRemapper.ts` — මෙවලම් නාම නැවත සිතියම්ගත කිරීම
-- `claudeCodeExtraRemap.ts` — අමතර payload සාමාන්යකරණය
+- `claudeCodeConstraints.ts` — උෂ්ණත්වය + හැඹිලි-පාලන නීති
+- `claudeCodeToolRemapper.ts` — tool-name remapping
+- `claudeCodeExtraRemap.ts` — අමතර ගෙවීමේ සාමාන්යකරණය
 
 ---
 
@@ -153,7 +154,7 @@ Antigravity ඉල්ලීම් ඇමතුම්කරු පෙළ byte-for
 2. **ඔටෝ-කොම්බෝ හරහා සැපයුම්කරුවන් හරහා පැටවීම පතුරුවන්න** (`model: "auto"` හෝ `kr/glm/etc` -combo) තනි Antigravity ගිණුමක් සංතෘප්ත කිරීම වෙනුවට.
 3. **එක් සම්බන්ධතාවයකට RPM සීමාවන් සකසන්න** Antigravity සපයන්නාගේ සංස්කරණ පිටුවෙහි (උපකරණ පුවරුව → සපයන්නන් → Antigravity → සම්බන්ධතා → අනුපාත සීමාව). 30-60 RPM යනු තිරසාර භාවිතය සඳහා ආරක්ෂිත ඉහළ සීමාවකි.
 4. **ස්ථාවර, ක්‍රියාකරු-පාලිත උඩු ප්‍රවාහ ජාලකරණය භාවිතා කරන්න** සහ සම්බන්ධයක් නැති පරිශීලකයන් හෝ වැඩ බර හරහා එක් ගිණුමක් බෙදා ගැනීමෙන් වළකින්න.
-5. **තහනම් නම්** : `support.google.com` → හරහා ආයාචනා කරන්න " Workspace/Account ප්‍රවේශය ප්‍රතිසාධනය කරන්න" යවන ලද නියම `quota_exceeded` / `service disabled` ප්‍රතිචාරය Google සමඟ. ප්රතිෂ්ඨාපනය සහතික නොවේ.
+5. **තහනම් නම්** : `support.google.com` → හරහා ආයාචනා කරන්න " Workspace/Account ප්‍රවේශය ප්‍රතිසාධනය කරන්න" යවන ලද නියම `quota_exceeded` / `service disabled` ප්‍රතිචාර බඳ Google සමඟ. ප්රතිෂ්ඨාපනය සහතික නොවේ.
 
 පාරිසරික යොමුව ගිණුම ලේඛනගත කරන අතර එක් එක් ණය මාදිලියේ ඇඟවුම් කරයි.
 
@@ -183,7 +184,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` කියවයි
 - `src/lib/oauth/providers/antigravity.ts` — අක්තපත්‍ර ජලනල
-- මුල් සිද්ධි වාර්තාව: සාකච්ඡාව [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- මුල් සිද්ධි වාර්තාව: සාකච්ඡාව [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

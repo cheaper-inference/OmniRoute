@@ -4,7 +4,7 @@
 
 ---
 
-> **Versión:** v3.8.44** Última actualización:** 2026-10-28** Audiencia:** Ingenieros que agregan, mantienen o depuran servicios integrados (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versión:** v3.8.44** Audiencia:** Ingenieros que agregan, mantienen o depuran servicios integrados (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Los servicios integrados son herramientas auxiliares de procesos instaladas localmente que OmniRoute instala, supervisa y expone como objetivos de enrutamiento de primera clase. A diferencia de los proveedores externos (a los que se accede a través de Internet mediante claves API ), los servicios integrados se ejecutan en la misma máquina que OmniRoute y se comunican a través de loopback.
 
@@ -45,7 +45,7 @@ Los ocho siguen el mismo modelo de supervisión:
 - OmniRoute los instala bajo `DATA_DIR/services/{name}/` (aislado del propio `package.json` de OmniRoute)
 - OmniRoute los genera y monitorea como procesos secundarios
 - OmniRoute inyecta una clave API efímera en el entorno del niño y la rota sin tiempo de inactividad (cuando corresponda)
-- Todas las rutas de gestión (`/api/services/*`) son**LOCAL_ONLY** Se puede acceder — solo desde loopback (regla estricta n.° 17)
+- Todas las rutas de gestión (`/api/services/*`) son**LOCAL_ONLY** — accesible solo desde loopback (regla estricta #17)
 
 ### Decisiones clave (del plan de diseño)
 
@@ -209,7 +209,7 @@ condiciones de carrera cuando, por ejemplo, el inicio automático y un botón de
 
 ## 4. referencia API
 
-Todas las rutas bajo `/api/services/` son**LOCAL_ONLY** (solo bucle invertido, regla estricta n.° 17). Las solicitudes sin bucle invertido reciben `403 LOCAL_ONLY` independientemente del token de autenticación.
+Todas las rutas bajo `/api/services/` son**LOCAL_ONLY** (solo bucle invertido, regla estricta #17). Las solicitudes sin bucle invertido reciben `403 LOCAL_ONLY` independientemente del token de autenticación.
 
 ### 4.1 9 puntos finales del enrutador (11 rutas)
 
@@ -236,7 +236,7 @@ Instale 9Router desde npm. Crea `DATA_DIR/services/9router/` con sus propios `pa
 | `409`  | Ya se está instalando (bloqueo retenido)                                    |
 | `500`  | La instalación de npm falló — consulte `message` para ver un error amigable |
 
-**Notas:** Utiliza `execFile('npm', [...])` — sin shell, sin interpolación (regla estricta n.° 13). Los errores EACCES aparecen como mensajes amigables.
+**Notas:** Utiliza `execFile('npm', [...])` — sin shell, sin interpolación (regla estricta #13). Los errores EACCES aparecen como mensajes amigables.
 
 ---
 
@@ -468,7 +468,7 @@ Bifrost es un backend de retransmisión de puerta de enlace Go AI (`@maximhq/bif
 | `POST` | `/api/services/bifrost/auto-start` | Alternar inicio automático                                                |
 | `GET`  | `/api/services/bifrost/logs`       | cola de registro SSE (a través de ruta dinámica `[name]/logs` compartida) |
 
-**Cableado de enrutamiento:** Cuando `BIFROST_BASE_URL` no está configurado y la instancia supervisada de Bifrost se está ejecutando, `getBifrostRoutingConfig()` (en `routingBackend.ts`) usa automáticamente `http://127.0.0.1:{port}` como base de retransmisión URL. El entorno `BIFROST_BASE_URL` explícito siempre tiene prioridad.
+**Cableado de enrutamiento:** Cuando `BIFROST_BASE_URL` no está configurado y la instancia Bifrost supervisada se está ejecutando, `getBifrostRoutingConfig()` (en `routingBackend.ts`) usa automáticamente `http://127.0.0.1:{port}` como base de retransmisión URL. El entorno `BIFROST_BASE_URL` explícito siempre tiene prioridad.
 
 ---
 
@@ -555,9 +555,7 @@ Este apoderado:
 - Elimina `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` de la respuesta
 - Reescribe las respuestas HTML para inyectar `<base href>` y normalizar rutas absolutas (`/foo` → `/dashboard/.../embed/foo`).
 
-Las actualizaciones WebSocket para el panel integrado son manejadas por un servidor complementario en un puerto dedicado (consulte `src/lib/services/embedWsProxy.ts`).
-
-Cada actualización se autoriza antes de que se abra el túnel, con las mismas reglas que la ruta de inserción HTTP : el interlocutor debe ser de bucle invertido sin encabezado de reenvío de proxy inverso, un navegador `Origin` debe ser un origen del panel (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` extiende los valores predeterminados del bucle invertido) y la persona que llama necesita una sesión del panel o una clave API de alcance de administración a menos que el inicio de sesión en el panel esté deshabilitado.
+Las actualizaciones WebSocket para el panel integrado son manejadas por un servidor complementario en un puerto dedicado (consulte `src/lib/services/embedWsProxy.ts`). Cada actualización se autoriza antes de que se abra el túnel, con las mismas reglas que la ruta de inserción HTTP : el par debe ser loopback sin encabezado de reenvío de proxy inverso, un navegador `Origin` debe ser un origen del panel (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` extiende los valores predeterminados del loopback) y la persona que llama necesita una sesión del panel o una clave API de alcance de administración a menos que el inicio de sesión en el panel esté deshabilitado.
 
 **Seguridad:** Las rutas de proxy integradas se clasifican en `LOCAL_ONLY_API_PREFIXES` y solo se puede acceder a ellas desde loopback. Un atacante que obtiene un JWT a través de un túnel Cloudflare/Ngrok no puede acceder a servicios integrados.
 
@@ -853,65 +851,44 @@ el puerto predeterminado 20128 de OmniRoute.
 
 ---
 
-## 8. Preguntas frecuentes
+## 8. FAQ
 
-**P: ¿Puedo exponer los endpoints de los servicios integrados a clientes que no sean de loopback?**
+**P: ¿Puedo exponer los puntos finales de los servicios integrados a clientes sin loopback?**
 
-No. El nivel LOCAL_ONLY es intencional (regla estricta n.º 17). Las rutas que pueden ejecutar
-`npm install` o generar procesos de `node` no deben ser accesibles desde tráfico que no sea de loopback,
-porque, de lo contrario, un JWT filtrado a través de un túnel (Cloudflare, Ngrok, Tailscale)
-permitiría generar procesos arbitrarios. No existe ninguna excepción voluntaria para
-`/api/services/`; a diferencia de `/api/mcp/`, está excluida de la lista de omisión
-del ámbito de administración. Consulte `docs/security/ROUTE_GUARD_TIERS.md`.
+No. El nivel LOCAL_ONLY es intencional (regla estricta #17). Las rutas que pueden invocar procesos `npm install` o generar `node` no deben ser accesibles desde tráfico sin loopback, porque un JWT filtrado a través de un túnel (Cloudflare, Ngrok, Tailscale) permitiría la generación de procesos arbitrarios. No existe una exclusión voluntaria para `/api/services/` —, a diferencia de `/api/mcp/`, que está excluido de la lista de omisión de alcance de administración. Ver `docs/security/ROUTE_GUARD_TIERS.md`.
 
 ---
 
-**P: ¿Estarán disponibles 9Router y CLIProxyAPI en despliegues de producción/en la nube?**
+**P: ¿9Router y CLIProxyAPI estarán disponibles en implementaciones production/cloud ?**
 
-Sí. Ambos servicios siguen el mismo modelo que prioriza la ejecución local que OmniRoute. Se ejecutan
-en la misma máquina y se comunican mediante loopback. Aquí, «producción» se refiere al VPS
-o servidor local donde se despliega OmniRoute, no a un proveedor remoto de servicios en la nube.
+Sí. Ambos servicios siguen el mismo modelo local primero que el propio OmniRoute. Se ejecutan en la misma máquina y se comunican mediante loopback. "Producción" aquí significa el VPS o el servidor local donde se implementa OmniRoute, no un proveedor de nube remoto.
 
 ---
 
 **P: ¿Cómo depuro el supervisor?**
 
-1. Siga el flujo de registros SSE: `curl -N http://localhost:20128/api/services/9router/logs`.
-2. Compruebe los registros estructurados en la salida de pino de OmniRoute filtrados por el
-   espacio de nombres `service:supervisor`.
-3. Inspeccione la fila de la base de datos: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
-4. Use `GET /api/services/9router/status` para ver en una sola llamada el estado actual en tiempo real, el PID, la salud
-   y `lastError`.
+1. Sigue el flujo de registro SSE : `curl -N http://localhost:20128/api/services/9router/logs`.
+2. Verifique los registros estructurados en la salida pino de OmniRoute filtrada por el espacio de nombres `service:supervisor`.
+3. Inspeccione la fila DB : `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
+4. Utilice `GET /api/services/9router/status` para ver el estado actual, PID, salud y `lastError` en una sola llamada.
 
 ---
 
-**P: El supervisor muestra `health: "degraded"` o `health: "unknown"`, pero el estado es `"running"`. ¿Es un problema?**
+**P: El supervisor muestra `health: "degraded"` o `health: "unknown"` pero el estado es `"running"`. ¿Es eso un problema?**
 
-`"degraded"` significa que la sonda de salud devolvió una respuesta distinta de 200. `"unknown"` significa que todavía no
-se ha completado ninguna sonda (condición de carrera con la primera consulta). Ambos estados son transitorios durante el arranque.
-Si la salud permanece en `"degraded"` durante más de `healthIntervalMs * 3` ms después de
-`"running"`, el servicio integrado está ejecutándose, pero su API HTTP no responde. Compruebe
-si el puerto indicado en la respuesta de estado es correcto y si el servicio realmente
-está escuchando en ese puerto.
+`"degraded"` significa que la sonda de estado devolvió una respuesta non-200. `"unknown"` significa que aún no se ha completado ninguna investigación (carrera con la primera encuesta). Ambos son transitorios durante el inicio. Si el estado permanece `"degraded"` durante más de `healthIntervalMs * 3` ms después de `"running"`, el servicio integrado se está ejecutando pero su HTTP API no responde. Verifique si el puerto es correcto en la respuesta de estado y si el servicio realmente está escuchando en ese puerto.
 
 ---
 
-**P: ¿Puedo cambiar la clave de la API de 9Router sin reiniciarlo por completo?**
+**P: ¿Puedo cambiar la clave 9Router API sin reiniciar por completo?**
 
-No. La clave de la API se proporciona a 9Router mediante una variable de entorno en el momento de generar el proceso.
-Las variables de entorno no pueden modificarse en un proceso en ejecución. `POST .../rotate-key`
-detiene y reinicia automáticamente el servicio para aplicar la nueva clave. La rotación de la clave
-surte efecto dentro del valor `stopTimeoutMs` del servicio (15 s de forma predeterminada), más su tiempo
-de arranque.
+No. La clave API se pasa a 9Router a través de una variable de entorno en el momento de la generación. Las variables de entorno no se pueden cambiar en un proceso en ejecución. `POST .../rotate-key` detiene y reinicia automáticamente el servicio para aplicar la nueva clave. La rotación de claves tiene efecto dentro del `stopTimeoutMs` del servicio (predeterminado 15 s) más su tiempo de inicio.
 
 ---
 
-**P: ¿Cuál es el límite del búfer circular y qué ocurre cuando se llena?**
+**P: ¿Cuál es el límite del búfer circular y qué sucede cuando se llena?**
 
-Cada servicio tiene un búfer circular dedicado de 5 MB. Cuando el búfer se llena, se eliminan las líneas
-de registro más antiguas para dejar espacio a las nuevas. El evento SSE `snapshot` devuelve
-las líneas más recientes dentro del límite de `tail`. Los registros no se guardan en el disco a menos que
-`logsBufferPath` esté establecido en la fila de la base de datos.
+Cada servicio tiene un buffer de anillo dedicado de 5 MB. Cuando el búfer está lleno, las líneas de registro más antiguas se eliminan para dejar espacio a las nuevas. El evento SSE `snapshot` devuelve las líneas más recientes dentro del límite `tail`. Los registros no se conservan en el disco a menos que `logsBufferPath` esté configurado en la fila DB.
 
 ---
 

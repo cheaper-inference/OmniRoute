@@ -4,13 +4,7 @@
 
 ---
 
-> **Doğruluğun kaynağı:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` ve `open-sse/utils/error.ts` içindeki herkese açık oluşturucular
-> **Testler:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Son güncelleme:** 2026-09-02 — v3.8.51
-> **Hedef kitle:** Hata yanıtlarıyla çalışan tüm mühendisler (HTTP rotaları, SSE akışları, yürütücüler, MCP işleyicileri).
-> **Durum:** İstemciye hata mesajı döndüren her kod yolu için **ZORUNLUDUR**.
+> **Gerçeğin kaynağı:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` ve `open-sse/utils/error.ts` kamu inşaatçıları** Testler:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Kitle:** Hata yanıtlarına dokunan herhangi bir mühendis (HTTP rotaları, SSE akışları, yürütücüler, MCP işleyicileri).** Durum:****MANDATORY** istemciye hata mesajı döndüren her kod yolu için.
 
 ## Bunun var olma nedeni
 

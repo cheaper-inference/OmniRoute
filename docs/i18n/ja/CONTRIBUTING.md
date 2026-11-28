@@ -8,28 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## 開発環境のセットアップ
+## 開発セットアップ
 
 ### 前提条件
 
-- **Node.js** `>=22.22.2 <23` または `>=24.0.0 <27`（推奨: 24 LTS）
-- **npm** 10 以降
+- **Node.js** `>=22.22.2 <23`または`>=24.0.0 <27` (推奨: 24 LTS)
+- **npm**+
 
-> **Node 24 を使用する Windows の場合:** 現行の 24 LTS パッチリリース（少なくとも 24.20.0）を使用してください。
-> それ以前のリリースでは、`--test-force-exit` がプロセスを終了すると、テストが成功した後に
-> 異常終了することがあります。Node の [Windows libuv 修正](https://github.com/nodejs/node/pull/61999) により
-> このランタイムクラッシュが解消されます。テストのアサーションとランナーの終了チェックは有効なままにしてください。
+> **Windowsとノード 24:**現在の 24 LTSパッチ リリース (少なくとも 24.20.0) を使用してください。以前のリリースでは、テストが成功した後、 `--test-force-exit`プロセスを閉じるときに中断されることがありました。ノードの[Windows libuv 修正は、](https://github.com/nodejs/node/pull/61999)このランタイム クラッシュに対処します。テスト アサーションとランナー終了チェックを有効にしておきます。
 
-> **npm v11 以降のユーザー（Node 24 以降）:** `npm install` の後、ネイティブモジュールがインストールされていることを確認してください:
-> `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` で失敗する場合は、
-> `npm approve-scripts better-sqlite3 && npm install` を実行してください。[トラブルシューティング](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)を参照してください。
+> **npm v11 +ユーザー (ノード 24 +):** `npm install`の後に、ネイティブ モジュール`node -e "require('better-sqlite3')"`がインストールされていることを確認します。 `MODULE_NOT_FOUND`で失敗した場合は、 `npm approve-scripts better-sqlite3 && npm install`を実行します。 [「トラブルシューティング」](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)を参照してください。
 
 - **Git**
 
 ### クローンとインストール
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -37,89 +32,81 @@ npm install
 ### 環境変数
 
 ```bash
-# テンプレートから .env を作成
+# Create your .env from the template
 cp .env.example .env
 
-# 必須のシークレットを生成
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-開発における主要な変数:
+開発のための主要な変数:
 
-| 変数                   | 開発時のデフォルト値     | 説明                       |
-| ---------------------- | ------------------------ | -------------------------- |
-| `PORT`                 | `20128`                  | サーバーポート             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | フロントエンドのベース URL |
-| `JWT_SECRET`           | (上記で生成)             | JWT 署名用シークレット     |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | 初回ログインパスワード     |
-| `APP_LOG_LEVEL`        | `info`                   | ログの詳細度               |
+| 変数                   | 開発のデフォルト         | 説明                      |
+| ---------------------- | ------------------------ | ------------------------- |
+| `PORT`                 | `20128`                  | サーバーポート            |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | フロントエンドのベースURL |
+| `JWT_SECRET`           | (上記で生成)             | JWT署名の秘密             |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | 初回ログインパスワード    |
+| `APP_LOG_LEVEL`        | `info`                   | ログの詳細レベル          |
 
-### ダッシュボード設定
+### ダッシュボードの設定
 
-ダッシュボードには、環境変数でも設定できる機能の UI 切り替えがあります:
+ダッシュボードには、環境変数を介して構成できる機能のUIトグルが用意されています。
 
-| 設定場所            | 切り替え項目     | 説明                                 |
-| ------------------- | ---------------- | ------------------------------------ |
-| Settings → Advanced | デバッグモード   | デバッグリクエストログを有効化（UI） |
-| Settings → General  | サイドバーの表示 | サイドバーのセクションを表示/非表示  |
+| 設置場所  | トグル             | 説明                              |
+| --------- | ------------------ | --------------------------------- |
+| 設定→詳細 | デバッグモード     | デバッグ要求ログを有効にする (UI) |
+| 設定→全般 | サイドバーの可視性 | Show/hideサイドバー セクション    |
 
-これらの設定はデータベースに保存され、再起動後も保持されます。設定されている場合は、環境変数のデフォルト値より優先されます。
+これらの設定はデータベースに保存され、再起動後も保持され、設定された環境変数のデフォルトをオーバーライドします。
 
-### ローカルでの実行
+### ローカルで実行する
 
 ```bash
-# 開発モード（ホットリロード）
+# Development mode (hot reload)
 npm run dev
 
-# 本番ビルド
-npm run build    # next build → .build/next/ で実行し、その後 assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# コントリビューターによる変更向けの高速なバックエンド/API 専用コンパイル
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# リリースビルド（クリーンな再ビルド + HEAD センチネル — デプロイに必須）
-npm run build:release   # rm -rf .build dist を実行してからビルドし、dist/BUILD_SHA を書き込む
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# 一般的なポート設定
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-コントリビュータービルドでは、コンパイルのみの検証が行われます。スタンドアロン
-ディストリビューションの組み立てや、オプションのネイティブパッケージングアセットの
-ビルドは行われません。出荷可能なバンドルを検証する必要がある場合は、通常の本番ビルドを使用してください。
+コントリビューター ビルドはコンパイルのみの検証を実行します。スタンドアロン ディストリビューションをアセンブルしたり、オプションのネイティブ パッケージ アセットをビルドしたりすることはありません。出荷可能なバンドルを検証する必要がある場合は、通常の実稼働ビルドを使用します。
 
-### ビルド出力の構成
+### ビルド出力レイアウト
 
-| ディレクトリ | 内容                                                                        | Git 管理 |
-| ------------ | --------------------------------------------------------------------------- | -------- |
-| `src/`       | アプリケーションソース（TypeScript / TSX）                                  | あり     |
-| `.build/`    | 中間生成物 — `next build` の出力（gitignore 対象、`distDir = .build/next`） | なし     |
-| `dist/`      | 出荷可能なバンドル — `assembleStandalone` により組み立て（gitignore 対象）  | なし     |
+| ディレクトリ | コンテンツ                                                                 | 追跡済み |
+| ------------ | -------------------------------------------------------------------------- | -------- |
+| `src/`       | アプリケーションソース (TypeScript / TSX)                                  | はい     |
+| `.build/`    | 中間— `next build`出力 (gitignored、 `distDir = .build/next`)              | いいえ   |
+| `dist/`      | `assembleStandalone`によって組み立てられた出荷可能なバンドル— (gitignored) | いいえ   |
 
-ビルドパイプラインは単一のパスで実行されます:
+ビルド パイプラインは単一パスです。
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js の出力)
-  └─ assembleStandalone()                 (standalone + static + public + native assets をコピー)
-       └─ 出力: dist/                    (server.js、.next/static/、public/、node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` では、最初に両方のディレクトリをクリーンアップし、デプロイ整合性センチネルとして
-`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）を追加で書き込みます。
+`npm run build:release`さらに、最初に両方のディレクトリをクリーンアップし、デプロイ整合性センチネルとして`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) を書き込みます。
 
-`npm run build:contributor` はバックエンド専用のビルドプロファイルを使用します。ビルド中に
-ダッシュボード UI ファイルを一時的にスタブ化し、API ルートハンドラーを維持したうえで、
-ビルド後に元のファイルを復元します。ダッシュボード UI に影響する変更や完全なリリース検証には
-`npm run build` を使用してください。コントリビュータープロファイルはリリースビルドの代替ではありません。
+`npm run build:contributor`バックエンド専用のビルド プロファイルを使用します。ビルド中にダッシュボードのUIファイルを一時的にスタブし、 APIルート ハンドラーを保持し、ビルド後に元のファイルを復元します。ダッシュボードUIに影響を与える変更、または完全なリリースの検証には`npm run build`使用します。貢献者プロファイルは、リリース ビルドに代わるものではありません。
 
-> **VPS デプロイに関する注意:** リモートのイメージディレクトリ `/usr/lib/node_modules/omniroute/app/`
-> は変更されません。デプロイ用スキルは `dist/` の内容をそこに rsync します。
-> リポジトリ内でのビルド出力パスのみが移動しました（`app/` → `dist/`）。
+> **VPSデプロイに関するメモ:**リモート イメージ ディレクトリ`/usr/lib/node_modules/omniroute/app/`は変更されません。デプロイ スキルは、 `dist/`の内容をそれに rsync します。リポジトリ内のビルド出力パスのみが移動されました (`app/` → `dist/`)。
 
-デフォルト URL:
+デフォルトのURLs:
 
 - **ダッシュボード**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -427,10 +414,10 @@ VPS へのデプロイには、`npm run build` ではなく `npm run build:relea
 
 ---
 
-## ヘルプ
+## 助けを求める
 
-- **アーキテクチャ**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)を参照してください
-- **API リファレンス**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)を参照してください
-- **セキュリティドキュメント**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md)、[`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md)、[`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md)、[`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **建築**： [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)参照
+- **APIリファレンス**： [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)参照
+- **セキュリティドキュメント**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md) 、 [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md) 、 [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md) 、 [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **運用ドキュメント**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Issue**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **問題**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

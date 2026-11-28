@@ -4,9 +4,9 @@
 
 ---
 
-> **Sürüm:** v3.8.44** Son güncelleme:** 2026-10-28** Kitle:** Gömülü hizmetleri (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box) ekleyen, bakımını yapan veya hata ayıklayan mühendisler.
+> **Sürüm:** v3.8.44** Kitle:** Gömülü hizmetleri (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box) ekleyen, bakımını yapan veya hata ayıklayan mühendisler.
 
-Gömülü hizmetler, OmniRoute yüklediği, denetlediği ve birinci sınıf yönlendirme hedefleri olarak kullanıma sunduğu, yerel olarak yüklenen süreç yardımcı araçlarıdır. Harici sağlayıcıların (İnternet üzerinden API anahtarları aracılığıyla erişilen) aksine, yerleşik hizmetler OmniRoute ile aynı makinede çalışır ve geri döngü üzerinden iletişim kurar.
+Gömülü hizmetler, OmniRoute yüklediği, denetlediği ve birinci sınıf yönlendirme hedefleri olarak kullanıma sunduğu, yerel olarak yüklenen süreç yardımcı araçlarıdır. Harici sağlayıcıların (İnternet üzerinden API anahtarları aracılığıyla erişilen) aksine, gömülü hizmetler OmniRoute ile aynı makinede çalışır ve geridöngü üzerinden iletişim kurar.
 
 ---
 

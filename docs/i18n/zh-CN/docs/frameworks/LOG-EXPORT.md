@@ -12,7 +12,7 @@
 
 ---
 
-## 1. 工作原理
+## 1. 运作原理
 
 ```
 server (decrypt + validate config, reconcile cursor)
@@ -23,120 +23,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **调度** — 使用一个 `JobRegistry` cron 作业 `log_export`，默认表达式为 `0 * * * *`（每小时执行一次，
-  UTC）。该作业在 `src/lib/initCloudSync.ts` 中注册；可通过 `OMNIROUTE_LOG_EXPORT_CRON` 覆盖。
-  每次触发都会依次处理所有**已启用**目标的待导出记录。
-- **游标** — 使用 SQLite 隐式的 `call_logs.rowid`，按目标持久化到
-  `log_export_destinations.cursor_row_id`。这里刻意不使用 `timestamp` 作为游标：调用方
-  可以提供自己的值，因此较慢的请求可能晚于一个启动更晚但完成更快的请求写入，
-  而基于时间戳的游标会漏掉该请求。
-- **批处理** — 每次请求处理 `batch_size` 行（默认 500），每次运行处理 `max_rows_per_run` 行
-  （默认 10000），以便将大量积压数据分散到多次调度中处理，而不是阻塞某一次调度。
-- **交付** — 只有在 `send()` 成功完成后，游标才会前进。批次失败时，
-  游标保持不变，因此下次运行会重试相同的行。所提供的保证是
-  至少一次交付加上目标端去重，而非真正的恰好一次交付：BigQuery 使用调用日志 ID 作为每行的键，
-  并在自身的去重时间窗口内尽力依据该键去重。
-- **重叠保护** — cron 调度和 `POST .../run` 可能同时触发。如果某个目标
-  已在处理待导出记录，则会跳过它，而不会重复处理（运行结果中包含 `skipped: true`），
-  因此并发运行不会重新发送批次，也不会将游标写回更早的位置。
-- **清空恢复** — 如果 `cursor_row_id` 超过了 `MAX(rowid)`（整张表已被
-  清空，且 rowid 重新开始计数），运行器会将游标重置为 0，而不是永久漏读后续记录。
+- **日程**—一个`JobRegistry` cron 作业`log_export`，默认为`0 * * * *` （每小时， UTC）。已在`src/lib/initCloudSync.ts`注册；可使用`OMNIROUTE_LOG_EXPORT_CRON`覆盖。每一次蜱虫都会耗尽**已启用**目的地，依次。
+- **Cursor** — SQLite的隐式`call_logs.rowid`，在`log_export_destinations.cursor_row_id`中的每个目标上持续存在。 `timestamp`故意不是游标：调用者可以提供自己的值，因此可以在稍后启动的较快请求之后写入较慢的请求，并且时间戳游标会跳过它。
+- **配料**— `batch_size`每个请求行数（默认 500）， `max_rows_per_run`每次运行行数（默认 10000），因此大量积压会在几个周期内耗尽，而不是阻塞一个周期。
+- **送货**—光标仅在`send()`解析后前进。失败的批处理会将光标留在原来的位置，因此在下次运行时会重试相同的行。保证是至少一次加上目标端重复数据删除，而不是真正的精确一次： BigQuery通过调用日志 ID 来对每一行进行键控，它在自己的重复数据删除窗口中尽最大努力遵守该 ID。
+- **重叠防护**— cron tick 和`POST .../run`可以一起触发。已耗尽的目标将被跳过，而不是耗尽两次（运行结果中的`skipped: true` ），因此并发运行无法重新发送批处理或向后写入游标。
+- **吹扫恢复**—如果`cursor_row_id`最终高于`MAX(rowid)` （整个表被清除并且 rowids 重新启动），则跑步者将倒回到 0 而不是永久失明。
 
-### 隔离运行器与限制
+### 孤立的跑步者和限制
 
-在 Node 上，每个目标的运行都会启动一个独立、短生命周期的操作系统子进程（使用带 IPC 的 `child_process`，
-而非 `worker_threads`）。正文读取、载荷 JSON 解析/序列化、目标的
-`prepare()` 以及目标网络 I/O 都在该子进程中执行，而不在服务器的事件循环中执行。
-只有配置和少量进度消息通过 IPC 传递；导出的记录从不返回
-服务器。cron 作业和“立即运行”路由保留相同的公开结果和重叠保护机制。
+Node 上运行的每个目标都会启动一个单独的、短期的OS子进程（`child_process`和IPC，而不是`worker_threads`）。正文读取、有效负载JSON parsing/serialization、目标`prepare()`和目标网络I/O都在那里运行，而不是在服务器的事件循环上运行。仅配置和小进度消息穿过IPC；导出的记录永远不会返回到服务器。 cron 作业和 Run now 路由保持相同的公共结果和重叠保护。
 
-子进程使用 `node:sqlite` 以只读方式打开服务器解析后的 `DATA_DIR/storage.sqlite`，
-并设置 `busy_timeout=5000` 和 `query_only=ON`。它不导入任何数据库单例，也不执行
-迁移、备份或 SQLite 更新。缺失/损坏产物的状态记录处理（包括对
-损坏产物执行的 UPDATE）仍仅在仪表板详情路径中进行。两条路径共享一个纯
-详情解析器；导出使用异步文件系统读取，并遵循相同的解析顺序：产物 → 旧版
-内联数据 → 旧版磁盘数据 → 无。子进程打开读取器时，每次运行都会对最大插入 rowid
-创建快照；之后插入的数据留待下次运行处理。这是插入
-边界，而不是长期持有的 SQLite 事务：在网络等待期间，WAL 写入和检查点操作仍可正常进行。
-此边界不会冻结对现有行的更新/删除。
+子进程使用`node:sqlite`、 `busy_timeout=5000`和`query_only=ON`以只读方式打开服务器解析的`DATA_DIR/storage.sqlite` 。它不导入DB单例，也不执行迁移、备份或SQLite更新。 Missing/corrupt工件簿记（包括损坏的工件UPDATE）仅保留在仪表板详细信息路径中。两条路径共享一个纯细节解析器；导出使用异步文件系统读取和相同的工件→传统内联→传统磁盘→无解析顺序。当子进程打开其读取器时，运行会快照最大插入 rowid；稍后插入等待下一次运行。这是一个插入边界，而不是一个长期存在的SQLite事务： WAL编写器和检查点在网络等待期间保持空闲。现有行的Updates/deletions不会被此边界冻结。
 
-每个批次被接受后，子进程都会等待确认。服务器先使用 `advanceLogExportCursor`
-持久化游标，然后发送 `ack`；在此之前不会开始下一个批次。
-发送失败、崩溃或超时都会记录为失败，且不会推进该批次的游标。此前
-已确认的批次保持已提交状态；最多只有一个尚未确认的批次可能被重新发送。
-只有收到 `done` 且子进程正常退出后，才会记录成功。发生失败时，会使用 SIGTERM 终止子进程，
-500 ms 后若仍未退出，则升级为 SIGKILL，运行器会等待进程关闭。
+在每个接受的批次之后，孩子都会等待确认。服务器首先使用`advanceLogExportCursor`持久化光标，然后发送`ack`；在此之前没有下一批开始。发送失败、崩溃或超时会记录失败，但不会推进该批次。先前确认的批次保持承诺状态；最多可以重新发送一个未确认的批次。仅在`done`和干净的子退出之后才会记录成功。失败会通过SIGTERM终止子进程，并在 500 毫秒后升级为SIGKILL ，并且运行程序等待进程关闭。
 
-| 环境变量                                      | 默认值 | 用途                                |
-| --------------------------------------------- | ------ | ----------------------------------- |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | 每个目标的实际运行时间上限          |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | 子进程 V8 老生代空间上限，单位为 MB |
+| 环境变量                                      | 默认   | 目的                 |
+| --------------------------------------------- | ------ | -------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | 每个目的地的挂钟限制 |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | MB中子 V8 旧空间限制 |
 
-无效、非正数或非整数值将使用默认值。堆设置并非总
-RSS 上限；过大的批次仍可能耗尽子进程内存，并使本次运行安全失败。
-默认的 1024 MB 为启用正文时、由 500 行各含 512 KiB 产物组成的默认批次预留了余量，
-其中也包括 BigQuery 按字节分块的 JSON 序列化开销。但这并不意味着
-包含正文的 10000 行批次就能安全运行。V8 堆耗尽会记录一条附带处理建议的失败信息：减小批次
-大小，或增大 `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`；游标会停留在最后一个
-已确认批次的位置。历史内联/磁盘正文不受现代产物大小上限的约束。
-运维人员必须单独规划 RSS 预算，尤其是在内存受限的容器中。
+Invalid/non-positive/non-integer值使用默认值。堆设置不是总RSS限制；非常大的批次仍然会耗尽子内存并使运行安全失败。 1024 MB默认值为启用主体的默认 500 行批 512 KiB工件留出了空间，包括BigQuery的字节分块JSON序列化。它并不能使 10000 行主体批次安全。 V8 堆耗尽记录了一个可操作的故障：降低批量大小或提高`OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`；光标停留在最后确认的批次上。历史上的inline/disk尸体并没有被现代神器上限所覆盖。操作员必须单独预算RSS ，尤其是在内存有限的容器内。
 
-子进程仅继承解析后的 `DATA_DIR`、`NODE_ENV`、显式设置的 `TZ`（用于旧版文件名的
-本地时间解析）、存在时的 `ELECTRON_RUN_AS_NODE`，以及以下出站配置：
-`HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`、`NO_PROXY`（及其小写形式）、
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`、`NODE_EXTRA_CA_CERTS`、`SSL_CERT_FILE`、`SSL_CERT_DIR`。
-全局 Undici dispatcher 与服务器共享完全基于环境变量的代理解析逻辑和本地主机
-绕过规则，包括 `NO_PROXY`；它不导入 `proxyFetch.ts`，也不使用其数据库/功能开关。
-转发的输出和记录的错误中的代理凭据会被脱敏。目标端凭据
-仅通过一条启动 IPC 消息传递，绝不通过 argv 或环境变量传递；转发的输出/错误均会
-添加前缀并进行清理。子进程执行参数中仅禁用 `ExperimentalWarning`，以避免
-每次 cron 运行时重复显示 Node 的 SQLite 警告；其他类型的警告仍然可见。
+子级仅继承已解析的`DATA_DIR`、 `NODE_ENV`、显式`TZ` （旧文件名本地时间解析）、 `ELECTRON_RUN_AS_NODE`如果存在）以及以下出站输入： `HTTP_PROXY`、 `HTTPS_PROXY`、 `ALL_PROXY`、 `NO_PROXY` （及其小写形式）、 `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`、 `NODE_EXTRA_CA_CERTS`、 `SSL_CERT_FILE`、 `SSL_CERT_DIR`。全局 Undici 调度程序共享服务器的纯环境代理解析和本地主机旁路规则，包括`NO_PROXY`；它不导入`proxyFetch.ts`或其DB/feature标志。代理凭据是根据转发的输出和记录的错误进行编辑的。目标凭证仅在一条起始IPC消息中传输，从不 argv 或环境； output/error转发带有前缀并经过清理。仅在子 exec 参数中禁用`ExperimentalWarning` ，以避免每次 cron 运行时重复 Node 的SQLite警告；其他警告类型仍然可见。
 
-目标端模块必须能够在不依赖 Next.js/server-only 依赖项的情况下导入。现有的
-BigQuery 实现已满足这一约定。访问令牌缓存仅在本次子进程
-运行期间有效，不会跨运行保留。Node 是受支持的运行时（见 `package.json` 的 engines），但 README 的 Bun
-安装章节和 `Dockerfile.bun` 也提供了使用
-`bun:sqlite`（`src/lib/db/core.ts` / 适配器）的生产环境兼容方案。因此，在 Bun 下，导出仍保留原有的
-进程内执行路径，并发出一次性警告：子进程堆内存/超时隔离不可用。如需
-事件循环和 OOM 隔离，请使用 Node；此处并不将 Bun 视为仅限开发使用的运行时。
+目标模块必须可导入而无需Next.js/server-only依赖项。现有的BigQuery实现已经满足该合同。访问令牌缓存仅适用于子运行，而不适用于跨运行。 Node 是受支持的运行时（`package.json`引擎）。存在尽力而为、不受支持的Bun兼容性路径（ `src/lib/db/core.ts` / 适配器中的`bun:sqlite`和`Dockerfile.bun`），因此导出不得在其下中断。在Bun下，导出保留先前的进程内路径并发出一次性警告：子heap/timeout隔离不可用。使用 Node 进行事件循环和OOM隔离。
 
-启用 `includeBodies` 时，建议采用分钟级的执行频率，例如
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`，而不是积累一小时的载荷后再处理。
-每次运行仍受批次和行数限制。每个目标端的每次运行都会产生进程启动开销；
-这是以少量启动成本换取服务器事件循环隔离，而非降低总 CPU 使用量。
+启用`includeBodies`时，更喜欢像`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`这样的分钟级节奏，而不是累积每小时的有效负载积压。批次和行数限制仍然限制每次运行。流程启动按每次运行的目的地付费；这会以少量的启动成本换取服务器事件循环隔离，但不会减少CPU总使用量。
 
-### 载荷（提示词和补全内容）
+### 有效负载（提示和完成）
 
-默认情况下，导出仅包含日志**列表**中显示的摘要字段。开启
-**导出提示词和响应**（`includeBodies`）后，还会导出日志**详情**
-面板中显示的每次调用的以下内容：
+默认情况下，导出仅包含日志中的汇总字段**列表**显示。正在开启**导出提示和响应**(`includeBodies`) 还提供了日志**细节**每个调用的窗格显示：
 
-| 字段                             | 包含的内容                                    |
-| -------------------------------- | --------------------------------------------- |
-| `request_body` / `response_body` | 仪表板中呈现的调用载荷                        |
-| `pipeline_route_decision`        | 路由器选择的目标和模型                        |
-| `pipeline_client_request`        | 客户端发送的原始请求，保持原样                |
-| `pipeline_openai_request`        | 转换为内部 OpenAI 格式后的请求                |
-| `pipeline_provider_request`      | 实际发送到上游的请求，采用提供者格式          |
-| `pipeline_provider_response`     | 原始上游响应                                  |
-| `pipeline_client_response`       | 返回给调用方的内容                            |
-| `pipeline_error`                 | 调用失败时的流水线级错误详情                  |
-| `bodies_truncated`               | 上述任一字段达到 `maxBodyBytes` 限制时为 True |
+| 场地                             | 它包含什么                                   |
+| -------------------------------- | -------------------------------------------- |
+| `request_body` / `response_body` | 仪表板呈现时的调用有效负载                   |
+| `pipeline_route_decision`        | 路由器选择了哪个目标和型号                   |
+| `pipeline_client_request`        | 与客户端发送的原始请求完全相同               |
+| `pipeline_openai_request`        | 翻译成内部OpenAI形状后                       |
+| `pipeline_provider_request`      | 正如实际发送到上游的那样，以提供者方言的形式 |
+| `pipeline_provider_response`     | 原始上游响应                                 |
+| `pipeline_client_response`       | 返还给调用者的内容是什么                     |
+| `pipeline_error`                 | 失败调用的管道级错误详细信息                 |
+| `bodies_truncated`               | 当上面的任何字段命中`maxBodyBytes`时为真     |
 
-这些属于提示词内容，因此**默认关闭**，并且特意设计为按目标端单独选择。
-导出的内容与仪表板显示的内容一致，因为导出与 `getCallLogById` 共用详情
-解析逻辑：载荷在
-写入时就已经过个人身份信息（PII）清理和密钥脱敏，而使用
-`noLog` API 密钥发起的调用完全不存储载荷，因此没有任何载荷可供导出。
+这是提示内容，所以是**默认关闭**并刻意根据目的地进行选择。所发送的是仪表板显示的内容，因为导出和`getCallLogById`共享详细解析：有效负载在写入时已经经过 PII 清理和秘密编辑，并且使用`noLog` API密钥进行的调用根本不存储任何有效负载，因此没有任何内容可以导出。
 
-载荷按行从文件系统中的产物读取，因此仅对
-请求包含载荷的目标端执行数据补全。产物缺失或损坏时，会导出摘要并将载荷设为 null，
-而不是让整个批次失败并导致游标停滞。
+有效负载是从文件系统工件中按行读取的，因此水合仅针对需要它的目的地运行。丢失或损坏的工件会以空负载导出其摘要，而不是使批处理失败并搁浅游标。
 
-`maxBodyBytes`（默认值为 262144）限制每个字段的大小。较长的载荷会被**截断而非
-丢弃**——截断后的提示词仍能说明“用户问了什么”——且该行会通过
-`bodies_truncated` 标记。不会导出流式传输中逐块产生的增量；组装完成的响应
-已包含在 `pipeline_provider_response` 和 `pipeline_client_response` 中。
+`maxBodyBytes` （默认 262144）限制每个字段。更长的有效载荷是**被截断而不是被丢弃**—被剪辑的提示仍然回答“所问的内容” —并且该行被标记为`bodies_truncated`。流式传输的逐块增量不会导出；组装的响应已在`pipeline_provider_response`和`pipeline_client_response`中。
 
 ---
 

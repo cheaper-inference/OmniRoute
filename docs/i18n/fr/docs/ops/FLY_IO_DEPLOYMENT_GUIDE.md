@@ -132,30 +132,30 @@ flyctl deploy
 
 ## 5. Paramètres requis
 
-Pour ce projet, il est recommandé de configurer au minimum les paramètres suivants sur Fly.io.
+Ce projet recommande de configurer au moins les paramètres suivants sur Fly.io.
 
 ### 5.1 Paramètres vérifiés
 
-Ces paramètres ont été utilisés lors de déploiements réels de l’application `omniroute` actuelle :
+Ces paramètres ont été utilisés dans des déploiements réels sur l'application `omniroute` actuelle :
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (requis en production — utilisé pour l’authentification du pont WebSocket)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (obligatoire en production — utilisé pour l'authentification du pont WebSocket )
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 À propos de `INITIAL_PASSWORD`
 
-Le projet actuel ne définit pas `INITIAL_PASSWORD`, car ce déploiement ne le nécessite pas.
+Le projet actuel ne définit pas `INITIAL_PASSWORD` car ce déploiement ne l'exige pas.
 
-S’il n’est pas défini :
+S'il n'est pas défini :
 
-- Le journal de démarrage indiquera que le mot de passe par défaut est `CHANGEME`
-- Vous devez modifier le mot de passe de connexion dans les paramètres système dès que possible après le déploiement
+- Vous créez le mot de passe du tableau de bord dans l'assistant d'intégration lors de la première visite. Terminez l'étape du mot de passe : la sauter désactive la connexion au tableau de bord, ce qui laisse le tableau de bord ouvert à toute personne pouvant accéder à l'application URL
+- Le proxy de Fly atteint l'application à partir d'une adresse sans bouclage. Ainsi, après avoir soumis le mot de passe, l'assistant demande un jeton d'amorçage unique, que l'application imprime dans son journal à ce moment-là : `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Si cette ligne est sortie du journal, redémarrez l'application et soumettez à nouveau l'assistant pour imprimer un nouveau jeton.
 
-Si vous souhaitez initialiser le mot de passe du backend sans intervention, vous pouvez l’ajouter ultérieurement :
+Pour définir le mot de passe sans surveillance, ajoutez-le avant la première visite du tableau de bord (une fois le mot de passe enregistré, `INITIAL_PASSWORD` est ignoré) :
 
 - `INITIAL_PASSWORD`
 
@@ -274,60 +274,60 @@ Si la page `Secrets` de la console n'affiche pas les variables attendues, vérif
 
 ---
 
-## 9. Mises à jour et déploiements ultérieurs
+## 9. Mises à jour et versions ultérieures
 
-Après une mise à jour du code, le processus de déploiement est simple :
+Après les mises à jour du code, le processus de publication est simple :
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Si vous devez uniquement mettre à jour les paramètres sans modifier le code :
+Si vous avez uniquement besoin de mettre à jour les paramètres sans changer le code :
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly effectuera automatiquement une mise à jour progressive des machines.
+Fly effectuera automatiquement une mise à jour continue des machines.
 
-### 9.1 Suivi des mises à jour du dépôt en amont tout en préservant le fichier `fly.toml` de votre fork
+### 9.1 Suivi des mises à jour du référentiel en amont tout en préservant `fly.toml` de votre Fork
 
-Si le dépôt actuel est un fork et que vous souhaitez synchroniser les mises à jour depuis le dépôt en amont `https://github.com/diegosouzapw/OmniRoute`, suivez la procédure ci-dessous.
+Si le référentiel actuel est un fork et que vous souhaitez synchroniser les mises à jour du `https://github.com/cheaper-inference/OmniRoute` en amont, suivez le flux de travail ci-dessous.
 
-Commencez par vérifier vos dépôts distants :
+Tout d'abord, vérifiez vos télécommandes :
 
 ```powershell
 git remote -v
 ```
 
-Vous devriez voir au moins :
+Vous devriez voir au moins :
 
-- `origin` pointant vers votre propre fork
+- `origin` pointant vers ta propre fourchette
 - `upstream` pointant vers le dépôt d'origine
 
-Si `upstream` n'est pas configuré, ajoutez-le :
+Si `upstream` n'est pas configuré, ajoutez-le :
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Avant d'effectuer la synchronisation avec le dépôt en amont, récupérez les derniers commits et tags :
+Avant de synchroniser avec l'amont, récupérez les derniers commits et balises :
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Vérifiez la version actuelle et les tags du dépôt en amont :
+Vérifiez la version actuelle et les balises en amont :
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Remarque : la version actuelle du projet est `v3.8.0`. Les références à `v3.4.7` ci-dessous sont conservées uniquement comme exemples historiques. Pour les versions réelles, utilisez `:latest` ou le tag de la version actuelle (par exemple `:v3.8.0`).
+> Remarque : La version actuelle du projet est `v3.8.0`. Les références `v3.4.7` ci-dessous sont conservées à titre d'exemples historiques uniquement. Pour les versions actuelles, utilisez `:latest` ou la balise de version actuelle (par exemple `:v3.8.0`).
 
-Si vous souhaitez fusionner la dernière version de la branche `main` du dépôt en amont tout en conservant de force le fichier `fly.toml` de votre fork, suivez cette procédure :
+Si vous souhaitez fusionner le dernier `main` en amont tout en conservant de force `fly.toml` de votre fork, suivez ce workflow :
 
 ```powershell
 git merge upstream/main
@@ -337,34 +337,34 @@ git commit -m "chore(deploy): keep fork fly.toml"
 git push origin main
 ```
 
-Remarques :
+Remarques :
 
-- `git merge upstream/main` synchronise le code le plus récent depuis le dépôt d'origine
-- `git checkout HEAD~1 -- fly.toml` restaure le fichier `fly.toml` propre à votre fork depuis l'état antérieur à la fusion
-- Si le dépôt en amont n'a pas modifié `fly.toml`, cette étape n'introduira aucune différence
-- Si le dépôt en amont a modifié `fly.toml`, cette étape garantit que le nom de votre application Fly, le montage du volume, la région et les autres paramètres de déploiement propres à votre fork ne seront pas écrasés
+- `git merge upstream/main` synchronise le dernier code du référentiel d'origine
+- `git checkout HEAD~1 -- fly.toml` restaure le propre `fly.toml` de votre fork avant la fusion
+- Si l'amont n'a pas modifié `fly.toml`, cette étape n'introduira aucune différence
+- Si l'amont a modifié `fly.toml`, cette étape garantit que le nom de votre application Fly, le montage du volume, la région et toute autre configuration de déploiement spécifique à fork ne sont pas écrasés.
 
-Si vous souhaitez vous aligner sur un tag de version spécifique (par exemple `v3.4.7`), vérifiez d'abord que le tag est déjà inclus dans `upstream/main` :
+Si vous souhaitez vous aligner sur une balise de version spécifique (par exemple `v3.4.7`), vérifiez d'abord que la balise est déjà incluse dans `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Un retour réussi signifie que `upstream/main` contient déjà cette version ; vous pouvez simplement fusionner `upstream/main`.
+Un retour réussi signifie que `upstream/main` contient déjà cette version ; vous pouvez simplement fusionner `upstream/main`.
 
-### 9.2 Séquence de déploiement standard après la synchronisation avec le dépôt en amont
+### 9.2 Séquence de publication standard après la synchronisation en amont
 
-Après la synchronisation avec le dépôt d'origine, suivez cet ordre de déploiement recommandé :
+Après la synchronisation avec le référentiel d'origine, suivez cet ordre de publication recommandé :
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Restaurer le fichier `fly.toml` du fork
+3. Restaurer le `fly.toml` de la fourchette
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Il s'agit de la procédure réellement utilisée lors de la mise à niveau du projet actuel vers `v3.4.7` (l'exemple fait référence à une version historique ; la version actuelle réelle est `v3.8.0`).
+Il s'agit du flux de travail réel utilisé lors de la mise à niveau du projet actuel vers `v3.4.7` (l'exemple fait référence à une version historique ; la version réelle actuelle est `v3.8.0`).
 
 ---
 
@@ -424,34 +424,34 @@ Si `/app/data/...` apparaît à la place, `DATA_DIR` est mal configuré et doit 
 
 Il y a généralement deux raisons :
 
-- Vous n’avez pas encore exécuté `flyctl secrets set`
-- Vous consultez une autre application (par exemple, `oroute` au lieu de `omniroute`)
+- Vous n'avez pas encore exécuté `flyctl secrets set`
+- Vous consultez une autre application (par exemple `oroute` au lieu de `omniroute`)
 
-### 12.2 `flyctl deploy` signale `app not found`
+### 12.2 `flyctl deploy` Rapports `app not found`
 
-Créez d’abord l’application :
+Créez d'abord l'application :
 
 ```powershell
 flyctl apps create omniroute
 ```
 
-### 12.3 Échec de l’analyse de `fly.toml`
+### 12.3 Échec de l'analyse `fly.toml`
 
-Vérifiez les points suivants :
+Vérifiez les éléments suivants :
 
-- La présence éventuelle de caractères illisibles dans les commentaires
-- L’exactitude des guillemets et de l’indentation TOML
+- S'il y a des caractères tronqués dans les commentaires
+- Si les citations et l'indentation TOML sont correctes
 
-### 12.4 Les données ne sont pas conservées
+### 12.4 Les données ne persistent pas
 
-Vérifiez les deux points suivants :
+Vérifiez les deux éléments suivants :
 
 - `fly.toml` contient `destination = '/data'`
 - `DATA_DIR` est défini sur `/data`
 
-### 12.5 L’application peut-elle fonctionner sans `INITIAL_PASSWORD` ?
+### 12.5 Peut-il fonctionner sans `INITIAL_PASSWORD`?
 
-Oui, elle peut fonctionner. Elle utilisera alors le mot de passe par défaut `CHANGEME`. Il est recommandé de modifier le mot de passe du backend dès que possible en production.
+Oui. Avec `INITIAL_PASSWORD` non défini, vous créez le mot de passe du tableau de bord dans l'assistant d'intégration lors de la première visite (la section 5.2 couvre le jeton d'amorçage unique et l'étape du mot de passe).
 
 ---
 

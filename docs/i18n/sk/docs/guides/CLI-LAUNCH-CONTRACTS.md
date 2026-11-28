@@ -12,6 +12,12 @@ Neutrálny kontrakt `config/cli-tools-manifest.json` deklaruje kanonické IDs, a
 
 Signály prerušenia a ukončenia sa posielajú dieťaťu. Pred odstránením dočasnej konfigurácie čaká spúšťač na zatvorenie udalosti dieťaťa. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` riadi obdobie odkladu pred vynúteným ukončením (predvolené 5 000 milisekúnd).
 
+`omniroute launch <tool>` (pozri [LAUNCH.md](./LAUNCH.md) ) sa riadi rovnakými pravidlami prostredia a presmerovaním signálu a dodáva:
+
+- **Automatické spustenie brány.** V prípade lokálneho cieľa, keď na porte neodpovedá žiadna brána, spúšťač spustí `omniroute serve --headless --no-open` viazaný na `127.0.0.1` v rámci procesu oddeleného reapera. Každé spustené spustenie má nájomnú zmluvu v `DATA_DIR/launch/leases/` (srdcový tep každých 15 s, zastaraný po 45 s alebo keď je proces ukončený). Reaper zastaví bránu, ktorú spustil, akonáhle sa neuskutoční žiadny prenájom na dobu nečinnosti (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, predvolená hodnota 10 000 milisekúnd). Použije sa brána, ktorú používateľ spustil, ale nikdy sa nezastaví. `--keep-gateway` alebo `omniroute gateway keep` zmení spúšťaciu bránu na normálnu; `--no-start` obnovuje staré správanie pri zlyhaní. Skúšajú sa iba vzdialené ciele.
+- **Spustenie relácií.** Každé spustenie razí krátkodobý token relácie `olx_` z nadradeného poverenia (`POST /api/launch/sessions`), aktivuje ho počas spustenia nástroja, prečíta súhrn používania a po ukončení nástroja ho zruší. Token je striktnou podmnožinou svojho rodiča: rovnaké povolenia, rovnaký alebo užší katalóg, kratšia životnosť a nie je to poverenie na dashboard. Nástroj prijíma token relácie, nikdy nie rodičovské poverenia a požiadavky sú označené `launch:<tool>:<sessionId>` pokiaľ nie je zadané `--tag`. Brána bez relácie API zlyhá so `GatewayTooOld` namiesto toho, aby sa vrátila k spusteniu bez rozsahu.
+- **Konfigurácia podľa spustenia.** Konfiguračné súbory nástroja sa zapíšu do súkromného dočasného adresára (režim 0700, predpona `omnirouter-`) a odstránia sa po ukončení podriadeného súboru. `SIGKILL` spúšťača opustí adresár; `omniroute launch --cleanup` odstráni takéto adresáre, keď sú staršie ako jeden deň.
+
 ## Gemini trvalé nastavenie
 
 ```bash

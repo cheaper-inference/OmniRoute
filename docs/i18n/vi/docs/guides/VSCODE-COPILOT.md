@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** đưa mọi mô hình mà OmniRoute của bạn cung cấp vào trình chọn mô hình _gốc_ của GitHub Copilot Chat.
-Không có thanh bên thứ hai, không có giao diện trò chuyện riêng — chế độ agent của Copilot, khả năng gọi công cụ,
-máy chủ MCP và hướng dẫn tùy chỉnh đều tiếp tục hoạt động, chỉ khác là chạy trên mô hình bạn chọn.
+**OmniCopilot** thêm các mô hình và tổ hợp trò chuyện OmniRoute của bạn vào bộ chọn mô hình Trò chuyện Copilot gốc. Sử dụng quy trình làm việc của tổng đài viên và trò chuyện hiện có của người chỉnh sửa, với lệnh gọi công cụ và tầm nhìn khi được mô hình đã chọn hỗ trợ.
 
-|                            |                                                                                                                                                 |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Cài đặt (VS Code)**      | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Cài đặt (các bản fork)** | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Mã nguồn / vấn đề**      | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Yêu cầu**                | VS Code 1.104+                                                                                                                                  |
+|                            |                                                                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cài đặt (Mã VS )**       | [Chợ → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                         |
+| **Cài đặt (Mở VSX)**       | [Mở VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — yêu cầu nhà cung cấp mô hình ngôn ngữ tương thích và trò chuyện APIs |
+| **Nguồn/vấn đề**           | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                                       |
+| **Yêu cầu**                | Mã VS 1.104 + (1.122 + để sử dụng mà không cần đăng nhập GitHub hoặc gói Copilot )                                                       |
+| **Bản phát hành hiện tại** | OmniCopilot v1.5.1 trên cả hai cửa hàng (phát hành 24-11-2026)                                                                           |
 
-> **Không cần đăng ký Copilot.** Kể từ VS Code 1.122, nhà cung cấp mô hình ngôn ngữ hoạt động
-> mà không cần đăng nhập GitHub và không cần bất kỳ gói Copilot nào. Tính năng hoàn thành nội tuyến và
-> các tính năng dựa trên embedding nằm ngoài API của nhà cung cấp và vẫn yêu cầu Copilot.
+Lưu trữ ảnh chụp nhanh trên** 25-11-2026 (01:43 UTC)** , bản phát hành hiện tại:** 52.081 lượt cài đặt trên Marketplace** Và** 20.989 lượt tải xuống VSX mở** . Đây là các số liệu khác nhau của cửa hàng chứ không phải số lượng người dùng kết hợp. Nguồn: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) và [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Tính khả dụng VSX mở tự nó không thiết lập khả năng tương thích với mọi trình soạn thảo sử dụng sổ đăng ký đó. Kiểm tra phần trò chuyện của người chỉnh sửa và hỗ trợ API mô hình ngôn ngữ.
+
+> **Không cần đăng ký Copilot để trò chuyện BYOK trong Mã VS 1.122 +.** Microsoft hỗ trợ trò chuyện, công cụ và MCP mà không cần đăng nhập GitHub khi nhà cung cấp được định cấu hình. Trên Mã VS 1.104–1.121, tiện ích mở rộng vẫn hoạt động, nhưng Mã VS yêu cầu gói Copilot đã đăng nhập. Các đề xuất nội tuyến và các tính năng dựa trên nội dung nhúng nằm ngoài nhà cung cấp API và vẫn yêu cầu Copilot; Quản trị viên Copilot Business/Enterprise có thể vô hiệu hóa các nhà cung cấp mô hình bên thứ ba theo chính sách; một ngã ba chỉ hiển thị các mô hình nếu nó triển khai nhà cung cấp trò chuyện API. Việc sử dụng nhà cung cấp ngược dòng vẫn có thể phải chịu phí. Xem [ghi chú phát hành VS Code 1.122](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) và [hướng dẫn về mô hình ngôn ngữ](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
-## Thiết lập
+## Cài đặt
 
-1. **Chạy OmniRoute** — `npm install -g omniroute && omniroute` (bảng điều khiển tại `http://localhost:20128`).
-2. **Cài đặt tiện ích mở rộng** — tìm kiếm "OmniRoute" trong chế độ xem Extensions.
-3. **Chọn mô hình** — Copilot Chat → trình chọn mô hình → **Manage Models…** → **OmniRoute**, sau đó đánh dấu
-   những mô hình bạn muốn.
+1. **Chạy OmniRoute** — `npm install -g omniroute && omniroute` (trang tổng quan trên `http://localhost:20128`).
+2. **Cài đặt tiện ích mở rộng** tìm kiếm — "OmniRoute" trong chế độ xem Tiện ích mở rộng.
+3. **Kết nối** — giữ `http://localhost:20128` mặc định hoặc đặt khóa URL và API máy chủ của bạn thông qua**OmniRoute: Quản lý kết nối** .
+4. **Chọn một mô hình** — Copilot Trò chuyện → bộ chọn mô hình →** Quản lý mô hình…** →**OmniRoute** , sau đó đánh dấu vào những gì bạn muốn.
 
-Không cần cấu hình gì khi OmniRoute chạy trên cổng mặc định. Với một phiên bản từ xa, hãy mở
-**biểu tượng OmniRoute trên Activity Bar** (hoặc chạy `OmniRoute: Manage Connection`) và thiết lập:
+Để biết cài đặt kết nối, hãy mở** biểu tượng OmniRoute trong Thanh hoạt động** (hoặc chạy `OmniRoute: Manage Connection`) và đặt:
 
-- **URL máy chủ** — URL gốc của máy chủ, ví dụ: `http://192.168.0.15:20128`. Hậu tố `/v1` được
-  tiện ích mở rộng tự động thêm vào; đừng đưa nó vào.
-- **Khóa API** — chỉ khi máy chủ thiết lập `REQUIRE_API_KEY`. Được lưu trữ trong chuỗi khóa của hệ điều hành thông qua VS
-  Code SecretStorage, không bao giờ nằm trong `settings.json`.
+- **máy chủ URL** — gốc máy chủ, ví dụ `http://omniroute.example.com:20128`. Hậu tố `/v1` được phần mở rộng thêm vào; không bao gồm nó.
+- **phím API** cần có — khi chính sách xác thực suy luận của máy chủ yêu cầu. Được lưu trữ thông qua Mã VS SecretStorage, không bao giờ trong `settings.json`; các phím dành riêng cho không gian làm việc có sẵn. Sử dụng khóa được ủy quyền cho các kiểu máy bạn muốn hiển thị.
+
+Tiện ích mở rộng này cũng cung cấp chỉ báo kết nối, làm mới mô hình, bối cảnh mô hình và siêu dữ liệu về giá (bao gồm các combo), lý luận theo luồng với một** Nỗ lực tư duy** menu trên VS Code 1.120 +, chỉ báo giới hạn hàng ngày trên thanh trạng thái và bảng sử dụng (OmniRoute 3.8.50 +), cấu hình CLI và tab bảng điều khiển tùy chọn. Chính sách máy chủ và mô hình đã chọn sẽ xác định các khả năng bạn có thể sử dụng.
 
 ---
 
@@ -119,26 +119,25 @@ Xem [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) và issue
 
 ---
 
-## Cấu hình các công cụ khác của bạn từ bên trong VS Code
+## Định cấu hình các công cụ khác của bạn từ bên trong Mã VS
 
-**`OmniRoute: Configure Coding CLI`** điều khiển CLI `omniroute` để ghi các profile sẵn sàng sử dụng
-cho Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo và Roo — các cấu hình tương tự được mô tả trong
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). Khóa API được chuyển cho CLI thông qua biến môi trường
-`OMNIROUTE_API_KEY`, không bao giờ được truyền trên dòng lệnh.
+**`OmniRoute: Configure Coding CLI`** điều khiển `omniroute` CLI để viết các cấu hình sẵn sàng sử dụng cho 16 công cụ: Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes và 5dive. Tiện ích mở rộng gọi các lệnh `setup-*` trong thiết bị đầu cuối tích hợp; cài đặt phiên bản OmniRoute CLI bao gồm lệnh đã chọn. Xem [hướng dẫn tích hợp CLI](CLI-INTEGRATIONS.md) để biết các tệp và cờ mà mỗi công thức sử dụng cũng như [sổ đăng ký công cụ của tiện ích mở rộng](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+Khóa API được trao cho CLI thông qua `OMNIROUTE_API_KEY`, không bao giờ có trên dòng lệnh. Công thức thiết lập có thể duy trì thông tin xác thực trong cấu hình của công cụ đích. Khi chia sẻ khóa dành riêng cho không gian làm việc với cấu hình cấp người dùng của công cụ, tiện ích mở rộng sẽ yêu cầu xác nhận trước.
 
 ---
 
 ## Khắc phục sự cố
 
-| Triệu chứng                                                         | Nguyên nhân / cách khắc phục                                                                                                                                                                                                                                      |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Không có model OmniRoute trong trình chọn                           | Không thể kết nối đến máy chủ. Dấu chấm trên thanh trạng thái chuyển sang màu xám; chạy `OmniRoute: Check Connection`. Theo thiết kế, quá trình khám phá diễn ra âm thầm và không cung cấp model nào thay vì hiển thị lời nhắc.                                   |
-| Mỗi model xuất hiện hai lần                                         | Bạn đang dùng phiên bản OmniCopilot cũ hơn 1.0.1 — hãy cập nhật. Extension hiện yêu cầu `?prefix=alias`.                                                                                                                                                          |
-| Một model hình ảnh/âm thanh từng được liệt kê nhưng nay đã biến mất | Đây là thay đổi có chủ đích kể từ 1.0.1 — model đó vốn không thể phản hồi yêu cầu trò chuyện.                                                                                                                                                                     |
-| Bảng điều khiển bị thiếu trên Activity Bar                          | VS Code chuyển các container khung nhìn bổ sung vào mục tràn **"…"** ở cuối Activity Bar, và container bị ẩn bằng thao tác nhấp chuột phải sẽ tiếp tục bị ẩn. Nhấp chuột phải vào Activity Bar → chọn **OmniRoute**, hoặc mở bằng `OmniRoute: Manage Connection`. |
-| Bảng điều khiển mở trong trình duyệt dù đang ở chế độ `editor`      | Máy chủ chưa được **build** với `DASHBOARD_ALLOW_EMBED=vscode` (xem ở trên) — việc đặt biến này khi khởi động một bản cài đặt được build sẵn không có tác dụng. Việc chuyển sang phương án dự phòng là có chủ đích.                                               |
-| Danh sách model đã lỗi thời sau khi thay đổi provider               | Chạy `OmniRoute: Refresh Models` hoặc nhấp vào liên kết ↻ trong bảng điều khiển.                                                                                                                                                                                  |
+| Triệu chứng                                                            | Nguyên nhân/cách khắc phục                                                                                                                                                                                                                                                |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Không có mô hình OmniRoute trong bộ chọn                               | Máy chủ không thể truy cập được. Dấu chấm trên thanh trạng thái chuyển sang màu xám; chạy `OmniRoute: Check Connection`. Discovery được thiết kế im lặng và không đóng góp mô hình nào ngoài việc nhắc nhở.                                                               |
+| Mỗi mô hình xuất hiện hai lần                                          | Bạn đang sử dụng bản cập nhật OmniCopilot cũ hơn 1.0.1 —. Tiện ích mở rộng hiện yêu cầu `?prefix=alias`.                                                                                                                                                                  |
+| Một mô hình image/audio từng được liệt kê và đã biến mất               | Cố ý kể từ 1.0.1 — nó không bao giờ có thể trả lời yêu cầu trò chuyện.                                                                                                                                                                                                    |
+| Bảng điều khiển bị thiếu trong Thanh hoạt động                         | Mã VS di chuyển các vùng chứa chế độ xem bổ sung vào** "..."** tràn ở cuối Thanh hoạt động và vùng chứa bị ẩn khi nhấp chuột phải vẫn bị ẩn. Nhấp chuột phải vào dấu tích → của Thanh hoạt động**OmniRoute** , hoặc mở nó bằng `OmniRoute: Manage Connection`.            |
+| Bảng điều khiển mở trong trình duyệt mặc dù ở chế độ `editor`          | Máy chủ không** được xây dựng** với `DASHBOARD_ALLOW_EMBED=vscode` (xem ở trên), — cài đặt nó khi khởi động trên bản cài đặt dựng sẵn không có tác dụng gì. Việc dự phòng là có chủ ý.                                                                                    |
+| Danh sách mô hình đã cũ sau khi thay đổi nhà cung cấp                  | `OmniRoute: Refresh Models` hoặc liên kết ↻ trong bảng điều khiển.                                                                                                                                                                                                        |
+| Bảng điều khiển cho biết _Trực tuyến (mô hình bị chặn)_, bộ chọn trống | Máy chủ từ chối khóa. Lưu khóa bên phải với** Lưu & Kiểm tra** . Thay vào đó, nếu khóa đã được sửa trên máy chủ (được bật hoặc được cấp quyền truy cập vào các mô hình), tiện ích mở rộng sẽ không tự thông báo: chạy `OmniRoute: Refresh Models` hoặc mở bảng OmniRoute. |
 
 ---
 

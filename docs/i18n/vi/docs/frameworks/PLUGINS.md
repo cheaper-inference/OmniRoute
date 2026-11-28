@@ -90,18 +90,17 @@ export function register(program, ctx) {
 
 ## Khám phá
 
-Các plugin được tìm thấy từ:
+Các plugin được phát hiện từ:
 
-1. `~/.omniroute/plugins/<name>/` — các bản cài đặt cục bộ của người dùng
-2. Biến môi trường `OMNIROUTE_PLUGIN_PATH` — thư mục tùy chỉnh
+1. `~/.omniroute/plugins/node_modules/<name>/` — nơi `omniroute plugin install` đặt các gói (an npm `--prefix`, không phải `npm -g`)
+2. thư mục plugin sao chép bằng tay `~/.omniroute/plugins/<name>/` —
+3. thư mục tùy chỉnh `OMNIROUTE_PLUGIN_PATH` env var —
 
-Cả hai đều **chỉ dành cho CLI**. Môi trường chạy plugin phía máy chủ (các plugin marketplace/`plugin.json`
-chạy bên trong proxy) có trình quét riêng với thiết lập ghi đè riêng,
-`OMNIROUTE_PLUGINS_DIR` — xem
-[PLUGIN_MARKETPLACE.md → Thư mục plugin](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Việc thiết lập một biến không ảnh hưởng đến biến còn lại.
+Các thư mục được liên kết tượng trưng (những gì npm tạo cho `plugin install ./dir`) được theo dõi.
 
-Các lỗi khi tải được bắt và hiển thị dưới dạng cảnh báo — một plugin bị lỗi sẽ không bao giờ làm CLI gặp sự cố.
+Cả hai đều** Chỉ CLI** . Thời gian chạy plugin phía máy chủ (các plugin Marketplace/`plugin.json` chạy bên trong proxy) có trình quét riêng với phần ghi đè riêng, `OMNIROUTE_PLUGINS_DIR` — xem [thư mục Plugin PLUGIN_MARKETPLACE.md →](./PLUGIN_MARKETPLACE.md#plugin-directory). Đặt cái này không ảnh hưởng đến cái kia.
+
+Lỗi tải được phát hiện và in dưới dạng cảnh báo — một plugin bị hỏng không bao giờ làm hỏng CLI.
 
 ## Bảo mật
 

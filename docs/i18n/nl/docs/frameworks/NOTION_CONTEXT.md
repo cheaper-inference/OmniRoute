@@ -66,43 +66,31 @@ slaat OmniRoute het token op en voert het onmiddellijk een testzoekopdracht met 
 resultaat uit. Als Notion een foutobject retourneert, wordt het token gewist en mislukt
 de aanroep met `400`.
 
-## MCP-tools (6)
+## MCP gereedschap (6)
 
-Gedefinieerd in `open-sse/mcp-server/tools/notionTools.ts`. Het token wordt bij elke
-aanroep opgehaald via `getNotionToken()`; als er geen token is geconfigureerd, genereert
-de tool de fout
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+Gedefinieerd in `open-sse/mcp-server/tools/notionTools.ts`. Het token wordt tijdens het gesprek opgelost via `getNotionToken()`; als er geen is geconfigureerd, genereert de tool `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Tool                         | Scope          | Beschrijving                                                                                         |
-| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Zoek pagina's en databases via een tekstquery (retourneert titels, ID's en URL's). Gepagineerd.      |
-| `notion_get_page`            | `read:notion`  | Haal de inhoud en metadata van een pagina op aan de hand van het ID.                                 |
-| `notion_list_block_children` | `read:notion`  | Geef alle onderliggende blokken van een blok of pagina weer (de blokstructuur). Gepagineerd.         |
-| `notion_query_database`      | `read:notion`  | Doorzoek een database met optionele `filter` + `sorts` (Notion-API-indeling). Gepagineerd.           |
-| `notion_get_database`        | `read:notion`  | Haal het schema/de metadata van een database op aan de hand van het ID.                              |
-| `notion_append_blocks`       | `write:notion` | Voeg onderliggende blokken toe aan een bestaand blok of bestaande pagina (maximaal 100 per verzoek). |
+| Hulpmiddel                   | Domein         | Beschrijving                                                                                             |
+| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Zoek pagina's en databases op tekstquery (retourneert titels, IDs, URLs). Gepagineerd.                   |
+| `notion_get_page`            | `read:notion`  | Haal inhoud en metadata van een pagina op via ID.                                                        |
+| `notion_list_block_children` | `read:notion`  | Maak een lijst van alle blokkinderen van een blok of pagina (de blokboom). Gepagineerd.                  |
+| `notion_query_database`      | `read:notion`  | Voer een query uit op een database met optionele `filter` + `sorts` (Notion API -indeling). Gepagineerd. |
+| `notion_get_database`        | `read:notion`  | Haal de schema/metadata van een database op met ID.                                                      |
+| `notion_append_blocks`       | `write:notion` | Voeg blokkinderen toe aan een bestaand blok of pagina (max. 100 blokken per aanvraag).                   |
 
 ### Invoerparameters
 
-- `notion_search` — `query` (1–500 tekens), `pageSize` (1–100, standaard 20),
-  `startCursor` (optioneel).
-- `notion_get_page` — `pageId` (32-tekens lange hexadecimale waarde of UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, standaard 50),
-  `startCursor` (optioneel).
-- `notion_query_database` — `databaseId`, `filter` (optioneel, Notion-filterindeling),
-  `sorts` (optionele array), `pageSize` (1–100, standaard 50), `startCursor` (optioneel).
+- `notion_search` — `query` (1–500 tekens), `pageSize` (1–100, standaard 20), `startCursor` (optioneel).
+- `notion_get_page` — `pageId` (32-char hex of UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, standaard 50), `startCursor` (optioneel).
+- `notion_query_database` — `databaseId`, `filter` (optioneel, Notion filterformaat), `sorts` (optionele array), `pageSize` (1–100, standaard 50), `startCursor` (optioneel).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (array van blokobjecten),
-  `after` (optionele positie).
+- `notion_append_blocks` — `blockId`, `children` (reeks blokobjecten), `after` (optionele positie).
 
-### Scopes
+### Bereik
 
-De leestools vereisen `read:notion` en de schrijftool vereist `write:notion`.
-Scopes worden alleen afgedwongen door `withScopeEnforcement()` in
-`open-sse/mcp-server/server.ts` wanneer `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; de
-toegestane scopes van de aanroeper zijn afkomstig uit `OMNIROUTE_MCP_SCOPES`
-(kommagescheiden) of uit de scopecontext van de geauthenticeerde API-sleutel. Zie
-[MCP-SERVER.md](./MCP-SERVER.md) voor het volledige scopemodel.
+De leestools vereisen `read:notion` en de schrijftool vereist `write:notion`. Scopes worden afgedwongen door `withScopeEnforcement()` in `open-sse/mcp-server/server.ts` wanneer `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, en altijd voor een HTTP/SSE beller wiens API sleutel `manage`/`admin` mist; de toegestane bereiken van de aanroeper zijn afkomstig van `OMNIROUTE_MCP_SCOPES` (door komma's gescheiden) of de bereikcontext van de geverifieerde API sleutel. Zie [MCP-SERVER.md](./MCP-SERVER.md) voor het volledige scopemodel.
 
 ## Eindpunten
 

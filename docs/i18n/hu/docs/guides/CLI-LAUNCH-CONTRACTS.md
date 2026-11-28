@@ -12,6 +12,12 @@ A semleges `config/cli-tools-manifest.json` szerződés kanonikus IDs, álneveke
 
 A megszakítási és befejezési jeleket továbbítják a gyermeknek. Az indító megvárja a gyermek bezárási eseményét, mielőtt eltávolítaná az ideiglenes konfigurációt. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` szabályozza a türelmi időt a kényszerített felmondás előtt (alapértelmezett 5000 ezredmásodperc).
 
+`omniroute launch <tool>` (lásd [LAUNCH.md](./LAUNCH.md) ) ugyanazokat a környezeti szabályokat és jeltovábbítást követi, és hozzáteszi:
+
+- **Átjáró automatikus indítása.** Helyi cél esetén, ha nincs átjáró a porton, az indító elindítja `omniroute serve --headless --no-open` `127.0.0.1` kötötten egy leválasztott arató folyamat alatt. Minden futó indításnak bérleti joga van `DATA_DIR/launch/leases/` -ben (szívverés 15 másodpercenként, elavult 45 másodperc után, vagy amikor a folyamat véget ért). Az arató leállítja az általa elindított átjárót, ha nem volt bérleti szerződés az üresjárati kegyelemre (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, alapértelmezett 10000 ezredmásodperc). A felhasználó által elindított átjáró használatban van, de soha nem állt le. `--keep-gateway` vagy `omniroute gateway keep` egy indítóátjárót normál átjáróvá alakít; `--no-start` visszaállítja a régi „fail-if-down” viselkedést. Csak a távoli célpontokat vizsgálják.
+- **Indítsa el a munkameneteket.** Minden indításnál egy rövid élettartamú `olx_` munkamenet token kerül a szülő hitelesítő adatból (`POST /api/launch/sessions`), megdobogtatja az eszköz futása közben, beolvassa a használati összefoglalót, majd az eszköz kilépése után visszavonja. A token a szülőjének egy szigorú részhalmaza: azonos engedélyek, azonos vagy szűkebb katalógus, rövidebb élettartam, és nem az irányítópult hitelesítő adatai. Az eszköz a munkamenet jogkivonatot kapja, a szülő hitelesítési adatokat soha, és a kéréseket `launch:<tool>:<sessionId>` címkével látja el, hacsak nincs megadva `--tag`. A API munkamenet nélküli átjáró meghibásodik `GatewayTooOld` el, ahelyett, hogy visszakerülne egy hatókör nélküli indításra.
+- **Indításonkénti konfiguráció.** Az eszköz konfigurációs fájlok egy privát ideiglenes könyvtárba íródnak (0700-as mód, `omnirouter-` előtag), és a gyermek kilépése után eltávolítják. Az indító `SIGKILL` je elhagyja a könyvtárat; `omniroute launch --cleanup` eltávolítja az ilyen könyvtárakat, ha azok egy napnál régebbiek.
+
 ## Gemini tartós beállítás
 
 ```bash

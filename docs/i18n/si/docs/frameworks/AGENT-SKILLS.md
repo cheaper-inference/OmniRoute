@@ -13,12 +13,12 @@ Agent Skills යනු OmniRoute හි REST API සහ CLI භාවිත ක�
 
 ## දළ විශ්ලේෂණය
 
-නාමාවලියෙහි **Agent Skills 45ක්** (REST API 23ක් + CLI 21ක් + වින්යාස කාර්ය ප්රවාහයක් 1ක්) අඩංගු වේ. සෑම කුසලතාවකටම පහත දෑ ඇත:
+නාමාවලියෙහි අඩංගු වේ** 45 නියෝජිත කුසලතා** (23 REST API + 21 CLI + 1 වින්‍යාස කාර්ය ප්‍රවාහය). සෑම කුසලතාවයකටම ඇත්තේ:
 
-- **සම්මත ID එකක්** (`omni-auth`, `cli-serve`, ආදිය)
-- YAML ඉදිරි දත්ත (`name`, `description`) + සවිස්තරාත්මක markdown අන්තර්ගතයක් සහිත `skills/{id}/SKILL.md` හි **SKILL.md** ගොනුවක්
-- OpenAPI පිරිවිතරයෙන් සහ CLI ලේඛනයෙන් ව්යුත්පන්න කළ **REST අන්ත ලක්ෂ්ය** (API කුසලතා) හෝ **CLI උපවිධාන** (CLI කුසලතා)
-- සජීවීව ලබා ගැනීම සඳහා **GitHub raw URL එකක්**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ඒ** කැනොනිකල් ID** (`omni-auth`, `cli-serve`, ආදිය)
+- ඒ**SKILL.md** YAML frontmatter (`name`, `description`) + රිච් මාර්ක්ඩවුන් බොඩි සමඟ `skills/{id}/SKILL.md` හි ගොනු කරන්න
+- **REST අවසාන ලක්ෂ්‍ය** (API කුසලතා) හෝ**CLI උප විධාන** (CLI කුසලතා) OpenAPI පිරිවිතර සහ CLI ලේඛනයෙන් ව්‍යුත්පන්න කර ඇත
+- ඒ**GitHub අමු URL** සජීවීව ලබා ගැනීම සඳහා: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## ආවරණ API
+## ආවරණය API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

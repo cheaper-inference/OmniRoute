@@ -4,15 +4,7 @@
 
 ---
 
-# Sanitizacija poruka o greškama
-
-> **Izvor istine:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, i javni builderi u `open-sse/utils/error.ts`
-> **Testovi:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Posljednje ažurirano:** 2026-09-02 — v3.8.51
-> **Ciljna grupa:** Svaki inženjer koji radi sa odgovorima o greškama (HTTP rute, SSE streamovi, izvršioci, MCP handler-i).
-> **Status:** **OBAVEZNO** za svaku putanju koda koja vraća poruku o grešci klijentu.
+> **Izvor istine:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, i javni graditelji u `open-sse/utils/error.ts`** testovi:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** publika:** Bilo koji inženjer koji dodirne odgovore na greške (HTTP rute, SSE tokovi, izvršioci, MCP rukovaoci).** Status:****MANDATORY** za svaki put koda koji klijentu vraća poruku o grešci.
 
 ## Zašto ovo postoji
 

@@ -4,13 +4,7 @@
 
 ---
 
-> **ಸತ್ಯದ ಮೂಲ:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts`, ಮತ್ತು `open-sse/utils/error.ts` ನಲ್ಲಿರುವ ಸಾರ್ವಜನಿಕ ಬಿಲ್ಡರ್ಗಳು
-> **ಪರೀಕ್ಷೆಗಳು:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **ಕೊನೆಯ ನವೀಕರಣ:** 2026-09-02 — v3.8.51
-> **ಉದ್ದೇಶಿತ ಓದುಗರು:** ದೋಷ ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ನಿರ್ವಹಿಸುವ ಯಾವುದೇ ಎಂಜಿನಿಯರ್ (HTTP ಮಾರ್ಗಗಳು, SSE ಸ್ಟ್ರೀಮ್ಗಳು, ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳು, MCP ಹ್ಯಾಂಡ್ಲರ್ಗಳು).
-> **ಸ್ಥಿತಿ:** ಕ್ಲೈಂಟ್ಗೆ ದೋಷ ಸಂದೇಶವನ್ನು ಹಿಂದಿರುಗಿಸುವ ಪ್ರತಿಯೊಂದು ಕೋಡ್ ಪಥಕ್ಕೂ **ಕಡ್ಡಾಯ**.
+> **ಸತ್ಯದ ಮೂಲ:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts`, ಮತ್ತು `open-sse/utils/error.ts` ನಲ್ಲಿ ಸಾರ್ವಜನಿಕ ಬಿಲ್ಡರ್ಗಳು** ಪರೀಕ್ಷೆಗಳು:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** ಪ್ರೇಕ್ಷಕರು:** ಯಾವುದೇ ಎಂಜಿನಿಯರ್ ಸ್ಪರ್ಶ ದೋಷ ಪ್ರತಿಕ್ರಿಯೆಗಳು (HTTP ಮಾರ್ಗಗಳು, SSE ಸ್ಟ್ರೀಮ್ಗಳು, ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳು, MCP ಹ್ಯಾಂಡ್ಲರ್ಗಳು).** ಸ್ಥಿತಿ:****MANDATORY** ಕ್ಲೈಂಟ್ಗೆ ದೋಷ ಸಂದೇಶವನ್ನು ಹಿಂತಿರುಗಿಸುವ ಪ್ರತಿಯೊಂದು ಕೋಡ್ ಮಾರ್ಗಕ್ಕಾಗಿ.
 
 ## ಇದು ಏಕೆ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ
 

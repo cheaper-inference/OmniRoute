@@ -88,20 +88,19 @@ Ohun `ctx` tí a fi ránṣẹ́ sí `register(program, ctx)`:
 | `ctx.baseUrl`                | `string`         | URL ìpìlẹ̀ tí a ti pinnu                                 |
 | `ctx.apiKey`                 | `string \| null` | Kọ́kọ́rọ́ API bí a bá pèsè rẹ̀                              |
 
-## Ìṣàwárí
+## Awari
 
-A ń ṣàwárí àwọn plugin láti:
+Awọn afikun ti wa ni awari lati:
 
-1. `~/.omniroute/plugins/<name>/` — àwọn ìfìsílẹ̀ agbègbè onílò
-2. `OMNIROUTE_PLUGIN_PATH` env var — àkójọpọ̀ fáìlì àdáni
+1. `~/.omniroute/plugins/node_modules/<name>/` — nibiti `omniroute plugin install` fi awọn idii (npm `--prefix` kan, kii ṣe `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — ọwọ-daakọ awọn ilana itanna
+3. `OMNIROUTE_PLUGIN_PATH` env var — aṣa liana
 
-Àwọn méjèèjì jẹ́ ti **CLI nìkan**. Àyíká ìṣiṣẹ́ plugin ní ẹ̀gbẹ́ olupèsè (marketplace/àwọn plugin `plugin.json`
-tí ń ṣiṣẹ́ nínú proxy) ní scanner tirẹ̀ pẹ̀lú override tirẹ̀,
-`OMNIROUTE_PLUGINS_DIR` — wo
-[PLUGIN_MARKETPLACE.md → Àkójọpọ̀ fáìlì plugin](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Ṣíṣètò ọ̀kan kò ní ipa lórí èkejì.
+Awọn ilana atọwọdọwọ (kini npm ṣẹda fun `plugin install ./dir`) ni atẹle.
 
-A máa ń mú àwọn àṣìṣe ìkójọpọ̀, a sì máa tẹ̀ wọ́n jáde gẹ́gẹ́ bí ìkìlọ̀ — plugin tí ó ní ìṣòro kò lè mú kí CLI jáwọ́ lójijì.
+Mejeji ni** CLI-nikan** . Ohun itanna-ẹgbẹ olupin asiko asiko isise (awọn ọja ọja/awọn afikun `plugin.json` ti o nṣiṣẹ inu aṣoju) ni ẹrọ iwoye tirẹ pẹlu ifasilẹ tirẹ, `OMNIROUTE_PLUGINS_DIR` — wo [PLUGIN_MARKETPLACE.md → Plugin directory](./PLUGIN_MARKETPLACE.md#plugin-directory). Eto ọkan ko ni ipa lori ekeji.
+
+Awọn aṣiṣe ikojọpọ ni a mu ati titẹjade bi awọn ikilọ — ohun itanna ti o bajẹ ko ni ipadanu CLI naa.
 
 ## Ààbò
 

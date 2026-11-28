@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | عنوان URL الأساسي الذي جرى تحديده                        |
 | `ctx.apiKey`                 | `string \| null` | مفتاح API إذا تم توفيره                                  |
 
-## الاكتشاف
+## اكتشاف
 
 يتم اكتشاف الإضافات من:
 
-1. `~/.omniroute/plugins/<name>/` — عمليات التثبيت المحلية للمستخدم
-2. متغير البيئة `OMNIROUTE_PLUGIN_PATH` — دليل مخصص
+1. `~/.omniroute/plugins/node_modules/<name>/` — حيث يضع `omniroute plugin install` الحزم (an npm `--prefix` وليس `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — أدلة البرنامج المساعد المنسوخة يدويا
+3. `OMNIROUTE_PLUGIN_PATH` env var — الدليل المخصص
 
-كلاهما **خاص بواجهة سطر الأوامر فقط**. يمتلك وقت تشغيل الإضافات على جانب الخادم (إضافات السوق/`plugin.json`
-التي تعمل داخل الوكيل) أداة الفحص الخاصة به مع إعداد التجاوز الخاص به،
-`OMNIROUTE_PLUGINS_DIR` — راجع
-[PLUGIN_MARKETPLACE.md ← دليل الإضافات](./PLUGIN_MARKETPLACE.md#plugin-directory).
-لا يؤثر تعيين أحدهما في الآخر.
+يتم اتباع الدلائل المرتبطة (ما ينشئه npm لـ `plugin install ./dir`).
 
-يتم التقاط أخطاء التحميل وعرضها كتحذيرات — فلا تؤدي أي إضافة معطّلة إلى تعطّل واجهة سطر الأوامر.
+كلاهما** سطر الأوامر فقط** . يحتوي وقت تشغيل البرنامج الإضافي من جانب الخادم (المكونات الإضافية للسوق/`plugin.json` التي تعمل داخل الوكيل) على ماسح ضوئي خاص به مع تجاوز خاص به، `OMNIROUTE_PLUGINS_DIR` — راجع [دليل PLUGIN_MARKETPLACE.md → Plugin](./PLUGIN_MARKETPLACE.md#plugin-directory). تعيين أحدهما لا يؤثر على الآخر.
+
+يتم اكتشاف أخطاء التحميل وطباعتها كتحذيرات — حيث لا يؤدي البرنامج الإضافي المعطل إلى تعطل CLI أبدًا.
 
 ## الأمان
 

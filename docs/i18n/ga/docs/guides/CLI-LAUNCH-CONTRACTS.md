@@ -12,6 +12,12 @@ Bíonn `omniroute run`, `omniroute launch` agus `omniroute launch-codex` le hoid
 
 Cuirtear comharthaí cur isteach agus foirceann ar aghaidh chuig an leanbh. Fanann an tosaitheoir ar theagmhas gar an linbh sula mbaintear an chumraíocht shealadach. rialaíonn `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` an tréimhse cairde roimh fhoirceannadh éigeantach (5000 milleasoicind mar réamhshocrú).
 
+Leanann `omniroute launch <tool>` (féach [LAUNCH.md](./LAUNCH.md) ) na rialacha comhshaoil céanna agus cur ar aghaidh comharthaí, agus cuireann sé leis:
+
+- **Auto-tús Geata.** Maidir le sprioc áitiúil, nuair nach dtugann aon gheata freagra ar an gcalafort, tosaíonn an tosaitheoir `omniroute serve --headless --no-open` ceangailte go `127.0.0.1` faoi phróiseas scoite reaper. Tá léas ag gach seoladh reatha i `DATA_DIR/launch/leases/` (buille croí gach 15 s, sean tar éis 45 s nó nuair a bhíonn a phróiseas imithe). Stopann an reaper an geata a thosaigh sé nuair nach bhfuil aon léas beo don ghrásta díomhaoin (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, réamhshocraithe 10000 milleasoicind). Úsáidtear geata a thosaigh an t-úsáideoir ach níor stop sé riamh. déanann `--keep-gateway` nó `omniroute gateway keep` geata tosaitheoir a iompú ina ghnáth-gheata; Déanann `--no-start` an sean-iompraíocht teip-má-síos a athchóiriú. Scrúdaítear spriocanna iargúlta amháin.
+- **Seisiúin seolta.** Buaileann gach seoladh comhartha seisiún `olx_` gearrshaolach ón gcreidiúlacht tuismitheora (`POST /api/launch/sessions`), builleann sé croí é agus an uirlis ar siúl, léann an achoimre úsáide agus cúlghaireann sé tar éis don uirlis dul amach. Is fothacar dian dá thuismitheoir é an comhartha: na ceadanna céanna, an catalóg chéanna nó an chatalóg níos cúinge, saol níos giorra, agus níl sé ina dhintiúir deais. Faigheann an uirlis comhartha an tseisiúin, ní fhaigheann sé an t-ainm tuismitheora riamh, agus déantar iarratais a chlibeáil `launch:<tool>:<sessionId>` mura dtugtar `--tag`. Teipeann ar gheata gan an seisiún API le `GatewayTooOld` seachas titim ar ais go dtí seoladh neamhscóip.
+- **Cumraíocht in aghaidh an tseolta.** Scríobhtar comhaid cumraíochta uirlisí chuig eolaire sealadach ama (modh 0700, réimír `omnirouter-`) agus baintear iad tar éis don leanbh imeacht. Fágann `SIGKILL` den tosaitheoir an t-eolaire ina dhiaidh; Baineann `omniroute launch --cleanup` Eolairí den sórt sin nuair a bhíonn siad níos sine ná lá.
+
 ## Gemini socrú leanúnach
 
 ```bash

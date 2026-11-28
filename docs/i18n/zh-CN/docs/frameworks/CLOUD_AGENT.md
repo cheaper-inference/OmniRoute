@@ -57,9 +57,9 @@ Cloud Agent 任务**不是**常规的聊天补全。它是一个持久化的多�
 
 同步是**延迟执行的**：每次调用 `GET /tasks/[id]` 时，都会从上游刷新状态。系统没有后台轮询器。需要获取最新状态的仪表板应以合理的时间间隔轮询该 GET 端点。
 
-## `CloudAgentBase` 接口
+## `CloudAgentBase`接口
 
-源文件：`src/lib/cloudAgent/baseAgent.ts`
+来源： `src/lib/cloudAgent/baseAgent.ts`
 
 ```typescript
 export interface AgentCredentials {
@@ -101,15 +101,15 @@ export abstract class CloudAgentBase {
     c: AgentCredentials
   ): Promise<{ name: string; url: string; branch?: string }[]>;
 
-  protected mapStatus(raw: string): CloudAgentStatus; // 启发式地将上游字符串 → 枚举
+  protected mapStatus(raw: string): CloudAgentStatus; // heuristic upstream-string → enum
   protected generateTaskId(): string; // `task_<ts>_<rand>`
   protected generateActivityId(): string; // `act_<ts>_<rand>`
 }
 ```
 
-`CodexCloudAgent.approvePlan` 会有意抛出异常——Codex Cloud 会自动制定计划，且没有审批环节。`CodexCloudAgent.listSources` 返回 `[]`。
+`CodexCloudAgent.approvePlan`故意抛出— Codex云自动计划，并且没有审批门。 `CodexCloudAgent.listSources`返回`[]`。
 
-`CursorCloudAgent` 通过其官方 REST API（`api.cursor.com/v0`），使用**用户或服务账号 API 密钥**来驱动 Cursor 的 Background / Cloud Agents——与复用 Cursor IDE 的 OAuth 会话（提供方 `cursor`，其带有封禁风险警告）相比，这是更安全的官方方案。它是一个纯 REST 适配器（不依赖原生 `@cursor/sdk`）。`approvePlan` 会抛出异常（Cursor 代理自主运行）；`listSources` 会列出该密钥可访问的代码仓库。Cursor 返回大写状态枚举（`CREATING`/`RUNNING`/`FINISHED`/`ERROR`），这些状态会被显式映射到共享的 `CloudAgentStatus`。可以按凭据覆盖 `baseUrl`，以便无需修改代码即可更正 API 版本/路径。
+`CursorCloudAgent`通过其官方REST API (`api.cursor.com/v0`) 驱动Cursor的后台/云代理**用户或服务帐户API密钥**—重用Cursor IDE的OAuth会话的更安全的第一方替代方案（提供者`cursor`，带有禁令风险警告）。它是一个普通的REST适配器（没有`@cursor/sdk`本机依赖项）。 `approvePlan`抛出（Cursor代理自主运行）； `listSources`列出了密钥可访问的存储库。 Cursor返回UPPERCASE状态枚举 (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`)，显式映射到共享`CloudAgentStatus`。 `baseUrl`是可覆盖每个凭证的，因此无需更改代码即可更正API version/path 。
 
 ## 领域类型
 
@@ -296,17 +296,16 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks/<id> \
 
 `/api/cloud/auth` 绝不会返回原始的 `apiKey` / `accessToken` / `refreshToken`。它会针对该密钥可使用的有效连接返回 `hasApiKey`、`hasAccessToken`、`hasRefreshToken`（受 `allowedConnections` 限制的密钥只能看到这些连接）。对于作用域为 `manage` 或 `admin` 的 API 密钥（包括来自 `OMNIROUTE_API_KEY` 的部署密钥），它还会返回脱敏预览（`maskedApiKey`：首尾各最多显示 4 个字符；对于较短的密钥则显示更少；对于长度不超过 8 个字符的密钥则不显示任何字符）以及连接的 `projectId`。对于任何其他密钥，这两个字段都不会包含在响应中。
 
-## 凭据解析
+## 凭证解析
 
-`src/lib/cloudAgent/api.ts` 中的 `getCloudAgentCredentials(providerId)`：
+`src/lib/cloudAgent/api.ts`中的`getCloudAgentCredentials(providerId)` ：
 
-1. 通过 `getProviderConnections({ provider: providerId, isActive: true })` 加载活跃的提供者连接。
-2. 对于每个连接，优先使用 `apiKey`（去除首尾空白）。如果不可用，则回退到 `accessToken`。
-3. 返回第一个非空令牌，并封装为 `{ apiKey: token }`。
-4. 如果找不到可用令牌，则返回 `null`——API 会以 `400` 响应，并返回
-   `"未为云代理提供者配置活跃凭据：<id>"`。
+1. 通过`getProviderConnections({ provider: providerId, isActive: true })`加载活动的提供者连接。
+2. 对于每个连接，首选`apiKey` （已修剪）。回落到`accessToken`。
+3. 返回包装为`{ apiKey: token }`第一个非空标记。
+4. 如果没有找到可用的令牌，则返回`null` — API `"No active credentials configured for cloud agent provider: <id>"`响应`400` 。
 
-这意味着 Cloud Agents 与常规 LLM 提供者共用同一张 Provider Connection 表。要启用 Jules，请创建一个活跃连接，将 `provider` 设置为 `"jules"`，并填充 `apiKey`。
+这意味着云代理重复使用与常规LLM提供者相同的提供者连接表。要启用Jules，请创建与`provider: "jules"`和填充的`apiKey`的活动连接。
 
 ## 仪表板
 

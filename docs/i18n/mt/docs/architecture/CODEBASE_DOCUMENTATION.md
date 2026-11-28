@@ -4,18 +4,11 @@
 
 ---
 
-> **Verżjoni:** v3.8.51
-> **Aġġornat l-aħħar:** 2026-06-28
-> **Udjenza:** Inġiniera li jikkontribwixxu għal OmniRoute jew li jibnu integrazzjonijiet fuqu.
+> **Verżjoni:** v3.8.51** Udjenza:** Inġiniera li jikkontribwixxu għal OmniRoute jew jibnu integrazzjonijiet fuqha.
 >
-> Għal dijagrammi arkitettoniċi ta’ livell għoli u r-raġunament wara kull sottosistema, aqra
-> [ARCHITECTURE.md](./ARCHITECTURE.md). Għal analiżi dettaljata ta’ sottosistemi individwali
-> (Auto Combo, server MCP, server A2A, Skills, Memory, Cloud Agents, Resilience,
-> Compression, eċċ.) ara l-fajls iddedikati għalihom f’dan id-direttorju `docs/`.
+> Għal dijagrammi ta' arkitettura ta' livell għoli u r-raġunament wara kull sottosistema, aqra [ARCHITECTURE.md](./ARCHITECTURE.md). Għal għadis fil-fond fuq sottosistemi individwali (Auto Combo, server MCP, server A2A, Ħiliet, Memorja, Aġenti Cloud, Reżiljenza, Kompressjoni, eċċ.) Ara l-fajls dedikati tagħhom f'dan id-direttorju `docs/`.
 
-Dan il-fajl jiddeskrivi **dak li jeżisti fir-repożitorju llum** sabiex inġinier ġdid
-ikun jista’ jinnaviga s-siġra, jifhem is-saffi waqt l-eżekuzzjoni, u jkun jaf fejn għandu jżid il-kodiċi
-mingħajr ma joħloq moduli ġodda.
+Dan il-fajl jiddeskrivi** dak li jeżisti fir-repożitorju llum** sabiex inġinier ġdid ikun jista 'jinnaviga fis-siġra, jifhem is-saffi tar-runtime, u jkun jaf fejn iżżid kodiċi mingħajr ma jivvinta moduli ġodda.
 
 ---
 
@@ -566,35 +559,14 @@ Kmandi komuni:
 
 ## 8. `scripts/`
 
-Organizzati f’6 subfolders skont l-iskop.
+Organizzata f'6 subfolders skont l-iskop.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, flimkien mal-għodod awżiljarji ta’ qari biss għall-monitoraġġ tal-PRs:
-  `ci-discriminate.sh` (jikklassifika l-firem tal-kontrolli li fallew ta’ PR bħala tiegħu stess / ntirtu /
-  mhux magħrufa billi jqabbilhom ma’ PR ta’ referenza jew mal-kwistjoni base-red) u `audit-worktree.sh`
-  (fajls mhux nodfa, partijiet protetti, asserts imneħħija, għadd ta’ soppressjonijiet, tsconfigs
-  temporanji li jkun għad fadal, il-head tal-PR kontra l-HEAD lokali — qabel ma jiġi aċċettat il-PR ta’ worker).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, plus the read-only PR babysitting helpers failing in `ci-discriminate.sh` proprju / wiret / mhux magħruf kontra PR ta’ PR jew il-kwistjoni bażi-aħmar) u `audit-worktree.sh` (fajls maħmuġin, uċuħ protetti, asserzjonijiet imneħħija, għadd ta’ soppressjoni, tmp tsconfigs fdal, PR head vs HEAD — lokali qabel ma PR ta’ ħaddiem jiġi aċċettat).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` jimmarka verżjonijiet espliċitament attribwiti lil OmniRoute (3.6.x u preċedenti). Il-kontroll jinjora d-dati.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

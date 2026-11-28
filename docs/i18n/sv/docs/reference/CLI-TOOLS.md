@@ -4,8 +4,6 @@
 
 ---
 
-Senast uppdaterad: 2026-08-23
-
 OmniRoute integreras med tre kategorier av CLI verktyg fördelade på tre dedikerade instrumentpanelsidor:
 
 | Sida           | Rutt                    | Begrepp                                                                     | Räkna        |

@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**ሁሉም የፕሮጀክት ደንቦች በ[`AGENTS.md`](AGENTS.md) ውስጥ ይገኛሉ** — ለእያንዳንዱ AI
-ረዳት ብቸኛው የእውነት ምንጭ ነው (አርክቴክቸር፣ ልማዶች፣ ሙከራ፣ የጥራት መግቢያዎች፣ የgit የሥራ ፍሰት፣ 23ቱ ጥብቅ ደንቦች፣
-የPII ትምህርቶች)። ሙሉውን ያንብቡ፤ የፕሮጀክት ደንቦችን እዚህ እንደገና አይጨምሩ። ከዚህ በታች ያለው ሁሉ ለClaude Code ብቻ
-ይሠራል — በ`AGENTS.md` ውስጥ አስቀድመው የተገለጹ ደንቦች የአሠራር ማሻሻያዎች ናቸው።
+**ሁሉም የፕሮጀክት ደንቦች በ [`AGENTS.md`](AGENTS.md) ውስጥ ይኖራሉ** ለእያንዳንዱ AI ረዳት ነጠላ የእውነት ምንጭ — ; ከላይ ያለው ማስመጣት ቀድሞውኑ ይጭነዋል. የፕሮጀክት ደንቦችን እዚህ እንደገና አይጨምሩ። ከዚህ በታች ያለው ሁሉም ነገር ONLY ለ Claude ኮድ — ይተገበራል የሕግ ማሻሻያ አስቀድሞ በ `AGENTS.md` ውስጥ የተገለጹ።
 
-## Worktree መለየት — የClaude Code ልዩ ነጥቦች
+## Worktree ማግለል — Claude ኮድ ዝርዝር
 
-ሙሉው የግዴታ worktree ፕሮቶኮል (የbase-branch ማረጋገጫ፣ `.claude/worktrees/` canonical
-መንገድ፣ `cp -al` node_modules፣ የማስወገጃ ህጎች) በ
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) ውስጥ ነው (በ`AGENTS.md` →
-Git Workflow → "Worktree isolation" ውስጥ በማጠቃለያ ተጠቅሷል)። ለClaude-Code የተወሰኑ ነጥቦች፦
+- አስቀድመው ካልነገሩህ በቀር የመሠረቱን ቅርንጫፍ ከኦፕሬተር ጋር በ `AskUserQuestion` (Hard Rule #19) ያረጋግጡ።
+- የሥራውን ዛፍ በ `scripts/dev/new-worktree.sh <branch> <confirmed-base>` ይፍጠሩ (በ `.claude/worktrees/` ስር ያረፈ ነው ፣ ሃርድ-ሊንኮች `node_modules` እና `.husky/_` ቅጂዎች) ፣ ከዚያ `EnterWorktree` በ `path` ይደውሉ። ሁልጊዜ መሰረቱን ይለፉ: ያለሱ ስክሪፕቱ ከፍተኛውን `release/*` ይመርጣል, ይህም ኦፕሬተሩ ያረጋገጠው ላይሆን ይችላል. `EnterWorktree` በራሱ የሚፈጥረው የስራ ዛፍ ሃርድ ሊንኮችም ሆነ መንጠቆዎች የሉትም ስለዚህ ምንም ቅድመ ቁርጠኝነት በር አይሰራም።
 
-- base branchን ከኦፕሬተሩ ጋር በ`AskUserQuestion` (ጥብቅ ህግ #19) ያረጋግጡ፣ አስቀድመው
-  ካልነገሩዎት በቀር።
-- አብሮ-የተሠራውን `EnterWorktree` መሳሪያ ይምረጡ — እሱ አስቀድሞ worktreesን በ
-  `.claude/worktrees/` ሥር (canonical መንገዱ) ይፈጥራል። worktreeን በሰነዱ የተጠቀሰው `git
-worktree add` ትእዛዝ ይፍጠሩ፣ ከዚያ `EnterWorktree`ን በ`path` ይደውሉ።
+## ንዑስ ወኪሎች እና git
 
-## የክፍለ-ጊዜ ተሻጋሪ ደህንነት — የClaude Code ዝርዝሮች
+Git (የወኪል መሳሪያ ወይም የስራ ፍሰት ስክሪፕት)ን የሚነካ እያንዳንዱ ንዑስ ወኪል በፍጥነት — የ Hard Rule #22 a's `git stash` እገዳን በቃል ያገኛል።
 
-ጥብቅ ደንቦች #19/#21/#22 (በ`AGENTS.md` ውስጥ) ትይዩ ክፍለ-ጊዜዎችን ያስተዳድራሉ። ለዚህ
-harness የአሠራር ማስታወሻዎች፦
+## ቅርሶችን ማቀድ — ልዕለ ኃያላን መንገድ ይሽራል።
 
-- **gitን በሚነካ እያንዳንዱ subagent prompt ውስጥ የ`git stash` ክልከላን ቃል በቃል ይድገሙ**
-  (Agent tool / Workflow scripts) — subagents ይህን ፋይል አይወርሱም፣ እና የstash ክስተቱ በመዝገብ የተያዘው
-  ድግግሞሽ በsubagent በኩል ነበር።
-- _በዚህ ክፍለ-ጊዜ_ ባልፈጠሩት ማንኛውም PR ላይ merge ወይም push ከማድረግዎ በፊት፣ `git worktree list`ን
-  ያስኪዱ እና `gh pr view <N> --json state,headRefOid`ን እንደገና ያረጋግጡ (ጥብቅ ደንብ #22b)።
-- እያንዳንዱን ክፍለ-ጊዜ ዋናው checkout በጀመረበት branch ላይ ሆኖ ያጠናቅቁ።
+የኃያላን ችሎታዎች በ `docs/superpowers/plans/`፣ `docs/superpowers/specs/` እና `docs/research/` ስር ያሉ ነባሪዎችን ያስታውቃሉ። ከመጻፍዎ በፊት እያንዳንዱን ወደ `_tasks/` አቻው በ `AGENTS.md` → "እቅድ እና ምርምር ቅርሶች" እንደገና ይፃፉ እና በ `git -C _tasks …` ያስገቡት፣ በጭራሽ በዋናው መዝገብ ውስጥ።
 
-## Superpowers / የዕቅድ artifacts — የpath መሻር
+## ፋይሎችን ቧጨራ — `_artifacts/` እንጂ `/tmp` አይደለም።
 
-የ`_tasks/` ልማድ በ`AGENTS.md` → "Planning & Research Artifacts" ውስጥ ተገልጿል።
-የsuperpowers skills ወደ `docs/…` የሚያመለክቱ defaults ይዘው ይመጣሉ — እነዚያ defaults እዚህ **ተሽረዋል**።
-አንድ superpowers skill እንደ "saved to `docs/superpowers/plans/…`" ያለ path ሲያሳውቅ፣ ከመጻፍዎ በፊት
-ወደ `_tasks/…` አቻው ይቀይሩት፦
+ይህ ፕሮጀክት የመታጠቂያውን ክፍለ ጊዜ ጭረት ሰሌዳ (`/tmp/claude-*/…`) ይሽራል። ጊዜያዊ ፋይሎችን ይፃፉ — ወደ ውጭ የሚላኩ፣ የመነጩ ዚፕዎች፣ የአንድ ጊዜ መካከለኛ ውጤቶች — ወደ `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: የጂቲግኖይድ ስርወ `_*` መንገድ፣ ስለዚህ ኦፕሬተሩ ሁሉንም ጭረቶች በአንድ ቦታ አግኝቶ ይሰርዛል። ዘላቂ ዕቅዶች፣ ዝርዝር መግለጫዎች፣ ጥናትና ምርምሮች በምትኩ ወደ `_tasks/` ይሄዳሉ (Hard Rule #23)።
 
-| Artifact (skill)               | Default (አይጠቀሙ)           | በምትኩ እዚህ ያስቀምጡ                                                |
-| ------------------------------ | ------------------------- | ------------------------------------------------------------- |
-| ዕቅዶች (`writing-plans`)         | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Specs / ዲዛይን (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| ምርምር (`deep-research`, ጊዜያዊ)   | `docs/research/`          | `_tasks/research/…`                                           |
-| ርክክቦች (`/handoff`)             | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## ቀይ መሠረት
 
-እነዚያን artifacts በ`_tasks/` repo ውስጥ (`git -C _tasks …`) commit ያድርጉ፤ በዋናው repo ውስጥ ፈጽሞ አያድርጉ።
-
-## Scratch / ጊዜያዊ ፋይሎች — `/tmp`ን ሳይሆን `_artifacts/`ን ይጠቀሙ
-
-ይህ ፕሮጀክት የharnessን default የክፍለ-ጊዜ scratchpad (`/tmp/claude-*/…`) ይሽራል።
-ጊዜያዊ/የሥራ ፋይሎችን — exports፣ የተፈጠሩ zips፣ ለአንድ ጊዜ የሚያገለግሉ መካከለኛ outputs፣ እንዲሁም
-በሌላ ሁኔታ በ`/tmp` ውስጥ የሚያስቀምጡትን ማንኛውንም ነገር — በምትኩ ወደ `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` ይጻፉ።
-
-- `_artifacts/` root `_*` path ነው፦ አስቀድሞ gitignored ተደርጓል (`AGENTS.md` → "Root `_*` paths")፣ በdisk ላይ ብቻ
-  ይኖራል፣ ፈጽሞ tracked አይሆንም።
-- ምክንያቱ፦ scratch outputን በፕሮጀክቱ ውስጥ (ከ`/tmp` ይልቅ) ማቆየት ኦፕሬተሩ
-  ጊዜያዊ የሆነውን ሁሉ በአንድ ቦታ በቀላሉ እንዲያገኝና እንዲሰርዝ ያስችለዋል፤ ይህም
-  የሚጠፉ ወይም untracked ሆነው የሚከማቹ ጊዜያዊ፣ ለየክፍለ-ጊዜው የተለዩ `/tmp` directoriesን ከማሰስ ይልቅ ነው።
-- ይህን ከ`_tasks/` (ጥብቅ ደንብ #23፣ ዘላቂ
-  ዕቅዶች/specs/ምርምር/ርክክቦች የሚቀመጡበት የራሱ private git repo) ጋር **አያምታቱ** — `_artifacts/` ለሚጣሉ የሥራ ፋይሎች ብቻ ነው፤ እዚህ
-  ያለ ምንም ነገር መቆየት ወይም versioned መሆን አያስፈልገውም።
-
-## PRsን ከመክፈት በፊት Base-green
-
-branch ከመፍጠርዎ ወይም PR ከመክፈትዎ በፊት፣ የbase-green checkን (`AGENTS.md` → Git Workflow →
-"Base-green check"፤ የፕሮጀክት skills እንደ `.agents/skills/_shared/base-green.md` ይጠቅሱታል) ያስኪዱ። base tip red ሆኖ ሳለ
-የተከፈተ PR በbodyው ውስጥ `⚠️ base-red inherited: #<issue>` መያዝ አለበት። የተከማቸ red stateን (base tip + red PRs)
-ለማጽዳት፣ `/sweep-reds` skillን ይጠቀሙ።
+የተከማቸ ቀይ ሁኔታን ለማፍሰስ (ቤዝ ቲፕ + ቀይ PRs)፣ የ `/sweep-reds` ችሎታን ይጠቀሙ።

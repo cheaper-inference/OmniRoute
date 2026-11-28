@@ -8,21 +8,22 @@
 
 ## Tartalomjegyzék
 
-- [Gyors futtatás](#quick-run)
-- [Környezeti fájllal](#with-environment-file)
+- [Gyors futás](#quick-run)
+- [Környezetfájllal](#with-environment-file)
 - [Docker Compose](#docker-compose)
 - [Elérhető profilok](#available-profiles)
-- [A gazdagép CLI-eszközeinek konfigurálása, amikor az OmniRoute Dockerben fut](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redis-sidecar](#redis-sidecar)
-- [Éles környezethez készült Compose](#production-compose)
-- [A Dockerfile szakaszai](#dockerfile-stages)
+- [Konténer keményedés](#container-hardening)
+- [A gazdagép CLI -eszközök konfigurálása, amikor OmniRoute Docker ben fut](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Oldalkocsi](#redis-sidecar)
+- [Gyártás Összeállítás](#production-compose)
+- [Dockerfile szakaszai](#dockerfile-stages)
 - [Kritikus környezeti változók](#critical-environment-variables)
-- [Docker Compose Caddyvel (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Docker Compose with Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
 - [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
-- [Rendszerképcímkék](#image-tags)
-- [Az irányítópult frissítése Dockerben](#dashboard-updates-in-docker)
-- [Rendelkezésre állás: az alapértelmezett SQLite egyetlen replikát támogat](#availability-default-sqlite-is-single-replica)
-- [Gemini regionális hibák Dockerben](#gemini-regional-errors-inside-docker)
+- [Képcímkék](#image-tags)
+- [Irányítópult frissítések a Docker](#dashboard-updates-in-docker)
+- [Elérhetőség: az alapértelmezett SQLite egyetlen replika](#availability-default-sqlite-is-single-replica)
+- [Gemini regionális hibák Docker n belül](#gemini-regional-errors-inside-docker)
 - [Fontos megjegyzések](#important-notes)
 
 ---
@@ -41,7 +42,7 @@ docker run -d \
   cheaperinference/omniroute:latest
 ```
 
-## Környezeti fájllal
+## Környezetfájllal
 
 ```bash
 # Copy and edit .env first
@@ -89,6 +90,30 @@ Az OmniRoute Compose-profilokat biztosít a fő telepítési kialakításokhoz. 
 | `web`                    | `omniroute-web`  | Böngészőt igénylő, webes munkamenetet használó szolgáltatókhoz: `gemini-web`, `claude-web`, `claude-turnstile` (`runner-web` build, beépített Chromiummal)                 | `docker compose --profile web up -d`         |
 
 > Több profil is kombinálható: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Konténer keményedés
+
+A `docker-compose.yml` `base`, `web`, `cli` és `host` alkalmazásszolgáltatásai `cap_drop: [ALL]` és a `no-new-privileges:true` biztonsági opciót használják. A kép nem root felhasználóként fut `node`, és magas portokon figyel, így nincs szüksége Linux képességekre. A biztonsági beállítás megakadályozza, hogy a folyamatok jogosultságokat szerezzenek a setuid binárisokon keresztül.
+
+Csak a `cli` profil rögzíti a Docker aljzatot az automatikus frissítéshez. Lásd: [Escape hatch: a tároló saját CLIs konfigurálása](#escape-hatch-configure-the-containers-own-clis-use-sparingly) a biztonsági vonatkozásokhoz.
+
+A gyökér fájlrendszer alapértelmezés szerint írható marad. A `cli` profil CLI konfigurációt és a gyorsítótárakat a tároló kezdőkönyvtárába írja, a `web` profil tárolja a Chromium munkamenet állapotát, a Next.js futási környezet pedig `/app/data` kívüli gyorsítótárakat írhat.
+
+Ha csak olvasható gyökér fájlrendszert szeretne kipróbálni a `base` profillal, mentse ezt `docker-compose.override.yml` néven `docker-compose.yml` mellett. A Compose automatikusan beolvassa a felülírást.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+A meglévő `/app/data` tartó írható marad. Tesztelje a munkaterhelést, mielőtt éles környezetben használná ezt a felülírást, mert előfordulhat, hogy más útvonalakra kell írnia.
 
 ## A gazdagépi CLI-eszközök konfigurálása, amikor az OmniRoute Dockerben fut
 
@@ -283,7 +308,7 @@ Ezen a fán mérve (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 | webpack   | 8 GiB              | építeni munkás SIGKILLed        |
 | webpack   | 12 GiB             | sikerült, 11,1 GiB-nál tetőzött |
 
-### Futásidejű alapértelmezett beállítások
+### Futásidejű alapértékek
 
 `runner-base` által exportált alapértelmezések: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
@@ -296,7 +321,7 @@ Memória viselkedése Docker ban:
 
 ### Futásidejű RAM kódoló ágensekhez
 
-Az 1 GiB Docker alapértelmezett dashboard/light-chat padló, nem pedig gyártási méret. A hosszú `POST /v1/responses` testek (üzenetek százai, eszközök tízei) több memóriában lévő gráfot is megőriznek a tömörítés során. Két egymást átfedő ~ 3 MiB / ~ 750k-token kérés megszakította a V8-at** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) és egy 16 GiB cgroup OOM is eltalált. Lásd: [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Az 1 GiB Docker alapértelmezett dashboard/light-chat padló, nem pedig gyártási méret. A hosszú `POST /v1/responses` testek (üzenetek százai, eszközök tízei) több memóriában lévő gráfot is megőriznek a tömörítés során. Két egymást átfedő ~ 3 MiB / ~ 750k-token kérés megszakította a V8-at** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) és egy 16 GiB cgroup OOM is eltalált. Lásd: [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Méret** cgroup `--memory` a kupac felett** — natív pufferek, SQLite és a tömörítés közbenső termékek a V8-on kívül helyezkednek el.
 
@@ -592,11 +617,11 @@ A szolgáltatás a lekérés előtt eltávolítja a kérésfájlt, így egy sike
 
 Stock Docker / Kubernetes OmniRoute is** one Node process + one SQLite író** . A magas rendelkezésre állás** nem támogatott** azon a topológián.
 
-| Kényszer                                      | Következmény                                                                                                                                                                                                                                                                                                                                |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Egyedülálló író                               | Tedd** nem** futtasson több replikát ugyanazon SQLite fájlon. Ez elrontja a DB.                                                                                                                                                                                                                                                             |
-| Újrakészítés / újraindítás / HEALTHCHECK kill | **Teljes leállás** a repülés közbeni SSE, a műszerfali munkamenetek és a memória állapota. Minden csatlakoztatott kliens leesik. Az üres végpont ablakban érkező új kérések fordított proxyt kapnak**`502 Bad Gateway: Unknown error`** , nem OmniRoute JSON — az ügyfelek nem tudják megkülönböztetni ezt a szolgáltatói hibától (#11015). |
-| Ugyanaz az eseményhurok, mint `/healthz`      | Egy elfoglalt katalógus vagy tömörítés késleltetheti a szondákat; egy rövid időtúllépés, majd újraindítja a** csak** másolat.                                                                                                                                                                                                               |
+| Kényszer                                      | Következmény                                                                                                                                                                                                                                                                                                                             |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Egyedülálló író                               | Tedd** nem** futtasson több replikát ugyanazon SQLite fájlon. Ez elrontja a DB.                                                                                                                                                                                                                                                          |
+| Újrakészítés / újraindítás / HEALTHCHECK kill | **Teljes leállás** a repülés közbeni SSE, a műszerfali munkamenetek és a memória állapota. Minden csatlakoztatott kliens leesik. Az üres végpont ablakban érkező új kérések fordított proxyt kapnak**`502 Bad Gateway: Unknown error`** , nem OmniRoute JSON — kliensek ezt nem tudják megkülönböztetni a szolgáltatói hibától (#11015). |
+| Ugyanaz az eseményhurok, mint `/healthz`      | Egy elfoglalt katalógus vagy tömörítés késleltetheti a szondákat; egy rövid időtúllépés, majd újraindítja a** csak** másolat.                                                                                                                                                                                                            |
 
 **Szonda mátrix** (lásd még [a Kubernetes szonda ajánlásait](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -606,11 +631,11 @@ Stock Docker / Kubernetes OmniRoute is** one Node process + one SQLite író** .
 | Készenlét      | HTTP `GET /healthz`                                             | Szűk időtúllépések, amelyek az eseményhurok foglaltságát halottként kezelik |
 | Mély / emberek | `/api/monitoring/health`                                        | Automatizált kubelet életerő                                                |
 
-**Frissítések:** számítson arra, hogy minden munkamenet leesik. Drain ügyfeleket, ha lehet; az alapértelmezett SQLite n nincs folyamatos frissítés. `restart: unless-stopped` plusz Docker összeállítása `HEALTHCHECK` az egyetlen folyamatot is lecseréli, ha a tároló egészségtelen – ugyanaz a robbanási sugár.
+**Frissítések:** számítson arra, hogy minden munkamenet leesik. Drain ügyfeleket, ha lehet; az alapértelmezett SQLite n nincs folyamatos frissítés. `restart: unless-stopped` plusz Docker összeállítása A `HEALTHCHECK` az egyetlen folyamatot is lecseréli, ha a tároló egészségtelen — azonos robbanási sugarú.
 
-A kész jegyzékek és a Helm-diagram élőben `deploy/kubernetes/` és `deploy/helm/omniroute/` nyelven – lásd a [Kubernetes telepítési útmutatóját](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+A kész jegyzékek és a Helm diagram élőben `deploy/kubernetes/` és `deploy/helm/omniroute/` — nyelven lásd a [Kubernetes telepítési útmutatóját](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
-Kubernetes kódrészlet a** egyetlen replika** (Újra létrehozás szükséges; ne emeljen `replicas` t egyetlen SQLite fájlra):
+Kubernetes kódrészlet a** egyetlen replika** (Újra létrehozás szükséges; ne emelje fel `replicas` egyetlen SQLite fájlra):
 
 ```yaml
 spec:
@@ -637,9 +662,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep lehetővé teszi, hogy a kube eldobja a szolgáltatás végpontjait SIGTERM előtt, így** új** a forgalom leáll, sújtja a haldokló folyamatot. Repülés közbeni `/v1/responses` SSE `SHUTDOWN_TIMEOUT_MS` (alapértelmezett 30 mp) lemerül nehézsúlyú belépőbérleti szerződések révén (#11015). Azok az új kérések, amelyek még mindig elérik a folyamatot `503` + `Retry-After: 5` fájlt kapják. Az Üres végpont-rés újra létrehozása, amíg a csere kész állapotba nem kerül, továbbra is súlyos kimaradást jelent – ez a SQLite topológia, nem pedig egy próba hiba.
+`preStop` sleep lehetővé teszi, hogy a kube eldobja a szolgáltatás végpontjait SIGTERM előtt, így** új** a forgalom leáll, sújtja a haldokló folyamatot. Repülés közbeni `/v1/responses` SSE `SHUTDOWN_TIMEOUT_MS` (alapértelmezett 30 mp) lemerül nehézsúlyú belépési bérleti szerződések (#11015) révén. Azok az új kérések, amelyek még mindig elérik a folyamatot `503` + `Retry-After: 5` fájlt kapják. Az Üres végpont rés újra létrehozása addig, amíg a csere készen nem áll, kemény kimaradási — marad, amely a SQLite topológia, nem pedig próba hiba.
 
-Külső Postgres / több író HA is** nem** dokumentált készletút. Ha HA van szüksége, tartson meg egyetlen replikát, vagy futtasson egy topológiát, amelyet a projekt külön tesztelt és dokumentált. A Postgres/MySQL mű a [#8075-](https://github.com/diegosouzapw/OmniRoute/issues/8075) ben lakik. Amíg ez kiszáll, az egyetlen támogatott módja a szaporításnak** nagy** `/v1/responses` kapacitás N független folyamat (következő rész), nem `replicas > 1` egy köteten.
+Külső Postgres / több író HA is** nem** dokumentált készletút. Ha HA van szüksége, tartson meg egyetlen replikát, vagy futtasson egy topológiát, amelyet a projekt külön tesztelt és dokumentált. A Postgres/MySQL munka [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) ben él. Amíg ez kiszáll, az egyetlen támogatott módja a szaporításnak** nagy** `/v1/responses` kapacitás N független folyamat (következő rész), nem `replicas > 1` egy köteten.
 
 ## Kiméretezés: N független folyamat
 
@@ -649,25 +674,25 @@ Egy Codex fiók másolatai nem használhatják fel önállóan az egyszer haszn�
 
 A passzív példány újraolvassa a kapcsolatot, amikor frissítésre van szükség, és csak egy másik, le nem járt hozzáférési jogkivonatot vesz át. Ellenkező esetben a frissítés le van tiltva a kapcsolat lejárta vagy inaktiválása nélkül, illetve a frissítési megszakító hibáinak számítása nélkül. A valódi upstream hitelesítési hibák továbbra is normál hibaelszámolást, exponenciális lehűlést és normál ügyfélhibát használnak; a fiók deaktiválása végleges marad. Szinkronizálja a tulajdonos elforgatott tokenjeit, mielőtt a hozzáférési jogkivonatok lejárnának (az alapértelmezett proaktív frissítési idő öt perc), vagy importálja újra a Codex auth fájlt. A passzív importálások a szolgáltatott tokeneket anélkül tárolják, hogy a jogkivonat végpontján érvényesítenék őket. A kézi dashboard/API frissítés `409 refresh_disabled` értéket adja vissza; az új OAuth bejelentkezési adatok változatlanok. Lásd [a környezeti referenciát](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-A One Node folyamat az** egy V8-as kupac** . Két egymást átfedő ~ 3 MiB / ~ 750k-token kódoló ágens, `POST /v1/responses` (RTK + Caveman) megszakítja ezt a kupacot ~ 12 Gi (`FATAL ERROR: Reached heap limit`) mellett, és OOM tud egy 16 Gi-s ccsoportot. Lásd [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Ez a mérés a** memória-költségvetés** figyelmeztetés, nem egy termék hard-max két egyidejű hosszú `/v1/responses`. A nehézsúlyú csevegésbeengedést egy automatikusan származtatott feldolgozási bájt-költségkeret (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) korlátozza, amely ugyanabból V8/cgroup plafonból áll, a — felülbírálása (vagy az örökölt `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` kérésszám-korlát beállítása) egy már méretű folyamaton újra bevezeti a megszakítást. Kis csevegés, `/healthz`, `/v1/models` és MCP** nem** abban a sapkában.
+A One Node folyamat az** egy V8-as kupac** . Két egymást átfedő ~ 3 MiB / ~ 750k-token kódoló ágens, `POST /v1/responses` (RTK + Caveman) megszakítja ezt a kupacot ~ 12 Gi (`FATAL ERROR: Reached heap limit`) mellett, és OOM tud egy 16 Gi-s ccsoportot. Lásd: [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Ez a mérés a** memória-költségvetés** figyelmeztetés, nem egy termék hard-max két egyidejű hosszú `/v1/responses`. A nehézsúlyú csevegés engedélyezését egy automatikusan származtatott feldolgozási bájt-költségkeret (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) korlátozza, amely ugyanabból V8/cgroup plafonból áll. — felülbírálása (vagy az örökölt `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` kérésszám-korlát beállítása) egy már méretű folyamaton újra bevezeti a megszakítást. Kis csevegés, `/healthz`, `/v1/models` és MCP** nem** abban a sapkában.
 
 ### Egy folyamat: több mint két hosszú `/v1/responses`
 
-A** egészséges** folyamat (halom `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` alatt, alapértelmezett `0.75`)** május** futtasson kettőnél több egyidejű hosszú `POST /v1/responses` ha a folyamatszintű bejárati bájt költségvetésben (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) még van hely. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` nél (alapértelmezett 256 KiB) vagy annál nagyobb testek ugyanazt a nehézsúlyú bérletet veszik fel, mint a szerkezet-súlyos kérések, és ugyanazt a [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape-t (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) használják. Több tíz egyidejű hosszú SSE kliens (az operátoroknak gyakran 40-50-re van szükségük) a** memória-költségvetés** kérdés — méret kupac + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nem kemény „max 2” termékkorlát. Egy nyomás alatt álló kupac továbbra is lemerül az újrapróbálható `503` vel, így a #7849 nem tér vissza.
+A** egészséges** folyamat (halom `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` alatt, alapértelmezett `0.75`)** május** futtasson kettőnél több egyidejű hosszú `POST /v1/responses` ha az egész folyamatra kiterjedő inflight-byte költségvetésben (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) még van hely. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (alapértelmezett 256 KiB) értéknél nagyobb testek ugyanazt a nehézsúlyú bérletet veszik fel, mint a szerkezetigényes kérések, és ugyanazt a [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape-t (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) használják. Több tíz egyidejű hosszú SSE kliens (az operátoroknak gyakran 40-50-re van szükségük) a** memória-költségvetés** kérdés — méret kupac + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nem kemény „max 2” termékkorlát. A nyomás alatt álló kupac továbbra is lemerül az újrapróbálható `503`, így #7849 nem tér vissza.
 
 To** halmokat szaporítani** (független V8-as régi terek)** ma** :
 
 | Tedd                                                                                                                                                  | Nem                                                                     |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | Fut** N containers/pods** , mindegyik a maga** saját** `DATA_DIR` / kötet                                                                             | Állítsa be `replicas > 1` egy SQLite fájlhoz                            |
-| Nehéz repülés közbeni + egészséges fejtér halom / berepülési bájtos költségvetésből; 1–2 a konzervatív #7849-es alapértelmezés, nem kemény termék max | Adjon meg egy folyamatnak 8 × RAM és egy korlátlan számsapkát           |
+| Nehéz repülés közbeni + egészséges fejtér halom / berepülési bájtos költségvetésből; Az 1–2 a konzervatív #7849 alapértéke, nem egy kemény termék max | Adjon meg egy folyamatnak 8 × RAM és egy korlátlan számsapkát           |
 | Nem kötelező: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for** megosztott kvótaszámlálók**                                                  | Kezelje Redis megosztott SQLite — ként, ez nem az                       |
 | A szolgáltatói titkok megkettőzése minden példányban (vagy particionált irányítópultok elfogadása)                                                    | Egy irányítópultra/egy hívásnaplóra számítson az egyes példányok között |
 | Elöl bármilyen terheléselosztóval; elég a sticky by API gomb vagy session                                                                             | Megkövetel egy szállítóspecifikus, mérettudatos köztes szoftvert        |
 
-A munkamenet és a fiók közötti affinitás Redis keresztül is megosztható: állítsa be `OMNIROUTE_SESSION_AFFINITY_STORE=redis` és `REDIS_URL` minden folyamathoz, ugyanazzal a `REDIS_KEY_PREFIX` vel és pozitív `sessionAffinityTtlMs` beállítással. A pinek feloldják a kivonatolt használati fiók identitásokat az egyes folyamatok jogosult helyi kapcsolataihoz, így az egyező identitás-metaadatokkal rendelkező OAuth -fiókoknak nem kell egyező IDs kapcsolattal rendelkezniük. Az ismert fiókazonosítók elsőbbséget élveznek az ellentmondásos helyi IDs szemben a tűfelbontásban és az őrzött kilakoltatásban; az identitás nélküli rekordok (vagy az identitás nélküli kilakoltatási hívók) megtartják az örökölt ID őrt. A stabil használati identitás nélküli fiókokhoz továbbra is meg kell egyezni IDs. Redis hibák vagy a 100 ms-ot meghaladó hívások a helyi SQLite re esnek vissza. Minden Redis affinitástároló 8-ra korlátozza a kiemelkedő műveleteket, azonnal megkerüli Redis, ha megtelik, és csak akkor szabadítja fel a réseket, amikor a mögöttes munka rendeződik, nem pedig a hívó határidejében. A Redis -kimaradás során nincs megosztott igazság: minden példány visszaesik a saját helyi rokonságához, a munkamenetek példányonként egyszer újra rögzíthetők, és a példányok eltérhetnek egymástól. A ragadósság újra konvergál Redis keresztül, amikor helyreáll. Az időtúllépési határok várnak, nem pedig egy elküldött EVAL, amely visszaesés után landolhat. Az útválasztási írások az útválasztási döntés által megfigyelt pontos értéket hasonlítják össze, nem pedig egy új mutációidő-olvasást; egy megfigyelt kihagyás vagy egy SQLite tartalék megfigyelés egy hiányzó Redis kulcshoz hasonlítható. Az elavult tűk cseréje egy CAS-ben történik, így a késői parancs nem cserélhet ki vagy törölhet újabb, eltérő tűt. Redis olvasása atomosan visszaadja a TTL értéket és a maradék szervert; a pozitív PTTL (vagy nincs lejárat) határozza meg az elevenséget, nem az író JSON időbélyege vagy az olvasó órája. A helyi pillanatképek leképezik a fennmaradó TTL t egy helyi határidőhöz; A meglévő JSON kulcsok olvashatóak maradnak, és nyers bájtjaik megmaradnak CAS számára. Redis az egyetlen igazságforrás, miközben válaszol. A megerősített megosztott feljavítások, érintések és törlések eltávolítják a helyi bejegyzést, soha nem telepítik vagy frissítik. A Redis útvonalon lévő SQLite csak ennek a példánynak Redis hibáiból, időtúllépéseiből vagy a belépési telítettségből származó tartalék döntéseit tartalmazza, a korábbiak szerint TTL-korlátozott. Egy későbbi kimaradásnál hiányzó helyi PIN-kód egy új választásba kerül (egy gyorsítótár-kihagyás), nem pedig egy rossz vagy kitiltott fiókba. Az elutasított feloldások atomosan visszaadják a megosztott nyertest és a maradék TTL t: a közönséges kiválasztás újraellenőrzi a feltérképezett helyi határidőt, és egy még élő jogosult nyertest használ, érintve az adott fiók használatát és naplózását további megosztott írás nélkül. Ha nem érhető el, a kijelölés megtartja a helyi jelöltet, a megosztott PIN-kódot változatlanul hagyja, és egy hibakeresési üzenetet küld. Elutasított CAS nem ír SQLite; Redis hibák, időtúllépések vagy belépési telítettség helyett a meglévő helyi műveletet alkalmazzák. Ha egy elküldött mutáció válasza időtúllépés után érkezik (elfogadva, elutasítva vagy hibásan), a szinkron, pontos soros érték összehasonlítása és törlése csak a bájt-azonos időtúllépési tartalék sort távolítja el. Az összehasonlítás és a törlés között nincs várakozás; egy újabb kimaradási írás megmarad. Az őrzött kilakoltatás eltávolítja a sikertelen fiók saját helyi PIN-kódját, még akkor is, ha Redis le van tiltva, és újra megtisztítja a megerősített megosztott kilakoltatást követően. A függőben lévő korábbi megosztott válaszok nem tudják visszaállítani a kilakoltatott helyi PIN-kódot, mert a megosztott sikerek soha nem írnak SQLite. Egy későbbi kiesés visszaállíthatja a fiókot; egy később elfogadott megosztott írás csak Redis ben létezik. Redis misses nem veszi figyelembe a helyi tartalék állapotot. Ha a meghajtó ki van kapcsolva, az újonnan kiválasztott csapok megtartják az örökölt négymezős SQLite JSON alakot; csak Redis útválasztás adja hozzá a kivonatolt fiókazonosítót. Az előre letöltött tűket a lejárati határon újra ellenőrzik. Redis nem bérleti kijelölés újraolvassa az áruházat, de a szinkron bérlettervezés továbbra is használhat egy kiürített tűt az előzetes letöltés és a tervezés között (egy elfogadott legjobb erőfeszítés ablak). A lízingkötelezettség nem válthat fiókot tartós követelés után: az elutasított feloldáskor csak az adott kérelemre igényelt jelöltet tartja meg, és érintetlenül hagyja a megosztott nyertest, így a példányok közötti megállapodás ezen az úton korlátozódik. A táblázat többi része továbbra is érvényes: ez nem osztja meg a kombinált munkamenetek ragadósságát, a natív Codex fordulótűket, a fiókszemaforokat, a kizárásokat, a költési limiteket, a konfigurációs vagy hívásnaplókat.
+A munkamenet és a fiók közötti affinitás Redis keresztül is megosztható: állítsa be `OMNIROUTE_SESSION_AFFINITY_STORE=redis` és `REDIS_URL` minden folyamathoz, ugyanazzal a `REDIS_KEY_PREFIX` vel és pozitív `sessionAffinityTtlMs` beállítással. A pinek feloldják a kivonatolt használati fiók identitásokat az egyes folyamatok jogosult helyi kapcsolataihoz, így az egyező identitás-metaadatokkal rendelkező OAuth -fiókoknak nem kell egyező IDs kapcsolattal rendelkezniük. Az ismert fiókazonosítók elsőbbséget élveznek az ellentmondásos helyi IDs szemben a tűfelbontásban és az őrzött kilakoltatásban; az identitás nélküli rekordok (vagy az identitás nélküli kilakoltatási hívók) megtartják az örökölt ID őrt. A stabil használati identitás nélküli fiókokhoz továbbra is meg kell egyezni IDs. Redis hibák vagy a 100 ms-ot meghaladó hívások a helyi SQLite re esnek vissza. Minden Redis affinitástároló 8-ra korlátozza a kiemelkedő műveleteket, azonnal megkerüli Redis, ha megtelik, és csak akkor szabadítja fel a réseket, amikor a mögöttes munka rendeződik, nem pedig a hívó határidejében. A Redis -kimaradás során nincs megosztott igazság: minden példány visszaesik a saját helyi rokonságához, a munkamenetek példányonként egyszer újra rögzíthetők, és a példányok eltérhetnek egymástól. A ragadósság újra konvergál Redis keresztül, amikor helyreáll. Az időtúllépési határok várnak, nem pedig egy elküldött EVAL, amely visszaesés után landolhat. Az útválasztási írások az útválasztási döntés által megfigyelt pontos értéket hasonlítják össze, nem pedig egy új mutációidő-olvasást; egy megfigyelt kihagyás vagy egy SQLite tartalék megfigyelés egy hiányzó Redis kulcshoz hasonlítható. Az elavult tűk cseréje egy CAS-ben történik, így a késői parancs nem cserélhet ki vagy törölhet újabb, eltérő tűt. Redis olvasása atomosan visszaadja a TTL értéket és a maradék szervert; a pozitív PTTL (vagy nincs lejárat) határozza meg az elevenséget, nem az író JSON időbélyege vagy az olvasó órája. A helyi pillanatképek leképezik a fennmaradó TTL t egy helyi határidőhöz; A meglévő JSON kulcsok olvashatóak maradnak, és nyers bájtjaik megmaradnak CAS számára. Redis az egyetlen igazságforrás, miközben válaszol. A megerősített megosztott feljavítások, érintések és törlések eltávolítják a helyi bejegyzést, soha nem telepítik vagy frissítik. A Redis útvonalon lévő SQLite csak ennek a példánynak Redis hibáiból, időtúllépéseiből vagy a belépési telítettségből származó tartalék döntéseit tartalmazza, a korábbiak szerint TTL-korlátozott. Egy későbbi kiesésnél egy hiányzó helyi PIN-kód egy új választásba kerül (egy gyorsítótár-kihagyás), nem pedig egy rossz vagy kilakoltatott fiókba. Az elutasított feloldások atomosan visszaadják a megosztott nyertest és a maradék TTL t: a közönséges kiválasztás újraellenőrzi a feltérképezett helyi határidőt, és egy még élő jogosult nyertest használ, érintve az adott fiók használatát és naplózását további megosztott írás nélkül. Ha nem érhető el, a kijelölés megtartja a helyi jelöltet, a megosztott PIN-kódot változatlanul hagyja, és egy hibakeresési üzenetet küld. Elutasított CAS nem ír SQLite; Redis hibák, időtúllépések vagy belépési telítettség helyett a meglévő helyi műveletet alkalmazzák. Ha egy elküldött mutáció válasza időtúllépés után érkezik (elfogadva, elutasítva vagy hibásan), a szinkron, pontos soros érték összehasonlítása és törlése csak a bájt-azonos időtúllépési tartalék sort távolítja el. Az összehasonlítás és a törlés között nincs várakozás; egy újabb kimaradási írás megmarad. Az őrzött kilakoltatás eltávolítja a sikertelen fiók saját helyi PIN-kódját, még akkor is, ha Redis le van tiltva, és újra megtisztítja a megerősített megosztott kilakoltatást követően. A függőben lévő korábbi megosztott válaszok nem tudják visszaállítani a kilakoltatott helyi PIN-kódot, mert a megosztott sikerek soha nem írnak SQLite. Egy későbbi kiesés visszaállíthatja a fiókot; egy később elfogadott megosztott írás csak Redis ben létezik. Redis misses nem veszi figyelembe a helyi tartalék állapotot. Ha a meghajtó ki van kapcsolva, az újonnan kiválasztott csapok megtartják az örökölt négymezős SQLite JSON alakot; csak Redis útválasztás adja hozzá a kivonatolt fiókazonosítót. Az előre letöltött tűket a lejárati határon újra ellenőrzik. Redis nem bérleti kijelölés újraolvassa az áruházat, de a szinkron bérlettervezés továbbra is használhat egy kiürített tűt az előzetes letöltés és a tervezés között (egy elfogadott legjobb erőfeszítés ablak). A lízingkötelezettség nem válthat fiókot tartós követelés után: az elutasított feloldáskor csak az adott kérelemre igényelt jelöltet tartja meg, és érintetlenül hagyja a megosztott nyertest, így a példányok közötti megállapodás ezen az úton korlátozódik. A táblázat többi része továbbra is érvényes: ez nem osztja meg a kombinált munkamenetek ragadósságát, a natív Codex fordulótűket, a fiókszemaforokat, a kizárásokat, a költési limiteket, a konfigurációs vagy hívásnaplókat.
 
-Hardver: példányonkénti párhuzamos hosszú `/v1/responses` a** memória-költségvetés** kérdés (heap + inflight-byte / #10110). `N` független `DATA_DIR` k továbbra is szoroznak kupacokat: RAM gazdagépnek `N × cgroup` kell lefednie, nem pedig „egy 16 Gi-s pod N = 8-cal”. Soha ne `replicas > 1` egy SQLite fájlon.
+Hardver: példányonkénti párhuzamos hosszú `/v1/responses` a** memória-költségvetés** kérdés (heap + inflight-byte / #10110). `N` független `DATA_DIR`-k továbbra is szoroznak kupacokat: RAM gazdagépnek `N × cgroup` kell lefednie, nem pedig „egy 16 Gi-s pod N = 8-cal”. Soha ne `replicas > 1` egy SQLite fájlon.
 
 Vázlat összeállítása (két kupac, két kötet — nem `deploy.replicas: 2`):
 
@@ -696,54 +721,32 @@ volumes:
   omniroute-b-data:
 ```
 
-A folyamat közbeni sűrűség (a HTTP izolátum tömörítése) [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). A megosztott tartós állapot egyik logikai fürtje a [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+A folyamat közbeni sűrűség (a HTTP izolátum tömörítése) [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). A megosztott tartós állapot egyik logikai fürtje a [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Gemini regionális hibák Dockerben
+## Gemini regionális hibák Docker n belül
 
-A Google AI Studio / Gemini API HTTP 400-as választ adhat FAILED_PRECONDITION állapottal és a következő üzenettel:
-`User location is not supported for the API use.` A gazdagépen sikeres kérés nem bizonyítja, hogy a konténer ugyanazt a kimenő útvonalat használja. A DNS-sorrend,
-az IPv4-/IPv6-kapcsolat, a VPN-útválasztás és a konfigurált proxyk eltérhetnek. Ellenőrizze
-[a Google által támogatott régiókat](https://ai.google.dev/gemini-api/docs/available-regions),
-valamint a tényleges kapcsolati útvonalat; ez a hiba önmagában nem jelenti azt, hogy az API-kulcs hibás.
+Google AI Studio / Gemini API vissza tudja adni HTTP 400 értéket FAILED_PRECONDITION és `User location is not supported for the API use.` paraméterekkel. A gazdagépen végrehajtott sikeres kérés nem bizonyítja, hogy a tároló ugyanazt a kimenő útvonalat használja. DNS -rendezés, IPv4/IPv6 -kapcsolat, VPN útválasztás és a konfigurált proxy-k eltérőek lehetnek. Ellenőrizze [Google által támogatott régiókat](https://ai.google.dev/gemini-api/docs/available-regions), valamint a tényleges csatlakozási útvonalat; ez a hiba önmagában nem azonosítja a rossz API kulcsot.
 
-### Részesítse előnyben a kapcsolatspecifikus proxyt
+### Csatlakozásspecifikus proxy előnyben részesítése
 
-Használja az OmniRoute [kapcsolatonkénti proxykonfigurációját](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-az érintett Gemini-kapcsolathoz, majd ismételje meg a **Kapcsolat tesztelése** műveletet és egy kisebb kérést
-ugyanazzal a modellel. Így az útválasztás módosítása az adott kapcsolatra korlátozódik. Ellenőrizze,
-hogy a proxy elérhető-e a konténerből, és hogy a kapcsolat valóban azt választja-e.
-Az útvonal módosítása nem garantálja, hogy a felsőbb szintű szolgáltatás regionális jogosultsági feltételei teljesülnek.
+Használja OmniRoute[kapcsolatonkénti proxykonfigurációját](../ops/PROXY_GUIDE.md#4-level-proxy-system) az érintett Gemini kapcsolathoz, majd ismételje meg** Kapcsolat tesztelése** és egy kis kérés ugyanazzal a modellel. Ez az útválasztás módosítását az adott kapcsolatra korlátozza. Ellenőrizze, hogy a proxy elérhető-e a tárolóból, és hogy a kapcsolat valóban azt választja-e. Az útvonal megváltoztatása nem garantálja az upstream regionális jogosultságot.
 
-### A gazdagép és a konténer hálózatának összehasonlítása
+### Hasonlítsa össze a gazdagép- és konténerhálózatokat
 
-A hitelesített eredmények összehasonlításakor használjon azonos kulcsot, modellt és kérést; soha
-ne illesszen be hitelesítő adatokat, proxyjelszavakat vagy teljes engedélyezési fejléceket egy hibajegybe.
-Először ellenőrizze, hogy az operációs rendszer névfeloldója mely címcsaládokat kínálja, ugyanazt a parancsot
-használva a gazdagépen és a konténeren belül:
+A hitelesített eredmények összehasonlításakor a kulcs, a modell és a kérés azonos legyen; soha ne illesszen be hitelesítő adatokat, proxyjelszavakat vagy teljes engedélyezési fejlécet egy problémába. Először ellenőrizze, hogy a OS feloldó mely címcsaládokat kínálja, ugyanazzal a paranccsal a gazdagépen és a tárolón belül:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Cserélje le az `omniroute` értéket a futtatott szolgáltatásra (például `omniroute-web`). Ezek
-a parancsok hitelesítő adatok és IP-címek nélkül írják ki a címcsaládokat. A visszaadott `6`
-csak IPv6-os DNS-eredményt jelez: **nem** bizonyítja a használható IPv6-útvonal vagy az API-hozzáférés meglétét.
-Ahol telepítve van a `curl`, hasonlítsa össze a `curl -4 -I https://generativelanguage.googleapis.com`
-és a `curl -6 -I https://generativelanguage.googleapis.com` eredményét mindkét környezetben.
-A HTTP-válasz igazolja az adott próba kapcsolati működését, még akkor is, ha az egy hitelesítés nélküli
-hibaválasz; a Gemini-jogosultságot csak a hitelesített modellkérés ellenőrzi.
+Cserélje le `omniroute` az Ön által futtatott szolgáltatással (például `omniroute-web`). Ezek a parancsok hitelesítő adatok vagy IP -címek nélkül nyomtatják ki a címcsaládokat. A visszaadott `6` csak IPv6 DNS eredményt mutat: igen** nem** bizonyítson használható IPv6 útvonalat vagy API hozzáférést. Ahol `curl` telepítve van, hasonlítsa össze `curl -4 -I https://generativelanguage.googleapis.com` `curl -6 -I https://generativelanguage.googleapis.com` mindkét környezetben. A HTTP válasz bizonyítja a szonda csatlakoztathatóságát, még akkor is, ha ez nem hitelesített hiba; csak a hitelesített modellkérés teszteli Gemini alkalmasságot.
 
-### Gazdagépszintű alternatíva: működő IPv6 és névfeloldási házirend
+### Gazdaszintű alternatíva: működő IPv6 és feloldó házirend
 
-A [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) bejelentője úgy állította helyre
-a hozzáférést a saját környezetében, hogy engedélyezte a konténeres IPv6-ot, és módosította a glibc címválasztását.
-Ezt környezetspecifikus alternatívaként kezelje. A névfeloldási beállítások módosítása előtt ellenőrizze
-a működő gazdagépi IPv6-ot, a konténer kimenő kapcsolatát/útválasztását és a tűzfalszabályokat.
-Egy privát ULA-cím önmagában nem igazolja a nyilvános IPv6-kapcsolat meglétét.
+A [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) riportere visszaállította a hozzáférést a környezetükbe IPv6 tároló engedélyezésével és a glibc cím kiválasztásának megváltoztatásával. Kezelje ezt környezet-specifikus alternatívaként. A feloldó beállításainak módosítása előtt ellenőrizze a működő gazdagép IPv6, tároló egress/routing és tűzfal szabályait. A privát ULA -cím önmagában nem hoz létre nyilvános IPv6 kapcsolatot.
 
-A Compose alapértelmezett hálózatához már csatlakoztatott szolgáltatások esetében ez a részlet engedélyezi
-az IPv6-ot az adott hálózaton; tartsa meg a szolgáltatás többi beállítását, portjait, köteteit és konfigurációját:
+A Compose alapértelmezett hálózatához már csatolt szolgáltatások esetében ez a töredék engedélyezi IPv6 azon a hálózaton; megőrzi a többi szolgáltatást, portokat, köteteket és konfigurációt:
 
 ```yaml
 networks:
@@ -751,30 +754,13 @@ networks:
     enable_ipv6: true
 ```
 
-Elnevezett hálózat esetén azon a hálózaton engedélyezze, amelyhez a szolgáltatás ténylegesen csatlakozik. A Docker
-kioszthat egy ULA-alhálózatot; explicit, átfedésmentes alhálózatot csak akkor válasszon, ha a hálózata
-ezt megköveteli. Lásd a [Docker IPv6-hálózatkezelését](https://docs.docker.com/engine/daemon/ipv6/)
-és a [Compose hálózati beállításait](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Megnevezett hálózat esetén engedélyezze azt azon a hálózaton, amelyhez a szolgáltatás ténylegesen csatlakozik. Docker lefoglalhat egy ULA alhálózatot; csak akkor válasszon explicit, nem átfedő alhálózatot, ha a hálózat megköveteli. Lásd [Docker IPv6 hálózatkezelés](https://docs.docker.com/engine/daemon/ipv6/) és [a Hálózati beállítások létrehozása című részt](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Egy **glibc-alapú lemezképen** az `/etc/gai.conf` módosíthatja a címválasztást. A jelenlegi
-adattár Dockerfile-ja Debiant használ; az egyéni, musl-alapú lemezképek nem használják ugyanezt a mechanizmust.
-A bejelentett módosítás az ULA-címke értékét `label fc00::/7 6` értékről
-`label fc00::/7 1` értékre változtatja. Induljon ki a lemezkép teljes házirendtáblájából, és őrizze meg annak többi
-bejegyzését: egy `label` vagy `precedence` bejegyzés hozzáadása lecseréli az alapértelmezett táblát, ezért egy
-csak a módosított sort tartalmazó fájl nem elegendő. A
-[glibc konfigurációs referenciája](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-dokumentálja ezeket a működési szabályokat. Csatolja a felülvizsgált fájlt csak olvasható bind mountként az `/etc/gai.conf`
-elérési útra, majd hozza létre újra a szolgáltatást a módosítás alkalmazásához.
+Az a** glibc alapú kép** , `/etc/gai.conf` módosíthatja a címválasztást. A jelenlegi Dockerfile tároló Debiant használ; Az egyéni muszli alapú képek nem osztják ezt a mechanizmust. A jelentett korrekció a ULA címkét `label fc00::/7 6` ről `label fc00::/7 1` re változtatja. Kezdje a kép teljes házirend-táblázatából, és őrizze meg a többi bejegyzést: a `label` vagy `precedence` bejegyzés hozzáadása lecseréli az alapértelmezett táblát, így a csak a módosított sort tartalmazó fájl nem elegendő. A [glibc konfigurációs hivatkozása](https://github.com/bminor/glibc/blob/master/posix/gai.conf) dokumentálja ezt a szemantikát. Csatlakoztassa a felülvizsgált fájlt írásvédett módon `/etc/gai.conf` -ben, és hozza létre újra a szolgáltatást az alkalmazáshoz.
 
-Ez módosítja az operációs rendszer címválasztását az **adott konténer összes kimenő forgalmánál**.
-Nem kényszerít minden alkalmazást az IPv6 választására: a Node DNS-sorrendje és kapcsolatválasztása
-is számít. Különösen a `--dns-result-order=ipv4first` az IPv4-et részesíti előnyben, és
-nem jelent megoldást egy kizárólag IPv4-en jelentkező hibára. Lásd a [Node DNS-sorrendjét](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Ez megváltoztatja OS cím kiválasztását** az adott tárolóban lévő összes kimenő forgalom** . Nem kényszerít minden alkalmazást IPv6 kiválasztására: a Node DNS sorrendje és kapcsolatválasztása is számít. `--dns-result-order=ipv4first` különösen IPv4 részesíti előnyben, és nem gyógyír a IPv4-only meghibásodására. Lásd: [Node DNS rendelés](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Minden gazdagépszintű módosítás után tesztelje újra a Geminit és a többi szolgáltatót. A visszaállításhoz
-távolítsa el az egyéni `gai.conf` csatolását, állítsa vissza a korábbi hálózati konfigurációt, és
-egy karbantartási időszakban hozza létre újra az érintett szolgáltatást/hálózatot. Egy hálózat újbóli létrehozása
-megszakíthatja a hozzá csatlakoztatott többi konténer működését; ne törölje a tartós adatkötetet.
+Bármilyen gazdagépszintű módosítás után tesztelje újra Gemini és a többi szolgáltatót. A visszaállításhoz távolítsa el az egyéni `gai.conf` -csatlakozót, állítsa vissza a korábbi hálózati konfigurációt, és hozza létre újra az érintett service/network a karbantartási időszak során. A hálózat újbóli létrehozása megszakíthatja a hozzá csatlakoztatott többi tárolót; ne törölje az állandó adatkötetet.
 
 ## Fontos megjegyzések
 

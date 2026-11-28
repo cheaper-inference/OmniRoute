@@ -4,13 +4,7 @@
 
 ---
 
-> **Haqiqatning asosiy manbasi:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` va `open-sse/utils/error.ts` ichidagi ommaviy builderlar
-> **Testlar:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Oxirgi yangilanish:** 2026-09-02 — v3.8.51
-> **Auditoriya:** Xato javoblari bilan ishlaydigan har qanday muhandis (HTTP marshrutlari, SSE oqimlari, ijrochilar, MCP ishlov beruvchilari).
-> **Holat:** Mijozga xato xabarini qaytaradigan har bir kod yoʻli uchun **MAJBURIY**.
+> **Haqiqat manbai:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` va `open-sse/utils/error.ts` jamoat quruvchilari** Testlar:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Tomoshabinlar:** Xato javoblariga tegadigan har qanday muhandis (HTTP marshrutlari, SSE oqimlari, ijrochilar, MCP ishlov beruvchilari).** Holati:****MANDATORY** mijozga xato xabarini qaytaradigan har bir kod yo'li uchun.
 
 ## Bu nima uchun mavjud
 

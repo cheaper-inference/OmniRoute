@@ -166,11 +166,11 @@ access_token=<jwt>; chathubPath=<oid>@<tenant>
 
 تأكد من تمكين `copilot-m365-web` في** موفري لوحة القيادة →** . قد يكون الموفر مخفيًا بشكل افتراضي في بعض المستويات.
 
-## المراجع
+## مراجع
 
-- المشكلة: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- المناقشة: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- المصدر: `src/shared/constants/providers/web-cookie.ts` (تعريف المزوّد)
-- استيراد HAR: `src/shared/utils/m365HarImport.ts`
-- حقول بيانات الاعتماد: `src/shared/providers/webSessionCredentials.ts`
-- النافذة المنبثقة للفئة: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- العدد: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- المناقشة: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- المصدر: `src/shared/constants/providers/web-cookie.ts` (تعريف الموفر)
+- استيراد HAR : `src/shared/utils/m365HarImport.ts`
+- حقول الاعتماد: `src/shared/providers/webSessionCredentials.ts`
+- مشروط الطبقة: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

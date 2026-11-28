@@ -504,27 +504,27 @@ atunci când datele clasamentului s-au modificat efectiv de la ultima trimitere.
 
 ---
 
-## Partajarea tokenurilor
+## Partajarea de jetoane
 
-**Fișier:** `src/lib/gamification/sharing.ts`
+**Fişier:** `src/lib/gamification/sharing.ts`
 
-### Registru în partidă dublă
+### Registrul cu intrare dublă
 
 Fiecare transfer creează două rânduri în `token_ledger`:
 
 | Rând   | `from_key_id` | `to_key_id` | `amount` |
 | ------ | ------------- | ----------- | -------- |
-| Debit  | expeditor     | destinatar  | +sumă    |
-| Credit | destinatar    | expeditor   | -sumă    |
+| Debit  | expeditor     | receptor    | suma +   |
+| Credit | receptor      | expeditor   | -amount  |
 
-Stați — convenția este:
+Așteaptă — convenția este:
 
-| Rând      | `from_key_id` | `to_key_id` | `amount` | Semnificație              |
-| --------- | ------------- | ----------- | -------- | ------------------------- |
-| Trimitere | expeditor     | destinatar  | +sumă    | Ieșire de la expeditor    |
-| Primire   | destinatar    | expeditor   | +sumă    | Intrare pentru destinatar |
+| Rând    | `from_key_id` | `to_key_id` | `amount` | Sens                   |
+| ------- | ------------- | ----------- | -------- | ---------------------- |
+| Trimite | expeditor     | receptor    | suma +   | Ieșire de la expeditor |
+| Primi   | receptor      | expeditor   | suma +   | Aflux către receptor   |
 
-Soldul este calculat astfel:
+Soldul se calculează astfel:
 
 ```sql
 SELECT
@@ -535,7 +535,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Fluxul transferului
+### Flux de transfer
 
 ```typescript
 export async function transferTokens(
@@ -546,19 +546,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Validare**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotență**: verificați dacă `idempotency_key` există deja în registru.
-   Dacă da, returnați rezultatul din cache.
-3. **Tranzacție** (o singură tranzacție SQLite):
-   a. Calculați soldul expeditorului.
-   b. Dacă `balance < amount`, abandonați operațiunea (fonduri insuficiente).
-   c. Inserați rândul de trimitere (`from=sender,`.
+1. **Valida** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotenta** : verificați dacă `idempotency_key` există deja în registru. Dacă da, returnați rezultatul stocat în cache.
+3. **Tranzacţie** (tranzacție unică SQLite ): a. Calculați soldul expeditorului. b. Dacă `balance < amount`, anulați (fonduri insuficiente). c. Inserați rândul de trimitere (`from=sender, to=receiver, amount`). d. Introduceți rândul de primire (`from=receiver, to=sender, amount`).
+4. **Limită de rată** : verificați rata de transfer pentru expeditor (max. 10 transfers/min).
+5. **Eveniment** : emite un eveniment de gamification `token_share` pentru evaluarea insigna XP +.
+6. Întoarceți `{ success: true, balance: newBalance }`.
 
-### Limitarea frecvenței
+### Limitarea ratei
 
-- Maximum 10 transferuri pe minut pentru fiecare cheie API.
-- Maximum 10.000 de tokenuri per transfer.
-- Maximum 100.000 de tokenuri transferate pe zi pentru fiecare cheie API.
+- Maximum 10 transferuri pe minut per cheie API.
+- Maxim 10.000 de jetoane pentru un singur transfer.
+- Maxim 100.000 de jetoane transferate pe zi per cheie API.
 
 ---
 

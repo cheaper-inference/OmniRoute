@@ -4,7 +4,7 @@
 
 ---
 
-> **Versiya:** v3.8.44** Son yeniləmə:** 28-10-2026** Tamaşaçılar:** Mühəndislər daxili xidmətləri əlavə edir, saxlayır və ya sazlayır (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versiya:** v3.8.44** Tamaşaçılar:** Mühəndislər daxili xidmətləri əlavə edir, saxlayır və ya sazlayır (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Quraşdırılmış xidmətlər OmniRoute quraşdırdığı, nəzarət etdiyi və birinci dərəcəli marşrutlaşdırma hədəfləri kimi ifşa etdiyi yerli olaraq quraşdırılmış proses yan avtomobil alətləridir. Xarici provayderlərdən ( API düymələri vasitəsilə internet üzərindən əldə edilən) fərqli olaraq, quraşdırılmış xidmətlər OmniRoute ilə eyni maşında işləyir və geri dönmə vasitəsilə əlaqə qurur.
 

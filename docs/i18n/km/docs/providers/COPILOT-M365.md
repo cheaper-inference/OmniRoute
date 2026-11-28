@@ -168,9 +168,9 @@ OmniRoute ស្កេន HAR សម្រាប់ Chathub WebSocket URL ទា
 
 ## ឯកសារយោង
 
-- បញ្ហា៖ [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- ការពិភាក្សា៖ [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- កូដប្រភព៖ `src/shared/constants/providers/web-cookie.ts` (និយមន័យអ្នកផ្តល់សេវា)
-- ការនាំចូល HAR៖ `src/shared/utils/m365HarImport.ts`
-- វាលព័ត៌មានសម្គាល់អត្តសញ្ញាណ៖ `src/shared/providers/webSessionCredentials.ts`
-- modal កម្រិតសេវា៖ `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- បញ្ហា៖ [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- ការពិភាក្សា៖ [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- ប្រភព៖ `src/shared/constants/providers/web-cookie.ts` (និយមន័យអ្នកផ្តល់សេវា)
+- HAR នាំចូល៖ `src/shared/utils/m365HarImport.ts`
+- វាលព័ត៌មានសម្ងាត់៖ `src/shared/providers/webSessionCredentials.ts`
+- ម៉ូឌុលថ្នាក់៖ `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

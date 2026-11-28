@@ -461,105 +461,105 @@ Interaktiivse seansi sees:
 
 ## Pikaajalised ülesanded
 
-Kaks OmniRoute'i vaikeväärtust võivad mitmetunniseid Codex CLI seansse märkamatult kahjustada. Kumbki pole Codex CLI säte — mõlemad asuvad OmniRoute'i poolel. Kasutajad, kes migreerivad konfiguratsiooni ülesvoolu puhverserveritest, mis seovad seansid kontodega ja keelavad jõudeoleku katkestused, puutuvad sageli kokku mõlema probleemiga ning järeldavad, et OmniRoute „ei suuda pikka seanssi töös hoida“.
+Kaks OmniRoute vaikeseadet võivad vaikselt saboteerida mitmetunniseid Codex CLI seansse. Kumbki ei ole Codex CLI seadistus — mõlemad elavad OmniRoute poolel. Kasutajad, kes migreerivad konfiguratsiooni ülesvoolu puhverserveritelt, mis kinnitavad kontosid ja keelavad jõudeoleku katkestused, tabavad sageli mõlemat ja järeldavad, OmniRoute "ei suuda pikka seanssi säilitada".
 
-| Sümptom                                                                           | Tõenäoline põhjus                                                              | Seadistus                |
-| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------ |
-| Seanss vahetab pidevalt kontosid / viiba vahemälu järjepidevus kaob käikude vahel | Seansi afiinsuse TTL on `0` (keelatud)                                         | `sessionAffinityTtlMs`   |
-| Ühendus katkeb arutluse ajal ilma kliendile kuvatava viibata                      | Voo jõudeoleku valve käivitus pärast 10 minutit ilma ülesvoolust saabuva osata | `STREAM_IDLE_TIMEOUT_MS` |
+| Sümptom                                                                             | Tõenäoline põhjus                                                       | Nupp                     |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------ |
+| Seanss jätkab kontode vahetamist / viipade vahemälu järjepidevus kaob pöörete vahel | Seansi afiinsus TTL on `0` (keelatud)                                   | `sessionAffinityTtlMs`   |
+| Ühendus katkeb mõtlemise keskel ilma kliendile suunatud viipata                     | Voo jõudeoleku valvekoer tulistas 10 minuti pärast ilma ülesvoolu osata | `STREAM_IDLE_TIMEOUT_MS` |
 
-Seotud arutelud: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (pikkade ülesannete katkemine), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (miks afiinsus on vaikimisi välja lülitatud). Jälgimine: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Seotud arutelud: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (pika ülesande langemine), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (miks afiinsus on vaikimisi välja lülitatud). Jälgimine: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Seansi afiinsus — seo üks vestlus ühe kontoga
+### 1. Seansi afiinsus — ühe vestluse kinnitamine ühele kontole
 
-**Vaikeväärtus:** `sessionAffinityTtlMs = 0` (keelatud).
+**Vaikimisi:** `sessionAffinityTtlMs = 0` (puuetega).
 
-**Kus seda määrata**
+**Kuhu seda seada**
 
-- Juhtpaneel → **Seaded → Marsruutimine** → **Seansi afiinsus** → **Afiinsuse TTL (sekundites)** (`ComboDefaultsTab`)
-- Või kasuta sätete PATCH-päringus välja `sessionAffinityTtlMs` väärtusega **millisekundites** (Zodi vahemik `0`–`86_400_000`, st kuni 24 tundi)
+- Armatuurlaud →** Seaded → Marsruutimine** →** Seansi afiinsus** →** Afiinsus TTL (sekundites)** (`ComboDefaultsTab`)
+- Või PATCH seaded `sessionAffinityTtlMs` in** millisekundid** (Zod vahemik `0`–`86_400_000`, st kuni 24 tundi)
 
-> Nimetati muudatuses #7274 ümber varasemast ainult Codexile mõeldud võtmest `codexSessionAffinityTtlMs`. Pärandvõtit aktsepteeritakse endiselt kirjutuskaitstud aliasena; uued konfiguratsioonid peaksid kasutama võtit `sessionAffinityTtlMs`. Kui TTL on suurem kui `0`, rakendub afiinsus nüüd **kõigile** pakkujatele, mitte ainult Codexile — vt [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Seansi afiinsus.
+> Nimetatud #7274 ümber ainult Codex-i jaoks mõeldud `codexSessionAffinityTtlMs`. Pärandvõtit aktsepteeritakse endiselt kirjutuskaitstud varjunimena; uued konfiguratsioonid peaksid kasutama `sessionAffinityTtlMs`. Afiinsus kehtib nüüd kohta** ükskõik milline** pakkuja, kui TTL on `0` kõrgem, mitte ainult Codex — vaadake [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → seansi afiinsust.
 
-**Mis läheb katki, kui väärtuseks jääb 0**
+**Mis katkeb, kui see jääb 0-le**
 
-Mitmekäigulise Codexi vestluse iga käik marsruuditakse aktiivse kombineerimisstrateegia alusel iseseisvalt ja võib sattuda **igal käigul eri kontole**. See katkestab ülesvoolu seansi / viiba vahemälu järjepidevuse. OmniRoute arvestab Codexi seansipäiseid (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) ja keha välju, nagu `prompt_cache_key` / `session_id`, ainult siis, kui TTL on suurem kui `0` (`extractSessionAffinityKey` failis `src/sse/services/auth.ts`).
+Mitme pöördega Codex vestluse iga pööre suunatakse iseseisvalt aktiivse kombineeritud strateegia abil ja see võib langeda** pöörde kohta erinev konto** . See katkestab ülesvoolu seansi / kiire vahemälu järjepidevuse. OmniRoute vaatab ainult Codex seansi päiseid (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) ja kehavälju, näiteks `prompt_cache_key` / `session_id` kui TTL on suurem kui `0` (`extractSessionAffinityKey` `src/sse/services/auth.ts`).
 
-**Soovitus ühe mitmetunnise ülesande jaoks**
+**Soovitatav mitmetunnise üksiku ülesande jaoks**
 
-Määra TTL **suuremaks kui ülesande eeldatav kogukestus** (kasutajaliidese maksimum on **86400 sekundit** = 24 tundi):
+Seadke TTL** üle ülesande eeldatava seinakella pikkuse** (UI max on** 86400 sekundit** = 24 tundi):
 
-| Ülesande eeldatav kestus | Afiinsuse TTL (kasutajaliides, sekundites) | `sessionAffinityTtlMs` |
-| ------------------------ | ------------------------------------------ | ---------------------- |
-| Mõni tund                | `14400` (4 h)                              | `14400000`             |
-| Üleöö / ~12 h            | `43200` (12 h)                             | `43200000`             |
-| Terve päev               | `86400` (24 h, maksimum)                   | `86400000`             |
+| Ülesande eeldatav pikkus | Afiinsus TTL (UI, sekundid) | `sessionAffinityTtlMs` |
+| ------------------------ | --------------------------- | ---------------------- |
+| Paar tundi               | `14400` (4 tundi)           | `14400000`             |
+| Ööbimine / ~ 12h         | `43200` (12h)               | `43200000`             |
+| Terve päev               | `86400` (24h, maksimum)     | `86400000`             |
 
-Sisselülitamine on teadlik valik: afiinsuse keelamine soosib kontodevahelist koormuse tasakaalustamist, selle lubamine aga ühe pika agendiseansi järjepidevust. See juhend **ei** muuda vaikeväärtust — pikki Codexi ülesandeid käitavad operaatorid peavad selle ise sisse lülitama.
+Lubamine on tahtlik: seotuse keelamine soodustab kontode koormuse tasakaalustamist; selle lubamine soodustab ühe pika agendiseansi järjepidevust. See juhend teeb seda** mitte** muutke vaike- — operaatorid, mis töötavad pikki Codex ülesandeid, peavad selle lubama.
 
-### 2. Voo jõudeoleku ajalõpp — ära katkesta vaikseid arutluskäike
+### 2. Voogesituse tühikäigu ajalõpp — ei tapa vaikset arutluskäiku
 
-**Vaikeväärtus:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minutit). Kui seda pole määratud, pärib see väärtuse muutujast `REQUEST_TIMEOUT_MS`; ka jagatud lähteväärtus on 600000. Vt [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Ajalõpud.
+**Vaikimisi:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 minutit). See pärib `REQUEST_TIMEOUT_MS` kui see on määramata; jagatud baasjoon on samuti 600000. Vt [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Timeouts.
 
-**Mis läheb vaikeväärtuse korral katki**
+**Mis vaikimisi puruneb**
 
-Codexi arutlus-/tööriistavoor, mis püsib vaiksena üle 10 minuti ilma **ühegi tegeliku ülesvoolu andmeplokita**, suletakse SSE jõudeoleku valve (`open-sse/utils/stream.ts`) poolt sunniviisiliselt. Klient näeb sageli lihtsalt ühenduse katkemist — see vastab kirjeldusele „peatati automaatselt ilma ühegi teavituseta“.
+Codex arutluskäik / tööriistapööre, mis jääb vaikseks rohkem kui 10 minutiks** pole päris ülesvoolu tükki** suletakse jõuga SSE tühikäigu valvekoera (`open-sse/utils/stream.ts`) poolt. Klient näeb sageli tühja ühenduse katkemist — vastega "peatati automaatselt ilma igasuguse teavituseta".
 
-Oluline detail: OmniRoute’i sünteetiline SSE **südamelöök ei lähtesta** jõudeoleku taimerit. Ainult tegelik ülesvoolu vastusekeha andmeplokk uuendab väärtust `lastChunkTime`. Vaikne mudel, mis alles „mõtleb“, näib valve seisukohast täpselt samasugune nagu seiskunud ülesvool.
+Kriitiline detail: OmniRoute sünteetiline SSE** südamelöögid ei lähtestu** tühikäigukell. `lastChunkTime` värskendab ainult tõeline ülesvoolu keretükk. Vaikne mudel, mis veel “mõtleb”, näeb valvekoera vaatenurgast välja identne seisma jääva ülesvooluga.
 
-Seotud Undici vastusekeha passiivsuse säte: `FETCH_BODY_TIMEOUT_MS` (vaikimisi samuti sama 10-minutiline lähteväärtus; `0` keelab selle). Voogedastuse puhul hõlmab `FETCH_TIMEOUT_MS` ainult ühenduse loomist / esimesi päiseid — kui voog on aktiivne, juhivad seiskumisi `STREAM_IDLE_TIMEOUT_MS` ja `FETCH_BODY_TIMEOUT_MS`.
+Seotud Undici keha passiivsus: `FETCH_BODY_TIMEOUT_MS` (vaikimisi on ka sama 10-minutiline lähtejoon; `0` keelab selle). Voogesituse puhul hõlmab `FETCH_TIMEOUT_MS` ainult ühenduse seadistust / esimesi päiseid — kui voog on aktiivne, peatusi reguleerivad `STREAM_IDLE_TIMEOUT_MS` ja `FETCH_BODY_TIMEOUT_MS`.
 
-**Soovitus mitmetunnise üksikülesande jaoks**
+**Soovitatav mitmetunnise üksiku ülesande jaoks**
 
-OmniRoute’i protsessi keskkonnas (`.env` / compose / systemd):
+OmniRoute protsessikeskkonnas (`.env` / koostamine / systemd):
 
 ```bash
-# Keela pikkade arutlusvoorude jaoks voo jõudeoleku ja vastusekeha passiivsuse katkestuspiirangud
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Või suurenda need väärtused pikimast eeldatavast vaikusest suuremaks (väärtused on millisekundites):
+Või tõstke need kõrgemale oodatavast pikimast vaiksest vahest (väärtused on millisekundid):
 
 ```bash
-# Näide: luba ülesvoolu andmeplokkide vahel kuni 2 tundi vaikust
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Pärast nende keskkonnamuutujate muutmist taaskäivita OmniRoute.
+Pärast nende keskkonnamuutuste muutmist taaskäivitage OmniRoute.
 
-### Konkreetne juhend — mitmetunnine Codexi ülesanne
+### Konkreetne retsept — mitmetunnine Codex ülesanne
 
-1. **Kinnista konto:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12 h) või `86400` (maksimaalselt 24 h).
-2. **Suurenda jõudeoleku katkestuspiiranguid või keela need** OmniRoute’i keskkonnas:
+1. **Kinnitage konto:** Armatuurlaud → Seaded → Marsruutimine → Seansi afiinsus → Afiinsus TTL = `43200` (12h) või `86400` (24h max).
+2. **Tõstke / keelake tühikäigu väljalülitused** OmniRoute keskkonnas:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Säilita tavapärane Codexi `config.toml` (`wire_api = "responses"`, õige `base_url`, `OMNIROUTE_API_KEY`) — nende kahe käitumise jaoks pole Codexi poolel seansi afiinsuse ega jõudeoleku sätteid.
-4. Taaskäivita OmniRoute ja seejärel käivita pikaajaline Codexi ülesanne.
+3. Säilitage tavaline Codex `config.toml` (`wire_api = "responses"`, õige `base_url`, `OMNIROUTE_API_KEY`) — nende kahe käitumise jaoks pole koodeksipoolseid affinity/idle -nuppe.
+4. Taaskäivitage OmniRoute ja seejärel alustage pikka Codex ülesannet.
 
-### Vaikeväärtuste otsus (#7287)
+### Vaikimisi otsus (#7287)
 
-| Säte                     | Tarnitav vaikeväärtus | Muuta selles juhendis?                                                                                               |
-| ------------------------ | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (väljas)          | **Ei** — jääb valikuliseks (koormuse tasakaalustamine vs järjepidevus; vt Discussion #5718)                          |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)     | **Ei** — jääb üldise liikluse jaoks 10 minutile; pikaajalise Codexi käitajad suurendavad väärtust või keelavad selle |
+| Nupp                     | Vaikimisi saatmine | Muudatus selles juhendis?                                                                    |
+| ------------------------ | ------------------ | -------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (väljas)       | **Ei** — jääb valikuliseks (koormuse tasakaalustamine vs järjepidevus; vt arutelu #5718)     |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 min)  | **Ei** — jääb üldliikluseks 10 minutiks; pikad Codex operaatorid tõstavad või keelavad selle |
 
-Kummagi vaikeväärtuse üleüldine muutmine muudaks käitumist eksemplari iga kliendi, mitte ainult Codexi jaoks. Dokumenteeri sätted; jäta vaikeväärtused muutmata, kuni selgesõnaline käitaja otsus näeb ette teisiti.
+Kummagi vaikeväärtuse globaalne ümberpööramine muudaks eksemplari iga kliendi käitumist, mitte ainult Codex. Dokumenteerige nupud; jätke vaikeseaded rahule, kuni operaatori selgesõnaline otsus ütleb teisiti.
 
-### Jõudeolekust tingitud katkestuste diagnoosimine
+### Tühikäigulõigete diagnoosimine
 
-Kui jõudeoleku valve rakendub, logib OmniRoute järgmise kujuga rea:
+Kui jõudeolekus olev valvekoer vallandab, logib OmniRoute järgmise kujuga joone:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Otsi käsuga grep teksti `Idle timeout: no data from` (või koodi `stream_idle_timeout` / vea nime `StreamIdleTimeoutError`). Teenusepakkuja segment on see, mida OmniRoute vastava päringu jaoks kasutas (`codex`, mõni muu teenusepakkuja ID või `provider`, kui see pole teada) — see ei ole alati sõnasõnaline string `codex`.
+Grep `Idle timeout: no data from` jaoks (või kood `stream_idle_timeout` / vea nimi `StreamIdleTimeoutError`). Pakkuja segment on mis tahes selle päringu jaoks kasutatud OmniRoute (`codex`, teise pakkuja ID või `provider`, kui see pole teada) — see ei ole alati sõnasõnaline string `codex`.
 
 ---
 

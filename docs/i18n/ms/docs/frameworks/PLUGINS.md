@@ -92,16 +92,15 @@ Objek `ctx` yang dihantar kepada `register(program, ctx)`:
 
 Pemalam ditemui daripada:
 
-1. `~/.omniroute/plugins/<name>/` — pemasangan setempat pengguna
-2. Pemboleh ubah persekitaran `OMNIROUTE_PLUGIN_PATH` — direktori tersuai
+1. `~/.omniroute/plugins/node_modules/<name>/` — tempat `omniroute plugin install` meletakkan pakej (npm `--prefix`, bukan `npm -g`)
+2. direktori pemalam yang disalin dengan tangan `~/.omniroute/plugins/<name>/` —
+3. `OMNIROUTE_PLUGIN_PATH` env var — direktori tersuai
 
-Kedua-duanya adalah **CLI sahaja**. Masa jalan pemalam sebelah pelayan (pemalam marketplace/`plugin.json`
-yang berjalan dalam proksi) mempunyai pengimbasnya sendiri dengan penggantian tersendiri,
-`OMNIROUTE_PLUGINS_DIR` — lihat
-[PLUGIN_MARKETPLACE.md → Direktori pemalam](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Menetapkan salah satu tidak mempengaruhi yang lain.
+Direktori terpaut sym (apa yang npm buat untuk `plugin install ./dir`) diikuti.
 
-Ralat pemuatan ditangkap dan dipaparkan sebagai amaran — pemalam yang rosak tidak akan menyebabkan CLI ranap.
+Kedua-duanya adalah** CLI sahaja** . Masa jalan pemalam sisi pelayan (pemalam pasaran/`plugin.json` yang dijalankan di dalam proksi) mempunyai pengimbasnya sendiri dengan penggantiannya sendiri, `OMNIROUTE_PLUGINS_DIR` — lihat [PLUGIN_MARKETPLACE.md → Direktori Pemalam](./PLUGIN_MARKETPLACE.md#plugin-directory). Menetapkan satu tidak menjejaskan yang lain.
+
+Ralat memuatkan ditangkap dan dicetak sebagai amaran — pemalam yang rosak tidak akan merosakkan CLI.
 
 ## Keselamatan
 

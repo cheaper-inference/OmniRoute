@@ -11,7 +11,7 @@ Confronto oggettivo delle funzionalità rispetto ai popolari router AI open sour
 | Caratteristica                                                  |                 OmniRoute 3.8                  |      LiteLLM 1.x      | OpenRouter (SaaS) |  Passaporta  |
 | --------------------------------------------------------------- | :--------------------------------------------: | :-------------------: | :---------------: | :----------: |
 | **Fornitori**                                                   |                    **329**                     |         ~100          |        ~50        |     ~30      |
-| **voci del catalogo Free/no-auth**                              |                    **155**                     |          n/a          |     passante      |     n/a      |
+| **Fornitori con accesso gratuito**                              |           **50 con accesso libero**            |          n/a          |     passante      |     n/a      |
 | **Auto-ospitale**                                               |                       ✅                       |          ✅           |        ❌         |   ⚠ pagato   |
 | **voci del catalogo OAuth**                                     |                     **23**                     |       parziale        |        ❌         |      ❌      |
 | **Combo di fallback automatico**                                |                **22 strategie**                | basato sulle priorità | basato su livelli |  ponderato   |
@@ -38,7 +38,7 @@ Confronto oggettivo delle funzionalità rispetto ai popolari router AI open sour
 
 ## Quando scegliere OmniRoute
 
-- Ti ospiti da solo e vuoi** massima copertura del fornitore** (394 fornitori, 155 voci di catalogo free/no-auth )
+- Ti ospiti da solo e vuoi** massima copertura del fornitore** (394 operatori, 50 con accesso gratuito)
 - Hai bisogno di un** server MCP integrato** (strumenti LLM, memoria, abilità esposte come strumenti)
 - Ne hai bisogno** protocollo A2A** per i flussi di lavoro da agente ad agente
 - Vuoi** furtività delle impronte digitali** (JA3/JA4) per evitare il rilevamento da parte CAPTCHAs a monte
@@ -56,12 +56,12 @@ Confronto oggettivo delle funzionalità rispetto ai popolari router AI open sour
 - Accetti di pagare per token con la maggiorazione SaaS
 - Hai bisogno di un **unico metodo di pagamento** per tutti i provider
 
-## Quando scegliere Portkey
+## Quando scegliere Passaporta
 
-- Hai bisogno di uno **SLA commerciale** con garanzie di disponibilità
-- Preferisci una **dashboard gestita** senza oneri operativi
-- Hai bisogno di **funzionalità di conformità enterprise** pronte all'uso
+- Hai bisogno di un** SLA commerciale** con garanzie di operatività
+- Preferisci a** dashboard gestito** senza spese generali per le operazioni
+- Ne hai bisogno** conformità aziendale** funzionalità fuori dagli schemi
 
 ---
 
-_Ultimo aggiornamento: 2026-08-02. Invia le correzioni tramite PR per mantenere accurata questa tabella._
+_Invia correzioni tramite PR per mantenere questa tabella accurata._

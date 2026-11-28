@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Podporuje** 22 stratégií smerovania** (pozri `src/shared/constants/routingStrategies.ts`):
 
-| Stratégia           | Správanie                                                                                                 |
-| ------------------- | --------------------------------------------------------------------------------------------------------- |
-| `priority`          | Zoradený zoznam prvého cieľa                                                                              |
-| `weighted`          | Pravdepodobnosť podľa cieľovej hmotnosti                                                                  |
-| `round-robin`       | Cyklujte cez ciele v poradí                                                                               |
-| `context-relay`     | Odovzdajte kontext medzi cieľmi                                                                           |
-| `fill-first`        | Pred prechodom na ďalšiu vyplňte kvótu                                                                    |
-| `p2c`               | Sila dvoch možností                                                                                       |
-| `random`            | Jednotné náhodné                                                                                          |
-| `least-used`        | Vyberte si ten s najmenším počtom nedávnych použití                                                       |
-| `cost-optimized`    | Najlacnejší zdravý cieľ ako prvý                                                                          |
-| `reset-aware`       | Uvedomte si okná resetovania poskytovateľa                                                                |
-| `reset-window`      | Obnoviť smerovanie založené na okne                                                                       |
-| `expiry-first`      | Najprv miňte účet, ktorého kvóta vyprší, nevyužitá                                                        |
-| `headroom`          | Najprv väčšina zostávajúcej kvóty                                                                         |
-| `quota-weighted`    | Preskočte vyčerpané účty a potom čerpajte podľa zostávajúcej kvóty ÷ počas letu                           |
-| `strict-random`     | Skutočne jednotný (bez váženia kvality)                                                                   |
-| `auto`              | Použite 16-faktorové skórovanie (`autoCombo/`)                                                            |
-| `lkgp`              | Najprv posledný známy dobrý poskytovateľ                                                                  |
-| `context-optimized` | Najlepšie pre žiadosti s dlhým kontextom                                                                  |
-| `cache-optimized`   | Pripnite každú opakovane použiteľnú predponu výzvy k rovnakému účtu (zásahy do vyrovnávacej pamäte výzvy) |
-| `fusion`            | Paralelne rozviňte do panelu a potom syntetizujte prostredníctvom porotcu (`fusion.ts`)                   |
-| `pipeline`          | Reťazové kroky — výstup každého cieľa napája ďalší                                                        |
-| `jev`               | Prihlásenie: TypeSafe Jev pripúšťa, ktoré položky v poradí sa spúšťajú; inak vaša objednávka              |
+| Stratégia           | Správanie                                                                                    |
+| ------------------- | -------------------------------------------------------------------------------------------- |
+| `priority`          | Zoradený zoznam prvého cieľa                                                                 |
+| `weighted`          | Pravdepodobnosť podľa cieľovej hmotnosti                                                     |
+| `round-robin`       | Cyklujte cez ciele v poradí                                                                  |
+| `context-relay`     | Odovzdajte kontext medzi cieľmi                                                              |
+| `fill-first`        | Pred prechodom na ďalšiu vyplňte kvótu                                                       |
+| `p2c`               | Sila dvoch možností                                                                          |
+| `random`            | Čerstvé náhodné miešanie na požiadanie                                                       |
+| `least-used`        | Vyberte tú s najmenším počtom zaznamenaných žiadostí                                         |
+| `cost-optimized`    | Najprv najnižšia katalógová vstupná cena                                                     |
+| `reset-aware`       | Zvyšná kvóta + resetovať naliehavosť                                                         |
+| `reset-window`      | Okno kvóty, ktoré sa resetuje najskôr                                                        |
+| `expiry-first`      | Najprv miňte účet, ktorého kvóta vyprší, nevyužitá                                           |
+| `headroom`          | Najprv väčšina zostávajúcej kvóty                                                            |
+| `quota-weighted`    | Preskočte vyčerpané účty a potom čerpajte podľa zostávajúcej kvóty ÷ počas letu              |
+| `strict-random`     | Zamiešaný balíček: každý cieľ sa raz opakuje                                                 |
+| `auto`              | Použite 16-faktorové skórovanie (`autoCombo/`)                                               |
+| `lkgp`              | Najprv posledný známy dobrý poskytovateľ                                                     |
+| `context-optimized` | Najprv najväčšie známe kontextové okno                                                       |
+| `cache-optimized`   | Uprednostnite účet, ktorý pravdepodobne obsahuje predponu výzvy vo vyrovnávacej pamäti       |
+| `fusion`            | Paralelne rozviňte do panelu a potom syntetizujte prostredníctvom porotcu (`fusion.ts`)      |
+| `pipeline`          | Reťazové kroky — výstup každého cieľa napája ďalší                                           |
+| `jev`               | Prihlásenie: TypeSafe Jev pripúšťa, ktoré položky v poradí sa spúšťajú; inak vaša objednávka |
 
 ### base.ts (1170 LOC)
 
@@ -309,7 +309,7 @@ Služby sú** zamerané, jednoúčelové moduly** že psovodi skladajú. Veľké
 ### Odolnosť
 
 - `resilience.ts` — retry, backoff, breaker orchestration
-- `emergencyFallback.ts` — záložné riešenie poslednej možnosti
+- `emergencyFallback.ts` — záložná možnosť poslednej možnosti
 - `modelDeprecation.ts` — automatické smerovanie k nástupníckym modelom
 
 ### štátu
@@ -341,7 +341,7 @@ Väčšinou jeden súbor na poskytovateľa. Všetky triedy exekútorov rozširuj
 
 Poskytovatelia sa riešia cez `getExecutor(providerId)`, ktorá vráti nakonfigurovaný spúšťač. poskytovatelia OpenAI/Anthropic-compatible používajú `DefaultExecutor` (`executors/default.ts`). Správanie špecifické pre poskytovateľa (základné URL, auth hlavičky, verzia API ) je nakonfigurované v `open-sse/config/providers/`, zatiaľ čo transformácie tela požiadavky sú spracované v `open-sse/translator/`.
 
-**Vlastná URL** sa nastavuje cez konfiguráciu poskytovateľa:
+**Vlastné URL** sa nastavuje cez konfiguráciu poskytovateľa:
 
 ```ts
 // Provider config in open-sse/config/providers/

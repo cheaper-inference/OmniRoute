@@ -469,107 +469,107 @@ Ndani ya kipindi shirikishi:
 
 ---
 
-## Majukumu yanayochukua muda mrefu
+## Kazi za muda mrefu
 
-Chaguo-msingi mbili za OmniRoute zinaweza kuhujumu kimya kimya vipindi vya Codex CLI vinavyochukua saa nyingi. Hakuna hata moja ambalo ni mpangilio wa Codex CLI — yote mawili yako upande wa OmniRoute. Watumiaji wanaohamisha usanidi kutoka kwa proksi za awali zinazofungamanisha akaunti na kulemaza ukomo wa kutokuwa na shughuli mara nyingi hukumbana na yote mawili na kuhitimisha kwamba OmniRoute “haiwezi kudumisha kipindi kirefu.”
+Chaguo-msingi mbili OmniRoute zinaweza kuhujumu kimya vipindi Codex CLI saa nyingi. Wala Codex CLI kuweka — zote mbili zinaishi upande wa OmniRoute. Watumiaji wanaohamisha usanidi kutoka kwa seva mbadala za mkondo zinazobandika akaunti na kuzima vipunguzo vya kutofanya kitu mara nyingi hugusa zote mbili na kuhitimisha OmniRoute "haiwezi kudumisha kipindi kirefu."
 
-| Dalili                                                                                          | Sababu inayowezekana                                                                                           | Kidhibiti                |
-| ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| Kipindi kinaendelea kubadilisha akaunti / mwendelezo wa akiba ya kidokezo unapotea kati ya zamu | TTL ya uhusiano wa kipindi ni `0` (imelemazwa)                                                                 | `sessionAffinityTtlMs`   |
-| Muunganisho unakatika katikati ya uchanganuzi bila kidokezo kinachoonekana kwa mteja            | Kilinzi cha kutokuwa na shughuli cha mtiririko kiliwashwa baada ya dakika 10 bila kipande kutoka upande wa juu | `STREAM_IDLE_TIMEOUT_MS` |
+| Dalili                                                                                        | Uwezekano wa sababu                                                                | Knobo                    |
+| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------ |
+| Kipindi kinaendelea kubadilisha akaunti / mwendelezo wa akiba ya haraka unapotea kati ya zamu | Uhusiano wa kipindi TTL ni `0` (umezimwa)                                          | `sessionAffinityTtlMs`   |
+| Muunganisho hupotea katikati ya hoja bila kidokezo kinachomkabili mteja                       | Tiririsha walinzi wavivu waliofukuzwa baada ya dakika 10 bila sehemu ya juu ya mto | `STREAM_IDLE_TIMEOUT_MS` |
 
-Majadiliano yanayohusiana: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (kukatika kwa majukumu marefu), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (kwa nini uhusiano umezimwa kwa chaguo-msingi). Ufuatiliaji: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Majadiliano yanayohusiana: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (matone marefu ya kazi), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (kwa nini mshikamano umezimwa). Kufuatilia: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Uhusiano wa kipindi — funganisha mazungumzo moja na akaunti moja
+### 1. Uhusiano wa kikao — bandika mazungumzo moja kwenye akaunti moja
 
-**Chaguo-msingi:** `sessionAffinityTtlMs = 0` (imelemazwa).
+**Chaguomsingi:** `sessionAffinityTtlMs = 0` (walemavu).
 
-**Mahali pa kuuweka**
+**Wapi kuweka**
 
-- Dashibodi → **Mipangilio → Uelekezaji** → **Uhusiano wa kipindi** → **TTL ya uhusiano (sekunde)** (`ComboDefaultsTab`)
-- Au fanya PATCH kwa mipangilio ukitumia `sessionAffinityTtlMs` katika **milisekunde** (masafa ya Zod `0`–`86_400_000`, yaani hadi saa 24)
+- Dashibodi →** Mipangilio Njia ya →** →** Mshikamano wa kikao** →** Affinity TTL (sekunde)** (`ComboDefaultsTab`)
+- Au mipangilio PATCH iliyo na `sessionAffinityTtlMs` ndani** millisekunde** (Zod mbalimbali `0`–`86_400_000`, yaani hadi saa 24)
 
-> Ilibadilishwa jina katika #7274 kutoka `codexSessionAffinityTtlMs` iliyokuwa ya Codex pekee. Ufunguo wa zamani bado unakubaliwa kama lakabu ya kusoma pekee; usanidi mpya unapaswa kutumia `sessionAffinityTtlMs`. Sasa uhusiano unatumika kwa mtoa huduma **yeyote** mara tu TTL inapozidi `0`, si Codex pekee — angalia [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Uhusiano wa kipindi.
+> Imepewa jina jipya kwa #7274 kutoka `codexSessionAffinityTtlMs` ya Kodeksi pekee . Ufunguo wa urithi bado unakubaliwa kama lakabu ya kusoma tu; usanidi mpya unapaswa kutumia `sessionAffinityTtlMs`. Mshikamano sasa unatumika kwa** yoyote** mtoaji mara tu TTL iko juu ya `0`, sio tu Codex — ona [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → mshikamano wa Kikao.
 
-**Kinachoharibika inapobaki 0**
+**Ni nini huvunjika wakati inakaa kwa 0**
 
-Kila zamu ya mazungumzo ya Codex yenye zamu nyingi inaelekezwa kivyake na mkakati amilifu wa mchanganyiko na inaweza kuishia kwenye **akaunti tofauti kwa kila zamu**. Hilo huvunja mwendelezo wa kipindi / akiba ya kidokezo katika upande wa juu. OmniRoute huchunguza tu vichwa vya kipindi vya Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) na sehemu za mwili kama `prompt_cache_key` / `session_id` wakati TTL ni kubwa kuliko `0` (`extractSessionAffinityKey` katika `src/sse/services/auth.ts`).
+Kila zamu ya mazungumzo Codex ya zamu nyingi hupitishwa kivyake na mkakati unaotumika wa kuchana na inaweza kutua kwenye a** akaunti tofauti kwa zamu** . Hiyo inavunja kipindi cha juu / mwendelezo wa akiba ya haraka. OmniRoute inashauriana tu na vichwa vya vipindi vya Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) na sehemu za mwili kama vile `prompt_cache_key` / `session_id` wakati TTL ni kubwa kuliko `0` (`extractSessionAffinityKey` katika `src/sse/services/auth.ts`).
 
-**Inapendekezwa kwa jukumu moja linalochukua saa nyingi**
+**Imependekezwa kwa kazi moja ya saa nyingi**
 
-Weka TTL **juu ya muda unaotarajiwa wa jukumu kulingana na saa halisi** (kiwango cha juu cha UI ni **sekunde 86400** = saa 24):
+Weka TTL** juu ya urefu unaotarajiwa wa saa ya ukuta wa kazi** (UI max ni** Sekunde 86400** = masaa 24):
 
-| Muda unaotarajiwa wa jukumu | TTL ya uhusiano (UI, sekunde)     | `sessionAffinityTtlMs` |
-| --------------------------- | --------------------------------- | ---------------------- |
-| Saa chache                  | `14400` (saa 4)                   | `14400000`             |
-| Usiku kucha / ~saa 12       | `43200` (saa 12)                  | `43200000`             |
-| Siku nzima                  | `86400` (saa 24, kiwango cha juu) | `86400000`             |
+| Urefu wa kazi unaotarajiwa | Uhusiano TTL (UI, sekunde) | `sessionAffinityTtlMs` |
+| -------------------------- | -------------------------- | ---------------------- |
+| Saa chache                 | `14400` (saa 4)            | `14400000`             |
+| Usiku / ~ 12h              | `43200` (saa 12)           | `43200000`             |
+| Siku nzima                 | `86400` (saa 24, upeo)     | `86400000`             |
 
-Kuchagua kujiunga ni kwa makusudi: kulemaza uhusiano kunapendelea usawazishaji wa mzigo kati ya akaunti; kuuwezesha kunapendelea mwendelezo wa kipindi kimoja kirefu cha ajenti. Mwongozo huu **haubadilishi** chaguo-msingi — waendeshaji wanaotekeleza majukumu marefu ya Codex lazima wachague kujiunga.
+Kujijumuisha ni kwa makusudi: kuzima ushirika kunapendelea kusawazisha upakiaji katika akaunti zote; kuiwezesha kunapendelea mwendelezo kwa kipindi kimoja kirefu cha wakala. Mwongozo huu unafanya** sivyo** badilisha waendeshaji chaguo-msingi wa — wanaoendesha kazi ndefu Codex lazima uchague kuingia.
 
-### 2. Muda wa kusubiri wa kutokuwa na shughuli kwa mtiririko — usikatishe zamu tulivu za uchanganuzi
+### 2. Tiririsha kuisha kwa muda — usiue zamu za kusababu tulivu
 
-**Chaguo-msingi:** `STREAM_IDLE_TIMEOUT_MS = 600000` (dakika 10). Hurithi kutoka `REQUEST_TIMEOUT_MS` ikiwa haijawekwa; kiwango msingi kinachoshirikiwa pia ni 600000. Angalia [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Muda wa kusubiri.
+**Chaguomsingi:** `STREAM_IDLE_TIMEOUT_MS = 600000` (dakika 10). Inarithi kutoka `REQUEST_TIMEOUT_MS` wakati haijawekwa; msingi ulioshirikiwa pia ni 600000. Angalia Muda wa Muda [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) →.
 
-**Kinachoharibika katika chaguo-msingi**
+**Kinachoharibika kwa chaguo-msingi**
 
-Zamu ya Codex ya kufikiri / kutumia zana ambayo inakaa kimya kwa zaidi ya dakika 10 bila **sehemu halisi kutoka upstream** hufungwa kwa lazima na kifuatiliaji cha kutokuwa na shughuli cha SSE (`open-sse/utils/stream.ts`). Mara nyingi mteja huona muunganisho ukikatika bila maelezo yoyote — hali inayolingana na “imesimamishwa kiotomatiki bila arifa yoyote.”
+Zamu ya Codex / zana ambayo hukaa kimya kwa zaidi ya dakika 10 nayo** hakuna sehemu halisi ya mto** imefungwa kwa nguvu na walinzi wa SSE wavivu (`open-sse/utils/stream.ts`). Mteja mara nyingi huona muunganisho wazi wa — unaolingana "umesimamishwa kiotomatiki bila arifa yoyote."
 
-Maelezo muhimu: **heartbeat** ya SSE inayozalishwa na OmniRoute haiweki upya saa ya kutokuwa na shughuli. Ni sehemu halisi tu ya body kutoka upstream inayosasisha `lastChunkTime`. Muundo ambao uko kimya lakini bado “unafikiri” huonekana sawa kabisa na upstream iliyokwama kwa mtazamo wa kifuatiliaji.
+Maelezo muhimu: OmniRoute's synthetic SSE** mapigo ya moyo hayarudi** saa ya uvivu. Sehemu halisi tu ya sehemu ya juu ya mto inasasisha `lastChunkTime`. Mtindo tulivu ambao bado "unafikiri" unaonekana sawa na mto uliokwama kutoka kwa mtazamo wa walinzi.
 
-Kutokuwa na shughuli kwa body ya Undici kunakohusiana: `FETCH_BODY_TIMEOUT_MS` (pia kwa chaguo-msingi hutumia msingi huohuo wa dakika 10; `0` huizima). Kwa utiririshaji, `FETCH_TIMEOUT_MS` hushughulikia tu usanidi wa muunganisho / headers za kwanza — baada ya mtiririko kuanza kufanya kazi, kukwama kunadhibitiwa na `STREAM_IDLE_TIMEOUT_MS` na `FETCH_BODY_TIMEOUT_MS`.
+Kutofanya kazi kwa mwili wa Undici huhusiana: `FETCH_BODY_TIMEOUT_MS` (pia hubadilika kuwa msingi sawa wa dakika 10; `0` huizima). Kwa utiririshaji, `FETCH_TIMEOUT_MS` inashughulikia tu usanidi wa muunganisho / vichwa vya kwanza — mara tu mtiririko unatumika, maduka yanatawaliwa na `STREAM_IDLE_TIMEOUT_MS` na `FETCH_BODY_TIMEOUT_MS`.
 
-**Inapendekezwa kwa jukumu moja la saa nyingi**
+**Imependekezwa kwa kazi moja ya saa nyingi**
 
-Katika mazingira ya mchakato wa OmniRoute (`.env` / compose / systemd):
+Katika mazingira ya mchakato wa OmniRoute (`.env` / tunga / systemd):
 
 ```bash
-# Zima vikomo vya kutokuwa na shughuli kwa mtiririko na body kwa zamu ndefu za kufikiri
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Au viongeze viwe juu ya kipindi kirefu zaidi cha ukimya unachotarajia (thamani ni katika milisekunde):
+Au ziinue juu ya pengo refu zaidi tulivu unayotarajia (maadili ni milisekunde):
 
 ```bash
-# Mfano: ruhusu hadi saa 2 za ukimya kati ya sehemu kutoka upstream
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Anzisha upya OmniRoute baada ya kubadilisha env vars hizi.
+Anzisha tena OmniRoute baada ya kubadilisha vars hizi za env.
 
-### Utaratibu mahususi — jukumu la Codex la saa nyingi
+### Kichocheo cha zege — kazi ya Codex ya saa nyingi
 
-1. **Bandika akaunti:** Dashibodi → Mipangilio → Uelekezaji → Uhusiano wa kipindi → TTL ya uhusiano = `43200` (saa 12) au `86400` (kiwango cha juu cha saa 24).
-2. **Ongeza / zima vikomo vya kutokuwa na shughuli** katika mazingira ya OmniRoute:
+1. **Bandika akaunti:** Mipangilio ya Dashibodi → Uelekezaji → Uhusiano wa Kikao → Uhusiano → TTL = (saa `43200` ) au `86400` (max 24).
+2. **Inua / zima sehemu za kukatika bila kufanya kitu** katika mazingira ya OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Endelea kutumia `config.toml` ya kawaida ya Codex (`wire_api = "responses"`, `base_url` sahihi, `OMNIROUTE_API_KEY`) — hakuna vidhibiti vya upande wa Codex vya uhusiano/kutokuwa na shughuli kwa tabia hizi mbili.
-4. Anzisha upya OmniRoute, kisha anza jukumu refu la Codex.
+3. Weka Codex `config.toml` za kawaida (`wire_api = "responses"`, sahihi `base_url`, `OMNIROUTE_API_KEY`) — hakuna visu vya affinity/idle vya Codex-side vipo kwa tabia hizi mbili.
+4. Anzisha upya OmniRoute, kisha anza kazi ndefu Codex.
 
-### Uamuzi wa chaguo-msingi (#7287)
+### Uamuzi chaguomsingi (#7287)
 
-| Kidhibiti                | Chaguo-msingi la kutolewa | Libadilishwe katika mwongozo huu?                                                                                       |
-| ------------------------ | ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (kimezimwa)           | **Hapana** — kinaendelea kuwa cha kujiunga kwa hiari (usawazishaji wa mzigo dhidi ya mwendelezo; angalia Mjadala #5718) |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (dakika 10)      | **Hapana** — kinaendelea kuwa dakika 10 kwa trafiki ya jumla; waendeshaji wa Codex za muda mrefu hukiongeza au kukizima |
+| Knobo                    | Chaguomsingi la usafirishaji | Je, ungependa kubadilisha katika mwongozo huu?                                                            |
+| ------------------------ | ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (zimezimwa)              | **Hapana** — inasalia kuchagua kuingia (kusawazisha mzigo dhidi ya mwendelezo; angalia Majadiliano #5718) |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (dakika 10)         | **Hapana** — inabakia dakika 10 kwa trafiki ya jumla; waendeshaji wa muda mrefu Codex huinua au kuizima   |
 
-Kubadilisha mojawapo ya chaguo-msingi hizi kwa mfumo mzima kungebadilisha tabia kwa kila mteja wa instance, si Codex pekee. Andika vidhibiti hivi kwenye nyaraka; acha chaguo-msingi kama vilivyo hadi uamuzi wa wazi wa mwendeshaji useme vinginevyo.
+Kugeuza chaguo-msingi ulimwenguni kunaweza kubadilisha tabia kwa kila mteja wa mfano, sio tu Codex. Andika visu; acha chaguo-msingi pekee hadi uamuzi wa wazi wa mwendeshaji utakaposema vinginevyo.
 
-### Kutambua kukatwa kwa sababu ya kutokuwa na shughuli
+### Utambuzi wa kupunguzwa bila kazi
 
-Kifuatiliaji cha kutokuwa na shughuli kinapoanzishwa, OmniRoute huandika mstari wa log wenye muundo kama huu:
+Wakati mlinzi asiye na kitu anapowaka moto, OmniRoute huweka mstari wenye umbo kama:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Tafuta kwa grep `Idle timeout: no data from` (au msimbo `stream_idle_timeout` / jina la hitilafu `StreamIdleTimeoutError`). Sehemu ya mtoa huduma ni chochote ambacho OmniRoute ilitumia kwa ombi hilo (`codex`, kitambulisho kingine cha mtoa huduma, au `provider` ikiwa hakijulikani) — si kila mara neno halisi `codex`.
+Grep kwa `Idle timeout: no data from` (au msimbo `stream_idle_timeout` / jina la makosa `StreamIdleTimeoutError`). Sehemu ya mtoaji ni chochote OmniRoute kinachotumika kwa ombi hilo (`codex`, kitambulisho kingine cha mtoa huduma, au `provider` ikiwa haijulikani) — sio kila wakati kamba halisi `codex`.
 
 ---
 

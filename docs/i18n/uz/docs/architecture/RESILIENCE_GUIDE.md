@@ -12,56 +12,53 @@ OmniRoute uchta alohida, lekin bir-biriga bog'liq bo'lgan moslashuvchanlik mexan
 
 > **Moslashuvchanlikni almashtirish uchun Env-vs-boshqaruv paneli ustunligi.** Qo'shilishga chidamlilik muhitdan — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — o'zgartiriladi faqat _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) bilan ta'minlaydi. Mantiqiy qiymat `resilienceSettings` da saqlanib qoldi (Dashboard →** Sozlamalar → Resilience** / `PATCH /api/resilience`, `key_value` da saqlanadi) env qiymatini yutadi: normallashtirish (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) mavjud bo'lganda saqlangan mantiqiy qiymatni saqlaydi. Boshqaruv paneli allaqachon saqlangan `false` bo'lgan joylashtirishda bunday env var ni `true` ga o'rnatish, shuning uchun hech narsani o'zgartirmaydi — almashtirish tugmachasini aylantiradi** Sozlamalar → Resilience** (yoki saqlangan maydonni tozalang) o'rniga.
 
-## 1. Provayder avtomatik uzgichi (Circuit Breaker)
+## 1. Provayderning elektron to'xtatuvchisi
 
-**Qamrov:** butun provayder (masalan, `glm`, `openai`, `anthropic`).
+**Qo'llash doirasi:** butun provayder (masalan, `glm`, `openai`, `anthropic`).
 
-**Maqsad:** yuqori oqim/xizmat darajasida takroran ishlamayotgan provayderga trafik yuborishni to'xtatish.
+**Maqsad:** upstream/service darajasida qayta-qayta muvaffaqiyatsizlikka uchragan provayderga trafik yuborishni to'xtating.
 
 **Amalga oshirish:**
 
-- Asosiy klass: `src/shared/utils/circuitBreaker.ts`
-- Ulanish: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Holat API'si: `GET /api/monitoring/health`
-- Qayta tiklash API'si: `POST /api/resilience/reset`
-- O'ramlar (wrapper): `open-sse/services/accountFallback.ts`
+- Asosiy sinf: `src/shared/utils/circuitBreaker.ts`
+- Elektr simlari: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Status API: `GET /api/monitoring/health`
+- API ni tiklash: `POST /api/resilience/reset`
+- O'ramlar: `open-sse/services/accountFallback.ts`
 - DB jadvali: `domain_circuit_breakers`
 
-**Holatlar:**
+**Davlatlar:**
 
-- `CLOSED` — oddiy trafik ruxsat etiladi
-- `DEGRADED` — trafik hali ham ruxsat etiladi, lekin provayderda ko'paygan xatoliklar kuzatilmoqda; yetarli miqdordagi muvaffaqiyatli so'rovlar, amal qiladigan ulanish testi yoki oxirgi xatolik turi uchun eng uzun `OPEN` ushlab turish muddatidan keyin (uning `cooldownByKind` qiymati, aks holda `resetTimeout`, × `maxBackoffMultiplier`, kamida bitta cooldown) yangi xatolik yuz bermasa, `CLOSED` holatiga qaytadi
-- `OPEN` — provayder vaqtincha bloklangan; combo marshrutlash uni o'tkazib yuboradi
-- `HALF_OPEN` — qayta tiklanish vaqti o'tgan; sinov (probe) so'roviga ruxsat beriladi
+- `CLOSED` — normal trafik ruxsat etilgan
+- `DEGRADED` — trafigi hali ham ruxsat etilgan, ammo provayderning yuqori nosozliklari kuzatilmoqda; yetarlicha muvaffaqiyatlar, yaroqli ulanish sinovi yoki oxirgi nosozlik turi (uning `cooldownByKind` qiymati, aks holda `resetTimeout`, × `maxBackoffMultiplier`, kamida bitta sovutish vaqti) uchun eng uzoq `OPEN` ushlab turishdan keyin yangi nosozliksiz `CLOSED` ga qaytadi
+- `OPEN` — provayderi vaqtincha bloklangan; birlashgan marshrutlash uni o'tkazib yuboradi
+- `HALF_OPEN` — reset vaqti tugadi; tekshirish soʻroviga ruxsat berilgan
 
-**Sozlanadigan standart qiymatlar (`open-sse/config/constants.ts`, Boshqaruv paneli → Sozlamalar → Chidamlilik sahifasida ko'rsatiladi):**
+**Sozlanishi mumkin bo'lgan birlamchi parametrlar (`open-sse/config/constants.ts`, asboblar panelida → sozlamalari → chidamliligida ko'rsatilgan):**
 
-| Sinf    | DEGRADED bo'ladi | Ochiladi   | Qayta tiklanish vaqti |
-| ------- | ---------------- | ---------- | --------------------- |
-| OAuth   | 5 xatolik        | 8 xatolik  | 60s                   |
-| API-key | 7 xatolik        | 12 xatolik | 30s                   |
-| Local   | hosilaviy        | 2 xatolik  | 15s                   |
+| Sinf       | Buzilgan                | Ochiladi                 | Vaqt tugashini tiklash |
+| ---------- | ----------------------- | ------------------------ | ---------------------- |
+| OAuth      | 5 ta muvaffaqiyatsizlik | 8 ta muvaffaqiyatsizlik  | 60-lar                 |
+| API kaliti | 7 ta muvaffaqiyatsizlik | 12 ta muvaffaqiyatsizlik | 30s                    |
 
-`degradationThreshold` provayder qachon `DEGRADED` holatiga kirishini boshqaradi; `failureThreshold` esa qachon ochilishi va o'tkazib yuborilishini belgilaydi. Mahalliy (Local) provayder profillari hozircha Chidamlilik sozlamalari sahifasida ko'rsatilmaydi.
+`degradationThreshold` provayder `DEGRADED` kirganda nazorat qiladi; `failureThreshold` ochilganda va o'tkazib yuborilganda boshqaradi. `PROVIDER_PROFILES.local` (2 nosozlik / 15s) `open-sse/config/constants.ts` da aniqlanadi, lekin** hali simli emas** : `getProviderCategory()` faqat `oauth` yoki `apikey` qaytaradi, shuning uchun mahalliy provayderlar OAuth yoki API kalit profilidan foydalanadilar.
 
-**Uzgich kodlari:** faqat provayder darajasidagi statuslar `[408, 500, 502, 503, 504]`. Hisob (account) darajasidagi xatoliklar uchun ishga TUSHMASLIGI kerak (ko'pchilik 401/403/429 xatoliklari cooldown yoki lockout mexanizmlariga tegishli).
+**Sayohat kodlari:** faqat provayder darajasidagi holatlar `[408, 500, 502, 503, 504]`. Hisob darajasidagi xatolar uchun NOT safarini bajaring (aksariyat 401/403/429 — sovutish yoki blokirovkaga tegishli).
 
-**Dangasa tiklanish (lazy recovery):** `OPEN` muddati tugagach, `getStatus()`, `canExecute()`, `getRetryAfterMs()` holatni `HALF_OPEN` ga yangilaydi. Xuddi shu o'qishlar (va keyingi xatolik) eskirgan `DEGRADED` holatini `CLOSED` ga qaytaradi. Orqa fon taymeri kerak emas.
+**Dangasa tiklanish:** `OPEN` muddati tugagach, `getStatus()`, `canExecute()`, `getRetryAfterMs()` holatini `HALF_OPEN` ga yangilang. Xuddi shu o'qiydi (va keyingi muvaffaqiyatsizlik) eskirgan `DEGRADED` `CLOSED` ga qaytaradi. Fon taymeriga ehtiyoj yo'q.
 
 ---
 
-### Ixtiyoriy (opt-in) global Provayder Cooldown'i (oyna cheklovi)
+### Ro‘yxatdan o‘tish global provayderni kutish (oyna eshigi)
 
-To'rtinchi, **ixtiyoriy** qavat (`PROVIDER_COOLDOWN_ENABLED`, sukut bo'yicha **o'chiq**) ishlamayotgan provayderlar haqida so'rovlararo xotirani `open-sse/services/providerCooldownTracker.ts` faylida saqlaydi; combo maqsadlarini aniqlash shu xotiraga murojaat qiladi, shunda ketma-ket combo so'rovlar hozirgina ishlamay qolgan provayderni qayta-qayta tekshirib o'tirmaydi. Provayder darajasidagi yozuvlar `PROVIDER_PROFILES` oyna chekloviga bo'ysunadi:
+To'rtinchisi,** ro'yxatdan o'tish** qatlam (`PROVIDER_COOLDOWN_ENABLED`, standart** o'chirilgan** ) `open-sse/services/providerCooldownTracker.ts` dagi muvaffaqiyatsiz provayderlarning oʻzaro soʻrov xotirasini saqlaydi, birlashgan maqsadli oʻlchamlari boʻyicha maslahatlanadi, shuning uchun ketma-ket kombinatsiyalangan soʻrovlar endigina muvaffaqiyatsiz boʻlgan provayderni qayta yurishni toʻxtatadi. Provayder darajasidagi yozuvlar `PROVIDER_PROFILES` oyna eshigini hurmat qiladi:
 
-| Profil  | ishga tushadi (`providerFailureThreshold`) | ichida (`providerFailureWindowMs`) | soviydi (`providerCooldownMs`) |
-| ------- | -----------------------------------------: | ---------------------------------: | -----------------------------: |
-| OAuth   |                                       `10` |                            `15min` |                         `5min` |
-| API key |                                       `15` |                            `30min` |                        `10min` |
+| Profil     | keyin sayohatlar (`providerFailureThreshold`) | ichida (`providerFailureWindowMs`) | uchun soviydi (`providerCooldownMs`) |
+| ---------- | --------------------------------------------: | ---------------------------------: | -----------------------------------: |
+| OAuth      |                                          `10` |                            `15min` |                               `5min` |
+| API kaliti |                                          `15` |                            `30min` |                              `10min` |
 
-Chegaradan past bo'lsa, provayder sovuyapti deb hisoblan**maydi**; muvaffaqiyatli so'rov oynani tozalaydi. Ulanish darajasidagi yozuvlar (`provider:connectionId`) buning o'rniga eksponensial `minRetryCooldownMs → maxRetryCooldownMs` backoff'ini saqlaydi. Qayta belgilashlar (override):
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Regressiyadan himoya qiluvchi test: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Provayder chegaradan pastda** emas** sovutish hisobga olinadi; muvaffaqiyat oynani tozalaydi. Ulanish darajasidagi yozuvlar (`provider:connectionId`) o'rniga eksponensial `minRetryCooldownMs → maxRetryCooldownMs` orqaga qaytishini saqlaydi. Bekor qilish: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regressiya himoyasi: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Ulanishni sovutish
 
@@ -618,6 +615,21 @@ errors” bo‘limidan ko‘ring.
 
 ---
 
+## Qachonki OmniRoute o'zi erishib bo'lmaydigan bo'lsa
+
+Provayderning elektron to'xtatuvchisi, ulanishni sovutish va modelni blokirovka qilish shlyuz ichida ishlaydi. Agar mijoz shlyuzga kira olmasa, u ulanish xatosini oladi. OmniRoute bu muvaffaqiyatsizlikni to'xtata olmaydi. Mijoz qayta urinib ko'rishni va qanday xabarni ko'rsatishni hal qiladi.
+
+OmniRoute hozirda mijoz tomonidan qaytarilmani ta'minlamaydi va u uchun hech qanday siyosatni belgilamaydi. Mijozda yoki shlyuz oldida har qanday muqobil marshrutni sozlang.
+
+- `GET /api/health` autentifikatsiyasiz jonlilikni tekshiradi.
+- `GET /api/health/ping` tayyorlikni tekshiradi, shu jumladan ma'lumotlar bazasi javob beradimi.
+- `GET /api/monitoring/health` autentifikatsiya qilingan qo'ng'iroq qiluvchilarga sog'lig'i haqida chuqurroq ma'lumot beradi.
+- mijozni ishga tushirishdan oldin `omniroute launch <tool>` probe `/api/monitoring/health`. Mahalliy shlyuzni avtomatik ravishda ishga tushirishi mumkin. `--no-start` bilan, erishib bo'lmaydigan shlyuz natijasida `GatewayUnreachable` va chiqish kodi `69`.
+
+Mijozni OmniRoute dan uzish uchun [Mijoz konfiguratsiyasini qaytarishga](../guides/UNINSTALL.md#revert-client-configuration) amal qiling.
+
+---
+
 ## Nosozliklarni tuzatish
 
 - Weighted combo `503 all_targets_cooling_down` javobini qaytaradi (`Retry-After` o'rnatilgan, `diagnostics.excluded` har bir targetni `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable` bilan sanaydi) → pool sozlangan va ulangan, har bir target shunchaki chidamlilik taymeri tomonidan istisno qilingan; `[COMBO] Weighted selection: every target excluded before dispatch — …` ogohlantirishi sabablarni va qolgan soniyalarni ko'rsatadi. Xuddi shu kombodan olingan `404 no_executable_targets` hech qanday chidamlilik taymeri ishtirok etmaganini anglatadi (ishga tushiradigan hech narsa yo'q yoki har bir akkaunt mavjudlik tekshiruvidan o'tolmagan). `targetResolution.ts` da yig'ilgan istisnolardan `open-sse/services/combo/pinRecovery.ts` da qurilgan.
@@ -629,70 +641,65 @@ errors” bo‘limidan ko‘ring.
 
 ---
 
-## Runtime holati — agent uchun tezkor ma'lumotnoma
+## Ish vaqti holati — agenti tezkor ma'lumotnomasi
 
-> Agent qo'llanmasi 40k kontekst byudjetidan oshmasligi uchun `AGENTS.md` → "Resilience
-> Runtime State" bo'limidan (PR #12743) so'zma-so'z ko'chirildi. Bu yuqoridagi bo'limlarning
-> ixcham, agentga mo'ljallangan ko'rinishi; raqamlangan bo'limlar to'liq ma'lumotnoma bo'lib qoladi.
+> `AGENTS.md` → "Resilience Runtime State" (PR #12743) dan so'zma-so'z ko'chirildi, shuning uchun agent qo'llanmasi 40 ming kontekst byudjeti ostida qoladi. Bu yuqoridagi bo'limlarning siqilgan, agentga qaragan ko'rinishi; raqamlangan bo'limlar to'liq ma'lumotnoma bo'lib qoladi.
 
-OmniRoute da bir-biri bilan bog'liq, lekin alohida uchta vaqtinchalik xato mexanizmi mavjud. Marshrutlash xatti-harakatida nosozlikni qidirganda ularning qamrovini alohida saqlang. Bir qarashda tushunish uchun [3 qatlamli chidamlilik diagrammasi](../diagrams/exported/resilience-3layers.svg) ga qarang (manba: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)).
+OmniRoute uchta o'zaro bog'liq, ammo aniq vaqtinchalik nosozlik mexanizmiga ega. Marshrutlash xatti-harakatlarini tuzatishda ularning doirasini alohida saqlang. Bir qarashda xarita uchun [3 qatlamli chidamlilik diagrammasiga](../diagrams/exported/resilience-3layers.svg) (manba: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) qarang.
 
-### Provayder Circuit Breaker
+### Provayder o'chirgich
 
-**Qamrov**: butun provayder, masalan `glm`, `openai`, `anthropic`.
+**Qo'llash doirasi** : butun provayder, masalan `glm`, `openai`, `anthropic`.
 
-**Maqsad**: upstream/xizmat darajasida qayta-qayta xato berayotgan provayderga trafik yuborishni to'xtatish, shunda bitta nosog'lom provayder har bir so'rovni sekinlashtirmaydi.
+**Maqsad** : upstream/service darajasida qayta-qayta muvaffaqiyatsizlikka uchragan provayderga trafik yuborishni to'xtating, shuning uchun bitta nosog'lom provayder har bir so'rovni sekinlashtirmaydi.
 
-**Amalga oshirish**:
+**Amalga oshirish** :
 
-- Asosiy klass: `src/shared/utils/circuitBreaker.ts`
-- Chat gate/ijro ulanishi: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Runtime holati API si: `src/app/api/monitoring/health/route.ts`
-- Umumiy wrapperlar: `open-sse/services/accountFallback.ts`
-- Doimiy saqlanadigan holat jadvali: `domain_circuit_breakers`
+- Asosiy sinf: `src/shared/utils/circuitBreaker.ts`
+- Chat gate/execution simlari: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Ish vaqti holati API: `src/app/api/monitoring/health/route.ts`
+- Umumiy o'ramlar: `open-sse/services/accountFallback.ts`
+- Doimiy holat jadvali: `domain_circuit_breakers`
 
-**Holatlar** (4 ta — `src/shared/utils/circuitBreaker.ts`):
+**Shtatlar** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: normal trafik ruxsat etiladi.
-- `DEGRADED`: erta ogohlantirish zonasi — xatolar degradatsiya chegarasidan oshdi, lekin hali uzgich chegarasidan oshmadi; trafik davom etadi, dashboardlar ogohlantirishni ko'rsatadi. Yaroqli ulanish testi yoki yangi xatosiz sokin oyna uni `CLOSED` holatiga qaytaradi (oyna `docs/architecture/RESILIENCE_GUIDE.md` da keltirilgan).
-- `OPEN`: provayder vaqtincha bloklangan; chaqiruvchilar provider-circuit-open javobini oladi yoki combo marshrutlash boshqa targetga o'tadi.
-- `HALF_OPEN`: reset timeout muddati o'tgan; sinov so'roviga ruxsat beriladi. Muvaffaqiyat uzgichni yopadi, xato uni qayta ochadi.
+- `CLOSED`: oddiy trafikka ruxsat beriladi.
+- `DEGRADED`: erta ogohlantirish diapazonining — nosozliklari buzilish chegarasini kesib o'tdi, lekin hali to'xtatuvchi chegarani emas; trafik hali ham oqadi, asboblar panelida ogohlantirish ko'rsatiladi. Yaroqli ulanish sinovi yoki yangi nosozliksiz jim oyna uni `CLOSED` ga qaytaradi (`docs/architecture/RESILIENCE_GUIDE.md` oynasi mavjud).
+- `OPEN`: provayder vaqtincha bloklangan; qo'ng'iroq qiluvchilar provayder-ochiq javob oladi yoki birlashtirilgan marshrutlash boshqa maqsadga o'tadi.
+- `HALF_OPEN`: qayta o'rnatish vaqti tugadi; tekshirish so'roviga ruxsat bering. Muvaffaqiyat to'xtatuvchini yopadi, muvaffaqiyatsizlik yana ochadi.
 
-**Standart qiymatlar** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, `src/lib/resilience/settings.ts` dagi `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` orqali ishlatiladi → `src/sse/handlers/chatHelpers.ts` dagi `getCircuitBreaker(provider, …)`). Butun provayder uzgichi `circuitBreakerThreshold` / `circuitBreakerReset` asosida ishlaydi:
+**Standartlar** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` orqali `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` da `src/sse/handlers/chatHelpers.ts` iste'mol qilinadi). Butun provayder to'xtatuvchisi `circuitBreakerThreshold` / `circuitBreakerReset` da ishlaydi:
 
-| Profil     | degradatsiya | ochilish (`circuitBreakerThreshold`) | tiklash (`circuitBreakerReset`) |
-| ---------- | -----------: | -----------------------------------: | ------------------------------: |
-| OAuth      |          `5` |                                  `8` |                           `60s` |
-| API kaliti |          `7` |                                 `12` |                           `30s` |
-| Lokal      |     (hosila) |                                  `2` |                           `15s` |
+| Profil     | da yomonlashadi | (`circuitBreakerThreshold`) da ochiladi | qayta o'rnatish (`circuitBreakerReset`) |
+| ---------- | --------------: | --------------------------------------: | --------------------------------------: |
+| OAuth      |             `5` |                                     `8` |                                   `60s` |
+| API kaliti |             `7` |                                    `12` |                                   `30s` |
 
-`PROVIDER_PROFILES` shuningdek `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 daq) va `providerCooldownMs` (5/10/1 daq) ni ham belgilaydi: bular **ixtiyoriy global Provider Cooldown ning oyna darvozasi**ni ta'minlaydi (`PROVIDER_COOLDOWN_ENABLED`, standart holda o'chiq) — `open-sse/services/providerCooldownTracker.ts` dagi provayder darajasidagi yozuv faqat `providerFailureWindowMs` ichida `providerFailureThreshold` ta xatodan keyin sovush deb hisoblanadi va keyin `providerCooldownMs` davomida sovuydi. Ular faol uzgichning chegaralari EMAS — ularni uzgich xatti-harakatini kutib sozlamang. Har bir standart qiymatni `OMNIROUTE_PROVIDER_BREAKER_*` va `OMNIROUTE_CIRCUIT_BREAKER_*` muhit o'zgaruvchilari orqali bekor qilish mumkin; runtime uchun aniq ma'lumotnoma jadvali `docs/architecture/RESILIENCE_GUIDE.md` da joylashgan.
+`local` profili (`2` muvaffaqiyatsizliklari / `15s`) `PROVIDER_PROFILES` da ham mavjud, lekin u to'xtatuvchiga ulanmagan: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) faqat `oauth` yoki `apikey` qabul qiladi va `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) ikkitadan birini qaytaradi (ro'yxatdan o'tmagan provayderlar `apikey` oladi).
 
-Faqat provayder darajasidagi xato holatlari provayder uzgichini ishga tushirishi kerak:
+`PROVIDER_PROFILES` shuningdek `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min ) va `providerCooldownMs` (5/10/1 min ) — OAuth/API key/local ham belgilaydi, bu yerda mahalliy qiymatlar yuqoridagi sababga ko‘ra inert bo‘ladi: bu quvvat** global provayderni kutish vaqtining oyna eshigi** (`PROVIDER_COOLDOWN_ENABLED`, sukut bo'yicha o'chirilgan) — `open-sse/services/providerCooldownTracker.ts` -dagi provayder darajasidagi yozuv faqat `providerFailureWindowMs` ichidagi `providerFailureThreshold` nosozliklaridan keyin sovutish deb hisoblanadi va keyin `providerCooldownMs` uchun soviydi. Ular NOT jonli to'xtatuvchining chegaralari — ularni to'xtatuvchining xatti-harakatiga moslashtirmaydi. Har bir standart `OMNIROUTE_PROVIDER_BREAKER_*` va `OMNIROUTE_CIRCUIT_BREAKER_*` env varslari orqali bekor qilinadi; ish vaqtining aniq mos yozuvlar jadvali `docs/architecture/RESILIENCE_GUIDE.md` da yashaydi.
+
+Faqat provayder darajasidagi nosozlik holatlari provayder to'xtatuvchisini o'chirib qo'yishi mumkin:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Ko'pchilik `401`, `403` yoki `429` holatlari kabi oddiy akkaunt/kalit/model xatolari uchun butun provayder uzgichini ishga tushirmang. Ular odatda connection cooldown yoki model lockout ga tegishli. Umumiy API-kalit provayderining `403` holati terminal provayder/akkaunt xatosi deb tasniflanmagan taqdirda tiklanadigan bo'lishi kerak.
+Aksariyat `401`, `403` yoki `429` holatlari kabi oddiy account/key/model xatolari uchun butun provayderni oʻchirgichni oʻchirmang. Ular odatda ulanishni sovutish yoki model blokirovkasiga tegishli. Umumiy API-kalit provayderi `403` agar u terminal provider/account xatosi sifatida tasniflanmasa, qayta tiklanishi kerak.
 
-Breaker fon taymeridan emas, balki dangasa (lazy) tiklashdan foydalanadi. `OPEN` muddati
-tugaganda, `getStatus()`, `canExecute()` va `getRetryAfterMs()` kabi o'qishlar holatni
-`HALF_OPEN` ga yangilaydi, shuning uchun dashboardlar va combo nomzod yaratuvchilar muddati
-o'tgan provayderni abadiy chetda qoldirmaydi.
+To'xtatuvchi fon taymerini emas, balki dangasa tiklashdan foydalanadi. `OPEN` muddati tugagach, `getStatus()`, `canExecute()` va `getRetryAfterMs()` kabi oʻqishlar holatni `HALF_OPEN` ga yangilaydi, shuning uchun asboblar paneli va kombinatsiyalangan nomzod quruvchilar muddati oʻtgan provayderni abadiy chiqarib tashlamaydilar.
 
-### Ulanish cooldowni
+### Ulanishni sovutish
 
-**Qamrov**: bitta provayder ulanishi/akkaunti/kaliti.
+**Qo'llash doirasi** : bitta provayder connection/account/key.
 
-**Maqsad**: bir provayderning boshqa ulanishlari so'rovlarga xizmat ko'rsatishda davom
-etishi uchun, bitta nosoz kalit/akkauntni vaqtincha o'tkazib yuborish.
+**Maqsad** : bir xil provayder uchun boshqa ulanishlarga soʻrovlarga xizmat koʻrsatishda davom etishiga ruxsat berib, bitta yomon key/account vaqtincha oʻtkazib yuboring.
 
-**Amalga oshirish**:
+**Amalga oshirish** :
 
-- Yozish/yangilash yo'li: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Akkauntni tanlash/filtrlash: `src/sse/services/auth.ts::getProviderCredentials...`
-- Cooldown hisoblash: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Write/update yo'li: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Hisob selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Sovutish muddatini hisoblash: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Sozlamalar: `src/lib/resilience/settings.ts`
 
 Provayder ulanishlaridagi muhim maydonlar:
@@ -706,69 +713,50 @@ errorCode;
 backoffLevel;
 ```
 
-Akkaunt tanlash paytida ulanish quyidagi holatda o'tkazib yuboriladi:
+Hisobni tanlashda ulanish quyidagi hollarda o'tkazib yuboriladi:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Cooldownlar ham dangasa ishlaydi: `rateLimitedUntil` o'tmishda qolganda, ulanish yana
-tanlashga mos bo'ladi. Muvaffaqiyatli foydalanilganda, `clearAccountError()` `testStatus`,
-`rateLimitedUntil`, xato maydonlari va `backoffLevel` qiymatlarini tozalaydi.
+Sovutish vaqti ham dangasa: `rateLimitedUntil` o'tmishda bo'lsa, ulanish yana mos bo'ladi. Muvaffaqiyatli foydalanishda `clearAccountError()` `testStatus`, `rateLimitedUntil`, xato maydonlari va `backoffLevel` ni tozalaydi.
 
-Standart ulanish cooldown xatti-harakati:
+Birlamchi ulanishni sovutish harakati:
 
-- OAuth asosiy cooldowni: `5s`.
-- API-kalit asosiy cooldowni: `3s`.
-- API-kalit uchun `429` javobida upstream qayta urinish ko'rsatmalariga (`Retry-After`,
-  reset sarlavhalari yoki tahlil qilinadigan reset matni) mavjud bo'lganda ustunlik
-  berish kerak.
-- Takrorlanuvchi tiklanadigan xatolar eksponensial backoffdan foydalanadi:
+- OAuth bazasini sovutish: `5s`.
+- API-kalit bazasini sovutish: `3s`.
+- API-kalit `429` mavjud bo'lganda yuqori oqimga oid maslahatlarni (`Retry-After`, sarlavhalarni tiklash yoki qayta o'rnatish matni) afzal ko'rishi kerak.
+- Qayta tiklanadigan nosozliklar eksponensial orqaga qaytishdan foydalanadi:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Thundering-herdga qarshi himoya bir xil ulanishda bir vaqtda yuzaga keladigan xatolarning
-cooldownni qayta-qayta uzaytirishi yoki `backoffLevel`ni ikki marta oshirib yuborishining
-oldini oladi.
+Momaqaldiroqqa qarshi qo'riqchi bir xil ulanishda bir vaqtning o'zida sodir bo'ladigan nosozliklarni qayta-qayta sovutish yoki ikki marta `backoffLevel` oshirishni oldini oladi.
 
-Yakuniy holatlar cooldown emas. `banned`, `expired` (u faqat `EXPIRED_RETRY_MAX` orqali
-N ta cheklangan qayta urinishdan keyin yakuniy holatga aylanadi) va `credits_exhausted`
-ma'lumotlar/sozlamalar o'zgartirilguncha yoki operator ularni qayta o'rnatguncha mavjud
-bo'lmasligi uchun mo'ljallangan. Yakuniy holatlarning ustiga vaqtinchalik cooldown
-holatini yozmang.
+Terminal holatlar sovutish davri emas. `banned`, `expired` (faqat `EXPIRED_RETRY_MAX` orqali N chegaralangan qayta urinishdan so‘ng terminalga aylanadi) va `credits_exhausted` credentials/settings o‘zgarmaguncha yoki operator ularni qayta tiklamaguncha mavjud bo‘lmay qolishi mo‘ljallangan. Vaqtinchalik sovutish holatiga ega terminal holatlarini qayta yozmang.
 
-### Model bloklanishi
+### Modelni blokirovka qilish
 
-**Qamrov**: provayder + ulanish + model.
+**Qo'llash doirasi** : provayder + ulanishi + modeli.
 
-**Maqsad**: ushbu ulanish uchun faqat bitta model mavjud bo'lmasa yoki kvota bilan
-cheklangan bo'lsa, butun ulanishni o'chirib qo'ymaslik.
+**Maqsad** : faqat bitta model mavjud bo'lmasa yoki u ulanish uchun kvotalar cheklangan bo'lsa, butun ulanishni o'chirib qo'ymang.
 
 Misollar:
 
-- Har bir model bo'yicha kvota qo'llab, `429` qaytaradigan provayderlar.
-- Bitta topilmayotgan model uchun `404` qaytaradigan mahalliy provayderlar.
-- Tanlangan Grok rejimlari kabi provayderga xos rejim/model ruxsat xatolari.
+- Har bir model uchun kvota provayderlari `429` qaytarmoqda.
+- Mahalliy provayderlar bitta etishmayotgan model uchun `404` qaytarmoqda.
+- Tanlangan Grok rejimlari kabi provayderga xos mode/model ruxsati xatosi.
 
-Model bloklanishi `open-sse/services/accountFallback.ts` da joylashgan bo'lib, bir xil
-ulanishga boshqa modellarga xizmat ko'rsatishda davom etish imkonini beradi.
+Model blokirovkasi `open-sse/services/accountFallback.ts` ishlaydi va bir xil ulanish boshqa modellarga xizmat ko'rsatishda davom etish imkonini beradi.
 
-### Nosozliklarni tuzatish bo'yicha ko'rsatmalar
+### Nosozliklarni tuzatish bo'yicha qo'llanma
 
-- Agar provayderning barcha kalitlari o'tkazib yuborilsa, provayder breaker holatini va
-  har bir ulanishning `rateLimitedUntil`/`testStatus` qiymatlarini tekshiring.
-- Agar provayder qayta o'rnatish oynasidan keyin ham doimiy ravishda chiqarib
-  yuborilgandek ko'rinsa, kod `getStatus()`/`canExecute()` dan foydalanish o'rniga xom
-  `state`ni o'qiyotganligini tekshiring.
-- Agar bitta provayder kaliti ishlamasa, lekin boshqalari ishlashi kerak bo'lsa, provayder
-  breakeri o'rniga ulanish cooldownini afzal ko'ring.
-- Agar faqat bitta model ishlamasa, ulanish cooldowni o'rniga model bloklanishini afzal
-  ko'ring.
-- Agar holat o'z-o'zidan tiklanishi kerak bo'lsa, unda kelajakdagi vaqt belgisi/qayta
-  o'rnatish taymauti hamda muddati o'tgan holatni yangilaydigan o'qish yo'li bo'lishi
-  kerak. Doimiy holatlar qo'lda ma'lumot yoki konfiguratsiya o'zgarishlarini talab qiladi.
+- Agar provayder uchun barcha kalitlar o'tkazib yuborilgan bo'lsa, ikkala provayderning o'chiruvchi holatini va har bir ulanishning `rateLimitedUntil`/`testStatus` ni tekshiring.
+- Qayta tiklash oynasidan keyin provayder butunlay chiqarib tashlangan bo'lsa, kod `getStatus()`/`canExecute()` dan foydalanish o'rniga raw `state` o'qiyotganligini tekshiring.
+- Agar bitta provayder kaliti ishlamay qolsa, lekin boshqalar ishlashi kerak bo'lsa, provayderni to'xtatuvchidan ko'ra ulanishning sovishini afzal qiling.
+- Agar faqat bitta model muvaffaqiyatsiz bo'lsa, ulanishni sovutishdan ko'ra modelni blokirovka qilishni afzal ko'ring.
+- Agar davlat o'zini o'zi tiklashi kerak bo'lsa, u kelajakda timestamp/reset vaqti va muddati o'tgan holatni yangilaydigan o'qish yo'liga ega bo'lishi kerak. Doimiy holatlar qo'lda hisob ma'lumotlarini yoki konfiguratsiyani o'zgartirishni talab qiladi.
 
 ---
 

@@ -53,7 +53,7 @@ Nuair a bhíonn scaoileadh á réiteach, osclaítear saincheist marcála lipéad
 Seiceáil le haghaidh reo oscailte sula nglacfaidh tú leis go bhfuil an brainse atá uait in cumasctha:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Tá meicnic chumaisc (úinéir `queue` lipéad → Mergify) doiciméadaithe i [MERGE_TRAIN.md](./MERGE_TRAIN.md).

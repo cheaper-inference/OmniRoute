@@ -5,36 +5,26 @@
 ---
 
 > **Sors tal-verità:** `src/lib/guardrails/`
-> **Aġġornat l-aħħar:** 2026-10-17 — v3.8.52 (miżjud [Kopertura u limiti](#coverage-and-limits):
-> liema rotot u mogħdijiet ta' rispons jilħqu l-hooks, il-headers magħquda tad-diżattivazzjoni (#16412), il-modalità block tal-injezzjoni bħala limitu obbligatorju (#16413), u x'jara rispons qabel il-post-call)
 
-Il-guardrails jinfurzaw trasformazzjonijiet ta' sigurtà, politika u kontenut fil-limitu
-bejn OmniRoute u l-fornituri upstream. Kull guardrail jista' jispezzjona (u
-b'mod opzjonali jirrifjuta, jittrasforma, jew jannota) il-payloads tat-talbiet
-(`preCall`) u r-risponsi upstream (`postCall`).
+Guardrails jinfurzaw is-sikurezza, il-politika, u t-trasformazzjonijiet tal-kontenut fil-konfini bejn OmniRoute u fornituri upstream. Kull guardrail jista' jispezzjona (u b'mod fakultattiv jirrifjuta, jittrasforma, jew jannota) it-tagħbija tat-talba (`preCall`) u tweġibiet upstream (`postCall`).
 
-Is-sistema hija **fail-open**: jekk guardrail jarmi eċċezzjoni waqt l-eżekuzzjoni,
-ir-reġistru jirrekordja l-iżball u jkompli mal-guardrail li jmiss minflok ifalli
-t-talba. Il-block huwa deċiżjoni espliċita (`block: true`), qatt aċċident.
-L-unika eċċezzjoni hija talba abortita: meta s-`signal` tal-sejjieħ tiġi abortita,
-guardrail li jarmi jirrifjuta r-run tal-hook minflok jiġi mqabbez.
+Is-sistema hija** fail-miftuħ** : jekk guardrail jitfa' waqt l-eżekuzzjoni, ir-reġistru jirreġistra l-iżball u jkompli bil-guardrail li jmiss aktar milli jfalli t-talba. L-imblukkar huwa deċiżjoni espliċita (`block: true`), qatt inċident. L-eċċezzjoni waħda hija talba abortita: meta `signal` ta' min iċempel jiġi abortit, guardrail li jitfa' jirrifjuta l-ġirja tal-ganċ minflok ma tinqabeż.
 
-Il-hooks **ma** jimxux fuq kull rota jew kull rispons. Aqra
-[Kopertura u limiti](#coverage-and-limits) qabel tafda fuq guardrail bħala
-kontroll ta' sigurtà.
+Il-ganċijiet jagħmlu** le** jimxu fuq kull rotta jew kull rispons. Aqra [Kopertura u limiti](#coverage-and-limits) qabel ma sserraħ fuq guardrail bħala kontroll tas-sigurtà.
 
 ## Guardrails Mibnija
 
-Ir-reġistru jgħabbi awtomatikament sitt guardrails f'ordni ta' prijorità mal-importazzjoni (ara `registry.ts` → `registerDefaultGuardrails()`):
+Ir-reġistru jgħabbi awtomatikament dawn il-guardrails f'ordni ta' prijorità mal-importazzjoni (ara `registry.ts` → `registerDefaultGuardrails()`):
 
-| Prijorità | Isem                | Stadju(i)      | Fajl                  |
-| --------- | ------------------- | -------------- | --------------------- |
-| `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`       | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`      | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| Prijorità | Isem                | Stadju(i)      | Fajl                      |
+| --------- | ------------------- | -------------- | ------------------------- |
+| `1`       | `agent-guard`       | `preCall`      | `agentGuard/guardrail.ts` |
+| `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`         |
+| `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`          |
+| `7`       | `video-bridge`      | `preCall`      | `videoBridge.ts`          |
+| `10`      | `pii-masker`        | `pre` + `post` | `piiMasker.ts`            |
+| `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`      |
+| `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts`     |
 
 Jiġru numri ta' prijorità aktar baxxa** l-ewwel** .
 
@@ -126,8 +116,8 @@ Fluss:
 1. Issolvi `supportsAudio` permezz ta `getResolvedModelCapabilities()`. Metadejta espliċita tal-fornitur-reġistru tirbaħ, imbagħad metadejta tal-mudell statiku, imbagħad `modalities_input` sinkronizzat . Lista ta' input iddikjarata mingħajr `audio` hija `false`; l-ebda evidenza ta' kapaċità ma tibqa' `null`. Kemm `false` kif ukoll `null` jattivaw il-pont konservattiv, filwaqt li `true` jevitah.
 2. Issolvi s-settings `modalityBridgeAudio*` u estratt partijiet awdjo ta' l-ogħla livell li jistgħu jiġu spliceable minn kull messaġġ permezz tad-ditekter `detectMediaParts()` kondiviż. Forom tal-wajer appoġġjati huma OpenAI `input_audio`, `audio_url`, u `source.media_type: "audio/*"`. Awdjo nested jiġi skopert għar-routing iżda mhux imneħħi mill-mogħdija ta 'splice. Ix-xoghol huwa limitat minn `modalityBridgeAudioMaxClips`; partijiet aktar tard jibqgħu mhux mittiefsa.
 3. Onora `provider/model` konfigurat, jew ħalli `selectAudioBridgeModel()` jimxi `AUDIO_TRANSCRIPTION_PROVIDERS` f'ordni ta' katalgu stabbli u agħżel l-ewwel mudell b'kredenzjali ta' fornitur attiv li jista' jintuża.
-4. `callAudioTranscription()` jikkonverti base64/data-URI awdjo għal `file` b'ħafna partijiet, jew tniżżel `audio_url` remot permezz tal-gwardja tal-ħruġ għall-pubbliku biss DNS pinning u 25 MB marbut. Imbagħad POSTs il-fajl u l-mudell magħżul għall-awto-loop `/v1/audio/transcriptions` lokali, awtentikati `resolveSelfLoopBearer()`. Ir-rotta tat-traskrizzjoni eżistenti twettaq tfittxija normali tal-kredenzjali, ġestjoni cooldown/rate-limit, u dispaċċ tal-fornitur.
-5. Sejħiet b'suċċess jissostitwixxu l-partijiet tagħhom `[Audio N]: <transcript>`. Is-sejħiet jimxu `Promise.allSettled`: falliment individwali jippreserva dik il-parti tal-awdjo oriġinali (kuntratt #4012 ). Jekk kull sejħa tonqos u l-mira hija ppruvata `supportsAudio === false`, il-partijiet isiru `[Audio N]: (unavailable — no STT provider connected)` (kuntratt #8430 ). Għal mira mhux magħrufa (`null`), riżultat ta’ falliment kollu jibqa’ mhux mimsus. Mira ppruvata ta' test biss mingħajr kredenzjali STT użabbli tirċievi l-istess stub espliċitu mingħajr ma toħroġ sejħa tan-netwerk.
+4. `callAudioTranscription()` tikkonverti base64/data-URI awdjo għal `file` b'ħafna partijiet, jew tniżżel `audio_url` remot permezz tal-gwardja tal-ħruġ għall-pubbliku biss DNS pinning u 25 MB marbut. Imbagħad POSTs il-fajl u l-mudell magħżul għall-awto-loop `/v1/audio/transcriptions` lokali, awtentikati `resolveSelfLoopBearer()`. Ir-rotta tat-traskrizzjoni eżistenti twettaq tfittxija normali tal-kredenzjali, ġestjoni cooldown/rate-limit, u dispaċċ tal-fornitur.
+5. Sejħiet b'suċċess jissostitwixxu l-partijiet tagħhom `[Audio N]: <transcript>`. Is-sejħiet jimxu `Promise.allSettled`: falliment individwali jippreserva dik il-parti tal-awdjo oriġinali (kuntratt #4012 ). Jekk kull sejħa tfalli u l-mira hija ppruvata `supportsAudio === false`, il-partijiet isiru `[Audio N]: (unavailable — no STT provider connected)` (kuntratt #8430 ). Għal mira mhux magħrufa (`null`), riżultat ta' falliment kollu jibqa' mhux mimsus. Mira ppruvata ta' test biss mingħajr kredenzjali STT użabbli tirċievi l-istess stub espliċitu mingħajr ma toħroġ sejħa tan-netwerk.
 
 Traskrizzjonijiet b'suċċess jużaw il-modality Bridge LRU/TTL cache madwar il-proċess kollu. Iċ-ċavetta tgħaqqad ir-referenza tal-awdjo, it-tikketta tal-operazzjoni `audio-transcription` stabbli, u l-mudell STT magħżul; fallimenti qatt ma huma cache. It-tentattivi tal-awdjo jaġġornaw il-counters kondiviżi `bridged`, `cacheHits`, `failures`, u `lastUsedAt`. Risposti trasformati jġorru `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; talbiet mhux mittiefsa ma jirċievux segment Audio Bridge.
 
@@ -290,11 +280,11 @@ Jiskopri strutturi kontradittorji f'kontenut fornut mill-utent u jinforza l-poli
 
 Sorsi ta' skoperta:
 
-1. `sanitizeRequest()` minn `@/shared/utils/inputSanitizer` (shared detector sett użat x'imkien ieħor fil-pipeline).
+1. `sanitizeRequest()` minn `@/shared/utils/inputSanitizer` (sett ta' detector kondiviż użat x'imkien ieħor fil-pipeline).
 2. Built-in `DEFAULT_GUARD_PATTERNS` (bħalissa `system_override_inline` u `markdown_system_block`, it-tnejn `high` severità).
 3. `customPatterns` mhux obbligatorju mgħoddi permezz ta' għażliet tal-kostruttur (kordi, regex, jew rekords `{ name, pattern, severity }` ).
 
-`mode === "block"`** u** mill-inqas skoperta waħda tilħaq il-limitu tas-severità, `preCall` jirritorna `{ block: true, message: "Request rejected: suspicious content detected" }`. Fil-modi `warn`/`log` il-guardrail jirreġistra iżda jippermetti s-sejħa. Il-helper `evaluatePromptInjection()` kondiviż huwa esportat ukoll għal min iċempel li jeħtieġ li jevalwaw il-prompts mingħajr ma jgħaddu mir-reġistru.
+`mode === "block"`** u** mill-inqas skoperta waħda tilħaq il-limitu tas-severità, `preCall` jirritorna `{ block: true, message: "Request rejected: suspicious content detected" }`. Fil-modi `warn`/`log` il-guardrail jirreġistra iżda jippermetti s-sejħa. Il-helper `evaluatePromptInjection()` kondiviż huwa esportat ukoll għal dawk li jċemplu li jeħtieġu jevalwaw il-promps mingħajr ma jgħaddu mir-reġistru.
 
 **Skann marbut (v3.8.20):** id-ditekter jispezzjona biss il-** l-ewwel 16 KB** tat-test fil-pront magħqud — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bytes) `src/shared/utils/inputSanitizer.ts`. Kemm `detectInjection()` kif ukoll `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` qabel ma tħaddem il-linja tal-mudell. Id-direttivi ta' injezzjoni joqogħdu ħdejn il-parti ta' fuq ta' input, għalhekk dan jillimita r-reġex CPU/GC fuq payloads ta' bosta mijiet ta' KB mingħajr skoperta li tiddgħajjef (cf. #3932, #4041).
 
@@ -305,9 +295,83 @@ Timxi fuq** it-tnejn** stadji, l-aħħar fil-katina default (prijorità `95`). T
 - **Opt-in biss** , l-istess konvenzjoni bħal PII redaction (Hard Rule #20-adjacent): disabled sakemm `settings.credentialRedactionEnabled === true`** jew** `CREDENTIAL_REDACTION_ENABLED=true`. Biha mitfija, il-guardrail huwa no-op — li qatt ma jimblokka u qatt ma jerġa jikteb.
 - `redactCredentials()` jimxi s-siġra payload/response sħiħa (`walkValue()`, prototip-pollution-safe, cycle-safe permezz `WeakSet`) u tissostitwixxi logħbiet b'post `[REDACTED:<type>]`, billi tikklona biss il-fergħat li fil-fatt inbidlu.
 - `CREDENTIAL_PATTERNS` tkopri ċwievet tal-fornitur LLM (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate ), tokens VCS/SaaS (GitHub, Slack, Linear, Notion, npm, Postman, Discord), ċwievet tal-ħlas (Stripe, Square, Twilio, SendGrid),AWS access Mailgun), ċwievet privati / JWTs, kordi ta 'konnessjoni li jkollhom kredenzjali (`mongodb://user:pass@...`, eċċ.), u mudell ġeneriku `Authorization`/`x-api-key`/`api-key`/`apikey` header-value. Iċ-ċwievet f'forma ta' header (`authorization`, `x-api-key`, `api-key`, `apikey`) huma redatti strutturalment (valur biss, prefiss tal-iskema bħal `Bearer `/`Basic ` ippreservat) aktar milli permezz tar-reġex tat-test ġeneriku.
+- Valur wara tikketta jiġi mgħotti anki meta ma jkollu l-ebda prefiss tal-fornitur: `DB_PASSWORD=…`, `AWS_SECRET_ACCESS_KEY=…`, `client_secret: …`, `?api_key=…` (tikketti: `password`, `passwd`, `secret`, `secret_key`, `secret_access_key`, `api_key`, `access_token`, `refresh_token`, `auth_token` such as, with `DB_` prefix ). It-tikketta u s-separatur jibqgħu u l-valur isir `[REDACTED:secret]`. Il-valur jeħtieġ 12-il karattru jew aktar, għalhekk proża bħal `password: required` tibqa' tinqara; valur li jibda `$` jew `%` (referenza varjabbli) jitħalla waħdu.
 - Il-guardrail qatt ma jimblokka; jerġa jikteb biss (`modifiedPayload` / `modifiedResponse`) u jannota (`meta.credentialsRedacted`, `meta.count`).
 
 Gwardja tar-rigressjoni: `tests/unit/credential-masker-guardrail.test.ts`.
+
+### Agent Guard (`agentGuard/`)
+
+Il-gwardja tal-aġent jikklassifika lill-klijent wara talba lill-fornitur `claude` jew `anthropic` mill-headers tiegħu. `AGENT_GUARD_MODE` jieħu tliet valuri: `off` (default), `monitor` u `block`. `off`, l-ebda header ma jinqara u xejn ma jiġi illoggjat.
+
+L-aġenti uffiċjali huma rikonoxxuti minn dawn l-intestaturi (meta mqabbla ma’ każi mhux sensittivi):
+
+- Claude Code: a `User-Agent` li jibda `claude-cli/` jew `claude-code/`, jew `x-app: cli` flimkien ma' header `anthropic-beta` jew `User-Agent` li fih `claude`.
+- Anthropic SDKs: a `User-Agent` li jibda bi `Anthropic/`, `AsyncAnthropic/`, `anthropic-typescript/` `anthropic-python/`.
+
+Il-livell default tal-logger fil-produzzjoni (`info`) juri ż-żewġ tipi ta 'linja. `APP_LOG_LEVEL=warn` jibqgħu biss il-linji magħrufa ta’ partijiet terzi.
+
+Log fields: `agent`, `thirdParty`, `provider`, `model`, `apiKeyId`, `userAgent`, `xApp`, `anthropicBeta`, `xTitle`, `referer`, `stainless`. Il-valuri tal-header u s-sekwenza tal-mudell huma limitati għal 200 karattru. Ir-referer jiġi illoggjat mingħajr is-sekwenza tal-mistoqsijiet, il-framment u l-informazzjoni għall-utent tiegħu. Iċ-ċavetta API, `Authorization`, `x-api-key` u l-cookies qatt ma jinqraw.
+
+Fajls: `src/lib/guardrails/agentGuard/classifier.ts`, `src/lib/guardrails/agentGuard/policy.ts`, `src/lib/guardrails/agentGuard/guardrail.ts`, `src/lib/guardrails/agentGuard/settings.ts`, `src/lib/guardrails/agentGuard/logLine.ts`, `src/lib/guardrails/agentGuard/enforcement.ts`, `src/sse/handlers/chat/agentGuardGate.ts`.
+
+**Limiti tal-klassifikazzjoni (iż-żewġ modi):**
+
+- Agent mibni fuq SDK ufficjali li ma jibghat ebda `X-Title`, `HTTP-Referer` jew `User-Agent` proprju qisu SDK. `x-stainless-*` headers waħedhom ma jagħmlux klijent uffiċjali.
+- L-aġenti ta' partijiet terzi huma mqabbla b'tokens ta' kliem sħiħ `User-Agent`, `X-Title` u `HTTP-Referer` (jew `Referer`). Klijenti mhux ikkwotati jidhru bħala `unknown`.
+- It-talbiet minn klijenti bbażati fuq il-browser iġorru `User-Agent` tal-brawżer stess u jidhru bħala mhux identifikati, sakemm `X-Title` jew ir-referer ma jġorrux token magħruf ta' parti terza.
+- Linja waħda ta' log għal kull talba osservata: stenna volum f'każijiet okkupati.
+
+#### Monitor
+
+`AGENT_GUARD_MODE=monitor`, talbiet li l-istring mudell tagħhom ismijiet il-fornitur `claude` jew `anthropic` huma kklassifikati mill-intestaturi tal-klijenti tagħhom. Meta l-klijent ma jkunx aġent uffiċjali, tinkiteb linja waħda ta' log `tag: "AGENT_GUARD"`. Huwa `warn` għal aġent ta' parti terza magħrufa u `info` għal klijent mhux identifikat. Prijorità `1`: il-guardrail jaqra biss headers u qatt ma tbiddel it-tagħbija, u għalhekk taħdem qabel il-pontijiet tal-midja. `monitor` qatt ma jimblokka.
+
+**Limiti ta `monitor`:**
+
+- Kull sinjal huwa header ikkontrollat mill-klijent. Din hija osservazzjoni, mhux kontroll tal-aċċess.
+- Il-fornitur jinqara mis-sekwenza tal-mudell qabel ma jiġi solvut il-mudell: `provider/model`, alias tal-fornitur bħal `cc/…`, u ids share-share (`qtSd/<group>/<provider>/<model>`). Ids tal-mudelli vojta, psewdonimi tal-mudell, combos u normalizzazzjoni tar-rotot aktar tard mhumiex segwiti. Dawk it-talbiet ma jiġux osservati.
+- Min iċempel jista’ jaqbeżha għal kull talba permezz tal-kanali tad-diżattivazzjoni tar-reġistru (ara [Inżabilitar tal-Guardrails Per-Request](#disabling-guardrails-per-request) ). Talbiet maqbuża mhumiex osservati.
+- Tiġri biss fejn timxi `runPreCallHooks` (ara [Kopertura u limiti](#coverage-and-limits) ).
+
+#### Blokk
+
+`AGENT_GUARD_MODE=block`, il-guardrail pre-call ma jagħmel xejn. Minflok, iċ-chat handler jieħu d-deċiżjoni:
+
+1. Id-deċiżjoni tittieħed meta mira tkun waslet biex tintbagħat, fuq il-fornitur it-talba riżolta għalih. Psewdonimi tal-fornitur, ids tal-mudelli vojta, ids tal-kwota-share u kull mira combo huma koperti.
+2. Ma jimxix fir-reġistru tal-guardrail, għalhekk il-kanali ta 'diżattivazzjoni għal kull talba ma japplikawx għaliha.
+3. Aġent ta' parti terza magħruf jiġi rrifjutat. Klijent mhux identifikat jiġi illoggjat bħal `monitor`, u miċħud biss `AGENT_GUARD_STRICT=true`. Claude Code u Anthropic SDKs uffiċjali qatt ma jiġu rrifjutati.
+4. Ir-rifjut huwa HTTP 403 bi `error.type` `permission_error` u `error.code` `client_agent_not_allowed`. Il-korp huwa żball fl-istil OpenAI. Fuq talbiet b'format Antropiku jġorr ukoll `type: "error"` fl-ogħla livell. M'hemm l-ebda header `Retry-After`, u r-rifjut jiġi rritornat qabel ma jibda kwalunkwe stream.
+5. Ċaħda mhix falliment tal-fornitur. Ma tmissx il-provditur circuit breaker, cooldowns tal-konnessjoni jew lockouts tal-mudell.
+6. F'combo, mira rrifjutata tinqabeż u l-miri li jifdal jimxu. It-talba tfalli bl-iżball tal-politika meta mill-inqas mira waħda ġiet rifjutata u l-ebda mira ma għaddiet mill-gwardja. Il-combo iżomm l-iżball tiegħu stess meta dħul tal-ogħla livell issemmi fornitur ieħor magħruf, bi prefiss jew bl-id tal-fornitur tal-pass. Mira prijoritarja rrifjutata `fallbackOnlyOnQuotaExhaustion` tinqabeż bl-istess mod u ma twaqqafx il-combo. Mira shadow hija ċċekkjata u illoggjata, iżda qatt ma tgħodd bħala mira li għaddiet mill-gwardja.
+7. A `fusion` combo jonqos qabel jibda l-panel meta l-ġudikant li se juża s-servizz tal-fużjoni jiġi rrifjutat. Dak l-imħallef ġej mill-konfigurazzjoni tal-combo jew mill-inadempjenzi globali tal-combo. L-istess verifika ssir meta tintlaħaq kombinazzjoni tal-fużjoni permezz tar-redirect tas-sigurtà.
+8. Linja ta' log waħda għal kull talba u fornitur, bi `tag: "AGENT_GUARD"`, `warn` għal rifjut, u l-istess oqsma bħal `monitor`.
+9. Fuq żball intern il-gwardja ma tiftaħx. It-talba tipproċedi u linja waħda `warn` `agent guard failed open` tiġi illoggjata.
+
+**Limiti ta `block`:**
+
+- Kull sinjal huwa header ikkontrollat mill-klijent. Klijent li jibgħat `User-Agent: claude-cli/…` jiġi ttrattat bħala Kodiċi Claude. `block` tiskoraġġixxi aġenti ta' partijiet terzi mhux modifikati. Mhuwiex kontroll ta 'aċċess.
+- Prokura li tneħħi l-headers ta' identifikazzjoni jbiddel kwalunkwe klijent f'wieħed mhux identifikat. Klijent bhal dan jinqeda bla `AGENT_GUARD_STRICT` u rrifjutat biha. Mexxi l-gwardja fuq l-istanza li tiffaċċja l-klijenti. It-tieni OmniRoute istanza wara l-ewwel tara l-headers tal-ewwel wieħed.
+- `AGENT_GUARD_STRICT` jirrifjuta kull klijent fuq dawk il-fornituri li ma jkunx Claude Code jew SDK uffiċjali. Dan jinkludi klijenti bbażati fuq browser u l-bitħa tad-dashboard. It-test live combo tad-dashboard huwa eżentat, anke permezz tar-redirect tas-sigurtà.
+- Xi karatteristiċi jibnu t-talba taċ-chat tagħhom stess minflok ma jgħaddu t-talba tal-klijent. Erbgħa minnhom jibagħtuha lura permezz tar-rotot `/v1/...` ta' OmniRoute:
+  - batch jobs (`src/lib/batches/dispatch.ts`)
+  - l-għodda tal-inferenza MCP (`open-sse/mcp-server/tools/inferenceTools.ts`)
+  - A2A smart routing (`src/lib/a2a/skills/smartRouting.ts`)
+  - il-pont tal-viżjoni meta jiddeskrivi immaġni permezz OmniRoute (`src/lib/guardrails/visionBridgeHelpers.ts`)
+- Il-proxy taċ-chat Telegram (`src/lib/telegram/chatProxy.ts`) jibni t-talba tiegħu fil-proċess u jsejjaħ lill-immaniġġjar taċ-chat direttament.
+- Dawk it-talbiet interni jġorru l-headers ta' OmniRoute stess, mhux l-intestaturi tal-klijent li bedahom. Il-gwardja tikklassifikahom bħala klijenti mhux identifikati.
+- Mingħajr `AGENT_GUARD_STRICT`, dawk it-talbiet interni jiġu moqdija lill-fornituri mħarsa min kien il-klijent oriġinali. Aġent ta’ parti terza li jilħaq Claude permezz tagħhom ma jiġix rifjutat.
+- Biż `AGENT_GUARD_STRICT`, dawk it-talbiet interni jiġu rrifjutati fuq il-fornituri mħarsa min bedahom, Claude Code inkluż.
+- Talbiet biss li jgħaddu mit-chat handler huma gated. Il-validazzjoni tal-mudell (`src/lib/modelValidation/runner.ts`) issejjaħ il-qalba tat-talba direttament u mhix gated.
+- Il-fornituri `claude` u `anthropic` biss huma koperti. mudelli Claude moqdija minn fornitur ieħor mhumiex koperti, u lanqas il-fornitur `claude-web`.
+- Xi combos jsemmu l-miri li fadal tagħhom mingħajr prefiss tal-fornitur, bħala ids tal-mudell vojta jew combos imnaqqxa. Meta dawk il-miri ma jkunux disponibbli għal raġuni mhux relatata (breaker miftuħ, cooldown, lockout), it-talba tonqos bl-iżball tal-politika.
+- Mira kombinata maqbuża tikklerja l-aħħar pin-tajba magħrufa ta' dik il-mira, kif tagħmel kull mira maqbuża.
+- Imħallef tal-fużjoni msemmi bi prefiss ta' fornitur mgħasses jiġi rrifjutat qabel ma jibda l-bord. Dak ikopri `anthropic/…`, `claude/…`, alias bħal `cc/…`, suffiss tal-kuntest bħal `[1m]`, u ismijiet ta' kwota ta' ishma fuq dawk il-fornituri.
+- Imħallef tal-fużjoni miktub bħala id-mudell vojt, jew bħala alias mudell li jirrisolvi għal fornitur mgħasses, jiġi rrifjutat biss meta jintbagħat. Il-panel diġà mexxa sa dak iż-żmien. L-isem tal-imħallef bil-prefiss tal-fornitur tiegħu jevita dan. L-ebda imħallef tal-ortografija ma jilħaq fornitur mgħasses mingħajr rifjut.
+- Il-pre-check jirrifjuta imħallef Claude konfigurat anke meta s-servizz tal-fużjoni jwaqqa' dak il-ġudikant fil-ħin tar-run. Is-servizz iwaqqa' imħallef li l-operatur ħeba, u imħallef li ma jistax jieħu l-midja tat-talba. It-tieni każ ikopri appoġġ tal-viżjoni mhux ikkonfermat u midja oħra li l-imħallef ma jaċċettax. Iż-żewġ mogħdijiet combo jaġixxu b'dan il-mod.
+- Fuq ir-redirezzjoni tax-xibka tas-sigurtà, is-servizz combo jirċievi settings vojta. Imħallef stabbilit biss fid-defaults globali combo qatt ma jintuża hemmhekk.
+- Waqt li `block` tkun mixgħula, klijent li l-gwardja jirrifjuta fuq fornitur mgħasses ma jużax is-sidecar fast path, għal kwalunkwe mudell. Taħt `AGENT_GUARD_STRICT` dak huwa kull klijent mhux identifikat. Wara l-kontroll tat-token relay tiegħu, `POST /v1/relay/chat/completions/bifrost` iwieġeb dawk it-talbiet b'503 u l-header `X-Bifrost-Fallback`.
+- `POST /v1/messages/count_tokens` jagħti l-istima lokali lil klijent li l-gwardja jirrifjuta fuq il-fornitur li l-mudell jirrisolvi.
+- M'hemm l-ebda eżenzjoni għal kull ċavetta.
 
 ## Kuntratt Bażi (`base.ts`)
 
@@ -360,64 +424,29 @@ ma tappoġġjahix.
 
 Is-singleton `guardrailRegistry` jesponi:
 
-- `register(guardrail)` — iżid (jew jissostitwixxi skont l-isem normalizzat)
-  guardrail u jerġa' jordna skont `priority` akxendenti.
-- `clear()` / `list()` — għodod għajnuna amministrattivi.
-- `runPreCallHooks(payload, context)` — jitera fuq il-guardrails attivi,
-  jgħaddi l-payload permezz ta' `modifiedPayload`, u jieqaf fl-ewwel
-  `block: true`.
-- `runPostCallHooks(response, context)` — l-istess fluss min-naħa tar-rispons.
-- `resetGuardrailsForTests({ registerDefaults })` — jnaddaf l-istat u b'mod
-  opzjonali jerġa' jirreġistra d-defaults għal iżolament nadif tat-testijiet.
+- `register(guardrail)` — iżid (jew jissostitwixxi b'isem normalizzat) guardrail u jerġa' jagħżel billi jogħla `priority`.
+- `clear()` / `list()` — helpers amministrattivi.
+- `runPreCallHooks(payload, context)` — itenni guardrails attivi, tgħaddi l-payload minn `modifiedPayload`, u tieqaf fuq l-ewwel `block: true`.
+- `runPostCallHooks(response, context)` — istess fluss fuq in-naħa tar-rispons.
+- `resetGuardrailsForTests({ registerDefaults })` — ineħħi l-istat u, b'mod fakultattiv, jerġa' jirreġistra l-inadempjenzi għal iżolament nadif tat-test.
 
-Iż-żewġ runners jirritornaw `{ blocked, payload|response, results, guardrail?, message? }`
-fejn `results` hija firxa ta' rekords `GuardrailExecutionResult` li jinkludu,
-għal kull guardrail, l-oqsma `blocked`, `skipped`, `modified`, `error`, u
-`meta`, utli għat-traċċar.
+Both runners return `{ blocked, payload|response, results, guardrail?, message? }` where `results` is an array of `GuardrailExecutionResult` records that include per-guardrail `blocked`, `skipped`, `modified`, `error`, and `meta` fields, useful for tracing.
 
-### Itfi Guardrails għal Kull Talba
+### Inżabilitar Guardrails Per-Talba
 
-`resolveDisabledGuardrails({ apiKeyInfo, body, headers })` jiġbor lista
-mingħajr duplikati ta' smijiet ta' guardrails li għandhom jiġu msaqta
-għat-talba kurrenti. Hemm ħames kanali, moqrija f'din l-ordni u magħquda
-f'lista waħda (l-ewwel okkorrenza tirbaħ meta jitneħħew d-duplikati):
+`resolveDisabledGuardrails({ apiKeyInfo, body, headers })` jaggrega lista deduplikata ta' ismijiet ta' guardrail li għandhom jinqabżu għat-talba attwali. Hemm ħames kanali, moqrija f'din l-ordni u magħquda f'lista waħda (l-ewwel okkorrenza tirbaħ meta tiġi deduplikata):
 
 1. `apiKeyInfo.disabledGuardrails`
-2. `disabledGuardrails` fil-korp tat-talba (livell ta' fuq)
-3. `metadata.disabledGuardrails` fil-korp tat-talba (biss meta `metadata` tkun oġġett)
+2. Talba tal-korp `disabledGuardrails` (l-ogħla livell)
+3. Talba korp `metadata.disabledGuardrails` (biss meta `metadata` huwa oġġett)
 4. Header `x-omniroute-disabled-guardrails`
-5. Header legacy `x-disabled-guardrails`
+5. Legacy header `x-disabled-guardrails`
 
-Il-ħames kanali kollha jingħaqdu, iż-żewġ headers inklużi: jekk jintbagħtu
-t-tnejn `x-omniroute-disabled-guardrails` u `x-disabled-guardrails`, jiġu
-msaqta l-unjoni tal-listi tagħhom, u header modern vojt ma jibqax jaħbi dak
-legacy
-([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412), iffissat f'
-[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805)).
+Il-ħames kanali kollha huma magħquda, iż-żewġ headers inklużi: li jintbagħtu kemm `x-omniroute-disabled-guardrails` kif ukoll `x-disabled-guardrails` jaqbeż l-unjoni tal-listi tagħhom, u header modern vojt ma jibqax jaħbi dak tal-legat ( [#16412](https://github.com/cheaper-inference/OmniRoute/issues/16412), iffissat [#16805](https://github.com/cheaper-inference/OmniRoute/pull/16805) ).
 
-Il-valuri jistgħu jkunu firxiet ta' strings jew string separata b'virgoli;
-l-ismijiet jitneħħa minnhom il-vojt żejjed u jiġu normalizzati għal kebab-case
-b'ittri żgħar (`pii_masker` → `pii-masker`), u d-dħul vojt jintrema.
-Ir-riżultat jingħaddi permezz ta' `context.disabledGuardrails` lir-reġistru,
-li jaqbeż il-guardrails li jaqblu (`skipped: true` fil-`results`).
+Il-valuri jistgħu jkunu arrays ta' strings jew string separati minn virgola; l-ismijiet huma mirquma u normalizzati għal kebab-case żgħar (`pii_masker` → `pii-masker`), u l-entrati vojta jitneħħew. Ir-riżultat jgħaddi minn `context.disabledGuardrails` lir-reġistru, li jaqbeż il-guardrails li jaqblu (`skipped: true` `results`).
 
-Il-lista tat-tfi taffettwa biss ir-**reġistru**. Il-modalità `block`
-tal-prompt-injection hija limitu obbligatorju: il-middleware injection-guard
-(`src/middleware/promptInjectionGuard.ts`) jsejjaħ `evaluatePromptInjection()`
-mingħajr ebda lista ta' tfi kkontrollata mill-kallier (issejħiet mejta
-`resolveDisabledGuardrails({ body })` li kienet tagħmel tneħħiet f'
-[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934)), u għalhekk
-talba li titfi l-`prompt-injection` xorta tiġi rifjutata fil-modalità `block`.
-Dan huwa skond id-disinn. Il-kanali tat-tfi huma kkontrollati mill-kallier
-(korp tat-talba, metadata, headers), u kallier ma għandux ikun jista' jtewwef
-kontroll ta' sigurtà li l-operatur stabbilixxa
-([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). L-unjoni
-tal-headers minn [#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)
-tibdel biss liema guardrails tar-reġistru jiġu msaqta; ma tħallix klijent
-jibbaġġja l-middleware. Politiki obbligatorji ta' guardrails għal kull
-ċavetta (per-key) u għal kull grupp huma segwiti fir-RFC v4
-[#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417). Ara
-[Kopertura u limiti](#coverage-and-limits).
+Il-lista tiddiżattiva taffettwa biss il-** reġistru** . Il-modalità `block` ta' injezzjoni fil-pront hija fruntiera obbligatorja: il-middleware injection-guard (`src/middleware/promptInjectionGuard.ts`) isejjaħ `evaluatePromptInjection()` mingħajr ebda lista ta' diżattivazzjoni kkontrollata minn min iċempel (is-sejħa `resolveDisabledGuardrails({ body })` mejta li kienet tagħmel tneħħiet [#16934](https://github.com/cheaper-inference/OmniRoute/pull/16934) ), għalhekk talba li tiddiżattiva `prompt-injection` għadha miċħuda fil-mod `block`. Dan huwa mid-disinn. Il-kanali ta 'diżattivazzjoni huma kkontrollati minn min iċempel (korp tat-talba, metadejta, headers), u min iċempel m'għandux ikun jista' jitfi kontroll tas-sigurtà li ssettja l-operatur ( [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ). L-unjoni header minn [#16412](https://github.com/cheaper-inference/OmniRoute/issues/16412) tibdel biss liema guardrails tar-reġistru huma maqbuża; ma tħallix klijent jevita l-middleware. Il-politiki tal-guardrail obbligatorji għal kull ċavetta u għal kull grupp huma ssorveljati fil-v4 RFC [#16417](https://github.com/cheaper-inference/OmniRoute/issues/16417). Ara [Kopertura u limiti](#coverage-and-limits).
 
 ## Ordni ta' Esekuzzjoni
 
@@ -451,32 +480,34 @@ Ir-reġistru tal-guardrail huwa fili fil-pipeline taċ-chat biss. Dawn il-limiti
 ### Dak li mhux kopert
 
 - **Midja, embeddings u rotot tad-data** (`/v1/images/*`, `/v1/embeddings`, `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/rerank`, `/v1/search`, `/v1/moderations`) qatt ma tilħaq ir-reġistru. L-ebda masking PII, masking tal-kredenzjali jew pont tal-modalità ma jgħaddi hemm. L-uniku kontroll tagħhom huwa l-middleware legacy injection-guard.
-- **Risposti streamed** Ikseb l-ebda post-call guardrails: l-ebda `pii-masker` jew `credential-masker` post-call, u l-ebda post-call block. Tapplika biss it-trasformazzjoni PII ta' streaming (meta `PII_RESPONSE_SANITIZATION` ikun mixgħul). Kredenzjali li ntbagħtet lura f'rispons streamed ma tiġix redatta.
-- **Iddiżattiva l-kanali vs. il-middleware (minn id-disinn):** il-middleware jevalwa l-injezzjoni fil-pront bis-sejħa tiegħu stess lil `evaluatePromptInjection()`, mingħajr ma jgħaddi xi lista ta 'diżattivazzjoni kkontrollata minn min iċempel. Il-modalità `block` hija konfini obbligatorja li d-diżattivazzjoni kkontrollata minn min iċempel ma tistax taqbeż, inkluż fuq rotot tal-familja taċ-chat ( [#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413) ). Id-diżattivazzjoni `prompt-injection` taqbeż biss il-guardrail tar-reġistru.
+- **Risposti streamed** Ikseb l-ebda post-call guardrails: l-ebda `pii-masker` jew `credential-masker` post-call, u l-ebda post-call block. Tapplika biss it-trasformazzjoni PII ta' streaming (meta `PII_RESPONSE_SANITIZATION` ikun mixgħul). Kredenzjali li ntbagħtet lura fi tweġiba streamed mhix redatta.
+- **Iddiżattiva l-kanali vs. il-middleware (minn id-disinn):** il-middleware jevalwa l-injezzjoni fil-pront bis-sejħa tiegħu stess lil `evaluatePromptInjection()`, mingħajr ma jgħaddi xi lista ta 'diżattivazzjoni kkontrollata minn min iċempel. Il-modalità `block` hija konfini obbligatorja li d-diżattivazzjoni kkontrollata minn min iċempel ma tistax taqbeż, inkluż fuq rotot tal-familja taċ-chat ( [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ). Id-diżattivazzjoni `prompt-injection` taqbeż biss il-guardrail tar-reġistru.
 
 ### Dak li jara rispons qabel is-sejħa ta 'wara
 
 Fuq il-mogħdija mhux streaming l-ordni hija: estrazzjoni tal-memorja → eżekuzzjoni ta 'għodda integrata → guardrails ta' wara s-sejħa → ħruġ tal-blokk ta 'wara s-sejħa → maħżen semantic-cache.
 
-- **Estrazzjoni tal-memorja** u** eżekuzzjoni tal-għodda** ara r-rispons qabel ma l-guardrails ta' wara s-sejħa jistgħu jerġgħu jiktbu jew jimblokkawha. Minn [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401), l-estrazzjoni tal-memorja tmexxi t-test estratt permezz ta ' `sanitizePII` meta `PII_RESPONSE_SANITIZATION` ikun mixgħul (kemm streaming kif ukoll mhux streaming), iżda rispons li jimblokka aktar tard wara s-sejħa għadu ġie offrut lill-memorja u lill-għodod.
+- **Estrazzjoni tal-memorja** u** eżekuzzjoni tal-għodda** ara r-rispons qabel ma l-guardrails ta' wara s-sejħa jistgħu jerġgħu jiktbu jew jimblokkawha. Minn [#16401](https://github.com/cheaper-inference/OmniRoute/pull/16401), l-estrazzjoni tal-memorja tmexxi t-test estratt permezz ta ' `sanitizePII` meta `PII_RESPONSE_SANITIZATION` ikun mixgħul (kemm streaming kif ukoll mhux streaming), iżda rispons li jimblokka aktar tard wara s-sejħa għadu ġie offrut lill-memorja u lill-għodod.
 - **Il-cache semantiku** jaħżen ir-rispons wara s-sejħa ta 'wara, u għalhekk jaħżen ir-rispons miktub mill-ġdid, u rispons imblukkat qatt ma jiġi cached. L-entrati tal-cache huma mmarkati għal kull ċavetta API.
 
 ## Konfigurazzjoni
 
 Varjabbli ambjentali moqrija mill-guardrails integrati:
 
-| Varjabbli                             | Użat minn                  | Effett                                                                                                                        |
-| ------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | Issettja `false` biex tiddiżattiva kompletament l-iskoperta.                                                                  |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | Politika ta 'injezzjoni: `warn`, `block`, jew `log`. Il-valur tal-legat `redact` ma jiktebx mill-ġdid it-test tal-injezzjoni. |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`         | Mod għall-ilqugħ tal-injezzjoni; ukoll DB feature flag li** jegħleb** l-env vars (DB > ENV).                                  |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | Severità minima li `MODE=block` tirrifjuta: `high` (default), `medium`, jew `low`.                                            |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | Legacy alias for `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                                           |
-| `PII_REDACTION_ENABLED`               | `pii-masker`               | Meta `true`, it-talba PII tiġi redatta (indipendenti mill-mod ta' injezzjoni).                                                |
-| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | `PII_REDACTION_ENABLED`, daħħal tokens riversibbli u rrestawrahom fi tweġibiet 2xx.                                           |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream)  | Jikkontrolla l-imġieba tal-masker fuq in-naħa tar-rispons.                                                                    |
+| Varjabbli                             | Użat minn                  | Effett                                                                                                                           |
+| ------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | Issettja `false` biex tiddiżattiva kompletament l-iskoperta.                                                                     |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | Politika ta 'injezzjoni: `warn`, `block`, jew `log`. Il-valur tal-legat `redact` ma jiktebx mill-ġdid it-test tal-injezzjoni.    |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`         | Mod għall-ilqugħ tal-injezzjoni; ukoll DB feature flag li** jegħleb** l-env vars (DB > ENV).                                     |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | Severità minima li `MODE=block` tirrifjuta: `high` (default), `medium`, jew `low`.                                               |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | Legacy alias for `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                                              |
+| `PII_REDACTION_ENABLED`               | `pii-masker`               | Meta `true`, it-talba PII tiġi redatta (indipendenti mill-mod ta' injezzjoni).                                                   |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | `PII_REDACTION_ENABLED`, daħħal tokens riversibbli u rrestawrahom fi tweġibiet 2xx.                                              |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream)  | Jikkontrolla l-imġiba tal-masker fuq in-naħa tar-rispons.                                                                        |
+| `AGENT_GUARD_MODE`                    | `agent-guard`              | `off` (default), `monitor` jew `block`. Ukoll bandiera karatteristika DB (DB > ENV).                                             |
+| `AGENT_GUARD_STRICT`                  | `agent-guard`              | `false` (default) jew `true`. `block`, jirrifjuta wkoll klijenti mhux identifikati. Ukoll bandiera karatteristika DB (DB > ENV). |
 
-Il-guardrails tal-Modality Bridge jaqraw il-konfigurazzjoni tar-runtime mill-maħżen tas-settings appoġġjati minn DB (`getSettings()`), mhux env vars. Iċ-ċwievet primarji ta' Vision huma `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes`, u `modalityBridgeCacheMaxEntries`. Iċ-ċwievet `visionBridge*` tal-wirt huma aċċettati biss bħala l-backup tal-qari dokumentat b'ċiklu wieħed; dashboard jikteb uża ċ-ċwievet primarji. Id-defaults u s-solvent ta' riżerva jgħixu `src/shared/constants/modalityBridgeDefaults.ts`, b'kostanti ta' legacy miżmuma `src/shared/constants/visionBridgeDefaults.ts`.
+Il-guardrails tal-Modality Bridge jaqraw il-konfigurazzjoni tar-runtime mill-maħżen tas-settings appoġġjati minn DB (`getSettings()`), mhux env vars. Iċ-ċwievet primarji ta' Vision huma `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes`, u `modalityBridgeCacheMaxEntries`. Iċ-ċwievet `visionBridge*` tal-wirt huma aċċettati biss bħala l-backup tal-qari dokumentat b'ċiklu wieħed; dashboard jikteb jużaw iċ-ċwievet primarji. Id-defaults u s-solvent ta' riżerva jgħixu `src/shared/constants/modalityBridgeDefaults.ts`, b'kostanti ta' legacy miżmuma `src/shared/constants/visionBridgeDefaults.ts`.
 
 L-awdjo juża `modalityBridgeAudioEnabled`, `modalityBridgeAudioModel`, `modalityBridgeAudioTimeout`, u `modalityBridgeAudioMaxClips`, flimkien mas-settings `modalityBridgeCache*` kondiviżi. L-awdjo m'għandu l-ebda riżerva taċ-ċwievet tal-wirt minħabba li dawn iċ-ċwievet ġew introdotti bl-iskema tal-Modality Bridge.
 
@@ -536,39 +567,23 @@ flussi mingħajr aċċess għal DB jew netwerk.
 - `docs/architecture/RESILIENCE_GUIDE.md` — saff ortogonali (circuit breaker, cooldowns)
 - `docs/reference/ENVIRONMENT.md` — referenza sħiħa tal-varjabbli tal-ambjent
 
-## Kopertura tar-routes tal-guard kontra l-injezzjoni u red-team (Fażi 8 · Blokk D)
+## Kopertura tar-rotta tal-protezzjoni tal-injezzjoni u tim aħmar (Fażi 8 · Blokk D)
 
-Il-guard kontra l-injezzjoni (`createInjectionGuard` / `withInjectionGuard`) jkopri r-routes
-kollha li jaċċettaw prompts mill-utent. Jirrispetta `INJECTION_GUARD_MODE` (default `warn` = log biss;
-`block` = jirritorna HTTP 400 `SECURITY_001`).
+Il-protezzjoni tal-injezzjoni (`createInjectionGuard` / `withInjectionGuard`) tkopri r-rotot kollha li jaċċettaw il-prompti tal-utent. Jirrispetta `INJECTION_GUARD_MODE` (default `warn` = log biss; `block` = jirritorna HTTP 400 `SECURITY_001`).
 
-| Tip              | Routes                                                                                                                                               | Modalità default |
+| Tip              | Rotot                                                                                                                                                | Modalità default |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| Test (eżistenti) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | warn             |
-| Ġenerattivi      | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | warn             |
-| Dejta            | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | warn             |
+| Test (eżistenti) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | iwissu           |
+| Ġenerattiv       | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | iwissu           |
+| Data             | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | iwissu           |
 
-L-estrazzjoni tat-test (`extractMessageContents`) tkopri `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`.
+L-estrazzjoni tat-test (`extractMessageContents`) tkopri `messages`/`input`/`prompt`/`query` + `documents`/`instructions`/`system`.
 
-**Red-team (ta' kull lejl, `nightly-llm-security.yml`):** promptfoo jivvalida li kull route
-timblokka l-korpus OWASP-LLM f'`INJECTION_GUARD_MODE=block`; garak imexxi probes (jaqbeż mingħajr secret).
-`moderations` huwa inkluż għal konsistenza. Il-modalità block hija fruntiera obbligatorja: `evaluatePromptInjection()`
-tinjora l-lista ta' diżattivazzjoni għal kull talba li l-middleware jgħaddilha, għalhekk `disabledGuardrails`
-**ma** jeżentax route minnha ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)).
+**Red-team (filgħaxija, `nightly-llm-security.yml`):** promptfoo jivvalida li kull rotta timblokka l-korpus OWASP-LLM `INJECTION_GUARD_MODE=block`; garak imexxi sondi (skips mingħajr sigriet). `moderations` huwa inkluż għall-konsistenza. Il-modalità tal-blokk hija fruntiera obbligatorja: `evaluatePromptInjection()` jinjora l-lista ta' diżattivazzjoni għal kull talba li l-middleware jgħaddiha, għalhekk `disabledGuardrails` jagħmel** le** jeżenta rotta minnha ( [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ).
 
-Il-workflow ta' kull lejl (`.github/workflows/nightly-llm-security.yml`, cron + attivazzjoni
-manwali) għandu żewġ jobs:
+Il-fluss tax-xogħol ta' filgħaxija (`.github/workflows/nightly-llm-security.yml`, dispaċċ manwali cron + ) għandu żewġ xogħlijiet:
 
-- **`promptfoo-guard` (imblukkar)** — imexxi `promptfoo eval -c promptfooconfig.yaml`
-  b'`INJECTION_GUARD_MODE=block`. Kull każ avversarju (eż. "injora l-istruzzjonijiet
-  preċedenti kollha…", jailbreaks stil DAN) jasserixxi li r-rispons għandu
-  `error.code === "SECURITY_001"`, jiġifieri l-guard verament irrifjuta t-talba.
-- **`garak` (konsultattiv)** — imexxi garak `--probes promptinject,dan,leakreplay`
-  kontra istanza lokali ta' OmniRoute (`http://localhost:20128/v1`). Kondizzjonat fuq
-  secret tal-provider (`PROMPTFOO_PROVIDER_KEY`); jaqbeż b'mod nadif u għandu s-suffiss
-  `|| true`, għalhekk jirrapporta mingħajr ma jfallixxi l-CI.
+- **`promptfoo-guard` (imblukkar)** — runs `promptfoo eval -c promptfooconfig.yaml` ma `INJECTION_GUARD_MODE=block`. Kull każ kontradittorju (eż. "jinjora l-istruzzjonijiet preċedenti kollha...", jailbreaks fl-istil DAN) jasserixxi li r-rispons iwettaq `error.code === "SECURITY_001"`, jiġifieri l-gwardja fil-fatt irrifjuta t-talba.
+- **`garak` (konsulenza)** — imexxi garak `--probes promptinject,dan,leakreplay` kontra istanza OmniRoute lokali (`http://localhost:20128/v1`). Gated on a provider secret (`PROMPTFOO_PROVIDER_KEY`); jaqbeż bil-grazzja u huwa suffissat `|| true`, għalhekk jirrapporta mingħajr ma jonqos CI.
 
-Il-kopertura tal-helper tal-guard (`createInjectionGuard` / `withInjectionGuard`)
-tinkludi kull route `/v1` li ġġorr prompts; it-test tal-prompt jinġibed minn
-`messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` minn
-`extractMessageContents()` f'`src/shared/utils/inputSanitizer.ts`.
+Coverage of the guard helper (`createInjectionGuard` / `withInjectionGuard`) spans every prompt-bearing `/v1` route; test fil-pront jinġibed minn `messages`/`input`/`prompt`/`query` + `documents`/`instructions`/`system` minn `extractMessageContents()` `src/shared/utils/inputSanitizer.ts`.

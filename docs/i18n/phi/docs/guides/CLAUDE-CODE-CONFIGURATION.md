@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) at OpenCode (`x-opencode-session`) ay kinik
 
 Ang gumaganang direktoryo ay naiiba sa pagitan ng mga makina, kaya ang parehong repositoryo ay maaaring magpakita sa ilalim ng iba't ibang mga landas. Ipadala ang proyekto nang tahasan sa halip: Claude Code ay nagdaragdag ng anumang mga header na nakalista sa `ANTHROPIC_CUSTOM_HEADERS` sa bawat kahilingan ng modelo, at binasa ng OmniRoute ang dalawa sa mga ito:
 
-| Header                     | Halaga                                                     |
-| -------------------------- | ---------------------------------------------------------- |
-| `x-omniroute-project`      | Pangalan ng proyekto, hal `omniroute`                      |
-| `x-omniroute-project-repo` | Normalized remote, hal `github.com/diegosouzapw/OmniRoute` |
+| Header                     | Halaga                                                          |
+| -------------------------- | --------------------------------------------------------------- |
+| `x-omniroute-project`      | Pangalan ng proyekto, hal `omniroute`                           |
+| `x-omniroute-project-repo` | Normalized remote, hal `github.com/cheaper-inference/OmniRoute` |
 
 Parehong binabasa lamang para sa pagpapatungkol; hindi sila kailanman ipinapasa sa upstream provider.
 
@@ -264,28 +264,20 @@ karagdagang flag na kailangan. I-override sa bawat invocation gamit ang `--remot
 
 ## Pag-troubleshoot
 
-**Hindi pinapansin ng Claude Code ang gateway** — tiyaking **walang
-`/v1`** ang `ANTHROPIC_BASE_URL` at i-restart ang `claude` (isang beses lang binabasa ang env sa startup). Ang `omniroute launch`
-ang nag-aasikaso nito para sa iyo.
+**Hindi pinapansin Claude Code ang gateway** — confirm `ANTHROPIC_BASE_URL` has** walang `/v1`** at i-restart `claude` (ang env ay binabasa nang isang beses sa pagsisimula). Hinahawakan ito `omniroute launch` para sa iyo.
 
-**Walang laman ang `/model` picker / nawawala ang mga modelo ng gateway** — kailangan ang Claude Code
-v2.1.219+ at `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Tanging mga model ID na `claude*` /
-`anthropic*` ang lumalabas sa picker; piliting gamitin ang anumang ibang modelo sa pamamagitan ng
-`ANTHROPIC_MODEL=<id>` (ito ang ginagawa ng mga profile).
+**`/model` picker ay walang laman / nawawalang mga modelo ng gateway** Kailangan — ang Claude Code v2.1.219 + at `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Tanging `claude*` / `anthropic*` model IDs ang lalabas sa picker; pilitin ang anumang iba pang modelo na may `ANTHROPIC_MODEL=<id>` (ito ang ginagawa ng mga profile).
 
-**`400 Ambiguous model 'claude-…'`** — palaging nagpapadala ang Claude Code ng mga **walang-prefix**
-na model ID (hal. `claude-opus-4-8`), kaya kapag parehong nakakonekta ang mga provider na Claude Code (`cc/…`) at
-Claude (`claude/…`), tumutugma ang bare id sa dalawang ruta at
-tumatanggi ang OmniRoute na manghula. Ayusin ito sa alinmang paraan: mag-pin ng may-prefix na id gamit ang
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, o paganahin ang **Prefer Claude Code for
-unprefixed Claude models** — ang toggle sa pahina ng Claude provider, o
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (naka-off bilang default;
-tingnan ang [Environment](../reference/ENVIRONMENT.md)) — na nagruruta sa mga bare na `claude-*`
-ID patungo sa Claude Code. Palaging nangingibabaw ang mga tahasang prefix ng provider.
+**`400 Ambiguous model 'claude-…'`** Palaging ipinapadala ang — Claude Code** unprefixed** modelong IDs (eg `claude-opus-4-8`), kaya kapag pareho ang Claude Code (`cc/…`) at Claude (`claude/…`) provider ay konektado ang bare id ay tumutugma sa dalawang ruta at OmniRoute ay tumangging hulaan. Ayusin ito sa alinmang paraan: i-pin ang isang prefixed id na may `ANTHROPIC_MODEL=cc/claude-opus-4-8`, o paganahin** Mas gusto Claude Code para sa mga unprefix na Claude na modelo** — ang toggle sa Claude provider page, o `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (default off; tingnan ang [Environment](../reference/ENVIRONMENT.md) ) — na nagruruta ng `claude-*` IDs sa Claude Code sa halip. Palaging panalo ang mga tahasang prefix ng provider.
 
-**Mga error sa authentication** — walang token ang profile. Gamitin ang `omniroute launch --profile`
-(ini-inject nito ang token) o i-export ang `ANTHROPIC_AUTH_TOKEN`.
+**"auto mode ... hindi karapat-dapat ang session na ito" (siningil ang mga kahilingan sa classifier)** — sa auto mode Hinihiling ng Claude Code sa server na suriin ang mga aksyon sa loob ng sarili nitong mga kahilingan sa modelo ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Kailangan nito ang `anthropic-beta` value `dangerous-tool-use-2026-09-03` at ang `safeguards` body field upang maabot Anthropic bilang isang pares, at `safeguard_results` kasama ang upstream tool-use IDs upang bumalik nang hindi nagbabago. Ginagawa ito ng OmniRoute kapag ang kahilingan ay nai-ruta sa native `claude` provider o sa isang `anthropic-compatible-*` node, na-stream o hindi (regression guard: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Hindi maibabalik ng ibang mga target ang pagsusuri, kaya bumabalik Claude Code sa sarili nitong mga kahilingan sa classifier at ipinapakita ang paunawa:
 
-**Hindi nakahiwalay ang mga profile** — bawat profile ay may natatanging `CLAUDE_CONFIG_DIR`;
-tiyaking ang `echo $CLAUDE_CONFIG_DIR` sa loob ng session ay nakaturo sa
-`~/.claude/profiles/<name>`.
+- isang modelo sa isang hindi-Anthropic provider, o isang combo na dumapo sa isa;
+- isang Claude-Code-compatible relay node (`anthropic-compatible-cc-*`), na muling itinatayo ang request body at hindi nagdadala `safeguards`;
+- isang mas lumang OmniRoute na nauna sa mga pinapahintulutang beta, o isang bersyon ng Claude Code sa ibaba ng inilista ng Anthropic page para sa mga session ng gateway.
+
+Patakbuhin `/status` sa Claude Code: ang** Auto mode server** Ang row ay nagbabasa ng `Enabled` habang aktibo ang pagsusuri ng server. Kung sisingilin ang mga kahilingang iyon ay pagpapasya ng Anthropic, hindi ng OmniRoute.
+
+**Mga error sa pagpapatotoo** — ang profile ay walang hawak na token. Gamitin ang `omniroute launch --profile` (i-inject ito) o i-export `ANTHROPIC_AUTH_TOKEN`.
+
+**Ang mga profile ay hindi nagbubukod** — bawat profile ay isang natatanging `CLAUDE_CONFIG_DIR`; i-verify `echo $CLAUDE_CONFIG_DIR` sa loob ng mga session point sa `~/.claude/profiles/<name>`.

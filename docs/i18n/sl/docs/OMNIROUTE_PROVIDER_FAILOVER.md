@@ -15,9 +15,11 @@ Privzeti pravilnik med ponudniki omogoča do tri poskuse ponudnika, omejitve št
 - **Kombinacije** preklapljajo med svojimi cilji v skladu s strategijo in nastavitvami kombinacije.
 - **ID golega modela** (brez predpone `provider/` ), ki ga streže več aktivnih ponudnikov, brez kombinacije s tem natančnim imenom, se najprej pošlje izborom sklepanja ponudnika. Če je ta poskus neuspešen na način, na katerega pravilnik ne uspe, se ista zahteva pošlje naslednjemu aktivnemu ponudniku, ki streže ID. Odgovor nosi `x-omniroute-fallback-attempts` s številom ponudnikov, ki so bili preizkušeni pred tistim, ki je odgovoril.
   - Vsak namestnik je pooblaščen natanko tako, kot da bi ga izbral sklep. Cilj, ki ga ključ API blokira ali ne dovoli, je preskočen brez klica navzgor in odjemalec prejme pravo napako navzgor in ne zavrnitve pravilnika za cilj, ki ga ni nikoli poimenoval.
-  - Samo neuspeli odgovor se premakne naprej: po prvem pretočnem bajtu se nič ne prekine.
+  - Samo neuspeli odziv se premakne naprej: po prvem pretočnem bajtu se nič ne prekine.
   - Zamenjava nadomestnega modela v sili se uporabi šele, ko vsak ponudnik zahtevanega modela odpove.
   - Zahteva, pripeta na povezavo (`x-omniroute-connection`), ostane na njej.
   - ID s predpono (`provider/model`) ni nikoli preusmerjen k drugemu ponudniku.
 
 Stanja vezja so `closed`, `open` in `half_open`. Ohladitev načrtuje omejeno sondo; uspešna sonda zapre tokokrog in neuspešna sonda ga ponovno odpre.
+
+Provider failover teče znotraj prehoda. Za vedenje odjemalca med izpadom prehoda glejte [Kdaj je OmniRoute sam nedosegljiv](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable).

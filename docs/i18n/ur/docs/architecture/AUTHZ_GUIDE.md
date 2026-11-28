@@ -4,12 +4,11 @@
 
 ---
 
-> **معلومات کا ماخذ:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **آخری بار اپ ڈیٹ کیا گیا:** 2026-09-22 — اسکوپ نیم اسپیسز MCP-SERVER.md کی طرف اشارہ کرتے ہیں
+> **سچائی کا ماخذ:** `src/server/authz/`، `src/shared/constants/publicApiRoutes.ts`، `src/lib/api/requireManagementAuth.ts`، `src/shared/utils/apiAuth.ts`
 
-OmniRoute کے پاس ایک روٹ-آگاہ اجازت پائپ لائن ہے جو ہر API درخواست کو روکتی ہے۔ درجہ بندی **مقرر** اور **فیل-کلوزڈ** ہے — کوئی بھی چیز جس کی درجہ بندی نہیں کی جا سکتی وہ `MANAGEMENT` کے طور پر ختم ہوتی ہے اور ایک سیشن یا مینجمنٹ-گریڈ ٹوکن کا مطالبہ کرتی ہے۔ یہ صفحہ ان انجینئرز کے لیے ماڈل کی وضاحت کرتا ہے جو روٹس کو برقرار رکھتے ہیں یا نئے اینڈ پوائنٹس ڈیزائن کرتے ہیں۔
+OmniRoute پاس روٹ سے آگاہی کی اجازت دینے والی پائپ لائن ہے جو ہر API کی درخواست کو گیٹ کرتی ہے۔ درجہ بندی ہے۔** فیصلہ کن** اور** ناکام بند** — کوئی بھی چیز جس کی درجہ بندی نہیں کی جاسکتی ہے وہ `MANAGEMENT` کے طور پر ختم ہوتی ہے اور سیشن یا مینجمنٹ گریڈ ٹوکن کا مطالبہ کرتی ہے۔ یہ صفحہ راستوں کو برقرار رکھنے یا نئے اختتامی نقطوں کو ڈیزائن کرنے والے انجینئرز کے ماڈل کی وضاحت کرتا ہے۔
 
-![AuthZ پائپ لائن (3 روٹ کلاسز + پالیسی کی تشخیص)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > ماخذ: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -198,8 +197,8 @@ Incoming request → src/proxy.ts
 ہر روٹ کلاس کی `src/server/authz/policies/` میں ایک پالیسی ہوتی ہے:
 
 - **`publicPolicy`** (`policies/public.ts`) — ہمیشہ `allow({ kind: "anonymous", id: "anonymous" })` لوٹاتا ہے۔
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — بیئرر کو نکالتا ہے، `validateApiKey()` کے ذریعے توثیق کرتا ہے۔ گمنام میں صرف اس وقت آتا ہے جب مؤثر `REQUIRE_API_KEY` خصوصیت کا جھنڈا غیر فعال ہو۔ مؤثر پرچم کو `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) کے ذریعے حل کیا جاتا ہے لہذا ڈیش بورڈ فیچر فلیگ اور ماحولیاتی متغیرات `/api/v1/*`، `/api/v1beta/*`، اور عرفی ناموں کو مستقل طور پر کنٹرول کرتے ہیں۔ حل کرنے والی ناکامیاں بند ہوگئیں. کلائنٹ API روٹس پر ڈیش بورڈ سیشن کی درخواستوں کی اجازت دیتا ہے (بشمول `/api/v1/models`، ڈیش بورڈ ماڈل کیٹلاگ کے ذریعے استعمال کیا جاتا ہے)۔ جب Entra ID SSO فعال کیا جاتا ہے، ایک بیئرر جو ساختی طور پر ایک Entra ٹوکن ہے (تین base64url سیگمنٹ، `RS*` alg، `kid`) SSO برانچ کے ذریعے ہینڈل کیا جاتا ہے۔** پہلے** `validateApiKey()` اور اس کا فیصلہ حتمی — ہے یہ کبھی بھی API-key پاتھ یا degrade-to-unonymous برانچ میں نہیں آتا، لہذا شناخت فراہم کرنے والے کی بندش کھلی رسائی نہیں بن سکتی۔ جامد API کیز غیر متاثر ہیں۔ [Entra ID SSO](../security/ENTRA_SSO.md) دیکھیں۔
-- **`managementPolicy`** (`policies/management.ts`) — ڈیش بورڈ سیشن، اندرونی ماڈل کی مطابقت پذیری کی درخواستوں کو قبول کرتا ہے ( `/api/providers/[name]/(sync-models|models)` کے خلاف مماثل ہے)، یا اگر `isAuthRequired()` غلط لوٹتا ہے تو مکمل طور پر چھوڑ دیتا ہے۔ 403 (`AUTH_001`) واپس کرتا ہے جب بیئرر ٹوکن موجود ہو لیکن غلط ہو، ورنہ 401۔ روٹ گارڈ ٹائرز (LOCAL_ONLY / ALWAYS_PROTECTED) کو بھی نافذ کرتا ہے اس سے پہلے کہ کسی بھی auth برانچ — [روٹ گارڈ ٹائرز](../security/ROUTE_GUARD_TIERS.md) دیکھیں۔ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` میں LOCAL_ONLY پاتھز (آج: `/api/mcp/`) تک نان لوپ بیک سے اس وقت رسائی حاصل کی جا سکتی ہے جب بیئرر کلید `manage` اسکوپ کو لے جاتی ہے۔ دیگر تمام LOCAL_ONLY راستے دائرہ کار سے قطع نظر سخت-لوپ بیک رہتے ہیں۔
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — بیئرر کو نکالتا ہے، `validateApiKey()` کے ذریعے توثیق کرتا ہے۔ گمنام میں صرف اس وقت آتا ہے جب مؤثر `REQUIRE_API_KEY` خصوصیت کا جھنڈا غیر فعال ہو۔ مؤثر پرچم کو `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) کے ذریعے حل کیا جاتا ہے لہذا ڈیش بورڈ فیچر فلیگ اور ماحولیاتی متغیرات `/api/v1/*`، `/api/v1beta/*`، اور عرفی ناموں کو مستقل طور پر کنٹرول کرتے ہیں۔ حل کرنے کی ناکامیاں بند ہو جاتی ہیں۔ کلائنٹ API روٹس پر ڈیش بورڈ سیشن کی درخواستوں کی اجازت دیتا ہے (بشمول `/api/v1/models`، ڈیش بورڈ ماڈل کیٹلاگ کے ذریعے استعمال کیا جاتا ہے)۔ جب Entra ID SSO فعال کیا جاتا ہے، ایک بیئرر جو ساختی طور پر ایک Entra ٹوکن ہے (تین base64url سیگمنٹ، `RS*` alg، `kid`) SSO برانچ کے ذریعے ہینڈل کیا جاتا ہے۔** پہلے** `validateApiKey()` اور اس کا فیصلہ حتمی — ہے یہ کبھی بھی API-key پاتھ یا degrade-to-unonymous برانچ میں نہیں آتا، لہذا شناخت فراہم کرنے والے کی بندش کھلی رسائی نہیں بن سکتی۔ جامد API کیز غیر متاثر ہیں۔ [Entra ID SSO](../security/ENTRA_SSO.md) دیکھیں۔
+- **`managementPolicy`** (`policies/management.ts`) — ڈیش بورڈ سیشن، اندرونی ماڈل کی مطابقت پذیری کی درخواستوں کو قبول کرتا ہے ( `/api/providers/[name]/(sync-models|models)` کے خلاف مماثل ہے)، یا اگر `isAuthRequired()` غلط لوٹتا ہے تو مکمل طور پر چھوڑ دیتا ہے۔ 403 (`AUTH_001`) واپس کرتا ہے جب بیئرر ٹوکن موجود ہو لیکن غلط ہو، ورنہ 401۔ روٹ گارڈ ٹائرز (LOCAL_ONLY / ALWAYS_PROTECTED) کو بھی نافذ کرتا ہے اس سے پہلے کہ کسی بھی auth برانچ — [روٹ گارڈ ٹائرز](../security/ROUTE_GUARD_TIERS.md) دیکھیں۔ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (آج: `/api/mcp/`) میں LOCAL_ONLY راستوں تک نان لوپ بیک سے اس وقت رسائی حاصل کی جا سکتی ہے جب بیئرر کلید `manage`/`admin` دائرہ کار یا تنگ `mcp:connect` اسکوپ (`hasMcpConnectOrManageScope`)، یا ایک مستند ڈیش بورڈ سیشن کے ساتھ؛ دیگر تمام LOCAL_ONLY راستے دائرہ کار سے قطع نظر سخت-لوپ بیک رہتے ہیں۔
 
 ایک کامیاب پالیسی `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` کے ساتھ `AuthSubject` واپس کرتی ہے۔ ڈاؤن اسٹریم ہینڈلرز اسے `src/server/authz/assertAuth.ts` میں `assertAuth(request, "CLIENT_API")` کے ذریعے auth logic کو دوبارہ چلانے کے بجائے پڑھ سکتے ہیں۔
 
@@ -290,24 +289,24 @@ export async function POST(request: Request) {
 
 set کا انتخاب سہولت کے بجائے ساخت کے لحاظ سے کریں۔ ایک route کو `PUBLIC_API_ROUTES_EXACT` میں رکھا جاتا ہے (یا صرف GET کے لیے `PUBLIC_READONLY_CORS_API_ROUTES` میں)؛ صرف حقیقی subtree کو `PUBLIC_API_ROUTE_PREFIXES` میں رکھا جاتا ہے، اور اس کا اختتام **لازماً `/` پر ہونا چاہیے**۔ prefix فہرست میں ایک منفرد route رکھنے سے ہر وہ متصل path بھی عوامی ہو جاتا ہے جس کے ابتدائی حروف یکساں ہوں — بشمول بعد میں شامل کیے جانے والے dynamic-segment siblings (GHSA-74g9-q8f6-793h)۔ `tests/unit/public-api-routes.test.ts`، `tests/unit/authz/public-route-exact-match.test.ts` اور `tests/unit/authz/classify.test.ts` میں unit tests اپ ڈیٹ کریں۔
 
-## سکوپس
+## دائرہ کار
 
-تین نام اسپیسز۔ ہر چیکر صرف اپنی سٹرنگز پڑھتا ہے۔ ساتھ ساتھ موازنہ، بشمول یہ کہ `manage` `read:compression` کے لیے `scopeMatches` میں کیوں ناکام ہوتا ہے اور ایک `read` ایکسیس ٹوکن `PATCH /api/keys/{id}` کیوں نہیں کر سکتا، [تین سکوپ نام اسپیسز](../frameworks/MCP-SERVER.md#three-scope-namespaces) میں ہے۔
+تین نام کی جگہیں۔ ہر چیکر صرف اس کے اپنے تار پڑھتا ہے۔ ساتھ ساتھ، بشمول `manage` `read:compression` کے لیے `scopeMatches` کیوں ناکام ہوتا ہے اور کیوں `read` رسائی ٹوکن `PATCH /api/keys/{id}` نہیں کر سکتا، [تین دائرہ کار نام کی جگہیں](../frameworks/MCP-SERVER.md#three-scope-namespaces) ہیں۔
 
-API کیز میں ایک `scopes` ایرے شامل ہوتا ہے (جو `api_keys.scopes` میں JSON کے طور پر محفوظ کیا جاتا ہے، دیکھیں `src/lib/db/apiKeys.ts`)۔
+API کیز ایک `scopes` صف رکھتی ہے ( `api_keys.scopes` میں JSON کے طور پر ذخیرہ کیا جاتا ہے، `src/lib/db/apiKeys.ts` دیکھیں)۔
 
-### مینجمنٹ سکوپ
+### انتظامی دائرہ کار
 
-- `manage` / `admin` — `hasManageScope`۔ مینجمنٹ API روٹس تک بیئرر رسائی۔
-- `mcp:connect`، `self:usage`، `self:account-quota`، اور `policy:bypass-provider-quota` اضافی عین مطابق میچ سکوپس ہیں۔ یہ `MANAGEMENT_API_KEY_SCOPES` سے باہر رہتے ہیں۔ `mcp:connect` صرف `/api/mcp/` نان-لوپ بیک کارو آؤٹ کو کھولتا ہے۔
+- `manage` / `admin` — `hasManageScope` انتظام API راستوں تک بیئرر رسائی۔
+- `mcp:connect`، `self:usage`، `self:account-quota`، اور `policy:bypass-provider-quota` اضافی عین مطابق مماثلت کے دائرہ کار ہیں۔ وہ `MANAGEMENT_API_KEY_SCOPES` بیٹھے ہیں . `mcp:connect` صرف `/api/mcp/` نان لوپ بیک کارو آؤٹ کو کھولتا ہے۔
 
-### MCP ٹول سکوپس
+### MCP ٹول اسکوپس
 
-کیٹلاگ اور میچنگ کے قواعد (یکساں سٹرنگ، یا ایک عطا کردہ سکوپ جو `*` پر ختم ہوتا ہے): [MCP ٹول سکوپس](../frameworks/MCP-SERVER.md#mcp-tool-scopes)۔ `src/shared/constants/mcpScopes.ts` میں `MCP_SCOPE_LIST` اصل ٹائپ شدہ ذیلی سیٹ ہے، نہ کہ وہ مکمل کیٹلاگ۔ نفاذ `open-sse/mcp-server/scopeEnforcement.ts` میں `resolveCallerScopeContext()` کے بعد چلتا ہے جو MCP تصدیقی معلومات، ریکویسٹ میٹا ڈیٹا، یا `OMNIROUTE_MCP_SCOPES` سے سکوپس کو حل کرتا ہے۔ یہ بند رہتا ہے جب تک کہ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` نہ ہو۔
+کیٹلاگ اور مماثلت کے اصول (ایک جیسی سٹرنگ، یا `*` پر ختم ہونے والا ایک عطا کردہ دائرہ کار): [MCP ٹول اسکوپس](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ۔ `src/shared/constants/mcpScopes.ts` میں `MCP_SCOPE_LIST` اصل ٹائپ شدہ سب سیٹ ہے، یہ مکمل کیٹلاگ نہیں۔ نفاذ `open-sse/mcp-server/scopeEnforcement.ts` میں چلتا ہے جب `resolveCallerScopeContext()` MCP auth معلومات، درخواست میٹا ڈیٹا، یا `OMNIROUTE_MCP_SCOPES` سے دائرہ کار کو حل کرتا ہے۔ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` اسے عالمی سطح پر آن کرتا ہے (پہلے سے طے شدہ `false`)، لیکن یہ ہمیشہ ایک HTTP/SSE کالر کے لیے نافذ ہوتا ہے جس کی API کلید میں `manage`/`admin` کمی ہوتی ہے ( `open-sse/mcp-server/scopeEnforcement.ts` میں `shouldForceScopeEnforcement()` دیکھیں)، پرچم سے قطع نظر۔
 
-### ایکسیس ٹوکن سکوپس
+### رسائی ٹوکن اسکوپس
 
-`oma_live_…` ٹوکنز پر `read` / `write` / `admin`، جن کی درجہ بندی `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) کے ذریعے کی جاتی ہے۔ یہ درجہ بندی صرف ایکسیس ٹوکن کریڈینشل پر لاگو ہوتی ہے۔ [مینجمنٹ تصدیق](../guides/MANAGEMENT-AUTH.md) دیکھیں۔
+`read` / `write` / `admin` `oma_live_…` ٹوکنز پر، `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) کے ذریعے درجہ بندی۔ یہ درجہ صرف رسائی ٹوکن اسناد پر لاگو ہوتا ہے۔ [انتظامی توثیق](../guides/MANAGEMENT-AUTH.md) دیکھیں۔
 
 ## توثیق مطلوبہ ٹوگل
 

@@ -4,29 +4,13 @@
 
 ---
 
-> **Doğruluk kaynağı:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`,
-> `scanner.ts`, `loader.ts`), `src/app/api/plugins/` ve
-> `src/app/(dashboard)/dashboard/plugins/`
-> **Son güncelleme:** 2026-06-28 — v3.8.40
+> **Gerçeğin kaynağı:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`, `scanner.ts`, `loader.ts`), `src/app/api/plugins/` ve `src/app/(dashboard)/dashboard/plugins/`
 
-OmniRoute, WordPress tarzı bir eklenti sistemiyle birlikte gelir. Eklentiler;
-her biri bir `plugin.json` manifesti ve bir giriş dosyası içeren, kendi kendine
-yeterli dizinlerdir. İstek işlem hattına (`onRequest` / `onResponse` / `onError`)
-ve yaşam döngüsü olaylarına (`onInstall` / `onActivate` / `onDeactivate` /
-`onUninstall`) bağlanırlar.
+OmniRoute WordPress tarzı bir eklenti sistemi sunar. Eklentiler, her biri bir `plugin.json` bildirimi ve istek hattına (`onRequest` / `onResponse` / `onError`) ve yaşam döngüsü olaylarına (`onInstall` / `onActivate` / `onDeactivate` / `onUninstall`) bağlanan bir — giriş dosyasına sahip bağımsız — dizinleridir.
 
-**Eklenti Pazarı**, bu sistemin üzerindeki keşif katmanıdır. Yüklenebilir
-eklentilerden oluşan, göz atılabilir bir katalog sunar. Katalog varsayılan olarak
-küçük, yerleşik bir başlangıç kayıt defteridir. Bir operatör, kataloğu özel bir
-uzak kayıt defteri URL'sine yönlendirebilir; bu durumda getirme işlemi, DNS
-çözümlemesi yapan bir SSRF korumasıyla güvence altına alınır (bkz.
-[Güvenlik](#security)).
+**Eklenti Pazarı** bu sistemin üstündeki keşif katmanıdır. Yüklenebilir eklentilerin göz atılabilir bir kataloğunu ortaya çıkarır. Varsayılan olarak katalog küçük bir yerleşik tohum kaydıdır; bir operatör onu özel bir uzak kayıt defteri URL yönlendirebilir; bu durumda getirme işlemi, DNS çözümleyici bir SSRF koruması tarafından sağlamlaştırılır (bkz. [Güvenlik](#security) ).
 
-Tüm eklenti rotaları **yalnızca loopback üzerinden erişilebilir** (Katman 1 —
-`LOCAL_ONLY`): Eklentiler alt süreçlerde kod yükleyip çalıştırdığından, kimlik
-doğrulamadan bağımsız olarak loopback dışındaki kaynaklardan bu rotalara
-erişilemez. Bkz.
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
+Her eklenti rotası** yalnızca geri döngü** (Kademe 1 — `LOCAL_ONLY`): eklentiler alt işlemlerde kod yükler ve yürütür, böylece kimlik doğrulamasından bağımsız olarak rotalara geridöngü olmayan bir kaynaktan erişilemez. Bkz. [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
 ## Together Nasıl Uyuyor?
 
@@ -86,18 +70,19 @@ dışında bir durum döndürürse veya tanınmayan bir gövde döndürürse
 
 Tüm uç noktalar yönetim kimlik doğrulaması (`requireManagementAuth`) gerektirir** Ve** yalnızca geri döngüdür — `/api/plugins` ve `/api/plugins/`, `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) içinde listelenir.
 
-| Uç nokta                         | Yöntem | Tanım                                                             |
-| -------------------------------- | ------ | ----------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Yüklü eklentileri listeleyin (isteğe bağlı `?status=` filtresi)   |
-| `/api/plugins`                   | POST   | Eklenti kaynakları dizininden bir eklenti yükleyin                |
-| `/api/plugins/scan`              | POST   | Eklenti dizinini tarayın ve yeni eklentileri kaydedin             |
-| `/api/plugins/marketplace`       | GET    | Pazar yeri katalog girişlerini listeleyin                         |
-| `/api/plugins/[name]`            | GET    | Yüklü eklenti ayrıntılarını alın                                  |
-| `/api/plugins/[name]`            | DELETE | Bir eklentiyi kaldırma                                            |
-| `/api/plugins/[name]/activate`   | POST   | Etkinleştir ( + kayıt kancalarını yükle)                          |
-| `/api/plugins/[name]/deactivate` | POST   | Devre dışı bırak ( `onDeactivate` ateşle, kancaların kaydını sil) |
-| `/api/plugins/[name]/config`     | GET    | Eklenti yapılandırma + yapılandırma şemasını alın                 |
-| `/api/plugins/[name]/config`     | PUT    | Eklenti yapılandırmasını güncelleyin (şemaya göre doğrulandı)     |
+| Uç nokta                           | Yöntem | Tanım                                                             |
+| ---------------------------------- | ------ | ----------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Yüklü eklentileri listeleyin (isteğe bağlı `?status=` filtresi)   |
+| `/api/plugins`                     | POST   | Eklenti kaynakları dizininden bir eklenti yükleyin                |
+| `/api/plugins/scan`                | POST   | Eklenti dizinini tarayın ve yeni eklentileri kaydedin             |
+| `/api/plugins/marketplace`         | GET    | Pazar yeri katalog girişlerini listeleyin                         |
+| `/api/plugins/marketplace/install` | POST   | Ada göre bir Market eklentisi yükleyin                            |
+| `/api/plugins/[name]`              | GET    | Yüklü eklenti ayrıntılarını alın                                  |
+| `/api/plugins/[name]`              | DELETE | Bir eklentiyi kaldırma                                            |
+| `/api/plugins/[name]/activate`     | POST   | Etkinleştir ( + kayıt kancalarını yükle)                          |
+| `/api/plugins/[name]/deactivate`   | POST   | Devre dışı bırak ( `onDeactivate` ateşle, kancaların kaydını sil) |
+| `/api/plugins/[name]/config`       | GET    | Eklenti yapılandırma + yapılandırma şemasını alın                 |
+| `/api/plugins/[name]/config`       | PUT    | Eklenti yapılandırmasını güncelleyin (şemaya göre doğrulandı)     |
 
 `GET /api/plugins` `status` filtresi `installed` / `active` / `inactive` / `error` birini kabul eder. Geçersiz bir değer `400` değerini döndürür.
 
@@ -117,9 +102,9 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` bir olmalıdır** mutlak** bir dizinin yolu** eklenti kaynakları dizininin içinde** : `plugin-sources` eklenti kökünün yanında, yani varsayılan olarak `~/.omniroute/plugin-sources/` veya bu değişken ayarlandığında `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` ( `src/lib/plugins/installSource.ts` `getPluginSourcesDir()` ). Önce eklentiyi oraya kopyalayın veya klonlayın. Yol `..` veya bir boş bayt içerdiğinde, bu dizinin dışında yer aldığında, bir sembolik bağlantı aracılığıyla onun dışında çözümlendiğinde, hedefi onun dışında olan bir sembolik bağlantı içerdiğinde veya dizin mevcut olmadığında kurulum `400` ile reddedilir. Kaynak dizinin geçerli bir `plugin.json` içermesi (veya birinin ebeveyni olması) gerekir. Başarı durumunda yanıt, yüklü eklenti satırıyla birlikte `201` olur.
+The `path` must be an **absolute** path to a directory **inside the plugin sources directory**: `plugin-sources` next to the plugin root, so `~/.omniroute/plugin-sources/` by default, or `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` when that variable is set (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Copy or clone the plugin there first. The install is refused with `400` when the path contains `..` or a null byte, lies outside that directory, resolves outside it through a symlink, contains a symlink whose target is outside it, or when the directory does not exist. The source directory must contain a valid `plugin.json` (or be a parent of one). On success the response is `201` with the installed plugin row.
 
-Diğer eklenti yollarından farklı olarak bu, oturum açma devre dışı bırakıldığında bile (`requireLogin=false`) yönetim kimlik bilgilerini (bir kontrol paneli oturumu veya yönetim kapsamlı bir API anahtarı) gerektirir: kodun yüklenmesi hiçbir zaman anonim bir eylem değildir.
+Diğer eklenti yollarından farklı olarak bu, oturum açma devre dışı bırakıldığında bile (`requireLogin=false`) yönetim kimlik bilgilerini (bir kontrol paneli oturumu veya yönetim kapsamlı bir API anahtarı) gerektirir: kodun yüklenmesi hiçbir zaman anonim bir eylem değildir. Aynısı `POST /api/plugins/marketplace/install` (vücut `{ "name": "<plugin>" }`) için de geçerlidir.
 
 ### Pazara göz atın
 
@@ -137,7 +122,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` sağlanan her değeri eklentinin `configSchema` (bildirimde belirtilen) göre doğrular: `number` alanları `min`/`max` onurlandırır, `select` alanları bildirilen `enum` ile eşleşmelidir. Şemada bulunmayan anahtarlara izin verilir.
+`PUT .../config` gövdeyi eklentinin `configSchema` (manifest'te bildirilen) karşı `src/lib/plugins/manifest.ts` `validatePluginConfig()` ile doğrular: her anahtar şemada bildirilmeli, değerler bildirilen türle eşleşmeli, `number` alanları `min`/`max` onurlandırmalı ve `select` alanları bildirilen `enum` eşleşmelidir. Herhangi bir ihlal `400` değerini döndürür ve hiçbir şey saklanmaz. `configSchema` olmadığını bildiren bir eklentinin yapılandırılabilir anahtarı yoktur, dolayısıyla istek `400` ile reddedilir ("Eklenti herhangi bir yapılandırılabilir anahtar bildirmez").
 
 ## Yapılandırma
 
@@ -220,12 +205,12 @@ Her iki katmanda da başarısız olan bir URL — isteğini iptal etmez, pazar y
 
 ### Eklenti yürütme izolasyonu
 
-> **Eklentiler korumalı alana alınmamıştır.** Çocuk, OmniRoute kullanıcısı olarak çalışan, VM bağlamı ve Node.js izin işaretleri olmayan sıradan bir Node.js işlemidir; dolayısıyla eklenti kodu, kullanıcının yapabileceği herhangi bir dosyayı okuyabilir ve yazabilir, programları çalıştırabilir ve ağa erişebilir. `requires.permissions` yalnızca çocuğun hangi ortam değişkenlerini alacağına karar verir; diğer izinler uygulanmaz. Yalnızca güvendiğiniz eklentileri yükleyin. Aşağıdaki süreç sınırında çökmeler ve takılmalar var; bir güvenlik sınırı değildir.
+> **Eklentiler varsayılan olarak korumalı alana alınmaz.** Çocuk, OmniRoute kullanıcısı olarak çalışan, VM bağlamı ve Node.js izin işaretleri olmayan sıradan bir Node.js işlemidir; dolayısıyla eklenti kodu, kullanıcının yapabileceği herhangi bir dosyayı okuyabilir ve yazabilir, programları çalıştırabilir ve ağa erişebilir. `requires.permissions` yalnızca çocuğun hangi ortam değişkenlerini alacağına karar verir; diğer izinler uygulanmaz. Katılma `PLUGIN_PERMISSION_MODEL_ENABLED` özellik bayrağı (varsayılan olarak kapalı), Node.js kısıtlayamadığı `network` hariç (bkz. [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#permission-system) ), bu izinlerden oluşturulan Node.js izin modeli altında her eklentiyi çalıştırır. Yalnızca güvendiğiniz eklentileri yükleyin. Aşağıdaki süreç sınırında çökmeler ve takılmalar var; bir güvenlik sınırı değildir.
 
 - **Süreç izolasyonu** — `loadPlugin()` (`src/lib/plugins/loader.ts`), her eklentiyi ayrı bir Node.js alt sürecinde oluşturur ve IPC üzerinden iletişim kurar. Kanca çağrılarının `SIGTERM` → `SIGKILL` yükseltme ile zaman aşımı vardır.
 - **Zarf izin verilenler listesi** — çocuk yalnızca izin verilenler listesine eklenen ortam değişkenleri kümesini alır; daha geniş küme yalnızca manifest `env` izni istediğinde verilir.
 - **Kaynak korumasını yükleyin** — `POST /api/plugins` yalnızca eklenti kaynakları dizininden okur (bkz. "Yerel yoldan yükleme"): yol, `realpath` ile kurallı hale getirilir, kesinlikle bu dizinin içinde kalmalıdır ve kendisinden kaçan bir sembolik bağlantı taşıyan kaynak ağacı, herhangi bir şey kopyalanmadan önce reddedilir.
-- **Yol sınırlaması** — install/upgrade/uninstall eklenti dizininin ve `manifest.main` çözümlendiğini iddia ediyor** içinde** herhangi bir kopyalama veya özyinelemeli silme işleminden önce yönetilen eklenti kökü (kurcalanmış DB yollarına ve `manifest.main` içindeki `../` geçişine karşı koruma sağlar). Etkinleştirme, sembolik bağlantıları `realpath` aracılığıyla çözer ve eklenti dizininden kaçan bir giriş noktasının yüklenmesini reddeder.
+- **Yol sınırlaması** — install/upgrade/uninstall eklenti dizininin ve `manifest.main` çözümlendiğini iddia ediyor** içinde** herhangi bir kopyalama veya yinelemeli silme işleminden önce yönetilen eklenti kökü (kurcalanmış DB yollarına ve `manifest.main` içindeki `../` geçişine karşı koruma sağlar). Etkinleştirme, sembolik bağlantıları `realpath` aracılığıyla çözer ve eklenti dizininden kaçan bir giriş noktasının yüklenmesini reddeder.
 - **İsteğe bağlı bütünlük pimi** — bir bildirim, bir `integrity` (`sha256-<base64>`, SRI formatı) alanı bildirebilir. Yükleyici, mevcut olduğunda yükleme sırasında giriş dosyası karmasını doğrular ve uyumsuzluk durumunda etkinleştirmeyi reddeder. İsteğe bağlı kurcalama tespitidir,** Olumsuz** bir güvenlik sınırı: yüklü bir eklentinin yapabileceklerini sınırlamaz.
 - **Kancalarda istemci kimlik bilgileri yok** — `onRequest`, `onResponse` ve `onError` iletilen bağlamda `authorization`, `x-api-key`, `proxy-authorization` ve `cookie` başlıkları kaldırılmıştır ve API anahtar kaydı hiçbir anahtar değeri taşımamaktadır ( `src/lib/plugins/hooks.ts` `redactPluginContext()` ).
 

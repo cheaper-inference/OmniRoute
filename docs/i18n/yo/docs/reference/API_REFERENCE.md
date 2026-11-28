@@ -49,7 +49,7 @@ Fún ìlànà ibaramu OpenAI pàtó àti àtòjọ agbára àwọn olùpèsè, w
 
 ---
 
-## Àwọn Ìparí Ìjíròrò
+## Iwiregbe Ipari
 
 ```bash
 POST /v1/chat/completions
@@ -65,35 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### Àwọn Àkọsílẹ̀ Àkànṣe
+### Aṣa Awọn akọle
 
-| Header                   | Direction | Description                                                                                                                                                                                                                 |
-| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Ìbéèrè    | Ṣètò sí `true` láti fo kaṣe kọjá                                                                                                                                                                                            |
-| `x-omniroute-no-memory`  | Ìbéèrè    | Ṣètò sí `true` láti fo abẹrẹ memory + skills fún ìbéèrè yìí (ó jọ no-cache; ó ń yàgò fún àfikún token/ìnáwó fún ìpè kọ̀ọ̀kan)                                                                                                 |
-| `X-OmniRoute-Progress`   | Ìbéèrè    | Ṣètò sí `true` fún àwọn ìṣẹ̀lẹ̀ ìlọsíwájú                                                                                                                                                                                     |
-| `X-Session-Id`           | Ìbéèrè    | Kókó session tí ó dúró ṣinṣin fún ìbáṣepọ̀ session ìta                                                                                                                                                                       |
-| `x_session_id`           | Ìbéèrè    | Ẹ̀yà underscore náà tún wà fún lílo (HTTP tààrà)                                                                                                                                                                             |
-| `X-OmniRoute-Session-Id` | Ìbéèrè    | Ààmì session/ìjíròrò tí olùpè pèsè (ó tún ń fún memory ní ìsọfúnni). Nígbà tí ó bá wà, a máa fi pamọ́ láìyípadà sínú `call_logs.session_tag` fún ìṣírò ìnáwó fún session kọ̀ọ̀kan (#8249) — a kì í dá a sílẹ̀ nígbà tí kò bá sí |
-| `Idempotency-Key`        | Ìbéèrè    | Kókó ìdènà àtúnṣe (àkókò ìṣẹ́jú-aaya 5)                                                                                                                                                                                      |
-| `X-Request-Id`           | Ìbéèrè    | Kókó ìdènà àtúnṣe mìíràn                                                                                                                                                                                                    |
-| `x-omniroute-connection` | Ìbéèrè    | So ìbéèrè model kan ṣoṣo mọ́ ìsopọ̀ provider kan (account) nípa id rẹ — wo [Píńnìngì account fún ìbéèrè kọ̀ọ̀kan](#account-pinning-per-request)                                                                                 |
-| `X-OmniRoute-Cache`      | Ìdáhùn    | `HIT` tàbí `MISS` (àì-ṣíṣàn)                                                                                                                                                                                                |
-| `X-OmniRoute-Idempotent` | Ìdáhùn    | `true` bí a bá dín àtúnṣe kù                                                                                                                                                                                                |
-| `X-OmniRoute-Progress`   | Ìdáhùn    | `enabled` bí ìtọ́pinpin ìlọsíwájú bá wà lórí                                                                                                                                                                                 |
-| `X-OmniRoute-Session-Id` | Ìdáhùn    | ID session tó munadoko tí OmniRoute lò                                                                                                                                                                                      |
-| `X-OmniRoute-Request-Id` | Ìdáhùn    | ID ìbáṣepọ̀ ìbéèrè (nígbà tí a bá mọ̀ ọ́n)                                                                                                                                                                                     |
-| `X-OmniRoute-Version`    | Ìdáhùn    | Ẹ̀dà ìkọ́ OmniRoute (ó máa wà nígbà gbogbo)                                                                                                                                                                                   |
-| `X-OmniRoute-Cost-Saved` | Ìdáhùn    | USD tí kaṣe gbà là nígbà `HIT` (àwọn cache hit nìkan)                                                                                                                                                                       |
-| `X-OmniRoute-Decision`   | Ìdáhùn    | Àkọsílẹ̀ ìtọ́sọ́nà: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` jẹ́ combo strategy, tàbí `single` fún ìbéèrè tí kì í ṣe combo) — ó máa wà nígbà gbogbo nínú àwọn ìdáhùn ìparí                                 |
+| Akọsori                  | Itọsọna | Apejuwe                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Ibere   | Ṣeto si `true` lati fori kaṣe                                                                                                                                                                                                                                                                                                                                                       |
+| `x-omniroute-no-memory`  | Ibere   | Ṣeto si `true` lati foju iranti abẹrẹ awọn ọgbọn + fun ibeere yii (awọn digi ko si kaṣe; yago fun ipe-kọọkan token/cost loke)                                                                                                                                                                                                                                                       |
+| `x-omniroute-no-log`     | Ibere   | Ṣeto si `true` lati yọkuro awọn ẹru isanwo request/response kuro ninu awọn iwe ipe fun ibeere itọkasi yii (gbogbo awọn ipa ọna iwiregbe-ẹbi: Iwiregbe Ipari, Awọn idahun, Awọn ifiranṣẹ, Awọn ipari, Gemini). Aami-akoko, awoṣe, ipo, iye akoko ati awọn iṣiro ami ti wa ni igbasilẹ sibẹ. Darapọ pẹlu `x-omniroute-no-memory` ati `x-omniroute-no-cache` fun ijade akoonu ni kikun |
+| `X-OmniRoute-Progress`   | Ibere   | Ṣeto si `true` fun awọn iṣẹlẹ ilọsiwaju                                                                                                                                                                                                                                                                                                                                             |
+| `X-Session-Id`           | Ibere   | Bọtini igba alalepo fun isunmọ igba ita                                                                                                                                                                                                                                                                                                                                             |
+| `x_session_id`           | Ibere   | Iyatọ abẹlẹ tun gba ( HTTP taara)                                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Session-Id` | Ibere   | Aami session/conversation ti olupe ti pese (tun nṣe iranti kikọ sii). Nigbati o ba wa, taku verbatim si `call_logs.session_tag` fun idasi iye owo igba-kọọkan (#8249) — ko ṣepọ rara nigbati ko si.                                                                                                                                                                                 |
+| `Idempotency-Key`        | Ibere   | Bọtini yiyọkuro (windows 5s)                                                                                                                                                                                                                                                                                                                                                        |
+| `X-Request-Id`           | Ibere   | Bọtini didapa yiyan                                                                                                                                                                                                                                                                                                                                                                 |
+| `x-omniroute-connection` | Ibere   | Pin ibeere awoṣe ẹyọkan kan si asopọ olupese kan (iroyin) nipasẹ id — wo [Pinning Account fun ibeere](#account-pinning-per-request)                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Cache`      | Idahun  | `HIT` tabi `MISS` (ti kii ṣe ṣiṣanwọle)                                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Idempotent` | Idahun  | `true` o ba ti deduplicated                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Progress`   | Idahun  | `enabled` ti ipasẹ ilọsiwaju lori                                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Session-Id` | Idahun  | Igba to munadoko ID nipasẹ OmniRoute                                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Request-Id` | Idahun  | Beere idasi ibamu (nigbati a ba mọ)                                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Version`    | Idahun  | OmniRoute kọ ẹya (nigbagbogbo wa)                                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Cost-Saved` | Idahun  | USD yago fun kaṣe lori HIT (kaṣe deba nikan)                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Decision`   | Idahun  | Itọpa ipa ọna: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` jẹ ilana konbo, tabi `single` fun ibeere ti kii ṣe konbo) — nigbagbogbo wa lori awọn idahun ipari                                                                                                                                                                                                      |
 
-> Àkíyèsí Nginx: bí o bá gbẹ́kẹ̀ lé àwọn akọsori underscore (fún àpẹẹrẹ `x_session_id`), ṣiṣẹ́ `underscores_in_headers on;`.
+> Akọsilẹ Nginx: ti o ba gbẹkẹle awọn akọle underscore (fun apẹẹrẹ `x_session_id`), mu `underscores_in_headers on;` ṣiṣẹ.
 
-#### Píńnìngì account fún ìbéèrè kọ̀ọ̀kan
+#### Pinni akọọlẹ fun ibeere
 
-Nígbà tí provider bá ní àwọn ìsopọ̀ púpọ̀ (accounts tàbí keys), OmniRoute sábà máa yan ọ̀kan
-nípasẹ̀ ọgbọ́n yíyan account rẹ̀. Ìbéèrè kan lè dípò bẹ́ẹ̀ so mọ́ ìsopọ̀ kan pàtó
-pẹ̀lú akọsori `x-omniroute-connection`:
+Nigbati olupese ba ni awọn ọna asopọ pupọ (awọn akọọlẹ tabi awọn bọtini), OmniRoute nigbagbogbo yan ọkan nipasẹ ilana yiyan akọọlẹ rẹ. Ibeere le dipo asopọ kan pato pẹlu akọsori `x-omniroute-connection` :
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,18 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Ibi tí a ti rí id.** Ṣí ojúewé olupèsè náà nínú dashboard
-  (**Dashboard → Providers → <provider>**) kí o sì tẹ chip id `xxxxxxxx…` lórí ìlà ìsopọ̀ kan — ó máa da id ìsopọ̀ kíkún kọ.
-- **Àwọn ìbéèrè wo ló bọ̀wọ̀ fún un.** Àwọn ìbéèrè model kan ṣoṣo (`provider/model`) lórí
-  `/v1/chat/completions`, `/v1/messages` àti `/v1/responses`. Àwọn combo kọ̀ láti lo header náà: pin
-  àkọọlẹ̀ kan fún ìgbésẹ̀ combo kọ̀ọ̀kan nípasẹ̀ ìsopọ̀ tirẹ̀ ti ìgbésẹ̀ náà.
-- **Pin náà jẹ́ dandan, kì í ṣe ààyò.** A máa lo ìsopọ̀ tí a pin sí nìkan. Bí ìkùnà bá wáyé nínú ìbéèrè náà, a máa gba àkọọlẹ̀ náà sílẹ̀ fún cooldown, ṣùgbọ́n a kò ní yí padà sí àkọọlẹ̀ arákùnrin kan ti olupèsè kan náà.
-- **Cooldown àti quota máa tú pin náà sílẹ̀.** Nígbà tí ìsopọ̀ tí a pin sí bá wà nínú cooldown,
-  quota ti parí tàbí ìlànà quota kan ti dí i, àwọn ìbéèrè tó tẹ̀lé máa padà sí àwọn ìsopọ̀ mìíràn ti olupèsè náà, gẹ́gẹ́ bí ìrìnàjò tí a kò pin sí.
-- **Àwọn id tí a kò mọ̀ tàbí tí a pa ṣiṣẹ́ máa fa ìkùnà.** Id kan tí kò sí nínú àkójọpọ̀ olupèsè tó ń ṣiṣẹ́ (tí a ti pa rẹ́, tí a ti dáṣiṣẹ́, tàbí tí ó jẹ́ ti olupèsè mìíràn) kò fi àkọọlẹ̀ tó yẹ sílẹ̀, nítorí náà ìbéèrè náà máa kùnà dípò kí ó máa darí lọ sí ibòmíràn láìsọ̀rọ̀.
+- **Nibo ni lati wa id.** Ṣii oju-iwe olupese ni dasibodu (** Dasibodu → Awọn olupese → <provider>** ) ki o si tẹ `xxxxxxxx…` id ërún lori ọna asopọ kan — daakọ id asopọ ni kikun.
+- **Awọn ibeere wo ni o bọwọ fun.** Awọn ibeere awoṣe ẹyọkan (`provider/model`) lori `/v1/chat/completions`, `/v1/messages` ati `/v1/responses`. Combos foju foju kọ akọsori: pin akọọlẹ kan fun igbesẹ konbo nipasẹ ọna asopọ tirẹ dipo.
+- **PIN ti o muna, kii ṣe ayanfẹ.** Asopọ ti a pinni ni a lo ni iyasọtọ. Ikuna inu ibeere naa ṣe igbasilẹ itutu agbaiye akọọlẹ ṣugbọn o ṣe** kii ṣe** yi lọ si akọọlẹ arakunrin ti olupese kanna.
+- **Itutu ati ipin ti tu pinni silẹ.** Lakoko ti asopọ pinni ti n tutu si isalẹ, o rẹwẹsi tabi dina nipasẹ eto imulo ipin kan, awọn ibeere nigbamii ṣubu si awọn asopọ miiran ti olupese, ni deede bii ijabọ ti a ko pin.
+- **Awọn ids aimọ tabi alaabo kuna.** id ti ko si ninu adagun-odo ti n ṣiṣẹ (parẹ, ti mu ṣiṣẹ, tabi ti o jẹ ti olupese miiran) ko fi iwe ipamọ ti o yẹ silẹ, nitorinaa ibeere naa kuna dipo ipalọlọ ipalọlọ ni ibomiiran.
 
-Claude Code máa ń fi àwọn header àṣà ránṣẹ́ nípasẹ̀ `ANTHROPIC_CUSTOM_HEADERS`. Fi í sínú abala `env`
-ti `~/.claude/settings.json`, tàbí sínú `.claude/settings.json` ní ipele project láti pin àkọọlẹ̀ mìíràn fún project kọ̀ọ̀kan:
+koodu Claude firanṣẹ awọn akọle aṣa nipasẹ `ANTHROPIC_CUSTOM_HEADERS`. Fi sii sinu bulọọki `env` ti `~/.claude/settings.json`, tabi ni ipele-ipele `.claude/settings.json` lati pin akọọlẹ oriṣiriṣi kan fun iṣẹ akanṣe:
 
 ```jsonc
 {
@@ -126,12 +120,11 @@ ti `~/.claude/settings.json`, tàbí sínú `.claude/settings.json` ní ipele pr
 }
 ```
 
-Orísun: `src/sse/handlers/chat.ts` (kíkà header), `src/sse/services/auth.ts` àti
-`src/sse/services/sessionAffinityPin.ts` (títú pin sílẹ̀ àti àyẹ̀wò pé kò sí nínú àkójọpọ̀).
+Orisun: `src/sse/handlers/chat.ts` (kika akọsori), `src/sse/services/auth.ts` ati `src/sse/services/sessionAffinityPin.ts` (itusilẹ pin ati ayẹwo-lati-odo-odo).
 
-> **Àwọn header telemetry iye owó:** àwọn response àṣeyọrí tí kì í ṣe streaming tún máa ní àkójọpọ̀ telemetry iye owó `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, decimal mẹ́wàá tó wa titi; `0.0000000000` fún ohun ọ̀fẹ́/tí kò ní iye owó), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, àti `X-OmniRoute-Fallback-Attempts` (nígbà tí iye náà bá ju 0 lọ nìkan), pẹ̀lú `X-OmniRoute-Request-Id` àti `X-OmniRoute-Version`. Àwọn yìí máa ń jáde láti inú chat completions, `/v1/responses`, `/v1/messages`, **àti àwọn media endpoints** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, àti `/v1/moderations` (iye owó jẹ́ `0` ní gbogbo ìgbà). A máa ṣe iṣírò iye owó media gẹ́gẹ́ bí modality (fún àwòrán kọ̀ọ̀kan, fún ìṣẹ́jú-aaya kọ̀ọ̀kan, fún ohun kikọ̀ kọ̀ọ̀kan, fún search-unit kọ̀ọ̀kan) nígbà tí pricing bá wà; bí kò bá sí, iye náà jẹ́ `0` (fail-open).
+> **Awọn akọle telemetry iye owo:** Awọn idahun aṣeyọri ti kii ṣe ṣiṣanwọle tun gbe `X-OmniRoute-*` iye owo-telemetry ṣeto — `X-OmniRoute-Response-Cost` (USD, awọn eleemewa mẹwa ti o wa titi; `0.0000000000` fun free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, ati `X-OmniRoute-Fallback-Attempts` (nikan nigbati > 0), pẹlu `X-OmniRoute-Request-Id` ati `X-OmniRoute-Version`. Iwọnyi jẹ itujade nipasẹ awọn ipari iwiregbe, `/v1/responses`, `/v1/messages`,** ati awọn aaye ipari media** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, ati `/v1/moderations` (nigbagbogbo iye owo `0`). Iye owo media jẹ iṣiro fun ọna kan (fun-aworan, fun-aaya, fun-iwa, fun ẹyọkan wiwa) nigbati idiyele ba wa, bibẹẹkọ `0` (kuna-ṣii).
 
-> **Ìtumọ̀ iye owó cache-hit:** lórí semantic-cache HIT (`X-OmniRoute-Cache-Hit: true`) kò sí ìpè upstream kankan tí a ṣe, nítorí náà `X-OmniRoute-Response-Cost` jẹ́ `0.0000000000` (iye owó **àfikún** fún fífi hit náà ṣiṣẹ́). Iye owó ìpilẹ̀ṣẹ̀/èyí tí ìbéèrè náà ì bá ti ná ni a máa ròyìn lọ́tọ̀ nínú `X-OmniRoute-Cost-Saved`. Àwọn oníbàárà billing yẹ kí wọ́n kó `X-OmniRoute-Response-Cost` jọ (hits kò ná owó); àwọn ìṣirò cache lè kó `X-OmniRoute-Cost-Saved` jọ.
+> **Itumọ iye owo kaṣe-lu:** lori kaṣe atunmọ HIT (`X-OmniRoute-Cache-Hit: true`) ko si ipe ti o wa ni oke, nitorina `X-OmniRoute-Response-Cost` jẹ `0.0000000000` (awọn** afikun** iye owo ti sìn awọn buruju). Iye owo original/would-have-been jẹ ijabọ lọtọ ni `X-OmniRoute-Cost-Saved`. Awọn onibara ìdíyelé yẹ ki o apao `X-OmniRoute-Response-Cost` (awọn kọlu ko ni nkan); Awọn atupale kaṣe le ṣajọpọ `X-OmniRoute-Cost-Saved`.
 
 ## Yíya Àkókò Àwọn Ìjókòó Tí A Ṣàkóso Pẹ̀lú Ìyasọ́tọ̀
 
@@ -330,6 +323,8 @@ Awọn olupese ti o wa pẹlu OpenAI (Aworan GPT 2), xAI (Aworan Grok ), Togethe
 
 `n` awọn aworan `n` pada ni `data[]`. Awọn olupese ti API oke wọn da aworan kan pada fun ipe kan (Labs Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) gba `n` lọtọ awọn ipe oke, ni julọ 4 ni flight. `seed` ti o wa titi jẹ aiṣedeede nipasẹ atọka ipe (`seed`, `seed + 1`, …), nitorinaa awọn aworan yato ṣugbọn o duro ni atunṣe. `n` ti wa ni capped ni 10. Awọn ìbéèrè kuna bi odidi ti eyikeyi ipe ba kuna. Atokọ awọn ọna kika àìpẹ-jade jẹ `SINGLE_IMAGE_FANOUT_FORMATS` ni `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Awọn awoṣe Aworan (`codex/gpt-image-*`) da pada PNG nikan: awọn idahun ti oke `200` pẹlu PNG awọn baiti paapaa nigba ti `jpeg` tabi `webp` ba beere. Ibere pẹlu eyikeyi `output_format` miiran (`webp`, `jpeg`, ...) jẹ kọ pẹlu HTTP 400 dipo ki o jẹ ki a kọju ni ipalọlọ; fi silẹ tabi firanṣẹ `png`. `output_compression` ko siwaju.
+
 ZenMux tun lo asopọ bọtini API ti o wa ati gba `zenmux/` tabi awọn ami-iṣaaju `zm/` :
 
 - `zenmux/openai/gpt-image-2` nlo ZenMux's OpenAI Awọn aworan API. Awọn aṣayan pẹlu `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, ati `response_format`.
@@ -347,7 +342,7 @@ GET /v1/images/generations
 
 ---
 
-## OCR Ìwé
+## Iwe aṣẹ OCR
 
 ```bash
 POST /v1/ocr
@@ -363,16 +358,15 @@ Content-Type: application/json
 }
 ```
 
-`model` máa ń yan olupèsè OCR nípasẹ̀ àfikún `provider/model`; ID àwòkọ́ṣe tí kò ní àfikún (fún àpẹẹrẹ
-`mistral-ocr-latest`) máa ń yanju sí olupèsè tí a forúkọ sílẹ̀ fún un, àti pé bí a kò bá fi `model` ránṣẹ́, a máa ń lo Mistral ní àìpẹ̀ (`mistral-ocr-latest`). Àwọn olupèsè tí a forúkọ sílẹ̀ (`open-sse/config/ocrRegistry.ts`):
+`model` yan olupese OCR nipasẹ ìpele `provider/model` ; id awoṣe igboro (fun apẹẹrẹ `mistral-ocr-latest`) pinnu si olupese ti o forukọ silẹ, ati `model` ti a yọkuro awọn aṣiṣe si Mistral (`mistral-ocr-latest`). Awọn olupese ti a forukọsilẹ (`open-sse/config/ocrRegistry.ts`):
 
-| Provider id                   | Model id             | `model` value                                               | Àwọn àlàyé                                                                                            |
-| ----------------------------- | -------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (or bare `mistral-ocr-latest`) | Amuṣiṣẹ́pọ̀ — a máa ń dá ìdáhùn padà taara láti inú ìpè upstream kan ṣoṣo.                              |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                 | Upstream aláìṣiṣẹ́pọ̀ (`analyze` + poll) — wo ìsàlẹ̀.                                                    |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                     | Amuṣiṣẹ́pọ̀, nípasẹ̀ endpoint alábàápín Vertex AI `openapi/chat/completions` — wo ìsàlẹ̀ fún ìfàṣẹsí/URL. |
+| ID olupese                    | id awoṣe                              | `model` iye                                                     | Awọn akọsilẹ                                                                                                                                                                                       |
+| ----------------------------- | ------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                  | `mistral/mistral-ocr-latest` (tabi igboro `mistral-ocr-latest`) | Amuṣiṣẹpọ — esi ti wa ni pada taara lati awọn nikan ipe oke.                                                                                                                                       |
+| `azure-document-intelligence` | `prebuilt-read`                       | `azure-document-intelligence/prebuilt-read`                     | Asynchronous oke (`analyze` + idibo) — wo isalẹ.                                                                                                                                                   |
+| `vertex-deepseek-ocr`         | ti ara ẹni (ko si awoṣe ti a ṣe sinu) | `vertex-deepseek-ocr/<your-deployed-model-id>`                  | Amuṣiṣẹpọ, nipasẹ ara rẹ Vertex AI Awoṣe Garden DeepSeek-OCR endpoint (`openapi/chat/completions` apẹrẹ); Google ti fẹyìntì `deepseek-ocr-maas` ti iṣakoso ni 2026-10-21 (#20423), ki id pada 400. |
 
-Gbogbo àwọn olupèsè mẹ́tẹ̀ẹ̀ta máa ń dá ara ìdáhùn tó dà bí ti Mistral padà:
+Gbogbo awọn olupese mẹta dahun ni ara ti o ni irisi Mistral kanna:
 
 ```json
 {
@@ -382,16 +376,13 @@ Gbogbo àwọn olupèsè mẹ́tẹ̀ẹ̀ta máa ń dá ara ìdáhùn tó dà b
 }
 ```
 
-### Ìṣàn ìdúró Azure Document Intelligence
+### Azure Document Intelligence didi sisan
 
-API `analyze` ti Azure Document Intelligence jẹ́ aláìṣiṣẹ́pọ̀: ìbéèrè àkọ́kọ́ máa ń dá àkọlé
-`Operation-Location` padà dípò ara ìdáhùn, a sì gbọ́dọ̀ máa ṣàyẹ̀wò àbájáde náà. Olùṣàkóso náà
-(`open-sse/handlers/ocr.ts`) máa ń ṣàyẹ̀wò URL yẹn ní gbogbo ìṣẹ́jú-aaya fún ìgbésẹ̀ tó pọ̀ jù lọ 30, ó máa ń kùnà kíákíá (kò tẹ̀síwájú láti ṣàyẹ̀wò) bí ìdáhùn ìṣàyẹ̀wò kan kò bá jẹ́ `ok` tàbí tí ipò náà bá jẹ́ `"failed"`, ó sì máa ń dá `504` padà bí iṣẹ́ náà bá ṣì ń lọ lẹ́yìn tí iye ìgbésẹ̀ tí a pèsè bá tán. A máa ń ṣe àtúnṣe ìdáhùn Azure ìkẹyìn sí irú `pages`/`markdown` kan náà tí Mistral ń lò kí a tó dá a padà sí olùpè, nítorí náà kóòdù oníbàárà kò nílò láti ṣe ìyàsọ́tọ̀ pàtàkì fún olupèsè náà.
+Azure Document Intelligence's `analyze` API jẹ asynchronous: ibeere akọkọ da akọsori `Operation-Location` pada dipo ara kan, ati pe abajade gbọdọ jẹ ibo fun. Olumudani (`open-sse/handlers/ocr.ts`) awọn idibo ti o URL ni gbogbo iṣẹju fun awọn igbiyanju 30, kuna ni kiakia (ko tọju idibo) lori idahun idibo ti kii-`ok` tabi ipo `"failed"` kan, o si da `504` pada ti iṣẹ naa ba tun nṣiṣẹ lẹhin igbiyanju igbiyanju igbiyanju ti pari. Idahun Azure ti o kẹhin jẹ deede si apẹrẹ `pages`/`markdown` kanna ti o lo nipasẹ Mistral ṣaaju ki o to pada si olupe, nitorinaa koodu alabara ko nilo lati ṣe pataki-ọran ti olupese.
 
-### Ìfàṣẹsí àti yíyan endpoint Vertex AI DeepSeek OCR
+### Vertex AI DeepSeek OCR auth ati ipinnu ipari ipari
 
-`vertex-deepseek-ocr` tún máa ń lo ìfàṣẹsí Vertex AI kan náà tí OmniRoute ti ń ṣe àtìlẹ́yìn fún ìrìnàjò chat/image (`open-sse/executors/vertex.ts`): API key ìsopọ̀ náà jẹ́ bóyá ẹ̀rí JSON Service Account (tí a ń pààrọ̀ sí àmi ìwọlé OAuth tó ní àkókò kúkúrú nípasẹ̀ ìṣàn JWT-bearer) tàbí àmi ìwọlé OAuth tí a ti ṣẹ̀dá tẹ́lẹ̀ tí a máa ń lò bó ṣe rí. URL endpoint upstream jẹ́ endpoint alábàápín Vertex fún `openapi/chat/completions`, tí a kọ́ láti inú iṣẹ́ àti agbègbè ìsopọ̀ — `providerSpecificData.project`/`providerSpecificData.region` tí a bá ṣàlàyé máa ń ṣẹ́gun nígbà gbogbo; bí bẹ́ẹ̀ kọ́, a máa ń yọ iṣẹ́ náà kúrò nínú `project_id` ti Service Account JSON, agbègbè náà sì máa ń jẹ́ `us-central1` ní àìpẹ̀. Àwọn ìpinnu méjèèjì ń ṣẹlẹ̀ ní `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), tí `src/app/api/v1/ocr/route.ts` sì ń lò kí ó tó pín iṣẹ́ náà sí `handleOcr`.
+`vertex-deepseek-ocr` tun lo Vertex AI ìfàṣẹsí OmniRoute tẹlẹ ṣe atilẹyin fun ijabọ chat/image (`open-sse/executors/vertex.ts`): bọtini asopọ asopọ jẹ boya iwe-ẹri Akọọlẹ Iṣẹ kan API JSON paṣipaarọ fun ami iraye si OAuth kukuru kan nipasẹ ṣiṣan JWT-rù) tabi ami-iwọle OAuth ti a ti sọ tẹlẹ ti a lo bi-is. Opin opin oke URL jẹ aaye ipari alabaṣepọ `openapi/chat/completions` ti Vertex, ti a ṣe lati inu iṣẹ akanṣe asopọ ati agbegbe — `providerSpecificData.project`/`providerSpecificData.region` ti o han gbangba bori nigbagbogbo; bibẹẹkọ, iṣẹ akanṣe naa ti jade lati Akọọlẹ Iṣẹ JSON's `project_id` ati awọn aipe agbegbe si `us-central1`. Awọn ipinnu mejeeji ṣẹlẹ ni `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), jẹ nipasẹ `src/app/api/v1/ocr/route.ts` ṣaaju fifiranṣẹ si `handleOcr`.
 
 ---
 
@@ -639,97 +630,104 @@ Endpoint ìṣọ̀kan máa ń pa àwọn kóòdù ipo aṣìṣe mọ́ nínú 
 
 ---
 
-## Àwọn Endpoint Ibámu
+## Ibamu Endpoints
 
-| Method | Path                                      | Format                                |
-| ------ | ----------------------------------------- | ------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                |
-| POST   | `/v1/messages`                            | Anthropic                             |
-| POST   | `/v1/responses`                           | OpenAI Responses                      |
-| POST   | `/v1/embeddings`                          | OpenAI                                |
-| POST   | `/v1/images/generations`                  | OpenAI Images                         |
-| POST   | `/v1/images/edits`                        | OpenAI Images (àtúnṣe/inpaint)        |
-| POST   | `/v1/videos/generations`                  | Ìṣẹ̀dá fídíò irú OpenAI                |
-| POST   | `/v1/music/generations`                   | Ìṣẹ̀dá orin irú OpenAI                 |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (ó máa dá body ohun padà)  |
-| POST   | `/v1/rerank`                              | Rerank irú Cohere/Voyage              |
-| POST   | `/v1/classify`                            | Ìpín Jina (`api.jina.ai`)             |
-| POST   | `/v1/segment`                             | Alàpín Jina (`segment.jina.ai`)       |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                    |
-| GET    | `/v1/models`                              | OpenAI                                |
-| POST   | `/v1/models/query`                        | Àkójọ kúkúrú àwọn model tí a ṣe àlẹ̀mọ́ |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                             |
-| GET    | `/v1beta/models`                          | Gemini                                |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                |
-| POST   | `/v1/api/chat`                            | Ollama                                |
-| GET    | `/api/v1/vscode/{token}/`                 | Àpèjáwe katalogi OpenAI               |
-| GET    | `/api/v1/vscode/{token}/models`           | Àpèjáwe models OpenAI                 |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | Àpèjáwe tokenized OpenAI              |
-| POST   | `/api/v1/vscode/{token}/responses`        | Àpèjáwe tokenized OpenAI Responses    |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Àpèjáwe tokenized Ollama              |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Àpèjáwe tokenized Ollama tags         |
+| Ọna  | Ona                                       | Ọna kika                           |
+| ---- | ----------------------------------------- | ---------------------------------- |
+| POST | `/v1/chat/completions`                    | OpenAI                             |
+| POST | `/v1/messages`                            | Anthropic                          |
+| POST | `/v1/responses`                           | OpenAI Awọn idahun                 |
+| POST | `/v1/embeddings`                          | OpenAI                             |
+| POST | `/v1/images/generations`                  | OpenAI Awọn aworan                 |
+| POST | `/v1/images/edits`                        | Awọn aworan OpenAI (edit/inpaint)  |
+| POST | `/v1/videos/generations`                  | OpenAI-ara fidio iran              |
+| POST | `/v1/music/generations`                   | OpenAI-ara orin iran               |
+| POST | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                 |
+| POST | `/v1/audio/speech`                        | OpenAI TTS (da ara ohun pada)      |
+| POST | `/v1/rerank`                              | Cohere/Voyage-style rerank         |
+| POST | `/v1/classify`                            | Jina classify (`api.jina.ai`)      |
+| POST | `/v1/segment`                             | Apa Jina (`segment.jina.ai`)       |
+| POST | `/v1/moderations`                         | OpenAI Awọn iwọntunwọnsi           |
+| POST | `/v1/systemone`                           | System Ọkan ti tẹ ipinu            |
+| POST | `/v1/decisions`                           | Awọn ipinnu OpenAI (abinibi)       |
+| GET  | `/v1/systemone/models`                    | Ipinnu-awoṣe katalogi              |
+| GET  | `/v1/models`                              | OpenAI                             |
+| POST | `/v1/models/query`                        | Filtered awoṣe kukuru              |
+| POST | `/v1/messages/count_tokens`               | Anthropic                          |
+| GET  | `/v1beta/models`                          | Gemini                             |
+| POST | `/v1beta/models/{...path}`                | Gemini generateContent             |
+| POST | `/v1/api/chat`                            | Ollama                             |
+| GET  | `/api/v1/vscode/{token}/`                 | OpenAI katalogi inagijẹ            |
+| GET  | `/api/v1/vscode/{token}/models`           | OpenAI si dede inagijẹ             |
+| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenized inagijẹ           |
+| POST | `/api/v1/vscode/{token}/responses`        | OpenAI Responses tokenized inagijẹ |
+| POST | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenized inagijẹ           |
+| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollama afi tokenized inagijẹ       |
 
-Gbogbo àwọn route POST ń tẹ̀lé ìrísí kan náà: `Bearer your-api-key` + body JSON tí Zod ti fọwọ́ sí (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ; wo `src/shared/validation/schemas.ts`). A máa dá 4xx padà tí schema bá kuna.
+Gbogbo awọn ipa ọna POST tẹle apẹrẹ kanna: `Bearer your-api-key` + Zod-fọwọsi JSON ara (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, ati bẹbẹ lọ, wo `src/shared/validation/schemas.ts`). 4xx ti pada lori ikuna ero.
 
-Fún àwọn client tí kò lè fi `Authorization: Bearer ...` ránṣẹ́, OmniRoute tún gba API keys nínú URL nípasẹ̀ ibámu query-string (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) tàbí àwọn endpoint `/api/v1/vscode/{token}/...` pàtó tí a ṣàkọsílẹ̀ ní ìsàlẹ̀.
+Fun awọn onibara ti ko le so `Authorization: Bearer ...`, OmniRoute tun gba awọn bọtini API ni URL nipasẹ boya ibamu-okun ibeere (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) tabi awọn igbẹhin `/api/v1/vscode/{token}/...` igbẹhin awọn akọsilẹ ni isalẹ.
 
 ```bash
-# Rerank (olùpèsè cloud registry, tàbí node olùpèsè tó bá OpenAI mu gẹ́gẹ́ bí "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Ìpín Jina (àwọn ẹ̀rí ìdánimọ̀ Foundation API)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Alàpín Jina
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Àwárí Jina (s.jina.ai; àwọn alias olùpèsè: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
 # Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — ó máa dá body audio/mpeg (tàbí ọ̀nà kika tí a béèrè) padà
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS nílò èdè àti ohùn kan: `language` máa ń jẹ́ "en" ní àìpẹ́
-# tí voice bá sọnù tàbí tí orúkọ ohùn OpenAI àdàkọ kan (alloy, nova, …) bá jẹ́, ó máa di "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Àtúnṣe àwòrán (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Ìṣẹ̀dá fídíò / orin (ID model tí a fi prefix olùpèsè sí)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Àwọn node provider rerank:** `POST /v1/rerank` tún ń darí sí àwọn node provider tó bá OpenAI mu
-> (oMLX, vLLM, Infinity, TEI lẹ́yìn gateway, …) tí a ń tọ́ka sí gẹ́gẹ́ bí `<node-prefix>/<model>`. Àwọn
-> node loopback (`localhost`, `127.0.0.1`, `172.16.0.0/12`) máa ń yẹ ní gbogbo ìgbà, bákan náà sì ni àwọn hostname tí
-> oníṣiṣẹ́ ṣe àtòjọ nínú `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (fún àpẹẹrẹ, orúkọ iṣẹ́ Docker/Compose
-> bí `http://reranker:8080/v1`; a máa ń pe wọ́n ní tààrà, kò sì ṣe é lò wọ́n nípasẹ̀ `HTTP(S)_PROXY` tàbí
-> proxy tí a pin mọ́ asopọ̀ kan). Àwọn node tó wà lórí host míì — àpótí LAN tàbí ẹlẹgbẹ́ Tailscale — máa ń yẹ
-> nìkan nígbà tí oníṣiṣẹ́ bá mú feature flag `RERANK_REMOTE_PROVIDER_NODES` ṣiṣẹ́ **àti** tí URL ìpìlẹ̀ node náà bá
-> kọjá ìlànà URL outbound provider (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Ìgbésẹ̀ rerank ti ẹ́ńjìnnì memory máa ń pe route yìí lórí loopback, nítorí náà ìlànà kan náà ni ó ń ṣàkóso
-> `rerankProviderModel` nínú àwọn ìṣètò Memory.
+> **Tun awọn apa olupese:** `POST /v1/rerank` tun awọn ipa ọna si OpenAI-ibaramu awọn apa olupese (oMLX, vLLM, Infinity, TEI lẹhin ẹnu-ọna kan,…) ti a koju bi `<node-prefix>/<model>`. Awọn apa loopback (`localhost`, `127.0.0.1`, `172.16.0.0/12`) jẹ ẹtọ nigbagbogbo, ati pe awọn orukọ olupin ni awọn atokọ oniṣẹ ni `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (fun apẹẹrẹ orukọ iṣẹ Docker/Compose gẹgẹbi `http://reranker:8080/v1`; awọn wọnyi ni a pe ni taara, kii ṣe nipasẹ `HTTP(S)_PROXY` tabi aṣoju pinni asopọ). Awọn apa lori eyikeyi miiran alejo — apoti LAN tabi Tailscale ẹlẹgbẹ — ni ẹtọ nikan nigbati oniṣẹ ba mu asia ẹya `RERANK_REMOTE_PROVIDER_NODES` ṣiṣẹ** ati** ipilẹ ipade URL kọja olupese eto imulo URL ti njade (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Igbesẹ rerank ẹrọ iranti n pe ipa ọna yii lori loopback, nitorinaa ofin kanna n ṣe akoso `rerankProviderModel` ninu awọn eto Iranti.
 >
-> **Àwọn ìrísí server agbegbe:** a máa ń pe node náà ní `<base>/v1/rerank` àti, nígbà 404, ní `<base>/rerank`
-> (Infinity, TEI). Ara ìbéèrè upstream máa ń gbé irú ìkọ̀wé Cohere/OpenAI (`documents`,
-> `return_documents`) àti irú ìkọ̀wé TEI (`texts`, `return_text`) pọ̀, a sì máa ń ṣe ìdíwọ̀n padà ìdáhùn upstream
-> sí envelope Cohere: TEI tí ó jẹ́ `[{index, score, text}]` lásán, `{results: [{index, score}]}`
-> láti ọ̀dọ̀ gateway tín-ínrín, àti `{data: [...]}` irú Voyage gbogbo wọn máa ń padà sí oníbàárà gẹ́gẹ́ bí
-> `{results: [{index, relevance_score, document?}]}`, tí a ṣètò gẹ́gẹ́ bí score tí a sì gé sí `top_n`.
+> **Awọn apẹrẹ olupin agbegbe:** ipade naa ni a npe ni `<base>/v1/rerank`, lori 404, ni `<base>/rerank` (Infinity, TEI). Ara ti o wa ni oke n gbe mejeeji akọtọ Cohere/OpenAI (`documents`, `return_documents`) ati akọtọ TEI (`texts`, `return_text`), ati pe idahun ti o wa ni oke jẹ deede si apoowe Cohere : TEI's bare `[{index, score, text}]`, `{results: [{index, score}]}` lati awọn ẹnu-ọna tinrin, ati irin-ajo irin ajo `{data: [...]}` gbogbo wọn pada wa si ọdọ alabara bi `{results: [{index, relevance_score, document?}]}` ti a ṣe lẹsẹsẹ ati `top_n`.
 
-> **Ìwádìí node provider:** àwọn model lórí node provider tó bá OpenAI mu máa ń hàn nínú `GET /v1/models`
-> lábẹ́ prefix node náà. Àwọn ìlà tí kò ní metadata endpoint kankan (èyí tó wọ́pọ̀ fún àtòjọ `/v1/models` agbegbe)
-> máa ń jogún `apiType` node náà, nítorí náà àwọn model node `embeddings` máa ń jẹ́ `type: "embedding"` àti àwọn
-> model node `rerank` máa ń jẹ́ `type: "rerank"` dípò kí wọ́n di chat ní àìpẹ̀yà; `supportedEndpoints` tí a sọ ní kedere
-> lórí ìlà tí a muṣiṣẹ́pọ̀ tàbí tí a fi ọwọ́ kún sí ṣì ní ààyè àkọ́kọ́.
+> **Awari-ipade olupese:** awọn awoṣe lori oju ipade olupese ibaramu OpenAI han ni `GET /v1/models` labẹ ìpele node. Awọn ori ila ti ko gbe metadata ipari (apẹrẹ fun awọn atokọ `/v1/models` agbegbe) jogun `apiType` node, nitorinaa awọn awoṣe node `embeddings` jẹ `type: "embedding"` ati awọn awoṣe node `rerank` jẹ `type: "rerank"` dipo aiyipada lati iwiregbe; `supportedEndpoints` ti o fojuhan lori mimuuṣiṣẹpọ tabi ọna ti a fi kun pẹlu ọwọ tun gba iṣaaju.
 
-### Àwọn Route Provider Pàtàkì
+### Awọn ipinnu Titẹ
+
+Awọn awoṣe ipinnu dahun awọn ibeere ti a tẹ pẹlu awọn iṣeeṣe iwọn dipo ti ipilẹṣẹ ọrọ. Wọn kii ṣe awọn awoṣe iwiregbe rara, ati pe awọn ọna kika waya meji ko ni tumọ si ara wọn rara:
+
+- `POST /v1/systemone` — System Ọkan `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, awọn ipinnu OpenRouter, Cloudflare Workers AI, agbegbe Ollama).
+- `POST /v1/decisions` — abinibi OpenAI Awọn ipinnu `{ model, input, questions: [...] }`, yoo wa nipasẹ asopọ `openai` kan. Awoṣe jẹ `openai/gpt-6-luna` ( `gpt-6-luna` igboro tun ṣiṣẹ). Awọn idahun pada wa ni ibere ibeere, laifọwọkan.
+- `GET /v1/systemone/models` — kan katalogi ti awọn mejeeji iru; ila kọọkan n sọ orukọ `api_format` rẹ (`systemone` tabi `decisions`). `limit` / `after` oju-iwe ti o kẹhin. Akọsori `X-OmniRoute-Catalog-Status` ka `complete`, `partial` tabi `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+Lori `/v1/decisions` akojọ iyọọda awoṣe bọtini API, ẹka ipari `decisions`, isuna ati aaye asopọ jẹ ayẹwo ṣaaju ki o to ka iwe-ẹri eyikeyi. Ijẹrisi ni asopọ `openai` ti o fipamọ sinu aaye bọtini (ko ṣe bọtini ayika kan); ipilẹ asopọ URL jẹ ọlá nikan nigbati o jẹ `http(s)` URL laisi awọn iwe-ẹri, ibeere tabi ajẹkù ti ko tọka si OmniRoute yii. Ipe naa lọ nipasẹ irinna iṣọṣọ kanna bi `decision` auto-router ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): oluso ti njade ti olupese, ko si awọn atunwi, ko si awọn àtúnjúwe, akoko 5 s ati fila idahun 64 KB (idahun nla jẹ 502). Awọn ara ibeere ni opin si 4 MiB. Ipe kọọkan nfi `Idempotency-Key` tuntun ranṣẹ. Awọn aṣiṣe gbe ipo oke nikan, kii ṣe ara rẹ, URL, bọtini tabi tọ.
+
+### Awọn ipa ọna Olupese igbẹhin
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -737,7 +735,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-A máa ń fi prefix provider náà kún un láìfọwọ́wọ́ tí ó bá sọnù. Àwọn model tí kò bá mu máa ń dá `400` padà.
+Ipilẹṣẹ olupese ti wa ni afikun laifọwọyi ti o ba sonu. Awọn awoṣe ti ko baamu pada `400`.
 
 ---
 

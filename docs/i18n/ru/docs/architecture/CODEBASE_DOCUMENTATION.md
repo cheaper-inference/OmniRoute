@@ -4,18 +4,11 @@
 
 ---
 
-> **Версия:** v3.8.51
-> **Последнее обновление:** 2026-06-28
-> **Аудитория:** Инженеры, вносящие вклад в OmniRoute или создающие интеграции на его основе.
+> **Версия:** v3.8.51** Аудитория:** Инженеры, участвующие в OmniRoute или строящие на его основе интеграции.
 >
-> Высокоуровневые архитектурные диаграммы и обоснование каждого компонента приведены в
-> [ARCHITECTURE.md](./ARCHITECTURE.md). Подробные сведения об отдельных компонентах
-> (Auto Combo, MCP-сервер, A2A-сервер, Skills, Memory, Cloud Agents, Resilience,
-> Compression и т. д.) см. в соответствующих файлах в этом каталоге `docs/`.
+> Схемы архитектуры высокого уровня и обоснование каждой подсистемы можно найти в [ARCHITECTURE.md](./ARCHITECTURE.md). Для более глубокого изучения отдельных подсистем (автоматическое объединение, сервер MCP, сервер A2A, навыки, память, облачные агенты, устойчивость, сжатие и т. д.) см. соответствующие файлы в этом каталоге `docs/`.
 
-Этот файл описывает **текущее содержимое репозитория**, чтобы новый инженер
-мог ориентироваться в его структуре, понимать уровни среды выполнения и знать, куда добавлять код,
-не создавая новые модули без необходимости.
+Этот файл описывает** что сегодня есть в репозитории** чтобы новый инженер мог перемещаться по дереву, понимать слои среды выполнения и знать, куда добавлять код, не изобретая новые модули.
 
 ---
 
@@ -566,35 +559,14 @@ bin/
 
 ## 8. `scripts/`
 
-Организованы в 6 подпапок по назначению.
+Организовано в 6 подпапок по назначению.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, а также вспомогательные скрипты только для чтения, отслеживающие PR:
-  `ci-discriminate.sh` (сортирует сигнатуры неуспешных проверок PR на собственные /
-  унаследованные / неизвестные, сравнивая их с эталонным PR или задачей о сбоях в базовой ветке) и `audit-worktree.sh`
-  (проверяет изменённые файлы, защищённые области, удалённые проверки, количество подавлений, оставшиеся
-  временные tsconfig-файлы, HEAD PR относительно локального HEAD — перед принятием PR исполнителя).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, а также доступные только для чтения помощники PR по присмотру за детьми `ci-discriminate.sh` (сортирует сигнатуры PR, прошедшие неудачную проверку, на собственные/унаследованные/неизвестные по ссылке PR или проблема с базовым красным) и `audit-worktree.sh` (грязные файлы, защищенные поверхности, удаленные утверждения, счетчики подавления, оставшиеся настройки tmp tsconfig, PR head против локального HEAD — до того, как PR работника будет принят).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` помечает версии, явно приписываемые OmniRoute (3.6.x и более ранние версии). Проверка игнорирует даты.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

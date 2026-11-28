@@ -13,29 +13,23 @@ a krokom zosúladenia.
 
 ---
 
-## Nastavenie vývojového prostredia
+## Nastavenie vývoja
 
 ### Predpoklady
 
 - **Node.js** `>=22.22.2 <23` alebo `>=24.0.0 <27` (odporúčané: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows s Node 24:** použite aktuálne opravné vydanie 24 LTS (aspoň 24.20.0).
-> Staršie vydania sa môžu po úspešných testoch prerušiť, keď `--test-force-exit` ukončí
-> proces. [Oprava libuv pre Windows](https://github.com/nodejs/node/pull/61999) v Node rieši
-> toto zlyhanie za behu; ponechajte kontroly testovacích tvrdení a ukončenia spúšťača zapnuté.
+> **Windows s Node 24:** použite aktuálne vydanie opravy 24 LTS (aspoň 24.20.0). Skoršie vydania sa môžu po úspešných testoch prerušiť, keď `--test-force-exit` ukončí proces. [Oprava Windows libuv uzla](https://github.com/nodejs/node/pull/61999) rieši tento pád behu; ponechajte testovacie tvrdenia a výstupné kontroly bežca povolené.
 
-> **Používatelia npm v11+ (Node 24+):** Po spustení `npm install` overte, či boli nainštalované natívne moduly:
-> `node -e "require('better-sqlite3')"`. Ak zlyhá s hlásením `MODULE_NOT_FOUND`,
-> spustite `npm approve-scripts better-sqlite3 && npm install`. Pozrite si
-> [Riešenie problémov](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Používatelia npm v11 + (Node 24 +):** Po `npm install` skontrolujte, či boli nainštalované natívne moduly: `node -e "require('better-sqlite3')"`. Ak zlyhá so `MODULE_NOT_FOUND`, spustite `npm approve-scripts better-sqlite3 && npm install`. Pozrite si [časť Riešenie problémov](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klonovanie a inštalácia
+### Klonovať a nainštalovať
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -43,91 +37,83 @@ npm install
 ### Premenné prostredia
 
 ```bash
-# Vytvorte súbor .env zo šablóny
+# Create your .env from the template
 cp .env.example .env
 
-# Vygenerujte požadované tajné kľúče
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Kľúčové premenné pre vývoj:
 
-| Premenná               | Predvolená hodnota pre vývoj | Popis                          |
-| ---------------------- | ---------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                      | Port servera                   |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Základná URL adresa frontendu  |
-| `JWT_SECRET`           | (vygenerujte vyššie)         | Tajný kľúč na podpisovanie JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`                   | Heslo na prvé prihlásenie      |
-| `APP_LOG_LEVEL`        | `info`                       | Úroveň podrobnosti protokolov  |
+| Variabilné             | Vývojové predvolené      | Popis                        |
+| ---------------------- | ------------------------ | ---------------------------- |
+| `PORT`                 | `20128`                  | Port servera                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Základňa URL pre frontend    |
+| `JWT_SECRET`           | (vygenerovať vyššie)     | JWT podpisové tajomstvo      |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Prvé prihlasovacie heslo     |
+| `APP_LOG_LEVEL`        | `info`                   | Zaznamenať úroveň výrečnosti |
 
 ### Nastavenia ovládacieho panela
 
-Ovládací panel poskytuje prepínače používateľského rozhrania pre funkcie, ktoré možno konfigurovať aj prostredníctvom premenných prostredia:
+Prístrojová doska poskytuje prepínače UI pre funkcie, ktoré možno konfigurovať aj prostredníctvom premenných prostredia:
 
-| Umiestnenie nastavenia | Prepínač                   | Popis                                       |
-| ---------------------- | -------------------------- | ------------------------------------------- |
-| Nastavenia → Rozšírené | Režim ladenia              | Zapne protokoly požiadaviek na ladenie (UI) |
-| Nastavenia → Všeobecné | Viditeľnosť bočného panela | Zobrazí/skryje sekcie bočného panela        |
+| Nastavenie polohy      | Prepnúť                    | Popis                                   |
+| ---------------------- | -------------------------- | --------------------------------------- |
+| Nastavenia → Rozšírené | Režim ladenia              | Povoliť denníky žiadostí o ladenie (UI) |
+| Nastavenia → Všeobecné | Viditeľnosť bočného panela | Show/hide sekcie bočného panela         |
 
-Tieto nastavenia sú uložené v databáze a zachovávajú sa aj po reštartoch. Ak sú nastavené, prepíšu predvolené hodnoty premenných prostredia.
+Tieto nastavenia sú uložené v databáze a pretrvávajú počas reštartov, pričom pri nastavení prepíšu predvolené hodnoty env var.
 
-### Lokálne spustenie
+### Beh lokálne
 
 ```bash
-# Vývojový režim (automatické opätovné načítanie)
+# Development mode (hot reload)
 npm run dev
 
-# Produkčné zostavenie
-npm run build    # next build → .build/next/, potom assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Rýchla kompilácia iba backendu/API pre zmeny prispievateľov
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Zostavenie vydania (čisté opätovné zostavenie + kontrolný súbor HEAD — povinné pre nasadenie)
-npm run build:release   # rm -rf .build dist && zostavenie + zápis dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Bežná konfigurácia portu
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Zostavenie pre prispievateľov vykonáva iba overenie kompilácie: nevytvára samostatnú
-distribúciu ani voliteľné natívne balíčkové artefakty. Ak potrebujete overiť balík
-určený na distribúciu, použite bežné produkčné zostavenie.
+Zostava prispievateľa vykonáva overenie iba pri kompilácii: nezostavuje samostatnú distribúciu ani nevytvára voliteľné aktíva natívneho balenia. Keď potrebujete overiť odoslateľný balík, použite bežnú produkčnú zostavu.
 
-### Rozloženie výstupu zostavenia
+### Zostavte rozloženie výstupu
 
-| Adresár   | Obsah                                                                              | Sledovaný |
-| --------- | ---------------------------------------------------------------------------------- | --------- |
-| `src/`    | Zdrojový kód aplikácie (TypeScript / TSX)                                          | Áno       |
-| `.build/` | Medzivýstupy — výstup `next build` (ignorovaný Gitom, `distDir = .build/next`)     | Nie       |
-| `dist/`   | Distribuovateľný balík — zostavený pomocou `assembleStandalone` (ignorovaný Gitom) | Nie       |
+| Adresár   | Obsah                                                                     | Sledované |
+| --------- | ------------------------------------------------------------------------- | --------- |
+| `src/`    | Zdroj aplikácie (TypeScript / TSX)                                        | áno       |
+| `.build/` | Medziprodukty — `next build` výstup (gitignored, `distDir = .build/next`) | Nie       |
+| `dist/`   | Odoslateľný balík — zostavený `assembleStandalone` (gitignorovaný)        | Nie       |
 
-Proces zostavenia prebieha v jednom prechode:
+Potrubie zostavenia je jednorazové:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (výstup Next.js)
-  └─ assembleStandalone()                 (kopíruje samostatný výstup + statické + verejné + natívne prostriedky)
-       └─ výstup: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` navyše najskôr vyčistí oba adresáre a zapíše
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ako kontrolný súbor integrity nasadenia.
+`npm run build:release` dodatočne najprv vyčistí oba adresáre a zapíše `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ako indikátor integrity nasadenia.
 
-`npm run build:contributor` používa profil zostavenia iba pre backend. Počas zostavenia dočasne nahradí
-súbory používateľského rozhrania ovládacieho panela zástupnými súbormi, ponechá obslužné rutiny trás API a po zostavení obnoví pôvodné súbory.
-Pre zmeny ovplyvňujúce používateľské rozhranie ovládacieho panela alebo na úplné
-overenie vydania použite `npm run build`; profil pre prispievateľov nenahrádza zostavenie vydania.
+`npm run build:contributor` používa iba backendový profil zostavy. Dočasne zablokuje súbory UI dashboardu počas vytvárania, ponecháva obslužné nástroje smerovania API a po zostavení obnoví pôvodné súbory. Použite `npm run build` na zmeny, ktoré ovplyvňujú dashboard UI alebo na overenie úplného vydania; profil prispievateľa nenahrádza zostavu vydania.
 
-> **Poznámka k nasadeniu na VPS:** adresár vzdialeného obrazu `/usr/lib/node_modules/omniroute/app/`
-> zostáva nezmenený. Nástroje nasadenia synchronizujú obsah adresára `dist/` doň pomocou rsync.
-> Zmenila sa iba cesta výstupu zostavenia v repozitári (`app/` → `dist/`).
+> **Poznámka k nasadeniu VPS :** vzdialený adresár obrázkov `/usr/lib/node_modules/omniroute/app/` sa nemení. Zručnosti nasadenia doň synchronizujú obsah `dist/`. Presunula sa iba výstupná cesta zostavy v rámci repo (`app/` → `dist/`).
 
-Predvolené URL adresy:
+Predvolená URLs:
 
-- **Ovládací panel**: `http://localhost:20128/dashboard`
+- **Dashboard** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -436,8 +422,8 @@ Potom použite zručnosti `/deploy-vps-*-cc`, ktoré pomocou rsync synchronizuj�
 
 ## Získanie pomoci
 
-- **Architektúra**: Pozrite si [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Referenčná dokumentácia API**: Pozrite si [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Bezpečnostná dokumentácia**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Prevádzková dokumentácia**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Problémy**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Architektúra** : Pozri [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Referencia** : Pozri [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Bezpečnostné dokumenty** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Operačné dokumenty** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Problémy** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

@@ -4,11 +4,9 @@
 
 ---
 
-> **Sors awtorevoli:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Aġġornat l-aħħar:** 2026-09-02 — v3.8.51
-> **Udjenza:** Inġiniera li jżommu integrazzjonijiet diskreti speċifiċi għall-fornituri.
+> **Sors tal-verità:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Udjenza:** Inġiniera li jżommu integrazzjonijiet stealth speċifiċi għall-fornitur.
 
-OmniRoute jintegra ma’ fornituri li l-punti periferiċi tagħhom jagħmlu fingerprinting attiv ta’ klijenti mhux uffiċjali (TLS JA3/JA4, l-ordni tal-headers, l-istruttura tal-body JSON, tokens tal-integrità). Din il-paġna tiddokumenta s-superfiċji ta’ diskrezzjoni li jesponi OmniRoute u fejn huma implimentati.
+OmniRoute jintegra ma' fornituri li t-truf tagħhom klijenti mhux uffiċjali tal-marki tas-swaba' b'mod attiv (TLS JA3/JA4, header ordering, JSON body shape, integrity tokens). Din il-paġna tiddokumenta l-uċuħ stealth OmniRoute jesponi u fejn huma implimentati.
 
 ## Avviż Legali u Etiku
 
@@ -75,65 +73,68 @@ awtorizzat b’mod espliċitu qabel ma tiddikjara parità ma’ browser tal-upst
 
 ---
 
-## Pakkett Stealth ta’ Claude Code
+## Claude Code Stealth Bundle
 
-Meta `cliCompatMode` ikun attivat, OmniRoute jerġa’ jifforma t-talbiet Claude ħerġin sabiex ma jkunux jistgħu jintgħarfu mit-traffiku ta’ `claude-cli`. Tliet moduli jikkollaboraw:
+Meta `cliCompatMode` tkun mixgħula, OmniRoute ifassal mill-ġdid it-talbiet Claude ħerġin sabiex ikunu ma jintgħarfux mit-traffiku `claude-cli`. Tliet moduli jikkollaboraw:
 
 ### `claudeCodeFingerprint.ts`
 
-Jikkalkula l-marki tas-swaba’ `cc_version` ta’ 3 karattri inkorporata fl-intestazzjoni tal-kontijiet:
+Jikkalkula l-marki tas-swaba `cc_version` ' 3 karattri inkorporati fl-header tal-kontijiet:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (inkorporat direttament; jaqbel mal-klijent uffiċjali)
-- Inputs: il-karattri fl-indiċi 4, 7 u 20 tat-test tal-ewwel messaġġ tal-utent + is-sekwenza tal-verżjoni
-- Output: prefiss eżadeċimali ta’ 3 karattri
+- `FINGERPRINT_SALT = "59cf53e54c78"` (hardcoded; jaqbel mal-klijent uffiċjali)
+- Inputs: chars fl-indiċi 4, 7, 20 tal-ewwel messaġġ tal-utent string verżjoni +
+- Output: prefiss hex 3-char
 
 ### `claudeCodeCCH.ts` (Hash tal-Kontenut tal-Klijent)
 
-Kontroll tal-integrità fuq in-naħa tas-server li s-CLI uffiċjali ta’ Claude Code tikkalkula permezz ta’ Bun/Zig. OmniRoute jerġa’ jimplimentah b’`xxhash-wasm`:
+L-integrità min-naħa tas-server iċċekkja l-Kodiċi Claude uffiċjali CLI jikkalkula permezz ta Bun/Zig. OmniRoute reimplements `xxhash-wasm`:
 
-1. Issarjalizza l-body bil-placeholder `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Valur eżadeċimali ta’ 5 karattri b’ittri żgħar u mimli b’żerijiet fil-bidu
-4. Ibdel `cch=00000;` bit-token ikkalkulat
+1. Serjalizza korp `cch=00000;` placeholder
+2. Ibni l-veduta tal-hash b'żewġ sostituzzjonijiet b'test sempliċi, f'din l-ordni (`hashView()`):
+   - kull taqbila ta' `/"model":"[^"]*"/g` ssir `"model":""` — it-taqbila tieqaf fl-ewwel `"`, allura valur b'kwotazzjoni mahrufa (`"model":"a\"b"`) jitbattal biss sa dik il-kwotazzjoni, kif jaghmel il-klijent
+   - kull taqbila ta `/"max_tokens":\d+,|,?"max_tokens":\d+/g` titneħħa — valuri numeriċi biss, fi kwalunkwe fond
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Żero-ikkuttunat 5-char żerriegħa hex
+5. Ibdel `cch=00000;` bit-token ikkalkulat
 
 Kostanti:
 
-- Seed: `0x6e52736ac806831e`
-- Pattern: `/\bcch=([0-9a-f]{5});/`
+- Żerriegħa: `0x4d659218e32a3268` (taqbel ma' qabdiet loopback tal-Kodiċi Claude 2.1.252 u 2.1.322)
+- Mudell: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Idaħħal **zero-width joiner** Unicode (`U+200D`) wara l-ewwel karattru tal-ismijiet “sensittivi” tal-klijenti sabiex il-filtri upstream ma jkunux jistgħu jsibuhom permezz ta’ grep. Lista predefinita ta’ kliem:
+Daħħal Unicode** joiner b'wisa' żero** (`U+200D`) wara l-ewwel karattru tal-ismijiet tal-klijenti "sensittivi" sabiex il-filtri upstream ma jkunux jistgħu grep minnhom. Lista tal-kliem default:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Applikat għal: blokok `system`, il-`messages[].content` kollha, u `tools[].description` / `tools[].function.description`. Jista’ jiġi sostitwit mill-operatur permezz ta’ `setSensitiveWords()`.
+Applikat għal: blokki `system`, kollha `messages[].content`, u `tools[].description` / `tools[].function.description`. Operatur-overridable permezz `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — fornituri `anthropic-compatible-cc-*`
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` providers
 
-Għal relays Anthropic ta’ partijiet terzi li jaċċettaw biss traffiku ta’ “Claude Code reali”:
+Għal relays Anthropic ta' partijiet terzi li jaċċettaw biss traffiku ta' "Kodiċi Claude reali":
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` b’mod predefinit
-- It-toggle għal kull konnessjoni “Enable redact-thinking beta” iżid `redact-thinking-2026-02-12` meta upstream CC Compatible jeħtieġ speċifikament streams ta’ ħsieb redatt
-- It-toggle għal kull konnessjoni “Enable summarized thinking display” jaħżen `providerSpecificData.requestDefaults.summarizeThinking` u jżid `display: "summarized"` mat-talbiet ta’ ħsieb CC Compatible li ma jkunux diġà speċifikaw mod ta’ wiri
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` awtomatikament
+- It-toggle għal kull konnessjoni "Ippermetti redact-thinking beta" żżid `redact-thinking-2026-02-12` meta CC Kompatibbli upstream speċifikament teħtieġ flussi ta' ħsieb rediġjati
+- Il-konnessjoni għal kull konnessjoni "Enable summarized thinking display" toggle stores `providerSpecificData.requestDefaults.summarizeThinking` u żżid `display: "summarized"` ma' CC Talbiet ta' ħsieb kompatibbli li ma kinux diġà stabbilixxew mod ta' wiri
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (familja Opus/Sonnet 4.x)
-- Path predefinit: `/v1/messages?beta=true`
+- Mogħdija default: `/v1/messages?beta=true`
 
-Moduli relatati fl-istess pakkett:
+Moduli aħwa fl-istess pakkett:
 
-- `claudeCodeConstraints.ts` — regoli tat-temperatura + cache-control
-- `claudeCodeToolRemapper.ts` — rimappjar tal-ismijiet tal-għodod
-- `claudeCodeExtraRemap.ts` — normalizzazzjoni addizzjonali tal-payload
+- `claudeCodeConstraints.ts` — temperature + cache-control rules
+- `claudeCodeToolRemapper.ts` — rimapping ta' l-isem ta' l-għodda
+- `claudeCodeExtraRemap.ts` — normalizzazzjoni tat-tagħbija żejda
 
 ---
 
@@ -147,7 +148,7 @@ Strixxi Stainless SDK markers (`x-stainless-lang`, `x-stainless-package-version`
 
 ### ⚠️ Riskju: `ANTIGRAVITY_CREDITS=always` (hot spot tal-projbizzjoni tal-kont)
 
-`ANTIGRAVITY_CREDITS=always` (consumed by `open-sse/executors/antigravity.ts`) rotot** kull** talba permezz ta' Antigravity AI Credit Overages (mħallsa Google credits) minflok ma tħalli l-affarijiet ta' gate ta' kwota b'xejn ta' Google. Dan huwa dokumentat bħala karatteristika, iżda huwa** ir-rapport waħdieni ta' ksur tat-ToS l-aktar komuni li naraw** — multiple Google Ultra accounts ġew ipprojbiti ma `403 / "service disabled for ToS violation" / insufficient_quota` wara li damu għal ftit sigħat ma `=always`.
+`ANTIGRAVITY_CREDITS=always` (consumed by `open-sse/executors/antigravity.ts`) rotot** kull** talba permezz ta' Antigravity AI Credit Overages (mħallsa Google credits) minflok ma tħalli l-affarijiet ta' gate ta' kwota b'xejn ta' Google. Dan huwa dokumentat bħala karatteristika, iżda huwa** ir-rapport uniku l-aktar komuni ta’ ksur ta’ ToS li naraw** — multiple Google Ultra accounts ġew ipprojbiti ma `403 / "service disabled for ToS violation" / insufficient_quota` wara li damu għal ftit sigħat ma `=always`.
 
 L-infurzar upstream huwa mixgħul** in-naha ta Google** , xejn OmniRoute jista jipprevjeni. L-isem env var u d-doks eżistenti jagħmluha ħoss bħal pum sikur biex taqleb; mhuwiex.
 
@@ -193,7 +194,7 @@ Punti ta' kuntatt:
 
 - `open-sse/executors/antigravity.ts` — jaqra `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — credential plumbing
-- Rapport oriġinali tal-inċident: Diskussjoni [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Rapport oriġinali tal-inċident: Diskussjoni [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

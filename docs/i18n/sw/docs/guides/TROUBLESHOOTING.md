@@ -185,74 +185,49 @@ haijumuishi hivyo.
 
 ---
 
-## Matokeo Chanya ya Uongo ya Antivirus
+## Antivirus Chanya za Uongo
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG huweka `README.md` karantini kwa `MD:HttpRequest-inf[Susp]`
+### Avast/AVG karantini `README.md` na `MD:HttpRequest-inf[Susp]`
 
-**Hili ni tokeo chanya la uongo. Hakuna kilichoambukizwa, na hakuna hatua inayohitajika.**
+**Hii ni chanya ya uwongo. Hakuna kitu kilichoambukizwa, na hakuna hatua inayohitajika.**
 
-Avast na AVG hutumia mbinu ya kiheuristiki inayoweka alama kwenye faili za maandishi tupu/Markdown zilizo na viungo vingi vinavyoonekana kama maombi ya HTTP. `README.md` ya OmniRoute husambazwa ndani ya kifurushi cha npm (imeorodheshwa katika `package.json` → `files`), kwa hivyo huishia katika `node_modules/omniroute/README.md` wakati wa usakinishaji wa kimataifa — na ina takriban mifano 15 ya `http://localhost:20128/...` (vituo vya mwisho vya MCP HTTP/SSE, URL ya A2A `.well-known`, na vijisehemu vya `curl`). Msongamano huo wa viungo unatosha kuamsha utambuzi wa kiheuristiki.
+Avast na AVG huendesha utabiri ambao hualamisha faili za plain-text/Markdown zilizo na viungo vingi vinavyoonekana katika ombi la HTTP. OmniRoute's `README.md` husafirishwa ndani ya kifurushi cha npm (imeorodheshwa katika `package.json` → `files`), kwa hivyo inatua `node_modules/omniroute/README.md` kwenye usakinishaji wa kimataifa — na ina mifano ~ 15 `http://localhost:20128/...` (mwisho wa MCP HTTP/SSE, A2A `.well-known` URL, na `curl` Msongamano huo wa kiunganishi unatosha kusafiri kwa heuristic.
 
-Ikiwa hili limeanza hivi karibuni tu: aina ya faili haikubadilika. README ilipanua jedwali lake la vituo vya mwisho (MCP HTTP + SSE + A2A viliongezwa) na mifano zaidi ya `curl`, hali iliyoifanya ivuke kiwango cha utambuzi.
+Ikiwa hii ilianza hivi karibuni tu: faili haikubadilika kwa aina. README ilikua meza yake ya mwisho (MCP HTTP + SSE + A2A iliongezwa) na mifano zaidi `curl`, ambayo iliisukuma nje ya kizingiti.
 
-Faili hiyo ni nyaraka tuli zisizo na maudhui yoyote yanayoweza kutekelezwa. Unaweza kuirejesha kutoka karantini kwa usalama.
+Faili ni hati ajizi yenye maudhui sifuri yanayoweza kutekelezwa. Unaweza kuirejesha kwa usalama kutoka kwa karantini.
 
-**Cha kufanya:**
+**Nini cha kufanya:**
 
-1. **Komesha arifa** — tenga saraka ya usakinishaji katika antivirus yako
-   (Avast: Settings → Exceptions), ukiongeza njia yako ya kimataifa ya `node_modules` na/au
-   saraka ya data ya OmniRoute (`~/.omniroute/`).
-2. **Ripoti tokeo chanya la uongo** — <https://www.avast.com/false-positive-file-form.php>,
-   ukiambatisha `README.md` iliyowekwa karantini. Hili ndilo suluhisho linalomsaidia kila mtu, kwa kuwa ni
-   mbinu ya kiheuristiki ya muuzaji inayojibu kupita kiasi kwa faili ya maandishi.
+1. **Acha arifa** — haijumuishi saraka ya kusakinisha katika kizuia virusi chako (Avast: Vighairi vya Mipangilio → ), na kuongeza njia yako ya kimataifa ya `node_modules` and/or data OmniRoute dir (`~/.omniroute/`).
+2. **Ripoti chanya ya uwongo** — <https://www.avast.com/false-positive-file-form.php>, ikiambatanisha `README.md` iliyowekewa karantini . Hili ndilo rekebisha ambalo linasaidia kila mtu, kwa kuwa ni hali ya muuzaji kujibu kupita kiasi kwa faili ya maandishi.
 
-**Kwa nini “haturekebishi” hili kwa upande wetu:** mifano yote ni `http://localhost`, na
-localhost haiwezi kutumia `https` bila usumbufu wa vyeti vilivyojisaini. Kuharibu nyaraka ili
-kukwepa mbinu ya kiheuristiki ya muuzaji mmoja kungewadhuru wasomaji wote ili kuridhisha hitilafu ya kichanganuzi.
+**Kwa nini "haturekebisha" hii kwa upande wetu:** mifano yote ni `http://localhost`, na localhost haiwezi kuwa `https` bila msuguano wa cheti cha kujiandikisha. Kuchanganya hati ili kukwepa utabiri wa muuzaji mmoja kungeumiza kila msomaji kutosheleza hitilafu ya skana.
 
-### Kaspersky huweka alama kwenye programu ya Desktop kama `PDM:Trojan.Win32.Generic`
+### Kaspersky anaashiria programu ya Eneo-kazi kama `PDM:Trojan.Win32.Generic`
 
-**Hili ni tokeo chanya la uongo kutoka kwa mbinu ya kiheuristiki ya kitabia. Hakuna kilichoambukizwa.** Kiambishi awali cha Kaspersky
-`PDM:` humaanisha kuwa uamuzi unatoka kwenye Proactive Defense Module (System Watcher),
-ambayo hutathmini kile kisakinishaji _hufanya_ badala ya kukilinganisha na programu hasidi zinazojulikana. Inapoamshwa, Kaspersky “hurudisha nyuma” usakinishaji wote — ikifuta faili ambazo tayari ilikuwa
-imeandika — hivyo programu huishia kuharibika au kutokuwepo.
+**Hii ni chanya ya uwongo kutoka kwa urithi wa tabia. Hakuna kitu kilichoambukizwa.** Kiambishi awali cha `PDM:` cha Kaspersky kinamaanisha kuwa hukumu inatoka katika Moduli yake ya Ulinzi Inayotumika (Kiangalizi cha Mfumo), ambayo hutathmini kile ambacho kisakinishi _hufanya_ badala ya kukilinganisha dhidi ya programu hasidi inayojulikana. Inapowaka, Kaspersky "hurejesha nyuma" usakinishaji mzima — kufuta faili ambazo tayari ilikuwa imeandikwa — hivyo programu kuishia kuvunjwa au kukosa.
 
-Faili inazowekea alama ni sehemu za kawaida za vitegemezi vilivyotangazwa vya chanzo huria vilivyofungashwa pamoja na
-programu ya desktop, kwa mfano:
+Faili inazoripoti ni sehemu za hisa za utegemezi uliotangazwa, wa chanzo-wazi uliowekwa pamoja na programu ya eneo-kazi, kwa mfano:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` na
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), maktaba ya uendeshaji otomatiki wa kivinjari
-  inayotumika kwa kuingia kwa watoa huduma ndani ya programu na gumzo linalotegemea kivinjari.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — kiunganishi asilia kilichobainishwa cha `wreq-js` kinachotumika kwa HTTP yenye alama bainifu ya kivinjari kwa watoa huduma
-  wa vidakuzi vya wavuti (`<arch>` ni `x64` au `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` na `workerProcessEntry.js` — [Playwright](https://playwright.dev), maktaba ya otomatiki ya kivinjari inayotumiwa kuingia kwa mtoa huduma wa ndani ya programu na gumzo linaloungwa mkono na kivinjari.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — ufungaji asili uliobandikwa `wreq-js` unaotumika kwa HTTP yenye vidole vya kivinjari kwenye watoa huduma za vidakuzi vya wavuti (`<arch>` ni `x64` au `arm64`).
 
-**Kwa nini huamshwa:** kisakinishaji cha Windows **bado hakijasainiwa kwa msimbo**, kwa hivyo kisakinishaji cha NSIS kisichosainiwa
-hakina sifa yoyote na mbinu za kiheuristiki za kitabia huendeshwa kwa ukali wa kiwango cha juu. Hali hiyo, pamoja
-na DLL asilia iliyofungashwa na mamia ya faili za `.js` zinazoandikwa chini ya
-`%LOCALAPPDATA%\Programs\OmniRoute` (ikijumuisha saraka za vifurushi zenye viambishi vya hash kutoka kwenye
-muundo huru wa Next.js), inatosha kuamsha mbinu hiyo ya kiheuristiki. Usainishaji wa msimbo umepangwa;
-hadi utekelezwe, matoleo mapya yanaweza kurudia hali hii.
+**Kwa nini inawaka:** kisakinishi cha Windows ni** bado haijatiwa saini kwa msimbo** , kwa hivyo kisakinishi cha NSIS ambacho hakijatiwa saini kina sifa sifuri na utabiri wa tabia huendeshwa kwa uchokozi wa hali ya juu. Ikiunganishwa na DLL asili iliyounganishwa na mamia ya faili za `.js` zilizoandikwa chini ya `%LOCALAPPDATA%\Programs\OmniRoute` (pamoja na saraka za kifurushi zenye viambishi vya heshi kutoka kwa muundo wa Next.js uliojitegemea), hiyo inatosha kukwepa utabiri. Uwekaji saini wa msimbo umepangwa; hadi itakapotua, matoleo mapya yanaweza kurudia hili.
 
-**Cha kufanya:**
+**Nini cha kufanya:**
 
-1. **Thibitisha kwanza faili uliyopakua** (hii huondoa uwezekano wa faili kuchezewa). Kila toleo huchapisha
-   `latest.yml`, ambayo uga wake wa `sha512` (base64) unahusisha kisakinishaji cha `OmniRoute.Setup.<version>.exe`.
-   Katika PowerShell, ukiwa kwenye folda iliyo na kisakinishaji:
+1. **Thibitisha upakuaji wako kwanza** (huondoa faili iliyoharibiwa). Kila toleo huchapisha `latest.yml`, ambalo sehemu yake ya `sha512` (base64) inashughulikia kisakinishi `OmniRoute.Setup.<version>.exe`. Katika PowerShell, kutoka kwa folda iliyo na kisakinishi:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Matokeo lazima yalingane na `latest.yml` → `sha512`. Ikiwa hayalingani, futa faili hiyo na
-   uipakue tena kutoka kwenye [ukurasa wa matoleo wa GitHub](https://github.com/diegosouzapw/OmniRoute/releases) pekee.
-2. **Rejesha + tenga** — rejesha vipengee vilivyoondolewa wakati wa urudishaji nyuma kutoka karantini na uongeze utengaji
-   kwa `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
-   kisha usakinishe upya.
-3. **Ripoti tokeo chanya la uongo** — <https://opentip.kaspersky.com/>. Ripoti za FP
-   zinazowasilishwa na watumiaji kwa kweli huharakisha kuongezwa kwenye orodha ya kuruhusiwa.
+   Matokeo lazima yalingane `latest.yml` → `sha512`. Ikiwa haifanyi hivyo, futa faili na upakue tena kutoka kwa [ukurasa wa matoleo ya GitHub](https://github.com/cheaper-inference/OmniRoute/releases) pekee .
+2. **Rejesha + kuwatenga** — kurejesha vipengee vilivyoviringishwa kutoka kwa karantini na uongeze kutengwa kwa `%LOCALAPPDATA%\Programs\OmniRoute` (Mipangilio ya Kaspersky → → Vitisho na Vighairi), kisha usakinishe upya.
+3. **Ripoti chanya ya uwongo** — <https://opentip.kaspersky.com/>. Ripoti za FP zilizowasilishwa na mtumiaji zinaongeza kasi ya uorodheshaji wa viingilio.
 
 ---
 
@@ -867,8 +842,8 @@ Dalili zaidi:
 
 ## Bado Umekwama?
 
-- **Masuala ya GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Usanifu**: Tazama [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) kwa maelezo ya ndani
-- **Rejea ya API**: Tazama [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) kwa endpoints zote
-- **Dashibodi ya Afya**: Angalia **Dashboard → Health** kwa hali ya mfumo ya wakati halisi
-- **Kitafsiri**: Tumia **Dashboard → Translator** kutatua matatizo ya umbizo
+- **GitHub Masuala** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Usanifu** : Tazama [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) kwa maelezo ya ndani
+- **API Rejea** : Tazama [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) kwa miisho yote
+- **Dashibodi ya Afya** : Angalia** Dashibodi → Afya** kwa hali ya mfumo wa wakati halisi
+- **Mfasiri** : Tumia** Dashibodi → Mtafsiri** kutatua masuala ya umbizo

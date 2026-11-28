@@ -4,11 +4,9 @@
 
 ---
 
-> **Fuente de referencia:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Última actualización:** 2026-09-02 — v3.8.51
-> **Audiencia:** Ingenieros que mantienen integraciones furtivas específicas de proveedores.
+> **Fuente de la verdad:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** Audiencia:** Ingenieros que mantienen integraciones sigilosas específicas del proveedor.
 
-OmniRoute se integra con proveedores cuyos extremos identifican activamente a clientes no oficiales mediante huellas digitales (TLS JA3/JA4, orden de encabezados, estructura del cuerpo JSON y tokens de integridad). Esta página documenta las superficies de ocultación que expone OmniRoute y dónde están implementadas.
+OmniRoute se integra con proveedores cuyos bordes toman huellas digitales activamente de clientes no oficiales (TLS JA3/JA4, orden de encabezado, forma del cuerpo JSON, tokens de integridad). Esta página documenta las superficies sigilosas que expone OmniRoute y dónde se implementan.
 
 ## Aviso legal y ético
 
@@ -73,65 +71,68 @@ antes de afirmar que existe paridad con un navegador del servidor de origen.
 
 ---
 
-## Paquete de sigilo de Claude Code
+## Paquete sigiloso de código Claude
 
-Cuando `cliCompatMode` está activado, OmniRoute transforma las solicitudes salientes de Claude para que sean indistinguibles del tráfico de `claude-cli`. Tres módulos colaboran:
+Cuando `cliCompatMode` está activado, OmniRoute reforma las solicitudes Claude salientes para que no se puedan distinguir del tráfico `claude-cli`. Colaboran tres módulos:
 
 ### `claudeCodeFingerprint.ts`
 
-Calcula la huella de 3 caracteres `cc_version` integrada en la cabecera de facturación:
+Calcula la huella digital `cc_version` de 3 caracteres incrustada en el encabezado de facturación:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (codificado de forma fija; coincide con el cliente oficial)
-- Entradas: caracteres en los índices 4, 7 y 20 del texto del primer mensaje del usuario + cadena de versión
+- `FINGERPRINT_SALT = "59cf53e54c78"` (codificado; coincide con el cliente oficial)
+- Entradas: caracteres en el índice 4, 7, 20 del texto del primer mensaje de usuario cadena de versión +
 - Salida: prefijo hexadecimal de 3 caracteres
 
-### `claudeCodeCCH.ts` (hash del contenido del cliente)
+### `claudeCodeCCH.ts` (hash de contenido del cliente)
 
-Comprobación de integridad del lado del servidor que la CLI oficial de Claude Code calcula mediante Bun/Zig. OmniRoute la vuelve a implementar con `xxhash-wasm`:
+La integridad del lado del servidor verifica el código Claude oficial CLI calcula mediante reimplementaciones Bun/Zig. OmniRoute con `xxhash-wasm`:
 
-1. Serializar el cuerpo con el marcador de posición `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Hexadecimal en minúsculas de 5 caracteres, rellenado con ceros
-4. Sustituir `cch=00000;` por el token calculado
+1. Serializar cuerpo con marcador de posición `cch=00000;`
+2. Cree la vista hash con dos reemplazos de texto sin formato, en este orden (`hashView()`):
+   - cada coincidencia de `/"model":"[^"]*"/g` se convierte en `"model":""` — la coincidencia se detiene en el primer `"`, por lo que un valor con una comilla de escape (`"model":"a\"b"`) se vacía solo hasta esa comilla, como lo hace el cliente
+   - cada coincidencia de `/"max_tokens":\d+,|,?"max_tokens":\d+/g` se elimina — solo valores numéricos, en cualquier profundidad
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Hexadecimal minúscula de 5 caracteres con relleno de ceros
+5. Reemplace `cch=00000;` con el token calculado
 
 Constantes:
 
-- Semilla: `0x6e52736ac806831e`
+- Semilla: `0x4d659218e32a3268` (coincide con las capturas de bucle invertido del código Claude 2.1.252 y 2.1.322)
 - Patrón: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Inserta un **conector de ancho cero** Unicode (`U+200D`) después del primer carácter de los nombres de clientes «sensibles», para que los filtros ascendentes no puedan encontrarlos mediante grep. Lista de palabras predeterminada:
+Inserta un Unicode** carpintero de ancho cero** (`U+200D`) después del primer carácter de los nombres de clientes "sensibles" para que los filtros ascendentes no puedan rastrearlos. Lista de palabras predeterminada:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Se aplica a: bloques `system`, todo `messages[].content` y `tools[].description` / `tools[].function.description`. El operador puede sobrescribirla mediante `setSensitiveWords()`.
+Aplicado a: bloques `system`, todos `messages[].content` y `tools[].description` / `tools[].function.description`. Anulable por el operador a través de `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — proveedores `anthropic-compatible-cc-*`
+### proveedores `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*`
 
-Para retransmisores Anthropic de terceros que solo aceptan tráfico de «Claude Code real»:
+Para repetidores Anthropic de terceros que solo aceptan tráfico de "Código Claude real":
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` de forma predeterminada
-- La opción por conexión «Habilitar la beta de ocultación del razonamiento» añade `redact-thinking-2026-02-12` cuando un servicio ascendente compatible con CC requiere específicamente flujos de razonamiento oculto
-- La opción por conexión «Habilitar la visualización del razonamiento resumido» almacena `providerSpecificData.requestDefaults.summarizeThinking` y añade `display: "summarized"` a las solicitudes de razonamiento compatibles con CC que aún no hayan establecido un modo de visualización
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` por defecto
+- La opción por conexión "Habilitar beta de pensamiento redactado" agrega `redact-thinking-2026-02-12` cuando un flujo ascendente compatible CC requiere específicamente flujos de pensamiento redactados
+- La opción "Habilitar visualización de pensamiento resumido" por conexión almacena `providerSpecificData.requestDefaults.summarizeThinking` y agrega `display: "summarized"` a CC Solicitudes de pensamiento compatibles que aún no establecieron un modo de visualización
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (familia Opus/Sonnet 4.x)
 - Ruta predeterminada: `/v1/messages?beta=true`
 
-Módulos relacionados del mismo paquete:
+Módulos hermanos en el mismo paquete:
 
-- `claudeCodeConstraints.ts` — reglas de temperatura y control de caché
-- `claudeCodeToolRemapper.ts` — reasignación de nombres de herramientas
-- `claudeCodeExtraRemap.ts` — normalización adicional de la carga útil
+- `claudeCodeConstraints.ts` — temperatura + reglas de control de caché
+- `claudeCodeToolRemapper.ts` — reasignación de nombre de herramienta
+- normalización de carga útil adicional `claudeCodeExtraRemap.ts` —
 
 ---
 
@@ -147,7 +148,7 @@ Tiras de marcadores SDK de acero inoxidable (`x-stainless-lang`, `x-stainless-pa
 
 Rutas `ANTIGRAVITY_CREDITS=always` (consumidas por `open-sse/executors/antigravity.ts`)** cada** solicite a través de Antigravity AI Credit Overages (créditos Google pagados) en lugar de permitir que la cuota de nivel gratuito de Google controle las cosas. Esto está documentado como una característica, pero es** el informe de infracción de ToS más común que vemos** — varias cuentas Google Ultra han sido prohibidas con `403 / "service disabled for ToS violation" / insufficient_quota` después de ejecutarse durante algunas horas con `=always`.
 
-La aplicación de la ley ascendente está en marcha** lado de Google** , nada que OmniRoute pueda prevenir. El nombre de la var env y los documentos existentes hacen que parezca una perilla segura para activar; no lo es.
+La aplicación de la ley ascendente está en marcha** lado de Google** , nada que OmniRoute pueda prevenir. El nombre de la var env y los documentos existentes hacen que parezca un botón seguro para activar; no lo es.
 
 **Por qué esto genera una detección de abusos más agresiva que el uso exclusivo del nivel gratuito:**
 
@@ -157,7 +158,7 @@ La aplicación de la ley ascendente está en marcha** lado de Google** , nada qu
 
 **Postura recomendada:**
 
-1. Mantenga el `ANTIGRAVITY_CREDITS=off` predeterminado a menos que el operador acepte explícitamente el riesgo de cumplimiento de cuentas y crédito pagado. `retry` envía primero la solicitud normal e inyecta créditos como máximo una vez después de una cuota elegible 429; `always` inyecta créditos en la primera solicitud.
+1. Mantenga el `ANTIGRAVITY_CREDITS=off` predeterminado a menos que el operador acepte explícitamente el riesgo de ejecución de cuentas y crédito pagado. `retry` envía primero la solicitud normal e inyecta créditos como máximo una vez después de una cuota elegible 429; `always` inyecta créditos en la primera solicitud.
 2. **Distribuya la carga entre proveedores a través de Auto-Combo** (`model: "auto"` o `kr/glm/etc` -combo) en lugar de saturar una sola cuenta Antigravity.
 3. **Establecer límites RPM por conexión** en la página de edición del proveedor Antigravity (Panel de → Proveedores → Antigravity → límite de velocidad de conexión → ). 30-60 RPM es un límite superior defendible para un uso sostenido.
 4. **Utilice redes ascendentes estables y controladas por el operador** y evite compartir una cuenta entre usuarios o cargas de trabajo no relacionados.
@@ -183,7 +184,7 @@ Ambos proveedores se autentican con la sesión OAuth del producto Antigravity, q
 | `gemini`                     | Gemini (Google AI estudio) | Clave Gemini API de Google AI Studio (nivel gratuito disponible)                      |
 | `vertex`                     | Vértice AI                 | Cuenta de servicio JSON, token de acceso OAuth o clave API de Vertex Express (Gemini) |
 
-Estos proveedores utilizan credenciales Google para acceder a API, a diferencia de la sesión del producto Antigravity. No hacen que todos los usos sean conformes ni eliminan el riesgo de cumplimiento: cada uno se rige por sus propios términos, que el operador debe verificar para su implementación. Por ejemplo, los [Términos de servicio adicionales Gemini API](https://ai.google.dev/gemini-api/terms) solo permiten Servicios pagos cuando los clientes API están disponibles para usuarios en el Espacio Económico Europeo, Suiza o el Reino Unido, y el contenido enviado a Servicios no pagos puede usarse para mejorar los productos de Google. Vertex AI se rige por los términos Google Cloud ( [Términos específicos del servicio](https://cloud.google.com/terms/service-terms) ). Los precios y las cuotas siguen esos términos API en lugar de una suscripción Antigravity.
+Estos proveedores utilizan credenciales Google para acceder a API, a diferencia de la sesión del producto Antigravity. No hacen que todos los usos sean conformes ni eliminan el riesgo de cumplimiento: cada uno se rige por sus propios términos, que el operador debe verificar para su implementación. Por ejemplo, los [Términos de servicio adicionales Gemini API](https://ai.google.dev/gemini-api/terms) solo permiten servicios pagos cuando los clientes API están disponibles para usuarios en el Espacio Económico Europeo, Suiza o el Reino Unido, y el contenido enviado a los servicios no pagos puede usarse para mejorar los productos de Google. Vertex AI se rige por los términos Google Cloud ( [Términos específicos del servicio](https://cloud.google.com/terms/service-terms) ). Los precios y las cuotas siguen esos términos API en lugar de una suscripción Antigravity.
 
 Los operadores que quieran evitar las suspensiones Antigravity descritas anteriormente deben enrutar el tráfico Gemini a través de uno de estos proveedores en lugar de `antigravity` / `agy`, después de comprobar que su uso se ajusta a los términos del proveedor.
 
@@ -191,7 +192,7 @@ Puntos de contacto:
 
 - `open-sse/executors/antigravity.ts` — lee `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — credencial fontanería
-- Informe original del incidente: Discusión [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Informe original del incidente: Discusión [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

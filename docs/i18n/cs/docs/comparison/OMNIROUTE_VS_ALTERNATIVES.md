@@ -11,7 +11,7 @@ Objektivní srovnání funkcí vs populární open-source AI routery.
 | Funkce                                               |                  OmniRoute 3.8                  |    LiteLLM 1.x     | OpenRouter (SaaS) |  Přenášedlo  |
 | ---------------------------------------------------- | :---------------------------------------------: | :----------------: | :---------------: | :----------: |
 | **Poskytovatelé**                                    |                     **329**                     |        ~100        |        ~50        |     ~30      |
-| **položky katalogu Free/no-auth**                    |                     **155**                     |        n/a         |     průchozí      |     n/a      |
+| **Poskytovatelé s volným přístupem**                 |            **50 s volným přístupem**            |        n/a         |     průchozí      |     n/a      |
 | **Samoobslužný**                                     |                       ✅                        |         ✅         |        ❌         | ⚠ zaplaceno  |
 | **položky katalogu OAuth**                           |                     **23**                      |      částečný      |        ❌         |      ❌      |
 | **Automatická záložní komba**                        |                **22 strategií**                 | na základě priorit | na základě úrovně |    vážený    |
@@ -38,9 +38,9 @@ Objektivní srovnání funkcí vs populární open-source AI routery.
 
 ## Kdy zvolit OmniRoute
 
-- Jste self-hostitel a chcete** maximální pokrytí poskytovatelem** (394 poskytovatelů, 155 záznamů v katalogu free/no-auth )
+- Jste self-hostitel a chcete** maximální pokrytí poskytovatelem** (394 poskytovatelů, 50 s volným přístupem)
 - Potřebujete a** vestavěný server MCP** (nástroje LLM, paměť, dovednosti vystavené jako nástroje)
-- Potřebujete** protokol A2A** pro pracovní postupy mezi agenty
+- Potřebujete** protokol A2A** pro pracovní postupy agent-agent
 - chcete** tajnost otisků prstů** (JA3/JA4), aby se zabránilo detekci proti proudu CAPTCHAs
 - Potřebujete** podnikové funkce** (zábradlí, evals, audit trail) bez účtu SaaS
 
@@ -56,12 +56,12 @@ Objektivní srovnání funkcí vs populární open-source AI routery.
 - Nevadí vám platit za token s přirážkou za SaaS
 - Potřebujete **jedinou platební metodu** pro všechny poskytovatele
 
-## Kdy zvolit Portkey
+## Kdy zvolit Přenášedlo
 
-- Potřebujete **komerční SLA** se zárukami dostupnosti
-- Preferujete **spravovaný dashboard** bez provozní režie
-- Potřebujete **funkce pro dodržování podnikových předpisů** ihned po nasazení
+- Potřebujete a** komerční SLA** se zárukami dostupnosti
+- Dáváte přednost a** spravovaný přístrojový panel** bez ops režie
+- Potřebujete** dodržování podnikových předpisů** funkce po vybalení z krabice
 
 ---
 
-_Naposledy aktualizováno: 2026-08-02. Opravy zasílejte prostřednictvím PR, aby tato tabulka zůstala přesná._
+_Odešlete opravy prostřednictvím PR, aby byla tato tabulka přesná._

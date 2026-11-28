@@ -4,9 +4,9 @@
 
 ---
 
-> **Változat:** v3.8.44** Utolsó frissítés:** 2026-10-28** Közönség:** Mérnökök, akik beágyazott szolgáltatásokat (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box) adnak hozzá, karbantartanak vagy hibakeresnek.
+> **Változat:** v3.8.44** Közönség:** A beágyazott szolgáltatásokat (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box) hozzáadó, karbantartó vagy hibakereső mérnökök.
 
-A beágyazott szolgáltatások helyileg telepített folyamatoldali eszközök, amelyeket OmniRoute telepít, felügyel és első osztályú útválasztási célpontként tesz közzé. Ellentétben a külső szolgáltatókkal (amelyek az interneten keresztül érhetők el API -kulcsokon keresztül), a beágyazott szolgáltatások ugyanazon a gépen futnak, mint OmniRoute, és visszacsatoláson keresztül kommunikálnak.
+A beágyazott szolgáltatások helyileg telepített folyamatoldali eszközök, amelyeket OmniRoute telepít, felügyel és első osztályú útválasztási célpontként tesz közzé. Ellentétben a külső szolgáltatókkal (amelyek az interneten keresztül érhetők el API billentyűkkel), a beágyazott szolgáltatások ugyanazon a gépen futnak, mint OmniRoute, és visszacsatoláson keresztül kommunikálnak.
 
 ---
 
@@ -38,25 +38,25 @@ Nyolc szolgáltatás van beágyazva:
 | **Dario**       | `@askalf/dario`                    |         3456         | Claude-előfizetéses proxy — alternative/failover to CLIProxyAPI Claude-Code alakú forgalomhoz; a beinjektált kulcs `DARIO_ADMIN_TOKEN` lesz, kapuzva `/admin/*` OAuth vezérlősíkját                                                                                                                                                                |
 | **open-wa**     | `@open-wa/wa-automate`             |         8323         | WhatsApp Web automatizálás (fej nélküli Chromium a Puppeteeren keresztül). Életciklus-menedzselt csak — nem útválasztási cél.                                                                                                                                                                                                                      |
 | **LLMLingua**   | `@atjsh/llmlingua-2`               |        20135         | Gyors tömörítésű oldalkocsi — valódi LLMLingua-2 ONNX modell ( Microsoft algoritmusának JS/TS portja). `open-sse/services/compression/engines/llmlingua/index.ts` elküldi `/compress` HTTP keresztül, és visszakerül a folyamatban lévő worker-szál hátterébe, amikor az oldalkocsi lefelé áll. Életciklus-menedzselt csak — nem útválasztási cél. |
-| **énekesdoboz** | GitHub kiadás bináris (`singbox`)  |        20140         | TPROXY oldalkocsi `applyTproxy()` transzparens-proxy intercepcióját (`src/mitm/tproxy/setup.ts`) támogatja. A telepítő letölti a rögzített, ellenőrzőösszeggel ellenőrzött kiadást. Életciklus-menedzselt csak — nem útválasztási cél (nincs LLM proxy)                                                                                            |
+| **énekesdoboz** | GitHub kiadás bináris (`singbox`)  |        20140         | TPROXY oldalkocsi `applyTproxy()` transzparens-proxy elfogását (`src/mitm/tproxy/setup.ts`) támogatja. A telepítő letölti a rögzített, ellenőrzőösszeggel ellenőrzött kiadást. Életciklus-menedzselt csak — nem útválasztási cél (nincs LLM proxy)                                                                                                 |
 
 Mind a nyolc ugyanazt a felügyeleti modellt követi:
 
 - OmniRoute `DATA_DIR/services/{name}/` alá telepíti őket ( OmniRoute saját `package.json` jétől elkülönítve)
 - OmniRoute előállítja és gyermekfolyamatként figyeli őket
 - OmniRoute egy efemer API kulcsot fecskendez be a gyermek környezetébe, és leállás nélkül forgatja (ha van)
-- Minden kezelési útvonal (`/api/services/*`) van**LOCAL_ONLY** — csak loopback-ről érhető el (17-es kemény szabály)
+- Minden kezelési útvonal (`/api/services/*`) van**LOCAL_ONLY** — csak visszahurkolásból érhető el ( #17 kemény szabály)
 
 ### Kulcsfontosságú döntések (a tervezési tervből)
 
-| Döntés                                           | Érték                                                                                             |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| A műszerfal hozzáférése a 9Router natív UI jához | Fordított proxy a `/dashboard/providers/services/9router/embed/*`                                 |
-| Beépítési mechanizmus                            | `npm install {package}` `execFile` keresztül (nincs shell-interpoláció)                           |
-| Fogyasztási mód                                  | A szolgáltató `9router/{sub}/{model}` néven regisztrált az útválasztó motorban                    |
-| API kulcskezelés                                 | OmniRoute generál, titkosítja a nyugalmi állapotot (AES-256-GCM) és injektálja az env-n keresztül |
-| A műszerfal helye                                | `/dashboard/providers/services` (három lap)                                                       |
-| Automatikus indítás                              | Váltás szolgáltatásonként, alapértelmezett OFF                                                    |
+| Döntés                                               | Érték                                                                                      |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Az irányítópult hozzáférése a 9Router natív UI jához | Fordított proxy a `/dashboard/providers/services/9router/embed/*`                          |
+| Beépítési mechanizmus                                | `npm install {package}` `execFile` keresztül (nincs shell-interpoláció)                    |
+| Fogyasztási mód                                      | A szolgáltató `9router/{sub}/{model}` néven regisztrált az útválasztó motorban             |
+| API kulcskezelés                                     | OmniRoute nyugalmi állapotot generál, titkosít (AES-256-GCM) és env-n keresztül injektálja |
+| A műszerfal helye                                    | `/dashboard/providers/services` (három lap)                                                |
+| Automatikus indítás                                  | Váltás szolgáltatásonként, alapértelmezett OFF                                             |
 
 ---
 
@@ -210,7 +210,7 @@ akkor, amikor az automatikus indítás és egy felhasználói felületi gomb egy
 
 ## 4. API hivatkozás
 
-`/api/services/` alatti összes útvonal az**LOCAL_ONLY** (csak loopback, 17-es kemény szabály). A visszahurkolás nélküli kérelmek `403 LOCAL_ONLY` kapnak a hitelesítési tokentől függetlenül.
+`/api/services/` alatti összes útvonal az**LOCAL_ONLY** (csak loopback, kemény szabály #17). A visszahurkolatlan kérelmek `403 LOCAL_ONLY` kapnak, függetlenül a hitelesítési tokentől.
 
 ### 4.1 9 Útválasztó végpontjai (11 útvonal)
 
@@ -540,7 +540,7 @@ sing-box ugyanaz a végpont alakja, mint a Mux — no `rotate-key` route, nincs 
 
 ---
 
-### 4.9 Fordított proxy (9 Router irányítópult beágyazása)
+### 4.9 Fordított proxy (9. Router irányítópult beágyazása)
 
 Az irányítópult a 9Router web UI egy iframe-be ágyazza egy belső fordított proxyn keresztül a következő címen:
 
@@ -550,76 +550,55 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 Ez a proxy:
 
-- Továbbítja a kérelmet `http://127.0.0.1:{port}/{path}` (csak visszacsatolás)
+- Továbbítja a kérést `http://127.0.0.1:{port}/{path}` (csak visszacsatolás)
 - Eltávolítja a bejövő `cookie` és `authorization` fejléceket (nincs OmniRoute munkamenet szivárgása)
 - `Authorization: Bearer {apiKey}` t fecskendez be a 9Router hitelesítéshez
 - A `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` kivonása a válaszból
 - Átírja HTML válaszokat `<base href>` beillesztéséhez és az abszolút útvonalak normalizálásához (`/foo` → `/dashboard/.../embed/foo`)
 
-A beágyazott műszerfal WebSocket frissítéseit egy társszerver kezeli egy dedikált porton (lásd: `src/lib/services/embedWsProxy.ts`).
+A beágyazott irányítópult WebSocket frissítéseit egy társszerver kezeli egy dedikált porton (lásd: `src/lib/services/embedWsProxy.ts`). Minden frissítés engedélyezve van az alagút megnyitása előtt, ugyanazokkal a szabályokkal, mint a HTTP beágyazási útvonala: a peer-nek visszacsatolásnak kell lennie fordított proxy továbbítási fejléc nélkül, a böngésző `Origin` irányítópult-eredetűnek kell lennie (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` kiterjeszti a visszahurkolási alapértékeket), és a hívónak egy irányítópult-munkamenetre vagy egy daqgco loginless API login-nélküli dashboard-billentyűzetre van szüksége.
 
-Minden frissítés engedélyezve van az alagút megnyitása előtt, ugyanazokkal a szabályokkal, mint a HTTP beágyazási útvonal: a társnak visszacsatoltnak kell lennie fordított proxy továbbítási fejléc nélkül, a böngésző `Origin` irányítópult-eredetűnek kell lennie (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` kiterjeszti a visszahurkolási alapértékeket), és a hívónak egy irányítópult-munkamenetre vagy egy dashboard-sco API dashboard key-re van szüksége.
-
-**Biztonság:** A beágyazott proxy útvonalak `LOCAL_ONLY_API_PREFIXES` alá vannak besorolva, és csak visszacsatolásból érhetők el. Az a támadó, aki JWT Cloudflare/Ngrok alagúton keresztül szerez meg, nem tud proxyt beágyazni a beágyazott szolgáltatásokba.
+**Biztonság:** A beágyazott proxy útvonalak `LOCAL_ONLY_API_PREFIXES` kategóriába vannak besorolva, és csak visszacsatolásból érhetők el. Az a támadó, aki JWT Cloudflare/Ngrok alagúton keresztül szerez be, nem tud proxyt beágyazott szolgáltatásokba használni.
 
 ---
 
 ## 5. Biztonság
 
-### LOCAL_ONLY kikényszerítése (17. szigorú szabály)
+### LOCAL_ONLY végrehajtás (kemény szabály #17)
 
-A `/api/services/` és `/dashboard/providers/services/*/embed/` alatti összes útvonal
-LOCAL_ONLY besorolású a `src/server/authz/routeGuard.ts` fájlban. A loopback-ellenőrzés
-minden hitelesítési ág előtt, feltétel nélkül lefut:
+`/api/services/` és `/dashboard/providers/services/*/embed/` alatti összes útvonal `src/server/authz/routeGuard.ts` LOCAL_ONLY besorolása. A visszacsatolási ellenőrzés feltétel nélkül lefut minden hitelesítési ág előtt:
 
 ```
-a kérés beérkezik
+request arrives
   → isLocalOnlyPath(path)?
-      → nem loopback → 403 LOCAL_ONLY (mindig, a hitelesítés ellenőrzése előtt)
-      → loopback     → továbblépés a normál hitelesítéshez
+      → non-loopback → 403 LOCAL_ONLY (always, before auth check)
+      → loopback    → fall through to normal auth
 ```
 
-Ez megakadályozza, hogy egy kiszivárgott JWT (például egy tunnelen keresztül) `npm install`
-futtatását vagy folyamatindítást váltson ki. A teljes szintmátrixot lásd a
-`docs/security/ROUTE_GUARD_TIERS.md` fájlban.
+Ez megakadályozza, hogy egy kiszivárgott JWT (pl. egy alagúton keresztül) `npm install` vagy folyamat ívást indítson el. Lásd `docs/security/ROUTE_GUARD_TIERS.md` a teljes szintű mátrixért.
 
-### API-kulcs injektálása
+### API kulcs befecskendezése
 
-A 9Router és a Mux saját HTTP-végpontjaihoz API-kulcsot/bearer tokent igényel.
-Az OmniRoute:
+9 A Router és a Mux API key/bearer tokent igényel a saját HTTP végpontjaihoz. OmniRoute:
 
-1. Kulcsot generál a `crypto.randomBytes(32).toString("base64url")` használatával,
-   szolgáltatásspecifikus előtaggal (`nr_` a 9Router, `mx_` a Mux esetén).
-2. AES-256-GCM használatával titkosítja a kulcsot tároláskor (ugyanazzal a titkosítóval,
-   amelyet a szolgáltatói hitelesítő adatokhoz használ).
-3. A folyamat indításakor visszafejti és környezeti változóként injektálja —
-   `NINEROUTER_API_KEY` a 9Router, `MUX_SERVER_AUTH_TOKEN` a Mux esetén (soha nem
-   CLI-jelzőként, így a token soha nem jelenik meg a `ps` kimenetében vagy a
-   folyamatlistákban).
-4. Soha nem adja vissza a titkosítatlan kulcsot egyetlen HTTP-válaszban sem.
+1. Kulcsot generál a `crypto.randomBytes(32).toString("base64url")` keresztül szolgáltatásspecifikus előtaggal (`nr_` a 9Routerhez, `mx_` a Muxhoz).
+2. Nyugalomban titkosítja AES-256-GCM használatával (ugyanaz a titkosítás, amelyet a szolgáltatói hitelesítő adatokhoz használnak).
+3. Dekódolja és környezeti változóként injektálja a spawn idején — `NINEROUTER_API_KEY` a 9Routerhez, `MUX_SERVER_AUTH_TOKEN` a Muxhoz (soha nem CLI flag, így a token soha nem jelenik meg `ps`/process listingsben).
+4. Soha nem adja vissza az egyszerű szöveges kulcsot egyetlen HTTP válaszban sem.
 
-A CLIProxyAPI egy dedikált adatsíkbeli kulcsot kap a folyamat indításakor
-(`needsApiKey: true` — az adapterrel végzett modellszinkronizáláshoz használatos).
+CLIProxyAPI egy dedikált adatsík kulcsot kap, amelyet spawnkor injektálnak (`needsApiKey: true` — a modell szinkronizálására szolgál az adapterrel).
 
-### SSRF elleni védelem
+### SSRF védelem
 
-A fordított HTTP-proxy (`/dashboard/.../embed/[...path]`) rögzített módon kizárólag a
-`http://127.0.0.1:{port}` címre továbbít. Soha nem követ nem loopback célokra mutató
-átirányításokat. Az `ssrf-req-filter` könyvtár elutasít minden olyan upstream URL-t,
-amely a loopback-tartományon kívüli címre oldódik fel.
+A fordított HTTP proxy (`/dashboard/.../embed/[...path]`) úgy van kódolva , hogy csak `http://127.0.0.1:{port}` hez továbbítson . Soha nem követi az átirányításokat nem visszacsatolt célhelyekre. A `ssrf-req-filter` könyvtár minden olyan upstream URL elutasítására szolgál, amely a visszahurkolási tartományon kívül oldódik fel.
 
-### Shellbiztonság (13. szigorú szabály)
+### Shell biztonság (hard rule #13)
 
-Az `npm install` meghívása az `execFile('npm', ['install', pkg, '--prefix', dir])`
-használatával történik — nincsenek sablonliterálok, nincs shell, és a külső elérési utak
-nincsenek beillesztve a parancssztringbe. A futásidejű értékek (portok, API-kulcsok) a
-gyermekfolyamat `env` objektumán keresztül kerülnek átadásra.
+`npm install` `execFile('npm', ['install', pkg, '--prefix', dir])` — keresztül kerül meghívásra, nincs sablon literál, nincs shell, nincs külső utak interpolációja a parancssorba. A futásidejű értékek (portok, API kulcsok) a gyermek `env` objektumon keresztül kerülnek átadásra.
 
-### Hibák megtisztítása (12. szigorú szabály)
+### Hibafertőtlenítés (kemény szabály #12)
 
-Az `/api/services/*` összes hibaválasza a `buildErrorBody()` vagy a
-`sanitizeErrorMessage()` függvényen halad keresztül. A nyers `err.stack` és
-`err.message` soha nem kerül változtatás nélkül visszaadásra a hívónak.
+`/api/services/*` összes hibaválasza `buildErrorBody()` vagy `sanitizeErrorMessage()` keresztül megy át. A nyers `err.stack` és `err.message` soha nem kap vissza szó szerint a hívó félnek.
 
 ---
 
@@ -849,44 +828,44 @@ Ha a beágyazott szolgáltatás OpenAI-kompatibilis `/v1/chat/completions` végp
 
 ---
 
-## 8. GYIK
+## 8. FAQ
 
-**K: Elérhetővé tehetem a beágyazott szolgáltatások végpontjait nem loopback kliensek számára?**
+**K: Megtehetem a beágyazott szolgáltatások végpontjait a visszahurkolatlan ügyfelek számára?**
 
-Nem. A LOCAL_ONLY szint szándékosan ilyen kialakítású (17. szigorú szabály). Azok az útvonalak, amelyek meghívhatják az `npm install` parancsot, vagy `node` folyamatokat indíthatnak, nem lehetnek elérhetők nem loopback forgalomból, mert egy alagúton (Cloudflare, Ngrok, Tailscale) keresztül kiszivárgott JWT egyébként tetszőleges folyamatok indítását tenné lehetővé. Az `/api/services/` esetében nincs lehetőség ezen korlátozás felülbírálására — az `/api/mcp/` útvonallal ellentétben ez nem szerepel a manage hatókört megkerülő listán. Lásd: `docs/security/ROUTE_GUARD_TIERS.md`.
-
----
-
-**K: Elérhető lesz a 9Router és a CLIProxyAPI éles/felhőalapú telepítésekben?**
-
-Igen. Mindkét szolgáltatás ugyanazt a helyi működést előtérbe helyező modellt követi, mint maga az OmniRoute. Ugyanazon a gépen futnak, és loopback kapcsolaton keresztül kommunikálnak. Az „éles” itt azt a VPS-t vagy helyi kiszolgálót jelenti, amelyen az OmniRoute telepítve van, nem pedig egy távoli felhőszolgáltatót.
+Nem. A LOCAL_ONLY szint szándékos (kemény szabály #17). Azok az útvonalak, amelyek `npm install` hívhatnak meg vagy `node` folyamatokat hozhatnak létre, nem lehetnek elérhetők a visszahurkolatlan forgalomból, mert egy alagúton (Cloudflare, Ngrok, Tailscale) keresztül kiszivárgott JWT egyébként tetszőleges folyamatindítást tenne lehetővé. `/api/services/` — esetében `/api/mcp/` ellentétben nincs leiratkozási lehetőség, ez ki van zárva a kezelési hatókör megkerülési listájából. Lásd `docs/security/ROUTE_GUARD_TIERS.md`.
 
 ---
 
-**K: Hogyan végezhetem el a felügyelő hibakeresését?**
+**K: A 9Router és CLIProxyAPI elérhető lesz production/cloud telepítésekben?**
 
-1. Kövesse élőben az SSE-naplófolyamot: `curl -N http://localhost:20128/api/services/9router/logs`.
-2. Ellenőrizze az OmniRoute pino-kimenetében található strukturált naplókat a `service:supervisor` névtérre szűrve.
-3. Vizsgálja meg az adatbázis sorát: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
-4. A `GET /api/services/9router/status` használatával egyetlen hívással megtekintheti az aktuális élő állapotot, a PID-et, az állapotellenőrzés eredményét és a `lastError` értékét.
+Igen. Mindkét szolgáltatás ugyanazt a helyi-első modellt követi, mint maga OmniRoute. Ugyanazon a gépen futnak, és visszacsatoláson keresztül kommunikálnak. A „termelés” itt azt a VPS vagy helyi szervert jelenti, ahol OmniRoute telepítve van, nem pedig egy távoli felhőszolgáltatót.
 
 ---
 
-**K: A felügyelőnél a `health: "degraded"` vagy a `health: "unknown"` látható, miközben az állapot `"running"`. Ez probléma?**
+**K: Hogyan lehet hibakeresni a felügyelőt?**
 
-A `"degraded"` azt jelenti, hogy az állapotellenőrző próba nem 200-as választ adott vissza. Az `"unknown"` azt jelenti, hogy még egyetlen próba sem fejeződött be (versenyhelyzet az első lekérdezéssel). Indítás közben mindkettő átmeneti állapot. Ha a `"running"` állapot elérését követően az állapotellenőrzés `healthIntervalMs * 3` ezredmásodpercnél tovább marad `"degraded"`, akkor a beágyazott szolgáltatás fut, de a HTTP API-ja nem válaszol. Ellenőrizze, hogy az állapotválaszban szereplő port helyes-e, és hogy a szolgáltatás valóban figyel-e azon a porton.
-
----
-
-**K: Módosíthatom a 9Router API-kulcsát teljes újraindítás nélkül?**
-
-Nem. Az API-kulcs a folyamat indításakor, környezeti változón keresztül kerül átadásra a 9Router számára. Egy futó folyamat környezeti változói nem módosíthatók. A `POST .../rotate-key` automatikusan leállítja és újraindítja a szolgáltatást az új kulcs alkalmazásához. A kulcs cseréje a szolgáltatás `stopTimeoutMs` időkorlátján (alapértelmezés szerint 15 s) és az indítási idején belül lép érvénybe.
+1. A SSE rönkfolyam farka: `curl -N http://localhost:20128/api/services/9router/logs`.
+2. Ellenőrizze a strukturált naplókat OmniRoute pino kimenetében `service:supervisor` névtér által szűrve.
+3. Vizsgálja meg a DB sort: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
+4. `GET /api/services/9router/status` segítségével egyetlen hívásban megtekintheti az aktuális élő állapotot, PID, az állapotot és `lastError`.
 
 ---
 
-**K: Mekkora a körkörös puffer korlátja, és mi történik, amikor megtelik?**
+**K: A felügyelő `health: "degraded"` vagy `health: "unknown"` értéket mutat, de az állapot `"running"`. Ez probléma?**
 
-Minden szolgáltatás külön 5 MB-os körkörös pufferrel rendelkezik. Amikor a puffer megtelik, a legrégebbi naplósorok törlődnek, hogy helyet biztosítsanak az újaknak. Az SSE `snapshot` esemény a `tail` korláton belüli legutóbbi sorokat adja vissza. A naplók nem kerülnek lemezre, kivéve, ha az adatbázis sorában be van állítva a `logsBufferPath`.
+`"degraded"` azt jelenti, hogy az egészségügyi szonda non-200 választ adott vissza. `"unknown"` azt jelenti, hogy még nem fejeződött be a szonda (verseny az első szavazással). Mindkettő átmeneti indításkor. Ha az állapot `"running"` után `healthIntervalMs * 3` ms-nál `"degraded"` marad, akkor a beágyazott szolgáltatás fut, de a HTTP API nem válaszol. Ellenőrizze, hogy a port helyes-e az állapotválaszban, és hogy a szolgáltatás valóban figyel-e az adott porton.
+
+---
+
+**K: Megváltoztathatom a 9Router API kulcsát teljes újraindítás nélkül?**
+
+Nem. A API kulcsot a 9Router egy környezeti változón keresztül továbbítja a spawn idején. A környezeti változók nem módosíthatók futó folyamatban. `POST .../rotate-key` automatikusan leállítja és újraindítja a szolgáltatást az új kulcs alkalmazásához. A kulcs elforgatása a szolgáltatás `stopTimeoutMs` (alapértelmezett 15 s) és az indítási időn belül lép életbe.
+
+---
+
+**K: Mi a gyűrűpuffer korlátja, és mi történik, amikor megtelik?**
+
+Minden szolgáltatáshoz tartozik egy dedikált 5 MB gyűrűpuffer. Amikor a puffer megtelik, a legrégebbi naplósorokat kiürítik, hogy helyet adjanak újaknak. A SSE `snapshot` esemény a `tail` határon belüli legfrissebb sorokat adja vissza. A naplók nem maradnak meg a lemezen, hacsak `logsBufferPath` nincs beállítva a DB sorban.
 
 ---
 

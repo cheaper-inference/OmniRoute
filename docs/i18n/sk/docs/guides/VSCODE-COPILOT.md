@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** pridáva každý model poskytovaný službou OmniRoute do _natívneho_ výberu modelov
-v GitHub Copilot Chat. Žiadny druhý bočný panel, žiadne samostatné používateľské rozhranie chatu — režim agenta Copilotu, volanie nástrojov,
-servery MCP aj vlastné pokyny naďalej fungujú, iba sa spúšťajú na modeli, ktorý si vyberiete.
+**OmniCopilot** pridá vaše modely chatu OmniRoute a kombá do natívneho výberu modelu chatu Copilot. Využite existujúce pracovné postupy chatu a agentov editora s volaním nástrojov a víziou, ak to podporuje vybraný model.
 
-|                             |                                                                                                                                                 |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Inštalácia (VS Code)**    | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Inštalácia (forky)**      | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Zdrojový kód / problémy** | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Požiadavky**              | VS Code 1.104+                                                                                                                                  |
+|                              |                                                                                                                                           |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Inštalovať (kód VS )**     | [Trhovisko → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                    |
+| **Inštalovať (Otvoriť VSX)** | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — vyžaduje kompatibilného poskytovateľa jazykového modelu a chat APIs |
+| **Zdroj / problémy**         | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                                        |
+| **Vyžaduje**                 | VS kód 1.104 + (1.122 + na použitie bez prihlásenia GitHub alebo plánu Copilot )                                                          |
+| **Aktuálne vydanie**         | OmniCopilot v1.5.1 v oboch obchodoch (vydaná 24. 11. 2026)                                                                                |
 
-> **Predplatné Copilot nie je potrebné.** Od VS Code 1.122 funguje poskytovateľ jazykového modelu
-> bez prihlásenia do GitHubu a bez akéhokoľvek plánu Copilot. Vnorené dokončovanie kódu a
-> funkcie založené na embeddingoch zostávajú mimo API poskytovateľa a naďalej vyžadujú Copilot.
+Uložiť snímku na** 25. 11. 2026 (01:43 UTC)** , aktuálne vydanie:** 52 081 inštalácií z Marketplace** a** 20 989 otvorených stiahnutí VSX** . Ide o rôzne metriky obchodu, nie o kombinovaný počet používateľov. Zdroje: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) a [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Dostupnosť otvoreného VSX sama osebe nezabezpečuje kompatibilitu s každým editorom, ktorý používa tento register. Skontrolujte chat editora a podporu jazykového modelu API.
+
+> **Pre BYOK chat v VS Code 1.122 + nie je potrebné žiadne predplatné Copilot.** Microsoft podporuje chat, nástroje a MCP bez prihlásenia GitHub, keď je nakonfigurovaný poskytovateľ. Na VS Code 1.104–1.121 rozšírenie stále funguje, ale VS Code vyžaduje prihlásený plán Copilot. Vložené návrhy a funkcie založené na vložení zostávajú mimo poskytovateľa API a stále vyžadujú Copilot; správcovia Copilot Business/Enterprise môžu zakázať poskytovateľov modelov tretích strán podľa pravidiel; vidlica zobrazuje modely iba vtedy, ak implementuje poskytovateľa chatu API. Za používanie poskytovateľa proti prúdu sa môžu stále účtovať poplatky. Pozrite si [poznámky k vydaniu VS Code 1.122](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) a [príručku k jazykovému modelu](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
 ## Nastavenie
 
-1. **Spustite OmniRoute** — `npm install -g omniroute && omniroute` (ovládací panel na `http://localhost:20128`).
-2. **Nainštalujte rozšírenie** — vo zobrazení Rozšírenia vyhľadajte „OmniRoute“.
-3. **Vyberte model** — Copilot Chat → výber modelu → **Spravovať modely…** → **OmniRoute**, potom začiarknite
-   požadované modely.
+1. **Spustiť OmniRoute** — `npm install -g omniroute && omniroute` (dashboard na `http://localhost:20128`).
+2. **Nainštalujte rozšírenie** — vyhľadajte "OmniRoute" v zobrazení rozšírení.
+3. **Pripojte sa** — ponechajte predvolené `http://localhost:20128` alebo nastavte kľúč URL a API vášho servera**OmniRoute: Správa pripojenia** .
+4. **Vyberte si model** — Copilot Chat → výber modelu →** Spravovať modely…** →**OmniRoute** , potom zaškrtnite, čo chcete.
 
-Keď OmniRoute beží na predvolenom porte, nie je potrebné nič konfigurovať. Pre vzdialenú inštanciu otvorte
-**ikonu OmniRoute na paneli aktivít** (alebo spustite `OmniRoute: Manage Connection`) a nastavte:
+Pre nastavenia pripojenia otvorte** ikonu OmniRoute na paneli aktivít** (alebo spustite `OmniRoute: Manage Connection`) a nastavte:
 
-- **URL servera** — koreňová adresa servera, napr. `http://192.168.0.15:20128`. Príponu `/v1`
-  pridáva rozšírenie; nezahŕňajte ju.
-- **Kľúč API** — iba ak má server nastavené `REQUIRE_API_KEY`. Ukladá sa do kľúčenky operačného systému prostredníctvom
-  VS Code SecretStorage, nikdy nie do `settings.json`.
+- **Server URL** — koreň servera, napr. `http://omniroute.example.com:20128`. Prípona `/v1` je pripojená príponou; nezahŕňajte to.
+- **kľúč API** — sa vyžaduje, keď ho vyžaduje politika overovania inferencie servera. Uložené cez VS Kód SecretStorage, nikdy nie v `settings.json`; k dispozícii sú klávesy špecifické pre pracovný priestor. Použite kľúč autorizovaný pre modely, ktoré chcete vystaviť.
+
+Rozšírenie tiež poskytuje indikátor pripojenia, obnovenie modelu, kontext modelu a cenové metadáta (vrátane kombinácií), streamované zdôvodnenie s** Snaha o premýšľanie** menu na VS Code 1.120 +, stavový riadok indikátora denného limitu a panel používania (OmniRoute 3.8.50 +), konfigurácia CLI a voliteľná karta dashboard. Vybratý model a politika servera určujú schopnosti, ktoré môžete použiť.
 
 ---
 
@@ -118,26 +118,25 @@ Pozrite si [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) a problém
 
 ---
 
-## Konfigurácia ďalších nástrojov priamo vo VS Code
+## Konfigurácia vašich ďalších nástrojov z kódu VS
 
-**`OmniRoute: Configure Coding CLI`** používa rozhranie CLI `omniroute` na zapisovanie profilov pripravených
-na použitie pre Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo a Roo — rovnakých konfigurácií, aké sú opísané v
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). Kľúč API sa rozhraniu CLI odovzdáva prostredníctvom
-premennej prostredia `OMNIROUTE_API_KEY`, nikdy nie cez príkazový riadok.
+**`OmniRoute: Configure Coding CLI`** poháňa `omniroute` CLI na písanie profilov pripravených na použitie pre 16 nástrojov: Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLI, Zed, WhyCodes a 5dive. Rozšírenie vyvoláva príkazy `setup-*` v integrovanom termináli; nainštalujte verziu OmniRoute CLI, ktorá obsahuje vybratý príkaz. Pozrite si [príručku integrácie CLI](CLI-INTEGRATIONS.md), kde nájdete súbory a príznaky, ktoré používa každý recept, a [register nástrojov rozšírenia](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+Kľúč API sa odovzdáva CLI cez `OMNIROUTE_API_KEY`, nikdy nie na príkazovom riadku. Inštalačné recepty môžu uchovávať poverenia v konfigurácii cieľového nástroja. Pri zdieľaní kľúča špecifického pre pracovný priestor s konfiguráciou na úrovni používateľa nástroja si rozšírenie najprv vyžiada potvrdenie.
 
 ---
 
 ## Riešenie problémov
 
-| Príznak                                                        | Príčina / riešenie                                                                                                                                                                                                                                                                           |
-| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vo výbere nie sú žiadne modely OmniRoute                       | Server je nedostupný. Bodka v stavovom riadku sa zmení na sivú; spustite `OmniRoute: Check Connection`. Zisťovanie je zámerne tiché a namiesto zobrazovania výzvy nepridá žiadne modely.                                                                                                     |
-| Každý model sa zobrazuje dvakrát                               | Používate OmniCopilot starší než 1.0.1 — aktualizujte ho. Rozšírenie teraz požaduje `?prefix=alias`.                                                                                                                                                                                         |
-| Model obrázkov/zvuku sa predtým zobrazoval a zmizol            | Od verzie 1.0.1 je to zámerné — nikdy nedokázal odpovedať na chatovú požiadavku.                                                                                                                                                                                                             |
-| Na paneli aktivity chýba panel                                 | VS Code presúva ďalšie kontajnery zobrazení do ponuky **„…“** v spodnej časti panela aktivity a kontajner skrytý kliknutím pravým tlačidlom zostane skrytý. Kliknite pravým tlačidlom na panel aktivity → začiarknite **OmniRoute** alebo ho otvorte pomocou `OmniRoute: Manage Connection`. |
-| Ovládací panel sa napriek režimu `editor` otvorí v prehliadači | Server nebol **zostavený** s `DASHBOARD_ALLOW_EMBED=vscode` (pozrite vyššie) — jeho nastavenie pri spustení vopred zostavenej inštalácie nič nezmení. Použitie náhradného riešenia je zámerné.                                                                                               |
-| Zoznam modelov je po zmene poskytovateľov neaktuálny           | Použite `OmniRoute: Refresh Models` alebo odkaz ↻ na paneli.                                                                                                                                                                                                                                 |
+| Symptóm                                                       | Príčina / oprava                                                                                                                                                                                                                                                                               |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vo výbere nie sú žiadne modely OmniRoute                      | Server je nedostupný. Bodka na stavovom riadku sa zmení na sivú; spustiť `OmniRoute: Check Connection`. Discovery je svojou konštrukciou tichý a neprispieva skôr k žiadnym modelom ako k výzvam.                                                                                              |
+| Každý model sa objaví dvakrát                                 | Používate aktualizáciu OmniCopilot staršiu ako 1.0.1 —. Rozšírenie teraz vyžaduje `?prefix=alias`.                                                                                                                                                                                             |
+| Kedysi bol uvedený model image/audio a je preč                | Úmyselne od 1.0.1 — nikdy nedokázal odpovedať na žiadosť o rozhovor.                                                                                                                                                                                                                           |
+| Na paneli aktivít chýba panel                                 | Kód VS presúva ďalšie kontajnery zobrazenia do** "…"** v spodnej časti panela aktivít a kontajner skrytý kliknutím pravým tlačidlom myši zostane skrytý. Kliknite pravým tlačidlom myši na začiarknutie lišty aktivity →**OmniRoute** alebo ho otvorte pomocou `OmniRoute: Manage Connection`. |
+| Dashboard sa otvorí v prehliadači napriek režimu `editor`     | Server nebol** postavený** s nastavením `DASHBOARD_ALLOW_EMBED=vscode` (pozri vyššie) — pri spustení na vopred zostavenej inštalácii nerobí nič. Záloha je zámerná.                                                                                                                            |
+| Zoznam modelov je po zmene poskytovateľa zastaralý            | `OmniRoute: Refresh Models` alebo odkaz ↻ na paneli.                                                                                                                                                                                                                                           |
+| Panel hovorí _Online (modely sú blokované)_, výber je prázdny | Server odmietne kľúč. Uložte správny kľúč pomocou** Uložiť a otestovať** . Ak bol kľúč namiesto toho opravený na serveri (povolený alebo daný prístup k modelom), rozšírenie si to samo nevšimne: spustite `OmniRoute: Refresh Models` alebo otvorte panel OmniRoute.                          |
 
 ---
 

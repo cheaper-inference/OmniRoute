@@ -21,24 +21,21 @@ ja että CLI:hin on **kirjauduttu sisään**.
 ## 1. Arkkitehtuuri
 
 ```
-┌─ OmniRoute-sovellus ────────────┐        ┌─ codex-app-server-sivukontti ───────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ ominaisuustunnus)            │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  hallitsee OpenAI OAuthia itse      │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, autom. päivitys)│
-        │ jakaa (compose-taltiot)            └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS-ominaisuustunnus (molemmat liittävät sen)
-  codex-appserver-home    → ~/.codex (koontinäytön kirjoittama auth.json,
-                             jota sivukontin codex app-server lukee)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sivukontti kuuntelee **vain** sisäisessä compose-verkossa
-  (`ws://codex-app-server:1456`) ominaisuustunnuksen suojaamana. Sitä **ei
-  koskaan** julkaista isäntäkoneelle tai internetiin.
-- Codex CLI sisältyy valmiiksi `omniroute:base`-kuvaan, joten Codexia ei tarvitse
-  asentaa isäntäkoneelle tai käyttäjän koneelle sivukonttia käytettäessä.
+- Sivuvaunu kuuntelee** vain** sisäisessä kirjoitusverkossa (`ws://codex-app-server:1456`) kykytunnuksen takana. Se on** ei koskaan** julkaistu isäntälle tai Internetiin.
+- Sivuvaunu käyttää `omniroute:cli-no-docker`, joka on rakennettu `runner-cli-no-docker` targetista, joka sisältää Codex CLI.
 
 ## 2. Käynnistys
 

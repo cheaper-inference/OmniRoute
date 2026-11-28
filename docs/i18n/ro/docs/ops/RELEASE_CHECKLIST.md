@@ -4,12 +4,9 @@
 
 ---
 
-> **Ultima actualizare:** 2026-08-28 — v3.8.51
-> Flux de lansare simplificat, care utilizează abilitățile Claude Code pentru automatizare.
+> Flux de lansare simplificat care valorifică abilitățile Claude Code pentru automatizare.
 >
-> **Mențineți coada/ramura verde între lansări:** consultați [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (familia `/green-prs` + `npm run check:release-green` + `/babysit` + rularea nocturnă). Rularea
-> periodică a acestora — și mai ales **înaintea** acestei liste de verificare — face ca PR-ul de lansare să pornească verde.
+> **Păstrați queue/branch verde între lansări:** vezi [RELEASE_GREEN.md](./RELEASE_GREEN.md) ( familia `/green-prs` + `npm run check:release-green` + `/babysit` + noaptea). Rularea aceasta periodic — si mai ales** înainte** această listă de verificare — face ca lansarea PR să înceapă verde.
 
 ## Pe scurt
 
@@ -58,9 +55,11 @@ Fluxul de lucru npm-publish nu se mai publică direct: pornește tarball-ul împ
 
 **Caiet de joc cu artefacte sparte (neschimbat):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` ca reflex implicit (minute, reversibil); `npm unpublish` numai în interiorul ferestrei 72h/no-dependents și niciodată ca primă mișcare. Docker: nu rescrie niciodată o etichetă de versiune. — rollback este redirecționează `latest` la ultimul rezumat bun.
 
-**Docker Hub `latest` (necesar pentru fiecare publicare SemVer stabilă):** fluxul de lucru `docker-publish` trebuie să fie etichetat** ambele** `X.Y.Z` și, când `should-promote-latest.sh` este de acord, acesta este cel mai mare SemVer stabil, `:latest` cu** același digerat** . După job: Hub `latest` digest este egal cu noul SemVer digest și `last_updated` mutat. Nu lăsați `:latest` pe o versiune mai veche în timp ce notele de lansare vorbesc despre remedieri care există numai pe git. Comune quickstarts folosește `:latest`; GitOps ar trebui să continue fixarea `X.Y.Z`. Vedeți [canalele de lansare Docker](../guides/DOCKER_GUIDE.md#release-channels) și #10317.
+**Docker Hub `latest` (necesar pentru fiecare publicare SemVer stabilă):** fluxul de lucru `docker-publish` trebuie etichetat** ambele** `X.Y.Z` și, când `should-promote-latest.sh` este de acord, acesta este cel mai mare SemVer stabil, `:latest` cu** același digerat** . După job: Hub `latest` digest este egal cu noul SemVer digest și `last_updated` mutat. Nu lăsați `:latest` pe o versiune mai veche în timp ce notele de lansare vorbesc despre remedieri care există doar pe git. Comune quickstarts folosește `:latest`; GitOps ar trebui să continue fixarea `X.Y.Z`. Vedeți [canalele de lansare Docker](../guides/DOCKER_GUIDE.md#release-channels) și #10317.
 
-**Depozitul organizației Docker Hub (`cheaperinference/omniroute`):** Docker Hub nu poate muta un depozit între spațiile de nume, așa că `diegosouzapw/omniroute` își păstrează istoricul extragerilor și fiecare lansare, iar jobul `mirror-org-dockerhub` al `docker-publish` copiază fiecare versiune lansată (și `:latest` când este promovată) din `ghcr.io/cheaper-inference/omniroute` în depozitul organizației. Are nevoie de secretele `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; fără ele, jobul rămâne verde cu un avertisment „Docker Hub org mirror ignored” și celelalte registre publică normal. Pentru a publica o versiune lansată acolo mai târziu, rulați** Acțiuni → Oglindă imaginea Docker în Docker Hub org → Executați fluxul de lucru** cu `version=X.Y.Z` (și `promote_latest` pentru cea mai înaltă versiune stabilă): copiază imaginile existente, fără reconstrucție.
+**Depozitul organizației Docker Hub (`cheaperinference/omniroute`):** Docker Hub nu poate muta un depozit între spațiile de nume, așa că `diegosouzapw/omniroute` își păstrează istoricul de extragere și fiecare lansare, iar jobul `mirror-org-dockerhub` al `docker-publish` copiază fiecare versiune lansată (și `:latest` când este promovată) din `ghcr.io/cheaper-inference/omniroute` în depozitul organizației. Are nevoie de secretele `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; fără ele, jobul rămâne verde cu un avertisment „Docker Hub org mirror ignored” și celelalte registre publică normal. Pentru a publica o versiune lansată acolo mai târziu, rulați** Acțiuni → Oglindă imaginea Docker în Docker Hub org → Executați fluxul de lucru** cu `version=X.Y.Z` (și `promote_latest` pentru cea mai înaltă versiune stabilă): copiază imaginile existente, fără reconstrucție. Prezentarea generală a Docker Hub a acelui depozit este setată manual: API ul care îl editează respinge jetoanele de acces organizației.
+
+Același flux de lucru copiază, de asemenea, fiecare lansare în pachetul GHCR moștenit `ghcr.io/diegosouzapw/omniroute` până în 2027-06-30, astfel încât instalările încă fixate pe acesta se actualizează în continuare; indexul său poartă o descriere „mutat în `ghcr.io/cheaper-inference/omniroute`”. Are nevoie de secretul `GHCR_LEGACY_TOKEN` (un simbol clasic de acces personal al `diegosouzapw` cu `write:packages`); fără ea, sarcina se omite cu un avertisment „Oglinda GHCR moștenire omisă”.
 
 ## Bandă rapidă pentru remedieri urgente (eticheta `hotfix`)
 
@@ -151,7 +150,7 @@ Modificări de ruptură: adăugați `BREAKING CHANGE:` subsol sau `!` după dome
 ### Documentare
 
 - [ ] `npm run check:docs-sync` trece (rulat automat prin pre-comitare)
-- [ ] `npm run check:docs-all` trece (umbrelă: docs-sync + docs-counts + env-doc-sync + versiuni depreciate + doc-links)
+- [ ] `npm run check:docs-all` trece. Avizul său `check:deprecated-versions` semnalează versiunile atribuite explicit lui OmniRoute (3.6.x și anterioare) și ignoră datele.
 - [ ] `npm run check:env-doc-sync` iese 0 cod — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env contractul este intact
 - [ ] `npm run check:doc-links` iese din 0 — fără referințe interne de reducere defalcate după restructurare
 - [ ] `docs/architecture/ARCHITECTURE.md` revizuit pentru storage/runtime drift
@@ -399,7 +398,7 @@ Comitarea bump de dezvoltare este construită cu git plumbing (nu este atins nic
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

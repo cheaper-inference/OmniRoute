@@ -49,7 +49,7 @@
 
 ---
 
-## የውይይት ማጠናቀቂያዎች
+## የውይይት ማጠናቀቅ
 
 ```bash
 POST /v1/chat/completions
@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### ብጁ ራስጌዎች
 
-| Header                   | Direction | Description                                                                                                                                                   |
-| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | ጥያቄ       | መሸጎጫን ለማለፍ `true` ያድርጉ                                                                                                                                        |
-| `x-omniroute-no-memory`  | ጥያቄ       | ለዚህ ጥያቄ የማስታወሻ + ክህሎቶች መጨመርን ለመዝለል `true` ያድርጉ (ከno-cache ጋር ተመሳሳይ ነው፤ በእያንዳንዱ ጥሪ የሚከሰተውን የቶከን/ወጪ ተጨማሪ ጫና ያስወግዳል)                                             |
-| `X-OmniRoute-Progress`   | ጥያቄ       | የእድገት ክስተቶችን ለማንቃት `true` ያድርጉ                                                                                                                                |
-| `X-Session-Id`           | ጥያቄ       | ለውጫዊ የክፍለ ጊዜ ተያያዥነት የሚጠቅም ቋሚ የክፍለ ጊዜ ቁልፍ                                                                                                                      |
-| `x_session_id`           | ጥያቄ       | የአስረጎድ ልዩነቱም ይቀበላል (ቀጥተኛ HTTP)                                                                                                                                |
-| `X-OmniRoute-Session-Id` | ጥያቄ       | በጠሪው የሚቀርብ የክፍለ ጊዜ/ውይይት መለያ (እንዲሁም ለማስታወሻ ይላካል)። በሚኖርበት ጊዜ ለእያንዳንዱ ክፍለ ጊዜ የወጪ መመደብ በቀጥታ ወደ `call_logs.session_tag` ይቀመጣል (#8249) — በሌለበት ጊዜ ፈጽሞ በራስ-ሰር አይፈጠርም |
-| `Idempotency-Key`        | ጥያቄ       | የድግግሞሽ መከላከያ ቁልፍ (የ5 ሰከንድ ጊዜ መስኮት)                                                                                                                            |
-| `X-Request-Id`           | ጥያቄ       | አማራጭ የድግግሞሽ መከላከያ ቁልፍ                                                                                                                                         |
-| `x-omniroute-connection` | ጥያቄ       | አንድ-ሞዴል ጥያቄን በመለያው ለአንድ አቅራቢ ግንኙነት (መለያ) ላይ ያስቀምጡ — [በእያንዳንዱ ጥያቄ የመለያ ማስቀመጥ](#account-pinning-per-request) ይመልከቱ                                              |
-| `X-OmniRoute-Cache`      | ምላሽ       | `HIT` ወይም `MISS` (ዥረት በማይጠቀምበት)                                                                                                                               |
-| `X-OmniRoute-Idempotent` | ምላሽ       | ድግግሞሽ መከላከያ ከተፈጸመ `true`                                                                                                                                      |
-| `X-OmniRoute-Progress`   | ምላሽ       | የእድገት ክትትል እየሰራ ከሆነ `enabled`                                                                                                                                 |
-| `X-OmniRoute-Session-Id` | ምላሽ       | በOmniRoute የተጠቀመበት ውጤታማ የክፍለ ጊዜ መለያ                                                                                                                           |
-| `X-OmniRoute-Request-Id` | ምላሽ       | የጥያቄ ተዛማጅነት መለያ (በሚታወቅበት ጊዜ)                                                                                                                                  |
-| `X-OmniRoute-Version`    | ምላሽ       | የOmniRoute ግንባታ ስሪት (ሁልጊዜ ይኖራል)                                                                                                                               |
-| `X-OmniRoute-Cost-Saved` | ምላሽ       | በ`HIT` ላይ መሸጎጫው ያስቀረው በUSD የተገለጸ ወጪ (የመሸጎጫ ግጥሚያዎች ብቻ)                                                                                                         |
-| `X-OmniRoute-Decision`   | ምላሽ       | የማዘዋወሪያ ዱካ፦ `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` የጥምር ስትራቴጂ ነው፣ ወይም ጥምር ላልሆነ ጥያቄ `single` ነው) — በማጠናቀቂያ ምላሾች ላይ ሁልጊዜ ይኖራል            |
+| ራስጌ                      | አቅጣጫ | መግለጫ                                                                                                                                                                                                                                                                      |
+| ------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | ጥያቄ  | መሸጎጫውን ለማለፍ ወደ `true` አቀናብር                                                                                                                                                                                                                                               |
+| `x-omniroute-no-memory`  | ጥያቄ  | ለዚህ ጥያቄ የማህደረ ትውስታ + ክህሎት መርፌን ለመዝለል ወደ `true` አቀናብር (መሸጎጫ የሌለው መሸጎጫ፤ በየጥሪው token/cost ላይ ያለውን ነገር ያስወግዳል)                                                                                                                                                                |
+| `x-omniroute-no-log`     | ጥያቄ  | ለዚህ የአስተያየት ጥያቄ (ሁሉም የውይይት-ቤተሰብ መንገዶች፡ የውይይት ማጠናቀቂያ፣ ምላሾች፣ መልእክቶች፣ ማጠናቀቂያዎች፣ Gemini) ከጥሪ request/response ማስታወሻዎች ለመተው ወደ `true` አቀናብር። የጊዜ ማህተም፣ ሞዴል፣ ሁኔታ፣ ቆይታ እና የማስመሰያ ቆጠራዎች አሁንም ተመዝግበዋል። ለሙሉ ይዘት መርጦ ለመውጣት `x-omniroute-no-memory` እና `x-omniroute-no-cache` ጋር ያዋህዱ |
+| `X-OmniRoute-Progress`   | ጥያቄ  | ለሂደት ክስተቶች ወደ `true` አቀናብር                                                                                                                                                                                                                                                |
+| `X-Session-Id`           | ጥያቄ  | ተለጣፊ የክፍለ-ጊዜ ቁልፍ ለውጫዊ ክፍለ-ጊዜ ቅርበት                                                                                                                                                                                                                                         |
+| `x_session_id`           | ጥያቄ  | የስር ነጥብ ልዩነት እንዲሁ ተቀባይነት አለው (ቀጥታ HTTP)                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Session-Id` | ጥያቄ  | በጠሪው የቀረበ session/conversation መለያ (እንዲሁም ማህደረ ትውስታን ይመገባል)። በሚገኝበት ጊዜ፣ ለክፍለ-ጊዜ ወጪ መለያ (#8249) — በቃል በቃል እስከ `call_logs.session_tag` በሌለበት ጊዜ ፈጽሞ አልተሰራም።                                                                                                                 |
+| `Idempotency-Key`        | ጥያቄ  | የተቀነሰ ቁልፍ (5 ሰ መስኮት)                                                                                                                                                                                                                                                      |
+| `X-Request-Id`           | ጥያቄ  | ተለዋጭ የማስወገጃ ቁልፍ                                                                                                                                                                                                                                                           |
+| `x-omniroute-connection` | ጥያቄ  | የነጠላ ሞዴል ጥያቄን ከአንድ አቅራቢ ግንኙነት (መለያ) ጋር በመታወቂያ — ይሰኩት [በጥያቄ መለያ መሰካትን](#account-pinning-per-request) ይመልከቱ                                                                                                                                                                 |
+| `X-OmniRoute-Cache`      | ምላሽ  | `HIT` ወይም `MISS` (የማይተላለፍ)                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Idempotent` | ምላሽ  | `true` ከተቀነሰ                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Progress`   | ምላሽ  | `enabled` የሂደት ክትትል በርቶ ከሆነ                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Session-Id` | ምላሽ  | በ OmniRoute ጥቅም ላይ የዋለው ውጤታማ ክፍለ ጊዜ ID                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Request-Id` | ምላሽ  | የግንኙነት መታወቂያ ይጠይቁ (ሲታወቅ)                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Version`    | ምላሽ  | OmniRoute ግንባታ ስሪት (ሁልጊዜ አለ)                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Cost-Saved` | ምላሽ  | USD መሸጎጫው በ HIT ላይ ተወግዷል (መሸጎጫ ብቻ ነው)                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Decision`   | ምላሽ  | የማዞሪያ ዱካ `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` ጥምር ስትራቴጂ ነው፣ ወይም `single` ላልሆነ ጥምር ጥያቄ) — ሁልጊዜ በማጠናቀቂያ ምላሾች ላይ ይገኛል።                                                                                                                              |
 
-> Nginx ማስታወሻ፦ በአስረጎድ የተጻፉ ራስጌዎችን (ለምሳሌ `x_session_id`) የሚጠቀሙ ከሆነ፣ `underscores_in_headers on;` ያንቁ።
+> Nginx ማስታወሻ፡ ከስር ራስጌዎች (ለምሳሌ `x_session_id`) ላይ የምትተማመን ከሆነ `underscores_in_headers on;` አንቃ።
 
-#### በእያንዳንዱ ጥያቄ የመለያ ማስቀመጥ
+#### የመለያ መሰካት በጥያቄ
 
-አንድ አቅራቢ ብዙ ግንኙነቶች (መለያዎች ወይም ቁልፎች) ሲኖሩት፣ OmniRoute በመደበኛነት አንዱን የሚመርጠው
-በመለያ ምርጫ ስትራቴጂው ነው። ነገር ግን አንድ ጥያቄ በ`x-omniroute-connection` ራስጌ
-አማካኝነት አንድ የተወሰነ ግንኙነት ላይ ሊቆልፍ ይችላል፦
+አቅራቢው ብዙ ግንኙነቶች (መለያዎች ወይም ቁልፎች) ሲኖረው፣ OmniRoute በመደበኛነት አንዱን በአካውንት ምርጫ ስልት ይመርጣል። ጥያቄ በምትኩ አንድ የተወሰነ ግንኙነት ከ `x-omniroute-connection` ራስጌ ጋር መሰካት ይችላል፡-
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,20 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **መታወቂያውን የት ማግኘት እንደሚችሉ።** በዳሽቦርዱ ውስጥ የአቅራቢውን ገጽ
-  (**ዳሽቦርድ → አቅራቢዎች → <provider>**) ይክፈቱ እና በግንኙነት
-  ረድፍ ላይ ያለውን `xxxxxxxx…` የመታወቂያ ቺፕ ይጫኑ — ይህም ሙሉውን የግንኙነት መታወቂያ ይቀዳል።
-- **የትኞቹ ጥያቄዎች እንደሚያከብሩት።** በ`/v1/chat/completions`፣ `/v1/messages` እና
-  `/v1/responses` ላይ የሚቀርቡ የነጠላ-ሞዴል ጥያቄዎች (`provider/model`) ብቻ ናቸው። ኮምቦዎች ራስጌውን ችላ ይላሉ፤
-  በምትኩ ለእያንዳንዱ የኮምቦ ደረጃ መለያ በደረጃው የራሱ ግንኙነት በኩል ይወስኑ።
-- **መለያው ጥብቅ ነው፣ ምርጫ ብቻ አይደለም።** የተመረጠው ግንኙነት ብቻ ጥቅም ላይ ይውላል። በጥያቄው ውስጥ የሚከሰት አለመሳካት የመለያውን የማቀዝቀዣ ጊዜ ይመዘግባል፣ ነገር ግን
-  ወደ ከተመሳሳይ አቅራቢ የሚገኝ ሌላ መለያ አይቀይርም።
-- **የማቀዝቀዣ ጊዜ እና ኮታ መለቀቅ መለያውን ያስለቅቃሉ።** የተመረጠው ግንኙነት በማቀዝቀዣ ጊዜ ላይ እያለ፣
-  ኮታው ሲሞላ ወይም በኮታ ፖሊሲ ሲከለከል፣ ቀጣይ ጥያቄዎች ወደ ሌሎች የአቅራቢው ግንኙነቶች ይመለሳሉ፤ ይህም መለያ ሳይመረጥ ከሚላክ ትራፊክ ጋር በትክክል ተመሳሳይ ነው።
-- **የማይታወቁ ወይም የተሰናከሉ መለያዎች አይሳካላቸውም።** በአቅራቢው ንቁ ስብስብ ውስጥ የሌለ መለያ (የተሰረዘ፣
-  የተቦዘነ ወይም የሌላ አቅራቢ ንብረት የሆነ) ብቁ መለያ እንዳይኖር ያደርጋል፤ ስለዚህ ጥያቄው በዝምታ ወደ ሌላ ቦታ ከመላክ ይልቅ ይሳካል።
+- **መታወቂያውን የት ማግኘት እንደሚቻል።** በዳሽቦርዱ ውስጥ የአቅራቢውን ገጽ ይክፈቱ (** ዳሽቦርድ → አቅራቢዎች → <provider>** ) እና በግንኙነት ረድፍ ላይ የ `xxxxxxxx…` id ቺፕን ጠቅ ያድርጉ — ሙሉውን የግንኙነት መታወቂያ ይቀዳል።
+- **የትኞቹ ጥያቄዎች ያከብራሉ.** ነጠላ ሞዴል ጥያቄዎች (`provider/model`) በ `/v1/chat/completions`፣ `/v1/messages` እና `/v1/responses` ላይ። ኮምቦዎች የራስጌውን ቸል ይላሉ፡ በእያንዳንዱ ጥምር ደረጃ መለያን በምትኩ በደረጃው ግኑኝነት ይሰኩት።
+- **ፒኑ ጥብቅ ነው, ምርጫ አይደለም.** የተሰካው ግንኙነት ብቻ ጥቅም ላይ ይውላል። በጥያቄው ውስጥ አለመሳካት የመለያውን መቀዝቀዝ ይመዘግባል ነገር ግን ያደርጋል** አይደለም** ወደ ተመሳሳዩ አቅራቢ ወደ ወንድም እህት መለያ አሽከርክር።
+- **ማቀዝቀዝ እና ኮታ ፒኑን ይለቃሉ።** የተሰካው ግንኙነት እየቀዘቀዘ፣ በኮታ ተሟጦ ወይም በኮታ ፖሊሲ ሲታገድ፣ በኋላ ጥያቄዎች ልክ እንደ ያልተሰካ ትራፊክ ወደ ሌሎች የአቅራቢው ግንኙነቶች ይመለሳሉ።
+- **ያልታወቁ ወይም የተሰናከሉ መታወቂያዎች አልተሳኩም።** በአቅራቢው ንቁ ገንዳ ውስጥ ያልሆነ መታወቂያ (ተሰርዟል፣ ቦዝኗል፣ ወይም የሌላ አቅራቢ አባል መሆን) ምንም ብቁ መለያ አይተዉም፣ ስለዚህ በጸጥታ ወደ ሌላ ቦታ ከማዞር ይልቅ ጥያቄው አልተሳካም።
 
-Claude Code ብጁ ራስጌዎችን በ`ANTHROPIC_CUSTOM_HEADERS` ይልካል። ይህን በ`~/.claude/settings.json` ውስጥ ባለው የ`env` እገዳ ውስጥ ያስቀምጡ፣ ወይም ለእያንዳንዱ ፕሮጀክት የተለየ መለያ ለመመደብ በፕሮጀክት-ደረጃ `.claude/settings.json` ውስጥ ያስቀምጡ፦
+Claude ኮድ ብጁ ራስጌዎችን በ `ANTHROPIC_CUSTOM_HEADERS` ይልካል። በ `~/.claude/settings.json` የ `env` ብሎክ ወይም በፕሮጀክት-ደረጃ `.claude/settings.json` ውስጥ በፕሮጀክት የተለየ መለያ ላይ ያስቀምጡት
 
 ```jsonc
 {
@@ -128,12 +120,11 @@ Claude Code ብጁ ራስጌዎችን በ`ANTHROPIC_CUSTOM_HEADERS` ይልካል
 }
 ```
 
-ምንጭ፦ `src/sse/handlers/chat.ts` (የራስጌ ንባብ)፣ `src/sse/services/auth.ts` እና
-`src/sse/services/sessionAffinityPin.ts` (መለያውን መልቀቅ እና ከስብስቡ የጎደለውን መለያ መፈተሽ)።
+ምንጭ `src/sse/handlers/chat.ts` (ራስጌ ማንበብ)፣ `src/sse/services/auth.ts` እና `src/sse/services/sessionAffinityPin.ts` (ሚስማር መለቀቅ እና ከመዋኛ ገንዳ የጠፋ ቼክ)።
 
-> **የወጪ ቴሌሜትሪ ራስጌዎች፦** የማይሰራጩ የስኬት ምላሾች የ`X-OmniRoute-*` የወጪ ቴሌሜትሪ ስብስብንም ይይዛሉ — `X-OmniRoute-Response-Cost` (በUSD፣ በቋሚ 10 ዲሲማል አሃዞች፤ ለነፃ/ዋጋ ላልተመደበ `0.0000000000`)፣ `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`፣ `X-OmniRoute-Model`፣ `X-OmniRoute-Provider`፣ `X-OmniRoute-Latency-Ms`፣ `X-OmniRoute-Cache-Hit` እና `X-OmniRoute-Fallback-Attempts` (ከ0 በላይ ሲሆን ብቻ)፣ እንዲሁም `X-OmniRoute-Request-Id` እና `X-OmniRoute-Version`። እነዚህ የሚመነጩት በቻት ማጠናቀቂያዎች፣ `/v1/responses`፣ `/v1/messages` **እና በሚዲያ ኤንድፖይንቶች** — `/v1/embeddings`፣ `/v1/images/generations`፣ `/v1/audio/speech`፣ `/v1/audio/transcriptions`፣ `/v1/rerank`፣ `/v1/videos/generations`፣ `/v1/music/generations` እና `/v1/moderations` (ሁልጊዜ ወጪው `0`) — ነው። የሚዲያ ወጪ ዋጋ ሲኖር በእያንዳንዱ ሞዳሊቲ (በእያንዳንዱ ምስል፣ በእያንዳንዱ ሰከንድ፣ በእያንዳንዱ ቁምፊ፣ በእያንዳንዱ የፍለጋ ክፍል) ይሰላል፤ ካልሆነ ግን `0` ይሆናል (fail-open)።
+> **ወጪ ቴሌሜትሪ ራስጌዎች፡-** ያልተለቀቁ የስኬት ምላሾች `X-OmniRoute-*` ወጪ-ቴሌሜትሪ ስብስብ — `X-OmniRoute-Response-Cost` (USD፣ ቋሚ 10 አስርዮሽ፣ `0.0000000000` ለ free/unpriced)፣ `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`፣ `X-OmniRoute-Model`፣ `X-OmniRoute-Provider`፣ `X-OmniRoute-Latency-Ms`፣ `X-OmniRoute-Cache-Hit`፣ እና `X-OmniRoute-Fallback-Attempts` ( > 0 ብቻ) እንዲሁም `X-OmniRoute-Request-Id` እና `X-OmniRoute-Version` ይይዛሉ። እነዚህ በቻት ማጠናቀቂያዎች፣ `/v1/responses`፣ `/v1/messages`፣** እና የመገናኛ ብዙሃን የመጨረሻ ነጥቦች** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, እና `/v1/moderations` (ሁልጊዜ `0` ወጪ). የሚዲያ ወጪ የሚሰላው በአንድ ሞዳሊቲ (በምስል፣ በሰከንድ፣ በቁምፊ፣ በፍለጋ ክፍል) ዋጋ ሲገኝ ነው፣ ካልሆነ `0` (ክፍት-ክፍት)።
 
-> **የካሽ-መምታት የወጪ ትርጉም፦** በሴማንቲክ-ካሽ HIT (`X-OmniRoute-Cache-Hit: true`) ላይ ወደ ላይኛው አገልጋይ ጥሪ አይደረግም፤ ስለዚህ `X-OmniRoute-Response-Cost` `0.0000000000` ነው (የተመታውን ውጤት ለማቅረብ የሚያስፈልገው **ተጨማሪ** ወጪ)። ዋናው/ሊከሰት የነበረው ወጪ በ`X-OmniRoute-Cost-Saved` ውስጥ በተለየ ይመዘገባል። የክፍያ ስርዓት ተጠቃሚዎች `X-OmniRoute-Response-Cost` ን መደመር አለባቸው (መምታቶች ምንም ወጪ የላቸውም)፤ የካሽ ትንታኔዎች ደግሞ `X-OmniRoute-Cost-Saved` ን በመደመር ማጠቃለል ይችላሉ።
+> **መሸጎጫ-የተመታ ወጪ ትርጉም፡** በትርጉም መሸጎጫ HIT (`X-OmniRoute-Cache-Hit: true`) ላይ ምንም የወዲያ ጥሪ አይደረግም፣ ስለዚህ `X-OmniRoute-Response-Cost` `0.0000000000` ነው (የ** ጭማሪ** ድብደባውን የማገልገል ዋጋ)። የ original/would-have-been ወጪ በ `X-OmniRoute-Cost-Saved` ውስጥ በተናጠል ሪፖርት ተደርጓል። የሂሳብ አከፋፈል ሸማቾች `X-OmniRoute-Response-Cost` መደመር አለባቸው (መምታት ምንም ዋጋ የለውም)። የመሸጎጫ ትንታኔዎች ድምር `X-OmniRoute-Cost-Saved`.
 
 ## ልዩ የሚተዳደሩ የክፍለ-ጊዜ ሊዝዎች
 
@@ -333,6 +324,8 @@ Content-Type: application/json
 
 `n` `n` ምስሎችን በ `data[]` ይመልሳል። ወደ ላይ ያለው API በአንድ ጥሪ አንድ ምስል የሚመልስ አቅራቢዎች (ጥቁር የደን ላብስ፣ መረጋጋት AI፣ ሊዮናርዶ፣ አይዲዮግራም፣ ሃይፐር፣ ሃይፐርቦሊክ፣ Magnific/Freepik፣ NVIDIA NIM፣ Cloudflare Workers AI) `n` በቀጥታ የሚተላለፉ ጥሪዎችን ያገኛሉ፣ ቢበዛ 4 በረራ። ቋሚ `seed` በጥሪ መረጃ ጠቋሚ (`seed`፣ `seed + 1`፣…) ተሽጧል፣ ስለዚህ ምስሎቹ ይለያያሉ ነገር ግን መባዛት የሚችሉ ሆነው ይቆያሉ። `n` በ 10 ተይዟል. ማንኛውም ጥሪ ካልተሳካ ጥያቄው በአጠቃላይ አይሳካም. የደጋፊ-ውጭ ቅርጸቶች ዝርዝር `SINGLE_IMAGE_FANOUT_FORMATS` በ `open-sse/handlers/imageGeneration/fanOut.ts` ነው።
 
+Codex GPT ምስል ሞዴሎች (`codex/gpt-image-*`) PNG ብቻ ይመለሳሉ፡ የላይኛው ተፋሰስ `jpeg` ወይም `webp` በተጠየቀ ጊዜም በ PNG ባይት `200` ። ከማንኛውም ሌላ `output_format` (`webp`, `jpeg`, ...) ጋር የቀረበ ጥያቄ በዝምታ ችላ ከመባል ይልቅ በ HTTP 400 ውድቅ ይደረጋል; ተወው ወይም `png` ላክ . `output_compression` አይተላለፍም።
+
 ZenMux ያለውን የኤፒአይ-ቁልፍ ግንኙነት እንደገና ይጠቀማል እና `zenmux/` ወይም `zm/` ቅድመ ቅጥያዎችን ይቀበላል
 
 - `zenmux/openai/gpt-image-2` ZenMux's OpenAI ምስሎችን ይጠቀማል API. አማራጮች `size`, `quality`, `n`, `output_format`, `output_compression`, `background` እና `response_format` ያካትታሉ።
@@ -350,7 +343,7 @@ GET /v1/images/generations
 
 ---
 
-## የሰነድ OCR
+## ሰነድ OCR
 
 ```bash
 POST /v1/ocr
@@ -366,17 +359,15 @@ Content-Type: application/json
 }
 ```
 
-`model` የOCR አቅራቢውን በ`provider/model` ቅድመ-ቅጥያ ይመርጣል፤ ቅድመ-ቅጥያ የሌለው የሞዴል መለያ (ለምሳሌ
-`mistral-ocr-latest`) ወደ የተመዘገበው አቅራቢ ይመራል፤ `model` ካልተሰጠ ደግሞ
-Mistral (`mistral-ocr-latest`) ነባሪ ይሆናል። የተመዘገቡ አቅራቢዎች (`open-sse/config/ocrRegistry.ts`)፦
+`model` የ OCR አቅራቢውን በ `provider/model` ቅድመ ቅጥያ ይመርጣል; ባዶ የሞዴል መታወቂያ (ለምሳሌ `mistral-ocr-latest`) ለተመዘገበው አቅራቢው መፍትሄ ይሰጣል፣ እና የተተወ `model` ወደ Mistral (`mistral-ocr-latest`) ነባሪ ይሆናል። የተመዘገቡ አቅራቢዎች (`open-sse/config/ocrRegistry.ts`):
 
-| የአቅራቢ መለያ                     | የሞዴል መለያ             | የ`model` እሴት                                                         | ማስታወሻ                                                                                     |
-| ----------------------------- | -------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (ወይም ቅድመ-ቅጥያ የሌለው `mistral-ocr-latest`) | ተመሳሳይ — ምላሹ በቀጥታ ከአንድ upstream ጥሪ ይመለሳል።                                                  |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                          | ያልተመሳሰለ upstream (`analyze` + poll) — ከዚህ በታች ይመልከቱ።                                      |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                              | ተመሳሳይ፣ በVertex AI `openapi/chat/completions` አጋር ኤንድፖይንት በኩል — ስለማረጋገጫ/URL ከዚህ በታች ይመልከቱ። |
+| የአቅራቢ መታወቂያ                   | የሞዴል መታወቂያ                      | `model` ዋጋ                                                 | ማስታወሻዎች                                                                                                                                                                                     |
+| ----------------------------- | ------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`            | `mistral/mistral-ocr-latest` (ወይም ባዶ `mistral-ocr-latest`) | የተመሳሰለ — ምላሹ በቀጥታ ከአንድ በላይኛው ጥሪ በቀጥታ ይመለሳል።                                                                                                                                                 |
+| `azure-document-intelligence` | `prebuilt-read`                 | `azure-document-intelligence/prebuilt-read`                | ያልተመሳሰለ ወደላይ (`analyze` + poll) — ከታች ይመልከቱ።                                                                                                                                                |
+| `vertex-deepseek-ocr`         | በራሱ የሚሰራ (ምንም አብሮ የተሰራ ሞዴል የለም) | `vertex-deepseek-ocr/<your-deployed-model-id>`             | የተመሳሰለ፣ በራስዎ Vertex AI ሞዴል የአትክልት ቦታ DeepSeek-OCR የመጨረሻ ነጥብ (`openapi/chat/completions` ቅርጽ) በኩል; Google የሚተዳደረውን `deepseek-ocr-maas` በ2026-10-21 (#20423) ጡረታ ወጥቷል፣ ስለዚህም መታወቂያ 400 ይመልሳል። |
 
-ሦስቱም አቅራቢዎች ተመሳሳይ የMistral ቅርጽ ያለው አካል ይመልሳሉ፦
+ሦስቱም አቅራቢዎች በተመሳሳይ ሚስትራል ቅርጽ ያለው አካል ምላሽ ይሰጣሉ፡-
 
 ```json
 {
@@ -386,18 +377,13 @@ Mistral (`mistral-ocr-latest`) ነባሪ ይሆናል። የተመዘገቡ አ�
 }
 ```
 
-### የAzure Document Intelligence የpoll ፍሰት
+### Azure ሰነድ ኢንተለጀንስ የሕዝብ አስተያየት መስጫ ፍሰት
 
-የAzure Document Intelligence `analyze` API ያልተመሳሰለ ነው፦ የመጀመሪያው ጥያቄ አካል ከመመለስ ይልቅ `Operation-Location` ራስጌ ይመልሳል፤ ውጤቱም ለማግኘት በተደጋጋሚ መጠየቅ አለበት። አስተናጋጁ
-(`open-sse/handlers/ocr.ts`) ያንን URL በየሰከንዱ እስከ 30 ሙከራዎች ድረስ ይጠይቃል፤ ከ`ok` ያልሆነ የpoll ምላሽ ወይም `"failed"` ሁኔታ ሲገኝ ወዲያውኑ ይሳካል (መጠየቁን አይቀጥልም)፤ እና የሙከራ ገደቡ ካለቀ በኋላ ክዋኔው አሁንም በሂደት ላይ ከሆነ `504` ይመልሳል። የመጨረሻው የAzure ምላሽ ወደ Mistral ከሚጠቀምበት ተመሳሳይ `pages`/`markdown` ቅርጽ ይቀየራል፤ ስለዚህ የደንበኛ ኮድ አቅራቢውን በተለየ ሁኔታ ማስተናገድ አያስፈልገውም።
+Azure Document Intelligence's `analyze` API አልተመሳሰለም፡የመጀመሪያው ጥያቄ ከሰውነት ይልቅ የ `Operation-Location` ራስጌን ይመልሳል እና ውጤቱም መጠይቅ አለበት። ተቆጣጣሪው (`open-sse/handlers/ocr.ts`) በየሰከንዱ እስከ 30 ሙከራዎች ድረስ URL የሚከፍለው፣ በፍጥነት የሚወድቀው (ምርጫውን አይቀጥልም)`ok` ባልሆነ የሕዝብ አስተያየት ምላሽ ወይም የ `"failed"` ሁኔታ፣ እና የሙከራው በጀት ካለቀ በኋላ ክዋኔው እየሄደ ከሆነ `504` ይመልሳል። የመጨረሻው የ Azure ምላሽ ወደ ደዋዩ ከመመለሱ በፊት Mistral በሚጠቀምበት ተመሳሳይ `pages`/`markdown` ቅርፅ ተስተካክሏል፣ ስለዚህ የደንበኛ ኮድ አቅራቢውን ልዩ ጉዳይ ማድረግ አያስፈልገውም።
 
-### የVertex AI DeepSeek OCR ማረጋገጫ እና የኤንድፖይንት መፍትሄ
+### Vertex AI DeepSeek OCR ማረጋገጫ እና የመጨረሻ ነጥብ ጥራት
 
-`vertex-deepseek-ocr` OmniRoute አስቀድሞ ለውይይት/ምስል ትራፊክ የሚደግፈውን የVertex AI ማረጋገጫ (`open-sse/executors/vertex.ts`) እንደገና ይጠቀማል፦ የግንኙነቱ API ቁልፍ የService Account JSON ማረጋገጫ ሊሆን ይችላል (በJWT-bearer
-ፍሰት አማካይነት ለአጭር ጊዜ የሚሰራ OAuth የመዳረሻ ቶከን ይለዋወጣል) ወይም አስቀድሞ የተፈጠረ OAuth የመዳረሻ ቶከን ሆኖ እንዳለ ይጠቀማል። የupstream ኤንድፖይንት URL ከግንኙነቱ ፕሮጀክት እና ክልል ተነስቶ ከVertex አጠቃላይ
-`openapi/chat/completions` አጋር ኤንድፖይንት ይገነባል፦ ግልጽ `providerSpecificData.project`/`providerSpecificData.region` ሁልጊዜ ቅድሚያ ያገኛሉ፤ ካልሆነ ፕሮጀክቱ ከService Account JSON `project_id` ይወጣል፤ ክልሉም ነባሪ ወደ `us-central1` ይሆናል። ሁለቱም መፍትሄዎች በ`open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`፣ `resolveVertexOcrBaseUrl`) ውስጥ ይከናወናሉ፤ ከዚያም ወደ `handleOcr` ከመላኩ በፊት በ
-`src/app/api/v1/ocr/route.ts` ይጠቀማሉ።
+`vertex-deepseek-ocr` ተመሳሳዩን የVertex AI ማረጋገጫ OmniRoute ቀድሞውንም ለ chat/image ትራፊክ ይደግፋል (`open-sse/executors/vertex.ts`)፡ የግንኙነቱ API ቁልፍ ወይ የአገልግሎት መለያ JSON ምስክርነት ነው (ለአጭር ጊዜ የዘለቀው OAuth መዳረሻ ማስመሰያ በJWT ተሸካሚ ፍሰት ተለውጧል) ወይም አስቀድሞ ጥቅም ላይ የዋለው OAuth መዳረሻ ማስመሰያ ነው። ወደ ላይ ያለው የመጨረሻ ነጥብ URL ከግንኙነቱ ፕሮጀክት እና ክልል — የተገነባው የቬርቴክስ አጠቃላይ `openapi/chat/completions` አጋር መጨረሻ ነጥብ ነው ግልጽ `providerSpecificData.project`/`providerSpecificData.region` ሁልጊዜ ያሸንፋል። አለበለዚያ ፕሮጀክቱ ከአገልግሎት መለያ JSON's `project_id` የተገኘ ሲሆን ክልሉ ደግሞ ወደ `us-central1` ተበላሽቷል። ሁለቱም ጥራቶች የሚከሰቱት በ `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`፣ `resolveVertexOcrBaseUrl`) ነው፣ ወደ `handleOcr` ከመላክዎ በፊት በ `src/app/api/v1/ocr/route.ts` ፍጆታ።
 
 ---
 
@@ -597,79 +583,104 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
 
 ---
 
-## የተኳኋኝነት መጨረሻ ነጥቦች
+## የተኳኋኝነት የመጨረሻ ነጥቦች
 
-| Method | Path                                      | Format                                |
-| ------ | ----------------------------------------- | ------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                |
-| POST   | `/v1/messages`                            | Anthropic                             |
-| POST   | `/v1/responses`                           | OpenAI Responses                      |
-| POST   | `/v1/embeddings`                          | OpenAI                                |
-| POST   | `/v1/images/generations`                  | OpenAI Images                         |
-| POST   | `/v1/images/edits`                        | OpenAI Images (edit/inpaint)          |
-| POST   | `/v1/videos/generations`                  | የOpenAI ዓይነት የቪዲዮ ማመንጨት               |
-| POST   | `/v1/music/generations`                   | የOpenAI ዓይነት የሙዚቃ ማመንጨት               |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (የድምጽ አካል ይመልሳል)           |
-| POST   | `/v1/rerank`                              | የCohere/Voyage ዓይነት ዳግም ደረጃ መስጠት      |
-| POST   | `/v1/classify`                            | Jina classify (`api.jina.ai`)         |
-| POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)    |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                    |
-| GET    | `/v1/models`                              | OpenAI                                |
-| POST   | `/v1/models/query`                        | በማጣሪያ የተመረጠ አጭር የሞዴሎች ዝርዝር            |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                             |
-| GET    | `/v1beta/models`                          | Gemini                                |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                |
-| POST   | `/v1/api/chat`                            | Ollama                                |
-| GET    | `/api/v1/vscode/{token}/`                 | የOpenAI ካታሎግ ተለዋጭ አድራሻ                |
-| GET    | `/api/v1/vscode/{token}/models`           | የOpenAI ሞዴሎች ተለዋጭ አድራሻ                |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | በOpenAI ቶከን የተደረገ ተለዋጭ አድራሻ           |
-| POST   | `/api/v1/vscode/{token}/responses`        | በOpenAI Responses ቶከን የተደረገ ተለዋጭ አድራሻ |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | በOllama ቶከን የተደረገ ተለዋጭ አድራሻ           |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | በOllama ቶከን የተደረገ የመለያዎች ተለዋጭ አድራሻ    |
+| ዘዴ   | መንገድ                                      | ቅርጸት                         |
+| ---- | ----------------------------------------- | ---------------------------- |
+| POST | `/v1/chat/completions`                    | OpenAI                       |
+| POST | `/v1/messages`                            | Anthropic                    |
+| POST | `/v1/responses`                           | OpenAI ምላሾች                  |
+| POST | `/v1/embeddings`                          | OpenAI                       |
+| POST | `/v1/images/generations`                  | OpenAI ምስሎች                  |
+| POST | `/v1/images/edits`                        | OpenAI ምስሎች (edit/inpaint)   |
+| POST | `/v1/videos/generations`                  | ክፍት AI-ቅጥ ቪዲዮ ትውልድ           |
+| POST | `/v1/music/generations`                   | ክፍት AI-ቅጥ የሙዚቃ ትውልድ          |
+| POST | `/v1/audio/transcriptions`                | OpenAI ኦዲዮ (STT)             |
+| POST | `/v1/audio/speech`                        | OpenAI TTS (የድምጽ አካልን ይመልሳል) |
+| POST | `/v1/rerank`                              | Cohere/Voyage-style rerank   |
+| POST | `/v1/classify`                            | ጂና ምደባ (`api.jina.ai`)       |
+| POST | `/v1/segment`                             | ጂና ክፍል (`segment.jina.ai`)   |
+| POST | `/v1/moderations`                         | OpenAI አወያዮች                 |
+| POST | `/v1/systemone`                           | ስርዓት አንድ የተተየቡ ውሳኔዎች         |
+| POST | `/v1/decisions`                           | OpenAI ውሳኔዎች (ቤተኛ)           |
+| GET  | `/v1/systemone/models`                    | የውሳኔ-ሞዴል ካታሎግ                |
+| GET  | `/v1/models`                              | OpenAI                       |
+| POST | `/v1/models/query`                        | የተጣራ ሞዴል እጩዎች ዝርዝር           |
+| POST | `/v1/messages/count_tokens`               | Anthropic                    |
+| GET  | `/v1beta/models`                          | Gemini                       |
+| POST | `/v1beta/models/{...path}`                | Gemini generateContent       |
+| POST | `/v1/api/chat`                            | Ollama                       |
+| GET  | `/api/v1/vscode/{token}/`                 | OpenAI ካታሎግ ተለዋጭ ስም          |
+| GET  | `/api/v1/vscode/{token}/models`           | OpenAI ሞዴሎች ተለዋጭ ስም          |
+| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenized ተለዋጭ ስም     |
+| POST | `/api/v1/vscode/{token}/responses`        | OpenAI ምላሾች ተለዋጭ ስም          |
+| POST | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenized ተለዋጭ ስም     |
+| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollama tags ተለዋጭ ስም          |
 
-ሁሉም POST መንገዶች ተመሳሳይ ቅርጽን ይከተላሉ፦ `Bearer your-api-key` + በZod የተረጋገጠ JSON አካል (`v1RerankSchema`፣ `v1ModerationSchema`፣ `v1AudioSpeechSchema` እና ሌሎችም፣ `src/shared/validation/schemas.ts` ይመልከቱ)። ስኪማው ካልተሳካ 4xx ይመለሳል።
+ሁሉም POST መንገዶች አንድ አይነት ቅርፅ ይከተላሉ፡- `Bearer your-api-key` + በዞድ የተረጋገጠ JSON አካል (`v1RerankSchema`፣ `v1ModerationSchema`፣ `v1AudioSpeechSchema`፣ ወዘተ፣ `src/shared/validation/schemas.ts` ይመልከቱ)። 4xx በሼማ ውድቀት ላይ ተመልሷል።
 
-`Authorization: Bearer ...` ማያያዝ ለማይችሉ ደንበኞች፣ OmniRoute በURL ውስጥ API ቁልፎችን በሁለት መንገዶች ይቀበላል፦ በጥያቄ ሕብረቁምፊ ተኳኋኝነት (`?token=...`፣ `?apiKey=...`፣ `?api_key=...`፣ `?key=...`) ወይም ከዚህ በታች በተገለጹት ልዩ `/api/v1/vscode/{token}/...` መጨረሻ ነጥቦች።
+`Authorization: Bearer ...` ማያያዝ ለማይችሉ ደንበኞች፣ OmniRoute በ URL ውስጥ API ቁልፎችን በሁለቱም መጠይቅ-ሕብረቁምፊ ተኳሃኝነት (`?token=...`፣ `?apiKey=...`፣ `?api_key=...`፣ `?key=...`) ወይም ከዚህ በታች በተመዘገቡት `/api/v1/vscode/{token}/...` የመጨረሻ ነጥቦችን ይቀበላል።
 
 ```bash
-# ዳግም ደረጃ መስጠት (የደመና መዝገብ አቅራቢ ወይም "<prefix>/<model>" በሚል ቅርጽ ያለ የOpenAI-ተኳኋኝ አቅራቢ ኖድ)
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina classify (የFoundation API ማረጋገጫ መረጃ)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
 # Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina search (s.jina.ai፤ የአቅራቢ ተለዋጭ ስሞች፦ jina-search፣ jina-ai፣ jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# የይዘት አወያይነት
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg (ወይም የተጠየቀውን ቅርጸት) አካል ይመልሳል
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS ቋንቋና ድምጽ ይፈልጋል፦ `language` በነባሪነት "en" ነው፤ ድምጽ ካልተሰጠ
-# ወይም የOpenAI መደበኛ የድምጽ ስም (alloy፣ nova፣ …) ከተሰጠ "Adrian" ይሆናል
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# የምስል ማስተካከያ (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# የቪዲዮ / ሙዚቃ ማመንጨት (በአቅራቢ ቅድመ ቅጥያ የተደረገ የሞዴል መለያ)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **የRerank አቅራቢ ኖዶች፦** `POST /v1/rerank` ወደ OpenAI-ተኳሃኝ አቅራቢ ኖዶችም (oMLX፣ vLLM፣ Infinity፣ ከጌትዌይ በስተጀርባ ያሉ TEI፣ …) ይመራል፤ እነዚህም እንደ `<node-prefix>/<model>` ይጠቀሳሉ። የሉፕባክ ኖዶች (`localhost`፣ `127.0.0.1`፣ `172.16.0.0/12`) ሁልጊዜ ብቁ ናቸው፤ እንዲሁም ኦፕሬተሩ በ `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` ውስጥ የዘረዘራቸው የአስተናጋጅ ስሞችም ብቁ ናቸው (ለምሳሌ እንደ `http://reranker:8080/v1` ያለ የDocker/Compose አገልግሎት ስም፤ እነዚህ በቀጥታ ይጠራሉ፣ በ `HTTP(S)_PROXY` ወይም በግንኙነት የተመደበ ፕሮክሲ በኩል አይደለም)። በሌላ አስተናጋጅ ላይ ያሉ ኖዶች — በLAN ላይ ያለ ኮምፒውተር ወይም የTailscale አቻ — ኦፕሬተሩ `RERANK_REMOTE_PROVIDER_NODES` የባህሪ ፍላግን **ካነቃ** እና የኖዱ መነሻ URL የአቅራቢውን የወጪ URL ፖሊሲ (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) **ካለፈ** ብቻ ብቁ ናቸው። የማህደረ ትውስታ ሞተሩ የድጋሚ ደረጃ አሰጣጥ ደረጃውን በሉፕባክ በኩል ይህን መንገድ በመጠቀም ይጠራዋል፤ ስለዚህ በMemory ቅንብሮች ውስጥ ላለው `rerankProviderModel` ተመሳሳይ ደንብ ይሠራል።
+> **የአቅራቢ አንጓዎችን ደረጃ ይስጡ፡** `POST /v1/rerank` ወደ OpenAI-ተኳሃኝ የአቅራቢ አንጓዎች (oMLX፣ vLLM፣ Infinity፣ TEI ከጌትዌይ ጀርባ፣…) እንደ `<node-prefix>/<model>` ይመራሉ። Loopback nodes (`localhost`፣ `127.0.0.1`፣ `172.16.0.0/12`) ሁል ጊዜ ብቁ ናቸው፣ እና የአስተናጋጅ ስሞችም እንዲሁ ኦፕሬተሩ በ `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` ውስጥ ይዘረዝራል (ለምሳሌ Docker/Compose አገልግሎት ስም እንደ `http://reranker:8080/v1`፣ እነዚህ በቀጥታ በ `HTTP(S)_PROXY` ወይም በግንኙነት በተሰካ ፕሮክሲ በኩል አይጠሩም)። አንጓዎች በማንኛውም ሌላ አስተናጋጅ — a LAN box ወይም Tailscale peer — ብቁ የሚሆኑት ኦፕሬተሩ የ `RERANK_REMOTE_PROVIDER_NODES` ባህሪ ባንዲራ ሲያነቃ ብቻ ነው።** እና** የመስቀለኛ መንገድ URL አቅራቢውን ወደ ውጪ URL ፖሊሲ (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) ያልፋል። የማህደረ ትውስታ ኢንጂነሩ የዳግም ደረጃ ይህን መንገድ በ loopback ላይ ይጠራዋል፣ ስለዚህ በማህደረ ትውስታ መቼቶች ውስጥ `rerankProviderModel` የሚገዛው ተመሳሳይ ህግ ነው።
 >
-> **የአካባቢያዊ አገልጋይ ቅርጾች፦** ኖዱ በ `<base>/v1/rerank` ይጠራል፤ 404 ከተመለሰ ደግሞ በ `<base>/rerank` ይጠራል (Infinity፣ TEI)። የአፕስትሪም አካሉ ሁለቱንም የCohere/OpenAI አጻጻፍ (`documents`፣ `return_documents`) እና የTEI አጻጻፍ (`texts`፣ `return_text`) ይይዛል፤ የአፕስትሪም ምላሹም ወደ Cohere ኤንቨሎፕ መደበኛ ይደረጋል፦ የTEI እርቃን `[{index, score, text}]`፣ ከቀጭን ጌትዌዮች የሚመጣ `{results: [{index, score}]}` እና የVoyage-ቅርጽ `{data: [...]}` ሁሉም ለደንበኛው እንደ `{results: [{index, relevance_score, document?}]}` ይመለሳሉ፤ ውጤቶቹም በነጥብ ደረጃቸው ተሰርተው ወደ `top_n` ቁጥር ይገደባሉ።
+> **የአካባቢ አገልጋይ ቅርጾች፡-** መስቀለኛ መንገድ በ `<base>/v1/rerank` እና በ 404, በ `<base>/rerank` (Infinity, TEI) ይባላል. ወደ ላይ ያለው አካል ሁለቱንም የ Cohere/OpenAI ሆሄያት (`documents`, `return_documents`) እና TEI ሆሄ (`texts`, `return_text`) ይሸከማል, እና የላይኛው ምላሽ ወደ Cohere ኤንቨሎፕ የተለመደ ነው: TEI's bare `[{index, score, text}]`, `{results: [{index, score}]}` ከቀጭን መግቢያ መንገዶች, እና Voyage-style `{data: [...]}` ሁሉም በ `{results: [{index, relevance_score, document?}]}` እና በ `top_n` ተደርድረው ወደ ደንበኛ ይመለሳሉ።
 
-> **የአቅራቢ-ኖድ ግኝት፦** በOpenAI-ተኳሃኝ አቅራቢ ኖድ ላይ ያሉ ሞዴሎች በ `GET /v1/models` ውስጥ በኖዱ ቅድመ ቅጥያ ስር ይታያሉ። ምንም የኤንድፖይንት ሜታዳታ የሌላቸው ረድፎች (በአካባቢያዊ `/v1/models` ዝርዝሮች ውስጥ የተለመዱ) የኖዱን `apiType` ይወርሳሉ፤ ስለዚህ የ`embeddings` ኖድ ሞዴሎች `type: "embedding"`፣ የ`rerank` ኖድ ሞዴሎች ደግሞ በነባሪነት ወደ chat ከመመደብ ይልቅ `type: "rerank"` ይሆናሉ። በማመሳሰል ላይ ባለ ወይም በእጅ በተጨመረ ረድፍ ላይ ያለ ግልጽ `supportedEndpoints` ግን አሁንም ቅድሚያ ይኖረዋል።
+> **የአቅራቢ-መስቀለኛ መንገድ ግኝት፡-** በOpenAI-ተኳሃኝ የአቅራቢ መስቀለኛ መንገድ ላይ ያሉ ሞዴሎች በ `GET /v1/models` ውስጥ በመስቀለኛ ቅድመ ቅጥያ ስር ይታያሉ። ምንም የማለቂያ ነጥብ ሜታዳታ የሌላቸው ረድፎች (ለአካባቢው `/v1/models` ዝርዝሮች የተለመደ) የመስቀለኛ መንገድን `apiType` ይወርሳሉ፣ ስለዚህ የ `embeddings` node ሞዴሎች `type: "embedding"` ናቸው እና የ `rerank` መስቀለኛ መንገድ ሞዴሎች ለመወያየት ከመፍታት ይልቅ `type: "rerank"` ናቸው። በተመሳሰለ ወይም በእጅ በተጨመረው ረድፍ ላይ ግልጽ የሆነ `supportedEndpoints` አሁንም ቅድሚያ ይሰጣል።
 
-### የተለዩ የአቅራቢ መንገዶች
+### የተተየቡ ውሳኔዎች
+
+የውሳኔ ሞዴሎች ጽሑፍ ከማመንጨት ይልቅ የተተየቡ ጥያቄዎችን በተስተካከሉ ፕሮባቢሊቲዎች ይመልሳሉ። እነሱ በጭራሽ የውይይት ሞዴሎች አይደሉም ፣ እና ሁለቱ የሽቦ ቅርጸቶች በጭራሽ ወደ አንዱ አይተረጎሙም
+
+- `POST /v1/systemone` — ስርዓት አንድ `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter ውሳኔዎች, Cloudflare ሠራተኞች AI, የአካባቢ Ollama).
+- `POST /v1/decisions` — ቤተኛ OpenAI ውሳኔዎች `{ model, input, questions: [...] }`፣ በ `openai` ግንኙነት አገልግሏል። ሞዴሉ `openai/gpt-6-luna` ነው (ባዶ `gpt-6-luna` እንዲሁ ይሰራል)። ምላሾች በጥያቄ ቅደም ተከተል ይመለሳሉ፣ ያልተነኩ ናቸው።
+- `GET /v1/systemone/models` — ከሁለቱም ዓይነቶች አንድ ካታሎግ; እያንዳንዱ ረድፍ `api_format` (`systemone` ወይም `decisions`) ይሰየማል። `limit` / `after` ገጽ የመጨረሻው ዝርዝር። የ `X-OmniRoute-Catalog-Status` ራስጌ `complete`፣ `partial` ወይም `unavailable` (503) ያነባል።
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+በ `/v1/decisions` የ API ቁልፍ የሞዴል ፍቃድ ዝርዝር፣ የ `decisions` የመጨረሻ ነጥብ ምድብ፣ በጀት እና የግንኙነት ወሰን ማንኛውም ምስክርነት ከመነበቡ በፊት ተረጋግጧል። ማረጋገጫው የተከማቸ `openai` ግንኙነት በቁልፍ ወሰን ውስጥ ነው (በፍፁም የአካባቢ ቁልፍ አይደለም)። የግንኙነት መሠረት URL የሚከበረው እዚህ OmniRoute ላይ የማይጠቁም ማስረጃዎች ፣ጥያቄ ወይም ቁርጥራጮች ሳይኖር `http(s)` URL ሲሆን ብቻ ነው። ጥሪው የሚሄደው ልክ እንደ `decision` አውቶ ራውተር ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ) ባለበት ተመሳሳይ የጥበቃ ትራንስፖርት ነው፡ አቅራቢው ወደ ውጭ የሚሄድ ጠባቂ፣ ዳግም ሙከራዎች የሉም፣ አቅጣጫ መቀየር የለም፣ የ 5 ሰአታት ጊዜ ማብቂያ እና 64 KB የመልስ ካፕ (ትልቁ መልስ 502 ነው)። የጥያቄ አካላት በ 4 MiB የተገደቡ ናቸው። እያንዳንዱ ጥሪ አዲስ `Idempotency-Key` ይልካል። ስህተቶቹ የሚሸከሙት ወደ ላይ ያለውን ሁኔታ ብቻ ነው፣ በጭራሽ አካሉን፣ URL፣ ቁልፉን ወይም መጠየቂያውን ብቻ ነው።
+
+### የወሰኑ አቅራቢ መንገዶች
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -677,7 +688,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-የአቅራቢው ቅድመ ቅጥያ ከጎደለ በራስ-ሰር ይጨመራል። የማይዛመዱ ሞዴሎች `400` ይመልሳሉ።
+የአቅራቢው ቅድመ ቅጥያ ከጠፋ በራስ-ሰር ታክሏል። የማይዛመዱ ሞዴሎች `400` ይመለሳሉ.
 
 ---
 
@@ -1588,10 +1599,10 @@ GET /api/telemetry/summary
 ## በጀት
 
 ```bash
-# ለሁሉም API ቁልፎች የበጀት ሁኔታን ያግኙ
+# Get budget status for all API keys
 GET /api/usage/budget
 
-# በጀት ያዘጋጁ ወይም ያዘምኑ
+# Set or update a budget
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1605,7 +1616,7 @@ Content-Type: application/json
 }
 ```
 
-> **የስኪማ ማስታወሻዎች** (`setBudgetSchema`): `apiKeyId` ግዴታ ነው፤ ከ`dailyLimitUsd`፣ `weeklyLimitUsd` ወይም `monthlyLimitUsd` መካከል ቢያንስ አንዱ ከዜሮ በላይ መሆን አለበት። አማራጭ መስኮች፦ `warningThreshold` (0–1)፣ `resetInterval` (`daily` | `weekly` | `monthly`)፣ `resetTime` (`HH:MM`)። የቆየው `{keyId, limit, period}` ቅርጽ `400 Bad Request` ይመልሳል።
+> **የመርሃግብር ማስታወሻዎች** (`setBudgetSchema`): `apiKeyId` ያስፈልጋል; ቢያንስ አንዱ `dailyLimitUsd`፣ `weeklyLimitUsd` ወይም `monthlyLimitUsd` ከዜሮ በላይ መሆን አለበት። አማራጭ መስኮች `warningThreshold` (0–1)፣ `resetInterval` (`daily` | `weekly` | `monthly`)፣ `resetTime` (`HH:MM`)። የቅርስ `{keyId, limit, period}` ቅርፅ `400 Bad Request` ይመልሳል።
 
 ## የቶከን ገደቦች
 

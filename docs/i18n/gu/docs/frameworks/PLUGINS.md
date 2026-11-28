@@ -90,18 +90,17 @@ export function register(program, ctx) {
 
 ## શોધ
 
-પ્લગઇન્સની શોધ આ સ્થાનોમાંથી થાય છે:
+પ્લગઇન્સ અહીંથી શોધવામાં આવે છે:
 
-1. `~/.omniroute/plugins/<name>/` — વપરાશકર્તા-સ્થાનિક ઇન્સ્ટોલ્સ
-2. `OMNIROUTE_PLUGIN_PATH` env var — કસ્ટમ ડિરેક્ટરી
+1. `~/.omniroute/plugins/node_modules/<name>/` — જ્યાં `omniroute plugin install` પેકેજો મૂકે છે (એક npm `--prefix`, `npm -g` નહીં)
+2. `~/.omniroute/plugins/<name>/` — હાથથી કૉપિ કરેલી પ્લગઇન ડિરેક્ટરીઓ
+3. `OMNIROUTE_PLUGIN_PATH` env var — કસ્ટમ ડિરેક્ટરી
 
-બંને **માત્ર CLI માટે** છે. સર્વર-સાઇડ પ્લગઇન રનટાઇમ (પ્રોક્સીની અંદર ચાલતાં marketplace/`plugin.json`
-પ્લગઇન્સ)નું પોતાનું સ્કેનર અને પોતાનું ઓવરરાઇડ,
-`OMNIROUTE_PLUGINS_DIR` છે — જુઓ
-[PLUGIN_MARKETPLACE.md → પ્લગઇન ડિરેક્ટરી](./PLUGIN_MARKETPLACE.md#plugin-directory).
-એકને સેટ કરવાથી બીજાને અસર થતી નથી.
+સિમલિંક્ડ ડિરેક્ટરીઓ (npm `plugin install ./dir` માટે શું બનાવે છે) અનુસરવામાં આવે છે.
 
-લોડિંગ ભૂલો પકડવામાં આવે છે અને ચેતવણીઓ તરીકે પ્રિન્ટ થાય છે — ખામીયુક્ત પ્લગઇન ક્યારેય CLI ને ક્રૅશ કરતું નથી.
+બંને છે** CLI-માત્ર** . સર્વર-સાઇડ પ્લગઇન રનટાઇમ (માર્કેટપ્લેસ/`plugin.json` પ્લગઇન્સ જે પ્રોક્સીની અંદર ચાલે છે) તેના પોતાના ઓવરરાઇડ સાથે તેનું પોતાનું સ્કેનર ધરાવે છે, `OMNIROUTE_PLUGINS_DIR` — જુઓ [PLUGIN_MARKETPLACE.md → પ્લગઇન ડિરેક્ટરી](./PLUGIN_MARKETPLACE.md#plugin-directory). એક સેટ કરવાથી બીજાને અસર થતી નથી.
+
+લોડિંગ ભૂલો પકડવામાં આવે છે અને ચેતવણીઓ તરીકે છાપવામાં આવે છે — તૂટેલું પ્લગઇન ક્યારેય CLI ક્રેશ કરતું નથી.
 
 ## સુરક્ષા
 

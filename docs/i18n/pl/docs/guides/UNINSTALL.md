@@ -4,23 +4,64 @@
 
 ---
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/UNINSTALL.md) · 🇪🇹 [am](../../../am/docs/guides/UNINSTALL.md) · 🇸🇦 [ar](../../../ar/docs/guides/UNINSTALL.md) · 🇦🇿 [az](../../../az/docs/guides/UNINSTALL.md) · 🇧🇬 [bg](../../../bg/docs/guides/UNINSTALL.md) · 🇧🇩 [bn](../../../bn/docs/guides/UNINSTALL.md) · 🇧🇦 [bs](../../../bs/docs/guides/UNINSTALL.md) · 🇨🇿 [cs](../../../cs/docs/guides/UNINSTALL.md) · 🇩🇰 [da](../../../da/docs/guides/UNINSTALL.md) · 🇩🇪 [de](../../../de/docs/guides/UNINSTALL.md) · 🇬🇷 [el](../../../el/docs/guides/UNINSTALL.md) · 🇪🇸 [es](../../../es/docs/guides/UNINSTALL.md) · 🇪🇪 [et](../../../et/docs/guides/UNINSTALL.md) · 🇮🇷 [fa](../../../fa/docs/guides/UNINSTALL.md) · 🇫🇮 [fi](../../../fi/docs/guides/UNINSTALL.md) · 🇫🇷 [fr](../../../fr/docs/guides/UNINSTALL.md) · 🇮🇪 [ga](../../../ga/docs/guides/UNINSTALL.md) · 🇮🇳 [gu](../../../gu/docs/guides/UNINSTALL.md) · 🇳🇬 [ha](../../../ha/docs/guides/UNINSTALL.md) · 🇮🇱 [he](../../../he/docs/guides/UNINSTALL.md) · 🇮🇳 [hi](../../../hi/docs/guides/UNINSTALL.md) · 🇭🇷 [hr](../../../hr/docs/guides/UNINSTALL.md) · 🇭🇺 [hu](../../../hu/docs/guides/UNINSTALL.md) · 🇦🇲 [hy](../../../hy/docs/guides/UNINSTALL.md) · 🇮🇩 [id](../../../id/docs/guides/UNINSTALL.md) · 🇳🇬 [ig](../../../ig/docs/guides/UNINSTALL.md) · 🇮🇹 [it](../../../it/docs/guides/UNINSTALL.md) · 🇯🇵 [ja](../../../ja/docs/guides/UNINSTALL.md) · 🇬🇪 [ka](../../../ka/docs/guides/UNINSTALL.md) · 🇰🇭 [km](../../../km/docs/guides/UNINSTALL.md) · 🇮🇳 [kn](../../../kn/docs/guides/UNINSTALL.md) · 🇰🇷 [ko](../../../ko/docs/guides/UNINSTALL.md) · 🇱🇹 [lt](../../../lt/docs/guides/UNINSTALL.md) · 🇱🇻 [lv](../../../lv/docs/guides/UNINSTALL.md) · 🇮🇳 [ml](../../../ml/docs/guides/UNINSTALL.md) · 🇮🇳 [mr](../../../mr/docs/guides/UNINSTALL.md) · 🇲🇾 [ms](../../../ms/docs/guides/UNINSTALL.md) · 🇲🇹 [mt](../../../mt/docs/guides/UNINSTALL.md) · 🇲🇲 [my](../../../my/docs/guides/UNINSTALL.md) · 🇳🇵 [ne](../../../ne/docs/guides/UNINSTALL.md) · 🇳🇱 [nl](../../../nl/docs/guides/UNINSTALL.md) · 🇳🇴 [no](../../../no/docs/guides/UNINSTALL.md) · 🇮🇳 [or](../../../or/docs/guides/UNINSTALL.md) · 🇮🇳 [pa](../../../pa/docs/guides/UNINSTALL.md) · 🇵🇭 [phi](../../../phi/docs/guides/UNINSTALL.md) · 🇵🇹 [pt](../../../pt/docs/guides/UNINSTALL.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/UNINSTALL.md) · 🇷🇴 [ro](../../../ro/docs/guides/UNINSTALL.md) · 🇷🇺 [ru](../../../ru/docs/guides/UNINSTALL.md) · 🇱🇰 [si](../../../si/docs/guides/UNINSTALL.md) · 🇸🇰 [sk](../../../sk/docs/guides/UNINSTALL.md) · 🇸🇮 [sl](../../../sl/docs/guides/UNINSTALL.md) · 🇷🇸 [sr](../../../sr/docs/guides/UNINSTALL.md) · 🇸🇪 [sv](../../../sv/docs/guides/UNINSTALL.md) · 🇰🇪 [sw](../../../sw/docs/guides/UNINSTALL.md) · 🇮🇳 [ta](../../../ta/docs/guides/UNINSTALL.md) · 🇮🇳 [te](../../../te/docs/guides/UNINSTALL.md) · 🇹🇭 [th](../../../th/docs/guides/UNINSTALL.md) · 🇹🇷 [tr](../../../tr/docs/guides/UNINSTALL.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/UNINSTALL.md) · 🇵🇰 [ur](../../../ur/docs/guides/UNINSTALL.md) · 🇺🇿 [uz](../../../uz/docs/guides/UNINSTALL.md) · 🇻🇳 [vi](../../../vi/docs/guides/UNINSTALL.md) · 🇳🇬 [yo](../../../yo/docs/guides/UNINSTALL.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/UNINSTALL.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/UNINSTALL.md)
+🌐** Języki:** 🇺🇸 [angielski](./UNINSTALL.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/guides/UNINSTALL.md) | 🇸🇦 [العربية](../i18n/ar/docs/guides/UNINSTALL.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/guides/UNINSTALL.md) | 🇧🇬 [Български](../i18n/bg/docs/guides/UNINSTALL.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/guides/UNINSTALL.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/guides/UNINSTALL.md) | 🇨🇿 [Čeština](../i18n/cs/docs/guides/UNINSTALL.md) | 🇩🇰 [Dansk](../i18n/da/docs/guides/UNINSTALL.md) | 🇩🇪 [Deutsch](../i18n/de/docs/guides/UNINSTALL.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/guides/UNINSTALL.md) | 🇪🇸 [Español](../i18n/es/docs/guides/UNINSTALL.md) | 🇪🇪 [Eesti](../i18n/et/docs/guides/UNINSTALL.md) | 🇮🇷 [فارسی](../i18n/fa/docs/guides/UNINSTALL.md) | 🇫🇮 [Suomi](../i18n/fi/docs/guides/UNINSTALL.md) | 🇫🇷 [Français](../i18n/fr/docs/guides/UNINSTALL.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/guides/UNINSTALL.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/guides/UNINSTALL.md) | 🇳🇬 [Hausa](../i18n/ha/docs/guides/UNINSTALL.md) | 🇮🇱 [עברית](../i18n/he/docs/guides/UNINSTALL.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/guides/UNINSTALL.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/guides/UNINSTALL.md) | 🇭🇺 [Magyar](../i18n/hu/docs/guides/UNINSTALL.md) | 🇦🇲 [tamtejszy](../i18n/hy/docs/guides/UNINSTALL.md) | 🇮🇩 [Bahasa Indonezja](../i18n/id/docs/guides/UNINSTALL.md) | 🇳🇬 [Igbo](../i18n/ig/docs/guides/UNINSTALL.md) | 🇮🇹 [Italiano](../i18n/it/docs/guides/UNINSTALL.md) | 🇯🇵[日本語](../i18n/ja/docs/guides/UNINSTALL.md)| 🇬🇪 [ქართული](../i18n/ka/docs/guides/UNINSTALL.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/guides/UNINSTALL.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/guides/UNINSTALL.md) | 🇰🇷 [한국어](../i18n/ko/docs/guides/UNINSTALL.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/guides/UNINSTALL.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/guides/UNINSTALL.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/guides/UNINSTALL.md) | 🇮🇳 [मराठी](../i18n/mr/docs/guides/UNINSTALL.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/guides/UNINSTALL.md) | 🇲🇹 [Malti](../i18n/mt/docs/guides/UNINSTALL.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/guides/UNINSTALL.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/guides/UNINSTALL.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/guides/UNINSTALL.md) | 🇳🇴 [Norsk](../i18n/no/docs/guides/UNINSTALL.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/guides/UNINSTALL.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/guides/UNINSTALL.md) | 🇵🇭 [filipiński](../i18n/phi/docs/guides/UNINSTALL.md) | 🇵🇱 [polski](../i18n/pl/docs/guides/UNINSTALL.md) | 🇵🇹 [Português (Portugalia)](../i18n/pt/docs/guides/UNINSTALL.md) | 🇧🇷 [Português (Brazylia)](../i18n/pt-BR/docs/guides/UNINSTALL.md) | 🇷🇴 [Română](../i18n/ro/docs/guides/UNINSTALL.md) | 🇷🇺 [Русский](../i18n/ru/docs/guides/UNINSTALL.md) | 🇱🇰 [සිංහල](../i18n/si/docs/guides/UNINSTALL.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/guides/UNINSTALL.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/guides/UNINSTALL.md) | 🇷🇸 [Српски](../i18n/sr/docs/guides/UNINSTALL.md) | 🇸🇪 [Svenska](../i18n/sv/docs/guides/UNINSTALL.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/guides/UNINSTALL.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/guides/UNINSTALL.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/guides/UNINSTALL.md) | 🇹🇭 [ไทย](../i18n/th/docs/guides/UNINSTALL.md) | 🇹🇷 [turecki](../i18n/tr/docs/guides/UNINSTALL.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/guides/UNINSTALL.md) | 🇵🇰 [اردو](../i18n/ur/docs/guides/UNINSTALL.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/guides/UNINSTALL.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/guides/UNINSTALL.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/guides/UNINSTALL.md) | 🇨🇳[中文 (简体)](../i18n/zh-CN/docs/guides/UNINSTALL.md) | 🇹🇼[中文 (繁體)](../i18n/zh-TW/docs/guides/UNINSTALL.md)
 
-Ten przewodnik opisuje, jak całkowicie usunąć OmniRoute z systemu.
+W tym przewodniku opisano, jak w czysty sposób usunąć OmniRoute z systemu.
+
+## Przywróć konfigurację klienta
+
+Deinstalator zatrzymuje proces OmniRoute zarządzany przez PM2, jeśli jest obecny, i pozostawia konfigurację klienta na miejscu. Klienci, którzy nadal wskazują na OmniRoute tracą połączenie po jego zatrzymaniu. Pełne usunięcie powoduje również usunięcie katalogu danych, domyślnie `~/.omniroute`, wraz z kopiami zapasowymi konfiguracji klienta.
+
+### 1. Użyj pulpitu nawigacyjnego, gdy OmniRoute jest uruchomiona
+
+Otwarte** Kod CLI** (`/dashboard/cli-code`) na desce rozdzielczej i znajdź plik** Kod Claude** karta.** Stosować** zapisuje do pliku ustawień kodu Claude hosta OmniRoute, domyślnie `~/.claude/settings.json`. Jeśli masz kopię zapasową sprzed zastosowania ustawień OmniRoute, otwórz** Kopie zapasowe** i przywróć go. W przeciwnym razie wybierz** Nastawić** aby usunąć ustawienia bramy z `env`. Zastosuj i zresetuj, najpierw utwórz kopię zapasową istniejącego pliku. Kopie zapasowe są przechowywane w `<DATA_DIR>/backups`.
+
+Jeśli `CLI_ALLOW_CONFIG_WRITES=false` lub pulpit nawigacyjny są niedostępne, przywróć plik ręcznie. Jeśli OmniRoute działa w Docker, a klient działa na hoście, przywróć konfigurację hosta. Pliki w niezamontowanym domu kontenera nie mają wpływu na klienta hosta.
+
+### 2. Przywróć ręcznie pozostałe zmiany
+
+W przypadku kodu Claude sprawdź `~/.claude/settings.json`, `settings.json` w `CLAUDE_CONFIG_DIR` jeśli jest ustawione, i `.claude/settings.json` projektu. Reset usuwa następujące klucze z `env`. Usuń wartości dodane dla OmniRoute lub przywróć poprzednie wartości.
+
+- `"ANTHROPIC_BASE_URL"`, `"ANTHROPIC_AUTH_TOKEN"` i `"ANTHROPIC_API_KEY"`
+- `"ANTHROPIC_DEFAULT_OPUS_MODEL"`, `"ANTHROPIC_DEFAULT_SONNET_MODEL"` i `"ANTHROPIC_DEFAULT_HAIKU_MODEL"`
+- `"API_TIMEOUT_MS"`
+
+Zresetuj pozostawia `ANTHROPIC_MODEL` w `env` i najwyższe ustawienia `model` i `apiKeyHelper` na swoim miejscu. Usuń lub przywróć je ręcznie, jeśli wybiorą model OmniRoute lub dane uwierzytelniające. Przestań używać dowolnego profilu OmniRoute utworzonego przez `omniroute setup-claude` w `~/.claude/profiles/<name>/` lub przywróć jego `settings.json`. Polecenie setup zapisuje profil bez zmiany pliku ustawień domyślnych ani zapisywania tokena. Usuń lub przywróć pasujące eksporty w plikach startowych powłoki i usuń stare wartości z bieżącej powłoki. `omniroute launch` i `omniroute run claude` ustawiają bramę URL i token tylko dla procesu potomnego.
+
+W przypadku Codex przywróć poprzedniego dostawcę i model w `~/.codex/config.toml`, jeśli zawiera on `model_provider = "omniroute"`. Usuń `[model_providers.omniroute]` jeśli został dodany dla tej bramy. Przywróć lub usuń `openai_base_url` jeśli wskazuje na OmniRoute. W przypadku klientów zgodnych z OpenAI przywróć lub wyczyść `OPENAI_BASE_URL` gdziekolwiek ustawisz tę opcję dla OmniRoute.
+
+### 3. Sprawdź, czy klient działa przy zatrzymanym OmniRoute
+
+Sprawdź domyślne ustawienia kodu Claude i bieżące środowisko powłoki.
+
+```bash
+grep -n ANTHROPIC ~/.claude/settings.json
+env | grep ANTHROPIC
+```
+
+Żadne sprawdzenie nie powinno pokazywać `ANTHROPIC_BASE_URL` wskazującego na OmniRoute. Jeśli korzystasz z ustawień profilu lub projektu, sprawdź także te pliki. Po zatrzymaniu OmniRoute i przywróceniu zwykłego uwierzytelniania uruchom bezpośrednio kod Claude.
+
+```bash
+claude -p "say hello"
+```
+
+Kod Claude powinien odpowiedzieć przy użyciu przywróconej konfiguracji. Jeśli nadal wskazuje na zatrzymaną bramę, żądanie nie powiedzie się i wystąpi błąd połączenia.
 
 ---
 
-## Szybka deinstalacja (v3.6.2+)
+## Szybka dezinstalacja (v3.6.2 +)
 
-OmniRoute udostępnia dwa wbudowane skrypty do czystego usunięcia:
+> Najpierw [przywróć konfigurację klienta](#revert-client-configuration), gdy OmniRoute nadal działa.
 
-### Zachowaj dane
+OmniRoute udostępnia dwa wbudowane skrypty do czystego usuwania:
+
+### Zachowaj swoje dane
 
 ```bash
 npm run uninstall
 ```
 
-To usuwa aplikację OmniRoute, ale **zachowuje** bazę danych, konfiguracje, klucze API oraz ustawienia providerów w `~/.omniroute/`. Użyj tej opcji, jeśli planujesz ponowną instalację i chcesz zachować swoją konfigurację.
+Spowoduje to usunięcie aplikacji OmniRoute but** konserwuje** twoja baza danych, konfiguracje, klucze API i ustawienia dostawcy w `~/.omniroute/`. Użyj tej opcji, jeśli planujesz ponowną instalację później i chcesz zachować swoją konfigurację.
 
 ### Pełne usunięcie
 
@@ -28,21 +69,23 @@ To usuwa aplikację OmniRoute, ale **zachowuje** bazę danych, konfiguracje, klu
 npm run uninstall:full
 ```
 
-To usuwa aplikację **i trwale kasuje** wszystkie dane:
+Spowoduje to usunięcie aplikacji** i trwale usuwa** wszystkie dane:
 
-- Bazę danych (`storage.sqlite`)
-- Konfiguracje providerów i klucze API
-- Pliki kopii zapasowych
-- Pliki logów
+- Baza danych (`storage.sqlite`)
+- Konfiguracje dostawców i klucze API
+- Kopie zapasowe plików
+- Pliki dziennika
 - Wszystkie pliki w katalogu `~/.omniroute/`
 
-> ⚠️ **Ostrzeżenie:** `npm run uninstall:full` jest nieodwracalne. Wszystkie połączenia z providerami, combo, klucze API oraz historia użycia zostaną trwale usunięte.
+> ⚠️** Ostrzeżenie:** `npm run uninstall:full` jest nieodwracalne. Wszystkie połączenia z dostawcami, kombinacje, klucze API i historia użytkowania zostaną trwale usunięte.
 
 ---
 
-## Deinstalacja ręczna
+## Odinstaluj ręcznie
 
-### Instalacja globalna NPM
+> Najpierw [przywróć konfigurację klienta](#revert-client-configuration), gdy OmniRoute nadal działa.
+
+### NPM Instalacja globalna
 
 ```bash
 # Remove the global package
@@ -52,7 +95,7 @@ npm uninstall -g omniroute
 rm -rf ~/.omniroute
 ```
 
-### Instalacja globalna pnpm
+### pnpm Instalacja globalna
 
 ```bash
 pnpm uninstall -g omniroute
@@ -71,11 +114,11 @@ docker volume rm omniroute-data
 
 # (Optional) Remove the image
 docker rmi cheaperinference/omniroute:latest
-# Starsze instalacje pobierały starszą nazwę:
+# Older installs pulled the legacy name:
 docker rmi diegosouzapw/omniroute:latest
 ```
 
-### Docker Compose
+### Docker Utwórz
 
 ```bash
 # Stop and remove containers
@@ -85,12 +128,12 @@ docker compose down
 docker compose down -v
 ```
 
-### Aplikacja desktopowa Electron
+### Aplikacja komputerowa Electron
 
 **Windows:**
 
 - Otwórz `Settings → Apps → OmniRoute → Uninstall`
-- Lub uruchom deinstalator NSIS z katalogu instalacji
+- Lub uruchom deinstalator NSIS z katalogu instalacyjnego
 
 **macOS:**
 
@@ -102,7 +145,7 @@ docker compose down -v
 - Usuń plik AppImage
 - Usuń dane: `rm -rf ~/.omniroute`
 
-### Instalacja ze źródeł (git clone)
+### Instalacja źródłowa (klon git)
 
 ```bash
 # Remove the cloned directory

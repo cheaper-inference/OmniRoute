@@ -8,22 +8,23 @@
 
 ## Talaan ng mga Nilalaman
 
-- [Mabilisang Pagpapatakbo](#quick-run)
+- [Mabilis na Pagtakbo](#quick-run)
 - [Gamit ang Environment File](#with-environment-file)
-- [Docker Compose](#docker-compose)
-- [Mga Available na Profile](#available-profiles)
-- [Pag-configure ng mga host CLI tool kapag tumatakbo ang OmniRoute sa Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Docker Gumawa](#docker-compose)
+- [Mga Magagamit na Profile](#available-profiles)
+- [Pagpapatigas ng lalagyan](#container-hardening)
+- [Pag-configure ng mga tool ng host CLI kapag tumatakbo ang OmniRoute sa Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
 - [Redis Sidecar](#redis-sidecar)
-- [Compose para sa Production](#production-compose)
-- [Mga Stage ng Dockerfile](#dockerfile-stages)
-- [Mahahalagang Environment Variable](#critical-environment-variables)
-- [Docker Compose gamit ang Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
-- [Mga Tag ng Image](#image-tags)
+- [Production Compose](#production-compose)
+- [Mga Yugto ng Dockerfile](#dockerfile-stages)
+- [Mga Variable ng Kritikal na Kapaligiran](#critical-environment-variables)
+- [Docker Mag-compose kasama si Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Mabilis na Tunnel](#cloudflare-quick-tunnel)
+- [Mga Tag ng Larawan](#image-tags)
 - [Mga update sa dashboard sa Docker](#dashboard-updates-in-docker)
-- [Availability: iisang replica lamang ang default na SQLite](#availability-default-sqlite-is-single-replica)
-- [Mga regional error ng Gemini sa loob ng Docker](#gemini-regional-errors-inside-docker)
-- [Mahahalagang Tala](#important-notes)
+- [Availability: ang default SQLite ay single-replica](#availability-default-sqlite-is-single-replica)
+- [Gemini rehiyonal na mga error sa loob ng Docker](#gemini-regional-errors-inside-docker)
+- [Mahalagang Tala](#important-notes)
 
 ---
 
@@ -89,6 +90,30 @@ May kasamang mga Compose profile ang OmniRoute para sa mga pangunahing uri ng de
 | `web`            | `omniroute-web`  | Mga web-session provider na nangangailangan ng browser: `gemini-web`, `claude-web`, `claude-turnstile` (bine-build ang `runner-web`, kasama ang Chromium)                         | `docker compose --profile web up -d`         |
 
 > Maaaring pagsamahin ang maraming profile: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Pagpapatigas ng lalagyan
+
+Ang `base`, `web`, `cli`, at `host` app na mga serbisyo sa `docker-compose.yml` ay gumagamit `cap_drop: [ALL]` at ang `no-new-privileges:true` na opsyon sa seguridad. Gumagana ang imahe bilang hindi-root na user `node` at nakikinig sa matataas na port, kaya hindi ito nangangailangan ng mga kakayahan Linux. Pinipigilan ng opsyon sa seguridad ang mga proseso na makakuha ng mga pribilehiyo sa pamamagitan ng setuid binary.
+
+Ang `cli` profile lang ang nag-mount sa Docker socket para sa auto-updater. Tingnan ang [Escape hatch: i-configure ang sariling CLIs ng container](#escape-hatch-configure-the-containers-own-clis-use-sparingly) para sa mga implikasyon sa seguridad.
+
+Ang root filesystem ay mananatiling masusulat bilang default. Ang `cli` profile ay nagsusulat ng CLI configuration at mga cache sa home directory ng container, ang `web` profile ay nag-iimbak ng Chromium session state, at ang Next.js runtime ay maaaring magsulat ng mga cache sa labas `/app/data`.
+
+Upang subukan ang isang read-only na root filesystem na may `base` profile, i-save ito bilang `docker-compose.override.yml` sa tabi ng `docker-compose.yml`. Awtomatikong binabasa ng Compose ang override.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Ang umiiral `/app/data` mount ay mananatiling nasusulat. Subukan ang iyong workload bago gamitin ang override na ito sa produksyon, dahil maaaring kailanganin nitong magsulat sa ibang mga path.
 
 ## Pag-configure ng mga host CLI tool kapag tumatakbo ang OmniRoute sa Docker
 
@@ -239,7 +264,7 @@ Nagpapadala ang repositoryo ng multi-stage Dockerfile (`Dockerfile`). Apat na yu
 
 | entablado     | Batayang larawan      | Layunin                                                                                                                                                                                                                                                                                                                                   |
 | ------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Nag-i-install ng mga deps (`npm ci --legacy-peer-deps`) at nagpapatakbo ng `npm run build` (Turbopack bilang default — tingnan ang Build-time na mga mapagkukunan sa ibaba)                                                                                                                                                               |
+| `builder`     | `node:26-trixie-slim` | Nag-install ng mga deps (`npm ci --legacy-peer-deps`) at nagpapatakbo ng `npm run build` (Turbopack bilang default — tingnan ang Build-time na mga mapagkukunan sa ibaba)                                                                                                                                                                 |
 | `runner-base` | `node:26-trixie-slim` | Runtime ng produksyon na may Next.js standalone na output.** Walang naka-bundle na provider CLIs.**                                                                                                                                                                                                                                       |
 | `runner-cli`  | `runner-base`         | Nagdadagdag ng `git`, `docker.io`, `docker-compose` at global CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Piliin ito para sa mga ahenteng daloy ng trabaho.**                                                                                                                                              |
 | `runner-web`  | `runner-base`         | Nagdaragdag ng Playwright + ng Chromium browser (`--with-deps`) para sa mga provider ng web-session: `gemini-web`, `claude-web`, `claude-turnstile`.** Piliin ito kapag ginamit mo ang mga provider na iyon** — ang plain image ay nabigo sa oras ng kahilingan nang wala ito (tingnan ang `-web` note sa ilalim ng Mga Release Channel). |
@@ -264,7 +289,7 @@ Kinokontrol ng tatlong build arg ang halaga ng `builder` stage. Ang mga ito ay b
 
 Ang `OMNIROUTE_BUILD_WORKERS` ang itataas sa isang malaking builder at ang maghihinala kapag namatay ang isang napilitang build** pagkatapos** `✓ Compiled successfully`. Ang bawat page-data worker ay sarili nitong proseso, at gayundin ang parent `next build` mismo; sinukat ng live VPS reproduction (isyu #7518) ang rurok ng bawat proseso na RSS sa ~ 4.5 GB na independyente sa `NODE_OPTIONS` heap flag (Turbopack ay nagko-compile sa native/Rust memory sa labas ng V8 heap). Ang default ng `2` (→ 1 manggagawa, 2 proseso sa kabuuan) ay may sukat para sa 16 GB / 4 vCPU GitHub-host na runner na ginagamit ng pipeline ng pag-publish. Sa `8` (→ 7 manggagawa) naubusan ng memorya ang runner na iyon at nabigo ang buildkit sa hakbang na may `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 manggagawa) ay hindi pa rin magkasya kapag ang bawat proseso RSS ay direktang nasukat sa halip na ipahiwatig. Ginagawa `tests/unit/docker-build-memory-budget.test.ts` ang aritmetika laban sa sinusukat na pigura at nabigo kung ang alinmang knob ay lumampas sa runner.
 
-Turbopack compiles sa katutubong Rust memory na nabubuhay** sa labas** ang V8 heap, kaya hindi ito tinalian `OMNIROUTE_BUILD_MEMORY_MB`. On a host with a memory ceiling the build is then SIGKILLed by the OOM killer with no error text at all — it simply stops mid-`Creating an optimized production build`, which reads like a hang rather than an out-of-memory. That is why the `Dockerfile` defaults to webpack (`OMNIROUTE_USE_TURBOPACK=0`), unlike `npm run dev` / `npm run build`, where Turbopack is the code default: a bare `docker build .` with no build args (what Railway and other one-click hosts run) must not die silently on a memory-capped builder. Ang mga nai-publish na larawan ay tahasang pumasa sa `OMNIROUTE_USE_TURBOPACK=0` sa `docker-publish.yml`. Sa isang builder na maraming RAM, mag-opt in sa Turbopack para sa mas mabilis na build:
+Turbopack compiles sa katutubong Rust memory na nabubuhay** sa labas** ang V8 heap, kaya hindi ito tinalian `OMNIROUTE_BUILD_MEMORY_MB`. Sa isang host na may memory ceiling ang build ay pagkatapos ay SIGKILLed ng OOM killer na walang error na text sa lahat — ito ay humihinto lamang sa kalagitnaan ng `Creating an optimized production build`, na nagbabasa tulad ng isang hang sa halip na isang out-of-memory. Iyon ang dahilan kung bakit ang `Dockerfile` ay nagde-default sa webpack (`OMNIROUTE_USE_TURBOPACK=0`), hindi tulad `npm run dev` / `npm run build`, kung saan Turbopack ay ang code default: isang bare `docker build .` na walang build args (kung ano ang tumatakbo sa Railway at iba pang isang-click na host) ay hindi dapat mamatay nang tahimik sa isang memory-capped builder. Ang mga nai-publish na larawan ay tahasang pumasa sa `OMNIROUTE_USE_TURBOPACK=0` sa `docker-publish.yml`. Sa isang builder na maraming RAM, mag-opt in sa Turbopack para sa mas mabilis na build:
 
 ```bash
 docker build --target runner-base \
@@ -295,7 +320,7 @@ Pag-uugali ng memorya sa Docker:
 
 ### Runtime RAM para sa mga ahente ng coding
 
-Ang 1 GiB Docker default ay isang dashboard/light-chat floor, hindi isang laki ng produksyon. Ang mga mahahabang katawan `POST /v1/responses` (daan-daang mga mensahe, sampu ng mga tool) ay nagpapanatili ng maraming in-memory na graph sa panahon ng compression. Dalawang nagsasapawan na ~ 3 MiB / ~ 750k-token na kahilingan ang nag-abort ng V8 sa isang** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) at tumama din ng 16 GiB cgroup OOM. Tingnan ang [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Ang 1 GiB Docker default ay isang dashboard/light-chat floor, hindi isang laki ng produksyon. Ang mga mahahabang katawan `POST /v1/responses` (daan-daang mga mensahe, sampu ng mga tool) ay nagpapanatili ng maraming in-memory na graph sa panahon ng compression. Dalawang nagsasapawan na ~ 3 MiB / ~ 750k-token na kahilingan ang nag-abort ng V8 sa isang** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) at tumama din ng 16 GiB cgroup OOM. Tingnan ang [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Sukat** cgroup `--memory` sa itaas ng heap** — native buffers, SQLite, at compression intermediate ay nasa labas ng V8.
 
@@ -415,7 +440,7 @@ volumes:
   omniroute-data:
 ```
 
-Itinatakda ni Caddy ang karaniwang mga header ng pagpapasa para sa upstream na lalagyan. Ginagamit OmniRoute `NEXT_PUBLIC_BASE_URL` bilang kanonikal na pampublikong pinagmulan para sa OAuth callback at nakabuo ng mga pampublikong link; Ang mga na-authenticate na pagsusulat sa dashboard ay gumagamit ng mga kahilingan sa parehong pinagmulan at proteksyon CSRF na nakatali sa session. I-enable lang `OMNIROUTE_TRUST_PROXY` para sa mga advanced na deployment kung saan sinasadya mong makuha ng OmniRoute ang pampublikong pinagmulan mula sa mga pinagkakatiwalaang naipasa na mga header sa halip na tahasang configuration.
+Itinatakda ni Caddy ang karaniwang mga header ng pagpapasa para sa upstream na lalagyan. Ginagamit OmniRoute `NEXT_PUBLIC_BASE_URL` bilang kanonikal na pampublikong pinagmulan para sa OAuth callback at nakabuo ng mga pampublikong link; Ang mga na-authenticate na pagsusulat sa dashboard ay gumagamit ng mga kahilingan sa parehong pinagmulan at proteksyon CSRF na nakatali sa session. Paganahin lang `OMNIROUTE_TRUST_PROXY` para sa mga advanced na deployment kung saan sinasadya mong makuha ng OmniRoute ang pampublikong pinagmulan mula sa mga pinagkakatiwalaang naipasa na mga header sa halip na tahasang configuration.
 
 ## Cloudflare Quick Tunnel
 
@@ -589,11 +614,11 @@ Inaalis ng service ang request bago mag-pull upang hindi paulit-ulit na tumakbo 
 
 Ang stock Docker / Kubernetes OmniRoute ay** isang Node na proseso + isang SQLite na manunulat** . Mataas ang availability ay** hindi suportado** sa topology na iyon.
 
-| Pagpigil                                      | Bunga                                                                                                                                                                                                                                                                                                                                                                         |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nag-iisang manunulat                          | Gawin** hindi** magpatakbo ng maraming replika laban sa parehong SQLite file. Na corrupt ang DB.                                                                                                                                                                                                                                                                              |
-| Muling likhain / i-restart / HEALTHCHECK kill | **Full outage** ng in-flight SSE, mga session sa dashboard, at in-memory na estado. Bawat konektadong kliyente ay bumababa. Ang mga bagong kahilingan sa panahon ng window ng walang laman na endpoint ay nakakakuha ng reverse-proxy**`502 Bad Gateway: Unknown error`** , hindi OmniRoute JSON — hindi ito makilala ng mga kliyente mula sa pagkabigo ng provider (#11015). |
-| Parehong loop ng kaganapan bilang `/healthz`  | Ang isang abalang catalog o compression tick ay maaaring maantala ang mga probe; isang maikling timeout pagkatapos ay i-restart ang** lamang** replika.                                                                                                                                                                                                                       |
+| Pagpigil                                      | Bunga                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nag-iisang manunulat                          | Gawin** hindi** magpatakbo ng maramihang mga replika laban sa parehong SQLite file. Na corrupt ang DB.                                                                                                                                                                                                                                                                                          |
+| Muling likhain / i-restart / HEALTHCHECK kill | **Full outage** ng in-flight SSE, mga session sa dashboard, at in-memory na estado. Bawat konektadong kliyente ay bumababa. Ang mga bagong kahilingan sa panahon ng window ng walang laman na endpoint ay nakakakuha ng reverse-proxy**`502 Bad Gateway: Unknown error`** , hindi OmniRoute JSON — na mga kliyente ay hindi maaaring makilala ito mula sa isang pagkabigo ng provider (#11015). |
+| Parehong loop ng kaganapan bilang `/healthz`  | Ang isang abalang catalog o compression tick ay maaaring maantala ang mga probe; isang maikling timeout pagkatapos ay i-restart ang** lamang** replika.                                                                                                                                                                                                                                         |
 
 **Probe matrix** (tingnan din [ang mga rekomendasyon sa pagsisiyasat ng Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -603,7 +628,7 @@ Ang stock Docker / Kubernetes OmniRoute ay** isang Node na proseso + isang SQLit
 | Kahandaan     | HTTP `GET /healthz`                                         | Mahigpit na pag-timeout na itinuturing na abala ang event-loop bilang patay |
 | Malalim / tao | `/api/monitoring/health`                                    | Automated kubelet liveness                                                  |
 
-**Mga upgrade:** asahan na babagsak ang bawat session. Alisin ang mga kliyente kung maaari mo; walang rolling update sa default SQLite. Papalitan din ng mag-compose ang `restart: unless-stopped` plus Docker `HEALTHCHECK` ang tanging proseso kapag hindi malusog ang container — parehong blast radius.
+**Mga upgrade:** asahan na babagsak ang bawat session. Alisin ang mga kliyente kung maaari mo; walang rolling update sa default SQLite. Ang mag-compose ng `restart: unless-stopped` plus Docker `HEALTHCHECK` ay papalitan din ang tanging proseso kapag ang lalagyan ay hindi malusog — parehong blast radius.
 
 Mga ready-made na manifest at isang Helm chart nang live sa `deploy/kubernetes/` at `deploy/helm/omniroute/` — tingnan ang [gabay sa pag-deploy ng Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
@@ -634,9 +659,9 @@ spec:
             periodSeconds: 20
 ```
 
-Hinahayaan `preStop` sleep si kube na mag-drop ng mga endpoint ng Serbisyo bago SIGTERM kaya** bago** humihinto ang trapiko sa proseso ng namamatay. In-flight `/v1/responses` SSE ay na-drain hanggang `SHUTDOWN_TIMEOUT_MS` (default 30s) sa pamamagitan ng heavyweight admission leases (#11015). Ang mga bagong kahilingan na umaabot pa rin sa proseso ay makakakuha ng `503` + `Retry-After: 5`. Ang Recreate empty-endpoint gap hanggang ang kapalit ay Ready ay nananatiling mahirap na pagkawala — iyon ay ang SQLite topology, hindi isang probe misconfig.
+Hinahayaan `preStop` sleep si kube na mag-drop ng mga endpoint ng Serbisyo bago SIGTERM kaya** bago** humihinto ang trapiko sa proseso ng namamatay. In-flight `/v1/responses` SSE ay pinatuyo hanggang `SHUTDOWN_TIMEOUT_MS` (default 30s) sa pamamagitan ng heavyweight admission leases (#11015). Ang mga bagong kahilingan na umaabot pa rin sa proseso ay nakakakuha `503` + `Retry-After: 5`. Ang Recreate empty-endpoint gap hanggang ang kapalit ay Ready ay nananatiling isang hard outage — na SQLite topology, hindi isang probe misconfig.
 
-Ang panlabas Postgres / multi-writer HA ay** hindi** isang dokumentadong stock path. Kung kailangan mo ng HA, panatilihin ang isang solong replika o magpatakbo ng topology na sinubukan at naidokumento ng proyekto nang hiwalay. Ang Postgres/MySQL work ay nakatira sa [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Hanggang sa nagpapadala iyon, ang tanging suportadong paraan upang dumami** malaki** Ang kapasidad `/v1/responses` ay N independiyenteng mga proseso (susunod na seksyon), hindi `replicas > 1` sa isang volume.
+Ang panlabas Postgres / multi-writer HA ay** hindi** isang dokumentadong stock path. Kung kailangan mo ng HA, panatilihin ang isang solong replika o magpatakbo ng topology na sinubukan at naidokumento ng proyekto nang hiwalay. Ang Postgres/MySQL work ay nakatira sa [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Hanggang sa nagpapadala iyon, ang tanging suportadong paraan upang dumami** malaki** Ang kapasidad `/v1/responses` ay N independiyenteng mga proseso (susunod na seksyon), hindi `replicas > 1` sa isang volume.
 
 ## Scale-out: N independiyenteng mga proseso
 
@@ -646,25 +671,25 @@ Ang mga kopya ng isang Codex account ay hindi dapat hiwalay na ubusin ang single
 
 Binabasa muli ng passive instance ang koneksyon kapag kailangan ang pag-refresh at gumagamit lang ng ibang hindi pa natatapos na access token. Kung hindi, ang pag-refresh ay hindi pinagana nang hindi nag-e-expire o nagde-deactivate ng koneksyon o nagbibilang ng pagkabigo sa pag-refresh-breaker. Ang mga tunay na upstream authentication failure ay gumagamit pa rin ng normal na failure accounting, exponential cooldown at ang normal na error ng kliyente; nananatiling permanente ang pag-deactivate ng account. I-synchronize ang mga na-rotate na token ng may-ari bago mag-expire ang mga access token (ang default na proactive na lead sa pag-refresh ay limang minuto), o muling i-import ang Codex auth file. Iniimbak ng mga passive import ang mga ibinigay na token nang hindi pinapatunayan ang mga ito sa endpoint ng token. Ang manu-manong dashboard/API refresh ay nagbabalik `409 refresh_disabled`; ang mga bagong OAuth login ay hindi nagbabago. Tingnan [ang sanggunian sa kapaligiran](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Ang isang proseso ng Node ay** isang V8 heap** . Dalawang magkakapatong ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman) ang nag-abort ng heap na iyon sa ~ 12 Gi (`FATAL ERROR: Reached heap limit`) at maaaring OOM ng 16 Gi cgroup. Tingnan ang [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Ang pagsukat na iyon ay a** memory-badyet** babala, hindi isang produkto hard-max ng dalawang magkasabay na haba `/v1/responses`. Ang mabigat na pagpasok sa chat ay may gate ng isang auto-derived na ingest byte na badyet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) na may laki mula sa parehong V8/cgroup ceiling — na nag-o-override dito pataas (o ang pagtatakda ng legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) sa isang kalakihang proseso ay muling ipinakilala ang abort. Ang mga maliliit na chat, `/healthz`, `/v1/models`, at MCP ay** hindi** sa cap na iyon.
+Ang isang proseso ng Node ay** isang V8 heap** . Dalawang magkakapatong ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman) ang nag-abort ng heap na iyon sa ~ 12 Gi (`FATAL ERROR: Reached heap limit`) at maaaring OOM ng 16 Gi cgroup. Tingnan [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Ang pagsukat na iyon ay a** memorya-badyet** babala, hindi isang produkto hard-max ng dalawang magkasabay na mahabang `/v1/responses`. Ang mabigat na pagpasok sa chat ay may gate ng isang auto-derived na ingest byte na badyet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) na may laki mula sa parehong V8/cgroup ceiling — na nag-o-override dito pataas (o ang pagtatakda ng legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) sa isang kalakihang proseso ay muling ipinakilala ang abort. Ang mga maliliit na chat, `/healthz`, `/v1/models`, at MCP ay** hindi** sa cap na iyon.
 
 ### Isang proseso: higit sa dalawang mahabang `/v1/responses`
 
-A** malusog** proseso (bunton sa ibaba `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** maaaring** magpatakbo ng higit sa dalawang magkasabay na mahabang `POST /v1/responses` kapag ang buong proseso ng inflight-byte na badyet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) ay may puwang pa rin. Ang mga katawan sa o mas mataas na `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) ay tumatanggap ng parehong heavyweight na lease gaya ng mga structure-heavy na kahilingan at gumagamit ng parehong [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Sampu-sampung magkakasabay na mahahabang SSE na kliyente (madalas na kailangan ng mga operator ng 40–50) ay a** memory-badyet** tanong — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — hindi isang mahirap na "max 2" na limitasyon ng produkto. Ang isang pressured heap ay nahuhulog pa rin na may retryable `503` kaya ang #7849 ay hindi bumalik.
+A** malusog** proseso (bunton sa ibaba `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** maaaring** magpatakbo ng higit sa dalawang magkasabay na mahabang `POST /v1/responses` kapag ang buong proseso ng inflight-byte na badyet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) ay may puwang pa rin. Ang mga katawan sa o mas mataas na `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) ay tumatanggap ng parehong heavyweight na lease gaya ng mga structure-heavy na kahilingan at gumagamit ng parehong [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Sampu-sampung magkakasabay na mahahabang SSE na kliyente (madalas na kailangan ng mga operator ng 40–50) ay a** memorya-badyet** tanong — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — hindi isang mahirap na "max 2" na limitasyon ng produkto. Ang isang pressured heap ay nahuhulog pa rin na may retryable `503` kaya #7849 ay hindi bumalik.
 
 Upang** multiply tambak** (mga independiyenteng V8 old-spaces)** ngayon** :
 
 | Gawin                                                                                                                                                          | huwag                                                                         |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | Takbo** N containers/pods** , bawat isa ay may nito** sariling** `DATA_DIR` / dami                                                                             | Itakda `replicas > 1` laban sa isang SQLite file                              |
-| Sukat ng mabigat na in-flight + healthy-headroom mula sa heap / inflight-byte na badyet; 1–2 ay ang konserbatibong #7849 default, hindi isang hard product max | Magbigay ng isang proseso na 8 × RAM at isang walang hangganang bilang ng cap |
+| Sukat ng mabigat na in-flight + healthy-headroom mula sa heap / inflight-byte na badyet; 1–2 ay ang konserbatibong #7849 default, hindi isang hard product max | Magbigay ng isang proseso ng 8 × RAM at isang walang hangganang bilang ng cap |
 | Opsyonal: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` para sa** mga nakabahaging quota counter**                                                      | Tratuhin Redis bilang nakabahaging SQLite — ito ay hindi                      |
 | I-duplicate ang mga lihim ng provider sa bawat instance (o tanggapin ang mga naka-partition na dashboard)                                                      | Asahan ang isang dashboard / isang call-log sa mga pagkakataon                |
 | Harapan na may anumang load balancer; malagkit sa pamamagitan ng API key o session ay sapat na                                                                 | Nangangailangan ng middleware na may alam sa laki na partikular sa vendor     |
 
 Ang affinity ng session-to-account ay maaari ding ibahagi sa pamamagitan ng Redis: itakda `OMNIROUTE_SESSION_AFFINITY_STORE=redis` at `REDIS_URL` sa bawat proseso, na may parehong `REDIS_KEY_PREFIX` at positibong `sessionAffinityTtlMs` na setting. Niresolba ng mga pin ang mga pagkakakilanlan ng na-hash na paggamit-account sa karapat-dapat na lokal na koneksyon ng bawat proseso, kaya ang mga OAuth account na may katugmang metadata ng pagkakakilanlan ay hindi kailangang magkaroon ng katugmang koneksyon IDs. Ang mga kilalang pagkakakilanlan ng account ay inuuna kaysa sa kontradiksyon na lokal na IDs sa pin resolution at binabantayang pagpapaalis; ang mga talaang walang pagkakakilanlan (o mga tumatawag sa pagpapaalis na walang pagkakakilanlan) ay nagpapanatili ng legacy ID guard. Ang mga account na walang stable na pagkakakilanlan sa paggamit ay nangangailangan pa rin ng pagtutugma IDs. Redis error o mga tawag na lumalagpas sa 100 ms ay bumabalik sa lokal na SQLite. Ang bawat Redis affinity store ay nagtatakda ng mga natitirang operasyon sa 8, agad na nilalampasan Redis kapag puno na, at naglalabas lamang ng mga slot kapag naayos na ang pinagbabatayan na gawain, hindi sa deadline ng tumatawag. Sa panahon ng Redis outage walang ibinahaging katotohanan: ang bawat instance ay bumabalik sa sarili nitong lokal na affinity, ang mga session ay maaaring muling i-pin nang isang beses bawat instance, at ang mga instance ay maaaring magkaiba. Ang lagkit ay muling nagsasama-sama sa pamamagitan ng Redis kapag ito ay nakabawi. Ang timeout ay may hangganan sa paghihintay, hindi isang ipinadalang EVAL, na maaaring mapunta pagkatapos ng fallback. Isinulat ng pagruruta ang eksaktong halaga na sinusunod ng desisyon sa pagruruta, hindi isang bagong mutation-time na nabasa; ang isang naobserbahang miss o isang SQLite fallback na obserbasyon ay inihahambing bilang isang absent Redis key. Ang mga hindi na ginagamit na pin ay pinapalitan sa isang CAS, kaya ang isang late command ay hindi maaaring palitan o tanggalin ang isang mas bago, ibang pin. Redis reads atomically ibalik ang halaga at natitirang server TTL; positive PTTL (o walang expiry) ang tumutukoy sa liveness, hindi ang JSON timestamp ng manunulat o ang orasan ng mambabasa. Mapa ng mga lokal na snapshot ang natitirang TTL sa isang lokal na deadline; Ang mga umiiral JSON key ay nananatiling nababasa at ang kanilang mga raw byte ay pinananatili para sa CAS. Redis ang tanging pinagmumulan ng katotohanan habang ito ay sumasagot. Ang mga kumpirmadong ibinahaging upsert, pagpindot, at pagtanggal ay alisin ang lokal na entry, hindi kailanman i-install o i-refresh ito. SQLite sa Redis path ay nagtataglay lamang ng sariling fallback na desisyon ng pagkakataong ito mula sa mga error Redis, timeout o admission saturation, TTL-bounded gaya ng dati. Ang nawawalang lokal na pin sa isang outage sa ibang pagkakataon ay nagkakahalaga ng isang bagong pagpili (isang prompt-cache miss), hindi isang mali o na-evict na account. Ibinabalik ng mga tinanggihang upserts ang nakabahaging panalo at ang natitirang TTL nito sa atomically: sinusuri muli ng ordinaryong seleksyon ang naka-map na lokal na deadline at gumagamit ng live na karapat-dapat na panalo, humipo sa paggamit at pag-log para sa account na iyon nang walang isa pang nakabahaging sulat. Kung hindi ito available, pinapanatili ng pagpili ang lokal na kandidato, iniiwan ang nakabahaging pin na hindi nagbabago at naglalabas ng isang mensahe sa pag-debug. Ang tinanggihang CAS ay hindi nagsusulat SQLite; Ang mga Redis error, timeout o admission saturation ay inilapat sa halip ang umiiral na lokal na operasyon. Kung dumating ang tugon ng ipinadalang mutation pagkatapos ng timeout (tinanggap, tinanggihan o error), ang isang kasabay na eksaktong serialized-value na paghahambing-at-delete ay nag-aalis lamang ng byte-magkaparehong timeout fallback na row. Walang naghihintay sa pagitan ng paghahambing at pagtanggal; isang mas bagong outage write ay napanatili. Inaalis ng binabantayang pagpapaalis ang sariling lokal na pin ng nabigong account kahit na nakababa ang Redis, at nililinis itong muli pagkatapos ng kumpirmadong ibinahaging pagpapalayas. Ang mga nakabinbing naunang nakabahaging tugon ay hindi makapagpapanumbalik ng isang pinaalis na lokal na pin dahil ang mga nakabahaging tagumpay ay hindi kailanman sumulat SQLite. Maaaring i-repin muli ng isang fallback na outage ang isang account; ang isang susunod na tinanggap na nakabahaging pagsulat ay umiiral lamang sa Redis. Redis miss ay hindi kumunsulta sa lokal na fallback na estado. Kapag naka-off ang driver, napapanatili ng mga bagong napiling pin ang legacy na four-field SQLite JSON na hugis; tanging pagruruta ng Redis ang nagdaragdag ng pagkakakilanlan ng na-hash na account. Ang mga prefetch na pin ay muling sinusuri sa kanilang expiry boundary. Binabasa muli ng Redis non-lease selection ang tindahan, ngunit ang sabay-sabay na pagpaplano sa pag-upa ay maaari pa ring gumamit ng pin na pinaalis sa pagitan ng prefetch at pagpaplano (isang tinatanggap na window ng pinakamahusay na pagsisikap). Ang isang lease commit ay hindi makakapagpalit ng mga account pagkatapos ng isang matibay na paghahabol: sa tinanggihang upsert ay pinapanatili nito ang na-claim na kandidato para sa kahilingang iyon lamang at iniiwan ang nakabahaging nanalo na hindi nagalaw, kaya ang kasunduan sa mga pagkakataon ay limitado sa landas na iyon. Nalalapat pa rin ang natitirang bahagi ng talahanayan: hindi ito nagbabahagi ng combo session stickiness, native Codex turn pins, account semaphores, lockout, limitasyon sa paggastos, configuration o call logs.
 
-Hardware: per-instance concurrent long `/v1/responses` is a** memory-badyet** tanong (heap + inflight-byte / #10110). `N` independent `DATA_DIR` s still multiply heps: host RAM must cover `N × cgroup`, hindi “one 16 Gi pod na may N = 8.” Huwag kailanman `replicas > 1` sa isang SQLite file.
+Hardware: per-instance concurrent long `/v1/responses` is a** memorya-badyet** tanong (magbunton ng + inflight-byte / #10110). `N` independent `DATA_DIR` s still multiply heps: dapat saklawin ng host RAM `N × cgroup`, hindi “one 16 Gi pod na may N = 8.” Huwag kailanman `replicas > 1` sa isang SQLite file.
 
 Gumawa ng sketch (dalawang tambak, dalawang volume — hindi `deploy.replicas: 2`):
 
@@ -693,55 +718,32 @@ volumes:
   omniroute-b-data:
 ```
 
-In-process density (compression off ang HTTP isolate) ay [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Ang isang lohikal na cluster sa shared durable state ay [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+In-process density (compression off ang HTTP isolate) ay [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Ang isang lohikal na kumpol sa nakabahaging matibay na estado ay [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Mga panrehiyong error ng Gemini sa loob ng Docker
+## Gemini rehiyonal na mga error sa loob ng Docker
 
-Maaaring magbalik ang Google AI Studio / Gemini API ng HTTP 400 na may FAILED_PRECONDITION at
-`User location is not supported for the API use.` Hindi pinatutunayan ng matagumpay na kahilingan sa host
-na gumagamit ang container ng parehong outbound route. Maaaring magkaiba ang pagkakasunod-sunod ng DNS,
-konektibidad ng IPv4/IPv6, pagruruta ng VPN, at mga naka-configure na proxy. Suriin ang
-[mga sinusuportahang rehiyon ng Google](https://ai.google.dev/gemini-api/docs/available-regions)
-pati ang aktuwal na ruta ng koneksyon; hindi natutukoy ng error na ito lamang kung hindi wasto ang API key.
+Google AI Studio / Gemini API ay maaaring ibalik HTTP 400 na may FAILED_PRECONDITION at `User location is not supported for the API use.` Ang isang matagumpay na kahilingan sa host ay hindi nagpapatunay na ang container ay gumagamit ng parehong papalabas na ruta. Ang pag-order DNS, pagkakakonekta IPv4/IPv6, pagruruta VPN at mga naka-configure na proxy ay maaaring magkaiba. Suriin [ang mga suportadong rehiyon ng Google](https://ai.google.dev/gemini-api/docs/available-regions) pati na rin ang aktwal na ruta ng koneksyon; ang error na ito lamang ay hindi nakikilala ang isang masamang API key.
 
-### Mas piliin ang proxy na partikular sa koneksyon
+### Mas gusto ang isang proxy na tukoy sa koneksyon
 
-Gamitin ang [configuration ng proxy para sa bawat koneksyon](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-ng OmniRoute para sa apektadong koneksyon sa Gemini, pagkatapos ay ulitin ang **Subukan ang Koneksyon** at isang maliit na kahilingan
-gamit ang parehong model. Pinananatili nitong nakatuon sa koneksyong iyon ang pagbabago sa pagruruta. Tiyaking
-naaabot ang proxy mula sa container, at talagang pinipili ito ng koneksyon.
-Hindi ginagarantiya ng pagbabago sa ruta ang pagiging kwalipikado sa rehiyon ng upstream.
+Gamitin [ang per-connection proxy configuration](../ops/PROXY_GUIDE.md#4-level-proxy-system) ng OmniRoute para sa apektadong Gemini connection, pagkatapos ay ulitin** Subukan ang Koneksyon** at isang maliit na kahilingan na may parehong modelo. Pinapanatili nitong saklaw ang pagbabago sa pagruruta sa koneksyong iyon. I-verify na ang proxy ay naaabot mula sa lalagyan, at talagang pinipili ito ng koneksyon. Ang pagpapalit ng ruta ay hindi ginagarantiyahan ang upstream na pagiging karapat-dapat sa rehiyon.
 
-### Paghambingin ang networking ng host at container
+### Ihambing ang host at container networking
 
-Panatilihing magkapareho ang key, model, at kahilingan kapag naghahambing ng mga authenticated na resulta; huwag kailanman
-mag-paste ng mga credential, password ng proxy, o kumpletong authorization header sa isang issue.
-Suriin muna kung aling mga address family ang iniaalok ng OS resolver, gamit ang parehong command
-sa host at sa loob ng container:
+Panatilihing magkapareho ang susi, modelo at kahilingan kapag naghahambing ng mga napatotohanang resulta; huwag na huwag mag-paste ng mga kredensyal, proxy password o kumpletong authorization header sa isang isyu. Suriin muna kung aling mga address sa pamilya ang inaalok ng OS resolver, gamit ang parehong command sa host at sa loob ng container:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Palitan ang `omniroute` ng service na pinapatakbo mo (halimbawa, `omniroute-web`). Ang mga
-command na ito ay nagpi-print ng mga address family nang walang mga credential o IP address. Ang ibinalik na `6`
-ay nagpapakita lamang ng resulta ng IPv6 DNS: **hindi** nito pinatutunayan na may nagagamit na IPv6 route o API access.
-Kung naka-install ang `curl`, paghambingin ang `curl -4 -I https://generativelanguage.googleapis.com`
-at `curl -6 -I https://generativelanguage.googleapis.com` sa parehong environment.
-Pinatutunayan ng isang HTTP response ang konektibidad para sa probe na iyon, kahit isa itong hindi authenticated na
-error; tanging ang authenticated na kahilingan sa model ang sumusubok sa pagiging kwalipikado sa Gemini.
+Palitan `omniroute` ng serbisyong pinapatakbo mo (halimbawa, `omniroute-web`). Ang mga command na ito ay nagpi-print ng mga pamilya ng address na walang mga kredensyal o IP address. Ang ibinalik na `6` ay nagpapakita lamang ng isang IPv6 DNS na resulta: ginagawa nito** hindi** patunayan ang isang magagamit na IPv6 ruta o API access. Kung saan naka-install `curl`, ihambing ang `curl -4 -I https://generativelanguage.googleapis.com` sa `curl -6 -I https://generativelanguage.googleapis.com` sa parehong mga kapaligiran. Ang tugon HTTP ay nagpapatunay ng pagkakakonekta para sa probe na iyon, kahit na ito ay isang hindi napatotohanang error; tanging ang na-authenticate na kahilingan sa modelo ang sumusubok sa pagiging kwalipikado Gemini.
 
-### Alternatibo sa antas ng host: gumaganang IPv6 at patakaran ng resolver
+### Alternatibong antas ng host: gumaganang IPv6 at patakaran sa solver
 
-Naibalik ng nag-ulat ng [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) ang
-access sa kanilang environment sa pamamagitan ng pag-enable ng IPv6 ng container at pagbabago sa pagpili
-ng address ng glibc. Ituring ito bilang alternatibong partikular sa environment. Kumpirmahing gumagana ang IPv6
-ng host, ang egress/pagruruta ng container, at ang mga panuntunan ng firewall bago baguhin ang mga preference ng resolver.
-Ang isang pribadong ULA address lamang ay hindi nagpapatunay ng pampublikong konektibidad ng IPv6.
+Ibinalik ng reporter ng [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) ang access sa kanilang kapaligiran sa pamamagitan ng pagpapagana ng container IPv6 at pagbabago ng pagpili ng address ng glibc. Tratuhin ito bilang isang alternatibong partikular sa kapaligiran. Kumpirmahin ang gumaganang host IPv6, container egress/routing at mga panuntunan sa firewall bago isaayos ang mga kagustuhan sa solver. Ang pribadong ULA address mismo ay hindi nagtatatag ng pampublikong IPv6 na koneksyon.
 
-Para sa mga service na nakakabit na sa default network ng Compose, ine-enable ng fragment na ito
-ang IPv6 sa network na iyon; panatilihin ang natitirang bahagi ng iyong service, mga port, volume, at configuration:
+Para sa mga serbisyong naka-attach na sa default na network ng Compose, pinapagana ng fragment na ito IPv6 sa network na iyon; panatilihin ang natitirang bahagi ng iyong serbisyo, port, volume at configuration:
 
 ```yaml
 networks:
@@ -749,30 +751,13 @@ networks:
     enable_ipv6: true
 ```
 
-Para sa isang pinangalanang network, i-enable ito sa network na aktuwal na sinasalihan ng service. Maaaring
-maglaan ang Docker ng ULA subnet; pumili lamang ng tahasan at hindi nagsasapawang subnet kapag kinakailangan
-ito ng iyong network. Tingnan ang [Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/)
-at [mga opsyon sa network ng Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Para sa isang pinangalanang network, paganahin ito sa network na aktwal na sinasalihan ng serbisyo. Docker ay maaaring maglaan ng isang ULA subnet; pumili ng tahasan, hindi nagsasapawan na subnet lamang kapag kailangan ito ng iyong network. Tingnan ang [Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/) at [Gumawa ng mga opsyon sa network](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Sa isang **image na nakabatay sa glibc**, maaaring baguhin ng `/etc/gai.conf` ang pagpili ng address. Gumagamit
-ng Debian ang kasalukuyang Dockerfile ng repository; hindi gumagamit ng parehong mekanismo ang mga custom na image na nakabatay sa musl.
-Binabago ng iniulat na pagsasaayos ang ULA label mula `label fc00::/7 6` patungong
-`label fc00::/7 1`. Magsimula sa kumpletong policy table ng image at panatilihin ang iba pa nitong
-mga entry: pinapalitan ng pagdaragdag ng isang `label` o `precedence` na entry ang default na table na iyon, kaya hindi
-sapat ang isang file na naglalaman lamang ng binagong linya. Idinodokumento ng
-[reference sa configuration ng glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-ang mga semantikang iyon. I-bind-mount ang nasuring file bilang read-only sa `/etc/gai.conf`
-at muling likhain ang service upang mailapat ito.
+Sa isang** glibc-based na imahe** , maaaring baguhin `/etc/gai.conf` ang pagpili ng address. Ang kasalukuyang repositoryong Dockerfile ay gumagamit ng Debian; Ang mga custom na imaheng batay sa musl ay hindi nagbabahagi ng mekanismong ito. Binago ng iniulat na pagsasaayos ang ULA label mula `label fc00::/7 6` patungong `label fc00::/7 1`. Magsimula sa kumpletong talahanayan ng patakaran ng larawan at panatilihin ang iba pang mga entry nito: ang pagdaragdag ng `label` o `precedence` entry ay papalitan ang default na talahanayan na iyon, kaya hindi sapat ang isang file na naglalaman lamang ng binagong linya. Ang [glibc configuration reference](https://github.com/bminor/glibc/blob/master/posix/gai.conf) ay nagdodokumento ng mga semantika na iyon. I-bind-mount ang sinuri na file na read-only sa `/etc/gai.conf` at muling likhain ang serbisyo upang ilapat ito.
 
-Binabago nito ang pagpili ng address ng OS para sa **lahat ng outbound traffic sa container na iyon**.
-Hindi nito pinipilit ang bawat application na piliin ang IPv6: mahalaga rin ang pagkakasunod-sunod ng DNS at pagpili
-ng koneksyon ng Node. Sa partikular, mas pinipili ng `--dns-result-order=ipv4first` ang IPv4 at
-hindi ito solusyon para sa isang pagkabigong nauugnay sa IPv4 lamang. Tingnan ang [pagkakasunod-sunod ng DNS ng Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Binabago nito ang pagpili ng OS address para sa** lahat ng papalabas na trapiko sa lalagyang iyon** . Hindi nito pinipilit ang bawat application na pumili IPv6: Mahalaga rin ang DNS order at pagpili ng koneksyon ng Node. Sa partikular, mas gusto ng `--dns-result-order=ipv4first` IPv4 at hindi isang lunas para sa pagkabigo IPv4-only. Tingnan [ang Node DNS na pag-order](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Muling subukan ang Gemini at ang iba mo pang provider pagkatapos ng anumang pagbabago sa antas ng host. Upang ibalik
-ang dating configuration, alisin ang custom na `gai.conf` mount, ibalik ang nakaraang network configuration, at
-muling likhain ang apektadong service/network sa panahon ng maintenance window. Maaaring maantala ng muling paglikha ng network
-ang iba pang container na nakakabit dito; huwag burahin ang persistent data volume.
+Muling subukan Gemini at ang iyong iba pang mga provider pagkatapos ng anumang pagbabago sa antas ng host. Para i-roll back, alisin ang custom `gai.conf` mount, i-restore ang dating network configuration at muling likhain ang apektadong service/network sa panahon ng maintenance window. Ang muling paggawa ng network ay maaaring makagambala sa iba pang mga lalagyan na nakakabit dito; huwag tanggalin ang patuloy na dami ng data.
 
 ## Mahahalagang Tala
 

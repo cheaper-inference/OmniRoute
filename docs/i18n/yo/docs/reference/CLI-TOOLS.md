@@ -4,8 +4,6 @@
 
 ---
 
-kẹhin imudojuiwọn: 2026-08-23
-
 OmniRoute ṣepọ pẹlu awọn ẹka mẹta ti awọn irinṣẹ CLI tan kaakiri awọn oju-iwe dasibodu igbẹhin mẹta:
 
 | Oju-iwe            | Ona                     | Erongba                                                                           | Ka             |

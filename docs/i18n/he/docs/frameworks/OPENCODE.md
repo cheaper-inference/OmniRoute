@@ -4,14 +4,11 @@
 
 ---
 
-> **סטטוס:** זמין לכלל.
-> **קהל יעד:** מפעילים המחברים את OpenCode לפריסת OmniRoute.
-> **מקור האמת (סכמת תצורה):** `src/shared/services/opencodeConfig.ts`
-> **מקור האמת (חבילת npm):** `@omniroute/opencode-provider/` (מרחב עבודה הניתן לפרסום)
+> **סטָטוּס:** זמין באופן כללי.** קהל:** מפעילים מחברים OpenCode לפריסת OmniRoute.** מקור האמת (סכימת תצורה):** `src/shared/services/opencodeConfig.ts`** חבילות npm מומלצות:** `@omniroute/opencode-plugin/` (OpenCode v1, מותקן על ידי `omniroute setup opencode`) ו- `@omniroute/opencode-plugin-v2/` (OpenCode v2). חבילת `@omniroute/opencode-provider/` הישנה יותר היא** הוצא משימוש** (ראה נתיב 2).
 
-[OpenCode](https://opencode.ai) הוא לקוח AI סוכני לממשק שורת הפקודה/לשולחן העבודה. הוא קורא את קטלוג הספקים שלו מתוך `~/.config/opencode/opencode.json` (או `opencode.jsonc`) ופועל לפי הסכמה שבכתובת `https://opencode.ai/config.json`. OmniRoute חושף את עצמו ל-OpenCode כאחד מהספקים האלה — כל בקשה עוברת דרך ממשק `/v1` הסטנדרטי ותואם-OpenAI של OmniRoute, כך ש-OpenCode נהנה אוטומטית מניתוב Auto-Combo, ממפסקי מעגל, ממדיניות מפתחות, מניטוריות וכו'.
+[OpenCode](https://opencode.ai) הוא לקוח CLI/desktop AI סוכן. הוא קורא את קטלוג הספקים שלו מ- `~/.config/opencode/opencode.json` (או `opencode.jsonc`) ועוקב אחר הסכימה ב- `https://opencode.ai/config.json`. OmniRoute חושפת את עצמה ל- OpenCode כאחד מאותם ספקים — כל בקשה זורמת דרך משטח `/v1` הסטנדרטי של OmniRoute תואם OpenAI, כך ש- OpenCode נהנית אוטומטית מניתוב Auto-Combo, מפסקים, מדיניות מפתח, צפייה וכו'.
 
-ישנם **שני נתיבי שילוב נתמכים**. בחרו אחד מהם — שניהם יוצרים את אותה תצורה.
+עמוד זה מתעד את שני הנתיבים הסטטיים להלן; שניהם יוצרים את אותה תצורה. לרשימת דגמים העוקבת אחר הקטלוג החי שלך, השתמש בתוסף במקום זאת: `omniroute setup opencode` מתקין `@omniroute/opencode-plugin` (OpenCode v1), ו- `@omniroute/opencode-plugin-v2` מכוון ל- OpenCode v2 (ראה [שילובי CLI](../guides/CLI-INTEGRATIONS.md) [ומדריך הפלאגין OpenCode v2](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ omniroute config opencode \
 
 ---
 
-## נתיב 2 — חבילת npm בשם `@omniroute/opencode-provider`
+## Path 2 — npm package `@omniroute/opencode-provider` (הוצא משימוש)
 
-מומלץ כאשר אתם יוצרים את התצורה באמצעות סקריפט מ-Node/TS (תהליכי CI, מאגרים אחודים, תהליכי התקנה מותאמים אישית).
+> **הוצא משימוש.** החבילה כותבת רשימת דגמים סטטית שנסחפת מאחורי קטלוג OmniRoute החי שלך. README שלו ממליץ לעבור ל- `@omniroute/opencode-plugin` (או `@omniroute/opencode-plugin-v2` ב- OpenCode v2). ה- API למטה נשמר עבור סקריפטים קיימים בלבד.
+
+משמש בעת יצירת סקריפט של התצורה מ- Node/TS (צינורות CI, monorepos, זרימות מתקין מותאמות אישית).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // אופציונלי: החלפת קטלוג המודלים שנחשף ל-OpenCode
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-כדי לבצע מיזוג שאינו הרסני עם קובץ קיים, שכפלו את `mergeOpenCodeConfigText()` מתוך `opencodeConfig.ts` או הפעילו את מחולל ה-CLI.
+למיזוג לא הרסני מול קובץ קיים, שכפל `mergeOpenCodeConfigText()` מ- `opencodeConfig.ts` או התקשר למחולל CLI.
 
-ראו את [קובץ ה-README של החבילה](../../@omniroute/opencode-provider/README.md) לקבלת ה-API המלא.
+ראה את [החבילה README](../../@omniroute/opencode-provider/README.md) עבור API המלא.
 
 ---
 
@@ -155,9 +154,11 @@ export const OMNIROUTE_DEFAULT_OPENCODE_MODELS = [
 
 ---
 
-## ראו גם
+## ראה גם
 
-- [תיעוד ה-API](../reference/API_REFERENCE.md) — כל ממשק ה-REST של OmniRoute
-- [Auto-Combo](../routing/AUTO-COMBO.md) — המשמעות של `model: "auto"`
-- [קובץ ה-README של `@omniroute/opencode-provider`](../../@omniroute/opencode-provider/README.md)
-- קוד מקור: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`
+- [API reference](../reference/API_REFERENCE.md) — מלא OmniRoute REST משטח
+- [Auto-Combo](../routing/AUTO-COMBO.md) — מה המשמעות של `model: "auto"`
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (מומלץ)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (הוצא משימוש)
+- מקור: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

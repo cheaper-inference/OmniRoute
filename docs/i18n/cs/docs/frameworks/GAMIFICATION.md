@@ -507,21 +507,21 @@ když se data žebříčku od posledního odeslání skutečně změnila.
 
 **Soubor:** `src/lib/gamification/sharing.ts`
 
-### Podvojné účetnictví
+### Podvojná účetní kniha
 
-Každý převod vytvoří dva řádky v tabulce `token_ledger`:
+Každý převod vytvoří dva řádky v `token_ledger`:
 
 | Řádek   | `from_key_id` | `to_key_id` | `amount` |
 | ------- | ------------- | ----------- | -------- |
-| Má dáti | odesílatel    | příjemce    | +částka  |
-| Dal     | příjemce      | odesílatel  | -částka  |
+| Debetní | odesílatel    | přijímač    | částka + |
+| Kredit  | přijímač      | odesílatel  | -amount  |
 
-Pozor — platí následující konvence:
+Počkejte — konvence je:
 
 | Řádek    | `from_key_id` | `to_key_id` | `amount` | Význam               |
 | -------- | ------------- | ----------- | -------- | -------------------- |
-| Odeslání | odesílatel    | příjemce    | +částka  | Odtok od odesílatele |
-| Přijetí  | příjemce      | odesílatel  | +částka  | Příjem pro příjemce  |
+| Poslat   | odesílatel    | přijímač    | částka + | Odtok od odesílatele |
+| Dostávat | přijímač      | odesílatel  | částka + | Přítok do přijímače  |
 
 Zůstatek se vypočítá takto:
 
@@ -534,7 +534,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Průběh převodu
+### Přenosový tok
 
 ```typescript
 export async function transferTokens(
@@ -545,19 +545,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Ověření**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotence**: zkontrolovat, zda již v účetní knize existuje `idempotency_key`.
-   Pokud ano, vrátit výsledek z mezipaměti.
-3. **Transakce** (jediná transakce SQLite):
-   a. Vypočítat zůstatek odesílatele.
-   b. Pokud `balance < amount`, operaci zrušit (nedostatek prostředků).
-   c. Vložit řádek odeslání (`from=sender,`.
+1. **Ověřit** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotence** : zkontrolujte, zda `idempotency_key` již existuje v účetní knize. Pokud ano, vraťte výsledek z mezipaměti.
+3. **Transakce** (jednorázová transakce SQLite ): a. Vypočítat zůstatek odesílatele. b. Pokud `balance < amount`, přerušte (nedostatek prostředků). C. Vložte řádek pro odeslání (`from=sender, to=receiver, amount`). d. Vložte řádek příjmu (`from=receiver, to=sender, amount`).
+4. **Limit sazby** : zkontrolujte přenosovou rychlost pro odesílatele (max 10 transfers/min).
+5. **Událost** : vyšle událost gamifikace `token_share` pro vyhodnocení odznaku + XP
+6. Návrat `{ success: true, balance: newBalance }`.
 
-### Omezení frekvence
+### Omezení sazby
 
-- Max. 10 převodů za minutu pro každý klíč API.
-- Max. 10 000 tokenů v jednom převodu.
-- Max. 100 000 převedených tokenů za den pro každý klíč API.
+- Maximálně 10 přenosů za minutu na klíč API.
+- Maximálně 10 000 tokenů na jeden převod.
+- Maximálně 100 000 tokenů převedených za den na klíč API.
 
 ---
 

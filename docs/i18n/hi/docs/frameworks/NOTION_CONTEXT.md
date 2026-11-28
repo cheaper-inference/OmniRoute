@@ -62,41 +62,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute टोकन सहेजता है और तुरंत 1-परिणाम वाली परीक्षण खोज चलाता है; यदि Notion
 कोई त्रुटि ऑब्जेक्ट लौटाता है, तो टोकन हटा दिया जाता है और कॉल `400` के साथ विफल हो जाती है।
 
-## MCP टूल (6)
+## MCP उपकरण (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` में परिभाषित। कॉल के समय टोकन को
-`getNotionToken()` के माध्यम से प्राप्त किया जाता है; यदि कोई टोकन कॉन्फ़िगर नहीं है, तो टूल यह त्रुटि देता है:
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+`open-sse/mcp-server/tools/notionTools.ts` में परिभाषित। टोकन को `getNotionToken()` के माध्यम से कॉल समय पर हल किया जाता है; यदि कोई भी कॉन्फ़िगर नहीं किया गया है तो उपकरण `"Notion integration token not configured. Set it in Settings > Context Sources."` फेंकता है
 
-| टूल                          | स्कोप          | विवरण                                                                                    |
-| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | टेक्स्ट क्वेरी द्वारा पेज और डेटाबेस खोजें (शीर्षक, ID और URL लौटाता है)। पृष्ठांकित।    |
-| `notion_get_page`            | `read:notion`  | किसी पेज की ID द्वारा उसकी सामग्री और मेटाडेटा प्राप्त करें।                             |
-| `notion_list_block_children` | `read:notion`  | किसी ब्लॉक या पेज के सभी चाइल्ड ब्लॉक (ब्लॉक ट्री) सूचीबद्ध करें। पृष्ठांकित।            |
-| `notion_query_database`      | `read:notion`  | वैकल्पिक `filter` + `sorts` (Notion API प्रारूप) के साथ डेटाबेस क्वेरी करें। पृष्ठांकित। |
-| `notion_get_database`        | `read:notion`  | ID द्वारा किसी डेटाबेस का स्कीमा/मेटाडेटा प्राप्त करें।                                  |
-| `notion_append_blocks`       | `write:notion` | किसी मौजूदा ब्लॉक या पेज में चाइल्ड ब्लॉक जोड़ें (प्रति अनुरोध अधिकतम 100 ब्लॉक)।        |
+| औजार                         | दायरा          | विवरण                                                                                          |
+| ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | टेक्स्ट क्वेरी (रिटर्न शीर्षक, IDs, URLs) द्वारा पेज और डेटाबेस खोजें। पृष्ठांकित.             |
+| `notion_get_page`            | `read:notion`  | किसी पृष्ठ की सामग्री और मेटाडेटा उसके ID द्वारा प्राप्त करें।                                 |
+| `notion_list_block_children` | `read:notion`  | किसी ब्लॉक या पेज (ब्लॉक ट्री) के सभी ब्लॉक चिल्ड्रेन की सूची बनाएं। पृष्ठांकित.               |
+| `notion_query_database`      | `read:notion`  | वैकल्पिक `filter` + `sorts` (Notion API प्रारूप) के साथ एक डेटाबेस को क्वेरी करें। पृष्ठांकित. |
+| `notion_get_database`        | `read:notion`  | ID द्वारा डेटाबेस का schema/metadata प्राप्त करें।                                             |
+| `notion_append_blocks`       | `write:notion` | ब्लॉक चिल्ड्रेन को किसी मौजूदा ब्लॉक या पेज पर जोड़ें (प्रति अनुरोध अधिकतम 100 ब्लॉक)।         |
 
 ### इनपुट पैरामीटर
 
-- `notion_search` — `query` (1–500 वर्ण), `pageSize` (1–100, डिफ़ॉल्ट 20),
-  `startCursor` (वैकल्पिक)।
-- `notion_get_page` — `pageId` (32-वर्ण हेक्स या UUID)।
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, डिफ़ॉल्ट 50),
-  `startCursor` (वैकल्पिक)।
-- `notion_query_database` — `databaseId`, `filter` (वैकल्पिक, Notion फ़िल्टर प्रारूप),
-  `sorts` (वैकल्पिक ऐरे), `pageSize` (1–100, डिफ़ॉल्ट 50), `startCursor` (वैकल्पिक)।
-- `notion_get_database` — `databaseId`।
-- `notion_append_blocks` — `blockId`, `children` (ब्लॉक ऑब्जेक्ट की ऐरे),
-  `after` (वैकल्पिक स्थिति)।
+- `notion_search` — `query` (1-500 वर्ण), `pageSize` (1-100, डिफ़ॉल्ट 20), `startCursor` (वैकल्पिक)।
+- `notion_get_page` — `pageId` (32-चार हेक्स या UUID)।
+- `notion_list_block_children` — `blockId`, `pageSize` (1-100, डिफ़ॉल्ट 50), `startCursor` (वैकल्पिक)।
+- `notion_query_database` — `databaseId`, `filter` (वैकल्पिक, Notion फ़िल्टर प्रारूप), `sorts` (वैकल्पिक सरणी), `pageSize` (1-100, डिफ़ॉल्ट 50), `startCursor` (वैकल्पिक)।
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`, `children` (ब्लॉक ऑब्जेक्ट्स की सरणी), `after` (वैकल्पिक स्थिति)।
 
-### स्कोप
+### कार्यक्षेत्र
 
-रीड टूल के लिए `read:notion` और राइट टूल के लिए `write:notion` आवश्यक है।
-स्कोप को `open-sse/mcp-server/server.ts` में `withScopeEnforcement()` द्वारा केवल तभी लागू किया जाता है
-जब `OMNIROUTE_MCP_ENFORCE_SCOPES=true` हो; कॉलर के अनुमत स्कोप
-`OMNIROUTE_MCP_SCOPES` (अल्पविराम से अलग किए गए) या प्रमाणीकृत API कुंजी के स्कोप कॉन्टेक्स्ट से आते हैं।
-पूर्ण स्कोप मॉडल के लिए [MCP-SERVER.md](./MCP-SERVER.md) देखें।
+पढ़ने वाले टूल के लिए `read:notion` आवश्यकता होती है और लिखने के टूल के लिए `write:notion` आवश्यकता होती है। `OMNIROUTE_MCP_ENFORCE_SCOPES=true` पर `open-sse/mcp-server/server.ts` में `withScopeEnforcement()` द्वारा स्कोप लागू किए जाते हैं, और हमेशा एक HTTP/SSE कॉलर के लिए जिसकी API कुंजी में `manage`/`admin` अभाव होता है; कॉल करने वाले की अनुमति वाले स्कोप `OMNIROUTE_MCP_SCOPES` (अल्पविराम से अलग) या प्रमाणित API कुंजी के स्कोप संदर्भ से आते हैं। पूर्ण स्कोप मॉडल के लिए [MCP-SERVER.md](./MCP-SERVER.md) देखें।
 
 ## एंडपॉइंट्स
 

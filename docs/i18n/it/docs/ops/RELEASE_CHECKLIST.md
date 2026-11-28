@@ -4,12 +4,9 @@
 
 ---
 
-> **Ultimo aggiornamento:** 2026-08-28 — v3.8.51
-> Flusso di rilascio semplificato che sfrutta le skill di Claude Code per l'automazione.
+> Flusso di rilascio semplificato che sfrutta le competenze Claude Code per l'automazione.
 >
-> **Mantieni verdi la coda e il branch tra un rilascio e l'altro:** consulta [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (famiglia `/green-prs` + `npm run check:release-green` + `/babysit` + esecuzione notturna). Eseguire
-> periodicamente queste operazioni — e soprattutto **prima** di questa checklist — fa sì che la PR di rilascio parta già verde.
+> **Mantieni la queue/branch verde tra una release e l'altra:** vedere [RELEASE_GREEN.md](./RELEASE_GREEN.md) (`/green-prs` family + `npm run check:release-green` + `/babysit` + notturno). Eseguendo questo periodicamente — e soprattutto** Prima** questa lista di controllo — fa sì che il rilascio PR inizi in verde.
 
 ## In breve
 
@@ -58,9 +55,11 @@ Il flusso di lavoro npm-publish non pubblica più direttamente: avvia il tarball
 
 **Playbook dell'artefatto rotto (invariato):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` come riflesso predefinito (minuti, reversibile); `npm unpublish` solo all'interno della finestra 72h/no-dependents e mai come prima mossa. Docker: non riscrivere mai un tag di versione — Il rollback rimanda `latest` all'ultimo digest valido.
 
-**Docker Hub `latest` (richiesto su ogni pubblicazione SemVer stabile):** il flusso di lavoro `docker-publish` deve essere taggato** Entrambi** `X.Y.Z` e, quando `should-promote-latest.sh` è d'accordo, questo è il SemVer stabile più alto, `:latest` con il** stesso digerito** . Dopo il lavoro: Hub `latest` digest equivale al nuovo SemVer digest e `last_updated` spostato. Non lasciare `:latest` su una build precedente mentre le note di rilascio parlano di correzioni che esistono solo su git. Componi le guide di avvio rapido usa `:latest`; GitOps dovrebbe continuare a bloccare `X.Y.Z`. Vedi [canali di rilascio Docker](../guides/DOCKER_GUIDE.md#release-channels) e #10317.
+**Docker Hub `latest` (richiesto su ogni pubblicazione SemVer stabile):** il flusso di lavoro `docker-publish` deve essere taggato** Entrambi** `X.Y.Z` e, quando `should-promote-latest.sh` è d'accordo, questo è il più alto SemVer stabile, `:latest` con il** stesso digerito** . Dopo il lavoro: Hub `latest` digest equivale al nuovo SemVer digest e `last_updated` spostato. Non lasciare `:latest` su una build precedente mentre le note di rilascio parlano di correzioni che esistono solo su git. Componi le guide di avvio rapido usa `:latest`; GitOps dovrebbe continuare a bloccare `X.Y.Z`. Vedi [canali di rilascio Docker](../guides/DOCKER_GUIDE.md#release-channels) e #10317.
 
-**Repository dell'organizzazione Docker Hub (`cheaperinference/omniroute`):** Docker Hub non può spostare un repository tra spazi dei nomi, quindi `diegosouzapw/omniroute` conserva la cronologia dei pull e ogni rilascio e il lavoro `mirror-org-dockerhub` di `docker-publish` copia ogni versione rilasciata (e `:latest` quando promossa) da `ghcr.io/cheaper-inference/omniroute` al repository dell'organizzazione. Ha bisogno dei segreti `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; senza di essi il lavoro rimane verde con un avviso "Docker Hub org mirror skipped" e gli altri registri pubblicano normalmente. Per pubblicare lì una versione rilasciata in un secondo momento, esegui** Azioni → Specchia l'immagine Docker nell'org Docker Hub → Esegui il flusso di lavoro** con `version=X.Y.Z` (e `promote_latest` per la versione stabile più alta): copia le immagini esistenti, senza ricostruirle.
+**Repository dell'organizzazione Docker Hub (`cheaperinference/omniroute`):** Docker Hub non può spostare un repository tra spazi dei nomi, quindi `diegosouzapw/omniroute` conserva la cronologia dei pull e ogni rilascio e il lavoro `mirror-org-dockerhub` di `docker-publish` copia ogni versione rilasciata (e `:latest` quando promossa) da `ghcr.io/cheaper-inference/omniroute` al repository dell'organizzazione. Ha bisogno dei segreti `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; senza di essi il lavoro rimane verde con un avviso "Docker Hub org mirror skipped" e gli altri registri pubblicano normalmente. Per pubblicare lì una versione rilasciata in un secondo momento, esegui** Azioni → Specchia l'immagine Docker nell'org Docker Hub → Esegui il flusso di lavoro** con `version=X.Y.Z` (e `promote_latest` per la versione stabile più alta): copia le immagini esistenti, senza ricostruirle. La panoramica dell'hub Docker di quel repository è impostata manualmente: lo API che la modifica rifiuta i token di accesso dell'organizzazione.
+
+Lo stesso flusso di lavoro copia anche ogni versione del pacchetto GHCR `ghcr.io/diegosouzapw/omniroute` legacy fino al 30/06/2027, quindi le installazioni ancora bloccate continuano ad aggiornarsi; il suo indice riporta la descrizione "spostato in `ghcr.io/cheaper-inference/omniroute`". Necessita del segreto `GHCR_LEGACY_TOKEN` (un classico token di accesso personale di `diegosouzapw` con `write:packages`); senza di esso il lavoro viene saltato con l'avviso "Legacy GHCR mirror skipped".
 
 ## Corsia rapida per hotfix (etichetta `hotfix`)
 
@@ -121,7 +120,7 @@ E2E, senza alcuna etichetta.
 - [ ] passaggio `npm run test:vitest` — (server MCP, autoCombo, cache)
 - [ ] `npm run test:coverage` — cancello 60/60/60/60 soddisfatto (statements/lines/functions/branches)
 - [ ] `npm run test:integration` — pass (se cambia tocca DB /handlers)
-- [ ] `npm run test:combo:matrix` — pass (matrice della strategia combinata: dimostra in modo deterministico tutte le 22 decisioni di selezione delle strategie di routing pubblico; esegui quando si tocca il routing combinato, la risoluzione della strategia o la logica di fallback)
+- [ ] `npm run test:combo:matrix` — pass (matrice della strategia combinata: dimostra in modo deterministico tutte le 22 decisioni di selezione delle strategie di routing pubbliche; esegui quando si tocca il routing combinato, la risoluzione della strategia o la logica di fallback)
 - [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (fumo reale a monte con gate; genera un'istantanea DB di sola lettura da VPS `root@192.168.0.15`; colpisce fornitori reali, costa crediti; non viene mai eseguito in CI; salta in modo pulito senza il gate)
 - [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live smoke: 7 scenari HTTP contro il server `.15` live tramite il semplice nodo ESM; richiede `ssh root@192.168.0.15`; creates/deletes solo combo `__live_test__*` ; colpisce fornitori reali; non viene mai eseguito in CI)
 - [ ] passaggio `npm run test:e2e` — (modifiche UI )
@@ -151,7 +150,7 @@ Modifiche importanti: aggiungi il piè di pagina `BREAKING CHANGE:` o `!` dopo l
 ### Documentazione
 
 - [ ] Pass `npm run check:docs-sync` (esecuzione automatica tramite pre-commit)
-- [ ] `npm run check:docs-all` pass (ombrello: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` passa. Il suo avviso `check:deprecated-versions` segnala le versioni esplicitamente attribuite a OmniRoute (3.6.xe precedenti) e ignora le date.
 - [ ] `npm run check:env-doc-sync` esce 0 codice — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` il contratto env è intatto
 - [ ] `npm run check:doc-links` esce 0 — nessun riferimento di ribasso interno interrotto dopo la ristrutturazione
 - [ ] `docs/architecture/ARCHITECTURE.md` recensito per storage/runtime drift
@@ -399,7 +398,7 @@ Il bump commit di sviluppo è creato con git plumbing (nessun albero di lavoro v
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

@@ -69,35 +69,35 @@ PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777) मा प्र
 
 ## तीन मानहरू
 
-| मान    | UI लेबल                 | व्यवहार                                                                                                                                                          |
-| ------ | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `स्वचालित (dual-stack)` | OS ले family चयन गर्छ। IP-literal proxy host का लागि family उक्त literal मै अन्तर्निहित हुन्छ; hostname का लागि दुवै family योग्य हुन्छन्। यो पूर्वनिर्धारित हो। |
-| `ipv4` | `IPv4 मात्र`            | जडानलाई IPv4 मा स्थिर गर्छ। proxy host सँग IPv4 (A) record नभए सुरक्षित रूपमा असफल हुन्छ।                                                                        |
-| `ipv6` | `IPv6 मात्र`            | जडानलाई IPv6 मा स्थिर गर्छ। proxy host सँग IPv6 (AAAA) record नभए सुरक्षित रूपमा असफल हुन्छ।                                                                     |
+| मूल्य  | UI लेबल             | व्यवहार                                                                                                                                                |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto` | `Auto (dual-stack)` | OS ले परिवार छान्छ। आईपी-लिटरल प्रोक्सी होस्टको लागि, परिवार शाब्दिकसँग भित्री हुन्छ; होस्टनामको लागि, दुबै परिवारहरू योग्य छन्। यो पूर्वनिर्धारित हो। |
+| `ipv4` | `IPv4 only`         | IPv4 मा जडान पिन गर्नुहोस्। यदि प्रोक्सी होस्टसँग IPv4 (A) रेकर्ड छैन भने बन्द हुन्छ।                                                                  |
+| `ipv6` | `IPv6 only`         | IPv6 मा जडान पिन गर्नुहोस्। यदि प्रोक्सी होस्टसँग IPv6 (AAAA) रेकर्ड छैन भने बन्द हुन्छ।                                                               |
 
-UI string हरू `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) मा छन्।
+UI स्ट्रिङहरू `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) मा बस्छन्।
 
 ---
 
 ## यसलाई कसरी कन्फिगर गर्ने
 
-### Dashboard
+### ड्यासबोर्ड
 
-चयनकर्ता **Proxy Pool** tab को proxy form मा छ:
+चयनकर्ता को प्रोक्सी रूप मा छ** प्रोक्सी पूल** ट्याब:
 
-1. **Dashboard → Settings → Proxy → Proxy Pool** खोल्नुहोस्
-2. proxy थप्नुहोस् वा सम्पादन गर्नुहोस्
-3. **IP family** dropdown लाई `स्वचालित (dual-stack)`, `IPv4 मात्र`, वा `IPv6 मात्र` मा सेट गर्नुहोस्
-4. सुरक्षित गर्नुहोस्
+1. खोल्नुहोस्** ड्यासबोर्ड → सेटिङहरू → प्रोक्सी → प्रोक्सी पूल**
+2. प्रोक्सी थप्नुहोस् वा सम्पादन गर्नुहोस्
+3. सेट गर्नुहोस्**IP परिवार** `Auto (dual-stack)`, `IPv4 only`, वा `IPv6 only` मा ड्रपडाउन
+4. बचत गर्नुहोस्
 
-यो control `ProxyRegistryManager.tsx` द्वारा render गरिन्छ (`proxy/ProxyPoolTab.tsx` मा mount गरिएको)।
+नियन्त्रण `ProxyRegistryManager.tsx` द्वारा रेन्डर गरिएको छ ( `proxy/ProxyPoolTab.tsx` मा माउन्ट गरिएको)।
 
 ### API
 
-`family` field proxy registry का create/update payload हरूको भाग हो, जसलाई `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) द्वारा validate गरिन्छ र `POST` / `PATCH /api/v1/management/proxies` द्वारा handle गरिन्छ:
+`family` फिल्ड प्रोक्सी रजिस्ट्री create/update पेलोडहरूको भाग हो, `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) द्वारा प्रमाणित र `POST` / `PATCH /api/v1/management/proxies` द्वारा ह्यान्डल गरिएको :
 
 ```bash
-# IPv6-मात्र proxy सिर्जना गर्नुहोस्
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# विद्यमान proxy लाई IPv4-मात्रमा परिवर्तन गर्नुहोस्
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-यही field upstream-proxy entry हरूका लागि प्रयोग हुने inline proxy config object ले पनि स्वीकार गर्छ (`upstream_proxy_config.family`, [डेटा मोडेल](#data-model) हेर्नुहोस्)।
+अपस्ट्रिम-प्रोक्सी प्रविष्टिहरूको लागि प्रयोग गरिएको इनलाइन प्रोक्सी कन्फिगरेसन वस्तुद्वारा पनि उही क्षेत्र स्वीकार गरिएको छ (`upstream_proxy_config.family`, [डाटा मोडेल](#data-model) हेर्नुहोस्)।
 
-proxy CRUD/assignment API का बाँकी विवरणका लागि [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) हेर्नुहोस्।
+प्रोक्सी CRUD/assignment API को लागि, [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) हेर्नुहोस्।
 
 ---
 

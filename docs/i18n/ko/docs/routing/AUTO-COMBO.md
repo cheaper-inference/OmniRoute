@@ -8,123 +8,114 @@
 
 > 적응형 점수 계산과 무설정 자동 라우팅을 사용하는 자체 관리형 모델 체인
 
-## 무설정 자동 라우팅(`auto/` 접두사)
+## 제로 구성 자동 라우팅(`auto/` 접두사)
 
-> **신규:** 콤보를 생성할 필요가 없습니다. 모든 클라이언트에서 `auto/` 접두사를 직접 사용하세요.
+콤보 생성이 필요하지 않습니다. 클라이언트에서 직접 `auto` 또는 `auto/` 변형을 사용하십시오.
 
-### 빠른 예시
+### 빠른 예
 
-| 모델 ID        | 변형    | 동작                                                  |
-| -------------- | ------- | ----------------------------------------------------- |
-| `auto`         | 기본값  | 연결된 모든 제공자, LKGP 전략, 균형 잡힌 가중치       |
-| `auto/coding`  | coding  | 품질 우선 가중치, 코드 생성에 적합                    |
-| `auto/fast`    | fast    | 지연 시간이 짧은 항목을 우선하는 가중 선택            |
-| `auto/cheap`   | cheap   | 비용 최적화 라우팅(비용이 가장 낮은 항목 우선)        |
-| `auto/offline` | offline | 할당량 가용성이 가장 높은 제공자를 우선               |
-| `auto/smart`   | smart   | 품질 우선 + 더 나은 모델 탐색을 위한 높은 탐색률(10%) |
-| `auto/lkgp`    | lkgp    | 명시적 LKGP(기본 `auto`와 동일)                       |
-| `auto/chaos`   | chaos   | 병렬 팬아웃, 제공자당 모델 하나(장애 주입 아님)       |
+| 모델 ID             | 행동                                                                                                                               |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`              | 적격 공급자 모델, LKGP 전략 및 균형 가중치                                                                                         |
+| `auto/coding`       | 코딩 작업을 위한 품질 우선 가중치                                                                                                  |
+| `auto/fast`         | 대기 시간이 짧고 건강한 공급자를 선호합니다.                                                                                       |
+| `auto/cheap`        | 비용 절감 가중치: 더 낮은 카탈로그 가격을 선호합니다. 엄격한 최저가 우선 정렬이 아닌 LKGP 접착성을 유지합니다.                     |
+| `auto/subscription` | 계획에 포함된 할당량만, 실시간으로 확인됩니다. 빈 풀은 HTTP 503을 반환하며 요금이 청구되지 않습니다.                               |
+| `auto/thrifty`      | → 키리스 → 무료 → 저렴한 → 프리미엄, 한 번에 한 단계씩 구독; 청구할 수 있다                                                        |
+| `auto/offline`      | 할당량 가용성 및 공급자 상태를 선호합니다(`offline-friendly` 팩). 오프라인 추론이 아님 — 요청은 여전히 원격 공급자에게 전달됩니다. |
+| `auto/smart`        | 탐색률 10%의 품질 우선 가중치                                                                                                      |
+| `auto/lkgp`         | 기본 LKGP 와 동일한 가중치를 갖는 명시적 `auto`                                                                                    |
+| `auto/chaos`        | 공급자당 하나의 모델(기본적으로 최대 5개)이 포함된 병렬 패널, 하나의 답변 반환                                                     |
 
-### 카테고리 × 티어 조합(`auto/<category>:<tier>`)
+가중치 변형은 LKGP 고정성을 유지하므로 `fast` 및 `cheap` 모든 요청에 대해 최저 대기 시간이나 가격을 보장하기보다는 선호도를 표현합니다. `auto/chaos` 여러 업스트림 호출을 수행합니다. `auto/thrifty` 유료 용량을 사용할 수 있습니다. 계획 할당량으로 돌아가는 것은 재설정 시간뿐만 아니라 갱신된 자격 및 연결 휴지 시간에 따라 달라집니다. [구독 우선 라우팅을](./SUBSCRIPTION_LADDER.md) 참조하세요.
 
-OpenRouter 스타일 접미사는 **어떤 종류의 경로인지**(카테고리)와 **어떻게 최적화할지**(티어)를 분리하므로 자유롭게 조합할 수 있습니다(#4235 Phase B, `open-sse/services/autoCombo/suffixComposition.ts`).
+### 카테고리 × 계층 구성(`auto/<category>:<tier>`)
 
-- **카테고리**(기능에 따라 후보 풀 필터링): `coding` · `reasoning` · `vision` · `chat` · `multimodal`. `vision`/`multimodal`은 비전 기능을 지원하는 모델을 유지하며, `reasoning`은 추론/사고 모델을 유지합니다.
-- **티어**(점수 가중치/풀 필터 선택): `fast`(빠른 제공) · `cheap`(별칭 `floor`, 비용 절감) · `reliable`(회로 차단기 상태 + 지연 시간 안정성) · `free` / `pro`(`classifyTier`를 통해 모델 티어별로 풀 필터링 — 무료 티어와 프리미엄 티어).
+OpenRouter 스타일 접미사는 별도입니다.** 어떤 종류의 경로** (카테고리) 에서** 그것을 최적화하는 방법** (tier)이므로 자유롭게 구성할 수 있습니다(#4235 Phase B, `open-sse/services/autoCombo/suffixComposition.ts`).
 
-| 예시                   | 해석 결과                                         |
-| ---------------------- | ------------------------------------------------- |
-| `auto/coding:fast`     | 코딩 풀, 짧은 지연 시간 가중치                    |
-| `auto/coding:cheap`    | 코딩 풀, 비용 최적화(별칭 `auto/coding:floor`)    |
-| `auto/reasoning:pro`   | 추론/사고 모델만, 프리미엄 티어                   |
-| `auto/vision`          | 비전 기능 지원 모델(티어 없음 → 균형 잡힌 가중치) |
-| `auto/multimodal:free` | 멀티모달 기능 지원 모델, 무료 티어만              |
+- **카테고리** : `coding` · `reasoning` · `vision` · `chat` · `multimodal`. `vision`/`multimodal` 비전 지원 모델을 유지합니다. `reasoning` reasoning/thinking 모델을 유지합니다. `coding` 및 `chat` 기능 필터를 추가하지 않습니다. 비채팅 카테고리는 등급을 재정의하기 전에 품질 우선 가중치를 선택합니다.
+- **계층** (점수 가중치 선택/풀 필터): `fast` (빠른 배송) · `cheap` (별칭 `floor`, 비용 절감) · `reliable` (회로 차단기 상태 + 대기 시간 안정성) · `free` / `pro` ( `classifyTier` — 프리 티어 대 프리미엄을 통해 모델 티어별로 풀 필터링). `subscription` 및 `thrifty` 연결 기반 [구독 래더를](./SUBSCRIPTION_LADDER.md) 적용합니다.
 
-유효한 모든 `auto/<category>[:<tier>]`는 요청 시 해석됩니다. 엄선된 일부 항목은 `/v1/models`와 대시보드(`open-sse/services/autoCombo/builtinCatalog.ts`의 `AUTO_SUFFIX_VARIANTS`)에 표시됩니다. 필터링은 **장애 시 개방** 방식입니다. 제약 조건과 일치하는 연결된 모델이 없으면 전체 풀이 사용되므로 라우팅이 중단되지 않습니다. 핵심 점수 계산기(`combo.ts`)는 변경되지 않으며, 카테고리/티어 필터는 `buildAutoCandidates`에서 적용됩니다.
+| 예                     | 다음으로 해결됨                                     |
+| ---------------------- | --------------------------------------------------- |
+| `auto/coding:fast`     | 적격 풀, 지연 시간이 짧은 가중치                    |
+| `auto/coding:cheap`    | 적격 풀, 비용 절감 가중치(별칭 `auto/coding:floor`) |
+| `auto/reasoning:pro`   | reasoning/thinking 모델만 해당, 프리미엄 등급       |
+| `auto/vision`          | 품질 우선 가중치를 갖춘 비전 지원 모델              |
+| `auto/multimodal:free` | 다중 모드 지원 모델, 무료 등급만 해당               |
 
-> **실시간 모델 인텔리전스:** `ARENA_ELO_SYNC_ENABLED` 플래그가 켜져 있으면 실시간 **Arena ELO** 순위와 **models.dev** 티어 데이터를 바탕으로 자동 라우팅 적합도를 판단합니다(그렇지 않으면 정적 적합도 맵으로 대체).
+유효한 `auto/<category>[:<tier>]` 요청 시 해결됩니다. 선별된 하위 집합은 `/v1/models` 및 대시보드( `open-sse/services/autoCombo/builtinCatalog.ts` 의 `AUTO_SUFFIX_VARIANTS` )에 광고됩니다. Category/tier 필터링은** 기본적으로 페일클로즈됨** : 적합한 모델이 일치하지 않으면 가상 콤보에는 빈 풀이 있고 채팅 확인자는 HTTP 503(`src/sse/handlers/chatHelpers.ts`)을 반환합니다. 필터는 `open-sse/services/autoCombo/virtualFactory.ts` 의 `narrowPoolByCategoryTier` 입니다.
+
+`OMNIROUTE_AUTO_FREE_FALLBACK_TO_FULL_POOL=true` 필터가 아무것도 일치하지 않을 때 레거시 category/tier 폴백을 전체 풀로 복원합니다. 이는 요청된 계층 또는 기능 제약 조건을 삭제할 수 있습니다. 모델 제품군 필터는 해당 대체를 사용하지 않으며 구독 전용 라우팅에는 여전히 확인된 계획 포함 용량이 필요합니다.
+
+> **실시간 모델 인텔리전스:** 자동 라우팅 적합성은 실시간으로 알려줍니다.** 아레나 ELO** 순위 +** models.dev** `ARENA_ELO_SYNC_ENABLED` 플래그가 켜져 있으면 데이터 계층화(그렇지 않으면 정적 피트니스 맵으로 대체).
 
 **사용 방법:**
 
 ```bash
-# OpenAI 형식을 지원하는 모든 IDE 또는 CLI 도구
+# Any IDE or CLI tool that supports OpenAI format
 Base URL: http://localhost:20128/v1
 API Key:  <your-endpoint-key>
 
-# 코드/구성에서 모델을 다음과 같이 설정:
-model: "auto"                 # 균형 잡힌 기본값
-model: "auto/coding"          # 코딩 작업에 가장 적합
-model: "auto/fast"            # 사용 가능한 항목 중 가장 빠름
-model: "auto/cheap"           # 토큰당 비용이 가장 저렴함
+# In your code/config, set model to:
+model: "auto"                 # balanced default
+model: "auto/coding"          # favor coding task fit
+model: "auto/fast"            # favor lower latency
+model: "auto/cheap"           # favor lower catalog cost
 ```
 
-**처리 과정:**
+**무슨 일이 일어나는지:**
 
-1. OmniRoute가 `src/sse/handlers/chat.ts`에서 `auto/` 접두사를 감지합니다
-2. 데이터베이스에서 모든 **활성 제공자 연결**을 조회합니다
-3. 유효한 자격 증명(API 키 또는 OAuth 토큰)이 있는 연결만 필터링합니다
-4. 연결별 모델(`connection.defaultModel` 또는 제공자의 첫 번째 모델)을 결정합니다
-5. 메모리 내에 **가상 콤보**를 생성합니다(DB에 저장되지 않음)
-6. 선택한 변형의 가중치 프로필 + LKGP 전략을 사용해 라우팅합니다
+1. OmniRoute `src/sse/handlers/chat.ts` 에서 `auto/` 접두사를 감지합니다.
+2. 모두 쿼리** 활성 공급자 연결** 데이터베이스에서
+3. 자격 증명, 모델 가시성 및 자격 필터를 적용합니다.
+4. 사용 가능한 모델에서 논리적 provider/model 후보를 구축하고 파견을 위한 적격 계정 허용 목록을 유지합니다.
+5. 빌드** 가상 콤보** 메모리 내 ( DB 에 저장되지 않음)
+6. 선택한 변형의 가중치 프로필 + LKGP 전략을 사용하여 경로
 
 **주요 속성:**
 
-- ✅ **상시 활성화:** 토글, 콤보 생성 또는 구성이 필요하지 않음
-- ✅ **동적:** 현재 연결된 제공자를 자동으로 반영
-- ✅ **세션 고정성:** LKGP가 마지막으로 성공한 제공자를 우선하도록 보장
-- ✅ **다중 계정 인식:** 각 제공자 연결이 별도의 후보가 됨
-- ✅ **DB 쓰기 없음:** 가상 콤보는 요청에 대해서만 존재하므로 영속성 오버헤드가 없음
+- ✅** 상시 접속:** 토글 없음, 콤보 생성 없음, 구성 필요 없음
+- ✅** 동적:** 현재 연결된 공급자를 자동으로 반영합니다.
+- ✅** 세션 고정성:** LKGP 마지막으로 성공한 공급자가 우선순위를 갖도록 보장합니다.
+- ✅** 다중 계정 인식:** 논리적인 provider/model 후보자는 적격 계정 허용 목록을 유지합니다.
+- ✅** 저장된 콤보가 필요하지 않습니다.** 가상 구성은 메모리에 유지됩니다. 일반 라우팅 메트릭과 런타임 상태는 계속 유지될 수 있습니다.
 
-### 키별 후보 제어(#7819, 레벨 1+2)
+### 키별 후보 제어(#7819, 레벨 1 + 2)
 
-`GET /v1/auto-combo/{channel}/candidates`에서 (`{channel}` = `auto/` 뒤의 접미사 또는
-기본 채널의 경우 리터럴 `auto`)는 기존 복원력 조회를 재사용하여 실시간
-도달 가능성 정보가 추가된 `auto/*` 채널의 현재 후보 풀을 나열하는 **읽기 전용**
-엔드포인트입니다(회로 차단기의 원시 `state`는 사용하지 않음).
+`GET /v1/auto-combo/{channel}/candidates` (`{channel}` = `auto/` 뒤의 접미사 또는 기본 채널의 리터럴 `auto` )는** 읽기 전용** 기존 복원력 읽기를 재사용하여 실시간 연결 가능성으로 장식된 `auto/*` 채널의 현재 후보 풀을 나열하는 엔드포인트(원시 차단기 `state` 아님):
 
-- 제공자 회로 차단기 — `getCircuitBreaker(provider).getStatus()` / `.canExecute()`
-- 연결 쿨다운 — 확인된 `provider_connections` 행의 `rateLimitedUntil` /
-  `testStatus`
-- 모델 잠금 — `isModelLocked(provider, connectionId, model)`
+- 공급자 회로 차단기 — `getCircuitBreaker(provider).getStatus()` / `.canExecute()`
+- 해결된 `provider_connections` 행의 연결 쿨다운 — `rateLimitedUntil` / `testStatus`
+- 모델 잠금 장치 — `isModelLocked(provider, connectionId, model)`
 
-각 후보에는 이 API 키의 `excluded` 플래그도 포함됩니다. 제외 설정은 API 키별로
-저장됩니다(`auto_candidate_overrides` 테이블, 마이그레이션 `128`). OmniRoute는
-`users` 테이블이 없는 단일 테넌트이므로 `apiKeyId`가 실제 호출자별 ID에 가장
-가깝습니다. 이 설정은 순수 함수이자 단위 테스트를 거친
-`filterExcludedCandidates()`(`open-sse/services/autoCombo/candidateOverrides.ts`)를
-통해 `open-sse/services/autoCombo/virtualFactory.ts`의 후보 풀 병목 지점에서
-적용됩니다. 필터는 **장애 시 개방** 방식입니다. apiKeyId/채널이 설정되지 않았거나
-DB 조회에 실패하면 풀이 필터링되지 않으므로, 재정의가 구성되지 않은 운영자에게는
-이 기능 도입 이전과 바이트 단위로 동일한 라우팅이 제공됩니다.
+각 후보는 또한 이 API 키의 `excluded` 플래그를 전달합니다. 제외는 API 키별로 저장됩니다(`auto_candidate_overrides` 테이블, 마이그레이션 `128`) — OmniRoute 는 `users` 테이블이 없는 단일 테넌트이므로 `apiKeyId` 는 가장 가까운 실제 호출자별 ID — 이며 순수 단위 테스트를 거친 `filterExcludedCandidates()` (`open-sse/services/autoCombo/candidateOverrides.ts`)를 통해 `open-sse/services/autoCombo/virtualFactory.ts` 의 후보 풀 초크포인트에서 시행됩니다. 필터는** 페일오픈** : 설정되지 않은 apiKeyId/channel 또는 DB 조회 실패는 둘 다 풀을 필터링하지 않은 상태로 두므로 재정의가 구성되지 않은 운영자는 이 기능 이전과 동일한 라우팅 바이트를 봅니다.
 
-**후속 이슈로 연기됨:** 후보별 가중치 + 명시적 순서 지정(Level 3
-— 기존의 가중치/우선순위 전략 경로에 반영) 및 `auto/*` 채널별로 특정
-`combo.ts` 전략 고정(Level 4). 단일 테넌트 모델을 고려할 때 재정의를 API 키별로
-유지할지 전역으로 변경할지에 대한 미해결 질문은 #7819 계획을 참조하세요.
+**후속 문제로 연기됨:** 후보별 가중치 + 명시적 순서 지정(레벨 3 — 기존 weighted/priority 전략 경로에 적용) 및 `auto/*` 채널당 특정 `combo.ts` 전략 고정(레벨 4). 재정의가 API 키별로 유지되어야 하는지 아니면 단일 테넌트 모델을 고려하여 전역화되어야 하는지에 대한 공개 질문은 #7819 계획을 참조하세요.
 
-**내부 동작:**
+**비하인드 스토리:**
 
 ```txt
-요청: { model: "auto/coding" }
+Request: { model: "auto/coding" }
    ↓
-src/sse/handlers/chat.ts에서 접두사 감지
+src/sse/handlers/chat.ts detects prefix
    ↓
-createVirtualAutoCombo('coding') → 활성 연결로부터 candidatePool 생성
+createVirtualAutoCombo('coding') → candidatePool from active connections
    ↓
-handleComboChat(저장된 콤보와 동일한 엔진)
+handleComboChat (same engine as persisted combos)
    ↓
-자동 점수 산정으로 요청별 최적의 제공자/모델 선택
+Auto-scoring selects best provider/model per request
 ```
 
 **구현 파일:**
 
-| 파일                                                      | 목적                                    |
-| --------------------------------------------------------- | --------------------------------------- |
-| `open-sse/services/autoCombo/autoPrefix.ts`               | 접두사 파서(`parseAutoPrefix`)          |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | 가상 `AutoComboConfig` 객체 생성        |
-| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | 제공자 레지스트리 모킹을 위한 테스트 훅 |
-| `src/sse/handlers/chat.ts`                                | 통합: auto 접두사 단락 처리             |
-| `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` 시스템 항목     |
+| 파일                                                      | 목적                                          |
+| --------------------------------------------------------- | --------------------------------------------- |
+| `open-sse/services/autoCombo/autoPrefix.ts`               | 접두사 파서(`parseAutoPrefix`)                |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | 가상 `AutoComboConfig` 객체를 생성합니다.     |
+| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | 공급자 레지스트리를 조롱하기 위한 테스트 후크 |
+| `src/sse/handlers/chat.ts`                                | 통합: 자동 접두사 단락                        |
+| `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` 시스템 항목           |
 
 ## 저장된 자동 콤보에 대한 계정 환경설정
 
@@ -149,29 +140,23 @@ Intelligent Auto 편집기는 옵션을 제공합니다.** 계정 환경설정**
 
 ## 실제 모델 ID와 일치하는 콤보 이름
 
-`name`이 접두사 없는 모델 ID와 동일한 콤보(예: 이름이 `gpt-5.5`인 콤보)는 버그가 아니라 **의도적으로 지원되는 패턴**입니다. 이는 [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940)에 문서화된 모델 ID별 공급자 폴백 메커니즘입니다. 접두사 없는 모델 ID를 확인하기 전에 콤보 해석을 먼저 확인하므로(`src/sse/services/model.ts`의 `getComboForModel()`), 접두사 없는 ID `gpt-5.5`에 대한 요청은 단일 공급자로 곧바로 전달되지 않고 콤보의 대상(예: `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`)을 통해 라우팅됩니다. 이는 [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227)을 위해 구현된 재작성 전 콤보 우선순위를 재사용하며, `tests/unit/responses-combo-resolution-3227.test.ts` 및 `tests/unit/combo-name-codex-responses-rewrite.test.ts`에서 회귀 테스트됩니다.
+`name` 가 기본 모델 ID와 동일한 콤보(예: `gpt-5.5` 라는 콤보)는** 의도적이며 지원되는 패턴** , 버그가 아닙니다. 이는 [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) 에 문서화된 모델 ID별 공급자 대체 메커니즘입니다. 베어 모델 ID 확인( `src/sse/services/model.ts` 의 `getComboForModel()` ) 전에 콤보 확인이 확인되기 때문에 베어 ID `gpt-5.5` 에 대한 요청은 단일 제공자 — 로 바로 전달되는 대신 콤보의 대상(예: `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`)을 통해 라우팅됩니다. 이는 [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) 용으로 구축된 재작성 전 콤보 우선 순위를 재사용하고 `tests/unit/responses-combo-resolution-3227.test.ts` 및 `tests/unit/combo-name-codex-responses-rewrite.test.ts` 에 의해 회귀 테스트됩니다.
 
-실제 모델 ID를 가리는 이름으로 콤보를 생성하거나 이름을 변경하는 작업은 **절대로 거부되지 않습니다**. 이를 거부하면 문서화된 이 워크플로가 중단되기 때문입니다. 대신 (#8530), 새 이름이 실제 모델 ID와 충돌하면 `POST /api/combos`와 `PUT /api/combos/[id]`가 응답에 비차단 `warning` 필드를 추가합니다.
+실제 모델 ID를 숨기는 이름으로 콤보를 만들거나 이름을 바꾸는 것은** 결코 거절하지 않았다** — 그렇게 하면 문서화된 작업 흐름이 중단될 수 있습니다. 대신(#8530), `POST /api/combos` 및 `PUT /api/combos/[id]` (새) 이름이 실제 모델 ID와 충돌할 때 응답에 비차단 `warning` 필드를 첨부합니다.
 
 ```json
-{
-  "warning": {
-    "code": "COMBO_NAME_SHADOWS_MODEL",
-    "modelId": "gpt-5.5",
-    "providerId": "openai"
-  }
-}
+{ "warning": { "code": "COMBO_NAME_SHADOWS_MODEL", "modelId": "gpt-5.5", "providerId": "openai" } }
 ```
 
-부팅 시 `scanComboModelNameCollisionsAtBoot()`(`src/instrumentation-node.ts`)는 모델 ID를 가리는 기존의 모든 콤보를 나열하는 한 줄짜리 `[STARTUP]` 경고도 기록합니다. 따라서 #6940에 따라 의도적으로 사용한 경우가 아니라 실수로 이 상황을 초래한 운영자도 이를 인지할 수 있습니다. 감지 헬퍼는 `src/lib/combos/modelNameCollision.ts`에 있습니다.
+부팅 시 `scanComboModelNameCollisionsAtBoot()` (`src/instrumentation-node.ts`)는 모델 ID를 섀도잉하는 모든 기존 콤보를 나열하는 한 줄 `[STARTUP]` 경고도 기록하므로 (고의적으로 #6940 아닌) 우연히 이 경고를 누른 운영자는 신호를 받습니다. 감지 도우미는 `src/lib/combos/modelNameCollision.ts` 에 있습니다.
 
-## 클라이언트에서 사용자 지정 콤보 호출하기
+## 클라이언트에서 사용자 정의 콤보 호출
 
-영구 저장된 콤보(Settings → Combos)는 클라이언트가 `model` 필드에 콤보의 **정확한 이름**을 전송할 때만 사용됩니다. 콤보 이름에 대한 유사 또는 부분 일치는 없으며, `auto/` 접두사도 사용되지 않습니다. 해석 순서(`src/sse/services/model.ts`의 `getComboForModel()`):
+지속형 콤보( → 콤보 설정)는 클라이언트가 콤보를 보낼 때만 사용됩니다.** 정확한 이름** `model` 필드 — 에는 콤보 이름의 퍼지 또는 부분 일치가 없으며 `auto/` 접두사가 포함되지 않습니다. 해결 순서(`getComboForModel()` in `src/sse/services/model.ts`):
 
 1. 정확한 콤보 이름 일치(`model: "my-combo"`),
 2. `combo/<name>` 접두사(`model: "combo/my-combo"`),
-3. 모델→콤보 glob 매핑(`/api/model-combo-mappings`).
+3. 모델 → 콤보 글로브 매핑(`/api/model-combo-mappings`).
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -180,16 +165,16 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -d '{"model":"my-combo","messages":[{"role":"user","content":"Hello"}]}'
 ```
 
-흔히 발생하는 두 가지 문제:
+두 가지 일반적인 함정:
 
-- **`auto`는 사용자의 콤보를 사용하지 않습니다.** `auto`/`auto/*`는 자체적인 무설정 후보 풀을 구성하며, 콤보 이름이 문자 그대로 `auto`인 경우에만 영구 저장된 콤보를 참조합니다(권장하지 않음). 콤보를 통해 라우팅하려면 `auto`가 아니라 해당 콤보의 정확한 이름을 전송하세요.
-- **`openrouter/auto`는 실제 유료 OpenRouter 제품**("Auto Best Available")이며 OmniRoute 별칭이 아닙니다. 이는 OpenRouter 레지스트리(`open-sse/config/providers/registry/openrouter/index.ts`)의 단일 정적 모델 항목이며 별도로 요금이 청구됩니다. `auto` 풀에서 제외하려면 Settings → Routing → Hide paid models를 사용하세요.
+- **`auto` 콤보를 사용하지 않습니다.** `auto`/`auto/*` 자체적으로 구성이 없는 후보 풀을 구축하고 콤보 이름이 문자 그대로 `auto` 인 경우에만 지속형 콤보를 참조합니다(권장하지 않음). 콤보를 통해 라우팅하려면 `auto` 아닌 정확한 이름 — 보내십시오.
+- **`openrouter/auto` 는 실제 유료 OpenRouter 제품입니다** ("Auto Best Available"), OmniRoute 별칭이 아닙니다. 이는 OpenRouter 레지스트리(`open-sse/config/providers/registry/openrouter/index.ts`)의 단일 정적 모델 항목이며 별도로 비용이 청구됩니다. 설정 → 라우팅 → 유료 모델 숨기기를 사용하여 `auto` 풀에서 제외하세요.
 
-이 문서에서 다루는 최초의 혼동에 대해서는 [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) 및 [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111)을 참조하세요.
+이 문서의 원래 혼동에 대해서는 [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) 및 [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) 참조하십시오.
 
 ## 작동 방식(지속적인 자동 콤보)
 
-자동 콤보 엔진은 다음을 사용하여 각 요청에 가장 적합한 provider/model 동적으로 선택합니다.** 16요인 채점 기능** ( `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS` 에 정의됨) 기본 가중치 합계는 `1.0` 입니다. 사용자 정의 가중치는 `normalizeScoringWeights()` 에 의해 재정규화됩니다. 16개의 — `cacheAffinity` 및 `resetWindowAffinity` — 중 2개는 `0` 의 기본 가중치를 갖습니다. `reliability` `DEFAULT_WEIGHTS` 에서 `0` 운반하지만 zqq에서는 `0.03`, `reliability-first` 에서 `0.04` 운반하며, `quality` `0.02` 팩으로 운반합니다(`0.03` 에서 `quality-first`): 여전히 모든 후보에 대해 계산되며 `cacheAffinity` 점수 외부에서 프롬프트 캐시 중복 제거를 수행하므로 팩이 수행하는 동안 기본 팩터가 0인 요소는 기본적으로 투표하지 않습니다.
+자동 콤보 엔진은 다음을 사용하여 동적으로 provider/model 후보의 점수를 매깁니다.** 16개의 선언된 요소** ( `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS` 에 정의됨) 기본 가중치 합계는 `1.0` 입니다. 사용자 정의 가중치는 `normalizeScoringWeights()` 에 의해 재정규화됩니다. 세 가지 요소 `cacheAffinity`, `resetWindowAffinity` 및 `reliability` 는 기본적으로 가중치가 0입니다. 모드 팩은 `reliability` `0.03` 의 가중치를 부여하거나 `reliability-first` 에 `0.04` 합니다. `quality` 기본적으로 `quality-first` 에서 `0.03` 운반하고 다른 팩에서는 `0.02` 운반합니다. `cacheAffinity` 또한 가중치 점수를 벗어나 프롬프트 캐시 중복 제거를 수행합니다.
 
 ![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
@@ -286,32 +271,34 @@ curl -sS http://localhost:20128/v1/chat/completions \
 
 OmniRoute 의 콤보 엔진은 다음을 지원합니다.** 22가지 라우팅 전략** ( `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` 에 선언됨) Auto Combo 엔진 자체는 `auto` 전략에 노출됩니다. 나머지는 지속적인 콤보에 사용할 수 있습니다.
 
-| 전략                | 설명                                                                                                                                                                                                        |
-| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | 명시적인 우선순위가 있는 첫 번째 대상 순서 목록                                                                                                                                                             |
-| `weighted`          | 목표별 가중치에 따라 무작위로 가중치 부여                                                                                                                                                                   |
-| `round-robin`       | 대상을 순서대로 순환합니다(일괄 처리, 아래 참조).                                                                                                                                                           |
-| `context-relay`     | 대상 전체에 걸쳐 컨텍스트 전달(긴 대화)                                                                                                                                                                     |
-| `fill-first`        | 다음 단계로 이동하기 전에 각 대상의 할당량을 채우세요.                                                                                                                                                      |
-| `p2c`               | Power-of-2-choices 무작위 로드 밸런싱                                                                                                                                                                       |
-| `random`            | 균일한 무작위 선택                                                                                                                                                                                          |
-| `least-used`        | 현재 부하가 가장 낮은 대상 선택                                                                                                                                                                             |
-| `cost-optimized`    | 카탈로그 가격을 고려하여 요청당 $를 최소화하세요.                                                                                                                                                           |
-| `reset-aware` ⭐    | 할당량 재설정 시간에 따라 우선순위 지정 — 짧은 재설정 기간이 더 높은 순위에 있음                                                                                                                            |
-| `reset-window`      | 할당량이 가장 빨리 재설정되는 대상을 선호합니다.                                                                                                                                                            |
-| `expiry-first`      | 그렇지 않으면 할당량이 만료될 계정을 사용하지 않고 먼저 사용합니다. — 재설정 기한이 가장 가까운 가장 높은 남은 금액이 먼저 사용됩니다.                                                                      |
-| `headroom`          | 할당량 헤드룸이 가장 많이 남은 대상을 선택합니다.                                                                                                                                                           |
-| `quota-weighted`    | 소진된 계정을 건너뛰고 남은 할당량을 기내 부하로 나눈 비율에 따라 나머지 계정 중에서 선택합니다. 기존 대화는 고정된 상태로 유지됩니다.                                                                      |
-| `strict-random`     | 반복 중복 제거 없이 무작위로 수행                                                                                                                                                                           |
-| `auto`              | 자동 콤보 점수(16요인) — 사용** 추천**                                                                                                                                                                      |
-| `lkgp`              | 마지막으로 알려진 양호한 경로(마지막으로 성공한 공급자에 고정한 다음 규칙으로 대체)                                                                                                                         |
-| `context-optimized` | 현재 컨텍스트 크기에 가장 적합한 대상을 선택하세요.                                                                                                                                                         |
-| `cache-optimized`   | 프롬프트 캐시 선호도에 따라 대상 재정렬 — 이 요청의 캐시된 접두사를 이미 보유하고 있을 가능성이 가장 높은 연결이 먼저 시도됩니다(`open-sse/services/combo/promptCacheAffinity.ts`, #8008)                   |
-| `fusion` 🧬         | 모델 패널을 병렬로 팬아웃한 다음 심사위원을 통해 하나의 답변을 종합합니다(아래 참조).                                                                                                                       |
-| `pipeline`          | 대상을 순차적으로 실행하여 각 단계의 출력을 다음 단계의 입력으로 스레딩합니다. 최종 답변만 반환됩니다(#6396).                                                                                               |
-| `jev`               | 사용자 순위 선호도 목록; TypeSafe Jev는 이 요청에 대해 어떤 항목이 실행되는지 인정합니다. 승자 우선, 다른 승인된 대상은 사용자 순서를 유지합니다. Jev를 사용할 수 없을 때 사용자 주문이 가능합니다(#15276). |
+| 전략                | 설명                                                                                                                                                                                                                                                                                                                                             |
+| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | 명시적인 우선순위가 있는 첫 번째 대상 순서 목록                                                                                                                                                                                                                                                                                                  |
+| `weighted`          | 목표 가중치에 따라 요청당 비례 무작위 추첨; 다른 대상은 대체 대상이 됩니다(아래 참조).                                                                                                                                                                                                                                                           |
+| `round-robin`       | 고정 배치로 순서대로 대상을 순환합니다(기본적으로 대상당 3개의 성공, 아래 참조).                                                                                                                                                                                                                                                                 |
+| `context-relay`     | 대화가 다른 계정으로 이동할 때 우선순위 순서와 전달 요약                                                                                                                                                                                                                                                                                         |
+| `fill-first`        | 다음 단계로 이동하기 전에 각 대상의 할당량을 채우세요.                                                                                                                                                                                                                                                                                           |
+| `p2c`               | 두 개의 대상을 샘플링하고 더 건강하고 빠른 대상을 선호합니다.                                                                                                                                                                                                                                                                                    |
+| `random`            | 요청에 따라 신선한 Fisher-Yates 셔플; 연속 요청은 동일한 대상에서 시작할 수 있습니다.                                                                                                                                                                                                                                                            |
+| `least-used`        | 이 콤보에서 기록된 요청이 가장 적은 대상을 선택하세요(모델 + 계정당).                                                                                                                                                                                                                                                                            |
+| `cost-optimized`    | 가장 낮은 카탈로그 입력 토큰 가격을 먼저 시도해 보십시오. 알 수 없는 가격은 마지막에 적용됩니다(최종 요청 비용 아님).                                                                                                                                                                                                                            |
+| `reset-aware` ⭐    | 남은 세션 및 주간 할당량에 더해 긴급성 재설정 점수를 매깁니다. 가까운 동점 회전                                                                                                                                                                                                                                                                  |
+| `reset-window`      | 할당량이 가장 빨리 재설정되는 대상을 선호합니다.                                                                                                                                                                                                                                                                                                 |
+| `expiry-first`      | 그렇지 않으면 할당량이 만료될 계정을 사용하지 않고 먼저 사용합니다. — 재설정 기한이 가장 가까운 가장 높은 남은 금액이 먼저 사용됩니다.                                                                                                                                                                                                           |
+| `headroom`          | 할당량 헤드룸이 가장 많이 남은 대상을 선택합니다.                                                                                                                                                                                                                                                                                                |
+| `quota-weighted`    | 할당량 가용성 및 진행 중인 로드를 기준으로 요청을 분산합니다. 세션 선호도 유지                                                                                                                                                                                                                                                                   |
+| `strict-random`     | 콤보당 셔플된 덱: 모든 대상은 재편성되기 전에 한 번 사용됩니다. 한 사이클의 마지막 사이클은 결코 다음 사이클을 시작하지 않습니다                                                                                                                                                                                                                 |
+| `auto`              | 자동 콤보 점수(16요인) — 사용** 추천**                                                                                                                                                                                                                                                                                                           |
+| `lkgp`              | 마지막으로 알려진 양호한 경로(마지막으로 성공한 공급자에 고정한 다음 규칙으로 대체)                                                                                                                                                                                                                                                              |
+| `context-optimized` | 알려진 가장 큰 컨텍스트 창을 먼저 시도해 보세요(모델 기능 제한 해결).                                                                                                                                                                                                                                                                            |
+| `cache-optimized`   | 캐시에 프롬프트 접두어를 보유할 가능성이 있는 적합한 연결을 선호합니다(`open-sse/services/combo/promptCacheAffinity.ts`, #8008)                                                                                                                                                                                                                  |
+| `fusion` 🧬         | 모델 패널을 병렬로 팬아웃한 다음 심사위원을 통해 하나의 답변을 종합합니다(아래 참조).                                                                                                                                                                                                                                                            |
+| `pipeline`          | 대상을 순차적으로 실행하여 각 단계의 출력을 다음 단계의 입력으로 스레딩합니다. 최종 답변만 반환됩니다(#6396).                                                                                                                                                                                                                                    |
+| `jev`               | 사용자 순위 선호도 목록; TypeSafe Jev는 이 요청에 대해 어떤 항목이 실행되는지 인정합니다. 승자가 먼저, 다른 승인된 대상이 순서를 유지합니다. 선택 및 유료: `COMBO_JEV_STRATEGY_ENABLED` 켜져 있을 때만 호출됩니다(기본값은 꺼져 있음). 각 호출은 api.typesafe.ai에 제한된 발췌 내용을 보냅니다. 사용할 수 없는 경우 주문으로 돌아갑니다(#15276). |
 
 ⭐ = v3.8.0의 새로운 기능 · 🧬 = v3.8.36의 새로운 기능
+
+`jev` 전략은 `COMBO_JEV_STRATEGY_ENABLED` 활성화된 경우에만 유료 TypeSafe 호출을 수행합니다. 저장된 TypeSafe 키만으로는 활성화되지 않습니다. 플래그를 끄면 콤보는 해당 호출(`open-sse/services/combo/jevAsk.ts`)을 하지 않고도 운영자의 명령을 유지합니다.
 
 ### `weighted` 의미론
 
@@ -356,7 +343,7 @@ OmniRoute 의 콤보 엔진은 다음을 지원합니다.** 22가지 라우팅 �
 }
 ```
 
-실행기는 하나의 응답으로 여러 개의 독립적인 호출을 내보낼 수 있습니다. 종속 호출은 이후 클라이언트 도구 결과 차례에서 처리되며 플래너는 모든 결과를 검토합니다. `maxToolRounds` 의 기본값은 `8` 이며 `1`–`32` 를 허용합니다. 일단 도달하면 계획자는 가능한 최상의 최종 답변을 생성해야 합니다. 내부 기획자 결정은 버퍼링되는 반면, 선택한 클라이언트 측 응답은 원래 스트리밍 기본 설정을 유지합니다.
+실행기는 하나의 응답으로 여러 개의 독립적인 호출을 내보낼 수 있습니다. 종속 호출은 이후 클라이언트 도구 결과 차례에서 처리되며 플래너는 모든 결과를 검토합니다. `maxToolRounds` 의 기본값은 `8` 이며 `1`–`32` 를 허용합니다. 일단 도달하면 계획자는 가능한 최상의 최종 답변을 생성해야 합니다. 내부 계획자의 결정은 버퍼링되는 반면, 선택한 클라이언트 측 응답은 원래 스트리밍 기본 설정을 유지합니다.
 
 ### `round-robin` 고정 배치 및 계정 확장
 
@@ -467,55 +454,47 @@ Auto Combo 엔진에는 사전 정의된 콤보가 필요하지 않습니다. �
 
 ## API
 
-**전용 `POST /api/combos/auto` 엔드포인트는 없습니다** — Auto-Combo는 다음 두 가지 방식으로 사용됩니다.
+있다** 전용 `POST /api/combos/auto` 엔드포인트 없음** — 자동 콤보는 두 가지 방법으로 소비됩니다:
 
-1. **구성 불필요(권장):** `model: "auto"` 또는 `model: "auto/<variant>"`를 사용하여 채팅 완성 요청을 보내세요. 가상 팩토리가 요청마다 콤보를 생성하므로 영속화나 API 호출이 필요하지 않습니다.
+1. **구성 없음(권장):** `model: "auto"` 또는 `model: "auto/<variant>"` 사용하여 채팅 완료 요청을 보냅니다. 가상 팩토리는 — 요청당 콤보를 구축하며 지속성도 없고 API 호출도 필요하지 않습니다.
 
-2. **`strategy: "auto"`를 사용하는 영속 콤보:** `POST /api/combos`를 통해 일반 콤보를 생성하고 `strategy: "auto"`와 함께 `config.auto.weights` / `config.auto.candidatePool`을 설정하세요. 동일한 점수 산정 엔진이 사용되며, 콤보는 `combos`에 저장되어 ID로 재사용할 수 있습니다.
+2. **`strategy: "auto"` 와의 지속적인 콤보 :** `POST /api/combos` 통해 일반 콤보를 만들고 `strategy: "auto"` + `config.auto.weights` / `config.auto.candidatePool` 를 설정합니다. 동일한 채점 엔진이 사용됩니다. 콤보는 `combos` 에 저장되고 ID 에 의해 재사용 가능합니다.
 
-탐색을 위해 `GET /api/combos/auto`는 해석된 후보 풀과 함께 모든 변형을 나열하며, 후보 풀의 컨텍스트 윈도우에서 가장 큰 값인 `context_length` / `max_output_tokens`도 제공합니다. 클라이언트(예: opencode 플러그인)는 `0` 대신 이 값을 표시해야 합니다. 컨텍스트가 0이면 opencode의 자동 압축이 완전히 비활성화되어, 게이트웨이의 기록 정리로 컨텍스트가 소실될 때까지 세션이 계속 커집니다. Auto-Combo의 컨텍스트 사전 필터가 크기가 초과된 요청을 큰 윈도우를 가진 후보로 라우팅하므로 최댓값을 표시해도 안전합니다.
+검색을 위해 `GET /api/combos/auto` 해결된 후보 풀과 함께 모든 변종을 나열하고 후보 풀의 창에 걸쳐 `context_length` / `max_output_tokens` — MAX 나열합니다. 클라이언트(예: 오픈코드 플러그인)는 `0` 대신 이러한 값을 광고해야 합니다. 컨텍스트가 0이면 오픈코드의 자동 압축이 완전히 비활성화되어 게이트웨이의 기록 제거로 컨텍스트가 파괴될 때까지 세션이 증가할 수 있습니다. 자동 콤보 컨텍스트 사전 필터가 대형 요청을 대형 창 후보로 라우팅하기 때문에 MAX 광고하기에 안전합니다.
 
 ```bash
-# 구성을 생성하지 않고 사용(콤보 생성 없음)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# 일반 콤보 엔드포인트를 통한 영속 Auto 콤보
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Auto 라우터 전략
+### 자동 라우터 전략
 
-영속 `strategy: "auto"` 콤보는 `config.routerStrategy`(또는 레거시
-`config.auto.routerStrategy`)를 다음 중 하나로 설정할 수 있습니다.
+지속형 `strategy: "auto"` 콤보는 `config.routerStrategy` (또는 레거시 `config.auto.routerStrategy`)를 다음 중 하나로 설정할 수 있습니다.
 
-- `rules` — 기본 가중치 기반 점수 산정
-- `score` — 구성된 가중 점수가 가장 높은 후보를 선택합니다. 점수가 정확히 같은 경우 구성된
-  후보 순서를 유지하며, 기존 `explorationRate`는 순위가 매겨진 전체 풀에서 샘플링합니다.
-- `cost` / `eco` — 정상 상태인 공급자 중 가장 저렴한 공급자
-- `latency` / `fast` — 신뢰성 페널티를 적용한 가장 낮은 p95 지연 시간
-- `sla-aware` / `sla` — p95 지연 시간, 오류율 및 선택적
-  비용 SLO를 충족하는 후보를 우선합니다.
-- `lkgp` — 마지막으로 정상 상태였던 공급자를 우선합니다.
-- `nadir` — 풀에서 프롬프트에 필요한 모델을 [Nadir](https://getnadir.com)의 의사 결정 API에
-  질의합니다. 옵트인 방식이며, 실패 시 `rules`로 개방형 장애 처리를 수행합니다.
+- `rules` — 기본 가중 점수
+- `score` — 구성된 가장 높은 가중치 점수를 선택합니다. 정확한 동점은 구성된 후보 순서를 유지합니다. 전체 순위 풀의 기존 `explorationRate` 샘플.
+- `cost` / `eco` — 가장 저렴한 건강한 공급자
+- `latency` / `fast` — 신뢰성 저하로 가장 낮은 p95 대기 시간
+- `sla-aware` / `sla` — p95 대기 시간, 오류율 및 선택적 비용을 만족하는 후보를 선호합니다 SLOs
+- `lkgp` — 마지막으로 알려진 양호한 공급자 먼저
+- `nadir` — [Nadir](https://getnadir.com) 의 결정을 묻습니다 API 프롬프트에 필요한 풀의 모델은 무엇입니까? 옵트인, `rules` 에 대한 페일오픈
+- `decision` — 구성된 결정자(TypeSafe System One, 자체 결정 URL 또는 콤보 자체 모델 중 하나)에게 풀의 어떤 모델이 요청에 맞는지 물어봅니다. 기본 꺼진 `COMBO_DECISION_ROUTER_ENABLED` 플래그 뒤에 `rules` 에 대한 페일오픈
 
-### 라우터 전략 상세
+### 라우터 전략 세부정보
 
-Auto-Combo 엔진은 `config.routerStrategy`(또는 레거시 `config.auto.routerStrategy`)를 통해
-교체할 수 있는 7개의 플러그형 **RouterStrategy** 구현을 제공합니다.
-각 전략은 `RoutingContext`(작업 유형, 도구/비전 힌트, 토큰 추정치, 선택적 SLA 정책,
-선택적 마지막 정상 공급자)를 기반으로 후보 풀에서 하나의 공급자를 선택합니다.
+자동 콤보 엔진은 7개의 플러그형을 노출합니다.**RouterStrategy** `config.routerStrategy` (또는 레거시 `config.auto.routerStrategy`)를 통해 교체할 수 있는 구현입니다. 각 전략은 `RoutingContext` (작업 유형, tool/vision 힌트, 토큰 추정, 선택적 SLA 정책, 선택적 마지막으로 알려진 양호한 공급자)를 고려하여 후보 풀에서 하나의 공급자를 선택합니다.
 
-#### 1. `rules` (기본값) — 16개 요소 가중치 기반 점수 산정
+#### 1. `rules` (기본값) — 16요인 가중치 점수
 
-기존 점수 산정 엔진을 래핑합니다. `OPEN` 상태인 회로 차단기
-후보를 제외한 다음, 현재 작업 유형 및 `getTaskFitness()`와 함께 `scorePool()`을 실행하여
-점수가 가장 높은 공급자를 선택합니다.
+기존 채점 엔진을 래핑합니다. `OPEN` 회로 차단기 후보를 필터링한 다음 현재 작업 유형 및 `getTaskFitness()` 로 `scorePool()` 실행하여 최고 점수 제공자를 선택합니다.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -535,16 +514,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**사용 시점**: 기본값입니다. 모든 신호를 균형 있게 절충하려는 경우 사용하세요.
+**언제 사용하나요?** : 기본. 모든 신호에 걸쳐 균형 잡힌 균형을 원할 때 사용합니다.
 
-**별칭**: `rules` (별칭 없음)
+**별명** : `rules` (별칭 없음)
 
 ---
 
-#### 2. `cost` / `eco` — 정상 상태인 공급자 중 가장 저렴한 공급자
+#### 2. `cost` / `eco` — 가장 저렴한 건강한 공급자
 
-후보 풀을 `costPer1MTokens` 기준 오름차순으로 정렬하고 가장 저렴한 공급자를 선택합니다.
-먼저 `OPEN` 상태인 후보를 제외합니다.
+후보 풀을 `costPer1MTokens` (오름차순)로 정렬하고 가장 저렴한 것을 선택합니다. 먼저 `OPEN` 후보를 필터링합니다.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -559,16 +537,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**사용 시점**: 비용에 민감한 워크로드, 배치 처리 또는 백그라운드 작업에 사용하세요.
+**언제 사용하나요?** : 비용에 민감한 워크로드, 일괄 처리 또는 백그라운드 작업.
 
-**별칭**: `cost`, `eco`
+**별칭** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — 신뢰성 페널티를 적용한 가장 낮은 p95 지연 시간
+#### 3. `latency` / `fast` — 최저 p95 대기 시간(신뢰성 저하)
 
-`p95LatencyMs + (errorRate * 1000)`을 기준으로 정렬합니다. 오류율 페널티를 통해
-명목상 지연 시간이 낮더라도 신뢰할 수 없는 공급자의 순위가 낮아집니다.
+`p95LatencyMs + (errorRate * 1000)` 로 정렬합니다. 오류율 페널티는 명목상 지연 시간이 낮더라도 신뢰할 수 없는 공급자의 순위를 낮추도록 보장합니다.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -585,28 +562,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**사용 시점**: 실시간 채팅, 자동 완성 또는 대화형 코딩 어시스턴트와 같이
-지연 시간에 민감한 워크로드에 사용하세요.
+**언제 사용하나요?** : 실시간 채팅, 자동 완성 또는 대화형 코딩 도우미와 같이 지연 시간에 민감한 워크로드입니다.
 
-**별칭**: `latency`, `fast`
+**별칭** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — 지연 시간/오류/비용 SLO 준수
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO 준수
 
-구성된 SLO 정책을 얼마나 잘 충족하는지에 따라 각 후보의 점수를 산정합니다.
+구성된 SLO 정책을 얼마나 잘 충족하는지에 따라 각 후보에 점수를 매깁니다.
 
-| 요소           | 가중치 | 공식                                              |
-| -------------- | ------ | ------------------------------------------------- |
-| 지연 시간 점수 | 35%    | `threshold / max(value, ε)`                       |
-| 오류 점수      | 35%    | `threshold / max(value, ε)`                       |
-| 상태 점수      | 15%    | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
-| 비용 점수      | 10%    | `threshold / max(value, ε)` 또는 역정규화         |
-| 안정성 점수    | 5%     | 지연 시간 표준 편차를 역정규화                    |
+| 요인           | 무게 | 공식                                              |
+| -------------- | ---- | ------------------------------------------------- |
+| 대기 시간 점수 | 35%  | `threshold / max(value, ε)`                       |
+| 오류 점수      | 35%  | `threshold / max(value, ε)`                       |
+| 건강 점수      | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
+| 비용 점수      | 10%  | `threshold / max(value, ε)` 또는 역 정규화        |
+| 안정성 점수    | 5%   | 역정규화 대기시간 표준편차                        |
 
-`hardConstraints: true`인 경우 후보는 우선 **위반 점수**
-(SLO를 얼마나 초과하는지)를 기준으로 정렬된 다음, 종합 점수를 기준으로 정렬됩니다. 그렇지 않으면
-종합 점수만 사용됩니다.
+`hardConstraints: true` 인 경우 후보자는 주로 다음을 기준으로 정렬됩니다.** 위반 점수** (얼마나 SLO 초과하는지), 그런 다음 종합 점수로 계산됩니다. 그렇지 않으면 단지 종합 점수일 뿐입니다.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -615,12 +589,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... 정책에 따라 각 후보의 점수를 계산합니다: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA 필드**(콤보 구성에서 설정):
+**SLA 필드** (콤보 구성에서 설정):
 
 ```json
 {
@@ -635,17 +609,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**사용 시점**: 지연 시간, 오류율 또는 비용 예산이 엄격한 프로덕션 워크로드.
+**언제 사용하나요?** : 대기 시간, 오류율 또는 비용 예산이 엄격한 프로덕션 워크로드입니다.
 
-**별칭**: `sla-aware`, `sla`
+**별칭** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — 마지막으로 정상 동작한 공급자를 우선 사용
+#### 5. `lkgp` — 마지막으로 알려진 양호한 공급자 먼저
 
-**마지막으로 정상 동작한 공급자**가 설정되어 있으면 먼저 시도한 다음,
-`rules` 전략으로 폴백합니다. 세션 고정에 유용하며, 대화의 후속 요청을
-동일한 공급자가 처리합니다.
+시도** 마지막으로 알려진 양호한 공급자** (설정된 경우) 먼저 `rules` 전략으로 돌아갑니다. 세션 고정성에 유용합니다. — 동일한 공급자가 대화에서 후속 요청을 처리합니다.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -666,27 +638,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // rules 전략으로 폴백
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**사용 시점**: 후속 요청을 동일한 공급자가 처리하도록 하려는
-멀티턴 대화(예: 캐싱, 컨텍스트 연속성 또는 가격 일관성을 위해).
+**언제 사용하나요?** : 동일한 공급자가 후속 요청(예: 캐싱, 컨텍스트 연속성 또는 가격 일관성)을 처리하기를 원하는 다중 전환 대화입니다.
 
-**별칭**: `lkgp`(별칭 없음)
+**별명** : `lkgp` (별칭 없음)
 
 ---
 
-#### 6. `nadir` — Nadir를 통한 프롬프트 인식 모델 선택
+#### 6. Nadir을 통한 `nadir` — 프롬프트 인식 모델 선택
 
-위의 모든 전략은 자체 텔레메트리를 기준으로 후보의 순위를 지정하며, 요청 내용은 읽지 않습니다.
-`nadir`는 마지막 사용자 턴과 풀의 모델 ID를
-[Nadir](https://getnadir.com)의 결정 API(`POST /v1/bucket`)로 전송하고, 해당 목록에서 Nadir가
-선택한 모델로 라우팅합니다(`simple` → 요구 사항을 충족하는 가장 저렴한 모델, `complex` → 최첨단
-모델). 해당 모델을 제공하는 연결은 여전히 `rules`에 의해 선택되므로, 어떤 계정을 사용할지는
-할당량, 상태 및 비용에 따라 계속 결정됩니다.
+위의 모든 전략은 자체 원격 측정을 통해 후보자의 순위를 매깁니다. 그들 중 누구도 요청을 읽지 않습니다. `nadir` 마지막 사용자 차례와 풀의 모델 ID를 [Nadir](https://getnadir.com) 의 결정 API (`POST /v1/bucket`)에 보내고 Nadir이 해당 메뉴에서 선택한 모델(`simple` → 가장 저렴한 모델, `complex` → 프론티어 모델)로 라우팅합니다. 해당 모델을 제공하는 연결은 여전히 `rules` 에 의해 선택되므로 할당량, 상태 및 비용에 따라 어떤 계정이 계속 결정됩니다.
 
 ```json
 {
@@ -702,34 +668,75 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY`와 `OMNIROUTE_NADIR_BASE_URL`은 두 문자열에 대한 환경 변수
-폴백입니다. `baseUrl`은 자체 호스팅 Nadir에만 필요합니다(끝의 `/v1`은 허용됨).
-키가 없는 호출은 IP별 속도 제한이 적용되는 Nadir의 익명 티어로 전달됩니다. 키를 사용하면
-([키 생성](https://app.getnadir.com/dashboard/api-keys)) 각 결정이
-Nadir 대시보드에 기록됩니다. 전체 설정 및 확인 방법:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` 및 `OMNIROUTE_NADIR_BASE_URL` 는 두 문자열에 대한 환경 대체입니다. `baseUrl` 는 자체 호스팅 Nadir에만 필요합니다(후행 `/v1` 는 허용됩니다). 무키 호출은 IP 당 속도가 제한되는 Nadir의 익명 계층에 연결됩니다. 키( [하나 만들기](https://app.getnadir.com/dashboard/api-keys) )를 사용하면 각 결정이 Nadir 대시보드에 기록됩니다. 전체 설정 및 확인: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-외부로 전송되는 정보: 마지막 사용자 메시지의 텍스트(처음 16k자), 후보
-모델 ID 및 `source: "omniroute"` 채널 태그입니다. 시스템 프롬프트, 기록, 도구 또는
-헤더는 전송되지 않습니다.
+상자에서 나오는 내용: 마지막 사용자 메시지의 텍스트(처음 16,000자), 후보 모델 ID 및 `source: "omniroute"` 채널 태그. 시스템 프롬프트, 기록, 도구 또는 헤더가 없습니다.
 
-실패 시에는 페일 오픈 방식으로 동작합니다. 시간 초과(기본값 2000 ms), 2xx가 아닌 응답, 연결할 수 없는
-호스트, 잘못된 형식의 응답 또는 풀에 없는 선택 항목이 발생하면 `rules`
-결정으로 폴백하며, 사유 앞에 `NadirStrategy: fallback (…)`가 붙습니다. 호출이 실패하면
-전략은 30초 동안 네트워크 호출을 건너뛰므로, 장애 발생 시 요청마다 한 번이 아니라 30초마다
-한 번의 시간 초과 비용만 발생합니다. Nadir가 실제로 선택을 수행한 경우에만 라우팅 이벤트에서
-`strategy: "nadir"`가 보고됩니다.
+실패 동작은 페일오픈(fail-open)입니다. 시간 초과(기본값 2000ms), non-2xx, 연결할 수 없는 호스트, 잘못된 응답 또는 풀 외부 선택은 `rules` 결정으로 해결되며 그 이유는 접두사 `NadirStrategy: fallback (…)` 로 표시됩니다. 호출이 실패한 후 전략은 30초 동안 네트워크를 건너뛰므로 중단으로 인해 요청당 시간 초과가 아닌 30초당 시간 초과 비용이 발생합니다. 라우팅 이벤트는 Nadir이 실제로 선택한 경우에만 `strategy: "nadir"` 보고합니다.
 
-**사용 시점**: 여러 모델 티어(소형, 중간급 및 최첨단 모델)에 걸친 풀에서 난이도가 다양한
-트래픽을 처리하며, 항상 최첨단 모델을 사용하는 데 드는 비용을 절감하려는 경우.
+**언제 사용하나요?** : 모델 계층(소형, 중간 및 프론티어 모델)에 걸쳐 있는 풀의 혼합 난이도 트래픽. 여기서 항상 프론티어는 절감하려는 비용입니다.
 
-**별칭**: `nadir`(별칭 없음)
+**별명** : `nadir` (별칭 없음)
 
 ---
 
-### 사용자 정의 라우터 전략
+#### 7. `decision` — 플러그형 결정자가 모델을 선택합니다.
 
-공개 API를 통해 자체 `RouterStrategy` 구현을 등록할 수 있습니다.
+`decision` 묻는다** 결정자** 풀의 어떤 모델이 요청에 맞는지, 그 모델로 풀의 범위를 좁히고 `rules` 연결을 선택하도록 합니다(할당량, 상태 및 비용은 여전히 계정을 선택합니다). 결정자는 라우터 손잡이가 `config` (대시보드가 작성하는 것)의 상단에 있거나 `config.auto.routerStrategy` 옆에 `config.auto.decision` 있을 때 콤보의 결정 블록 — `config.decision` 에 설정됩니다.
+
+| `decider`     | 누가 대답합니까?                                                                                                | 요구사항                                    |
+| ------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `systemone`   | TypeSafe System One(`POST https://api.typesafe.ai/v1/systemone`), 기본 모델 `jev-latest`                        | `typesafe` 연결 또는 env 키                 |
+| `http`        | `baseUrl` 에서 자신만의 결정자: `wire: "systemone"` (`{baseUrl}/v1/systemone`) 또는 `"openai-chat"` (채팅 완료) | `baseUrl` + `model`; 선택적인 키            |
+| `combo-model` | 융합 판사와 같은 프로세스에서 호출되는 제공자 모델 중 하나                                                      | `model` `provider/model` 로 사용(콤보 없음) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+필드(저장 시 및 요청 시 다시 엄격한 스키마로 검증됨):
+
+- `decider` — `systemone`, `http` 또는 `combo-model`.
+- `model` — TypeSafe 모델, URL 의 결정 모델 또는 콤보 모델 호출의 `provider/model` (최대 200자).
+- `baseUrl` — `http` 전용: 자격 증명, 쿼리 또는 조각 없이 `http(s)` URL 최대 500자입니다. 이 OmniRoute (루프백 + `PORT`)를 가리키는 URL 거부됩니다.
+- `wire` — `http` 전용: `systemone` (기본값) 또는 `openai-chat`.
+- `connectionId` — 키가 사용되는 저장된 연결입니다(호출 API 키의 허용된 연결 내에서만). 이것이 없으면 `systemone` `typesafe` 연결을 읽고 모든 네트워크 결정자는 `OMNIROUTE_DECISION_API_KEY` 로 대체됩니다. `apiKey` 필드가 없습니다. 키는 콤보에 저장되지 않습니다.
+- `timeoutMs` — 정수, 100–5000, 기본값은 2000입니다.
+- `minConfidence` — 0–1; 신뢰도가 낮은 답변은 `rules` 로 돌아갑니다(신뢰도가 없다고 보고하는 결정자는 0으로 계산됩니다).
+- `descriptions` — 최대 50개 항목(키는 최대 300개, 텍스트는 최대 1000자), 모델 ID 또는 `provider/model` 로 키 지정; 설정되지 않은 항목은 생성된 비용 순위 설명을 얻습니다.
+
+**깃발.** `COMBO_DECISION_ROUTER_ENABLED` (기본값 `false`)는 모든 결정자를 게이트합니다. 꺼져 있는 동안 `decision` 콤보는 자격 증명을 읽지 않고 호출도 하지 않으며 `rules` 로 라우팅합니다. 로그에 `fallback (disabled)` 라고 나와 있습니다. 저장된 키만으로는 절대로 켜지지 않습니다. 결정 블록이 없는 콤보는 전혀 영향을 받지 않습니다.
+
+**상자를 떠나는 것.** 마지막 사용자 메시지의 텍스트(최대 8000자, chat/Claude `messages` 또는 응답 `input`)와 해당 설명이 포함된 모델 ID 메뉴만 있습니다. 시스템 프롬프트, 응답 `instructions`, 도구, 기록, 헤더 또는 계정 데이터를 사용하지 마세요. 네트워크 통화는 재시도, 리디렉션 및 64 KB 응답 제한 없이 공급자 아웃바운드 가드를 통과합니다. `combo-model` 호출은 스트리밍이 아니며, 도구가 필요 없으며, `temperature: 0` 예산이 256개입니다. 결정 호출 내에서 시작된 결정은 거부됩니다.
+
+**실패 행동** 페일오픈(fail-open): 모든 실패는 `rules` 결정으로 해결되고 이유는 `decision(<decider>): fallback (<reason>)` 로 읽혀지며, `<reason>` 는 `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` 또는 `no_user_text` 하나입니다. 시간 초과, HTTP 오류 또는 네트워크 오류가 발생하면 30초 동안 엔드포인트를 건너뜁니다. 성공적인 선택은 `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)` 읽습니다. URL, 키, 프롬프트 또는 업스트림 본문이 로그에 도달하지 않습니다.
+
+콤보 빌더는 라우터 전략이 `decision` 일 때 생성된 설명을 자리 표시자로 표시하고** 테스트 결정** 저장되지 않은 설정(동일 플래그)으로 `POST /api/combos/decision-preview` 한 번 호출하는 버튼입니다.
+
+**언제 사용하나요?** : 특별히 Nadir이 아닌 선택한 분류자가 요청별로 계층을 선택하려는 혼합 난이도 트래픽입니다.
+
+**별명** : `decision` (별칭 없음)
+
+---
+
+### 맞춤형 라우터 전략
+
+공개 API 통해 자신만의 `RouterStrategy` 구현을 등록할 수 있습니다.
 
 ```ts
 import {
@@ -742,7 +749,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // 여기에 라우팅 로직을 작성합니다
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -757,7 +764,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-그런 다음 다음과 같이 사용합니다.
+그런 다음 사용하십시오.
 
 ```json
 {
@@ -772,14 +779,15 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ### 라우터 전략 선택 가이드
 
-| 사용 사례          | 전략        | 이유                                   |
-| ------------------ | ----------- | -------------------------------------- |
-| 균형 잡힌 워크로드 | `rules`     | 기본값 — 모든 요소를 고려              |
-| 비용 최소화        | `cost`      | 항상 가장 저렴한 옵션을 선택           |
-| 지연 시간 최소화   | `latency`   | 가장 빠르고 안정적인 제공업체를 선택   |
-| 엄격한 SLO         | `sla-aware` | p95/오류/비용 임계값을 기준으로 필터링 |
-| 멀티턴 채팅        | `lkgp`      | 세션 고정성                            |
-| 다양한 난이도      | `nadir`     | 프롬프트별로 모델 티어를 선택          |
+| 사용 사례        | 전략        | 이유                                     |
+| ---------------- | ----------- | ---------------------------------------- |
+| 균형 잡힌 작업량 | `rules`     | 기본 — 모든 요소를 고려합니다.           |
+| 비용 최소화      | `cost`      | 항상 최저가를 고른다                     |
+| 대기 시간 최소화 | `latency`   | 가장 빠르고 신뢰할 수 있는 제공업체 선택 |
+| 엄격한 SLOs      | `sla-aware` | p95/error/cost 임계값으로 필터링         |
+| 다단계 채팅      | `lkgp`      | 세션 고정성                              |
+| 혼합 난이도      | `nadir`     | 프롬프트별로 모델 계층을 선택합니다.     |
+| 자체 분류기      | `decision`  | 결정자가 모델을 선택합니다.              |
 
 SLA 인식 필드:
 
@@ -800,13 +808,13 @@ SLA 인식 필드:
 
 6가지 작업 유형(`coding`, `review`, `planning`, `analysis`, `debugging`, `documentation`)에 걸쳐 30개 이상의 모델에 점수가 부여됩니다. 와일드카드 패턴도 지원합니다(예: `*-coder` → 높은 코딩 점수).
 
-## 자동 변형 요약
+## 자동차 변형 요약
 
-기본 `auto`와 `autoPrefix.ts`에 선언된 6개의 `AutoVariant` 값을 포함하면, **호출 가능한 모델 ID는 7개**입니다.
+`autoPrefix.ts` 의 `AutoVariant` 선언합니다.** 7가지 가치** (`coding`, `fast`, `cheap`, `offline`, `smart`, `lkgp`, `chaos`). 베어 `auto` 가 있는 Together ( `parseAutoPrefix()` 에 의해 `variant: undefined` 으로 처리됨)와 두 개의 평면 계층 오버레이 `auto/subscription` 및 `auto/thrifty` ( `builtinCatalog.ts` 의 `FLAT_TIER_OVERLAY_IDS` )에는 다음이 있습니다.** 10 플랫 모델 IDs** :
 
-`auto`, `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`
+`auto`, `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`, `auto/chaos`, `auto/subscription`, `auto/thrifty`
 
-(`AutoVariant` 자체는 6개의 값을 열거합니다. 7번째 옵션은 "변형 없음"을 의미하는 기본 `auto`이며, `parseAutoPrefix()`에서 `variant: undefined`로 처리됩니다.)
+그 외에도 `auto/<category>[:<tier>]` 구성, 모델 계열 IDs (예: `auto/claude-opus`) 및 `builtinCatalog.ts` 의 `auto/best-*` / `auto/pro-*` 별칭도 해결됩니다.
 
 ## 티어가 Auto-Combo에 적용되는 방식
 
@@ -835,9 +843,9 @@ Tier 1(구독)을 강하게 선호하려면 `tierPriority` 가중치를 높이�
 
 ### 결정적 라우팅 결정 행렬(`npm run test:combo:matrix`)
 
-`tests/integration/combo-matrix/*.test.ts` 라우팅을 증명합니다** 결정** 공개 전략 중 모의 업스트림을 사용하여 실제 콤보 파이프라인을 통해 엔드투엔드를 다룹니다. 보장 내용은 다음과 같습니다:
+`tests/integration/combo-matrix/*.test.ts` 라우팅을 증명합니다** 결정** 공개 전략 중 모의 업스트림을 사용하여 실제 콤보 파이프라인을 통해 엔드투엔드를 다루고 있습니다. 보장 내용은 다음과 같습니다:
 
-- 모든 21가지 `ROUTING_STRATEGY_VALUES` 전략(순서, 가중치, 비용, 컨텍스트, 융합 등).
+- 22개의 공개 `ROUTING_STRATEGY_VALUES` 전략 중 18개(순서, 가중치, 비용, 컨텍스트, 융합 등) `quota-weighted`, `cache-optimized`, `pipeline` 및 `jev` 행렬에 의해 실행되지 않으며 자체 단위 테스트에 의존합니다.
 - `quota-share` (내부) 종단 간: 실제 `selectQuotaShareTarget` 솔기(`registerQuotaFetcher` / `setLKGP` / `__setHeadroomSaturationFetcherForTests`)를 통한 DRR 공정성 + 포화 우선 순위 해제.
 - 모든 대상 수에 대한 `context-relay` 범용 핸드오프 적용 범위.
 

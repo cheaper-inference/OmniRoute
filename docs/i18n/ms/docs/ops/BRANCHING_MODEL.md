@@ -53,7 +53,7 @@ Apabila keluaran sedang diselaraskan, isu penanda berlabel `release-freeze` dibu
 Semak pembekuan terbuka sebelum menganggap cawangan yang anda inginkan boleh digabungkan:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mekanik gabungan (label `queue` pemilik → Mergify) didokumenkan dalam [MERGE_TRAIN.md](./MERGE_TRAIN.md).

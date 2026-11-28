@@ -226,13 +226,13 @@ OmniRoute משתמש** הגירות מנוסחות וחסרות יכולת** ב-
 
 ### מה השער בודק מול הבסיס
 
-בבקשת משיכה וריצות תור מיזוג, `npm run check:migration-numbering` משווה `src/lib/db/migrations/` בדיסק עם אותה ספרייה בענף הבסיס. הבסיס הוא, בסדר הזה: `--base-latest-tag`, `--base <ref>`, המשתנה `MIGRATION_BASE_REF`, או, כאשר `GITHUB_EVENT_NAME` הוא `pull_request`, `pull_request_target` או `merge_group`, האב הראשון של commit המיזוג, `merge_group.base_sha` של מטען האירוע, או `git merge-base HEAD origin/$GITHUB_BASE_REF`. בבקשת משיכה או ריצת תור מיזוג ללא בסיס שניתן לפתור, השער נכשל. מחוץ CI ללא `--base` הוא מדפיס `comparação com a base: pulada (sem --base)` ומדלג על הכללים הללו.
+בבקשת משיכה והרצת תור מיזוג, `npm run check:migration-numbering` משווה `src/lib/db/migrations/` בדיסק עם אותה ספרייה בענף הבסיס. הבסיס הוא, בסדר הזה: `--base-latest-tag`, `--base <ref>`, המשתנה `MIGRATION_BASE_REF`, או, כאשר `GITHUB_EVENT_NAME` הוא `pull_request`, `pull_request_target` או `merge_group`, האב הראשון של commit המיזוג, `merge_group.base_sha` של מטען האירוע, או `git merge-base HEAD origin/$GITHUB_BASE_REF`. בבקשת משיכה או ריצת תור מיזוג ללא בסיס שניתן לפתור, השער נכשל. מחוץ CI ללא `--base` הוא מדפיס `comparação com a base: pulada (sem --base)` ומדלג על הכללים הללו.
 
 `--base-latest-tag` משווה לתג המהדורה החדש ביותר (`vX.Y.Z` לפי סדר semver; תגיות סיומות כגון לילה לא נחשבות) שנמצא בהיסטוריה של `HEAD`, עם אותם כללים כמו `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) מפעיל את השער בצורה זו, מכיוון של push וריצות מתוזמנות אין בסיס בקשת משיכה ומיזוג יכול לנחות ללא ריצת CI חדשה. ללא תג שחרור בהיסטוריה השער נכשל; הרץ `git fetch --tags` (ב- CI, `actions/checkout` עם `fetch-depth: 0` מביא את התגים).
 
 | שנה בבקשת המשיכה                                                                    | תוֹצָאָה                                                                                                                                                                                                                                                               |
 | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| שם קובץ שקיים בבסיס שונה, עם ערך `RENAMED_MIGRATION_COMPATIBILITY`                  | **אַזהָרָה** אם התוכן זהה, ובדיקת המעבר פועלת ללא קשר לחותמת הזמן החדשה; זה נכשל אם המיקום החדש משנה את הסכימה הסופית (בטל את השם, או בחר חותמת זמן חדשה אחרת למקום שבו הוא נוסע) או אם הרץ יחיל את הקובץ ששונה שוב על מסד נתונים משודרג.** נכשל** אם התוכן השתנה.     |
+| שם קובץ שקיים בבסיס שונה, עם ערך `RENAMED_MIGRATION_COMPATIBILITY`                  | **אַזהָרָה** אם התוכן זהה, ובדיקת המעבר פועלת ללא קשר לחותמת הזמן החדשה; זה נכשל אם המיקום החדש משנה את הסכימה הסופית (בטל את השם, או בחר חותמת זמן חדשה אחרת למקום שבו הוא נוסע) או אם הרץ יחיל את הקובץ ששונה שוב במסד נתונים משודרג.** נכשל** אם התוכן השתנה.       |
 | שם קובץ שקיים בבסיס שונה תוך שמירה על חותמת הזמן שלו (רק התיאור משתנה)              | **נכשל** , עם או בלי ערך: הרץ יחיל אותו שוב (עם הערך) או דילג עליו לפי גרסה (ללא אחת). השתמש בחותמת זמן אחרת בתוספת ערך תאימות, או שמור את השם.                                                                                                                        |
 | קובץ שקיים בבסיס נמחק, או שונה שם ללא ערך                                           | **נכשל** , בין אם הקובץ נמצא בתג שחרור או לא. כדי לבטל אותו, שחזר את הקובץ באמצעות `git checkout <base> -- src/lib/db/migrations/<file>`; כדי להחזיר את הסכימה שלו, הוסף הגירה חדשה עם `DROP ... IF EXISTS`.                                                           |
 | לקובץ שקיים בבסיס יש תוכן שונה                                                      | **אַזהָרָה** (ביאור `::warning` ב- GitHub Actions), ובדיקת ה-commutation פועלת. היא נכשלת אם העריכה משנה את הסכימה הסופית, מכיוון שבסיסי נתונים משודרגים אינם מחילים את הקובץ הערוך שוב: הכנס את השינוי להגירה חדשה. עריכה לא מזיקה (הערה, `IF NOT EXISTS`) רק מזהירה. |
@@ -255,7 +255,7 @@ OmniRoute משתמש** הגירות מנוסחות וחסרות יכולת** ב-
 3. **שמור על ה- SQL אימפוטנטי** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), מכיוון שההגירה המרה עשויה לפגוש מסד נתונים שבו הסכימה שלו כבר קיימת.
 4. **העבר מקרים מיוחדים עם מפתח גרסה.** אם ה- PR הוסיף מקרה עבור המספר הישן שלו ב- `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) או ב- `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), שנה את המפתח לחותמת הזמן החדשה.
 
-`tests/unit/db/codex-fence-migration-rename.test.ts` הוא דוגמה פועלת לבדיקה עבור הגירה עם שמות שונים.
+`tests/unit/db/codex-fence-migration-rename.test.ts` הוא דוגמה עובדת לבדיקה עבור הגירה עם שמה שונה.
 
 ### יציאות חזרה לסניפים לפני המעבר
 
@@ -286,7 +286,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 }
 ```
 
-### חוסר אונות
+### אידמונטיות
 
 הגירות חייבות להיות** אימפוטנטי** — להריץ אותם פעמיים אמור להיות ללא הפעלה:
 
@@ -306,10 +306,10 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 
 1. **צור את הקובץ עם המחולל** : `npm run db:new-migration -- <description>` (לדוגמה `npm run db:new-migration -- add combo priority`). הוא כותב `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` עם זמן UTC הנוכחי וכותרת הערה, מתקדם שנייה אחת קדימה אם חותמת הזמן הזו נלקחת, ולעולם לא מחליף קובץ. אל תבחר מספר ביד.
 2. **השתמש ב- DDL בטוח** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-3. **מילוי חוזר של נתונים בזהירות** : השתמש `UPDATE ... WHERE ...` כדי לטפל בשורות קיימות
-4. **בדוק סדר ושם** : `npm run test:migrations:fresh` (כל ההגירות במסד נתונים ריק) ו- `npm run check:migration-numbering`
+3. **מילוי חוזר נתונים בזהירות** : השתמש `UPDATE ... WHERE ...` כדי לטפל בשורות קיימות
+4. **בדוק סדר ושם** : `npm run test:migrations:fresh` (כל ההגירות במסד נתונים ריק) ו- `npm run check:migration-numbering`. ה-Husky Pre-commit Hook מפעיל את `check:migration-numbering` בעצמו כאשר ה-commit משלב קובץ תחת `src/lib/db/migrations/`, כך ששם שנבחר ידנית או שנוצר בצורה גרועה (לדוגמה `242_x.sql`) נכשל ב-commit באופן מקומי עם אותה הודעה CI מודפס. הקרס בודק שמות, כפילויות וסדרת `001`–`241` בלבד; ההשוואה לבסיס PR (הוסר, שונה שם או מעבר לסדר) עדיין פועל ב- CI
 5. **מבחן על עותק** : לעולם אל תפעיל העברות לא בדוקות בייצור
-6. **טבלה שנוצרה מקוד זקוקה גם להעברה** : אם מודול גם יוצר את הטבלה בעצלתיים (`CREATE TABLE IF NOT EXISTS`, שמור כנתיב לריפוי עצמי), הגירה חייבת ליצור אותו עם אותו DDL. אחרת התקנה נקייה והתקנה משודרגת יסתיימו עם סכמות שונות, תלוי אם נתיב הקוד הזה רץ. `tests/unit/db/lazy-table-migration-guard.test.ts` סורק `src/` ו- `open-sse/` ונכשל ב- `CREATE` עצלן ללא הגירה (#20557). דוגמה: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
+6. **טבלה שנוצרה מקוד זקוקה גם להעברה** : אם מודול גם יוצר את הטבלה בעצלתיים (`CREATE TABLE IF NOT EXISTS`, שמור כנתיב לריפוי עצמי), העברה חייבת ליצור אותו עם אותו DDL. אחרת התקנה נקייה והתקנה משודרגת יסתיימו עם סכמות שונות, תלוי אם נתיב הקוד הזה רץ. `tests/unit/db/lazy-table-migration-guard.test.ts` סורק `src/` ו- `open-sse/` ונכשל ב- `CREATE` עצלן ללא הגירה (#20557). דוגמה: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 דוּגמָה:
 
@@ -320,7 +320,7 @@ UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **שינויים שאינם תואמים לאחור** (למשל, שחרור עמודות) הם מסובכים. OmniRoute האם NOT תומך בשדרוג לאחור — לאחר החלת הגירה, שינוי הסכימה הוא קבוע. תכננו בהתאם.
+> **שינויים שאינם תואמים לאחור** (למשל, שחרור עמודות) הם מסובכים. OmniRoute האם NOT תומך בשדרוג לאחור — ברגע שהעברה מוחלת, השינוי בסכימה הוא קבוע. תכננו בהתאם.
 
 ---
 

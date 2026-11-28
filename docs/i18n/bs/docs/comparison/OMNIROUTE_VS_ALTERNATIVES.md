@@ -11,7 +11,7 @@ Objektivno poređenje karakteristika u odnosu na popularne AI rutere otvorenog k
 | Feature                                               |             OmniRoute 3.8             |     LiteLLM 1.x      | OpenRouter (SaaS) |   Portkey   |
 | ----------------------------------------------------- | :-----------------------------------: | :------------------: | :---------------: | :---------: |
 | **Provajderi**                                        |                **329**                |         ~100         |        ~50        |     ~30     |
-| **Free/no-auth kataloški unosi**                      |                **155**                |         n/a          |      prolaz       |     n/a     |
+| **Provajderi sa besplatnim pristupom**                |     **50 sa slobodnim pristupom**     |         n/a          |      prolaz       |     n/a     |
 | **Self-hostable**                                     |                  ✅                   |          ✅          |        ❌         |  ⚠ plaćeno  |
 | **OAuth kataloški unosi**                             |                **23**                 |      djelomično      |        ❌         |     ❌      |
 | **Automatske povratne kombinacije**                   |           **22 strategije**           | na osnovu prioriteta | baziran na nivou  | ponderisano |
@@ -38,7 +38,7 @@ Objektivno poređenje karakteristika u odnosu na popularne AI rutere otvorenog k
 
 ## Kada odabrati OmniRoute
 
-- Vi ste sami domaćini i želite** maksimalna pokrivenost provajdera** (394 dobavljač, 155 unosa u katalogu free/no-auth )
+- Vi ste sami domaćini i želite** maksimalna pokrivenost provajdera** (394 provajdera, 50 sa besplatnim pristupom)
 - Treba vam a** ugrađeni MCP server** (LLM alati, memorija, vještine izložene kao alati)
 - Trebaš**A2A protokol** za tokove rada od agenta do agenta
 - Ti želiš** Stealth otiska prsta** (JA3/JA4) kako bi se izbjeglo otkrivanje uzvodno CAPTCHAs
@@ -58,10 +58,10 @@ Objektivno poređenje karakteristika u odnosu na popularne AI rutere otvorenog k
 
 ## Kada odabrati Portkey
 
-- Potreban vam je **komercijalni SLA** sa garancijama dostupnosti (uptime)
-- Preferirate **upravljanu kontrolnu tablu** bez operativnog opterećenja
-- Potrebne su vam **enterprise compliance** funkcije odmah po instalaciji
+- Treba vam a** komercijalni SLA** sa garancijom neprekidnog rada
+- Više voliš a** upravljana kontrolna tabla** bez operativnih troškova
+- Trebaš** usklađenost preduzeća** karakteristike izvan kutije
 
 ---
 
-_Poslednje ažurirano: 2026-08-02. Pošaljite ispravke putem PR-a kako bi ova tabela ostala tačna._
+_Pošaljite ispravke putem PR da ova tabela bude tačna._

@@ -64,48 +64,31 @@ on Bifrost ainult `external` (ligipääsetav üksnes `BIFROST_BASE_URL`-i kaudu)
 filtreerida selle järgi, mida mootor tegelikult teha suudab, selle asemel et
 iga identifikaatori jaoks harusid jäigalt koodi kirjutada.
 
-## Telg A — manustatud teenused (järelevalvatava protsessi pool)
+## Axis A — manustatud teenused (järelevalvega protsessi pool)
 
-- **Järelevalvatavate protsesside register:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (praegu: `9router`, `cliproxy`).
-- **Elutsükli haldur:** `src/lib/services/ServiceSupervisor.ts` — `start()` käivitab
-  alamprotsessi, ootab `waitForHealthy()` kontrolli läbimist ja suunab stdout/stderr-i ringpuhvrisse;
-  `stop()` SIGTERM→SIGKILL; kõik toimingud jadastatakse luku abil.
-- **Olekute ühendtüüp** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error`, lisaks
-  ortogonaalne `HealthState = healthy | unhealthy | unknown`.
-- **Miks eraldi protsess (mitte protsessisisene SDK)?** Protsesside isoleerimine võimaldab
-  iga külgproksi installimist, käivitamist, peatamist, seisundikontrolli ja logisid eraldi hallata ning
-  rakendada tagasisideaadressilt käivitamise kaitset. Protsessisisese adapteri modelleerimine on tulevikutöö —
-  selle väljendamiseks on võimekuslipp `native-hot-path`.
+- **Registry of supervised processes:** `src/lib/services/bootstrap.ts` `SERVICES[]` (today: `9router`, `cliproxy`).
+- **Elutsükli omanik:** `src/lib/services/ServiceSupervisor.ts` — `start()` sünnitab lapse, väravad `waitForHealthy()`, koputab stdout/stderr rõngaspuhvrisse; `stop()` SIGTERM→SIGKILL; all serialized under a lock.
+- **Riigiliit** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error`, plus an orthogonal `HealthState = healthy | unhealthy | unknown`.
+- **Why a separate process (not an in-proc SDK)?** Protsessi isoleerimine muudab install/start/stop/health/logs külgkorvi kohta iseseisvalt juhitavaks ja laseb rakenduda loopback kudemiskaitsel. In-proc adapteri modelleerimine on tulevane töö. — `native-hot-path` võimekuse lipp on koht, kus see väljendub.
 
-### Elutsükli marsruudi leping (`/api/services/<tool>/…`)
+### Lifecycle route contract (`/api/services/<tool>/…`)
 
-Olekukoodid on **oleku-, verbi- ja teepõhised taotluslikult** — see on leping, mitte
-ebajärjekindlus:
+Olekukoodid on**state/verb/path-specific disaini järgi** — this is the contract, not inconsistency:
 
-| Kutse                        | Tingimus                                               | Olek                                 |
-| ---------------------------- | ------------------------------------------------------ | ------------------------------------ |
-| `POST .../start`             | teenus on `not_installed`                              | **409** (eeltingimus)                |
-| `POST .../stop`              | juba peatatud                                          | **200** (idempotentne tühitoiming)   |
-| `GET .../status`             | korras                                                 | **200** (`live ?? row ?? "unknown"`) |
-| `POST .../start`             | käivitamise nurjumine                                  | **503** (ajutine)                    |
-| `GET .../status`, `.../stop` | püüdmata viga                                          | **500**                              |
-| `GET /api/services/<x>/logs` | tundmatu tööriist `<x>`                                | **404** `Service '<x>' not found`    |
-| `GET .../status?reveal=key`  | `X-Reveal-Confirm: yes` puudub                         | **403** (ainult 9router)             |
-| **iga** `/api/services/*`    | kutsuja pole tagasisideaadressil ega privaatses LAN-is | **403 LOCAL_ONLY**                   |
+| Helista                               | Seisund                              | Olek                                 |
+| ------------------------------------- | ------------------------------------ | ------------------------------------ |
+| `POST .../start`                      | teenus `not_installed`               | **409** (eeltingimus)                |
+| `POST .../stop`                       | juba peatunud                        | **200** (idempotent no-op)           |
+| `GET .../status`                      | OK                                   | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`                      | kudemise ebaõnnestumine              | **503** (mööduv)                     |
+| `GET .../status`, `.../stop`          | tabamata viga                        | **500**                              |
+| `GET /api/services/<x>/logs`          | tundmatu tööriist `<x>`              | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`           | `X-Reveal-Confirm: yes` puudu        | **403** (ainult 9 ruuter)            |
+| **ükskõik milline** `/api/services/*` | helistaja mitte loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-Kõik veakehad vormindab `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, kus `type` tuletatakse olekukoodist
-(`500→server_error`, `404→not_found`, `409→conflict`, muul juhul `invalid_request`) ja see on
-masintöödeldav eristaja. Sõnumid eelpuhastatakse
-(`sanitizeErrorMessage()`, range reegel nr 12).
+Kõik veakehad on kujundatud `createErrorResponse()` → `{ error: { message, type }, requestId }` järgi, kus `type` tuletatakse olekust (`500→server_error`, `404→not_found`, `409→conflict`, else `invalid_request`) ja see on masintoimiv diskrimineerija. Sõnumid on eelnevalt desinfitseeritud (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**Tagasisideaadressi kaitse** on kõige tavalisem `403` põhjus: `/api/services/` kuulub
-loendisse `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) ning
-`src/server/authz/policies/management.ts` lükkab iga tagasisideaadressilt või privaatsest LAN-ist
-mitte pärineva kutsuja tagasi **enne autentimist**, sest need marsruudid käivitavad alamprotsesse (ranged reeglid 15
-ja 17). Nende poole pöördumine avaliku tunneli kaudu annab taotluslikult vastuseks `403`.
+**Tagasisilmuse kaitse** on kõige levinum `403` allikas: `/api/services/` on `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) ja `src/server/authz/policies/management.ts` lükkab tagasi kõik mitte-loop- / mitteprivaat-LAN-helistajad** enne autentimist** , sest need marsruudid tekitavad alamprotsesse (Kõvad reeglid 15 ja 17). Nendeni jõudmine läbi avaliku tunneli on disainilt `403`.
 
 ## Telg B — releemarsruutimise taustsüsteem (suunamise pool)
 

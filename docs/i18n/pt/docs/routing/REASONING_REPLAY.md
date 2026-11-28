@@ -4,7 +4,7 @@
 
 ---
 
-> **Fonte da verdade:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Última atualização:** 28/06/2026 — v3.8.40
+> **Fonte da verdade:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute captura o assistente `reasoning_content` produzido pelos modelos de modo de pensamento e reproduz-no de forma transparente em pedidos multi-volta quando o fornecedor upstream o exige. Isto elimina os erros HTTP 400 que os fornecedores estritos levantam quando o histórico de conversação de um cliente não contém o raciocínio do turno anterior.
 

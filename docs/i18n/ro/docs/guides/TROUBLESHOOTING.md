@@ -185,83 +185,49 @@ le include.
 
 ---
 
-## Rezultate fals pozitive ale antivirusului
+## False pozitive antivirus
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG pune în carantină `README.md` cu `MD:HttpRequest-inf[Susp]`
+### Avast/AVG carantină `README.md` cu `MD:HttpRequest-inf[Susp]`
 
-**Acesta este un rezultat fals pozitiv. Nimic nu este infectat și nu este necesară nicio acțiune.**
+**Acesta este un fals pozitiv. Nimic nu este infectat și nu este necesară nicio acțiune.**
 
-Avast și AVG rulează o euristică ce semnalează fișierele text simplu/Markdown care conțin multe
-linkuri asemănătoare solicitărilor HTTP. Fișierul `README.md` al OmniRoute este inclus în pachetul npm (este
-enumerat în `package.json` → `files`), astfel că, la o instalare globală, ajunge în `node_modules/omniroute/README.md` —
-și conține aproximativ 15 exemple `http://localhost:20128/...` (endpointurile HTTP/SSE MCP,
-URL-ul A2A `.well-known` și fragmente `curl`). Această densitate de linkuri este
-suficientă pentru a declanșa euristica.
+Avast și AVG rulează o euristică care semnalează fișierele plain-text/Markdown care conțin multe link-uri care arată cererile HTTP. OmniRoute lui `README.md` este livrat în interiorul pachetului npm (este listat în `package.json` → `files`), deci aterizează la `node_modules/omniroute/README.md` pe o instalare globală — și conține ~ 15 exemple `http://localhost:20128/...` (punctele finale MCP HTTP/SSE, A2A `.well-known` URL și `curl` ). Această densitate de legături este suficientă pentru a opri euristica.
 
-Dacă acest lucru a început abia recent: tipul fișierului nu s-a schimbat. Tabelul cu
-endpointuri din README a fost extins (au fost adăugate MCP HTTP + SSE + A2A), precum și mai multe exemple `curl`,
-ceea ce a făcut ca acesta să depășească pragul.
+Dacă acest lucru a început doar recent: fișierul nu s-a schimbat în natură. README -a crescut tabelul de puncte finale (s-au adăugat MCP HTTP + SSE + A2A ) și mai multe exemple `curl`, care l-au împins peste prag.
 
-Fișierul este documentație inertă, fără niciun conținut executabil. Îl puteți restaura în
-siguranță din carantină.
+Fișierul este o documentație inertă cu zero conținut executabil. Îl poți restabili în siguranță din carantină.
 
-**Ce trebuie să faceți:**
+**Ce să fac:**
 
-1. **Opriți notificările** — excludeți directorul de instalare din antivirus
-   (Avast: Setări → Excepții), adăugând calea globală `node_modules` și/sau directorul de
-   date OmniRoute (`~/.omniroute/`).
-2. **Raportați rezultatul fals pozitiv** — <https://www.avast.com/false-positive-file-form.php>,
-   atașând fișierul `README.md` aflat în carantină. Aceasta este soluția care îi ajută pe toți, deoarece
-   euristica furnizorului reacționează excesiv la un fișier text.
+1. **Opriți notificările** — exclude directorul de instalare din antivirusul tău (Avast: Settings → Exceptions), adăugând calea `node_modules` globală and/or directorul de date OmniRoute (`~/.omniroute/`).
+2. **Raportați fals pozitiv** — <https://www.avast.com/false-positive-file-form.php>, atașând `README.md` în carantină . Aceasta este remedierea care îi ajută pe toată lumea, deoarece este euristica vânzătorului care reacționează excesiv la un fișier text.
 
-**De ce nu „remediem” acest lucru de partea noastră:** toate exemplele folosesc `http://localhost`, iar
-localhost nu poate utiliza `https` fără complicațiile certificatelor autosemnate. Modificarea forțată a documentației
-pentru a evita euristica unui singur furnizor ar afecta toți cititorii doar pentru a compensa o eroare a scanerului.
+**De ce nu „reparăm” acest lucru din partea noastră:** exemplele sunt toate `http://localhost`, iar localhost nu poate fi `https` fără frecare cu certificat autosemnat. Deformarea documentelor pentru a evita euristica unui furnizor ar răni fiecare cititor pentru a satisface o eroare a scanerului.
 
-### Kaspersky semnalează aplicația desktop drept `PDM:Trojan.Win32.Generic`
+### Kaspersky semnalează aplicația Desktop ca `PDM:Trojan.Win32.Generic`
 
-**Acesta este un rezultat fals pozitiv al unei euristici comportamentale. Nimic nu este infectat.** Prefixul
-`PDM:` al Kaspersky înseamnă că verdictul provine de la Proactive Defense Module (System Watcher),
-care evaluează ce _face_ programul de instalare, în loc să îl compare cu programe malware cunoscute. Când
-se declanșează, Kaspersky „revine” asupra întregii instalări — ștergând fișierele pe care le
-scrisese deja — astfel încât aplicația ajunge să fie nefuncțională sau să lipsească.
+**Acesta este un fals pozitiv dintr-o euristică comportamentală. Nimic nu este infectat.** Prefixul `PDM:` al Kaspersky înseamnă că verdictul provine de la modulul său de apărare proactivă (System Watcher), care judecă ceea ce _face_ instalatorul, în loc să îl potrivească cu malware-ul cunoscut. Când se declanșează, Kaspersky „retroduce” întreaga instalare — ștergând fișierele pe care le-a scris deja — astfel încât aplicația ajunge să fie ruptă sau lipsă.
 
-Fișierele semnalate sunt componente standard ale unor dependențe open-source declarate, incluse împreună cu
-aplicația desktop, de exemplu:
+Fișierele pe care le semnalează sunt părți stoc ale dependențelor declarate, open source, incluse în aplicația desktop, de exemplu:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` și
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), biblioteca de automatizare a browserului
-  utilizată pentru autentificarea în furnizori din aplicație și pentru chatul bazat pe browser.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — bindingul nativ `wreq-js` cu versiune fixată, utilizat pentru solicitări HTTP cu amprentă de browser în cazul furnizorilor
-  bazați pe cookie-uri web (`<arch>` este `x64` sau `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` și `workerProcessEntry.js` — [Playwright](https://playwright.dev), biblioteca de automatizare a browserului utilizată pentru autentificarea furnizorului în aplicație și chatul susținut de browser.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — legarea nativă `wreq-js` fixată utilizată pentru HTTP cu amprentă prin browser pe furnizorii de cookie-uri web (`<arch>` este `x64` sau `arm64`).
 
-**De ce se declanșează:** programul de instalare pentru Windows **nu este încă semnat cu un certificat de cod**, astfel încât un program de
-instalare NSIS nesemnat are reputație zero, iar euristicile comportamentale rulează la agresivitate maximă. Împreună
-cu un DLL nativ inclus și sute de fișiere `.js` scrise în
-`%LOCALAPPDATA%\Programs\OmniRoute` (inclusiv directoare de pachete cu sufixuri hash din versiunea
-autonomă Next.js), acest lucru este suficient pentru a declanșa euristica. Semnarea codului este planificată;
-până la implementarea ei, problema poate reapărea la versiunile noi.
+**De ce se declanșează:** programul de instalare Windows este** încă nesemnate în cod** , deci un program de instalare NSIS nesemnat nu are reputație și euristica comportamentală rulează la agresiune maximă. Combinat cu un pachet DLL nativ și sute de fișiere `.js` scrise sub `%LOCALAPPDATA%\Programs\OmniRoute` (inclusiv directoare de pachete cu sufix hash din versiunea Next.js autonomă), este suficient pentru a opri euristica. Semnarea codului este planificată; până când aterizează, noile versiuni pot repeta acest lucru.
 
-**Ce trebuie să faceți:**
+**Ce să fac:**
 
-1. **Verificați mai întâi fișierul descărcat** (pentru a exclude posibilitatea ca fișierul să fi fost modificat). Fiecare versiune publică
-   `latest.yml`, al cărui câmp `sha512` (base64) acoperă programul de instalare
-   `OmniRoute.Setup.<version>.exe`. În PowerShell, din directorul care conține programul de instalare:
+1. **Verificați mai întâi descărcarea** (exclude un fișier falsificat). Fiecare versiune publică `latest.yml`, al cărui câmp `sha512` (base64) acoperă programul de instalare `OmniRoute.Setup.<version>.exe`. În PowerShell, din folderul care conține programul de instalare:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Rezultatul trebuie să corespundă cu `latest.yml` → `sha512`. Dacă nu corespunde, ștergeți fișierul și
-   descărcați-l din nou numai de pe [pagina de versiuni GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
-2. **Restaurați + excludeți** — restaurați din carantină elementele eliminate prin revenire și adăugați o excludere
-   pentru `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Setări → Amenințări și excluderi),
-   apoi reinstalați.
-3. **Raportați rezultatul fals pozitiv** — <https://opentip.kaspersky.com/>. Rapoartele FP
-   trimise de utilizatori accelerează în mod real includerea pe lista de permisiuni.
+   Ieșirea trebuie să se potrivească `latest.yml` → `sha512`. Dacă nu, ștergeți fișierul și re-descărcați numai de pe [pagina versiuni GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Restaurare + exclude** — restabilește elementele anulate din carantină și adaugă o excludere pentru `%LOCALAPPDATA%\Programs\OmniRoute` (Setări Kaspersky → → Amenințări și excluderi), apoi reinstalează.
+3. **Raportați fals pozitiv** — <https://opentip.kaspersky.com/>. Rapoartele FP trimise de utilizatori accelerează cu adevărat listarea permisă.
 
 ---
 
@@ -874,10 +840,10 @@ Mai multe simptome:
 
 ---
 
-## Încă sunteți blocat?
+## Încă blocat?
 
-- **Probleme GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Arhitectură**: Consultați [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) pentru detalii interne
-- **Referință API**: Consultați [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) pentru toate endpoint-urile
-- **Panou de monitorizare a stării**: Verificați **Panou de control → Stare** pentru starea sistemului în timp real
-- **Traducător**: Utilizați **Panou de control → Traducător** pentru a depana problemele de format
+- **GitHub Probleme** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Arhitectură** : Consultați [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) pentru detalii interne
+- **API Referință** : Consultați [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) pentru toate punctele finale
+- **Tabloul de bord pentru sănătate** : Verificați** Tabloul de bord → Health** pentru starea sistemului în timp real
+- **Traducător** : Folosește** Tabloul de bord → Translator** pentru a depana problemele de format

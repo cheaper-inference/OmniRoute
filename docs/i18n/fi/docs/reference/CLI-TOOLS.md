@@ -4,14 +4,12 @@
 
 ---
 
-Viimeksi päivitetty: 23.8.2026
-
 OmniRoute integroituu kolmeen CLI työkaluluokkaan, jotka on jaettu kolmelle omistetulle kojelautasivulle:
 
 | Sivu            | Reitti                  | Käsite                                                                              | Laskea          |
 | --------------- | ----------------------- | ----------------------------------------------------------------------------------- | --------------- |
 | **CLI -koodit** | `/dashboard/cli-code`   | Koodaustyökalut, joita osoitat OmniRoute (asiakas → CLI → OmniRoute → Provider)     | 26              |
-| **CLI Agentit** | `/dashboard/cli-agents` | Autonomiset agentit, jotka osoitat OmniRoute (sama virtaus, laajempi soveltamisala) | 11              |
+| **CLI Agentit** | `/dashboard/cli-agents` | Autonomiset agentit, joita osoitat OmniRoute (sama virtaus, laajempi soveltamisala) | 11              |
 | **ACP Agentit** | `/dashboard/acp-agents` | CLIs että OmniRoute syntyy taustaohjelmaksi stdio/ACP kautta (käänteinen virtaus)   | katso rekisteri |
 
 Vanhat reitit uudelleenohjaavat 308:n kautta: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
@@ -235,7 +233,7 @@ Uusilla `configType: "custom"` työkaluilla on omat asetukset API -reitit:
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
 | `POST /api/cli-tools/qwen-settings`         | Qwen koodi (`~/.qwen/settings.json` + lle oma `.env` avain)                    |
 
-Kaikki reitit käyttävät `sanitizeErrorMessage()` virhevastauksiin (kova sääntö 12).
+Kaikki reitit käyttävät `sanitizeErrorMessage()` virhevastauksiin (kova sääntö #12).
 
 ---
 

@@ -62,48 +62,31 @@ As `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
 `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) permitem que os chamadores
 filtrem pelo que um mecanismo realmente pode fazer, em vez de codificar ramificações específicas por ID.
 
-## Eixo A — serviços incorporados (lado do processo supervisionado)
+## Serviços integrados do Eixo A — (lado do processo supervisionado)
 
-- **Registro de processos supervisionados:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (atualmente: `9router`, `cliproxy`).
-- **Responsável pelo ciclo de vida:** `src/lib/services/ServiceSupervisor.ts` — `start()` inicia o
-  processo filho, aguarda a liberação por `waitForHealthy()`, captura stdout/stderr em um buffer circular;
-  `stop()` usa SIGTERM→SIGKILL; tudo é serializado sob um lock.
-- **União de estados** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error`, além de um
-  `HealthState = healthy | unhealthy | unknown` ortogonal.
-- **Por que um processo separado (e não um SDK no mesmo processo)?** O isolamento de processos é o que torna
-  instalação/inicialização/parada/saúde/logs controláveis de forma independente por sidecar e permite a
-  aplicação da proteção de inicialização via loopback. A modelagem de um adaptador no mesmo processo é trabalho futuro — a
-  flag de capacidade `native-hot-path` é onde isso seria expresso.
+- **Cadastro de processos supervisionados:** `src/lib/services/bootstrap.ts` `SERVICES[]` (hoje: `9router`, `cliproxy`).
+- **Proprietário do ciclo de vida:** `src/lib/services/ServiceSupervisor.ts` — `start()` gera o filho, bloqueia `waitForHealthy()`, coloca stdout/stderr em um buffer de anel; `stop()` SIGTERM→SIGKILL; tudo serializado sob um cadeado.
+- **União estadual** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error`, mais um `HealthState = healthy | unhealthy | unknown` ortogonal.
+- **Por que um processo separado (não um SDK em processo)?** O isolamento do processo é o que torna install/start/stop/health/logs controlável de forma independente por sidecar e permite que o loopback spawn-guard seja aplicado. Modelar um adaptador em processo é um trabalho futuro — o sinalizador de capacidade `native-hot-path` é onde isso seria expresso.
 
-### Contrato das rotas de ciclo de vida (`/api/services/<tool>/…`)
+### Contrato de rota de ciclo de vida (`/api/services/<tool>/…`)
 
-Os códigos de status são **específicos por estado/verbo/caminho intencionalmente** — este é o contrato, não
-uma inconsistência:
+Os códigos de status são**state/verb/path-specific por design** — este é o contrato, não a inconsistência:
 
-| Chamada                        | Condição                            | Status                                |
-| ------------------------------ | ----------------------------------- | ------------------------------------- |
-| `POST .../start`               | serviço `not_installed`             | **409** (pré-condição)                |
-| `POST .../stop`                | já está parado                      | **200** (operação inócua idempotente) |
-| `GET .../status`               | OK                                  | **200** (`live ?? row ?? "unknown"`)  |
-| `POST .../start`               | falha ao iniciar o processo         | **503** (transitório)                 |
-| `GET .../status`, `.../stop`   | erro não capturado                  | **500**                               |
-| `GET /api/services/<x>/logs`   | ferramenta `<x>` desconhecida       | **404** `Service '<x>' not found`     |
-| `GET .../status?reveal=key`    | `X-Reveal-Confirm: yes` ausente     | **403** (somente 9router)             |
-| **qualquer** `/api/services/*` | chamador não é loopback/LAN privada | **403 LOCAL_ONLY**                    |
+| Chamar                         | Doença                            | Status                               |
+| ------------------------------ | --------------------------------- | ------------------------------------ |
+| `POST .../start`               | serviço `not_installed`           | **409** (condição prévia)            |
+| `POST .../stop`                | já parou                          | **200** (idempotente sem operação)   |
+| `GET .../status`               | OK                                | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`               | falha de geração                  | **503** (transitório)                |
+| `GET .../status`, `.../stop`   | erro não detectado                | **500**                              |
+| `GET /api/services/<x>/logs`   | ferramenta desconhecida `<x>`     | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`    | faltando `X-Reveal-Confirm: yes`  | **403** (9 roteador apenas)          |
+| **qualquer** `/api/services/*` | chamador não loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-Todos os corpos de erro são formatados por `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, em que `type` é derivado do status
-(`500→server_error`, `404→not_found`, `409→conflict`; caso contrário, `invalid_request`) e é
-o discriminador acionável por máquina. As mensagens são previamente sanitizadas
-(`sanitizeErrorMessage()`, Regra Rígida nº 12).
+Todos os corpos de erro são moldados por `createErrorResponse()` → `{ error: { message, type }, requestId }`, onde `type` é derivado do status (`500→server_error`, `404→not_found`, `409→conflict`, senão `invalid_request`) e é o discriminador acionável pela máquina. As mensagens são pré-higienizadas (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**A proteção de loopback** é a origem mais comum de um `403`: `/api/services/` está em
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) e
-`src/server/authz/policies/management.ts` rejeita qualquer chamador que não seja de loopback/LAN privada
-**antes da autenticação**, porque essas rotas iniciam processos filhos (Regras Rígidas 15
-e 17). Acessá-las por meio de um túnel público resulta em `403` intencionalmente.
+**O protetor de loopback** é a fonte mais comum de um `403`: `/api/services/` está em `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) e `src/server/authz/policies/management.ts` rejeita qualquer chamador de LAN não-loopback/não-privada** antes da autenticação** , porque essas rotas geram processos filhos (Regras rígidas 15 e 17). Alcançar eles através de um túnel público é `403` por design.
 
 ## Eixo B — backend de roteamento do relay (lado do despacho)
 

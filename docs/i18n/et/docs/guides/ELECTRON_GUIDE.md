@@ -4,7 +4,7 @@
 
 ---
 
-> **Tõe allikas:** `electron/` tööruum** Viimati värskendatud:** 28.06.2026 — v3.8.40
+> **Tõe allikas:** `electron/` tööruum
 
 OmniRoute tarnib platvormideülese töölauarakenduse (Windows / macOS / Linux), mis on ehitatud**Electron 41** +** elektronehitaja 26.10** . Töölauarakendus loob Next.js eraldiseisva serveri alamprotsessina, osutab sellele `BrowserWindow` ja lisab süsteemse salve, automaatse värskendaja, IPC silla ja nullkonfiguratsiooniga salajase alglaadimise.
 
@@ -198,7 +198,7 @@ Seadista `session.defaultSession.webRequest.onHeadersReceived` kaudu. Märkimisv
 
 ## Automaatne värskendus
 
-Kasutab `electron-updater` koos GitHub pakkujaga (`diegosouzapw/OmniRoute`).
+Kasutab `electron-updater` koos GitHub pakkujaga (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC kaudu renderdajale edastatud sündmused: `checking`, `available`, `not-available`, `downloading` (koos `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefaktid maanduvad `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Väljalasked avaldatakse GitHub Releases (`diegosouzapw/OmniRoute`), kus `electron-updater` kontrollib ka uusi versioone.
+Väljalasked avaldatakse GitHub Releases (`cheaper-inference/OmniRoute`), kus `electron-updater` kontrollib ka uusi versioone.
 
 ## Veaotsing
 

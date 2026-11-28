@@ -11,7 +11,7 @@ Paghahambing ng tampok na layunin kumpara sa mga sikat na open-source AI router.
 | Tampok                                                     |                OmniRoute 3.8                |       LiteLLM 1.x       | OpenRouter (SaaS) |   Portkey    |
 | ---------------------------------------------------------- | :-----------------------------------------: | :---------------------: | :---------------: | :----------: |
 | **Mga tagapagbigay**                                       |                   **329**                   |          ~100           |        ~50        |     ~30      |
-| **Free/no-auth catalog entry**                             |                   **155**                   |           n/a           |    passthrough    |     n/a      |
+| **Mga provider na may libreng access**                     |        **50 na may libreng access**         |           n/a           |    passthrough    |     n/a      |
 | **Self-hostable**                                          |                     ✅                      |           ✅            |        ❌         |  nagbayad ⚠  |
 | **OAuth catalog entry**                                    |                   **23**                    |        bahagyang        |        ❌         |      ❌      |
 | **Auto-fallback na mga combo**                             |             **22 estratehiya**              | nakabatay sa priyoridad |  batay sa antas   |  natimbang   |
@@ -38,7 +38,7 @@ Paghahambing ng tampok na layunin kumpara sa mga sikat na open-source AI router.
 
 ## Kailan pipiliin ang OmniRoute
 
-- Self-host ka at gusto mo** maximum na saklaw ng provider** (394 provider, 155 free/no-auth catalog entries)
+- Self-host ka at gusto mo** maximum na saklaw ng provider** (394 provider, 50 na may libreng access)
 - Kailangan mo ng isang** built-in na MCP server** (LLM tool, memorya, mga kasanayang nakalantad bilang mga tool)
 - kailangan mo**A2A protocol** para sa mga daloy ng trabaho ng ahente sa ahente
 - gusto mo** fingerprint stealth** (JA3/JA4) upang maiwasan ang pagtuklas ng upstream CAPTCHAs
@@ -58,10 +58,10 @@ Paghahambing ng tampok na layunin kumpara sa mga sikat na open-source AI router.
 
 ## Kailan pipiliin ang Portkey
 
-- Kailangan mo ng **commercial SLA** na may mga garantiya sa uptime
-- Mas gusto mo ang **managed dashboard** na walang dagdag na gawaing pang-ops
-- Kailangan mo ng mga **enterprise compliance** feature na handa nang gamitin
+- Kailangan mo ng isang** komersyal SLA** na may mga garantiya ng uptime
+- Mas gusto mo a** pinamamahalaang dashboard** walang ops overhead
+- kailangan mo** pagsunod sa negosyo** mga tampok sa labas ng kahon
 
 ---
 
-_Huling na-update: 2026-08-02. Magsumite ng mga pagwawasto sa pamamagitan ng PR upang mapanatiling tumpak ang talahanayang ito._
+_Magsumite ng mga pagwawasto sa pamamagitan ng PR upang mapanatiling tumpak ang talahanayang ito._

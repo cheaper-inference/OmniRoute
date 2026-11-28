@@ -4,11 +4,9 @@
 
 ---
 
-> **Zdroj pravdy:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **Posledná aktualizácia:** 2026-09-02 — v3.8.51
-> **Cieľová skupina:** Inžinieri spravujúci stealth integrácie špecifické pre jednotlivých poskytovateľov.
+> **Zdroj pravdy:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** publikum:** Inžinieri udržiavajú integrácie utajenia špecifické pre poskytovateľa.
 
-OmniRoute sa integruje s poskytovateľmi, ktorých okrajová infraštruktúra aktívne identifikuje neoficiálnych klientov podľa digitálnych odtlačkov (TLS JA3/JA4, poradie hlavičiek, štruktúra tela JSON, tokeny integrity). Táto stránka dokumentuje stealth rozhrania, ktoré OmniRoute poskytuje, a miesta ich implementácie.
+OmniRoute sa integruje s poskytovateľmi, ktorých okraje aktívne odtlačia neoficiálnych klientov (TLS JA3/JA4, usporiadanie hlavičiek, tvar tela JSON, tokeny integrity). Táto stránka dokumentuje skryté povrchy, OmniRoute odhaľuje a kde sú implementované.
 
 ## Právne a etické upozornenie
 
@@ -74,65 +72,68 @@ pomocou explicitne autorizovaného živého účtu.
 
 ---
 
-## Balík utajenia Claude Code
+## Claude Kód Stealth Bundle
 
-Keď je zapnutý režim `cliCompatMode`, OmniRoute upravuje odchádzajúce požiadavky Claude tak, aby boli nerozoznateľné od prevádzky `claude-cli`. Spolupracujú na tom tri moduly:
+Keď je `cliCompatMode` zapnuté, OmniRoute pretvára odchádzajúce požiadavky Claude tak, aby boli na nerozoznanie od prevádzky `claude-cli`. Spolupracujú tri moduly:
 
 ### `claudeCodeFingerprint.ts`
 
-Vypočítava 3-znakový odtlačok `cc_version` vložený do fakturačnej hlavičky:
+Vypočíta 3-znakový odtlačok `cc_version` vložený do hlavičky fakturácie:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
 - `FINGERPRINT_SALT = "59cf53e54c78"` (pevne zakódované; zodpovedá oficiálnemu klientovi)
-- Vstupy: znaky na indexoch 4, 7 a 20 textu prvej správy používateľa + reťazec verzie
-- Výstup: 3-znakový hexadecimálny prefix
+- Vstupy: znaky na indexe 4, 7, 20 prvého textu správy používateľa + reťazca verzie
+- Výstup: 3-znaková hexadecimálna predpona
 
-### `claudeCodeCCH.ts` (hash obsahu klienta)
+### `claudeCodeCCH.ts` (Hash obsahu klienta)
 
-Kontrola integrity na strane servera, ktorú oficiálne CLI Claude Code vypočítava prostredníctvom Bun/Zig. OmniRoute ju opätovne implementuje pomocou `xxhash-wasm`:
+Kontrola integrity na strane servera oficiálny kód Claude CLI sa počíta prostredníctvom reimplementácií Bun/Zig. OmniRoute pomocou `xxhash-wasm`:
 
-1. Serializuje telo so zástupným reťazcom `cch=00000;`
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. 5-znakový hexadecimálny reťazec malými písmenami doplnený nulami
-4. Nahradí `cch=00000;` vypočítaným tokenom
+1. Serializujte telo pomocou zástupného symbolu `cch=00000;`
+2. Zostavte zobrazenie hash s dvoma náhradami ako obyčajný text v tomto poradí (`hashView()`):
+   - každá zhoda `/"model":"[^"]*"/g` sa zmení `"model":""` — zhoda sa zastaví na prvom `"`, takže hodnota s úvodzovkou (`"model":"a\"b"`) sa vyprázdni iba po túto citáciu, ako to robí klient
+   - každá zhoda `/"max_tokens":\d+,|,?"max_tokens":\d+/g` sa odstráni — iba číselné hodnoty, v akejkoľvek hĺbke
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. 5-znakový hexadecimálny znak s nulovými výplňami
+5. Nahraďte `cch=00000;` vypočítaným tokenom
 
-Konštanty:
+konštanty:
 
-- Počiatočná hodnota: `0x6e52736ac806831e`
+- Seed: `0x4d659218e32a3268` (zhoduje sa so spätnou slučkou zachytenia kódu Claude 2.1.252 a 2.1.322)
 - Vzor: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-Vkladá znak Unicode **spojovník s nulovou šírkou** (`U+200D`) za prvý znak „citlivých“ názvov klientov, aby ich nadradené filtre nemohli vyhľadať pomocou grep. Predvolený zoznam slov:
+Vloží kód Unicode** spojka s nulovou šírkou** (`U+200D`) za prvým znakom "citlivých" mien klientov, takže upstream filtre ich nemôžu grep. Predvolený zoznam slov:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-Používa sa na: bloky `system`, celý obsah `messages[].content` a `tools[].description` / `tools[].function.description`. Operátor ho môže prepísať pomocou `setSensitiveWords()`.
+Aplikuje sa na: bloky `system`, všetky `messages[].content` a `tools[].description` / `tools[].function.description`. Prepisovateľné operátorom cez `setSensitiveWords()`.
 
-### `claudeCodeCompatible.ts` — poskytovatelia `anthropic-compatible-cc-*`
+### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` poskytovatelia
 
-Pre relé Anthropic tretích strán, ktoré akceptujú iba prevádzku „skutočného Claude Code“:
+Pre relé Anthropic tretích strán, ktoré akceptujú iba prenos „skutočného kódu Claude “:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` v predvolenom nastavení
-- Prepínač „Povoliť beta verziu redact-thinking“ pre jednotlivé pripojenia pridáva `redact-thinking-2026-02-12`, keď nadradená služba kompatibilná s CC výslovne vyžaduje redigované prúdy uvažovania
-- Prepínač „Povoliť zobrazenie zhrnutého uvažovania“ pre jednotlivé pripojenia uloží `providerSpecificData.requestDefaults.summarizeThinking` a pridá `display: "summarized"` k požiadavkám uvažovania kompatibilným s CC, ktoré ešte nemajú nastavený režim zobrazenia
+- `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` štandardne
+- Prepínač „Enable redact-thinking beta“ pre jednotlivé pripojenia pridáva `redact-thinking-2026-02-12` keď kompatibilita CC upstream špecificky vyžaduje zredigované toky myslenia.
+- Prepínač „Povoliť zobrazenie súhrnného myslenia“ pre jednotlivé pripojenia ukladá `providerSpecificData.requestDefaults.summarizeThinking` a pridáva `display: "summarized"` do CC kompatibilných požiadaviek myslenia, ktoré ešte nenastavili režim zobrazenia
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (rodina Opus/Sonnet 4.x)
 - Predvolená cesta: `/v1/messages?beta=true`
 
-Súvisiace moduly v rovnakom balíku:
+Sesterské moduly v rovnakom balíku:
 
-- `claudeCodeConstraints.ts` — pravidlá teploty a riadenia vyrovnávacej pamäte
-- `claudeCodeToolRemapper.ts` — premapovanie názvov nástrojov
-- `claudeCodeExtraRemap.ts` — dodatočná normalizácia dátovej časti
+- `claudeCodeConstraints.ts` — teplota + pravidlá kontroly vyrovnávacej pamäte
+- premapovanie názvu nástroja `claudeCodeToolRemapper.ts` —
+- `claudeCodeExtraRemap.ts` — normalizácia extra užitočného zaťaženia
 
 ---
 
@@ -146,7 +147,7 @@ Pred preposielaním odizoluje nerezové značky SDK (`x-stainless-lang`, `x-stai
 
 ### ⚠️ riziko: `ANTIGRAVITY_CREDITS=always` (hot spot-ban účtu)
 
-`ANTIGRAVITY_CREDITS=always` (spotrebované `open-sse/executors/antigravity.ts`) cesty** každý** požiadať cez Antigravity AI Credit Overages (platené Google kredity) namiesto toho, aby ste nechali veci z voľnej úrovne kvóty Google. Toto je zdokumentované ako vlastnosť, ale je to tak** jediná najbežnejšia správa o porušení zmluvných podmienok, ktorú vidíme** — viaceré účty Google Ultra boli zakázané so `403 / "service disabled for ToS violation" / insufficient_quota` po niekoľkých hodinách behu so `=always`.
+`ANTIGRAVITY_CREDITS=always` (spotrebované `open-sse/executors/antigravity.ts`) cesty** každý** požiadať cez Antigravity AI Credit Overages (platené Google kredity) namiesto toho, aby ste nechali veci z voľnej úrovne Google. Toto je zdokumentované ako vlastnosť, ale je to tak** jediná najbežnejšia správa o porušení zmluvných podmienok, ktorú vidíme** — viaceré účty Google Ultra boli zakázané so `403 / "service disabled for ToS violation" / insufficient_quota` po niekoľkých hodinách behu so `=always`.
 
 Presadzovanie proti prúdu je zapnuté** strana Google** , ničomu nemôže OmniRoute zabrániť. Názov env var a existujúce dokumenty znejú ako bezpečný gombík na otočenie; nie je.
 
@@ -192,7 +193,7 @@ Dotykové body:
 
 - `open-sse/executors/antigravity.ts` — číta `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — poverenie inštalatérstvo
-- Pôvodná správa o incidente: Diskusia [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Pôvodná správa o incidente: Diskusia [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

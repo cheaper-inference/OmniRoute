@@ -69,35 +69,35 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## ਤਿੰਨ ਮੁੱਲ
 
-| ਮੁੱਲ   | UI ਲੇਬਲ                | ਵਿਹਾਰ                                                                                                                                                         |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `ਸਵੈਚਾਲਿਤ (ਡੁਅਲ-ਸਟੈਕ)` | OS ਫੈਮਿਲੀ ਚੁਣਦਾ ਹੈ। IP-ਲਿਟਰਲ ਪ੍ਰਾਕਸੀ ਹੋਸਟ ਲਈ, ਫੈਮਿਲੀ ਉਸ ਲਿਟਰਲ ਵਿੱਚ ਅੰਦਰੂਨੀ ਤੌਰ 'ਤੇ ਨਿਰਧਾਰਤ ਹੁੰਦੀ ਹੈ; ਹੋਸਟਨੇਮ ਲਈ, ਦੋਵੇਂ ਫੈਮਿਲੀਆਂ ਯੋਗ ਹੁੰਦੀਆਂ ਹਨ। ਇਹ ਡਿਫਾਲਟ ਹੈ। |
-| `ipv4` | `ਸਿਰਫ਼ IPv4`           | ਕਨੈਕਸ਼ਨ ਨੂੰ IPv4 ਨਾਲ ਨਿਰਧਾਰਤ ਕਰਦਾ ਹੈ। ਜੇ ਪ੍ਰਾਕਸੀ ਹੋਸਟ ਕੋਲ IPv4 (A) ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ, ਤਾਂ ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਅਸਫਲ ਹੁੰਦਾ ਹੈ।                                        |
-| `ipv6` | `ਸਿਰਫ਼ IPv6`           | ਕਨੈਕਸ਼ਨ ਨੂੰ IPv6 ਨਾਲ ਨਿਰਧਾਰਤ ਕਰਦਾ ਹੈ। ਜੇ ਪ੍ਰਾਕਸੀ ਹੋਸਟ ਕੋਲ IPv6 (AAAA) ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ, ਤਾਂ ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਅਸਫਲ ਹੁੰਦਾ ਹੈ।                                     |
+| ਮੁੱਲ   | UI ਲੇਬਲ             | ਵਿਵਹਾਰ                                                                                                                                   |
+| ------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS ਪਰਿਵਾਰ ਨੂੰ ਚੁਣਦਾ ਹੈ। ਇੱਕ IP-ਲਿਟਰਲ ਪ੍ਰੌਕਸੀ ਹੋਸਟ ਲਈ, ਪਰਿਵਾਰ ਸ਼ਾਬਦਿਕ ਲਈ ਅੰਦਰੂਨੀ ਹੁੰਦਾ ਹੈ; ਹੋਸਟਨਾਮ ਲਈ, ਦੋਵੇਂ ਪਰਿਵਾਰ ਯੋਗ ਹਨ। ਇਹ ਡਿਫਾਲਟ ਹੈ। |
+| `ipv4` | `IPv4 only`         | IPv4 ਨਾਲ ਕੁਨੈਕਸ਼ਨ ਪਿੰਨ ਕਰਦਾ ਹੈ। ਬੰਦ ਹੋ ਜਾਂਦਾ ਹੈ ਜੇਕਰ ਪ੍ਰੌਕਸੀ ਹੋਸਟ ਕੋਲ ਕੋਈ IPv4 (A) ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।                                       |
+| `ipv6` | `IPv6 only`         | IPv6 ਨਾਲ ਕੁਨੈਕਸ਼ਨ ਪਿੰਨ ਕਰਦਾ ਹੈ। ਬੰਦ ਹੋ ਜਾਂਦਾ ਹੈ ਜੇਕਰ ਪ੍ਰੌਕਸੀ ਹੋਸਟ ਕੋਲ ਕੋਈ IPv6 (AAAA) ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।                                    |
 
-UI ਸਟਰਿੰਗਾਂ `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) ਵਿੱਚ ਹਨ।
+UI ਸਤਰਾਂ `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`) ਵਿੱਚ ਰਹਿੰਦੀਆਂ ਹਨ।
 
 ---
 
-## ਇਸਨੂੰ ਕਿਵੇਂ ਕੌਂਫਿਗਰ ਕਰਨਾ ਹੈ
+## ਇਸਨੂੰ ਕਿਵੇਂ ਸੰਰਚਿਤ ਕਰਨਾ ਹੈ
 
 ### ਡੈਸ਼ਬੋਰਡ
 
-ਚੋਣਕਾਰ **Proxy Pool** ਟੈਬ ਦੇ ਪ੍ਰਾਕਸੀ ਫਾਰਮ ਵਿੱਚ ਹੈ:
+ਚੋਣਕਾਰ ਦੇ ਪ੍ਰੌਕਸੀ ਰੂਪ ਵਿੱਚ ਹੈ** ਪ੍ਰੌਕਸੀ ਪੂਲ** ਟੈਬ:
 
-1. **Dashboard → Settings → Proxy → Proxy Pool** ਖੋਲ੍ਹੋ
-2. ਕੋਈ ਪ੍ਰਾਕਸੀ ਜੋੜੋ ਜਾਂ ਸੰਪਾਦਿਤ ਕਰੋ
-3. **IP ਫੈਮਿਲੀ** ਡ੍ਰੌਪਡਾਊਨ ਨੂੰ `ਸਵੈਚਾਲਿਤ (ਡੁਅਲ-ਸਟੈਕ)`, `ਸਿਰਫ਼ IPv4`, ਜਾਂ `ਸਿਰਫ਼ IPv6` 'ਤੇ ਸੈੱਟ ਕਰੋ
+1. ਖੋਲ੍ਹੋ** ਡੈਸ਼ਬੋਰਡ → ਸੈਟਿੰਗਾਂ → ਪ੍ਰੌਕਸੀ → ਪ੍ਰੌਕਸੀ ਪੂਲ**
+2. ਇੱਕ ਪ੍ਰੌਕਸੀ ਜੋੜੋ ਜਾਂ ਸੰਪਾਦਿਤ ਕਰੋ
+3. ਸੈੱਟ ਕਰੋ**IP ਪਰਿਵਾਰ** `Auto (dual-stack)`, `IPv4 only`, ਜਾਂ `IPv6 only` ਤੇ ਡ੍ਰੌਪਡਾਊਨ
 4. ਸੇਵ ਕਰੋ
 
-ਇਹ ਕੰਟਰੋਲ `ProxyRegistryManager.tsx` ਵੱਲੋਂ ਰੈਂਡਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ (`proxy/ProxyPoolTab.tsx` ਵਿੱਚ ਮਾਊਂਟ ਕੀਤਾ ਗਿਆ ਹੈ)।
+ਨਿਯੰਤਰਣ `ProxyRegistryManager.tsx` ਦੁਆਰਾ ਰੈਂਡਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ( `proxy/ProxyPoolTab.tsx` ਵਿੱਚ ਮਾਊਂਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ)।
 
 ### API
 
-`family` ਫੀਲਡ ਪ੍ਰਾਕਸੀ ਰਜਿਸਟਰੀ ਬਣਾਉਣ/ਅੱਪਡੇਟ ਕਰਨ ਵਾਲੇ ਪੇਲੋਡਾਂ ਦਾ ਹਿੱਸਾ ਹੈ, ਜਿਸਨੂੰ `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ਵੱਲੋਂ ਪ੍ਰਮਾਣਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ `POST` / `PATCH /api/v1/management/proxies` ਵੱਲੋਂ ਸੰਭਾਲਿਆ ਜਾਂਦਾ ਹੈ:
+`family` ਫੀਲਡ ਪ੍ਰੌਕਸੀ ਰਜਿਸਟਰੀ create/update ਪੇਲੋਡ ਦਾ ਹਿੱਸਾ ਹੈ, `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ ਅਤੇ `POST` / `PATCH /api/v1/management/proxies` ਦੁਆਰਾ ਸੰਭਾਲਿਆ ਜਾਂਦਾ ਹੈ:
 
 ```bash
-# ਸਿਰਫ਼-IPv6 ਪ੍ਰਾਕਸੀ ਬਣਾਓ
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# ਕਿਸੇ ਮੌਜੂਦਾ ਪ੍ਰਾਕਸੀ ਨੂੰ ਸਿਰਫ਼-IPv4 ਵਿੱਚ ਬਦਲੋ
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-ਇਹੀ ਫੀਲਡ ਅੱਪਸਟ੍ਰੀਮ-ਪ੍ਰਾਕਸੀ ਐਂਟਰੀਆਂ ਲਈ ਵਰਤੇ ਜਾਂਦੇ ਇਨਲਾਈਨ ਪ੍ਰਾਕਸੀ ਕੌਂਫਿਗ ਆਬਜੈਕਟ ਵੱਲੋਂ ਵੀ ਸਵੀਕਾਰ ਕੀਤੀ ਜਾਂਦੀ ਹੈ (`upstream_proxy_config.family`, [ਡਾਟਾ ਮਾਡਲ](#data-model) ਵੇਖੋ)।
+ਇਹੀ ਖੇਤਰ ਅਪਸਟ੍ਰੀਮ-ਪ੍ਰਾਕਸੀ ਐਂਟਰੀਆਂ (`upstream_proxy_config.family`, [ਡੇਟਾ ਮਾਡਲ](#data-model) ਵੇਖੋ) ਲਈ ਵਰਤੀ ਜਾਂਦੀ ਇਨਲਾਈਨ ਪ੍ਰੌਕਸੀ ਸੰਰਚਨਾ ਆਬਜੈਕਟ ਦੁਆਰਾ ਵੀ ਸਵੀਕਾਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
 
-ਪ੍ਰਾਕਸੀ CRUD/ਅਸਾਈਨਮੈਂਟ API ਦੇ ਬਾਕੀ ਹਿੱਸੇ ਲਈ, [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) ਵੇਖੋ।
+ਬਾਕੀ ਪ੍ਰੌਕਸੀ CRUD/assignment API ਲਈ , [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) ਵੇਖੋ .
 
 ---
 

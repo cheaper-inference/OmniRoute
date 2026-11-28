@@ -4,86 +4,63 @@
 
 ---
 
-> **19-11-2026: de samenvoegwachtrij voor samenvoegen is buiten gebruik gesteld** (beslissing van de eigenaar). `.mergify.yml` definieert niet langer een wachtrij en weigert de Mergify-opdrachten die een pull-verzoek samenvoegen of herschrijven. Release PRs wordt met de hand samengevoegd onder de repository-regelset "Vereist groene poorten voor de actieve release" (`Gate / CI` + `Gate / Quality`) totdat de omni-queue in de live-modus draait, en daarna via de omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). In de onderstaande secties Samenvoegen wordt de wachtrij beschreven zoals deze was.
+## Landen op een vrijgavetak
 
-Sinds v3.8.49 (WS3.2/WS3.4 van het quality/velocity -plan) is het standaard samenvoegpad voor beoordeelde PRs naar `release/vX.Y.Z` de** Samenvoegwachtrij samenvoegen** (`.mergify.yml`); de** handmatige samenvoegtrein** Hieronder wordt de FALLBACK — gedocumenteerd die wordt gebruikt tijdens incidenten, bevriezing van releases of als het Mergify Open Source-plan ooit verandert.
+De omni-wachtrij regelt de landingen in `release/vX.Y.Z`. Lees de `mode` op het hoogste niveau in `config/merge-queue/config.json` op de standaardbranch voordat u een PR landt. Zie [Omni-wachtrij](OMNI_QUEUE.md).
 
-## Standaardpad: de Mergify-wachtrij
+- **`shadow`** voert de validatie uit en verlaat de landing naar een handmatige samenvoeging. Breng `omni-queue` aan op de goedgekeurde PR bij de laatste kop. Controleer of u in aanmerking komt met `npm run queue -- why <PR>`. Wacht op de uitspraak voor dat hoofd in `npm run queue -- history --base <branch>`. Ga verder met `would-land`. Houd op `culprit-found` of `would-dequeue` de samenvoeging vast en verhelp de oorzaak.
+- **Schaduwuitzonderingen.** Een trein met groene volle CI tegen de huidige basistip kan zonder apart wachtrijoordeel doorrijden. Dezelfde uitzondering is van toepassing wanneer de PR kop al de huidige basistip bevat.
+- **`live`** gebruikt het `omni-queue` label om de landing te activeren. Alleen al de wachtrij brengt de PR binnen. Laat samenvoegopdrachten en directe push-opdrachten naar de wachtrij.
 
-1. De PR wordt beoordeeld/goedgekeurd door de campagnes en goedgekeurd via de pre-merge-⭐
-   poort van de eigenaar (het rapport + de beslissing per item — zie `/merge-prs` Stap 0.75).
-2. De eigenaar (of de sessie die handelt op basis van de beslissing van de eigenaar) past het
-   **`queue`**-label toe. Het label IS de goedkeuring voor het samenvoegen; Mergify voert deze alleen uit.
-3. Mergify valideert PR's in de wachtrij **serieel** (één tegelijk) aan de hand van de snelle controles
-   en voegt ze samen (squash). Batching + automatische bisectie is onderdeel van een betaalde Mergify-laag
-   ("Cannot use Merge Queue batch" bij het gratis abonnement, #7220), dus stelt `.mergify.yml` geen
-   `batch_size` in; batching blijft de taak van de onderstaande handmatige merge train. Een PR waarvan
-   de controles na `checks_timeout` (240 min = 2× de gemeten p95 van
-   `quality.yml`) nog steeds in behandeling zijn, wordt uit de wachtrij verwijderd in plaats van deze te blokkeren.
-4. Na het samenvoegen valideert de continue release-green-workflow de nieuwe tip bij een push
-   en opent deze een attributie-issue als de combinatie een regressie heeft veroorzaakt (nooit automatisch terugdraaien).
+Voor iedere landing is de toestemming van de eigenaar en de daarbij behorende vereiste controles vereist. Pas `omni-queue` pas toe nadat de eigenaar toestemming heeft gegeven om te landen. In de wachtrij geplaatste PRs die beschermde paden raken, vereisen ook de `protected-approved` beslissing van de eigenaar voor die PR.
 
-Beveiligingsmaatregelen (conform de harde regels #21/#22 van `CLAUDE.md`):
+De regelset "Vereist groene poorten bij actieve vrijgave" vereist groene `Gate / CI` en `Gate / Quality` op het hoofd. Gebruik `--admin` nooit om een rode poort te omzeilen. Een release-bevriezingsblok gaat over in de bevroren tak. Zie [harde regel 21](HARD_RULES_DETAIL.md). Label, merge of push nooit een pull-verzoek dat een andere sessie werkt. Zie [harde regel 22](HARD_RULES_DETAIL.md).
 
-- **Release freeze actief** → label PR's die op de bevroren branch zijn gericht NIET; richt ze eerst opnieuw op
-  de actieve `release/vX+1`.
-- **Lopende PR van een andere sessie** → label deze nooit; alleen de sessie die eigenaar is, zet
-  het eigen werk in de wachtrij.
-- Diffs met alleen tests en PR's met het label `hotfix` voeren al gereduceerde CI uit (zie
-  `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane); de wachtrijvoorwaarden accepteren elke
-  daadwerkelijk uitgevoerde set controles (`#check-failure=0` + `#check-pending=0`).
+## Het treintrekverzoek
 
-## Terugvaloptie: de handmatige merge-train
+1. Start een treinvertakking op de huidige release-basispunt. Integreer de exact goedgekeurde lidhoofden met behulp van merge commits. Behoud hun commitgeschiedenis door squash en rebase te vermijden.
+2. Open één pull-aanvraag voor de treintak. Valideer die PR met zijn eigen volledige CI op de huidige basistip. Controleer de basistip en de goedgekeurde lidkoppen opnieuw voordat u landt. Ververs de trein en zijn CI wanneer de gevalideerde kandidaat verandert.
+3. Land de trein PR met een merge commit onder de toepasselijke wachtrijmodus. In de live-modus behoudt de `merge-ff` landingsmethode van de wachtrij de merge-commits. De oorspronkelijke ledenhoofden worden bereikbaar vanaf de releasetak. GitHub markeert het lid PRs als samengevoegd en de commits behouden hun auteurs.
 
-Wordt gebruikt wanneer de wachtrij niet beschikbaar is. Dit formaliseert de werkwijze waarmee tijdens
-de v3.8.47-cyclus in één dag 33 PR's zijn weggewerkt:
+Een openbaar voorbeeld is [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Het combineerde PRs met 18 leden en kwam op 24-11-2026 terecht met een fusieverplichting.
 
-1. **Stel de batch samen** (~10–30 beoordeelde+goedgekeurde PR's). Controleer op `linked:`-conflicten
-   (dezelfde `tap.testFiles`, dezelfde CHANGELOG-secties) en verwerk die na elkaar.
-2. **Valideer EENMAAL**: merge in een geïsoleerde worktree vanaf de release-tip alle batch-heads
-   lokaal en voer vervolgens de release-equivalente suite uit
-   (`npm run check:release-green`; voeg vóór een release `--with-build` toe).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatiseert stappen 1–2 (conflicterende
-   PR's worden verwijderd, de trein gaat verder). De volledige modus voert `npm run test:unit` uit — de
-   op de machine afgestemde runner (`--test-concurrency=20`), **niet** de twee sequentiële CI-shards met 4 cores,
-   die de dominante fase op ~25% van een machine met 16 cores lieten draaien (opgelost op
-   2026-07-18). `--fast` (mega-trains binnen één dag wegwerken, goedgekeurd door de eigenaar op 2026-07-18)
-   behoudt elke statische controle + vitest, maar voert alleen de node:test-bestanden uit die zijn gewijzigd door de
-   ingestapte PR's; de VOLLEDIGE suite moet nog steeds minstens eenmaal per dag op de
-   opgebouwde tip worden uitgevoerd (één trein zonder `--fast`).
-3. **Groen** → merge de PR's op volgorde (controleer vóór elke merge opnieuw `state,headRefOid` —
-   een PR waarvan de head is gewijzigd, gaat opnieuw de beoordeling in). Bewijs dat de netto diff van elke merge de
-   eigen wijziging van de PR is (geen automatisch opgeloste terugdraaiingen: controleer `git diff --stat` op
-   verwijderingen buiten het bereik).
-4. **Rood** → bisecteer de batch in helften (valideer elke helft) in plaats van PR's
-   één voor één opnieuw te valideren; plaats de veroorzakende PR met het bewijs terug in de beoordelingswachtrij.
-5. **Nooit**: tijdens een freeze naar de bevroren branch mergen; ergens `git stash` gebruiken;
-   CI klakkeloos opnieuw uitvoeren in de hoop dat rood verdwijnt (regel: rood is informatie).
+Een sync-back van `main` naar de volgende release branch komt ook terecht via een merge commit. Het behouden van de voorouders `main` is vereist voor latere synchronisaties. Zie [Werkboomisolatie](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Niveaus (waarom de wachtrij veilig is met alleen snelle controles)
+## De lokale validator voor samenvoegtreinen
 
-- **Per PR** (snelle controles van quality.yml): door TIA beïnvloede tests + volledige unit-suite met 4 shards +
-  vitest + lint-verzameling + typecheck + integriteitscontrole voor documentatie/changelog.
-- **Per batch/tip** (continue release-green): HARDE `--quick`-controles bij elke push naar
-  de releasebranch; volledige `--with-build --full-ci`-controles 3×/dag.
-- **Per release** (ci.yml op de release-PR): de volledige matrix incl. E2E ×9,
-  package-artifact + opstartrooktest voor tarball, coverage/ratchets.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Niets wordt minder gevalideerd dan voorheen — het zware testoppervlak wordt alleen per batch/tip uitgevoerd
-in plaats van per PR, wat de O(N)-rondgangen elimineert.
+De validator haalt de basis- en PR -koppen op en combineert deze in een wegwerpbare werkboom. Het voert zijn pariteitssuite één keer uit op de resulterende boom. Een mislukt headfetch- of merge-conflict werpt die PR uit en het script gaat verder met de resterende PRs.
 
-## Vereisten voor een nieuwe checkout voor `merge-train.sh`
+- **`--plan`** drukt de stappen van de geselecteerde modus af en sluit af zonder een werkboom te maken of contact op te nemen met de afstandsbediening. Combineer het met `--fast` om het snelle plan te bekijken.
+- **`--fast`** voert de algemene statische poorten uit, de geselecteerde gewijzigde `node:test` bestanden onder `tests/unit/` en `npm run test:vitest`. Voer minstens één keer per dag een volledige lokale validatie uit op de verzamelde tip als u de snelle modus gebruikt.
+- **Volledige modus** voegt de volledige statische poorten toe en voert `npm run test:unit` en `npm run test:vitest` uit.
 
-Het script voert een onmiddellijk afbrekende **preflight** uit op de root-checkout (vóór enig werk
-in een worktree), zodat een defecte installatie zich nooit als een rode trein kan voordoen:
+Een falende statische poort wordt opnieuw uitgevoerd op de onaangeroerde basis als de basissonde beschikbaar is. Het script rapporteert overgeërfde fouten en gaat verder wanneer elke herkende overtredingslijn ook op de basis verschijnt en het totaal aantal niet is toegenomen.
 
-1. `npm ci`, voer daarna de `bun`-postinstall uit die npm blokkeert:
-   `(cd node_modules/bun && node install.js)` — anders mislukken `check:provider-consistency`
-   en `check:known-symbols` (beide `bun scripts/…`) op de trein EN de basis zonder
-   overtredingsregel.
-2. Geen verdwaalde `node_modules/node_modules` (een dubbele dependencystructuur; React wordt tweemaal geladen
-   en UI-vitest-suites mislukken onmiddellijk).
-3. `node_modules/.bin/tsc` aanwezig en uitvoerbaar (bij een gedeeltelijke installatie ontbreekt dit).
+| Uitgang | Betekenis                                                                                                                                                 |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`     | Het plan afgedrukt of de suite voltooid. In het suiteoverzicht worden eventuele overgenomen statische fouten en uitgeworpen PRs vermeld.                  |
+| `1`     | Ongeldige argumenten, geen Git-checkout, mislukte preflight of geen PR boarding.                                                                          |
+| `2`     | Een suitecontrole mislukte en kwalificeerde niet als geërfd. De operator kan de batch in tweeën delen, de overtredende PR uitwerpen en opnieuw uitvoeren. |
 
-De trein voert het blokkerende `npm run check:cycles:ratchet` uit; alleen `npm run check:cycles`
-is adviserend (het vermeldt de SCC's en eindigt met een niet-nulstatus, zelfs op een gezonde basis).
+Een lokale pas levert uitsluitend diagnostisch bewijs voor het dossier van de eigenaar. Voor elke landing is nog steeds toestemming van de eigenaar vereist, de eigen vereiste controles en, indien van toepassing, het oordeel over de schaduwwachtrij.
+
+## Niveaus
+
+- **Per PR.** CI en kwaliteitsselectiecontroles op basis van de gewijzigde paden. Code PRs voert snelle kwaliteitspoorten en impacttests uit, met afzonderlijke eenheids- en Vitest -taken in CI.
+- **Per wachtrijkandidaat.** CI en Quality voeren het volledige profiel uit voor de samengestelde kandidaat op zijn wachtrij ref.
+- **Per releasetip.** Release-Green voert snelle, harde poorten uit bij aanvallen die overeenkomen met de padfilters. Drie geplande runs per dag maken gebruik van de volledige sweep voor de release branch.
+- **Per uitgave.** De volledige CI matrix omvat E2E scherven, pakketvalidatie, tarball-bootrook en dekkingscontroles. Zie de [Vrijgavechecklist](RELEASE_CHECKLIST.md).
+
+## Vereisten voor vers afrekenen voor `merge-train.sh`
+
+De preflight wordt uitgevoerd voordat werkbomen worden gemaakt. Installeer afhankelijkheden met `npm ci`. Bevestig dat `node_modules/.bin/tsc` uitvoerbaar is en dat `node_modules/node_modules` afwezig is. Controleer of `node_modules/.bin/bun --version` slaagt.
+
+Als de Bun postinstall is overgeslagen, voer dan `(cd node_modules/bun && node install.js)` uit. De providerconsistentie en bekende-symboolcontroles gebruiken Bun. De validator voert `npm run check:cycles:ratchet` uit als een blokkerende poort. Het zelfstandige `npm run check:cycles` commando is adviserend.
+
+## Geschiedenis
+
+De samenvoegwachtrij voor samenvoegen is op 19-11-2026 buiten gebruik gesteld.

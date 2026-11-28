@@ -505,27 +505,27 @@ ketika data papan peringkat benar-benar berubah sejak pengiriman terakhir.
 
 ---
 
-## Berbagi Token
+## Pembagian Token
 
-**File:** `src/lib/gamification/sharing.ts`
+**Mengajukan:** `src/lib/gamification/sharing.ts`
 
-### Buku Besar Berpasangan
+### Buku Besar Entri Ganda
 
-Setiap transfer membuat dua baris di `token_ledger`:
+Setiap transfer menciptakan dua baris di `token_ledger`:
 
 | Baris  | `from_key_id` | `to_key_id` | `amount` |
 | ------ | ------------- | ----------- | -------- |
-| Debit  | pengirim      | penerima    | +amount  |
+| Debet  | pengirim      | penerima    | jumlah + |
 | Kredit | penerima      | pengirim    | -amount  |
 
 Tunggu — konvensinya adalah:
 
-| Baris  | `from_key_id` | `to_key_id` | `amount` | Arti                 |
-| ------ | ------------- | ----------- | -------- | -------------------- |
-| Kirim  | pengirim      | penerima    | +amount  | Arus keluar pengirim |
-| Terima | penerima      | pengirim    | +amount  | Arus masuk penerima  |
+| Baris    | `from_key_id` | `to_key_id` | `amount` | Arti                      |
+| -------- | ------------- | ----------- | -------- | ------------------------- |
+| Mengirim | pengirim      | penerima    | jumlah + | Arus keluar dari pengirim |
+| Menerima | penerima      | pengirim    | jumlah + | Aliran masuk ke penerima  |
 
-Saldo dihitung sebagai berikut:
+Saldo dihitung sebagai:
 
 ```sql
 SELECT
@@ -536,7 +536,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Alur Transfer
+### Aliran Perpindahan
 
 ```typescript
 export async function transferTokens(
@@ -547,19 +547,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Validasi**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotensi**: periksa apakah `idempotency_key` sudah ada di buku besar.
-   Jika ya, kembalikan hasil yang telah di-cache.
-3. **Transaksi** (satu transaksi SQLite):
-   a. Hitung saldo pengirim.
-   b. Jika `balance < amount`, batalkan (dana tidak mencukupi).
-   c. Sisipkan baris pengiriman (`from=pengirim,`.
+1. **Mengesahkan** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotensi** : periksa apakah `idempotency_key` sudah ada di buku besar. Jika ya, kembalikan hasil cache.
+3. **Transaksi** (transaksi SQLite tunggal): a. Hitung saldo pengirim. B. Jika `balance < amount`, batalkan (dana tidak mencukupi). C. Sisipkan baris kirim (`from=sender, to=receiver, amount`). D. Sisipkan baris terima (`from=receiver, to=sender, amount`).
+4. **Batas tarif** : periksa kecepatan transfer untuk pengirim (maks 10 transfers/min).
+5. **Peristiwa** : memancarkan acara gamifikasi `token_share` untuk evaluasi lencana XP +.
+6. Kembalikan `{ success: true, balance: newBalance }`.
 
-### Pembatasan Laju
+### Pembatasan Nilai
 
-- Maks. 10 transfer per menit per kunci API.
-- Maks. 10.000 token per transfer.
-- Maks. 100.000 token yang ditransfer per hari per kunci API.
+- Maksimum 10 transfer per menit per kunci API.
+- Maksimum 10.000 token per transfer tunggal.
+- Maksimum 100.000 token ditransfer per hari per kunci API.
 
 ---
 

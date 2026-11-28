@@ -4,7 +4,7 @@
 
 ---
 
-> **진실의 출처:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** 마지막 업데이트:** 2026-06-28 — v3.8.40
+> **진실의 출처:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute 사고 모드 모델에서 생성된 보조 `reasoning_content` 캡처하고 업스트림 공급자가 요구할 때 다중 턴 요청에서 이를 투명하게 재생합니다. 이는 클라이언트의 대화 기록에 이전 차례의 추론이 누락된 경우 엄격한 공급자가 발생시키는 HTTP 400 오류를 제거합니다.
 

@@ -49,7 +49,7 @@ Elke implementatie biedt een eigen exemplaar van de specificatie op `/openapi.ya
 
 ---
 
-## Chatvoltooiingen
+## Chat-voltooiingen
 
 ```bash
 POST /v1/chat/completions
@@ -65,35 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### Aangepaste headers
+### Aangepaste kopteksten
 
-| Header                   | Richting | Beschrijving                                                                                                                                                                                                                                  |
-| ------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Verzoek  | Instellen op `true` om de cache te omzeilen                                                                                                                                                                                                   |
-| `x-omniroute-no-memory`  | Verzoek  | Instellen op `true` om het injecteren van geheugen + vaardigheden voor dit verzoek over te slaan (spiegelt no-cache; voorkomt de overhead van tokens/kosten per aanroep)                                                                      |
-| `X-OmniRoute-Progress`   | Verzoek  | Instellen op `true` voor voortgangsgebeurtenissen                                                                                                                                                                                             |
-| `X-Session-Id`           | Verzoek  | Sticky-sessiesleutel voor externe sessie-affiniteit                                                                                                                                                                                           |
-| `x_session_id`           | Verzoek  | Variant met underscore wordt ook geaccepteerd (direct HTTP)                                                                                                                                                                                   |
-| `X-OmniRoute-Session-Id` | Verzoek  | Door de aanroeper opgegeven sessie-/conversietag (wordt ook aan geheugen doorgegeven). Indien aanwezig, letterlijk opgeslagen in `call_logs.session_tag` voor kostentoewijzing per sessie (#8249) — nooit samengesteld wanneer deze ontbreekt |
-| `Idempotency-Key`        | Verzoek  | Deduplicatiesleutel (venster van 5 seconden)                                                                                                                                                                                                  |
-| `X-Request-Id`           | Verzoek  | Alternatieve deduplicatiesleutel                                                                                                                                                                                                              |
-| `x-omniroute-connection` | Verzoek  | Een verzoek voor één model vastzetten op één providerverbinding (account) op basis van de id — zie [Account vastzetten per verzoek](#account-pinning-per-request)                                                                             |
-| `X-OmniRoute-Cache`      | Antwoord | `HIT` of `MISS` (niet-streaming)                                                                                                                                                                                                              |
-| `X-OmniRoute-Idempotent` | Antwoord | `true` als er is gededupliceerd                                                                                                                                                                                                               |
-| `X-OmniRoute-Progress`   | Antwoord | `enabled` als voortgangsregistratie actief is                                                                                                                                                                                                 |
-| `X-OmniRoute-Session-Id` | Antwoord | Effectieve sessie-ID die door OmniRoute wordt gebruikt                                                                                                                                                                                        |
-| `X-OmniRoute-Request-Id` | Antwoord | Correlatie-id van het verzoek (indien bekend)                                                                                                                                                                                                 |
-| `X-OmniRoute-Version`    | Antwoord | Buildversie van OmniRoute (altijd aanwezig)                                                                                                                                                                                                   |
-| `X-OmniRoute-Cost-Saved` | Antwoord | USD die de cache heeft bespaard bij een HIT (alleen cache-hits)                                                                                                                                                                               |
-| `X-OmniRoute-Decision`   | Antwoord | Routeringstracering: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` is de combinatiestrategie, of `single` voor een verzoek zonder combinatie) — altijd aanwezig in voltooiingsantwoorden                                      |
+| Koptekst                 | Richting | Beschrijving                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Verzoek  | Stel in op `true` om de cache te omzeilen                                                                                                                                                                                                                                                                                                                                                 |
+| `x-omniroute-no-memory`  | Verzoek  | Stel in op `true` om de injectie van geheugen + -vaardigheden voor dit verzoek over te slaan (spiegelt geen cache; vermijdt de token/cost overhead per oproep)                                                                                                                                                                                                                            |
+| `x-omniroute-no-log`     | Verzoek  | Stel in op `true` om request/response payloads weg te laten uit oproeplogboeken voor dit inferentieverzoek (alle chatfamilieroutes: chatvoltooiingen, reacties, berichten, voltooiingen, Gemini). Tijdstempel, model, status, duur en tokentellingen worden nog steeds vastgelegd. Combineer met `x-omniroute-no-memory` en `x-omniroute-no-cache` voor een opt-out voor volledige inhoud |
+| `X-OmniRoute-Progress`   | Verzoek  | Stel in op `true` voor voortgangsgebeurtenissen                                                                                                                                                                                                                                                                                                                                           |
+| `X-Session-Id`           | Verzoek  | Sticky sessiesleutel voor externe sessie-affiniteit                                                                                                                                                                                                                                                                                                                                       |
+| `x_session_id`           | Verzoek  | Underscore-variant ook geaccepteerd (directe HTTP)                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Session-Id` | Verzoek  | Door de beller geleverde session/conversation tag (voedt ook het geheugen). Indien aanwezig, woordelijk voortgezet met `call_logs.session_tag` voor toewijzing van kosten per sessie (#8249) — nooit gesynthetiseerd indien afwezig                                                                                                                                                       |
+| `Idempotency-Key`        | Verzoek  | Ontdubbelingssleutel (5s-venster)                                                                                                                                                                                                                                                                                                                                                         |
+| `X-Request-Id`           | Verzoek  | Alternatieve ontdubbelingssleutel                                                                                                                                                                                                                                                                                                                                                         |
+| `x-omniroute-connection` | Verzoek  | Een aanvraag voor één model vastmaken aan één providerverbinding (account) met de id — zie [Account vastzetten per aanvraag](#account-pinning-per-request)                                                                                                                                                                                                                                |
+| `X-OmniRoute-Cache`      | Antwoord | `HIT` of `MISS` (niet-streaming)                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Idempotent` | Antwoord | `true` indien ontdubbeld                                                                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Progress`   | Antwoord | `enabled` als voortgangsregistratie is ingeschakeld                                                                                                                                                                                                                                                                                                                                       |
+| `X-OmniRoute-Session-Id` | Antwoord | Effectieve sessie ID gebruikt door OmniRoute                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Request-Id` | Antwoord | Correlatie-id aanvragen (indien bekend)                                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Version`    | Antwoord | OmniRoute build-versie (altijd aanwezig)                                                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Cost-Saved` | Antwoord | USD de cache vermeden op een HIT (alleen cachehits)                                                                                                                                                                                                                                                                                                                                       |
+| `X-OmniRoute-Decision`   | Antwoord | Routing trace: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` is de combostrategie, of `single` voor een niet-comboverzoek) — is altijd aanwezig bij voltooiingsantwoorden                                                                                                                                                                                                 |
 
-> Nginx-opmerking: als je vertrouwt op headers met underscores (bijvoorbeeld `x_session_id`), schakel dan `underscores_in_headers on;` in.
+> Nginx-opmerking: als u vertrouwt op underscore-headers (bijvoorbeeld `x_session_id`), schakel dan `underscores_in_headers on;` in.
 
-#### Account vastzetten per verzoek
+#### Account pinnen per verzoek
 
-Wanneer een provider meerdere verbindingen (accounts of sleutels) heeft, kiest OmniRoute er normaal gesproken één
-via zijn accountselectiestrategie. Een verzoek kan in plaats daarvan één specifieke verbinding vastzetten
-met de header `x-omniroute-connection`:
+Wanneer een provider meerdere verbindingen heeft (accounts of sleutels), kiest OmniRoute er normaal gesproken één via zijn accountselectiestrategie. Een verzoek kan in plaats daarvan één specifieke verbinding vastzetten met de `x-omniroute-connection` header:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,25 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Waar u de id kunt vinden.** Open de providerpagina in het dashboard
-  (**Dashboard → Providers → <provider>**) en klik op de `xxxxxxxx…`-idchip op een verbindingsrij —
-  hiermee wordt de volledige verbindings-id gekopieerd.
-- **Welke aanvragen deze id gebruiken.** Aanvragen voor één model (`provider/model`) op
-  `/v1/chat/completions`, `/v1/messages` en `/v1/responses`. Combinaties negeren de header: pin
-  een account per combinatiestap via de eigen verbinding van die stap.
-- **De pin is strikt, geen voorkeur.** De vastgezette verbinding wordt uitsluitend gebruikt. Als er
-  binnen de aanvraag een fout optreedt, wordt de cooldown van het account geregistreerd, maar wordt
-  niet overgeschakeld naar een ander account van dezelfde provider.
-- **Cooldown en quotum geven de pin vrij.** Terwijl de vastgezette verbinding in cooldown is,
-  het quotum heeft opgebruikt of door een quotumbeleid is geblokkeerd, vallen latere aanvragen terug
-  op de andere verbindingen van de provider, precies zoals niet-gepinde aanvragen.
-- **Onbekende of uitgeschakelde id's mislukken.** Een id die niet in de actieve pool van de provider
-  staat (verwijderd, gedeactiveerd of behorend tot een andere provider) laat geen eligible account
-  over. Daarom mislukt de aanvraag in plaats van stilzwijgend elders te worden gerouteerd.
+- **Waar vind je de id.** Open de providerpagina in het dashboard (** Dashboard → Providers → <provider>** ) en klik op de `xxxxxxxx…` id-chip op een verbindingsrij. — kopieert de volledige verbindings-id.
+- **Welke verzoeken eren het.** Verzoeken voor één model (`provider/model`) op `/v1/chat/completions`, `/v1/messages` en `/v1/responses`. Combo's negeren de header: pin een account per combostap via de eigen verbinding van de stap.
+- **De pin is streng, geen voorkeur.** Er wordt uitsluitend gebruik gemaakt van de vastgezette verbinding. Een fout in het verzoek registreert de cooldown van het account, maar dat gebeurt wel** niet** overstappen naar een broer of zus-account van dezelfde provider.
+- **Cooldown en quota geven de pin vrij.** Terwijl de vastgezette verbinding aan het afkoelen is, de quota uitgeput is of geblokkeerd wordt door een quotabeleid, vallen latere verzoeken terug naar de andere verbindingen van de provider, net als bij niet-vastgezet verkeer.
+- **Onbekende of uitgeschakelde ID's mislukken.** Een ID die niet in de actieve pool van de provider zit (verwijderd, gedeactiveerd of bij een andere provider hoort) laat geen in aanmerking komend account achter, dus het verzoek mislukt in plaats van stilletjes ergens anders naartoe te routeren.
 
-Claude Code verstuurt aangepaste headers via `ANTHROPIC_CUSTOM_HEADERS`. Plaats deze in het `env`-blok
-van `~/.claude/settings.json`, of in een `.claude/settings.json` op projectniveau om per project een
-ander account vast te zetten:
+Claude Code verzendt aangepaste headers via `ANTHROPIC_CUSTOM_HEADERS`. Plaats het in het `env` blok van `~/.claude/settings.json`, of in een `.claude/settings.json` op projectniveau om per project een ander account vast te zetten:
 
 ```jsonc
 {
@@ -133,12 +120,11 @@ ander account vast te zetten:
 }
 ```
 
-Bron: `src/sse/handlers/chat.ts` (headeruitlezing), `src/sse/services/auth.ts` en
-`src/sse/services/sessionAffinityPin.ts` (vrijgave van de pin en de controle op ontbrekende verbindingen in de pool).
+Bron: `src/sse/handlers/chat.ts` (header lezen), `src/sse/services/auth.ts` en `src/sse/services/sessionAffinityPin.ts` (pinvrijgave en de ontbrekende-van-pool-controle).
 
-> **Headers voor kostenmetrieken:** succesvolle niet-streamingantwoorden bevatten ook de `X-OmniRoute-*`-set voor kostenmetrieken — `X-OmniRoute-Response-Cost` (USD, exact 10 decimalen; `0.0000000000` voor gratis of niet-geprijsde aanvragen), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` en `X-OmniRoute-Fallback-Attempts` (alleen wanneer > 0), plus `X-OmniRoute-Request-Id` en `X-OmniRoute-Version`. Deze worden uitgegeven door chat completions, `/v1/responses`, `/v1/messages` **en de media-eindpunten** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` en `/v1/moderations` (altijd met kosten `0`). Mediakosten worden per modaliteit berekend (per afbeelding, per seconde, per teken, per zoekeenheid) wanneer prijsinformatie beschikbaar is; anders zijn de kosten `0` (fail-open).
+> **Kostentelemetriekopteksten:** niet-streaming succesreacties bevatten ook de `X-OmniRoute-*` -kostentelemetrieset — `X-OmniRoute-Response-Cost` (USD, vaste 10 decimalen; `0.0000000000` voor free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` en `X-OmniRoute-Fallback-Attempts` (alleen als > 0), plus `X-OmniRoute-Request-Id` en `X-OmniRoute-Version`. Deze worden uitgezonden door chatvoltooiingen, `/v1/responses`, `/v1/messages`,** en de media-eindpunten** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` en `/v1/moderations` (kost altijd `0`). De mediakosten worden berekend per modaliteit (per afbeelding, per seconde, per teken, per zoekeenheid) wanneer prijzen beschikbaar zijn, anders `0` (fail-open).
 
-> **Semantiek van kosten bij cache-hits:** bij een HIT in de semantische cache (`X-OmniRoute-Cache-Hit: true`) wordt er geen upstream-aanroep gedaan, waardoor `X-OmniRoute-Response-Cost` `0.0000000000` is (de **incrementele** kosten voor het leveren van de hit). De oorspronkelijke kosten of de kosten die zouden zijn gemaakt, worden afzonderlijk gerapporteerd in `X-OmniRoute-Cost-Saved`. Factureringssystemen moeten `X-OmniRoute-Response-Cost` optellen (hits kosten niets); cache-analyses kunnen `X-OmniRoute-Cost-Saved` aggregeren.
+> **Semantiek van cache-hitkosten:** op een semantische cache HIT (`X-OmniRoute-Cache-Hit: true`) wordt er geen stroomopwaartse aanroep gedaan, dus `X-OmniRoute-Response-Cost` is `0.0000000000` (de** toenemend** kosten voor het serveren van de hit). De original/would-have-been kosten worden afzonderlijk gerapporteerd in `X-OmniRoute-Cost-Saved`. Factureringsconsumenten moeten `X-OmniRoute-Response-Cost` optellen (hits kosten niets); cache-analyses kunnen `X-OmniRoute-Cost-Saved` aggregeren.
 
 ## Exclusieve beheerde sessieleases
 
@@ -376,13 +362,15 @@ Beschikbare providers zijn onder meer OpenAI (GPT Image 2), xAI (Grok Image), To
 
 `n` retourneert `n` afbeeldingen in `data[]`. Providers waarvan de upstream API één afbeelding per oproep retourneert (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) krijgen `n` afzonderlijke upstream-oproepen, maximaal 4 tijdens de vlucht. Een vaste `seed` wordt gecompenseerd door de oproepindex (`seed`, `seed + 1`, …), dus de afbeeldingen verschillen maar blijven reproduceerbaar. `n` is beperkt tot 10. Het verzoek mislukt als geheel als een oproep mislukt. De lijst met fan-outformaten is `SINGLE_IMAGE_FANOUT_FORMATS` in `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Beeldmodellen (`codex/gpt-image-*`) retourneren alleen PNG : de stroomopwaartse antwoordt `200` met PNG bytes, zelfs wanneer `jpeg` of `webp` wordt gevraagd. Een verzoek met een andere `output_format` (`webp`, `jpeg`, ...) wordt afgewezen met HTTP 400 in plaats van stilzwijgend genegeerd; laat het weg of stuur `png`. `output_compression` wordt niet doorgestuurd.
+
 ZenMux hergebruikt de bestaande API-sleutelverbinding en accepteert `zenmux/` of `zm/` voorvoegsels:
 
 - `zenmux/openai/gpt-image-2` gebruikt ZenMux's OpenAI Images API. Opties zijn onder meer `size`, `quality`, `n`, `output_format`, `output_compression`, `background` en `response_format`.
 - Andere uitgevers, zoals `zm/meta/muse-image-1.0`, gebruiken het Vertex AI `:predict` eindpunt van ZenMux. `n` wordt toegewezen aan `sampleCount`, `aspect_ratio` aan `aspectRatio`, en `image_size` (`1K`, `2K`, `4K`) aan `sampleImageSize`. Een pixel `size` levert alleen een beeldverhouding, geen gegarandeerde pixelafmetingen. Ondersteunde verhoudingen, resoluties en aantallen variëren per model.
 - `zm/inclusionai/ming-image-0.1-design` kiest haar eigen dimensies. Laat `size`, `aspect_ratio` en `image_size` weg; expliciete waarden retourneren HTTP 400. PNG, JPEG en WebP kunnen worden aangevraagd met `output_format`.
 
-Deze integratie ondersteunt het genereren van tekst naar afbeeldingen, niet het bewerken van referentieafbeeldingen. Vertex-uitvoer wordt genormaliseerd naar `data[].b64_json`; `response_format: "url"` retourneert een stroomopwaartse HTTPS URL of een base64-gegevens URL wanneer alleen afbeeldingsbytes beschikbaar zijn. Empty/filtered -uitvoer retourneert een fout in plaats van een leeg succes. Toegang tot modellen is afhankelijk van het ZenMux account. Zie [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) en [OpenAI afbeeldingen API](https://docs.zenmux.ai/api/openai/generate-an-image).
+Deze integratie ondersteunt het genereren van tekst naar afbeeldingen, niet het bewerken van referentieafbeeldingen. Vertex-uitvoer wordt genormaliseerd naar `data[].b64_json`; `response_format: "url"` retourneert een stroomopwaartse HTTPS URL of een base64-gegevens URL wanneer alleen afbeeldingsbytes beschikbaar zijn. Empty/filtered uitvoer retourneert een fout in plaats van een leeg succes. Toegang tot modellen is afhankelijk van het ZenMux account. Zie [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) en [OpenAI afbeeldingen API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
 Een Microsoft 365 Copilot -inlogverbinding bedient `copilot-m365-web/m365-copilot-image` via de ingebouwde afbeeldingstool van Copilot: één Copilot -beurt per afbeelding (`n` 1–4), `size` stuurt alleen de oriëntatie, en afbeeldingen worden inline geretourneerd (`b64_json`, of een data URL voor `response_format: "url"`). Zie [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
@@ -393,7 +381,7 @@ GET /v1/images/generations
 
 ---
 
-## OCR voor documenten
+## Document OCR
 
 ```bash
 POST /v1/ocr
@@ -409,17 +397,15 @@ Content-Type: application/json
 }
 ```
 
-`model` selecteert de OCR-provider via een voorvoegsel in de vorm `provider/model`; een model-id zonder voorvoegsel (bijv.
-`mistral-ocr-latest`) wordt omgezet naar de geregistreerde provider ervan, en als `model` wordt weggelaten, wordt standaard
-Mistral gebruikt (`mistral-ocr-latest`). Geregistreerde providers (`open-sse/config/ocrRegistry.ts`):
+`model` selecteert de OCR provider via een `provider/model` voorvoegsel; een kaal model-ID (bijv. `mistral-ocr-latest`) wordt omgezet naar de geregistreerde provider, en een weggelaten `model` wordt standaard ingesteld op Mistral (`mistral-ocr-latest`). Geregistreerde aanbieders (`open-sse/config/ocrRegistry.ts`):
 
-| Provider-id                   | Model-id             | `model`-waarde                                                            | Opmerkingen                                                                                                         |
-| ----------------------------- | -------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (of `mistral-ocr-latest` zonder voorvoegsel) | Synchroon — de respons wordt rechtstreeks van de enkele upstream-aanroep geretourneerd.                             |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                               | Asynchrone upstream-aanroep (`analyze` + polling) — zie hieronder.                                                  |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                                   | Synchroon, via het `openapi/chat/completions`-partnerendpoint van Vertex AI — zie hieronder voor authenticatie/URL. |
+| Provider-id                   | Model-ID                               | `model` waarde                                              | Opmerkingen                                                                                                                                                                                                                         |
+| ----------------------------- | -------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                   | `mistral/mistral-ocr-latest` (of kale `mistral-ocr-latest`) | Synchrone — het antwoord wordt rechtstreeks geretourneerd door de enkele stroomopwaartse oproep.                                                                                                                                    |
+| `azure-document-intelligence` | `prebuilt-read`                        | `azure-document-intelligence/prebuilt-read`                 | Asynchrone stroomopwaarts (`analyze` + poll) — zie hieronder.                                                                                                                                                                       |
+| `vertex-deepseek-ocr`         | in eigen beheer (geen ingebouwd model) | `vertex-deepseek-ocr/<your-deployed-model-id>`              | Synchronisch, via uw eigen Vertex AI Model Garden DeepSeek-OCR-eindpunt (`openapi/chat/completions` vorm); Google heeft de beheerde `deepseek-ocr-maas` op 21-10-2026 (#20423) buiten gebruik gesteld, zodat de id 400 retourneert. |
 
-Alle drie de providers retourneren een body met dezelfde vorm als die van Mistral:
+Alle drie de providers reageren in hetzelfde Mistral-vormige lichaam:
 
 ```json
 {
@@ -429,28 +415,13 @@ Alle drie de providers retourneren een body met dezelfde vorm als die van Mistra
 }
 ```
 
-### Pollingverloop voor Azure Document Intelligence
+### Azure Document Intelligence-peilingstroom
 
-De `analyze`-API van Azure Document Intelligence is asynchroon: de eerste aanvraag retourneert een
-`Operation-Location`-header in plaats van een body, en het resultaat moet worden opgevraagd via polling. De handler
-(`open-sse/handlers/ocr.ts`) vraagt die URL elke seconde op, gedurende maximaal 30 pogingen, stopt direct (en
-gaat niet door met pollen) bij een poll-respons die niet `ok` is of bij de status `"failed"`, en retourneert `504` als de
-bewerking nog steeds wordt uitgevoerd nadat het aantal pogingen is uitgeput. De uiteindelijke Azure-respons wordt
-genormaliseerd naar dezelfde `pages`/`markdown`-vorm die Mistral gebruikt voordat deze aan de aanroeper wordt geretourneerd,
-zodat clientcode geen provider-specifieke uitzonderingen hoeft te implementeren.
+`analyze` API van Azure Document Intelligence is asynchroon: de initiële aanvraag retourneert een `Operation-Location` header in plaats van een hoofdtekst, en het resultaat moet worden gecontroleerd. De handler (`open-sse/handlers/ocr.ts`) ondervraagt die URL elke seconde gedurende maximaal 30 pogingen, faalt snel (blijft niet pollen) bij een niet-`ok` poll-antwoord of een `"failed"` status, en retourneert `504` als de bewerking nog steeds wordt uitgevoerd nadat het pogingsbudget is uitgeput. Het uiteindelijke Azure-antwoord wordt genormaliseerd in dezelfde `pages`/`markdown` -vorm die door Mistral wordt gebruikt voordat het wordt teruggestuurd naar de aanroeper, zodat de clientcode geen speciaal geval van de provider hoeft te maken.
 
-### Authenticatie en endpointresolutie voor Vertex AI DeepSeek OCR
+### Vertex AI DeepSeek OCR auth en eindpuntresolutie
 
-`vertex-deepseek-ocr` hergebruikt dezelfde Vertex AI-authenticatie die OmniRoute al ondersteunt voor
-chat- en afbeeldingsverkeer (`open-sse/executors/vertex.ts`): de API-sleutel van de verbinding is ofwel een
-Service Account JSON-referentie (uitgewisseld voor een kortlevend OAuth-toegangstoken via de JWT-bearerflow)
-ofwel een al uitgegeven OAuth-toegangstoken dat ongewijzigd wordt gebruikt. De upstream-endpoint-URL is het generieke
-`openapi/chat/completions`-partnerendpoint van Vertex, opgebouwd uit het project en de regio van de verbinding —
-een expliciete `providerSpecificData.project`/`providerSpecificData.region` heeft altijd voorrang;
-anders wordt het project afgeleid van `project_id` in de Service Account JSON en is de regio standaard
-`us-central1`. Beide resoluties vinden plaats in `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) en worden gebruikt door
-`src/app/api/v1/ocr/route.ts` voordat de aanvraag wordt doorgestuurd naar `handleOcr`.
+`vertex-deepseek-ocr` gebruikt dezelfde Vertex AI authenticatie OmniRoute al ondersteunt voor chat/image verkeer (`open-sse/executors/vertex.ts`): de API sleutel van de verbinding is ofwel een JSON -referentie van een serviceaccount (ingewisseld voor een kortstondig OAuth toegangstoken via de JWT-dragerstroom) of een reeds geslagen OAuth toegangstoken dat wordt gebruikt zoals het is. Het stroomopwaartse eindpunt URL is het generieke `openapi/chat/completions` partnereindpunt van Vertex, opgebouwd uit het project van de verbinding en de regio — een expliciete `providerSpecificData.project`/`providerSpecificData.region` wint altijd; anders wordt het project afgeleid van de `project_id` van de serviceaccount JSON en wordt de regio standaard ingesteld op `us-central1`. Beide resoluties vinden plaats in `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), verbruikt door `src/app/api/v1/ocr/route.ts` voordat ze naar `handleOcr` worden verzonden.
 
 ---
 
@@ -698,96 +669,102 @@ Upstream-contracten: [geluidseffecten](https://elevenlabs.io/docs/api-reference/
 
 ## Compatibiliteitseindpunten
 
-| Methode | Pad                                       | Indeling                              |
+| Methode | Pad                                       | Formaat                               |
 | ------- | ----------------------------------------- | ------------------------------------- |
 | POST    | `/v1/chat/completions`                    | OpenAI                                |
 | POST    | `/v1/messages`                            | Anthropic                             |
-| POST    | `/v1/responses`                           | OpenAI Responses                      |
+| POST    | `/v1/responses`                           | OpenAI Reacties                       |
 | POST    | `/v1/embeddings`                          | OpenAI                                |
-| POST    | `/v1/images/generations`                  | OpenAI Images                         |
-| POST    | `/v1/images/edits`                        | OpenAI Images (bewerken/inpainten)    |
+| POST    | `/v1/images/generations`                  | OpenAI afbeeldingen                   |
+| POST    | `/v1/images/edits`                        | OpenAI Afbeeldingen (edit/inpaint)    |
 | POST    | `/v1/videos/generations`                  | Videogeneratie in OpenAI-stijl        |
 | POST    | `/v1/music/generations`                   | Muziekgeneratie in OpenAI-stijl       |
 | POST    | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
-| POST    | `/v1/audio/speech`                        | OpenAI TTS (retourneert audiobody)    |
-| POST    | `/v1/rerank`                              | Reranking in Cohere/Voyage-stijl      |
-| POST    | `/v1/classify`                            | Jina classify (`api.jina.ai`)         |
-| POST    | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)    |
-| POST    | `/v1/moderations`                         | OpenAI Moderations                    |
+| POST    | `/v1/audio/speech`                        | OpenAI TTS (retourneert audiolichaam) |
+| POST    | `/v1/rerank`                              | Cohere/Voyage-style herrangschikken   |
+| POST    | `/v1/classify`                            | Jina classificeren (`api.jina.ai`)    |
+| POST    | `/v1/segment`                             | Jina-segmenter (`segment.jina.ai`)    |
+| POST    | `/v1/moderations`                         | OpenAI Moderaties                     |
+| POST    | `/v1/systemone`                           | Systeem Eén getypte beslissingen      |
+| POST    | `/v1/decisions`                           | OpenAI beslissingen (native)          |
+| GET     | `/v1/systemone/models`                    | Beslismodelcatalogus                  |
 | GET     | `/v1/models`                              | OpenAI                                |
-| POST    | `/v1/models/query`                        | Gefilterde modelselectie              |
+| POST    | `/v1/models/query`                        | Gefilterde model shortlist            |
 | POST    | `/v1/messages/count_tokens`               | Anthropic                             |
 | GET     | `/v1beta/models`                          | Gemini                                |
 | POST    | `/v1beta/models/{...path}`                | Gemini generateContent                |
 | POST    | `/v1/api/chat`                            | Ollama                                |
-| GET     | `/api/v1/vscode/{token}/`                 | OpenAI-catalogusalias                 |
-| GET     | `/api/v1/vscode/{token}/models`           | OpenAI-modellenalias                  |
-| POST    | `/api/v1/vscode/{token}/chat/completions` | Getokeniseerde OpenAI-alias           |
-| POST    | `/api/v1/vscode/{token}/responses`        | Getokeniseerde OpenAI Responses-alias |
-| POST    | `/api/v1/vscode/{token}/api/chat`         | Getokeniseerde Ollama-alias           |
-| GET     | `/api/v1/vscode/{token}/api/tags`         | Getokeniseerde Ollama-tagsalias       |
+| GET     | `/api/v1/vscode/{token}/`                 | OpenAI -catalogusalias                |
+| GET     | `/api/v1/vscode/{token}/models`           | OpenAI modellen alias                 |
+| POST    | `/api/v1/vscode/{token}/chat/completions` | OpenAI getokeniseerde alias           |
+| POST    | `/api/v1/vscode/{token}/responses`        | OpenAI Reacties getokeniseerde alias  |
+| POST    | `/api/v1/vscode/{token}/api/chat`         | Ollama getokeniseerde alias           |
+| GET     | `/api/v1/vscode/{token}/api/tags`         | Ollama -tags tokenized alias          |
 
-Alle POST-routes volgen dezelfde structuur: `Bearer your-api-key` + door Zod gevalideerde JSON-body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, enzovoort; zie `src/shared/validation/schemas.ts`). Bij een schemafout wordt een 4xx-status geretourneerd.
+Alle POST routes volgen dezelfde vorm: `Bearer your-api-key` + Zod-gevalideerde JSON body (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, etc., zie `src/shared/validation/schemas.ts`). 4xx wordt geretourneerd bij een schemafout.
 
-Voor clients die geen `Authorization: Bearer ...` kunnen toevoegen, accepteert OmniRoute ook API-sleutels in de URL via querystringcompatibiliteit (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) of via de speciale `/api/v1/vscode/{token}/...`-eindpunten die hieronder worden beschreven.
+Voor clients die `Authorization: Bearer ...` niet kunnen koppelen, accepteert OmniRoute ook API sleutels in de URL via query-string-compatibiliteit (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) of de speciale `/api/v1/vscode/{token}/...` eindpunten die hieronder worden gedocumenteerd.
 
 ```bash
-# Reranking (cloudregisterprovider of een OpenAI-compatibel providernode als "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina classify (Foundation API-inloggegevens)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
 # Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina search (s.jina.ai; provideraliases: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
 # Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — retourneert een body van het type audio/mpeg (of de aangevraagde indeling)
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS vereist een taal en een stem: `language` heeft standaard de waarde "en"; een ontbrekende
-# stem of een standaard OpenAI-stemnaam (alloy, nova, …) wordt "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Afbeelding bewerken (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Video-/muziekgeneratie (model-id met providerprefix)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Providerknooppunten voor reranking:** `POST /v1/rerank` routeert ook naar OpenAI-compatibele providerknooppunten
-> (oMLX, vLLM, Infinity, TEI achter een gateway, …) die worden aangeduid als `<node-prefix>/<model>`. Lusbackknooppunten
-> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) komen altijd in aanmerking, evenals hostnamen die de
-> operator vermeldt in `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (bijvoorbeeld een Docker/Compose-servicenaam zoals
-> `http://reranker:8080/v1`; deze worden rechtstreeks aangeroepen, nooit via `HTTP(S)_PROXY` of een
-> vastgezette proxy van een verbinding). Knooppunten op elke andere
-> host — een LAN-computer of Tailscale-peer — komen alleen in aanmerking wanneer de operator de
-> functieflag `RERANK_REMOTE_PROVIDER_NODES` inschakelt **en** de basis-URL van het knooppunt voldoet aan het
-> beleid voor uitgaande provider-URL's (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> De rerankstap van de geheugenengine roept deze route aan via
-> loopback, dus dezelfde regel geldt voor `rerankProviderModel` in de geheugeninstellingen.
+> **Providerknooppunten opnieuw rangschikken:** `POST /v1/rerank` routeert ook naar OpenAI-compatibele providerknooppunten (oMLX, vLLM, Infinity, TEI achter een gateway, ...) geadresseerd als `<node-prefix>/<model>`. Loopback-knooppunten (`localhost`, `127.0.0.1`, `172.16.0.0/12`) komen altijd in aanmerking, en dat geldt ook voor hostnamen die de operator in `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` vermeldt (bijvoorbeeld een Docker/Compose -servicenaam zoals `http://reranker:8080/v1`; deze worden rechtstreeks aangeroepen, nooit via `HTTP(S)_PROXY` of de vastgezette proxy van een verbinding). Knooppunten op een andere host —, een LAN box of Tailscale peer — komen alleen in aanmerking als de operator de `RERANK_REMOTE_PROVIDER_NODES` -functievlag inschakelt** En** de basis URL van het knooppunt geeft het uitgaande URL beleid van de provider door (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). De herrangschikkingsstap van de geheugenengine roept deze route via loopback aan, dus dezelfde regel geldt voor `rerankProviderModel` in de geheugeninstellingen.
 >
-> **Vormen van lokale servers:** het knooppunt wordt aangeroepen via `<base>/v1/rerank` en, bij een 404, via `<base>/rerank`
-> (Infinity, TEI). De body naar de upstream bevat zowel de Cohere/OpenAI-benaming (`documents`,
-> `return_documents`) als de TEI-benaming (`texts`, `return_text`), en de upstreamrespons wordt
-> genormaliseerd naar de Cohere-envelop: TEI's onbewerkte `[{index, score, text}]`, `{results: [{index, score}]}`
-> van dunne gateways en Voyage-achtige `{data: [...]}` komen allemaal bij de client terug als
-> `{results: [{index, relevance_score, document?}]}`, gesorteerd op score en afgekapt op `top_n`.
+> **Lokale servervormen:** het knooppunt wordt aangeroepen op `<base>/v1/rerank` en, op 404, op `<base>/rerank` (Infinity, TEI). Het stroomopwaartse lichaam bevat zowel de Cohere/OpenAI -spelling (`documents`, `return_documents`) als de TEI spelling (`texts`, `return_text`), en de stroomopwaartse respons is genormaliseerd naar de Cohere envelop: TEI's kale `[{index, score, text}]`, `{results: [{index, score}]}` van thin gateways en `{data: [...]}` in Voyage-stijl komen allemaal terug naar de client als `{results: [{index, relevance_score, document?}]}`, gesorteerd op score en afgetopt op `top_n`.
 
-> **Detectie van providerknooppunten:** modellen op een OpenAI-compatibel providerknooppunt verschijnen in `GET /v1/models`
-> onder het knooppuntprefix. Rijen zonder endpointmetadata (typisch voor lokale `/v1/models`-lijsten)
-> nemen de `apiType` van het knooppunt over, zodat de modellen van een `embeddings`-knooppunt
-> `type: "embedding"` zijn en die van een `rerank`-knooppunt `type: "rerank"` in plaats van standaard chat; een expliciete
-> `supportedEndpoints` op een gesynchroniseerde of handmatig toegevoegde rij heeft nog steeds voorrang.
+> **Detectie van providerknooppunten:** modellen op een OpenAI-compatibel providerknooppunt verschijnen in `GET /v1/models` onder het knooppuntvoorvoegsel. Rijen die geen metagegevens van het eindpunt bevatten (typisch voor lokale `/v1/models` lijsten) nemen de `apiType` van het knooppunt over, dus de modellen van een `embeddings` knooppunt zijn `type: "embedding"` en de modellen van een `rerank` knooppunt zijn `type: "rerank"` in plaats van standaard te chatten; een expliciete `supportedEndpoints` op een gesynchroniseerde of handmatig toegevoegde rij heeft nog steeds voorrang.
 
-### Toegewijde providerroutes
+### Getypte beslissingen
+
+Beslissingsmodellen beantwoorden getypte vragen met gekalibreerde kansen in plaats van tekst te genereren. Het zijn nooit chatmodellen en de twee draadformaten worden nooit in elkaar vertaald:
+
+- `POST /v1/systemone` — Systeem Eén `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter besluiten, Cloudflare Werknemers AI, lokale Ollama).
+- `POST /v1/decisions` — native OpenAI Beslissingen `{ model, input, questions: [...] }`, bediend door een `openai` verbinding. Het model is `openai/gpt-6-luna` (de kale `gpt-6-luna` werkt ook). De antwoorden komen terug in vraagvolgorde, onaangeroerd.
+- `GET /v1/systemone/models` — één catalogus van beide soorten; elke rij noemt zijn `api_format` (`systemone` of `decisions`). `limit` / `after` pagina de definitieve lijst. De `X-OmniRoute-Catalog-Status` header luidt `complete`, `partial` of `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+Op `/v1/decisions` worden de modeltoelatingslijst van de API sleutel, de `decisions` eindpuntcategorie, het budget en het verbindingsbereik gecontroleerd voordat er referenties worden gelezen. De referentie is de opgeslagen `openai` -verbinding binnen het bereik van de sleutel (nooit een omgevingssleutel); een verbindingsbasis URL wordt alleen gehonoreerd als het een `http(s)` URL is zonder inloggegevens, query of fragment dat niet naar deze OmniRoute verwijst. De oproep vertrekt via hetzelfde bewaakte transport als de `decision` auto-router ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): uitgaande bewaker van de provider, geen nieuwe pogingen, geen omleidingen, een time-out van 5 seconden en een KB -antwoordlimiet van 64 (een groter antwoord is een 502). Aanvraaginstanties zijn beperkt tot 4 MiB. Bij elke oproep wordt een nieuwe `Idempotency-Key` verzonden. Fouten hebben alleen de upstream-status, nooit de hoofdtekst, de URL, de sleutel of de prompt.
+
+### Speciale providerroutes
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -795,7 +772,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Het providerprefix wordt automatisch toegevoegd als het ontbreekt. Modellen die niet overeenkomen, retourneren `400`.
+Het providervoorvoegsel wordt automatisch toegevoegd als het ontbreekt. Niet-overeenkomende modellen retourneren `400`.
 
 ---
 

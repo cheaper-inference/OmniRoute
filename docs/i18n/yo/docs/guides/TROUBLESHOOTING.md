@@ -184,83 +184,49 @@ Tun OmniRoute bẹ̀rẹ̀ lẹ́yìn fífi í sórí ẹrọ, lẹ́yìn náà 
 
 ---
 
-## Àwọn Ìkìlọ̀ Èké Láti Ọ̀dọ̀ Antivirus
+## Antivirus Eke Rere
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG ya `README.md` sọ́tọ̀ pẹ̀lú `MD:HttpRequest-inf[Susp]`
+### Avast/AVG quarantine `README.md` pẹlu `MD:HttpRequest-inf[Susp]`
 
-**Èyí jẹ́ ìkìlọ̀ èké. Kò sí ohun tí ó ní àkóràn, kò sì sí ìgbésẹ̀ kankan tí a nílò.**
+**Eleyi jẹ a eke rere. Ko si ohun ti o ni akoran, ko si si igbese ti a beere.**
 
-Avast àti AVG ń lo ìlànà heuristic kan tí ń ṣàmì sí àwọn fáìlì plain-text/Markdown tí ó ní ọ̀pọ̀
-ìjápọ̀ tí ó dà bí ìbéèrè HTTP. `README.md` ti OmniRoute wà nínú package npm (a
-ṣe àkójọ rẹ̀ nínú `package.json` → `files`), nítorí náà ó máa ń dé sí `node_modules/omniroute/README.md` nígbà
-ìfiṣọ́pọ̀ àgbáyé — ó sì ní àpẹẹrẹ `http://localhost:20128/...` bíi ~15 (àwọn endpoint MCP
-HTTP/SSE, URL A2A `.well-known`, àti àwọn àpẹẹrẹ `curl`). Ìpọ̀n-ọn àwọn ìjápọ̀ yẹn
-ti tó láti mú heuristic náà ṣiṣẹ́.
+Avast ati AVG nṣiṣẹ heuristic ti o ṣe asia awọn faili plain-text/Markdown ti o ni ọpọlọpọ awọn ọna asopọ wiwa-ibeere HTTP ninu. OmniRoute's `README.md` awọn ọkọ inu apo npm (o wa ni akojọ si `package.json` → `files`), nitorina o gbe ni `node_modules/omniroute/README.md` lori fifi sori — agbaye ati pe o ni awọn apẹẹrẹ ~ 15 `http://localhost:20128/...` (awọn aaye ipari MCP HTTP/SSE, A2A `.well-known` URL, ati awọn snippets `curl` ). Iwọn ọna asopọ yẹn ti to lati rin irin ajo heuristic naa.
 
-Bí èyí bá ṣẹ̀ṣẹ̀ bẹ̀rẹ̀ láìpẹ́ yìí: irú fáìlì náà kò yí padà. Tábìlì àwọn
-endpoint inú README ti pọ̀ sí i (a fi MCP HTTP + SSE + A2A kún un), bẹ́ẹ̀ sì ni àwọn àpẹẹrẹ `curl` tún pọ̀ sí i, èyí tí ó
-mú un kọjá ààlà náà.
+Ti eyi ba bẹrẹ laipẹ: faili ko yipada ni iru. README naa dagba tabili awọn aaye ipari rẹ (MCP HTTP + SSE + A2A ni a ṣafikun) ati awọn apẹẹrẹ `curl` diẹ sii, eyiti o ti i kọja iloro.
 
-Fáìlì náà jẹ́ àkọsílẹ̀ aláìṣiṣẹ́ tí kò ní àkóónú tí a lè ṣiṣẹ́ rárá. O lè dá a padà láìléwu
-láti quarantine.
+Faili naa jẹ iwe inert pẹlu akoonu ṣiṣiṣẹ ti odo. O le mu pada lailewu lati quarantine.
 
-**Ohun tí o yẹ kí o ṣe:**
+**Kin ki nse:**
 
-1. **Dá àwọn ìfitónilétí dúró** — yọ directory ìfiṣọ́pọ̀ náà kúrò nínú ìṣàyẹ̀wò antivirus rẹ
-   (Avast: Settings → Exceptions), nípa fífi path `node_modules` àgbáyé rẹ àti/tàbí
-   directory data OmniRoute (`~/.omniroute/`) kún un.
-2. **Jábọ̀ ìkìlọ̀ èké náà** — <https://www.avast.com/false-positive-file-form.php>,
-   kí o sì so `README.md` tí a yà sọ́tọ̀ mọ́ ọn. Èyí ni àtúnṣe tí ó ń ran gbogbo ènìyàn lọ́wọ́, nítorí
-   heuristic olùpèsè náà ló ń fèsì ju bó ṣe yẹ lọ sí fáìlì ọ̀rọ̀ kan.
+1. **Duro awọn iwifunni** — yọkuro ilana ilana fifi sori ẹrọ ninu ọlọjẹ rẹ (Avast: Awọn imukuro → Eto), ṣafikun ọna `node_modules` agbaye rẹ and/or awọn OmniRoute data dir (`~/.omniroute/`).
+2. **Jabo awọn eke rere** — <https://www.avast.com/false-positive-file-form.php>, somọ `README.md` ti a ya sọtọ. Eyi ni atunṣe ti o ṣe iranlọwọ fun gbogbo eniyan, niwọn bi o ti jẹ aibikita heuristic ti olutaja si faili ọrọ kan.
 
-**Ìdí tí a kò fi “ṣe àtúnṣe” èyí ní ẹ̀gbẹ́ tiwa:** gbogbo àwọn àpẹẹrẹ náà jẹ́ `http://localhost`, àti pé
-localhost kò lè jẹ́ `https` láìsí ìṣòro ìwé-ẹ̀rí tí ẹni fúnra rẹ̀ fọwọ́ sí. Yíyí àwọn àkọsílẹ̀ náà bàjẹ́ láti
-yẹra fún heuristic olùpèsè kan yóò ṣe gbogbo òǹkàwé níṣe láti lè tẹ́ àṣìṣe scanner kan lọ́rùn.
+**Kini idi ti a ko “tunṣe” eyi ni ẹgbẹ wa:** awọn apẹẹrẹ jẹ gbogbo `http://localhost`, ati pe localhost ko le jẹ `https` laisi ikọlu iwe-ẹri ti ara ẹni. Ṣiṣakoṣo awọn iwe aṣẹ lati yago fun heuristic olutaja kan yoo ṣe ipalara fun gbogbo oluka lati ni itẹlọrun kokoro ọlọjẹ kan.
 
-### Kaspersky ṣàmì sí app Desktop gẹ́gẹ́ bí `PDM:Trojan.Win32.Generic`
+### Kaspersky ṣe asia ohun elo Desktop bi `PDM:Trojan.Win32.Generic`
 
-**Èyí jẹ́ ìkìlọ̀ èké láti ọ̀dọ̀ heuristic ìhùwàsí. Kò sí ohun tí ó ní àkóràn.** Àkọ́kọ́ ọ̀rọ̀ `PDM:`
-ti Kaspersky túmọ̀ sí pé ìpinnu náà wá láti inú Proactive Defense Module (System Watcher) rẹ,
-èyí tí ń ṣe ìdájọ́ ohun tí installer náà _ṣe_ dípò fífi í wé malware tí a ti mọ̀. Nígbà
-tí ó bá ṣiṣẹ́, Kaspersky máa ń “yí gbogbo ìfiṣọ́pọ̀ náà padà sẹ́yìn” — yóò pa àwọn fáìlì tí ó ti
-kọ sílẹ̀ rẹ́ — nítorí náà app náà yóò bàjẹ́ tàbí kò ní sí mọ́.
+**Eyi jẹ idaniloju eke lati inu heuristic ihuwasi. Ko si ohun ti o ni akoran.** Kaspersky's `PDM:` ìpele tumọ si idajo naa wa lati Module Aabo Proactive (System Watcher), eyiti o ṣe idajọ kini insitola _does_ dipo ki o baamu si malware ti a mọ. Nigbati o ba tan, Kaspersky "yipo pada" gbogbo fifi sori — piparẹ awọn faili ti o ti kọ — tẹlẹ ki app naa dopin bajẹ tabi sonu.
 
-Àwọn fáìlì tí ó ṣàmì sí jẹ́ àwọn apá déédéé ti àwọn dependency open-source tí a ti kéde, tí a sì kó pọ̀ mọ́
-app desktop náà, fún àpẹẹrẹ:
+Awọn faili ti o ṣe asia jẹ awọn apakan iṣura ti ikede, awọn igbẹkẹle orisun-ìmọ ti a ṣajọpọ pẹlu ohun elo tabili tabili, fun apẹẹrẹ:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` àti
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), library ìṣiṣẹ́ browser
-  láìfọwọ́ṣe tí a ń lò fún wíwọlé provider láti inú app àti chat tí browser ń ṣe àtìlẹ́yìn fún.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — native binding `wreq-js` tí a ti so mọ́ ẹ̀dà kan pàtó, tí a ń lò fún HTTP tí ó ní ìdánimọ̀ browser lórí àwọn provider
-  web-cookie (`<arch>` jẹ́ `x64` tàbí `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` ati `workerProcessEntry.js` — [Playwright](https://playwright.dev), ile-ikawe ẹrọ aṣawakiri-adaaṣe ti a lo fun iwọle olupese iṣẹ inu ohun elo ati iwiregbe ti o ni atilẹyin aṣawakiri.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — ṣonṣo `wreq-js` abinibi abuda ti a lo fun HTTP titẹ ikawe aṣawakiri lori awọn olupese kuki wẹẹbu (`<arch>` jẹ `x64` tabi `arm64`).
 
-**Ìdí tí ó fi ń ṣiṣẹ́:** installer Windows náà **kò tíì ní ìfọwọ́sí kóòdù**, nítorí náà installer NSIS
-tí kò ní ìfọwọ́sí kò ní òkìkí kankan, àwọn heuristic ìhùwàsí sì máa ń ṣiṣẹ́ pẹ̀lú ìmúná tó ga jù lọ. Nígbà tí èyí
-bá darapọ̀ mọ́ native DLL tí a kó sínú rẹ̀ àti ọgọ́rọ̀ọ̀rún fáìlì `.js` tí a kọ sí abẹ́
-`%LOCALAPPDATA%\Programs\OmniRoute` (tí ó fi mọ́ àwọn directory package tí hash wà lẹ́yìn orúkọ wọn láti inú
-build standalone Next.js), ó ti tó láti mú heuristic náà ṣiṣẹ́. A ti gbero ìfọwọ́sí kóòdù;
-títí tí a ó fi ṣe é, àwọn release tuntun lè tún fa èyí.
+**Kini idi ti ina:** insitola Windows ni** ko sibẹsibẹ koodu-wole** , nitorina olupilẹṣẹ NSIS ti a ko fowo si ni orukọ odo ati awọn heuristics ihuwasi nṣiṣẹ ni ibinu ti o pọju. Ni idapọ pẹlu DLL abinibi ti a ṣajọpọ ati awọn ọgọọgọrun ti awọn faili `.js` ti a kọ labẹ `%LOCALAPPDATA%\Programs\OmniRoute` (pẹlu awọn ilana idii-suffixed hash lati kọ iduro Next.js ), iyẹn ti to lati rin irin ajo heuristic. Iforukọsilẹ koodu ti gbero; titi o fi de, awọn idasilẹ tuntun le tun ṣe eyi.
 
-**Ohun tí o yẹ kí o ṣe:**
+**Kin ki nse:**
 
-1. **Kọ́kọ́ ṣàyẹ̀wò download rẹ** (èyí yóò fi dájú pé a kò yí fáìlì náà padà lọ́nà àìtọ́). Release kọ̀ọ̀kan máa ń tẹ̀jáde
-   `latest.yml`, tí field `sha512` rẹ̀ (base64) ń bo installer `OmniRoute.Setup.<version>.exe`.
-   Nínú PowerShell, láti inú folder tí installer náà wà:
+1. **Jẹrisi igbasilẹ rẹ ni akọkọ** (ofin jade a tampered faili). Gbogbo itusilẹ ṣe atẹjade `latest.yml`, eyiti aaye `sha512` (base64) ni wiwa insitola `OmniRoute.Setup.<version>.exe`. Ni PowerShell, lati folda ti o ni insitola ninu:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Output náà gbọ́dọ̀ bá `latest.yml` → `sha512` mu. Bí kò bá bá a mu, pa fáìlì náà rẹ́, kí o sì
-   tún ṣe download láti [ojú-ìwé àwọn release GitHub](https://github.com/diegosouzapw/OmniRoute/releases) nìkan.
-2. **Dá a padà + yọ ọ́ kúrò nínú ìṣàyẹ̀wò** — dá àwọn ohun tí a yí padà sẹ́yìn padà láti quarantine, kí o sì fi exclusion kan
-   fún `%LOCALAPPDATA%\Programs\OmniRoute` kún un (Kaspersky → Settings → Threats and Exclusions),
-   lẹ́yìn náà tún fi í sọ́pọ̀.
-3. **Jábọ̀ ìkìlọ̀ èké náà** — <https://opentip.kaspersky.com/>. Àwọn ìròyìn FP
-   tí àwọn olumulo fi ránṣẹ́ máa ń mú kí fífi sí allowlist yára sí i ní tòótọ́.
+   Iṣẹjade gbọdọ baramu `latest.yml` → `sha512`. Ti ko ba ṣe bẹ, paarẹ faili naa ki o tun ṣe igbasilẹ nikan lati [oju-iwe awọn idasilẹ GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+2. **Mu pada + ifesi** — mu pada awọn nkan ti a ti yiyi pada lati ipinya ati ṣafikun iyasoto fun `%LOCALAPPDATA%\Programs\OmniRoute` (Awọn Eto Kaspersky → → Awọn Irokeke ati Awọn imukuro), lẹhinna tun fi sii.
+3. **Jabo awọn eke rere** — <https://opentip.kaspersky.com/>. Awọn ijabọ FP ti olumulo ti fi silẹ ni tootọ mu kikojọ gbigba laaye.
 
 ---
 
@@ -871,10 +837,10 @@ Awọn aami aisan diẹ sii:
 
 ---
 
-## Ṣé O Ṣì Dìmọ́lẹ̀?
+## Tun Di?
 
-- **Àwọn Ọ̀ràn GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Ìṣètò Ẹ̀rọ**: Wo [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) fún àlàyé inú
-- **Ìtọ́kasí API**: Wo [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) fún gbogbo àwọn endpoint
-- **Pánẹ́ẹ̀lì Ìlera**: Ṣàyẹ̀wò **Dashboard → Health** fún ipò ètò ní àkókò gidi
-- **Atúmọ̀ Èdè**: Lo **Dashboard → Translator** láti ṣàwárí àti ṣàtúnṣe àwọn ìṣòro ìgúnrégé
+- **GitHub Awọn oran** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Faaji** Wo [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) fun awọn alaye inu
+- **API Reference** : Wo [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) fun gbogbo awọn aaye ipari
+- **Dasibodu ilera** : Ṣayẹwo** Dasibodu → Health** fun gidi-akoko eto ipo
+- **Onitumọ** : Lo** Dasibodu → Onitumọ** lati ṣatunṣe awọn oran kika

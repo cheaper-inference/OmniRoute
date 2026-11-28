@@ -473,107 +473,107 @@ Bên trong một phiên tương tác:
 
 ---
 
-## Các tác vụ chạy dài
+## Nhiệm vụ chạy dài
 
-Hai giá trị mặc định của OmniRoute có thể âm thầm phá hỏng các phiên Codex CLI kéo dài nhiều giờ. Cả hai đều không phải là cài đặt của Codex CLI — chúng đều nằm ở phía OmniRoute. Người dùng chuyển cấu hình từ các proxy thượng nguồn vốn ghim tài khoản và vô hiệu hóa giới hạn thời gian nhàn rỗi thường gặp phải cả hai vấn đề rồi kết luận rằng OmniRoute “không thể duy trì một phiên dài.”
+Hai giá trị mặc định của OmniRoute có thể âm thầm phá hoại các phiên Codex CLI kéo dài nhiều giờ. Cả cài đặt Codex CLI — đều không tồn tại ở phía OmniRoute. Người dùng di chuyển cấu hình từ proxy ngược dòng để ghim tài khoản và vô hiệu hóa các điểm cắt không hoạt động thường gặp phải cả hai và kết luận OmniRoute “không thể duy trì một phiên dài”.
 
-| Triệu chứng                                                                                    | Nguyên nhân có khả năng xảy ra                                                    | Tham số                  |
-| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------ |
-| Phiên liên tục chuyển đổi tài khoản / tính liên tục của bộ nhớ đệm prompt bị mất giữa các lượt | TTL liên kết phiên là `0` (đã tắt)                                                | `sessionAffinityTtlMs`   |
-| Kết nối bị ngắt giữa lúc suy luận mà phía máy khách không nhận được thông báo                  | Cơ chế giám sát stream nhàn rỗi kích hoạt sau 10 phút không có chunk thượng nguồn | `STREAM_IDLE_TIMEOUT_MS` |
+| Triệu chứng                                                                             | Có khả năng gây ra                                                                            | Nhô lên                  |
+| --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------ |
+| Phiên tiếp tục chuyển đổi tài khoản/mất tính liên tục của bộ đệm nhắc nhở giữa các lượt | Mối quan hệ của phiên TTL là `0` (bị vô hiệu hóa)                                             | `sessionAffinityTtlMs`   |
+| Kết nối bị ngắt giữa chừng mà không có lời nhắc nào từ phía máy khách                   | Cơ quan giám sát luồng không hoạt động được kích hoạt sau 10 phút mà không có đoạn ngược dòng | `STREAM_IDLE_TIMEOUT_MS` |
 
-Các thảo luận liên quan: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (tác vụ dài bị ngắt), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (lý do liên kết mặc định bị tắt). Theo dõi: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Các cuộc thảo luận liên quan: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (giảm nhiệm vụ dài), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (tại sao mối quan hệ mặc định bị tắt). Theo dõi: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. Liên kết phiên — ghim một cuộc hội thoại vào một tài khoản
+### 1. Mối quan hệ phiên — ghim một cuộc trò chuyện vào một tài khoản
 
-**Mặc định:** `sessionAffinityTtlMs = 0` (đã tắt).
+**Mặc định:** `sessionAffinityTtlMs = 0` (bị vô hiệu hóa).
 
-**Nơi thiết lập**
+**Đặt nó ở đâu**
 
-- Bảng điều khiển → **Cài đặt → Định tuyến** → **Liên kết phiên** → **TTL liên kết (giây)** (`ComboDefaultsTab`)
-- Hoặc PATCH các cài đặt bằng `sessionAffinityTtlMs` tính theo **mili giây** (phạm vi Zod `0`–`86_400_000`, tức tối đa 24 giờ)
+- Trang tổng quan →** Cài đặt định tuyến →** →** Mối quan hệ phiên** →** Mối quan hệ TTL (giây)** (`ComboDefaultsTab`)
+- Hoặc cài đặt PATCH với `sessionAffinityTtlMs` trong** mili giây** ( phạm vi Zod `0`–`86_400_000`, tức là tối đa 24 giờ)
 
-> Được đổi tên trong #7274 từ `codexSessionAffinityTtlMs`, vốn chỉ dành cho Codex. Khóa cũ vẫn được chấp nhận dưới dạng bí danh chỉ đọc; các cấu hình mới nên sử dụng `sessionAffinityTtlMs`. Giờ đây, liên kết áp dụng cho **mọi** nhà cung cấp khi TTL lớn hơn `0`, không chỉ Codex — xem [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Liên kết phiên.
+> Được đổi tên thành #7274 từ `codexSessionAffinityTtlMs` chỉ có trong Codex. Khóa kế thừa vẫn được chấp nhận dưới dạng bí danh chỉ đọc; cấu hình mới nên sử dụng `sessionAffinityTtlMs`. Mối quan hệ bây giờ áp dụng cho** bất kì** nhà cung cấp khi TTL ở trên `0`, không chỉ Codex — mới thấy [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → Mối quan hệ phiên.
 
-**Điều gì bị ảnh hưởng khi giá trị vẫn là 0**
+**Cái gì bị hỏng khi nó ở mức 0**
 
-Mỗi lượt trong một cuộc hội thoại Codex nhiều lượt được định tuyến độc lập theo chiến lược tổ hợp đang hoạt động và có thể được chuyển đến một **tài khoản khác nhau ở mỗi lượt**. Điều đó phá vỡ tính liên tục của phiên / bộ nhớ đệm prompt ở phía thượng nguồn. OmniRoute chỉ kiểm tra các header phiên Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) và các trường trong phần thân như `prompt_cache_key` / `session_id` khi TTL lớn hơn `0` (`extractSessionAffinityKey` trong `src/sse/services/auth.ts`).
+Mỗi lượt của cuộc trò chuyện Codex nhiều lượt được định tuyến độc lập bằng chiến lược kết hợp hoạt động và có thể kết thúc trên một** tài khoản khác nhau mỗi lượt** . Điều đó phá vỡ tính liên tục của phiên ngược dòng/bộ đệm nhắc nhở. OmniRoute chỉ tham khảo các tiêu đề phiên Codex (`x-codex-session-id` / `x-session-id` / `x-omniroute-session`) và các trường nội dung như `prompt_cache_key` / `session_id` khi TTL lớn hơn `0` (`extractSessionAffinityKey` trong `src/sse/services/auth.ts`).
 
-**Khuyến nghị cho một tác vụ đơn lẻ kéo dài nhiều giờ**
+**Được đề xuất cho một nhiệm vụ kéo dài nhiều giờ**
 
-Đặt TTL **cao hơn thời lượng thực tế dự kiến của tác vụ** (giá trị tối đa trên giao diện người dùng là **86400 giây** = 24 giờ):
+Đặt TTL** trên độ dài đồng hồ treo tường dự kiến của nhiệm vụ** (UI tối đa là** 86400 giây** = 24 giờ):
 
-| Thời lượng tác vụ dự kiến | TTL liên kết (giao diện, giây) | `sessionAffinityTtlMs` |
-| ------------------------- | ------------------------------ | ---------------------- |
-| Vài giờ                   | `14400` (4 giờ)                | `14400000`             |
-| Qua đêm / khoảng 12 giờ   | `43200` (12 giờ)               | `43200000`             |
-| Cả ngày                   | `86400` (24 giờ, tối đa)       | `86400000`             |
+| Độ dài nhiệm vụ dự kiến | Mối quan hệ TTL (UI, giây) | `sessionAffinityTtlMs` |
+| ----------------------- | -------------------------- | ---------------------- |
+| Một vài giờ             | `14400` (4h)               | `14400000`             |
+| Qua đêm / ~ 12h         | `43200` (12h)              | `43200000`             |
+| Cả ngày                 | `86400` (24h, tối đa)      | `86400000`             |
 
-Việc yêu cầu chủ động bật là có chủ đích: tắt liên kết sẽ ưu tiên cân bằng tải giữa các tài khoản; bật liên kết sẽ ưu tiên tính liên tục cho một phiên tác tử kéo dài. Hướng dẫn này **không** thay đổi giá trị mặc định — các nhà vận hành chạy tác vụ Codex dài phải chủ động bật tính năng này.
+Việc chọn tham gia là có chủ ý: việc vô hiệu hóa mối quan hệ sẽ ưu tiên cân bằng tải trên các tài khoản; cho phép nó hỗ trợ tính liên tục cho một phiên tác nhân dài. Hướng dẫn này làm** không** thay đổi toán tử — mặc định chạy các tác vụ Codex dài phải chọn tham gia.
 
-### 2. Thời gian chờ khi stream nhàn rỗi — không ngắt các lượt suy luận im lặng
+### 2. Dòng thời gian chờ nhàn rỗi — không giết lượt lý luận yên tĩnh
 
-**Mặc định:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 phút). Khi không được đặt, nó kế thừa từ `REQUEST_TIMEOUT_MS`; giá trị cơ sở dùng chung cũng là 600000. Xem [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → Thời gian chờ.
+**Mặc định:** `STREAM_IDLE_TIMEOUT_MS = 600000` (10 phút). Nó kế thừa từ `REQUEST_TIMEOUT_MS` khi không được đặt; đường cơ sở được chia sẻ cũng là 600000. Xem Thời gian chờ [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) →.
 
-**Điều gì bị ảnh hưởng với giá trị mặc định**
+**Những gì bị phá vỡ ở mặc định**
 
-Một lượt suy luận / sử dụng công cụ của Codex im lặng hơn 10 phút mà **không có chunk thực sự nào từ upstream** sẽ bị bộ giám sát thời gian rảnh SSE (`open-sse/utils/stream.ts`) buộc đóng. Phía client thường chỉ thấy kết nối bị ngắt mà không có thông báo — đúng với hiện tượng “tự động dừng mà không có bất kỳ thông báo nào.”
+Một lý luận / công cụ Codex giữ im lặng trong hơn 10 phút với** không có đoạn ngược dòng thực sự** bị đóng cửa bởi cơ quan giám sát nhàn rỗi SSE (`open-sse/utils/stream.ts`). Khách hàng thường thấy kết nối trần bị rớt — khớp "tự động dừng mà không có bất kỳ thông báo nào".
 
-Chi tiết quan trọng: **heartbeat SSE tổng hợp của OmniRoute không đặt lại** đồng hồ thời gian rảnh. Chỉ một chunk nội dung thực sự từ upstream mới cập nhật `lastChunkTime`. Theo góc nhìn của bộ giám sát, một mô hình đang im lặng nhưng vẫn “suy nghĩ” không khác gì một upstream bị đình trệ.
+Chi tiết quan trọng: SSE tổng hợp của OmniRoute** nhịp tim không thiết lập lại** đồng hồ nhàn rỗi. Chỉ có một đoạn nội dung ngược dòng thực sự cập nhật `lastChunkTime`. Một mô hình yên tĩnh vẫn đang “suy nghĩ” trông giống hệt một mô hình ngược dòng bị đình trệ theo quan điểm của cơ quan giám sát.
 
-Thời gian chờ liên quan đối với tình trạng không hoạt động của body trong Undici: `FETCH_BODY_TIMEOUT_MS` (cũng mặc định theo mốc cơ sở 10 phút; `0` sẽ vô hiệu hóa). Đối với streaming, `FETCH_TIMEOUT_MS` chỉ áp dụng cho quá trình thiết lập kết nối / các header đầu tiên — sau khi stream đã hoạt động, tình trạng đình trệ được chi phối bởi `STREAM_IDLE_TIMEOUT_MS` và `FETCH_BODY_TIMEOUT_MS`.
+Liên quan đến việc cơ thể Undici không hoạt động: `FETCH_BODY_TIMEOUT_MS` (cũng được mặc định có cùng đường cơ sở 10 phút; `0` vô hiệu hóa nó). Để phát trực tuyến, `FETCH_TIMEOUT_MS` chỉ bao gồm thiết lập kết nối/tiêu đề đầu tiên — sau khi luồng hoạt động, các gian hàng được điều chỉnh bởi `STREAM_IDLE_TIMEOUT_MS` và `FETCH_BODY_TIMEOUT_MS`.
 
-**Khuyến nghị cho một tác vụ đơn lẻ kéo dài nhiều giờ**
+**Được đề xuất cho một nhiệm vụ kéo dài nhiều giờ**
 
-Trong môi trường tiến trình OmniRoute (`.env` / compose / systemd):
+Trong môi trường quy trình OmniRoute (`.env` /composite /systemd):
 
 ```bash
-# Vô hiệu hóa các ngưỡng cắt do stream không hoạt động và body không hoạt động đối với các lượt suy luận dài
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-Hoặc tăng chúng lên cao hơn khoảng im lặng dài nhất mà bạn dự kiến (giá trị được tính bằng mili giây):
+Hoặc nâng chúng lên trên khoảng cách yên tĩnh dài nhất mà bạn mong đợi (giá trị là mili giây):
 
 ```bash
-# Ví dụ: cho phép tối đa 2 giờ im lặng giữa các chunk từ upstream
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-Khởi động lại OmniRoute sau khi thay đổi các biến môi trường này.
+Khởi động lại OmniRoute sau khi thay đổi các vars env này.
 
-### Công thức cụ thể — tác vụ Codex kéo dài nhiều giờ
+### Công thức bê tông — nhiệm vụ Codex nhiều giờ
 
-1. **Cố định tài khoản:** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200` (12 giờ) hoặc `86400` (tối đa 24 giờ).
-2. **Tăng / vô hiệu hóa các ngưỡng cắt do không hoạt động** trong môi trường của OmniRoute:
+1. **Ghim tài khoản:** Bảng điều khiển → Cài đặt → Định tuyến → Mối quan hệ phiên → Mối quan hệ TTL = `43200` (12h) hoặc `86400` (tối đa 24h).
+2. **Tăng / tắt giới hạn nhàn rỗi** trong môi trường của OmniRoute:
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. Giữ nguyên `config.toml` thông thường của Codex (`wire_api = "responses"`, `base_url` chính xác, `OMNIROUTE_API_KEY`) — phía Codex không có thiết lập affinity/thời gian rảnh nào cho hai hành vi này.
-4. Khởi động lại OmniRoute, sau đó bắt đầu tác vụ Codex dài hạn.
+3. Giữ Codex `config.toml` (`wire_api = "responses"`, đúng `base_url`, `OMNIROUTE_API_KEY`) — thông thường không tồn tại các nút affinity/idle phía Codex cho hai hành vi này.
+4. Khởi động lại OmniRoute, sau đó bắt đầu tác vụ Codex dài.
 
-### Quyết định về giá trị mặc định (#7287)
+### Quyết định mặc định (#7287)
 
-| Thiết lập                | Giá trị mặc định khi phát hành | Có thay đổi trong hướng dẫn này không?                                                                                       |
-| ------------------------ | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0` (tắt)                      | **Không** — vẫn là tùy chọn chủ động bật (cân bằng tải so với tính liên tục; xem Discussion #5718)                           |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 phút)             | **Không** — vẫn là 10 phút đối với lưu lượng thông thường; người vận hành Codex dài hạn sẽ tăng hoặc vô hiệu hóa giá trị này |
+| Nhô lên                  | Vận chuyển mặc định | Thay đổi trong hướng dẫn này?                                                               |
+| ------------------------ | ------------------- | ------------------------------------------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` (tắt)           | **KHÔNG** — vẫn chọn tham gia (cân bằng tải và liên tục; xem Thảo luận #5718)               |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` (10 phút)  | **KHÔNG** — vẫn còn 10 phút cho giao thông thông thường; toán tử Codex dài tăng hoặc tắt nó |
 
-Việc thay đổi toàn cục một trong hai giá trị mặc định sẽ làm thay đổi hành vi đối với mọi client của một instance, không chỉ Codex. Hãy ghi lại các thiết lập này trong tài liệu; giữ nguyên giá trị mặc định cho đến khi có quyết định rõ ràng khác từ người vận hành.
+Việc lật ngược mặc định trên toàn cầu sẽ thay đổi hành vi của mọi máy khách trong một phiên bản, không chỉ Codex. Ghi lại các nút bấm; để nguyên các giá trị mặc định cho đến khi có quyết định rõ ràng của nhà điều hành nói khác.
 
-### Chẩn đoán việc bị ngắt do không hoạt động
+### Chẩn đoán vết cắt không tải
 
-Khi bộ giám sát thời gian rảnh được kích hoạt, OmniRoute ghi một dòng log có dạng:
+Khi cơ quan giám sát nhàn rỗi kích hoạt, OmniRoute sẽ ghi lại một dòng có hình dạng như sau:
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-Tìm kiếm bằng grep với `Idle timeout: no data from` (hoặc mã `stream_idle_timeout` / tên lỗi `StreamIdleTimeoutError`). Phần provider là giá trị mà OmniRoute đã sử dụng cho yêu cầu đó (`codex`, một id provider khác hoặc `provider` nếu không xác định) — không phải lúc nào cũng là chuỗi ký tự `codex`.
+Grep cho `Idle timeout: no data from` (hoặc mã `stream_idle_timeout` /tên lỗi `StreamIdleTimeoutError`). Phân đoạn nhà cung cấp là bất kỳ thứ gì OmniRoute được sử dụng cho yêu cầu đó (`codex`, id nhà cung cấp khác hoặc `provider` nếu không xác định) — nó không phải lúc nào cũng là chuỗi ký tự `codex`.
 
 ---
 

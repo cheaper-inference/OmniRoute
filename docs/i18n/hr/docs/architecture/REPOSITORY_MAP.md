@@ -4,9 +4,9 @@
 
 ---
 
-> **Što živi gdje: svaki praćeni direktorij najviše razine i korijenska datoteka, sa svrhom u jednom retku.** Zadnje ažuriranje: 2026-11-13 (OmniRoute v3.8.54)
+> **Što živi gdje: svaki praćeni direktorij najviše razine i korijenska datoteka, sa svrhom u jednom retku.**
 >
-> Upotrijebite ovu kartu kako biste se snašli u bazi kodova, a zatim slijedite veze do namjenskih dokumenata. Broj datoteka mjeren je pomoću `git ls-files` na gornji datum. Mijenjaju se s gotovo svakim izdanjem, pa ih tretirajte kao redove veličina.
+> Upotrijebite ovu kartu kako biste se snašli u bazi kodova, a zatim slijedite veze do namjenskih dokumenata. Brojevi datoteka dolaze iz `git ls-files` i mijenjaju se s gotovo svakim izdanjem. Tretirajte ih kao redove veličina.
 
 ## Drvo najviše razine
 

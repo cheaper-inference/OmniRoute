@@ -4,9 +4,9 @@
 
 ---
 
-> **Sors tal-verità:** `electron/` workspace** Aġġornata l-aħħar:** 2026-06-28 — v3.8.40
+> **Sors tal-verità:** `electron/` workspace
 
-OmniRoute jibgħat app tad-desktop fuq pjattaformi (Windows / macOS / Linux) mibnija fuq**Electron 41** +** il-bennej tal-elettroni 26.10** . L-app tad-desktop ibid is-server Next.js waħdu bħala proċess tifel, tipponta `BrowserWindow` lejha, u żżid trej tas-sistema, auto-updater, IPC bridge, u bootstrap sigriet zero-config.
+OmniRoute jibgħat app tad-desktop fuq pjattaformi (Windows / macOS / Linux) mibnija fuq**Electron 41** +** il-bennej tal-elettroni 26.10** . L-app tad-desktop tbid is-server waħdu Next.js bħala proċess tifel, tipponta `BrowserWindow` lejha, u żżid trej tas-sistema, auto-updater, IPC bridge, u bootstrap sigriet zero-config.
 
 ## Arkitettura
 
@@ -198,7 +198,7 @@ Set via `session.defaultSession.webRequest.onHeadersReceived`. Direttivi notevol
 
 ## Aġġornament awtomatiku
 
-Juża `electron-updater` mal-fornitur GitHub (`diegosouzapw/OmniRoute`).
+Juża `electron-updater` mal-fornitur GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Avvenimenti mibgħuta lil min jirrendu permezz ta' `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (with `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artifacts art fi `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Ir-rilaxxi huma ppubblikati għal GitHub Releases (`diegosouzapw/OmniRoute`), li huwa wkoll fejn `electron-updater` jiċċekkja għal verżjonijiet ġodda.
+Ir-rilaxxi huma ppubblikati għal GitHub Releases (`cheaper-inference/OmniRoute`), li huwa wkoll fejn `electron-updater` jiċċekkja għal verżjonijiet ġodda.
 
 ## Issolvi l-problemi
 

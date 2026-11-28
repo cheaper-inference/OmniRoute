@@ -4,12 +4,9 @@
 
 ---
 
-> **Dernière mise à jour :** 2026-08-28 — v3.8.51
-> Processus de publication simplifié qui exploite les compétences de Claude Code pour l’automatisation.
+> Flux de publication rationalisé qui exploite les compétences Claude Code pour l'automatisation.
 >
-> **Maintenez la file d’attente/branche au vert entre les publications :** consultez [RELEASE_GREEN.md](./RELEASE_GREEN.md)
-> (famille `/green-prs` + `npm run check:release-green` + `/babysit` + exécution nocturne). L’exécuter
-> périodiquement — et en particulier **avant** cette liste de contrôle — permet à la PR de publication de démarrer au vert.
+> **Gardez le queue/branch vert entre les versions :** voir [RELEASE_GREEN.md](./RELEASE_GREEN.md) (famille `/green-prs` + `npm run check:release-green` + `/babysit` + tous les soirs). Exécuter ceci périodiquement — et surtout** avant** cette liste de contrôle — rend la version PR start verte.
 
 ## En bref
 
@@ -52,7 +49,7 @@ Le workflow npm-publish ne publie plus directement : il démarre l'archive tar 
 3. `npm stage approve <id>` — l'invite 2FA IS la publication. `npm stage reject <id>` se défausse.
 4. Réseau post-publication : le vérificateur post-publication (WS1.4 du plan v3.8.49) installe la version publiée à partir du registre public dans un conteneur propre et la démarre.
 
-**Solution de repli d'urgence :** `workflow_dispatch` avec `publish_mode=direct` restaure l'héritage `npm publish` immédiat (à utiliser uniquement si la mise en scène elle-même se comporte mal ; notez pourquoi).
+**Solution de secours :** `workflow_dispatch` avec `publish_mode=direct` restaure l'héritage `npm publish` immédiat (à utiliser uniquement si la mise en scène elle-même se comporte mal ; notez pourquoi).
 
 **Durcissement unique (propriétaire, npmjs.com) :** configurez l'éditeur de confiance pour `omniroute` en mode étape uniquement afin qu'un jeton de longue durée divulgué ne puisse pas `npm publish` directement depuis n'importe où — CI ne peut que mettre en scène ; uniquement les versions 2FA du propriétaire.
 
@@ -60,7 +57,9 @@ Le workflow npm-publish ne publie plus directement : il démarre l'archive tar 
 
 **Docker Hub `latest` (obligatoire pour chaque publication SemVer stable) :** le workflow `docker-publish` doit baliser** les deux** `X.Y.Z` et, lorsque `should-promote-latest.sh` est d'accord, c'est le SemVer stable le plus élevé, `:latest` avec le** même résumé** . Après le travail : Hub `latest` digest est égal au nouveau SemVer digest et `last_updated` déplacé. Ne laissez pas `:latest` sur une ancienne version pendant que les notes de version parlent de correctifs qui n'existent que sur git. Composer des démarrages rapides, utilisez `:latest`; GitOps devrait continuer à épingler `X.Y.Z`. Voir [les canaux de version Docker](../guides/DOCKER_GUIDE.md#release-channels) et #10317.
 
-**Référentiel d'organisation Docker Hub (`cheaperinference/omniroute`) :** Docker Hub ne peut pas déplacer un référentiel entre les espaces de noms, donc `diegosouzapw/omniroute` conserve son historique d'extraction et chaque version, et le travail `mirror-org-dockerhub` de `docker-publish` copie chaque version publiée (et `:latest` lorsqu'il est promu) de `ghcr.io/cheaper-inference/omniroute` vers le référentiel de l'organisation. Il a besoin des secrets `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; sans eux, le travail reste vert avec un avertissement « miroir d'organisation Docker Hub ignoré » et les autres registres publient normalement. Pour y publier une version publiée ultérieurement, exécutez** Actions → Mettre en miroir l'image Docker sur l'organisation Docker Hub → Exécuter le workflow** avec `version=X.Y.Z` (et `promote_latest` pour la version stable la plus élevée) : il copie les images existantes, pas de reconstruction.
+**Référentiel d'organisation Docker Hub (`cheaperinference/omniroute`) :** Docker Hub ne peut pas déplacer un référentiel entre les espaces de noms, donc `diegosouzapw/omniroute` conserve son historique d'extraction et chaque version, et le travail `mirror-org-dockerhub` de `docker-publish` copie chaque version publiée (et `:latest` lorsqu'il est promu) de `ghcr.io/cheaper-inference/omniroute` vers le référentiel de l'organisation. Il a besoin des secrets `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; sans eux, le travail reste vert avec un avertissement « miroir d'organisation Docker Hub ignoré » et les autres registres publient normalement. Pour y publier une version publiée ultérieurement, exécutez** Actions → Mettre en miroir l'image Docker sur l'organisation Docker Hub → Exécuter le workflow** avec `version=X.Y.Z` (et `promote_latest` pour la version stable la plus élevée) : il copie les images existantes, pas de reconstruction. L'aperçu du Docker Hub de ce référentiel est défini manuellement : le API qui le modifie rejette les jetons d'accès à l'organisation.
+
+Le même flux de travail copie également chaque version dans l'ancien package GHCR `ghcr.io/diegosouzapw/omniroute` jusqu'au 30/06/2027, de sorte que les installations toujours épinglées y continuent à être mises à jour ; son index porte une description "déplacé vers `ghcr.io/cheaper-inference/omniroute`". Il a besoin du secret `GHCR_LEGACY_TOKEN` (un jeton d'accès personnel classique de `diegosouzapw` avec `write:packages`) ; sans cela, ce travail est sauté avec un avertissement « Miroir GHCR hérité ignoré ».
 
 ## Voie rapide pour les correctifs urgents (label `hotfix`)
 
@@ -151,7 +150,7 @@ Modifications majeures : ajoutez un pied de page `BREAKING CHANGE:` ou `!` apr�
 ### Documentation
 
 - [ ] `npm run check:docs-sync` passe (auto-exécuté par pré-commit)
-- [ ] `npm run check:docs-all` passes (parapluie : docs-sync + docs-counts + env-doc-sync + versions obsolètes + doc-links)
+- [ ] `npm run check:docs-all` passe. Son avis `check:deprecated-versions` signale les versions explicitement attribuées à OmniRoute (3.6.x et versions antérieures) et ignore les dates.
 - [ ] `npm run check:env-doc-sync` quitte 0 code — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env le contrat est intact
 - [ ] `npm run check:doc-links` quitte 0 — aucune référence de démarque interne cassée après restructuration
 - [ ] `docs/architecture/ARCHITECTURE.md` examiné pour storage/runtime drift
@@ -398,7 +397,7 @@ Le commit de développement est construit avec git plumbing (aucun arbre de trav
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

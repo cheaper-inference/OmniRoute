@@ -4,13 +4,7 @@
 
 ---
 
-> **Vir resnice:** `open-sse/utils/errorSanitization.ts`,
-> `open-sse/utils/errorPathRedaction.ts` in javni gradniki v `open-sse/utils/error.ts`
-> **Preizkusi:** `tests/unit/error-message-sanitization.test.ts`,
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Nazadnje posodobljeno:** 2026-09-02 — v3.8.51
-> **Ciljna skupina:** Vsi inženirji, ki delajo z odgovori o napakah (poti HTTP, tokovi SSE, izvajalniki, obdelovalniki MCP).
-> **Stanje:** **OBVEZNO** za vsako pot kode, ki odjemalcu vrne sporočilo o napaki.
+> **Vir resnice:** `open-sse/utils/errorSanitization.ts`, `open-sse/utils/errorPathRedaction.ts` in javnih graditeljev v `open-sse/utils/error.ts`** Testi:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** Občinstvo:** Vsak inženir, ki se dotakne odzivov na napake (smer HTTP, tokov SSE, izvajalcev, upravljavcev MCP ).** status:****MANDATORY** za vsako kodno pot, ki odjemalcu vrne sporočilo o napaki.
 
 ## Zakaj to obstaja
 

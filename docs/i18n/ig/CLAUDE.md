@@ -6,70 +6,25 @@
 
 @AGENTS.md
 
-**Iwu niile nke ọrụ a dị na [`AGENTS.md`](AGENTS.md)** — ebe otu eziokwu ahụ si abịa maka onye enyemaka AI ọ bụla
-(nhazi sistemụ, ụkpụrụ, nnwale, ọnụ ụzọ ogo, usoro ọrụ git, Iwu Siri Ike 23,
-ihe amụtara gbasara PII). Gụọ ya niile; etinyekwala iwu ọrụ ọzọ ebe a. Ihe niile dị n'okpuru metụtara
-naanị Claude Code — mmezi etu e si arụ ọrụ nke iwu ndị akọwarala na `AGENTS.md`.
+**Iwu oru ngo niile na-ebi na [`AGENTS.md`](AGENTS.md)** — bụ otu isi iyi nke eziokwu maka onye inyeaka AI ọ bụla; mbubata n'elu ebugola ya. Etinyekwala iwu oru ngo ebe a. Ihe niile dị n'okpuru na-emetụta ONLY na Claude Code — nhazi ọrụ nke iwu akọwarala na `AGENTS.md`.
 
-## Ịkewapụ worktree — ihe ndị metụtara Claude Code
+## Nkọwapụta koodu ọrụ osisi — Claude
 
-Usoro ịkewapụ worktree zuru oke nke bụ iwu (ịkwenye base-branch, ụzọ canonical
-`.claude/worktrees/`, `cp -al` node_modules, iwu ịwepụ) nọ na
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (nke a chịkọtara n'ụzọ mkpirikpi na `AGENTS.md` →
-Usoro ọrụ Git → "Ịkewapụ worktree"). Ihe ndị metụtara naanị Claude Code:
+- Kwado ngalaba ntọala na onye ọrụ site na `AskUserQuestion` (Hard Rule #19) belụsọ na ha agwala gị.
+- Mepụta osisi ọrụ na `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (ọ na-ada n'okpuru `.claude/worktrees/`, hard-links `node_modules` na mbipụta `.husky/_`), wee kpọọ `EnterWorktree` na `path` ya. Na-agafe isi mgbe niile: na-enweghị ya script na-ahọrọ `release/*` kachasị elu, nke nwere ike ọ gaghị abụ nke onye ọrụ kwadoro. Osisi na-arụ ọrụ nke `EnterWorktree` na-emepụta n'onwe ya enweghị njikọ siri ike ma ọ bụ nko, ya mere, ọ dịghị ụzọ ntinye ụzọ na-agba ọsọ na ya.
 
-- Kwenye base branch n'aka onye na-arụ ọrụ ahụ site na `AskUserQuestion` (Iwu Ike #19) ọ bụrụ na ha
-  agwabeghị gị tupu.
-- Họrọ ngwá ọrụ `EnterWorktree` nke e wuru n'ime — ọ na-emepụtala worktree n'okpuru
-  `.claude/worktrees/` (ụzọ canonical ahụ). Jiri iwu `git worktree add` e dekọrọ mepụta worktree ahụ, wee
-  kpọọ `EnterWorktree` jiri `path` ya.
+## Subagents na git
 
-## Nchekwa gafee nnọkọ dị iche iche — nkọwa ndị metụtara Claude Code
+Subagent ọ bụla metụrụ git (Agent Tool or Workflow script) na-enweta iwu siri ike #22 a's `git stash` ban verbatim n'ime ngwa ngwa — nlọghachite ndekọ nke ihe ndekọ stash mere site na subgent.
 
-Iwu Siri Ike #19/#21/#22 (dị na `AGENTS.md`) na-achịkwa nnọkọ ndị na-aga n'otu oge. Ihe ncheta gbasara etu e si arụ ọrụ
-maka harness a:
+## Ịhazi arịa arịa dị elu — gabigara ụzọ
 
-- **Tinye mmachibido `git stash` otu mkpụrụokwu ahụ dị na prompt nke subagent ọ bụla na-emetụ git aka**
-  (Agent tool / Workflow scripts) — subagent anaghị eketa faịlụ a, ma ihe ndekọ banyere nlọghachi
-  nke nsogbu stash ahụ sitere n'aka subagent.
-- Tupu ijikọta ma ọ bụ ịkwanye gaa na PR ọ bụla ị na-emepụtaghị _na nnọkọ a_, mee `git worktree list`
-  ma nyochaa ọzọ `gh pr view <N> --json state,headRefOid` (Iwu Siri Ike #22b).
-- Mechie nnọkọ ọ bụla ka main checkout nọ na branch ọ malitere na ya.
+Nkà ndị nwere ike na-ekwupụta ndabara n'okpuru `docs/superpowers/plans/`, `docs/superpowers/specs/` na `docs/research/`. Degharịa nke ọ bụla na `_tasks/` ya na `AGENTS.md` → "Atụmatụ & Nchọpụta Artifacts" tupu ịde ya, ma tinye ya na `git -C _tasks …`, ọ dịghị mgbe na isi repo.
 
-## Superpowers / ihe ndekọ atụmatụ — mgbanwe ụzọ
+## Ikpochapụ faịlụ — `_artifacts/`, ọ bụghị `/tmp`
 
-A kọwara ụkpụrụ `_tasks/` na `AGENTS.md` → "Planning & Research Artifacts". Skills nke
-superpowers na-abịa na ndabara ndị na-atụ aka na `docs/…` — **agbanweela
-ndabara ndị ahụ ebe a**. Mgbe skill superpowers kwupụtara ụzọ dịka "echekwara na `docs/superpowers/plans/…`",
-gbanwee ya ka ọ bụrụ nke kwekọrọ na `_tasks/…` tupu ide ya:
+Ihe oru ngo a na-akpochapu ihe nkedo oge nke njikota (`/tmp/claude-*/…`). Dee faịlụ nwa oge — mbupụ, zips emepụtara, mpụta otu oge — gaa `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: ụzọ `_*` mgbọrọgwụ gitignored, yabụ onye ọrụ na-achọpụta ma hichapụ ọkọ niile n'otu ebe. Atụmatụ na-adịgide adịgide, nkọwapụta, nyocha na nkwụsị aka na-aga `_tasks/` (Hard Rule #23).
 
-| Ihe ndekọ (skill)                   | Ndabara (EJILA ya)        | Chekwaa ya ebe a kama                                         |
-| ----------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Atụmatụ (`writing-plans`)           | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Nkọwapụta / imewe (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Nnyocha (`deep-research`, ad-hoc)   | `docs/research/`          | `_tasks/research/…`                                           |
-| Nnyefe (`/handoff`)                 | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Isi uhie
 
-Mee commit nke ihe ndekọ ndị ahụ n'ime repo `_tasks/` (`git -C _tasks …`), emela ya na repo bụ isi.
-
-## Faịlụ idegharị / nwa oge — jiri `_artifacts/`, ọ bụghị `/tmp`
-
-Ọrụ a na-agbanwe session scratchpad ndabara nke harness (`/tmp/claude-*/…`). Dee
-faịlụ nwa oge/ọrụ — exports, zips emepụtara, nsonaazụ etiti eji naanị otu ugboro, ihe ọ bụla ị gaara
-etinye na `/tmp` — na `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` kama.
-
-- `_artifacts/` bụ ụzọ mgbọrọgwụ `_*`: etinyelarị ya na gitignore (`AGENTS.md` → "Root `_*` paths"), ọ dị
-  naanị na diski, a naghị etinye ya na nsuso.
-- Ihe kpatara ya: idobe nsonaazụ nwa oge n'ime ọrụ ahụ (kama `/tmp`) na-eme ka ọ dịrị onye na-ahụ maka ọrụ mfe
-  ịchọta ma hichapụ ihe niile nwa oge n'otu ebe, kama ịchụgharị ha n'ime directories `/tmp`
-  nke nnọkọ ọ bụla, ndị na-apụ n'anya ma ọ bụ na-achịkọba n'enweghị nsuso.
-- **Agwakọtala** nke a na `_tasks/` (Iwu Siri Ike #23, repo git nzuzo nke ya maka atụmatụ/
-  nkọwapụta/nnyocha/nnyefe ga-adịgide) — `_artifacts/` bụ naanị maka faịlụ ọrụ a ga-atụfu; ọ dịghị ihe
-  dị ebe a kwesịrị ịdịgide ma ọ bụ inwe ụdị mbipụta.
-
-## Base-green tupu imepe PR
-
-Tupu imepụta branch ma ọ bụ imepe PR, mee nyocha base-green (`AGENTS.md` → Git Workflow →
-"Base-green check"; skills nke ọrụ a na-akpọ ya `.agents/skills/_shared/base-green.md`). PR
-emeghere mgbe base tip na-acha uhie uhie ga-enwerịrị `⚠️ base-red inherited: #<issue>` n'ime body ya. Iji
-kpochapụ ọnọdụ uhie chịkọbara (base tip + PR ndị na-acha uhie uhie), jiri skill `/sweep-reds`.
+Iji mee ka ọnọdụ uhie chịkọbara (base n'ọnụ + red PRs), jiri nkà `/sweep-reds`.

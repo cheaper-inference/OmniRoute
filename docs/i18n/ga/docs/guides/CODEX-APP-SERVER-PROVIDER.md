@@ -21,24 +21,21 @@ don CLI sin a bheith **sínithe isteach**.
 ## 1. Ailtireacht
 
 ```
-┌─ Aip OmniRoute ─────────────────┐        ┌─ Taobhcharr codex-app-server ────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ comhartha cumais)            │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  bainistíonn sé OpenAI OAuth féin   │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, uath-athnuachan)│
-        │ comhroinneann (imleabhair compose) └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → comhartha cumais WS (gléasann an dá cheann é)
-  codex-appserver-home    → ~/.codex (scríobhann an painéal auth.json,
-                             léann codex app-server an taobhchairr é)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Éisteann an taobhcharr **amháin** ar an líonra inmheánach compose
-  (`ws://codex-app-server:1456`) taobh thiar de chomhartha cumais. **Ní**
-  fhoilsítear riamh é chuig an óstríomhaire ná chuig an idirlíon.
-- Tá Codex CLI ionsuite in `omniroute:base`, mar sin ní gá codex a shuiteáil ar
-  an óstríomhaire ná ar ríomhaire an úsáideora nuair a ritheann tú an taobhcharr.
+- Éisteann an taobhcharr** amháin** ar an ngréasán cumadóireachta inmheánach (`ws://codex-app-server:1456`) taobh thiar de chomhartha cumais. Tá sé** riamh** foilsithe don óstach nó don idirlíon.
+- Úsáideann an taobhcharr `omniroute:cli-no-docker`, tógtha ón sprioc `runner-cli-no-docker`, lena n-áirítear an Codex CLI.
 
 ## 2. Cuir ar bun é
 

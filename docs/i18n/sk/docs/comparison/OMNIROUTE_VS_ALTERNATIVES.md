@@ -11,7 +11,7 @@ Porovnanie objektívnych funkcií a populárnych smerovačov AI s otvoreným zdr
 | Funkcia                                               |                  OmniRoute 3.8                   |    LiteLLM 1.x     | OpenRouter (SaaS) |  Prenášadlo  |
 | ----------------------------------------------------- | :----------------------------------------------: | :----------------: | :---------------: | :----------: |
 | **Poskytovatelia**                                    |                     **329**                      |        ~100        |        ~50        |     ~30      |
-| **položky katalógu Free/no-auth**                     |                     **155**                      |        n/a         |     priechod      |     n/a      |
+| **Poskytovatelia s voľným prístupom**                 |            **50 s voľným prístupom**             |        n/a         |     priechod      |     n/a      |
 | **Samoobslužné**                                      |                        ✅                        |         ✅         |        ❌         | ⚠ zaplatené  |
 | **položky katalógu OAuth**                            |                      **23**                      |     čiastočné      |        ❌         |      ❌      |
 | **Automatické záložné kombá**                         |                 **22 stratégií**                 | na základe priorít |     na úrovni     |    vážený    |
@@ -24,13 +24,13 @@ Porovnanie objektívnych funkcií a populárnych smerovačov AI s otvoreným zdr
 | **Pamäť (vektor FTS5 + )**                            |                        ✅                        |         ❌         |        ❌         |      ❌      |
 | **Zábradlia (PII, vstrekovanie, videnie)**            |                        ✅                        |     čiastočné      |        ❌         | ✅ zaplatené |
 | **Integrácie cloudových agentov**                     |           Codex, Cursor, Devin, Jules            |         ❌         |        ❌         |      ❌      |
-| **Istič na poskytovateľa**                            |           ✅ 3-stav, lenivé zotavenie            |      základné      |        ❌         |      ✅      |
+| **Istič na poskytovateľa**                            |           ✅ 3-stav, lenivé zotavenie            |       basic        |        ❌         |      ✅      |
 | **TLS stealth odtlačkov prstov (JA3/JA4)**            |                    ✅ wreq-js                    |         ❌         |        ❌         |      ❌      |
 | **Eval rámec**                                        |                   ✅ vstavaný                    |         ❌         |        ❌         | ⚠ zaplatené  |
 | **MITM proxy (zachytáva Cursor/Antigravity)**         |           ✅ na viacerých platformách            |         ❌         |        ❌         |      ❌      |
 | **CLI so systémovou lištou (bez Electron)**           |                        ✅                        |         ❌         |        n/a        |     n/a      |
 | **CLI automatické overenie ID stroja**                |                        ✅                        |         ❌         |        n/a        |     n/a      |
-| **Dashboard**                                         |                    Next.js 16                    |      základné      |    vlastnícky     |  vlastnícky  |
+| **Dashboard**                                         |                    Next.js 16                    |       basic        |    vlastnícky     |  vlastnícky  |
 | **i18n**                                              |                   **67 miest**                   |         ❌         |        ❌         |      ⚠       |
 | **zručnosti verejného agenta (SKILL.md)**             |                      ✅ 45                       |         ❌         |        ❌         |      ❌      |
 | **Podpora tunelov (Cloudflared, Tailscale, Ngrok)**   |                        ✅                        |         ❌         |        n/a        |     n/a      |
@@ -38,8 +38,8 @@ Porovnanie objektívnych funkcií a populárnych smerovačov AI s otvoreným zdr
 
 ## Kedy zvoliť OmniRoute
 
-- Ste self-hostiteľ a chcete** maximálne pokrytie poskytovateľa** (394 poskytovateľov, 155 záznamov v katalógu free/no-auth )
-- Potrebujete a** vstavaný server MCP** (nástroje LLM, pamäť, zručnosti vystavené ako nástroje)
+- Ste self-hostiteľ a chcete** maximálne pokrytie poskytovateľa** (394 poskytovateľov, 50 s voľným prístupom)
+- Potrebujete a** vstavaný server MCP** (LLM nástroje, pamäť, zručnosti vystavené ako nástroje)
 - Potrebujete** protokol A2A** pre pracovné toky agent-agent
 - chceš** tajnosť odtlačkov prstov** (JA3/JA4), aby sa predišlo detekcii protiprúdovým CAPTCHAs
 - Potrebujete** podnikové funkcie** (zábradlia, evals, audit trail) bez účtu SaaS
@@ -56,12 +56,12 @@ Porovnanie objektívnych funkcií a populárnych smerovačov AI s otvoreným zdr
 - Nevadí vám platiť za token s prirážkou SaaS
 - Potrebujete **jeden spôsob platby** pre všetkých poskytovateľov
 
-## Kedy si vybrať Portkey
+## Kedy zvoliť prenášadlo
 
-- Potrebujete **komerčnú SLA** so zárukami dostupnosti
-- Uprednostňujete **spravovaný ovládací panel** bez prevádzkovej réžie
-- Potrebujete hotové **funkcie na zabezpečenie podnikového súladu**
+- Potrebujete a** obchodná SLA** so zárukami dostupnosti
+- Uprednostňujete a** riadený prístrojový panel** bez ops réžie
+- Potrebujete** dodržiavanie predpisov podniku** funkcie po vybalení
 
 ---
 
-_Naposledy aktualizované: 2026-08-02. Opravy posielajte prostredníctvom PR, aby táto tabuľka zostala presná._
+_Odošlite opravy prostredníctvom PR, aby bola táto tabuľka presná._

@@ -5,9 +5,8 @@
 ---
 
 > **Chanzo cha ukweli:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Iliyosasishwa mwisho:** 2026-09-22 — majina ya nafasi za wigo yanaelekeza kwenye MCP-SERVER.md
 
-OmniRoute ina bomba la uidhinishaji linalozingatia njia ambalo huzuia kila ombi la API. Uainishaji ni **hakika** na **hufeli-hufungwa** — chochote kisichoweza kuainishwa huishia kama `MANAGEMENT` na huhitaji kipindi au tokeni ya kiwango cha usimamizi. Ukurasa huu unaeleza mfumo kwa wahandisi wanaosimamia njia au kubuni vituo vipya.
+OmniRoute ina bomba la uidhinishaji linalofahamu njia ambalo huruhusu kila ombi la API. Uainishaji ni** ya kuamua** na** kushindwa-kufungwa** — kitu chochote ambacho hakiwezi kuainishwa huishia kuwa `MANAGEMENT` na hudai kikao au ishara ya daraja la usimamizi. Ukurasa huu unafafanua muundo wa wahandisi wanaodumisha njia au kubuni maeneo mapya ya mwisho.
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
@@ -206,7 +205,7 @@ Kila darasa la njia lina sera katika `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — daima inarudi `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — inadondosha Mbebaji, inathibitisha kupitia `validateApiKey()`. Huanguka hadi kutokujulikana wakati tu alama ya kipengele `REQUIRE_API_KEY` bora imezimwa. Bendera inayotumika hutatuliwa kupitia `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) kwa hivyo Bendera za Kipengele cha Dashibodi na vigeu vya mazingira vinatawala `/api/v1/*`, `/api/v1beta/*`, na lakabu mfululizo; kushindwa kwa kisuluhishi kushindwa kufungwa. Huruhusu maombi ya kikao cha dashibodi kwenye njia za API za mteja (pamoja na `/api/v1/models`, inayotumiwa na katalogi ya muundo wa dashibodi). Wakati Entra ID SSO imewashwa, Mbeba ambayo kimuundo ni ishara ya Entra (sehemu tatu za base64url, `RS*` alg, `kid`) hushughulikiwa na tawi la SSO** kabla** `validateApiKey()` na uamuzi wake ni — ya mwisho kamwe haianguki kwenye njia ya ufunguo wa API au tawi la kushusha hadhi hadi lisilojulikana, kwa hivyo hitilafu ya mtoaji kitambulisho haiwezi kuwa ufikiaji wazi. Vifunguo tuli vya API hazijaathiriwa. Tazama [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — inakubali kipindi cha dashibodi, maombi ya kusawazisha ya ndani ya kielelezo (yanayolingana na `/api/providers/[name]/(sync-models|models)`), au huruka kabisa ikiwa `isAuthRequired()` itarejesha sivyo. Hurejesha 403 (`AUTH_001`) wakati ishara ya Bearer iko lakini ni batili, 401 vinginevyo. Pia hutekeleza viwango vya walinzi wa njia (LOCAL_ONLY / ALWAYS_PROTECTED) kabla ya tawi lolote la mwandishi — kuona [Viwango vya Walinzi wa Njia](../security/ROUTE_GUARD_TIERS.md). njia za LOCAL_ONLY katika `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (leo: `/api/mcp/`) zinaweza kufikiwa kutoka kwa njia zisizo za nyuma wakati kitufe cha Bearer kinapobeba upeo wa `manage` ; njia zingine zote LOCAL_ONLY hubaki nyuma-kitanzi madhubuti bila kujali wigo.
+- **`managementPolicy`** (`policies/management.ts`) — inakubali kipindi cha dashibodi, maombi ya kusawazisha ya ndani ya kielelezo (yanayolingana na `/api/providers/[name]/(sync-models|models)`), au huruka kabisa ikiwa `isAuthRequired()` itarejesha sivyo. Hurejesha 403 (`AUTH_001`) wakati ishara ya Bearer iko lakini ni batili, 401 vinginevyo. Pia hutekeleza viwango vya walinzi wa njia (LOCAL_ONLY / ALWAYS_PROTECTED) kabla ya tawi lolote la mwandishi — kuona [Viwango vya Walinzi wa Njia](../security/ROUTE_GUARD_TIERS.md). njia za LOCAL_ONLY katika `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (leo: `/api/mcp/`) zinaweza kufikiwa kutoka kwa kutorudi nyuma wakati Kitufe cha Bearer kinapobeba upeo wa `manage`/`admin` au upeo mwembamba `mcp:connect` (`hasMcpConnectOrManageScope`), au kwa kipindi cha dashibodi kilichothibitishwa; njia zingine zote LOCAL_ONLY zinabaki nyuma-kitanzi madhubuti bila kujali wigo.
 
 Sera iliyofanikiwa inarudisha `AuthSubject` kwa `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Washughulikiaji wa mkondo wa chini wanaweza kuisoma kupitia `assertAuth(request, "CLIENT_API")` katika `src/server/authz/assertAuth.ts` badala ya kuendesha tena mantiki ya uandishi.
 
@@ -300,37 +299,24 @@ export async function POST(request: Request) {
 
 Chagua seti kulingana na muundo, si urahisi. Njia moja huwekwa katika `PUBLIC_API_ROUTES_EXACT` (au `PUBLIC_READONLY_CORS_API_ROUTES` ikiwa ni ya GET pekee); ni kitawi halisi pekee kinachowekwa katika `PUBLIC_API_ROUTE_PREFIXES`, na **lazima kiishie kwa `/`**. Kuweka njia moja katika orodha ya viambishi awali pia hufanya kila njia iliyo karibu inayoshiriki herufi zake za mwanzo kuwa ya umma — ikijumuisha njia zinazohusiana zenye sehemu zinazobadilika ambazo zitaongezwa baadaye (GHSA-74g9-q8f6-793h). Sasisha majaribio ya kitengo katika `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` na `tests/unit/authz/classify.test.ts`.
 
-## Wigo
+## Mawanda
 
-Nafasi tatu za majina. Kila kikagua husoma tu nyuzi zake. Ulinganisho wa kando-kando,
-ikiwemo kwa nini `manage` inashindwa `scopeMatches` kwa `read:compression` na kwa nini tokeni ya ufikiaji ya `read` haiwezi `PATCH /api/keys/{id}`, unapatikana hapa:
-[Nafasi tatu za majina ya wigo](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Nafasi tatu za majina. Kila kusahihisha husoma tu kamba zake. Upande kwa upande, ikijumuisha kwa nini `manage` inashindwa `scopeMatches` kwa `read:compression` na kwa nini ishara ya ufikiaji `read` haiwezi `PATCH /api/keys/{id}`, ni [Nafasi tatu za majina](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Funguo za API hubeba safu ya `scopes` (iliyohifadhiwa kama JSON katika `api_keys.scopes`, angalia `src/lib/db/apiKeys.ts`).
+API funguo hubeba safu ya `scopes` (iliyohifadhiwa kama JSON katika `api_keys.scopes`, angalia `src/lib/db/apiKeys.ts`).
 
-### Wigo wa usimamizi
+### Upeo wa usimamizi
 
-- `manage` / `admin` — `hasManageScope`. Ufikiaji wa mbebaji kwa njia za API za usimamizi.
-- `mcp:connect`, `self:usage`, `self:account-quota`, na
-  `policy:bypass-provider-quota` ni wigo wa nyongeza unaolingana hasa. Ziko
-  nje ya `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` hufungua tu
-  sehemu ya `/api/mcp/` isiyo ya loopback.
+- `manage` / `admin` — `hasManageScope`. Ufikiaji wa mbebaji kwa njia za usimamizi API.
+- `mcp:connect`, `self:usage`, `self:account-quota`, na `policy:bypass-provider-quota` ni mawanda ya ziada yanayolingana. Wanakaa nje `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` inafungua tu `/api/mcp/` zisizo na kitanzi nakshi.
 
-### Wigo wa zana za MCP
+### MCP mawanda ya zana
 
-Katalogi na sheria za kulinganisha (nyuzi zinazofanana, au wigo uliotolewa unaoishia na `*`):
-[Wigo wa zana za MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` katika `src/shared/constants/mcpScopes.ts` ni sehemu ndogo
-iliyoandikwa asili, si katalogi kamili. Utekelezaji huendeshwa katika
-`open-sse/mcp-server/scopeEnforcement.ts` baada ya `resolveCallerScopeContext()`
-kutatua wigo kutoka kwa maelezo ya uthibitishaji wa MCP, metadata ya ombi, au
-`OMNIROUTE_MCP_SCOPES`. Inabaki imezimwa isipokuwa `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Katalogi na sheria zinazolingana (kamba inayofanana, au upeo uliotolewa unaoishia `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` katika `src/shared/constants/mcpScopes.ts` ni kitengo cha awali kilichochapishwa, sio orodha kamili. Utekelezaji hutekelezwa `open-sse/mcp-server/scopeEnforcement.ts` baada ya `resolveCallerScopeContext()` kusuluhisha mawanda kutoka kwa maelezo ya MCP auth, ombi la metadata, au `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` huwasha kimataifa (chaguo-msingi `false`), lakini hutekelezwa kila mara kwa mpigaji simu HTTP/SSE ambaye ufunguo wake wa API hauna `manage`/`admin` (ona `shouldForceScopeEnforcement()` katika `open-sse/mcp-server/scopeEnforcement.ts`), bila kujali bendera.
 
-### Wigo wa tokeni ya ufikiaji
+### Upeo wa ishara za ufikiaji
 
-`read` / `write` / `admin` kwenye tokeni za `oma_live_…`, zilizopangwa kwa `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Cheo hiki kinatumika tu kwa kitambulisho cha
-tokeni ya ufikiaji. Angalia [Uthibitishaji wa Usimamizi](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` kwenye tokeni `oma_live_…`, zilizoorodheshwa na `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Cheo hiki kinatumika kwa kitambulisho cha tokeni ya ufikiaji pekee. Tazama [Uthibitishaji wa Usimamizi](../guides/MANAGEMENT-AUTH.md).
 
 ## Kigeuzi cha Kuhitaji Uthibitishaji
 

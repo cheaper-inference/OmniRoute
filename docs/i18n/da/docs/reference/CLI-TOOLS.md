@@ -4,8 +4,6 @@
 
 ---
 
-Sidst opdateret: 2026-08-23
-
 OmniRoute integreres med tre kategorier af CLI -værktøjer fordelt på tre dedikerede dashboard-sider:
 
 | Side            | Rute                    | Begreb                                                                         | Tælle                     |

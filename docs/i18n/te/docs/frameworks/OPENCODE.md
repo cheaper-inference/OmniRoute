@@ -4,14 +4,11 @@
 
 ---
 
-> **స్థితి:** సాధారణంగా అందుబాటులో ఉంది.
-> **లక్ష్య పాఠకులు:** OpenCodeను OmniRoute డిప్లాయ్మెంట్కు అనుసంధానించే ఆపరేటర్లు.
-> **ప్రామాణిక మూలం (కాన్ఫిగ్ స్కీమా):** `src/shared/services/opencodeConfig.ts`
-> **ప్రామాణిక మూలం (npm ప్యాకేజ్):** `@omniroute/opencode-provider/` (ప్రచురించదగిన వర్క్స్పేస్)
+> **స్థితి:** సాధారణంగా అందుబాటులో ఉంటుంది.** ప్రేక్షకులు:** ఆపరేటర్లు OpenCode OmniRoute విస్తరణకు వైరింగ్ చేస్తున్నారు.** సత్యానికి మూలం (కాన్ఫిగరేషన్ స్కీమా):** `src/shared/services/opencodeConfig.ts`** సిఫార్సు చేయబడిన npm ప్యాకేజీలు:** `@omniroute/opencode-plugin/` (OpenCode v1, `omniroute setup opencode` ద్వారా ఇన్స్టాల్ చేయబడింది) మరియు `@omniroute/opencode-plugin-v2/` (OpenCode v2). పాత `@omniroute/opencode-provider/` ప్యాకేజీ** తిరస్కరించబడింది** (మార్గం 2 చూడండి).
 
-[OpenCode](https://opencode.ai) అనేది ఏజెంటిక్ CLI/డెస్క్టాప్ AI క్లయింట్. ఇది తన ప్రొవైడర్ కేటలాగ్ను `~/.config/opencode/opencode.json` (లేదా `opencode.jsonc`) నుండి చదివి, `https://opencode.ai/config.json`లోని స్కీమాను అనుసరిస్తుంది. OmniRoute ఈ ప్రొవైడర్లలో ఒకటిగా OpenCodeకు తనను అందుబాటులో ఉంచుతుంది — ప్రతి అభ్యర్థన OmniRoute యొక్క ప్రామాణిక OpenAI-అనుకూల `/v1` ఇంటర్ఫేస్ ద్వారా ప్రవహిస్తుంది, కాబట్టి OpenCodeకు Auto-Combo రూటింగ్, సర్క్యూట్ బ్రేకర్లు, కీ పాలసీలు, పరిశీలన సామర్థ్యం మొదలైన వాటి ప్రయోజనాలు స్వయంచాలకంగా లభిస్తాయి.
+[OpenCode](https://opencode.ai) ఒక ఏజెంట్ CLI/desktop AI క్లయింట్. ఇది `~/.config/opencode/opencode.json` (లేదా `opencode.jsonc`) నుండి దాని ప్రొవైడర్ కేటలాగ్ను చదువుతుంది మరియు `https://opencode.ai/config.json` వద్ద స్కీమాను అనుసరిస్తుంది. ప్రతి అభ్యర్థన OpenCode యొక్క ప్రామాణిక OpenAI-అనుకూల `/v1` ఉపరితలం ద్వారా ప్రవహిస్తుంది, కాబట్టి — స్వయంచాలకంగా ఆటో-కాంబో రూటింగ్, సర్క్యూట్ బ్రేకర్లు, కీలక విధానాలు, పరిశీలన మొదలైన OmniRoute నుండి OpenCode పొందుతుంది OmniRoute
 
-**రెండు మద్దతు ఉన్న ఇంటిగ్రేషన్ మార్గాలు** ఉన్నాయి. వాటిలో ఒకదాన్ని ఎంచుకోండి — రెండూ ఒకే కాన్ఫిగ్ను రూపొందిస్తాయి.
+ఈ పేజీ దిగువన ఉన్న రెండు స్టాటిక్-కాన్ఫిగరేషన్ పాత్లను డాక్యుమెంట్ చేస్తుంది; రెండూ ఒకే కాన్ఫిగరేషన్ను ఉత్పత్తి చేస్తాయి. మీ లైవ్ కేటలాగ్ని అనుసరించే మోడల్ జాబితా కోసం, బదులుగా ప్లగిన్ని ఉపయోగించండి: `omniroute setup opencode` `@omniroute/opencode-plugin` (OpenCode v1)ని ఇన్స్టాల్ చేస్తుంది మరియు `@omniroute/opencode-plugin-v2` OpenCode v2ని లక్ష్యంగా చేసుకుంటుంది ( [CLI ఇంటిగ్రేషన్లు](../guides/CLI-INTEGRATIONS.md) మరియు [OpenCode v2 ప్లగిన్ గైడ్](../guides/OPENCODE-V2-PLUGIN.md) చూడండి).
 
 ---
 
@@ -54,9 +51,11 @@ omniroute config opencode \
 
 ---
 
-## మార్గం 2 — npm ప్యాకేజ్ `@omniroute/opencode-provider`
+## మార్గం 2 — npm ప్యాకేజీ `@omniroute/opencode-provider` (విస్మరించబడింది)
 
-మీరు Node/TS నుండి కాన్ఫిగ్ను స్క్రిప్ట్ చేస్తున్నప్పుడు (CI పైప్లైన్లు, మోనోరెపోలు, అనుకూల ఇన్స్టాలర్ ఫ్లోలు) ఇది సిఫార్సు చేయబడుతుంది.
+> **తిరస్కరించబడింది.** ప్యాకేజీ మీ లైవ్ OmniRoute కేటలాగ్ వెనుక ఉన్న స్టాటిక్ మోడల్ జాబితాను వ్రాస్తుంది. దీని README `@omniroute/opencode-plugin` (లేదా OpenCode v2లో `@omniroute/opencode-plugin-v2` )కి మైగ్రేట్ చేయమని సిఫార్సు చేస్తుంది. దిగువ API ఇప్పటికే ఉన్న స్క్రిప్ట్ల కోసం మాత్రమే ఉంచబడింది.
+
+Node/TS (CI పైప్లైన్లు, మోనోరెపోస్, కస్టమ్ ఇన్స్టాలర్ ఫ్లోలు) నుండి కాన్ఫిగరేషన్ను స్క్రిప్టింగ్ చేసేటప్పుడు ఉపయోగించబడుతుంది.
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // ఐచ్ఛికం: OpenCodeకు అందుబాటులో ఉంచే మోడల్ కేటలాగ్ను ఓవర్రైడ్ చేయండి
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-ఇప్పటికే ఉన్న ఫైల్తో నాశనరహిత విలీనం కోసం, `opencodeConfig.ts`లోని `mergeOpenCodeConfigText()`ను పునరుత్పత్తి చేయండి లేదా CLI జనరేటర్ను కాల్ చేయండి.
+ఇప్పటికే ఉన్న ఫైల్తో నాన్-డిస్ట్రక్టివ్ విలీనం కోసం, `opencodeConfig.ts` నుండి `mergeOpenCodeConfigText()` పునరావృతం చేయండి లేదా CLI జెనరేటర్కి కాల్ చేయండి.
 
-పూర్తి API కోసం [ప్యాకేజ్ README](../../@omniroute/opencode-provider/README.md)ను చూడండి.
+పూర్తి API కోసం [ప్యాకేజీ README](../../@omniroute/opencode-provider/README.md) చూడండి.
 
 ---
 
@@ -155,9 +154,11 @@ export const OMNIROUTE_DEFAULT_OPENCODE_MODELS = [
 
 ---
 
-## ఇవి కూడా చూడండి
+## కూడా చూడండి
 
-- [API సూచన](../reference/API_REFERENCE.md) — పూర్తి OmniRoute REST పరిధి
-- [Auto-Combo](../routing/AUTO-COMBO.md) — `model: "auto"` అంటే ఏమిటి
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
+- [API సూచన](../reference/API_REFERENCE.md) — పూర్తి OmniRoute REST ఉపరితలం
+- [ఆటో-కాంబో](../routing/AUTO-COMBO.md) — అంటే `model: "auto"` అంటే ఏమిటి
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (సిఫార్సు చేయబడింది)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (విస్మరించబడింది)
 - మూలం: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

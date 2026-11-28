@@ -5,43 +5,32 @@
 ---
 
 > **Foinse na fírinne:** `src/lib/guardrails/`
-> **Nuashonraithe go deireanach:** 2026-10-17 — v3.8.52 (cuireadh [Clúdach agus teorainneacha](#coverage-and-limits) leis:
-> na bealaí agus na cosáin fhreagartha a shroicheann na hooks, na ceanntásca díchumasaigh chumaisc (#16412), an mód
-> blocála insteallta mar theorainn éigeantach (#16413), agus cad a fheiceann freagra roimh an iarghlao)
 
-Cuireann guardrails sábháilteacht, polasaí, agus claochluithe ábhair i bhfeidhm ag an teorainn
-idir OmniRoute agus soláthraithe suas an tsrutha. Is féidir le gach guardrail iniúchadh a dhéanamh
-ar ualaigh iarratais (`preCall`) agus ar fhreagraí suas an tsrutha (`postCall`) — agus iad a dhiúltú,
-a chlaochlú, nó a anótáil go roghnach.
+Forfheidhmíonn ráillí cosanta trasfhoirmithe sábháilteachta, beartais agus ábhair ag an teorainn idir soláthraithe OmniRoute agus in aghaidh an tsrutha. Is féidir le gach ráille cosanta iniúchadh a dhéanamh (agus go roghnach diúltú, claochlú, nó anótáil) ualaí pálasta (`preCall`) agus freagraí réamhtheachtacha (`postCall`) a iarraidh.
 
-Tá an córas **fail-open**: má chaithfidh guardrail earráid le linn rite, taifeadann an clárlann
-an earráid agus leanann sé ar aghaidh leis an gcéad guardrail eile seachas teip ar an iarratas.
-Is cinneadh sainráite í an bhlocáil (`block: true`), ní taisme í riamh.
-Is é an t-aon eisceacht ná iarratas tochscartha: nuair a thochtscarftar `signal` an ghláiteora,
-diúltaíonn guardrail a chaithfidh earráid an rith hook in ionad a bheith scipthe.
+Tá an córas** teip-oscailte** : má chaitheann ráille cosanta agus é á fhorghníomhú, taifeadann an chlárlann an earráid agus leanann sé ar aghaidh leis an gcéad ráille cosanta eile seachas an t-iarratas a theip. Is cinneadh sainráite é blocáil (`block: true`), ní timpiste riamh. Is é an t-aon eisceacht amháin ná iarratas cealaithe: nuair a chuirtear deireadh le `signal` an ghlaoiteora, diúltaíonn ráille cosanta don rith crúcaí seachas é a bheith scipeála.
 
-**Ní** ritear na hooks ar gach bealach ná ar gach freagra. Léigh
-[Clúdach agus teorainneacha](#coverage-and-limits) sula gcuirfidh tú muinín i guardrail mar
-rialú slándála.
+Déanann na crúcaí** nach bhfuil** rith ar gach bealach nó gach freagra. Léigh [Clúdach agus teorainneacha](#coverage-and-limits) roimh brath ar ráille cosanta mar rialú slándála.
 
 ## Ráillí Garda Insuite
 
-Déanann an chlárlann sé cinn de ráillí cosanta a lódáil go huathoibríoch in ord tosaíochta ar iompórtáil (féach `registry.ts` → `registerDefaultGuardrails()`):
+Déanann an chlárlann na ráillí cosanta seo a lódáil go huathoibríoch in ord tosaíochta ar iompórtáil (féach `registry.ts` → `registerDefaultGuardrails()`):
 
-| Tosaíocht | Ainm                | Céim(eanna)    | Comhad                |
-| --------- | ------------------- | -------------- | --------------------- |
-| `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`       | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`      | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| Tosaíocht | Ainm                | Céim(eanna)    | Comhad                    |
+| --------- | ------------------- | -------------- | ------------------------- |
+| `1`       | `agent-guard`       | `preCall`      | `agentGuard/guardrail.ts` |
+| `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`         |
+| `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`          |
+| `7`       | `video-bridge`      | `preCall`      | `videoBridge.ts`          |
+| `10`      | `pii-masker`        | `pre` + `post` | `piiMasker.ts`            |
+| `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`      |
+| `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts`     |
 
 Ritheann uimhreacha tosaíochta níos ísle** ar dtús** .
 
 ### Droichead Fís (`visionBridge.ts`) — Módúlacht Droichead PR-1
 
-Tá meiteashonraí sainráite `supportsVision:false` registry/spec ag múnla bonn GLM 5.3 agus `glm-5.3-{low,high,max}`. Is samhlacha fís-dhúchais iad na leaganacha GLM 5.3 Flash. Téann bealach `/v1/messages` Cód Claude isteach sa slabhra ráillí cosanta réamhghlao `handleChat` roinnte** roimhe** aistriúchán Claude-go-OpenAI; ní mór cur síos a dhéanamh ar na híomhánna neadaithe `Read` tool-toraidh nó iad a láimhseáil sula n-ardóidh an t-aistriúchán sin go hábhar OpenAI `image_url` (#17069).
+Tá meiteashonraí sainráite `supportsVision:false` registry/spec ag múnla bonn GLM 5.3 agus `glm-5.3-{low,high,max}`. Tá na leaganacha GLM 5.3 Flash fós ina múnlaí fís dúchais. Téann bealach `/v1/messages` Cód Claude isteach sa slabhra ráillí cosanta réamhghlao `handleChat` roinnte** roimhe** aistriúchán Claude-go-OpenAI; ní mór cur síos a dhéanamh ar íomhánna torthaí-uirlis neadaithe `Read` nó iad a láimhseáil sula n-ardóidh an t-aistriúchán sin iad in ábhar OpenAI `image_url` (#17069).
 
 Idircheapann iarratais a bhfuil íomhá dírithe orthu** samhlacha gan fís** agus déanann sé an t-iarratas iomlán a athródú chuig samhail atá in ann fís nó cuireann sé tuairiscí téacs in ionad na gcodanna íomhá arna dtáirgeadh ag samhail fís inchumraithe roimh an nglao réamhtheachtacha. Ligeann sé seo do sholáthraithe téacs-amháin ualaí pálasta ilmhódacha a láimhseáil go trédhearcach.
 
@@ -51,7 +40,7 @@ Sreabhadh:
 2. Sliocht codanna íomhá trí `extractImageParts(messages)` (`visionBridgeHelpers.ts`), a tharmligean chuig an** brathadóir meáin aontaithe** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` — an fhoinse fhírinne amháin a roinntear leis an scagaire comhoiriúnachta teaglama. Tá eastóscadh ceadaithe do na cruthanna is féidir `replaceImageParts` splice ar ais (an sliocht ↔ ionad conradh): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"`, agus Freagraí API `input_image`. Baintear íomhánna meaitseála neadaithe laistigh de Claude Code `tool_result.content` agus aschuir uirlisí Freagraí freisin agus cuirtear in ionad iad ag a mbunchosáin; is ábhar teaglama-scagaire iad cruthanna táscaire amháin agus ní bhaintear iad. Léim mura bhfuarthas aon cheann.
 3. Réitigh cumraíocht ama rite trí `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`): buaigh eochracha nua socruithe `modalityBridge*` ; Fanann eochracha oidhreacht `visionBridge*` a** aischur aon-timthriall** (fuinneog rolladh siar). Scipeáil roimh aon trasnú meán nuair atá an droichead díchumasaithe.
 4. Cinneann roghnóir mód (`modalityBridgeVisionMode`, féach an tábla thíos) athród vs cur síos. Filleann Reroute `modifiedPayload` gan ach `model` a mhalartú, móide meta `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Déan cur síos ar an gcosán: cuir caipín ar na híomhánna ag `maxImages`, cum an leid atá feasach ar an tasc, féach ar an taisce déan cur síos, cuir glaoch ar an tsamhail fís** i gcomhthreo** (`Promise.allSettled`), agus instealladh páirteanna téacs `[Image N]: <description>` ina n-áit. Níor éirigh le cur síos ar thorthaí `null`: caomhnaítear an íomhá amh le haghaidh spriocanna unknown/vision-capable (#4012) , ach a** sprioc dhíreach téacs-amháin deimhnithe** nó faigheann teaglama fís nialasach stub téacs `(unavailable — no vision-capable provider connected)` sainráite do gach íomhá neamhthuairiscithe, lena n-áirítear teipeanna páirteacha agus íomhánna thar an caipín tuairisc-ghlao (#17069). Déanann an teaglama uile-theip atá ann faoi láthair cur síos ar chúltaca fós i bhfeidhm (#8430).
+5. Déan cur síos ar an gcosán: cuir caipín ar íomhánna ag `maxImages`, cum an leid atá feasach ar an tasc, féach ar an taisce déan cur síos, cuir glaoch ar an tsamhail fís** i gcomhthreo** (`Promise.allSettled`), agus instealladh páirteanna téacs `[Image N]: <description>` ina n-áit. Níor éirigh le cur síos ar thorthaí `null`: caomhnaítear an íomhá amh le haghaidh spriocanna unknown/vision-capable (#4012) , ach a** sprioc dhíreach téacs-amháin deimhnithe** nó faigheann teaglama fís nialasach stub téacs `(unavailable — no vision-capable provider connected)` sainráite do gach íomhá neamhthuairiscithe, lena n-áirítear teipeanna páirteacha agus íomhánna thar an caipín tuairisc-ghlao (#17069). Déanann an teaglama uile-theip reatha cur síos ar chúltaca fós i bhfeidhm (#8430).
 6. Fill ar `modifiedPayload` + meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`).
 
 #### Roghnóir mód (`modalityBridgeVisionMode`)
@@ -86,7 +75,7 @@ ciallaíonn `0` (réamhshocraithe).** gan caipín** — cuirtear an tuairisc ar 
 
 #### Déan cur síos ar taisce (`modalityBridge/bridgeCache.ts`)
 
-Taisce i gcuimhne LRU + TTL chun cur síos a dhéanamh ar aschuir, roinnte ar fud an phróisis. Eochair = `sha256(imageRef + composedPrompt + configuredBridgeModel)` le frámaíocht réimír faid (gan imbhuailtí teorann páirce). Is é an comhpháirt múnla an** cumraithe** samhail droichid, ní an tsamhail a d'fhreagair go hiarbhír — `callVisionModel` b'fhéidir go dtitfeadh sé siar go hinmheánach, agus roinnfí an taisce le heochrú in aghaidh na hiarrachta. Ní chuirtear tuairiscí ar theip orthu riamh i dtaisce. Socruithe:
+Taisce i gcuimhne LRU + TTL chun cur síos a dhéanamh ar aschuir, roinnte ar fud an phróisis. Eochair = `sha256(imageRef + composedPrompt + configuredBridgeModel)` le frámaíocht réimír faid (gan imbhuailtí teorann páirce). Is é an comhpháirt múnla an** cumraithe** samhail droichid, ní an tsamhail a d'fhreagair go hiarbhír — `callVisionModel` b'fhéidir go dtitfeadh sé siar go hinmheánach, agus scoilteodh an eochair in aghaidh na hiarrachta an taisce. Ní chuirtear tuairiscí ar theip orthu riamh i dtaisce. Socruithe:
 
 | eochair                         | Réamhshocrú | Raon    |
 | ------------------------------- | ----------- | ------- |
@@ -96,7 +85,7 @@ Taisce i gcuimhne LRU + TTL chun cur síos a dhéanamh ar aschuir, roinnte ar fu
 
 #### normalú íomhá cianda (féin-lúb describe/base64 )
 
-Nuair a fhaigheann an droichead a** iargúlta** íomhá féin — an Anthropic cur síos ar fhéinghlao agus ar an chomhshó claude-wire-format base64 (`ensureBase64ImagesForClaudeWire`), araon trí `fetchRemoteImageAsDataUri()` i `visionBridgeHelpers.ts` — na sonraí a eascraíonn as URI a chur trí `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) sula leabaithe san iarratas fís-samhail. Laghdaítear íomhánna rómhóra go dtí a** 2048px ciumhais fhada** (ag teacht leis an gcaipín athmhéadaigh OpenAI/Anthropic atá i bhfeidhm cheana féin ar thaobh an fhreastalaí), a ghearrann uaslódáil bytes/latency gan athrú ar an méid a fheiceann an tsamhail fhíse. Úsáideann athrú méid `sharp`, lódáilte trí allmhairiú dinimiciúil: ar ardán a dteipeann ar a dhénártha dúchais a luchtú, `normalizeDataUri()`** riamh throws** — titeann sé ar ais go dtí pasthrough de na bearta bunaidh, mar sin coinníonn an cosán describe/base64-conversion ag obair i gcónaí. Cuirtear bearta neamhíomhá (beir nár thug íomhá díchódaithe ar ais) tríd freisin gan teagmháil. Déantar an normalú seo a scóip le híomhánna a fhaigheann an droichead as a — féinghlao féin ní chuirtear i bhfeidhm riamh é ar pháil-ualach pastrí amh an ghlaoiteora, i gcomhréir leis an bprionsabal sóchán rogha an diúltaithe ( Hard Riail #20).
+Nuair a fhaigheann an droichead a** iargúlta** íomhá féin — an Anthropic cur síos ar fhéinghlao agus ar an chomhshó claude-wire-format base64 (`ensureBase64ImagesForClaudeWire`), araon trí `fetchRemoteImageAsDataUri()` i `visionBridgeHelpers.ts` — na sonraí a eascraíonn as URI a chur trí `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) sula leabaithe san iarratas fís-samhail. Laghdaítear íomhánna rómhóra go dtí a** 2048px ciumhais fhada** (ag teacht leis an gcaipín athmhéadaigh OpenAI/Anthropic atá i bhfeidhm cheana féin ar thaobh an fhreastalaí), a ghearrann uaslódáil bytes/latency gan athrú ar an méid a fheiceann an tsamhail fhíse. Úsáideann athrú méid `sharp`, lódáilte trí allmhairiú dinimiciúil: ar ardán a dteipeann ar a dhénártha dúchais a luchtú, `normalizeDataUri()`** riamh throws** — titeann sé ar ais go dtí pasthrough de na bearta bunaidh, mar sin coinníonn an cosán describe/base64-conversion ag obair i gcónaí. Cuirtear bearta neamhíomhá (beir nár thug íomhá díchódaithe ar ais) trí gan teagmháil freisin. Déantar an normalú seo a scóip le híomhánna a fhaigheann an droichead as a — féinghlao féin ní chuirtear i bhfeidhm riamh é ar pháil-ualach pastrí amh an ghlaoiteora, i gcomhréir leis an bprionsabal sóchán rogha an diúltaithe ( Hard Riail #20).
 
 #### Scéimre socruithe + imirce
 
@@ -124,11 +113,11 @@ Idircheapann sé iarratais chomhrá fuaime sula sroicheann siad sprioc nach eol 
 
 Sreabhadh:
 
-1. Réitigh `supportsAudio` trí `getResolvedModelCapabilities()`. Bhuaigh meiteashonraí sainráite soláthraí-clárlainne, ansin meiteashonraí samhlacha statacha, ansin sioncronaithe `modalities_input`. Is é `false` liosta dearbhaithe ionchuir gan `audio` ; níl aon fhianaise cumais fós `null`. Gníomhaíonn `false` agus `null` an droichead coimeádach, agus seachnaíonn `true` é.
-2. Réitigh socruithe `modalityBridgeAudio*` agus bain páirteanna fuaime barrleibhéil spliceable ó gach teachtaireacht tríd an brathadóir `detectMediaParts()` roinnte. Is iad na cruthanna sreang tacaithe ná OpenAI `input_audio`, `audio_url`, agus `source.media_type: "audio/*"`. Braitear fuaim neadaithe le haghaidh ródú ach ní bhaintear í ag an gcosán splice. Cuirtear teorainn le `modalityBridgeAudioMaxClips` ar an obair; fanann codanna níos déanaí gan teagmháil.
+1. Réitigh `supportsAudio` trí `getResolvedModelCapabilities()`. Bhuaigh meiteashonraí sainráite soláthraí-clár, ansin meiteashonraí samhlacha statacha, ansin sioncronaithe `modalities_input`. Is é `false` liosta dearbhaithe ionchuir gan `audio` ; níl aon fhianaise cumais fós `null`. Gníomhaíonn `false` agus `null` an droichead coimeádach, agus seachnaíonn `true` é.
+2. Réitigh socruithe `modalityBridgeAudio*` agus bain páirteanna fuaime barrleibhéil spliceable ó gach teachtaireacht tríd an brathadóir `detectMediaParts()` roinnte. Is iad cruthanna sreinge tacaithe ná OpenAI `input_audio`, `audio_url`, agus `source.media_type: "audio/*"`. Aimsítear fuaim neadaithe le haghaidh ródú ach ní bhaintear í ag an gcosán splice. Cuirtear teorainn le `modalityBridgeAudioMaxClips` ar an obair; fanann codanna níos déanaí gan teagmháil.
 3. Tabhair onóir do `provider/model` cumraithe , nó lig `selectAudioBridgeModel()` siúl `AUDIO_TRANSCRIPTION_PROVIDERS` in ord catalóige cobhsaí agus roghnaigh an chéad mhúnla le dintiúir soláthraí gníomhach inúsáidte.
 4. Tiontaíonn `callAudioTranscription()` base64/data-URI fuaime go `file` ilpháirteach, nó íoslódálann sé `audio_url` iargúlta tríd an ngarda amach poiblí amháin le feannadh DNS agus 25 MB faoi cheangal. Ansin POSTs an comhad agus an tsamhail roghnaithe chuig an féin-lúb `/v1/audio/transcriptions` áitiúil, fíordheimhnithe le `resolveSelfLoopBearer()`. Déanann an bealach trascríobh reatha gnáthchuardach dintiúir, láimhseáil cooldown/rate-limit, agus seoladh soláthraí.
-5. Cuireann glaonna rathúla `[Audio N]: <transcript>` in ionad a gcuid páirteanna . Ritheann glaonna le `Promise.allSettled`: caomhnaíonn teip aonair an bhunchuid fuaime sin (conradh #4012 ). Má theipeann ar gach glao agus go bhfuil an sprioc cruthaithe `supportsAudio === false`, déantar na codanna a bheith `[Audio N]: (unavailable — no STT provider connected)` ( conradh #8430 ). Maidir le sprioc anaithnid (`null`), fanann toradh uile-teip gan teagmháil. Faigheann sprioc chruthaithe téacs-amháin gan aon fhaisnéis inúsáidte STT an stub follasach chéanna gan glao líonra a eisiúint.
+5. Cuirtear `[Audio N]: <transcript>` in ionad glaonna rathúla . Ritheann glaonna le `Promise.allSettled`: caomhnaíonn teip aonair an bhunchuid fuaime sin (conradh #4012 ). Má theipeann ar gach glao agus go bhfuil an sprioc cruthaithe `supportsAudio === false`, déantar na codanna a bheith `[Audio N]: (unavailable — no STT provider connected)` ( conradh #8430 ). Maidir le sprioc anaithnid (`null`), fanann toradh uile-teip gan teagmháil. Faigheann sprioc chruthaithe téacs-amháin gan aon fhaisnéis inúsáidte STT an stub follasach chéanna gan glao líonra a eisiúint.
 
 Úsáideann tras-scríbhinní rathúla an taisce Modality Bridge LRU/TTL ar fud an phróisis. Comhcheanglaíonn an eochair an tagairt fuaime, an lipéad oibríochta cobhsaí `audio-transcription`, agus múnla roghnaithe STT ; ní dhéantar teipeanna a thaisceadh riamh. Nuashonraíonn iarrachtaí fuaime na cuntair roinnte `bridged`, `cacheHits`, `failures`, agus `lastUsedAt`. Tá `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>` ag gabháil le freagraí trasfhoirmithe; ní fhaigheann iarratais gan teagmháil deighleog Droichead Fuaime.
 
@@ -181,11 +170,11 @@ Féadfaidh glaoiteoirí eagar `transcript.cues` roghnach a cheangal le cuid den 
 
 Féadfaidh ardghlaoiteoir rian `audioTranscript` a sholáthar don fhíseán céanna; caitear leis mar théacs a sholáthraíonn an cliant, ní mar chruthúnas ar thrascríobh an fhreastalaí. Ritheann an seam comhleá breathnuithe amhairc agus fuaime faoi sprioc-am amháin agus comhartha toirmisc, ordaíonn sé iad ar amlíne choiteann, laghdaítear dúbailt chruinne, agus tuairiscíonn sé toradh páirteach nuair nach n-éiríonn ach le taobh amháin. Díghrádaíonn `audioTranscript` neamhbhailí go dtí an toradh páirteach sin — coinnítear an cur síos amhairc agus taifeadann an brainse fuaime cód teip sláintithe — seachas teip ar an bhfíseán iomlán. Caomhnaítear infhaighteacht in aghaidh an bhrainse, an bhratach pháirteach, agus na cóid teip sláintithe sa toradh a thuairiscítear, sna meiteashonraí ráille cosanta (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`), sna meiteashonraí taisce-toraidh, agus sna cuntair chomhleá droichid. Ní agairt urlabhra-go-téacs an chonair réamhshocraithe Video Bridge ná ní íoslódálann sé an dara cóip meán; gan an rian follasach sin, fanann sé le fís-amháin.
 
-**Coimeád an tras-scríbhinn (#12150 P1).** Baineann sé seo go huathoibríoch nuair a dhéanann an Videobridge (diúltú isteach é féin) cue trascríobh — níl aon bhratach coinneála ar leith ann. Nuair a dhéanann iarratas aon leid tras-scríbhinne ( `transcript` dearbhaithe ag an nglaoiteoir nó `audioTranscript` comhleádh ), marcálann an ráille cosanta é `videoBridgeObserved` agus cuireann sé scáth deargtha den chur síos ar an bhfíseán — rindreáil comhionann ina gcuirtear `[redacted-video-transcript]` in ionad gach cue saorthéacs , tógtha tríd an gcue struchtúrtha a chur in ionad an téacs comhréidh agus é a pharsáil roimh ré mar sin ní féidir le haon ábhar cue — sáraíochta nó gnáth, lena n-áirítear comhlachtaí ina bhfuil `]` mar `[inaudible]`/`[music]` — maireachtáil). Déanann an comhlacht iarratais glao-logála marthanach gach cuid den téacs díorthaithe ó fhíseáin a mhalartú don scáth atheagraithe sin, arna mheaitseáil le comhionannas ábhair; déantar an t-ancaire `fullText` a athléamh ón ualach pá ráillí cosanta réamhghlao, agus mar sin éiríonn leis an gcluiche fós tar éis ráillí cosanta slabhra níos déanaí (na mascairí PII agus inchreidte, tosaíochtaí 10/95) an téacs tuairisc a athscríobh i bhfeidhm agus tar éis an t-instealladh system-prompt/handoff/memory athmhúnlú an eagar teachtaireachta. Níl aon athrú ar an gcorp a sheoltar in aghaidh an tsrutha chuig an múnla. Ní bhíonn aon Chuimhne Marthanach in iarratas breathnaithe freisin (scaiptear an t-eastóscadh bunaithe ar iarratas agus ar fhreagra), mar sin ní féidir le freagra na samhla féin macalla téacs tras-scríbhinne a chur isteach i Memory.
+**Coinneáil tras-scríbhinn (#12150 P1).** Baineann sé seo go huathoibríoch nuair a dhéanann an Videobridge (diúltú isteach é féin) cue trascríobh — níl aon bhratach coinneála ar leith ann. Nuair a dhéanann iarratas aon leid tras-scríbhinne ( `transcript` dearbhaithe ag an nglaoiteoir nó `audioTranscript` comhleádh ), marcálann an ráille cosanta é `videoBridgeObserved` agus cuireann sé scáth deargtha den chur síos ar an bhfíseán — rindreáil comhionann ina gcuirtear `[redacted-video-transcript]` in ionad gach cue saorthéacs , tógtha tríd an gcue struchtúrtha a chur in ionad an téacs comhréidh agus é a pharsáil roimh ré mar sin ní féidir le haon ábhar cue — sáraíochta nó gnáth, lena n-áirítear comhlachtaí ina bhfuil `]` mar `[inaudible]`/`[music]` — maireachtáil). Déanann an comhlacht iarratais glao-logála marthanach gach cuid den téacs díorthaithe ó fhíseáin a mhalartú don scáth atheagraithe sin, arna mheaitseáil le comhionannas ábhair; déantar an t-ancaire `fullText` a athléamh ón ualach pá ráillí cosanta réamhghlao, agus mar sin éiríonn leis an gcluiche fós tar éis ráillí cosanta slabhra níos déanaí (na mascairí PII agus inchreidte, tosaíochtaí 10/95) an téacs tuairisc a athscríobh i bhfeidhm agus tar éis an t-instealladh system-prompt/handoff/memory athmhúnlú an eagar teachtaireachta. Níl aon athrú ar an gcorp a sheoltar in aghaidh an tsrutha chuig an múnla. Ní bhíonn aon Chuimhne Marthanach in iarratas breathnaithe freisin (scaiptear an t-eastóscadh bunaithe ar iarratas agus ar fhreagra), mar sin ní féidir le freagra na samhla féin macalla téacs tras-scríbhinne a chur isteach i Memory.
 
-**Réimsí físeáin amh (#12430).** Nuair atá an droichead cumasaithe agus tacaíocht físe dúchais anaithnid nó as láthair, gníomhaíonn réimsí sainithe `transcript`/`audioTranscript` `videoBridgeObserved`, fiú tar éis teip tuairisce nó teorainn `maxVideos`. `null` agus teaghráin folamh a chomhaireamh; ní bhaineann réimsí as láthair agus meiteashonraí neamhfhíseáin. Déanann cóipeanna coinnithe na réimsí seo a cheartú nó fág an t-iarratas ar lár, agus seachnaítear caches/Memory.
+**Réimsí amh físeáin (#12430).** Nuair atá an droichead cumasaithe agus tacaíocht físe dúchais anaithnid nó as láthair, gníomhaíonn réimsí sainithe `transcript`/`audioTranscript` `videoBridgeObserved`, fiú tar éis teip tuairisce nó teorainn `maxVideos`. `null` agus teaghráin folamh a chomhaireamh; ní bhaineann réimsí as láthair agus meiteashonraí neamhfhíseáin. Déanann cóipeanna coinnithe na réimsí seo a cheartú nó fág an t-iarratas ar lár, agus seachnaítear caches/Memory.
 
-Ar na cosáin chúltaca sin, déantar leideanna bailí glaoiteoirí a bheith ina gcodanna `text`/`input_text` tacaithe seachas réimsí soláthraithe neamhchaighdeánach. Tá an dá rian arna soláthar ag iarratas fós ina mbreathnuithe `client` neamhiontaofa, le rabhadh sainráite nár cuireadh síos ar an bhfíseán agus nár fíoraíodh stampaí ama i gcoinne na meán cumarsáide. Baineann na buiséid iomlána 256-cue/64-KiB agus per-cue atá ann cheana féin trasna an dá rian le chéile; caithfidh stampaí ama a bheith oiriúnach d'uasteorainn 600 soicind an bhróicéir agus d'aon fhuinneog fócais a sholáthraítear. Cuirtear rianta neamhbhailí i leataobh, ní chuirtear ar aghaidh iad mar théacs treallach; féadfar deartháir nó deirfiúr bailí a úsáid fós mura sáraítear a gcomhbhuiséad. cuir aon téacs leis na réimsí Null/empty. Ní chuirtear aon ghabháil nó tras-scríobh ó na meáin leis an bhfilleadh seo. Baintear réimsí síntí trascríbhinne ón iompróir físeáin chúltaca agus a oibiachtaí `video_url`/`source`. Fanann an cheadliosta sreang OpenAI go docht; tá iompróirí físe anaithnide fós ar fáil agus coinníonn spriocanna aitheanta téacs-amháin marcóirí sábháilte. Cosnaíonn scáthanna athdhéanta struchtúrtha an téacs tras-scríbhinne atá i gceangal leis, agus níl aon athrú ar an mbuniarratas ar leis an nglaoiteoir é. Coinníonn spriocanna dúchasacha agus droichid faoi mhíchumas a n-iompraíocht sheachbhóthar reatha.
+Ar na cosáin chúltaca sin, déantar leideanna bailí glaoiteoirí a bheith ina gcodanna `text`/`input_text` tacaithe seachas réimsí soláthraithe neamhchaighdeánach. Tá an dá rian arna soláthar ag iarratas fós ina mbreathnuithe `client` neamhiontaofa, le rabhadh sainráite nár cuireadh síos ar an bhfíseán agus nár fíoraíodh stampaí ama i gcoinne na meán cumarsáide. Baineann na buiséid iomlána 256-cue/64-KiB agus per-cue atá ann cheana féin trasna an dá rian le chéile; caithfidh stampaí ama a bheith oiriúnach d'uasteorainn 600 soicind an bhróicéir agus d'aon fhuinneog fócais a sholáthraítear. Cuirtear rianta neamhbhailí i leataobh, ní chuirtear ar aghaidh iad mar théacs treallach; féadfar deartháir nó deirfiúr bailí a úsáid fós mura sáraítear a gcomhbhuiséad. cuir aon téacs leis réimsí Null/empty. Ní chuirtear aon ghabháil nó tras-scríobh ó na meáin leis an bhfilleadh seo. Baintear réimsí síntí trascríbhinne ón iompróir físeáin chúltaca agus a oibiachtaí `video_url`/`source`. Fanann an liosta ceadaithe sreang OpenAI dian; tá iompróirí físe anaithnide fós ar fáil agus coinníonn spriocanna aitheanta téacs-amháin marcóirí sábháilte. Cosnaíonn scáthanna athdhéanta struchtúrtha an téacs tras-scríbhinne atá i gceangal leis, agus níl aon athrú ar an mbuniarratas ar leis an nglaoiteoir é. Coinníonn spriocanna dúchasacha agus droichid faoi mhíchumas a n-iompraíocht sheachbhóthar reatha.
 
 Úsáideann cóipeanna coinnithe breise an comhartha iarratais breathnaithe céanna. Cuireann an t-amharc réamhráille cliant-iarraidh, cuimhneachán ar feitheamh iarratais, agus logáil luath-iarratais diúltaithe go struchtúrach na réimsí tras-scríbhinne i gcodanna físeáin; déantar leideanna teaghrán a shintéisiú de réir na gcéimeanna píblíne agus athraítear aistrithe comhthéacs ag an doirteal marthanach-iarratas-chomhlacht. Fágann an marcóir leanúnach `video_content_removed` go dteipeann ar leanúint ar aghaidh `previous_response_id` a dhúnadh seachas téacs a cuireadh i leataobh d'aon ghnó a athchruthú. Má chailleann iarratas breathnaithe a scáth athcheartaithe in aghaidh na coda roimh logáil, nó má theipeann ar fiú ceann amháin de roinnt scáthanna físe a mheaitseáil i ndiaidh sócháin iarratais níos déanaí, fágtar ar lár an comhlacht iarratais coinnithe go hiomlán in ionad athscríbhinn pháirt-athchóirithe a choinneáil.
 
@@ -205,7 +194,7 @@ Faigheann an tomhaltóir úinéireacht ón eochair fhíordheimhnithe agus cuirea
 
 Tá an stór comhroinnte próiseas-áitiúil: téann na láimhseálacha in éag nuair a atosófar iad agus ní féidir iad a aistriú idir próisis neamhspleácha OmniRoute. Nochtann staitisticí bainistíochta beartas éifeachtach coinneála/cianta agus entries/bytes comhiomlán coinnithe amháin, ní bhaineann na meáin, tagairtí, príomh- IDs nó lámha. Taispeánann an painéal socruithe Físeáin na luachanna sin agus is féidir leis an dá lasc toilithe a leanúint. Ní fianaise ar imscaradh beo ná ar ardú céime atá sa doiciméadú cur chun feidhme seo; déantar glacadh le fíor-mhúnla a rianú ar leithligh.
 
-Cuirtear fotheideal ar fhrámaí go seicheamhach leis an tsamhail Físeáin cumraithe. Gheobhaidh sárú físe folamh an socrú Fís le hoidhreacht; má tá an dá cheann folamh, roghnaíonn an t-uathródaire Vision an tsamhail éifeachtach atá in ann fís. Cuirtear réimír cobhsaí `[Video description:` in ionad na coda bunaidh i bhfotheidil rathúla a mharcálann freisin ar an téacs mar bhreathnóireacht neamhiontaofa atá díorthaithe ó na meáin agus a insíonn do mhúnlaí iartheachtacha gan treoracha a fhaightear sna meáin a leanúint. I measc na n-eochracha taisce fráma-theideal tá na bearta JPEG, pras, stampa ama, agus múnla éifeachtach; ní dhéantar ach fotheidil rathúla a thaisceadh. Coinníonn iontrálacha taisce an tsamhail táirgeora rathúil iarbhír, lena n-áirítear samhail chúltaca; tuairiscíonn an droichead `mixed` nuair a tháirgtear frámaí éagsúla ag samhlacha éagsúla. Athúsáideann taisce buailte céannacht an táirgeora sin seachas é a athlipéadú mar an plean ródaithe iarrtha. Tá an taisce toradh uile-físeáin eochair ar gach ionchur a athraíonn an t-aschur — múnla pras, éifeachtach, polasaí samplála, comhaireamh fráma, modh anailíse shéimeantach, méarloirg SHA-256 an leid fócas normalaithe, an fhuinneog fócais, `transcript`, `audioTranscript`, agus an bhratach bileog teagmhála — mar sin ní chailleann taisce é aon cheann de na toisí sin a athrú, gan athúsáid gan staonadh. Tá leagan an bheartais asbhainte amhairc, an tairseach, agus an comhaireamh fráma iarrthóra teorantach soiléir freisin san eochair taisce toraidh agus meiteashonraí; mar sin ní féidir le hathrú polasaí cur síos seanfhíseáin a athúsáid. Coinníonn meiteashonraí Result-cache v4 an modh agus na méarloirg, ní tasc amhúsáideora riamh. Tuairiscíonn meiteashonraí ráillí cosanta na modhanna anailíse a iarrtar agus atá éifeachtach; tuairiscítear go bhfuil modh `focused` iarrtha gan téacs úsáideora inúsáidte mar `full` éifeachtach .
+Cuirtear fotheideal ar fhrámaí go seicheamhach leis an tsamhail Físeáin cumraithe. Gheobhaidh sárú físe folamh an socrú Fís le hoidhreacht; má tá an dá cheann folamh, roghnaíonn an t-uathródaire Vision an tsamhail éifeachtach atá in ann fís. Cuirtear réimír cobhsaí `[Video description:` in ionad na coda bunaidh i bhfotheidil rathúla a mharcálann freisin ar an téacs mar bhreathnóireacht neamhiontaofa atá díorthaithe ó na meáin agus a insíonn do mhúnlaí iartheachtacha gan treoracha a fhaightear sna meáin a leanúint. I measc na n-eochracha taisce fráma-theideal tá na bearta JPEG, pras, stampa ama, agus múnla éifeachtach; ní dhéantar ach fotheidil rathúla a thaisceadh. Coinníonn iontrálacha taisce an tsamhail táirgeora rathúil iarbhír, lena n-áirítear samhail chúltaca; tuairiscíonn an droichead `mixed` nuair a tháirgtear frámaí éagsúla ag samhlacha éagsúla. Athúsáideann taisce buailte céannacht an táirgeora sin seachas é a athlipéadú mar an plean ródaithe iarrtha. Tá an taisce toradh uile-físeáin eochair ar gach ionchur a athraíonn an t-aschur — múnla pras, éifeachtach, polasaí samplála, comhaireamh fráma, modh anailíse shéimeantach, méarloirg SHA-256 an leid fócas normalaithe, an fhuinneog fócais, `transcript`, `audioTranscript`, agus an bhratach bileog teagmhála — mar sin ní chailleann taisce é aon cheann de na toisí sin a athrú, gan athúsáid gan staonadh. Tá leagan an bheartais asbhainte amhairc, an tairseach, agus an comhaireamh fráma iarrthóra teorantach soiléir freisin san eochair taisce toraidh agus meiteashonraí; dá bhrí sin ní féidir le hathrú polasaí cur síos seanfhíseáin a athúsáid. Coinníonn meiteashonraí Result-cache v4 an modh agus na méarloirg, ní tasc amhúsáideora riamh. Tuairiscíonn meiteashonraí ráillí cosanta na modhanna anailíse a iarrtar agus atá éifeachtach; tuairiscítear go bhfuil modh `focused` iarrtha gan téacs úsáideora inúsáidte mar `full` éifeachtach .
 
 Baineann an ráille cosanta amach gach cuid den fhíseán tacaithe ach ní dhéanann sé cur síos ar níos mó ná `modalityBridgeVideoMaxVideos`. I gcás sprioc a chruthaítear go bhfuil `supportsVideo === false`, déantar físeáin ar theip orthu agus thar theorainn a bheith mar mharcóirí téacs soiléir sábháilte agus mar sin ní mhaireann aon fhíseán amh. Nuair nach bhfuil an cumas anaithnid, coinníonn na codanna sin a n-iompróir físeáin; leanann aon athscríbhinn chúltaca an t-athrú téacs teorannaithe thuas. Seachbhóthar spriocanna le `supportsVideo === true` an droichead. Iomadaítear comhartha iarratas an chliaint trí ghlaonna íoslódála, scuaine bróicéir, fophróisis agus glaonna fotheideal; stopann ginmhilleadh idir físeáin agus ní theipeann ar oscailt do mheáin amh.
 
@@ -306,9 +295,83 @@ Ritheann ar** araon** céimeanna, go deireanach sa slabhra réamhshocraithe (tos
 - **Liostáil amháin** , an coinbhinsiún céanna le PII redaction (Rail chrua #20 in aice láimhe): díchumasaithe mura `settings.credentialRedactionEnabled === true`** nó** `CREDENTIAL_REDACTION_ENABLED=true`. Agus é as, is — neamhoibríoch é an ráille cosanta nach ndéanann sé blocáil riamh agus ní athscríobhann sé riamh.
 - `redactCredentials()` siúlann an crann iomlán payload/response (`walkValue()`, fréamhshamhail-truailliú-sábháilte, timthriall-sábháilte trí `WeakSet`) agus ionad matches le placeholder `[REDACTED:<type>]`, chlónáil ach na brainsí a d'athraigh i ndáiríre.
 - Clúdaíonn `CREDENTIAL_PATTERNS` eochracha soláthraí LLM (OpenAI, OpenAI-proj , Anthropic, Google, Hugging Face , Replicate ), comharthaí VCS/SaaS (GitHub, Slack, Líneach, Notion, npm, Fear an Phoist, Discord), eochracha íocaíochta (Stripe, Cearnóg), eochracha scamall (AWS, eochair rochtana, Tw / SendGrid, eochair rochtana, Tw / JWTs teaghráin naisc a bhfuil dintiúir acu (`mongodb://user:pass@...`, etc.), agus patrún cineálach ceanntásca `Authorization`/`x-api-key`/`api-key`/`apikey`. Athraítear eochracha ceanntásca (`authorization`, `x-api-key`, `api-key`, `apikey`) go struchtúrach (luach amháin, réimír scéime cosúil le `Bearer `/`Basic ` caomhnaithe) seachas tríd an téacs cineálach regex.
+- Clúdaítear luach taobh thiar de lipéad fiú nuair nach bhfuil aon réimír soláthraí aige: `DB_PASSWORD=…`, `AWS_SECRET_ACCESS_KEY=…`, `client_secret: …`, `?api_key=…` ( lipéid : `password`, `passwd`, `secret`, `secret_key`, `secret_access_key`, `api_key`, `access_token`, `refresh_token`, `auth_token`, le haon réimír mar `DB_`). Fanann an lipéad agus an deighilteoir agus éiríonn an luach `[REDACTED:secret]`. Tá 12 carachtar nó níos mó ag teastáil ón luach, mar sin fanann prós mar `password: required` inléite; fágtar luach a thosaíonn le `$` nó `%` (tagairt inathraithe) leis féin.
 - Ní bhacann an ráille cosanta riamh; athscríobhann sé ach (`modifiedPayload` / `modifiedResponse`) agus anótáil (`meta.credentialsRedacted`, `meta.count`).
 
 Garda aischéimnithí: `tests/unit/credential-masker-guardrail.test.ts`.
+
+### Garda Gníomhaire (`agentGuard/`)
+
+Rangaíonn an garda gníomhaire an cliant taobh thiar d'iarratas chuig an soláthraí `claude` nó `anthropic` óna cheanntásca. Glacann `AGENT_GUARD_MODE` trí luach: `off` (réamhshocraithe), `monitor` agus `block`. Le `off`, ní léitear aon cheanntásc agus ní logáiltear aon rud.
+
+Aithníonn na ceannteidil seo gníomhairí oifigiúla (i gcomparáid le cás-neamhíogair):
+
+- Cód Claude : `User-Agent` ag tosú le `claude-cli/` nó `claude-code/`, nó `x-app: cli` mar aon le ceanntásc `anthropic-beta` nó `User-Agent` ina bhfuil `claude`.
+- Anthropic SDKs: a `User-Agent` ag tosú le `Anthropic/`, `AsyncAnthropic/`, `anthropic-typescript/` nó `anthropic-python/`.
+
+Léiríonn leibhéal réamhshocraithe an logálaí i dtáirgeadh (`info`) an dá chineál líne. Le `APP_LOG_LEVEL=warn` níl fágtha ach na línte tríú páirtí aitheanta.
+
+Réimsí logála: `agent`, `thirdParty`, `provider`, `model`, `apiKeyId`, `userAgent`, `xApp`, `anthropicBeta`, `xTitle`, `referer`, `stainless`. Tá teorainn de 200 carachtar ar luachanna ceanntásca agus ar theaghrán na samhla. Tá an moltóir logáilte gan teaghrán na gceisteanna, blúire agus faisnéis úsáideora. Ní léitear an eochair API, `Authorization`, `x-api-key` agus fianáin choíche.
+
+Comhaid: `src/lib/guardrails/agentGuard/classifier.ts`, `src/lib/guardrails/agentGuard/policy.ts`, `src/lib/guardrails/agentGuard/guardrail.ts`, `src/lib/guardrails/agentGuard/settings.ts`, `src/lib/guardrails/agentGuard/logLine.ts`, `src/lib/guardrails/agentGuard/enforcement.ts`, `src/sse/handlers/chat/agentGuardGate.ts`.
+
+**Teorainneacha aicmithe (an dá mhodh):**
+
+- Breathnaíonn gníomhaire a tógadh ar SDK oifigiúil nach seolann `X-Title`, `HTTP-Referer` nó `User-Agent` féin an SDK. Ní dhéanann ceanntásca `x-stainless-*` leo féin oifigeach cliant.
+- Déantar gníomhairí tríú páirtí a mheaitseáil le comharthaí uilefhocail i `User-Agent`, `X-Title` agus `HTTP-Referer` (nó `Referer`). Léiríonn cliaint neamhliostaithe mar `unknown`.
+- Iompraíonn iarratais ó chliaint bunaithe ar bhrabhsálaí `User-Agent` an bhrabhsálaí féin agus taispeántar iad mar neamhaitheanta, ach amháin má tá comhartha tríú páirtí aitheanta ag `X-Title` nó ag an moltóir.
+- Líne logála amháin in aghaidh an iarratais bhreathnaithe: bí ag súil leis an méid ar chásanna gnóthacha.
+
+#### Monatóir
+
+Le `AGENT_GUARD_MODE=monitor`, déantar iarratais a bhfuil a n-ainmneacha teaghrán múnla an soláthraí `claude` nó `anthropic` a rangú de réir ceanntásca a gcliant. Nuair nach gníomhaire oifigiúil an cliant, scríobhtar líne logála amháin le `tag: "AGENT_GUARD"`. Is `warn` é do ghníomhaire aitheanta tríú páirtí agus `info` do chliant neamhaitheanta. `1` tosaíochta : ní léann an ráille cosanta ach ceanntásca agus ní athraíonn sé an pálasta riamh, mar sin ritheann sé roimh dhroichid na meán cumarsáide. `monitor` riamh bloic.
+
+**Teorainneacha `monitor`:**
+
+- Is ceanntásc arna rialú ag an gcliant é gach comhartha. Breathnú é seo, ní rialú rochtana.
+- Léitear an soláthraí as teaghrán an mhúnla sula réitítear an tsamhail: `provider/model`, ailias soláthraí ar nós `cc/…`, agus aitheantais comhroinnte cuóta (`qtSd/<group>/<provider>/<model>`). Ní leantar aitheantais mhúnla lom, ailiasanna múnla, combos agus normalú ródaithe níos déanaí. Ní chloítear leis na hiarrataí sin.
+- Is féidir le glaoiteoir é a scipeáil in aghaidh an iarratais trí na bealaí díchumasaithe clárlainne (féach [Ráillí Garda a Dhíchumasú De réir Iarratas](#disabling-guardrails-per-request) ). Ní bhreathnaítear ar iarratais a ndearnadh faillí orthu.
+- Ritheann sé ach amháin nuair a ritheann `runPreCallHooks` (féach [Clúdach agus teorainneacha](#coverage-and-limits) ).
+
+#### Bloc
+
+Le `AGENT_GUARD_MODE=block`, ní dhéanann an ráille cosanta réamhghlao aon rud. Déanann an láimhseálaí comhrá an cinneadh ina ionad sin:
+
+1. Déantar an cinneadh nuair atá sprioc ar tí a bheith seolta, ar an soláthraí a bhfuil an t-iarratas ar réiteach dó. Clúdaítear ailiasanna soláthraithe, aitheantais samhlacha lom, aitheantais comhroinnte cuóta agus gach sprioc teaglama.
+2. Ní ritheann sé sa chlár ráillí cosanta, mar sin ní bhaineann na bealaí díchumasaithe in aghaidh an iarratais leis.
+3. Diúltaítear gníomhaire aitheanta tríú páirtí. Tá cliant anaithnid logáilte mar atá i `monitor`, agus ní dhiúltaítear ach le `AGENT_GUARD_STRICT=true`. Ní dhiúltaítear riamh don Chód Claude agus don Anthropic SDKs oifigiúil.
+4. Is é an diúltú HTTP 403 le `error.type` `permission_error` agus `error.code` `client_agent_not_allowed`. Is earráid stíl OpenAI é an comhlacht. Ar iarratais i bhformáid Antraipeach iompraíonn sé `type: "error"` ag an leibhéal is airde freisin. Níl aon cheanntásc `Retry-After` ann, agus cuirtear an diúltú ar ais sula dtosaíonn aon sruth.
+5. Ní teip soláthraí é diúltú. Ní dhéanann sé teagmháil leis an scoradán ciorcaid soláthraí, fuarú naisc nó frithdhúnadh samhail.
+6. I teaglama, ní dhéantar sprioc diúltaithe a bhaint amach agus reáchtáiltear na spriocanna eile. Theipeann ar an iarratas leis an earráid pholasaí nuair a diúltaíodh ar a laghad sprioc amháin agus ní raibh aon sprioc imithe thar an garda. Coinníonn an teaglama a earráid féin nuair a ainmníonn iontráil ardleibhéil soláthraí aitheanta eile, trí réimír nó trí aitheantas soláthraí na céime. Léirítear sprioc tosaíochta diúltaithe le `fallbackOnlyOnQuotaExhaustion` ar an mbealach céanna agus ní stopann sé an teaglama. Déantar scáth-sprioc a sheiceáil agus a logáil, ach ní áirítear é riamh mar sprioc a chuaigh thar an ngarda.
+7. Teipeann ar teaglama `fusion` sula ritheann an painéal nuair a dhiúltófar don bhreitheamh a úsáideann an tseirbhís chomhleá. Tagann an breitheamh sin ó chumraíocht an teaglama nó ó na mainneachtainí teaglama domhanda. Ritheann an tseiceáil chéanna nuair a shroichtear teaglama comhleá tríd an atreorú líontán sábhála.
+8. Líne logála amháin in aghaidh an iarratais agus an tsoláthraí, le `tag: "AGENT_GUARD"`, `warn` le haghaidh diúltú, agus na réimsí céanna le `monitor`.
+9. Ar earráid inmheánach theipeann ar an garda a oscailt. Leanann an t-iarratas ar aghaidh agus tá líne amháin `warn` `agent guard failed open` logáilte isteach.
+
+**Teorainneacha `block`:**
+
+- Is ceanntásc arna rialú ag an gcliant é gach comhartha. Caitear le cliant a sheolann `User-Agent: claude-cli/…` mar Chód Claude. díspreagann `block` gníomhairí tríú páirtí neamhmhodhnaithe. Ní rialú rochtana é.
+- Déanann seachfhreastalaí a scriosann na ceanntásca aitheantais aon chliant a iompú ina chliant neamhaitheanta. Déantar cliant den sórt sin a sheirbheáil gan `AGENT_GUARD_STRICT` agus diúltaíodh leis. Rith an garda ar an ásc atá os comhair na gcliant. Feiceann an dara cás OmniRoute taobh thiar den chéad cheann ceanntásca an chéad cheann.
+- diúltaíonn `AGENT_GUARD_STRICT` do gach cliant ar na soláthraithe sin nach Cód Claude nó SDK oifigiúil é. Áirítear leis sin cliaint bunaithe ar bhrabhsálaí agus clós súgartha an deais. Tá an tástáil bheo teaglama ar an deais díolmhaithe, freisin tríd an atreorú líontán sábhála.
+- Tógann gnéithe áirithe a n-iarratas comhrá féin in ionad iarratas an chliaint a chur ar aghaidh. Seolann ceathrar acu ar ais é trí bhealaí OmniRoute' `/v1/...` :
+  - jabanna baisc (`src/lib/batches/dispatch.ts`)
+  - na huirlisí tátail MCP (`open-sse/mcp-server/tools/inferenceTools.ts`)
+  - ródú cliste A2A (`src/lib/a2a/skills/smartRouting.ts`)
+  - an droichead radhairc nuair a dhéanann sé cur síos ar íomhá trí OmniRoute (`src/lib/guardrails/visionBridgeHelpers.ts`)
+- Tógann an seachfhreastalaí comhrá Telegram (`src/lib/telegram/chatProxy.ts`) a iarratas sa phróiseas agus cuireann sé glaoch ar an láimhseálaí comhrá go díreach.
+- Tá ceanntásca OmniRoute féin ar na hiarratais sin ón taobh istigh, ní ceanntásca an chliaint a chuir tús leo. Déanann an garda iad a rangú mar chliaint neamhaitheanta.
+- Gan `AGENT_GUARD_STRICT`, déantar na hiarrataí inmheánacha sin a sheirbheáil ar na soláthraithe cosanta cibé duine a bhí ina bhunchliant. Ní dhiúltaítear do ghníomhaire tríú páirtí a shroicheann Claude tríothu.
+- Le `AGENT_GUARD_STRICT`, diúltaítear do na hiarrataí istigh sin ar na soláthraithe cosanta cibé duine a chuir tús leo, áirítear Cód Claude.
+- Ní thacaítear ach le hiarratais a théann tríd an láimhseálaí comhrá. Glaonn bailíochtú múnla (`src/lib/modelValidation/runner.ts`) croí an iarratais go díreach agus ní thugtar geata air.
+- Ní chlúdaítear ach na soláthraithe `claude` agus `anthropic`. ní chlúdaítear samhlacha Claude a bhfreastalaíonn soláthraí eile orthu, agus níl an soláthraí `claude-web` ach an oiread.
+- Ainmníonn roinnt teaglama na spriocanna atá fágtha acu gan réimír soláthraí, mar aitheantais mhúnla lom nó teaglama neadaithe. Nuair nach mbíonn na spriocanna sin ar fáil ar chúis nach mbaineann le hábhar (briseadh oscailte, fuarú, frithdhúnadh), teipeann ar an iarratas leis an earráid bheartais.
+- Glanann sprioc teaglama scipeála an biorán is déanaí a bhfuil aithne mhaith air, mar a dhéanann aon sprioc nár baineadh amach.
+- Diúltaítear do bhreitheamh comhleá ainmnithe a bhfuil réimír soláthraí cosanta aige sula ritheann an painéal. Clúdaíonn sé sin `anthropic/…`, `claude/…`, ailias mar `cc/…`, iarmhír comhthéacs mar `[1m]`, agus ainmneacha sciartha cuóta ar na soláthraithe sin.
+- Ní dhiúltaítear do bhreitheamh comhleá scríofa mar aitheantas múnla lom, nó mar ailias eiseamláireach a réitíonn do sholáthraí cosanta, ach amháin nuair a sheoltar é. Tá an painéal á rith cheana féin faoin am sin. Má dhéantar an breitheamh a ainmniú agus a réimír soláthraí ní féidir é sin a dhéanamh. Ní shroicheann aon litriú breitheamh soláthraí cosanta gan diúltú.
+- Diúltaíonn an réamhsheiceáil breitheamh Claude cumraithe fiú nuair a scaoilfeadh an tseirbhís chomhleá an breitheamh sin ag am rite. Scaoileann an tseirbhís breitheamh a chuireann an t-oibreoir i bhfolach, agus breitheamh nach féidir leis meáin an iarratais a ghlacadh. Clúdaíonn an dara cás tacaíocht fís neamhdhearbhaithe agus meáin eile nach nglacann an breitheamh leo. Iompraíonn an dá chosán teaglama ar an mbealach seo.
+- Ar atreorú an líontáin sábhála, faigheann an tseirbhís teaglama socruithe folamh. Ní úsáidtear breitheamh atá socraithe ach sna mainneachtainí teaglama domhanda riamh ann.
+- Cé go bhfuil `block` ar siúl, cliant a ndiúltóidh an garda ar sholáthraí cosanta ní úsáideann sé cosán tapa an chairr taobh, le haghaidh aon mhúnla. Faoi `AGENT_GUARD_STRICT` is é sin gach cliant anaithnid. Tar éis a sheiceáil comhartha sealaíochta, freagraíonn `POST /v1/relay/chat/completions/bifrost` na hiarratais sin le 503 agus an ceanntásc `X-Bifrost-Fallback`.
+- Tugann `POST /v1/messages/count_tokens` an meastachán áitiúil do chliant a ndiúltódh an garda ar an soláthraí a shocraíonn an tsamhail dó.
+- Níl aon díolúine in aghaidh an eochair.
 
 ## Bunchonradh (`base.ts`)
 
@@ -360,69 +423,31 @@ dtacaíonn sí leo.
 
 ## Clárlann (`registry.ts`)
 
-Nochtann an t-aonán aonair `guardrailRegistry` na nithe seo a leanas:
+Nochtann an singleton `guardrailRegistry` :
 
-- `register(guardrail)` — cuireann sé srian cosanta leis (nó cuireann sé ceann nua
-  in ionad cinn de réir ainm normalaithe) agus athshórtálann sé de réir `priority`
-  in ord ardaitheach.
-- `clear()` / `list()` — áiseanna riaracháin.
-- `runPreCallHooks(payload, context)` — téann sé trí na srianta cosanta gníomhacha,
-  cuireann sé an pálasta ar aghaidh trí `modifiedPayload`, agus stopann sé ag an
-  gcéad `block: true`.
-- `runPostCallHooks(response, context)` — an sreabhadh céanna ar thaobh an fhreagra.
-- `resetGuardrailsForTests({ registerDefaults })` — glanann sé an staid agus,
-  go roghnach, athchláraíonn sé na réamhshocruithe chun tástálacha a leithlisiú
-  go glan.
+- Cuireann `register(guardrail)` — ráille cosanta leis (nó a ionadú le hainm gnáthaithe) agus athsórtáil é trí `priority` a ardú.
+- cúntóirí riaracháin `clear()` / `list()` —.
+- athraíonn `runPreCallHooks(payload, context)` — ráillí cosanta gníomhacha, snáitheann sé an pálasta trí `modifiedPayload`, agus stopann sé ar an gcéad `block: true`.
+- `runPostCallHooks(response, context)` — sreabhadh céanna ar an taobh freagartha.
+- Glanann `resetGuardrailsForTests({ registerDefaults })` — an stát agus go roghnach athchláraíonn sé na mainneachtainí maidir le haonrú tástála glan.
 
-Tugann an dá ritheoir `{ blocked, payload|response, results, guardrail?, message? }`
-ar ais, áit ar eagar de thaifid `GuardrailExecutionResult` é `results` ina bhfuil
-na réimsí `blocked`, `skipped`, `modified`, `error`, agus `meta` do gach srian
-cosanta, rud atá úsáideach don rianú.
+Filleann an dá reathaí `{ blocked, payload|response, results, guardrail?, message? }` áit a bhfuil sraith de thaifid `GuardrailExecutionResult` `results` a chuimsíonn réimsí in aghaidh an ráille cosanta `blocked`, `skipped`, `modified`, `error`, agus `meta`, atá úsáideach le haghaidh rianú.
 
-### Srianta Cosanta a Dhíchumasú de Réir Iarratais
+### Ráillí Garda a Dhíchumasú De réir Iarratas
 
-Comhbhailíonn `resolveDisabledGuardrails({ apiKeyInfo, body, headers })` liosta
-dí-dhúblaithe d’ainmneacha srianta cosanta ba cheart a scipeáil don iarratas
-reatha. Tá cúig chainéal ann, a léitear san ord seo agus a chumascann i liosta
-amháin (bíonn an bua ag an gcéad tarlú agus dí-dhúbláil á déanamh):
+Déanann `resolveDisabledGuardrails({ apiKeyInfo, body, headers })` liosta dí-dhúbailt d'ainmneacha ráillí cosanta a dhí-chomhiomlánú ar cheart a bheith gan bacadh le haghaidh an iarratais reatha. Tá cúig chainéal ann, iad a léamh san ord seo agus cumasc isteach i liosta amháin (buaiteann an chéad chás nuair a dhéantar dí-dhúbláil):
 
 1. `apiKeyInfo.disabledGuardrails`
-2. `disabledGuardrails` i gcorp an iarratais (ag an mbarrleibhéal)
-3. `metadata.disabledGuardrails` i gcorp an iarratais (nuair is oibiacht é `metadata` amháin)
-4. Ceanntásc `x-omniroute-disabled-guardrails`
+2. Iarr corp `disabledGuardrails` (ardleibhéal)
+3. Iarr corp `metadata.disabledGuardrails` (nuair is réad é `metadata` amháin)
+4. Ceanntásca `x-omniroute-disabled-guardrails`
 5. Ceanntásc oidhreachta `x-disabled-guardrails`
 
-Cumaisctear na cúig chainéal ar fad, agus cuirtear an dá cheanntásc san áireamh:
-má sheoltar `x-omniroute-disabled-guardrails` agus `x-disabled-guardrails` araon,
-scipeáiltear aontas a liostaí, agus ní cheileann ceanntásc nua-aimseartha folamh
-an ceann oidhreachta a thuilleadh
-([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412), socraithe in
-[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805)).
+Déantar na cúig chainéal ar fad a chumasc, lena n-áirítear an dá cheanntásc: scipeanna an dá liostaí `x-omniroute-disabled-guardrails` agus `x-disabled-guardrails` a sheoladh, agus ní fholaíonn ceanntásc nua-aimseartha folamh an ceann oidhreachta a thuilleadh ( [#16412](https://github.com/cheaper-inference/OmniRoute/issues/16412), socraithe i [#16805](https://github.com/cheaper-inference/OmniRoute/pull/16805) ).
 
-Féadfaidh na luachanna a bheith ina n-eagair teaghrán nó ina dteaghrán scartha
-le camóga; baintear spás bán ó na hainmneacha agus normalaítear iad go cás
-ceibeab i litreacha beaga (`pii_masker` → `pii-masker`), agus baintear iontrálacha
-folmha. Cuirtear an toradh ar aghaidh chuig an gclárlann trí
-`context.disabledGuardrails`, agus scipeálann an chlárlann srianta cosanta
-comhoiriúnacha (`skipped: true` in `results`).
+D’fhéadfadh luachanna a bheith ina n-eagair de theaghráin nó ina sreangán scartha le camóga; déantar ainmneacha a bhearradh agus a normalú go cás cábáin (`pii_masker` → `pii-masker`), agus fágtar iontrálacha folamha. Cuirtear an toradh ar aghaidh trí `context.disabledGuardrails` chuig an gclárlann, a dhéanann scipeáil ar ráillí cosanta meaitseála (`skipped: true` in `results`).
 
-Ní dhéanann an liosta díchumasaithe difear ach don **chlárlann**. Is teorainn
-éigeantach é mód `block` insteallta leide: glaonn meánearra na cosanta insteallta
-(`src/middleware/promptInjectionGuard.ts`) ar `evaluatePromptInjection()` gan
-aon liosta díchumasaithe atá faoi rialú an ghlaoiteora (baineadh an glao
-neamhbheo `resolveDisabledGuardrails({ body })` a bhíodh á dhéanamh aige in
-[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934)), mar sin diúltaítear
-d’iarratas a dhíchumasaíonn `prompt-injection` fós i mód `block`. Tá sé seo
-d’aon ghnó. Tá na cainéil díchumasaithe faoi rialú an ghlaoiteora (corp an
-iarratais, meiteashonraí, ceanntásca), agus ní ceadmhach do ghlaoiteoir rialú
-slándála a shocraigh an t-oibreoir a mhúchadh
-([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Ní athraíonn
-aontas na gceanntásca ó [#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)
-ach na srianta cosanta clárlainne a scipeáiltear; ní ligeann sé do chliant an
-meánearra a sheachaint. Déantar beartais éigeantacha srianta cosanta de réir
-eochrach agus de réir grúpa a rianú in RFC v4
-[#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417).
-Féach [Cumhdach agus teorainneacha](#coverage-and-limits).
+Ní dhéanann an liosta díchumasaithe ach difear do na** clárlann** . Is teorainn éigeantach é modh pras-instealladh `block` : glaonn an lárearraí garda-instealladh (`src/middleware/promptInjectionGuard.ts`) `evaluatePromptInjection()` gan aon liosta díchumasaithe faoi rialú an ghlaoiteora (baineadh an glao `resolveDisabledGuardrails({ body })` marbh a d’úsáid sé a dhéanamh i [#16934](https://github.com/cheaper-inference/OmniRoute/pull/16934) ), mar sin diúltaítear d’iarratas a dhíchumasaíonn `prompt-injection` fós i mód `block`. Tá sé seo de réir dearadh. Tá na bealaí díchumasaithe rialaithe ag an nglaoiteoir (comhlacht iarratais, meiteashonraí, ceanntásca), agus ní féidir le glaoiteoir a bheith in ann rialú slándála a shocraíonn an t-oibreoir a mhúchadh ( [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ). Ní athraíonn an aontas ceanntásc ó [#16412](https://github.com/cheaper-inference/OmniRoute/issues/16412) ach na ráillí cosanta clárlainne a sciptear; ní ligeann sé do chliant an meánearraí a sheachbhóthar. Rianaítear beartais éigeantacha ráillí cosanta in aghaidh an eochair agus in aghaidh an ghrúpa sa v4 RFC [#16417](https://github.com/cheaper-inference/OmniRoute/issues/16417). Féach [Clúdach agus teorainneacha](#coverage-and-limits).
 
 ## Ordú Forghníomhaithe
 
@@ -457,29 +482,31 @@ Sreangaítear clárlann na ráillí cosanta isteach sa phíblíne comhrá amhái
 
 - **Meáin, leabaithe agus bealaí sonraí** (`/v1/images/*`, `/v1/embeddings`, `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/rerank`, `/v1/search`, `/v1/moderations`) riamh an clár a bhaint amach. Ní ritheann aon chumhdach PII, chumhdach dintiúir nó droichead modhúlachta ann. Is é an t-aon seiceáil atá acu ná na hearraí lár-garda insteallta oidhreachta.
 - **Freagraí sruthaithe** ná faigh ráillí cosanta iarghlao: níl aon iarghlao `pii-masker` nó `credential-masker`, agus gan aon bhloc iarghlao. Ní bhaineann ach an t-athrú sruthaithe PII (nuair a bhíonn `PII_RESPONSE_SANITIZATION` ar siúl). Ní dhéantar athghníomhú ar dhintiúir atá macalla ar ais i bhfreagra sruthaithe.
-- **Díchumasaigh cainéil vs. na meánearraí (de réir dearadh):** déanann an lárearraí meastóireacht ar instealladh pras lena ghlao féin chuig `evaluatePromptInjection()`, gan aon liosta díchumasaithe atá faoi rialú an ghlaoiteora a rith. Is teorainn éigeantach é mód `block` nach féidir le díchumasaithe atá faoi rialú an ghlaoiteora a sheachbhóthar, lena n-áirítear ar bhealaí comhrá-teaghlaigh ( [#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413) ). Má dhíchumasaítear `prompt-injection` ní dhéantar ach ráille cosanta na clárlainne a scipeáil.
+- **Díchumasaigh cainéil vs. na meánearraí (de réir dearadh):** déanann an lárearraí meastóireacht ar instealladh pras lena ghlao féin chuig `evaluatePromptInjection()`, gan aon liosta díchumasaithe atá faoi rialú an ghlaoiteora a rith. Is teorainn éigeantach é mód `block` nach féidir le díchumasaithe atá faoi rialú an ghlaoiteora a sheachbhóthar, lena n-áirítear ar bhealaí comhrá-teaghlaigh ( [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ). Má dhíchumasaítear `prompt-injection` ní dhéantar ach ráille cosanta na clárlainne a scipeáil.
 
 ### Rud a fheiceann freagra roimh iarghlao
 
 Ar an gcosán neamhshruthaithe is é an t-ordú ná: eastóscadh cuimhne → forghníomhú uirlis ionsuite → ráillí cosanta iarghlao → bloc iar-ghlao scoir → siopa shéimeantach-taisce.
 
-- **Eastóscadh cuimhne** agus** forghníomhú uirlisí** féach ar an bhfreagra sular féidir le ráillí cosanta iarghlao athscríobh nó bac a chur air. Ós rud é [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401), ritheann eastóscadh cuimhne an téacs a bhaintear trí `sanitizePII` nuair a bhíonn `PII_RESPONSE_SANITIZATION` ar siúl (idir shruthú agus neamhshruthú), ach tá freagra a chuir bloic iarghlao níos déanaí fós ar fáil don chuimhne agus d'uirlisí.
+- **Eastóscadh cuimhne** agus** forghníomhú uirlisí** féach ar an bhfreagra sular féidir le ráillí cosanta iarghlao athscríobh nó bac a chur air. Ós rud é [#16401](https://github.com/cheaper-inference/OmniRoute/pull/16401), ritheann eastóscadh cuimhne an téacs a bhaintear trí `sanitizePII` nuair a bhíonn `PII_RESPONSE_SANITIZATION` ar siúl (idir shruthú agus neamhshruthú), ach tá freagra a chuir bloic iarghlao níos déanaí fós ar fáil don chuimhne agus d'uirlisí.
 - **An taisce shéimeantach** stórálann sé an freagra tar éis an iarghlao, mar sin stórálann sé an freagra athscríofa, agus ní chuirtear i dtaisce freagra bactha. Cuirtear iontrálacha taisce in aghaidh na heochrach API.
 
 ## Cumraíocht
 
 Athróga comhshaoil á léamh ag na ráillí cosanta ionsuite:
 
-| Athróg                                | In úsáid ag                    | Éifeacht                                                                                                     |
-| ------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`             | Socraigh `false` chun an bhrath a dhíchumasú go hiomlán.                                                     |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`             | Beartas insteallta: `warn`, `block`, nó `log`. Ní athscríobhann luach oidhreachta `redact` téacs insteallta. |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`             | Modh don gharda insteallta; freisin bratach gné DB go** sáraíonn** an env vars (DB > ENV).                   |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`             | An déine íosta a dhiúltaíonn `MODE=block` : `high` (réamhshocraithe), `medium`, nó `low`.                    |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`             | Ailias oidhreachta do `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                     |
-| `PII_REDACTION_ENABLED`               | `pii-masker`                   | Nuair a `true`, déantar an t-iarratas PII a chur in eagar (neamhspleách ar mhodh insteallta).                |
-| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat`     | Le `PII_REDACTION_ENABLED`, miontas comharthaí inchúlaithe agus cuir ar ais iad i bhfreagraí 2xx.            |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (síos an tsrutha) | Rialaíonn iompar mascara ar thaobh freagartha.                                                               |
+| Athróg                                | In úsáid ag                    | Éifeacht                                                                                                                                  |
+| ------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`             | Socraigh `false` chun an bhrath a dhíchumasú go hiomlán.                                                                                  |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`             | Beartas insteallta: `warn`, `block`, nó `log`. Ní athscríobhann luach oidhreachta `redact` téacs insteallta.                              |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`             | Modh don gharda insteallta; freisin bratach gné DB go** sáraíonn** an env vars (DB > ENV).                                                |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`             | An déine íosta a dhiúltaíonn `MODE=block` : `high` (réamhshocraithe), `medium`, nó `low`.                                                 |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`             | Ailias oidhreachta do `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                                                  |
+| `PII_REDACTION_ENABLED`               | `pii-masker`                   | Nuair a `true`, déantar an t-iarratas PII a chur in eagar (neamhspleách ar mhodh insteallta).                                             |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat`     | Le `PII_REDACTION_ENABLED`, miontas comharthaí inchúlaithe agus cuir ar ais iad i bhfreagraí 2xx.                                         |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (síos an tsrutha) | Rialaíonn iompar maisc ar thaobh freagartha.                                                                                              |
+| `AGENT_GUARD_MODE`                    | `agent-guard`                  | `off` (réamhshocraithe), `monitor` nó `block`. Chomh maith leis sin tá bratach gné DB (DB > ENV).                                         |
+| `AGENT_GUARD_STRICT`                  | `agent-guard`                  | `false` (réamhshocraithe) nó `true`. Le `block`, freisin diúltú do chliaint anaithnid. Chomh maith leis sin tá bratach gné DB (DB > ENV). |
 
 Léann na ráillí cosanta Droichead Módúlachta cumraíocht ama rite ón siopa socruithe tacaithe ag DB (`getSettings()`), ní env vars. Is iad príomh-eochracha Vision ná `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes`, agus `modalityBridgeCacheMaxEntries`. Ní ghlactar leis na heochracha oidhreachta `visionBridge*` ach mar chúltaca doiciméadaithe léite aon-timthrialla; scríobhann painéal úsáid as na heochracha príomhúla. Maireann mainneachtainí agus an réititheoir cúltaca i `src/shared/constants/modalityBridgeDefaults.ts`, agus coinnítear tairisigh oidhreachta in `src/shared/constants/visionBridgeDefaults.ts`.
 
@@ -541,41 +568,23 @@ chleachtadh gan rochtain ar DB nó ar líonra.
 - `docs/architecture/RESILIENCE_GUIDE.md` — ciseal ortagonalach (circuit breaker, tréimhsí fuaraithe)
 - `docs/reference/ENVIRONMENT.md` — tagairt iomlán d'athróga comhshaoil
 
-## Clúdach bealaí an injection-guard & red-team (Céim 8 · Bloc D)
+## Clúdach bealaigh garda-instealladh & foireann dhearg (Céim 8 · Bloc D)
 
-Clúdaíonn an injection-guard (`createInjectionGuard` / `withInjectionGuard`) gach
-bealach a ghlacann le prómptáil úsáideoirí. Comhlíonann sé `INJECTION_GUARD_MODE`
-(réamhshocrú `warn` = logáil amháin; `block` = cuireann sé HTTP 400 `SECURITY_001` ar ais).
+Clúdaíonn an garda insteallta (`createInjectionGuard` / `withInjectionGuard`) gach bealach a ghlacann le leideanna úsáideora. Tá meas aige ar `INJECTION_GUARD_MODE` (logáil réamhshocraithe `warn` = amháin; tuairisceáin `block` = HTTP 400 `SECURITY_001`).
 
-| Cineál                 | Bealaí                                                                                                                                               | Mód réamhshocraithe |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| Téacs (atá ann cheana) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | warn                |
-| Giniúnach              | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | warn                |
-| Sonraí                 | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | warn                |
+| Cineál             | Bealaí                                                                                                                                               | Modh réamhshocraithe |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| Téacs (ann cheana) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | rabhadh a thabhairt  |
+| ginideach          | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | rabhadh a thabhairt  |
+| Sonraí             | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | rabhadh a thabhairt  |
 
-Clúdaíonn eastósú téacs (`extractMessageContents`) `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`.
+Clúdaíonn eastóscadh téacs (`extractMessageContents`) `messages`/`input`/`prompt`/`query` + `documents`/`instructions`/`system`.
 
-**Red-team (gach oíche, `nightly-llm-security.yml`):** bailíochtaíonn promptfoo go
-mblocálann gach bealach córpas OWASP-LLM in `INJECTION_GUARD_MODE=block`; ritheann
-garak probanna (scipeálann sé mura bhfuil rún ann). Tá `moderations` san áireamh ar
-mhaithe le comhsheasmhacht. Is teorainn éigeantach é an mód blocála: déanann
-`evaluatePromptInjection()` neamhaird den liosta díchumasaith in aghaidh an iarratais
-a thugann an middleware dó, mar sin **ní** dhíolmhóidh `disabledGuardrails` bealach
-uaidh ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)).
+**Foireann dhearg (oíche, `nightly-llm-security.yml`):** bailíochtaíonn promptfoo go ndéanann gach bealach an corpas OWASP-LLM a bhlocáil i `INJECTION_GUARD_MODE=block`; Ritheann garak tóireadóirí (scipeanna gan rún). tá `moderations` san áireamh le haghaidh comhsheasmhachta. Is teorainn éigeantach é mód blocála: déanann `evaluatePromptInjection()` neamhaird den liosta díchumasaithe in aghaidh an iarratais téann an meánearraí ar aghaidh, mar sin déanann `disabledGuardrails`** nach bhfuil** bealach a dhíolmhú uaidh ( [#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413) ).
 
-Tá dhá jab ag sreabhadh oibre na hoíche (`.github/workflows/nightly-llm-security.yml`,
-cron + seoladh láimhe):
+Tá dhá phost ag an sreabhadh oibre oíche (`.github/workflows/nightly-llm-security.yml`, cron + seolta láimhe):
 
-- **`promptfoo-guard` (ag blocáil)** — ritheann sé `promptfoo eval -c promptfooconfig.yaml`
-  le `INJECTION_GUARD_MODE=block`. Dearbhaíonn gach cás frithpháirteach (m.sh. "ignore all
-  previous instructions…", jailbreaks ar stíl DAN) go n-iompraíonn an freagra
-  `error.code === "SECURITY_001"`, is é sin, gur dhiúltaigh an garda don iarratas i ndáiríre.
-- **`garak` (comhairleach)** — ritheann sé garak `--probes promptinject,dan,leakreplay`
-  i gcoinne instance áitiúil OmniRoute (`http://localhost:20128/v1`). Geataítear é ar
-  rún soláthraí (`PROMPTFOO_PROVIDER_KEY`); scipeálann sé go séimh agus tá `|| true`
-  mar iarmhír aige, mar sin tuairiscíonn sé gan teip a chur ar CI.
+- **`promptfoo-guard` (blocáil)** Ritheann — `promptfoo eval -c promptfooconfig.yaml` le `INJECTION_GUARD_MODE=block`. Dearbhaíonn gach cás sáraíochta (m.sh. "neamhaird ar na treoracha go léir roimhe seo ...", jailbreaks ar stíl DAN) go n-iompraíonn an freagra `error.code === "SECURITY_001"`, ie dhiúltaigh an garda don iarratas i ndáiríre.
+- **`garak` (comhairle)** Ritheann — garak `--probes promptinject,dan,leakreplay` i gcoinne shampla OmniRoute áitiúil (`http://localhost:20128/v1`). Gated ar rún soláthraí (`PROMPTFOO_PROVIDER_KEY`); scipeann go galánta agus iarmhír `|| true`, mar sin tuairiscíonn sé gan teip CI.
 
-Cuimsíonn clúdach an chúntóra garda (`createInjectionGuard` / `withInjectionGuard`)
-gach bealach `/v1` a iompraíonn prómptáil; tarraingítear téacs na prómptála ó
-`messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` ag
-`extractMessageContents()` i `src/shared/utils/inputSanitizer.ts`.
+Cuimsíonn clúdach an chúntóra garda (`createInjectionGuard` / `withInjectionGuard`) gach bealach `/v1` pras-iompartha; Baintear an pras-téacs ó `messages`/`input`/`prompt`/`query` + `documents`/`instructions`/`system` ag `extractMessageContents()` i `src/shared/utils/inputSanitizer.ts`.

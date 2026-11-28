@@ -6,76 +6,25 @@
 
 @AGENTS.md
 
-**Kaikki projektin säännöt ovat tiedostossa [`AGENTS.md`](AGENTS.md)** — se on kaikkien
-tekoälyavustajien ainoa totuuden lähde (arkkitehtuuri, käytännöt, testaus, laatuportit, git-työnkulku,
-23 ehdotonta sääntöä, henkilötietoja koskevat opit). Lue se kokonaan; älä lisää projektin sääntöjä
-uudelleen tähän. Kaikki alla oleva koskee VAIN Claude Codea — kyse on tiedostossa `AGENTS.md` jo
-määriteltyjen sääntöjen toiminnallisista tarkennuksista.
+**Kaikki projektin säännöt elävät [`AGENTS.md`](AGENTS.md)** — ainoa totuuden lähde jokaiselle AI avustajalle; yllä oleva tuonti lataa sen jo. Älä lisää tähän projektisääntöjä uudelleen. Kaikki alla oleva koskee ONLY Claude koodiin. — toiminnalliset tarkennukset sääntöihin, jotka on jo määritetty `AGENTS.md` ssä.
 
-## Worktree-eristys — Claude Code -kohtaiset seikat
+## Työpuun eristäminen — Claude Koodin tiedot
 
-Pakollinen worktree-protokolla kokonaisuudessaan (kantahaaran vahvistus, kanoninen
-`.claude/worktrees/`-polku, `cp -al` node_modules, purkusäännöt) on tiedostossa
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (yhteenveto `AGENTS.md`-tiedostossa →
-Git-työnkulku → "Worktree-eristys"). Claude Code -kohtaiset huomiot:
+- Vahvista perushaara operaattorilta `AskUserQuestion` (kova sääntö #19), ellei he ole jo kertoneet sinulle.
+- Luo työpuu komennolla `scripts/dev/new-worktree.sh <branch> <confirmed-base>` (se laskeutuu `.claude/worktrees/` alle, linkittää `node_modules` ja kopioi `.husky/_`) ja kutsu sitten `EnterWorktree` `path` llä. Ohita aina kanta: ilman sitä skripti valitsee korkeimman `release/*`, joka ei välttämättä ole operaattorin vahvistama. Työpuussa, jonka `EnterWorktree` luo itsestään, ei ole kovia linkkejä eikä koukkuja, joten siinä ei kulje esisitoumusporttia.
 
-- Vahvista kantahaara operaattorin kanssa `AskUserQuestion`-työkalulla (Ehdoton sääntö #19), ellei hän
-  ole jo kertonut sitä sinulle.
-- Suosi natiivia `EnterWorktree`-työkalua — se luo worktree:t jo valmiiksi
-  `.claude/worktrees/`-hakemiston alle (kanoninen polku). Luo worktree dokumentoidulla `git
-worktree add` -komennolla ja kutsu sitten `EnterWorktree`-työkalua sen `path`-arvolla.
+## Subagents ja git
 
-## Istuntojen välinen turvallisuus — Claude Codea koskevat erityisohjeet
+Jokainen aliagentti, joka koskettaa gitiä (agenttityökalu tai työnkulkukomentosarja), saa Kovan säännön #22 a:n `git stash` ban sanatarkasti kehotteessaan — tallennetun stash-tapahtuman toistuminen tuli aliagentin kautta.
 
-Ehdottomat säännöt #19/#21/#22 (tiedostossa `AGENTS.md`) ohjaavat rinnakkaisia istuntoja.
-Toiminnalliset muistutukset tälle suoritusympäristölle:
+## Artefaktien suunnittelu — supervoimien polun ohituksia
 
-- **Toista `git stash` -kielto sanatarkasti jokaisen gitiin koskevan aliagentin kehotteessa**
-  (Agent-työkalu / työnkulkuskriptit) — aliagentit eivät peri tätä tiedostoa, ja kirjattu
-  stash-ongelman toistuminen tapahtui aliagentin kautta.
-- Ennen yhdistämistä tai puskemista sellaiseen PR:ään, jota et luonut _tässä istunnossa_, suorita
-  `git worktree list` ja tarkista uudelleen `gh pr view <N> --json state,headRefOid` (ehdoton sääntö
-  #22b).
-- Päätä jokainen istunto niin, että päätyökopio on samalla haaralla, jolla se oli istunnon alkaessa.
+Supervoimataidot ilmoittavat oletusarvot kohdissa `docs/superpowers/plans/`, `docs/superpowers/specs/` ja `docs/research/`. Kirjoita jokainen uudelleen `_tasks/` -vastineensa `AGENTS.md` → "Planning & Research Artifacts" -kohdassa ennen kirjoittamista ja sitoa se `git -C _tasks …` llä, ei koskaan päärepossa.
 
-## Superpowers-/suunnitteluartifaktit — polkujen ohitukset
+## Raaputustiedostot — `_artifacts/`, ei `/tmp`
 
-`_tasks/`-käytäntö on määritelty kohdassa `AGENTS.md` → "Planning & Research Artifacts".
-Superpowers-taidot toimitetaan oletuksilla, jotka viittaavat polkuun `docs/…` — nämä oletukset
-**ohitetaan tässä**. Kun superpowers-taito ilmoittaa polun, kuten "tallennettu kohteeseen
-`docs/superpowers/plans/…`", muuta se vastaavaksi `_tasks/…`-poluksi ennen kirjoittamista:
+Tämä projekti ohittaa valjaiden istuntoalustan (`/tmp/claude-*/…`). Kirjoita väliaikaiset tiedostot — -vientit, luodut zip-tiedostot, kertaluonteiset välitulosteet — - `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: ohitettu `_*` juuripolku, jotta operaattori löytää ja poistaa kaikki naarmut yhdestä paikasta. Kestävät suunnitelmat, tekniset tiedot, tutkimus ja luovutukset menevät sen sijaan `_tasks/` (Hard Rule #23).
 
-| Artifakti (taito)                           | Oletus (ÄLÄ käytä)        | Tallenna sen sijaan tänne                                     |
-| ------------------------------------------- | ------------------------- | ------------------------------------------------------------- |
-| Suunnitelmat (`writing-plans`)              | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Määritykset / suunnittelu (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Tutkimus (`deep-research`, tilapäinen)      | `docs/research/`          | `_tasks/research/…`                                           |
-| Luovutukset (`/handoff`)                    | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Punainen pohja
 
-Commitoi nämä artifaktit `_tasks/`-repositoriossa (`git -C _tasks …`), älä koskaan päärepositoriossa.
-
-## Luonnos-/väliaikaistiedostot — käytä `_artifacts/`-hakemistoa, älä `/tmp`-hakemistoa
-
-Tämä projekti ohittaa suoritusympäristön oletusarvoisen istuntokohtaisen luonnosalueen
-(`/tmp/claude-*/…`). Kirjoita väliaikaiset/työtiedostot — viennit, luodut zip-tiedostot,
-kertaluonteiset välitulosteet ja kaikki, minkä muutoin sijoittaisit hakemistoon `/tmp` — sen sijaan
-hakemistoon `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`.
-
-- `_artifacts/` on juuritason `_*`-polku: se on jo gitin ohittama (`AGENTS.md` → "Root `_*`
-  paths"), sijaitsee vain levyllä eikä sitä koskaan seurata.
-- Syy: luonnostulosteiden säilyttäminen projektin sisällä (`/tmp`-hakemiston sijaan) tekee kaikkien
-  väliaikaistiedostojen löytämisestä ja poistamisesta operaattorille helppoa yhdessä paikassa sen
-  sijaan, että niitä pitäisi etsiä katoavista tai seuraamattomia tiedostoja kerryttävistä
-  väliaikaisista istuntokohtaisista `/tmp`-hakemistoista.
-- Älä **sekoita** tätä `_tasks/`-hakemistoon (ehdoton sääntö #23, oma yksityinen git-repositorio
-  pysyville suunnitelmille/määrityksille/tutkimuksille/luovutuksille) — `_artifacts/` on tarkoitettu
-  vain kertakäyttöisille työtiedostoille; minkään täällä olevan ei tarvitse säilyä tai olla
-  versioitu.
-
-## Pohjan vihreys ennen PR:ien avaamista
-
-Ennen haaran luomista tai PR:n avaamista suorita pohjan vihreystarkistus (`AGENTS.md` → Git
-Workflow → "Base-green check"; projektin taidot viittaavat siihen polulla
-`.agents/skills/_shared/base-green.md`). PR:n, joka avataan pohjahaaran kärjen ollessa punainen,
-tekstissä on oltava `⚠️ base-red inherited: #<issue>`. Käytä `/sweep-reds`-taitoa kertyneen punaisen
-tilan (pohjahaaran kärki + punaiset PR:t) purkamiseen.
+Tyhjennä kerääntynyt punainen tila (peruskärki + red PRs), käytä `/sweep-reds` taitoa.

@@ -329,19 +329,16 @@ det også en maskert forhåndsvisning (`maskedApiKey`: opptil 4 tegn i hver ende
 nøkkel og ingen for nøkler på 8 tegn eller færre) samt tilkoblingens `projectId`. Begge feltene
 utelates fra svaret for alle andre nøkler.
 
-## Oppslag av påloggingsinformasjon
+## Oppløsning av legitimasjon
 
 `getCloudAgentCredentials(providerId)` i `src/lib/cloudAgent/api.ts`:
 
-1. Laster aktive leverandørtilkoblinger via `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Foretrekker `apiKey` (uten innledende og etterfølgende mellomrom) for hver tilkobling. Faller tilbake til `accessToken`.
-3. Returnerer det første tokenet som ikke er tomt, pakket inn som `{ apiKey: token }`.
-4. Returnerer `null` hvis det ikke finnes noe brukbart token — API-et svarer med `400` og
-   `"Ingen aktiv påloggingsinformasjon er konfigurert for skyleverandøragenten: <id>"`.
+1. Laster inn aktive leverandørforbindelser via `getProviderConnections({ provider: providerId, isActive: true })`.
+2. For hver tilkobling, foretrekker `apiKey` (trimmet). Faller tilbake til `accessToken`.
+3. Returnerer det første ikke-tomme tokenet pakket inn som `{ apiKey: token }`.
+4. Returnerer `null` hvis ingen brukbar token blir funnet — API svarer `400` med `"No active credentials configured for cloud agent provider: <id>"`.
 
-Dette betyr at skyagenter bruker den samme tabellen for leverandørtilkoblinger som vanlige LLM-
-leverandører. For å aktivere Jules oppretter du en aktiv tilkobling med `provider: "jules"`
-og en utfylt `apiKey`.
+Dette betyr at Cloud Agents gjenbruker den samme Provider Connection-tabellen som vanlige LLM leverandører. For å aktivere Jules, opprette en aktiv forbindelse med `provider: "jules"` og en fylt `apiKey`.
 
 ## Kontrollpanel
 

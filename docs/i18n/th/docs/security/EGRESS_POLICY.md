@@ -67,15 +67,15 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ---
 
-## ค่าทั้งสามแบบ
+## ค่านิยมสามประการ
 
-| ค่า    | ป้ายกำกับใน UI           | ลักษณะการทำงาน                                                                                                                                                               |
-| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `อัตโนมัติ (dual-stack)` | ระบบปฏิบัติการเป็นผู้เลือกแฟมิลี สำหรับโฮสต์พร็อกซีที่ระบุเป็น IP โดยตรง แฟมิลีจะถูกกำหนดโดยค่าดังกล่าวอยู่แล้ว ส่วนชื่อโฮสต์สามารถใช้ได้ทั้งสองแฟมิลี ค่านี้เป็นค่าเริ่มต้น |
-| `ipv4` | `IPv4 เท่านั้น`          | บังคับให้การเชื่อมต่อใช้ IPv4 และจะปฏิเสธการเชื่อมต่อหากโฮสต์พร็อกซีไม่มีระเบียน IPv4 (A)                                                                                    |
-| `ipv6` | `IPv6 เท่านั้น`          | บังคับให้การเชื่อมต่อใช้ IPv6 และจะปฏิเสธการเชื่อมต่อหากโฮสต์พร็อกซีไม่มีระเบียน IPv6 (AAAA)                                                                                 |
+| ค่า    | ป้าย UI             | พฤติกรรม                                                                                                                                 |
+| ------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS เลือกครอบครัว สำหรับโฮสต์พร็อกซีตามตัวอักษร IP ตระกูลจะอยู่ภายในตามตัวอักษร สำหรับชื่อโฮสต์ ทั้งสองครอบครัวมีสิทธิ์ นี่คือค่าเริ่มต้น |
+| `ipv4` | `IPv4 only`         | ปักหมุดการเชื่อมต่อกับ IPv4 ปิดไม่สำเร็จหากโฮสต์พร็อกซีไม่มีระเบียน IPv4 (A)                                                             |
+| `ipv6` | `IPv6 only`         | ปักหมุดการเชื่อมต่อกับ IPv6 ปิดไม่สำเร็จหากพร็อกซีโฮสต์ไม่มีบันทึก IPv6 (AAAA)                                                           |
 
-สตริงของ UI อยู่ใน `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`)
+สตริง UI อยู่ใน `src/i18n/messages/en.json` (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`)
 
 ---
 
@@ -83,21 +83,21 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ### แดชบอร์ด
 
-ตัวเลือกอยู่ในแบบฟอร์มพร็อกซีของแท็บ **กลุ่มพร็อกซี**:
+ตัวเลือกอยู่ในรูปแบบพร็อกซีของ** พร็อกซีพูล** แท็บ:
 
-1. เปิด **แดชบอร์ด → การตั้งค่า → พร็อกซี → กลุ่มพร็อกซี**
-2. เพิ่มหรือแก้ไขพร็อกซี
-3. ตั้งค่ารายการแบบเลื่อนลง **แฟมิลี IP** เป็น `อัตโนมัติ (dual-stack)`, `IPv4 เท่านั้น` หรือ `IPv6 เท่านั้น`
+1. เปิด** แดชบอร์ด การตั้งค่า → → Proxy → Proxy Pool**
+2. เพิ่มหรือแก้ไขพรอกซี
+3. ตั้งค่า** ครอบครัว IP** ดร็อปดาวน์ไปที่ `Auto (dual-stack)`, `IPv4 only` หรือ `IPv6 only`
 4. บันทึก
 
-คอนโทรลนี้เรนเดอร์โดย `ProxyRegistryManager.tsx` (เมานต์อยู่ใน `proxy/ProxyPoolTab.tsx`)
+การควบคุมถูกเรนเดอร์โดย `ProxyRegistryManager.tsx` (ติดตั้งใน `proxy/ProxyPoolTab.tsx`)
 
 ### API
 
-ฟิลด์ `family` เป็นส่วนหนึ่งของเพย์โหลดสำหรับสร้าง/อัปเดตรีจิสทรีพร็อกซี ซึ่งตรวจสอบความถูกต้องโดย `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) และจัดการโดย `POST` / `PATCH /api/v1/management/proxies`:
+ฟิลด์ `family` เป็นส่วนหนึ่งของการลงทะเบียนพร็อกซี create/update payloads ตรวจสอบโดย `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) และจัดการโดย `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# สร้างพร็อกซีที่ใช้ IPv6 เท่านั้น
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# เปลี่ยนพร็อกซีที่มีอยู่ให้ใช้ IPv4 เท่านั้น
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-ออบเจ็กต์การกำหนดค่าพร็อกซีแบบอินไลน์ที่ใช้กับรายการพร็อกซีต้นทางก็รองรับฟิลด์เดียวกันนี้ด้วย (`upstream_proxy_config.family` โปรดดู [โมเดลข้อมูล](#data-model))
+อ็อบเจ็กต์การกำหนดค่าพร็อกซีแบบอินไลน์ยังยอมรับฟิลด์เดียวกันนี้สำหรับรายการพร็อกซีอัปสตรีม (`upstream_proxy_config.family` ดูที่ [Data Model](#data-model) )
 
-สำหรับ API ส่วนที่เหลือเกี่ยวกับการสร้าง อ่าน อัปเดต ลบ และกำหนดพร็อกซี โปรดดู [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md)
+สำหรับส่วนที่เหลือของพร็อกซี CRUD/assignment API ดู [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md)
 
 ---
 

@@ -4,11 +4,9 @@
 
 ---
 
-> **ప్రామాణిక మూలం:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`
-> **చివరిగా నవీకరించబడింది:** 2026-09-02 — v3.8.51
-> **లక్ష్య పాఠకులు:** ప్రొవైడర్-నిర్దిష్ట స్టెల్త్ ఇంటిగ్రేషన్లను నిర్వహించే ఇంజినీర్లు.
+> **సత్యానికి మూలం:** `open-sse/utils/tlsClient.ts`, `open-sse/services/{tlsClientBase,claudeTlsClient,perplexityTlsClient,grokTlsClient,notionTlsClient,lmarenaTlsClient,claudeCodeCCH,claudeCodeFingerprint,claudeCodeObfuscation,claudeCodeCompatible}.ts`, `open-sse/config/cliFingerprints.ts`, `src/mitm/`** ప్రేక్షకులు:** ప్రొవైడర్-నిర్దిష్ట స్టెల్త్ ఇంటిగ్రేషన్లను నిర్వహిస్తున్న ఇంజనీర్లు.
 
-అధికారికం కాని క్లయింట్లను క్రియాశీలంగా ఫింగర్ప్రింట్ చేసే ఎడ్జ్లను కలిగిన ప్రొవైడర్లతో OmniRoute అనుసంధానమవుతుంది (TLS JA3/JA4, హెడర్ క్రమం, JSON బాడీ ఆకృతి, సమగ్రత టోకెన్లు). OmniRoute అందుబాటులో ఉంచే స్టెల్త్ ఉపరితలాలను, అవి ఎక్కడ అమలు చేయబడ్డాయో ఈ పేజీ డాక్యుమెంట్ చేస్తుంది.
+OmniRoute ప్రొవైడర్లతో అనుసంధానం అవుతుంది, దీని అంచులు నాన్-అఫీషియల్ క్లయింట్లను (TLS JA3/JA4, హెడర్ ఆర్డరింగ్, JSON బాడీ షేప్, ఇంటిగ్రిటీ టోకెన్లు) చురుకుగా వేలిముద్ర వేస్తాయి. ఈ పేజీ స్టెల్త్ ఉపరితలాలను OmniRoute బహిర్గతం చేస్తుంది మరియు అవి ఎక్కడ అమలు చేయబడతాయో డాక్యుమెంట్ చేస్తుంది.
 
 ## చట్టపరమైన మరియు నైతిక గమనిక
 
@@ -77,71 +75,74 @@ Cloudflare వెనుక ఉన్న అప్స్ట్రీమ్ల క
 
 ---
 
-## Claude Code స్టెల్త్ బండిల్
+## Claude కోడ్ స్టీల్త్ బండిల్
 
-`cliCompatMode` ఆన్లో ఉన్నప్పుడు, అవి `claude-cli` ట్రాఫిక్ నుండి వేరు చేసి గుర్తించలేని విధంగా OmniRoute అవుట్గోయింగ్ Claude అభ్యర్థనలను పునర్రూపకల్పన చేస్తుంది. మూడు మాడ్యూల్లు కలిసి పనిచేస్తాయి:
+`cliCompatMode` ఆన్లో ఉన్నప్పుడు, OmniRoute అవుట్గోయింగ్ Claude అభ్యర్థనలను పునర్నిర్మిస్తుంది కాబట్టి అవి `claude-cli` ట్రాఫిక్ నుండి వేరు చేయలేవు. మూడు మాడ్యూల్స్ సహకరిస్తాయి:
 
 ### `claudeCodeFingerprint.ts`
 
-బిల్లింగ్ హెడర్లో పొందుపరిచిన 3-అక్షరాల `cc_version` ఫింగర్ప్రింట్ను గణిస్తుంది:
+బిల్లింగ్ హెడర్లో పొందుపరిచిన 3-చార్ `cc_version` వేలిముద్రను గణిస్తుంది:
 
 ```
 SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 ```
 
-- `FINGERPRINT_SALT = "59cf53e54c78"` (హార్డ్కోడ్ చేయబడింది; అధికారిక క్లయింట్తో సరిపోలుతుంది)
-- ఇన్పుట్లు: మొదటి వినియోగదారు సందేశంలోని టెక్స్ట్లో ఇండెక్స్ 4, 7, 20 వద్ద ఉన్న అక్షరాలు + వెర్షన్ స్ట్రింగ్
-- అవుట్పుట్: 3-అక్షరాల హెక్స్ ప్రిఫిక్స్
+- `FINGERPRINT_SALT = "59cf53e54c78"` (హార్డ్కోడ్; అధికారిక క్లయింట్తో సరిపోలుతుంది)
+- ఇన్పుట్లు: మొదటి వినియోగదారు సందేశ టెక్స్ట్ + వెర్షన్ స్ట్రింగ్లోని సూచిక 4, 7, 20 వద్ద అక్షరాలు
+- అవుట్పుట్: 3-చార్ హెక్స్ ఉపసర్గ
 
-### `claudeCodeCCH.ts` (క్లయింట్ కంటెంట్ హ్యాష్)
+### `claudeCodeCCH.ts` (క్లయింట్ కంటెంట్ హాష్)
 
-అధికారిక Claude Code CLI, Bun/Zig ద్వారా గణించే సర్వర్-సైడ్ సమగ్రత తనిఖీ. OmniRoute దీన్ని `xxhash-wasm`తో తిరిగి అమలు చేస్తుంది:
+`xxhash-wasm` తో Bun/Zig. OmniRoute రీఇంప్లిమెంట్ల ద్వారా అధికారిక Claude కోడ్ CLI కంప్యూట్లను సర్వర్ వైపు సమగ్రతను తనిఖీ చేయండి:
 
-1. బాడీని `cch=00000;` ప్లేస్హోల్డర్తో సీరియలైజ్ చేయండి
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. సున్నాలతో ప్యాడ్ చేసిన 5-అక్షరాల లోయర్కేస్ హెక్స్
-4. `cch=00000;`ను గణించిన టోకెన్తో భర్తీ చేయండి
+1. `cch=00000;` ప్లేస్హోల్డర్తో బాడీని సీరియలైజ్ చేయండి
+2. ఈ క్రమంలో (`hashView()`) రెండు సాదా-వచన భర్తీలతో హాష్ వీక్షణను రూపొందించండి:
+   - `/"model":"[^"]*"/g` యొక్క ప్రతి సరిపోలిక `"model":""` — అవుతుంది, మ్యాచ్ మొదటి `"` వద్ద ఆగిపోతుంది, కాబట్టి క్లయింట్ చేసినట్లుగా, తప్పించుకున్న కోట్ (`"model":"a\"b"`) ఉన్న విలువ ఆ కోట్ వరకు మాత్రమే ఖాళీ చేయబడుతుంది.
+   - `/"max_tokens":\d+,|,?"max_tokens":\d+/g` యొక్క ప్రతి సరిపోలిక — మాత్రమే సంఖ్యా విలువలు, ఏ లోతులో అయినా తీసివేయబడుతుంది
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. జీరో-ప్యాడెడ్ 5-చార్ చిన్న అక్షరం హెక్స్
+5. `cch=00000;` కంప్యూటెడ్ టోకెన్తో భర్తీ చేయండి
 
 స్థిరాంకాలు:
 
-- సీడ్: `0x6e52736ac806831e`
-- ప్యాటర్న్: `/\bcch=([0-9a-f]{5});/`
+- సీడ్: `0x4d659218e32a3268` ( Claude కోడ్ 2.1.252 మరియు 2.1.322 యొక్క లూప్బ్యాక్ క్యాప్చర్లతో సరిపోలుతుంది)
+- నమూనా: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
 
-అప్స్ట్రీమ్ ఫిల్టర్లు వాటిని grep చేయకుండా ఉండేందుకు, "సున్నితమైన" క్లయింట్ పేర్లలోని మొదటి అక్షరం తర్వాత Unicode **zero-width joiner** (`U+200D`)ను చొప్పిస్తుంది. డిఫాల్ట్ పదాల జాబితా:
+యూనికోడ్ని ఇన్సర్ట్ చేస్తుంది** సున్నా-వెడల్పు జాయినర్** (`U+200D`) "సెన్సిటివ్" క్లయింట్ పేర్ల యొక్క మొదటి అక్షరం తర్వాత అప్స్ట్రీమ్ ఫిల్టర్లు వాటిని grep చేయవు. డిఫాల్ట్ పదాల జాబితా:
 
 ```
 opencode, open-code, cline, roo-cline, roo_cline, cursor, windsurf,
 aider, continue.dev, copilot, avante, codecompanion
 ```
 
-వర్తించే చోటులు: `system` బ్లాక్లు, అన్ని `messages[].content`, అలాగే `tools[].description` / `tools[].function.description`. ఆపరేటర్ `setSensitiveWords()` ద్వారా దీన్ని ఓవర్రైడ్ చేయవచ్చు.
+దీనికి వర్తింపజేయబడింది: `system` బ్లాక్లు, అన్ని `messages[].content`, మరియు `tools[].description` / `tools[].function.description`. `setSensitiveWords()` ద్వారా ఆపరేటర్-ఓవర్రిడబుల్.
 
 ### `claudeCodeCompatible.ts` — `anthropic-compatible-cc-*` ప్రొవైడర్లు
 
-"నిజమైన Claude Code" ట్రాఫిక్ను మాత్రమే అంగీకరించే థర్డ్-పార్టీ Anthropic రిలేల కోసం:
+"నిజమైన Claude కోడ్" ట్రాఫిక్ను మాత్రమే ఆమోదించే మూడవ పక్షం Anthropic రిలేల కోసం:
 
 - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
-- డిఫాల్ట్గా `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
-- ప్రతి కనెక్షన్కు ఉన్న "Enable redact-thinking beta" టాగుల్, ఒక CC Compatible అప్స్ట్రీమ్కు ప్రత్యేకంగా రీడాక్ట్ చేసిన థింకింగ్ స్ట్రీమ్లు అవసరమైనప్పుడు `redact-thinking-2026-02-12`ను జోడిస్తుంది
-- ప్రతి కనెక్షన్కు ఉన్న "Enable summarized thinking display" టాగుల్ `providerSpecificData.requestDefaults.summarizeThinking`ను నిల్వ చేస్తుంది మరియు ఇప్పటికే డిస్ప్లే మోడ్ సెట్ చేయని CC Compatible థింకింగ్ అభ్యర్థనలకు `display: "summarized"`ను జోడిస్తుంది
+- డిఫాల్ట్గా`anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
+- CC అనుకూలమైన అప్స్ట్రీమ్కు ప్రత్యేకంగా సవరించిన ఆలోచనా ప్రవాహాలు అవసరమైనప్పుడు ప్రతి-కనెక్షన్ "రీడక్ట్-థింకింగ్ బీటాను ప్రారంభించు" టోగుల్ `redact-thinking-2026-02-12` జోడిస్తుంది
+- ప్రతి-కనెక్షన్ "సంగ్రహీకరించిన ఆలోచన ప్రదర్శనను ప్రారంభించు" టోగుల్ `providerSpecificData.requestDefaults.summarizeThinking` ని నిల్వ చేస్తుంది మరియు ఇప్పటికే డిస్ప్లే మోడ్ను సెట్ చేయని అనుకూల ఆలోచన అభ్యర్థనలను `display: "summarized"` CC జోడిస్తుంది
 - `CONTEXT_1M_BETA_HEADER = "context-1m-2025-08-07"` (Opus/Sonnet 4.x కుటుంబం)
-- డిఫాల్ట్ పాత్: `/v1/messages?beta=true`
+- డిఫాల్ట్ మార్గం: `/v1/messages?beta=true`
 
-అదే బండిల్లోని అనుబంధ మాడ్యూల్లు:
+ఒకే బండిల్లోని సోదరి మాడ్యూల్స్:
 
-- `claudeCodeConstraints.ts` — టెంపరేచర్ + cache-control నియమాలు
-- `claudeCodeToolRemapper.ts` — టూల్ పేరు రీమ్యాపింగ్
+- `claudeCodeConstraints.ts` — ఉష్ణోగ్రత + కాష్-నియంత్రణ నియమాలు
+- `claudeCodeToolRemapper.ts` — సాధనం-పేరు రీమాపింగ్
 - `claudeCodeExtraRemap.ts` — అదనపు పేలోడ్ సాధారణీకరణ
 
 ---
 
 ## Antigravity స్టీల్త్
 
-Antigravity అభ్యర్థనలు కాలర్ టెక్స్ట్ బైట్-ఫర్-బైట్ను భద్రపరుస్తాయి. OmniRoute IDE క్లయింట్ను అనుకరించడానికి ప్రాంప్ట్లు లేదా rename/inject సాధనాల్లో సున్నా-వెడల్పు అక్షరాలను చొప్పించదు.
+Antigravity అభ్యర్థనలు కాలర్ టెక్స్ట్ బైట్-ఫర్-బైట్ను భద్రపరుస్తాయి. OmniRoute IDE క్లయింట్ని అనుకరించడానికి ప్రాంప్ట్లు లేదా rename/inject సాధనాల్లో జీరో-వెడల్పు అక్షరాలను చొప్పించదు.
 
 ### `antigravityHeaderScrub.ts`
 
@@ -153,7 +154,7 @@ Antigravity అభ్యర్థనలు కాలర్ టెక్స్ట
 
 అప్స్ట్రీమ్ ఎన్ఫోర్స్మెంట్ ఆన్లో ఉంది**Google వైపు** , OmniRoute దేనినీ నిరోధించదు. env var పేరు మరియు ఇప్పటికే ఉన్న పత్రాలు దాన్ని తిప్పడానికి సురక్షితమైన నాబ్ లాగా ఉంటాయి; అది కాదు.
 
-**ఇది ఫ్రీ-టైర్-ఓన్లీ వినియోగం కంటే దుర్వినియోగ గుర్తింపును ఎందుకు దూకుడుగా ఆకర్షిస్తుంది:**
+**ఇది ఫ్రీ-టైర్-ఓన్లీ వాడకం కంటే దుర్వినియోగ గుర్తింపును ఎందుకు మరింత దూకుడుగా ఆకర్షిస్తుంది:**
 
 - ఉచిత-టైర్ హిట్లు-కోటా-అండ్-స్టాప్ల కంటే భిన్నంగా ఒకే Google ఖాతా ఫ్లాగ్లపై నిరంతర స్వయంచాలక వ్యయం.
 - క్రెడిట్ ఓవర్గేజ్లకు రేట్ సీలింగ్ ఉండదు, కాబట్టి తప్పుగా కాన్ఫిగర్ చేయబడిన క్లయింట్ నిమిషాల్లో అనేక వందల USD బర్న్ చేయవచ్చు మరియు API-కీ రీసేల్ లేదా బాట్ ట్రాఫిక్ లాగా కనిపిస్తుంది.
@@ -195,7 +196,7 @@ Please submit an appeal to continue using this product.
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` అని చదువుతుంది
 - `src/lib/oauth/providers/antigravity.ts` — క్రెడెన్షియల్ ప్లంబింగ్
-- అసలైన సంఘటన నివేదిక: చర్చ [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- అసలైన సంఘటన నివేదిక: చర్చ [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

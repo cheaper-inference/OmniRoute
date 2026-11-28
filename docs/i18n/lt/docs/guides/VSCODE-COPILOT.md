@@ -4,37 +4,37 @@
 
 ---
 
-**OmniCopilot** įtraukia kiekvieną modelį, kurį aptarnauja jūsų OmniRoute, į _savosios_ GitHub Copilot Chat
-modelių parinkiklį. Jokios antros šoninės juostos, jokios atskiros pokalbių sąsajos — Copilot agento režimas, įrankių iškvietimas,
-MCP serveriai ir pasirinktinės instrukcijos veikia kaip anksčiau, tik naudojamas jūsų pasirinktas modelis.
+**OmniCopilot** prideda jūsų OmniRoute pokalbių modelius ir kombinacijas į vietinį Copilot pokalbių modelių rinkiklį. Naudokite esamas redaktoriaus pokalbių ir agento darbo eigas su įrankių iškvietimu ir vizija, kai tai palaiko pasirinktas modelis.
 
-|                          |                                                                                                                                                 |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Įdiegti (VS Code)**    | [Marketplace → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)                        |
-| **Įdiegti (atšakose)**   | [Open VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro |
-| **Šaltinis / problemos** | [github.com/diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) (MIT)                                                        |
-| **Reikalavimai**         | VS Code 1.104+                                                                                                                                  |
+|                             |                                                                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Įdiegti (VS kodas)**      | [Prekyvietė → `diegosouzapw.omnicopilot`](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot)              |
+| **Įdiegti (atidaryti VSX)** | [Atidaryti VSX](https://open-vsx.org/extension/diegosouzapw/omnicopilot) — reikia suderinamo kalbos modelio teikėjo ir pokalbių APIs |
+| **Šaltinis / problemos**    | [github.com/cheaper-inference/OmniCopilot](https://github.com/cheaper-inference/OmniCopilot) (MIT)                                   |
+| **Reikalauja**              | VS kodas 1.104 + (1.122 + jei norite jį naudoti be GitHub prisijungimo ar Copilot plano)                                             |
+| **Dabartinis leidimas**     | OmniCopilot v1.5.1 abiejose parduotuvėse (išleista 2026-11-24)                                                                       |
 
-> **Copilot prenumerata nereikalinga.** Nuo VS Code 1.122 kalbos modelio teikėjas veikia
-> neprisijungus prie GitHub ir neturint jokio Copilot plano. Įterptieji užbaigimai ir
-> įterpiniais pagrįstos funkcijos nepatenka į teikėjo API ir joms vis dar reikia Copilot.
+Išsaugoti momentinę nuotrauką** 2026-11-25 (01:43 UTC)** , dabartinis leidimas:** 52 081 Marketplace diegimas** ir** 20 989 Open VSX atsisiuntimai** . Tai skirtinga parduotuvių metrika, o ne bendras vartotojų skaičius. Šaltiniai: [Marketplace](https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot) ir [Open VSX API](https://open-vsx.org/api/diegosouzapw/omnicopilot/latest).
+
+Atviras VSX prieinamumas pats savaime nenustato suderinamumo su kiekvienu tą registrą naudojančiu redaktoriumi. Patikrinkite redaktoriaus pokalbių ir kalbos modelio API palaikymą.
+
+> **Copilot pokalbiams BYOK kodo 1.122 +VS prenumerata nereikalinga.** Microsoft palaiko pokalbius, įrankius ir MCP be GitHub prisijungimo, kai sukonfigūruotas teikėjas. Naudojant VS kodą 1.104–1.121 plėtinys vis dar veikia, bet VS kodui reikalingas prisijungęs Copilot planas. Įterptieji pasiūlymai ir įterpimais pagrįstos funkcijos lieka už teikėjo API ribų ir vis tiek reikalauja Copilot; Copilot Business/Enterprise administratoriai gali išjungti trečiųjų šalių modelių teikėjus pagal politiką; šakutė rodo modelius tik tuo atveju, jei įdiegia pokalbių teikėją API. Už tiekėjų naudojimą vis tiek gali būti taikomi mokesčiai. Žr. [VS Code 1.122 laidos pastabas](https://code.visualstudio.com/updates/v1_122#_use-byok-without-a-github-sign-in) ir [kalbos modelio vadovą](https://code.visualstudio.com/docs/agent-customization/language-models).
 
 ---
 
 ## Sąranka
 
-1. **Paleiskite OmniRoute** — `npm install -g omniroute && omniroute` (valdymo skydas pasiekiamas adresu `http://localhost:20128`).
-2. **Įdiekite plėtinį** — plėtinių rodinyje ieškokite „OmniRoute“.
-3. **Pasirinkite modelį** — Copilot Chat → modelių parinkiklis → **Valdyti modelius…** → **OmniRoute**, tada pažymėkite
-   norimus modelius.
+1. **Paleisti OmniRoute** — `npm install -g omniroute && omniroute` (prietaisų skydelis `http://localhost:20128`).
+2. **Įdiekite plėtinį** — ieškokite „OmniRoute“ plėtinių rodinyje.
+3. **Prisijunkite** — išsaugokite numatytąjį `http://localhost:20128` arba nustatykite savo serverio URL ir API raktus**OmniRoute: Tvarkyti ryšį** .
+4. **Pasirinkite modelį** — Copilot Pokalbių → modelių rinkiklis →** Tvarkyti modelius…** →**OmniRoute** , tada pažymėkite, ką norite.
 
-Kai OmniRoute veikia numatytuoju prievadu, nieko konfigūruoti nereikia. Jei naudojate nuotolinį egzempliorių, atverkite
-**OmniRoute piktogramą veiklos juostoje** (arba paleiskite `OmniRoute: Manage Connection`) ir nustatykite:
+Norėdami sužinoti ryšio nustatymus, atidarykite**OmniRoute piktogramą veiklos juostoje** (arba paleiskite `OmniRoute: Manage Connection`) ir nustatykite:
 
-- **Serverio URL** — serverio šakninis adresas, pvz., `http://192.168.0.15:20128`. Plėtinys
-  prideda `/v1` priesagą; jos neįtraukite.
-- **API raktas** — tik kai serveryje nustatytas `REQUIRE_API_KEY`. Jis saugomas OS raktinėje naudojant VS
-  Code SecretStorage, niekada — `settings.json`.
+- **Serveris URL** — serverio šaknį, pvz., `http://omniroute.example.com:20128`. `/v1` priesaga pridedama prie plėtinio; jo neįtraukti.
+- **API raktas** — reikalingas, kai to reikalauja serverio išvados autentifikavimo politika. Saugoma per VS kodą SecretStorage, niekada ne `settings.json`; galimi konkrečios darbo vietos klavišai. Naudokite raktą, patvirtintą modeliams, kuriuos norite parodyti.
+
+Plėtinyje taip pat pateikiamas ryšio indikatorius, modelio atnaujinimas, modelio kontekstas ir kainodaros metaduomenys (įskaitant derinius), srautinis motyvavimas su** Mąstymo pastangos** VS Code 1.120 + meniu, būsenos juostos dienos limito indikatorius ir naudojimo skydelis (OmniRoute 3.8.50 +), CLI konfigūracija ir pasirenkamas prietaisų skydelio skirtukas. Pasirinktas modelis ir serverio politika nustato galimybes, kurias galite naudoti.
 
 ---
 
@@ -118,26 +118,25 @@ atsako antraštes ir grįžta prie išorinės naršyklės — niekas nesugenda, 
 
 ---
 
-## Kitų įrankių konfigūravimas iš VS Code
+## Kitų įrankių konfigūravimas iš VS kodo
 
-**`OmniRoute: Configure Coding CLI`** naudoja `omniroute` CLI, kad įrašytų paruoštus naudoti profilius,
-skirtus Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code,
-Kilo ir Roo — tas pačias konfigūracijas, kurios aprašytos
-[`CLI-INTEGRATIONS.md`](CLI-INTEGRATIONS.md). API raktas CLI perduodamas per
-`OMNIROUTE_API_KEY` aplinkos kintamąjį, niekada ne komandų eilutėje.
+**`OmniRoute: Configure Coding CLI`** skatina `omniroute` CLI rašyti paruoštus naudoti profilius 16 įrankių: Codex CLI, Claude Code, Cline, Continue, Cursor, Aider, OpenCode, Goose, Crush, Qwen Code, Kilo, Roo, Gemini CLIWhyCodes, Zed Plėtinys iškviečia `setup-*` komandas integruotame terminale; įdiekite OmniRoute CLI versiją, kurioje yra pasirinkta komanda. Žr [CLI integravimo vadovą](CLI-INTEGRATIONS.md), kuriame rasite kiekvieno recepto naudojamus failus ir vėliavėles bei [plėtinio įrankių registrą](https://github.com/cheaper-inference/OmniCopilot/blob/main/src/cliBridge.ts).
+
+Raktas API perduodamas CLI per `OMNIROUTE_API_KEY`, niekada komandų eilutėje. Sąrankos receptai gali išlaikyti kredencialus tikslinio įrankio konfigūracijoje. Kai bendrinate konkrečios darbo srities raktą su įrankio vartotojo lygio konfigūracija, plėtinys pirmiausia prašo patvirtinimo.
 
 ---
 
 ## Trikčių šalinimas
 
-| Požymis                                                           | Priežastis / sprendimas                                                                                                                                                                                                                                                                                             |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Modelių pasirinkimo sąraše nėra OmniRoute modelių                 | Serveris nepasiekiamas. Būsenos juostos taškas tampa pilkas; paleiskite `OmniRoute: Check Connection`. Aptikimas tyčia vyksta tyliai ir, užuot rodęs raginimą, tiesiog nepateikia jokių modelių.                                                                                                                    |
-| Kiekvienas modelis rodomas du kartus                              | Naudojate senesnę nei 1.0.1 OmniCopilot versiją — atnaujinkite. Dabar plėtinys siunčia užklausą su `?prefix=alias`.                                                                                                                                                                                                 |
-| Anksčiau rodytas vaizdo / garso modelis dingo                     | Nuo 1.0.1 taip yra tyčia — jis niekada negalėjo atsakyti į pokalbio užklausą.                                                                                                                                                                                                                                       |
-| Veiklos juostoje nėra skydelio                                    | VS Code perkelia papildomus rodinių konteinerius į **„…“** perpildymo meniu Veiklos juostos apačioje, o dešiniuoju pelės mygtuku paslėptas konteineris lieka paslėptas. Dešiniuoju pelės mygtuku spustelėkite Veiklos juostą → pažymėkite **OmniRoute** arba atverkite jį naudodami `OmniRoute: Manage Connection`. |
-| Nepaisant `editor` režimo, valdymo skydelis atveriamas naršyklėje | Serveris nebuvo **sukompiliuotas** su `DASHBOARD_ALLOW_EMBED=vscode` (žr. pirmiau) — jo nustatymas paleidimo metu iš anksto sukompiliuotame dieginyje nieko nekeičia. Perėjimas prie atsarginio varianto yra numatytas.                                                                                             |
-| Pakeitus teikėjus modelių sąrašas yra pasenęs                     | `OmniRoute: Refresh Models` arba skydelyje esanti ↻ nuoroda.                                                                                                                                                                                                                                                        |
+| Simptomas                                                               | Priežastis / pataisyti                                                                                                                                                                                                                                                                                           |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rinkiklyje nėra OmniRoute modelių                                       | Serveris nepasiekiamas. Būsenos juostos taškas tampa pilkas; paleisti `OmniRoute: Check Connection`. „Discovery“ dizainas yra tylus ir neteikia jokių modelių, o skatina.                                                                                                                                        |
+| Kiekvienas modelis pasirodo du kartus                                   | Jūs naudojate OmniCopilot senesnį nei 1.0.1 — naujinimą. Plėtinys dabar prašo `?prefix=alias`.                                                                                                                                                                                                                   |
+| Anksčiau buvo įtrauktas į sąrašą image/audio modelis, kurio nebėra      | Tyčia, nes 1.0.1 — niekada negalėjo atsakyti į pokalbio užklausą.                                                                                                                                                                                                                                                |
+| Veiklos juostoje trūksta skydelio                                       | VS kodas perkelia papildomus rodinio konteinerius į** "…"** perpildymas veiklos juostos apačioje, o dešiniuoju pelės klavišu paslėptas konteineris lieka paslėptas. Dešiniuoju pelės mygtuku spustelėkite veiklos juostos → varnelę**OmniRoute** , arba atidarykite jį naudodami `OmniRoute: Manage Connection`. |
+| Prietaisų skydelis atidaromas naršyklėje nepaisant `editor` režimo      | Serverio nebuvo** pastatytas** su `DASHBOARD_ALLOW_EMBED=vscode` (žr. aukščiau) — nustatant jį paleidžiant iš anksto įdiegtame diegime nieko nedaro. Atsarginis sprendimas yra sąmoningas.                                                                                                                       |
+| Pakeitus tiekėją modelių sąrašas yra pasenęs                            | `OmniRoute: Refresh Models` arba skydelyje esanti ↻ nuoroda.                                                                                                                                                                                                                                                     |
+| Skydelyje rašoma _Prisijungęs (modeliai užblokuoti)_, rinkiklis tuščias | Serveris atmeta raktą. Išsaugokite tinkamą raktą su** Išsaugoti ir išbandyti** . Jei raktas buvo pataisytas serveryje (įjungtas arba suteikta prieiga prie modelių), plėtinys pats nepastebi: paleiskite `OmniRoute: Refresh Models` arba atidarykite OmniRoute skydelį.                                         |
 
 ---
 

@@ -5,9 +5,8 @@
 ---
 
 > **ସତ୍ୟର ଉତ୍ସ:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **ଶେଷ ଅପଡେଟ୍:** 2026-09-22 — ସ୍କୋପ୍ ନାମସ୍ପେସ୍ MCP-SERVER.md କୁ ସୂଚାଏ
 
-OmniRoute ରେ ଏକ ରୁଟ୍-ସଚେତନ ଅନୁମତି ପାଇପଲାଇନ୍ ଅଛି ଯାହା ପ୍ରତ୍ୟେକ API ଅନୁରୋଧକୁ ଗେଟ୍ କରେ। ବର୍ଗୀକରଣ **ନିର୍ଣ୍ଣାୟକ** ଏବଂ **ଫେଲ୍-କ୍ଲୋଜ୍ଡ** — ଯାହା ବର୍ଗୀକୃତ ହୋଇପାରିବ ନାହିଁ ତାହା `MANAGEMENT` ଭାବରେ ଶେଷ ହୁଏ ଏବଂ ଏକ ସେସନ୍ କିମ୍ବା ମ୍ୟାନେଜମେଣ୍ଟ-ଗ୍ରେଡ୍ ଟୋକେନ୍ ଆବଶ୍ୟକ କରେ। ଏହି ପୃଷ୍ଠାଟି ରୁଟ୍ ରକ୍ଷଣାବେକ୍ଷଣ କରୁଥିବା କିମ୍ବା ନୂତନ ଏଣ୍ଡପଏଣ୍ଟ୍ ଡିଜାଇନ୍ କରୁଥିବା ଇଞ୍ଜିନିୟରମାନଙ୍କ ପାଇଁ ମଡେଲ୍ ବ୍ୟାଖ୍ୟା କରେ।
+OmniRoute ଏକ ମାର୍ଗ-ସଚେତନ ପ୍ରାଧିକରଣ ପାଇପଲାଇନ ଅଛି ଯାହା ପ୍ରତ୍ୟେକ API ଅନୁରୋଧକୁ ଗେଟ୍ କରେ। ବର୍ଗୀକରଣ ହେଉଛି।** ନିର୍ଣ୍ଣୟବାଦୀ।** ଏବଂ** ବିଫଳ-ବନ୍ଦ।** — ଯାହାକିଛି ଶ୍ରେଣୀଭୁକ୍ତ ହୋଇପାରିବ ନାହିଁ `MANAGEMENT` ଭାବରେ ଶେଷ ହୁଏ ଏବଂ ଏକ ଅଧିବେଶନ କିମ୍ବା ପରିଚାଳନା-ଗ୍ରେଡ୍ ଟୋକେନ୍ ଆବଶ୍ୟକ କରେ। ଏହି ପୃଷ୍ଠା ଇଞ୍ଜିନିୟର୍ମାନଙ୍କ ପାଇଁ ମାର୍ଗ ପରିଚାଳନା କିମ୍ବା ନୂତନ ଏଣ୍ଡପଏଣ୍ଟ ଡିଜାଇନ୍ କରିବା ପାଇଁ ମଡେଲ୍ ବ୍ୟାଖ୍ୟା କରେ।
 
 ![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
@@ -181,17 +180,17 @@ Incoming request → src/proxy.ts
        - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-ବିଶ୍ୱସ୍ତ ଆଭ୍ୟନ୍ତରୀଣ ଶୀର୍ଷଲେଖଗୁଡ଼ିକ ( `src/server/authz/headers.ts` ରେ ବ୍ୟାଖ୍ୟା କରାଯାଇଛି) \|** ଆସୁଥିବା ଅନୁରୋଧରୁ ଛଡ଼ାଯାଇଛି \|** ବର୍ଗୀକରଣ ପୂର୍ବରୁ — ଗ୍ରାହକମାନେ ଏକ ବିଷୟର ଛଦ୍ମନାମ କରିବାକୁ `x-omniroute-auth-*` ପୂର୍ବ-ଜନସଂଖ୍ୟା କରିପାରିବେ ନାହିଁ \|
+ବିଶ୍ୱସ୍ତ ଆଭ୍ୟନ୍ତରୀଣ ଶୀର୍ଷଲେଖଗୁଡ଼ିକ ( `src/server/authz/headers.ts` ରେ ବ୍ୟାଖ୍ୟା କରାଯାଇଛି)।** ଆସୁଥିବା ଅନୁରୋଧରୁ ଛଡ଼ାଯାଇଛି।** ବର୍ଗୀକରଣ ପୂର୍ବରୁ — ଗ୍ରାହକମାନେ ଏକ ବିଷୟର ଛଦ୍ମନାମ କରିବାକୁ `x-omniroute-auth-*` ପୂର୍ବ-ଜନସଂଖ୍ୟା କରିପାରିବେ ନାହିଁ।
 
 ### ନୀତି ଚୁକ୍ତି
 
 ପ୍ରତ୍ୟେକ ରୁଟ୍ ଶ୍ରେଣୀର `src/server/authz/policies/` ରେ ଏକ ନୀତି ଅଛି:
 
-- **`publicPolicy`** (`policies/public.ts`) — ସର୍ବଦା `allow({ kind: "anonymous", id: "anonymous" })` ଫେରସ୍ତ କରେ \|
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — ନିର୍ବାହକାରୀ, `validateApiKey()` ମାଧ୍ୟମରେ ବ valid ଧ କରେ \| ପ୍ରଭାବଶାଳୀ `REQUIRE_API_KEY` feature ଶିଷ୍ଟ୍ୟ ପତାକା ଅକ୍ଷମ ହେଲେ ହିଁ ଅଜ୍ଞାତ ହୋଇଯାଏ \| ପ୍ରଭାବଶାଳୀ ପତାକା `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ମାଧ୍ୟମରେ ସମାଧାନ ହୋଇଛି ତେଣୁ ଡ୍ୟାସବୋର୍ଡ ବ ature ଶିଷ୍ଟ୍ୟ ଫ୍ଲାଗ ଏବଂ ପରିବେଶ ଭେରିଏବଲ୍ `/api/v1/*`, `/api/v1beta/*`, ଏବଂ ଛଦ୍ମନାମକୁ କ୍ରମାଗତ ଭାବରେ ପରିଚାଳନା କରେ \| ସମାଧାନକାରୀ ବିଫଳତା ବନ୍ଦ ହୋଇଯାଏ \| କ୍ଲାଏଣ୍ଟ API ରୁଟରେ ଡ୍ୟାସବୋର୍ଡ-ଅଧିବେଶନ ଅନୁରୋଧକୁ ଅନୁମତି ଦେଇଥାଏ ( `/api/v1/models` ଅନ୍ତର୍ଭୂକ୍ତ କରି, ଡ୍ୟାସବୋର୍ଡ ମଡେଲ କାଟାଲଗ୍ ଦ୍ୱାରା ବ୍ୟବହୃତ) \| ଯେତେବେଳେ ଏଣ୍ଟ୍ରା ID SSO ସକ୍ଷମ ହୁଏ, ଏକ ବିୟର ଯାହାକି ଗଠନମୂଳକ ଭାବରେ ଏକ ଏଣ୍ଟ୍ରା ଟୋକେନ୍ (ତିନୋଟି ଆଧାର 64url ସେଗମେଣ୍ଟ, `RS*` alg, `kid`) SSO ଶାଖା ଦ୍ୱାରା ପରିଚାଳିତ ହୋଇଥାଏ \|** ପୂର୍ବରୁ** `validateApiKey()` — ଷ୍ଟାଟିକ୍ API କିଗୁଡ଼ିକ ପ୍ରଭାବିତ ନୁହେଁ \| [Entra ID SSO](../security/ENTRA_SSO.md) ଦେଖନ୍ତୁ \|
-- **`managementPolicy`** (`policies/management.ts`) — ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ, ଆଭ୍ୟନ୍ତରୀଣ ମଡେଲ-ସିଙ୍କ ଅନୁରୋଧ ( `/api/providers/[name]/(sync-models|models)` ସହିତ ମେଳ) ଗ୍ରହଣ କରେ, କିମ୍ବା ଯଦି `isAuthRequired()` ମିଥ୍ୟା ଫେରସ୍ତ କରେ ତେବେ ସଂପୂର୍ଣ୍ଣ ଛାଡିଦିଏ \| 403 (`AUTH_001`) ଫେରସ୍ତ କରେ ଯେତେବେଳେ ଏକ ବିୟର ଟୋକନ୍ ଉପସ୍ଥିତ କିନ୍ତୁ ଅବ alid ଧ, 401 ଅନ୍ୟଥା \| ଯେକ any ଣସି auth ଶାଖା — [ରୁଟ୍ ଗାର୍ଡ ଟାୟର୍](../security/ROUTE_GUARD_TIERS.md) ଦେଖିବା ପୂର୍ବରୁ ରୁଟ୍-ଗାର୍ଡ ସ୍ତରଗୁଡିକ (LOCAL_ONLY / ALWAYS_PROTECTED) କୁ ମଧ୍ୟ କାର୍ଯ୍ୟକାରୀ କରିଥାଏ \| `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ରେ LOCAL_ONLY ପଥ (ଆଜି: `/api/mcp/`) ଅଣ-ଲୁପବ୍ୟାକ୍ ରୁ ପ୍ରବେଶ କରାଯାଇପାରେ ଯେତେବେଳେ ବିୟର ଚାବି `manage` ପରିସର ବହନ କରେ; ଅନ୍ୟ ସମସ୍ତ LOCAL_ONLY ପଥଗୁଡିକ ପରିସରକୁ ଖାତିର ନକରି କଠୋର-ଲୁପବ୍ୟାକ୍ ରହିଥାଏ \|
+- **`publicPolicy`** (`policies/public.ts`) — ସର୍ବଦା `allow({ kind: "anonymous", id: "anonymous" })` ଫେରସ୍ତ କରେ।
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ନିର୍ବାହକାରୀ, `validateApiKey()` ମାଧ୍ୟମରେ ବ valid ଧ କରେ। ପ୍ରଭାବଶାଳୀ `REQUIRE_API_KEY` feature ଶିଷ୍ଟ୍ୟ ପତାକା ଅକ୍ଷମ ହେଲେ ହିଁ ଅଜ୍ଞାତ ହୋଇଯାଏ। ପ୍ରଭାବଶାଳୀ ପତାକା `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ମାଧ୍ୟମରେ ସମାଧାନ ହୋଇଛି ତେଣୁ ଡ୍ୟାସବୋର୍ଡ ବ ature ଶିଷ୍ଟ୍ୟ ଫ୍ଲାଗ ଏବଂ ପରିବେଶ ଭେରିଏବଲ୍ `/api/v1/*`, `/api/v1beta/*`, ଏବଂ ଛଦ୍ମନାମକୁ କ୍ରମାଗତ ଭାବରେ ପରିଚାଳନା କରେ। ସମାଧାନକାରୀ ବିଫଳତା ବନ୍ଦ ହୋଇଯାଏ। କ୍ଲାଏଣ୍ଟ API ରୁଟରେ ଡ୍ୟାସବୋର୍ଡ-ଅଧିବେଶନ ଅନୁରୋଧକୁ ଅନୁମତି ଦେଇଥାଏ ( `/api/v1/models` ଅନ୍ତର୍ଭୂକ୍ତ କରି, ଡ୍ୟାସବୋର୍ଡ ମଡେଲ କାଟାଲଗ୍ ଦ୍ୱାରା ବ୍ୟବହୃତ)। ଯେତେବେଳେ ଏଣ୍ଟ୍ରା ID SSO ସକ୍ଷମ ହୁଏ, ଏକ ବିୟର ଯାହାକି ଗଠନମୂଳକ ଭାବରେ ଏକ ଏଣ୍ଟ୍ରା ଟୋକେନ୍ (ତିନୋଟି ଆଧାର 64url ସେଗମେଣ୍ଟ, `RS*` alg, `kid`) SSO ଶାଖା ଦ୍ୱାରା ପରିଚାଳିତ ହୋଇଥାଏ।** ପୂର୍ବରୁ** `validateApiKey()` — ଷ୍ଟାଟିକ୍ API କିଗୁଡ଼ିକ ପ୍ରଭାବିତ ନୁହେଁ। [Entra ID SSO](../security/ENTRA_SSO.md) ଦେଖନ୍ତୁ।
+- **`managementPolicy`** (`policies/management.ts`) — ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ, ଆଭ୍ୟନ୍ତରୀଣ ମଡେଲ-ସିଙ୍କ ଅନୁରୋଧ ( `/api/providers/[name]/(sync-models|models)` ସହିତ ମେଳ) ଗ୍ରହଣ କରେ, କିମ୍ବା ଯଦି `isAuthRequired()` ମିଥ୍ୟା ଫେରସ୍ତ କରେ ତେବେ ସଂପୂର୍ଣ୍ଣ ଛାଡିଦିଏ। 403 (`AUTH_001`) ଫେରସ୍ତ କରେ ଯେତେବେଳେ ଏକ ବିୟର ଟୋକନ୍ ଉପସ୍ଥିତ କିନ୍ତୁ ଅବ alid ଧ, 401 ଅନ୍ୟଥା। ଯେକ any ଣସି auth ଶାଖା — [ରୁଟ୍ ଗାର୍ଡ ଟାୟର୍](../security/ROUTE_GUARD_TIERS.md) ଦେଖିବା ପୂର୍ବରୁ ରୁଟ୍-ଗାର୍ଡ ସ୍ତରଗୁଡିକ (LOCAL_ONLY / ALWAYS_PROTECTED) କୁ ମଧ୍ୟ କାର୍ଯ୍ୟକାରୀ କରିଥାଏ। `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ରେ LOCAL_ONLY ପଥ (ଆଜି: `/api/mcp/`) ଅଣ-ଲୁପବ୍ୟାକ୍ ରୁ ପ୍ରବେଶ କରାଯାଇପାରେ ଯେତେବେଳେ ବିୟର ଚାବି `manage`/`admin` ପରିସର କିମ୍ବା ସଂକୀର୍ଣ୍ଣ `mcp:connect` ପରିସର (`hasMcpConnectOrManageScope`), କିମ୍ବା ଏକ ପ୍ରାମାଣିକ ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ ସହିତ; ଅନ୍ୟ ସମସ୍ତ LOCAL_ONLY ପଥଗୁଡିକ ପରିସରକୁ ଖାତିର ନକରି କଠୋର-ଲୁପବ୍ୟାକ୍ ରହିଥାଏ।
 
-ଏକ ସଫଳ ନୀତି `AuthSubject` ସହିତ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ଫେରସ୍ତ କରେ \| ଡାଉନ୍ଷ୍ଟ୍ରିମ୍ ହ୍ୟାଣ୍ଡେଲର୍ମାନେ auth ତର୍କକୁ ପୁନ running ଚଲାଇବା ପରିବର୍ତ୍ତେ `src/server/authz/assertAuth.ts` ରେ `assertAuth(request, "CLIENT_API")` ମାଧ୍ୟମରେ ପ read ିପାରିବେ \|
+ଏକ ସଫଳ ନୀତି `AuthSubject` ସହିତ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ଫେରସ୍ତ କରେ। ଡାଉନ୍ଷ୍ଟ୍ରିମ୍ ହ୍ୟାଣ୍ଡେଲର୍ମାନେ auth ତର୍କକୁ ପୁନ running ଚଲାଇବା ପରିବର୍ତ୍ତେ `src/server/authz/assertAuth.ts` ରେ `assertAuth(request, "CLIENT_API")` ମାଧ୍ୟମରେ ପ read ିପାରିବେ।
 
 ## ସର୍ବସାଧାରଣ ମାର୍ଗ ତାଲିକା।
 
@@ -280,35 +279,24 @@ export async function POST(request: Request) {
 
 ସୁବିଧା ଅନୁସାରେ ନୁହେଁ, ଆକୃତି ଅନୁସାରେ ସେଟ୍ ବାଛନ୍ତୁ। ଗୋଟିଏ ରୁଟ୍ `PUBLIC_API_ROUTES_EXACT`ରେ ଯାଏ (କିମ୍ବା କେବଳ-GET ପାଇଁ `PUBLIC_READONLY_CORS_API_ROUTES`ରେ); କେବଳ ଏକ ପ୍ରକୃତ ଉପବୃକ୍ଷ `PUBLIC_API_ROUTE_PREFIXES`ରେ ଯାଏ, ଏବଂ ଏହା **`/`ରେ ଶେଷ ହେବା ଆବଶ୍ୟକ**। ଉପସର୍ଗ ତାଲିକାରେ ଗୋଟିଏ ଏକକ ରୁଟ୍ ରଖିବା ଦ୍ୱାରା ଏହାର ପ୍ରାରମ୍ଭିକ ଅକ୍ଷରଗୁଡ଼ିକ ସମାନ ଥିବା ପ୍ରତ୍ୟେକ ସଂଲଗ୍ନ ପଥ ମଧ୍ୟ ସାର୍ବଜନୀନ ହୋଇଯାଏ — ଏଥିରେ ପରେ ଯୋଡ଼ାଯାଇଥିବା ଡାଇନାମିକ୍-ସେଗମେଣ୍ଟ ସହୋଦର ରୁଟ୍ଗୁଡ଼ିକ ମଧ୍ୟ ଅନ୍ତର୍ଭୁକ୍ତ (GHSA-74g9-q8f6-793h)। `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` ଏବଂ `tests/unit/authz/classify.test.ts`ରେ ଥିବା ୟୁନିଟ୍ ପରୀକ୍ଷାଗୁଡ଼ିକୁ ଅଦ୍ୟତନ କରନ୍ତୁ।
 
-## ସ୍କୋପ୍ସ
+## ପରିସର
 
-ତିନୋଟି ନାମସ୍ପେସ୍। ପ୍ରତ୍ୟେକ ଚେକର୍ କେବଳ ନିଜର ଷ୍ଟ୍ରିଙ୍ଗ୍ ପଢ଼େ। `manage` କାହିଁକି `read:compression` ପାଇଁ `scopeMatches` ରେ ବିଫଳ ହୁଏ ଏବଂ `read` ଆକ୍ସେସ୍ ଟୋକେନ୍ କାହିଁକି `PATCH /api/keys/{id}` କରିପାରିବ ନାହିଁ, ତାହା ସହିତ ପାର୍ଶ୍ୱ-ପାର୍ଶ୍ୱ ତୁଳନା [ତିନୋଟି ସ୍କୋପ୍ ନାମସ୍ପେସ୍](../frameworks/MCP-SERVER.md#three-scope-namespaces) ରେ ଦିଆଯାଇଛି।
+ତିନୋଟି ନାମ ସ୍ଥାନ ପ୍ରତ୍ୟେକ ଚେକର୍ କେବଳ ନିଜର ଷ୍ଟ୍ରିଙ୍ଗ୍ ପ read ନ୍ତି। `manage` କାହିଁକି `read:compression` ପାଇଁ `scopeMatches` ବିଫଳ ହୁଏ ଏବଂ କାହିଁକି `read` ଆକ୍ସେସ୍ ଟୋକେନ୍ `PATCH /api/keys/{id}` କରିପାରିବ ନାହିଁ, ପାର୍ଶ୍ୱରେ, [ତିନୋଟି ପରିସର ନାମ ସ୍ଥାନ](../frameworks/MCP-SERVER.md#three-scope-namespaces) ଅଟେ।
 
-API କି'ଗୁଡ଼ିକ ଏକ `scopes` ଆରେ ଧାରଣ କରନ୍ତି (JSON ଭାବରେ `api_keys.scopes` ରେ ସଂରକ୍ଷିତ, `src/lib/db/apiKeys.ts` ଦେଖନ୍ତୁ)।
+API କିଗୁଡ଼ିକ ଏକ `scopes` ଆରେ ଧାରଣ କରିଥାଏ ( `api_keys.scopes` ରେ JSON ଭାବରେ ଗଚ୍ଛିତ, `src/lib/db/apiKeys.ts` ଦେଖନ୍ତୁ)।
 
-### ପରିଚାଳନା ସ୍କୋପ୍
+### ପରିଚାଳନା ପରିସର
 
-- `manage` / `admin` — `hasManageScope`। ପରିଚାଳନା API ରୁଟ୍ଗୁଡ଼ିକୁ ବେୟରର୍ ଆକ୍ସେସ୍।
-- `mcp:connect`, `self:usage`, `self:account-quota`, ଏବଂ
-  `policy:bypass-provider-quota` ହେଉଛି ଯୋଗାତ୍ମକ ସଠିକ୍-ମେଳ ସ୍କୋପ୍ସ। ସେଗୁଡ଼ିକ
-  `MANAGEMENT_API_KEY_SCOPES` ବାହାରେ ରୁହନ୍ତି। `mcp:connect` କେବଳ
-  `/api/mcp/` ନନ୍-ଲୁପ୍ବ୍ୟାକ୍ କାର୍ଭ-ଆଉଟ୍ ଖୋଲିଥାଏ।
+- `manage` / `admin` — `hasManageScope`। ପରିଚାଳନା API ମାର୍ଗଗୁଡିକ ପାଇଁ ଧାରଣକାରୀ ପ୍ରବେଶ।
+- `mcp:connect`, `self:usage`, `self:account-quota`, ଏବଂ `policy:bypass-provider-quota` ହେଉଛି ଯୋଗୀ ସଠିକ୍ ମେଳକ ପରିସର। ସେମାନେ `MANAGEMENT_API_KEY_SCOPES` ବାହାରେ ବସନ୍ତି। `mcp:connect` କେବଳ `/api/mcp/` non-loopback carve-out ଖୋଲିବ।
 
-### MCP ଟୁଲ୍ ସ୍କୋପ୍ସ
+### MCP ଟୁଲ୍ ସ୍କୋପ୍।
 
-କାଟାଲଗ୍ ଏବଂ ମେଳ ଖାଉଥିବା ନିୟମ (ସମାନ ଷ୍ଟ୍ରିଙ୍ଗ୍, କିମ୍ବା `*` ରେ ଶେଷ ହେଉଥିବା ଏକ ଅନୁମତିପ୍ରାପ୍ତ ସ୍କୋପ୍):
-[MCP ଟୁଲ୍ ସ୍କୋପ୍ସ](../frameworks/MCP-SERVER.md#mcp-tool-scopes)।
-`src/shared/constants/mcpScopes.ts` ରେ ଥିବା `MCP_SCOPE_LIST` ହେଉଛି ମୂଳ ଟାଇପ୍ କରାଯାଇଥିବା ସବ୍ସେଟ୍,
-ସମ୍ପୂର୍ଣ୍ଣ କାଟାଲଗ୍ ନୁହେଁ। `resolveCallerScopeContext()` MCP ଅଥ୍ ସୂଚନା, ଅନୁରୋଧ ମେଟାଡାଟା,
-କିମ୍ବା `OMNIROUTE_MCP_SCOPES` ରୁ ସ୍କୋପ୍ସ ସମାଧାନ କରିବା ପରେ
-`open-sse/mcp-server/scopeEnforcement.ts` ରେ ଏନଫୋର୍ସମେଣ୍ଟ ଚାଲିଥାଏ।
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ନହେବା ପର୍ଯ୍ୟନ୍ତ ଏହା ବନ୍ଦ ରୁହେ।
+କାଟାଲଗ୍ ଏବଂ ମେଳଣ ନିୟମ (ସମାନ ଷ୍ଟ୍ରିଙ୍ଗ୍, କିମ୍ବା `*` ରେ ସମାପ୍ତ ଏକ ମଞ୍ଜୁର ପରିସର): [MCP ଟୁଲ୍ ସ୍କୋପ୍](../frameworks/MCP-SERVER.md#mcp-tool-scopes)। `src/shared/constants/mcpScopes.ts` ରେ `MCP_SCOPE_LIST` ହେଉଛି ମୂଳ ଟାଇପ୍ ହୋଇଥିବା ସବ୍ସେଟ୍, ସେହି ପୂର୍ଣ୍ଣ କାଟାଲଗ୍ ନୁହେଁ। `resolveCallerScopeContext()` MCP auth ସୂଚନା, ମେଟାଡାଟା ଅନୁରୋଧ, କିମ୍ବା `OMNIROUTE_MCP_SCOPES` ରୁ ସ୍କୋପ୍ ସମାଧାନ କରିବା ପରେ `open-sse/mcp-server/scopeEnforcement.ts` ରେ ଏନଫୋର୍ସମେଣ୍ଟ ଚାଲିଥାଏ। `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ଏହାକୁ ସର୍ବଭାରତୀୟ ସ୍ତରରେ ଟର୍ନ୍ କରେ (ଡିଫଲ୍ଟ `false`), କିନ୍ତୁ ଏହା ସର୍ବଦା ଏକ HTTP/SSE କଲ୍ ପାଇଁ ବାଧ୍ୟତାମୂଳକ ହୋଇଥାଏ ଯାହାର API ଚାବିରେ `manage`/`admin` ଅଭାବ ଥାଏ ( `open-sse/mcp-server/scopeEnforcement.ts` ରେ `shouldForceScopeEnforcement()` ଦେଖନ୍ତୁ), ପତାକାକୁ ଖାତିର ନକରି।
 
-### ଆକ୍ସେସ୍-ଟୋକେନ୍ ସ୍କୋପ୍ସ
+### ଆକ୍ସେସ୍-ଟୋକନ୍ ସ୍କୋପ୍।
 
-`oma_live_…` ଟୋକେନ୍ଗୁଡ଼ିକ ଉପରେ `read` / `write` / `admin`, `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`) ଦ୍ୱାରା ମାନ୍ୟତାପ୍ରାପ୍ତ। ଏହି ମାନ୍ୟତା କେବଳ
-ଆକ୍ସେସ୍-ଟୋକେନ୍ କ୍ରେଡେନ୍ସିଆଲ୍ ପାଇଁ ପ୍ରଯୁଜ୍ୟ। [ପରିଚାଳନା ପ୍ରମାଣୀକରଣ](../guides/MANAGEMENT-AUTH.md) ଦେଖନ୍ତୁ।
+`oma_live_…` ଟୋକେନ୍ ଉପରେ`read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) ଦ୍ୱାରା ସ୍ଥାନିତ। ଏହି ମାନ୍ୟତା କେବଳ ଆକ୍ସେସ୍-ଟୋକେନ୍ ପ୍ରମାଣପତ୍ର ପାଇଁ ପ୍ରଯୁଜ୍ୟ। [ପରିଚାଳନା ପ୍ରାମାଣିକିକରଣ](../guides/MANAGEMENT-AUTH.md) ଦେଖନ୍ତୁ।
 
 ## Auth ଟୋଗଲ୍ ଆବଶ୍ୟକ।
 

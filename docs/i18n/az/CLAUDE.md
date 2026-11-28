@@ -6,75 +6,25 @@
 
 @AGENTS.md
 
-**Bütün layihə qaydaları [`AGENTS.md`](AGENTS.md) faylında yerləşir** — hər bir AI köməkçisi üçün
-vahid həqiqət mənbəyidir (arxitektura, konvensiyalar, testlər, keyfiyyət yoxlamaları, git iş axını,
-23 Sərt Qayda, PII üzrə öyrənilənlər). Onu tam oxuyun; layihə qaydalarını burada yenidən əlavə
-etməyin. Aşağıdakıların hamısı YALNIZ Claude Code üçün keçərlidir — bunlar `AGENTS.md` faylında
-artıq müəyyən edilmiş qaydaların əməliyyat dəqiqləşdirmələridir.
+**Bütün layihə qaydaları [`AGENTS.md`](AGENTS.md) -da yaşayır** — hər AI köməkçisi üçün yeganə həqiqət mənbəyi; yuxarıdakı idxal artıq onu yükləyir. Layihə qaydalarını bura yenidən əlavə etməyin. Aşağıdakı hər şey artıq `AGENTS.md` — Claude ONLY aiddir.
 
-## Worktree izolyasiyası — Claude Code-a xas məqamlar
+## İş ağacı izolyasiyası — Claude Kodunun xüsusiyyətləri
 
-Tam məcburi worktree protokolu (baza branch-inin təsdiqi, `.claude/worktrees/` kanonik
-yolu, `cp -al` node_modules, sökmə qaydaları)
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) faylındadır (xülasəsi `AGENTS.md` →
-Git iş axını → "Worktree izolyasiyası" bölməsində verilib). Claude Code-a xas məqamlar:
+- Əgər onlar sizə deməsələr, `AskUserQuestion` (Hard Rule #19) vasitəsilə operatorla baza filialını təsdiqləyin.
+- `scripts/dev/new-worktree.sh <branch> <confirmed-base>` ilə iş ağacını yaradın ( `.claude/worktrees/` altına enir, `node_modules` bərk bağlayır və `.husky/_` kopyalayır), sonra `path` ilə `EnterWorktree` çağırın. Həmişə bazanı keçin: onsuz skript operatorun təsdiq etdiyi ən yüksək `release/*` seçir. `EnterWorktree` öz-özünə yaratdığı iş ağacının nə sərt keçidləri, nə də qarmaqları var, ona görə də onun içərisində heç bir əvvəlcədən icra qapısı işləmir.
 
-- Operatorla baza branch-ini `AskUserQuestion` vasitəsilə təsdiqləyin (Sərt Qayda #19) — əgər
-  onlar bunu artıq sizə bildirməyiblərsə.
-- Nativ `EnterWorktree` alətinə üstünlük verin — o, worktree-ləri artıq
-  `.claude/worktrees/` altında yaradır (kanonik yol). Worktree-ni sənədləşdirilmiş `git worktree add`
-  əmri ilə yaradın, sonra `EnterWorktree`-ni onun `path` parametri ilə çağırın.
+## Subagentlər və git
 
-## Sessiyalararası təhlükəsizlik — Claude Code xüsusiyyətləri
+Every subagent that touches git (Agent tool or Workflow script) gets Hard Rule #22a's `git stash` ban verbatim in its prompt — the recorded recurrence of the stash incident came through a subagent.
 
-Sərt Qaydalar #19/#21/#22 (`AGENTS.md` faylında) paralel sessiyaları tənzimləyir. Bu icra mühiti
-üçün əməliyyat xatırlatmaları:
+## Planlaşdırma artefaktları — supergüclərin yolunu ləğv edir
 
-- **Git-ə toxunan hər bir alt agentin sorğusunda `git stash` qadağasını sözbəsöz təkrarlayın**
-  (Agent aləti / Workflow skriptləri) — alt agentlər bu faylı miras almır və stash insidentinin
-  qeydə alınmış təkrarı alt agent vasitəsilə baş verib.
-- _Bu sessiyada_ yaratmadığınız hər hansı PR-a merge və ya push etməzdən əvvəl `git worktree list`
-  icra edin və `gh pr view <N> --json state,headRefOid` ilə yenidən yoxlayın (Sərt Qayda #22b).
-- Hər sessiyanı əsas checkout-u başladığı branch-də saxlayaraq bitirin.
+Supergüclər bacarıqları `docs/superpowers/plans/`, `docs/superpowers/specs/` və `docs/research/` altında defoltları elan edir . Yazmadan əvvəl hər birini `AGENTS.md` → "Planlaşdırma və Tədqiqat Artefaktları" ilə öz `_tasks/` ekvivalentinə yenidən yazın və bunu heç vaxt əsas repoda deyil, `git -C _tasks …` ilə yerinə yetirin.
 
-## Superpowers / planlaşdırma artefaktları — yol əvəzləmələri
+## Scratch faylları — `_artifacts/`, `/tmp` deyil
 
-`_tasks/` konvensiyası `AGENTS.md` → "Planning & Research Artifacts" bölməsində müəyyən edilib.
-Superpowers bacarıqları `docs/…` istiqamətini göstərən standart yollarla gəlir — həmin standartlar
-**burada əvəzlənir**. Superpowers bacarığı "saved to `docs/superpowers/plans/…`" kimi bir yol elan
-etdikdə, yazmazdan əvvəl onu `_tasks/…` ekvivalenti ilə əvəz edin:
+Bu layihə qoşqunun seans skreçpadını (`/tmp/claude-*/…`) ləğv edir. Müvəqqəti faylları yazın — ixracı, yaradılan ziplər, birdəfəlik ara çıxışlar — to `/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/`: gitignored root `_*` yolu, beləliklə operator bütün cızıqları bir yerdə tapıb silir. Davamlı planlar, spesifikasiyalar, tədqiqatlar və təhvil-təslimlər əvəzinə `_tasks/` -ə keçir (Hard Rule #23).
 
-| Artefakt (bacarıq)                          | Standart (istifadə ETMƏYİN) | Bunun əvəzinə burada saxlayın                                 |
-| ------------------------------------------- | --------------------------- | ------------------------------------------------------------- |
-| Planlar (`writing-plans`)                   | `docs/superpowers/plans/`   | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
-| Spesifikasiyalar / dizayn (`brainstorming`) | `docs/superpowers/specs/`   | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
-| Araşdırma (`deep-research`, ad-hoc)         | `docs/research/`            | `_tasks/research/…`                                           |
-| Təhvil-təslimlər (`/handoff`)               | —                           | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
+## Qırmızı baza
 
-Həmin artefaktları əsas repoda deyil, `_tasks/` reposunda commit edin (`git -C _tasks …`).
-
-## Qaralama / müvəqqəti fayllar — `/tmp` deyil, `_artifacts/` istifadə edin
-
-Bu layihə icra mühitinin standart sessiya qaralama sahəsini (`/tmp/claude-*/…`) əvəzləyir.
-Müvəqqəti/işçi faylları — ixraclar, yaradılmış zip faylları, birdəfəlik aralıq nəticələr və
-normalda `/tmp` daxilində saxlayacağınız hər şeyi — bunun əvəzinə
-`/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/` daxilində saxlayın.
-
-- `_artifacts/` kök səviyyəli `_*` yoludur: artıq gitignore-a əlavə olunub (`AGENTS.md` → "Root
-  `_*` paths"), yalnız diskdə saxlanılır və heç vaxt izlənmir.
-- Səbəb: qaralama nəticələrini layihənin daxilində (`/tmp` əvəzinə) saxlamaq operatorun bütün
-  müvəqqəti faylları bir yerdə asanlıqla tapıb silməsinə imkan verir; beləliklə yoxa çıxan və ya
-  izlənilməyən fayllarla dolan, müvəqqəti sessiyaya xas `/tmp` qovluqlarında axtarış aparmağa
-  ehtiyac qalmır.
-- Bunu `_tasks/` ilə qarışdırmayın (Sərt Qayda #23, davamlı
-  planlar/spesifikasiyalar/araşdırmalar/təhvil-təslimlər üçün ayrıca şəxsi git reposu) —
-  `_artifacts/` yalnız birdəfəlik işçi fayllar üçündür; buradakı heç nəyin qorunmasına və ya
-  versiyalaşdırılmasına ehtiyac yoxdur.
-
-## PR-ları açmazdan əvvəl base-green yoxlaması
-
-Branch yaratmazdan və ya PR açmazdan əvvəl base-green yoxlamasını icra edin (`AGENTS.md` → Git
-Workflow → "Base-green check"; layihə bacarıqları ona `.agents/skills/_shared/base-green.md` kimi
-istinad edir). Base tip qırmızı vəziyyətdə olarkən açılmış PR-ın mətnində `⚠️ base-red inherited:
-#<issue>` olmalıdır. Toplanmış qırmızı vəziyyəti (base tip + qırmızı PR-lar) aradan qaldırmaq üçün
-`/sweep-reds` bacarığından istifadə edin.
+Yığılmış qırmızı vəziyyəti boşaltmaq üçün (əsas uc + qırmızı PRs) `/sweep-reds` bacarığından istifadə edin.

@@ -13,12 +13,12 @@ Agent Skills הם קובצי SKILL.md מובנים, המלמדים סוכנים 
 
 ## סקירה כללית
 
-הקטלוג מכיל **45 מיומנויות סוכן** (23 עבור REST API +‏ 21 עבור CLI +‏ 1 עבור תהליך עבודה של הגדרות). לכל מיומנות יש:
+הקטלוג מכיל** 45 כישורי סוכן** (זרימת עבודה של 23 REST API + 21 CLI + 1). לכל מיומנות יש:
 
-- **מזהה קנוני** (`omni-auth`, `cli-serve` וכו')
-- קובץ **SKILL.md** בנתיב `skills/{id}/SKILL.md`, הכולל YAML frontmatter (`name`, `description`) + גוף Markdown עשיר
-- **נקודות קצה של REST** (מיומנויות API) או **פקודות משנה של CLI** (מיומנויות CLI), הנגזרות ממפרט OpenAPI וממרשם ה-CLI
-- **כתובת URL גולמית של GitHub** לאחזור בזמן אמת: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- א** ID קנונית** (`omni-auth`, `cli-serve` וכו')
+- א**SKILL.md** קובץ ב- `skills/{id}/SKILL.md` עם YAML frontmatter (`name`, `description`) + rich markdown body
+- **נקודות REST** (מיומנויות API ) או** פקודות משנה CLI** (מיומנויות CLI ) שמקורן ב- OpenAPI spec ו- CLI registry
+- א**GitHub raw URL** להבאה חיה: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ curl -X POST http://localhost:20128/api/agent-skills/generate \
 
 ---
 
-## API לכיסוי
+## כיסוי API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

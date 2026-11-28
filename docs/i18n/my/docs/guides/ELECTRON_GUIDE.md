@@ -4,7 +4,7 @@
 
 ---
 
-> **အမှန်တရားအရင်းအမြစ်-** `electron/` အလုပ်ခွင်** နောက်ဆုံးအပ်ဒိတ်လုပ်ထားသည်-** 2026-06-28 — v3.8.40
+> **အမှန်တရားအရင်းအမြစ်-** `electron/` အလုပ်ခွင်
 
 OmniRoute တည်ဆောက်ထားသော cross-platform desktop app (Windows / macOS / Linux) ကို ပေးပို့သည်**Electron ၄၁** +** အီလက်ထရွန်တည်ဆောက်သူ ၂၆.၁၀** . ဒက်စ်တော့အက်ပ်သည် Next.js သီးသန့်ဆာဗာကို ကလေးလုပ်ငန်းစဉ်အဖြစ် ပေါက်ဖွားစေပြီး `BrowserWindow` ကို ညွှန်ပြကာ စနစ်ဗန်း၊ အလိုအလျောက် အပ်ဒိတ်လုပ်သူ၊ IPC တံတားနှင့် သုည config လျှို့ဝှက် bootstrap တို့ကို ပေါင်းထည့်သည်။
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## အလိုအလျောက်မွမ်းမံခြင်း။
 
-`electron-updater` GitHub ပံ့ပိုးပေးသူ (`diegosouzapw/OmniRoute`) ဖြင့် အသုံးပြုသည်။
+`electron-updater` GitHub ပံ့ပိုးပေးသူ (`cheaper-inference/OmniRoute`) ဖြင့် အသုံးပြုသည်။
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC မှတဆင့် တင်ဆက်သူသို့ ထပ်ဆင့်ပို့သော အစီအစဉ်များ : `checking`, `available`, `not-available`, `downloading` (with `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage လက်မှတ်ထိုးခြင်းသည် လက်မ�
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ဖြန့်ချိမှုများကို GitHub Releases (`diegosouzapw/OmniRoute`) တွင် ထုတ်ဝေထားပြီး `electron-updater` ဗားရှင်းအသစ်များကို စစ်ဆေးသည့်နေရာဖြစ်သည်။
+ဖြန့်ချိမှုများကို GitHub Releases (`cheaper-inference/OmniRoute`) တွင် ထုတ်ဝေထားပြီး `electron-updater` သည် ဗားရှင်းအသစ်များအတွက်လည်း စစ်ဆေးပါသည်။
 
 ## ပြသာနာရှာဖွေရှင်းပေးခြင်း
 

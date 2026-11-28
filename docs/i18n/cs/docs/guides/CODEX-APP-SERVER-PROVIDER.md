@@ -21,24 +21,21 @@ omezení použití týkající se opakovaného přehrávání relace. Vyžaduje 
 ## 1. Architektura
 
 ```
-┌─ Aplikace OmniRoute ─────────────┐        ┌─ Sidecar codex-app-server ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ token schopností)             │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  samostatně spravuje OpenAI OAuth   │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, automatická   │
-        │ sdílí (svazky compose)            │   obnova)                            │
-        ▼                                   └─────────────────────────────────────┘
-  codex-appserver-token   → token schopností WS (připojují jej oba)
-  codex-appserver-home    → ~/.codex (auth.json zapisovaný řídicím panelem,
-                             čtený procesem codex app-server v sidecaru)
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
+        ▼
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidecar naslouchá **pouze** v interní síti compose
-  (`ws://codex-app-server:1456`) a je chráněn tokenem schopností. **Nikdy** není
-  zpřístupněn hostiteli ani internetu.
-- Codex CLI je součástí obrazu `omniroute:base`, takže při spuštění sidecaru
-  není nutné instalovat codex na hostiteli ani na počítači uživatele.
+- Sajdkára poslouchá** pouze** v interní síti pro vytváření zpráv (`ws://codex-app-server:1456`) za tokenem schopností. To je** nikdy** zveřejněny na hostiteli nebo na internetu.
+- Postranní vozík používá `omniroute:cli-no-docker`, postavený z cíle `runner-cli-no-docker`, který zahrnuje Codex CLI.
 
 ## 2. Spuštění
 

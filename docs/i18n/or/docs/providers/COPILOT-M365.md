@@ -166,11 +166,11 @@ Microsoft ଗୋଟିଏ ଫେରସ୍ତ କଲାବେଳେ ଦେଶୀ 
 
 ନିଶ୍ଚିତ କରନ୍ତୁ ଯେ `copilot-m365-web` ସକ୍ଷମ ହୋଇଛି।** ଡ୍ୟାସବୋର୍ଡ → ପ୍ରଦାନକାରୀ।** । ପ୍ରଦାନକାରୀ କିଛି ସ୍ତରରେ ଡିଫଲ୍ଟ ଭାବରେ ଲୁକ୍କାୟିତ ହୋଇପାରେ।
 
-## ସନ୍ଦର୍ଭଗୁଡ଼ିକ
+## ସନ୍ଦର୍ଭ
 
-- ସମସ୍ୟା: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- ଆଲୋଚନା: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- ଇସୁ: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- ଆଲୋଚନା: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - ଉତ୍ସ: `src/shared/constants/providers/web-cookie.ts` (ପ୍ରଦାନକାରୀ ସଂଜ୍ଞା)
-- HAR ଇମ୍ପୋର୍ଟ: `src/shared/utils/m365HarImport.ts`
-- ପ୍ରମାଣପତ୍ର ଫିଲ୍ଡଗୁଡ଼ିକ: `src/shared/providers/webSessionCredentials.ts`
-- ସ୍ତର ମୋଡାଲ୍: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- HAR ଆମଦାନି: `src/shared/utils/m365HarImport.ts`
+- ପରିଚୟ କ୍ଷେତ୍ର: `src/shared/providers/webSessionCredentials.ts`
+- ପର୍ଯ୍ୟାୟ ମୋଡାଲ୍: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

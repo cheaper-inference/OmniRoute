@@ -68,10 +68,10 @@ omniroute launch --profile glm52  # استخدام Claude Code للنموذج gl
 
 يختلف دليل العمل بين الأجهزة، لذلك يمكن أن يظهر نفس المستودع ضمن مسارات مختلفة. أرسل المشروع بشكل صريح بدلاً من ذلك: يضيف Claude Code أي رؤوس مدرجة في `ANTHROPIC_CUSTOM_HEADERS` إلى كل طلب نموذج، ويقرأ OmniRoute اثنين منها:
 
-| رأس                        | قيمة                                                              |
-| -------------------------- | ----------------------------------------------------------------- |
-| `x-omniroute-project`      | اسم المشروع، على سبيل المثال `omniroute`                          |
-| `x-omniroute-project-repo` | تطبيع البعيد، على سبيل المثال `github.com/diegosouzapw/OmniRoute` |
+| رأس                        | قيمة                                                                   |
+| -------------------------- | ---------------------------------------------------------------------- |
+| `x-omniroute-project`      | اسم المشروع، على سبيل المثال `omniroute`                               |
+| `x-omniroute-project-repo` | تطبيع البعيد، على سبيل المثال `github.com/cheaper-inference/OmniRoute` |
 
 كلاهما يُقرأ من أجل الإسناد فقط؛ ولا يتم إعادة توجيهها مطلقًا إلى الموفر الرئيسي.
 
@@ -286,28 +286,20 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm/glm-4.7-flash"
 
 ## استكشاف الأخطاء وإصلاحها
 
-**يتجاهل Claude Code البوابة** — تأكد من أن `ANTHROPIC_BASE_URL` **لا يحتوي على
-`/v1`**، ثم أعد تشغيل `claude` (تُقرأ متغيرات البيئة مرة واحدة عند بدء التشغيل). يتولى `omniroute launch`
-ذلك نيابةً عنك.
+**رمز Claude يتجاهل البوابة** تأكيد — `ANTHROPIC_BASE_URL` لديه** لا `/v1`** وأعد تشغيل `claude` (تتم قراءة env مرة واحدة عند بدء التشغيل). `omniroute launch` يتولى هذا نيابة عنك.
 
-**قائمة اختيار `/model` فارغة / نماذج البوابة مفقودة** — يتطلب ذلك Claude Code
-v2.1.219+ وضبط `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. لا تظهر في قائمة الاختيار سوى معرّفات النماذج التي تبدأ بـ `claude*` /
-`anthropic*`؛ لفرض استخدام أي نموذج آخر، استخدم
-`ANTHROPIC_MODEL=<id>` (وهذا ما تفعله ملفات التعريف).
+**منتقي `/model` فارغ / مفقود نماذج البوابة** يحتاج — إلى رمز Claude v2.1.219 + و `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. يظهر فقط نموذج `claude*` / `anthropic*` IDs في المنتقي؛ فرض أي نموذج آخر باستخدام `ANTHROPIC_MODEL=<id>` (وهذا ما تفعله الملفات الشخصية).
 
-**`400 Ambiguous model 'claude-…'`** — يرسل Claude Code دائمًا معرّفات نماذج **من دون بادئة**
-(مثل `claude-opus-4-8`)، ولذلك عندما يكون كل من مزوّد Claude Code (`cc/…`) ومزوّد
-Claude (`claude/…`) متصلين، يطابق المعرّف غير المسبوق ببادئة مسارين، ويرفض
-OmniRoute التخمين. أصلح ذلك بإحدى الطريقتين: ثبّت معرّفًا مسبوقًا ببادئة باستخدام
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`، أو فعّل **تفضيل Claude Code لنماذج Claude
-غير المسبوقة ببادئة** — من مفتاح التبديل في صفحة مزوّد Claude، أو باستخدام
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (معطّل افتراضيًا؛
-راجع [البيئة](../reference/ENVIRONMENT.md)) — ما يوجّه معرّفات `claude-*`
-غير المسبوقة ببادئة إلى Claude Code بدلًا من ذلك. تكون الأولوية دائمًا لبادئات المزوّد الصريحة.
+**`400 Ambiguous model 'claude-…'`** يرسل رمز — Claude دائمًا** غير مسبوقة** نموذج IDs (على سبيل المثال `claude-opus-4-8`)، لذلك عندما يكون كل من مقدمي كود Claude (`cc/…`) و Claude (`claude/…`) متصلين، فإن المعرف المجرد يطابق مسارين ويرفض OmniRoute التخمين. قم بإصلاحه في كلتا الحالتين: قم بتثبيت معرف مسبوق بـ `ANTHROPIC_MODEL=cc/claude-opus-4-8` أو قم بتمكينه** تفضل رمز Claude لنماذج Claude غير مسبوقة** — قم بالتبديل على صفحة موفر Claude ، أو `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (إيقاف افتراضي؛ راجع [البيئة](../reference/ENVIRONMENT.md) ) — الذي يوجه `claude-*` IDs إلى Claude Code بدلاً من ذلك. بادئات الموفر الصريحة تفوز دائمًا.
 
-**أخطاء المصادقة** — لا يحتوي ملف التعريف على أي رمز. استخدم `omniroute launch --profile`
-(لحقنه) أو صدّر `ANTHROPIC_AUTH_TOKEN`.
+**"الوضع التلقائي... هذه الجلسة غير مؤهلة" (طلبات المصنف تتم فوترتها)** — في الوضع التلقائي يطلب رمز Claude من الخادم مراجعة الإجراءات داخل طلبات النموذج الخاصة به ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). وهذا يحتاج إلى قيمة `anthropic-beta` `dangerous-tool-use-2026-09-03` وحقل الجسم `safeguards` للوصول إلى Anthropic كزوج، و `safeguard_results` بالإضافة إلى أداة المنبع - استخدم IDs للعودة دون تغيير. يقوم OmniRoute بذلك عندما يتم توجيه الطلب إلى موفر `claude` الأصلي أو إلى عقدة `anthropic-compatible-*` ، سواء كان متدفقًا أم لا (حارس الانحدار: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). لا يمكن للأهداف الأخرى إرجاع المراجعة، لذلك يعود Claude Code إلى طلبات المصنف الخاصة به ويعرض الإشعار:
 
-**ملفات التعريف غير معزولة** — لكل ملف تعريف `CLAUDE_CONFIG_DIR` مستقل؛
-تحقق من أن `echo $CLAUDE_CONFIG_DIR` داخل الجلسة يشير إلى
-`~/.claude/profiles/<name>`.
+- نموذج على مزود غير إنساني، أو مجموعة من السرد التي تصل إلى واحد؛
+- عقدة ترحيل متوافقة مع Claude-Code (`anthropic-compatible-cc-*`) ، والتي تعيد بناء نص الطلب ولا تحمل `safeguards`؛
+- إصدار OmniRoute أقدم يسبق الإصدارات التجريبية المدرجة في القائمة المسموح بها، أو إصدار رمز Claude أسفل الإصدار الذي تدرجه صفحة Anthropic لجلسات البوابة.
+
+قم بتشغيل `/status` في كود Claude : the** خادم الوضع التلقائي** يقرأ الصف `Enabled` عندما تكون مراجعة الخادم نشطة. يتم تحديد ما إذا كان سيتم تحرير فواتير هذه الطلبات بواسطة Anthropic، وليس بواسطة OmniRoute.
+
+**أخطاء المصادقة** — الملف الشخصي لا يحمل أي رمز مميز. استخدم `omniroute launch --profile` (يحقنه) أو قم بتصدير `ANTHROPIC_AUTH_TOKEN`.
+
+**الملفات الشخصية لا تعزل** — كل ملف تعريف هو `CLAUDE_CONFIG_DIR` مميز ; تحقق من `echo $CLAUDE_CONFIG_DIR` داخل نقاط الجلسة في `~/.claude/profiles/<name>`.

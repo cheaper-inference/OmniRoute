@@ -17,27 +17,24 @@
 
 ---
 
-## 1. البنية
+## 1. الهندسة المعمارية
 
 ```
-┌─ تطبيق OmniRoute ────────────────┐        ┌─ الحاوية المرافقة codex-app-server ─┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ رمز الإمكانية)               │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  يدير OpenAI OAuth ذاتيًا           │
-└──────────────────────────────────┘        │  (~/.codex/auth.json، تحديث تلقائي) │
-        │ مشاركة (وحدات تخزين compose)      └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → رمز إمكانية WS (يتم تركيبه لدى كليهما)
-  codex-appserver-home    → ~/.codex (يكتب auth.json عبر لوحة المعلومات،
-                             ويقرأه codex app-server في الحاوية المرافقة)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- تستمع الحاوية المرافقة **فقط** على شبكة compose الداخلية
-  (`ws://codex-app-server:1456`) خلف رمز إمكانية. ولا يتم **مطلقًا** نشرها
-  على المضيف أو الإنترنت.
-- تكون Codex CLI مضمنة في `omniroute:base`، ولذلك لا يلزم تثبيت codex على
-  المضيف أو جهاز المستخدم عند تشغيل الحاوية المرافقة.
+- العربة الجانبية تستمع** فقط** على شبكة الإنشاء الداخلية (`ws://codex-app-server:1456`) خلف رمز القدرة. إنها** أبداً** نشرت إلى المضيف أو الإنترنت.
+- يستخدم العربة الجانبية `omniroute:cli-no-docker`، المبني من هدف `runner-cli-no-docker` ، والذي يتضمن Codex CLI.
 
 ## 2. تشغيله
 

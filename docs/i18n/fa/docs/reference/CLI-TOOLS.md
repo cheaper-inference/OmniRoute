@@ -4,8 +4,6 @@
 
 ---
 
-آخرین به روز رسانی: 2026-08-23
-
 OmniRoute با سه دسته از ابزارهای CLI که در سه صفحه داشبورد اختصاصی پخش شده اند ادغام می شود:
 
 | صفحه              | مسیر                    | مفهوم                                                                                 | بشمار             |
@@ -235,7 +233,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)               |
 | `POST /api/cli-tools/qwen-settings`         | کد Qwen (کلید `.env` اختصاصی + `~/.qwen/settings.json` )            |
 
-همه مسیرها `sanitizeErrorMessage()` برای پاسخ به خطا استفاده می کنند (قانون سخت شماره 12).
+همه مسیرها `sanitizeErrorMessage()` برای پاسخ به خطا استفاده می کنند (قانون سخت #12).
 
 ---
 

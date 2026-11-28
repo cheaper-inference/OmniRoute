@@ -504,27 +504,27 @@ meta d-data tal-klassifika tkun effettivament inbidlet mill-aħħar darba li ntb
 
 ---
 
-## Kondiviżjoni tat-Tokens
+## Qsim tat-Tokens
 
 **Fajl:** `src/lib/gamification/sharing.ts`
 
-### Reġistru bi Dħul Doppju
+### Ledger ta' Dħul Doppju
 
-Kull trasferiment joħloq żewġ ringieli f’`token_ledger`:
+Kull trasferiment joħloq żewġ ringieli `token_ledger`:
 
 | Ringiela | `from_key_id` | `to_key_id` | `amount` |
 | -------- | ------------- | ----------- | -------- |
-| Debitu   | mittent       | riċevitur   | +amount  |
+| Debitu   | mittent       | riċevitur   | + ammont |
 | Kreditu  | riċevitur     | mittent     | -amount  |
 
 Stenna — il-konvenzjoni hija:
 
-| Ringiela | `from_key_id` | `to_key_id` | `amount` | Tifsira                  |
-| -------- | ------------- | ----------- | -------- | ------------------------ |
-| Tibgħat  | mittent       | riċevitur   | +amount  | Ħruġ mingħand il-mittent |
-| Tirċievi | riċevitur     | mittent     | +amount  | Dħul għand ir-riċevitur  |
+| Ringiela | `from_key_id` | `to_key_id` | `amount` | Tifsira               |
+| -------- | ------------- | ----------- | -------- | --------------------- |
+| Ibgħat   | mittent       | riċevitur   | + ammont | Ħruġ minn min jibgħat |
+| Irċievi  | riċevitur     | mittent     | + ammont | Influss lir-riċevitur |
 
-Il-bilanċ jiġi kkalkolat hekk:
+Il-bilanċ huwa kkalkulat bħala:
 
 ```sql
 SELECT
@@ -535,7 +535,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Fluss tat-Trasferiment
+### Fluss ta' Trasferiment
 
 ```typescript
 export async function transferTokens(
@@ -546,19 +546,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Ivvalida**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotenza**: iċċekkja jekk `idempotency_key` diġà teżistix fir-reġistru.
-   Jekk iva, irritorna r-riżultat maħżun fil-cache.
-3. **Tranżazzjoni** (tranżazzjoni SQLite waħda):
-   a. Ikkalkola l-bilanċ tal-mittent.
-   b. Jekk `balance < amount`, waqqaf (fondi insuffiċjenti).
-   c. Daħħal ir-ringiela tat-trażmissjoni (`from=sender,`.
+1. **Ivvalida** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotenza** : iċċekkja jekk `idempotency_key` diġà teżistix fir-reġistru. Jekk iva, irritorna r-riżultat tal-cache.
+3. **Transazzjoni** (tranżazzjoni SQLite waħda): a. Ikkalkula l-bilanċ tal-mittent. b. Jekk `balance < amount`, abort (fondi insuffiċjenti). c. Daħħal ringiela tibgħat (`from=sender, to=receiver, amount`). d. Daħħal ringiela ta' riċeviment (`from=receiver, to=sender, amount`).
+4. **Limitu tar-rata** : iċċekkja r-rata ta' trasferiment għal min jibgħat (max 10 transfers/min).
+5. **Avveniment** : emetti avveniment gamification `token_share` għall-valutazzjoni tal-badge XP +.
+6. Ritorn `{ success: true, balance: newBalance }`.
 
 ### Limitazzjoni tar-Rata
 
-- Massimu ta’ 10 trasferimenti kull minuta għal kull ċavetta API.
-- Massimu ta’ 10,000 token fi trasferiment wieħed.
-- Massimu ta’ 100,000 token trasferiti kuljum għal kull ċavetta API.
+- Max 10 transfers kull minuta kull API key.
+- Max 10,000 token għal kull trasferiment wieħed.
+- Max 100,000 token trasferiti kuljum għal kull ċavetta API.
 
 ---
 

@@ -244,33 +244,41 @@ Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 
 ---
 
-## 🎨 Haɗe-haɗe
+## 🎨 Combos
 
-Za ka iya sake tsara katunan haɗe-haɗe kai tsaye a **Dashboard → Combos** ta hanyar jan abin riƙewa da ke kan kowane kati. Ana adana tsarin a SQLite kuma ana dawo da shi idan an sake loda shafin.
+Kuna iya sake yin odar katunan hada-hadar kai tsaye a ciki** Dashboard → Combos** ta hanyar jan hannun akan kowane kati. Ana adana odar a cikin SQLite kuma ana dawo da shi akan sake kunnawa.
 
-### Misali na 1: Ƙara Amfanin Biyan Kuɗi → Madadin Mai Arha
+### Nemo mai bayarwa, samfuri, ko asusu
+
+A cikin Ƙirƙiri ko Shirya Haɗuwa, Mai Bayar da Mataki-mataki, Samfura, Asusu, da masu zaɓen haɗin kai sun haɗa da filin bincike na gida. Bincika da sunan da aka nuna, mai ganowa, laƙabin mai bayarwa, ko tushen ƙirar, sannan danna sakamako ko amfani da maɓallan kibiya da Shigar. Sharuɗɗan nema da yawa dole ne duka su dace. Share binciken ko danna Tserewa yana barin ƙimar da aka zaɓa ba ta canzawa.
+
+Zaɓin asusun atomatik yana kasancewa a bayyane yayin bincike. Jerin ƙuntatawa na asusun na zaɓi yana da keɓan tacewa: zaɓaɓɓun asusun da ke waje da sakamakon da ake iya gani sun tsaya zaɓi, kuma ƙidayar ta haɗa da su. Ba za a iya bincika gutsuwar imel ɗin ɓoye yayin da ke kunnen sirrin imel. Ƙara mataki kuma ajiye haɗin kamar yadda aka saba; Buga tambaya baya ajiyewa ko gwada komai.
+
+Neman gida iri ɗaya yana samuwa don ƙirar gwajin haɗin kai, Custom CLI tsoho da ƙirar laƙabi, da zaɓin wakili-ajiya. Ajiye data kasance, yi aiki, da ayyukan gwaji sun kasance daban.
+
+### Misali 1: Haɓaka Biyan kuɗi → Ajiyayyen Mai Rahusa
 
 ```
 Dashboard → Combos → Create New
 
-Suna: premium-coding
-Samfura:
-  1. cc/claude-opus-4-7 (Babban zaɓin biyan kuɗi)
-  2. glm/glm-4.7 (Madadin mai arha, $0.6/1M)
-  3. minimax/MiniMax-M2.7 (Madadin ƙarshe mafi arha, $0.3/1M)
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
 
-Amfani a CLI: premium-coding
+Use in CLI: premium-coding
 ```
 
-### Misali na 2: Na Kyauta Kawai (Babu Kuɗi)
+### Misali 2: Kyauta-kawai (Farashin Sifili)
 
 ```
-Suna: free-combo
-Samfura:
-  1. if/kimi-k2.7-code (an jera damar kyauta; ƙayyadaddun mai samarwa na iya aiki)
-  2. kr/qwen3-coder-next (madadin kyauta na Kiro)
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
 
-Kuɗi: a halin yanzu an jera shi a matsayin $0; sharuɗɗa da samuwa na iya canzawa
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -430,7 +438,7 @@ Lokacin da ba ku buƙatar OmniRoute, muna samar da rubutun sauri guda biyu don c
 ### VPS turawa
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -512,8 +520,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -733,8 +741,8 @@ Zaɓi takamaiman prefix (`mygw`, `acme-proxy`). Idan buƙatun kumbura na al'ada 
 
 Waɗannan maɓallan suna shiga cikin `providerSpecificData` na haɗin gwiwa (misali ta `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1-1024) — don haɗin haɗin haɗin kai-tsarin taɗi OpenAI waɗanda ƙofarsu ta ƙi dogayen sunayen kayan aiki. Ana aika dogayen sunaye a matsayin gajeriyar laƙabi kuma a mayar da su a cikin martani. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go and Muse Code already alias names over 64 characters with no settings. Ƙimar haɗin kai ta maye gurbin Azure OpenAI / Azure AI Foundry tsoho (haɗin Azure a bayan ƙofa mai tsauri) kuma yana saita iyaka don kumburin da ya dace da al'ada; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go da Muse Code suna kiyaye iyakar rajista kuma suyi watsi da shi.
-- `quotaEndpoint` — ƙarshen quota/credits na ƙofa, karanta don dashboard keɓaɓɓun tsiri da kuma sarrafa keɓaɓɓu. Yana aiki akan duka hanyoyin haɗin gwiwar OpenAI- da Anthropic; An rubuta cikakken siffar a cikin `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (integer, 1-1024) — don haɗin haɗin haɗin kai-tsarin taɗi OpenAI waɗanda ƙofarsu ta ƙi dogayen sunayen kayan aiki. Ana aika dogayen sunaye a matsayin gajeriyar laƙabi kuma a mayar da su a cikin martani. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go and Muse Code already alias names over 64 characters with no settings. Ƙimar haɗi ta maye gurbin Azure OpenAI / Azure AI Foundry tsoho (haɗin Azure a bayan ƙofa mai tsauri) kuma yana saita iyaka don kumburin da ya dace da al'ada; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go da Muse Code suna kiyaye iyakar rajista kuma suyi watsi da shi.
+- `quotaEndpoint` — ƙarshen quota/credits na ƙofa, karanta don dashboard keɓaɓɓun tsiri da kuma hanyar keɓancewa. Yana aiki akan duka hanyoyin haɗin gwiwar OpenAI- da Anthropic; An rubuta cikakken siffar a cikin `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -751,7 +759,7 @@ Waɗannan maɓallan suna shiga cikin `providerSpecificData` na haɗin gwiwa (mis
 
 ### Sarkar OmniRoute Takwarori
 
-Ana iya ƙara wata ƙofar OmniRoute azaman a** Custom OpenAI mai jituwa** mai bayarwa. Yi amfani da tushen `/v1` na ɗan'uwan URL da keɓaɓɓen maɓallin API mafi ƙarancin gata wanda ɗan'uwan ya bayar.
+Ana iya ƙara wata ƙofar OmniRoute azaman a** Custom OpenAI mai jituwa** mai bayarwa. Yi amfani da tushen `/v1` na ɗan'uwan URL da keɓewar, maɓallin API mafi ƙarancin gata da wancan ɗan'uwan ya bayar.
 
 Don sarƙaƙƙiya ko sarƙoƙi masu yawa, kunna gadin madauki a kowace ƙofa:
 
@@ -769,9 +777,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Buƙatun da aka aika zuwa ga jerin sunayen takwarorinsu URL kawai suna karɓar taken `X-OmniRoute-Peer-Trace`. Ƙofar ƙofa tana ƙin maimaita misali ID ko ƙarancin kasafin kuɗi tare da HTTP `508 Loop Detected`; Talakawa masu samar da sama ba su karɓi metadata takwarorinsu ba.
+Buƙatun da aka aika zuwa ga jerin sunayen tsarar URL kawai suna karɓar taken `X-OmniRoute-Peer-Trace`. Ƙofar ƙofa tana ƙin maimaita misali ID ko ƙarancin kasafin kuɗi tare da HTTP `508 Loop Detected`; na yau da kullun masu samar da sama ba su karɓi metadata takwarorinsu ba.
 
-Sarkar takwarorinsu ba kwafin bayanai ba ne ko gazawar mai masaukin baki. Kowace ƙofa tana riƙe da jihar SQLite mai zaman kanta, caches, ƙididdiga masu ƙima, da zama. Yi amfani da wakili na baya da aka bincika lafiya ko rashin nasarar abokin ciniki don samuwar active/passive ko active/active, kuma kada a taɓa hawan ma'ajin SQLite guda ɗaya cikin misalan OmniRoute masu gudana da yawa.
+Sarkar takwarorinsu ba kwafin bayanai ba ne ko gazawar mai masaukin baki. Kowace ƙofa tana kiyaye jihar SQLite mai zaman kanta, caches, ƙididdiga masu ƙima, da zama. Yi amfani da wakili na baya da aka bincika lafiya ko gazawar abokin ciniki don samuwar active/passive ko active/active, kuma kar a taɓa sanya ma'ajin SQLite guda ɗaya cikin misalan OmniRoute masu gudana da yawa.
 
 ### Hanyoyi masu sadaukar da kai
 
@@ -822,12 +830,12 @@ Yana dawo da ƙira wanda aka haɗa ta mai bayarwa tare da nau'ikan (`chat`, `emb
 - Akwai a ciki** Dashboard → Endpoints** don Docker da sauran turawa da kansu
 - Yana ƙirƙira `https://*.trycloudflare.com` URL na ɗan lokaci wanda ke turawa zuwa ƙarshen `/v1` ku na OpenAI mai jituwa na yanzu
 - Da farko kunna shigar `cloudflared` kawai lokacin da ake buƙata; daga baya zata sake farawa sake amfani da binary iri ɗaya da aka sarrafa
-- Ba a sake dawo da Ramin sauri ta atomatik bayan an sake kunna OmniRoute ko akwati; sake kunna su daga dashboard lokacin da ake buƙata
+- Ba a sake dawo da Ramukan gaggawa ta atomatik bayan an sake OmniRoute ko akwati; sake kunna su daga dashboard lokacin da ake buƙata
 - Tunnel URLs abu ne na al'ada kuma yana canzawa duk lokacin da kuka stop/start ramin
 - Matsakaicin Matsakaicin Saurin Gudanarwa zuwa jigilar HTTP/2 don gujewa faɗakarwa na QUIC UDP mai hayaniya a cikin kwantena.
 - Saita `CLOUDFLARED_PROTOCOL=quic` ko `auto` idan kuna son soke zaɓin jigilar da aka sarrafa
 - Saita `CLOUDFLARED_BIN` idan kun fi son amfani da riga-kafi `cloudflared` binary maimakon zazzagewar da aka sarrafa
-- Za'a iya nunawa ko ɓoye a ciki Cloudflare Tunnel mai sauri, Tailscale Funnel da ngrok Tunnel** Saituna → Bayyanar** . Boye panel baya hana ramin gudu.
+- Za a iya nunawa ko ɓoyayye a ciki Cloudflare Tunnel mai sauri, Tailscale Funnel da ngrok Ramin rami** Saituna → Bayyanar** . Boye panel baya hana ramin gudu.
 
 ### Sirrin Ƙofar LLM (Mataki na 9)
 
@@ -860,7 +868,7 @@ Shiga ta hanyar** Dashboard → Translator** . Gyara kuma duba yadda OmniRoute k
 
 Sanya ta hanyar** Dashboard → Saitunan →** . Dashboard ɗin yana fallasa dabaru shida da aka fi amfani da su; combos da auto-router a ciki suna goyan bayan saiti mai faɗi.
 
-**Dabarun ganuwa-Dashboard (tushen matakin-asusu):**
+**Dabarun gani-dashboard (tushen matakin-asusu):**
 
 | Dabarun                  | Bayani                                                                                                                   |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
@@ -880,9 +888,9 @@ Sanya ta hanyar** Dashboard → Saitunan →** . Dashboard ɗin yana fallasa dab
 - `p2c` (Ikon Zabi Biyu)
 - `least-used` a `cost-optimized`
 - `auto` — ci-kore a duk ƴan takara
-- `lkgp` (Mai bayarwa na Ƙarshe da aka sani) — fil zuwa ga mai bada nasara na ƙarshe, sannan ya koma ga ƙa'idodi
-- `context-optimized` — yana zaɓar samfurin tare da babbar taga mahallin kyauta
-- `context-relay` — sarƙoƙi samfura masu tsayin yanayi don bibiyar juye-juye
+- `lkgp` (Mai Ba da Kyauta na Ƙarshe da Aka Sani) — fil zuwa ga mai bada nasara na ƙarshe, sannan ya koma ga ƙa'idodi
+- `context-optimized` — yana gwada samfurin tare da mafi girman sanannen taga mahallin farko
+- `context-relay` — odar fifiko tare da taƙaitaccen bayani lokacin da tattaunawar ta motsa zuwa wani asusu
 
 #### Shugaban Zama Mai Danko Na Waje
 
@@ -999,7 +1007,7 @@ OmniRoute yana aiwatar da juriya na matakin mai bayarwa tare da abubuwa biyar:
    - **Yi amfani da Nassosi Sake gwadawa** — Yana girmama `Retry-After` mai iko ko sake saita alamu lokacin da aka bayar
    - **Max Backoff Matakan** — Matsakaicin matakin koma baya don maimaita gazawar
 
-3. **Mai Bayar da Wuta** — Yana bin gazawar mai ba da sabis na ƙarshe zuwa ƙarshe, yana yiwa mai ba da alamar ƙasƙantar da shi a daidaitaccen madaidaicin faɗakarwa, kuma yana buɗe mai karya lokacin da aka daidaita madaidaicin gazawar:
+3. **Mai Bayar da Wuta** — Yana bin gazawar mai bayarwa daga ƙarshe zuwa ƙarshe, yana yiwa mai ba da alama ƙasƙantar da shi a daidaitaccen madaidaicin faɗakarwa, kuma yana buɗe mai karya lokacin da aka saita madaidaicin gazawar:
    - **Ƙarƙashin ƙazantawa** — gazawar mai bada a jere kafin shigar da `DEGRADED`
    - **Matsakaicin gazawa** — gazawar mai bada a jere kafin shigar da `OPEN`
    - **Sake saita Lokacin Karewa** — Lokaci taga kafin a sake gwada mai badawa
@@ -1016,7 +1024,7 @@ OmniRoute yana aiwatar da juriya na matakin mai bayarwa tare da abubuwa biyar:
 
 5. **Ƙayyadadden Ƙimar Gano Kai** — Lokacin da masu samarwa na sama suka dawo fayyace tagogin jira, waɗancan alamun sun ƙetare sanyin haɗin gida lokacin da aka kunna saitin.
 
-**Pro Tukwici:** Yi amfani da** Lafiya** shafi don dubawa da sake saita masu watsewar mai ba da rai bayan fita. Shafin Resilience yana canza tsari kawai.
+**Pro Tukwici:** Yi amfani da** Lafiya** shafi don dubawa da sake saita masu watsewar mai ba da rai bayan an fita. Shafin Resilience yana canza tsari kawai.
 
 ---
 
@@ -1027,7 +1035,7 @@ Sarrafa madaidaitan bayanai a ciki** Dashboard → Saitunan → Tsarin & Ajiya**
 | Aiki                    | Bayani                                                                                                                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Aika Database**       | Zazzage bayanan SQLite na yanzu azaman fayil `.sqlite`                                                                                                                          |
-| **Fitar Duk (.tar.gz)** | Zazzage cikakken ma'ajiyar ajiya gami da: bayanan bayanai, saituna, haɗe-haɗe, haɗin kai (babu takaddun shaida), metadata maɓalli na API                                        |
+| **Fitar Duk (.tar.gz)** | Zazzage cikakken ma'ajiyar ajiya gami da: bayanan bayanai, saituna, haɗe-haɗe, haɗin mai bayarwa (babu takaddun shaida), metadata maɓalli na API                                |
 | **Shigo Database**      | Loda fayil ɗin `.sqlite` don maye gurbin bayanan bayanai na yanzu. Ana ƙirƙira maajiyar da aka riga aka shigo da ita ta atomatik sai dai idan `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
@@ -1048,7 +1056,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 - Ƙaura OmniRoute tsakanin inji
 - Ƙirƙiri madogara na waje don murmurewa bala'i
-- Raba saiti tsakanin membobin ƙungiyar (fitar da duk tarihin raba → )
+- Raba daidaitawa tsakanin membobin ƙungiyar (fitar da duk tarihin raba → )
 
 ---
 
@@ -1058,7 +1066,7 @@ An tsara shafin saituna zuwa ciki** 7 tabs** don kewayawa cikin sauƙi:
 
 | Tab              | Abubuwan da ke ciki                                                                                                                                                      |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Gabaɗaya**     | Kayan aikin ajiyar tsarin, dabi'un da aka saba, hangen nesa na ƙarshen ƙarshen                                                                                           |
+| **Gabaɗaya**     | Kayan aikin ajiyar tsarin, dabi'un tsoho, hangen nesa na ƙarshen ƙarshen                                                                                                 |
 | **Bayyanar**     | Ikon jigo (light/dark/system), hangen nesa na gefe, maɓalli don katunan ramin Cloudflare/Tailscale/ngrok                                                                 |
 | **AI**           | Kasafin kuɗi na tunani (wucewa / auto-strip / custom / adaptive — see [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), tsarin tsarin duniya da sauri, saurin cache stats    |
 | **Tsaro**        | Saitunan Login/Password, Gudanarwar Samun damar IP, API auth don `/models`, Katange mai bayarwa, gadin allura da gaggawa                                                 |
@@ -1157,9 +1165,9 @@ Sanya ma'auni na kowane-hadarin ciki** Dashboard → Combos → Create/Edit →*
 
 Za a iya saita abubuwan da suka dace na haɗakarwa na duniya** Dashboard → Saitunan → Rarraba → Tsoffin Tsoffin** . Ƙaddamar da niyya ta haɗuwa ta gaji lokacin buƙatun na yanzu ta tsohuwa. Amfani** Lokaci ya ƙare (daƙiƙa)** akan abubuwan da suka dace na haɗin kai ko haɗin kai ɗaya kawai lokacin da gajeriyar iyakar kowane manufa ya kamata ya jawo koma baya cikin sauri.
 
-Haɓaka haɗin haɗin sifili-latency an shiga. Bar** Haɓakawa-latency** nakasassu don hana waɗannan fasalulluka na latency daga tseren maƙasudin koma baya, tsallake maƙasudi dangane da tarihin TTFT, ko matsawa buƙatun koma baya; kunna shi yana ba da damar saita shinge, tsallaka TTFT mai tsinkaya, da matsawar faɗuwa mai ƙarfi don kasuwanci amincin routing/request don ƙarancin lat ɗin wutsiya.
+Haɓaka haɗin haɗin sifili-latency an shiga. Bar** Haɓakawa-latency** nakasassu don hana waɗannan fasalulluka na latency daga tseren maƙasudin koma baya, tsallake maƙasudi dangane da tarihin TTFT, ko matsawa buƙatun koma baya; kunna shi yana ba da damar saita shinge, tsinkaya TTFT tsallakewa, da matsawar faɗuwa mai ƙarfi don kasuwanci amincin routing/request don ƙarancin lat ɗin wutsiya.
 
-A kashe** Matsakaicin alamar alama** lokacin da masu samarwa na sama suna buƙatar tsauraran iyaka `max_tokens` / `maxOutputTokens`. Lokacin da aka kunna, hanyar haɗin haɗakarwa kawai tana ƙara ƙirar ƙira don ƙira tare da sanannen madaidaicin fitarwa kuma yana barin ƙayyadaddun alamar abokin ciniki baya canzawa lokacin da amintaccen ƙimar ƙimar za ta wuce wannan hular. Idan iyakar abokin ciniki ya riga ya wuce sanannen hula, OmniRoute ya matsa shi zuwa waccan hular kafin aika buƙatun sama.
+A kashe** Matsakaicin alamar alama** lokacin da masu samarwa na sama suna buƙatar tsauraran iyaka `max_tokens` / `maxOutputTokens`. Lokacin da aka kunna, hanyar haɗin haɗakarwa kawai tana ƙara ƙirar ƙira don ƙira tare da sanannen madaidaicin fitarwa kuma yana barin ƙayyadaddun alamar abokin ciniki baya canzawa lokacin da amintaccen ƙimar ƙimar za ta wuce wannan hular. Idan iyakar abokin ciniki ya riga ya sama da sanannen hula, OmniRoute ya matsa shi zuwa waccan hula kafin aika buƙatun sama.
 
 ---
 
@@ -1329,34 +1337,36 @@ Duba [API_REFERENCE.md](../reference/API_REFERENCE.md) don cikakken kundin endpo
 
 ---
 
-## 💻 CLI na Ciki
+## 💻 Internal CLI
 
-OmniRoute yana zuwa da CLI na ciki (`omniroute …`) don saiti, binciken matsaloli, da sarrafa lokacin aiki. Wannan **ya bambanta da shafin "CLI Tools" da ke cikin dashboard**, wanda yake saita CLI na wasu kamfanoni (Claude Code, Cursor, Codex, Cline, …) domin su iya sadarwa da OmniRoute.
+OmniRoute yana jigilar CLI na ciki (`omniroute …`) don saiti, bincike, da sarrafa lokacin aiki. Wannan shine** ware daga shafin "CLI Tools" a cikin dashboard** , wanda ke daidaita CLIs na ɓangare na uku ( lambar Claude, Cursor, Codex, Cline, ...) don su iya magana da OmniRoute.
 
 ```bash
-omniroute setup                    # Jagorar saiti mai mu'amala (kalmar sirri, masu samarwa, haɗe-haɗe)
-omniroute setup --non-interactive  # Ya dace da CI
-omniroute doctor                   # Binciken lafiya (kundin bayanai, DB, masu samarwa, tashoshin jiragen ruwa)
-omniroute providers available      # Nuna masu samarwa da ake tallafawa
-omniroute providers list           # Nuna haɗin da aka saita
-omniroute providers test <id>      # Gwada haɗin mai samarwa kai tsaye
-omniroute combos list              # Nuna haɗe-haɗe
-omniroute combos switch <name>     # Saita haɗin tsoho
-omniroute models                   # Nuna samfuran da ake da su (--json, --search)
-omniroute keys add | list | remove # Sarrafa maɓallan API daga terminal
-omniroute backup                   # Ɗauki hoton config + DB
-omniroute restore [<timestamp>]    # Mayar da bayanai daga hoton ajiya
-omniroute health                   # Cikakken bayani kan lafiya (breakers, cache, memory)
-omniroute quota                    # Amfani da ƙayyadadden kaso na mai samarwa
-omniroute mcp status               # Matsayin uwar garken MCP
-omniroute a2a status               # Matsayin uwar garken A2A
-omniroute tunnel list|create|stop  # Tunnels na Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Sake saita kalmar sirrin mai gudanarwa
-omniroute --mcp                    # Fara uwar garken MCP ta stdio
-omniroute --port 3000              # Fara uwar garken a tashar jirgin ruwa ta musamman
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Shawara: haɗa `omniroute doctor --json` da kayan aikinka na sa ido domin samun faɗakarwa idan haɗin masu samarwa ba su da lafiya.
+Tukwici: haɗa `omniroute doctor --json` tare da kayan aikin sa ido don faɗakarwa akan karyewar shigar gida. `doctor` baya gwada haɗin mai badawa; amfani da `omniroute providers test <id>` don haka.
 
 ---
 

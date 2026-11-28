@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | URL ฐานที่ผ่านการกำหนดค่าแล้ว                                     |
 | `ctx.apiKey`                 | `string \| null` | คีย์ API หากมีการระบุ                                             |
 
-## การค้นหา
+## การค้นพบ
 
-ระบบค้นหาปลั๊กอินจาก:
+ปลั๊กอินถูกค้นพบจาก:
 
-1. `~/.omniroute/plugins/<name>/` — การติดตั้งเฉพาะผู้ใช้
-2. ตัวแปรสภาพแวดล้อม `OMNIROUTE_PLUGIN_PATH` — ไดเรกทอรีที่กำหนดเอง
+1. `~/.omniroute/plugins/node_modules/<name>/` — โดยที่ `omniroute plugin install` ใส่แพ็คเกจ (npm `--prefix` ไม่ใช่ `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — ไดเร็กทอรีปลั๊กอินที่คัดลอกด้วยมือ
+3. `OMNIROUTE_PLUGIN_PATH` env var — ไดเร็กทอรีที่กำหนดเอง
 
-ทั้งสองรายการใช้สำหรับ **CLI เท่านั้น** รันไทม์ปลั๊กอินฝั่งเซิร์ฟเวอร์ (ปลั๊กอิน marketplace/`plugin.json`
-ที่ทำงานภายในพร็อกซี) มีตัวสแกนและตัวแปรสำหรับเขียนทับเป็นของตนเองคือ
-`OMNIROUTE_PLUGINS_DIR` — ดู
-[PLUGIN_MARKETPLACE.md → ไดเรกทอรีปลั๊กอิน](./PLUGIN_MARKETPLACE.md#plugin-directory)
-การตั้งค่ารายการหนึ่งจะไม่ส่งผลต่ออีกรายการหนึ่ง
+ไดเร็กทอรี Symlinked (สิ่งที่ npm สร้างสำหรับ `plugin install ./dir`) จะถูกติดตาม
 
-ข้อผิดพลาดในการโหลดจะถูกดักจับและแสดงเป็นคำเตือน — ปลั๊กอินที่เสียหายจะไม่ทำให้ CLI หยุดทำงาน
+เป็นทั้งสองอย่าง** CLI เท่านั้น** . รันไทม์ปลั๊กอินฝั่งเซิร์ฟเวอร์ (ปลั๊กอิน Marketplace/`plugin.json` ที่ทำงานภายในพร็อกซี) มีสแกนเนอร์ของตัวเองพร้อมการแทนที่ของตัวเอง `OMNIROUTE_PLUGINS_DIR` — ดู [PLUGIN_MARKETPLACE.md → Plugin directory](./PLUGIN_MARKETPLACE.md#plugin-directory) การตั้งค่าอย่างใดอย่างหนึ่งจะไม่ส่งผลกระทบต่ออีกอัน
+
+ข้อผิดพลาดในการโหลดจะถูกตรวจพบและพิมพ์ออกมาเป็นคำเตือน — ปลั๊กอินที่ใช้งานไม่ได้จะไม่ทำให้ CLI ขัดข้อง
 
 ## ความปลอดภัย
 

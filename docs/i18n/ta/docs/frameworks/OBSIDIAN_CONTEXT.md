@@ -127,53 +127,46 @@ fallback-ஐத் தொடர்ந்து பயன்படுத்து
 
 ## MCP கருவிகள் (22)
 
-`open-sse/mcp-server/tools/obsidianTools.ts` இல் வரையறுக்கப்பட்டுள்ளன. token/base-URL ஒவ்வொரு அழைப்பிற்கும் தீர்மானிக்கப்படுகின்றன (முதலில் ஒவ்வொரு API key-க்குமானவை, பின்னர் global). OmniRoute **sync server**-ஐ அணுகும் கருவிகளுக்கு (நான்கு `obsidian_sync_*` கருவிகள்) கூடுதலாக OmniRoute அமைப்புகளில் உள்ளமைக்கப்பட்ட sync auth token தேவைப்படுகிறது.
+`open-sse/mcp-server/tools/obsidianTools.ts` இல் வரையறுக்கப்பட்டுள்ளது. token/base-URL ஒரு அழைப்பிற்குத் தீர்க்கப்படும் (ஒவ்வொரு API-விசையும் முதலில், பின்னர் உலகளாவியது). OmniRoute ஐத் தாக்கும் கருவிகள்** ஒத்திசைவு சேவையகம்** (நான்கு `obsidian_sync_*` கருவிகள்) கூடுதலாக OmniRoute அமைப்புகளில் உள்ளமைக்கப்பட்ட ஒத்திசைவு அங்கீகார டோக்கன் தேவைப்படுகிறது.
 
-### வாசிப்புக் கருவிகள் (`read:obsidian`)
+### வாசிப்பு கருவிகள் (`read:obsidian`)
 
-| கருவி                        | விளக்கம்                                                                                                              |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | Local REST API-ஐ அணுக முடியுமா மற்றும் அங்கீகரிக்கப்பட்டுள்ளதா என்பதைச் சரிபார்க்கும்.                                |
-| `obsidian_search_simple`     | குறிப்புகளின் உள்ளடக்கத்தில் முழு-உரைத் தேடல்; file paths உடன் துணுக்குகளை வழங்கும்.                                  |
-| `obsidian_search_structured` | JSON Logic expression-ஐப் பயன்படுத்தித் தேடும் (and/or/regex/path filters).                                           |
-| `obsidian_read_note`         | vault-relative path மூலம் ஒரு குறிப்பைப் படிக்கும்; விருப்பமாகக் குறிப்பிட்ட heading/block/frontmatter-ஐப் படிக்கும். |
-| `obsidian_list_vault`        | vault-இல் உள்ள files மற்றும் directories-ஐப் பட்டியலிடும் (உள்ளீடுகளின் tree).                                        |
-| `obsidian_get_document_map`  | குறிப்பின் heading கட்டமைப்பை headings → line numbers வரைபடமாகப் பெறும்.                                              |
-| `obsidian_get_note_metadata` | முழு உள்ளடக்கம் இல்லாமல் frontmatter, tags, links, char/word count ஆகியவற்றைப் பெறும்.                                |
-| `obsidian_get_active_file`   | Obsidian-இல் தற்போது செயலில் உள்ள file-இன் path + content-ஐப் பெறும்.                                                 |
-| `obsidian_get_periodic_note` | ஒரு தேதிக்கான daily/weekly/monthly periodic note-ஐப் பெறும் (விடுபட்டால் இன்றைய தேதி).                                |
-| `obsidian_get_tags`          | அனைத்து vault tags-ஐயும் அவற்றின் frequencies உடன் பட்டியலிடும்.                                                      |
-| `obsidian_list_commands`     | கிடைக்கக்கூடிய Obsidian command IDs-ஐப் பட்டியலிடும் (`obsidian_execute_command` உடன் பயன்படுத்தவும்).                |
-| `obsidian_sync_status`       | OmniRoute sync server நிலை: இயங்குகிறதா, vault பெயர், port, uptime, கடைசி sync.                                       |
-| `obsidian_sync_conflicts`    | தீர்க்கப்படாத sync conflicts-ஐப் பட்டியலிடும் (path, conflict path, கண்டறியப்பட்ட நேரம்).                             |
+| கருவி                        | விளக்கம்                                                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | உள்ளூர் REST API அணுகக்கூடியதா மற்றும் அங்கீகரிக்கப்பட்டதா என்பதைச் சரிபார்க்கவும்.                        |
+| `obsidian_search_simple`     | குறிப்பு உள்ளடக்கத்தின் முழு உரை தேடல்; கோப்பு பாதைகளுடன் துணுக்குகளை வழங்குகிறது.                         |
+| `obsidian_search_structured` | JSON லாஜிக் வெளிப்பாடு (and/or/regex/path வடிகட்டிகள்) பயன்படுத்தி தேடவும்.                                |
+| `obsidian_read_note`         | வால்ட்-உறவினர் பாதை மூலம் ஒரு குறிப்பைப் படிக்கவும்; விருப்பமாக ஒரு குறிப்பிட்ட heading/block/frontmatter. |
+| `obsidian_list_vault`        | பெட்டகத்தில் உள்ள கோப்புகள் மற்றும் கோப்பகங்களை பட்டியலிடுங்கள் (உள்ளீடுகளின் மரம்).                       |
+| `obsidian_get_document_map`  | → வரி எண்களின் தலைப்புகளின் வரைபடமாக குறிப்பின் தலைப்பு அமைப்பைப் பெறவும்.                                 |
+| `obsidian_get_note_metadata` | முழு உள்ளடக்கம் இல்லாமல் முதன்மைப் பொருள், குறிச்சொற்கள், இணைப்புகள், char/word எண்ணிக்கையைப் பெறுங்கள்.   |
+| `obsidian_get_active_file`   | தற்போது செயலில் உள்ள கோப்பின் பாதை + உள்ளடக்கத்தை Obsidian இல் பெறவும்.                                    |
+| `obsidian_get_periodic_note` | ஒரு தேதிக்கான daily/weekly/monthly காலக் குறிப்பைப் பெறவும் (இன்று தவிர்க்கப்பட்டால்).                     |
+| `obsidian_get_tags`          | அனைத்து வால்ட் குறிச்சொற்களையும் அவற்றின் அதிர்வெண்களுடன் பட்டியலிடுங்கள்.                                 |
+| `obsidian_list_commands`     | கிடைக்கும் Obsidian கட்டளை IDs ( `obsidian_execute_command` உடன் பயன்படுத்தவும்) பட்டியலிடுங்கள்.          |
+| `obsidian_sync_status`       | OmniRoute ஒத்திசைவு சேவையக நிலை: இயங்கும், வால்ட் பெயர், போர்ட், இயக்க நேரம், கடைசி ஒத்திசைவு.             |
+| `obsidian_sync_conflicts`    | தீர்க்கப்படாத ஒத்திசைவு முரண்பாடுகளை பட்டியலிடவும் (பாதை, மோதல் பாதை, கண்டறியப்பட்ட இடத்தில்).             |
 
-### எழுதும் கருவிகள் (`write:obsidian`)
+### எழுது கருவிகள் (`write:obsidian`)
 
-| கருவி                            | விளக்கம்                                                                                                     |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `obsidian_write_note`            | கொடுக்கப்பட்ட Markdown உள்ளடக்கத்துடன் ஒரு குறிப்பை உருவாக்கும் அல்லது மேலெழுதும்.                           |
-| `obsidian_append_note`           | ஒரு குறிப்பில் உள்ளடக்கத்தைச் சேர்க்கும்; விருப்பமாகக் குறிப்பிட்ட heading/block-இல் சேர்க்கும்.             |
-| `obsidian_patch_note`            | ஒரு heading, block அல்லது frontmatter field-இல் துல்லியமாக append/prepend/replace செய்யும்.                  |
-| `obsidian_delete_note`           | vault-இலிருந்து ஒரு குறிப்பை நிரந்தரமாக நீக்கும்.                                                            |
-| `obsidian_move_note`             | vault-க்குள் ஒரு குறிப்பை நகர்த்தும் அல்லது மறுபெயரிடும்.                                                    |
-| `obsidian_execute_command`       | ஒரு Obsidian command-ஐ அதன் command ID மூலம் இயக்கும்.                                                       |
-| `obsidian_open_file`             | Obsidian-இல் ஒரு file-ஐத் திறக்கும் (அது இல்லாவிட்டால் உருவாக்கும்).                                         |
-| `obsidian_sync_trigger`          | உடனடி இருதிசை desktop↔mobile vault sync-ஐத் தூண்டும்.                                                        |
-| `obsidian_sync_resolve_conflict` | sync conflict-ஐத் தீர்க்கும்: `local` (mobile), `remote` (desktop) அல்லது `keep-both` என்பதைத் தக்கவைக்கும். |
+| கருவி                            | விளக்கம்                                                                                                 |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | கொடுக்கப்பட்ட மார்க் டவுன் உள்ளடக்கத்துடன் குறிப்பை உருவாக்கவும் அல்லது மேலெழுதவும்.                     |
+| `obsidian_append_note`           | ஒரு குறிப்பில் உள்ளடக்கத்தைச் சேர்க்கவும்; விருப்பமாக ஒரு குறிப்பிட்ட heading/block. க்கு                |
+| `obsidian_patch_note`            | அறுவைசிகிச்சை மூலம் ஒரு தலைப்பு, தொகுதி அல்லது முன்பகுதியில் append/prepend/replace.                     |
+| `obsidian_delete_note`           | பெட்டகத்திலிருந்து ஒரு குறிப்பை நிரந்தரமாக நீக்கவும்.                                                    |
+| `obsidian_move_note`             | பெட்டகத்திற்குள் ஒரு குறிப்பை நகர்த்தவும் அல்லது மறுபெயரிடவும்.                                          |
+| `obsidian_execute_command`       | Obsidian கட்டளையை அதன் கட்டளை ID மூலம் இயக்கவும்.                                                        |
+| `obsidian_open_file`             | Obsidian இல் கோப்பைத் திறக்கவும் (அது இல்லை என்றால் அதை உருவாக்குகிறது).                                 |
+| `obsidian_sync_trigger`          | உடனடியாக இருதரப்பு டெஸ்க்டாப்↔ மொபைல் வால்ட் ஒத்திசைவைத் தூண்டவும்.                                      |
+| `obsidian_sync_resolve_conflict` | ஒத்திசைவு மோதலைத் தீர்க்கவும்: `local` (மொபைல்), `remote` (டெஸ்க்டாப்) அல்லது `keep-both` வைத்திருங்கள். |
 
 > [!NOTE]
-> `obsidian_patch_note` இலக்குகள் `heading | block | frontmatter` என்ற `targetType`-ஐயும்
-> `append | prepend | replace` என்ற `operation`-ஐயும் ஏற்கின்றன; விருப்பமாக
-> `createTargetIfMissing`-ஐயும் ஏற்கின்றன. நான்கு `obsidian_sync_*` கருவிகள் உள்ளக sync
-> server-உடன் (`http://127.0.0.1:27781` இயல்புநிலையாக) தொடர்புகொள்கின்றன; அவற்றுக்கு sync token தேவைப்படுகிறது.
+> `obsidian_patch_note` இலக்குகள் விருப்பமான `createTargetIfMissing` உடன் `heading | block | frontmatter` இன் `targetType` மற்றும் `append | prepend | replace` இன் `operation` ஏற்கின்றன. நான்கு `obsidian_sync_*` கருவிகள் உள்ளூர் ஒத்திசைவு சேவையகத்துடன் பேசுகின்றன (இயல்புநிலையாக `http://127.0.0.1:27781` ) மற்றும் ஒத்திசைவு டோக்கன் தேவைப்படுகிறது.
 
-### Scopes
+### நோக்கங்கள்
 
-வாசிப்புக் கருவிகளுக்கு `read:obsidian` தேவை; எழுதும் கருவிகளுக்கு `write:obsidian` தேவை. அமலாக்கம்
-Notion-ஐப் போலவே உள்ளது — இது `open-sse/mcp-server/server.ts` இல் உள்ள
-`withScopeEnforcement()` மூலம் கையாளப்படுகிறது; `OMNIROUTE_MCP_ENFORCE_SCOPES=true` என்பதைப் பொறுத்து செயல்படுத்தப்பட்டு,
-அனுமதிக்கப்பட்ட scopes `OMNIROUTE_MCP_SCOPES` அல்லது API key-இன் scope context-இலிருந்து பெறப்படுகின்றன. பார்க்கவும்:
-[MCP-SERVER.md](./MCP-SERVER.md).
+வாசிப்பு கருவிகளுக்கு `read:obsidian` தேவை; எழுதும் கருவிகளுக்கு `write:obsidian` தேவை. அமலாக்கமானது `open-sse/mcp-server/server.ts` இல் `withScopeEnforcement()` ஆல் கையாளப்படும் Notion — ஐப் போன்றது, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` இல் நுழையப்பட்டு, API விசையில் `manage`/`admin` இல்லாத HTTP/SSE அழைப்பாளர்களுக்கு கட்டாயப்படுத்தப்படுகிறது, `OMNIROUTE_MCP_SCOPES` அல்லது API விசையின் ஸ்கோப் சூழலில் இருந்து பெறப்பட்ட அனுமதிக்கப்பட்ட நோக்கங்களுடன். பார்க்க [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## இறுதிப்புள்ளிகள்
 

@@ -166,11 +166,11 @@ OmniRoute HAR را برای Chathub WebSocket URL اسکن می کند، `access
 
 اطمینان حاصل کنید که `copilot-m365-web` در آن فعال است** ارائه دهندگان داشبورد →** . ممکن است ارائه دهنده به طور پیش فرض در برخی از سطوح پنهان باشد.
 
-## منابع
+## مراجع
 
-- مسئله: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- بحث: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- منبع: `src/shared/constants/providers/web-cookie.ts` (تعریف ارائهدهنده)
-- وارد کردن HAR: `src/shared/utils/m365HarImport.ts`
-- فیلدهای اعتبارنامه: `src/shared/providers/webSessionCredentials.ts`
-- پنجره سطح: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- مسأله: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- بحث: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- منبع: `src/shared/constants/providers/web-cookie.ts` (تعریف ارائه دهنده)
+- HAR واردات: `src/shared/utils/m365HarImport.ts`
+- زمینه های اعتبار: `src/shared/providers/webSessionCredentials.ts`
+- معین ردیف: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

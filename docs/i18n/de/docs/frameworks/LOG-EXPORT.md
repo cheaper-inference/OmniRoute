@@ -13,7 +13,7 @@ die Pipeline ist als Registry aufgebaut, sodass sich weitere Ziele ergänzen las
 
 ---
 
-## 1. Funktionsweise
+## 1. Wie es funktioniert
 
 ```
 server (decrypt + validate config, reconcile cursor)
@@ -24,120 +24,55 @@ server (decrypt + validate config, reconcile cursor)
           → next batch; done IPC → server records success
 ```
 
-- **Zeitplan** — ein `JobRegistry`-Cronjob, `log_export`, standardmäßig mit `0 * * * *` (stündlich,
-  UTC). Registriert in `src/lib/initCloudSync.ts`; überschreibbar mit `OMNIROUTE_LOG_EXPORT_CRON`.
-  Jeder Durchlauf arbeitet alle **aktivierten** Ziele nacheinander ab.
-- **Cursor** — die implizite `call_logs.rowid` von SQLite, pro Ziel in
-  `log_export_destinations.cursor_row_id` gespeichert. `timestamp` dient bewusst nicht als Cursor: Aufrufer
-  können einen eigenen Wert angeben, sodass eine langsame Anfrage nach einer schnelleren geschrieben werden kann, die
-  später gestartet wurde. Ein Zeitstempel-Cursor würde sie überspringen.
-- **Stapelverarbeitung** — `batch_size` Zeilen pro Anfrage (standardmäßig 500), `max_rows_per_run` Zeilen pro Lauf
-  (standardmäßig 10000), damit ein großer Rückstand über mehrere Durchläufe abgearbeitet wird, statt einen einzigen zu blockieren.
-- **Zustellung** — der Cursor wird erst weitergesetzt, nachdem `send()` erfolgreich abgeschlossen wurde. Bei einem fehlgeschlagenen Stapel bleibt der
-  Cursor unverändert, sodass dieselben Zeilen beim nächsten Lauf erneut versucht werden. Garantiert wird
-  eine mindestens einmalige Zustellung mit zielseitiger Deduplizierung, keine echte genau einmalige Zustellung: BigQuery verwendet für jede
-  Zeile die Aufrufprotokoll-ID als Schlüssel und berücksichtigt diese nach dem Best-Effort-Prinzip innerhalb seines eigenen Deduplizierungsfensters.
-- **Überlappungsschutz** — der Cron-Durchlauf und `POST .../run` können gleichzeitig ausgelöst werden. Ein Ziel,
-  das bereits abgearbeitet wird, wird übersprungen statt doppelt verarbeitet (`skipped: true` im Laufergebnis),
-  sodass ein gleichzeitiger Lauf weder einen Stapel erneut senden noch den Cursor zurücksetzen kann.
-- **Wiederherstellung nach vollständiger Löschung** — wenn `cursor_row_id` über `MAX(rowid)` liegt (die gesamte Tabelle wurde
-  geleert und die rowids beginnen wieder von vorn), setzt der Runner den Cursor auf 0 zurück, statt dauerhaft keine Daten mehr zu erkennen.
+- **Zeitplan** — ein `JobRegistry` -Cronjob, `log_export`, standardmäßig `0 * * * *` (stündlich, UTC). Registriert in `src/lib/initCloudSync.ts`; überschreibbar mit `OMNIROUTE_LOG_EXPORT_CRON`. Jeder Tick entleert jeden** ermöglicht** Ziel, nacheinander.
+- **Cursor** — SQLite implizites `call_logs.rowid`, bleibt pro Ziel in `log_export_destinations.cursor_row_id` bestehen. `timestamp` ist bewusst nicht der Cursor: Aufrufer können ihren eigenen Wert angeben, sodass eine langsame Anfrage nach einer schnelleren, die später gestartet wurde, geschrieben werden kann und ein Zeitstempel-Cursor sie überspringen würde.
+- **Stapeln** — `batch_size` Zeilen pro Anfrage (Standard 500), `max_rows_per_run` Zeilen pro Lauf (Standard 10000), sodass ein großer Rückstand über mehrere Ticks abfließt, anstatt einen zu blockieren.
+- **Lieferung** — Der Cursor bewegt sich erst weiter, nachdem `send()` aufgelöst wurde. Bei einem fehlgeschlagenen Stapel verbleibt der Cursor an der Stelle, an der er sich befand, sodass bei der nächsten Ausführung dieselben Zeilen erneut versucht werden. Die Garantie ist „mindestens einmal“ plus zielseitige Deduplizierung, nicht „genau einmal“: BigQuery verschlüsselt jede Zeile mit der Anrufprotokoll-ID, die es nach bestem Wissen und Gewissen innerhalb seines eigenen Deduplizierungsfensters berücksichtigt.
+- **Überlappungsschutz** — der Cron-Tick und `POST .../run` können zusammen ausgelöst werden. Ein Ziel, das bereits entleert wird, wird übersprungen und nicht zweimal entleert (`skipped: true` im Laufergebnis), sodass bei einer gleichzeitigen Ausführung kein Stapel erneut gesendet oder der Cursor rückwärts geschrieben werden kann.
+- **Bereinigungswiederherstellung** — Wenn `cursor_row_id` über `MAX(rowid)` landet (die gesamte Tabelle wurde gelöscht und die Zeilen-IDs neu gestartet), spult der Läufer auf 0 zurück, anstatt dauerhaft blind zu werden.
 
-### Isolierter Runner und Grenzwerte
+### Isolierter Läufer und Grenzen
 
-Jeder Ziellauf unter Node startet einen separaten, kurzlebigen untergeordneten Betriebssystemprozess (`child_process`
-mit IPC, nicht `worker_threads`). Das Lesen von Bodys, das Parsen/Serialisieren von Nutzdaten-JSON, das zielseitige
-`prepare()` und die Netzwerk-E/A zum Ziel laufen vollständig dort, nicht in der Ereignisschleife des Servers.
-Nur die Konfiguration und kleine Fortschrittsmeldungen passieren IPC; exportierte Datensätze gelangen nie zurück
-zum Server. Der Cronjob und die Route „Jetzt ausführen“ behalten dasselbe öffentliche Ergebnis und denselben Überlappungsschutz bei.
+Jedes auf dem Knoten ausgeführte Ziel startet einen separaten, kurzlebigen untergeordneten OS Prozess (`child_process` mit IPC, nicht `worker_threads`). Body-Reads, Nutzlast JSON parsing/serialization, Ziel- `prepare()` und Zielnetzwerk- I/O werden alle dort ausgeführt, nicht in der Ereignisschleife des Servers. Nur Konfigurations- und kleine Fortschrittsmeldungen überqueren IPC; Exportierte Datensätze kehren nie zum Server zurück. Der Cron-Job und die Route „Jetzt ausführen“ behalten das gleiche öffentliche Ergebnis und den Überlappungsschutz bei.
 
-Der Kindprozess öffnet die vom Server aufgelöste Datei `DATA_DIR/storage.sqlite` schreibgeschützt mit `node:sqlite`,
-mit `busy_timeout=5000` und `query_only=ON`. Er importiert keinen DB-Singleton und führt weder
-Migrationen noch Sicherungen oder SQLite-Aktualisierungen durch. Die Behandlung fehlender/beschädigter Artefakte (einschließlich des
-UPDATE für beschädigte Artefakte) bleibt ausschließlich im Detailpfad des Dashboards. Beide Pfade verwenden einen gemeinsamen reinen
-Detail-Resolver; der Export nutzt asynchrone Dateisystem-Lesezugriffe und dieselbe Auflösungsreihenfolge: Artefakt → ältere
-Inline-Daten → ältere Festplattendaten → keine Daten. Ein Lauf erfasst die maximale Einfüge-rowid
-beim Öffnen des Readers durch den Kindprozess; spätere Einfügungen warten auf den nächsten Lauf. Dies ist eine Einfügegrenze,
-keine langlebige SQLite-Transaktion: WAL-Schreiber und Checkpoints bleiben während
-Netzwerkwartezeiten ungehindert. Aktualisierungen/Löschungen vorhandener Zeilen werden durch diese Grenze nicht eingefroren.
+Das Kind öffnet das aufgelöste `DATA_DIR/storage.sqlite` des Servers schreibgeschützt mit `node:sqlite`, mit `busy_timeout=5000` und `query_only=ON`. Es importiert keinen DB Singleton und führt keine Migrationen, Sicherungen oder SQLite Updates durch. Die Buchhaltung Missing/corrupt Artefakts (einschließlich des korrupten Artefakts UPDATE) verbleibt nur im Dashboard-Detailpfad. Beide Pfade teilen sich einen reinen Detail-Resolver; Der Export verwendet asynchrone Dateisystem-Lesevorgänge und die → → →. Ein Lauf erstellt einen Snapshot der maximalen Einfügungszeilen-ID, wenn das untergeordnete Element seinen Reader öffnet. Spätere Einfügungen warten auf den nächsten Lauf. Dies ist eine Einfügungsgrenze, keine langlebige SQLite Transaktion: WAL Writer und Prüfpunkte bleiben während Netzwerkwartezeiten frei. Updates/deletions vorhandener Zeilen werden durch diese Grenze nicht eingefroren.
 
-Nach jedem akzeptierten Stapel wartet der Kindprozess auf eine Bestätigung. Der Server speichert zunächst
-den Cursor mit `advanceLogExportCursor` und sendet dann `ack`; vorher beginnt kein nächster Stapel.
-Ein Sendefehler, Absturz oder Timeout wird als Fehler erfasst, ohne den Cursor für diesen Stapel weiterzusetzen. Zuvor
-bestätigte Stapel bleiben festgeschrieben; höchstens der eine unbestätigte Stapel kann erneut gesendet werden.
-Ein Erfolg wird erst nach `done` und einem ordnungsgemäßen Ende des Kindprozesses erfasst. Bei Fehlern wird der Kindprozess
-mit SIGTERM beendet, nach 500 ms eskaliert dies zu SIGKILL, und der Runner wartet auf die vollständige Prozessbeendigung.
+Nach jedem akzeptierten Stapel wartet das Kind auf eine Bestätigung. Der Server behält den Cursor zunächst bei `advanceLogExportCursor` bei und sendet dann `ack`; Es startet kein nächster Batch davor. Bei einem Sendefehler, einem Absturz oder einer Zeitüberschreitung wird ein Fehler aufgezeichnet, ohne dass dieser Stapel weitergeführt wird. Zuvor bestätigte Batches bleiben festgeschrieben; höchstens der eine unbestätigte Stapel kann erneut gesendet werden. Der Erfolg wird erst nach `done` und einem sauberen untergeordneten Exit aufgezeichnet. Fehler beenden das Kind mit SIGTERM und eskalieren nach 500 ms zu SIGKILL, und der Läufer wartet auf den Abschluss des Prozesses.
 
-| Umgebungsvariable                             | Standardwert | Zweck                                      |
-| --------------------------------------------- | ------------ | ------------------------------------------ |
-| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000       | Zeitlimit pro Ziel in Echtzeit             |
-| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024         | V8-Old-Space-Limit des Kindprozesses in MB |
+| Umgebungsvariable                             | Standard | Zweck                           |
+| --------------------------------------------- | -------- | ------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000   | Limit für die Wanduhr pro Ziel  |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024     | Kinder-V8-Old-Space-Limit in MB |
 
-Bei ungültigen, nicht positiven oder nicht ganzzahligen Werten werden die Standardwerte verwendet. Die Heap-Einstellung ist kein Gesamtlimit
-für den RSS; sehr große Stapel können weiterhin den Speicher des Kindprozesses erschöpfen und den Lauf sicher fehlschlagen lassen.
-Der Standardwert von 1024 MB lässt Spielraum für den Standardstapel mit 500 Zeilen aus 512-KiB-Artefakten bei
-aktivierten Bodys, einschließlich der nach Byteumfang gestückelten JSON-Serialisierung von BigQuery. Er macht einen
-Stapel mit 10000 Zeilen samt Bodys nicht sicher. Bei erschöpftem V8-Heap wird ein Fehler mit konkreten Handlungshinweisen erfasst: Stapelgröße
-verringern oder `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` erhöhen; der Cursor bleibt beim letzten
-bestätigten Stapel. Historische Inline-/Festplatten-Bodys unterliegen nicht der modernen Artefaktgrößenbegrenzung.
-Betreiber müssen den RSS separat einplanen, insbesondere in Containern mit begrenztem Arbeitsspeicher.
+Invalid/non-positive/non-integer -Werte verwenden die Standardwerte. Die Heap-Einstellung stellt kein Gesamt- RSS Limit dar; Sehr große Stapel können immer noch den untergeordneten Speicher erschöpfen und den Lauf sicher zum Scheitern bringen. Der 1024 MB Standard lässt Spielraum für den standardmäßigen 500-Zeilen-Stapel von 512 KiB Artefakten mit aktivierten Körpern, einschließlich der byte-chunked JSON Serialisierung von BigQuery. Dadurch wird ein Körperstapel mit 10.000 Zeilen nicht sicher. V8-Heap-Erschöpfung zeichnet einen umsetzbaren Fehler auf: Stapelgröße verringern oder `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` erhöhen; Der Cursor bleibt bei der letzten bestätigten Charge. Historische inline/disk Körper fallen nicht unter die moderne Artefaktobergrenze. Betreiber müssen RSS separat budgetieren, insbesondere in Containern mit begrenztem Speicher.
 
-Der Kindprozess erbt nur das aufgelöste `DATA_DIR`, `NODE_ENV`, ein explizites `TZ` (Auflösung
-älterer Dateinamen anhand der Ortszeit), `ELECTRON_RUN_AS_NODE`, sofern vorhanden, und die folgenden Eingaben für ausgehende Verbindungen:
-`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (und ihre kleingeschriebenen Varianten),
-`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
-Ein globaler Undici-Dispatcher verwendet dieselbe rein umgebungsbasierte Proxy-Auflösung und dieselben
-Umgehungsregeln für lokale Hosts wie der Server, einschließlich `NO_PROXY`; er importiert weder `proxyFetch.ts` noch dessen Datenbank-/Feature-Flags.
-Proxy-Zugangsdaten werden aus weitergeleiteten Ausgaben und aufgezeichneten Fehlern entfernt. Zugangsdaten für das Ziel
-werden ausschließlich in einer einzelnen Start-IPC-Nachricht übertragen, niemals über argv oder die Umgebung; weitergeleitete Ausgaben und Fehler werden
-mit einem Präfix versehen und bereinigt. In den Ausführungsargumenten des Kindprozesses wird nur `ExperimentalWarning` deaktiviert, damit
-Nodes SQLite-Warnung nicht bei jedem Cron-Lauf erneut erscheint; andere Warnungstypen bleiben sichtbar.
+Das untergeordnete Element erbt nur das aufgelöste `DATA_DIR`, `NODE_ENV`, das explizite `TZ` (alte Auflösung des Dateinamens in Ortszeit), `ELECTRON_RUN_AS_NODE` sofern vorhanden, und die folgenden ausgehenden Eingaben: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (und ihre Kleinbuchstabenformen), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`. Ein globaler Undici-Dispatcher teilt die reine Umgebungs-Proxy-Auflösung des Servers und die lokalen Host-Umgehungsregeln, einschließlich `NO_PROXY`; Es importiert weder `proxyFetch.ts` noch seine DB/feature Flags. Proxy-Anmeldeinformationen werden aus der weitergeleiteten Ausgabe und den aufgezeichneten Fehlern geschwärzt. Zielanmeldeinformationen werden nur in einer IPC Startnachricht übertragen, niemals argv oder Umgebung; output/error -Weiterleitung wird vorangestellt und bereinigt. Nur `ExperimentalWarning` ist in untergeordneten Exec-Argumenten deaktiviert, um zu vermeiden, dass Nodes SQLite Warnung bei jedem Cron-Lauf wiederholt wird. Andere Warntypen bleiben sichtbar.
 
-Zielmodule müssen ohne Next.js-/server-only-Abhängigkeiten importierbar sein. Die bestehende
-BigQuery-Implementierung erfüllt diese Anforderung bereits. Zugriffstoken-Caches bestehen nur für die Dauer des
-Kindprozesslaufs, nicht über mehrere Läufe hinweg. Node ist die unterstützte Laufzeitumgebung (`package.json` engines), aber der Bun-
-Installationsabschnitt der README und `Dockerfile.bun` beschreiben auch einen produktiven Kompatibilitätspfad mit
-`bun:sqlite` (`src/lib/db/core.ts` / Adapter). Unter Bun behalten Exporte daher den bisherigen
-prozessinternen Pfad bei und geben eine einmalige Warnung aus: Heap-/Timeout-Isolation durch Kindprozesse ist nicht verfügbar. Verwenden Sie
-Node für Event-Loop- und OOM-Isolation; Bun wird hier nicht als reine Entwicklungsumgebung behandelt.
+Zielmodule müssen ohne Next.js/server-only Abhängigkeiten importierbar sein. Die vorhandene BigQuery -Implementierung erfüllt diesen Vertrag bereits. Zugriffstoken-Caches sind nur für die untergeordnete Ausführung gültig, nicht über mehrere Ausführungen hinweg. Knoten ist die unterstützte Laufzeit (`package.json` Engines). Es gibt einen bestmöglichen, nicht unterstützten Bun -Kompatibilitätspfad (`bun:sqlite` in `src/lib/db/core.ts` /adapters und `Dockerfile.bun`), daher dürfen Exporte nicht unter diesem Pfad unterbrochen werden. Unter Bun behalten Exporte den vorherigen In-Process-Pfad bei und geben eine einmalige Warnung aus: Die untergeordnete heap/timeout Isolation ist nicht verfügbar. Verwenden Sie Node für die Ereignisschleife und OOM Isolation.
 
-Wenn `includeBodies` aktiviert ist, bevorzugen Sie einen Takt im Minutenbereich wie
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, statt stündlich einen Rückstau an Nutzdaten anzusammeln.
-Batch- und Zeilenlimits begrenzen weiterhin jeden Lauf. Der Prozessstart fällt pro Ziel und Lauf an;
-dabei wird ein geringer Startaufwand gegen die Isolation der Server-Event-Loop eingetauscht, nicht gegen eine geringere CPU-Gesamtauslastung.
+Wenn `includeBodies` aktiviert ist, bevorzugen Sie einen Rhythmus auf Minutenebene wie `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, anstatt einen stündlichen Payload-Rückstand anzusammeln. Batch- und Zeilenlimits begrenzen weiterhin jeden Lauf. Der Prozessstart wird pro Ziel und Lauf bezahlt. Dies führt zu geringen Startkosten für die Isolation der Server-Ereignisschleife und nicht zu einer Reduzierung der gesamten CPU Nutzung.
 
-### Nutzdaten (Prompts und Antworten)
+### Nutzlasten (Eingabeaufforderungen und Vervollständigungen)
 
-Standardmäßig enthält der Export nur die Zusammenfassungsfelder, die die **Liste** der Protokolle anzeigt. Durch Aktivieren von
-**Prompts und Antworten exportieren** (`includeBodies`) werden zusätzlich die Inhalte übertragen, die der **Detailbereich**
-der Protokolle für jeden Aufruf anzeigt:
+Standardmäßig enthält der Export nur die Zusammenfassungsfelder der Protokolle** Liste** zeigt. Einschalten** Exportieren Sie Eingabeaufforderungen und Antworten** (`includeBodies`) liefert zusätzlich die Protokolle** Detail** Bereich zeigt für jeden Anruf:
 
-| Feld                             | Inhalt                                                             |
-| -------------------------------- | ------------------------------------------------------------------ |
-| `request_body` / `response_body` | Die Nutzdaten des Aufrufs, wie sie im Dashboard dargestellt werden |
-| `pipeline_route_decision`        | Welches Ziel und Modell der Router ausgewählt hat                  |
-| `pipeline_client_request`        | Die unveränderte Anfrage, genau wie vom Client gesendet            |
-| `pipeline_openai_request`        | Nach der Übersetzung in das interne OpenAI-Format                  |
-| `pipeline_provider_request`      | Wie tatsächlich an den Anbieter gesendet, in dessen Dialekt        |
-| `pipeline_provider_response`     | Die unveränderte Antwort des Anbieters                             |
-| `pipeline_client_response`       | Was an den Aufrufer zurückgegeben wurde                            |
-| `pipeline_error`                 | Fehlerdetails auf Pipeline-Ebene für einen fehlgeschlagenen Aufruf |
-| `bodies_truncated`               | Wahr, wenn eines der obigen Felder `maxBodyBytes` erreicht hat     |
+| Feld                             | Was es enthält                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------- |
+| `request_body` / `response_body` | Die Anrufnutzlasten werden so angezeigt, wie sie vom Dashboard gerendert werden |
+| `pipeline_route_decision`        | Welches Ziel und welches Modell der Router ausgewählt hat                       |
+| `pipeline_client_request`        | Die Rohanfrage genau so, wie der Client sie gesendet hat                        |
+| `pipeline_openai_request`        | Nach der Übersetzung in die interne OpenAI Form                                 |
+| `pipeline_provider_request`      | Wie tatsächlich upstream gesendet, im Provider-Dialekt                          |
+| `pipeline_provider_response`     | Die rohe Upstream-Antwort                                                       |
+| `pipeline_client_response`       | Was dem Anrufer zurückgegeben wurde                                             |
+| `pipeline_error`                 | Fehlerdetails auf Pipelineebene für einen fehlgeschlagenen Aufruf               |
+| `bodies_truncated`               | True, wenn in einem der oben genannten Felder `maxBodyBytes` angezeigt wird     |
 
-Dabei handelt es sich um Prompt-Inhalte. Daher ist diese Option **standardmäßig deaktiviert** und bewusst pro Ziel festzulegen.
-Exportiert wird, was das Dashboard anzeigt, da Export und `getCallLogById` dieselbe Detailauflösung
-verwenden: Nutzdaten werden
-bereits beim Schreiben von personenbezogenen Daten und Geheimnissen bereinigt, und ein Aufruf mit einem
-`noLog`-API-Schlüssel speichert keinerlei Nutzdaten, sodass nichts exportiert werden kann.
+Es handelt sich also um prompten Inhalt** standardmäßig deaktiviert** und bewusst eine Auswahl pro Reiseziel. Im Lieferumfang ist enthalten, was auf dem Dashboard angezeigt wird, da Export und `getCallLogById` die Detailauflösung teilen: Nutzlasten sind bereits beim Schreiben personenbezogener Daten bereinigt und geheim redigiert, und ein mit einem `noLog` API Schlüssel getätigter Aufruf speichert überhaupt keine Nutzlast, sodass nichts exportiert werden kann.
 
-Nutzdaten werden zeilenweise aus dem Dateisystem-Artefakt gelesen. Die Hydrierung erfolgt daher nur für Ziele,
-die sie angefordert haben. Bei einem fehlenden oder beschädigten Artefakt wird dessen Zusammenfassung mit null-Nutzdaten exportiert,
-statt den Batch fehlschlagen zu lassen und den Cursor zu blockieren.
+Nutzlasten werden pro Zeile aus dem Dateisystemartefakt gelesen, sodass die Hydratation nur für Ziele ausgeführt wird, die danach gefragt haben. Ein fehlendes oder beschädigtes Artefakt exportiert seine Zusammenfassung mit Null-Payloads, anstatt dass der Batch fehlschlägt und der Cursor blockiert.
 
-`maxBodyBytes` (Standardwert 262144) begrenzt jedes Feld. Längere Nutzdaten werden **gekürzt statt
-verworfen** — ein gekürzter Prompt beantwortet immer noch die Frage „Was wurde gefragt?“ — und die Zeile wird mit
-`bodies_truncated` gekennzeichnet. Gestreamte, abschnittsweise Deltas werden nicht exportiert; die zusammengesetzte Antwort befindet sich
-bereits in `pipeline_provider_response` und `pipeline_client_response`.
+`maxBodyBytes` (Standard 262144) begrenzt jedes Feld. Längere Nutzlasten sind** eher abgeschnitten als gelöscht** — Eine abgeschnittene Eingabeaufforderung antwortet weiterhin mit „Was wurde gefragt“ — und die Zeile ist mit `bodies_truncated` gekennzeichnet. Gestreamte Chunk-by-Chunk-Deltas werden nicht exportiert; Die zusammengestellte Antwort befindet sich bereits in `pipeline_provider_response` und `pipeline_client_response`.
 
 ---
 

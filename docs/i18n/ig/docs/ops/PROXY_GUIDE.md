@@ -270,150 +270,150 @@ Nke a na-eme naanị otu ugboro na mbido mbụ mgbe emelitechara. Jiri `migrateL
 
 ---
 
-## 1proxy Ahịa Proxy N'efu
+## 1proxy Free Proxy Market
 
-> 🆕 **Onye [@oyi77](https://github.com/oyi77) nyere aka** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Nsogbu [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Ọ bụ [@oyi77](https://github.com/oyi77) nyere aka** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Isi okwu [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute na-ejikọta na nyiwe obodo **[1proxy](https://1proxy-api.aitradepulse.com)** iji nye ohere iji **ọtụtụ narị proxy efu a kwadoro** sitere n'akụkụ ụwa niile. Nke a dabara nke ọma maka ndị ọrụ na-enweghị akụrụngwa proxy nke ha.
+OmniRoute integrates na** [1 proxy](https://1proxy-api.aitradepulse.com)** ikpo okwu obodo iji nye ohere** narị narị proxies efu, kwadoro** si gburugburu ụwa. Nke a zuru oke maka ndị ọrụ na-enweghị akụrụngwa proxy nke ha.
 
-### Otu O Si Arụ Ọrụ
+### Ka o si arụ ọrụ
 
 ```
-┌─────────────┐  Mekọrịta   ┌─────────────────┐   Gbanwee    ┌──────────┐
-│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Onye na- │
-│  (mpụga)    │ ruo proxy 500│  source=oneproxy │ site n'ogo  │ enye API │
-└─────────────┘              └─────────────────┘               └──────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Mekọrịta** — OmniRoute na-ewepụta proxy ndị a kwadoro site na 1proxy API
-2. **Chekwaa** — A na-echekwa proxy ndị ahụ n'otu tebụl `proxy_registry` ahụ nwere `source = 'oneproxy'`
-3. **Nyochaa** — Jiri protocol, obodo, na akara ogo nyochaa ha
-4. **Gbanwee** — Họrọ proxy kacha mma site n'iji atụmatụ ogo, enweghị usoro, ma ọ bụ usoro n'usoro
-5. **Wedata onwe ya** — A na-ebelata akara ogo proxy ndị dara ada; ma ọ bụrụ na ọ daa n'okpuru oke → a ga-akara ya dị ka `inactive`
+1. **Mmekọrịta** — OmniRoute na-ebute proxies akwadoro site na 1proxy API
+2. **Ụlọ ahịa** A na-echekwa — proxies n'otu tebụl `proxy_registry` nwere `source = 'oneproxy'`
+3. **Iyo** — Filter site na protocol, obodo, akara mma
+4. **Tugharia** — Họrọ proxy kacha mma site na iji atụmatụ dị mma, enweghị usoro ma ọ bụ usoro
+5. **Weda onwe ya ala** — proxies dara ada na-ebelata akara ogo ha; n'okpuru → akara adịghị arụ ọrụ
 
-### Imekọrịta Proxy
+### Mmekọrịta Proxies
 
 **Site na Dashboard:**
 
-1. Gaa na taabụ **Settings → 1proxy**
-2. Pịa **"Sync Now"**
-3. Lelee ọnụ ọgụgụ: proxy niile, ọnụọgụ ndị nọ n'ọrụ, nkezi ogo, na nkewa dịka obodo
+1. Gaa na** Ntọala → 1proxy** tab
+2. Pịa** "Mekọrịta Ugbu a"**
+3. Lelee stats: mkpokọta proxies, ọnụ ọgụgụ nọ n'ọrụ, ogo ogo, ndakpọ obodo
 
-**Site na API:**
+**Site API:**
 
 ```bash
-# Bido mmekọrịta
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Nzaghachi:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
-### Inyocha Proxy
+### Nzacha proxies
 
 ```bash
-# Nyochaa site na protocol
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Nyochaa site na obodo
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Nyochaa site na akara ogo kacha nta
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Jikọta ihe nzacha
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
 ### Akara Ogo Proxy
 
-Proxy 1proxy ọ bụla na-abịa na metadata:
+Onye nnọchi anya proxy 1 ọ bụla na-abịa na metadata:
 
-| Mpaghara        | Nkọwa                                       |
+| Ubi             | Nkọwa                                       |
 | --------------- | ------------------------------------------- |
-| `qualityScore`  | Ogo 0-100 sitere na nkwado 1proxy           |
-| `latencyMs`     | Oge igbu oge netwọkụ a tụrụ                 |
+| `qualityScore`  | 0-100 ọkwa sitere na nkwado proxy 1         |
+| `latencyMs`     | Atụghị netwọọk tụrụ                         |
 | `anonymity`     | `transparent`, `anonymous`, ma ọ bụ `elite` |
-| `googleAccess`  | Ma proxy ahụ nwere ike ịnweta ọrụ Google    |
-| `countryCode`   | Koodu obodo ISO nwere mkpụrụedemede abụọ    |
-| `lastValidated` | Akara oge nkwado ikpeazụ                    |
+| `googleAccess`  | Ma proxy nwere ike ịnweta ọrụ Google        |
+| `countryCode`   | Koodu obodo ISO mkpụrụedemede abụọ          |
+| `lastValidated` | Stampụ oge nkwado ikpeazụ                   |
 
-A na-agbanwe akara ogo n'ụzọ na-agbanwe agbanwe:
+A na-edozi akara ogo nke ọma:
 
-- **Arịrịọ ndị dara ada** na-ebelata akara ahụ site na isi 10
-- **Akara dara ruo ≤10** → a ga-akara proxy ahụ dị ka `inactive`
-- A naghị etinye proxy ndị na-adịghị arụ ọrụ na ngbanwe
+- **Arịrịọ emezughị** belata akara site na isi iri
+- **Akara dara na ≤ 10** → proxy ka akara `inactive`
+- Ewepụrụ proxies na-adịghị arụ ọrụ na ntụgharị
 
-### Atụmatụ Ngbanwe
+### Atụmatụ ntụgharị
 
 ```bash
-# Gbanwee site n'ogo (proxy kacha mma na-ebu ụzọ) — ndabara
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Ngbanwe enweghị usoro
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# N'usoro (nke a kwadoro n'oge kacha ochie na-ebu ụzọ)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
-### Ihe Nkwụsị Sekit
+### Ihe mgbaji sekit
 
-Mmekọrịta 1proxy nwere ihe nkwụsị sekit arụnyere n'ime ya:
+Mmekọrịta 1proxy nwere ihe mgbaji sekit arụnyere n'ime ya:
 
-- Mgbe **mmekọrịta dara ugboro 5 n'usoro**, a na-egbochi mbọ mmekọrịta ndị ọzọ
-- Tọgharịa ya site na: `resetOneproxyCircuitBreaker()` ma ọ bụ malite sava ahụ ọzọ
-- Ọnọdụ mmekọrịta dị na `GET /api/settings/oneproxy?action=status`
+- Mgbe** Ọdịda mmekọrịta 5 na-esochi** , A na-egbochi mgbalị mmekọrịta ọzọ
+- Tọgharịa na: `resetOneproxyCircuitBreaker()` ma ọ bụ malitegharịa ihe nkesa
+- Ọkwa mmekọrịta dị na `GET /api/settings/oneproxy?action=status`
 
-### Ihichapụ Proxy 1proxy
+### Na-ekpochapụ 1 proxy proxies
 
 ```bash
-# Hichapụ otu proxy 1proxy
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# Hichapụ proxy 1proxy NIILE (emetụghị proxy ndị e ji aka tinye)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
 ---
 
-## Mgbochi Nchọpụta & Izo Onwe
+## Mgbochi nchọpụta & Stealth
 
-OmniRoute anaghị naanị ebufe okporo data site na proxy — ọ na-emekwa ka okporo data ahụ yie nke ziri ezi:
+OmniRoute abụghị naanị ụzọ okporo ụzọ site na proxy — ọ na-eme ka okporo ụzọ ahụ yie ihe ziri ezi:
 
-### Nṅomi Mkpịsịaka TLS
+### TLS aka mkpịsị aka
 
-Ọ na-eji `wreq-js` emepụta mkpịsịaka TLS yiri nke ihe nchọgharị, si otú ahụ gafee sistemụ nchọpụta bot ndị na-akara njikọ TLS na-esighị na ihe nchọgharị akara.
+Na-eji `wreq-js` iwepụta akara mkpịsị aka TLS dị ka ihe nchọgharị, na-agafe sistemu nchọpụta bot nke na-egosipụta aka aka TLS na-abụghị ihe nchọgharị.
 
-### Ndakọrịta Mkpịsịaka CLI
+### CLI Mkpịsị aka
 
-**Mgbanwe Mkpịsịaka CLI** (`Ntọala → Nche`) na-ahazigharị nkụnyeisi HTTP na mpaghara ahụ JSON ka ha dakọọ kpọmkwem na akara nke faịlụ CLI binary izizi (Claude Code, Codex, wdg.). Nke a na-arụ ọrụ **n'elu** proxy ahụ:
+Nke**CLI aka mkpịsị aka** (`Settings → Security`) na-emegharị ndị nkụnye eji isi HTTP na mpaghara anụ ahụ JSON ka ọ dakọtara kpọmkwem mbinye aka nke ọnụọgụ abụọ CLI ( Koodu Claude, Codex, wdg). Nke a na-arụ ọrụ** n'elu** onye nnọchiteanya:
 
 ```
-IP gị (egbochiri) → IP Proxy (US) → API nke Onye Na-enye Ọrụ
-                    + nṅomi TLS
-                    + mkpịsịaka CLI
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-Ị na-enweta ma **ikpuchi IP** ma **izi ezi nke arịrịọ** n'otu oge.
+Ị nweta ha abụọ**IP nkpuchi** na** ịrịọ eziokwu** n'out oge.
 
-### Ichekwa IP Proxy
+### Nchekwa proxy IP
 
-Baajị ndị e ji agba dị iche iche kaa akara na dashboard na-egosi ọkwa proxy nke na-arụ ọrụ:
+baajị nwere koodu agba na dashboard na-egosi ọkwa proxy na-arụ ọrụ:
 
-| Baajị | Ọkwa             | Ihe ọ pụtara                                                     |
-| ----- | ---------------- | ---------------------------------------------------------------- |
-| 🟢    | Zuru ụwa ọnụ     | Okporo data niile na-agafe na proxy a                            |
-| 🟡    | Onye na-enye ọrụ | Naanị okporo data onye na-enye ọrụ a ka a na-ebufe site na proxy |
-| 🔵    | Njikọ            | Igodo/akaụntụ a kpọmkwem na-eji proxy a                          |
+| baajị | Ọkwa           | Pụtara                                         |
+| ----- | -------------- | ---------------------------------------------- |
+| 🟢    | Gburugburu ụwa | Okporo ụzọ niile na-aga site na proxy a        |
+| 🟡    | Onye na-enye   | Naanị okporo ụzọ ndị na-eweta ọrụ a bụ proxied |
+| 🔵    | Njikọ          | Nke a kpọmkwem key/account na-eji proxy a      |
 
-Baajị ahụ na-egosikwa IP proxy a chọpụtara maka nkwenye.
+baajị ahụ gosikwara IP proxy edoziziri maka nkwenye.
 
 ---
 
@@ -777,51 +777,28 @@ Jiri `random`
 n'ụzọ hà nhata)
 ```
 
-## Mwepu Akpaka nke Proxy nke Gị Dara Ada
+## Mwepu ọdịda akpaaka maka proxies nke gị
 
-Ọdọ proxy nke ahịa 1proxy na-ewedalarị ogo proxy ndị dara ada n'onwe ya (lee
-[Akara Ogo Proxy](#proxy-quality-scores)). Maka
-proxy ndị **ị** tinyere na ndekọ ahụ, onye nhazi nyocha ọnọdụ nke na-arụ ọrụ n'azụ
-(`src/lib/proxyHealth/scheduler.ts`) na-enye otu omume ahụ nke “iwepu onye otu nwụrụ anwụ na
-yinye ahụ na-akpaghị aka,” na-ehichapụghị ihe ọ bụla:
+Ọdọ mmiri 1proxy ebe a na-ere ahịa ebutelarị proxies dara ada n'onwe ya (lee [Proxy Quality Scores](#proxy-quality-scores) ). Maka proxies** ị** agbakwunyere na ndekọ ahụ, onye na-ahụ maka ahụike ndabere (`src/lib/proxyHealth/scheduler.ts`) na-enye otu ihe ahụ "wepụ onye nwụrụ anwụ na agbụ na-akpaghị aka", na-enweghị ihichapụ ihe ọ bụla:
 
 ```bash
-# .env — gbanyụọ proxy n'ụzọ dị nro mgbe nyocha 3 sochiri onwe ha dara ada, ma gbanye ya ọzọ
-# na-akpaghị aka ozugbo ọ malitere ịzaghachi nyocha ọzọ.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Otu o si arụ ọrụ n'ime yinye nwere ọtụtụ proxy:
+Otu ọ dabara na yinye ọtụtụ proxy:
 
-1. Onye nhazi ahụ na-enyocha proxy ọ bụla edebanyere aha kwa `PROXY_HEALTH_INTERVAL_MS`
-   (ndabara bụ nkeji 10; opekempe bụ nkeji 1).
-2. Mgbe ọdịda **doro anya** sochiri onwe ha ruru `PROXY_AUTO_REMOVE_AFTER` (ezigbo
-   ọdịda njikọ — oge gafere ma ọ bụ 5xx nke ebe a na-enyocha n'onwe ya anaghị agụnye, lee
-   [Nnyocha Ọnọdụ Proxy](#proxy-health-checking-v3816)), a na-edobe `status` nke proxy ahụ ka ọ bụrụ
-   `dead`.
-3. `dead` bụ otu n'ime ọnọdụ ndị nzacha ọnọdụ-dị-ndụ nke mkpebi ọdọ/ntụgharị
-   na-ewepu, ya mere ntụgharị nke scope (round-robin / random / sticky /
-   latency — lee [Osisi Mkpebi Atụmatụ Ntụgharị](#rotation-strategy-decision-tree))
-   na-akwụsị ozugbo inye proxy ahụ arịrịọ ọhụrụ. Nke a anaghị emetụta proxy ndị ọzọ dị na
-   ọdọ ahụ, ọdọ ahụ dum anaghịkwa alaghachi na njikọ ozugbo n'enweghị ọkwa —
-   lee nchedo fail-closed nke [Sistemụ Proxy Ọkwa 4](#4-level-proxy-system).
-4. Onye nhazi ahụ na-aga n'ihu na-enyocha proxy ndị `dead` n'otu nkeji oge ahụ. Nnyocha
-   na-esote nke gara nke ọma na-agbanwe `status` azụ ka ọ bụrụ `active`, proxy ahụ wee laghachi na ntụgharị —
-   ọ dịghị mkpa iji aka tinye ya ọzọ.
+1. Onye nhazi oge na-enyocha proxy ọ bụla edebanyere aha `PROXY_HEALTH_INTERVAL_MS` ọ bụla (nkeji 10 ndabara; opekempe 1 min).
+2. Mgbe `PROXY_AUTO_REMOVE_AFTER` soso** mmechi** ọdịda (ezigbo njikọ ọdịda — nkwụsị oge ma ọ bụ 5xx nke ihe nyocha nke ya onwe ya anaghị agụta, lee [Proxy Health Checking](#proxy-health-checking-v3816) ), `status` proxy ka edobere na `dead`.
+3. `dead` bụ otu n'ime statuses ihe nzacha ndụ ndụ nke mkpebi pool/rotation na-eji ewepu, yabụ ntụgharị nke scope (round-robin / random / sticky / latency / session — see [Rotation Strategy Decision Tree](#rotation-strategy-decision-tree) ) na-akwụsị ozugbo inyefe proxy ahụ na arịrịọ ọhụrụ. Ọ nweghị proxies ọzọ dị na ọdọ mmiri a na-emetụta, ọdọ mmiri ahụ niile anaghị ada jụụ na njikọ ziri ezi — hụ ihe nchekwa [4-Level Proxy System](#4-level-proxy-system) na-emechi emechi.
+4. Onye nhazi oge na-eme nyocha `dead` proxies n'otu oge. Nchọpụta na-aga nke ọma na-atụgharị `status` azụ na `active` ma ọ na-abanyegharị — ọ nweghị akwụkwọ mgbakwunye ọzọ achọrọ.
 
-E ji ụma mee nke a ka ọ bụrụ ihe a ga-ahọrọ ịgbanye, nke **na-adịghị emebi ihe**: na ndabara, onye nhazi ahụ na-
-agụta ma dekọọ naanị ọdịda (lee iwu C na `decision.ts`), ebe `PROXY_AUTO_DISABLE`
-anaghị ehichapụ ahịrị ọ bụla — ọkọlọtọ `PROXY_AUTO_REMOVE` dị iche, nke siri ike
-karị, bụ maka nke ahụ. Ọ bụrụ na edobere ha abụọ ka ha bụrụ `true`, `PROXY_AUTO_REMOVE`
-ga-emeri (proxy a na-achọ ihichapụ agaghị enwe uru site na mgbanyụ dị nro n'etiti usoro ahụ). Lee
-ntụaka [Nhazi Gburugburụ](../reference/ENVIRONMENT.md) maka ndepụta mgbanwe
-zuru ezu.
+Nke a bụ ụma** Nwepu na anaghị emebi emebi** : na ndabara onye nhazi naanị na-agụta ma dekọọ ọdịda (lee amụma C na `decision.ts`), na `PROXY_AUTO_DISABLE` anaghị ehichapụ — ahịrị nke ahụ bụ ihe dị iche, ọkọlọtọ `PROXY_AUTO_REMOVE` na-eme ihe ike bụ maka. Ọ bụrụ na edobere ha abụọ na `true`, `PROXY_AUTO_REMOVE` na-enweta mmeri (proxy nke a ga-ehichapụ enweghị uru maka gbanyụọ nro n'etiti). Hụ ntụnye aka [Config Environment](../reference/ENVIRONMENT.md) maka ndepụta mgbanwe zuru oke.
 
 ---
 
-> 📖 **Akwụkwọ metụtara ya:**
+> 📖** Akwụkwọ emetụtara:**
 >
-> - [Ntuziaka Onye Ọrụ](../guides/USER_GUIDE.md) — Ntọala na nhazi izugbe
-> - [Ntụaka API](../reference/API_REFERENCE.md) — Akwụkwọ API zuru ezu
-> - [Nhazi Gburugburụ](../reference/ENVIRONMENT.md) — Mgbanwe gburugburụ niile
+> - [Ntuziaka onye ọrụ](../guides/USER_GUIDE.md) — Nhazi na nhazi izugbe - [API Reference](../reference/API_REFERENCE.md) — akwụkwọ API zuru ezu - [Environment Config](../reference/ENVIRONMENT.md) — mgbanwe gburugburu ebe obibi niile

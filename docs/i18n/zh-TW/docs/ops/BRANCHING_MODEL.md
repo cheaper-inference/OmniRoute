@@ -43,7 +43,7 @@ flowchart LR
 
 ## 釋放凍結（並行循環）
 
-當協調某個版本時，會開啟一個標記為`release-freeze`標記問題。那**並沒有停止發展**:
+當協調某個版本時，會開啟一個標記為`release-freeze`標記問題。那**does not stop development** ：
 
 - 凍結的`release/vX.Y.Z`屬於該船的釋放船長。
 - 下一個週期的`release/vX+1`將從凍結的尖端中刪除，以便貢獻者可以繼續工作。
@@ -52,7 +52,7 @@ flowchart LR
 在假設您想要的分支可合併之前，請檢查開啟的凍結：
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 合併機制（所有者`queue`標籤→ Mergify）記錄在[MERGE_TRAIN.md](./MERGE_TRAIN.md) 。

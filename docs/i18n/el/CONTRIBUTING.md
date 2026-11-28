@@ -18,117 +18,102 @@ UI/UX, i18n, CLI, βάση δεδομένων και build/deploy στα συμ�
 ### Προαπαιτούμενα
 
 - **Node.js** `>=22.22.2 <23`, ή `>=24.0.0 <27` (συνιστάται: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows με Node 24:** χρησιμοποιήστε την τρέχουσα έκδοση ενημέρωσης του 24 LTS (τουλάχιστον 24.20.0).
-> Οι παλαιότερες εκδόσεις μπορούν να τερματίσουν μετά την επιτυχή ολοκλήρωση των δοκιμών, όταν το `--test-force-exit` κλείνει τη
-> διεργασία. Η [διόρθωση του Windows libuv](https://github.com/nodejs/node/pull/61999) αντιμετωπίζει
-> αυτήν την κατάρρευση κατά την εκτέλεση· διατηρήστε ενεργοποιημένους τους ελέγχους assertions των δοκιμών και εξόδου του runner.
+> **Windows με τον κόμβο 24:** χρησιμοποιήστε την τρέχουσα έκδοση ενημερωμένης έκδοσης κώδικα 24 LTS (τουλάχιστον 24.20.0). Οι προηγούμενες εκδόσεις μπορούν να ματαιωθούν μετά από επιτυχείς δοκιμές όταν `--test-force-exit` κλείσει τη διαδικασία. [Η επιδιόρθωση Windows libuv](https://github.com/nodejs/node/pull/61999) του Node αντιμετωπίζει αυτό το σφάλμα χρόνου εκτέλεσης. κρατήστε ενεργοποιημένους τους ισχυρισμούς δοκιμής και τους ελέγχους εξόδου δρομέων.
 
-> **Χρήστες npm v11+ (Node 24+):** Μετά την εκτέλεση του `npm install`, επαληθεύστε ότι εγκαταστάθηκαν οι εγγενείς λειτουργικές μονάδες:
-> `node -e "require('better-sqlite3')"`. Αν αποτύχει με `MODULE_NOT_FOUND`,
-> εκτελέστε `npm approve-scripts better-sqlite3 && npm install`. Δείτε την ενότητα
-> [Αντιμετώπιση προβλημάτων](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Χρήστες npm v11 + (Node 24 +):** Μετά `npm install`, επαληθεύστε ότι εγκαταστάθηκαν οι εγγενείς λειτουργικές μονάδες: `node -e "require('better-sqlite3')"`. Εάν αποτύχει με `MODULE_NOT_FOUND`, εκτελέστε `npm approve-scripts better-sqlite3 && npm install`. Δείτε [Αντιμετώπιση προβλημάτων](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Κλωνοποίηση και εγκατάσταση
+### Κλωνοποίηση & Εγκατάσταση
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### Μεταβλητές περιβάλλοντος
+### Μεταβλητές Περιβάλλοντος
 
 ```bash
-# Δημιουργήστε το .env από το πρότυπο
+# Create your .env from the template
 cp .env.example .env
 
-# Δημιουργήστε τα απαιτούμενα μυστικά
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Βασικές μεταβλητές για την ανάπτυξη:
+Βασικές μεταβλητές για ανάπτυξη:
 
-| Μεταβλητή              | Προεπιλογή ανάπτυξης     | Περιγραφή                               |
-| ---------------------- | ------------------------ | --------------------------------------- |
-| `PORT`                 | `20128`                  | Θύρα διακομιστή                         |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Βασικό URL για το frontend              |
-| `JWT_SECRET`           | (δημιουργήστε παραπάνω)  | Μυστικό υπογραφής JWT                   |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Κωδικός πρόσβασης πρώτης σύνδεσης       |
-| `APP_LOG_LEVEL`        | `info`                   | Επίπεδο λεπτομέρειας αρχείων καταγραφής |
+| Μεταβλητός             | Προεπιλογή ανάπτυξης     | Περιγραφή                       |
+| ---------------------- | ------------------------ | ------------------------------- |
+| `PORT`                 | `20128`                  | Θύρα διακομιστή                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Βάση URL για frontend           |
+| `JWT_SECRET`           | (δημιουργία παραπάνω)    | μυστικό υπογραφής JWT           |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Πρώτος κωδικός σύνδεσης         |
+| `APP_LOG_LEVEL`        | `info`                   | Επίπεδο πολυγλωσσίας καταγραφής |
 
-### Ρυθμίσεις πίνακα ελέγχου
+### Ρυθμίσεις ταμπλό
 
-Ο πίνακας ελέγχου παρέχει διακόπτες UI για λειτουργίες που μπορούν επίσης να ρυθμιστούν μέσω μεταβλητών περιβάλλοντος:
+Ο πίνακας εργαλείων παρέχει εναλλαγές UI για λειτουργίες που μπορούν επίσης να διαμορφωθούν μέσω μεταβλητών περιβάλλοντος:
 
-| Τοποθεσία ρύθμισης  | Διακόπτης          | Περιγραφή                                                     |
-| ------------------- | ------------------ | ------------------------------------------------------------- |
-| Settings → Advanced | Debug Mode         | Ενεργοποίηση αρχείων καταγραφής αιτημάτων αποσφαλμάτωσης (UI) |
-| Settings → General  | Sidebar Visibility | Εμφάνιση/απόκρυψη ενοτήτων πλευρικής γραμμής                  |
+| Ρύθμιση τοποθεσίας   | Μπαρέτα                         | Περιγραφή                                                           |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------- |
+| Ρυθμίσεις → Advanced | Λειτουργία εντοπισμού σφαλμάτων | Ενεργοποίηση αρχείων καταγραφής αιτημάτων εντοπισμού σφαλμάτων (UI) |
+| Ρυθμίσεις → Γενικές  | Ορατότητα πλευρικής γραμμής     | τμήματα πλευρικής γραμμής Show/hide                                 |
 
-Αυτές οι ρυθμίσεις αποθηκεύονται στη βάση δεδομένων και διατηρούνται μετά από επανεκκινήσεις, παρακάμπτοντας τις προεπιλογές των μεταβλητών περιβάλλοντος όταν ορίζονται.
+Αυτές οι ρυθμίσεις αποθηκεύονται στη βάση δεδομένων και παραμένουν κατά τις επανεκκινήσεις, παρακάμπτοντας τις προεπιλογές env var όταν ορίζονται.
 
-### Τοπική εκτέλεση
+### Τρέξιμο τοπικά
 
 ```bash
-# Λειτουργία ανάπτυξης (hot reload)
+# Development mode (hot reload)
 npm run dev
 
-# Build παραγωγής
-npm run build    # next build → .build/next/ και στη συνέχεια assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Γρήγορη μεταγλώττιση μόνο backend/API για αλλαγές συνεισφερόντων
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Build έκδοσης (καθαρή ανακατασκευή + sentinel HEAD — απαιτείται για ανάπτυξη)
-npm run build:release   # rm -rf .build dist και στη συνέχεια build + εγγραφή dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Συνήθης ρύθμιση θύρας
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Το build συνεισφέροντα εκτελεί επικύρωση μόνο μεταγλώττισης: δεν συναρμολογεί την αυτόνομη
-διανομή ούτε δημιουργεί προαιρετικά εγγενή στοιχεία συσκευασίας. Χρησιμοποιήστε το κανονικό build
-παραγωγής όταν χρειάζεται να επικυρώσετε το πακέτο που είναι έτοιμο για αποστολή.
+Η έκδοση συνεισφέρων εκτελεί επικύρωση μόνο μεταγλώττισης: δεν συγκεντρώνει την αυτόνομη διανομή ούτε δημιουργεί προαιρετικά στοιχεία εγγενούς συσκευασίας. Χρησιμοποιήστε την κανονική έκδοση παραγωγής όταν πρέπει να επικυρώσετε το πακέτο με δυνατότητα αποστολής.
 
-### Διάταξη εξόδου build
+### Δημιουργία διάταξης εξόδου
 
-| Κατάλογος | Περιεχόμενα                                                                           | Παρακολουθείται |
-| --------- | ------------------------------------------------------------------------------------- | --------------- |
-| `src/`    | Πηγαίος κώδικας εφαρμογής (TypeScript / TSX)                                          | Ναι             |
-| `.build/` | Ενδιάμεσα αρχεία — έξοδος `next build` (gitignored, `distDir = .build/next`)          | Όχι             |
-| `dist/`   | Πακέτο έτοιμο για αποστολή — συναρμολογείται από το `assembleStandalone` (gitignored) | Όχι             |
+| Τηλεφωνικός κατάλογος | Περιεχόμενα                                                                           | Παρακολούθησαν |
+| --------------------- | ------------------------------------------------------------------------------------- | -------------- |
+| `src/`                | Πηγή εφαρμογής (TypeScript / TSX)                                                     | Ναί            |
+| `.build/`             | Ενδιάμεσα έξοδο — `next build` (gitignored, `distDir = .build/next`)                  | Οχι            |
+| `dist/`               | Πακέτο με δυνατότητα αποστολής — συναρμολογημένο από `assembleStandalone` (αγνοείται) | Οχι            |
 
-Η διαδικασία build εκτελείται σε ένα μόνο πέρασμα:
+Ο αγωγός κατασκευής είναι ένα μόνο πέρασμα:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (έξοδος Next.js)
-  └─ assembleStandalone()                 (αντιγράφει standalone + static + public + native assets)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-Το `npm run build:release` καθαρίζει επιπλέον πρώτα και τους δύο καταλόγους και γράφει
-το `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ως sentinel ακεραιότητας ανάπτυξης.
+`npm run build:release` καθαρίζει επιπλέον πρώτα και τους δύο καταλόγους και γράφει `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ως φρουρό ακεραιότητας ανάπτυξης.
 
-Το `npm run build:contributor` χρησιμοποιεί το προφίλ build μόνο backend. Αντικαθιστά προσωρινά
-τα αρχεία UI του πίνακα ελέγχου κατά τη δημιουργία, διατηρεί τους handlers διαδρομών API
-και επαναφέρει τα αρχικά αρχεία μετά το build. Χρησιμοποιήστε το `npm run build` για αλλαγές
-που επηρεάζουν το UI του πίνακα ελέγχου ή για πλήρη επικύρωση έκδοσης· το προφίλ συνεισφέροντα
-δεν αντικαθιστά το build έκδοσης.
+`npm run build:contributor` χρησιμοποιεί το προφίλ κατασκευής μόνο για backend. Αποκλείει προσωρινά τα αρχεία UI του πίνακα ελέγχου κατά την κατασκευή, διατηρεί τους χειριστές διαδρομών API και επαναφέρει τα αρχικά αρχεία μετά την κατασκευή. Χρησιμοποιήστε `npm run build` για αλλαγές που επηρεάζουν τον πίνακα εργαλείων UI ή για πλήρη επικύρωση κυκλοφορίας. το προφίλ συνεργάτη δεν αντικαθιστά την έκδοση έκδοσης.
 
-> **Σημείωση για ανάπτυξη VPS:** ο απομακρυσμένος κατάλογος εικόνας `/usr/lib/node_modules/omniroute/app/`
-> παραμένει αμετάβλητος. Τα skills ανάπτυξης συγχρονίζουν μέσω rsync τα περιεχόμενα του `dist/` σε αυτόν.
-> Μετακινήθηκε μόνο η διαδρομή εξόδου build μέσα στο αποθετήριο (`app/` → `dist/`).
+> **Σημείωση ανάπτυξης VPS :** ο απομακρυσμένος κατάλογος εικόνων `/usr/lib/node_modules/omniroute/app/` δεν έχει αλλάξει. Οι δεξιότητες ανάπτυξης συγχρονίζουν τα περιεχόμενα του `dist/` σε αυτό. Μόνο η διαδρομή εξόδου δημιουργίας σε repo μετακινήθηκε (`app/` → `dist/`).
 
-Προεπιλεγμένα URL:
+Προεπιλεγμένο URLs:
 
-- **Πίνακας ελέγχου**: `http://localhost:20128/dashboard`
+- **Ταμπλό** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -431,8 +416,8 @@ docs/
 
 ## Λήψη βοήθειας
 
-- **Αρχιτεκτονική**: Δείτε το [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Αναφορά API**: Δείτε το [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Τεκμηρίωση ασφαλείας**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Τεκμηρίωση λειτουργίας**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Ζητήματα**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Αρχιτεκτονική** : Βλέπε [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Αναφορά** : Βλέπε [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Έγγραφα ασφαλείας** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Έγγραφα λειτουργιών** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Θέματα** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

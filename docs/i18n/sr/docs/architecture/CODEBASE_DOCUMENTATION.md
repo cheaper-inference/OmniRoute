@@ -4,18 +4,11 @@
 
 ---
 
-> **Верзија:** v3.8.51
-> **Последње ажурирање:** 2026-06-28
-> **Циљна публика:** Инжењери који доприносе пројекту OmniRoute или развијају интеграције поврх њега.
+> **верзија:** в3.8.51** публика:** Инжењери који доприносе OmniRoute или граде интеграције поврх тога.
 >
-> За архитектонске дијаграме високог нивоа и образложење сваког подсистема, прочитајте
-> [ARCHITECTURE.md](./ARCHITECTURE.md). За детаљне описе појединачних подсистема
-> (Auto Combo, MCP сервер, A2A сервер, Skills, Memory, Cloud Agents, Resilience,
-> Compression итд.) погледајте њихове наменске датотеке у овом директоријуму `docs/`.
+> За дијаграме архитектуре високог нивоа и образложење иза сваког подсистема, прочитајте [ARCHITECTURE.md](./ARCHITECTURE.md). За детаљне информације о појединачним подсистемима (Ауто Цомбо, MCP сервер, A2A сервер, Скиллс, Мемори, Цлоуд Агентс, Ресилиенце, Цомпрессион, итд.) погледајте њихове наменске датотеке у овом `docs/` директоријуму.
 
-Ова датотека описује **шта данас постоји у репозиторијуму** како би нови инжењер
-могао да се снађе у стаблу, разуме слојеве извршног окружења и зна где да дода кôд
-без осмишљавања нових модула.
+Ова датотека описује** оно што данас постоји у репозиторијуму** тако да нови инжењер може да се креће кроз стабло, да разуме слојеве током извршавања и да зна где да дода код без измишљања нових модула.
 
 ---
 
@@ -566,35 +559,14 @@ Uobičajene komande:
 
 ## 8. `scripts/`
 
-Организовано је у 6 потфасцикли према намени.
+Организовано у 6 потфасцикли према сврси.
 
-- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
-  `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
-  `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
-  `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
-- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
-  `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
-  `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
-  `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
-  `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`, као и помоћне алатке само за читање за надгледање PR-ова:
-  `ci-discriminate.sh` (разврстава потписе неуспелих провера PR-а на сопствене / наслеђене /
-  непознате, у односу на референтни PR или пријаву за неуспешну основну грану) и `audit-worktree.sh`
-  (измењене датотеке, заштићене површине, уклоњене провере, број потискивања, преостале
-  привремене tsconfig датотеке, PR head у односу на локални HEAD — пре него што се прихвати PR извршиоца).
-- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
-  `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
-  `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
-  `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+- **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`, `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`, `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`, `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`, `native-binary-compat.mjs`.
+- **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`, `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`, `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`, `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`, `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`, `system-info.mjs`, плус PR помоћници за чување деце само за читање `ci-discriminate.sh` (разврстава зкцхе у властиту референцу / неуспешну / непознату референцу PR PR проблем са основном црвеном бојом) и `audit-worktree.sh` (прљаве датотеке, заштићене површине, уклоњена тврдња, бројање супресије, преостали тмп тсцонфигс, PR глава наспрам локалног HEAD — пре него што се прихвати PR радника).
+- **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`, `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`, `check-deprecated-versions.mjs`, `check-route-validation.mjs`, `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`, `check-supported-node-runtime.ts`, `test-report-summary.mjs`. `check-deprecated-versions.mjs` верзије заставица експлицитно приписане OmniRoute (3.6.к и раније). Чек игнорише датуме.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
-- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
-  `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
-  `validate_translation.py`, `check_translations.py`,
-  `untranslatable-keys.json`.
-- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `dbsetup.js`.
+- **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`, `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`, `validate_translation.py`, `check_translations.py`, `untranslatable-keys.json`.
+- **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`, `dbsetup.js`.
 
 ---
 

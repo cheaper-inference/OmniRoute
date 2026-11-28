@@ -49,7 +49,7 @@ Setiap deployment menyajikan salinan spesifikasinya sendiri di `/openapi.yaml`, 
 
 ---
 
-## Penyelesaian Chat
+## Penyelesaian Obrolan
 
 ```bash
 POST /v1/chat/completions
@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Header Kustom
 
-| Header                   | Direction  | Description                                                                                                                                                                                                                    |
-| ------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `X-OmniRoute-No-Cache`   | Permintaan | Atur ke `true` untuk melewati cache                                                                                                                                                                                            |
-| `x-omniroute-no-memory`  | Permintaan | Atur ke `true` untuk melewati injeksi memori + skills pada permintaan ini (mencerminkan no-cache; menghindari overhead token/biaya per panggilan)                                                                              |
-| `X-OmniRoute-Progress`   | Permintaan | Atur ke `true` untuk mengaktifkan event progres                                                                                                                                                                                |
-| `X-Session-Id`           | Permintaan | Kunci sesi tetap untuk afinitas sesi eksternal                                                                                                                                                                                 |
-| `x_session_id`           | Permintaan | Varian garis bawah juga diterima (HTTP langsung)                                                                                                                                                                               |
-| `X-OmniRoute-Session-Id` | Permintaan | Tag sesi/percakapan yang disediakan pemanggil (juga diteruskan ke memori). Jika ada, disimpan apa adanya ke `call_logs.session_tag` untuk atribusi biaya per sesi (#8249) — tidak pernah dibuat secara sintetis jika tidak ada |
-| `Idempotency-Key`        | Permintaan | Kunci deduplikasi (jendela 5 detik)                                                                                                                                                                                            |
-| `X-Request-Id`           | Permintaan | Kunci deduplikasi alternatif                                                                                                                                                                                                   |
-| `x-omniroute-connection` | Permintaan | Menetapkan permintaan satu model ke satu koneksi penyedia (akun) berdasarkan ID-nya — lihat [Penetapan akun per permintaan](#account-pinning-per-request)                                                                      |
-| `X-OmniRoute-Cache`      | Respons    | `HIT` atau `MISS` (non-streaming)                                                                                                                                                                                              |
-| `X-OmniRoute-Idempotent` | Respons    | `true` jika dideduplikasi                                                                                                                                                                                                      |
-| `X-OmniRoute-Progress`   | Respons    | `enabled` jika pelacakan progres aktif                                                                                                                                                                                         |
-| `X-OmniRoute-Session-Id` | Respons    | ID sesi efektif yang digunakan oleh OmniRoute                                                                                                                                                                                  |
-| `X-OmniRoute-Request-Id` | Respons    | ID korelasi permintaan (jika diketahui)                                                                                                                                                                                        |
-| `X-OmniRoute-Version`    | Respons    | Versi build OmniRoute (selalu ada)                                                                                                                                                                                             |
-| `X-OmniRoute-Cost-Saved` | Respons    | USD yang dihemat oleh cache pada `HIT` (hanya cache hit)                                                                                                                                                                       |
-| `X-OmniRoute-Decision`   | Respons    | Jejak perutean: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` adalah strategi kombinasi, atau `single` untuk permintaan nonkombinasi) — selalu ada pada respons penyelesaian                                   |
+| Tajuk                    | Arah      | Keterangan                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `X-OmniRoute-No-Cache`   | Meminta   | Setel ke `true` untuk melewati cache                                                                                                                                                                                                                                                                                                                                                             |
+| `x-omniroute-no-memory`  | Meminta   | Setel ke `true` untuk melewati injeksi keterampilan + memori untuk permintaan ini (mencerminkan tanpa cache; menghindari overhead token/cost per panggilan)                                                                                                                                                                                                                                      |
+| `x-omniroute-no-log`     | Meminta   | Setel ke `true` untuk menghilangkan muatan request/response dari log panggilan untuk permintaan inferensi ini (semua rute keluarga obrolan: Penyelesaian Obrolan, Tanggapan, Pesan, Penyelesaian, Gemini). Stempel waktu, model, status, durasi, dan jumlah token masih dicatat. Gabungkan dengan `x-omniroute-no-memory` dan `x-omniroute-no-cache` untuk tidak ikut serta dalam konten lengkap |
+| `X-OmniRoute-Progress`   | Meminta   | Setel ke `true` untuk acara kemajuan                                                                                                                                                                                                                                                                                                                                                             |
+| `X-Session-Id`           | Meminta   | Kunci sesi melekat untuk afinitas sesi eksternal                                                                                                                                                                                                                                                                                                                                                 |
+| `x_session_id`           | Meminta   | Varian garis bawah juga diterima ( HTTP langsung)                                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Session-Id` | Meminta   | Tag session/conversation yang disediakan penelepon (juga memberi makan memori). Saat ini, tetap dipertahankan kata demi kata hingga `call_logs.session_tag` untuk atribusi biaya per sesi (#8249) — tidak pernah disintesis saat tidak ada                                                                                                                                                       |
+| `Idempotency-Key`        | Meminta   | Kunci Dedup (jendela 5 detik)                                                                                                                                                                                                                                                                                                                                                                    |
+| `X-Request-Id`           | Meminta   | Kunci dedup alternatif                                                                                                                                                                                                                                                                                                                                                                           |
+| `x-omniroute-connection` | Meminta   | Sematkan permintaan model tunggal ke satu koneksi penyedia (akun) berdasarkan idnya — lihat [Penyematan akun per permintaan](#account-pinning-per-request)                                                                                                                                                                                                                                       |
+| `X-OmniRoute-Cache`      | Tanggapan | `HIT` atau `MISS` (non-streaming)                                                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Idempotent` | Tanggapan | `true` jika dideduplikasi                                                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Progress`   | Tanggapan | `enabled` jika pelacakan kemajuan aktif                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Session-Id` | Tanggapan | Sesi efektif ID digunakan oleh OmniRoute                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Request-Id` | Tanggapan | Minta ID korelasi (bila diketahui)                                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Version`    | Tanggapan | versi build OmniRoute (selalu ada)                                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Cost-Saved` | Tanggapan | USD cache dihindari di HIT (hanya cache yang ditemukan)                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Decision`   | Tanggapan | Jejak perutean: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` adalah strategi kombo, atau `single` untuk permintaan non-kombo) — selalu ada pada respons penyelesaian                                                                                                                                                                                                            |
 
-> Catatan Nginx: jika Anda mengandalkan header dengan garis bawah (misalnya `x_session_id`), aktifkan `underscores_in_headers on;`.
+> Catatan Nginx: jika Anda mengandalkan header garis bawah (misalnya `x_session_id`), aktifkan `underscores_in_headers on;`.
 
-#### Penetapan akun per permintaan
+#### Penyematan akun per permintaan
 
-Ketika penyedia memiliki beberapa koneksi (akun atau kunci), OmniRoute biasanya memilih salah satunya
-melalui strategi pemilihan akun. Sebagai gantinya, permintaan dapat menetapkan satu koneksi tertentu
-dengan header `x-omniroute-connection`:
+Ketika penyedia memiliki beberapa koneksi (akun atau kunci), OmniRoute biasanya memilih satu melalui strategi pemilihan akunnya. Sebagai gantinya, permintaan dapat menyematkan satu koneksi tertentu dengan header `x-omniroute-connection` :
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,24 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Tempat menemukan id.** Buka halaman provider di dashboard
-  (**Dashboard → Providers → <provider>**) lalu klik chip id `xxxxxxxx…` pada baris koneksi — tindakan ini menyalin connection id lengkap.
-- **Request yang menghormatinya.** Request model tunggal (`provider/model`) pada
-  `/v1/chat/completions`, `/v1/messages`, dan `/v1/responses`. Combo mengabaikan header ini: sematkan
-  satu akun untuk setiap langkah combo melalui koneksi langkah tersebut.
-- **Pin ini bersifat ketat, bukan preferensi.** Koneksi yang disematkan digunakan secara eksklusif. Jika
-  terjadi kegagalan di dalam request, cooldown akun dicatat, tetapi sistem **tidak** beralih ke akun
-  lain dari provider yang sama.
-- **Cooldown dan kuota dapat melepaskan pin.** Saat koneksi yang disematkan sedang dalam cooldown,
-  kuotanya habis, atau diblokir oleh kebijakan kuota, request berikutnya akan beralih ke koneksi provider
-  lainnya, persis seperti traffic yang tidak disematkan.
-- **Id yang tidak dikenal atau dinonaktifkan akan gagal.** Id yang tidak ada di pool aktif provider (dihapus,
-  dinonaktifkan, atau berasal dari provider lain) tidak menyisakan akun yang memenuhi syarat, sehingga request
-  gagal, bukan diam-diam dialihkan ke tempat lain.
+- **Di mana menemukan id.** Buka halaman penyedia di dashboard (** Dasbor Penyedia → → <provider>** ) dan klik chip id `xxxxxxxx…` pada baris koneksi — itu akan menyalin id koneksi lengkap.
+- **Permintaan mana yang menghormatinya.** Permintaan model tunggal (`provider/model`) pada `/v1/chat/completions`, `/v1/messages` dan `/v1/responses`. Kombo mengabaikan header: sematkan akun per langkah kombo melalui koneksi langkah itu sendiri.
+- **Pinnya ketat, bukan preferensi.** Koneksi yang disematkan digunakan secara eksklusif. Kegagalan dalam permintaan mencatat cooldown akun, tetapi tidak** bukan** putar ke akun saudara dari penyedia yang sama.
+- **Cooldown dan pelepasan kuota pin.** Saat koneksi yang dipasangi pin sedang dalam masa pendinginan, kehabisan kuota, atau diblokir oleh kebijakan kuota, permintaan selanjutnya akan dikembalikan ke koneksi penyedia lainnya, persis seperti lalu lintas yang tidak dipasangi pin.
+- **Id yang tidak dikenal atau dinonaktifkan gagal.** Id yang tidak ada dalam kumpulan aktif penyedia (dihapus, dinonaktifkan, atau menjadi milik penyedia lain) tidak meninggalkan akun yang memenuhi syarat, sehingga permintaan gagal alih-alih merutekan secara diam-diam ke tempat lain.
 
-Claude Code mengirimkan header khusus melalui `ANTHROPIC_CUSTOM_HEADERS`. Letakkan di blok `env`
-pada `~/.claude/settings.json`, atau di `.claude/settings.json` tingkat proyek untuk menyematkan akun
-yang berbeda di setiap proyek:
+Claude Code mengirimkan header khusus melalui `ANTHROPIC_CUSTOM_HEADERS`. Letakkan di blok `env` `~/.claude/settings.json`, atau di tingkat proyek `.claude/settings.json` untuk menyematkan akun berbeda per proyek:
 
 ```jsonc
 {
@@ -132,12 +120,11 @@ yang berbeda di setiap proyek:
 }
 ```
 
-Sumber: `src/sse/handlers/chat.ts` (pembacaan header), `src/sse/services/auth.ts` dan
-`src/sse/services/sessionAffinityPin.ts` (pelepasan pin dan pemeriksaan bahwa koneksi tidak ada di pool).
+Sumber: `src/sse/handlers/chat.ts` (pembacaan header), `src/sse/services/auth.ts` dan `src/sse/services/sessionAffinityPin.ts` (pelepasan pin dan pemeriksaan yang hilang dari kumpulan).
 
-> **Header telemetri biaya:** respons sukses non-streaming juga menyertakan kumpulan telemetri biaya `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, 10 desimal tetap; `0.0000000000` untuk layanan gratis/tanpa harga), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, dan `X-OmniRoute-Fallback-Attempts` (hanya jika > 0), serta `X-OmniRoute-Request-Id` dan `X-OmniRoute-Version`. Header ini dihasilkan oleh chat completions, `/v1/responses`, `/v1/messages`, **dan endpoint media** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, dan `/v1/moderations` (selalu dengan biaya `0`). Biaya media dihitung berdasarkan modality (per gambar, per detik, per karakter, per unit pencarian) jika harga tersedia, jika tidak maka nilainya `0` (fail-open).
+> **Header telemetri biaya:** respons keberhasilan non-streaming juga membawa kumpulan telemetri biaya `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, 10 desimal tetap; `0.0000000000` untuk free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, dan `X-OmniRoute-Fallback-Attempts` (hanya jika > 0), ditambah `X-OmniRoute-Request-Id` dan `X-OmniRoute-Version`. Ini dikeluarkan oleh penyelesaian obrolan, `/v1/responses`, `/v1/messages`,** dan titik akhir media** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, dan `/v1/moderations` (selalu dikenakan biaya `0`). Biaya media dihitung per modalitas (per gambar, per detik, per karakter, per unit pencarian) ketika harga tersedia, jika tidak maka `0` (pembukaan gagal).
 
-> **Semantik biaya cache-hit:** pada HIT cache semantik (`X-OmniRoute-Cache-Hit: true`), tidak ada panggilan upstream yang dilakukan, sehingga `X-OmniRoute-Response-Cost` bernilai `0.0000000000` (biaya **inkremental** untuk menyajikan hit tersebut). Biaya asli/seandainya request dilakukan dilaporkan secara terpisah dalam `X-OmniRoute-Cost-Saved`. Konsumen penagihan harus menjumlahkan `X-OmniRoute-Response-Cost` (hit tidak dikenai biaya); analitik cache dapat mengagregasikan `X-OmniRoute-Cost-Saved`.
+> **Semantik biaya cache-hit:** pada cache semantik HIT (`X-OmniRoute-Cache-Hit: true`) tidak ada panggilan upstream yang dilakukan, jadi `X-OmniRoute-Response-Cost` adalah `0.0000000000` (the** tambahan** biaya melayani pukulan). Biaya original/would-have-been dilaporkan secara terpisah di `X-OmniRoute-Cost-Saved`. Konsumen yang menagih harus menjumlahkan `X-OmniRoute-Response-Cost` (tidak ada biaya apa pun); analisis cache dapat mengumpulkan `X-OmniRoute-Cost-Saved`.
 
 ## Lease Sesi Terkelola Eksklusif
 
@@ -357,43 +344,30 @@ Content-Type: application/json
 }
 ```
 
-Provider yang tersedia mencakup OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokal), ComfyUI (lokal).
+Penyedia yang tersedia antara lain OpenAI (GPT Gambar 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hiperbolik, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (lokal), ComfyUI (lokal).
 
-`n` mengembalikan `n` gambar dalam `data[]`. Provider yang API upstream-nya mengembalikan satu gambar per panggilan
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) mendapatkan `n` panggilan upstream terpisah, dengan maksimal 4 panggilan yang berjalan bersamaan. `seed`
-tetap digeser berdasarkan indeks panggilan (`seed`, `seed + 1`, …), sehingga gambarnya berbeda tetapi tetap dapat direproduksi. `n` dibatasi hingga 10. Permintaan gagal secara keseluruhan jika ada panggilan yang gagal. Daftar format fan-out adalah `SINGLE_IMAGE_FANOUT_FORMATS` dalam
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` mengembalikan gambar `n` di `data[]`. Penyedia yang upstreamnya API mengembalikan satu gambar per panggilan (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) mendapatkan `n` panggilan upstream terpisah, paling banyak 4 dalam penerbangan. `seed` yang tetap diimbangi oleh indeks panggilan (`seed`, `seed + 1`, …), sehingga gambarnya berbeda tetapi tetap dapat direproduksi. `n` dibatasi hingga 10. Permintaan gagal secara keseluruhan jika ada panggilan yang gagal. Daftar format fan-out adalah `SINGLE_IMAGE_FANOUT_FORMATS` di `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux menggunakan kembali koneksi kunci API yang ada dan menerima prefiks `zenmux/` atau `zm/`:
+Codex GPT Model gambar (`codex/gpt-image-*`) hanya mengembalikan PNG : upstream menjawab `200` dengan PNG byte bahkan ketika `jpeg` atau `webp` diminta. Permintaan dengan `output_format` lainnya (`webp`, `jpeg`, ...) ditolak dengan HTTP 400 alih-alih diabaikan secara diam-diam; hilangkan atau kirim `png`. `output_compression` tidak diteruskan.
 
-- `zenmux/openai/gpt-image-2` menggunakan API OpenAI Images milik ZenMux. Opsi mencakup `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, dan `response_format`.
-- Publisher lain, seperti `zm/meta/muse-image-1.0`, menggunakan endpoint Vertex AI `:predict` milik ZenMux. `n` dipetakan ke `sampleCount`, `aspect_ratio` ke `aspectRatio`, dan `image_size`
-  (`1K`, `2K`, `4K`) ke `sampleImageSize`. `size` dalam piksel hanya memberikan rasio aspek,
-  bukan dimensi piksel yang dijamin. Rasio, resolusi, dan jumlah yang didukung berbeda-beda menurut model.
-- `zm/inclusionai/ming-image-0.1-design` menentukan dimensinya sendiri. Hilangkan `size`,
-  `aspect_ratio`, dan `image_size`; nilai eksplisit akan menghasilkan HTTP 400. PNG, JPEG, dan WebP
-  dapat diminta dengan `output_format`.
+ZenMux menggunakan kembali koneksi kunci API yang ada dan menerima awalan `zenmux/` atau `zm/` :
 
-Integrasi ini mendukung pembuatan teks-ke-gambar, bukan pengeditan gambar referensi. Output Vertex dinormalisasi menjadi `data[].b64_json`; `response_format: "url"` mengembalikan URL HTTPS upstream atau URL data base64 jika hanya byte gambar yang tersedia. Output yang kosong/disaring
-menghasilkan error, bukan keberhasilan kosong. Akses model bergantung pada akun ZenMux.
-Lihat [API Vertex ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) dan
-[API OpenAI Images](https://docs.zenmux.ai/api/openai/generate-an-image).
+- `zenmux/openai/gpt-image-2` menggunakan ZenMux Gambar OpenAI API. Opsinya mencakup `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, dan `response_format`.
+- Penerbit lain, seperti `zm/meta/muse-image-1.0`, menggunakan titik akhir ZenMuxAI `:predict`. `n` dipetakan ke `sampleCount`, `aspect_ratio` ke `aspectRatio`, dan `image_size` (`1K`, `2K`, `4K`) ke `sampleImageSize`. `size` piksel hanya menyediakan rasio aspek, bukan jaminan dimensi piksel. Rasio, resolusi, dan jumlah yang didukung bervariasi menurut model.
+- `zm/inclusionai/ming-image-0.1-design` memilih dimensinya sendiri. Hilangkan `size`, `aspect_ratio`, dan `image_size`; nilai eksplisit mengembalikan HTTP 400. PNG, JPEG, dan WebP dapat diminta dengan `output_format`.
 
-Koneksi login Microsoft 365 Copilot menyediakan `copilot-m365-web/m365-copilot-image`
-melalui alat gambar bawaan Copilot: satu giliran Copilot per gambar (`n` 1–4), `size` hanya mengarahkan
-orientasi, dan gambar dikembalikan secara inline (`b64_json`, atau URL data untuk
-`response_format: "url"`). Lihat [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+This integration supports text-to-image generation, not reference-image editing. Vertex output is normalized to `data[].b64_json`; `response_format: "url"` returns an upstream HTTPS URL or a base64 data URL when only image bytes are available. Empty/filtered outputs return an error rather than an empty success. Model access depends on the ZenMux account. See [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) and [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Koneksi masuk Microsoft 365 Copilot melayani `copilot-m365-web/m365-copilot-image` melalui alat gambar bawaan Copilot: satu putaran Copilot per gambar (`n` 1–4), `size` hanya mengarahkan orientasi, dan gambar dikembalikan sebaris (`b64_json`, atau data URL untuk `response_format: "url"`). Lihat [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Daftar semua model gambar
+# List all image models
 GET /v1/images/generations
 ```
 
 ---
 
-## OCR Dokumen
+## Dokumen OCR
 
 ```bash
 POST /v1/ocr
@@ -409,17 +383,15 @@ Content-Type: application/json
 }
 ```
 
-`model` memilih provider OCR melalui awalan `provider/model`; id model tanpa awalan (misalnya
-`mistral-ocr-latest`) akan diatasi ke provider terdaftarnya, dan jika `model` tidak dicantumkan, nilai bawaannya adalah
-Mistral (`mistral-ocr-latest`). Provider yang terdaftar (`open-sse/config/ocrRegistry.ts`):
+`model` memilih penyedia OCR melalui awalan `provider/model` ; id model kosong (misalnya `mistral-ocr-latest`) ditetapkan ke penyedia terdaftarnya, dan `model` yang dihilangkan ditetapkan secara default ke Mistral (`mistral-ocr-latest`). Penyedia terdaftar (`open-sse/config/ocrRegistry.ts`):
 
-| ID provider                   | ID model             | Nilai `model`                                            | Catatan                                                                                                        |
-| ----------------------------- | -------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (atau `mistral-ocr-latest`) | Sinkron — respons dikembalikan langsung dari satu panggilan upstream.                                          |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`              | Upstream asinkron (`analyze` + polling) — lihat di bawah.                                                      |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                  | Sinkron, melalui endpoint partner `openapi/chat/completions` Vertex AI — lihat di bawah untuk autentikasi/URL. |
+| ID penyedia                   | ID model                                    | nilai `model`                                                      | Catatan                                                                                                                                                                                                                            |
+| ----------------------------- | ------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                        | `mistral/mistral-ocr-latest` (atau telanjang `mistral-ocr-latest`) | — sinkron, respons dikembalikan langsung dari panggilan upstream tunggal.                                                                                                                                                          |
+| `azure-document-intelligence` | `prebuilt-read`                             | `azure-document-intelligence/prebuilt-read`                        | Hulu asinkron (`analyze` + poll) — lihat di bawah.                                                                                                                                                                                 |
+| `vertex-deepseek-ocr`         | diterapkan sendiri (tidak ada model bawaan) | `vertex-deepseek-ocr/<your-deployed-model-id>`                     | Sinkron, melalui titik akhir Vertex AI Model Garden DeepSeek-OCR Anda sendiri (bentuk `openapi/chat/completions` ); Google menghentikan `deepseek-ocr-maas` yang dikelola pada 21-10-2026 (#20423), sehingga id mengembalikan 400. |
 
-Ketiga provider merespons dengan isi berbentuk Mistral yang sama:
+Ketiga penyedia merespons dalam tubuh berbentuk Mistral yang sama:
 
 ```json
 {
@@ -429,25 +401,13 @@ Ketiga provider merespons dengan isi berbentuk Mistral yang sama:
 }
 ```
 
-### Alur polling Azure Document Intelligence
+### Alur jajak pendapat Azure Document Intelligence
 
-API `analyze` Azure Document Intelligence bersifat asinkron: permintaan awal mengembalikan header
-`Operation-Location`, bukan isi respons, dan hasilnya harus di-poll. Handler
-(`open-sse/handlers/ocr.ts`) melakukan polling pada URL tersebut setiap detik hingga 30 percobaan, gagal lebih awal (tidak
-melanjutkan polling) pada respons polling yang tidak `ok` atau status `"failed"`, dan mengembalikan `504` jika operasi masih berjalan setelah anggaran percobaan habis. Respons Azure final
-dinormalisasi ke bentuk `pages`/`markdown` yang sama seperti yang digunakan oleh Mistral sebelum dikembalikan kepada
-pemanggil, sehingga kode klien tidak perlu menangani provider secara khusus.
+`analyze` API Azure Document Intelligence tidak sinkron: permintaan awal mengembalikan header `Operation-Location`, bukan isi, dan hasilnya harus disurvei. Penangan (`open-sse/handlers/ocr.ts`) melakukan polling yang URL setiap detik hingga 30 upaya, gagal dengan cepat (tidak melanjutkan polling) pada respons polling non-`ok` atau status `"failed"`, dan mengembalikan `504` jika operasi masih berjalan setelah anggaran upaya habis. Respons Azure akhir dinormalisasi ke dalam bentuk `pages`/`markdown` yang sama dengan yang digunakan oleh Mistral sebelum dikembalikan ke pemanggil, sehingga kode klien tidak perlu menggunakan kasus khusus pada penyedia.
 
-### Autentikasi dan resolusi endpoint Vertex AI DeepSeek OCR
+### Vertex AI DeepSeek OCR autentikasi dan resolusi titik akhir
 
-`vertex-deepseek-ocr` menggunakan kembali autentikasi Vertex AI yang sama yang sudah didukung OmniRoute untuk
-trafik chat/gambar (`open-sse/executors/vertex.ts`): kunci API koneksi berupa kredensial JSON Service Account (ditukar
-dengan token akses OAuth berumur pendek melalui alur JWT-bearer) atau token akses OAuth yang sudah dibuat sebelumnya dan digunakan apa adanya. URL endpoint upstream adalah endpoint partner
-`openapi/chat/completions` generik milik Vertex, yang dibangun dari project dan region koneksi — `providerSpecificData.project`/`providerSpecificData.region` yang eksplisit selalu diutamakan;
-jika tidak, project diturunkan dari `project_id` JSON Service Account dan region secara default adalah
-`us-central1`. Kedua resolusi berlangsung di `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), yang digunakan oleh
-`src/app/api/v1/ocr/route.ts` sebelum meneruskan permintaan ke `handleOcr`.
+`vertex-deepseek-ocr` menggunakan kembali autentikasi Vertex AI yang sama OmniRoute sudah mendukung lalu lintas chat/image (`open-sse/executors/vertex.ts`): kunci API koneksi dapat berupa kredensial JSON Akun Layanan (dipertukarkan dengan token akses OAuth yang berumur pendek melalui aliran pembawa JWT) atau token akses OAuth yang sudah dicetak digunakan apa adanya. Titik akhir hulu URL adalah titik akhir mitra `openapi/chat/completions` generik Vertex, yang dibangun dari proyek koneksi dan wilayah — `providerSpecificData.project`/`providerSpecificData.region` eksplisit selalu menang; jika tidak, proyek tersebut berasal dari `project_id` Akun Layanan JSON dan default wilayahnya adalah `us-central1`. Kedua resolusi terjadi di `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), digunakan oleh `src/app/api/v1/ocr/route.ts` sebelum dikirim ke `handleOcr`.
 
 ---
 
@@ -698,97 +658,104 @@ Kontrak upstream: [efek suara](https://elevenlabs.io/docs/api-reference/text-to-
 
 ---
 
-## Endpoint Kompatibilitas
+## Titik Akhir Kompatibilitas
 
-| Method | Path                                      | Format                                |
-| ------ | ----------------------------------------- | ------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                |
-| POST   | `/v1/messages`                            | Anthropic                             |
-| POST   | `/v1/responses`                           | OpenAI Responses                      |
-| POST   | `/v1/embeddings`                          | OpenAI                                |
-| POST   | `/v1/images/generations`                  | OpenAI Images                         |
-| POST   | `/v1/images/edits`                        | OpenAI Images (edit/inpaint)          |
-| POST   | `/v1/videos/generations`                  | Pembuatan video bergaya OpenAI        |
-| POST   | `/v1/music/generations`                   | Pembuatan musik bergaya OpenAI        |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (mengembalikan body audio) |
-| POST   | `/v1/rerank`                              | Rerank bergaya Cohere/Voyage          |
-| POST   | `/v1/classify`                            | Klasifikasi Jina (`api.jina.ai`)      |
-| POST   | `/v1/segment`                             | Segmenter Jina (`segment.jina.ai`)    |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                    |
-| GET    | `/v1/models`                              | OpenAI                                |
-| POST   | `/v1/models/query`                        | Daftar model terpilih yang difilter   |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                             |
-| GET    | `/v1beta/models`                          | Gemini                                |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                |
-| POST   | `/v1/api/chat`                            | Ollama                                |
-| GET    | `/api/v1/vscode/{token}/`                 | Alias katalog OpenAI                  |
-| GET    | `/api/v1/vscode/{token}/models`           | Alias model OpenAI                    |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | Alias OpenAI bertokenisasi            |
-| POST   | `/api/v1/vscode/{token}/responses`        | Alias OpenAI Responses bertokenisasi  |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Alias Ollama bertokenisasi            |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Alias tag Ollama bertokenisasi        |
+| Metode | Jalur                                     | Format                                   |
+| ------ | ----------------------------------------- | ---------------------------------------- |
+| POST   | `/v1/chat/completions`                    | OpenAI                                   |
+| POST   | `/v1/messages`                            | Anthropic                                |
+| POST   | `/v1/responses`                           | OpenAI Tanggapan                         |
+| POST   | `/v1/embeddings`                          | OpenAI                                   |
+| POST   | `/v1/images/generations`                  | Gambar OpenAI                            |
+| POST   | `/v1/images/edits`                        | Gambar OpenAI (edit/inpaint)             |
+| POST   | `/v1/videos/generations`                  | Pembuatan video bergaya OpenAI           |
+| POST   | `/v1/music/generations`                   | Generasi musik bergaya OpenAI            |
+| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                       |
+| POST   | `/v1/audio/speech`                        | OpenAI TTS (mengembalikan badan audio)   |
+| POST   | `/v1/rerank`                              | Cohere/Voyage-style mengubah peringkat   |
+| POST   | `/v1/classify`                            | Jina mengklasifikasikan (`api.jina.ai`)  |
+| POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)       |
+| POST   | `/v1/moderations`                         | OpenAI Moderasi                          |
+| POST   | `/v1/systemone`                           | Keputusan yang diketik Sistem Satu       |
+| POST   | `/v1/decisions`                           | Keputusan OpenAI (asli)                  |
+| GET    | `/v1/systemone/models`                    | Katalog model keputusan                  |
+| GET    | `/v1/models`                              | OpenAI                                   |
+| POST   | `/v1/models/query`                        | Daftar pilihan model yang difilter       |
+| POST   | `/v1/messages/count_tokens`               | Anthropic                                |
+| GET    | `/v1beta/models`                          | Gemini                                   |
+| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                   |
+| POST   | `/v1/api/chat`                            | Ollama                                   |
+| GET    | `/api/v1/vscode/{token}/`                 | alias katalog OpenAI                     |
+| GET    | `/api/v1/vscode/{token}/models`           | alias model OpenAI                       |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | alias tokenisasi OpenAI                  |
+| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Merespons alias yang diberi token |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | alias tokenisasi Ollama                  |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama menandai alias yang diberi token  |
 
-Semua rute POST mengikuti bentuk yang sama: `Bearer your-api-key` + body JSON yang divalidasi oleh Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, dan sebagainya; lihat `src/shared/validation/schemas.ts`). Respons 4xx dikembalikan jika validasi skema gagal.
+Semua rute POST mengikuti bentuk yang sama: `Bearer your-api-key` + Badan JSON yang divalidasi Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, dll., lihat `src/shared/validation/schemas.ts`). 4xx dikembalikan pada kegagalan skema.
 
-Untuk klien yang tidak dapat melampirkan `Authorization: Bearer ...`, OmniRoute juga menerima kunci API di URL melalui kompatibilitas query-string (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) atau endpoint `/api/v1/vscode/{token}/...` khusus yang didokumentasikan di bawah ini.
+Untuk klien yang tidak dapat melampirkan `Authorization: Bearer ...`, OmniRoute juga menerima kunci API di URL melalui kompatibilitas string kueri (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) atau titik akhir `/api/v1/vscode/{token}/...` khusus yang didokumentasikan di bawah.
 
 ```bash
-# Rerank (provider registri cloud, atau node provider yang kompatibel dengan OpenAI sebagai "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Klasifikasi Jina (kredensial API Foundation)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Segmenter Jina
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Pencarian Jina (s.jina.ai; alias provider: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderasi
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — mengembalikan body audio/mpeg (atau format yang diminta)
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS memerlukan bahasa dan voice: `language` secara default bernilai "en"; jika
-# voice tidak ada atau menggunakan nama voice bawaan OpenAI (alloy, nova, …), nilainya menjadi "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Edit gambar (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Pembuatan video / musik (ID model yang diawali provider)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Node provider rerank:** `POST /v1/rerank` juga merutekan ke node provider yang kompatibel dengan OpenAI
-> (oMLX, vLLM, Infinity, TEI di balik gateway, …) yang dialamatkan sebagai `<node-prefix>/<model>`. Node
-> loopback (`localhost`, `127.0.0.1`, `172.16.0.0/12`) selalu memenuhi syarat, begitu pula hostname yang
-> dicantumkan operator dalam `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (misalnya nama layanan Docker/Compose seperti
-> `http://reranker:8080/v1`; node ini dipanggil secara langsung, tidak pernah melalui `HTTP(S)_PROXY` atau
-> proxy yang dipasang pada suatu koneksi). Node pada host lain mana pun — komputer di LAN atau peer Tailscale —
-> hanya memenuhi syarat ketika operator mengaktifkan flag fitur `RERANK_REMOTE_PROVIDER_NODES` **dan** URL dasar
-> node lolos dari kebijakan URL outbound provider (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` /
-> `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Mesin memori memanggil rute ini melalui
-> loopback pada langkah rerank, sehingga aturan yang sama berlaku untuk `rerankProviderModel` dalam pengaturan Memori.
+> **Mengubah peringkat node penyedia:** `POST /v1/rerank` juga merutekan ke node penyedia yang kompatibel dengan OpenAI (oMLX, vLLM, Infinity, TEI di belakang gateway, …) yang dialamatkan sebagai `<node-prefix>/<model>`. Node loopback (`localhost`, `127.0.0.1`, `172.16.0.0/12`) selalu memenuhi syarat, begitu pula nama host yang dicantumkan operator dalam `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (misalnya nama layanan Docker/Compose seperti `http://reranker:8080/v1`; ini dipanggil secara langsung, tidak pernah melalui `HTTP(S)_PROXY` atau proxy yang disematkan pada koneksi). Node pada host lain — a LAN box atau Tailscale peer — hanya memenuhi syarat jika operator mengaktifkan tanda fitur `RERANK_REMOTE_PROVIDER_NODES`** Dan** URL dasar node meneruskan kebijakan URL keluar penyedia (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Langkah pemeringkatan ulang mesin memori memanggil rute ini melalui loopback, sehingga aturan yang sama mengatur `rerankProviderModel` dalam pengaturan Memori.
 >
-> **Bentuk server lokal:** node dipanggil di `<base>/v1/rerank` dan, jika menghasilkan 404, di `<base>/rerank`
-> (Infinity, TEI). Body upstream memuat kedua ejaan Cohere/OpenAI (`documents`,
-> `return_documents`) dan ejaan TEI (`texts`, `return_text`), lalu respons upstream
-> dinormalisasi menjadi envelope Cohere: array TEI tanpa pembungkus `[{index, score, text}]`, `{results: [{index, score}]}`
-> dari gateway tipis, dan `{data: [...]}` bergaya Voyage semuanya dikembalikan ke klien sebagai
-> `{results: [{index, relevance_score, document?}]}`, diurutkan berdasarkan skor dan dibatasi hingga `top_n`.
+> **Bentuk server lokal:** simpul dipanggil di `<base>/v1/rerank` dan, di 404, di `<base>/rerank` (Infinity, TEI). Badan hulu membawa ejaan Cohere/OpenAI (`documents`, `return_documents`) dan ejaan TEI (`texts`, `return_text`), dan respons hulu dinormalisasi ke amplop Cohere : TEI telanjang `[{index, score, text}]`, `{results: [{index, score}]}` dari gerbang tipis, dan gaya Voyage `{data: [...]}` semuanya kembali ke klien sebagai `{results: [{index, relevance_score, document?}]}`, diurutkan berdasarkan skor dan dibatasi pada `top_n`.
 
-> **Penemuan node provider:** model pada node provider yang kompatibel dengan OpenAI muncul dalam `GET /v1/models`
-> di bawah prefiks node. Baris yang tidak memiliki metadata endpoint (umumnya pada daftar `/v1/models` lokal)
-> mewarisi `apiType` node tersebut, sehingga model pada node `embeddings` memiliki
-> `type: "embedding"` dan model pada node `rerank` memiliki `type: "rerank"` alih-alih secara default menjadi chat;
-> `supportedEndpoints` yang eksplisit pada baris yang disinkronkan atau ditambahkan secara manual tetap memiliki prioritas.
+> **Penemuan node penyedia:** model pada node penyedia yang kompatibel dengan OpenAI muncul di `GET /v1/models` di bawah awalan node. Baris yang tidak membawa metadata titik akhir (khas untuk daftar `/v1/models` lokal) mewarisi `apiType` simpul, sehingga model simpul `embeddings` adalah `type: "embedding"` dan model simpul `rerank` adalah `type: "rerank"` alih-alih default ke chat; `supportedEndpoints` eksplisit pada baris yang disinkronkan atau ditambahkan secara manual masih diutamakan.
 
-### Rute Provider Khusus
+### Keputusan yang Diketik
+
+Model keputusan menjawab pertanyaan yang diketik dengan probabilitas yang dikalibrasi alih-alih menghasilkan teks. Mereka tidak pernah menjadi model obrolan, dan kedua format kabel tidak pernah diterjemahkan satu sama lain:
+
+- `POST /v1/systemone` — Sistem Satu `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, keputusan OpenRouter, Cloudflare Pekerja AI, Ollama lokal).
+- `POST /v1/decisions` — native OpenAI Keputusan `{ model, input, questions: [...] }`, dilayani oleh koneksi `openai`. Modelnya adalah `openai/gpt-6-luna` ( `gpt-6-luna` telanjang juga berfungsi). Jawaban muncul kembali dalam urutan pertanyaan, tidak tersentuh.
+- `GET /v1/systemone/models` — satu katalog dari kedua jenis; setiap baris memberi nama `api_format` (`systemone` atau `decisions`). `limit` / `after` halaman daftar akhir. Header `X-OmniRoute-Catalog-Status` berbunyi `complete`, `partial` atau `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+Pada daftar model kunci `/v1/decisions` API yang diizinkan, kategori titik akhir `decisions`, anggaran, dan cakupan koneksi diperiksa sebelum kredensial apa pun dibaca. Kredensialnya adalah koneksi `openai` yang disimpan di dalam cakupan kunci (bukan kunci lingkungan); basis koneksi URL dihormati hanya jika itu adalah `http(s)` URL tanpa kredensial, kueri, atau fragmen yang tidak menunjuk pada OmniRoute ini. Panggilan keluar melalui transportasi yang dijaga sama dengan router otomatis `decision` ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): penjaga keluar penyedia, tidak ada percobaan ulang, tidak ada pengalihan, batas waktu 5 detik dan batas jawaban 64 KB (jawaban yang lebih besar adalah 502). Badan permintaan dibatasi hingga 4 MiB. Setiap panggilan mengirimkan `Idempotency-Key` baru. Kesalahan hanya membawa status upstream, tidak pernah isi, URL, kunci atau prompt.
+
+### Rute Penyedia Khusus
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -796,7 +763,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Prefiks provider otomatis ditambahkan jika tidak ada. Model yang tidak cocok mengembalikan `400`.
+Awalan penyedia ditambahkan secara otomatis jika tidak ada. Model yang tidak cocok mengembalikan `400`.
 
 ---
 

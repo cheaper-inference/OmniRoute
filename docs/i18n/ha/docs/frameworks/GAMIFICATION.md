@@ -503,27 +503,27 @@ idan bayanan teburin matsayi sun canza da gaske tun bayan turawa ta ƙarshe.
 
 ---
 
-## Raba Token
+## Rarraba Token
 
 **Fayil:** `src/lib/gamification/sharing.ts`
 
-### Littafin Lissafi Mai Shigarwa Biyu
+### Ledger Mai Shiga Biyu
 
 Kowane canja wuri yana ƙirƙirar layuka biyu a cikin `token_ledger`:
 
 | Layi      | `from_key_id` | `to_key_id` | `amount` |
 | --------- | ------------- | ----------- | -------- |
-| Cire kuɗi | mai aikawa    | mai karɓa   | +amount  |
-| Ƙara kuɗi | mai karɓa     | mai aikawa  | -amount  |
+| Zare kudi | mai aikawa    | mai karɓa   | adadin + |
+| Kiredit   | mai karɓa     | mai aikawa  | -amount  |
 
-Dakata — ƙa'idar ita ce:
+Jira — taron shine:
 
-| Layi   | `from_key_id` | `to_key_id` | `amount` | Ma'ana                     |
-| ------ | ------------- | ----------- | -------- | -------------------------- |
-| Aikawa | mai aikawa    | mai karɓa   | +amount  | Fitar kuɗi daga mai aikawa |
-| Karɓa  | mai karɓa     | mai aikawa  | +amount  | Shigar kuɗi ga mai karɓa   |
+| Layi  | `from_key_id` | `to_key_id` | `amount` | Ma'ana                 |
+| ----- | ------------- | ----------- | -------- | ---------------------- |
+| Aika  | mai aikawa    | mai karɓa   | adadin + | Fitowa daga mai aikawa |
+| Karba | mai karɓa     | mai aikawa  | adadin + | Shiga zuwa mai karɓa   |
 
-Ana ƙididdige ma'auni kamar haka:
+Ana lissafta ma'auni kamar:
 
 ```sql
 SELECT
@@ -534,7 +534,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Tsarin Canja Wuri
+### Canja wurin yawo
 
 ```typescript
 export async function transferTokens(
@@ -545,19 +545,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Tabbatarwa**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Rashin maimaituwar aiki**: bincika ko `idempotency_key` ya riga ya kasance a cikin littafin lissafi.
-   Idan haka ne, mayar da sakamakon da aka adana.
-3. **Mu'amala** (mu'amalar SQLite guda ɗaya):
-   a. Ƙididdige ma'aunin mai aikawa.
-   b. Idan `balance < amount`, dakatar (kuɗi ba su isa ba).
-   c. Saka layin aikawa (`from=sender,`.
+1. **Tabbatar da** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Rashin ƙarfi** : duba idan `idempotency_key` ta riga ta wanzu a cikin leta. Idan eh, mayar da sakamakon da aka adana.
+3. **Ma'amala** (ma'amalar SQLite guda): a. Yi lissafin ma'aunin mai aikawa. b. Idan `balance < amount`, zubar da ciki (rashin isassun kudade). c. Saka layin aikawa (`from=sender, to=receiver, amount`). d. Saka layin karba (`from=receiver, to=sender, amount`).
+4. **Iyakar ƙimar** : duba ƙimar canja wurin mai aikawa (max 10 transfers/min).
+5. **Lamarin** : ƙaddamar da taron gamification `token_share` don kimanta lambar tambarin XP +.
+6. Dawo `{ success: true, balance: newBalance }`.
 
-### Iyakance Ƙima
+### Ƙimar Ƙidaya
 
-- Mafi yawa canja wuri 10 a minti ga kowane API key.
-- Mafi yawa token 10,000 a canja wuri guda.
-- Mafi yawa token 100,000 da aka canja a rana ga kowane API key.
+- Matsakaicin canja wuri 10 a cikin minti daya akan maɓallan API.
+- Matsakaicin alamun 10,000 a kowane canja wuri guda.
+- Matsakaicin alamun 100,000 ana canjawa wuri kowace rana a kowane maɓalli API.
 
 ---
 

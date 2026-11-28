@@ -49,7 +49,7 @@ OpenAI-అనుకూల ప్రోటోకాల్ మరియు ప్�
 
 ---
 
-## చాట్ పూర్తి సమాధానాలు
+## చాట్ పూర్తిలు
 
 ```bash
 POST /v1/chat/completions
@@ -65,33 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### అనుకూల హెడర్లు
+### అనుకూల శీర్షికలు
 
-| Header                   | Direction   | Description                                                                                                                                                                                                                |
-| ------------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | అభ్యర్థన    | క్యాష్ను దాటవేయడానికి `true`గా సెట్ చేయండి                                                                                                                                                                                 |
-| `x-omniroute-no-memory`  | అభ్యర్థన    | ఈ అభ్యర్థన కోసం మెమరీ + స్కిల్స్ ఇంజెక్షన్ను దాటవేయడానికి `true`గా సెట్ చేయండి (no-cacheను అనుకరిస్తుంది; ప్రతి కాల్కు అయ్యే టోకెన్/ఖర్చు ఓవర్హెడ్ను నివారిస్తుంది)                                                        |
-| `X-OmniRoute-Progress`   | అభ్యర్థన    | ప్రోగ్రెస్ ఈవెంట్ల కోసం `true`గా సెట్ చేయండి                                                                                                                                                                               |
-| `X-Session-Id`           | అభ్యర్థన    | బాహ్య సెషన్ అనుబంధం కోసం స్టికీ సెషన్ కీ                                                                                                                                                                                   |
-| `x_session_id`           | అభ్యర్థన    | అండర్స్కోర్ వేరియంట్ కూడా ఆమోదించబడుతుంది (డైరెక్ట్ HTTP)                                                                                                                                                                  |
-| `X-OmniRoute-Session-Id` | అభ్యర్థన    | కాలర్ అందించే సెషన్/సంభాషణ ట్యాగ్ (మెమరీకి కూడా పంపబడుతుంది). ఇది ఉన్నప్పుడు, ప్రతి-సెషన్ ఖర్చు కేటాయింపు కోసం `call_logs.session_tag`లో యథాతథంగా నిల్వ చేయబడుతుంది (#8249) — లేనప్పుడు ఎప్పుడూ స్వయంచాలకంగా రూపొందించబడదు |
-| `Idempotency-Key`        | అభ్యర్థన    | డీడప్ కీ (5 సెకన్ల వ్యవధి)                                                                                                                                                                                                 |
-| `X-Request-Id`           | అభ్యర్థన    | ప్రత్యామ్నాయ డీడప్ కీ                                                                                                                                                                                                      |
-| `x-omniroute-connection` | అభ్యర్థన    | ఒకే-మోడల్ అభ్యర్థనను ఒక ప్రొవైడర్ కనెక్షన్ (ఖాతా)కు దాని ID ద్వారా పిన్ చేయండి — [ప్రతి అభ్యర్థనకు ఖాతా పిన్నింగ్](#account-pinning-per-request) చూడండి                                                                    |
-| `X-OmniRoute-Cache`      | ప్రతిస్పందన | స్ట్రీమింగ్ కానప్పుడు `HIT` లేదా `MISS`                                                                                                                                                                                    |
-| `X-OmniRoute-Idempotent` | ప్రతిస్పందన | డీడప్ చేయబడితే `true`                                                                                                                                                                                                      |
-| `X-OmniRoute-Progress`   | ప్రతిస్పందన | ప్రోగ్రెస్ ట్రాకింగ్ ఆన్లో ఉంటే `enabled`                                                                                                                                                                                  |
-| `X-OmniRoute-Session-Id` | ప్రతిస్పందన | OmniRoute ఉపయోగించిన ప్రభావిత సెషన్ ID                                                                                                                                                                                     |
-| `X-OmniRoute-Request-Id` | ప్రతిస్పందన | అభ్యర్థన సహసంబంధ ID (తెలిసినప్పుడు)                                                                                                                                                                                        |
-| `X-OmniRoute-Version`    | ప్రతిస్పందన | OmniRoute బిల్డ్ వెర్షన్ (ఎల్లప్పుడూ ఉంటుంది)                                                                                                                                                                              |
-| `X-OmniRoute-Cost-Saved` | ప్రతిస్పందన | `HIT` సమయంలో క్యాష్ నివారించిన USD ఖర్చు (క్యాష్ హిట్లకు మాత్రమే)                                                                                                                                                          |
-| `X-OmniRoute-Decision`   | ప్రతిస్పందన | రూటింగ్ ట్రేస్: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` కాంబో స్ట్రాటజీ, లేదా కాంబో కాని అభ్యర్థనకు `single`) — పూర్తయిన ప్రతిస్పందనల్లో ఎల్లప్పుడూ ఉంటుంది                                          |
+| హెడర్                    | దిశ         | వివరణ                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | అభ్యర్థన    | కాష్ని బైపాస్ చేయడానికి `true` కి సెట్ చేయండి                                                                                                                                                                                                                                                                                                                                     |
+| `x-omniroute-no-memory`  | అభ్యర్థన    | ఈ అభ్యర్థన కోసం మెమరీ + నైపుణ్యాల ఇంజెక్షన్ను దాటవేయడానికి `true` కి సెట్ చేయండి (అద్దాలు నో-కాష్; పర్-కాల్ token/cost ఓవర్హెడ్ను నివారిస్తుంది)                                                                                                                                                                                                                                  |
+| `x-omniroute-no-log`     | అభ్యర్థన    | ఈ అనుమితి అభ్యర్థన కోసం కాల్ లాగ్ల నుండి request/response పేలోడ్లను వదిలివేయడానికి `true` కి సెట్ చేయండి (అన్ని చాట్-కుటుంబ మార్గాలు: చాట్ పూర్తిలు, ప్రతిస్పందనలు, సందేశాలు, పూర్తిలు, Gemini). టైమ్స్టాంప్, మోడల్, స్థితి, వ్యవధి మరియు టోకెన్ గణనలు ఇప్పటికీ రికార్డ్ చేయబడ్డాయి. పూర్తి కంటెంట్ నిలిపివేత కోసం `x-omniroute-no-memory` మరియు `x-omniroute-no-cache` తో కలపండి |
+| `X-OmniRoute-Progress`   | అభ్యర్థన    | ప్రోగ్రెస్ ఈవెంట్ల కోసం `true` కి సెట్ చేయండి                                                                                                                                                                                                                                                                                                                                     |
+| `X-Session-Id`           | అభ్యర్థన    | బాహ్య సెషన్ అనుబంధం కోసం స్టిక్కీ సెషన్ కీ                                                                                                                                                                                                                                                                                                                                        |
+| `x_session_id`           | అభ్యర్థన    | అండర్ స్కోర్ వేరియంట్ కూడా ఆమోదించబడింది (డైరెక్ట్ HTTP)                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Session-Id` | అభ్యర్థన    | కాలర్-సరఫరా చేసిన session/conversation ట్యాగ్ (మెమరీని కూడా ఫీడ్ చేస్తుంది). ప్రస్తుతం ఉన్నప్పుడు, పర్-సెషన్ కాస్ట్ అట్రిబ్యూషన్ (#8249) `call_logs.session_tag` వరకు వెర్బేటమ్ను కొనసాగించారు — లేనప్పుడు ఎప్పుడూ సింథసైజ్ చేయబడదు                                                                                                                                               |
+| `Idempotency-Key`        | అభ్యర్థన    | డెడప్ కీ (5సె విండో)                                                                                                                                                                                                                                                                                                                                                              |
+| `X-Request-Id`           | అభ్యర్థన    | ప్రత్యామ్నాయ డ్యూడప్ కీ                                                                                                                                                                                                                                                                                                                                                           |
+| `x-omniroute-connection` | అభ్యర్థన    | ఒకే మోడల్ అభ్యర్థనను ఒక ప్రొవైడర్ కనెక్షన్ (ఖాతా)కి దాని ఐడి — ద్వారా పిన్ చేయండి [, ఒక్కో అభ్యర్థనకు ఖాతా పిన్నింగ్](#account-pinning-per-request) చూడండి                                                                                                                                                                                                                        |
+| `X-OmniRoute-Cache`      | ప్రతిస్పందన | `HIT` లేదా `MISS` (నాన్ స్ట్రీమింగ్)                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Idempotent` | ప్రతిస్పందన | డీప్లికేట్ అయితే`true`                                                                                                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Progress`   | ప్రతిస్పందన | ప్రోగ్రెస్ ట్రాకింగ్ ఆన్ అయితే`enabled`                                                                                                                                                                                                                                                                                                                                           |
+| `X-OmniRoute-Session-Id` | ప్రతిస్పందన | OmniRoute ద్వారా ఉపయోగించబడే ప్రభావవంతమైన సెషన్ ID                                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Request-Id` | ప్రతిస్పందన | సహసంబంధ ఐడిని అభ్యర్థించండి (తెలిసినప్పుడు)                                                                                                                                                                                                                                                                                                                                       |
+| `X-OmniRoute-Version`    | ప్రతిస్పందన | OmniRoute బిల్డ్ వెర్షన్ (ఎల్లప్పుడూ ఉంటుంది)                                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Cost-Saved` | ప్రతిస్పందన | USD HIT లో తప్పించబడిన కాష్ (కాష్ హిట్లు మాత్రమే)                                                                                                                                                                                                                                                                                                                                 |
+| `X-OmniRoute-Decision`   | ప్రతిస్పందన | రూటింగ్ ట్రేస్: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` అనేది కాంబో స్ట్రాటజీ, లేదా నాన్-కాంబో అభ్యర్థన కోసం `single` ) — ఎల్లప్పుడూ పూర్తి ప్రతిస్పందనలపై ఉంటుంది                                                                                                                                                                                          |
 
-> Nginx గమనిక: మీరు అండర్స్కోర్ హెడర్లపై ఆధారపడితే (ఉదాహరణకు `x_session_id`), `underscores_in_headers on;`ను ప్రారంభించండి.
+> Nginx గమనిక: మీరు అండర్స్కోర్ హెడర్లపై ఆధారపడినట్లయితే (ఉదాహరణకు `x_session_id`), `underscores_in_headers on;` ప్రారంభించండి.
 
 #### ప్రతి అభ్యర్థనకు ఖాతా పిన్నింగ్
 
-ఒక ప్రొవైడర్కు అనేక కనెక్షన్లు (ఖాతాలు లేదా కీలు) ఉన్నప్పుడు, OmniRoute సాధారణంగా తన ఖాతా-ఎంపిక వ్యూహం ద్వారా ఒకదాన్ని ఎంచుకుంటుంది. ఒక అభ్యర్థనకు బదులుగా `x-omniroute-connection` హెడర్తో ఒక నిర్దిష్ట కనెక్షన్ను పిన్ చేయవచ్చు:
+ప్రొవైడర్కు అనేక కనెక్షన్లు (ఖాతాలు లేదా కీలు) ఉన్నప్పుడు, OmniRoute సాధారణంగా దాని ఖాతా-ఎంపిక వ్యూహం ద్వారా ఒకదాన్ని ఎంచుకుంటుంది. ఒక అభ్యర్థన బదులుగా `x-omniroute-connection` హెడర్తో ఒక నిర్దిష్ట కనెక్షన్ని పిన్ చేయగలదు:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -101,25 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **idను ఎక్కడ కనుగొనాలి.** డ్యాష్బోర్డ్లో provider పేజీని తెరవండి
-  (**Dashboard → Providers → <provider>**) మరియు connection
-  వరుసలోని `xxxxxxxx…` id chipను క్లిక్ చేయండి — ఇది పూర్తి connection idను కాపీ చేస్తుంది.
-- **ఇది ఏ అభ్యర్థనలకు వర్తిస్తుంది.** `/v1/chat/completions`, `/v1/messages` మరియు
-  `/v1/responses`లోని సింగిల్-మోడల్ అభ్యర్థనలు (`provider/model`). Combos ఈ headerను
-  పట్టించుకోవు: ప్రతి combo దశకు దాని స్వంత connection ద్వారా ఒక accountను pin చేయండి.
-- **ఈ pin కేవలం ప్రాధాన్యత కాదు, కఠినంగా అమలవుతుంది.** Pin చేసిన connection మాత్రమే
-  ప్రత్యేకంగా ఉపయోగించబడుతుంది. అభ్యర్థనలోని వైఫల్యం account యొక్క cooldownను నమోదు చేస్తుంది,
-  కానీ అదే providerకు చెందిన sibling accountకు మారదు.
-- **Cooldown మరియు quota pinను విడుదల చేస్తాయి.** Pin చేసిన connection cooldownలో ఉన్నప్పుడు,
-  quota పూర్తయినప్పుడు లేదా quota policy ద్వారా బ్లాక్ చేయబడినప్పుడు, తరువాతి అభ్యర్థనలు providerలోని
-  ఇతర connectionsకు fallback అవుతాయి — pin చేయని traffic మాదిరిగానే.
-- **తెలియని లేదా డిసేబుల్ చేసిన ids విఫలమవుతాయి.** Provider యొక్క active poolలో లేని id
-  (తొలగించబడినది, డీయాక్టివేట్ చేయబడినది లేదా మరొక providerకు చెందినది) eligible account ఏదీ
-  లేకుండా చేస్తుంది, కాబట్టి అభ్యర్థన నిశ్శబ్దంగా మరెక్కడికీ route కాకుండా విఫలమవుతుంది.
+- **ఐడి ఎక్కడ దొరుకుతుంది.** డాష్బోర్డ్లో ప్రొవైడర్ పేజీని తెరవండి (** డాష్బోర్డ్ → ప్రొవైడర్లు → <provider>** ) మరియు కనెక్షన్ అడ్డు వరుస zqeపై `xxxxxxxx…` id చిప్ని క్లిక్ చేయండి — అది పూర్తి కనెక్షన్ ఐడిని కాపీ చేస్తుంది.
+- **ఏ అభ్యర్థనలు దానిని గౌరవిస్తాయి.** `/v1/chat/completions`, `/v1/messages` మరియు `/v1/responses` లలో ఒకే మోడల్ అభ్యర్థనలు (`provider/model`). కాంబోలు హెడర్ను విస్మరిస్తాయి: బదులుగా స్టెప్ యొక్క స్వంత కనెక్షన్ ద్వారా కాంబో స్టెప్కు ఒక ఖాతాను పిన్ చేయండి.
+- **పిన్ కఠినంగా ఉంటుంది, ప్రాధాన్యత కాదు.** పిన్ చేయబడిన కనెక్షన్ ప్రత్యేకంగా ఉపయోగించబడుతుంది. అభ్యర్థనలో వైఫల్యం ఖాతా యొక్క కూల్డౌన్ను రికార్డ్ చేస్తుంది, కానీ అది చేస్తుంది** కాదు** అదే ప్రొవైడర్ యొక్క తోబుట్టువుల ఖాతాకు తిప్పండి.
+- **కూల్డౌన్ మరియు కోటా పిన్ను విడుదల చేస్తాయి.** పిన్ చేయబడిన కనెక్షన్ కూల్ అవుతున్నప్పుడు, కోటా అయిపోయినప్పుడు లేదా కోటా విధానం ద్వారా బ్లాక్ చేయబడినప్పుడు, తర్వాత అభ్యర్థనలు సరిగ్గా అన్పిన్ చేయని ట్రాఫిక్ వలె ప్రొవైడర్ యొక్క ఇతర కనెక్షన్లకు తిరిగి వస్తాయి.
+- **తెలియని లేదా నిలిపివేయబడిన ఐడిలు విఫలమయ్యాయి.** ప్రొవైడర్ యొక్క యాక్టివ్ పూల్లో లేని (తొలగించబడినది, నిష్క్రియం చేయబడినది లేదా మరొక ప్రొవైడర్కు చెందినది) ఒక ఐడి అర్హత గల ఖాతాని వదిలివేయదు, కాబట్టి అభ్యర్థన నిశ్శబ్దంగా వేరే చోటికి వెళ్లే బదులు విఫలమవుతుంది.
 
-Claude Code custom headersను `ANTHROPIC_CUSTOM_HEADERS` ద్వారా పంపుతుంది. దీన్ని
-`~/.claude/settings.json`లోని `env` blockలో ఉంచండి, లేదా ప్రతి projectకు వేర్వేరు accountను
-pin చేయడానికి project-level `.claude/settings.json`లో ఉంచండి:
+Claude కోడ్ అనుకూల శీర్షికలను `ANTHROPIC_CUSTOM_HEADERS` ద్వారా పంపుతుంది. `~/.claude/settings.json` యొక్క `env` బ్లాక్లో లేదా ప్రాజెక్ట్కి వేరే ఖాతాను పిన్ చేయడానికి ప్రాజెక్ట్-స్థాయి `.claude/settings.json` లో ఉంచండి:
 
 ```jsonc
 {
@@ -131,12 +120,11 @@ pin చేయడానికి project-level `.claude/settings.json`లో ఉ�
 }
 ```
 
-మూలం: `src/sse/handlers/chat.ts` (header read), `src/sse/services/auth.ts` మరియు
-`src/sse/services/sessionAffinityPin.ts` (pin విడుదల మరియు poolలో లేని వాటి తనిఖీ).
+మూలం: `src/sse/handlers/chat.ts` (హెడర్ రీడ్), `src/sse/services/auth.ts` మరియు `src/sse/services/sessionAffinityPin.ts` (పిన్ విడుదల మరియు తప్పిపోయిన పూల్ చెక్).
 
-> **ఖర్చు టెలిమెట్రీ headers:** non-streaming విజయవంతమైన ప్రతిస్పందనల్లో `X-OmniRoute-*` ఖర్చు-టెలిమెట్రీ సమితి కూడా ఉంటుంది — `X-OmniRoute-Response-Cost` (USD, స్థిరమైన 10 దశాంశ స్థానాలు; ఉచితం/ధర నిర్ణయించనిది అయితే `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, మరియు `X-OmniRoute-Fallback-Attempts` (0 కంటే ఎక్కువ ఉన్నప్పుడు మాత్రమే), అలాగే `X-OmniRoute-Request-Id` మరియు `X-OmniRoute-Version`. ఇవి chat completions, `/v1/responses`, `/v1/messages`, **మరియు media endpoints** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, మరియు `/v1/moderations` — ద్వారా జారీ చేయబడతాయి (ఎల్లప్పుడూ ఖర్చు `0`). ధర అందుబాటులో ఉన్నప్పుడు media ఖర్చు ప్రతి modality ప్రకారం (ప్రతి image, ప్రతి second, ప్రతి character, ప్రతి search-unit) లెక్కించబడుతుంది; లేకపోతే `0`గా ఉంటుంది (fail-open).
+> **ధర టెలిమెట్రీ శీర్షికలు:** నాన్-స్ట్రీమింగ్ సక్సెస్ రెస్పాన్స్లు కూడా `X-OmniRoute-*` కాస్ట్-టెలిమెట్రీ సెట్ — `X-OmniRoute-Response-Cost` (USD, స్థిర 10 దశాంశాలు; free/unpriced కోసం `0.0000000000` ), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`(మరియు >, మరియు `X-OmniRoute-Fallback-Attempts` `X-OmniRoute-Version`) `X-OmniRoute-Request-Id` ఇవి చాట్ కంప్లీషన్ల ద్వారా విడుదల చేయబడతాయి, `/v1/responses`, `/v1/messages`,** మరియు మీడియా ముగింపు పాయింట్లు** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, మరియు `/v1/moderations` (ఎల్లప్పుడూ `0` ధర ఉంటుంది). ధర అందుబాటులో ఉన్నప్పుడు మీడియా ధర (ప్రతి ఇమేజ్, సెకండ్, ఒక్కో అక్షరం, సెర్చ్ యూనిట్) ప్రకారం గణించబడుతుంది, లేకపోతే `0` (ఫెయిల్-ఓపెన్).
 
-> **Cache-hit ఖర్చు అర్థం:** semantic-cache HIT (`X-OmniRoute-Cache-Hit: true`) అయినప్పుడు upstream call చేయబడదు, కాబట్టి `X-OmniRoute-Response-Cost` `0.0000000000`గా ఉంటుంది (hitను అందించడానికి అయ్యే **incremental** ఖర్చు). అసలు/జరిగి ఉండాల్సిన ఖర్చు `X-OmniRoute-Cost-Saved`లో విడిగా నివేదించబడుతుంది. Billing consumers `X-OmniRoute-Response-Cost` మొత్తాన్ని కలపాలి (hitsకు ఎలాంటి ఖర్చూ ఉండదు); cache analytics `X-OmniRoute-Cost-Saved`ను aggregate చేయవచ్చు.
+> **కాష్-హిట్ కాస్ట్ సెమాంటిక్స్:** సెమాంటిక్-కాష్ HIT (`X-OmniRoute-Cache-Hit: true`)లో అప్స్ట్రీమ్ కాల్ చేయలేదు, కాబట్టి `X-OmniRoute-Response-Cost` అనేది `0.0000000000` (ది** పెరుగుతున్న** హిట్కి వడ్డించే ఖర్చు). original/would-have-been ధర `X-OmniRoute-Cost-Saved` లో విడిగా నివేదించబడింది. బిల్లింగ్ వినియోగదారులు `X-OmniRoute-Response-Cost` మొత్తాన్ని మొత్తం చేయాలి (హిట్లకు ఏమీ ఖర్చు లేదు); కాష్ అనలిటిక్స్ `X-OmniRoute-Cost-Saved` ని సమగ్రపరచగలదు.
 
 ## ప్రత్యేక నిర్వహిత సెషన్ లీజులు
 
@@ -381,11 +369,13 @@ Content-Type: application/json
 
 `n` `data[]` లో `n` చిత్రాలను అందిస్తుంది. అప్స్ట్రీమ్ API ఒక్కో కాల్కు ఒక ఇమేజ్ని తిరిగి ఇచ్చే ప్రొవైడర్లు (బ్లాక్ ఫారెస్ట్ ల్యాబ్స్, స్టెబిలిటీ AI, లియోనార్డో, ఐడియోగ్రామ్, హైపర్, హైపర్బోలిక్, Magnific/Freepik, NVIDIA NIM, Cloudflare వర్కర్స్ AI) గరిష్టంగా 4 విమానాల్లో `n` ప్రత్యేక అప్స్ట్రీమ్ కాల్లను పొందుతారు. స్థిర `seed` కాల్ ఇండెక్స్ (`seed`, `seed + 1`, …) ద్వారా ఆఫ్సెట్ చేయబడుతుంది, కాబట్టి చిత్రాలు విభిన్నంగా ఉంటాయి కానీ పునరుత్పత్తి చేయగలవు. `n` 10కి పరిమితం చేయబడింది. ఏదైనా కాల్ విఫలమైతే అభ్యర్థన మొత్తం విఫలమవుతుంది. ఫ్యాన్ అవుట్ ఫార్మాట్ల జాబితా `open-sse/handlers/imageGeneration/fanOut.ts` లో `SINGLE_IMAGE_FANOUT_FORMATS`.
 
+Codex GPT చిత్ర నమూనాలు (`codex/gpt-image-*`) PNG మాత్రమే తిరిగి ఇస్తాయి: `jpeg` లేదా `webp` అభ్యర్థించబడినప్పుడు కూడా PNG బైట్లతో అప్స్ట్రీమ్ `200` సమాధానం ఇస్తుంది. ఏదైనా ఇతర `output_format` (`webp`, `jpeg`, ...)తో అభ్యర్థన నిశ్శబ్దంగా విస్మరించబడటానికి బదులుగా HTTP 400తో తిరస్కరించబడుతుంది; దానిని వదిలివేయండి లేదా `png` పంపండి. `output_compression` ఫార్వార్డ్ చేయబడలేదు.
+
 ZenMux ఇప్పటికే ఉన్న API-కీ కనెక్షన్ని మళ్లీ ఉపయోగిస్తుంది మరియు `zenmux/` లేదా `zm/` ప్రిఫిక్స్లను అంగీకరిస్తుంది:
 
 - `zenmux/openai/gpt-image-2` ZenMux యొక్క OpenAI చిత్రాలు API ఉపయోగిస్తుంది. ఎంపికలలో `size`, `quality`, `n`, `output_format`, `output_compression`, `background` మరియు `response_format` ఉన్నాయి.
 - `zm/meta/muse-image-1.0` వంటి ఇతర ప్రచురణకర్తలు ZenMux యొక్క వెర్టెక్స్ AI `:predict` ముగింపు బిందువును ఉపయోగిస్తారు. `n` మ్యాప్లు `sampleCount`, `aspect_ratio` నుండి `aspectRatio` మరియు `image_size` (`1K`, `2K`, `4K`) నుండి `sampleImageSize`. పిక్సెల్ `size` ఒక కారక నిష్పత్తిని మాత్రమే అందిస్తుంది, పిక్సెల్ కొలతలు హామీ ఇవ్వబడవు. మద్దతు ఉన్న నిష్పత్తులు, తీర్మానాలు మరియు గణనలు మోడల్ను బట్టి మారుతూ ఉంటాయి.
-- `zm/inclusionai/ming-image-0.1-design` దాని స్వంత కొలతలు ఎంచుకుంటుంది. `size`, `aspect_ratio` మరియు `image_size` వదిలివేయండి; స్పష్టమైన విలువలు HTTP 400ని అందిస్తాయి. `output_format` తో PNG, JPEG, మరియు WebP అభ్యర్థించవచ్చు.
+- `zm/inclusionai/ming-image-0.1-design` దాని స్వంత కొలతలు ఎంచుకుంటుంది. `size`, `aspect_ratio` మరియు `image_size` వదిలివేయండి; స్పష్టమైన విలువలు HTTP 400ని అందిస్తాయి. PNG, JPEG, మరియు WebP `output_format` తో అభ్యర్థించవచ్చు.
 
 ఈ ఏకీకరణ టెక్స్ట్-టు-ఇమేజ్ జనరేషన్కు మద్దతు ఇస్తుంది, రిఫరెన్స్-ఇమేజ్ ఎడిటింగ్ కాదు. వెర్టెక్స్ అవుట్పుట్ `data[].b64_json` కి సాధారణీకరించబడింది; ఇమేజ్ బైట్లు మాత్రమే అందుబాటులో ఉన్నప్పుడు `response_format: "url"` అప్స్ట్రీమ్ HTTPS URL లేదా బేస్64 డేటా URL అందిస్తుంది. Empty/filtered అవుట్పుట్లు ఖాళీ విజయం కంటే దోషాన్ని అందిస్తాయి. మోడల్ యాక్సెస్ ZenMux ఖాతాపై ఆధారపడి ఉంటుంది. [ZenMux యొక్క వెర్టెక్స్ API](https://docs.zenmux.ai/api/vertexai/generate-images) మరియు [OpenAI చిత్రాలు API](https://docs.zenmux.ai/api/openai/generate-an-image) చూడండి.
 
@@ -414,17 +404,15 @@ Content-Type: application/json
 }
 ```
 
-`model` అనేది `provider/model` ప్రీఫిక్స్ ద్వారా OCR ప్రొవైడర్ను ఎంచుకుంటుంది; ప్రీఫిక్స్ లేని మోడల్ ఐడి (ఉదా.
-`mistral-ocr-latest`) దాని నమోదిత ప్రొవైడర్కు పరిష్కరించబడుతుంది, మరియు వదిలివేసిన `model` డిఫాల్ట్గా
-Mistral (`mistral-ocr-latest`)కు సెట్ అవుతుంది. నమోదిత ప్రొవైడర్లు (`open-sse/config/ocrRegistry.ts`):
+`model` OCR ప్రొవైడర్ను `provider/model` ఉపసర్గ ద్వారా ఎంపిక చేస్తుంది; ఒక బేర్ మోడల్ ఐడి (ఉదా `mistral-ocr-latest`) దాని నమోదిత ప్రొవైడర్కు పరిష్కరిస్తుంది మరియు విస్మరించబడిన `model` డిఫాల్ట్గా Mistral (`mistral-ocr-latest`). నమోదిత ప్రొవైడర్లు (`open-sse/config/ocrRegistry.ts`):
 
-| ప్రొవైడర్ ఐడి                 | మోడల్ ఐడి            | `model` విలువ                                                            | గమనికలు                                                                                                               |
-| ----------------------------- | -------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (లేదా ప్రీఫిక్స్ లేని `mistral-ocr-latest`) | సమకాలికం — ఒకే అప్స్ట్రీమ్ కాల్ నుండి ప్రతిస్పందన నేరుగా అందించబడుతుంది.                                              |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                              | అసమకాలిక అప్స్ట్రీమ్ (`analyze` + poll) — దిగువ చూడండి.                                                               |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                                  | Vertex AI యొక్క `openapi/chat/completions` భాగస్వామి ఎండ్పాయింట్ ద్వారా సమకాలికం — ప్రామాణీకరణ/URL కోసం దిగువ చూడండి. |
+| ప్రొవైడర్ ఐడి                 | మోడల్ id                                | `model` విలువ                                                 | గమనికలు                                                                                                                                                                                                                          |
+| ----------------------------- | --------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                    | `mistral/mistral-ocr-latest` (లేదా బేర్ `mistral-ocr-latest`) | సింక్రోనస్ — ప్రతిస్పందన నేరుగా సింగిల్ అప్స్ట్రీమ్ కాల్ నుండి అందించబడుతుంది.                                                                                                                                                   |
+| `azure-document-intelligence` | `prebuilt-read`                         | `azure-document-intelligence/prebuilt-read`                   | అసమకాలిక అప్స్ట్రీమ్ (`analyze` + పోల్) — క్రింద చూడండి.                                                                                                                                                                         |
+| `vertex-deepseek-ocr`         | స్వీయ-ప్రయోగం (అంతర్నిర్మిత మోడల్ లేదు) | `vertex-deepseek-ocr/<your-deployed-model-id>`                | సింక్రోనస్, మీ స్వంత వెర్టెక్స్ AI మోడల్ గార్డెన్ డీప్సీక్-OCR ఎండ్పాయింట్ (`openapi/chat/completions` ఆకారం) ద్వారా; Google నిర్వహించబడే `deepseek-ocr-maas` 2026-10-21 (#20423)న రిటైర్ చేసింది, తద్వారా id 400ని అందిస్తుంది. |
 
-మూడు ప్రొవైడర్లూ ఒకే Mistral-ఆకారంలోని బాడీలో ప్రతిస్పందిస్తాయి:
+ముగ్గురు ప్రొవైడర్లు ఒకే మిస్ట్రాల్ ఆకారంలో ప్రతిస్పందిస్తారు:
 
 ```json
 {
@@ -434,27 +422,13 @@ Mistral (`mistral-ocr-latest`)కు సెట్ అవుతుంది. న�
 }
 ```
 
-### Azure Document Intelligence పోలింగ్ ప్రవాహం
+### అజూర్ డాక్యుమెంట్ ఇంటెలిజెన్స్ పోల్ ఫ్లో
 
-Azure Document Intelligence యొక్క `analyze` API అసమకాలికంగా ఉంటుంది: ప్రారంభ అభ్యర్థన బాడీకి బదులుగా
-`Operation-Location` హెడర్ను అందిస్తుంది, మరియు ఫలితాన్ని పోలింగ్ చేయాలి. హ్యాండ్లర్
-(`open-sse/handlers/ocr.ts`) ఆ URLను ప్రతి సెకనుకు గరిష్ఠంగా 30 ప్రయత్నాల వరకు పోలింగ్ చేస్తుంది, `ok` కాని
-పోలింగ్ ప్రతిస్పందన లేదా `"failed"` స్థితి వచ్చినప్పుడు వెంటనే విఫలమవుతుంది (పోలింగ్ కొనసాగించదు), మరియు ప్రయత్నాల పరిమితి పూర్తయ్యాక
-ఆపరేషన్ ఇంకా కొనసాగుతుంటే `504`ను అందిస్తుంది. తుది Azure ప్రతిస్పందన తిరిగి అందించడానికి ముందు Mistral ఉపయోగించే అదే
-`pages`/`markdown` ఆకృతిలోకి సాధారణీకరించబడుతుంది, కాబట్టి క్లయింట్ కోడ్ ప్రొవైడర్ను ప్రత్యేకంగా నిర్వహించాల్సిన అవసరం లేదు.
+అజూర్ డాక్యుమెంట్ ఇంటెలిజెన్స్ యొక్క `analyze` API అసమకాలికమైనది: ప్రారంభ అభ్యర్థన శరీరానికి బదులుగా `Operation-Location` హెడర్ను అందిస్తుంది మరియు ఫలితం తప్పనిసరిగా పోల్ చేయబడాలి. 30 ప్రయత్నాల వరకు ప్రతి సెకనుకు URL చేసే హ్యాండ్లర్ (`open-sse/handlers/ocr.ts`) పోల్స్,`ok` యేతర పోల్ ప్రతిస్పందన లేదా `"failed"` స్థితిపై వేగంగా విఫలమవుతుంది (పోలింగ్ను కొనసాగించదు), మరియు ప్రయత్నం బడ్జెట్ ముగిసిన తర్వాత కూడా ఆపరేషన్ నడుస్తుంటే `504` అందిస్తుంది. చివరి అజూర్ ప్రతిస్పందన కాలర్కు తిరిగి రావడానికి ముందు Mistral ఉపయోగించిన అదే `pages`/`markdown` ఆకృతిలోకి సాధారణీకరించబడుతుంది, కాబట్టి క్లయింట్ కోడ్కు ప్రొవైడర్ను ప్రత్యేకంగా సూచించాల్సిన అవసరం లేదు.
 
-### Vertex AI DeepSeek OCR ప్రామాణీకరణ మరియు ఎండ్పాయింట్ పరిష్కారం
+### వెర్టెక్స్ AI DeepSeek OCR auth మరియు ఎండ్పాయింట్ రిజల్యూషన్
 
-`vertex-deepseek-ocr`, చాట్/ఇమేజ్ ట్రాఫిక్ కోసం OmniRoute ఇప్పటికే మద్దతు ఇచ్చే అదే Vertex AI ప్రామాణీకరణను
-(`open-sse/executors/vertex.ts`) మళ్లీ ఉపయోగిస్తుంది: కనెక్షన్ యొక్క API కీ ఒక Service Account JSON
-క్రెడెన్షియల్ (JWT-bearer ఫ్లో ద్వారా స్వల్పకాలిక OAuth యాక్సెస్ టోకెన్కు మార్పిడి చేయబడుతుంది) లేదా ఇప్పటికే రూపొందించబడిన
-OAuth యాక్సెస్ టోకెన్ అయి ఉండవచ్చు, దాన్ని యథాతథంగా ఉపయోగిస్తారు. అప్స్ట్రీమ్ ఎండ్పాయింట్ URL అనేది Vertex యొక్క
-సాధారణ `openapi/chat/completions` భాగస్వామి ఎండ్పాయింట్; ఇది కనెక్షన్ యొక్క ప్రాజెక్ట్ మరియు ప్రాంతం ఆధారంగా నిర్మించబడుతుంది —
-స్పష్టమైన `providerSpecificData.project`/`providerSpecificData.region` ఎల్లప్పుడూ ప్రాధాన్యత పొందుతాయి;
-లేకపోతే ప్రాజెక్ట్ Service Account JSONలోని `project_id` నుండి ఉత్పన్నమవుతుంది మరియు ప్రాంతం డిఫాల్ట్గా
-`us-central1`గా ఉంటుంది. రెండు పరిష్కారాలూ `open-sse/handlers/ocr.ts`లో జరుగుతాయి
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`); `src/app/api/v1/ocr/route.ts`లో ఇవి
-`handleOcr`కు పంపిణీ చేయడానికి ముందు వినియోగించబడతాయి.
+`vertex-deepseek-ocr` అదే Vertex AI ప్రమాణీకరణను OmniRoute ఇప్పటికే chat/image ట్రాఫిక్కు (`open-sse/executors/vertex.ts`) మద్దతిస్తోంది: కనెక్షన్ యొక్క API కీ ఒక సేవా ఖాతా JSON క్రెడెన్షియల్ (JWT-బేరర్ ఫ్లో ద్వారా స్వల్పకాలిక OAuth యాక్సెస్ టోకెన్ కోసం మార్పిడి చేయబడింది) లేదా ఇప్పటికే ఉపయోగించిన OAuth మింట్ చేయబడిన . అప్స్ట్రీమ్ ఎండ్పాయింట్ URL అనేది వెర్టెక్స్ యొక్క జెనరిక్ `openapi/chat/completions` పార్టనర్ ఎండ్పాయింట్, ఇది కనెక్షన్ యొక్క ప్రాజెక్ట్ మరియు రీజియన్ — నుండి రూపొందించబడింది మరియు స్పష్టమైన `providerSpecificData.project`/`providerSpecificData.region` ఎల్లప్పుడూ గెలుస్తుంది; లేకుంటే ప్రాజెక్ట్ సేవా ఖాతా JSON యొక్క `project_id` నుండి తీసుకోబడింది మరియు ప్రాంతం డిఫాల్ట్గా `us-central1` కి ఉంటుంది. రెండు రిజల్యూషన్లు `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`)లో జరుగుతాయి, `handleOcr` కి పంపే ముందు `src/app/api/v1/ocr/route.ts` ద్వారా వినియోగించబడుతుంది.
 
 ---
 
@@ -663,79 +637,104 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
 
 ---
 
-## అనుకూలత ఎండ్పాయింట్లు
+## అనుకూలత ముగింపు పాయింట్లు
 
-| పద్ధతి | మార్గం                                    | ఫార్మాట్                                |
-| ------ | ----------------------------------------- | --------------------------------------- |
-| POST   | `/v1/chat/completions`                    | OpenAI                                  |
-| POST   | `/v1/messages`                            | Anthropic                               |
-| POST   | `/v1/responses`                           | OpenAI Responses                        |
-| POST   | `/v1/embeddings`                          | OpenAI                                  |
-| POST   | `/v1/images/generations`                  | OpenAI Images                           |
-| POST   | `/v1/images/edits`                        | OpenAI Images (edit/inpaint)            |
-| POST   | `/v1/videos/generations`                  | OpenAI-శైలి వీడియో జనరేషన్              |
-| POST   | `/v1/music/generations`                   | OpenAI-శైలి సంగీత జనరేషన్               |
-| POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                      |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (ఆడియో బాడీని అందిస్తుంది)   |
-| POST   | `/v1/rerank`                              | Cohere/Voyage-శైలి ర్యాంక్ పునఃక్రమీకరణ |
-| POST   | `/v1/classify`                            | Jina classify (`api.jina.ai`)           |
-| POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)      |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                      |
-| GET    | `/v1/models`                              | OpenAI                                  |
-| POST   | `/v1/models/query`                        | ఫిల్టర్ చేసిన మోడల్ షార్ట్లిస్ట్        |
-| POST   | `/v1/messages/count_tokens`               | Anthropic                               |
-| GET    | `/v1beta/models`                          | Gemini                                  |
-| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                  |
-| POST   | `/v1/api/chat`                            | Ollama                                  |
-| GET    | `/api/v1/vscode/{token}/`                 | OpenAI కేటలాగ్ అలియాస్                  |
-| GET    | `/api/v1/vscode/{token}/models`           | OpenAI మోడల్స్ అలియాస్                  |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI టోకెనైజ్డ్ అలియాస్               |
-| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses టోకెనైజ్డ్ అలియాస్     |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama టోకెనైజ్డ్ అలియాస్               |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama ట్యాగ్స్ టోకెనైజ్డ్ అలియాస్      |
+| పద్ధతి | మార్గం                                    | ఫార్మాట్                                  |
+| ------ | ----------------------------------------- | ----------------------------------------- |
+| POST   | `/v1/chat/completions`                    | OpenAI                                    |
+| POST   | `/v1/messages`                            | Anthropic                                 |
+| POST   | `/v1/responses`                           | OpenAI ప్రతిస్పందనలు                      |
+| POST   | `/v1/embeddings`                          | OpenAI                                    |
+| POST   | `/v1/images/generations`                  | OpenAI చిత్రాలు                           |
+| POST   | `/v1/images/edits`                        | OpenAI చిత్రాలు (edit/inpaint)            |
+| POST   | `/v1/videos/generations`                  | OpenAI-శైలి వీడియో ఉత్పత్తి               |
+| POST   | `/v1/music/generations`                   | OpenAI-శైలి సంగీత ఉత్పత్తి                |
+| POST   | `/v1/audio/transcriptions`                | OpenAI ఆడియో (STT)                        |
+| POST   | `/v1/audio/speech`                        | OpenAI TTS (ఆడియో బాడీని తిరిగి ఇస్తుంది) |
+| POST   | `/v1/rerank`                              | Cohere/Voyage-style రీర్యాంక్             |
+| POST   | `/v1/classify`                            | జినా వర్గీకరణ (`api.jina.ai`)             |
+| POST   | `/v1/segment`                             | జినా సెగ్మెంటర్ (`segment.jina.ai`)       |
+| POST   | `/v1/moderations`                         | OpenAI మోడరేషన్లు                         |
+| POST   | `/v1/systemone`                           | సిస్టమ్ వన్ టైప్ చేసిన నిర్ణయాలు          |
+| POST   | `/v1/decisions`                           | OpenAI నిర్ణయాలు (స్థానిక)                |
+| GET    | `/v1/systemone/models`                    | డెసిషన్ మోడల్ కేటలాగ్                     |
+| GET    | `/v1/models`                              | OpenAI                                    |
+| POST   | `/v1/models/query`                        | ఫిల్టర్ చేయబడిన మోడల్ షార్ట్లిస్ట్        |
+| POST   | `/v1/messages/count_tokens`               | Anthropic                                 |
+| GET    | `/v1beta/models`                          | Gemini                                    |
+| POST   | `/v1beta/models/{...path}`                | Gemini generateContent                    |
+| POST   | `/v1/api/chat`                            | Ollama                                    |
+| GET    | `/api/v1/vscode/{token}/`                 | OpenAI కేటలాగ్ అలియాస్                    |
+| GET    | `/api/v1/vscode/{token}/models`           | OpenAI మోడల్స్ అలియాస్                    |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI టోకనైజ్డ్ అలియాస్                  |
+| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI ప్రతిస్పందనలు టోకనైజ్డ్ అలియాస్    |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama టోకనైజ్డ్ అలియాస్                  |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | Ollama ట్యాగ్లు టోకనైజ్డ్ అలియాస్         |
 
-అన్ని POST మార్గాలు ఒకే ఆకృతిని అనుసరిస్తాయి: `Bearer your-api-key` + Zod ద్వారా ధృవీకరించబడిన JSON బాడీ (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` మొదలైనవి, `src/shared/validation/schemas.ts` చూడండి). స్కీమా విఫలమైతే 4xx తిరిగి అందించబడుతుంది.
+అన్ని POST మార్గాలు ఒకే ఆకారాన్ని అనుసరిస్తాయి: `Bearer your-api-key` + Zod-ధృవీకరించబడిన JSON శరీరం (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, మొదలైనవి, `src/shared/validation/schemas.ts` చూడండి). స్కీమా వైఫల్యంపై 4xx తిరిగి ఇవ్వబడింది.
 
-`Authorization: Bearer ...` హెడర్ను జోడించలేని క్లయింట్ల కోసం, దిగువ వివరించిన క్వెరీ-స్ట్రింగ్ అనుకూలత (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ద్వారా లేదా ప్రత్యేక `/api/v1/vscode/{token}/...` ఎండ్పాయింట్ల ద్వారా URLలో API కీలను కూడా OmniRoute స్వీకరిస్తుంది.
+`Authorization: Bearer ...` అటాచ్ చేయలేని క్లయింట్ల కోసం, OmniRoute URL లోని API కీలను క్వెరీ-స్ట్రింగ్ అనుకూలత (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) లేదా దిగువ డాక్యుమెంట్ చేయబడిన డెడికేటెడ్ `/api/v1/vscode/{token}/...` ఎండ్ పాయింట్ల ద్వారా కూడా అంగీకరిస్తుంది.
 
 ```bash
-# ర్యాంక్ పునఃక్రమీకరణ (క్లౌడ్ రిజిస్ట్రీ ప్రొవైడర్ లేదా "<prefix>/<model>"గా OpenAI-అనుకూల ప్రొవైడర్ నోడ్)
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina వర్గీకరణ (Foundation API ఆధారాలు)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina సెగ్మెంటర్
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina శోధన (s.jina.ai; ప్రొవైడర్ అలియాస్లు: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# మోడరేషన్లు
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg (లేదా అభ్యర్థించిన ఫార్మాట్) బాడీని అందిస్తుంది
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS కు భాష మరియు వాయిస్ అవసరం: `language` డిఫాల్ట్గా "en"; ఇవ్వని
-# వాయిస్ లేదా OpenAI స్టాక్ వాయిస్ పేరు (alloy, nova, …) "Adrian"గా మారుతుంది
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# ఇమేజ్ ఎడిట్ (మల్టీపార్ట్)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# వీడియో / సంగీత జనరేషన్ (ప్రొవైడర్-ప్రిఫిక్స్ కలిగిన మోడల్ ఐడి)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **రీర్యాంక్ ప్రొవైడర్ నోడ్లు:** `POST /v1/rerank` కూడా `<node-prefix>/<model>`గా సూచించబడిన OpenAI-అనుకూల ప్రొవైడర్ నోడ్లకు (oMLX, vLLM, Infinity, గేట్వే వెనుక ఉన్న TEI, …) రూట్ చేస్తుంది. లూప్బ్యాక్ నోడ్లు (`localhost`, `127.0.0.1`, `172.16.0.0/12`) ఎల్లప్పుడూ అర్హత కలిగి ఉంటాయి. అలాగే `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`లో ఆపరేటర్ జాబితా చేసిన హోస్ట్నేమ్లు కూడా అర్హత కలిగి ఉంటాయి (ఉదా., `http://reranker:8080/v1` వంటి Docker/Compose సర్వీస్ పేరు; వీటిని నేరుగా పిలుస్తారు, ఎప్పుడూ `HTTP(S)_PROXY` ద్వారా లేదా కనెక్షన్కు పిన్ చేసిన ప్రాక్సీ ద్వారా కాదు). ఇతర ఏ హోస్ట్లోనైనా ఉన్న నోడ్లు — LAN బాక్స్ లేదా Tailscale పీర్ — ఆపరేటర్ `RERANK_REMOTE_PROVIDER_NODES` ఫీచర్ ఫ్లాగ్ను ప్రారంభించినప్పుడు **మరియు** నోడ్ యొక్క బేస్ URL ప్రొవైడర్ అవుట్బౌండ్ URL పాలసీకి (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) సరిపడినప్పుడు మాత్రమే అర్హత కలిగి ఉంటాయి. మెమరీ ఇంజిన్లోని రీర్యాంక్ దశ ఈ రూట్ను లూప్బ్యాక్ ద్వారా పిలుస్తుంది, కాబట్టి Memory సెట్టింగ్లలోని `rerankProviderModel`కూ ఇదే నియమం వర్తిస్తుంది.
+> **రీర్యాంక్ ప్రొవైడర్ నోడ్స్:** `POST /v1/rerank` కూడా OpenAI-అనుకూల ప్రొవైడర్ నోడ్లకు (oMLX, vLLM, ఇన్ఫినిటీ, TEI వెనుక గేట్వే, …) `<node-prefix>/<model>` అని సంబోధిస్తుంది. లూప్బ్యాక్ నోడ్లు (`localhost`, `127.0.0.1`, `172.16.0.0/12`) ఎల్లప్పుడూ అర్హత కలిగి ఉంటాయి మరియు `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` లో ఆపరేటర్ల జాబితాల హోస్ట్ పేర్లు కూడా ఉంటాయి (ఉదా. `http://reranker:8080/v1` వంటి Docker/Compose సర్వీస్ పేరు; వీటిని నేరుగా పిలుస్తారు, ఎప్పుడూ `HTTP(S)_PROXY` లేదా కనెక్షన్ యొక్క పిన్ చేయబడిన ప్రాక్సీ ద్వారా కాదు). ఆపరేటర్ `RERANK_REMOTE_PROVIDER_NODES` ఫీచర్ ఫ్లాగ్ను ప్రారంభించినప్పుడు మాత్రమే ఏదైనా ఇతర హోస్ట్ — a LAN బాక్స్ లేదా Tailscale పీర్ — నోడ్లకు అర్హత ఉంటుంది** మరియు** నోడ్ యొక్క బేస్ URL ప్రొవైడర్ అవుట్బౌండ్ URL విధానాన్ని (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) పాస్ చేస్తుంది. మెమరీ ఇంజిన్ యొక్క రీర్యాంక్ దశ ఈ మార్గాన్ని లూప్బ్యాక్ ద్వారా పిలుస్తుంది, కాబట్టి అదే నియమం మెమరీ సెట్టింగ్లలో `rerankProviderModel` నియంత్రిస్తుంది.
 >
-> **లోకల్ సర్వర్ ఆకృతులు:** నోడ్ను `<base>/v1/rerank` వద్ద, 404 వచ్చినప్పుడు `<base>/rerank` వద్ద (Infinity, TEI) పిలుస్తారు. అప్స్ట్రీమ్ బాడీలో Cohere/OpenAI స్పెల్లింగ్ (`documents`, `return_documents`)తో పాటు TEI స్పెల్లింగ్ (`texts`, `return_text`) కూడా ఉంటాయి. అప్స్ట్రీమ్ ప్రతిస్పందన Cohere ఎన్వలప్కు సాధారణీకరించబడుతుంది: TEI యొక్క నిరాడంబరమైన `[{index, score, text}]`, సన్నని గేట్వేల నుంచి వచ్చే `{results: [{index, score}]}`, అలాగే Voyage-శైలి `{data: [...]}` అన్నీ క్లయింట్కు `{results: [{index, relevance_score, document?}]}`గా తిరిగి వస్తాయి; ఇవి స్కోర్ ప్రకారం క్రమబద్ధీకరించబడి, `top_n`కి పరిమితం చేయబడతాయి.
+> **స్థానిక సర్వర్ ఆకారాలు:** నోడ్ను `<base>/v1/rerank` వద్ద మరియు 404లో `<base>/rerank` (ఇన్ఫినిటీ, TEI) వద్ద పిలుస్తారు. అప్స్ట్రీమ్ బాడీ Cohere/OpenAI స్పెల్లింగ్ (`documents`, `return_documents`) మరియు TEI స్పెల్లింగ్ (`texts`, `return_text`) రెండింటినీ కలిగి ఉంటుంది మరియు అప్స్ట్రీమ్ ప్రతిస్పందన Cohere ఎన్వలప్కు సాధారణీకరించబడుతుంది: TEI యొక్క బేర్ `[{index, score, text}]`, `{results: [{index, score}]}` నుండి థిన్ గేట్వేస్-అన్నింటికి తిరిగి వస్తుంది, మరియు `{results: [{index, relevance_score, document?}]}`, స్కోర్ ద్వారా క్రమబద్ధీకరించబడింది మరియు `{data: [...]}` వద్ద `top_n` చేయబడింది.
 
-> **ప్రొవైడర్-నోడ్ డిస్కవరీ:** OpenAI-అనుకూల ప్రొవైడర్ నోడ్లోని మోడళ్లు నోడ్ ప్రిఫిక్స్ కింద `GET /v1/models`లో కనిపిస్తాయి. ఎండ్పాయింట్ మెటాడేటా లేని వరుసలు (లోకల్ `/v1/models` జాబితాల్లో సాధారణంగా కనిపించేవి) నోడ్ యొక్క `apiType`ను స్వీకరిస్తాయి. అందువల్ల `embeddings` నోడ్లోని మోడళ్ల `type: "embedding"`గా, `rerank` నోడ్లోని మోడళ్ల `type: "rerank"`గా ఉంటాయి; డిఫాల్ట్గా chatగా మారవు. సింక్ చేసిన లేదా మాన్యువల్గా జోడించిన వరుసలోని స్పష్టమైన `supportedEndpoints`కు ఇప్పటికీ ప్రాధాన్యత ఉంటుంది.
+> **ప్రొవైడర్-నోడ్ ఆవిష్కరణ:** OpenAI-అనుకూల ప్రొవైడర్ నోడ్లోని మోడల్లు నోడ్ ప్రిఫిక్స్ క్రింద `GET /v1/models` లో కనిపిస్తాయి. ఎండ్పాయింట్ మెటాడేటా లేని అడ్డు వరుసలు (స్థానిక `/v1/models` జాబితాలకు విలక్షణమైనవి) నోడ్ యొక్క `apiType` వారసత్వంగా పొందుతాయి, కాబట్టి `embeddings` నోడ్ యొక్క నమూనాలు `type: "embedding"` మరియు `rerank` నోడ్ యొక్క నమూనాలు చాట్కు డిఫాల్ట్ కాకుండా `type: "rerank"` ; సమకాలీకరించబడిన లేదా మాన్యువల్గా జోడించిన అడ్డు వరుసలో స్పష్టమైన `supportedEndpoints` ఇప్పటికీ ప్రాధాన్యతనిస్తుంది.
 
-### ప్రత్యేక ప్రొవైడర్ రూట్లు
+### టైప్ చేసిన నిర్ణయాలు
+
+నిర్ణయ నమూనాలు టైప్ చేసిన ప్రశ్నలకు వచనాన్ని రూపొందించడానికి బదులుగా క్రమాంకనం చేసిన సంభావ్యతలతో సమాధానమిస్తాయి. అవి ఎప్పుడూ చాట్ మోడల్లు కావు మరియు రెండు వైర్ ఫార్మాట్లు ఒకదానికొకటి అనువదించబడవు:
+
+- `POST /v1/systemone` — సిస్టమ్ వన్ `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter నిర్ణయాలు, Cloudflare వర్కర్స్ AI, స్థానిక Ollama).
+- `POST /v1/decisions` — స్థానిక OpenAI నిర్ణయాలు `{ model, input, questions: [...] }`, `openai` కనెక్షన్ ద్వారా అందించబడుతుంది. మోడల్ `openai/gpt-6-luna` (బేర్ `gpt-6-luna` కూడా పనిచేస్తుంది). సమాధానాలు ప్రశ్న క్రమంలో తిరిగి వస్తాయి, తాకబడలేదు.
+- `GET /v1/systemone/models` — రెండు రకాల ఒక కేటలాగ్; ప్రతి అడ్డు వరుస దాని `api_format` (`systemone` లేదా `decisions`) అని పేరు పెట్టింది. `limit` / `after` పేజీ చివరి జాబితా. `X-OmniRoute-Catalog-Status` హెడర్ `complete`, `partial` లేదా `unavailable` (503) అని చదువుతుంది.
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+`/v1/decisions` లో API కీ మోడల్ అనుమతి జాబితా, `decisions` ఎండ్పాయింట్ వర్గం, బడ్జెట్ మరియు కనెక్షన్ స్కోప్ ఏదైనా క్రెడెన్షియల్ చదవడానికి ముందు తనిఖీ చేయబడతాయి. క్రెడెన్షియల్ అనేది కీ యొక్క స్కోప్ లోపల నిల్వ చేయబడిన `openai` కనెక్షన్ (ఎప్పుడూ పర్యావరణ కీ కాదు); కనెక్షన్ బేస్ URL ఈ OmniRoute వద్ద సూచించని ఆధారాలు, ప్రశ్న లేదా ఫ్రాగ్మెంట్ లేకుండా `http(s)` URL అయినప్పుడు మాత్రమే గౌరవించబడుతుంది. `decision` ఆటో-రౌటర్ ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): ప్రొవైడర్ అవుట్బౌండ్ గార్డ్, రీట్రీలు లేవు, దారి మళ్లింపులు లేవు, 5 సెకన్ల సమయం ముగిసింది మరియు 64 KB ఆన్సర్ క్యాప్ (పెద్ద సమాధానం 502). అభ్యర్థన సంస్థలు 4 MiB కి పరిమితం చేయబడ్డాయి. ప్రతి కాల్ తాజా `Idempotency-Key` ని పంపుతుంది. లోపాలు అప్స్ట్రీమ్ స్థితిని మాత్రమే కలిగి ఉంటాయి, ఎప్పుడూ దాని శరీరం, URL, కీ లేదా ప్రాంప్ట్ కాదు.
+
+### డెడికేటెడ్ ప్రొవైడర్ రూట్లు
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -743,7 +742,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-ప్రొవైడర్ ప్రిఫిక్స్ లేకపోతే అది స్వయంచాలకంగా జోడించబడుతుంది. సరిపోలని మోడళ్లకు `400` తిరిగి వస్తుంది.
+ప్రొవైడర్ ప్రిఫిక్స్ మిస్ అయినట్లయితే స్వయంచాలకంగా జోడించబడుతుంది. సరిపోలని మోడల్లు తిరిగి `400`.
 
 ---
 

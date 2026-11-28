@@ -12,54 +12,53 @@ OmniRoute memiliki tiga mekanisme ketahanan yang berbeda namun terkait. Masing-m
 
 > **Prioritas env-vs-dashboard untuk peralihan ketahanan.** Tombol ketahanan keikutsertaan yang diunggulkan dari lingkungan — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — hanya menyediakan _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean bertahan di `resilienceSettings` (Dashboard →** Pengaturan → Ketahanan** / `PATCH /api/resilience`, disimpan dalam `key_value`) memenangkan nilai env: normalisasi (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) mempertahankan boolean yang disimpan setiap kali ada. Menyetel env var ke `true` pada penerapan di mana dasbor sudah menyimpan `false` oleh karena itu tidak mengubah apa pun — balikkan tombolnya** Pengaturan → Ketahanan** (atau kosongkan bidang yang disimpan) sebagai gantinya.
 
-## 1. Circuit Breaker Provider
+## 1. Penyedia Pemutus Arus
 
-**Cakupan:** seluruh provider (mis., `glm`, `openai`, `anthropic`).
+**Cakupan:** seluruh penyedia (misalnya, `glm`, `openai`, `anthropic`).
 
-**Tujuan:** menghentikan pengiriman traffic ke provider yang berulang kali gagal pada tingkat upstream/layanan.
+**Tujuan:** berhenti mengirimkan lalu lintas ke penyedia yang berulang kali gagal di tingkat upstream/service.
 
-**Implementasi:**
+**Pelaksanaan:**
 
 - Kelas inti: `src/shared/utils/circuitBreaker.ts`
-- Penyambungan: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API status: `GET /api/monitoring/health`
-- API reset: `POST /api/resilience/reset`
-- Wrapper: `open-sse/services/accountFallback.ts`
-- Tabel DB: `domain_circuit_breakers`
+- Pengkabelan: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Status API: `GET /api/monitoring/health`
+- Setel ulang API: `POST /api/resilience/reset`
+- Pembungkus: `open-sse/services/accountFallback.ts`
+- tabel DB : `domain_circuit_breakers`
 
-**Status:**
+**menyatakan:**
 
-- `CLOSED` — traffic normal diizinkan
-- `DEGRADED` — traffic masih diizinkan, tetapi kegagalan provider yang meningkat sedang dilacak; kembali ke `CLOSED` setelah cukup banyak keberhasilan, pada uji koneksi yang valid, atau setelah penahanan `OPEN` terlama untuk jenis kegagalan terakhir (nilai `cooldownByKind`-nya, jika tidak ada maka `resetTimeout`, × `maxBackoffMultiplier`, minimal satu cooldown) tanpa kegagalan baru
-- `OPEN` — provider diblokir sementara; routing combo melewatinya
-- `HALF_OPEN` — timeout reset telah berlalu; permintaan probe diizinkan
+- `CLOSED` — lalu lintas normal diperbolehkan
+- lalu lintas `DEGRADED` — masih diperbolehkan, tetapi peningkatan kegagalan penyedia sedang dilacak; kembali ke `CLOSED` jika cukup berhasil, pada pengujian koneksi yang valid, atau setelah `OPEN` ditahan terlama untuk jenis kegagalan terakhir (nilai `cooldownByKind` -nya, jika tidak `resetTimeout`, × `maxBackoffMultiplier`, setidaknya satu cooldown) tanpa kegagalan baru
+- penyedia `OPEN` — diblokir sementara; perutean kombo melewatkannya
+- batas waktu reset `HALF_OPEN` — telah berlalu; permintaan penyelidikan diperbolehkan
 
-**Default yang dapat dikonfigurasi (`open-sse/config/constants.ts`, ditampilkan di Dashboard → Pengaturan → Ketahanan):**
+**Default yang dapat dikonfigurasi (`open-sse/config/constants.ts`, diekspos di Dashboard → Settings → Resilience):**
 
-| Kelas   | Degraded pada | Terbuka pada | Timeout reset |
-| ------- | ------------- | ------------ | ------------- |
-| OAuth   | 5 kegagalan   | 8 kegagalan  | 60s           |
-| API-key | 7 kegagalan   | 12 kegagalan | 30s           |
-| Local   | diturunkan    | 2 kegagalan  | 15s           |
+| Kelas     | Terdegradasi di | Buka pada    | Setel ulang batas waktu |
+| --------- | --------------- | ------------ | ----------------------- |
+| OAuth     | 5 kegagalan     | 8 kegagalan  | 60an                    |
+| Kunci API | 7 kegagalan     | 12 kegagalan | 30an                    |
 
-`degradationThreshold` mengontrol kapan provider masuk ke `DEGRADED`; `failureThreshold` mengontrol kapan provider terbuka dan dilewati. Profil provider Local belum ditampilkan di halaman pengaturan Ketahanan.
+`degradationThreshold` mengontrol kapan penyedia memasukkan `DEGRADED`; `failureThreshold` mengontrol kapan dibuka dan dilewati. `PROVIDER_PROFILES.local` (2 kegagalan / 15 detik) didefinisikan dalam `open-sse/config/constants.ts` tapi** belum disambungkan** : `getProviderCategory()` hanya mengembalikan `oauth` atau `apikey`, sehingga penyedia lokal menggunakan profil OAuth atau kunci API.
 
-**Kode trip:** hanya status tingkat provider `[408, 500, 502, 503, 504]`. JANGAN trip untuk error tingkat akun (sebagian besar 401/403/429 — itu termasuk cooldown atau lockout).
+**Kode perjalanan:** hanya status tingkat penyedia `[408, 500, 502, 503, 504]`. Lakukan NOT trip untuk kesalahan tingkat akun (sebagian besar 401/403/429 — termasuk dalam cooldown atau lockout).
 
-**Pemulihan lazy:** saat `OPEN` kedaluwarsa, `getStatus()`, `canExecute()`, `getRetryAfterMs()` menyegarkan status ke `HALF_OPEN`. Pembacaan yang sama (dan kegagalan berikutnya) menurunkan `DEGRADED` yang usang kembali ke `CLOSED`. Tidak perlu timer latar belakang.
+**Pemulihan yang lambat:** ketika `OPEN` kedaluwarsa, `getStatus()`, `canExecute()`, `getRetryAfterMs()` segarkan status ke `HALF_OPEN`. Bacaan yang sama (dan kegagalan berikutnya) mengembalikan `DEGRADED` yang basi ke `CLOSED`. Tidak diperlukan pengatur waktu latar belakang.
 
 ---
 
-### Cooldown Provider global opt-in (gerbang jendela)
+### Keikutsertaan Cooldown Penyedia global (gerbang jendela)
 
-Lapisan keempat, **opt-in** (`PROVIDER_COOLDOWN_ENABLED`, default **nonaktif**) menyimpan memori lintas-permintaan tentang provider yang gagal di `open-sse/services/providerCooldownTracker.ts`, yang dikonsultasikan oleh resolusi target combo sehingga permintaan combo berurutan berhenti menjelajahi ulang provider yang baru saja gagal. Entri tingkat provider mematuhi gerbang jendela `PROVIDER_PROFILES`:
+Yang keempat,** ikut serta** lapisan (`PROVIDER_COOLDOWN_ENABLED`, default** mati** ) menyimpan memori permintaan silang dari penyedia yang gagal di `open-sse/services/providerCooldownTracker.ts`, dikonsultasikan dengan resolusi target kombo sehingga permintaan kombo berturut-turut berhenti berjalan kembali ke penyedia yang baru saja gagal. Entri tingkat penyedia menghormati gerbang jendela `PROVIDER_PROFILES` :
 
-| Profil  | trip setelah (`providerFailureThreshold`) | dalam (`providerFailureWindowMs`) | cooldown selama (`providerCooldownMs`) |
-| ------- | ----------------------------------------: | --------------------------------: | -------------------------------------: |
-| OAuth   |                                      `10` |                           `15min` |                                 `5min` |
-| API key |                                      `15` |                           `30min` |                                `10min` |
+| Profil    | perjalanan setelahnya (`providerFailureThreshold`) | di dalam (`providerFailureWindowMs`) | keren untuk (`providerCooldownMs`) |
+| --------- | -------------------------------------------------: | -----------------------------------: | ---------------------------------: |
+| OAuth     |                                               `10` |                              `15min` |                             `5min` |
+| kunci API |                                               `15` |                              `30min` |                            `10min` |
 
-Di bawah ambang, provider **tidak** dianggap sedang cooldown; keberhasilan menghapus jendela. Entri tingkat koneksi (`provider:connectionId`) tetap memakai backoff eksponensial `minRetryCooldownMs → maxRetryCooldownMs`. Override: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Pengaman regresi: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Di bawah ambang batas penyedianya** bukan** dianggap pendinginan; kesuksesan membersihkan jendela. Entri tingkat koneksi (`provider:connectionId`) tetap mempertahankan `minRetryCooldownMs → maxRetryCooldownMs` backoff eksponensial. Penggantian: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Penjaga regresi: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Cooldown Koneksi
 
@@ -849,6 +848,21 @@ habis. Batasan yang wajar:
 
 ---
 
+## Ketika OmniRoute sendiri tidak dapat dijangkau
+
+Pemutus sirkuit penyedia, cooldown koneksi, dan penguncian model semuanya berjalan di dalam gateway. Jika klien tidak dapat mencapai gateway, maka akan terjadi kesalahan koneksi. OmniRoute tidak dapat mencegat kegagalan itu. Klien memutuskan apakah akan mencoba lagi dan pesan apa yang akan ditampilkan.
+
+OmniRoute saat ini tidak menyediakan fallback sisi klien dan tidak menentukan kebijakan untuk itu. Konfigurasikan rute alternatif apa pun di klien atau di depan gateway.
+
+- `GET /api/health` memeriksa keaktifan tanpa otentikasi.
+- `GET /api/health/ping` memeriksa kesiapan, termasuk apakah database merespons.
+- `GET /api/monitoring/health` memberi penelepon terotentikasi gambaran kesehatan yang lebih mendalam.
+- `omniroute launch <tool>` menyelidiki `/api/monitoring/health` sebelum memulai klien. Itu dapat memulai gateway lokal secara otomatis. Dengan `--no-start`, gateway yang tidak dapat dijangkau menghasilkan `GatewayUnreachable` dan kode keluar `69`.
+
+Untuk memutuskan sambungan klien dari OmniRoute, ikuti [Kembalikan konfigurasi klien](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Debugging
 
 - Weighted combo menjawab `503 all_targets_cooling_down` (`Retry-After` diatur, `diagnostics.excluded` mencantumkan setiap target dengan `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → pool sudah dikonfigurasi dan terhubung, setiap target hanya dikecualikan oleh timer ketahanan; peringatan `[COMBO] Weighted selection: every target excluded before dispatch — …` menyebutkan alasan dan detik yang tersisa. `404 no_executable_targets` dari combo yang sama berarti tidak ada timer ketahanan yang terlibat (tidak ada yang bisa dijalankan, atau setiap akun gagal dalam probe ketersediaan). Dibangun di `open-sse/services/combo/pinRecovery.ts` dari pengecualian yang dikumpulkan di `targetResolution.ts`.
@@ -860,94 +874,68 @@ habis. Batasan yang wajar:
 
 ---
 
-## State runtime — referensi cepat agen
+## Referensi cepat agen — status runtime
 
-> Dipindahkan apa adanya dari `AGENTS.md` → "Resilience Runtime State" (PR #12743) agar
-> panduan agen tetap di bawah anggaran konteks 40k. Ini adalah tampilan ringkas yang ditujukan
-> untuk agen dari bagian-bagian di atas; bagian bernomor tetap menjadi referensi lengkap.
+> Dipindahkan kata demi kata dari `AGENTS.md` → "Resilience Runtime State" (PR #12743) sehingga panduan agen tetap berada di bawah anggaran konteks 40k. Ini adalah tampilan ringkas yang menghadap agen dari bagian di atas; bagian yang diberi nomor tetap menjadi referensi lengkap.
 
-OmniRoute memiliki tiga mekanisme kegagalan sementara yang saling terkait tetapi berbeda.
-Jaga agar cakupannya tetap terpisah saat men-debug perilaku routing. Lihat
-[diagram ketahanan 3 lapis](../diagrams/exported/resilience-3layers.svg)
-(sumber: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-untuk peta sekilas.
+OmniRoute memiliki tiga mekanisme kegagalan sementara yang terkait namun berbeda. Pisahkan cakupannya saat men-debug perilaku perutean. Lihat [diagram ketahanan 3 lapis](../diagrams/exported/resilience-3layers.svg) (sumber: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) untuk melihat peta sekilas.
 
-### Circuit Breaker Provider
+### Pemutus Arus Penyedia
 
-**Cakupan**: seluruh provider, mis. `glm`, `openai`, `anthropic`.
+**Cakupan** : seluruh penyedia, misalnya `glm`, `openai`, `anthropic`.
 
-**Tujuan**: menghentikan pengiriman trafik ke provider yang berulang kali gagal di tingkat
-upstream/layanan, sehingga satu provider yang tidak sehat tidak memperlambat setiap permintaan.
+**Tujuan** : berhenti mengirimkan lalu lintas ke penyedia yang berulang kali gagal pada tingkat upstream/service, sehingga satu penyedia yang tidak sehat tidak memperlambat setiap permintaan.
 
-**Implementasi**:
+**Pelaksanaan** :
 
 - Kelas inti: `src/shared/utils/circuitBreaker.ts`
-- Pengkabelan gate/eksekusi chat: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API status runtime: `src/app/api/monitoring/health/route.ts`
-- Wrapper bersama: `open-sse/services/accountFallback.ts`
-- Tabel state yang dipersistensikan: `domain_circuit_breakers`
+- Obrolan kabel gate/execution : `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Status waktu proses API: `src/app/api/monitoring/health/route.ts`
+- Pembungkus bersama: `open-sse/services/accountFallback.ts`
+- Tabel status yang bertahan: `domain_circuit_breakers`
 
-**State** (4 — `src/shared/utils/circuitBreaker.ts`):
+**Amerika** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: trafik normal diizinkan.
-- `DEGRADED`: pita peringatan dini — kegagalan telah melewati ambang degradasi tetapi belum
-  melewati ambang breaker; trafik masih mengalir, dashboard menampilkan peringatan. Uji koneksi
-  yang valid atau jendela tenang tanpa kegagalan baru mengembalikannya ke `CLOSED`
-  (`docs/architecture/RESILIENCE_GUIDE.md` memuat jendelanya).
-- `OPEN`: provider diblokir sementara; pemanggil mendapat respons provider-circuit-open
-  atau routing combo beralih ke target lain.
-- `HALF_OPEN`: timeout reset telah berlalu; izinkan satu permintaan probe. Keberhasilan menutup
-  breaker, kegagalan membukanya lagi.
+- `CLOSED`: lalu lintas normal diperbolehkan.
+- `DEGRADED`: kegagalan pita peringatan dini — melewati ambang batas degradasi tetapi belum mencapai ambang batas pemutus; lalu lintas masih mengalir, dashboard menunjukkan peringatan. Tes koneksi yang valid atau jendela yang tenang tanpa kegagalan baru akan mengembalikannya ke `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` memiliki jendelanya).
+- `OPEN`: penyedia diblokir sementara; penelepon mendapatkan respons terbuka sirkuit penyedia atau lompatan perutean kombo ke target lain.
+- `HALF_OPEN`: batas waktu reset telah berlalu; mengizinkan permintaan penyelidikan. Kesuksesan menutup pemutusnya, kegagalan membukanya kembali.
 
-**Default** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, dikonsumsi melalui
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` di `src/lib/resilience/settings.ts` →
-`getCircuitBreaker(provider, …)` di `src/sse/handlers/chatHelpers.ts`). Breaker seluruh
-provider berjalan pada `circuitBreakerThreshold` / `circuitBreakerReset`:
+**Default** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, dikonsumsi melalui `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` di `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` di `src/sse/handlers/chatHelpers.ts`). Pemutus seluruh penyedia berjalan pada `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profil  | terdegradasi pada | terbuka pada (`circuitBreakerThreshold`) | reset (`circuitBreakerReset`) |
-| ------- | ----------------: | ---------------------------------------: | ----------------------------: |
-| OAuth   |               `5` |                                      `8` |                         `60s` |
-| API key |               `7` |                                     `12` |                         `30s` |
-| Local   |      (diturunkan) |                                      `2` |                         `15s` |
+| Profil    | terdegradasi di | dibuka di (`circuitBreakerThreshold`) | mengatur ulang (`circuitBreakerReset`) |
+| --------- | --------------: | ------------------------------------: | -------------------------------------: |
+| OAuth     |             `5` |                                   `8` |                                  `60s` |
+| kunci API |             `7` |                                  `12` |                                  `30s` |
 
-`PROVIDER_PROFILES` juga mendefinisikan `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 menit) dan `providerCooldownMs` (5/10/1 menit): ketiganya
-menggerakkan **window gate dari Provider Cooldown global yang bersifat opt-in**
-(`PROVIDER_COOLDOWN_ENABLED`, default nonaktif) — entri tingkat provider di
-`open-sse/services/providerCooldownTracker.ts` hanya dihitung sebagai cooling setelah
-kegagalan sebanyak `providerFailureThreshold` di dalam `providerFailureWindowMs`, lalu
-cooling selama `providerCooldownMs`. Keduanya BUKAN ambang breaker yang aktif — jangan
-menyetelnya dengan harapan mengubah perilaku breaker. Setiap default dapat ditimpa melalui
-env var `OMNIROUTE_PROVIDER_BREAKER_*` dan `OMNIROUTE_CIRCUIT_BREAKER_*`; tabel referensi
-yang akurat sesuai runtime ada di `docs/architecture/RESILIENCE_GUIDE.md`.
+Profil `local` (`2` failed / `15s`) juga ada di `PROVIDER_PROFILES`, namun tidak dihubungkan ke pemutus: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) hanya menerima `oauth` atau `apikey`, dan `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) mengembalikan salah satu dari keduanya (penyedia yang tidak terdaftar mendapatkan `apikey`).
 
-Hanya status kegagalan tingkat provider yang boleh memicu breaker provider:
+`PROVIDER_PROFILES` juga mendefinisikan `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) dan `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, dengan nilai lokalnya inert karena alasan yang sama seperti di atas: ini memberi daya pada** gerbang jendela Cooldown Penyedia global keikutsertaan** (`PROVIDER_COOLDOWN_ENABLED`, default nonaktif) — entri tingkat penyedia di `open-sse/services/providerCooldownTracker.ts` hanya dihitung sebagai pendinginan setelah `providerFailureThreshold` gagal di dalam `providerFailureWindowMs`, dan kemudian didinginkan untuk `providerCooldownMs`. Mereka adalah NOT ambang batas pemutus arus — tidak menyetelnya untuk mengharapkan perilaku pemutus. Setiap default dapat ditimpa melalui `OMNIROUTE_PROVIDER_BREAKER_*` dan `OMNIROUTE_CIRCUIT_BREAKER_*` env vars; tabel referensi yang akurat waktu proses berada di `docs/architecture/RESILIENCE_GUIDE.md`.
+
+Hanya status kegagalan tingkat penyedia yang dapat membuat pemutus penyedia tersandung:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Jangan memicu breaker seluruh provider untuk kesalahan akun/key/model biasa seperti kebanyakan
-kasus `401`, `403`, atau `429`. Biasanya itu termasuk ranah cooldown koneksi atau model
-lockout. `403` provider API-key generik seharusnya dapat dipulihkan kecuali jika diklasifikasikan
-sebagai kesalahan provider/akun yang terminal.
+Jangan tersandung pemutus seluruh penyedia untuk kesalahan account/key/model normal seperti kebanyakan kasus `401`, `403`, atau `429`. Itu biasanya milik cooldown koneksi atau penguncian model. Penyedia kunci API generik `403` harus dapat dipulihkan kecuali jika diklasifikasikan sebagai kesalahan terminal provider/account.
 
-Breaker menggunakan pemulihan lazy, bukan timer latar belakang. Ketika `OPEN` kedaluwarsa, pembacaan seperti `getStatus()`, `canExecute()`, dan `getRetryAfterMs()` akan menyegarkan state menjadi `HALF_OPEN`, sehingga dashboard dan pembuat kandidat combo tidak terus mengecualikan provider yang sudah kedaluwarsa selamanya.
+Pemutus menggunakan pemulihan lambat, bukan pengatur waktu latar belakang. Ketika `OPEN` kedaluwarsa, pembacaan seperti `getStatus()`, `canExecute()`, dan `getRetryAfterMs()` menyegarkan status menjadi `HALF_OPEN`, sehingga dasbor dan pembuat kandidat kombo tidak terus-menerus mengecualikan penyedia yang kedaluwarsa.
 
-### Cooldown Koneksi
+### Pendinginan Koneksi
 
-**Cakupan**: satu koneksi/akun/kunci provider.
+**Cakupan** : satu penyedia connection/account/key.
 
-**Tujuan**: melewati sementara satu kunci/akun yang bermasalah sambil membiarkan koneksi lain untuk provider yang sama tetap melayani permintaan.
+**Tujuan** : untuk sementara melewatkan satu key/account buruk sambil mengizinkan koneksi lain untuk penyedia yang sama untuk terus melayani permintaan.
 
-**Implementasi**:
+**Pelaksanaan** :
 
-- Jalur penulisan/pembaruan: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Pemilihan/penyaringan akun: `src/sse/services/auth.ts::getProviderCredentials...`
+- jalur Write/update : `src/sse/services/auth.ts::markAccountUnavailable()`
+- Akun selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
 - Perhitungan cooldown: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Pengaturan: `src/lib/resilience/settings.ts`
 
-Field penting pada koneksi provider:
+Bidang penting pada koneksi penyedia:
 
 ```ts
 rateLimitedUntil;
@@ -964,44 +952,44 @@ Selama pemilihan akun, koneksi dilewati ketika:
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Cooldown juga bersifat lazy: ketika `rateLimitedUntil` sudah berlalu, koneksi menjadi memenuhi syarat lagi. Setelah penggunaan berhasil, `clearAccountError()` membersihkan `testStatus`, `rateLimitedUntil`, field error, dan `backoffLevel`.
+Cooldownnya juga lambat: ketika `rateLimitedUntil` sudah lewat, koneksi menjadi memenuhi syarat lagi. Jika penggunaan berhasil, `clearAccountError()` menghapus `testStatus`, `rateLimitedUntil`, bidang kesalahan, dan `backoffLevel`.
 
 Perilaku cooldown koneksi default:
 
-- Cooldown dasar OAuth: `5s`.
-- Cooldown dasar API-key: `3s`.
-- `429` pada API-key sebaiknya mengutamakan petunjuk retry dari upstream (`Retry-After`, header reset, atau teks reset yang dapat di-parse) bila tersedia.
-- Kegagalan berulang yang dapat dipulihkan menggunakan exponential backoff:
+- cooldown dasar OAuth : `5s`.
+- Cooldown basis kunci API: `3s`.
+- Kunci API `429` sebaiknya memilih petunjuk percobaan ulang upstream (`Retry-After`, header ulang, atau teks reset yang dapat diurai) bila tersedia.
+- Kegagalan berulang yang dapat dipulihkan menggunakan backoff eksponensial:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Perlindungan anti-thundering-herd mencegah kegagalan konkuren pada koneksi yang sama berulang kali memperpanjang cooldown atau menaikkan `backoffLevel` dua kali.
+Penjaga anti-guntur-kawanan mencegah kegagalan bersamaan pada koneksi yang sama dari perpanjangan cooldown berulang kali atau penambahan `backoffLevel` dua kali lipat.
 
-State terminal bukanlah cooldown. `banned`, `expired` (yang baru menjadi terminal setelah N percobaan ulang terbatas melalui `EXPIRED_RETRY_MAX`), dan `credits_exhausted` dimaksudkan untuk tetap tidak tersedia sampai kredensial/pengaturan berubah atau operator mengatur ulang secara manual. Jangan menimpa state terminal dengan state cooldown sementara.
+Status terminal bukanlah cooldown. `banned`, `expired` (yang menjadi terminal hanya setelah N percobaan ulang terbatas melalui `EXPIRED_RETRY_MAX`), dan `credits_exhausted` dimaksudkan untuk tetap tidak tersedia sampai credentials/settings berubah atau operator mengatur ulangnya. Jangan menimpa status terminal dengan status cooldown sementara.
 
 ### Penguncian Model
 
-**Cakupan**: provider + koneksi + model.
+**Cakupan** : penyedia koneksi + model +.
 
-**Tujuan**: menghindari penonaktifan seluruh koneksi ketika hanya satu model yang tidak tersedia atau dibatasi kuotanya untuk koneksi tersebut.
+**Tujuan** : hindari menonaktifkan seluruh koneksi ketika hanya satu model yang tidak tersedia atau kuota terbatas untuk koneksi tersebut.
 
 Contoh:
 
-- Provider dengan kuota per model yang mengembalikan `429`.
-- Provider lokal yang mengembalikan `404` untuk satu model yang tidak ditemukan.
-- Kegagalan izin mode/model spesifik provider seperti mode Grok tertentu.
+- Penyedia kuota per model mengembalikan `429`.
+- Penyedia lokal mengembalikan `404` untuk satu model yang hilang.
+- Kegagalan izin mode/model khusus penyedia seperti mode Grok yang dipilih.
 
-Penguncian model berada di `open-sse/services/accountFallback.ts` dan memungkinkan koneksi yang sama tetap melayani model lain.
+Penguncian model ada di `open-sse/services/accountFallback.ts` dan memungkinkan koneksi yang sama terus melayani model lain.
 
 ### Panduan Debugging
 
-- Jika semua kunci untuk suatu provider dilewati, periksa state breaker provider maupun `rateLimitedUntil`/`testStatus` setiap koneksi.
-- Jika provider tampak dikeluarkan secara permanen setelah jendela reset, periksa apakah kode membaca `state` mentah alih-alih menggunakan `getStatus()`/`canExecute()`.
-- Jika satu kunci provider gagal tetapi kunci lain seharusnya berfungsi, utamakan cooldown koneksi daripada breaker provider.
-- Jika hanya satu model yang gagal, utamakan penguncian model daripada cooldown koneksi.
-- Jika suatu state seharusnya pulih sendiri, state tersebut harus memiliki timestamp masa depan/timeout reset dan jalur pembacaan yang menyegarkan state yang kedaluwarsa. Status permanen memerlukan perubahan kredensial atau konfigurasi secara manual.
+- Jika semua kunci untuk penyedia dilewati, periksa status pemutus penyedia dan `rateLimitedUntil`/`testStatus` masing-masing koneksi.
+- Jika penyedia muncul dikecualikan secara permanen setelah jendela reset, periksa apakah kode membaca `state` mentah alih-alih menggunakan `getStatus()`/`canExecute()`.
+- Jika salah satu kunci penyedia gagal tetapi yang lain berfungsi, pilih waktu tunggu koneksi daripada pemutus penyedia.
+- Jika hanya satu model yang gagal, pilih penguncian model daripada cooldown koneksi.
+- Jika suatu negara bagian harus memulihkan dirinya sendiri, negara tersebut harus memiliki batas waktu timestamp/reset di masa depan dan jalur baca yang menyegarkan keadaan yang sudah kadaluwarsa. Status permanen memerlukan kredensial manual atau perubahan konfigurasi.
 
 ---
 

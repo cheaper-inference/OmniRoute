@@ -4,24 +4,13 @@
 
 ---
 
-> **事实来源：** `src/lib/memory/` 和 `src/app/api/memory/`
-> **最后更新：** 2026-06-28 — v3.8.40（默认关闭 + int8 量化补齐）
+> **事实来源：** `src/lib/memory/`和`src/app/api/memory/`
 
-OmniRoute 提供以 API 密钥为键（也可以选择使用会话 ID）的持久化对话记忆。系统通过轻量级正则表达式模式匹配，自动从 LLM 响应中提取记忆，并将其作为开头的系统消息注入后续请求（对于拒绝 system 角色的提供者，则作为第一条用户消息注入）。
+OmniRoute提供由API密钥（以及可选的会话 id）作为密钥的持久会话内存。内存通过轻量级正则表达式模式匹配从LLM响应中自动提取，并作为主导系统消息（或拒绝系统角色的提供者的第一条用户消息）注入后续请求中。
 
-> **记忆功能默认关闭（v3.8.30+）。** `DEFAULT_MEMORY_SETTINGS.enabled`
-> 现在为 `false`（`src/lib/memory/settings.ts`）。启用记忆后，最多会将
-> `maxTokens`（约 2k）的检索上下文注入到**每个**聊天请求中，而这些
-> token 会产生费用——对于新安装实例和自行管理上下文的客户端而言，这可能是意料之外的成本。
-> 请在 **设置 → 记忆** 中明确选择启用（启用记忆后，
-> `MemorySkillsTab` 会显示 token 成本警告提示）。
-> 客户端可以通过 `x-omniroute-no-memory`
-> 请求标头（`true`/`1`/`yes`）为单个请求停用此功能——请参阅
-> [API_REFERENCE.md](../reference/API_REFERENCE.md) 中的请求标头表。
-> 无记忆请求会设置 `memoryOwnerId = null`，从而为该请求同时禁用
-> **记忆**和技能注入（`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`）。
+> **内存默认为OFF (v3.8.30 +)。** `DEFAULT_MEMORY_SETTINGS.enabled`现在是`false` (`src/lib/memory/settings.ts`)。启用内存将检索到的上下文最多`maxTokens` (~ 2k) 注入到**每一个**聊天请求，这对于新安装和管理自己上下文的客户端—是一个令人惊讶的成本。明确选择加入**设置→内存**（启用内存时， `MemorySkillsTab`显示令牌成本警告标注）。客户端可以使用`x-omniroute-no-memory`请求头 (`true`/`1`/`yes`) 选择单个请求—请参阅[API_REFERENCE.md](../reference/API_REFERENCE.md)中的请求头表。无内存请求设置`memoryOwnerId = null`，这会禁用**两个都**该请求的内存和技能注入（`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`）。
 
-记忆的作用域是**每个 API 密钥**，而不是每个用户——使用同一 API 密钥进行身份验证的每个请求都会共享同一个记忆池，也可以选择通过 `sessionId` 进一步限定作用域。
+内存是**每个API密钥的范围**，不是每个用户—使用相同API密钥进行身份验证的每个请求都共享相同的内存池，并且可以选择由`sessionId`进一步确定范围。
 
 ## 架构
 
@@ -453,42 +442,36 @@ metadata?}` → 封装 `createMemory()`。仅接受 4 种规范类型：
 
 ## 仪表板（记忆工作室）
 
-`src/app/(dashboard)/dashboard/memory/page.tsx` 现在是一个包含 **3 个选项卡的工作室**：
+`src/app/(dashboard)/dashboard/memory/page.tsx`现在是**3 选项卡工作室**：
 
-### 选项卡：记忆
+### 标签：回忆
 
-- 概念卡片（可折叠的“工作原理”说明）。
-- 实时列表、搜索和分页（300 ms 防抖）。
-- 类型筛选器（`factual` / `episodic` / `procedural` / `semantic` / 全部）。
-- 添加记忆模态框（键、内容、类型）。
-- 行内编辑（铅笔按钮 → `PUT /api/memory/[id]`）。
-- 逐行删除（带确认对话框）。
-- 将当前页面导出为 JSON；通过文件选择器导入 JSON。
-- 统计卡片：`totalEntries`、`tokensUsed`、`hitRate`。
-- “压缩旧记忆”按钮 → `POST /api/memory/summarize`（先试运行并显示
-  候选项数量，然后进行确认）。
-- 由 `GET /api/memory/health` 驱动的绿色/红色健康状态指示点。
+- 概念卡（可折叠的“它是如何工作的”解释器）。
+- 实时列表、搜索和分页（去抖 300 毫秒）。
+- 类型过滤器（`factual` / `episodic` / `procedural` / `semantic` / all）。
+- 添加内存模式（键、内容、类型）。
+- 内联编辑（铅笔按钮→ `PUT /api/memory/[id]`）。
+- 删除每行（带有确认对话框）。
+- JSON导出当前页面； JSON通过文件选择器导入。
+- 统计卡： `totalEntries`、 `tokensUsed`、 `hitRate`。
+- “Compact old”按钮→ `POST /api/memory/summarize` （空运行首先显示候选数，然后确认）。
+- 由`GET /api/memory/health`驱动的green/red健康点。
 
-### 选项卡：演练场
+### 标签：游乐场
 
-- 查询输入框 + 策略选择器（精确 / 语义 / 混合）+ 令牌预算。
-- “模拟” → `POST /api/memory/retrieve-preview` — 显示排序后的结果，包括
-  `score`、`tier`、`tokens`、`vecScore`、`ftsScore`。
-- 解析面板，用于显示所使用的嵌入来源 / 向量存储，以及是否发生了回退。
+- 查询输入+策略选择器（精确/语义/混合） +代币预算。
+- “模拟” → `POST /api/memory/retrieve-preview` —显示`score`、 `tier`、 `tokens`、 `vecScore`、 `ftsScore`的排名结果。
+- 分辨率面板显示使用了哪个嵌入源/矢量存储以及是否发生回退。
 
-### 选项卡：引擎
+### 选项卡：发动机
 
-- 引擎状态面板（关键字 FTS5 标签、嵌入标签、向量存储标签、
-  Qdrant 健康状态标签、重排序标签）。
-- “立即重新索引”按钮 → `POST /api/memory/reindex`。
-- 嵌入来源选择器（自动 / 远程 / 静态 / transformers + 切换开关）。
-- Qdrant 配置卡片（启用开关、主机/端口/集合/密钥、测试连接、
-  语义搜索测试、清理）。
-- 重排序配置卡片（启用开关、提供者/模型选择器）。
+- 引擎状态面板（关键字FTS5芯片、嵌入芯片、向量存储芯片、 Qdrant健康芯片、重新排名芯片）。
+- “立即重新索引”按钮→ `POST /api/memory/reindex`。
+- 嵌入源选择器（自动/远程/静态/变压器+切换）。
+- Qdrant配置卡（启用切换、 host/port/collection/key、测试连接、语义搜索测试、清理）。
+- 重新排列配置卡（启用切换、 provider/model选择器）。
 
-记忆和 Qdrant 设置也位于
-`/dashboard/settings → 记忆与技能`（`MemorySkillsTab.tsx`）下，
-作为旧版/全局设置界面。
+内存和Qdrant设置也位于legacy/global设置界面的`/dashboard/settings → Memory & Skills` (`MemorySkillsTab.tsx`) 下。
 
 ## 缓存
 

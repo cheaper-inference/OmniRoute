@@ -4,13 +4,7 @@
 
 ---
 
-> **منبع حقیقت:** `open-sse/utils/errorSanitization.ts`،
-> `open-sse/utils/errorPathRedaction.ts` و سازندههای عمومی در `open-sse/utils/error.ts`
-> **آزمونها:** `tests/unit/error-message-sanitization.test.ts`،
-> `tests/unit/error-public-boundaries-hardening.test.ts`
-> **آخرین بهروزرسانی:** 2026-09-02 — v3.8.51
-> **مخاطبان:** هر مهندسی که با پاسخهای خطا سروکار دارد (مسیرهای HTTP، جریانهای SSE، اجراکنندهها، کنترلکنندههای MCP).
-> **وضعیت:** برای هر مسیر کدی که پیام خطا را به کلاینت بازمیگرداند، **الزامی** است.
+> **منبع حقیقت:** `open-sse/utils/errorSanitization.ts`، `open-sse/utils/errorPathRedaction.ts`، و سازندگان عمومی در `open-sse/utils/error.ts`** تست ها:** `tests/unit/error-message-sanitization.test.ts`, `tests/unit/error-public-boundaries-hardening.test.ts`** مخاطب:** هر مهندسی که پاسخهای خطا را لمس کند (مسیرهای HTTP ، جریانهای SSE ، مجریها، کنترلکنندههای MCP ).** وضعیت:****MANDATORY** برای هر مسیر کدی که پیغام خطا را به مشتری برمی گرداند.
 
 ## دلیل وجود این سند
 

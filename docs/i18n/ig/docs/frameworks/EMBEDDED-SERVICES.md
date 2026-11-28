@@ -4,7 +4,7 @@
 
 ---
 
-> **Ụdị:** v3.8.44** Emelitere ikpeazụ:** 2026-10-28** Ndị na-ege ntị:** Ndị injinia na-agbakwunye, na-edobe ma ọ bụ na-emezigharị ọrụ agbakwunyere (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Ụdị:** v3.8.44** Ndị na-ege ntị:** Ndị injinia na-agbakwunye, na-edobe ma ọ bụ na-emezigharị ọrụ agbakwunyere (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Ọrụ agbakwunyere bụ ngwa ọrụ akụkụ ụgbọ ala arụnyere na mpaghara nke OmniRoute na-etinye, na-ahụ maka ma na-ekpughere dị ka ebumnuche mbugharị klaasị mbụ. N'adịghị ka ndị na-eweta mpụga (nke a na-enweta na ịntanetị site na igodo API ), ọrụ agbakwunyere na-arụ n'otu igwe dị ka OmniRoute ma na-ekwurịta okwu na loopback.
 

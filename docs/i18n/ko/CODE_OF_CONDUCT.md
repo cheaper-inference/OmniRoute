@@ -42,15 +42,13 @@
 본 행동 강령은 모든 커뮤니티 공간에 적용되며, 개인이 공공장소에서 공식적으로 커뮤니티를 대표하는 경우에도 적용됩니다.
 커뮤니티를 대표하는 사례로는 공식 이메일 주소 사용, 공식 소셜 미디어 계정을 통한 게시물 작성, 온라인 또는 오프라인 행사에서 임명된 대표자로 활동하는 경우 등이 있습니다.
 
-## Enforcement
+## 시행
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-.
-All complaints will be reviewed and investigated promptly and fairly.
+욕설, 희롱 또는 기타 용납할 수 없는 행위의 사례는 개인 보안 자문을 열어 집행을 담당하는 커뮤니티 리더에게 보고될 수 있습니다.
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+또는 diegosouza.pw@outlook.com으로 관리자에게 이메일을 보내세요. 보안에 민감한 사건의 경우 [`SECURITY.md`](SECURITY.md) 참조하세요. 모든 불만사항은 신속하고 공정하게 검토되고 조사됩니다.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+모든 지역 사회 지도자는 사건 신고자의 개인 정보 보호와 보안을 존중할 의무가 있습니다.
 
 ## 집행 지침
 

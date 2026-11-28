@@ -4,15 +4,11 @@
 
 ---
 
-> **Sumber acuan:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Terakhir diperbarui:** 2026-06-28 — v3.8.40
+> **Sumber kebenaran:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-OmniRoute dapat mengirim webhook HTTP pada peristiwa platform. Gunakan webhook tersebut untuk berintegrasi dengan
-Slack, PagerDuty, Datadog, layanan peringatan internal, atau penerima HTTP apa pun.
+OmniRoute dapat mengaktifkan webhook HTTP pada acara platform. Gunakan mereka untuk berintegrasi dengan Slack, PagerDuty, Datadog, layanan peringatan internal, atau penerima HTTP apa pun.
 
-Dispatcher menandatangani setiap pengiriman dengan HMAC-SHA256, mencoba kembali saat terjadi
-kegagalan sementara, melacak kesehatan pengiriman per webhook, dan secara otomatis menonaktifkan endpoint yang
-terus mengalami kegagalan.
+Petugas operator menandatangani setiap pengiriman dengan HMAC-SHA256, mencoba kembali kegagalan sementara, melacak kesehatan pengiriman per webhook, dan menonaktifkan secara otomatis titik akhir yang terus gagal.
 
 ## Acara yang Didukung
 

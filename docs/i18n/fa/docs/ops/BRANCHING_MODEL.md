@@ -48,7 +48,7 @@ flowchart LR
 قبل از اینکه فرض کنید شاخه مورد نظر شما قابل ادغام است، انجماد باز را بررسی کنید:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 مکانیک ادغام (مالک برچسب `queue` → Mergify) در [MERGE_TRAIN.md](./MERGE_TRAIN.md) مستند شده است.

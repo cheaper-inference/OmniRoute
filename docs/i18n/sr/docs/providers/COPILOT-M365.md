@@ -168,9 +168,9 @@ OmniRoute скенира HAR за Цхатхуб WebSocket URL, издваја `
 
 ## Референце
 
-- Проблем: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Дискусија: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- Извор: `src/shared/constants/providers/web-cookie.ts` (дефиниција добављача)
-- Увоз HAR-а: `src/shared/utils/m365HarImport.ts`
+- Издање: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Дискусија: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Извор: `src/shared/constants/providers/web-cookie.ts` (дефиниција провајдера)
+- HAR импорт: `src/shared/utils/m365HarImport.ts`
 - Поља акредитива: `src/shared/providers/webSessionCredentials.ts`
-- Модални прозор нивоа претплате: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- Модални ниво: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

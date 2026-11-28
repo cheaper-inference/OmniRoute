@@ -236,19 +236,19 @@ Tukee** 22 reititysstrategiaa** (katso `src/shared/constants/routingStrategies.t
 | `context-relay`     | Siirrä konteksti eri kohteiden välillä                                                                                 |
 | `fill-first`        | Täytä kiintiö ennen kuin siirryt seuraavaan                                                                            |
 | `p2c`               | Kahden valinnan voima                                                                                                  |
-| `random`            | Tasainen satunnainen                                                                                                   |
-| `least-used`        | Valitse se, jolla on viime aikoina vähiten käytetty                                                                    |
-| `cost-optimized`    | Halvin terve kohde ensin                                                                                               |
-| `reset-aware`       | Tietoinen palveluntarjoajan nollausikkunoista                                                                          |
-| `reset-window`      | Nollaa ikkunapohjainen reititys                                                                                        |
-| `expiry-first`      | Käytä tili, jonka kiintiö vanhenee käyttämättä ensin                                                                   |
+| `random`            | Tuore sekoitus pyynnöstä                                                                                               |
+| `least-used`        | Valitse se, jolla on vähiten tallennettuja pyyntöjä                                                                    |
+| `cost-optimized`    | Alhaisin luettelon syöttöhinta ensin                                                                                   |
+| `reset-aware`       | Jäljellä oleva kiintiö + nollaa kiireellisyys                                                                          |
+| `reset-window`      | Kiintiöikkuna, joka nollautuu ensin                                                                                    |
+| `expiry-first`      | Käytä tili, jonka kiintiö vanhentuisi käyttämättä ensin                                                                |
 | `headroom`          | Suurin osa jäljellä olevasta kiintiötilasta ensin                                                                      |
-| `quota-weighted`    | Ohita käytetyt tilit ja nosta sitten jäljellä oleva kiintiö ÷ lennon aikana                                            |
-| `strict-random`     | Todella yhtenäinen (ei laatupainotusta)                                                                                |
+| `quota-weighted`    | Ohita loppuun käytetyt tilit ja nosta sitten jäljellä oleva kiintiö ÷ lennon aikana                                    |
+| `strict-random`     | Sekoitettu kansi: jokainen kohde kerran ennen toistoja                                                                 |
 | `auto`              | Käytä 16-tekijän pisteytystä (`autoCombo/`)                                                                            |
 | `lkgp`              | Viimeinen tunnettu hyvä palveluntarjoaja ensin                                                                         |
-| `context-optimized` | Paras pitkille asiakirjoille                                                                                           |
-| `cache-optimized`   | Kiinnitä jokainen uudelleenkäytettävä kehotteen etuliite samalle tilille (kehotteen välimuistin osumat)                |
+| `context-optimized` | Suurin tunnettu konteksti-ikkuna ensin                                                                                 |
+| `cache-optimized`   | Valitse tili, joka todennäköisesti sisältää kehotteen etuliitettä välimuistissa                                        |
 | `fusion`            | Tuuleta paneeliin rinnakkain ja syntetisoi sitten tuomarin kautta (`fusion.ts`)                                        |
 | `pipeline`          | Ketjun askeleet — kunkin kohteen tulos syöttää seuraavan                                                               |
 | `jev`               | Osallistuminen: TypeSafe Jev myöntää, mitkä paremmuusjärjestykseen sijoitetut merkinnät suoritetaan; muuten tilauksesi |
@@ -270,7 +270,7 @@ export class DefaultExecutor extends BaseExecutor {
 }
 ```
 
-Palveluntarjoajakohtainen toiminta (todennusotsikot, URL, versiootsikot) määritetään toimittajarekisterin kautta, ei erillisten suoritusluokkien kautta.
+Palveluntarjoajakohtainen toiminta (todennusotsikot, perus- URL, versiootsikot) määritetään toimittajarekisterin kautta, ei erillisten suoritusluokkien kautta.
 
 ````
 

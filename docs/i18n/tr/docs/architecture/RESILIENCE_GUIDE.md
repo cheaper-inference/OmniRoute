@@ -12,63 +12,53 @@ OmniRoute üç farklı ancak birbiriyle ilişkili esneklik mekanizması vardır.
 
 > **Esneklik geçişleri için Env-vs-dashboard önceliği.** — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — ortamından tohumlanan isteğe bağlı esneklik geçişleri yalnızca _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) sağlar. `resilienceSettings` bir boole varlığını sürdürdü (Kontrol Paneli →** Ayarlar → Esneklik** / `PATCH /api/resilience`, `key_value` içinde saklanır) env değerini kazanır: normalleştirme (`toBoolean`, `src/lib/resilience/settings/normalize.ts`), mevcut olduğu sürece depolanan boole değerini korur. Kontrol panelinin `false` zaten kaydettiği bir dağıtımda böyle bir env var'ı `true` olarak ayarlamak hiçbir şeyi değiştirmez — geçişi çevirir** Ayarlar → Esneklik** (veya saklanan alanı temizleyin).
 
-## 1. Sağlayıcı Devre Kesici (Provider Circuit Breaker)
+## 1. Sağlayıcı Devre Kesici
 
-**Kapsam:** sağlayıcının tamamı (ör. `glm`, `openai`, `anthropic`).
+**Kapsam:** sağlayıcının tamamı (örneğin, `glm`, `openai`, `anthropic`).
 
-**Amaç:** yukarı akış/servis düzeyinde tekrar tekrar başarısız olan bir sağlayıcıya trafik göndermeyi durdurmak.
+**Amaç:** upstream/service düzeyinde sürekli olarak başarısız olan bir sağlayıcıya trafik göndermeyi durdurun.
 
 **Uygulama:**
 
 - Çekirdek sınıf: `src/shared/utils/circuitBreaker.ts`
-- Bağlantılar: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Durum API'si: `GET /api/monitoring/health`
-- Sıfırlama API'si: `POST /api/resilience/reset`
+- Kablolama: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Durum API: `GET /api/monitoring/health`
+- API sıfırla: `POST /api/resilience/reset`
 - Sarmalayıcılar: `open-sse/services/accountFallback.ts`
 - DB tablosu: `domain_circuit_breakers`
 
-**Durumlar:**
+**Devletler:**
 
-- `CLOSED` — normal trafiğe izin verilir
-- `DEGRADED` — trafiğe hâlâ izin verilir, ancak artan sağlayıcı hataları izlenir; yeterli sayıda başarı durumunda, geçerli bir bağlantı testinde veya son hata türü için en uzun `OPEN` bekleme süresi (o türün `cooldownByKind` değeri, yoksa `resetTimeout`, × `maxBackoffMultiplier`, en az bir cooldown) boyunca yeni bir hata oluşmadan geçmesi durumunda `CLOSED` durumuna döner
-- `OPEN` — sağlayıcı geçici olarak engellenir; combo yönlendirme onu atlar
-- `HALF_OPEN` — sıfırlama zaman aşımı doldu; deneme isteğine izin verilir
+- `CLOSED` — normal trafiğe izin veriliyor
+- `DEGRADED` — trafiğine hâlâ izin veriliyor ancak yüksek sağlayıcı hataları izleniyor; Yeterli başarı elde edildiğinde, geçerli bir bağlantı testinde veya son hata türü için en uzun `OPEN` tutma süresinden sonra ( `cooldownByKind` değeri, aksi takdirde `resetTimeout`, × `maxBackoffMultiplier`, en az bir bekleme süresi) yeni bir hata olmadan `CLOSED` geri döner
+- `OPEN` — sağlayıcısı geçici olarak engellendi; birleşik yönlendirme onu atlar
+- `HALF_OPEN` — sıfırlama zaman aşımı geçti; araştırma isteğine izin verildi
 
-**Yapılandırılabilir varsayılanlar (`open-sse/config/constants.ts`, Dashboard → Settings → Resilience altında sunulur):**
+**Yapılandırılabilir varsayılanlar (`open-sse/config/constants.ts`, Kontrol Paneli → Ayarları → Dayanıklılık'ta gösterilir):**
 
-| Sınıf   | Degraded eşiği | Açılma eşiği | Sıfırlama zaman aşımı |
-| ------- | -------------- | ------------ | --------------------- |
-| OAuth   | 5 hata         | 8 hata       | 60sn                  |
-| API-key | 7 hata         | 12 hata      | 30sn                  |
-| Local   | türetilmiş     | 2 hata       | 15sn                  |
+| Sınıf        | Bozulma tarihi: | Açılış saati:   | Zaman aşımını sıfırla |
+| ------------ | --------------- | --------------- | --------------------- |
+| OAuth        | 5 başarısızlık  | 8 başarısızlık  | 60'lar                |
+| API anahtarı | 7 başarısızlık  | 12 başarısızlık | 30'lar                |
 
-`degradationThreshold`, sağlayıcının ne zaman `DEGRADED` durumuna gireceğini; `failureThreshold` ise ne zaman açılacağını ve atlanacağını kontrol eder. Yerel (Local) sağlayıcı profilleri henüz Resilience ayarları sayfasında sunulmamaktadır.
+`degradationThreshold` bir sağlayıcının `DEGRADED` ne zaman gireceğini kontrol eder; `failureThreshold` ne zaman açıldığını ve atlandığını kontrol eder. `PROVIDER_PROFILES.local` (2 hata / 15s) `open-sse/config/constants.ts` tanımlanmıştır ancak** henüz kablolu değil** : `getProviderCategory()` yalnızca `oauth` veya `apikey` değerini döndürür, dolayısıyla yerel sağlayıcılar OAuth veya API anahtarı profilini kullanır.
 
-**Tetikleme kodları:** yalnızca sağlayıcı düzeyindeki durumlar `[408, 500, 502, 503, 504]`. Hesap düzeyindeki hatalar için tetikleme YAPMAYIN (çoğu 401/403/429 — bunlar cooldown veya lockout kapsamına girer).
+**Yolculuk kodları:** yalnızca sağlayıcı düzeyindeki durumlar `[408, 500, 502, 503, 504]`. Hesap düzeyindeki hatalar için NOT gezisi yapın (çoğu 401/403/429 — bekleme süresine veya kilitlemeye aittir).
 
-**Tembel kurtarma (lazy recovery):** `OPEN` süresi dolduğunda `getStatus()`, `canExecute()`, `getRetryAfterMs()` durumu `HALF_OPEN` olarak yeniler. Aynı okumalar (ve bir sonraki hata), bayatlamış bir `DEGRADED` durumunu `CLOSED` durumuna geri düşürür. Arka plan zamanlayıcısı gerekmez.
+**Tembel iyileşme:** `OPEN` süresi dolduğunda, `getStatus()`, `canExecute()`, `getRetryAfterMs()` durumunu `HALF_OPEN` olarak yenileyin. Aynı okumalar (ve bir sonraki başarısızlık), eski bir `DEGRADED` `CLOSED` geri döndürür. Arka plan zamanlayıcısına gerek yok.
 
 ---
 
-### İsteğe bağlı genel Sağlayıcı Cooldown'u (pencere kapısı)
+### Küresel Sağlayıcı Bekleme Süresine kaydolun (pencere kapısı)
 
-Dördüncü, **isteğe bağlı** bir katman (`PROVIDER_COOLDOWN_ENABLED`, varsayılan **kapalı**),
-başarısız olan sağlayıcıların istekler arası hafızasını
-`open-sse/services/providerCooldownTracker.ts` içinde tutar; combo hedef
-çözümlemesi tarafından kullanılarak, art arda gelen combo isteklerinin az önce
-başarısız olmuş bir sağlayıcıyı tekrar tekrar denemesi engellenir. Sağlayıcı düzeyindeki
-kayıtlar, `PROVIDER_PROFILES` pencere kapısına uyar:
+Dördüncüsü,** katılım** katman (`PROVIDER_COOLDOWN_ENABLED`, varsayılan** kapalı** ), başarısız sağlayıcıların çapraz istek hafızasını `open-sse/services/providerCooldownTracker.ts` tutar ve birleşik hedef çözümlemesi tarafından danışılır, böylece ardışık birleşik istekler, başarısız olan bir sağlayıcının yeniden yürümesini durdurur. Sağlayıcı düzeyindeki girişler `PROVIDER_PROFILES` pencere kapısını dikkate alır:
 
-| Profil  | tetikleme eşiği (`providerFailureThreshold`) | pencere (`providerFailureWindowMs`) | cooldown süresi (`providerCooldownMs`) |
-| ------- | -------------------------------------------: | ----------------------------------: | -------------------------------------: |
-| OAuth   |                                         `10` |                             `15min` |                                 `5min` |
-| API key |                                         `15` |                             `30min` |                                `10min` |
+| Profil       | (`providerFailureThreshold`) sonrasındaki yolculuklar | içeride (`providerFailureWindowMs`) | (`providerCooldownMs`) için soğur |
+| ------------ | ----------------------------------------------------: | ----------------------------------: | --------------------------------: |
+| OAuth        |                                                  `10` |                             `15min` |                            `5min` |
+| API anahtarı |                                                  `15` |                             `30min` |                           `10min` |
 
-Eşiğin altında sağlayıcı cooldown'da **sayılmaz**; bir başarı pencereyi temizler.
-Bağlantı düzeyindeki kayıtlar (`provider:connectionId`) bunun yerine üstel
-`minRetryCooldownMs → maxRetryCooldownMs` geri çekilmesini kullanmaya devam eder. Geçersiz kılmalar:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Regresyon koruması: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Eşiğin altında sağlayıcı** Olumsuz** soğutma olarak kabul edilir; bir başarı pencereyi temizler. Bağlantı düzeyindeki girişler (`provider:connectionId`), bunun yerine üstel `minRetryCooldownMs → maxRetryCooldownMs` gerilemesini korur. Geçersiz kılmalar: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regresyon koruması: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Bağlantı Bekleme Süresi
 
@@ -716,6 +706,21 @@ toplamda en fazla 50 kural olabilir.
 
 ---
 
+## OmniRoute kendisine ulaşılamadığında
+
+Sağlayıcı devre kesici, bağlantı bekleme süresi ve model kilitleme işlemlerinin tümü ağ geçidinin içinde çalışır. İstemci ağ geçidine ulaşamazsa bağlantı hatası alır. OmniRoute bu başarısızlığa müdahale edemez. İstemci yeniden deneyip deneymeyeceğine ve hangi mesajın gösterileceğine karar verir.
+
+OmniRoute şu anda istemci tarafında bir geri dönüş sağlamıyor ve bunun için herhangi bir politika tanımlamıyor. İstemcide veya ağ geçidinin önünde herhangi bir alternatif rota yapılandırın.
+
+- `GET /api/health` kimlik doğrulaması olmadan canlılığı kontrol eder.
+- `GET /api/health/ping` veritabanının yanıt verip vermediği de dahil olmak üzere hazır olup olmadığını kontrol eder.
+- `GET /api/monitoring/health` kimliği doğrulanmış arayanlara daha derin bir sağlık genel bakışı sunar.
+- `omniroute launch <tool>` istemciyi başlatmadan önce `/api/monitoring/health` araştırır. Yerel bir ağ geçidini otomatik olarak başlatabilir. `--no-start` ile ulaşılamayan bir ağ geçidi `GatewayUnreachable` ve `69` çıkış koduyla sonuçlanır.
+
+Bir istemcinin OmniRoute ile olan bağlantısını kesmek için [İstemci yapılandırmasını geri alma seçeneğini](../guides/UNINSTALL.md#revert-client-configuration) izleyin.
+
+---
+
 ## Hata Ayıklama
 
 - Weighted combo `503 all_targets_cooling_down` yanıtı veriyor (`Retry-After` ayarlanmış, `diagnostics.excluded` her hedefi `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable` ile listeliyor) → havuz yapılandırılmış ve bağlı, her hedef yalnızca bir dayanıklılık zamanlayıcısı tarafından hariç tutulmuş demektir; `[COMBO] Weighted selection: every target excluded before dispatch — …` uyarısı nedenleri ve kalan saniyeleri belirtir. Aynı combo'dan gelen bir `404 no_executable_targets` ise hiçbir dayanıklılık zamanlayıcısının devrede olmadığı anlamına gelir (çalıştırılacak bir şey yok ya da her hesap kullanılabilirlik yoklamasından kalmıştır). `targetResolution.ts` içinde toplanan hariç tutmalardan `open-sse/services/combo/pinRecovery.ts` içinde oluşturulmuştur.
@@ -727,95 +732,65 @@ toplamda en fazla 50 kural olabilir.
 
 ---
 
-## Çalışma zamanı durumu — ajan hızlı başvurusu
+## Çalışma zamanı durumu — aracısı hızlı referansı
 
-> Ajan kılavuzunun 40k bağlam bütçesinin altında kalması için `AGENTS.md` → "Resilience Runtime State"
-> bölümünden olduğu gibi taşındı (PR #12743). Bu, yukarıdaki bölümlerin
-> ajanlara yönelik yoğunlaştırılmış görünümüdür; numaralı bölümler tam referans
-> olmaya devam eder.
+> Temsilci kılavuzunun 40 bin bağlam bütçesinin altında kalması için `AGENTS.md` → "Resilience Runtime State" (PR #12743) kelimesi kelimesine taşındı. Yukarıdaki bölümlerin kısaltılmış, temsilciye bakan görünümüdür; numaralandırılmış bölümler tam referans olarak kalır.
 
-OmniRoute'ta birbiriyle ilişkili ancak farklı üç geçici hata mekanizması vardır.
-Yönlendirme davranışında hata ayıklarken kapsamlarını ayrı tutun. Bir bakışta
-harita için
-[3 katmanlı dayanıklılık diyagramına](../diagrams/exported/resilience-3layers.svg)
-(kaynak: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-bakın.
+OmniRoute birbiriyle ilişkili fakat farklı üç geçici arıza mekanizması vardır. Yönlendirme davranışında hata ayıklarken kapsamlarını ayrı tutun. Bir bakışta harita için [3 katmanlı dayanıklılık diyagramına](../diagrams/exported/resilience-3layers.svg) (kaynak: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) bakın.
 
 ### Sağlayıcı Devre Kesici
 
-**Kapsam**: sağlayıcının tamamı, örn. `glm`, `openai`, `anthropic`.
+**Kapsam** : sağlayıcının tamamı, örneğin `glm`, `openai`, `anthropic`.
 
-**Amaç**: yukarı akış/hizmet düzeyinde tekrar tekrar başarısız olan bir sağlayıcıya
-trafik göndermeyi durdurmak; böylece sağlıksız tek bir sağlayıcı her isteği
-yavaşlatmaz.
+**Amaç** : upstream/service düzeyinde sürekli olarak başarısız olan bir sağlayıcıya trafik göndermeyi durdurun, böylece sağlıksız bir sağlayıcı her isteği yavaşlatmaz.
 
-**Uygulama**:
+**Uygulama** :
 
 - Çekirdek sınıf: `src/shared/utils/circuitBreaker.ts`
-- Sohbet kapısı/yürütme bağlantısı: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Çalışma zamanı durum API'si: `src/app/api/monitoring/health/route.ts`
+- Sohbet gate/execution kablolaması: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Çalışma zamanı durumu API: `src/app/api/monitoring/health/route.ts`
 - Paylaşılan sarmalayıcılar: `open-sse/services/accountFallback.ts`
 - Kalıcı durum tablosu: `domain_circuit_breakers`
 
-**Durumlar** (4 — `src/shared/utils/circuitBreaker.ts`):
+**Devletler** (4 — `src/shared/utils/circuitBreaker.ts`):
 
 - `CLOSED`: normal trafiğe izin verilir.
-- `DEGRADED`: erken uyarı bandı — hatalar düşürülme eşiğini aştı ancak henüz kesici
-  eşiğini aşmadı; trafik akmaya devam eder, paneller uyarıyı gösterir. Geçerli bir bağlantı
-  testi veya yeni hata olmayan sakin bir pencere, durumu `CLOSED`'a döndürür
-  (pencere `docs/architecture/RESILIENCE_GUIDE.md` dosyasında açıklanmıştır).
-- `OPEN`: sağlayıcı geçici olarak engellenmiştir; çağıranlar bir provider-circuit-open yanıtı
-  alır ya da combo yönlendirme başka bir hedefe atlar.
-- `HALF_OPEN`: sıfırlama zaman aşımı dolmuştur; bir yoklama isteğine izin verilir. Başarı
-  kesiciyi kapatır, başarısızlık onu tekrar açar.
+- `DEGRADED`: erken uyarı bandı — arızaları bozulma eşiğini aştı ancak henüz kesici eşiğini geçmedi; trafik hala akmaya devam ediyor, kontrol panelleri uyarıyı gösteriyor. Geçerli bir bağlantı testi veya yeni bir arızanın olmadığı sessiz bir pencere onu `CLOSED` döndürür (`docs/architecture/RESILIENCE_GUIDE.md` pencere vardır).
+- `OPEN`: sağlayıcı geçici olarak engellendi; arayanlar, sağlayıcı devre açık yanıtı alır veya başka bir hedefe birleşik yönlendirme atlar.
+- `HALF_OPEN`: sıfırlama zaman aşımı doldu; bir araştırma isteğine izin ver. Başarı kesiciyi kapatır, başarısızlık ise tekrar açar.
 
-**Varsayılanlar** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`,
-`src/lib/resilience/settings.ts` içindeki `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` üzerinden
-tüketilir → `src/sse/handlers/chatHelpers.ts` içindeki `getCircuitBreaker(provider, …)`). Tüm sağlayıcı
-kesicisi `circuitBreakerThreshold` / `circuitBreakerReset` üzerinde çalışır:
+**Defaults** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, consumed via `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). The whole-provider breaker runs on `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| Profil  | düşürülme eşiği | açılma eşiği (`circuitBreakerThreshold`) | sıfırlama (`circuitBreakerReset`) |
-| ------- | --------------: | ---------------------------------------: | --------------------------------: |
-| OAuth   |             `5` |                                      `8` |                             `60s` |
-| API key |             `7` |                                     `12` |                             `30s` |
-| Local   |    (türetilmiş) |                                      `2` |                             `15s` |
+| Profil       | bozulur | (`circuitBreakerThreshold`) saatinde açılıyor | sıfırlama (`circuitBreakerReset`) |
+| ------------ | ------: | --------------------------------------------: | --------------------------------: |
+| OAuth        |     `5` |                                           `8` |                             `60s` |
+| API anahtarı |     `7` |                                          `12` |                             `30s` |
 
-`PROVIDER_PROFILES` ayrıca `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 dk) ve `providerCooldownMs` (5/10/1 dk) tanımlar: bunlar,
-**isteğe bağlı genel Provider Cooldown'un pencere kapısını** besler
-(`PROVIDER_COOLDOWN_ENABLED`, varsayılan kapalı) — `open-sse/services/providerCooldownTracker.ts`
-içindeki sağlayıcı düzeyindeki bir girdi, yalnızca `providerFailureWindowMs` içinde
-`providerFailureThreshold` kadar hata sonrasında soğuma sayılır ve ardından
-`providerCooldownMs` boyunca soğur. Bunlar canlı kesicinin eşikleri DEĞİLDİR — kesici
-davranışı bekleyerek bunları ayarlamayın. Her varsayılan, `OMNIROUTE_PROVIDER_BREAKER_*` ve
-`OMNIROUTE_CIRCUIT_BREAKER_*` ortam değişkenleri aracılığıyla geçersiz kılınabilir;
-çalışma zamanına uygun referans tablosu `docs/architecture/RESILIENCE_GUIDE.md` dosyasında bulunur.
+`PROVIDER_PROFILES` bir `local` profili (`2` Failures / `15s`) da mevcuttur, ancak kesiciye bağlı değildir: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) yalnızca `oauth` veya `apikey` kabul eder ve `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) bu ikisinden birini döndürür (kayıtsız sağlayıcılar `apikey` alır).
 
-Sağlayıcı kesicisini yalnızca sağlayıcı düzeyindeki hata durumları tetiklemelidir:
+`PROVIDER_PROFILES` ayrıca `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) ve `providerCooldownMs` (5/10/1 min) — OAuth/API key/local de tanımlar; burada yerel değerler yukarıdakiyle aynı nedenden dolayı atıldır: bunlar** isteğe bağlı küresel Sağlayıcı Bekleme Süresinin pencere kapısı** (`PROVIDER_COOLDOWN_ENABLED`, varsayılan olarak kapalı) — `open-sse/services/providerCooldownTracker.ts` sağlayıcı düzeyindeki bir giriş, yalnızca `providerFailureWindowMs` içindeki `providerFailureThreshold` arızalarından sonra soğutma olarak sayılır ve ardından `providerCooldownMs` için soğutulur. Bunlar canlı kesicinin eşikleri NOT — kesici davranışını bekleyerek onları ayarlamayın. Her varsayılan `OMNIROUTE_PROVIDER_BREAKER_*` ve `OMNIROUTE_CIRCUIT_BREAKER_*` env değişkenleri aracılığıyla geçersiz kılınabilir; çalışma zamanı açısından doğru referans tablosu `docs/architecture/RESILIENCE_GUIDE.md` bulunur.
+
+Yalnızca sağlayıcı düzeyindeki arıza durumları sağlayıcı kesiciyi tetiklemelidir:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Çoğu `401`, `403` veya `429` durumu gibi normal hesap/anahtar/model hataları için
-tüm sağlayıcı kesicisini tetiklemeyin. Bunlar genellikle bağlantı bekleme süresine (connection
-cooldown) veya model kilidine (model lockout) aittir. Genel bir API anahtarı sağlayıcısı
-`403` hatası, nihai bir sağlayıcı/hesap hatası olarak sınıflandırılmadıkça kurtarılabilir
-olmalıdır.
+Çoğu `401`, `403` veya `429` durumu gibi normal account/key/model hataları için tüm sağlayıcı kesiciyi açmayın. Bunlar genellikle bağlantı bekleme süresine veya model kilitlemeye aittir. Genel bir API anahtarı sağlayıcısı `403` terminal provider/account hatası olarak sınıflandırılmadığı sürece kurtarılabilir olmalıdır.
 
-Kesici, arka plan zamanlayıcısı yerine tembel (lazy) kurtarma kullanır. `OPEN` süresi dolduğunda, `getStatus()`, `canExecute()` ve `getRetryAfterMs()` gibi okumalar durumu `HALF_OPEN` olarak yeniler; böylece panolar ve combo aday oluşturucuları, süresi dolmuş bir sağlayıcıyı sonsuza kadar hariç tutmaya devam etmez.
+Kesici, arka plan zamanlayıcısını değil yavaş kurtarmayı kullanır. `OPEN` süresi dolduğunda `getStatus()`, `canExecute()` ve `getRetryAfterMs()` gibi okumalar durumu `HALF_OPEN` olarak yeniler, böylece kontrol panelleri ve birleşik aday oluşturucular süresi dolmuş bir sağlayıcıyı sonsuza kadar hariç tutmaz.
 
-### Bağlantı Soğuma Süresi
+### Bağlantı Bekleme Süresi
 
-**Kapsam**: tek bir sağlayıcı bağlantısı/hesabı/anahtarı.
+**Kapsam** : tek sağlayıcı connection/account/key.
 
-**Amaç**: aynı sağlayıcının diğer bağlantılarının istekleri sunmaya devam etmesine izin verirken, hatalı tek bir anahtarı/hesabı geçici olarak atlamak.
+**Amaç** : aynı sağlayıcının diğer bağlantılarının istekleri sunmaya devam etmesine izin verirken hatalı bir key/account geçici olarak atlayın.
 
-**Uygulama**:
+**Uygulama** :
 
-- Yazma/güncelleme yolu: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Hesap seçimi/filtreleme: `src/sse/services/auth.ts::getProviderCredentials...`
-- Soğuma süresi hesaplama: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Write/update yolu: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Hesap selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Bekleme süresi hesaplaması: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Ayarlar: `src/lib/resilience/settings.ts`
 
 Sağlayıcı bağlantılarındaki önemli alanlar:
@@ -829,50 +804,50 @@ errorCode;
 backoffLevel;
 ```
 
-Hesap seçimi sırasında, şu koşul sağlandığı sürece bir bağlantı atlanır:
+Hesap seçimi sırasında aşağıdaki durumlarda bir bağlantı atlanır:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Soğuma süreleri de tembeldir: `rateLimitedUntil` geçmişte kaldığında, bağlantı yeniden uygun hale gelir. Başarılı kullanımda `clearAccountError()`, `testStatus`, `rateLimitedUntil`, hata alanlarını ve `backoffLevel` değerini temizler.
+Bekleme süreleri de yavaştır: `rateLimitedUntil` geçmişte kaldığında bağlantı tekrar uygun hale gelir. Başarılı kullanımda `clearAccountError()`, `testStatus`, `rateLimitedUntil`, hata alanlarını ve `backoffLevel` temizler.
 
-Varsayılan bağlantı soğuma süresi davranışı:
+Varsayılan bağlantı bekleme süresi davranışı:
 
-- OAuth temel soğuma süresi: `5s`.
-- API anahtarı temel soğuma süresi: `3s`.
-- API anahtarı `429` durumunda, mevcut olduğunda yukarı akış (upstream) yeniden deneme ipuçları (`Retry-After`, sıfırlama başlıkları veya ayrıştırılabilir sıfırlama metni) tercih edilmelidir.
-- Tekrarlanan kurtarılabilir hatalar üstel geri çekilme kullanır:
+- OAuth temel bekleme süresi: `5s`.
+- API anahtarı tabanı bekleme süresi: `3s`.
+- API anahtarı `429` mevcut olduğunda yukarı akış yeniden deneme ipuçlarını (`Retry-After`, sıfırlama üstbilgileri veya ayrıştırılabilir sıfırlama metni) tercih etmelidir.
+- Tekrarlanan kurtarılabilir arızalar üstel gerilemeyi kullanır:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Thundering-herd önleme koruması, aynı bağlantıdaki eşzamanlı hataların soğuma süresini tekrar tekrar uzatmasını veya `backoffLevel` değerini iki kez artırmasını engeller.
+Yıldırım önleyici sürü koruması, aynı bağlantıdaki eş zamanlı arızaların bekleme süresinin tekrar tekrar uzatılmasını veya `backoffLevel` iki kat artırılmasını önler.
 
-Nihai (terminal) durumlar soğuma süresi değildir. `banned`, `expired` (yalnızca `EXPIRED_RETRY_MAX` aracılığıyla N sınırlı yeniden denemeden sonra nihai hale gelir) ve `credits_exhausted` durumlarının, kimlik bilgileri/ayarlar değişene veya bir operatör bunları sıfırlayana kadar kullanılamaz kalması amaçlanmıştır. Nihai durumları geçici soğuma durumuyla geçersiz kılmayın.
+Terminal durumları bekleme süreleri değildir. `banned`, `expired` (yalnızca `EXPIRED_RETRY_MAX` yoluyla N sınırlı yeniden denemeden sonra terminal haline gelir) ve `credits_exhausted` credentials/settings değişene veya bir operatör bunları sıfırlayana kadar kullanılamaz kalması amaçlanır. Geçici soğuma durumuyla terminal durumlarının üzerine yazmayın.
 
-### Model Kilitlenmesi
+### Model Kilitleme
 
-**Kapsam**: sağlayıcı + bağlantı + model.
+**Kapsam** : sağlayıcı + bağlantısı + modeli.
 
-**Amaç**: bir bağlantı için yalnızca tek bir model kullanılamaz veya kota sınırlı olduğunda, bağlantının tamamını devre dışı bırakmaktan kaçınmak.
+**Amaç** : söz konusu bağlantı için yalnızca bir model mevcut olmadığında veya kota sınırlı olduğunda, bağlantının tamamını devre dışı bırakmaktan kaçının.
 
 Örnekler:
 
-- Model başına kota uygulayıp `429` döndüren sağlayıcılar.
-- Eksik bir model için `404` döndüren yerel sağlayıcılar.
-- Seçili Grok modları gibi sağlayıcıya özgü mod/model izin hataları.
+- `429` değerini döndüren model başına kota sağlayıcıları.
+- Yerel sağlayıcılar eksik bir model için `404` iade ediyor.
+- Seçilen Grok modları gibi sağlayıcıya özgü mode/model izin hataları.
 
-Model kilitlenmesi `open-sse/services/accountFallback.ts` içinde bulunur ve aynı bağlantının diğer modelleri sunmaya devam etmesini sağlar.
+Model kilitleme `open-sse/services/accountFallback.ts` bulunur ve aynı bağlantının diğer modellere hizmet vermeye devam etmesine olanak tanır.
 
 ### Hata Ayıklama Kılavuzu
 
-- Bir sağlayıcının tüm anahtarları atlanıyorsa, hem sağlayıcı kesici durumunu hem de her bağlantının `rateLimitedUntil`/`testStatus` değerlerini inceleyin.
-- Sıfırlama penceresinden sonra bir sağlayıcı kalıcı olarak hariç tutuluyor görünüyorsa, kodun `getStatus()`/`canExecute()` kullanmak yerine ham `state` değerini okuyup okumadığını kontrol edin.
-- Bir sağlayıcı anahtarı başarısız oluyor ancak diğerlerinin çalışması gerekiyorsa, sağlayıcı kesicisi yerine bağlantı soğuma süresini tercih edin.
-- Yalnızca bir model başarısız oluyorsa, bağlantı soğuma süresi yerine model kilitlenmesini tercih edin.
-- Bir durumun kendi kendine iyileşmesi gerekiyorsa, gelecekte bir zaman damgası/sıfırlama zaman aşımına ve süresi dolmuş durumu yenileyen bir okuma yoluna sahip olmalıdır. Kalıcı durumlar, manuel kimlik bilgisi veya yapılandırma değişiklikleri gerektirir.
+- Bir sağlayıcının tüm anahtarları atlanırsa, hem sağlayıcı kesici durumunu hem de her bağlantının `rateLimitedUntil`/`testStatus` inceleyin.
+- Sıfırlama penceresinden sonra bir sağlayıcı kalıcı olarak dışlanmış görünüyorsa `getStatus()`/`canExecute()` kullanmak yerine kodun ham `state` okuyup okumadığını kontrol edin.
+- Sağlayıcı anahtarlarından biri arızalanırken diğerlerinin çalışması gerekiyorsa, sağlayıcı kesici yerine bağlantının bekleme süresini tercih edin.
+- Yalnızca bir model arızalanırsa bağlantı bekleme süresi yerine model kilitlemeyi tercih edin.
+- Bir durumun kendi kendini kurtarması gerekiyorsa, gelecekte bir timestamp/reset zaman aşımına ve süresi dolmuş durumu yenileyen bir okuma yoluna sahip olması gerekir. Kalıcı durumlar, manuel kimlik bilgisi veya yapılandırma değişiklikleri gerektirir.
 
 ---
 

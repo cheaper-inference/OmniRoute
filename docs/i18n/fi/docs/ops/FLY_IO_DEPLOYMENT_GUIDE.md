@@ -132,30 +132,30 @@ flyctl deploy
 
 ## 5. Vaaditut parametrit
 
-Tässä projektissa suositellaan määrittämään Fly.io-palvelussa vähintään seuraavat parametrit.
+Tämä projekti suosittelee ainakin seuraavien Fly.io-parametrien määrittämistä.
 
-### 5.1 Varmennetut parametrit
+### 5.1 Vahvistetut parametrit
 
-Näitä parametreja on käytetty nykyisen `omniroute`-sovelluksen varsinaisissa käyttöönotoissa:
+Näitä parametreja on käytetty todellisissa käyttöönotoissa nykyisessä `omniroute` sovelluksessa:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (vaaditaan tuotannossa — käytetään WebSocket-sillan todentamiseen)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (pakollinen tuotannossa — jota käytetään WebSocket -siltatodennukseen)
 - `STORAGE_ENCRYPTION_KEY`
 
-### 5.2 Tietoja `INITIAL_PASSWORD`-parametrista
+### 5.2 Tietoja `INITIAL_PASSWORD`
 
-Nykyisessä projektissa ei aseteta `INITIAL_PASSWORD`-parametria, koska tämä käyttöönotto ei edellytä sitä.
+Nykyinen projekti ei aseta `INITIAL_PASSWORD` koska tämä käyttöönotto ei vaadi sitä.
 
 Jos sitä ei ole asetettu:
 
-- Käynnistysloki ilmoittaa oletussalasanaksi `CHANGEME`
-- Kirjautumissalasana on vaihdettava järjestelmäasetuksissa mahdollisimman pian käyttöönoton jälkeen
+- Luot kojelaudan salasanan ohjatussa käyttöönottotoiminnossa ensimmäisellä käynnillä. Suorita salasanan vaihe loppuun: sen ohittaminen poistaa kojelautaan kirjautumisen pois päältä, mikä jättää kojelaudan avoimeksi kaikille, jotka pääsevät sovellukseen URL
+- Flyn välityspalvelin saavuttaa sovelluksen ei-palautusosoitteesta, joten salasanan lähettämisen jälkeen ohjattu toiminto pyytää kertakäyttöistä käynnistystunnusta, jonka sovellus tulostaa sillä hetkellä lokiinsa: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Jos tämä rivi on vieritetty ulos lokista, käynnistä sovellus uudelleen ja lähetä ohjattu toiminto uudelleen uuden tunnuksen tulostamiseksi
 
-Jos haluat alustaa taustajärjestelmän salasanan ilman käyttäjän toimia, voit lisätä sen myöhemmin:
+Jos haluat asettaa sen sijaan salasanan ilman valvontaa, lisää se ennen ensimmäistä käyntiä kojelautaan (kun salasana on tallennettu, `INITIAL_PASSWORD` ohitetaan):
 
 - `INITIAL_PASSWORD`
 
@@ -276,58 +276,58 @@ Jos konsolin `Secrets`-sivulla ei näy odotettuja muuttujia, tarkista:
 
 ## 9. Myöhemmät päivitykset ja julkaisut
 
-Koodipäivitysten jälkeen julkaisuprosessi on suoraviivainen:
+Koodipäivitysten jälkeen julkaisuprosessi on yksinkertainen:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Jos sinun tarvitsee päivittää vain parametreja muuttamatta koodia:
+Jos sinun on päivitettävä vain parametrit muuttamatta koodia:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly suorittaa automaattisesti koneiden vaiheittaisen päivityksen.
+Fly suorittaa automaattisesti koneiden jatkuvan päivityksen.
 
-### 9.1 Alkuperäisen tietovaraston päivitysten seuraaminen säilyttäen haarasi `fly.toml`-tiedoston
+### 9.1 Ylävirran arkiston päivitysten seuranta säilyttäen samalla haarukan `fly.toml`
 
-Jos nykyinen tietovarasto on haara ja haluat synkronoida päivitykset alkuperäisestä tietovarastosta `https://github.com/diegosouzapw/OmniRoute`, noudata alla kuvattua työnkulkua.
+Jos nykyinen arkisto on haarukka ja haluat synkronoida päivitykset ylävirran `https://github.com/cheaper-inference/OmniRoute`, noudata alla olevaa työnkulkua.
 
-Tarkista ensin etätietovarastosi:
+Tarkista ensin kaukosäätimesi:
 
 ```powershell
 git remote -v
 ```
 
-Näkyvissä pitäisi olla vähintään:
+Sinun pitäisi nähdä ainakin:
 
-- `origin`, joka osoittaa omaan haaraasi
-- `upstream`, joka osoittaa alkuperäiseen tietovarastoon
+- `origin` osoittaa omaa haarukkaasi
+- `upstream` osoittaa alkuperäiseen arkistoon
 
-Jos `upstream`-etätietovarastoa ei ole määritetty, lisää se:
+Jos `upstream` ei ole määritetty, lisää se:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Nouda uusimmat commitit ja tunnisteet ennen synkronointia alkuperäisen tietovaraston kanssa:
+Ennen kuin synkronoit ylävirran kanssa, nouda uusimmat sitoumukset ja tagit:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Tarkista nykyinen versio ja alkuperäisen tietovaraston tunnisteet:
+Tarkista nykyinen versio ja alkupään tagit:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Huomautus: Projektin nykyinen versio on `v3.8.0`. Alla olevat viittaukset versioon `v3.4.7` on säilytetty vain historiallisina esimerkkeinä. Käytä todellisissa julkaisuissa tunnistetta `:latest` tai nykyisen version tunnistetta (esim. `:v3.8.0`).
+> Huomautus: Projektin nykyinen versio on `v3.8.0`. Alla olevat `v3.4.7` viitteet ovat vain historiallisia esimerkkejä. Käytä varsinaisissa julkaisuissa `:latest` tai nykyistä versiota (esim. `:v3.8.0`).
 
-Jos haluat yhdistää alkuperäisen tietovaraston uusimman `main`-haaran ja säilyttää pakotetusti oman haarasi `fly.toml`-tiedoston, noudata tätä työnkulkua:
+Jos haluat yhdistää viimeisimmän ylävirran `main` pitäen samalla väkisin haarukan `fly.toml`:tä, seuraa tätä työnkulkua:
 
 ```powershell
 git merge upstream/main
@@ -337,34 +337,34 @@ git commit -m "chore(deploy): keep fork fly.toml"
 git push origin main
 ```
 
-Huomautukset:
+Huomautuksia:
 
-- `git merge upstream/main` synkronoi uusimman koodin alkuperäisestä tietovarastosta
-- `git checkout HEAD~1 -- fly.toml` palauttaa oman haarasi `fly.toml`-tiedoston yhdistämistä edeltäneestä tilasta
-- Jos alkuperäisessä tietovarastossa ei muutettu `fly.toml`-tiedostoa, tämä vaihe ei aiheuta eroja
-- Jos alkuperäisessä tietovarastossa muutettiin `fly.toml`-tiedostoa, tämä vaihe varmistaa, ettei Fly-sovelluksesi nimeä, taltion liitospistettä, aluetta tai muita haarakohtaisia käyttöönottomäärityksiä korvata
+- `git merge upstream/main` synkronoi uusimman koodin alkuperäisestä arkistosta
+- `git checkout HEAD~1 -- fly.toml` palauttaa haarukan oman `fly.toml` ennen yhdistämistä
+- Jos ylävirta ei muuttanut `fly.toml`, tämä vaihe ei tuota eroja
+- Jos ylävirtaan muutti `fly.toml`, tämä vaihe varmistaa, että Fly-sovelluksesi nimeä, aseman kiinnitystä, aluetta ja muita haarukkakohtaisia käyttöönottomäärityksiä ei korvata
 
-Jos haluat kohdistaa tiettyyn julkaisutunnisteeseen (esim. `v3.4.7`), varmista ensin, että tunniste sisältyy jo `upstream/main`-haaraan:
+Jos haluat kohdistaa tietyn julkaisutunnisteen (esim. `v3.4.7`), varmista ensin, että tunniste on jo sisällytetty `upstream/main` hen:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-Komennon onnistunut suoritus tarkoittaa, että `upstream/main` sisältää jo kyseisen version. Voit tällöin yksinkertaisesti yhdistää `upstream/main`-haaran.
+Onnistunut palautus tarkoittaa, että `upstream/main` sisältää jo kyseisen version; voit yksinkertaisesti yhdistää `upstream/main`.
 
-### 9.2 Tavanomainen julkaisujärjestys alkuperäisen tietovaraston synkronoinnin jälkeen
+### 9.2 Vakiojulkaisujärjestys ylävirtaan synkronoinnin jälkeen
 
-Kun olet synkronoinut alkuperäisen tietovaraston kanssa, noudata tätä suositeltua julkaisujärjestystä:
+Kun olet synkronoinut alkuperäisen arkiston kanssa, noudata tätä suositeltua julkaisujärjestystä:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Palauta haaran `fly.toml`
+3. Palauta haarukan `fly.toml`
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Tätä työnkulkua käytettiin, kun nykyinen projekti päivitettiin versioon `v3.4.7` (esimerkki viittaa historialliseen versioon; nykyinen varsinainen versio on `v3.8.0`).
+Tämä on todellinen työnkulku, jota käytetään päivitettäessä nykyinen projekti `v3.4.7` :ksi (esimerkki viittaa historialliseen versioon; nykyinen todellinen versio on `v3.8.0`).
 
 ---
 
@@ -420,14 +420,14 @@ Jos näet sen sijaan polun `/app/data/...`, `DATA_DIR` on määritetty virheelli
 
 ## 12. Yleisiä ongelmia
 
-### 12.1 `Secrets`-sivu on tyhjä
+### 12.1 `Secrets` sivu on tyhjä
 
-Tähän on yleensä kaksi syytä:
+Syitä on yleensä kaksi:
 
-- Et ole vielä suorittanut komentoa `flyctl secrets set`
-- Tarkastelet eri sovellusta (esim. `oroute` sovelluksen `omniroute` sijaan)
+- Et ole vielä ajanut `flyctl secrets set`
+- Tarkastelet eri sovellusta (esim. `oroute` `omniroute`:n sijaan)
 
-### 12.2 `flyctl deploy` ilmoittaa `app not found`
+### 12.2 `flyctl deploy` Raportoi `app not found`
 
 Luo sovellus ensin:
 
@@ -435,23 +435,23 @@ Luo sovellus ensin:
 flyctl apps create omniroute
 ```
 
-### 12.3 `fly.toml`-tiedoston jäsentäminen epäonnistuu
+### 12.3 `fly.toml` Jäsennys epäonnistuu
 
 Tarkista seuraavat asiat:
 
-- Onko kommenteissa virheellisiä merkkejä
-- Ovatko TOML-lainausmerkit ja sisennykset oikein
+- Onko kommenteissa vääriä hahmoja
+- Ovatko TOML -lainaus ja sisennys oikein
 
-### 12.4 Tiedot eivät säily
+### 12.4 Tiedot eivät ole säilyviä
 
-Varmista molemmat seuraavista:
+Tarkista molemmat seuraavista:
 
-- `fly.toml` sisältää määrityksen `destination = '/data'`
-- `DATA_DIR`-arvoksi on asetettu `/data`
+- `fly.toml` sisältää `destination = '/data'`
+- `DATA_DIR` on asetettu arvoon `/data`
 
-### 12.5 Voiko sovellusta käyttää ilman `INITIAL_PASSWORD`-muuttujaa?
+### 12.5 Voiko se toimia ilman `INITIAL_PASSWORD`?
 
-Kyllä, sovellusta voi käyttää. Se käyttää tällöin oletussalasanaa `CHANGEME`. Tuotantoympäristössä taustajärjestelmän salasana on suositeltavaa vaihtaa mahdollisimman pian.
+Kyllä. Kun `INITIAL_PASSWORD` unset, luot kojelaudan salasanan ohjatussa käyttöönottotoiminnossa ensimmäisellä käynnillä (osio 5.2 kattaa kertakäyttöisen käynnistystunnisteen ja salasanavaiheen).
 
 ---
 

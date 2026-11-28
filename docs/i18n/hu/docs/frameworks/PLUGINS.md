@@ -88,18 +88,19 @@ A `register(program, ctx)` függvénynek átadott `ctx` objektum:
 | `ctx.baseUrl`                | `string`         | Feloldott alap-URL                                                     |
 | `ctx.apiKey`                 | `string \| null` | API-kulcs, ha meg lett adva                                            |
 
-## Felderítés
+## Felfedezés
 
-A bővítmények felderítése a következő helyeken történik:
+A beépülő modulokat innen fedezték fel:
 
-1. `~/.omniroute/plugins/<name>/` — felhasználói helyi telepítések
-2. `OMNIROUTE_PLUGIN_PATH` környezeti változó — egyéni könyvtár
+1. `~/.omniroute/plugins/node_modules/<name>/` — ahol `omniroute plugin install` csomagokat helyez el (egy npm `--prefix`, nem `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — kézzel másolt beépülő modulok könyvtárai
+3. `OMNIROUTE_PLUGIN_PATH` env var — egyéni könyvtár
 
-Mindkettő **csak a CLI-re** vonatkozik. A kiszolgálóoldali bővítmény-futtatókörnyezetnek (a proxyn belül futó piactér-/`plugin.json`-bővítményeknek) saját keresője és saját felülbírálási beállítása van: `OMNIROUTE_PLUGINS_DIR` — lásd:
-[PLUGIN_MARKETPLACE.md → Bővítménykönyvtár](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Az egyik beállítása nincs hatással a másikra.
+A rendszer követi a szimbolizált könyvtárakat (amit az npm hoz létre `plugin install ./dir` számára).
 
-A betöltési hibákat a rendszer elfogja, és figyelmeztetésként jeleníti meg — egy hibás bővítmény soha nem okozza a CLI összeomlását.
+Mindkettő az** Csak CLI** . A szerveroldali beépülő modul futtatókörnyezete (a piactér/`plugin.json` beépülő modulok, amelyek a proxy belsejében futnak) saját szkennerrel rendelkezik saját felülírással, `OMNIROUTE_PLUGINS_DIR` — lásd [:PLUGIN_MARKETPLACE.md → Plugin könyvtár](./PLUGIN_MARKETPLACE.md#plugin-directory). Az egyik beállítása nincs hatással a másikra.
+
+A betöltési hibákat a rendszer elkapja és figyelmeztetésként nyomtatja ki. — a törött plugin soha nem omlik össze a CLI.
 
 ## Biztonság
 

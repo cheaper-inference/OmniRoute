@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) ja OpenCode (`x-opencode-session`) tunniste
 
 Työhakemisto vaihtelee koneiden välillä, joten sama arkisto voi näkyä eri poluilla. Lähetä projekti sen sijaan nimenomaisesti: Claude Code lisää kaikki `ANTHROPIC_CUSTOM_HEADERS` ssä luetellut otsikot jokaiseen mallipyyntöön, ja OmniRoute lukee niistä kaksi:
 
-| Otsikko                    | Arvo                                                               |
-| -------------------------- | ------------------------------------------------------------------ |
-| `x-omniroute-project`      | Projektin nimi, esim `omniroute`                                   |
-| `x-omniroute-project-repo` | Normalisoitu kaukosäädin, esim `github.com/diegosouzapw/OmniRoute` |
+| Otsikko                    | Arvo                                                                    |
+| -------------------------- | ----------------------------------------------------------------------- |
+| `x-omniroute-project`      | Projektin nimi, esim `omniroute`                                        |
+| `x-omniroute-project-repo` | Normalisoitu kaukosäädin, esim `github.com/cheaper-inference/OmniRoute` |
 
 Molemmat luetaan vain nimeämistä varten; niitä ei koskaan välitetä eteenpäin toimittajalle.
 
@@ -96,7 +96,7 @@ x-omniroute-project-repo: ${repo}}" command claude "$@"
 }
 ```
 
-`sed` -lauseke poistaa kaikki etä- URL hen upotetut tunnistetiedot, kyselymerkkijonot ja fragmentit, ja `ANTHROPIC_CUSTOM_HEADERS` ssä jo olevat otsikot säilytetään. IDE laajennukset käynnistävät Claude koodin ilman komentotulkkiasi, joten niiden istunnot palaavat työhakemistoon.
+`sed` -lauseke poistaa kaikki etä- URL hen upotetut valtuustiedot, kyselyjonon ja fragmentin, ja `ANTHROPIC_CUSTOM_HEADERS` :ssä jo olevat otsikot säilytetään. IDE laajennukset käynnistävät Claude -koodin ilman kuorta, joten niiden istunnot palaavat työhakemistoon.
 
 ---
 
@@ -249,30 +249,22 @@ valitsimia ei tarvita. Voit ohittaa asetuksen yksittäisellä suorituskerralla v
 
 ---
 
-## Vianmääritys
+## Vianetsintä
 
-**Claude Code ohittaa yhdyskäytävän** — varmista, että `ANTHROPIC_BASE_URL` **ei
-sisällä `/v1`-osaa**, ja käynnistä `claude` uudelleen (ympäristömuuttujat luetaan vain kerran käynnistyksen yhteydessä). `omniroute launch`
-hoitaa tämän puolestasi.
+**Claude Code jättää yhdyskäytävän huomioimatta** — vahvista, että `ANTHROPIC_BASE_URL` llä on** ei `/v1`** ja käynnistä `claude` uudelleen (env luetaan kerran käynnistyksen yhteydessä). `omniroute launch` hoitaa tämän puolestasi.
 
-**`/model`-valitsin on tyhjä / yhdyskäytävän mallit puuttuvat** — edellyttää Claude Code
--versiota v2.1.219+ ja asetusta `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Vain `claude*`- /
-`anthropic*`-mallitunnukset näkyvät valitsimessa; pakota mikä tahansa muu malli asetuksella
-`ANTHROPIC_MODEL=<id>` (profiilit toimivat näin).
+**`/model` picker on tyhjä / yhdyskäytävämalleja puuttuu** — tarvitsee Claude koodin v2.1.219 + ja `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Vain `claude*` / `anthropic*` malli IDs näkyvät poimijassa; pakota mikä tahansa muu malli `ANTHROPIC_MODEL=<id>` :llä (tämän profiilit tekevät).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code lähettää aina mallien **etuliitteettömät**
-tunnukset (esim. `claude-opus-4-8`), joten kun sekä Claude Code (`cc/…`)- että
-Claude (`claude/…`)-palveluntarjoajat on yhdistetty, etuliitteetön tunnus vastaa kahta reittiä eikä
-OmniRoute yritä arvata oikeaa. Korjaa ongelma jommallakummalla tavalla: kiinnitä etuliitteellinen tunnus asetuksella
-`ANTHROPIC_MODEL=cc/claude-opus-4-8` tai ota käyttöön **Suosi Claude Codea
-etuliitteettömille Claude-malleille** — kytkin Claude-palveluntarjoajan sivulla tai
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (oletuksena pois käytöstä;
-katso [Ympäristö](../reference/ENVIRONMENT.md)) — jolloin etuliitteettömät `claude-*`-
-tunnukset reititetään sen sijaan Claude Codeen. Eksplisiittiset palveluntarjoajan etuliitteet ovat aina etusijalla.
+**`400 Ambiguous model 'claude-…'`** — Claude Koodi lähettää aina** etuliitteetön** malli IDs (esim. `claude-opus-4-8`), joten kun sekä Claude -koodi (`cc/…`) että Claude (`claude/…`) on yhdistetty, paljas id vastaa kahta reittiä ja OmniRoute kieltäytyy arvaamasta. Korjaa se kummallakin tavalla: kiinnitä etuliitteenä oleva id `ANTHROPIC_MODEL=cc/claude-opus-4-8` tai ota käyttöön** Suosi Claude koodia etuliitteettömille Claude malleille** — kytkin Claude -toimittajasivulla tai `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (oletus pois käytöstä; katso [Ympäristö](../reference/ENVIRONMENT.md) ) — joka reitittää paljaat `claude-*` IDs Claude -koodiin. Eksplisiittiset palveluntarjoajan etuliitteet voittaa aina.
 
-**Todennusvirheet** — profiili ei sisällä tunnusta. Käytä komentoa `omniroute launch --profile`
-(joka lisää sen) tai vie ympäristömuuttuja `ANTHROPIC_AUTH_TOKEN`.
+**"automaattinen tila … tämä istunto ei ole kelvollinen" (luokittelupyynnöt laskutetaan)** — automaattitilassa Claude Code pyytää palvelinta tarkistamaan toiminnot omien mallipyyntöjensä sisällä ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Se tarvitsee `anthropic-beta` -arvon `dangerous-tool-use-2026-09-03` ja `safeguards` -runkokentän saavuttaakseen Anthropic parina, ja `safeguard_results` sekä ylävirran työkalun käytön IDs palaavat muuttumattomina. OmniRoute tekee tämän, kun pyyntö reititetään alkuperäiseen `claude` palveluntarjoajaan tai `anthropic-compatible-*` solmuun, suoratoistona tai ei (regressiovartija: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Muut kohteet eivät voi palauttaa arvostelua, joten Claude Code palaa omiin luokittelupyyntöihinsä ja näyttää ilmoituksen:
 
-**Profiilit eivät pysy erillään** — jokaisella profiililla on erillinen `CLAUDE_CONFIG_DIR`;
-varmista, että istunnossa komento `echo $CLAUDE_CONFIG_DIR` osoittaa hakemistoon
-`~/.claude/profiles/<name>`.
+- malli ei-antrooppisella palveluntarjoajalla tai yhdistelmä, joka osuu sellaiseen;
+- Claude-Code-yhteensopiva välityssolmu (`anthropic-compatible-cc-*`), joka rakentaa pyyntörungon uudelleen eikä kuljeta `safeguards`;
+- vanhempi OmniRoute, joka on ennen sallittujen luettelon betaversioita, tai Claude -koodiversio, joka on Anthropic -sivulla yhdyskäytäväistuntoja varten listatun version alapuolella.
+
+Suorita `/status` Claude koodissa: the** Auto-tilan palvelin** rivillä lukee `Enabled` kun palvelimen tarkistus on aktiivinen. Anthropic päättää, laskutetaanko nämä pyynnöt, ei OmniRoute.
+
+**Todennusvirheet** — profiilissa ei ole merkkiä. Käytä `omniroute launch --profile` (lisää sen) tai vie `ANTHROPIC_AUTH_TOKEN`.
+
+**Profiilit eivät eristä** — jokainen profiili on erillinen `CLAUDE_CONFIG_DIR`; tarkista `echo $CLAUDE_CONFIG_DIR` istuntopisteiden sisällä kohdassa `~/.claude/profiles/<name>`.

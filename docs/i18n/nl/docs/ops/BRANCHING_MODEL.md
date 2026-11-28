@@ -53,7 +53,7 @@ Wanneer een release wordt afgestemd, wordt een markerprobleem met de naam `relea
 Controleer of er sprake is van een open bevriezing voordat u ervan uitgaat dat de gewenste vertakking kan worden samengevoegd:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Het samenvoegmechanisme (eigenaar `queue` label → Mergify) is gedocumenteerd in [MERGE_TRAIN.md](./MERGE_TRAIN.md).

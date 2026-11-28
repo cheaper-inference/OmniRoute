@@ -4,14 +4,11 @@
 
 ---
 
-> **สถานะ:** พร้อมใช้งานทั่วไป
-> **กลุ่มเป้าหมาย:** ผู้ดูแลระบบที่เชื่อมต่อ OpenCode เข้ากับการติดตั้งใช้งาน OmniRoute
-> **แหล่งข้อมูลอ้างอิงหลัก (สคีมาการกำหนดค่า):** `src/shared/services/opencodeConfig.ts`
-> **แหล่งข้อมูลอ้างอิงหลัก (แพ็กเกจ npm):** `@omniroute/opencode-provider/` (เวิร์กสเปซที่เผยแพร่ได้)
+> **สถานะ:** มีจำหน่ายทั่วไป.** ผู้ชม:** ตัวดำเนินการเดินสาย OpenCode กับการปรับใช้ OmniRoute** แหล่งที่มาของความจริง (สคีมาการกำหนดค่า):** `src/shared/services/opencodeConfig.ts`** แพ็คเกจ npm ที่แนะนำ:** `@omniroute/opencode-plugin/` (OpenCode v1 ติดตั้งโดย `omniroute setup opencode`) และ `@omniroute/opencode-plugin-v2/` (OpenCode v2) แพ็คเกจ `@omniroute/opencode-provider/` รุ่นเก่าคือ** เลิกใช้แล้ว** (ดูเส้นทาง 2)
 
-[OpenCode](https://opencode.ai) เป็นไคลเอนต์ AI แบบเอเจนต์สำหรับ CLI/เดสก์ท็อป โดยอ่านแค็ตตาล็อกผู้ให้บริการจาก `~/.config/opencode/opencode.json` (หรือ `opencode.jsonc`) และเป็นไปตามสคีมาที่ `https://opencode.ai/config.json` OmniRoute จะแสดงตัวต่อ OpenCode ในฐานะหนึ่งในผู้ให้บริการเหล่านั้น โดยทุกคำขอจะไหลผ่านพื้นผิว `/v1` มาตรฐานของ OmniRoute ที่เข้ากันได้กับ OpenAI ทำให้ OpenCode ได้รับประโยชน์โดยอัตโนมัติจากการกำหนดเส้นทางแบบ Auto-Combo, ตัวตัดวงจร, นโยบายคีย์, ความสามารถในการสังเกตการณ์ และอื่นๆ
+[OpenCode](https://opencode.ai) เป็นไคลเอ็นต์ CLI/desktop AI แบบตัวแทน อ่านแค็ตตาล็อกผู้ให้บริการจาก `~/.config/opencode/opencode.json` (หรือ `opencode.jsonc`) และติดตามสคีมาที่ `https://opencode.ai/config.json` OmniRoute แสดงตัวเองต่อ OpenCode ในฐานะหนึ่งในผู้ให้บริการ — ทุกคำขอไหลผ่านพื้นผิว `/v1` ที่เข้ากันได้กับ OpenAI มาตรฐานของ OmniRoute ดังนั้น OpenCode จะได้รับประโยชน์โดยอัตโนมัติจากการกำหนดเส้นทาง Auto-Combo, เซอร์กิตเบรกเกอร์, นโยบายสำคัญ, ความสามารถในการสังเกต ฯลฯ
 
-มี**เส้นทางการผสานรวมที่รองรับสองเส้นทาง** เลือกใช้เพียงหนึ่งเส้นทาง โดยทั้งสองจะสร้างการกำหนดค่าเดียวกัน
+หน้านี้บันทึกเส้นทางการกำหนดค่าคงที่สองเส้นทางด้านล่าง ทั้งสองสร้างการกำหนดค่าเดียวกัน สำหรับรายการโมเดลที่เป็นไปตามแคตตาล็อกสดของคุณ ให้ใช้ปลั๊กอินแทน: `omniroute setup opencode` ติดตั้ง `@omniroute/opencode-plugin` (OpenCode v1) และ `@omniroute/opencode-plugin-v2` เป้าหมาย OpenCode v2 (ดู [การผสานรวม CLI](../guides/CLI-INTEGRATIONS.md) และ [คำแนะนำปลั๊กอิน OpenCode v2](../guides/OPENCODE-V2-PLUGIN.md) )
 
 ---
 
@@ -54,9 +51,11 @@ omniroute config opencode \
 
 ---
 
-## เส้นทางที่ 2 — แพ็กเกจ npm `@omniroute/opencode-provider`
+## พาธ 2 แพ็คเกจ — npm `@omniroute/opencode-provider` (เลิกใช้แล้ว)
 
-แนะนำเมื่อคุณเขียนสคริปต์สร้างการกำหนดค่าจาก Node/TS (ไปป์ไลน์ CI, โมโนรีโพ, โฟลว์ตัวติดตั้งแบบกำหนดเอง)
+> **เลิกใช้แล้ว** แพ็คเกจเขียนรายการโมเดลแบบคงที่ซึ่งอยู่หลังแค็ตตาล็อก OmniRoute แบบสดของคุณ README แนะนำให้ย้ายไปยัง `@omniroute/opencode-plugin` (หรือ `@omniroute/opencode-plugin-v2` บน OpenCode v2) API ด้านล่างถูกเก็บไว้สำหรับสคริปต์ที่มีอยู่เท่านั้น
+
+ใช้เมื่อเขียนสคริปต์การกำหนดค่าจาก Node/TS (ไปป์ไลน์CI, monorepos, โฟลว์ตัวติดตั้งแบบกำหนดเอง)
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // ไม่บังคับ: แทนที่แค็ตตาล็อกโมเดลที่เปิดให้ OpenCode ใช้งาน
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-สำหรับการผสานรวมกับไฟล์ที่มีอยู่โดยไม่ทำลายข้อมูล ให้จำลอง `mergeOpenCodeConfigText()` จาก `opencodeConfig.ts` หรือเรียกใช้ตัวสร้างผ่าน CLI
+สำหรับการผสานแบบไม่ทำลายกับไฟล์ที่มีอยู่ ให้จำลอง `mergeOpenCodeConfigText()` จาก `opencodeConfig.ts` หรือเรียกใช้ตัวสร้าง CLI
 
-ดู API ฉบับเต็มได้ที่ [README ของแพ็กเกจ](../../@omniroute/opencode-provider/README.md)
+ดู [แพ็คเกจ README](../../@omniroute/opencode-provider/README.md) แบบเต็ม API
 
 ---
 
@@ -157,7 +156,9 @@ export const OMNIROUTE_DEFAULT_OPENCODE_MODELS = [
 
 ## ดูเพิ่มเติม
 
-- [เอกสารอ้างอิง API](../reference/API_REFERENCE.md) — รายละเอียด REST API ทั้งหมดของ OmniRoute
-- [Auto-Combo](../routing/AUTO-COMBO.md) — ความหมายของ `model: "auto"`
-- [README ของ `@omniroute/opencode-provider`](../../@omniroute/opencode-provider/README.md)
-- ซอร์สโค้ด: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`
+- [การอ้างอิง API](../reference/API_REFERENCE.md) — เต็ม OmniRoute REST พื้นผิว
+- [Auto-Combo](../routing/AUTO-COMBO.md) — `model: "auto"` หมายถึงอะไร
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (แนะนำ)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (เลิกใช้แล้ว)
+- ที่มา: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

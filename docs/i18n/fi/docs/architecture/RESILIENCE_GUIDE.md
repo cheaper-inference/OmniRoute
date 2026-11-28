@@ -12,54 +12,53 @@ OmniRoute on kolme erillistä, mutta toisiinsa liittyvää joustavuusmekanismia.
 
 > **Env-vs-dashboard ensisijaisuus joustavuuden vaihtajille.** Opt-in resilience vaihtaa ympäristöstä — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — toimittaa vain _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean säilyi `resilienceSettings` (Dashboard →** Asetukset → Resilience** / `PATCH /api/resilience`, tallennettu `key_value`) voittaa env-arvon: normalisointi (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) säilyttää tallennetun loogisen arvon aina, kun sellainen on olemassa. Tällaisen env var:n asettaminen `true` :ksi käyttöönotossa, jossa kojelautaan on jo tallennettu `false` ei siksi muutu mitään. — käännä kytkin sisään** Asetukset → Resilience** (tai tyhjennä tallennettu kenttä) sen sijaan.
 
-## 1. Palveluntarjoajan circuit breaker
+## 1. Palveluntarjoajan katkaisija
 
 **Laajuus:** koko palveluntarjoaja (esim. `glm`, `openai`, `anthropic`).
 
-**Tarkoitus:** lopettaa liikenteen lähettäminen palveluntarjoajalle, joka epäonnistuu toistuvasti upstream-/palvelutasolla.
+**Tarkoitus:** lopeta liikenteen lähettäminen palveluntarjoajalle, joka epäonnistuu toistuvasti upstream/service tasolla.
 
 **Toteutus:**
 
 - Ydinluokka: `src/shared/utils/circuitBreaker.ts`
-- Kytkennät: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Tila-API: `GET /api/monitoring/health`
-- Nollaus-API: `POST /api/resilience/reset`
-- Wrapperit: `open-sse/services/accountFallback.ts`
-- Tietokantataulu: `domain_circuit_breakers`
+- Johdot: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Tila API: `GET /api/monitoring/health`
+- Palauta API: `POST /api/resilience/reset`
+- Kääreet: `open-sse/services/accountFallback.ts`
+- DB -pöytä: `domain_circuit_breakers`
 
-**Tilat:**
+**Osavaltiot:**
 
 - `CLOSED` — normaali liikenne sallittu
-- `DEGRADED` — liikenne on edelleen sallittua, mutta kohonneita palveluntarjoajan epäonnistumisia seurataan; palaa tilaan `CLOSED`, kun onnistumisia on kertynyt riittävästi, kun yhteystesti on kelvollinen, tai kun viimeisimmän epäonnistumislajin pisin `OPEN`-jakso (sen `cooldownByKind`-arvo, muuten `resetTimeout`, × `maxBackoffMultiplier`, vähintään yhden jäähdytysajan verran) on kulunut ilman uutta epäonnistumista
-- `OPEN` — palveluntarjoaja tilapäisesti estetty; combo-reititys ohittaa sen
-- `HALF_OPEN` — nollauksen aikakatkaisu on kulunut; koepyyntö sallittu
+- `DEGRADED` — -liikenne on edelleen sallittua, mutta kohonneita palveluntarjoajan vikoja seurataan; palaa `CLOSED` :hen riittävän onnistumisen yhteydessä, kelvollisen yhteystestin jälkeen tai pisimmän `OPEN` pidon jälkeen viimeiselle vikatyypille (sen `cooldownByKind` arvo, muuten `resetTimeout`, × `maxBackoffMultiplier`, vähintään yksi jäähtyminen) ilman uutta vikaa
+- `OPEN` — palveluntarjoaja tilapäisesti estetty; yhdistelmäreititys ohittaa sen
+- `HALF_OPEN` — reset aikakatkaisu kulunut; tutkintapyyntö sallittu
 
-**Konfiguroitavat oletusarvot (`open-sse/config/constants.ts`, näkyvissä kohdassa Dashboard → Settings → Resilience):**
+**Konfiguroitavat oletusasetukset (`open-sse/config/constants.ts`, näkyvät Dashboardissa → Settings → Resilience):**
 
-| Luokka      | Heikkenee         | Avautuu            | Nollauksen aikakatkaisu |
-| ----------- | ----------------- | ------------------ | ----------------------- |
-| OAuth       | 5 epäonnistumista | 8 epäonnistumista  | 60s                     |
-| API-avain   | 7 epäonnistumista | 12 epäonnistumista | 30s                     |
-| Paikallinen | johdettu          | 2 epäonnistumista  | 15s                     |
+| Luokka    | Heikentynyt klo   | Avautuu klo        | Nollaa aikakatkaisu |
+| --------- | ----------------- | ------------------ | ------------------- |
+| OAuth     | 5 epäonnistumista | 8 epäonnistumista  | 60-luku             |
+| API-avain | 7 epäonnistumista | 12 epäonnistumista | 30s                 |
 
-`degradationThreshold` määrittää, milloin palveluntarjoaja siirtyy tilaan `DEGRADED`; `failureThreshold` määrittää, milloin se avautuu ja ohitetaan. Paikallisten palveluntarjoajien profiileja ei vielä näytetä Resilience-asetussivulla.
+`degradationThreshold` ohjaa kun palveluntarjoaja syöttää `DEGRADED`; `failureThreshold` ohjaa, kun se avautuu ja ohitetaan. `PROVIDER_PROFILES.local` (2 vikaa / 15 s) on määritelty `open-sse/config/constants.ts` butissa** ei vielä kytketty** : `getProviderCategory()` palauttaa vain `oauth` tai `apikey`, joten paikalliset palveluntarjoajat käyttävät OAuth tai API-avainprofiilia.
 
-**Laukaisukoodit:** vain palveluntarjoajatason tilakoodit `[408, 500, 502, 503, 504]`. ÄLÄ laukaise tilitason virheistä (useimmat 401/403/429 — ne kuuluvat jäähdytykselle tai lukitukselle).
+**Matkakoodit:** vain tarjoajatason tilat `[408, 500, 502, 503, 504]`. Tee NOT laukaisu tilitason virheiden varalta (useimmat 401/403/429 — niistä kuuluvat cooldowniin tai työsulkuun).
 
-**Laiska palautuminen:** kun `OPEN`-tila vanhenee, `getStatus()`, `canExecute()`, `getRetryAfterMs()` päivittävät tilan arvoksi `HALF_OPEN`. Samat lukutapahtumat (ja seuraava epäonnistuminen) palauttavat vanhentuneen `DEGRADED`-tilan takaisin tilaan `CLOSED`. Tausta-ajastinta ei tarvita.
+**Laiska toipuminen:** kun `OPEN` vanhenee, `getStatus()`, `canExecute()`, `getRetryAfterMs()` päivittää tilaksi `HALF_OPEN`. Sama lukema (ja seuraava virhe) hajottaa vanhentuneen `DEGRADED` takaisin muotoon `CLOSED`. Taustaajastinta ei tarvita.
 
 ---
 
-### Valinnainen (opt-in) globaali palveluntarjoajan jäähdytys (ikkunaportti)
+### Ota käyttöön maailmanlaajuinen palveluntarjoajan viilennys (ikkunaportti)
 
-Neljäs, **opt-in**-periaatteella otettava kerros (`PROVIDER_COOLDOWN_ENABLED`, oletuksena **pois käytöstä**) pitää pyyntöjen välistä muistia epäonnistuvista palveluntarjoajista tiedostossa `open-sse/services/providerCooldownTracker.ts`. Combo-kohteiden ratkaisu hyödyntää sitä, jotta peräkkäiset combo-pyynnöt eivät enää käy läpi palveluntarjoajaa, joka juuri epäonnistui. Palveluntarjoajatason merkinnät noudattavat `PROVIDER_PROFILES`-ikkunaporttia:
+Neljäs,** opt-in** kerros (`PROVIDER_COOLDOWN_ENABLED`, oletus** pois** ) säilyttää ristiinpyyntömuistin epäonnistuneista palveluntarjoajista `open-sse/services/providerCooldownTracker.ts` ssä, jota tarkastelee yhdistelmäkohderesoluutio, joten peräkkäiset yhdistelmäpyynnöt lopettavat juuri epäonnistuneen palveluntarjoajan uudelleenkävelemisen. Palveluntarjoajatason merkinnät kunnioittavat `PROVIDER_PROFILES` -ikkunaporttia:
 
-| Profiili  | laukeaa kynnyksen jälkeen (`providerFailureThreshold`) | aikaikkunan sisällä (`providerFailureWindowMs`) | jäähtyy (`providerCooldownMs`) |
-| --------- | -----------------------------------------------------: | ----------------------------------------------: | -----------------------------: |
-| OAuth     |                                                   `10` |                                         `15min` |                         `5min` |
-| API-avain |                                                   `15` |                                         `30min` |                        `10min` |
+| Profiili  | matkat jälkeen (`providerFailureThreshold`) | sisällä (`providerFailureWindowMs`) | viilentää (`providerCooldownMs`) |
+| --------- | ------------------------------------------: | ----------------------------------: | -------------------------------: |
+| OAuth     |                                        `10` |                             `15min` |                           `5min` |
+| API avain |                                        `15` |                             `30min` |                          `10min` |
 
-Kynnyksen alapuolella palveluntarjoajaa **ei** pidetä jäähdytyksessä; onnistuminen tyhjentää ikkunan. Yhteystason merkinnät (`provider:connectionId`) käyttävät sen sijaan eksponentiaalista `minRetryCooldownMs → maxRetryCooldownMs` -backoffia. Ylikirjoitukset: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regressiosuojaus: `tests/unit/provider-cooldown-window-gate.test.ts`.
+Palveluntarjoaja on kynnyksen alapuolella** ei** harkittu jäähdytys; menestys tyhjentää ikkunan. Yhteystason merkinnät (`provider:connectionId`) säilyttävät sen sijaan eksponentiaalisen `minRetryCooldownMs → maxRetryCooldownMs` perääntymisen. Ohitus: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regressiovartija: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. Yhteyden jäähdytys
 
@@ -858,6 +857,21 @@ kiintiö. Rehelliset rajoitukset:
 
 ---
 
+## Kun OmniRoute itsessään on tavoittamaton
+
+Palveluntarjoajan katkaisija, yhteyden jäähdytys ja mallin lukitus toimivat kaikki yhdyskäytävän sisällä. Jos asiakas ei saa yhteyttä yhdyskäytävään, se saa yhteysvirheen. OmniRoute ei voi siepata tätä epäonnistumista. Asiakas päättää yrittääkö uudelleen ja minkä viestin näyttää.
+
+OmniRoute ei tällä hetkellä tarjoa asiakaspuolen varavaihtoehtoa eikä määrittele sille käytäntöä. Määritä mikä tahansa vaihtoehtoinen reitti asiakkaassa tai yhdyskäytävän edessä.
+
+- `GET /api/health` tarkistaa elävyyden ilman todennusta.
+- `GET /api/health/ping` tarkistaa valmiuden, mukaan lukien vastaako tietokanta.
+- `GET /api/monitoring/health` antaa todennetuille soittajille syvemmän yleiskatsauksen terveydestä.
+- `omniroute launch <tool>` tutkii `/api/monitoring/health` ennen asiakkaan käynnistämistä. Se voi käynnistää paikallisen yhdyskäytävän automaattisesti. Käytettäessä `--no-start`, tavoittamaton yhdyskäytävä johtaa `GatewayUnreachable` koodiin ja poistumiskoodiin `69`.
+
+Voit katkaista asiakkaan yhteyden OmniRoute seuraamalla [Palauta asiakasasetukset](../guides/UNINSTALL.md#revert-client-configuration).
+
+---
+
 ## Virheenkorjaus
 
 - Painotettu combo vastaa `503 all_targets_cooling_down` (`Retry-After` asetettu, `diagnostics.excluded` listaa jokaisen kohteen tiloilla `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → allas on määritetty ja yhdistetty, jokainen kohde on vain vikasietoisuusajastimen sulkema pois; varoitus `[COMBO] Weighted selection: every target excluded before dispatch — …` nimee syyt ja jäljellä olevat sekunnit. Samasta kombosta tuleva `404 no_executable_targets` tarkoittaa, ettei vikasietoisuusajastin ollut osallisena (ei mitään ajettavaa, tai jokainen tili epäonnistui saatavuuskokeessa). Toteutettu tiedostossa `open-sse/services/combo/pinRecovery.ts` tiedoston `targetResolution.ts` keräämistä poissulkennoista.
@@ -869,96 +883,65 @@ kiintiö. Rehelliset rajoitukset:
 
 ---
 
-## Ajonaikainen tila — agentin pikaviite
+## Runtime state — agentin pikaopas
 
-> Siirretty sellaisenaan tiedostosta `AGENTS.md` → "Resilience Runtime State" (PR #12743),
-> jotta agenttiopas pysyy alle 40k:n kontekstibudjetin. Kyseessä on tiivistetty,
-> agenteille suunnattu näkymä yllä oleviin osioihin; numeroidut osiot pysyvät täydenä
-> viitteenä.
+> Siirretty sanatarkasti `AGENTS.md` → "Resilience Runtime State" -tilasta (PR #12743), joten agenttiopas pysyy 40 000 kontekstibudjetin alapuolella. Se on tiivistetty, agenttiin päin oleva näkymä yllä olevista osioista; numeroidut kohdat pysyvät täydellisinä viitteinä.
 
-OmniRoutessa on kolme toisiinsa liittyvää mutta erillistä tilapäisvirhemekanismia. Pidä
-niiden vaikutusaluet erillään reitityksen käyttäytymistä virheenkorjatessasi. Katso
-[3-kerroksinen vikasietoisuuskaavio](../diagrams/exported/resilience-3layers.svg)
-(lähde: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-nopeaa yleiskuvaa varten.
+OmniRoute on kolme toisiinsa liittyvää mutta erillistä tilapäisvikamekanismia. Pidä niiden laajuus erillään reitityskäyttäytymisen virheenkorjauksessa. Katso [3-kerroksinen kimmoisuuskaavio](../diagrams/exported/resilience-3layers.svg) (lähde: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ) saadaksesi yhdellä silmäyksellä karttaa.
 
 ### Palveluntarjoajan katkaisija
 
-**Vaikutusalue**: koko palveluntarjoaja, esim. `glm`, `openai`, `anthropic`.
+**Laajuus** : koko palveluntarjoaja, esim. `glm`, `openai`, `anthropic`.
 
-**Tarkoitus**: lopettaa liikenteen lähettäminen palveluntarjoajalle, joka epäonnistuu
-toistuvasti upstream-/palvelutasolla, jotta yksi epäkunnossa oleva palveluntarjoaja ei
-hidasta jokaista pyyntöä.
+**Tarkoitus** : lopeta liikenteen lähettäminen palveluntarjoajalle, joka epäonnistuu toistuvasti upstream/service tasolla, jotta yksi epäterveellinen palveluntarjoaja ei hidasta jokaista pyyntöä.
 
-**Toteutus**:
+**Toteutus** :
 
 - Ydinluokka: `src/shared/utils/circuitBreaker.ts`
-- Chat-portin/suorituksen kytkennät: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- Ajonaikaisen tilan API: `src/app/api/monitoring/health/route.ts`
-- Jaetut wrapperit: `open-sse/services/accountFallback.ts`
-- Pysyväistetty tilataulu: `domain_circuit_breakers`
+- Chat gate/execution johdotus: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- Ajonaikainen tila API: `src/app/api/monitoring/health/route.ts`
+- Jaetut kääreet: `open-sse/services/accountFallback.ts`
+- Pysyvä tilataulukko: `domain_circuit_breakers`
 
-**Tilat** (4 — `src/shared/utils/circuitBreaker.ts`):
+**osavaltioissa** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: normaali liikenne sallitaan.
-- `DEGRADED`: varhaisvaroitusvyöhyke — virheet ylittivät heikkenemiskynnyksen mutta eivät
-  vielä katkaisukynnystä; liikenne virtaa edelleen, hallintanäkymät näyttävät varoituksen.
-  Onnistunut yhteystesti tai hiljainen jakso ilman uusia virheitä palauttaa sen tilaan
-  `CLOSED` (ikkunan tiedot ovat tiedostossa `docs/architecture/RESILIENCE_GUIDE.md`).
-- `OPEN`: palveluntarjoaja on tilapäisesti estetty; kutsujat saavat provider-circuit-open
-  -vastauksen tai combo-reititys siirtyy toiseen kohteeseen.
-- `HALF_OPEN`: nollausaikakatkaisu on kulunut umpeen; salli koepyyntö. Onnistuminen sulkee
-  katkaisijan, epäonnistuminen avaa sen uudelleen.
+- `CLOSED`: normaali liikenne on sallittua.
+- `DEGRADED`: ennakkovaroituskaistan — virheet ylittivät huononemisrajan, mutta eivät vielä katkaisukynnystä; liikenne kulkee edelleen, kojelaudat näyttävät varoituksen. Kelvollinen yhteystesti tai hiljainen ikkuna ilman uutta vikaa palauttaa sen `CLOSED` (`docs/architecture/RESILIENCE_GUIDE.md` ssä on ikkuna).
+- `OPEN`: palveluntarjoaja on väliaikaisesti estetty; soittajat saavat palveluntarjoajan piirin avoimen vastauksen tai yhdistelmäreititys hyppää toiseen kohteeseen.
+- `HALF_OPEN`: nollauksen aikakatkaisu on kulunut; salli tutkintapyyntö. Onnistuminen sulkee katkaisijan, epäonnistuminen avaa sen uudelleen.
 
-**Oletusarvot** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, käytetään kohdan
-`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` kautta tiedostossa
-`src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` tiedostossa
-`src/sse/handlers/chatHelpers.ts`). Koko palveluntarjoajan katkaisija toimii parametreilla
-`circuitBreakerThreshold` / `circuitBreakerReset`:
+**Oletukset** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, kulutetaan `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` n kautta `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). Koko palveluntarjoajan katkaisija toimii `circuitBreakerThreshold` / `circuitBreakerReset` llä:
 
-| Profiili    |  heikkenee | avautuu (`circuitBreakerThreshold`) | nollautuu (`circuitBreakerReset`) |
-| ----------- | ---------: | ----------------------------------: | --------------------------------: |
-| OAuth       |        `5` |                                 `8` |                             `60s` |
-| API-avain   |        `7` |                                `12` |                             `30s` |
-| Paikallinen | (johdettu) |                                 `2` |                             `15s` |
+| Profiili  | hajoaa klo | aukeaa (`circuitBreakerThreshold`) | nollaa (`circuitBreakerReset`) |
+| --------- | ---------: | ---------------------------------: | -----------------------------: |
+| OAuth     |        `5` |                                `8` |                          `60s` |
+| API avain |        `7` |                               `12` |                          `30s` |
 
-`PROVIDER_PROFILES` määrittelee myös `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) ja `providerCooldownMs` (5/10/1 min): nämä
-ruokkivat **valinnaisen globaalin Provider Cooldown -jäähdyttelyn ikkunaportin**
-(`PROVIDER_COOLDOWN_ENABLED`, oletuksena pois päältä) — palveluntarjoajatason merkintä
-tiedostossa `open-sse/services/providerCooldownTracker.ts` lasketaan jäähtyvänä vasta
-`providerFailureThreshold` virheen jälkeen ikkunan `providerFailureWindowMs` sisällä, ja
-jäähtyy sitten `providerCooldownMs`:n ajan. Ne EIVÄT ole käytössä olevan katkaisijan
-kynnyksiä — älä säädä niitä odottaen katkaisijan käyttäytymistä. Jokainen oletusarvo on
-ohitettavissa `OMNIROUTE_PROVIDER_BREAKER_*`- ja
-`OMNIROUTE_CIRCUIT_BREAKER_*`-ympäristömuuttujilla; ajonaikaisesti tarkka viitetaulukko
-sijaitsee tiedostossa `docs/architecture/RESILIENCE_GUIDE.md`.
+`local` profiili (`2` errors / `15s`) on myös `PROVIDER_PROFILES` ssä, mutta sitä ei ole kytketty katkaisijaan: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) hyväksyy vain `oauth` tai `apikey`, ja `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) palauttaa toisen näistä kahdesta (rekisteröimättömät palveluntarjoajat saavat `apikey`).
 
-Vain palveluntarjoajatason virhetilojen pitäisi laukaista palveluntarjoajan katkaisija:
+`PROVIDER_PROFILES` määrittelee myös `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) ja `providerCooldownMs` (5/10/1 min) — OAuth/API key/local, joissa paikalliset arvot ovat inerttejä samasta syystä kuin edellä: nämä tehostavat** maailmanlaajuisen palveluntarjoajan jäähtymisen ikkunaportti** (`PROVIDER_COOLDOWN_ENABLED`, oletuksena pois päältä) — palveluntarjoajan tason merkintä `open-sse/services/providerCooldownTracker.ts` :ssä lasketaan vain jäähdytykseksi `providerFailureWindowMs` sisällä tapahtuneiden `providerFailureThreshold` vikojen jälkeen ja jäähtyy sitten `providerCooldownMs` ssä. Ne ovat NOT live-katkaisijan kynnykset — eivät viritä niitä odottaen katkaisijan käyttäytymistä. Jokainen oletusarvo on ohitettavissa `OMNIROUTE_PROVIDER_BREAKER_*` ja `OMNIROUTE_CIRCUIT_BREAKER_*` env-muuttujilla; ajonaikaisen tarkkuuden viitetaulukko elää `docs/architecture/RESILIENCE_GUIDE.md` ssa.
+
+Vain palveluntarjoajan tason vikatilojen tulee laukaista palveluntarjoajan katkaisija:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-Älä laukaise koko palveluntarjoajan katkaisijaa tavallisten tili-/avain-/mallivirheiden
-vuoksi, kuten useimmissa `401`-, `403`- tai `429`-tapauksissa. Ne kuuluvat yleensä
-yhteyden jäähdyttelyn tai mallilukituksen piiriin. Yleisen API-avainpalveluntarjoajan
-`403`-virheen pitäisi olla palautuva, ellei sitä luokitella lopulliseksi
-palveluntarjoaja-/tilivirheeksi.
+Älä laukea koko palveluntarjoajan katkaisijaa normaaleissa account/key/model virheissä, kuten useimmissa `401`, `403` tai `429` tapauksissa. Ne kuuluvat yleensä yhteyden jäähdytykseen tai mallin lukitukseen. Yleisen API-avaimen tarjoajan `403` pitäisi olla palautettavissa, ellei sitä ole luokiteltu terminaalin provider/account virheeksi.
 
-Katkaisija käyttää laiskaa palautumista, ei tausta-ajastinta. Kun `OPEN`-tila vanhenee, lukukutsut kuten `getStatus()`, `canExecute()` ja `getRetryAfterMs()` päivittävät tilan tilaan `HALF_OPEN`, jotta koontinäytöt ja combo-ehdokkaiden muodostajat eivät jatka vanhentuneen palveluntarjoajan poissulkemista loputtomiin.
+Katkaisija käyttää laiskaa palautusta, ei taustaajastinta. Kun `OPEN` vanhenee, lukemat, kuten `getStatus()`, `canExecute()` ja `getRetryAfterMs()` päivittävät tilan muotoon `HALF_OPEN`, joten kojelaudat ja yhdistelmäehdokkaiden rakentajat eivät sulje pois vanhentuneita palveluntarjoajia ikuisesti.
 
-### Yhteyden jäähdytysaika
+### Yhteyden jäähdytys
 
-**Laajuus**: yksi palveluntarjoajan yhteys/tili/avain.
+**Laajuus** : yksi palveluntarjoaja connection/account/key.
 
-**Tarkoitus**: ohittaa väliaikaisesti yksi viallinen avain/tili samalla, kun muut saman palveluntarjoajan yhteydet voivat jatkaa pyyntöjen käsittelyä.
+**Tarkoitus** : ohita tilapäisesti yksi huono key/account ja salli muiden saman palveluntarjoajan yhteyksien jatkaa pyyntöjen käsittelyä.
 
-**Toteutus**:
+**Toteutus** :
 
-- Kirjoitus-/päivityspolku: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Tilin valinta/suodatus: `src/sse/services/auth.ts::getProviderCredentials...`
-- Jäähdytysajan laskenta: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Write/update polku: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Tili selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Jäähdytyslaskenta: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Asetukset: `src/lib/resilience/settings.ts`
 
 Tärkeät kentät palveluntarjoajan yhteyksissä:
@@ -978,44 +961,44 @@ Tilin valinnan aikana yhteys ohitetaan, kun:
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Jäähdytysjaksot ovat myös laiskoja: kun `rateLimitedUntil` on menneisyydessä, yhteys tulee jälleen kelvolliseksi. Onnistuneen käytön yhteydessä `clearAccountError()` tyhjentää `testStatus`- ja `rateLimitedUntil`-kentät, virhekentät sekä `backoffLevel`-kentän.
+Jäähdytykset ovat myös laiskoja: kun `rateLimitedUntil` on menneisyydessä, yhteys tulee jälleen kelvolliseksi. Onnistuneen käytön yhteydessä `clearAccountError()` tyhjentää `testStatus`, `rateLimitedUntil`, virhekentät ja `backoffLevel`.
 
-Yhteyden jäähdytysajan oletuskäyttäytyminen:
+Oletusyhteyden jäähtymiskäyttäytyminen:
 
-- OAuth-perusjäähdytysaika: `5s`.
-- API-avaimen perusjäähdytysaika: `3s`.
-- API-avaimen `429`-virheessä tulee suosia ylävirran uudelleenyritysvihjeitä (`Retry-After`, reset-otsakkeet tai jäsenneltävä nollausteksti), kun niitä on saatavilla.
-- Toistuvat korjattavissa olevat virheet käyttävät eksponentiaalista viivettä (backoff):
+- OAuth perusjäähdytys: `5s`.
+- API-avaimen perusjäähdytys: `3s`.
+- API-avain `429` suosii ylävirran uudelleenyritysvihjeitä (`Retry-After`, reset headers tai jäsennettävä nollausteksti), kun niitä on saatavilla.
+- Toistuvissa korjattavissa olevissa virheissä käytetään eksponentiaalista perääntymistä:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Thundering herd -ilmiön estävä suojaus estää samanaikaisia virheitä samassa yhteydessä pidentämästä jäähdytysaikaa toistuvasti tai kasvattamasta `backoffLevel`-arvoa kahdesti.
+Ukkosta estävä laumasuoja estää saman liitännän samanaikaiset viat pidentämästä toistuvasti jäähdytysaikaa tai lisäämästä `backoffLevel` kaksinkertaisesti.
 
-Lopputilat eivät ole jäähdytysjaksoja. `banned`, `expired` (josta tulee lopputila vasta N:n rajatun uudelleenyrityksen jälkeen `EXPIRED_RETRY_MAX`-arvon kautta) ja `credits_exhausted` on tarkoitus pysyä poissa käytöstä, kunnes tunnistetiedot tai asetukset muuttuvat tai operaattori nollaa ne. Älä korvaa lopputiloja ohimenevällä jäähdytystilalla.
+Päätetilat eivät ole jäähdytyksiä. `banned`, `expired` (josta tulee terminaali vasta N rajatun uudelleenyrityksen jälkeen `EXPIRED_RETRY_MAX` kautta) ja `credits_exhausted` on tarkoitus pysyä poissa käytöstä, kunnes credentials/settings muuttuu tai operaattori nollaa ne. Älä kirjoita päätetiloja ohimenevällä jäähdytystilalla.
 
-### Mallilukitus
+### Mallin lukitus
 
-**Laajuus**: palveluntarjoaja + yhteys + malli.
+**Laajuus** : palveluntarjoaja + -yhteys + -malli.
 
-**Tarkoitus**: välttää koko yhteyden poistamista käytöstä, kun vain yksi malli on käyttämättävissä tai kiintiörajoitettu kyseisessä yhteydessä.
+**Tarkoitus** : vältä koko yhteyden poistamista käytöstä, kun vain yksi malli ei ole käytettävissä tai sille on rajoitettu kiintiö.
 
 Esimerkkejä:
 
-- Mallikohtaisia kiintiöitä käyttävät palveluntarjoajat, jotka palauttavat `429`.
-- Paikalliset palveluntarjoajat, jotka palauttavat `404` yhdestä puuttuvasta mallista.
-- Palveluntarjoajakohtaiset tila-/mallioikeusvirheet, kuten tietyt Grok-tilat.
+- Mallikohtaisten kiintiöiden tarjoajat palauttavat `429`.
+- Paikalliset toimittajat palauttavat `404` yhdestä puuttuvasta mallista.
+- Palveluntarjoajakohtaiset mode/model -lupavirheet, kuten valitut Grok tilat.
 
-Mallilukitus sijaitsee tiedostossa `open-sse/services/accountFallback.ts`, ja se antaa saman yhteyden jatkaa muiden mallien käsittelyä.
+Mallin lukitus toimii `open-sse/services/accountFallback.ts` ja antaa saman yhteyden edelleen palvella muita malleja.
 
-### Vianmääritysohjeet
+### Virheenkorjausopas
 
 - Jos kaikki palveluntarjoajan avaimet ohitetaan, tarkista sekä palveluntarjoajan katkaisijan tila että kunkin yhteyden `rateLimitedUntil`/`testStatus`.
-- Jos palveluntarjoaja vaikuttaa olevan pysyvästi poissuljettu nollausikkunan jälkeen, tarkista, lukeeko koodi raakaa `state`-arvoa sen sijaan, että se käyttäisi `getStatus()`/`canExecute()`-funktioita.
-- Jos yksi palveluntarjoajan avain epäonnistuu, mutta muiden pitäisi toimia, suosi yhteyden jäähdytysaikaa palveluntarjoajan katkaisijan sijaan.
-- Jos vain yksi malli epäonnistuu, suosi mallilukitusta yhteyden jäähdytysajan sijaan.
-- Jos tilan pitäisi palautua itsestään, sillä tulisi olla tuleva aikaleima/nollauksen aikakatkaisu sekä lukupolku, joka päivittää vanhentuneen tilan. Pysyvät tilat vaativat manuaalisia tunnistetieto- tai konfiguraatiomuutoksia.
+- Jos palveluntarjoaja näyttää pysyvästi poissuljetulta nollausikkunan jälkeen, tarkista, lukeeko koodi raakaa `state` `getStatus()`/`canExecute()` n sijaan.
+- Jos yksi palveluntarjoajan avain epäonnistuu, mutta muiden pitäisi toimia, suosittele yhteyden jäähdyttämistä palveluntarjoajan katkaisijan sijaan.
+- Jos vain yksi malli epäonnistuu, mieluummin mallin lukitus kuin yhteyden jäähdytys.
+- Jos tilan pitäisi palautua itsestään, sillä pitäisi olla tuleva timestamp/reset aikakatkaisu ja lukupolku, joka päivittää vanhentuneen tilan. Pysyvät tilat edellyttävät manuaalisia tunnistetietojen tai asetusten muutoksia.
 
 ---
 

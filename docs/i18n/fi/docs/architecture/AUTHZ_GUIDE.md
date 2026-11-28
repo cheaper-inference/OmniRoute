@@ -5,11 +5,10 @@
 ---
 
 > **Totuuden lähde:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Viimeksi päivitetty:** 2026-09-22 — laajuuden nimiavaruudet osoittavat tiedostoon MCP-SERVER.md
 
-OmniRoutessa on reittitietoinen valtuutusputki, joka valvoo jokaista API-pyyntöä. Luokittelu on **deterministinen** ja **fail-closed** — kaikki, mitä ei voida luokitella, päätyy `MANAGEMENT`-luokkaan ja vaatii istunnon tai hallintatason tunnuksen. Tämä sivu selittää mallin insinööreille, jotka ylläpitävät reittejä tai suunnittelevat uusia päätepisteitä.
+OmniRoute on reittitietoinen valtuutusputki, joka portit jokaisen API pyynnön. Luokittelu on** deterministinen** ja** vika-suljettu** — kaikki, mitä ei voida luokitella, päätyy `MANAGEMENT` :ksi ja vaatii istunnon tai hallintatason tunnuksen. Tämä sivu selittää mallin reittejä ylläpitäville tai uusia päätepisteitä suunnitteleville insinööreille.
 
-![Valtuutusputki (3 reittiluokkaa + käytäntöjen arviointi)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Lähde: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -203,7 +202,7 @@ Jokaisella reittiluokalla on käytäntö `src/server/authz/policies/`:ssa:
 
 - **`publicPolicy`** (`policies/public.ts`) — palauttaa aina `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — poimii siirtotiestä, vahvistaa `validateApiKey()` kautta. Menee nimettömäksi vain, kun tehokas `REQUIRE_API_KEY` -ominaisuuden lippu on poistettu käytöstä. Tehokas lippu ratkaistaan `isRequireApiKeyEnabled()` :n (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) avulla, joten hallintapaneelin ominaisuusliput ja ympäristömuuttujat hallitsevat `/api/v1/*`, `/api/v1beta/*` ja aliaksia johdonmukaisesti. Ratkaisijavika epäonnistuu suljettu. Sallii kojelauta-istuntopyynnöt asiakkaan API reiteillä (mukaan lukien `/api/v1/models`, jota käytetään kojelautamalliluettelossa). Kun Entra ID SSO on käytössä, SSO -haara käsittelee siirtotietä, joka on rakenteellisesti Entra-tunnus (kolme base64url-segmenttiä, `RS*` alg, `kid`).** ennen** `validateApiKey()` ja sen tuomio on lopullinen — se ei koskaan putoa API-avaimen polulle tai degrade-anonyymiksi haaralle, joten identiteetintarjoajan katkosta ei voi tulla avointa pääsyä. Staattiset API -näppäimet eivät muutu. Katso [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — hyväksyy kojelautaistunnon, sisäiset mallisynkronointipyynnöt (verrataan `/api/providers/[name]/(sync-models|models)`) tai ohittaa kokonaan, jos `isAuthRequired()` palauttaa epätosi. Palauttaa 403 (`AUTH_001`), kun siirtotie on olemassa, mutta virheellinen, 401 muussa tapauksessa. Pakottaa myös reittivartijatasot (LOCAL_ONLY / ALWAYS_PROTECTED) ennen todennushaaraa — katso [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` :n LOCAL_ONLY polkuja (tänään: `/api/mcp/`) voidaan käyttää ei-paluupalkin kautta, kun siirtotieavain kantaa `manage` aluetta; kaikki muut LOCAL_ONLY polut pysyvät tiukkana takaisinkytkentäisinä laajuudesta riippumatta.
+- **`managementPolicy`** (`policies/management.ts`) — hyväksyy kojelautaistunnon, sisäiset mallisynkronointipyynnöt (verrataan `/api/providers/[name]/(sync-models|models)`) tai ohittaa kokonaan, jos `isAuthRequired()` palauttaa epätosi. Palauttaa 403 (`AUTH_001`), kun siirtotie on olemassa, mutta virheellinen, 401 muussa tapauksessa. Pakottaa myös reittivartijatasot (LOCAL_ONLY / ALWAYS_PROTECTED) ennen todennushaaraa — katso [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (tänään: `/api/mcp/`) LOCAL_ONLY polkuja voidaan käyttää ei-paluupalkin kautta, kun siirtotieavaimessa on `manage`/`admin` -alue tai kapea `mcp:connect` -alue (`hasMcpConnectOrManageScope`), tai todennettu kojelautaistunto; kaikki muut LOCAL_ONLY polut pysyvät tiukkana takaisinkytkentäisinä laajuudesta riippumatta.
 
 Onnistunut käytäntö palauttaa `AuthSubject` ja `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Alavirran käsittelijät voivat lukea sen `assertAuth(request, "CLIENT_API")` kautta `src/server/authz/assertAuth.ts` ssä sen sijaan, että he suorittaisivat todennuslogiikkaa uudelleen.
 
@@ -294,37 +293,24 @@ export async function POST(request: Request) {
 
 Valitse joukko muodon, älä helppouden perusteella. Yksittäinen reitti lisätään joukkoon `PUBLIC_API_ROUTES_EXACT` (tai vain GET-pyynnöille joukkoon `PUBLIC_READONLY_CORS_API_ROUTES`); vain aito alipuu lisätään joukkoon `PUBLIC_API_ROUTE_PREFIXES`, ja sen **täytyy päättyä merkkiin `/`**. Yksittäisen reitin lisääminen etuliiteluetteloon julkaisee myös kaikki viereiset polut, joilla on samat alkumerkit — mukaan lukien myöhemmin lisättävät dynaamisten segmenttien sisarreitit (GHSA-74g9-q8f6-793h). Päivitä yksikkötestit tiedostoissa `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` ja `tests/unit/authz/classify.test.ts`.
 
-## Laajuudet
+## Soveltamisalat
 
-Kolme nimiavaruutta. Jokainen tarkistaja lukee vain omat merkkijononsa. Vertailu,
-mukaan lukien miksi `manage` epäonnistuu `scopeMatches`-tarkistuksessa `read:compression`-kohdalla ja miksi `read`-käyttöoikeustunnus ei voi `PATCH /api/keys/{id}`, löytyy
-[Kolme laajuuden nimiavaruutta](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Kolme nimiavaruutta. Jokainen nappula lukee vain omat merkkijonansa. Vierekkäin, mukaan lukien miksi `manage` epäonnistuu `scopeMatches` :ssä `read:compression` ssä ja miksi `read` käyttöoikeustunnus ei voi `PATCH /api/keys/{id}`, on [kolme soveltamisalan nimiavaruutta](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API-avaimet sisältävät `scopes`-taulukon (tallennetaan JSON-muodossa `api_keys.scopes`-kenttään, katso `src/lib/db/apiKeys.ts`).
+API -näppäimet sisältävät `scopes` taulukon (tallennettu nimellä JSON `api_keys.scopes`:ssä, katso `src/lib/db/apiKeys.ts`).
 
-### Hallintalaajuus
+### Hallinnon laajuus
 
-- `manage` / `admin` — `hasManageScope`. Bearer-pääsy hallinnan API-reitteihin.
-- `mcp:connect`, `self:usage`, `self:account-quota` ja
-  `policy:bypass-provider-quota` ovat additiivisia tarkkoja vastaavuuslaajuuksia. Ne ovat
-  `MANAGEMENT_API_KEY_SCOPES`-ulkopuolella. `mcp:connect` avaa vain
-  `/api/mcp/`-reitin, joka on ei-loopback-poikkeus.
+- `manage` / `admin` — `hasManageScope`. Kuljettajan pääsy hallinta- API -reiteille.
+- `mcp:connect`, `self:usage`, `self:account-quota` ja `policy:bypass-provider-quota` ovat additiivisia tarkan haun skooppeja. He istuvat `MANAGEMENT_API_KEY_SCOPES` ulkopuolella. `mcp:connect` avaa vain `/api/mcp/` non-loopback carve-out.
 
-### MCP-työkalun laajuudet
+### MCP työkalutähtäimet
 
-Luettelo ja vastaavuussäännöt (identtinen merkkijono tai myönnetty laajuus, joka päättyy `*`):
-[MCP-työkalun laajuudet](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` tiedostossa `src/shared/constants/mcpScopes.ts` on alkuperäinen tyypitetty
-osajoukko, ei koko luettelo. Täytäntöönpano tapahtuu
-`open-sse/mcp-server/scopeEnforcement.ts`-tiedostossa sen jälkeen, kun `resolveCallerScopeContext()`
-ratkaisee laajuudet MCP-todennustiedoista, pyynnön metatiedoista tai `OMNIROUTE_MCP_SCOPES`-muuttujasta.
-Se pysyy poissa käytöstä, ellei `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Katalogi- ja täsmäyssäännöt (identtinen merkkijono tai myönnetty laajuus, joka päättyy `*` aan): [MCP -työkalualueet](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` on alkuperäinen kirjoitettu osajoukko, ei koko luettelo. Täytäntöönpano suoritetaan `open-sse/mcp-server/scopeEnforcement.ts` ssä sen jälkeen, kun `resolveCallerScopeContext()` on selvittänyt laajuudet MCP -todennustiedoista, pyynnön metadatasta tai `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ottaa sen käyttöön maailmanlaajuisesti (oletus `false`), mutta se on aina pakotettu HTTP/SSE soittajalle, jonka API näppäimestä puuttuu `manage`/`admin` (katso `shouldForceScopeEnforcement()` in `open-sse/mcp-server/scopeEnforcement.ts`), lipusta riippumatta.
 
-### Käyttöoikeustunnuksen laajuudet
+### Käyttöoikeusvaltuudet
 
-`read` / `write` / `admin` `oma_live_…`-tunnuksissa, järjestetty `scopeSatisfies`-funktion mukaan
-(`src/lib/accessTokens/scopes.ts`). Tämä järjestys koskee vain käyttöoikeustunnuksen
-tunnistetietoja. Katso [Hallinnan todennus](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` `oma_live_…` tokeneilla, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) järjestys. Tämä sijoitus koskee vain käyttöoikeustunnusta. Katso [Hallintatodennus](../guides/MANAGEMENT-AUTH.md).
 
 ## Todennus vaaditaan -kytkin
 

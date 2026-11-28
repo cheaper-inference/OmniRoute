@@ -166,11 +166,11 @@ Microsoft 365 პროვაიდერში** კავშირის დ�
 
 დარწმუნდით, რომ `copilot-m365-web` ჩართულია** დაფის → პროვაიდერები** . პროვაიდერი შესაძლოა დამალული იყოს ნაგულისხმევად ზოგიერთ დონეზე.
 
-## მითითებები
+## ცნობები
 
-- პრობლემა: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- განხილვა: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
-- წყარო: `src/shared/constants/providers/web-cookie.ts` (პროვაიდერის განსაზღვრება)
-- HAR-ის იმპორტი: `src/shared/utils/m365HarImport.ts`
-- ავტორიზაციის მონაცემების ველები: `src/shared/providers/webSessionCredentials.ts`
-- ტარიფის მოდალური ფანჯარა: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`
+- გამოცემა: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- დისკუსია: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- წყარო: `src/shared/constants/providers/web-cookie.ts` (პროვაიდერის განმარტება)
+- HAR იმპორტი: `src/shared/utils/m365HarImport.ts`
+- საკრედიტო ველები: `src/shared/providers/webSessionCredentials.ts`
+- დონის მოდალური: `src/app/(dashboard)/dashboard/providers/[id]/components/modals/m365Tier.ts`

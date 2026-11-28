@@ -329,19 +329,16 @@ ang isang naka-mask na preview (`maskedApiKey`: hanggang 4 na character sa bawat
 key, at wala para sa key na may 8 character o mas kaunti) at ang `projectId` ng koneksyon. Hindi isinasama ang dalawang field
 na ito sa response para sa anumang ibang key.
 
-## Pagresolba ng mga Credential
+## Resolusyon ng Mga Kredensyal
 
 `getCloudAgentCredentials(providerId)` sa `src/lib/cloudAgent/api.ts`:
 
-1. Nilo-load ang mga aktibong koneksyon ng provider sa pamamagitan ng `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Para sa bawat koneksyon, inuuna ang `apiKey` (na-trim). Kung wala ito, ginagamit ang `accessToken`.
-3. Ibinabalik ang unang token na hindi walang laman, na nakabalot bilang `{ apiKey: token }`.
-4. Ibinabalik ang `null` kung walang makitang magagamit na token — tumutugon ang API ng `400` na may
-   `"Walang naka-configure na aktibong credential para sa cloud agent provider: <id>"`.
+1. Naglo-load ng mga aktibong koneksyon sa provider sa pamamagitan ng `getProviderConnections({ provider: providerId, isActive: true })`.
+2. Para sa bawat koneksyon, mas pinipili `apiKey` (trimmed). Bumagsak pabalik sa `accessToken`.
+3. Ibinabalik ang unang walang laman na token na nakabalot bilang `{ apiKey: token }`.
+4. Ibinabalik ang `null` kung walang nahanap na token na magagamit — ang API ay tumutugon `400` na may `"No active credentials configured for cloud agent provider: <id>"`.
 
-Nangangahulugan itong muling ginagamit ng Cloud Agents ang parehong talahanayan ng Provider Connection na ginagamit ng mga regular na LLM
-provider. Upang i-enable ang Jules, gumawa ng aktibong koneksyon na may `provider: "jules"`
-at may laman na `apiKey`.
+Nangangahulugan ito na muling ginagamit ng Cloud Agents ang parehong talahanayan ng Connection ng Provider bilang mga regular na provider LLM. Upang paganahin Jules, lumikha ng aktibong koneksyon sa `provider: "jules"` at isang populated `apiKey`.
 
 ## Dashboard
 

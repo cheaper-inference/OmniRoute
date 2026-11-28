@@ -62,41 +62,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute ଟୋକେନ୍କୁ ସଂରକ୍ଷଣ କରେ ଏବଂ ତୁରନ୍ତ 1ଟି ଫଳାଫଳ ପାଇଁ ଏକ ପରୀକ୍ଷଣ ସନ୍ଧାନ ଚଲାଏ; ଯଦି Notion
 ଏକ ତ୍ରୁଟି ଅବଜେକ୍ଟ ଫେରାଏ, ତେବେ ଟୋକେନ୍କୁ ସଫା କରାଯାଏ ଏବଂ କଲ୍ଟି `400` ସହିତ ବିଫଳ ହୁଏ।
 
-## MCP ଟୁଲ୍ଗୁଡ଼ିକ (6)
+## MCP ସାଧନ (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` ରେ ପରିଭାଷିତ। କଲ୍ ସମୟରେ
-`getNotionToken()` ମାଧ୍ୟମରେ ଟୋକେନ୍ ନିର୍ଣ୍ଣୟ କରାଯାଏ; ଯଦି କୌଣସି ଟୋକେନ୍ କନଫିଗର୍ ହୋଇନାହିଁ, ତେବେ ଟୁଲ୍ଟି
-`"Notion ଇଣ୍ଟିଗ୍ରେସନ୍ ଟୋକେନ୍ କନଫିଗର୍ ହୋଇନାହିଁ। ଏହାକୁ Settings > Context Sources ରେ ସେଟ୍ କରନ୍ତୁ।"` ତ୍ରୁଟି ଉତ୍ପନ୍ନ କରେ।
+`open-sse/mcp-server/tools/notionTools.ts` ରେ ବ୍ୟାଖ୍ୟା କରାଯାଇଛି। `getNotionToken()` ମାଧ୍ୟମରେ କଲ୍ ସମୟରେ ଟୋକେନ୍ ସମାଧାନ ହୁଏ। ଯଦି କ none ଣସି ବିନ୍ୟାସ ହୋଇନାହିଁ ଟୁଲ୍ `"Notion integration token not configured. Set it in Settings > Context Sources."` ଫିଙ୍ଗିଥାଏ।
 
-| ଟୁଲ୍                         | ସ୍କୋପ୍         | ବର୍ଣ୍ଣନା                                                                                    |
-| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | ପାଠ୍ୟ କ୍ୱେରି ଦ୍ୱାରା ପୃଷ୍ଠା ଓ ଡାଟାବେସ୍ ସନ୍ଧାନ କରେ (ଶୀର୍ଷକ, ID, URL ଫେରାଏ)। ପୃଷ୍ଠାଙ୍କିତ।      |
-| `notion_get_page`            | `read:notion`  | ଏକ ପୃଷ୍ଠାର ID ଦ୍ୱାରା ତାହାର ବିଷୟବସ୍ତୁ ଓ ମେଟାଡାଟା ପ୍ରାପ୍ତ କରେ।                                |
-| `notion_list_block_children` | `read:notion`  | ଏକ ବ୍ଲକ୍ କିମ୍ବା ପୃଷ୍ଠାର ସମସ୍ତ ଚାଇଲ୍ଡ ବ୍ଲକ୍ (ବ୍ଲକ୍ ଟ୍ରି) ତାଲିକାଭୁକ୍ତ କରେ। ପୃଷ୍ଠାଙ୍କିତ।       |
-| `notion_query_database`      | `read:notion`  | ଇଚ୍ଛାଧୀନ `filter` + `sorts` (Notion API ଫର୍ମାଟ୍) ସହିତ ଡାଟାବେସ୍ କ୍ୱେରି କରେ। ପୃଷ୍ଠାଙ୍କିତ।     |
-| `notion_get_database`        | `read:notion`  | ID ଦ୍ୱାରା ଏକ ଡାଟାବେସ୍ର ସ୍କିମା/ମେଟାଡାଟା ପ୍ରାପ୍ତ କରେ।                                         |
-| `notion_append_blocks`       | `write:notion` | ଏକ ବିଦ୍ୟମାନ ବ୍ଲକ୍ କିମ୍ବା ପୃଷ୍ଠାରେ ଚାଇଲ୍ଡ ବ୍ଲକ୍ ଯୋଡ଼େ (ପ୍ରତି ଅନୁରୋଧରେ ସର୍ବାଧିକ 100ଟି ବ୍ଲକ୍)। |
+| ସାଧନ                         | ପରିସର          | ବର୍ଣ୍ଣନା                                                                                         |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
+| `notion_search`              | `read:notion`  | ପାଠ୍ୟ ଜିଜ୍ଞାସା ଦ୍ pages ାରା ପୃଷ୍ଠା ଏବଂ ଡାଟାବେସ୍ ସନ୍ଧାନ କରନ୍ତୁ (ଶିରୋନାମା, IDs, URLs)। ପୃଷ୍ଠା      |
+| `notion_get_page`            | `read:notion`  | ଏହାର ID ଦ୍ୱାରା ଏକ ପୃଷ୍ଠାର ବିଷୟବସ୍ତୁ ଏବଂ ମେଟାଡାଟା ପାଆନ୍ତୁ।                                        |
+| `notion_list_block_children` | `read:notion`  | ଏକ ବ୍ଲକ କିମ୍ବା ପୃଷ୍ଠାର ସମସ୍ତ ବ୍ଲକ ପିଲାମାନଙ୍କୁ ତାଲିକାଭୁକ୍ତ କର (ବ୍ଲକ ବୃକ୍ଷ)। ପୃଷ୍ଠା                |
+| `notion_query_database`      | `read:notion`  | ବ al କଳ୍ପିକ `filter` + `sorts` (Notion API ଫର୍ମାଟ୍) ସହିତ ଏକ ଡାଟାବେସ୍ ପ୍ରଶ୍ନ କରନ୍ତୁ। ପୃଷ୍ଠା       |
+| `notion_get_database`        | `read:notion`  | ID ଦ୍ୱାରା ଏକ ଡାଟାବେସର schema/metadata ପାଆନ୍ତୁ।                                                   |
+| `notion_append_blocks`       | `write:notion` | ବ୍ଲକ ପିଲାମାନଙ୍କୁ ଏକ ବିଦ୍ୟମାନ ବ୍ଲକ କିମ୍ବା ପୃଷ୍ଠାରେ ଯୋଡନ୍ତୁ (ପ୍ରତି ଅନୁରୋଧ ପାଇଁ ସର୍ବାଧିକ 100 ବ୍ଲକ)। |
 
-### ଇନ୍ପୁଟ୍ ପାରାମିଟର୍ଗୁଡ଼ିକ
+### ଇନପୁଟ୍ ପାରାମିଟରଗୁଡିକ
 
-- `notion_search` — `query` (1–500ଟି ଅକ୍ଷର), `pageSize` (1–100, ଡିଫଲ୍ଟ 20),
-  `startCursor` (ଇଚ୍ଛାଧୀନ)।
-- `notion_get_page` — `pageId` (32-ଅକ୍ଷରର ହେକ୍ସ କିମ୍ବା UUID)।
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ଡିଫଲ୍ଟ 50),
-  `startCursor` (ଇଚ୍ଛାଧୀନ)।
-- `notion_query_database` — `databaseId`, `filter` (ଇଚ୍ଛାଧୀନ, Notion ଫିଲ୍ଟର୍ ଫର୍ମାଟ୍),
-  `sorts` (ଇଚ୍ଛାଧୀନ ଆରେ), `pageSize` (1–100, ଡିଫଲ୍ଟ 50), `startCursor` (ଇଚ୍ଛାଧୀନ)।
-- `notion_get_database` — `databaseId`।
-- `notion_append_blocks` — `blockId`, `children` (ବ୍ଲକ୍ ଅବଜେକ୍ଟଗୁଡ଼ିକର ଆରେ),
-  `after` (ଇଚ୍ଛାଧୀନ ସ୍ଥାନ)।
+- `notion_search` — `query` (1-500 ଅକ୍ଷର), `pageSize` (1–100, ଡିଫଲ୍ଟ 20), `startCursor` (ବ al କଳ୍ପିକ)।
+- `notion_get_page` — `pageId` (32-char hex କିମ୍ବା UUID)।
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ଡିଫଲ୍ଟ 50), `startCursor` (ବ al କଳ୍ପିକ)।
+- `notion_query_database` — `databaseId`, `filter` (ବ al କଳ୍ପିକ, Notion ଫିଲ୍ଟର୍ ଫର୍ମାଟ୍), `sorts` (ଇଚ୍ଛାଧୀନ ଆରେ), `pageSize` (1–100, ଡିଫଲ୍ଟ 50), `startCursor` (ବ al କଳ୍ପିକ)।
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`, `children` (ବ୍ଲକ ବସ୍ତୁର ଆରେ), `after` (ବ al କଳ୍ପିକ ସ୍ଥିତି)।
 
-### ସ୍କୋପ୍ଗୁଡ଼ିକ
+### ପରିସର
 
-ପଠନ ଟୁଲ୍ଗୁଡ଼ିକ ପାଇଁ `read:notion` ଏବଂ ଲିଖନ ଟୁଲ୍ ପାଇଁ `write:notion` ଆବଶ୍ୟକ।
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ଥିବା ସମୟରେ ମାତ୍ର
-`open-sse/mcp-server/server.ts` ରେ ଥିବା `withScopeEnforcement()` ଦ୍ୱାରା ସ୍କୋପ୍ଗୁଡ଼ିକୁ ବାଧ୍ୟତାମୂଳକ କରାଯାଏ; କଲ୍କାରୀଙ୍କ
-ଅନୁମୋଦିତ ସ୍କୋପ୍ଗୁଡ଼ିକ `OMNIROUTE_MCP_SCOPES` (କମା ଦ୍ୱାରା ପୃଥକ) କିମ୍ବା
-ପ୍ରମାଣୀକୃତ API କି’ର ସ୍କୋପ୍ ପ୍ରସଙ୍ଗରୁ ଆସେ। ସମ୍ପୂର୍ଣ୍ଣ ସ୍କୋପ୍ ମଡେଲ୍ ପାଇଁ [MCP-SERVER.md](./MCP-SERVER.md) ଦେଖନ୍ତୁ।
+ପଠନ ଉପକରଣଗୁଡ଼ିକ `read:notion` ଆବଶ୍ୟକ କରେ ଏବଂ ଲେଖିବା ଉପକରଣ `write:notion` ଆବଶ୍ୟକ କରେ। `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ଯେତେବେଳେ `open-sse/mcp-server/server.ts` ରେ `withScopeEnforcement()` ଦ୍ୱାରା ପରିସରଗୁଡିକ ବାଧ୍ୟତାମୂଳକ ହୋଇଥାଏ, ଏବଂ ସର୍ବଦା ଏକ HTTP/SSE କଲର୍ ପାଇଁ ଯାହାର API ଚାବିରେ `manage`/`admin` ଅଭାବ ଥାଏ। କଲରଙ୍କ ଅନୁମତିପ୍ରାପ୍ତ ସ୍କୋପଗୁଡ଼ିକ `OMNIROUTE_MCP_SCOPES` (କମା ଦ୍ୱାରା ପୃଥକ) କିମ୍ବା ପ୍ରାମାଣିକୃତ API କି ର ପରିସର ପ୍ରସଙ୍ଗରୁ ଆସିଥାଏ। ପୂର୍ଣ୍ଣ ପରିସର ମଡେଲ ପାଇଁ [MCP-SERVER.md](./MCP-SERVER.md) ଦେଖନ୍ତୁ।
 
 ## ଏଣ୍ଡପଏଣ୍ଟଗୁଡ଼ିକ
 

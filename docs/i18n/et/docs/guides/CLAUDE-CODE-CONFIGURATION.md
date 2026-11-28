@@ -68,10 +68,10 @@ Codex (`<environment_context><cwd>`) ja OpenCode (`x-opencode-session`) tuvastat
 
 Töökataloog erineb masinate vahel, seega võib sama hoidla kuvada erinevatel teedel. Selle asemel saatke projekt selgesõnaliselt: Claude Code lisab igale mudelipäringule kõik `ANTHROPIC_CUSTOM_HEADERS` loetletud päised ja OmniRoute loeb neist kaks:
 
-| Päis                       | Väärtus                                                                  |
-| -------------------------- | ------------------------------------------------------------------------ |
-| `x-omniroute-project`      | Projekti nimi, nt `omniroute`                                            |
-| `x-omniroute-project-repo` | Normaliseeritud kaugjuhtimispult, nt `github.com/diegosouzapw/OmniRoute` |
+| Päis                       | Väärtus                                                                       |
+| -------------------------- | ----------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Projekti nimi, nt `omniroute`                                                 |
+| `x-omniroute-project-repo` | Normaliseeritud kaugjuhtimispult, nt `github.com/cheaper-inference/OmniRoute` |
 
 Mõlemat loetakse ainult omistamiseks; neid ei edastata kunagi ülesvoolu pakkujale.
 
@@ -272,29 +272,22 @@ lippe pole vaja. Konkreetse käivituse korral saab selle alistada lippudega `--r
 
 ---
 
-## Tõrkeotsing
+## Veaotsing
 
-**Claude Code eirab lüüsi** — veenduge, et `ANTHROPIC_BASE_URL` **ei sisaldaks
-`/v1`**, ja taaskäivitage `claude` (keskkonnamuutujaid loetakse käivitamisel ainult üks kord). `omniroute launch`
-teeb selle teie eest.
+**Claude kood ignoreerib lüüsi** — kinnitage, `ANTHROPIC_BASE_URL` on** ei `/v1`** ja taaskäivitage `claude` (env loetakse käivitamisel üks kord). `omniroute launch` tegeleb sellega teie eest.
 
-**Mudeli `/model` valija on tühi / lüüsimudelid puuduvad** — vajalik on Claude Code
-v2.1.219+ ja `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Valijas kuvatakse ainult `claude*` /
-`anthropic*` mudeli-ID-d; mis tahes muu mudeli sundimiseks kasutage
-`ANTHROPIC_MODEL=<id>` (seda profiilid teevadki).
+**`/model` valija on tühi / lüüsimudelid puuduvad** — vajab Claude koodi v2.1.219 + ja `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Valijas kuvatakse ainult `claude*` / `anthropic*` mudel IDs ; sundige `ANTHROPIC_MODEL=<id>` -ga mõnda muud mudelit (seda teevad profiilid).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code saadab alati **prefiksita**
-mudeli-ID-sid (nt `claude-opus-4-8`), mistõttu juhul, kui ühendatud on nii Claude Code’i (`cc/…`) kui ka
-Claude’i (`claude/…`) teenusepakkujad, vastab prefiksita ID kahele marsruudile ja
-OmniRoute keeldub oletamast. Parandamiseks on kaks võimalust: kinnitage prefiksiga ID,
-kasutades `ANTHROPIC_MODEL=cc/claude-opus-4-8`, või lubage **Eelista prefiksita Claude’i mudelite puhul Claude Code’i** — see on Claude’i teenusepakkuja lehel olev lüliti või
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (vaikimisi välja lülitatud;
-vt [Keskkond](../reference/ENVIRONMENT.md)) — mis suunab prefiksita `claude-*`
-ID-d hoopis Claude Code’i. Teenusepakkuja eksplitsiitsed prefiksid on alati ülimuslikud.
+**`400 Ambiguous model 'claude-…'`** — Claude Kood saadab alati** eesliiteta** mudel IDs (nt `claude-opus-4-8`), nii et kui nii Claude -koodi (`cc/…`) kui ka Claude (`claude/…`) pakkujad on ühendatud, vastab tühi ID kahele marsruudile ja OmniRoute keeldub arvamast. Parandage see mõlemal viisil: kinnitage eesliitega ID koos `ANTHROPIC_MODEL=cc/claude-opus-4-8` või lubage** Eelista Claude koodi ilma eesliiteta Claude mudelite jaoks** — lüliti Claude pakkuja lehel või `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (vaikimisi välja lülitatud; vt [Keskkond](../reference/ENVIRONMENT.md) ) — mis suunab tühjad `claude-*` IDs asemel Claude koodi. Selged pakkuja eesliited võidavad alati.
 
-**Autentimisvead** — profiil ei sisalda juurdepääsutõendit. Kasutage käsku `omniroute launch --profile`
-(mis lisab selle) või eksportige `ANTHROPIC_AUTH_TOKEN`.
+**"automaatrežiim … see seanss ei ole sobilik" (klassifikaatori taotlused on arveldatud)** — automaatrežiimis Claude Code palub serveril vaadata üle oma mudelipäringutes ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ) tehtud toimingud. Selleks on vaja `anthropic-beta` väärtust `dangerous-tool-use-2026-09-03` ja `safeguards` kehavälja, et jõuda Anthropic paarina, ja `safeguard_results` pluss ülesvoolu tööriistade kasutamise IDs et muutumatul kujul tagasi tulla. OmniRoute teeb seda siis, kui päring suunatakse algsele `claude` pakkujale või `anthropic-compatible-*` sõlmele, voogedastus või mitte (regressioonikaitse: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Teised sihtmärgid ei saa ülevaadet tagastada, nii et Claude Code naaseb oma klassifikaatori taotlustele ja kuvab teatise:
 
-**Profiilid pole isoleeritud** — iga profiil kasutab eraldi `CLAUDE_CONFIG_DIR`-i;
-veenduge, et seansi sees osutaks käsu `echo $CLAUDE_CONFIG_DIR` väljund asukohale
-`~/.claude/profiles/<name>`.
+- mitte-antroopse teenusepakkuja mudel või kombinatsioon, mis maandub ühele;
+- Claude Code'iga ühilduv releesõlm (`anthropic-compatible-cc-*`), mis ehitab uuesti päringu keha ja ei kanna `safeguards`;
+- vanem OmniRoute, mis pärineb lubatud loendis olevatest beetaversioonidest, või Claude -koodi versioon, mis on allpool seda, mis Anthropic lehel lüüsiseansside jaoks on loetletud.
+
+Käivitage `/status` Claude Kood: the** Automaatrežiimi server** rida loeb `Enabled` kui serveri ülevaade on aktiivne. Seda, kas need taotlused esitatakse arveldamiseks, otsustab Anthropic, mitte OmniRoute.
+
+**Auth vead** — profiilil pole märki. Kasutage `omniroute launch --profile` (sisestab selle) või eksportige `ANTHROPIC_AUTH_TOKEN`.
+
+**Profiilid ei isoleeri** — iga profiil on eraldiseisev `CLAUDE_CONFIG_DIR`; kontrollige `echo $CLAUDE_CONFIG_DIR` seansi punktides `~/.claude/profiles/<name>`.

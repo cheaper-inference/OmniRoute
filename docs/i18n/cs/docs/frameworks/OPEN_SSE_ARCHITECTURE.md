@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Podporuje** 22 směrovacích strategií** (viz `src/shared/constants/routingStrategies.ts`):
 
-| Strategie           | Chování                                                                                            |
-| ------------------- | -------------------------------------------------------------------------------------------------- |
-| `priority`          | Seřazený seznam prvního cíle                                                                       |
-| `weighted`          | Pravděpodobnost podle cílové hmotnosti                                                             |
-| `round-robin`       | Procházejte cíle v pořadí                                                                          |
-| `context-relay`     | Odevzdejte kontext napříč cíli                                                                     |
-| `fill-first`        | Před přechodem na další vyplňte kvótu                                                              |
-| `p2c`               | Síla dvou možností                                                                                 |
-| `random`            | Jednotné náhodné                                                                                   |
-| `least-used`        | Vyberte ten, který má v poslední době nejméně použití                                              |
-| `cost-optimized`    | Nejprve nejlevnější zdravý cíl                                                                     |
-| `reset-aware`       | Uvědomte si okna resetování poskytovatele                                                          |
-| `reset-window`      | Obnovit směrování založené na okně                                                                 |
-| `expiry-first`      | Nejprve utraťte nevyužitý účet, jehož kvóta vyprší                                                 |
-| `headroom`          | Nejprve většina zbývající kvóty                                                                    |
-| `quota-weighted`    | Přeskočte vyčerpané účty a poté čerpejte podle zbývající kvóty ÷ zatížení během letu               |
-| `strict-random`     | Skutečně jednotný (žádné vážení kvality)                                                           |
-| `auto`              | Použijte 16faktorové hodnocení (`autoCombo/`)                                                      |
-| `lkgp`              | Nejprve poslední známý dobrý poskytovatel                                                          |
-| `context-optimized` | Nejlepší pro žádosti s dlouhým kontextem                                                           |
-| `cache-optimized`   | Připnout každou opakovaně použitelnou předponu výzvy ke stejnému účtu (zásahy do mezipaměti výzvy) |
-| `fusion`            | Paralelně se rozprostřete do panelu a poté syntetizujte pomocí rozhodčího (`fusion.ts`)            |
-| `pipeline`          | Řetězové kroky — výstup každého cíle napájí další                                                  |
-| `jev`               | Opt-in: TypeSafe Jev připouští, které hodnocené položky běží; jinak vaše objednávka                |
+| Strategie           | Chování                                                                                   |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| `priority`          | Seřazený seznam prvního cíle                                                              |
+| `weighted`          | Pravděpodobnost podle cílové hmotnosti                                                    |
+| `round-robin`       | Procházejte cíle v pořadí                                                                 |
+| `context-relay`     | Odevzdejte kontext napříč cíli                                                            |
+| `fill-first`        | Před přechodem na další vyplňte kvótu                                                     |
+| `p2c`               | Síla dvou možností                                                                        |
+| `random`            | Čerstvé míchání na vyžádání                                                               |
+| `least-used`        | Vyberte ten s nejmenším počtem zaznamenaných požadavků                                    |
+| `cost-optimized`    | Nejdříve nejnižší katalogová vstupní cena                                                 |
+| `reset-aware`       | Zbývající kvóta + resetovat naléhavost                                                    |
+| `reset-window`      | Okno kvóty, které se resetuje nejdříve                                                    |
+| `expiry-first`      | Nejprve utraťte nevyužitý účet, jehož kvóta vyprší                                        |
+| `headroom`          | Nejprve většina zbývající kvóty                                                           |
+| `quota-weighted`    | Přeskočte vyčerpané účty a poté čerpejte podle zbývající kvóty ÷ zatížení během letu      |
+| `strict-random`     | Zamíchaný balíček: každý cíl se jednou opakuje                                            |
+| `auto`              | Použijte 16faktorové hodnocení (`autoCombo/`)                                             |
+| `lkgp`              | Nejprve poslední známý dobrý poskytovatel                                                 |
+| `context-optimized` | Nejprve největší známé kontextové okno                                                    |
+| `cache-optimized`   | Preferujte účet, který pravděpodobně obsahuje předponu výzvy v mezipaměti                 |
+| `fusion`            | Paralelně se rozprostřete do panelu a poté syntetizujte pomocí rozhodčího (`fusion.ts`)   |
+| `pipeline`          | Řetězové kroky — výstup každého cíle napájí další                                         |
+| `jev`               | Přihlášení: TypeSafe Jev připouští, které položky v hodnocení běží; jinak vaše objednávka |
 
 ### base.ts (1170 LOC)
 

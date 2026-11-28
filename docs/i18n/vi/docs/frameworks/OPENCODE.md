@@ -4,14 +4,11 @@
 
 ---
 
-> **Trạng thái:** Khả dụng rộng rãi.
-> **Đối tượng:** Các nhà vận hành kết nối OpenCode với một bản triển khai OmniRoute.
-> **Nguồn chính xác (schema cấu hình):** `src/shared/services/opencodeConfig.ts`
-> **Nguồn chính xác (gói npm):** `@omniroute/opencode-provider/` (workspace có thể phát hành)
+> **Trạng thái:** Nói chung có sẵn.** Khán giả:** Người vận hành kết nối OpenCode với triển khai OmniRoute.** Nguồn sự thật (lược đồ cấu hình):** `src/shared/services/opencodeConfig.ts`** Gói npm được đề xuất:** `@omniroute/opencode-plugin/` (OpenCode v1, được cài đặt bởi `omniroute setup opencode`) và `@omniroute/opencode-plugin-v2/` (OpenCode v2). Gói `@omniroute/opencode-provider/` cũ hơn là** không được dùng nữa** (xem Đường dẫn 2).
 
-[OpenCode](https://opencode.ai) là một ứng dụng khách AI dạng CLI/desktop có khả năng tác tử. Ứng dụng đọc danh mục nhà cung cấp từ `~/.config/opencode/opencode.json` (hoặc `opencode.jsonc`) và tuân theo schema tại `https://opencode.ai/config.json`. OmniRoute tự cung cấp cho OpenCode dưới dạng một trong các nhà cung cấp đó — mọi yêu cầu đều đi qua bề mặt `/v1` tiêu chuẩn tương thích với OpenAI của OmniRoute, nhờ đó OpenCode tự động hưởng lợi từ tính năng định tuyến Auto-Combo, bộ ngắt mạch, chính sách khóa, khả năng quan sát, v.v.
+[OpenCode](https://opencode.ai) là một khách hàng CLI/desktop AI đại lý. Nó đọc danh mục nhà cung cấp của nó từ `~/.config/opencode/opencode.json` (hoặc `opencode.jsonc`) và tuân theo lược đồ tại `https://opencode.ai/config.json`. OmniRoute tiếp xúc với OpenCode vì một trong những nhà cung cấp — mọi yêu cầu đều chảy qua bề mặt `/v1` tương thích với OpenAI tiêu chuẩn của OmniRoute, do đó OpenCode tự động được hưởng lợi từ định tuyến Auto-Combo, bộ ngắt mạch, chính sách chính, khả năng quan sát, v.v.
 
-Có **hai cách tích hợp được hỗ trợ**. Hãy chọn một — cả hai đều tạo ra cùng một cấu hình.
+Trang này ghi lại hai đường dẫn cấu hình tĩnh bên dưới; cả hai đều tạo ra cùng một cấu hình. Để có danh sách mô hình tuân theo danh mục trực tiếp của bạn, hãy sử dụng plugin thay thế: `omniroute setup opencode` cài đặt `@omniroute/opencode-plugin` (OpenCode v1) và `@omniroute/opencode-plugin-v2` target OpenCode v2 (xem [phần tích hợp CLI](../guides/CLI-INTEGRATIONS.md) và [hướng dẫn plugin OpenCode v2](../guides/OPENCODE-V2-PLUGIN.md) ).
 
 ---
 
@@ -54,9 +51,11 @@ Tệp kết quả (danh mục mô hình mặc định):
 
 ---
 
-## Cách 2 — Gói npm `@omniroute/opencode-provider`
+## Gói — npm đường dẫn 2 `@omniroute/opencode-provider` (không dùng nữa)
 
-Khuyến nghị khi bạn tạo cấu hình bằng tập lệnh từ Node/TS (pipeline CI, monorepo, quy trình cài đặt tùy chỉnh).
+> **Không được dùng nữa.** Gói này viết một danh sách mô hình tĩnh nằm phía sau danh mục OmniRoute trực tiếp của bạn. README của nó khuyên bạn nên chuyển sang `@omniroute/opencode-plugin` (hoặc `@omniroute/opencode-plugin-v2` trên OpenCode v2). API bên dưới chỉ được giữ cho các tập lệnh hiện có.
+
+Được sử dụng khi viết kịch bản cấu hình từ Node/TS (đường ống CI, monorepos, luồng trình cài đặt tùy chỉnh).
 
 ```bash
 npm install --save-dev @omniroute/opencode-provider
@@ -69,7 +68,7 @@ import { buildOmniRouteOpenCodeConfig } from "@omniroute/opencode-provider";
 const config = buildOmniRouteOpenCodeConfig({
   baseURL: "http://localhost:20128",
   apiKey: process.env.OMNIROUTE_API_KEY ?? "sk_omniroute",
-  // Tùy chọn: ghi đè danh mục mô hình được cung cấp cho OpenCode
+  // Optional: override the model catalog exposed to OpenCode
   models: ["auto", "claude-opus-4-7", "gpt-5.5"],
   modelLabels: { auto: "Auto-Combo" },
 });
@@ -77,9 +76,9 @@ const config = buildOmniRouteOpenCodeConfig({
 writeFileSync("opencode.json", JSON.stringify(config, null, 2));
 ```
 
-Để hợp nhất không phá hủy với một tệp hiện có, hãy mô phỏng lại `mergeOpenCodeConfigText()` từ `opencodeConfig.ts` hoặc gọi trình tạo CLI.
+Để hợp nhất không phá hủy đối với tệp hiện có, hãy sao chép `mergeOpenCodeConfigText()` từ `opencodeConfig.ts` hoặc gọi trình tạo CLI.
 
-Xem [README của gói](../../@omniroute/opencode-provider/README.md) để biết API đầy đủ.
+Xem [gói README](../../@omniroute/opencode-provider/README.md) để biết API đầy đủ.
 
 ---
 
@@ -157,7 +156,9 @@ Việc loại bỏ trùng lặp này là **lỗi phổ biến nhất** gặp ph�
 
 ## Xem thêm
 
-- [Tài liệu tham khảo API](../reference/API_REFERENCE.md) — toàn bộ bề mặt REST của OmniRoute
-- [Auto-Combo](../routing/AUTO-COMBO.md) — ý nghĩa của `model: "auto"`
-- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md)
-- Mã nguồn: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`
+- [tham chiếu API](../reference/API_REFERENCE.md) — bề mặt OmniRoute REST đầy đủ
+- [Auto-Combo](../routing/AUTO-COMBO.md) — `model: "auto"` nghĩa là gì
+- [`@omniroute/opencode-plugin` README](../../@omniroute/opencode-plugin/README.md) (được khuyến nghị)
+- [`@omniroute/opencode-plugin-v2` README](../../@omniroute/opencode-plugin-v2/README.md)
+- [`@omniroute/opencode-provider` README](../../@omniroute/opencode-provider/README.md) (không dùng nữa)
+- Nguồn: `src/shared/services/opencodeConfig.ts`, `src/lib/cli-helper/config-generator/opencode.ts`, `@omniroute/opencode-provider/src/index.ts`

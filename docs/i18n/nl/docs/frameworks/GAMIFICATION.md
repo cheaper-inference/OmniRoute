@@ -509,27 +509,27 @@ de laatste push.
 
 ---
 
-## Tokens delen
+## Token delen
 
 **Bestand:** `src/lib/gamification/sharing.ts`
 
-### Dubbel boekhouden
+### Grootboek met dubbele invoer
 
-Elke overdracht maakt twee rijen aan in `token_ledger`:
+Elke overdracht creëert twee rijen in `token_ledger`:
 
-| Rij    | `from_key_id` | `to_key_id` | `amount` |
-| ------ | ------------- | ----------- | -------- |
-| Debet  | verzender     | ontvanger   | +bedrag  |
-| Credit | ontvanger     | verzender   | -bedrag  |
+| Rij       | `from_key_id` | `to_key_id` | `amount` |
+| --------- | ------------- | ----------- | -------- |
+| Debiteren | afzender      | ontvanger   | + bedrag |
+| Credit    | ontvanger     | afzender    | -amount  |
 
 Wacht — de conventie is:
 
-| Rij       | `from_key_id` | `to_key_id` | `amount` | Betekenis                  |
-| --------- | ------------- | ----------- | -------- | -------------------------- |
-| Verzenden | verzender     | ontvanger   | +bedrag  | Uitstroom van de verzender |
-| Ontvangen | ontvanger     | verzender   | +bedrag  | Instroom naar de ontvanger |
+| Rij       | `from_key_id` | `to_key_id` | `amount` | Betekenis               |
+| --------- | ------------- | ----------- | -------- | ----------------------- |
+| Versturen | afzender      | ontvanger   | + bedrag | Uitstroom van afzender  |
+| Ontvangen | ontvanger     | afzender    | + bedrag | Instroom naar ontvanger |
 
-Het saldo wordt als volgt berekend:
+Het saldo wordt berekend als:
 
 ```sql
 SELECT
@@ -540,7 +540,7 @@ FROM token_ledger
 WHERE from_key_id = ? OR to_key_id = ?
 ```
 
-### Overdrachtsproces
+### Overdrachtsstroom
 
 ```typescript
 export async function transferTokens(
@@ -551,19 +551,18 @@ export async function transferTokens(
 ): Promise<{ success: boolean; balance: number }>;
 ```
 
-1. **Valideren**: `amount > 0`, `fromKeyId !== toKeyId`.
-2. **Idempotentie**: controleer of `idempotency_key` al in het grootboek bestaat.
-   Zo ja, retourneer het gecachte resultaat.
-3. **Transactie** (één SQLite-transactie):
-   a. Bereken het saldo van de verzender.
-   b. Als `balance < amount`, breek dan af (onvoldoende saldo).
-   c. Voeg de verzendrij toe (`from=sender,`.
+1. **Valideer** : `amount > 0`, `fromKeyId !== toKeyId`.
+2. **Idempotentie** : controleer of `idempotency_key` al bestaat in het grootboek. Zo ja, retourneer het resultaat in de cache.
+3. **Transactie** (enkele SQLite transactie): a. Bereken het afzendersaldo. B. Indien `balance < amount`, afbreken (onvoldoende saldo). C. Voeg verzendrij in (`from=sender, to=receiver, amount`). D. Voeg ontvangstrij in (`from=receiver, to=sender, amount`).
+4. **Tarieflimiet** : controleer de overdrachtssnelheid voor de afzender (max. 10 transfers/min).
+5. **Evenement** : zend `token_share` -gamificatie-evenement uit voor XP + badge-evaluatie.
+6. `{ success: true, balance: newBalance }` retourneren.
 
-### Frequentiebeperking
+### Tariefbeperking
 
-- Maximaal 10 overdrachten per minuut per API-sleutel.
-- Maximaal 10.000 tokens per afzonderlijke overdracht.
-- Maximaal 100.000 tokens per dag overgedragen per API-sleutel.
+- Max 10 overschrijvingen per minuut per API sleutel.
+- Maximaal 10.000 tokens per enkele overdracht.
+- Maximaal 100.000 tokens overgedragen per dag per API sleutel.
 
 ---
 

@@ -113,56 +113,46 @@ curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 
 ## เครื่องมือ MCP (22)
 
-กำหนดไว้ใน `open-sse/mcp-server/tools/obsidianTools.ts` โดย token/base-URL จะถูกกำหนด
-แยกสำหรับแต่ละการเรียก (ใช้ค่าของ API key ก่อน แล้วจึงใช้ค่าส่วนกลาง) เครื่องมือที่เรียกใช้ **sync server**
-ของ OmniRoute (เครื่องมือ `obsidian_sync_*` ทั้งสี่รายการ) จำเป็นต้องใช้ sync auth token ที่กำหนดค่าไว้
-ในการตั้งค่า OmniRoute เพิ่มเติมด้วย
+กำหนดไว้ใน `open-sse/mcp-server/tools/obsidianTools.ts` token/base-URL ได้รับการแก้ไขต่อการโทร (ต่อคีย์ API ก่อน จากนั้นจึงทั่วโลก) เครื่องมือที่โดน OmniRoute** เซิร์ฟเวอร์การซิงค์** (เครื่องมือ `obsidian_sync_*` ทั้งสี่) ต้องใช้โทเค็นการตรวจสอบสิทธิ์การซิงค์ที่กำหนดค่าในการตั้งค่า OmniRoute เพิ่มเติม
 
-### เครื่องมืออ่าน (`read:obsidian`)
+### อ่านเครื่องมือ (`read:obsidian`)
 
-| เครื่องมือ                   | คำอธิบาย                                                                              |
-| ---------------------------- | ------------------------------------------------------------------------------------- |
-| `obsidian_check_status`      | ตรวจสอบว่าสามารถเข้าถึง Local REST API และผ่านการยืนยันตัวตนได้หรือไม่                |
-| `obsidian_search_simple`     | ค้นหาข้อความแบบเต็มในเนื้อหาโน้ต โดยส่งคืนส่วนย่อยพร้อมพาธไฟล์                        |
-| `obsidian_search_structured` | ค้นหาโดยใช้นิพจน์ JSON Logic (ตัวกรอง and/or/regex/path)                              |
-| `obsidian_read_note`         | อ่านโน้ตตามพาธที่สัมพันธ์กับ vault โดยเลือกเฉพาะ heading/block/frontmatter ได้        |
-| `obsidian_list_vault`        | แสดงรายการไฟล์และไดเรกทอรีใน vault (โครงสร้างแบบต้นไม้ของรายการ)                      |
-| `obsidian_get_document_map`  | รับโครงสร้าง heading ของโน้ตในรูปแบบแผนที่ heading → หมายเลขบรรทัด                    |
-| `obsidian_get_note_metadata` | รับ frontmatter, แท็ก, ลิงก์ และจำนวนอักขระ/คำโดยไม่ต้องดึงเนื้อหาทั้งหมด             |
-| `obsidian_get_active_file`   | รับพาธและเนื้อหาของไฟล์ที่กำลังใช้งานอยู่ใน Obsidian                                  |
-| `obsidian_get_periodic_note` | รับโน้ตรายวัน/รายสัปดาห์/รายเดือนสำหรับวันที่ระบุ (ใช้วันนี้หากไม่ระบุ)               |
-| `obsidian_get_tags`          | แสดงแท็กทั้งหมดใน vault พร้อมความถี่ในการปรากฏ                                        |
-| `obsidian_list_commands`     | แสดง ID คำสั่ง Obsidian ที่พร้อมใช้งาน (ใช้กับ `obsidian_execute_command`)            |
-| `obsidian_sync_status`       | สถานะ sync server ของ OmniRoute: การทำงาน, ชื่อ vault, พอร์ต, uptime, การ sync ล่าสุด |
-| `obsidian_sync_conflicts`    | แสดงข้อขัดแย้งในการ sync ที่ยังไม่ได้แก้ไข (พาธ, พาธข้อขัดแย้ง, เวลาที่ตรวจพบ)        |
+| เครื่องมือ                   | คำอธิบาย                                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| `obsidian_check_status`      | ตรวจสอบว่า Local REST API สามารถเข้าถึงได้และรับรองความถูกต้องหรือไม่                            |
+| `obsidian_search_simple`     | การค้นหาข้อความแบบเต็มของเนื้อหาบันทึกย่อ ส่งคืนตัวอย่างพร้อมเส้นทางไฟล์                         |
+| `obsidian_search_structured` | ค้นหาโดยใช้นิพจน์ JSON Logic (ตัวกรอง and/or/regex/path )                                        |
+| `obsidian_read_note`         | อ่านบันทึกตามเส้นทางที่สัมพันธ์กับห้องนิรภัย เป็นทางเลือก heading/block/frontmatter. เฉพาะ       |
+| `obsidian_list_vault`        | แสดงรายการไฟล์และไดเร็กทอรีในห้องนิรภัย (แผนผังรายการ)                                           |
+| `obsidian_get_document_map`  | รับโครงสร้างส่วนหัวของบันทึกย่อเป็นแผนผังของหมายเลขบรรทัด → ของส่วนหัว                           |
+| `obsidian_get_note_metadata` | รับ frontmatter แท็ก ลิงก์ จำนวน char/word โดยไม่ต้องมีเนื้อหาทั้งหมด                            |
+| `obsidian_get_active_file`   | รับเส้นทางเนื้อหา + ของไฟล์ที่ใช้งานอยู่ใน Obsidian                                              |
+| `obsidian_get_periodic_note` | รับบันทึก daily/weekly/monthly เป็นระยะสำหรับวันที่ (วันนี้หากละเว้น)                            |
+| `obsidian_get_tags`          | แสดงรายการแท็กห้องนิรภัยทั้งหมดพร้อมความถี่                                                      |
+| `obsidian_list_commands`     | รายการคำสั่ง Obsidian ที่มีอยู่ IDs (ใช้กับ `obsidian_execute_command`)                          |
+| `obsidian_sync_status`       | สถานะเซิร์ฟเวอร์การซิงค์OmniRoute : ทำงานอยู่ ชื่อห้องนิรภัย พอร์ต เวลาทำงาน การซิงค์ครั้งล่าสุด |
+| `obsidian_sync_conflicts`    | แสดงรายการข้อขัดแย้งในการซิงค์ที่ยังไม่ได้แก้ไข (เส้นทาง, เส้นทางข้อขัดแย้ง, ตรวจพบที่)          |
 
 ### เครื่องมือเขียน (`write:obsidian`)
 
 | เครื่องมือ                       | คำอธิบาย                                                                                |
 | -------------------------------- | --------------------------------------------------------------------------------------- |
-| `obsidian_write_note`            | สร้างหรือเขียนทับโน้ตด้วยเนื้อหา Markdown ที่กำหนด                                      |
-| `obsidian_append_note`           | เพิ่มเนื้อหาต่อท้ายโน้ต โดยเลือกเพิ่มที่ heading/block ที่ระบุได้                       |
-| `obsidian_patch_note`            | เพิ่มต่อท้าย/เพิ่มไว้ข้างหน้า/แทนที่อย่างเจาะจงที่ heading, block หรือฟิลด์ frontmatter |
-| `obsidian_delete_note`           | ลบโน้ตออกจาก vault อย่างถาวร                                                            |
-| `obsidian_move_note`             | ย้ายหรือเปลี่ยนชื่อโน้ตภายใน vault                                                      |
-| `obsidian_execute_command`       | เรียกใช้คำสั่ง Obsidian ตาม command ID                                                  |
-| `obsidian_open_file`             | เปิดไฟล์ใน Obsidian (สร้างไฟล์หากยังไม่มี)                                              |
-| `obsidian_sync_trigger`          | เรียกใช้การ sync vault แบบสองทิศทางระหว่างเดสก์ท็อป↔มือถือทันที                         |
-| `obsidian_sync_resolve_conflict` | แก้ไขข้อขัดแย้งในการ sync: เก็บ `local` (มือถือ), `remote` (เดสก์ท็อป) หรือ `keep-both` |
+| `obsidian_write_note`            | สร้างหรือเขียนทับบันทึกด้วยเนื้อหา Markdown ที่กำหนด                                    |
+| `obsidian_append_note`           | เพิ่มเนื้อหาต่อท้ายบันทึก เป็นทางเลือกให้กับ heading/block. ที่เฉพาะเจาะจง              |
+| `obsidian_patch_note`            | การผ่าตัด append/prepend/replace ที่ส่วนหัว บล็อก หรือฟิลด์ frontmatter                 |
+| `obsidian_delete_note`           | ลบบันทึกออกจากห้องนิรภัยอย่างถาวร                                                       |
+| `obsidian_move_note`             | ย้ายหรือเปลี่ยนชื่อบันทึกภายในห้องนิรภัย                                                |
+| `obsidian_execute_command`       | ดำเนินการคำสั่ง Obsidian ด้วยคำสั่ง ID                                                  |
+| `obsidian_open_file`             | เปิดไฟล์ใน Obsidian (สร้างขึ้นหากไม่มีอยู่)                                             |
+| `obsidian_sync_trigger`          | ทริกเกอร์การซิงค์↔ mobile vault บนเดสก์ท็อปแบบสองทิศทางทันที                            |
+| `obsidian_sync_resolve_conflict` | แก้ไขข้อขัดแย้งในการซิงค์: เก็บ `local` (มือถือ), `remote` (เดสก์ท็อป) หรือ `keep-both` |
 
 > [!NOTE]
-> เป้าหมายของ `obsidian_patch_note` รองรับ `targetType` เป็น `heading | block | frontmatter`
-> และ `operation` เป็น `append | prepend | replace` พร้อมตัวเลือก
-> `createTargetIfMissing` เครื่องมือ `obsidian_sync_*` ทั้งสี่รายการสื่อสารกับ sync
-> server ภายในเครื่อง (`http://127.0.0.1:27781` โดยค่าเริ่มต้น) และจำเป็นต้องใช้ sync token
+> เป้าหมาย `obsidian_patch_note` ยอมรับ `targetType` ของ `heading | block | frontmatter` และ `operation` ของ `append | prepend | replace` โดยมีตัวเลือก `createTargetIfMissing` เครื่องมือ `obsidian_sync_*` สี่เครื่องมือพูดคุยกับเซิร์ฟเวอร์การซิงค์ในเครื่อง (`http://127.0.0.1:27781` ตามค่าเริ่มต้น) และต้องใช้โทเค็นการซิงค์
 
-### Scope
+### ขอบเขต
 
-เครื่องมืออ่านจำเป็นต้องมี `read:obsidian` ส่วนเครื่องมือเขียนจำเป็นต้องมี `write:obsidian` การบังคับใช้
-เหมือนกับ Notion โดยจัดการผ่าน `withScopeEnforcement()` ใน
-`open-sse/mcp-server/server.ts` ซึ่งควบคุมด้วย `OMNIROUTE_MCP_ENFORCE_SCOPES=true` และ
-scope ที่อนุญาตมาจาก `OMNIROUTE_MCP_SCOPES` หรือบริบท scope ของ API key ดู
-[MCP-SERVER.md](./MCP-SERVER.md)
+เครื่องมืออ่านต้องใช้ `read:obsidian`; เครื่องมือการเขียนต้องใช้ `write:obsidian` การบังคับใช้จะเหมือนกับ Notion — ที่จัดการโดย `withScopeEnforcement()` ใน `open-sse/mcp-server/server.ts` มีรั้วรอบขอบชิดบน `OMNIROUTE_MCP_ENFORCE_SCOPES=true` และบังคับใช้สำหรับผู้เรียก HTTP/SSE ซึ่งคีย์ API ขาด `manage`/`admin` โดยมีขอบเขตที่อนุญาตที่มาจาก `OMNIROUTE_MCP_SCOPES` หรือบริบทขอบเขตของคีย์ API ดู [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## เอนด์พอยต์
 

@@ -4,8 +4,6 @@
 
 ---
 
-Ostatnia aktualizacja: 23.08.2026
-
 OmniRoute integruje się z trzema kategoriami narzędzi CLI rozmieszczonymi na trzech dedykowanych stronach pulpitu nawigacyjnego:
 
 | Strona         | Trasa                   | Pojęcie                                                                                     | Liczyć         |
@@ -235,7 +233,7 @@ Nowe narzędzia z `configType: "custom"` mają dedykowane ustawienia tras API :
 | `POST /api/cli-tools/grok-build-settings`   | Kompilacja Grok (~/.grok/config.toml, `[model.omniroute]`)                              |
 | `POST /api/cli-tools/qwen-settings`         | Kod Qwen (dedykowany klucz `~/.qwen/settings.json` + `.env` )                           |
 
-Wszystkie trasy używają `sanitizeErrorMessage()` do odpowiedzi na błędy (twarda zasada nr 12).
+Wszystkie trasy używają `sanitizeErrorMessage()` do odpowiedzi na błędy (twarda reguła #12).
 
 ---
 

@@ -13,12 +13,12 @@ Agent Skills bụ faịlụ SKILL.md ahaziri nke na-akụziri ndị nnọchitean
 
 ## Nchịkọta
 
-Katalọgụ ahụ nwere **Agent Skills 45** (REST API 23 + CLI 21 + usoro nhazi 1). Nkà ọ bụla nwere:
+Katalọgụ ahụ nwere** 45 Agent Nkà** (23 REST API + 21 CLI + 1 nhazi ọrụ nhazi). Nkà ọ bụla nwere:
 
-- **ID iwu kwadoro** (`omni-auth`, `cli-serve`, wdg.)
-- Faịlụ **SKILL.md** dị na `skills/{id}/SKILL.md` nwere YAML frontmatter (`name`, `description`) + ọdịnaya markdown zuru ezu
-- **REST endpoints** (nkà API) ma ọ bụ **CLI subcommands** (nkà CLI) ndị sitere na nkọwa OpenAPI na ndekọ CLI
-- **URL raw GitHub** maka iweta ya ozugbo: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** canonical ID** (`omni-auth`, `cli-serve`, wdg)
+- A**SKILL.md** faịlụ na `skills/{id}/SKILL.md` na YAML frontmatter (`name`, `description`) + ọgaranya markdown ahu
+- **REST njedebe** (API nkà) ma ọ bụ**CLI subiwu** (CLI ) sitere na OpenAPI spec na ndekọ CLI
+- A**GitHub raw URL** maka mbubata ndụ: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Nzaghachi ihe nrụpụta ahụ bụ `GeneratorReport`:
 
 ---
 
-## API Mkpuchi
+## Mkpuchi API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

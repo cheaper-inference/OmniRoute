@@ -4,9 +4,9 @@
 
 ---
 
-> **Gerçeğin kaynağı:** `electron/` çalışma alanı** Son güncelleme:** 2026-06-28 — v3.8.40
+> **Gerçeğin kaynağı:** `electron/` çalışma alanı
 
-OmniRoute platformlar arası bir masaüstü uygulaması (Windows / macOS / Linux) üzerine kurulu olarak gelir**Electron 41** +** elektron oluşturucu 26.10** . Masaüstü uygulaması Next.js bağımsız sunucusunu bir alt süreç olarak oluşturur, ona bir `BrowserWindow` işaret eder ve bir sistem tepsisi, otomatik güncelleyici, IPC köprüsü ve sıfır yapılandırmalı gizli önyükleme ekler.
+OmniRoute platformlar arası bir masaüstü uygulamasını (Windows / macOS / Linux) temel alarak sunuyor**Electron 41** +** elektron oluşturucu 26.10** . Masaüstü uygulaması Next.js bağımsız sunucusunu bir alt süreç olarak oluşturur, ona bir `BrowserWindow` işaret eder ve bir sistem tepsisi, otomatik güncelleyici, IPC köprüsü ve sıfır yapılandırmalı gizli önyükleme ekler.
 
 ## Mimarlık
 
@@ -198,7 +198,7 @@ Ana süreç yalnızca o dosyayı okur; daha sonraki adaylar birleştirilmez. Sun
 
 ## Otomatik güncelleme
 
-`electron-updater` GitHub sağlayıcısıyla (`diegosouzapw/OmniRoute`) kullanır.
+`electron-updater` GitHub sağlayıcısıyla (`cheaper-inference/OmniRoute`) kullanır.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Oluşturucuya `update-status` IPC aracılığıyla iletilen olaylar: `checking`, `available`, `not-available`, `downloading` ( `percent` ile), `downloaded`, `error`
@@ -273,7 +273,7 @@ Eserler `electron/dist-electron/` iniyor:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Sürümler, aynı zamanda `electron-updater` yeni sürümleri kontrol ettiği GitHub Sürümlerine (`diegosouzapw/OmniRoute`) yayınlanır.
+Sürümler, aynı zamanda `electron-updater` yeni sürümleri kontrol ettiği GitHub Sürümlerine (`cheaper-inference/OmniRoute`) yayınlanır.
 
 ## Sorun giderme
 

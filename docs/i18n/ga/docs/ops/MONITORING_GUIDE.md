@@ -99,29 +99,29 @@ De réir teaglama:
 
 ---
 
-## API Seiceála Sláinte
+## Seiceáil Sláinte API
 
-Nochtann OmniRoute **dhá** dhromchla sláinte HTTP. Ní féidir iad a úsáid go hidirmhalartach le haghaidh ceolfhoirneoirí.
+nochtann OmniRoute** dhá** dromchlaí sláinte HTTP. Níl siad idirmhalartaithe do cheolfhoirneoirí.
 
-| Conair                       | Cuspóir                                                                           | Ualach                                        | Úsáid le haghaidh                                                              |
-| ---------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------ |
-| `GET /healthz`               | Beogacht/ullmhacht saolré (`ok` / `starting` / `stopping`)                        | Fánach (bratach céime amháin)                 | **Ullmhacht** Kubernetes; **beogacht** bhog más gá HTTP a úsáid                |
-| `GET /api/monitoring/health` | Achoimre dhomhain ar an gcóras + soláthraithe (DB, carn, comhairimh catalóige, …) | Trom (obair shioncronach DB / monatóireachta) | Deaiseanna, seiceálacha doimhne bosca dhuibh, seiceáil sláinte ionsuite Docker |
+| Conair                       | Cuspóir                                                                   | Meáchan                                | Úsáid le haghaidh                                                            |
+| ---------------------------- | ------------------------------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------- |
+| `GET /healthz`               | saolré liveness/readiness (`ok` / `starting` / `stopping`)                | Fánach (bratach na céime amháin)       | Cubernetes** ullmhacht** ; bog** beocht** más gá duit HTTP a úsáid           |
+| `GET /api/monitoring/health` | Achoimre soláthraí + córas domhain (DB, carn, comhaireamh catalóige, ...) | Trom (sync DB / obair mhonatóireachta) | Deais, seiceálacha domhain an bhosca dhubh, seiceáil sláinte ionsuite Docker |
 
-> **Nóta:** Tá maitrísí sláinte soláthraithe, fadhbanna uathphíolóta, monatóirí cuóta, sláinte comharthaí, agus sonraí folaigh sa bhreis ar `/api/monitoring/health` ar fáil tríd an **uirlis MCP** `observability_snapshot` nó trí leathanaigh na **deaise** — níl aon bhealaí tiomnaithe REST ann dóibh siúd.
+> **Nóta:** Tá maitrísí sláinte an tsoláthraí, saincheisteanna uathphíolótacha, monatóirí cuóta, sláinte chomharthaí, agus sonraí latency thar `/api/monitoring/health` ar fáil tríd an** uirlis MCP** `observability_snapshot` nó an** deais** leathanaigh — níl aon bealaí REST tiomnaithe dóibh siúd.
 
-Ritheann an dá bhealach ar an **lúb teagmhas Node chéanna** agus a láimhseálann iarratais. Is féidir le conair atá faoi cheangal ag an LAP (obair mhór chatalóige `GET /v1/models`, comhbhrú comhthéacs fhada / comhaireamh comharthaí) moill a chur ar **gach** láimhseálaí HTTP, lena n-áirítear `/healthz`. Lúb theagmhas gnóthach ≠ próiseas marbh. B’fhearr an próiseas santach a dheisiú; ní dhéanann tiúnadh tóireadóirí ach maruithe bréagacha a laghdú.
+Ritheann an dá bhealach ar an** lúb imeacht Nód céanna** mar láimhseáil iarratais. Is féidir moill a chur ar chonair atá ceangailte le LAP (obair chatalóg mhór `GET /v1/models`, comhbhrú fad-chomhthéacs / comhaireamh comharthaí)** go léir** láimhseálaithe HTTP, lena n-áirítear `/healthz`. Imeacht-lúb próiseas ≠ gnóthach marbh. Is fearr an muc a shocrú; ní laghdaíonn tiúnadh taiscéalaithe ach maruithe bréagacha.
 
-### Tóraire éadrom ceolfhoirneora
+### Insamhlóir ceolfhoirne éadrom
 
 ```bash
 GET /healthz
-# nó HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + corp `ok` nuair atá céim saolré an fhreastalaí ullamh
-- **503** + `starting` / `stopping` le linn tosaithe nó múchta
-- Cur chun feidhme: `src/app/healthz/route.ts` (gan ping DB)
+- **200** comhlacht + `ok` nuair a bhíonn céim shaolré an fhreastalaí réidh
+- **503** + `starting` / `stopping` le linn tosaithe nó múchadh
+- Cur i bhfeidhm: `src/app/healthz/route.ts` (gan ping DB )
 
 ### Sláinte an Chórais (domhain)
 
@@ -153,35 +153,35 @@ Freagra:
 }
 ```
 
-#### `credentialHealth`: taisce tóireadóra i gcomparáid le `test_status` SQLite
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-Is é `credentialHealth` ó `GET /api/monitoring/health` an **tomhasaire taisce tóireadóra sa chuimhne**, ní dumpáil bheo de `provider_connections.test_status`. Tar éis #12532, ní léann conair an iarratais ach `getCachedCredentialHealthSummary()`; déanann tóireadóirí cúlra an taisce a athnuachan lasmuigh den lúb theagmhas.
+`GET /api/monitoring/health` → `credentialHealth` é an** tomhsaire taiscéalaíochta i gcuimhne** , ní dumpa beo `provider_connections.test_status`. Tar éis #12532 ní léann conair an iarratais ach `getCachedCredentialHealthSummary()` ; déanann tóireadóirí cúlra an taisce a athnuachan as lúb na hócáide.
 
-| Sraith                       | Cá háit                                                               | Cad is brí leis                                                                                                                                                                                                                               |
-| ---------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tomhasaire taisce tóireadóra | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Torthaí deiridh tóireadóra sláinte dintiúr atá fós á gcoinneáil i gcuimhne an phróisis. Is é `probe-cache` luach `source` i gcónaí.                                                                                                           |
-| Sonraí naisc theipthe        | `credentialHealth.failedConnections`                                  | I láthair **ach amháin nuair atá `failed > 0`**. Liosta teoranta de rónna taisce le `status=error` (`connectionId`, `status`, `lastError` / `lastErrorType` sláintithe). Socraítear `failedOmitted` nuair a cuireadh teorainn leis an liosta. |
-| Stádas greamaitheach SQLite  | `credentialHealth.staleDbNonOkCount`                                  | Líon na rónna naisc **gníomhacha** (`is_active=1`) ar luach neamhcheart aitheanta é a `test_status` marthanach (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                                             |
+| Ciseal                        | Cá                                                                    | Cad a chiallaíonn sé                                                                                                                                                                                                                                    |
+| ----------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tomhsaire taiscéalaí-taisce   | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Tá na torthaí taiscéalaithe dintiúr is déanaí fós i gcuimhne próisis. Tá `source` i gcónaí `probe-cache`.                                                                                                                                               |
+| Theip ar shonraí an cheangail | `credentialHealth.failedConnections`                                  | i láthair** ach amháin nuair a `failed > 0`** . Liosta teoranta de na sraitheanna taisce le `status=error` (`connectionId`, `status`, sláintithe `lastError` / `lastErrorType`). Tá `failedOmitted` socraithe nuair a cuireadh teorainn leis an liosta. |
+| SQLite stádas greamaitheach   | `credentialHealth.staleDbNonOkCount`                                  | Comhaireamh de** gníomhach** (`is_active=1`) sraitheanna nasc a bhfuil a `test_status` fós aitheanta neamh-ok (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                                                        |
 
-D’fhéadfadh an dá shraith a bheith ar neamhréir d’aon ghnó:
+Is féidir leis an dá shraith easaontú ar chuspóir:
 
-- Tomhasaire `failed=0` agus `staleDbNonOkCount>0` — tá `test_status` greamaitheach fós ag SQLite (mar shampla `expired` nó `credits_exhausted`) nach n-áirítear mar `status=error` sa léargas taisce tóireadóra is déanaí.
-- Tomhasaire `failed>0` agus cuma shláintiúil ar SQLite — theip ar thóraire le déanaí agus tá sé i dtaisce; níor nuashonraíodh ró an DB, nó glanadh é níos déanaí.
+- Tomhsaire `failed=0` cé go bhfuil `test_status` greamaitheach fós ag `staleDbNonOkCount>0` — SQLite (mar shampla `expired` nó `credits_exhausted`) nach n-áirítear mar `status=error` an pictiúr taiscéalaithe-taisce is déanaí.
+- Tomhsaire `failed>0` cé go bhfuil cuma shláintiúil SQLite — theip ar thaiscéalaí le déanaí agus tá sé i dtaisce; níl an tsraith DB nuashonraithe, nó glanadh níos déanaí.
 
-Ná heisigh foláireamh bunaithe ar `provider_connections.test_status` amháin agus an críochphointe seo á scríobadh. Úsáid `failed` + `failedConnections` le haghaidh teipeanna beo tóireadóra, agus `staleDbNonOkCount` nuair a bhíonn comhaireamh marthanach na stádas greamaitheach de dhíth ort.
+Ná cuir foláireamh ar `provider_connections.test_status` amháin agus an críochphointe seo á scríobadh. Bain úsáid as `failed` + `failedConnections` le haghaidh teipeanna taiscéalaithe beo, agus `staleDbNonOkCount` nuair is gá duit an comhaireamh stádais greamaitheach leanúnach.
 
-### Moltaí maidir le tóireadóirí Kubernetes
+### Moltaí cuardaigh Kubernetes
 
-Is **próiseas aonair Node** é OmniRoute (lúb theagmhas amháin). Díríonn `HEALTHCHECK` caighdeánach Docker ar `/healthz` éadrom. Tá `/api/monitoring/health` **róthrom** d’eatraimh bheogachta kubelet.
+Tá OmniRoute a** próiseas Nód amháin** (lúb imeacht amháin). Díríonn stoc Docker `HEALTHCHECK` ar `/healthz` éadrom . Tá `/api/monitoring/health`** ró-throm** le haghaidh eatraimh beoga kubelet.
 
-| Taiscéalaí           | Sprioc molta                                                                                         | Nótaí                                                                                                                                                                                                                                                                                                                                                                                                           |
-| -------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Tosú**             | HTTP `GET /healthz` le `failureThreshold` fada (nó `startPeriod` mór)                                | Féadfaidh tús fuar + asc迁 SQLite níos mó ná cúpla soicind a thógáil                                                                                                                                                                                                                                                                                                                                            |
-| **Ullmhacht**        | HTTP `GET /healthz`                                                                                  | Saolré `ok` / `starting` / `stopping` (200 i gcoinne 503). Beidh sé luaineach fós má chuireann an lúb bac ar an LAP. **Níl 200 a thógann roinnt soicind sláintiúil** (#10303) — ciallaíonn sé gur fágadh an lúb teagmhas gan acmhainní sular rith an láimhseálaí 3 bheart                                                                                                                                       |
-| **Beogacht**         | HTTP `GET /livez`, **nó TCP** ar phríomhphort na seirbhíse (`PORT`, `20128` de réir réamhshocraithe) | Ní dhéanann `/livez` ach seiceáil go bhfuil an próiseas beo (200 i gcónaí má ritheann an láimhseálaí). Roinneann sé an lúb teagmhas fós — gnóthach ≠ marbh, agus ní bhraitheann sé easpa acmhainní sa lúb teagmhas (#10303) níos fearr ná TCP. B’fhearr **TCP** má théann taiscéalaithe HTTP thar am faoi ualach catalóige/comhbhrúite; ná maraigh an pod de dheasca stadanna gearra sa lúb teagmhas ach oiread |
-| **Sláinte dhomhain** | `GET /api/monitoring/health` ó sheiceálaí seachtrach                                                 | Ní le haghaidh `livenessProbe` kubelet / `readinessProbe` docht é                                                                                                                                                                                                                                                                                                                                               |
+| Tóraigh             | Sprioc molta                                                                                  | Nótaí                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tosaithe**        | HTTP `GET /healthz` le `failureThreshold` fada (nó `startPeriod` mór)                         | Is féidir le tús fuar + SQLite imirce níos mó ná cúpla soicind                                                                                                                                                                                                                                                                                                                               |
+| **ullmhacht**       | HTTP `GET /healthz`                                                                           | Saolré `ok` / `starting` / `stopping` (200 vs 503). Flaps fós má tá an lúb bac LAP. A** Níl 200 i soicindí iolracha sláintiúil** (#10303) — ciallaíonn sé go raibh an lúb teagmhais ocras sula rith an láimhseálaí 3 beart                                                                                                                                                                   |
+| **Beo**             | HTTP `GET /livez`,** nó TCP** ar an bpríomhphort seirbhíse (`PORT`, `20128` réamhshocraithe ) | tá `/livez` beo próiseas amháin (200 i gcónaí má ritheann an láimhseálaí). Roinneann sé fós an lúb imeacht — gnóthach ≠ marbh, agus ní bhraitheann sé ocras lúb imeachta (#10303) ar bith níos fearr ná mar a dhéanann TCP. Is fearr**TCP** má aimsíonn HTTP am amuigh faoi ualach catalog/compression ; dhéanamh** nach bhfuil** an pod a mharú ar stallaí lúb-imeachtaí gearr cibé bealach |
+| **Sláinte domhain** | `GET /api/monitoring/health` ó sheiceálaí seachtrach                                          | Ní le haghaidh kubelet `livenessProbe` / daingean `readinessProbe`                                                                                                                                                                                                                                                                                                                           |
 
-Cruth samplach (coigeartaigh na tairseacha de réir d’ualaigh tosaithe fhuair agus comhbhrúite):
+Cruth samplach (coigeartaigh na tairseacha chuig d’ualach tosaithe fuar agus comhbhrú):
 
 ```yaml
 ports:
@@ -207,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Nuair a bhíonn stad sa lúb teagmhas, féadfaidh HTTP /livez dul thar am fós. Is é TCP an
-  # rogha choimeádach eile:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-**Ná** dírigh **beogacht** kubelet ar `/api/monitoring/health`. Déanann an chonair sin fíorobair bunachair sonraí/monatóireachta agus tabharfaidh sí toradh dearfach bréagach faoi ualach.
+**Ná déan** cúilín pointe** beocht** ag `/api/monitoring/health`. Déanann an cosán sin fíor-obair DB/monitoring agus beidh sé bréagach-dearfach faoi ualach.
 
-Gaolmhar: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (taiscéalaithe agus an lúb teagmhas gnóthach), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (monaplóir praghsála catalóige), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (monaplóir chomhairimh comharthaí an chomhbhrúite).
+Gaolmhar: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (probes cé go bhfuil an lúb imeacht gnóthach), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (muc praghsála catalóige), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (muc comhbhrú chomhartha-áireamh).
 
-### faireoir systemd (lúb teagmhas reoite)
+### faire córasd (lúb imeachtaí reoite)
 
-Ar óstach systemd, insíonn OmniRoute do bhainisteoir na seirbhíse nuair atá sé réidh agus leanann sé á phingeáil, ionas go marófar agus go n-atosófar freastalaí a bhfuil a lúb teagmhas greamaithe in ionad é a fhágáil ag rith agus ina thost. Tagann na pingí ó lúb teagmhas an fhreastalaí féin: nuair a chuirtear bac uirthi, stopann siad, agus atosaíonn systemd an tseirbhís nuair a théann `WatchdogSec` thart gan ceann ar bith.
+Ar óstach systemd, insíonn OmniRoute don bhainisteoir seirbhíse nuair a bhíonn sé réidh agus go gcoinníonn sé ag pingin é, mar sin maraítear agus atosófar freastalaí a bhfuil a lúb imeacht i bhfostú in ionad fanacht suas agus ciúin. Tagann na pings ó lúb imeachtaí an fhreastalaí féin: nuair a bhlocálann sé, stopann siad, agus atosaíonn systemd an tseirbhís nuair a théann `WatchdogSec` i léig gan cheann.
 
-Scríobhann [`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) aonad úsáideora ina bhfuil sé seo cheana féin. Ní fhaigheann aonad a scríobhann tú féin (`Type=simple` de réir réamhshocraithe) faireoir ar bith, mar sin cuir na línte seo lena rannán `[Service]`:
+Scríobhann [`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) aonad úsáideora leis seo cheana féin. Ní fhaigheann aonad a scríobhann tú féin (an `Type=simple` réamhshocraithe ) faire ar bith, mar sin cuir na línte seo lena chuid `[Service]` :
 
 ```ini
 [Service]
@@ -231,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-Socraíonn an t-aonad ginte `Restart=on-failure`, mar sin cuir an líne sin leis freisin — gan í, ní dhéanann an faireoir ach an tseirbhís ghreamaithe a mharú seachas í a atosú.
+Socraíonn an t-aonad ginte `Restart=on-failure`, mar sin cuir leis an líne sin freisin — gan é ní mharaíonn an faire ach an tseirbhís atá i bhfostú seachas é a atosú.
 
-- `Type=notify`: meastar go bhfuil an tseirbhís “tosaithe” nuair a sheolann an freastalaí `READY=1`, ní nuair a dhéanann an próiseas forcáil. Cuireann `TimeoutStartSec` teorainn le tosú mall.
-- `NotifyAccess=all`: seolann próiseas an fhreastalaí na pingí, ar próiseas mac é de mhaoirseoir `omniroute serve`.
-- `WatchdogSec`: seoltar pingí gach 60 soicind, mar sin úsáid **120 nó níos mó**. D’atosódh luachanna níos lú freastalaí sláintiúil.
-- Rith `omniroute serve` sa tulra. Dícheanglaíonn `--daemon` an freastalaí ó cgroup an aonaid agus ní chríochnaíonn an croitheadh láimhe fógartha riamh.
+- `Type=notify`: cuirtear "tús" leis an tseirbhís nuair a sheolann an freastalaí `READY=1`, ní nuair a fhorbraíonn an próiseas. Tá tús mall faoi cheangal ag `TimeoutStartSec`.
+- `NotifyAccess=all`: seolann an próiseas freastalaí na pings, ar leanbh de chuid an mhaoirseora `omniroute serve` é.
+- `WatchdogSec`: téann pings amach gach 60 soicind, mar sin bain úsáid as** 120 nó níos mó** . Dhéanfadh luachanna níos lú freastalaí sláintiúil a atosú.
+- Rith `omniroute serve` sa tulra. scoiteann `--daemon` an freastalaí ó cgroup an aonaid agus ní chríochnaíonn an croitheadh láimhe fógra.
 
-Seiceáil go bhfuil sé gníomhach tar éis atosaithe:
+Seiceáil go bhfuil sé gníomhach tar éis atosú:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-Taispeánann `WatchdogUSec` an mhoill chumraithe agus bogann `WatchdogTimestamp` ar aghaidh gach nóiméad. Taifeadtar atosú a rinne an faireoir mar `Result=watchdog`. Chun na pingí a mhúchadh agus an t-aonad a choinneáil mar atá sé, socraigh `OMNIROUTE_DISABLE_SD_NOTIFY=1`; gan `NOTIFY_SOCKET` (teirminéal, Docker, Electron, Windows), ní sheoltar tada.
+Taispeánann `WatchdogUSec` an mhoill chumraithe agus bogann `WatchdogTimestamp` ar aghaidh gach nóiméad. Taifeadtar atosú mar gheall ar an gcomhlacht faire mar `Result=watchdog`. Chun na pings a mhúchadh agus an t-aonad a choinneáil mar atá sé, socraigh `OMNIROUTE_DISABLE_SD_NOTIFY=1`; gan `NOTIFY_SOCKET` (teirminéal, Docker, Electron, Windows) ní sheoltar aon rud.
 
-Ní dhéanann an faireoir ach seiceáil go leanann an lúb teagmhas ag rith. Ní atosófar freastalaí atá mall ach atá fós ag casadh.
+Ní dhéanann an faire ach seiceáil go leanann lúb na hócáide ar siúl. Ní atosaítear freastalaí atá mall ach fós ag casadh.
 
-### Obair roghnach ar chonair na n-iarratas (cuimhne, scileanna, athnuachan comharthaí)
+### Obair roghnach cosáin iarratais (cuimhne, scileanna, athnuachan comharthaí)
 
-Roinneann eastóscadh cuimhne, instealladh scileanna agus athnuachan comhartha OAuth an **phríomh-lúb teagmhas Node** le `/healthz`. Is gnéithe scoránaithe deais iad (`memoryEnabled`, `skillsEnabled`), ní linn oibrithe. Féach [Timpeallacht — costas lúibe teagmhas](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+Eastóscadh cuimhne, instealladh scileanna, agus OAuth athnuachan comhartha a roinnt ar an** príomh lúb imeacht Nód** le `/healthz`. Is gnéithe deais-scoránaigh iad (`memoryEnabled`, `skillsEnabled`), ní linn oibrithe. Féach ar [an Timpeallacht — ócáid-chostas lúb](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
-### Sláinte Soláthraithe
+### Sláinte Soláthraí
 
-> **Níl aon chríochphointe REST ann.** Tá sonraí sláinte soláthraithe ar fáil tríd an uirlis MCP `observability_snapshot` nó ar leathanach na deaise `/dashboard/providers`.
+> **Gan críochphointe REST.** Tá sonraí sláinte an tsoláthraí ar fáil tríd an uirlis MCP `observability_snapshot` nó an leathanach deais `/dashboard/providers`.
 
 ### Sonraí Soláthraí
 
-> **Níl aon chríochphointe REST ann.** Tá sonraí faoi gach soláthraí ar fáil ar leathanach na deaise `/dashboard/providers`.
+> **Gan críochphointe REST.** Tá sonraí in aghaidh an tsoláthraí ar fáil tríd an leathanach deais `/dashboard/providers`.
 
 ---
 

@@ -49,7 +49,7 @@ Každé nasazení poskytuje vlastní kopii specifikace na adrese `/openapi.yaml`
 
 ---
 
-## Chatová dokončení
+## Dokončení chatu
 
 ```bash
 POST /v1/chat/completions
@@ -65,35 +65,34 @@ Content-Type: application/json
 }
 ```
 
-### Vlastní hlavičky
+### Vlastní záhlaví
 
-| Hlavička                 | Směr      | Popis                                                                                                                                                                                                               |
-| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Požadavek | Nastavte na `true` pro obejití mezipaměti                                                                                                                                                                           |
-| `x-omniroute-no-memory`  | Požadavek | Nastavte na `true` pro vynechání vložení paměti a dovedností pro tento požadavek (zrcadlí no-cache; zabraňuje režii tokenů/nákladů na každé volání)                                                                 |
-| `X-OmniRoute-Progress`   | Požadavek | Nastavte na `true` pro události průběhu                                                                                                                                                                             |
-| `X-Session-Id`           | Požadavek | Klíč trvalé relace pro afinitu externí relace                                                                                                                                                                       |
-| `x_session_id`           | Požadavek | Varianta s podtržítkem je také podporována (přímé HTTP)                                                                                                                                                             |
-| `X-OmniRoute-Session-Id` | Požadavek | Značka relace/konverzace zadaná volajícím (také se předává do paměti). Pokud je přítomna, uloží se doslovně do `call_logs.session_tag` pro přiřazení nákladů podle relace (#8249) — při absenci se nikdy negeneruje |
-| `Idempotency-Key`        | Požadavek | Klíč pro odstranění duplicit (časové okno 5 s)                                                                                                                                                                      |
-| `X-Request-Id`           | Požadavek | Alternativní klíč pro odstranění duplicit                                                                                                                                                                           |
-| `x-omniroute-connection` | Požadavek | Připnutí požadavku pro jeden model k připojení jednoho poskytovatele (účtu) podle jeho ID — viz [Připnutí účtu pro jednotlivý požadavek](#account-pinning-per-request)                                              |
-| `X-OmniRoute-Cache`      | Odpověď   | `HIT` nebo `MISS` (bez streamování)                                                                                                                                                                                 |
-| `X-OmniRoute-Idempotent` | Odpověď   | `true`, pokud byly odstraněny duplicity                                                                                                                                                                             |
-| `X-OmniRoute-Progress`   | Odpověď   | `enabled`, pokud je sledování průběhu aktivní                                                                                                                                                                       |
-| `X-OmniRoute-Session-Id` | Odpověď   | Efektivní ID relace použité službou OmniRoute                                                                                                                                                                       |
-| `X-OmniRoute-Request-Id` | Odpověď   | ID korelace požadavku (je-li známo)                                                                                                                                                                                 |
-| `X-OmniRoute-Version`    | Odpověď   | Verze sestavení OmniRoute (vždy přítomná)                                                                                                                                                                           |
-| `X-OmniRoute-Cost-Saved` | Odpověď   | Částka v USD, které se mezipaměť vyhnula při `HIT` (pouze při zásahu mezipaměti)                                                                                                                                    |
-| `X-OmniRoute-Decision`   | Odpověď   | Trasovací záznam směrování: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` je kombinovaná strategie nebo `single` pro požadavek bez kombinace) — vždy přítomný v odpovědích při dokončení            |
+| Záhlaví                  | Směr    | Popis                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Žádost  | Chcete-li obejít mezipaměť, nastavte na `true`                                                                                                                                                                                                                                                                                                                                   |
+| `x-omniroute-no-memory`  | Žádost  | Nastavením na `true` přeskočíte vkládání dovedností + paměti pro tento požadavek (zrcadlí se bez mezipaměti; zabrání režii token/cost na volání)                                                                                                                                                                                                                                 |
+| `x-omniroute-no-log`     | Žádost  | Nastavte na `true`, chcete-li z protokolů volání pro tento požadavek na odvození vynechat užitečné zatížení request/response (všechny trasy chatu: dokončení chatu, odpovědi, zprávy, dokončení, Gemini). Časové razítko, model, stav, trvání a počty tokenů jsou stále zaznamenávány. Zkombinujte s `x-omniroute-no-memory` a `x-omniroute-no-cache` pro úplné odhlášení obsahu |
+| `X-OmniRoute-Progress`   | Žádost  | Nastavte na `true` pro události postupu                                                                                                                                                                                                                                                                                                                                          |
+| `X-Session-Id`           | Žádost  | Sticky klíč relace pro externí příbuznost relace                                                                                                                                                                                                                                                                                                                                 |
+| `x_session_id`           | Žádost  | Přijímá se také varianta podtržení (přímá HTTP)                                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Session-Id` | Žádost  | Značka session/conversation dodaná volajícím (také napájí paměť). Pokud je přítomen, přetrvává doslovně do `call_logs.session_tag` pro atribuci nákladů na relaci (#8249) — se nikdy nesyntetizuje, když není přítomen                                                                                                                                                           |
+| `Idempotency-Key`        | Žádost  | Odstraňovací klíč (okno 5s)                                                                                                                                                                                                                                                                                                                                                      |
+| `X-Request-Id`           | Žádost  | Alternativní dedup klíč                                                                                                                                                                                                                                                                                                                                                          |
+| `x-omniroute-connection` | Žádost  | Připněte požadavek jednoho modelu k jednomu připojení poskytovatele (účtu) podle jeho id — viz [Připnutí účtu na požadavek](#account-pinning-per-request)                                                                                                                                                                                                                        |
+| `X-OmniRoute-Cache`      | Odpověď | `HIT` nebo `MISS` (bez streamování)                                                                                                                                                                                                                                                                                                                                              |
+| `X-OmniRoute-Idempotent` | Odpověď | `true` pokud je deduplikován                                                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Progress`   | Odpověď | `enabled` pokud je zapnuto sledování pokroku                                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Session-Id` | Odpověď | Efektivní relace ID používaná OmniRoute                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Request-Id` | Odpověď | ID korelace požadavku (pokud je známo)                                                                                                                                                                                                                                                                                                                                           |
+| `X-OmniRoute-Version`    | Odpověď | Verze sestavení OmniRoute (vždy k dispozici)                                                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Cost-Saved` | Odpověď | USD mezipaměť se vyhýbala na HIT (pouze přístupy do mezipaměti)                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Decision`   | Odpověď | Trasování směrování: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` je kombinovaná strategie nebo `single` pro nekombinovaný požadavek) — je vždy přítomen při dokončení odpovědí                                                                                                                                                                                 |
 
-> Poznámka k Nginx: pokud se spoléháte na hlavičky s podtržítky (například `x_session_id`), povolte `underscores_in_headers on;`.
+> Poznámka Nginx: pokud se spoléháte na podtržítka (například `x_session_id`), povolte `underscores_in_headers on;`.
 
-#### Připnutí účtu pro jednotlivý požadavek
+#### Připnutí účtu na žádost
 
-Pokud má poskytovatel několik připojení (účtů nebo klíčů), OmniRoute obvykle vybere jedno
-prostřednictvím své strategie výběru účtu. Požadavek může místo toho připnout jedno konkrétní připojení
-pomocí hlavičky `x-omniroute-connection`:
+Když má poskytovatel několik připojení (účtů nebo klíčů), OmniRoute obvykle vybere jedno prostřednictvím své strategie výběru účtu. Požadavek může místo toho připnout jedno konkrétní připojení s hlavičkou `x-omniroute-connection` :
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,24 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Kde ID najít.** Otevřete stránku poskytovatele v dashboardu
-  (**Dashboard → Providers → <provider>**) a klikněte na čip s ID `xxxxxxxx…` v řádku připojení —
-  zkopíruje se celé ID připojení.
-- **Které požadavky ho respektují.** Požadavky na jediný model (`provider/model`) na
-  `/v1/chat/completions`, `/v1/messages` a `/v1/responses`. Kombinace hlavičku ignorují: připněte
-  účet pro každý krok kombinace prostřednictvím vlastního připojení daného kroku.
-- **Připnutí je striktní, nikoli preferované.** Připnuté připojení se používá výhradně. Selhání
-  uvnitř požadavku zaznamená cooldown účtu, ale nepřepne na sourozenecký účet stejného poskytovatele.
-- **Cooldown a vyčerpání kvóty připnutí uvolní.** Dokud je připnuté připojení v cooldownu,
-  je vyčerpána kvóta nebo je připojení zablokováno zásadou kvóty, následné požadavky se přepnou
-  na ostatní připojení poskytovatele, přesně jako u provozu bez připnutí.
-- **Neznámá nebo deaktivovaná ID selžou.** ID, které není v aktivním fondu poskytovatele (bylo
-  smazáno, deaktivováno nebo patří jinému poskytovateli), nezanechá žádný způsobilý účet, takže
-  požadavek selže namísto tichého směrování jinam.
+- **Kde najít id.** Otevřete stránku poskytovatele na hlavním panelu (** Dashboard → Providers → <provider>** ) a klikněte na čip ID `xxxxxxxx…` na řádku připojení — zkopíruje celé ID připojení.
+- **Která žádá ctít to.** Požadavky na jeden model (`provider/model`) na `/v1/chat/completions`, `/v1/messages` a `/v1/responses`. Kombinace ignorují hlavičku: místo toho připněte účet na kombinovaný krok přes vlastní připojení kroku.
+- **Špendlík je přísný, není preferován.** Používá se výhradně kolíkové spojení. Selhání uvnitř požadavku zaznamená cooldown účtu, ale ano** ne** otočit na sourozenecký účet stejného poskytovatele.
+- **Cooldown a kvóta uvolní špendlík.** Zatímco se připnuté připojení ochlazuje, kvóta je vyčerpána nebo je blokována zásadou kvót, pozdější požadavky se vrátí k ostatním připojením poskytovatele, stejně jako nepřipnutý provoz.
+- **Neznámá nebo deaktivovaná ID selžou.** ID, které není v aktivním fondu poskytovatele (smazané, deaktivované nebo patřící jinému poskytovateli), nezanechá žádný způsobilý účet, takže požadavek selže namísto tichého směrování jinam.
 
-Claude Code odesílá vlastní hlavičky prostřednictvím `ANTHROPIC_CUSTOM_HEADERS`. Umístěte ji do bloku
-`env` v `~/.claude/settings.json`, nebo do projektového `.claude/settings.json`, abyste mohli pro každý
-projekt připnout jiný účet:
+Claude Code odesílá vlastní hlavičky přes `ANTHROPIC_CUSTOM_HEADERS`. Vložte jej do bloku `env` `~/.claude/settings.json` nebo do `.claude/settings.json` na úrovni projektu a připněte jiný účet na projekt:
 
 ```jsonc
 {
@@ -132,12 +120,11 @@ projekt připnout jiný účet:
 }
 ```
 
-Zdroj: `src/sse/handlers/chat.ts` (načtení hlavičky), `src/sse/services/auth.ts` a
-`src/sse/services/sessionAffinityPin.ts` (uvolnění připnutí a kontrola chybějícího připojení ve fondu).
+Zdroj: `src/sse/handlers/chat.ts` (čtení záhlaví), `src/sse/services/auth.ts` a `src/sse/services/sessionAffinityPin.ts` (uvolnění kolíků a kontrola chybějícího z fondu).
 
-> **Hlavičky s telemetrií nákladů:** úspěšné odpovědi bez streamování obsahují také sadu telemetrických hlaviček nákladů `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, vždy 10 desetinných míst; `0.0000000000` pro bezplatné služby nebo služby bez ceny), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` a `X-OmniRoute-Fallback-Attempts` (pouze pokud je hodnota > 0), dále `X-OmniRoute-Request-Id` a `X-OmniRoute-Version`. Tyto hlavičky generují chat completions, `/v1/responses`, `/v1/messages` **a koncové body médií** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` a `/v1/moderations` (vždy s nákladem `0`). Náklady na média se počítají podle modality (za obrázek, za sekundu, za znak, za vyhledávací jednotku), pokud je cena k dispozici, jinak je hodnota `0` (fail-open).
+> **Nákladové telemetrické hlavičky:** non-streaming úspěšné odpovědi také nesou `X-OmniRoute-*` sadu nákladů-telemetrie — `X-OmniRoute-Response-Cost` (USD, pevných 10 desetinných míst; `0.0000000000` pro free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` a `X-OmniRoute-Fallback-Attempts` (pouze když > 0), plus `X-OmniRoute-Request-Id` a `X-OmniRoute-Version` Ty jsou vydávány dokončením chatu, `/v1/responses`, `/v1/messages`,** a mediální koncové body** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` a `/v1/moderations` (vždy stojí `0`). Mediální náklady se počítají podle modality (na obrázek, za sekundu, na znak, na vyhledávací jednotku), pokud je cena k dispozici, jinak `0` (neúspěšné otevření).
 
-> **Sémantika nákladů při zásahu mezipaměti:** při zásahu sémantické mezipaměti (`X-OmniRoute-Cache-Hit: true`) se nevolá upstream, takže `X-OmniRoute-Response-Cost` je `0.0000000000` (**přírůstkový** náklad obsloužení zásahu). Původní/náklad, který by jinak vznikl, se uvádí samostatně v `X-OmniRoute-Cost-Saved`. Fakturační systémy by měly sčítat `X-OmniRoute-Response-Cost` (zásahy nic nestojí); analytika mezipaměti může agregovat `X-OmniRoute-Cost-Saved`.
+> **Sémantika nákladů na přístup do mezipaměti:** na sémantické mezipaměti HIT (`X-OmniRoute-Cache-Hit: true`) není provedeno žádné upstream volání, takže `X-OmniRoute-Response-Cost` je `0.0000000000` (** přírůstkové** náklady na obsluhu hitu). Náklady original/would-have-been se vykazují samostatně v `X-OmniRoute-Cost-Saved`. Fakturující spotřebitelé by měli sčítat `X-OmniRoute-Response-Cost` (hledání nestojí nic); Analýza mezipaměti může agregovat `X-OmniRoute-Cost-Saved`.
 
 ## Exkluzivní spravované zapůjčení relací
 
@@ -335,7 +322,7 @@ GET /v1/embeddings
 
 ---
 
-## Generování obrázků
+## Generování obrazu
 
 ```bash
 POST /v1/images/generations
@@ -349,49 +336,30 @@ Content-Type: application/json
 }
 ```
 
-Mezi dostupné poskytovatele patří OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (lokální) a ComfyUI (lokální).
+Mezi dostupné poskytovatele patří OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (místní), ComfyUI (místní).
 
-`n` vrací `n` obrázků v `data[]`. Poskytovatelé, jejichž nadřazené API vrací jeden obrázek na volání
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), provedou `n` samostatných volání nadřazeného API,
-přičemž současně probíhají nejvýše 4. Pevná hodnota `seed` se posouvá podle indexu volání
-(`seed`, `seed + 1`, …), takže se obrázky liší, ale zůstávají reprodukovatelné. Hodnota `n` je
-omezena na 10. Pokud některé volání selže, požadavek jako celek selže. Seznam formátů pro
-rozvětvení volání je uveden v `SINGLE_IMAGE_FANOUT_FORMATS` v
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` vrátí obrázky `n` v `data[]`. Poskytovatelé, jejichž upstream API vrací jeden obrázek na volání (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), obdrží `n` samostatných upstream volání, maximálně 4 za letu. Pevné `seed` je kompenzováno indexem volání (`seed`, `seed + 1`, …), takže obrázky se liší, ale zůstávají reprodukovatelné. `n` je omezeno na 10. Požadavek jako celek selže, pokud selže jakékoli volání. Seznam formátů rozvětvení je `SINGLE_IMAGE_FANOUT_FORMATS` v `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux znovu používá existující připojení s klíčem API a přijímá předpony `zenmux/` nebo `zm/`:
+Codex GPT Obrazové modely (`codex/gpt-image-*`) vracejí pouze PNG : upstream odpoví `200` PNG bajty, i když je požadováno `jpeg` nebo `webp`. Požadavek s jakýmkoli jiným `output_format` (`webp`, `jpeg`, ...) je odmítnut s HTTP 400 místo toho, aby byl tiše ignorován; vynechat nebo odeslat `png`. `output_compression` není přeposlán.
 
-- `zenmux/openai/gpt-image-2` používá rozhraní OpenAI Images API společnosti ZenMux. Mezi možnosti patří `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` a `response_format`.
-- Ostatní vydavatelé, například `zm/meta/muse-image-1.0`, používají koncový bod Vertex AI
-  `:predict` společnosti ZenMux. `n` se mapuje na `sampleCount`, `aspect_ratio` na `aspectRatio` a
-  `image_size` (`1K`, `2K`, `4K`) na `sampleImageSize`. Hodnota `size` v pixelech poskytuje pouze poměr stran,
-  nikoli zaručené rozměry v pixelech. Podporované poměry stran, rozlišení a počty se liší podle modelu.
-- `zm/inclusionai/ming-image-0.1-design` volí vlastní rozměry. Vynechte `size`,
-  `aspect_ratio` a `image_size`; explicitní hodnoty vrátí HTTP 400. Pomocí `output_format` lze
-  vyžádat PNG, JPEG nebo WebP.
+ZenMux znovu používá stávající připojení klíče API a přijímá předpony `zenmux/` nebo `zm/` :
 
-Tato integrace podporuje generování obrázků z textu, nikoli úpravu referenčních obrázků. Výstup
-Vertex je normalizován na `data[].b64_json`; `response_format: "url"` vrací nadřazenou
-HTTPS URL nebo datovou URL base64, pokud jsou k dispozici pouze bajty obrázku. Prázdné nebo filtrované výstupy
-vracejí chybu namísto úspěšné odpovědi s prázdným obsahem. Přístup k modelům závisí na účtu ZenMux.
-Viz [Vertex API společnosti ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) a
-[Images API společnosti OpenAI](https://docs.zenmux.ai/api/openai/generate-an-image).
+- `zenmux/openai/gpt-image-2` používá obrázky ZenMuxOpenAI API. Možnosti zahrnují `size`, `quality`, `n`, `output_format`, `output_compression`, `background` a `response_format`.
+- Jiní vydavatelé, jako je `zm/meta/muse-image-1.0`, používají koncový bod ZenMuxAI `:predict`. `n` mapuje na `sampleCount`, `aspect_ratio` na `aspectRatio` a `image_size` (`1K`, `2K`, `4K`) na `sampleImageSize`. Pixel `size` poskytuje pouze poměr stran, nikoli zaručené rozměry pixelů. Podporované poměry, rozlišení a počty se liší podle modelu.
+- `zm/inclusionai/ming-image-0.1-design` volí své vlastní rozměry. Vynechat `size`, `aspect_ratio` a `image_size`; explicitní hodnoty vrátí HTTP 400. PNG, JPEG a WebP lze vyžádat pomocí `output_format`.
 
-Připojení pro přihlášení k Microsoft 365 Copilot obsluhuje `copilot-m365-web/m365-copilot-image`
-prostřednictvím integrovaného nástroje Copilotu pro obrázky: jeden tah Copilotu na obrázek (`n` 1–4), přičemž `size` řídí
-pouze orientaci a obrázky se vracejí přímo v odpovědi (`b64_json` nebo datová URL pro
-`response_format: "url"`). Viz [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+This integration supports text-to-image generation, not reference-image editing. Vertex output is normalized to `data[].b64_json`; `response_format: "url"` returns an upstream HTTPS URL or a base64 data URL when only image bytes are available. Empty/filtered outputs return an error rather than an empty success. Model access depends on the ZenMux account. See [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) and [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Přihlašovací připojení Microsoft 365 Copilot obsluhuje `copilot-m365-web/m365-copilot-image` prostřednictvím vestavěného obrazového nástroje Copilot: jedno otočení Copilot na obraz (`n` 1–4), `size` řídí pouze orientaci a obrazy se vrací inline (`b64_json` nebo data URL pro `response_format: "url"`). Viz [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Seznam všech modelů pro generování obrázků
+# List all image models
 GET /v1/images/generations
 ```
 
 ---
 
-## OCR dokumentů
+## Dokument OCR
 
 ```bash
 POST /v1/ocr
@@ -407,18 +375,15 @@ Content-Type: application/json
 }
 ```
 
-`model` vybírá poskytovatele OCR pomocí prefixu `provider/model`; samostatný identifikátor modelu (např.
-`mistral-ocr-latest`) se přeloží na registrovaného poskytovatele a neuvedený `model` se ve výchozím
-nastavení překládá na Mistral (`mistral-ocr-latest`). Registrovaní poskytovatelé
-(`open-sse/config/ocrRegistry.ts`):
+`model` vybere poskytovatele OCR pomocí předpony `provider/model` ; holé id modelu (např. `mistral-ocr-latest`) se převede na svého registrovaného poskytovatele a vynechané `model` je výchozí Mistral (`mistral-ocr-latest`). Registrovaní poskytovatelé (`open-sse/config/ocrRegistry.ts`):
 
-| ID poskytovatele              | ID modelu            | Hodnota `model`                                                     | Poznámky                                                                                                                                   |
-| ----------------------------- | -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (nebo samostatné `mistral-ocr-latest`) | Synchronní — odpověď se vrací přímo z jediného upstreamového volání.                                                                       |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                         | Asynchronní upstream (`analyze` + poll) — viz níže.                                                                                        |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                             | Synchronní, prostřednictvím partnerského endpointu Vertex AI `openapi/chat/completions` — informace o autentizaci a URL jsou uvedeny níže. |
+| ID poskytovatele              | ID modelu                                   | hodnota `model`                                               | Poznámky                                                                                                                                                                                                                     |
+| ----------------------------- | ------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                        | `mistral/mistral-ocr-latest` (nebo holé `mistral-ocr-latest`) | Synchronní — odpověď je vrácena přímo z jednoho upstream volání.                                                                                                                                                             |
+| `azure-document-intelligence` | `prebuilt-read`                             | `azure-document-intelligence/prebuilt-read`                   | Asynchronní upstream (`analyze` + poll) — viz níže.                                                                                                                                                                          |
+| `vertex-deepseek-ocr`         | samostatně nasazený (žádný vestavěný model) | `vertex-deepseek-ocr/<your-deployed-model-id>`                | Synchronní, prostřednictvím vašeho vlastního koncového bodu Vertex AI Model Garden DeepSeek-OCR (tvar `openapi/chat/completions` ); Google vyřadil spravovaný `deepseek-ocr-maas` 21. 10. 2026 (#20423), takže id vrátí 400. |
 
-Všichni tři poskytovatelé odpovídají tělem ve stejném formátu jako Mistral:
+Všichni tři poskytovatelé odpovídají ve stejném těle ve tvaru Mistralu:
 
 ```json
 {
@@ -430,28 +395,11 @@ Všichni tři poskytovatelé odpovídají tělem ve stejném formátu jako Mistr
 
 ### Průběh dotazování Azure Document Intelligence
 
-API `analyze` služby Azure Document Intelligence je asynchronní: počáteční požadavek vrací
-hlavičku `Operation-Location` namísto těla a na výsledek je nutné se dotazovat. Obslužná rutina
-(`open-sse/handlers/ocr.ts`) se na tuto URL dotazuje každou sekundu, nejvýše po dobu 30 pokusů,
-okamžitě selže (a nepokračuje v dotazování) při odpovědi dotazu s nenastaveným `ok` nebo při
-stavu `"failed"` a vrátí `504`, pokud operace po vyčerpání rozpočtu pokusů stále probíhá. Konečná
-odpověď Azure se před vrácením volajícímu normalizuje do stejného tvaru `pages`/`markdown`,
-jaký používá Mistral, takže kód klienta nemusí pro jednotlivé poskytovatele používat speciální
-logiku.
+`analyze` API Azure Document Intelligence je asynchronní: počáteční požadavek vrátí záhlaví `Operation-Location` místo těla a výsledek musí být dotazován. Obslužná rutina (`open-sse/handlers/ocr.ts`) se dotazuje, že URL každou sekundu až na 30 pokusů, rychle selže (nepokračuje v dotazování) na odpověď bez `ok` nebo na stav `"failed"` a vrátí `504`, pokud operace stále běží i po vyčerpání rozpočtu pokusu. Finální odpověď Azure je normalizována do stejného tvaru `pages`/`markdown` jaký používá Mistral, než se vrátí volajícímu, takže klientský kód nemusí poskytovatele zvlášť rozlišovat.
 
-### Autentizace a rozlišení endpointu Vertex AI DeepSeek OCR
+### Vertex AI DeepSeek OCR ověření a rozlišení koncového bodu
 
-`vertex-deepseek-ocr` znovu používá stejnou autentizaci Vertex AI, kterou OmniRoute již podporuje
-pro komunikaci s chatovacími a obrazovými modely (`open-sse/executors/vertex.ts`): API klíčem
-připojení je buď přihlašovací údaj Service Account ve formátu JSON (vyměněný za krátkodobý
-přístupový token OAuth prostřednictvím flow JWT-bearer), nebo již vydaný přístupový token OAuth,
-který se použije beze změny. URL upstreamového endpointu je obecný partnerský endpoint Vertexu
-`openapi/chat/completions`, sestavený z projektu a oblasti připojení — explicitní hodnoty
-`providerSpecificData.project`/`providerSpecificData.region` mají vždy přednost;
-jinak se projekt odvodí z `project_id` JSONu Service Account a oblast se ve výchozím nastavení
-nastaví na `us-central1`. Obě rozlišení probíhají v `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`) a používá je
-`src/app/api/v1/ocr/route.ts` před odesláním požadavku do `handleOcr`.
+`vertex-deepseek-ocr` znovu používá stejnou autentizaci Vertex AI OmniRoute již podporuje pro provoz chat/image (`open-sse/executors/vertex.ts`): klíč API připojení je buď pověření Service Account JSON (vyměněné za krátkodobý přístupový token OAuth prostřednictvím toku nosiče JWT), nebo již vytvořený přístupový token OAuth používaný tak, jak je. Upstream koncový bod URL je generický partnerský koncový bod `openapi/chat/completions` společnosti Vertex, vytvořený z projektu připojení a regionu — vždy vítězí explicitní `providerSpecificData.project`/`providerSpecificData.region` ; jinak je projekt odvozen od `project_id` servisního účtu JSON a oblast má výchozí hodnotu `us-central1`. K oběma rozlišením dochází v `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), které `src/app/api/v1/ocr/route.ts` spotřebuje před odesláním do `handleOcr`.
 
 ---
 
@@ -702,96 +650,102 @@ Smlouvy upstreamu: [zvukové efekty](https://elevenlabs.io/docs/api-reference/te
 
 ---
 
-## Endpointy kompatibility
+## Koncové body kompatibility
 
 | Metoda | Cesta                                     | Formát                             |
 | ------ | ----------------------------------------- | ---------------------------------- |
 | POST   | `/v1/chat/completions`                    | OpenAI                             |
 | POST   | `/v1/messages`                            | Anthropic                          |
-| POST   | `/v1/responses`                           | OpenAI Responses                   |
+| POST   | `/v1/responses`                           | OpenAI odpovědi                    |
 | POST   | `/v1/embeddings`                          | OpenAI                             |
-| POST   | `/v1/images/generations`                  | OpenAI Images                      |
-| POST   | `/v1/images/edits`                        | OpenAI Images (úpravy/inpainting)  |
+| POST   | `/v1/images/generations`                  | OpenAI obrázky                     |
+| POST   | `/v1/images/edits`                        | OpenAI obrázky (edit/inpaint)      |
 | POST   | `/v1/videos/generations`                  | Generování videa ve stylu OpenAI   |
-| POST   | `/v1/music/generations`                   | Generování hudby ve stylu OpenAI   |
+| POST   | `/v1/music/generations`                   | Generace hudby ve stylu OpenAI     |
 | POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                 |
-| POST   | `/v1/audio/speech`                        | OpenAI TTS (vrací tělo audia)      |
-| POST   | `/v1/rerank`                              | Reranking ve stylu Cohere/Voyage   |
-| POST   | `/v1/classify`                            | Jina classify (`api.jina.ai`)      |
+| POST   | `/v1/audio/speech`                        | OpenAI TTS (vrací tělo zvuku)      |
+| POST   | `/v1/rerank`                              | Cohere/Voyage-style rerank         |
+| POST   | `/v1/classify`                            | Jina klasifikovat (`api.jina.ai`)  |
 | POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`) |
-| POST   | `/v1/moderations`                         | OpenAI Moderations                 |
+| POST   | `/v1/moderations`                         | OpenAI moderování                  |
+| POST   | `/v1/systemone`                           | System One typovaná rozhodnutí     |
+| POST   | `/v1/decisions`                           | OpenAI rozhodnutí (nativní)        |
+| GET    | `/v1/systemone/models`                    | Katalog rozhodovacích modelů       |
 | GET    | `/v1/models`                              | OpenAI                             |
-| POST   | `/v1/models/query`                        | Filtrovaný seznam modelů           |
+| POST   | `/v1/models/query`                        | Filtrovaný výběr modelů            |
 | POST   | `/v1/messages/count_tokens`               | Anthropic                          |
 | GET    | `/v1beta/models`                          | Gemini                             |
 | POST   | `/v1beta/models/{...path}`                | Gemini generateContent             |
 | POST   | `/v1/api/chat`                            | Ollama                             |
-| GET    | `/api/v1/vscode/{token}/`                 | Alias katalogu OpenAI              |
-| GET    | `/api/v1/vscode/{token}/models`           | Alias modelů OpenAI                |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | Alias OpenAI s tokenem             |
-| POST   | `/api/v1/vscode/{token}/responses`        | Alias OpenAI Responses s tokenem   |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Alias Ollama s tokenem             |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Alias tagů Ollama s tokenem        |
+| GET    | `/api/v1/vscode/{token}/`                 | alias katalogu OpenAI              |
+| GET    | `/api/v1/vscode/{token}/models`           | OpenAI modely alias                |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | OpenAI tokenizovaný alias          |
+| POST   | `/api/v1/vscode/{token}/responses`        | OpenAI Responses tokenized alias   |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | Ollama tokenizovaný alias          |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | tokenizovaný alias značek Ollama   |
 
-Všechny POST cesty používají stejný tvar: `Bearer your-api-key` + tělo JSON ověřené pomocí Zodu (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` atd., viz `src/shared/validation/schemas.ts`). Při selhání schématu se vrací chyba 4xx.
+Všechny cesty POST mají stejný tvar: `Bearer your-api-key` + Tělo JSON ověřené Zodem (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` atd., viz `src/shared/validation/schemas.ts`). 4xx je vráceno při selhání schématu.
 
-Pro klienty, které nemohou připojit `Authorization: Bearer ...`, OmniRoute také přijímá API klíče v URL prostřednictvím kompatibility s query stringem (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) nebo prostřednictvím vyhrazených endpointů `/api/v1/vscode/{token}/...` popsaných níže.
+Pro klienty, kteří nemohou připojit `Authorization: Bearer ...`, přijímá OmniRoute také klíče API v URL buď prostřednictvím kompatibility s řetězcem dotazu (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) nebo vyhrazených koncových bodů `/api/v1/vscode/{token}/...` zdokumentovaných níže.
 
 ```bash
-# Reranking (poskytovatel z cloudového registru nebo uzel poskytovatele kompatibilního s OpenAI jako "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Klasifikace Jina (přihlašovací údaje Foundation API)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Segmenter Jina
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Vyhledávání Jina (s.jina.ai; aliasy poskytovatele: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderace
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — vrací tělo audio/mpeg (nebo požadovaného formátu)
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# TTS Soniox vyžaduje jazyk a hlas: `language` má výchozí hodnotu "en"; chybějící
-# hlas nebo název standardního hlasu OpenAI (alloy, nova, …) se změní na "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Úprava obrázku (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Generování videa / hudby (ID modelu s prefixem poskytovatele)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Přesměrování na uzly poskytovatelů:** `POST /v1/rerank` také směruje požadavky na uzly poskytovatelů kompatibilní s OpenAI
-> (oMLX, vLLM, Infinity, TEI za gatewayí, …) adresované jako `<node-prefix>/<model>`. Uzly loopback
-> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) jsou vždy způsobilé, stejně jako názvy hostitelů,
-> které operátor uvede v `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (např. název služby Dockeru/Compose, jako
-> `http://reranker:8080/v1`; tyto služby jsou volány přímo, nikdy přes `HTTP(S)_PROXY` ani přes proxy připnutou ke
-> spojení). Uzly na jakémkoli jiném
-> hostiteli — počítač v LAN nebo peer v Tailscale — jsou způsobilé pouze tehdy, když operátor povolí
-> příznak funkce `RERANK_REMOTE_PROVIDER_NODES` **a** základní URL uzlu projde zásadami odchozích URL poskytovatelů
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Krok přerankování paměťového enginu volá tuto trasu přes
-> loopback, takže stejné pravidlo platí pro `rerankProviderModel` v nastavení Memory.
+> **Přehodnotit uzly poskytovatele:** `POST /v1/rerank` také směruje do uzlů poskytovatelů kompatibilních s OpenAI (oMLX, vLLM, Infinity, TEI za bránou, …) adresovaných jako `<node-prefix>/<model>`. Uzly zpětné smyčky (`localhost`, `127.0.0.1`, `172.16.0.0/12`) jsou vždy vhodné, stejně jako názvy hostitelů, které operátor uvádí v `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (např. název služby Docker/Compose jako je `http://reranker:8080/v1`; volají se přímo, nikdy přes `HTTP(S)_PROXY` nebo připojený proxy server). Uzly na jakémkoli jiném hostiteli — a LAN box nebo Tailscale peer — jsou způsobilé pouze v případě, že operátor povolí příznak funkce `RERANK_REMOTE_PROVIDER_NODES`** a** základní URL uzlu předává odchozí zásadu URL poskytovatele (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Krok změny pořadí paměťového enginu volá tuto cestu přes zpětnou smyčku, takže stejné pravidlo řídí `rerankProviderModel` v nastavení paměti.
 >
-> **Tvary místního serveru:** uzel je volán na `<base>/v1/rerank` a při odpovědi 404 na `<base>/rerank`
-> (Infinity, TEI). Tělo požadavku upstreamu obsahuje obě označení kompatibilní s Cohere/OpenAI (`documents`,
-> `return_documents`) i označení TEI (`texts`, `return_text`) a odpověď upstreamu je
-> normalizována na obálku Cohere: holé `[{index, score, text}]` z TEI, `{results: [{index, score}]}`
-> z tenkých gatewayí i `{data: [...]}` ve stylu Voyage se klientovi vrací jako
-> `{results: [{index, relevance_score, document?}]}`, seřazené podle skóre a omezené na `top_n`.
+> **Tvary místního serveru:** uzel je volán v `<base>/v1/rerank` a na 404 v `<base>/rerank` (nekonečno, TEI). Tělo proti proudu nese pravopis Cohere/OpenAI (`documents`, `return_documents`) i pravopis TEI (`texts`, `return_text`) a odezva proti proudu je normalizována na obálku Cohere : holé TEI `[{index, score, text}]`, `{results: [{index, score}]}` z tenkých bran a `{data: [...]}` ve stylu Voyage se všechny vrátí klientovi `{results: [{index, relevance_score, document?}]}` podle skóre a `top_n`.
 
-> **Zjišťování uzlů poskytovatelů:** modely na uzlu poskytovatele kompatibilním s OpenAI se zobrazují v `GET /v1/models`
-> pod prefixem uzlu. Řádky, které neobsahují metadata koncového bodu (typické pro místní výpisy `/v1/models`),
-> převezmou `apiType` uzlu, takže modely uzlu `embeddings` mají `type: "embedding"` a
-> modely uzlu `rerank` mají `type: "rerank"` namísto výchozí hodnoty chat; explicitní
-> `supportedEndpoints` u synchronizovaného nebo ručně přidaného řádku má stále přednost.
+> **Zjištění uzlu poskytovatele:** modely na uzlu poskytovatele kompatibilního s OpenAI se objeví v `GET /v1/models` pod předponou uzlu. Řádky, které nenesou žádná metadata koncového bodu (typické pro místní výpisy `/v1/models` ), dědí uzlu `apiType`, takže modely uzlu `embeddings` jsou `type: "embedding"` a modely uzlu `rerank` jsou `type: "rerank"` namísto výchozího nastavení pro chat; explicitní `supportedEndpoints` na synchronizovaném nebo ručně přidaném řádku má stále přednost.
+
+### Typovaná rozhodnutí
+
+Rozhodovací modely místo generování textu odpovídají na zadané otázky s kalibrovanými pravděpodobnostmi. Nikdy to nejsou modely chatu a tyto dva formáty drátu se nikdy nepřekládají do sebe:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter rozhodnutí, Cloudflare Pracovníci AI, místní Ollama).
+- `POST /v1/decisions` — nativní OpenAI Rozhodnutí `{ model, input, questions: [...] }`, obsluhovaná připojením `openai`. Model je `openai/gpt-6-luna` (funguje i holé `gpt-6-luna` ). Odpovědi se vrací v pořadí otázek, nedotčené.
+- `GET /v1/systemone/models` — jeden katalog obou druhů; každý řádek pojmenuje své `api_format` (`systemone` nebo `decisions`). `limit` / `after` stránka konečný seznam. Záhlaví `X-OmniRoute-Catalog-Status` zní `complete`, `partial` nebo `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+Na seznamu povolených modelů klíče API `/v1/decisions` se před přečtením jakýchkoli pověření zkontroluje kategorie koncového bodu `decisions`, rozpočet a rozsah připojení. Pověření je uložené připojení `openai` v rozsahu klíče (nikdy klíč prostředí); připojovací základna URL je respektována pouze v případě, že se jedná o `http(s)` URL bez pověření, dotazu nebo fragmentu, který neukazuje na toto OmniRoute. Hovor odchází stejným střeženým přenosem jako automatický směrovač `decision` ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): odchozí stráž poskytovatele, žádné opakování, žádná přesměrování, časový limit 5 s a limit odpovědi 64 KB (větší odpověď je 502). Těla požadavků jsou omezena na 4 MiB. Každý hovor odešle nový `Idempotency-Key`. Chyby nesou pouze stav upstream, nikdy jeho tělo, URL, klíč nebo výzvu.
 
 ### Vyhrazené trasy poskytovatelů
 
@@ -801,7 +755,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Prefix poskytovatele se automaticky doplní, pokud chybí. Modely, které si neodpovídají, vracejí `400`.
+Pokud chybí předpona poskytovatele, je automaticky přidána. Neshodné modely vrátí `400`.
 
 ---
 

@@ -66,7 +66,7 @@ La sincronizzazione è **differita**: lo stato viene aggiornato dal sistema upst
 Non è presente alcun processo di polling in background. Le dashboard che necessitano di uno stato aggiornato devono interrogare l'endpoint GET
 a intervalli ragionevoli.
 
-## Interfaccia `CloudAgentBase`
+## interfaccia `CloudAgentBase`
 
 Fonte: `src/lib/cloudAgent/baseAgent.ts`
 
@@ -110,15 +110,15 @@ export abstract class CloudAgentBase {
     c: AgentCredentials
   ): Promise<{ name: string; url: string; branch?: string }[]>;
 
-  protected mapStatus(raw: string): CloudAgentStatus; // stringa upstream euristica → enum
+  protected mapStatus(raw: string): CloudAgentStatus; // heuristic upstream-string → enum
   protected generateTaskId(): string; // `task_<ts>_<rand>`
   protected generateActivityId(): string; // `act_<ts>_<rand>`
 }
 ```
 
-`CodexCloudAgent.approvePlan` genera intenzionalmente un'eccezione: Codex Cloud crea automaticamente i piani e non dispone di un passaggio di approvazione. `CodexCloudAgent.listSources` restituisce `[]`.
+`CodexCloudAgent.approvePlan` lancia intenzionalmente — Codex piani automatici cloud e non ha alcun cancello di approvazione. `CodexCloudAgent.listSources` restituisce `[]`.
 
-`CursorCloudAgent` gestisce gli agenti Background / Cloud di Cursor tramite la relativa API REST ufficiale (`api.cursor.com/v0`) con una **chiave API utente o di account di servizio**: l'alternativa proprietaria e più sicura al riutilizzo della sessione OAuth dell'IDE Cursor (provider `cursor`, che comporta un avviso relativo al rischio di ban). È un semplice adattatore REST (senza dipendenza nativa da `@cursor/sdk`). `approvePlan` genera un'eccezione (gli agenti Cursor operano autonomamente); `listSources` elenca i repository accessibili dalla chiave. Cursor restituisce enum di stato in MAIUSCOLO (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`), mappati esplicitamente al valore `CloudAgentStatus` condiviso. `baseUrl` può essere sovrascritto per ciascuna credenziale, in modo che la versione o il percorso dell'API possano essere corretti senza modificare il codice.
+`CursorCloudAgent` guida gli agenti Background/Cloud Cursor attraverso il suo REST API (`api.cursor.com/v0`) ufficiale con a** Chiave API dell'utente o dell'account di servizio** — l'alternativa più sicura e di prima parte al riutilizzo della sessione OAuth di Cursor IDE(fornitore `cursor`, che porta un avviso di rischio di ban). È un semplice adattatore REST (nessuna dipendenza nativa `@cursor/sdk` ). `approvePlan` lancia (gli agenti Cursor funzionano autonomamente); `listSources` elenca i repository raggiungibili dalla chiave. Cursor restituisce le enumerazioni di stato UPPERCASE (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`), mappate esplicitamente allo `CloudAgentStatus` condiviso. `baseUrl` è sovrascrivibile per credenziale, quindi API version/path può essere corretto senza modificare il codice.
 
 ## Tipi di dominio
 
@@ -323,15 +323,12 @@ dalla risposta per qualsiasi altra chiave.
 
 `getCloudAgentCredentials(providerId)` in `src/lib/cloudAgent/api.ts`:
 
-1. Carica le connessioni attive dei provider tramite `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Per ogni connessione, preferisce `apiKey` (senza spazi iniziali e finali). In alternativa, utilizza `accessToken`.
-3. Restituisce il primo token non vuoto nel formato `{ apiKey: token }`.
-4. Restituisce `null` se non viene trovato alcun token utilizzabile — l'API risponde con `400` e
-   `"Nessuna credenziale attiva configurata per il provider del cloud agent: <id>"`.
+1. Carica le connessioni del provider attivo tramite `getProviderConnections({ provider: providerId, isActive: true })`.
+2. Per ogni connessione si preferisce `apiKey` (rifilato). Ritorna a `accessToken`.
+3. Restituisce il primo token non vuoto racchiuso come `{ apiKey: token }`.
+4. Restituisce `null` se non viene trovato alcun token utilizzabile — API risponde `400` con `"No active credentials configured for cloud agent provider: <id>"`.
 
-Ciò significa che i Cloud Agent riutilizzano la stessa tabella Provider Connection dei normali
-provider LLM. Per abilitare Jules, crea una connessione attiva con `provider: "jules"`
-e un valore `apiKey` impostato.
+Ciò significa che gli agenti cloud riutilizzano la stessa tabella di connessione del provider dei normali provider LLM. Per abilitare Jules, crea una connessione attiva con `provider: "jules"` e uno `apiKey` popolato.
 
 ## Dashboard
 

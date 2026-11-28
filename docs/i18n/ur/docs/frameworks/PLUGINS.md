@@ -90,18 +90,17 @@ export function register(program, ctx) {
 
 ## دریافت
 
-پلگ اِنز ان مقامات سے دریافت کیے جاتے ہیں:
+پلگ ان اس سے دریافت ہوئے ہیں:
 
-1. `~/.omniroute/plugins/<name>/` — صارف کی مقامی انسٹالیشنز
-2. `OMNIROUTE_PLUGIN_PATH` env var — حسبِ ضرورت ڈائریکٹری
+1. `~/.omniroute/plugins/node_modules/<name>/` — جہاں `omniroute plugin install` پیکجز رکھتا ہے (ایک npm `--prefix`، `npm -g` نہیں)
+2. `~/.omniroute/plugins/<name>/` — ہاتھ سے کاپی شدہ پلگ ان ڈائریکٹریز
+3. `OMNIROUTE_PLUGIN_PATH` env var — کسٹم ڈائریکٹری
 
-دونوں **صرف CLI** کے لیے ہیں۔ سرور سائیڈ پلگ اِن رن ٹائم (مارکیٹ پلیس/`plugin.json`
-پلگ اِنز، جو پراکسی کے اندر چلتے ہیں) کا اپنا اسکینر اور اپنا اوور رائیڈ،
-`OMNIROUTE_PLUGINS_DIR` ہے — دیکھیے
-[PLUGIN_MARKETPLACE.md → پلگ اِن ڈائریکٹری](./PLUGIN_MARKETPLACE.md#plugin-directory)۔
-ایک کو سیٹ کرنے سے دوسرے پر کوئی اثر نہیں پڑتا۔
+symlinked ڈائریکٹریز (npm `plugin install ./dir` کے لیے کیا تخلیق کرتا ہے) کی پیروی کی جاتی ہے۔
 
-لوڈنگ کی خرابیوں کو پکڑ کر تنبیہات کے طور پر دکھایا جاتا ہے — خراب پلگ اِن کبھی بھی CLI کو کریش نہیں کرتا۔
+دونوں ہیں۔** صرف CLI** . سرور سائیڈ پلگ ان کا رن ٹائم (بازار /`plugin.json` پلگ ان جو پراکسی کے اندر چلتے ہیں) کا اپنا اسکینر ہوتا ہے جس کی اپنی اوور رائڈ ہوتی ہے، `OMNIROUTE_PLUGINS_DIR` — دیکھیں [PLUGIN_MARKETPLACE.md → پلگ ان ڈائریکٹری](./PLUGIN_MARKETPLACE.md#plugin-directory) ۔ ایک کی ترتیب دوسرے پر اثر انداز نہیں ہوتی۔
+
+لوڈنگ کی غلطیاں پکڑی جاتی ہیں اور انتباہات کے طور پر پرنٹ کی جاتی ہیں — ٹوٹا ہوا پلگ ان کبھی بھی CLI کو کریش نہیں کرتا۔
 
 ## سیکیورٹی
 

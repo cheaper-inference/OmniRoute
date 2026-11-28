@@ -12,25 +12,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Forudsætninger
 
-- **Node.js** `>=22.22.2 <23`, eller `>=24.0.0 <27` (anbefalet: 24 LTS)
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` eller `>=24.0.0 <27` (anbefalet: 24 LTS)
+- **npm** 10 +
 
-> **Windows med Node 24:** brug den aktuelle 24 LTS-patchudgivelse (mindst 24.20.0).
-> Tidligere udgivelser kan afslutte efter vellykkede tests, når `--test-force-exit` lukker
-> processen. Node's [Windows libuv-rettelse](https://github.com/nodejs/node/pull/61999) afhjælper
-> dette runtime-nedbrud; behold testpåstandene og kontrollerne af runnerens afslutning aktiveret.
+> **Windows med node 24:** brug den nuværende 24 LTS patch-udgivelse (mindst 24.20.0). Tidligere udgivelser kan afbryde efter vellykkede test, når `--test-force-exit` lukker processen. Nodes [Windows libuv rettelse](https://github.com/nodejs/node/pull/61999) adresserer dette runtime crash; hold testpåstandene og runner exit checks aktiveret.
 
-> **Brugere af npm v11+ (Node 24+):** Efter `npm install` skal du kontrollere, at native moduler blev installeret:
-> `node -e "require('better-sqlite3')"`. Hvis det mislykkes med `MODULE_NOT_FOUND`,
-> kør `npm approve-scripts better-sqlite3 && npm install`. Se
-> [Fejlfinding](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + brugere (Node 24 +):** Efter `npm install` skal du kontrollere, at native moduler er installeret: `node -e "require('better-sqlite3')"`. Hvis det mislykkes med `MODULE_NOT_FOUND`, så kør `npm approve-scripts better-sqlite3 && npm install`. Se [Fejlfinding](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klon og installation
+### Klon og installer
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,68 +32,66 @@ npm install
 ### Miljøvariabler
 
 ```bash
-# Opret din .env ud fra skabelonen
+# Create your .env from the template
 cp .env.example .env
 
-# Generer de nødvendige hemmeligheder
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Vigtige variabler til udvikling:
+Nøglevariabler for udvikling:
 
-| Variabel               | Standard for udvikling   | Beskrivelse                  |
+| Variabel               | Udviklingsstandard       | Beskrivelse                  |
 | ---------------------- | ------------------------ | ---------------------------- |
-| `PORT`                 | `20128`                  | Serverport                   |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis-URL for frontend       |
-| `JWT_SECRET`           | (generer ovenfor)        | JWT-signeringshemmelighed    |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Adgangskode til første login |
-| `APP_LOG_LEVEL`        | `info`                   | Logningsdetaljeringsniveau   |
+| `PORT`                 | `20128`                  | Server port                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL til frontend        |
+| `JWT_SECRET`           | (generer ovenfor)        | JWT underskriver hemmelighed |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Første login-adgangskode     |
+| `APP_LOG_LEVEL`        | `info`                   | Log verbosity niveau         |
 
-### Dashboard-indstillinger
+### Indstillinger for instrumentbræt
 
-Dashboardet indeholder UI-knapper til funktioner, der også kan konfigureres via miljøvariabler:
+Dashboardet giver UI -skift til funktioner, der også kan konfigureres via miljøvariabler:
 
-| Indstillingsplacering     | Kontakt                | Beskrivelse                                     |
-| ------------------------- | ---------------------- | ----------------------------------------------- |
-| Indstillinger → Avanceret | Fejlsøgningstilstand   | Aktivér logning af fejlfindingsanmodninger (UI) |
-| Indstillinger → Generelt  | Synlighed af sidepanel | Vis/skjul sektioner i sidepanelet               |
+| Indstilling af placering  | Skift                | Beskrivelse                                       |
+| ------------------------- | -------------------- | ------------------------------------------------- |
+| Indstillinger → Avanceret | Fejlretningstilstand | Aktiver logfiler for fejlretningsanmodninger (UI) |
+| Indstillinger → Generelt  | Sidebar synlighed    | Show/hide sidebar sektioner                       |
 
-Disse indstillinger gemmes i databasen og bevares på tværs af genstarter, hvor de tilsidesætter standardværdierne for miljøvariabler, når de er angivet.
+Disse indstillinger gemmes i databasen og fortsætter på tværs af genstarter, og tilsidesætter env var-standarder, når de er indstillet.
 
-### Kørsel lokalt
+### Kører lokalt
 
 ```bash
-# Udviklingstilstand (hot reload)
+# Development mode (hot reload)
 npm run dev
 
-# Produktionsbuild
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Hurtig backend/API-only-kompilering til bidragyderændringer
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Release-build (ren genopbygning + HEAD-sentinel — påkrævet til deployment)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Almindelig portkonfiguration
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bidragyder-buildet udfører kun kompileringstest: det samler ikke den selvstændige
-distribution eller bygger valgfrie native-pakkeressourcer. Brug det almindelige produktionsbuild, når
-du har brug for at validere den pakke, der skal leveres.
+Bidragyder-builden udfører kun kompileringsvalidering: den samler ikke den selvstændige distribution eller bygger valgfri indbyggede pakkeaktiver. Brug den almindelige produktionsbygning, når du skal validere den forsendelige pakke.
 
-### Layout for buildoutput
+### Byg outputlayout
 
-| Mappe     | Indhold                                                                     | Versionsstyret |
-| --------- | --------------------------------------------------------------------------- | -------------- |
-| `src/`    | Applikationskildekode (TypeScript / TSX)                                    | Ja             |
-| `.build/` | Mellemprodukter — `next build`-output (gitignored, `distDir = .build/next`) | Nej            |
-| `dist/`   | Leveringsklar pakke — samlet af `assembleStandalone` (gitignored)           | Nej            |
+| Vejviser  | Indhold                                                                     | Sporet |
+| --------- | --------------------------------------------------------------------------- | ------ |
+| `src/`    | Applikationskilde (TypeScript / TSX)                                        | Ja     |
+| `.build/` | Mellemprodukter — `next build` output (gitignored, `distDir = .build/next`) | Ingen  |
+| `dist/`   | Sendbart bundt — samlet af `assembleStandalone` (gitignored)                | Ingen  |
 
-Build-pipelinen er et enkelt gennemløb:
+Byggepipelinen er et enkelt gennemløb:
 
 ```
 npm run build
@@ -108,21 +100,15 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` rydder desuden begge mapper først og skriver
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en sentinel til kontrol af deployment-integritet.
+`npm run build:release` renser desuden begge mapper først og skriver `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en deploy integrity sentinel.
 
-`npm run build:contributor` bruger backend-only-buildprofilen. Den opretter midlertidigt stubs for
-dashboardets UI-filer under buildet, beholder API-routehandlerne og gendanner de oprindelige filer
-efter buildet. Brug `npm run build` til ændringer, der påvirker dashboardets UI, eller til fuld
-release-validering; bidragyderprofilen er ikke en erstatning for release-buildet.
+`npm run build:contributor` bruger backend-only build-profilen. Den stopper midlertidigt dashboard- UI -filer, mens den bygger, beholder API rutehandlere og gendanner de originale filer efter bygningen. Brug `npm run build` til ændringer, der påvirker dashboardet UI eller til fuld udgivelsesvalidering; bidragyderprofilen er ikke en erstatning for udgivelsesbuilden.
 
-> **Bemærkning om VPS-deployment:** Den eksterne billedmappe `/usr/lib/node_modules/omniroute/app/`
-> er uændret. Deployment-færdighederne rsync'er indholdet af `dist/` til den.
-> Kun buildoutputstien i repositoryet er flyttet (`app/` → `dist/`).
+> **VPS deploy note:** den eksterne billedmappe `/usr/lib/node_modules/omniroute/app/` er uændret. Deploy-færdighederne rsync indholdet af `dist/` ind i det. Kun in-repo build-outputstien blev flyttet (`app/` → `dist/`).
 
-Standard-URL'er:
+Standard URLs:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **Dashboard** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -431,8 +417,8 @@ Brug derefter `/deploy-vps-*-cc`-skills, som synkroniserer `dist/` til den ekste
 
 ## Få hjælp
 
-- **Arkitektur**: Se [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API-reference**: Se [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Sikkerhedsdokumentation**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Driftsdokumentation**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Problemer**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arkitektur** : Se [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API reference** : Se [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Sikkerhedsdokumenter** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops docs** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Problemer** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

@@ -4,7 +4,7 @@
 
 ---
 
-> **Nguồn của sự thật:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Cập nhật lần cuối:** 28-06-2028 — v3.8.40
+> **Nguồn của sự thật:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
 OmniRoute nắm bắt trợ lý `reasoning_content` được tạo bởi các mô hình chế độ tư duy và phát lại nó một cách minh bạch theo các yêu cầu nhiều lượt khi nhà cung cấp ngược dòng yêu cầu. Điều này giúp loại bỏ các lỗi HTTP 400 mà các nhà cung cấp nghiêm ngặt gặp phải khi lịch sử hội thoại của khách hàng thiếu lý do của lượt trước.
 
@@ -38,9 +38,9 @@ Turn N+1 (client sends follow-up):
 
 Việc chụp xảy ra ở `open-sse/handlers/chatCore.ts` (hai địa điểm, tại hai địa điểm gọi `cacheReasoningFromAssistantMessage` ). Việc phát lại xảy ra trong `open-sse/translator/index.ts` sau khi ép buộc lược đồ nhưng trước khi gửi đi.
 
-Các mục nhập lệnh gọi công cụ được lưu trữ trong `buildToolCallCacheKey()`, bản tóm tắt phạm vi yêu cầu và id lệnh gọi công cụ, do đó, cùng một id được sử dụng bởi khóa hoặc phiên API khác sẽ không chọn mục nhập. Phạm vi đến từ `buildReasoningCacheScope()`: id khóa API, cộng với khóa phiên khi yêu cầu có. Do đó, cột `tool_call_id` và bảng điều khiển hiển thị thông báo này cho các mục nhập đó.
+Tool-call entries are stored under `buildToolCallCacheKey()`, a digest of the request scope and the tool call id, so the same id used by another API key or session does not select the entry. Phạm vi đến từ `buildReasoningCacheScope()`: id khóa API, cộng với khóa phiên khi yêu cầu có. Do đó, cột `tool_call_id` và bảng điều khiển hiển thị thông báo này cho các mục nhập đó.
 
-Các lượt trợ lý đơn giản (không gọi công cụ) được khóa khác nhau: `buildAssistantMessageCacheKey()` phân tích phạm vi phiên cộng với bản ghi định dạng OpenAI được chuẩn hóa cho đến lượt đó, bởi vì DeepSeek yêu cầu lý luận _every_ lượt trước khi `tools` có mặt. Đối với các mục tiêu API phản hồi (ví dụ `opencode-go/deepseek-v4-flash`, được định tuyến đến `/responses`), phần thượng nguồn mang `input`, không phải `messages`, do đó `translateRequest()` (`open-sse/translator/index.ts`) báo cáo bản ghi trục mà nó đã tiêu hóa thông qua tùy chọn gọi lại và các trang web chụp sẽ tiêu hóa cùng bản ghi đó. Thẻ phát lại Phản hồi chạy trên trục OpenAI cho mọi định dạng nguồn, do đó, ứng dụng khách Tin nhắn Anthropic (Claude → OpenAI → Phản hồi) cũng được phát lại.
+Plain (non-tool-call) assistant turns are keyed differently: `buildAssistantMessageCacheKey()` digests the session scope plus the normalized OpenAI-format transcript up to that turn, because DeepSeek requires the reasoning of _every_ prior turn once `tools` is present. For Responses-API targets (for example `opencode-go/deepseek-v4-flash`, routed to `/responses`) the upstream body carries `input`, not `messages`, so `translateRequest()` (`open-sse/translator/index.ts`) reports the pivot transcript it digested through a callback option and the capture sites digest that same transcript. Thẻ phát lại Phản hồi chạy trên trục OpenAI cho mọi định dạng nguồn, do đó, ứng dụng khách Tin nhắn Anthropic (Claude → OpenAI → Phản hồi) cũng được phát lại.
 
 ## Lưu trữ — Bộ nhớ lai + SQLite
 

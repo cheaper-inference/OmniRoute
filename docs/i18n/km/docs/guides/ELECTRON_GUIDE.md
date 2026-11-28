@@ -4,7 +4,7 @@
 
 ---
 
-> **ប្រភពនៃការពិត៖** កន្លែងធ្វើការ `electron/`** ធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖** 2026-06-28 — v3.8.40
+> **ប្រភពនៃការពិត៖** កន្លែងធ្វើការ `electron/`
 
 OmniRoute បញ្ជូនកម្មវិធីផ្ទៃតុឆ្លងវេទិកា (Windows / macOS / Linux) បង្កើតឡើងនៅលើ**Electron ៤១** +** អ្នកបង្កើតអេឡិចត្រុង 26.10** . កម្មវិធីកុំព្យូទ័របង្កើតម៉ាស៊ីនមេ Next.js standalone ជាដំណើរការកុមារ ចង្អុល `BrowserWindow` ទៅកាន់វា ហើយបន្ថែមថាសប្រព័ន្ធ កម្មវិធីអាប់ដេតស្វ័យប្រវត្តិ ស្ពាន IPC និងសូន្យកំណត់រចនាសម្ព័ន្ធ bootstrap សម្ងាត់។
 
@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## ធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ
 
-ប្រើ `electron-updater` ជាមួយអ្នកផ្តល់ GitHub (`diegosouzapw/OmniRoute`) ។
+ប្រើ `electron-updater` ជាមួយអ្នកផ្តល់ GitHub (`cheaper-inference/OmniRoute`) ។
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - ព្រឹត្តិការណ៍ត្រូវបានបញ្ជូនបន្តទៅអ្នកបង្ហាញតាមរយៈ `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (ជាមួយ `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ npm run electron:build:win
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ការចេញផ្សាយត្រូវបានបោះពុម្ពទៅ GitHub Releases (`diegosouzapw/OmniRoute`) ដែលជាកន្លែង `electron-updater` ពិនិត្យមើលកំណែថ្មីផងដែរ។
+ការចេញផ្សាយត្រូវបានបោះពុម្ពទៅ GitHub Releases (`cheaper-inference/OmniRoute`) ដែលជាកន្លែង `electron-updater` ពិនិត្យមើលកំណែថ្មីផងដែរ។
 
 ## ការដោះស្រាយបញ្ហា
 

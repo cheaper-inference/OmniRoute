@@ -4,15 +4,11 @@
 
 ---
 
-> **Patiesais avots:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Pēdējoreiz atjaunināts:** 2026-06-28 — v3.8.40
+> **Patiesības avots:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-OmniRoute var nosūtīt HTTP tīmekļa aizķeres platformas notikumu gadījumā. Izmantojiet tās integrācijai ar
-Slack, PagerDuty, Datadog, iekšējiem brīdinājumu pakalpojumiem vai jebkuru HTTP saņēmēju.
+OmniRoute var aktivizēt HTTP tīmekļa aizķeres platformas notikumos. Izmantojiet tos, lai integrētu ar Slack, PagerDuty, Datadog, iekšējiem brīdināšanas pakalpojumiem vai jebkuru HTTP uztvērēju.
 
-Dispečers katru piegādi paraksta ar HMAC-SHA256, īslaicīgu
-kļūmju gadījumā veic atkārtotus mēģinājumus, izseko katras tīmekļa aizķeres piegādes stāvokli un automātiski atspējo galapunktus, kuru
-darbība atkārtoti neizdodas.
+Dispečers katru piegādi paraksta ar HMAC-SHA256, mēģina atkārtoti pārejošas kļūmes, izseko piegādes stāvokli katram tīmekļa aizķerei un automātiski atspējo galapunktus, kas pastāvīgi neizdodas.
 
 ## Atbalstītie pasākumi
 

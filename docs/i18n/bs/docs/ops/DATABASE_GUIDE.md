@@ -194,9 +194,9 @@ OmniRoute koristi** verzionisane, idempotentne migracije** u `src/lib/db/migrati
 | `NNN_description.sql` (tačno 3 cifre)             | `241_seen_models.sql`                | Stara serija `001`–`241`. Zamrznuto kada se format vremenske oznake spustio (`240` i `241` su spojeni neposredno prije njega): nijedna nova datoteka ne dobija redni broj. |
 | `YYYYMMDDHHMMSS_description.sql` (14 cifara, UTC) | `20261113120000_add_usage_index.sql` | Svaka migracija kreirana od 2026-11-13.                                                                                                                                    |
 
-Zašto promjena: sa sekvencijalnim brojevima, paralelni PRs je odabrao isti sljedeći broj i svi osim jednog morali su prenumerirati prije spajanja. UTC vremenska oznaka daje svakom PR svoju verziju.
+Zašto promjena: sa sekvencijalnim brojevima, paralelni PRs je odabrao isti sljedeći broj i svi osim jednog morali su ponovo numerisati prije spajanja. UTC vremenska oznaka daje svakom PR svoju verziju.
 
-Pravila za format vremenske oznake (nametnuta od strane `npm run check:migration-numbering`, dijeljena s generatorom u `scripts/check/lib/migrationNaming.mjs`):
+Pravila za format vremenske oznake (nametnuta `npm run check:migration-numbering`, dijeljena s generatorom u `scripts/check/lib/migrationNaming.mjs`):
 
 - Vremenska oznaka je pravi UTC datum i vrijeme, ne ranije od `20261113000000` i ne više od 10 minuta u budućnosti.
 - Opis je `snake_case` malim slovima koji počinje slovom (`a-z`, `0-9`, jedan `_` između riječi), najviše 80 znakova.
@@ -216,7 +216,7 @@ Jednom kada se datoteka za migraciju nađe na grani izdanja ili `main`, već je 
 - **Nikada ga ne preimenuj.** Verzija u `_omniroute_migrations` više ne bi odgovarala fajlu, tako da bi je svaka baza podataka koja je već primijenila ponovo pokrenula. Ne-idempotentni SQL tada duplicira podatke ili zaustavlja pokretanje.
 - **Trebate drugačiju šemu?** Kreirajte novu migraciju sa `npm run db:new-migration`.
 
-Preimenovanje je bezbedno samo za fajl koji još nije spojen, što je slučaj na koji se upućuju nagoveštaji kapije. Oznaka izdanja ovdje ništa ne mijenja: svaki pritisak na `release/v*` granu objavljuje Docker `:next` sliku i radi na homologu, VPS instalacijama i Enterprise sync, tako da je spojena migracija pokrenuta na stvarnim bazama podataka prije nego što postoji bilo koja `vX.Y.Z` oznaka. Kapija ne uspijeva pri svakom uklanjanju osnovne datoteke, označene ili ne.
+Preimenovanje je bezbedno samo za fajl koji još nije spojen, što je slučaj na koji se upućuju nagoveštaji kapije. Oznaka izdanja ne mijenja ništa ovdje: svaki pritisak na `release/v*` granu objavljuje Docker `:next` sliku i radi na homologu, VPS instalacijama i Enterprise sync, tako da je spojena migracija pokrenuta na stvarnim bazama podataka prije nego što postoji bilo koja `vX.Y.Z` oznaka. Gate ne uspijeva pri svakom uklanjanju osnovne datoteke, označene ili ne.
 
 - **Vraćanje spojene migracije.** `git revert` koji briše datoteku ne uspijeva na kapiji. Zadržite datoteku i poništite njenu šemu u novoj migraciji: `npm run db:new-migration -- <description>`, sa `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` i tako dalje. Nadograđene i svježe baze podataka zatim završavaju istom šemom.
 - **Jedno prihvaćeno preimenovanje: unos kompatibilnosti i identičan sadržaj.** Ako se spojena datoteka mora premjestiti (na primjer, dvije spojene datoteke dijele vremensku oznaku i pokretač se zaustavlja sa kolizijom verzije), preimenujte kasniju bez dodirivanja njenog SQL i dodajte `{ fromVersion, fromName, toVersion, toName }` u `RENAMED_MIGRATION_COMPATIBILITY` u `src/lib/db/migrationRunner/constants.ts`. Baze podataka koje su primijenile staru verziju premještaju svoj `_omniroute_migrations` red umjesto da ponovo pokreću datoteku. Gate upozorava na takvo preimenovanje i uvijek pokreće provjeru komutacije na njemu, bez obzira na novu vremensku oznaku: nove instalacije primjenjuju datoteku na novu poziciju, nadograđene baze podataka ne, pa odaberite novu vremensku oznaku blizu stare. Vrata ne uspijeva preimenovati ako se sadržaj promijenio (promjena šeme i dalje ide u novoj migraciji) ili ako ciljna datoteka unosa nije na disku.
@@ -256,7 +256,7 @@ Zahtjev za povlačenjem otvoren prije prekidača može i dalje nositi sekvencija
 
 `tests/unit/db/codex-fence-migration-rename.test.ts` je radni primjer testa za preimenovanu migraciju.
 
-### Povratni portovi na grane prije prebacivanja
+### Backports na grane prije Switch
 
 Nikada nemojte birati ili prenositi `YYYYMMDDHHMMSS_` datoteku u granu koja je prethodila prebacivanju (na primjer starija `release/v*` grana). Runner tamo sortira imena datoteka kao tekst, tako da bi datoteka s vremenskim žigom radila između `201_` i `202_` na novoj bazi podataka, a stara kapija ne razumije 14-cifrene prefikse. Na takvoj grani, napišite promjenu kao vlastiti sljedeći `NNN_` fajl te grane, idempotent, tako da je ne-op kada verzija s vremenskim žigom stigne kasnije.
 
@@ -306,7 +306,7 @@ Slobodno koristite klauzule `IF NOT EXISTS`, `IF EXISTS` i `OR IGNORE` / `OR REP
 1. **Kreirajte datoteku sa generatorom** : `npm run db:new-migration -- <description>` (na primjer `npm run db:new-migration -- add combo priority`). Zapisuje `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` sa trenutnim UTC vremenom i zaglavljem komentara, pomiče se za jednu sekundu naprijed ako se uzme ta vremenska oznaka i nikada ne prepisuje datoteku. Nemojte birati broj ručno.
 2. **Koristite sigurnu DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
 3. **Pažljivo popunite podatke** : koristite `UPDATE ... WHERE ...` za rukovanje postojećim redovima
-4. **Provjerite redoslijed i imenovanje** : `npm run test:migrations:fresh` (sve migracije na praznu bazu podataka) i `npm run check:migration-numbering`
+4. **Provjerite redoslijed i imenovanje** : `npm run test:migrations:fresh` (sve migracije na praznu bazu podataka) i `npm run check:migration-numbering`. Husky pre-urezivanje kuka pokreće `check:migration-numbering` samostalno kada urezivanje postavlja datoteku pod `src/lib/db/migrations/`, tako da ručno odabrano ili loše oblikovano ime (na primjer `242_x.sql`) ne uspijeva urezivanje lokalno sa istom porukom CI ispisuje. Hook provjerava samo imena, duplikate i zamrznute serije `001`–`241` ; poređenje sa PR bazom (uklonjeno, preimenovano ili migracije van reda) još uvijek radi u CI
 5. **Testirajte na kopiji** : nikada ne izvodite neprovjerene migracije u proizvodnji
 6. **Tabela kreirana iz koda također treba migraciju** : ako modul također kreira tabelu lijeno (`CREATE TABLE IF NOT EXISTS`, čuva se kao staza samoizlječenja), migracija je mora kreirati sa istim DDL. U suprotnom čista instalacija i nadograđena instalacija završavaju s različitim shemama, ovisno o tome da li je ta kodna putanja pokrenuta. `tests/unit/db/lazy-table-migration-guard.test.ts` skenira `src/` i `open-sse/` i ne uspijeva na lijenom `CREATE` bez migracije (#20557). Primjer: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 

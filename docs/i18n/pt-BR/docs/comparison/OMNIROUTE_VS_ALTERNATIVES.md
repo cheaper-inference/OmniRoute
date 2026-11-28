@@ -11,7 +11,7 @@ Comparação objetiva de recursos com roteadores AI de código aberto populares.
 | Recurso                                                   |                  OmniRoute 3.8                  |      LiteLLM 1.x      | OpenRouter (SaaS) | Chave de portal |
 | --------------------------------------------------------- | :---------------------------------------------: | :-------------------: | :---------------: | :-------------: |
 | **Provedores**                                            |                     **329**                     |         ~100          |        ~50        |       ~30       |
-| **entradas do catálogo Free/no-auth**                     |                     **155**                     |          n/a          |     passagem      |       n/a       |
+| **Provedores com acesso gratuito**                        |           **50 com acesso gratuito**            |          n/a          |     passagem      |       n/a       |
 | **Auto-hospedável**                                       |                       ✅                        |          ✅           |        ❌         |     ⚠ pago      |
 | **entradas do catálogo OAuth**                            |                     **23**                      |        parcial        |        ❌         |       ❌        |
 | **Combos de fallback automático**                         |               **22 estratégias**                | baseado em prioridade | baseado em níveis |    ponderado    |
@@ -38,7 +38,7 @@ Comparação objetiva de recursos com roteadores AI de código aberto populares.
 
 ## Quando escolher OmniRoute
 
-- Você se auto-hospeda e quer** cobertura máxima do provedor** (394 fornecedores, 155 entradas de catálogo free/no-auth )
+- Você se auto-hospeda e quer** cobertura máxima do provedor** (394 prestadores, 50 com acesso gratuito)
 - Você precisa de um** servidor MCP integrado** (ferramentas LLM, memória, habilidades expostas como ferramentas)
 - Você precisa** protocolo A2A** para fluxos de trabalho entre agentes
 - Você quer** furtividade de impressão digital** (JA3/JA4) para evitar a detecção pelo CAPTCHAs upstream
@@ -56,12 +56,12 @@ Comparação objetiva de recursos com roteadores AI de código aberto populares.
 - Você aceita pagar por token com a margem adicional do SaaS
 - Você precisa de uma **única forma de pagamento** para todos os provedores
 
-## Quando escolher o Portkey
+## Quando escolher a chave de portal
 
-- Você precisa de um **SLA comercial** com garantias de disponibilidade
-- Você prefere um **painel gerenciado** sem sobrecarga operacional
-- Você precisa de **recursos de conformidade empresarial** prontos para uso
+- Você precisa de um** SLA comercial** com garantias de tempo de atividade
+- Você prefere um** painel gerenciado** sem sobrecarga de operações
+- Você precisa** conformidade empresarial** recursos prontos para uso
 
 ---
 
-_Última atualização: 2026-08-02. Envie correções via PR para manter esta tabela precisa._
+_Envie correções via PR para manter esta tabela precisa._

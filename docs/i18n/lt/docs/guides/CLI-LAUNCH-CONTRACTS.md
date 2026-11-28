@@ -12,6 +12,12 @@ Neutralioje `config/cli-tools-manifest.json` sutartyje deklaruojamas kanoninis I
 
 Pertraukimo ir nutraukimo signalai perduodami vaikui. Prieš pašalindama laikiną konfigūraciją, paleidimo priemonė laukia vaiko uždarymo įvykio. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` kontroliuoja atidėjimo laikotarpį prieš priverstinį nutraukimą (numatytasis 5000 milisekundžių).
 
+`omniroute launch <tool>` (žr. [LAUNCH.md](./LAUNCH.md) ) laikosi tų pačių aplinkos taisyklių ir signalo persiuntimo bei prideda:
+
+- **Šliuzo automatinis paleidimas.** Vietiniam taikiniui, kai prievade neatsiliepia joks šliuzas, paleidimo priemonė paleidžia `omniroute serve --headless --no-open` susietą su `127.0.0.1` pagal atskirtą pjovimo procesą. Kiekvienam vykdomam paleidimui taikoma `DATA_DIR/launch/leases/` nuoma (širdies plakimas kas 15 s, pasenęs po 45 s arba kai jo procesas baigiasi). Javapjūtė sustabdo pradėtą šliuzą, kai tik jokia nuoma neveikia tuščiosios eigos malonei (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, numatytoji 10 000 milisekundžių). Vartai, kuriuos pradėjo vartotojas, naudojami, bet niekada nesustabdomi. `--keep-gateway` arba `omniroute gateway keep` paleidimo priemonės šliuzą paverčia įprastu; `--no-start` atkuria seną nesėkmės, jei nepavyko, elgseną. Tikrinami tik nuotoliniai taikiniai.
+- **Pradėti sesijas.** Kiekvieną kartą paleidus, iš pirminio kredencialo (`POST /api/launch/sessions`) gaunamas trumpalaikis `olx_` seanso atpažinimo ženklas, jis sumuša, kol įrankis veikia, nuskaito naudojimo suvestinę ir atšaukia ją išėjus įrankiui. Ženklas yra griežtas pirminio jo poaibis: tie patys leidimai, tas pats arba siauresnis katalogas, trumpesnis tarnavimo laikas ir tai nėra prietaisų skydelio kredencialas. Įrankis gauna seanso prieigos raktą, o ne pirminį kredencialą, o užklausos pažymimos `launch:<tool>:<sessionId>` nebent `--tag` būtų suteiktas. Vartai be seanso API sugenda naudojant `GatewayTooOld`, o ne grįžta į neaprėpiamo paleidimo.
+- **Paleidimo konfigūracija.** Įrankio konfigūracijos failai įrašomi į privatų laikinąjį katalogą (režimas 0700, priešdėlis `omnirouter-`) ir pašalinami vaikui išėjus. Paleidimo priemonės `SIGKILL` palieka katalogą; `omniroute launch --cleanup` pašalina tokius katalogus, kai jie yra senesni nei viena diena.
+
 ## Gemini nuolatinė sąranka
 
 ```bash

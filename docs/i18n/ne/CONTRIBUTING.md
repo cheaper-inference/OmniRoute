@@ -15,96 +15,88 @@ coverage, र reconciliation चरणहरूसँग नक्साङ्�
 
 ## विकास सेटअप
 
-### पूर्वापेक्षाहरू
+### पूर्व शर्तहरू
 
 - **Node.js** `>=22.22.2 <23`, वा `>=24.0.0 <27` (सिफारिस गरिएको: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Node 24 सहित Windows:** हालको 24 LTS प्याच रिलिज (कम्तीमा 24.20.0) प्रयोग गर्नुहोस्।
-> पहिलेका रिलिजहरूले `--test-force-exit` ले प्रक्रिया बन्द गरेपछि सफल परीक्षणहरू पश्चात्
-> abort गर्न सक्छन्। Node को [Windows libuv fix](https://github.com/nodejs/node/pull/61999) ले
-> यो runtime crash समाधान गर्छ; परीक्षण assertions र runner exit checks सक्षम नै राख्नुहोस्।
+> **नोड 24 संग Windows :** हालको 24 LTS प्याच रिलीज प्रयोग गर्नुहोस् (कम्तिमा 24.20.0)। `--test-force-exit` प्रक्रिया बन्द गर्दा सफल परीक्षण पछि अघिल्लो रिलीजहरू रद्द गर्न सकिन्छ। नोडको [Windows libuv फिक्स](https://github.com/nodejs/node/pull/61999) ठेगानाहरू यो रनटाइम क्र्यास; परीक्षण दावीहरू र धावक निकास जाँचहरू सक्षम राख्नुहोस्।
 
-> **npm v11+ प्रयोगकर्ताहरू (Node 24+):** `npm install` पछि native modules स्थापना भएको
-> प्रमाणित गर्नुहोस्: `node -e "require('better-sqlite3')"`. यदि यो `MODULE_NOT_FOUND` सहित
-> असफल भएमा, `npm approve-scripts better-sqlite3 && npm install` चलाउनुहोस्। हेर्नुहोस्
-> [समस्या समाधान](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
+> **npm v11 + प्रयोगकर्ताहरू (Node 24 +):** `npm install` पछि, नेटिभ मोड्युलहरू स्थापना भएको प्रमाणित गर्नुहोस्: `node -e "require('better-sqlite3')"`। यदि यो `MODULE_NOT_FOUND` सँग असफल भयो भने, `npm approve-scripts better-sqlite3 && npm install` चलाउनुहोस्। [समस्या निवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) हेर्नुहोस्।
 
 - **Git**
 
-### क्लोन र स्थापना
+### क्लोन र स्थापना गर्नुहोस्
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
 
-### वातावरणीय चरहरू
+### वातावरण चर
 
 ```bash
-# टेम्प्लेटबाट आफ्नो .env सिर्जना गर्नुहोस्
+# Create your .env from the template
 cp .env.example .env
 
-# आवश्यक secrets सिर्जना गर्नुहोस्
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 विकासका लागि मुख्य चरहरू:
 
-| Variable               | Development Default      | Description           |
-| ---------------------- | ------------------------ | --------------------- |
-| `PORT`                 | `20128`                  | सर्भर पोर्ट           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | फ्रन्टएन्डको आधार URL |
-| `JWT_SECRET`           | (generate above)         | JWT signing secret    |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | पहिलो लगइन पासवर्ड    |
-| `APP_LOG_LEVEL`        | `info`                   | लगको विस्तृतता स्तर   |
+| चर                     | विकास पूर्वनिर्धारित     | विवरण                      |
+| ---------------------- | ------------------------ | -------------------------- |
+| `PORT`                 | `20128`                  | सर्भर पोर्ट                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | फ्रन्टएन्डको लागि आधार URL |
+| `JWT_SECRET`           | (माथि उत्पन्न)           | JWT हस्ताक्षर गोप्य        |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | पहिलो लगइन पासवर्ड         |
+| `APP_LOG_LEVEL`        | `info`                   | लग वर्बोसिटी स्तर          |
 
 ### ड्यासबोर्ड सेटिङहरू
 
-ड्यासबोर्डले वातावरणीय चरमार्फत पनि कन्फिगर गर्न सकिने सुविधाहरूका लागि UI toggles प्रदान गर्छ:
+ड्यासबोर्डले सुविधाहरूको लागि UI टगलहरू प्रदान गर्दछ जुन वातावरण चर मार्फत पनि कन्फिगर गर्न सकिन्छ:
 
-| Setting Location    | Toggle             | Description                               |
-| ------------------- | ------------------ | ----------------------------------------- |
-| Settings → Advanced | Debug Mode         | डिबग अनुरोध लगहरू सक्षम गर्नुहोस् (UI)    |
-| Settings → General  | Sidebar Visibility | साइडबारका खण्डहरू देखाउनुहोस्/लुकाउनुहोस् |
+| स्थान सेट गर्दै    | टगल गर्नुहोस्   | विवरण                                  |
+| ------------------ | --------------- | -------------------------------------- |
+| सेटिङहरू → उन्नत   | डिबग मोड        | डिबग अनुरोध लगहरू सक्षम गर्नुहोस् (UI) |
+| सेटिङहरू → सामान्य | साइडबार दृश्यता | Show/hide साइडबार खण्डहरू              |
 
-यी सेटिङहरू database मा भण्डारण हुन्छन् र restart पछि पनि कायम रहन्छन्, तथा सेट गरिएमा env var defaults लाई override गर्छन्।
+यी सेटिङहरू डाटाबेसमा भण्डारण गरिएका छन् र सेट गर्दा env var पूर्वनिर्धारितहरूलाई ओभरराइड गर्दै, पुन: सुरुहरूमा जारी रहन्छ।
 
-### स्थानीय रूपमा चलाउने
+### स्थानीय रूपमा चलिरहेको छ
 
 ```bash
-# विकास मोड (hot reload)
+# Development mode (hot reload)
 npm run dev
 
-# उत्पादन build
+# Production build
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# contributor परिवर्तनहरूका लागि छिटो backend/API-only compile
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Release build (clean rebuild + HEAD sentinel — deploy का लागि आवश्यक)
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# सामान्य पोर्ट कन्फिगरेसन
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-contributor build ले compile-only validation गर्छ: यसले standalone distribution assemble गर्दैन
-वा वैकल्पिक native packaging assets build गर्दैन। पठाउन मिल्ने bundle validate गर्नुपर्ने
-हुँदा नियमित production build प्रयोग गर्नुहोस्।
+योगदानकर्ता निर्माणले कम्पाइल-मात्र प्रमाणीकरण गर्दछ: यसले स्ट्यान्डअलोन वितरण वा वैकल्पिक नेटिभ प्याकेजिङ्ग सम्पत्तिहरू निर्माण गर्दैन। नियमित उत्पादन निर्माण प्रयोग गर्नुहोस् जब तपाइँ शिप गर्न योग्य बन्डल मान्य गर्न आवश्यक छ।
 
-### Build Output Layout
+### आउटपुट लेआउट बनाउनुहोस्
 
-| Directory | Contents                                                                  | Tracked |
-| --------- | ------------------------------------------------------------------------- | ------- |
-| `src/`    | Application source (TypeScript / TSX)                                     | Yes     |
-| `.build/` | Intermediates — `next build` output (gitignored, `distDir = .build/next`) | No      |
-| `dist/`   | Shippable bundle — assembled by `assembleStandalone` (gitignored)         | No      |
+| निर्देशिका | सामग्री                                                                  | ट्र्याक गरियो |
+| ---------- | ------------------------------------------------------------------------ | ------------- |
+| `src/`     | आवेदन स्रोत (TypeScript / TSX)                                           | हो            |
+| `.build/`  | मध्यवर्ती — `next build` आउटपुट (gitigned, `distDir = .build/next`)      | छैन           |
+| `dist/`    | ढुवानी योग्य बन्डल — `assembleStandalone` द्वारा जम्मा गरिएको (gitigned) | छैन           |
 
-Build pipeline एकल pass हो:
+निर्माण पाइपलाइन एकल पास हो:
 
 ```
 npm run build
@@ -113,21 +105,15 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ले पहिले दुवै directory सफा गर्नुका साथै
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लाई deploy integrity sentinel का रूपमा लेख्छ।
+`npm run build:release` ले दुबै डाइरेक्टरीहरू पहिले सफा गर्छ र `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लाई डिप्लोय इटिग्रिटी सेन्टिनेलको रूपमा लेख्छ।
 
-`npm run build:contributor` ले backend-only build profile प्रयोग गर्छ। यसले build गर्दा dashboard
-UI files लाई अस्थायी रूपमा stub गर्छ, API route handlers कायम राख्छ, र build पछि मूल files
-पुनर्स्थापित गर्छ। ड्यासबोर्ड UI मा प्रभाव पार्ने परिवर्तनहरू वा पूर्ण release validation का लागि
-`npm run build` प्रयोग गर्नुहोस्; contributor profile release build को विकल्प होइन।
+`npm run build:contributor` ले ब्याकइन्ड-मात्र निर्माण प्रोफाइल प्रयोग गर्दछ। यसले अस्थायी रूपमा ड्यासबोर्ड UI फाइलहरू निर्माण गर्दा स्टब गर्दछ, API मार्ग ह्यान्डलरहरू राख्छ, र निर्माण पछि मूल फाइलहरू पुनर्स्थापित गर्दछ। ड्यासबोर्ड UI असर गर्ने परिवर्तनहरू वा पूर्ण रिलीज प्रमाणीकरणको लागि `npm run build` प्रयोग गर्नुहोस्; योगदानकर्ता प्रोफाइल रिलीज निर्माणको लागि प्रतिस्थापन होइन।
 
-> **VPS deploy note:** remote image directory `/usr/lib/node_modules/omniroute/app/`
-> अपरिवर्तित रहन्छ। deploy skills ले `dist/` का contents त्यसमा rsync गर्छन्।
-> Repo भित्रको build output path मात्र परिवर्तन भएको हो (`app/` → `dist/`)।
+> **VPS डिप्लोय नोट:** रिमोट छवि डाइरेक्टरी `/usr/lib/node_modules/omniroute/app/` अपरिवर्तित छ। डिप्लोय सीपहरूले यसमा `dist/` को सामग्रीहरू rsync गर्छ। केवल इन-रेपो निर्माण आउटपुट पथ सारियो (`app/` → `dist/`)।
 
 पूर्वनिर्धारित URLs:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **ड्यासबोर्ड** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -434,10 +420,10 @@ VPS डिप्लोयका लागि, `npm run build` होइन, `npm
 
 ---
 
-## मद्दत प्राप्त गर्ने
+## मद्दत प्राप्त गर्दै
 
-- **आर्किटेक्चर**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) हेर्नुहोस्
-- **API सन्दर्भ**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) हेर्नुहोस्
-- **सुरक्षा कागजातहरू**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **सञ्चालनसम्बन्धी कागजातहरू**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **समस्याहरू**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **वास्तुकला** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) हेर्नुहोस्
+- **API सन्दर्भ** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) हेर्नुहोस्
+- **सुरक्षा कागजातहरू** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops कागजातहरू** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **मुद्दाहरू** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

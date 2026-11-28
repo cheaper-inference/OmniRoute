@@ -4,9 +4,9 @@
 
 ---
 
-> **Quelle der Wahrheit:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Letzte Aktualisierung:** 28.06.2026 — v3.8.40
+> **Quelle der Wahrheit:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
 
-OmniRoute erfasst den von Denkmodusmodellen erzeugten Assistenten- `reasoning_content` und gibt ihn transparent bei Multiturn-Anfragen wieder, wenn der Upstream-Anbieter dies benötigt. Dies eliminiert die HTTP 400-Fehler, die strenge Anbieter auslösen, wenn im Gesprächsverlauf eines Kunden die Argumentation des vorherigen Zugs fehlt.
+OmniRoute erfasst den von Denkmodusmodellen erzeugten Assistenten- `reasoning_content` und gibt ihn transparent bei Multiturn-Anfragen wieder, wenn der Upstream-Anbieter dies benötigt. Dies eliminiert die HTTP 400-Fehler, die strenge Anbieter auslösen, wenn im Gesprächsverlauf eines Kunden die Argumentation des vorherigen Zuges fehlt.
 
 ## Warum das existiert
 

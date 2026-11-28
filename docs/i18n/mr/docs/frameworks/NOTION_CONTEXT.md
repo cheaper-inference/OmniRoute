@@ -64,41 +64,29 @@ OmniRoute टोकन जतन करते आणि लगेच 1 परि
 
 ## MCP साधने (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` मध्ये परिभाषित. कॉलच्या
-वेळी `getNotionToken()` द्वारे टोकन मिळवले जाते; कोणतेही टोकन कॉन्फिगर केलेले नसल्यास साधन
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
-ही त्रुटी दर्शवते.
+`open-sse/mcp-server/tools/notionTools.ts` मध्ये परिभाषित केले आहे. टोकन `getNotionToken()` द्वारे कॉलच्या वेळी सोडवले जाते; जर काहीही कॉन्फिगर केले नसेल तर टूल `"Notion integration token not configured. Set it in Settings > Context Sources."` फेकते
 
-| साधन                         | स्कोप          | वर्णन                                                                                  |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | मजकूर क्वेरीद्वारे पृष्ठे आणि डेटाबेस शोधते (शीर्षके, IDs, URLs परत करते). पृष्ठांकित. |
-| `notion_get_page`            | `read:notion`  | पृष्ठाच्या ID द्वारे त्याची सामग्री आणि मेटाडेटा मिळवते.                               |
-| `notion_list_block_children` | `read:notion`  | ब्लॉक किंवा पृष्ठाचे सर्व चाइल्ड ब्लॉक्स (ब्लॉक ट्री) सूचीबद्ध करते. पृष्ठांकित.       |
-| `notion_query_database`      | `read:notion`  | पर्यायी `filter` + `sorts` सह डेटाबेस क्वेरी करते (Notion API स्वरूप). पृष्ठांकित.     |
-| `notion_get_database`        | `read:notion`  | ID द्वारे डेटाबेसची स्कीमा/मेटाडेटा मिळवते.                                            |
-| `notion_append_blocks`       | `write:notion` | विद्यमान ब्लॉक किंवा पृष्ठामध्ये चाइल्ड ब्लॉक्स जोडते (प्रति विनंती कमाल 100 ब्लॉक्स). |
+| साधन                         | व्याप्ती       | वर्णन                                                                               |
+| ---------------------------- | -------------- | ----------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | मजकूर क्वेरीद्वारे पृष्ठे आणि डेटाबेस शोधा (शीर्षके, IDs, URLs) मिळवा. पृष्ठांकित.  |
+| `notion_get_page`            | `read:notion`  | पृष्ठाची सामग्री आणि मेटाडेटा त्याच्या ID द्वारे मिळवा.                             |
+| `notion_list_block_children` | `read:notion`  | ब्लॉक किंवा पृष्ठ (ब्लॉक ट्री) च्या सर्व ब्लॉक मुलांची यादी करा. पृष्ठांकित.        |
+| `notion_query_database`      | `read:notion`  | पर्यायी `filter` + `sorts` (Notion API फॉरमॅट) सह डेटाबेसची क्वेरी करा. पृष्ठांकित. |
+| `notion_get_database`        | `read:notion`  | ID द्वारे डेटाबेसचा schema/metadata मिळवा.                                          |
+| `notion_append_blocks`       | `write:notion` | सध्याच्या ब्लॉक किंवा पेजवर ब्लॉक मुलांना जोडा (प्रति विनंती कमाल 100 ब्लॉक).       |
 
 ### इनपुट पॅरामीटर्स
 
-- `notion_search` — `query` (1–500 अक्षरे), `pageSize` (1–100, डीफॉल्ट 20),
-  `startCursor` (पर्यायी).
-- `notion_get_page` — `pageId` (32-अक्षरी हेक्स किंवा UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, डीफॉल्ट 50),
-  `startCursor` (पर्यायी).
-- `notion_query_database` — `databaseId`, `filter` (पर्यायी, Notion फिल्टर स्वरूप),
-  `sorts` (पर्यायी अॅरे), `pageSize` (1–100, डीफॉल्ट 50), `startCursor` (पर्यायी).
+- `notion_search` — `query` (1–500 वर्ण), `pageSize` (1–100, डीफॉल्ट 20), `startCursor` (पर्यायी).
+- `notion_get_page` — `pageId` (32-char hex किंवा UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, डीफॉल्ट 50), `startCursor` (पर्यायी).
+- `notion_query_database` — `databaseId`, `filter` (पर्यायी, Notion फिल्टर स्वरूप), `sorts` (पर्यायी ॲरे), `pageSize` (1–100, डीफॉल्ट 50), `startCursor` (पर्यायी).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (ब्लॉक ऑब्जेक्ट्सचा अॅरे),
-  `after` (पर्यायी स्थान).
+- `notion_append_blocks` — `blockId`, `children` (ब्लॉक ऑब्जेक्ट्सचा ॲरे), `after` (पर्यायी स्थिती).
 
-### स्कोप्स
+### व्याप्ती
 
-वाचन साधनांसाठी `read:notion` आणि लेखन साधनासाठी `write:notion` आवश्यक आहे.
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` असतानाच
-`open-sse/mcp-server/server.ts` मधील `withScopeEnforcement()` द्वारे स्कोप्सची अंमलबजावणी केली जाते;
-कॉलरला अनुमत असलेले स्कोप्स `OMNIROUTE_MCP_SCOPES` (स्वल्पविरामाने विभक्त) किंवा
-प्रमाणीकृत API कीच्या स्कोप संदर्भातून येतात. संपूर्ण स्कोप मॉडेलसाठी
-[MCP-SERVER.md](./MCP-SERVER.md) पहा.
+वाचन साधनांना `read:notion` आवश्यक आहे आणि लेखन साधनासाठी `write:notion` आवश्यक आहे. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` असताना `open-sse/mcp-server/server.ts` मध्ये `withScopeEnforcement()` द्वारे स्कोप लागू केले जातात आणि नेहमी HTTP/SSE कॉलरसाठी ज्यांच्या API कीमध्ये `manage`/`admin` नसतात; कॉलरचे अनुमत स्कोप `OMNIROUTE_MCP_SCOPES` (स्वल्पविरामाने विभक्त केलेले) किंवा प्रमाणीकृत API की च्या स्कोप संदर्भातून येतात. पूर्ण स्कोप मॉडेलसाठी [MCP-SERVER.md](./MCP-SERVER.md) पहा.
 
 ## एंडपॉइंट्स
 

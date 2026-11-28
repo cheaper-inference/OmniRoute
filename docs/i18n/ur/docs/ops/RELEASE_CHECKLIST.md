@@ -4,12 +4,9 @@
 
 ---
 
-> **آخری تازہ کاری:** 2026-08-28 — v3.8.51
-> خودکاری کے لیے Claude Code کی مہارتوں سے فائدہ اٹھانے والا ہموار ریلیز فلو۔
+> ہموار ریلیز کا بہاؤ جو آٹومیشن کے لیے Claude کوڈ کی مہارتوں کا فائدہ اٹھاتا ہے۔
 >
-> **ریلیزز کے درمیان قطار/برانچ کو گرین رکھیں:** [RELEASE_GREEN.md](./RELEASE_GREEN.md) دیکھیں
-> (`/green-prs` فیملی + `npm run check:release-green` + `/babysit` + رات کے وقت چلنے والا عمل)۔ اسے
-> وقفے وقفے سے — اور خاص طور پر اس چیک لسٹ سے **پہلے** — چلانے سے ریلیز PR ابتدا ہی سے گرین رہتا ہے۔
+> **ریلیز کے درمیان queue/branch سبز رکھیں:** [RELEASE_GREEN.md](./RELEASE_GREEN.md) دیکھیں (`/green-prs` family + `npm run check:release-green` + `/babysit` + رات کو)۔ وقتاً — اس کو چلانا اور خاص طور پر** پہلے** یہ چیک لسٹ — ریلیز PR کو سبز کر دیتی ہے۔
 
 ## خلاصہ
 
@@ -35,7 +32,7 @@ npm run test:e2e           # اختیاری مگر تجویز کردہ
 /capture-release-evidences-cc
 ```
 
-## npm ٹرسٹڈ پبلشنگ (v3.8.51 سے پہلے سے طے شدہ) — درخواست پر پیش کیا گیا، براہ راست فال بیک کے طور پر
+## npm ٹرسٹڈ پبلشنگ (v3.8.51 سے پہلے سے طے شدہ) — درخواست پر، براہ راست فال بیک کے طور پر
 
 `npm-publish.yml` کے ذریعے شائع ہوتا ہے۔** npm ٹرسٹڈ پبلشنگ (OIDC)** بذریعہ ڈیفالٹ: `stage-npm` جاب (github-hosted) GitHub کے id-token کا تبادلہ کرتا ہے ایک مختصر مدت کے npm اسناد کے لیے اس رن کے لیے — کوئی طویل المدتی npm ٹوکن ریپوزٹری سیکریٹ میں نہیں، کوئی 2FA پرامپٹ، پرووینس منسلک نہیں۔ یہ ہے بائی پاس این پی ایم پابندیاں اب 2FA کو چھوڑنے والے ٹوکنز کو ریٹائر کیا جا رہا ہے۔ یہ WS1.3 گارنٹی رکھتے ہوئے پروجیکٹ کے v3.8.48 تک مکمل طور پر خودکار بہاؤ کو بحال کرتا ہے (ایک لیک شدہ ٹوکن اکیلے — شائع نہیں کر سکتا کوئی ٹوکن نہیں ہے)۔
 
@@ -43,7 +40,7 @@ npm run test:e2e           # اختیاری مگر تجویز کردہ
 
 ### مرحلہ وار اشاعت (درخواست پر — `publish_mode=staged`)
 
-npm-publish ورک فلو اب براہ راست شائع نہیں کرتا ہے: یہ پیکڈ ٹربال (`check:pack-boot`) کو بوٹ کرتا ہے اور پھر `npm stage publish` — چلاتا ہے بالکل صحیح بائٹس رجسٹری پر کھڑی ہیں،** انسٹال نہیں** جب تک مالک منظور نہیں کرتا۔ انسانی 2FA گیٹ AFTER ثبوت میں منتقل ہوا، اس سے پہلے نہیں۔
+npm-publish ورک فلو اب براہ راست شائع نہیں کرتا ہے: یہ پیکڈ ٹربال (`check:pack-boot`) کو بوٹ کرتا ہے اور پھر `npm stage publish` — چلاتا ہے بالکل صحیح بائٹس رجسٹری پر کھڑی ہیں،** انسٹال نہیں ہے** جب تک مالک منظور نہیں کرتا۔ انسانی 2FA گیٹ AFTER ثبوت میں منتقل ہوا، اس سے پہلے نہیں۔
 
 **ورک فلو سبز ہونے کے بعد مالک کا بہاؤ:**
 
@@ -60,7 +57,9 @@ npm-publish ورک فلو اب براہ راست شائع نہیں کرتا ہے
 
 **Docker Hub `latest` (ہر مستحکم SemVer اشاعت پر ضروری ہے):** `docker-publish` ورک فلو کو ٹیگ کرنا ضروری ہے۔** دونوں** `X.Y.Z` اور، جب `should-promote-latest.sh` اتفاق کرتا ہے تو یہ سب سے زیادہ مستحکم SemVer ہے، `:latest` کے ساتھ** ایک ہی ڈائجسٹ** . کام کے بعد: حب `latest` ڈائجسٹ نئے SemVer ڈائجسٹ اور `last_updated` منتقل ہونے کے برابر ہے۔ `:latest` پرانی تعمیر پر مت چھوڑیں جب کہ ریلیز نوٹ ان اصلاحات کے بارے میں بات کرتے ہیں جو صرف گٹ پر موجود ہیں۔ کمپوز کوئیک سٹارٹس `:latest` استعمال کرتے ہیں؛ GitOps `X.Y.Z` کو پن کرتے رہنا چاہئے۔ [Docker ریلیز چینلز](../guides/DOCKER_GUIDE.md#release-channels) اور #10317 دیکھیں۔
 
-**Docker حب تنظیمی ذخیرہ (`cheaperinference/omniroute`):** Docker Hub نام کی جگہوں کے درمیان کسی ذخیرے کو منتقل نہیں کرسکتا، لہذا `diegosouzapw/omniroute` اپنی پل ہسٹری اور ہر ریلیز کو برقرار رکھتا ہے، اور `docker-publish` کی `mirror-org-dockerhub` جاب ہر جاری کردہ ورژن (اور `:latest` کو فروغ دینے پر) `ghcr.io/cheaper-inference/omniroute` سے تنظیم کے ذخیرے میں کاپی کرتی ہے۔ اسے `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` راز کی ضرورت ہے۔ ان کے بغیر کام "Docker Hub org mirror skipped" وارننگ کے ساتھ سبز رہتا ہے اور دوسری رجسٹریاں عام طور پر شائع ہوتی ہیں۔ وہاں بعد میں جاری کردہ ورژن شائع کرنے کے لیے، چلائیں۔** ایکشنز → Mirror Docker امیج کو Docker Hub org → رن ورک فلو پر** `version=X.Y.Z` کے ساتھ (اور اعلی ترین مستحکم ورژن کے لیے `promote_latest` ): یہ موجودہ امیجز کو کاپی کرتا ہے، کوئی دوبارہ تعمیر نہیں۔
+**Docker حب تنظیمی ذخیرہ (`cheaperinference/omniroute`):** Docker Hub نام کی جگہوں کے درمیان کسی ذخیرے کو منتقل نہیں کرسکتا، لہذا `diegosouzapw/omniroute` اپنی پل ہسٹری اور ہر ریلیز کو برقرار رکھتا ہے، اور `docker-publish` کی `mirror-org-dockerhub` جاب ہر جاری کردہ ورژن (اور `:latest` کو فروغ دینے پر) `ghcr.io/cheaper-inference/omniroute` سے تنظیم کے ذخیرے میں کاپی کرتی ہے۔ اسے `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` راز کی ضرورت ہے۔ ان کے بغیر کام "Docker Hub org mirror skipped" وارننگ کے ساتھ سبز رہتا ہے اور دوسری رجسٹریاں عام طور پر شائع ہوتی ہیں۔ وہاں بعد میں جاری کردہ ورژن شائع کرنے کے لیے، چلائیں۔** ایکشنز → آئینہ Docker امیج کو Docker Hub org → رن ورک فلو پر** `version=X.Y.Z` کے ساتھ (اور اعلی ترین مستحکم ورژن کے لیے `promote_latest` ): یہ موجودہ امیجز کو کاپی کرتا ہے، کوئی دوبارہ تعمیر نہیں۔ اس ذخیرے کے Docker حب کا جائزہ ہاتھ سے ترتیب دیا گیا ہے: API جو اس میں ترمیم کرتے ہیں آرگنائزیشن ایکسیس ٹوکنز کو مسترد کرتے ہیں۔
+
+وہی ورک فلو 2027-06-2027 تک ہر ریلیز کو لیگیسی GHCR پیکیج `ghcr.io/diegosouzapw/omniroute` میں بھی کاپی کرتا ہے، اس لیے اس پر پن کیے ہوئے انسٹالز اپ ڈیٹ ہوتے رہتے ہیں۔ اس کے انڈیکس میں " `ghcr.io/cheaper-inference/omniroute` میں منتقل" کی تفصیل ہے۔ اسے `GHCR_LEGACY_TOKEN` راز کی ضرورت ہے ( `write:packages` کے ساتھ `diegosouzapw` کا ایک کلاسک ذاتی رسائی ٹوکن)؛ اس کے بغیر یہ کام "Legacy GHCR mirror skipped" وارننگ کے ساتھ چھوڑ دیتا ہے۔
 
 ## ہاٹ فکس فاسٹ لین (لیبل `hotfix`)
 
@@ -151,9 +150,9 @@ release branch پر دوبارہ توثیق کی جاتی ہے (مسلسل relea
 ### دستاویزی
 
 - [ ] `npm run check:docs-sync` پاسز (پری کمٹ کے ذریعے خود کار طریقے سے چلایا جاتا ہے)
-- [ ] `npm run check:docs-all` پاسز (چھتری: docs-sync + docs-counts + env-doc-sync + فرسودہ ورژن + دستاویز کے لنکس)
+- [ ] `npm run check:docs-all` گزرتا ہے۔ اس کا ایڈوائزری `check:deprecated-versions` فلیگ ورژنز کو واضح طور پر OmniRoute (3.6.x اور اس سے پہلے) سے منسوب کرتا ہے اور تاریخوں کو نظر انداز کرتا ہے۔
 - [ ] `npm run check:env-doc-sync` 0 — کوڈ سے باہر نکلتا ہے ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env معاہدہ برقرار ہے
-- [ ] `npm run check:doc-links` ری اسٹرکچرنگ کے بعد 0 — کوئی ٹوٹا ہوا اندرونی مارک ڈاؤن حوالہ جات سے باہر نکلتا ہے۔
+- [ ] ری سٹرکچرنگ کے بعد `npm run check:doc-links` 0 — سے باہر نکلتا ہے کوئی ٹوٹا ہوا اندرونی مارک ڈاؤن حوالہ جات نہیں۔
 - [ ] `docs/architecture/ARCHITECTURE.md` نے storage/runtime بڑھے کے لیے جائزہ لیا۔
 - [ ] `docs/guides/TROUBLESHOOTING.md` env var اور آپریشنل ڈرفٹ کا جائزہ لیا۔
 - [ ] اگر `.env.example` تبدیل ہو گیا: `docs/reference/ENVIRONMENT.md` اپ ڈیٹ ہو گیا۔
@@ -195,7 +194,7 @@ release branch پر دوبارہ توثیق کی جاتی ہے (مسلسل relea
 
 اگر `electron/` بدل گیا ہے:
 
-- [ ] `npm run electron:smoke:packaged` گزر جاتا ہے۔
+- [ ] `npm run electron:smoke:packaged` گزرتا ہے۔
 - [ ] `:win`, `:mac`, `:linux` میں سے کم از کم ایک کے لیے جانچ کی گئی تعمیرات
 - [ ] کوڈ پر دستخط کرنے والے سرٹیفکیٹ کی میعاد ختم نہیں ہوئی ہے (اگر دستخط کر رہے ہیں)
 - [ ] `electron/package.json` ورژن روٹ `package.json` سے میل کھاتا ہے۔
@@ -203,9 +202,9 @@ release branch پر دوبارہ توثیق کی جاتی ہے (مسلسل relea
 
 ### لے آؤٹ بنائیں
 
-ریپوزٹری تین الگ آؤٹ پٹ ڈائریکٹریز کا استعمال کرتی ہے — ان کو کبھی نہیں ملاتا:
+ریپوزٹری تین الگ آؤٹ پٹ ڈائریکٹریز کا استعمال کرتی ہے — انہیں کبھی نہیں ملاتا ہے:
 
-| ڈائریکٹری | مقصد                                                  | ٹریک کیا؟        |
+| ڈائرکٹری  | مقصد                                                  | ٹریک کیا؟        |
 | --------- | ----------------------------------------------------- | ---------------- |
 | `src/`    | درخواست کا ذریعہ (TypeScript / TSX)                   | جی ہاں           |
 | `.build/` | انٹرمیڈیٹس کی تعمیر — `next build` آؤٹ پٹ (`distDir`) | نہیں (نظر انداز) |
@@ -276,7 +275,7 @@ npm run build:release
 ریڈار کا اعلان `active: false` کے ساتھ جان بوجھ کر کیا گیا ہے۔ مندرجہ ذیل ہر آئٹم کے ثبوت کے بعد ایکٹیویشن ایک الگ تبدیلی ہے:
 
 - [ ] تمام اسٹیک شدہ Radar PRs ضم کر دیا گیا ہے اور ریلیز ٹپ CI سبز ہے۔
-- [ ] OSS ریڈار کے راستوں کو `RADAR_ENABLED` کے ساتھ ڈیفالٹ کے طور پر بند کریں
+- [ ] OSS ریڈار کے راستوں کو ڈیفالٹ کے طور پر `RADAR_ENABLED` اب بھی بند کے ساتھ تعینات کریں اور دھوئیں
 - [ ] نامی ریڈار میزبان پر `GET /planos`، `/termos`، `/privacidade`، اور `/reembolso` دھواں
 - [ ] نجی سروس میں ریکارڈ آپریٹر identity/contact/address اور مالک سے منظور شدہ قانونی جائزہ
 - [ ] صرف ٹیسٹ موڈ میں اسٹرائپ چیک آؤٹ اور دستخط شدہ ویب ہک کی مشق کریں۔
@@ -399,7 +398,7 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

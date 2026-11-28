@@ -11,14 +11,14 @@ Agent Skills fayilolin SKILL.md ne masu tsari waɗanda ke koya wa wakilai na waj
 
 ---
 
-## Bayanin Gabaɗaya
+## Dubawa
 
-Kundin ya ƙunshi **Agent Skills 45** (REST API 23 + CLI 21 + tsarin aiki na daidaitawa 1). Kowace fasaha tana da:
+Katalojin ya ƙunshi** Ƙwararrun Wakilai 45** (23 REST API + 21 CLI + 1 daidaitawar aiki). Kowace fasaha tana da:
 
-- **ID na hukuma** (`omni-auth`, `cli-serve`, da sauransu)
-- Fayil ɗin **SKILL.md** a cikin `skills/{id}/SKILL.md` mai YAML frontmatter (`name`, `description`) + cikakken jikin markdown
-- **REST endpoints** (fasahohin API) ko **CLI subcommands** (fasahohin CLI) da aka samo daga ƙayyadaddun OpenAPI da rajistar CLI
-- **GitHub raw URL** don ɗaukowa kai tsaye: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- A** canonical ID** (`omni-auth`, `cli-serve`, da dai sauransu)
+- A**SKILL.md** fayil a cikin `skills/{id}/SKILL.md` tare da YAML frontmatter (`name`, `description`) + mai cike da alamar alama
+- **REST karshen** (API basira) ko**CLI sub umarni** (ƙwararrun CLI ) waɗanda aka samo daga OpenAPI spec da rajistar CLI
+- A**GitHub raw URL** don kawowa kai tsaye: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -290,7 +290,7 @@ Amsar mai ƙirƙirawa `GeneratorReport` ce:
 
 ---
 
-## API na Rufewa
+## Rufe API
 
 ```bash
 curl "http://localhost:20128/api/agent-skills/coverage"

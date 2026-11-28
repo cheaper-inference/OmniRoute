@@ -12,62 +12,53 @@ OmniRoute එකිනෙකට වෙනස් නමුත් ඊට අදා
 
 > **ඔරොත්තු දීමේ ටොගල් සඳහා Env-vs-dashboard ප්‍රමුඛතාවය.** — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — පරිසරයෙන් බීජ ටොගල් ප්‍රත්‍යස්ථතාව ටොගල් කරන්නේ _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) පමණි. `resilienceSettings` (උපකරණ පුවරුව →** සැකසීම් → ඔරොත්තු දීමේ හැකියාව** / `PATCH /api/resilience`, `key_value` හි ගබඩා කර ඇත ) env අගය ජය ගනී: සාමාන්‍යකරණය (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) එකක් පවතින විට ගබඩා කරන ලද boolean තබා ගනී. උපකරණ පුවරුව දැනටමත් `false` සුරකින ලද යෙදවුමක එවැනි env var `true` ලෙස සැකසීම, එබැවින් කිසිවක් වෙනස් නොවේ — ටොගලය පෙරළන්න** සැකසීම් → ඔරොත්තු දීමේ හැකියාව** (හෝ ගබඩා කර ඇති ක්ෂේත්‍රය හිස් කරන්න) ඒ වෙනුවට.
 
-## 1. Provider Circuit Breaker
+## 1. සැපයුම්කරු පරිපථ කඩනය
 
-**විෂය පථය:** සම්පූර්ණ provider එක (උදා., `glm`, `openai`, `anthropic`).
+**විෂය පථය:** සම්පූර්ණ සැපයුම්කරු (උදා, `glm`, `openai`, `anthropic`).
 
-**අරමුණ:** upstream/service මට්ටමින් නැවත නැවත අසාර්ථක වන provider කෙනෙකු වෙත යානා යැවීම නවත්වා දැමීම.
+**අරමුණ:** upstream/service මට්ටමින් නැවත නැවතත් අසාර්ථක වන සැපයුම්කරුවෙකු වෙත ගමනාගමනය යැවීම නවත්වන්න.
 
 **ක්රියාත්මක කිරීම:**
 
-- ප්රධාන class එක: `src/shared/utils/circuitBreaker.ts`
-- සම්බන්ධ කිරීම: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- තත්ත්ව API එක: `GET /api/monitoring/health`
-- Reset API එක: `POST /api/resilience/reset`
-- Wrapper ඒවා: `open-sse/services/accountFallback.ts`
+- මූලික පන්තිය: `src/shared/utils/circuitBreaker.ts`
+- රැහැන්: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- තත්ත්වය API: `GET /api/monitoring/health`
+- API යළි පිහිටුවන්න : `POST /api/resilience/reset`
+- දවටන: `open-sse/services/accountFallback.ts`
 - DB වගුව: `domain_circuit_breakers`
 
-**තත්ත්ව:**
+**ප්‍රාන්ත:**
 
-- `CLOSED` — සාමාන්ය යානා වලට අවසර ඇත
-- `DEGRADED` — යානා තවමත් වලට අවසර ඇත, නමුත් ඉහළ ගිය provider අසාර්ථකතා නිරීක්ෂණය කරමින් සිටී; ප්රමාණවත් සාර්ථකත්වයන් මත, වලංගු සම්බන්ධතා පරීක්ෂණයක් මත, හෝ අවසාන අසාර්ථක වර්ගය සඳහා දිගම `OPEN` රඳවා තැබීමෙන් පසු (එහි `cooldownByKind` අගය, නැතිනම් `resetTimeout`, × `maxBackoffMultiplier`, අවම වශයෙන් එක් cooldown එකක්) අලුත් අසාර්ථකත්වයක් නොමැතිව `CLOSED` වෙත ආපසු යයි
-- `OPEN` — provider තාවකාලිකව අවහිර කර ඇත; combo routing එය මඟහරියි
-- `HALF_OPEN` — reset කාලසීමාව ගෙවී ගොස් ඇත; probe ඉල්ලීමට අවසර ඇත
+- `CLOSED` — සාමාන්‍ය ගමනාගමනයට අවසර ඇත
+- `DEGRADED` — ගමනාගමනයට තවමත් අවසර ඇත, නමුත් ඉහළ සැපයුම්කරුවන්ගේ අසාර්ථක වීම් නිරීක්ෂණය කෙරේ; `CLOSED` වෙත ප්‍රමාණවත් සාර්ථකත්වයක් මත, වලංගු සම්බන්ධතා පරීක්ෂණයක් මත, හෝ අවසන් අසාර්ථක වර්ගය (එහි `cooldownByKind` අගය, වෙනත් `resetTimeout`, × `maxBackoffMultiplier`, අවම වශයෙන් එක් සිසිල් කිරීමක්) සඳහා දීර්ඝතම `OPEN` රඳවා තබා ගැනීමෙන් පසුව නව අසාර්ථක වීමක් නොමැතිව ආපසු පැමිණේ.
+- `OPEN` — සපයන්නා තාවකාලිකව අවහිර කර ඇත; combo routing එය මග හරියි
+- `HALF_OPEN` — යළි පිහිටුවීමේ කාල සීමාව ඉක්ම ගියේය; පරීක්ෂණ ඉල්ලීමට අවසර දී ඇත
 
-**වින්යාසගත කළ හැකි පෙරනිමි (`open-sse/config/constants.ts`, Dashboard → Settings → Resilience හි නිරාවරණය වේ):**
+**වින්‍යාසගත කළ හැකි පෙරනිමි (`open-sse/config/constants.ts`, උපකරණ පුවරුවේ → සිටුවම් → ප්‍රත්‍යස්ථතාව) තුළ නිරාවරණය කර ඇත:**
 
-| පන්තිය  | Degraded වන්නේ | විවෘත වන්නේ  | Reset කාලසීමාව |
-| ------- | -------------- | ------------ | -------------- |
-| OAuth   | අසාර්ථකතා 5    | අසාර්ථකතා 8  | 60s            |
-| API-key | අසාර්ථකතා 7    | අසාර්ථකතා 12 | 30s            |
-| Local   | ව්යුත්පන්න     | අසාර්ථකතා 2  | 15s            |
+| පන්තිය   | දී පරිහානියට පත් විය | දී විවෘත වේ       | කල් ඉකුත්වීම නැවත සකසන්න |
+| -------- | -------------------- | ----------------- | ------------------------ |
+| OAuth    | 5 අසාර්ථකයි          | 8 අසාර්ථකයි       | 60 ගණන්                  |
+| API-යතුර | අසාර්ථක වීම් 7ක්     | අසාර්ථක වීම් 12ක් | 30s                      |
 
-`degradationThreshold` මඟින් provider කෙනෙක් `DEGRADED` වෙත ඇතුළු වන අවස්ථාව පාලනය කරයි; `failureThreshold` මඟින් එය විවෘත වී මඟහරින අවස්ථාව පාලනය කරයි. Local provider profile ඒවා තවම Resilience settings පිටුවේ නිරාවරණය නොවේ.
+සැපයුම්කරුවෙකු `DEGRADED` වෙත ඇතුළු වූ විට `degradationThreshold` පාලනය කරයි; `failureThreshold` එය විවෘත වන විට සහ මඟ හරින විට පාලනය කරයි. `PROVIDER_PROFILES.local` (2 අසාර්ථක / 15s) `open-sse/config/constants.ts` හි අර්ථ දක්වා ඇත නමුත්** තවමත් රැහැන්ගත කර නැත** : `getProviderCategory()` ආපසු ලබා දෙන්නේ `oauth` හෝ `apikey` පමණි, එබැවින් දේශීය සැපයුම්කරුවන් OAuth හෝ API-key පැතිකඩ භාවිතා කරයි.
 
-**Trip කේත:** provider මට්ටමේ තත්ත්ව `[408, 500, 502, 503, 504]` පමණි. Account මට්ටමේ දෝෂ සඳහා trip නොවන්න (බොහෝ 401/403/429 — ඒවා cooldown හෝ lockout වෙත අයත් වේ).
+**සංචාර කේත:** සපයන්නා මට්ටමේ තත්ව පමණක් `[408, 500, 502, 503, 504]`. ගිණුම් මට්ටමේ දෝෂ සඳහා NOT සංචාරය කරන්න (බොහෝ 401/403/429 — ඒවා cooldown හෝ lockout වලට අයත් වේ).
 
-**කම්මැලි ප්රතිසාධනය:** `OPEN` එක කල් ඉකුත් වූ විට, `getStatus()`, `canExecute()`, `getRetryAfterMs()` මඟින් තත්ත්වය `HALF_OPEN` වෙත නැවුම් කරයි. එම කියවීම්ම (සහ ඊළඟ අසාර්ථකත්වය) කල් ඉකුත් වූ `DEGRADED` එකක් `CLOSED` වෙත හීන කරයි. පසුබිම් timer එකක් අවශ්ය නොවේ.
+**කම්මැලි සුවය:** `OPEN` කල් ඉකුත් වූ විට, `getStatus()`, `canExecute()`, `getRetryAfterMs()` තත්ත්වය `HALF_OPEN` වෙත නැවුම් කරන්න. එම කියවීම් (සහ ඊළඟ අසාර්ථකත්වය) පරණ `DEGRADED` නැවත `CLOSED` වෙත ක්ෂය වේ. පසුබිම් ටයිමරය අවශ්‍ය නොවේ.
 
 ---
 
-### තේරීම්-පාදක ගෝලීය Provider Cooldown (කවුළු දොරටුව)
+### ගෝලීය සැපයුම්කරු සිසිල් කිරීම (කවුළු දොරටුව) තෝරා ගැනීම
 
-සිව්වන, **තේරීම්-පාදක** ස්ථරයක් (`PROVIDER_COOLDOWN_ENABLED`, පෙරනිමිය **අක්රිය**) අසාර්ථක වන provider ඒවා පිළිබඳ ඉල්ලීම්-හරහා මතකයක්
-`open-sse/services/providerCooldownTracker.ts` හි තබා ගනී, එය combo target
-නිරාකරණය විසින් සලකා බැලෙන අතර, එමඟින් අඛණ්ඩ combo ඉල්ලීම් මඳ වේලාවකට පෙර අසාර්ථක වූ
-provider එකක් නැවත ගමන් කිරීම නවත්වයි. Provider මට්ටමේ ඇතුළත් කිරීම්
-`PROVIDER_PROFILES` කවුළු දොරටුවට ගරු කරයි:
+හතරවෙනි එක,** තේරීම** ස්ථරය (`PROVIDER_COOLDOWN_ENABLED`, පෙරනිමිය** අක්රිය** ) `open-sse/services/providerCooldownTracker.ts` හි අසාර්ථක වන සැපයුම්කරුවන්ගේ හරස් ඉල්ලීම් මතකයක් තබා ගනී, සංයුක්ත ඉලක්ක විභේදනය මගින් උපදෙස් ලබා ගනී, එබැවින් අඛණ්ඩ ඒකාබද්ධ ඉල්ලීම් අසාර්ථක වූ සැපයුම්කරුවෙකු නැවත ඇවිදීම නතර කරයි. සපයන්නන්ගේ මට්ටමේ ප්‍රවේශයන් `PROVIDER_PROFILES` කවුළු ගේට්ටුවට ගරු කරයි:
 
-| Profile | ඉන් පසු trip වේ (`providerFailureThreshold`) | තුළ (`providerFailureWindowMs`) | cooldown වන්නේ (`providerCooldownMs`) |
-| ------- | -------------------------------------------: | ------------------------------: | ------------------------------------: |
-| OAuth   |                                         `10` |                         `15min` |                                `5min` |
-| API key |                                         `15` |                         `30min` |                               `10min` |
+| පැතිකඩ   | පසු සංචාර (`providerFailureThreshold`) | ඇතුළත (`providerFailureWindowMs`) | (`providerCooldownMs`) සඳහා සිසිල් කරයි |
+| -------- | -------------------------------------: | --------------------------------: | --------------------------------------: |
+| OAuth    |                                   `10` |                           `15min` |                                  `5min` |
+| API යතුර |                                   `15` |                           `30min` |                                 `10min` |
 
-සීමාවට වඩා අඩුවෙන් provider එක cooling ලෙස සැලකෙන්නේ **නැත**; සාර්ථකත්වයක්
-කවුළුව මකා දමයි. සම්බන්ධතා මට්ටමේ ඇතුළත් කිරීම් (`provider:connectionId`) ඒ වෙනුවට
-ඝාතීය `minRetryCooldownMs → maxRetryCooldownMs` backoff එක තබා ගනී. අභිබවා යාම්:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-Regression ආරක්ෂකය: `tests/unit/provider-cooldown-window-gate.test.ts`.
+එළිපත්තට පහළින් සැපයුම්කරු සිටී** නැත** සිසිලනය ලෙස සැලකේ; සාර්ථකත්වය කවුළුව පිරිසිදු කරයි. සම්බන්ධතා මට්ටමේ ඇතුළත් කිරීම් (`provider:connectionId`) ඒ වෙනුවට ඝාතීය `minRetryCooldownMs → maxRetryCooldownMs` backoff තබා ගන්න. අභිබවා යයි: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. ප්‍රතිගාමී ආරක්ෂකයා: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 ## 2. සම්බන්ධතා සිසිලනය
 
@@ -763,6 +754,21 @@ path එකේදී opencode-විශේෂිත නියම කිසිව
 
 ---
 
+## OmniRoute ම ළඟා විය නොහැකි විට
+
+සපයන්නාගේ පරිපථ කඩනය, සම්බන්ධතා සිසිල් කිරීම සහ ආකෘති අගුලු දැමීම ද්වාරය තුළ ක්‍රියාත්මක වේ. සේවාදායකයාට ද්වාරය වෙත ළඟා විය නොහැකි නම්, එය සම්බන්ධතා දෝෂයක් ලබා ගනී. OmniRoute එම අසාර්ථකත්වය වළක්වා ගත නොහැක. සේවාදායකයා නැවත උත්සාහ කළ යුතුද සහ කුමන පණිවිඩය පෙන්විය යුතුද යන්න තීරණය කරයි.
+
+OmniRoute දැනට සේවාලාභී පාර්ශවයේ පසුබෑමක් ලබා නොදෙන අතර ඒ සඳහා ප්‍රතිපත්තියක් නිර්වචනය නොකරයි. සේවාලාභියා තුළ හෝ ද්වාරය ඉදිරිපිට ඕනෑම විකල්ප මාර්ගයක් වින්‍යාස කරන්න.
+
+- `GET /api/health` සත්‍යාපනයකින් තොරව සජීවී බව පරීක්ෂා කරයි.
+- `GET /api/health/ping` දත්ත සමුදාය ප්‍රතිචාර දක්වයිද යන්න ඇතුළුව සූදානම පරීක්ෂා කරයි.
+- `GET /api/monitoring/health` සත්‍යාපිත ඇමතුම්කරුවන්ට ගැඹුරු සෞඛ්‍ය දළ විශ්ලේෂණයක් ලබා දෙයි.
+- සේවාලාභියා ආරම්භ කිරීමට පෙර `omniroute launch <tool>` `/api/monitoring/health` පරීක්ෂා කරයි. එය දේශීය ද්වාරයක් ස්වයංක්රීයව ආරම්භ කළ හැක. `--no-start` සමඟ, ළඟා විය නොහැකි ද්වාරය `GatewayUnreachable` සහ පිටවීමේ කේතය `69` ඇති කරයි.
+
+සේවාලාභියෙකු OmniRoute වෙතින් විසන්ධි කිරීමට, [Revert සේවාදායක වින්‍යාසය](../guides/UNINSTALL.md#revert-client-configuration) අනුගමනය කරන්න.
+
+---
+
 ## නිදොස්කරණය
 
 - Weighted combo එක `503 all_targets_cooling_down` ලෙස පිළිතුරු දේ (`Retry-After` සකසා ඇත, `diagnostics.excluded` සෑම ඉලක්කයක්ම `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable` සමඟ ලැයිස්තුගත කරයි) → පොල එක වින්යාසගත කර සම්බන්ධ කර ඇත, සෑම ඉලක්කයක්ම ඔරොත්තු දැක්වීමේ ටයිමරයකින් බැහැර කර ඇති බවක් පමණි; `[COMBO] Weighted selection: every target excluded before dispatch — …` අවවාදය හේතු සහ ඉතිරි තත්පර සඳහන් කරයි. එම combo එකෙන්ම ලැබෙන `404 no_executable_targets` යනු කිසිදු ඔරොත්තු ටයිමරයක් සම්බන්ධ නොවූ බවයි (ධාවනය කිරීමට දෙයක් නැත, නැතහොත් සෑම ගිණුමක්ම ලබා ගත හැකි බව පරීක්ෂා කිරීමෙන් අසාර්ථක විය). `targetResolution.ts` හි එකතු කරන ලද බැහැර කිරීම් වලින් `open-sse/services/combo/pinRecovery.ts` හි ඉදිකර ඇත.
@@ -774,84 +780,68 @@ path එකේදී opencode-විශේෂිත නියම කිසිව
 
 ---
 
-## ධාවන කාලීන තත්ත්වය — නියෝජිත ඉක්මන් සඳහන
+## ධාවන කාලය රාජ්‍ය — නියෝජිත ඉක්මන් යොමුව
 
-> නියෝජිත මාර්ගෝපදේශය 40k සන්දර්භ අයවැය යටතේ රැඳී සිටීම සඳහා `AGENTS.md` → "ඔරොත්තු දැක්වීමේ ධාවන කාලීන තත්ත්වය" වෙතින් වචනානුසාරයෙන් ගෙන එන ලදි (PR #12743). එය ඉහත කොටස්වල සංක්ෂිප්ත, නියෝජිතයා-මුහුණුවර දර්ශනයයි; අංකිත කොටස් සම්පූර්ණ සඳහන ලෙස පවතී.
+> `AGENTS.md` → "Resilence Runtime State" (PR #12743) වෙතින් වාචිකව ගෙන යන ලද බැවින් නියෝජිත මාර්ගෝපදේශය 40k සන්දර්භය අයවැය යටතේ පවතී. එය ඉහත කොටස්වල සංක්ෂිප්ත, නියෝජිත-මුහුණු දසුනයි; අංකිත කොටස් සම්පූර්ණ යොමුව පවතී.
 
-OmniRoute හි සම්බන්ධ නමුත් වෙනස් තාවකාලික-අසාර්ථකත්ව යාන්ත්රණ තුනක් ඇත. මාර්ග හැසිරීම නිදොස්කරණය කරන විට ඒවායේ විෂය පථය වෙන වෙනම තබන්න. එක බැල්මක සිතියමක් සඳහා
-[ස්ථර-3 ඔරොත්තු දැක්වීමේ රූපසටහන](../diagrams/exported/resilience-3layers.svg)
-(මූලාශ්රය: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
-බලන්න.
+OmniRoute සම්බන්ධ නමුත් වෙනස් තාවකාලික-අසාර්ථක යාන්ත්‍රණ තුනක් ඇත. මාර්ගගත හැසිරීම් නිදොස් කිරීමේදී ඔවුන්ගේ විෂය පථය වෙනම තබා ගන්න. බැලූ බැල්මට සිතියමක් සඳහා [3-ස්ථර ඔරොත්තු දීමේ රූප සටහන](../diagrams/exported/resilience-3layers.svg) බලන්න (මූලාශ්‍රය: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ).
 
-### සැපයුම්කරු පරිපථ විච්ඡේදකය
+### සැපයුම්කරු පරිපථ කඩනය
 
-**විෂය පථය**: සම්පූර්ණ සැපයුම්කරු, උදා. `glm`, `openai`, `anthropic`.
+**විෂය පථය** : සම්පූර්ණ සැපයුම්කරු, උදා `glm`, `openai`, `anthropic`.
 
-**අරමුණ**: ඉහළ ගලායාම/සේවා මට්ටමින් නැවත නැවත අසාර්ථක වන සැපයුම්කරුවෙකු වෙත ගමනාගමනය යැවීම නැවැත්වීම, එවිට එක් අසෞඛ්ය සම්පන්න සැපයුම්කරුවෙකු සෑම ඉල්ලීමක්ම මන්දගාමී නොකරයි.
+**අරමුණ** : upstream/service මට්ටමින් නැවත නැවතත් අසාර්ථක වන සැපයුම්කරුවෙකු වෙත ගමනාගමනය යැවීම නවත්වන්න, එබැවින් එක් සෞඛ්‍ය සම්පන්න නොවන සැපයුම්කරුවෙකු සෑම ඉල්ලීමක්ම මන්දගාමී නොකරයි.
 
-**ක්රියාත්මක කිරීම**:
+**ක්රියාත්මක කිරීම** :
 
-- මූලික පංතිය: `src/shared/utils/circuitBreaker.ts`
-- Chat දොරටු/ක්රියාත්මක වයරින්: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- ධාවන කාලීන තත්ත්ව API: `src/app/api/monitoring/health/route.ts`
-- බෙදාගත් ආවරණ: `open-sse/services/accountFallback.ts`
-- ස්ථාවර තත්ත්ව වගුව: `domain_circuit_breakers`
+- මූලික පන්තිය: `src/shared/utils/circuitBreaker.ts`
+- චැට් gate/execution රැහැන්: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- ධාවන කාල තත්ත්වය API: `src/app/api/monitoring/health/route.ts`
+- බෙදාගත් දවටන: `open-sse/services/accountFallback.ts`
+- දිගටම පවතින රාජ්‍ය වගුව: `domain_circuit_breakers`
 
-**තත්ත්ව** (4 — `src/shared/utils/circuitBreaker.ts`):
+**ප්රාන්ත** (4 — `src/shared/utils/circuitBreaker.ts`):
 
-- `CLOSED`: සාමාන්ය ගමනාගමනයට අවසර ඇත.
-- `DEGRADED`: මුල් අවවාද කලාපය — අසාර්ථකත්ව පහත වැටීමේ සීමාව පසු කළ නමුත් බ්රේකර් සීමාව තවම නොවේ; ගමනාගමනය තවමත් ගලා යයි, උපකරණ පුවරු අවවාදය පෙන්වයි. වලංගු සම්බන්ධතා පරීක්ෂණයක් හෝ නව අසාර්ථකත්වයක් නොමැති නිශ්ශබ්ද කවුළුවක් එය `CLOSED` වෙත ආපසු ගෙන එයි
-  (`docs/architecture/RESILIENCE_GUIDE.md` හි කවුළුව ඇත).
-- `OPEN`: සැපයුම්කරු තාවකාලිකව අවහිර කර ඇත; අමතන්නන්ට provider-circuit-open පිළිතුරක් ලැබේ
-  නැතහොත් combo මාර්ගය වෙනත් ඉලක්කයකට මඟ හරියි.
-- `HALF_OPEN`: යළි සැකසුම් කාලය ඉකුත් වී ඇත; පරීක්ෂණ ඉල්ලීමකට අවසර දෙන්න. සාර්ථකත්වය බ්රේකරය වසා දමයි, අසාර්ථකත්වය එය නැවත විවෘත කරයි.
+- `CLOSED`: සාමාන්‍ය ගමනාගමනයට අවසර ඇත.
+- `DEGRADED`: පූර්ව අනතුරු ඇඟවීමේ සංගීත කණ්ඩායම — අසාර්ථකත්වය පිරිහීමේ සීමාව ඉක්මවා ඇත, නමුත් තවමත් කඩන සීමාව ඉක්මවා නැත; ගමනාගමනය තවමත් ගලා යයි, උපකරණ පුවරු අනතුරු ඇඟවීම පෙන්වයි. වලංගු සම්බන්ධතා පරීක්ෂණයක් හෝ නව අසාර්ථකත්වයක් නොමැති නිහඬ කවුළුවක් එය `CLOSED` වෙත ආපසු ලබා දෙයි (`docs/architecture/RESILIENCE_GUIDE.md` කවුළුව ඇත).
+- `OPEN`: සපයන්නා තාවකාලිකව අවහිර කර ඇත; අමතන්නන් සපයන්නා-පරිපථ-විවෘත ප්‍රතිචාරයක් ලබා ගනී හෝ වෙනත් ඉලක්කයකට සංයෝජන රවුටින් මඟ හැරේ.
+- `HALF_OPEN`: යළි පිහිටුවීමේ කාලය අවසන් වී ඇත; පරීක්ෂණ ඉල්ලීමකට ඉඩ දෙන්න. සාර්ථකත්වය බ්රේකර් වසා දමයි, අසාර්ථකත්වය එය නැවත විවෘත කරයි.
 
-**පෙරනිමි** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, `src/lib/resilience/settings.ts` හි `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` හරහා පරිභෝජනය වේ →
-`src/sse/handlers/chatHelpers.ts` හි `getCircuitBreaker(provider, …)`). සම්පූර්ණ-සැපයුම්කරු
-බ්රේකරය `circuitBreakerThreshold` / `circuitBreakerReset` මත ක්රියාත්මක වේ:
+**Defaults** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES`, consumed via `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` in `src/lib/resilience/settings.ts` → `getCircuitBreaker(provider, …)` in `src/sse/handlers/chatHelpers.ts`). The whole-provider breaker runs on `circuitBreakerThreshold` / `circuitBreakerReset`:
 
-| පැතිකඩය | පහත වැටෙන්නේ | විවෘත වන්නේ (`circuitBreakerThreshold`) | යළි සැකසීම (`circuitBreakerReset`) |
-| ------- | -----------: | --------------------------------------: | ---------------------------------: |
-| OAuth   |          `5` |                                     `8` |                              `60s` |
-| API key |          `7` |                                    `12` |                              `30s` |
-| Local   | (ව්යුත්පන්න) |                                     `2` |                              `15s` |
+| පැතිකඩ   | දී පිරිහෙයි | (`circuitBreakerThreshold`) හි විවෘත වේ | යළි පිහිටුවන්න (`circuitBreakerReset`) |
+| -------- | ----------: | --------------------------------------: | -------------------------------------: |
+| OAuth    |         `5` |                                     `8` |                                  `60s` |
+| API යතුර |         `7` |                                    `12` |                                  `30s` |
 
-`PROVIDER_PROFILES` තවද `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) සහ `providerCooldownMs` (5/10/1 min) අර්ථ දක්වයි: මේවා
-**විකල්ප ලෙස තෝරාගත හැකි ගෝලීය Provider Cooldown එකේ කවුළු දොරටුව** බලගන්වයි (`PROVIDER_COOLDOWN_ENABLED`, පෙරනිමිය වසා ඇත)
-— `open-sse/services/providerCooldownTracker.ts` හි සැපයුම්කරු-මට්ටමින් ඇතුළත් කිරීමක්, `providerFailureWindowMs` තුළ `providerFailureThreshold` අසාර්ථකත්වයන්ට පසුව පමණක්
-සිසිලනය ලෙස ගණනය වේ, පසුව `providerCooldownMs` තරම කාලයක් සිසිල වේ. මේවා සජීවී බ්රේකරයේ සීමාවන්
-නොවේ — බ්රේකර් හැසිරීම අපේක්ෂා කරමින් ඒවා සකස් නොකරන්න. සෑම පෙරනිමියක්ම
-`OMNIROUTE_PROVIDER_BREAKER_*` සහ `OMNIROUTE_CIRCUIT_BREAKER_*` පරිසර විචල්යයන් හරහා අභිබවා යා හැක;
-ධාවන-නිවැරදි සඳහන් වගුව `docs/architecture/RESILIENCE_GUIDE.md` හි පවතී.
+`local` පැතිකඩක් (`2` අසාර්ථක / `15s`) `PROVIDER_PROFILES` හි ද පවතී, නමුත් එය බ්‍රේකර් එකට සම්බන්ධ කර නැත: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) පිළිගන්නේ `oauth` හෝ `apikey` පමණක් වන අතර `getProviderCategory()` (`open-sse/config/providerRegistry.ts`) එම දෙකෙන් එකක් ආපසු ලබා දෙයි (ලියාපදිංචිය නොකළ සපයන්නන් `apikey` ලබා ගනී).
 
-සැපයුම්කරු-මට්ටමින් අසාර්ථකත්ව තත්ත්ව පමණක් සැපයුම්කරු බ්රේකරය ක්රියාත්මක කළ යුතුය:
+`PROVIDER_PROFILES` `providerFailureThreshold` (10/15/2), `providerFailureWindowMs` (15/30/5 min) සහ `providerCooldownMs` (5/10/1 min) — OAuth/API key/local ද අර්ථ දක්වයි, එහිදී දේශීය අගයන් ඉහත හේතුව නිසාම නිෂ්ක්‍රීය වේ: මේවා බලයට** ගෝලීය සැපයුම්කරු Cooldown තෝරා ගැනීමේ කවුළුවේ දොරටුව** (`PROVIDER_COOLDOWN_ENABLED`, පෙරනිමියෙන් ක්‍රියාවිරහිතයි) — සපයන්නා මට්ටමේ ප්‍රවේශයක් `open-sse/services/providerCooldownTracker.ts` හි `providerFailureWindowMs` තුළ `providerFailureThreshold` අසාර්ථක වීමෙන් පසුව පමණක් සිසිලනය ලෙස ගණන් ගනු ලැබේ, පසුව `providerCooldownMs` සඳහා සිසිල් වේ. ඒවා NOT සජීවී බ්‍රේකර්ගේ එළිපත්ත — බ්‍රේකර් හැසිරීම් අපේක්ෂාවෙන් ඒවා සුසර නොකරයි. සෑම පෙරනිමියක්ම `OMNIROUTE_PROVIDER_BREAKER_*` සහ `OMNIROUTE_CIRCUIT_BREAKER_*` env vars හරහා අතික්‍රමණය කළ හැකිය; ධාවන කාලය-නිවැරදි යොමු වගුව `docs/architecture/RESILIENCE_GUIDE.md` හි ජීවත් වේ.
+
+සැපයුම්කරු-මට්ටමේ අසාර්ථක තත්ත්වයන් පමණක් සැපයුම්කරු බිඳ දැමිය යුතුය:
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-බොහෝ `401`, `403`, හෝ `429` අවස්ථා වැනි සාමාන්ය ගිණුම්/යතුරු/ආකෘති දෝෂ සඳහා සම්පූර්ණ-සැපයුම්කරු
-බ්රේකරය ක්රියාත්මක නොකරන්න. ඒවා සාමාන්යයෙන් connection cooldown හෝ model
-lockout වලට අයත් වේ. සාමාන්ය API-යතුරු සැපයුම්කරුවෙකුගේ `403` එකක්, අවසාන සැපයුම්කරු/ගිණුම්
-දෝෂයක් ලෙස වර්ගීකරණය කර නොමැති නම්, ප්රතිසාධනය කළ හැකි එකක් විය යුතුය.
+බොහෝ `401`, `403`, හෝ `429` අවස්ථා වැනි සාමාන්‍ය account/key/model දෝෂ සඳහා සම්පූර්ණ-සැපයුම්කරු බ්‍රේකර් නොයන්න. ඒවා සාමාන්‍යයෙන් සම්බන්ධක cooldown හෝ model lockout වලට අයත් වේ. සාමාන්‍ය API-යතුරු සපයන්නා `403` එය ටර්මිනල් provider/account දෝෂයක් ලෙස වර්ගීකරණය කර ඇත්නම් මිස එය ප්‍රතිසාධනය කළ හැකි විය යුතුය.
 
-Breaker එක background timer එකක් නොව, lazy recovery භාවිතා කරයි. `OPEN` කල් ඉකුත් වූ විට, `getStatus()`, `canExecute()`, සහ `getRetryAfterMs()` වැනි reads state එක `HALF_OPEN` ලෙස refresh කරයි, එබැවින් dashboards සහ combo candidate builders කල් ඉකුත් වූ provider කෙනෙකු සදහටම බැහැර කර නොතබයි.
+බ්‍රේකර් භාවිතා කරන්නේ කම්මැලි ප්‍රතිසාධනය මිස පසුබිම් ටයිමරයක් නොවේ. `OPEN` කල් ඉකුත් වූ විට, `getStatus()`, `canExecute()`, සහ `getRetryAfterMs()` වැනි කියවීම් රාජ්‍යය `HALF_OPEN` වෙත නැවුම් කරයි, එබැවින් උපකරණ පුවරු සහ සංයුක්ත අපේක්ෂකයින් කල් ඉකුත් වූ සැපයුම්කරුවෙකු සදහටම බැහැර නොකරයි.
 
-### සම්බන්ධතා Cooldown
+### සම්බන්ධතා සිසිලනය
 
-**විෂය පථය**: එක් provider සම්බන්ධතාවයක්/ගිණුමක්/key එකක්.
+**විෂය පථය** : එක් සැපයුම්කරුවෙකු connection/account/key.
 
-**අරමුණ**: එකම provider සඳහා වෙනත් සම්බන්ධතා ඉල්ලීම් සැපයීම දිගටම කරගෙන යාමට ඉඩ දෙන අතරතුර, දෝෂ සහිත එක් key/ගිණුමක් තාවකාලිකව මඟ හැරීම.
+**අරමුණ** : එකම සැපයුම්කරු සඳහා ඉල්ලීම් දිගටම කරගෙන යාමට වෙනත් සම්බන්ධතාවලට ඉඩ දෙන අතරේ එක් නරක key/account එකක් තාවකාලිකව මඟ හරින්න.
 
-**ක්රියාත්මක කිරීම**:
+**ක්රියාත්මක කිරීම** :
 
-- ලිවීමේ/යාවත්කාලීන කිරීමේ මාර්ගය: `src/sse/services/auth.ts::markAccountUnavailable()`
-- ගිණුම් තේරීම/පෙරීම: `src/sse/services/auth.ts::getProviderCredentials...`
-- Cooldown ගණනය කිරීම: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- සැකසුම්: `src/lib/resilience/settings.ts`
+- Write/update මාර්ගය: `src/sse/services/auth.ts::markAccountUnavailable()`
+- ගිණුම selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- Cooldown ගණනය: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- සැකසීම්: `src/lib/resilience/settings.ts`
 
-Provider සම්බන්ධතා මත ඇති වැදගත් ක්ෂේත්ර:
+සපයන්නාගේ සම්බන්ධතා පිළිබඳ වැදගත් ක්ෂේත්‍ර:
 
 ```ts
 rateLimitedUntil;
@@ -862,50 +852,50 @@ errorCode;
 backoffLevel;
 ```
 
-ගිණුම් තේරීමේදී, පහත කොන්දේසිය සත්ය වන අතරතුර සම්බන්ධතාවයක් මඟ හරිනු ලැබේ:
+ගිණුම් තෝරාගැනීමේදී, සම්බන්ධතාවයක් මඟ හැරෙන්නේ:
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-Cooldowns ද lazy වේ: `rateLimitedUntil` අතීතයේ ඇති විට, සම්බන්ධතාවය නැවත සුදුසුකම් ලබයි. සාර්ථක භාවිතයකදී, `clearAccountError()` විසින් `testStatus`, `rateLimitedUntil`, දෝෂ ක්ෂේත්ර, සහ `backoffLevel` ඉවත් කරයි.
+Cooldowns ද කම්මැලි ය: `rateLimitedUntil` අතීතයේ ඇති විට, සම්බන්ධතාවය නැවත සුදුසු වේ. සාර්ථක භාවිතයේදී, `clearAccountError()` `testStatus`, `rateLimitedUntil`, දෝෂ ක්ෂේත්‍ර සහ `backoffLevel` ඉවත් කරයි.
 
-පෙරනිමි සම්බන්ධතා cooldown හැසිරීම:
+පෙරනිමි සම්බන්ධතා සිසිල් කිරීමේ හැසිරීම:
 
-- OAuth මූලික cooldown: `5s`.
-- API-key මූලික cooldown: `3s`.
-- API-key `429` සඳහා ලබා ගත හැකි විට upstream retry ඉඟි (`Retry-After`, reset headers, හෝ parse කළ හැකි reset text) ප්රමුඛත්වය දිය යුතුය.
-- නැවත නැවත ඇති වන නැවත ලබා ගත හැකි අසාර්ථකත්වයන් exponential backoff භාවිතා කරයි:
+- OAuth පදනම සිසිල් කිරීම: `5s`.
+- API-යතුරු පදනම සිසිල් කිරීම: `3s`.
+- API-key `429` ඉහළ ප්‍රවාහය නැවත උත්සාහ කිරීමේ ඉඟි (`Retry-After`, යළි පිහිටුවීමේ ශීර්ෂයන්, හෝ parseable reset text) තිබෙන විට කැමති විය යුතුය.
+- නැවත නැවත ලබා ගත හැකි අසාර්ථක වීම් ඝාතීය පසුබෑම භාවිතා කරයි:
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-Anti-thundering-herd ආරක්ෂකය, එකම සම්බන්ධතාවයක සමවිරිත (concurrent) අසාර්ථකත්වයන් cooldown එක නැවත නැවත දීර්ඝ කිරීමෙන් හෝ `backoffLevel` දෙවරක් වැඩි කිරීමෙන් වළක්වයි.
+ප්‍රති-ගිගුරුම්-රංචු ආරක්ෂකය එකම සම්බන්ධතාවයේ සමගාමී අසාර්ථකවීම් නැවත නැවතත් සිසිලනය දිගු කිරීමෙන් හෝ ද්විත්ව වර්ධක `backoffLevel` වළක්වයි.
 
-අවසාන (terminal) තත්ත්වයන් cooldowns නොවේ. `banned`, `expired` (`EXPIRED_RETRY_MAX` හරහා N සීමිත නැවත උත්සාහයන්ට පසුව පමණක් අවසාන වේ), සහ `credits_exhausted` යනු credentials/සැකසුම් වෙනස් වන තෙක් හෝ operator කෙනෙකු ඒවා reset කරන තෙක් නොලැබෙන ලෙස රැඳී සිටීමට අදහස් කර ඇත. අවසාන තත්ත්වයන් තාවකාලික cooldown තත්ත්වයකින් නැවත ලියන්න එපා.
+පර්යන්ත තත්ත්‍වය සිසිල්කිරීම් නොවේ. `banned`, `expired` (එය ටර්මිනල් බවට පත්වන්නේ `EXPIRED_RETRY_MAX` හරහා N සීමා කළ නැවත උත්සාහ කිරීමෙන් පසුව පමණි), සහ `credits_exhausted` credentials/settings වෙනස් කරන තෙක් හෝ ක්‍රියාකරු ඒවා යළි පිහිටුවන තෙක් නොතිබීමට අදහස් කෙරේ. තාවකාලික සිසිලන තත්ත්වය සමඟ පර්යන්ත තත්වයන් උඩින් ලියන්න එපා.
 
-### ආකෘති Lockout
+### ආදර්ශ ලොක්අවුට්
 
-**විෂය පථය**: provider + සම්බන්ධතාවය + ආකෘතිය.
+**විෂය පථය** : සපයන්නා + සම්බන්ධතා + ආකෘතිය.
 
-**අරමුණ**: එම සම්බන්ධතාවය සඳහා එක් ආකෘතියක් පමණක් නොලැබෙන හෝ quota-සීමිත වූ විට, මුළු සම්බන්ධතාවයම අක්රීය කිරීම වළක්වා ගැනීම.
+**අරමුණ** : එක් ආකෘතියක් පමණක් නොමැති විට හෝ එම සම්බන්ධතාවය සඳහා කෝටාව සීමා වූ විට සම්පූර්ණ සම්බන්ධතාවයක් අක්‍රිය කිරීමෙන් වළකින්න.
 
 උදාහරණ:
 
-- `429` ලබා දෙන ආකෘති-එකක quota providers.
-- අස්ථානගත වූ එක් ආකෘතියක් සඳහා `404` ලබා දෙන දේශීය providers.
-- තෝරාගත් Grok modes වැනි provider-විශේෂිත mode/model අවසර අසාර්ථකත්වයන්.
+- එක්-ආදර්ශ කෝටා සපයන්නන් ආපසු `429`.
+- නැතිවූ එක් ආකෘතියක් සඳහා `404` ආපසු ලබා දෙන දේශීය සැපයුම්කරුවන්.
+- තෝරාගත් Grok මාදිලි වැනි සැපයුම්කරු-විශේෂිත mode/model අවසර අසමත්වීම්.
 
-Model lockout `open-sse/services/accountFallback.ts` හි පිහිටා ඇති අතර, එකම සම්බන්ධතාවයට වෙනත් ආකෘතීන් සැපයීම දිගටම කරගෙන යාමට ඉඩ දෙයි.
+මාදිලි අගුලු දැමීම `open-sse/services/accountFallback.ts` හි ජීවත් වන අතර එම සම්බන්ධතාවයට අනෙකුත් මාදිලිවලට දිගටම සේවය කිරීමට ඉඩ සලසයි.
 
-### Debugging මඟ පෙන්වීම
+### නිදොස් කිරීමේ මාර්ගෝපදේශය
 
-- Provider කෙනෙකුගේ සියලුම keys මඟ හැර ඇත්නම්, provider breaker state එක සහ එක් එක් සම්බන්ධතාවයේ `rateLimitedUntil`/`testStatus` යන දෙකම පරීක්ෂා කරන්න.
-- Reset window එකෙන් පසුව provider කෙනෙකු ස්ථිරවම බැහැර කර ඇති බව පෙනේ නම්, කේතය `getStatus()`/`canExecute()` භාවිතා කිරීම වෙනුවට අමු `state` කියවනවාදැයි බලන්න.
-- එක් provider key එකක් අසාර්ථක වුවත් අනෙක් ඒවා ක්රියාත්මක විය යුතු නම්, provider breaker වලට වඩා සම්බන්ධතා cooldown එකට ප්රමුඛත්වය දෙන්න.
-- එක් ආකෘතියක් පමණක් අසාර්ථක වුවහොත්, සම්බන්ධතා cooldown වලට වඩා model lockout එකට ප්රමුඛත්වය දෙන්න.
-- තත්ත්වයක් ස්වයං-ප්රත්යාරෝපණය විය යුතු නම්, එයට අනාගත timestamp/reset timeout එකක් සහ කල් ඉකුත් වූ තත්ත්වය refresh කරන read path එකක් තිබිය යුතුය. ස්ථිර තත්ත්වයන්ට අතින් credential හෝ config වෙනස් කිරීම් අවශ්ය වේ.
+- සපයන්නෙකු සඳහා වන සියලුම යතුරු මඟ හරිනු ලැබුවහොත්, සපයන්නාගේ බ්‍රේකර් තත්ත්වය සහ එක් එක් සම්බන්ධතාවයේ `rateLimitedUntil`/`testStatus` යන දෙකම පරීක්ෂා කරන්න.
+- යළි පිහිටුවීමේ කවුළුවෙන් පසු සැපයුම්කරුවෙකු ස්ථිරවම බැහැර කර ඇති බවක් දිස්වන්නේ නම්, කේතය `getStatus()`/`canExecute()` භාවිතා කරනවා වෙනුවට raw `state` කියවනවාදැයි පරීක්ෂා කරන්න.
+- එක් සපයන්නෙකුගේ යතුර අසමත් වුවද අනෙක් ඒවා ක්‍රියා කළ යුතු නම්, සපයන්නා කඩනයට වඩා සම්බන්ධතා සිසිල් කිරීම ප්‍රිය කරන්න.
+- එක් ආකෘතියක් පමණක් අසාර්ථක වුවහොත්, සම්බන්ධතා සිසිලනයට වඩා ආදර්ශ අගුලු දැමීමට කැමති වන්න.
+- රාජ්‍යයක් ස්වයං-ප්‍රකෘතිමත් විය යුතු නම්, එයට අනාගත timestamp/reset කල් ඉකුත්වීමක් සහ කල් ඉකුත් වූ තත්ත්වය ප්‍රබෝධමත් කරන කියවීමේ මාර්ගයක් තිබිය යුතුය. ස්ථිර තත්ත්වයන් සඳහා අතින් අක්තපත්‍ර හෝ වින්‍යාස වෙනස් කිරීම් අවශ්‍ය වේ.
 
 ---
 

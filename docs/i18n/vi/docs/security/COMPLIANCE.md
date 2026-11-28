@@ -4,12 +4,11 @@
 
 ---
 
-> **Nguồn chính xác:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Cập nhật lần cuối:** 2026-06-28 — v3.8.40
+> **Nguồn của sự thật:** `src/lib/compliance/`, `src/app/api/compliance/`
 
-OmniRoute ghi lại các thao tác quản trị, sự kiện xác thực, thay đổi trong vòng đời thông tin xác thực của nhà cung cấp và các lần gọi công cụ MCP vào các bảng kiểm toán được SQLite hỗ trợ. Trang này trình bày những nội dung được ghi nhật ký, nơi lưu trữ, thời gian lưu giữ, cách các khóa API có thể chọn không tham gia và cách truy vấn dữ liệu.
+OmniRoute ghi lại các hành động quản trị, sự kiện xác thực, các thay đổi trong vòng đời thông tin xác thực của nhà cung cấp và các lệnh gọi công cụ MCP vào các bảng kiểm tra được SQLite hỗ trợ. Trang này bao gồm những gì được ghi lại, nơi nó tồn tại, thời gian lưu giữ, cách các khóa API có thể chọn không tham gia và cách truy vấn dữ liệu.
 
-Phần triển khai nằm trong `src/lib/compliance/index.ts` (T-43 — "Kiểm soát tuân thủ") và `src/lib/compliance/providerAudit.ts`. Các thao tác ghi kiểm toán không bao giờ ném ngoại lệ: khi xảy ra bất kỳ lỗi nào, lệnh gọi sẽ bị bỏ qua một cách âm thầm để việc ghi nhật ký kiểm toán không làm gián đoạn luồng yêu cầu chính.
+Việc triển khai nằm trong `src/lib/compliance/index.ts` (T-43 — "Kiểm soát tuân thủ") và `src/lib/compliance/providerAudit.ts`. Ghi kiểm tra không bao giờ ném: nếu có lỗi, lệnh gọi sẽ được âm thầm nuốt nên việc ghi nhật ký kiểm tra không thể phá vỡ luồng yêu cầu chính.
 
 ## Những gì được ghi nhật ký
 
@@ -127,31 +126,33 @@ gọi `POST /api/settings/purge-request-history`, thao tác này sẽ xóa `call
 Các giá trị mặc định được định nghĩa trong `src/lib/logEnv.ts`
 (`DEFAULT_APP_LOG_RETENTION_DAYS = 7`, `DEFAULT_CALL_LOG_RETENTION_DAYS = 7`).
 
-## Tùy chọn từ chối `noLog` (theo từng khóa API)
+## Chọn không tham gia `noLog` (mỗi khóa API )
 
-Các khóa API có thể được gắn cờ để lưu lượng cuộc gọi hạ nguồn của chúng không bị ghi nhật ký. Cờ này
-nằm trong bảng `api_keys` (`no_log INTEGER DEFAULT 0`) và được sao chép
-vào một tập hợp trong bộ nhớ để tra cứu trên đường xử lý nóng.
+Khóa API có thể được gắn cờ để lưu lượng cuộc gọi xuôi dòng của chúng không được ghi lại. Cờ nằm trên bảng `api_keys` (`no_log INTEGER DEFAULT 0`) và được phản chiếu vào bộ nhớ trong để tra cứu đường dẫn nóng.
 
 ```bash
-# Tạo khóa không ghi nhật ký (yêu cầu xác thực quản lý)
+# Create a no-log key (management auth required)
 curl -X POST http://localhost:20128/api/keys \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"name": "Privacy key", "noLog": true}'
 ```
 
-Các hàm hỗ trợ (`src/lib/compliance/index.ts`):
+Người trợ giúp (`src/lib/compliance/index.ts`):
 
-- `setNoLog(apiKeyId, true|false)` — bật/tắt mục nhập trong bộ nhớ
-- `isNoLog(apiKeyId)` — được kiểm tra trên đường xử lý yêu cầu; nếu không có thì chuyển sang đọc
-  `api_keys.no_log` từ bộ nhớ đệm 30 giây
-- `NO_LOG_API_KEY_IDS` (biến môi trường, phân tách bằng dấu phẩy) — được nạp trước vào tập hợp trong bộ nhớ
-  khi khởi động; hữu ích khi bạn không thể trực tiếp thay đổi cột
+- `setNoLog(apiKeyId, true|false)` — chuyển đổi mục nhập trong bộ nhớ
+- `isNoLog(apiKeyId)` — đã kiểm tra trên đường dẫn yêu cầu; quay trở lại thời gian đọc được lưu trong bộ nhớ đệm 30 giây từ `api_keys.no_log`
+- `NO_LOG_API_KEY_IDS` (env, được phân tách bằng dấu phẩy) — được tải sẵn vào bộ nhớ trong khi khởi động; hữu ích khi bạn không thể chuyển đổi cột trực tiếp
 
-Các sự kiện kiểm tra quản trị (đăng nhập, thay đổi nhà cung cấp, lệnh gọi công cụ MCP, v.v.)
-**không** bị ảnh hưởng bởi `noLog` — chỉ việc ghi nhật ký lưu lượng theo từng yêu cầu mới bị
-từ chối.
+Các sự kiện kiểm tra hành chính (đăng nhập, thay đổi nhà cung cấp, lệnh gọi công cụ MCP, v.v.) được** không** bị ảnh hưởng bởi `noLog` — chỉ ghi nhật ký lưu lượng truy cập theo yêu cầu mới được chọn không tham gia.
+
+### Từ chối theo yêu cầu (`x-omniroute-no-log`)
+
+Khách hàng có thể chọn một yêu cầu suy luận duy nhất để duy trì tải trọng mà không cần tạo khóa chuyên dụng. Gửi `x-omniroute-no-log: true` theo yêu cầu (`1` và `yes` cũng được chấp nhận, không phân biệt chữ hoa chữ thường). Nó áp dụng cho mọi tuyến trò chuyện trong gia đình chạy qua trình xử lý trò chuyện: Hoàn thành trò chuyện, Phản hồi, Tin nhắn, Hoàn thành và đường dẫn tương thích với Gemini. Hàng nhật ký cuộc gọi vẫn được ghi với dấu thời gian, mô hình, nhà cung cấp, trạng thái, thời lượng và số lượng mã thông báo, nhưng `request_body`, `response_body`, tóm tắt yêu cầu và tạo phẩm quy trình bị bỏ qua.
+
+Tiêu đề là ORed với cờ khóa: khóa không ghi nhật ký vẫn không ghi nhật ký bất kể tiêu đề là gì và tiêu đề không thể bật lại tính năng ghi nhật ký cho khóa không ghi nhật ký. Tiêu đề bị loại bỏ trước khi yêu cầu được chuyển tiếp ngược dòng.
+
+Tiêu đề này làm** không** vô hiệu hóa trích xuất bộ nhớ hoặc bộ đệm ngữ nghĩa. Gửi `x-omniroute-no-memory: true` và `x-omniroute-no-cache: true` cùng với nó khi yêu cầu không được duy trì nội dung trong các hệ thống con đó.
 
 ## API REST
 

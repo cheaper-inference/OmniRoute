@@ -185,83 +185,49 @@ OmniRoute ਨੂੰ Docker ਇਮੇਜ ਤੋਂ ਚਲਾਉਂਦੇ ਹੋ, 
 
 ---
 
-## ਐਂਟੀਵਾਇਰਸ ਦੀਆਂ ਗਲਤ ਪਾਜ਼ਿਟਿਵ ਚੇਤਾਵਨੀਆਂ
+## ਐਂਟੀਵਾਇਰਸ ਗਲਤ ਸਕਾਰਾਤਮਕ
 
 <a name="antivirus-false-positives"></a>
 
-### Avast/AVG ਵੱਲੋਂ `README.md` ਨੂੰ `MD:HttpRequest-inf[Susp]` ਨਾਲ ਕਵਾਰੰਟੀਨ ਕਰਨਾ
+### Avast/AVG ਕੁਆਰੰਟੀਨ `README.md` `MD:HttpRequest-inf[Susp]` ਨਾਲ
 
-**ਇਹ ਇੱਕ ਗਲਤ ਪਾਜ਼ਿਟਿਵ ਹੈ। ਕੁਝ ਵੀ ਸੰਕਰਮਿਤ ਨਹੀਂ ਹੈ ਅਤੇ ਕਿਸੇ ਕਾਰਵਾਈ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ।**
+**ਇਹ ਇੱਕ ਗਲਤ ਸਕਾਰਾਤਮਕ ਹੈ. ਕੁਝ ਵੀ ਸੰਕਰਮਿਤ ਨਹੀਂ ਹੈ, ਅਤੇ ਕਿਸੇ ਕਾਰਵਾਈ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ।**
 
-Avast ਅਤੇ AVG ਇੱਕ heuristic ਚਲਾਉਂਦੇ ਹਨ ਜੋ ਬਹੁਤ ਸਾਰੇ HTTP ਬੇਨਤੀ ਵਰਗੇ ਦਿਸਣ ਵਾਲੇ ਲਿੰਕਾਂ ਵਾਲੀਆਂ
-plain-text/Markdown ਫਾਈਲਾਂ ਨੂੰ ਫਲੈਗ ਕਰਦਾ ਹੈ। OmniRoute ਦੀ `README.md` npm package ਦੇ ਅੰਦਰ ਸ਼ਾਮਲ ਹੁੰਦੀ ਹੈ (ਇਹ
-`package.json` → `files` ਵਿੱਚ ਸੂਚੀਬੱਧ ਹੈ), ਇਸ ਲਈ global install ਦੌਰਾਨ ਇਹ `node_modules/omniroute/README.md` ਵਿੱਚ
-ਪਹੁੰਚ ਜਾਂਦੀ ਹੈ — ਅਤੇ ਇਸ ਵਿੱਚ ਲਗਭਗ 15 `http://localhost:20128/...` ਉਦਾਹਰਨਾਂ ਹਨ (MCP
-HTTP/SSE endpoints, A2A `.well-known` URL ਅਤੇ `curl` snippets)। ਲਿੰਕਾਂ ਦੀ ਇਹ ਘਣਤਾ
-heuristic ਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ ਕਾਫ਼ੀ ਹੈ।
+Avast ਅਤੇ AVG ਇੱਕ ਹਿਉਰਿਸਟਿਕ ਚਲਾਉਂਦੇ ਹਨ ਜੋ plain-text/Markdown ਫਾਈਲਾਂ ਨੂੰ ਫਲੈਗ ਕਰਦਾ ਹੈ ਜਿਸ ਵਿੱਚ ਬਹੁਤ ਸਾਰੇ HTTP- ਬੇਨਤੀ-ਦਿੱਖ ਵਾਲੇ ਲਿੰਕ ਹੁੰਦੇ ਹਨ। npm ਪੈਕੇਜ ਦੇ ਅੰਦਰ OmniRoute ਦੇ `README.md` ਜਹਾਜ਼ (ਇਹ `package.json` → `files` ਵਿੱਚ ਸੂਚੀਬੱਧ ਹੈ), ਇਸਲਈ ਇਹ ਇੱਕ ਗਲੋਬਲ ਇੰਸਟੌਲ — ਤੇ `node_modules/omniroute/README.md` ਤੇ ਉਤਰਦਾ ਹੈ ਅਤੇ ਇਸ ਵਿੱਚ ~ 15 `http://localhost:20128/...` ਉਦਾਹਰਨਾਂ URL( MCP HTTP/SSE ਅੰਤਮ ਬਿੰਦੂ, A2A `.well-known`, `curl` ਉਹ ਲਿੰਕ ਘਣਤਾ ਹਿਉਰਿਸਟਿਕ ਨੂੰ ਟ੍ਰਿਪ ਕਰਨ ਲਈ ਕਾਫੀ ਹੈ।
 
-ਜੇ ਇਹ ਹਾਲ ਹੀ ਵਿੱਚ ਹੀ ਸ਼ੁਰੂ ਹੋਇਆ ਹੈ: ਫਾਈਲ ਦੀ ਕਿਸਮ ਨਹੀਂ ਬਦਲੀ। README ਦੀ
-endpoints ਸਾਰਣੀ ਵਧੀ ਹੈ (MCP HTTP + SSE + A2A ਸ਼ਾਮਲ ਕੀਤੇ ਗਏ ਸਨ) ਅਤੇ ਹੋਰ `curl` ਉਦਾਹਰਨਾਂ ਜੋੜੀਆਂ ਗਈਆਂ, ਜਿਸ ਕਾਰਨ
-ਇਹ ਸੀਮਾ ਤੋਂ ਅੱਗੇ ਲੰਘ ਗਈ।
+ਜੇਕਰ ਇਹ ਹਾਲ ਹੀ ਵਿੱਚ ਸ਼ੁਰੂ ਹੋਇਆ ਹੈ: ਫਾਈਲ ਕਿਸਮ ਵਿੱਚ ਨਹੀਂ ਬਦਲੀ ਹੈ। README ਆਪਣੇ ਅੰਤਮ ਬਿੰਦੂ ਸਾਰਣੀ ਨੂੰ ਵਧਾਇਆ (MCP HTTP + SSE + A2A ਜੋੜਿਆ ਗਿਆ ਸੀ) ਅਤੇ ਹੋਰ `curl` ਉਦਾਹਰਨਾਂ, ਜੋ ਇਸ ਨੂੰ ਥ੍ਰੈਸ਼ਹੋਲਡ ਤੋਂ ਅੱਗੇ ਲੈ ਗਈਆਂ।
 
-ਇਹ ਫਾਈਲ ਬਿਨਾਂ ਕਿਸੇ executable ਸਮੱਗਰੀ ਵਾਲਾ ਨਿਸ਼ਕ੍ਰਿਆ ਦਸਤਾਵੇਜ਼ ਹੈ। ਤੁਸੀਂ ਇਸਨੂੰ ਕਵਾਰੰਟੀਨ ਤੋਂ
-ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ restore ਕਰ ਸਕਦੇ ਹੋ।
+ਫਾਈਲ ਜ਼ੀਰੋ ਐਗਜ਼ੀਕਿਊਟੇਬਲ ਸਮਗਰੀ ਦੇ ਨਾਲ ਅਟੱਲ ਦਸਤਾਵੇਜ਼ ਹੈ। ਤੁਸੀਂ ਇਸਨੂੰ ਕੁਆਰੰਟੀਨ ਤੋਂ ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਬਹਾਲ ਕਰ ਸਕਦੇ ਹੋ।
 
-**ਕੀ ਕਰਨਾ ਹੈ:**
+**ਮੈਂ ਕੀ ਕਰਾਂ:**
 
-1. **ਸੂਚਨਾਵਾਂ ਰੋਕੋ** — ਆਪਣੇ ਐਂਟੀਵਾਇਰਸ ਵਿੱਚ install directory ਨੂੰ exclude ਕਰੋ
-   (Avast: Settings → Exceptions), ਅਤੇ ਆਪਣਾ global `node_modules` path ਅਤੇ/ਜਾਂ
-   OmniRoute data dir (`~/.omniroute/`) ਸ਼ਾਮਲ ਕਰੋ।
-2. **ਗਲਤ ਪਾਜ਼ਿਟਿਵ ਦੀ ਰਿਪੋਰਟ ਕਰੋ** — <https://www.avast.com/false-positive-file-form.php>,
-   ਅਤੇ ਕਵਾਰੰਟੀਨ ਕੀਤੀ `README.md` ਨੱਥੀ ਕਰੋ। ਇਹ ਉਹ ਹੱਲ ਹੈ ਜੋ ਹਰ ਕਿਸੇ ਦੀ ਮਦਦ ਕਰਦਾ ਹੈ, ਕਿਉਂਕਿ ਇਹ
-   vendor ਦਾ heuristic ਹੈ ਜੋ ਇੱਕ text file ਉੱਤੇ ਲੋੜ ਤੋਂ ਵੱਧ ਪ੍ਰਤੀਕਿਰਿਆ ਕਰ ਰਿਹਾ ਹੈ।
+1. **ਸੂਚਨਾਵਾਂ ਬੰਦ ਕਰੋ** — ਤੁਹਾਡੇ ਐਂਟੀਵਾਇਰਸ (Avast: ਸੈਟਿੰਗਜ਼ → ਅਪਵਾਦ) ਵਿੱਚ ਇੰਸਟਾਲ ਡਾਇਰੈਕਟਰੀ ਨੂੰ ਬਾਹਰ ਕੱਢੋ, ਤੁਹਾਡੇ ਗਲੋਬਲ `node_modules` ਮਾਰਗ ਨੂੰ and/or the OmniRoute ਡੇਟਾ ਡਾਇਰ (`~/.omniroute/`) ਜੋੜੋ।
+2. **ਗਲਤ ਸਕਾਰਾਤਮਕ ਰਿਪੋਰਟ ਕਰੋ** — <https://www.avast.com/false-positive-file-form.php>, ਕੁਆਰੰਟੀਨ ਕੀਤੇ `README.md` ਨੂੰ ਜੋੜਨਾ। ਇਹ ਉਹ ਫਿਕਸ ਹੈ ਜੋ ਹਰ ਕਿਸੇ ਦੀ ਮਦਦ ਕਰਦਾ ਹੈ, ਕਿਉਂਕਿ ਇਹ ਟੈਕਸਟ ਫਾਈਲ 'ਤੇ ਵਿਕਰੇਤਾ ਦੀ ਹੇਰਿਸਟਿਕ ਓਵਰਐਕਟਿੰਗ ਹੈ।
 
-**ਅਸੀਂ ਆਪਣੇ ਪਾਸੇ ਇਸਨੂੰ "ਠੀਕ" ਕਿਉਂ ਨਹੀਂ ਕਰਦੇ:** ਸਾਰੀਆਂ ਉਦਾਹਰਨਾਂ `http://localhost` ਹਨ, ਅਤੇ
-self-signed-certificate ਦੀ ਔਖ ਤੋਂ ਬਿਨਾਂ localhost ਨੂੰ `https` ਨਹੀਂ ਬਣਾਇਆ ਜਾ ਸਕਦਾ। ਇੱਕ vendor ਦੇ heuristic ਤੋਂ
-ਬਚਣ ਲਈ ਦਸਤਾਵੇਜ਼ਾਂ ਨੂੰ ਵਿਗਾੜਨਾ scanner ਦੀ ਖਾਮੀ ਨੂੰ ਸੰਤੁਸ਼ਟ ਕਰਨ ਵਾਸਤੇ ਹਰ ਪਾਠਕ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚਾਏਗਾ।
+**ਅਸੀਂ ਇਸ ਨੂੰ ਆਪਣੇ ਪਾਸੇ ਕਿਉਂ "ਠੀਕ" ਨਹੀਂ ਕਰਦੇ:** ਉਦਾਹਰਨਾਂ ਸਾਰੀਆਂ `http://localhost` ਹਨ, ਅਤੇ ਲੋਕਲਹੋਸਟ ਸਵੈ-ਦਸਤਖਤ-ਸਰਟੀਫਿਕੇਟ ਰਗੜ ਤੋਂ ਬਿਨਾਂ `https` ਨਹੀਂ ਹੋ ਸਕਦਾ। ਇੱਕ ਵਿਕਰੇਤਾ ਦੇ ਹੇਰਿਸਟਿਕ ਨੂੰ ਚਕਮਾ ਦੇਣ ਲਈ ਡੌਕਸ ਨੂੰ ਤੋੜਨਾ ਇੱਕ ਸਕੈਨਰ ਬੱਗ ਨੂੰ ਸੰਤੁਸ਼ਟ ਕਰਨ ਲਈ ਹਰ ਪਾਠਕ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚਾਏਗਾ।
 
-### Kaspersky ਵੱਲੋਂ Desktop app ਨੂੰ `PDM:Trojan.Win32.Generic` ਵਜੋਂ ਫਲੈਗ ਕਰਨਾ
+### Kaspersky ਡੈਸਕਟਾਪ ਐਪ ਨੂੰ `PDM:Trojan.Win32.Generic` ਵਜੋਂ ਫਲੈਗ ਕਰਦਾ ਹੈ
 
-**ਇਹ behavioral heuristic ਤੋਂ ਆਇਆ ਇੱਕ ਗਲਤ ਪਾਜ਼ਿਟਿਵ ਹੈ। ਕੁਝ ਵੀ ਸੰਕਰਮਿਤ ਨਹੀਂ ਹੈ।** Kaspersky ਦਾ
-`PDM:` prefix ਦਰਸਾਉਂਦਾ ਹੈ ਕਿ ਇਹ ਫ਼ੈਸਲਾ ਇਸਦੇ Proactive Defense Module (System Watcher) ਤੋਂ ਆਇਆ ਹੈ,
-ਜੋ ਜਾਣੇ-ਪਛਾਣੇ malware ਨਾਲ ਮਿਲਾਨ ਕਰਨ ਦੀ ਬਜਾਏ ਇਹ ਨਿਰਣਾ ਕਰਦਾ ਹੈ ਕਿ installer _ਕੀ ਕਰਦਾ ਹੈ_। ਜਦੋਂ
-ਇਹ ਚਾਲੂ ਹੁੰਦਾ ਹੈ, Kaspersky ਪੂਰੀ installation ਨੂੰ "roll back" ਕਰ ਦਿੰਦਾ ਹੈ — ਪਹਿਲਾਂ ਹੀ
-ਲਿਖੀਆਂ ਫਾਈਲਾਂ ਨੂੰ ਮਿਟਾਉਂਦਿਆਂ — ਇਸ ਲਈ app ਅੰਤ ਵਿੱਚ ਖਰਾਬ ਜਾਂ ਗਾਇਬ ਹੋ ਜਾਂਦੀ ਹੈ।
+**ਇਹ ਇੱਕ ਵਿਵਹਾਰਿਕ ਖੋਜ ਤੋਂ ਇੱਕ ਗਲਤ ਸਕਾਰਾਤਮਕ ਹੈ। ਕੁਝ ਵੀ ਸੰਕਰਮਿਤ ਨਹੀਂ ਹੈ।** Kaspersky ਦੇ `PDM:` ਅਗੇਤਰ ਦਾ ਮਤਲਬ ਹੈ ਕਿ ਫੈਸਲਾ ਇਸਦੇ ਪ੍ਰੋਐਕਟਿਵ ਡਿਫੈਂਸ ਮੋਡੀਊਲ (ਸਿਸਟਮ ਵਾਚਰ) ਤੋਂ ਆਉਂਦਾ ਹੈ, ਜੋ ਇਹ ਨਿਰਣਾ ਕਰਦਾ ਹੈ ਕਿ ਜਾਣੇ-ਪਛਾਣੇ ਮਾਲਵੇਅਰ ਨਾਲ ਮੇਲ ਕਰਨ ਦੀ ਬਜਾਏ ਇੰਸਟਾਲਰ ਕੀ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਇਹ ਫਾਇਰ ਕਰਦਾ ਹੈ, ਤਾਂ ਕੈਸਪਰਸਕੀ ਪੂਰੀ ਇੰਸਟਾਲੇਸ਼ਨ — "ਰੋਲ ਬੈਕ" ਕਰਦਾ ਹੈ ਅਤੇ ਉਹਨਾਂ ਫਾਈਲਾਂ ਨੂੰ ਮਿਟਾਉਂਦਾ ਹੈ ਜੋ ਪਹਿਲਾਂ ਹੀ — ਲਿਖੀਆਂ ਹੋਈਆਂ ਸਨ ਤਾਂ ਕਿ ਐਪ ਟੁੱਟ ਜਾਵੇ ਜਾਂ ਗੁੰਮ ਹੋ ਜਾਵੇ।
 
-ਇਸ ਵੱਲੋਂ ਫਲੈਗ ਕੀਤੀਆਂ ਫਾਈਲਾਂ desktop app ਨਾਲ bundle ਕੀਤੀਆਂ ਘੋਸ਼ਿਤ, open-source dependencies ਦੇ
-ਮਿਆਰੀ ਹਿੱਸੇ ਹਨ, ਉਦਾਹਰਨ ਵਜੋਂ:
+ਉਹ ਫਾਈਲਾਂ ਜੋ ਇਹ ਫਲੈਗ ਕਰਦੀਆਂ ਹਨ, ਡੈਸਕਟੌਪ ਐਪ ਨਾਲ ਬੰਡਲ ਕੀਤੇ ਘੋਸ਼ਿਤ, ਓਪਨ-ਸੋਰਸ ਨਿਰਭਰਤਾਵਾਂ ਦੇ ਸਟਾਕ ਹਿੱਸੇ ਹਨ, ਉਦਾਹਰਨ ਲਈ:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` ਅਤੇ
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), browser-automation
-  library ਜੋ app ਦੇ ਅੰਦਰ provider login ਅਤੇ browser-backed chat ਲਈ ਵਰਤੀ ਜਾਂਦੀ ਹੈ।
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — web-cookie providers ਉੱਤੇ browser-fingerprinted HTTP ਲਈ ਵਰਤੀ ਜਾਣ ਵਾਲੀ pinned `wreq-js` native binding
-  (`<arch>` `x64` ਜਾਂ `arm64` ਹੈ)।
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` ਅਤੇ `workerProcessEntry.js` — [Playwright](https://playwright.dev), ਇਨ-ਐਪ ਪ੍ਰਦਾਤਾ ਲੌਗਇਨ ਅਤੇ ਬ੍ਰਾਊਜ਼ਰ-ਬੈਕਡ ਚੈਟ ਲਈ ਵਰਤੀ ਜਾਂਦੀ ਬ੍ਰਾਊਜ਼ਰ-ਆਟੋਮੇਸ਼ਨ ਲਾਇਬ੍ਰੇਰੀ।
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — ਵੈੱਬ-ਕੂਕੀ ਪ੍ਰਦਾਤਾਵਾਂ (`<arch>` is `x64` ਜਾਂ `arm64`) 'ਤੇ ਬ੍ਰਾਊਜ਼ਰ-ਫਿੰਗਰਪ੍ਰਿੰਟਡ HTTP ਲਈ ਪਿੰਨ ਕੀਤੀ `wreq-js` ਮੂਲ ਬਾਈਡਿੰਗ।
 
-**ਇਹ ਕਿਉਂ ਚਾਲੂ ਹੁੰਦਾ ਹੈ:** Windows installer ਹਾਲੇ **code-signed ਨਹੀਂ ਹੈ**, ਇਸ ਲਈ ਇੱਕ unsigned NSIS
-installer ਦੀ reputation ਸਿਫ਼ਰ ਹੁੰਦੀ ਹੈ ਅਤੇ behavioral heuristics ਵੱਧ ਤੋਂ ਵੱਧ ਸਖ਼ਤੀ ਨਾਲ ਚੱਲਦੇ ਹਨ। ਇਸਦੇ ਨਾਲ
-ਇੱਕ bundled native DLL ਅਤੇ `%LOCALAPPDATA%\Programs\OmniRoute` ਦੇ ਅਧੀਨ ਲਿਖੀਆਂ ਸੈਂਕੜੇ `.js` ਫਾਈਲਾਂ
-(Next.js standalone build ਤੋਂ hash-suffixed package directories ਸਮੇਤ) ਹੋਣ ਕਾਰਨ,
-ਇਹ heuristic ਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ ਕਾਫ਼ੀ ਹੈ। Code signing ਦੀ ਯੋਜਨਾ ਹੈ;
-ਇਸ ਦੇ ਲਾਗੂ ਹੋਣ ਤੱਕ ਨਵੀਆਂ releases ਵਿੱਚ ਇਹ ਮੁੜ ਵਾਪਰ ਸਕਦਾ ਹੈ।
+**ਇਹ ਕਿਉਂ ਅੱਗ ਲਗਾਉਂਦਾ ਹੈ:** Windows ਇੰਸਟਾਲਰ ਹੈ** ਅਜੇ ਤੱਕ ਕੋਡ-ਦਸਤਖਤ ਨਹੀਂ ਕੀਤੇ ਹਨ** , ਇਸ ਲਈ ਇੱਕ ਹਸਤਾਖਰਿਤ NSIS ਸਥਾਪਕ ਦੀ ਜ਼ੀਰੋ ਪ੍ਰਤਿਸ਼ਠਾ ਹੈ ਅਤੇ ਵਿਵਹਾਰ ਸੰਬੰਧੀ ਖੋਜ ਅਧਿਕਤਮ ਹਮਲਾਵਰਤਾ 'ਤੇ ਚੱਲਦੀ ਹੈ। ਇੱਕ ਬੰਡਲ ਕੀਤੇ ਨੇਟਿਵ DLL ਅਤੇ `%LOCALAPPDATA%\Programs\OmniRoute` ਦੇ ਅਧੀਨ ਲਿਖੀਆਂ ਸੈਂਕੜੇ `.js` ਫਾਈਲਾਂ ( Next.js ਸਟੈਂਡਅਲੋਨ ਬਿਲਡ ਤੋਂ ਹੈਸ਼-ਸਫਿਕਸਡ ਪੈਕੇਜ ਡਾਇਰੈਕਟਰੀਆਂ ਸਮੇਤ) ਦੇ ਨਾਲ ਜੋੜਿਆ ਗਿਆ ਹੈ, ਜੋ ਕਿ ਹਿਉਰਿਸਟਿਕ ਨੂੰ ਟ੍ਰਿਪ ਕਰਨ ਲਈ ਕਾਫੀ ਹੈ। ਕੋਡ ਸਾਈਨਿੰਗ ਦੀ ਯੋਜਨਾ ਬਣਾਈ ਗਈ ਹੈ; ਜਦੋਂ ਤੱਕ ਇਹ ਲੈਂਡ ਨਹੀਂ ਹੁੰਦਾ, ਨਵੀਆਂ ਰੀਲੀਜ਼ਾਂ ਇਸਨੂੰ ਦੁਹਰਾ ਸਕਦੀਆਂ ਹਨ।
 
-**ਕੀ ਕਰਨਾ ਹੈ:**
+**ਮੈਂ ਕੀ ਕਰਾਂ:**
 
-1. **ਪਹਿਲਾਂ ਆਪਣੇ download ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ** (ਇਸ ਨਾਲ ਛੇੜਛਾੜ ਕੀਤੀ ਫਾਈਲ ਦੀ ਸੰਭਾਵਨਾ ਖ਼ਾਰਜ ਹੋ ਜਾਂਦੀ ਹੈ)। ਹਰ release
-   `latest.yml` ਪ੍ਰਕਾਸ਼ਿਤ ਕਰਦੀ ਹੈ, ਜਿਸਦਾ `sha512` field (base64) `OmniRoute.Setup.<version>.exe`
-   installer ਨੂੰ cover ਕਰਦਾ ਹੈ। PowerShell ਵਿੱਚ, installer ਵਾਲੇ folder ਤੋਂ:
+1. **ਪਹਿਲਾਂ ਆਪਣੇ ਡਾਊਨਲੋਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ** (ਛੇੜਛਾੜ ਕੀਤੀ ਫਾਈਲ ਨੂੰ ਰੱਦ ਕਰਦਾ ਹੈ)। ਹਰ ਰੀਲੀਜ਼ `latest.yml` ਪ੍ਰਕਾਸ਼ਿਤ ਕਰਦੀ ਹੈ, ਜਿਸਦਾ `sha512` ਫੀਲਡ (base64) `OmniRoute.Setup.<version>.exe` ਇੰਸਟਾਲਰ ਨੂੰ ਕਵਰ ਕਰਦਾ ਹੈ। PowerShell ਵਿੱਚ, ਇੰਸਟਾਲਰ ਵਾਲੇ ਫੋਲਡਰ ਤੋਂ:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   output ਦਾ `latest.yml` → `sha512` ਨਾਲ ਮੇਲ ਖਾਣਾ ਲਾਜ਼ਮੀ ਹੈ। ਜੇ ਇਹ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ, ਤਾਂ ਫਾਈਲ ਮਿਟਾਓ ਅਤੇ
-   ਸਿਰਫ਼ [GitHub releases page](https://github.com/diegosouzapw/OmniRoute/releases) ਤੋਂ ਮੁੜ download ਕਰੋ।
-2. **Restore + exclude ਕਰੋ** — ਕਵਾਰੰਟੀਨ ਤੋਂ roll back ਕੀਤੀਆਂ items ਨੂੰ restore ਕਰੋ ਅਤੇ
-   `%LOCALAPPDATA%\Programs\OmniRoute` ਲਈ exclusion ਸ਼ਾਮਲ ਕਰੋ (Kaspersky → Settings → Threats and Exclusions),
-   ਫਿਰ ਦੁਬਾਰਾ install ਕਰੋ।
-3. **ਗਲਤ ਪਾਜ਼ਿਟਿਵ ਦੀ ਰਿਪੋਰਟ ਕਰੋ** — <https://opentip.kaspersky.com/>। ਵਰਤੋਂਕਾਰਾਂ ਵੱਲੋਂ ਜਮ੍ਹਾਂ ਕੀਤੀਆਂ FP
-   reports ਵਾਸਤਵ ਵਿੱਚ allowlisting ਨੂੰ ਤੇਜ਼ ਕਰਦੀਆਂ ਹਨ।
+   ਆਉਟਪੁੱਟ ਦਾ `latest.yml` → `sha512` ਨਾਲ ਮੇਲ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ। ਜੇਕਰ ਅਜਿਹਾ ਨਹੀਂ ਹੁੰਦਾ, ਤਾਂ ਫਾਈਲ ਨੂੰ ਮਿਟਾਓ ਅਤੇ ਸਿਰਫ [GitHub ਰੀਲੀਜ਼ ਪੰਨੇ](https://github.com/cheaper-inference/OmniRoute/releases) ਤੋਂ ਮੁੜ-ਡਾਊਨਲੋਡ ਕਰੋ।
+2. **+ ਬਹਾਲ ਕਰੋ** — ਕੁਆਰੰਟੀਨ ਤੋਂ ਰੋਲਡ-ਬੈਕ ਆਈਟਮਾਂ ਨੂੰ ਬਹਾਲ ਕਰਦਾ ਹੈ ਅਤੇ `%LOCALAPPDATA%\Programs\OmniRoute` (ਕੈਸਪਰਸਕੀ → ਸੈਟਿੰਗਾਂ → ਧਮਕੀਆਂ ਅਤੇ ਅਲਹਿਦਗੀ) ਲਈ ਇੱਕ ਬੇਦਖਲੀ ਜੋੜਦਾ ਹੈ, ਫਿਰ ਮੁੜ ਸਥਾਪਿਤ ਕਰੋ।
+3. **ਗਲਤ ਸਕਾਰਾਤਮਕ ਰਿਪੋਰਟ ਕਰੋ** — <https://opentip.kaspersky.com/> ਉਪਭੋਗਤਾ ਦੁਆਰਾ ਸਪੁਰਦ ਕੀਤੀਆਂ FP ਰਿਪੋਰਟਾਂ ਅਸਲ ਵਿੱਚ ਅਨੁਮਤੀ ਸੂਚੀ ਨੂੰ ਤੇਜ਼ ਕਰਦੀਆਂ ਹਨ।
 
 ---
 
@@ -873,10 +839,10 @@ omniroute serve --ready-timeout 180000
 
 ---
 
-## ਅਜੇ ਵੀ ਸਮੱਸਿਆ ਹੱਲ ਨਹੀਂ ਹੋਈ?
+## ਅਜੇ ਵੀ ਫਸਿਆ ਹੋਇਆ ਹੈ?
 
-- **GitHub ਮੁੱਦੇ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **ਆਰਕੀਟੈਕਚਰ**: ਅੰਦਰੂਨੀ ਵੇਰਵਿਆਂ ਲਈ [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) ਵੇਖੋ
-- **API ਹਵਾਲਾ**: ਸਾਰੇ ਐਂਡਪੌਇੰਟਾਂ ਲਈ [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) ਵੇਖੋ
-- **ਸਿਹਤ ਡੈਸ਼ਬੋਰਡ**: ਰੀਅਲ-ਟਾਈਮ ਸਿਸਟਮ ਸਥਿਤੀ ਲਈ **Dashboard → Health** ਦੀ ਜਾਂਚ ਕਰੋ
-- **ਅਨੁਵਾਦਕ**: ਫਾਰਮੈਟ ਸੰਬੰਧੀ ਸਮੱਸਿਆਵਾਂ ਨੂੰ ਡੀਬੱਗ ਕਰਨ ਲਈ **Dashboard → Translator** ਵਰਤੋ
+- **GitHub ਮੁੱਦੇ** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **ਆਰਕੀਟੈਕਚਰ** : ਅੰਦਰੂਨੀ ਵੇਰਵਿਆਂ ਲਈ [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) ਦੇਖੋ
+- **API ਹਵਾਲਾ** : ਸਾਰੇ ਅੰਤਮ ਬਿੰਦੂਆਂ ਲਈ [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) ਵੇਖੋ
+- **ਸਿਹਤ ਡੈਸ਼ਬੋਰਡ** : ਚੈੱਕ ਕਰੋ** ਡੈਸ਼ਬੋਰਡ → ਸਿਹਤ** ਰੀਅਲ-ਟਾਈਮ ਸਿਸਟਮ ਸਥਿਤੀ ਲਈ
+- **ਅਨੁਵਾਦਕ** : ਵਰਤੋ** ਡੈਸ਼ਬੋਰਡ → ਅਨੁਵਾਦਕ** ਫਾਰਮੈਟ ਮੁੱਦਿਆਂ ਨੂੰ ਡੀਬੱਗ ਕਰਨ ਲਈ

@@ -21,25 +21,21 @@ app-server URL వద్ద **అందుబాటులో ఉండే Codex 
 ## 1. ఆర్కిటెక్చర్
 
 ```
-┌─ OmniRoute యాప్ ────────────────┐        ┌─ codex-app-server సైడ్కార్ ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ సామర్థ్య టోకెన్)              │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  OpenAI OAuthను స్వయంగా నిర్వహిస్తుంది │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, ఆటో-రీఫ్రెష్) │
-        │ భాగస్వామ్యం చేస్తుంది (compose వాల్యూమ్లు) └──────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS సామర్థ్య టోకెన్ (రెండూ దీన్ని మౌంట్ చేస్తాయి)
-  codex-appserver-home    → ~/.codex (డ్యాష్బోర్డ్ ద్వారా auth.json వ్రాయబడుతుంది,
-                             సైడ్కార్లోని codex app-server ద్వారా చదవబడుతుంది)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- సైడ్కార్ సామర్థ్య టోకెన్ వెనుక ఉన్న అంతర్గత compose నెట్వర్క్
-  (`ws://codex-app-server:1456`)లో **మాత్రమే** లిసన్ చేస్తుంది. ఇది హోస్ట్కు లేదా
-  ఇంటర్నెట్కు **ఎప్పుడూ** పబ్లిష్ చేయబడదు.
-- Codex CLI అనేది `omniroute:base`లోనే బేక్ చేయబడింది, కాబట్టి సైడ్కార్ను
-  అమలు చేసేటప్పుడు హోస్ట్లో లేదా వినియోగదారు మెషీన్లో codexను ఇన్స్టాల్ చేయాల్సిన
-  అవసరం లేదు.
+- పక్క కారు వింటుంది** మాత్రమే** కెపాబిలిటీ టోకెన్ వెనుక అంతర్గత కంపోజ్ నెట్వర్క్ (`ws://codex-app-server:1456`)లో. ఇది** ఎప్పుడూ** హోస్ట్ లేదా ఇంటర్నెట్కు ప్రచురించబడింది.
+- సైడ్కార్ `omniroute:cli-no-docker` ఉపయోగిస్తుంది, `runner-cli-no-docker` లక్ష్యం నుండి నిర్మించబడింది, ఇందులో Codex CLI ఉంటుంది.
 
 ## 2. దీన్ని ప్రారంభించడం
 

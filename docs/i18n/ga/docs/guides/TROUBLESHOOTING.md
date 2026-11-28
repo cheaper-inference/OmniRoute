@@ -184,83 +184,49 @@ ritheann tú OmniRoute ó íomhá Docker, úsáid an íomhá `-web` (nó an spri
 
 ---
 
-## Dearfaigh bhréagacha frithvíris
+## Frithvíreas Dearfach Bréagach
 
 <a name="antivirus-false-positives"></a>
 
-### Cuireann Avast/AVG `README.md` ar coraintín le `MD:HttpRequest-inf[Susp]`
+### coraintín Avast/AVG `README.md` le `MD:HttpRequest-inf[Susp]`
 
-**Is dearfach bréagach é seo. Níl aon rud ionfhabhtaithe, agus ní gá aon ghníomh a dhéanamh.**
+**Dearfach bréagach é seo. Níl aon rud ionfhabhtaithe, agus ní gá aon ghníomh.**
 
-Ritheann Avast agus AVG heorastúil a mharcálann comhaid gnáth-théacs/Markdown ina bhfuil go leor
-nasc a bhfuil cuma iarrataí HTTP orthu. Seoltar `README.md` OmniRoute laistigh den phacáiste npm (tá sé
-liostaithe in `package.json` → `files`), mar sin cuirtear ag `node_modules/omniroute/README.md` é nuair
-a dhéantar suiteáil dhomhanda — agus tá ~15 shampla `http://localhost:20128/...` ann (críochphointí
-HTTP/SSE MCP, URL `.well-known` A2A, agus sleachta `curl`). Is leor dlús na nasc sin
-chun an heorastúil a spreagadh.
+Reáchtálann Avast agus AVG heuristic a chuireann bratach ar chomhaid plain-text/Markdown ina bhfuil go leor naisc HTTP-iarraidh. longa OmniRoute's `README.md` taobh istigh den phacáiste npm (tá sé liostaithe i `package.json` → `files`), mar sin tuirlingíonn sé ag `node_modules/omniroute/README.md` ar shuiteáil domhanda — agus tá samplaí ~ 15 `http://localhost:20128/...` ann (na críochphointí MCP HTTP/SSE, na críochphointí A2A `.well-known` URL, agus `curl` snippets). Is leor an dlús nasc sin chun turas a dhéanamh ar an heuristic.
 
-Murar thosaigh sé seo ach le déanaí: níor athraigh cineál an chomhaid. Cuireadh tuilleadh leis an
-tábla críochphointí sa README (cuireadh MCP HTTP + SSE + A2A leis) agus tuilleadh samplaí `curl`, rud a bhrúigh
-thar an tairseach é.
+Murar thosaigh sé seo ach le déanaí: níor tháinig aon athrú ar an gcomhad. D’fhás an README a tábla críochphointí (cuireadh MCP HTTP + SSE + A2A ) agus tuilleadh samplaí `curl`, a bhrúigh sé thar an tairseach.
 
-Is doiciméadacht neamhghníomhach é an comhad gan aon ábhar inrite ann. Is féidir leat é a aischur
-ón gcoraintín go sábháilte.
+Is doiciméadú támh é an comhad agus níl aon ábhar inrite nialais ann. Is féidir leat é a chur ar ais go sábháilte ó coraintín.
 
 **Cad atá le déanamh:**
 
-1. **Cuir stop leis na fógraí** — fág an chomhadlann suiteála ar lár i do fhrithvíreas
-   (Avast: Socruithe → Eisceachtaí), trí do chonair dhomhanda `node_modules` agus/nó
-   comhadlann sonraí OmniRoute (`~/.omniroute/`) a chur leis.
-2. **Tuairiscigh an dearfach bréagach** — <https://www.avast.com/false-positive-file-form.php>,
-   agus ceangail an `README.md` atá ar coraintín. Is é seo an réiteach a chuidíonn le gach duine, ós rud é gurb í
-   heorastúil an díoltóra atá ag rófhreagairt do chomhad téacs.
+1. **Stop na fógraí** — eisiamh an t-eolaire suiteála i do antivirus (Avast: Socruithe → Exceptions), ag cur do chosáin domhanda `node_modules` and/or the OmniRoute data dir (`~/.omniroute/`).
+2. **Tuairiscigh an dearfach bréagach** — <https://www.avast.com/false-positive-file-form.php>, ag gabháil leis an `README.md` coraintín . Is é seo an deisiú a chuidíonn le gach duine, ós rud é gurb é heoraíoch an díoltóra ró-fhreagairt do chomhad téacs.
 
-**An fáth nach ndéanaimid é seo a "shocrú" ar ár dtaobh:** is `http://localhost` iad na samplaí ar fad, agus
-ní féidir le localhost a bheith ina `https` gan deacrachtaí deimhnithe féinshínithe. Dá ndéanfaí an doiciméadacht a
-shaobhadh chun heorastúil díoltóra amháin a sheachaint, dhéanfaí dochar do gach léitheoir chun fabht scanóra a shásamh.
+**Cén fáth nach ndéanaimid "shocrú" ar seo ar ár taobh:** Is iad na samplaí go léir `http://localhost`, agus ní féidir localhost a bheith `https` gan cuimilte féin-shínithe. Dá ndéanfaí na doiciméid a láimhseáil chun heorastúla díoltóra amháin a sheachaint, ghortófaí gach léitheoir fabht scanóir a shásamh.
 
-### Marcálann Kaspersky an aip Deisce mar `PDM:Trojan.Win32.Generic`
+### Cuireann Kaspersky bratach ar an aip Deisce mar `PDM:Trojan.Win32.Generic`
 
-**Is dearfach bréagach ó heorastúil iompraíochta é seo. Níl aon rud ionfhabhtaithe.** Ciallaíonn réimír
-`PDM:` Kaspersky gur óna Mhodúl Cosanta Réamhghníomhaí (System Watcher) a thagann an breithiúnas,
-modúl a dhéanann measúnú ar an méid a _dhéanann_ an suiteálaí seachas é a chur i gcomparáid le bogearraí mailíseacha aitheanta. Nuair
-a spreagtar é, déanann Kaspersky an tsuiteáil iomlán a "rolladh siar" — ag scriosadh comhad a bhí
-scríofa aige cheana féin — agus mar sin bíonn an aip briste nó in easnamh sa deireadh.
+**Dearfach bréagach é seo ó heorastúla iompraíochta. Níl aon rud ionfhabhtaithe.** Ciallaíonn réimír `PDM:` Kaspersky go dtagann an fíorasc óna Mhodúl Réamhghníomhach Cosanta (System Watcher), a bhreithníonn cad a dhéanann an suiteálaí _does_ seachas é a mheaitseáil i gcoinne malware aitheanta. Nuair a lasann sé, déanann Kaspersky "rolladh ar ais" an — suiteáil iomlán a scriosadh comhaid a bhí scríofa aige cheana féin — agus mar sin críochnaíonn an app briste nó ar iarraidh.
 
-Is gnáthchodanna iad na comhaid a mharcálann sé de spleáchais dhearbhaithe, foinse oscailte atá cuachta leis an
-aip deisce, mar shampla:
+Is codanna stoic iad na comhaid a luann sé de spleáchas foinse oscailte dearbhaithe atá cuachta leis an aip deisce, mar shampla:
 
-- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` agus
-  `workerProcessEntry.js` — [Playwright](https://playwright.dev), an leabharlann uathoibrithe brabhsálaí
-  a úsáidtear le haghaidh logáil isteach soláthraithe laistigh den aip agus comhrá arna chumhachtú ag brabhsálaí.
-- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node`
-  — an ceangal dúchasach pionnáilte `wreq-js` a úsáidtear le haghaidh HTTP le méarlorg brabhsálaí ar sholáthraithe
-  fianán gréasáin (`<arch>` ná `x64` nó `arm64`).
+- `resources/app/.build/next/node_modules/playwright-<hash>/lib/…/agentParser.js` agus `workerProcessEntry.js` — [Playwright](https://playwright.dev), an leabharlann uathoibrithe brabhsálaí a úsáidtear le haghaidh logáil isteach soláthraí in-app agus comhrá le tacaíocht brabhsálaí.
+- `resources/app/.build/next/node_modules/@wreq-js/binding-win32-<arch>-msvc-<hash>/wreq-js.win32-<arch>-msvc.node` — an ceangailteach dúchasach `wreq-js` pinned a úsáidtear le haghaidh HTTP méarloirg brabhsálaí ar sholáthraithe fianán gréasáin (`<arch>` is `x64` nó `arm64`).
 
-**An fáth a spreagtar é:** níl an suiteálaí Windows **sínithe le cód fós**, mar sin níl aon
-cháil ar shuiteálaí NSIS gan síniú agus ritheann heorastúla iompraíochta ar an leibhéal ionsaitheachta is airde. Nuair a chuirtear
-é sin le DLL dúchasach cuachta agus na céadta comhad `.js` a scríobhtar faoi
-`%LOCALAPPDATA%\Programs\OmniRoute` (lena n-áirítear comhadlanna pacáiste a bhfuil iarmhíreanna haise orthu ón
-leagan neamhspleách Next.js), is leor sin chun an heorastúil a spreagadh. Tá síniú cóid beartaithe;
-go dtí go gcuirfear i bhfeidhm é, d'fhéadfadh sé seo tarlú arís le heisiúintí nua.
+**Cén fáth a lasann sé:** Tá an suiteálaí Windows** gan cód sínithe fós** , mar sin tá cáil nialasach ag suiteálaí NSIS neamhshínithe agus ritheann heuristics iompraíochta ag an ionsaí uasta. In éineacht le DLL dúchais cuachta agus na céadta comhad `.js` scríofa faoi `%LOCALAPPDATA%\Programs\OmniRoute` (lena n-áirítear eolairí pacáiste hash-iarmhír ón tógáil neamhspleách Next.js ), is leor sin chun turas a dhéanamh ar an heuristic. Tá síniú cód beartaithe; go dtí go dtiocfaidh sé i dtír, is féidir le heisiúintí nua é seo a dhéanamh arís.
 
 **Cad atá le déanamh:**
 
-1. **Fíoraigh d'íoslódáil ar dtús** (fágann sé seo comhad ar cuireadh isteach air as an áireamh). Foilsíonn gach eisiúint
-   `latest.yml`, a bhfuil réimse `sha512` (base64) ann a chumhdaíonn an suiteálaí
-   `OmniRoute.Setup.<version>.exe`. In PowerShell, ón bhfillteán ina bhfuil an suiteálaí:
+1. **Fíoraigh do íoslódáil ar dtús** (rialaíonn amach comhad a bhfuil cur isteach air). Foilsíonn gach scaoileadh `latest.yml`, a chlúdaíonn a réimse `sha512` (base64) an suiteálaí `OmniRoute.Setup.<version>.exe`. In PowerShell, ón bhfillteán ina bhfuil an suiteálaí:
    ```powershell
    $b = [System.Security.Cryptography.SHA512]::Create().ComputeHash(
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Ní mór don aschur a bheith ag teacht le `latest.yml` → `sha512`. Mura bhfuil, scrios an comhad agus
-   íoslódáil arís é ón [leathanach eisiúintí GitHub](https://github.com/diegosouzapw/OmniRoute/releases) amháin.
-2. **Aischuir + fág ar lár** — aischuir na míreanna a rolladh siar ón gcoraintín agus cuir eisceacht leis
-   do `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Socruithe → Bagairtí agus Eisceachtaí),
-   ansin athshuiteáil.
-3. **Tuairiscigh an dearfach bréagach** — <https://opentip.kaspersky.com/>. Cuireann tuairiscí dearfacha bréagacha
-   a chuireann úsáideoirí isteach dlús dáiríre le cur ar an liosta ceadaithe.
+   Caithfidh an t-aschur a bheith ag teacht le `latest.yml` → `sha512`. Mura ndéanann sé, scrios an comhad agus ath-íoslódáil ó [leathanach eisiúintí GitHub](https://github.com/cheaper-inference/OmniRoute/releases) amháin .
+2. **Athchóirigh + eisiamh** — na hítimí ais-rollta ó coraintín a chur ar ais agus cuir eisiamh le haghaidh `%LOCALAPPDATA%\Programs\OmniRoute` (Socruithe Kaspersky → → Bagairtí agus Eisiaimh), ansin athshuiteáil.
+3. **Tuairiscigh an dearfach bréagach** — <https://opentip.kaspersky.com/> Cuireann tuairiscí FP arna gcur isteach ag úsáideoir dlús leis an liostú ceadaithe i ndáiríre.
 
 ---
 
@@ -872,10 +838,10 @@ Tuilleadh comharthaí:
 
 ---
 
-## Fós i Sáinn?
+## Fós i bhfostú?
 
-- **Fadhbanna GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **Ailtireacht**: Féach [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) chun sonraí inmheánacha a fháil
-- **Tagairt API**: Féach [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) chun gach críochphointe a fheiceáil
-- **Painéal Sláinte**: Seiceáil **Painéal → Sláinte** le haghaidh stádas fíor-ama an chórais
-- **Aistritheoir**: Úsáid **Painéal → Aistritheoir** chun fadhbanna formáide a dhífhabhtú
+- **GitHub Saincheisteanna** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Ailtireacht** : Féach [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) le haghaidh sonraí inmheánacha
+- **Tagairt API** : Féach [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) do gach críochphointe
+- **Painéal na Sláinte** : Seiceáil** Dashboard → Sláinte** le haghaidh stádas córais fíor-ama
+- **Aistritheoir** : Úsáid** Painéal → nIonstraimí** le saincheisteanna formáide dífhabhtaithe

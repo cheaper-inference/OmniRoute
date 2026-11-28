@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | Aniqlangan asosiy URL                                                  |
 | `ctx.apiKey`                 | `string \| null` | Taqdim etilgan boʻlsa, API kaliti                                      |
 
-## Aniqlash
+## Kashfiyot
 
-Plaginlar quyidagi joylardan aniqlanadi:
+Plaginlar quyidagilardan topiladi:
 
-1. `~/.omniroute/plugins/<name>/` — foydalanuvchining lokal oʻrnatmalari
-2. `OMNIROUTE_PLUGIN_PATH` muhit oʻzgaruvchisi — maxsus katalog
+1. `~/.omniroute/plugins/node_modules/<name>/` — bu yerda `omniroute plugin install` paketlarni joylashtiradi ( `npm -g` emas, npm `--prefix`)
+2. `~/.omniroute/plugins/<name>/` — qo'lda ko'chirilgan plagin kataloglari
+3. `OMNIROUTE_PLUGIN_PATH` env var — maxsus katalogi
 
-Ikkalasi ham **faqat CLI uchun**. Server tomonidagi plaginlar ish muhiti (proksi ichida ishlaydigan marketplace/`plugin.json`
-plaginlari) oʻzining alohida skaneri va alohida qayta belgilash sozlamasi —
-`OMNIROUTE_PLUGINS_DIR`ga ega; qarang:
-[PLUGIN_MARKETPLACE.md → Plagin katalogi](./PLUGIN_MARKETPLACE.md#plugin-directory).
-Ulardan birini sozlash boshqasiga taʼsir qilmaydi.
+Symbog'langan kataloglar (npm `plugin install ./dir` uchun nima yaratadi) kuzatiladi.
 
-Yuklash xatolari ushlanadi va ogohlantirish sifatida chiqariladi — buzilgan plagin hech qachon CLI ishini toʻxtatmaydi.
+Ikkalasi ham** Faqat CLI** . Server tomonidagi plaginning ishlash vaqti (proksi-server ichida ishlaydigan bozor/`plugin.json` plaginlari) o'z bekor qilish xususiyatiga ega o'z skaneriga ega, `OMNIROUTE_PLUGINS_DIR` — [PLUGIN_MARKETPLACE.md → Plugin katalogiga qarang](./PLUGIN_MARKETPLACE.md#plugin-directory). Birini sozlash boshqasiga ta'sir qilmaydi.
+
+Yuklash xatoliklari ushlanib, ogohlantirish sifatida chop etiladi — buzilgan plagin hech qachon CLI buzmaydi.
 
 ## Xavfsizlik
 

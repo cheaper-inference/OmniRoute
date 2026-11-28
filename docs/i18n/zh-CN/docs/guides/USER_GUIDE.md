@@ -233,33 +233,41 @@ Claude 和 Claude Code 兼容路由会为 Opus 和 Sonnet
 
 ---
 
-## 🎨 组合
+## 🎨组合
 
-你可以在 **仪表盘 → 组合** 中通过拖动每张卡片上的手柄直接重新排列组合卡片。顺序会存储在 SQLite 中，并在重新加载时恢复。
+您可以直接重新排序组合卡**仪表板→组合**拖动每张卡上的手柄。该订单存储在SQLite中并在重新加载时恢复。
 
-### 示例 1：最大化利用订阅 → 低成本备用
+### 查找提供者、型号或帐户
 
-```
-仪表盘 → 组合 → 新建
+在创建或编辑组合中，分步提供者、模型、帐户和组合引用选取器包括本地搜索字段。按显示的名称、标识符、提供程序别名或模型源进行搜索，然后单击结果或使用箭头键和 Enter。多个搜索词必须全部匹配。清除搜索或按 Esc 键会使所选值保持不变。
 
-名称：premium-coding
-模型：
-  1. cc/claude-opus-4-7（订阅主模型）
-  2. glm/glm-4.7（低成本备用，$0.6/1M）
-  3. minimax/MiniMax-M2.7（最便宜的后备模型，$0.3/1M）
+搜索时自动帐户选择保持可见。其可选帐户限制列表有一个单独的过滤器：可见结果之外的选定帐户保持选中状态，并且计数包括它们。当电子邮件隐私处于启用状态时，隐藏的电子邮件片段不可搜索。像往常一样添加步骤并保存组合；输入查询不会保存或测试任何内容。
 
-在 CLI 中使用：premium-coding
-```
+相同的本地搜索可用于连接测试模型、自定义CLI默认和别名模型以及保存的代理选择。现有的保存、应用和测试操作保持独立。
 
-### 示例 2：仅使用免费模型（零成本）
+### 示例 1：最大化订阅→廉价备份
 
 ```
-名称：free-combo
-模型：
-  1. if/kimi-k2.7-code（标注为可免费使用；可能受提供者限制）
-  2. kr/qwen3-coder-next（Kiro 免费后备模型）
+Dashboard → Combos → Create New
 
-成本：当前标注为 $0；条款和可用性可能发生变化
+Name: premium-coding
+Models:
+  1. cc/claude-opus-4-7 (Subscription primary)
+  2. glm/glm-4.7 (Cheap backup, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (Cheapest fallback, $0.3/1M)
+
+Use in CLI: premium-coding
+```
+
+### 示例 2：仅免费（零成本）
+
+```
+Name: free-combo
+Models:
+  1. if/kimi-k2.7-code (listed free access; provider limits may apply)
+  2. kr/qwen3-coder-next (Kiro free fallback)
+
+Cost: currently listed as $0; terms and availability may change
 ```
 
 ---
@@ -419,7 +427,7 @@ omniroute autostart disable
 ### VPS部署
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -501,8 +509,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -703,7 +711,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 2. **姓名**：节点的显示标签。
 3. **前缀**：路由名称。客户端将模型称为`<prefix>/<model>`，因此前缀为`mygw`节点服务`mygw/gpt-4o-mini`。必需的;没有字符限制。
 4. **API型**：网关服务的端点系列（聊天完成、响应、嵌入、音频、图像）。
-5. **基地URL** ： API根，直到并包括`/v1` （例如`https://gateway.example.com/v1`），而不是完整的`/chat/completions`路径。具有非标准路径的网关将其设置为**高级设置**（聊天路径，模型路径）。
+5. **基地URL** ： API根目录，直到并包括`/v1` （例如`https://gateway.example.com/v1`），而不是完整的`/chat/completions`路径。具有非标准路径的网关将其设置为**高级设置**（聊天路径，模型路径）。
 6. 这**API密钥（用于检查）**字段仅测试连接。创建节点后，打开并使用**添加连接**存储请求将使用的密钥。
 
 节点获得`openai-compatible-<apiType>-<uuid>`形式的内部 id；您永远不需要键入它，前缀是公共名称。
@@ -870,12 +878,12 @@ curl http://localhost:20128/api/models/catalog
 - `least-used`和`cost-optimized`
 - `auto` —对所有考生进行分数驱动
 - `lkgp` （最后一个已知的良好提供者） —固定到最后一个成功的提供者，然后退回到规则
-- `context-optimized` —选择具有最大自由上下文窗口的模型
-- `context-relay` —链接长上下文模型以进行后续回合
+- `context-optimized` —首先尝试具有最大已知上下文窗口的模型
+- `context-relay` —优先顺序加上对话转移到另一个帐户时的移交摘要
 
 #### 外部粘性会话标头
 
-对于外部会话关联（例如，反向代理后面的Claude Code/Codex代理），发送：
+对于外部会话亲和性（例如，反向代理后面的Claude Code/Codex代理），发送：
 
 ```http
 X-Session-Id: your-session-key
@@ -921,8 +929,8 @@ Chain: production-fallback
 
 非常适合编码代理（OpenCode、 Claude Code、 Cursor、 Cline）。最初路由到前沿推理模型，在配额耗尽或错误时回退到快速编码模型。
 
-- **仪表板**：组合→新组合→名称： `agent-coding` →策略： `Priority`
-- **型号**:
+- **仪表板**：连击→新连击→名称： `agent-coding` →策略： `Priority`
+- **型号**：
   1. `claude/claude-sonnet-4-6` （主要编码代理）
   2. `openai/gpt-4o` （二次高容量后备）
   3. `deepseek/deepseek-v4-flash` （高效率、高性价比的后备）
@@ -948,7 +956,7 @@ curl -X POST http://localhost:20128/api/combos \
 链接多个免费层和无密钥提供者，以最大限度地延长正常运行时间，而无需API成本。
 
 - **战略**： `Least Used`或`Round Robin` （跨配额分配负载）
-- **型号**:
+- **型号**：
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
@@ -965,7 +973,7 @@ omniroute combo create free-stack \
 将专门的视觉模型与高速文本生成配对，以实现涉及图像理解和代码生成的工作流程。
 
 - **图案**：一个`Priority`组合，首先列出具有视觉功能的模型，最后列出高吞吐量text/code模型。
-- **型号**:
+- **型号**：
   1. `gemini/gemini-2.5-pro` （强image/multimodal理解）
   2. `openai/gpt-4o` （平衡愿景和工具使用）
   3. `deepseek/deepseek-v4-flash` （Text/code一代）
@@ -1318,34 +1326,36 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ---
 
-## 💻 内部 CLI
+## 💻内部CLI
 
-OmniRoute 提供了一个内部 CLI（`omniroute …`），用于设置、诊断和运行时控制。它与仪表板中的“CLI 工具”页面**相互独立**；该页面用于配置第三方 CLI（Claude Code、Cursor、Codex、Cline 等），使其能够与 OmniRoute 通信。
+OmniRoute附带一个内部CLI (`omniroute …`)，用于设置、诊断和运行时控制。这是**与仪表板中的“CLI Tools”页面分开**，它配置第三方CLIs （Claude代码、 Cursor、 Codex、 Cline，...），以便他们可以与OmniRoute对话。
 
 ```bash
-omniroute setup                    # 交互式向导（密码、提供者、组合）
-omniroute setup --non-interactive  # 适用于 CI
-omniroute doctor                   # 健康诊断（数据目录、数据库、提供者、端口）
-omniroute providers available      # 列出支持的提供者
-omniroute providers list           # 列出已配置的连接
-omniroute providers test <id>      # 实时测试提供者连接
-omniroute combos list              # 列出组合
-omniroute combos switch <name>     # 设置默认组合
-omniroute models                   # 列出可用模型（--json、--search）
-omniroute keys add | list | remove # 从终端管理 API 密钥
-omniroute backup                   # 创建配置和数据库快照
-omniroute restore [<timestamp>]    # 从快照恢复
-omniroute health                   # 详细健康状态（断路器、缓存、内存）
-omniroute quota                    # 提供者配额使用情况
-omniroute mcp status               # MCP 服务器状态
-omniroute a2a status               # A2A 服务器状态
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok 隧道
-omniroute reset-password           # 重置管理员密码
-omniroute --mcp                    # 通过 stdio 启动 MCP 服务器
-omniroute --port 3000              # 在自定义端口上启动服务器
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-提示：将 `omniroute doctor --json` 与监控工具配合使用，以便在提供者连接不健康时发出警报。
+提示：将`omniroute doctor --json`与您的监控工具配对，以针对损坏的本地安装发出警报。 `doctor`不测试提供者连接；使用`omniroute providers test <id>`来实现这一点。
 
 ---
 

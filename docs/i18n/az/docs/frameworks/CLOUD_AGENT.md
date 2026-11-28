@@ -66,7 +66,7 @@ Sinxronizasiya **tənbəldir**: status hər `GET /tasks/[id]` sorğusunda ilkin 
 Arxa planda işləyən sorğulayıcı yoxdur. Aktual vəziyyətə ehtiyac duyan idarə panelləri GET
 son nöqtəsini münasib intervalla sorğulamalıdır.
 
-## `CloudAgentBase` İnterfeysi
+## `CloudAgentBase` interfeysi
 
 Mənbə: `src/lib/cloudAgent/baseAgent.ts`
 
@@ -110,15 +110,15 @@ export abstract class CloudAgentBase {
     c: AgentCredentials
   ): Promise<{ name: string; url: string; branch?: string }[]>;
 
-  protected mapStatus(raw: string): CloudAgentStatus; // yuxarı axın sətri → enum üçün evristik çevirmə
+  protected mapStatus(raw: string): CloudAgentStatus; // heuristic upstream-string → enum
   protected generateTaskId(): string; // `task_<ts>_<rand>`
   protected generateActivityId(): string; // `act_<ts>_<rand>`
 }
 ```
 
-`CodexCloudAgent.approvePlan` qəsdən xəta yaradır — Codex Cloud planları avtomatik hazırlayır və təsdiq mərhələsi yoxdur. `CodexCloudAgent.listSources` `[]` qaytarır.
+`CodexCloudAgent.approvePlan` qəsdən — Codex Cloud avtomatik planlarını atır və təsdiq qapısı yoxdur. `CodexCloudAgent.listSources` `[]` qaytarır.
 
-`CursorCloudAgent` Cursor-un Background / Cloud Agents xidmətlərini onun rəsmi REST API-si (`api.cursor.com/v0`) vasitəsilə, **istifadəçi və ya xidmət hesabı API açarı** ilə idarə edir — bu, Cursor IDE-nin OAuth sessiyasından təkrar istifadə etməyə nisbətən daha təhlükəsiz, birbaşa istehsalçı tərəfindən təqdim olunan alternativdir (`cursor` provayderi isə bloklanma riski barədə xəbərdarlıq daşıyır). Bu, sadə REST adapteridir (`@cursor/sdk` üçün yerli asılılıq yoxdur). `approvePlan` xəta yaradır (Cursor agentləri avtonom işləyir); `listSources` isə açarın giriş imkanı olan repozitoriyaları siyahıya alır. Cursor BÖYÜK HƏRFLƏRLƏ status enum-ları (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`) qaytarır və bunlar ortaq `CloudAgentStatus` dəyərlərinə açıq şəkildə uyğunlaşdırılır. API versiyasının/yolunun kod dəyişikliyi olmadan düzəldilə bilməsi üçün `baseUrl` hər etimadnamə üzrə dəyişdirilə bilər.
+`CursorCloudAgent` rəsmi REST API (`api.cursor.com/v0`) vasitəsilə Cursor- nin Fonu / Bulud Agentlərini idarə edir** istifadəçi və ya xidmət hesabı API açarı** — Cursor IDE-nin OAuth sessiyasından yenidən istifadə etmək üçün daha təhlükəsiz, birinci tərəf alternativi (qadağa riski xəbərdarlığı daşıyan `cursor` provayderi). Bu sadə REST adapterdir ( `@cursor/sdk` yerli asılılığı yoxdur). `approvePlan` atışları (Cursor agentləri avtonom şəkildə işləyir); `listSources` açarla əldə edilə bilən depoları sadalayır. Cursor açıq şəkildə paylaşılan `CloudAgentStatus` ilə əlaqələndirilmiş UPPERCASE status nömrələrini (`CREATING`/`RUNNING`/`FINISHED`/`ERROR`) qaytarır. `baseUrl` hər bir etimadnamə ilə əvəz edilə bilər, belə ki, API version/path kod dəyişikliyi olmadan düzəldilə bilər.
 
 ## Domen tipləri
 
@@ -183,7 +183,7 @@ Validasiya sxemləri (`CreateCloudAgentTaskSchema`, `UpdateCloudAgentTaskSchema`
 
 ## Verilənlər bazası
 
-Mənbə: `src/lib/cloudAgent/db.ts` — cədvəl `createCloudAgentTaskTable()` vasitəsilə tənbəl şəkildə yaradılır (həmçinin modul idxal edilərkən `src/lib/cloudAgent/index.ts` daxilində çağırılır).
+Mənbə: `src/lib/cloudAgent/db.ts` — cədvəli `createCloudAgentTaskTable()` vasitəsilə tənbəl şəkildə yaradılır (modul idxalında `src/lib/cloudAgent/index.ts` -dan da deyilir).
 
 ```sql
 CREATE TABLE IF NOT EXISTS cloud_agent_tasks (
@@ -206,9 +206,7 @@ CREATE INDEX IF NOT EXISTS idx_cloud_agent_tasks_status   ON cloud_agent_tasks(s
 CREATE INDEX IF NOT EXISTS idx_cloud_agent_tasks_created  ON cloud_agent_tasks(created_at DESC);
 ```
 
-`updateCloudAgentTask` SQL inyeksiyasının qarşısını almaq üçün **sütunların icazə siyahısını** tətbiq edir:
-`status`, `prompt`, `source`, `options`, `result`, `activities`, `error`,
-`completed_at`. Qismən yeniləmədəki hər hansı digər açar heç bir bildiriş verilmədən nəzərə alınmır.
+`updateCloudAgentTask` məcbur edir a** sütun ağ siyahısı** SQL inyeksiyasının qarşısını almaq üçün: `status`, `prompt`, `source`, `options`, `result`, `activities`, `error`, `completed_at`. Qismən yeniləmədəki hər hansı digər açar səssizcə silinir.
 
 ## REST API — Tapşırığın həyat dövrü
 
@@ -312,19 +310,16 @@ maskalanmış önizləməni (`maskedApiKey`: hər ucda 4-ə qədər simvol, qıs
 8 və ya daha az simvoldan ibarət açar üçün isə heç biri) və bağlantının `projectId` dəyərini qaytarır. Digər bütün
 açarlar üçün hər iki sahə cavabdan çıxarılır.
 
-## Giriş Məlumatlarının Müəyyənləşdirilməsi
+## Etibarnamə Qətnaməsi
 
-`src/lib/cloudAgent/api.ts` faylındakı `getCloudAgentCredentials(providerId)`:
+`src/lib/cloudAgent/api.ts`-də `getCloudAgentCredentials(providerId)` :
 
-1. Aktiv provayder bağlantılarını `getProviderConnections({ provider: providerId, isActive: true })` vasitəsilə yükləyir.
-2. Hər bağlantı üçün `apiKey` dəyərinə (boşluqları təmizlənmiş) üstünlük verir. Mövcud deyilsə, `accessToken` istifadə edir.
-3. İlk boş olmayan tokeni `{ apiKey: token }` şəklində qaytarır.
-4. İstifadəyə yararlı token tapılmadıqda `null` qaytarır — API `400` statusu və
-   `"Bulud agenti provayderi üçün aktiv giriş məlumatları konfiqurasiya edilməyib: <id>"` mesajı ilə cavab verir.
+1. `getProviderConnections({ provider: providerId, isActive: true })` vasitəsilə aktiv provayder bağlantılarını yükləyir.
+2. Hər bir əlaqə üçün `apiKey` (kesilmiş) üstünlük verir. `accessToken` ə qayıdır.
+3. `{ apiKey: token }` kimi bükülmüş ilk boş olmayan nişanı qaytarır.
+4. Əgər istifadə edilə bilən nişan tapılmazsa `null` qaytarır — API `400` `"No active credentials configured for cloud agent provider: <id>"` ilə cavab verir.
 
-Bu o deməkdir ki, Cloud Agents adi LLM provayderləri ilə eyni Provider Connection cədvəlindən
-təkrar istifadə edir. Jules-u aktivləşdirmək üçün `provider: "jules"` və doldurulmuş
-`apiKey` ilə aktiv bağlantı yaradın.
+Bu o deməkdir ki, Bulud Agentləri adi LLM provayderləri ilə eyni Provayder Bağlantısı cədvəlindən yenidən istifadə edir. Jules aktivləşdirmək üçün `provider: "jules"` və məskunlaşmış `apiKey` ilə aktiv əlaqə yaradın.
 
 ## İdarəetmə Paneli
 

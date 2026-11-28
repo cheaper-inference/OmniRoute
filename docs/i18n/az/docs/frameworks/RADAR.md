@@ -95,57 +95,30 @@ marşrutlaşdırmanı və ya model seçimini dəyişdirmir — aşağıdakı ayr
 
 ---
 
-## Məlumatların sinxronizasiyası AYRICA qoşulma seçimidir — məxfilik vədi
+## Məlumatların sinxronizasiyası məxfilik vədi olan SEPARATE opt-in — dir
 
-`RADAR_ENABLED` parametrinin aktivləşdirilməsi yalnız istifadəçi interfeysinin kilidini açır.
-Lentin sinxronizasiyası üçün `radar_settings.opt_in` daxilində saxlanılan ikinci, müstəqil
-qoşulma seçimi tələb olunur (`src/lib/db/radar.ts`, miqrasiya
-`136_radar_cache_settings.sql`). `syncRadar()` hər hansı şəbəkə çağırışı etməzdən əvvəl
-həm bayrağı, həm də qoşulma seçimini yoxlayır:
+`RADAR_ENABLED` yandırılması yalnız UI kilidini açır. Lentin sinxronlaşdırılması `radar_settings.opt_in` (`src/lib/db/radar.ts`, miqrasiya `136_radar_cache_settings.sql`) daxilində saxlanılan ikinci, müstəqil qoşulma tələb edir. `syncRadar()` hər hansı bir şəbəkə zəngi etməzdən əvvəl bayrağı _və qoşulmanı yoxlayır:
 
 ```
-Bayraq söndürülüb    → { status: "disabled" }   — şəbəkə çağırışı yoxdur
-Qoşulma seçimi false → { status: "opt_out" }    — şəbəkə çağırışı yoxdur
+Flag off      → { status: "disabled" }   — no network call
+Opt-in false  → { status: "opt_out" }    — no network call
 ```
 
 Hər ikisi aktiv olduqda sinxronizasiya yolu belədir:
 
-1. `x-omniroute-radar-schema: 2` və istəyə bağlı `Authorization: Bearer <supporter key>`
-   başlığı ilə `GET <feed base URL>/v1/catalog/latest` (aşağıya baxın). Sxem başlığı olmadıqda
-   serverlər standart olaraq ayrıca imzalanmış v1 keçid artefaktından istifadə edir, beləliklə
-   quraşdırılmış köhnə klientlər yeniləmələri almağa davam edir.
-2. Bu, yalnız endirmə üçün nəzərdə tutulmuş tətbiq axınıdır, lakin yenə də HTTPS sorğusudur.
-   Hostinq infrastrukturu mənbə IP kimi adi bağlantı metadatasını qəbul edir. Dəstəkçi açarı
-   konfiqurasiya edildikdə sinxronizasiya həmin açarı Bearer başlığında da göndərir ki, xidmət
-   hüququ müəyyən edə bilsin. Yuxarıdakı sübut sərhədində göstərilən özəl serverin dəqiq
-   reviziyasında lent sorğularının uçotu əl ilə sui-istifadə yoxlaması üçün açar heşlərindən,
-   ümumiləşdirilmiş istifadədən və IP-nin gündəlik rotasiya edilən qısaldılmış HMAC dəyərindən
-   istifadə edir; həmin cədvəllər nə açarı, nə də IP-ni xam formada saxlayır.
-   İnfrastruktur giriş jurnalları və şifrələnmiş çatdırılma çıxış qutusu ayrıca əməliyyat
-   sərhədləridir.
-3. OmniRoute heç vaxt Radar xidmətinə sorğu mətnlərini, cavabları, söhbətləri, provayder
-   autentifikasiya məlumatlarını, model trafikini, işlək qalma müddətini, gecikməni və ya
-   lokal provayder konfiqurasiyasını göndərmir.
-4. Cavab yoxlanılır, doğrulanır və lokal olaraq keşlənir (bax:
-   [Təhlükəsizlik modeli](#security-model)). Radar-ın server tərəfində dəqiq dörd şəbəkə yolu var:
-   kataloq üçün `syncRadar()`, yönləndirmələr üçün `syncRadarReferrals()` və yalnız dəstəkçilər
-   üçün olan təkliflər və Intel üçün `syncRadarOffers()` / `syncRadarIntel()`.
+1. `x-omniroute-radar-schema: 2` və isteğe bağlı `Authorization: Bearer <supporter key>` başlığı ilə `GET <feed base URL>/v1/catalog/latest` (aşağıya bax). Sxem başlığı olmadıqda serverlər defolt olaraq ayrıca imzalanmış v1 keçid artefaktına keçir, beləliklə köhnə quraşdırılmış müştərilər yeniləmələri qəbul etməyə davam edir.
+2. Bu, yalnız endirilə bilən proqram axınıdır, lakin yenə də HTTPS sorğusudur. Yerləşdirilmiş infrastruktur mənbə IP kimi adi bağlantı metadatasını alır. Dəstəkçi açarı konfiqurasiya edildikdə, sinxronizasiya həmçinin həmin açarı Daşıyıcı başlığına göndərir ki, xidmət hüququ həll edə bilsin. Yuxarıdakı sübut sərhəddində müəyyən edilmiş dəqiq şəxsi server təftişində, feed-sorğu uçotu əsas hashlərdən, ümumi istifadədən və əl ilə sui-istifadənin nəzərdən keçirilməsi üçün IP nin gündəlik fırlanan kəsilmiş HMAC istifadə edir; həmin cədvəllər xam formada nə açar, nə də IP olaraq qalır. İnfrastruktur giriş jurnalları və şifrələnmiş çatdırılma qutusu ayrı-ayrı əməliyyat sərhədləridir.
+3. OmniRoute heç vaxt Radar xidmətinə sorğular, cavablar, söhbətlər, provayder etimadnamələri, model trafiki, iş vaxtı, gecikmə və ya yerli provayder konfiqurasiyası göndərmir.
+4. Cavab yerli olaraq yoxlanılır, təsdiqlənir və keşlənir (bax: [Təhlükəsizlik modeli](#security-model) ). Radarın tam olaraq dörd server tərəfi şəbəkə yolu var: kataloq üçün `syncRadar()`, referallar üçün `syncRadarReferrals()` və yalnız dəstəkləyənlər üçün təkliflər və Intel üçün `syncRadarOffers()` / `syncRadarIntel()`.
 
-**Dəstəkçi açarı**, lent xidmətinə hansı səviyyənin təqdim ediləcəyinə qərar verməyə imkan
-verən istəyə bağlı Bearer tokenidir (`radar_settings.supporter_key`) (bax:
-[Səviyyələr](#tiers-community-and-live)). O:
+Kataloq yoxlanışı hər 24 saatdan bir həyata keçirilir. Təsdiqlənmiş lent hələ də keşlənmiş versiyanı və səviyyəsini daşıdıqda, sinxronizasiya keşlənmiş faydalı yükü saxlayır, `fetchedAt` yeniləyir və növbəti yoxlama növbəti saatlıq işarənin əvəzinə 24 saat sonra gəlir.
 
-- Provayder autentifikasiya məlumatları üçün istifadə edilən eyni AES-256-GCM
-  `encrypt()`/`decrypt()` köməkçiləri (`src/lib/db/encryption.ts`) ilə **saxlanma zamanı
-  şifrələnir**.
-- `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) vasitəsilə təyin
-  edilir və **heç vaxt geri qaytarılmır** — cavab maskalanmış formanı (`omr_****abcd`) qaytarır.
-- Onun dəyişdirilməsi və ya silinməsi kataloq, yönləndirmələr, təkliflər və Intel keşlərini
-  atomar şəkildə etibarsız edir. Növbəti sinxronizasiya/oxuma yeni hüququ server tərəfində
-  müəyyən edir; açarın saxlanılması öz-özlüyündə şəbəkə sorğusu yaratmır və birdəfəlik
-  aktivləşdirmə açarını istifadə etmir.
-- Sinxronizasiya GET sorğusunda lent xidmətinə Bearer tokeni kimi göndərilir — açar haqqında
-  başqa heç nə klientdən kənara çıxmır.
+The** dəstəkləyici açar** lent xidmətinə hansı [səviyyənin](#tiers-community-and-live) xidmət göstərəcəyinə qərar verməyə imkan verən isteğe bağlı Daşıyıcı nişanıdır (`radar_settings.supporter_key`). Bu:
+
+- Saxlanılır** istirahətdə şifrələnir** provayder etimadnaməsi üçün istifadə edilən eyni AES-256-GCM `encrypt()`/`decrypt()` köməkçiləri (`src/lib/db/encryption.ts`) ilə.
+- `POST /api/radar/settings` (`{ supporterKey: "omr_" + 40 hex chars }`) və vasitəsilə təyin edin** heç vaxt əks-səda vermədi** — cavab maskalı formanı qaytarır (`omr_****abcd`).
+- Onu dəyişdirmək və ya təmizləmək kataloqu, müraciətləri, təklifləri və Intel keşlərini atomik olaraq etibarsız edir. Növbəti sync/read server tərəfinin yeni hüququnu həll edir; açarın saxlanması şəbəkə sorğusu yaratmır və ya birdəfəlik aktivləşdirmə açarını istehlak etmir.
+- Lent xidmətinə GET — sinxronizasiyasında Daşıyıcı nişanı kimi göndərildi, açar haqqında başqa heç nə müştərini tərk etmir.
 
 ---
 
@@ -357,86 +330,45 @@ version, tier }` kimi qaytarılır — idarəetmə panelinin göstərdiyi dəyə
 
 ---
 
-## Oxuma zamanı örtük birləşdirmə qaydaları
+## Oxuma vaxtının üst qatında birləşmə qaydaları
 
-`applyFeed()` (`src/lib/radar/applyFeed.ts`) keşlənmiş lenti statik baza üzərinə
-**oxuma zamanı**, `getRadarCatalog()` daxilində birləşdirir. Baza massivi
-(`FREE_MODEL_BUDGETS`) heç vaxt dəyişdirilmir — hər çağırışda yeni `MergedEntry[]` hesablanır.
+`applyFeed()` (`src/lib/radar/applyFeed.ts`) keşlənmiş lenti birləşdirir** bitdi** statik baza xətti** oxu vaxtı** , `getRadarCatalog()` daxilində. Əsas massiv (`FREE_MODEL_BUDGETS`) heç vaxt mutasiya edilmir — a `MergedEntry[]` hər zəngdə təzə hesablanır.
 
 Üstünlük sırasına görə dörd qayda:
 
-1. **Lent heç vaxt lokal fərdiləşdirməni əvəz etmir.** Hər sahə üzrə: operator
-   qeyddəki sahəni fərdiləşdiribsə (`provider:modelId` açarlı `localOverrides` xəritəsi),
-   lentin həmin konkret sahə üçün dəyəri nəzərə alınmır — operatorun dəyəri üstün olur.
-2. **`enabled: false` qeydi deaktiv edir və mənşəni göstərir.** Qeydi söndürən lent qeydi
-   birləşdirilmiş nəticədə `enabled: false` və `disabledBy: "radar"` təyin edir,
-   beləliklə UI qeydin niyə mövcud vəziyyətdən deaktiv vəziyyətə keçdiyini izah edə bilər.
-3. **Lentdə olmayan, istifadəçi tərəfindən əlavə edilmiş qeyd toxunulmaz qalır.** Yalnız
-   bazada mövcud olan (və ya lokal olaraq əlavə edilmiş) və uyğun lent qeydi olmayan qeydlər
-   dəyişdirilmədən ötürülür.
-4. **Silinmə nişanı qoyulmuş qeyd heç vaxt bərpa edilmir.** Operator qeydi açıq şəkildə silibsə
-   (`tombstones` çoxluğu), lentin sonrakı versiyada həmin `provider:modelId` dəyərini yenidən
-   əlavə etməsi onu geri qaytarmır.
+1. **Lent heç vaxt yerli ləğvin üzərinə yazmır.** Hər sahə üzrə: əgər operator girişdə sahəni fərdiləşdiribsə (`localOverrides` xəritəsi, açarlı `provider:modelId`), həmin xüsusi sahə üçün lentin dəyəri atlanır — operatorun dəyəri qazanır.
+2. **`enabled: false` mənbə ilə girişi deaktiv edir.** Girişi söndürən lent girişi birləşdirilmiş nəticədə `enabled: false` və `disabledBy: "radar"` təyin edir, beləliklə, UI girişin niyə əlçatandan əlil vəziyyətə düşdüyünü izah edə bilər.
+3. **Lentdə olmayan istifadəçi tərəfindən əlavə edilmiş giriş toxunulmaz olaraq qalır.** Yalnız bazada mövcud olan (və ya yerli olaraq əlavə edilmiş) və müvafiq lent girişi olmayan girişlər dəyişməz olaraq keçir.
+4. **Qəbirüstü giriş heç vaxt dirilmir.** Operator bir girişi (`tombstones` dəsti) açıq şəkildə silibsə, sonrakı versiyada həmin `provider:modelId` yenidən əlavə edən lent onu geri gətirmir.
 
-Redaktə edilə bilən sahələr və silinmə nişanları
-`radar_local_model_state` daxilində saxlanılır (miqrasiya `153_radar_local_model_state.sql`). İctimai DB
-adapteri (`src/lib/db/radar.ts`) həmin sətirləri `applyFeed()` tərəfindən istifadə olunan
-`localOverrides` xəritəsinə və `tombstones` çoxluğuna çevirir; istehsal mühitindəki
-`getRadarCatalog()` bu vəziyyəti bayraq, keş və sxem yoxlamaları keçdikdən sonra yükləyir.
-Operator yalnız `displayName` və `enabled` sahələrini redaktə edə bilər. Provayder/model identikliyi,
-lent mənşəyi, kvota, imkanlar, ToS və quraşdırma məlumatları bu interfeys vasitəsilə yazıla bilməz.
+Redaktə edilə bilən sahələr və məzar daşları `radar_local_model_state` (miqrasiya `153_radar_local_model_state.sql`) daxilində saxlanılır. İctimai DB adapteri (`src/lib/db/radar.ts`) həmin sətirləri `applyFeed()` tərəfindən istifadə edilən `localOverrides` xəritəsi və `tombstones` dəstinə çevirir; istehsal `getRadarCatalog()` yükləri bayraq, keş və sxem qapıları keçdikdən sonra vəziyyətə gətirilir. Yalnız `displayName` və `enabled` operator tərəfindən redaktə edilə bilər. Provider/model identifikasiyası, yem mənbəyi, kvota, imkanlar, ToS və quraşdırma məlumatları bu səth vasitəsilə yazıla bilməz.
 
-İdarəetmə paneli dörd lokal əməliyyat təqdim edir:
+İdarə paneli dörd yerli hərəkəti ifşa edir:
 
-- **Redaktə et** lokal ekran adını və aktivlik vəziyyətini dəyişir.
-- **Lokal dəyişiklikləri sıfırla** silinmə nişanını dəyişdirmədən hər iki redaktə edilə bilən sahəni təmizləyir.
-- **Gizlət** silinmə nişanı yaradır ki, sonrakı lent yeniləmələri sətri yenidən yarada bilməsin.
-- **Bərpa et** silinmə nişanını götürür; ayrıca saxlanmış hər hansı fərdiləşdirmə qüvvədə qalır.
+- **Redaktə et** yerli ekran adını və aktiv vəziyyətini dəyişir.
+- **Yerli dəyişiklikləri sıfırlayın** məzar daşı dəyişdirmədən hər iki redaktə edilə bilən sahəni təmizləyir.
+- **Gizlət** qəbir daşı yaradır, ona görə də sonrakı lent yeniləmələri sıranı yenidən yarada bilməz.
+- **Bərpa et** məzar daşını götürür; ayrıca saxlanmış hər hansı ləğvetmə qüvvədə qalır.
 
-Lentdəki `enabled: false` təhlükəsizlik istisnası olaraq qalır: köhnəlmiş lokal
-`enabled: true` dəyərindən üstün olur, birləşdirilmiş qeydi deaktiv saxlayır və
-`disabledBy: "radar"` qeyd edir.
+Lent `enabled: false` təhlükəsizlik istisnası olaraq qalır: köhnə yerli `enabled: true` üzərində qalib gəlir, birləşdirilən girişi qeyri-aktiv saxlayır və `disabledBy: "radar"` qeyd edir.
 
-Kataloq nəşrləri `schemaVersion: 2` istifadə edir. `contextWindow` və `tools`, `vision` və
-`thinking` sahələrinin hər biri müstəqil olaraq `number | null` / `boolean | null` tipindədir: `null`
-naməlum deməkdir, `false` isə D16 ilə təsdiqlənmiş rəsmi provayder mənbəsinin imkanın mövcud olmadığını
-açıq şəkildə bildirməsi deməkdir. Daxili OmniRoute reyestri/model spesifikasiyası bayraqları heç vaxt
-birbaşa lent faktlarına çevrilmir. Müştəri hələ də v1 ani görüntülərini qəbul edir; köhnə qurucu
-`false` dəyərini yoxluq əvəzedicisi kimi istifadə etdiyinə görə, v1-dəki `false` naməlum olaraq
-normallaşdırılır, v1-dəki `true` isə fakt kimi qalır. Naməlum sxem versiyaları bağlı rejimdə uğursuz
-olur və son etibarlı keş əlçatan qalır. Kontekst/imkan dəyəri null olmayan hər bir v2 modeli
-giriş məlumatı tələb etməyən HTTPS `metadataEvidenceUrls[]` daşımalıdır; əks halda sxem yoxlaması
-uğursuz olur və keş əvəz edilmir. Kataloq cədvəli hər üç vəziyyəti `✓`, `✕` və `?` kimi göstərir.
+Kataloq nəşrləri `schemaVersion: 2` istifadə edir. `contextWindow` və `tools`, `vision` və `thinking` hər biri müstəqil olaraq `number | null` / `boolean | null`: `null` naməlum deməkdir, `false` isə D16-confirmed rəsmi provayder mənbəyinin açıq şəkildə qabiliyyətin olmadığını bildirir. Daxili OmniRoute registry/model-spec bayraqları heç vaxt birbaşa faktlara yönəldilmir. Müştəri hələ də v1 snapshotlarını qəbul edir; köhnə qurucu `false` yoxluq yeri tutucusu kimi istifadə etdiyi üçün v1 `false` naməlum olaraq normallaşdırılır, v1 `true` faktiki olaraq qalır. Naməlum sxem versiyaları bağlana bilmir və sonuncu etibarlı keş əlçatan qalır. Qeyri-null context/capability olan hər bir v2 modeli etimadnaməsiz HTTPS `metadataEvidenceUrls[]` daşımalıdır; əks halda sxemin yoxlanılması uğursuz olur və keş dəyişdirilmir. Kataloq cədvəli hər üç vəziyyəti `✓`, `✕` və `?` kimi göstərir.
 
-### İstiqamətləndirilən kombinasiyalar və MCP girişi
+### Rəhbərli kombinlər və MCP girişi
 
-Təsdiqlənmiş `familyId` dəyərləri oxuma zamanı örtükdən sonra saxlanılır və saf
-`buildRadarComboSuggestions()` modulunu (`src/lib/radar/comboSuggestions.ts`) idarə edir. Ailə yalnız
-ən azı iki fərqli provayderin aktiv bağlantıları olduqda və dəqiq seçilmiş model ID-sini təqdim
-etdikdə təklif olunur. Deaktiv modellər, qeyri-aktiv provayderlər, çatışmayan model ID-ləri, təküzvlü
-ailələr və qeyri-müəyyən alias/prefiks uyğunluqları bağlı rejimdə rədd edilir. Təkliflər mövcud
-`priority` strategiyasından istifadə edərək ən böyük təkrarlanan aylıq büdcəni birinci sıralayır;
-UI onları yalnız `POST /api/combos` vasitəsilə yaradır.
+Təsdiqlənmiş `familyId` dəyərləri oxuma vaxtının üst-üstə düşməsindən sağ qalır və təmiz `buildRadarComboSuggestions()` modulunu (`src/lib/radar/comboSuggestions.ts`) idarə edir. Ailə yalnız ən azı iki fərqli provayderin aktiv əlaqəsi olduqda və dəqiq seçilmiş model ID ifşa etdikdə təklif olunur. Əlil modellər, qeyri-aktiv provayderlər, itkin model IDs, singleton ailələri və qeyri-müəyyən alias/prefix uyğunluqları bağlandı. Təkliflər mövcud `priority` strategiyasından istifadə edərək, ilk növbədə ən böyük təkrarlanan aylıq büdcəni sifariş edir; UI onları yalnız `POST /api/combos` vasitəsilə yaradır.
 
-İstiqamətləndirilən UI `/dashboard/radar/combos` ünvanında yerləşir. O, yalnız lokal
-`GET /api/radar/catalog` və `GET /api/combos/builder/options` son nöqtələrini oxuyur. O, heç vaxt Radar sinxronizasiyasını işə salmır,
-provayder giriş məlumatlarını oxumur və ya birbaşa combo verilənlər bazasına yazmır.
+Bələdçi UI `/dashboard/radar/combos`-da yaşayır. O, yalnız yerli `GET /api/radar/catalog` və `GET /api/combos/builder/options` son nöqtələrini oxuyur. O, heç vaxt Radar sinxronizasiyasını işə salmır, provayderin etimadnaməsini oxuyur və ya birbaşa kombinasiya verilənlər bazasına yazmır.
 
-MCP müştəriləri eyni lokal proyeksiyanı `omniroute_radar_catalog` (`read:radar`) vasitəsilə oxuya bilər. İxtiyari
-`provider`, `familyId` və `enabledOnly` filtrləri bir lokal
-`GET /api/radar/catalog` sorğusundan sonra tətbiq edilir. Onun qapalı çıxışına kataloq metadatası, həmçinin provayder/model,
-göstərilən ad, `familyId`, kvota, imkanlar, aktivlik vəziyyəti, mənşə və `disabledBy` daxildir; quraşdırma URL-ləri,
-addımlar, bağlantılar, e-poçt ünvanları, açarlar və yönləndirmə məlumatları heç vaxt qaytarılmır. Bu alət
-yalnız oxuma üçündür və heç vaxt `/api/radar/sync` çağırmır.
+MCP müştəriləri eyni yerli proyeksiyanı `omniroute_radar_catalog` (`read:radar`) ilə oxuya bilər. İsteğe bağlı `provider`, `familyId` və `enabledOnly` filtrləri bir yerli `GET /api/radar/catalog` oxunduqdan sonra qiymətləndirilir. Onun qapalı çıxışına kataloq metadata üstəgəl provider/model, displey adı, `familyId`, kvota, imkanlar, aktiv vəziyyət, mənşə və `disabledBy` daxildir; quraşdırma URLs, addımlar, əlaqələr, e-poçt ünvanları, açarlar və istinad məlumatları heç vaxt geri qaytarılmır. Bu alət yalnız oxunur və heç vaxt `/api/radar/sync` işə salmır. Keşlənmiş lent quraşdırılmış kataloqdan əvvəl olduqda, `meta.olderThanRelease` `true` olur və alət quraşdırılmış kataloqdan modelləri yerli ləğvetmələr və məzar daşları tətbiq etməklə qaytarır.
 
-### Mənşə göstəriciləri
+### Provenans markerləri
 
-Birləşdirilmiş hər bir qeyddə UI-nin nişan kimi göstərdiyi `origin` sahəsi var:
+Hər birləşdirilmiş giriş UI nişan kimi təqdim etdiyi `origin` sahəsini daşıyır:
 
-- `"baseline"` — statik buraxılış kataloqundan dəyişdirilmədən götürülüb.
-- `"radar"` — bir və ya daha çox sahə lent vasitəsilə yenilənib.
-- `"local"` — operatorun bu qeyddə ən azı bir lokal əvəzləməsi var (lokal
-  əvəzləmələr, lentin nə bildirməsindən asılı olmayaraq, 1-ci qaydaya əsasən həmişə üstün tutulur).
+- `"baseline"` — statik buraxılış kataloqundan toxunulmaz.
+- `"radar"` — bir və ya daha çox sahə lent tərəfindən yeniləndi.
+- `"local"` — operatorun bu girişdə ən azı bir yerli ləğvi var (yerli ləğvetmələr həmişə lentin nə deməsindən asılı olmayaraq, 1-ci qayda üzrə lent üzərində qalib gəlir).
 
 ---
 

@@ -62,48 +62,31 @@ Bifrost darbojas tikai kā `external` (sasniedzams tikai, izmantojot `BIFROST_BA
 `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) ļauj izsaucējiem
 filtrēt pēc tā, ko dzinējs faktiski spēj paveikt, nevis kodā veidot katram identifikatoram specifiskus atzarus.
 
-## Ass A — iegultie pakalpojumi (uzraudzītā procesa puse)
+## Axis — iegultie pakalpojumi (uzraudzīta procesa puse)
 
-- **Uzraudzīto procesu reģistrs:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (pašlaik: `9router`, `cliproxy`).
-- **Dzīves cikla pārvaldnieks:** `src/lib/services/ServiceSupervisor.ts` — `start()` palaiž
-  bērnprocesu, gaida `waitForHealthy()` izpildi un novirza stdout/stderr uz gredzenbuferi;
-  `stop()` SIGTERM→SIGKILL; visas darbības tiek secīgi izpildītas zem slēdzenes.
-- **Stāvokļu apvienojums** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error`, kā arī
-  ortogonāls `HealthState = healthy | unhealthy | unknown`.
-- **Kāpēc atsevišķs process (nevis SDK procesa iekšienē)?** Procesu izolācija ļauj
-  katram blakusprocesam neatkarīgi pārvaldīt instalēšanu/palaišanu/apturēšanu/veselības pārbaudi/žurnālus
-  un piemērot palaišanas aizsardzību atgriezeniskās cilpas saskarnei. Procesa iekšējā adaptera modelēšana ir nākotnes darbs —
-  to paredzēts izteikt ar iespējas karogu `native-hot-path`.
+- **Uzraudzīto procesu reģistrs:** `src/lib/services/bootstrap.ts` `SERVICES[]` (šodien: `9router`, `cliproxy`).
+- **Dzīves cikla īpašnieks:** `src/lib/services/ServiceSupervisor.ts` — `start()` nārsto bērnu, ieslēdz `waitForHealthy()`, piesit stdout/stderr gredzena buferim; `stop()` SIGTERM→SIGKILL; viss serializēts zem slēdzenes.
+- **Valsts savienība** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error` plus ortogonāls `HealthState = healthy | unhealthy | unknown`.
+- **Kāpēc atsevišķs process (nevis in-proc SDK)?** Procesa izolācija ir tas, kas padara install/start/stop/health/logs neatkarīgi vadāmu katrai blakusvāģim un ļauj izmantot cilpas iznīcināšanas aizsargu. In-proc adaptera modelēšana ir nākotnes darbs. — `native-hot-path` iespējas karodziņš ir vieta, kur tas būtu izteikts.
 
-### Dzīves cikla maršrutu līgums (`/api/services/<tool>/…`)
+### Dzīves cikla maršruta līgums (`/api/services/<tool>/…`)
 
-Statusa kodi pēc ieceres ir **specifiski stāvoklim/darbības vārdam/ceļam** — tas ir līgums, nevis
-nekonsekvence:
+Statusa kodi ir**state/verb/path-specific pēc dizaina** — šis ir līgums, nevis neatbilstība:
 
-| Izsaukums                     | Nosacījums                                         | Statuss                                  |
-| ----------------------------- | -------------------------------------------------- | ---------------------------------------- |
-| `POST .../start`              | pakalpojums ir `not_installed`                     | **409** (priekšnosacījums)               |
-| `POST .../stop`               | jau apturēts                                       | **200** (idempotenta darbība bez efekta) |
-| `GET .../status`              | Viss kārtībā                                       | **200** (`live ?? row ?? "unknown"`)     |
-| `POST .../start`              | procesa palaišanas kļūme                           | **503** (īslaicīga)                      |
-| `GET .../status`, `.../stop`  | nenotverta kļūda                                   | **500**                                  |
-| `GET /api/services/<x>/logs`  | nezināms rīks `<x>`                                | **404** `Service '<x>' not found`        |
-| `GET .../status?reveal=key`   | trūkst `X-Reveal-Confirm: yes`                     | **403** (tikai 9router)                  |
-| **jebkurš** `/api/services/*` | izsaucējs nav no atgriezeniskās cilpas/privātā LAN | **403 LOCAL_ONLY**                       |
+| Zvaniet                       | Stāvoklis                            | Statuss                              |
+| ----------------------------- | ------------------------------------ | ------------------------------------ |
+| `POST .../start`              | serviss `not_installed`              | **409** (priekšnosacījums)           |
+| `POST .../stop`               | jau apstājies                        | **200** (idempotents no-op)          |
+| `GET .../status`              | OK                                   | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`              | nārsta neveiksme                     | **503** (pārejošs)                   |
+| `GET .../status`, `.../stop`  | nenovērsta kļūda                     | **500**                              |
+| `GET /api/services/<x>/logs`  | nezināms rīks `<x>`                  | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`   | trūkst `X-Reveal-Confirm: yes`       | **403** (tikai 9 maršrutētājs)       |
+| **jebkura** `/api/services/*` | zvanītājs nevis loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-Visu kļūdu atbilžu struktūru veido `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, kur `type` tiek atvasināts no statusa
-(`500→server_error`, `404→not_found`, `409→conflict`, citādi `invalid_request`) un ir
-mašīnapstrādei paredzētais atšķiršanas lauks. Ziņojumi tiek iepriekš sanitizēti
-(`sanitizeErrorMessage()`, stingrais noteikums Nr. 12).
+Visus kļūdu korpusus veido `createErrorResponse()` → `{ error: { message, type }, requestId }`, kur `type` tiek atvasināts no statusa (`500→server_error`, `404→not_found`, `409→conflict`, else `invalid_request`) un ir mašīndarbības diskriminators. Ziņojumi ir iepriekš dezinficēti (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**Atgriezeniskās cilpas aizsargs** ir visbiežākais `403` avots: `/api/services/` ir iekļauts
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`), un
-`src/server/authz/policies/management.ts` noraida jebkuru izsaucēju, kas nav no atgriezeniskās cilpas vai privātā LAN,
-**pirms autentifikācijas**, jo šie maršruti palaiž bērnprocesus (stingrie noteikumi Nr. 15
-un 17). Piekļuve tiem caur publisku tuneli pēc ieceres atgriež `403`.
+**Cilpas aizsargs** ir visizplatītākais `403` avots: `/api/services/` ir `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) un `src/server/authz/policies/management.ts` noraida jebkuru zvanītāju, kas nav atpakaļcilpas/neprivātā LAN.** pirms autorizācijas** , jo šie maršruti rada bērnu procesus (Cietie noteikumi 15. un 17.). To sasniegšana caur publisku tuneli ir `403` pēc dizaina.
 
 ## Ass B — releja maršrutēšanas aizmugursistēma (nosūtīšanas puse)
 

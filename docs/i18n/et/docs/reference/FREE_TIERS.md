@@ -4,60 +4,148 @@
 
 ---
 
-> **Kasutajatele**: otsite lihtsat juhendit? Üksikasjalikud juhised tasuta tehisintellekti kasutamiseks leiate [tasuta tasemete juhendist](../getting-started/FREE-TIERS-GUIDE.md).
+> **Kasutajatele** : Kas otsite lihtsat juhendit? Tasuta AI hankimise samm-sammult juhised leiate tasuta [tasandite](../getting-started/FREE-TIERS-GUIDE.md) juhendist.
 
-> **Viimati uuritud:** 2026-06-17 — teenusepakkujate kaupa tehtud veebiuuring (ametlik dokumentatsioon + viimase 7 päeva uudised, 50 agendiga läbivaatus koos vastandkontrolliga), mille käigus värskendati kõiki tasuta tasemete kvoote ja kasutustingimusi. **Osaline kordusaudit 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — vt allpool kuupäevaga märkust).
-> **Tõeallikas (kataloog):** `open-sse/config/freeModelCatalog.ts` (MUDELIPÕHISED eelarved, puulide kaupa deduplikeeritud). Alltoodud tokenieelarve arvud pärinevad reaalajas veebiuuringust ja on **ligikaudsed** — vt [Metoodika ja piirangud](#methodology--caveats).
+> **Viimati auditeeritud:** 2026-11-23. Iga kvoodiga rida, iga lõpetatud pakkumine ja iga kaardivärav avati sel päeval uuesti teenusepakkuja enda lehel (`config/quality/free-catalog-evidence.json`). Varasemad läbimised: 2026-06-17 pakkujapõhine uuring ja 2026-09-02 osaline kordusaudit.** Tõe allikas (kataloog):** `open-sse/config/freeModelCatalog.ts` (MUDELIpõhised eelarved, basseinipõhised eelarved). Allolevad märgi-eelarve numbrid pärinevad reaalajas veebiuuringutest ja on** lähendamine** — vt [Metoodika ja hoiatused](#methodology--caveats).
 
-## TL;DR — kui palju tasuta järeldusi OmniRoute tegelikult koondab?
+## TL;DR — kui palju vaba järeldusi OmniRoute tegelikult koondab?
 
-Need arvud kirjeldavad kataloogi lõikes eraldi kolmandate osapoolte kontosid ja sobivustingimusi. OmniRoute seda mahtu ei anna: peate hankima nõutud kontod või mandaadid, ühendama sobivad pakkujad ja järgima nende piiranguid. Tegelik kasutatav maht võib olla väiksem, sealhulgas uuel paigaldusel ilma ühegi sobiva marsruudita ka null. Pakkujad, mille märge on `tos: avoid`, jäetakse vaikimisi automaatsest marsruutimisest välja.
+Need arvud kirjeldavad eraldi kolmanda osapoole kontosid ja sobilikkuse tingimusi kogu kataloogis. OmniRoute ei anna seda eelarvet: peate hankima vajalikud kontod või mandaadid, ühendama sobilikud pakkujad ja järgima nende piiranguid. Tegelik kasutatav võimsus võib olla väiksem, sealhulgas null uuel paigaldusel, millel pole sobilikku marsruuti. Pakkujad, millel on märge `tos: avoid` on vaikimisi automaatsest marsruutimisest välja jäetud.
 
-**Kontrollitud 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) pakub ühekordset 5-dollarilist sooduskrediiti, mille saamiseks on vaja makseviisi; see aegub 30 päeva pärast. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) avaldab projekti-, mudeli- ja tasemepõhised päringupiirangud; see jääb kvantifitseeritud kuuülevaatest välja.
+**Kontrollitud 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) pakub ühekordset 5-dollarist sooduskrediiti, mis nõuab makseviisi ja aegub 30 päeva pärast. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) avaldab project/model/tier kiiruspiirangud; see jääb kvantifitseeritud kuupealkirjast väljapoole.
 
-| Mõõdik                                            | Tokenit / kuu              | Tähendus                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dokumenteeritud korduv toetus (püsiv)**         | **~1.62B**                 | Tasuta taseme **kogumid** (mudelipõhises kataloogis), kus iga jagatud kogum on arvestatud **üks kord**. `/api/free-tier/summary` taga olev reaalajas allikas ja juhtpaneeli tasuta taseme eelarve leht. **Kasutage seda arvu.**                                                                          |
-| **+ esimene kuu koos registreerumiskrediitidega** | **~2.22B**                 | Püsiv maht + ühekordsed registreerumiskrediidid (Z.AI 20M, DeepSeek 5M, …), kontode kaupa duplikaadid eemaldatud. **Ainult esimesel kuul** — ei kordu.                                                                                                                                                   |
-| **+ püsivalt tasuta, avaldatud ülempiirita**      | _ei ole kvantifitseeritav_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — tegelik korduv juurdepääs, piiratud päringumäära ja samaaegsusega, **puudub arvestatav tokenipiir**. Loetletud, kuid mitte summeeritud (nende arvestamine kujul `RPM×24/7` on paisutus, mille me tagasi lükkame). |
-| **+ sissemaksega avatav lisamaht**                | **+~24M**                  | Ühekordne **$10** OpenRouteri sissemakse suurendab selle tasuta kogumit 50 → 1000 päringuni päevas. Esitatud eraldi, et see ei suurendaks kunagi püsivat arvu.                                                                                                                                           |
-| **+ piirkondliku identiteedikontrolli taga**      | **+~6M**                   | `modelscope` (Alibaba Cloudi sidumine + Mandri-Hiina tegeliku nimega verifitseerimine). Tegelik korduv kvoot, mis kuvatakse väljadena `gatedRecurringTokens` / `gatedProviders` ja juhtpaneelil. Põhinumbri sisse seda kunagi ei summeerita: +~6M piirkondliku identiteedikontrolli taga.                |
-| Teoreetiline lagi (kõik päringupiirangud, 24/7)   | ~10B                       | Kõigi pakkujate päringupiirangute summa, ekstrapoleerituna katkematule kasutusele. **See ei ole garantii** — ärge kasutage seda põhinumbrina.                                                                                                                                                            |
+| Mõõdik                                          | Tokenid / kuus  | Tähendus                                                                                                                                                                                                                                                                                  |
+| ----------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dokumenteeritud korduv toetus (püsiv)**       | **~ 90M**       | Vaba aste** basseinid** (mudelite kataloog), arvestatakse iga jagatud kogum** üks kord** . `/api/free-tier/summary` reaalajas allikas ja armatuurlaua vaba taseme eelarve leht.** Kasutage seda numbrit.**                                                                                |
+| **+ esimene kuu registreerumiskrediidiga**      | **~ 153M**      | Püsivad + ühekordsed registreerumiskrediidid (Z.AI 20M, DeepSeek 5M, …), dedupped konto kohta.** Ainult esimene kuu** — ei kordu.                                                                                                                                                         |
+| **+ püsivalt tasuta, avaldatud ülempiiri pole** | _mittemääratav_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — tõeline korduv juurdepääs, rate/concurrency-limited,** pole märki, mida lugeda** . Loetletud, mitte kunagi summeeritud (nende arvestamine `RPM×24/7` -ga on inflatsioon, mille me tagasi lükkame). |
+| **+ sissemakse-avamise võimendus**              | **+~ 24M**      | Ühekordne** 10 dollarit** OpenRouter top-up tõstab oma vaba kogumit 50-lt → 1000- req/day. lt Eraldi teatatud, nii et see ei suurenda kunagi püsivat numbrit.                                                                                                                             |
+| **+ piirkondliku identiteedikontrolli taga**    | **+~ 6M**       | `modelscope` (Alibaba Cloud siduv + Mandri-Hiina pärisnime kinnitamine). Tegelik korduv kvoot, kuvatud kujul `gatedRecurringTokens` / `gatedProviders` ja armatuurlaual. Pole kunagi pealkirjas kokku võetud: +~ 6M piirkondliku identiteedi kinnitamise taga.                            |
 
-**Aus kokkuvõte:** _OmniRoute koondab **~1.62B dokumenteeritud tasuta tokenit kuus** (esimesel kuul koos registreerumiskrediitidega kuni ~2.22B) 26 tasuta taseme kogumi kaudu — lisaks pikale sabale püsivalt tasuta ja ülempiirita pakkujaid — ning RTK + Cavemani tihendus (15–95% tokenisääst) võimaldab seda veelgi kaugemale venitada._
+**Aus pealkiri:** _OmniRoute kataloogid**~ 90M tasuta märgid** kuu, mida saate tegelikult kasutada (kuni 153 miljonit ~-i esimesel kuul koos registreerumiskrediidiga), 12-st basseinist koos avaldatud kvoodiga, millele lisandub pikk saba püsivalt tasuta, ilma piiranguteta pakkujaid. RTK + Cavemani tihendamine (15–95% märgisääst) venitab seda veelgi._
 
-> **Miks see langes varasemalt ~1,94 miljardilt.** 2026-06-17 värskendus on aususe korrigeerimine, mitte kaotus: `gemini` arvestatakse nüüd kogumi duplikaatideta (varem paisutas tulemust iga Flashi variandi eraldi loendamine, 462M → 60M), `cloudflare-ai` korrigeeriti tegeliku 10k neuroni/päevani (122M → 30M), `doubao` klassifitseeriti ümber ühekordseks registreerimisboonuseks (mitte korduvaks) ning suletud tasemed eemaldati (`chutes`/`phind`/`kluster` lõpetatud). Osaliselt tasakaalustab seda `llm7` (õige 5M/päev → 150M) ja uued tasuta pakkujad (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Ajaloolised märkmed. Allolevad joonised kirjeldavad tolleaegset kataloogi; need ei ole tänased numbrid._
 >
-> **Veel kord korrigeeritud ~1,37 miljardini versioonis v3.8.42:** `longcat` klassifitseeriti ümber 150M kuus korduvast toetusest ühekordseks 10M registreerimisboonuseks pärast tasuta eelvaate lõppu. Sama aususe reegel — ühtegi pakkujat ei eemaldatud kogemata.
+> **Miks see langes varasemalt 1,94 miljardilt?** 2026-06-17 värskendus on aususe parandus, mitte kahjum: `gemini` on nüüd basseinist eemaldatud (suurendati iga Flashi variandi eraldi loendamisega, 462M → 60M), `cloudflare-ai` on korrigeeritud selle tegelikule 10k-Neurons/day (122M → 30M), `doubao` kordusregistreerimine, aqf-recurring, aqf-recurring. väljalülitustasemed eemaldatud (`chutes`/`phind`/`kluster` tootmine lõpetatud). Osaliselt kompenseerivad `llm7` (õige 5M/day → 150M) ja uued tasuta pakkujad (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Uuendatud 2026-08-26 pärast Felo Webi eemaldamist:** Felo Web on välja jäetud, kuni selle GPL-ist tuletatud päritolu/litsentsimine jääb olekusse HOLD; allikas teatas sel ajal 38 kogumi võtme olemasolust. Kogumi arv on dünaamiline ja CI-ga kontrollitud (`check:docs-counts` katkestab järgu, kui ülaltoodud numbrid erinevad väärtusest `computeFreeModelTotals()`).
+> **Täiendavalt parandatud 1,37 miljardile versioonis 3.8.42:** `longcat` liigitati pärast tasuta eelvaate lõppemist 150M/mo korduvast toetusest ümber ühekordseks 10 miljoniliseks registreerumiskrediidiks. Sama aususe reegel — ükski pakkuja ei langenud kogemata välja.
 >
-> **Kontrollitud uuesti 2026-09-02 pakkujate enda lehtede põhjal** (allikad: `// evidence:` kommentaarid iga uuesti kontrollitud kirje kõrval failis `open-sse/config/freeModelCatalog.data.ts`): `gemini` ja `ollama-cloud` ei avalda enam tokenite arvu (Google eemaldas mudelipõhise tasuta tabeli 2025-12-23; Ollama tasuta pakett on „alustava kasutuse krediidid“) ning need on nüüd loetletud **piiranguta** ja neid ei summeerita (−80M); `groq` puhul on viis **mudelipõhist** 200K TPD piirangut (igaüks 6M, +15M) ning kolm kasutuselt kõrvaldatud ID-d eemaldati; `nara` puhul on üks 7M/päev kogum (+60M, 210M). `mistral`i 1B on nähtav ainult konto konsoolis — vt metoodika jaotist _Tõendiklassid_.
+> **Värskendatud 26.08.2026 pärast Felo Web pensionile jäämist:** Felo Web on välistatud, samas kui selle GPL-st tuletatud provenance/licensing jääb HOLD-le; allikas teatas sel ajal 38 basseinivõtmest.
 >
-> **Uuendatud 2026-11-09 (#19334):** `ollama-cloud` eemaldati tasuta kataloogist pärast seda, kui Ollama lõpetas tasuta taseme ja viis kõik pilvemudelid üle kasutuspõhisele tasule.
+> **Kordusauditeeritud 2026-09-02 pakkujate endi lehtede suhtes** (allikad: `// evidence:` kommentaarid iga uuesti auditeeritud kirje kõrval `open-sse/config/freeModelCatalog.data.ts`-s): `gemini` ja `ollama-cloud` ei avalda enam märki (Google eemaldas mudelipõhise tasuta tabeli 23.12.2025; Ollama tasuta plaan on "alguskasutuskrediit") ja on nüüd loetletud kui** korgita** , mitte kunagi summeeritud (− 80M); `groq` on viis** mudeli kohta** 200K-TPD ülempiirid (igaüks 6 miljonit, + 15 miljonit) koos kolme pensionile jäänud IDs ga; `nara` on üks 7M/day ämber (+ 60M, 210M). `mistral` 1B on nähtav ainult kontokonsoolis. — vt _Tõendusklassid_ jaotises Metoodika.
 >
-> **Korrigeeritud 2026-09-03 (#11773):** `cerebras` klassifitseeriti ümber 30M kuus korduvast toetusest (vana kaardita 1M tokeni/päevane prooviperiood) ühekordseks 5-dollariliseks registreerumiskrediidiks, mis nõuab makseviisi. Sama aususe reegel nagu LongCati puhul.
+> **Värskendatud 2026-11-09 (#19334):** `ollama-cloud` eemaldati tasuta kataloogist pärast seda, kui Ollama lõpetas oma tasuta taseme ja muutis kõik pilvemudelid üle jooksvalt tasumisele.
 >
-> **Lisaks xKiro (2026-09-03):** uus `xkiro-free` kogum (150M kuus) lisab 35. korduva kogumi võtme. Felo Web jääb välja, kuni selle GPL-ist tuletatud päritolu/litsentsimine jääb olekusse HOLD. Allikas teatab nüüd **26 korduvast kogumi võtmest** ja **~1,62 miljardist stabiilsest mahust** — see on dünaamiline, CI-ga kontrollitud arv (`check:docs-counts` katkestab järgu, kui see erineb väärtusest `computeFreeModelTotals()`).
+> **Parandatud 2026-09-03 (#11773):** `cerebras` liigitati ümber 30M/mo korduvast toetusest (vana ilma kaardita 1M tokens/day prooviversioon) ühekordseks 5 dollari suuruseks registreerumiskrediidiks, mis nõuab makseviisi. Sama aususe reegel nagu LongCat.
+>
+> **Plus xKiro (2026-09-03):** uus `xkiro-free` bassein (150M/mo) lisab 35. korduva basseini võtme. Felo Web jääb välja jäetud, samas kui selle GPL-ist tuletatud provenance/licensing jääb HOLD-sse. Sel ajal teatas allikas 34 kogumisvõtmest ja 1,62 miljardist žetoonist kuus (stabiilne).
 
-Suurimad **dokumenteeritud** panustajad: `mistral` 1,00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (viis mudelipõhist piirangut), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` on välja jäetud — selle 10M suurune LongCat-2.0 toetus on ühekordne, KYC-ga piiratud registreerimiskrediit, mitte korduv kuueelarve.)
+Suurim** dokumenteeritud** Tänapäeva tegelikule arvule kaasaaitajad: `groq` 24M (4 korki mudeli kohta), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (`longcat` on välistatud — selle 10 miljoni LongCat-2.0 toetus on ühekordne KYC-ga registreerimiskrediit, mitte korduv kuueelarve.)
 
-> ⚠️ Teoreetiline lagi (~10B) on paisutatud ainult kiirusepiirangutel põhinevate pakkujate tõttu, kellel puudub **avaldatud tokenipiirang** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`) ja kelle näitajad oleksid `RPM/TPM × 24/7 × 30d` — teoreetiline maksimum, mida ükski konto ei suuda püsivalt kasutada. Need on kaitstavast arvust välja jäetud (selle asemel kuvatakse need reas „püsivalt tasuta, piiranguta“). See on sama paisutus, mis muudab konkurentide mitme miljardi suurused väited ebausaldusväärseks.
+## Parandus, november 2026
+
+Kuni selle väljalaskeni ütles see leht ja README 1,62 miljardit tasuta žetoonit kuus. See oli vale. Neli basseini sisaldasid 93% sellest ja kõik neli olid teenusepakkuja juures muutunud, samas kui meie kataloog jäi samaks. Tegelik arv on täna ~ 90 miljonit tasuta žetoonit kuus. Tabelis on iga teenusepakkuja juures muutunud teave selle kõrvale, mis meil valesti läks.
+
+| Mis teenusepakkuja juures muutus (kuupäev, allikas)                                                                                                 | Mis meil valesti läks (mis, mis ajast)                                                             |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Mistral: tasuta režiim ei sisalda enam juurdepääsu API (docs.mistral.ai, loe 18.11.2026)                                                            | Lugesime 2026-09-02 konsooli näidu põhjal 1 miljard märki kuus ja ei kontrollinud seda enam kunagi |
+| Nara: tasuta plaanis pole ühtegi mudelit (pakkuja `router.bynara.id/api/plans`, loe 18.11.2026)                                                     | Lugesime 210 miljonit žetoonit kuus                                                                |
+| xKiro: 500 000 märki päevas konto kohta (xkiro.com, loe 18.11.2026)                                                                                 | Kataloogi jäid 30 mudelit IDs, mida enam ei eksisteeri                                             |
+| LLM7: piirangute leht on kadunud ja ükski ametlik leht ei avalda tasuta kvooti (2026-11-23)                                                         | Ilma dateeritud tõenditeta loendasime 150 miljonit märki kuus                                      |
+| Groq: üks tasuta basseini mudel jäi pensionile (2026-09-14)                                                                                         | Bassein säilitas oma vana suuruse                                                                  |
+| AgentRouter: teenusepakkuja loetleb 25-dollarise sisseregistreerimise krediiti päevas ja 50-dollarise kutsega registreerumise eest (loe 23.11.2026) | Loetlesime 200-dollarise registreerumiskrediidi                                                    |
+| Predibase: toode lõppes                                                                                                                             | Lugesime selle registreerumiskrediiti ikkagi esimesel kuul                                         |
+| (mitte ükski)                                                                                                                                       | 16 pakkujat säilitasid pärast pakkumise lõppemist tasuta pakkumise lipu                            |
+| (mitte ükski)                                                                                                                                       | README lubas kordusauditi teha iga kahe nädala tagant. Viimane enne seda oli 2026-09-02            |
+| (mitte ükski)                                                                                                                                       | Dokumendikontroll lubas 0,05B triivi ja ei suutnud lugeda miljonites arve                          |
+
+Ühe kvoodi liitmine rea kohta suurendab iga kataloogi, sealhulgas meie oma. Seetõttu kannabki ridade summeeritud kuju oma silti ja õige istub otse selle all.
+
+## Mis loeb
+
+Rida läheb vabade arvude hulka, kui see kõik kehtib:
+
+- Kvoot kordub ja avaldatakse teenusepakkuja enda lehel koos dateeritud tõenditega kataloogi rea kõrval.
+- Üks konto pakkuja kohta. Mitte midagi, mis vajaks makset, kaarti, deposiiti või isikutšekki (KYC). Kvoot, mille registreerimiseks on vaja telefoninumbrit, Telegram või Discord on loetletud eraldi kui "sotsiaalse registreerumisega", mitte kunagi tegelikus numbris.
+- Ükski pakkuja ei märgistanud `tos: "avoid"`, vaid ainult pakkuja ametlik API.
+- Ühekordse registreerumise krediiti arvestatakse ainult esimese kuu arvus ja ainult siis, kui kaarti ei küsita. Omaette tõuge on ühekordne sissemakse, mis tõstab kvooti. Pakkumised ei lähe kunagi tegelikkuses arvesse.
+- Otsingu-, kõne- ja meediateenuse pakkujad jäävad juurdepääsu tüübi ja iga märgilise arvu järgi tähelepanuta. Nad saavad sellel lehel oma loendused oma ühikutes (tulemused, märgid, pildid), kui need lisab; neid ei lisata kunagi üksteisele ega muudeta märkideks.
+
+Mida iga avalik arv tähendab:
+
+- **Tasuta juurdepääsuga pakkujad** (Täna 50: 43 API võtmega, 6 ilma võtmeta, 1 tööriistakonto kaudu): pakkujad, kellel on vähemalt üks kataloogirida, mis annab vaba juurdepääsu selleni jõudmise järgi.
+- **Vaba juurdepääsuga kataloogi read** (täna 214): üks rida pakkuja ja mudeli kohta.
+- **Avaldatud kvoodiga basseinid** (täna 12): tegeliku arvu taga olevad jagatud kvoodid, millest igaüks loetakse üks kord.
+- **Erilised tasuta mudelid** (täna 185): mudeli ID järgi rühmitatud read.
+- **Tasuta pakkumisega märgistatud** (täna 140 + ): kõik pakkujad, kelle registrikirjes on `hasFree`, sealhulgas otsingu-, kõne- ja meediateenuse pakkujad, prooviversioonid ja registreerumiskrediidid.
+
+Iga loend on kataloogitud, mitte testitud kõne kohta: seal on kirjas, mida kataloog loetleb, mitte seda, et iga marsruut vastab praegu.
+
+## Kuidas me loeme
+
+Kolm joonist pärinevad samast kataloogist, auditeeritud 23.11.2026:
+
+- **Tegelik arv, ~ 90 miljonit tasuta märki kuus.** Iga jagatud kvooti arvestatakse üks kord, seega viis ühe päevaraha taga olevat mudelit on üks toetus. Seda saab tegelikult kasutada iga teenusepakkuja üks konto. Ühekordse registreerimiskrediidiga saate esimesel kuul 153 miljonit ~.
+- **Suur kuju, ~ 11.3B, summeeritakse ridade kaupa** , lõppenud pakkumised sisalduvad. Nii loevad teised kataloogid. Peaaegu kõik see on ajalugu: 98,6% pakkumistest, mida enam ei eksisteeri. Trükime selle ainult koos sildi ja tegeliku kujuga kõrval.
+- **Reaalajas kataloog, ~ 159M summeeritud reaalajas rea kohta** : sama rida-realt summa ilma lõppenud pakkumisteta.
+
+Ridade kaupa meetod (`row-sum-v1`) järgib nelja reeglit:
+
+1. Iga loetletud rida lisatakse sellisena, nagu see on, ilma ühte kogumit jagavaid ridu liitmata.
+2. Lisatakse ainult žetoonides avaldatud kvoodid. Taotlustes, ainepunktides või neuronites avaldatud kvoot loetakse nulliks (`FREE_QUOTA_UNIT` in `open-sse/config/freeModelCatalog.ts`).
+3. Registreerumiskrediidid, sissemaksete suurendamised ja väljalülitatud read (`enabled: false`) jäetakse välja.
+4. Suur arv lisab lõppenud pakkumiste pearaamatu (`open-sse/config/freeModelCatalog.retired.data.ts`) iga loetletud rea viimasele kvoodile. Sellesse sisestatakse ainult read, mis on pärast `RETIRED_LEDGER_SINCE` kasutusest kõrvaldatud, ja iga rida langeb välja 12 kuud pärast selle lõppemist.
+
+Kui ridade kaupa loendamine lakkab olemast või hooldaja nii otsustab, lahkub suur kuju igalt lehelt ja alles jääb vaid tegelik näitaja.
+
+## Eemaldatud / tasuta tase puudub
+
+Pakkujad, kelle tasuta pakkumine lõppes või kelle kinnitust ei õnnestunud kinnitada. Nad jäävad registrisse `hasFree: false` (või on tasuta kataloogist välja jäetud) ja neid ei arvestata kunagi ühegi tasuta arvu hulka. See ei ole OmniRoute nõudmisel eemaldatud pakkujate loend (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Pakkuja                  | Alates     | Miks                                                                                      | Allikas                                             |
+| ------------------------ | ---------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `mistral`                | 2026-11-23 | Tasuta režiim ei sisalda enam API juurdepääsu                                             | docs.mistral.ai (kasutuspiirangud)                  |
+| `nara`                   | 2026-11-23 | Tasuta plaanis pole ühtegi mudelit                                                        | `router.bynara.id/api/plans`                        |
+| `llm7`                   | 2026-11-23 | Ükski ametlik leht ei avalda tasuta kvooti                                                | pakkuja sait                                        |
+| `navy`                   | 2026-11-23 | Ametlikel lehtedel ei õnnestunud ühtegi tasuta kvooti kinnitada                           | api.merevägi                                        |
+| `bluesminds`             | 2026-11-23 | Kasutamiseks on vaja teenusepakkujalt ostetud krediiti                                    | `api.bluesminds.com/api/status`                     |
+| `arcee-ai`               | 2026-11-23 | Ainult tasuline hind                                                                      | docs.arcee.ai (hinnakujundus)                       |
+| `huggingface`            | 2026-11-23 | Tasuta kontodel tuleb krediiti osta või PRO versioonile üle minna                         | huggingface.co (järelduste pakkujate hinnakujundus) |
+| `huggingchat`            | 2026-11-23 | Kallistava näo järeldamiseks on vaja ostetud krediite või PRO                             | huggingface.co (järelduste pakkujate hinnakujundus) |
+| `ainative`               | 2026-11-23 | Hobbyisti plaan makstakse pärast 3-päevast prooviperioodi                                 | pakkuja hinnakujunduse leht                         |
+| `stepfun`                | 2026-11-23 | Ainult kasutuseest tasuline hind                                                          | pakkuja hinnakujunduse leht                         |
+| `predibase`              | 2026-11-23 | Toode on lõpetatud                                                                        | predibase.com                                       |
+| `poolside`               | 2026-10-31 | Otsene järeldus lülitatakse välja                                                         | platform.poolside.ai                                |
+| `amazon-q`               | 2026-05-15 | Uusi tasuta tasemega registreerumisi pole                                                 | pakkuja leht                                        |
+| `chat-oripe`             | 2026-11-23 | API host vastab HTTP 530                                                                  | API peremees                                        |
+| `naga-ai`                | 2026-11-23 | Naga.ac pakkuja duplikaat                                                                 | api.naga.ac                                         |
+| `dxnt`                   | 2026-11-23 | Registreerumisboonus on olemas, kuid ükski mudel seda ei aktsepteeri                      | dxnt.com                                            |
+| `ollama-cloud`           | 2026-11-09 | Pilvemudelid on tasulised märgi eest või kaetud tasuliste plaanidega                      | ollama.com (#19334)                                 |
+| `chutes`                 | 2026-03    | Tasuta tase lõppes                                                                        | pakkuja leht                                        |
+| `phind`                  | 2026-01    | Ettevõte suleti                                                                           | pakkuja leht                                        |
+| `kluster`                | 2026-06-09 | Päikeseloojang (kolis MITO)                                                               | pakkuja leht                                        |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo tasuta tühistatud; Nemotroni pakkumine lõppes 2026-06 (uuesti kinnitatud 2026-06-18) | pakkuja leht                                        |
+| `aimlapi`                | 2026-06-18 | Tasuta tase peatatud                                                                      | pakkuja leht                                        |
+| `yi`                     | 2026-06-18 | Yi-Light on pensionil, makstakse jooksvalt                                                | pakkuja leht                                        |
+| `featherless-ai`         | 2026-06    | Praegust tasuta taset pole                                                                | pakkuja leht                                        |
+| `chipotle`               | 2026-09-15 | Selle taga olev vestlusvidin vastab 404 igal marsruudil (#13131, #4037)                   | amelia.chipotle.com                                 |
+
+`iflytek` / `sparkdesk` jätke loendisse koos tingimustega hoiatusmärkusega: Spark Lite on tasuta, kuid ToS piirab puhverserveri ja relee kasutamist.
 
 ---
 
-## 2026-06-17 värskendus — mis muutus alates 2026-06-05
+## 2026-06-17 värskenda —, mis on muutunud alates 2026-06-05
 
-50 agendiga tehtud veebiuuringu läbivaatus (ametlikud dokumendid + viimase 7 päeva uudised, adversaarselt kontrollitud) värskendas kogu kataloogi. Peamised muudatused:
+50 agendi veebiuuringute pass (ametlikud docs + last-7-days uudised, võistlevalt kinnitatud) värskendas kogu kataloogi. Tähtsündmused:
 
-- **Eemaldatud / tasuta tasandit pole (2026):** `chutes` (tasuta tasand lõppes 2026-03), `phind` (ettevõte lõpetas tegevuse 2026-01), `kluster` (suletud 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo tasuta pakkumine tühistati 2026-05-24, Nemotroni kampaania lõppes 2026-06 — uuesti kontrollitud 2026-06-18), `aimlapi` (tasuta tasand peatatud — uuesti kontrollitud 2026-06-18), `yi` (Yi-Light eemaldati, tasu kasutuse järgi — uuesti kontrollitud 2026-06-18), `featherless-ai` (praegu tasuta tasandit pole), `chipotle` (Chipotle'i "Pepper AI" — pöördprojekteeritud `amelia.chipotle.com` Amelia vestlusvidin, millega teenusepakkuja suhtles, tagastab nüüd igal marsruudil, sealhulgas juurel, vea 404; kasutusest kõrvaldatud/teisaldatud taustsüsteem, kinnitatud 2026-09-15 — kataloogist täielikult eemaldatud, #13131/#4037). `iflytek` / `sparkdesk` jäävad loendisse, kuid nende juures on ToS-i ettevaatusmärkus (Spark Lite on tasuta; ToS piirab puhver-/edastuskasutust).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` suleti 2026-06-01 ja `2.5 Pro` lahkus tasuta tasandilt (2026-04); tasuta tasand hõlmab nüüd **ainult Flash-peret** (2.5/3/3.1/3.5 Flash + Gemma). Kataloog nüüd **koondab** Flash-pere ühte (varem oli arv täis puhutud, sest iga varianti arvestati eraldi: 462M → 60M).
-- **Parandatud arvud:** `cloudflare-ai` 122M → **30M** (tegelik 10k Neuronit/päevas), `doubao` liigitati ümber ühekordseks registreerimiskrediidiks (mitte korduv), `llm7` 4M → **150M** (dokumenteeritud 5M tokenit/päevas), teenuse `together` "-Free" lõpp-punktid lõpetati → ka $25 registreerimiskrediit eemaldatud (nõuab vähemalt $5 suurust ostu, tasuta prooviperioodi pole), teenuse `longcat` Preview lõppes + Flash-mudelid eemaldati kasutusest → ainult **LongCat-2.0**, liigitati ümber ühekordseks **10M** tokeni suuruseks registreerimiskrediidiks (KYC-nõudega, mitte korduv).
-- **Poolside'i otsene järeldusteenus lõpeb (kontrollitud 2026-10-20):** [ametlik platvorm](https://platform.poolside.ai/) teatab sulgemisest **2026-10-31** ja suunab kasutajad mudeleid ise majutamiseks Hugging Face'ist alla laadima. Otsese teenusepakkuja `poolside` juures on see hoiatus. Käsitsi kureeritud tasuta kataloogis pole Poolside'i otseseid kirjeid; selle Poolside'i-nimelised kirjed kuuluvad `kilo-gateway` alla. See teadaanne ei kinnita Kilo, Cline'i, NVIDIA või muude lüüside kaudu pakutavate mudelite saadavust, seega neid kirjeid sellel alusel kasutusest ei eemaldata.
-- **Avastati uued tasuta teenusepakkujad:** ⭐ **Kilo Code** (`kilo-gateway` — vahelduv "Auto Free" valik: NVIDIA Nemotron 3 pere, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 vahelduvat tasuta kodeerimismudelit, värskendatud 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash püsivalt tasuta + 20M registreerimisboonus) ja `arcee-ai` Trinity Large Preview.
-- **Uued ausad kategooriad** (vt Metoodikat): _püsivalt-tasuta-kuid-ülempiirita_ kategooria (tegelik korduv juurdepääs, tokeni ülempiir puudub, seega pole midagi arvestada) ja _sissemaksega avatav tõuge_ (OpenRouter $10 → +24M/kuus), mõlemad tuuakse esile **eraldi**, et need ei puhuks kunagi peanumbrit täis.
+- **Eemaldatud / tasuta tase puudub:** kolis [oma sektsiooni](#removed--no-free-tier).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` suleti 2026-06-01 ja `2.5 Pro` lahkus vabast tasemest (2026-04); tasuta tase on nüüd** Ainult Flash-perekond** (2.5/3/3.1/3.5 Flash + Gemma). Kataloog nüüd** basseinid** Flash-perekond (täiendati iga variandi eraldi loendamisega: 462M → 60M).
+- **Parandatud numbrid:** `cloudflare-ai` 122M →** 30 miljonit** (päris 10k-Neurons/day), `doubao` liigitati ümber ühekordseks registreerumiskrediidiks (mitte korduvaks), `llm7` 4M →** 150 miljonit** (dokumenteeritud 5M tokens/day), `together` "-Free" lõpp-punktid lõpetati → 25 $ registreerumiskrediit eemaldati samuti (nõuab minimaalset 5 $ ostmist, tasuta prooviversiooni pole), `longcat` Eelvaade lõppes + Flash mudelid →**LongCat-2.0** ainult, ümber liigitatud ühekordseks** 10 miljonit**-token registreerumiskrediit (KYC-ga piiratud, mitte korduv).
+- **Basseiniäärse otsejärelduse lõpp (kinnitatud 2026-10-20):** [ametlik platvorm](https://platform.poolside.ai/) teatab väljalülitumisest** 2026-10-31** ja suunab kasutajad Hugging Face'ist oma mudeleid ise hostimiseks alla laadima. Otsene `poolside` pakkuja kannab seda hoiatust. Käsitsi kureeritud tasuta kataloogis pole otseseid basseiniäärseid kirjeid; selle Poolside-nimelised kirjed kuuluvad `kilo-gateway`. See teadaanne ei kinnita Kilo, Cline, NVIDIA või muude lüüside pakutavate mudelite saadavust, mistõttu neid kirjeid selle alusel ei kõrvaldata.
+- **Avastati uued tasuta pakkujad:** ⭐** Kilo kood** (`kilo-gateway` — pöörlev "Auto Free" komplekt: NVIDIA Nemotron 3 perekond, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — 10 pöörlevat vaba kodeerimismudelit, värskendatud 2026-10-20), ⭐** Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash püsivalt tasuta + 20M registreerumisboonus) ja `arcee-ai` Trinity Large eelvaade.
+- **Uued ausad tasemed** (vt metoodika): _püsivalt tasuta, kuid ilma piiranguta_ kategooria (tõeline korduv juurdepääs, ei loeta lubade piirangut) ja _deposiidi avamise võimendus_ (OpenRouter $ 10 → +24M/mo), mõlemad ilmusid** eraldi** nii et nad ei paisuta kunagi pealkirja.
 
-> Üksikasjalik teenusepakkujatepõhine tabel allpool on **2026-06-05 hetktõmmis**; ülaltoodud muudatused asendavad selle. Ajakohane, kanooniline allikas on mudelipõhine kataloog `open-sse/config/freeModelCatalog.ts`.
+> Üksikasjalik pakkujate tabel allpool on** 2026-06-05 hetktõmmis** ; ülaltoodud deltad asendavad selle. Reaalajas kanooniline allikas on mudelipõhine kataloog `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -98,26 +186,30 @@ võrguühenduseta korratav ning ilma andmebaasita testitav. Kui brauseri eelvaad
 loeks ühest allikast ja serveri import teisest, tekiks eelvaade, mis ei vastaks
 klõpsamisel tegelikult toimuvale — see eristus on tahtlik.
 
-## Metoodika ja märkused
+## Metoodika ja hoiatused
 
-- Numbrid on **ülemmäära hinnangud**, mis põhinevad iga teenusepakkuja dokumenteeritud tasuta taseme piirangutel seisuga **2026-06-17** ja on kogutud veebiuuringu käigus. Tasuta tasemed muutuvad pidevalt — kontrollige arvud enne neile tuginemist uuesti.
-- **Mida iga kirje tegelikult kinnitab.** Ühelgi kirjel ei ole reaülest usaldusväärsuse hinnangut ja API ei paku neid — käsitlege kõiki ülaltoodud arve sama, täpsustamata kvaliteediga hinnangutena. Kaks fakti on erinevad, sest need on käsitsi kureeritud, mitte tuletatud: 44 kirjel on sõltumatult dokumenteeritud kindel peatamine (39 neist on xKiro read, millel kõigil on sama päevane limiit) ja 22 kirjel on promptide treenimiseks kasutamise avalikustus. `hardStopGuaranteed` määratakse ainult siis, kui teenusepakkuja enda tingimused ütlevad, et tasuta limiidi ületamine keeldub päringust, selle asemel et hakata teilt vaikselt tasu võtma; allikas on kirje kõrval olevas kommentaaris. Seda ei määrata kunagi vaikimisi väärtusele `true` ning kirje, mida keegi pole kontrollinud, jääb määramata. Seega puuduv hard-stop-lipp tähendab „pole kindlaks tehtud”, mitte „on teada, et võtab teilt tasu”. **STRICT-režiim** (lubatud `freeAccessPolicy=strict` marsruutimise kaitse) usaldab ainult lipuga kirjeid; kõik muud tasuta tasemed jäetakse välja kui `no-hard-stop` (vt `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kui kaitse filtreerib kogumit, näitab operaatorile nähtav logi nii väljaarvamiste arvu kui ka nende `no-hard-stop` osakaalu.
-- `estMonthlyFreeTokens` = ainult korduvad igakuised tokenid. **Ühekordsed registreerumiskrediidid ei kordu** ja nende väärtus on 0. Lõpetatud tasemed on samuti 0.
-- Päevane tokenilimiit → `monthly = daily × 30`. Kui dokumenteeritud on ainult RPD → `RPD × ~800 output tokens × 30`. Kui dokumenteeritud on ainult RPM/TPM (päevalimiiti pole) → **piiramatu** (vt allpool).
-- **Tasuta juurdepääs, kuid avaldatud tokenilimiiti pole** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `nvidia`): nende puhul piiravad kasutust päringu sagedus ja samaaegsus. Liigitame need kategooriasse `recurring-uncapped` ega liida neid **kunagi kokku** — `RPM × 24/7 × 30d` korrutamine annaks väljamõeldud ülempiiri (inflatsioon, mille me tagasi lükkame). NVIDIA API on mõeldud ainult proovikasutuseks; vt allolevat ToS-i märkust.
-- **Sissemaksega avatav suurendus:** ühekordne väike lisamakse, mis suurendab tasuta kvooti püsivalt (OpenRouter: $10 → 1000 req/day ≈ +24M/mo). Esitatakse eraldi arvuna ja jäetakse stabiilsest põhinäitajast välja.
-- **Abikõlblikkusest sõltuvad kvoodid** (`eligibilityGate: "regional-identity"`): tegelik korduv kvoot, mis avaneb alles pärast piirkonnaga seotud isikutuvastust (praegu Mandri-Hiina pärisnimega verifitseerimine). Arvestatakse sama kogumite deduplitseerimise reegli alusel eraldi näitajasse (`gatedRecurringTokens`), mitte kunagi stabiilsesse põhinäitajasse. Režiim (`freeType`) ei muutu, seega marsruutimine ei muutu.
-- **Tõendusklassid.** Reegel: kataloogis olev number viitab oma allikale kirje kõrval olevas `// evidence:` kommentaaris — `public-page` (teenusepakkuja leht, mida igaüks saab lugeda), `api-public` (teenusepakkuja autentimata lõpp-punkt, nt NaraRouteri avalik plaanide lõpp-punkt aadressil router.bynara.id) või `console-verified <date> por <who>` (arv on nähtav ainult konto konsoolis; kommentaaris märgitakse, kes seda nägi ja millal, ning avalik leht, mis kinnitab limiidi olemasolu). Tänane seis: viis 2026-09-02 uuesti auditeeritud plokki sisaldavad seda (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); kirjed, mis pärinevad 2026-09-02 uuest auditist, kasutavad varasemat uurimistulemust kuni nende muutmiseni; iga **uus või muudetud** number, millel puudub tõenduskommentaar, on viga. Praegu on ainult `mistral` konsoolis verifitseeritud.
+- Numbrid on** ülempiiri hinnangud** alates iga teenusepakkuja dokumenteeritud vabataseme limiitidest, viimati kontrollitud** 2026-11-23** iga kvoodiga rea kohta. Tasuta tasemed muutuvad pidevalt — kontrollige enne figuurile lootmist uuesti.
+- **Mille eest kanne tegelikult garanteerib.** Ühelgi kirjel ei ole reapõhise usaldusväärsuse reitingut ja API ei anna ühtegi — käsitleb kõiki ülaltoodud arve sama, kinnitamata kvaliteedi hinnanguna. Kaks fakti on erinevad, kuna need on pigem käsitsi kureeritud, mitte järeldatud: 44 kirjel on sõltumatult dokumenteeritud range stopp (neist 39 xKiro read, mis kõik jagavad ühte päevaraha) ja 22 kirjel on kiire koolituse avalikustamine. `hardStopGuaranteed` määratakse ainult siis, kui teenusepakkuja enda tingimused ütlevad, et tasuta kvoodi ületamine keeldub taotlusest, mitte ei hakka teile vaikselt arvet esitama, kusjuures allikas on kirje kõrval kommentaaris; see ei ole kunagi vaikeväärtus `true` ja kirje, mida keegi pole kontrollinud, jääb määramata. Nii et puuduv hard-stop lipp tähendab "pole loodud", mitte "teada arve".**STRICT režiim** (opt-in `freeAccessPolicy=strict` marsruutimise valvur) usaldab ainult neid kirjeid, mis kannavad lippu; iga teine vaba tasand on `no-hard-stop` -na välistatud (vt `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kui valvur filtreerib basseini, teatab operaatorile nähtav logi nii väljajätmiste arvu kui ka selle `no-hard-stop` osa.
+- `estMonthlyFreeTokens` = ainult korduvad igakuised märgid.** Ühekordse registreerumise krediit ei kordu** ja loetakse 0-ks. Katkestatud tasemed on samuti 0.
+- Igapäevane token cap → `monthly = daily × 30`. Ainult RPD dokumenteeris → `RPD × ~800 output tokens × 30`. Ainult RPM/TPM (ilma päevapiiranguta) →** korgita** (vt allpool).
+- **Tasuta juurdepääs, kuid avaldatud märgipiiranguta** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `nvidia`): need on rate/concurrency-limited. Me liigitame need `recurring-uncapped` ja** kunagi ei võta neid kokku** — korrutamine `RPM × 24/7 × 30d` tooks kaasa fantaasia lae (inflatsiooni, mille me tagasi lükkame). NVIDIAAPI on ainult proovikasutus; vaadake selle ToS hoiatust allpool.
+- **Sissemakse avamise võimendus:** ühekordne väike täiendus, mis tõstab püsivalt tasuta kvooti (OpenRouter: $10 → 1000 req/day ≈ +24M/mo). Esitatud eraldi arvuna, püsivast pealkirjast eemal hoitud.
+- **Abikõlblikkuse piiridega kvoodid** (`eligibilityGate: "regional-identity"`): tõeline korduv kvoot, mis avaneb alles pärast piirkonnaga seotud identiteedikontrolli (tänapäeval Mandri-Hiina pärisnime kontrollimine). Loendatakse sama pool-dedupe reegliga eraldi jooniseks (`gatedRecurringTokens`), mitte kunagi püsivasse pealkirja. Režiim (`freeType`) on muutumatu, seega ei muudeta marsruutimist.
+- **Tõendusklassid.** Reegel: kataloogis olev arv viitab oma allikale `// evidence:` kommentaaris kirje kõrval — `public-page` (teenusepakkuja leht, mida saab lugeda igaüks), `api-public` (pakkuja autentimata lõpp-punkt, nt NaraRouter avaliku plaani lõpp-punkt aadressil ruuter.bynara.id) või `console-verified <date> por <who>` (joonis on nähtav ainult siis, kui see on avalik; leht on nähtav ainult siis, kui kontol on kirjas miinus ja ülem). on olemas). Seisund täna: 2026-09-02 uuesti auditeeritud viis plokki kannavad seda (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); kirjed, mis on tehtud enne 2026-09-02 kordusauditit, pärivad varasema uurimistöö, kuni neid puudutatakse; ükskõik milline** uus või muudetud** number ilma tõendita kommentaarita on viga. Tänapäeval on konsooliga kinnitatud ainult `mistral`.
 
-## Miks on meie number väiksem kui teistel koondajatel?
+---
 
-Enamik selle valdkonna „tasuta tokenite kuus” näitajaid on mudelipõhiste näitajate summad. Meie oma ei ole seda, ja seda meelega:
+## Miks meie arv on väiksem kui teistel koondajatel
 
-- **Iga jagatud kogumit arvestatakse üks kord.** Mistrali tasuta pakett annab organisatsiooni kohta ühe 1B kuus kasutatava limiidi; selle loetlemine viie mudeli all ei muuda seda 5B-ks. Mudelite kaupa summeerides oleks meie enda kataloogi näit **~7.4B** (arvutatud uuesti 2026-09-03; see näitaja ei ole CI-ga kontrollitud — mõõtke seda uuesti alati, kui kataloog muutub) — pealkirjas on **~1.47B**, sest just nii palju saab üks konto iga teenusepakkuja juures tegelikult kulutada.
-- **Päevased limiidid teisendatakse, päringumäärasid mitte.** Dokumenteeritud tokenite/päeva limiit teisendatakse kujule `× 30`; dokumenteeritud päringute/päeva limiit kujule `RPD × ~800 tokens × 30`; teenusepakkujal, kes avaldab ainult päringuid minutis, puudub kuunäitaja ja see on märgitud kui _piiramatu_, mitte summeeritud. Päringumäära korrutamine ööpäevaringse kasutusega on paisutamine, mida me ei aktsepteeri.
-- **Piirkondliku identiteedikontrolli taha jäävad kvoodid kuvatakse eraldi** (`+~6M behind regional identity verification`), sest enamik lugejaid ei saa neid kasutada.
-- **Registreerumiseks saadavad krediidid kehtivad ainult esimesel kuul** ja neist teatatakse teise näitajana; neid ei segata kunagi püsiva näitajaga.
-- **Näitaja jõustatakse CI abil.** `npm run check:docs-counts` arvutab kogusummad kataloogist uuesti ja ebaõnnestab järgu, kui see fail, README või eelarvekaart neist erineb.
+Enamik sellel alal olevaid arve "tasuta märgid kuus" on mudelite siltide summad. Meie oma ei ole meelega:
+
+- **Iga jagatud bassein arvestatakse üks kord.** Viis mudelit ühe toetuse taga on üks toetus, mitte viis. Sama kataloogi ridade kaupa lugemine ja selle printimise põhjus on jaotises [Kuidas me loendame](#how-we-count).
+- **Päevased piirid teisendatakse, intressimäärad mitte.** Dokumenteeritud tokens/day kork muutub `× 30`; dokumenteeritud requests/day kork muutub `RPD × ~800 tokens × 30`; teenusepakkujal, kes avaldab ainult taotlusi minutis** ei** igakuine arv ja on loetletud kui _piiramata_, mitte kunagi summeeritud. Inflatsioonimäära korrutamine 24/7 ga on inflatsioon, millest me keeldume.
+- **Piirkondliku identiteedikontrolli taga olevad kvoodid on näidatud eraldi** (`+~6M behind regional identity verification`), sest enamik lugejaid ei saa neid kasutada.
+- **Registreerumiskrediit on ainult esimesel kuul** ja esitatakse teise arvuna, mis ei ole kunagi sulandunud püsivasse numbrisse.
+- **Mida teeb dokumentide kontroll.** `npm run check:docs-counts` (väljalaskerežiim) arvutab kataloogist ümber tegeliku arvu, esimese kuu näitaja ja kahe rea-rea summad ning ebaõnnestub, kui README, see leht või tasuta tasandite juhend prindib erineva väärtuse või prindib suure numbri ilma sildi ja tegeliku numbrita. Eelarvekaart koostatakse vabastamisel samadest faktidest.
+
+---
 
 ## ToS-i tähelepanu tabel
 
@@ -224,74 +316,74 @@ Enamik selle valdkonna „tasuta tokenite kuus” näitajaid on mudelipõhiste n
 
 ---
 
-## Pakkujate kaupa tasuta tasand (Bytez/Nous kontrollitud 2026-10-15; readite kontroll 2026-09-02; teised 2026-06-17)
+## Pakkujapõhine tasuta tase (kataloogi auditeeritud 23.11.2026)
 
-> Taasgenereeritud mudelite kaupa kataloogist (`open-sse/config/freeModelCatalog.ts`), duplikaatsed kogumid eemaldatud. Sorditud korduvate püsivate tokenite arvu järgi kuus. `uncapped*` = püsivalt tasuta, kuid avaldatud tokenipiiranguta (piiratud päringu sageduse/konkurentsuse alusel) — tegelik juurdepääs, **ei ole pealkirjas sisalduva summa hulka arvestatud**. `—` = ainult krediidipõhine / võtmeta / tokenites mittekvantifitseeritav.
+> Käsitsi hooldatud mudelite kataloogist (`open-sse/config/freeModelCatalog.data.ts`); viimati kontrollitud 2026-11-23. Sorteeritud iga kogumi tegelike igakuiste märkide järgi (iga jagatud kogum loeti üks kord). `uncapped*` = püsivalt tasuta, kuid ilma avaldatud märgipiiranguta (rate/concurrency-limited): tõeline juurdepääs,** mitte** reaalseks figuuriks kokku võetud. `not counted` = on korduv kvoot, mille tegelik näitaja välja jätab (`avoid` või piirkondliku identiteedikontrolli taga). Pakkujad, kelle pakkumine lõppes, on [tasemes Eemaldatud / tasuta](#removed--no-free-tier). `—` = ainult krediit / võtmeta / pole märgiga kvantifitseeritav.
 
-| Pakkuja          | Tasuta tüüp           | Püsivad tokenid/kuu | Esimese kuu krediit | Kasutustingimused | Mudelid |
-| ---------------- | --------------------- | ------------------- | ------------------- | ----------------- | ------- |
-| `mistral`        | korduv                | ~1.00B              | —                   | ettevaatust       | 5       |
-| `nara`           | korduv                | ~210M               | —                   | ettevaatust       | 8       |
-| `llm7`           | korduv                | ~150M               | —                   | ettevaatust       | 4       |
-| `xkiro`          | korduv                | ~150M               | —                   | ettevaatust       | 39      |
-| `longcat`        | ühekordne             | —                   | 10M                 | ettevaatust       | 1       |
-| `cerebras`       | ühekordne             | —                   | $5 krediit          | ettevaatust       | 2       |
-| `cloudflare-ai`  | korduv                | ~30M                | —                   | ettevaatust       | 9       |
-| `groq`           | korduv                | ~30M                | —                   | ettevaatust       | 5       |
-| `api-airforce`   | korduv                | ~24M                | —                   | ettevaatust       | 7       |
-| `bluesminds`     | korduv                | ~7M                 | —                   | ebaselge          | 22      |
-| `sambanova`      | korduv                | ~6M                 | —                   | ettevaatust       | 5       |
-| `arcee-ai`       | korduv                | ~5M                 | —                   | ettevaatust       | 1       |
-| `bazaarlink`     | korduv                | ~4M                 | —                   | ettevaatust       | 32      |
-| `openrouter`     | korduv                | ~1M                 | —                   | ettevaatust       | 1       |
-| `cohere`         | korduv                | ~800K               | —                   | ettevaatust       | 6       |
-| `huggingchat`    | korduv                | ~500K               | —                   | ettevaatust       | 4       |
-| `morph`          | korduv                | ~400K               | —                   | korras            | 2       |
-| `huggingface`    | korduv                | ~200K               | —                   | ettevaatust       | 6       |
-| `kiro`           | korduv                | ~25K                | —                   | vältida           | 12      |
-| `glm-cn`         | piiranguta            | piiranguta\*        | ~20M                | korras            | 4       |
-| `baidu`          | piiranguta            | piiranguta\*        | —                   | ettevaatust       | 1       |
-| `gemini`         | piiranguta            | piiranguta\*        | —                   | ettevaatust       | 4       |
-| `kilo-gateway`   | piiranguta            | piiranguta\*        | —                   | ettevaatust       | 7       |
-| `opencode-zen`   | piiranguta            | piiranguta\*        | —                   | ettevaatust       | 10      |
-| `tencent`        | piiranguta            | piiranguta\*        | —                   | ettevaatust       | 1       |
-| `vertex`         | registreerumiskrediit | —                   | ~300M               | ettevaatust       | 10      |
-| `agentrouter`    | registreerumiskrediit | —                   | ~200M               | ettevaatust       | 4       |
-| `predibase`      | registreerumiskrediit | —                   | ~25M                | ettevaatust       | 1       |
-| `doubao`         | registreerumiskrediit | —                   | ~15M                | ebaselge          | 1       |
-| `ai21`           | registreerumiskrediit | —                   | ~10M                | vältida           | 2       |
-| `deepseek`       | registreerumiskrediit | —                   | ~5M                 | korras            | 2       |
-| `hyperbolic`     | registreerumiskrediit | —                   | ~5M                 | korras            | 8       |
-| `nscale`         | registreerumiskrediit | —                   | ~5M                 | ettevaatust       | 6       |
-| `bytez`          | krediit (korduv)      | —                   | teadmata            | ebaselge          | 1       |
-| `deepinfra`      | registreerumiskrediit | —                   | ~1M                 | ettevaatust       | 22      |
-| `fireworks`      | registreerumiskrediit | —                   | ~1M                 | vältida           | 10      |
-| `nebius`         | registreerumiskrediit | —                   | ~1M                 | ettevaatust       | 1       |
-| `qoder`          | registreerumiskrediit | —                   | ~1M                 | ettevaatust       | 14      |
-| `scaleway`       | registreerumiskrediit | —                   | ~1M                 | korras            | 6       |
-| `novita`         | registreerumiskrediit | —                   | ~500K               | ettevaatust       | 1       |
-| `agy`            | võtmeta               | —                   | —                   | vältida           | 16      |
-| `baichuan`       | võtmeta               | —                   | —                   | ebaselge          | 1       |
-| `blackbox`       | võtmeta               | —                   | —                   | vältida           | 6       |
-| `coze`           | võtmeta               | —                   | —                   | vältida           | 1       |
-| `duckduckgo-web` | võtmeta               | —                   | —                   | vältida           | 6       |
-| `freemodel-dev`  | võtmeta               | —                   | —                   | teadmata          | 4       |
-| `friendliai`     | võtmeta               | —                   | —                   | vältida           | 2       |
-| `iflytek`        | võtmeta               | —                   | —                   | vältida           | 1       |
-| `inference-net`  | võtmeta               | —                   | —                   | ettevaatust       | 3       |
-| `liquid`         | võtmeta               | —                   | —                   | teadmata          | 1       |
-| `monsterapi`     | võtmeta               | —                   | —                   | ebaselge          | 1       |
-| `muse-spark-web` | võtmeta               | —                   | —                   | vältida           | 3       |
-| `nlpcloud`       | võtmeta               | —                   | —                   | vältida           | 1       |
-| `nvidia`         | piiranguta            | piiranguta\*        | —                   | ettevaatust       | 3       |
-| `pollinations`   | võtmeta               | —                   | —                   | ettevaatust       | 31      |
-| `publicai`       | võtmeta               | —                   | —                   | ettevaatust       | 3       |
-| `reka`           | võtmeta               | —                   | —                   | ettevaatust       | 2       |
-| `sensenova`      | võtmeta               | —                   | —                   | ettevaatust       | 1       |
-| `sparkdesk`      | võtmeta               | —                   | —                   | ettevaatust       | 1       |
-| `stepfun`        | võtmeta               | —                   | —                   | korras            | 1       |
-| `t3-web`         | võtmeta               | —                   | —                   | väldi             | 23      |
-| `uncloseai`      | võtmeta               | —                   | —                   | ettevaatus        | 3       |
+| Pakkuja          | Vaba tüüp             | Tõeline tokens/mo                      | Esimese kuu krediit | ToS              | Mudelid |
+| ---------------- | --------------------- | -------------------------------------- | ------------------- | ---------------- | ------- |
+| `api-airforce`   | korduv                | ~ 24M                                  | —                   | ettevaatust      | 5       |
+| `groq`           | korduv                | ~ 24M (4 korki mudeli kohta)           | —                   | ettevaatust      | 4       |
+| `cloudflare-ai`  | korduv                | ~ 23M                                  | —                   | ettevaatust      | 8       |
+| `xkiro`          | korduv                | ~ 15M                                  | —                   | ettevaatust      | 9       |
+| `bazaarlink`     | korduv                | ~ 1.4M                                 | —                   | ettevaatust      | 1       |
+| `openrouter`     | korduv                | ~ 1,2M                                 | —                   | ettevaatust      | 1       |
+| `cohere`         | korduv                | ~ 800K                                 | —                   | ettevaatust      | 6       |
+| `sambanova`      | korduv                | ~ 480K                                 | —                   | ettevaatust      | 2       |
+| `morph`          | korduv                | ~ 160K                                 | —                   | okei             | 2       |
+| `glm-cn`         | korgita               | kaaneta\*                              | 20 miljonit         | okei             | 4       |
+| `agnes`          | korgita               | kaaneta\*                              | —                   | okei             | 3       |
+| `agnes-cn`       | korgita               | kaaneta\*                              | —                   | okei             | 3       |
+| `aion`           | korgita               | kaaneta\*                              | —                   | okei             | 4       |
+| `baidu`          | korgita               | kaaneta\*                              | —                   | ettevaatust      | 1       |
+| `gemini`         | korgita               | kaaneta\*                              | —                   | ettevaatust      | 4       |
+| `glm`            | korgita               | kaaneta\*                              | —                   | okei             | 2       |
+| `kilo-gateway`   | korgita               | kaaneta\*                              | —                   | ettevaatust      | 12      |
+| `nvidia`         | korgita               | kaaneta\*                              | —                   | ettevaatust      | 3       |
+| `onomeo`         | korgita               | kaaneta\*                              | —                   | ettevaatust      | 2       |
+| `requesty`       | korgita               | kaaneta\*                              | —                   | ettevaatust      | 2       |
+| `sealion`        | korgita               | kaaneta\*                              | —                   | okei             | 5       |
+| `tokenharbor`    | korgita               | kaaneta\*                              | —                   | ettevaatust      | 2       |
+| `coze`           | korduv                | ei loeta (`avoid`)                     | —                   | vältida          | 1       |
+| `inference-net`  | korduv                | ei arvestata                           | —                   | ettevaatust      | 3       |
+| `kiro`           | korduv                | ei loeta (`avoid`)                     | —                   | vältida          | 7       |
+| `modelscope`     | korduv                | piirkondliku identiteedikontrolli taga | —                   | ettevaatust      | 2       |
+| `nlpcloud`       | korduv                | ei loeta (`avoid`)                     | —                   | vältida          | 1       |
+| `reka`           | korduv                | ei arvestata                           | —                   | ettevaatust      | 2       |
+| `t3-web`         | korduv                | ei loeta (`avoid`)                     | —                   | vältida          | 23      |
+| `bytez`          | krediit (salvestatud) | —                                      | —                   | mitmetähenduslik | 1       |
+| `doubao`         | registreerumiskrediit | —                                      | 15 miljonit         | mitmetähenduslik | 1       |
+| `longcat`        | registreerumiskrediit | —                                      | 10 miljonit         | ettevaatust      | 1       |
+| `deepseek`       | registreerumiskrediit | —                                      | 5 milj              | okei             | 2       |
+| `hyperbolic`     | registreerumiskrediit | —                                      | 5 milj              | okei             | 8       |
+| `nscale`         | registreerumiskrediit | —                                      | 5 milj              | ettevaatust      | 6       |
+| `deepinfra`      | registreerumiskrediit | —                                      | 1 milj              | ettevaatust      | 22      |
+| `qoder`          | registreerumiskrediit | —                                      | 1 milj              | ettevaatust      | 9       |
+| `scaleway`       | registreerumiskrediit | —                                      | 1 milj              | okei             | 6       |
+| `novita`         | registreerumiskrediit | —                                      | 500K                | ettevaatust      | 1       |
+| `agentrouter`    | registreerumiskrediit | —                                      | —                   | ettevaatust      | 1       |
+| `ai21`           | registreerumiskrediit | —                                      | —                   | vältida          | 2       |
+| `baichuan`       | registreerumiskrediit | —                                      | —                   | mitmetähenduslik | 1       |
+| `cerebras`       | registreerumiskrediit | —                                      | —                   | ettevaatust      | 2       |
+| `fireworks`      | registreerumiskrediit | —                                      | —                   | vältida          | 10      |
+| `freemodel-dev`  | registreerumiskrediit | —                                      | —                   | teadmata         | 4       |
+| `monsterapi`     | registreerumiskrediit | —                                      | —                   | mitmetähenduslik | 1       |
+| `nebius`         | registreerumiskrediit | —                                      | —                   | ettevaatust      | 1       |
+| `publicai`       | registreerumiskrediit | —                                      | —                   | ettevaatust      | 3       |
+| `sensenova`      | registreerumiskrediit | —                                      | —                   | ettevaatust      | 1       |
+| `vertex`         | registreerumiskrediit | —                                      | —                   | ettevaatust      | 16      |
+| `agy`            | võtmeta               | —                                      | —                   | vältida          | 9       |
+| `aihorde`        | võtmeta               | —                                      | —                   | okei             | 3       |
+| `blackbox`       | võtmeta               | —                                      | —                   | vältida          | 6       |
+| `duckduckgo-web` | võtmeta               | —                                      | —                   | vältida          | 6       |
+| `friendliai`     | võtmeta               | —                                      | —                   | vältida          | 2       |
+| `iflytek`        | võtmeta               | —                                      | —                   | vältida          | 1       |
+| `liquid`         | võtmeta               | —                                      | —                   | teadmata         | 1       |
+| `muse-spark-web` | võtmeta               | —                                      | —                   | vältida          | 3       |
+| `ovhcloud`       | võtmeta               | —                                      | —                   | okei             | 5       |
+| `pollinations`   | võtmeta               | —                                      | —                   | ettevaatust      | 24      |
+| `sparkdesk`      | võtmeta               | —                                      | —                   | ettevaatust      | 1       |
+| `uncloseai`      | võtmeta               | —                                      | —                   | ettevaatust      | 1       |
 
 ---
 

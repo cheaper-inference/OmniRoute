@@ -4,12 +4,11 @@
 
 ---
 
-> **منبع اصلی:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **آخرین بهروزرسانی:** 2026-09-22 — فضاهای نام دامنه به MCP-SERVER.md اشاره دارند
+> **منبع حقیقت:** `src/server/authz/`، `src/shared/constants/publicApiRoutes.ts`، `src/lib/api/requireManagementAuth.ts`، `src/shared/utils/apiAuth.ts`
 
-OmniRoute دارای یک خط لوله احراز هویت آگاه به مسیر است که هر درخواست API را کنترل میکند. طبقهبندی **قطعی** و **بستهدرصورتخطا** است — هر چیزی که قابل طبقهبندی نباشد به عنوان `MANAGEMENT` در نظر گرفته میشود و به یک نشست یا توکن با سطح دسترسی مدیریت نیاز دارد. این صفحه مدل را برای مهندسانی که مسیرها را نگهداری میکنند یا نقاط پایانی جدید طراحی میکنند، توضیح میدهد.
+OmniRoute دارای یک خط لوله مجوز آگاه از مسیر است که هر درخواست API را گیت می کند. طبقه بندی است** قطعی** و** fail-closed** — هر چیزی که نمی تواند طبقه بندی شود به عنوان `MANAGEMENT` ختم می شود و به یک جلسه یا توکن درجه مدیریت نیاز دارد. این صفحه مدل را برای مهندسان حفظ مسیرها یا طراحی نقاط پایانی جدید توضیح می دهد.
 
-![خط لوله AuthZ (3 کلاس مسیر + ارزیابی سیاست)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > منبع: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -182,9 +181,9 @@ Incoming request → src/proxy.ts
 
 هر کلاس مسیر یک خط مشی در `src/server/authz/policies/` دارد:
 
-- **`publicPolicy`** (`policies/public.ts`) — همیشه `allow({ kind: "anonymous", id: "anonymous" })` را برمیگرداند.
+- **`publicPolicy`** (`policies/public.ts`) — همیشه `allow({ kind: "anonymous", id: "anonymous" })` را برمی گرداند.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — را استخراج میکند، از طریق `validateApiKey()` تأیید میکند. تنها زمانی که پرچم ویژگی موثر `REQUIRE_API_KEY` غیرفعال باشد، به ناشناس می رسد. پرچم مؤثر از طریق `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) حل میشود، بنابراین پرچمهای ویژگی داشبورد و متغیرهای محیطی به طور مداوم `/api/v1/*`، `/api/v1beta/*` و نامهای مستعار را کنترل میکنند. خرابی های حل کننده با شکست مواجه می شوند. به درخواستهای جلسه داشبورد در مسیرهای API مشتری (از جمله `/api/v1/models` که توسط کاتالوگ مدل داشبورد استفاده میشود) اجازه میدهد. هنگامی که Entra ID SSO فعال است، یک حامل که از نظر ساختاری یک توکن Entra است (سه بخش base64url، `RS*` alg، `kid`) توسط شاخه SSO مدیریت میشود.** قبل از** `validateApiKey()` و حکم آن نهایی است — هرگز به مسیر کلید API یا شاخه تنزل به ناشناس نمیافتد، بنابراین قطعی ارائهدهنده هویت نمیتواند به دسترسی باز تبدیل شود. کلیدهای ثابت API تحت تأثیر قرار نمی گیرند. [Entra ID SSO](../security/ENTRA_SSO.md) را ببینید.
-- **`managementPolicy`** (`policies/management.ts`) — جلسه داشبورد، درخواستهای داخلی همگامسازی مدل (مطابق با `/api/providers/[name]/(sync-models|models)`) را میپذیرد، یا اگر `isAuthRequired()` false را برگرداند، بهطور کامل رد میشود. 403 (`AUTH_001`) را هنگامی که یک توکن حامل وجود دارد اما نامعتبر است، برمیگرداند، در غیر این صورت 401. همچنین ردیفهای محافظ مسیر (LOCAL_ONLY / ALWAYS_PROTECTED) را قبل از هر شعبه auth — اجرا میکند. [Route Guard Tiers را](../security/ROUTE_GUARD_TIERS.md) ببینید. مسیرهای LOCAL_ONLY در `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (امروز: `/api/mcp/`) ممکن است از غیر حلقه بک دسترسی داشته باشند زمانی که کلید حامل محدوده `manage` را حمل می کند. تمام مسیرهای LOCAL_ONLY دیگر بدون در نظر گرفتن دامنه، دارای حلقه بک سخت هستند.
+- **`managementPolicy`** (`policies/management.ts`) — جلسه داشبورد، درخواستهای داخلی همگامسازی مدل (مطابق با `/api/providers/[name]/(sync-models|models)`) را میپذیرد، یا اگر `isAuthRequired()` false را برگرداند، بهطور کامل رد میشود. 403 (`AUTH_001`) را هنگامی که یک توکن حامل وجود دارد اما نامعتبر است، برمیگرداند، در غیر این صورت 401. همچنین ردیفهای محافظ مسیر (LOCAL_ONLY / ALWAYS_PROTECTED) را قبل از هر شعبه auth — اجرا میکند. [Route Guard Tiers را](../security/ROUTE_GUARD_TIERS.md) ببینید. مسیرهای LOCAL_ONLY در `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (امروزه: `/api/mcp/`) ممکن است از غیر حلقه بک زمانی که کلید حامل دارای محدوده `manage`/`admin` یا محدوده باریک `mcp:connect` (`hasMcpConnectOrManageScope`) باشد یا با یک جلسه داشبورد تأیید شده قابل دسترسی باشد. همه مسیرهای LOCAL_ONLY دیگر بدون در نظر گرفتن دامنه، دارای حلقههای سخت هستند.
 
 یک سیاست موفق `AuthSubject` با `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` برمی گرداند. کنترلکنندههای پاییندست میتوانند آن را از طریق `assertAuth(request, "CLIENT_API")` در `src/server/authz/assertAuth.ts` به جای اجرای مجدد منطق احراز هویت بخوانند.
 
@@ -275,24 +274,24 @@ export async function POST(request: Request) {
 
 مجموعه را بر اساس شکل انتخاب کنید، نه بر اساس سهولت. یک مسیر تکی باید در `PUBLIC_API_ROUTES_EXACT` قرار گیرد (یا برای مسیرهای فقط-GET در `PUBLIC_READONLY_CORS_API_ROUTES`)؛ تنها یک زیردرخت واقعی باید در `PUBLIC_API_ROUTE_PREFIXES` قرار گیرد و **حتماً باید به `/` ختم شود**. قرار دادن یک مسیر تکی در فهرست پیشوندها، تمام مسیرهای مجاوری را که نویسههای ابتدایی یکسانی دارند نیز عمومی میکند — از جمله مسیرهای همخانواده با سگمنت پویا که بعداً اضافه میشوند (GHSA-74g9-q8f6-793h). تستهای واحد موجود در `tests/unit/public-api-routes.test.ts`، `tests/unit/authz/public-route-exact-match.test.ts` و `tests/unit/authz/classify.test.ts` را بهروزرسانی کنید.
 
-## دامنهها
+## محدوده ها
 
-سه فضای نام. هر بررسیکننده فقط رشتههای خود را میخواند. مقایسه جانبی، شامل اینکه چرا `manage` برای `read:compression` در `scopeMatches` شکست میخورد و چرا یک توکن دسترسی `read` نمیتواند `PATCH /api/keys/{id}` را انجام دهد، در [سه فضای نام دامنه](../frameworks/MCP-SERVER.md#three-scope-namespaces) آمده است.
+سه فضای نام هر چکر فقط رشته های خودش را می خواند. ساید بای ساید، از جمله اینکه چرا `manage` `scopeMatches` برای `read:compression` شکست میدهد و چرا رمز دسترسی `read` نمیتواند `PATCH /api/keys/{id}`، [سه فضای نام دامنه](../frameworks/MCP-SERVER.md#three-scope-namespaces) است.
 
-کلیدهای API یک آرایه `scopes` را حمل میکنند (که به صورت JSON در `api_keys.scopes` ذخیره میشود، به `src/lib/db/apiKeys.ts` مراجعه کنید).
+کلیدهای API دارای یک آرایه `scopes` هستند (به صورت JSON در `api_keys.scopes` ذخیره میشوند، به `src/lib/db/apiKeys.ts` مراجعه کنید).
 
 ### دامنه مدیریت
 
-- `manage` / `admin` — `hasManageScope`. دسترسی Bearer به مسیرهای API مدیریت.
-- `mcp:connect`، `self:usage`، `self:account-quota` و `policy:bypass-provider-quota` دامنههای افزودنی با تطابق دقیق هستند. آنها خارج از `MANAGEMENT_API_KEY_SCOPES` قرار دارند. `mcp:connect` فقط بخش غیر-لوپبک `/api/mcp/` را باز میکند.
+- `manage` / `admin` — `hasManageScope`. دسترسی حامل به مدیریت مسیرهای API.
+- `mcp:connect`، `self:usage`، `self:account-quota`، و `policy:bypass-provider-quota` دامنههای تطبیق دقیق افزودنی هستند. بیرون `MANAGEMENT_API_KEY_SCOPES` می نشینند . `mcp:connect` فقط `/api/mcp/` حک شده بدون حلقه را باز می کند.
 
-### دامنههای ابزار MCP
+### محدوده ابزار MCP
 
-کاتالوگ و قوانین تطابق (رشته یکسان، یا دامنهای اعطا شده که به `*` ختم میشود): [دامنههای ابزار MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` در `src/shared/constants/mcpScopes.ts` زیرمجموعه تایپ شده اصلی است، نه آن کاتالوگ کامل. اعمال قوانین در `open-sse/mcp-server/scopeEnforcement.ts` پس از اینکه `resolveCallerScopeContext()` دامنهها را از اطلاعات احراز هویت MCP، فراداده درخواست، یا `OMNIROUTE_MCP_SCOPES` حل و فصل میکند، اجرا میشود. این قابلیت خاموش میماند مگر اینکه `OMNIROUTE_MCP_ENFORCE_SCOPES=true` باشد.
+کاتالوگ و قوانین تطبیق (رشته یکسان، یا محدوده اعطایی که به `*` ختم می شود): [محدوده ابزار MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` در `src/shared/constants/mcpScopes.ts` زیر مجموعه اصلی تایپ شده است، نه آن کاتالوگ کامل. پس از اینکه `resolveCallerScopeContext()` دامنهها را از اطلاعات تأیید اعتبار MCP ، فراداده درخواست یا `OMNIROUTE_MCP_SCOPES` حل کرد، اجرای در `open-sse/mcp-server/scopeEnforcement.ts` اجرا میشود. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` آن را به صورت سراسری روشن میکند (پیشفرض `false`)، اما همیشه برای تماسگیرنده HTTP/SSE که کلید API فاقد `manage`/`admin` است ( `shouldForceScopeEnforcement()` در `open-sse/mcp-server/scopeEnforcement.ts` مراجعه کنید)، بدون توجه به پرچم، اجرا میشود.
 
-### دامنههای توکن دسترسی
+### دامنه های نشانه دسترسی
 
-`read` / `write` / `admin` بر روی توکنهای `oma_live_…`، رتبهبندی شده توسط `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). این رتبه فقط برای اعتبارنامه توکن دسترسی اعمال میشود. به [احراز هویت مدیریت](../guides/MANAGEMENT-AUTH.md) مراجعه کنید.
+`read` / `write` / `admin` در نشانههای `oma_live_…` ، رتبهبندی شده توسط `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). این رتبه فقط برای اعتبار نشانه دسترسی اعمال می شود. [احراز هویت مدیریت را](../guides/MANAGEMENT-AUTH.md) ببینید.
 
 ## Auth Required Toggle
 

@@ -67,37 +67,37 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ---
 
-## სამი მნიშვნელობა
+## სამი ღირებულებები
 
-| მნიშვნელობა | UI-ის წარწერა             | ქცევა                                                                                                                                                          |
-| ----------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`      | `ავტომატური (dual-stack)` | ოჯახს OS ირჩევს. IP-ლიტერალური პროქსი-ჰოსტისთვის ოჯახი თავად ლიტერალით განისაზღვრება; ჰოსტის სახელისთვის ორივე ოჯახი დასაშვებია. ეს ნაგულისხმევი მნიშვნელობაა. |
-| `ipv4`      | `მხოლოდ IPv4`             | კავშირს IPv4-ზე აფიქსირებს. თუ პროქსი-ჰოსტს IPv4 (A) ჩანაწერი არ აქვს, კავშირი უსაფრთხოდ იბლოკება.                                                             |
-| `ipv6`      | `მხოლოდ IPv6`             | კავშირს IPv6-ზე აფიქსირებს. თუ პროქსი-ჰოსტს IPv6 (AAAA) ჩანაწერი არ აქვს, კავშირი უსაფრთხოდ იბლოკება.                                                          |
+| ღირებულება | UI იარლიყი          | ქცევა                                                                                                                                                               |
+| ---------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | `Auto (dual-stack)` | OS ირჩევს ოჯახს. IP-ლიტერატურული მარიონეტული ჰოსტისთვის, ოჯახი არის პირდაპირი მნიშვნელობით; მასპინძლის სახელისთვის ორივე ოჯახი უფლებამოსილია. ეს არის ნაგულისხმევი. |
+| `ipv4`     | `IPv4 only`         | ამაგრებს კავშირს IPv4 სთან. ვერ დაიხურება, თუ პროქსი ჰოსტს არ აქვს IPv4 (A) ჩანაწერი.                                                                               |
+| `ipv6`     | `IPv6 only`         | ამაგრებს კავშირს IPv6 სთან. ვერ დაიხურება, თუ პროქსი ჰოსტს არ აქვს IPv6 (AAAA) ჩანაწერი.                                                                            |
 
-UI-ის სტრიქონები განთავსებულია `src/i18n/messages/en.json`-ში (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
+UI სიმები ცხოვრობს `src/i18n/messages/en.json` ში (`labelFamily`, `familyAuto`, `familyIpv4`, `familyIpv6`, `familyHint`).
 
 ---
 
-## როგორ დავაკონფიგურიროთ
+## როგორ დავაკონფიგურიროთ იგი
 
-### მართვის პანელი
+### დაფა
 
-ამომრჩეველი მდებარეობს **Proxy Pool** ჩანართის პროქსის ფორმაში:
+სელექტორი არის პროქსის სახით** პროქსი აუზი** ჩანართი:
 
-1. გახსენით **Dashboard → Settings → Proxy → Proxy Pool**
-2. დაამატეთ ან ჩაასწორეთ პროქსი
-3. **IP family** ჩამოსაშლელ სიაში აირჩიეთ `ავტომატური (dual-stack)`, `მხოლოდ IPv4` ან `მხოლოდ IPv6`
-4. შეინახეთ
+1. გახსენით** Dashboard → პარამეტრები → Proxy → Proxy Pool**
+2. პროქსის დამატება ან რედაქტირება
+3. დააყენეთ**IP ოჯახი** ჩამოსაშლელი მენიუ `Auto (dual-stack)`, `IPv4 only` ან `IPv6 only`
+4. შენახვა
 
-კონტროლს რენდერს უკეთებს `ProxyRegistryManager.tsx` (`proxy/ProxyPoolTab.tsx`-ში დამონტაჟებული).
+კონტროლი ხორციელდება `ProxyRegistryManager.tsx` მიერ (დამონტაჟებულია `proxy/ProxyPoolTab.tsx` ში).
 
 ### API
 
-`family` ველი პროქსი-რეესტრის შექმნის/განახლების payload-ების ნაწილია, მოწმდება `createProxyRegistrySchema` / `updateProxyRegistrySchema`-ის მიერ (`src/shared/validation/schemas.ts`) და მუშავდება `POST` / `PATCH /api/v1/management/proxies`-ის მიერ:
+`family` ველი არის პროქსი რეესტრის create/update დატვირთვის ნაწილი, დამოწმებული `createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) მიერ და დამუშავებული `POST` / `PATCH /api/v1/management/proxies`:
 
 ```bash
-# შექმენით მხოლოდ IPv6-ის პროქსი
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# არსებული პროქსი შეცვალეთ მხოლოდ IPv4-ზე
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-იგივე ველი ასევე მიიღება upstream-proxy ჩანაწერებისთვის გამოყენებულ inline პროქსის კონფიგურაციის ობიექტში (`upstream_proxy_config.family`, იხილეთ [მონაცემთა მოდელი](#data-model)).
+იგივე ველი ასევე მიღებულია შიდა პროქსის კონფიგურაციის ობიექტით, რომელიც გამოიყენება ზედა პროქსის ჩანაწერებისთვის (`upstream_proxy_config.family`, იხილეთ [მონაცემთა მოდელი](#data-model) ).
 
-პროქსის CRUD/მინიჭების API-ის დანარჩენი ნაწილისთვის იხილეთ [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
+სხვა პროქსი CRUD/assignment API იხილეთ [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md).
 
 ---
 

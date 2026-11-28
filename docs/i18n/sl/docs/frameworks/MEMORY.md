@@ -5,30 +5,12 @@
 ---
 
 > **Vir resnice:** `src/lib/memory/` in `src/app/api/memory/`
-> **Nazadnje posodobljeno:** 2026-06-28 — v3.8.40 (privzeto izklopljeno + naknadna kvantizacija int8)
 
-OmniRoute zagotavlja trajni pomnilnik pogovorov, vezan na ključ API (in
-izbirno na ID seje). Spomini se samodejno pridobivajo iz odgovorov LLM
-z lahkim ujemanjem vzorcev regularnih izrazov in se znova vstavijo v nadaljnje
-zahteve kot začetno sistemsko sporočilo (ali kot prvo uporabniško sporočilo pri
-ponudnikih, ki zavračajo sistemsko vlogo).
+OmniRoute zagotavlja trajen pogovorni pomnilnik, ki ga vnese ključ API (in po izbiri ID seje). Spomini se samodejno ekstrahirajo iz odgovorov LLM prek lahkega ujemanja vzorcev regularnih izrazov in vnesejo nazaj v naslednje zahteve kot vodilno sistemsko sporočilo (ali prvo uporabniško sporočilo za ponudnike, ki zavrnejo sistemsko vlogo).
 
-> **Pomnilnik je privzeto IZKLOPLJEN (v3.8.30+).** `DEFAULT_MEMORY_SETTINGS.enabled`
-> je zdaj `false` (`src/lib/memory/settings.ts`). Omogočanje pomnilnika v
-> **vsako** zahtevo za klepet vstavi do `maxTokens` (~2k) pridobljenega konteksta,
-> ki se obračuna — to je lahko nepričakovan strošek pri novih namestitvah in za
-> odjemalce, ki sami upravljajo svoj kontekst. Izrecno ga omogočite pod
-> **Nastavitve → Pomnilnik** (`MemorySkillsTab` prikaže opozorilo o strošku
-> žetonov, ko je pomnilnik omogočen). Odjemalec lahko pomnilnik izklopi za
-> posamezno zahtevo z glavo zahteve `x-omniroute-no-memory`
-> (`true`/`1`/`yes`) — glejte tabelo glav zahtev v
-> [API_REFERENCE.md](../reference/API_REFERENCE.md). Zahteva brez pomnilnika
-> nastavi `memoryOwnerId = null`, kar za to zahtevo onemogoči **tako** vstavljanje
-> spominov **kot** veščin (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
+> **Pomnilnik je privzeto OFF (v3.8.30 +).** `DEFAULT_MEMORY_SETTINGS.enabled` je zdaj `false` (`src/lib/memory/settings.ts`). Omogočanje pomnilnika vstavi do `maxTokens` (~ 2k) pridobljenega konteksta v** vsak** chat request, ki se zaračuna — kar je presenetljiv strošek za nove namestitve in za stranke, ki upravljajo svoj kontekst. Izrecno se odločite pod** Nastavitve → Pomnilnik** ( `MemorySkillsTab` prikaže opozorilni oblaček žetonske cene, ko je pomnilnik omogočen). Odjemalec lahko izključi eno samo zahtevo z glavo zahteve `x-omniroute-no-memory` (`true`/`1`/`yes`) — glejte tabelo glav zahteve v [API_REFERENCE.md](../reference/API_REFERENCE.md). Zahteva brez pomnilnika nastavi `memoryOwnerId = null`, ki onemogoči** oboje** vnos spomina in spretnosti za to zahtevo (`open-sse/handlers/chatCore/headers.ts::isNoMemoryRequested`).
 
-Pomnilnik je **omejen na posamezni ključ API**, ne na posameznega uporabnika —
-vse zahteve, overjene z istim ključem API, si delijo isti pomnilniški sklad,
-z možnostjo dodatne omejitve po `sessionId`.
+Spomin je** obseg na ključ API** , ne na uporabnika — vsaka zahteva, overjena z istim ključem API, si deli isto pomnilniško področje z izbirnim nadaljnjim obsegom z `sessionId`.
 
 ## Arhitektura
 

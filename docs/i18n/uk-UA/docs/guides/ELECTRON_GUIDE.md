@@ -4,9 +4,9 @@
 
 ---
 
-> **Джерело правди:** робоча область `electron/`** Останнє оновлення:** 2026-06-28 — v3.8.40
+> **Джерело правди:** робоча область `electron/`
 
-OmniRoute постачає кросплатформну настільну програму (Windows / macOS / Linux), побудовану на**Electron 41** +** електрон-будівельник 26.10** . Програма для настільного комп’ютера створює автономний сервер Next.js як дочірній процес, вказує на нього `BrowserWindow` і додає системний лоток, засіб автоматичного оновлення, міст IPC і секретну завантажувальну програму без конфігурації.
+OmniRoute постачає кросплатформну настільну програму (Windows / macOS / Linux), побудовану на**Electron 41** +** електрон-будівельник 26.10** . Програма для настільного комп’ютера створює автономний сервер Next.js як дочірній процес, вказує на нього `BrowserWindow` і додає системний лоток, засіб автоматичного оновлення, міст IPC і секретну завантажувальну програму з нульовою конфігурацією.
 
 ## Архітектура
 
@@ -198,11 +198,11 @@ spawn(process.execPath, [serverScript], {
 
 ## Автоматичне оновлення
 
-Використовує `electron-updater` з провайдером GitHub (`diegosouzapw/OmniRoute`).
+Використовує `electron-updater` з постачальником GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Події, що пересилаються до рендерера через `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (із `percent`), `downloaded`, `error`
-- `installUpdate()` вимикає сервер, а потім викликає `autoUpdater.quitAndInstall()`
+- `installUpdate()` вбиває сервер, а потім викликає `autoUpdater.quitAndInstall()`
 - Пропущено в режимі розробника (`!app.isPackaged`)
 
 ## Побудувати трубопровід
@@ -273,7 +273,7 @@ AppImage підпис є необов’язковим — встановити 
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Релізи публікуються в GitHub Releases (`diegosouzapw/OmniRoute`), де також `electron-updater` перевіряє наявність нових версій.
+Релізи публікуються в GitHub Releases (`cheaper-inference/OmniRoute`), де також `electron-updater` перевіряє наявність нових версій.
 
 ## Усунення несправностей
 

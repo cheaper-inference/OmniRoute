@@ -18,28 +18,24 @@ accesibil la URL-ul app-server configurat**, iar acel CLI trebuie să fie
 
 ---
 
-## 1. Arhitectură
+## 1. Arhitectura
 
 ```
-┌─ Aplicația OmniRoute ────────────┐        ┌─ Sidecar codex-app-server ──────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ token de capabilitate)       │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  își gestionează singur OAuth OpenAI│
-└──────────────────────────────────┘        │  (~/.codex/auth.json, reîmprospătare│
-        │ partajate (volume compose)         │   automată)                         │
-        ▼                                   └─────────────────────────────────────┘
-  codex-appserver-token   → tokenul de capabilitate WS (montat de ambele)
-  codex-appserver-home    → ~/.codex (auth.json scris de panoul de control,
-                             citit de codex app-server din sidecar)
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
+        ▼
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- Sidecar-ul ascultă **doar** în rețeaua compose internă
-  (`ws://codex-app-server:1456`), în spatele unui token de capabilitate. Acesta
-  nu este **niciodată** expus pe gazdă sau pe internet.
-- Codex CLI este inclus în imaginea `omniroute:base`, astfel încât nu este
-  necesară instalarea codex pe gazdă sau pe dispozitivul utilizatorului atunci
-  când rulați sidecar-ul.
+- Sidecarul ascultă** numai** în rețeaua de compunere internă (`ws://codex-app-server:1456`) în spatele unui simbol de capacitate. Este** nu** publicat pe gazdă sau pe internet.
+- Sidecarul folosește `omniroute:cli-no-docker`, construit din ținta `runner-cli-no-docker`, care include Codex CLI.
 
 ## 2. Pornire
 

@@ -54,12 +54,12 @@ OmniRoute agrupa las solicitudes de cada clave API en** sesiones de agente** y r
 
 Qué se graba sin ninguna configuración de cliente:
 
-| Campo    | Fuente                                                                                                                                                                                       |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sesión   | Encabezado `x-claude-code-session-id` (mismo valor que `metadata.user_id.session_id`), estable por sesión                                                                                    |
-| Proyecto | La línea `Primary working directory:` el Código Claude envía en su mensaje de entorno; Las carpetas del árbol de trabajo en `.claude/worktrees/` se resuelven con el nombre del repositorio. |
-| Rama     | `Current branch:` del código git status Claude enviado con el primer mensaje                                                                                                                 |
-| Cliente  | `user-agent` (`claude-cli/<version>`)                                                                                                                                                        |
+| Campo    | Fuente                                                                                                                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sesión   | Encabezado `x-claude-code-session-id` (mismo valor que `metadata.user_id.session_id`), estable por sesión                                                                                   |
+| Proyecto | La línea `Primary working directory:` el Código Claude envía en su mensaje de entorno; Las carpetas del árbol de trabajo en `.claude/worktrees/` se resuelven en el nombre del repositorio. |
+| Rama     | `Current branch:` del código git status Claude enviado con el primer mensaje                                                                                                                |
+| Cliente  | `user-agent` (`claude-cli/<version>`)                                                                                                                                                       |
 
 Codex (`<environment_context><cwd>`) y OpenCode (`x-opencode-session`) se reconocen de la misma manera. llaves con** sin registro** habilitado conserva solo la identificación de la sesión y los campos del proyecto proporcionados en el encabezado; no se almacena nada leído desde el mensaje (ruta, rama).
 
@@ -67,10 +67,10 @@ Codex (`<environment_context><cwd>`) y OpenCode (`x-opencode-session`) se recono
 
 El directorio de trabajo difiere entre máquinas, por lo que el mismo repositorio puede aparecer en diferentes rutas. En su lugar, envíe el proyecto explícitamente: Claude Code agrega los encabezados enumerados en `ANTHROPIC_CUSTOM_HEADERS` a cada solicitud de modelo, y OmniRoute lee dos de ellos:
 
-| Encabezamiento             | Valor                                                                        |
-| -------------------------- | ---------------------------------------------------------------------------- |
-| `x-omniroute-project`      | Nombre del proyecto, por ejemplo `omniroute`                                 |
-| `x-omniroute-project-repo` | Control remoto normalizado, por ejemplo, `github.com/diegosouzapw/OmniRoute` |
+| Encabezamiento             | Valor                                                                             |
+| -------------------------- | --------------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Nombre del proyecto, por ejemplo `omniroute`                                      |
+| `x-omniroute-project-repo` | Control remoto normalizado, por ejemplo, `github.com/cheaper-inference/OmniRoute` |
 
 Ambos sólo se leen para atribución; nunca se reenvían al proveedor ascendente.
 
@@ -284,28 +284,20 @@ se necesitan indicadores adicionales. Sobrescribe esta configuración para una i
 
 ## Solución de problemas
 
-**Claude Code ignora la puerta de enlace** — confirma que `ANTHROPIC_BASE_URL` **no
-incluya `/v1`** y reinicia `claude` (las variables de entorno se leen una sola vez al iniciarse). `omniroute launch`
-se encarga de esto por ti.
+**El código Claude ignora la puerta de enlace** — confirma `ANTHROPIC_BASE_URL` tiene** no `/v1`** y reinicie `claude` (env se lee una vez al inicio). `omniroute launch` se encarga de esto por usted.
 
-**El selector `/model` está vacío / faltan los modelos de la puerta de enlace** — requiere Claude Code
-v2.1.219+ y `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Solo aparecen en el selector los ID de modelo `claude*` /
-`anthropic*`; fuerza cualquier otro modelo con
-`ANTHROPIC_MODEL=<id>` (esto es lo que hacen los perfiles).
+**El selector `/model` está vacío/faltan modelos de puerta de enlace** — necesita Claude Código v2.1.219 + y `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Sólo el modelo `claude*` / `anthropic*` IDs aparece en el selector; fuerza cualquier otro modelo con `ANTHROPIC_MODEL=<id>` (esto es lo que hacen los perfiles).
 
-**`400 Ambiguous model 'claude-…'`** — Claude Code siempre envía ID de modelo **sin prefijo**
-(p. ej., `claude-opus-4-8`), por lo que, cuando están conectados tanto el proveedor Claude Code (`cc/…`) como
-Claude (`claude/…`), el ID sin prefijo coincide con dos rutas y
-OmniRoute se niega a decidir por su cuenta. Puedes solucionarlo de cualquiera de estas formas: fija un ID con prefijo mediante
-`ANTHROPIC_MODEL=cc/claude-opus-4-8`, o activa **Preferir Claude Code para
-modelos Claude sin prefijo** — el conmutador de la página del proveedor Claude, o
-`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (desactivado de forma predeterminada;
-consulta [Entorno](../reference/ENVIRONMENT.md)) —, lo que enruta los ID `claude-*`
-sin prefijo a Claude Code. Los prefijos explícitos de proveedor siempre tienen prioridad.
+**`400 Ambiguous model 'claude-…'`** — Claude El código siempre envía** sin prefijo** modelo IDs (por ejemplo, `claude-opus-4-8`), por lo que cuando los proveedores de Código Claude (`cc/…`) y Claude (`claude/…`) están conectados, la identificación simple coincide con dos rutas y OmniRoute se niega a adivinar. Arréglelo de cualquier manera: fije una identificación con el prefijo `ANTHROPIC_MODEL=cc/claude-opus-4-8` o habilítela** Prefiera el código Claude para modelos Claude sin prefijo** — el interruptor en la página del proveedor Claude, o `OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (desactivado por defecto; consulte [Entorno](../reference/ENVIRONMENT.md) ) — que enruta `claude-*` IDs desnudos al código Claude. Los prefijos de proveedores explícitos siempre ganan.
 
-**Errores de autenticación** — el perfil no contiene ningún token. Usa `omniroute launch --profile`
-(lo inyecta) o exporta `ANTHROPIC_AUTH_TOKEN`.
+**"modo automático... esta sesión no es elegible" (solicitudes de clasificador facturadas)** — en modo automático El código Claude le pide al servidor que revise las acciones dentro de sus propias solicitudes de modelo ( [Anthropic docs](https://code.claude.com/docs/en/auto-mode-classifier-billing) ). Eso necesita el valor `anthropic-beta` `dangerous-tool-use-2026-09-03` y el campo del cuerpo `safeguards` para llegar a Anthropic como un par, y `safeguard_results` más la herramienta ascendente IDs para volver sin cambios. OmniRoute hace esto cuando la solicitud se enruta al proveedor `claude` nativo o a un nodo `anthropic-compatible-*`, transmitido o no (protección de regresión: `tests/integration/claude-auto-mode-classifier-e2e.test.ts`). Otros objetivos no pueden devolver la revisión, por lo que Claude Code recurre a sus propias solicitudes de clasificador y muestra el aviso:
 
-**Los perfiles no están aislados** — cada perfil es un `CLAUDE_CONFIG_DIR` distinto;
-verifica que `echo $CLAUDE_CONFIG_DIR` dentro de la sesión apunte a
-`~/.claude/profiles/<name>`.
+- un modelo en un proveedor no antrópico, o un combo que aterriza en uno;
+- un nodo de retransmisión compatible con Claude-Code (`anthropic-compatible-cc-*`), que reconstruye el cuerpo de la solicitud y no transporta `safeguards`;
+- un OmniRoute anterior que es anterior a las versiones beta permitidas, o una versión del Código Claude inferior a la que la página Anthropic enumera para las sesiones de puerta de enlace.
+
+Ejecute `/status` en código Claude : el** Servidor en modo automático** La fila lee `Enabled` mientras la revisión del servidor está activa. Si esas solicitudes se facturan lo decide Anthropic, no OmniRoute.
+
+**Errores de autenticación** — el perfil no tiene token. Utilice `omniroute launch --profile` (lo inyecta) o exporte `ANTHROPIC_AUTH_TOKEN`.
+
+**Los perfiles no aíslan** — cada perfil es un `CLAUDE_CONFIG_DIR` distinto; verifique `echo $CLAUDE_CONFIG_DIR` dentro de los puntos de sesión en `~/.claude/profiles/<name>`.

@@ -270,150 +270,150 @@ Bu, təkmilləşdirmədən sonra ilk işə salınma zamanı bir dəfə baş veri
 
 ---
 
-## 1proxy Pulsuz Proksi Bazarı
+## 1proxy Pulsuz Proksi Marketplace
 
-> 🆕 **Töhfə verən: [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Məsələ [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** [@oyi77](https://github.com/oyi77) tərəfindən töhfə** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Məsələ [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute dünyanın hər yerindən **yüzlərlə pulsuz, yoxlanılmış proksiyə** giriş təmin etmək üçün **[1proxy](https://1proxy-api.aitradepulse.com)** icma platforması ilə inteqrasiya olunur. Bu, öz proksi infrastrukturu olmayan istifadəçilər üçün idealdır.
+OmniRoute ilə inteqrasiya olunur** [1 proksi](https://1proxy-api.aitradepulse.com)** girişi təmin etmək üçün icma platforması** yüzlərlə pulsuz, təsdiqlənmiş proksi** dünyanın hər yerindən. Bu, öz proxy infrastrukturu olmayan istifadəçilər üçün mükəmməldir.
 
-### İş Prinsipi
+### Necə işləyir
 
 ```
-┌─────────────┐  Sinxronizasiya ┌─────────────────┐  Rotasiya   ┌──────────┐
-│  1proxy API │ ───────────────▶ │  proxy_registry  │ ───────────▶ │ Provayder│
-│   (xarici)  │  500 proksiyə   │  source=oneproxy │ keyfiyyətə  │   API    │
-└─────────────┘      qədər       └─────────────────┘    görə      └──────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Sinxronizasiya** — OmniRoute yoxlanılmış proksiləri 1proxy API-dən əldə edir
-2. **Saxlama** — Proksilər eyni `proxy_registry` cədvəlində `source = 'oneproxy'` ilə saxlanılır
-3. **Filtrləmə** — Protokola, ölkəyə və keyfiyyət balına görə filtrləyin
-4. **Rotasiya** — Keyfiyyət, təsadüfi və ya ardıcıl strategiyalardan istifadə edərək ən yaxşı proksini seçin
-5. **Avtomatik zəiflətmə** — Uğursuz proksilərin keyfiyyət balı azaldılır; həddən aşağı düşdükdə → qeyri-aktiv kimi işarələnir
+1. **Sinxronizasiya** — OmniRoute təsdiqlənmiş proksiləri 1proxy API-dən alır
+2. **Mağaza** — Proksilər `source = 'oneproxy'` ilə eyni `proxy_registry` cədvəlində saxlanılır
+3. **Filtr** — Protokol, ölkə, keyfiyyət balı ilə süzün
+4. **Döndürün** — Keyfiyyətli, təsadüfi və ya ardıcıl strategiyalardan istifadə edərək ən yaxşı proksi seçin
+5. **Avtomatik deqradasiya** — Uğursuz proksilər keyfiyyət xallarını azaldır; eşikdən aşağı → qeyri-aktiv olaraq qeyd edildi
 
-### Proksilərin Sinxronizasiyası
+### Proksilərin sinxronizasiyası
 
-**İdarəetmə Paneli Vasitəsilə:**
+**İdarə Paneli vasitəsilə:**
 
-1. **Parametrlər → 1proxy** bölməsinə keçin
-2. **"İndi Sinxronlaşdır"** düyməsinə klikləyin
-3. Statistikaya baxın: ümumi proksi sayı, aktiv proksilərin sayı, orta keyfiyyət və ölkələr üzrə bölgü
+1. gedin** Parametrlər → 1proxy** nişanı
+2. basın** "İndi sinxronlaşdır"**
+3. Statistikaya baxın: ümumi etibarnamələr, aktiv sayı, orta keyfiyyət, ölkə üzrə bölgü
 
-**API Vasitəsilə:**
+**API vasitəsilə:**
 
 ```bash
-# Sinxronizasiyanı başladın
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Cavab:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
-### Proksilərin Filtrlənməsi
+### Proksilərin filtrlənməsi
 
 ```bash
-# Protokola görə filtrləyin
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Ölkəyə görə filtrləyin
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Minimum keyfiyyət balına görə filtrləyin
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Filtrləri birləşdirin
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### Proksi Keyfiyyət Balları
+### Proksi keyfiyyət balları
 
-Hər bir 1proxy proksisi metadata ilə təqdim olunur:
+Hər 1 proksi proksi metadata ilə gəlir:
 
 | Sahə            | Təsvir                                            |
 | --------------- | ------------------------------------------------- |
-| `qualityScore`  | 1proxy yoxlamasından alınan 0-100 balı            |
+| `qualityScore`  | 1 proksi təsdiqindən 0-100 reytinq                |
 | `latencyMs`     | Ölçülmüş şəbəkə gecikməsi                         |
 | `anonymity`     | `transparent`, `anonymous` və ya `elite`          |
 | `googleAccess`  | Proksinin Google xidmətlərinə daxil olub-olmaması |
 | `countryCode`   | İki hərfli ISO ölkə kodu                          |
-| `lastValidated` | Son yoxlamanın vaxt damğası                       |
+| `lastValidated` | Son doğrulamanın vaxt möhürü                      |
 
 Keyfiyyət balları dinamik şəkildə tənzimlənir:
 
-- **Uğursuz sorğular** balı 10 xal azaldır
-- **Bal ≤10 səviyyəsinə düşdükdə** → proksi `inactive` kimi işarələnir
-- Qeyri-aktiv proksilər rotasiyadan çıxarılır
+- **Uğursuz sorğular** xalı 10 bal azaltmaq
+- **Hesab ≤ 10-a enir** → proxy `inactive` ilə işarələnib
+- Qeyri-aktiv proksilər rotasiyadan xaric edilir
 
-### Rotasiya Strategiyaları
+### Rotasiya strategiyaları
 
 ```bash
-# Keyfiyyətə görə rotasiya (əvvəlcə ən yaxşı proksi) — standart
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Təsadüfi rotasiya
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Ardıcıl (əvvəlcə ən uzun müddət əvvəl yoxlanılan)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
-### Dövrə Qırıcı
+### Circuit Breaker
 
-1proxy sinxronizasiyasının daxili dövrə qırıcısı var:
+1proxy sinxronizasiyası daxili elektrik açarına malikdir:
 
-- **Ardıcıl 5 sinxronizasiya uğursuzluğundan** sonra növbəti sinxronizasiya cəhdləri bloklanır
-- Bu əmrlə sıfırlayın: `resetOneproxyCircuitBreaker()` və ya serveri yenidən başladın
-- Sinxronizasiya statusu `GET /api/settings/oneproxy?action=status` ünvanında mövcuddur
+- sonra** 5 ardıcıl sinxronizasiya uğursuzluğu** , əlavə sinxronizasiya cəhdləri bloklanır
+- Sıfırlayın: `resetOneproxyCircuitBreaker()` və ya serveri yenidən başladın
+- Sinxronizasiya statusu `GET /api/settings/oneproxy?action=status`-da mövcuddur
 
-### 1proxy Proksilərinin Təmizlənməsi
+### 1 proksi proksilərin təmizlənməsi
 
 ```bash
-# Tək bir 1proxy proksisini silin
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# BÜTÜN 1proxy proksilərini təmizləyin (əl ilə əlavə edilmiş proksilərə toxunulmur)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
 ---
 
-## Aşkarlanmadan Yayınma və Gizlilik
+## Aşkarlanma və Gizlilik
 
-OmniRoute trafiki sadəcə proksi üzərindən yönləndirmir — həm də trafikin legitim görünməsini təmin edir:
+OmniRoute yalnız — proksi vasitəsilə trafiki yönləndirmir, həm də trafiki qanuni göstərir:
 
-### TLS Barmaq İzinin Saxtalaşdırılması
+### TLS Barmaq izi Spoofing
 
-Brauzerə bənzər TLS barmaq izləri yaratmaq üçün `wreq-js` istifadə edir və brauzer olmayan TLS əlaqə qurma cəhdlərini işarələyən bot aşkarlama sistemlərindən yayınır.
+Qeyri-brauzer TLS əl sıxmalarını qeyd edən bot aşkarlama sistemlərindən yan keçərək, brauzerə bənzər TLS barmaq izləri yaratmaq üçün `wreq-js` istifadə edir.
 
-### CLI Barmaq İzinin Uyğunlaşdırılması
+### CLI Barmaq İzi Uyğunluğu
 
-**CLI Barmaq İzi Dəyişdiricisi** (`Parametrlər → Təhlükəsizlik`) HTTP başlıqlarını və JSON gövdəsindəki sahələri yerli CLI binar fayllarının (Claude Code, Codex və s.) dəqiq imzasına uyğunlaşdırmaq üçün yenidən sıralayır. Bu, proksi ilə **birlikdə** işləyir:
+The**CLI Barmaq izi keçidi** (`Settings → Security`) HTTP başlıqlarını və JSON əsas sahələrini yerli CLI ikili faylların (Claude Kodu, Codex və s.) dəqiq imzasına uyğunlaşdırmaq üçün yenidən sıralayır. Bu işləyir** üstündə** proxy:
 
 ```
-IP ünvanınız (bloklanıb) → Proksi IP-si (ABŞ) → Provayder API-si
-                           + TLS saxtalaşdırması
-                           + CLI barmaq izi
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-Beləliklə, eyni vaxtda həm **IP maskalanması**, həm də **sorğunun autentikliyi** təmin edilir.
+Hər ikisini alırsınız**IP maskalanması** və** həqiqiliyini tələb edin** eyni vaxtda.
 
-### Proksi IP-sinin Qorunması
+### Proxy IP Qorunması
 
-İdarəetmə panelindəki rəng kodlu nişanlar hansı proksi səviyyəsinin aktiv olduğunu göstərir:
+İdarə panelindəki rəng kodlu nişanlar hansı proksi səviyyəsinin aktiv olduğunu göstərir:
 
-| Nişan | Səviyyə   | Mənası                                           |
-| ----- | --------- | ------------------------------------------------ |
-| 🟢    | Qlobal    | Bütün trafik bu proksi üzərindən keçir           |
-| 🟡    | Provayder | Yalnız bu provayderin trafiki proksiləşdirilir   |
-| 🔵    | Bağlantı  | Bu konkret açar/hesab bu proksidən istifadə edir |
+| Nişan | Səviyyə   | Mənası                                             |
+| ----- | --------- | -------------------------------------------------- |
+| 🟢    | Qlobal    | Bütün trafik bu proxy vasitəsilə keçir             |
+| 🟡    | Provayder | Yalnız bu provayderin trafiki proksiləşdirilmişdir |
+| 🔵    | Əlaqə     | Bu xüsusi key/account bu proksidən istifadə edir   |
 
-Nişan həmçinin yoxlama üçün müəyyən edilmiş proksi IP-sini göstərir.
+Nişan, həmçinin yoxlama üçün həll edilmiş proksi IP göstərir.
 
 ---
 
@@ -777,54 +777,28 @@ Bir əhatə dairəsinə bir neçə proksi təyin edildikdə, OmniRoute hər sor�
 paylayır)
 ```
 
-## Öz Proksiləriniz üçün Avtomatik Nasazlıq İstisnası
+## Öz Proksiləriniz üçün Avtomatik Uğursuzluq İstisnası
 
-1proxy marketplace hovuzu artıq nasaz proksilərin prioritetini avtomatik olaraq azaldır (bax:
-[Proksi Keyfiyyət Balları](#proxy-quality-scores)). Reyestrə **sizin** əlavə etdiyiniz
-proksilər üçün fon rejimində işləyən sağlamlıq planlaşdırıcısı
-(`src/lib/proxyHealth/scheduler.ts`) heç nəyi silmədən eyni «işləməyən üzvü
-zəncirdən avtomatik çıxarma» davranışını təmin edir:
+1proksi bazarı hovuzu artıq özbaşına uğursuz proksiləri avtomatik pisləşdirir (bax: [Proksi Keyfiyyət Xalları](#proxy-quality-scores) ). Proksilər üçün** sən** reyestrə əlavə edildikdə, fon sağlamlığı planlaşdırıcısı (`src/lib/proxyHealth/scheduler.ts`) heç nəyi silmədən eyni "ölü üzvü avtomatik olaraq zəncirdən çıxarmaq" davranışını təmin edir:
 
 ```bash
-# .env — ardıcıl 3 uğursuz yoxlamadan sonra proksini proqram təminatı səviyyəsində deaktiv edin və
-# yoxlamalara yenidən cavab verməyə başladıqda onu avtomatik olaraq aktivləşdirin.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Bunun çoxproksili zəncirə uyğunlaşması:
+Çox proksi zəncirinə necə uyğun gəlir:
 
-1. Planlaşdırıcı qeydiyyatdan keçmiş hər proksini hər `PROXY_HEALTH_INTERVAL_MS`
-   intervalında yoxlayır (standart olaraq 10 dəq.; minimum 1 dəq.).
-2. `PROXY_AUTO_REMOVE_AFTER` sayda ardıcıl **qəti** uğursuzluqdan sonra (real
-   bağlantı xətası — taymaut və ya yoxlama hədəfinin öz 5xx xətası heç vaxt nəzərə
-   alınmır, bax: [Proksi Sağlamlığının Yoxlanması](#proxy-health-checking-v3816)),
-   proksinin `status` dəyəri `dead` olaraq təyin edilir.
-3. `dead`, hovuz/rotasiya həlli tərəfindən istifadə edilən aktiv status filtrinin
-   istisna etdiyi statuslardan biridir, buna görə əhatə dairəsinin rotasiyası
-   (dairəvi / təsadüfi / sabit / gecikmə — bax:
-   [Rotasiya Strategiyası üzrə Qərar Ağacı](#rotation-strategy-decision-tree))
-   həmin proksini yeni sorğulara dərhal verməyi dayandırır. Hovuzdakı digər
-   proksilərə təsir göstərilmir və bütün hovuz heç vaxt xəbərdarlıq etmədən birbaşa
-   bağlantıya keçmir — [4 Səviyyəli Proksi Sistemi](#4-level-proxy-system)
-   bölməsindəki xəta zamanı bağlı qalma qoruyucusuna baxın.
-4. Planlaşdırıcı `dead` proksiləri eyni intervalda yoxlamağa davam edir. Növbəti
-   uğurlu yoxlama `status` dəyərini yenidən `active` vəziyyətinə keçirir və proksi
-   rotasiyaya qayıdır — əl ilə yenidən əlavə etmək tələb olunmur.
+1. Planlayıcı hər bir qeydə alınmış proksi-ni hər `PROXY_HEALTH_INTERVAL_MS` yoxlayır (standart 10 dəqiqə; minimum 1 dəq).
+2. Ardıcıl `PROXY_AUTO_REMOVE_AFTER` sonra** yekun** uğursuzluqlar (həqiqi əlaqə nasazlığı — a timeout və ya zond hədəfinin öz 5xx heç vaxt sayılmaz, bax [Proxy Sağlamlığının Yoxlanması](#proxy-health-checking-v3816) ), proksinin `status` `dead` olaraq təyin edilib.
+3. `dead` pool/rotation həlli tərəfindən istifadə edilən canlı status filtrinin istisna etdiyi statuslardan biridir, ona görə də əhatə dairəsinin fırlanması (dairəvi rejimli / təsadüfi / yapışqan / gecikmə / sessiya — [Fırlanma Strategiyası Qərar Ağacına](#rotation-strategy-decision-tree) baxın) həmin proksinin yeni sorğulara verilməsini dərhal dayandırır. Hovuzdakı başqa heç bir proksi təsirlənmir və bütün hovuz heç vaxt səssizcə birbaşa əlaqəyə qayıtmır — [4-Səviyyəli Proksi Sistemi](#4-level-proxy-system) uğursuz qapalı qoruyucuya baxın.
+4. The scheduler keeps probing `dead` proxies on the same interval. The next successful probe flips `status` back to `active` and it re-enters rotation — no manual re-add required.
 
-Bu funksiya qəsdən **seçim əsasında aktivləşdirilir və dağıdıcı deyil**: standart
-olaraq planlaşdırıcı yalnız uğursuzluqları sayır və qeydə alır (`decision.ts`
-faylındakı C siyasətinə baxın), `PROXY_AUTO_DISABLE` isə heç vaxt sətri silmir —
-bunun üçün ayrıca, daha sərt `PROXY_AUTO_REMOVE` bayrağı nəzərdə tutulub. Hər
-ikisi `true` olaraq təyin edilərsə, `PROXY_AUTO_REMOVE` üstünlük təşkil edir
-(silinmək üzrə olan proksini bu arada proqram təminatı səviyyəsində deaktiv
-etməyin faydası yoxdur). Dəyişənlərin tam siyahısı üçün
-[Mühit Konfiqurasiyası](../reference/ENVIRONMENT.md) arayışına baxın.
+Bu qəsdəndir** qoşulma və dağıdıcı olmayan** : defolt olaraq planlayıcı yalnız uğursuzluqları hesablayır və qeyd edir ( `decision.ts`-da C siyasətinə baxın) və `PROXY_AUTO_DISABLE` heç vaxt ayrı, daha aqressiv `PROXY_AUTO_REMOVE` bayrağının məqsədi olan — cərgəsini silmir. Hər ikisi `true` olaraq təyin edilərsə, `PROXY_AUTO_REMOVE` qalib gəlir (silinmək üzrə olan proksi aralarındakı yumşaq deaktiv üçün heç bir faydası yoxdur). Tam dəyişən siyahısı üçün [Ətraf Mühitin Konfiqurasiyası](../reference/ENVIRONMENT.md) arayışına baxın.
 
 ---
 
-> 📖 **Əlaqəli sənədlər:**
+> 📖** Əlaqədar sənədlər:**
 >
-> - [İstifadəçi Təlimatı](../guides/USER_GUIDE.md) — Ümumi quraşdırma və konfiqurasiya
-> - [API Arayışı](../reference/API_REFERENCE.md) — Tam API sənədləri
-> - [Mühit Konfiqurasiyası](../reference/ENVIRONMENT.md) — Bütün mühit dəyişənləri
+> - [İstifadəçi Təlimatı](../guides/USER_GUIDE.md) — Ümumi quraşdırma və konfiqurasiya - [API İstinad](../reference/API_REFERENCE.md) — Tam API sənədləri - [Ətraf Mühit Konfiqurasiyası](../reference/ENVIRONMENT.md) — Bütün mühit dəyişənləri

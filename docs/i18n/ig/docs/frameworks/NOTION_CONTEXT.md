@@ -62,42 +62,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute na-echekwa token ahụ ma na-eme ọchụchọ ule nwere nsonaazụ 1 ozugbo; ọ bụrụ na Notion
 weghachite ihe njehie, a ga-ehichapụ token ahụ, oku ahụ adaakwa na `400`.
 
-## Ngwaọrụ MCP (6)
+## ngwá ọrụ MCP (6)
 
-A kọwara ha na `open-sse/mcp-server/tools/notionTools.ts`. A na-achọpụta token n'oge
-oku site na `getNotionToken()`; ọ bụrụ na ahazighị nke ọ bụla, ngwaọrụ ahụ na-atụpụ
-`"Notion integration token not configured. Set it in Settings > Context Sources."`
+Akọwapụtara na `open-sse/mcp-server/tools/notionTools.ts`. A na-edozi akara ahụ n'oge oku site na `getNotionToken()`; Ọ bụrụ na ọ nweghị onye ahaziri ngwá ọrụ na-atụfu `"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| Ngwaọrụ                      | Scope          | Nkọwa                                                                                         |
-| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | Jiri ajụjụ ederede chọọ peeji na database (na-eweghachi aha, ID, URL). E kewara ya na peeji.  |
-| `notion_get_page`            | `read:notion`  | Nweta ọdịnaya na metadata nke peeji site na ID ya.                                            |
-| `notion_list_block_children` | `read:notion`  | Depụta block ụmụ niile nke block ma ọ bụ peeji (osisi block). E kewara ya na peeji.           |
-| `notion_query_database`      | `read:notion`  | Jiri `filter` + `sorts` nhọrọ mee query na database (usoro Notion API). E kewara ya na peeji. |
-| `notion_get_database`        | `read:notion`  | Nweta schema/metadata nke database site na ID.                                                |
-| `notion_append_blocks`       | `write:notion` | Tinye block ụmụ na block ma ọ bụ peeji dị adị (karịa akarị block 100 n'otu arịrịọ).           |
+| Ngwá ọrụ                     | Oke            | Nkọwa                                                                                 |
+| ---------------------------- | -------------- | ------------------------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | Chọọ ibe na ọdụ data site na ajụjụ ederede (na-eweghachi aha, IDs, URLs). Edebere ya. |
+| `notion_get_page`            | `read:notion`  | Nweta ọdịnaya na metadata nke ibe site na ID ya.                                      |
+| `notion_list_block_children` | `read:notion`  | Depụta ụmụaka niile ngọngọ nke ngọngọ ma ọ bụ ibe (osisi ngọngọ). Edebere ya.         |
+| `notion_query_database`      | `read:notion`  | Jụọ nchekwa data nwere nhọrọ `filter` + `sorts` (usoro Notion API ). Edebere ya.      |
+| `notion_get_database`        | `read:notion`  | Nweta schema/metadata nke nchekwa data site na ID.                                    |
+| `notion_append_blocks`       | `write:notion` | Tinye ngọngọ ụmụaka na ngọngọ ma ọ bụ ibe dị (max 100 blocks kwa arịrịọ).             |
 
-### Paramita ntinye
+### Ntinye ntinye
 
-- `notion_search` — `query` (mkpụrụedemede 1–500), `pageSize` (1–100, ndabara 20),
-  `startCursor` (nhọrọ).
-- `notion_get_page` — `pageId` (hex mkpụrụedemede 32 ma ọ bụ UUID).
-- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ndabara 50),
-  `startCursor` (nhọrọ).
-- `notion_query_database` — `databaseId`, `filter` (nhọrọ, usoro filter Notion),
-  `sorts` (array nhọrọ), `pageSize` (1–100, ndabara 50), `startCursor` (nhọrọ).
+- `notion_search` — `query` (1-500 chars), `pageSize` (1-100, ndabara 20), `startCursor` (nhọrọ).
+- `notion_get_page` — `pageId` (32-char hex ma ọ bụ UUID).
+- `notion_list_block_children` — `blockId`, `pageSize` (1–100, ndabara 50), `startCursor` (nhọrọ).
+- `notion_query_database` — `databaseId`, `filter` (nhọrọ, Notion usoro nzacha), `sorts` (nhọrọ array), `pageSize` (1-100, ndabara 50), `startCursor` (nhọrọ).
 - `notion_get_database` — `databaseId`.
-- `notion_append_blocks` — `blockId`, `children` (array nke ihe block),
-  `after` (ọnọdụ nhọrọ).
+- `notion_append_blocks` — `blockId`, `children` (usoro ihe mgbochi), `after` (ọnọdụ nhọrọ).
 
-### Scopes
+### Oke
 
-Ngwaọrụ ọgụgụ chọrọ `read:notion`, ebe ngwaọrụ odide chọrọ `write:notion`.
-`withScopeEnforcement()` dị na
-`open-sse/mcp-server/server.ts` na-amanye scopes naanị mgbe `OMNIROUTE_MCP_ENFORCE_SCOPES=true`;
-scopes ndị e kwere ka onye na-akpọ oku jiri na-abịa site na `OMNIROUTE_MCP_SCOPES` (e ji rikoma kewaa)
-ma ọ bụ ọnọdụ scope nke API key enyochara njirimara ya. Lee [MCP-SERVER.md](./MCP-SERVER.md) maka
-usoro scope zuru ezu.
+Ngwa ndị a na-agụ chọrọ `read:notion` na ihe ederede chọrọ `write:notion`. A na-amanye oke `withScopeEnforcement()` na `open-sse/mcp-server/server.ts` mgbe `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, na mgbe niile maka onye na-akpọ HTTP/SSE onye igodo API enweghị `manage`/`admin`; Oghere ekwere nke onye na-akpọ oku na-abịa site na `OMNIROUTE_MCP_SCOPES` (nkewapụrụ rikoma) ma ọ bụ okirikiri igodo API akwadoro. Hụ [MCP-SERVER.md](./MCP-SERVER.md) maka ihe atụ zuru oke.
 
 ## Ebe njedebe
 

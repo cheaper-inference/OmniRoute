@@ -8,124 +8,114 @@
 
 > Samostatne sa spravujúce reťazce modelov s adaptívnym hodnotením + automatickým smerovaním bez konfigurácie
 
-## Automatické smerovanie bez konfigurácie (prefix `auto/`)
+## Zero-Config automatické smerovanie (predpona `auto/` )
 
-> **NOVINKA:** Nie je potrebné vytvárať žiadne combo. Použite prefix `auto/` priamo v ľubovoľnom klientovi.
+Nevyžaduje sa vytváranie komba. Použite `auto` alebo variant `auto/` priamo vo svojom klientovi.
 
 ### Rýchle príklady
 
-| ID modelu      | Variant | Správanie                                                                             |
-| -------------- | ------- | ------------------------------------------------------------------------------------- |
-| `auto`         | default | Všetci pripojení poskytovatelia, stratégia LKGP, vyvážené váhy                        |
-| `auto/coding`  | coding  | Váhy uprednostňujúce kvalitu, vhodné na generovanie kódu                              |
-| `auto/fast`    | fast    | Vážený výber s nízkou latenciou                                                       |
-| `auto/cheap`   | cheap   | Smerovanie optimalizované podľa nákladov (najnižšie náklady ako prvé)                 |
-| `auto/offline` | offline | Uprednostňuje poskytovateľov s najvyššou dostupnou kvótou                             |
-| `auto/smart`   | smart   | Kvalita na prvom mieste + vyššia miera prieskumu (10 %) na lepšie objavovanie modelov |
-| `auto/lkgp`    | lkgp    | Explicitné LKGP (rovnaké ako predvolené `auto`)                                       |
-| `auto/chaos`   | chaos   | Paralelné rozvetvenie, jeden model na poskytovateľa (nejde o vkladanie porúch)        |
+| Model ID            | Správanie                                                                                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`              | Modely vhodných poskytovateľov, stratégia LKGP a vyvážené váhy                                                                                                           |
+| `auto/coding`       | Závažia kvality pre úlohy kódovania                                                                                                                                      |
+| `auto/fast`         | Uprednostňuje nižšiu latenciu a zdravých poskytovateľov                                                                                                                  |
+| `auto/cheap`        | Úsporné váhy: uprednostňuje nižšie katalógové ceny; zachováva priľnavosť LKGP, nie striktne najlacnejšie triedenie                                                       |
+| `auto/subscription` | Iba kvóta zahrnutá v pláne, overená naživo; prázdny fond vráti HTTP 503, nikdy sa neúčtuje záložný účet                                                                  |
+| `auto/thrifty`      | predplatné → bezkľúčové → zadarmo → lacné → prémiové, po jednej priečke; môže účtovať                                                                                    |
+| `auto/offline`      | Uprednostňuje dostupnosť kvót a zdravie poskytovateľa (balíček `offline-friendly` ); Žiadosti — ktoré nie sú v režime offline, stále smerujú k vzdialeným poskytovateľom |
+| `auto/smart`        | Kvalitné závažia s 10% mierou prieskumu                                                                                                                                  |
+| `auto/lkgp`         | Explicitné LKGP s rovnakými váhami ako predvolené `auto`                                                                                                                 |
+| `auto/chaos`        | Paralelný panel s jedným modelom na poskytovateľa, v predvolenom nastavení až piatimi, pričom vráti jednu odpoveď                                                        |
 
-### Kombinácia kategórie × úrovne (`auto/<category>:<tier>`)
+Varianty hmotnosti si zachovávajú priľnavosť LKGP, takže `fast` a `cheap` vyjadrujú preferencie a nie zaručujú najnižšiu latenciu alebo cenu pri každej požiadavke. `auto/chaos` uskutočňuje viacero upstream hovorov. `auto/thrifty` môže využívať platenú kapacitu; návrat k kvóte plánu závisí od obnovenej spôsobilosti a ochladenia pripojenia, nielen od času resetovania. Pozrite si [Smerovanie prvého predplatného](./SUBSCRIPTION_LADDER.md).
 
-Prípony v štýle OpenRouter oddeľujú **aký druh trasy** (kategória) od toho, **ako ju optimalizovať** (úroveň), takže ich môžete ľubovoľne kombinovať (#4235 Phase B, `open-sse/services/autoCombo/suffixComposition.ts`):
+### Kategória × Zloženie úrovne (`auto/<category>:<tier>`)
 
-- **Kategórie** (filtrujú množinu kandidátov podľa schopností): `coding` · `reasoning` · `vision` · `chat` · `multimodal`. `vision`/`multimodal` zachovávajú modely podporujúce obrazový vstup; `reasoning` zachováva modely s uvažovaním/premýšľaním.
-- **Úrovne** (vyberajú váhy hodnotenia/filter množiny): `fast` (rýchle nasadenie) · `cheap` (alias `floor`, úspora nákladov) · `reliable` (stav ističa + stabilita latencie) · `free` / `pro` (filtrujú množinu podľa úrovne modelu prostredníctvom `classifyTier` — bezplatná vs. prémiová úroveň).
+Prípony v štýle OpenRouter sú oddelené** akú trasu** (kategória) od** ako to optimalizovať** (úroveň), takže ich môžete voľne skladať (#4235 fáza B, `open-sse/services/autoCombo/suffixComposition.ts`):
 
-| Príklad                | Výsledok                                                                         |
-| ---------------------- | -------------------------------------------------------------------------------- |
-| `auto/coding:fast`     | množina pre kódovanie, váhy s nízkou latenciou                                   |
-| `auto/coding:cheap`    | množina pre kódovanie, optimalizovaná podľa nákladov (alias `auto/coding:floor`) |
-| `auto/reasoning:pro`   | iba modely s uvažovaním/premýšľaním, prémiová úroveň                             |
-| `auto/vision`          | modely podporujúce obrazový vstup (bez úrovne → vyvážené váhy)                   |
-| `auto/multimodal:free` | modely s multimodálnymi schopnosťami, iba bezplatná úroveň                       |
+- **kategórie** : `coding` · `reasoning` · `vision` · `chat` · `multimodal`. `vision`/`multimodal` udržať modely schopné videnia; `reasoning` zachováva modely reasoning/thinking. `coding` a `chat` nepridávajú filter schopností. Kategórie bez četu vyberajú váhy na prvom mieste pred akýmkoľvek prepísaním úrovne.
+- **Vrstvy** (vyberte bodovacie váhy / filter bazéna): `fast` (rýchlo odoslanie) · `cheap` (alias `floor`, šetriace náklady) · `reliable` (stabilita latencie + pre zdravie ističa) · `free` / `pro` (filtrovanie fondu podľa modelovej úrovne cez `classifyTier` — bezplatná úroveň vs. prémia). `subscription` a `thrifty` aplikujú [rebríček odberov](./SUBSCRIPTION_LADDER.md) založený na pripojení .
 
-Každé platné `auto/<category>[:<tier>]` sa vyhodnocuje na požiadanie; vybraná podmnožina sa zobrazuje v `/v1/models` a na ovládacom paneli (`AUTO_SUFFIX_VARIANTS` v `open-sse/services/autoCombo/builtinCatalog.ts`). Filtrovanie funguje v režime **fail-open** — ak obmedzeniu nezodpovedá žiadny pripojený model, použije sa celá množina, aby sa smerovanie nikdy neprerušilo. Základný hodnotiaci mechanizmus (`combo.ts`) zostáva nezmenený; filter kategórie/úrovne sa aplikuje v `buildAutoCandidates`.
+| Príklad                | Rozhodne sa k                                                      |
+| ---------------------- | ------------------------------------------------------------------ |
+| `auto/coding:fast`     | oprávnený bazén, váhy s nízkou latenciou                           |
+| `auto/coding:cheap`    | oprávnený súbor, váhy šetriace náklady (alias `auto/coding:floor`) |
+| `auto/reasoning:pro`   | Len modely reasoning/thinking, prémiová úroveň                     |
+| `auto/vision`          | modely schopné videnia so závažiami na prvom mieste                |
+| `auto/multimodal:free` | multimodálne modely, iba bezplatná úroveň                          |
 
-> **Aktuálne informácie o modeloch:** vhodnosť pre automatické smerovanie sa určuje pomocou aktuálnych rebríčkov **Arena ELO** a údajov o úrovniach z **models.dev**, keď je zapnutý príznak `ARENA_ELO_SYNC_ENABLED` (inak sa použije statická mapa vhodnosti).
+Akékoľvek platné `auto/<category>[:<tier>]` sa rieši na požiadanie; vybraná podmnožina je inzerovaná v `/v1/models` a na prístrojovej doske (`AUTO_SUFFIX_VARIANTS` v `open-sse/services/autoCombo/builtinCatalog.ts`). Category/tier filtrovanie je** predvolene zatvorené pri poruche** : ak sa nezhodujú žiadne vhodné modely, virtuálne kombo má prázdnu oblasť a nástroj na riešenie rozhovoru vráti HTTP 503 (`src/sse/handlers/chatHelpers.ts`). Filter je `narrowPoolByCategoryTier` v `open-sse/services/autoCombo/virtualFactory.ts`.
+
+`OMNIROUTE_AUTO_FREE_FALLBACK_TO_FULL_POOL=true` obnoví starú rezervu category/tier na celý fond, keď sa filter nič nezhoduje; toto môže zrušiť požadovanú úroveň alebo obmedzenie spôsobilosti. Filtre modelovej rodiny túto rezervu nikdy nepoužívajú a smerovanie len na predplatné si stále vyžaduje overenú kapacitu zahrnutú v pláne.
+
+> **Inteligencia živého modelu:** automatické smerovanie kondície je informované naživo** Aréna ELO** rebríček +** modely.dev** údaje úrovne, keď je zapnutý príznak `ARENA_ELO_SYNC_ENABLED` (v opačnom prípade sa vráti späť na statickú mapu fitness).
 
 **Ako používať:**
 
 ```bash
-# Ľubovoľné IDE alebo nástroj CLI, ktorý podporuje formát OpenAI
+# Any IDE or CLI tool that supports OpenAI format
 Base URL: http://localhost:20128/v1
-API Key:  <váš-kľúč-koncového-bodu>
+API Key:  <your-endpoint-key>
 
-# V kóde/konfigurácii nastavte model na:
-model: "auto"                 # vyvážené predvolené nastavenie
-model: "auto/coding"          # najlepšie pre úlohy programovania
-model: "auto/fast"            # najrýchlejší dostupný
-model: "auto/cheap"           # najlacnejší na token
+# In your code/config, set model to:
+model: "auto"                 # balanced default
+model: "auto/coding"          # favor coding task fit
+model: "auto/fast"            # favor lower latency
+model: "auto/cheap"           # favor lower catalog cost
 ```
 
 **Čo sa stane:**
 
-1. OmniRoute zistí prefix `auto/` v `src/sse/handlers/chat.ts`
-2. Z databázy načíta všetky **aktívne pripojenia poskytovateľov**
-3. Vyfiltruje tie, ktoré majú platné prihlasovacie údaje (kľúč API alebo token OAuth)
-4. Určí model pre každé pripojenie (`connection.defaultModel` alebo prvý model poskytovateľa)
-5. Zostaví **virtuálne combo** v pamäti (neukladá sa do DB)
-6. Smeruje pomocou váhového profilu vybraného variantu + stratégie LKGP
+1. OmniRoute zistí predponu `auto/` v `src/sse/handlers/chat.ts`
+2. Všetky otázky** aktívne pripojenia k poskytovateľovi** z databázy
+3. Používa filtre poverení, viditeľnosti modelu a oprávnenosti
+4. Vytvára logických kandidátov provider/model z dostupných modelov a uchováva zoznamy povolených účtov na odoslanie
+5. Stavia a** virtuálne kombo** v pamäti (nie je uložené v DB)
+6. Trasy využívajúce stratégiu váhového profilu + LKGP zvoleného variantu
 
 **Kľúčové vlastnosti:**
 
-- ✅ **Vždy aktívne:** Nie je potrebný prepínač, vytvorenie comba ani konfigurácia
-- ✅ **Dynamické:** Automaticky zohľadňuje aktuálne pripojených poskytovateľov
-- ✅ **Stabilita relácie:** LKGP zabezpečuje uprednostnenie posledného úspešného poskytovateľa
-- ✅ **Podpora viacerých účtov:** Každé pripojenie poskytovateľa sa stane samostatným kandidátom
-- ✅ **Žiadne zápisy do DB:** Virtuálne combo existuje iba počas požiadavky, bez režijných nákladov na perzistenciu
+- ✅** Vždy zapnuté:** Bez prepínania, bez vytvárania komb, nie je potrebná žiadna konfigurácia
+- ✅** Dynamický:** Automaticky odráža aktuálne pripojených poskytovateľov
+- ✅** Lepivosť relácie:** LKGP zaisťuje uprednostnenie posledného úspešného poskytovateľa
+- ✅** Viacnásobné účty:** Logickí kandidáti provider/model si ponechávajú zoznamy povolených účtov
+- ✅** Nevyžaduje sa žiadna uložená kombinácia:** Virtuálna konfigurácia zostáva v pamäti; normálne metriky smerovania a stav behu môžu stále pretrvávať
 
-### Riadenie kandidátov podľa kľúča (#7819, úroveň 1+2)
+### Kontrola kandidáta na kľúč (#7819, Úroveň 1 + 2)
 
-`GET /v1/auto-combo/{channel}/candidates` (`{channel}` = prípona za `auto/` alebo
-doslovná hodnota `auto` pre základný kanál) je koncový bod **iba na čítanie**, ktorý uvádza
-aktuálnu množinu kandidátov kanála `auto/*` doplnenú o aktuálnu dostupnosť, pričom opätovne používa
-existujúce čítania odolnosti (nikdy nie surovú hodnotu `state` ističa):
+`GET /v1/auto-combo/{channel}/candidates` (`{channel}` = prípona za `auto/` alebo doslovné `auto` pre základný kanál) je** len na čítanie** koncový bod, ktorý uvádza zoznam aktuálnych kandidátskych skupín kanála `auto/*` zdobený živou dostupnosťou, pričom sa opätovne používajú existujúce hodnoty odolnosti (nikdy nie surové prerušovače `state`):
 
 - istič poskytovateľa — `getCircuitBreaker(provider).getStatus()` / `.canExecute()`
-- čakacia lehota pripojenia — `rateLimitedUntil` / `testStatus` vo vyhodnotenom
-  riadku `provider_connections`
+- cooldown pripojenia — `rateLimitedUntil` / `testStatus` na vyriešený riadok `provider_connections`
 - uzamknutie modelu — `isModelLocked(provider, connectionId, model)`
 
-Každý kandidát obsahuje aj príznak `excluded` pre tento kľúč API. Vylúčenia sa ukladajú
-samostatne pre každý kľúč API (tabuľka `auto_candidate_overrides`, migrácia `128`) — OmniRoute je
-systém s jedným tenantom bez tabuľky `users`, takže `apiKeyId` je najbližšia skutočná identita
-jednotlivého volajúceho — a vynucujú sa v kritickom bode množiny kandidátov v
-`open-sse/services/autoCombo/virtualFactory.ts` prostredníctvom čistej, jednotkovo testovanej funkcie
-`filterExcludedCandidates()` (`open-sse/services/autoCombo/candidateOverrides.ts`).
-Filter funguje v režime **fail-open**: nenastavené apiKeyId/kanál aj zlyhanie vyhľadávania v DB
-ponechajú množinu nefiltrovanú, takže operátor bez nakonfigurovaných prepísaní uvidí smerovanie
-na úrovni bajtov identické so stavom pred zavedením tejto funkcie.
+Každý kandidát tiež nesie vlajku `excluded` tohto kľúča API. Vylúčenia sa ukladajú pre každý kľúč API ( tabuľka `auto_candidate_overrides`, migrácia `128`) — OmniRoute je s jedným nájomníkom bez tabuľky `users`, takže `apiKeyId` je najbližšia skutočná identita volajúceho — a je vynútená v tlmivom bode skupiny kandidátov v `open-sse/services/autoCombo/virtualFactory.ts` prostredníctvom čistého `filterExcludedCandidates()` (`open-sse/services/autoCombo/candidateOverrides.ts`) testovaného na jednotku. Filter je** zlyhanie otvorené** : Nenastavené apiKeyId/channel alebo zlyhanie vyhľadávania DB ponechajú fond nefiltrovaný, takže operátor bez nakonfigurovaných prepísaní vidí bajt smerovania identický s pred touto funkciou.
 
-**Odložené na nadväzujúcu úlohu:** váhy jednotlivých kandidátov + explicitné poradie (úroveň 3
-— napája sa na existujúce cesty stratégií váženia/priority) a pripnutie konkrétnej
-stratégie `combo.ts` ku každému kanálu `auto/*` (úroveň 4). Otvorenú otázku, či majú
-prepísania vzhľadom na model s jedným nájomníkom zostať viazané na jednotlivé kľúče API,
-alebo sa majú stať globálnymi, nájdete v pláne #7819.
+**Odložené na následný problém:** na každého kandidáta má váhu + explicitné poradie (úroveň 3 — vstupy do existujúcich ciest stratégie weighted/priority ) a pripnutie špecifickej stratégie `combo.ts` na kanál `auto/*` (úroveň 4). Pozrite si plán #7819 pre otvorenú otázku, či by prepisy mali zostať na kľúč API alebo by sa mali stať globálnymi vzhľadom na model jedného nájomníka.
 
-**Na pozadí:**
+**Zo zákulisia:**
 
 ```txt
-Požiadavka: { model: "auto/coding" }
+Request: { model: "auto/coding" }
    ↓
-src/sse/handlers/chat.ts zistí prefix
+src/sse/handlers/chat.ts detects prefix
    ↓
-createVirtualAutoCombo('coding') → candidatePool z aktívnych pripojení
+createVirtualAutoCombo('coding') → candidatePool from active connections
    ↓
-handleComboChat (rovnaký mechanizmus ako pri uložených kombináciách)
+handleComboChat (same engine as persisted combos)
    ↓
-Automatické vyhodnocovanie vyberie pre každú požiadavku najlepšieho poskytovateľa/model
+Auto-scoring selects best provider/model per request
 ```
 
 **Implementačné súbory:**
 
-| Súbor                                                     | Účel                                                         |
-| --------------------------------------------------------- | ------------------------------------------------------------ |
-| `open-sse/services/autoCombo/autoPrefix.ts`               | Analyzátor prefixu (`parseAutoPrefix`)                       |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | Vytvára virtuálne objekty `AutoComboConfig`                  |
-| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Testovací mechanizmus na simulovanie registra poskytovateľov |
-| `src/sse/handlers/chat.ts`                                | Integrácia: skrátené spracovanie automatického prefixu       |
-| `src/shared/constants/providers.ts`                       | Systémová položka `SYSTEM_PROVIDERS.auto`                    |
+| Súbor                                                     | Účel                                                    |
+| --------------------------------------------------------- | ------------------------------------------------------- |
+| `open-sse/services/autoCombo/autoPrefix.ts`               | Analyzátor predpon (`parseAutoPrefix`)                  |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | Vytvára virtuálne objekty `AutoComboConfig`             |
+| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Testovací hák na zosmiešňovanie registra poskytovateľov |
+| `src/sse/handlers/chat.ts`                                | Integrácia: auto prefix skrat                           |
+| `src/shared/constants/providers.ts`                       | vstup do systému `SYSTEM_PROVIDERS.auto`                |
 
 ## Predvoľby účtu pre uložené automatické kombinácie
 
@@ -148,49 +138,25 @@ Vynechaná alebo prázdna mapa si zachová existujúcu trasu. Predvoľby nepovo�
 
 Nakonfigurované preferencie používajú automatickú cestu s ohľadom na účet: neviazaná kontextová vyrovnávacia pamäť, inteligentné potrubie, chaos a tieňové skratky sa neodosielajú. Špekulatívne zaistenie je pre tieto požiadavky zakázané, takže rezervné účty nemôžu súťažiť s preferovanými. Iné kombinované stratégie toto nastavenie neinterpretujú. Ak zmeníte kombináciu z možnosti Automaticky, uložené predvoľby sa zachovajú na neskoršie prepnutie späť.
 
-## Názvy kombinácií zhodné so skutočným identifikátorom modelu
+## Kombinované mená, ktoré zodpovedajú skutočnému ID modelu
 
-Kombinácia, ktorej `name` je zhodný s holým identifikátorom modelu (napr. kombinácia s názvom
-`gpt-5.5`), je **zámerný a podporovaný vzor**, nie chyba: ide o
-mechanizmus záložného prepínania poskytovateľov pre jednotlivé identifikátory modelov, zdokumentovaný v
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Keďže rozlíšenie
-kombinácie sa kontroluje pred rozlíšením holého identifikátora modelu
-(`getComboForModel()` v `src/sse/services/model.ts`), požiadavka na holý
-identifikátor `gpt-5.5` je smerovaná cez ciele kombinácie (napr.
-`acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) namiesto priameho smerovania
-k jedinému poskytovateľovi — opätovne sa tým využíva priorita kombinácie pred prepisovaním, vytvorená pre
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), a regresne sa testuje pomocou `tests/unit/responses-combo-resolution-3227.test.ts` a
-`tests/unit/combo-name-codex-responses-rewrite.test.ts`.
+Kombinácia, ktorej `name` je identická s holým ID modelu (napr. combo s názvom `gpt-5.5`), je** zámerný, podporovaný vzor** , nie je to chyba: je to mechanizmus pre záložné riešenie poskytovateľa na model-id zdokumentovaný v [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Pretože rozlíšenie komba sa kontroluje pred rozlíšením identického modelu holého modelu (`getComboForModel()` v `src/sse/services/model.ts`), požiadavka na holé id `gpt-5.5` je smerovaná cez ciele komba (napr. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) namiesto priamo jedinému poskytovateľovi — čím sa opätovne používa prednosť pred prepísaním komba vytvorená pre [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) a je regresne testovaná `tests/unit/responses-combo-resolution-3227.test.ts` `tests/unit/combo-name-codex-responses-rewrite.test.ts`
 
-Vytvorenie alebo premenovanie kombinácie na názov, ktorý prekrýva skutočný identifikátor modelu,
-sa **nikdy neodmietne** — takýto postup by narušil tento zdokumentovaný pracovný postup. Namiesto toho
-(#8530) pripájajú `POST /api/combos` a `PUT /api/combos/[id]` k odpovedi neblokujúce
-pole `warning`, keď sa (nový) názov zhoduje so skutočným
-identifikátorom modelu:
+Vytvorenie alebo premenovanie komba na názov, ktorý zatieňuje skutočné ID modelu** nikdy odmietnutý** — by to narušilo tento zdokumentovaný pracovný postup. Namiesto toho (#8530), `POST /api/combos` a `PUT /api/combos/[id]` pripájajú k odpovedi neblokujúce pole `warning` keď sa (nový) názov zrazí so skutočným ID modelu:
 
 ```json
-{
-  "warning": {
-    "code": "COMBO_NAME_SHADOWS_MODEL",
-    "modelId": "gpt-5.5",
-    "providerId": "openai"
-  }
-}
+{ "warning": { "code": "COMBO_NAME_SHADOWS_MODEL", "modelId": "gpt-5.5", "providerId": "openai" } }
 ```
 
-Pri spustení funkcia `scanComboModelNameCollisionsAtBoot()`
-(`src/instrumentation-node.ts`) tiež zaznamená jednoriadkové upozornenie `[STARTUP]`
-s výpočtom všetkých existujúcich kombinácií, ktoré prekrývajú identifikátor modelu, aby prevádzkovatelia,
-ktorí na túto situáciu narazia omylom (namiesto zámerného použitia podľa #6940), dostali upozornenie.
-Pomocná funkcia na detekciu sa nachádza v `src/lib/combos/modelNameCollision.ts`.
+Pri zavádzaní `scanComboModelNameCollisionsAtBoot()` (`src/instrumentation-node.ts`) tiež zaznamená jednoriadkové varovanie `[STARTUP]` s uvedením každého existujúceho komba, ktoré zatieňuje ID modelu, takže operátori, ktorí toto zasiahnu náhodne (a nie úmyselne, za #6940), majú signál. Detekčný pomocník žije v `src/lib/combos/modelNameCollision.ts`.
 
-## Volanie vlastnej kombinácie z klienta
+## Volanie vlastného komba od klienta
 
-Uložené kombinácie (Nastavenia → Kombinácie) sa použijú iba vtedy, keď klient odošle **presný názov** kombinácie v poli `model` — názov kombinácie sa neporovnáva približne ani čiastočne a nepoužíva sa žiadna predpona `auto/`. Poradie rozlíšenia (`getComboForModel()` v `src/sse/services/model.ts`):
+Trvalé kombá (Nastavenia → kombá) sa používajú iba vtedy, keď klient odošle kombá** presný názov** v poli `model` — nie je žiadna fuzzy alebo čiastočná zhoda názvu komba a žiadna predpona `auto/`. Poradie rozlíšenia (`getComboForModel()` v `src/sse/services/model.ts`):
 
-1. presná zhoda názvu kombinácie (`model: "my-combo"`),
+1. presná zhoda názvov kombinácie (`model: "my-combo"`),
 2. predpona `combo/<name>` (`model: "combo/my-combo"`),
-3. mapovania modelov na kombinácie pomocou glob vzorov (`/api/model-combo-mappings`).
+3. model → combo glob mappings (`/api/model-combo-mappings`).
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -199,16 +165,16 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -d '{"model":"my-combo","messages":[{"role":"user","content":"Hello"}]}'
 ```
 
-Dve bežné nástrahy:
+Dve bežné úskalia:
 
-- **`auto` nepoužíva vaše kombinácie.** `auto`/`auto/*` vytvára vlastnú množinu kandidátov bez potreby konfigurácie a uložené kombinácie zohľadní iba vtedy, ak má niektorá kombinácia doslova názov `auto` (neodporúča sa). Ak chcete smerovať cez kombináciu, odošlite jej presný názov — nie `auto`.
-- **`openrouter/auto` je skutočný platený produkt OpenRouter** („Auto Best Available“), nie alias OmniRoute. Ide o jedinú statickú položku modelu v registri OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) a účtuje sa samostatne. Ak ho chcete vylúčiť z množín `auto`, použite Nastavenia → Smerovanie → Skryť platené modely.
+- **`auto` nepoužíva vaše kombá.** `auto`/`auto/*` vytvára svoj vlastný fond kandidátov s nulovou konfiguráciou a konzultuje trvalé kombá iba vtedy, ak je kombo doslova pomenované `auto` (neodporúča sa). Ak chcete smerovať cez kombináciu, pošlite jej presný názov — nie `auto`.
+- **`openrouter/auto` je skutočný platený produkt OpenRouter** ("Auto Best Available"), nie alias OmniRoute. Je to jediná položka statického modelu registra OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) a účtuje sa samostatne. Použite Nastavenia → Smerovanie → Skryť platené modely, aby ste ich vylúčili z fondov `auto`.
 
-Pôvodné nejasnosti, ktoré táto dokumentácia objasňuje, nájdete v [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) a [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111).
+Pôvodný zmätok v týchto dokumentoch nájdete [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) a [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111).
 
 ## Ako to funguje (trvalé automatické kombá)
 
-Auto-Combo Engine dynamicky vyberá najlepšiu provider/model pre každú požiadavku pomocou a** 16-faktorová bodovacia funkcia** (definované v `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Súčet predvolených váh je `1.0`; vlastné váhy sú renormalizované pomocou `normalizeScoringWeights()`. Dve zo šestnástich — `cacheAffinity` a `resetWindowAffinity` — majú štandardnú váhu `0`; `reliability` nesie `0` v `DEFAULT_WEIGHTS`, ale `0.03` v generických balíkoch a `0.04` v `reliability-first` a `quality` nesie `0.02` v balíkoch (`0.03` v `quality-first`): stále sa počítajú pre každého kandidáta a `cacheAffinity` bráni deduplikácii rýchlej vyrovnávacej pamäte mimo skóre, takže faktory s nulovým predvoleným nastavením jednoducho v predvolenom nastavení nehlasujú.
+Auto-Combo Engine dynamicky hodnotí kandidátov provider/model pomocou** 16 deklarovaných faktorov** (definované v `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). Súčet predvolených váh je `1.0`; vlastné váhy sú renormalizované pomocou `normalizeScoringWeights()`. Tri faktory majú štandardne nulovú váhu: `cacheAffinity`, `resetWindowAffinity` a `reliability`. Balíky režimov dávajú `reliability` váhu `0.03` alebo `0.04` v `reliability-first`; `quality` nesie `0.03` štandardne a v `quality-first` a `0.02` v ostatných balíkoch. `cacheAffinity` tiež zabezpečuje deduplikáciu rýchlej vyrovnávacej pamäte mimo váženého skóre.
 
 ![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
@@ -218,7 +184,7 @@ Auto-Combo Engine dynamicky vyberá najlepšiu provider/model pre každú požia
 | :-------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `quota`               | 0.1429              | Zostávajúca rezerva kvóty / limitu sadzby [0..1]                                                                                                                                                                       |
 | `health`              | 0.1605              | Skóre zdravia z ističa (CLOSED= 1,0, HALF_OPEN= 0,5, OPEN= 0,0)                                                                                                                                                        |
-| `costInv`             | 0.1429              | Inverzný** zmiešané** náklady (60 % vstup + 40 % výstupná cena tokenu, normalizované) — lacnejšie = vyššie skóre                                                                                                       |
+| `costInv`             | 0.1429              | Inverzne** zmiešané** náklady (60 % vstup + 40 % výstupná cena tokenu, normalizované) — lacnejšie = vyššie skóre                                                                                                       |
 | `latencyInv`          | 0.1143              | Inverzná latencia p95 sa normalizovala tak, aby — rýchlejšie = vyššie skóre                                                                                                                                            |
 | `taskFit`             | 0.0762              | Vhodnosť typu úlohy (kódovanie, kontrola, plánovanie, analýza, ladenie, dokumenty)                                                                                                                                     |
 | `stability`           | 0.0476              | Stabilita založená na rozptyle od štandardnej odchýlky latencie — kandidát, ktorého kolísanie času odozvy má nižšie skóre                                                                                              |
@@ -306,39 +272,41 @@ vyhodnotené hodnoty vstupujú do existujúcich vstupov mechanizmu `config.modeP
 
 OmniRoute's combo engine podporuje** 22 stratégií smerovania** (deklarované v `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Samotný motor Auto Combo je vystavený v rámci stratégie `auto` ; ostatné sú dostupné pre trvalé kombá.
 
-| Stratégia           | Popis                                                                                                                                                                                                                                                      |
-| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Prvý cieľový zoradený zoznam s explicitnou prioritou                                                                                                                                                                                                       |
-| `weighted`          | Náhodné vážené podľa hmotnosti cieľa                                                                                                                                                                                                                       |
-| `round-robin`       | Prechádzajte cieľmi v poradí (dávkové; pozri nižšie)                                                                                                                                                                                                       |
-| `context-relay`     | Odovzdanie kontextu medzi cieľmi (dlhé rozhovory)                                                                                                                                                                                                          |
-| `fill-first`        | Pred prechodom na ďalší vyplňte kvótu každého cieľa                                                                                                                                                                                                        |
-| `p2c`               | Power-of-2-choices náhodné vyrovnávanie záťaže                                                                                                                                                                                                             |
-| `random`            | Jednotný náhodný výber                                                                                                                                                                                                                                     |
-| `least-used`        | Vyberte cieľ s najnižším prúdovým zaťažením                                                                                                                                                                                                                |
-| `cost-optimized`    | Minimalizujte $ za požiadavku podľa katalógových cien                                                                                                                                                                                                      |
-| `reset-aware` ⭐    | Uprednostnite podľa času resetovania kvóty — krátke resetovacie okná sú hodnotené vyššie                                                                                                                                                                   |
-| `reset-window`      | Uprednostniť ciele, ktorých okno kvóty sa resetuje čo najskôr                                                                                                                                                                                              |
-| `expiry-first`      | Utraťte účet, ktorého kvóta by inak vypršala, nevyužitá ako prvá — najvyššia zvyšná suma s najbližším termínom resetovania ide ako prvá                                                                                                                    |
-| `headroom`          | Vyberte cieľ s najväčšou zostávajúcou rezervou kvóty                                                                                                                                                                                                       |
-| `quota-weighted`    | Preskočte vyčerpané účty a potom vyberte spomedzi ostatných v pomere k zostávajúcej kvóte vydelenej nákladom počas letu; existujúce konverzácie zostanú pripnuté                                                                                           |
-| `strict-random`     | Náhodné bez deduplikácie opakovaní                                                                                                                                                                                                                         |
-| `auto`              | Použite automatické kombo skórovanie (16-faktorové) —** odporúčané**                                                                                                                                                                                       |
-| `lkgp`              | Posledná známa dobrá cesta (pripne posledného úspešného poskytovateľa, potom sa vráti k pravidlám)                                                                                                                                                         |
-| `context-optimized` | Vyberte cieľ, ktorý najlepšie vyhovuje aktuálnej veľkosti kontextu                                                                                                                                                                                         |
-| `cache-optimized`   | Zmeňte poradie cieľov podľa afinity rýchlej vyrovnávacej pamäte — Najprv sa vyskúša pripojenie, ktoré už pravdepodobne obsahuje predponu tejto požiadavky vo vyrovnávacej pamäti (`open-sse/services/combo/promptCacheAffinity.ts`, #8008)                 |
-| `fusion` 🧬         | Rozšírte sa na panel modelov paralelne a potom pomocou porotcu syntetizujte jednu odpoveď (pozri nižšie)                                                                                                                                                   |
-| `pipeline`          | Spustite ciele postupne, pričom výstup každého kroku sa zloží do vstupu nasledujúceho kroku; vráti sa iba konečná odpoveď (#6396)                                                                                                                          |
-| `jev`               | zoznam preferencií zoradený podľa používateľov; TypeSafe Jev pripúšťa, ktoré položky sa spúšťajú pre túto požiadavku. Prvý víťaz, ostatné povolené ciele udržujú užívateľský poriadok. Otvára sa na objednávku používateľa, keď je Jev nedostupný (#15276) |
+| Stratégia           | Popis                                                                                                                                                                                                                                                                                                                                                                                                                |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Prvý cieľový zoradený zoznam s explicitnou prioritou                                                                                                                                                                                                                                                                                                                                                                 |
+| `weighted`          | Proporcionálne náhodné žrebovanie na žiadosť podľa cieľovej hmotnosti; ostatné ciele sa stanú záložnými (pozri nižšie)                                                                                                                                                                                                                                                                                               |
+| `round-robin`       | Prechádzajte cieľmi v poradí, v lepkavých dávkach (štandardne 3 úspechy na cieľ; pozri nižšie)                                                                                                                                                                                                                                                                                                                       |
+| `context-relay`     | Prioritné poradie plus súhrn odovzdania, keď sa konverzácia presunie do iného účtu                                                                                                                                                                                                                                                                                                                                   |
+| `fill-first`        | Pred prechodom na ďalší vyplňte kvótu každého cieľa                                                                                                                                                                                                                                                                                                                                                                  |
+| `p2c`               | Otestujte dva ciele a uprednostnite ten zdravší, rýchlejší                                                                                                                                                                                                                                                                                                                                                           |
+| `random`            | Fresh Fisher-Yates shuffle na požiadanie; po sebe idúce požiadavky môžu začať na rovnakom cieli                                                                                                                                                                                                                                                                                                                      |
+| `least-used`        | Vyberte cieľ s najmenším počtom zaznamenaných žiadostí v tejto kombinácii (na modelový účet + )                                                                                                                                                                                                                                                                                                                      |
+| `cost-optimized`    | Najprv vyskúšajte najnižšiu vstupnú cenu tokenu v katalógu; neznáme ceny sú posledné (nie sú konečné náklady na požiadavku)                                                                                                                                                                                                                                                                                          |
+| `reset-aware` ⭐    | Skóre zostávajúcej relácie a týždennej kvóty plus naliehavosť resetovania; blízke väzby sa otáčajú                                                                                                                                                                                                                                                                                                                   |
+| `reset-window`      | Uprednostniť ciele, ktorých okno kvóty sa resetuje čo najskôr                                                                                                                                                                                                                                                                                                                                                        |
+| `expiry-first`      | Utraťte účet, ktorého kvóta by inak vypršala, nevyužitá ako prvá — najvyšší zostatok s najbližším termínom vynulovania ide ako prvý                                                                                                                                                                                                                                                                                  |
+| `headroom`          | Vyberte cieľ s najväčšou zostávajúcou rezervou kvóty                                                                                                                                                                                                                                                                                                                                                                 |
+| `quota-weighted`    | Rozdeľte požiadavky podľa dostupnosti kvóty a zaťaženia počas letu; zachovať afinitu relácie                                                                                                                                                                                                                                                                                                                         |
+| `strict-random`     | Zamiešaný balíček na kombináciu: každý cieľ sa použije raz pred premiešaním; posledný z jedného cyklu nikdy nezačína ďalší                                                                                                                                                                                                                                                                                           |
+| `auto`              | Použite automatické kombo skórovanie (16-faktorové) —** odporúčané**                                                                                                                                                                                                                                                                                                                                                 |
+| `lkgp`              | Posledná známa dobrá cesta (pripne posledného úspešného poskytovateľa, potom sa vráti k pravidlám)                                                                                                                                                                                                                                                                                                                   |
+| `context-optimized` | Najprv vyskúšajte najväčšie známe kontextové okno (vyriešené limity schopností modelu)                                                                                                                                                                                                                                                                                                                               |
+| `cache-optimized`   | Uprednostniť vhodné pripojenie, ktoré pravdepodobne obsahuje predponu výzvy vo vyrovnávacej pamäti (`open-sse/services/combo/promptCacheAffinity.ts`, #8008)                                                                                                                                                                                                                                                         |
+| `fusion` 🧬         | Rozšírte sa na panel modelov paralelne a potom pomocou porotcu syntetizujte jednu odpoveď (pozri nižšie)                                                                                                                                                                                                                                                                                                             |
+| `pipeline`          | Spustite ciele postupne, pričom výstup každého kroku sa zloží do vstupu nasledujúceho kroku; vráti sa iba konečná odpoveď (#6396)                                                                                                                                                                                                                                                                                    |
+| `jev`               | zoznam preferencií zoradených používateľmi; TypeSafe Jev pripúšťa, ktoré položky sa spúšťajú pre túto požiadavku. Prvý víťaz, ostatné pripustené ciele si ponechajú vaše poradie. Prihlásené a platené: volané iba vtedy, keď je `COMBO_JEV_STRATEGY_ENABLED` zapnuté (predvolene vypnuté); každé volanie odošle ohraničený úryvok do api.typesafe.ai. Vráti sa k vašej objednávke, keď nie je k dispozícii (#15276) |
 
 ⭐ = Novinka vo verzii 3.8.0 · 🧬 = Novinka vo verzii 3.8.36
+
+Stratégia `jev` uskutočňuje platené volania TypeSafe iba vtedy, keď je `COMBO_JEV_STRATEGY_ENABLED` povolené. Samotný uložený kľúč TypeSafe to neumožňuje. Keď je príznak vypnutý, kombo zachováva príkaz operátora bez toho, aby uskutočnilo toto volanie (`open-sse/services/combo/jevAsk.ts`).
 
 ### sémantika `weighted`
 
 `weighted` je a** proporcionálne náhodné žrebovanie na žiadosť** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), nie ekvalizér:
 
 - Každá žiadosť sa žrebuje** jeden** krok s pravdepodobnosťou `weight / totalWeight`; zostávajúce kroky sú zoradené podľa zostupnej váhy ako záložný reťazec pre danú požiadavku.
-- Krok, ktorého hmotnosť je `0` (alebo chýba), je** nikdy nekreslené** zatiaľ čo akýkoľvek iný krok má váhu > 0 — môže slúžiť len ako záložný krok, keď nakreslený krok zlyhá. Len keď** všetky** váhy sú 0, výber bude jednotný.
+- Krok, ktorého hmotnosť je `0` (alebo chýba), je** nikdy nekreslené** zatiaľ čo ktorýkoľvek iný krok má váhu > 0 — môže slúžiť len ako záložný krok, keď nakreslený krok zlyhá. Len keď** všetky** váhy sú 0, výber bude jednotný.
 - Kroky, ktorých ciele sú nedostupné — poskytovateľ obvodu `OPEN`, ochladzovanie pripojenia, blokovanie modelu — sú odstránené zo žrebovania skôr, ako sa tak stane (`open-sse/services/combo/targetResolution.ts`), takže každú požiadavku môže dočasne vyhrať jeden zdravý krok.
 - `stickyWeightedLimit` (kombinovaná konfigurácia, predvolené `1` = vypnuté) pripne nakreslený krok pre toľko po sebe nasledujúcich úspechov pred opätovným vykreslením.
 
@@ -383,7 +351,7 @@ Vykonávateľ môže vyslať viacero nezávislých volaní v jednej odpovedi. Z�
 Round-robin je dávkový, nie jedna požiadavka na krok:
 
 - `stickyRoundRobinLimit` (kombinovaná konfigurácia, potom `comboStickyRoundRobinLimit`, potom `settings.stickyRoundRobinLimit`, predvolená hodnota** 3** ) si pred otočením udrží rovnaký cieľ pre toľko po sebe idúcich úspechov. Nastavte prepísanie komba na `1` pre rotáciu s jednou požiadavkou. Kombinovaný editor zobrazuje efektívnu hodnotu a vrstvu, z ktorej pochádza.
-- `connectionAwareExpansion` (kombinovaná konfigurácia, potom nastavenia, predvolené** falošný** ) rozširuje každý krok na úrovni poskytovateľa na ciele pre jednotlivé účty pred rotáciou. Stratégie skupiny B (prioritná, vážená, cyklická, náhodná, p2c, najmenej používaná, nákladovo optimalizovaná, lkgp, fill-first, striktne náhodná, kontextovo optimalizovaná, cache-optimalizovaná, kontextová relé, fúzia, pipeline, jev) uchovávajú zobrazenie na úrovni poskytovateľa, kým sa nezapne. Kombinovaný editor odhaľuje dedičstvo / zapnutie / vypnutie; dedičstvo používa globálne predvolené nastavenie (vypnuté).
+- `connectionAwareExpansion` (kombinovaná konfigurácia, potom nastavenia, predvolené** falošný** ) rozširuje každý krok na úrovni poskytovateľa na ciele pre jednotlivé účty pred rotáciou. Stratégie skupiny B (prioritná, vážená, cyklická, náhodná, p2c, najmenej používaná, nákladovo optimalizovaná, lkgp, fill-first, striktne náhodná, kontextovo optimalizovaná, cache-optimalizovaná, kontextová relé, fúzia, pipeline, jev) si uchovávajú zobrazenie na úrovni poskytovateľa, kým sa nezapne. Kombinovaný editor odhaľuje dedičstvo / zapnutie / vypnutie; dedičstvo používa globálne predvolené nastavenie (vypnuté).
 - Prompt-cache local routing (`promptCacheAffinityEnabled`, predvolené** pravda** ) zmení poradie pripnutých pripojení tak, aby zhodné kľúče vyrovnávacej pamäte zostali na jednom účte. Má prednosť pred obojstrannou a váženou rotáciou medzi pripnutými krokmi pre jednotlivé účty. Ak potrebujete striktnú rotáciu, vypnite ju v časti Nastavenia → Combo predvolené. Neexistuje žiadne prepísanie pre jednotlivé kombinácie.
 
 Uprednostňujte rotáciu viacerých účtov na jednom modeli** jeden krok dynamického účtu** (prázdne `connectionId`, celý bazén) s lepivým limitom `1`, nie tri pripnuté `connectionId` s. Pripnuté kroky plus afinita sa zrútia na rovnaký účet, aj keď sa počítadlo RR posúva.
@@ -465,22 +433,22 @@ To znamená, že **pridanie nového poskytovateľa s povoleným `auto/*` automat
 
 ## API
 
-**Neexistuje žiadny vyhradený koncový bod `POST /api/combos/auto`** — Auto-Combo sa používa dvoma spôsobmi:
+Existuje** žiadny vyhradený koncový bod `POST /api/combos/auto`** — Auto-Combo sa spotrebuje dvoma spôsobmi:
 
-1. **Bez konfigurácie (odporúčané):** Odošlite ľubovoľnú požiadavku na dokončenie chatu s `model: "auto"` alebo `model: "auto/<variant>"`. Virtuálna továreň zostaví kombo pre každú požiadavku — nie je potrebné žiadne trvalé uloženie ani volania API.
+1. **Zero-config (odporúčané):** Pošlite akúkoľvek žiadosť o dokončenie rozhovoru pomocou `model: "auto"` alebo `model: "auto/<variant>"`. Virtuálna továreň zostaví kombináciu na základe požiadavky — bez trvalosti, nie sú potrebné žiadne volania API.
 
-2. **Trvalo uložené kombo so `strategy: "auto"`:** Vytvorte bežné kombo prostredníctvom `POST /api/combos` a nastavte `strategy: "auto"` spolu s `config.auto.weights` / `config.auto.candidatePool`. Používa sa rovnaký mechanizmus hodnotenia; kombo sa uloží do `combos` a možno ho opakovane používať podľa ID.
+2. **Pretrvávajúce kombo so `strategy: "auto"`:** Vytvorte bežné combo cez `POST /api/combos` a nastavte `strategy: "auto"` plus `config.auto.weights` / `config.auto.candidatePool`. Použije sa rovnaký systém hodnotenia; kombo je uložené v `combos` a opakovane použiteľné pomocou ID.
 
-Na zisťovanie možností uvádza `GET /api/combos/auto` každý variant s jeho vyhodnotenou množinou kandidátov spolu s `context_length` / `max_output_tokens` — maximálnymi hodnotami zo všetkých kontextových okien v množine kandidátov. Klienti (napr. doplnok opencode) musia uvádzať tieto hodnoty namiesto `0`: nulový kontext úplne zakáže automatickú kompakciu v opencode, čo umožní reláciám rásť, až kým vymazanie histórie bránou nezničí kontext. Uvádzanie maximálnej hodnoty je bezpečné, pretože predbežný filter kontextu automatického komba smeruje príliš veľké požiadavky ku kandidátom s veľkým kontextovým oknom.
+Na zistenie `GET /api/combos/auto` uvádza každý variant s vyriešenou kandidátskou skupinou plus `context_length` / `max_output_tokens` — MAX cez okná kandidátskej skupiny. Klienti (napr. plugin opencode) musia inzerovať tieto hodnoty namiesto `0`: nulový kontext úplne zakáže automatické komprimovanie opencode, čím umožní reláciám rásť, kým vyčistenie histórie brány nezničí kontext. MAX je bezpečné inzerovať, pretože kontextový predbežný filter automatického kombinovania smeruje príliš veľké požiadavky na kandidátov s veľkým oknom.
 
 ```bash
-# Použitie bez konfigurácie (bez vytvorenia komba)
+# Zero-config usage (no combo creation)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Trvalo uložené automatické kombo prostredníctvom bežného koncového bodu pre kombá
+# Persisted auto combo via the regular combos endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
@@ -488,33 +456,24 @@ curl -X POST http://localhost:20128/api/combos \
 
 ### Stratégie automatického smerovača
 
-Trvalo uložené kombá so `strategy: "auto"` môžu nastaviť `config.routerStrategy` (alebo staršie
-`config.auto.routerStrategy`) na jednu z týchto hodnôt:
+Pretrvávajúce kombá `strategy: "auto"` môžu nastaviť `config.routerStrategy` (alebo staršie `config.auto.routerStrategy`) na jednu z:
 
-- `rules` — predvolené vážené hodnotenie
-- `score` — vyberie najvyššie nakonfigurované vážené skóre. Pri presnej zhode sa zachová nakonfigurované
-  poradie kandidátov; existujúca hodnota `explorationRate` vykonáva výber z celej zoradenej množiny.
+- `rules` — predvolené vážené bodovanie
+- `score` — vyberie najvyššie nakonfigurované vážené skóre. Presné väzby zachovávajú konfigurované poradie kandidátov; existujúce vzorky `explorationRate` z celého radu.
 - `cost` / `eco` — najlacnejší zdravý poskytovateľ
-- `latency` / `fast` — najnižšia latencia p95 s penalizáciou za nespoľahlivosť
-- `sla-aware` / `sla` — uprednostní kandidátov, ktorí spĺňajú ciele SLO pre latenciu p95, mieru chýb a voliteľne
-  náklady
-- `lkgp` — najskôr naposledy známy funkčný poskytovateľ
-- `nadir` — opýta sa rozhodovacieho API služby [Nadir](https://getnadir.com), ktorý model z množiny
-  potrebuje daný prompt; vyžaduje výslovné zapnutie a pri zlyhaní prejde na `rules`
+- `latency` / `fast` — najnižšia latencia p95 s penalizáciou za spoľahlivosť
+- `sla-aware` / `sla` — uprednostňujú kandidátov, ktorí spĺňajú latenciu p95, chybovosť a voliteľné náklady SLOs
+- `lkgp` — posledný známy dobrý poskytovateľ ako prvý
+- `nadir` — opýtajte sa rozhodnutia [Nadira](https://getnadir.com) API ktorý model v skupine potrebuje výzva; opt-in, fail-open to `rules`
+- `decision` — opýtajte sa nakonfigurovaného rozhodcu (TypeSafe System One, vaše vlastné rozhodnutie URL alebo jeden z vlastných modelov komba), ktorý model v skupine vyhovuje požiadavke; za predvolene vypnutým príznakom `COMBO_DECISION_ROUTER_ENABLED`, zlyhanie pri `rules`
 
-### Podrobnosti o stratégiách smerovača
+### Stratégie smerovača podrobne
 
-Mechanizmus automatického komba poskytuje 7 vymeniteľných implementácií **RouterStrategy**,
-medzi ktorými môžete prepínať prostredníctvom `config.routerStrategy` (alebo staršieho `config.auto.routerStrategy`).
-Každá stratégia vyberie jedného poskytovateľa z množiny kandidátov na základe `RoutingContext`
-(typ úlohy, informácie o nástrojoch/vizuálnych vstupoch, odhad počtu tokenov, voliteľné pravidlá SLA, voliteľný
-naposledy známy funkčný poskytovateľ).
+Auto-kombo motor odhaľuje 7 zásuvných**RouterStrategy** implementácie, ktoré môžete zameniť cez `config.routerStrategy` (alebo staršie `config.auto.routerStrategy`). Každá stratégia vyberie jedného poskytovateľa zo skupiny kandidátov s daným `RoutingContext` (typ úlohy, rady tool/vision, odhad tokenu, voliteľná politika SLA, voliteľný poskytovateľ posledného známeho dobrého).
 
-#### 1. `rules` (predvolené) — 16-faktorové vážené hodnotenie
+#### 1. `rules` (predvolené) — 16-faktorové vážené bodovanie
 
-Obaľuje existujúci mechanizmus hodnotenia. Odfiltruje kandidátov s ističom v stave `OPEN`
-a následne spustí `scorePool()` s aktuálnym typom úlohy a `getTaskFitness()`,
-pričom vyberie poskytovateľa s najvyšším skóre.
+Zabalí existujúci nástroj na hodnotenie. Odfiltruje kandidátov na ističe `OPEN`, potom spustí `scorePool()` s aktuálnym typom úlohy a `getTaskFitness()` a vyberie poskytovateľa s najvyšším skóre.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -534,16 +493,15 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kedy použiť**: Predvolená možnosť. Použite ju, keď chcete vyvážený kompromis medzi všetkými signálmi.
+**Kedy použiť** : Predvolené. Použite, keď chcete vyvážený kompromis medzi všetkými signálmi.
 
-**Alias**: `rules` (bez aliasu)
+**Alias** : `rules` (bez aliasu)
 
 ---
 
 #### 2. `cost` / `eco` — najlacnejší zdravý poskytovateľ
 
-Zoradí množinu kandidátov podľa `costPer1MTokens` (vzostupne) a vyberie najlacnejšieho.
-Najskôr odfiltruje kandidátov v stave `OPEN`.
+Zoradí zoznam kandidátov podľa `costPer1MTokens` (vzostupne) a vyberie najlacnejšieho. Najprv odfiltruje kandidátov `OPEN`.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -558,16 +516,15 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kedy použiť**: Úlohy citlivé na náklady, dávkové spracovanie alebo úlohy na pozadí.
+**Kedy použiť** : Nákladovo citlivé pracovné zaťaženie, dávkové spracovanie alebo úlohy na pozadí.
 
-**Aliasy**: `cost`, `eco`
+**Aliasy** : `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — najnižšia latencia p95 s penalizáciou za nespoľahlivosť
+#### 3. `latency` / `fast` — najnižšia latencia p95 s penalizáciou za spoľahlivosť
 
-Zoraďuje podľa `p95LatencyMs + (errorRate * 1000)`. Penalizácia za mieru chýb zaisťuje,
-že nespoľahliví poskytovatelia budú umiestnení nižšie, aj keď je ich nominálna latencia nízka.
+Zoradené podľa `p95LatencyMs + (errorRate * 1000)`. Pokuta za chybovosť zabezpečuje, že nespoľahliví poskytovatelia sú zaradení nižšie, aj keď je ich nominálna latencia nízka.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -584,28 +541,25 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kedy použiť**: Úlohy citlivé na latenciu, ako sú chat v reálnom čase, automatické dopĺňanie alebo
-interaktívni asistenti pri programovaní.
+**Kedy použiť** : Pracovné zaťaženie citlivé na latenciu, ako je chat v reálnom čase, automatické dopĺňanie alebo interaktívni asistenti kódovania.
 
-**Aliasy**: `latency`, `fast`
+**Aliasy** : `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — súlad s cieľmi SLO pre latenciu/chyby/náklady
+#### 4. `sla-aware` / `sla` — latency/error/cost SLO súlad
 
-Ohodnotí každého kandidáta podľa toho, ako dobre spĺňa nakonfigurované pravidlá SLO:
+Hodnotí každého kandidáta podľa toho, ako dobre spĺňa nakonfigurovanú politiku SLO :
 
-| Faktor          | Váha | Vzorec                                                   |
-| --------------- | ---- | -------------------------------------------------------- |
-| Skóre latencie  | 35%  | `threshold / max(value, ε)`                              |
-| Skóre chýb      | 35%  | `threshold / max(value, ε)`                              |
-| Skóre zdravia   | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)        |
-| Skóre nákladov  | 10%  | `threshold / max(value, ε)` alebo inverzne normalizované |
-| Skóre stability | 5%   | inverzne normalizovaná smerodajná odchýlka latencie      |
+| Faktor          | Hmotnosť | Vzorec                                                   |
+| --------------- | -------- | -------------------------------------------------------- |
+| Skóre latencie  | 35%      | `threshold / max(value, ε)`                              |
+| Chybové skóre   | 35%      | `threshold / max(value, ε)`                              |
+| Zdravotné skóre | 15%      | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)        |
+| Skóre nákladov  | 10%      | `threshold / max(value, ε)` alebo inverzne normalizované |
+| Skóre stability | 5%       | inverzná normalizovaná latencia stddev                   |
 
-Keď je `hardConstraints: true`, kandidáti sa zoraďujú primárne podľa **skóre porušenia**
-(miery, o ktorú prekračujú niektoré SLO) a následne podľa kombinovaného skóre. V opačnom prípade
-sa používa iba kombinované skóre.
+Keď `hardConstraints: true`, kandidáti sú zoradení predovšetkým podľa** skóre porušenia** (do akej miery prekračujú akékoľvek SLO), potom zloženým skóre. Inak je to len zložené skóre.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -614,12 +568,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... ohodnotí každého kandidáta podľa politiky: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scores each candidate against policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**Polia SLA** (nastavujú sa v konfigurácii kombinácie):
+**SLA polia** (nastavené v kombinovanej konfigurácii):
 
 ```json
 {
@@ -634,17 +588,15 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kedy použiť**: Produkčné pracovné záťaže s prísnymi limitmi latencie, miery chýb alebo nákladov.
+**Kedy použiť** : Produkčné úlohy s prísnou latenciou, chybovosťou alebo rozpočtom nákladov.
 
-**Aliasy**: `sla-aware`, `sla`
+**Aliasy** : `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — posledný známy funkčný poskytovateľ ako prvý
+#### 5. `lkgp` — posledný známy dobrý poskytovateľ ako prvý
 
-Najprv vyskúša **posledného známeho funkčného poskytovateľa** (ak je nastavený) a potom použije
-stratégiu `rules` ako záložnú možnosť. Je to užitočné na zachovanie relácie — následné
-požiadavky v konverzácii spracúva rovnaký poskytovateľ.
+Skúša** posledný známy dobrý poskytovateľ** (ak je nastavené), potom sa vráti späť k stratégii `rules`. Užitočné pre priľnavosť relácie — rovnaký poskytovateľ spracováva následné požiadavky v konverzácii.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -665,27 +617,21 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Použitie stratégie rules ako záložnej možnosti
+    // Fallback to rules strategy
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Kedy použiť**: Viackolové konverzácie, pri ktorých chcete, aby rovnaký poskytovateľ spracúval
-následné požiadavky (napr. z dôvodu ukladania do vyrovnávacej pamäte, kontinuity kontextu alebo konzistentnosti cien).
+**Kedy použiť** : Viacotáčkové konverzácie, pri ktorých chcete, aby rovnaký poskytovateľ spracovával následné požiadavky (napr. pre ukladanie do vyrovnávacej pamäte, súvislosť kontextu alebo konzistentnosť cien).
 
-**Alias**: `lkgp` (bez aliasu)
+**Alias** : `lkgp` (bez aliasu)
 
 ---
 
-#### 6. `nadir` — výber modelu s ohľadom na výzvu prostredníctvom služby Nadir
+#### 6. `nadir` — prompt-aware výber modelu cez Nadir
 
-Každá z vyššie uvedených stratégií zoraďuje kandidátov podľa vlastnej telemetrie; žiadna z nich nečíta
-požiadavku. `nadir` odošle posledný vstup používateľa spolu s identifikátormi modelov v skupine
-do rozhodovacieho API služby [Nadir](https://getnadir.com) (`POST /v1/bucket`) a smeruje požiadavku na model,
-ktorý Nadir vyberie z tejto ponuky (`simple` → najlacnejší vyhovujúci model, `complex` → špičkový
-model). Pripojenie obsluhujúce daný model sa naďalej vyberá pomocou `rules`, takže kvóta,
-zdravie a náklady naďalej rozhodujú o tom, ktorý účet sa použije.
+Každá vyššie uvedená stratégia zoraďuje kandidátov podľa ich vlastnej telemetrie; nikto z nich žiadosť nečíta. `nadir` odošle posledný používateľský ťah plus ID modelu fondu do [Nadirovho](https://getnadir.com) rozhodnutia API (`POST /v1/bucket`) a smeruje k modelu, ktorý si Nadir vyberie z tejto ponuky (`simple` → najlacnejší schopný model, `complex` → hraničný). Pripojenie, ktoré obsluhuje tento model, stále vyberá `rules`, takže kvóta, stav a náklady sa stále rozhodujú, ktorý účet.
 
 ```json
 {
@@ -701,34 +647,75 @@ zdravie a náklady naďalej rozhodujú o tom, ktorý účet sa použije.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` a `OMNIROUTE_NADIR_BASE_URL` sú záložné premenné prostredia pre tieto dva
-reťazce. `baseUrl` je potrebné iba pre vlastnú inštanciu služby Nadir (koncové `/v1` je akceptované).
-Volania bez kľúča smerujú do anonymnej úrovne služby Nadir, ktorá má obmedzenú frekvenciu podľa IP adresy. S kľúčom
-([vytvorte si ho](https://app.getnadir.com/dashboard/api-keys)) sa každé rozhodnutie
-zaznamená na vašom ovládacom paneli služby Nadir. Kompletné nastavenie a overenie:
-[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+`OMNIROUTE_NADIR_API_KEY` a `OMNIROUTE_NADIR_BASE_URL` sú zálohy env pre dva reťazce. `baseUrl` je potrebný iba pre Nadir, ktorý je hostiteľom samostatne (toleruje sa koncové `/v1` ). Bezkľúčové hovory pristávajú na Nadirovej anonymnej úrovni, ktorá je obmedzená na IP. Pomocou kľúča ( [vytvorte jeden](https://app.getnadir.com/dashboard/api-keys) ) sa každé rozhodnutie zaznamená na váš informačný panel Nadir. Úplné nastavenie a overenie: [getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Čo sa odosiela mimo systému: text poslednej správy používateľa (prvých 16-tisíc znakov), identifikátory
-kandidátskych modelov a značka kanála `source: "omniroute"`. Neodosiela sa systémová výzva, história, nástroje ani
-hlavičky.
+Čo opúšťa pole: text poslednej správy používateľa (prvých 16 000 znakov), ID kandidátskeho modelu a značka kanála `source: "omniroute"`. Žiadna systémová výzva, história, nástroje alebo hlavičky.
 
-Správanie pri zlyhaní je typu fail-open: časový limit (predvolene 2000 ms), odpoveď mimo rozsahu 2xx, nedostupný
-hostiteľ, chybná odpoveď alebo výber mimo skupiny vedie k rozhodnutiu stratégie `rules`
-a dôvod dostane predponu `NadirStrategy: fallback (…)`. Po neúspešnom volaní stratégia
-na 30 s preskočí sieťovú komunikáciu, takže výpadok spôsobí jeden časový limit za 30 s namiesto
-jedného pri každej požiadavke. Udalosti smerovania uvádzajú `strategy: "nadir"` iba vtedy, keď výber
-skutočne vykonal Nadir.
+Zlyhanie je otvorené pri zlyhaní: časový limit (predvolené 2000 ms), non-2xx, nedostupný hostiteľ, chybná odpoveď alebo výber mimo fondu sa riešia podľa rozhodnutia `rules` a dôvodom je predpona `NadirStrategy: fallback (…)`. Po neúspešnom hovore stratégia preskočí sieť na 30 s, takže výpadok stojí jeden časový limit na 30 s, a nie jeden na požiadavku. Udalosti smerovania hlásia `strategy: "nadir"` iba vtedy, keď sa Nadir skutočne rozhodol.
 
-**Kedy použiť**: Prevádzka s rôznou náročnosťou v skupine, ktorá zahŕňa viac úrovní modelov (malý, stredný
-a špičkový model), keď chcete znížiť náklady spôsobené neustálym používaním špičkového modelu.
+**Kedy použiť** : premávka so zmiešanou obtiažnosťou v bazéne, ktorý zahŕňa modelové úrovne (malý, stredný a hraničný model), kde vždy na hranici sú náklady, ktoré chcete znížiť.
 
-**Alias**: `nadir` (bez aliasu)
+**Alias** : `nadir` (bez aliasu)
 
 ---
 
-### Vlastné stratégie smerovača
+#### 7. `decision` — zásuvný rozhodca vyberie model
 
-Prostredníctvom verejného API môžete zaregistrovať vlastnú implementáciu `RouterStrategy`:
+`decision` pýta a** rozhodovateľ** ktorý model v skupine vyhovuje požiadavke, potom zúži skupinu na tento model a nechá `rules` vybrať spojenie (kvóta, zdravie a náklady si stále vyberú účet). Rozhodujúci prvok sa nastavuje v rozhodovacom bloku komba — `config.decision` keď sú gombíky smerovača umiestnené v hornej časti `config` (to, čo píše palubná doska), alebo `config.auto.decision` vedľa `config.auto.routerStrategy`:
+
+| `decider`     | Kto odpovedá                                                                                                                   | Potreby                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), predvolený model `jev-latest`                               | pripojenie `typesafe` alebo kľúč env          |
+| `http`        | váš vlastný rozhodovateľ na `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) alebo `"openai-chat"` (dokončenia chatu) | `baseUrl` + `model`; kľúč voliteľný           |
+| `combo-model` | jeden z modelov vášho poskytovateľa, ktorý sa v procese nazýva ako sudca fúzie                                                 | `model` ako `provider/model` (bez kombinácie) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Polia (overené prísnou schémou pri ukladaní a znova v čase vyžiadania):
+
+- `decider` — `systemone`, `http` alebo `combo-model`.
+- `model` — TypeSafe model, rozhodovací model vo vašom URL alebo `provider/model` volania kombinovaného modelu (až 200 znakov).
+- `baseUrl` — len `http` : `http(s)` URL do 500 znakov, bez poverení, dotazu alebo fragmentu. URL smerujúce na toto OmniRoute (spätná slučka + `PORT`) je odmietnuté.
+- `wire` — len `http` : `systemone` (predvolené) alebo `openai-chat`.
+- `connectionId` — uložené spojenie, ktorého kľúč sa používa (iba v rámci povolených spojení volajúceho kľúča API ). Bez toho `systemone` načíta spojenie `typesafe` a každý sieťový rozhodca sa vráti k `OMNIROUTE_DECISION_API_KEY`. Neexistuje žiadne pole `apiKey` : kľúč nie je nikdy uložený v kombinácii.
+- `timeoutMs` — celé číslo, 100–5000, predvolená hodnota je 2000.
+- `minConfidence` — 0–1; odpoveď s nižšou istotou padá späť na `rules` (rozhodujúci, ktorý uvádza nedôveru, sa počíta ako 0).
+- `descriptions` — až 50 záznamov (kľúč do 300, text do 1 000 znakov), zadaných podľa ID modelu alebo `provider/model`; nenastavené položky získajú vygenerovaný popis cenovej kategórie.
+
+**Vlajka.** `COMBO_DECISION_ROUTER_ENABLED` (predvolené `false`) ohraničuje každého rozhodcu. Kým je vypnuté, `decision` combo nečíta žiadne poverenia, neuskutočňuje žiadne volanie a smeruje pomocou `rules`; log hovorí `fallback (disabled)`. Samotný uložený kľúč ho nikdy nezapne. Kombá bez rozhodovacieho bloku nie sú vôbec ovplyvnené.
+
+**Čo opustí krabicu.** Iba text poslednej správy používateľa (do 8000 znakov; chat/Claude `messages` alebo Responses `input`) a ponuka ID modelov s ich popismi. Nikdy nie systémová výzva, odpovede `instructions`, nástroje, história, hlavičky alebo údaje o účte. Sieťové hovory prechádzajú cez odchádzajúce stráže poskytovateľa bez opakovania, bez presmerovaní a s limitom odozvy 64 KB. Volanie `combo-model` nie je streamované, bez nástrojov, `temperature: 0` s rozpočtom 256 tokenov; rozhodnutie začaté v rámci výzvy na rozhodnutie je odmietnuté.
+
+**Zlyhanie** je otvorené pri zlyhaní: akékoľvek zlyhanie sa rieši podľa rozhodnutia `rules` a dôvod znie `decision(<decider>): fallback (<reason>)`, pričom `<reason>` je jedno z `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` alebo `no_user_text`. Po uplynutí časového limitu, chybe HTTP alebo chybe siete sa koncový bod na 30 s preskočí. Úspešný výber číta `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Žiadny URL, kľúč, výzva alebo upstream telo nedosiahne protokol.
+
+Zostavovač kombo zobrazuje tieto polia, keď je stratégia smerovača `decision`, s vygenerovanými popismi ako zástupnými symbolmi a** Rozhodnutie o teste** tlačidlo, ktoré raz zavolá `POST /api/combos/decision-preview` s neuloženými nastaveniami (rovnaký príznak).
+
+**Kedy použiť** : premávka so zmiešanou obtiažnosťou, kde chcete, aby úroveň na žiadosť vybral klasifikátor, ktorý si vyberiete, nie konkrétne Nadir.
+
+**Alias** : `decision` (bez aliasu)
+
+---
+
+### Vlastné stratégie smerovačov
+
+Svoju vlastnú implementáciu `RouterStrategy` si môžete zaregistrovať prostredníctvom verejného API:
 
 ```ts
 import {
@@ -741,7 +728,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Sem patrí vaša logika smerovania
+    // Your routing logic here
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -756,7 +743,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Potom ju použite:
+Potom ho použite:
 
 ```json
 {
@@ -771,16 +758,17 @@ Potom ju použite:
 
 ### Sprievodca výberom stratégie smerovača
 
-| Prípad použitia         | Stratégia   | Dôvod                                              |
-| ----------------------- | ----------- | -------------------------------------------------- |
-| Vyvážená pracovná záťaž | `rules`     | Predvolená — zohľadňuje všetky faktory             |
-| Minimalizácia nákladov  | `cost`      | Vždy vyberie najlacnejšiu možnosť                  |
-| Minimalizácia latencie  | `latency`   | Vyberie najrýchlejšieho spoľahlivého poskytovateľa |
-| Prísne SLO              | `sla-aware` | Filtruje podľa limitov p95/chybovosti/nákladov     |
-| Viackolový čet          | `lkgp`      | Zachovanie konzistencie relácie                    |
-| Rôzna náročnosť         | `nadir`     | Vyberie úroveň modelu pre každý prompt             |
+| Prípad použitia             | Stratégia   | Dôvod                                             |
+| --------------------------- | ----------- | ------------------------------------------------- |
+| Vyvážené pracovné zaťaženie | `rules`     | Predvolená — zohľadňuje všetky faktory            |
+| Minimalizujte náklady       | `cost`      | Vždy vyberá najlacnejšie                          |
+| Minimalizujte latenciu      | `latency`   | Vyberá najrýchlejšieho spoľahlivého poskytovateľa |
+| Prísne SLOs                 | `sla-aware` | Filtruje podľa prahov p95/error/cost              |
+| Viacotáčkový chat           | `lkgp`      | Lepivosť relácie                                  |
+| Zmiešaná obtiažnosť         | `nadir`     | Vyberie úroveň modelu na výzvu                    |
+| Vlastný klasifikátor        | `decision`  | Váš rozhodca vyberie model                        |
 
-Polia pre SLA-aware:
+Polia podporujúce SLA:
 
 ```json
 {
@@ -799,13 +787,13 @@ Polia pre SLA-aware:
 
 Viac ako 30 modelov bolo ohodnotených v rámci 6 typov úloh (`coding`, `review`, `planning`, `analysis`, `debugging`, `documentation`). Podporuje vzory so zástupnými znakmi (napr. `*-coder` → vysoké skóre pre programovanie).
 
-## Súhrn variantov Auto
+## Rekapitulácia automatických variantov
 
-Vrátane samotného `auto` (predvolené) a 6 hodnôt `AutoVariant` deklarovaných v `autoPrefix.ts` existuje **7 vyvolateľných ID modelov**:
+`AutoVariant` v `autoPrefix.ts` vyhlasuje** 7 hodnôt** (`coding`, `fast`, `cheap`, `offline`, `smart`, `lkgp`, `chaos`). Together s holým `auto` (spracúva ho `parseAutoPrefix()` ako `variant: undefined`) a dvoma plochými vrstvami `auto/subscription` a `auto/thrifty` (`FLAT_TIER_OVERLAY_IDS` v `builtinCatalog.ts`), existujú** 10 plochý model IDs** :
 
-`auto`, `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`
+`auto`, `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`, `auto/chaos`, `auto/subscription`, `auto/thrifty`
 
-(`AutoVariant` samotný vymenúva 6 hodnôt; siedmou možnosťou je „bez variantu“ — samotné `auto` — ktoré funkcia `parseAutoPrefix()` spracuje ako `variant: undefined`.)
+Okrem toho sa rozlišujú aj kompozície `auto/<category>[:<tier>]`, modelová rodina IDs (napríklad `auto/claude-opus`) a aliasy `auto/best-*` / `auto/pro-*` v `builtinCatalog.ts`.
 
 ## Ako úrovne zapadajú do Auto-Combo
 
@@ -833,9 +821,9 @@ Definície úrovní a klasifikáciu poskytovateľov nájdete v dokumente [`docs/
 
 ### Deterministická matica smerovania a rozhodovania (`npm run test:combo:matrix`)
 
-`tests/integration/combo-matrix/*.test.ts` dokazuje smerovanie** rozhodnutie** z verejných stratégií pokrýva celý koniec cez skutočný kombinovaný kanál s falošným upstreamom. Pokrytie zahŕňa:
+`tests/integration/combo-matrix/*.test.ts` dokazuje smerovanie** rozhodnutie** z verejných stratégií pokrýva od začiatku do konca prostredníctvom skutočného kombinovaného potrubia s falošným upstreamom. Pokrytie zahŕňa:
 
-- Všetkých 21 stratégií `ROUTING_STRATEGY_VALUES` (usporiadané, vážené, náklady, kontext, fúzia, ...).
+- 18 z 22 verejných stratégií `ROUTING_STRATEGY_VALUES` (usporiadané, vážené, náklady, kontext, fúzia, …); `quota-weighted`, `cache-optimized`, `pipeline` a `jev` nie sú vykonávané maticou a spoliehajú sa na svoje vlastné jednotkové testy.
 - `quota-share` (interné) end-to-end: DRR spravodlivosť + saturácia deprioritizácia cez skutočný šev `selectQuotaShareTarget` (`registerQuotaFetcher` / `setLKGP` / `__setHeadroomSaturationFetcherForTests`).
 - `context-relay` univerzálne pokrytie všetkých cieľov.
 

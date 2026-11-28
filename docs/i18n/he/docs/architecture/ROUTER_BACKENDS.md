@@ -60,48 +60,31 @@ Bifrost הוא `external` בלבד (נגיש אך ורק באמצעות `BIFROST
 `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) מאפשרות לצרכנים
 לסנן לפי מה שמנוע מסוגל לעשות בפועל, במקום לקודד במפורש הסתעפויות נפרדות לכל מזהה.
 
-## ציר A — שירותים מוטמעים (צד התהליכים המפוקחים)
+## שירותים משובצים של ציר A — (צד תהליך מפוקח)
 
-- **רישום התהליכים המפוקחים:** `src/lib/services/bootstrap.ts`‏ `SERVICES[]`
-  (כיום: `9router`,‏ `cliproxy`).
-- **האחראי על מחזור החיים:** `src/lib/services/ServiceSupervisor.ts` — הפונקציה `start()` מפעילה את
-  תהליך הבן, ממתינה למעבר של `waitForHealthy()`, ומזרימה את stdout/stderr למאגר מעגלי;
-  `stop()` מבצעת SIGTERM→SIGKILL; כל הפעולות מסודרות באופן טורי תחת נעילה.
-- **איחוד המצבים** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error`, ובנוסף
-  `HealthState = healthy | unhealthy | unknown` אורתוגונלי.
-- **למה תהליך נפרד (ולא SDK בתוך התהליך)?** בידוד תהליכים הוא שמאפשר
-  לשלוט באופן עצמאי בהתקנה/הפעלה/עצירה/תקינות/יומנים של כל sidecar, ומאפשר
-  להחיל את מגבלת ההפעלה מ-loopback. מידול מתאם בתוך התהליך הוא עבודה עתידית —
-  דגל היכולת `native-hot-path` הוא המקום שבו הדבר יבוטא.
+- **רישום התהליכים המפוקחים:** `src/lib/services/bootstrap.ts` `SERVICES[]` (היום: `9router`, `cliproxy`).
+- **בעל מחזור חיים:** `src/lib/services/ServiceSupervisor.ts` — `start()` מוליד את הילד, משער על `waitForHealthy()`, מקיש stdout/stderr לתוך חיץ טבעת; `stop()` SIGTERM→SIGKILL; הכל מסודר תחת מנעול.
+- **איגוד המדינה** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error`, בתוספת `HealthState = healthy | unhealthy | unknown` אורתוגונלית .
+- **למה תהליך נפרד (לא תהליך SDK)?** בידוד תהליכים הוא מה שהופך install/start/stop/health/logs לשליטה עצמאית לכל צד ומאפשר ל-loopback spawn-guard לחול. מודלים של מתאם תוך-פרוק הוא עבודה עתידית — דגל יכולת `native-hot-path` הוא המקום שבו זה יבוא לידי ביטוי.
 
-### חוזה נתיבי מחזור החיים (`/api/services/<tool>/…`)
+### חוזה מסלול מחזור חיים (`/api/services/<tool>/…`)
 
-קודי הסטטוס הם **ספציפיים למצב/פעולה/נתיב במכוון** — זהו החוזה, ולא
-חוסר עקביות:
+קודי סטטוס הם**state/verb/path-specific לפי עיצוב** — זה החוזה, לא חוסר עקביות:
 
-| קריאה                        | תנאי                                | סטטוס                                |
-| ---------------------------- | ----------------------------------- | ------------------------------------ |
-| `POST .../start`             | השירות במצב `not_installed`         | **409** (תנאי מקדים)                 |
-| `POST .../stop`              | כבר נעצר                            | **200** (פעולת no-op אידמפוטנטית)    |
-| `GET .../status`             | תקין                                | **200** (`live ?? row ?? "unknown"`) |
-| `POST .../start`             | כשל בהפעלת התהליך                   | **503** (חולף)                       |
-| `GET .../status`, `.../stop` | שגיאה שלא נתפסה                     | **500**                              |
-| `GET /api/services/<x>/logs` | כלי לא מוכר `<x>`                   | **404** `Service '<x>' not found`    |
-| `GET .../status?reveal=key`  | חסרה הכותרת `X-Reveal-Confirm: yes` | **403** (עבור 9router בלבד)          |
-| **כל** `/api/services/*`     | הפונה אינו מ-loopback/LAN פרטי      | **403 LOCAL_ONLY**                   |
+| שִׂיחָה                      | מַצָב                         | סטָטוּס                              |
+| ---------------------------- | ----------------------------- | ------------------------------------ |
+| `POST .../start`             | שירות `not_installed`         | **409** (תְנַאִי מוּקדָם)            |
+| `POST .../stop`              | כבר נעצר                      | **200** (אימפוטנטי ללא הפעלה)        |
+| `GET .../status`             | OK                            | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`             | כישלון השרצים                 | **503** (חוֹלֵף)                     |
+| `GET .../status`, `.../stop` | שגיאה שלא נתפסה               | **500**                              |
+| `GET /api/services/<x>/logs` | כלי לא ידוע `<x>`             | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`  | חסר `X-Reveal-Confirm: yes`   | **403** (9 נתב בלבד)                 |
+| **כֹּל** `/api/services/*`   | מתקשר לא loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-המבנה של כל גופי השגיאות נקבע באמצעות `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, כאשר `type` נגזר מהסטטוס
-(`500→server_error`, `404→not_found`, `409→conflict`, else `invalid_request`) ומשמש
-כמבחין הניתן לעיבוד על ידי מכונה. ההודעות עוברות ניקוי מראש
-(`sanitizeErrorMessage()`, כלל קשיח מס' 12).
+כל גופי השגיאה מעוצבים על ידי `createErrorResponse()` → `{ error: { message, type }, requestId }`, כאשר `type` נגזר מהסטטוס (`500→server_error`, `404→not_found`, `409→conflict`, else `invalid_request`) והוא המאפיין הניתן לפעולה במכונה. ההודעות עוברות חיטוי מראש (`sanitizeErrorMessage()`, Hard Rule #12).
 
-**מגבלת ה-loopback** היא המקור הנפוץ ביותר ל-`403`: הנתיב `/api/services/` נמצא
-בתוך `LOCAL_ONLY_API_PREFIXES`‏ (`src/server/authz/routeGuard.ts`), ו-
-`src/server/authz/policies/management.ts` דוחה כל פונה שאינו מ-loopback או מ-LAN פרטי
-**לפני האימות**, משום שנתיבים אלה מפעילים תהליכי בן (כללים קשיחים 15
-ו-17). הגישה אליהם דרך מנהרה ציבורית מחזירה `403` במכוון.
+**שומר הלופ-בק** הוא המקור הנפוץ ביותר ל- `403`: `/api/services/` הוא ב- `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) ו- `src/server/authz/policies/management.ts` דוחה כל מתקשר ללא לולאה/לא פרטי-LAN** לפני אישור** , מכיוון שמסלולים אלו מולידים תהליכים ילדים (חוקים קשיחים 15 ו-17). הגעה אליהם דרך מנהרה ציבורית היא `403` בתכנון.
 
 ## ציר B — קצה עורפי לניתוב ממסר (צד השיגור)
 

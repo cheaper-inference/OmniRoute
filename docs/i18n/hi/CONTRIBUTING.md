@@ -10,26 +10,21 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ## विकास सेटअप
 
-### पूर्वापेक्षाएँ
+### आवश्यक शर्तें
 
 - **Node.js** `>=22.22.2 <23`, या `>=24.0.0 <27` (अनुशंसित: 24 LTS)
-- **npm** 10+
+- **NPM** 10 +
 
-> **Node 24 के साथ Windows:** वर्तमान 24 LTS पैच रिलीज़ (कम से कम 24.20.0) का उपयोग करें।
-> पहले की रिलीज़ में `--test-force-exit` द्वारा प्रक्रिया बंद किए जाने पर सफल परीक्षणों के बाद
-> भी प्रक्रिया अचानक समाप्त हो सकती है। Node का [Windows libuv सुधार](https://github.com/nodejs/node/pull/61999) इस
-> रनटाइम क्रैश को ठीक करता है; परीक्षण अभिकथनों और रनर एग्ज़िट जाँचों को सक्षम रखें।
+> **नोड 24 के साथ Windows :** वर्तमान 24 LTS पैच रिलीज़ (कम से कम 24.20.0) का उपयोग करें। जब `--test-force-exit` प्रक्रिया बंद कर देता है तो सफल परीक्षणों के बाद पहले की रिलीज़ रद्द हो सकती है। नोड का [Windows libuv फिक्स](https://github.com/nodejs/node/pull/61999) इस रनटाइम क्रैश को संबोधित करता है; परीक्षण अभिकथन और रनर निकास जांच सक्षम रखें।
 
-> **npm v11+ उपयोगकर्ता (Node 24+):** `npm install` के बाद सत्यापित करें कि नेटिव मॉड्यूल इंस्टॉल हो गए हैं:
-> `node -e "require('better-sqlite3')"`. यदि यह `MODULE_NOT_FOUND` के साथ विफल होता है,
-> तो `npm approve-scripts better-sqlite3 && npm install` चलाएँ। [समस्या निवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) देखें।
+> **npm v11 + उपयोगकर्ता (नोड 24 +):** `npm install` के बाद, सत्यापित करें कि मूल मॉड्यूल स्थापित किए गए थे: `node -e "require('better-sqlite3')"`। यदि यह `MODULE_NOT_FOUND` के साथ विफल रहता है, तो `npm approve-scripts better-sqlite3 && npm install` चलाएँ। [समस्या निवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) देखें.
 
-- **Git**
+- **गिट**
 
-### क्लोन और इंस्टॉल
+### क्लोन एवं इंस्टाल करें
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -37,91 +32,83 @@ npm install
 ### पर्यावरण चर
 
 ```bash
-# टेम्पलेट से अपना .env बनाएँ
+# Create your .env from the template
 cp .env.example .env
 
-# आवश्यक सीक्रेट जनरेट करें
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-विकास के लिए प्रमुख चर:
+विकास के लिए मुख्य चर:
 
-| चर                     | विकास डिफ़ॉल्ट           | विवरण               |
-| ---------------------- | ------------------------ | ------------------- |
-| `PORT`                 | `20128`                  | सर्वर पोर्ट         |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | फ्रंटएंड का बेस URL |
-| `JWT_SECRET`           | (ऊपर जनरेट करें)         | JWT साइनिंग सीक्रेट |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | पहली लॉगिन पासवर्ड  |
-| `APP_LOG_LEVEL`        | `info`                   | लॉग वर्बोसिटी स्तर  |
+| चर                     | विकास डिफ़ॉल्ट           | विवरण                          |
+| ---------------------- | ------------------------ | ------------------------------ |
+| `PORT`                 | `20128`                  | सर्वर पोर्ट                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | फ्रंटएंड के लिए बेस URL        |
+| `JWT_SECRET`           | (ऊपर उत्पन्न करें)       | JWT पर हस्ताक्षर करने का रहस्य |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | पहला लॉगिन पासवर्ड             |
+| `APP_LOG_LEVEL`        | `info`                   | लॉग वर्बोसिटी स्तर             |
 
 ### डैशबोर्ड सेटिंग्स
 
-डैशबोर्ड उन सुविधाओं के लिए UI टॉगल प्रदान करता है जिन्हें पर्यावरण चरों के माध्यम से भी कॉन्फ़िगर किया जा सकता है:
+डैशबोर्ड उन सुविधाओं के लिए UI टॉगल प्रदान करता है जिन्हें पर्यावरण चर के माध्यम से भी कॉन्फ़िगर किया जा सकता है:
 
-| सेटिंग स्थान       | टॉगल            | विवरण                           |
-| ------------------ | --------------- | ------------------------------- |
-| सेटिंग्स → उन्नत   | डीबग मोड        | डीबग अनुरोध लॉग सक्षम करें (UI) |
-| सेटिंग्स → सामान्य | साइडबार दृश्यता | साइडबार अनुभाग दिखाएँ/छिपाएँ    |
+| स्थान निर्धारित करना | टॉगल            | विवरण                           |
+| -------------------- | --------------- | ------------------------------- |
+| सेटिंग्स → उन्नत     | डिबग मोड        | डिबग अनुरोध लॉग सक्षम करें (UI) |
+| सामान्य → सेटिंग्स   | साइडबार दृश्यता | Show/hide साइडबार अनुभाग        |
 
-ये सेटिंग्स डेटाबेस में संग्रहीत होती हैं और रीस्टार्ट के बाद भी बनी रहती हैं। सेट होने पर, ये env var डिफ़ॉल्ट को ओवरराइड करती हैं।
+ये सेटिंग्स डेटाबेस में संग्रहीत होती हैं और सेट होने पर env var डिफ़ॉल्ट को ओवरराइड करते हुए, पुनरारंभ पर बनी रहती हैं।
 
-### स्थानीय रूप से चलाना
+### स्थानीय रूप से चल रहा है
 
 ```bash
-# विकास मोड (हॉट रीलोड)
+# Development mode (hot reload)
 npm run dev
 
-# प्रोडक्शन बिल्ड
-npm run build    # next build → .build/next/ फिर assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# योगदानकर्ता परिवर्तनों के लिए तेज़ बैकएंड/API-केवल कंपाइल
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# रिलीज़ बिल्ड (क्लीन रीबिल्ड + HEAD सेंटिनल — डिप्लॉय के लिए आवश्यक)
-npm run build:release   # rm -rf .build dist और build + dist/BUILD_SHA लिखता है
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# सामान्य पोर्ट कॉन्फ़िगरेशन
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-योगदानकर्ता बिल्ड केवल कंपाइल-आधारित सत्यापन करता है: यह स्टैंडअलोन वितरण को असेंबल नहीं करता
-और वैकल्पिक नेटिव पैकेजिंग एसेट्स को बिल्ड नहीं करता। जब आपको शिप किए जाने योग्य बंडल का
-सत्यापन करना हो, तब नियमित प्रोडक्शन बिल्ड का उपयोग करें।
+योगदानकर्ता बिल्ड केवल-संकलन सत्यापन करता है: यह स्टैंडअलोन वितरण को इकट्ठा नहीं करता है या वैकल्पिक मूल पैकेजिंग संपत्तियों का निर्माण नहीं करता है। जब आपको शिप करने योग्य बंडल को सत्यापित करने की आवश्यकता हो तो नियमित उत्पादन बिल्ड का उपयोग करें।
 
-### बिल्ड आउटपुट लेआउट
+### आउटपुट लेआउट बनाएं
 
-| डायरेक्टरी | सामग्री                                                                            | ट्रैक की गई |
-| ---------- | ---------------------------------------------------------------------------------- | ----------- |
-| `src/`     | एप्लिकेशन स्रोत (TypeScript / TSX)                                                 | हाँ         |
-| `.build/`  | इंटरमीडिएट — `next build` आउटपुट (gitignored, `distDir = .build/next`)             | नहीं        |
-| `dist/`    | शिप किए जाने योग्य बंडल — `assembleStandalone` द्वारा असेंबल किया गया (gitignored) | नहीं        |
+| निर्देशिका | अंतर्वस्तु                                                                     | ट्रैक |
+| ---------- | ------------------------------------------------------------------------------ | ----- |
+| `src/`     | एप्लिकेशन स्रोत (TypeScript / TSX)                                             | हाँ   |
+| `.build/`  | मध्यवर्ती — `next build` आउटपुट (gitignored, `distDir = .build/next`)          | नहीं  |
+| `dist/`    | शिप करने योग्य बंडल — `assembleStandalone` द्वारा असेंबल किया गया (gitignored) | नहीं  |
 
-बिल्ड पाइपलाइन एकल पास है:
+बिल्ड पाइपलाइन एक एकल पास है:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js आउटपुट)
-  └─ assembleStandalone()                 (standalone + static + public + native assets की प्रतिलिपि बनाता है)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` पहले दोनों डायरेक्टरी को साफ़ करता है और
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) को डिप्लॉय इंटीग्रिटी सेंटिनल के रूप में लिखता है।
+`npm run build:release` अतिरिक्त रूप से पहले दोनों निर्देशिकाओं को साफ़ करता है और एक परिनियोजन अखंडता प्रहरी के रूप में `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लिखता है।
 
-`npm run build:contributor` बैकएंड-केवल बिल्ड प्रोफ़ाइल का उपयोग करता है। यह बिल्ड के दौरान
-डैशबोर्ड UI फ़ाइलों को अस्थायी रूप से स्टब करता है, API रूट हैंडलर बनाए रखता है और बिल्ड के
-बाद मूल फ़ाइलों को पुनर्स्थापित करता है। डैशबोर्ड UI को प्रभावित करने वाले परिवर्तनों या पूर्ण
-रिलीज़ सत्यापन के लिए `npm run build` का उपयोग करें; योगदानकर्ता प्रोफ़ाइल रिलीज़ बिल्ड का विकल्प नहीं है।
+`npm run build:contributor` केवल बैकएंड बिल्ड प्रोफ़ाइल का उपयोग करता है। यह निर्माण के दौरान डैशबोर्ड UI फ़ाइलों को अस्थायी रूप से स्टब करता है, API रूट हैंडलर रखता है, और निर्माण के बाद मूल फ़ाइलों को पुनर्स्थापित करता है। डैशबोर्ड UI प्रभावित करने वाले परिवर्तनों के लिए या पूर्ण रिलीज़ सत्यापन के लिए `npm run build` उपयोग करें; योगदानकर्ता प्रोफ़ाइल रिलीज़ बिल्ड का प्रतिस्थापन नहीं है।
 
-> **VPS डिप्लॉय नोट:** रिमोट इमेज डायरेक्टरी `/usr/lib/node_modules/omniroute/app/`
-> अपरिवर्तित रहती है। डिप्लॉय स्किल्स `dist/` की सामग्री को इसमें rsync करती हैं।
-> केवल रिपॉज़िटरी के अंदर का बिल्ड आउटपुट पथ बदला है (`app/` → `dist/`)।
+> **VPS परिनियोजन नोट:** दूरस्थ छवि निर्देशिका `/usr/lib/node_modules/omniroute/app/` अपरिवर्तित है। परिनियोजन कौशल इसमें `dist/` की सामग्री को rsync करता है। केवल इन-रेपो बिल्ड आउटपुट पथ स्थानांतरित हुआ (`app/` → `dist/`)।
 
-डिफ़ॉल्ट URL:
+डिफ़ॉल्ट URLs:
 
-- **डैशबोर्ड**: `http://localhost:20128/dashboard`
+- **डैशबोर्ड** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -426,10 +413,10 @@ VPS डिप्लॉयमेंट के लिए, `npm run build` के �
 
 ---
 
-## सहायता प्राप्त करना
+## मदद प्राप्त करें
 
-- **आर्किटेक्चर**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) देखें
-- **API संदर्भ**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) देखें
-- **सुरक्षा दस्तावेज़**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **संचालन दस्तावेज़**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **समस्याएँ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **वास्तुकला** : [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) देखें
+- **API संदर्भ** : [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) देखें
+- **सुरक्षा दस्तावेज़** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **ऑप्स डॉक्स** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **समस्याएँ** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

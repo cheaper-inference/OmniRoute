@@ -45,12 +45,12 @@ flowchart LR
 
 - منجمد `release/vX.Y.Z` اس جہاز کے رہائی کے کپتان کا ہے۔
 - اگلے سائیکل کا `release/vX+1` منجمد ٹپ سے کاٹا جاتا ہے تاکہ شراکت دار لینڈنگ کا کام جاری رکھیں۔
-- کھلی PRs جو اب بھی منجمد شاخ کو نشانہ بنانا چاہیے۔** دوبارہ نشانہ بنایا** فعال (سب سے زیادہ) `release/v*` برانچ میں۔
+- کھلا PRs جو اب بھی منجمد برانچ کو نشانہ بنانا چاہیے۔** دوبارہ نشانہ بنایا** فعال (سب سے زیادہ) `release/v*` برانچ میں۔
 
-یہ ماننے سے پہلے کہ آپ جو برانچ چاہتے ہیں اسے ضم کرنے کے قابل ہے، اوپن فریز کی جانچ کریں:
+یہ ماننے سے پہلے کہ آپ جس برانچ کو ضم کرنے کے قابل چاہتے ہیں اسے اوپن فریز کے لیے چیک کریں:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 ضم میکانکس (مالک `queue` لیبل → Mergify) کو [MERGE_TRAIN.md](./MERGE_TRAIN.md) میں دستاویز کیا گیا ہے۔

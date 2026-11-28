@@ -4,15 +4,11 @@
 
 ---
 
-> **Hiteles forrás:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
-> **Utolsó frissítés:** 2026-06-28 — v3.8.40
+> **Az igazság forrása:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 
-Az OmniRoute HTTP-webhookokat indíthat a platform eseményeire. Ezekkel integrálható a
-Slack, a PagerDuty, a Datadog, a belső riasztási szolgáltatások vagy bármely HTTP-fogadó.
+OmniRoute képes HTTP webhookot indítani platformeseményekre. Használja őket Slack, PagerDuty, Datadog, belső riasztási szolgáltatások vagy bármely HTTP vevő integrálásához.
 
-A diszpécser minden kézbesítést HMAC-SHA256 használatával ír alá, átmeneti
-hibák esetén újrapróbálkozik, webhookonként követi a kézbesítés állapotát, és automatikusan letiltja a
-folyamatosan hibázó végpontokat.
+A diszpécser minden kézbesítést HMAC-SHA256 val ír alá, újrapróbálkozik átmeneti hibákkal, webhookonként követi a kézbesítés állapotát, és automatikusan letiltja a folyamatosan meghibásodó végpontokat.
 
 ## Támogatott események
 

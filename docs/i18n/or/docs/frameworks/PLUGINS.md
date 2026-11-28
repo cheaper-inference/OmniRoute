@@ -88,20 +88,19 @@ export function register(program, ctx) {
 | `ctx.baseUrl`                | `string`         | ସମାଧାନ କରାଯାଇଥିବା ମୂଳ URL                              |
 | `ctx.apiKey`                 | `string \| null` | ପ୍ରଦାନ କରାଯାଇଥିଲେ API କୀ                               |
 
-## ଆବିଷ୍କାର
+## ଆବିଷ୍କାର।
 
-ପ୍ଲଗିନ୍ଗୁଡ଼ିକୁ ନିମ୍ନ ସ୍ଥାନଗୁଡ଼ିକରୁ ଖୋଜାଯାଏ:
+ଏଥିରୁ ପ୍ଲଗଇନ୍ ଆବିଷ୍କୃତ ହୋଇଛି:
 
-1. `~/.omniroute/plugins/<name>/` — ବ୍ୟବହାରକାରୀଙ୍କ ସ୍ଥାନୀୟ ଇନ୍ଷ୍ଟଲେସନ୍
-2. `OMNIROUTE_PLUGIN_PATH` env var — କଷ୍ଟମ୍ ଡିରେକ୍ଟୋରୀ
+1. `~/.omniroute/plugins/node_modules/<name>/` — ଯେଉଁଠାରେ `omniroute plugin install` ପ୍ୟାକେଜ୍ ରଖେ (ଏକ npm `--prefix`, `npm -g` ନୁହେଁ)
+2. `~/.omniroute/plugins/<name>/` — ହ୍ୟାଣ୍ଡ-କପି ହୋଇଥିବା ପ୍ଲଗଇନ୍ ଡିରେକ୍ଟୋରୀଗୁଡିକ।
+3. `OMNIROUTE_PLUGIN_PATH` env var — କଷ୍ଟମ୍ ଡିରେକ୍ଟୋରୀ।
 
-ଉଭୟ **କେବଳ CLI ପାଇଁ**। ସର୍ଭର-ପାର୍ଶ୍ୱ ପ୍ଲଗିନ୍ ରନ୍ଟାଇମ୍ (ପ୍ରକ୍ସି ଭିତରେ ଚାଲୁଥିବା marketplace/`plugin.json`
-ପ୍ଲଗିନ୍ଗୁଡ଼ିକ) ପାଇଁ ନିଜସ୍ୱ ଓଭର୍ରାଇଡ୍ ସହିତ ଏକ ପୃଥକ ସ୍କାନର୍ ରହିଛି,
-`OMNIROUTE_PLUGINS_DIR` — ଦେଖନ୍ତୁ
-[PLUGIN_MARKETPLACE.md → ପ୍ଲଗିନ୍ ଡିରେକ୍ଟୋରୀ](./PLUGIN_MARKETPLACE.md#plugin-directory)।
-ଗୋଟିଏକୁ ସେଟ୍ କରିବା ଦ୍ୱାରା ଅନ୍ୟଟି ପ୍ରଭାବିତ ହୁଏ ନାହିଁ।
+ସିମ୍ ଲିଙ୍କ୍ ହୋଇଥିବା ଡିରେକ୍ଟୋରୀଗୁଡିକ ( `plugin install ./dir` ପାଇଁ npm ଯାହା ସୃଷ୍ଟି କରେ) ଅନୁସରଣ କରାଯାଏ।
 
-ଲୋଡିଂ ତ୍ରୁଟିଗୁଡ଼ିକୁ ଧରାଯାଇ ଚେତାବନୀ ଭାବେ ଦେଖାଯାଏ — ଏକ ତ୍ରୁଟିପୂର୍ଣ୍ଣ ପ୍ଲଗିନ୍ କେବେ ମଧ୍ୟ CLI-କୁ କ୍ରାଶ୍ କରେ ନାହିଁ।
+ଉଭୟ** କେବଳ CLI।** । ସର୍ଭର-ସାଇଡ୍ ପ୍ଲଗଇନ୍ ଚାଲିବା ସମୟ (ପ୍ରକ୍ସି ଭିତରେ ଚାଲୁଥିବା ମାର୍କେଟପ୍ଲେସ୍ /`plugin.json` ପ୍ଲଗଇନ୍) ର ନିଜସ୍ୱ ସ୍କାନର୍ ଅଛି, `OMNIROUTE_PLUGINS_DIR` — [PLUGIN_MARKETPLACE.md → ପ୍ଲଗଇନ୍ ଡିରେକ୍ଟୋରୀ](./PLUGIN_MARKETPLACE.md#plugin-directory) ଦେଖନ୍ତୁ। ଗୋଟିଏ ସେଟ୍ କରିବା ଅନ୍ୟକୁ ପ୍ରଭାବିତ କରେ ନାହିଁ।
+
+ଲୋଡିଂ ତ୍ରୁଟି ଧରାଯାଏ ଏବଂ ଚେତାବନୀ ଭାବରେ — ଏକ ଭଙ୍ଗା ପ୍ଲଗଇନ CLI କୁ କ୍ରାସ କରେ ନାହିଁ।
 
 ## ସୁରକ୍ଷା
 

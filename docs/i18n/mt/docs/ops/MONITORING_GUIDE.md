@@ -99,31 +99,31 @@ Għal kull combo:
 
 ---
 
-## API tal-Kontroll tas-Saħħa
+## Health Check API
 
-OmniRoute jesponi **żewġ** endpoints HTTP tas-saħħa. Dawn ma jistgħux jintużaw b’mod interkambjabbli mill-orkestraturi.
+OmniRoute jesponi** tnejn** uċuħ tas-saħħa HTTP. Mhumiex interkambjabbli għall-orkestraturi.
 
-| Mogħdija                     | Għan                                                                          | Piż                                                 | Uża għal                                                                    |
-| ---------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------- |
-| `GET /healthz`               | Ħajja/prontezza taċ-ċiklu tal-ħajja (`ok` / `starting` / `stopping`)          | Trivjali (indikatur tal-fażi biss)                  | **Prontezza** ta’ Kubernetes; **ħajja** mhux stretta jekk trid tuża HTTP    |
-| `GET /api/monitoring/health` | Sommarju profond tas-sistema + tal-fornituri (DB, heap, għadd tal-katalgu, …) | Tqil (xogħol sinkroniku fuq id-DB / ta’ monitoraġġ) | Dashboards, kontrolli profondi blackbox, il-healthcheck integrat ta’ Docker |
+| Mogħdija                     | Għan                                                                             | Piż                                                 | Uża għal                                                        |
+| ---------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------- |
+| `GET /healthz`               | Lifecycle liveness/readiness (`ok` / `starting` / `stopping`)                    | Trivjali (bandiera tal-fażi biss)                   | Kubernetes** prontezza** ; artab** ħajja** jekk trid tuża HTTP  |
+| `GET /api/monitoring/health` | Sommarju tal-fornitur + tas-sistema profonda (DB, borġ, għadd ta' katalogu, ...) | Tqil (sinkronizzazzjoni DB / xogħol ta' monitoraġġ) | Dashboards, blackbox deep checks, Docker's built-in healthcheck |
 
-> **Nota:** Il-matriċi tas-saħħa tal-fornituri, il-problemi tal-awtopilota, il-monitors tal-kwoti, is-saħħa tat-tokens, u d-dettalji dwar il-latenza lil hinn minn `/api/monitoring/health` huma disponibbli permezz tal-**għodda MCP** `observability_snapshot` jew il-paġni tad-**dashboard** — ma hemm l-ebda rotta REST iddedikata għalihom.
+> **Nota:** Il-matriċi tas-saħħa tal-fornitur, il-kwistjonijiet tal-awtopilota, il-monitors tal-kwoti, is-saħħa tat-tokens, u d-dettall tal-latency lil hinn minn `/api/monitoring/health` huma disponibbli permezz tal-** għodda MCP** `observability_snapshot` jew il** dashboard** paġni — m'hemmx rotot REST apposta għal dawk.
 
-Iż-żewġ rotot jaħdmu fuq l-**istess event loop ta’ Node** bħall-ipproċessar tat-talbiet. Mogħdija intensiva fuq is-CPU (xogħol fuq katalgu kbir ta’ `GET /v1/models`, kompressjoni ta’ kuntest twil / għadd tat-tokens) tista’ ddewwem il-handlers HTTP **kollha**, inkluż `/healthz`. Event loop okkupat ≠ proċess wieqaf. Agħti prijorità lit-tiswija tal-proċess li qed jikkonsma r-riżorsi; l-irfinar tal-probe jnaqqas biss il-waqfiet żbaljati.
+Iż-żewġ rotot jimxu fuq il-** istess linja ta 'avveniment Node** bħala trattament tat-talba. Mogħdija marbuta mas-CPU (xogħol ta' katalogu `GET /v1/models` kbir, kompressjoni ta' kuntest twil / għadd ta' tokens) tista' tittardja** kollha** HTTP handlers, inkluż `/healthz`. Event-loop busy ≠ proċess mejjet. Jippreferi li jiffissa l-hog; irfinar tas-sonda inaqqas biss qtil falz.
 
-### Probe ħafif għall-orkestratur
+### Sonda orkestratur ħafifa
 
 ```bash
 GET /healthz
-# jew HEAD /healthz
+# or HEAD /healthz
 ```
 
-- **200** + il-korp `ok` meta l-fażi taċ-ċiklu tal-ħajja tas-server tkun lesta
-- **503** + `starting` / `stopping` waqt l-istartjar jew l-għeluq
-- Implimentazzjoni: `src/app/healthz/route.ts` (mingħajr ping lid-DB)
+- **200** + body `ok` meta l-fażi taċ-ċiklu tal-ħajja tas-server tkun lesta
+- **503** + `starting` / `stopping` waqt boot jew shutdown
+- Implimentazzjoni: `src/app/healthz/route.ts` (l-ebda DB ping)
 
-### Saħħa tas-Sistema (profonda)
+### Saħħa tas-Sistema (fond)
 
 ```bash
 GET /api/monitoring/health
@@ -153,43 +153,35 @@ Risposta:
 }
 ```
 
-#### `credentialHealth`: cache tal-probe kontra `test_status` ta’ SQLite
+#### `credentialHealth`: probe-cache vs SQLite `test_status`
 
-`GET /api/monitoring/health` → `credentialHealth` huwa l-**gauge tal-cache tal-probe fil-memorja**,
-mhux estrazzjoni diretta ta’ `provider_connections.test_status`. Wara #12532, il-mogħdija
-tat-talba taqra `getCachedCredentialHealthSummary()` biss; probes fl-isfond
-jaġġornaw il-cache barra mill-event loop.
+`GET /api/monitoring/health` → `credentialHealth` huwa l** fil-memorja sonda-cache gauge** , mhux miżbla ħaj ta `provider_connections.test_status`. Wara #12532 il-mogħdija tat-talba taqra `getCachedCredentialHealthSummary()` biss; sondi fl-isfond jġedded il-cache barra mill-loop tal-avveniment.
 
-| Saff                             | Fejn                                                                  | Xi jfisser                                                                                                                                                                                                                        |
-| -------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Gauge tal-cache tal-probe        | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | L-aħħar riżultati tal-probe tas-saħħa tal-kredenzjali li għadhom miżmuma fil-memorja tal-proċess. `source` huwa dejjem `probe-cache`.                                                                                             |
-| Dettalji ta’ konnessjoni falluta | `credentialHealth.failedConnections`                                  | Preżenti **biss meta `failed > 0`**. Lista limitata ta’ ringieli tal-cache b’`status=error` (`connectionId`, `status`, `lastError` / `lastErrorType` sanitizzati). `failedOmitted` jiġi ssettjat meta l-lista tkun ġiet limitata. |
-| Status persistenti ta’ SQLite    | `credentialHealth.staleDbNonOkCount`                                  | Għadd ta’ ringieli ta’ konnessjonijiet **attivi** (`is_active=1`) li l-`test_status` persistit tagħhom huwa valur magħruf mhux ok (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).              |
+| Saff                           | Fejn                                                                  | Xi jfisser                                                                                                                                                                                                                     |
+| ------------------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Probe-cache gauge              | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | L-aħħar riżultati tas-sonda tal-kredenzjali tas-saħħa għadhom miżmuma fil-memorja tal-proċess. `source` huwa dejjem `probe-cache`.                                                                                             |
+| Dettall tal-konnessjoni fallut | `credentialHealth.failedConnections`                                  | Preżenti** biss meta `failed > 0`** . Lista delimitata ta' ringieli tal-cache `status=error` (`connectionId`, `status`, sanitized `lastError` / `lastErrorType`). `failedOmitted` huwa stabbilit meta l-lista kienet limitata. |
+| SQLite status twaħħal          | `credentialHealth.staleDbNonOkCount`                                  | Għadd ta'** attiv** (`is_active=1`) ringieli ta’ konnessjoni li `test_status` persistenti tagħhom huwa mhux ok magħruf (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`).                      |
 
-Iż-żewġ saffi jistgħu intenzjonalment ma jaqblux:
+Iż-żewġ saffi jistgħu ma jaqblux apposta:
 
-- Gauge `failed=0` filwaqt li `staleDbNonOkCount>0` — SQLite għad għandu
-  `test_status` persistenti (pereżempju `expired` jew `credits_exhausted`) li l-aħħar
-  snapshot tal-cache tal-probe ma jgħoddx bħala `status=error`.
-- Gauge `failed>0` filwaqt li SQLite jidher f’saħħtu — probe reċenti falla u jinsab
-  fil-cache; ir-ringiela fid-DB ma ġietx aġġornata, jew tneħħielha l-istatus aktar tard.
+- Gauge `failed=0` filwaqt `staleDbNonOkCount>0` — SQLite għad għandu `test_status` li jwaħħal (per eżempju `expired` jew `credits_exhausted`) li l-aħħar snapshot probe-cache ma jgħoddx bħala `status=error`.
+- Gauge `failed>0` filwaqt li SQLite jidher b'saħħtu — sonda riċenti falliet u hija mħaddma fil-cache; ir-ringiela DB ma ġietx aġġornata, jew aktar tard ġiet approvata.
 
-Toħloqx twissija abbażi ta’ `provider_connections.test_status` biss meta tkun qed tiġbor id-data minn dan
-l-endpoint. Uża `failed` + `failedConnections` għal fallimenti diretti tal-probe, u
-`staleDbNonOkCount` meta jkollok bżonn l-għadd tal-istatus persistenti.
+Twissiex biss fuq `provider_connections.test_status` meta tobrox dan l-endpoint. Uża `failed` + `failedConnections` għal fallimenti tas-sonda ħajjin, u `staleDbNonOkCount` meta jkollok bżonn l-għadd persistenti tal-istatus li jwaħħal.
 
-### Rakkomandazzjonijiet għall-probes ta’ Kubernetes
+### Rakkomandazzjonijiet tas-sonda Kubernetes
 
-OmniRoute huwa **proċess Node wieħed** (event loop wieħed). Id-Docker `HEALTHCHECK` standard jimmira lejn `/healthz`, li huwa ħafif. `/api/monitoring/health` huwa **tqil wisq** għall-intervalli tal-liveness ta’ kubelet.
+OmniRoute hija a** proċess ta' Node wieħed** (linja ta' avveniment wieħed). Stock Docker `HEALTHCHECK` timmira `/healthz` ħafif . `/api/monitoring/health` huwa** tqil wisq** għall-intervalli tal-ħajja tal-kubelet.
 
-| Sonda              | Mira rakkomandata                                                                           | Noti                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ------------------ | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Bidu**           | HTTP `GET /healthz` b’`failureThreshold` twil (jew `startPeriod` kbir)                      | Il-bidu mill-kesħa + il-migrazzjoni ta’ SQLite jistgħu jieħdu aktar minn ftit sekondi                                                                                                                                                                                                                                                                                                                 |
-| **Prontezza**      | HTTP `GET /healthz`                                                                         | Ċiklu tal-ħajja `ok` / `starting` / `stopping` (200 kontra 503). Xorta jvarja jekk il-loop ikun imblukkat mis-CPU. **200 wara diversi sekondi mhuwiex stat tajjeb** (#10303) — ifisser li l-event loop kien imċaħħad mir-riżorsi qabel ma tħaddem il-handler ta’ 3 bytes                                                                                                                              |
-| **Vijabbiltà**     | HTTP `GET /livez`, **jew TCP** fuq il-port ewlieni tas-servizz (`PORT`, predefinit `20128`) | `/livez` jiċċekkja biss jekk il-proċess huwiex ħaj (dejjem 200 jekk jitħaddem il-handler). Xorta jaqsam l-istess event loop — okkupat ≠ mejjet, u ma jindividwax iċ-ċaħda tar-riżorsi tal-event loop (#10303) aħjar minn TCP. Ippreferi **TCP** jekk is-sondi HTTP jispiċċalhom il-ħin taħt tagħbija tal-katalgu/kompressjoni; fi kwalunkwe każ, **toqtolx** il-pod għal waqfiet qosra tal-event loop |
-| **Saħħa profonda** | `GET /api/monitoring/health` minn kontrollur estern                                         | Mhux għal `livenessProbe` tal-kubelet / `readinessProbe` stretta                                                                                                                                                                                                                                                                                                                                      |
+| Sonda              | Mira rakkomandata                                                                        | Noti                                                                                                                                                                                                                                                                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **L-istartjar**    | HTTP `GET /healthz` `failureThreshold` twil (jew `startPeriod` kbir)                     | Cold start + SQLite migration tista 'taqbeż ftit sekondi                                                                                                                                                                                                                                                                          |
+| **Prontezza**      | HTTP `GET /healthz`                                                                      | Lifecycle `ok` / `starting` / `stopping` (200 vs 503). Xorta flaps jekk il-linja hija mblukkata mis-CPU. A** 200 f'diversi sekondi mhix b'saħħitha** (#10303) — dan ifisser li l-linja ta' l-avvenimenti tneħħa bil-ġuħ qabel ma dam il-handler ta' 3 byte                                                                        |
+| **Ħajja**          | HTTP `GET /livez`,** jew TCP** fuq il-port tas-servizz ewlieni (`PORT`, default `20128`) | `/livez` huwa proċess-alive biss (dejjem 200 jekk il-handler jaħdem). Għadu jaqsam l-avveniment loop — busy ≠ dead, u ma jiskoprix event-loop starvation (#10303) aħjar minn TCP. Jippreferi**TCP** jekk HTTP sondi time out taħt tagħbija catalog/compression ; tagħmel** le** joqtlu l-powd fuq tilari qasir event-loop jew mod |
+| **Saħħa profonda** | `GET /api/monitoring/health` minn kontrollur estern                                      | Mhux ghal kubelet `livenessProbe` / tight `readinessProbe`                                                                                                                                                                                                                                                                        |
 
-Forma ta’ eżempju (aġġusta l-limiti skont it-tagħbija tal-bidu mill-kesħa u tal-kompressjoni tiegħek):
+Eżempju ta' għamla (aġġusta l-limiti għat-tagħbija tal-bidu kiesaħ u l-kompressjoni tiegħek):
 
 ```yaml
 ports:
@@ -215,21 +207,21 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Waqt waqfa tal-event loop, HTTP /livez xorta jista’ jispiċċalu l-ħin. TCP huwa
-  # l-alternattiva konservattiva:
+  # Under event-loop stall HTTP /livez can still time out. TCP is the
+  # conservative alternative:
   # tcpSocket:
   #   port: http
 ```
 
-**Tippuntax** il-**liveness** tal-kubelet lejn `/api/monitoring/health`. Dik il-mogħdija twettaq xogħol reali fuq id-DB/il-monitoraġġ u taħt tagħbija tagħti pożittivi foloz.
+**M'għandekx** punt kubelet** ħajja** `/api/monitoring/health`. Dik it-triq tagħmel xogħol DB/monitoring reali u se tkun pożittiva falza taħt tagħbija.
 
-Relatat: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sondi waqt li l-event loop ikun okkupat), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (il-prezzijiet tal-katalgu jaħtfu r-riżorsi), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (l-għadd tat-tokens tal-kompressjoni jaħtaf ir-riżorsi).
+Relatati: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sondi waqt li l-linja tal-avvenimenti hija okkupata), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (hog tal-ipprezzar tal-katalgu), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (hog ta 'kompressjoni ta' token-count).
 
-### watchdog ta’ systemd (event loop iffriżat)
+### systemd watchdog (linja ta' avveniment iffriżat)
 
-Fuq host b’systemd, OmniRoute jgħarraf lill-maniġer tas-servizz meta jkun lest u jkompli jibgħatlu sinjali, sabiex server li l-event loop tiegħu jeħel jinqatel u jerġa’ jinbeda minflok jibqa’ attiv u sieket. Is-sinjali jintbagħtu mill-event loop tas-server stess: meta dan jiġi mblukkat, is-sinjali jieqfu, u systemd jerġa’ jibda s-servizz ladarba jgħaddi `WatchdogSec` mingħajr ma jirċievi wieħed.
+Fuq host systemd, OmniRoute jgħid lill-maniġer tas-servizz meta jkun lest u jibqa’ jagħmel ping, għalhekk server li l-loop ta’ l-avvenimenti tiegħu huwa mwaħħal jinqatel u jerġa’ jibda flok jibqa’ wieqaf u sieket. Il-pings jiġu mill-loop tal-avveniment tas-server stess: meta jimblokka, jieqfu, u systemd jerġa 'jibda s-servizz ladarba `WatchdogSec` jgħaddi mingħajr wieħed.
 
-[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) diġà jikteb unit tal-utent b’dan. Unit li tikteb int stess (bil-`Type=simple` predefinit) ma jkollux watchdog, għalhekk żid dawn il-linji mat-taqsima `[Service]` tiegħu:
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) diġà jikteb user unit b'dan. Unità li tikteb lilek innifsek (iż- `Type=simple` default) ma tieħu l-ebda għassies, għalhekk żid dawn il-linji mat-taqsima `[Service]` tagħha:
 
 ```ini
 [Service]
@@ -239,34 +231,34 @@ WatchdogSec=180
 TimeoutStartSec=300
 ```
 
-L-unit iġġenerat jistabbilixxi `Restart=on-failure`, għalhekk żid dik il-linja wkoll — mingħajrha, il-watchdog joqtol biss is-servizz imwaħħal minflok jerġa’ jibdieh.
+L-unità ġġenerata tissettja `Restart=on-failure`, għalhekk żid dik il-linja wkoll — mingħajrha l-għassies joqtol biss is-servizz imwaħħal minflok jerġa' jibda.
 
-- `Type=notify`: is-servizz jitqies bħala “mibdi” meta s-server jibgħat `READY=1`, mhux meta l-proċess jagħmel fork. `TimeoutStartSec` jillimita bidu kajman.
-- `NotifyAccess=all`: is-sinjali jintbagħtu mill-proċess tas-server, li huwa wild tas-superviżur `omniroute serve`.
-- `WatchdogSec`: is-sinjali jintbagħtu kull 60 sekonda, għalhekk uża **120 jew aktar**. Valuri iżgħar jerġgħu jibdew server li jkun qed jaħdem sew.
-- Ħaddem `omniroute serve` fil-foreground. `--daemon` jifred lis-server mis-cgroup tal-unit u l-handshake tan-notifika qatt ma jitlesta.
+- `Type=notify`: is-servizz "jinbeda" meta s-server jibgħat `READY=1`, mhux meta l-proċess jitbaxxa. `TimeoutStartSec` jillimita bidu bil-mod.
+- `NotifyAccess=all`: il-pings jintbagħtu mill-proċess tas-server, li huwa tifel tas-superviżur `omniroute serve`.
+- `WatchdogSec`: pings johorgu kull 60 sekonda, allura uża** 120 jew aktar** . Valuri iżgħar jerġgħu jibdew server b'saħħtu.
+- Mexxi `omniroute serve` fil-foreground. `--daemon` jinqata 's-server mill-cgroup tal-unità u l-handshake notify qatt ma jitlesta.
 
-Iċċekkja li jkun attiv wara li jerġa’ jinbeda:
+Iċċekkja li hija attiva wara bidu mill-ġdid:
 
 ```bash
 systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
 ```
 
-`WatchdogUSec` juri d-dewmien ikkonfigurat u `WatchdogTimestamp` javvanza kull minuta. Bidu mill-ġdid ikkawżat mill-watchdog jiġi rreġistrat bħala `Result=watchdog`. Biex titfi s-sinjali filwaqt li żżomm l-unit kif inhu, issettja `OMNIROUTE_DISABLE_SD_NOTIFY=1`; mingħajr `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) ma jintbagħat xejn.
+`WatchdogUSec` juri d-dewmien konfigurat u `WatchdogTimestamp` jimxi 'l quddiem kull minuta. Startjar mill-ġdid ikkawżat mill-għassa huwa rreġistrat bħala `Result=watchdog`. Biex itfi l-pings waqt li żżomm l-unità kif inhi, issettja `OMNIROUTE_DISABLE_SD_NOTIFY=1`; mingħajr `NOTIFY_SOCKET` (terminal, Docker, Electron, Windows) ma jintbagħat xejn.
 
-Il-watchdog jiċċekkja biss li l-event loop jibqa’ jaħdem. Server li jkun kajman iżda xorta jibqa’ jipproċessa ma jerġax jinbeda.
+L-għassies jiċċekkja biss li l-loop tal-avveniment jibqa' għaddej. Server li jkun bil-mod iżda li għadu jdur ma jerġax jinbeda.
 
-### Xogħol fakultattiv fil-mogħdija tat-talba (memorja, ħiliet, tiġdid tat-token)
+### Xogħol fakultattiv fit-triq talba (memorja, ħiliet, aġġornament tat-token)
 
-L-estrazzjoni tal-memorja, l-injezzjoni tal-ħiliet, u t-tiġdid tat-token OAuth jaqsmu l-**event loop ewlieni ta’ Node** ma’ `/healthz`. Dawn huma funzjonalitajiet li jistgħu jiġu attivati jew diżattivati mid-dashboard (`memoryEnabled`, `skillsEnabled`), mhux worker pool. Ara [Ambjent — l-ispiża fuq l-event loop](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+L-estrazzjoni tal-memorja, l-injezzjoni tal-ħiliet, u l-aġġornament tat-token OAuth jaqsmu l-** linja ta 'avveniment Node prinċipali** ma `/healthz`. Huma karatteristiċi ta' dashboard-toggle (`memoryEnabled`, `skillsEnabled`), mhux grupp ta' ħaddiema. Ara [Ambjent — event-loop cost](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
-### Saħħa tal-Provider
+### Saħħa tal-Fornitur
 
-> **L-ebda endpoint REST.** Id-data dwar is-saħħa tal-provider hija disponibbli permezz tal-għodda MCP `observability_snapshot` jew il-paġna `/dashboard/providers` tad-dashboard.
+> **L-ebda endpoint REST.** Id-dejta dwar is-saħħa tal-fornitur hija disponibbli permezz tal-għodda MCP `observability_snapshot` jew il-paġna tad-dashboard `/dashboard/providers`.
 
-### Dettalji tal-Provider
+### Dettall tal-Fornitur
 
-> **L-ebda endpoint REST.** Id-dettalji għal kull provider huma disponibbli permezz tal-paġna `/dashboard/providers` tad-dashboard.
+> **L-ebda endpoint REST.** Dettall għal kull fornitur huwa disponibbli permezz tal-paġna `/dashboard/providers` tad-dashboard.
 
 ---
 

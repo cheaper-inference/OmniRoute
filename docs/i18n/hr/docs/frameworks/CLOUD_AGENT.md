@@ -330,19 +330,16 @@ vraća maskirani pretpregled (`maskedApiKey`: do 4 znaka na svakom kraju, manje 
 ključ, nijedan za 8 znakova ili manje) i `projectId` veze. Oba su polja izostavljena
 iz odgovora za sve ostale ključeve.
 
-## Razrješavanje vjerodajnica
+## Rezolucija vjerodajnica
 
 `getCloudAgentCredentials(providerId)` u `src/lib/cloudAgent/api.ts`:
 
-1. Učitava aktivne veze s pružateljima putem `getProviderConnections({ provider: providerId, isActive: true })`.
-2. Za svaku vezu daje prednost vrijednosti `apiKey` (bez okolnih bjelina). Ako nije dostupna, koristi `accessToken`.
-3. Vraća prvi token koji nije prazan, omotan kao `{ apiKey: token }`.
-4. Vraća `null` ako nije pronađen nijedan upotrebljiv token — API odgovara statusom `400` uz
-   `"Nisu konfigurirane aktivne vjerodajnice za pružatelja agenta u oblaku: <id>"`.
+1. Učitava aktivne veze pružatelja putem `getProviderConnections({ provider: providerId, isActive: true })`.
+2. Za svaku vezu preferira `apiKey` (podrezan). Vraća se na `accessToken`.
+3. Vraća prvi neprazan token zamotan kao `{ apiKey: token }`.
+4. Vraća `null` ako nije pronađen upotrebljiv token — API odgovara `400` sa `"No active credentials configured for cloud agent provider: <id>"`.
 
-To znači da agenti u oblaku ponovno upotrebljavaju istu tablicu veza s pružateljima kao i uobičajeni LLM
-pružatelji. Da biste omogućili Jules, stvorite aktivnu vezu s `provider: "jules"`
-i popunjenim poljem `apiKey`.
+To znači da agenti u oblaku ponovno koriste istu tablicu povezivanja pružatelja usluga kao obični pružatelji usluga LLM. Da biste omogućili Jules, stvorite aktivnu vezu sa `provider: "jules"` i popunjenim `apiKey`.
 
 ## Nadzorna ploča
 

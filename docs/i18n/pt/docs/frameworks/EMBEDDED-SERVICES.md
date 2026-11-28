@@ -4,7 +4,7 @@
 
 ---
 
-> **Versão:** v3.8.44** Última atualização:** 28/10/2026** Audiência:** Engenheiros a adicionar, manter ou depurar serviços incorporados (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versão:** v3.8.44** Audiência:** Engenheiros a adicionar, manter ou depurar serviços incorporados (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Os serviços incorporados são ferramentas secundárias de processo instaladas localmente que OmniRoute instala, supervisiona e expõe como alvos de encaminhamento de primeira classe. Ao contrário dos fornecedores externos (que são acedidos pela Internet através de chaves API ), os serviços incorporados são executados na mesma máquina que OmniRoute e comunicam por loopback.
 
@@ -29,23 +29,23 @@ Os serviços incorporados são ferramentas secundárias de processo instaladas l
 
 Oito serviços estão incorporados:
 
-| Serviço             | pacote npm                                | Porta padrão | Finalidade                                                                                                                                                                                                                                                                                                                                                                                |
-| ------------------- | ----------------------------------------- | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**         | `9router`                                 |    20130     | router AI que OmniRoute pode utilizar como subfornecedor. Modelos expostos como `9router/{sub}/{model}`                                                                                                                                                                                                                                                                                   |
-| **CLIProxyAPI**     | binário de libertação GitHub (`cliproxy`) |     8317     | Adaptador de proxy local para fluxos de autenticação Anthropic CLI. Fornece um encaminhamento substituto quando os tokens OAuth expiram                                                                                                                                                                                                                                                   |
-| **Mux**             | `mux` ( `mux server` sem cabeça)          |     8322     | Daemon de orquestração de agentes locais (coder/mux). Apenas — gerido pelo ciclo de vida, não um destino de encaminhamento (sem proxy LLM ).                                                                                                                                                                                                                                              |
-| **Bifrost**         | `@maximhq/bifrost`                        |     8080     | Vá para o back-end de retransmissão do gateway AI. Ao executar, selecionado automaticamente pela rota de retransmissão (`/v1/relay/`)                                                                                                                                                                                                                                                     |
-| **Dário**           | `@askalf/dario`                           |     3456     | Claude — alternative/failover assinatura proxy para CLIProxyAPI para tráfego em formato Claude-Code; a chave injetada passa a ser `DARIO_ADMIN_TOKEN` bloqueando o seu plano de controlo `/admin/*` OAuth                                                                                                                                                                                 |
-| **abrir-wa**        | `@open-wa/wa-automate`                    |     8323     | Automação WhatsApp Web (Chromium headless via Puppeteer). Apenas — gerido pelo ciclo de vida não é um destino de encaminhamento.                                                                                                                                                                                                                                                          |
-| **LLMLingua**       | `@atjsh/llmlingua-2`                      |    20135     | Modelo sidecar de compressão de prompt — real LLMLingua-2 ONNX (porta JS/TS do algoritmo de Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` despacha `/compress` sobre HTTP para ele, voltando para o back-end do thread de trabalho em processo quando o ficheiro secundário está inativo. Apenas — gerido pelo ciclo de vida não é um destino de encaminhamento. |
-| **caixa de cantar** | binário de libertação GitHub (`singbox`)  |    20140     | TPROXY sidecar suportando a interceção de proxy transparente do `applyTproxy()`(`src/mitm/tproxy/setup.ts`). O instalador descarrega a versão fixada e verificada pela soma de verificação. Apenas — gerido pelo ciclo de vida, não um destino de encaminhamento (sem proxy LLM )                                                                                                         |
+| Serviço            | pacote npm                                | Porta padrão | Finalidade                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------ | ----------------------------------------- | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**        | `9router`                                 |    20130     | router AI que OmniRoute pode utilizar como subprovedor. Modelos expostos como `9router/{sub}/{model}`                                                                                                                                                                                                                                                                                     |
+| **CLIProxyAPI**    | binário de libertação GitHub (`cliproxy`) |     8317     | Adaptador de proxy local para fluxos de autenticação Anthropic CLI. Fornece um encaminhamento substituto quando os tokens OAuth expiram                                                                                                                                                                                                                                                   |
+| **Mux**            | `mux` ( `mux server` sem cabeça)          |     8322     | Daemon de orquestração de agentes locais (coder/mux). Apenas — gerido pelo ciclo de vida, não um destino de encaminhamento (sem proxy LLM ).                                                                                                                                                                                                                                              |
+| **Bifrost**        | `@maximhq/bifrost`                        |     8080     | Vá para o back-end de retransmissão do gateway AI. Ao executar, selecionado automaticamente pela rota de retransmissão (`/v1/relay/`)                                                                                                                                                                                                                                                     |
+| **Dário**          | `@askalf/dario`                           |     3456     | Claude — alternative/failover assinatura proxy para CLIProxyAPI para tráfego em formato Claude-Code; a chave injetada passa a ser `DARIO_ADMIN_TOKEN` bloqueando o seu plano de controlo `/admin/*` OAuth                                                                                                                                                                                 |
+| **abrir-wa**       | `@open-wa/wa-automate`                    |     8323     | Automação WhatsApp Web (Chromium headless via Puppeteer). Apenas — gerido pelo ciclo de vida não é um destino de encaminhamento.                                                                                                                                                                                                                                                          |
+| **LLMLingua**      | `@atjsh/llmlingua-2`                      |    20135     | Modelo sidecar de compressão de prompt — real LLMLingua-2 ONNX (porta JS/TS do algoritmo de Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` despacha `/compress` sobre HTTP para ele, voltando para o back-end do thread de trabalho em processo quando o ficheiro secundário está inativo. Apenas — gerido pelo ciclo de vida não é um destino de encaminhamento. |
+| **caixa de canto** | binário de libertação GitHub (`singbox`)  |    20140     | TPROXY sidecar suportando a interceção de proxy transparente do `applyTproxy()`(`src/mitm/tproxy/setup.ts`). O instalador descarrega a versão fixada e verificada pela soma de verificação. Apenas — gerido pelo ciclo de vida, não um destino de encaminhamento (sem proxy LLM )                                                                                                         |
 
 Todos os oito seguem o mesmo modelo de supervisão:
 
 - OmniRoute instala-os em `DATA_DIR/services/{name}/` (isolado do próprio OmniRoute `package.json`)
 - OmniRoute gera-os e monitoriza-os como processos filhos
-- OmniRoute injeta uma chave API efémera no ambiente filho e roda-a sem tempo de inatividade (quando aplicável)
-- Todas as rotas de gestão (`/api/services/*`) são**LOCAL_ONLY** — apenas acessível por loopback (regra rígida nº 17)
+- OmniRoute injeta uma chave API efémera no ambiente filho e alterna-a sem tempo de inatividade (quando aplicável)
+- Todas as rotas de gestão (`/api/services/*`) são**LOCAL_ONLY** — apenas acessível por loopback (regra rígida #17)
 
 ### Principais decisões (do plano de design)
 
@@ -211,7 +211,7 @@ o arranque automático e um botão da IU são acionados simultaneamente.
 
 ## 4. referência API
 
-Todas as rotas sob `/api/services/` são**LOCAL_ONLY** (apenas loopback, regra rígida nº 17). Os pedidos sem loopback recebem `403 LOCAL_ONLY` independentemente do token de autenticação.
+Todas as rotas sob `/api/services/` são**LOCAL_ONLY** (apenas loopback, regra rígida #17). Os pedidos sem loopback recebem `403 LOCAL_ONLY` independentemente do token de autenticação.
 
 ### 4.1 9 Terminais do router (11 rotas)
 
@@ -238,7 +238,7 @@ Instale o 9Router a partir do npm. Cria `DATA_DIR/services/9router/` com os seus
 | `409`    | Já a instalar (bloqueio mantido)                       |
 | `500`    | npm install failed — ver `message` para erro amigável  |
 
-**Notas:** Utiliza `execFile('npm', [...])` — sem shell, sem interpolação (regra rígida nº 13). Os erros EACCES são apresentados como mensagens amigáveis.
+**Notas:** Utiliza `execFile('npm', [...])` — sem shell, sem interpolação (regra rígida #13). Os erros EACCES são apresentados como mensagens amigáveis.
 
 ---
 
@@ -289,7 +289,7 @@ Pare graciosamente o 9Router. Envia SIGTERM, espera 15 s e SIGKILL se ainda esti
 
 #### `POST /api/services/9router/restart`
 
-Equivalente a `stop()` e `start()` no bloqueio de operação.
+Equivalente a `stop()` e `start()` no bloqueio de funcionamento.
 
 **Corpo do pedido:** nenhum
 
@@ -388,7 +388,7 @@ Alterne o sinalizador de início automático. Quando `enabled: true`, o serviço
 
 #### `GET /api/services/9router/logs`
 
-SSE stream de registos ao vivo do buffer de anel stdout/stderr do 9Router.
+SSE fluxo de registos ao vivo do buffer de anel stdout/stderr do 9Router.
 
 **Parâmetros de consulta:**
 
@@ -435,7 +435,7 @@ CLIProxyAPI tem o mesmo formato de ponto final que 9Router menos `rotate-key`, m
 | `GET`  | `/api/services/cliproxy/status`     | Estado + DB ao vivo (sem `apiKeyMasked`) |
 | `POST` | `/api/services/cliproxy/auto-start` | Alternar arranque automático             |
 
-O endpoint partilhado `GET /api/services/{name}/logs` (ver §4.1) funciona para todos os quatro serviços utilizando o segmento dinâmico `[name]`.
+O endpoint `GET /api/services/{name}/logs` partilhado (ver §4.1) funciona para todos os quatro serviços utilizando o segmento dinâmico `[name]`.
 
 ---
 
@@ -551,15 +551,13 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 Este proxy:
 
-- Encaminha o pedido para `http://127.0.0.1:{port}/{path}` (somente loopback)
+- Encaminha o pedido para `http://127.0.0.1:{port}/{path}` (apenas loopback)
 - Remove os cabeçalhos `cookie` e `authorization` de entrada (sem fuga da sessão OmniRoute )
 - Injeta `Authorization: Bearer {apiKey}` para autenticação 9Router
 - Retira `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` da resposta
 - Reescreve as respostas HTML para injectar `<base href>` e normalizar caminhos absolutos (`/foo` → `/dashboard/.../embed/foo`)
 
-As atualizações WebSocket para o painel integrado são geridas por um servidor complementar numa porta dedicada (consulte `src/lib/services/embedWsProxy.ts`).
-
-Cada atualização é autorizada antes da abertura do túnel, com as mesmas regras da rota de incorporação HTTP : o peer deve ser um loopback sem cabeçalho de encaminhamento de proxy reverso, um navegador `Origin` deve ser uma origem do painel (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` estende os padrões de loopback) e o chamador precisa de uma sessão do painel ou de uma chave API de âmbito de gestão, a menos que o login do painel esteja desativado.
+As atualizações WebSocket para o painel integrado são geridas por um servidor complementar numa porta dedicada (consulte `src/lib/services/embedWsProxy.ts`). Cada atualização é autorizada antes da abertura do túnel, com as mesmas regras da rota de incorporação HTTP : o par deve ser loopback sem cabeçalho de encaminhamento de proxy reverso, um navegador `Origin` deve ser uma origem do painel (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` estende os padrões de loopback) e o chamador precisa de uma sessão do painel ou de uma chave API de âmbito de gestão, a menos que o login do painel esteja desativado.
 
 **Segurança:** As rotas de proxy incorporadas são classificadas em `LOCAL_ONLY_API_PREFIXES` e só podem ser acedidas através de loopback. Um atacante que obtenha um JWT através de um túnel Cloudflare/Ngrok não pode fazer proxy em serviços incorporados.
 
@@ -567,61 +565,41 @@ Cada atualização é autorizada antes da abertura do túnel, com as mesmas regr
 
 ## 5. Segurança
 
-### Aplicação de LOCAL_ONLY (regra rígida n.º 17)
+### Aplicação LOCAL_ONLY (regra rígida #17)
 
-Todas as rotas em `/api/services/` e `/dashboard/providers/services/*/embed/` estão
-classificadas como LOCAL_ONLY em `src/server/authz/routeGuard.ts`. A verificação de
-loopback é executada incondicionalmente antes de qualquer ramo de autenticação:
+Todas as rotas sob `/api/services/` e `/dashboard/providers/services/*/embed/` são classificadas como LOCAL_ONLY em `src/server/authz/routeGuard.ts`. A verificação de loopback é executada incondicionalmente antes de qualquer ramo de autenticação:
 
 ```
-o pedido chega
+request arrives
   → isLocalOnlyPath(path)?
-      → não loopback → 403 LOCAL_ONLY (sempre, antes da verificação de autenticação)
-      → loopback     → prossegue para a autenticação normal
+      → non-loopback → 403 LOCAL_ONLY (always, before auth check)
+      → loopback    → fall through to normal auth
 ```
 
-Isto impede que um JWT exposto (por exemplo, através de um túnel) acione `npm install`
-ou a criação de processos. Consulte `docs/security/ROUTE_GUARD_TIERS.md` para obter a
-matriz completa de níveis.
+Isto evita que um JWT vazado (por exemplo, através de um túnel) acione `npm install` ou a geração do processo. Consulte `docs/security/ROUTE_GUARD_TIERS.md` para a matriz de camada completa.
 
-### Injeção de chaves de API
+### injeção de chave API
 
-O 9Router e o Mux requerem uma chave de API/token bearer para os respetivos endpoints
-HTTP. O OmniRoute:
+9Router e Mux requerem um token API key/bearer para os seus próprios terminais HTTP. OmniRoute:
 
-1. Gera uma chave através de `crypto.randomBytes(32).toString("base64url")` com um
-   prefixo específico do serviço (`nr_` para o 9Router, `mx_` para o Mux).
-2. Encripta-a em repouso utilizando AES-256-GCM (a mesma cifra utilizada para as
-   credenciais dos fornecedores).
-3. Desencripta-a e injeta-a como uma variável de ambiente no momento da criação do
-   processo — `NINEROUTER_API_KEY` para o 9Router, `MUX_SERVER_AUTH_TOKEN` para o Mux
-   (nunca como um sinalizador da CLI, para que o token nunca apareça em `ps`/listagens
-   de processos).
-4. Nunca devolve a chave em texto simples em qualquer resposta HTTP.
+1. Gera uma chave via `crypto.randomBytes(32).toString("base64url")` com um prefixo específico do serviço (`nr_` para 9Router, `mx_` para Mux).
+2. Encripta em repouso usando AES-256-GCM (mesma cifra usada para as credenciais do fornecedor).
+3. Desencripta e injecta como variável de ambiente no momento do spawn — `NINEROUTER_API_KEY` para 9Router, `MUX_SERVER_AUTH_TOKEN` para Mux (nunca um sinalizador CLI, pelo que o token nunca aparece nas listagens `ps`/process).
+4. Nunca devolve a chave de texto simples em qualquer resposta HTTP.
 
-O CLIProxyAPI recebe uma chave dedicada do plano de dados, injetada no momento da
-criação do processo (`needsApiKey: true` — utilizada para a sincronização de modelos
-com o adaptador).
+CLIProxyAPI recebe uma chave de plano de dados dedicada injetada no spawn (`needsApiKey: true` — utilizada para sincronização de modelos no adaptador).
 
-### Defesa contra SSRF
+### defesa SSRF
 
-O proxy HTTP inverso (`/dashboard/.../embed/[...path]`) está codificado para reencaminhar
-apenas para `http://127.0.0.1:{port}`. Nunca segue redirecionamentos para destinos que
-não sejam loopback. A biblioteca `ssrf-req-filter` é utilizada para rejeitar qualquer
-URL upstream que seja resolvido para fora do intervalo de loopback.
+O proxy HTTP reverso (`/dashboard/.../embed/[...path]`) está codificado para encaminhar apenas para `http://127.0.0.1:{port}`. Nunca segue redirecionamentos para destinos sem loopback. A biblioteca `ssrf-req-filter` é utilizada para rejeitar qualquer URL upstream que resolva fora do intervalo de loopback.
 
-### Segurança da shell (regra rígida n.º 13)
+### Segurança da casca (regra rígida #13)
 
-`npm install` é invocado através de `execFile('npm', ['install', pkg, '--prefix', dir])` —
-sem template literals, sem shell e sem interpolação de caminhos externos na cadeia de
-comando. Os valores de execução (portas, chaves de API) são transmitidos através do
-objeto `env` do processo filho.
+`npm install` é invocado através de `execFile('npm', ['install', pkg, '--prefix', dir])` — sem literais de modelo, sem shell, sem interpolação de caminhos externos na string de comando. Os valores de tempo de execução (portas, chaves API ) são passados através do objeto `env` do filho.
 
-### Saneamento de erros (regra rígida n.º 12)
+### Limpeza de erros (regra rígida #12)
 
-Todas as respostas de erro de `/api/services/*` passam por `buildErrorBody()` ou
-`sanitizeErrorMessage()`. Os valores brutos de `err.stack` e `err.message` nunca são
-devolvidos literalmente ao cliente.
+Todas as respostas de erro do `/api/services/*` passam por `buildErrorBody()` ou `sanitizeErrorMessage()`. `err.stack` e `err.message` em bruto nunca são devolvidos literalmente ao chamador.
 
 ---
 
@@ -860,69 +838,44 @@ a porta predefinida 20128 do OmniRoute.
 
 ---
 
-## 8. Perguntas frequentes
+## 8. FAQ
 
-**P: Posso expor os endpoints dos serviços integrados a clientes que não sejam de loopback?**
+**P: Posso expor os terminais de serviços incorporados a clientes que não sejam de loopback?**
 
-Não. O nível LOCAL_ONLY é intencional (regra rígida n.º 17). As rotas que podem invocar
-`npm install` ou iniciar processos `node` não podem estar acessíveis a partir de tráfego
-que não seja de loopback, porque, caso contrário, um JWT exposto através de um túnel
-(Cloudflare, Ngrok, Tailscale) permitiria iniciar processos arbitrários. Não existe
-qualquer exceção de exclusão voluntária para `/api/services/` — ao contrário de
-`/api/mcp/`, este caminho está excluído da lista de exceções do âmbito manage.
-Consulte `docs/security/ROUTE_GUARD_TIERS.md`.
+Não. A camada LOCAL_ONLY é intencional (regra rígida #17). As rotas que podem invocar `npm install` ou gerar processos `node` não devem ser acessíveis a partir de tráfego sem loopback, porque um JWT vazado através de um túnel (Cloudflare, Ngrok, Tailscale) permitiria a geração arbitrária de processos. Não há exclusão de exclusão para `/api/services/` — diferentemente de `/api/mcp/`, é excluído da lista de bypass do âmbito de gestão. Veja `docs/security/ROUTE_GUARD_TIERS.md`.
 
 ---
 
-**P: O 9Router e a CLIProxyAPI estarão disponíveis em implementações de produção/na cloud?**
+**P: O 9Router e CLIProxyAPI estarão disponíveis nas implementações production/cloud ?**
 
-Sim. Ambos os serviços seguem o mesmo modelo local-first do próprio OmniRoute. São
-executados na mesma máquina e comunicam através de loopback. Neste caso, «produção»
-refere-se ao VPS ou servidor local onde o OmniRoute está implementado, e não a um
-fornecedor de cloud remoto.
+Sim. Ambos os serviços seguem o mesmo modelo local-first do próprio OmniRoute. São executados na mesma máquina e comunicam por loopback. "Produção" aqui significa o VPS ou servidor local onde OmniRoute está implementado, e não um fornecedor de cloud remoto.
 
 ---
 
-**P: Como posso depurar o supervisor?**
+**P: Como depuro o supervisor?**
 
-1. Acompanhe o fluxo de registos SSE: `curl -N http://localhost:20128/api/services/9router/logs`.
-2. Verifique os registos estruturados na saída pino do OmniRoute, filtrados pelo
-   namespace `service:supervisor`.
-3. Inspecione a linha da base de dados: `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
-4. Utilize `GET /api/services/9router/status` para ver, numa única chamada, o estado
-   atual em tempo real, o PID, a integridade e `lastError`.
+1. Siga o fluxo de registo SSE : `curl -N http://localhost:20128/api/services/9router/logs`.
+2. Verifique os logs estruturados na saída pino de OmniRoute filtrada pelo namespace `service:supervisor`.
+3. Inspecione a linha DB : `sqlite3 ~/.omniroute/omniroute.db "SELECT * FROM version_manager WHERE tool='9router'"`.
+4. Utilize `GET /api/services/9router/status` para ver o estado ativo atual, PID, health e `lastError` numa chamada.
 
 ---
 
-**P: O supervisor mostra `health: "degraded"` ou `health: "unknown"`, mas o estado é `"running"`. É um problema?**
+**P: O supervisor mostra `health: "degraded"` ou `health: "unknown"` mas o estado é `"running"`. Isso é um problema?**
 
-`"degraded"` significa que a sonda de integridade devolveu uma resposta diferente de 200. `"unknown"` significa que ainda não foi concluída qualquer sondagem (condição de
-corrida com a primeira consulta). Ambos os estados são transitórios durante o arranque.
-Se a integridade permanecer como `"degraded"` durante mais de `healthIntervalMs * 3`
-ms após `"running"`, o serviço integrado está em execução, mas a respetiva API HTTP não
-está a responder. Verifique se a porta está correta na resposta de estado e se o
-serviço está efetivamente à escuta nessa porta.
+`"degraded"` significa que a investigação de integridade retornou uma resposta non-200. `"unknown"` significa que ainda não foi concluída nenhuma investigação (corrida com a primeira sondagem). Ambos são transitórios durante o arranque. Se a integridade permanecer `"degraded"` durante mais de `healthIntervalMs * 3` ms após `"running"`, o serviço integrado estará em execução, mas o seu HTTP API não estará a responder. Verifique se a porta está correta na resposta de estado e se o serviço está realmente a escutar nessa porta.
 
 ---
 
-**P: Posso alterar a chave de API do 9Router sem um reinício completo?**
+**P: Posso alterar o interruptor API do 9Router sem uma reinicialização completa?**
 
-Não. A chave de API é transmitida ao 9Router através de uma variável de ambiente no
-momento em que o processo é iniciado. As variáveis de ambiente não podem ser alteradas
-num processo em execução. `POST .../rotate-key` para e reinicia automaticamente o
-serviço para aplicar a nova chave. A rotação da chave entra em vigor dentro do
-`stopTimeoutMs` do serviço (15 s por predefinição), acrescido do respetivo tempo de
-arranque.
+Não. A chave API é passada para o 9Router através de uma variável de ambiente no momento do spawn. As variáveis de ambiente não podem ser alteradas num processo em execução. `POST .../rotate-key` pára e reinicia automaticamente o serviço para aplicar a nova chave. A rotação da chave entra em vigor dentro do `stopTimeoutMs` do serviço (padrão 15 s) mais o tempo de arranque.
 
 ---
 
-**P: Qual é o limite do buffer circular e o que acontece quando este fica cheio?**
+**P: Qual é o limite do buffer circular e o que acontece quando fica cheio?**
 
-Cada serviço tem um buffer circular dedicado de 5 MB. Quando o buffer fica cheio, as
-linhas de registo mais antigas são removidas para libertar espaço para as novas. O
-evento SSE `snapshot` devolve as linhas mais recentes dentro do limite `tail`. Os
-registos não são guardados no disco, a menos que `logsBufferPath` esteja definido na
-linha da base de dados.
+Cada serviço possui um buffer de anel dedicado de 5 MB. Quando o buffer está cheio, as linhas de registo mais antigas são removidas para dar espaço às novas. O evento SSE `snapshot` devolve as linhas mais recentes dentro do limite `tail`. Os registos não são persistidos no disco, a menos que `logsBufferPath` esteja definido na linha DB.
 
 ---
 

@@ -13,11 +13,13 @@ Defolt provayderlər arası siyasət üçə qədər provayder cəhdinə icazə v
 ## Harada tətbiq olunur
 
 - **Kombolar** kombonun öz strategiyasına və parametrlərinə uyğun olaraq hədəfləri arasında uğursuzluğa düçar olurlar.
-- **Çılpaq model id** ( `provider/` prefiksi yoxdur) bir neçə aktiv provayderin xidmət etdiyi, dəqiq adın kombinasiyası olmadan əvvəlcə provayderin nəticə seçimlərinə göndərilir. Bu cəhd siyasətin uğursuz olduğu şəkildə uğursuz olarsa, eyni sorğu id-yə xidmət edən növbəti aktiv provayderə göndərilir. Cavab, cavab verəndən əvvəl sınaqdan keçirilmiş provayderlərin sayı ilə `x-omniroute-fallback-attempts` daşıyır.
-  - Hər bir alternativ, nəticə onu seçmiş kimi tam olaraq səlahiyyətlidir. API açarının blokladığı və ya qəbul etmədiyi hədəf yuxarı zəng olmadan atlanır və müştəri heç vaxt adlandırmadığı hədəf üçün siyasətin rədd edilməsini deyil, real upstream xətasını alır.
+- **Çılpaq model identifikatoru** ( `provider/` prefiksi yoxdur) bir neçə aktiv provayderin xidmət etdiyi, dəqiq adın kombinasiyası olmadan əvvəlcə provayderin nəticə seçimlərinə göndərilir. Bu cəhd siyasətin uğursuz olduğu şəkildə uğursuz olarsa, eyni sorğu id-yə xidmət edən növbəti aktiv provayderə göndərilir. Cavab, cavab verəndən əvvəl sınaqdan keçirilmiş provayderlərin sayı ilə `x-omniroute-fallback-attempts` daşıyır.
+  - Hər bir alternativ, nəticə onu seçmiş kimi tam olaraq səlahiyyətlidir. API açarının blokladığı və ya qəbul etmədiyi hədəf yuxarı çağırış olmadan atlanır və müştəri heç vaxt adını çəkmədiyi hədəf üçün siyasətin rədd edilməsini deyil, real upstream xətasını alır.
   - Yalnız uğursuz cavab davam edir: ilk axın baytından sonra heç nə uğursuz olmur.
   - Fövqəladə vəziyyətdə geri dönmə model dəyişdirilməsi yalnız tələb olunan modelin hər bir provayderi uğursuz olduqdan sonra tətbiq edilir.
   - Bağlantıya (`x-omniroute-connection`) bərkidilmiş sorğu onun üzərində qalır.
   - Prefiksli id (`provider/model`) heç vaxt başqa provayderə yönləndirilmir.
 
 Dövrə vəziyyətləri `closed`, `open` və `half_open` dir. Sərinləmə müddəti məhdud zondu planlaşdırır; uğurlu zond dövrəni bağlayır və uğursuz bir zond onu yenidən açır.
+
+Provayderin əvəzlənməsi şlüz daxilində işləyir. Şlüz kəsilməsi zamanı müştəri davranışı üçün [OmniRoute özü əlçatmaz olduqda](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) baxın.

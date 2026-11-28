@@ -4,167 +4,176 @@
 
 ---
 
-> **TL;DR**: Gamitin ang sarili mong mga kwalipikadong provider account. Pinagsasama ng OmniRoute ang mga koneksiyong kino-configure mo; hindi nito ibinibigay ang inanunsyong pinagsama-samang badyet ng token. Maaaring mangailangan ang libreng pag-access ng pag-sign up, API key, pag-apruba, o paraan ng pagbabayad. Nalalapat pa rin ang mga limitasyon, patakaran sa privacy, at tuntunin ng provider.
+> **TL;DR** : Dalhin ang sarili mong mga karapat-dapat na account ng provider. Pinagsasama ng OmniRoute ang mga koneksyon na iyong iko-configure; hindi ito naglalabas ng na-advertise na pinagsama-samang badyet ng token. Ang libreng pag-access ay maaaring mangailangan ng pag-signup, isang API key, pag-apruba, o isang paraan ng pagbabayad. Nalalapat pa rin ang mga limitasyon ng provider, mga patakaran sa privacy, at mga tuntunin.
 
 ---
 
 ## Ano ang Mga Libreng Tier?
 
-Maraming provider ng AI ang nag-aalok ng ilang uri ng **libreng access**. Depende sa provider, maaaring mangahulugan iyon ng endpoint na hindi nangangailangan ng authentication, umuulit na quota, walang takdang limitasyon sa access ngunit may rate limit, grant sa pag-sign up, manu-manong pag-apruba, o pansamantalang promosyon. Nangangailangan ang ilang opsyon ng account, API key, credit card, KYC, o pagtanggap sa mga tuntuning partikular sa provider.
+Maraming mga provider AI ang nag-aalok ng ilang uri ng** libreng pag-access** . Depende sa provider, maaaring mangahulugan iyon ng walang-auth endpoint, umuulit na quota, walang limitasyon sa rate na access, grant sa pag-signup, manual na pag-apruba, o pansamantalang promosyon. Ang ilang mga opsyon ay nangangailangan ng account, API key, credit card, KYC, o pagtanggap ng mga tuntuning partikular sa provider.
 
-**Pinagsasama-sama** ng OmniRoute ang mga naka-configure na koneksyon sa iisang endpoint. Kailangan mo pa ring hiwalay na mag-sign up para sa bawat provider na nangangailangan ng account. Ikonekta ang mga account na iyon at gamitin ang `model: "auto"` upang mag-route sa mga kwalipikadong target. Maaaring walang kwalipikadong target na hindi nangangailangan ng key ang isang bagong installation; hindi ginagarantiya ng pag-install lamang ng OmniRoute ang matagumpay na tugon sa chat.
-
----
-
-## Mga Kinatawang Provider na may Libreng Access
-
-### Paulit-ulit, Walang Key, o Walang Takdang Limitasyon sa Access
-
-Ang mga provider na ito ay may paulit-ulit, walang key, o walang takdang limitasyong paraan ng libreng access sa na-audit na catalog. Ang “Walang takdang limitasyon” ay nangangahulugang walang inilathalang limitasyon sa token; maaari pa ring malapat ang mga limitasyon sa rate, concurrency, account, rehiyon, at patakaran:
-
-| Provider          | Mga Model                                                                                                     | Quota                                                                                                                                             | Paano Kumonekta                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, at iba pa                                                        | Tinataya ng na-audit na catalog ang isang pinagsasaluhang buwanang pool na 25K token                                                              | Daloy ng OAuth/account; minarkahan ang ToS bilang `avoid` sa catalog                    |
-| **Pollinations**  | Kasalukuyang hanay ng mga model na walang key; itinigil na o nangangailangan na ng key ang ilang dating model | Walang key; walang inilathalang limitasyon sa token                                                                                               | Walang credential ng provider para sa mga model na walang key                           |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, at marami pa                                     | Libreng API key (walang limitasyon sa rate, walang card); **nilo-log ang bawat request** para sa pananaliksik (mag-opt out sa logfare.ai/consent) | Agarang key sa logfare.ai/register; ToS/privacy sa logfare.ai/tos at logfare.ai/privacy |
-| **Cloudflare AI** | Catalog ng Workers AI                                                                                         | Tinataya ng na-audit na pool ang ~30M token/buwan mula sa mga inilathalang unit ng paggamit                                                       | Cloudflare account at mga credential ng API                                             |
-| **Gemini**        | Pamilya ng Gemini Flash                                                                                       | Nag-iibang mga limitasyon sa rate ayon sa project/model; walang nakapirming buwanang token grant na kasama sa pangunahing alok                    | Google AI Studio API key; tingnan ang mga aktibong limitasyon ng project                |
-| **Groq**          | Mga model na Llama, GPT-OSS, at Qwen                                                                          | Tinataya ng na-audit na pool ang ~15M token/buwan                                                                                                 | Groq API key; nalalapat ang mga limitasyon sa rate                                      |
-
-### Mga Grant sa Pag-sign Up at Credit na Partikular sa Provider
-
-Nag-aalok ang mga provider na ito ng mga grant sa pag-sign up o pampromosyong credit, alinsunod sa kanilang mga tuntunin sa pagiging kuwalipikado. Batay sa beripikasyon noong 2026-10-08, nangangailangan ang [pagpepresyo ng Cerebras](https://www.cerebras.ai/pricing) ng paraan ng pagbabayad para sa isang beses na $5 credit na mawawalan ng bisa pagkalipas ng 30 araw; hindi ito isang paulit-ulit na token quota. Nag-iiba ang [mga limitasyon sa rate ng Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) ayon sa project, model, at tier, kaya hindi kino-convert ang mga ito sa isang garantisadong buwanang token grant.
-
-| Provider      | Mga Libreng Credit                                                              | Mga Model                      | Paano Makukuha                                                                       |
-| ------------- | ------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------ |
-| **Cerebras**  | Isang beses na $5 pampromosyong credit; mawawalan ng bisa pagkalipas ng 30 araw | Kasalukuyang inference catalog | Account at wastong paraan ng pagbabayad                                              |
-| **DeepSeek**  | 5M libreng token                                                                | DeepSeek V4                    | Mag-sign up sa platform.deepseek.com                                                 |
-| **LongCat**   | Isang beses na grant na 10M token                                               | LongCat 2.0                    | API key + KYC; bayad ayon sa paggamit pagkatapos ng grant                            |
-| **Vertex AI** | $300 na credit sa pag-sign up na kinakatawan bilang ~300M token sa budget model | Gemini at mga partner model    | Google Cloud account; nalalapat ang mga tuntunin sa billing at pagiging kuwalipikado |
-
-### Iba Pang Limitadong Access
-
-Ang mga provider na ito ay may **mga libreng tier** na may mga partikular na limitasyon:
-
-| Provider                   | Libreng Limitasyon                                                                                                              | Mga Model                             | Pinakamainam Para Sa |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | -------------------- |
-| **GitHub Models**          | Tinataya ng na-audit na pinagsasaluhang pool ang ~18M token/buwan                                                               | Malawakang pagsusuri ng model         |
-| **Hugging Face**           | Maliit na paulit-ulit na buwanang pool                                                                                          | Mga eksperimento at sari-saring model |
-| **OpenRouter free models** | Pinagsasaluhang pool na may limitasyon sa request; pinapataas ng opsyonal na isang beses na top-up ang paulit-ulit na allowance | Malawak na fallback catalog           |
-| **AI Horde**               | Kapasidad ng komunidad na walang key; nag-iiba ang availability                                                                 | Oportunistikong distributed inference |
+OmniRoute** mga pinagsama-samang** naka-configure na mga koneksyon sa isang endpoint. Mag-sign up ka pa rin nang hiwalay para sa bawat provider na nangangailangan ng account. Ikonekta ang mga account na iyon at gamitin `model: "auto"` para magruta sa mga kwalipikadong target. Ang isang bagong pag-install ay maaaring walang karapat-dapat na keyless target; Ang pag-install ng OmniRoute lamang ay hindi ginagarantiyahan ang isang matagumpay na tugon sa chat.
 
 ---
 
-## Paano Pagsama-samahin ang mga Libreng Tier
+## Kinatawan ng Libreng-Access Provider
 
-Ang mahika ng OmniRoute ay ang **pagsama-sama ng mga libreng tier**. Sa halip na umasa sa iisang provider, kumokonekta ka sa maraming libreng provider at hinahayaan ang OmniRoute na awtomatikong piliin ang pinakamainam para sa bawat request.
+### Paulit-ulit, Walang Key, o Walang Naka-cap na Access
 
-### Halimbawa: Mas Malawak na Saklaw ng Libreng Tier
+Ang mga provider na ito ay may paulit-ulit, walang key, o walang takip na libreng access na landas sa na-audit na catalog. Ang ibig sabihin ng “Uncapped” ay walang na-publish na token cap; maaari pa ring ilapat ang mga limitasyon sa rate, concurrency, account, rehiyonal, at patakaran:
 
-Kumonekta sa ilang provider upang mabawasan ang pagdepende sa iisang quota:
+| Provider           | Mga modelo                                                                                                | Quota                                                                                                                                               | Paano Kumonekta                                                                         |
+| ------------------ | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Kiro AI**        | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2, at iba pa                                                    | Tinatantya ng na-audit na catalog ang isang 25K-token na nakabahaging buwanang pool                                                                 | daloy ng OAuth/account ; Na-flag ng ToS `avoid` sa catalog                              |
+| **Mga polinasyon** | Kasalukuyang keyless model set; ang ilang mga dating modelo ay hindi na ipinagpatuloy o kailangan ng susi | Walang susi; walang na-publish na token cap                                                                                                         | Walang kredensyal ng provider para sa mga keyless na modelo                             |
+| **Logfare**        | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3, at higit pa                                  | Libreng API key (walang mga limitasyon sa rate, walang card);** bawat kahilingan ay naka-log** para sa pananaliksik (opt out sa logfare.ai/consent) | Instant key sa logfare.ai/register; ToS/privacy at logfare.ai/tos at logfare.ai/privacy |
+| **Cloudflare AI**  | Katalogo ng mga manggagawa AI                                                                             | Tinatantya ng na-audit na pool ~ 23M tokens/month mula sa mga na-publish na unit ng paggamit (na-audit ang catalog noong 2026-11-23)                | Cloudflare account at mga kredensyal API                                                |
+| **Gemini**         | Gemini Flash pamilya                                                                                      | Mga limitasyon sa rate ng variable project/model ; walang nakapirming buwanang token grant na kasama sa headline                                    | Google AI Studio API key; suriin ang mga aktibong limitasyon ng proyekto                |
+| **Groq**           | Llama, GPT-OSS, at Qwen na mga modelo                                                                     | Ang na-audit na pool ay tinantyang ~ 24M tokens/month (4 na cap sa bawat modelo, na-audit ang catalog noong 2026-11-23)                             | Groq API key; nalalapat ang mga limitasyon sa rate                                      |
 
-1. **Gemini** — umuulit na quota ng API key
-2. **Groq** — umuulit na quota ng API key
-3. **Pollinations** — access na hindi nangangailangan ng key at may limitasyon sa rate
-4. **LongCat** — minsanang grant sa pag-sign up (nangangailangan ng KYC)
+### Mga Grant sa Pag-signup at Mga Kredito na Partikular sa Provider
 
-Pagkatapos, gamitin ang `model: "auto"` at gagawin ng OmniRoute ang sumusunod:
+Nag-aalok ang mga provider na ito ng mga grant sa pag-signup o mga kreditong pang-promosyon, na napapailalim sa kanilang mga panuntunan sa pagiging kwalipikado. Gaya ng na-verify noong 2026-10-08, [ang pagpepresyo ng Cerebras](https://www.cerebras.ai/pricing) ay nangangailangan ng paraan ng pagbabayad para sa isang beses na $5 na credit na mag-e-expire pagkalipas ng 30 araw; ito ay hindi isang umuulit na quota ng token. [Ang mga limitasyon sa rate ng Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) ay nag-iiba ayon sa proyekto, modelo, at tier, kaya hindi na-convert ang mga ito sa isang garantisadong buwanang token grant.
 
-- Susubukan muna ang kwalipikadong koneksyong may pinakamataas na ranggo
-- Kung mabigo ang quota o pagsusuri sa kalagayan nito → susubukan ang susunod na naka-configure na provider
-- Kung hindi available ang provider na hindi nangangailangan ng key → magpapatuloy sa natitirang mga target
-- Kung walang kwalipikadong koneksyon ang magtagumpay → magbabalik ng error; magagamit lamang ang mga credit sa pag-sign up habang balido at available ang mga ito
+| Provider      | Libreng Credits                                                                                 | Mga modelo                      | Paano Kumuha                                                                            |
+| ------------- | ----------------------------------------------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------- |
+| **Cerebras**  | Isang beses na $5 na kreditong pang-promosyon; mag-e-expire pagkatapos ng 30 araw               | Kasalukuyang katalogo ng hinuha | Account at wastong paraan ng pagbabayad                                                 |
+| **DeepSeek**  | 5M libreng token                                                                                | DeepSeek V4                     | Mag-sign up sa platform.deepseek.com                                                    |
+| **LongCat**   | 10M-token na isang beses na grant                                                               | LongCat 2.0                     | API key + KYC; pay-as-you-go pagkatapos ng grant                                        |
+| **Vertex AI** | Ang $300 na kredito sa pag-signup ay kinakatawan bilang mga ~ 300M na token sa modelo ng badyet | Gemini at mga modelo ng kasosyo | Google Cloud account; nalalapat ang mga tuntunin sa pagsingil at pagiging karapat-dapat |
 
-**Resulta**: mas malawak na saklaw ng libreng tier na may awtomatikong fallback — hindi ito garantiya ng walang limitasyong kapasidad.
+### Iba pang Limitadong Access
+
+Ang mga provider na ito ay mayroon** libreng tier** na may mga tiyak na limitasyon:
+
+| Provider                          | Libreng Limitasyon                                                                                         | Mga modelo                             | Pinakamahusay Para sa |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------- | --------------------- |
+| **GitHub Mga Modelo**             | Mga na-audit na pagtatantya ng ibinahaging pool ~ 18M tokens/month                                         | Malawak na pagsusuri ng modelo         |
+| **Yakap Mukha**                   | Maliit na umuulit na buwanang pool                                                                         | Mga eksperimento at iba't ibang modelo |
+| **OpenRouter libreng mga modelo** | Shared request-limitado pool; ang opsyonal na isang beses na top-up ay nagpapataas ng umuulit na allowance | Malawak na fallback catalog            |
+| **AI Horde**                      | Kapasidad ng komunidad na walang susing; nag-iiba-iba ang availability                                     | Oportunistikong ipinamahagi na hinuha  |
 
 ---
 
-## Paano Ikonekta ang mga Libreng Provider
+## Paano Mag-stack ng Mga Libreng Tier
+
+Ang magic ng OmniRoute ay** pagsasalansan ng mga libreng tier** . Sa halip na umasa sa isang provider, ikinonekta mo ang maraming libreng provider at hayaan OmniRoute na awtomatikong pumili ng pinakamahusay para sa bawat kahilingan.
+
+### Halimbawa: Mas malawak na Free-Tier na Saklaw
+
+Ikonekta ang ilang provider para mabawasan ang pag-asa sa anumang solong quota:
+
+1. **Gemini** — umuulit na API-key na quota
+2. **Groq** — umuulit na API-key na quota
+3. **Mga polinasyon** — keyless, rate-limited na access
+4. **LongCat** — one-time signup grant (nangangailangan ng KYC)
+
+Pagkatapos ay gamitin `model: "auto"` at OmniRoute ay:
+
+- Subukan muna ang pinakamataas na ranggo na karapat-dapat na koneksyon
+- Kung nabigo ang quota o health check nito → subukan ang susunod na naka-configure na provider
+- Kung hindi available ang keyless provider → magpatuloy sa mga natitirang target
+- Kung walang karapat-dapat na koneksyon na magtagumpay, magbabalik → ng error; Ang mga kredito sa pag-signup ay magagamit lamang habang may bisa at magagamit
+
+**Resulta** : mas malawak na free-tier na saklaw na may awtomatikong fallback — hindi isang garantiya ng walang limitasyong kapasidad.
+
+---
+
+## Paano Ikonekta ang Mga Libreng Provider
 
 ### Hakbang 1: Buksan ang Dashboard
 
 Pumunta sa `http://localhost:20128` sa iyong browser.
 
-### Hakbang 2: Pumunta sa Providers
+### Hakbang 2: Pumunta sa Mga Provider
 
-I-click ang **Providers** sa sidebar.
+I-click** Mga tagapagbigay** sa sidebar.
 
-### Hakbang 3: I-click ang Add Provider
+### Hakbang 3: I-click ang Magdagdag ng Provider
 
-I-click ang button na **+ Add Provider**.
+I-click ang**+ Magdagdag ng Provider** pindutan.
 
 ### Hakbang 4: Pumili ng Libreng Provider
 
-I-browse ang catalog at suriin ang kasalukuyang `hasFree`, auth, quota, privacy,
-at ToS metadata ng bawat provider. Tinutukoy ng provider card at ng
-[Reference ng mga Libreng Tier](../reference/FREE_TIERS.md) ang pagkakaiba ng mga umuulit na pool,
-walang limitasyon/walang key na access, mga credit sa pag-sign up, mga itinigil na entry, at mga source na may mas mataas na panganib.
+I-browse ang catalog at siyasatin ang kasalukuyang `hasFree`, auth, quota, privacy, at ToS metadata ng bawat provider. Ang provider card at ang [Free Tiers Reference](../reference/FREE_TIERS.md) ay nakikilala ang mga umuulit na pool, uncapped/keyless access, signup credits, itinigil na mga entry, at mas mataas na panganib na mapagkukunan.
 
 ### Hakbang 5: I-click ang Connect
 
-Para sa isang `NOAUTH` provider, hindi humihingi ang OmniRoute ng upstream credential. Hindi nito ginagarantiyahan na tumatanggap ang upstream ng mga third-party client o mayroon itong available na kapasidad. Dapat ikonekta ang mga OAuth at API-key provider sa pamamagitan ng nakadokumentong daloy ng kanilang account. Ginagamit pa rin ng iyong client ang OmniRoute API key na ipinapakita sa **Dashboard → Endpoints** kapag naka-enable ang router authentication.
+Para sa isang provider `NOAUTH`, hindi humihiling OmniRoute ng isang upstream na kredensyal. Hindi nito ginagarantiyahan na ang upstream ay tumatanggap ng mga third-party na kliyente o may available na kapasidad. OAuth at API-key provider ay dapat na konektado sa pamamagitan ng kanilang nakadokumentong daloy ng account. Gumagamit pa rin ang iyong kliyente ng OmniRoute API key na ginawa sa** Dashboard → API Keys** (ipinapakita nang isang beses lamang, sa paggawa) kapag pinagana ang pagpapatunay ng router.
 
 ### Hakbang 6: Ulitin
 
-Ikonekta ang ilang provider na ang mga tuntunin at modelo ng privacy ay angkop sa iyong use case.
+Ikonekta ang ilang provider na ang mga tuntunin at modelo ng privacy ay umaangkop sa iyong kaso ng paggamit.
 
 ---
 
-## Tamang Pagbasa sa Catalog
+## Galing sa dsh "Ang Ating Libreng Modelo"
 
-- Ang `NOAUTH` ay nangangahulugang hindi ka hihingan ng OmniRoute ng kredensyal ng provider; hindi nito
-  ginagarantiya ang uptime, privacy, o walang limitasyong kapasidad.
-- Ang `hasFree` ay metadata para sa pagtuklas. Maaari itong kumatawan sa umuulit na quota, access na walang key,
-  credit sa pag-sign up, programa ng pag-apruba, o promosyon.
-- Ang `recurring-uncapped` ay nangangahulugang walang available na naka-publish na limitasyon sa token; nalalapat pa rin ang mga limitasyon sa rate at
-  concurrency.
-- Ang `one-time-initial` ay hindi umuulit matapos maubos ang grant sa pag-sign up.
-- Ang mga provider na may `tos: avoid` ay hindi isinasama sa awtomatikong pagruruta bilang default (`excludeTosAvoid`). Hindi nalalampasan ng pagkonekta ng account ang filter na ito. Ang anumang override ng operator ay dapat gawin pagkatapos suriin ang mga tuntunin ng provider at panganib sa account.
-- Ang mga entry na minarkahang `discontinued` ay nananatiling makasaysayang ebidensya at hindi dapat ipresenta bilang
-  kasalukuyang libre.
+Ang [dsh-our-free-model](https://github.com/Ebony-Vinyl/dsh-our-free-model) na plugin para sa dsh agent host ay umaabot sa dalawang upstream. OmniRoute ay mayroon nang provider para sa bawat isa, ngunit isa lamang sa kanila ang isang libreng landas sa OmniRoute:
+
+| Plugin lane  | Upstream                                    | tagapagbigay ng OmniRoute   | Libre sa OmniRoute? | Paano kumonekta                                                                        |
+| ------------ | ------------------------------------------- | --------------------------- | ------------------- | -------------------------------------------------------------------------------------- |
+| Kilo channel | Kilo AI gateway (`api.kilo.ai/api/gateway`) | `kilo-gateway` (alias `kg`) | Oo                  | API key opsyonal: hayaan itong walang laman upang magamit ang libreng pool ng gateway  |
+| Libreng lane | OpenCode Zen (`opencode.ai`)                | `opencode-zen`              | Hindi               | Ang iyong sariling OpenCode API key mula sa [opencode.ai/zen](https://opencode.ai/zen) |
+
+**Kilo.** Tawagan ang libreng pool bilang `kilo-gateway/<model>` o `kg/<model>`, halimbawa `kg/kilo-auto/free` (libreng auto-router ng Kilo) o isa sa mga modelo ng `:free` ng gateway. Ang libreng set ay umiikot; `kilo-gateway` ay dumadaan sa mga model id na wala sa built-in na listahan ng OmniRoute, kaya ang isang modelo na nasa listahan ng gateway ngayon ay maaaring tawagan bago ito isama sa catalog. Ang mga libreng model card ng Kilo ay nagsasabi na ang mga senyas ay maaaring i-log ng upstream provider at gamitin upang pahusayin ang mga serbisyo nito, kaya huwag magpadala ng sensitibong data.
+
+**OpenCode.** Ang libreng lane ng plugin ay ang walang-susi na alok ng OpenCode. OmniRoute ay hindi nagbibigay ng alok na iyon bilang libreng pag-access:
+
+- Ang walang keyless na OpenCode provider ng OmniRoute ay inalis sa kahilingan ng operator ng OpenCode(tingnan ang [Mga Inalis na Provider](../reference/REMOVED_PROVIDERS.md) ).
+- Itinatali [ng dokumentasyon ng endpoint](https://opencode.ai/v2/docs/console/models/#endpoints) ng OpenCode ang mga libreng alok nito sa chat sa sariling kliyente ng OpenCode, kaya hindi binibilang o bina-badge OmniRoute ang mga ito bilang libre.
+
+Ang mga modelong id na ipinapakita ng plugin, gaya ng `deepseek-v4.1-flash-free`, `mimo-v2.6-flash-free` at `nemotron-3.5-lightning-free`, ay nasa `opencode-zen` catalog. Ikonekta ang `opencode-zen` gamit ang sarili mong OpenCode key para magamit ang mga ito sa ilalim ng mga tuntunin ng iyong OpenCode account.
+
+**Ang lokal na port ng plugin.** Maaaring ilantad ng plugin ang mga modelo nito sa isang lokal na OpenAI-compatible port (default `18899`). Anumang ganoong endpoint ay maaaring idagdag bilang [custom na OpenAI-compatible provider](../guides/USER_GUIDE.md#custom-openai-compatible-providers), ngunit hindi ini-install, sinisimulan o ina-update OmniRoute ang plugin, at ang plugin ang nagpapasya kung aling upstream ang nagsisilbi sa bawat kahilingan. Ang mga paghihigpit OpenCode sa itaas ay nalalapat sa alok ng OpenCode alinmang kliyente ang magpapadala ng kahilingan.
 
 ---
 
-## Paano Pinahuhusay ng OmniRoute ang mga Libreng Tier
+## Pagbasa ng Catalog ng Tama
+
+- Ang ibig sabihin ng `NOAUTH` ay hindi humihingi sa iyo ang OmniRoute ng kredensyal ng provider; hindi nito ginagarantiya ang uptime, privacy, o walang limitasyong kapasidad.
+- `hasFree` ay metadata ng pagtuklas. Maaari itong kumatawan sa isang umuulit na quota, keyless access, signup credit, approval program, o promosyon.
+- ang ibig sabihin ng `recurring-uncapped` ay walang naka-publish na token ceiling na available; nalalapat pa rin ang mga limitasyon sa rate at concurrency.
+- hindi umuulit `one-time-initial` pagkatapos maubos ang grant sa pag-signup.
+- Ang mga nagbibigay ng `tos: avoid` ay hindi kasama sa awtomatikong pagruruta bilang default (`excludeTosAvoid`). Hindi nalalampasan ng pagkonekta ng isang account ang filter na ito. Ang anumang override ng operator ay dapat sumunod sa pagsusuri ng mga tuntunin ng provider at panganib sa account.
+- Ang mga entry na may markang `discontinued` ay nananatiling makasaysayang ebidensya at hindi dapat ipakita bilang kasalukuyang libre.
+
+---
+
+## Paano Pinahusay ng OmniRoute ang Mga Libreng Tier
 
 ### 1. Awtomatikong Fallback
 
-Kung abala o hindi gumagana ang isang libreng provider, awtomatikong susubukan ng OmniRoute ang susunod. Wala kang kailangang gawin.
+Kung abala o down ang isang libreng provider, awtomatikong susubukan ng OmniRoute ang susunod. Wala kang kailangang gawin.
 
-### 2. Matalinong Routing
+### 2. Smart Routing
 
-Pinipili ng OmniRoute ang **pinakamahusay na libreng provider** para sa bawat request batay sa:
+pinipili OmniRoute ang** pinakamahusay na libreng provider** para sa bawat kahilingan batay sa:
 
 - Bilis — Aling provider ang pinakamabilis ngayon?
-- Kalidad — Aling provider ang pinakamahusay para sa gawaing ito?
-- Kapasidad — Aling provider ang mayroon pang natitirang quota?
+- Quality — Aling provider ang pinakamainam para sa gawaing ito?
+- Kapasidad — Aling provider ang may natitirang quota?
 
-### 3. Pagtitipid sa Token
+### 3. Token Savings
 
-Maaaring bawasan ng compression pipeline ng OmniRoute ang mga kwalipikadong token sa prompt at output ng tool. Ang
-aktuwal na matitipid ay nakadepende sa content, mga napiling engine, accounting ng provider, at mga setting ng
-fidelity; hindi pinararami ng compression ang quota ng bawat provider nang nakapirming dami.
+Maaaring bawasan ng compression pipeline ng OmniRoute ang mga karapat-dapat na prompt at tool-output token. Ang aktwal na pagtitipid ay nakasalalay sa nilalaman, mga napiling makina, accounting ng provider, at mga setting ng katapatan; hindi pinaparami ng compression ang bawat quota ng provider sa isang nakapirming halaga.
 
-### 4. Suporta sa Maraming Account
+### 4. Suporta sa Multi-Account
 
-Kung pinahihintulutan ng mga tuntunin ng provider ang maraming account o credential, maaaring ituring ng OmniRoute ang bawat
-koneksyon bilang hiwalay na kandidato sa routing. Huwag gumawa ng mga karagdagang account upang iwasan ang
-quota o patakaran sa access ng provider.
+Kung pinahihintulutan ng mga tuntunin ng provider ang maraming account o kredensyal, maaaring ituring OmniRoute ang bawat koneksyon bilang isang hiwalay na kandidato sa pagruruta. Huwag gumawa ng mga karagdagang account para iwasan ang quota o patakaran sa pag-access ng provider.
 
 ---
 
-## Pagkalkula ng Libreng Tier
+## Libreng Tier Math
 
-Kasalukuyang iniulat ng live na catalog na nag-aalis ng mga duplikado sa pool ang:
+Ang live, pool-deduplicated catalog ay kasalukuyang nag-uulat ng:
 
-| Sukatan                             | Kasalukuyang na-audit na halaga | Interpretasyon                                                                                                     |
-| ----------------------------------- | ------------------------------: | ------------------------------------------------------------------------------------------------------------------ |
-| Paulit-ulit na nasusukat na grant   |          **~1.62B token/buwan** | Isang beses lang binilang ang mga nakabahaging pool; hindi kasama sa kabuuan ang mga provider na walang limitasyon |
-| Unang buwan na may mga signup grant |                **~2.22B token** | Kabuuang paulit-ulit na grant kasama ang minsanan at paulit-ulit na mga credit                                     |
+| Sukatan                         | Kasalukuyang na-audit na halaga | Interpretasyon                                                                                                    |
+| ------------------------------- | ------------------------------: | ----------------------------------------------------------------------------------------------------------------- |
+| Paulit-ulit na quantified grant |  **~ 90M libreng tokens/month** | Ang mga shared pool ay binibilang ng isang beses; hindi kasama ang mga hindi naka-cap na provider mula sa kabuuan |
+| Unang buwan na may signup grant | **~ 153M sa iyong unang buwan** | Umuulit na kabuuang kasama ang isang beses at umuulit na mga kredito                                              |
 
-Ang mga ito ay mga pagtatantya para sa buong catalog sa magkakahiwalay na kwalipikadong account, hindi allowance na ibinibigay ng OmniRoute o hula para sa bagong installation. Nakadepende ang magagamit mong kapasidad sa mga provider na ikokonekta mo at sa kanilang kasalukuyang mga kondisyon. Kinukuwenta ang mga halaga mula sa `open-sse/config/freeModelCatalog.ts`; tingnan ang
-[Sanggunian sa Mga Libreng Tier](../reference/FREE_TIERS.md) para sa pag-aalis ng mga duplikado sa pool, mga flag ng ToS,
-mga itinigil na entry, at metodolohiya para sa signup credit.
+Ito ay mga pagtatantya sa buong catalog sa magkakahiwalay na mga kwalipikadong account, hindi isang allowance na ibinibigay ng OmniRoute o isang hula para sa isang bagong pag-install. Ang iyong magagamit na kapasidad ay nakasalalay sa mga provider na iyong kinokonekta at sa kanilang mga kasalukuyang kondisyon. Ang mga halaga ay kinakalkula mula sa `open-sse/config/freeModelCatalog.ts`; tingnan ang [Free Tiers Reference](../reference/FREE_TIERS.md) para sa pool deduplication, ToS flag, itinigil na mga entry, at signup-credit methodology.
 
 ---
 
@@ -172,43 +181,36 @@ mga itinigil na entry, at metodolohiya para sa signup credit.
 
 ### "Libre ba talaga ito?"
 
-Itinatala ng catalog ang mga tuntuning inilathala ng provider at ang pananaliksik ng proyekto, ngunit maaaring magbago ang mga alok.
-Suriin ang kasalukuyang presyo, quota, patakaran sa privacy, at mga kinakailangan sa pagiging kwalipikado ng provider bago gamitin.
+Itinatala ng catalog ang mga tuntuning na-publish ng provider at pananaliksik sa proyekto, ngunit maaaring magbago ang mga alok. I-verify ang kasalukuyang pagpepresyo, quota, patakaran sa privacy, at pagiging kwalipikado ng provider bago gamitin.
 
 ### "Mauubos ba ang libreng tier?"
 
-Maaaring magtakda ng rate limit, magpalit ng mga modelo, magsuspinde ng access, o mawala sa serbisyo ang bawat provider. Napapahusay ng maraming
-koneksyon ang saklaw ng fallback, ngunit hindi ginagarantiya ng mga ito na palaging may available na libreng ruta.
+Ang bawat provider ay maaaring mag-rate-limit, magpalit ng mga modelo, magsuspinde ng access, o mag-offline. Pinapahusay ng maraming koneksyon ang fallback coverage ngunit hindi ginagarantiyahan ang isang available na libreng ruta.
 
-### "Maaari ko bang gamitin ang mga libreng provider para sa production?"
+### "Maaari ba akong gumamit ng mga libreng provider para sa produksyon?"
 
-Maaari lamang kung natutugunan ng SLA, pangangasiwa ng data, mga limitasyon, at mga tuntunin ng provider ang iyong mga kinakailangan sa production.
-Ang mga kritikal na workload ay dapat may sinusubaybayan at naaangkop ayon sa kontratang fallback.
+Kung ang SLA, pangangasiwa ng data, limitasyon, at tuntunin ng provider ay nakakatugon lamang sa iyong mga kinakailangan sa produksyon. Ang mga kritikal na workload ay dapat na sinusubaybayan, na angkop sa kontrata.
 
-### "Ano ang kapalit?"
+### "Ano ang catch?"
 
-Maaaring kabilang sa mga kompromiso ang mahihigpit na limitasyon, waitlist, KYC, beripikasyon ng credit card, paggamit ng mga
-prompt para sa training, mas mahinang privacy, kawalan ng SLA, madalas na pagpapalit ng modelo, mga heograpikong paghihigpit, bayad sa labis na paggamit, o
-panganib kaugnay ng patakaran ng account. Ipinapakita ng OmniRoute ang available na metadata; ikaw ang pipili kung ano ang ie-enable.
+Maaaring kabilang sa mga tradeoff ang mahigpit na limitasyon, waitlist, KYC, pag-verify ng credit card, pagsasanay sa mga prompt, mas mahinang privacy, walang SLA, model churn, geographic na paghihigpit, bayad na labis, o panganib sa patakaran ng account. inilalabas ng OmniRoute ang magagamit na metadata; piliin mo kung ano ang paganahin.
 
-### "Paano ako makakakuha ng mas malaking libreng quota?"
+### "Paano ako makakakuha ng mas maraming libreng quota?"
 
-1. Kumonekta sa mas marami pang libreng provider
-2. I-enable ang mga naaangkop na compression engine at sukatin ang matitipid para sa iyong workload
-3. Gamitin ang `auto/cheap` upang bigyang-priyoridad ang mga libre/murang provider
-4. Magdagdag ng iba pang pinapahintulutang provider o credential nang hindi lumalabag sa mga tuntunin ng provider
+1. Ikonekta ang higit pang mga libreng provider
+2. Paganahin ang naaangkop na mga compression engine at sukatin ang mga matitipid para sa iyong workload
+3. Gamitin `auto/cheap` para unahin ang mga provider free/cheap
+4. Magdagdag ng mga karagdagang pinapahintulutang provider o kredensyal nang hindi lumalabag sa mga tuntunin ng provider
 
-### "Mas mababa ba ang kalidad ng mga libreng provider?"
+### "May mas masamang kalidad ba ang mga libreng provider?"
 
-Hindi palagi. Iniaalok ng ilang provider ang parehong mga pamilya ng modelo na available sa pamamagitan ng mga may bayad na
-ruta, ngunit maaaring magkaiba ang mga limitasyon, latency, privacy, pagiging maaasahan, at mga bersyon ng modelo. Gamitin ang
-pahina ng Free Provider Rankings bilang palatandaan ng kalidad at beripikahin ang aktuwal na modelong inihahatid.
+Hindi naman kailangan. Inilalantad ng ilang provider ang parehong mga modelong pamilya na available sa pamamagitan ng mga bayad na ruta, ngunit maaaring mag-iba ang mga limitasyon, latency, privacy, pagiging maaasahan, at mga bersyon ng modelo. Gamitin ang page ng Libreng Ranggo ng Provider bilang isang signal ng kalidad at i-verify ang aktwal na modelong inihatid.
 
 ---
 
 ## Ano ang Susunod?
 
-- **[Gabay sa Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Hayaan ang OmniRoute na pumili ng pinakamahusay na AI para sa iyo
-- **[Gabay sa mga Provider](./PROVIDERS-GUIDE.md)** — Kumonekta sa mas marami pang provider
-- **[Pag-troubleshoot](../guides/TROUBLESHOOTING.md)** — Ayusin ang mga karaniwang problema
-- **[Sanggunian sa mga Libreng Tier](../reference/FREE_TIERS.md)** — Kumpletong listahan ng mga libreng tier
+- **[Gabay sa Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Hayaan OmniRoute na piliin ang pinakamahusay AI para sa iyo
+- **[Gabay sa mga Provider](./PROVIDERS-GUIDE.md)** — Connect mas maraming provider
+- **[Pag-troubleshoot](../guides/TROUBLESHOOTING.md)** — Ayusin ang mga karaniwang isyu
+- **[Libreng Sanggunian sa Mga Tier](../reference/FREE_TIERS.md)** — Buong listahan ng mga libreng tier

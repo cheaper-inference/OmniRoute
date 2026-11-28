@@ -307,7 +307,7 @@ Utilisez généreusement les clauses `IF NOT EXISTS`, `IF EXISTS` et `OR IGNORE`
 1. **Créez le fichier avec le générateur** : `npm run db:new-migration -- <description>` (par exemple `npm run db:new-migration -- add combo priority`). Il écrit `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` avec l'heure UTC actuelle et un en-tête de commentaire, avance d'une seconde si cet horodatage est pris et n'écrase jamais un fichier. Ne choisissez pas un numéro à la main.
 2. **Utilisez DDL en toute sécurité** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
 3. **Remplissez soigneusement les données** : utilisez `UPDATE ... WHERE ...` pour gérer les lignes existantes
-4. **Vérifier l'ordre et le nom** : `npm run test:migrations:fresh` (toutes les migrations sur une base de données vide) et `npm run check:migration-numbering`
+4. **Vérifier l'ordre et le nom** : `npm run test:migrations:fresh` (toutes les migrations sur une base de données vide) et `npm run check:migration-numbering`. Le hook de pré-commit husky exécute `check:migration-numbering` seul lorsque la validation prépare un fichier sous `src/lib/db/migrations/`, donc un nom trié sur le volet ou mal formé (par exemple `242_x.sql`) échoue à la validation localement avec le même message CI imprime. Le hook vérifie uniquement les noms, les doublons et les séries `001`–`241` gelées ; la comparaison avec la base PR (migrations supprimées, renommées ou dans le désordre) fonctionne toujours en CI
 5. **Test sur copie** : n'exécutez jamais de migrations non testées en production
 6. **Une table créée à partir de code nécessite également une migration** : si un module crée également la table paresseusement (`CREATE TABLE IF NOT EXISTS`, conservé comme chemin d'auto-réparation), une migration doit la créer avec le même DDL. Sinon, une nouvelle installation et une installation mise à niveau se retrouvent avec des schémas différents, selon que ce chemin de code a été exécuté ou non. `tests/unit/db/lazy-table-migration-guard.test.ts` analyse `src/` et `open-sse/` et échoue sur un `CREATE` paresseux sans migration (#20557). Exemple : `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
@@ -320,7 +320,7 @@ UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Modifications rétrocompatibles** (par exemple, supprimer des colonnes) sont délicats. OmniRoute prend NOT il en charge la rétrogradation — une fois la migration appliquée, le changement de schéma est permanent. Planifiez en conséquence.
+> **Modifications rétrocompatibles** (par exemple, supprimer des colonnes) sont délicats. OmniRoute prend NOT il en charge la rétrogradation — une fois qu'une migration est appliquée, le changement de schéma est permanent. Planifiez en conséquence.
 
 ---
 

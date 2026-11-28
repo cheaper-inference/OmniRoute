@@ -4,12 +4,11 @@
 
 ---
 
-> **Həqiqət mənbəyi:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Son yenilənmə:** 2026-09-22 — əhatə adları MCP-SERVER.md sənədinə istinad edir
+> **Həqiqətin mənbəyi:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
 
-OmniRoute hər bir API sorğusunu yoxlayan, marşrutdan xəbərdar avtorizasiya konveyerinə malikdir. Təsnifat **deterministikdir** və **uğursuzluq zamanı girişi rədd edir** — təsnif edilə bilməyən hər bir sorğu `MANAGEMENT` kateqoriyasına düşür və sessiya və ya idarəetmə səviyyəli token tələb edir. Bu səhifə marşrutları idarə edən və ya yeni son nöqtələr layihələndirən mühəndislər üçün modeli izah edir.
+OmniRoute hər bir API sorğusuna cavab verən marşrutdan xəbərdar olan icazə boru kəməri var. Təsnifatdır** deterministik** və** uğursuz bağlı** — təsnif edilə bilməyən hər şey `MANAGEMENT` kimi başa çatır və sessiya və ya idarəetmə dərəcəli nişan tələb edir. Bu səhifə marşrutları saxlayan və ya yeni son nöqtələr dizayn edən mühəndislər üçün modeli izah edir.
 
-![AuthZ konveyeri (3 marşrut sinfi + siyasətin qiymətləndirilməsi)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
 > Mənbə: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -177,7 +176,7 @@ Hər bir marşrut sinfinin `src/server/authz/policies/`-da siyasəti var:
 
 - **`publicPolicy`** (`policies/public.ts`) — həmişə `allow({ kind: "anonymous", id: "anonymous" })` qaytarır.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Daşıyıcını çıxarır, `validateApiKey()` vasitəsilə təsdiq edir. Yalnız effektiv `REQUIRE_API_KEY` funksiyasının bayrağı deaktiv edildikdə anonimə keçir. Effektiv bayraq `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) vasitəsilə həll edilir, beləliklə, İdarə Paneli Xüsusiyyətləri Bayraqlar və mühit dəyişənləri `/api/v1/*`, `/api/v1beta/*` və ləqəbləri ardıcıl olaraq idarə edir; həlledici uğursuzluqlar bağlandı. Müştəri API marşrutları üzrə (o cümlədən tablosuna model kataloqu tərəfindən istifadə edilən `/api/v1/models`) panel-sessiya sorğularına icazə verir. Entra ID SSO aktivləşdirildikdə, struktur olaraq Entra tokeni (üç base64url seqmenti, `RS*` alg, `kid`) olan Daşıyıcı SSO filialı tərəfindən idarə olunur.** əvvəl** `validateApiKey()` və onun hökmü yekun — o, heç vaxt API açarı yoluna və ya degraddan anonim filiala düşmür, ona görə də identifikasiya provayderinin kəsilməsi açıq girişə çevrilə bilməz. Statik API düymələri təsirlənmir. [Entra ID SSO](../security/ENTRA_SSO.md) baxın.
-- **`managementPolicy`** (`policies/management.ts`) — tablosuna seansı, daxili model sinxronizasiya sorğularını qəbul edir ( `/api/providers/[name]/(sync-models|models)` ilə uyğun gəlir) və ya `isAuthRequired()` yalnış qaytardıqda tamamilə ötür. Daşıyıcı nişanı mövcud olduqda, lakin etibarsız olduqda 403 (`AUTH_001`) qaytarır, əks halda 401. Həmçinin marşrut qoruyucu səviyyələrini (LOCAL_ONLY / ALWAYS_PROTECTED) hər hansı auth filialından əvvəl tətbiq edir — Baxın [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` da (bu gün: `/api/mcp/`) LOCAL_ONLY yollarına Daşıyıcı açarı `manage` əhatə dairəsini daşıdıqda qeyri-döngüdən daxil ola bilər; bütün digər LOCAL_ONLY yolları əhatə dairəsindən asılı olmayaraq ciddi geri dönmə olaraq qalır.
+- **`managementPolicy`** (`policies/management.ts`) — tablosuna seansı, daxili model sinxronizasiya sorğularını qəbul edir ( `/api/providers/[name]/(sync-models|models)` ilə uyğun gəlir) və ya `isAuthRequired()` yalnış qaytardıqda tamamilə ötür. Daşıyıcı nişanı mövcud olduqda, lakin etibarsız olduqda 403 (`AUTH_001`) qaytarır, əks halda 401. Həmçinin marşrut qoruyucu səviyyələrini (LOCAL_ONLY / ALWAYS_PROTECTED) hər hansı auth filialından əvvəl tətbiq edir — Baxın [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). Daşıyıcı açarı `manage`/`admin` əhatə dairəsini və ya dar `mcp:connect` əhatə dairəsini (`hasMcpConnectOrManageScope`) və ya təsdiqlənmiş panel seansı ilə daşıdıqda `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` da (bu gün: `/api/mcp/`) LOCAL_ONLY yollarına geri dönmədən daxil olmaq olar; bütün digər LOCAL_ONLY yolları əhatə dairəsindən asılı olmayaraq ciddi geri dönmə olaraq qalır.
 
 Uğurlu siyasət `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ilə `AuthSubject` qaytarır. Aşağı axın işləyiciləri auth məntiqini yenidən işə salmaq əvəzinə onu `src/server/authz/assertAuth.ts` -də `assertAuth(request, "CLIENT_API")` vasitəsilə oxuya bilər.
 
@@ -270,34 +269,22 @@ export async function POST(request: Request) {
 
 ## Əhatə dairələri
 
-Üç ad məkanı mövcuddur. Hər yoxlayıcı yalnız öz sətirlərini oxuyur. `manage` əhatə dairəsinin `read:compression` üçün `scopeMatches` yoxlamasından niyə keçmədiyi və `read` giriş tokeninin niyə `PATCH /api/keys/{id}` sorğusunu yerinə yetirə bilmədiyi də daxil olmaqla paralel müqayisə üçün baxın:
-[Üç əhatə dairəsi ad məkanı](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Üç ad sahəsi. Hər bir dama yalnız öz sətirlərini oxuyur. Yan-yana, o cümlədən `manage` niyə `read:compression` üçün `scopeMatches` uğursuz olur və niyə `read` giriş nişanı `PATCH /api/keys/{id}` edə bilmir, [Üç əhatə dairəsi ad sahəsidir](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-API açarları `scopes` massivi daşıyır (`api_keys.scopes` daxilində JSON kimi saxlanılır, baxın: `src/lib/db/apiKeys.ts`).
+API düymələri `scopes` massivi daşıyır ( `api_keys.scopes` də JSON kimi saxlanılır, `src/lib/db/apiKeys.ts` baxın).
 
-### İdarəetmə əhatə dairəsi
+### İdarəetmə dairəsi
 
-- `manage` / `admin` — `hasManageScope`. İdarəetmə API marşrutlarına Bearer girişi.
-- `mcp:connect`, `self:usage`, `self:account-quota` və
-  `policy:bypass-provider-quota` əlavə, dəqiq uyğunluq tələb edən əhatə dairələridir. Onlar
-  `MANAGEMENT_API_KEY_SCOPES` xaricində yerləşir. `mcp:connect` yalnız
-  `/api/mcp/` üçün qeyri-loopback istisnasını açır.
+- `manage` / `admin` — `hasManageScope`. İdarəetmə API marşrutlarına daşıyıcının girişi.
+- `mcp:connect`, `self:usage`, `self:account-quota` və `policy:bypass-provider-quota` əlavə dəqiq uyğunluq dairələridir. Onlar `MANAGEMENT_API_KEY_SCOPES` xaricində otururlar. `mcp:connect` yalnız `/api/mcp/` qeyri-döngü kəsməni açır.
 
-### MCP alət əhatə dairələri
+### MCP alət dairələri
 
-Kataloq və uyğunlaşdırma qaydaları (eyni sətir və ya `*` ilə bitən verilmiş əhatə dairəsi):
-[MCP alət əhatə dairələri](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`src/shared/constants/mcpScopes.ts` daxilindəki `MCP_SCOPE_LIST` həmin tam kataloq deyil, ilkin tipləşdirilmiş
-alt çoxluqdur. Məcburi tətbiqetmə
-`open-sse/mcp-server/scopeEnforcement.ts` daxilində, `resolveCallerScopeContext()`
-əhatə dairələrini MCP autentifikasiya məlumatından, sorğu metadatasından və ya `OMNIROUTE_MCP_SCOPES` dəyişənindən
-müəyyən etdikdən sonra işləyir. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` olmadığı halda deaktiv qalır.
+Kataloq və uyğunluq qaydaları (eyni sətir və ya `*` ilə bitən verilmiş əhatə dairəsi): [MCP alət dairələri](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `src/shared/constants/mcpScopes.ts` -də `MCP_SCOPE_LIST` həmin tam kataloq deyil, orijinal yazılmış alt dəstdir. `resolveCallerScopeContext()` MCP auth məlumatından, sorğu metadatasından və ya `OMNIROUTE_MCP_SCOPES` əhatə dairələrini həll etdikdən sonra icra `open-sse/mcp-server/scopeEnforcement.ts` də həyata keçirilir. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` onu qlobal olaraq yandırır (defolt `false`), lakin bayraqdan asılı olmayaraq API açarında `manage`/`admin` olmayan ( `open-sse/mcp-server/scopeEnforcement.ts`-də `shouldForceScopeEnforcement()` ya baxın) həmişə HTTP/SSE zəng edən üçün tətbiq edilir.
 
-### Giriş tokeni əhatə dairələri
+### Access-token əhatə dairələri
 
-`oma_live_…` tokenlərində `read` / `write` / `admin`, `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`) tərəfindən dərəcələndirilir. Bu dərəcə yalnız giriş tokeni
-etimadnaməsinə tətbiq olunur. Baxın: [İdarəetmə autentifikasiyası](../guides/MANAGEMENT-AUTH.md).
+`oma_live_…` nişanlarında `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) ilə sıralanır. Bu dərəcə yalnız giriş-token etimadnaməsinə aiddir. [İdarəetmə Doğrulamasına](../guides/MANAGEMENT-AUTH.md) baxın.
 
 ## Auth tələb olunan keçid
 

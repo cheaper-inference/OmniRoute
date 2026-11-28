@@ -130,32 +130,32 @@ flyctl deploy
 
 ---
 
-## 5. Obligatoriske parametere
+## 5. Nødvendige parametere
 
-For dette prosjektet anbefales det å konfigurere minst følgende parametere på Fly.io.
+Dette prosjektet anbefaler å konfigurere minst følgende parametere på Fly.io.
 
 ### 5.1 Verifiserte parametere
 
-Disse parameterne har blitt brukt i faktiske distribusjoner av den nåværende `omniroute`-applikasjonen:
+Disse parameterne har blitt brukt i faktiske distribusjoner på gjeldende `omniroute` applikasjon:
 
 - `API_KEY_SECRET`
 - `DATA_DIR`
 - `JWT_SECRET`
 - `MACHINE_ID_SALT`
 - `NEXT_PUBLIC_BASE_URL`
-- `OMNIROUTE_WS_BRIDGE_SECRET` (obligatorisk i produksjon — brukes til autentisering av WebSocket-broen)
+- `OMNIROUTE_WS_BRIDGE_SECRET` (påkrevd i produksjon — brukt for WebSocket -broautentisering)
 - `STORAGE_ENCRYPTION_KEY`
 
 ### 5.2 Om `INITIAL_PASSWORD`
 
-Det nåværende prosjektet angir ikke `INITIAL_PASSWORD`, fordi denne distribusjonen ikke krever det.
+Det nåværende prosjektet angir ikke `INITIAL_PASSWORD` fordi denne distribusjonen ikke krever det.
 
-Hvis den ikke er angitt:
+Hvis det ikke er satt:
 
-- Oppstartsloggen vil indikere at standardpassordet er `CHANGEME`
-- Du bør endre innloggingspassordet i systeminnstillingene så snart som mulig etter distribusjonen
+- Du oppretter dashbordpassordet i onboarding-veiviseren ved første besøk. Fullfør passordtrinnet: Hvis du hopper over det, slås pålogging på dashbord av, noe som lar dashbordet være åpent for alle som kan nå appen URL
+- Flys proxy når appen fra en ikke-loopback-adresse, så etter at du har sendt inn passordet, ber veiviseren om et engangs bootstrap-token, som appen skriver ut til loggen sin i det øyeblikket: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Hvis den linjen har rullet ut av loggen, start appen på nytt og send veiviseren på nytt for å skrive ut et nytt token
 
-Hvis du vil initialisere backend-passordet uten manuell inngripen, kan du legge det til senere:
+For å sette passordet uten tilsyn i stedet, legg det til før det første dashboardbesøket (når et passord er lagret, ignoreres `INITIAL_PASSWORD` ):
 
 - `INITIAL_PASSWORD`
 
@@ -274,60 +274,60 @@ Hvis siden `Secrets` i konsollen ikke viser de forventede variablene, må du kon
 
 ---
 
-## 9. Senere oppdateringer og utrullinger
+## 9. Påfølgende oppdateringer og utgivelser
 
-Etter kodeoppdateringer er utrullingsprosessen enkel:
+Etter kodeoppdateringer er utgivelsesprosessen enkel:
 
 ```powershell
 git pull
 flyctl deploy
 ```
 
-Hvis du bare trenger å oppdatere parametere uten å endre koden:
+Hvis du bare trenger å oppdatere parametere uten å endre kode:
 
 ```powershell
 flyctl secrets set KEY=value -a omniroute
 ```
 
-Fly utfører automatisk en rullerende oppdatering av maskinene.
+Fly vil automatisk utføre en rullende oppdatering av maskiner.
 
-### 9.1 Spore oppdateringer fra oppstrømsrepositoriet og samtidig bevare forkens `fly.toml`
+### 9.1 Spore oppstrøms depotoppdateringer mens du bevarer din gaffels `fly.toml`
 
-Hvis det gjeldende repositoriet er en fork og du vil synkronisere oppdateringer fra det oppstrøms repositoriet `https://github.com/diegosouzapw/OmniRoute`, følger du arbeidsflyten nedenfor.
+Hvis det nåværende depotet er en gaffel og du vil synkronisere oppdateringer fra oppstrøms `https://github.com/cheaper-inference/OmniRoute`, følg arbeidsflyten nedenfor.
 
-Kontroller først fjernrepositoriene dine:
+Bekreft først fjernkontrollene dine:
 
 ```powershell
 git remote -v
 ```
 
-Du bør minst se:
+Du bør se minst:
 
-- `origin` som peker til din egen fork
-- `upstream` som peker til det opprinnelige repositoriet
+- `origin` peker på din egen gaffel
+- `upstream` peker på det opprinnelige depotet
 
-Hvis `upstream` ikke er konfigurert, legger du det til:
+Hvis `upstream` ikke er konfigurert, legg det til:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
-Før du synkroniserer med oppstrømsrepositoriet, henter du de nyeste commitene og taggene:
+Før du synkroniserer med oppstrøm, hent de siste forpliktelsene og taggene:
 
 ```powershell
 git fetch upstream --tags
 ```
 
-Kontroller gjeldende versjon og oppstrømstaggene:
+Sjekk gjeldende versjon og oppstrøms-tagger:
 
 ```powershell
 git describe --tags --always
 git show --no-patch --oneline v3.4.7
 ```
 
-> Merk: Gjeldende prosjektversjon er `v3.8.0`. Referansene til `v3.4.7` nedenfor er bare beholdt som historiske eksempler. For faktiske utrullinger bruker du `:latest` eller den gjeldende versjonstaggen (f.eks. `:v3.8.0`).
+> Merk: Gjeldende prosjektversjon er `v3.8.0`. `v3.4.7` referansene nedenfor holdes kun som historiske eksempler. For faktiske utgivelser, bruk `:latest` eller gjeldende versjonstag (f.eks. `:v3.8.0`).
 
-Hvis du vil flette inn den nyeste oppstrømsversjonen av `main` og samtidig tvinge gjennom bevaring av forkens `fly.toml`, følger du denne arbeidsflyten:
+Hvis du vil slå sammen den siste oppstrøms `main` mens du beholder gaffelens `fly.toml` kraftig, følg denne arbeidsflyten:
 
 ```powershell
 git merge upstream/main
@@ -339,32 +339,32 @@ git push origin main
 
 Merknader:
 
-- `git merge upstream/main` synkroniserer den nyeste koden fra det opprinnelige repositoriet
-- `git checkout HEAD~1 -- fly.toml` gjenoppretter forkens egen `fly.toml` fra før flettingen
-- Hvis oppstrømsrepositoriet ikke endret `fly.toml`, vil dette trinnet ikke introdusere noen forskjeller
-- Hvis oppstrømsrepositoriet endret `fly.toml`, sikrer dette trinnet at navnet på Fly-applikasjonen, volummonteringen, regionen og annen forkspesifikk utrullingskonfigurasjon ikke blir overskrevet
+- `git merge upstream/main` synkroniserer den siste koden fra det originale depotet
+- `git checkout HEAD~1 -- fly.toml` gjenoppretter gaffelens egen `fly.toml` fra før sammenslåingen
+- Hvis oppstrøms ikke endret `fly.toml`, vil ikke dette trinnet introdusere noen forskjeller
+- Hvis oppstrøms endret `fly.toml`, sikrer dette trinnet at Fly-applikasjonsnavnet, volumfestet, regionen og andre gaffelspesifikke distribusjonskonfigurasjoner ikke blir overskrevet
 
-Hvis du vil samsvare med en bestemt utgivelsestagg (f.eks. `v3.4.7`), må du først kontrollere at taggen allerede er inkludert i `upstream/main`:
+Hvis du ønsker å justere med en spesifikk utgivelseskode (f.eks. `v3.4.7`), må du først kontrollere at taggen allerede er inkludert i `upstream/main`:
 
 ```powershell
 git merge-base --is-ancestor v3.4.7 upstream/main
 ```
 
-En vellykket retur betyr at `upstream/main` allerede inneholder denne versjonen. Da kan du ganske enkelt flette inn `upstream/main`.
+En vellykket retur betyr at `upstream/main` allerede inneholder den versjonen; du kan ganske enkelt slå sammen `upstream/main`.
 
-### 9.2 Standard utgivelsessekvens etter synkronisering med oppstrømsrepositoriet
+### 9.2 Standard utgivelsessekvens etter synkronisering oppstrøms
 
-Etter synkronisering med det opprinnelige repositoriet følger du denne anbefalte utgivelsesrekkefølgen:
+Etter synkronisering med det originale depotet, følg denne anbefalte utgivelsesrekkefølgen:
 
 1. `git fetch upstream --tags`
 2. `git merge upstream/main`
-3. Gjenopprett forkens `fly.toml`
+3. Gjenopprett gaffelens `fly.toml`
 4. `git push origin main`
 5. `flyctl deploy`
 6. `flyctl status -a omniroute`
 7. `flyctl logs --no-tail -a omniroute`
 
-Dette er den faktiske arbeidsflyten som ble brukt da det gjeldende prosjektet ble oppgradert til `v3.4.7` (eksemplet viser til en historisk versjon; den faktiske gjeldende versjonen er `v3.8.0`).
+Dette er den faktiske arbeidsflyten som brukes når du oppgraderer det gjeldende prosjektet til `v3.4.7` (eksemplet refererer til en historisk versjon; gjeldende faktiske versjon er `v3.8.0`).
 
 ---
 
@@ -420,14 +420,14 @@ Hvis du ser `/app/data/...` i stedet, er `DATA_DIR` feilkonfigurert og må korri
 
 ## 12. Vanlige problemer
 
-### 12.1 `Secrets`-siden er tom
+### 12.1 `Secrets` er tom
 
-Det er vanligvis to årsaker:
+Det er vanligvis to grunner:
 
 - Du har ennå ikke kjørt `flyctl secrets set`
-- Du viser en annen applikasjon (f.eks. `oroute` i stedet for `omniroute`)
+- Du ser på en annen applikasjon (f.eks. `oroute` i stedet for `omniroute`)
 
-### 12.2 `flyctl deploy` rapporterer `app not found`
+### 12.2 `flyctl deploy` Rapporter `app not found`
 
 Opprett applikasjonen først:
 
@@ -435,23 +435,23 @@ Opprett applikasjonen først:
 flyctl apps create omniroute
 ```
 
-### 12.3 Tolking av `fly.toml` mislykkes
+### 12.3 `fly.toml` Parsing mislykkes
 
-Kontroller følgende:
+Sjekk følgende:
 
-- Om det finnes uleselige tegn i kommentarer
-- Om anførselstegn og innrykk i TOML er riktige
+- Om det er forvrengte karakterer i kommentarer
+- Om TOML -sitering og innrykk er riktige
 
-### 12.4 Data blir ikke lagret permanent
+### 12.4 Data vedvarer ikke
 
-Kontroller begge de følgende punktene:
+Bekreft begge følgende:
 
 - `fly.toml` inneholder `destination = '/data'`
 - `DATA_DIR` er satt til `/data`
 
-### 12.5 Kan den kjøre uten `INITIAL_PASSWORD`?
+### 12.5 Kan det kjøres uten `INITIAL_PASSWORD`?
 
-Ja, den kan kjøre. Den vil falle tilbake til standardpassordet `CHANGEME`. Det anbefales å endre passordet for backend så snart som mulig i produksjon.
+Ja. Med `INITIAL_PASSWORD` unset oppretter du dashbordpassordet i onboarding-veiviseren ved første besøk (avsnitt 5.2 dekker engangs-bootstrap-tokenet og passordtrinnet).
 
 ---
 

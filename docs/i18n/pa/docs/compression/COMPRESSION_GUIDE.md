@@ -296,7 +296,7 @@ RTK ਕੱਚੇ-ਆਉਟਪੁੱਟ ਦੀ ਰਿਕਵਰੀ ਕਿਸੇ �
 
 ## ਕੰਪਰੈਸ਼ਨ ਅੰਕੜੇ
 
-ਹਰ ਕੰਪਰੈੱਸ ਕੀਤੀ ਬੇਨਤੀ ਵਿੱਚ ਸਰਵਰ ਲੌਗਾਂ ਵਿੱਚ ਅੰਕੜੇ ਸ਼ਾਮਲ ਹੁੰਦੇ ਹਨ:
+ਹਰੇਕ ਸੰਕੁਚਿਤ ਬੇਨਤੀ ਵਿੱਚ ਸਰਵਰ ਲੌਗਸ ਵਿੱਚ ਅੰਕੜੇ ਸ਼ਾਮਲ ਹੁੰਦੇ ਹਨ:
 
 ```json
 {
@@ -334,36 +334,24 @@ RTK ਮੋਡ **[RTK AI](https://github.com/rtk-ai)** ਦੇ **[RTK - Rust Token
 
 ---
 
-## ਉੱਨਤ ਸੰਕੁਚਨ ਸਿਸਟਮ
+## ਐਡਵਾਂਸਡ ਕੰਪਰੈਸ਼ਨ ਸਿਸਟਮ
 
-ਉੱਪਰ ਵਰਣਿਤ 7 ਮੋਡਾਂ ਤੋਂ ਇਲਾਵਾ (ਸਰੋਤ `codex-responses` ਅਤੇ
-`omniglyph` ਮੋਡਾਂ ਨੂੰ ਵੀ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ, ਜਿਨ੍ਹਾਂ ਨੂੰ ਇਹ ਗਾਈਡ ਕਵਰ ਨਹੀਂ ਕਰਦੀ), ਹੇਠਾਂ ਦਿੱਤੇ ਭਾਗ ਉਹਨਾਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਕਵਰ ਕਰਦੇ ਹਨ
-ਜੋ ਉਹਨਾਂ ਮੋਡਾਂ ਦੇ ਅੰਦਰ ਜਾਂ ਨਾਲ ਕੰਮ ਕਰਦੀਆਂ ਹਨ: ਟੂਲ ਨਤੀਜਾ ਸੰਕੁਚਨ ਅਤੇ ਪ੍ਰਗਤੀਸ਼ੀਲ ਏਜਿੰਗ
-ਹਮਲਾਵਰ ਇੰਜਣ ਦੇ ਪੜਾਅ 1 ਅਤੇ 2 ਹਨ (ਹਮਲਾਵਰ ਮੋਡ ਅਤੇ ਸਟੈਕ ਕੀਤੀ ਪਾਈਪਲਾਈਨ ਦਾ ਇੱਕ `aggressive`
-ਪੜਾਅ), ਸਟੈਕ ਕੀਤੀ ਪਾਈਪਲਾਈਨ ਉਹ ਤਰੀਕਾ ਹੈ ਜਿਸ ਨਾਲ ਸਟੈਕਡ ਮੋਡ ਚੱਲਦਾ ਹੈ, ਕੈਸ਼-ਅਵੇਅਰ ਸੰਕੁਚਨ
-ਕੈਸ਼ਿੰਗ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ `aggressive` ਅਤੇ `ultra` ਨੂੰ `standard` ਵਿੱਚ ਡਾਊਨਗ੍ਰੇਡ ਕਰਦਾ ਹੈ ਜਦੋਂ ਸੰਕੁਚਨ
-ਚਾਲੂ ਹੁੰਦਾ ਹੈ, ਅਤੇ ਕੇਵਮੈਨ ਆਉਟਪੁੱਟ ਮੋਡ ਅਤੇ ਆਉਟਪੁੱਟ ਸਟਾਈਲ ਚੋਣਵੀਆਂ ਸਿਸਟਮ-ਪ੍ਰੌਮਪਟ ਹਦਾਇਤਾਂ ਹਨ,
-ਜੋ ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ ਹੁੰਦੀਆਂ ਹਨ ਅਤੇ ਬੇਨਤੀ ਨੂੰ ਸੰਕੁਚਿਤ ਕਰਨ ਦੀ ਬਜਾਏ ਮਾਡਲ ਦੇ ਆਉਟਪੁੱਟ ਨੂੰ ਰੂਪ ਦਿੰਦੀਆਂ ਹਨ।
+ਉੱਪਰ ਦੱਸੇ ਗਏ 7 ਮੋਡਾਂ ਤੋਂ ਪਰੇ (ਸਰੋਤ `codex-responses` ਅਤੇ `omniglyph` ਮੋਡਾਂ ਨੂੰ ਵੀ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ, ਜਿਸ ਨੂੰ ਇਹ ਗਾਈਡ ਕਵਰ ਨਹੀਂ ਕਰਦੀ), ਹੇਠਾਂ ਦਿੱਤੇ ਭਾਗ ਉਹਨਾਂ ਮੋਡਾਂ ਦੇ ਅੰਦਰ ਜਾਂ ਨਾਲ-ਨਾਲ ਕੰਮ ਕਰਨ ਵਾਲੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਕਵਰ ਕਰਦੇ ਹਨ: ਟੂਲ ਰਿਜ਼ਲਟ ਕੰਪਰੈਸ਼ਨ ਅਤੇ ਪ੍ਰੋਗਰੈਸਿਵ ਏਜਿੰਗ ਐਗਰੈਸਿਵ ਇੰਜਣ (ਅਗਰੈਸਿਵ ਮੋਡ ਅਤੇ ਇੱਕ `aggressive` ਲਾਈਨ) ਦੇ ਸਟੈਪ 1 ਅਤੇ 2 ਹਨ, ਸਟੈਕ ਸਟੈਕਡ ਪਾਈਪ ਲਾਈਨ ਦਾ ਸਟੈਪ ਕਿਵੇਂ ਚੱਲਦਾ ਹੈ। ਕੈਸ਼-ਅਵੇਅਰ ਕੰਪਰੈਸ਼ਨ, ਕੰਪਰੈਸ਼ਨ ਚਾਲੂ ਹੋਣ 'ਤੇ ਕੈਚਿੰਗ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ `aggressive` ਅਤੇ `ultra` ਨੂੰ `standard` ਨੂੰ ਡਾਊਨਗ੍ਰੇਡ ਕਰਦਾ ਹੈ, ਅਤੇ ਕੈਵਮੈਨ ਆਉਟਪੁੱਟ ਮੋਡ ਅਤੇ ਆਉਟਪੁੱਟ ਸਟਾਈਲ ਔਪਟ-ਇਨ ਸਿਸਟਮ-ਪ੍ਰੋਂਪਟ ਹਦਾਇਤਾਂ ਹਨ, ਮੂਲ ਰੂਪ ਵਿੱਚ, ਜੋ ਬੇਨਤੀ ਨੂੰ ਸੰਕੁਚਿਤ ਕਰਨ ਦੀ ਬਜਾਏ ਮਾਡਲ ਦੇ ਆਉਟਪੁੱਟ ਨੂੰ ਆਕਾਰ ਦਿੰਦੀਆਂ ਹਨ।
 
-### ਕੈਸ਼-ਅਵੇਅਰ ਸੰਕੁਚਨ
+### ਕੈਸ਼-ਜਾਗਰੂਕ ਕੰਪਰੈਸ਼ਨ
 
-ਕੁਝ ਪ੍ਰਦਾਤਾ (ਜਿਵੇਂ ਕਿ ਪ੍ਰੌਮਪਟ ਕੈਸ਼ਿੰਗ ਵਾਲਾ Anthropic) **ਪ੍ਰੌਮਪਟ ਕੈਸ਼ਿੰਗ** ਦਾ ਸਮਰਥਨ ਕਰਦੇ ਹਨ,
-ਜੋ ਉਹਨਾਂ ਨੂੰ ਲਾਗਤ ਅਤੇ ਲੇਟੈਂਸੀ ਘਟਾਉਣ ਲਈ ਪ੍ਰੌਮਪਟ ਦੇ ਹਿੱਸੇ ਕੈਸ਼ ਕਰਨ ਦਿੰਦੀ ਹੈ। ਜਦੋਂ
-ਕੈਸ਼ਿੰਗ ਸਮਰੱਥ ਹੁੰਦੀ ਹੈ, ਹਮਲਾਵਰ ਸੰਕੁਚਨ ਅਸਲ ਵਿੱਚ ਕਾਰਗੁਜ਼ਾਰੀ ਨੂੰ **ਨੁਕਸਾਨ** ਪਹੁੰਚਾ ਸਕਦਾ ਹੈ
-ਕਿਉਂਕਿ ਇਹ ਕੈਸ਼ ਕੀਤੇ ਟੋਕਨਾਂ ਨੂੰ ਬਦਲਦਾ ਹੈ, ਜਿਸ ਨਾਲ ਕੈਸ਼ ਅਵੈਧ ਹੋ ਜਾਂਦਾ ਹੈ।
+ਕੁਝ ਪ੍ਰਦਾਤਾ (ਜਿਵੇਂ ਪ੍ਰੋਂਪਟ ਕੈਚਿੰਗ ਦੇ ਨਾਲ Anthropic ) ਸਹਾਇਤਾ** ਪ੍ਰੋਂਪਟ ਕੈਸ਼ਿੰਗ** , ਜੋ ਉਹਨਾਂ ਨੂੰ ਲਾਗਤਾਂ ਅਤੇ ਲੇਟੈਂਸੀ ਨੂੰ ਘਟਾਉਣ ਲਈ ਪ੍ਰੋਂਪਟ ਦੇ ਭਾਗਾਂ ਨੂੰ ਕੈਸ਼ ਕਰਨ ਦਿੰਦਾ ਹੈ। ਜਦੋਂ ਕੈਚਿੰਗ ਸਮਰਥਿਤ ਹੁੰਦੀ ਹੈ, ਅਸਲ ਵਿੱਚ ਹਮਲਾਵਰ ਕੰਪਰੈਸ਼ਨ ਹੋ ਸਕਦਾ ਹੈ** ਸੱਟ** ਪ੍ਰਦਰਸ਼ਨ ਕਿਉਂਕਿ ਇਹ ਕੈਸ਼ ਟੋਕਨਾਂ ਨੂੰ ਬਦਲਦਾ ਹੈ, ਕੈਸ਼ ਨੂੰ ਅਯੋਗ ਬਣਾਉਂਦਾ ਹੈ।
 
-`cachingAware.ts` ਮੋਡੀਊਲ **ਕੈਸ਼ਿੰਗ ਸੰਦਰਭ ਦਾ ਪਤਾ ਲਗਾ ਕੇ** ਅਤੇ
-ਉਸ ਅਨੁਸਾਰ **ਸੰਕੁਚਨ ਰਣਨੀਤੀ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰਕੇ** ਇਸ ਸਮੱਸਿਆ ਨੂੰ ਹੱਲ ਕਰਦਾ ਹੈ।
+`cachingAware.ts` ਮੋਡੀਊਲ ਇਸ ਦੁਆਰਾ ਹੱਲ ਕਰਦਾ ਹੈ** ਕੈਸ਼ਿੰਗ ਸੰਦਰਭ ਦਾ ਪਤਾ ਲਗਾ ਰਿਹਾ ਹੈ** ਅਤੇ** ਕੰਪਰੈਸ਼ਨ ਰਣਨੀਤੀ ਨੂੰ ਅਨੁਕੂਲ ਕਰਨਾ** ਉਸ ਅਨੁਸਾਰ।
 
 #### ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ
 
-1. **ਕੈਸ਼ਿੰਗ ਸੰਦਰਭ ਦਾ ਪਤਾ ਲਗਾਓ** — `cache_control` ਮਾਰਕਰਾਂ ਲਈ ਬੇਨਤੀ ਬੌਡੀ ਨੂੰ ਸਕੈਨ ਕਰਦਾ ਹੈ
-2. **ਕੈਸ਼ਿੰਗ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਪਛਾਣ ਕਰੋ** — ਜਾਂਚਦਾ ਹੈ ਕਿ ਕੀ ਟਾਰਗੇਟ ਪ੍ਰਦਾਤਾ ਕੈਸ਼ਿੰਗ ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ
-3. **ਰਣਨੀਤੀ ਵਿਵਸਥਿਤ ਕਰੋ** — ਕੈਸ਼ਿੰਗ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ `aggressive`/`ultra` ਨੂੰ `standard` ਵਿੱਚ ਡਾਊਨਗ੍ਰੇਡ ਕਰਦਾ ਹੈ
-4. **ਸਿਸਟਮ ਪ੍ਰੌਮਪਟ ਛੱਡੋ** — ਸਿਸਟਮ ਪ੍ਰੌਮਪਟ ਆਮ ਤੌਰ 'ਤੇ ਕੈਸ਼ ਕੀਤੇ ਜਾਂਦੇ ਹਨ, ਇਸ ਲਈ ਉਹਨਾਂ ਨੂੰ ਸੰਕੁਚਿਤ ਨਾ ਕਰੋ
+1. **ਕੈਸ਼ਿੰਗ ਸੰਦਰਭ ਦਾ ਪਤਾ ਲਗਾਓ** — `cache_control` ਮਾਰਕਰਾਂ ਲਈ ਬੇਨਤੀ ਬਾਡੀ ਨੂੰ ਸਕੈਨ ਕਰਦਾ ਹੈ
+2. **ਕੈਸ਼ਿੰਗ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਪਛਾਣ ਕਰੋ** — ਜਾਂਚ ਕਰਦਾ ਹੈ ਕਿ ਕੀ ਟੀਚਾ ਪ੍ਰਦਾਤਾ ਕੈਚਿੰਗ ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ
+3. **ਰਣਨੀਤੀ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰੋ** — ਕੈਚਿੰਗ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ `aggressive`/`ultra` ਨੂੰ `standard` ਨੂੰ ਡਾਊਨਗ੍ਰੇਡ ਕਰਦਾ ਹੈ
+4. **ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ ਛੱਡੋ** — ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ ਆਮ ਤੌਰ 'ਤੇ ਕੈਸ਼ ਕੀਤੇ ਜਾਂਦੇ ਹਨ, ਇਸਲਈ ਉਹਨਾਂ ਨੂੰ ਸੰਕੁਚਿਤ ਨਾ ਕਰੋ
 
-ਰਣਨੀਤੀ ਹੈਲਪਰ ਇੱਕ `deterministicOnly` ਫਲੈਗ ਵੀ ਵਾਪਸ ਕਰਦਾ ਹੈ, ਪਰ ਯੋਜਨਾ ਬਿਲਡਰ
-ਕੇਵਲ ਰਣਨੀਤੀ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ — ਇਸ ਵੇਲੇ ਡਾਊਨਸਟ੍ਰੀਮ ਵਿੱਚ ਕੋਈ ਵੀ ਇਸ ਫਲੈਗ ਨੂੰ ਨਹੀਂ ਪੜ੍ਹਦਾ।
+ਰਣਨੀਤੀ ਸਹਾਇਕ ਇੱਕ `deterministicOnly` ਫਲੈਗ ਵੀ ਵਾਪਸ ਕਰਦਾ ਹੈ, ਪਰ ਯੋਜਨਾ ਨਿਰਮਾਤਾ ਸਿਰਫ ਰਣਨੀਤੀ — ਦੀ ਖਪਤ ਕਰਦਾ ਹੈ, ਅੱਜ ਫਲੈਗ ਨੂੰ ਹੇਠਾਂ ਵੱਲ ਕੁਝ ਨਹੀਂ ਪੜ੍ਹਦਾ।
 
 #### ਕੋਡ ਉਦਾਹਰਨ
 
@@ -376,7 +364,7 @@ import {
 const body = {
   model: "anthropic/claude-sonnet-4.5",
   messages: [{ role: "user", content: "Hello" }],
-  cache_control: { type: "ephemeral" }, // ← ਕੈਸ਼ ਮਾਰਕਰ
+  cache_control: { type: "ephemeral" }, // ← Cache marker
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
@@ -388,26 +376,17 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### ਕਦੋਂ ਵਰਤਣਾ ਹੈ
 
-ਕੈਸ਼-ਅਵੇਅਰ ਸੰਕੁਚਨ **ਹਮੇਸ਼ਾ ਚਾਲੂ** ਹੁੰਦਾ ਹੈ — ਕਿਸੇ ਸੰਰਚਨਾ ਦੀ ਲੋੜ ਨਹੀਂ। ਇਹ ਉਦੋਂ ਸਰਗਰਮ ਹੁੰਦਾ ਹੈ ਜਦੋਂ
-ਸੰਕੁਚਨ ਚਾਲੂ ਹੋਵੇ ਅਤੇ ਟਾਰਗੇਟ ਪ੍ਰਦਾਤਾ ਪ੍ਰੌਮਪਟ ਕੈਸ਼ਿੰਗ (Anthropic, OpenAI,
-ਆਦਿ) ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੋਵੇ; ਸਪਸ਼ਟ `cache_control` ਮਾਰਕਰਾਂ ਦੀ ਲੋੜ ਨਹੀਂ ਹੁੰਦੀ — ਸਿਰਫ਼ ਇੱਕ ਕੈਸ਼ਿੰਗ ਪ੍ਰਦਾਤਾ ਹੀ
-ਡਾਊਨਗ੍ਰੇਡ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰਦਾ ਹੈ, ਅਤੇ ਸਿਰਫ਼ ਮਾਰਕਰ ਕਦੇ ਵੀ ਅਜਿਹਾ ਨਹੀਂ ਕਰਦੇ (ਮਾਰਕਰ ਦੀ ਪਛਾਣ ਕੈਸ਼
-ਟੈਲੀਮੈਟਰੀ ਨੂੰ ਫੀਡ ਕਰਦੀ ਹੈ, ਰਣਨੀਤੀ ਫੈਸਲੇ ਨੂੰ ਨਹੀਂ)।
+ਕੈਸ਼-ਜਾਗਰੂਕ ਕੰਪਰੈਸ਼ਨ ਹੈ** ਹਮੇਸ਼ਾ ਚਾਲੂ** — ਕੋਈ ਸੰਰਚਨਾ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ। ਇਹ ਕਿੱਕ ਇਨ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਵੀ ਕੰਪਰੈਸ਼ਨ ਚਾਲੂ ਹੁੰਦਾ ਹੈ ਅਤੇ ਟੀਚਾ ਪ੍ਰਦਾਤਾ ਪ੍ਰੋਂਪਟ ਕੈਚਿੰਗ (Anthropic, OpenAI, ਆਦਿ) ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ; ਸਪਸ਼ਟ `cache_control` ਮਾਰਕਰਾਂ ਦੀ ਲੋੜ ਨਹੀਂ ਹੈ — ਇੱਕ ਕੈਚਿੰਗ ਪ੍ਰਦਾਤਾ ਇਕੱਲੇ ਡਾਊਨਗ੍ਰੇਡ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ, ਅਤੇ ਇਕੱਲੇ ਮਾਰਕਰ ਕਦੇ ਨਹੀਂ ਕਰਦੇ (ਮਾਰਕਰ ਖੋਜ ਕੈਸ਼ ਟੈਲੀਮੈਟਰੀ ਨੂੰ ਫੀਡ ਕਰਦੀ ਹੈ, ਰਣਨੀਤੀ ਦਾ ਫੈਸਲਾ ਨਹੀਂ)।
 
-### ਪ੍ਰਗਤੀਸ਼ੀਲ ਏਜਿੰਗ
+OpenRouter ਸਿਰਫ਼ `anthropic/*` ਮਾਡਲਾਂ ਲਈ ਇੱਕ ਕੈਚਿੰਗ ਪ੍ਰਦਾਤਾ ਵਜੋਂ ਗਿਣਦਾ ਹੈ: Claude ਕੋਡ ਬੇਨਤੀਆਂ ਆਪਣੇ `cache_control` ਬ੍ਰੇਕਪੁਆਇੰਟਸ (ਜ਼ਿਆਦਾਤਰ 4) ਰੱਖਦੀਆਂ ਹਨ ਅਤੇ ਗਾਰਡ ਅਗੇਤਰ ਦੀ ਰੱਖਿਆ ਕਰਦਾ ਹੈ, ਜਦੋਂ ਕਿ ਹਰ ਦੂਜਾ OpenRouter ਪਰਿਵਾਰ (`openai/`, `google/`, `qwen/`, …) ਸਟ੍ਰਿਪਡ ਅਤੇ ਅਣਜਾਣ ਰਹਿੰਦਾ ਹੈ।
 
-ਲੰਬੀਆਂ ਗੱਲਬਾਤਾਂ ਵਿੱਚ ਬਹੁਤ ਸਾਰੇ ਸੁਨੇਹਾ ਟਰਨ ਇਕੱਠੇ ਹੋ ਜਾਂਦੇ ਹਨ, ਪਰ ਪੁਰਾਣੇ ਟਰਨ ਘੱਟ
-ਪ੍ਰਸੰਗਿਕ ਹੋ ਜਾਂਦੇ ਹਨ। `progressiveAging.ts` ਮੋਡੀਊਲ **ਟਰਨ ਦੂਰੀ ਦੇ ਆਧਾਰ 'ਤੇ ਸੁਨੇਹਿਆਂ ਨੂੰ ਘਟਾਉਂਦਾ ਹੈ**
-(ਦੂਰੀ ਗੱਲਬਾਤ ਦੇ ਅੰਤ ਤੋਂ ਮਾਪੀ ਜਾਂਦੀ ਹੈ)। ਦਿੱਤੇ ਗਏ ਡਿਫਾਲਟਾਂ
-(`verbatim: 2, light: 2, moderate: 3`) ਨਾਲ:
+### ਪ੍ਰਗਤੀਸ਼ੀਲ ਉਮਰ
 
-- **ਆਖਰੀ 2 ਟਰਨ (ਦੂਰੀ ≤ 2)**: ਜਿਉਂ ਦੇ ਤਿਉਂ ਰੱਖੇ ਜਾਂਦੇ ਹਨ
-- **ਦੂਰੀ 3**: ਕੇਵਮੈਨ ਸੰਕੁਚਨ (ਫ਼ਜ਼ੂਲ ਸਮੱਗਰੀ ਹਟਾਉਣਾ)
-- **ਦੂਰੀ 4+**: ਅਸਿਸਟੈਂਟ ਸੁਨੇਹਿਆਂ ਦਾ ਸਾਰ ਬਣਾਇਆ ਜਾਂਦਾ ਹੈ; ਵਰਤੋਂਕਾਰ ਸੁਨੇਹਿਆਂ ਨੂੰ ਉਹਨਾਂ ਦੀ ਪਹਿਲੀ
-  ਲਾਈਨ ਤੱਕ ਘਟਾਇਆ ਜਾਂਦਾ ਹੈ, ਜਿਸ ਦੀ ਸੀਮਾ 120 ਅੱਖਰ ਹੈ; ਹੋਰ ਭੂਮਿਕਾਵਾਂ ਨੂੰ ਛੇੜਿਆ ਨਹੀਂ ਜਾਂਦਾ। ਸਿਸਟਮ ਪ੍ਰੌਮਪਟ, ਪਹਿਲਾਂ ਤੋਂ ਏਜ ਕੀਤੇ
-  ਸੁਨੇਹੇ ਅਤੇ ਸਭ ਤੋਂ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸੁਨੇਹਾ ਦੂਰੀ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਹਮੇਸ਼ਾ ਜਿਉਂ ਦੇ ਤਿਉਂ ਰੱਖੇ ਜਾਂਦੇ ਹਨ।
-  ਕੁਝ ਵੀ ਸਿੱਧੇ ਤੌਰ 'ਤੇ ਹਟਾਇਆ ਨਹੀਂ ਜਾਂਦਾ, ਅਤੇ ਦਿੱਤੇ ਗਏ ਡਿਫਾਲਟਾਂ ਨਾਲ `light`
-  ਬੈਂਡ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਹੁੰਦੀ (`light`, `verbatim` ਦੇ ਬਰਾਬਰ ਹੈ)।
+ਲੰਬੀਆਂ ਗੱਲਾਂਬਾਤਾਂ ਬਹੁਤ ਸਾਰੇ ਸੁਨੇਹੇ ਮੋੜਾਂ ਨੂੰ ਇਕੱਠਾ ਕਰਦੀਆਂ ਹਨ, ਪਰ ਪੁਰਾਣੇ ਮੋੜ ਘੱਟ ਢੁਕਵੇਂ ਹੋ ਜਾਂਦੇ ਹਨ। `progressiveAging.ts` ਮੋਡੀਊਲ** ਵਾਰੀ ਦੂਰੀ ਦੁਆਰਾ ਸੁਨੇਹਿਆਂ ਨੂੰ ਘਟਾਉਂਦਾ ਹੈ** (ਗੱਲਬਾਤ ਦੇ ਅੰਤ ਤੋਂ ਮਾਪੀ ਗਈ ਦੂਰੀ)। ਭੇਜੇ ਗਏ ਮੂਲ (`verbatim: 2, light: 2, moderate: 3`) ਦੇ ਨਾਲ:
+
+- **ਆਖਰੀ 2 ਮੋੜ (ਦੂਰੀ ≤ 2)** : ਵਰਬੈਟਿਮ ਰੱਖਿਆ
+- **ਦੂਰੀ 3** : ਕੈਵਮੈਨ ਕੰਪਰੈਸ਼ਨ (ਫਿਲਰ ਹਟਾਉਣਾ)
+- **ਦੂਰੀ 4 +** : ਸਹਾਇਕ ਸੁਨੇਹਿਆਂ ਦਾ ਸੰਖੇਪ; ਉਪਭੋਗਤਾ ਸੁਨੇਹਿਆਂ ਨੂੰ ਉਹਨਾਂ ਦੀ ਪਹਿਲੀ ਲਾਈਨ ਤੱਕ ਘਟਾ ਦਿੱਤਾ ਗਿਆ, 120 ਅੱਖਰਾਂ 'ਤੇ ਕੈਪ ਕੀਤਾ ਗਿਆ; ਹੋਰ ਭੂਮਿਕਾਵਾਂ ਅਛੂਤ। ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ, ਪਹਿਲਾਂ ਤੋਂ ਪੁਰਾਣੇ ਸੁਨੇਹੇ ਅਤੇ ਨਵੀਨਤਮ ਉਪਭੋਗਤਾ ਸੰਦੇਸ਼ ਨੂੰ ਦੂਰੀ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਹਮੇਸ਼ਾਂ ਜ਼ੁਬਾਨੀ ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ। ਕੁਝ ਵੀ ਸਿੱਧਾ ਨਹੀਂ ਛੱਡਿਆ ਜਾਂਦਾ ਹੈ, ਅਤੇ `light` ਬੈਂਡ ਭੇਜੇ ਗਏ ਡਿਫੌਲਟ (`light` ਬਰਾਬਰ `verbatim`) ਨਾਲ ਪਹੁੰਚਯੋਗ ਨਹੀਂ ਹੈ।
 
 #### ਕੋਡ ਉਦਾਹਰਨ
 
@@ -418,67 +397,47 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... 50 ਹੋਰ ਟਰਨ ...
+  // ... 50 more turns ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // ਆਖਰੀ 3 ਟਰਨ: ਜਿਉਂ ਦੇ ਤਿਉਂ
-  light: 8, // ਦੂਰੀ <= 8: ਹਲਕਾ ਸੰਕੁਚਨ
-  moderate: 20, // ਦੂਰੀ <= 20: ਕੇਵਮੈਨ ਸੰਕੁਚਨ
-  fullSummary: 5, // ਕਿਸਮ ਦੁਆਰਾ ਲੋੜੀਂਦਾ, ਬੈਂਡਿੰਗ ਕੋਡ ਦੁਆਰਾ ਨਹੀਂ ਪੜ੍ਹਿਆ ਜਾਂਦਾ
-  // ਦੂਰੀ > 20: ਸਾਰ ਬਣਾਇਆ ਜਾਂਦਾ ਹੈ (ਅਸਿਸਟੈਂਟ) / ਪਹਿਲੀ ਲਾਈਨ ਰੱਖੀ ਜਾਂਦੀ ਹੈ (ਵਰਤੋਂਕਾਰ)
+  verbatim: 3, // last 3 turns: verbatim
+  light: 8, // distance <= 8: lite compression
+  moderate: 20, // distance <= 20: caveman compression
+  fullSummary: 5, // required by the type, not read by the banding code
+  // distance > 20: summarized (assistant) / first line kept (user)
 });
 
-// saved = ਬਚਾਏ ਗਏ ਟੋਕਨਾਂ ਦੀ ਗਿਣਤੀ
+// saved = number of tokens saved
 ```
 
 #### ਕਦੋਂ ਵਰਤਣਾ ਹੈ
 
-ਪ੍ਰਗਤੀਸ਼ੀਲ ਏਜਿੰਗ `aggressive` ਮੋਡ ਲਈ **ਹਮੇਸ਼ਾ ਚਾਲੂ** ਹੁੰਦੀ ਹੈ — ਇਹ
-`compressAggressive()` ਦਾ ਪੜਾਅ 2 ਹੈ। Ultra ਮੋਡ ਇਸਨੂੰ ਨਹੀਂ ਚਲਾਉਂਦਾ। ਇਹ
-ਖ਼ਾਸ ਤੌਰ 'ਤੇ ਇਹਨਾਂ ਲਈ ਪ੍ਰਭਾਵਸ਼ਾਲੀ ਹੈ:
+ਪ੍ਰਗਤੀਸ਼ੀਲ ਬੁਢਾਪਾ ਹੈ** ਹਮੇਸ਼ਾ ਚਾਲੂ** `aggressive` ਮੋਡ — ਲਈ ਇਹ `compressAggressive()` ਦਾ ਕਦਮ 2 ਹੈ। ਅਲਟਰਾ ਮੋਡ ਇਸ ਨੂੰ ਨਹੀਂ ਚਲਾਉਂਦਾ। ਇਹ ਇਹਨਾਂ ਲਈ ਖਾਸ ਤੌਰ 'ਤੇ ਪ੍ਰਭਾਵਸ਼ਾਲੀ ਹੈ:
 
-- ਲੰਬੇ ਸਮੇਂ ਤੱਕ ਚੱਲਣ ਵਾਲੇ ਕੋਡਿੰਗ ਸੈਸ਼ਨ
-- ਕਈ ਦਿਨਾਂ ਦੀਆਂ ਗੱਲਬਾਤਾਂ
-- ਬਹੁਤ ਸਾਰੀਆਂ ਟੂਲ ਕਾਲਾਂ ਵਾਲੇ ਏਜੰਟਿਕ ਵਰਕਫਲੋ
+- ਲੰਬੇ ਸਮੇਂ ਤੋਂ ਚੱਲ ਰਹੇ ਕੋਡਿੰਗ ਸੈਸ਼ਨ
+- ਬਹੁ-ਦਿਨ ਗੱਲਬਾਤ
+- ਕਈ ਟੂਲ ਕਾਲਾਂ ਦੇ ਨਾਲ ਏਜੰਟਿਕ ਵਰਕਫਲੋ
 
-### ਕੇਵਮੈਨ ਆਉਟਪੁੱਟ ਮੋਡ
+### Caveman ਆਉਟਪੁੱਟ ਮੋਡ
 
-ਕੇਵਮੈਨ ਆਉਟਪੁੱਟ ਮੋਡ **ਸਿਸਟਮ ਪ੍ਰੌਮਪਟ ਹਦਾਇਤਾਂ** ਜੋੜਦਾ ਹੈ ਜੋ ਮਾਡਲ ਨੂੰ ਸੰਖੇਪ ਆਉਟਪੁੱਟ ਦੇਣ ਲਈ ਕਹਿੰਦੀਆਂ ਹਨ — `lite` ਪੱਧਰ ਪੂਰੇ ਵਾਕ ਰੱਖਣ ਵਾਲੇ ਸੰਖੇਪ ਜਵਾਬ ਮੰਗਦਾ ਹੈ, `full`
-ਇਸਨੂੰ "ਚੁਸਤ ਗੁਫ਼ਾ-ਮਨੁੱਖ ਵਾਂਗ ਸੰਖੇਪ ਜਵਾਬ ਦੇਣ" ਲਈ ਕਹਿੰਦਾ ਹੈ, ਅਤੇ `ultra` ਤਾਰ-ਸੁਨੇਹਾ ਸ਼ੈਲੀ ਦਾ ਆਉਟਪੁੱਟ ਮੰਗਦਾ ਹੈ;
-ਹਦਾਇਤਾਂ ਸਿਰਫ਼ ਬੇਨਤੀ ਕਰਦੀਆਂ ਹਨ, ਉਹ ਇਸਦੀ ਗਾਰੰਟੀ ਨਹੀਂ ਦੇ ਸਕਦੀਆਂ। ਬੇਨਤੀਆਂ ਇਹਨਾਂ ਨੂੰ
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) ਰਾਹੀਂ ਪ੍ਰਾਪਤ ਕਰਦੀਆਂ ਹਨ:
-`open-sse/handlers/chatCore.ts` ਪਹਿਲਾਂ ਬੈਕਵਰਡ-ਕੰਪੈਟੀਬਿਲਟੀ ਸ਼ਿਮ
-(`resolveOutputStyleSelection()` ਜੋ
-`open-sse/services/compression/outputStyles/backCompat.ts` ਵਿੱਚ ਹੈ) ਨਾਲ ਚੋਣ ਦਾ ਨਿਰਧਾਰਨ ਕਰਦਾ ਹੈ, ਜੋ `outputStyles`
-ਖਾਲੀ ਹੋਣ ਵੇਲੇ ਸਮਰੱਥ `cavemanOutputMode` ਨੂੰ
-`cavemanOutputMode.intensity` 'ਤੇ `terse-prose` ਆਉਟਪੁੱਟ ਸਟਾਈਲ ਨਾਲ ਮੈਪ ਕਰਦਾ ਹੈ (ਹੇਠਾਂ ਬੈਕਵਰਡ-ਕੰਪੈਟੀਬਿਲਟੀ ਵੇਖੋ); ਇੱਕ ਗੈਰ-ਖਾਲੀ `outputStyles`
-ਚੋਣ ਜਿਵੇਂ ਹੈ ਤਿਵੇਂ ਵਰਤੀ ਜਾਂਦੀ ਹੈ, ਅਤੇ ਫਿਰ `cavemanOutputMode.enabled` ਅਤੇ `intensity` ਦਾ ਕੋਈ
-ਪ੍ਰਭਾਵ ਨਹੀਂ ਹੁੰਦਾ, ਜਦਕਿ ਇਸਦਾ `autoClarity` ਟੌਗਲ ਫਿਰ ਵੀ ਲਾਗੂ ਹੁੰਦਾ ਹੈ। `outputMode.ts` ਵਿੱਚ
-ਹਦਾਇਤ ਟੈਕਸਟ (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), ਸਮੱਗਰੀ ਬਾਈਪਾਸ ਅਤੇ
-ਉਹ ਪਲੇਸਮੈਂਟ ਹੈਲਪਰ ਹਨ ਜਿਨ੍ਹਾਂ ਨੂੰ ਇੰਜੈਕਸ਼ਨ ਵਰਤਦਾ ਹੈ; ਇਸਦੇ ਆਪਣੇ `applyCavemanOutputMode()` ਇੰਜੈਕਟਰ ਦਾ ਕੋਈ
-ਪ੍ਰੋਡਕਸ਼ਨ ਕਾਲਰ ਨਹੀਂ ਹੈ।
+Caveman ਆਉਟਪੁੱਟ ਮੋਡ ਜੋੜਦਾ ਹੈ** ਸਿਸਟਮ ਪ੍ਰਾਉਟ ਨਿਰਦੇਸ਼** ਜੋ ਕਿ ਮਾਡਲ ਨੂੰ terse ਆਉਟਪੁੱਟ — ਲਈ ਪੁੱਛਦਾ ਹੈ, `lite` ਪੱਧਰ ਸੰਖੇਪ ਜਵਾਬਾਂ ਲਈ ਪੁੱਛਦਾ ਹੈ ਜੋ ਪੂਰੇ ਵਾਕਾਂ ਨੂੰ ਰੱਖਦੇ ਹਨ, `full` ਇਸਨੂੰ "ਸਮਾਰਟ ਕੇਵਮੈਨ ਦੀ ਤਰ੍ਹਾਂ ਤਿੱਖਾ ਜਵਾਬ ਦੇਣ ਲਈ ਕਹਿੰਦਾ ਹੈ", ਅਤੇ `ultra` ਟੈਲੀਗ੍ਰਾਫਿਕ ਆਉਟਪੁੱਟ ਲਈ ਪੁੱਛਦਾ ਹੈ; ਨਿਰਦੇਸ਼ ਸਿਰਫ ਪੁੱਛਦੇ ਹਨ, ਉਹ ਇਸਦੀ ਗਰੰਟੀ ਨਹੀਂ ਦੇ ਸਕਦੇ ਹਨ। ਬੇਨਤੀਆਂ ਉਹਨਾਂ ਨੂੰ `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) ਦੁਆਰਾ ਪ੍ਰਾਪਤ ਹੁੰਦੀਆਂ ਹਨ : `open-sse/handlers/chatCore.ts` ਪਹਿਲਾਂ ਬੈਕ-ਕੰਪੈਟ ਸ਼ਿਮ ( `open-sse/services/compression/outputStyles/backCompat.ts` ਵਿੱਚ `resolveOutputStyleSelection()` ) ਨਾਲ ਚੋਣ ਨੂੰ ਹੱਲ ਕਰਦਾ ਹੈ, ਜੋ ਕਿ, ਜਦੋਂ ਕਿ `outputStyles` ਖਾਲੀ ਹੁੰਦਾ ਹੈ, ਇੱਕ ਸਮਰਥਿਤ `cavemanOutputMode` ਨੂੰ `cavemanOutputMode.intensity` ਤੇ `terse-prose` ਆਉਟਪੁੱਟ ਸ਼ੈਲੀ ਵਿੱਚ ਮੈਪ ਕਰਦਾ ਹੈ (ਹੇਠਾਂ ਬੈਕ-ਕੰਪੈਟ ਦੇਖੋ); ਇੱਕ ਗੈਰ-ਖਾਲੀ `outputStyles` ਚੋਣ ਨੂੰ ਇਸ ਤਰ੍ਹਾਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ, ਅਤੇ `cavemanOutputMode.enabled` ਅਤੇ `intensity` ਕੋਈ ਪ੍ਰਭਾਵ ਨਹੀਂ ਹੁੰਦਾ, ਜਦੋਂ ਕਿ ਇਸਦਾ `autoClarity` ਟੌਗਲ ਅਜੇ ਵੀ ਲਾਗੂ ਹੁੰਦਾ ਹੈ। `outputMode.ts` ਹਦਾਇਤ ਟੈਕਸਟ (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), ਸਮੱਗਰੀ ਬਾਈਪਾਸ ਅਤੇ ਪਲੇਸਮੈਂਟ ਸਹਾਇਕ ਰੱਖਦਾ ਹੈ ਜੋ ਇੰਜੈਕਸ਼ਨ ਵਰਤਦਾ ਹੈ; ਇਸਦੇ ਆਪਣੇ `applyCavemanOutputMode()` ਇੰਜੈਕਟਰ ਦਾ ਕੋਈ ਉਤਪਾਦਨ ਕਾਲਰ ਨਹੀਂ ਹੈ।
 
 #### ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ
 
-ਇਹ ਮੋਡ ਇਨਪੁੱਟ ਨੂੰ ਸੰਕੁਚਿਤ ਨਹੀਂ ਕਰਦਾ। ਇਹ system prompt ਵਿੱਚ ਇੱਕ ਹਦਾਇਤ ਬਲਾਕ ਜੋੜਦਾ ਹੈ
-(ਹੇਠਾਂ ਇੰਜੈਕਸ਼ਨ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ ਵੇਖੋ), ਅਤੇ ਬੇਨਤੀ ਲਈ ਚੁਣਿਆ ਗਿਆ ਕੋਈ ਵੀ ਇਨਪੁੱਟ ਕੰਪ੍ਰੈਸ਼ਨ ਮੋਡ
-ਫਿਰ ਵੀ ਉਸ body ਉੱਤੇ ਬਾਅਦ ਵਿੱਚ ਚੱਲਦਾ ਹੈ, ਜਿਸ ਵਿੱਚ ਹੁਣ ਇਹ ਬਲਾਕ ਸ਼ਾਮਲ ਹੈ। ਹਰ ਪੱਧਰ ਦੇ ਅੰਤ ਵਿੱਚ ਆਉਣ ਵਾਲੀ ਸਾਂਝੀ
-boundaries clause ਤੋਂ ਪਹਿਲਾਂ, ਅੰਗਰੇਜ਼ੀ `full` ਪੱਧਰ ਇਹ ਕਹਿੰਦਾ ਹੈ:
+ਇਹ ਮੋਡ ਇੰਪੁੱਟ ਨੂੰ ਸੰਕੁਚਿਤ ਨਹੀਂ ਕਰਦਾ ਹੈ। ਇਹ ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ ਵਿੱਚ ਇੱਕ ਨਿਰਦੇਸ਼ ਬਲਾਕ ਜੋੜਦਾ ਹੈ (ਦੇਖੋ ਕਿ ਇੰਜੈਕਸ਼ਨ ਹੇਠਾਂ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ), ਅਤੇ ਬੇਨਤੀ ਲਈ ਚੁਣਿਆ ਗਿਆ ਕੋਈ ਵੀ ਇੰਪੁੱਟ ਕੰਪਰੈਸ਼ਨ ਮੋਡ ਅਜੇ ਵੀ ਬਾਅਦ ਵਿੱਚ ਚੱਲਦਾ ਹੈ, ਉਸ ਬਾਡੀ ਉੱਤੇ ਜੋ ਹੁਣ ਬਲਾਕ ਨੂੰ ਰੱਖਦਾ ਹੈ। ਸਾਂਝੀਆਂ ਸੀਮਾਵਾਂ ਦੀ ਧਾਰਾ ਤੋਂ ਪਹਿਲਾਂ, ਜਿਸ ਨਾਲ ਹਰ ਪੱਧਰ ਖਤਮ ਹੁੰਦਾ ਹੈ, ਅੰਗਰੇਜ਼ੀ `full` ਪੱਧਰ ਪੜ੍ਹਦਾ ਹੈ:
 
-> "ਸਿਆਣੇ ਗੁਫ਼ਾਵਾਸੀ ਵਾਂਗ ਸੰਖੇਪ ਜਵਾਬ ਦਿਓ। articles (a/an/the), filler (just/really/basically/actually/simply), ਸ਼ਿਸ਼ਟਾਚਾਰਕ ਸ਼ਬਦ ਅਤੇ ਅਨਿਸ਼ਚਿਤਤਾ ਦਰਸਾਉਣ ਵਾਲੇ ਸ਼ਬਦ ਹਟਾਓ। ਵਾਕਾਂਸ਼ ਠੀਕ ਹਨ। ਛੋਟੇ ਸਮਾਨਾਰਥਕ ਸ਼ਬਦ ਵਰਤੋ (extensive ਦੀ ਥਾਂ big, implement ਦੀ ਥਾਂ fix)। ਸਾਰਾ ਤਕਨੀਕੀ ਤੱਤ, code, errors, URLs, identifiers ਬਿਲਕੁਲ ਸਹੀ ਰੱਖੋ।"
+> "ਸਮਾਰਟ ਕੈਵਮੈਨ ਦੀ ਤਰ੍ਹਾਂ ਜਵਾਬ ਦਿਓ। ਆਰਟੀਕਲ (a/an/the), ਫਿਲਰ (just/really/basically/actually/simply), pleasantries, ਹੈਜਿੰਗ। ਟੁਕੜੇ OK. ਛੋਟੇ ਸਮਾਨਾਰਥੀ (ਵੱਡੇ ਵੱਡੇ ਨਹੀਂ, ਫਿਕਸ ਨਹੀਂ ਲਾਗੂ)। ਸਾਰੇ ਤਕਨੀਕੀ ਪਦਾਰਥ, ਕੋਡ, ਤਰੁੱਟੀਆਂ, URLs, ਸਾਬਕਾ ਪਛਾਣਕਰਤਾ ਰੱਖੋ।"
 
-ਇਹ ਖਾਸ ਤੌਰ 'ਤੇ ਇਨ੍ਹਾਂ ਲਈ ਵਧੀਆ ਕੰਮ ਕਰਦਾ ਹੈ:
+ਇਹ ਇਹਨਾਂ ਲਈ ਖਾਸ ਤੌਰ 'ਤੇ ਵਧੀਆ ਕੰਮ ਕਰਦਾ ਹੈ:
 
-- Code generation (ਵਧੇਰੇ ਸੰਖੇਪ ਆਉਟਪੁੱਟ = ਘੱਟ tokens)
-- ਤੁਰੰਤ Q&A (ਵਿਸਤ੍ਰਿਤ ਵਿਆਖਿਆਵਾਂ ਦੀ ਲੋੜ ਨਹੀਂ)
-- Batch processing (throughput ਵੱਧ ਤੋਂ ਵੱਧ ਕਰੋ)
+- ਕੋਡ ਜਨਰੇਸ਼ਨ (ਟਰਸਰ ਆਉਟਪੁੱਟ = ਘੱਟ ਟੋਕਨ)
+- ਤਤਕਾਲ ਸਵਾਲ ਅਤੇ ਜਵਾਬ (ਵਿਸਤ੍ਰਿਤ ਵਿਆਖਿਆ ਦੀ ਕੋਈ ਲੋੜ ਨਹੀਂ)
+- ਬੈਚ ਪ੍ਰੋਸੈਸਿੰਗ (ਵੱਧ ਤੋਂ ਵੱਧ ਥ੍ਰੋਪੁੱਟ)
 
 #### ਕਦੋਂ ਵਰਤਣਾ ਹੈ
 
-Caveman output mode **opt-in** ਹੈ। ਕੰਪ੍ਰੈਸ਼ਨ ਚਾਲੂ ਹੋਣ 'ਤੇ (`enabled: true`, Compression Settings ਪੰਨੇ ਉੱਤੇ master toggle
-ਚਾਲੂ), ਇਸਨੂੰ `cavemanOutputMode.enabled` ਨਾਲ ਚਾਲੂ ਕਰੋ; `intensity`
-`lite`, `full` ਜਾਂ `ultra` ਚੁਣਦਾ ਹੈ:
+Caveman ਆਉਟਪੁੱਟ ਮੋਡ ਹੈ** ਚੋਣ ਕਰੋ** . ਕੰਪਰੈਸ਼ਨ ਚਾਲੂ ਕਰਨ ਦੇ ਨਾਲ (`enabled: true`, ਕੰਪਰੈਸ਼ਨ ਸੈਟਿੰਗਜ਼ ਪੰਨੇ 'ਤੇ ਮਾਸਟਰ ਟੌਗਲ), ਇਸਨੂੰ `cavemanOutputMode.enabled` ਨਾਲ ਚਾਲੂ ਕਰੋ; `intensity` `lite`, `full` ਜਾਂ `ultra` ਚੁਣਦਾ ਹੈ:
 
 ```json
 {
@@ -490,101 +449,44 @@ Caveman output mode **opt-in** ਹੈ। ਕੰਪ੍ਰੈਸ਼ਨ ਚਾਲ�
 }
 ```
 
-ਕਿਸੇ compression combo ਦਾ **Output Mode** toggle (`outputMode`, `outputModeIntensity` ਵਿੱਚ ਪੱਧਰ)
-ਉਨ੍ਹਾਂ ਬੇਨਤੀਆਂ ਲਈ ਇਹੀ switch ਸੈੱਟ ਕਰਦਾ ਹੈ ਜਿਨ੍ਹਾਂ ਉੱਤੇ ਉਹ combo ਲਾਗੂ ਹੁੰਦਾ ਹੈ, ਅਤੇ
-`omniroute_set_compression_engine` MCP tool ਆਪਣੇ boolean `outputMode`
-argument ਰਾਹੀਂ ਇਸਨੂੰ ਲਿਖਦਾ ਹੈ। ਇੱਕ ਗੈਰ-ਖਾਲੀ `outputStyles` ਚੋਣ ਨੂੰ ਇਸ switch ਉੱਤੇ ਤਰਜੀਹ ਮਿਲਦੀ ਹੈ। Dashboard ਵਿੱਚ, **Terse prose** output style ਨੂੰ ਚਾਲੂ ਕਰਨ ਨਾਲ ਉਹੀ ਬਲਾਕ inject ਹੁੰਦਾ ਹੈ (ਹੇਠਾਂ Output
-Styles ਵੇਖੋ)।
+ਇੱਕ ਕੰਪਰੈਸ਼ਨ ਕੰਬੋ ਦਾ** ਆਉਟਪੁੱਟ ਮੋਡ** ਟੌਗਲ (`outputMode`, `outputModeIntensity` ਵਿੱਚ ਪੱਧਰ ) ਉਹਨਾਂ ਬੇਨਤੀਆਂ ਲਈ ਉਹੀ ਸਵਿੱਚ ਸੈਟ ਕਰਦਾ ਹੈ ਜਿਸ ਉੱਤੇ ਕੰਬੋ ਲਾਗੂ ਹੁੰਦਾ ਹੈ, ਅਤੇ `omniroute_set_compression_engine` MCP ਟੂਲ ਇਸਨੂੰ ਆਪਣੇ ਬੁਲੀਅਨ `outputMode` ਆਰਗੂਮੈਂਟ ਦੁਆਰਾ ਲਿਖਦਾ ਹੈ। ਇੱਕ ਗੈਰ-ਖਾਲੀ `outputStyles` ਚੋਣ ਨੂੰ ਇਸ ਸਵਿੱਚ ਉੱਤੇ ਤਰਜੀਹ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ, ਨੂੰ ਸਮਰੱਥ ਕਰਨਾ** ਵਾਰਤਕ ਗੱਦ** ਆਉਟਪੁੱਟ ਸ਼ੈਲੀ ਉਸੇ ਬਲਾਕ ਨੂੰ ਇੰਜੈਕਟ ਕਰਦੀ ਹੈ (ਹੇਠਾਂ ਆਉਟਪੁੱਟ ਸਟਾਈਲ ਦੇਖੋ)।
 
-### Output Styles (ਕੈਟਾਲੌਗ)
+### ਆਉਟਪੁੱਟ ਸਟਾਈਲ (ਕੈਟਲਾਗ)
 
-ਉੱਪਰ ਦਿੱਤਾ Caveman output mode **legacy single-style path** ਹੈ। Phase 4 ਨੇ ਇਸਨੂੰ
-composable output styles ਦੇ ਇੱਕ ਕੈਟਾਲੌਗ ਵਿੱਚ ਆਮ ਕੀਤਾ: `OUTPUT_STYLE_CATALOG`,
-`open-sse/services/compression/outputStyles/catalog.ts` ਵਿੱਚ। ਹਰ style ਇੱਕ system-prompt
-ਹਦਾਇਤ ਹੈ ਜੋ ਮਾਡਲ ਨੂੰ ਖੁਦ ਘੱਟ ਮਹਿੰਗਾ ਆਉਟਪੁੱਟ ਦੇਣ ਲਈ ਕਹਿੰਦੀ ਹੈ; styles ਨੂੰ
-ਇਕੱਠੇ ਚਾਲੂ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ ਅਤੇ ਉਹ catalog ਕ੍ਰਮ ਵਿੱਚ inject ਹੁੰਦੇ ਹਨ।
+ਉੱਪਰ Caveman ਆਉਟਪੁੱਟ ਮੋਡ ਹੈ** ਵਿਰਾਸਤੀ ਸਿੰਗਲ-ਸ਼ੈਲੀ ਮਾਰਗ** . ਫੇਜ਼ 4 ਨੇ ਇਸਨੂੰ ਕੰਪੋਸੇਬਲ ਆਉਟਪੁੱਟ ਸਟਾਈਲ ਦੇ ਇੱਕ ਕੈਟਾਲਾਗ ਵਿੱਚ ਸਧਾਰਣ ਕੀਤਾ: `open-sse/services/compression/outputStyles/catalog.ts` ਵਿੱਚ `OUTPUT_STYLE_CATALOG` । ਹਰ ਸ਼ੈਲੀ ਇੱਕ ਸਿਸਟਮ-ਪ੍ਰੋਂਪਟ ਹਦਾਇਤ ਹੈ ਜੋ ਮਾਡਲ ਨੂੰ ਸਸਤੀ ਆਉਟਪੁੱਟ ਲਈ ਪੁੱਛਦੀ ਹੈ; ਸਟਾਈਲ ਇਕੱਠੇ ਯੋਗ ਕੀਤੇ ਜਾ ਸਕਦੇ ਹਨ ਅਤੇ ਕੈਟਾਲਾਗ ਕ੍ਰਮ ਵਿੱਚ ਇੰਜੈਕਟ ਕੀਤੇ ਜਾ ਸਕਦੇ ਹਨ।
 
-| Style                          | `id`            | ਇਹ ਕੀ ਕਰਦਾ ਹੈ                                                                                                                                                                                                                                                 | ਹਦਾਇਤ ਦੀਆਂ ਭਾਸ਼ਾਵਾਂ                           |
-| ------------------------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| ਸੰਖੇਪ ਗੱਦ                      | `terse-prose`   | Filler/articles/hedging ਹਟਾਓ; ਤਕਨੀਕੀ ਤੱਤ ਬਿਲਕੁਲ ਸਹੀ ਰੱਖੋ। legacy caveman output mode ਵਾਲਾ ਹੀ ਪਾਠ (ਹਵਾਲਾ ਦਿੱਤਾ ਗਿਆ ਹੈ, ਮੁੜ ਲਿਖਿਆ ਨਹੀਂ)।                                                                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| ਘੱਟ code                       | `less-code`     | YAGNI ਪੌੜੀ: ਸਭ ਤੋਂ ਛੋਟਾ ਕਾਰਗਰ ਬਦਲਾਅ, ਬਿਨਾਂ ਮੰਗੀਆਂ abstractions ਨਹੀਂ।                                                                                                                                                                                          | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ponytail (ਆਲਸੀ senior dev)     | `ponytail`      | "ਸਭ ਤੋਂ ਵਧੀਆ code ਉਹ ਹੈ ਜੋ ਕਦੇ ਲਿਖਿਆ ਹੀ ਨਾ ਗਿਆ ਹੋਵੇ": reuse > rewrite, root cause > symptom, ਸਭ ਤੋਂ ਛੋਟਾ ਕਾਰਗਰ diff।                                                                                                                                          | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| ਮੈਨੂੰ ADHD ਹੈ (action-first)   | `i-have-adhd`   | ਪਹਿਲਾਂ ਕਾਰਵਾਈ (ਗੱਦ ਤੋਂ ਪਹਿਲਾਂ command/path/snippet), ਨੰਬਰਬੱਧ ਸੀਮਿਤ ਕਦਮ, ਸਿਰਫ਼ ਇੱਕ ਠੋਸ ਅਗਲਾ ਕਦਮ, ਕੋਈ preamble/recap/closers ਨਹੀਂ। [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT) ਤੋਂ ਅਨੁਕੂਲਿਤ।                                              | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Antislop UI filter             | `antislop-ui`   | ਹਰ visual technique ਨੂੰ ਮਕਸਦ ਦੀ ਜਾਂਚ ਪਾਸ ਕਰਨੀ ਲਾਜ਼ਮੀ ਹੈ (hierarchy, identity, readability); ਕੋਈ default gradients/glass/glow ਨਹੀਂ, ਸੀਮਿਤ palette, ਕੋਈ template layouts ਨਹੀਂ। ਦੋਵੇਂ antislop styles no-dead-controls / no-fabricated-claims boundary ਜੋੜਦੇ ਹਨ। | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Antislop copy ਅਤੇ human filter | `antislop-copy` | ਖਾਸ copy (ਕੋਈ em dash, generic CTAs, buzzwords, chatbot closers ਜਾਂ ਘੜੇ ਹੋਏ ਤੱਥ ਨਹੀਂ), ਨਾਲ ਹੀ ਲੋਕਾਂ ਲਈ ਨਿਯਮ: WCAG AA contrast, ਦਿਖਾਈ ਦੇਣ ਵਾਲਾ focus, keyboard reach, empty/loading/error states, mobile reflow।                                               | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| ਸੰਖੇਪ CJK (文言)               | `terse-cjk`     | `full`/`ultra` ਜਵਾਬ Classical Chinese (文言) ਵਿੱਚ; `lite` ਸਿਰਫ਼ function words, ਸ਼ਿਸ਼ਟਾਚਾਰਕ ਸ਼ਬਦਾਂ ਜਾਂ ਸਜਾਵਟ ਤੋਂ ਬਿਨਾਂ ਸੰਖੇਪ ਜਵਾਬ ਮੰਗਦਾ ਹੈ।                                                                                                                   | zh (locale-gated, ਹੇਠਾਂ ਵੇਖੋ)                 |
+| ਸ਼ੈਲੀ                          | `id`            | ਇਹ ਕੀ ਕਰਦਾ ਹੈ                                                                                                                                                                                                                                     | ਨਿਰਦੇਸ਼ ਭਾਸ਼ਾਵਾਂ                              |
+| ------------------------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| ਵਾਰਤਕ ਗੱਦ                      | `terse-prose`   | filler/articles/hedging ਸੁੱਟੋ; ਤਕਨੀਕੀ ਪਦਾਰਥ ਨੂੰ ਸਹੀ ਰੱਖੋ। ਪੁਰਾਤਨ ਕੇਵਮੈਨ ਆਉਟਪੁੱਟ ਮੋਡ ਦੇ ਰੂਪ ਵਿੱਚ ਸਮਾਨ ਟੈਕਸਟ (ਹਵਾਲਾ ਦਿੱਤਾ ਗਿਆ, ਦੁਬਾਰਾ ਟਾਈਪ ਨਹੀਂ ਕੀਤਾ ਗਿਆ)।                                                                                          | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| ਘੱਟ ਕੋਡ                        | `less-code`     | YAGNI ਪੌੜੀ: ਸਭ ਤੋਂ ਛੋਟੀ ਕਾਰਜਸ਼ੀਲ ਤਬਦੀਲੀ, ਕੋਈ ਬੇਲੋੜੀ ਐਬਸਟਰੈਕਸ਼ਨ ਨਹੀਂ।                                                                                                                                                                              | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| ਪੋਨੀਟੇਲ (ਆਲਸੀ ਸੀਨੀਅਰ ਦੇਵ)      | `ponytail`      | "ਸਭ ਤੋਂ ਵਧੀਆ ਕੋਡ ਉਹ ਕੋਡ ਹੈ ਜੋ ਕਦੇ ਨਹੀਂ ਲਿਖਿਆ ਜਾਂਦਾ": ਦੁਬਾਰਾ ਵਰਤੋਂ > ਰੀਰਾਈਟ, ਰੂਟ ਕਾਰਨ > ਲੱਛਣ, ਛੋਟਾ ਕੰਮ ਕਰਨ ਵਾਲਾ ਅੰਤਰ।                                                                                                                              | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| ਮੇਰੇ ਕੋਲ ADHD (ਐਕਸ਼ਨ-ਪਹਿਲਾ) ਹੈ | `i-have-adhd`   | ਐਕਸ਼ਨ ਫਸਟ (ਗਦ ਤੋਂ ਪਹਿਲਾਂcommand/path/snippet ), ਸੰਖਿਆਬੱਧ ਬਾਊਂਡਡ ਸਟੈਪਸ, ONE ਕੰਕਰੀਟ ਅਗਲਾ ਕਦਮ, [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT) ਤੋਂ ਕੋਈ preamble/recap/closers. ਅਨੁਕੂਲਿਤ ਨਹੀਂ।                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| ਐਂਟੀਸਲੋਪ UI ਫਿਲਟਰ              | `antislop-ui`   | ਹਰੇਕ ਵਿਜ਼ੂਅਲ ਤਕਨੀਕ ਨੂੰ ਇੱਕ ਮਕਸਦ ਟੈਸਟ ਪਾਸ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ (ਪਦਨਾਮੀ, ਪਛਾਣ, ਪੜ੍ਹਨਯੋਗਤਾ); ਕੋਈ ਡਿਫੌਲਟ gradients/glass/glow, ਕੈਪਡ ਪੈਲੇਟ ਨਹੀਂ, ਕੋਈ ਟੈਂਪਲੇਟ ਲੇਆਉਟ ਨਹੀਂ। ਦੋਵੇਂ ਐਂਟੀਸਲੋਪ ਸਟਾਈਲ ਇੱਕ ਨੋ-ਡੈੱਡ-ਕੰਟਰੋਲ / ਨੋ-ਫੈਬਰੀਕੇਟਿਡ-ਦਾਅਵਿਆਂ ਦੀ ਸੀਮਾ ਜੋੜਦੀਆਂ ਹਨ। | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| ਐਂਟੀਸਲੌਪ ਕਾਪੀ ਅਤੇ ਮਨੁੱਖੀ ਫਿਲਟਰ | `antislop-copy` | ਖਾਸ ਕਾਪੀ (ਕੋਈ em ਡੈਸ਼, ਆਮ CTAs, buzzwords, chatbot closers, invented facts) ਪਲੱਸ ਲੋਕ ਨਿਯਮ: WCAG AA ਕੰਟ੍ਰਾਸਟ, ਦਿਖਣਯੋਗ ਫੋਕਸ, ਕੀਬੋਰਡ ਪਹੁੰਚ, empty/loading/error ਸਟੇਟਸ, ਮੋਬਾਈਲ ਰੀਫਲੋ।                                                                 | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Terse CJK (文言)               | `terse-cjk`     | ਕਲਾਸੀਕਲ ਚੀਨੀ (文言) ਵਿੱਚ `full`/`ultra` ਜਵਾਬ; `lite` ਕੇਵਲ ਫੰਕਸ਼ਨ ਸ਼ਬਦਾਂ, ਪ੍ਰਸੰਨਤਾ ਜਾਂ ਸ਼ਿੰਗਾਰ ਤੋਂ ਬਿਨਾਂ ਸੰਖੇਪ ਜਵਾਬਾਂ ਲਈ ਪੁੱਛਦਾ ਹੈ।                                                                                                                | zh (ਲੋਕੇਲ-ਗੇਟਿਡ, ਹੇਠਾਂ ਦੇਖੋ)                  |
 
-ਹਰ style ਤਿੰਨ intensity levels — `lite`, `full`, `ultra` — ਨਾਲ ਆਉਂਦਾ ਹੈ, ਅਤੇ ਹਰ level
-ਸਾਂਝੀ boundaries clause (`outputMode.ts` ਵਿੱਚ `SHARED_BOUNDARIES`) ਨਾਲ ਖਤਮ ਹੁੰਦਾ ਹੈ, ਜੋ
-code blocks, file paths, commands, errors ਅਤੇ URLs ਨੂੰ ਬਿਲਕੁਲ ਸਹੀ ਰੱਖਦਾ ਹੈ। `terse-prose` ਅਤੇ
-`terse-cjk` level texts ਉਸ ਸੂਚੀ ਵਿੱਚ identifiers ਵੀ ਜੋੜਦੇ ਹਨ।
+ਹਰ ਸ਼ੈਲੀ ਤਿੰਨ ਤੀਬਰਤਾ ਪੱਧਰਾਂ — `lite`, `full`, `ultra` — ਭੇਜਦੀ ਹੈ ਅਤੇ ਹਰ ਪੱਧਰ ਸਾਂਝੀ ਸੀਮਾ ਧਾਰਾ ( `outputMode.ts` ਵਿੱਚ `SHARED_BOUNDARIES` ) ਨਾਲ ਖਤਮ ਹੁੰਦਾ ਹੈ, ਜੋ ਕੋਡ ਬਲਾਕਾਂ, ਫਾਈਲ ਮਾਰਗਾਂ, ਕਮਾਂਡਾਂ, ਗਲਤੀਆਂ ਅਤੇ URLs ਨੂੰ ਸਟੀਕ ਰੱਖਦਾ ਹੈ। `terse-prose` ਅਤੇ `terse-cjk` ਪੱਧਰ ਦੇ ਟੈਕਸਟ ਉਸ ਸੂਚੀ ਵਿੱਚ ਪਛਾਣਕਰਤਾਵਾਂ ਨੂੰ ਜੋੜਦੇ ਹਨ।
 
-`terse-cjk` ਦੋ ਥਾਵਾਂ ਉੱਤੇ `zh` ਲਈ locale-gated ਹੈ। Compression Settings ਪੰਨਾ
-ਇਸ ਦੀ row ਸਿਰਫ਼ ਉਦੋਂ ਦਿਖਾਉਂਦਾ ਹੈ ਜਦੋਂ dashboard UI language ਚੀਨੀ (`zh-CN` ਜਾਂ `zh-TW`) ਹੋਵੇ, ਅਤੇ
-`applyOutputStyles()` ਇਸਨੂੰ ਸਿਰਫ਼ ਉਦੋਂ inject ਕਰਦਾ ਹੈ ਜਦੋਂ ਬੇਨਤੀ ਦੀ resolved language (ਹੇਠਾਂ Language
-selection ਵੇਖੋ) `zh` ਹੋਵੇ। Row ਨੂੰ ਲੁਕਾਉਣ ਨਾਲ saved `terse-cjk` selection ਸਾਫ਼ ਨਹੀਂ ਹੁੰਦੀ:
-settings API ਕਿਸੇ ਵੀ style id ਨੂੰ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ, ਅਤੇ ਪੰਨੇ ਉੱਤੇ ਹੋਰ styles ਨੂੰ save ਕਰਨ ਨਾਲ ਇਹ ਬਣੀ ਰਹਿੰਦੀ ਹੈ। ਬੇਨਤੀ ਦੇ
-ਸਮੇਂ, `applyOutputStyles()` language check ਹੀ ਇਕੱਲਾ locale gate ਹੈ।
+`terse-cjk` ਦੋ ਥਾਵਾਂ 'ਤੇ `zh` ਨੂੰ ਲੋਕੇਲ-ਗੇਟ ਕੀਤਾ ਗਿਆ ਹੈ। ਕੰਪਰੈਸ਼ਨ ਸੈਟਿੰਗਜ਼ ਪੰਨਾ ਆਪਣੀ ਕਤਾਰ ਨੂੰ ਸਿਰਫ਼ ਉਦੋਂ ਹੀ ਸੂਚੀਬੱਧ ਕਰਦਾ ਹੈ ਜਦੋਂ ਡੈਸ਼ਬੋਰਡ UI ਭਾਸ਼ਾ ਚੀਨੀ ਹੁੰਦੀ ਹੈ (`zh-CN` ਜਾਂ `zh-TW`), ਅਤੇ `applyOutputStyles()` ਇਸਨੂੰ ਉਦੋਂ ਹੀ ਇੰਜੈਕਟ ਕਰਦਾ ਹੈ ਜਦੋਂ ਬੇਨਤੀ ਦੀ ਹੱਲ ਕੀਤੀ ਭਾਸ਼ਾ (ਹੇਠਾਂ ਭਾਸ਼ਾ ਦੀ ਚੋਣ ਦੇਖੋ) `zh` ਹੁੰਦੀ ਹੈ। ਕਤਾਰ ਨੂੰ ਛੁਪਾਉਣਾ ਇੱਕ ਸੁਰੱਖਿਅਤ ਕੀਤੀ `terse-cjk` ਚੋਣ ਨੂੰ ਸਾਫ਼ ਨਹੀਂ ਕਰਦਾ ਹੈ: ਸੈਟਿੰਗਜ਼ API ਕਿਸੇ ਵੀ ਸ਼ੈਲੀ ਆਈਡੀ ਨੂੰ ਸਵੀਕਾਰ ਕਰਦੀ ਹੈ, ਅਤੇ ਪੰਨੇ 'ਤੇ ਹੋਰ ਸ਼ੈਲੀਆਂ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰਨਾ ਇਸ ਨੂੰ ਰੱਖਦਾ ਹੈ। ਬੇਨਤੀ ਦੇ ਸਮੇਂ, `applyOutputStyles()` ਭਾਸ਼ਾ ਦੀ ਜਾਂਚ ਸਿਰਫ ਲੋਕੇਲ ਗੇਟ ਹੈ।
 
 #### ਇੰਜੈਕਸ਼ਨ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) ਚੋਣ ਨੂੰ
-ਕੈਟਾਲਾਗ ਦੇ ਮੁਕਾਬਲੇ ਹੱਲ ਕਰਦਾ ਹੈ (ਅਣਜਾਣ ids ਅਤੇ locale ਨਾਲ ਮੇਲ ਨਾ ਖਾਣ ਵਾਲੀਆਂ styles ਨੂੰ
-ਹਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ, ਇਹ ਕਦੇ ਵੀ ਗਲਤੀ ਨਹੀਂ ਹੁੰਦੀ; ਅਜਿਹੀ ਚੋਣ ਜੋ ਕਿਸੇ style ਤੱਕ ਹੱਲ ਨਹੀਂ ਹੁੰਦੀ,
-body ਨੂੰ ਬਿਨਾਂ ਬਦਲੇ ਛੱਡ ਦਿੰਦੀ ਹੈ ਅਤੇ `no_styles` ਵਜੋਂ ਛੱਡੀ ਜਾਂਦੀ ਹੈ), ਚੁਣੀਆਂ ਹੋਈਆਂ ਹਦਾਇਤਾਂ ਨੂੰ
-ਕੈਟਾਲਾਗ ਕ੍ਰਮ ਵਿੱਚ ਜੋੜਦਾ ਹੈ,
-boundaries clause ਨੂੰ **ਇੱਕ ਵਾਰ** ਜੋੜਦਾ ਹੈ (ਨਾਲ ਹੀ safety clause, `SAFETY_BOUNDARIES` ਜਾਂ ਇਸਦਾ
-ਅਨੁਵਾਦ, ਜਦੋਂ `less-code` ਜਾਂ `ponytail` ਚੁਣਿਆ ਗਿਆ ਹੋਵੇ), ਅਤੇ block ਨੂੰ ਇੱਕੋ
-idempotency marker (`[OmniRoute Output Styles]`) ਨਾਲ ਸ਼ੁਰੂ ਕਰਦਾ ਹੈ, ਇਸ ਲਈ ਇਸਨੂੰ ਮੁੜ ਲਾਗੂ ਕਰਨਾ
-ਕੋਈ ਤਬਦੀਲੀ ਨਹੀਂ ਕਰਦਾ। ਜਦੋਂ ਹੱਲ ਕੀਤੀ ਗਈ ਭਾਸ਼ਾ (ਹੇਠਾਂ Language selection ਵੇਖੋ) ਦਾ ਅਨੁਵਾਦ
-ਉਪਲਬਧ ਹੋਵੇ, ਤਾਂ ਅੰਗਰੇਜ਼ੀ ਦੀ ਥਾਂ ਸਥਾਨਕ ਬਣਾਈ ਹਦਾਇਤ ਸ਼ਾਮਲ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) ਕੈਟਾਲਾਗ ਦੇ ਵਿਰੁੱਧ ਚੋਣ ਨੂੰ ਹੱਲ ਕਰਦਾ ਹੈ (ਅਣਜਾਣ ਆਈਡੀ ਅਤੇ ਲੋਕੇਲ-ਮੇਲ ਖਾਂਦੀਆਂ ਸ਼ੈਲੀਆਂ ਛੱਡ ਦਿੱਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਕਦੇ ਕੋਈ ਗਲਤੀ ਨਹੀਂ ਹੁੰਦੀ; ਇੱਕ ਚੋਣ ਜੋ ਕਿਸੇ ਸ਼ੈਲੀ ਨੂੰ ਹੱਲ ਕਰਦੀ ਹੈ, ਬਾਡੀ ਨੂੰ ਬਦਲਿਆ ਨਹੀਂ ਛੱਡਦੀ, `no_styles` ਵਜੋਂ ਛੱਡੀ ਜਾਂਦੀ ਹੈ), ਕੈਟਾਲਾਗ ਕ੍ਰਮ ਵਿੱਚ ਚੁਣੀਆਂ ਗਈਆਂ ਹਦਾਇਤਾਂ ਨੂੰ ਜੋੜਦਾ ਹੈ, ਸੀਮਾਵਾਂ ਦੀ ਧਾਰਾ ਜੋੜਦਾ ਹੈ** ਇੱਕ ਵਾਰ** (ਨਾਲ ਹੀ ਸੁਰੱਖਿਆ ਧਾਰਾ, `SAFETY_BOUNDARIES` ਜਾਂ ਇਸਦਾ ਅਨੁਵਾਦ, ਜਦੋਂ `less-code` ਜਾਂ `ponytail` ਚੁਣਿਆ ਜਾਂਦਾ ਹੈ), ਅਤੇ ਬਲਾਕ ਨੂੰ ਇੱਕ ਸਿੰਗਲ ਆਈਡੈਮਪੋਟੈਂਸੀ ਮਾਰਕਰ (`[OmniRoute Output Styles]`) ਨਾਲ ਸ਼ੁਰੂ ਕਰਦਾ ਹੈ, ਇਸਲਈ ਮੁੜ-ਅਪਲਾਈ ਕਰਨਾ ਇੱਕ ਨੋ-ਓਪ ਹੈ। ਜਦੋਂ ਹੱਲ ਕੀਤੀ ਭਾਸ਼ਾ (ਹੇਠਾਂ ਭਾਸ਼ਾ ਦੀ ਚੋਣ ਦੇਖੋ) ਦਾ ਅਨੁਵਾਦ ਹੁੰਦਾ ਹੈ, ਤਾਂ ਅੰਗਰੇਜ਼ੀ ਦੀ ਬਜਾਏ ਸਥਾਨਿਕ ਹਦਾਇਤਾਂ ਦਾ ਟੀਕਾ ਲਗਾਇਆ ਜਾਂਦਾ ਹੈ।
 
-ਗੈਰ-ਖਾਲੀ `messages` array ਵਾਲੀ body ਉੱਤੇ, idempotency ਜਾਂਚ content bypass ਤੋਂ ਪਹਿਲਾਂ
-ਚੱਲਦੀ ਹੈ: ਜਦੋਂ `[OmniRoute Output Styles]` marker ਪਹਿਲਾਂ ਹੀ top-level
-`system` field (ਇੱਕ string ਜਾਂ content-block array) ਵਿੱਚ, ਜਾਂ string content ਵਾਲੇ system
-message ਵਿੱਚ ਮੌਜੂਦ ਹੋਵੇ, ਤਾਂ body ਨੂੰ `already_applied` ਵਜੋਂ ਬਿਨਾਂ ਬਦਲੇ ਛੱਡ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ
-ਅਤੇ ਕੋਈ keyword ਜਾਂਚ ਨਹੀਂ ਚੱਲਦੀ। ਨਹੀਂ ਤਾਂ content bypass
-(`open-sse/services/compression/outputMode.ts` ਵਿੱਚ `shouldBypassCavemanOutputMode()`)
-ਆਖਰੀ ਤਿੰਨ messages ਦੇ text ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ, ਭਾਵੇਂ ਉਨ੍ਹਾਂ ਦੀ role ਕੋਈ ਵੀ ਹੋਵੇ, ਅਤੇ ਜਦੋਂ ਉਹ
-text ਇਸਦੇ security, irreversible-action ਜਾਂ clarification keywords ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੋਵੇ,
-ਜਾਂ ਕ੍ਰਮ-ਸੰਵੇਦਨਸ਼ੀਲ sequence ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੋਵੇ ਤਾਂ ਪੂਰੇ turn ਲਈ styles ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ:
-`first`, `then`, `after that`, `before`, `rollback` ਜਾਂ `backup`, ਜਿਸ ਤੋਂ ਬਾਅਦ 240
-characters ਦੇ ਅੰਦਰ `delete`, `drop`, `migrate`, `deploy` ਜਾਂ `release` ਆਵੇ। bypass ਉਦੋਂ
-ਚੱਲਦਾ ਹੈ ਜਦੋਂ **Auto-Clarity Bypass** toggle
-(`cavemanOutputMode.autoClarity`, ਮੂਲ ਰੂਪ ਵਿੱਚ ਚਾਲੂ) ਚਾਲੂ ਹੋਵੇ; toggle ਨੂੰ ਬੰਦ ਕਰਨ ਨਾਲ
-keyword ਜਾਂਚ ਛੱਡ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ।
+ਇੱਕ ਗੈਰ-ਖਾਲੀ `messages` ਐਰੇ ਵਾਲੇ ਸਰੀਰ 'ਤੇ, ਸਮਗਰੀ ਦੇ ਬਾਈਪਾਸ ਤੋਂ ਪਹਿਲਾਂ ਆਈਡੈਮਪੋਟੈਂਸੀ ਜਾਂਚ ਚੱਲਦੀ ਹੈ: ਜਦੋਂ `[OmniRoute Output Styles]` ਮਾਰਕਰ ਪਹਿਲਾਂ ਤੋਂ ਹੀ ਉੱਚ-ਪੱਧਰੀ `system` ਖੇਤਰ (ਇੱਕ ਸਟ੍ਰਿੰਗ ਜਾਂ ਇੱਕ ਸਮੱਗਰੀ-ਬਲਾਕ ਐਰੇ) ਵਿੱਚ ਜਾਂ ਸਟ੍ਰਿੰਗ ਸਮੱਗਰੀ ਵਾਲੇ ਇੱਕ ਸਿਸਟਮ ਸੰਦੇਸ਼ ਵਿੱਚ ਹੁੰਦਾ ਹੈ, ਤਾਂ ਸਰੀਰ ਨੂੰ `already_applied` ਦੇ ਤੌਰ 'ਤੇ ਬਦਲਿਆ ਨਹੀਂ ਜਾਂਦਾ ਹੈ ਅਤੇ ਕੋਈ ਕੀਵਰਡ ਜਾਂਚ ਨਹੀਂ ਚੱਲਦੀ ਹੈ। ਨਹੀਂ ਤਾਂ ਇੱਕ ਸਮਗਰੀ ਬਾਈਪਾਸ (`shouldBypassCavemanOutputMode()` in `open-sse/services/compression/outputMode.ts`) ਪਿਛਲੇ ਤਿੰਨ ਸੁਨੇਹਿਆਂ ਦੇ ਟੈਕਸਟ ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ, ਭਾਵੇਂ ਉਹਨਾਂ ਦੀ ਭੂਮਿਕਾ ਜੋ ਵੀ ਹੋਵੇ, ਅਤੇ ਪੂਰੇ ਮੋੜ ਲਈ ਸਟਾਈਲ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ ਜਦੋਂ ਉਹ ਟੈਕਸਟ ਇਸਦੇ ਸੁਰੱਖਿਆ, ਅਟੱਲ-ਐਕਸ਼ਨ ਜਾਂ ਸਪਸ਼ਟੀਕਰਨ ਕੀਵਰਡਸ, ਜਾਂ ਇੱਕ ਆਰਡਰ-ਸੰਵੇਦਨਸ਼ੀਲ ਕ੍ਰਮ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ: `first`, `then`, , `after that` `before`, `delete`, `drop`, `rollback` ਜਾਂ `backup` `migrate` `deploy` ਅੱਖਰਾਂ ਦੇ ਅੰਦਰ `release` ਬਾਈਪਾਸ ਚੱਲਦਾ ਹੈ ਜਦੋਂ ਕਿ** ਸਵੈ-ਸਪਸ਼ਟਤਾ ਬਾਈਪਾਸ** ਟੌਗਲ (`cavemanOutputMode.autoClarity`, ਮੂਲ ਰੂਪ ਵਿੱਚ) ਚਾਲੂ ਹੈ; ਟੌਗਲ ਨੂੰ ਬੰਦ ਕਰਨਾ ਕੀਵਰਡ ਜਾਂਚ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ।
 
-ਜਦੋਂ bypass turn ਨੂੰ ਅੱਗੇ ਜਾਣ ਦਿੰਦਾ ਹੈ, ਤਾਂ `placeSystemInstruction()` (ਉਸੇ file ਵਿੱਚ),
-ਜੋ ਕਦੇ ਵੀ ਨਵਾਂ `messages[0]` ਨਹੀਂ ਬਣਾਉਂਦਾ, block ਨੂੰ ਹੇਠਾਂ ਦਿੱਤਿਆਂ ਵਿੱਚੋਂ ਸਭ ਤੋਂ ਪਹਿਲਾਂ
-ਮਿਲਣ ਵਾਲੀ ਥਾਂ ਉੱਤੇ ਰੱਖਦਾ ਹੈ:
+ਜਦੋਂ ਬਾਈਪਾਸ ਲੰਘਣ ਦਿੰਦਾ ਹੈ, `placeSystemInstruction()` (ਇੱਕੋ ਫਾਈਲ), ਜੋ ਕਦੇ ਵੀ ਨਵਾਂ `messages[0]` ਨਹੀਂ ਬਣਾਉਂਦਾ, ਬਲਾਕ ਨੂੰ ਇਹਨਾਂ ਵਿੱਚੋਂ ਪਹਿਲੇ ਵਿੱਚ ਰੱਖਦਾ ਹੈ:
 
-1. string content ਵਾਲਾ ਸ਼ੁਰੂਆਤੀ system message: block ਨੂੰ ਇਸਦੇ text ਤੋਂ ਬਾਅਦ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ।
-2. top-level `system` field: block ਨੂੰ string ਦੇ text ਤੋਂ ਬਾਅਦ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ, ਜਾਂ
-   content-block array ਵਿੱਚ ਨਵੇਂ text block ਵਜੋਂ ਸ਼ਾਮਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
-3. string content ਵਾਲਾ ਬਾਅਦ ਵਿੱਚ ਆਉਣ ਵਾਲਾ ਪਹਿਲਾ system message: block ਨੂੰ ਇਸਦੇ
-   text ਤੋਂ ਬਾਅਦ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ।
-4. ਉਪਰੋਕਤ ਵਿੱਚੋਂ ਕੋਈ ਨਹੀਂ: block ਨੂੰ `messages` ਦੇ ਅੰਤ ਵਿੱਚ ਇੱਕ ਨਵੇਂ system message ਵਿੱਚ
-   ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ।
+1. ਸਤਰ ਸਮੱਗਰੀ ਦੇ ਨਾਲ ਇੱਕ ਪ੍ਰਮੁੱਖ ਸਿਸਟਮ ਸੁਨੇਹਾ: ਬਲਾਕ ਇਸਦੇ ਟੈਕਸਟ ਤੋਂ ਬਾਅਦ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ।
+2. ਸਿਖਰ-ਪੱਧਰੀ `system` ਖੇਤਰ: ਬਲਾਕ ਨੂੰ ਇੱਕ ਸਤਰ ਦੇ ਟੈਕਸਟ ਤੋਂ ਬਾਅਦ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ, ਜਾਂ ਇੱਕ ਸਮੱਗਰੀ-ਬਲਾਕ ਐਰੇ ਵਿੱਚ ਇੱਕ ਨਵੇਂ ਟੈਕਸਟ ਬਲਾਕ ਵਜੋਂ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ।
+3. ਸਤਰ ਸਮੱਗਰੀ ਦੇ ਨਾਲ ਪਹਿਲਾ ਬਾਅਦ ਵਾਲਾ ਸਿਸਟਮ ਸੁਨੇਹਾ: ਬਲਾਕ ਨੂੰ ਇਸਦੇ ਟੈਕਸਟ ਤੋਂ ਬਾਅਦ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ।
+4. ਉਪਰੋਕਤ ਵਿੱਚੋਂ ਕੋਈ ਨਹੀਂ: ਬਲਾਕ `messages` ਦੇ ਅੰਤ ਵਿੱਚ ਇੱਕ ਨਵੇਂ ਸਿਸਟਮ ਸੰਦੇਸ਼ ਵਿੱਚ ਜਾਂਦਾ ਹੈ।
 
-`messages` array ਤੋਂ ਬਿਨਾਂ body ਉੱਤੇ (ਜਾਂ ਖਾਲੀ array ਵਾਲੀ body ਉੱਤੇ), ਕੋਈ content bypass
-ਨਹੀਂ ਚੱਲਦਾ ਅਤੇ top-level `system` field ਦੀ ਜਾਂਚ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ। block ਨੂੰ string
-`instructions` field ਦੇ text ਤੋਂ ਬਾਅਦ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ, ਜਦ ਤੱਕ ਉਸ field ਵਿੱਚ ਪਹਿਲਾਂ ਹੀ
-`[OmniRoute Output Styles]` marker ਨਾ ਹੋਵੇ; ਉਸ ਸਥਿਤੀ ਵਿੱਚ body ਨੂੰ
-`already_applied` ਵਜੋਂ ਬਿਨਾਂ ਬਦਲੇ ਛੱਡ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ। ਜਦੋਂ body ਵਿੱਚ string
-`instructions` field ਨਹੀਂ ਹੁੰਦਾ ਪਰ `input` (ਇੱਕ string ਜਾਂ array) ਮੌਜੂਦ ਹੁੰਦਾ ਹੈ,
-ਤਾਂ block `instructions` ਬਣ ਜਾਂਦਾ ਹੈ ਅਤੇ ਉਸ field ਵਿੱਚ ਮੌਜੂਦ ਕਿਸੇ ਵੀ non-string value
-ਨੂੰ ਬਦਲ ਦਿੰਦਾ ਹੈ। ਅਜਿਹੀ body ਜਿਸ ਵਿੱਚ ਨਾ string `instructions` field ਹੋਵੇ ਅਤੇ ਨਾ ਹੀ
-string ਜਾਂ array `input`, ਉਸਨੂੰ ਬਿਨਾਂ ਬਦਲੇ ਛੱਡ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ `no_messages` ਵਜੋਂ
-skip ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+ਇੱਕ `messages` ਐਰੇ (ਜਾਂ ਖਾਲੀ ਇੱਕ ਦੇ ਨਾਲ) ਦੇ ਬਿਨਾਂ, ਕੋਈ ਵੀ ਸਮੱਗਰੀ ਬਾਈਪਾਸ ਨਹੀਂ ਚੱਲਦੀ ਹੈ ਅਤੇ ਇੱਕ ਉੱਚ-ਪੱਧਰੀ `system` ਖੇਤਰ ਨਾਲ ਸਲਾਹ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਬਲਾਕ ਨੂੰ ਇੱਕ ਸਤਰ `instructions` ਫੀਲਡ ਦੇ ਟੈਕਸਟ ਤੋਂ ਬਾਅਦ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ, ਜਦੋਂ ਤੱਕ ਕਿ ਉਸ ਖੇਤਰ ਵਿੱਚ ਪਹਿਲਾਂ ਹੀ `[OmniRoute Output Styles]` ਮਾਰਕਰ ਸ਼ਾਮਲ ਨਹੀਂ ਹੁੰਦਾ, ਜਿਸ ਸਥਿਤੀ ਵਿੱਚ ਬਾਡੀ ਨੂੰ `already_applied` ਦੇ ਤੌਰ ਤੇ ਬਦਲਿਆ ਨਹੀਂ ਜਾਂਦਾ ਹੈ। ਜਦੋਂ ਬਾਡੀ ਵਿੱਚ ਕੋਈ ਸਟ੍ਰਿੰਗ `instructions` ਫੀਲਡ ਨਹੀਂ ਹੁੰਦੀ ਹੈ ਪਰ ਇਹ `input` (ਇੱਕ ਸਟ੍ਰਿੰਗ ਜਾਂ ਇੱਕ ਐਰੇ) ਰੱਖਦਾ ਹੈ, ਤਾਂ ਬਲਾਕ `instructions` ਬਣ ਜਾਂਦਾ ਹੈ, ਜੋ ਕਿ ਫੀਲਡ ਵਿੱਚ ਰੱਖੇ ਗਏ ਕਿਸੇ ਵੀ ਗੈਰ-ਸਟਰਿੰਗ ਮੁੱਲ ਨੂੰ ਬਦਲਦਾ ਹੈ। ਇੱਕ ਬਾਡੀ ਜਿਸ ਵਿੱਚ ਨਾ ਤਾਂ ਇੱਕ ਸਟ੍ਰਿੰਗ `instructions` ਫੀਲਡ ਹੈ ਅਤੇ ਨਾ ਹੀ ਇੱਕ ਸਟ੍ਰਿੰਗ ਜਾਂ ਐਰੇ `input` ਬਦਲਿਆ ਨਹੀਂ ਛੱਡਿਆ ਗਿਆ ਹੈ ਅਤੇ `no_messages` ਵਜੋਂ ਛੱਡਿਆ ਗਿਆ ਹੈ।
 
-#### ਸਮਰੱਥ ਕਿਵੇਂ ਕਰਨਾ ਹੈ
+#### ਕਿਵੇਂ ਯੋਗ ਕਰਨਾ ਹੈ
 
-dashboard ਵਿੱਚ: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), Output styles ਭਾਗ: ਹਰ style ਲਈ ਇੱਕ row, ਜਿਸ ਵਿੱਚ on/off
-toggle ਅਤੇ level selector ਹੁੰਦਾ ਹੈ। styles ਉਦੋਂ inject ਹੁੰਦੀਆਂ ਹਨ ਜਦੋਂ compression ਖੁਦ
-ਚਾਲੂ ਹੋਵੇ (page ਦਾ master toggle, `enabled`)। **Auto-Clarity Bypass** toggle
-**Caveman** page (`/dashboard/context/caveman`) ਦੇ **Output Mode** card ਵਿੱਚ ਹੈ।
-Programmatically, compression config ਚੋਣ ਨੂੰ ਇਸ ਤਰ੍ਹਾਂ persist ਕਰਦੀ ਹੈ:
+ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ:** ਕੰਪਰੈਸ਼ਨ ਸੰਦਰਭ → ਕੰਪਰੈਸ਼ਨ ਸੈਟਿੰਗਜ਼** (`/dashboard/context/settings`), ਆਉਟਪੁੱਟ ਸਟਾਈਲ ਸੈਕਸ਼ਨ: ਇੱਕ ਕਤਾਰ ਪ੍ਰਤੀ ਸ਼ੈਲੀ ਇੱਕ on/off ਟੌਗਲ ਅਤੇ ਇੱਕ ਪੱਧਰ ਚੋਣਕਾਰ ਨਾਲ। ਸਟਾਈਲ ਇੰਜੈਕਟ ਕਰਦੇ ਹਨ ਜਦੋਂ ਕੰਪਰੈਸ਼ਨ ਖੁਦ ਚਾਲੂ ਹੁੰਦਾ ਹੈ (ਪੰਨੇ ਦਾ ਮਾਸਟਰ ਟੌਗਲ, `enabled`)। ਦ** ਸਵੈ-ਸਪਸ਼ਟਤਾ ਬਾਈਪਾਸ** ਟੌਗਲ 'ਤੇ ਹੈ** ਕੈਵਮੈਨ** ਪੰਨਾ (`/dashboard/context/caveman`), ਇਸਦੇ ਵਿੱਚ** ਆਉਟਪੁੱਟ ਮੋਡ** ਕਾਰਡ. ਪ੍ਰੋਗਰਾਮੇਟਿਕ ਤੌਰ 'ਤੇ, ਸੰਕੁਚਨ ਸੰਰਚਨਾ ਚੋਣ ਨੂੰ ਇਸ ਤਰ੍ਹਾਂ ਜਾਰੀ ਰੱਖਦੀ ਹੈ:
 
 ```json
 {
@@ -595,134 +497,50 @@ Programmatically, compression config ਚੋਣ ਨੂੰ ਇਸ ਤਰ੍ਹਾ�
 }
 ```
 
-Back-compat: ਜਦੋਂ `outputStyles` ਖਾਲੀ ਹੁੰਦਾ ਹੈ, legacy
-`cavemanOutputMode.enabled` setting, `cavemanOutputMode.intensity` ਉੱਤੇ `terse-prose`
-ਨਾਲ map ਹੁੰਦੀ ਹੈ। ਫਿਰ block `[OmniRoute Output Styles]` marker ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ, ਜਦਕਿ
-legacy `applyCavemanOutputMode()` injector `[OmniRoute Caveman Output Mode]` ਲਿਖਦਾ ਸੀ।
-marker ਤੋਂ ਹੇਠਾਂ, text en, pt-BR, es, de, fr, it, ru, id ਅਤੇ vi ਵਿੱਚ legacy injection
-ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ; ja ਅਤੇ zh ਵਿੱਚ boundaries clause ਤੋਂ ਪਹਿਲਾਂ ਇੱਕ ਵਾਧੂ space ਹੁੰਦੀ ਹੈ।
-`terse-prose` ਦਾ pt-BR, es, de, fr, it, ru, zh, ja, id ਅਤੇ vi ਵਿੱਚ ਅਨੁਵਾਦ ਹੁੰਦਾ ਹੈ,
-ਇਸ ਲਈ ਜਿਸ request ਦੀ resolved language `hu` ਹੋਵੇ, ਉਸਨੂੰ ਉੱਥੇ ਅੰਗਰੇਜ਼ੀ text ਮਿਲਦਾ ਹੈ
-ਜਿੱਥੇ legacy injector ਇਸਦਾ Hungarian text ਵਰਤਦਾ ਸੀ।
+ਬੈਕ-ਕੰਪੈਟ: ਜਦੋਂ ਕਿ `outputStyles` ਖਾਲੀ ਹੈ, ਵਿਰਾਸਤੀ `cavemanOutputMode.enabled` ਸੈਟਿੰਗ `cavemanOutputMode.intensity` ਤੇ `terse-prose` 'ਤੇ ਨਕਸ਼ੇ ਬਣਾਉਂਦੀ ਹੈ। ਬਲਾਕ ਫਿਰ `[OmniRoute Output Styles]` ਮਾਰਕਰ ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ, ਜਿੱਥੇ ਵਿਰਾਸਤੀ `applyCavemanOutputMode()` ਇੰਜੈਕਟਰ ਨੇ `[OmniRoute Caveman Output Mode]` ਲਿਖਿਆ ਸੀ। ਮਾਰਕਰ ਦੇ ਹੇਠਾਂ, ਟੈਕਸਟ en, pt-BR, es, de, fr, it, ru, id ਅਤੇ vi ਵਿੱਚ ਵਿਰਾਸਤੀ ਇੰਜੈਕਸ਼ਨ ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ; ja ਅਤੇ zh ਵਿੱਚ ਇਹ ਸੀਮਾਵਾਂ ਦੀ ਧਾਰਾ ਤੋਂ ਪਹਿਲਾਂ ਇੱਕ ਵਾਧੂ ਥਾਂ ਰੱਖਦਾ ਹੈ। `terse-prose` pt-BR, es, de, fr, it, ru, zh, ja, id ਅਤੇ vi ਵਿੱਚ ਅਨੁਵਾਦ ਕਰਦਾ ਹੈ, ਇਸਲਈ ਇੱਕ ਬੇਨਤੀ ਜਿਸਦੀ ਹੱਲ ਕੀਤੀ ਭਾਸ਼ਾ `hu` ਹੈ ਅੰਗਰੇਜ਼ੀ ਟੈਕਸਟ ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ ਜਿੱਥੇ ਵਿਰਾਸਤੀ ਇੰਜੈਕਟਰ ਨੇ ਇਸਦੀ ਹੰਗਰੀ ਭਾਸ਼ਾ ਦੀ ਵਰਤੋਂ ਕੀਤੀ ਹੈ।
 
-Output-style language selection (`outputStyles/apply.ts` ਵਿੱਚ
-`resolveOutputStyleLanguage()`): `languageConfig.enabled` ਚਾਲੂ ਹੋਣ ਉੱਤੇ, `autoDetect`
-request ਦੀ `messages` array ਵਿੱਚ text ਵਾਲੇ ਸਭ ਤੋਂ ਨਵੇਂ user message ਦਾ sample ਲੈਂਦਾ ਹੈ
-(string content, ਜਾਂ ਇਸਦੇ content parts ਦਾ `text`) ਅਤੇ ਇਸ ਉੱਤੇ Caveman engine ਦਾ detector
-(`detectCompressionLanguage()`) ਚਲਾਉਂਦਾ ਹੈ। Han characters ਅਤੇ ਕੋਈ kana ਨਾ ਰੱਖਣ ਵਾਲੇ
-text ਲਈ detector `zh` ਵਾਪਸ ਕਰਦਾ ਹੈ; ਨਹੀਂ ਤਾਂ ਇਹ `it`, `pt-BR`, `es`, `de`,
-`fr`, `ru`, `ja`, `hu` ਅਤੇ `id` ਵਿੱਚੋਂ ਸਭ ਤੋਂ ਵੱਧ hint matches ਵਾਲੀ language ਵਾਪਸ ਕਰਦਾ
-ਹੈ, ਅਤੇ ਜਦੋਂ ਕੋਈ match ਨਾ ਹੋਵੇ ਤਾਂ `en` ਵਾਪਸ ਕਰਦਾ ਹੈ — ਜਿਸ text ਨੂੰ ਇਹ classify ਨਹੀਂ
-ਕਰ ਸਕਦਾ, ਉਸ ਲਈ English ਵਰਤੀ ਜਾਂਦੀ ਹੈ, `defaultLanguage` ਕਦੇ ਨਹੀਂ, ਅਤੇ styles ਦੇ ਨਾਲ
-`vi` text ਦਿੱਤਾ ਹੋਣ ਦੇ ਬਾਵਜੂਦ `vi` ਕਦੇ detect ਨਹੀਂ ਹੁੰਦੀ। Responses API body ਆਪਣੇ turns
-ਨੂੰ `input` ਵਿੱਚ ਰੱਖਦੀ ਹੈ, ਜਿਸਦਾ sample ਨਹੀਂ ਲਿਆ ਜਾਂਦਾ, ਇਸ ਲਈ ਇਸਨੂੰ ਪਹਿਲਾਂ
-`defaultLanguage`, ਫਿਰ English ਮਿਲਦੀ ਹੈ। ਜਦੋਂ `messages` ਵਿੱਚ ਕਿਸੇ user message ਕੋਲ text
-ਨਾ ਹੋਵੇ, ਜਾਂ `autoDetect` ਬੰਦ ਹੋਵੇ, ਤਾਂ `defaultLanguage` ਲਾਗੂ ਹੁੰਦੀ ਹੈ, ਫਿਰ English।
-`languageConfig.enabled` ਬੰਦ ਹੋਣ ਉੱਤੇ language English ਹੁੰਦੀ ਹੈ — ਜਦ ਤੱਕ request ਉੱਤੇ
-ਕੋਈ compression combo ਲਾਗੂ ਨਾ ਹੋਵੇ (request ਦੇ routing combo ਨੂੰ assign ਕੀਤਾ combo,
-ਜਾਂ built-in stacked pipeline ਲਈ chatCore ਵੱਲੋਂ fallback ਕੀਤਾ default compression
-combo): combo ਲਾਗੂ ਕਰਨ ਨਾਲ ਉਸ request ਲਈ `languageConfig.enabled` ਚਾਲੂ ਹੋ ਜਾਂਦਾ ਹੈ ਅਤੇ
-`defaultLanguage` ਨੂੰ combo ਦੇ language packs ਤੋਂ set ਕੀਤਾ ਜਾਂਦਾ ਹੈ (ਜੇ saved value combo
-ਦੇ packs ਵਿੱਚੋਂ ਇੱਕ ਹੈ ਤਾਂ ਉਹੀ, ਨਹੀਂ ਤਾਂ combo ਦਾ ਪਹਿਲਾ pack, ਜੋ ਮੂਲ ਰੂਪ ਵਿੱਚ `en` ਹੁੰਦਾ
-ਹੈ), ਜਦਕਿ saved `autoDetect` (ਮੂਲ ਰੂਪ ਵਿੱਚ ਚਾਲੂ) ਫਿਰ ਵੀ ਲਾਗੂ ਰਹਿੰਦਾ ਹੈ। Caveman input
-engine ਆਪਣੇ rule-pack ਦੀ language ਵੱਖਰੇ ਢੰਗ ਨਾਲ ਚੁਣਦਾ ਹੈ — ਹਰ text part ਮੁਤਾਬਕ ਅਤੇ,
-auto-detect ਬੰਦ ਹੋਣ ਉੱਤੇ, `enabledPacks` ਦੇ ਆਧਾਰ ਉੱਤੇ gated ਹੋ ਕੇ।
+Output-style language selection (`resolveOutputStyleLanguage()` in `outputStyles/apply.ts`): with `languageConfig.enabled` on, `autoDetect` samples the latest user message in the request's `messages` array that has text (string content, or the `text` of its content parts) and runs the Caveman engine's detector (`detectCompressionLanguage()`) on it. The detector returns `zh` for text with Han characters and no kana; otherwise it returns whichever of `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` and `id` has the most hint matches, and `en` when none match — text it cannot classify gets English, never `defaultLanguage`, and `vi` is never detected although the styles ship `vi` text. A Responses API body keeps its turns in `input`, which is not sampled, so it gets `defaultLanguage`, then English. When no user message in `messages` has text, or with `autoDetect` off, `defaultLanguage` applies, then English. With `languageConfig.enabled` off, the language is English — unless a compression combo applies to the request (a combo assigned to the request's routing combo, or the default compression combo chatCore falls back to for the built-in stacked pipeline): applying a combo turns `languageConfig.enabled` on for that request and sets `defaultLanguage` from the combo's language packs (the saved value if it is one of the combo's packs, otherwise the combo's first pack, which defaults to `en`), while the saved `autoDetect` (on by default) still applies. The Caveman input engine picks its rule-pack language differently — per text part and, with auto-detect off, gated on `enabledPacks`.
 
-ਸ਼ੈਲੀ × ਭਾਸ਼ਾ ਮੈਟ੍ਰਿਕਸ ਨੂੰ
-`tests/unit/compression/output-styles-i18n-matrix.test.ts` ਦੁਆਰਾ ਪਿਨ ਕੀਤਾ ਗਿਆ ਹੈ: ਹਰ ਕੈਟਾਲਾਗ ਸ਼ੈਲੀ ਲਈ ਟੈਸਟ ਦੇ `BASELINE_LANGUAGES` ਵਿੱਚ ਇੱਕ
-ਐਂਟਰੀ ਲਾਜ਼ਮੀ ਹੈ; ਜਿਹੜੀ ਸ਼ੈਲੀ locale-gated ਨਹੀਂ ਹੈ, ਉਸ ਨਾਲ
-pt-BR ਅਨੁਵਾਦ ਭੇਜਣਾ ਲਾਜ਼ਮੀ ਹੈ (locale-gated `terse-cjk` ਨੂੰ ਇਸ ਨਿਯਮ ਤੋਂ ਛੋਟ ਹੈ), ਜਦੋਂ ਤੱਕ ਉਹ
-`KNOWN_ENGLISH_ONLY` ਵਿੱਚ ਸੂਚੀਬੱਧ ਨਾ ਹੋਵੇ, ਜਿਸ ਵਿੱਚ ਸਿਰਫ਼ ਉਹੀ ਸ਼ੈਲੀਆਂ ਹੋ ਸਕਦੀਆਂ ਹਨ ਜਿਨ੍ਹਾਂ ਦੇ ਕੋਈ ਅਨੁਵਾਦ ਨਹੀਂ ਹਨ —
-ਜੇ ਕਿਸੇ ਸੂਚੀਬੱਧ ਸ਼ੈਲੀ ਦਾ ਕੋਈ ਵੀ ਅਨੁਵਾਦ ਹੋਵੇ ਤਾਂ ਟੈਸਟ ਅਸਫਲ ਹੋ ਜਾਂਦਾ ਹੈ; ਅਤੇ ਜਦੋਂ ਕੋਈ ਸ਼ੈਲੀ
-ਆਪਣੀ `BASELINE_LANGUAGES` ਐਂਟਰੀ ਵਿੱਚ ਸੂਚੀਬੱਧ ਭਾਸ਼ਾ ਗੁਆ ਲੈਂਦੀ ਹੈ ਤਾਂ ਉਹ ਟੈਸਟ ਵਿੱਚ ਅਸਫਲ ਹੋ ਜਾਂਦੀ ਹੈ। ਸ਼ੈਲੀ ਜੋੜਨ ਲਈ,
-[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style) ਵੇਖੋ।
+ਸ਼ੈਲੀ × ਭਾਸ਼ਾ ਮੈਟ੍ਰਿਕਸ ਨੂੰ `tests/unit/compression/output-styles-i18n-matrix.test.ts` ਦੁਆਰਾ ਪਿੰਨ ਕੀਤਾ ਗਿਆ ਹੈ: ਹਰੇਕ ਕੈਟਾਲਾਗ ਸ਼ੈਲੀ ਨੂੰ ਟੈਸਟ ਦੇ `BASELINE_LANGUAGES` ਵਿੱਚ ਐਂਟਰੀ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ; ਇੱਕ ਸ਼ੈਲੀ ਜੋ ਲੋਕੇਲ-ਗੇਟਿਡ ਨਹੀਂ ਹੈ, ਨੂੰ ਇੱਕ pt-BR ਅਨੁਵਾਦ ਭੇਜਣਾ ਚਾਹੀਦਾ ਹੈ (ਲੋਕੇਲ-ਗੇਟਿਡ `terse-cjk` ਨੂੰ ਇਸ ਨਿਯਮ ਤੋਂ ਛੋਟ ਹੈ) ਜਦੋਂ ਤੱਕ ਕਿ ਇਹ `KNOWN_ENGLISH_ONLY` ਵਿੱਚ ਸੂਚੀਬੱਧ ਨਹੀਂ ਹੈ, ਜਿਸ ਵਿੱਚ ਸਿਰਫ਼ — ਵਿੱਚ ਬਿਨਾਂ ਅਨੁਵਾਦ ਦੇ ਸਟਾਈਲ ਹੋ ਸਕਦੀਆਂ ਹਨ, ਇੱਕ ਸੂਚੀਬੱਧ ਸ਼ੈਲੀ ਜਿਸਦਾ ਕੋਈ ਅਨੁਵਾਦ ਟੈਸਟ ਵਿੱਚ ਅਸਫਲ ਹੁੰਦਾ ਹੈ; ਅਤੇ ਇੱਕ ਸ਼ੈਲੀ ਟੈਸਟ ਵਿੱਚ ਅਸਫਲ ਹੋ ਜਾਂਦੀ ਹੈ ਜਦੋਂ ਇਹ ਇੱਕ ਭਾਸ਼ਾ ਗੁਆ ਦਿੰਦੀ ਹੈ ਜੋ ਇਸਦੀ `BASELINE_LANGUAGES` ਐਂਟਰੀ ਸੂਚੀ ਵਿੱਚ ਹੈ। ਇੱਕ ਸ਼ੈਲੀ ਜੋੜਨ ਲਈ, [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style) ਵੇਖੋ।
 
-### ਟੂਲ ਨਤੀਜਾ ਕੰਪ੍ਰੈਸ਼ਨ
+### ਟੂਲ ਨਤੀਜਾ ਕੰਪਰੈਸ਼ਨ
 
-`open-sse/services/compression/toolResultCompressor.ts` ਵਿੱਚ `compressToolResult()`
-ਟੂਲ-ਨਤੀਜੇ ਦੇ ਟੈਕਸਟ ਨੂੰ **5 ਰਣਨੀਤੀਆਂ** ਨਾਲ ਕੰਪ੍ਰੈੱਸ ਕਰਦਾ ਹੈ। ਇਹ ਉਨ੍ਹਾਂ ਨੂੰ ਇਸ ਕ੍ਰਮ ਵਿੱਚ ਅਜ਼ਮਾਉਂਦਾ ਹੈ, ਅਤੇ ਸਮੱਗਰੀ ਨਾਲ ਮੇਲ ਖਾਂਦੀ ਜਾਂਚ ਵਾਲੀ
-ਪਹਿਲੀ ਸਮਰੱਥ ਰਣਨੀਤੀ ਨਤੀਜਾ ਨਿਰਧਾਰਤ ਕਰਦੀ ਹੈ:
+`open-sse/services/compression/toolResultCompressor.ts` ਵਿੱਚ `compressToolResult()` ਟੂਲ-ਨਤੀਜਾ ਟੈਕਸਟ ਨੂੰ ਸੰਕੁਚਿਤ ਕਰਦਾ ਹੈ** 5 ਰਣਨੀਤੀਆਂ** . ਇਹ ਉਹਨਾਂ ਨੂੰ ਇਸ ਕ੍ਰਮ ਵਿੱਚ ਅਜ਼ਮਾਉਂਦਾ ਹੈ, ਅਤੇ ਪਹਿਲੀ ਸਮਰਥਿਤ ਰਣਨੀਤੀ ਜਿਸਦੀ ਜਾਂਚ ਸਮੱਗਰੀ ਨਾਲ ਮੇਲ ਖਾਂਦੀ ਹੈ ਨਤੀਜਾ ਤੈਅ ਕਰਦੀ ਹੈ:
 
-1. **`fileContent`**: 3 ਜਾਂ ਵੱਧ ਲਾਈਨਾਂ ਵਾਲੀ ਸਮੱਗਰੀ, ਜਿਸ ਵਿੱਚ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਲਾਈਨ, ਅਗਲੀ
-   ਇੰਡੈਂਟੇਸ਼ਨ ਨੂੰ ਅਣਡਿੱਠਾ ਕਰਦੇ ਹੋਏ, `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` ਜਾਂ `return ` (ਕੀਵਰਡ ਤੋਂ ਬਾਅਦ ਇੱਕ ਸਪੇਸ) ਨਾਲ, ਜਾਂ `if`,
-   `for` ਜਾਂ `while` ਤੋਂ ਬਾਅਦ `(` ਜਾਂ ` (` ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦੀ ਹੋਵੇ, ਆਪਣੀਆਂ ਪਹਿਲੀਆਂ 20 ਅਤੇ ਆਖ਼ਰੀ 5 ਲਾਈਨਾਂ ਰੱਖਦੀ ਹੈ, ਅਤੇ
-   ਹਟਾਏ ਗਏ ਵਿਚਕਾਰਲੇ ਹਿੱਸੇ ਨੂੰ ਚਿੰਨ੍ਹਿਤ ਕਰਦੀ ਹੈ।
-2. **`grepSearch`**: `<path>:<digits>:` ਰੂਪ ਦੀ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਲਾਈਨ ਵਾਲੀ ਸਮੱਗਰੀ,
-   ਜਿੱਥੇ ਪਹਿਲੇ ਕੋਲਨ ਤੋਂ ਪਹਿਲਾਂ ਵਾਲੇ ਟੈਕਸਟ ਵਿੱਚ ਕੋਈ whitespace ਨਹੀਂ ਹੁੰਦੀ, ਸਿਰਫ਼ ਉਹੀ ਲਾਈਨਾਂ ਰੱਖਦੀ ਹੈ, ਵੱਧ ਤੋਂ ਵੱਧ
-   30, ਜਿਸ ਤੋਂ ਬਾਅਦ ਹੋਰ ਮੇਲਾਂ ਦੀ ਗਿਣਤੀ ਅਤੇ ਮੇਲ ਖਾਂਦੀਆਂ ਫ਼ਾਈਲਾਂ ਦੀ ਸੂਚੀ ਹੁੰਦੀ ਹੈ;
-   ਹਰ ਹੋਰ ਲਾਈਨ ਹਟਾ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਰਣਨੀਤੀ ਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ ਅਜਿਹੀ ਇੱਕ ਲਾਈਨ ਹੀ ਕਾਫ਼ੀ ਹੈ, ਇਸ ਲਈ
-   `12:30:45` ਵਰਗੇ timestamp ਨਾਲ ਸ਼ੁਰੂ ਹੋਣ ਵਾਲੀ ਲੌਗ ਲਾਈਨ ਵੀ ਗਿਣੀ ਜਾਂਦੀ ਹੈ।
-3. **`shellOutput`**: ਉਹ ਆਉਟਪੁੱਟ ਜਿਸ ਵਿੱਚ ANSI CSI sequence (`ESC[` ਤੋਂ ਬਾਅਦ ਅੰਕ ਜਾਂ
-   semicolons ਅਤੇ ਫਿਰ ਇੱਕ ਅੱਖਰ, ਜਿਵੇਂ color codes ਵਿੱਚ) ਜਾਂ ਟੈਕਸਟ ਵਿੱਚ ਕਿਤੇ ਵੀ whitespace ਤੋਂ ਪਹਿਲਾਂ `$`
-   ਹੋਵੇ, ਉਹ sequences ਗੁਆ ਦਿੰਦੀ ਹੈ (ਹੋਰ escapes, ਜਿਵੇਂ `ESC[?25l` ਜਾਂ
-   OSC window-title sequence, ਰੱਖੇ ਜਾਂਦੇ ਹਨ) ਅਤੇ ਆਪਣੀਆਂ ਆਖ਼ਰੀ 50 ਲਾਈਨਾਂ ਰੱਖਦੀ ਹੈ, ਜਦਕਿ ਲਗਾਤਾਰ
-   ਦੁਹਰਾਈਆਂ ਲਾਈਨਾਂ ਨੂੰ ਇੱਕ ਵਿੱਚ ਸਮੇਟ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ। ਕਿਉਂਕਿ ਇਹ ਜਾਂਚ `json` ਅਤੇ `errorMessage` ਤੋਂ ਪਹਿਲਾਂ ਚੱਲਦੀ ਹੈ,
-   ਅਜਿਹੇ `$` ਵਾਲੀ JSON ਜਾਂ error ਆਉਟਪੁੱਟ `shellOutput` ਚਾਲੂ ਹੋਣ ਦੌਰਾਨ
-   ਉਨ੍ਹਾਂ ਤੱਕ ਕਦੇ ਨਹੀਂ ਪਹੁੰਚਦੀ।
-4. **`json`**: 2,000 ਅੱਖਰਾਂ ਤੋਂ ਵੱਧ ਦਾ JSON payload ਜੋ `{` ਜਾਂ `[` ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ (ਵਿਕਲਪਿਕ
-   whitespace ਤੋਂ ਬਾਅਦ) ਅਤੇ parse ਹੁੰਦਾ ਹੈ, ਉਸਦਾ ਸਾਰ ਬਣਾਇਆ ਜਾਂਦਾ ਹੈ: 7 ਤੋਂ ਵੱਧ items ਵਾਲੀ array
-   ਆਪਣੇ ਪਹਿਲੇ 5 ਅਤੇ ਆਖ਼ਰੀ 2 items ਅਤੇ ਆਪਣੀ ਕੁੱਲ ਗਿਣਤੀ ਰੱਖਦੀ ਹੈ, ਅਤੇ object ਆਪਣੀਆਂ ਪਹਿਲੀਆਂ 20
-   keys ਰੱਖਦਾ ਹੈ, ਜਿਸ ਵਿੱਚ ਹਰ nested object ਜਾਂ array value ਨੂੰ `{…N keys}` placeholder ਨਾਲ
-   ਬਦਲਿਆ ਜਾਂਦਾ ਹੈ (array ਲਈ, N ਉਸਦੀ length ਹੈ) ਅਤੇ ਪਹਿਲੀਆਂ 20 ਤੋਂ ਬਾਅਦ ਹਟਾਈਆਂ keys ਦੀ ਗਿਣਤੀ ਕਰਨ ਵਾਲਾ
-   `_remaining_<N>_keys` marker ਹੁੰਦਾ ਹੈ। Scalar values ਪੂਰੀਆਂ ਕਾਪੀ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਇਸ ਲਈ 20 keys
-   ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ ਅਤੇ ਬਿਨਾਂ nested values ਵਾਲਾ object ਸਿਰਫ਼ ਦੁਬਾਰਾ indent ਹੁੰਦਾ ਹੈ — minified object ਵਿੱਚ ਅੱਖਰ
-   ਵਧ ਜਾਂਦੇ ਹਨ ਅਤੇ ਉਹ ਬਦਲਿਆ ਨਹੀਂ ਜਾਂਦਾ।
-5. **`errorMessage`**: ਉਹ ਆਉਟਪੁੱਟ ਜਿਸ ਵਿੱਚ ਕਿਤੇ ਵੀ ਅਤੇ ਕਿਸੇ ਵੀ letter case ਵਿੱਚ `error:`,
-   `error ` (ਸ਼ਬਦ ਤੋਂ ਬਾਅਦ ਇੱਕ ਸਪੇਸ, ਜਿਵੇਂ `no error found` ਵਿੱਚ), `[error]`,
-   `exception:`, `exception `, `[exception]` ਜਾਂ `traceback` ਹੋਵੇ, ਆਪਣੀ ਪਹਿਲੀ ਲਾਈਨ,
-   ਅਗਲੀਆਂ 10 ਲਾਈਨਾਂ ਅਤੇ ਆਖ਼ਰੀ 3 ਲਾਈਨਾਂ ਰੱਖਦੀ ਹੈ, ਅਤੇ ਉਨ੍ਹਾਂ ਵਿਚਕਾਰਲੀਆਂ ਲਾਈਨਾਂ ਦੀ ਥਾਂ
-   `… [N frames elided] …` marker ਲਗਾਉਂਦੀ ਹੈ। Marker ਸਿਰਫ਼ ਉਦੋਂ ਦਿਖਾਈ ਦਿੰਦਾ ਹੈ ਜਦੋਂ ਪਹਿਲੀ
-   ਲਾਈਨ ਤੋਂ ਬਾਅਦ 13 ਤੋਂ ਵੱਧ ਲਾਈਨਾਂ ਹੋਣ, ਇਸ ਲਈ 14 ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ ਲਾਈਨਾਂ ਵਾਲੀ error ਆਉਟਪੁੱਟ ਛੋਟੀ ਨਹੀਂ ਹੁੰਦੀ (12 ਜਾਂ 13 ਲਾਈਨਾਂ ਉੱਤੇ
-   ਆਖ਼ਰੀ 3 ਪਹਿਲਾਂ ਹੀ ਰੱਖੀਆਂ ਲਾਈਨਾਂ ਨੂੰ ਦੁਹਰਾਉਂਦੀਆਂ ਹਨ)।
+1. **`fileContent`** : 3 ਜਾਂ ਵੱਧ ਲਾਈਨਾਂ ਦੀ ਸਮੱਗਰੀ ਜਿਸ ਵਿੱਚ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਲਾਈਨ, ਮੋਹਰੀ ਇੰਡੈਂਟੇਸ਼ਨ ਨੂੰ ਨਜ਼ਰਅੰਦਾਜ਼ ਕਰਦੇ ਹੋਏ, `import `, `export `, `function `, `class `, `const `, `let `, `var ` ਜਾਂ `return ` (ਕੀਵਰਡ ਪਲੱਸ ਸਪੇਸ) ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦੀ ਹੈ, ਜਾਂ `if`, `for` ਜਾਂ ` (` ਦੇ ਨਾਲ `(`, `while` ਜਾਂ ਇਸ ਦੀ ਪਾਲਣਾ ਕਰੋ ਪਹਿਲੀਆਂ 20 ਅਤੇ ਆਖ਼ਰੀ 5 ਲਾਈਨਾਂ, ਐਲੀਡਿਡ ਮੱਧ ਮਾਰਕ ਕੀਤੇ ਹੋਏ ਹਨ।
+2. **`grepSearch`** : `<path>:<digits>:` ਫਾਰਮ ਦੀ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਲਾਈਨ ਵਾਲੀ ਸਮੱਗਰੀ, ਜਿੱਥੇ ਪਹਿਲੇ ਕੋਲਨ ਤੋਂ ਪਹਿਲਾਂ ਟੈਕਸਟ ਵਿੱਚ ਕੋਈ ਖਾਲੀ ਥਾਂ ਨਹੀਂ ਹੈ, ਸਿਰਫ਼ ਉਹਨਾਂ ਲਾਈਨਾਂ ਨੂੰ ਰੱਖਦੀ ਹੈ, ਵੱਧ ਤੋਂ ਵੱਧ 30, ਇਸ ਤੋਂ ਬਾਅਦ ਕਿਸੇ ਹੋਰ ਮੇਲ ਦੀ ਗਿਣਤੀ ਅਤੇ ਮੇਲ ਖਾਂਦੀਆਂ ਫਾਈਲਾਂ ਦੀ ਸੂਚੀ; ਹਰ ਦੂਜੀ ਲਾਈਨ ਸੁੱਟ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਅਜਿਹੀ ਇੱਕ ਲਾਈਨ ਰਣਨੀਤੀ ਨੂੰ ਟਰਿੱਗਰ ਕਰਨ ਲਈ ਕਾਫੀ ਹੈ, ਇਸਲਈ ਟਾਈਮਸਟੈਂਪ ਨਾਲ ਸ਼ੁਰੂ ਹੋਣ ਵਾਲੀ ਇੱਕ ਲੌਗ ਲਾਈਨ ਜਿਵੇਂ ਕਿ `12:30:45` ਵੀ ਗਿਣਿਆ ਜਾਂਦਾ ਹੈ।
+3. **`shellOutput`** : ਆਉਟਪੁੱਟ ਜਿਸ ਵਿੱਚ ਇੱਕ ANSI CSI ਕ੍ਰਮ ਹੁੰਦਾ ਹੈ (`ESC[` ਫਿਰ ਅੰਕ ਜਾਂ ਸੈਮੀਕੋਲਨ ਫਿਰ ਇੱਕ ਅੱਖਰ, ਜਿਵੇਂ ਕਿ ਰੰਗ ਕੋਡਾਂ ਵਿੱਚ) ਜਾਂ ਟੈਕਸਟ ਵਿੱਚ ਕਿਤੇ ਵੀ ਵ੍ਹਾਈਟ ਸਪੇਸ ਦੇ ਬਾਅਦ ਇੱਕ `$` ਉਹਨਾਂ ਕ੍ਰਮਾਂ ਨੂੰ ਗੁਆ ਦਿੰਦਾ ਹੈ (ਹੋਰ ਐਸਕੇਪ, ਜਿਵੇਂ ਕਿ `ESC[?25l` ਜਾਂ ਇੱਕ OSC ਵਿੰਡੋ-ਟਾਈਟਲ ਕ੍ਰਮ ਅਤੇ ਕੱਟਣ ਵਾਲੇ ਕ੍ਰਮ ਨੂੰ ਦੁਹਰਾਇਆ ਜਾਂਦਾ ਹੈ, ਇਸਦੇ ਅੰਤਮ ਰੂਪ ਵਿੱਚ 5 ਨੂੰ ਦੁਹਰਾਇਆ ਜਾਂਦਾ ਹੈ) ਲਾਈਨਾਂ ਟੁੱਟ ਗਈਆਂ। ਕਿਉਂਕਿ ਇਹ ਜਾਂਚ `json` ਅਤੇ `errorMessage` ਤੋਂ ਪਹਿਲਾਂ ਚੱਲਦੀ ਹੈ, JSON ਜਾਂ ਗਲਤੀ ਆਉਟਪੁੱਟ ਜਿਸ ਵਿੱਚ ਅਜਿਹਾ `$` ਹੁੰਦਾ ਹੈ ਕਦੇ ਵੀ ਉਹਨਾਂ ਤੱਕ ਨਹੀਂ ਪਹੁੰਚਦਾ ਜਦੋਂ `shellOutput` ਚਾਲੂ ਹੁੰਦਾ ਹੈ।
+4. **`json`** : 2,000 ਅੱਖਰਾਂ ਦਾ ਇੱਕ JSON ਪੇਲੋਡ ਜੋ `{` ਜਾਂ `[` (ਵਿਕਲਪਿਕ ਵ੍ਹਾਈਟਸਪੇਸ ਤੋਂ ਬਾਅਦ) ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ ਅਤੇ ਪਾਰਸ ਕੀਤਾ ਜਾਂਦਾ ਹੈ: 7 ਤੋਂ ਵੱਧ ਆਈਟਮਾਂ ਦੀ ਇੱਕ ਐਰੇ ਆਪਣੀਆਂ ਪਹਿਲੀਆਂ 5 ਅਤੇ ਆਖਰੀ 2 ਆਈਟਮਾਂ ਅਤੇ ਇਸਦੀ ਕੁੱਲ ਗਿਣਤੀ ਰੱਖਦੀ ਹੈ, ਅਤੇ ਇੱਕ ਵਸਤੂ ਆਪਣੀਆਂ ਪਹਿਲੀਆਂ 20 ਕੁੰਜੀਆਂ ਰੱਖਦੀ ਹੈ, ਹਰੇਕ ਨੇਸਟਡ ਆਬਜੈਕਟ ਜਾਂ ਐਰੇ ਲਈ ਇੱਕ `{…N keys}` ਦੀ ਥਾਂ ਇੱਕ ਐਰੇ ਦੇ ਮੁੱਲ ਨਾਲ ਬਦਲਦਾ ਹੈ। ਲੰਬਾਈ) ਅਤੇ ਇੱਕ `_remaining_<N>_keys` ਮਾਰਕਰ ਪਹਿਲੇ 20 ਤੋਂ ਬਾਅਦ ਡਿੱਗੀਆਂ ਕੁੰਜੀਆਂ ਨੂੰ ਗਿਣਦਾ ਹੈ। ਸਕੇਲਰ ਮੁੱਲ ਪੂਰੀ ਤਰ੍ਹਾਂ ਕਾਪੀ ਕੀਤੇ ਜਾਂਦੇ ਹਨ, ਇਸਲਈ 20 ਕੁੰਜੀਆਂ ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ ਦੀ ਵਸਤੂ ਨੂੰ ਬਿਨਾਂ ਨੇਸਟਡ ਮੁੱਲਾਂ ਦੇ ਸਿਰਫ — ਮੁੜ-ਇੰਡੇਂਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਇੱਕ ਛੋਟਾ ਜਿਹਾ ਅੱਖਰ ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ ਅਤੇ ਬਦਲਿਆ ਨਹੀਂ ਰਹਿੰਦਾ।
+5. **`errorMessage`** : ਆਉਟਪੁੱਟ ਜਿਸ ਵਿੱਚ, ਕਿਤੇ ਵੀ ਅਤੇ ਕਿਸੇ ਵੀ ਅੱਖਰ ਦੇ ਕੇਸ ਵਿੱਚ, `error:`, `error ` (ਇੱਕ ਸਪੇਸ ਤੋਂ ਬਾਅਦ ਸ਼ਬਦ, ਜਿਵੇਂ ਕਿ `no error found` ਵਿੱਚ), `[error]`, `exception:`, `exception `, `[exception]` ਜਾਂ `traceback` ਆਪਣੀ ਪਹਿਲੀ ਲਾਈਨ, ਅਗਲੀਆਂ 10 ਲਾਈਨਾਂ ਅਤੇ ਆਖਰੀ 3 ਰੱਖਦਾ ਹੈ, ਉਹਨਾਂ ਦੇ ਵਿਚਕਾਰ ਇੱਕ `… [N frames elided] …` ਮਾਰਕਰ ਦੇ ਨਾਲ। ਮਾਰਕਰ ਉਦੋਂ ਹੀ ਦਿਖਾਈ ਦਿੰਦਾ ਹੈ ਜਦੋਂ 13 ਤੋਂ ਵੱਧ ਲਾਈਨਾਂ ਪਹਿਲੀ ਲਾਈਨ ਦੀ ਪਾਲਣਾ ਕਰਦੀਆਂ ਹਨ, ਇਸਲਈ 14 ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ ਲਾਈਨਾਂ ਦੀ ਗਲਤੀ ਆਉਟਪੁੱਟ ਨੂੰ ਛੋਟਾ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ (12 ਜਾਂ 13 ਲਾਈਨਾਂ 'ਤੇ ਆਖਰੀ 3 ਦੁਹਰਾਉਣ ਵਾਲੀਆਂ ਲਾਈਨਾਂ ਪਹਿਲਾਂ ਹੀ ਰੱਖੀਆਂ ਗਈਆਂ ਹਨ)।
 
-ਕਿਸੇ ਰਣਨੀਤੀ ਦੇ ਮੇਲ ਖਾਣ ਤੋਂ ਬਾਅਦ, ਭਾਵੇਂ ਉਹ ਕੁਝ ਵੀ ਨਾ ਬਚਾਵੇ, ਬਾਅਦ ਦੀਆਂ ਰਣਨੀਤੀਆਂ
-ਨਹੀਂ ਅਜ਼ਮਾਈਆਂ ਜਾਂਦੀਆਂ। ਜਦੋਂ ਮੇਲ ਖਾਂਦੀ ਰਣਨੀਤੀ ਕੋਈ ਅਨੁਮਾਨਿਤ tokens ਨਹੀਂ ਬਚਾਉਂਦੀ (ਲੰਬਾਈ ÷ 4, ਉੱਪਰ ਵੱਲ round ਕੀਤੀ) —
-ਉਦਾਹਰਨ ਲਈ 25 ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ ਲਾਈਨਾਂ ਵਾਲੀ code-like ਫ਼ਾਈਲ, ਜਾਂ 2,000
-ਅੱਖਰਾਂ ਤੋਂ ਵੱਧ ਪਰ 7 ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ items ਵਾਲੀ JSON array — ਤਾਂ aggressive engine ਮੂਲ tool
-result ਨੂੰ ਰੱਖਦਾ ਹੈ: ਦੋਵੇਂ callers (`compressAggressive()` ਅਤੇ `compressAnthropicToolResultBlock()`)
-`saved` ਦੇ 0 ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ ਹੋਣ ਉੱਤੇ ਮੂਲ ਨੂੰ ਰੱਖਦੇ ਹਨ, ਜਦਕਿ `compressToolResult()` ਖੁਦ ਫਿਰ ਵੀ
-ਉਸ ਰਣਨੀਤੀ ਦੀ ਆਉਟਪੁੱਟ ਵਾਪਸ ਕਰਦਾ ਹੈ। Tool-result ਕਦਮ ਅੰਤਿਮ ਫ਼ੈਸਲਾ ਨਹੀਂ ਹੈ:
-engine ਦਾ fallback summarizer ਫਿਰ ਵੀ 8,192 ਅੱਖਰਾਂ ਤੋਂ ਲੰਬੇ `tool` ਜਾਂ `function` ਸੁਨੇਹੇ ਨੂੰ
-ਛੋਟਾ ਕਰ ਸਕਦਾ ਹੈ (`maxTokensPerMessage`, 2,048, ਗੁਣਾ 4)।
+ਇੱਕ ਰਣਨੀਤੀ ਦੇ ਮੇਲ ਤੋਂ ਬਾਅਦ, ਇੱਥੋਂ ਤੱਕ ਕਿ ਇੱਕ ਜੋ ਕੁਝ ਵੀ ਨਹੀਂ ਬਚਾਉਂਦਾ, ਬਾਅਦ ਦੀਆਂ ਰਣਨੀਤੀਆਂ ਦੀ ਕੋਸ਼ਿਸ਼ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ. ਜਦੋਂ ਮੇਲ ਖਾਂਦੀ ਰਣਨੀਤੀ ਕੋਈ ਅਨੁਮਾਨਿਤ ਟੋਕਨ (ਲੰਬਾਈ ÷ 4, ਰਾਊਂਡ ਅੱਪ) — ਨਹੀਂ ਬਚਾਉਂਦੀ ਹੈ, ਉਦਾਹਰਨ ਲਈ 25 ਲਾਈਨਾਂ ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ ਦੀ ਕੋਡ-ਵਰਗੀ ਫਾਈਲ, ਜਾਂ 7 ਆਈਟਮਾਂ ਜਾਂ ਘੱਟ — ਦੇ ਨਾਲ 2,000 ਅੱਖਰਾਂ ਤੋਂ ਵੱਧ ਦੀ ਇੱਕ JSON ਐਰੇ, ਹਮਲਾਵਰ ਇੰਜਣ ਅਸਲ ਟੂਲ ਨਤੀਜਾ ਰੱਖਦਾ ਹੈ: ਜਦੋਂ `saved` ਅਤੇ `compressAnthropicToolResultBlock()` ਅਸਲੀ ਹੁੰਦੇ ਹਨ (`compressAggressive()` ) ਦੋਵੇਂ ਜਾਂ ਹੇਠਾਂ, ਜਦੋਂ ਕਿ `compressToolResult()` ਖੁਦ ਅਜੇ ਵੀ ਉਸ ਰਣਨੀਤੀ ਦਾ ਆਉਟਪੁੱਟ ਵਾਪਸ ਕਰਦਾ ਹੈ। ਟੂਲ-ਨਤੀਜਾ ਕਦਮ ਆਖਰੀ ਸ਼ਬਦ ਨਹੀਂ ਹੈ: ਇੰਜਣ ਦਾ ਫਾਲਬੈਕ ਸੰਖੇਪ ਅਜੇ ਵੀ 8,192 ਅੱਖਰਾਂ (`maxTokensPerMessage`, 2,048, ਵਾਰ 4) ਤੋਂ ਲੰਬੇ ਇੱਕ `tool` ਜਾਂ `function` ਸੰਦੇਸ਼ ਨੂੰ ਛੋਟਾ ਕਰ ਸਕਦਾ ਹੈ।
 
 #### ਕਦੋਂ ਵਰਤਣਾ ਹੈ
 
-Tool result compression aggressive engine ਦਾ ਕਦਮ 1 ਹੈ (`open-sse/services/compression/aggressive.ts` ਵਿੱਚ `compressAggressive()`),
-ਇਸ ਲਈ ਇਹ Aggressive mode ਵਿੱਚ ਅਤੇ stacked pipeline ਦੇ
-`aggressive` ਕਦਮ ਵਿੱਚ ਚੱਲਦਾ ਹੈ। ਇਹ OpenAI-shape `tool` ਅਤੇ `function`
-ਸੁਨੇਹਿਆਂ ਅਤੇ Anthropic `tool_result` blocks ਦੇ ਅੰਦਰਲੇ ਟੈਕਸਟ ਨੂੰ ਕੰਪ੍ਰੈੱਸ ਕਰਦਾ ਹੈ। ਹਰ ਰਣਨੀਤੀ ਦਾ
-`aggressive.toolStrategies` ਅਧੀਨ ਆਪਣਾ switch ਹੈ, ਅਤੇ ਸਾਰੇ ਮੂਲ ਰੂਪ ਵਿੱਚ ਚਾਲੂ ਹਨ। Dashboard ਵਿੱਚ,
-compression ਚਾਲੂ ਹੋਣ ਅਤੇ default mode Aggressive ਹੋਣ ਦੌਰਾਨ switches Caveman ਪੰਨੇ ਦੀ **Advanced** view ਵਿੱਚ ਹੁੰਦੇ ਹਨ।
+ਟੂਲ ਰਿਜ਼ਲਟ ਕੰਪਰੈਸ਼ਨ ਐਗਰੈਸਿਵ ਇੰਜਣ (`compressAggressive()` in `open-sse/services/compression/aggressive.ts`) ਦਾ ਸਟੈਪ 1 ਹੈ, ਇਸਲਈ ਇਹ ਐਗਰੈਸਿਵ ਮੋਡ ਵਿੱਚ ਅਤੇ ਸਟੈਕਡ ਪਾਈਪਲਾਈਨ ਦੇ ਇੱਕ `aggressive` ਸਟੈਪ ਵਿੱਚ ਚੱਲਦਾ ਹੈ। ਇਹ ਓਪਨਏਆਈ-ਸ਼ੇਪ `tool` ਅਤੇ `function` ਸੁਨੇਹਿਆਂ ਅਤੇ Anthropic `tool_result` ਬਲਾਕਾਂ ਦੇ ਅੰਦਰ ਟੈਕਸਟ ਨੂੰ ਸੰਕੁਚਿਤ ਕਰਦਾ ਹੈ। ਹਰੇਕ ਰਣਨੀਤੀ ਦਾ `aggressive.toolStrategies` ਅਧੀਨ ਆਪਣਾ ਸਵਿੱਚ ਹੁੰਦਾ ਹੈ, ਸਭ ਕੁਝ ਮੂਲ ਰੂਪ ਵਿੱਚ ਚਾਲੂ ਹੁੰਦਾ ਹੈ। ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ, ਸਵਿੱਚ Caveman ਪੰਨੇ ਵਿੱਚ ਹਨ** ਉੱਨਤ** ਜਦੋਂ ਕੰਪਰੈਸ਼ਨ ਚਾਲੂ ਹੋਵੇ ਤਾਂ ਵੇਖੋ ਅਤੇ ਡਿਫੌਲਟ ਮੋਡ ਐਗਰੈਸਿਵ ਹੈ।
 
 ### ਸਟੈਕਡ ਪਾਈਪਲਾਈਨ
 
-stacked mode **ਕਈ engines ਨੂੰ ਕ੍ਰਮਵਾਰ** ਚਲਾਉਂਦਾ ਹੈ — ਆਮ ਤੌਰ ਉੱਤੇ ਪਹਿਲਾਂ RTK
-(tool output ਉੱਤੇ 60-90% ਬਚਤ), ਫਿਰ ਬਾਕੀ ਟੈਕਸਟ ਉੱਤੇ Caveman (~46% input
-ਬਚਤ)। ਇਕੱਠੇ ਕਰਨ ਉੱਤੇ, ਇਹ **78-95% ਯੋਗ ਰੇਂਜ** ਬਣਦੀ ਹੈ (ਉੱਪਰ Upstream Savings Math
-ਵੇਖੋ): `1 - (1 - 0.60..0.90) × (1 - 0.46)` ਦੀ ਔਸਤ ≈89% ਹੈ।
+ਸਟੈਕਡ ਮੋਡ ਚੱਲਦਾ ਹੈ** ਕ੍ਰਮ ਵਿੱਚ ਕਈ ਇੰਜਣ** — ਆਮ ਤੌਰ 'ਤੇ RTK ਪਹਿਲਾਂ (ਟੂਲ ਆਉਟਪੁੱਟ 'ਤੇ 60-90% ਬੱਚਤ), ਫਿਰ ਬਾਕੀ ਟੈਕਸਟ 'ਤੇ Caveman (~ 46% ਇਨਪੁਟ ਬਚਤ)। ਰਚਿਆ, ਜੋ ਕਿ ਹੈ** 78-95% ਯੋਗ ਰੇਂਜ** (ਉਪਰ ਅੱਪਸਟ੍ਰੀਮ ਸੇਵਿੰਗ ਮੈਥ ਦੇਖੋ): `1 - (1 - 0.60..0.90) × (1 - 0.46)` ≈ 89%।
 
 #### ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ
 
 ```
-ਇਨਪੁੱਟ (1000 tokens)
+Input (1000 tokens)
   → RTK (command-aware filter) → 200 tokens
     → Caveman (filler removal) → 108 tokens
-  → ਆਉਟਪੁੱਟ (108 tokens, ~89% ਬਚਤ)
+  → Output (108 tokens, ~89% savings)
 ```
 
 #### ਕਦੋਂ ਵਰਤਣਾ ਹੈ
 
-stacked mode ਨੂੰ ਇਨ੍ਹਾਂ ਲਈ ਵਰਤੋ:
+ਇਸ ਲਈ ਸਟੈਕਡ ਮੋਡ ਦੀ ਵਰਤੋਂ ਕਰੋ:
 
-- Tool-heavy workflows (agentic coding, research)
-- ਲਾਗਤ-ਸੰਵੇਦਨਸ਼ੀਲ batch processing
-- ਜਦੋਂ ਤੁਹਾਨੂੰ ਵੱਧ ਤੋਂ ਵੱਧ token ਬਚਤ ਦੀ ਲੋੜ ਹੋਵੇ
+- ਟੂਲ-ਭਾਰੀ ਵਰਕਫਲੋ (ਏਜੰਟਿਕ ਕੋਡਿੰਗ, ਖੋਜ)
+- ਲਾਗਤ-ਸੰਵੇਦਨਸ਼ੀਲ ਬੈਚ ਪ੍ਰੋਸੈਸਿੰਗ
+- ਜਦੋਂ ਤੁਹਾਨੂੰ ਵੱਧ ਤੋਂ ਵੱਧ ਟੋਕਨ ਬਚਤ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ
 
-Stacked pipelines ਨੂੰ global `stackedPipeline` compression
-setting ਰਾਹੀਂ, ਜਾਂ routing combo ਨੂੰ ਦਿੱਤੇ named compression combo ਰਾਹੀਂ configure ਕੀਤਾ ਜਾਂਦਾ ਹੈ (ਉੱਪਰ
-Per-Combo Override ਵੇਖੋ) — auto-combo `modePack` ਰਾਹੀਂ ਨਹੀਂ (ਉਹ field ਸਿਰਫ਼
-auto-combo model selection ਨੂੰ ਮੁੜ weight ਕਰਦਾ ਹੈ, ਅਤੇ `stacked` ਕੋਈ ਵੈਧ pack name ਨਹੀਂ ਹੈ)।
+ਸਟੈਕਡ ਪਾਈਪਲਾਈਨਾਂ ਨੂੰ ਗਲੋਬਲ `stackedPipeline` ਕੰਪਰੈਸ਼ਨ ਸੈਟਿੰਗ ਦੁਆਰਾ ਸੰਰਚਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਜਾਂ ਇੱਕ ਰੂਟਿੰਗ ਕੰਬੋ (ਉੱਪਰ ਪ੍ਰਤੀ-ਕੌਂਬੋ ਓਵਰਰਾਈਡ ਵੇਖੋ) — ਇੱਕ ਆਟੋ-ਕੋਂਬੋ `modePack` ਦੁਆਰਾ ਨਿਰਧਾਰਤ ਕੀਤੇ ਗਏ ਇੱਕ ਨਾਮਕ ਕੰਪਰੈਸ਼ਨ ਕੰਬੋ ਦੁਆਰਾ ਸੰਰਚਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ (ਉਹ ਖੇਤਰ ਸਿਰਫ ਆਟੋ-ਕੋਂਬੋ ਮਾਡਲ ਦੀ ਚੋਣ ਨੂੰ ਮੁੜ-ਵਜ਼ਨ ਦਿੰਦਾ ਹੈ, ਅਤੇ `stacked` ਇੱਕ ਵੈਧ ਪੈਕ ਨਾਮ ਨਹੀਂ ਹੈ)।
 
 ---
 

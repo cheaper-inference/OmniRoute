@@ -11,14 +11,14 @@ Agent Skills হলো কাঠামোবদ্ধ SKILL.md ফাইল, য
 
 ---
 
-## সংক্ষিপ্ত বিবরণ
+## ওভারভিউ
 
-ক্যাটালগটিতে **45টি Agent Skills** (23টি REST API + 21টি CLI + 1টি কনফিগারেশন ওয়ার্কফ্লো) রয়েছে। প্রতিটি স্কিলে রয়েছে:
+ক্যাটালগ রয়েছে** 45 এজেন্ট দক্ষতা** (23 REST API + 21 CLI + 1 কনফিগারেশন ওয়ার্কফ্লো)। প্রতিটি দক্ষতা আছে:
 
-- একটি **ক্যানোনিক্যাল ID** (`omni-auth`, `cli-serve` ইত্যাদি)
-- `skills/{id}/SKILL.md`-এ একটি **SKILL.md** ফাইল, যাতে YAML frontmatter (`name`, `description`) + সমৃদ্ধ markdown বডি রয়েছে
-- OpenAPI স্পেসিফিকেশন ও CLI রেজিস্ট্রি থেকে প্রাপ্ত **REST এন্ডপয়েন্টসমূহ** (API স্কিল) অথবা **CLI সাবকমান্ডসমূহ** (CLI স্কিল)
-- সরাসরি ফেচ করার জন্য একটি **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ক** ক্যানোনিকাল ID** (`omni-auth`, `cli-serve`, ইত্যাদি)
+- ক**SKILL.md** `skills/{id}/SKILL.md` এ YAML ফ্রন্টম্যাটার (`name`, `description`) + সমৃদ্ধ মার্কডাউন বডি সহ ফাইল করুন
+- **REST শেষ পয়েন্ট** (API দক্ষতা) বা**CLI সাবকমান্ড** (CLI দক্ষতা) OpenAPI spec এবং CLI রেজিস্ট্রি থেকে প্রাপ্ত
+- ক**GitHub কাঁচা URL** লাইভ আনার জন্য: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 

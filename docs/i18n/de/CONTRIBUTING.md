@@ -8,29 +8,23 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Entwicklungssetup
+## Entwicklungs-Setup
 
 ### Voraussetzungen
 
 - **Node.js** `>=22.22.2 <23` oder `>=24.0.0 <27` (empfohlen: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows mit Node 24:** Verwenden Sie das aktuelle 24-LTS-Patch-Release (mindestens 24.20.0).
-> Frühere Releases können nach erfolgreichen Tests abbrechen, wenn `--test-force-exit` den
-> Prozess schließt. Node's [Windows-libuv-Fix](https://github.com/nodejs/node/pull/61999) behebt
-> diesen Laufzeitabsturz. Lassen Sie die Testassertions und die Exit-Prüfungen des Runners aktiviert.
+> **Windows mit Knoten 24:** Verwenden Sie die aktuelle 24- LTS -Patch-Version (mindestens 24.20.0). Frühere Versionen können nach erfolgreichen Tests abbrechen, wenn `--test-force-exit` den Prozess schließt. [Windows libuv-Fix](https://github.com/nodejs/node/pull/61999) von Node behebt diesen Laufzeitabsturz; Lassen Sie die Testzusicherungen und Runner-Exit-Prüfungen aktiviert.
 
-> **Nutzer von npm v11+ (Node 24+):** Überprüfen Sie nach `npm install`, ob native Module installiert wurden:
-> `node -e "require('better-sqlite3')"`. Falls der Befehl mit `MODULE_NOT_FOUND` fehlschlägt,
-> führen Sie `npm approve-scripts better-sqlite3 && npm install` aus. Siehe
-> [Fehlerbehebung](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **npm v11 + Benutzer (Knoten 24 +):** Überprüfen Sie nach `npm install`, ob native Module installiert wurden: `node -e "require('better-sqlite3')"`. Wenn es mit `MODULE_NOT_FOUND` fehlschlägt, führen Sie `npm approve-scripts better-sqlite3 && npm install` aus. Siehe [Fehlerbehebung](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klonen und Installieren
+### Klonen und installieren
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -38,86 +32,83 @@ npm install
 ### Umgebungsvariablen
 
 ```bash
-# Ihre .env aus der Vorlage erstellen
+# Create your .env from the template
 cp .env.example .env
 
-# Erforderliche Geheimnisse generieren
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Wichtige Variablen für die Entwicklung:
+Schlüsselvariablen für die Entwicklung:
 
-| Variable               | Entwicklungsstandardwert | Beschreibung                             |
-| ---------------------- | ------------------------ | ---------------------------------------- |
-| `PORT`                 | `20128`                  | Serverport                               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis-URL für das Frontend               |
-| `JWT_SECRET`           | (oben generieren)        | Geheimnis zum Signieren von JWTs         |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Passwort für die erste Anmeldung         |
-| `APP_LOG_LEVEL`        | `info`                   | Ausführlichkeitsgrad der Protokollierung |
+| Variable               | Entwicklungsstandard     | Beschreibung                        |
+| ---------------------- | ------------------------ | ----------------------------------- |
+| `PORT`                 | `20128`                  | Server-Port                         |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis URL für Frontend              |
+| `JWT_SECRET`           | (oben generieren)        | JWT -Signaturgeheimnis              |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Erstes Login-Passwort               |
+| `APP_LOG_LEVEL`        | `info`                   | Ausführlichkeitsgrad des Protokolls |
 
 ### Dashboard-Einstellungen
 
-Das Dashboard bietet UI-Schalter für Funktionen, die auch über Umgebungsvariablen konfiguriert werden können:
+Das Dashboard bietet UI -Schalter für Funktionen, die auch über Umgebungsvariablen konfiguriert werden können:
 
-| Einstellungsort           | Schalter                      | Beschreibung                              |
-| ------------------------- | ----------------------------- | ----------------------------------------- |
-| Einstellungen → Erweitert | Debug-Modus                   | Debug-Anfrageprotokolle aktivieren (UI)   |
-| Einstellungen → Allgemein | Sichtbarkeit der Seitenleiste | Seitenleistenbereiche anzeigen/ausblenden |
+| Standort festlegen        | Umschalten                    | Beschreibung                                 |
+| ------------------------- | ----------------------------- | -------------------------------------------- |
+| Einstellungen → Erweitert | Debug-Modus                   | Debug-Anforderungsprotokolle aktivieren (UI) |
+| Einstellungen → Allgemein | Sichtbarkeit der Seitenleiste | Show/hide Seitenleistenabschnitte            |
 
-Diese Einstellungen werden in der Datenbank gespeichert und bleiben über Neustarts hinweg erhalten. Wenn sie gesetzt sind, überschreiben sie die Standardwerte der Umgebungsvariablen.
+Diese Einstellungen werden in der Datenbank gespeichert und bleiben über Neustarts hinweg bestehen, wobei sie bei Festlegung die Standardeinstellungen der Umgebungsvariablen überschreiben.
 
-### Lokal ausführen
+### Lokal ausgeführt
 
 ```bash
-# Entwicklungsmodus (Hot Reload)
+# Development mode (hot reload)
 npm run dev
 
-# Produktions-Build
-npm run build    # next build → .build/next/ und anschließend assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Schnelle Backend-/API-only-Kompilierung für Änderungen von Mitwirkenden
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Release-Build (sauberer Neuaufbau + HEAD-Marker — für das Deployment erforderlich)
-npm run build:release   # rm -rf .build dist && build + schreibt dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Allgemeine Portkonfiguration
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Der Contributor-Build führt ausschließlich eine Kompilierungsvalidierung durch: Er erstellt weder die Standalone-Distribution noch optionale native Paketierungs-Assets. Verwenden Sie den regulären Produktions-Build, wenn Sie das auslieferbare Bundle validieren möchten.
+Der Contributor-Build führt eine reine Kompilierungsvalidierung durch: Er assembliert weder die eigenständige Distribution noch erstellt er optionale native Verpackungsressourcen. Verwenden Sie den regulären Produktions-Build, wenn Sie das versandfähige Paket validieren müssen.
 
-### Struktur der Build-Ausgabe
+### Erstellen Sie ein Ausgabelayout
 
-| Verzeichnis | Inhalt                                                                          | Nachverfolgt |
-| ----------- | ------------------------------------------------------------------------------- | ------------ |
-| `src/`      | Anwendungscode (TypeScript / TSX)                                               | Ja           |
-| `.build/`   | Zwischenstände — Ausgabe von `next build` (gitignored, `distDir = .build/next`) | Nein         |
-| `dist/`     | Auslieferbares Bundle — von `assembleStandalone` zusammengestellt (gitignored)  | Nein         |
+| Verzeichnis | Inhalt                                                                     | Verfolgt |
+| ----------- | -------------------------------------------------------------------------- | -------- |
+| `src/`      | Anwendungsquelle (TypeScript / TSX)                                        | Ja       |
+| `.build/`   | Zwischenausgabe — `next build` (gitignored, `distDir = .build/next`)       | NEIN     |
+| `dist/`     | Lieferbares Paket — zusammengestellt von `assembleStandalone` (gitignored) | NEIN     |
 
-Die Build-Pipeline besteht aus einem einzigen Durchlauf:
+Die Build-Pipeline ist ein einzelner Durchgang:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js-Ausgabe)
-  └─ assembleStandalone()                 (kopiert Standalone-, statische, öffentliche und native Assets)
-       └─ Ausgabe: dist/                  (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` bereinigt zusätzlich zunächst beide Verzeichnisse und schreibt
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) als Integritätsmarker für das Deployment.
+`npm run build:release` bereinigt außerdem zuerst beide Verzeichnisse und schreibt `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) als Deploy Integrity Sentinel.
 
-`npm run build:contributor` verwendet das Backend-only-Build-Profil. Während des Builds werden Dashboard-UI-Dateien vorübergehend durch Platzhalter ersetzt, API-Route-Handler bleiben erhalten, und die ursprünglichen Dateien werden nach dem Build wiederhergestellt. Verwenden Sie `npm run build` für Änderungen, die sich auf die Dashboard-UI auswirken, oder für eine vollständige Release-Validierung. Das Contributor-Profil ist kein Ersatz für den Release-Build.
+`npm run build:contributor` verwendet das reine Backend-Build-Profil. Während der Erstellung werden UI Dateien des Dashboards vorübergehend gestuft, API Routenhandler bleiben erhalten und die Originaldateien werden nach der Erstellung wiederhergestellt. Verwenden Sie `npm run build` für Änderungen, die sich auf das Dashboard UI auswirken, oder für die vollständige Release-Validierung. Das Mitwirkendenprofil ist kein Ersatz für den Release-Build.
 
-> **Hinweis zum VPS-Deployment:** Das entfernte Image-Verzeichnis `/usr/lib/node_modules/omniroute/app/`
-> bleibt unverändert. Die Deployment-Skills synchronisieren den Inhalt von `dist/` per rsync dorthin.
-> Nur der Build-Ausgabepfad innerhalb des Repositorys wurde verschoben (`app/` → `dist/`).
+> **VPS -Bereitstellungshinweis:** Das Remote-Image-Verzeichnis `/usr/lib/node_modules/omniroute/app/` bleibt unverändert. Die Deploy-Skills rsyncen den Inhalt von `dist/` hinein. Nur der In-Repo-Build-Ausgabepfad wurde verschoben (`app/` → `dist/`).
 
-Standard-URLs:
+Standard- URLs:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **Armaturenbrett** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -424,10 +415,10 @@ Verwenden Sie anschließend die Skills `/deploy-vps-*-cc`, die `dist/` per rsync
 
 ---
 
-## Hilfe erhalten
+## Hilfe bekommen
 
-- **Architektur**: Siehe [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API-Referenz**: Siehe [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Sicherheitsdokumentation**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Betriebsdokumentation**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Probleme**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Architektur** : Siehe [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API Referenz** : Siehe [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Sicherheitsdokumente** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Ops-Dokumente** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Probleme** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

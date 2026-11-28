@@ -13,29 +13,23 @@ dan langkah-langkah rekonsiliasinya.
 
 ---
 
-## Penyiapan Pengembangan
+## Pengaturan Pengembangan
 
 ### Prasyarat
 
 - **Node.js** `>=22.22.2 <23`, atau `>=24.0.0 <27` (disarankan: 24 LTS)
-- **npm** 10+
+- **npm** 10 +
 
-> **Windows dengan Node 24:** gunakan rilis patch 24 LTS saat ini (setidaknya 24.20.0).
-> Rilis sebelumnya dapat berhenti setelah pengujian berhasil ketika `--test-force-exit` menutup
-> proses. [Perbaikan libuv Windows](https://github.com/nodejs/node/pull/61999) dari Node
-> mengatasi crash runtime ini; tetap aktifkan assertion pengujian dan pemeriksaan keluar runner.
+> **Windows dengan Node 24:** gunakan rilis patch 24 LTS saat ini (setidaknya 24.20.0). Rilis sebelumnya dapat dibatalkan setelah pengujian berhasil ketika `--test-force-exit` menutup prosesnya. [Perbaikan Windows libuv](https://github.com/nodejs/node/pull/61999) Node mengatasi kerusakan runtime ini; tetap aktifkan pernyataan pengujian dan pemeriksaan keluar pelari.
 
-> **Pengguna npm v11+ (Node 24+):** Setelah `npm install`, verifikasi bahwa modul native telah terpasang:
-> `node -e "require('better-sqlite3')"`. Jika gagal dengan `MODULE_NOT_FOUND`,
-> jalankan `npm approve-scripts better-sqlite3 && npm install`. Lihat
-> [Pemecahan Masalah](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **pengguna npm v11 + (Node 24 +):** Setelah `npm install`, verifikasi modul asli telah diinstal: `node -e "require('better-sqlite3')"`. Jika gagal dengan `MODULE_NOT_FOUND`, jalankan `npm approve-scripts better-sqlite3 && npm install`. Lihat [Pemecahan Masalah](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Kloning & Instalasi
+### Kloning & Instal
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -43,91 +37,83 @@ npm install
 ### Variabel Lingkungan
 
 ```bash
-# Buat .env Anda dari templat
+# Create your .env from the template
 cp .env.example .env
 
-# Buat rahasia yang diperlukan
+# Generate required secrets
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Variabel utama untuk pengembangan:
+Variabel kunci untuk pengembangan:
 
-| Variabel               | Default Pengembangan     | Deskripsi                   |
+| Variabel               | Default Pengembangan     | Keterangan                  |
 | ---------------------- | ------------------------ | --------------------------- |
-| `PORT`                 | `20128`                  | Port server                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL dasar untuk frontend    |
-| `JWT_SECRET`           | (buat di atas)           | Rahasia penandatanganan JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Kata sandi login pertama    |
-| `APP_LOG_LEVEL`        | `info`                   | Tingkat detail log          |
+| `PORT`                 | `20128`                  | Pelabuhan server            |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis URL untuk frontend    |
+| `JWT_SECRET`           | (hasilkan di atas)       | rahasia penandatanganan JWT |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Kata sandi masuk pertama    |
+| `APP_LOG_LEVEL`        | `info`                   | Catat tingkat verbositas    |
 
 ### Pengaturan Dasbor
 
-Dasbor menyediakan toggle UI untuk fitur yang juga dapat dikonfigurasi melalui variabel lingkungan:
+Dasbor menyediakan tombol UI untuk fitur yang juga dapat dikonfigurasi melalui variabel lingkungan:
 
-| Lokasi Pengaturan   | Toggle             | Deskripsi                            |
-| ------------------- | ------------------ | ------------------------------------ |
-| Settings → Advanced | Debug Mode         | Aktifkan log permintaan debug (UI)   |
-| Settings → General  | Sidebar Visibility | Tampilkan/sembunyikan bagian sidebar |
+| Mengatur Lokasi       | Beralih                | Keterangan                         |
+| --------------------- | ---------------------- | ---------------------------------- |
+| Pengaturan → Lanjutan | Modus Debug            | Aktifkan log permintaan debug (UI) |
+| Pengaturan → Umum     | Visibilitas Bilah Sisi | bagian sidebar Show/hide           |
 
-Pengaturan ini disimpan di database dan tetap berlaku setelah restart, serta mengesampingkan default variabel lingkungan jika ditetapkan.
+Pengaturan ini disimpan dalam database dan bertahan selama restart, mengesampingkan default env var ketika diatur.
 
-### Menjalankan Secara Lokal
+### Berjalan Secara Lokal
 
 ```bash
-# Mode pengembangan (muat ulang otomatis)
+# Development mode (hot reload)
 npm run dev
 
-# Build produksi
-npm run build    # next build → .build/next/ lalu assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Kompilasi backend/API saja yang cepat untuk perubahan kontributor
+# Fast backend/API-only compile for contributor changes
 npm run build:contributor
 
-# Build rilis (build ulang bersih + sentinel HEAD — diperlukan untuk deployment)
-npm run build:release   # rm -rf .build dist lalu build + menulis dist/BUILD_SHA
+# Release build (clean rebuild + HEAD sentinel — required for deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Konfigurasi port umum
+# Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Build kontributor melakukan validasi khusus kompilasi: build ini tidak merakit
-distribusi standalone atau membangun aset pengemasan native opsional. Gunakan build produksi biasa saat
-Anda perlu memvalidasi bundel yang siap dikirim.
+Build kontributor hanya melakukan validasi kompilasi: build ini tidak merakit distribusi mandiri atau membuat aset pengemasan asli opsional. Gunakan build produksi reguler saat Anda perlu memvalidasi paket yang dapat dikirim.
 
-### Tata Letak Output Build
+### Bangun Tata Letak Keluaran
 
-| Direktori | Isi                                                                      | Dilacak |
-| --------- | ------------------------------------------------------------------------ | ------- |
-| `src/`    | Sumber aplikasi (TypeScript / TSX)                                       | Ya      |
-| `.build/` | Perantara — output `next build` (diabaikan git, `distDir = .build/next`) | Tidak   |
-| `dist/`   | Bundel siap dikirim — dirakit oleh `assembleStandalone` (diabaikan git)  | Tidak   |
+| Direktori | Isi                                                                        | Dilacak |
+| --------- | -------------------------------------------------------------------------- | ------- |
+| `src/`    | Sumber aplikasi (TypeScript / TSX)                                         | Ya      |
+| `.build/` | Keluaran — `next build` perantara (gitignored, `distDir = .build/next`)    | TIDAK   |
+| `dist/`   | Bundel — yang dapat dikirim dirakit oleh `assembleStandalone` (gitignored) | TIDAK   |
 
-Pipeline build adalah satu tahap:
+Pipeline build adalah single pass:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (output Next.js)
-  └─ assembleStandalone()                 (menyalin standalone + static + public + aset native)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` juga membersihkan kedua direktori terlebih dahulu dan menulis
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) sebagai sentinel integritas deployment.
+`npm run build:release` juga membersihkan kedua direktori terlebih dahulu dan menulis `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) sebagai penjaga integritas penerapan.
 
-`npm run build:contributor` menggunakan profil build khusus backend. Profil ini sementara mengganti file
-UI dasbor dengan stub saat melakukan build, mempertahankan handler rute API, lalu memulihkan file asli
-setelah build selesai. Gunakan `npm run build` untuk perubahan yang memengaruhi UI dasbor atau untuk validasi
-rilis lengkap; profil kontributor bukan pengganti build rilis.
+`npm run build:contributor` menggunakan profil build khusus backend. Ini untuk sementara menghentikan file UI dasbor saat membangun, mempertahankan penangan rute API, dan memulihkan file asli setelah pembuatan. Gunakan `npm run build` untuk perubahan yang memengaruhi dasbor UI atau untuk validasi rilis penuh; profil kontributor bukan pengganti versi rilis.
 
-> **Catatan deployment VPS:** direktori image jarak jauh `/usr/lib/node_modules/omniroute/app/`
-> tidak berubah. Skill deployment melakukan rsync terhadap isi `dist/` ke dalamnya.
-> Hanya jalur output build di dalam repositori yang berpindah (`app/` → `dist/`).
+> **catatan penerapan VPS :** direktori gambar jarak jauh `/usr/lib/node_modules/omniroute/app/` tidak berubah. Keterampilan penyebaran menyinkronkan konten `dist/` ke dalamnya. Hanya jalur keluaran build dalam repo yang dipindahkan (`app/` → `dist/`).
 
-URL default:
+URLs bawaan :
 
-- **Dasbor**: `http://localhost:20128/dashboard`
+- **Dasbor** : `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -435,8 +421,8 @@ Kemudian gunakan skill `/deploy-vps-*-cc` yang menyinkronkan `dist/` melalui rsy
 
 ## Mendapatkan Bantuan
 
-- **Arsitektur**: Lihat [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **Referensi API**: Lihat [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Dokumentasi keamanan**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
-- **Dokumentasi operasional**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Masalah**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Arsitektur** : Lihat [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **Referensi API** : Lihat [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Dokumen keamanan** : [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Dokumen operasi** : [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Masalah** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

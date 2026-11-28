@@ -4,10 +4,9 @@
 
 ---
 
-> **D’Úsáideoirí**: Ag lorg treoir shimplí? Féach ar an [Treoir maidir le Sraitheanna Saor in Aisce](../getting-started/FREE-TIERS-GUIDE.md) le haghaidh treoracha céim ar chéim chun IS saor in aisce a fháil.
+> **D'Úsáideoirí** : Ag lorg treoir shimplí? Féach an [Treoir Sraitheanna Saor in Aisce](../getting-started/FREE-TIERS-GUIDE.md) le haghaidh treoracha céim ar chéim maidir le AI saor in aisce a fháil.
 
-> **Taighde deireanach déanta:** 2026-06-17 — taighde gréasáin de réir soláthraí (doiciméid oifigiúla + nuacht ó na 7 lá roimhe sin, babhta 50 gníomhaire le fíorú sáraíochta) inar nuashonraíodh gach cuóta sraithe saor in aisce + ToS. **Ath-iniúchadh páirteach 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — féach an nóta dátaithe thíos).
-> **Foinse údarásach (catalóg):** `open-sse/config/freeModelCatalog.ts` (buiséid in aghaidh na SAMHLA, dí-dhúblaithe de réir linne). Tagann na figiúirí maidir le buiséid chomharthaí thíos ó thaighde beo gréasáin agus is **neasluach** iad — féach [Modheolaíocht & foláirimh](#methodology--caveats).
+> **Iniúchadh deiridh:** 2026-11-23. Athosclaíodh gach sraith le cuóta, gach tairiscint scoir agus gach geata cárta i gcoinne leathanach an tsoláthraí féin an lá sin (`config/quality/free-catalog-evidence.json`). Gabhann níos luaithe: taighde in aghaidh an tsoláthraí 2026-06-17 agus ath-iniúchadh páirteach 2026-09-02.** Foinse na fírinne (catalóg):** `open-sse/config/freeModelCatalog.ts` (buiséid in aghaidh an tSamhail, comhthiomsaithe). Tagann na huimhreacha dearbháin-bhuiséid thíos ó thaighde gréasáin beo agus is ionann iad agus** comhfhogasú** — féach [Modheolaíocht & caveats](#methodology--caveats).
 
 ## TL;DR — cé mhéad tátal in aisce a chomhiomlánaítear OmniRoute i ndáiríre?
 
@@ -17,20 +16,21 @@ Déanann na figiúirí seo cur síos ar chuntais tríú páirtí ar leithligh ag
 
 | méadrach                                              | Comharthaí / míosa      | Brí                                                                                                                                                                                                                                                                                              |
 | ----------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Deontas athfhillteach doiciméadaithe (seasta)**     | **~ 1.62B**             | Sraith saor** linnte** (catalóg in aghaidh an tsamhail), gach linn roinnte a chomhaireamh** uair amháin** . An fhoinse beo taobh thiar de `/api/free-tier/summary` agus leathanach Buiséid Saorshraith an deais.** Bain úsáid as an uimhir seo.**                                                |
-| **+ chéad mhí le creidmheasanna sínithe**             | **~ 2. 22B**            | Creidmheasanna sínithe aon-uaire seasta + (Z.AI 20M, DeepSeek 5M, ...), asbhainte in aghaidh an chuntais.** An chéad mhí amháin** — ní atarlú.                                                                                                                                                   |
-| **+ saor in aisce go buan, gan caipín foilsithe**     | _un-inchainníochtaithe_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — rochtain athfhillteach fíor, rate/concurrency-limited,** gan caipín comharthaí a chomhaireamh** . Liostaithe, níor achoimriú riamh (iad a chomhaireamh ag `RPM×24/7` is é an boilsciú a dhiúltóidh muid). |
+| **Deontas athfhillteach doiciméadaithe (seasta)**     | **~90m**                | Sraith saor** linnte** (catalóg in aghaidh an tsamhail), gach linn roinnte a chomhaireamh** uair** . An fhoinse beo taobh thiar de `/api/free-tier/summary` agus leathanach Buiséid Saorshraith an deais.** Bain úsáid as an uimhir seo.**                                                       |
+| **+ chéad mhí le creidmheasanna sínithe**             | **~ 153m**              | Creidmheasanna sínithe aon-uaire seasta + (Z.AI 20M, DeepSeek 5M, ...), asbhainte in aghaidh an chuntais.** An chéad mhí amháin** — ní atarlú.                                                                                                                                                   |
+| **+ saor in aisce go buan, gan caipín foilsithe**     | _un-inchainníochtaithe_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini` — rochtain athfhillteach fíor, rate/concurrency-limited,** gan caipín chomhartha a chomhaireamh** . Liostaithe, níor achoimriú riamh (iad a chomhaireamh ag `RPM×24/7` is é an boilsciú a dhiúltóidh muid). |
 | **treisiú taisce-dhíghlasáil +**                      | **+~ 24M**              | A aon-uaire** $10** ardaíonn breisiú OpenRouter a linn saor ó 50 → 1000 req/day. Tuairiscíodh go leithleach agus mar sin ní ardaíonn sé an líon seasta riamh.                                                                                                                                    |
 | **+ taobh thiar de sheiceáil aitheantais réigiúnach** | **+~**                  | `modelscope` (Alibaba Cloud ceangailteach + mórthír-an tSín fíorú fíor-ainm). Cuóta athfhillteach fíor, nochta mar `gatedRecurringTokens` / `gatedProviders` agus ar an deais. Ná hachoimriú sa cheannlíne riamh: +~ 6M taobh thiar de fhíorú aitheantais réigiúnach.                            |
-| Uasteorainn theoiriciúil (gach teorainn rátaí, 24/7)  | ~ 10B                   | Suim gach teorainn ráta soláthraí arna eachtarshuíomh chuig úsáid neamh-stad.** Ní ráthaíocht** — ná cuir ceannteideal air seo.                                                                                                                                                                  |
 
-**Ceannlíne macánta:** Comhiomláin _OmniRoute**~ 1.62B comharthaí saor in aisce doiciméadaithe in aghaidh na míosa** (suas go dtí ~ 2.22B i do chéad mhí le creidmheasanna sínithe) ar fud 26 linn snámha saor-shraith — móide eireaball fada de sholáthraithe buan-saor in aisce, gan caipín — agus RTK + Comhbhrú Caveman (coigilteas comhartha 15-95%) níos mó ná sin._
+**Ceannlíne macánta:** catalóga _OmniRoute**~ 90m comharthaí saor in aisce** in aghaidh na míosa ar féidir leat a úsáid i ndáiríre (suas go dtí ~ 153M i do chéad mhí le creidmheasanna sínithe), ó 12 linn snámha le cuóta foilsithe, chomh maith le heireaball fada de sholáthróirí gan teorainn, gan teorainn. RTK + Comhbhrú Caveman (coigilteas comharthaí 15-95%) sínte sin a thuilleadh._
 
-> **Cén fáth ar thit sé seo ón ~ 1.94B roimhe seo.** Is ceartú macántachta é an t-athnuachan 2026-06-17, ní caillteanas: tá `gemini` díothaithe anois i gcomhthiomsú (brothaíodh é trí gach leagan Flash a chomhaireamh ar leithligh, 462M → 60M), ceartaíodh `cloudflare-ai` go dtí a fhíor- 10k-Neurons/day (122M → 30M), `doubao` athrangaithe mar shíntiús aonuaire (síntiús aonuaire bainte amach),`chutes`/`phind`/`kluster` scortha). Fritháireamh go páirteach ag `llm7` (ceart 5M/day → 150M) agus soláthraithe nua saor in aisce (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+> _Nótaí stairiúla. Déanann na figiúirí thíos cur síos ar an gcatalóg ag an am; ní huimhreacha an lae inniu iad._
 >
-> **Ceartaithe tuilleadh go ~ 1.37B in v3.8.42:** Rinneadh `longcat` a athrangú ó dheontas athfhillteach 150M/mo go creidmheas sínithe 10M aonuaire nuair a tháinig deireadh lena réamhamharc saor in aisce. An riail macántachta céanna — níor thit aon soláthraí trí dhearmad.
+> **Cén fáth gur thit sé seo ón 1.94 billiún roimhe seo.** Is ceartú macántachta é an t-athnuachan 2026-06-17, ní caillteanas: tá `gemini` anois comhthiomsaithe (brothaíodh é trí gach leagan Flash a chomhaireamh ar leithligh, 462M → 60M), ceartaíodh `cloudflare-ai` go dtí a fhíor- 10k-Neurons/day (122M → 30M), `doubao` athrangaithe mar thagairt aonuaire (síniú aon-uaire), agus athrangú creidmheasa `chutes`/`phind`/`kluster` scortha). Fritháireamh go páirteach ag `llm7` (ceart 5M/day → 150M) agus soláthraithe nua saor in aisce (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
-> **Nuashonraithe an 2026-08-26 tar éis éirí as Felo Web:** Tá Felo Web eisiata fad is a fhanann a provenance/licensing díorthaithe GPL ar HOLD; thuairiscigh an fhoinse 38 eochair linne ag an am. Tá comhaireamh na linne beo agus CI-gated (teipeann ar `check:docs-counts` an tógáil má shreabhann na huimhreacha thuas ó `computeFreeModelTotals()`).
+> **Ceartaithe tuilleadh go 1.37 billiún in v3.8.42:** Rinneadh `longcat` a athrangú ó dheontas athfhillteach 150M/mo go creidmheas sínithe 10M aonuaire nuair a tháinig deireadh lena réamhamharc saor in aisce. An riail macántachta céanna — níor thit aon soláthraí trí dhearmad.
+>
+> **Nuashonraithe an 2026-08-26 tar éis éirí as Felo Web:** Tá Felo Web eisiata fad is a fhanann a provenance/licensing díorthaithe GPL ar HOLD; thuairiscigh an fhoinse 38 eochair linne ag an am.
 >
 > **Ath-iniúchadh ar 2026-09-02 i gcoinne leathanaigh na soláthraithe féin** (foinsí: na tráchtanna `// evidence:` in aice le gach iontráil ath-iniúchta in `open-sse/config/freeModelCatalog.data.ts`): ní fhoilsíonn `gemini` agus `ollama-cloud` figiúr chomharthaíochta a thuilleadh (bhain Google an tábla saor in aisce in aghaidh an tsamhail ar 2025-12-23; "creidmheasanna úsáide tosaithe" is ea plean saor Ollama) agus tá siad liostaithe anois mar** gan teorainn** , níor achoimriú riamh (− 80M); Tá `groq` cúig** in aghaidh an tsamhail** caipíní 200K-TPD (6M an ceann, + 15M) le trí IDs scortha thit; Is buicéad 7M/day amháin é `nara` (+ 60M, 210M). Tá `mistral`'s 1B le feiceáil sa chonsól cuntais amháin — féach _Evidence classes_ faoi Modheolaíocht.
 >
@@ -38,26 +38,114 @@ Déanann na figiúirí seo cur síos ar chuntais tríú páirtí ar leithligh ag
 >
 > **Ceartaithe ar 2026-09-03 (#11773):** Athrangaíodh `cerebras` ó dheontas athfhillteach 30M/mo (sean-triail gan chárta 1M tokens/day ) go creidmheas sínithe aonuaire $5 a éilíonn modh íocaíochta. An riail macántachta céanna agus LongCat.
 >
-> **Plus xKiro (2026-09-03):** cuireann an linn snámha `xkiro-free` nua (150M/mo) 35ú eochair linn athfhillteach leis. Fanann Felo Web eisiata fad is a fhanann provenance/licensing díorthaithe GPL ar HOLD. Tuairiscíonn an fhoinse anois** 26 eochair linn snámha athfhillteach** agus**~ 1.62B seasta** — an uimhir bheo, CI-gated (`check:docs-counts` theipeann ar an tógáil má drifts seo ó `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** cuireann an linn snámha `xkiro-free` nua (150M/mo) 35ú eochair linn athfhillteach leis. Fanann Felo Web eisiata fad is a fhanann provenance/licensing díorthaithe GPL ar HOLD. Ag an am thuairiscigh an fhoinse 34 eochair linn snámha agus 1.62 billiún comharthaí in aghaidh na míosa (seasmhach).
 
-Is mó** doiciméadaithe** ranníocóirí: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (cúig caipín in aghaidh an mhúnla), `cloudflare-ai` 30M, `api-airforce` 24M. (Tá `longcat` eisiata — is creidmheas sínithe aonuaire é a dheontas 10M LongCat-2.0, le geata KYC, ní buiséad míosúil athfhillteach.)
+Is mó** doiciméadaithe** rannchuiditheoirí leis an bhfíorfhigiúr inniu: `groq` 24M (4 caipín in aghaidh an mhúnla), `api-airforce` 24M, `cloudflare-ai` 23M, `xkiro` 15M. (Tá `longcat` eisiata — Is creidmheas sínithe aonuaire é a dheontas 10M LongCat-2.0, le geata KYC, ní buiséad míosúil athfhillteach.)
 
-> ⚠️ Tá an uasteorainn theoiriciúil (~ 10B) teannta ag soláthraithe teorainn-ráta amháin le** gan caipín chomhartha foilsithe** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`) a mbeadh a bhfigiúirí `RPM/TPM × 24/7 × 30d` — uasmhéid teoiriciúil ní chothóidh aon chuntas amháin. Tá siad** eisiata** ón uimhir inchosanta (léirithe sa tsraith "saor in aisce go buan, gan caipín" ina ionad). Is é seo an boilsciú céanna a fhágann go bhfuil éilimh il-billiún iomaitheoirí neamhiontaofa.
+## Ceartúchán, Samhain 2026
+
+Go dtí an scaoileadh seo, dúirt an leathanach seo agus an README 1.62 billiún comharthaí in aisce in aghaidh na míosa. Bhí sé sin mícheart. D'iompair ceithre linn 93% de, agus d'athraigh an soláthraí go léir ceithre linn agus d'fhan ár gcatalóg mar a chéile. Is é an fíorfhigiúr inniu ná comharthaí saor in aisce ~ 90M in aghaidh na míosa. Cuireann an tábla an méid a d’athraigh gach soláthraí in aice leis an méid a d’éirigh linn.
+
+| Cad a d'athraigh ag an soláthraí (dáta, foinse)                                                                                                        | Cad a fuaireamar mícheart (cad, ó shin)                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Mistral: ní chuimsíonn an modh saor in aisce rochtain API a thuilleadh (docs.mistral.ai, léigh ar 2026-11-18)                                          | Choinníomar ag comhaireamh 1 billiún comhartha in aghaidh na míosa ó léamh consól 2026-09-02 agus níor sheiceáil muid arís é |
+| Nara: ní liostaíonn an plean saor in aisce aon mhúnlaí ( `router.bynara.id/api/plans` an tsoláthraí , léigh ar 2026-11-18)                             | Rinneamar 210 milliún airíochtaí a chomhaireamh in aghaidh na míosa                                                          |
+| xKiro: 500K comharthaí in aghaidh an lae in aghaidh an chuntais (xkiro.com, léigh ar 2026-11-18)                                                       | D’fhan 30 samhail IDs nach bhfuil ann a thuilleadh sa chatalóg                                                               |
+| LLM7: tá leathanach na dteorainneacha imithe agus ní fhoilsíonn aon leathanach oifigiúil cuóta in aisce (2026-11-23)                                   | Rinneamar 150 milliún comhartha a chomhaireamh in aghaidh na míosa gan fianaise dátaithe                                     |
+| Groq: scoireadh samhail amháin sa linn saor in aisce (2026-09-14)                                                                                      | Choinnigh an linn snámha a mhéid d'aois                                                                                      |
+| AgentRouter: liostaíonn an soláthraí creidmheas seiceála isteach laethúil $25 agus $50 sa bhreis le haghaidh clárúcháin cuireadh (léigh ar 2026-11-23) | Liostaíomar creidmheas sínithe $200                                                                                          |
+| Predibase: tháinig deireadh leis an táirge                                                                                                             | Rinneamar a chreidmheas sínithe a chomhaireamh fós sa chéad mhí                                                              |
+| (aon cheann)                                                                                                                                           | Choinnigh 16 soláthraí an bhratach saorthairisceana nuair a tháinig deireadh lena dtairiscint                                |
+| (aon cheann)                                                                                                                                           | Gheall an README go ndéanfaí ath-iniúchadh gach coicís. Bhí an ceann deireanach roimhe seo ar 2026-09-02                     |
+| (aon cheann)                                                                                                                                           | Cheadaigh seiceáil na ndoiciméad sruth 0.05B agus níorbh fhéidir na figiúirí sna milliúin a léamh                            |
+
+Má dhéantar achoimre ar chuóta amháin in aghaidh an tsraith, méadaítear aon chatalóg, ár gcatalóg san áireamh. Sin é an fáth go bhfuil a lipéad ar an bhfigiúr achoimrithe as a chéile agus go suíonn an fíorcheann díreach faoi.
+
+## Cad a chomhaireamh
+
+Áireamh as a chéile i dtreo na bhfigiúirí saor in aisce nuair a bhíonn sé seo go léir:
+
+- Athfhilltear an cuóta agus foilsítear é ar leathanach an tsoláthraí féin, agus fianaise dátaithe in aice leis an tsraith sa chatalóg.
+- Cuntas amháin in aghaidh an tsoláthraí. Ní dhéanfaidh aon ní a dteastaíonn íocaíocht, cárta, éarlais nó seiceáil aitheantais (KYC). Tá cuóta a bhfuil uimhir theileafóin, Telegram nó Discord ag teastáil uaidh le clárú liostaithe ó chéile, mar "le síniú sóisialta", nach bhfuil san fhíorfhigiúr riamh.
+- Níl aon soláthraí faoi bhratach `tos: "avoid"`, agus ní raibh ach API oifigiúil an tsoláthraí .
+- Ní áirítear creidmheasanna clárúcháin aonuaire ach san fhigiúr don chéad mhí, agus ní áirítear iad ach amháin nuair nach n-iarrtar cárta ar bith. Treisiú ar leith is ea éarlais aonuaire a ardaíonn cuóta. Ní áirítear arduithe céime san fhíorfhigiúr.
+- Fanann soláthraithe cuardaigh, gutha agus meán amach as an gcomhaireamh de réir cineáil rochtana agus as gach figiúr chomhartha. Faigheann siad a n-áireamh féin, ina n-aonad féin (torthaí, carachtair, íomhánna), ar an leathanach seo nuair a chuireann athchomhaireamh iad; ní chuirtear iad sin lena chéile nó ní dhéantar comharthaí orthu.
+
+Cad a chiallaíonn gach comhaireamh poiblí:
+
+- **Soláthraithe le rochtain saor in aisce** (50 inniu: 43 le heochair API, 6 gan eochair, 1 trí chuntas uirlisí): soláthraithe le sraith catalóige amháin ar a laghad a thugann rochtain saor in aisce, de réir mar a shroicheann tú é.
+- **Sraitheanna catalóg le rochtain saor in aisce** (214 inniu): sraith amháin in aghaidh an tsoláthraí agus an tsamhail.
+- **Linnte le cuóta foilsithe** (12 inniu): na cuótaí roinnte taobh thiar den fhíorfhigiúr, gach ceann díobh á chomhaireamh uair amháin.
+- **Samhlacha ar leith saor in aisce,** (185 inniu): na sraitheanna grúpáilte de réir samhail ID.
+- **Brataithe le tairiscint saor in aisce** (140 + inniu): gach soláthraí a n-iompraíonn `hasFree` a iontráil sa chlár, lena n-áirítear soláthraithe cuardaigh, gutha agus meán, trialacha agus creidmheasanna sínithe.
+
+Déantar gach comhaireamh a chatalógú, ní dhéantar é a thástáil in aghaidh an ghlao: deir sé cad a liostaítear sa chatalóg, ní freagraíonn gach bealach faoi láthair.
+
+## Conas a dhéanaimid comhaireamh
+
+Tagann trí fhigiúr ón gcatalóg chéanna, arna hiniúchadh ar 2026-11-23:
+
+- **An figiúr fíor, ~ 90M comharthaí saor in aisce in aghaidh na míosa.** Déantar gach cuóta comhroinnte a chomhaireamh uair amháin, mar sin is liúntas amháin iad cúig mhúnla taobh thiar de liúntas laethúil amháin. Seo an méid is féidir le cuntas amháin ag gach soláthraí a úsáid i ndáiríre. Le creidmheasanna sínithe aonuaire, ~ 153M i do chéad mhí.
+- **Achoimriú an figiúr mór, ~ 11.3B as a chéile** , tairiscintí dar críoch san áireamh. Seo é an chaoi a n-áirítear catalóga eile. Is stair é beagnach ar fad: 98.6% ó thairiscintí nach ann dóibh a thuilleadh. Ní phriontáilimid é ach lena lipéad agus leis an bhfíor-fhíor in aice leis.
+- **An chatalóg bheo, ~ 159M arna achoimriú in aghaidh an tsraith bheo** : an tsuim chéanna as a chéile gan na tairiscintí dar críoch.
+
+Leanann an modh as a chéile (`row-sum-v1`) ceithre riail:
+
+1. Cuirtear le gach sraith liostaithe mar atá sé, gan na sraitheanna a roinneann linn amháin a chumasc.
+2. Ní chuirtear leis ach cuótaí a fhoilsítear mar chomharthaí. Is ionann cuóta a fhoilsítear in iarratais, creidmheasanna nó néaróin mar nialas (`FREE_QUOTA_UNIT` in `open-sse/config/freeModelCatalog.ts`).
+3. Fágtar amach creidmheasanna sínithe, treisithe taisce agus sraitheanna múchta (`enabled: false`).
+4. Cuireann an figiúr mór mórleabhar na dtairiscintí dar críoch (`open-sse/config/freeModelCatalog.retired.data.ts`) leis an gcuóta deiridh i ngach sraith atá liostaithe. Níor scoir ach sraitheanna ó chuaigh `RETIRED_LEDGER_SINCE` isteach ann, agus titeann gach sraith amach 12 mhí tar éis di críochnú.
+
+Má stopann an bealach comhairimh as a chéile a bheith coitianta, nó má chinneann an cothaitheoir amhlaidh, fágann an figiúr mór gach leathanach agus ní fhanann ach an fíorfhigiúr.
+
+## Bainte / gan aon sraith in aisce
+
+Soláthraithe ar tháinig deireadh lena dtairiscint in aisce nó nárbh fhéidir a dhearbhú. Fanann siad sa chlár le `hasFree: false` (nó tá siad ar scor ón gcatalóg in aisce) agus ní áirítear iad in aon fhigiúr saor in aisce. Ní hé seo an liosta soláthraithe a baineadh de OmniRoute ar iarratas (`docs/reference/REMOVED_PROVIDERS.md`).
+
+| Soláthraí                | Ós rud é   | Cén fáth                                                                                            | Foinse                                          |
+| ------------------------ | ---------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `mistral`                | 2026-11-23 | Ní chuimsíonn an modh saor in aisce rochtain API a thuilleadh                                       | docs.mistral.ai (teorainneacha úsáide)          |
+| `nara`                   | 2026-11-23 | Níl aon samhlacha sa phlean saor in aisce                                                           | `router.bynara.id/api/plans`                    |
+| `llm7`                   | 2026-11-23 | Ní fhoilsíonn aon leathanach oifigiúil cuóta in aisce                                               | suíomh soláthraí                                |
+| `navy`                   | 2026-11-23 | Níorbh fhéidir aon chuóta in aisce a dhearbhú ar na leathanaigh oifigiúla                           | aip.navy                                        |
+| `bluesminds`             | 2026-11-23 | Creidmheas riachtanais úsáide ceannaithe ón soláthraí                                               | `api.bluesminds.com/api/status`                 |
+| `arcee-ai`               | 2026-11-23 | Praghsáil íoctha amháin                                                                             | docs.arcee.ai (praghsáil)                       |
+| `huggingface`            | 2026-11-23 | Caithfidh cuntais in aisce creidmheasanna a cheannach nó uasghrádú go PRO                           | huggingface.co (praghsanna Soláthraithe Tátail) |
+| `huggingchat`            | 2026-11-23 | Tá creidiúintí ceannaithe nó PRO de dhíth ar thátal Aghaidh Hugging                                 | huggingface.co (praghsanna Soláthraithe Tátail) |
+| `ainative`               | 2026-11-23 | Íoctar an plean Caitheamh aimsire tar éis triail 3 lá                                               | leathanach praghsála soláthraí                  |
+| `stepfun`                | 2026-11-23 | Praghsáil íoc in aghaidh na húsáide amháin                                                          | leathanach praghsála soláthraí                  |
+| `predibase`              | 2026-11-23 | Táirge scortha                                                                                      | predibase.com                                   |
+| `poolside`               | 2026-10-31 | Tátail dhíreach múchta                                                                              | ardán.linn.ai                                   |
+| `amazon-q`               | 2026-05-15 | Níl aon chlárú Sraith Saor in Aisce nua                                                             | leathanach soláthraí                            |
+| `chat-oripe`             | 2026-11-23 | Freagraíonn an t-óstach API HTTP 530                                                                | API óstach                                      |
+| `naga-ai`                | 2026-11-23 | Dúblach an tsoláthraí Naga.ac                                                                       | api.naga.ac                                     |
+| `dxnt`                   | 2026-11-23 | Tá an bónas sínithe ann, ach ní ghlacann múnla ar bith leis                                         | dxnt.com                                        |
+| `ollama-cloud`           | 2026-11-09 | Tá samhlacha néalphá in aghaidh an chomhartha nó clúdaithe ag pleananna íoctha                      | ollama.com (#19334)                             |
+| `chutes`                 | 2026-03    | Chríochnaigh sraith saor in aisce,                                                                  | leathanach soláthraí                            |
+| `phind`                  | 2026-01    | Cuideachta dúnta síos                                                                               | leathanach soláthraí                            |
+| `kluster`                | 2026-06-09 | Luí na gréine (bogtha go MITO)                                                                      | leathanach soláthraí                            |
+| `gitlawb`, `gitlawb-gmi` | 2026-05-24 | MiMo saor in aisce cúlghairthe; Chríochnaigh ardú céime Nemotron 2026-06 (athfhíoraithe 2026-06-18) | leathanach soláthraí                            |
+| `aimlapi`                | 2026-06-18 | Sraith saor in aisce ar sos                                                                         | leathanach soláthraí                            |
+| `yi`                     | 2026-06-18 | Yi-Light ar scor, íoc mar a théann tú                                                               | leathanach soláthraí                            |
+| `featherless-ai`         | 2026-06    | Níl aon sraith saor in aisce i láthair na huaire                                                    | leathanach soláthraí                            |
+| `chipotle`               | 2026-09-15 | Freagraíonn an ghiuirléid comhrá taobh thiar de 404 ar gach bealach (#13131, #4037)                 | amelia.chipotle.com                             |
+
+fanacht `iflytek` / `sparkdesk` liostaithe le nóta ToS-rabhadh: Tá Spark Lite saor in aisce, ach cuireann an ToS srian le húsáid seachfhreastalaí agus sealaíochta.
 
 ---
 
-## 2026-06-17 athnuachan — cad a athraíodh ó 2026-06-05
+## 2026-06-17 athnuachan — cad a d’athraigh ó 2026-06-05
 
-Rinne pas taighde gréasáin le 50 gníomhaire (doiciméid oifigiúla + nuacht an 7 lá seo caite, fíoraithe go frithpháirteach) athnuachan ar an gcatalóg ar fad. Buaicphointí:
+Rinne pas taighde gréasáin 50 gníomhaire (doiciméid oifigiúla + last-7-days news, arna fhíorú go sáraíochta) an chatalóg iomlán a athnuachan. Buaicphointí:
 
-- **Bainte / gan sraith saor in aisce (2026):** `chutes` (chríochnaigh an tsraith saor in aisce 2026-03), `phind` (dhún an chuideachta 2026-01), `kluster` (curtha as feidhm 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo saor in aisce aisghairmithe 2026-05-24, chríochnaigh an promóisean Nemotron 2026-06 — athfhíoraithe 2026-06-18), `aimlapi` (sraith saor in aisce curtha ar sos — athfhíoraithe 2026-06-18), `yi` (Yi-Light scortha, íoc de réir úsáide — athfhíoraithe 2026-06-18), `featherless-ai` (gan sraith saor in aisce faoi láthair), `chipotle` ("Pepper AI" Chipotle — tugann an giuirléid comhrá Amelia ag `amelia.chipotle.com`, a rinneadh droim-innealtóireacht uirthi agus a raibh an soláthraí ag cumarsáid léi, 404 anois ar gach bealach, an fhréamh san áireamh; cúlchríoch dhíchomisiúnaithe/bogtha, deimhnithe 2026-09-15 — bainte go hiomlán as an gcatalóg, #13131/#4037). Fanann `iflytek` / `sparkdesk` liostaithe ach tá nóta aireachais ToS leo (tá Spark Lite saor in aisce; cuireann an ToS srian ar úsáid proxy/relay).
-- **Gemini** — dúnadh `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01 agus d'fhág `2.5 Pro` an tsraith saor in aisce (2026-04); is é **teaghlach Flash amháin** atá sa tsraith saor in aisce anois (2.5/3/3.1/3.5 Flash + Gemma). **Comhthiomsaíonn** an chatalóg teaghlach Flash anois (bhí sé ró-mhór mar gur comhairíodh gach leagan as a chéile: 462M → 60M).
-- **Uimhreacha ceartaithe:** `cloudflare-ai` 122M → **30M** (an 10k-Neurons/lá iarbhír), `doubao` athaicmithe mar chreidmheas síniúcháin aonuaire (nach n-athnuaítear), `llm7` 4M → **150M** (5M comharthaí/lá doiciméadaithe), `together` críochphointí "-Free" curtha ar ceal → baineadh an creidmheas síniúcháin $25 freisin (éilíonn sé íoscheannach $5, gan triail saor in aisce), `longcat` chríochnaigh an Réamhamharc + samhlacha Flash scortha → **LongCat-2.0** amháin, athaicmithe mar chreidmheas síniúcháin aonuaire **10M**-comhartha (faoi gheata KYC, nach n-athnuaítear).
-- **Tá inferince dhíreach Poolside ag teacht chun deiridh (fíoraithe 2026-10-20):** fógraíonn an [t-ardán oifigiúil](https://platform.poolside.ai/) múchadh ar **2026-10-31** agus treoraíonn sé úsáideoirí a shamhlacha a íoslódáil ó Hugging Face le haghaidh féin-óstála. Iompraíonn an soláthraí díreach `poolside` an rabhadh seo. Níl aon iontrálacha díreacha Poolside sa chatalóg saor in aisce lámhchurtha; is le `kilo-gateway` na hiontrálacha atá ainmnithe as Poolside. Ní bhunaíonn an fógra seo infhaighteacht na samhlacha a fhreastalaíonn Kilo, Cline, NVIDIA nó geataí eile, mar sin ní scorthar na liostáil sin ar an mbunús sin.
-- **Soláthraithe saor in aisce nua aimsithe:** ⭐ **Kilo Code** (`kilo-gateway` — tacar rothlach "Auto Free": teaghlach NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 samhail chódaithe saor in aisce a rothlaíonn, athnuaithe 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash saor in aisce go buan + bónas síniúcháin 20M), agus `arcee-ai` Trinity Large Preview.
-- **Sraitheanna macánta nua** (féach an Mhodheolaíocht): catagóir _saor in aisce go buan ach gan uasteorainn_ (rochtain athfhillteach iarbhír, gan uasteorainn chomharthaí le comhaireamh) agus _treiseadh díghlasála éarlais_ (OpenRouter $10 → +24M/mo), taispeántar an bheirt **ar leithligh** ionas nach ndéanfaidh siad an phríomhuimhir a mhéadú riamh.
+- **Bainte / gan aon sraith in aisce:** bhog sé go dtí [a rannóg féin](#removed--no-free-tier).
+- **Gemini** dhún — `2.0 Flash` / `2.0 Flash-Lite` síos 2026-06-01 agus d'fhág `2.5 Pro` an tsraith shaor (2026-04); Tá sraith saor in aisce anois** Flash-teaghlach amháin** (2.5/3/3.1/3.5 Flash + Gemma). An catalóg anois** linnte** an teaghlach Flash (bhreisíodh é trí gach malairt a chomhaireamh ar leithligh: 462M → 60M).
+- **Uimhreacha ceartaithe:** `cloudflare-ai` 122M →** 30M** (fíor 10k-Neurons/day), `doubao` athrangaithe mar chreidmheas sínithe aonuaire (ní athfhillteach), `llm7` 4M →** 150M** (doiciméadaithe 5M tokens/day), scortha críochphointí `together` "-Saor in Aisce" → Baineadh creidmheas sínithe $25 freisin (gá le ceannach íosta $5, gan triail saor in aisce), `longcat` Réamhamharc dar críoch + Múnlaí Flash scortha →**LongCat-2.0** amháin, athrangaithe mar aon-uaire** 10M** creidmheas sínithe -token (KYC-gated, ní athfhillteach).
+- **Críoch tátail dhíreach cois na linne (fíoraithe 2026-10-20):** Fógraíonn an [t-ardán oifigiúil](https://platform.poolside.ai/) múchadh ar** 2026-10-31** agus stiúrann sé d’úsáideoirí a samhlacha a íoslódáil ó Hugging Face le haghaidh féin-óstáil. Tá an rabhadh seo ag an soláthraí `poolside` díreach. Níl aon iontrálacha díreacha ag Poolside sa chatalóg lámh-choimeádta; is le `kilo-gateway` í a iontrálacha ainmnithe ar thaobh na linne. Ní bhunaítear leis an bhfógra seo go bhfuil fáil ar shamhlacha a bhfreastalaíonn Kilo, Cline, NVIDIA orthu nó geataí eile orthu, agus mar sin ní chuirtear na liostaí sin ar scor ar an mbonn sin.
+- **Soláthraithe nua saor in aisce aimsithe:** ⭐** Cód Kilo** (`kilo-gateway` — ag rothlú sraith "Auto Free": teaghlach NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐**OpenCode Zen** (`opencode-zen` — 10 samhlacha códaithe rothlacha saor in aisce, athnuachan 2026-10-20), ⭐** Z.AI / Zhipu** (bónas signup + 20M saor in aisce go buan `glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash), agus `arcee-ai` Trinity Large Preview.
+- **Sraitheanna nua macánta** (féach Modheolaíocht): catagóir _buan-saor-ach-uncapped_ (fíor-rochtain athfhillteach, gan caipín comharthaí le háireamh) agus treisiú _taisce-díghlasáil_ (OpenRouter $10 → +24M/mo), dromchla ar an dá** leithleach** mar sin ní inflate siad an ceannlíne.
 
-> Is é an tábla mionsonraithe in aghaidh an tsoláthraí níos faide síos an **ghrianghraf 2026-06-05**; is iad na difríochtaí thuas a thagann ina ionad. Is é an chatalóg beo in aghaidh na samhla `open-sse/config/freeModelCatalog.ts` an foinse chanonach.
+> Is é an tábla mionsonraithe in aghaidh an tsoláthraí níos faide síos ná an** 2026-06-05 seat** ; tháinig na deiltí thuas ina áit. Is é an fhoinse beo, chanónach ná an catalóg in aghaidh an tsamhail `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -112,7 +200,7 @@ d'aon ghnó.
 
 ## Modheolaíocht & caveats
 
-- Tá uimhreacha** meastacháin uachtaracha** ó theorainneacha saorshraitheanna doiciméadaithe gach soláthraí amhail de** 2026-06-17** , bailithe ag taighde gréasáin. Athraíonn sraitheanna saor in aisce i gcónaí — a athfhíorú roimh brath ar fhigiúr.
+- Tá uimhreacha** meastacháin uachtaracha** ó theorainneacha saorshraitheanna doiciméadaithe gach soláthraí, seiceáilte ar deireadh** 2026-11-23** le haghaidh gach sraith le cuóta. Athraíonn sraitheanna saor in aisce i gcónaí — a athfhíorú roimh brath ar fhigiúr.
 - **Rud a dhearbhaíonn iontráil i ndáiríre.** Ní bhíonn rátáil muiníne in aghaidh an tsraith ag aon iontráil, agus ní fhreastalaíonn an API ar aon cheann — bain úsáid as gach figiúr thuas mar mheastachán ar an gcáilíocht chéanna, neamhluaite. Tá dhá fhíric difriúil, toisc go ndéantar iad a choimeád de láimh seachas tátal a bhaint as: iompraíonn 44 iontráil stad crua doiciméadaithe neamhspleách (39 acu na sraitheanna xKiro, a roinneann gach liúntas laethúil amháin), agus tá nochtadh pras-oiliúna ag 22 iontráil. ní shocraítear `hardStopGuaranteed` ach amháin nuair a deir téarmaí an tsoláthraí féin go ndiúltaítear an t-iarratas má sháraítear an liúntas in aisce seachas tosú ag cur bille chugat go ciúin, agus an fhoinse i dtrácht in aice leis an iontráil; ní mhainnítear riamh é a `true`, agus níl aon iontráil fíoraithe ag fanacht gan socrú. Mar sin ciallaíonn bratach crua-stad atá ar iarraidh "neamhbhunaithe", ní "eolas a bhilleálann tú".** mód STRICT** (an garda ródaithe `freeAccessPolicy=strict` rogha an diúltaithe) nach bhfuil muinín aige ach as iontrálacha ar a bhfuil an bhratach; tá gach sraith saor in aisce eile eisiata mar `no-hard-stop` (féach `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Nuair a dhéanann an garda comhthiomsú a scagadh, tuairiscíonn an loga infheicthe oibreoir an comhaireamh eisiaimh agus a sciar `no-hard-stop` araon.
 - `estMonthlyFreeTokens` = comharthaí míosúla athfhillteacha amháin.** Ní athfhilltear creidmheasanna clárúcháin aonuaire** agus comhaireamh mar 0. Is ionann sraitheanna scoite agus 0 freisin.
 - caipín chomhartha laethúil → `monthly = daily × 30`. RPD amháin doiciméadaithe → `RPD × ~800 output tokens × 30`. Níl ach RPM/TPM (gan caipín laethúil) →** gan teorainn** (féach thíos).
@@ -127,11 +215,11 @@ d'aon ghnó.
 
 Suimeanna de lipéid in aghaidh na samhla is ea an chuid is mó de na figiúirí "comhartha in aisce in aghaidh na míosa" sa spás seo. Ní linne, ar chuspóir:
 
-- **Déantar gach linn comhroinnte a chomhaireamh uair amháin.** Is é plean saor in aisce Mistral ná liúntas 1B/month amháin in aghaidh na heagraíochta; ní 5B é a liostú faoi chúig mhúnla. Achoimriú in aghaidh an tsamhail, bheadh ár gcatalóg féin a léamh**~ 7.4B** (arna ríomh ar 2026-09-03; níl an figiúr seo CI-gated — aththomhas é aon uair a athraíonn an chatalóg) — deir an ceannlíne**~ 1.47B** mar is é sin an méid is féidir le cuntas amháin ó gach soláthraí a chaitheamh i ndáiríre.
-- **Tiontaítear caipíní laethúla, ní bhíonn rátaí.** Éiríonn caipín tokens/day doiciméadaithe `× 30`; déantar caipín requests/day doiciméadaithe `RPD × ~800 tokens × 30`; tá ag soláthraí nach bhfoilsíonn ach iarratais in aghaidh an nóiméid** níl** figiúr míosúil agus tá sé liostaithe mar _uncappped_, níor achoimriú riamh. Is é an boilsciú a dhiúltaíonn muid a dhiúltóidh teorainn ráta a iolrú faoi 24/7.
+- **Déantar gach linn comhroinnte a chomhaireamh uair amháin.** Is liúntas amháin iad cúig mhúnla taobh thiar de liúntas amháin, ní cúig cinn. Tá léamh as a chéile ar an gcatalóg chéanna, agus an fáth a ndéanaimid í a phriontáil, ar [Conas a chomhaireamhaimid](#how-we-count).
+- **Tiontaítear caipíní laethúla, ní bhíonn rátaí.** Éiríonn caipín tokens/day doiciméadaithe `× 30`; déantar caipín requests/day doiciméadaithe `RPD × ~800 tokens × 30`; tá ag soláthraí nach bhfoilsíonn ach iarratais in aghaidh an nóiméid** níl** figiúr míosúil agus tá sé liostaithe mar _uncappped_, níor achoimriú riamh. Is é an boilsciú a dhiúltóidh muid a dhiúltóidh teorainn ráta a iolrú faoi 24/7.
 - **Taispeántar cuótaí taobh thiar de sheiceáil aitheantais réigiúnach óna chéile** (`+~6M behind regional identity verification`), toisc nach féidir le formhór na léitheoirí iad a úsáid.
 - **Tá creidmheasanna clárúcháin don chéad mhí amháin** agus tuairiscíodh mar dhara figiúr, nár chumasc riamh isteach sa líon seasta.
-- **Forfheidhmítear an figiúr ag CI.** Déanann `npm run check:docs-counts` na hiomláin a ríomh ón gcatalóg agus teipeann ar an tógáil nuair a imíonn an comhad seo, an README nó an cárta buiséid uathu.
+- **Cad a dhéanann na doiciméid a sheiceáil.** Déanann `npm run check:docs-counts` (modh scaoileadh) an figiúr fíor, an figiúr don chéad mhí agus an dá shuim as a chéile a ríomh ón gcatalóg, agus go mainneoidh sé nuair a phriontáileann an README, an leathanach seo nó an Treoir Sraitheanna Saor in Aisce luach difriúil nó priontáil an figiúr mór gan a lipéad agus an ceann fíor. Déantar an cárta buiséid a aththarraingt ó na fíricí céanna tráth a eisithe.
 
 ---
 
@@ -240,74 +328,74 @@ Suimeanna de lipéid in aghaidh na samhla is ea an chuid is mó de na figiúirí
 
 ---
 
-## Saorshraith in aghaidh an tsoláthraí ( seiceáilte Bytez/Nous 2026-10-15; sraitheanna ath-iniúchta 2026-09-02; cinn eile 2026-06-17)
+## Saorshraith in aghaidh an tsoláthraí (iniúchadh ar an gcatalóg 2026-11-23)
 
-> Athghinte ón gcatalóg in aghaidh an tsamhail (`open-sse/config/freeModelCatalog.ts`), linn snámha-deduped. Sórtáilte de réir athfhillteach seasta tokens/mo. `uncapped*` = saor in aisce go buan ach gan aon caipín chomhartha foilsithe (rate/concurrency-limited) — fíor-rochtain,** nach bhfuil** achoimriú isteach sa cheannlíne. `—` = creidmheas-amháin / gan eochair / gan comhartha inchainníochtaithe.
+> Coinnithe de láimh ón gcatalóg in aghaidh an tsamhail (`open-sse/config/freeModelCatalog.data.ts`); seiceáladh é seo caite 2026-11-23. Arna chur in eagar de réir fíor-chomharthaí míosúla gach linne (cuireadh gach linn comhroinnte uair amháin). `uncapped*` = saor in aisce go buan ach gan aon caipín chomhartha foilsithe (rate/concurrency-limited): rochtain fíor,** nach bhfuil** achoimriú san fhíorfhigiúr. `not counted` = cuóta athfhillteach a fhágann an fíorfhigiúr amach (`avoid`, nó taobh thiar de sheiceáil aitheantais réigiúnach). Tá soláthraithe ar tháinig deireadh lena dtairiscint i [gciseal Bainte / gan sraith saor](#removed--no-free-tier). `—` = creidmheas-amháin / gan eochair / gan comharthaí inchainníochtaithe.
 
-| Soláthraí        | Cineál saor in aisce, | Slán tokens/mo | Creidmheas don chéad mhí | ToS           | Múnlaí |
-| ---------------- | --------------------- | -------------- | ------------------------ | ------------- | ------ |
-| `mistral`        | athfhillteach         | ~ 1.00B        | —                        | rabhadh       | 5      |
-| `nara`           | athfhillteach         | ~ 210m         | —                        | rabhadh       | 8      |
-| `llm7`           | athfhillteach         | ~150M          | —                        | rabhadh       | 4      |
-| `xkiro`          | athfhillteach         | ~150M          | —                        | rabhadh       | 39     |
-| `longcat`        | aon-uaire             | —              | 10M                      | rabhadh       | 1      |
-| `cerebras`       | aon-uaire             | —              | Creidmheas $5            | rabhadh       | 2      |
-| `cloudflare-ai`  | athfhillteach         | ~ 30m          | —                        | rabhadh       | 9      |
-| `groq`           | athfhillteach         | ~ 30m          | —                        | rabhadh       | 5      |
-| `api-airforce`   | athfhillteach         | ~ 24M          | —                        | rabhadh       | 7      |
-| `bluesminds`     | athfhillteach         | ~ 7M           | —                        | débhríoch     | 22     |
-| `sambanova`      | athfhillteach         | ~              | —                        | rabhadh       | 5      |
-| `arcee-ai`       | athfhillteach         | ~              | —                        | rabhadh       | 1      |
-| `bazaarlink`     | athfhillteach         | ~              | —                        | rabhadh       | 32     |
-| `openrouter`     | athfhillteach         | ~              | —                        | rabhadh       | 1      |
-| `cohere`         | athfhillteach         | ~              | —                        | rabhadh       | 6      |
-| `huggingchat`    | athfhillteach         | ~              | —                        | rabhadh       | 4      |
-| `morph`          | athfhillteach         | ~ 400K         | —                        | ceart go leor | 2      |
-| `huggingface`    | athfhillteach         | ~ 200K         | —                        | rabhadh       | 6      |
-| `kiro`           | athfhillteach         | ~              | —                        | sheachaint    | 12     |
-| `glm-cn`         | gan teorainn          | gan teorainn\* | ~                        | ceart go leor | 4      |
-| `baidu`          | gan teorainn          | gan teorainn\* | —                        | rabhadh       | 1      |
-| `gemini`         | gan teorainn          | gan teorainn\* | —                        | rabhadh       | 4      |
-| `kilo-gateway`   | gan teorainn          | gan teorainn\* | —                        | rabhadh       | 7      |
-| `opencode-zen`   | gan teorainn          | gan teorainn\* | —                        | rabhadh       | 10     |
-| `tencent`        | gan teorainn          | gan teorainn\* | —                        | rabhadh       | 1      |
-| `vertex`         | creidmheas clárúcháin | —              | ~                        | rabhadh       | 10     |
-| `agentrouter`    | creidmheas clárúcháin | —              | ~                        | rabhadh       | 4      |
-| `predibase`      | creidmheas clárúcháin | —              | ~                        | rabhadh       | 1      |
-| `doubao`         | creidmheas clárúcháin | —              | ~                        | débhríoch     | 1      |
-| `ai21`           | creidmheas clárúcháin | —              | ~                        | sheachaint    | 2      |
-| `deepseek`       | creidmheas clárúcháin | —              | ~                        | ceart go leor | 2      |
-| `hyperbolic`     | creidmheas clárúcháin | —              | ~                        | ceart go leor | 8      |
-| `nscale`         | creidmheas clárúcháin | —              | ~                        | rabhadh       | 6      |
-| `bytez`          | creidmheas (leith)    | —              | anaithnid                | débhríoch     | 1      |
-| `deepinfra`      | creidmheas clárúcháin | —              | ~                        | rabhadh       | 22     |
-| `fireworks`      | creidmheas clárúcháin | —              | ~                        | sheachaint    | 10     |
-| `nebius`         | creidmheas clárúcháin | —              | ~                        | rabhadh       | 1      |
-| `qoder`          | creidmheas clárúcháin | —              | ~                        | rabhadh       | 14     |
-| `scaleway`       | creidmheas clárúcháin | —              | ~                        | ceart go leor | 6      |
-| `novita`         | creidmheas clárúcháin | —              | ~                        | rabhadh       | 1      |
-| `agy`            | gan eochair           | —              | —                        | sheachaint    | 16     |
-| `baichuan`       | gan eochair           | —              | —                        | débhríoch     | 1      |
-| `blackbox`       | gan eochair           | —              | —                        | sheachaint    | 6      |
-| `coze`           | gan eochair           | —              | —                        | sheachaint    | 1      |
-| `duckduckgo-web` | gan eochair           | —              | —                        | sheachaint    | 6      |
-| `freemodel-dev`  | gan eochair           | —              | —                        | anaithnid     | 4      |
-| `friendliai`     | gan eochair           | —              | —                        | sheachaint    | 2      |
-| `iflytek`        | gan eochair           | —              | —                        | sheachaint    | 1      |
-| `inference-net`  | gan eochair           | —              | —                        | rabhadh       | 3      |
-| `liquid`         | gan eochair           | —              | —                        | anaithnid     | 1      |
-| `monsterapi`     | gan eochair           | —              | —                        | débhríoch     | 1      |
-| `muse-spark-web` | gan eochair           | —              | —                        | sheachaint    | 3      |
-| `nlpcloud`       | gan eochair           | —              | —                        | sheachaint    | 1      |
-| `nvidia`         | gan teorainn          | gan teorainn\* | —                        | rabhadh       | 3      |
-| `pollinations`   | gan eochair           | —              | —                        | rabhadh       | 31     |
-| `publicai`       | gan eochair           | —              | —                        | rabhadh       | 3      |
-| `reka`           | gan eochair           | —              | —                        | rabhadh       | 2      |
-| `sensenova`      | gan eochair           | —              | —                        | rabhadh       | 1      |
-| `sparkdesk`      | gan eochair           | —              | —                        | rabhadh       | 1      |
-| `stepfun`        | gan eochair           | —              | —                        | ceart go leor | 1      |
-| `t3-web`         | gan eochair           | —              | —                        | sheachaint    | 23     |
-| `uncloseai`      | gan eochair           | —              | —                        | rabhadh       | 3      |
+| Soláthraí        | Cineál saor in aisce, | tokens/mo                                       | Creidmheas don chéad mhí | ToS           | Múnlaí |
+| ---------------- | --------------------- | ----------------------------------------------- | ------------------------ | ------------- | ------ |
+| `api-airforce`   | athfhillteach         | ~ 24M                                           | —                        | rabhadh       | 5      |
+| `groq`           | athfhillteach         | ~ 24M (4 caipín in aghaidh an mhúnla)           | —                        | rabhadh       | 4      |
+| `cloudflare-ai`  | athfhillteach         | ~ 23m                                           | —                        | rabhadh       | 8      |
+| `xkiro`          | athfhillteach         | ~                                               | —                        | rabhadh       | 9      |
+| `bazaarlink`     | athfhillteach         | ~ 1.4M                                          | —                        | rabhadh       | 1      |
+| `openrouter`     | athfhillteach         | ~ 1.2M                                          | —                        | rabhadh       | 1      |
+| `cohere`         | athfhillteach         | ~                                               | —                        | rabhadh       | 6      |
+| `sambanova`      | athfhillteach         | ~ 480K                                          | —                        | rabhadh       | 2      |
+| `morph`          | athfhillteach         | ~ 160K                                          | —                        | ceart go leor | 2      |
+| `glm-cn`         | gan teorainn          | gan teorainn\*                                  | 20M                      | ceart go leor | 4      |
+| `agnes`          | gan teorainn          | gan teorainn\*                                  | —                        | ceart go leor | 3      |
+| `agnes-cn`       | gan teorainn          | gan teorainn\*                                  | —                        | ceart go leor | 3      |
+| `aion`           | gan teorainn          | gan teorainn\*                                  | —                        | ceart go leor | 4      |
+| `baidu`          | gan teorainn          | gan teorainn\*                                  | —                        | rabhadh       | 1      |
+| `gemini`         | gan teorainn          | gan teorainn\*                                  | —                        | rabhadh       | 4      |
+| `glm`            | gan teorainn          | gan teorainn\*                                  | —                        | ceart go leor | 2      |
+| `kilo-gateway`   | gan teorainn          | gan teorainn\*                                  | —                        | rabhadh       | 12     |
+| `nvidia`         | gan teorainn          | gan teorainn\*                                  | —                        | rabhadh       | 3      |
+| `onomeo`         | gan teorainn          | gan teorainn\*                                  | —                        | rabhadh       | 2      |
+| `requesty`       | gan teorainn          | gan teorainn\*                                  | —                        | rabhadh       | 2      |
+| `sealion`        | gan teorainn          | gan teorainn\*                                  | —                        | ceart go leor | 5      |
+| `tokenharbor`    | gan teorainn          | gan teorainn\*                                  | —                        | rabhadh       | 2      |
+| `coze`           | athfhillteach         | gan áireamh (`avoid`)                           | —                        | sheachaint    | 1      |
+| `inference-net`  | athfhillteach         | gan áireamh                                     | —                        | rabhadh       | 3      |
+| `kiro`           | athfhillteach         | gan áireamh (`avoid`)                           | —                        | sheachaint    | 7      |
+| `modelscope`     | athfhillteach         | taobh thiar de sheiceáil aitheantais réigiúnach | —                        | rabhadh       | 2      |
+| `nlpcloud`       | athfhillteach         | gan áireamh (`avoid`)                           | —                        | sheachaint    | 1      |
+| `reka`           | athfhillteach         | gan áireamh                                     | —                        | rabhadh       | 2      |
+| `t3-web`         | athfhillteach         | gan áireamh (`avoid`)                           | —                        | sheachaint    | 23     |
+| `bytez`          | creidmheas (leith)    | —                                               | —                        | débhríoch     | 1      |
+| `doubao`         | creidmheas clárúcháin | —                                               | 15M                      | débhríoch     | 1      |
+| `longcat`        | creidmheas clárúcháin | —                                               | 10M                      | rabhadh       | 1      |
+| `deepseek`       | creidmheas clárúcháin | —                                               | 5M                       | ceart go leor | 2      |
+| `hyperbolic`     | creidmheas clárúcháin | —                                               | 5M                       | ceart go leor | 8      |
+| `nscale`         | creidmheas clárúcháin | —                                               | 5M                       | rabhadh       | 6      |
+| `deepinfra`      | creidmheas clárúcháin | —                                               | 1M                       | rabhadh       | 22     |
+| `qoder`          | creidmheas clárúcháin | —                                               | 1M                       | rabhadh       | 9      |
+| `scaleway`       | creidmheas clárúcháin | —                                               | 1M                       | ceart go leor | 6      |
+| `novita`         | creidmheas clárúcháin | —                                               | 500K                     | rabhadh       | 1      |
+| `agentrouter`    | creidmheas clárúcháin | —                                               | —                        | rabhadh       | 1      |
+| `ai21`           | creidmheas clárúcháin | —                                               | —                        | sheachaint    | 2      |
+| `baichuan`       | creidmheas clárúcháin | —                                               | —                        | débhríoch     | 1      |
+| `cerebras`       | creidmheas clárúcháin | —                                               | —                        | rabhadh       | 2      |
+| `fireworks`      | creidmheas clárúcháin | —                                               | —                        | sheachaint    | 10     |
+| `freemodel-dev`  | creidmheas clárúcháin | —                                               | —                        | anaithnid     | 4      |
+| `monsterapi`     | creidmheas clárúcháin | —                                               | —                        | débhríoch     | 1      |
+| `nebius`         | creidmheas clárúcháin | —                                               | —                        | rabhadh       | 1      |
+| `publicai`       | creidmheas clárúcháin | —                                               | —                        | rabhadh       | 3      |
+| `sensenova`      | creidmheas clárúcháin | —                                               | —                        | rabhadh       | 1      |
+| `vertex`         | creidmheas clárúcháin | —                                               | —                        | rabhadh       | 16     |
+| `agy`            | gan eochair           | —                                               | —                        | sheachaint    | 9      |
+| `aihorde`        | gan eochair           | —                                               | —                        | ceart go leor | 3      |
+| `blackbox`       | gan eochair           | —                                               | —                        | sheachaint    | 6      |
+| `duckduckgo-web` | gan eochair           | —                                               | —                        | sheachaint    | 6      |
+| `friendliai`     | gan eochair           | —                                               | —                        | sheachaint    | 2      |
+| `iflytek`        | gan eochair           | —                                               | —                        | sheachaint    | 1      |
+| `liquid`         | gan eochair           | —                                               | —                        | anaithnid     | 1      |
+| `muse-spark-web` | gan eochair           | —                                               | —                        | sheachaint    | 3      |
+| `ovhcloud`       | gan eochair           | —                                               | —                        | ceart go leor | 5      |
+| `pollinations`   | gan eochair           | —                                               | —                        | rabhadh       | 24     |
+| `sparkdesk`      | gan eochair           | —                                               | —                        | rabhadh       | 1      |
+| `uncloseai`      | gan eochair           | —                                               | —                        | rabhadh       | 1      |
 
 ---
 

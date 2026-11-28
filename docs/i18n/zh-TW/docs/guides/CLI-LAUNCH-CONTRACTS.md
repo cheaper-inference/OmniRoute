@@ -12,6 +12,12 @@
 
 中斷和終止訊號被轉發給子程序。啟動器在刪除臨時配置之前等待子進程的關閉事件。 `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS`控制強制終止之前的寬限期（預設5000毫秒）。
 
+`omniroute launch <tool>` （參見[LAUNCH.md](./LAUNCH.md) ）遵循相同的環境規則和訊號轉發，並添加：
+
+- **網關自動啟動。**對於本機目標，當連接埠上沒有閘道應答時，啟動器會在分離的收割者程序下啟動綁定到`127.0.0.1`的`omniroute serve --headless --no-open` 。每個正在運行的啟動都在`DATA_DIR/launch/leases/`中持有租約（每 15 秒檢測一次，45 秒後或其進程消失時失效）。一旦在空閒寬限期內沒有任何租約存在，收割機就會停止它啟動的網關（`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`，預設為 10000 毫秒）。用戶啟動的網關已被使用但從未停止。 `--keep-gateway`或`omniroute gateway keep`將啟動器閘道變成普通網關； `--no-start`恢復舊的「fail-if-down」行為。僅探測遠程目標。
+- **啟動會議。**每次啟動都會從父憑證 (`POST /api/launch/sessions`) 中建立一個短期的`olx_`會話令牌，在工具運行時對其進行檢測，讀取使用情況摘要並在工具退出後撤銷它。該令牌是其父代令牌的嚴格子集：相同的權限、相同或更窄的目錄、較短的生命週期，並且它不是儀表板憑證。此工具接收會話令牌，而不是父憑證，除非給予`--tag` ，否則請求將被標記為`launch:<tool>:<sessionId>` 。沒有會話API網關會因`GatewayTooOld`失敗，而不是回退到無範圍啟動。
+- **每次啟動配置。**工具設定檔寫入私有暫存目錄（模式 0700，前綴`omnirouter-`）並在子程序退出後刪除。啟動器的`SIGKILL`會留下目錄；一旦此類目錄超過一天， `omniroute launch --cleanup`就會將其刪除。
+
 ## Gemini持久設置
 
 ```bash

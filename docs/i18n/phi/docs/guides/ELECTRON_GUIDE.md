@@ -4,9 +4,9 @@
 
 ---
 
-> **Pinagmulan ng katotohanan:** `electron/` workspace** Huling na-update:** 2026-06-28 — v3.8.40
+> **Pinagmulan ng katotohanan:** `electron/` workspace
 
-Nagpapadala OmniRoute ng cross-platform na desktop app (Windows / macOS / Linux) na binuo**Electron 41** +** tagabuo ng elektron 26.10** . Binubuo ng desktop app ang Next.js standalone server bilang proseso ng bata, itinuturo ang isang `BrowserWindow` dito, at nagdaragdag ng system tray, auto-updater, IPC bridge, at zero-config na sikretong bootstrap.
+Nagpapadala OmniRoute ng cross-platform desktop app (Windows / macOS / Linux) na binuo**Electron 41** +** tagabuo ng elektron 26.10** . Binubuo ng desktop app ang Next.js standalone server bilang proseso ng bata, itinuturo ang isang `BrowserWindow` dito, at nagdaragdag ng system tray, auto-updater, IPC bridge, at zero-config na sikretong bootstrap.
 
 ## Arkitektura
 
@@ -198,7 +198,7 @@ Itakda sa pamamagitan ng `session.defaultSession.webRequest.onHeadersReceived`. 
 
 ## Auto-update
 
-Gumagamit `electron-updater` sa GitHub provider (`diegosouzapw/OmniRoute`).
+Gumagamit `electron-updater` sa GitHub provider (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Ipinasa ang mga kaganapan sa renderer sa pamamagitan ng `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (may `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Nakarating ang mga artifact sa `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Na-publish ang mga release sa GitHub Releases (`diegosouzapw/OmniRoute`), na kung saan din tumitingin `electron-updater` para sa mga bagong bersyon.
+Na-publish ang mga release sa GitHub Releases (`cheaper-inference/OmniRoute`), na kung saan din tumitingin `electron-updater` para sa mga bagong bersyon.
 
 ## Pag-troubleshoot
 

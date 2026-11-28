@@ -205,7 +205,7 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-Čeprav gre za eno velikansko funkcijo, je organizirana v** komentiranih odsekov** ki preslikajo na 5-stopenjski cevovod.
+Čeprav gre za eno velikansko funkcijo, je organizirana v** komentiranih odsekov** ki se preslika na 5-stopenjski cevovod.
 
 ### combo.ts (4456 LOC)
 
@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 podpira** 22 strategij usmerjanja** (glej `src/shared/constants/routingStrategies.ts`):
 
-| Strategija          | Vedenje                                                                                         |
-| ------------------- | ----------------------------------------------------------------------------------------------- |
-| `priority`          | Urejen seznam prvega cilja                                                                      |
-| `weighted`          | Verjetnost glede na težo na cilj                                                                |
-| `round-robin`       | Krožite skozi cilje po vrstnem redu                                                             |
-| `context-relay`     | Predajte kontekst med cilji                                                                     |
-| `fill-first`        | Izpolnite kvoto, preden se premaknete na naslednjega                                            |
-| `p2c`               | Moč dveh izbir                                                                                  |
-| `random`            | Enotna naključna                                                                                |
-| `least-used`        | Izberite tisto z najmanj nedavnimi uporabami                                                    |
-| `cost-optimized`    | Najprej najcenejša zdrava tarča                                                                 |
-| `reset-aware`       | Poznavanje oken za ponastavitev ponudnika                                                       |
-| `reset-window`      | Ponastavi usmerjanje na podlagi oken                                                            |
-| `expiry-first`      | Najprej porabite račun, katerega kvota bi potekla neizkoriščen                                  |
-| `headroom`          | Najprej večina preostale kvote                                                                  |
-| `quota-weighted`    | Preskočite izčrpane račune, nato črpajte po preostali kvoti ÷ med letom                         |
-| `strict-random`     | Resnično enotno (brez tehtanja kakovosti)                                                       |
-| `auto`              | Uporabite 16-faktorsko točkovanje (`autoCombo/`)                                                |
-| `lkgp`              | Najprej zadnji znani dober ponudnik                                                             |
-| `context-optimized` | Najboljše za zahteve z dolgim kontekstom                                                        |
-| `cache-optimized`   | Pripni vsako predpono poziva za večkratno uporabo na isti račun (zadetki predpomnilnika poziva) |
-| `fusion`            | Vzporedno razširite na ploščo, nato pa sintetizirajte prek sodnika (`fusion.ts`)                |
-| `pipeline`          | Verižni koraki — vsak izhod tarče napaja naslednjega                                            |
-| `jev`               | Opt-in: TypeSafe Jev priznava, kateri uvrščeni vnosi tečejo; sicer vaše naročilo                |
+| Strategija          | Vedenje                                                                          |
+| ------------------- | -------------------------------------------------------------------------------- |
+| `priority`          | Urejen seznam prvega cilja                                                       |
+| `weighted`          | Verjetnost glede na težo na cilj                                                 |
+| `round-robin`       | Krožite skozi cilje po vrstnem redu                                              |
+| `context-relay`     | Predajte kontekst med cilji                                                      |
+| `fill-first`        | Izpolnite kvoto, preden se premaknete na naslednjega                             |
+| `p2c`               | Moč dveh izbir                                                                   |
+| `random`            | Sveže naključno predvajanje na zahtevo                                           |
+| `least-used`        | Izberite tisto z najmanj zabeleženimi zahtevami                                  |
+| `cost-optimized`    | Najprej najnižja kataloška vhodna cena                                           |
+| `reset-aware`       | Nujnost ponastavitve preostale kvote +                                           |
+| `reset-window`      | Okno kvote, ki se najprej čim prej ponastavi                                     |
+| `expiry-first`      | Najprej porabite račun, katerega kvota bi potekla neizkoriščen                   |
+| `headroom`          | Najprej večina preostale kvote                                                   |
+| `quota-weighted`    | Preskočite izčrpane račune, nato črpajte po preostali kvoti ÷ med letom          |
+| `strict-random`     | Premešan komplet: vsaka tarča enkrat pred ponovitvijo                            |
+| `auto`              | Uporabite 16-faktorsko točkovanje (`autoCombo/`)                                 |
+| `lkgp`              | Najprej zadnji znani dober ponudnik                                              |
+| `context-optimized` | Najprej največje znano kontekstno okno                                           |
+| `cache-optimized`   | Dajte prednost računu, ki bo verjetno imel predpono poziva v predpomnilniku      |
+| `fusion`            | Vzporedno razširite na ploščo, nato pa sintetizirajte prek sodnika (`fusion.ts`) |
+| `pipeline`          | Verižni koraki — vsak izhod tarče napaja naslednjega                             |
+| `jev`               | Opt-in: TypeSafe Jev priznava, kateri uvrščeni vnosi tečejo; sicer vaše naročilo |
 
 ### base.ts (1170 LOC)
 

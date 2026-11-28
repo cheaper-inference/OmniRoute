@@ -259,7 +259,7 @@ Zahtjev za povlačenjem otvoren prije preklopnika još uvijek može sadržavati 
 
 ### Povratak na grane prije preklopnika
 
-Nikada ne birajte ili vraćajte `YYYYMMDDHHMMSS_` datoteku u ogranak koji je prethodio prebacivanju (na primjer, stariji ogranak `release/v*` ). Tamošnji pokretač razvrstava nazive datoteka kao tekst, tako da bi se datoteka s vremenskom oznakom izvodila između `201_` i `202_` na novoj bazi podataka, a stara vrata tamo ne razumiju 14-znamenkasti prefikse. Na takvu granu, zapišite promjenu kao vlastitu sljedeću `NNN_` datoteku te grane, idempotentnu, tako da je bez operacije kada verzija s vremenskom oznakom stigne kasnije.
+Nikada ne birajte ili vraćajte `YYYYMMDDHHMMSS_` datoteku u ogranak koji je prethodio prebacivanju (na primjer, stariji ogranak `release/v*` ). Tamošnji pokretač razvrstava nazive datoteka kao tekst, tako da bi se datoteka s vremenskom oznakom izvodila između `201_` i `202_` na novoj bazi podataka, a stara vrata tamo ne razumiju 14-znamenkasti prefikse. Na takvoj grani zapišite promjenu kao vlastitu sljedeću `NNN_` datoteku te grane, idempotentnu, tako da je bez operacije kada verzija s vremenskom oznakom stigne kasnije.
 
 ### Kako se odvijaju migracije
 
@@ -307,9 +307,9 @@ Koristite klauzule `IF NOT EXISTS`, `IF EXISTS` i `OR IGNORE` / `OR REPLACE` slo
 1. **Stvorite datoteku s generatorom** : `npm run db:new-migration -- <description>` (na primjer `npm run db:new-migration -- add combo priority`). Zapisuje `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` s trenutnim UTC vremenom i zaglavljem komentara, pomiče se jednu sekundu naprijed ako se ta vremenska oznaka uzme i nikada ne prepisuje datoteku. Ne birajte broj rukom.
 2. **Koristite siguran DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
 3. **Pažljivo ispunite podatke** : koristite `UPDATE ... WHERE ...` za rukovanje postojećim redovima
-4. **Provjerite redoslijed i imenovanje** : `npm run test:migrations:fresh` (sve migracije na praznoj bazi podataka) i `npm run check:migration-numbering`
+4. **Provjerite redoslijed i imenovanje** : `npm run test:migrations:fresh` (sve migracije na praznoj bazi podataka) i `npm run check:migration-numbering`. Husky pre-commit hook samostalno pokreće `check:migration-numbering` kada commit postavlja datoteku pod `src/lib/db/migrations/`, tako da ručno odabrano ili loše oblikovano ime (na primjer `242_x.sql`) ne uspije u commitu lokalno s istom porukom koju CI ispisuje. Udica provjerava samo imena, duplikate i smrznutu seriju `001`–`241` ; usporedba s bazom PR (uklonjene, preimenovane ili migracije izvan redoslijeda) i dalje se izvodi u CI
 5. **Test na kopiji** : nikada ne izvodite neprovjerene migracije na proizvodnju
-6. **Tablica stvorena iz koda također treba migraciju** : ako modul također stvara tablicu lijeno (`CREATE TABLE IF NOT EXISTS`, čuva se kao staza samoiscjeljivanja), migracija je mora kreirati s istim DDL. U suprotnom čista instalacija i nadograđena instalacija završe s različitim shemama, ovisno o tome je li se ta staza koda izvodila. `tests/unit/db/lazy-table-migration-guard.test.ts` skenira `src/` i `open-sse/` i ne uspijeva na lijenom `CREATE` bez migracije (#20557). Primjer: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
+6. **Tablica stvorena iz koda također treba migraciju** : ako modul također stvara tablicu lijeno (`CREATE TABLE IF NOT EXISTS`, čuva se kao staza samoiscjeljivanja), migracija je mora kreirati s istim DDL. U suprotnom čista instalacija i nadograđena instalacija završe s različitim shemama, ovisno o tome je li se taj put koda pokrenuo. `tests/unit/db/lazy-table-migration-guard.test.ts` skenira `src/` i `open-sse/` i ne uspijeva na lijenom `CREATE` bez migracije (#20557). Primjer: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Primjer:
 

@@ -328,38 +328,26 @@ Ipò RTK gba ìmísí láti ọ̀dọ̀ **[RTK - Rust Token Killer](https://gith
 
 ---
 
-## Àwọn Ètò Ìfúnpọ̀ Onípele-Gíga
+## To ti ni ilọsiwaju funmorawon Systems
 
-Ní àfikún sí àwọn módù 7 tí a ṣàpèjúwe lókè (orísun náà tún gba àwọn módù `codex-responses` àti
-`omniglyph`, èyí tí ìtọ́sọ́nà yìí kò ṣàlàyé), àwọn apá ìsàlẹ̀ yìí ṣàlàyé àwọn ẹ̀ya
-tí ń ṣiṣẹ́ nínú tàbí lẹ́gbẹ̀ẹ́ àwọn módù wọ̀nyẹn: Tool Result Compression àti Progressive Aging
-jẹ́ ìgbésẹ̀ 1 àti 2 ti ẹ̀rọ ìfúnpọ̀ líle (módù Aggressive àti ìgbésẹ̀ `aggressive` kan nínú
-páìpù alápele), Stacked Pipeline ni bí módù Stacked ṣe ń ṣiṣẹ́, Cache-Aware Compression
-ń sọ `aggressive` àti `ultra` di `standard` fún àwọn olùpèsè tó ń lo ìpamọ́-káṣe nígbà tí ìfúnpọ̀
-bá wà ní ṣíṣiṣẹ́, Caveman Output Mode àti Output Styles sì jẹ́ àwọn ìtọ́ni àṣàyàn-fún-lílo nínú system-prompt,
-tí a pa ní àkọ́kọ́, tí ń ṣe àgbékalẹ̀ àbájáde módẹ́lì dípò fífún ìbéèrè náà pọ̀.
+Ni ikọja awọn ipo 7 ti a ṣalaye loke (orisun naa tun gba awọn ipo `codex-responses` ati awọn ipo `omniglyph`, eyiti itọsọna yii ko bo), awọn apakan ti o wa ni isalẹ awọn ẹya ideri ti o ṣiṣẹ inu tabi lẹgbẹẹ awọn ipo wọnyẹn: Imudanu Abajade Ọpa ati Ilọsiwaju Aging jẹ awọn igbesẹ 1 ati 2 ti ẹrọ ibinu (Ipo ibinu ati igbesẹ `aggressive` kan ti opo gigun ti epo ti a tolera, ipo isakoṣo ti paipu ti a ti tolera), bi o ṣe jẹ Stacked-Compression. downgrades `aggressive` ati `ultra` to `standard` fun caching awọn olupese nigba ti funmorawon wa ni titan, ati Caveman o wu Ipo ati Output Styles ti wa ni ijade-ni eto-kia awọn ilana, pipa nipa aiyipada, ti o apẹrẹ awọn awoṣe ká o wu dipo ti compressing awọn ìbéèrè.
 
-### Ìfúnpọ̀ Tó Mọ̀ Nípa Káṣe
+### Kaṣe-mọ funmorawon
 
-Àwọn olùpèsè kan (bí Anthropic pẹ̀lú ìpamọ́-káṣe prompt) ṣe àtìlẹ́yìn fún **ìpamọ́-káṣe prompt**,
-èyí tó jẹ́ kí wọ́n lè fi àwọn apá prompt pamọ́ sínú káṣe láti dín iye owó àti àkókò ìdádúró kù. Nígbà tí
-ìpamọ́-káṣe bá ṣiṣẹ́, ìfúnpọ̀ líle lè **ba** iṣẹ́ jẹ́ ní tòótọ́
-nítorí pé ó ń yí àwọn token tí a fi pamọ́ sínú káṣe padà, tó sì ń sọ káṣe náà di aláìṣe.
+Diẹ ninu awọn olupese (bii Anthropic pẹlu caching kiakia) atilẹyin** kiakia caching** , eyi ti o jẹ ki wọn kaṣe awọn ẹya ara ti kiakia lati dinku awọn idiyele ati lairi. Nigba ti caching ti wa ni sise, ibinu funmorawon le kosi** farapa** iṣẹ nitori pe o yipada awọn ami ti a fipamọ, ti o sọ kaṣe di alaimọ.
 
-Módù `cachingAware.ts` yanjú èyí nípa **ṣíṣàwárí àyíká ìpamọ́-káṣe** àti
-**ṣíṣe àtúnṣe sí ọ̀nà ìfúnpọ̀** ní ìbámu pẹ̀lú rẹ̀.
+Module `cachingAware.ts` yanju eyi nipasẹ** wiwa ọrọ caching** ati** Siṣàtúnṣe iwọn nwon.Mirza funmorawon** ni ibamu.
 
-#### Bí ó ṣe ń ṣiṣẹ́
+#### Bawo ni o ṣe n ṣiṣẹ
 
-1. **Ṣàwárí àyíká ìpamọ́-káṣe** — Ó ń yẹ ara ìbéèrè wò fún àwọn àmì `cache_control`
-2. **Ṣèdámọ̀ àwọn olùpèsè ìpamọ́-káṣe** — Ó ń ṣàyẹ̀wò bóyá olùpèsè ibi-afẹ́ ṣe àtìlẹ́yìn fún ìpamọ́-káṣe
-3. **Ṣàtúnṣe ọ̀nà** — Ó ń sọ `aggressive`/`ultra` di `standard` fún àwọn olùpèsè ìpamọ́-káṣe
-4. **Fò system prompt** — A sábà máa ń fi àwọn system prompt pamọ́ sínú káṣe, nítorí náà má ṣe fún wọn pọ̀
+1. **Ṣewadii ọrọ-ọrọ caching** — Ṣiṣayẹwo ara ibeere fun awọn ami `cache_control`
+2. **Ṣe idanimọ awọn olupese caching** — Ṣayẹwo ti olupese ibi-afẹde ba ṣe atilẹyin caching
+3. **Satunṣe nwon.Mirza** — Downgrades `aggressive`/`ultra` si `standard` fun awọn olupese caching
+4. **Rekọja ọna eto** — Awọn ilana eto nigbagbogbo jẹ cache, nitorinaa ma ṣe rọpọ wọn
 
-Olùrànlọ́wọ́ ọ̀nà náà tún dá àsìá `deterministicOnly` padà, ṣùgbọ́n olùkọ́ ètò náà
-ń lo ọ̀nà náà nìkan — kò sí ohun kankan lẹ́yìn rẹ̀ tó ń ka àsìá náà lónìí.
+Oluranlọwọ ilana naa tun da asia `deterministicOnly` pada, ṣugbọn olupilẹṣẹ ero n gba ilana — nikan ko si nkankan ti o ka asia loni.
 
-#### Àpẹẹrẹ kóòdù
+#### Apeere koodu
 
 ```ts
 import {
@@ -370,7 +358,7 @@ import {
 const body = {
   model: "anthropic/claude-sonnet-4.5",
   messages: [{ role: "user", content: "Hello" }],
-  cache_control: { type: "ephemeral" }, // ← Àmì káṣe
+  cache_control: { type: "ephemeral" }, // ← Cache marker
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
@@ -380,30 +368,21 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 // → { strategy: "standard", skipSystemPrompt: true, deterministicOnly: true }
 ```
 
-#### Ìgbà tó yẹ kí o lò ó
+#### Nigbati lati lo
 
-Ìfúnpọ̀ tó mọ̀ nípa káṣe **máa ń ṣiṣẹ́ ní gbogbo ìgbà** — kò nílò àtòpọ̀ kankan. Ó máa bẹ̀rẹ̀ sí í ṣiṣẹ́ nígbàkigbà tí
-ìfúnpọ̀ bá wà ní ṣíṣiṣẹ́ tí olùpèsè ibi-afẹ́ sì ṣe àtìlẹ́yìn fún ìpamọ́-káṣe prompt (Anthropic, OpenAI,
-àti bẹ́ẹ̀ bẹ́ẹ̀ lọ); àwọn àmì `cache_control` tí a sọ ní pàtó kò pọn dandan — olùpèsè ìpamọ́-káṣe nìkan
-ti tó láti fa ìsọdìpele náà, àwọn àmì nìkan kò sì lè ṣe bẹ́ẹ̀ láéláé (ìṣàwárí àmì ń pèsè dátà
-telemetry káṣe, kì í ṣe ìpinnu ọ̀nà náà).
+Kaṣe-mọ funmorawon ni** nigbagbogbo lori** — ko si iṣeto ni ti nilo. O bẹrẹ ni nigbakugba ti funmorawon ba wa ni titan ati pe olupese ibi-afẹde ṣe atilẹyin caching kiakia (Anthropic, OpenAI, bbl); Awọn asami `cache_control` ti o fojuhan ko nilo — olupese caching nikan nfa idinku, ati awọn asami nikan ko ṣe (iṣawari awọn kikọ sii kaṣe telemetry, kii ṣe ipinnu ilana).
 
-### Ìdínkù Díẹ̀díẹ̀ Nípa Ọjọ́-Orí
+OpenRouter ka bi olupese caching nikan fun awọn awoṣe `anthropic/*` : Awọn ibeere koodu Claude tọju awọn aaye fifọ `cache_control` wọn (4 ni pupọ julọ) ati pe ẹṣọ ṣe aabo ìpele, lakoko ti gbogbo idile OpenRouter miiran (`openai/`, `google/`, `qwen/`,…) duro ni ṣi kuro ati aisi aabo.
 
-Àwọn ìjíròrò gígùn máa ń kó ọ̀pọ̀ ìyípadà ìfiranṣẹ́ jọ, ṣùgbọ́n àwọn ìyípadà àtijọ́ máa ń dín
-ní ìbámu pẹ̀lú ọ̀rọ̀ lọ. Módù `progressiveAging.ts` **ń sọ àwọn ìfiranṣẹ́ di kékeré ní ìbámu pẹ̀lú jíjìn ìyípadà**
-(a ń wọn jíjìn láti òpin ìjíròrò náà). Pẹ̀lú àwọn àiyípadà tí a pèsè
-(`verbatim: 2, light: 2, moderate: 3`):
+### Onitẹsiwaju ti ogbo
 
-- **Àwọn ìyípadà 2 tó kẹ́yìn (jíjìn ≤ 2)**: A pa wọ́n mọ́ gẹ́gẹ́ bí wọ́n ṣe rí
-- **Jíjìn 3**: Ìfúnpọ̀ Caveman (yíyọ àwọn ọ̀rọ̀ àfikún kúrò)
-- **Jíjìn 4+**: A ṣe àkópọ̀ àwọn ìfiranṣẹ́ assistant; a dín àwọn ìfiranṣẹ́ user kù sí ìlà àkọ́kọ́ wọn,
-  pẹ̀lú ààlà lẹ́tà 120; a kò fọwọ́ kan àwọn ipa míì. Àwọn system prompt, àwọn ìfiranṣẹ́
-  tí a ti sọ di àtijọ́, àti ìfiranṣẹ́ user tuntun jù lọ ni a máa ń pa mọ́ gẹ́gẹ́ bí wọ́n ṣe rí láìka jíjìn sí.
-  A kò sọ ohunkóhun nù pátápátá, ìpele `light`
-  kò sì ṣeé dé pẹ̀lú àwọn àiyípadà tí a pèsè (`light` dọ́gba pẹ̀lú `verbatim`).
+Awọn ibaraẹnisọrọ gigun kojọpọ ọpọlọpọ awọn iyipada ifiranṣẹ, ṣugbọn awọn iyipada ti ogbo di kere si ibaramu. module `progressiveAging.ts`** degrades awọn ifiranṣẹ nipa Tan ijinna** (ijinna wọn lati opin ibaraẹnisọrọ). Pẹlu awọn aiyipada gbigbe (`verbatim: 2, light: 2, moderate: 3`):
 
-#### Àpẹẹrẹ kóòdù
+- **Awọn iyipada 2 kẹhin (ijinna ≤ 2)** : Pa verbatim
+- **Ijinna 3** : Caveman funmorawon (yiyọ kikun)
+- **Ijinna 4 +** : Awọn ifiranṣẹ iranlọwọ ni ṣoki; awọn ifiranšẹ olumulo dinku si laini akọkọ wọn, ti o ni awọn ohun kikọ 120; miiran ipa untouched. Awọn ifilọlẹ eto, awọn ifiranṣẹ ti o ti dagba tẹlẹ ati ifiranṣẹ olumulo tuntun nigbagbogbo ni a tọju ni ọrọ-ọrọ laibikita ijinna. Ko si ohun ti o lọ silẹ taara, ati pe ẹgbẹ `light` ko le de ọdọ pẹlu awọn aṣiṣe ti a firanṣẹ (`light` dogba `verbatim`).
+
+#### Apeere koodu
 
 ```ts
 import { applyAging } from "@omniroute/open-sse/services/compression/progressiveAging";
@@ -412,68 +391,47 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... àwọn ìyípadà 50 míì ...
+  // ... 50 more turns ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // àwọn ìyípadà 3 tó kẹ́yìn: gẹ́gẹ́ bí wọ́n ṣe rí
-  light: 8, // jíjìn <= 8: ìfúnpọ̀ fẹ́ẹ́rẹ́
-  moderate: 20, // jíjìn <= 20: ìfúnpọ̀ caveman
-  fullSummary: 5, // irú dátà náà nílò rẹ̀, kóòdù ìpín-ìpele kò kà á
-  // jíjìn > 20: a ṣe àkópọ̀ (assistant) / a pa ìlà àkọ́kọ́ mọ́ (user)
+  verbatim: 3, // last 3 turns: verbatim
+  light: 8, // distance <= 8: lite compression
+  moderate: 20, // distance <= 20: caveman compression
+  fullSummary: 5, // required by the type, not read by the banding code
+  // distance > 20: summarized (assistant) / first line kept (user)
 });
 
-// saved = iye àwọn token tí a dín kù
+// saved = number of tokens saved
 ```
 
-#### Ìgbà tó yẹ kí o lò ó
+#### Nigbati lati lo
 
-Ìdínkù díẹ̀díẹ̀ nípa ọjọ́-orí **máa ń ṣiṣẹ́ ní gbogbo ìgbà** fún módù `aggressive` — ó jẹ́ ìgbésẹ̀ 2 ti
-`compressAggressive()`. Módù Ultra kì í ṣiṣẹ́ ẹ. Ó
-wúlò gan-an fún:
+Ilọsiwaju ti ogbo ni** nigbagbogbo lori** fun ipo `aggressive` — o jẹ igbesẹ 2 ti `compressAggressive()`. Ipo Ultra ko ṣiṣẹ. O wulo ni pataki fun:
 
-- Àwọn sáàsì kíkóòdù tó ń lọ fún ìgbà pípẹ́
-- Àwọn ìjíròrò tó ń gba ọ̀pọ̀ ọjọ́
-- Àwọn ìṣàn-iṣẹ́ aṣojú aládàáṣe tó ní ọ̀pọ̀ ìpè irinṣẹ́
+- Awọn akoko ifaminsi igba pipẹ
+- Olona-ọjọ awọn ibaraẹnisọrọ
+- Awọn ṣiṣan iṣẹ aṣoju pẹlu ọpọlọpọ awọn ipe irinṣẹ
 
-### Módù Àbájáde Caveman
+### Caveman o wu Ipo
 
-Módù àbájáde Caveman ń fi **àwọn ìtọ́ni system prompt** kún un láti bẹ módẹ́lì fúnra rẹ̀ pé kó
-dáhùn ní ṣókí — ìpele `lite` ń béèrè fún àwọn ìdáhùn ṣókí tó ṣì pa àwọn gbólóhùn kíkún mọ́, `full`
-ń ní kó “dáhùn ní ṣókí bí caveman ọlọ́gbọ́n”, `ultra` sì ń béèrè fún àbájáde bíi tẹlifíráfù;
-àwọn ìtọ́ni lè béèrè nìkan, wọn kò lè ṣe ìdánilójú rẹ̀. Àwọn ìbéèrè gba wọn nípasẹ̀
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
-`open-sse/handlers/chatCore.ts` kọ́kọ́ ń pinnu àṣàyàn náà pẹ̀lú àfikún ìbáramu-ẹ̀yà-àtijọ́
-(`resolveOutputStyleSelection()` nínú
-`open-sse/services/compression/outputStyles/backCompat.ts`), èyí tí, nígbà tí `outputStyles`
-bá ṣófo, ń yí `cavemanOutputMode` tí a mú ṣiṣẹ́ padà sí ọ̀nà àbájáde `terse-prose` ní
-`cavemanOutputMode.intensity` (wo Ìbáramu-ẹ̀yà-àtijọ́ ní ìsàlẹ̀); àṣàyàn `outputStyles`
-tí kò ṣófo ni a lò gẹ́gẹ́ bí ó ṣe rí, `cavemanOutputMode.enabled` àti `intensity` kò sì ní
-ipa mọ́, nígbà tí àṣàyàn `autoClarity` rẹ̀ ṣì ń ṣiṣẹ́. `outputMode.ts` ní àwọn
-ọ̀rọ̀ ìtọ́ni (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), ọ̀nà ìkọjá àkóónú, àti
-olùrànlọ́wọ́ ìfi-sí-àyè tí ìṣàfikún ń lò; abẹrẹ `applyCavemanOutputMode()` tirẹ̀ kò ní
-olùpè kankan ní production.
+Caveman o wu mode afikun** awọn ilana kiakia eto** ti o beere awọn awoṣe ara fun terse o wu — awọn `lite` ipele béèrè fun ṣoki ti idahun ti o pa ni kikun awọn gbolohun ọrọ, `full` béèrè o lati "dahun terse bi smart caveman", ati `ultra` béèrè fun telegraphic o wu; Awọn ilana nikan beere, wọn ko le ṣe ẹri. Awọn ibeere gba wọn nipasẹ `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`): `open-sse/handlers/chatCore.ts` akọkọ ṣe ipinnu yiyan pẹlu ẹhin-compat shim (`resolveOutputStyleSelection()` in `open-sse/services/compression/outputStyles/backCompat.ts`), eyiti, lakoko ti `outputStyles` ti ṣofo, maapu `cavemanOutputMode` ti o ṣiṣẹ si aṣa iṣelọpọ `terse-prose` ni `cavemanOutputMode.intensity` (wo Back-compat ni isalẹ); yiyan `outputStyles` ti ko ṣofo ni a lo bi o ti ri, ati `cavemanOutputMode.enabled` ati `intensity` ko ni ipa kankan, nigba ti yiyi `autoClarity` rẹ si tun wa. `outputMode.ts` di awọn ọrọ itọnisọna mu (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), ipadabọ akoonu ati oluranlọwọ ibi ti abẹrẹ nlo; injector `applyCavemanOutputMode()` tirẹ ko ni olupe iṣelọpọ.
 
-#### Bí ó ṣe ń ṣiṣẹ́
+#### Bawo ni o ṣe n ṣiṣẹ
 
-Ìpo yìí kì í fún ìwọlé náà pọ̀. Ó ń fi ìdíwọ̀n àṣẹ kan kún ìtọ́sọ́nà ètò
-(wo Bí ìfisí ṣe ń ṣiṣẹ́ ní ìsàlẹ̀), àti pé ìpo ìfúnpọ̀ ìwọlé èyíkéyìí tí a yàn fún ìbéèrè náà
-yóò ṣì ṣiṣẹ́ lẹ́yìn náà lórí àkóónú tí ó ti ní ìdíwọ̀n náà báyìí. Ṣáájú gbólóhùn ààlà
-àjọpín tí gbogbo ìpele fi ń parí, ìpele `full` ti Gẹ̀ẹ́sì sọ pé:
+Ipo yii kii ṣe titẹ titẹ sii. O ṣe afikun ohun amorindun itọnisọna si tọ eto (wo Bawo ni abẹrẹ ṣe n ṣiṣẹ ni isalẹ), ati eyikeyi ipo funmorawon titẹ sii ti a yan fun ibeere naa tun nṣiṣẹ lẹhinna, lori ara ti o gbe bulọọki bayi. Ṣaaju gbolohun awọn aala ti o pin ti gbogbo ipele pari pẹlu, ipele `full` Gẹẹsi ka:
 
-> "Dáhùn ní ṣókí bí ògbójú ènìyàn inú ihò. Yọ àwọn article (a/an/the), ọ̀rọ̀ àfikún (just/really/basically/actually/simply), ọ̀rọ̀ ìkíni, àti ọ̀rọ̀ àìdánilójú kúrò. Àwọn àjákù gbólóhùn dára. Lo àwọn ọ̀rọ̀ alájọṣe kúkúrú (big dípò extensive, fix dípò implement). Pa gbogbo kókó imọ̀ ẹ̀rọ, code, errors, URLs, identifiers mọ́ gẹ́gẹ́ bí wọ́n ṣe rí."
+> "Dahun terse bi smart caveman. Ju ìwé (a/an/the), filler (just/really/basically/actually/simply), pleasantries, hedging. Fragments OK. Kukuru synonyms (nla ko sanlalu, fix ko muse). Jeki gbogbo imọ nkan na, koodu, aṣiṣe, URLs, identifiers gangan. "
 
-Èyí ṣiṣẹ́ dáadáa ní pàtàkì fún:
+Eyi ṣiṣẹ daradara daradara fun:
 
-- Ṣíṣẹ̀dá code (àbájáde tó kúkúrú = tokens díẹ̀)
-- Ìbéèrè àti ìdáhùn kíákíá (kò nílò àlàyé gígùn)
-- Ṣíṣe ọ̀pọ̀ iṣẹ́ lẹ́ẹ̀kan (mú throughput pọ̀ sí i)
+- Iran koodu (jade terser awọn ami kekere = )
+- Q&A iyara (ko si iwulo fun awọn alaye asọye)
+- Ṣiṣẹda ipele (ṣe igbejade pọsi)
 
-#### Ìgbà tí ó yẹ kí a lò ó
+#### Nigbati lati lo
 
-Ìpo àbájáde Caveman jẹ́ **opt-in**. Nígbà tí ìfúnpọ̀ bá wà ní titan (`enabled: true`, bọ́tìnì àkọ́kọ́
-wà ní titan lórí ojú-ewé Compression Settings), tan án pẹ̀lú `cavemanOutputMode.enabled`; `intensity`
-ń yan `lite`, `full` tàbí `ultra`:
+Caveman o wu mode ni** jáde** . Pẹlu titẹkuro lori (`enabled: true`, titunto si yiyi lori oju-iwe Awọn eto Imudara), tan-an pẹlu `cavemanOutputMode.enabled`; `intensity` yan `lite`, `full` `ultra`:
 
 ```json
 {
@@ -485,101 +443,44 @@ wà ní titan lórí ojú-ewé Compression Settings), tan án pẹ̀lú `caveman
 }
 ```
 
-Bọ́tìnì **Output Mode** ti àpapọ̀ ìfúnpọ̀ kan (`outputMode`, pẹ̀lú ìpele nínú `outputModeIntensity`)
-ń ṣètò bọ́tìnì kan náà fún àwọn ìbéèrè tí àpapọ̀ náà kan, àti irinṣẹ́ MCP
-`omniroute_set_compression_engine` ń kọ ọ́ sílẹ̀ nípasẹ̀ àríyànjiyàn boolean `outputMode`
-rẹ̀. Àṣàyàn `outputStyles` tí kò ṣófo ní àṣẹ ju bọ́tìnì yìí lọ. Nínú
-dashboard, mímú ara àbájáde **Terse prose** ṣiṣẹ́ ń fi ìdíwọ̀n kan náà sí i (wo Output
-Styles ní ìsàlẹ̀).
+A funmorawon konbo's** Ipo Ijade** toggle (`outputMode`, ipele ni `outputModeIntensity`) ṣeto iyipada kanna fun awọn ibeere ti konbo kan si, ati `omniroute_set_compression_engine` MCP ọpa kọwe nipasẹ ariyanjiyan `outputMode` boolean rẹ. Aṣayan `outputStyles` ti ko ṣofo gba iṣaaju lori iyipada yii. Ni awọn Dasibodu, muu awọn** Ọrọ aṣiwadi** o wu ara injects kanna Àkọsílẹ (wo wu Styles ni isalẹ).
 
-### Àwọn Ara Àbájáde (àkójọ)
+### Awọn aṣa Ijade (katalogi)
 
-Ìpo àbájáde Caveman lókè ni **ọ̀nà ara-ẹyọ kan ti àtijọ́**. Phase 4 mú un gbòòrò
-sí àkójọ àwọn ara àbájáde tí a lè darapọ̀: `OUTPUT_STYLE_CATALOG` nínú
-`open-sse/services/compression/outputStyles/catalog.ts`. Ara kọ̀ọ̀kan jẹ́ àṣẹ ìtọ́sọ́nà-ètò
-tí ó ń ní kí model náà fúnra rẹ̀ pèsè àbájáde tó dín owó kù; a lè mú ọ̀pọ̀ ara ṣiṣẹ́
-papọ̀, a sì máa fi wọ́n sí i ní ìtòlẹ́sẹẹsẹ àkójọ.
+Caveman o wu mode loke ni awọn** julọ nikan-ara ona** . Ipele 4 ṣakopọ rẹ sinu katalogi kan ti awọn aza ti o wujade: `OUTPUT_STYLE_CATALOG` in `open-sse/services/compression/outputStyles/catalog.ts`. Ara kọọkan jẹ itọnisọna eto-kia ti o beere awoṣe funrararẹ fun iṣelọpọ ti o din owo; aza le wa ni sise papo ki o si ti wa ni itasi ni katalogi ibere.
 
-| Ara                           | `id`            | Ohun tí ó ń ṣe                                                                                                                                                                                                                                 | Àwọn èdè àṣẹ                                  |
-| ----------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Ọ̀rọ̀ ṣókí                      | `terse-prose`   | Yọ ọ̀rọ̀ àfikún/articles/ọ̀rọ̀ àìdánilójú kúrò; pa kókó imọ̀ ẹ̀rọ mọ́ gẹ́gẹ́ bí ó ṣe rí. Ọ̀rọ̀ kan náà bí ìpo àbájáde caveman ti àtijọ́ (a tọ́ka sí i, a kò tún kọ ọ́).                                                                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Code díẹ̀                      | `less-code`     | Àkàbà YAGNI: ìyípadà tó kéré jù tí ó ṣiṣẹ́, kò sí abstractions tí a kò béèrè fún.                                                                                                                                                               | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ponytail (senior dev ọ̀lẹ)     | `ponytail`      | "Code tó dára jù ni code tí a kò kọ rárá": reuse > rewrite, root cause > symptom, diff tó kúkúrú jù tí ó ṣiṣẹ́.                                                                                                                                 | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Mo ní ADHD (ìṣe-kọ́kọ́)         | `i-have-adhd`   | Ìṣe kọ́kọ́ (command/path/snippet ṣáájú ọ̀rọ̀), àwọn ìgbésẹ̀ onínọ́mbà tí ó ní ààlà, ìgbésẹ̀ tó ṣe kedere kan ṣoṣo tí ó tẹ̀ lé, kò sí ọ̀rọ̀ ìṣáájú/àtúnyẹ̀wò/ìparí. A ṣe àtúnṣe rẹ̀ láti [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Àlẹ̀mọ́ UI Antislop             | `antislop-ui`   | Gbogbo ọgbọ́n àwòrán gbọ́dọ̀ kọjá ìdánwò ète (hierarchy, identity, readability); kò sí gradients/glass/glow àìyàn, palette ní ààlà, kò sí àwọn layout àdàkọ. Àwọn ara antislop méjèèjì ń fi ààlà no-dead-controls / no-fabricated-claims kún un.  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Àlẹ̀mọ́ ẹ̀dà àti ènìyàn Antislop | `antislop-copy` | Ẹ̀dà tó ṣe kedere (kò sí em dash, generic CTAs, buzzwords, chatbot closers, òtítọ́ tí a hùmọ̀) pẹ̀lú àwọn òfin fún ènìyàn: WCAG AA contrast, visible focus, keyboard reach, empty/loading/error states, mobile reflow.                             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| CJK ṣókí (文言)               | `terse-cjk`     | Ìdáhùn `full`/`ultra` ní èdè Ṣáínà Àtọwọ́dọ́wọ́ (文言); `lite` ń béèrè fún ìdáhùn ṣókí láìsí àwọn ọ̀rọ̀ iṣẹ́, ìkíni tàbí ohun ọ̀ṣọ́ nìkan.                                                                                                             | zh (locale-gated, wo ìsàlẹ̀)                   |
+| Ara                                 | `id`            | Ohun ti o ṣe                                                                                                                                                                                                                              | Awọn ede itọnisọna                            |
+| ----------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Ọrọ aṣiwadi                         | `terse-prose`   | Ju silẹ filler/articles/hedging; pa imọ nkan na gangan. Ọrọ kanna gẹgẹbi ipo abajade caveman julọ (itọkasi, ko tun-tẹ).                                                                                                                   | yo, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Kekere koodu                        | `less-code`     | YAGNI akaba: iyipada iṣẹ ti o kere julọ, ko si awọn abstraction ti a ko beere.                                                                                                                                                            | yo, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Ponytail (ọlẹ agba dev)             | `ponytail`      | "Koodu ti o dara julọ ni koodu ko kọ rara": tun lo > atunkọ, root fa aami aisan >, iyatọ iṣẹ ṣiṣe kukuru.                                                                                                                                 | yo, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Mo ni ADHD (igbese-akọkọ)           | `i-have-adhd`   | Iṣe akọkọ (command/path/snippet ṣaaju prose), awọn igbesẹ ti o ni nọmba, ONE nja ni igbesẹ ti nbọ, ko si preamble/recap/closers. Ti a farada lati [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                      | yo, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop UI àlẹmọ                   | `antislop-ui`   | Gbogbo ilana wiwo gbọdọ ṣe idanwo idi kan (logalomomoise, idanimọ, kika); ko si aiyipada gradients/glass/glow, paleti capped, ko si awọn ipilẹ awoṣe. Mejeeji awọn aza antislop ṣafikun awọn idari-aisi-ku / ko si-iṣelọpọ-aala awọn ẹtọ. | yo, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop daakọ ati eda eniyan àlẹmọ | `antislop-copy` | Ẹda kan pato (ko si em dash, jeneriki CTAs, buzzwords, chatbot closers, invented facts) pẹlu awọn ofin eniyan: WCAG AA itansan, idojukọ ti o han, arọwọto keyboard, awọn ipinlẹ empty/loading/error, atunsan alagbeka.                    | yo, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Terse CJK (文言)                    | `terse-cjk`     | idahun `full`/`ultra` ni Kannada Alailẹgbẹ (文言); `lite` nikan beere fun awọn idahun kukuru laisi awọn ọrọ iṣẹ, awọn adun tabi ohun ọṣọ.                                                                                                 | zh (agbegbe-gated, wo isalẹ)                  |
 
-Ara kọ̀ọ̀kan ní ìpele intensity mẹ́ta — `lite`, `full`, `ultra` — gbogbo ìpele sì
-ń parí pẹ̀lú gbólóhùn ààlà àjọpín (`SHARED_BOUNDARIES` nínú `outputMode.ts`), èyí tí
-ń pa code blocks, file paths, commands, errors àti URLs mọ́ gẹ́gẹ́ bí wọ́n ṣe rí. Àwọn ọ̀rọ̀ ìpele `terse-prose` àti
-`terse-cjk` tún fi identifiers kún àkójọ náà.
+Gbogbo ara ọkọ oju omi awọn ipele kikankikan mẹta — `lite`, `full`, `ultra` — ati gbogbo ipele dopin pẹlu gbolohun awọn aala ti o pin (`SHARED_BOUNDARIES` ni `outputMode.ts`), eyiti o tọju awọn bulọọki koodu, awọn ọna faili, awọn aṣẹ, awọn aṣiṣe ati deede URLs. Awọn ọrọ ipele `terse-prose` ati `terse-cjk` ṣafikun awọn idamọ si atokọ yẹn.
 
-`terse-cjk` jẹ́ locale-gated sí `zh` ní ibi méjì. Ojú-ewé Compression Settings ń fi
-ìlà rẹ̀ hàn nìkan nígbà tí èdè UI dashboard jẹ́ Ṣáínà (`zh-CN` tàbí `zh-TW`), àti pé
-`applyOutputStyles()` ń fi í sí i nìkan nígbà tí èdè tí a pinnu fún ìbéèrè náà (wo Language
-selection ní ìsàlẹ̀) jẹ́ `zh`. Fífipamọ́ ìlà náà kò pa àṣàyàn `terse-cjk` tí a ti fipamọ́ rẹ́:
-API ètò ń gba style id èyíkéyìí, àti fífipamọ́ àwọn ara míì lórí ojú-ewé ń pa á mọ́. Ní
-àkókò ìbéèrè, àyẹ̀wò èdè `applyOutputStyles()` ni locale gate kan ṣoṣo.
+`terse-cjk` jẹ agbegbe-gated si `zh` ni awọn aaye meji. Oju-iwe Awọn Eto Imudaranu ṣe atokọ awọn ila rẹ nikan nigbati ede UI dashboard jẹ Kannada (`zh-CN` tabi `zh-TW`), ati pe `applyOutputStyles()` fi itọlẹ nikan nigbati ede ti o yanju ibeere naa (wo yiyan Ede ni isalẹ) jẹ `zh`. Fifipamọ ila naa ko ṣe imukuro yiyan `terse-cjk` ti o fipamọ: awọn eto API gba id ara eyikeyi, ati fifipamọ awọn aza miiran lori oju-iwe naa tọju rẹ. Ni akoko ibeere, ayẹwo ede `applyOutputStyles()` jẹ ẹnu-ọna agbegbe nikan.
 
-#### Bí ìfisí ṣe ń ṣiṣẹ́
+#### Bawo ni abẹrẹ ṣiṣẹ
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) ń ṣe ìbámu
-àṣàyàn náà pẹ̀lú àkójọ (a máa yọ àwọn id tí a kò mọ̀ àti àwọn ara tí locale wọn kò bá mu
-kúrò, kì í jẹ́ àṣìṣe láéláé; àṣàyàn tí kò yọrí sí ara kankan yóò fi body náà sílẹ̀ láìyípadà,
-a ó sì fò ó gẹ́gẹ́ bí `no_styles`), ó so àwọn ìtọ́nisọ́nà tí a yàn pọ̀ ní ìtòlẹ́sẹẹsẹ àkójọ,
-ó fi gbólóhùn ààlà kún un **lẹ́ẹ̀kan ṣoṣo** (pẹ̀lú gbólóhùn ààbò, `SAFETY_BOUNDARIES` tàbí
-ìtumọ̀ rẹ̀, nígbà tí a bá yan `less-code` tàbí `ponytail`), ó sì bẹ̀rẹ̀ block náà pẹ̀lú
-àmì idempotency kan ṣoṣo (`[OmniRoute Output Styles]`), nítorí náà fífi í sílò lẹ́ẹ̀kan sí i
-kò ní ṣe ohunkóhun. Nígbà tí èdè tí a yanjú (wo Àṣàyàn èdè ní ìsàlẹ̀) bá ní ìtumọ̀,
-ìtọ́nisọ́nà tí a ṣe sí àdúgbò ni a ó fi sínú rẹ̀ dípò ti Gẹ̀ẹ́sì.
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) ṣe ipinnu yiyan lodi si katalogi naa (ids ti a ko mọ ati awọn aṣa ti ko baamu agbegbe ti lọ silẹ, kii ṣe aṣiṣe; yiyan ti o pinnu si ara ko fi ara silẹ ni iyipada, fo bi `no_styles`), ṣajọpọ awọn ilana ti o yan ni ilana katalogi, fikun gbolohun awọn aala.** lẹẹkan** (pẹlu gbolohun ọrọ ailewu, `SAFETY_BOUNDARIES` tabi itumọ rẹ, nigbati `less-code` tabi `ponytail` ti yan), ati bẹrẹ bulọki pẹlu ami-ami arapotency kan (`[OmniRoute Output Styles]`), nitorinaa atunbere jẹ ko si-op. Nigbati ede ti o yanju (wo yiyan Ede ni isalẹ) ni itumọ kan, itọnisọna ti agbegbe jẹ itasi dipo Gẹẹsi.
 
-Lórí body tí ó ní array `messages` tí kò ṣófo, àyẹ̀wò idempotency máa ń ṣiṣẹ́ ṣáájú
-content bypass: nígbà tí àmì `[OmniRoute Output Styles]` bá ti wà nínú field `system`
-ìpele-òkè (string kan tàbí array content-block) tàbí nínú system message tí content rẹ̀
-jẹ́ string, a ó fi body náà sílẹ̀ láìyípadà gẹ́gẹ́ bí `already_applied`, kò sì ní sí àyẹ̀wò
-keyword kankan. Bí kò bá rí bẹ́ẹ̀, content bypass kan (`shouldBypassCavemanOutputMode()`
-nínú `open-sse/services/compression/outputMode.ts`) máa ń ṣàyẹ̀wò ọ̀rọ̀ inú message mẹ́ta
-tó gbẹ̀yìn, láìka role wọn sí, ó sì máa ń fò àwọn ara náà fún gbogbo turn náà nígbà tí
-ọ̀rọ̀ yẹn bá bá àwọn keyword ààbò, ìgbésẹ̀ tí kò ṣeé dá padà tàbí ìbéèrè fún àlàyé mu,
-tàbí nígbà tí ó bá ní ọ̀wọ̀ọ̀wọ́ tí ìtòlẹ́sẹẹsẹ ṣe pàtàkì: `first`, `then`, `after that`,
-`before`, `rollback` tàbí `backup` tí `delete`, `drop`, `migrate`, `deploy` tàbí
-`release` tẹ̀ lé láàárín ohun kikọ 240. Bypass náà máa ń ṣiṣẹ́ nígbà tí toggle
-**Auto-Clarity Bypass** (`cavemanOutputMode.autoClarity`, tí ó wà ní titan ní àkọ́kọ́)
-bá wà ní titan; pípa toggle náà máa ń fò àyẹ̀wò keyword náà.
+On a body with a non-empty `messages` array, the idempotency check runs before the content bypass: when the `[OmniRoute Output Styles]` marker is already in the top-level `system` field (a string or a content-block array) or in a system message with string content, the body is left unchanged as `already_applied` and no keyword check runs. Otherwise a content bypass (`shouldBypassCavemanOutputMode()` in `open-sse/services/compression/outputMode.ts`) checks the text of the last three messages, whatever their role, and skips the styles for the whole turn when that text matches its security, irreversible-action or clarification keywords, or an order-sensitive sequence: `first`, `then`, `after that`, `before`, `rollback` or `backup` followed within 240 characters by `delete`, `drop`, `migrate`, `deploy` or `release`. The bypass runs while the **Auto-Clarity Bypass** toggle (`cavemanOutputMode.autoClarity`, on by default) is on; turning the toggle off skips the keyword check.
 
-Nígbà tí bypass bá jẹ́ kí turn náà kọjá, `placeSystemInstruction()` (nínú file kan náà),
-tí kì í ṣẹ̀dá `messages[0]` tuntun láéláé, máa ń fi block náà sí àkọ́kọ́ nínú àwọn wọ̀nyí
-tí ó bá rí:
+Nigbati ọna-ọna ba jẹ ki ọna yii kọja, `placeSystemInstruction()` (faili kanna), eyiti ko ṣẹda `messages[0]` tuntun, gbe bulọọki naa si akọkọ ninu iwọnyi o rii:
 
-1. System message tó wà níwájú tí content rẹ̀ jẹ́ string: a ó fi block náà kún un lẹ́yìn
-   ọ̀rọ̀ rẹ̀.
-2. Field `system` ìpele-òkè: a ó fi block náà kún un lẹ́yìn ọ̀rọ̀ string kan, tàbí
-   fi í kún un gẹ́gẹ́ bí text block tuntun sínú array content-block kan.
-3. System message àkọ́kọ́ tó wà lẹ́yìn tí content rẹ̀ jẹ́ string: a ó fi block náà kún un
-   lẹ́yìn ọ̀rọ̀ rẹ̀.
-4. Kò sí èyíkéyìí nínú àwọn tó wà lókè: block náà yóò wọ system message tuntun ní òpin
-   `messages`.
+1. Ifiranṣẹ eto oludari pẹlu akoonu okun: bulọki ti wa ni afikun lẹhin ọrọ rẹ.
+2. Aaye `system` ti o ga julọ: bulọki naa ti wa ni ifikun lẹhin ọrọ ti okun kan, tabi ṣafikun bi idinaki ọrọ tuntun si ọna idina akoonu.
+3. Ifiranṣẹ eto akọkọ nigbamii pẹlu akoonu okun: bulọki naa ti wa ni afikun lẹhin ọrọ rẹ.
+4. Ko si ọkan ninu awọn loke: Àkọsílẹ lọ sinu ifiranṣẹ eto titun ni opin `messages`.
 
-Lórí body tí kò ní array `messages` (tàbí tí ó ní èyí tí ó ṣófo), kò sí content bypass
-tí yóò ṣiṣẹ́, a kò sì ní ṣàyẹ̀wò field `system` ìpele-òkè. A ó fi block náà kún un lẹ́yìn
-ọ̀rọ̀ field `instructions` tí ó jẹ́ string, àyàfi bí field náà bá ti ní àmì
-`[OmniRoute Output Styles]`, nígbà náà a ó fi body náà sílẹ̀ láìyípadà gẹ́gẹ́ bí
-`already_applied`. Nígbà tí body kò bá ní field `instructions` tí ó jẹ́ string ṣùgbọ́n
-ó ní `input` (string kan tàbí array), block náà yóò di `instructions`, yóò sì rọ́pò iye
-tí kì í ṣe string èyíkéyìí tí field náà ní tẹ́lẹ̀. Body tí kò ní field `instructions`
-tí ó jẹ́ string tàbí `input` tí ó jẹ́ string tàbí array ni a ó fi sílẹ̀ láìyípadà,
-a ó sì fò ó gẹ́gẹ́ bí `no_messages`.
+Lori ara ti ko ni eto `messages` (tabi pẹlu eyi ti o ṣofo), ko si akoonu fori gbalaye ati aaye `system` ipele-oke ko ni imọran. Bulọọki naa ti wa ni ifikun lẹhin ọrọ ti aaye `instructions` okun kan, ayafi ti aaye yẹn ti ni ami ami `[OmniRoute Output Styles]` tẹlẹ ninu, ninu ọran ti ara ti wa ni iyipada laisi iyipada bi `already_applied`. Nigbati ara ko ba ni aaye `instructions` okun ṣugbọn o gbe `input` (okun kan tabi orun), bulọki naa di `instructions`, rọpo eyikeyi iye ti kii ṣe okun ti aaye ti o waye. Ara ti ko ni aaye `instructions` okun tabi okun tabi opo `input` ko yipada ati fo bi `no_messages`.
 
-#### Bí a ṣe lè mú un ṣiṣẹ́
+#### Bi o ṣe le mu ṣiṣẹ
 
-Nínú dashboard: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), apá Output styles: row kan fún ara kọ̀ọ̀kan pẹ̀lú toggle
-titan/pípa àti selector ìpele kan. Àwọn ara máa ń fi ìtọ́nisọ́nà sínú rẹ̀ nígbà tí
-compression fúnra rẹ̀ bá wà ní titan (toggle àgbà ti page náà, `enabled`). Toggle
-**Auto-Clarity Bypass** wà lórí page **Caveman**
-(`/dashboard/context/caveman`), nínú card **Output Mode** rẹ̀. Nípasẹ̀ ètò,
-config compression máa ń tọ́jú àṣàyàn náà bí:
+Ninu dasibodu naa:** Funmorawon Opo → funmorawon Eto** (`/dashboard/context/settings`), Abala awọn aza ti o wu jade: ọna kan fun ara pẹlu yiyi on/off ati yiyan ipele kan. Awọn ara abẹrẹ nigba ti funmorawon ara wa ni titan (olori oju-iwe, `enabled`). Awọn** Ifi-isọye-laifọwọyi** toggle jẹ lori awọn** Caveman** oju-iwe (`/dashboard/context/caveman`), ninu rẹ** Ipo Ijade** kaadi. Ni eto, atunto funmorawon duro yiyan bi:
 
 ```json
 {
@@ -590,135 +491,50 @@ config compression máa ń tọ́jú àṣàyàn náà bí:
 }
 ```
 
-Ìbámu-sẹ́yìn: nígbà tí `outputStyles` bá ṣófo, setting àtijọ́
-`cavemanOutputMode.enabled` máa ń darí sí `terse-prose` ní
-`cavemanOutputMode.intensity`. Block náà yóò bẹ̀rẹ̀ pẹ̀lú àmì
-`[OmniRoute Output Styles]`, níbi tí injector àtijọ́ `applyCavemanOutputMode()` ti kọ
-`[OmniRoute Caveman Output Mode]`. Ní ìsàlẹ̀ àmì náà, ọ̀rọ̀ náà bá injection àtijọ́ mu
-ní en, pt-BR, es, de, fr, it, ru, id àti vi; ní ja àti zh ó ní àyè àfikún kan ṣáájú
-gbólóhùn ààlà náà. `terse-prose` ní ìtumọ̀ sí pt-BR, es, de, fr, it, ru, zh, ja, id àti
-vi, nítorí náà request tí èdè tí a yanjú fún un jẹ́ `hu` máa ń gba ọ̀rọ̀ Gẹ̀ẹ́sì níbi tí
-injector àtijọ́ ti lo ti Hungarian.
+Back-compat: nigba ti `outputStyles` ti ṣofo, ogún `cavemanOutputMode.enabled` eto awọn maapu si `terse-prose` ni `cavemanOutputMode.intensity`. Àkọsílẹ lẹhinna bẹrẹ pẹlu aami `[OmniRoute Output Styles]`, nibiti abẹrẹ `applyCavemanOutputMode()` julọ ti kọ `[OmniRoute Caveman Output Mode]`. Ni isalẹ aami, ọrọ baamu abẹrẹ julọ ni en, pt-BR, es, de, fr, it, ru, id ati vi; ni ja ati zh o gbe aaye afikun kan ṣaaju gbolohun awọn aala. `terse-prose` tumọ si pt-BR, es, de, fr, it, ru, zh, ja, id ati vi, nitorinaa ibeere ti ede ti o yanju jẹ `hu` gba ọrọ Gẹẹsi nibiti injector legacy ti lo ọkan Hungarian rẹ.
 
-Àṣàyàn èdè output-style (`resolveOutputStyleLanguage()` nínú
-`outputStyles/apply.ts`): nígbà tí `languageConfig.enabled` bá wà ní titan, `autoDetect`
-máa ń mú àpẹẹrẹ láti inú user message tuntun jù lọ nínú array `messages` ti request náà
-tí ó ní ọ̀rọ̀ (content string, tàbí `text` inú àwọn apá content rẹ̀), ó sì máa ń ṣiṣẹ́
-detector engine Caveman (`detectCompressionLanguage()`) lórí rẹ̀. Detector náà máa ń
-dá `zh` padà fún ọ̀rọ̀ tí ó ní àwọn ohun kikọ Han tí kò sì ní kana; bí kò bá rí bẹ́ẹ̀, ó
-máa ń dá èyí tí ó ní hint match tó pọ̀ jù lọ padà láàárín `it`, `pt-BR`, `es`, `de`,
-`fr`, `ru`, `ja`, `hu` àti `id`, àti `en` nígbà tí kò sí èyí tó bá mu — ọ̀rọ̀ tí kò lè
-sọ̀rí rẹ̀ máa ń gba Gẹ̀ẹ́sì, kì í gba `defaultLanguage` láéláé, a kò sì máa ń ṣàwárí `vi`
-bó tilẹ̀ jẹ́ pé àwọn ara náà ní ọ̀rọ̀ `vi`. Body Responses API máa ń pa àwọn turn rẹ̀ mọ́
-nínú `input`, tí a kò mú àpẹẹrẹ rẹ̀, nítorí náà ó máa ń gba `defaultLanguage`, lẹ́yìn náà
-Gẹ̀ẹ́sì. Nígbà tí kò bá sí user message nínú `messages` tí ó ní ọ̀rọ̀, tàbí tí
-`autoDetect` bá wà ní pípa, `defaultLanguage` ni a ó lò, lẹ́yìn náà Gẹ̀ẹ́sì. Nígbà tí
-`languageConfig.enabled` bá wà ní pípa, èdè náà jẹ́ Gẹ̀ẹ́sì — àyàfi bí compression combo
-kan bá kan request náà (combo tí a yàn sí routing combo request náà, tàbí default
-compression combo tí chatCore máa ń padà sí fún built-in stacked pipeline): lílo combo
-kan máa ń tan `languageConfig.enabled` fún request náà, ó sì máa ń ṣètò
-`defaultLanguage` láti inú àwọn language pack combo náà (iye tí a fipamọ́ bí ó bá jẹ́
-ọ̀kan lára pack combo náà, bí kò bá rí bẹ́ẹ̀ pack àkọ́kọ́ combo náà, tí default rẹ̀ jẹ́
-`en`), nígbà tí `autoDetect` tí a fipamọ́ (tí ó wà ní titan ní àkọ́kọ́) ṣì ń ṣiṣẹ́.
-Engine input Caveman máa ń yan èdè rule-pack rẹ̀ ní ọ̀nà mìíràn — fún apá ọ̀rọ̀ kọ̀ọ̀kan
-àti, nígbà tí auto-detect bá wà ní pípa, nípasẹ̀ ìdènà `enabledPacks`.
+Yiyan ede ara-jade (`resolveOutputStyleLanguage()` ni `outputStyles/apply.ts`): pẹlu `languageConfig.enabled` titan, `autoDetect` ṣe ayẹwo ifiranṣẹ olumulo tuntun ninu eto `messages` ibeere ti o ni ọrọ (akoonu okun, tabi `text` ti awọn apakan akoonu rẹ) ati ṣiṣe aṣawari ẹrọ Caveman (`detectCompressionLanguage()`) sori rẹ. Oluwari naa pada `zh` fun ọrọ pẹlu awọn ohun kikọ Han ko si si kana; bibẹkọ ti o pada eyikeyi ti `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` ati `id` ni o ni awọn julọ ofiri ibaamu, ati `en` nigbati kò baramu — ọrọ ti o ko ba le ṣe lẹtọ gba English, kò `defaultLanguage`, ati `vi` ti wa ni ko ri biotilejepe awọn aza ọkọ `vi` ọrọ. A Awọn idahun API ara ntọju awọn iyipada rẹ ni `input`, eyiti a ko ṣe ayẹwo, nitorina o gba `defaultLanguage`, lẹhinna Gẹẹsi. Nigbati ifiranṣẹ olumulo ko ba ni `messages` ni ọrọ, tabi pẹlu `autoDetect` pa, `defaultLanguage` kan, lẹhinna Gẹẹsi. Pẹlu `languageConfig.enabled` ni pipa, ede naa jẹ English — ayafi ti konbo funmorawon kan kan si ibeere naa (akopọ kan ti a yàn si konbo afisona ibeere naa, tabi konbo funmorawon aiyipada chatCore ṣubu pada si fun opo gigun ti epo tolera ti a ṣe sinu): fifi konbo kan tan `languageConfig.enabled` fun ibeere yẹn ati ṣeto `defaultLanguage` lati inu awọn idii iye ede kan ti o ba jẹ pe o ṣeto awọn idii ede kan idii akọkọ konbo, eyiti o ṣe aipe si `en`), lakoko ti `autoDetect` ti o fipamọ (lori nipasẹ aiyipada) ṣi kan. Enjini igbewọle Caveman mu ede-pack rẹ yatọ si — fun apakan ọrọ ati, pẹlu wiwa-laifọwọyi, gated lori `enabledPacks`.
 
-Mátíríìsì àṣà × èdè náà ni
-`tests/unit/compression/output-styles-i18n-matrix.test.ts` ṣe àìyípadà: gbogbo àṣà inú àkójọ gbọ́dọ̀ ní
-àkọọ́lẹ̀ kan nínú `BASELINE_LANGUAGES` ti ìdánwò náà; àṣà tí a kò fi ààlà agbègbè-èdè sí gbọ́dọ̀ pèsè
-ìtumọ̀ pt-BR (a yọ `terse-cjk` tí a fi ààlà agbègbè-èdè sí kúrò nínú òfin yìí) àyàfi tí a bá
-ṣe àkójọ rẹ̀ sínú `KNOWN_ENGLISH_ONLY`, èyí tí ó lè ní àwọn àṣà tí kò ní ìtumọ̀ kankan nìkan —
-àṣà tí a ṣe àkójọ rẹ̀ tí ó ní ìtumọ̀ èyíkéyìí yóò kuna ìdánwò náà; àṣà kan náà yóò sì kuna ìdánwò náà nígbà tí
-ó bá pàdánù èdè kan tí àkọọ́lẹ̀ rẹ̀ nínú `BASELINE_LANGUAGES` ṣe àkójọ rẹ̀. Láti ṣàfikún àṣà kan, wo
-[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
+Awọn ara × ede matrix ti wa ni pinned nipa `tests/unit/compression/output-styles-i18n-matrix.test.ts`: gbogbo katalogi ara nilo ohun titẹsi ni `BASELINE_LANGUAGES` igbeyewo; ara ti kii ṣe agbegbe-gated gbọdọ gbe itumọ pt-BR kan ( `terse-cjk` locale-gated jẹ alayokuro lati ofin yii) ayafi ti o ba wa ni akojọ `KNOWN_ENGLISH_ONLY`, eyiti o le di awọn aṣa nikan mu laisi awọn itumọ ni gbogbo — ara ti a ṣe akojọ ti o ni itumọ eyikeyi kuna idanwo naa; ati pe ara kan kuna idanwo naa nigbati o padanu ede kan ti awọn atokọ titẹsi `BASELINE_LANGUAGES` rẹ. Lati fi ara kan kun, wo [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
-### Ìfúnpọ̀ Àbájáde Irinṣẹ́
+### Funmorawon Abajade Irinṣẹ
 
-`compressToolResult()` nínú `open-sse/services/compression/toolResultCompressor.ts`
-ń fún ọ̀rọ̀ àbájáde irinṣẹ́ pọ̀ pẹ̀lú **ọgbọ́n 5**. Ó máa ń dán wọn wò ní ìtòlẹ́sẹẹsẹ yìí, ọgbọ́n àkọ́kọ́
-tí a mú ṣiṣẹ́ tí àyẹ̀wò rẹ̀ sì bá àkóónú náà mu ló máa pinnu àbájáde:
+`compressToolResult()` ni `open-sse/services/compression/toolResultCompressor.ts` ṣe compress ọrọ abajade-irinṣẹ pẹlu** 5 ogbon** . O gbiyanju wọn ni aṣẹ yii, ati ilana imuṣiṣẹ akọkọ ti ayẹwo rẹ baamu akoonu pinnu abajade:
 
-1. **`fileContent`**: àkóónú onílà mẹ́ta tàbí jù bẹ́ẹ̀ lọ, nínú èyí tí ó kéré tán ìlà kan, lẹ́yìn pípa
-   ìfàsẹ́yìn ní ìbẹ̀rẹ̀ tì, bẹ̀rẹ̀ pẹ̀lú `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` tàbí `return ` (ọ̀rọ̀-ìtọ́kasí náà pẹ̀lú àyè kan), tàbí pẹ̀lú `if`,
-   `for` tàbí `while` tí `(` tàbí ` (` tẹ̀ lé, yóò pa ìlà 20 àkọ́kọ́ àti ìlà 5 ìkẹyìn mọ́, pẹ̀lú
-   ààmì sí àárín tí a yọ kúrò.
-2. **`grepSearch`**: àkóónú tí ó ní ó kéré tán ìlà kan ní ìrísí `<path>:<digits>:`,
-   níbi tí ọ̀rọ̀ tó wà ṣáájú àmì kọ́lónì àkọ́kọ́ kò ti ní àyè funfun, yóò pa àwọn ìlà wọ̀nyẹn nìkan mọ́, tó
-   pọ̀ jù ìlà 30, lẹ́yìn náà yóò fi iye àwọn ìbámu mìíràn àti àkójọ àwọn fáìlì tó bá mu hàn;
-   gbogbo ìlà mìíràn ni a óò yọ kúrò. Ìlà kan ṣoṣo bẹ́ẹ̀ ti tó láti mú ọgbọ́n náà ṣiṣẹ́, nítorí náà
-   ìlà àkọsílẹ̀ tó bẹ̀rẹ̀ pẹ̀lú àmì-àkókò bí `12:30:45` náà ni a kà sí ìbámu.
-3. **`shellOutput`**: àbájáde tí ó ní ọkọọkan ANSI CSI (`ESC[` lẹ́yìn náà àwọn díjíìtì tàbí
-   àwọn àmì semikólónì, lẹ́yìn náà lẹ́tà kan, bíi nínú àwọn kóòdù àwọ̀) tàbí `$` tí àyè funfun
-   tẹ̀ lé níbikíbi nínú ọ̀rọ̀ náà yóò pàdánù àwọn ọkọọkan wọ̀nyẹn (àwọn escape mìíràn, bíi `ESC[?25l` tàbí
-   ọkọọkan àkọlé-fèrèsé OSC, ni a ó pa mọ́), yóò sì pa ìlà 50 ìkẹyìn mọ́, nípa dídín àwọn ìlà
-   àsọtúnṣe tó tẹ̀ lé ara wọn kù sí ọ̀kan. Nítorí pé àyẹ̀wò yìí ń ṣiṣẹ́ ṣáájú `json` àti `errorMessage`,
-   JSON tàbí àbájáde àṣìṣe tí ó ní `$` bẹ́ẹ̀ kò ní dé ọ̀dọ̀ wọn nígbà tí
-   `shellOutput` bá wà ní títàn.
-4. **`json`**: a máa ṣe àkópọ̀ ẹrù JSON tó ju àmì-ọ̀rọ̀ 2,000 lọ, tó bẹ̀rẹ̀ pẹ̀lú `{` tàbí `[` (lẹ́yìn
-   àyè funfun àṣàyàn) tí a sì lè túmọ̀: array tó ní ohun tó ju 7 lọ yóò pa ohun 5 àkọ́kọ́
-   àti ohun 2 ìkẹyìn mọ́, pẹ̀lú iye àpapọ̀ rẹ̀, object kan sì máa pa keys 20 àkọ́kọ́ rẹ̀ mọ́,
-   nípa fífi aṣàmúlò `{…N keys}` rọ́pò iye object tàbí array kọ̀ọ̀kan tó wà ní inú rẹ̀
-   (fún array, N ni gígùn rẹ̀), àti àmì `_remaining_<N>_keys` kan tó ń ka iye keys
-   tí a yọ kúrò lẹ́yìn 20 àkọ́kọ́. A máa ń da àwọn iye scalar kọ ní odindi, nítorí náà object oní keys 20
-   tàbí díẹ̀ sí i tí kò ní iye tó wà ní inú rẹ̀ ni a óò kàn tún fi ìfàsẹ́yìn ṣe — èyí tí a ti dín kù yóò ní àwọn àmì-ọ̀rọ̀
-   sí i, yóò sì dúró láìyípadà.
-5. **`errorMessage`**: àbájáde tí ó ní, níbikíbi àti láìka bí lẹ́tà ṣe tóbi tàbí kékeré, `error:`,
-   `error ` (ọ̀rọ̀ náà tí àyè kan tẹ̀ lé, bíi nínú `no error found`), `[error]`,
-   `exception:`, `exception `, `[exception]` tàbí `traceback` yóò pa ìlà àkọ́kọ́, àwọn
-   ìlà 10 tó tẹ̀ lé àti àwọn ìlà 3 ìkẹyìn mọ́, pẹ̀lú àmì `… [N frames elided] …` ní ààyè àwọn
-   ìlà tó wà láàárín wọn. Àmì náà máa hàn nígbà tí ó bá ju ìlà 13 lọ lẹ́yìn ìlà àkọ́kọ́
-   nìkan, nítorí náà àbájáde àṣìṣe onílà 14 tàbí díẹ̀ sí i kò ní kúrú (ní ìlà 12 tàbí 13,
-   àwọn ìlà 3 ìkẹyìn tún àwọn ìlà tí a ti pa mọ́ ṣe).
+1. **`fileContent`** : akoonu ti 3 tabi diẹ ẹ sii awọn ila ninu eyiti o kere ju laini kan, ti o kọju ifọrọwerọ asiwaju, bẹrẹ pẹlu `import `, `export `, `function `, `class `, `const `, `let `, `var ` tabi `return ` (ọrọ koko pẹlu aaye kan), tabi pẹlu `if`, `for` tabi `while` ti o tẹle nipasẹ `(` tabi ` (` 2, ti o tẹle awọn ila 20s ti o kẹhin.
+2. **`grepSearch`** : akoonu pẹlu ni o kere kan ila ti awọn fọọmu `<path>:<digits>:`, ibi ti awọn ọrọ ṣaaju ki o to akọkọ oluṣafihan ni o ni ko si whitespace, ntọju nikan awon ila, ni julọ 30, atẹle nipa a kika eyikeyi siwaju sii ere-kere ati awọn akojọ ti awọn ti baamu awọn faili; gbogbo miiran ila ti wa ni silẹ. Laini iru kan to lati ṣe okunfa ilana naa, nitorinaa laini log kan ti o bẹrẹ pẹlu aami igba bii `12:30:45` tun ka.
+3. **`shellOutput`** : iṣẹjade ti o ni ọna ANSI CSI (`ESC[` lẹhinna awọn nọmba tabi awọn semicolons lẹhinna lẹta kan, gẹgẹbi ninu awọn koodu awọ) tabi `$` kan ti o tẹle nipasẹ aaye funfun nibikibi ninu ọrọ naa padanu awọn ilana wọnyẹn (awọn ona abayo miiran, gẹgẹbi `ESC[?25l` tabi eto akọle window OSC kan, ti wa ni ipamọ) ati tọju awọn laini 50 ti o kẹhin, pẹlu awọn laini ti o ṣubu leralera. Nitoripe ayẹwo yii nṣiṣẹ ṣaaju `json` ati `errorMessage`, JSON tabi aṣiṣe aṣiṣe ti o ni iru `$` kan ko de ọdọ wọn nigba ti `shellOutput` wa ni titan.
+4. **`json`** : ẹru isanwo JSON kan ju awọn ohun kikọ 2,000 ti o bẹrẹ pẹlu `{` tabi `[` (lẹhin aaye funfun ti o yan) ati pe a ṣe akopọ: opo ti o ju awọn ohun 7 lọ ntọju awọn ohun 5 akọkọ ati awọn ohun 2 kẹhin ati kika lapapọ rẹ, ati pe ohun kan tọju awọn bọtini 20 akọkọ rẹ, pẹlu ohun itẹ-ẹiyẹ kọọkan tabi oniduro titobi ti a rọpo pẹlu `{…N keys}` kan (fun qear iye). `_remaining_<N>_keys` asami kika awọn bọtini silẹ ti o ti kọja akọkọ 20. Scalar iye ti wa ni dakọ odidi, ki ohun kan ti 20 bọtini tabi díẹ pẹlu ko si iteeye iye ti wa ni nikan tun-indented — a miniified ọkan jèrè ohun kikọ ki o si duro ko yipada.
+5. **`errorMessage`** : o wu ti o ni, nibikibi ati ni eyikeyi lẹta nla, `error:`, `error ` (ọrọ ti o tẹle pẹlu aaye kan, bi ni `no error found`), `[error]`, `exception:`, `exception `, `[exception]` tabi `traceback` ntọju laini akọkọ rẹ, awọn ila 10 tókàn ati 3 ti o kẹhin, pẹlu ami `… [N frames elided] …` ni aaye awọn ila laarin wọn. Aami naa han nikan nigbati diẹ sii ju awọn ila 13 tẹle laini akọkọ, nitorinaa abajade aṣiṣe ti awọn ila 14 tabi diẹ ko kuru (ni awọn ila 12 tabi 13 awọn ila 3 ti o kẹhin tun ti pa tẹlẹ).
 
-Lẹ́yìn tí ọgbọ́n kan bá bá a mu, kódà bí kò bá fi ohunkóhun pamọ́, a kò ní dán àwọn ọgbọ́n tó tẹ̀ lé e
-wò. Nígbà tí ọgbọ́n tó bá a mu kò bá fi token tí a fojú díwọ̀n kankan pamọ́ (gígùn ÷ 4, tí a yí sókè) —
-fún àpẹẹrẹ, fáìlì tó dà bí kóòdù onílà 25 tàbí díẹ̀ sí i, tàbí array JSON tó ju àmì-ọ̀rọ̀ 2,000
-lọ pẹ̀lú ohun 7 tàbí díẹ̀ sí i — ẹ́ńjìnnì alágbára yóò pa àbájáde irinṣẹ́ ìpilẹ̀ṣẹ̀ mọ́:
-àwọn olùpè méjèèjì (`compressAggressive()` àti `compressAnthropicToolResultBlock()`)
-máa ń pa ìpilẹ̀ṣẹ̀ mọ́ nígbà tí `saved` bá jẹ́ 0 tàbí kéré sí i, nígbà tí `compressToolResult()` fúnra rẹ̀ ṣì
-máa ń dá àbájáde ọgbọ́n náà padà. Ìgbésẹ̀ àbájáde irinṣẹ́ kì í ṣe ọ̀rọ̀ ìkẹyìn:
-olùṣàkópọ̀ àfẹ́yinti ẹ́ńjìnnì náà ṣì lè dín ìfiranṣẹ́ `tool` tàbí `function` tó gùn ju
-àmì-ọ̀rọ̀ 8,192 lọ kù (`maxTokensPerMessage`, 2,048, tí a sọ di ìlọ́po 4).
+Lẹhin awọn ibaamu ilana kan, paapaa ọkan ti ko fi nkan pamọ, awọn ilana nigbamii ko gbiyanju. Nigbati ilana ti o baamu naa ko fipamọ awọn ami ifoju (ipari ÷ 4, ti yika) — fun apẹẹrẹ koodu-bii faili ti awọn laini 25 tabi diẹ, tabi JSON kan lori awọn ohun kikọ 2,000 pẹlu awọn nkan 7 tabi diẹ — ẹrọ ibinu ntọju abajade irinṣẹ atilẹba: awọn olupe mejeeji (`compressAggressive()` ati `compressAnthropicToolResultBlock()`) ti o tun pada wa ni isalẹ 0 nigba ti atilẹba `saved` `compressToolResult()` ká o wu. Igbesẹ esi-irinṣẹ kii ṣe ọrọ ti o kẹhin: akopọ ifẹhinti ti ẹrọ naa tun le kuru `tool` tabi ifiranṣẹ `function` kan gun ju awọn ohun kikọ 8,192 (`maxTokensPerMessage`, 2,048, awọn akoko 4).
 
-#### Ìgbà tí o yẹ kí o lò ó
+#### Nigbati lati lo
 
-Ìfúnpọ̀ àbájáde irinṣẹ́ ni ìgbésẹ̀ 1 ti ẹ́ńjìnnì alágbára (`compressAggressive()` nínú
-`open-sse/services/compression/aggressive.ts`), nítorí náà ó máa ń ṣiṣẹ́ ní módù Aggressive àti nínú
-ìgbésẹ̀ `aggressive` ti pipeline alápele. Ó máa ń fún àwọn ìfiranṣẹ́ `tool` àti `function`
-onírísí OpenAI pọ̀, àti ọ̀rọ̀ tó wà nínú àwọn búlọ́ọ̀kù `tool_result` Anthropic. Ọgbọ́n kọ̀ọ̀kan ní
-switch tirẹ̀ lábẹ́ `aggressive.toolStrategies`, gbogbo wọn sì wà ní títàn ní àìyípadà. Nínú dashboard,
-àwọn switch náà wà ní ìwò **Advanced** ti ojúewé Caveman nígbà tí ìfúnpọ̀ bá wà ní títàn tí
-módù àìyípadà sì jẹ́ Aggressive.
+Funmorawon abajade ọpa jẹ igbesẹ 1 ti ẹrọ ibinu (`compressAggressive()` ni `open-sse/services/compression/aggressive.ts`), nitorinaa o nṣiṣẹ ni ipo ibinu ati ni igbesẹ `aggressive` ti opo gigun ti epo tolera. O ṣe akojọpọ OpenAI-apẹrẹ `tool` ati awọn ifiranṣẹ `function` ati ọrọ inu awọn bulọọki Anthropic `tool_result`. Ilana kọọkan ni iyipada tirẹ labẹ `aggressive.toolStrategies`, gbogbo rẹ nipasẹ aiyipada. Ninu dasibodu, awọn iyipada wa ni oju-iwe Caveman** To ti ni ilọsiwaju** wo nigba ti funmorawon wa ni titan ati awọn aiyipada mode ti wa ni Ibinu.
 
-### Pipeline Alápele
+### Pipeline tolera
 
-Módù alápele máa ń ṣiṣẹ́ **ọ̀pọ̀ ẹ́ńjìnnì ní tẹ̀léńtẹ̀lé** — ní gbogbogbòò RTK ni àkọ́kọ́
-(60-90% ìpamọ́ lórí àbájáde irinṣẹ́), lẹ́yìn náà Caveman lórí ọ̀rọ̀ tó ṣẹ́kù (~46% ìpamọ́
-ìwọlé). Ní àpapọ̀, èyí ni **ìwọ̀n tó yẹ 78-95%** (wo Ìṣirò Ìpamọ́ Upstream
-lókè): `1 - (1 - 0.60..0.90) × (1 - 0.46)` ní ìpíndọ́gba ≈89%.
+Awọn tolera mode nṣiṣẹ** ọpọ enjini ni ọkọọkan** — nigbagbogbo RTK akọkọ (60-90% awọn ifowopamọ lori iṣelọpọ irinṣẹ), lẹhinna Caveman lori ọrọ ti o ku (~ 46% awọn ifowopamọ titẹ sii). Ti a kọ, iyẹn ni** 78-95% yẹ ibiti** (wo Iṣiro Awọn ifowopamọ Igbesoke oke): awọn aropin `1 - (1 - 0.60..0.90) × (1 - 0.46)` ≈ 89%.
 
-#### Bí ó ṣe ń ṣiṣẹ́
+#### Bawo ni o ṣe n ṣiṣẹ
 
 ```
-Ìwọlé (1000 tokens)
-  → RTK (àsẹ-aware filter) → 200 tokens
-    → Caveman (yíyọ filler kúrò) → 108 tokens
-  → Àbájáde (108 tokens, ~89% ìpamọ́)
+Input (1000 tokens)
+  → RTK (command-aware filter) → 200 tokens
+    → Caveman (filler removal) → 108 tokens
+  → Output (108 tokens, ~89% savings)
 ```
 
-#### Ìgbà tí o yẹ kí o lò ó
+#### Nigbati lati lo
 
-Lo módù alápele fún:
+Lo ipo tolera fun:
 
-- Àwọn ìṣàn-iṣẹ́ tó gbára lé irinṣẹ́ gan-an (agentic coding, ìwádìí)
-- Ṣíṣe ipele púpọ̀ tó fiyè sí iye owó
-- Nígbà tí o bá nílò ìpamọ́ token tó pọ̀ jù lọ
+- Awọn iṣan-iṣẹ iṣẹ ti o wuwo (iforukọsilẹ aṣoju, iwadii)
+- Iṣatunṣe ipele iye owo-kókó
+- Nigbati o ba nilo awọn ifowopamọ ami ti o pọju
 
-A máa ń ṣètò àwọn pipeline alápele nípasẹ̀ ètò ìfúnpọ̀ àgbáyé `stackedPipeline`,
-tàbí nípasẹ̀ compression combo olórúkọ tí a yàn sí routing combo kan (wo
-Per-Combo Override lókè) — kì í ṣe nípasẹ̀ `modePack` auto-combo kan (field náà kàn ń
-tún ìwọ̀n yíyan model auto-combo ṣe, `stacked` kì í sì í ṣe orúkọ pack tó fẹsẹ̀ múlẹ̀).
+Awọn opo gigun ti o tolera ni a tunto nipasẹ eto funmorawon `stackedPipeline` agbaye, tabi nipasẹ konbo funmorawon ti a npè ni ti a yàn si konbo ipa-ọna kan (wo Per-Combo Yipadanu loke) — kii ṣe nipasẹ `modePack` auto-combo (aaye yẹn nikan tun-aṣayan awoṣe konbo adaṣe, ati `stacked` kii ṣe orukọ idii to wulo).
 
 ---
 

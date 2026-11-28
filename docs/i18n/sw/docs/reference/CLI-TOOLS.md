@@ -4,8 +4,6 @@
 
 ---
 
-Ilisasishwa mwisho: 2026-08-23
-
 OmniRoute inaunganishwa na aina tatu za zana za CLI zilizoenea katika kurasa tatu maalum za dashibodi:
 
 | Ukurasa           | Njia                    | Dhana                                                                                  | Hesabu         |

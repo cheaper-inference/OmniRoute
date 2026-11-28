@@ -4,9 +4,9 @@
 
 ---
 
-> **Cén áit a bhfuil cónaí air: gach eolaire barrleibhéil rianaithe agus comhad fréimhe, le cuspóir aonlíne.** Nuashonrú is déanaí: 2026-11-13 (OmniRoute v3.8.54)
+> **Cén áit a bhfuil cónaí air: gach eolaire barrleibhéil rianaithe agus comhad fréimhe, le cuspóir aonlíne.**
 >
-> Bain úsáid as an léarscáil seo chun do bhealach a dhéanamh timpeall an bhunachair chóid, ansin lean na naisc chuig na doiciméid tiomnaithe. Tomhaiseadh comhaireamh comhaid le `git ls-files` ar an dáta thuas. Athraíonn siad le beagnach gach scaoileadh, mar sin déileálann leo mar orduithe méide.
+> Bain úsáid as an léarscáil seo chun do bhealach a dhéanamh timpeall an bhunachair chód, ansin lean na naisc chuig na doiciméid tiomnaithe. Tagann comhaireamh comhaid ó `git ls-files` agus athraíonn siad le beagnach gach scaoileadh. Caitheamh leo mar orduithe méide.
 
 ## Crann barrleibhéil
 
@@ -36,7 +36,7 @@ OmniRoute/
 └── (root files — see below)
 ```
 
-Cosáin áitiúla, ghinte nó phríobháideacha (ginearálta go léir, níor tiománaíodh riamh, níor cuireadh síos a thuilleadh orthu):
+Cosáin áitiúla, ghinte nó phríobháideacha (ginearálta go léir, níor cuireadh i leith iad, níor cuireadh síos a thuilleadh orthu):
 
 ```
 node_modules/            # npm dependencies

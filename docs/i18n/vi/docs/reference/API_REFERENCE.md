@@ -49,7 +49,7 @@ Mỗi bản triển khai cung cấp bản sao riêng của đặc tả tại `/o
 
 ---
 
-## Hoàn tất trò chuyện
+## Hoàn thành cuộc trò chuyện
 
 ```bash
 POST /v1/chat/completions
@@ -67,33 +67,32 @@ Content-Type: application/json
 
 ### Tiêu đề tùy chỉnh
 
-| Header                   | Direction | Description                                                                                                                                                                                                              |
-| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `X-OmniRoute-No-Cache`   | Yêu cầu   | Đặt thành `true` để bỏ qua bộ nhớ đệm                                                                                                                                                                                    |
-| `x-omniroute-no-memory`  | Yêu cầu   | Đặt thành `true` để bỏ qua việc chèn bộ nhớ + kỹ năng cho yêu cầu này (tương tự no-cache; tránh chi phí mã thông báo/chi phí cho mỗi lần gọi)                                                                            |
-| `X-OmniRoute-Progress`   | Yêu cầu   | Đặt thành `true` cho các sự kiện tiến trình                                                                                                                                                                              |
-| `X-Session-Id`           | Yêu cầu   | Khóa phiên cố định cho liên kết phiên bên ngoài                                                                                                                                                                          |
-| `x_session_id`           | Yêu cầu   | Biến thể sử dụng dấu gạch dưới cũng được chấp nhận (HTTP trực tiếp)                                                                                                                                                      |
-| `X-OmniRoute-Session-Id` | Yêu cầu   | Thẻ phiên/cuộc hội thoại do bên gọi cung cấp (cũng được đưa vào bộ nhớ). Khi có mặt, được lưu nguyên văn vào `call_logs.session_tag` để phân bổ chi phí theo phiên (#8249) — không bao giờ được tạo tự động khi vắng mặt |
-| `Idempotency-Key`        | Yêu cầu   | Khóa loại bỏ trùng lặp (cửa sổ 5 giây)                                                                                                                                                                                   |
-| `X-Request-Id`           | Yêu cầu   | Khóa loại bỏ trùng lặp thay thế                                                                                                                                                                                          |
-| `x-omniroute-connection` | Yêu cầu   | Ghim một yêu cầu sử dụng một mô hình duy nhất vào một kết nối nhà cung cấp (tài khoản) theo ID của kết nối — xem [Ghim tài khoản cho mỗi yêu cầu](#account-pinning-per-request)                                          |
-| `X-OmniRoute-Cache`      | Phản hồi  | `HIT` hoặc `MISS` (không truyền trực tuyến)                                                                                                                                                                              |
-| `X-OmniRoute-Idempotent` | Phản hồi  | `true` nếu đã loại bỏ trùng lặp                                                                                                                                                                                          |
-| `X-OmniRoute-Progress`   | Phản hồi  | `enabled` nếu tính năng theo dõi tiến trình đang bật                                                                                                                                                                     |
-| `X-OmniRoute-Session-Id` | Phản hồi  | ID phiên hiệu dụng được OmniRoute sử dụng                                                                                                                                                                                |
-| `X-OmniRoute-Request-Id` | Phản hồi  | ID tương quan của yêu cầu (khi xác định được)                                                                                                                                                                            |
-| `X-OmniRoute-Version`    | Phản hồi  | Phiên bản bản dựng OmniRoute (luôn có mặt)                                                                                                                                                                               |
-| `X-OmniRoute-Cost-Saved` | Phản hồi  | Số USD mà bộ nhớ đệm đã giúp tránh được trong một lần HIT (chỉ các lần truy cập bộ nhớ đệm)                                                                                                                              |
-| `X-OmniRoute-Decision`   | Phản hồi  | Dấu vết định tuyến: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` là chiến lược kết hợp hoặc `single` đối với yêu cầu không kết hợp) — luôn có trong các phản hồi hoàn tất                               |
+| tiêu đề                  | Phương hướng | Sự miêu tả                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `X-OmniRoute-No-Cache`   | Lời yêu cầu  | Đặt thành `true` để bỏ qua bộ đệm                                                                                                                                                                                                                                                                                                                                                                                  |
+| `x-omniroute-no-memory`  | Lời yêu cầu  | Đặt thành `true` để bỏ qua việc chèn kỹ năng + bộ nhớ cho yêu cầu này (nhân bản không có bộ đệm; tránh chi phí token/cost cho mỗi cuộc gọi)                                                                                                                                                                                                                                                                        |
+| `x-omniroute-no-log`     | Lời yêu cầu  | Đặt thành `true` để bỏ qua tải trọng request/response khỏi nhật ký cuộc gọi cho yêu cầu suy luận này (tất cả các tuyến trò chuyện trong gia đình: Hoàn thành trò chuyện, Phản hồi, Tin nhắn, Hoàn thành, Gemini). Dấu thời gian, kiểu máy, trạng thái, thời lượng và số lượng mã thông báo vẫn được ghi lại. Kết hợp với `x-omniroute-no-memory` và `x-omniroute-no-cache` để chọn không tham gia toàn bộ nội dung |
+| `X-OmniRoute-Progress`   | Lời yêu cầu  | Đặt thành `true` cho các sự kiện tiến triển                                                                                                                                                                                                                                                                                                                                                                        |
+| `X-Session-Id`           | Lời yêu cầu  | Khóa phiên cố định cho mối quan hệ phiên bên ngoài                                                                                                                                                                                                                                                                                                                                                                 |
+| `x_session_id`           | Lời yêu cầu  | Biến thể gạch dưới cũng được chấp nhận (trực tiếp HTTP)                                                                                                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Session-Id` | Lời yêu cầu  | Thẻ session/conversation do người gọi cung cấp (cũng cung cấp bộ nhớ). Khi có mặt, nguyên văn vẫn tồn tại đến `call_logs.session_tag` để phân bổ chi phí mỗi phiên (#8249) — không bao giờ được tổng hợp khi vắng mặt                                                                                                                                                                                              |
+| `Idempotency-Key`        | Lời yêu cầu  | Khóa khấu trừ (cửa sổ 5s)                                                                                                                                                                                                                                                                                                                                                                                          |
+| `X-Request-Id`           | Lời yêu cầu  | Khóa khấu trừ thay thế                                                                                                                                                                                                                                                                                                                                                                                             |
+| `x-omniroute-connection` | Lời yêu cầu  | Ghim một yêu cầu một mô hình vào một kết nối (tài khoản) của nhà cung cấp theo id — của nó, xem [Ghim tài khoản theo yêu cầu](#account-pinning-per-request)                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Cache`      | Phản ứng     | `HIT` hoặc `MISS` (không phát trực tuyến)                                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Idempotent` | Phản ứng     | `true` nếu bị trùng lặp                                                                                                                                                                                                                                                                                                                                                                                            |
+| `X-OmniRoute-Progress`   | Phản ứng     | `enabled` nếu bật tính năng theo dõi tiến trình                                                                                                                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Session-Id` | Phản ứng     | Phiên hiệu quả ID được sử dụng bởi OmniRoute                                                                                                                                                                                                                                                                                                                                                                       |
+| `X-OmniRoute-Request-Id` | Phản ứng     | Yêu cầu id tương quan (khi biết)                                                                                                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Version`    | Phản ứng     | phiên bản xây dựng OmniRoute (luôn có mặt)                                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Cost-Saved` | Phản ứng     | USD bộ đệm đã tránh trên HIT (chỉ các lần truy cập bộ đệm)                                                                                                                                                                                                                                                                                                                                                         |
+| `X-OmniRoute-Decision`   | Phản ứng     | Dấu vết định tuyến: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` là chiến lược kết hợp hoặc `single` cho yêu cầu không kết hợp) — luôn xuất hiện trên các phản hồi hoàn thành                                                                                                                                                                                                                     |
 
-> Lưu ý về Nginx: nếu bạn dựa vào các header có dấu gạch dưới (ví dụ: `x_session_id`), hãy bật `underscores_in_headers on;`.
+> Lưu ý Nginx: nếu bạn dựa vào tiêu đề gạch dưới (ví dụ `x_session_id`), hãy bật `underscores_in_headers on;`.
 
-#### Ghim tài khoản cho mỗi yêu cầu
+#### Ghim tài khoản theo yêu cầu
 
-Khi một nhà cung cấp có nhiều kết nối (tài khoản hoặc khóa), OmniRoute thường chọn một kết nối
-thông qua chiến lược lựa chọn tài khoản. Thay vào đó, một yêu cầu có thể ghim vào một kết nối cụ thể
-bằng header `x-omniroute-connection`:
+Khi nhà cung cấp có nhiều kết nối (tài khoản hoặc khóa), OmniRoute thường chọn một kết nối thông qua chiến lược chọn tài khoản của mình. Thay vào đó, một yêu cầu có thể ghim một kết nối cụ thể bằng tiêu đề `x-omniroute-connection` :
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -103,24 +102,13 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Nơi tìm id.** Mở trang nhà cung cấp trong dashboard
-  (**Dashboard → Providers → <provider>**) và nhấp vào chip id `xxxxxxxx…` trên một hàng kết nối
-  — thao tác này sẽ sao chép đầy đủ connection id.
-- **Những request nào áp dụng id này.** Các request đơn mô hình (`provider/model`) trên
-  `/v1/chat/completions`, `/v1/messages` và `/v1/responses`. Các combo sẽ bỏ qua header này: hãy
-  ghim một tài khoản cho từng bước của combo thông qua connection riêng của bước đó.
-- **Việc ghim là bắt buộc, không phải tùy chọn ưu tiên.** Connection được ghim sẽ được sử dụng độc quyền. Một
-  lỗi xảy ra trong request sẽ ghi nhận thời gian chờ của tài khoản nhưng **không** chuyển sang tài khoản
-  cùng provider khác.
-- **Thời gian chờ và hạn ngạch sẽ giải phóng việc ghim.** Trong khi connection được ghim đang
-  trong thời gian chờ, đã hết hạn ngạch hoặc bị chặn bởi chính sách hạn ngạch, các request tiếp theo sẽ chuyển sang
-  những connection khác của provider, giống hệt lưu lượng không được ghim.
-- **Id không xác định hoặc bị vô hiệu hóa sẽ gây lỗi.** Một id không nằm trong pool đang hoạt động của provider (đã bị xóa,
-  vô hiệu hóa hoặc thuộc về provider khác) sẽ không để lại tài khoản nào đủ điều kiện, vì vậy request sẽ
-  thất bại thay vì âm thầm định tuyến sang nơi khác.
+- **Tìm id ở đâu.** Mở trang nhà cung cấp trong bảng điều khiển (** Bảng điều khiển → Nhà cung cấp → <provider>** ) và nhấp vào chip `xxxxxxxx…` id trên hàng kết nối — nó sao chép id kết nối đầy đủ.
+- **Những yêu cầu tôn vinh nó.** Yêu cầu mô hình đơn (`provider/model`) trên `/v1/chat/completions`, `/v1/messages` và `/v1/responses`. Combo bỏ qua tiêu đề: thay vào đó, hãy ghim một tài khoản cho mỗi bước kết hợp thông qua kết nối của chính bước đó.
+- **Pin là nghiêm ngặt, không phải là một ưu tiên.** Kết nối được ghim được sử dụng riêng. Lỗi bên trong yêu cầu sẽ ghi lại thời gian hồi chiêu của tài khoản nhưng lại ghi lại** không** xoay sang tài khoản anh chị em của cùng một nhà cung cấp.
+- **Thời gian hồi chiêu và hạn ngạch giải phóng chốt.** Trong khi kết nối được ghim đang nguội đi, hết hạn ngạch hoặc bị chặn bởi chính sách hạn ngạch, các yêu cầu sau đó sẽ quay trở lại các kết nối khác của nhà cung cấp, giống hệt như lưu lượng truy cập đã được bỏ ghim.
+- **Id không xác định hoặc bị vô hiệu hóa không thành công.** Id không nằm trong nhóm hoạt động của nhà cung cấp (đã bị xóa, vô hiệu hóa hoặc thuộc về nhà cung cấp khác) sẽ không có tài khoản đủ điều kiện, do đó yêu cầu không thành công thay vì âm thầm định tuyến ở nơi khác.
 
-Claude Code gửi các header tùy chỉnh thông qua `ANTHROPIC_CUSTOM_HEADERS`. Đặt biến này trong khối `env`
-của `~/.claude/settings.json`, hoặc trong `.claude/settings.json` ở cấp dự án để ghim một tài khoản khác cho từng dự án:
+Mã Claude gửi tiêu đề tùy chỉnh thông qua `ANTHROPIC_CUSTOM_HEADERS`. Đặt nó vào khối `env` của `~/.claude/settings.json` hoặc trong `.claude/settings.json` cấp dự án để ghim một tài khoản khác cho mỗi dự án:
 
 ```jsonc
 {
@@ -132,12 +120,11 @@ của `~/.claude/settings.json`, hoặc trong `.claude/settings.json` ở cấp 
 }
 ```
 
-Nguồn: `src/sse/handlers/chat.ts` (đọc header), `src/sse/services/auth.ts` và
-`src/sse/services/sessionAffinityPin.ts` (giải phóng việc ghim và kiểm tra mục không có trong pool).
+Nguồn: `src/sse/handlers/chat.ts` (đọc tiêu đề), `src/sse/services/auth.ts` và `src/sse/services/sessionAffinityPin.ts` (giải phóng pin và kiểm tra thiếu từ nhóm).
 
-> **Header telemetry chi phí:** các response thành công không streaming cũng bao gồm bộ telemetry chi phí `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, cố định 10 chữ số thập phân; `0.0000000000` đối với miễn phí/không có giá), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` và `X-OmniRoute-Fallback-Attempts` (chỉ khi > 0), cùng với `X-OmniRoute-Request-Id` và `X-OmniRoute-Version`. Các header này được phát ra bởi chat completions, `/v1/responses`, `/v1/messages`, **và các endpoint media** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` và `/v1/moderations` (luôn có chi phí `0`). Chi phí media được tính theo từng loại (mỗi hình ảnh, mỗi giây, mỗi ký tự, mỗi đơn vị tìm kiếm) khi có thông tin giá; nếu không thì là `0` (fail-open).
+> **Tiêu đề đo lường chi phí từ xa:** Các phản hồi thành công không phát trực tuyến cũng mang bộ đo từ xa chi phí `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, cố định 10 số thập phân; `0.0000000000` cho free/unpriced), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` và `X-OmniRoute-Fallback-Attempts` (chỉ khi > 0), cộng với `X-OmniRoute-Request-Id` và `X-OmniRoute-Version`. Chúng được phát ra khi hoàn thành trò chuyện, `/v1/responses`, `/v1/messages`,** và các điểm cuối truyền thông** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` và `/v1/moderations` (luôn có giá `0`). Chi phí phương tiện được tính theo phương thức (mỗi hình ảnh, mỗi giây, mỗi ký tự, mỗi đơn vị tìm kiếm) khi có sẵn giá, nếu không thì `0` (mở không thành công).
 
-> **Ngữ nghĩa chi phí khi cache hit:** khi xảy ra semantic-cache HIT (`X-OmniRoute-Cache-Hit: true`), không có lệnh gọi upstream nào được thực hiện, vì vậy `X-OmniRoute-Response-Cost` là `0.0000000000` (chi phí **tăng thêm** để cung cấp kết quả hit). Chi phí ban đầu/đáng lẽ phát sinh được báo cáo riêng trong `X-OmniRoute-Cost-Saved`. Các hệ thống tiêu thụ dữ liệu thanh toán nên tính tổng `X-OmniRoute-Response-Cost` (hit không tốn chi phí); các công cụ phân tích cache có thể tổng hợp `X-OmniRoute-Cost-Saved`.
+> **Ngữ nghĩa chi phí truy cập bộ đệm:** trên bộ đệm ngữ nghĩa HIT (`X-OmniRoute-Cache-Hit: true`) không có lệnh gọi ngược dòng nào được thực hiện, vì vậy `X-OmniRoute-Response-Cost` là `0.0000000000` (** tăng dần** chi phí thực hiện cú đánh). Chi phí original/would-have-been được báo cáo riêng trong `X-OmniRoute-Cost-Saved`. Người tiêu dùng thanh toán phải tính tổng `X-OmniRoute-Response-Cost` (lượt truy cập không mất phí); phân tích bộ đệm có thể tổng hợp `X-OmniRoute-Cost-Saved`.
 
 ## Lease phiên được quản lý độc quyền
 
@@ -366,7 +353,7 @@ GET /v1/embeddings
 
 ---
 
-## Tạo ảnh
+## Tạo hình ảnh
 
 ```bash
 POST /v1/images/generations
@@ -380,49 +367,30 @@ Content-Type: application/json
 }
 ```
 
-Các nhà cung cấp khả dụng bao gồm OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (cục bộ), ComfyUI (cục bộ).
+Các nhà cung cấp có sẵn bao gồm OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (cục bộ), ComfyUI (cục bộ).
 
-`n` trả về `n` ảnh trong `data[]`. Các nhà cung cấp có API upstream trả về một ảnh mỗi lần gọi
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) sẽ thực hiện `n` lần gọi upstream riêng biệt, tối đa 4 lần
-đang chạy đồng thời. `seed` cố định được tăng theo chỉ số lần gọi (`seed`, `seed + 1`, …), vì vậy
-các ảnh sẽ khác nhau nhưng vẫn có thể tái lập. `n` được giới hạn ở mức 10. Toàn bộ yêu cầu sẽ
-thất bại nếu bất kỳ lần gọi nào thất bại. Danh sách các định dạng fan-out là
-`SINGLE_IMAGE_FANOUT_FORMATS` trong
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` trả về hình ảnh `n` trong `data[]`. Các nhà cung cấp có API ngược dòng trả về một hình ảnh cho mỗi cuộc gọi (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) nhận được các cuộc gọi ngược dòng riêng biệt `n`, tối đa là 4 cuộc gọi trong chuyến bay. Một `seed` cố định được bù bằng chỉ mục cuộc gọi (`seed`, `seed + 1`, …), do đó các hình ảnh khác nhau nhưng vẫn có thể tái tạo. `n` được giới hạn ở mức 10. Toàn bộ yêu cầu sẽ thất bại nếu bất kỳ cuộc gọi nào không thành công. Danh sách các định dạng phân xuất ra là `SINGLE_IMAGE_FANOUT_FORMATS` trong `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux sử dụng lại kết nối khóa API hiện có và chấp nhận tiền tố `zenmux/` hoặc `zm/`:
+Codex GPT Các mô hình hình ảnh (`codex/gpt-image-*`) chỉ trả về PNG : luồng ngược dòng trả lời `200` với PNG byte ngay cả khi `jpeg` hoặc `webp` được yêu cầu. Một yêu cầu với bất kỳ `output_format` nào khác (`webp`, `jpeg`, ...) đều bị từ chối với HTTP 400 thay vì bị âm thầm bỏ qua; bỏ qua nó hoặc gửi `png`. `output_compression` không được chuyển tiếp.
 
-- `zenmux/openai/gpt-image-2` sử dụng API Images của OpenAI trên ZenMux. Các tùy chọn bao gồm `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` và `response_format`.
-- Các nhà phát hành khác, chẳng hạn như `zm/meta/muse-image-1.0`, sử dụng endpoint `:predict` của
-  Vertex AI trên ZenMux. `n` ánh xạ tới `sampleCount`, `aspect_ratio` ánh xạ tới `aspectRatio`, và
-  `image_size` (`1K`, `2K`, `4K`) ánh xạ tới `sampleImageSize`. `size` tính theo pixel chỉ cung cấp
-  tỷ lệ khung hình, không đảm bảo kích thước pixel. Các tỷ lệ, độ phân giải và số lượng được hỗ trợ
-  sẽ khác nhau tùy theo model.
-- `zm/inclusionai/ming-image-0.1-design` tự chọn kích thước. Bỏ qua `size`,
-  `aspect_ratio` và `image_size`; các giá trị rõ ràng sẽ trả về HTTP 400. Có thể yêu cầu PNG, JPEG và WebP
-  bằng `output_format`.
+ZenMux sử dụng lại kết nối khóa API hiện có và chấp nhận tiền tố `zenmux/` hoặc `zm/` :
 
-Tích hợp này hỗ trợ tạo ảnh từ văn bản, không hỗ trợ chỉnh sửa ảnh tham chiếu. Đầu ra của Vertex
-được chuẩn hóa thành `data[].b64_json`; `response_format: "url"` trả về URL HTTPS upstream hoặc
-URL dữ liệu base64 khi chỉ có byte ảnh. Đầu ra rỗng/bị lọc sẽ trả về lỗi thay vì thành công với
-nội dung rỗng. Quyền truy cập model phụ thuộc vào tài khoản ZenMux. Xem [API Vertex của ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) và
-[API Images của OpenAI](https://docs.zenmux.ai/api/openai/generate-an-image).
+- `zenmux/openai/gpt-image-2` sử dụng Hình ảnh OpenAI của ZenMuxAPI. Các tùy chọn bao gồm `size`, `quality`, `n`, `output_format`, `output_compression`, `background` và `response_format`.
+- Các nhà xuất bản khác, chẳng hạn như `zm/meta/muse-image-1.0`, sử dụng điểm cuối Vertex AI `:predict` của ZenMux. `n` ánh xạ tới `sampleCount`, `aspect_ratio` tới `aspectRatio` và `image_size` (`1K`, `2K`, `4K`) tới `sampleImageSize`. Pixel `size` chỉ cung cấp tỷ lệ khung hình, không đảm bảo kích thước pixel. Tỷ lệ, độ phân giải và số lượng được hỗ trợ sẽ khác nhau tùy theo kiểu máy.
+- `zm/inclusionai/ming-image-0.1-design` chọn kích thước riêng của nó. Bỏ qua `size`, `aspect_ratio` và `image_size`; các giá trị rõ ràng trả về HTTP 400. PNG, JPEG và WebP có thể được yêu cầu với `output_format`.
 
-Kết nối đăng nhập Microsoft 365 Copilot cung cấp `copilot-m365-web/m365-copilot-image`
-thông qua công cụ hình ảnh tích hợp của Copilot: một lượt Copilot cho mỗi ảnh (`n` từ 1–4), `size` chỉ
-định hướng, và ảnh được trả về trực tiếp (`b64_json`, hoặc URL dữ liệu cho
-`response_format: "url"`). Xem [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+This integration supports text-to-image generation, not reference-image editing. Vertex output is normalized to `data[].b64_json`; `response_format: "url"` returns an upstream HTTPS URL or a base64 data URL when only image bytes are available. Empty/filtered outputs return an error rather than an empty success. Model access depends on the ZenMux account. See [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) and [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Kết nối đăng nhập Microsoft 365 Copilot phục vụ `copilot-m365-web/m365-copilot-image` thông qua công cụ hình ảnh tích hợp của Copilot: một lượt Copilot cho mỗi hình ảnh (`n` 1–4), `size` chỉ điều khiển hướng và hình ảnh được trả về nội tuyến (`b64_json` hoặc URL dữ liệu cho `response_format: "url"`). Xem [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Liệt kê tất cả model hình ảnh
+# List all image models
 GET /v1/images/generations
 ```
 
 ---
 
-## OCR tài liệu
+## Tài liệu OCR
 
 ```bash
 POST /v1/ocr
@@ -438,17 +406,15 @@ Content-Type: application/json
 }
 ```
 
-`model` chọn nhà cung cấp OCR thông qua tiền tố `provider/model`; mã định danh mô hình không có tiền tố (ví dụ:
-`mistral-ocr-latest`) sẽ được phân giải thành nhà cung cấp đã đăng ký tương ứng, và nếu bỏ qua `model` thì mặc định là
-Mistral (`mistral-ocr-latest`). Các nhà cung cấp đã đăng ký (`open-sse/config/ocrRegistry.ts`):
+`model` chọn nhà cung cấp OCR thông qua tiền tố `provider/model` ; id mô hình trần (ví dụ `mistral-ocr-latest`) phân giải thành nhà cung cấp đã đăng ký và `model` bị bỏ qua mặc định là Mistral (`mistral-ocr-latest`). Nhà cung cấp đã đăng ký (`open-sse/config/ocrRegistry.ts`):
 
-| Mã định danh nhà cung cấp     | Mã định danh mô hình | Giá trị `model`                                          | Ghi chú                                                                                                        |
-| ----------------------------- | -------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (hoặc `mistral-ocr-latest`) | Đồng bộ — phản hồi được trả về trực tiếp từ một lần gọi upstream duy nhất.                                     |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`              | Upstream bất đồng bộ (`analyze` + thăm dò) — xem bên dưới.                                                     |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                  | Đồng bộ, thông qua endpoint đối tác `openapi/chat/completions` của Vertex AI — xem phần xác thực/URL bên dưới. |
+| Id nhà cung cấp               | Mã mẫu                                    | giá trị `model`                                               | Ghi chú                                                                                                                                                                                                                     |
+| ----------------------------- | ----------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`                      | `mistral/mistral-ocr-latest` (hoặc `mistral-ocr-latest` trần) | — đồng bộ, phản hồi được trả về trực tiếp từ cuộc gọi ngược dòng duy nhất.                                                                                                                                                  |
+| `azure-document-intelligence` | `prebuilt-read`                           | `azure-document-intelligence/prebuilt-read`                   | Ngược dòng không đồng bộ (`analyze` + poll) — xem bên dưới.                                                                                                                                                                 |
+| `vertex-deepseek-ocr`         | tự triển khai (không có mô hình tích hợp) | `vertex-deepseek-ocr/<your-deployed-model-id>`                | Đồng bộ, thông qua điểm cuối Vertex AI Model Garden DeepSeek-OCR của riêng bạn (hình dạng `openapi/chat/completions` ); Google đã gỡ bỏ `deepseek-ocr-maas` được quản lý vào ngày 21-10-2026 (#20423), do đó id trả về 400. |
 
-Cả ba nhà cung cấp đều phản hồi với phần thân có cấu trúc giống Mistral:
+Cả ba nhà cung cấp đều phản hồi trong cùng một cơ thể hình Mistral:
 
 ```json
 {
@@ -458,27 +424,13 @@ Cả ba nhà cung cấp đều phản hồi với phần thân có cấu trúc g
 }
 ```
 
-### Luồng thăm dò Azure Document Intelligence
+### Luồng thăm dò ý kiến thông minh tài liệu Azure
 
-API `analyze` của Azure Document Intelligence là bất đồng bộ: yêu cầu ban đầu trả về tiêu đề
-`Operation-Location` thay vì phần thân, và phải thăm dò để lấy kết quả. Handler
-(`open-sse/handlers/ocr.ts`) thăm dò URL đó mỗi giây, tối đa 30 lần, dừng ngay khi phản hồi thăm dò không
-`ok` hoặc trạng thái là `"failed"` (không tiếp tục thăm dò), và trả về `504` nếu thao tác vẫn đang chạy sau khi
-hết số lần thử. Phản hồi Azure cuối cùng được chuẩn hóa thành cùng cấu trúc `pages`/`markdown` được Mistral
-sử dụng trước khi trả về cho bên gọi, vì vậy mã phía máy khách không cần xử lý riêng theo nhà cung cấp.
+`analyze` API của Azure Document Intelligence không đồng bộ: yêu cầu ban đầu trả về tiêu đề `Operation-Location` thay vì nội dung và kết quả phải được thăm dò ý kiến. Trình xử lý (`open-sse/handlers/ocr.ts`) thăm dò ý kiến URL mỗi giây trong tối đa 30 lần thử, không thành công nhanh (không tiếp tục thăm dò) đối với phản hồi thăm dò không phải `ok` hoặc trạng thái `"failed"` và trả về `504` nếu hoạt động vẫn chạy sau khi hết ngân sách lần thử. Phản hồi Azure cuối cùng được chuẩn hóa thành cùng hình dạng `pages`/`markdown` được Mistral sử dụng trước khi được trả về cho người gọi, vì vậy mã máy khách không cần phải phân biệt trường hợp đặc biệt với nhà cung cấp.
 
-### Xác thực và phân giải endpoint Vertex AI DeepSeek OCR
+### Độ phân giải xác thực và điểm cuối của Vertex AI DeepSeek OCR
 
-`vertex-deepseek-ocr` sử dụng lại cơ chế xác thực Vertex AI mà OmniRoute đã hỗ trợ cho lưu lượng
-chat/hình ảnh (`open-sse/executors/vertex.ts`): khóa API của kết nối là thông tin xác thực JSON của
-Service Account (được đổi lấy mã thông báo truy cập OAuth ngắn hạn thông qua luồng JWT-bearer) hoặc
-mã thông báo truy cập OAuth đã được cấp, được sử dụng nguyên trạng. URL endpoint upstream là endpoint đối tác
-`openapi/chat/completions` chung của Vertex, được xây dựng từ project và region của kết nối — giá trị
-`providerSpecificData.project`/`providerSpecificData.region` được chỉ định rõ ràng luôn được ưu tiên;
-nếu không, project được suy ra từ `project_id` trong JSON của Service Account và region mặc định là
-`us-central1`. Cả hai quá trình phân giải đều diễn ra trong `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), và được `src/app/api/v1/ocr/route.ts`
-sử dụng trước khi chuyển tiếp đến `handleOcr`.
+`vertex-deepseek-ocr` sử dụng lại cùng một xác thực Vertex AI OmniRoute đã hỗ trợ cho lưu lượng truy cập chat/image (`open-sse/executors/vertex.ts`): khóa API của kết nối là thông tin xác thực JSON của Tài khoản dịch vụ (được trao đổi lấy mã thông báo truy cập OAuth tồn tại trong thời gian ngắn thông qua luồng mang JWT) hoặc mã thông báo truy cập OAuth đã được tạo sẵn được sử dụng nguyên trạng. Điểm cuối ngược dòng URL là điểm cuối đối tác `openapi/chat/completions` chung của Vertex, được xây dựng từ dự án và vùng — của kết nối, một `providerSpecificData.project`/`providerSpecificData.region` rõ ràng luôn thắng; mặt khác, dự án được lấy từ `project_id` của Tài khoản dịch vụ JSON và vùng mặc định là `us-central1`. Cả hai độ phân giải đều xảy ra ở `open-sse/handlers/ocr.ts` (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), được sử dụng bởi `src/app/api/v1/ocr/route.ts` trước khi gửi tới `handleOcr`.
 
 ---
 
@@ -732,98 +684,104 @@ Hợp đồng upstream: [hiệu ứng âm thanh](https://elevenlabs.io/docs/api-
 
 ---
 
-## Các endpoint tương thích
+## Điểm cuối tương thích
 
-| Phương thức | Đường dẫn                                 | Định dạng                             |
-| ----------- | ----------------------------------------- | ------------------------------------- |
-| POST        | `/v1/chat/completions`                    | OpenAI                                |
-| POST        | `/v1/messages`                            | Anthropic                             |
-| POST        | `/v1/responses`                           | OpenAI Responses                      |
-| POST        | `/v1/embeddings`                          | OpenAI                                |
-| POST        | `/v1/images/generations`                  | OpenAI Images                         |
-| POST        | `/v1/images/edits`                        | OpenAI Images (chỉnh sửa/inpaint)     |
-| POST        | `/v1/videos/generations`                  | Tạo video theo kiểu OpenAI            |
-| POST        | `/v1/music/generations`                   | Tạo nhạc theo kiểu OpenAI             |
-| POST        | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                    |
-| POST        | `/v1/audio/speech`                        | OpenAI TTS (trả về nội dung âm thanh) |
-| POST        | `/v1/rerank`                              | Rerank theo kiểu Cohere/Voyage        |
-| POST        | `/v1/classify`                            | Jina classify (`api.jina.ai`)         |
-| POST        | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)    |
-| POST        | `/v1/moderations`                         | OpenAI Moderations                    |
-| GET         | `/v1/models`                              | OpenAI                                |
-| POST        | `/v1/models/query`                        | Danh sách rút gọn model đã lọc        |
-| POST        | `/v1/messages/count_tokens`               | Anthropic                             |
-| GET         | `/v1beta/models`                          | Gemini                                |
-| POST        | `/v1beta/models/{...path}`                | Gemini generateContent                |
-| POST        | `/v1/api/chat`                            | Ollama                                |
-| GET         | `/api/v1/vscode/{token}/`                 | Bí danh catalog OpenAI                |
-| GET         | `/api/v1/vscode/{token}/models`           | Bí danh model OpenAI                  |
-| POST        | `/api/v1/vscode/{token}/chat/completions` | Bí danh OpenAI có token               |
-| POST        | `/api/v1/vscode/{token}/responses`        | Bí danh OpenAI Responses có token     |
-| POST        | `/api/v1/vscode/{token}/api/chat`         | Bí danh Ollama có token               |
-| GET         | `/api/v1/vscode/{token}/api/tags`         | Bí danh thẻ Ollama có token           |
+| Phương pháp | Con đường                                 | Định dạng                               |
+| ----------- | ----------------------------------------- | --------------------------------------- |
+| POST        | `/v1/chat/completions`                    | OpenAI                                  |
+| POST        | `/v1/messages`                            | Anthropic                               |
+| POST        | `/v1/responses`                           | OpenAI các phản hồi                     |
+| POST        | `/v1/embeddings`                          | OpenAI                                  |
+| POST        | `/v1/images/generations`                  | hình ảnh OpenAI                         |
+| POST        | `/v1/images/edits`                        | Hình ảnh OpenAI (edit/inpaint)          |
+| POST        | `/v1/videos/generations`                  | Tạo video theo phong cách OpenAI        |
+| POST        | `/v1/music/generations`                   | Thế hệ âm nhạc theo phong cách OpenAI   |
+| POST        | `/v1/audio/transcriptions`                | Âm thanh OpenAI (STT)                   |
+| POST        | `/v1/audio/speech`                        | OpenAI TTS (trả về nội dung âm thanh)   |
+| POST        | `/v1/rerank`                              | Cohere/Voyage-style sắp xếp lại         |
+| POST        | `/v1/classify`                            | Jina phân loại (`api.jina.ai`)          |
+| POST        | `/v1/segment`                             | Máy phân đoạn Jina (`segment.jina.ai`)  |
+| POST        | `/v1/moderations`                         | kiểm duyệt OpenAI                       |
+| POST        | `/v1/systemone`                           | Các quyết định được gõ bởi Hệ thống Một |
+| POST        | `/v1/decisions`                           | Quyết định OpenAI (bản địa)             |
+| GET         | `/v1/systemone/models`                    | Danh mục mô hình quyết định             |
+| GET         | `/v1/models`                              | OpenAI                                  |
+| POST        | `/v1/models/query`                        | Danh sách rút gọn mô hình đã lọc        |
+| POST        | `/v1/messages/count_tokens`               | Anthropic                               |
+| GET         | `/v1beta/models`                          | Gemini                                  |
+| POST        | `/v1beta/models/{...path}`                | Gemini generateContent                  |
+| POST        | `/v1/api/chat`                            | Ollama                                  |
+| GET         | `/api/v1/vscode/{token}/`                 | bí danh danh mục OpenAI                 |
+| GET         | `/api/v1/vscode/{token}/models`           | bí danh mô hình OpenAI                  |
+| POST        | `/api/v1/vscode/{token}/chat/completions` | bí danh được mã hóa OpenAI              |
+| POST        | `/api/v1/vscode/{token}/responses`        | bí danh được mã hóa của phản hồi OpenAI |
+| POST        | `/api/v1/vscode/{token}/api/chat`         | bí danh được mã hóa Ollama              |
+| GET         | `/api/v1/vscode/{token}/api/tags`         | thẻ Ollama bí danh được mã hóa          |
 
-Tất cả các route POST đều tuân theo cùng một cấu trúc: `Bearer your-api-key` + nội dung JSON được xác thực bằng Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, v.v.; xem `src/shared/validation/schemas.ts`). Trả về 4xx khi schema không hợp lệ.
+Tất cả các tuyến POST đều có hình dạng giống nhau: `Bearer your-api-key` + Phần thân JSON được Zod xác thực (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, v.v., xem `src/shared/validation/schemas.ts`). 4xx được trả về khi lược đồ bị lỗi.
 
-Đối với các client không thể đính kèm `Authorization: Bearer ...`, OmniRoute cũng chấp nhận API key trong URL thông qua query string tương thích (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) hoặc các endpoint chuyên dụng `/api/v1/vscode/{token}/...` được ghi chép bên dưới.
+Đối với các máy khách không thể đính kèm `Authorization: Bearer ...`, OmniRoute cũng chấp nhận các khóa API trong URL thông qua khả năng tương thích chuỗi truy vấn (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) hoặc các điểm cuối `/api/v1/vscode/{token}/...` chuyên dụng được ghi lại bên dưới.
 
 ```bash
-# Rerank (nhà cung cấp trong cloud registry hoặc một node của nhà cung cấp tương thích với OpenAI dưới dạng "<prefix>/<model>")
+# Rerank (cloud registry provider, or an OpenAI-compatible provider node as "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina classify (thông tin xác thực Foundation API)
+# Jina classify (Foundation API credentials)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
 # Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina search (s.jina.ai; bí danh nhà cung cấp: jina-search, jina-ai, jina)
+# Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
 # Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — trả về nội dung audio/mpeg (hoặc định dạng được yêu cầu)
+# TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS yêu cầu ngôn ngữ và giọng nói: `language` mặc định là "en"; nếu thiếu
-# giọng nói hoặc sử dụng tên giọng OpenAI có sẵn (alloy, nova, …) thì sẽ trở thành "Adrian"
+# Soniox TTS requires a language and a voice: `language` defaults to "en"; a missing
+# voice or an OpenAI stock voice name (alloy, nova, …) becomes "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Chỉnh sửa hình ảnh (multipart)
+# Image edit (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Tạo video / nhạc (id model có tiền tố nhà cung cấp)
+# Video / music generation (provider-prefixed model id)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Các node nhà cung cấp rerank:** `POST /v1/rerank` cũng định tuyến đến các node nhà cung cấp tương thích với OpenAI
-> (oMLX, vLLM, Infinity, TEI phía sau một gateway, …) được định địa chỉ dưới dạng `<node-prefix>/<model>`. Các
-> node loopback (`localhost`, `127.0.0.1`, `172.16.0.0/12`) luôn đủ điều kiện, cũng như các hostname mà
-> operator liệt kê trong `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (ví dụ: tên dịch vụ Docker/Compose như
-> `http://reranker:8080/v1`; các node này được gọi trực tiếp, không bao giờ thông qua `HTTP(S)_PROXY` hoặc proxy
-> được ghim của một connection). Các node trên mọi
-> host khác — một máy trong mạng LAN hoặc peer Tailscale — chỉ đủ điều kiện khi operator bật
-> feature flag `RERANK_REMOTE_PROVIDER_NODES` **và** base URL của node vượt qua chính sách URL outbound của nhà cung cấp
-> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Bước rerank của memory engine gọi route này qua
-> loopback, vì vậy cùng quy tắc này chi phối `rerankProviderModel` trong phần cài đặt Memory.
+> **Xếp hạng lại các nút nhà cung cấp:** `POST /v1/rerank` cũng định tuyến đến các nút nhà cung cấp tương thích với OpenAI (oMLX, vLLM, Infinity, TEI đằng sau một cổng, …) có địa chỉ là `<node-prefix>/<model>`. Các nút vòng lặp (`localhost`, `127.0.0.1`, `172.16.0.0/12`) luôn đủ điều kiện và tên máy chủ mà nhà điều hành liệt kê trong `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (ví dụ: tên dịch vụ Docker/Compose chẳng hạn như `http://reranker:8080/v1`; chúng được gọi trực tiếp, không bao giờ thông qua `HTTP(S)_PROXY` hoặc proxy được ghim của kết nối). Các nút trên bất kỳ máy chủ — a LAN box hoặc Tailscale ngang hàng — nào khác chỉ đủ điều kiện khi nhà điều hành kích hoạt cờ tính năng `RERANK_REMOTE_PROVIDER_NODES`** Và** URL cơ sở của nút vượt qua chính sách URL gửi đi của nhà cung cấp (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). Bước sắp xếp lại của công cụ bộ nhớ gọi tuyến đường này qua vòng lặp ngược, do đó, quy tắc tương tự sẽ chi phối `rerankProviderModel` trong cài đặt Bộ nhớ.
 >
-> **Các dạng máy chủ cục bộ:** node được gọi tại `<base>/v1/rerank` và, khi trả về 404, tại `<base>/rerank`
-> (Infinity, TEI). Body gửi đến upstream chứa cả cách viết của Cohere/OpenAI (`documents`,
-> `return_documents`) và cách viết của TEI (`texts`, `return_text`), còn response từ upstream được
-> chuẩn hóa thành envelope của Cohere: dữ liệu dạng mảng thuần `[{index, score, text}]` của TEI, `{results: [{index, score}]}`
-> từ các gateway mỏng và `{data: [...]}` theo kiểu Voyage đều được trả về client dưới dạng
-> `{results: [{index, relevance_score, document?}]}`, sắp xếp theo score và giới hạn ở `top_n`.
+> **Hình dạng máy chủ cục bộ:** nút được gọi tại `<base>/v1/rerank` và, trên 404, tại `<base>/rerank` (Vô cực, TEI). Phần thân ngược dòng mang cả cách viết Cohere/OpenAI (`documents`, `return_documents`) và cách viết TEI (`texts`, `return_text`) và phản hồi ngược dòng được chuẩn hóa cho đường bao Cohere : `[{index, score, text}]` trần của TEI, `{results: [{index, score}]}` từ các cổng mỏng và `{data: [...]}` kiểu Voyage đều quay trở lại máy khách dưới dạng `{results: [{index, relevance_score, document?}]}`, được sắp xếp theo điểm số và giới hạn ở `top_n`.
 
-> **Phát hiện node nhà cung cấp:** các model trên một node nhà cung cấp tương thích với OpenAI xuất hiện trong `GET /v1/models`
-> dưới tiền tố của node. Các row không có metadata endpoint (thường gặp trong các danh sách `/v1/models` cục bộ)
-> sẽ kế thừa `apiType` của node, vì vậy các model của node `embeddings` có `type: "embedding"` và
-> các model của node `rerank` có `type: "rerank"` thay vì mặc định là chat; `supportedEndpoints` rõ ràng
-> trên một row được đồng bộ hoặc thêm thủ công vẫn được ưu tiên.
+> **Khám phá nút nhà cung cấp:** các mô hình trên nút nhà cung cấp tương thích với OpenAI xuất hiện trong `GET /v1/models` dưới tiền tố nút. Các hàng không chứa siêu dữ liệu điểm cuối (điển hình cho danh sách `/v1/models` cục bộ) kế thừa `apiType` của nút, do đó, mô hình của nút `embeddings` là `type: "embedding"` và mô hình của nút `rerank` là `type: "rerank"` thay vì mặc định là trò chuyện; `supportedEndpoints` rõ ràng trên hàng được đồng bộ hóa hoặc được thêm thủ công vẫn được ưu tiên.
 
-### Các Route Nhà cung cấp Chuyên dụng
+### Quyết định đánh máy
+
+Mô hình quyết định trả lời các câu hỏi đã đánh máy với xác suất được hiệu chỉnh thay vì tạo ra văn bản. Chúng không bao giờ là mô hình trò chuyện và hai định dạng dây không bao giờ được dịch sang nhau:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev, OpenRouter quyết định, Cloudflare Workers AI, Ollama).
+- `POST /v1/decisions` — gốc OpenAI Quyết định `{ model, input, questions: [...] }`, được cung cấp bởi kết nối `openai`. Mô hình là `openai/gpt-6-luna` ( `gpt-6-luna` trần cũng hoạt động). Các câu trả lời sẽ quay lại theo thứ tự câu hỏi, không bị ảnh hưởng.
+- `GET /v1/systemone/models` — một danh mục của cả hai loại; mỗi hàng đặt tên cho `api_format` của nó (`systemone` hoặc `decisions`). trang `limit` / `after` danh sách cuối cùng. Tiêu đề `X-OmniRoute-Catalog-Status` đọc `complete`, `partial` hoặc `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+Trên `/v1/decisions`, danh sách cho phép mô hình của khóa API, danh mục điểm cuối `decisions`, ngân sách và phạm vi kết nối đều được kiểm tra trước khi đọc bất kỳ thông tin xác thực nào. Thông tin xác thực là kết nối `openai` được lưu trữ bên trong phạm vi của khóa (không bao giờ là khóa môi trường); cơ sở kết nối URL chỉ được vinh danh khi nó là `http(s)` URL không có thông tin xác thực, truy vấn hoặc đoạn không trỏ đến OmniRoute này. Cuộc gọi rời khỏi cùng một phương thức vận chuyển được bảo vệ như bộ định tuyến tự động `decision` ( [AUTO-COMBO](../routing/AUTO-COMBO.md) ): bảo vệ gửi đi của nhà cung cấp, không thử lại, không chuyển hướng, thời gian chờ 5 giây và giới hạn câu trả lời 64 KB (câu trả lời lớn hơn là 502). Nội dung yêu cầu được giới hạn ở mức 4 MiB. Mỗi cuộc gọi sẽ gửi một `Idempotency-Key` mới. Các lỗi chỉ mang trạng thái ngược dòng, không bao giờ có nội dung, URL, khóa hoặc dấu nhắc.
+
+### Tuyến đường cung cấp chuyên dụng
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -831,7 +789,7 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Tiền tố của nhà cung cấp sẽ được tự động thêm nếu bị thiếu. Các model không khớp sẽ trả về `400`.
+Tiền tố nhà cung cấp được tự động thêm vào nếu thiếu. Các mô hình không khớp trả về `400`.
 
 ---
 

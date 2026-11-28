@@ -4,86 +4,63 @@
 
 ---
 
-> **2026-11-19: sujungimo eilė panaikinta** (savininko sprendimas). `.mergify.yml` nebeapibrėžia eilės ir atmeta sujungimo komandas, kurios sujungia arba perrašo ištraukimo užklausą. Leidimas PRs yra sujungiamas rankomis pagal saugyklos taisyklių rinkinį „Reikalauti žaliųjų vartų aktyviam leidimui“ (`Gate / CI` + `Gate / Quality`), kol visa eilė paleidžiama tiesioginiu režimu, o po to per visą eilę ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Toliau pateiktuose skyriuose „Sujungti“ aprašoma tokia eilė, kokia ji buvo.
+## Nusileidimas ant išleidimo šakos
 
-Nuo 3.8.49 versijos ( quality/velocity plano WS3.2/WS3.4 ) numatytasis peržiūrėto PRs sujungimo kelias į `release/vX.Y.Z` yra** Sujungti sujungimo eilę** (`.mergify.yml`); į** rankinis sujungimas-traukinys** Toliau dokumentuotas FALLBACK —, naudojamas incidentų, leidimo įšaldymo metu arba jei kada nors pasikeičia sujungimo atvirojo kodo planas.
+Visa eilė reguliuoja nusileidimus į `release/vX.Y.Z`. Perskaitykite aukščiausio lygio `mode` `config/merge-queue/config.json` numatytojoje šakoje prieš nusileisdami PR. Žr. [Omni-Queue](OMNI_QUEUE.md).
 
-## Numatytasis kelias: „Mergify“ eilė
+- **`shadow`** vykdo patvirtinimą ir palieka nukreipimą į rankinį sujungimą. Užtepkite `omni-queue` ant patvirtinto PR jo galutinėje galvutėje. Patikrinkite tinkamumą naudodami `npm run queue -- why <PR>`. Palaukite nuosprendžio už tą galvą `npm run queue -- history --base <branch>`. Tęskite `would-land`. `culprit-found` arba `would-dequeue` palaikykite sujungimą ir pašalinkite priežastį.
+- **Šešėlių išimtys.** Traukinys su žaliu pilnu CI prieš dabartinį bazinį galiuką gali važiuoti be atskiro eilės verdikto. Ta pati išimtis taikoma, kai PR galvutėje jau yra dabartinis pagrindo antgalis.
+- **`live`** naudoja `omni-queue` etiketę, kad suaktyvintų nusileidimą. Vien tik eilė patenka į PR. Palikite sujungimo komandas ir nukreipkite stūmimus į eilę.
 
-1. PR peržiūrimas / patvirtinamas kampanijų ir gauna savininko patvirtinimą prieš sujungimą ⭐
-   kontroliniame etape (ataskaita + kiekvieno elemento sprendimas — žr. `/merge-prs` 0.75 veiksmą).
-2. Savininkas (arba sesija, vykdanti savininko sprendimą) pritaiko **`queue`**
-   žymą. Ši žyma YRA sujungimo patvirtinimas; „Mergify“ tik jį įvykdo.
-3. „Mergify“ tikrina eilėje esančius PR **nuosekliai** (po vieną) pagal greituosius
-   kontrolinius etapus ir sujungia („squash“ būdu). Paketinis apdorojimas ir automatinė bisekcija priklauso mokamam „Mergify“ planui
-   („Cannot use Merge Queue batch“ nemokamame plane, #7220), todėl `.mergify.yml` nenustato
-   `batch_size`; paketinis apdorojimas paliekamas toliau aprašytam rankiniam sujungimo konvejeriui. PR, kurio
-   patikros vis dar nebaigtos pasibaigus `checks_timeout` (240 min. = 2× išmatuotas `quality.yml`
-   p95), pašalinamas iš eilės, užuot sustabdžius visą eilę.
-4. Po sujungimo nuolatinė leidimo tinkamumo darbo eiga patikrina naują viršūnę po „push“
-   ir sukuria priskyrimo problemą, jei derinys sukėlė regresiją (automatinis atšaukimas niekada nevykdomas).
+Kiekvienam iškrovimui reikalingas savininko leidimas ir atitinkami privalomi patikrinimai. Taikyti `omni-queue` tik po to, kai savininkas leidžia nusileisti. Eilėje esantiems PRs liečiantiems apsaugotus kelius, taip pat reikalingas savininko `protected-approved` sprendimas dėl to PR.
 
-Apsaugos priemonės (atitinka `CLAUDE.md` griežtąsias taisykles #21/#22):
+Taisyklių rinkinys „Reikalauti žalių vartų aktyviam išleidimui“ reikalauja žalių `Gate / CI` ir `Gate / Quality` ant galvos. Niekada nenaudokite `--admin` kad apeitumėte raudonus vartus. Atleidžiami užšalimo blokai susilieja į užšaldytą šaką. Žr. [21 griežtą taisyklę](HARD_RULES_DETAIL.md). Niekada nežymėkite, nesujunkite ir nespauskite ištraukimo užklausos, kad veikia kita sesija. Žr. [22 griežtą taisyklę](HARD_RULES_DETAIL.md).
 
-- **Aktyvus leidimo įšaldymas** → NEŽYMĖKITE PR, nukreiptų į įšaldytą šaką; pirmiausia
-  nukreipkite juos į aktyvią `release/vX+1`.
-- **Kitos sesijos vykdomas PR** → niekada jo nežymėkite; tik jį valdanti sesija įtraukia
-  savo darbą į eilę.
-- Skirtumai, apimantys tik testus, ir `hotfix` žyma pažymėti PR jau vykdo sumažintą CI patikrų rinkinį (žr.
-  `RELEASE_CHECKLIST.md` → „Hotfix Fast-Lane“); eilės sąlygos priima bet kokį
-  faktiškai vykdytą patikrų rinkinį (`#check-failure=0` + `#check-pending=0`).
+## Traukinio traukimo prašymas
 
-## Atsarginis variantas: rankinis sujungimo traukinys
+1. Pradėkite traukinio atšaką nuo dabartinio atleidimo pagrindo galo. Integruokite tikslius patvirtintus narių vadovus naudodami sujungimo įsipareigojimus. Išsaugokite jų įsipareigojimų istoriją, vengdami skvošo ir pažeminimo.
+2. Atidarykite vieną traukinio atšakos traukimo užklausą. Patvirtinkite tą PR naudodami visą CI dabartiniame pagrindiniame antgalyje. Prieš nusileisdami dar kartą patikrinkite pagrindo antgalį ir patvirtintas elementų galvutes. Atnaujinkite traukinį ir jo CI kai pasikeičia patvirtintas kandidatas.
+3. Nustatyti traukinį PR su sujungimo įsipareigojimu pagal taikomą eilės režimą. Tiesioginiame režime eilės `merge-ff` nusileidimo metodas išsaugo sujungimo įsipareigojimus. Pradinės narių galvutės tampa pasiekiamos iš išleidimo šakos. GitHub pažymi narį PRs kaip sujungtą, o įsipareigojimai išlaiko savo autorius.
 
-Naudojamas, kai eilė nepasiekiama. Taip formalizuojama praktika, per kurią v3.8.47 ciklo metu
-per vieną dieną buvo apdoroti 33 PR:
+Viešas pavyzdys yra [PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071). Jis sujungė 18 narių PRs ir susijungė 2026-11-24.
 
-1. **Sudarykite grupę** (~10–30 peržiūrėtų ir patvirtintų PR). Patikrinkite `linked:` sutapimus
-   (tie patys `tap.testFiles`, tos pačios CHANGELOG fragmentų dalys) ir tokius PR apdorokite nuosekliai.
-2. **Patikrinkite VIENĄ KARTĄ**: izoliuotame darbiniame medyje, sukurtame nuo leidimo šakos viršūnės, lokaliai sujunkite visas grupės
-   viršūnes, tada paleiskite leidimui lygiavertį rinkinį
-   (`npm run check:release-green`, prieš leidimą pridėkite `--with-build`).
-   `scripts/release/merge-train.sh <base> <PR#>…` automatizuoja 1–2 veiksmus (konfliktuojantys
-   PR pašalinami, traukinys tęsia darbą). Visas režimas vykdo `npm run test:unit` — konkrečiam
-   kompiuteriui suderintą vykdyklę (`--test-concurrency=20`), **o ne** dvi nuoseklias 4 branduolių CI
-   dalis, dėl kurių dominuojantis etapas naudojo tik ~25 % 16 branduolių kompiuterio pajėgumo (ištaisyta
-   2026-07-18). `--fast` (dienos metu vykdomiems didžiulių traukinių ištuštinimams, savininko patvirtinta 2026-07-18)
-   išlaiko kiekvieną statinį kontrolinį etapą ir vitest, tačiau vykdo tik į traukinį įtrauktų PR
-   pakeistus node:test failus; VISAS rinkinys vis tiek turi būti vykdomas bent kartą per dieną
-   sukauptoje šakos viršūnėje (vienas traukinys be `--fast`).
-3. **Sėkminga patikra** → sujunkite PR nuosekliai (prieš kiekvieną iš naujo patikrindami `state,headRefOid` —
-   PR, kurio viršūnė pasikeitė, grąžinamas peržiūrėti). Įrodykite, kad kiekvieno sujungimo grynasis skirtumas yra tik
-   paties PR pakeitimas (jokių automatinio konfliktų sprendimo sukeltų atšaukimų: patikrinkite `git diff --stat`, ar nėra
-   į apimtį nepatenkančių pašalinimų).
-4. **Nesėkminga patikra** → dalykite grupę pusiau (patikrinkite kiekvieną pusę), užuot pakartotinai tikrinę
-   po vieną; grąžinkite probleminį PR į peržiūros eilę kartu su įrodymais.
-5. **Niekada**: įšaldymo metu nejunkite į įšaldytą šaką; niekur nenaudokite `git stash`;
-   aklai iš naujo nevykdykite CI tikėdamiesi, kad nesėkmė išnyks (taisyklė: nesėkmė yra informacija).
+Sinchronizavimas iš `main` į kitą leidimo šaką taip pat vyksta per sujungimo įsipareigojimą. Norint vėliau sinchronizuoti, būtina išsaugoti `main` kilmę. Žr. [Darbo medžio izoliacija](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash).
 
-## Lygiai (kodėl eilė saugi naudojant tik sparčiuosius kontrolinius etapus)
+## Vietinis sujungimo-traukinio tikrintuvas
 
-- **Kiekvienam PR** (quality.yml spartieji kontroliniai etapai): TIA paveikti testai + visas 4 dalių vienetinių testų rinkinys +
-  vitest + lint rinkinys + tipų patikra + dokumentacijos / pakeitimų žurnalo vientisumas.
-- **Kiekvienai grupei / viršūnei** (nuolatinis leidimo tinkamumo patvirtinimas): `--quick` PRIVALOMIEJI kontroliniai etapai kiekvienam `push` į
-  leidimo šaką; visi `--with-build --full-ci` patikrinimai 3 kartus per dieną.
-- **Kiekvienam leidimui** (ci.yml leidimo PR): visa matrica, įskaitant E2E ×9,
-  paketo artefaktą + tarball paleidimo testą, aprėptį / karteles.
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-Niekas nėra tikrinama mažiau nei anksčiau — didelės apimties patikros tiesiog vykdomos kiekvienai grupei / viršūnei,
-o ne kiekvienam PR; būtent tai pašalina O(N) pirmyn ir atgal atliekamus ciklus.
+Validatorius paima pagrindą ir PR galvutes ir sujungia jas į vienkartinį darbo medį. Jis vieną kartą paleidžia savo pariteto rinkinį gautame medyje. Nesėkmingas galvos gavimo arba sujungimo konfliktas išstumia tą PR, o scenarijus tęsiamas su likusiu PRs.
 
-## Naujos darbinės kopijos būtinosios sąlygos, skirtos `merge-train.sh`
+- **`--plan`** atspausdina pasirinkto režimo žingsnius ir išeina nesukūrę darbo medžio arba nesusisiekę su nuotolinio valdymo pultu. Sujunkite jį su `--fast`, kad patikrintumėte greitąjį planą.
+- **`--fast`** paleidžia bendrus statinius vartus, pasirinktus pakeistus `node:test` failus, esančius `tests/unit/` ir `npm run test:vitest`. Kai naudojate greitąjį režimą, bent kartą per dieną atlikite visą sukaupto patarimo vietinį patvirtinimą.
+- **Pilnas režimas** prideda tik visiškai statinius vartus ir paleidžia `npm run test:unit` ir `npm run test:vitest`.
 
-Scenarijus šakninėje darbinėje kopijoje vykdo nedelsiant nesėkmę aptinkantį **išankstinį patikrinimą** (prieš bet kokį darbą
-darbiniame medyje), kad sugadytas diegimas niekada negalėtų apsimesti nesėkmingu traukiniu:
+Sugedę statiniai vartai pakartotinai paleidžiami ant nepaliesto pagrindo, jei yra bazinis zondas. Scenarijus praneša apie paveldėtas klaidas ir tęsiasi, kai bazėje taip pat atsiranda kiekviena atpažinto pažeidimo eilutė, o bendras skaičius nepadidėjo.
 
-1. `npm ci`, tada paleiskite `bun` podiegiminį veiksmą, kurį npm blokuoja:
-   `(cd node_modules/bun && node install.js)` — kitaip `check:provider-consistency`
-   ir `check:known-symbols` (abu `bun scripts/…`) nepavyksta tiek traukinyje, TIEK bazėje,
-   nepateikdami pažeidimo eilutės.
-2. Neturi būti pašalinio `node_modules/node_modules` (dubliuotas priklausomybių medis; „React“ įkeliamas du kartus,
-   todėl UI vitest rinkiniai iškart nepavyksta).
-3. `node_modules/.bin/tsc` turi egzistuoti ir būti vykdomas (daliniame diegime jo nėra).
+| Išeiti | Reikšmė                                                                                                                                               |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`    | Išspausdino planą arba užbaigė komplektą. Rinkinio santraukoje pateikiami visi paveldėti statiniai gedimai ir išmestas PRs.                           |
+| `1`    | Netinkami argumentai, nėra „Git“ patikros, nepavyko išankstinis patikrinimas arba PR neįtraukta.                                                      |
+| `2`    | Rinkinio patikrinimas nepavyko ir nebuvo laikomas paveldėtu. Operatorius gali padalinti paketą į pusę, išstumti pažeidžiantį PR ir paleisti iš naujo. |
 
-Traukinys vykdo blokuojantį `npm run check:cycles:ratchet`; paprastas `npm run check:cycles`
-yra informacinis (jis išvardija SCC ir baigiamas ne nuliniu kodu net sveikoje bazėje).
+Vietinis leidimas suteikia diagnostikos įrodymus tik savininko dokumentacijai. Kiekvienam nusileidimui vis tiek reikalingas savininko leidimas, reikiamos patikros ir šešėlinės eilės sprendimas, kai taikoma.
+
+## Pakopų nustatymas
+
+- **Pagal PR.** CI ir kokybės pasirinkimas tikrina pagal pakeistus kelius. Kodas PRs vykdo greitus kokybės vartus ir paveikiamus bandymus su atskiru vienetu ir Vitest užduotimis CI.
+- **Už kandidatą į eilę.** CI ir Quality paleidžia visą profilį sudarytam kandidatui jo eilėje nuorod.
+- **Pagal išleidimo patarimą.** „Release-Green“ paleidžia greitus tvirtus vartus, kai stūmimai atitinka jo kelio filtrus. Trys suplanuoti paleidimai per dieną naudoja visą išleidimo šakos nuvalymą.
+- **Pagal leidimą.** Visą CI matricą sudaro E2E skeveldros, paketo patvirtinimas, tarball įkrovos dūmai ir aprėpties patikros. Žr. [išleidimo kontrolinį sąrašą](RELEASE_CHECKLIST.md).
+
+## Būtinos `merge-train.sh` atsiskaitymo sąlygos
+
+Išankstinis patikrinimas vyksta prieš sukuriant darbo medžius. Įdiekite priklausomybes su `npm ci`. Patvirtinkite, kad `node_modules/.bin/tsc` yra vykdomas ir kad `node_modules/node_modules` nėra. Patikrinkite, ar `node_modules/.bin/bun --version` pavyko.
+
+Jei Bun postinstall buvo praleistas, paleiskite `(cd node_modules/bun && node install.js)`. Teikėjo nuoseklumo ir žinomų simbolių patikros naudoja Bun. Valdymo priemonė paleidžia `npm run check:cycles:ratchet` kaip blokavimo vartus. Atskira `npm run check:cycles` komanda yra patariamoji.
+
+## Istorija
+
+2026-11-19 sujungimo eilė buvo pašalinta.

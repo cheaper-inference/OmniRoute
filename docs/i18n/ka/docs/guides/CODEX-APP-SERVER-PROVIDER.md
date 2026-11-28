@@ -21,24 +21,21 @@ OmniRoute გთავაზობთ OpenAI Codex-ის გამოყენ�
 ## 1. არქიტექტურა
 
 ```
-┌─ OmniRoute აპი ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
+┌─ OmniRoute app ─────────────────┐        ┌─ codex-app-server sidecar ─────────┐
 │  CodexAppServerExecutor          │  WS    │  codex app-server                   │
 │  ws://codex-app-server:1456 ─────┼───────▶│  --listen ws://0.0.0.0:1456         │
-│  (+ შესაძლებლობის ტოკენი)        │  JSON  │  --ws-auth capability-token         │
-│                                  │  RPC   │  თავად მართავს OpenAI OAuth-ს       │
-└──────────────────────────────────┘        │  (~/.codex/auth.json, ავტო-განახლება)│
-        │ გაზიარებულია (compose ტომები)      └─────────────────────────────────────┘
+│  (+ capability token)            │  JSON  │  --ws-auth capability-token         │
+│                                  │  RPC   │  self-manages OpenAI OAuth          │
+└──────────────────────────────────┘        │  (~/.codex/auth.json, auto-refresh) │
+        │ shares (compose volumes)           └─────────────────────────────────────┘
         ▼
-  codex-appserver-token   → WS შესაძლებლობის ტოკენი (ორივე ამონტაჟებს მას)
-  codex-appserver-home    → ~/.codex (auth.json იწერება მართვის პანელის მიერ,
-                             ხოლო sidecar-ის codex app-server კითხულობს მას)
+  codex-appserver-token   → the WS capability token (both mount it)
+  codex-appserver-home    → ~/.codex (auth.json written by the dashboard,
+                             read by the sidecar's codex app-server)
 ```
 
-- sidecar უსმენს **მხოლოდ** შიდა compose ქსელში
-  (`ws://codex-app-server:1456`), შესაძლებლობის ტოკენის მიღმა. ის **არასოდეს**
-  ქვეყნდება ჰოსტზე ან ინტერნეტში.
-- Codex CLI ჩაშენებულია `omniroute:base`-ში, ამიტომ sidecar-ის გაშვებისას
-  ჰოსტზე ან მომხმარებლის კომპიუტერზე codex-ის დაყენება საჭირო არ არის.
+- გვერდითა მანქანა უსმენს** მხოლოდ** შედგენის შიდა ქსელზე (`ws://codex-app-server:1456`) შესაძლებლობების ნიშნის უკან. ეს არის** არასოდეს** გამოქვეყნებულია მასპინძელზე ან ინტერნეტში.
+- გვერდითი მანქანა იყენებს `omniroute:cli-no-docker`, რომელიც აგებულია `runner-cli-no-docker` სამიზნეზე, რომელიც მოიცავს Codex CLI.
 
 ## 2. გაშვება
 

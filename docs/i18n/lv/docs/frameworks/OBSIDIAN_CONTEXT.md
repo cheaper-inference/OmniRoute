@@ -112,58 +112,48 @@ piekļuvi; joprojām tiek atbalstīti derīgi vides akreditācijas dati, kas tie
 Autentificētām atslēgām bez katrai atslēgai specifiskas Obsidian konfigurācijas tiek saglabāta atkāpšanās uz globālo konfigurāciju.
 Četri `obsidian_sync_*` rīki saglabā savu atsevišķo sinhronizācijas pilnvaru darbību.
 
-## MCP rīki (22)
+## MCP instrumenti (22)
 
-Definēti failā `open-sse/mcp-server/tools/obsidianTools.ts`. Pilnvara/pamata URL tiek noteikti
-katram izsaukumam (vispirms katrai API atslēgai, pēc tam globāli). Rīkiem, kas piekļūst OmniRoute **sinhronizācijas serverim**
-(četriem `obsidian_sync_*` rīkiem), papildus ir nepieciešama OmniRoute iestatījumos konfigurētā
-sinhronizācijas autentifikācijas pilnvara.
+Definēts `open-sse/mcp-server/tools/obsidianTools.ts`. token/base-URL tiek atrisināti katram zvanam (vispirms katrai API atslēgai, pēc tam globālajai). Rīki, kas sasniedz OmniRoute** sinhronizācijas serveris** (četriem `obsidian_sync_*` rīkiem) papildus ir nepieciešama sinhronizācijas autentifikācijas pilnvara, kas konfigurēta OmniRoute iestatījumos.
 
 ### Lasīšanas rīki (`read:obsidian`)
 
-| Rīks                         | Apraksts                                                                                                                 |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `obsidian_check_status`      | Pārbaudīt, vai lokālā REST API ir sasniedzama un autentificēta.                                                          |
-| `obsidian_search_simple`     | Pilnteksta meklēšana piezīmju saturā; atgriež fragmentus ar failu ceļiem.                                                |
-| `obsidian_search_structured` | Meklēšana, izmantojot JSON Logic izteiksmi (and/or/regex/path filtrus).                                                  |
-| `obsidian_read_note`         | Lasīt piezīmi pēc ceļa attiecībā pret glabātuvi; pēc izvēles — konkrētu virsrakstu/bloku/priekšmetadatus.                |
-| `obsidian_list_vault`        | Uzskaitīt glabātuvē esošos failus un direktorijus (ierakstu koku).                                                       |
-| `obsidian_get_document_map`  | Iegūt piezīmes virsrakstu struktūru kā virsrakstu → rindu numuru karti.                                                  |
-| `obsidian_get_note_metadata` | Iegūt priekšmetadatus, tagus, saites un rakstzīmju/vārdu skaitu bez pilna satura.                                        |
-| `obsidian_get_active_file`   | Iegūt Obsidian pašlaik aktīvā faila ceļu un saturu.                                                                      |
-| `obsidian_get_periodic_note` | Iegūt dienas/nedēļas/mēneša periodisko piezīmi konkrētam datumam (ja nav norādīts — šodienai).                           |
-| `obsidian_get_tags`          | Uzskaitīt visus glabātuves tagus un to biežumu.                                                                          |
-| `obsidian_list_commands`     | Uzskaitīt pieejamos Obsidian komandu ID (izmantošanai ar `obsidian_execute_command`).                                    |
-| `obsidian_sync_status`       | OmniRoute sinhronizācijas servera statuss: darbība, glabātuves nosaukums, ports, darbības ilgums, pēdējā sinhronizācija. |
-| `obsidian_sync_conflicts`    | Uzskaitīt neatrisinātos sinhronizācijas konfliktus (ceļš, konflikta ceļš, noteikšanas laiks).                            |
+| Rīks                         | Apraksts                                                                                                                   |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `obsidian_check_status`      | Pārbaudiet, vai vietējais REST API ir sasniedzams un autentificēts.                                                        |
+| `obsidian_search_simple`     | Piezīmju satura pilna teksta meklēšana; atgriež fragmentus ar faila ceļiem.                                                |
+| `obsidian_search_structured` | Meklējiet, izmantojot JSON Logic izteiksmi (and/or/regex/path filtri).                                                     |
+| `obsidian_read_note`         | Izlasiet piezīmi pēc velves relatīvā ceļa; pēc izvēles konkrētu heading/block/frontmatter.                                 |
+| `obsidian_list_vault`        | Saraksta failus un direktorijus glabātavā (ierakstu koks).                                                                 |
+| `obsidian_get_document_map`  | Iegūstiet piezīmes virsrakstu struktūru kā virsrakstu → līniju numuru karti.                                               |
+| `obsidian_get_note_metadata` | Iegūstiet frontmatter, atzīmes, saites, char/word skaitu bez visa satura.                                                  |
+| `obsidian_get_active_file`   | Iegūstiet pašlaik aktīvā faila ceļu + saturu programmā Obsidian.                                                           |
+| `obsidian_get_periodic_note` | Saņemiet daily/weekly/monthly periodisko piezīmi datumam (šodien, ja tas ir izlaists).                                     |
+| `obsidian_get_tags`          | Uzskaitiet visus glabātuves tagus ar to frekvencēm.                                                                        |
+| `obsidian_list_commands`     | Norādiet pieejamo Obsidian komandu IDs (izmantojiet kopā ar `obsidian_execute_command`).                                   |
+| `obsidian_sync_status`       | OmniRoute sinhronizācijas servera statuss: darbojas, glabātuves nosaukums, ports, darbspējas laiks, pēdējā sinhronizācija. |
+| `obsidian_sync_conflicts`    | Norādiet neatrisinātos sinhronizācijas konfliktus (ceļš, konflikta ceļš, konstatēts-at).                                   |
 
 ### Rakstīšanas rīki (`write:obsidian`)
 
-| Rīks                             | Apraksts                                                                                                     |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `obsidian_write_note`            | Izveidot vai pārrakstīt piezīmi ar norādīto Markdown saturu.                                                 |
-| `obsidian_append_note`           | Pievienot saturu piezīmei; pēc izvēles — konkrētam virsrakstam/blokam.                                       |
-| `obsidian_patch_note`            | Precīzi pievienot beigās/sākumā vai aizstāt saturu pie virsraksta, bloka vai priekšmetadatu lauka.           |
-| `obsidian_delete_note`           | Neatgriezeniski dzēst piezīmi no glabātuves.                                                                 |
-| `obsidian_move_note`             | Pārvietot vai pārdēvēt piezīmi glabātuvē.                                                                    |
-| `obsidian_execute_command`       | Izpildīt Obsidian komandu pēc tās komandas ID.                                                               |
-| `obsidian_open_file`             | Atvērt failu Obsidian (izveido to, ja tas nepastāv).                                                         |
-| `obsidian_sync_trigger`          | Aktivizēt tūlītēju divvirzienu darbvirsmas↔mobilās ierīces glabātuves sinhronizāciju.                        |
-| `obsidian_sync_resolve_conflict` | Atrisināt sinhronizācijas konfliktu: paturēt `local` (mobilā ierīce), `remote` (darbvirsma) vai `keep-both`. |
+| Rīks                             | Apraksts                                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `obsidian_write_note`            | Izveidojiet vai pārrakstiet piezīmi ar norādīto Markdown saturu.                                                    |
+| `obsidian_append_note`           | Pievienot piezīmei saturu; pēc izvēles uz konkrētu heading/block.                                                   |
+| `obsidian_patch_note`            | Ķirurģiski append/prepend/replace virziena, bloka vai frontmatter laukā.                                            |
+| `obsidian_delete_note`           | Neatgriezeniski dzēst piezīmi no glabātuves.                                                                        |
+| `obsidian_move_note`             | Pārvietojiet vai pārdēvējiet piezīmi glabātuvē.                                                                     |
+| `obsidian_execute_command`       | Izpildiet Obsidian komandu ar tās komandu ID.                                                                       |
+| `obsidian_open_file`             | Atveriet failu programmā Obsidian (izveido to, ja tas neeksistē).                                                   |
+| `obsidian_sync_trigger`          | Aktivizējiet tūlītēju divvirzienu darbvirsmas ↔ mobilās glabātuves sinhronizāciju.                                  |
+| `obsidian_sync_resolve_conflict` | Atrisiniet sinhronizācijas konfliktu: saglabājiet `local` (mobilajā ierīcē), `remote` (galddatorā) vai `keep-both`. |
 
 > [!NOTE]
-> `obsidian_patch_note` mērķi pieņem `targetType` vērtību `heading | block | frontmatter`
-> un `operation` vērtību `append | prepend | replace` ar neobligātu
-> `createTargetIfMissing`. Četri `obsidian_sync_*` rīki sazinās ar lokālo sinhronizācijas
-> serveri (pēc noklusējuma `http://127.0.0.1:27781`), un tiem ir nepieciešama sinhronizācijas pilnvara.
+> `obsidian_patch_note` mērķi pieņem `targetType` no `heading | block | frontmatter` un `operation` no `append | prepend | replace` ar izvēles `createTargetIfMissing`. Četri `obsidian_sync_*` rīki sazinās ar vietējo sinhronizācijas serveri (pēc noklusējuma `http://127.0.0.1:27781` ) un pieprasa sinhronizācijas pilnvaru.
 
-### Tvērumi
+### Darbības jomas
 
-Lasīšanas rīkiem ir nepieciešams `read:obsidian`; rakstīšanas rīkiem ir nepieciešams `write:obsidian`. Piemērošana
-ir identiska Notion — to apstrādā `withScopeEnforcement()` failā
-`open-sse/mcp-server/server.ts`, un tā tiek aktivizēta ar `OMNIROUTE_MCP_ENFORCE_SCOPES=true`; atļautie
-tvērumi tiek iegūti no `OMNIROUTE_MCP_SCOPES` vai API atslēgas tvēruma konteksta. Skatiet
-[MCP-SERVER.md](./MCP-SERVER.md).
+Lasīšanas rīkiem ir nepieciešams `read:obsidian`; rakstīšanas rīkiem ir nepieciešams `write:obsidian`. Izpilde ir identiska Notion — ko apstrādā `withScopeEnforcement()` `open-sse/mcp-server/server.ts`, ar `OMNIROUTE_MCP_ENFORCE_SCOPES=true` vārtiem un piespiedu kārtā HTTP/SSE zvanītājiem, kuru API atslēgai nav `manage`/`admin`, ar atļautajiem tvērumiem, kas iegūti no `OMNIROUTE_MCP_SCOPES` vai API atslēgas tvēruma konteksta. Skatiet [MCP-SERVER.md](./MCP-SERVER.md).
 
 ## Galapunkti
 

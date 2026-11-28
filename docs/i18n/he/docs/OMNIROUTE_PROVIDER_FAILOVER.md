@@ -21,3 +21,5 @@
   - מזהה עם קידומת (`provider/model`) לעולם אינו מנותב לספק אחר.
 
 מצבי המעגל הם `closed`, `open` ו- `half_open`. צינון מתזמן בדיקה מוגבלת; בדיקה מוצלחת סוגרת את המעגל ובדיקה שנכשלה פותחת אותו מחדש.
+
+מעבר לכשל של ספק פועל בתוך השער. ראה [כאשר OmniRoute עצמו אינו נגיש](architecture/RESILIENCE_GUIDE.md#when-omniroute-itself-is-unreachable) להתנהגות הלקוח במהלך הפסקת שער.

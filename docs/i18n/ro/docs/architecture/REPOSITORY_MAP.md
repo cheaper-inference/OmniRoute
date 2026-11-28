@@ -4,9 +4,9 @@
 
 ---
 
-> **Ce trăiește unde: fiecare director de nivel superior urmărit și fișier rădăcină, cu un scop de o singură linie.** Ultima actualizare: 2026-11-13 (OmniRoute v3.8.54)
+> **Ce trăiește unde: fiecare director de nivel superior urmărit și fișier rădăcină, cu un scop pe o singură linie.**
 >
-> Utilizați această hartă pentru a vă găsi drumul în baza de cod, apoi urmați linkurile către documentele dedicate. Numărările de fișiere au fost măsurate cu `git ls-files` la data de mai sus. Se schimbă cu aproape fiecare lansare, așa că tratați-le ca ordine de mărime.
+> Utilizați această hartă pentru a vă găsi drumul în baza de cod, apoi urmați linkurile către documentele dedicate. Numărul de fișiere provine de la `git ls-files` și se modifică cu aproape fiecare lansare. Tratează-le ca ordine de mărime.
 
 ## Arborele de nivel superior
 

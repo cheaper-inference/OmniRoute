@@ -66,49 +66,31 @@ Bifrost veikia tik kaip `external` (pasiekiamas tik per `BIFROST_BASE_URL`).
 kvietėjams filtruoti pagal tai, ką variklis iš tiesų gali atlikti, užuot programos
 kode įrašius atskiras sąlygines šakas kiekvienam identifikatoriui.
 
-## A ašis — įterptosios paslaugos (prižiūrimo proceso pusė)
+## A ašies — įterptosios paslaugos (prižiūrimo proceso pusė)
 
-- **Prižiūrimų procesų registras:** `src/lib/services/bootstrap.ts` `SERVICES[]`
-  (šiuo metu: `9router`, `cliproxy`).
-- **Gyvavimo ciklo valdytojas:** `src/lib/services/ServiceSupervisor.ts` — `start()` paleidžia
-  antrinį procesą, laukia `waitForHealthy()` patvirtinimo, nukreipia stdout/stderr į žiedinį buferį;
-  `stop()` naudoja SIGTERM→SIGKILL; visos operacijos nuosekliai vykdomos naudojant užraktą.
-- **Būsenų junginys** (`src/lib/services/types.ts`):
-  `not_installed | stopped | starting | running | stopping | error`, taip pat
-  nepriklausoma `HealthState = healthy | unhealthy | unknown`.
-- **Kodėl atskiras procesas (o ne vidinio proceso SDK)?** Procesų izoliavimas leidžia
-  nepriklausomai valdyti kiekvieno šalutinio proceso diegimą / paleidimą / stabdymą / būklę / žurnalus
-  ir taikyti paleidimo apsaugą vietinio ciklo sąsajai. Vidinio proceso adapterio modeliavimas yra
-  būsimas darbas — tam išreikšti būtų naudojama `native-hot-path` galimybių žyma.
+- **Prižiūrimų procesų registras:** `src/lib/services/bootstrap.ts` `SERVICES[]` (šiandien: `9router`, `cliproxy`).
+- **Gyvenimo ciklo savininkas:** `src/lib/services/ServiceSupervisor.ts` — `start()` neršia vaiką, vartai ant `waitForHealthy()`, bakstelėja stdout/stderr į žiedo buferį; `stop()` SIGTERM→SIGKILL; viskas serializuota po užraktu.
+- **Valstybės sąjunga** (`src/lib/services/types.ts`): `not_installed | stopped | starting | running | stopping | error`, plius stačiakampis `HealthState = healthy | unhealthy | unknown`.
+- **Kodėl atskiras procesas (ne in-proc SDK)?** Proceso izoliacija yra tai, kas leidžia install/start/stop/health/logs valdyti nepriklausomai nuo kiekvienos šoninės priekabos ir suteikia galimybę naudoti kilpą, apsaugančią nuo atsiradimo. In-proc adapterio modeliavimas yra būsimas darbas — `native-hot-path` galimybių vėliavėlė yra ta vieta, kur tai būtų išreikšta.
 
-### Gyvavimo ciklo maršruto sutartis (`/api/services/<tool>/…`)
+### Gyvenimo ciklo maršruto sutartis (`/api/services/<tool>/…`)
 
-Būsenos kodai yra **sąmoningai susieti su konkrečia būsena / veiksmažodžiu / keliu** — tai sutartis,
-o ne nenuoseklumas:
+Būsenos kodai yra**state/verb/path-specific pagal dizainą** — tai yra sutartis, o ne nenuoseklumas:
 
-| Iškvietimas                     | Sąlyga                                           | Būsena                                   |
-| ------------------------------- | ------------------------------------------------ | ---------------------------------------- |
-| `POST .../start`                | paslaugos būsena `not_installed`                 | **409** (išankstinė sąlyga)              |
-| `POST .../stop`                 | jau sustabdyta                                   | **200** (idempotentinė tuščia operacija) |
-| `GET .../status`                | Gerai                                            | **200** (`live ?? row ?? "unknown"`)     |
-| `POST .../start`                | paleidimo klaida                                 | **503** (laikina)                        |
-| `GET .../status`, `.../stop`    | nepagauta klaida                                 | **500**                                  |
-| `GET /api/services/<x>/logs`    | nežinomas įrankis `<x>`                          | **404** `Service '<x>' not found`        |
-| `GET .../status?reveal=key`     | nėra `X-Reveal-Confirm: yes`                     | **403** (tik 9router)                    |
-| **bet kuris** `/api/services/*` | kvietėjas nėra iš vietinio ciklo / privataus LAN | **403 LOCAL_ONLY**                       |
+| Skambinti                      | Būklė                            | Būsena                               |
+| ------------------------------ | -------------------------------- | ------------------------------------ |
+| `POST .../start`               | servisas `not_installed`         | **409** (sąlyga)                     |
+| `POST .../stop`                | jau sustojo                      | **200** (idempotentas ne-op)         |
+| `GET .../status`               | OK                               | **200** (`live ?? row ?? "unknown"`) |
+| `POST .../start`               | neršto gedimas                   | **503** (trumpalaikis)               |
+| `GET .../status`, `.../stop`   | nepastebėta klaida               | **500**                              |
+| `GET /api/services/<x>/logs`   | nežinomas įrankis `<x>`          | **404** `Service '<x>' not found`    |
+| `GET .../status?reveal=key`    | trūksta `X-Reveal-Confirm: yes`  | **403** (tik 9 maršrutizatorius)     |
+| **bet koks** `/api/services/*` | skambina ne loopback/private-LAN | **403 LOCAL_ONLY**                   |
 
-Visų klaidų atsakymų struktūrą suformuoja `createErrorResponse()` →
-`{ error: { message, type }, requestId }`, kur `type` nustatomas pagal būseną
-(`500→server_error`, `404→not_found`, `409→conflict`, kitais atvejais `invalid_request`) ir yra
-mašininiam apdorojimui skirtas skiriamasis požymis. Pranešimai iš anksto išvalomi
-(`sanitizeErrorMessage()`, griežtoji taisyklė Nr. 12).
+Visi klaidų elementai yra suformuoti pagal `createErrorResponse()` → `{ error: { message, type }, requestId }`, kur `type` gaunamas iš būsenos (`500→server_error`, `404→not_found`, `409→conflict`, else `invalid_request`) ir yra mašininiu būdu veikiamas diskriminatorius. Pranešimai yra iš anksto dezinfekuojami (`sanitizeErrorMessage()`, griežta taisyklė #12).
 
-**Vietinio ciklo apsauga** yra dažniausia `403` priežastis: `/api/services/` yra įtraukta į
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`), o
-`src/server/authz/policies/management.ts` atmeta visus ne iš vietinio ciklo / privataus LAN
-gaunamus kvietimus **prieš autentifikavimą**, nes šie maršrutai paleidžia antrinius procesus
-(griežtosios taisyklės Nr. 15 ir 17). Jų pasiekimas per viešąjį tunelį pagal numatytąją paskirtį
-grąžina `403`.
+**Atgalinė apsauga** yra labiausiai paplitęs `403` šaltinis: `/api/services/` yra `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) ir `src/server/authz/policies/management.ts` atmeta bet kokį negrįžtamąjį / ne privatų LAN skambintoją** prieš patvirtinimą** , nes šie maršrutai sukuria vaikų procesus (15 ir 17 griežtos taisyklės). Pasiekti juos viešuoju tuneliu yra `403` pagal dizainą.
 
 ## B ašis — retransliavimo maršrutizavimo posistemė (paskirstymo pusė)
 
