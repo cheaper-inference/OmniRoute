@@ -1,0 +1,1 @@
+- **fix(compression):** Start the colocated compression worker from packaged Turbopack builds.
