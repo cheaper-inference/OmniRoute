@@ -1,0 +1,1 @@
+- `SEMANTIC_CACHE_PROVIDER_KEY_ENABLED` adds the answering provider to the default semantic cache key. The flag is off by default, so the key and existing entries stay as they are. ([#21510](https://github.com/cheaper-inference/OmniRoute/pull/21510))
