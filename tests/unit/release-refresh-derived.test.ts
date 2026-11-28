@@ -528,13 +528,13 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
   it("refreshes free-token figures in the source docs and their translated mirrors", async () => {
     const files = {
       "README.md":
-        '<img alt="~11.4B as others count · ~93M real"> +~6M behind regional identity verification',
+        '<img alt="~11.3B as others count · ~93M real"> +~6M behind regional identity verification',
       "docs/i18n/pt-BR/README.md":
-        '<img alt="~11.4B como outros contam · ~93M reais"> Arquivo de ~93MB.',
+        '<img alt="~11.3B como outros contam · ~93M reais"> Arquivo de ~93MB.',
       "docs/reference/FREE_TIERS.md":
-        "~93M real today. ~11.4B summed row by row, 98.6% from retired rows. +~6M behind regional identity verification",
+        "~93M real today. ~11.3B summed row by row, 98.6% from retired rows. +~6M behind regional identity verification",
       "docs/i18n/pt-BR/docs/reference/FREE_TIERS.md":
-        "~93M reais hoje. ~11.4B somados linha por linha, 98.6% de ofertas que já acabaram.",
+        "~93M reais hoje. ~11.3B somados linha por linha, 98.6% de ofertas que já acabaram.",
       "docs/getting-started/FREE-TIERS-GUIDE.md": "~93M real today.",
       "docs/i18n/pt-BR/docs/getting-started/FREE-TIERS-GUIDE.md": "~93M reais hoje.",
     };
@@ -546,7 +546,8 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
       code: {
         ...snapshot.code,
         headlineSteady: 89_780_000,
-        rowSumTotal: 11_349_500_000,
+        rowSumTotal: 11_352_500_000,
+        rowSumTotalLabel: "~11.4B",
         rowSumRetiredShare: 0.9761,
       },
     };
@@ -559,7 +560,7 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
     );
     for (const [file, before] of Object.entries(files)) {
       const after = before
-        .replace("~11.4B", "~11.3B")
+        .replace("~11.3B", "~11.4B")
         .replace("~93M", "~90M")
         .replace("98.6%", "97.6%");
       assert.equal(read(root, file), after, file);
