@@ -110,6 +110,10 @@ import { resolveChatCoreTargetFormat } from "./chatCore/targetFormat.ts";
 import { resolveOmniGlyphTransport } from "../services/compression/imageTransportPolicy.ts";
 import { usesClaudeBridge } from "./chatCore/agentRouterProtocol.ts";
 import { normalizeUpstreamRequestParams } from "./chatCore/upstreamRequestParams.ts";
+import {
+  getComboFirstOutputHook,
+  shouldStreamUpstreamForFirstOutput,
+} from "../services/combo/nonStreamFirstOutput.ts";
 import { injectSystemPromptPreTranslation } from "../services/systemPrompt.ts";
 import { applyCustomSystemPrompt } from "./chatCore/customSystemPrompt.ts";
 import { applyProviderSystemTransforms } from "../services/systemTransforms.ts";
@@ -2289,8 +2293,20 @@ async function handleChatCoreInner({
   // / an empty body. Force the upstream request to stream even when the client
   // wants JSON; the non-streaming branch below accumulates the SSE and converts
   // it back to JSON (same mechanism already used for Claude-Code-compatible
-  // providers via isClaudeCodeCompatible).
-  const upstreamStream = stream || isClaudeCodeCompatible || providerRequiresStreaming;
+  // providers via isClaudeCodeCompatible). A non-streamed combo target streams too, so its
+  // first output can stop the per-target timer (combo/nonStreamFirstOutput.ts).
+  const comboFirstOutput = getComboFirstOutputHook(clientRawRequest);
+  // Each account attempt of a combo target passes here: a replacement attempt after the previous
+  // account already produced output is held to the target budget again.
+  comboFirstOutput?.onAttemptStart?.();
+  const streamForFirstOutput = shouldStreamUpstreamForFirstOutput({
+    stream,
+    upstreamStream: stream || isClaudeCodeCompatible || providerRequiresStreaming,
+    targetFormat,
+    onFirstOutput: comboFirstOutput,
+  });
+  const upstreamStream =
+    stream || isClaudeCodeCompatible || providerRequiresStreaming || streamForFirstOutput;
   let ccSessionId: string | null = null;
   const stripTypes = getStripTypesForProviderModel(provider || "", model || "");
 
@@ -2632,6 +2648,8 @@ async function handleChatCoreInner({
       | undefined,
     log,
   });
+  // Anthropic picks streaming from the body, not the Accept header.
+  if (streamForFirstOutput) translatedBody.stream = true;
 
   // Resolve executor with optional upstream proxy routing. The native / cliproxyapi / dario /
   // fallback modes and the #6339 per-connection override live in chatCore/executorProxy.ts.
@@ -2782,6 +2800,7 @@ async function handleChatCoreInner({
     toolDisclosure,
     upstreamStream,
     userAgent,
+    onUpstreamFirstOutput: comboFirstOutput?.onFirstOutput ?? null,
   };
   // The pre-decomposition inline executeProviderRequest closed over the LIVE
   // `translatedBody` binding: every mid-flight rebinding (pipeline wire update,

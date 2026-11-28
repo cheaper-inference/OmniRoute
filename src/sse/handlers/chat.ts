@@ -1305,6 +1305,7 @@ async function handleAdmittedChat(
           effectiveComboStrategy?: string | null;
           modelAbortSignal?: AbortSignal | null;
           fallbackAttempts?: number;
+          comboFirstOutput?: SingleModelTarget["comboFirstOutput"];
           trafficType?: "production" | "shadow";
         }
       ) =>
@@ -1364,6 +1365,7 @@ async function handleAdmittedChat(
             trafficType: trafficTypeOf(target),
             comboStalledConnections,
             fallbackAttempts: target?.fallbackAttempts,
+            comboFirstOutput: target?.comboFirstOutput ?? null,
           },
           target?.effectiveComboStrategy ?? combo.strategy,
           true
@@ -1649,6 +1651,7 @@ async function handleSingleModelChat(
     /** Accounts an earlier target of this combo request stalled on (comboStalledConnections.ts). */
     comboStalledConnections?: ComboStalledConnections | null;
     fallbackAttempts?: number;
+    comboFirstOutput?: SingleModelTarget["comboFirstOutput"];
     /** A shadow target's dispatch: the agent guard decides without recording request state. */
     trafficType?: "production" | "shadow";
     /** Carries the trusted live combo test's agent guard exemption alone, without breaker bypass. */
@@ -1758,6 +1761,7 @@ async function handleSingleModelChat(
             modelAbortSignal: target?.modelAbortSignal ?? null,
             comboStalledConnections: sNetStalledConnections,
             fallbackAttempts: target?.fallbackAttempts,
+            comboFirstOutput: target?.comboFirstOutput ?? null,
           },
           resolvedTarget?.effectiveComboStrategy ?? redirectCombo.strategy ?? "priority",
           isStoredAutoCombo

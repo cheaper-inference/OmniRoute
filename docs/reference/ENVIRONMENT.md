@@ -1018,10 +1018,17 @@ REQUEST_TIMEOUT_MS (global override)
 | `OMNIROUTE_LOGIN_BROWSER_PATH`                  | _(auto-detected)_                                                 | Path to a system Chrome/Edge executable for the Adobe Firefly interactive browser sign-in (`adobeFireflyBrowserLogin.ts`); overrides per-OS auto-detection.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `OMNIROUTE_STANDALONE_DIR`                      | _.build/ standalone output_                                       | Build-time override for the standalone output directory consumed by the post-build colocation step (`scripts/build/colocate-standalone.mjs`); build tooling, not runtime.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
-Combo target attempts inherit the resolved upstream request timeout (`FETCH_TIMEOUT_MS`, or
-`REQUEST_TIMEOUT_MS` when it supplies the fetch default). Set `targetTimeoutMs` in a combo,
-combo defaults, or provider override only to make combo fallback faster; values above the
-current upstream timeout are capped to the upstream timeout.
+Each combo target gets a per-target budget: `targetTimeoutMs` from the combo, combo defaults,
+or provider override, otherwise 120 s (the code default in
+`open-sse/services/comboConfig.ts`). The budget covers the wait for the target's first output,
+not the whole answer. A streamed target is held until its first output event
+(`open-sse/services/combo/firstOutputStream.ts`). A non-streamed target stops its timer when the
+upstream stream shows its first output (`open-sse/services/combo/nonStreamFirstOutput.ts`); for
+this, a non-streamed request to an Anthropic-format provider (for example `claude` or
+`anthropic`) inside a combo is sent upstream as a stream and assembled back into JSON. A
+non-streamed target whose upstream answers with plain JSON must still finish within the budget.
+The resolved upstream request timeout (`FETCH_TIMEOUT_MS`, or `REQUEST_TIMEOUT_MS` when it
+supplies the fetch default) still applies, so a larger `targetTimeoutMs` has no effect.
 
 `comboTimeoutMs` is a separate whole-combo wall-clock budget across failover targets.
 Leave it unset or `0` to keep unlimited iteration (a 10-minute hardcoded hang-stop in

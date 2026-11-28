@@ -9,6 +9,7 @@
  * are unchanged.
  */
 import { mergeAbortSignals } from "@omniroute/open-sse/executors/base.ts";
+import type { ComboFirstOutputHook } from "@omniroute/open-sse/services/combo/nonStreamFirstOutput.ts";
 import { cloneBoundedForLog } from "@omniroute/open-sse/utils/requestLogger.ts";
 import {
   INTERNAL_TEST_HEADER,
@@ -61,16 +62,25 @@ export function buildClientRawRequest(
  * abandoned dispatch can actually observe its own abort and reach its
  * cleanup path — returns clientRawRequest unchanged when there's no
  * modelAbortSignal to merge in (the non-combo / non-timed-out common case).
+ *
+ * The same timer's first-output hook rides along as `comboFirstOutput`, so a non-streamed
+ * target can tell the timer when its answer has started (nonStreamFirstOutput.ts).
  */
 export function resolveDispatchClientRawRequest(
   clientRawRequest: { signal?: AbortSignal | null } | null | undefined,
-  modelAbortSignal: AbortSignal | null | undefined
+  modelAbortSignal: AbortSignal | null | undefined,
+  comboFirstOutput: ComboFirstOutputHook | null | undefined = null
 ): typeof clientRawRequest {
-  if (!modelAbortSignal) return clientRawRequest;
+  if (!modelAbortSignal && !comboFirstOutput) return clientRawRequest;
   return {
     ...clientRawRequest,
-    signal: clientRawRequest?.signal
-      ? mergeAbortSignals(clientRawRequest.signal, modelAbortSignal)
-      : modelAbortSignal,
+    ...(modelAbortSignal
+      ? {
+          signal: clientRawRequest?.signal
+            ? mergeAbortSignals(clientRawRequest.signal, modelAbortSignal)
+            : modelAbortSignal,
+        }
+      : {}),
+    ...(comboFirstOutput ? { comboFirstOutput } : {}),
   };
 }

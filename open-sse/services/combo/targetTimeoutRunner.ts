@@ -15,7 +15,67 @@ import { requestMediaRequirements, nonImageMediaFailures } from "./mediaCompatib
 import { parseModel } from "../model.ts";
 import { COMBO_PER_MODEL_TIMEOUT_REASON } from "./comboAbortReasons.ts";
 import { awaitFirstOutput, isEventStreamResponse } from "./firstOutputStream.ts";
+import type { ComboFirstOutputHook } from "./nonStreamFirstOutput.ts";
 import type { HandleSingleModel, SingleModelTarget, ComboLogger } from "./types.ts";
+
+/**
+ * The per-target budget timer and the first-output hook handed to the target.
+ *
+ * A non-streamed target only returns once its whole answer is assembled, so the budget would cut
+ * any answer that takes longer to write. The dispatch reports the upstream's first output through
+ * `hook.onFirstOutput` (nonStreamFirstOutput.ts); from then on the target is writing, not
+ * stalled, and the timer stops. If that account then fails and another account is tried for the
+ * same target, `hook.onAttemptStart` re-arms the full budget until the new attempt's own first
+ * output. A streamed target returns at its headers and is held by gateFirstOutput instead.
+ */
+function createTargetBudget(opts: {
+  timeoutMs: number;
+  modelStr: string;
+  startedAt: number;
+  log: ComboLogger;
+  onExpire: () => void;
+}) {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let expired = false;
+  let settled = false;
+  let firstOutputAt = 0;
+  const arm = () => {
+    timeoutId = setTimeout(() => {
+      if (settled) return;
+      expired = true;
+      opts.onExpire();
+    }, opts.timeoutMs);
+  };
+  arm();
+  const hook: ComboFirstOutputHook = {
+    onFirstOutput: () => {
+      if (expired || settled || firstOutputAt) return;
+      firstOutputAt = Date.now();
+      clearTimeout(timeoutId);
+      opts.log.info(
+        "COMBO",
+        `Model ${opts.modelStr} produced its first output after ${firstOutputAt - opts.startedAt}ms — the ${opts.timeoutMs}ms target budget no longer applies to this non-streamed answer`
+      );
+    },
+    onAttemptStart: () => {
+      if (expired || settled || !firstOutputAt) return;
+      firstOutputAt = 0;
+      arm();
+      opts.log.info(
+        "COMBO",
+        `Model ${opts.modelStr} is trying another account after a failed answer — the ${opts.timeoutMs}ms target budget applies again until it produces output`
+      );
+    },
+  };
+  return {
+    hook,
+    isExpired: () => expired,
+    settle: () => {
+      settled = true;
+      clearTimeout(timeoutId);
+    },
+  };
+}
 
 /** Stable internal classification for OmniRoute's own combo per-target timer. */
 export const COMBO_TARGET_TIMEOUT_CODE = "combo_target_timeout";
@@ -281,11 +341,16 @@ export function buildTargetTimeoutRunner(deps: {
 
     const startedAt = Date.now();
     const timeoutController = new AbortController();
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let timedOut = false;
+    let resolveTimeout: (response: Response) => void = () => {};
     const timeoutPromise = new Promise<Response>((resolve) => {
-      timeoutId = setTimeout(() => {
-        timedOut = true;
+      resolveTimeout = resolve;
+    });
+    const budget = createTargetBudget({
+      timeoutMs: effectiveTimeoutMs,
+      modelStr,
+      startedAt,
+      log,
+      onExpire: () => {
         const abortErr = new Error(COMBO_PER_MODEL_TIMEOUT_REASON);
         recordTimeoutContext({
           modelStr,
@@ -298,8 +363,8 @@ export function buildTargetTimeoutRunner(deps: {
           `Model ${modelStr} exceeded ${effectiveTimeoutMs}ms timeout — falling back`
         );
         timeoutController.abort(abortErr);
-        resolve(targetTimeoutResponse(modelStr));
-      }, effectiveTimeoutMs);
+        resolveTimeout(targetTimeoutResponse(modelStr));
+      },
     });
     const parentHedgeSignal = target?.modelAbortSignal ?? null;
     const targetSignal = parentHedgeSignal
@@ -310,6 +375,7 @@ export function buildTargetTimeoutRunner(deps: {
       // Keep the caller's abort linked after headers are returned: the attempt's
       // response-quality peek may still be consuming this target's stream.
       modelAbortSignal: targetSignal,
+      comboFirstOutput: budget.hook,
     };
     // Both branches of the race resolve (never reject): the inner handleSingleModel call has a
     // .catch() that converts rejections into responses, and timeoutPromise always resolves. The
@@ -319,7 +385,7 @@ export function buildTargetTimeoutRunner(deps: {
     try {
       dispatched = await Promise.race([
         handleSingleModel(b, modelStr, targetWithSignal).catch((err) => {
-          if (timedOut) {
+          if (budget.isExpired()) {
             // Inner call rejected because we aborted it. The synthetic 504 from timeoutPromise
             // already won the race; resolve cleanly without leaking err.message.
             return new Response(null, { status: 599 });
@@ -337,7 +403,7 @@ export function buildTargetTimeoutRunner(deps: {
         return errorResponse(502, `Combo timeout dispatch error: ${detail}`);
       });
     } finally {
-      clearTimeout(timeoutId);
+      budget.settle();
     }
 
     return gateFirstOutput({
