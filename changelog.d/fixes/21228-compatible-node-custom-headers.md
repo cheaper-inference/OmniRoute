@@ -1,0 +1,1 @@
+- **fix(api):** Preserve connection-level custom headers when editing or clearing the inherited headers of a compatible provider node (#21228 — thanks @AyhamJo7 and @rafacpti23).

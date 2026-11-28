@@ -103,7 +103,7 @@ process.on("SIGHUP", () => void shutdown("SIGHUP"));
 
 const { wrapRequestListenerWithMethodGuard } = methodGuard;
 const { wrapRequestListenerWithHeadResponseGuard } = headResponseGuard;
-const { handleH2cUpgrade } = h2cUpgradeGuard;
+const { handleH2cUpgrade, withH2cUpgradeGuard } = h2cUpgradeGuard;
 
 // Opt-in native HTTPS (#5242). Resolved once at boot: when both OMNIROUTE_TLS_CERT
 // and OMNIROUTE_TLS_KEY point at readable files we terminate TLS on the same
@@ -189,8 +189,7 @@ function proxyLiveWs(req, socket, head) {
 function wrapUpgradeListener(server, listener) {
   return async function responsesWsAwareUpgrade(req, socket, head) {
     try {
-      // A cleartext `Upgrade: h2c` (JDK HttpClient: JetBrains/Air) is not a WebSocket
-      // upgrade: answer it as plain HTTP/1.1 instead of dropping the socket.
+      // Older Node 24 versions deliver h2c to the upgrade listener.
       if (handleH2cUpgrade(server, req, socket, head)) return;
 
       // If this server IS the LiveWS server (port 20132), the ws library's
@@ -254,6 +253,11 @@ http.createServer = function createServerWithResponsesWs(...args) {
         wrapRequestListenerWithWebdav(wrapRequestListenerWithPeerStamp(args[lastFnIdx]))
       )
     );
+  }
+
+  if (!tlsOptions) {
+    if (typeof args[0] === "function") args.unshift(withH2cUpgradeGuard());
+    else args[0] = withH2cUpgradeGuard(args[0]);
   }
 
   // When TLS is configured, return an https.Server (terminating TLS on the same

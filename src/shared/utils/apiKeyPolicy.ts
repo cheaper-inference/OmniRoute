@@ -518,26 +518,62 @@ export interface EnforceApiKeyPolicyOptions {
  *  test the policy for (never the key secret). */
 const PLAYGROUND_KEY_ID_HEADER = "x-omniroute-playground-key-id";
 
+type PlaygroundKeySelection =
+  | { status: "absent" }
+  | { status: "selected"; apiKey: string; apiKeyInfo: ApiKeyMetadata }
+  | { status: "rejected"; rejection: Response };
+
+function rejectPlaygroundKeySelection(
+  message = "Selected Playground API key is unavailable"
+): PlaygroundKeySelection {
+  return {
+    status: "rejected",
+    rejection: errorResponse(HTTP_STATUS.FORBIDDEN, message),
+  };
+}
+
 /**
- * Dashboard playground support. An authenticated admin session may test a
- * specific API key's policy (allowed_models, budget, …) WITHOUT putting the key
- * secret on the wire: the browser sends only the key id via
- * `x-omniroute-playground-key-id` and we resolve the secret server-side.
- *
- * Security: honored ONLY for authenticated dashboard sessions, and only as a
- * fallback when no bearer key was presented — so it can never bypass auth or
- * escalate privileges, it only applies (narrows to) the selected key's policy.
+ * A dashboard session can select an ordinary key by ID. Once the selector is
+ * used, the request requires that specific key and its current policy.
  */
-export async function resolvePlaygroundTestKey(request: Request): Promise<string | null> {
-  const keyId = request.headers.get(PLAYGROUND_KEY_ID_HEADER);
-  if (!keyId) return null;
-  if (!(await isDashboardSessionAuthenticated(request))) return null;
+async function resolvePlaygroundKeySelection(request: Request): Promise<PlaygroundKeySelection> {
+  const header = request.headers.get(PLAYGROUND_KEY_ID_HEADER);
+  if (header === null) return { status: "absent" };
+  const keyId = header.trim();
+  if (!keyId) return rejectPlaygroundKeySelection();
+  if (!(await isDashboardSessionAuthenticated(request))) {
+    return rejectPlaygroundKeySelection(
+      "Testing with a selected API key requires a signed-in dashboard session"
+    );
+  }
+
   try {
     const row = await getApiKeyById(keyId);
-    return typeof row?.key === "string" ? row.key : null;
+    const apiKey = row?.key;
+    if (typeof apiKey !== "string" || apiKey === "") return rejectPlaygroundKeySelection();
+
+    const apiKeyInfo = await getApiKeyMetadata(apiKey, { bypassCache: true });
+    if (
+      apiKeyInfo?.id !== keyId ||
+      apiKeyInfo.isActive === false ||
+      apiKeyInfo.isBanned ||
+      apiKeyInfo.revokedAt ||
+      (apiKeyInfo.expiresAt && !(Date.parse(apiKeyInfo.expiresAt) > Date.now()))
+    ) {
+      return rejectPlaygroundKeySelection();
+    }
+    return { status: "selected", apiKey, apiKeyInfo };
   } catch {
-    return null;
+    return {
+      status: "rejected",
+      rejection: errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "API key policy unavailable"),
+    };
   }
+}
+
+export async function resolvePlaygroundTestKey(request: Request): Promise<string | null> {
+  const selection = await resolvePlaygroundKeySelection(request);
+  return selection.status === "selected" ? selection.apiKey : null;
 }
 
 type PolicyContext = {
@@ -955,28 +991,38 @@ function resolveSsoApiKeySecret(request: Request): string | null {
 /**
  * The bound API key takes precedence. Without a binding, the credential that
  * actually validated wins (a stale Bearer sent next to a valid x-api-key must
- * not hide that key's policy); then a real bearer key; then a bare
- * x-api-key/x-goog-api-key that auth accepted but extractApiKey() gates out;
- * otherwise an authenticated dashboard playground may test a specific key's
- * policy by id (resolved server-side, secret never sent).
+ * not hide that key's policy). Without a validated credential, an explicit
+ * Playground selection must resolve before applying the legacy client
+ * behavior for unvalidated credential headers.
  */
 export async function resolvePolicyApiKey(request: Request): Promise<string | null> {
   const requiredKey = resolveRequiredApiKey();
   if (requiredKey) return (await requiredKey)?.apiKey ?? null;
-  return resolvePresentedPolicyApiKey(request);
+  return (await resolveUnboundPolicyKey(request)).apiKey;
 }
 
-async function resolvePresentedPolicyApiKey(request: Request): Promise<string | null> {
+async function resolveUnboundPolicyKey(request: Request): Promise<{
+  apiKey: string | null;
+  apiKeyInfo?: ApiKeyMetadata;
+  rejection: Response | null;
+}> {
   // SSO first: its bearer is a JWT, not a key, and must map to the shadow key.
   const ssoSecret = resolveSsoApiKeySecret(request);
-  if (ssoSecret) return ssoSecret;
+  if (ssoSecret) return { apiKey: ssoSecret, rejection: null };
   const resolved = await resolveClientApiKey(request);
-  return (
-    (resolved.valid ? resolved.apiKey : null) ||
-    extractApiKey(request) ||
-    extractUngatedClientApiKey(request) ||
-    (await resolvePlaygroundTestKey(request))
-  );
+  if (resolved.valid) return { apiKey: resolved.apiKey, rejection: null };
+
+  const selection = await resolvePlaygroundKeySelection(request);
+  if (selection.status === "selected") {
+    return { apiKey: selection.apiKey, apiKeyInfo: selection.apiKeyInfo, rejection: null };
+  }
+  if (selection.status === "rejected") {
+    return { apiKey: null, rejection: selection.rejection };
+  }
+  return {
+    apiKey: extractApiKey(request) || extractUngatedClientApiKey(request),
+    rejection: null,
+  };
 }
 
 /**
@@ -1061,7 +1107,11 @@ export async function resolveEnforcedPolicyKey(request: Request): Promise<{
       : { apiKey: null, selfLoopScope: NO_SELF_LOOP_SCOPE, rejection: requiredApiKeyUnavailable() };
   }
 
-  const presentedKey = await resolvePresentedPolicyApiKey(request);
+  const unbound = await resolveUnboundPolicyKey(request);
+  if (unbound.rejection || unbound.apiKeyInfo) {
+    return { ...unbound, selfLoopScope: NO_SELF_LOOP_SCOPE };
+  }
+  const presentedKey = unbound.apiKey;
   const selfLoopScope = await resolveSelfLoopScopedKey(request, presentedKey);
   return {
     apiKey: selfLoopScope.key ?? presentedKey,
