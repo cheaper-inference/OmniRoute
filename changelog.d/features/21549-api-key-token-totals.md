@@ -1,0 +1,1 @@
+- **feat(api-manager):** each API key shows its total tokens next to its cost. (thanks @m4tinbeigi-official)
