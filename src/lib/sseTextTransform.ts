@@ -367,7 +367,8 @@ export function createSseTextTransform(
             obj: any,
             currentChoiceIdx = 0,
             currentToolIdx = 0,
-            parentKey = ""
+            parentKey = "",
+            inUsage = false
           ) => {
             if (!obj || typeof obj !== "object") return;
             if (isOpaqueReasoningDetail(obj, parentKey)) return;
@@ -401,6 +402,12 @@ export function createSseTextTransform(
                 if (field === null) {
                   continue;
                 }
+                // Usage strings are complete metadata values. Redact each in place so they
+                // neither consume buffered answer text nor become the last content frame.
+                if (inUsage) {
+                  obj[key] = processor(val, "content", false, compositeKey, true);
+                  continue;
+                }
                 if (field === "toolArgs" || field === "partialJson") {
                   if (opts?.processToolArgs === true) {
                     obj[key] = processor(
@@ -420,7 +427,13 @@ export function createSseTextTransform(
                 obj[key] = processor(val, field, isStopSignal, compositeKey, isSnapshot, fieldName);
                 matched = true;
               } else if (typeof obj[key] === "object") {
-                sanitizeObject(obj[key], choiceIdx, toolIdx, isArray ? parentKey : key);
+                sanitizeObject(
+                  obj[key],
+                  choiceIdx,
+                  toolIdx,
+                  isArray ? parentKey : key,
+                  inUsage || (obj === json && key === "usage")
+                );
               }
             }
           };

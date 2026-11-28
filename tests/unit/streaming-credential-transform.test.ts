@@ -74,6 +74,40 @@ test("image data URL carrying key-shaped base64 stays intact", async () => {
   assert.ok(output.includes(url), "image data URL must pass through unchanged");
 });
 
+test("terminal usage evidence preserves the buffered reply and redacts credentials in place", async () => {
+  const reply = "Synthetic stream sentence. ".repeat(25).slice(0, 520);
+  const usage = {
+    completion_tokens: 42,
+    usage_evidence: { input: { source: "native" }, output: { source: "native" } },
+    extra: [OPENAI_KEY],
+  };
+  const finish = { choices: [{ index: 0, delta: {}, finish_reason: "stop" }], usage };
+  const output = await runTransform(createCredentialSseTransform({ windowSize: 512 }), [
+    sseContent(reply),
+    `data: ${JSON.stringify(finish)}\n\n`,
+    "data: [DONE]\n\n",
+  ]);
+  const frames = output
+    .split("\n")
+    .filter((line) => line.startsWith("data: {"))
+    .map((line) => JSON.parse(line.slice(6)));
+  assert.equal(frames.map((frame) => frame.choices[0]?.delta.content ?? "").join(""), reply);
+  assert.deepEqual(frames.at(-1).usage, { ...usage, extra: ["[REDACTED:openai]"] });
+});
+
+test("terminal usage metadata masks a private key with no closing marker", async () => {
+  const finish = {
+    choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+    usage: { extra: "prefix -----BEGIN PRIVATE KEY-----\nsynthetic-unclosed-body" },
+  };
+  const output = await runTransform(createCredentialSseTransform(), [
+    `data: ${JSON.stringify(finish)}\n\n`,
+    "data: [DONE]\n\n",
+  ]);
+  assert.ok(!output.includes("synthetic-unclosed-body"));
+  assert.ok(output.includes('"extra":"prefix [REDACTED:private_key]"'));
+});
+
 test("secret split across chunk boundaries is still masked", async () => {
   const half = Math.floor(OPENAI_KEY.length / 2);
   const output = await runTransform(createCredentialSseTransform({ windowSize: 512 }), [
