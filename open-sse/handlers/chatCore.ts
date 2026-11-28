@@ -639,7 +639,9 @@ async function handleChatCoreInner({
   // per-connection and global settings, OR-combined. The full decision is
   // resolved AFTER background-redirect / Copilot-auto / lifecycle have finalized
   // the model (see the recompute below), so the per-model flag applies to the
-  // model actually routed to, not the requested alias.
+  // model actually routed to, not the requested alias. `sourceFormat` is bound
+  // below; the closure captures the binding, so by the time it runs the value
+  // is the request's final format.
   const settingsForNoLog = cachedSettings ?? (await getCachedSettings());
   let noLogEnabled = false;
   let agentContext: ReturnType<typeof resolveUsageAgentContext> | null = null;
