@@ -41,6 +41,20 @@ ops_sqlite() {
   sqlite3 -init /dev/null -batch -noheader -list "$@"
 }
 
+# ops_cp_db <src.sqlite> <dst.sqlite> — copy a SQLite file together with its -wal file.
+# In WAL mode, committed rows sit in the -wal file until a checkpoint, so the main
+# file alone is not the database. The -shm file is an index of the WAL and is rebuilt on open.
+# A source without a WAL removes the destination's: a reused directory must not pair the new
+# main file with a WAL left by another database state.
+ops_cp_db() {
+  cp -a "$1" "$2"
+  if [ -f "$1-wal" ]; then
+    cp -a "$1-wal" "$2-wal"
+  else
+    rm -f "$2-wal"
+  fi
+}
+
 ops_require_cmd() {
   command -v "$1" >/dev/null 2>&1 || ops_die "required command not found: $1"
 }

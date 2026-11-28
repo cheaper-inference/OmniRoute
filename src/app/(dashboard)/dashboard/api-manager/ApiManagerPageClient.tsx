@@ -38,6 +38,7 @@ import {
   computeApiKeyCounts,
   formatProviderModelPermissionSummary,
   formatUsdCost,
+  keyCreatedNoteKey,
   restoreProviderScopeSelection,
   toggleKeyVisibility,
 } from "./apiManagerPageUtils";
@@ -1355,7 +1356,7 @@ export default function ApiManagerPageClient() {
             variant="success"
             icon={<Icon name="check_circle" />}
             title={t("keyCreatedSuccess")}
-            description={t("keyCreatedNote")}
+            description={t(keyCreatedNoteKey(allowKeyReveal))}
             dismissLabel={tc("close")}
           />
           <div className="flex gap-2">

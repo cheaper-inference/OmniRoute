@@ -4,6 +4,7 @@ import {
   isCacheableForRead,
   recordSemanticCacheHit,
   outputContractOf,
+  signatureScopeOf,
 } from "@/lib/semanticCache";
 import { calculateCost } from "@/lib/usage/costCalculator";
 import { isSemanticCacheDbEnabled } from "@/lib/db/databaseSettings";
@@ -118,7 +119,8 @@ export async function checkSemanticCache({
         body.temperature,
         body.top_p,
         apiKeyId ?? undefined,
-        outputContractOf(body)
+        outputContractOf(body),
+        signatureScopeOf(clientRawRequest?.headers)
       );
       const legacyEntry = getCachedResponseEntry(signature);
       if (legacyEntry) {
@@ -197,7 +199,8 @@ export async function checkSemanticCache({
         body.temperature,
         body.top_p,
         apiKeyId ?? undefined,
-        outputContractOf(body)
+        outputContractOf(body),
+        signatureScopeOf(clientRawRequest?.headers)
       );
 
       const targetSignature =
