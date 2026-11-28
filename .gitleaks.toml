@@ -6,7 +6,7 @@
 # INSTRUÇÕES para allowlists:
 #   Findings legítimos (fixtures de teste, creds OAuth públicas já cobertas pelo
 #   check-public-creds.mjs, valores de exemplo em docs) devem ser registrados abaixo
-#   em [[allowlist]] com um comentário explicativo obrigatório.
+#   em [[allowlists]] com um comentário explicativo obrigatório.
 #
 #   NÃO adicione uma entrada de allowlist sem justificativa. Cada entrada é revisada
 #   a cada release (stale-enforcement). Regra: se o finding é um valor real que o
@@ -32,48 +32,68 @@
 
 # ---------------------------------------------------------------------------
 # Allowlist global do projeto
-# Entradas aqui são ignoradas em TODAS as varreduras.
+# Entradas aqui são ignoradas em todas as varreduras conforme as condições.
 # ---------------------------------------------------------------------------
-[allowlist]
-  description = "OmniRoute project-level allowlist — fixtures, test vectors, public OAuth creds"
-
-  # Paths a ignorar completamente (node_modules, builds, etc.)
+[[allowlists]]
+  description = "Dependency, build and Git directories"
+  # Match complete path segments so names such as src/distributed.ts are scanned.
   paths = [
-    '''node_modules''',
-    '''\.next''',
-    '''dist''',
-    '''\.git''',
-    '''coverage''',
-    '''\.nyc_output''',
+    '''(^|[/\\])node_modules([/\\]|$)''',
+    '''(^|[/\\])\.next([/\\]|$)''',
+    '''(^|[/\\])dist([/\\]|$)''',
+    '''(^|[/\\])\.git([/\\]|$)''',
+    '''(^|[/\\])coverage([/\\]|$)''',
+    '''(^|[/\\])\.nyc_output([/\\]|$)''',
   ]
 
-  # Commits específicos a ignorar (ex: commit que introduziu fixtures de teste)
-  # commits = []
+[[allowlists]]
+  description = "Literal bearer placeholders in the README, curl guides and their translations"
+  targetRules = ["curl-auth-header"]
+  condition = "AND"
+  paths = [
+    '''^(?:docs[/\\]i18n[/\\][^/\\]+[/\\])?README\.md$''',
+    '''^(?:docs[/\\]i18n[/\\][^/\\]+[/\\])?docs[/\\](?:guides[/\\]USER_GUIDE|reference[/\\]API_REFERENCE)\.md$''',
+  ]
+  regexes = ['''^your-(?:api|management)-key$''', '''^YOUR_OMNIROUTE_KEY$''']
 
-  # Regexes de stopwords — linhas que contêm estes padrões são ignoradas.
-  # Usar apenas para falsos positivos comprovados com justificativa abaixo.
-  # stopwords = []
+[[allowlists]]
+  description = "Intentionally invalid bearer value used by the Docker auth denial probe"
+  targetRules = ["curl-auth-header"]
+  condition = "AND"
+  paths = ['''^tests[/\\]security[/\\]test-docker-hardening\.sh$''']
+  regexes = ['''^sk-invalid$''']
 
-  # Regexes de targets (paths de arquivos) que podem ser allowlistados por regra.
-  # Ver [[allowlist]] por-regra abaixo para granularidade.
+[[allowlists]]
+  description = "Deliberately fake key in the Perplexity stream error redaction fixture"
+  targetRules = ["generic-api-key"]
+  condition = "AND"
+  paths = ['''^tests[/\\]fixtures[/\\]perplexity-web-stream-error-boundary\.fixture\.ts$''']
+  regexes = ['''^sk-[a-z]{4}-secret-[A-Za-z0-9]{6}$''']
+
+[[allowlists]]
+  description = "PEM containing only placeholder text in the GitHub collector's redaction test"
+  targetRules = ["private-key"]
+  condition = "AND"
+  paths = ['''^tests[/\\]unit[/\\]github-collector\.test\.ts$''']
+  regexes = ['''^-----BEGIN RSA PRIVATE KEY-----\\n[A-Z_]*PLACEHOLDER[A-Z_]*\\n-----END RSA PRIVATE KEY-----$''']
+
+[[allowlists]]
+  description = "Public OAuth client identifiers in the sample env and public-credential test vectors"
+  targetRules = ["generic-api-key"]
+  condition = "AND"
+  regexTarget = "line"
+  paths = [
+    '''^\.env\.example$''',
+    '''^tests[/\\]unit[/\\](?:claude-oauth-provider|oauth-providers-config)\.test\.ts$''',
+  ]
+  regexes = [
+    '''^\s*(?:CLAUDE|KIMI_CODING|GITHUB)_OAUTH_CLIENT_ID=[A-Za-z0-9.-]+\s*$''',
+    '''^\s*(?:CLAUDE|KIMI_CODING|GITHUB)_OAUTH_CLIENT_ID: "[A-Za-z0-9.-]+",?\s*$''',
+  ]
 
 # ---------------------------------------------------------------------------
-# Allowlist por-regra (adicionar conforme necessário durante o stale review)
+# Exceções existentes para falsos positivos que aparecem em vários arquivos
 # ---------------------------------------------------------------------------
-#
-# Exemplo (REMOVER / SUBSTITUIR por entradas reais quando necessário):
-#
-# [[rules]]
-#   # Allowlistar fixtures de teste que contêm tokens OAuth de exemplo/inválidos
-#   # Adicionado: 2026-06-13 | Revisar em: v3.9.0 | Justificativa: valores não-reais de teste
-#   id = "github-fine-grained-pat"
-#   [rules.allowlist]
-#     description = "Test fixture PATs — valores sintéticos, não funcionais"
-#     paths = [
-#       '''tests/fixtures/''',
-#       '''tests/unit/''',
-#     ]
-#
 
 [[rules]]
   # Falsos-positivos comprovados do generic-api-key — zerados em 2026-07-13 (WS6/D3,

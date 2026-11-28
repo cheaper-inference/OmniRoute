@@ -1,0 +1,1 @@
+- **fix(security):** scan staged changes for secrets, recognize known test fixtures and documentation placeholders, and warn when Gitleaks is unavailable
