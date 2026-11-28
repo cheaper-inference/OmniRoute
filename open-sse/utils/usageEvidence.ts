@@ -73,6 +73,7 @@ function cacheEvidence(value: unknown): Pick<UsageEvidence, "cacheRead" | "cache
         u.cacheRead,
         u.cache_read_input_tokens,
         u.cached_tokens,
+        u.prompt_cache_hit_tokens,
         u.cachedContentTokenCount,
         p.cached_tokens,
         i.cached_tokens,

@@ -1,0 +1,1 @@
+- **fix(usage):** Keep DeepSeek's reported prompt cache-hit count, including zero, in extracted and partial-stream usage receipts.

@@ -19,6 +19,7 @@ import {
   carryUsageEvidence,
   deriveUsageEvidence,
   hasEstimatedUsageEvidence,
+  usableTokenCounter,
   withoutInvalidCacheCounters,
   type UsageEvidence,
 } from "./usageEvidence.ts";
@@ -756,10 +757,16 @@ export function normalizeUsage(usage: UsageLike | null | undefined) {
   assignNumber("output_tokens", usage?.output_tokens);
   assignNumber("cache_read_input_tokens", usage?.cache_read_input_tokens);
   assignNumber("cache_creation_input_tokens", readCacheWriteUsage(usage).total);
+  const deepseekCacheHits =
+    normalized.cache_read_input_tokens === undefined &&
+    usableTokenCounter(usage.prompt_cache_hit_tokens)
+      ? usage.prompt_cache_hit_tokens
+      : undefined;
   const reportedCachedTokens =
     usage?.cached_tokens ??
     usage?.prompt_tokens_details?.cached_tokens ??
-    usage?.input_tokens_details?.cached_tokens;
+    usage?.input_tokens_details?.cached_tokens ??
+    deepseekCacheHits;
   if (reportedCachedTokens !== undefined) assignNumber("cached_tokens", reportedCachedTokens);
   if (
     usage?.cache_evidence === "hit" ||
@@ -996,9 +1003,9 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
       cached_tokens:
         chunk.usage.prompt_tokens_details?.cached_tokens ??
         chunk.usage.input_tokens_details?.cached_tokens ??
-        chunk.usage.prompt_cache_hit_tokens ??
         chunk.usage.cached_tokens,
       cache_read_input_tokens: chunk.usage.cache_read_input_tokens,
+      prompt_cache_hit_tokens: chunk.usage.prompt_cache_hit_tokens,
       cache_creation_input_tokens: pickCacheCreationTokens(chunk.usage),
       no_cache_tokens: chunk.usage.no_cache_tokens,
       reasoning_tokens:
