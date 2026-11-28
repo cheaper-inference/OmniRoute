@@ -82,6 +82,18 @@
       "landed": [],
       "steps": 0,
       "hang": false
+    },
+    "rerun": {
+      "ref": "omni-queue/release-v3.8.55/b76-2322e03a4bb5",
+      "requestedAt": "2026-11-28T11:07:16.137Z",
+      "afterMs": 1795864014000,
+      "runIds": [
+        46132567375
+      ],
+      "jobs": [
+        "Gate / CI",
+        "Integration Tests (1/2)"
+      ]
     }
   },
   "baseChecks": [
@@ -182,38 +194,11 @@
     "ciRuns": 81,
     "landedPrs": 77,
     "landedBatches": 27,
-    "redBatches": 16,
+    "redBatches": 17,
     "bisections": 6,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-24T17:06:03.845Z",
-      "type": "would-land",
-      "batchId": "b29",
-      "prs": [
-        21091,
-        21092,
-        21097
-      ],
-      "sha": "c944e126c57d838a8c25656643264abe4a5d0239",
-      "detail": "shadow mode: would merge-ff onto eff2a475edf1",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45444649299"
-    },
-    {
-      "at": "2026-11-24T17:42:19.281Z",
-      "type": "batch-started",
-      "batchId": "b30",
-      "prs": [
-        21146
-      ],
-      "sha": "e368cf45cbfe0342dcabef2df83cd221ea8ef055",
-      "detail": "1 PR(s) on 95b18be41592; window 5",
-      "labeledAt": {
-        "21146": "2026-11-24T17:25:11Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45451386157"
-    },
     {
       "at": "2026-11-24T18:56:22.382Z",
       "type": "checks-green",
@@ -2870,8 +2855,34 @@
         "21418": "2026-11-27T13:19:15Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46132515532"
+    },
+    {
+      "at": "2026-11-28T11:07:16.137Z",
+      "type": "checks-red",
+      "batchId": "b76",
+      "prs": [
+        21418,
+        21405,
+        21415
+      ],
+      "sha": "2322e03a4bb50483e35e7b381181395b3b9dc7c9",
+      "detail": "Gate / CI, Integration Tests (1/2)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46138333847"
+    },
+    {
+      "at": "2026-11-28T11:07:16.138Z",
+      "type": "flaky-rerun",
+      "batchId": "b76",
+      "prs": [
+        21418,
+        21405,
+        21415
+      ],
+      "sha": "2322e03a4bb50483e35e7b381181395b3b9dc7c9",
+      "detail": "re-running the failed jobs of b76 once (Gate / CI, Integration Tests (1/2)) before bisecting",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46138333847"
     }
   ],
-  "updatedAt": "2026-11-28T11:00:50.651Z",
+  "updatedAt": "2026-11-28T11:08:44.064Z",
   "batchWindow": 2
 }
