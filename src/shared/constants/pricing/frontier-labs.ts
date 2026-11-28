@@ -4,6 +4,7 @@
  */
 import {
   GPT_6_ASTRA_PRICING,
+  GPT_6_2_ASTRA_PRICING,
   GPT_6_SOL_PRICING,
   GPT_6_TERRA_PRICING,
   GEMINI_3_7_FLASH_PROMO_PRICING,
@@ -51,6 +52,9 @@ export const DEFAULT_PRICING_FRONTIER = {
       cache_creation: 0.125,
     }),
     "gpt-6.1-sol": withOpenAiLongContextTier(GPT_6_SOL_PRICING),
+    // https://developers.openai.com/api/docs/models/gpt-6.2-sol: same rates as 6.1 Sol.
+    "gpt-6.2-sol": withOpenAiLongContextTier(GPT_6_SOL_PRICING),
+    "gpt-6.2-astra": withOpenAiLongContextTier(GPT_6_2_ASTRA_PRICING),
     "gpt-6.1-terra": withOpenAiLongContextTier(GPT_6_TERRA_PRICING),
     "gpt-5.6": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),
     "gpt-5.6-sol": withOpenAiLongContextTier(GPT_5_6_SOL_PRICING),

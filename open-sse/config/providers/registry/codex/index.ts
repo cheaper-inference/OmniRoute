@@ -83,6 +83,43 @@ export const codexProvider: RegistryEntry = {
     },
     { id: "gpt-6.1-sol-medium", name: "GPT 6.1 Sol (Medium)", ...GPT_5_6_CODEX_CAPABILITIES },
     { id: "gpt-6.1-sol-low", name: "GPT 6.1 Sol (Low)", ...GPT_5_6_CODEX_CAPABILITIES },
+    // GPT-6.2 (live Codex catalog, 2026-11-21): same limits block as the GPT-6 / 6.1
+    // rows (max_context_window 872000). The backend serves these ids only to
+    // clients at minimal_client_version 0.166.0 or newer.
+    { id: "gpt-6.2-sol", name: "GPT 6.2 Sol", ...GPT_5_6_CODEX_CAPABILITIES },
+    { id: "gpt-6.2-sol-ultra", name: "GPT 6.2 Sol (Ultra)", ...GPT_5_6_CODEX_CAPABILITIES },
+    { id: "gpt-6.2-sol-max", name: "GPT 6.2 Sol (Max)", ...GPT_5_6_CODEX_CAPABILITIES },
+    {
+      id: "gpt-6.2-sol-xhigh",
+      name: "GPT 6.2 Sol (xHigh)",
+      ...GPT_5_6_CODEX_CAPABILITIES,
+      timeoutMs: 1200000,
+    },
+    {
+      id: "gpt-6.2-sol-high",
+      name: "GPT 6.2 Sol (High)",
+      ...GPT_5_6_CODEX_CAPABILITIES,
+      timeoutMs: 1200000,
+    },
+    { id: "gpt-6.2-sol-medium", name: "GPT 6.2 Sol (Medium)", ...GPT_5_6_CODEX_CAPABILITIES },
+    { id: "gpt-6.2-sol-low", name: "GPT 6.2 Sol (Low)", ...GPT_5_6_CODEX_CAPABILITIES },
+    { id: "gpt-6.2-astra", name: "GPT 6.2 Astra", ...GPT_5_6_CODEX_CAPABILITIES },
+    { id: "gpt-6.2-astra-ultra", name: "GPT 6.2 Astra (Ultra)", ...GPT_5_6_CODEX_CAPABILITIES },
+    { id: "gpt-6.2-astra-max", name: "GPT 6.2 Astra (Max)", ...GPT_5_6_CODEX_CAPABILITIES },
+    {
+      id: "gpt-6.2-astra-xhigh",
+      name: "GPT 6.2 Astra (xHigh)",
+      ...GPT_5_6_CODEX_CAPABILITIES,
+      timeoutMs: 1200000,
+    },
+    {
+      id: "gpt-6.2-astra-high",
+      name: "GPT 6.2 Astra (High)",
+      ...GPT_5_6_CODEX_CAPABILITIES,
+      timeoutMs: 1200000,
+    },
+    { id: "gpt-6.2-astra-medium", name: "GPT 6.2 Astra (Medium)", ...GPT_5_6_CODEX_CAPABILITIES },
+    { id: "gpt-6.2-astra-low", name: "GPT 6.2 Astra (Low)", ...GPT_5_6_CODEX_CAPABILITIES },
     { id: "gpt-6.1-terra", name: "GPT 6.1 Terra", ...GPT_5_6_CODEX_CAPABILITIES },
     { id: "gpt-6.1-terra-ultra", name: "GPT 6.1 Terra (Ultra)", ...GPT_5_6_CODEX_CAPABILITIES },
     { id: "gpt-6.1-terra-max", name: "GPT 6.1 Terra (Max)", ...GPT_5_6_CODEX_CAPABILITIES },

@@ -32,6 +32,23 @@ export const openaiProvider: RegistryEntry = {
       // active reasoning; static unsupportedParams would strip them always.
       supportedThinkingEfforts: ["none", "low", "medium", "high", "xhigh", "max"],
     },
+    // https://developers.openai.com/api/docs/models/gpt-6.2-sol
+    // Same API surface and price as 6.1 Sol: tools with reasoning require Responses.
+    {
+      id: "gpt-6.2-sol",
+      name: "GPT-6.2 Sol",
+      ...GPT_5_6_API_CAPABILITIES,
+      unsupportedParams: ["temperature", "top_p", "top_logprobs", "logprobs"],
+    },
+    // https://developers.openai.com/api/docs/models/gpt-6.2-astra
+    // Same API surface as GPT-6 Astra (1.05M context, low..max); tools require Responses.
+    {
+      id: "gpt-6.2-astra",
+      name: "GPT-6.2 Astra",
+      ...GPT_5_6_API_CAPABILITIES,
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+      unsupportedParams: ["temperature", "top_p", "top_logprobs", "logprobs"],
+    },
     // Astra shares the public GPT-5.6 limits; tool calling requires Responses.
     // https://developers.openai.com/api/docs/guides/latest-model
     {

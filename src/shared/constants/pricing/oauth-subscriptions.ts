@@ -21,6 +21,7 @@ import {
   GPT_5_6_LUNA_PRICING,
   GPT_5_6_SOL_PRICING,
   GPT_5_6_TERRA_PRICING,
+  GPT_6_2_ASTRA_PRICING,
 } from "./shared-tiers";
 
 // Both connection ids and the legacy alias must reach the same billing data.
@@ -122,7 +123,7 @@ const GPT_6_SOL_CODEX_PRICING = {
   reasoning: 10.0,
   cache_creation: 2.5,
 };
-// GPT-6.1 Sol Standard: 50 / 2.5 / 250 credits per MTok (input / cached / output).
+// GPT-6.1 Sol and GPT-6.2 Sol Standard: 50 / 2.5 / 250 credits per MTok (input / cached / output).
 // Keep GPT-6 Sol's 5-credit cached rate separate. Dollar equivalents below use
 // this table's existing 25 credits/USD convention, not included-plan usage.
 // https://learn.chatgpt.com/docs/pricing#token-rates (checked 2026-10-07)
@@ -229,6 +230,20 @@ export const DEFAULT_PRICING_OAUTH = {
     "gpt-6-sol-high": GPT_6_SOL_CODEX_PRICING,
     "gpt-6-sol-medium": GPT_6_SOL_CODEX_PRICING,
     "gpt-6-sol-low": GPT_6_SOL_CODEX_PRICING,
+    "gpt-6.2-sol": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.2-sol-ultra": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.2-sol-max": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.2-sol-xhigh": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.2-sol-high": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.2-sol-medium": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.2-sol-low": GPT_6_1_SOL_CODEX_PRICING,
+    "gpt-6.2-astra": GPT_6_2_ASTRA_PRICING,
+    "gpt-6.2-astra-ultra": GPT_6_2_ASTRA_PRICING,
+    "gpt-6.2-astra-max": GPT_6_2_ASTRA_PRICING,
+    "gpt-6.2-astra-xhigh": GPT_6_2_ASTRA_PRICING,
+    "gpt-6.2-astra-high": GPT_6_2_ASTRA_PRICING,
+    "gpt-6.2-astra-medium": GPT_6_2_ASTRA_PRICING,
+    "gpt-6.2-astra-low": GPT_6_2_ASTRA_PRICING,
     "gpt-6.1-sol": GPT_6_1_SOL_CODEX_PRICING,
     "gpt-6.1-sol-ultra": GPT_6_1_SOL_CODEX_PRICING,
     "gpt-6.1-sol-max": GPT_6_1_SOL_CODEX_PRICING,
