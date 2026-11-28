@@ -1,0 +1,23 @@
+-- Migration: api_key_compression_default_off
+-- Version:   20261128184159 (UTC YYYYMMDDHHMMSS; creation order, not merge order)
+-- Created by `npm run db:new-migration`. Guide: docs/ops/DATABASE_GUIDE.md
+--
+-- Rules:
+--   * Idempotent DDL: CREATE TABLE IF NOT EXISTS, CREATE INDEX IF NOT EXISTS,
+--     DROP ... IF EXISTS, INSERT OR IGNORE. The runner wraps the file in a transaction.
+--   * Do not depend on a migration with a NEWER timestamp: files apply in timestamp
+--     order (old 001-241 first, then date-named ones, then ee- ones), so a
+--     dependency on a newer file breaks fresh databases.
+--   * Regenerate the name only while the migration is not merged. Once merged,
+--     never rename or delete it (databases that applied it would run it again):
+--     create a new migration instead.
+--   * Before opening the PR run: npm run test:migrations:fresh
+--     and npm run check:migration-numbering
+
+-- Prompt compression is opt-in. The original column was added with DEFAULT 1,
+-- so keys created before migration 150 inherited enabled compression simply
+-- by predating the field. The legacy DEFAULT 1 remains baked into the
+-- physical schema, but the application now treats a missing value as disabled
+-- and only honors persisted 1 values. No insert may rely on the legacy
+-- schema default for this security-sensitive opt-in.
+UPDATE api_keys SET compression_enabled = 0;

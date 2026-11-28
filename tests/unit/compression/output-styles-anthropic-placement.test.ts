@@ -159,6 +159,7 @@ for (const [shape, system] of [
         body: structuredClone(body),
         modelInfo: { provider: "claude", model: "claude-opus-5", extendedContext: false },
         credentials: { apiKey: "test-claude-key", providerSpecificData: {} },
+        apiKeyInfo: { compressionEnabled: true },
         log: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} },
         clientRawRequest: { endpoint: "/v1/messages", body: structuredClone(body), headers },
         connectionId: null,

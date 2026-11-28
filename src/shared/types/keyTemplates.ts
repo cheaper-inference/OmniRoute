@@ -339,7 +339,7 @@ export function createDefaultKeyTemplatePolicy(): KeyTemplatePolicy {
       weeklyUsageLimitUsd: null,
       fiveHourUsageLimitUsd: null,
       chaosModeEnabled: false,
-      compressionEnabled: true,
+      compressionEnabled: false,
       allowAutoCombos: true,
       allowCcDiscoveryAliases: true,
       catalogScope: "all",

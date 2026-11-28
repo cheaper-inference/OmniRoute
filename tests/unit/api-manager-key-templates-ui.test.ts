@@ -280,7 +280,7 @@ test("related configurations (groups, domainBudget, quotaLimits, tokenLimits, au
       dailyUsageLimitUsd: 15,
       weeklyUsageLimitUsd: 75,
       chaosModeEnabled: true,
-      compressionEnabled: true,
+      compressionEnabled: false,
       allowAutoCombos: true,
       allowCcDiscoveryAliases: true,
       catalogScope: "combos",

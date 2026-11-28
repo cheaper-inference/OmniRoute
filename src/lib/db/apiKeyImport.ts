@@ -81,8 +81,8 @@ export function importApiKey(input: ImportKeyInput, machineId: string) {
       model_access_mode, allowed_models, allowed_combos, allowed_connections,
       preferred_connections, expires_at,
       no_log, allow_usage_command, usage_limit_enabled, daily_usage_limit_usd,
-      weekly_usage_limit_usd, chaos_mode_enabled
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      weekly_usage_limit_usd, chaos_mode_enabled, compression_enabled
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       id,
       data.name,
@@ -103,7 +103,8 @@ export function importApiKey(input: ImportKeyInput, machineId: string) {
       data.usageLimitEnabled === true ? 1 : 0,
       parseNullablePositiveNumber(data.dailyUsageLimitUsd),
       parseNullablePositiveNumber(data.weeklyUsageLimitUsd),
-      data.chaosModeEnabled === true ? 1 : 0
+      data.chaosModeEnabled === true ? 1 : 0,
+      0
     );
     created = true;
   });

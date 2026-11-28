@@ -1,0 +1,1 @@
+- **fix(api):** API-key prompt compression now defaults to off everywhere — existing legacy-key ingestion, key templates, editor forms, and the runtime gate require an explicit stored opt-in, while persisted opt-ins stay intact

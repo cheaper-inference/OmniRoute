@@ -67,6 +67,7 @@ export async function createChatPipelineHarness(prefix) {
   type SeedApiKeyOptions = {
     name?: string;
     noLog?: boolean;
+    compressionEnabled?: boolean;
     allowedConnections?: string[];
     allowedCombos?: string[];
     allowedModels?: string[];
@@ -74,6 +75,7 @@ export async function createChatPipelineHarness(prefix) {
 
   type ApiKeyPermissionUpdates = {
     noLog?: boolean;
+    compressionEnabled?: boolean;
     allowedConnections?: string[];
     allowedCombos?: string[];
     allowedModels?: string[];
@@ -331,6 +333,7 @@ export async function createChatPipelineHarness(prefix) {
   async function seedApiKey({
     name = `${prefix}-key`,
     noLog = false,
+    compressionEnabled,
     allowedConnections,
     allowedCombos,
     allowedModels,
@@ -338,6 +341,7 @@ export async function createChatPipelineHarness(prefix) {
     const key = await apiKeysDb.createApiKey(name, "machine-test");
     const updates: ApiKeyPermissionUpdates = {};
     if (noLog) updates.noLog = true;
+    if (compressionEnabled !== undefined) updates.compressionEnabled = compressionEnabled;
     if (allowedConnections) updates.allowedConnections = allowedConnections;
     if (allowedCombos) updates.allowedCombos = allowedCombos;
     if (allowedModels) updates.allowedModels = allowedModels;
