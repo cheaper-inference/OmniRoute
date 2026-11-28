@@ -4,6 +4,7 @@ import { FORMATS } from "../formats.ts";
 import { initThinkState, applyThinkTag, flushThinkBuffer } from "../../utils/thinkTagParser.ts";
 import { storeClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
 import { chargeRetained } from "../../utils/streamRetainedBudget.ts";
+import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
 
 type OpenAIUsage = {
   prompt_tokens: number;
@@ -358,6 +359,17 @@ export function claudeToOpenAIResponse(chunk, state) {
             results.push(createChunk(state, { content: "</think>" }));
           }
           state.pendingThinkClose = false;
+        }
+        // Opt-in CLAUDE_REFUSAL_EXPLANATION_ENABLED (default off): a refusal carries the
+        // safeguard explanation in stop_details; emit it as one content chunk before the finish.
+        const refusalExplanation = chunk.delta.stop_details?.explanation;
+        if (
+          chunk.delta.stop_reason === "refusal" &&
+          typeof refusalExplanation === "string" &&
+          refusalExplanation &&
+          isRegisteredFeatureFlagEnabled("CLAUDE_REFUSAL_EXPLANATION_ENABLED")
+        ) {
+          results.push(createChunk(state, { content: refusalExplanation }));
         }
         state.finishReason = convertStopReason(chunk.delta.stop_reason);
         const finalChunk: {

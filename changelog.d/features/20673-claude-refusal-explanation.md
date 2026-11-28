@@ -1,0 +1,1 @@
+- **feat(providers):** Claude refusals can return the safeguard explanation as assistant text, behind the default-off `CLAUDE_REFUSAL_EXPLANATION_ENABLED` environment flag, for streaming and non-streaming responses. ([#20673](https://github.com/cheaper-inference/OmniRoute/pull/20673))
