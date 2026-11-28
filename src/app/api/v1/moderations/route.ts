@@ -14,6 +14,7 @@ import {
   resolveKeyConnectionScope,
 } from "@/sse/services/keyConnectionScope";
 import { recordUnpricedSpecialtyRequest } from "@/lib/usage/specialtyRequestAccounting";
+import { toCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
 import { v1ModerationSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import {
@@ -92,9 +93,7 @@ async function postHandler(request, context) {
       provider: resolvedProvider,
       model: providerModel ?? model,
       startTime,
-      apiKeyId: policy.apiKeyInfo?.id,
-      apiKeyName: policy.apiKeyInfo?.name,
-      connectionId: credentials.connectionId,
+      ...toCallLogApiKeyContext(policy.apiKeyInfo, credentials),
     });
   }
   return response;

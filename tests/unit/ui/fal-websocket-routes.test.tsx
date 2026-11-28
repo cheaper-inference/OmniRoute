@@ -96,6 +96,12 @@ afterAll(async () => {
 for (const transport of ["realtime", "http-websocket"]) {
   test(`${transport} authorizes and accounts every initial/later invocation, rejects invalid input and closes`, async () => {
     const record = vi.spyOn(accounting, "recordFalDispatch");
+    const usageForKey = core
+      .getDbInstance()
+      .prepare(
+        "SELECT api_key_name, connection_id FROM usage_history WHERE api_key_id = ? AND endpoint = '/v1/fal/run' ORDER BY id"
+      );
+    const previousUsageCount = usageForKey.all(key.id).length;
     peer.sends.mockClear();
     peer.close.mockClear();
     const input = {
@@ -129,6 +135,10 @@ for (const transport of ["realtime", "http-websocket"]) {
     expect(peer.sends).toHaveBeenCalledTimes(2);
     expect(record).toHaveBeenCalledTimes(2);
     expect(record.mock.calls[0][0].id).not.toBe(record.mock.calls[1][0].id);
+    expect(usageForKey.all(key.id).slice(previousUsageCount)).toEqual([
+      { api_key_name: "fal-sockets", connection_id: connectionId },
+      { api_key_name: "fal-sockets", connection_id: connectionId },
+    ]);
     for (const invalid of [
       { ...input, unsupported: true },
       { ...input, prompt: false },

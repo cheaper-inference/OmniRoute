@@ -410,7 +410,7 @@ export async function handleValidatedRerankRequestBody(
           model: localModel,
           apiKeyId: meta.apiKeyId,
           apiKeyName: meta.apiKeyName,
-          connectionId: credentials.connectionId,
+          connectionId: (credentials as { connectionId?: string } | null)?.connectionId,
           startTime,
         });
         saveCallLog({

@@ -76,6 +76,16 @@ function deliveredImageCount(payload: unknown): number | null {
   ).length;
 }
 
+function shouldRecordImageUsage(
+  usageWritten: boolean,
+  apiKeyId: string | null,
+  bill: ImageBill
+): boolean {
+  return (
+    !usageWritten && (Boolean(apiKeyId) || bill.costUsd !== null || bill.pricingFailed === true)
+  );
+}
+
 export async function runImageRequestWithAccounting<T>(
   accounting: ImageRequestAccounting,
   attempt: () => Promise<T>
@@ -102,7 +112,7 @@ export async function runImageRequestWithAccounting<T>(
       requestId: generateRequestId(),
     };
     const attributed = { ...identity, model: localModel, requestId: bill.requestId };
-    if (!mediaWrites.usage && (apiKeyId || bill.costUsd !== null || bill.pricingFailed)) {
+    if (shouldRecordImageUsage(mediaWrites.usage, apiKeyId, bill)) {
       await recordMediaRequest(attributed, bill, {
         enforceUnpricedBudget: bill.pricingFailed === true,
       });

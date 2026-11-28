@@ -5,6 +5,7 @@ import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
 import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { recordUnpricedSpecialtyRequest } from "@/lib/usage/specialtyRequestAccounting";
+import { toCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
 import {
   isKeyScopeBlockedCredentials,
   keyScopeBlockedResponse,
@@ -127,9 +128,7 @@ export async function POST(request: Request) {
       endpoint: "/v1/web/map",
       provider: "firecrawl",
       model: "map",
-      apiKeyId: policy.apiKeyInfo?.id,
-      apiKeyName: policy.apiKeyInfo?.name,
-      connectionId: credentials.connectionId,
+      ...toCallLogApiKeyContext(policy.apiKeyInfo, credentials),
       startTime,
     });
     return Response.json(payload, { headers: CORS_HEADERS });

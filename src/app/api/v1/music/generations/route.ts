@@ -25,7 +25,7 @@ import {
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { getComboByName } from "@/lib/db/combos";
 import { runModelEndpointCombo } from "@/lib/combos/modelEndpointCombo";
-import { trackMediaWrites } from "@/lib/usage/callLogApiKeyContext";
+import { toCallLogApiKeyContext, trackMediaWrites } from "@/lib/usage/callLogApiKeyContext";
 import { recordSpecialtyCallLog } from "@/lib/usage/specialtyRequestAccounting";
 import type { ApiKeyPolicyResult } from "@/shared/utils/apiKeyPolicy";
 
@@ -49,10 +49,13 @@ export async function GET(request?: Request) {
   );
 }
 
+type MusicBody = Record<string, unknown> & { model: string; duration?: unknown };
+type MusicCredentials = Parameters<typeof handleMusicGeneration>[0]["credentials"];
+
 /** Dispatch one resolved combo target through the provider's music executor. */
 async function dispatchMusicModel(
   request: Request,
-  body: Record<string, unknown> & { model: string; duration?: unknown },
+  body: MusicBody,
   allowedConnections: string[] | null,
   apiKeyInfo: ApiKeyPolicyResult["apiKeyInfo"],
   startTime: number
@@ -90,12 +93,19 @@ async function dispatchMusicModel(
     credentials = local.credentials;
   }
 
+  return generateMusicForConnection(request, body, provider, credentials, apiKeyInfo, startTime);
+}
+
+async function generateMusicForConnection(
+  request: Request,
+  body: MusicBody,
+  provider: string,
+  credentials: MusicCredentials,
+  apiKeyInfo: ApiKeyPolicyResult["apiKeyInfo"],
+  startTime: number
+) {
   const endpoint = "/v1/music/generations";
-  const identity = {
-    apiKeyId: apiKeyInfo?.id ?? null,
-    apiKeyName: apiKeyInfo?.name ?? null,
-    connectionId: credentials?.connectionId ?? null,
-  };
+  const identity = toCallLogApiKeyContext(apiKeyInfo, credentials);
   const { result, mediaWrites } = await trackMediaWrites(identity, endpoint, () =>
     handleMusicGeneration({
       prepareFalInput: getFalCompatibilityPreparer(),
@@ -162,7 +172,7 @@ async function postHandler(request, context) {
         dispatch: (routedBody, allowedConnections) =>
           dispatchMusicModel(
             request,
-            routedBody as Record<string, unknown> & { model: string; duration?: unknown },
+            routedBody as MusicBody,
             allowedConnections,
             scope.policy.apiKeyInfo,
             startTime
