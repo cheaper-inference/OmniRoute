@@ -1,6 +1,7 @@
 import {
   isForbiddenCustomHeaderName,
   isForbiddenUpstreamHeaderName,
+  isValidHttpHeaderName,
 } from "@/shared/constants/upstreamHeaders";
 
 export { isForbiddenUpstreamHeaderName };
@@ -51,6 +52,7 @@ export function applyCustomHeaders(
   if (!customHeaders) return;
   for (const [name, value] of Object.entries(customHeaders)) {
     if (typeof value !== "string" || isForbiddenCustomHeaderName(name)) continue;
+    if (!isValidHttpHeaderName(name)) continue;
     if (/[\r\n\0]/.test(name) || /[\r\n]/.test(value)) continue;
     assignHeaderCaseInsensitive(headers, name, value);
   }

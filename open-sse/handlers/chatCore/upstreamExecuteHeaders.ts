@@ -11,8 +11,14 @@
 
 import { getModelUpstreamExtraHeaders } from "@/lib/db/models";
 import { resolveModelAlias } from "../../services/modelDeprecation.ts";
-import { CPA_FORCE_FAST_MODE_HEADER, shouldRequestClaudeFastMode } from "@/lib/providers/claudeFastMode";
-import { isForbiddenCustomHeaderName } from "@/shared/constants/upstreamHeaders";
+import {
+  CPA_FORCE_FAST_MODE_HEADER,
+  shouldRequestClaudeFastMode,
+} from "@/lib/providers/claudeFastMode";
+import {
+  isForbiddenCustomHeaderName,
+  isValidHttpHeaderName,
+} from "@/shared/constants/upstreamHeaders";
 import { mergeUpstreamExtraHeaders } from "../../executors/base/headers.ts";
 import { resolveConnectionUpstreamOverrides } from "./connectionUpstreamOverrides.ts";
 import { FORMATS } from "../../translator/formats.ts";
@@ -69,9 +75,8 @@ export function buildUpstreamHeadersForExecute(opts: {
       const keyLower = key.trim().toLowerCase();
       if (!keyLower) continue;
       if (isForbiddenCustomHeaderName(key)) continue;
-      const existingKey = Object.keys(upstreamHeaders).find(
-        (k) => k.toLowerCase() === keyLower
-      );
+      if (!isValidHttpHeaderName(key)) continue;
+      const existingKey = Object.keys(upstreamHeaders).find((k) => k.toLowerCase() === keyLower);
       if (!existingKey) {
         upstreamHeaders[key] = value;
       }

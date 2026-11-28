@@ -7,7 +7,10 @@ import {
   type ModelCompatProtocolKey,
   type ThinkingReplayMode,
 } from "@/shared/constants/modelCompat";
-import { isForbiddenUpstreamHeaderName } from "@/shared/constants/upstreamHeaders";
+import {
+  isForbiddenUpstreamHeaderName,
+  isValidHttpHeaderName,
+} from "@/shared/constants/upstreamHeaders";
 import { isHiddenForModality } from "@/shared/utils/modelVisibility";
 import { getKeyValue } from "./shared";
 import { finishModelCatalogWriteWithBackup } from "./modelCatalogWriteSignals";
@@ -41,6 +44,7 @@ function isValidUpstreamHeaderName(k: string): boolean {
   if (/[\r\n\0]/.test(k)) return false;
   if (/\s/.test(k)) return false;
   if (k.includes(":")) return false;
+  if (!isValidHttpHeaderName(k)) return false;
   return true;
 }
 
