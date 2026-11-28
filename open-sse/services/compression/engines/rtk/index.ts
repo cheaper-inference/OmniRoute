@@ -117,6 +117,10 @@ function mergeRtkConfig(base?: Partial<RtkConfig>, override?: Record<string, unk
     disabledFilters: Array.isArray(merged.disabledFilters)
       ? merged.disabledFilters.filter((id): id is string => typeof id === "string")
       : [],
+    // An allowlist read as `config.renderers.includes(...)`: anything but an array of names is empty.
+    renderers: Array.isArray(merged.renderers)
+      ? merged.renderers.filter((id): id is string => typeof id === "string")
+      : [],
     maxLinesPerResult:
       typeof merged.maxLinesPerResult === "number" && Number.isFinite(merged.maxLinesPerResult)
         ? Math.max(0, Math.floor(merged.maxLinesPerResult))
@@ -824,7 +828,11 @@ export {
   detectCommandType,
 } from "./commandDetector.ts";
 export { effectiveMaxLines } from "./intensity.ts";
-export { RTK_STRUCTURAL_RENDERERS_FLAG, resolveRtkStructuralFlag } from "./structuralFlag.ts";
+export {
+  RTK_STRUCTURAL_RENDERERS_FLAG,
+  resolveRtkStructuralFlag,
+  rtkRenderersMayRun,
+} from "./structuralFlag.ts";
 export { runRtkFilterTests } from "./verify.ts";
 export {
   maybePersistRtkRawOutput,

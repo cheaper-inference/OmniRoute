@@ -4,6 +4,7 @@ import {
   detectCommandType,
   processRtkText,
   resolveRtkStructuralFlag,
+  rtkRenderersMayRun,
 } from "@omniroute/open-sse/services/compression/engines/rtk";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -34,13 +35,15 @@ export async function POST(request: Request) {
   }
 
   const detection = detectCommandType(validation.data.text, validation.data.command);
+  // The flag lookup is skipped while the structural gate is closed for this preview config.
+  const structuralMayRun = rtkRenderersMayRun(validation.data.config, [{ engine: "rtk" }]);
   return NextResponse.json({
     detection,
     ...processRtkText(validation.data.text, {
       command: validation.data.command,
       config: validation.data.config,
       // Same dispatch as a real tool result: the preview must show what the pipeline would do.
-      rtkStructuralRenderersEnabled: resolveRtkStructuralFlag(),
+      rtkStructuralRenderersEnabled: structuralMayRun && resolveRtkStructuralFlag(),
       toolResult: true,
     }),
   });
