@@ -4,32 +4,26 @@
  * Uses the existing `key_value` table under a dedicated namespace (no migration
  * needed — same pattern as settings.ts). The cursor lets the bridge resume the
  * hub SSE from where it stopped; the hub replay covers the gap.
+ *
+ * Persistence lives in `repositories/sqliteConductorCursorRepository.ts`. These
+ * exports stay synchronous (SQLite-only legacy access) because the conductor
+ * boot code passes them to the bridge as synchronous cursor callbacks.
  */
 
-import { getDbInstance } from "./core";
+import type { ConductorCursorRepository } from "@/domain/persistence/localToolStateRepositories";
+import { localToolStateRepositories } from "./repositories/localToolStateRepositories";
 
-const NAMESPACE = "conductor";
-const CURSOR_KEY = "last_event_id";
+const conductorCursor = localToolStateRepositories.legacySync.conductorCursor;
+
+/** Async persistence contract for the conductor SSE cursor. */
+export function getConductorCursorRepository(): ConductorCursorRepository {
+  return localToolStateRepositories.conductorCursor;
+}
 
 export function getConductorCursor(): string | null {
-  const db = getDbInstance();
-  const row = db
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(NAMESPACE, CURSOR_KEY) as { value: string } | undefined;
-  if (!row) return null;
-  try {
-    const parsed = JSON.parse(row.value);
-    return typeof parsed === "string" ? parsed : null;
-  } catch {
-    return null;
-  }
+  return conductorCursor.get();
 }
 
 export function setConductorCursor(value: string): void {
-  const db = getDbInstance();
-  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
-    NAMESPACE,
-    CURSOR_KEY,
-    JSON.stringify(value)
-  );
+  conductorCursor.set(value);
 }

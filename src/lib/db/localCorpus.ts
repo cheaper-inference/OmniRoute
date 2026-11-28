@@ -1,40 +1,37 @@
-import { getDbInstance } from "./core";
+/**
+ * Local corpus root persistence (`key_value`, namespace `local_corpus`).
+ *
+ * Persistence lives in `repositories/sqliteLocalCorpusRootRepository.ts`. These
+ * exports stay synchronous (SQLite-only legacy access) because the
+ * local-corpus settings route and the configured-index loader call them
+ * synchronously.
+ */
 
-const LOCAL_CORPUS_NAMESPACE = "local_corpus";
-const LOCAL_CORPUS_ROOT_KEY = "root_path";
-
-type KeyValueRow = {
-  value?: string;
-};
+import type { LocalCorpusRootRepository } from "@/domain/persistence/localToolStateRepositories";
+import { localToolStateRepositories } from "./repositories/localToolStateRepositories";
 
 export interface LocalCorpusConfig {
   rootPath: string | null;
   configured: boolean;
 }
 
+const localCorpusRoot = localToolStateRepositories.legacySync.localCorpusRoot;
+
+/** Async persistence contract for the local corpus root. */
+export function getLocalCorpusRootRepository(): LocalCorpusRootRepository {
+  return localToolStateRepositories.localCorpusRoot;
+}
+
 export function getLocalCorpusRoot(): string | null {
-  try {
-    const row = getDbInstance()
-      .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-      .get(LOCAL_CORPUS_NAMESPACE, LOCAL_CORPUS_ROOT_KEY) as KeyValueRow | undefined;
-    if (typeof row?.value !== "string") return null;
-    const parsed = JSON.parse(row.value);
-    return typeof parsed === "string" && parsed.trim() ? parsed : null;
-  } catch {
-    return null;
-  }
+  return localCorpusRoot.get();
 }
 
 export function setLocalCorpusRoot(rootPath: string): void {
-  getDbInstance()
-    .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
-    .run(LOCAL_CORPUS_NAMESPACE, LOCAL_CORPUS_ROOT_KEY, JSON.stringify(rootPath));
+  localCorpusRoot.set(rootPath);
 }
 
 export function clearLocalCorpusRoot(): void {
-  getDbInstance()
-    .prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?")
-    .run(LOCAL_CORPUS_NAMESPACE, LOCAL_CORPUS_ROOT_KEY);
+  localCorpusRoot.clear();
 }
 
 export function getLocalCorpusConfig(): LocalCorpusConfig {
