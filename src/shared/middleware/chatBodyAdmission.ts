@@ -32,10 +32,15 @@ import {
   bodyExceedsBudgetResponse,
   chatAdmissionRejectionResponse,
   contentEncodingRejectionResponse,
+  duplicateModelFieldResponse,
   resourcePressureRejectionResponse,
   structuralRejectionResponse,
 } from "./chatAdmissionResponses";
 import { estimateStructureTokens } from "./chatAdmissionStructureEstimate";
+import {
+  hasDuplicateModelMember,
+  isRejectDuplicateModelMemberEnabled,
+} from "./duplicateModelMember";
 import {
   composeAdmissionLease,
   IngestByteAdmissionController,
@@ -1138,6 +1143,11 @@ export async function admitChatRequest(
     if (!("body" in decodedBypass)) {
       return { admit: false, response: chatAdmissionRejectionResponse(413, hardMaxBytes) };
     }
+    // Opt-in (OMNIROUTE_REJECT_DUPLICATE_MODEL_MEMBER): the self-loop bypass skips the lease,
+    // not the body check. No lease is held here, so there is nothing to release.
+    if (isRejectDuplicateModelMemberEnabled() && hasDuplicateModelMember(decodedBypass.body)) {
+      return { admit: false, response: duplicateModelFieldResponse() };
+    }
     return { admit: true, request: rebuildRequest(request, decodedBypass.body), lease: NULL_LEASE };
   }
 
@@ -1293,6 +1303,12 @@ export async function admitChatRequest(
       return { admit: false, response: bodyExceedsBudgetResponse(controller.maxInflightBytes) };
     }
     return { admit: false, response: busyResponse() };
+  }
+  // Opt-in (OMNIROUTE_REJECT_DUPLICATE_MODEL_MEMBER); off by default. Runs after the guard above,
+  // because a budget-exceeded decode has no body to scan. releaseAll() also frees extra leases.
+  if (isRejectDuplicateModelMemberEnabled() && hasDuplicateModelMember(decoded.body)) {
+    releaseAll();
+    return { admit: false, response: duplicateModelFieldResponse() };
   }
   // A decoded body is charged its decoded size, whether it only crosses the large-body line once
   // expanded or was already charged its smaller wire size.

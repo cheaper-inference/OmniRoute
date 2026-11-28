@@ -7,6 +7,7 @@ const REASONS = new Set([
   "no_terminal",
   "parse_fail",
   "content_is_upstream_error",
+  "required_tool_not_called",
 ]);
 const record = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
