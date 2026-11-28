@@ -101,16 +101,16 @@
 //     status on its commits into `failure` (withdrawAbandoned; only statuses created by the App
 //     count, as for the release ruleset). That save also counts the attempt
 //     (inFlight.landAttempts, the candidate's: kept at either stage, started again only by a new
-//     candidate and by an operator's pause or resume): after LANDING_ATTEMPTS_LIMIT attempts
-//     without a verdict a live tick does not bless the batch again and the queue pauses with
-//     reason "error" (shadow never checks it). A batch HELD at
+//     candidate, by an explicit rejection or by an operator's pause or resume). After
+//     LANDING_ATTEMPTS_LIMIT attempts without a verdict, merge-ff begins a bounded retry window
+//     before parking the batch. Squash-api pauses with reason "error". A batch HELD at
 //     the landing stage (release-freeze, checks back to pending, manual pause) goes back to stage
 //     "testing" (leaveLandingStage), so the same tick withdraws its status and later held ticks
 //     read nothing; it is blessed again only right before it lands. A paused base that does not
 //     process its batch sends it back to "testing" too (a paused base holds no blessed batch). A
 //     tick that throws withdraws the status of a batch it loaded at the landing stage before
 //     rethrowing (settleFailure), unless it landed it or made its own landing attempt (that
-//     attempt withdrew its own blessing and keeps its count). A `failure` GitHub refuses to write
+//     attempt handles its own blessing and keeps its count). A `failure` GitHub refuses to write
 //     is kept in state.landWithdrawals and retried by the next ticks (retryWithdrawals); when that
 //     list is full (LAND_WITHDRAWALS_LIMIT) nothing is dropped: the refusal goes to
 //     state.landWithdrawalsOverflow, retried alike, and a base that is not paused (or paused as
@@ -281,12 +281,15 @@ export const STATE_HEARTBEAT_MINUTES = 60;
 
 /**
  * How many ticks in a row may bless and land the same batch and end without a verdict (the
- * landing threw, or the tick died after the blessing) before the queue pauses. Without a bound,
+ * landing threw, or the tick died after the blessing) before the merge-ff retry window (or a squash-api pause). Without a bound,
  * such an error repeats on every tick, forever: a success/failure land status pair per commit and
  * one `error` event each time, and nobody is told the queue is stuck. Counted in
  * `inFlight.landAttempts` (markLanding), saved before each blessing.
  */
 export const LANDING_ATTEMPTS_LIMIT = 3;
+
+/** Number of ticks in a merge-ff landing retry window, including the first explicit refusal. */
+export const LANDING_RETRY_TICKS = 3;
 
 /** Time for the newly written land status to become visible to the release ruleset. */
 export const LAND_STATUS_RETRY_DELAY_MS = 5000;
@@ -373,6 +376,25 @@ function isAuthFailureText(text) {
   return !RATE_LIMIT_RE.test(text) && AUTH_FAILURE_RE.test(text);
 }
 
+/** Delay before the first probe, then after consecutive failures, capped at one hour. */
+export const AUTO_PROBE_BACKOFF_MINUTES = Object.freeze([10, 20, 40, 60]);
+
+function scheduleProbe(probe, attempts, now) {
+  const minutes =
+    AUTO_PROBE_BACKOFF_MINUTES[Math.min(attempts, AUTO_PROBE_BACKOFF_MINUTES.length) - 1];
+  return {
+    probe,
+    attempts,
+    nextProbeAt: new Date(Date.parse(now) + minutes * 60_000).toISOString(),
+  };
+}
+
+function automaticPause(state, paused, probe) {
+  const previous = state.autoPauseEpisodes?.[paused.retryCause ?? probe];
+  const auto = scheduleProbe(probe, (previous?.attempts ?? 0) + 1, paused.since);
+  return { ...paused, since: previous?.since ?? paused.since, auto };
+}
+
 const DEFAULT_MODULES = Object.freeze({
   eligibility: eligibilityModule,
   checks: checksModule,
@@ -425,7 +447,7 @@ function couldNotRun(check, error) {
 }
 
 /** Eligibility reasons caused by the batch itself: never a reason to drop one of its PRs. */
-const SELF_REASONS = new Set(["in-flight", "shadow-processed"]);
+const SELF_REASONS = new Set(["in-flight", "shadow-processed", "parked"]);
 
 const head12 = (sha) => String(sha ?? "").slice(0, 12);
 const prNumbers = (prs) => (prs ?? []).map((pr) => pr.n);
@@ -546,6 +568,18 @@ export function operatorReason(reason) {
     .slice(0, OPERATOR_REASON_CHARS);
 }
 
+/** Normalize a GitHub rejection without the candidate-specific push output. */
+function landingRejectionReason(detail) {
+  const text = String(detail ?? "")
+    .replace(/\b[0-9a-f]{7,40}\b/gi, "<sha>")
+    .replace(/https?:\/\/[^\s|]+/gi, "<url>");
+  if (!text.includes("GH013")) return operatorReason(text) || "push rejected";
+  const rules = text
+    .split(/\n| \| /)
+    .flatMap((line) => line.match(/^(?:remote:\s*)?\s*-\s+(.+)$/)?.[1]?.trim() ?? []);
+  return operatorReason([...new Set(rules)].sort().join(" / ")) || "GH013";
+}
+
 function stripUndefined(object) {
   return Object.fromEntries(Object.entries(object).filter(([, v]) => v !== undefined));
 }
@@ -649,6 +683,7 @@ class Tick {
     this.landing = null;
     /** batchId of the batch this tick landed (its land status stays). */
     this.landedBatch = null;
+    this.discardedBatch = false;
     /** batchId of the batch this tick stored at the landing stage itself (markLanding). */
     this.attemptedBatch = null;
     /** The landing record (this.landing) withdrawAbandoned already handled this tick. */
@@ -908,6 +943,7 @@ class Tick {
     // After the retry pass: a resume dispatched once GitHub accepts the App's writes again
     // succeeds when this very tick drains the overflow (resumeRefusal).
     this.applyResume();
+    await this.maybeProbePause();
     await this.leaveLandingInShadow();
     // The next segment of a bisection whose segment recordEarlierLanding found landed: composed
     // only now that the action is applied, and never under a pause.
@@ -918,6 +954,10 @@ class Tick {
     const f = this.s.inFlight;
     if (f && (!this.s.paused || (this.repairOnlyPause() && f.lane === "base-repair"))) {
       await this.processInFlight();
+      // A batch that left flight for any other outcome breaks both runs of discards.
+      if (!this.discardedBatch && this.s.inFlight?.batchId !== f.batchId) {
+        delete this.s.batchDiscard;
+      }
     } else if (f) {
       // A paused base never keeps a batch at the landing stage (a base-repair batch blessed under
       // a base-red pause whose lane no longer runs, say): back to testing, its status withdrawn
@@ -1100,10 +1140,16 @@ class Tick {
     const cleared = keptNowhereCommits(this.s.paused.detail);
     this.s.paused = null;
     delete this.s.landingsWithoutVerdict;
+    delete this.s.batchDiscard;
+    delete this.s.autoPauseEpisodes;
     // The operator's fresh start: the landing count of the batch in flight starts again.
     if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight, { resetCount: true });
     this.event("resumed", {
-      detail: resumedDetail(previous, cleared, this.config.landing.statusContext),
+      detail: resumedDetail(
+        `manual resume (was ${previous})`,
+        cleared,
+        this.config.landing.statusContext
+      ),
     });
     this.note(`resumed (was ${previous})`);
   }
@@ -1147,14 +1193,80 @@ class Tick {
     }
   }
 
+  async maybeProbePause() {
+    const paused = this.s.paused;
+    const auto = paused?.auto;
+    // A manual resume has already had its chance. Keep a refused or stale action separate from
+    // a scheduled tick so the CLI can report the result of the action it dispatched.
+    if (!auto || this.action === "resume") return;
+    const now = this.now();
+    if (Date.parse(now) < Date.parse(auto.nextProbeAt)) {
+      this.note(`auto: ${auto.probe} waiting until ${auto.nextProbeAt}`);
+      return;
+    }
+    let passed = false;
+    try {
+      if (!resumeBlockers(this.s)) passed = await this.probePause(paused);
+    } catch {
+      // An unavailable read is not evidence of recovery. Keep the pause and try again later.
+      this.note(`auto: ${auto.probe} could not complete its read`);
+    }
+    if (!passed) {
+      paused.auto = scheduleProbe(auto.probe, auto.attempts + 1, now);
+      this.note(`auto: ${auto.probe} still blocked; next check ${paused.auto.nextProbeAt}`);
+      return;
+    }
+
+    this.s.autoPauseEpisodes ??= {};
+    this.s.autoPauseEpisodes[paused.retryCause ?? auto.probe] = {
+      since: paused.since,
+      attempts: auto.attempts,
+    };
+    this.s.paused = null;
+    const detail = `auto: ${auto.probe} (was ${paused.reason})`;
+    this.event("resumed", {
+      detail: resumedDetail(
+        detail,
+        keptNowhereCommits(paused.detail),
+        this.config.landing.statusContext
+      ),
+    });
+    this.note(detail);
+  }
+
+  async probePause(paused) {
+    switch (paused.auto.probe) {
+      case "retry":
+        return true;
+      case "land-credential":
+        if (!this.landGh) return false;
+        await this.landGh.getBranchSha(this.base);
+        return true;
+      case "land-token-present":
+        return this.hasLandingCredential();
+      case "queue-refs-protected": {
+        // Pauses made by a landing remember the exact branch name. The rules endpoint can
+        // evaluate a candidate name after the discarded branch has been deleted.
+        const ref = paused.candidateRef ?? candidateRef(this.base, "b0", "0".repeat(40));
+        return (await this.queueRefsProtection(ref)).ok;
+      }
+      case "withdrawals-empty":
+        return storedWithdrawalCount(this.s) === 0;
+    }
+  }
+
+  hasLandingCredential() {
+    return !this.ownerLands || Boolean(this.deps.landGitFor && this.landGh);
+  }
+
   /**
    * A base-red pause loaded together with entries in state.landWithdrawalsOverflow (the code never
    * writes both: a full list replaces a base-red pause, recordFullWithdrawals; a hand-edited state
    * can hold them, and the runbook's last resort is a hand edit) becomes the full-list pause, as
    * when the list fills under a base-red pause: reason `error`, one `error` event, one comment on
    * the base-red issue (tellBaseRedReplaced), a batch at the landing stage back to testing (its
-   * status withdrawn by this tick). A base-red pause lifts and blesses its repair lane by itself;
-   * the full-list pause does neither.
+   * status withdrawn by this tick). The full-list pause waits for both lists to empty and
+   * blocks the base-repair lane while it waits.
    */
   async replaceBaseRedForOverflow() {
     const was = this.s.paused;
@@ -1512,14 +1624,19 @@ class Tick {
    */
   leaveLandingStage(f, { resetCount = false } = {}) {
     if (f.stage !== "landing") {
-      if (!resetCount || f.landAttempts === undefined || this.s.inFlight !== f) return;
+      if (!resetCount || this.s.inFlight !== f) return;
+      if (f.landAttempts === undefined && f.landingRetryTicks === undefined) return;
       const rest = { ...f };
       delete rest.landAttempts;
+      delete rest.landingRetryTicks;
       this.s.inFlight = rest;
       return this.note(`${f.batchId}: its landing attempts count starts again`);
     }
     const rest = { ...f, stage: "testing", landAttempts: storedLandAttempts(f) };
-    if (resetCount) delete rest.landAttempts;
+    if (resetCount) {
+      delete rest.landAttempts;
+      delete rest.landingRetryTicks;
+    }
     this.s.inFlight = rest;
     // A dry-run withdraws nothing (withdrawAbandoned returns early): say what would happen.
     const goes = this.dryRun ? "would go" : "goes";
@@ -1671,20 +1788,24 @@ class Tick {
         trees: true,
       })
     );
-    // A mismatch is a verdict: it pauses in shadow too.
-    if (composition && !composition.ok) return this.compositionMismatch(f, composition.detail);
+    // A mismatch is a verdict, including in shadow mode.
+    if (composition && !composition.ok)
+      return this.compositionMismatch(f, composition.detail, valid);
     // Second lock: the record and the candidate are only as trustworthy as the refs holding them.
     // Live blesses nothing while GitHub does not enforce the queue-refs ruleset on both; shadow
     // only says what live would do. Before the attempts limit: an unprotected ref stops the
     // landing whatever the count. A failed read throws in live (the next tick reads again).
-    const refs = (await orUnrun("queue refs check", () => this.queueRefsProtection(f))) ?? {
+    const refs = (await orUnrun("queue refs check", () =>
+      this.queueRefsProtection(f.candidateRef)
+    )) ?? {
       ok: true,
     };
     if (live && !refs.ok) {
       return this.pauseLanding(
         f,
         `queue refs are not protected (${refs.detail}): not blessed, not landed; ` +
-          "apply apply-ruleset.mjs --kind queue-refs, then resume"
+          "apply apply-ruleset.mjs --kind queue-refs, then resume",
+        { probe: "queue-refs-protected" }
       );
     }
     // Third: bless only on the base the candidate was composed on. The stored baseSha comes from
@@ -1702,10 +1823,10 @@ class Tick {
 
     // Earlier ticks blessed this batch and none of them reached a verdict (stored at the landing
     // stage, or sent back to testing by main()'s failure path with its count kept). After
-    // LANDING_ATTEMPTS_LIMIT of them it is not blessed again: pause and say so.
+    // LANDING_ATTEMPTS_LIMIT of them, merge-ff enters its bounded retry window.
     // Live only: shadow blesses nothing, so a count carried from live mode never pauses it.
     const landAttempts = storedLandAttempts(f);
-    if (live && landAttempts >= LANDING_ATTEMPTS_LIMIT) {
+    if (live && !mergeFf && landAttempts >= LANDING_ATTEMPTS_LIMIT) {
       const lastError = this.s.history.findLast((e) => e.type === "error")?.detail || "unknown";
       return this.pauseLanding(
         f,
@@ -1750,11 +1871,25 @@ class Tick {
       return;
     }
 
-    if (this.ownerLands && !(this.deps.landGitFor && this.landGh)) {
+    if (!this.hasLandingCredential()) {
       // Nothing is blessed that cannot be landed.
-      return this.pauseLanding(f, 'landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")');
+      return this.pauseLanding(
+        f,
+        'landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")',
+        {
+          probe: "land-token-present",
+        }
+      );
     }
-    await this.markLanding(f);
+    const retries = f.landingRetryTicks ?? 0;
+    if (mergeFf && retries >= LANDING_RETRY_TICKS) {
+      // The previous tick died or failed after saving the last attempt. The base and batch
+      // have been rechecked above, and withdrawAbandoned will settle any standing status.
+      return this.parkBatch(f, "attempts-limit", "landing ended without a verdict");
+    }
+    const retryTick =
+      mergeFf && (retries > 0 || landAttempts >= LANDING_ATTEMPTS_LIMIT) ? retries + 1 : undefined;
+    await this.markLanding(f, retryTick);
     try {
       await this.blessForLanding(f);
     } catch (error) {
@@ -1776,8 +1911,12 @@ class Tick {
           });
     } catch (error) {
       if (!isAuthFailure(error)) {
-        // Outcome unknown (no verdict): withdraw the blessing and fail the tick; the next tick
-        // re-observes the base (a landing that did happen is recognized) and blesses again.
+        if (retryTick !== undefined && !isRateLimitError(error)) {
+          // A merge-ff retry keeps its blessing while another retry is available. On the last
+          // attempt, re-read the base before discarding a push whose outcome is unknown.
+          if (retryTick === LANDING_RETRY_TICKS) return this.settleLastLandingAttempt(f, error);
+          throw error;
+        }
         await this.revokeOrNote(f, error);
         throw error;
       }
@@ -1805,6 +1944,18 @@ class Tick {
     // A landing that answered: the run of landings without a verdict is over.
     delete this.s.landingsWithoutVerdict;
     if (result.ok) return this.afterLanded(f, result.newBaseSha ?? f.candidateSha);
+    if (mergeFf && result.reason === "rejected" && !isAuthFailureText(result.detail ?? "")) {
+      const tried = retryTick ?? 1;
+      const reason = landingRejectionReason(result.detail);
+      if (tried < LANDING_RETRY_TICKS) {
+        this.s.inFlight.landingRetryTicks = tried;
+        this.s.inFlight.landAttempts = 0;
+        this.note(`${f.batchId}: landing rejected (${reason}); retrying on the next tick`);
+        return;
+      }
+      await this.revokeLanding(f, "rejected");
+      return this.parkBatch(f, reason);
+    }
     // A blessed commit of a batch that did not land could otherwise be merged by hand.
     await this.revokeLanding(f, result.reason);
     if (result.reason === "base-moved") return this.baseMoved(f, result.detail);
@@ -1816,7 +1967,72 @@ class Tick {
     if (this.ownerLands && authHint) {
       detail += ' (check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")';
     }
-    return this.pauseLanding(f, detail, result.merged ?? []);
+    return this.pauseLanding(f, detail, {
+      merged: result.merged ?? [],
+      probe: authHint && result.reason !== "merge-failed" ? "land-credential" : undefined,
+    });
+  }
+
+  async settleLastLandingAttempt(f, error) {
+    let tip;
+    try {
+      tip = await this.gh.getBranchSha(this.base);
+    } catch {
+      await this.revokeOrNote(f, error);
+      throw error;
+    }
+    if (tip === f.candidateSha) return this.afterLanded(f, tip);
+    await this.revokeOrNote(f, error);
+    if (!tip) throw error;
+    if (tip !== f.baseSha)
+      return this.baseMoved(f, `base ${this.base} is at ${tip}, expected ${f.baseSha}`);
+    return this.parkBatch(
+      f,
+      "attempts-limit",
+      `landing ended without a verdict: ${operatorReason(error.message)}`
+    );
+  }
+
+  async parkBatch(f, reason, detail = reason) {
+    const parked = (this.s.parked ??= {});
+    for (const { n, head } of f.prs) {
+      const previous = parked[String(n)];
+      parked[String(n)] = {
+        head,
+        baseSha: f.baseSha,
+        reason,
+        at: this.now(),
+        retried: previous?.head === head && previous.retried,
+      };
+      await this.gh.addLabels(n, [this.config.parkedLabel]);
+      await this.commentPr(
+        n,
+        `parked:${head12(head)}`,
+        `This batch did not land (${reason}). The queue will continue and retry this PR once when the base moves.`
+      );
+    }
+    this.s.inFlight = null;
+    this.event("pr-parked", {
+      batchId: f.batchId,
+      prs: prNumbers(f.prs),
+      sha: f.candidateSha,
+      detail: detail === reason ? reason : `${reason}: ${detail}`,
+    });
+    this.note(`${f.batchId}: parked ${formatPrs(f.prs)} (${reason})`);
+    if (this.countBatchDiscard("parked", reason) >= 2) {
+      this.pauseLanding(f, `two batches in a row parked for the same reason: ${reason}`, {
+        probe: "retry",
+        retryCause: `retry:parked:${reason}`,
+      });
+    }
+  }
+
+  countBatchDiscard(kind, reason = "") {
+    const previous = this.s.batchDiscard;
+    const count = previous?.kind === kind && previous.reason === reason ? previous.count + 1 : 1;
+    this.s.batchDiscard = { kind, reason, count };
+    this.discardedBatch = true;
+    return count;
   }
 
   async landMergeFf(f) {
@@ -1867,36 +2083,60 @@ class Tick {
    * "protected".
    * @returns {Promise<{ok: boolean, missing: string[], detail: string}>}
    */
-  async queueRefsProtection(f) {
-    if (this.queueRefs?.ref !== f.candidateRef) {
-      const result = await readQueueRefsProtection({ gh: this.gh, candidateRef: f.candidateRef });
-      this.queueRefs = { ref: f.candidateRef, result };
+  async queueRefsProtection(ref) {
+    if (this.queueRefs?.ref !== ref) {
+      const result = await readQueueRefsProtection({ gh: this.gh, candidateRef: ref });
+      this.queueRefs = { ref, result };
     }
     return this.queueRefs.result;
   }
 
   /**
-   * The stored in-flight batch is not the composition of its candidate: nothing is blessed or
-   * landed, and the queue pauses (state tampering or corruption is not something to retry).
+   * Reject a mismatched candidate before blessing. The first mismatch discards the old
+   * composition and rebuilds from revalidated heads and the current base. A repeated mismatch
+   * pauses, since the freshly assembled candidate also failed the integrity check.
    */
-  compositionMismatch(f, detail) {
-    return this.pauseLanding(
-      f,
+  async compositionMismatch(f, detail, valid = []) {
+    const count = this.countBatchDiscard("composition-mismatch");
+    const mismatch =
       `the stored in-flight batch ${f.batchId} does not match its candidate ` +
-        `${head12(f.candidateSha)}: ${detail} (state tampering or corruption: not landed, ` +
-        "not retried)"
-    );
+      `${head12(f.candidateSha)}: ${detail} (state tampering or corruption)`;
+    const action = count === 1 ? "discarded; recomposing" : "second consecutive mismatch; paused";
+    this.event("composition-mismatch", {
+      batchId: f.batchId,
+      prs: prNumbers(f.prs),
+      sha: f.candidateSha,
+      detail: `${mismatch}; ${action}`,
+    });
+    if (count >= 2) {
+      return this.pauseLanding(f, `${mismatch}; ${action}`, {
+        probe: "retry",
+        retryCause: "retry:composition-mismatch",
+      });
+    }
+
+    this.note(`${mismatch}; ${action}`);
+    this.s.inFlight = null;
+    await this.withdrawAbandoned();
+    // Revalidate already checked the exact heads against GitHub. Do not reuse the stored
+    // bisection or stack, and deduplicate PRs from the suspect record. With no usable PRs
+    // runLoaded selects from the fresh queue snapshot.
+    const prs = [...new Map(valid.map((pr) => [pr.n, pr])).values()];
+    if (prs.length) await this.composeAndPush(prs, null, { lane: f.lane });
   }
 
   /** The landing cannot go on: pause with reason "error" (a resume recomposes the batch). */
-  pauseLanding(f, detail, merged = []) {
-    this.setPaused({
+  pauseLanding(f, detail, { merged = [], probe, retryCause } = {}) {
+    const paused = {
       reason: "error",
       since: this.now(),
       baseSha: f.baseSha,
       detail,
       issue: null,
-    });
+      ...(retryCause && { retryCause }),
+      ...(probe === "queue-refs-protected" && { candidateRef: f.candidateRef }),
+    };
+    this.setPaused(probe ? automaticPause(this.s, paused, probe) : paused);
     this.s.inFlight = null;
     this.event("error", { batchId: f.batchId, prs: merged, detail });
     this.note(`paused: ${detail}`);
@@ -1919,9 +2159,14 @@ class Tick {
    * batch the failure path sent back to "testing" with its count kept. A document of the code
    * before the count has no `landAttempts` at the landing stage: that stored attempt counts as 1.
    */
-  async markLanding(f) {
+  async markLanding(f, retryTick) {
     const landAttempts = storedLandAttempts(f) + 1;
-    this.s.inFlight = { ...f, stage: "landing", landAttempts };
+    this.s.inFlight = {
+      ...f,
+      stage: "landing",
+      landAttempts,
+      ...(retryTick === undefined ? {} : { landingRetryTicks: retryTick }),
+    };
     // Landing now: a release-freeze hold is over (saved here, in case the landing dies).
     if (f.freezeHold && f.freezeHold.endedAt === undefined) {
       this.s.inFlight.freezeHold = { ...f.freezeHold, endedAt: this.now() };
@@ -2078,8 +2323,8 @@ class Tick {
    *    may carry the land status: a tick that throws lands nothing more, so its blessing is
    *    withdrawn now (withdrawAbandoned, forced), unless its candidate is the base tip (it
    *    landed; the next tick records it). Not when this tick made its own landing attempt
-   *    (markLanding): that attempt withdrew its own blessing before rethrowing (revokeOrNote),
-   *    and its landing stage with `landAttempts` is the record of the attempts bound.
+   *    (markLanding): the landing path decides whether to keep or withdraw its own blessing,
+   *    and its landing stage with `landAttempts` records the attempts bound.
    *  - What the stored state must learn from this tick is handed to main()'s failure path, which
    *    saves it with the `error` event (failedTickRecord, amendFailedTick): the landing stage of
    *    a batch withdrawn here is left (back to testing), the withdrawals GitHub refused are
@@ -2175,9 +2420,9 @@ class Tick {
           `⏸️ **omni-queue**: \`${this.base}\` is now paused because its list of land-status ` +
             "withdrawals is full (`landWithdrawals is full`), not only because the base is red.",
           "",
-          "This pause will not resume by itself when the base moves: an operator resumes it",
-          "(`npm run queue -- resume <base>`) once `landWithdrawalsOverflow` is empty. See the",
-          "dashboard issue of the base.",
+          "The queue resumes automatically after both withdrawal lists are empty, on the next",
+          "scheduled check. Use `npm run queue -- resume <base>` for a manual resume once",
+          "`landWithdrawalsOverflow` is empty. See the dashboard issue of the base.",
         ].join("\n")
       );
     } catch (error) {
@@ -2368,6 +2613,8 @@ class Tick {
     const { label, protectedApprovalLabel } = this.config;
     this.landedBatch = f.batchId; // its land status stays: the commits are on the base
     delete this.s.landingsWithoutVerdict; // a landing: the run without a verdict is over
+    delete this.s.batchDiscard;
+    delete this.s.autoPauseEpisodes;
     // A stored withdrawal of a landed commit (its landing threw after the push went through and
     // the withdrawal was refused) must not write `failure` on the base.
     this.dropWithdrawals(this.landShas(f));
@@ -2401,6 +2648,7 @@ class Tick {
     for (const pr of f.prs) {
       await this.removeLabel(pr.n, label);
       await this.removeLabel(pr.n, protectedApprovalLabel);
+      if (this.s.parked?.[String(pr.n)]) await this.removeLabel(pr.n, this.config.parkedLabel);
       await this.commentPr(
         pr.n,
         `landed:${head12(pr.head)}`,
@@ -3043,13 +3291,20 @@ class Tick {
       for (const pr of repairPrs) await this.countRepairInfraDrop(pr, f.baseSha);
       return;
     }
-    this.setPaused({
-      reason: "infra",
-      since: this.now(),
-      baseSha: f.baseSha,
-      detail: `${f.batchId}: ${detail}`,
-      issue: null,
-    });
+    this.setPaused(
+      automaticPause(
+        this.s,
+        {
+          reason: "infra",
+          since: this.now(),
+          baseSha: f.baseSha,
+          detail: `${f.batchId}: ${detail}`,
+          issue: null,
+          retryCause: "retry:infra",
+        },
+        "retry"
+      )
+    );
     this.s.inFlight = null;
     this.event("infra-paused", {
       batchId: f.batchId,
@@ -3438,6 +3693,10 @@ class Tick {
       bisect: bisect ? { ...bisect, segments: [included, ...bisect.segments.slice(1)] } : null,
       ...(lane ? { lane } : {}),
     };
+    for (const { n, head } of included) {
+      const parked = this.s.parked?.[String(n)];
+      if (parked?.head === head) parked.retried = true;
+    }
     this.s.counters.ciRuns += 1;
     const excluded = [
       ...(result.excludedBatchConflict ?? []).map((pr) => `#${pr.n} batch-conflict`),
@@ -3638,12 +3897,16 @@ class Tick {
     }
     this.pruneRepairTried(pulls);
     this.pruneRepairInfraDrops(pulls);
+    await this.pruneParked(pulls);
     const labeled = pulls.filter(
       (p) =>
         p.baseRef === this.base && (p.labels ?? []).includes(label) && !this.touched.has(p.number)
     );
     const freezeIssues = labeled.length ? await this.freezeIssues() : [];
-    const ctx = { config: this.config, freezeIssues, state: this.s, now: this.now() };
+    const baseSha = Object.values(this.s.parked ?? {}).some((entry) => !entry.retried)
+      ? await this.gh.getBranchSha(this.base)
+      : null;
+    const ctx = { config: this.config, freezeIssues, state: this.s, baseSha, now: this.now() };
     const entries = [];
     const candidates = [];
     for (const summary of labeled) {
@@ -3686,6 +3949,27 @@ class Tick {
       (a, b) => (a.labeledAt ?? "￿").localeCompare(b.labeledAt ?? "￿") || a.number - b.number
     );
     return { entries, candidates, ctx };
+  }
+
+  async pruneParked(pulls) {
+    const parked = this.s.parked;
+    if (!parked) return;
+    const { label, parkedLabel } = this.config;
+    const open = new Map(pulls.map((pull) => [String(pull.number), pull]));
+    for (const [n, entry] of Object.entries(parked)) {
+      const pull = open.get(n);
+      if (
+        pull?.headSha === entry.head &&
+        pull.labels.includes(label) &&
+        !this.touched.has(pull.number)
+      )
+        continue;
+      if (pull?.labels.includes(parkedLabel) && !this.dryRun && !this.shadow) {
+        await this.voice.removeLabel(pull.number, parkedLabel);
+      }
+      delete parked[n];
+    }
+    if (!Object.keys(parked).length) delete this.s.parked;
   }
 
   /**
@@ -4397,15 +4681,14 @@ function namedWithin(list, room, where = "named in paused.detail") {
 }
 
 /**
- * Detail of the `resumed` event of an allowed resume (applyResume). When the pause it clears
+ * Detail of the `resumed` event of a manual or automatic resume. When the pause it clears
  * named commits kept nowhere (keptNowhereCommits), they leave the state with it: the event names
  * as many as fit in 500 characters, then how many more.
- * @param {string} previous the reason of the pause cleared
+ * @param {string} head  how the pause was lifted
  * @param {{sha: string, batchId: string}[]} cleared
  * @param {string} statusContext
  */
-function resumedDetail(previous, cleared, statusContext) {
-  const head = `manual resume (was ${previous})`;
+function resumedDetail(head, cleared, statusContext) {
   if (!cleared.length) return head;
   const lead =
     `${head}; the pause it cleared named commits kept nowhere (both lists full), check their ` +
@@ -4469,7 +4752,11 @@ export function recordFullWithdrawals(state, refusals, { at, url, statusContext 
       replaced;
     next = leaveLandingIn({
       ...state,
-      paused: { reason: "error", since: at, baseSha: null, detail, issue: null },
+      paused: automaticPause(
+        state,
+        { reason: "error", since: at, baseSha: null, detail, issue: null },
+        "withdrawals-empty"
+      ),
     });
   } else {
     // Already named only when a `Kept nowhere` clause names it, not because the SHA appears
@@ -4729,10 +5016,14 @@ export async function discoverBases(deps) {
     if (bases.has(base) || !isManagedBase(config, base)) continue;
     try {
       const { state } = await store.load(base);
-      // An open episode or a counted run of failures needs one completed tick to end it, even on
-      // a base that lost its work (its labeled PRs gone): that tick clears both, then the base
-      // drops out of this list.
-      if (hasQueueWork(state, false) || state.stalled || state.failedTicks !== undefined) {
+      // Stored quarantine, an open episode and counted failures still need housekeeping after
+      // the last labeled PR leaves. When that state is pruned, the base drops out of this list.
+      if (
+        hasQueueWork(state, false) ||
+        Object.keys(state.parked ?? {}).length > 0 ||
+        state.stalled ||
+        state.failedTicks !== undefined
+      ) {
         bases.add(base);
       }
     } catch {

@@ -18,7 +18,12 @@ import {
   STATE_BRANCH,
   commentMarker,
 } from "../../../../scripts/merge-queue/contracts.mjs";
-import { laneOf, prGatesReason, selectLane } from "../../../../scripts/merge-queue/eligibility.mjs";
+import {
+  laneOf,
+  parkedReason,
+  prGatesReason,
+  selectLane,
+} from "../../../../scripts/merge-queue/eligibility.mjs";
 import { createStateStore, gitBlobSha } from "../../../../scripts/merge-queue/state.mjs";
 import { runTick } from "../../../../scripts/merge-queue/tick.mjs";
 
@@ -633,6 +638,8 @@ export function createFakeModules(world) {
       // "base-repair" lane; no action.
       const gates = prGatesReason(pr, ctx);
       if (gates) reasons.push(gates);
+      const parked = parkedReason(pr, ctx);
+      if (pr.labels.includes(label) && parked) reasons.push(parked);
       if (inFlight) reasons.push({ code: "in-flight", detail: "" });
       if (processed) reasons.push({ code: "shadow-processed", detail: "" });
       return {

@@ -339,3 +339,35 @@ test("protected globs also match paths that contain a newline (fail closed)", ()
   assert.equal(matchesGlob("src/a\nb.ts", "src/*.ts"), true);
   assert.equal(matchesGlob("src/a/b.ts", "src/*.ts"), false);
 });
+
+test("validateState accepts legacy pauses and validates automatic probes and their schedule", () => {
+  const state = initialState("release/v3.8.54", NOW);
+  state.paused = { reason: "error", since: NOW, detail: "waiting", baseSha: null, issue: null };
+  assert.deepEqual(validateState(state), []);
+  const auto = { probe: "retry", attempts: 1, nextProbeAt: "2026-11-13T12:10:00.000Z" };
+  for (const probe of [
+    "retry",
+    "land-credential",
+    "land-token-present",
+    "queue-refs-protected",
+    "withdrawals-empty",
+  ]) {
+    state.paused.auto = { ...auto, probe };
+    assert.deepEqual(validateState(state), [], probe);
+  }
+  for (const invalid of [
+    null,
+    [],
+    { ...auto, probe: "unknown" },
+    { ...auto, attempts: 0 },
+    { ...auto, attempts: 1.5 },
+    { ...auto, attempts: "1" },
+    { ...auto, nextProbeAt: "tomorrow" },
+    { ...auto, nextProbeAt: "2026-11-13" },
+  ]) {
+    state.paused.auto = invalid;
+    assert.ok(validateState(state).includes("paused.auto"), JSON.stringify(invalid));
+  }
+  state.paused = { ...state.paused, reason: "manual", auto };
+  assert.ok(validateState(state).includes("paused.auto"), "a manual pause must stay manual");
+});

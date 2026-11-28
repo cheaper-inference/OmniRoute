@@ -201,8 +201,7 @@ export function computeMetrics(state, now, extra = {}) {
 export const STALL_PAUSED_MINUTES = 120;
 /**
  * Pause reasons that are a stall at once, from the first tick (no STALL_PAUSED_MINUTES wait):
- * nothing lifts them but an operator (a landing that cannot go on, a full withdrawal list, a
- * tree divergence).
+ * a landing that cannot go on, a full withdrawal list, or a tree divergence.
  */
 export const STALL_AT_ONCE_PAUSE_REASONS = Object.freeze(["error", "tree-divergence"]);
 /** A candidate in flight for longer than config.checksTimeoutMinutes + this is stalled. */
@@ -348,7 +347,9 @@ export function assessHealthDetail({ state, queue, config, now }) {
       stalls.push({
         kind: `paused:${p.reason}`,
         t: e.t,
-        reason: `${pausedText}: a pause for this reason does not lift by itself`,
+        reason: p.auto
+          ? `${pausedText}: waiting for the ${code(p.auto.probe)} probe`
+          : `${pausedText}: a pause for this reason does not lift by itself`,
       });
     }
   } else if (p) {
@@ -602,6 +603,11 @@ function renderPause(paused, blockers = 0) {
   if (isSha(paused.baseSha)) extra.push(`base tip when paused ${code(short(paused.baseSha))}`);
   if (Number.isSafeInteger(paused.issue)) extra.push(`issue #${paused.issue}`);
   if (extra.length) parts.push(`> ${extra.join(" · ")}`);
+  if (paused.auto) {
+    parts.push(
+      `> auto-resumes: ${code(paused.auto.probe)}; next check ${formatTime(paused.auto.nextProbeAt)}.`
+    );
+  }
   if (paused.reason === "base-red") {
     parts.push("> Resumes automatically when the base tip moves.");
   } else if (blockers) {
@@ -610,7 +616,11 @@ function renderPause(paused, blockers = 0) {
         `(${blockers} now): wait until the ticks write them, then \`npm run queue -- resume <base>\`.`
     );
   } else {
-    parts.push("> Resume with `npm run queue -- resume <base>` once the cause is fixed.");
+    parts.push(
+      paused.auto
+        ? "> To resume manually, use `npm run queue -- resume <base>`."
+        : "> Resume with `npm run queue -- resume <base>` once the cause is fixed."
+    );
   }
   return parts.join("\n");
 }

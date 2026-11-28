@@ -30,10 +30,12 @@ import {
   NO_HEARTBEAT_LINE,
   assessHealth,
   formatTime,
+  renderDashboard,
 } from "../../../scripts/merge-queue/dashboard.mjs";
 import {
   GH_WRITE_METHODS,
   LANDING_ATTEMPTS_LIMIT,
+  LANDING_RETRY_TICKS,
   WITHDRAWAL_ALERT_MINUTES,
   RERUN_START_MINUTES,
   STATE_HEARTBEAT_MINUTES,
@@ -2528,7 +2530,7 @@ test("live merge-ff: retries once after the ruleset has not seen the configured 
   assert.deepEqual(calls[3].args, calls[1].args);
 });
 
-test("live merge-ff: pauses when the ruleset still expects the land status after the retry", async () => {
+test("live merge-ff: retries across ticks when the ruleset still expects the land status", async () => {
   const h = createHarness({ mode: "live" });
   const f = await greenBatch(h, [1]);
   const detail = requiredStatusRejection("omni-queue/land");
@@ -2536,21 +2538,31 @@ test("live merge-ff: pauses when the ruleset still expects the land status after
 
   await h.tick();
 
-  const state = await h.state();
-  assert.equal(state.paused.reason, "error");
-  assert.ok(state.paused.detail.includes(detail));
+  let state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(state.inFlight.stage, "landing");
+  assert.equal(state.inFlight.landingRetryTicks, 1);
   assert.equal(h.gh.branches.get(BASE), f.baseSha);
   const calls = h.calls.filter((c) =>
     ["createCommitStatus", "landMergeFf", "sleep"].includes(c.name)
   );
   assert.deepEqual(
     calls.map((c) => c.name),
-    ["createCommitStatus", "landMergeFf", "sleep", "landMergeFf", "createCommitStatus"]
+    ["createCommitStatus", "landMergeFf", "sleep", "landMergeFf"]
   );
-  assert.equal(calls[4].args[1].state, "failure");
+  assert.equal(newestLand(h, f.candidateSha), "success");
+
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(state.inFlight, null);
+  assert.equal(h.gh.branches.get(BASE), f.candidateSha);
+  assert.equal(Object.keys(state.parked ?? {}).length, 0);
+  assert.ok(!types(state).includes("pr-parked"));
+  assert.ok(types(state).includes("landed"));
 });
 
-test("live merge-ff: pauses without a retry when GH013 names another required status", async () => {
+test("live merge-ff: GH013 for another status skips the five-second retry and holds for the next tick", async () => {
   const h = createHarness({ mode: "live" });
   const f = await greenBatch(h, [1]);
   const detail = requiredStatusRejection("omni-queue/land-other");
@@ -2559,15 +2571,233 @@ test("live merge-ff: pauses without a retry when GH013 names another required st
   await h.tick();
 
   const state = await h.state();
-  assert.equal(state.paused.reason, "error");
-  assert.ok(state.paused.detail.includes(detail));
+  assert.equal(state.paused, null);
+  assert.equal(state.inFlight.stage, "landing");
+  assert.equal(state.inFlight.landingRetryTicks, 1);
   assert.equal(h.gh.branches.get(BASE), f.baseSha);
   assert.equal(h.calls.filter((c) => c.name === "landMergeFf").length, 1);
   assert.equal(h.calls.filter((c) => c.name === "sleep").length, 0);
-  assert.deepEqual(
-    statusCalls(h).map((c) => c.args[1].state),
-    ["success", "failure"]
+  assert.deepEqual(statusStates(h), ["success"]);
+});
+
+async function rejectUntilParked(h, detail) {
+  assert.equal(LANDING_RETRY_TICKS, 3);
+  simulateLandingRejections(h, ...Array(LANDING_RETRY_TICKS).fill(detail));
+  for (let tick = 0; tick < LANDING_RETRY_TICKS; tick++) await h.tick();
+}
+
+test("live merge-ff: exhausted refusals withdraw the status, park the PRs and start the next batch", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1, 2]);
+  h.addPr(3);
+  const detail = requiredStatusRejection("Gate / Other");
+  await rejectUntilParked(h, detail);
+
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  assert.deepEqual(nums(state.inFlight.prs), [3], "next batch started in the same tick");
+  assert.equal(landCalls(h).length, LANDING_RETRY_TICKS);
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+  assert.equal(statusStates(h).filter((status) => status === "failure").length, 1);
+  const event = state.history.find((e) => e.type === "pr-parked");
+  assert.equal(event.batchId, f.batchId);
+  assert.deepEqual(event.prs, [1, 2]);
+  assert.match(event.detail, /Gate \/ Other/);
+  for (const { n, head } of f.prs) {
+    assert.ok(h.gh.pulls.get(n).labels.includes(h.config.label));
+    assert.ok(h.gh.pulls.get(n).labels.includes(h.config.parkedLabel));
+    assert.equal(state.parked[n].head, head);
+    assert.equal(state.parked[n].baseSha, f.baseSha);
+    assert.equal(state.parked[n].retried, false);
+    const comments = commentsWithKey(h, n, `parked:${head12(head)}`);
+    assert.equal(comments.length, 1);
+    assert.match(
+      comments[0].body,
+      /did not land.*Gate \/ Other.*queue will continue.*retry.*once.*base moves/i
+    );
+  }
+});
+
+test("live merge-ff: a parked head is selected once on a new base, then waits for a new head", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  await rejectUntilParked(h, "branch protection");
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.inFlight, null, "the unchanged base keeps it out of selection");
+  assert.match(
+    renderDashboard(h.world.renders.at(-1)),
+    /parked.*branch protection.*retry once when the base moves/i
   );
+
+  h.gh.branches.set(BASE, fakeSha("advanced base"));
+  await h.tick();
+  state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [1]);
+  assert.equal(state.parked[1].retried, true);
+  h.runCi(state.inFlight.candidateSha);
+  await rejectUntilParked(h, "another rule");
+  h.gh.branches.set(BASE, fakeSha("advanced base again"));
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.inFlight, null);
+  assert.equal(state.parked[1].retried, true);
+  assert.match(renderDashboard(h.world.renders.at(-1)), /parked.*until the head changes/i);
+  assert.equal(commentsWithKey(h, 1, `parked:${head12(f.prs[0].head)}`).length, 1);
+});
+
+test("live merge-ff: a new head removes the parked label and record, and a removed queue label prunes the record", async () => {
+  const h = createHarness({ mode: "live" });
+  await greenBatch(h, [1, 2]);
+  await rejectUntilParked(h, "branch protection");
+  h.gh.pulls.get(1).headSha = fakeSha("updated PR");
+  h.gh.pulls.get(2).labels = [h.config.parkedLabel];
+  await h.tick();
+  const state = await h.state();
+  assert.equal(Object.keys(state.parked ?? {}).length, 0);
+  assert.ok(!h.gh.pulls.get(1).labels.includes(h.config.parkedLabel));
+  assert.ok(h.gh.pulls.get(1).labels.includes(h.config.label));
+});
+
+test("a scheduled tick still visits a base to prune its last parked PR", async () => {
+  const h = createHarness({ mode: "live" });
+  await greenBatch(h, [1]);
+  await rejectUntilParked(h, "branch protection");
+  h.gh.issues.push({
+    number: 77,
+    title: dashboardTitle(BASE),
+    body: "",
+    labels: [DASHBOARD_LABEL],
+    state: "open",
+  });
+  h.gh.pulls.get(1).state = "closed";
+  assert.deepEqual(await discoverBases(h.deps), [BASE]);
+  await h.tick();
+  assert.equal((await h.state()).parked, undefined);
+  assert.deepEqual(await discoverBases(h.deps), []);
+});
+
+test("live merge-ff: the no-verdict limit starts bounded retries, then parks and starts the next batch", async () => {
+  const h = createHarness({ mode: "live" });
+  const f = await greenBatch(h, [1]);
+  h.addPr(2);
+  h.world.landError = notAvailable(1);
+  for (let i = 0; i < LANDING_ATTEMPTS_LIMIT; i++) {
+    await failingTick(h, /not available from origin/);
+  }
+  for (let i = 1; i < LANDING_RETRY_TICKS; i++) {
+    await failingTick(h, /not available from origin/);
+    const state = await h.state();
+    assert.equal(state.paused, null);
+    assert.equal(state.inFlight.stage, "landing");
+    assert.equal(state.inFlight.landingRetryTicks, i);
+    assert.equal(newestLand(h, f.candidateSha), "success", "a retry remains available");
+  }
+
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  assert.deepEqual(nums(state.inFlight.prs), [2]);
+  assert.equal(landCalls(h).length, LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS);
+  assert.equal(newestLand(h, f.candidateSha), "failure");
+  assert.ok(h.gh.pulls.get(1).labels.includes(h.config.label));
+  assert.ok(h.gh.pulls.get(1).labels.includes(h.config.parkedLabel));
+  assert.equal(commentsWithKey(h, 1, `parked:${head12(f.prs[0].head)}`).length, 1);
+  const event = state.history.find((e) => e.type === "pr-parked");
+  assert.equal(event.batchId, f.batchId);
+  assert.deepEqual(event.prs, [1]);
+  assert.match(event.detail, /attempts-limit.*ended without a verdict/);
+});
+
+for (const sameReason of [true, false]) {
+  test(`live merge-ff: two consecutive parked batches with ${sameReason ? "the same" : "different"} rules`, async () => {
+    const h = createHarness({ mode: "live" });
+    const first = await greenBatch(h, [1]);
+    h.addPr(2);
+    const rejection = (sha, rule) =>
+      `remote: GH013: Repository rule violations found for refs/heads/${BASE}. | ` +
+      `remote: - ${rule} | ! ${sha}:refs/heads/${BASE} [remote rejected]`;
+    const signature = "Commits must have verified signatures.";
+    await rejectUntilParked(h, rejection(first.candidateSha, signature));
+    const second = (await h.state()).inFlight;
+    assert.deepEqual(nums(second.prs), [2]);
+    h.runCi(second.candidateSha);
+    h.addPr(3);
+    await rejectUntilParked(
+      h,
+      rejection(
+        second.candidateSha,
+        sameReason ? signature : "Changes must be made through a pull request."
+      )
+    );
+    const state = await h.state();
+    assert.deepEqual(
+      state.history.filter((e) => e.type === "pr-parked").map((e) => e.prs),
+      [[1], [2]]
+    );
+    assert.equal(newestLand(h, first.candidateSha), "failure");
+    assert.equal(newestLand(h, second.candidateSha), "failure");
+    if (sameReason) {
+      assert.equal(state.paused?.reason, "error");
+      assert.equal(
+        state.paused.detail,
+        `two batches in a row parked for the same reason: ${signature}`
+      );
+      assert.equal(state.inFlight, null);
+      assertAutoPause(h, state, "retry", 1, 10);
+      await waitForAutoProbe(h, 9);
+      h.clock.advance(1);
+      const resumed = await h.tick();
+      assertAutoResumed(resumed.state, "retry");
+      assert.deepEqual(
+        nums(resumed.state.inFlight.prs),
+        [3],
+        "b72: the next batch starts on the due tick"
+      );
+
+      h.runCi(resumed.state.inFlight.candidateSha);
+      h.addPr(4);
+      await rejectUntilParked(h, rejection(resumed.state.inFlight.candidateSha, signature));
+      const repeated = await h.state();
+      assertAutoPause(h, repeated, "retry", 2, 20);
+      assert.equal(repeated.paused.since, state.paused.since);
+
+      await h.tick({ action: "resume" });
+      let next = await h.state();
+      assert.equal(next.paused, null);
+      assert.match(next.history.findLast((e) => e.type === "resumed").detail, /^manual resume/);
+      for (const n of [5, 6]) {
+        h.runCi(next.inFlight.candidateSha);
+        h.addPr(n);
+        await rejectUntilParked(h, rejection(next.inFlight.candidateSha, signature));
+        next = await h.state();
+      }
+      assertAutoPause(h, next, "retry", 1, 10);
+      assert.equal(next.paused.since, h.clock.now());
+    } else {
+      assert.equal(state.paused, null);
+      assert.deepEqual(nums(state.inFlight.prs), [3]);
+    }
+  });
+}
+
+test("a landing between two parked batches breaks the run of refusals", async () => {
+  const h = createHarness({ mode: "live" });
+  await greenBatch(h, [1]);
+  h.addPr(2);
+  await rejectUntilParked(h, "branch protection");
+  let state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [2]);
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick();
+  state = await h.state();
+  assert.ok(types(state).includes("landed"));
+  assert.deepEqual(nums(state.inFlight.prs), [1]);
+  h.runCi(state.inFlight.candidateSha);
+  await rejectUntilParked(h, "branch protection");
+  state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(state.parked[1].retried, true);
 });
 
 test("live squash-api: every PR head is blessed and merged with the owner client", async () => {
@@ -2679,7 +2909,7 @@ test("live with actor owner and no OMNI_QUEUE_LAND_TOKEN: paused (error) naming 
 
   await h.tick();
   state = await h.state();
-  assert.equal(state.paused.reason, "error", "stays paused until a resume");
+  assert.equal(state.paused.reason, "error", "stays paused before its scheduled probe");
   assert.deepEqual(statusCalls(h), []);
   assert.deepEqual(h.world.lands, []);
 });
@@ -2709,6 +2939,9 @@ test("auth failure of the landing push pauses once and does not bless again on t
   const errors = () => state.history.filter((e) => e.type === "error");
   assert.equal(errors().length, 1);
 
+  h.landGh.getBranchSha = async () => {
+    throw Object.assign(new Error("Bad credentials"), { status: 401 });
+  };
   for (let i = 0; i < 3; i++) {
     h.clock.advance(10);
     await h.tick();
@@ -2785,8 +3018,31 @@ const notAvailable = (attempt) =>
   new Error(`land: attempt ${attempt} is not available from origin`);
 const landPairs = (n) => Array.from({ length: n }, () => ["success", "failure"]).flat();
 
+const noVerdictRetryStatuses = (initialAttempts) => [
+  ...landPairs(initialAttempts),
+  ...Array(LANDING_RETRY_TICKS).fill("success"),
+  "failure",
+];
+
+async function exhaustNoVerdictRetries(h) {
+  for (let tick = 1; tick < LANDING_RETRY_TICKS; tick++) {
+    await failingTick(h, /not available from origin/);
+    const { inFlight, paused } = await h.state();
+    assert.equal(paused, null);
+    assert.equal(inFlight.landingRetryTicks, tick);
+  }
+  await h.tick();
+  const state = await h.state();
+  assert.equal(state.paused, null);
+  assert.match(
+    state.history.findLast((e) => e.type === "pr-parked")?.detail ?? "",
+    /attempts-limit: landing ended without a verdict/
+  );
+  return state;
+}
+
 for (const landing of ["merge-ff", "squash-api"]) {
-  test(`a landing that throws every tick pauses after 3 attempts (${landing})`, async () => {
+  test(`a landing that throws every tick is bounded (${landing})`, async () => {
     assert.equal(LANDING_ATTEMPTS_LIMIT, 3);
     const h = createHarness({ mode: "live", landing, actor: "owner" });
     const f = await greenBatch(h, [1]);
@@ -2802,7 +3058,21 @@ for (const landing of ["merge-ff", "squash-api"]) {
     assert.deepEqual(statusStates(h), landPairs(3), "3 success/failure pairs");
     assert.equal(landCalls(h).length, 3);
 
-    await h.tick(); // the 4th attempt: paused without blessing or landing
+    if (landing === "merge-ff") {
+      const state = await exhaustNoVerdictRetries(h);
+      const total = LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS;
+      assert.deepEqual(statusStates(h), noVerdictRetryStatuses(LANDING_ATTEMPTS_LIMIT));
+      assert.equal(landCalls(h).length, total);
+      assert.equal(state.inFlight, null);
+      assert.equal(newestLand(h, sha), "failure");
+      h.clock.advance(10);
+      await h.tick();
+      assert.equal((await h.state()).inFlight, null, "the unchanged base keeps it parked");
+      assert.deepEqual(statusStates(h), noVerdictRetryStatuses(LANDING_ATTEMPTS_LIMIT));
+      return;
+    }
+
+    await h.tick(); // squash-api pauses without blessing or landing
     let state = await h.state();
     assert.deepEqual(statusStates(h), landPairs(3), "then none");
     assert.equal(landCalls(h).length, 3, "not landed again");
@@ -2879,14 +3149,12 @@ test("a manual pause and resume resets the counter", async () => {
     assert.equal((await h.state()).paused, null);
   }
   assert.equal((await h.state()).inFlight.landAttempts, 3);
-  await h.tick();
-  state = await h.state();
-  assert.equal(state.paused.reason, "error");
-  assert.match(
-    state.paused.detail,
-    /ended without a verdict 3 times since its candidate was composed/
+  await exhaustNoVerdictRetries(h);
+  assert.deepEqual(
+    statusStates(h),
+    noVerdictRetryStatuses(5),
+    "2 attempts, then a fresh count and retry window"
   );
-  assert.deepEqual(statusStates(h), landPairs(5), "2 attempts, then 3 after the resume");
 });
 
 test("a state without landAttempts loads and counts from 1", async () => {
@@ -2900,15 +3168,12 @@ test("a state without landAttempts loads and counts from 1", async () => {
     await failingTick(h, /not available from origin/);
     assert.equal((await h.state()).inFlight.landAttempts, attempt, "the stored attempt was 1");
   }
-  await h.tick();
-  const state = await h.state();
-  assert.equal(state.paused.reason, "error");
+  const state = await exhaustNoVerdictRetries(h);
   assert.match(
-    state.paused.detail,
-    /ended without a verdict 3 times since its candidate was composed/
+    state.history.findLast((e) => e.type === "pr-parked").detail,
+    /attempt 3 is not available from origin/
   );
-  assert.match(state.paused.detail, /attempt 3 is not available from origin/);
-  assert.deepEqual(statusStates(h), landPairs(2));
+  assert.deepEqual(statusStates(h), noVerdictRetryStatuses(2));
   assert.equal(newestLand(h, f.candidateSha), "failure");
 });
 
@@ -4579,7 +4844,7 @@ for (const [mode, landing] of [
       }),
     ],
   ]) {
-    test(`${mode} ${landing}: a stored batch that ${label} is not blessed, not landed, and pauses`, async () => {
+    test(`${mode} ${landing}: a stored batch that ${label} is discarded and recomposed without a blessing or landing`, async () => {
       const h = createHarness({ mode, landing, actor: "owner" });
       const f = await startBatch(h, [1]);
       if (label.includes("another head")) h.gh.pulls.get(1).headSha = fakeSha("planted-head");
@@ -4591,11 +4856,24 @@ for (const [mode, landing] of [
       assert.deepEqual(h.world.lands, [], "nothing landed");
       assert.ok(!types(state).includes("would-land"), "not recorded as would-land");
       assert.ok(!types(state).includes("land-blessed"));
-      assert.equal(state.inFlight, null);
-      assert.equal(state.paused?.reason, "error");
-      assert.match(state.paused.detail, /does not match its candidate/);
-      assert.equal(lastBeforeStall(state).type, "error");
-      assert.match(lastBeforeStall(state).detail, /state tampering or corruption/);
+      assert.equal(state.paused, null);
+      assert.notEqual(state.inFlight.batchId, f.batchId);
+      assert.notEqual(state.inFlight.candidateSha, f.candidateSha);
+      assert.equal(state.inFlight.stage, "testing");
+      assert.deepEqual(
+        nums(state.inFlight.prs),
+        label.includes("its candidate does not merge") ? [1, 2] : [1]
+      );
+      for (const pr of state.inFlight.prs) assert.equal(pr.head, h.gh.pulls.get(pr.n).headSha);
+      const mismatch = state.history.find((e) => e.type === "composition-mismatch");
+      assert.equal(mismatch.batchId, f.batchId);
+      assert.equal(mismatch.sha, f.candidateSha);
+      assert.match(
+        mismatch.detail,
+        /does not match its candidate.*state tampering or corruption.*recompos/
+      );
+      assert.ok(!types(state).includes("pr-parked"));
+      assert.equal(state.parked, undefined);
     });
   }
 }
@@ -4825,9 +5103,9 @@ test("dry-run reads the rules with GET only", async () => {
 });
 
 for (const mode of ["live", "shadow"]) {
-  test(`${mode}: a merge commit whose tree is not the merge of its parents pauses before the rules read`, async () => {
+  test(`${mode}: a merge commit whose tree is not the merge of its parents recomposes once, then pauses on a second mismatch before the rules read`, async () => {
     const h = createHarness({ mode });
-    await greenBatch(h, [1]);
+    const first = await greenBatch(h, [1]);
     const fake = h.modules.land.verifyComposition;
     // Shape, trailers and parents pass; only the recomposition (trees: true) disagrees.
     h.deps.modules = {
@@ -4845,8 +5123,26 @@ for (const mode of ["live", "shadow"]) {
       },
     };
     await h.tick();
-    const state = await h.state();
+    let state = await h.state();
+    assert.equal(state.paused, null);
+    assert.notEqual(state.inFlight.candidateSha, first.candidateSha);
+    assert.deepEqual(nums(state.inFlight.prs), [1]);
+    assert.deepEqual(statusCalls(h), []);
+    assert.deepEqual(h.world.lands, []);
+    assert.deepEqual(rulesReads(h), [], "the composition is checked first");
+    const replacement = state.inFlight;
+    h.runCi(replacement.candidateSha);
+    await h.tick();
+    state = await h.state();
     assert.equal(state.paused?.reason, "error");
+    assert.equal(state.inFlight, null);
+    assert.equal(state.parked, undefined);
+    assertAutoPause(h, state, "retry", 1, 10);
+    assert.ok(!types(state).includes("pr-parked"));
+    assert.deepEqual(
+      state.history.filter((e) => e.type === "composition-mismatch").map((e) => e.batchId),
+      [first.batchId, replacement.batchId]
+    );
     assert.match(
       state.paused.detail,
       /does not match its candidate .*: merge commit 0123456789ab of #1: tree aaaa, recomposing gives bbbb \(state tampering/
@@ -4857,6 +5153,26 @@ for (const mode of ["live", "shadow"]) {
     assert.deepEqual(rulesReads(h), [], "the composition is checked first");
   });
 }
+
+test("a valid landing breaks the run of composition mismatches", async () => {
+  const h = createHarness({ mode: "live" });
+  const first = await greenBatch(h, [1]);
+  await tamperInFlight(h, { prs: [] });
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.paused, null);
+  assert.notEqual(state.inFlight.candidateSha, first.candidateSha);
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick();
+  assert.ok(types(await h.state()).includes("landed"));
+
+  await greenBatch(h, [2]);
+  await tamperInFlight(h, { prs: [] });
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.paused, null);
+  assert.deepEqual(nums(state.inFlight.prs), [2]);
+});
 
 test("every batch-started event (batch, bisection segment, recomposition) carries labeledAt", async () => {
   const h = createHarness({ mode: "live" });
@@ -7175,8 +7491,7 @@ test("an error event appended by a tick that completed (a landing pause) is not 
   // The episode is the error pause's, open since the pause (a stall at once, M4), not a streak of
   // three failed ticks.
   assert.deepEqual(state.stalled.reasons, [
-    `paused (reason \`error\`) since ${formatTime(state.paused.since)}: a pause for this ` +
-      "reason does not lift by itself",
+    `paused (reason \`error\`) since ${formatTime(state.paused.since)}: waiting for the \`land-token-present\` probe`,
   ]);
 });
 
@@ -7585,10 +7900,10 @@ test("M4: while paused for a full list both lists are still retried; a resume wi
   assert.notEqual(recomposed.candidateSha, f.candidateSha, "recomposed before the pause");
 
   h.gh.writeError = null; // GitHub accepts the App's status writes again
-  h.clock.advance(10);
+  h.clock.advance(5);
   await h.tick();
   let state = await h.state();
-  assert.equal(state.paused?.reason, "error", "still paused: the operator resumes");
+  assert.equal(state.paused?.reason, "error", "still paused before the scheduled probe");
   assert.equal("landWithdrawals" in state, false, "every stored withdrawal was written");
   assert.equal("landWithdrawalsOverflow" in state, false, "the overflow too");
   for (const sha of old) assert.equal(newestLand(h, sha), "failure");
@@ -7598,6 +7913,10 @@ test("M4: while paused for a full list both lists are still retried; a resume wi
   await h.tick({ action: "resume" });
   state = await h.state();
   assert.equal(state.paused, null);
+  assert.match(
+    state.history.findLast((event) => event.type === "resumed").detail,
+    /^manual resume/
+  );
   h.runCi(recomposed.candidateSha);
   await h.tick();
   state = await h.state();
@@ -7813,18 +8132,21 @@ test("an authentication failure on the second landing attempt pauses with the st
   assert.equal(newestLand(h, f.candidateSha), "failure");
 });
 
-test("the tick that hits LANDING_ATTEMPTS_LIMIT withdraws a blessing still standing", async () => {
+test("an exhausted retry window withdraws a blessing still standing after a crashed tick", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1]);
-  // The third attempt's tick blessed it and died: no withdrawal ran.
+  // The last retry's tick blessed it and died: no withdrawal ran.
   await diedAfterBlessing(h, f, [f.candidateSha]);
-  await tamperInFlight(h, { landAttempts: LANDING_ATTEMPTS_LIMIT });
+  await tamperInFlight(h, {
+    landAttempts: LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS,
+    landingRetryTicks: LANDING_RETRY_TICKS,
+  });
   await h.tick();
   const state = await h.state();
-  assert.equal(state.paused?.reason, "error");
+  assert.equal(state.paused, null);
   assert.match(
-    state.paused.detail,
-    /ended without a verdict 3 times since its candidate was composed/
+    state.history.findLast((e) => e.type === "pr-parked").detail,
+    /attempts-limit: landing ended without a verdict/
   );
   assert.deepEqual(
     statusCalls(h).map((c) => c.args),
@@ -7919,7 +8241,7 @@ const brokenGetPull = () => async () => {
   throw new Error("GET /pulls/1 → 502: Bad Gateway");
 };
 
-test("V1 (review probe 1): landings that throw, alternating with ticks that throw before landing, pause at the third landing without a verdict; three blessings", async () => {
+test("V1 (review probe 1): landings that throw, alternating with ticks that throw before landing, reach the retry window after three landings without a verdict", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1]);
   const getPull = h.gh.getPull;
@@ -7937,15 +8259,11 @@ test("V1 (review probe 1): landings that throw, alternating with ticks that thro
     assert.equal(state.paused, null);
   }
   h.gh.getPull = getPull;
-  await h.tick(); // the fourth landing tick: not blessed
-  const state = await h.state();
-  assert.equal(state.paused?.reason, "error");
-  assert.match(
-    state.paused.detail,
-    /ended without a verdict 3 times since its candidate was composed/
-  );
-  assert.equal(statusStates(h).filter((s) => s === "success").length, 3, "three blessings");
-  assert.equal(landCalls(h).length, 3);
+  assert.deepEqual(statusStates(h), landPairs(LANDING_ATTEMPTS_LIMIT));
+  await exhaustNoVerdictRetries(h);
+  const total = LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS;
+  assert.deepEqual(statusStates(h), noVerdictRetryStatuses(LANDING_ATTEMPTS_LIMIT));
+  assert.equal(landCalls(h).length, total);
   assert.equal(newestLand(h, f.candidateSha), "failure");
 });
 
@@ -8212,7 +8530,7 @@ test("W2: a base-red pause with a repair in flight is replaced by the full-list 
   assert.equal(statusStates(h).filter((s) => s === "success").length, blessings, "nothing blessed");
 });
 
-test("W3 (re-review RR-2): landings that throw, alternating with checks back to pending, pause at the third landing without a verdict", async () => {
+test("W3 (re-review RR-2): landings that throw, alternating with checks back to pending, reach the retry window after three landings without a verdict", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const f = await greenBatch(h, [1]);
   h.world.landError = notAvailable(1);
@@ -8226,14 +8544,9 @@ test("W3 (re-review RR-2): landings that throw, alternating with checks back to 
     assert.equal(state.inFlight.landAttempts, attempt, "the count is the candidate's: kept");
     rerunGate(h, f.candidateSha, "completed");
   }
-  await h.tick();
-  const state = await h.state();
-  assert.equal(state.paused?.reason, "error");
-  assert.match(
-    state.paused.detail,
-    /ended without a verdict 3 times since its candidate was composed/
-  );
-  assert.equal(statusStates(h).filter((s) => s === "success").length, 3, "three blessings");
+  assert.deepEqual(statusStates(h), landPairs(LANDING_ATTEMPTS_LIMIT));
+  await exhaustNoVerdictRetries(h);
+  assert.deepEqual(statusStates(h), noVerdictRetryStatuses(LANDING_ATTEMPTS_LIMIT));
 });
 
 test("W3 (re-review RR-10): a shadow tick never pauses on a kept count", async () => {
@@ -8509,8 +8822,8 @@ test("X2: a dry-run tick on a base paused with overflow entries makes no GitHub 
   assert.equal(h.gh.writes.length, writes);
 });
 
-test('X3: the attempts-limit pause says what it counts (not "in a row")', async () => {
-  const h = createHarness({ mode: "live", actor: "owner" });
+test('X3: the squash-api attempts-limit pause says what it counts (not "in a row")', async () => {
+  const h = createHarness({ mode: "live", landing: "squash-api", actor: "owner" });
   await greenBatch(h, [1]);
   h.world.landError = notAvailable(1);
   for (let i = 0; i < 3; i++) await failingTick(h, /not available from origin/);
@@ -8676,7 +8989,7 @@ test("X3: the day-old withdrawal alert comes from the failure path too, once", (
   assert.equal(alerts(next).length, 1, "not again on the next refusal");
 });
 
-test("X3: a replaced base-red pause gets one comment on its issue: the base will not resume by itself", async () => {
+test("X3: a replaced base-red pause gets one comment explaining automatic withdrawal recovery", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const { baseRepairLabel } = h.config.lanes;
   h.gh.issues.push({
@@ -8706,13 +9019,15 @@ test("X3: a replaced base-red pause gets one comment on its issue: the base will
   assert.equal(state.paused.reason, "error");
   assert.match(state.paused.detail, /counts at the time of the pause/);
   const notes = (h.gh.comments.get(321) ?? []).filter((c) =>
-    /will not resume by itself/.test(c.body)
+    /resumes automatically after both withdrawal lists are empty/.test(c.body)
   );
   assert.equal(notes.length, 1);
   h.clock.advance(10);
   await h.tick();
   assert.equal(
-    (h.gh.comments.get(321) ?? []).filter((c) => /will not resume by itself/.test(c.body)).length,
+    (h.gh.comments.get(321) ?? []).filter((c) =>
+      /resumes automatically after both withdrawal lists are empty/.test(c.body)
+    ).length,
     1,
     "once"
   );
@@ -8781,7 +9096,7 @@ test("Y1: a kept pause whose text names a commit outside the words gets it appen
 
 // Re-aimed by the final fix wave (T13b-b): a base-red pause loaded with overflow entries is no
 // longer kept as base-red; it becomes the full-list pause.
-test("Y2 (re-review Q-6): a base-red pause with overflow entries (a hand-edited state) becomes the full-list pause: a tip move does not lift it, nor does writing the overflow; a resume does", async () => {
+test("Y2 (re-review Q-6): a base-red pause with overflow waits for the withdrawal probe even if the tip moves", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   await baseRedPause(h, [1, 2]);
   const x = fakeSha("ov");
@@ -8808,19 +9123,19 @@ test("Y2 (re-review Q-6): a base-red pause with overflow entries (a hand-edited 
   assert.equal(state.inFlight, null, "nothing composed");
   assert.ok(!types(state).includes("resumed"));
   h.gh.writeError = null; // this tick writes the overflow
-  h.clock.advance(10);
+  h.clock.advance(5);
   await h.tick();
   state = await h.state();
   assert.equal("landWithdrawalsOverflow" in state, false);
-  h.clock.advance(10);
+  assert.equal(state.paused?.reason, "error", "draining before the probe does not lift the pause");
+  h.clock.advance(5);
   await h.tick();
   state = await h.state();
-  assert.equal(state.paused?.reason, "error", "it does not lift by itself");
-  assert.ok(!types(state).includes("resumed"));
-  h.clock.advance(10);
-  await h.tick({ action: "resume" });
-  state = await h.state();
-  assert.equal(state.paused, null, "an operator's resume lifts it");
+  assert.equal(state.paused, null, "the probe lifts the pause once the overflow is written");
+  assert.match(
+    state.history.findLast((event) => event.type === "resumed").detail,
+    /^auto: withdrawals-empty/
+  );
 });
 
 // Re-aimed by the final fix wave (T13b-b): the base-red pause loaded with overflow entries becomes
@@ -8909,7 +9224,9 @@ test("Y3: a refused comment on the replaced base-red issue does not fail the tic
   const notes = result.decisions.filter((d) => d.includes("#321") && d.includes("410: Gone"));
   assert.equal(notes.length, 1, result.decisions.join("\n"));
   assert.equal(
-    (h.gh.comments.get(321) ?? []).filter((c) => /will not resume by itself/.test(c.body)).length,
+    (h.gh.comments.get(321) ?? []).filter((c) =>
+      /resumes automatically after both withdrawal lists are empty/.test(c.body)
+    ).length,
     0
   );
   assert.match(state.paused.detail, /the base was also paused as base-red \(issue #321\)/);
@@ -8997,4 +9314,203 @@ test("Y3: a resume of a pause that names no commit kept nowhere keeps the plain 
     state.history.findLast((e) => e.type === "resumed").detail,
     "manual resume (was manual)"
   );
+});
+
+function assertAutoPause(h, state, probe, attempts, minutes) {
+  assert.deepEqual(state.paused?.auto, {
+    probe,
+    attempts,
+    nextProbeAt: new Date(Date.parse(h.clock.now()) + minutes * 60_000).toISOString(),
+  });
+}
+
+function assertAutoResumed(state, probe) {
+  assert.equal(state.paused, null);
+  const resumed = state.history.findLast((event) => event.type === "resumed");
+  assert.ok(resumed?.detail.startsWith(`auto: ${probe}`), resumed?.detail);
+  assert.equal(state.history.at(-1).type, "batch-started");
+  assert.ok(state.inFlight);
+}
+
+/** An early tick leaves the schedule alone, without extra operator-visible writes. */
+async function waitForAutoProbe(h, minutes) {
+  const before = await h.state();
+  const writes = h.gh.writes.length;
+  h.clock.advance(minutes);
+  const result = await h.tick();
+  assert.deepEqual(result.state.paused, before.paused);
+  assert.deepEqual(result.state.inFlight, before.inFlight);
+  assert.ok(result.decisions.some((line) => line.includes(before.paused.auto.nextProbeAt)));
+  assert.deepEqual(
+    h.gh.writes.slice(writes).filter(({ method }) => method !== "putFileContent"),
+    []
+  );
+}
+
+test("auto resume: exhausted ordinary infra retries wait, then compose in the due tick", async () => {
+  const h = createHarness({ infraRetries: 0 });
+  const first = await startBatch(h, [1]);
+  h.runCi(first.candidateSha, { infra: true });
+  const paused = await h.tick();
+  assert.equal(paused.state.paused.reason, "infra");
+  assert.ok(types(paused.state).includes("infra-paused"));
+  assertAutoPause(h, paused.state, "retry", 1, 10);
+  await waitForAutoProbe(h, 9);
+  h.clock.advance(1);
+  const { state } = await h.tick();
+  assertAutoResumed(state, "retry");
+  assert.notEqual(state.inFlight.batchId, first.batchId);
+
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick();
+  const next = await startBatch(h, [2]);
+  h.runCi(next.candidateSha, { infra: true });
+  const second = (await h.tick()).state;
+  assertAutoPause(h, second, "retry", 1, 10);
+  assert.equal(second.paused.since, h.clock.now(), "landing ends the episode");
+});
+
+for (const actor of ["owner", "app"]) {
+  test(`auto resume: land-credential checks the ${actor} client`, async () => {
+    const h = createHarness({ actor });
+    await greenBatch(h, [1]);
+    h.world.landError = new Error("fatal: Authentication failed");
+    const paused = (await h.tick()).state;
+    assertAutoPause(h, paused, "land-credential", 1, 10);
+    if (actor === "owner") {
+      let attempted = 0;
+      let restored = false;
+      h.landGh.getBranchSha = async (branch) => {
+        assert.equal(branch, BASE);
+        attempted++;
+        if (!restored) throw Object.assign(new Error("Bad credentials"), { status: 401 });
+        return BASE0;
+      };
+      await waitForAutoProbe(h, 9);
+      assert.equal(attempted, 0);
+      for (const [minutes, attempts, next] of [
+        [1, 2, 20],
+        [20, 3, 40],
+        [40, 4, 60],
+        [60, 5, 60],
+      ]) {
+        h.clock.advance(minutes);
+        const failed = (await h.tick()).state;
+        assertAutoPause(h, failed, "land-credential", attempts, next);
+        assert.equal(failed.paused.since, paused.paused.since);
+        assert.equal(failed.inFlight, null);
+        assert.equal(attempted, attempts - 1);
+        assert.equal(statusCalls(h).length, 2, "the probe never blesses or withdraws");
+      }
+      restored = true;
+      h.clock.advance(60);
+    } else {
+      const getBranchSha = h.gh.getBranchSha;
+      let failing = true;
+      h.gh.getBranchSha = async (branch) => {
+        if (failing) {
+          failing = false;
+          assert.equal(branch, BASE);
+          throw Object.assign(new Error("Bad credentials"), { status: 401 });
+        }
+        return getBranchSha(branch);
+      };
+      await waitForAutoProbe(h, 9);
+      assert.equal(failing, true);
+      h.clock.advance(1);
+      const { state } = await h.tick();
+      assertAutoPause(h, state, "land-credential", 2, 20);
+      assert.equal(failing, false, "the probe ran with the App credential");
+      h.clock.advance(20);
+    }
+    h.world.landError = null;
+    assertAutoResumed((await h.tick()).state, "land-credential");
+  });
+}
+
+test("auto resume: missing owner land token waits, backs off, then resumes once supplied", async () => {
+  const h = createHarness({ actor: "owner", landToken: false });
+  await greenBatch(h, [1]);
+  const { state } = await h.tick();
+  assertAutoPause(h, state, "land-token-present", 1, 10);
+  await waitForAutoProbe(h, 9);
+  h.clock.advance(1);
+  const failed = (await h.tick()).state;
+  assertAutoPause(h, failed, "land-token-present", 2, 20);
+  assert.equal(failed.paused.since, state.paused.since);
+  assert.deepEqual(statusCalls(h), []);
+  h.deps.landGitFor = () => h.landGit;
+  h.deps.landGh = h.landGh;
+  h.clock.advance(20);
+  assertAutoResumed((await h.tick()).state, "land-token-present");
+});
+
+test("auto resume: queue refs probe rechecks the rejected candidate ref and the state branch", async () => {
+  const h = createHarness();
+  const f = await greenBatch(h, [1]);
+  h.unprotect(f.candidateRef, "update");
+  const { state } = await h.tick();
+  assertAutoPause(h, state, "queue-refs-protected", 1, 10);
+  await waitForAutoProbe(h, 9);
+  assert.deepEqual(rulesReads(h), [STATE_BRANCH, f.candidateRef]);
+  h.clock.advance(1);
+  const failed = (await h.tick()).state;
+  assertAutoPause(h, failed, "queue-refs-protected", 2, 20);
+  assert.equal(failed.paused.since, state.paused.since);
+  assert.deepEqual(rulesReads(h), [STATE_BRANCH, f.candidateRef, STATE_BRANCH, f.candidateRef]);
+  assert.deepEqual(statusCalls(h), []);
+  h.gh.branchRules.delete(f.candidateRef);
+  h.clock.advance(20);
+  assertAutoResumed((await h.tick()).state, "queue-refs-protected");
+});
+
+test("auto resume: full withdrawals wait for both lists to drain after the current tick's retries", async () => {
+  const h = createHarness({ actor: "owner" });
+  const { old } = await fullListThenRefusedLanding(h);
+  refuseWithdrawals(h, () => true);
+  const { state } = await h.tick();
+  h.addPr(2);
+  assertAutoPause(h, state, "withdrawals-empty", 1, 10);
+  await waitForAutoProbe(h, 9);
+  h.clock.advance(1);
+  refuseWithdrawals(h, (sha) => sha === old[0]);
+  const failed = (await h.tick()).state;
+  assertAutoPause(h, failed, "withdrawals-empty", 2, 20);
+  assert.equal(failed.paused.since, state.paused.since);
+  assert.deepEqual(overflowOf(failed), []);
+  assert.deepEqual(
+    failed.landWithdrawals.map((w) => w.sha),
+    [old[0]]
+  );
+  assert.deepEqual(failed.inFlight, state.inFlight, "the candidate is left at testing");
+  h.gh.writeError = null;
+  h.runCi(state.inFlight.candidateSha);
+  h.clock.advance(20);
+  const resumed = (await h.tick()).state;
+  assertAutoResumed(resumed, "withdrawals-empty");
+  assert.deepEqual(nums(resumed.inFlight.prs), [2]);
+  assert.equal(resumed.landWithdrawals, undefined);
+  assert.equal(resumed.landWithdrawalsOverflow, undefined);
+});
+
+test("a manual pause replaces a scheduled auto pause and keeps both lanes stopped after it was due", async () => {
+  const h = createHarness({ actor: "owner", landToken: false });
+  await greenBatch(h, [1]);
+  const paused = (await h.tick()).state;
+  assertAutoPause(h, paused, "land-token-present", 1, 10);
+  h.addPr(2);
+  h.addLane(2, h.config.lanes.hotfixLabel);
+  h.addPr(3);
+  h.addLane(3, h.config.lanes.baseRepairLabel);
+  await waitForAutoProbe(h, 9);
+  const manual = (await h.tick({ action: "pause" })).state;
+  assert.equal(manual.paused.reason, "manual");
+  assert.equal(manual.paused.auto, undefined);
+  h.deps.landGitFor = () => h.landGit;
+  h.deps.landGh = h.landGh;
+  h.clock.advance(20);
+  const later = (await h.tick()).state;
+  assert.deepEqual(later.paused, manual.paused);
+  assert.equal(later.inFlight, null);
+  assert.ok(!types(later).includes("resumed"));
 });

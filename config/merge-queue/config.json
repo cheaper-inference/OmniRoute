@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "label": "omni-queue",
+  "parkedLabel": "omni-queue-parked",
   "protectedApprovalLabel": "protected-approved",
   "approvers": ["diegosouzapw"],
   "appSlug": "omni-queue",
