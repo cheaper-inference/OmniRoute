@@ -26,6 +26,22 @@ import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 import { handleComboChat } from "@omniroute/open-sse/services/combo.ts";
 import { log } from "@omniroute/open-sse/utils/logger.ts";
 import { saveCallLog } from "@/lib/usageDb";
+import { recordSpecialtyRequestUsage } from "@/lib/usage/specialtyRequestAccounting";
+
+async function accountSuccessfulTranslation(
+  response: Response,
+  input: Parameters<typeof recordSpecialtyRequestUsage>[0]
+): Promise<Response> {
+  await recordSpecialtyRequestUsage(input);
+  // The multipart upload supplies no playback duration for per-second pricing.
+  return attachOmniRouteMetaToResponse(response, {
+    provider: input.provider,
+    model: input.model,
+    costUsd: 0,
+    latencyMs: Date.now() - input.startTime,
+    requestId: generateRequestId(),
+  });
+}
 
 /**
  * Copy a multipart body, swapping only the `model` field. Combo fan-out needs one
@@ -151,14 +167,14 @@ async function translateWithModel(
 
   if (response?.ok) {
     await clearRecoveredProviderState(credentials);
-    // No text body / playback duration available from the multipart upload, so
-    // per-second pricing cannot be applied → cost 0 (ADD-only headers, body intact).
-    response = attachOmniRouteMetaToResponse(response, {
+    response = await accountSuccessfulTranslation(response, {
+      endpoint: "/v1/audio/translations",
       provider,
       model: resolvedModel,
-      costUsd: 0,
-      latencyMs: Date.now() - startTime,
-      requestId: generateRequestId(),
+      apiKeyId,
+      apiKeyName,
+      connectionId,
+      startTime,
     });
     saveCallLog({
       method: "POST",

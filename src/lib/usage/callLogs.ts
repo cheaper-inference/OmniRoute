@@ -943,6 +943,19 @@ async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void>
   scheduleCallLogRotation();
 }
 
+function observeMediaCallLog(entry: { path?: string; status: number }, metadataOnly: boolean) {
+  const mediaWrites = getCallLogApiKeyContext()?.mediaWrites;
+  if (
+    mediaWrites &&
+    !metadataOnly &&
+    entry.path === mediaWrites.endpoint &&
+    entry.status >= 200 &&
+    entry.status < 300
+  ) {
+    mediaWrites.callLog = true;
+  }
+}
+
 export function saveCallLog(entry: any, metadataOnly = false): Promise<void> {
   // Usage is also needed by the live dashboard when disk history is disabled.
   if (!metadataOnly && entry?.tokens && typeof entry.tokens === "object") {
@@ -958,6 +971,7 @@ export function saveCallLog(entry: any, metadataOnly = false): Promise<void> {
   }
   if (!shouldPersistToDisk || callLogSavesClosing) return Promise.resolve();
 
+  observeMediaCallLog(entry, metadataOnly);
   const operation = saveCallLogOperation(entry, metadataOnly);
   pendingCallLogSaves.add(operation);
   void operation.then(

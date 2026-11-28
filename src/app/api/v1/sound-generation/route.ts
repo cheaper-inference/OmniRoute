@@ -63,6 +63,7 @@ export async function POST(request: Request) {
               model: target,
               contentType: "application/json",
               preauthorizedConnections: allowedConnections,
+              apiKeyInfo: policy.apiKeyInfo,
             }
           );
         },

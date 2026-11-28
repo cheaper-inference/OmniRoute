@@ -93,6 +93,7 @@ export async function executeVideoCombo(
   body: Record<string, unknown>,
   auth: {
     prepareFalInput?: PrepareFalInput | null;
+    generateVideo?: typeof handleVideoGeneration;
     request: Request;
     policy: { apiKeyInfo?: { id?: string; name?: string } | null };
     /** GHSA-3w2r: the caller key's scope; omitted = unrestricted (unchanged). */
@@ -105,6 +106,7 @@ export async function executeVideoCombo(
 ): Promise<Response> {
   // Every target gets the client's signal, so a disconnect stops each
   // target's local polling exactly like the single-provider route.
+  const { generateVideo = handleVideoGeneration } = auth;
   const signal = auth.request.signal;
   if (signal.aborted) return errorResponse(499, "Request aborted");
 
@@ -263,7 +265,7 @@ export async function executeVideoCombo(
         credentials = local.credentials;
       }
 
-      const result: MediaGenerationResultLike = await handleVideoGeneration({
+      const result: MediaGenerationResultLike = await generateVideo({
         prepareFalInput: auth.prepareFalInput,
         body: { ...body, model: modelStr },
         credentials,

@@ -30,6 +30,43 @@ function recordBill(input: Identity, costUsd: number | null, tokens?: unknown): 
   }
 }
 
+type SpecialtyRequest = Identity & { endpoint: string };
+
+export async function recordSpecialtyRequestUsage(
+  input: SpecialtyRequest &
+    Pick<UsageEntry, "calculatedCostUsd" | "billingUnit" | "billingQuantity" | "tokens" | "status">
+): Promise<void> {
+  if (!input.apiKeyId) return;
+  await saveRequestUsage(
+    {
+      ...input,
+      billingUnit: input.billingUnit ?? "request",
+      status: input.status ?? "200",
+      success: true,
+      latencyMs: Date.now() - input.startTime,
+    },
+    { deduplicate: false }
+  );
+}
+
+export async function recordSpecialtyCallLog(input: SpecialtyRequest): Promise<void> {
+  if (!input.apiKeyId) return;
+  await saveCallLog({
+    ...input,
+    id: input.requestId,
+    method: "POST",
+    path: input.endpoint,
+    status: 200,
+    duration: Date.now() - input.startTime,
+  });
+}
+
+/** Attribute a request whose endpoint has no dollar tariff. */
+export async function recordUnpricedSpecialtyRequest(input: SpecialtyRequest): Promise<void> {
+  await recordSpecialtyRequestUsage(input);
+  await recordSpecialtyCallLog(input);
+}
+
 function normalizeEmbeddingUsage(raw: Record<string, unknown> | null): Record<string, unknown> {
   const usage = raw ? { ...raw } : {};
   // OpenRouter's raw embeddings usage reports dollars as `cost`; the shared

@@ -8,6 +8,11 @@ import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
+  runWithCallLogApiKeyContext,
+  toCallLogApiKeyContext,
+} from "@/lib/usage/callLogApiKeyContext";
+import { recordSpecialtyRequestUsage } from "@/lib/usage/specialtyRequestAccounting";
+import {
   isKeyScopeBlockedCredentials,
   keyScopeBlockedResponse,
   resolveKeyConnectionScope,
@@ -40,6 +45,7 @@ export async function OPTIONS() {
  * still Foundation API, not Reader.
  */
 async function postHandler(request: Request) {
+  const startTime = Date.now();
   let rawBody: unknown;
   try {
     rawBody = await request.json();
@@ -78,16 +84,26 @@ async function postHandler(request: Request) {
     return rateLimitedProviderResponse(JINA_FOUNDATION_PROVIDER_ID, credentials);
   }
 
-  const response = await handleJinaFoundationProxy({
-    path: "/v1/segment",
-    upstreamUrl: `${JINA_SEGMENT_BASE_URL}/`,
-    body,
-    credentials,
-    provider: JINA_FOUNDATION_PROVIDER_ID,
-    model: "segment",
-  });
+  const identity = toCallLogApiKeyContext(policy.apiKeyInfo, credentials);
+  const response = await runWithCallLogApiKeyContext(identity, () =>
+    handleJinaFoundationProxy({
+      path: "/v1/segment",
+      upstreamUrl: `${JINA_SEGMENT_BASE_URL}/`,
+      body,
+      credentials,
+      provider: JINA_FOUNDATION_PROVIDER_ID,
+      model: "segment",
+    })
+  );
   if (response?.ok) {
     await clearRecoveredProviderState(credentials);
+    await recordSpecialtyRequestUsage({
+      ...identity,
+      endpoint: "/v1/segment",
+      provider: JINA_FOUNDATION_PROVIDER_ID,
+      model: "segment",
+      startTime,
+    });
   }
   return response;
 }

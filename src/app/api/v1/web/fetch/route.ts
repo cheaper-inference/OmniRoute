@@ -42,6 +42,8 @@ import {
 } from "@/app/api/v1/_shared/rateLimit";
 
 import { runWebEndpointCombo } from "@/lib/combos/webEndpointCombo";
+import { recordUnpricedSpecialtyRequest } from "@/lib/usage/specialtyRequestAccounting";
+import type { ApiKeyPolicyResult } from "@/shared/utils/apiKeyPolicy";
 import { getSettings } from "@/lib/db/settings";
 import type { z } from "zod";
 
@@ -70,7 +72,8 @@ const QUOTA_STATUS_PROVIDERS = new Set<WebFetchProviderId>([
   "tinyfish",
 ]);
 
-type CredentialsLookup = WebFetchCredentials | RateLimitedCredentials | null;
+type RouteCredentials = WebFetchCredentials & { connectionId?: string };
+type CredentialsLookup = RouteCredentials | RateLimitedCredentials | null;
 
 export async function OPTIONS() {
   return new Response(null, { headers: CORS_HEADERS });
@@ -110,7 +113,7 @@ function isRetryableWebFetchStatus(providerId: WebFetchProviderId, status?: numb
 async function findNextFallbackProvider(
   tried: Set<WebFetchProviderId>,
   allowedConnections: string[] | null
-): Promise<{ providerId: WebFetchProviderId; credentials: WebFetchCredentials } | null> {
+): Promise<{ providerId: WebFetchProviderId; credentials: RouteCredentials } | null> {
   for (const pid of WEB_FETCH_PROVIDERS) {
     if (EXPLICIT_ONLY_PROVIDERS.has(pid)) continue;
     if (tried.has(pid)) continue;
@@ -135,6 +138,7 @@ interface WebFetchExecutionResult {
   result: WebFetchResult;
   provider: WebFetchProviderId;
   poolExhausted: boolean;
+  connectionId?: string;
 }
 
 /**
@@ -145,7 +149,7 @@ interface WebFetchExecutionResult {
 async function executeWithFallback(
   reqBody: WebFetchExecutionInput,
   startProvider: WebFetchProviderId,
-  startCredentials: WebFetchCredentials,
+  startCredentials: RouteCredentials,
   allowFallback: boolean,
   triedProviders: Set<WebFetchProviderId>,
   allowedConnections: string[] | null
@@ -155,27 +159,27 @@ async function executeWithFallback(
   let result = await handleWebFetch(reqBody, credentials, provider);
 
   if (!allowFallback) {
-    return { result, provider, poolExhausted: false };
+    return { result, provider, poolExhausted: false, connectionId: credentials.connectionId };
   }
 
   while (!result.success && isRetryableWebFetchStatus(provider, result.status)) {
     const next = await findNextFallbackProvider(triedProviders, allowedConnections);
     if (!next) {
-      return { result, provider, poolExhausted: true };
+      return { result, provider, poolExhausted: true, connectionId: credentials.connectionId };
     }
     provider = next.providerId;
     credentials = next.credentials;
     result = await handleWebFetch(reqBody, credentials, provider);
   }
 
-  return { result, provider, poolExhausted: false };
+  return { result, provider, poolExhausted: false, connectionId: credentials.connectionId };
 }
 
 type ResolvedWebFetchTarget =
   | {
       ok: true;
       provider: WebFetchProviderId;
-      credentials: WebFetchCredentials;
+      credentials: RouteCredentials;
       tried: Set<WebFetchProviderId>;
       isExplicit: boolean;
     }
@@ -327,18 +331,21 @@ export async function POST(request: Request) {
       dispatch: (provider, allowedConnections) =>
         executeWebFetchBody(
           { ...body, model: undefined, provider: provider as WebFetchProviderId },
-          allowedConnections
+          allowedConnections,
+          scope.policy.apiKeyInfo
         ),
     });
   }
-  return executeWebFetchBody(body, scope.allowedConnections);
+  return executeWebFetchBody(body, scope.allowedConnections, scope.policy.apiKeyInfo);
 }
 
 /** Execute a validated page-fetch body through a direct provider or named combo. */
 async function executeWebFetchBody(
   body: z.infer<typeof v1WebFetchSchema>,
-  allowedConnections: string[] | null
+  allowedConnections: string[] | null,
+  apiKeyInfo: ApiKeyPolicyResult["apiKeyInfo"]
 ): Promise<Response> {
+  const startTime = Date.now();
   // Resolve provider + credentials (explicit provider never falls back; #8297)
   const target = await resolveWebFetchTarget(body.provider, allowedConnections);
   if (!target.ok) return target.response;
@@ -349,6 +356,7 @@ async function executeWebFetchBody(
     result,
     provider: finalProvider,
     poolExhausted,
+    connectionId,
   } = await executeWithFallback(
     {
       url: body.url,
@@ -387,6 +395,15 @@ async function executeWebFetchBody(
     log.info("WEB_FETCH", `Fell back from ${target.provider} to ${finalProvider}`);
   }
 
+  await recordUnpricedSpecialtyRequest({
+    endpoint: "/v1/web/fetch",
+    provider: finalProvider,
+    model: finalProvider,
+    startTime,
+    apiKeyId: apiKeyInfo?.id,
+    apiKeyName: apiKeyInfo?.name,
+    connectionId,
+  });
   return new Response(JSON.stringify(result.data), {
     status: 200,
     headers: { "Content-Type": "application/json", ...CORS_HEADERS },

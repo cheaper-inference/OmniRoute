@@ -47,6 +47,8 @@ import { getSettings } from "@/lib/db/settings";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { saveCallLog } from "@/lib/usageDb";
+import { runWithCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
+import { recordSpecialtyRequestUsage } from "@/lib/usage/specialtyRequestAccounting";
 import type { z } from "zod";
 import type { ApiKeyPolicyResult } from "@/shared/utils/apiKeyPolicy";
 import { runWebEndpointCombo } from "@/lib/combos/webEndpointCombo";
@@ -429,36 +431,42 @@ async function executeSearchBody(
   );
 
   const ttl = providerConfig.cacheTTLMs ?? SEARCH_CACHE_DEFAULT_TTL_MS;
+  const identity = {
+    apiKeyId: policy.apiKeyInfo?.id ?? null,
+    apiKeyName: policy.apiKeyInfo?.name ?? null,
+  };
 
   try {
     const { data: searchResult, cached } = await getOrCoalesce(cacheKey, ttl, async () => {
-      const result = await handleSearch({
-        query: body.query,
-        provider: providerConfig.id,
-        maxResults: clampedMaxResults,
-        searchType: body.search_type,
-        country: body.country,
-        language: body.language,
-        timeRange: body.time_range,
-        offset: body.offset,
-        domainFilter: buildDomainFilter(body.filters),
-        contentOptions: body.content,
-        strictFilters: body.strict_filters,
-        providerOptions: body.provider_options,
-        credentials,
-        alternateProvider: alternateProviderId,
-        alternateCredentials,
-        log,
-        connectionId: credentials?.connectionId || undefined,
-        apiKeyId: policy.apiKeyInfo?.id || undefined,
-        timeoutMs:
-          typeof settings?.searchTimeoutMs === "number" ? settings.searchTimeoutMs : undefined,
-        providerTimeoutsMs:
-          settings?.searchProviderTimeoutsMs &&
-          typeof settings.searchProviderTimeoutsMs === "object"
-            ? settings.searchProviderTimeoutsMs
-            : undefined,
-      });
+      const result = await runWithCallLogApiKeyContext(identity, () =>
+        handleSearch({
+          query: body.query,
+          provider: providerConfig.id,
+          maxResults: clampedMaxResults,
+          searchType: body.search_type,
+          country: body.country,
+          language: body.language,
+          timeRange: body.time_range,
+          offset: body.offset,
+          domainFilter: buildDomainFilter(body.filters),
+          contentOptions: body.content,
+          strictFilters: body.strict_filters,
+          providerOptions: body.provider_options,
+          credentials,
+          alternateProvider: alternateProviderId,
+          alternateCredentials,
+          log,
+          connectionId: credentials?.connectionId || undefined,
+          apiKeyId: identity.apiKeyId ?? undefined,
+          timeoutMs:
+            typeof settings?.searchTimeoutMs === "number" ? settings.searchTimeoutMs : undefined,
+          providerTimeoutsMs:
+            settings?.searchProviderTimeoutsMs &&
+            typeof settings.searchProviderTimeoutsMs === "object"
+              ? settings.searchProviderTimeoutsMs
+              : undefined,
+        })
+      );
 
       if (!result.success) {
         throw new SearchError(result.error || "Search failed", result.status || 502);
@@ -475,8 +483,8 @@ async function executeSearchBody(
         method: "POST",
         path: "/v1/search",
         status: 200,
-        model: providerConfig.id,
-        provider: providerConfig.id,
+        model: searchResult.provider,
+        provider: searchResult.provider,
         duration: Date.now() - requestStartTime,
         requestType: "search",
         cacheSource: "semantic",
@@ -487,7 +495,7 @@ async function executeSearchBody(
           max_results: clampedMaxResults,
         },
         responseBody: { results_count: searchResult.results?.length ?? 0, cached: true },
-        apiKeyId: policy.apiKeyInfo?.id || undefined,
+        ...identity,
       }).catch(() => {
         /* non-critical — logging must not block search response */
       });
@@ -501,6 +509,17 @@ async function executeSearchBody(
         log.warn("SEARCH", `Cost recording failed: ${e instanceof Error ? e.message : String(e)}`);
       }
     }
+
+    await recordSpecialtyRequestUsage({
+      ...identity,
+      endpoint: "/v1/search",
+      provider: searchResult.provider,
+      model: searchResult.provider,
+      startTime: requestStartTime,
+      calculatedCostUsd: cached ? 0 : (searchResult.usage?.search_cost_usd ?? null),
+      billingUnit: "query",
+      billingQuantity: cached ? 0 : (searchResult.usage?.queries_used ?? null),
+    });
 
     const response = {
       id: `search-${crypto.randomUUID()}`,

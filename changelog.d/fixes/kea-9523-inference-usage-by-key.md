@@ -1,0 +1,1 @@
+- **fix(usage):** API-key analytics now count authenticated inference across media, moderation, search, web fetch, rerank, and other specialty endpoints. Unknown costs stay unknown, and existing provider logs and charges are reused (KEA-9523).

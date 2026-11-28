@@ -43,6 +43,13 @@ export interface OpenAiDecisionsProxyOptions {
   credentials: OpenAiDecisionsCredentials;
   /** Test seam; production uses the guarded transport. */
   transport?: DecisionTransport;
+  recordUsage?: (usage: {
+    provider: string;
+    model: string;
+    connectionId?: string | null;
+    startTime: number;
+    tokens: { input_tokens: number; output_tokens: number };
+  }) => Promise<void>;
 }
 
 type DecisionUsage = { input_tokens?: unknown; output_tokens?: unknown };
@@ -142,6 +149,16 @@ export async function handleOpenAiDecisionsProxy(
 
   const usage = isRecord(data.usage) ? (data.usage as DecisionUsage) : null;
   logDecisionsCall(options, { status: 200, usage, startTime });
+  await options.recordUsage?.({
+    provider: OPENAI_DECISIONS_PROVIDER_ID,
+    model: options.model.qualified,
+    connectionId: options.credentials.connectionId,
+    startTime,
+    tokens: {
+      input_tokens: tokenCount(usage?.input_tokens),
+      output_tokens: tokenCount(usage?.output_tokens),
+    },
+  });
   const headers = new Headers({
     ...CORS_HEADERS,
     "Content-Type": "application/json",

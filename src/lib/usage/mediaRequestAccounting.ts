@@ -171,16 +171,18 @@ export async function safelyRecordMedia(work: () => Promise<unknown>): Promise<v
 /** One physical successful attempt, including combos. No wrapper-level second debit. */
 export async function recordMediaRequest(
   input: MediaRequestIdentity,
-  bill: MediaBill
+  bill: MediaBill,
+  { enforceUnpricedBudget = true }: { enforceUnpricedBudget?: boolean } = {}
 ): Promise<void> {
+  const countOnly = bill.costUsd === null && !enforceUnpricedBudget;
   return safelyRecordMedia(async () => {
     await saveRequestUsage(
       {
         ...input,
         tokens: bill.usage,
         calculatedCostUsd: bill.reportedCostUsd === null ? bill.costUsd : null,
-        billingUnit: bill.unit,
-        billingQuantity: bill.quantity,
+        billingUnit: countOnly ? "request" : bill.unit,
+        billingQuantity: countOnly ? null : bill.quantity,
         billingUnitPriceUsd: bill.unitPriceUsd,
         status: "200",
         success: true,
@@ -189,8 +191,11 @@ export async function recordMediaRequest(
       { deduplicate: false }
     );
     if (!input.apiKeyId || isFlatRateProvider(input.provider)) return;
-    if (bill.costUsd === null) recordUnpricedBudgetUsage(input.apiKeyId, input);
-    else recordCost(input.apiKeyId, bill.costUsd, { ...input, tokens: bill.usage, success: true });
+    if (bill.costUsd !== null) {
+      recordCost(input.apiKeyId, bill.costUsd, { ...input, tokens: bill.usage, success: true });
+    } else if (enforceUnpricedBudget) {
+      recordUnpricedBudgetUsage(input.apiKeyId, input);
+    }
   });
 }
 

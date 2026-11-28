@@ -50,6 +50,13 @@ export interface SystemOneProxyOptions {
   /** Client-requested model id (for logs when upstream reports none). */
   requestedModel?: string | null;
   fetchImpl?: typeof fetch;
+  recordUsage?: (usage: {
+    provider: string;
+    model: string;
+    connectionId?: string | null;
+    startTime: number;
+    tokens: { input_tokens?: number; output_tokens?: number; cost_usd?: number };
+  }) => Promise<void>;
 }
 
 interface SystemOneUpstreamResponse {
@@ -361,6 +368,25 @@ async function readDecisionResponse(
   };
 }
 
+async function recordDecisionUsage(
+  options: SystemOneProxyOptions,
+  model: string,
+  usage: SystemOneUpstreamResponse["usage"],
+  startTime: number
+): Promise<void> {
+  await options.recordUsage?.({
+    provider: options.target.provider,
+    model,
+    connectionId: options.credentials?.connectionId,
+    startTime,
+    tokens: {
+      input_tokens: usage?.input_tokens,
+      output_tokens: usage?.output_tokens,
+      cost_usd: usage?.cost,
+    },
+  });
+}
+
 export async function handleSystemOneProxy(options: SystemOneProxyOptions): Promise<Response> {
   const startTime = Date.now();
   const provider = options.target.provider;
@@ -391,6 +417,7 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
       return errorResponse(status, upstreamError || `Provider returned HTTP ${status}`);
     }
 
+    await recordDecisionUsage(options, answeredModel, usage, startTime);
     return buildSuccessResponse(parsed, {
       provider,
       model: answeredModel,

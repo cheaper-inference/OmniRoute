@@ -20,6 +20,11 @@ import { errorResponse, sanitizeErrorMessage } from "@omniroute/open-sse/utils/e
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
+  runWithCallLogApiKeyContext,
+  toCallLogApiKeyContext,
+} from "@/lib/usage/callLogApiKeyContext";
+import { recordSpecialtyRequestUsage } from "@/lib/usage/specialtyRequestAccounting";
+import {
   isKeyScopeBlockedCredentials,
   keyScopeBlockedResponse,
   resolveKeyConnectionScope,
@@ -175,13 +180,18 @@ async function postHandler(request: Request): Promise<Response> {
   const bound = bindConnectionUrl(target, credentials as SystemOneCredentials);
   if ("rejection" in bound) return bound.rejection;
 
-  const response = await handleSystemOneProxy({
-    path: new URL(request.url).pathname,
-    target: bound.target,
-    body,
-    credentials: credentials as SystemOneCredentials,
-    requestedModel: model ?? null,
-  });
+  const identity = toCallLogApiKeyContext(policy.apiKeyInfo);
+  const response = await runWithCallLogApiKeyContext(identity, () =>
+    handleSystemOneProxy({
+      path: new URL(request.url).pathname,
+      target: bound.target,
+      body,
+      credentials: credentials as SystemOneCredentials,
+      requestedModel: model ?? null,
+      recordUsage: (usage) =>
+        recordSpecialtyRequestUsage({ ...identity, ...usage, endpoint: "/v1/systemone" }),
+    })
+  );
   if (response.ok) {
     await clearRecoveredProviderState(credentials);
   }

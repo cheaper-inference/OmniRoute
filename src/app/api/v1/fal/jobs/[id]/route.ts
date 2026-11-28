@@ -152,7 +152,7 @@ export async function POST(request: Request, route: Context) {
     sendFalRealtime(id, body.input);
     await recordFalDispatch(
       { ...job, id: randomUUID(), createdAt: Date.now() },
-      context.apiKeyInfo?.id ?? null,
+      context.apiKeyInfo,
       200
     );
     return Response.json({

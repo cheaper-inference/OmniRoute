@@ -47,7 +47,7 @@ function headers(job: FalJob) {
 async function account(job: FalJob, context: Context, status: number) {
   if (!claimFalAccounting(job.id)) return;
   job.accounted = true;
-  await recordFalDispatch(job, context.apiKeyInfo?.id ?? null, status);
+  await recordFalDispatch(job, context.apiKeyInfo, status);
 }
 function closed(job: FalJob, uncertain = false) {
   removeFalRealtime(job.id);

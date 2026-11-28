@@ -8,6 +8,11 @@ import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
+  runWithCallLogApiKeyContext,
+  toCallLogApiKeyContext,
+} from "@/lib/usage/callLogApiKeyContext";
+import { recordSpecialtyRequestUsage } from "@/lib/usage/specialtyRequestAccounting";
+import {
   isKeyScopeBlockedCredentials,
   keyScopeBlockedResponse,
   resolveKeyConnectionScope,
@@ -39,6 +44,7 @@ export async function OPTIONS() {
  * credentials (or JINA_AI_API_KEY when no dashboard key exists).
  */
 async function postHandler(request: Request) {
+  const startTime = Date.now();
   let rawBody: unknown;
   try {
     rawBody = await request.json();
@@ -78,16 +84,26 @@ async function postHandler(request: Request) {
     return rateLimitedProviderResponse(JINA_FOUNDATION_PROVIDER_ID, credentials);
   }
 
-  const response = await handleJinaFoundationProxy({
-    path: "/v1/classify",
-    upstreamUrl: `${JINA_FOUNDATION_BASE_URL}/v1/classify`,
-    body,
-    credentials,
-    provider: JINA_FOUNDATION_PROVIDER_ID,
-    model: model || null,
-  });
+  const identity = toCallLogApiKeyContext(policy.apiKeyInfo, credentials);
+  const response = await runWithCallLogApiKeyContext(identity, () =>
+    handleJinaFoundationProxy({
+      path: "/v1/classify",
+      upstreamUrl: `${JINA_FOUNDATION_BASE_URL}/v1/classify`,
+      body,
+      credentials,
+      provider: JINA_FOUNDATION_PROVIDER_ID,
+      model: model || null,
+    })
+  );
   if (response?.ok) {
     await clearRecoveredProviderState(credentials);
+    await recordSpecialtyRequestUsage({
+      ...identity,
+      endpoint: "/v1/classify",
+      provider: JINA_FOUNDATION_PROVIDER_ID,
+      model: model || "classify",
+      startTime,
+    });
   }
   return response;
 }

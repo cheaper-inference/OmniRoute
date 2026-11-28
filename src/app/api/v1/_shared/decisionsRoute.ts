@@ -29,6 +29,11 @@ import {
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
+  runWithCallLogApiKeyContext,
+  toCallLogApiKeyContext,
+} from "@/lib/usage/callLogApiKeyContext";
+import { recordSpecialtyRequestUsage } from "@/lib/usage/specialtyRequestAccounting";
+import {
   isKeyScopeBlockedCredentials,
   keyScopeBlockedResponse,
   resolveKeyConnectionScope,
@@ -120,13 +125,18 @@ async function postHandler(request: Request, deps: DecisionsRouteDeps): Promise<
     return rateLimitedProviderResponse(OPENAI_DECISIONS_PROVIDER_ID, credentials);
   }
 
-  const response = await handleOpenAiDecisionsProxy({
-    path: new URL(request.url).pathname,
-    model,
-    body,
-    credentials: credentials as Parameters<typeof handleOpenAiDecisionsProxy>[0]["credentials"],
-    transport: deps.transport,
-  });
+  const identity = toCallLogApiKeyContext(policy.apiKeyInfo);
+  const response = await runWithCallLogApiKeyContext(identity, () =>
+    handleOpenAiDecisionsProxy({
+      path: new URL(request.url).pathname,
+      model,
+      body,
+      credentials: credentials as Parameters<typeof handleOpenAiDecisionsProxy>[0]["credentials"],
+      transport: deps.transport,
+      recordUsage: (usage) =>
+        recordSpecialtyRequestUsage({ ...identity, ...usage, endpoint: "/v1/decisions" }),
+    })
+  );
   if (response.ok) await clearRecoveredProviderState(credentials);
   return response;
 }

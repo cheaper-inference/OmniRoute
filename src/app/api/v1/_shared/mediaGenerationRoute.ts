@@ -4,6 +4,11 @@ import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { calculateModalCost } from "@/lib/usage/costCalculator";
 import { recordModalCallCost } from "@/domain/costRules";
+import {
+  attachMediaResponseMeta,
+  priceMediaRequest,
+  recordMediaRequest,
+} from "@/lib/usage/mediaRequestAccounting";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { v1ImageGenerationSchema } from "@/shared/validation/schemas";
@@ -116,6 +121,7 @@ export async function successfulMediaGenerationResponse({
   strategy,
   fallbackAttempts,
   apiKeyId,
+  musicAccounting,
 }: {
   result: { data: unknown };
   billingMode: "audio" | "video";
@@ -130,25 +136,55 @@ export async function successfulMediaGenerationResponse({
   fallbackAttempts?: number;
   /** The caller's API key: the priced call is charged to its dollar budget. */
   apiKeyId?: string | null;
+  musicAccounting?: { apiKeyName?: string | null; connectionId?: string | null; usage?: unknown };
 }) {
   const seconds = Number(duration) || 0;
-  const costUsd = await calculateModalCost(billingMode, provider, model, { seconds });
-  recordModalCallCost(apiKeyId, { provider, model, costUsd });
+  const bill = musicAccounting
+    ? await priceMediaRequest({
+        provider,
+        model,
+        unit: "second",
+        quantity: seconds > 0 ? seconds : null,
+        usage: musicAccounting.usage,
+      })
+    : null;
+  const costUsd = bill
+    ? bill.costUsd
+    : await calculateModalCost(billingMode, provider, model, { seconds });
+  const requestId = generateRequestId();
+  if (bill) {
+    await recordMediaRequest(
+      {
+        provider,
+        model,
+        endpoint: "/v1/music/generations",
+        apiKeyId,
+        apiKeyName: musicAccounting?.apiKeyName,
+        connectionId: musicAccounting?.connectionId,
+        startTime,
+        requestId,
+      },
+      bill,
+      { enforceUnpricedBudget: false }
+    );
+  } else {
+    recordModalCallCost(apiKeyId, { provider, model, costUsd });
+  }
+
   const headers = new Headers({ "Content-Type": "application/json" });
-  attachOmniRouteMetaHeaders(headers, {
+  const meta = {
     provider,
     model,
     costUsd,
     latencyMs: Date.now() - startTime,
-    requestId: generateRequestId(),
+    requestId,
     ...(strategy ? { strategy } : {}),
     ...(fallbackAttempts !== undefined ? { fallbackAttempts } : {}),
-  });
-
-  return new Response(JSON.stringify(result.data), {
-    status: 200,
-    headers,
-  });
+  };
+  const response = new Response(JSON.stringify(result.data), { status: 200, headers });
+  if (bill) return attachMediaResponseMeta(response, meta);
+  attachOmniRouteMetaHeaders(response.headers, meta);
+  return response;
 }
 
 export function failedMediaGenerationResponse(

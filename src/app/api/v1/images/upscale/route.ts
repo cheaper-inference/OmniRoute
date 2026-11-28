@@ -26,6 +26,11 @@ import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { calculateModalCost } from "@/lib/usage/costCalculator";
 import { recordModalCallCost } from "@/domain/costRules";
+import { trackMediaWrites } from "@/lib/usage/callLogApiKeyContext";
+import {
+  recordSpecialtyCallLog,
+  recordSpecialtyRequestUsage,
+} from "@/lib/usage/specialtyRequestAccounting";
 import { generateRequestId } from "@/shared/utils/requestId";
 
 export const dynamic = "force-dynamic";
@@ -242,23 +247,31 @@ async function postHandler(request: Request) {
     }
   }
 
+  const endpoint = "/v1/images/upscale";
+  const identity = {
+    apiKeyId: policy.apiKeyInfo?.id ?? null,
+    apiKeyName: policy.apiKeyInfo?.name ?? null,
+    connectionId: creds.connectionId,
+  };
   const runUpscale = () =>
     handleImageUpscale({ body, credentials: upscaleCredentials, log, signal: request.signal });
 
-  const result = await (creds.connectionId
-    ? runWithProxyContext((proxyInfo?.proxy as never) || null, runUpscale).catch(
-        (err: { statusCode?: number; message?: string }) => ({
-          success: false,
-          status: err.statusCode || 500,
-          // Hard Rule #12 (#15159 wave 1.2): sanitize where the raw value is
-          // captured. toJsonErrorPayload() also sanitizes internally (wave 1.1),
-          // but the gate judges per LINE and cannot see through that call — so
-          // without this the site stayed frozen in KNOWN_MISSING_ERROR_HELPER
-          // while the route hand-serialized the payload via new Response().
-          error: sanitizeErrorMessage(err.message),
-        })
-      )
-    : runUpscale());
+  const { result, mediaWrites } = await trackMediaWrites(identity, endpoint, () =>
+    creds.connectionId
+      ? runWithProxyContext((proxyInfo?.proxy as never) || null, runUpscale).catch(
+          (err: { statusCode?: number; message?: string }) => ({
+            success: false,
+            status: err.statusCode || 500,
+            // Hard Rule #12 (#15159 wave 1.2): sanitize where the raw value is
+            // captured. toJsonErrorPayload() also sanitizes internally (wave 1.1),
+            // but the gate judges per LINE and cannot see through that call — so
+            // without this the site stayed frozen in KNOWN_MISSING_ERROR_HELPER
+            // while the route hand-serialized the payload via new Response().
+            error: sanitizeErrorMessage(err.message),
+          })
+        )
+      : runUpscale()
+  );
 
   if (result.success) {
     await clearRecoveredProviderState(credentialsResult);
@@ -268,6 +281,15 @@ async function postHandler(request: Request) {
       model: `${provider}/${model}`,
       costUsd,
     });
+    const accounting = { ...identity, endpoint, provider, model, startTime };
+    if (!mediaWrites.usage) {
+      await recordSpecialtyRequestUsage({
+        ...accounting,
+        calculatedCostUsd: costUsd > 0 ? costUsd : null,
+        billingQuantity: 1,
+      });
+    }
+    if (!mediaWrites.callLog) await recordSpecialtyCallLog(accounting);
     const headers = new Headers({ "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {
       provider,
