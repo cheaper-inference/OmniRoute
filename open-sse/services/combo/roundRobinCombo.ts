@@ -1,4 +1,5 @@
 /** Round-robin combo dispatcher. Lift-as-is from combo.ts. @internal */
+import { createRoundRobinTrace } from "./roundRobinTrace.ts";
 import { cloneForQuality } from "./preContentTransportFailure.ts";
 import {
   checkFallbackError,
@@ -23,7 +24,7 @@ import {
 } from "./pinRecovery.ts";
 import { buildContextBudgetResponse } from "./budgetExhaustion.ts";
 import { formatExhaustedConnectionKey } from "./comboDiagFormat.ts";
-import { collectQuotaWindowExclusions, formatQuotaSkipMessage } from "./quotaSkipDiagnostics.ts";
+import { recordRoundRobinRequest, roundRobinExhaustedResponse } from "./roundRobinExhaustion.ts";
 import { recordComboRequest, recordPersistedSkipBypass } from "../comboMetrics.ts";
 import {
   expandComboSystemPromptIfPresent,
@@ -173,6 +174,7 @@ import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
  */
 export async function handleRoundRobinCombo({
   body,
+  invocationId,
   combo,
   handleSingleModel,
   isModelAvailable,
@@ -503,6 +505,20 @@ export async function handleRoundRobinCombo({
   // terminal message lists each distinct reason separately (see the quality path
   // and the "Done with this model" path below), mirroring handleComboChat.
   const rrOutcomes: Array<ComboErrorEntry> = [];
+
+  const trace = createRoundRobinTrace(invocationId);
+  // The loop's finally is not the end of the function: a compat-rejected target can still
+  // serve the request afterwards. Finalize where every exit has already run, so that
+  // dispatch — and the targets skipped on the way to it — are in the record.
+  // The compat-rejected set can still serve the request, so its targets belong to the same
+  // candidate list: otherwise the trace would show a request that dispatched nothing.
+  const traceTargets = () =>
+    [...filteredTargets, ...compatRejectedTargets].map((t) => ({
+      executionKey: t.executionKey,
+      modelStr: t.modelStr,
+    }));
+  let loopExhausted = false;
+  const finalizeTrace = () => trace.finalize(traceTargets());
   // #11134: operator-configurable shared attempt budget (clamped to the hard
   // cap). Defaults to MAX_GLOBAL_ATTEMPTS when unset.
   const maxGlobalAttempts = clampGlobalAttempts(config.maxGlobalAttempts);
@@ -609,6 +625,7 @@ export async function handleRoundRobinCombo({
       const modelStr = target.modelStr;
       const provider = target.provider;
       if (rejectedModelKeys.has(requestScopedReplayKey(modelStr))) {
+        trace.skip(target, modelStr, "request_exhaustion");
         log.info("COMBO-RR", `Skipping ${modelStr} — same request already refused request-scoped`);
         fallbackCount++;
         continue;
@@ -631,6 +648,7 @@ export async function handleRoundRobinCombo({
           allowRateLimitedConnection
         );
         if (persistedSkip) {
+          trace.skip(target, modelStr, "provider_cooldown");
           log.info("COMBO-RR", persistedSkip);
           clearStaleLKGP(
             combo.name,
@@ -654,6 +672,7 @@ export async function handleRoundRobinCombo({
       if (isModelAvailable) {
         const available = await isModelAvailable(modelStr, targetForAttempt);
         if (available !== true) {
+          trace.skip(target, modelStr, "availability");
           log.debug?.(
             "COMBO-RR",
             `Skipping ${modelStr} — no credentials available or model excluded`
@@ -681,6 +700,7 @@ export async function handleRoundRobinCombo({
           resilienceSettings
         )
       ) {
+        trace.skip(target, modelStr, "provider_cooldown");
         log.info("COMBO-RR", `Skipping ${modelStr} — provider ${provider} in global cooldown`);
         clearStaleLKGP(
           combo.name,
@@ -702,6 +722,7 @@ export async function handleRoundRobinCombo({
         exhaustedConnections
       );
       if (exhaustedSkip) {
+        trace.skip(target, modelStr, "request_exhaustion");
         log.info("COMBO-RR", exhaustedSkip);
         clearStaleLKGP(
           combo.name,
@@ -722,6 +743,7 @@ export async function handleRoundRobinCombo({
         perTargetAdmission &&
         !(await perTargetAdmission({ modelStr, executionKey: target.executionKey, body }))
       ) {
+        trace.skip(target, modelStr, "admission_lane");
         log.info("COMBO-RR", `Skipping ${modelStr} — admission lane full (#9654)`);
         fallbackCount++;
         continue;
@@ -740,6 +762,9 @@ export async function handleRoundRobinCombo({
       } catch (err) {
         const errCode = isRecord(err) && typeof err.code === "string" ? err.code : null;
         if (errCode === "SEMAPHORE_TIMEOUT" || errCode === "SEMAPHORE_QUEUE_FULL") {
+          // Blocked by the concurrency gate, not by upstream: without this the
+          // target would fall through to not_reached and read as never visited.
+          trace.skip(target, modelStr, "concurrency_cap");
           log.warn(
             "COMBO-RR",
             `Semaphore ${errCode === "SEMAPHORE_QUEUE_FULL" ? "queue full" : "timeout"} for ${modelStr}, trying next model`
@@ -776,6 +801,7 @@ export async function handleRoundRobinCombo({
               recovery: buildRecoveryHint("max_attempts_exceeded"),
             });
           }
+          if (retry === 0) trace.dispatched(target, modelStr);
           if (retry > 0) {
             log.info(
               "COMBO-RR",
@@ -1421,6 +1447,7 @@ export async function handleRoundRobinCombo({
         release();
       }
     }
+    loopExhausted = true;
   } catch (err) {
     // G4: unexpected exception in the round-robin loop must never crash the
     // request silently — surface a 500 instead of hanging the client.
@@ -1431,11 +1458,16 @@ export async function handleRoundRobinCombo({
       clearTimeout(rrLoopSafetyTimer);
       rrLoopSafetyTimer = null;
     }
+    // A request that returned from inside the loop passes here: targets after it were
+    // never reached and the trace has to say so. Exhaustion is finalized below, once the
+    // compat-rejected fallback has had its turn.
+    if (!loopExhausted) finalizeTrace();
   }
 
   // G4: if the safety timer fired between iterations (no race captured it),
   // terminate with the actionable 504 instead of the generic exhaustion path.
   if (rrExpired) {
+    finalizeTrace();
     return errorResponse(
       504,
       `Round-robin combo exceeded ${rrLoopSafetyMs}ms without a terminal response`
@@ -1450,70 +1482,48 @@ export async function handleRoundRobinCombo({
   // the compat pre-filter rejected — a compat-rejected-but-healthy provider is a
   // valid last-resort fallback tier, not a permanently dropped target.
   if (recordedAttempts === 0 && compatRejectedTargets.length > 0) {
-    const compatFallbackResult = await attemptCompatRejectedFallback(compatRejectedTargets, body, {
-      handleSingleModel,
-      isModelAvailable,
-      isProviderInCooldown: (target) =>
-        resilienceSettings.providerCooldown.enabled &&
-        Boolean(target.provider && target.provider !== "unknown") &&
-        isProviderInCooldown(
-          target.provider as string,
-          target.connectionId as string | undefined,
-          resilienceSettings
-        ),
-      log,
-      strategy: "round-robin",
-    });
-    if (compatFallbackResult) {
-      if (!compatFallbackResult.ok) return compatFallbackResult;
-      recordComboRequest(combo.name, null, {
-        success: true,
-        latencyMs: Date.now() - startTime,
-        fallbackCount,
+    let compatFallbackResult: Response | null = null;
+    try {
+      compatFallbackResult = await attemptCompatRejectedFallback(compatRejectedTargets, body, {
+        handleSingleModel,
+        isModelAvailable,
+        isProviderInCooldown: (target) =>
+          resilienceSettings.providerCooldown.enabled &&
+          Boolean(target.provider && target.provider !== "unknown") &&
+          isProviderInCooldown(
+            target.provider as string,
+            target.connectionId as string | undefined,
+            resilienceSettings
+          ),
+        log,
         strategy: "round-robin",
+        onDispatch: (target, modelStr) => trace.dispatched(target, modelStr),
+        onSkip: (target, modelStr, reason) => trace.skip(target, modelStr, reason),
       });
+    } finally {
+      // A throw inside the fallback leaves the function without reaching the finalize calls
+      // below, and the trace would stay open.
+      finalizeTrace();
+    }
+    if (compatFallbackResult) {
+      if (!compatFallbackResult.ok) {
+        finalizeTrace();
+        return compatFallbackResult;
+      }
+      recordRoundRobinRequest(combo.name, true, Date.now() - startTime, fallbackCount);
+      finalizeTrace();
       return compatFallbackResult;
     }
   }
 
   if (recordedAttempts === 0) {
-    recordComboRequest(combo.name, null, {
-      success: false,
-      latencyMs,
-      fallbackCount,
-      strategy: "round-robin",
-    });
+    recordRoundRobinRequest(combo.name, false, latencyMs, fallbackCount);
   }
 
   if (!lastStatus) {
-    if (recordedAttempts === 0) {
-      const quotaExcluded = collectQuotaWindowExclusions(filteredTargets);
-      const quotaSkip = formatQuotaSkipMessage(quotaExcluded);
-      return errorResponseWithComboDiagnostics(
-        503,
-        quotaSkip
-          ? `Service temporarily unavailable: all targets were skipped by pre-dispatch filters (${quotaSkip})`
-          : "Service temporarily unavailable: all targets were skipped by pre-dispatch filters",
-        {
-          poolSize: filteredTargets.length,
-          attempted: 0,
-          excluded: quotaExcluded,
-          attemptOrder: [],
-          terminalReason: "all_targets_skipped",
-        },
-        { code: "ALL_TARGETS_SKIPPED", type: "service_unavailable" }
-      );
-    }
-    return new Response(
-      JSON.stringify({
-        error: {
-          message: "Service temporarily unavailable: all upstream accounts are inactive",
-          type: "service_unavailable",
-          code: "ALL_ACCOUNTS_INACTIVE",
-        },
-      }),
-      { status: 503, headers: { "Content-Type": "application/json" } }
-    );
+    finalizeTrace();
+    // Every branch of the builder applies once nothing was dispatched and no status arrived.
+    return roundRobinExhaustedResponse(filteredTargets, recordedAttempts, lastStatus) as Response;
   }
 
   // #10501: same terminal-status policy as handleComboChat — see
@@ -1527,10 +1537,12 @@ export async function handleRoundRobinCombo({
   if (earliestRetryAfter && isRetryAfterEligibleStatus(status)) {
     const retryHuman = formatRetryAfter(toRetryAfterDisplayValue(earliestRetryAfter));
     log.warn("COMBO-RR", `All models failed | ${msg} (${retryHuman})`);
+    finalizeTrace();
     return unavailableResponse(status, msg, earliestRetryAfter, retryHuman);
   }
 
   log.warn("COMBO-RR", `All models failed | ${msg}`);
+  finalizeTrace();
   return errorResponse(status, msg, {
     code: resolveComboTerminalCode(rrOutcomes, status),
   });
