@@ -5437,6 +5437,7 @@ paths:
     get:
       tags: [CLI Tools]
       summary: Get runtime status for a CLI tool
+      x-loopback-only: true
       parameters:
         - name: toolId
           in: path
@@ -5465,12 +5466,14 @@ paths:
     get:
       tags: [CLI Tools]
       summary: Get Antigravity MITM proxy settings
+      x-loopback-only: true
       responses:
         "200":
           description: MITM proxy configuration
     post:
       tags: [CLI Tools]
       summary: Update Antigravity MITM proxy settings
+      x-loopback-only: true
       requestBody:
         required: true
         content:
@@ -5483,6 +5486,7 @@ paths:
     delete:
       tags: [CLI Tools]
       summary: Reset Antigravity MITM proxy settings
+      x-loopback-only: true
       responses:
         "200":
           description: MITM proxy settings reset
@@ -5491,12 +5495,14 @@ paths:
     get:
       tags: [CLI Tools]
       summary: Get Antigravity MITM alias configuration
+      x-loopback-only: true
       responses:
         "200":
           description: Alias configuration
     put:
       tags: [CLI Tools]
       summary: Update Antigravity MITM alias configuration
+      x-loopback-only: true
       requestBody:
         required: true
         content:
@@ -5731,6 +5737,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Install 9Router from npm
+      x-loopback-only: true
       description: >-
         Installs the `9router` npm package under DATA_DIR/services/9router/.
         Uses execFile (no shell interpolation — hard rule #13).
@@ -5769,6 +5776,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Start 9Router
+      x-loopback-only: true
       description: >-
         Spawns the 9Router process. Idempotent if already running.
         **LOCAL_ONLY** — loopback only.
@@ -5788,6 +5796,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Stop 9Router
+      x-loopback-only: true
       description: >-
         Gracefully stops 9Router (SIGTERM → 15 s → SIGKILL). Idempotent.
         **LOCAL_ONLY** — loopback only.
@@ -5805,6 +5814,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Restart 9Router
+      x-loopback-only: true
       description: >-
         Equivalent to stop() then start() under the operation lock.
         **LOCAL_ONLY** — loopback only.
@@ -5820,6 +5830,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Update 9Router to a newer npm version
+      x-loopback-only: true
       description: >-
         Stops the service (if running), installs the newer npm version, then restarts.
         **LOCAL_ONLY** — loopback only.
@@ -5856,6 +5867,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Rotate the 9Router API key
+      x-loopback-only: true
       description: >-
         Generates a new API key, encrypts it at-rest, and restarts the service to
         apply it. The plaintext key is never returned.
@@ -5879,6 +5891,7 @@ paths:
     get:
       tags: [Embedded Services]
       summary: Get 9Router status
+      x-loopback-only: true
       description: >-
         Returns combined live supervisor state and DB metadata.
         **LOCAL_ONLY** — loopback only.
@@ -5896,6 +5909,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle 9Router auto-start
+      x-loopback-only: true
       description: >-
         When enabled, 9Router starts automatically on the next OmniRoute boot.
         **LOCAL_ONLY** — loopback only.
@@ -5926,6 +5940,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle 9Router auto-restart-when-adopted
+      x-loopback-only: true
       description: >-
         When enabled, an externally-adopted (not OmniRoute-spawned) 9Router
         process is restarted under OmniRoute's own supervisor on the next
@@ -5953,6 +5968,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Install CLIProxyAPI from npm
+      x-loopback-only: true
       description: >-
         Installs the CLIProxyAPI package under DATA_DIR/services/cliproxy/.
         **LOCAL_ONLY** — loopback only.
@@ -5987,6 +6003,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Start CLIProxyAPI
+      x-loopback-only: true
       description: >-
         Spawns the CLIProxyAPI process. Idempotent if already running.
         **LOCAL_ONLY** — loopback only.
@@ -6006,6 +6023,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Stop CLIProxyAPI
+      x-loopback-only: true
       description: >-
         Gracefully stops CLIProxyAPI. Idempotent.
         **LOCAL_ONLY** — loopback only.
@@ -6021,6 +6039,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Restart CLIProxyAPI
+      x-loopback-only: true
       description: >-
         stop() then start() under the operation lock.
         **LOCAL_ONLY** — loopback only.
@@ -6036,6 +6055,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Update CLIProxyAPI to a newer npm version
+      x-loopback-only: true
       description: >-
         Stops, installs newer version, restarts.
         **LOCAL_ONLY** — loopback only.
@@ -6071,7 +6091,6 @@ paths:
       description: >-
         Returns live supervisor state and DB metadata (no apiKeyMasked — CLIProxyAPI
         does not use an injected API key).
-        **LOCAL_ONLY** — loopback only.
       responses:
         "200":
           description: Status response
@@ -6084,6 +6103,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle CLIProxyAPI auto-start
+      x-loopback-only: true
       description: >-
         When enabled, CLIProxyAPI starts automatically on the next OmniRoute boot.
         **LOCAL_ONLY** — loopback only.
@@ -6114,6 +6134,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle CLIProxyAPI auto-restart-when-adopted
+      x-loopback-only: true
       description: >-
         When enabled, an externally-adopted (not OmniRoute-spawned) CLIProxyAPI
         process is restarted under OmniRoute's own supervisor on the next
@@ -6141,6 +6162,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Install Mux from npm
+      x-loopback-only: true
       description: >-
         Installs the `mux` npm package (coder/mux — local agent-orchestration
         daemon) under DATA_DIR/services/mux/. **LOCAL_ONLY** — loopback only.
@@ -6175,6 +6197,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Start Mux
+      x-loopback-only: true
       description: >-
         Spawns `mux server --host 127.0.0.1 --port <port>`. Idempotent if
         already running. **LOCAL_ONLY** — loopback only.
@@ -6194,6 +6217,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Stop Mux
+      x-loopback-only: true
       description: >-
         Gracefully stops Mux. Idempotent.
         **LOCAL_ONLY** — loopback only.
@@ -6209,6 +6233,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Restart Mux
+      x-loopback-only: true
       description: >-
         stop() then start() under the operation lock.
         **LOCAL_ONLY** — loopback only.
@@ -6224,6 +6249,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Update Mux to a newer npm version
+      x-loopback-only: true
       description: >-
         Stops, installs newer version, restarts.
         **LOCAL_ONLY** — loopback only.
@@ -6256,6 +6282,7 @@ paths:
     get:
       tags: [Embedded Services]
       summary: Get Mux status
+      x-loopback-only: true
       description: >-
         Returns live supervisor state and DB metadata.
         **LOCAL_ONLY** — loopback only.
@@ -6271,6 +6298,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle Mux auto-start
+      x-loopback-only: true
       description: >-
         When enabled, Mux starts automatically on the next OmniRoute boot.
         **LOCAL_ONLY** — loopback only.
@@ -6301,6 +6329,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle Mux auto-restart-when-adopted
+      x-loopback-only: true
       description: >-
         When enabled, an externally-adopted (not OmniRoute-spawned) Mux
         process is restarted under OmniRoute's own supervisor on the next
@@ -6328,6 +6357,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Install open-wa from npm
+      x-loopback-only: true
       description: >-
         Installs the `@open-wa/wa-automate` npm package (WhatsApp Web
         automation via headless Chromium/Puppeteer) under
@@ -6365,6 +6395,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Start open-wa
+      x-loopback-only: true
       description: >-
         Spawns `wa-automate --port <port> --host 127.0.0.1
         --session-data-path data`. The HTTP API does not start listening
@@ -6389,6 +6420,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Stop open-wa
+      x-loopback-only: true
       description: >-
         Gracefully stops open-wa. Idempotent.
         **LOCAL_ONLY** — loopback only.
@@ -6404,6 +6436,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Restart open-wa
+      x-loopback-only: true
       description: >-
         stop() then start() under the operation lock.
         **LOCAL_ONLY** — loopback only.
@@ -6419,6 +6452,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Update open-wa to a newer npm version
+      x-loopback-only: true
       description: >-
         Stops, installs newer version, restarts.
         **LOCAL_ONLY** — loopback only.
@@ -6451,6 +6485,7 @@ paths:
     get:
       tags: [Embedded Services]
       summary: Get open-wa status
+      x-loopback-only: true
       description: >-
         Returns live supervisor state and DB metadata. `health` only reflects
         whether `/api-docs/` answered — it does not indicate whether a
@@ -6468,6 +6503,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle open-wa auto-start
+      x-loopback-only: true
       description: >-
         When enabled, open-wa starts automatically on the next OmniRoute boot.
         **LOCAL_ONLY** — loopback only.
@@ -6498,6 +6534,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle open-wa auto-restart-when-adopted
+      x-loopback-only: true
       description: >-
         When enabled, an externally-adopted (not OmniRoute-spawned) open-wa
         process is restarted under OmniRoute's own supervisor on the next
@@ -6525,6 +6562,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Install Bifrost
+      x-loopback-only: true
       description: >-
         Installs the `@maximhq/bifrost` npm package under DATA_DIR/services/bifrost/.
         The package downloads the Go binary on first run. Accepts an optional `version`
@@ -6560,6 +6598,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Start Bifrost
+      x-loopback-only: true
       description: Starts the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
       responses:
         "200":
@@ -6571,6 +6610,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Stop Bifrost
+      x-loopback-only: true
       description: Stops the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
       responses:
         "200":
@@ -6580,6 +6620,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Restart Bifrost
+      x-loopback-only: true
       description: Restarts the supervised Bifrost process. **LOCAL_ONLY** — loopback only.
       responses:
         "200":
@@ -6591,6 +6632,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Update Bifrost
+      x-loopback-only: true
       description: >-
         Updates Bifrost to the latest npm version. Stops the running process,
         installs the new version, and restarts if it was previously running.
@@ -6603,6 +6645,7 @@ paths:
     get:
       tags: [Embedded Services]
       summary: Get Bifrost status
+      x-loopback-only: true
       description: Returns live and DB status for the supervised Bifrost service. **LOCAL_ONLY** — loopback only.
       responses:
         "200":
@@ -6612,6 +6655,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle Bifrost auto-start
+      x-loopback-only: true
       description: >-
         When enabled, Bifrost starts automatically on the next OmniRoute boot.
         **LOCAL_ONLY** — loopback only.
@@ -6635,6 +6679,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle Bifrost auto-restart-when-adopted
+      x-loopback-only: true
       description: >-
         When enabled, an externally-adopted (not OmniRoute-spawned) Bifrost
         process is restarted under OmniRoute's own supervisor on the next
@@ -6662,6 +6707,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Install Dario from npm
+      x-loopback-only: true
       description: >-
         Installs the `@askalf/dario` npm package (Claude-account-pool proxy) under
         DATA_DIR/services/dario/. Uses execFile (no shell interpolation — hard rule
@@ -6700,6 +6746,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Start Dario
+      x-loopback-only: true
       description: >-
         Spawns the Dario process. Idempotent if already running.
         **LOCAL_ONLY** — loopback only.
@@ -6719,6 +6766,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Stop Dario
+      x-loopback-only: true
       description: >-
         Gracefully stops Dario. Idempotent — returns a stopped status even if no
         supervisor is currently tracking the process.
@@ -6737,6 +6785,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Restart Dario
+      x-loopback-only: true
       description: >-
         Equivalent to stop() then start() under the operation lock.
         **LOCAL_ONLY** — loopback only.
@@ -6756,6 +6805,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Update Dario to a newer npm version
+      x-loopback-only: true
       description: >-
         Stops the service (if running), installs the newer npm version, then
         restarts it if it was running before the update. **LOCAL_ONLY** — loopback
@@ -6786,6 +6836,7 @@ paths:
     get:
       tags: [Embedded Services]
       summary: Get Dario status
+      x-loopback-only: true
       description: >-
         Returns combined live supervisor state and DB metadata, including the
         auto-start / auto-restart-adopted flags and whether an update is available.
@@ -6804,6 +6855,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle Dario auto-start
+      x-loopback-only: true
       description: >-
         When enabled, Dario starts automatically on the next OmniRoute boot.
         **LOCAL_ONLY** — loopback only.
@@ -6829,6 +6881,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle Dario auto-restart-when-adopted
+      x-loopback-only: true
       description: >-
         When enabled, an externally-adopted (not OmniRoute-spawned) Dario process
         is restarted under OmniRoute's own supervisor on the next health-check
@@ -6856,6 +6909,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Start a Dario account-pool login (device-code style)
+      x-loopback-only: true
       description: >-
         Forwards to the running Dario instance's `POST /admin/login/start` using
         the stored admin token. The operator opens the returned `authorize_url`,
@@ -6898,6 +6952,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Complete a Dario account-pool login
+      x-loopback-only: true
       description: >-
         Forwards to the running Dario instance's `POST /admin/login/complete`.
         On success the account becomes routable immediately (Dario hot-reloads
@@ -6939,6 +6994,7 @@ paths:
     get:
       tags: [Embedded Services]
       summary: List Dario account-pool accounts
+      x-loopback-only: true
       description: >-
         Forwards to the running Dario instance's `GET /admin/accounts`.
         **LOCAL_ONLY** — loopback only.
@@ -6963,6 +7019,7 @@ paths:
     delete:
       tags: [Embedded Services]
       summary: Remove a Dario account-pool account
+      x-loopback-only: true
       description: >-
         Forwards to the running Dario instance's `DELETE /admin/accounts/<alias>`.
         The alias is taken from a `?alias=` query param or a `{ alias }` JSON body.
@@ -7005,6 +7062,7 @@ paths:
     get:
       tags: [Embedded Services]
       summary: List OmniRoute claude connections eligible for Dario import
+      x-loopback-only: true
       description: >-
         Returns eligible OmniRoute `claude` OAuth provider connections (metadata
         only — id/name/email/org tier, never tokens) so the UI can offer a picker
@@ -7040,6 +7098,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Import an OmniRoute claude connection's OAuth tokens into Dario
+      x-loopback-only: true
       description: >-
         Writes the source connection's access/refresh token pair directly into
         Dario's own account-file store (`~/.dario/accounts/<alias>.json`), reusing
@@ -7088,6 +7147,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Install LLMLingua
+      x-loopback-only: true
       description: >-
         Installs `@atjsh/llmlingua-2` (real LLMLingua-2 ONNX prompt-compression
         package) plus its `@huggingface/transformers`/`js-tiktoken` peers under
@@ -7125,6 +7185,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Start LLMLingua
+      x-loopback-only: true
       description: Starts the supervised LLMLingua sidecar process. **LOCAL_ONLY** — loopback only.
       responses:
         "200":
@@ -7136,6 +7197,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Stop LLMLingua
+      x-loopback-only: true
       description: Stops the supervised LLMLingua sidecar process. **LOCAL_ONLY** — loopback only.
       responses:
         "200":
@@ -7145,6 +7207,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Restart LLMLingua
+      x-loopback-only: true
       description: Restarts the supervised LLMLingua sidecar process. **LOCAL_ONLY** — loopback only.
       responses:
         "200":
@@ -7156,6 +7219,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Update LLMLingua
+      x-loopback-only: true
       description: >-
         Updates LLMLingua to the latest npm version. Stops the running process,
         installs the new version, and restarts if it was previously running.
@@ -7168,6 +7232,7 @@ paths:
     get:
       tags: [Embedded Services]
       summary: Get LLMLingua status
+      x-loopback-only: true
       description: Returns live and DB status for the supervised LLMLingua service. **LOCAL_ONLY** — loopback only.
       responses:
         "200":
@@ -7177,6 +7242,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle LLMLingua auto-start
+      x-loopback-only: true
       description: >-
         When enabled, LLMLingua starts automatically on the next OmniRoute boot.
         **LOCAL_ONLY** — loopback only.
@@ -7200,6 +7266,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle LLMLingua auto-restart-when-adopted
+      x-loopback-only: true
       description: >-
         When enabled, an externally-adopted (not OmniRoute-spawned) LLMLingua
         process is restarted under OmniRoute's own supervisor on the next
@@ -7227,6 +7294,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Install sing-box
+      x-loopback-only: true
       description: >-
         Downloads the pinned sing-box release binary from GitHub
         (SagerNet/sing-box) and verifies its SHA256 against a checksum baked
@@ -7264,6 +7332,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Start sing-box
+      x-loopback-only: true
       description: >-
         Spawns `sing-box run -c config.json`. Idempotent if already running.
         **LOCAL_ONLY** — loopback only.
@@ -7283,6 +7352,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Stop sing-box
+      x-loopback-only: true
       description: >-
         Gracefully stops sing-box. Idempotent.
         **LOCAL_ONLY** — loopback only.
@@ -7298,6 +7368,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Restart sing-box
+      x-loopback-only: true
       description: >-
         stop() then start() under the operation lock.
         **LOCAL_ONLY** — loopback only.
@@ -7313,6 +7384,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Re-verify/reinstall the pinned sing-box release
+      x-loopback-only: true
       description: >-
         Stops, re-downloads and checksum-verifies the pinned release, restarts.
         **LOCAL_ONLY** — loopback only.
@@ -7335,6 +7407,7 @@ paths:
     get:
       tags: [Embedded Services]
       summary: Get sing-box status
+      x-loopback-only: true
       description: >-
         Returns live supervisor state and DB metadata.
         **LOCAL_ONLY** — loopback only.
@@ -7350,6 +7423,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle sing-box auto-start
+      x-loopback-only: true
       description: >-
         When enabled, sing-box starts automatically on the next OmniRoute boot.
         **LOCAL_ONLY** — loopback only.
@@ -7380,6 +7454,7 @@ paths:
     post:
       tags: [Embedded Services]
       summary: Toggle sing-box auto-restart-when-adopted
+      x-loopback-only: true
       description: >-
         When enabled, an externally-adopted (not OmniRoute-spawned) sing-box
         process is restarted under OmniRoute's own supervisor on the next
@@ -7407,6 +7482,7 @@ paths:
     get:
       tags: [Embedded Services]
       summary: Stream service logs via SSE
+      x-loopback-only: true
       description: >-
         Returns a Server-Sent Events stream from the service's in-memory ring buffer
         (5 MB, circular). Sends a `snapshot` event with historical lines first, then
@@ -7477,6 +7553,7 @@ paths:
     get:
       tags: [OAuth]
       summary: Auto-import Cursor OAuth credentials
+      x-loopback-only: true
       description: Automatically detects and imports Cursor credentials from local config.
       responses:
         "200":
@@ -7506,6 +7583,7 @@ paths:
     get:
       tags: [OAuth]
       summary: Auto-import Kiro OAuth credentials
+      x-loopback-only: true
       description: Automatically detects and imports Kiro credentials from local config.
       responses:
         "200":
@@ -7993,7 +8071,11 @@ paths:
     get:
       tags: [System]
       summary: List registered background jobs
-      description: Local-only runtime administration. Returns each registered job and its latest run.
+      x-loopback-only: true
+      description: >-
+        Local-only runtime administration. Returns each registered job and its latest run.
+        The LOCAL_ONLY tier admits loopback and private-LAN peers; public clients are
+        rejected with 403 LOCAL_ONLY.
       x-internal: true
       responses:
         "200":
@@ -8005,6 +8087,7 @@ paths:
     post:
       tags: [System]
       summary: Enable a background job
+      x-loopback-only: true
       description: Local-only runtime administration. Enables the job and restarts its timer.
       x-internal: true
       parameters:
@@ -8025,6 +8108,7 @@ paths:
     post:
       tags: [System]
       summary: Disable a background job
+      x-loopback-only: true
       description: Local-only runtime administration. Disables the job and stops its timer.
       x-internal: true
       parameters:
@@ -8045,6 +8129,7 @@ paths:
     post:
       tags: [System]
       summary: Trigger a background job
+      x-loopback-only: true
       description: >-
         Local-only runtime administration. Starts the job, or waits for an in-flight
         run before queueing the next one, subject to OMNIROUTE_RUNNOW_TIMEOUT_MS.
@@ -8067,6 +8152,7 @@ paths:
     get:
       tags: [System]
       summary: Read background-job run history
+      x-loopback-only: true
       description: Local-only runtime administration. Returns newest-first run history for one job.
       x-internal: true
       parameters:
@@ -8294,6 +8380,7 @@ paths:
     get:
       tags: [System]
       summary: Inspect connection resilience state
+      x-loopback-only: true
       description: >-
         Operational view of per-connection cooldowns, provider circuit breakers,
         model lockouts, and recent breaker transitions. Local-only for anonymous
@@ -9282,6 +9369,7 @@ paths:
     get:
       tags: [AgentBridge]
       summary: List all 9 IDE agents with current state
+      x-loopback-only: true
       description: >-
         Returns the state (dns_enabled, cert_trusted, setup_completed, last_started_at,
         last_error) for all 9 configured IDE agents. LOCAL_ONLY.
@@ -9301,6 +9389,7 @@ paths:
     get:
       tags: [AgentBridge]
       summary: Get global AgentBridge server state
+      x-loopback-only: true
       description: Returns running status, port, cert info, and intercepted request count.
       responses:
         "200":
@@ -9314,6 +9403,7 @@ paths:
     post:
       tags: [AgentBridge]
       summary: Control AgentBridge MITM server
+      x-loopback-only: true
       description: Start, stop, restart, trust-cert, or regenerate-cert. SPAWN_CAPABLE.
       requestBody:
         required: true
@@ -9333,6 +9423,7 @@ paths:
     post:
       tags: [AgentBridge]
       summary: Enable or disable DNS for one agent
+      x-loopback-only: true
       description: Adds or removes /etc/hosts entries for the agent's host list. SPAWN_CAPABLE.
       parameters:
         - name: agentId
@@ -9356,6 +9447,7 @@ paths:
     get:
       tags: [AgentBridge]
       summary: Get model mappings for one agent
+      x-loopback-only: true
       parameters:
         - name: agentId
           in: path
@@ -9374,6 +9466,7 @@ paths:
     put:
       tags: [AgentBridge]
       summary: Update model mappings for one agent
+      x-loopback-only: true
       parameters:
         - name: agentId
           in: path
@@ -9394,6 +9487,7 @@ paths:
     get:
       tags: [AgentBridge]
       summary: List bypass patterns (hosts never decrypted)
+      x-loopback-only: true
       responses:
         "200":
           description: Bypass patterns
@@ -9406,6 +9500,7 @@ paths:
     put:
       tags: [AgentBridge]
       summary: Update user bypass patterns
+      x-loopback-only: true
       requestBody:
         required: true
         content:
@@ -9420,6 +9515,7 @@ paths:
     post:
       tags: [AgentBridge]
       summary: Download or regenerate the AgentBridge CA certificate
+      x-loopback-only: true
       requestBody:
         required: true
         content:
@@ -9439,6 +9535,7 @@ paths:
     get:
       tags: [AgentBridge]
       summary: Get configured upstream CA cert path
+      x-loopback-only: true
       responses:
         "200":
           description: Upstream CA configuration
@@ -9453,6 +9550,7 @@ paths:
     post:
       tags: [AgentBridge]
       summary: Set upstream CA cert path for corporate TLS environments
+      x-loopback-only: true
       requestBody:
         required: true
         content:
@@ -9471,6 +9569,7 @@ paths:
     get:
       tags: [Traffic Inspector]
       summary: List intercepted requests (filterable)
+      x-loopback-only: true
       parameters:
         - name: profile
           in: query
@@ -9511,6 +9610,7 @@ paths:
     delete:
       tags: [Traffic Inspector]
       summary: Clear the in-memory traffic buffer
+      x-loopback-only: true
       responses:
         "204":
           description: Buffer cleared
@@ -9519,6 +9619,7 @@ paths:
     get:
       tags: [Traffic Inspector]
       summary: Get a single intercepted request by ID
+      x-loopback-only: true
       parameters:
         - name: id
           in: path
@@ -9540,6 +9641,7 @@ paths:
     post:
       tags: [Traffic Inspector]
       summary: Replay a captured request through OmniRoute router
+      x-loopback-only: true
       description: Re-executes the original request body against /v1/chat/completions. Consumes quota.
       parameters:
         - name: id
@@ -9558,6 +9660,7 @@ paths:
     put:
       tags: [Traffic Inspector]
       summary: Save or update annotation on a request
+      x-loopback-only: true
       parameters:
         - name: id
           in: path
@@ -9579,10 +9682,12 @@ paths:
     get:
       tags: [Traffic Inspector]
       summary: Live WebSocket stream of intercepted requests
+      x-loopback-only: true
       description: >-
         Upgrade to WebSocket. On connect, server sends `{type:"snapshot", data:[...]}`.
         Subsequent events: `{type:"new", data:{...}}`, `{type:"update", data:{...}}`,
-        `{type:"clear"}`. LOCAL_ONLY.
+        `{type:"clear"}`. LOCAL_ONLY: loopback and private-LAN peers only; public
+        clients are rejected with 403 LOCAL_ONLY.
       responses:
         "101":
           description: WebSocket upgrade successful
@@ -9593,6 +9698,7 @@ paths:
     get:
       tags: [Traffic Inspector]
       summary: Export current filtered request list as HAR 1.2
+      x-loopback-only: true
       parameters:
         - name: profile
           in: query
@@ -9617,6 +9723,7 @@ paths:
     get:
       tags: [Traffic Inspector]
       summary: List custom capture hosts
+      x-loopback-only: true
       responses:
         "200":
           description: Custom hosts list
@@ -9629,6 +9736,7 @@ paths:
     post:
       tags: [Traffic Inspector]
       summary: Add a custom capture host (edits /etc/hosts)
+      x-loopback-only: true
       requestBody:
         required: true
         content:
@@ -9645,6 +9753,7 @@ paths:
     delete:
       tags: [Traffic Inspector]
       summary: Remove a custom capture host
+      x-loopback-only: true
       parameters:
         - name: host
           in: path
@@ -9657,6 +9766,7 @@ paths:
     patch:
       tags: [Traffic Inspector]
       summary: Toggle enabled state of a custom host
+      x-loopback-only: true
       parameters:
         - name: host
           in: path
@@ -9681,6 +9791,7 @@ paths:
     get:
       tags: [Traffic Inspector]
       summary: Get state of all 4 capture modes
+      x-loopback-only: true
       responses:
         "200":
           description: Capture modes state
@@ -9693,6 +9804,7 @@ paths:
     post:
       tags: [Traffic Inspector]
       summary: Start or stop the HTTP_PROXY listener (port 8080)
+      x-loopback-only: true
       description: SPAWN_CAPABLE — spawns a net.Server listener.
       requestBody:
         required: true
@@ -9710,6 +9822,7 @@ paths:
     post:
       tags: [Traffic Inspector]
       summary: Apply or revert system-wide proxy settings
+      x-loopback-only: true
       description: SPAWN_CAPABLE — executes networksetup/gsettings/netsh. Requires admin.
       requestBody:
         required: true
@@ -9727,6 +9840,7 @@ paths:
     get:
       tags: [Traffic Inspector]
       summary: List all saved recording sessions
+      x-loopback-only: true
       responses:
         "200":
           description: Sessions list
@@ -9739,6 +9853,7 @@ paths:
     post:
       tags: [Traffic Inspector]
       summary: Start a new recording session
+      x-loopback-only: true
       requestBody:
         required: false
         content:
@@ -9757,6 +9872,7 @@ paths:
     get:
       tags: [Traffic Inspector]
       summary: Get session snapshot (all captured requests)
+      x-loopback-only: true
       parameters:
         - name: id
           in: path
@@ -9772,6 +9888,7 @@ paths:
     patch:
       tags: [Traffic Inspector]
       summary: Stop or rename a recording session
+      x-loopback-only: true
       parameters:
         - name: id
           in: path
@@ -9791,6 +9908,7 @@ paths:
     delete:
       tags: [Traffic Inspector]
       summary: Delete a recording session
+      x-loopback-only: true
       parameters:
         - name: id
           in: path
@@ -9806,6 +9924,7 @@ paths:
     get:
       tags: [Traffic Inspector]
       summary: Export a recorded session as HAR 1.2
+      x-loopback-only: true
       parameters:
         - name: id
           in: path
@@ -9828,10 +9947,12 @@ paths:
     post:
       tags: [Traffic Inspector]
       summary: Internal ingest endpoint for server.cjs passthrough path
+      x-loopback-only: true
       description: >-
         Accepts a serialized InterceptedRequest from the CJS MITM server for requests
         that do not go through TypeScript handlers (e.g., passthrough hosts). Requires
-        INSPECTOR_INTERNAL_INGEST_TOKEN header. LOCAL_ONLY.
+        INSPECTOR_INTERNAL_INGEST_TOKEN header. LOCAL_ONLY: loopback and private-LAN
+        peers only; public clients are rejected with 403 LOCAL_ONLY.
       security: []
       requestBody:
         required: true
@@ -11965,6 +12086,7 @@ paths:
       tags:
         - Db
       summary: "GET db › health"
+      x-loopback-only: true
       responses:
         "200":
           description: OK
@@ -11972,6 +12094,7 @@ paths:
       tags:
         - Db
       summary: "POST db › health"
+      x-loopback-only: true
       responses:
         "200":
           description: OK
@@ -12855,7 +12978,6 @@ paths:
       tags:
         - Mcp
       summary: "GET mcp › audit"
-      x-loopback-only: true
       responses:
         "200":
           description: OK
@@ -12864,7 +12986,6 @@ paths:
       tags:
         - Mcp
       summary: "GET mcp › audit › stats"
-      x-loopback-only: true
       responses:
         "200":
           description: OK
@@ -15320,7 +15441,6 @@ paths:
       tags:
         - Skills
       summary: "GET skills › executions"
-      x-loopback-only: true
       responses:
         "200":
           description: OK
@@ -15508,7 +15628,6 @@ paths:
         Running version, latest published version, auto-update status and npm release channel.
         `releaseChannel` and `channels` are additive (rail 3.8.54); `channel` keeps meaning the
         deployment mode used by the dashboard updater.
-      x-loopback-only: true
       responses:
         "200":
           description: OK
@@ -15718,7 +15837,6 @@ paths:
       tags:
         - Tunnels
       summary: "GET tunnels › cloudflared"
-      x-loopback-only: true
       responses:
         "200":
           description: OK

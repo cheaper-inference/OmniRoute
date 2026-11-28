@@ -23,6 +23,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import * as yaml from "js-yaml";
+import { readStringEntries } from "./lib/parseStringEntries.mjs";
 
 const ROOT = process.cwd();
 const OPENAPI_PATH = path.join(ROOT, "docs", "openapi.yaml");
@@ -42,6 +43,27 @@ function extractArrayBody(name) {
 }
 
 const stripLineComments = (s) => s.replace(/\/\/[^\n]*/g, "");
+
+const GET_EXEMPTION_SET = new Set(
+  readStringEntries(guardSrc, "LOCAL_ONLY_API_GET_EXEMPTIONS") || []
+);
+if (GET_EXEMPTION_SET.size === 0) {
+  // Fail closed: an unparsed set would make the exemption checks below silent
+  // no-ops, and a no-op here certifies exactly the annotations they exist to catch.
+  throw new Error(
+    "openapi-security-tiers: could not locate LOCAL_ONLY_API_GET_EXEMPTIONS in routeGuard.ts"
+  );
+}
+
+// Safari methods the runtime exempts, read from routeGuard rather than assumed:
+// isLocalOnlyPath() consults SAFE_METHODS, which is GET/HEAD/OPTIONS.
+const SAFE_METHODS_ENTRIES = readStringEntries(guardSrc, "SAFE_METHODS");
+if (SAFE_METHODS_ENTRIES === null) {
+  // Same fail-closed contract as the exemption set: an empty safe-method set makes
+  // both exemption checks no-ops without ever reporting a problem.
+  throw new Error("openapi-security-tiers: could not locate SAFE_METHODS in routeGuard.ts");
+}
+const SAFE_METHODS_SET = new Set(SAFE_METHODS_ENTRIES);
 
 function resolveModule(spec) {
   let base;
@@ -151,6 +173,18 @@ function coveredByAlwaysProtected(pathStr) {
   );
 }
 
+// Every method the runtime distinguishes: the five the spec normally documents,
+// plus the safe methods SAFE_METHODS exempts. Leaving head/options out of the
+// iteration made the exemption check unreachable for exactly those methods.
+const CHECKED_METHODS = new Set([
+  "get",
+  "post",
+  "put",
+  "patch",
+  "delete",
+  ...[...SAFE_METHODS_SET].map((m) => m.toLowerCase()),
+]);
+
 const raw = yaml.load(fs.readFileSync(OPENAPI_PATH, "utf-8"));
 const paths = raw.paths || {};
 const errors = [];
@@ -158,7 +192,18 @@ const errors = [];
 for (const [pathStr, methods] of Object.entries(paths)) {
   if (!methods || typeof methods !== "object") continue;
   for (const [method, spec] of Object.entries(methods)) {
-    if (!["get", "post", "put", "patch", "delete"].includes(method) || !spec) continue;
+    if (!CHECKED_METHODS.has(method) || !spec) continue;
+
+    if (
+      spec["x-loopback-only"] === true &&
+      SAFE_METHODS_SET.has(method.toUpperCase()) &&
+      GET_EXEMPTION_SET.has(concretize(pathStr))
+    ) {
+      errors.push(
+        `${method.toUpperCase()} ${pathStr}: has x-loopback-only but the route is in ` +
+          `LOCAL_ONLY_API_GET_EXEMPTIONS, so safe methods stay remote-reachable`
+      );
+    }
 
     if (spec["x-loopback-only"] === true && !coveredByLocalOnly(pathStr)) {
       errors.push(
@@ -184,7 +229,9 @@ for (const [pathStr, methods] of Object.entries(paths)) {
   if (!methods || typeof methods !== "object") continue;
   if (!matchesPrefix(concretize(pathStr))) continue;
   for (const [method, spec] of Object.entries(methods)) {
-    if (!["get", "post", "put", "patch", "delete"].includes(method) || !spec) continue;
+    if (!CHECKED_METHODS.has(method) || !spec) continue;
+    if (SAFE_METHODS_SET.has(method.toUpperCase()) && GET_EXEMPTION_SET.has(concretize(pathStr)))
+      continue;
     if (spec["x-loopback-only"] !== true) {
       reverseWarnings.push(
         `${method.toUpperCase()} ${pathStr}: falls under LOCAL_ONLY_API_PREFIXES ` +

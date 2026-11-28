@@ -336,7 +336,8 @@ vendor extension if the route is classified by `routeGuard.ts`:
 
 | routeGuard.ts classification  | YAML annotation            | Enforcement                                     |
 | ----------------------------- | -------------------------- | ----------------------------------------------- |
-| `LOCAL_ONLY_API_PREFIXES`     | `x-loopback-only: true`    | Blocked from non-loopback unconditionally       |
+| `LOCAL_ONLY_API_PREFIXES`     | `x-loopback-only: true`    | Locality tier applies unless exempted          |
+| `LOCAL_ONLY_API_GET_EXEMPTIONS` | none on the exempted operation | Safe methods (GET/HEAD/OPTIONS) stay reachable on those paths |
 | `ALWAYS_PROTECTED_API_PATHS`  | `x-always-protected: true` | Auth required even with `requireLogin=false`    |
 | Internal admin/debug route    | `x-internal: true`         | Hidden from /dashboard/api-endpoints by default |
 | None (public / standard auth) | (no annotation needed)     | Standard `requireLogin`-controlled access       |
@@ -352,6 +353,11 @@ Two scripts enforce consistency between YAML annotations and `routeGuard.ts`:
 Both scripts run in the pre-commit hook and in CI.
 
 ### False Positive Rule
+
+A path listed in `LOCAL_ONLY_API_GET_EXEMPTIONS` must not carry `x-loopback-only` on its
+safe-method operations: the runtime keeps them reachable on purpose (a tunnel-served
+dashboard polls them), so the annotation would overclaim. The checker enforces this
+direction too.
 
 If `x-always-protected` or `x-loopback-only` is annotated on a route that is NOT in
 the `routeGuard.ts` constant, the coverage script fails. The fix is always to align the
