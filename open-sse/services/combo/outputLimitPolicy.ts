@@ -41,6 +41,12 @@ export type CompatFilterOptions = {
    */
   outputLimitAdvisory?: boolean;
   sourceFormat?: string | null;
+  /**
+   * Auto (#19257): confirmed-fitting targets keep the strategy (score) order.
+   * The override-first context tiering (#13870) then applies only when an
+   * override target was rejected near the boundary.
+   */
+  preserveStrategyOrder?: boolean;
 };
 
 /** Anthropic uses the combo override and keeps absence available for automatic fallback. */

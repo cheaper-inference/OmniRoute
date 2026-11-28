@@ -718,6 +718,7 @@ async function applyContinuityFilters(
   const compatibility = resolveTargetRequestCompatibility(orderedTargets, body, log, undefined, {
     failOpen: isEnabledInConfigOrSettings(config, settings, "compatFilterFailOpen"),
     ...resolveOutputLimitPolicy(config, settings, deps.sourceFormat),
+    preserveStrategyOrder: getStrategyTraits(deps.strategy).ordering === "auto",
   });
   orderedTargets = applyTargetFilter(orderedTargets, compatibility.targets, jevOwnsOrder);
   // #6238: keep the targets the compat pre-filter rejected so the dispatch loop

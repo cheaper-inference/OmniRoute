@@ -23,6 +23,8 @@ const { saveModelsDevCapabilities, clearModelsDevCapabilities } =
   await import("../../src/lib/modelsDevSync.ts");
 const { resolveComboTargetPipeline } =
   await import("../../open-sse/services/combo/targetResolution.ts");
+const { setModelContextOverride, removeModelContextOverride } =
+  await import("../../src/lib/db/modelContextOverrides.ts");
 const { filterJevTargetsByHardRequestContext } =
   await import("../../open-sse/services/combo/jevBlockChecker.ts");
 const {
@@ -497,6 +499,46 @@ test("Jev returns cooldown diagnostics when every candidate has an open breaker"
     breaker.reset();
   }
 });
+
+// #19257: Auto's fitting head must survive the compat filter even when an
+// undersized target is in the pool and a later fitting target has an override;
+// declared strategies keep the #13870 override-first tiering.
+for (const [strategy, expectedHead] of [
+  ["auto", "unit-19257-g/flash"],
+  ["priority", "unit-19257-c/luna"],
+] as const) {
+  test(`#19257 ${strategy} pipeline puts ${expectedHead} first with an undersized tail target`, async () => {
+    saveModelsDevCapabilities({
+      "unit-19257-g": { flash: capabilityEntry(1_048_576) },
+      "unit-19257-c": { luna: capabilityEntry(872_000) },
+      "unit-19257-t": { small: capabilityEntry(8_192) },
+    });
+    setModelContextOverride("unit-19257-c", "luna", 872_000);
+
+    try {
+      const result = await resolveComboTargetPipeline(
+        deps({
+          strategy,
+          combo: {
+            id: `c-19257-${strategy}`,
+            name: `c-19257-${strategy}`,
+            models: ["unit-19257-g/flash", "unit-19257-c/luna", "unit-19257-t/small"],
+            config: {},
+          },
+          // The reporter's large request estimated ~27k input tokens.
+          body: { messages: [{ role: "user", content: "x".repeat(108_000) }] },
+        })
+      );
+
+      assert.ok(!("earlyResponse" in result));
+      if ("earlyResponse" in result) return;
+      assert.equal(result.orderedTargets[0]?.modelStr, expectedHead);
+      assert.equal(result.orderedTargets.at(-1)?.modelStr, "unit-19257-t/small");
+    } finally {
+      removeModelContextOverride("unit-19257-c", "luna");
+    }
+  });
+}
 
 // #8790: maxContextWindow rejects every target whose known context window
 // exceeds the configured ceiling. When that empties the pool, the

@@ -1,0 +1,1 @@
+- **fix(combo):** Auto no longer lets an undersized target in the pool move a fitting target with a context override ahead of the fitting score winner; the override-first context tiering (#13870) still applies to declared strategies and to near-boundary override rejects, and every context-tiering reorder is now logged with its reason (#19257)
