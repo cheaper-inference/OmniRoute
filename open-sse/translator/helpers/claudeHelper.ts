@@ -11,6 +11,7 @@ import { sanitizeToolId } from "./schemaCoercion.ts";
 import { isRestoredClaudeThinkingBlock } from "../../services/claudeThinkingStore.ts";
 import { getThinkingReplayOverride } from "./thinkingReplayMode.ts";
 import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
+import { unpairedClaudeToolResultText } from "./claudeToolResultText.ts";
 
 /**
  * The DEFAULT blob is a real encrypted thought from an unrelated
@@ -352,14 +353,7 @@ export function fixToolUseOrdering(messages: ClaudeMessage[]): ClaudeMessage[] {
         continue;
       }
 
-      const serialized =
-        typeof block.content === "string"
-          ? block.content
-          : (JSON.stringify(block.content ?? "") ?? "");
-      otherContent.push({
-        type: "text",
-        text: `[Unpaired tool result ${toolUseId || "unknown"}]\n${serialized}`,
-      });
+      otherContent.push(unpairedClaudeToolResultText(toolUseId, block.content));
     }
 
     const pairedResults = [...validIds].map(
