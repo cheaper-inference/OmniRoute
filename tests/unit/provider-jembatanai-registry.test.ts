@@ -29,7 +29,7 @@ test("jembatanai is registered as an API-key gateway provider in the UI catalog"
   assert.match(entry.apiHint, /https:\/\/freeai\.jembatanai\.com\/v1/);
   assert.match(
     String((entry as { notice?: { text?: string } }).notice?.text),
-    /Token Plan keys only/
+    /Token Plan and Unlimited Reseller Gateway keys only/
   );
 });
 
