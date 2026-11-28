@@ -9,7 +9,7 @@ export async function POST(): Promise<Response> {
   try {
     const row = await getServiceRow(TOOL);
     if (!row || row.status === "not_installed") {
-      return createErrorResponse({ status: 409, message: "open-wa não está instalado." });
+      return createErrorResponse({ status: 409, message: "open-wa is not installed." });
     }
 
     const sup = await getOrInitSupervisor();

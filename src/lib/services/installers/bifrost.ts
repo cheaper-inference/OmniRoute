@@ -113,7 +113,7 @@ export async function install(version = "latest"): Promise<InstallResult> {
   if (!installedVersion) {
     throw new InstallError(
       "Could not read installed version from node_modules/@maximhq/bifrost/package.json",
-      "Bifrost instalado mas versão não pôde ser lida.",
+      "Bifrost is installed, but its version could not be read.",
       500
     );
   }

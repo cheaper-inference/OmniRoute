@@ -89,7 +89,7 @@ export async function validateChatGptWebCodexProvider({
       return {
         valid: false,
         error:
-          "Kein unterstütztes Chrome oder Chromium gefunden. Installiere Chromium oder konfiguriere den Browserpfad.",
+          "No supported Chrome or Chromium was found. Install Chromium or configure the browser path.",
       };
     }
     const validationId = `validation-${randomBytes(12).toString("hex")}`;

@@ -44,7 +44,7 @@ function classifyError(
   if (err.code === "EACCES") {
     return new InstallError(
       raw,
-      "Sem permissão para instalar. Verifique as permissões da pasta de dados.",
+      "Permission denied while installing. Check the permissions of the data folder.",
       403
     );
   }
@@ -56,10 +56,10 @@ function classifyError(
     );
   }
   if (err.code === "ENOSPC" || stderr.includes("ENOSPC")) {
-    return new InstallError(raw, "Espaço em disco insuficiente.", 507);
+    return new InstallError(raw, "Insufficient disk space.", 507);
   }
   if (err.signal === "SIGTERM" || err.code === "ETIMEDOUT" || err.killed) {
-    return new InstallError(raw, "Instalação demorou demais. Tente novamente.", 504);
+    return new InstallError(raw, "Installation took too long. Please try again.", 504);
   }
   if (
     stderr.includes("ENOTFOUND") ||
@@ -69,12 +69,12 @@ function classifyError(
   ) {
     return new InstallError(
       raw,
-      "Falha de rede ao instalar. Verifique a conexão e tente novamente.",
+      "Network error while installing. Check your connection and try again.",
       503
     );
   }
 
-  return new InstallError(raw, `Falha na instalação: ${raw}`, 500);
+  return new InstallError(raw, `Installation failed: ${raw}`, 500);
 }
 
 /**

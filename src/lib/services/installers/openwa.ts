@@ -130,7 +130,7 @@ export async function install(version = "latest"): Promise<InstallResult> {
   if (!installedVersion) {
     throw new InstallError(
       "Could not read installed version from node_modules/@open-wa/wa-automate/package.json",
-      "open-wa instalado mas versão não pôde ser lida.",
+      "open-wa is installed, but its version could not be read.",
       500
     );
   }
