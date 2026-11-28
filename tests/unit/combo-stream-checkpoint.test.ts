@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
+const previousDataDir = process.env.DATA_DIR;
 const data = fs.mkdtempSync(path.join(os.tmpdir(), "combo-stream-checkpoint-"));
 process.env.DATA_DIR = data;
 process.env.APP_LOG_TO_FILE = "false";
@@ -171,8 +172,11 @@ test.after(async () => {
   await dispatchEvent("request.completed", {});
   await closeCallLogSaves(2000);
   resetDbInstance();
-  fs.rmSync(data, { recursive: true, force: true });
+  if (previousDataDir === undefined) delete process.env.DATA_DIR;
+  else process.env.DATA_DIR = previousDataDir;
 });
+// Modules that captured DATA_DIR keep the path until the process ends: remove it only then.
+process.on("exit", () => fs.rmSync(data, { recursive: true, force: true }));
 
 // ─── The pure parts ────────────────────────────────────────────────────────────
 

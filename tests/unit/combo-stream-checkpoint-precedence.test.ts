@@ -8,6 +8,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+const previousDataDir = process.env.DATA_DIR;
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-ckpt-precedence-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 
@@ -45,8 +46,12 @@ after(async () => {
   }
   await closeCallLogSaves();
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  if (previousDataDir === undefined) delete process.env.DATA_DIR;
+  else process.env.DATA_DIR = previousDataDir;
 });
+process.on("exit", () =>
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+);
 
 async function run(extraBody: Record<string, unknown>) {
   const sent: string[] = [];
