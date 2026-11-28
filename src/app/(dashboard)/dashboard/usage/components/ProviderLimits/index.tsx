@@ -27,6 +27,10 @@ import {
   supportsProviderQuota,
   isProviderQuotaVisible,
 } from "@/shared/utils/providerQuotaVisibility";
+import {
+  isAnthropicCompatibleProvider,
+  isOpenAICompatibleProvider,
+} from "@/shared/constants/providers";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { useNotificationStore } from "@/store/notificationStore";
 
@@ -53,7 +57,7 @@ import { useAutomaticQuotaRequests } from "./useAutomaticQuotaRequests";
 import CodexResetCreditsModal from "./CodexResetCreditsModal";
 import { useVisibleQuotaData } from "./useVisibleQuotaData";
 import { useCodexResetCreditRedemption } from "./useCodexResetCreditRedemption";
-import { PROVIDER_LABEL, PROVIDER_ORDER, TIER_FILTERS } from "./constants";
+import { providerLabelsWithNodes, PROVIDER_ORDER, TIER_FILTERS } from "./constants";
 import { formatAutoRefreshCountdown } from "./formatters";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
 import { compareTr } from "@/shared/utils/turkishText";
@@ -297,6 +301,32 @@ export default function ProviderLimits({
     Record<string, Record<string, number>>
   >({});
   const [globalThresholdDefault, setGlobalThresholdDefault] = useState<number>(98);
+  // Custom provider nodes are keyed by their generated id, which is absent from the
+  // static PROVIDER_LABEL table, so the quota page fell back to printing the raw id.
+  const [providerLabels, setNodeLabels] = useState<Record<string, string>>(
+    providerLabelsWithNodes([])
+  );
+
+  const hasCustomProvider = connections.some(
+    ({ provider }) =>
+      isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider)
+  );
+  useEffect(() => {
+    if (!hasCustomProvider) return;
+    let alive = true;
+    fetch("/api/provider-nodes")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!alive || !data) return;
+        setNodeLabels(providerLabelsWithNodes(data.nodes));
+      })
+      .catch(() => {
+        /* the static table still covers built-in providers */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [hasCustomProvider]);
 
   useEffect(() => {
     let alive = true;
@@ -590,11 +620,11 @@ export default function ProviderLimits({
     return [...filteredConnections].sort((a, b) =>
       compareQuotaConnections(a, b, {
         providerOrder: PROVIDER_ORDER,
-        providerLabels: PROVIDER_LABEL,
+        providerLabels,
         compare: compareTr,
       })
     );
-  }, [filteredConnections]);
+  }, [filteredConnections, providerLabels]);
   const visibleQuotaData = useVisibleQuotaData(sortedConnections, quotaData);
 
   const resolvedPlanByConnection = useMemo(
@@ -712,7 +742,7 @@ export default function ProviderLimits({
     return [...filtered].sort((a, b) =>
       compareQuotaConnections(a, b, {
         providerOrder: PROVIDER_ORDER,
-        providerLabels: PROVIDER_LABEL,
+        providerLabels,
         compare: compareTr,
         accountCompare: (x, y) => {
           const sx = statusRank[statusByConnection[x.id] || "empty"];
@@ -726,6 +756,7 @@ export default function ProviderLimits({
     );
   }, [
     sortedConnections,
+    providerLabels,
     tierByConnection,
     tierFilter,
     purchaseTypeFilter,
@@ -982,7 +1013,7 @@ export default function ProviderLimits({
                 <option value="all">{tr("filterProviderAll", "All providers")}</option>
                 {providerOptions.map((provider) => (
                   <option key={provider} value={provider}>
-                    {PROVIDER_LABEL[provider] || provider}
+                    {providerLabels[provider] || provider}
                   </option>
                 ))}
               </Select>
@@ -1039,7 +1070,7 @@ export default function ProviderLimits({
           errors={errors}
           lastRefreshedAt={lastRefreshedAt}
           emailsVisible={emailsVisible}
-          providerLabels={PROVIDER_LABEL}
+          providerLabels={providerLabels}
           renderInlineQuotaSummary={(quota) => renderInlineQuotaSummary(quota.quotas)}
           onRefresh={refreshProvider}
           onOpenCutoff={(conn) => {
