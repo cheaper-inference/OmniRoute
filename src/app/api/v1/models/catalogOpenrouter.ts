@@ -16,6 +16,8 @@ export function normalizeOpenRouterModalities(value: unknown): string[] {
 }
 
 export function getOpenRouterModelType(inputModalities: string[], outputModalities: string[]) {
+  // System One decisions models (served by /v1/systemone, not chat).
+  if (outputModalities.includes("decisions")) return "decisions";
   if (outputModalities.includes("image")) return "image";
   if (outputModalities.includes("audio")) return "audio";
   if (outputModalities.includes("video")) return "video";

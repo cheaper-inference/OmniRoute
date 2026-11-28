@@ -1614,11 +1614,10 @@ async function buildUnifiedModelsResponseCore(
       console.error("[catalog] Error fetching synced provider models:", err);
     }
 
-    if (
-      activeAliases.has("openrouter") &&
-      !blockedProviders.has("openrouter") &&
-      !providersWithSyncedModels.has("openrouter")
-    ) {
+    // Synced OpenRouter models come from the default listing, which hides decisions
+    // models: with a sync, only those are still taken from the catalog.
+    const openRouterSynced = providersWithSyncedModels.has("openrouter");
+    if (activeAliases.has("openrouter") && !blockedProviders.has("openrouter")) {
       try {
         const openRouterCatalog = await getOpenRouterCatalog();
         const openRouterCaps: Record<string, ModelCapabilityEntry> = {};
@@ -1635,6 +1634,7 @@ async function buildUnifiedModelsResponseCore(
             openRouterModel.architecture?.output_modalities
           );
           const modelType = getOpenRouterModelType(inputModalities, outputModalities);
+          if (openRouterSynced && modelType !== "decisions") continue;
           const isFree = isOpenRouterFreeModel(openRouterModel);
           if (hidePaid && !isFree) continue;
           // #9293: respect per-model hidden flags (e.g. operator hid google/chirp-3
@@ -1688,7 +1688,7 @@ async function buildUnifiedModelsResponseCore(
           );
           if (capEntry) openRouterCaps[openRouterModel.id] = capEntry;
         }
-        upsertSyncedCapabilities("openrouter", openRouterCaps);
+        if (!openRouterSynced) upsertSyncedCapabilities("openrouter", openRouterCaps);
       } catch (err) {
         console.error("[catalog] Error loading OpenRouter catalog:", err);
       }

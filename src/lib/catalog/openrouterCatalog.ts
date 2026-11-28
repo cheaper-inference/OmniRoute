@@ -12,6 +12,7 @@ import path from "path";
 import { invalidateModelCatalogCache } from "@/lib/db/readCache";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/models";
+const OPENROUTER_DECISIONS_API_URL = `${OPENROUTER_API_URL}?output_modalities=decisions`;
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 function getTTL(): number {
@@ -85,9 +86,28 @@ function writeCache(data: CatalogEntry[]): void {
   }
 }
 
-/** Fetch fresh catalog from OpenRouter API. */
+/**
+ * Fetch fresh catalog from OpenRouter API.
+ *
+ * OpenRouter's default listing hides decisions models (System One: TypeSafe Jev,
+ * Inception Mercury Decide, ...); they are only listed with
+ * `output_modalities=decisions`. Both lists share this cache so /v1/systemone/models
+ * can advertise them. A failed decisions listing keeps the default catalog.
+ */
 async function fetchFromAPI(): Promise<CatalogEntry[]> {
-  const res = await fetch(OPENROUTER_API_URL, {
+  const models = await fetchList(OPENROUTER_API_URL);
+  let decisions: CatalogEntry[] = [];
+  try {
+    decisions = await fetchList(OPENROUTER_DECISIONS_API_URL);
+  } catch (err) {
+    console.warn("[OpenRouterCatalog] Decisions listing failed, keeping the default catalog:", err);
+  }
+  const known = new Set(models.map((model) => model?.id));
+  return [...models, ...decisions.filter((model) => model?.id && !known.has(model.id))];
+}
+
+async function fetchList(url: string): Promise<CatalogEntry[]> {
+  const res = await fetch(url, {
     headers: {
       "User-Agent": "OmniRoute/2.0",
       Accept: "application/json",
