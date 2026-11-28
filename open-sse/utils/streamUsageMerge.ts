@@ -1,3 +1,4 @@
+import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 import { mergeUsageEvidence } from "./usageEvidence.ts";
 import type { UsageLike } from "./usageTracking.ts";
 
@@ -21,6 +22,15 @@ export function mergeUsageSnapshot(current: UsageLike | null, incoming: UsageLik
       ? { cache_creation_input_tokens: incoming.cache_creation_input_tokens }
       : {}),
     ...(incoming.cache_evidence !== undefined ? { cache_evidence: incoming.cache_evidence } : {}),
+  };
+}
+
+/** Keep the merged receipt on both the fully parsed and buffered Responses paths. */
+export function mergeResponsesUsage(current: UsageLike | null, value: unknown): UsageLike | null {
+  if (!value) return current;
+  return {
+    ...mergeUsageSnapshot(current, value as UsageLike),
+    ...mergeCacheCreationFields(current, value),
   };
 }
 

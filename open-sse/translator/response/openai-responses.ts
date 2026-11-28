@@ -40,7 +40,7 @@ import {
 import { logger } from "../../utils/logger.ts";
 import { plaintextCollaborationFields } from "./openai-responses/collaborationPlaintextMarker.ts";
 import { resolveLocalToolCallIndex } from "./openai-responses/toolCallLocalIndex.ts";
-import { firstReportedCounter } from "../../utils/reportedCounter.ts";
+import { firstReportedCounter, positiveReportedTotal } from "../../utils/reportedCounter.ts";
 import {
   synthesizeCompletedToolItem,
   buildFinalChunk,
@@ -1581,7 +1581,8 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
         }),
         prompt_tokens: promptTokens,
         completion_tokens: outputTokens,
-        total_tokens: promptTokens + outputTokens,
+        total_tokens:
+          positiveReportedTotal(responseUsage.total_tokens) ?? promptTokens + outputTokens,
       };
 
       // Add prompt_tokens_details if cache tokens exist

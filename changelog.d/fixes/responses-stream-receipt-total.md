@@ -1,0 +1,1 @@
+- **fix(usage):** Preserve independently reported Responses token totals in translated Chat streams and completion logs instead of replacing them with the input/output sum. Receipts without a valid positive total still use the component sum.

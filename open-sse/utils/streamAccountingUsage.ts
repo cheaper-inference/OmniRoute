@@ -1,5 +1,6 @@
 import { FORMATS } from "../translator/formats.ts";
 import { finalizeStreamingUsage } from "./finalizeStreamingUsage.ts";
+import { positiveReportedTotal } from "./reportedCounter.ts";
 import type { UsageLike } from "./usageTracking.ts";
 
 /** Normalize receipt aliases once so completion, partial usage and quota consumers agree. */
@@ -52,4 +53,14 @@ export function projectStreamingClientUsage(
     total_tokens: prompt + (usage.completion_tokens ?? 0),
     prompt_tokens_details: { ...usage.prompt_tokens_details, cache_creation_in_prompt: false },
   };
+}
+
+/** The Responses receipt can count units outside the projected component sum. */
+export function summaryTotal(
+  upstream: string | boolean | null,
+  usage: UsageLike | null,
+  fallback: number
+): number {
+  const useReceipt = upstream === true || upstream === FORMATS.OPENAI_RESPONSES;
+  return (useReceipt ? positiveReportedTotal(usage?.total_tokens) : undefined) ?? fallback;
 }
