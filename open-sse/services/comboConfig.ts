@@ -165,6 +165,9 @@ const DEFAULT_COMBO_CONFIG = {
   //      "fixed" mechanism 2 but silently broke mechanism 1's default-on
   //      behavior for every combo without an explicit opt-in.
   failoverBeforeRetry: true,
+  // Opt-in: count stream readiness timeouts (502/504 STREAM_READINESS_TIMEOUT) toward
+  // the provider-level circuit breaker. Default false preserves upstream behavior.
+  trackStreamReadinessInCircuitBreaker: false,
   // Feature 4985: configurable response-body validation predicate (per-combo). When set,
   // a 200 OK whose body fails the predicate fails over to the next target.
   responseValidation: undefined as ResponseValidationConfig | undefined,
@@ -341,8 +344,12 @@ export function resolveComboConfig(
   const cleanProviderOverride = clean(providerOverride);
   const cleanComboConfig = clean(comboConfig);
 
+  const envTrackStreamReadiness =
+    process.env.OMNIROUTE_CIRCUIT_BREAKER_TRACK_STREAM_TIMEOUT === "true";
+
   const merged = {
     ...DEFAULT_COMBO_CONFIG,
+    trackStreamReadinessInCircuitBreaker: envTrackStreamReadiness,
     ...cleanGlobal,
     ...cleanProviderOverride,
     ...cleanComboConfig,
@@ -363,6 +370,7 @@ export function resolveComboConfig(
   return {
     ...merged,
     failoverBeforeRetryExplicit,
+    trackStreamReadinessInCircuitBreaker: Boolean(merged.trackStreamReadinessInCircuitBreaker),
     shadowRouting: {
       ...DEFAULT_COMBO_CONFIG.shadowRouting,
       ...(isRecord(global.shadowRouting) ? clean(global.shadowRouting) : {}),
@@ -388,6 +396,8 @@ export function getDefaultComboConfig() {
     // default stays consistent (#10217 round-4 fix). With no cascade layer
     // setting the flag, it is a genuine non-opt-in → false.
     failoverBeforeRetryExplicit: false,
+    trackStreamReadinessInCircuitBreaker:
+      process.env.OMNIROUTE_CIRCUIT_BREAKER_TRACK_STREAM_TIMEOUT === "true",
   };
 }
 
@@ -397,15 +407,43 @@ export function getDefaultComboConfig() {
  * config. Encapsulated here so the ternary lives in one place (DRY) and its inferred union
  * return type is the single source of truth for ComboContext.config (combo/context.ts).
  */
-export function resolveComboSetupConfig(combo: ComboConfigLike, settings: ComboSettingsLike) {
-  if (settings) return resolveComboConfig(combo, settings);
+export function resolveComboSetupConfig(
+  combo: ComboConfigLike,
+  settings: ComboSettingsLike,
+  provider?: string | null
+) {
+  if (settings) return resolveComboConfig(combo, settings, provider);
   const comboConfig = (combo?.config as Record<string, unknown>) || {};
+  const defaults = getDefaultComboConfig();
   return {
-    ...getDefaultComboConfig(),
+    ...defaults,
     ...comboConfig,
     // See resolveComboConfig's failoverBeforeRetryExplicit comment — same
     // distinction applies here (no `settings`, so only the combo's own config
     // can opt in).
     failoverBeforeRetryExplicit: comboConfig.failoverBeforeRetry === true,
+    trackStreamReadinessInCircuitBreaker: Boolean(
+      comboConfig.trackStreamReadinessInCircuitBreaker ??
+      defaults.trackStreamReadinessInCircuitBreaker
+    ),
   };
+}
+
+/**
+ * Resolve `trackStreamReadinessInCircuitBreaker` for a specific target provider
+ * (preserving `combo > provider > global > env > default` precedence) without
+ * adding conditional branches inside large combo dispatchers.
+ */
+export function resolveTrackStreamReadinessForProvider(
+  combo: ComboConfigLike,
+  settings: ComboSettingsLike,
+  provider?: string | null,
+  setupFallback?: boolean
+): boolean {
+  if (settings) {
+    return resolveComboConfig(combo, settings, provider).trackStreamReadinessInCircuitBreaker;
+  }
+  return setupFallback !== undefined
+    ? Boolean(setupFallback)
+    : resolveComboSetupConfig(combo, null).trackStreamReadinessInCircuitBreaker;
 }

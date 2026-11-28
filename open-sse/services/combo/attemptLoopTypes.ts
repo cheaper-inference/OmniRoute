@@ -78,6 +78,7 @@ export type AttemptLoopDeps = {
     responseValidation?: ResponseValidationConfig | null;
     failoverBeforeRetryExplicit?: boolean;
     failoverBeforeRetry?: boolean;
+    trackStreamReadinessInCircuitBreaker?: boolean;
     predictiveTtftMs?: number;
     fallbackCompressionMode?: string;
     fallbackCompressionThreshold?: number;

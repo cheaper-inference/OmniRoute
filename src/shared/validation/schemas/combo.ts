@@ -227,6 +227,7 @@ export const comboRuntimeConfigSchema = z
     compressionMode: compressionModeSchema.optional(),
     comboCooldownWaitEnabled: z.boolean().optional(),
     failoverBeforeRetry: z.boolean().optional(),
+    trackStreamReadinessInCircuitBreaker: z.boolean().optional(),
     maxSetRetries: z.coerce.number().int().min(0).max(10).optional(),
     setRetryDelayMs: z.coerce.number().int().min(0).max(60000).optional(),
     zeroLatencyOptimizationsEnabled: z.boolean().optional(),
