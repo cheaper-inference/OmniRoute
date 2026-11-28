@@ -1,0 +1,1 @@
+- Add opt-in Antigravity base model IDs such as `Opus 5.5` beside existing native tier models. The base models select an advertised tier from the Claude Messages effort setting without changing fixed-tier behavior.

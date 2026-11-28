@@ -50,6 +50,8 @@ export type SyncedAvailableModelInput = Omit<SyncedAvailableModel, "source"> & {
 
 function normalizeSyncedAvailableModel(model: unknown): SyncedAvailableModel | null {
   const record = asRecord(model);
+  // Virtual Antigravity aliases are projections, never evidence of a native catalog.
+  if (record.virtualModel === "antigravity-client-effort") return null;
   const id =
     toNonEmptyString(record.id) || toNonEmptyString(record.name) || toNonEmptyString(record.model);
   if (!id) return null;
