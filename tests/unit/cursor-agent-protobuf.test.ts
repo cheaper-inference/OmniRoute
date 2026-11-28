@@ -415,6 +415,37 @@ test("Grok 4.7 Medium variants use standard speed and reasoning_effort (#20077)"
   }
 });
 
+test("Cursor encodes model-specific speed and effort options", () => {
+  for (const [modelId, reasoningEffort, parameter, value, legacy] of [
+    ["composer-2.5", undefined, "fast", "false", false],
+    ["composer-2.5-fast", undefined, "fast", "true", true],
+    ["claude-sonnet-5-5", "medium", "reasoning_effort", "medium", false],
+    ["claude-haiku-5-5", "medium", "reasoning_effort", "medium", false],
+    ["claude-haiku-5-5-medium", "high", "effort", "medium", true],
+    ["deepseek-v41-flash-1017-medium", "high", "reasoning_effort", "medium", true],
+    ["deepseek-v41-flash-1017-max", "medium", "reasoning_effort", "max", true],
+  ] as const) {
+    const run = findField(
+      decodeFields(encodeAgentRunRequest({ modelId, reasoningEffort, userText: "hi" })),
+      1
+    );
+    assert.ok(run?.wireType === WT_LEN);
+    const fields = decodeFields(run.bytes);
+    assert.equal(Boolean(findField(fields, 3)), legacy, modelId);
+    const requested = findField(fields, 9);
+    assert.ok(requested?.wireType === WT_LEN);
+    const entries = decodeFields(requested.bytes).filter(({ fieldNumber }) => fieldNumber === 3);
+    assert.equal(entries.length, 1, modelId);
+    const [entry] = entries;
+    assert.ok(entry?.wireType === WT_LEN);
+    const pair = decodeFields(entry.bytes);
+    const key = findField(pair, 1);
+    const actual = findField(pair, 2);
+    assert.ok(key?.wireType === WT_LEN && actual?.wireType === WT_LEN);
+    assert.deepEqual([key.bytes.toString(), actual.bytes.toString()], [parameter, value], modelId);
+  }
+});
+
 test("buildAgentRequestBody wraps the message in a Connect-RPC frame", () => {
   const buf = buildAgentRequestBody({ modelId: "claude-4.6-sonnet-medium", userText: "hi" });
   // First byte is flags (0x00 = uncompressed); next 4 bytes are big-endian length.
