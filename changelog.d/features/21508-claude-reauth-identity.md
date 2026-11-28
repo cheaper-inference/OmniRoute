@@ -1,0 +1,1 @@
+- `CLAUDE_REAUTH_IDENTITY_ENABLED` keeps different Claude accounts in separate connections on re-auth. The flag is off by default. ([#21508](https://github.com/cheaper-inference/OmniRoute/pull/21508))

@@ -1,1 +1,0 @@
-- `CLAUDE_REAUTH_IDENTITY_ENABLED` keeps different Claude accounts in separate connections on re-auth. The flag is off by default.
