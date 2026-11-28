@@ -3,12 +3,28 @@
  */
 
 import { v4 as uuidv4 } from "uuid";
-import { getDbInstance, rowToCamel } from "../core";
+import type { ProviderNodeRepository } from "@/domain/persistence/providerNodeRepositories";
+import { rowToCamel } from "../core";
 import { selectProviderNodeForConnection } from "../providerNodeSelect";
 import { backupDbFile } from "../backup";
 import { invalidateDbCache } from "../readCache";
 import { toRecord, type JsonRecord } from "./columns";
 import { resetProviderNodePrefixCache } from "./nodePrefix";
+import { providerNodeRepositories } from "../repositories/providerNodeRepositories";
+
+/**
+ * Persistence lives behind ProviderNodeRepository. The exports below keep their
+ * original shapes and run the SQLite-only legacy access in the caller's turn, so a
+ * write, its backup and both cache invalidations still happen without yielding.
+ * This facade owns payload defaults, JSON column handling, the id-conflict error,
+ * backups and cache invalidation.
+ */
+const legacy = providerNodeRepositories.legacySync.nodes;
+
+/** Async persistence contract; it never takes backups or invalidates caches. */
+export function getProviderNodeRepository(): ProviderNodeRepository {
+  return providerNodeRepositories.nodes;
+}
 
 function normalizeDailyQuotaResetHour(value: unknown): number | null {
   return value === 0 || value ? Number(value) : null;
@@ -44,52 +60,16 @@ function customJsonConfigColumn(data: JsonRecord, existing: JsonRecord | null): 
   return typeof stored === "string" ? stored : null;
 }
 
-interface StatementLike<TRow = unknown> {
-  all: (...params: unknown[]) => TRow[];
-  get: (...params: unknown[]) => TRow | undefined;
-  run: (...params: unknown[]) => { changes?: number };
-}
-
-interface DbLike {
-  prepare: <TRow = unknown>(sql: string) => StatementLike<TRow>;
-}
-
 export async function getProviderNodes(filter: JsonRecord = {}, limit?: number, offset?: number) {
-  const db = getDbInstance() as unknown as DbLike;
-  let sql = "SELECT * FROM provider_nodes";
-  const params: Record<string, unknown> = {};
-
-  if (filter.type) {
-    sql += " WHERE type = @type";
-    params.type = filter.type;
-  }
-  sql += " ORDER BY id ASC";
-  if (limit !== undefined) {
-    sql += " LIMIT @limit OFFSET @offset";
-    params.limit = limit;
-    params.offset = offset ?? 0;
-  }
-
-  return db.prepare(sql).all(params).map(rowToCamel);
+  return legacy.list(filter, limit !== undefined ? { limit, offset } : undefined).map(rowToCamel);
 }
 
 export function getProviderNodesCount(filter: JsonRecord = {}): number {
-  const db = getDbInstance() as unknown as DbLike;
-  let sql = "SELECT count(*) as cnt FROM provider_nodes";
-  const params: Record<string, unknown> = {};
-
-  if (filter.type) {
-    sql += " WHERE type = @type";
-    params.type = filter.type;
-  }
-
-  const row = db.prepare(sql).get(params) as { cnt: number };
-  return row.cnt;
+  return legacy.count(filter);
 }
 
 export async function getProviderNodeById(id: string) {
-  const db = getDbInstance() as unknown as DbLike;
-  const row = db.prepare("SELECT * FROM provider_nodes WHERE id = ?").get(id);
+  const row = legacy.findById(id);
   return row ? rowToCamel(row) : null;
 }
 
@@ -133,7 +113,6 @@ export function isProviderNodeIdConflictError(
 }
 
 export async function createProviderNode(data: JsonRecord) {
-  const db = getDbInstance() as unknown as DbLike;
   const now = new Date().toISOString();
 
   const customHeadersJson = data.customHeaders ? JSON.stringify(data.customHeaders) : null;
@@ -157,18 +136,10 @@ export async function createProviderNode(data: JsonRecord) {
     updatedAt: now,
   };
 
-  const result = db
-    .prepare(
-      `
-    INSERT INTO provider_nodes (id, type, name, prefix, api_type, base_url, chat_path, models_path, icon_url, custom_headers_json, custom_json_config_json, daily_quota_reset_timezone, daily_quota_reset_hour, created_at, updated_at)
-    VALUES (@id, @type, @name, @prefix, @apiType, @baseUrl, @chatPath, @modelsPath, @iconUrl, @customHeadersJson, @customJsonConfigJson, @dailyQuotaResetTimezone, @dailyQuotaResetHour, @createdAt, @updatedAt)
-    ON CONFLICT(id) DO NOTHING
-  `
-    )
-    .run(node);
+  const inserted = legacy.insert(node);
   // Ids can be operator-chosen (custom suffix), so a collision is a caller error,
   // never a silent overwrite nor an unhandled constraint failure.
-  if ((result?.changes ?? 0) === 0) throw new ProviderNodeIdConflictError(String(node.id));
+  if (!inserted) throw new ProviderNodeIdConflictError(String(node.id));
 
   backupDbFile("pre-write");
   invalidateDbCache("nodes");
@@ -178,8 +149,7 @@ export async function createProviderNode(data: JsonRecord) {
 }
 
 export async function updateProviderNode(id: string, data: JsonRecord) {
-  const db = getDbInstance() as unknown as DbLike;
-  const existing = db.prepare("SELECT * FROM provider_nodes WHERE id = ?").get(id);
+  const existing = legacy.findById(id);
   if (!existing) return null;
 
   const merged: JsonRecord = {
@@ -202,20 +172,7 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
   merged["customJsonConfigJson"] = customJsonConfigColumn(data, existing as JsonRecord);
   delete merged["customJsonConfig"];
 
-  db.prepare(
-    `
-    UPDATE provider_nodes SET type = @type, name = @name, prefix = @prefix,
-    api_type = @apiType, base_url = @baseUrl, chat_path = @chatPath,
-    models_path = @modelsPath, icon_url = @iconUrl,
-    custom_headers_json = @customHeadersJson,
-    custom_json_config_json = @customJsonConfigJson,
-    daily_quota_reset_timezone = @dailyQuotaResetTimezone,
-    daily_quota_reset_hour = @dailyQuotaResetHour,
-    updated_at = @updatedAt
-    WHERE id = @id
-  `
-  ).run({
-    id,
+  legacy.update(id, {
     type: merged["type"],
     name: merged["name"],
     prefix: merged["prefix"] || null,
@@ -241,14 +198,10 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
 }
 
 export async function deleteProviderNode(id: string) {
-  const db = getDbInstance() as unknown as DbLike;
-  const existing = db.prepare("SELECT * FROM provider_nodes WHERE id = ?").get(id);
+  // Also removes the node's customModels row (see the repository).
+  const existing = legacy.delete(id);
   if (!existing) return null;
 
-  db.prepare("DELETE FROM provider_nodes WHERE id = ?").run(id);
-  // A node's custom models live in key_value keyed by the node id; leaving the
-  // row behind keeps deleted nodes surfacing models (9router a8f63f4d).
-  db.prepare("DELETE FROM key_value WHERE namespace = 'customModels' AND key = ?").run(id);
   backupDbFile("pre-write");
   invalidateDbCache("nodes");
   resetProviderNodePrefixCache();
