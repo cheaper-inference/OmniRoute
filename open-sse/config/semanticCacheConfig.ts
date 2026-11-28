@@ -91,6 +91,81 @@ function parseNumber(val: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+/** Where the effective embedding dimension came from. */
+export type SemanticCacheEmbeddingDimensionSource = "env" | "db" | "default";
+
+export interface ResolvedEmbeddingDimension {
+  /** Dimension the runtime actually uses. */
+  dimension: number;
+  /** Winning layer: environment override, database setting, or the built-in default. */
+  source: SemanticCacheEmbeddingDimensionSource;
+}
+
+export interface EmbeddingDimensionCheck {
+  /** Dimension the runtime is configured with (env → db → default). */
+  configured: number;
+  source: SemanticCacheEmbeddingDimensionSource;
+  /** Vector length a live embedding probe returned, when it returned one. */
+  detected?: number;
+  /** True when the probe returned a vector length the configured dimension does not match. */
+  mismatch: boolean;
+}
+
+/** Accepts a positive integer (or its numeric string form); anything else is "not set". */
+function normalizeDimension(value: unknown): number | undefined {
+  const parsed = typeof value === "string" ? Number(value.trim()) : value;
+  if (typeof parsed !== "number" || !Number.isFinite(parsed)) return undefined;
+  const truncated = Math.trunc(parsed);
+  return truncated > 0 ? truncated : undefined;
+}
+
+/**
+ * Resolves the embedding dimension the runtime actually uses, with the same precedence as
+ * `resolveSemanticCacheConfig()`: environment variable → database setting → built-in default.
+ *
+ * Reporting the source lets the settings API/UI show the effective value without copying an
+ * environment override into the database.
+ */
+export function resolveSemanticCacheEmbeddingDimension(
+  configuredDimension?: number | null
+): ResolvedEmbeddingDimension {
+  const defaultDimension = DEFAULT_SEMANTIC_CACHE_CONFIG.embeddingDimension as number;
+  const rawEnv = process.env.OMNIROUTE_SEMANTIC_CACHE_EMBEDDING_DIMENSION;
+
+  if (rawEnv !== undefined && rawEnv.trim() !== "") {
+    const envDimension = normalizeDimension(rawEnv);
+    // An unparsable or non-positive override keeps the historical 1536 fallback instead of
+    // silently deferring to a database value the operator meant to override.
+    return {
+      dimension: envDimension ?? defaultDimension,
+      source: envDimension !== undefined ? "env" : "default",
+    };
+  }
+
+  const dbDimension = normalizeDimension(configuredDimension);
+  if (dbDimension !== undefined) return { dimension: dbDimension, source: "db" };
+
+  return { dimension: defaultDimension, source: "default" };
+}
+
+/**
+ * Compares a live embedding probe with the configured dimension. A mismatch is reported, never
+ * enforced: the configured value is the operator's decision and is kept as-is.
+ */
+export function checkEmbeddingDimension(
+  detectedDimension: number | null | undefined,
+  configuredDimension?: number | null
+): EmbeddingDimensionCheck {
+  const resolved = resolveSemanticCacheEmbeddingDimension(configuredDimension);
+  const detected = normalizeDimension(detectedDimension);
+  return {
+    configured: resolved.dimension,
+    source: resolved.source,
+    detected,
+    mismatch: detected !== undefined && detected !== resolved.dimension,
+  };
+}
+
 type DynamicConfigResolver = () => Partial<SemanticCacheConfig> | null | undefined;
 let dynamicResolver: DynamicConfigResolver | null = null;
 
@@ -148,9 +223,8 @@ export function resolveSemanticCacheConfig(
       env.OMNIROUTE_SEMANTIC_CACHE_EMBEDDING_MODEL?.trim() ||
       dynamic?.embeddingModel ||
       DEFAULT_SEMANTIC_CACHE_CONFIG.embeddingModel,
-    embeddingDimension: env.OMNIROUTE_SEMANTIC_CACHE_EMBEDDING_DIMENSION
-      ? parseNumber(env.OMNIROUTE_SEMANTIC_CACHE_EMBEDDING_DIMENSION, 1536)
-      : (dynamic?.embeddingDimension ?? DEFAULT_SEMANTIC_CACHE_CONFIG.embeddingDimension),
+    embeddingDimension: resolveSemanticCacheEmbeddingDimension(dynamic?.embeddingDimension)
+      .dimension,
     embeddingTimeoutMs: parseNumber(
       env.OMNIROUTE_SEMANTIC_CACHE_EMBEDDING_TIMEOUT_MS,
       dynamic?.embeddingTimeoutMs ?? DEFAULT_SEMANTIC_CACHE_CONFIG.embeddingTimeoutMs

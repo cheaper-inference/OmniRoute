@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  clearPersistedCacheSetting,
+  getPersistedCacheSetting,
   getUserDatabaseSettings,
   updateDatabaseSettings,
   type UserDatabaseSettings,
@@ -15,6 +17,7 @@ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { redactCacheSecrets, CacheCredentialEndpointError } from "@/lib/db/cacheSecrets";
 import { validateEmbeddingEndpoint } from "@omniroute/open-sse/services/cache/embeddingEndpoint";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { resolveSemanticCacheEmbeddingDimension } from "@omniroute/open-sse/config/semanticCacheConfig";
 
 ensureSemanticCacheDbBridge();
 
@@ -27,7 +30,10 @@ const cacheConfigUpdateSchema = z.object({
   semanticCacheThreshold: z.number().min(0).max(1).optional(),
   semanticCacheEmbeddingProvider: z.string().trim().optional(),
   semanticCacheEmbeddingModel: z.string().trim().optional(),
-  semanticCacheEmbeddingDimension: z.number().positive().nullable().optional(),
+  // A vector length is a positive whole number. Rejecting fractions/non-positive values here
+  // keeps `embeddingDimension` comparable to a real vector length (the test-embedding probe
+  // reports `embedding.length`); 65,536 is far above any current embedding model.
+  semanticCacheEmbeddingDimension: z.number().int().positive().max(65_536).nullable().optional(),
   semanticCacheEmbeddingBaseUrl: z.string().trim().nullable().optional(),
   semanticCacheEmbeddingApiKey: z.string().trim().nullable().optional(),
   semanticCacheRedisUrl: z.string().trim().nullable().optional(),
@@ -93,7 +99,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const dbSettings = getUserDatabaseSettings();
-    const cache = dbSettings.cache ?? {};
+    const cache: Partial<UserDatabaseSettings["cache"]> = dbSettings.cache ?? {};
     // idempotencyWindowMs is not part of the databaseSettings "cache" section —
     // it lives in the flat general settings (src/lib/db/settings.ts), which is
     // where src/lib/idempotencyLayer.ts actually reads it from.
@@ -114,6 +120,25 @@ export async function GET(request: NextRequest) {
       }
     }
     config.embeddingOptions = embeddingOptions;
+
+    // The runtime resolves the embedding dimension env-first (semanticCacheConfig.ts), so
+    // echoing the raw merged DB value alone could show a dimension the runtime never uses
+    // (env 768 vs settings 1024). Report the effective value plus its source, and the persisted
+    // value separately. The environment value is reported only — never written to the database.
+    const effectiveDimension = resolveSemanticCacheEmbeddingDimension(
+      cache.semanticCacheEmbeddingDimension
+    );
+    const persistedDimension = getPersistedCacheSetting("semanticCacheEmbeddingDimension");
+    config.semanticCacheEmbeddingDimension = effectiveDimension.dimension;
+    config.semanticCacheEmbeddingDimensionSource =
+      effectiveDimension.source === "env"
+        ? "env"
+        : effectiveDimension.source === "db" && typeof persistedDimension === "number"
+          ? "db"
+          : "default";
+    config.semanticCacheEmbeddingDimensionConfigured =
+      typeof persistedDimension === "number" ? persistedDimension : null;
+
     return NextResponse.json(redactCacheSecrets(config));
   } catch (error) {
     return NextResponse.json({ error: sanitizeErrorMessage(error) }, { status: 500 });
@@ -175,8 +200,9 @@ export async function PUT(request: NextRequest) {
     if (body.semanticCacheEmbeddingModel !== undefined) {
       updates.semanticCacheEmbeddingModel = body.semanticCacheEmbeddingModel;
     }
-    if (body.semanticCacheEmbeddingDimension !== undefined) {
-      updates.semanticCacheEmbeddingDimension = body.semanticCacheEmbeddingDimension ?? undefined;
+    const clearEmbeddingDimension = body.semanticCacheEmbeddingDimension === null;
+    if (body.semanticCacheEmbeddingDimension !== undefined && !clearEmbeddingDimension) {
+      updates.semanticCacheEmbeddingDimension = body.semanticCacheEmbeddingDimension;
     }
     if (body.semanticCacheEmbeddingBaseUrl !== undefined) {
       updates.semanticCacheEmbeddingBaseUrl = body.semanticCacheEmbeddingBaseUrl ?? undefined;
@@ -206,7 +232,7 @@ export async function PUT(request: NextRequest) {
     // updateDatabaseSettings() calls invalidateDbCache("settings") internally,
     // which bumps the model-catalog cache version so in-flight responses pick
     // up the fresh TTL — no separate version bump needed here.
-    if (Object.keys(updates).length > 0) {
+    if (Object.keys(updates).length > 0 || clearEmbeddingDimension) {
       // Snapshot the state BEFORE the write and wait for it. A failed routine snapshot is logged
       // and does not block the write.
       await backupDbFileAwaited("pre-write").catch((error: unknown) => {
@@ -215,7 +241,12 @@ export async function PUT(request: NextRequest) {
           error instanceof Error ? error.message : error
         );
       });
-      updateDatabaseSettings({ cache: updates });
+      if (Object.keys(updates).length > 0) {
+        updateDatabaseSettings({ cache: updates });
+      }
+      if (clearEmbeddingDimension) {
+        clearPersistedCacheSetting("semanticCacheEmbeddingDimension");
+      }
       // Drop the in-memory semantic cache manager so the next request rebuilds it
       // from the freshly-persisted databaseSettings (dual-layer cache work).
       resetSemanticCacheManager();

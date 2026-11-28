@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CacheSettingsTab from "@/app/(dashboard)/dashboard/settings/components/CacheSettingsTab";
+import en from "@/i18n/messages/en.json";
 import zh from "@/i18n/messages/zh-CN.json";
 // The shared Select renders the kit (Radix) Select for `options` since KEA-7886: no DOM
 // <select>/<option>; the helpers read the menu items (data-value) and the controlled value.
@@ -36,7 +37,10 @@ function mount() {
     <NextIntlClientProvider
       locale="zh-CN"
       timeZone="UTC"
-      messages={{ settings: zh.settings, common: zh.common }}
+      messages={{
+        settings: { ...en.settings, ...zh.settings },
+        common: { ...en.common, ...zh.common },
+      }}
       onError={(error) => {
         throw error;
       }}
@@ -81,7 +85,10 @@ describe("cache settings with real Chinese catalogs", () => {
       modelOptions.find((option) => option.label === "text-embedding-3-small（1,536 维）")?.value
     ).toBe(model.rawId);
     expect(screen.getByText("使用已配置的连接（默认 URL）")).toBeTruthy();
-    expect(screen.getByText("维度：1,536")).toBeTruthy();
+    expect(screen.getByLabelText(en.settings.semanticCacheEmbeddingDimension)).toHaveProperty(
+      "value",
+      "1536"
+    );
     expect(screen.getByText("词元上限：8,191")).toBeTruthy();
     expect(screen.getByText("输入：文本和图像")).toBeTruthy();
     fireEvent.click(screen.getByRole("radio", { name: "Redis 向量存储" }));

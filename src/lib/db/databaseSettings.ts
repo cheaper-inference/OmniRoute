@@ -462,6 +462,73 @@ function clearSemanticCacheFlagCache(): void {
 
 registerDbStateResetter(clearSemanticCacheFlagCache);
 
+/**
+ * Reads a cache setting only from what was persisted, with no defaults merged in.
+ * `getUserDatabaseSettings()` deliberately fills every missing key from
+ * `DEFAULT_DATABASE_SETTINGS`, so the merged value alone cannot tell a saved 1024 from the
+ * model's 1024 fallback — the difference the settings UI needs to say "default" vs "stored".
+ *
+ * Precedence mirrors `getUserDatabaseSettings()`: the `databaseSettings` namespace (nested
+ * `cache.<key>` and legacy flat aliases) wins over the flat `cache` section, which wins over
+ * the nested object inside the `settings` namespace.
+ */
+export function getPersistedCacheSetting<K extends keyof UserDatabaseSettings["cache"]>(
+  key: K
+): UserDatabaseSettings["cache"][K] | undefined {
+  const mainSettings = readNamespace("settings");
+  const nestedSettings = isRecord(mainSettings[DATABASE_SETTINGS_NAMESPACE])
+    ? mainSettings[DATABASE_SETTINGS_NAMESPACE]
+    : undefined;
+  const rows = readNamespace(DATABASE_SETTINGS_NAMESPACE);
+  const aliases = (LEGACY_FLAT_KEYS.cache as Partial<Record<string, string[]>>)[String(key)] ?? [];
+
+  for (const name of [`cache.${String(key)}`, ...aliases]) {
+    if (rows[name] !== undefined && rows[name] !== null) {
+      return rows[name] as UserDatabaseSettings["cache"][K];
+    }
+  }
+
+  const flatCache = mainSettings.cache;
+  if (
+    isRecord(flatCache) &&
+    flatCache[String(key)] !== undefined &&
+    flatCache[String(key)] !== null
+  ) {
+    return flatCache[String(key)] as UserDatabaseSettings["cache"][K];
+  }
+
+  const nestedCache = nestedSettings?.cache;
+  if (
+    isRecord(nestedCache) &&
+    nestedCache[String(key)] !== undefined &&
+    nestedCache[String(key)] !== null
+  ) {
+    return nestedCache[String(key)] as UserDatabaseSettings["cache"][K];
+  }
+
+  return undefined;
+}
+
+/**
+ * Deletes a persisted cache setting (and any legacy flat aliases) so the runtime falls back to
+ * defaults instead of retaining a previously saved number.
+ */
+export function clearPersistedCacheSetting<K extends keyof UserDatabaseSettings["cache"]>(
+  key: K
+): void {
+  const db = getDbInstance();
+  const aliases = (LEGACY_FLAT_KEYS.cache as Partial<Record<string, string[]>>)[String(key)] ?? [];
+  const del = db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?");
+  const tx = db.transaction(() => {
+    for (const name of [`cache.${String(key)}`, ...aliases]) {
+      del.run(DATABASE_SETTINGS_NAMESPACE, name);
+    }
+  });
+  tx();
+  clearSemanticCacheFlagCache();
+  invalidateDbCache("settings");
+}
+
 export function isSemanticCacheDbEnabled(): boolean {
   const cached = semanticCacheFlagCache;
   if (cached && Date.now() <= cached.expiresAt) return cached.value;

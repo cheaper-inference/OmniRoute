@@ -1,0 +1,1 @@
+- **fix(cache):** the semantic-cache embedding dimension is editable and persisted, and the settings API reports the effective value (env → DB → default) with its source, so a 768-dimension model no longer reads back as 1024 ([#21167](https://github.com/cheaper-inference/OmniRoute/pull/21167))
