@@ -1,61 +1,34 @@
 /**
  * Database module: AgentBridgeBypass
- * CRUD + seed for agent_bridge_bypass table.
+ * Synchronous compatibility facade for the agent_bridge_bypass table.
+ *
+ * Persistence lives in `repositories/sqliteAgentBridgeBypassRepository.ts`. These
+ * exports stay synchronous (SQLite-only legacy access) because the agent-bridge
+ * routes, the MITM manager and inspector config import/export call them
+ * synchronously.
  */
 
-import { getDbInstance } from "./core.ts";
+import type { AgentBridgeBypassRepository } from "@/domain/persistence/agentBridgeRepositories";
 import type { AgentBridgeBypassRow } from "./_rowTypes.ts";
+import { agentBridgeRepositories } from "./repositories/agentBridgeRepositories";
 
-// SQLite rows have source as plain string
-interface AgentBridgeBypassDbRow {
-  pattern: string;
-  source: string;
-  created_at: string;
-}
+const agentBridgeBypass = agentBridgeRepositories.legacySync.bypass;
 
-function mapRow(row: AgentBridgeBypassDbRow): AgentBridgeBypassRow {
-  return {
-    pattern: row.pattern,
-    source: row.source as "default" | "user",
-    created_at: row.created_at,
-  };
+/** Async persistence contract for the bypass pattern list. */
+export function getAgentBridgeBypassRepository(): AgentBridgeBypassRepository {
+  return agentBridgeRepositories.bypass;
 }
 
 export function getAllBypassPatterns(): AgentBridgeBypassRow[] {
-  const db = getDbInstance();
-  const rows = db
-    .prepare(
-      "SELECT pattern, source, created_at FROM agent_bridge_bypass ORDER BY source ASC, pattern ASC"
-    )
-    .all() as AgentBridgeBypassDbRow[];
-  return rows.map(mapRow);
+  return agentBridgeBypass.listAll();
 }
 
 export function getUserBypassPatterns(): string[] {
-  const db = getDbInstance();
-  const rows = db
-    .prepare("SELECT pattern FROM agent_bridge_bypass WHERE source = 'user' ORDER BY pattern ASC")
-    .all() as Array<{ pattern: string }>;
-  return rows.map((r) => r.pattern);
+  return agentBridgeBypass.listUserPatterns();
 }
 
 export function replaceUserBypassPatterns(patterns: string[]): void {
-  const db = getDbInstance();
-  const now = new Date().toISOString();
-
-  const deleteUserStmt = db.prepare("DELETE FROM agent_bridge_bypass WHERE source = 'user'");
-  const insertStmt = db.prepare(
-    `INSERT INTO agent_bridge_bypass (pattern, source, created_at) VALUES (?, 'user', ?)`
-  );
-
-  const runTransaction = db.transaction(() => {
-    deleteUserStmt.run();
-    for (const pattern of patterns) {
-      insertStmt.run(pattern, now);
-    }
-  });
-
-  runTransaction();
+  agentBridgeBypass.replaceUserPatterns(patterns);
 }
 
 /**
@@ -64,18 +37,5 @@ export function replaceUserBypassPatterns(patterns: string[]): void {
  * Called at app boot by the AgentBridge manager (F3 will wire this).
  */
 export function seedDefaultBypassPatterns(defaults: string[]): void {
-  const db = getDbInstance();
-  const now = new Date().toISOString();
-
-  const insertIfMissing = db.prepare(
-    `INSERT OR IGNORE INTO agent_bridge_bypass (pattern, source, created_at) VALUES (?, 'default', ?)`
-  );
-
-  const runTransaction = db.transaction(() => {
-    for (const pattern of defaults) {
-      insertIfMissing.run(pattern, now);
-    }
-  });
-
-  runTransaction();
+  agentBridgeBypass.seedDefaults(defaults);
 }

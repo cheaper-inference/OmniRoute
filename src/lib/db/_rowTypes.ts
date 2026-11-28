@@ -4,35 +4,19 @@
  * F1 will create canonical Zod schemas in src/shared/schemas/; F10 reconciles them.
  */
 
-export interface AgentBridgeStateRow {
-  agent_id: string;
-  dns_enabled: boolean;
-  cert_trusted: boolean;
-  setup_completed: boolean;
-  last_started_at: string | null;
-  last_error: string | null;
-}
+// Agent bridge state, bypass and custom-host rows are defined with their
+// repository contracts; re-exported here for existing imports.
+export type {
+  AgentBridgeBypassRow,
+  AgentBridgeStateRow,
+  InspectorCustomHostRow,
+} from "@/domain/persistence/agentBridgeRepositories";
 
 export interface AgentBridgeMappingRow {
   agent_id: string;
   source_model: string;
   target_model: string;
   updated_at: string;
-}
-
-export interface AgentBridgeBypassRow {
-  pattern: string;
-  source: "default" | "user";
-  created_at: string;
-}
-
-export interface InspectorCustomHostRow {
-  host: string;
-  enabled: boolean;
-  label: string | null;
-  kind: "llm" | "app" | "custom";
-  added_at: string;
-  last_seen_at: string | null;
 }
 
 export interface InspectorSessionRow {
