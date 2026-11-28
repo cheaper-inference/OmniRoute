@@ -136,10 +136,26 @@ export function baseRefCandidates(env = process.env, cwd = process.cwd()) {
 
 /**
  * Merge base between HEAD and the first resolvable candidate, or null (shallow clone, unknown
- * ref). Callers SKIP their diff-based check on null, like the other diff-aware gates do.
+ * ref). Callers with the Actions PR test merge can opt into its first parent as the diff base.
  * @returns {{ sha: string, ref: string } | null}
  */
-export function resolvePrDiffBase({ env = process.env, cwd = process.cwd() } = {}) {
+export function resolvePrDiffBase({
+  env = process.env,
+  cwd = process.cwd(),
+  usePrMergeParent = false,
+} = {}) {
+  // Actions checks out GitHub's test merge commit. Its first parent is the base actually used
+  // for that merge, even if the event SHA is older or unreachable in a depth-2 checkout.
+  if (
+    usePrMergeParent &&
+    env.GITHUB_ACTIONS === "true" &&
+    env.GITHUB_EVENT_NAME === "pull_request"
+  ) {
+    const first = tryGit(["rev-parse", "--verify", "HEAD^1"], cwd);
+    if (first && tryGit(["rev-parse", "--verify", "HEAD^2"], cwd)) {
+      return { sha: first, ref: "HEAD^1 (base side of the PR merge commit)" };
+    }
+  }
   for (const ref of baseRefCandidates(env, cwd)) {
     if (!tryGit(["rev-parse", "--verify", "--quiet", `${ref}^{commit}`], cwd)) continue;
     const sha = tryGit(["merge-base", "HEAD", ref], cwd);

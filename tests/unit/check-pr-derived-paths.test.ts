@@ -15,6 +15,7 @@ import {
   main,
   normalizeFamily,
 } from "../../scripts/check/check-pr-derived-paths.mjs";
+import { syncLlmMirrors } from "../../scripts/i18n/sync-llm-mirrors.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -182,28 +183,32 @@ function gitIn(dir: string, ...args: string[]) {
   }).trim();
 }
 
+function initRepo(dir: string) {
+  gitIn(dir, "init", "-q", "-b", "base");
+  gitIn(dir, "config", "user.email", "test@example.invalid");
+  gitIn(dir, "config", "user.name", "test");
+  gitIn(dir, "config", "commit.gpgsign", "false");
+  fs.mkdirSync(path.join(dir, "config/quality/derived-paths"), { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, "config/quality/derived-paths/translation.json"),
+    JSON.stringify({
+      family: "translation",
+      writers: ["docs/i18n-*"],
+      categories: [{ id: "docs-i18n-mirrors", paths: ["docs/i18n/**"] }],
+    })
+  );
+  fs.writeFileSync(path.join(dir, "app.ts"), "1\n");
+  gitIn(dir, "add", "-A");
+  gitIn(dir, "commit", "-q", "-m", "base");
+  const baseSha = gitIn(dir, "rev-parse", "HEAD");
+  gitIn(dir, "checkout", "-q", "-b", "feat/x");
+  return baseSha;
+}
+
 function withRepo(fn: (dir: string, baseSha: string) => void) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "derived-paths-"));
   try {
-    gitIn(dir, "init", "-q", "-b", "base");
-    gitIn(dir, "config", "user.email", "test@example.invalid");
-    gitIn(dir, "config", "user.name", "test");
-    gitIn(dir, "config", "commit.gpgsign", "false");
-    fs.mkdirSync(path.join(dir, "config/quality/derived-paths"), { recursive: true });
-    fs.writeFileSync(
-      path.join(dir, "config/quality/derived-paths/translation.json"),
-      JSON.stringify({
-        family: "translation",
-        writers: ["docs/i18n-*"],
-        categories: [{ id: "docs-i18n-mirrors", paths: ["docs/i18n/**"] }],
-      })
-    );
-    fs.writeFileSync(path.join(dir, "app.ts"), "1\n");
-    gitIn(dir, "add", "-A");
-    gitIn(dir, "commit", "-q", "-m", "base");
-    const baseSha = gitIn(dir, "rev-parse", "HEAD");
-    gitIn(dir, "checkout", "-q", "-b", "feat/x");
-    fn(dir, baseSha);
+    fn(dir, initRepo(dir));
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -248,6 +253,52 @@ test("main: pr mode fails a feature commit that edits a mirror; --warn reports a
     );
   });
 });
+
+const LLM_MIRROR = "docs/i18n/ko/llm.txt";
+const LLM_HEADER = "# OmniRoute (한국어)\n\nLanguage bar\n\n---\n\n";
+
+for (const { name, expected, edit } of [
+  { name: "accepts the copier output with the root change", expected: 0, edit: "none" },
+  { name: "rejects a mirror without a root change", expected: 1, edit: "root" },
+  { name: "rejects a hand-edited mirror body", expected: 1, edit: "body" },
+  { name: "rejects a hand-edited locale header", expected: 1, edit: "header" },
+  {
+    name: "rejects a changed translation alongside the copied mirror",
+    expected: 1,
+    edit: "translation",
+  },
+  { name: "checks committed mirrors even with a synced working copy", expected: 1, edit: "dirty" },
+]) {
+  test(`main: ${name}`, async (t) => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "derived-llm-mirrors-"));
+    t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+    initRepo(dir);
+    const write = (file: string, content: string) =>
+      fs.writeFileSync(path.join(dir, file), content);
+    fs.mkdirSync(path.join(dir, "docs/i18n/ko"), { recursive: true });
+    write("llm.txt", "# OmniRoute\n\nOld body\n");
+    write(LLM_MIRROR, `${LLM_HEADER}Old body\n`);
+    write("docs/i18n/ko/README.md", "Old translation\n");
+    gitIn(dir, "add", "-A");
+    gitIn(dir, "commit", "-qm", "base with mirrors");
+    const BASE_SHA = gitIn(dir, "rev-parse", "HEAD");
+
+    if (edit !== "root") write("llm.txt", "# OmniRoute\n\nNew body\n");
+    await syncLlmMirrors({ root: dir });
+    write("app.ts", "2\n");
+    if (["root", "body", "dirty"].includes(edit)) write(LLM_MIRROR, `${LLM_HEADER}Hand edit\n`);
+    if (edit === "header") write(LLM_MIRROR, "# Hand edit\n\n---\n\nNew body\n");
+    if (edit === "translation") write("docs/i18n/ko/README.md", "New translation\n");
+    gitIn(dir, "add", "-A");
+    gitIn(dir, "commit", "-qm", "feature change");
+    if (edit === "dirty") write(LLM_MIRROR, `${LLM_HEADER}New body\n`);
+
+    assert.equal(
+      quiet(() => main(["--mode=pr"], { CI: "true", BASE_SHA }, dir)),
+      expected
+    );
+  });
+}
 
 test("main: unresolved base is a SKIP, not a pass by accident of an empty diff", () => {
   withRepo((dir) => {

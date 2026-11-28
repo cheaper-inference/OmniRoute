@@ -165,7 +165,7 @@ assertion weakening and other masking remain owned by the independently blocking
 
 ### Job: `lint`
 
-Runs on every PR to `main`. Blocks merge on failure.
+Runs for code changes in admitted PRs to `main` or `release/**`. Blocks merge on failure.
 
 | Script (`npm run ...`)            | Validates                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Blocking                                 |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
@@ -253,12 +253,13 @@ measurement is missing.
 
 ### Job: `docs-sync-strict`
 
-Runs on every PR to `main`. Blocks merge on failure.
+Runs for docs or code changes in admitted PRs to `main` or `release/**`. Blocks merge on failure.
+The `docs-gates` job in `quality.yml` also runs `check:docs-all` for those changes.
 
 | Script                         | Validates                                                                                                                                         | Blocking                   |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
 | `check:docs-all`               | Meta-gate that runs the 6 sub-gates below sequentially                                                                                            | Yes                        |
-| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI version consistency; release mode also the 66 `llm.txt` mirrors and translated CHANGELOG sections (PR mode: mirrors agree)    | Yes                        |
+| ↳ `check:docs-sync`            | CHANGELOG and OpenAPI version consistency, strict `llm.txt` mirrors when the PR edits the root, and full mirror checks in release mode            | Yes                        |
 | ↳ `check:docs-counts`          | Counts in prose (provider count, migration count, etc.). Two modes: `pr` on feature PRs, `release` elsewhere — see "Derived values" below         | Yes                        |
 | ↳ `check:env-doc-sync`         | Every env var in `.env.example` is documented in a docs table, and vice versa                                                                     | Yes                        |
 | ↳ `check:deprecated-versions`  | Flags versions explicitly attributed to OmniRoute (3.6.x and earlier). Ignores dates.                                                             | Only with `--strict`       |
@@ -273,29 +274,28 @@ Runs on every PR to `main`. Blocks merge on failure.
 
 #### Translation mirrors are derived files (PR mode vs release mode)
 
-A feature PR edits only English sources. The `docs/i18n/<locale>/**` mirrors (including the 66
-`llm.txt` copies and the translated `CHANGELOG.md` files) and `.i18n-state.json` are rewritten in
-one step by the translation wave (`docs/i18n-*` / `chore/i18n-*` branches, the scheduled
-`i18n-mirror-refresh.yml`) and by the release (`npm run release:sync-changelog-i18n`). The mirror
-gates therefore run in two modes, resolved by `scripts/check/lib/gateMode.mjs` (`--mode=pr|release`,
-then `OMNIROUTE_GATE_MODE`, then the Actions event; a local run is `release`):
+The translation wave (`docs/i18n-*` / `chore/i18n-*`, including the scheduled
+`i18n-mirror-refresh.yml`) and the release refresh rewrite translated mirrors and `.i18n-state.json`.
+Feature PRs that change the root `llm.txt` also commit its mechanical copies. The mirror gates
+resolve their mode through `scripts/check/lib/gateMode.mjs` in this order, `--mode=pr|release`,
+`OMNIROUTE_GATE_MODE`, then the Actions event. Local runs default to `release`.
 
-- `check:docs-sync` — release mode runs every check. PR mode keeps the package.json/OpenAPI version,
-  the root CHANGELOG headings and the superseded-docs guard, and prints
-  `SKIP reason=pr-mode` for the `llm.txt` mirror copies and the translated CHANGELOG sections —
-  unless the PR writes mirrors: a head branch declared as a writer of the `docs/i18n/**` family in
-  `config/quality/derived-paths/*.json` runs both checks strictly, and, when the diff base
-  resolves, a change whose own diff edits `docs/i18n/<locale>/llm.txt` or `CHANGELOG.md` runs that
-  check strictly. The diff base does not resolve in a depth-1 checkout (the `docs-sync-strict`
-  job), so PR mode also runs one check that needs no base: every `llm.txt` mirror must exist, keep
-  its `---` separator and carry either the root body or the body most mirrors share. A base that
-  moved leaves all mirrors equally stale and passes; a hand edit to one mirror fails. The
-  translated `CHANGELOG.md` files have no such check in a depth-1 PR checkout.
-- The pre-commit hook runs `check-docs-sync.mjs --mode=pr`: a commit is judged on what it does.
-  Without the flag a local run is release mode, and one merged PR that edits the root `llm.txt`
-  would block every later commit on that base until the wave ran. The same rule holds for any
-  mode-aware gate a Husky hook runs: the hook passes `--mode=pr`, and the strict verdict stays
-  with the release-mode runs (the release PR, pushes to `main`, a plain local run).
+- `check:docs-sync` runs every check in release mode. PR mode checks package.json/OpenAPI
+  versions, root CHANGELOG headings and superseded docs. A head branch declared as a translation
+  writer in `config/quality/derived-paths/*.json` runs both mirror checks strictly. A PR that edits
+  `llm.txt` or its copies runs the strict `llm.txt` check, and a PR that edits translated CHANGELOG
+  mirrors runs the strict CHANGELOG check. Both docs jobs use the first parent of the Actions PR
+  merge commit as the diff base. When a PR changes the root `llm.txt`, run
+  `node scripts/i18n/sync-llm-mirrors.mjs` and commit its output with the root change. For other
+  PRs the consistency check tolerates inherited `llm.txt` drift when every mirror exists,
+  keeps its `---` separator and carries either the root body or the body most mirrors share.
+- `check:pr-derived-paths` permits these mechanical copies alongside a root `llm.txt` change when
+  the committed copies match the copier output from the base versions, including their locale
+  headers. Other translations follow the existing derived-family rules.
+- The pre-commit hook runs `check-docs-sync.mjs --mode=pr` because a plain local run defaults to
+  release mode, where a stale mirror inherited from the base would block every subsequent commit
+  until the translation wave runs. The same rule applies to any mode-aware gate run by a Husky
+  hook, with the hook passing `--mode=pr` and release-mode runs providing the strict verdict.
 - Mirror-content unit tests (`tests/_helpers/mirrorFreshness.ts`: `cycle-docs-mirror-contract`,
   `resilience-pre-dispatch-docs-mirrors`, `cli-env-quality-docs-mirrors`,
   `docs/*-locales`) — release mode asserts every locale. PR mode asserts only the mirrors that are
@@ -310,9 +310,9 @@ then `OMNIROUTE_GATE_MODE`, then the Actions event; a local run is `release`):
   stale mirror cannot ship in a release.
 
 `scripts/i18n/sync-llm-mirrors.mjs` (also exported as `syncLlmMirrors()`, with `--dry-run`)
-rewrites the `llm.txt` mirrors; the release refresh, the translation wave and the scheduled
-`i18n-mirror-refresh.yml` run it (the refresh detects stale `llm.txt` mirrors with a dry run, since
-the drift report does not list them, and syncs them before `check:docs-all`).
+rewrites the `llm.txt` mirrors in the PR that changes their source. The release refresh, the
+translation wave and the scheduled `i18n-mirror-refresh.yml` also run it. The scheduled refresh
+detects inherited drift with a dry run and syncs copies before `check:docs-all`.
 
 The twelve README SVGs under `docs/diagrams/` are generated (`scripts/docs/gen-readme-<name>.mjs`;
 `npm run docs:readme-diagrams` regenerates all of them). Each has a byte-compare unit test

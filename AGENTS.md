@@ -144,6 +144,9 @@ Documentation must describe verified behavior, not plausible behavior.
 5. Edit only the English source. Never commit `docs/i18n/**` mirrors, `llm.txt` mirrors or
    `.i18n-state.json` in a feature PR: the translation wave (`/i18n-waves`, `docs/i18n-*`
    branches) and the release rewrite them (`docs/guides/I18N.md`).
+   As an exception, when a PR changes the root `llm.txt`, the PR gate requires running
+   `node scripts/i18n/sync-llm-mirrors.mjs` and committing its `llm.txt` copies in the same PR,
+   with all other translations still left to the translation wave and release.
 
 ---
 

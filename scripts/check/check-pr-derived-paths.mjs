@@ -15,6 +15,8 @@
  *     fragment) is a refresh/translation PR → allowed (a community fix to ko.json is fine);
  *   - a PR whose head branch matches one of the family's `writers` globs → allowed
  *     (release/v*, translation waves, derived-refresh branches);
+ *   - the mechanical llm.txt copies may accompany a root llm.txt change when they match the
+ *     copier output from the base mirrors;
  *   - any other PR that touches a family file → FAIL: those edits ride along with a feature
  *     and belong to the refresh that owns them.
  *
@@ -38,6 +40,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { LLM_MIRROR_PATH, renderLlmMirror } from "../i18n/sync-llm-mirrors.mjs";
 import { isMainModule } from "../lib/is-main-module.mjs";
 
 import {
@@ -228,6 +231,56 @@ function gitShow(cwd, ref, file) {
   }
 }
 
+function readWorktreeFile(cwd, file) {
+  try {
+    return fs.readFileSync(path.join(cwd, file), "utf8");
+  } catch {
+    return null;
+  }
+}
+
+function llmMirrorLocales(cwd, committed) {
+  try {
+    if (committed) {
+      return execFileSync("git", ["ls-tree", "-z", "-d", "--name-only", "HEAD:docs/i18n"], {
+        cwd,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      })
+        .split("\0")
+        .filter(Boolean);
+    }
+    return fs
+      .readdirSync(path.join(cwd, "docs/i18n"), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+  } catch {
+    return null;
+  }
+}
+
+function syncedLlmMirrorEdits({ files, base, cwd, committed }) {
+  const mirrors = files.filter((file) => LLM_MIRROR_PATH.test(file));
+  if (!base || !files.includes("llm.txt") || mirrors.length === 0) return [];
+
+  const readHead = (file) => (committed ? gitShow(cwd, "HEAD", file) : readWorktreeFile(cwd, file));
+  const root = readHead("llm.txt");
+  if (root === null || root === gitShow(cwd, base, "llm.txt")) return [];
+
+  const locales = llmMirrorLocales(cwd, committed);
+  if (!locales?.length) return [];
+  const localePaths = locales.map((locale) => `docs/i18n/${locale}/llm.txt`);
+  const changedMirrors = new Set(mirrors);
+  // Check every current locale for drift and compare each changed mirror to the copier applied
+  // to its base version. The copier preserves headers, so a dry run alone misses header edits.
+  const synced = [...new Set([...localePaths, ...mirrors])].every((file) => {
+    const head = readHead(file);
+    const original = changedMirrors.has(file) ? gitShow(cwd, base, file) : head;
+    return head !== null && original !== null && renderLlmMirror(original, root) === head;
+  });
+  return synced ? mirrors : [];
+}
+
 // --- Orphan cleanup ----------------------------------------------------------------------------
 // Deleting a translation of a document that no longer exists is cleanup, not a derived copy:
 // keeping the mirror would leave a translation with no source, and nothing ever regenerates it.
@@ -334,7 +387,7 @@ export function main(argv = process.argv.slice(2), env = process.env, cwd = ROOT
     files = readFileList(opts.files);
     baseLabel = `--files=${opts.files}`;
   } else {
-    const base = resolvePrDiffBase({ env, cwd });
+    const base = resolvePrDiffBase({ env, cwd, usePrMergeParent: true });
     if (!base) {
       emit(opts, { ok: true, skipped: true, reason: "base-unresolved", mode: info }, [
         `${TAG} SKIP reason=base-unresolved — no merge base (shallow clone or unknown base ref); set BASE_SHA or fetch the base branch.`,
@@ -350,16 +403,20 @@ export function main(argv = process.argv.slice(2), env = process.env, cwd = ROOT
     files,
     existsAtHead: (p) => fs.existsSync(path.join(cwd, p)),
     readBase: (p) => (diffBase ? gitShow(cwd, diffBase, p) : null),
-    readHead: (p) => {
-      try {
-        return fs.readFileSync(path.join(cwd, p), "utf8");
-      } catch {
-        return null;
-      }
-    },
+    readHead: (p) => readWorktreeFile(cwd, p),
   });
-  const judged = files.filter((f) => !orphans.has(f));
+  const syncedMirrors = syncedLlmMirrorEdits({
+    files,
+    base: diffBase,
+    cwd,
+    committed: Boolean(env.CI),
+  });
+  const exempt = new Set([...orphans, ...syncedMirrors]);
+  const judged = files.filter((f) => !exempt.has(f));
   const { violations, allowed } = evaluateDerivedPaths({ files: judged, branch, families });
+  if (syncedMirrors.length) {
+    allowed.push({ family: "translation", reason: "llm-mirror-sync", files: syncedMirrors });
+  }
   if (orphans.size) {
     allowed.push({
       family: "orphan-cleanup",
@@ -377,9 +434,14 @@ export function main(argv = process.argv.slice(2), env = process.env, cwd = ROOT
   };
 
   if (violations.length === 0) {
+    const reasons = {
+      writer: `writer branch ${branch}`,
+      "orphan-cleanup": "mirrors and state entries of documents this PR's head no longer has",
+      "family-only": "derived-only PR",
+      "llm-mirror-sync": "copier output for the root llm.txt change",
+    };
     const notes = allowed.map(
-      (a) =>
-        `${TAG}   allowed ${a.family}: ${a.files.length} file(s) (${a.reason === "writer" ? `writer branch ${branch}` : a.reason === "orphan-cleanup" ? "mirrors and state entries of documents this PR's head no longer has" : "derived-only PR"})`
+      (a) => `${TAG}   allowed ${a.family}: ${a.files.length} file(s) (${reasons[a.reason]})`
     );
     emit(opts, payload, [
       `${TAG} PASS — ${describeGateMode(info)}; ${files.length} changed file(s) vs ${baseLabel}; ${families.length} famil${families.length === 1 ? "y" : "ies"} checked.`,

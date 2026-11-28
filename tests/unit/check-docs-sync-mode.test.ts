@@ -1,9 +1,7 @@
 // scripts/check/check-docs-sync.mjs in its two gate modes (plan "derived numbers and texts
 // resolved only at release", 2026-11-13). Release mode keeps every check it always had. PR mode
-// keeps the checks a feature PR can break in its own sources (package.json vs OpenAPI version,
-// the root CHANGELOG headings, superseded docs) and skips the two translation-mirror checks
-// (docs/i18n/<locale>/llm.txt copies and translated CHANGELOG sections): those mirrors are
-// rewritten by the translation wave / release refresh, never by a feature PR.
+// checks the root documentation and the mirrors a PR changes. A root llm.txt edit also
+// requires fresh copies, while inherited drift can pass the mirror consistency check.
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -11,6 +9,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { syncLlmMirrors } from "../../scripts/i18n/sync-llm-mirrors.mjs";
 
 const SCRIPT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -238,6 +237,76 @@ function git(root: string, ...args: string[]) {
   }).trim();
 }
 
+function commit(root: string, message: string) {
+  git(root, "add", "-A");
+  git(root, "-c", "commit.gpgsign=false", "commit", "-q", "-m", message);
+  return git(root, "rev-parse", "HEAD");
+}
+
+const RELEASE_PR = {
+  GITHUB_ACTIONS: "true",
+  GITHUB_EVENT_NAME: "pull_request",
+  GITHUB_HEAD_REF: "feat/update-llm",
+  GITHUB_BASE_REF: "release/v1.2.3",
+};
+
+function shallowPr(root: string, edit: () => void, advance = () => {}) {
+  git(root, "init", "-q", "-b", "base");
+  const eventBase = commit(root, "event base");
+  git(root, "branch", "feature");
+  write(root, "README.md", "Base advanced after the event.\n");
+  advance();
+  const base = commit(root, "advance base");
+  git(root, "switch", "-q", "feature");
+  edit();
+  const feature = commit(root, "feature change");
+  git(root, "switch", "-q", "base");
+  git(root, "-c", "commit.gpgsign=false", "merge", "-q", "--no-ff", "feature");
+
+  git(root, "switch", "-q", "--detach");
+  // The merge's parents are the history boundary in the Actions depth-2 checkout.
+  write(root, ".git/shallow", `${base}\n${feature}\n`);
+  assert.equal(git(root, "rev-parse", "--is-shallow-repository"), "true");
+  return { ...RELEASE_PR, BASE_SHA: eventBase };
+}
+
+test("PR mode fails a committed root llm.txt change with stale mirrors in a depth-2 checkout", () => {
+  const root = fixture();
+  const env = shallowPr(root, () => staleMirrors(root));
+  const { status, out } = run(root, [], env);
+  assert.equal(status, 1, out);
+  assert.match(
+    out,
+    /llm\.txt mirrors are out of date.*node scripts\/i18n\/sync-llm-mirrors\.mjs.*this PR/
+  );
+});
+
+test("PR mode accepts a root llm.txt change synced by the copier", async () => {
+  const root = fixture();
+  git(root, "init", "-q", "-b", "base");
+  git(root, "update-ref", "refs/remotes/origin/release/v1.2.3", commit(root, "base"));
+  staleMirrors(root);
+  await syncLlmMirrors({ root });
+  commit(root, "sync the root change");
+
+  const { status, out } = run(root, [], RELEASE_PR);
+  assert.equal(status, 0, out);
+  assert.match(out, /llm\.txt i18n mirrors match root content: 1 locales/);
+  assert.match(out, /SKIP reason=pr-mode — translated CHANGELOG\.md mirrors/);
+});
+
+test("PR mode tolerates stale mirrors inherited from a resolved base", () => {
+  const root = fixture();
+  const env = shallowPr(
+    root,
+    () => write(root, "docs/guide.md", "# Guide\n"),
+    () => staleMirrors(root)
+  );
+  const { status, out } = run(root, [], env);
+  assert.equal(status, 0, out);
+  assert.match(out, /llm\.txt mirrors agree with each other: 1 locales/);
+});
+
 test("PR mode judges the mirror a change itself edits, whatever the branch name", () => {
   const root = fixture();
   git(root, "init", "-q", "-b", "main");
@@ -256,8 +325,7 @@ test("PR mode judges the mirror a change itself edits, whatever the branch name"
   assert.match(edited.out, /SKIP reason=pr-mode — translated CHANGELOG\.md mirrors/);
 });
 
-// A shallow CI checkout (the docs-sync-strict job checks out at depth 1) cannot resolve the diff
-// base, so "did the change edit a mirror?" is unanswerable there. One check needs no base: the
+// A depth-1 checkout cannot resolve the diff base. One check needs no base: the
 // llm.txt mirrors are exact copies, so a base that moved leaves them all equally stale, while a
 // hand edit leaves one mirror differing from the root AND from the others.
 const MIRROR_HEADER = (locale: string) => `# OmniRoute (${locale})\n\n🌐 bar\n\n---\n\n`;
@@ -333,9 +401,7 @@ test("PR mode still fails a missing llm.txt mirror or a mirror without its separ
   assert.match(out, /FAIL - docs\/i18n\/de\/llm\.txt is missing the i18n mirror separator/);
 });
 
-// The pre-commit hook judges what the commit does, not what the base did: a local run defaults
-// to release mode, so without the flag one merged feature PR that edits llm.txt (allowed — the
-// wave syncs the mirrors) would block every later commit on that base until the wave runs.
+// The pre-commit hook judges what the commit does. A plain local run also checks inherited drift.
 test("the pre-commit hook runs check-docs-sync in PR mode", () => {
   const hook = fs.readFileSync(
     path.resolve(path.dirname(SCRIPT), "../../.husky/pre-commit"),

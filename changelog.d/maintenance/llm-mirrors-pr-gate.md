@@ -1,0 +1,1 @@
+- **fix(ci):** Require the mechanical `llm.txt` mirrors to be synced in the PR that changes the root `llm.txt`.
