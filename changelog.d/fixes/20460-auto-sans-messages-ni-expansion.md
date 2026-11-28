@@ -1,0 +1,1 @@
+- **test(combo):** an auto combo with an empty model list keeps serving the catalog on native Responses requests, with a guard that fails if that expansion disappears ([#20460](https://github.com/cheaper-inference/OmniRoute/pull/20460)) — thanks @maxmad64bis
