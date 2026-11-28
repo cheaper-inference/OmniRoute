@@ -788,3 +788,54 @@ test("a node binary that does not exist is a launch failure, not an uncaught exc
     fs.rmSync(runtimeRoot, { recursive: true, force: true });
   }
 });
+
+// ---------------------------------------------------------------------------------------
+// Remaining branches of the review fixes.
+// ---------------------------------------------------------------------------------------
+
+test("lock: a reclaim guard with unreadable content belongs to nobody and is taken over", async () => {
+  const dataDir = tmp("omni-tx-lock-garbage-guard-");
+  try {
+    const lockFile = path.join(dataDir, "managed-update", "lock");
+    fs.mkdirSync(path.dirname(lockFile), { recursive: true });
+    fs.writeFileSync(lockFile, lockBody(OTHER_OPERATION_ID, DEAD_PID));
+    fs.writeFileSync(`${lockFile}.reclaim`, "not a pid");
+    const lock = await tx.acquireFileLock(dataDir, OPERATION_ID, {
+      isPidAlive: (pid: number) => pid === process.pid,
+    });
+    assert.equal(JSON.parse(fs.readFileSync(lockFile, "utf8")).operationId, OPERATION_ID);
+    await lock.release();
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("the coordinator log line carries the recovery steps of a verdict it could not persist", async () => {
+  const dir = tmp("omni-tx-main-steps-");
+  try {
+    const planFile = path.join(dir, `plan-${OPERATION_ID}.json`);
+    fs.writeFileSync(
+      planFile,
+      JSON.stringify({ plan: makePlan(), runtime: { dataDir: dir, packageRoot: dir } })
+    );
+    const h = happyDeps(async (state) => {
+      if (state.phase === "finished") throw enospc();
+    });
+    h.deps.installTarget = async () => {
+      throw new Error("npm exited with 1");
+    };
+    h.deps.restorePrevious = async () => {
+      throw new Error("copy back failed");
+    };
+    const logged: string[] = [];
+    const code = await tx.coordinatorMain(planFile, dir, {
+      createDependencies: () => h.deps,
+      log: (line: string) => logged.push(line),
+    });
+    assert.equal(code, 3);
+    assert.match(logged[0], /manual-recovery \(restore-failed\)/);
+    assert.match(logged[0], /Recovery: Stop OmniRoute/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
