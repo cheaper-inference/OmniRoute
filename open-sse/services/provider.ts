@@ -118,26 +118,31 @@ export function detectFormatFromEndpoint(body, endpointPath = "") {
     return "claude";
   }
 
-  // Antigravity/cloudcode-compatible inbound endpoint (D4): the AgentBridge
-  // proxy forwards the IDE's cloudcode envelope here. Path-based detection
-  // (mirrors /messages → claude) makes the pipeline translate the request
-  // antigravity→openai and the response openai→antigravity, so the IDE gets
-  // a cloudcode reply regardless of which provider actually served it.
-  if (/\/antigravity(?=\/|:|$)/i.test(path) || /^antigravity(?=\/|:|$)/i.test(path)) {
-    return "antigravity";
-  }
-
-  // #14165: the /v1beta Gemini ingress converts gemini -> openai chat format
+  // #14165 & #21472: the /v1beta Gemini ingress converts gemini -> openai chat format
   // before re-entering handleChat while the request URL keeps its /v1beta
-  // path. With no path branch, detectFormat's `max_tokens` heuristic misread
-  // the converted body (messages + max_tokens) as claude, so non-streaming
-  // replies came back anthropic-shaped and streaming replies were empty. The
-  // ingress always produces an openai chat body; a body that still carries
+  // path (e.g. /v1beta/models/... or /v1beta/models/antigravity/...).
+  // This check MUST run before any provider-specific path matching so converted
+  // bodies are classified as "openai" and properly translated to the upstream format.
+  // The ingress always produces an openai chat body; a body that still carries
   // the raw gemini `contents` envelope keeps the body-based detection below.
   if (/\/v1beta(?:\/|$)/i.test(path) || /^v1beta(?:\/|$)/i.test(path)) {
     if (!(body && typeof body === "object" && body.contents && Array.isArray(body.contents))) {
       return "openai";
     }
+  }
+
+  // Antigravity/cloudcode-compatible inbound endpoint (D4): the AgentBridge
+  // proxy forwards the IDE's cloudcode envelope here. Path-based detection
+  // (mirrors /messages → claude) makes the pipeline translate the request
+  // antigravity→openai and the response openai→antigravity, so the IDE gets
+  // a cloudcode reply regardless of which provider actually served it.
+  // Must NOT match model subpaths (e.g. /models/antigravity/...) or /v1beta ingress (#21472).
+  if (
+    !/\/models(?:\/|$)/i.test(path) &&
+    (/(?:^|\/)(?:api\/)?v1\/antigravity(?=\/|:|$)/i.test(path) ||
+      /^antigravity(?=\/|:|$)/i.test(path))
+  ) {
+    return "antigravity";
   }
 
   if (
