@@ -581,7 +581,8 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-          # Full history needed for auto-bump: git diff against previous release tag
+          # Full history needed for auto-bump: git diff against the commit npm last published
+          # the plugin from (its gitHead), or the previous release tag
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
@@ -623,20 +624,49 @@ jobs:
             exit 0
           fi
 
-          # 2) Find the previous release tag (exclude the current one)
-          PREV_TAG=$(git tag -l 'v*' --sort=-version:refname \
-            | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            echo "No previous tag to compare — skipping bump."
-            echo "bumped=false" >> "$GITHUB_OUTPUT"
-            exit 0
+          # 2) Baseline: the commit npm recorded (gitHead) for the version its "latest" tag
+          # serves. The previous release tag alone missed a change from a release whose plugin
+          # publish failed or never ran: the next release already had it at its previous tag,
+          # saw no diff, and the change never reached npm. git diff compares trees, so the
+          # commit only has to be in this full-history checkout (fetch-depth: 0), not be an
+          # ancestor of the release. Without a usable gitHead the previous release tag is the
+          # baseline, as before; a registry failure fails the step, like npm_has_version.
+          HEAD_ERR=$(mktemp)
+          HEAD_RC=0
+          PUBLISHED_HEAD=$(npm view "${PKG_NAME}@latest" gitHead 2>"$HEAD_ERR") || HEAD_RC=$?
+          if [ "$HEAD_RC" -ne 0 ]; then
+            echo "::error::npm view ${PKG_NAME}@latest gitHead failed (exit $HEAD_RC)." >&2
+            cat "$HEAD_ERR" >&2
+            exit 1
+          fi
+          rm -f "$HEAD_ERR"
+          BASE=""
+          if [ -z "$PUBLISHED_HEAD" ]; then
+            echo "::warning::npm has no gitHead for ${PKG_NAME}@latest — comparing with the previous release tag."
+          elif [[ ! "$PUBLISHED_HEAD" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::warning::npm's gitHead for ${PKG_NAME}@latest is not a commit id — comparing with the previous release tag."
+          elif ! git cat-file -e "${PUBLISHED_HEAD}^{commit}" 2>/dev/null; then
+            echo "::warning::${PKG_NAME}@latest was published from ${PUBLISHED_HEAD}, which this checkout does not have — comparing with the previous release tag."
+          else
+            BASE="$PUBLISHED_HEAD"
+            echo "Baseline: ${PKG_NAME}@latest was published from ${BASE}."
+          fi
+          if [ -z "$BASE" ]; then
+            # Previous release tag (exclude the current one)
+            BASE=$(git tag -l 'v*' --sort=-version:refname \
+              | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
+            if [ -z "$BASE" ]; then
+              echo "No previous tag to compare — skipping bump."
+              echo "bumped=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
           fi
 
-          # 3) Check if plugin dir actually changed since that tag. The step runs inside the
-          # plugin folder and git resolves pathspecs against the current directory, so the
+          # 3) Check if plugin dir actually changed since that baseline. The step runs inside
+          # the plugin folder and git resolves pathspecs against the current directory, so the
           # folder is "." here (the repo-root path matched nothing and no change was ever seen).
-          if git diff --quiet "$PREV_TAG" -- .; then
-            echo "⏭️ No plugin changes since $PREV_TAG — nothing to publish."
+          if git diff --quiet "$BASE" -- .; then
+            echo "⏭️ No plugin changes since $BASE — nothing to publish."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -707,7 +737,8 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-          # Full history needed for auto-bump: git diff against previous release tag
+          # Full history needed for auto-bump: git diff against the commit npm last published
+          # the plugin from (its gitHead), or the previous release tag
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
@@ -749,20 +780,49 @@ jobs:
             exit 0
           fi
 
-          # 2) Find the previous release tag (exclude the current one)
-          PREV_TAG=$(git tag -l 'v*' --sort=-version:refname \
-            | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            echo "No previous tag to compare — skipping bump."
-            echo "bumped=false" >> "$GITHUB_OUTPUT"
-            exit 0
+          # 2) Baseline: the commit npm recorded (gitHead) for the version its "latest" tag
+          # serves. The previous release tag alone missed a change from a release whose plugin
+          # publish failed or never ran: the next release already had it at its previous tag,
+          # saw no diff, and the change never reached npm. git diff compares trees, so the
+          # commit only has to be in this full-history checkout (fetch-depth: 0), not be an
+          # ancestor of the release. Without a usable gitHead the previous release tag is the
+          # baseline, as before; a registry failure fails the step, like npm_has_version.
+          HEAD_ERR=$(mktemp)
+          HEAD_RC=0
+          PUBLISHED_HEAD=$(npm view "${PKG_NAME}@latest" gitHead 2>"$HEAD_ERR") || HEAD_RC=$?
+          if [ "$HEAD_RC" -ne 0 ]; then
+            echo "::error::npm view ${PKG_NAME}@latest gitHead failed (exit $HEAD_RC)." >&2
+            cat "$HEAD_ERR" >&2
+            exit 1
+          fi
+          rm -f "$HEAD_ERR"
+          BASE=""
+          if [ -z "$PUBLISHED_HEAD" ]; then
+            echo "::warning::npm has no gitHead for ${PKG_NAME}@latest — comparing with the previous release tag."
+          elif [[ ! "$PUBLISHED_HEAD" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::warning::npm's gitHead for ${PKG_NAME}@latest is not a commit id — comparing with the previous release tag."
+          elif ! git cat-file -e "${PUBLISHED_HEAD}^{commit}" 2>/dev/null; then
+            echo "::warning::${PKG_NAME}@latest was published from ${PUBLISHED_HEAD}, which this checkout does not have — comparing with the previous release tag."
+          else
+            BASE="$PUBLISHED_HEAD"
+            echo "Baseline: ${PKG_NAME}@latest was published from ${BASE}."
+          fi
+          if [ -z "$BASE" ]; then
+            # Previous release tag (exclude the current one)
+            BASE=$(git tag -l 'v*' --sort=-version:refname \
+              | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
+            if [ -z "$BASE" ]; then
+              echo "No previous tag to compare — skipping bump."
+              echo "bumped=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
           fi
 
-          # 3) Check if plugin-v2 dir actually changed since that tag. The step runs inside the
-          # plugin folder and git resolves pathspecs against the current directory, so the
+          # 3) Check if plugin-v2 dir actually changed since that baseline. The step runs inside
+          # the plugin folder and git resolves pathspecs against the current directory, so the
           # folder is "." here (the repo-root path matched nothing and no change was ever seen).
-          if git diff --quiet "$PREV_TAG" -- .; then
-            echo "⏭️ No plugin-v2 changes since $PREV_TAG — nothing to publish."
+          if git diff --quiet "$BASE" -- .; then
+            echo "⏭️ No plugin-v2 changes since $BASE — nothing to publish."
             echo "bumped=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
