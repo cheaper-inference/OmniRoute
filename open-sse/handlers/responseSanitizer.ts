@@ -1,3 +1,4 @@
+import { normalizeResponsesCompletedUsage } from "../utils/responsesStreamHelpers.ts";
 import {
   copyOpenAICompatibleReasoningFields,
   getReadableReasoningValue,
@@ -594,7 +595,12 @@ function sanitizeResponsesUsage(usage: unknown): unknown {
   sanitized.output_tokens = outputTokens;
   sanitized.total_tokens = totalTokens;
 
-  return normalizeResponsesContextUsage(sanitized);
+  const event = {
+    type: "response.completed",
+    response: { usage: normalizeResponsesContextUsage(sanitized) },
+  };
+  normalizeResponsesCompletedUsage(event);
+  return event.response.usage;
 }
 
 /**
