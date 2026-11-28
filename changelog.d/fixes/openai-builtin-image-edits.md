@@ -1,0 +1,1 @@
+- Support built-in OpenAI models, including GPT Image 2.6 Flare, on POST /v1/images/edits and in image-edit Combos, with multiple references, masks, and GIF controls.

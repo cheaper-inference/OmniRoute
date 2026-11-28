@@ -91,6 +91,12 @@ import {
   reportPollinationsAnonOutcome,
 } from "./imageGeneration/pollinationsAnonAuth.ts";
 import { fetchImageEndpoint } from "./imageGeneration/openAiImageFetch.ts";
+import {
+  appendNativeOpenAIEditOptions,
+  finishOpenAIEditMultipart,
+  nativeOpenAIEditCount,
+  usesOpenAIEditResponseFormat,
+} from "./imageGeneration/openAIEditMultipart.ts";
 import { prepareImageGenerationOptions } from "./imageGeneration/generationOptions.ts";
 
 // Re-export so /v1/images/edits can dispatch Firefly reference-image edits.
@@ -1561,12 +1567,8 @@ async function handleOpenAIImageGeneration({
 }
 
 /**
- * OpenAI-compatible image *edit* forwarder for custom providers (#3214 / #3215).
- *
- * Mirrors `handleOpenAIImageGeneration` but posts multipart/form-data to the node's
- * `/images/edits` endpoint and returns the upstream OpenAI-compatible response. Kept
- * separate from provider-specific hosted-tool flows. The fetch helper leaves Content-Type unset so
- * `fetch` derives the multipart boundary from the FormData body.
+ * Forward multipart image edits to built-in OpenAI and custom OpenAI-compatible providers.
+ * Native callers supply a provider base URL and options. Custom nodes keep their legacy fields.
  */
 export async function handleOpenAIImageEdit({
   model,
@@ -1579,6 +1581,10 @@ export async function handleOpenAIImageEdit({
   responseFormat,
   n = 1,
   log,
+  baseUrl,
+  images,
+  options,
+  mask,
 }: {
   model: string;
   provider: string;
@@ -1598,13 +1604,20 @@ export async function handleOpenAIImageEdit({
   responseFormat?: string | null;
   n?: number;
   log?: { info: (tag: string, message: string) => void } | null;
+  baseUrl?: string | null;
+  images?: Array<{ bytes: Buffer; mime?: string | null }> | null;
+  options?: Record<string, unknown> | null;
+  mask?: Buffer;
 }) {
   const startTime = Date.now();
-  const url = resolveImageBaseUrl(
-    credentials,
-    `https://generativelanguage.googleapis.com/v1beta/openai/images/edits`,
+  const defaultUrl = resolveImageBaseUrl(
+    { baseUrl },
+    "https://generativelanguage.googleapis.com/v1beta/openai/images/edits",
     "edits"
   );
+  const url = resolveImageBaseUrl(credentials, defaultUrl, "edits");
+  const nativeOpenAI = provider === "openai" && Boolean(baseUrl);
+  const count = nativeOpenAIEditCount(nativeOpenAI ? options?.n : undefined, n || 1);
 
   // Build the multipart body as a Buffer with an explicit boundary instead of a global
   // `FormData`. In production `globalThis.fetch` is patched with node_modules/undici's fetch,
@@ -1625,18 +1638,17 @@ export async function handleOpenAIImageEdit({
   appendField("model", model);
   appendField("prompt", prompt);
   if (size) appendField("size", size);
-  if (responseFormat) appendField("response_format", responseFormat);
-  appendField("n", String(n || 1));
-  partBuffers.push(
-    Buffer.from(
-      `--${boundary}${CRLF}Content-Disposition: form-data; name="image"; filename="image.png"${CRLF}` +
-        `Content-Type: ${imageMime || "image/png"}${CRLF}${CRLF}`
-    )
+  if (responseFormat && usesOpenAIEditResponseFormat(nativeOpenAI, model)) {
+    appendField("response_format", responseFormat);
+  }
+  appendField("n", String(count));
+  if (nativeOpenAI && options) appendNativeOpenAIEditOptions(appendField, options);
+  const multipartBody = finishOpenAIEditMultipart(
+    partBuffers,
+    boundary,
+    { bytes: imageBytes, mime: imageMime },
+    nativeOpenAI ? { images, mask } : undefined
   );
-  partBuffers.push(imageBytes);
-  partBuffers.push(Buffer.from(`${CRLF}--${boundary}--${CRLF}`));
-  const multipartBody = Buffer.concat(partBuffers);
-
   const headers: Record<string, string> = {
     "Content-Type": `multipart/form-data; boundary=${boundary}`,
   };
@@ -1672,7 +1684,7 @@ export async function handleOpenAIImageEdit({
       : typeof result.error === "string"
         ? result.error.slice(0, 500)
         : null,
-    requestBody: { model, prompt: prompt.slice(0, 200), size: size || "default", n: n || 1 },
+    requestBody: { model, prompt: prompt.slice(0, 200), size: size || "default", n: count },
     responseBody: result.success ? { images_count: result.data?.data?.length || 0 } : null,
   }).catch(() => {});
 

@@ -120,6 +120,12 @@ export const XAI_SUBSCRIPTION_IMAGE_PROVIDERS: Record<string, ImageProviderConfi
 };
 
 export const IMAGE_MODEL_ALIASES: Record<string, ImageModelAliasEntry> = {
+  "gpt-image-2.6-sunburst": {
+    provider: "codex",
+    model: "gpt-image-2.6-sunburst",
+    name: "GPT Image 2.6 Sunburst (Codex)",
+    listInCatalog: false,
+  },
   "gemini-3.1-flash-image-preview": {
     provider: "antigravity",
     model: "gemini-3.1-flash-image",
@@ -250,9 +256,19 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     format: "openai", // native OpenAI format
     models: [
       { id: "dall-e-3", name: "DALL·E 3" },
-      { id: "gpt-image-2", name: "GPT Image 2" },
-      { id: "gpt-image-1.5", name: "GPT Image 1.5" },
-      { id: "gpt-image-1-mini", name: "GPT Image 1 Mini" },
+      { id: "gpt-image-2", name: "GPT Image 2", inputModalities: ["text", "image"] },
+      { id: "gpt-image-1.5", name: "GPT Image 1.5", inputModalities: ["text", "image"] },
+      { id: "gpt-image-1-mini", name: "GPT Image 1 Mini", inputModalities: ["text", "image"] },
+      {
+        id: "gpt-image-2.6-flare",
+        name: "GPT Image 2.6 Flare",
+        inputModalities: ["text", "image"],
+      },
+      {
+        id: "gpt-image-2.6-sunburst",
+        name: "GPT Image 2.6 Sunburst",
+        inputModalities: ["text", "image"],
+      },
     ],
     supportedSizes: ["1024x1024", "1024x1792", "1792x1024"],
   },

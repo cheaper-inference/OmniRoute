@@ -107,9 +107,11 @@ test("#12547 edits combo falls through a non-edit-capable first target to a late
   await combosDb.createCombo({
     name: "edit-fallback-combo",
     strategy: "priority",
-    // openai/gpt-image-2 is a built-in provider with NO OpenAI-compatible edit
-    // endpoint (the single-model path hard-errors on it); the openrouter target can edit.
-    models: ["openai/gpt-image-2", "openrouter/google/gemini-3.1-flash-image-preview"],
+    // Together has an image-generation adapter. OpenRouter supports edits.
+    models: [
+      "together/black-forest-labs/FLUX.2-max",
+      "openrouter/google/gemini-3.1-flash-image-preview",
+    ],
   });
 
   const response = await imageEditRoute.POST(editRequest("edit-fallback-combo"));
@@ -151,8 +153,7 @@ test("#12547 edits combo with no edit-capable targets returns a clean 400", asyn
   await combosDb.createCombo({
     name: "no-edit-capable-combo",
     strategy: "priority",
-    // openai + a chat model: neither exposes an OpenAI-compatible edit endpoint.
-    models: ["openai/gpt-image-2", "openai/gpt-4o"],
+    models: ["together/black-forest-labs/FLUX.2-max", "openai/gpt-4o"],
   });
 
   const response = await imageEditRoute.POST(editRequest("no-edit-capable-combo"));

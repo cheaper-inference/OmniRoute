@@ -89,6 +89,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // shape as the sibling provider branches, 7->8.
     // #14619 extracted Firefly's credential lookup into adobeFireflyEdit.ts;
     // the same class-B site moves with it, 8->7 here and 0->1 in the helper.
+    // #21031: the built-in OpenAI edit uses the same scoped quota-preflight selector (class B).
+    "src/app/api/v1/images/edits/openAIEdit.ts": 1,
     "src/app/api/v1/images/edits/route.ts": 7,
     "src/app/api/v1/images/generations/route.ts": 3,
     "src/app/api/v1/images/upscale/route.ts": 1,

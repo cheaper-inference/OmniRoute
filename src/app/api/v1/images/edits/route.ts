@@ -38,7 +38,16 @@ import { resolveComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import {
   runImageComboTargets,
   type ImageComboDispatchResult,
+  type ImageComboTarget,
 } from "@omniroute/open-sse/services/imageCombo.ts";
+import {
+  scopeComboTargetsForKey,
+  type ComboKeyScope,
+} from "@omniroute/open-sse/services/comboKeyScope.ts";
+import {
+  narrowMediaConnectionScope,
+  pinnedConnectionIds,
+} from "@omniroute/open-sse/services/mediaComboFallback.ts";
 import { projectComboForEndpoint } from "@omniroute/open-sse/services/combo/endpointCapabilities.ts";
 import { orderCapabilityTargets } from "@omniroute/open-sse/services/combo/capabilityTargetOrder.ts";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
@@ -49,6 +58,11 @@ import {
 import * as log from "@/sse/utils/logger";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
+import {
+  createComboTargetKeyGate,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
 import {
   resolveImageRouteModel,
   resolveImageModelPrefix,
@@ -63,6 +77,15 @@ import { isCodexFreePlan } from "@omniroute/open-sse/executors/codex/tools.ts";
 import { imageQuotaPreflightOptions } from "@/sse/services/imageQuotaSelectionPolicy";
 import { RequestBodyTooLargeError } from "@/shared/middleware/bodySizeGuard";
 import { readEditInput, type EditInput } from "./editInput.ts";
+import {
+  dispatchBuiltinOpenAIEdit,
+  isBuiltinOpenAIEditModel,
+  isBuiltinOpenAIEditProvider,
+  MAX_OPENAI_EDIT_REFERENCES,
+  OPENAI_EDIT_REFERENCE_ERROR,
+  readBuiltinOpenAIEditMask,
+  runDirectBuiltinOpenAIEdit,
+} from "./openAIEdit.ts";
 import {
   CHATGPT_WEB_RETIRED_ERROR_CODE,
   isCommonChatGptWebRetirementError,
@@ -230,14 +253,14 @@ interface ImageEditContext {
   imageMime: string | null;
   imageInputCount: number;
   hasMask: boolean;
-  allowedConnections: string[] | null;
+  keyScope: ComboKeyScope;
   request: Request;
   accounting: EditAccountingBase;
 }
 
 /** A combo target that resolved to an edit-capable provider/node. */
-interface EditComboTarget {
-  modelStr: string;
+interface EditComboTarget extends ImageComboTarget {
+  resolvedModel: string;
   weight?: number;
   parsed: ReturnType<typeof parseImageModel>;
   providerConfig: ReturnType<typeof getImageProvider> | null;
@@ -249,8 +272,7 @@ interface EditComboTarget {
  * Decide whether a prefix-resolved combo target can service an image edit, and
  * return the credential key to resolve it with. Mirrors postHandler's provider
  * branches: codex-responses, fal-ai edit models, adobe-firefly, syntx, leonardo,
- * built-in openrouter, and custom OpenAI-compatible nodes are edit-capable; every other
- * built-in provider is not (it exposes no OpenAI-compatible edit endpoint).
+ * built-in OpenAI and OpenRouter, and custom OpenAI-compatible nodes are edit-capable.
  */
 function classifyImageEditTarget(
   resolvedModel: string,
@@ -258,6 +280,9 @@ function classifyImageEditTarget(
   providerConfig: ReturnType<typeof getImageProvider> | null
 ): { credKey: string } | null {
   if (providerConfig) {
+    if (isBuiltinOpenAIEditProvider(providerConfig)) {
+      return isBuiltinOpenAIEditModel(parsed.model) ? { credKey: providerConfig.id } : null;
+    }
     if (
       providerConfig.format === "codex-responses" ||
       providerConfig.format === "adobe-firefly-image" ||
@@ -288,9 +313,10 @@ function classifyImageEditTarget(
 async function dispatchImageEditTarget(
   target: EditComboTarget,
   credentials: unknown,
-  ctx: ImageEditContext
+  ctx: ImageEditContext,
+  openAIMask?: Buffer
 ): Promise<ImageComboDispatchResult> {
-  const { parsed, providerConfig, modelStr } = target;
+  const { parsed, providerConfig, resolvedModel: modelStr } = target;
   const { prompt, size, responseFormat, images, imageBytes, imageMime, request } = ctx;
 
   // Built-in Codex — native Responses hosted tool for reference-image edits.
@@ -468,6 +494,17 @@ async function dispatchImageEditTarget(
     })) as ImageComboDispatchResult;
   }
 
+  if (isBuiltinOpenAIEditProvider(providerConfig)) {
+    return dispatchBuiltinOpenAIEdit(
+      parsed.model,
+      providerConfig.baseUrl,
+      credentials,
+      ctx,
+      ctx.accounting.apiKeyInfo?.id ?? undefined,
+      openAIMask
+    );
+  }
+
   // Custom OpenAI-compatible node: forward to {base_url}/images/edits.
   const slash = modelStr.indexOf("/");
   const customProviderId = slash > 0 ? modelStr.slice(0, slash) : null;
@@ -526,14 +563,30 @@ async function resolveEditComboTargets(
     const capability = classifyImageEditTarget(resolved, parsed, providerConfig);
     if (!capability) continue;
     editTargets.push({
-      modelStr: resolved,
+      modelStr: raw,
+      resolvedModel: resolved,
       weight: t.weight,
+      connectionId: t.connectionId,
+      allowedConnectionIds: t.allowedConnectionIds,
       parsed,
       providerConfig,
       credKey: capability.credKey,
     });
   }
   return editTargets;
+}
+
+function prepareOpenAIComboEdit(
+  orderedTargets: EditComboTarget[],
+  ctx: ImageEditContext
+): Buffer | Response | undefined {
+  if (orderedTargets.length === 0) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, OPENAI_EDIT_REFERENCE_ERROR);
+  }
+
+  return orderedTargets.some(({ providerConfig }) => isBuiltinOpenAIEditProvider(providerConfig))
+    ? readBuiltinOpenAIEditMask(ctx)
+    : undefined;
 }
 
 async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): Promise<Response> {
@@ -555,21 +608,30 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
       `No image-edit-capable targets in combo "${comboName}"`
     );
   }
+  const scoped = await scopeComboTargetsForKey(editTargets, ctx.keyScope, comboName);
+  if (scoped.rejection) return scoped.rejection;
 
   const orderedTargets = orderCapabilityTargets({
     comboName,
     endpoint: "image-edits",
     strategy: projected.combo.strategy,
-    targets: editTargets,
+    targets: scoped.targets.filter(
+      ({ providerConfig }) =>
+        !isBuiltinOpenAIEditProvider(providerConfig) ||
+        ctx.imageInputCount <= MAX_OPENAI_EDIT_REFERENCES
+    ),
   });
+  const openAIMask = prepareOpenAIComboEdit(orderedTargets, ctx);
+  if (openAIMask instanceof Response) return openAIMask;
+
   const run = await runImageComboTargets(orderedTargets, {
     resolveProvider: (target) => ({ provider: target.credKey, model: target.parsed.model }),
     resolveCredentials: (_provider, target) =>
       getProviderCredentialsWithQuotaPreflight(
         target.credKey,
         null,
-        ctx.allowedConnections,
-        target.modelStr,
+        narrowMediaConnectionScope(scoped.allowedConnections, pinnedConnectionIds(target)),
+        target.resolvedModel,
         imageQuotaPreflightOptions(target.credKey)
       ),
     isRateLimited: isAllRateLimitedCredentials,
@@ -582,7 +644,7 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
           credentials,
           projected.combo.strategy || "priority"
         ),
-        () => dispatchImageEditTarget(target, credentials, ctx)
+        () => dispatchImageEditTarget(target, credentials, ctx, openAIMask)
       ),
     onSuccess: async (credentials) => {
       await clearRecoveredProviderState(credentials as never);
@@ -682,11 +744,8 @@ async function postHandler(request: Request, _context?: unknown) {
     if (combo) {
       const comboPolicy = await enforceApiKeyPolicy(request, fullModel);
       if (comboPolicy.rejection) return comboPolicy.rejection;
-      const comboAllowedConnections =
-        comboPolicy.apiKeyInfo?.allowedConnections &&
-        comboPolicy.apiKeyInfo.allowedConnections.length > 0
-          ? comboPolicy.apiKeyInfo.allowedConnections
-          : null;
+      const scope = await resolveKeyConnectionScope(comboPolicy.apiKeyInfo);
+      if (scope.rejection) return scope.rejection;
       return executeImageEditCombo(fullModel, {
         options: input.options,
         prompt,
@@ -697,7 +756,10 @@ async function postHandler(request: Request, _context?: unknown) {
         imageMime,
         imageInputCount,
         hasMask,
-        allowedConnections: comboAllowedConnections,
+        keyScope: {
+          allowedConnections: scope.allowedConnections,
+          isTargetAllowed: createComboTargetKeyGate(comboPolicy, fullModel),
+        },
         request,
         accounting: { apiKeyInfo: comboPolicy.apiKeyInfo, startTime },
       });
@@ -736,6 +798,29 @@ async function postHandler(request: Request, _context?: unknown) {
   const providerConfig = parsed.provider ? getImageProvider(parsed.provider) : null;
   const prepareFalInput = getFalCompatibilityPreparer();
   const falNative = prepareFalInput !== null;
+  if (isBuiltinOpenAIEditProvider(providerConfig)) {
+    if (!isBuiltinOpenAIEditModel(parsed.model)) {
+      return errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `Unsupported OpenAI image edit model: ${resolvedModel}`
+      );
+    }
+    const result = await runDirectBuiltinOpenAIEdit(
+      parsed.model,
+      providerConfig.baseUrl,
+      input,
+      allowedConnections,
+      resolvedModel,
+      editAccounting(accounting, providerConfig.id, parsed.model, null)
+    );
+    if (result instanceof Response) return result;
+    if (result.success) return jsonResponse(result.data);
+    return jsonResponse(
+      toJsonErrorPayload(result.error, "Image edit provider error"),
+      result.status
+    );
+  }
+
   // Firefly nano/gpt-image, fal edit models and Antigravity Gemini image accept multiple
   // reference images; other non-Codex stay at 1.
   const isGeminiImageEdit =
@@ -1134,7 +1219,7 @@ async function postHandler(request: Request, _context?: unknown) {
     return errorResponse(
       HTTP_STATUS.BAD_REQUEST,
       `Image edit is not supported for built-in provider "${parsed.provider}". ` +
-        `Use adobe-firefly, syntx, codex, leonardo, or a custom OpenAI-compatible image provider.`
+        `Use openai, adobe-firefly, syntx, codex, leonardo, or a custom OpenAI-compatible image provider.`
     );
   }
 
@@ -1220,4 +1305,7 @@ async function postHandler(request: Request, _context?: unknown) {
   );
 }
 
-export const POST = postHandler;
+export async function POST(request: Request, context?: unknown) {
+  const authRejection = await enforceClientApiRouteAuth(request);
+  return authRejection ?? postHandler(request, context);
+}

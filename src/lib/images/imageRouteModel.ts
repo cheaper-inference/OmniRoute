@@ -128,10 +128,14 @@ export const MAX_CODEX_IMAGE_EDIT_REFERENCES = 128;
 export const MAX_CODEX_GPT_IMAGE_EDIT_REFERENCES = 16;
 export const MAX_CODEX_IMAGE_EDIT_TOTAL_BYTES = 20 * 1024 * 1024;
 
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+export function hasPngImageSignature(bytes: Buffer): boolean {
+  return bytes.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE);
+}
+
 const CODEX_IMAGE_MIME_MAGIC: Readonly<Record<string, (bytes: Buffer) => boolean>> = {
-  "image/png": (bytes) =>
-    bytes.length >= 8 &&
-    bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
+  "image/png": hasPngImageSignature,
   "image/jpeg": (bytes) =>
     bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff,
   "image/webp": (bytes) =>
