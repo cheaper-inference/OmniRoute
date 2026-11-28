@@ -101,6 +101,8 @@ export async function PUT(request: Request, { params }: RouteParams) {
       // Re-register with new code
       unregisterHook(name);
       registerHook(saved);
+    } else if (!updateHook(name, updates)) {
+      registerHook(saved);
     }
 
     return NextResponse.json({ hook: saved });
