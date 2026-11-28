@@ -39,7 +39,10 @@ export default function AdvancedSection({ forceOpenSlug, children }: AdvancedSec
   };
 
   return (
-    <Card id="translator-advanced-section" className="border-warning/20 bg-warning/[0.02]">
+    <Card
+      id="translator-advanced-section"
+      className="w-full min-w-0 border-warning/20 bg-warning/[0.02] max-sm:p-0"
+    >
       <div className="p-4 space-y-3">
         {/* Header */}
         <div className="flex items-start gap-3">
@@ -57,9 +60,9 @@ export default function AdvancedSection({ forceOpenSlug, children }: AdvancedSec
           </div>
         </div>
 
-        {/* Accordion slots — children provided by F9 (TranslateTab) */}
+        {/* Let accordion and disclosure headings and subtitles wrap on phones. */}
         <div
-          className="space-y-2"
+          className="min-w-0 space-y-2 max-sm:[&_:is([data-slot=accordion-trigger],[data-slot=disclosure-trigger])_.truncate]:whitespace-normal max-sm:[&_:is([data-slot=accordion-trigger],[data-slot=disclosure-trigger])_.truncate]:wrap-anywhere"
           data-advanced-container="true"
           data-slug={forceOpenSlug ?? "none"}
         >

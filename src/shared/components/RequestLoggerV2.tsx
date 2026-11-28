@@ -1231,7 +1231,12 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
               </Select>
 
               {/* Column visibility — kit DropdownMenu checkbox items via the adapter. */}
-              <ColumnToggle columns={columns} visible={visibleColumns} onToggle={toggleColumn} />
+              <ColumnToggle
+                columns={columns}
+                visible={visibleColumns}
+                onToggle={toggleColumn}
+                size="default"
+              />
             </>
           }
         >

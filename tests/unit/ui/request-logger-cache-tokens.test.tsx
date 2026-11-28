@@ -112,6 +112,17 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
+it("KEA-9805: the Columns menu can match the default toolbar control height", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => Response.json([]))
+  );
+  await render(<RequestLoggerV2 />);
+
+  const trigger = container.querySelector('button[aria-label="toggleColumns"]');
+  expect(trigger?.classList.contains("ci-button--size-default")).toBe(true);
+});
+
 describe("request log cache token metrics (#9620)", () => {
   it("renders cache read/write beside the existing row token metrics", async () => {
     const emptyCacheLog = {
