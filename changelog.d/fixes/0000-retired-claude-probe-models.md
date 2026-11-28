@@ -1,0 +1,1 @@
+- **fix(providers):** the Anthropic-format key-validation probe and the Claude warm-up default no longer use retired models (`claude-3-5-sonnet-20241022`/`-20240620`, `claude-3-5-haiku-20241022`, which Anthropic answers with 404); both now default to `claude-haiku-5-5`. `validationModelId` and `OMNIROUTE_WARMUP_MODEL` still override

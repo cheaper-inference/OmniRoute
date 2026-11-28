@@ -21,7 +21,7 @@ import { toValidationErrorResult, validationRead, validationWrite } from "./tran
 export async function validateAnthropicLikeProvider({
   apiKey,
   baseUrl,
-  modelId = "claude-3-5-sonnet-20240620",
+  modelId = "claude-haiku-5-5",
   headers = {},
   providerSpecificData = {},
   isLocal = false,
@@ -102,7 +102,7 @@ export async function validateAnthropicLikeProvider({
     mergeConnectionCustomHeaders(requestHeaders, providerSpecificData);
 
     const testModelId =
-      providerSpecificData?.validationModelId || modelId || "claude-3-5-sonnet-20241022";
+      providerSpecificData?.validationModelId || modelId || "claude-haiku-5-5";
 
     const chatResponse = await validationWrite(
       baseUrl,
@@ -269,7 +269,7 @@ export async function validateAnthropicCompatibleProvider({
   }
 
   // Step 2: Authoritative probe — POST /v1/messages with max_tokens=1.
-  const testModelId = providerSpecificData?.validationModelId || "claude-3-5-sonnet-20241022";
+  const testModelId = providerSpecificData?.validationModelId || "claude-haiku-5-5";
   try {
     const messagesRes = await validationWrite(
       joinBaseUrlAndPath(baseUrl, providerSpecificData?.chatPath || "/messages"),
