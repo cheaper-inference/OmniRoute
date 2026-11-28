@@ -76,9 +76,11 @@ export async function isRuntimeUnitAtConcurrencyCap(
   }
   if (byConnection.size === 0) return false;
 
+  const connections = [...byConnection.values()];
+  const caps = await Promise.all(connections.map(({ connectionId }) => lookupCap(connectionId)));
   let sawLimitedConnection = false;
-  for (const { provider, connectionId } of byConnection.values()) {
-    const cap = await lookupCap(connectionId);
+  for (const [index, { provider, connectionId }] of connections.entries()) {
+    const cap = caps[index];
     if (!cap) continue;
     sawLimitedConnection = true;
     if (!isAccountSemaphoreFull(provider, connectionId, cap)) {

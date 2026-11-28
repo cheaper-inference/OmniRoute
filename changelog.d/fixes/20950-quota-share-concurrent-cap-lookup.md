@@ -1,0 +1,1 @@
+- **perf(sse):** quota-share routing now resolves each connection's concurrency cap in a single lookup wave instead of one at a time, with the same routing decisions ([#20950](https://github.com/cheaper-inference/OmniRoute/pull/20950)) — thanks @maxmad64bis
