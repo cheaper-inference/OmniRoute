@@ -137,6 +137,7 @@ export const EVENT_TYPES = Object.freeze([
   "would-land", // shadow mode: green candidate that was NOT landed
   "would-dequeue", // shadow mode: live mode would have removed this PR from the queue (label
   // kept, no comment); detail = reason code(s), sha = the PR head it was decided for
+  "composition-mismatch", // candidate discarded before blessing; a repeat pauses the queue
   "land-rejected", // base moved (fast-forward push refused) → recompose
   "bisect-split",
   "culprit-found",
@@ -361,6 +362,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                       (and in documents written before it existed): startSize.
  *                                       When present, validateState requires a positive integer
  *                                       (the clamp to the configured sizes happens on read)
+ * @property {{kind: "parked"|"composition-mismatch", reason: string, count: number}} [batchDiscard]
+ *                                     run of consecutive batch discards with the same result
  * @property {Record<string, {head: string, baseSha: string, reason: string, at: string, retried: boolean}>} [parked]
  * @property {Object<string, string>} [repairTried]  PR number (string) → head SHA of a base-repair
  *                                       PR whose candidate failed like the base: that head is
@@ -628,6 +631,9 @@ export function validateState(state) {
   ) {
     errors.push("batchWindow");
   }
+  if (state.batchDiscard !== undefined && !isBatchDiscard(state.batchDiscard)) {
+    errors.push("batchDiscard");
+  }
   if (state.parked !== undefined && !isParkedMap(state.parked)) errors.push("parked");
   if (state.repairTried !== undefined && !isRepairTried(state.repairTried)) {
     errors.push("repairTried");
@@ -648,6 +654,16 @@ export function validateState(state) {
   }
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
   return errors;
+}
+
+function isBatchDiscard(entry) {
+  return (
+    isRecord(entry) &&
+    ((entry.kind === "parked" && typeof entry.reason === "string" && entry.reason.length > 0) ||
+      (entry.kind === "composition-mismatch" && entry.reason === "")) &&
+    isCount(entry.count) &&
+    entry.count > 0
+  );
 }
 
 function isParkedMap(map) {

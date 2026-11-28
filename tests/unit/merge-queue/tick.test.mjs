@@ -2691,6 +2691,7 @@ test("live merge-ff: the no-verdict limit starts bounded retries, then parks and
     assert.equal(state.paused, null);
     assert.equal(state.inFlight.stage, "landing");
     assert.equal(state.inFlight.landingRetryTicks, i);
+    assert.equal(newestLand(h, f.candidateSha), "success", "a retry remains available");
   }
 
   await h.tick();
@@ -2706,6 +2707,67 @@ test("live merge-ff: the no-verdict limit starts bounded retries, then parks and
   assert.equal(event.batchId, f.batchId);
   assert.deepEqual(event.prs, [1]);
   assert.match(event.detail, /attempts-limit.*ended without a verdict/);
+});
+
+for (const sameReason of [true, false]) {
+  test(`live merge-ff: two consecutive parked batches with ${sameReason ? "the same" : "different"} rules`, async () => {
+    const h = createHarness({ mode: "live" });
+    const first = await greenBatch(h, [1]);
+    h.addPr(2);
+    const rejection = (sha, rule) =>
+      `remote: GH013: Repository rule violations found for refs/heads/${BASE}. | ` +
+      `remote: - ${rule} | ! ${sha}:refs/heads/${BASE} [remote rejected]`;
+    const signature = "Commits must have verified signatures.";
+    await rejectUntilParked(h, rejection(first.candidateSha, signature));
+    const second = (await h.state()).inFlight;
+    assert.deepEqual(nums(second.prs), [2]);
+    h.runCi(second.candidateSha);
+    h.addPr(3);
+    await rejectUntilParked(
+      h,
+      rejection(
+        second.candidateSha,
+        sameReason ? signature : "Changes must be made through a pull request."
+      )
+    );
+    const state = await h.state();
+    assert.deepEqual(
+      state.history.filter((e) => e.type === "pr-parked").map((e) => e.prs),
+      [[1], [2]]
+    );
+    assert.equal(newestLand(h, first.candidateSha), "failure");
+    assert.equal(newestLand(h, second.candidateSha), "failure");
+    if (sameReason) {
+      assert.equal(state.paused?.reason, "error");
+      assert.equal(
+        state.paused.detail,
+        `two batches in a row parked for the same reason: ${signature}`
+      );
+      assert.equal(state.inFlight, null);
+    } else {
+      assert.equal(state.paused, null);
+      assert.deepEqual(nums(state.inFlight.prs), [3]);
+    }
+  });
+}
+
+test("a landing between two parked batches breaks the run of refusals", async () => {
+  const h = createHarness({ mode: "live" });
+  await greenBatch(h, [1]);
+  h.addPr(2);
+  await rejectUntilParked(h, "branch protection");
+  let state = await h.state();
+  assert.deepEqual(nums(state.inFlight.prs), [2]);
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick();
+  state = await h.state();
+  assert.ok(types(state).includes("landed"));
+  assert.deepEqual(nums(state.inFlight.prs), [1]);
+  h.runCi(state.inFlight.candidateSha);
+  await rejectUntilParked(h, "branch protection");
+  state = await h.state();
+  assert.equal(state.paused, null);
+  assert.equal(state.parked[1].retried, true);
 });
 
 test("live squash-api: every PR head is blessed and merged with the owner client", async () => {
@@ -2923,6 +2985,12 @@ const notAvailable = (attempt) =>
   new Error(`land: attempt ${attempt} is not available from origin`);
 const landPairs = (n) => Array.from({ length: n }, () => ["success", "failure"]).flat();
 
+const noVerdictRetryStatuses = (initialAttempts) => [
+  ...landPairs(initialAttempts),
+  ...Array(LANDING_RETRY_TICKS).fill("success"),
+  "failure",
+];
+
 async function exhaustNoVerdictRetries(h) {
   for (let tick = 1; tick < LANDING_RETRY_TICKS; tick++) {
     await failingTick(h, /not available from origin/);
@@ -2960,14 +3028,14 @@ for (const landing of ["merge-ff", "squash-api"]) {
     if (landing === "merge-ff") {
       const state = await exhaustNoVerdictRetries(h);
       const total = LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS;
-      assert.deepEqual(statusStates(h), landPairs(total));
+      assert.deepEqual(statusStates(h), noVerdictRetryStatuses(LANDING_ATTEMPTS_LIMIT));
       assert.equal(landCalls(h).length, total);
       assert.equal(state.inFlight, null);
       assert.equal(newestLand(h, sha), "failure");
       h.clock.advance(10);
       await h.tick();
       assert.equal((await h.state()).inFlight, null, "the unchanged base keeps it parked");
-      assert.deepEqual(statusStates(h), landPairs(total));
+      assert.deepEqual(statusStates(h), noVerdictRetryStatuses(LANDING_ATTEMPTS_LIMIT));
       return;
     }
 
@@ -3051,7 +3119,7 @@ test("a manual pause and resume resets the counter", async () => {
   await exhaustNoVerdictRetries(h);
   assert.deepEqual(
     statusStates(h),
-    landPairs(5 + LANDING_RETRY_TICKS),
+    noVerdictRetryStatuses(5),
     "2 attempts, then a fresh count and retry window"
   );
 });
@@ -3072,7 +3140,7 @@ test("a state without landAttempts loads and counts from 1", async () => {
     state.history.findLast((e) => e.type === "pr-parked").detail,
     /attempt 3 is not available from origin/
   );
-  assert.deepEqual(statusStates(h), landPairs(2 + LANDING_RETRY_TICKS));
+  assert.deepEqual(statusStates(h), noVerdictRetryStatuses(2));
   assert.equal(newestLand(h, f.candidateSha), "failure");
 });
 
@@ -4743,7 +4811,7 @@ for (const [mode, landing] of [
       }),
     ],
   ]) {
-    test(`${mode} ${landing}: a stored batch that ${label} is not blessed, not landed, and pauses`, async () => {
+    test(`${mode} ${landing}: a stored batch that ${label} is discarded and recomposed without a blessing or landing`, async () => {
       const h = createHarness({ mode, landing, actor: "owner" });
       const f = await startBatch(h, [1]);
       if (label.includes("another head")) h.gh.pulls.get(1).headSha = fakeSha("planted-head");
@@ -4755,11 +4823,24 @@ for (const [mode, landing] of [
       assert.deepEqual(h.world.lands, [], "nothing landed");
       assert.ok(!types(state).includes("would-land"), "not recorded as would-land");
       assert.ok(!types(state).includes("land-blessed"));
-      assert.equal(state.inFlight, null);
-      assert.equal(state.paused?.reason, "error");
-      assert.match(state.paused.detail, /does not match its candidate/);
-      assert.equal(lastBeforeStall(state).type, "error");
-      assert.match(lastBeforeStall(state).detail, /state tampering or corruption/);
+      assert.equal(state.paused, null);
+      assert.notEqual(state.inFlight.batchId, f.batchId);
+      assert.notEqual(state.inFlight.candidateSha, f.candidateSha);
+      assert.equal(state.inFlight.stage, "testing");
+      assert.deepEqual(
+        nums(state.inFlight.prs),
+        label.includes("its candidate does not merge") ? [1, 2] : [1]
+      );
+      for (const pr of state.inFlight.prs) assert.equal(pr.head, h.gh.pulls.get(pr.n).headSha);
+      const mismatch = state.history.find((e) => e.type === "composition-mismatch");
+      assert.equal(mismatch.batchId, f.batchId);
+      assert.equal(mismatch.sha, f.candidateSha);
+      assert.match(
+        mismatch.detail,
+        /does not match its candidate.*state tampering or corruption.*recompos/
+      );
+      assert.ok(!types(state).includes("pr-parked"));
+      assert.equal(state.parked, undefined);
     });
   }
 }
@@ -4989,9 +5070,9 @@ test("dry-run reads the rules with GET only", async () => {
 });
 
 for (const mode of ["live", "shadow"]) {
-  test(`${mode}: a merge commit whose tree is not the merge of its parents pauses before the rules read`, async () => {
+  test(`${mode}: a merge commit whose tree is not the merge of its parents recomposes once, then pauses on a second mismatch before the rules read`, async () => {
     const h = createHarness({ mode });
-    await greenBatch(h, [1]);
+    const first = await greenBatch(h, [1]);
     const fake = h.modules.land.verifyComposition;
     // Shape, trailers and parents pass; only the recomposition (trees: true) disagrees.
     h.deps.modules = {
@@ -5009,8 +5090,25 @@ for (const mode of ["live", "shadow"]) {
       },
     };
     await h.tick();
-    const state = await h.state();
+    let state = await h.state();
+    assert.equal(state.paused, null);
+    assert.notEqual(state.inFlight.candidateSha, first.candidateSha);
+    assert.deepEqual(nums(state.inFlight.prs), [1]);
+    assert.deepEqual(statusCalls(h), []);
+    assert.deepEqual(h.world.lands, []);
+    assert.deepEqual(rulesReads(h), [], "the composition is checked first");
+    const replacement = state.inFlight;
+    h.runCi(replacement.candidateSha);
+    await h.tick();
+    state = await h.state();
     assert.equal(state.paused?.reason, "error");
+    assert.equal(state.inFlight, null);
+    assert.equal(state.parked, undefined);
+    assert.ok(!types(state).includes("pr-parked"));
+    assert.deepEqual(
+      state.history.filter((e) => e.type === "composition-mismatch").map((e) => e.batchId),
+      [first.batchId, replacement.batchId]
+    );
     assert.match(
       state.paused.detail,
       /does not match its candidate .*: merge commit 0123456789ab of #1: tree aaaa, recomposing gives bbbb \(state tampering/
@@ -5021,6 +5119,26 @@ for (const mode of ["live", "shadow"]) {
     assert.deepEqual(rulesReads(h), [], "the composition is checked first");
   });
 }
+
+test("a valid landing breaks the run of composition mismatches", async () => {
+  const h = createHarness({ mode: "live" });
+  const first = await greenBatch(h, [1]);
+  await tamperInFlight(h, { prs: [] });
+  await h.tick();
+  let state = await h.state();
+  assert.equal(state.paused, null);
+  assert.notEqual(state.inFlight.candidateSha, first.candidateSha);
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick();
+  assert.ok(types(await h.state()).includes("landed"));
+
+  await greenBatch(h, [2]);
+  await tamperInFlight(h, { prs: [] });
+  await h.tick();
+  state = await h.state();
+  assert.equal(state.paused, null);
+  assert.deepEqual(nums(state.inFlight.prs), [2]);
+});
 
 test("every batch-started event (batch, bisection segment, recomposition) carries labeledAt", async () => {
   const h = createHarness({ mode: "live" });
@@ -8107,7 +8225,7 @@ test("V1 (review probe 1): landings that throw, alternating with ticks that thro
   assert.deepEqual(statusStates(h), landPairs(LANDING_ATTEMPTS_LIMIT));
   await exhaustNoVerdictRetries(h);
   const total = LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS;
-  assert.deepEqual(statusStates(h), landPairs(total));
+  assert.deepEqual(statusStates(h), noVerdictRetryStatuses(LANDING_ATTEMPTS_LIMIT));
   assert.equal(landCalls(h).length, total);
   assert.equal(newestLand(h, f.candidateSha), "failure");
 });
@@ -8391,7 +8509,7 @@ test("W3 (re-review RR-2): landings that throw, alternating with checks back to 
   }
   assert.deepEqual(statusStates(h), landPairs(LANDING_ATTEMPTS_LIMIT));
   await exhaustNoVerdictRetries(h);
-  assert.deepEqual(statusStates(h), landPairs(LANDING_ATTEMPTS_LIMIT + LANDING_RETRY_TICKS));
+  assert.deepEqual(statusStates(h), noVerdictRetryStatuses(LANDING_ATTEMPTS_LIMIT));
 });
 
 test("W3 (re-review RR-10): a shadow tick never pauses on a kept count", async () => {

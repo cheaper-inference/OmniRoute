@@ -110,7 +110,7 @@
 //     process its batch sends it back to "testing" too (a paused base holds no blessed batch). A
 //     tick that throws withdraws the status of a batch it loaded at the landing stage before
 //     rethrowing (settleFailure), unless it landed it or made its own landing attempt (that
-//     attempt withdrew its own blessing and keeps its count). A `failure` GitHub refuses to write
+//     attempt handles its own blessing and keeps its count). A `failure` GitHub refuses to write
 //     is kept in state.landWithdrawals and retried by the next ticks (retryWithdrawals); when that
 //     list is full (LAND_WITHDRAWALS_LIMIT) nothing is dropped: the refusal goes to
 //     state.landWithdrawalsOverflow, retried alike, and a base that is not paused (or paused as
@@ -549,6 +549,18 @@ export function operatorReason(reason) {
     .slice(0, OPERATOR_REASON_CHARS);
 }
 
+/** Normalize a GitHub rejection without the candidate-specific push output. */
+function landingRejectionReason(detail) {
+  const text = String(detail ?? "")
+    .replace(/\b[0-9a-f]{7,40}\b/gi, "<sha>")
+    .replace(/https?:\/\/[^\s|]+/gi, "<url>");
+  if (!text.includes("GH013")) return operatorReason(text) || "push rejected";
+  const rules = text
+    .split(/\n| \| /)
+    .flatMap((line) => line.match(/^(?:remote:\s*)?\s*-\s+(.+)$/)?.[1]?.trim() ?? []);
+  return operatorReason([...new Set(rules)].sort().join(" / ")) || "GH013";
+}
+
 function stripUndefined(object) {
   return Object.fromEntries(Object.entries(object).filter(([, v]) => v !== undefined));
 }
@@ -652,6 +664,7 @@ class Tick {
     this.landing = null;
     /** batchId of the batch this tick landed (its land status stays). */
     this.landedBatch = null;
+    this.discardedBatch = false;
     /** batchId of the batch this tick stored at the landing stage itself (markLanding). */
     this.attemptedBatch = null;
     /** The landing record (this.landing) withdrawAbandoned already handled this tick. */
@@ -921,6 +934,10 @@ class Tick {
     const f = this.s.inFlight;
     if (f && (!this.s.paused || (this.repairOnlyPause() && f.lane === "base-repair"))) {
       await this.processInFlight();
+      // A batch that left flight for any other outcome breaks both runs of discards.
+      if (!this.discardedBatch && this.s.inFlight?.batchId !== f.batchId) {
+        delete this.s.batchDiscard;
+      }
     } else if (f) {
       // A paused base never keeps a batch at the landing stage (a base-repair batch blessed under
       // a base-red pause whose lane no longer runs, say): back to testing, its status withdrawn
@@ -1103,6 +1120,7 @@ class Tick {
     const cleared = keptNowhereCommits(this.s.paused.detail);
     this.s.paused = null;
     delete this.s.landingsWithoutVerdict;
+    delete this.s.batchDiscard;
     // The operator's fresh start: the landing count of the batch in flight starts again.
     if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight, { resetCount: true });
     this.event("resumed", {
@@ -1679,8 +1697,9 @@ class Tick {
         trees: true,
       })
     );
-    // A mismatch is a verdict: it pauses in shadow too.
-    if (composition && !composition.ok) return this.compositionMismatch(f, composition.detail);
+    // A mismatch is a verdict, including in shadow mode.
+    if (composition && !composition.ok)
+      return this.compositionMismatch(f, composition.detail, valid);
     // Second lock: the record and the candidate are only as trustworthy as the refs holding them.
     // Live blesses nothing while GitHub does not enforce the queue-refs ruleset on both; shadow
     // only says what live would do. Before the attempts limit: an unprotected ref stops the
@@ -1792,10 +1811,11 @@ class Tick {
           });
     } catch (error) {
       if (!isAuthFailure(error)) {
-        // Outcome unknown (no verdict): withdraw the blessing and fail the tick; the next tick
-        // re-observes the base (a landing that did happen is recognized) and blesses again.
-        if (retryTick === LANDING_RETRY_TICKS && !isRateLimitError(error)) {
-          return this.settleLastLandingAttempt(f, error);
+        if (retryTick !== undefined && !isRateLimitError(error)) {
+          // A merge-ff retry keeps its blessing while another retry is available. On the last
+          // attempt, re-read the base before discarding a push whose outcome is unknown.
+          if (retryTick === LANDING_RETRY_TICKS) return this.settleLastLandingAttempt(f, error);
+          throw error;
         }
         await this.revokeOrNote(f, error);
         throw error;
@@ -1826,9 +1846,7 @@ class Tick {
     if (result.ok) return this.afterLanded(f, result.newBaseSha ?? f.candidateSha);
     if (mergeFf && result.reason === "rejected" && !isAuthFailureText(result.detail ?? "")) {
       const tried = retryTick ?? 1;
-      const reason =
-        result.detail?.match(/Required status check "[^"]+"/)?.[0] ??
-        (operatorReason(result.detail) || "push rejected");
+      const reason = landingRejectionReason(result.detail);
       if (tried < LANDING_RETRY_TICKS) {
         this.s.inFlight.landingRetryTicks = tried;
         this.s.inFlight.landAttempts = 0;
@@ -1898,6 +1916,17 @@ class Tick {
       detail: detail === reason ? reason : `${reason}: ${detail}`,
     });
     this.note(`${f.batchId}: parked ${formatPrs(f.prs)} (${reason})`);
+    if (this.countBatchDiscard("parked", reason) >= 2) {
+      this.pauseLanding(f, `two batches in a row parked for the same reason: ${reason}`);
+    }
+  }
+
+  countBatchDiscard(kind, reason = "") {
+    const previous = this.s.batchDiscard;
+    const count = previous?.kind === kind && previous.reason === reason ? previous.count + 1 : 1;
+    this.s.batchDiscard = { kind, reason, count };
+    this.discardedBatch = true;
+    return count;
   }
 
   async landMergeFf(f) {
@@ -1957,16 +1986,32 @@ class Tick {
   }
 
   /**
-   * The stored in-flight batch is not the composition of its candidate: nothing is blessed or
-   * landed, and the queue pauses (state tampering or corruption is not something to retry).
+   * Reject a mismatched candidate before blessing. The first mismatch discards the old
+   * composition and rebuilds from revalidated heads and the current base. A repeated mismatch
+   * pauses, since the freshly assembled candidate also failed the integrity check.
    */
-  compositionMismatch(f, detail) {
-    return this.pauseLanding(
-      f,
+  async compositionMismatch(f, detail, valid = []) {
+    const count = this.countBatchDiscard("composition-mismatch");
+    const mismatch =
       `the stored in-flight batch ${f.batchId} does not match its candidate ` +
-        `${head12(f.candidateSha)}: ${detail} (state tampering or corruption: not landed, ` +
-        "not retried)"
-    );
+      `${head12(f.candidateSha)}: ${detail} (state tampering or corruption)`;
+    const action = count === 1 ? "discarded; recomposing" : "second consecutive mismatch; paused";
+    this.event("composition-mismatch", {
+      batchId: f.batchId,
+      prs: prNumbers(f.prs),
+      sha: f.candidateSha,
+      detail: `${mismatch}; ${action}`,
+    });
+    if (count >= 2) return this.pauseLanding(f, `${mismatch}; ${action}`);
+
+    this.note(`${mismatch}; ${action}`);
+    this.s.inFlight = null;
+    await this.withdrawAbandoned();
+    // Revalidate already checked the exact heads against GitHub. Do not reuse the stored
+    // bisection or stack, and deduplicate PRs from the suspect record. With no usable PRs
+    // runLoaded selects from the fresh queue snapshot.
+    const prs = [...new Map(valid.map((pr) => [pr.n, pr])).values()];
+    if (prs.length) await this.composeAndPush(prs, null, { lane: f.lane });
   }
 
   /** The landing cannot go on: pause with reason "error" (a resume recomposes the batch). */
@@ -2164,8 +2209,8 @@ class Tick {
    *    may carry the land status: a tick that throws lands nothing more, so its blessing is
    *    withdrawn now (withdrawAbandoned, forced), unless its candidate is the base tip (it
    *    landed; the next tick records it). Not when this tick made its own landing attempt
-   *    (markLanding): that attempt withdrew its own blessing before rethrowing (revokeOrNote),
-   *    and its landing stage with `landAttempts` is the record of the attempts bound.
+   *    (markLanding): the landing path decides whether to keep or withdraw its own blessing,
+   *    and its landing stage with `landAttempts` records the attempts bound.
    *  - What the stored state must learn from this tick is handed to main()'s failure path, which
    *    saves it with the `error` event (failedTickRecord, amendFailedTick): the landing stage of
    *    a batch withdrawn here is left (back to testing), the withdrawals GitHub refused are
@@ -2454,6 +2499,7 @@ class Tick {
     const { label, protectedApprovalLabel } = this.config;
     this.landedBatch = f.batchId; // its land status stays: the commits are on the base
     delete this.s.landingsWithoutVerdict; // a landing: the run without a verdict is over
+    delete this.s.batchDiscard;
     // A stored withdrawal of a landed commit (its landing threw after the push went through and
     // the withdrawal was refused) must not write `failure` on the base.
     this.dropWithdrawals(this.landShas(f));
