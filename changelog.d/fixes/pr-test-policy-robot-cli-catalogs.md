@@ -1,0 +1,1 @@
+- **fix(ci):** Exempt valid non-English CLI catalog edits on `chore/derived-refresh` from PR tests.

@@ -5,6 +5,7 @@ import { isDeepStrictEqual } from "node:util";
 
 const SOURCE_ROOTS = ["src/", "open-sse/", "electron/", "bin/"];
 const CLI_CATALOG = /^bin\/cli\/locales\/[a-zA-Z0-9-]+\.json$/;
+const DERIVED_REFRESH_BRANCH = "chore/derived-refresh";
 const TEST_PATTERNS = [/^tests\//, /(?:^|\/)__tests__\//, /\.(?:test|spec)\.[cm]?[jt]sx?$/];
 // Test files for specific source types (e.g., Python validation scripts for i18n)
 const TEST_FILE_PATTERNS = {
@@ -85,15 +86,19 @@ function readCliCatalog(objectId) {
   return value;
 }
 
-function hasSameCliTranslations(before, after) {
+function isExemptCliCatalog(before, after, isDerivedRefresh) {
   try {
+    if (isDerivedRefresh) {
+      readCliCatalog(after);
+      return true;
+    }
     return isDeepStrictEqual(readCliCatalog(before), readCliCatalog(after));
   } catch {
     return false;
   }
 }
 
-function classifyCliCatalogChanges(diffRange) {
+function classifyCliCatalogChanges(diffRange, isDerivedRefresh) {
   const fields = runGit([
     "diff",
     "--raw",
@@ -109,13 +114,13 @@ function classifyCliCatalogChanges(diffRange) {
     const filePath = fields[index + 1];
     if (!CLI_CATALOG.test(filePath)) continue;
     const [beforeMode, afterMode, before, after, status] = fields[index].slice(1).split(" ");
-    const unchangedTranslations =
+    const exempt =
       filePath !== "bin/cli/locales/en.json" &&
       status === "M" &&
       beforeMode === afterMode &&
       /^(100644|100755)$/.test(beforeMode) &&
-      hasSameCliTranslations(before, after);
-    changed.set(filePath, unchangedTranslations);
+      isExemptCliCatalog(before, after, isDerivedRefresh);
+    changed.set(filePath, exempt);
   }
   return changed;
 }
@@ -169,9 +174,13 @@ const misplacedNewTests = addedFiles.filter(
   (filePath) => isTestFile(filePath) && !isPlacedTest(filePath)
 );
 
-// Derived locale formatting has no runtime effect when the exact Git blobs have the same
-// translations. Additions, deletions, and other substantive locale edits still require tests.
-const cliCatalogChanges = classifyCliCatalogChanges(diffRange);
+// The nightly refresh may update existing translations. Other PRs only get the exemption
+// when the exact Git blobs have the same translations.
+const isDerivedRefresh = process.env.GITHUB_HEAD_REF === DERIVED_REFRESH_BRANCH;
+const cliCatalogChanges = classifyCliCatalogChanges(diffRange, isDerivedRefresh);
+const generatedCliCatalogCount = isDerivedRefresh
+  ? [...cliCatalogChanges.values()].filter(Boolean).length
+  : 0;
 const changedSourceFiles = [...new Set([...changedFiles, ...cliCatalogChanges.keys()])].filter(
   (filePath) => isSourceFile(filePath) && !cliCatalogChanges.get(filePath)
 );
@@ -186,8 +195,15 @@ const reportLines = [
   `Changed production files: ${changedSourceFiles.length}`,
   `Changed automated test files: ${changedTestFiles.length}`,
   `New test files outside tests/: ${misplacedNewTests.length}`,
-  "",
 ];
+
+if (generatedCliCatalogCount > 0) {
+  reportLines.push(
+    `CLI catalogs exempted as generated translations on \`${DERIVED_REFRESH_BRANCH}\`:` +
+      ` ${generatedCliCatalogCount}`
+  );
+}
+reportLines.push("");
 
 if (changedSourceFiles.length > 0) {
   reportLines.push("### Production files in scope", "");
