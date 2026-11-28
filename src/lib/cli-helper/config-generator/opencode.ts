@@ -341,6 +341,61 @@ function buildModelEntry(
 }
 
 /**
+ * OpenCode's model picker shows only the display `name`, so two catalog entries
+ * that resolve to the same name look identical — typically the same
+ * model served by two provider nodes whose catalog labels differ only by the
+ * `owned_by/` prefix that `buildModelEntry` strips. Append a suffix to colliding
+ * names only so each becomes unique: the provider node (first id segment),
+ * falling back to the full id when the node alone is still not unique (e.g.
+ * reasoning variants of one model). Unique labels are left untouched.
+ */
+function ensureUniqueModelNames(models: Record<string, ExistingModelEntry>): void {
+  const idsByName = new Map<string, string[]>();
+  for (const [id, entry] of Object.entries(models)) {
+    if (typeof entry.name !== "string" || entry.name.trim() === "") continue;
+    const ids = idsByName.get(entry.name);
+    if (ids) ids.push(id);
+    else idsByName.set(entry.name, [id]);
+  }
+
+  // Seed the global set with the names of unique groups, which are emitted
+  // unchanged, so a suffixed candidate can never collide with an untouched
+  // entry that merely happens to equal `<name> (<node>)`.
+  const emitted = new Set<string>();
+  for (const [name, ids] of idsByName) {
+    if (ids.length < 2) emitted.add(name);
+  }
+
+  for (const [name, ids] of idsByName) {
+    if (ids.length < 2) continue;
+    for (const id of ids) {
+      const slash = id.indexOf("/");
+      const node = slash > 0 ? id.slice(0, slash) : "";
+      const fullIdName = `${name} (${id})`;
+      const nodeName = node && node !== id ? `${name} (${node})` : null;
+      // Preference order: node suffix, then full id, then an incrementing
+      // suffix. Each step must advance — a candidate already in `emitted`
+      // (e.g. a unique entry literally named `<name> (<id>)`) would otherwise
+      // loop forever and block the event loop.
+      let candidate: string;
+      if (nodeName && !emitted.has(nodeName)) {
+        candidate = nodeName;
+      } else if (!emitted.has(fullIdName)) {
+        candidate = fullIdName;
+      } else {
+        let n = 2;
+        do {
+          candidate = `${fullIdName} (${n})`;
+          n += 1;
+        } while (emitted.has(candidate));
+      }
+      models[id].name = candidate;
+      emitted.add(candidate);
+    }
+  }
+}
+
+/**
  * Load the user's current OpenCode config so we can preserve names,
  * capability flags, explicit `limit.context` overrides, and JSONC source text.
  * Existing invalid files are a hard stop: replacing one with a regenerated
@@ -492,6 +547,7 @@ export async function generateOpencodeConfig(options: GenerateOpencodeOptions): 
   for (const id of mergedIds) {
     mergedModels[id] = buildModelEntry(id, catalogById.get(id), existingModels[id]);
   }
+  ensureUniqueModelNames(mergedModels);
 
   const provider: Record<string, unknown> = {
     name: existingProvider?.name ?? "OmniRoute",
