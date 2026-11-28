@@ -235,3 +235,26 @@ test("POST /v1/messages: the sidecar's echoed credential and cookie headers are 
   assert.equal(res.headers.get("authorization"), null);
   assert.equal(res.headers.get("set-cookie"), null);
 });
+
+test("POST /v1/messages: a slow non-streaming sidecar answer is covered by the JSON keepalive", async () => {
+  enableBifrost("bifrost");
+  process.env.OMNIROUTE_NONSTREAM_KEEPALIVE_MS = "50";
+
+  globalThis.fetch = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return new Response(JSON.stringify({ id: "msg-slow-sidecar", type: "message", content: [] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+
+  const { POST } = await import(
+    `../../../../src/app/api/v1/messages/route.ts?testCase=${Date.now()}-slow-sidecar`
+  );
+  const res = await POST(messagesRequest());
+  const wire = await res.text();
+
+  assert.equal(res.status, 200, wire);
+  assert.ok(wire.startsWith(" "), "keepalive bytes must flow while the sidecar is slow");
+  assert.equal(JSON.parse(wire).id, "msg-slow-sidecar");
+});

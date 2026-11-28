@@ -169,6 +169,28 @@ export function resolveExplicitStreamAlias(body: unknown): boolean | undefined {
 }
 
 /**
+ * Route-side mirror of chatCore's client-facing stream decision, made before the API key
+ * is known: applies the non-standard stream aliases chatCore applies, then
+ * resolveStreamFlag. A per-key `streamDefaultMode: "json"` can only turn `true` into
+ * `false`, so `false` here means the client will receive a JSON body.
+ */
+export function resolveClientStreamFlag(
+  body: unknown,
+  acceptHeader: unknown,
+  sourceFormat: string,
+  userAgent?: unknown
+): boolean {
+  const alias = resolveExplicitStreamAlias(body);
+  const bodyStream =
+    alias !== undefined
+      ? alias
+      : body && typeof body === "object"
+        ? (body as Record<string, unknown>).stream
+        : undefined;
+  return resolveStreamFlag(bodyStream, acceptHeader, sourceFormat, { userAgent });
+}
+
+/**
  * Backward-compatible helper used by tests/legacy call sites.
  */
 export function hasExplicitNoStreamParam(body: unknown): boolean {

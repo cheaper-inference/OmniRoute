@@ -11,13 +11,20 @@ import {
 } from "@omniroute/open-sse/services/selfHostedEntry.ts";
 import { initTranslators } from "@omniroute/open-sse/translator/index.ts";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
-import { acceptHeaderForcesStream } from "@omniroute/open-sse/utils/aiSdkCompat.ts";
+import {
+  acceptHeaderForcesStream,
+  resolveClientStreamFlag,
+} from "@omniroute/open-sse/utils/aiSdkCompat.ts";
 import {
   OPENAI_CHAT_ERROR_FRAME,
   OPENAI_KEEPALIVE_FRAME,
   OPENAI_STARTUP_FRAME,
   withEarlyStreamKeepalive,
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
+import {
+  resolveJsonKeepaliveThresholdMs,
+  withEarlyJsonKeepalive,
+} from "@omniroute/open-sse/utils/earlyJsonKeepalive";
 import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
 import {
@@ -427,16 +434,32 @@ export async function POST(request) {
       );
     }
 
-    const handlerResponse = await handleChat(request, null, parsedBody, reqId);
-    const recoveryResponse = await maybeQueueQuotaSessionRecovery({
-      request,
-      body: parsedBody,
-      response: handlerResponse,
-      endpoint: "chat/completions",
-    });
-    return finishAdmission(
-      withCompressionHeaderEcho(applyFallbackHeaders(recoveryResponse), compressionRequestHeader)
+    const answer = handleChat(request, null, parsedBody, reqId).then((handlerResponse) =>
+      maybeQueueQuotaSessionRecovery({
+        request,
+        body: parsedBody,
+        response: handlerResponse,
+        endpoint: "chat/completions",
+      })
     );
+    const userAgent = request.headers.get("user-agent");
+    if (resolveClientStreamFlag(parsedBody, acceptHeader, "openai", userAgent)) {
+      return finishAdmission(
+        withCompressionHeaderEcho(applyFallbackHeaders(await answer), compressionRequestHeader)
+      );
+    }
+    // JSON answer: no byte reaches the client until it is complete, so a proxy with an
+    // idle-read timeout (Cloudflare 524 at ~120 s) cuts slow reasoning answers. Keep the
+    // connection open with leading whitespace; the admission lease is held until the
+    // handler settles, not just until the keepalive response opens.
+    const jsonResponse = await withEarlyJsonKeepalive(
+      releaseChatAdmissionAfterHandler(answer, admission.lease, { signal: request.signal }),
+      {
+        thresholdMs: resolveJsonKeepaliveThresholdMs(),
+        extraHeaders: { "X-Correlation-Id": reqId },
+      }
+    );
+    return withCompressionHeaderEcho(applyFallbackHeaders(jsonResponse), compressionRequestHeader);
   } catch (error) {
     admission.lease?.release();
     throw error;

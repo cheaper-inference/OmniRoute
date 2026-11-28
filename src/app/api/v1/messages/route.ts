@@ -10,6 +10,10 @@ import {
   withEarlyStreamKeepalive,
   ANTHROPIC_PING_FRAME,
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
+import {
+  withEarlyJsonKeepalive,
+  resolveJsonKeepaliveThresholdMs,
+} from "@omniroute/open-sse/utils/earlyJsonKeepalive";
 import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
 import { resolveStreamFlag } from "@omniroute/open-sse/utils/aiSdkCompat";
@@ -170,8 +174,8 @@ async function postHandler(request: any, context: any, preParsedBody: any = null
   // the response until the first useful upstream byte (ensureStreamReadiness), so keep
   // the connection warm with early keepalives during that gap — same wrapper used by
   // /v1/responses (#2544). Anthropic clients ignore SSE comments for their watchdog, so
-  // emit a real `event: ping` (ANTHROPIC_PING_FRAME). Non-streaming callers keep the
-  // verbatim path.
+  // emit a real `event: ping` (ANTHROPIC_PING_FRAME). Non-streaming callers get the
+  // JSON keepalive below.
   let body = preParsedBody;
   if (body == null) {
     try {
@@ -189,20 +193,17 @@ async function postHandler(request: any, context: any, preParsedBody: any = null
   // Bifrost sidecar fast-path (falls back to the native pipeline below on 5xx / error).
   const relayBackend = resolveRelayRoutingBackend();
   const bifrostConfig = getBifrostRoutingConfig();
-  const fastPathResult = await tryBifrostFastPath(request, body, bifrostConfig, relayBackend);
-  if (fastPathResult.response) {
-    return fastPathResult.response;
-  }
-  const applyHeaders = (res: Response) =>
-    applyBifrostHeaders(res, bifrostConfig, relayBackend, fastPathResult.fallbackHeader);
-
   if (wantsStreaming) {
+    const fastPathResult = await tryBifrostFastPath(request, body, bifrostConfig, relayBackend);
+    if (fastPathResult.response) {
+      return fastPathResult.response;
+    }
     // Single id for handler + keepalive bytes + deadline warn (matches the
     // chat/completions convention: caller id preserved, generated when absent).
     const correlationId =
       resolveIncomingCorrelationId(request.headers.get("x-correlation-id")) ?? generateRequestId();
     const { signal: streamSignal, deadlineController } = createStreamDeadlineSignal(request.signal);
-    return applyHeaders(
+    return applyBifrostHeaders(
       await withEarlyStreamKeepalive(handleChat(request, null, body, correlationId, streamSignal), {
         signal: streamSignal,
         thresholdMs: resolveKeepaliveThreshold(body?.model),
@@ -210,17 +211,53 @@ async function postHandler(request: any, context: any, preParsedBody: any = null
         correlationId,
         extraHeaders: { "X-Correlation-Id": correlationId },
         deadlineController,
-      })
+      }),
+      bifrostConfig,
+      relayBackend,
+      fastPathResult.fallbackHeader
     );
   }
-  return applyHeaders(
-    await handleChat(
-      request,
-      null,
-      body,
-      resolveIncomingCorrelationId(request.headers.get("x-correlation-id")) ?? undefined
-    )
+  return respondNonStreaming(request, body, bifrostConfig, relayBackend);
+}
+
+/**
+ * Non-streaming: a proxy with an idle-read timeout (Cloudflare 524 at ~100-120 s) cuts a
+ * slow answer before its first byte. Claude Code retries a failed stream this way. The
+ * keepalive covers the Bifrost attempt and the native fallback together, so a slow
+ * sidecar cannot hold back the first byte either.
+ */
+async function respondNonStreaming(
+  request: Request,
+  body: Record<string, unknown> | null,
+  bifrostConfig: BifrostRoutingConfig | null,
+  relayBackend: RelayRoutingBackend
+): Promise<Response> {
+  const correlationId =
+    resolveIncomingCorrelationId(request.headers.get("x-correlation-id")) ?? generateRequestId();
+  // nativeFallback is set once the Bifrost attempt hands the request to the native pipeline.
+  const state: { nativeFallback?: { header?: string }; dispatched?: Response } = {};
+  const dispatch = async (): Promise<Response> => {
+    const fastPath = await tryBifrostFastPath(request, body, bifrostConfig, relayBackend);
+    if (fastPath.response) return fastPath.response;
+    state.nativeFallback = { header: fastPath.fallbackHeader };
+    const native = await handleChat(request, null, body, correlationId);
+    return applyBifrostHeaders(native, bifrostConfig, relayBackend, fastPath.fallbackHeader);
+  };
+  const response = await withEarlyJsonKeepalive(
+    dispatch().then((res) => (state.dispatched = res)),
+    {
+      thresholdMs: resolveJsonKeepaliveThresholdMs(),
+      extraHeaders: { "X-Correlation-Id": correlationId },
+    }
   );
+  // Returned before the threshold: the sidecar or native response, unchanged.
+  if (response === state.dispatched) return response;
+  // Keepalive committed early. The routing headers are known only when the Bifrost
+  // attempt had already handed over; while it is still running, the sidecar may answer.
+  const fallback = state.nativeFallback;
+  return fallback
+    ? applyBifrostHeaders(response, bifrostConfig, relayBackend, fallback.header)
+    : response;
 }
 
 // `logger: null` — the guardrail registry re-evaluates this request inside
