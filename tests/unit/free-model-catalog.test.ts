@@ -98,14 +98,15 @@ test("deposit-unlock boost is reported separately, not folded into steady", () =
 test("2026-06-17 refresh: discontinued providers dropped, new free providers added", () => {
   const providers = new Set(FREE_MODEL_BUDGETS.map((m) => m.provider));
   // dead in 2026 — must be gone from the budget catalog
-  for (const dead of ["chutes", "phind", "kluster", "gitlawb", "aimlapi"]) {
+  for (const dead of ["chutes", "phind", "kluster", "aimlapi"]) {
     assert.ok(!providers.has(dead), `${dead} should be removed (discontinued)`);
   }
   assert.equal(providers.has("qwen-web"), false, "retired qwen-web must stay out of routing");
   // discovered in the refresh — must be present
   // opencode-zen's free rows were dropped with the OpenCode Free removal
   // (docs/reference/REMOVED_PROVIDERS.md): the free models only work from the OpenCode client.
-  for (const fresh of ["kilo-gateway", "glm-cn"]) {
+  // https://twigpine.com/opengateway/docs (2026-11-27): the MiMo allowance puts Gitlawb back.
+  for (const fresh of ["kilo-gateway", "glm-cn", "gitlawb"]) {
     assert.ok(providers.has(fresh), `${fresh} should be added`);
   }
 });

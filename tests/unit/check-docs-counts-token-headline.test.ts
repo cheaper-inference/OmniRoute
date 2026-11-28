@@ -424,7 +424,7 @@ const D47_BLOCK =
   "~11.4B free tokens / month\n  counted the way other catalogs count: every row added up, ended offers included\n\n~93M real today\n  each shared quota counted once: what you can actually use";
 const SHORT_PAIR = "~11.4B as others count · ~93M real";
 
-const UPDATED_TOTALS = { headlineSteady: 89_780_000, rowSumTotal: 11_349_500_000 };
+const UPDATED_TOTALS = { headlineSteady: 89_780_000, rowSumTotal: 11_352_500_000 };
 
 function headlineCheck(file: string, code: Record<string, unknown> = UPDATED_TOTALS) {
   const check = freeTierChecks({ ...gate.PR_MODE_FACTS, code }).find((c) => c.files.includes(file));
@@ -434,19 +434,20 @@ function headlineCheck(file: string, code: Record<string, unknown> = UPDATED_TOT
 
 test("the README plan refreshes the Markdown pair and alt figures in place", () => {
   const { plan, validate } = headlineCheck("README.md");
-  for (const content of [D47_BLOCK, `<img alt="… ${SHORT_PAIR} …">`]) {
+  for (const currentPair of [D47_BLOCK, `<img alt="… ${SHORT_PAIR} …">`]) {
+    const content = currentPair.replace("~11.4B", "~11.3B");
     assert.equal(validate(content).ok, false);
     const { edits, manual } = plan(content);
     assert.deepEqual(manual, []);
     assert.deepEqual(
       edits.map(({ start, end, to }) => [content.slice(start, end), to]),
       [
-        ["~11.4B", "~11.3B"],
+        ["~11.3B", "~11.4B"],
         ["~93M", "~90M"],
       ]
     );
     const after = claimsLib.applyEdits(content, edits);
-    assert.equal(after, content.replace("~11.4B", "~11.3B").replace("~93M", "~90M"));
+    assert.equal(after, currentPair.replace("~93M", "~90M"));
     assert.equal(validate(after).ok, true);
     assert.deepEqual(plan(after), { edits: [], manual: [] });
   }
@@ -496,7 +497,9 @@ test("the headline plan keeps missing steady and unresolved gated claims manual"
   assert.match(missing.manual.join(" "), /missing gated figure.*no headline:steady/);
   assert.doesNotMatch(missing.manual.join(" "), /stale free-token figure/);
 
-  const stale = plan(`${SHORT_PAIR} +~7M behind regional identity verification`);
+  const stale = plan(
+    `${SHORT_PAIR.replace("~11.4B", "~11.3B")} +~7M behind regional identity verification`
+  );
   assert.equal(stale.edits.length, 2);
   assert.match(stale.manual.join(" "), /stale gated figure/);
 });

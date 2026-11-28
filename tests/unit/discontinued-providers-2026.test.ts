@@ -16,7 +16,7 @@ describe("2026 discontinued free tiers — providers.ts hasFree reconciliation",
     // they are KEPT with hasFree:false. phind is NOT here: the whole phind.com service
     // shut down 2026-01-16, so it was removed entirely (registry/executor/catalogs),
     // matching the dead-service-removal precedent (#5246 Gemini CLI).
-    for (const id of ["chutes", "gitlawb", "gitlawb-gmi", "aimlapi", "yi"]) {
+    for (const id of ["chutes", "gitlawb-gmi", "aimlapi", "yi"]) {
       const p = (APIKEY_PROVIDERS as Record<string, { hasFree?: boolean }>)[id];
       assert.ok(
         p,
@@ -28,6 +28,8 @@ describe("2026 discontinued free tiers — providers.ts hasFree reconciliation",
         `${id} should have hasFree:false (discontinued in 2026)`
       );
     }
+    // https://twigpine.com/opengateway/docs (2026-11-27): MiMo 2.6 Pro has a zero-balance allowance.
+    assert.equal(APIKEY_PROVIDERS.gitlawb?.hasFree, true);
   });
 
   it("g4f.space sub-providers no longer advertise an anonymous free tier", async () => {
@@ -76,8 +78,7 @@ describe("2026 discontinued free tiers — providers.ts hasFree reconciliation",
   it("intentionally-kept providers still advertise free (genuinely free / ToS-flagged, not flipped)", async () => {
     const { APIKEY_PROVIDERS } = await import("../../src/shared/constants/providers.ts");
     // iflytek/sparkdesk stay hasFree:true but carry a ToS-caution freeNote (Spark Lite is free, the ToS
-    // restricts proxy/relay use). gitlawb/gitlawb-gmi/aimlapi/yi were re-verified dead 2026-06-18 and are
-    // asserted false above — keeping them out of this list guards against a silent re-flip-to-true.
+    // restricts proxy/relay use). The ended offers are checked separately above.
     const apikey = APIKEY_PROVIDERS as Record<string, { hasFree?: boolean; freeNote?: string }>;
     assert.strictEqual(apikey["iflytek"]?.hasFree, true, "iflytek kept free with ToS-caution note");
     assert.match(

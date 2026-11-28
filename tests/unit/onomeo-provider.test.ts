@@ -45,13 +45,11 @@ test("onomeo is listed as an aggregator", () => {
 });
 
 test("onomeo's free note states the call-metered allowance and the rate limits", () => {
-  // #14297: onomeo dropped its site credits and daily check-in on 2026-10-06.
-  // Free models are now metered by calls; the note states those limits and
-  // must not keep describing the retired check-in or imply a standing quota.
+  // https://onomeo.com/models (2026-11-27): no-top-up rate limits are per account.
   assert.equal(APIKEY_PROVIDERS.onomeo?.hasFree, true);
   const note = String(APIKEY_PROVIDERS.onomeo?.freeNote ?? "");
   assert.match(note, /30 calls per 5 hours per account/);
-  assert.match(note, /12 requests\/min per key/);
+  assert.match(note, /12 requests per minute before a top-up/);
   assert.match(note, /site-wide pool/i);
   assert.doesNotMatch(note, /check in|check-in|credits/i);
   assert.doesNotMatch(note, /unlimited/i);

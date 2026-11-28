@@ -10,27 +10,35 @@ describe("Gitlawb Opengateway providers", () => {
       assert.strictEqual(provider.id, "gitlawb");
       assert.strictEqual(provider.alias, "glb");
       assert.ok(provider.name.includes("Gitlawb"));
-      // Free MiMo (xiaomi/mimo-v2.5) revoked 2026-05; Opengateway is now pay-as-you-go (re-verified 2026-06-18).
-      assert.strictEqual(provider.hasFree, false);
+      // https://twigpine.com/opengateway/docs (2026-11-27): new MiMo allowance with a zero balance.
+      assert.strictEqual(provider.hasFree, true);
     });
 
     it("should have registry entry with correct baseUrl", async () => {
       const { REGISTRY } = await import("../../open-sse/config/providerRegistry.ts");
       const entry = REGISTRY["gitlawb"];
       assert.ok(entry, "gitlawb should exist in REGISTRY");
-      assert.strictEqual(entry.baseUrl, "https://opengateway.gitlawb.com/v1/xiaomi-mimo");
+      // https://twigpine.com/opengateway/docs (2026-11-27): OpenAI-compatible endpoint.
+      assert.strictEqual(entry.baseUrl, "https://api.twigpine.com/v1/chat/completions");
+      assert.strictEqual(entry.modelsUrl, "https://api.twigpine.com/v1/models");
       assert.strictEqual(entry.format, "openai");
       assert.strictEqual(entry.executor, "default");
       assert.strictEqual(entry.authType, "apikey");
     });
 
-    it("should have CLI-mimicking headers", async () => {
+    it("should use bearer auth without client impersonation headers", async () => {
       const { REGISTRY } = await import("../../open-sse/config/providerRegistry.ts");
       const entry = REGISTRY["gitlawb"];
-      assert.ok(entry.headers, "should have headers");
-      assert.ok(entry.headers["User-Agent"].includes("OpenClaude"));
-      assert.strictEqual(entry.headers["X-Title"], "OpenClaude CLI");
-      assert.ok(entry.headers["HTTP-Referer"].includes("Gitlawb/openclaude"));
+      // https://twigpine.com/opengateway/docs (2026-11-27) only asks for bearer auth.
+      assert.equal(entry.authHeader, "bearer");
+      for (const name of ["user-agent", "x-title", "http-referer"]) {
+        assert.ok(
+          ![...Object.keys(entry.headers ?? {}), ...Object.keys(entry.extraHeaders ?? {})].some(
+            (key) => key.toLowerCase() === name
+          ),
+          name
+        );
+      }
     });
 
     it("should list MiMo models", async () => {
@@ -40,9 +48,13 @@ describe("Gitlawb Opengateway providers", () => {
         entry.models.length >= 5,
         `should have at least 5 models, got ${entry.models.length}`
       );
+      // https://api.twigpine.com/v1/models (2026-11-27): the old short ID remains an alias.
       const pro = entry.models.find((m: any) => m.id === "mimo-v2.5-pro");
       assert.ok(pro, "mimo-v2.5-pro should be listed");
-      assert.strictEqual(pro.contextLength, 1048576);
+      const canonicalPro = entry.models.find((m) => m.id === "xiaomi/mimo-v2.6-pro");
+      assert.ok(canonicalPro, "xiaomi/mimo-v2.6-pro should be listed");
+      assert.strictEqual(canonicalPro.contextLength, 262144);
+      assert.strictEqual(canonicalPro.toolCalling, true);
     });
   });
 

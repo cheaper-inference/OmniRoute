@@ -1,0 +1,1971 @@
+{
+  "schemaVersion": 1,
+  "baselineRef": "9671192011beb2d7f83979f40be488c5da8772b9",
+  "baselineIds": [
+    "360ai",
+    "9router",
+    "adapta-web",
+    "adobe-firefly",
+    "agentrouter",
+    "agnes",
+    "agnes-cn",
+    "agy",
+    "ai21",
+    "aihorde",
+    "aimlapi",
+    "ainative",
+    "ainetcafe",
+    "aion",
+    "alibaba",
+    "alibaba-cn",
+    "amazon-q",
+    "ant-ling",
+    "anthropic",
+    "antigravity",
+    "anyapi",
+    "anysearch-search",
+    "api-airforce",
+    "apmix",
+    "arcee-ai",
+    "assemblyai",
+    "auggie",
+    "auriko",
+    "auto",
+    "aws-polly",
+    "azure-ai",
+    "azure-openai",
+    "bai",
+    "baichuan",
+    "baidu",
+    "bailian-coding-plan",
+    "baseten",
+    "bazaarlink",
+    "beatapi",
+    "bedrock",
+    "bigmodel",
+    "black-forest-labs",
+    "blackbox",
+    "blackbox-web",
+    "bluesminds",
+    "brave-search",
+    "byteplus",
+    "bytez",
+    "cartesia",
+    "cerebras",
+    "cerebrium",
+    "charm-hyper",
+    "chat-oripe",
+    "chatanywhere",
+    "chatgpt",
+    "chatgpt-web",
+    "chatgpt-web-codex",
+    "chatplayground",
+    "cheaperinference",
+    "chenzk",
+    "chutes",
+    "clarifai",
+    "claude",
+    "claude-web",
+    "cline",
+    "clinepass",
+    "cliproxyapi",
+    "cloudcode-one",
+    "cloudflare-ai",
+    "cloudflare-playground",
+    "clova-studio",
+    "codebuddy-cn",
+    "codebuddy-intl",
+    "codestral",
+    "codex",
+    "codex-app-server",
+    "codex-cloud",
+    "codex-search",
+    "cohere",
+    "comfyui",
+    "command-code",
+    "conol-web",
+    "context7",
+    "copilot-m365-web",
+    "copilot-web",
+    "coze",
+    "crof",
+    "cursor",
+    "cursor-api",
+    "dahl",
+    "daoxe",
+    "databricks",
+    "datarobot",
+    "deapi",
+    "deepai",
+    "deepgram",
+    "deepinfra",
+    "deepseek",
+    "deepseek-web",
+    "demonroute",
+    "devin",
+    "devin-cli",
+    "devin-cli-agentic",
+    "devin-desktop",
+    "dgrid",
+    "dify",
+    "digitalocean",
+    "dit",
+    "docker-model-runner",
+    "doubao",
+    "doubao-web",
+    "duckduckgo-web",
+    "dxnt",
+    "electronhub",
+    "elevenlabs",
+    "empiriolabs",
+    "empower",
+    "eurouter",
+    "exa-search",
+    "factory",
+    "fal-ai",
+    "fastrouter",
+    "featherless-ai",
+    "fenayai",
+    "firecrawl",
+    "fireworks",
+    "fishaudio",
+    "free-ai",
+    "freeaiapikey",
+    "freebuff",
+    "freeinference",
+    "freemodel-dev",
+    "freetheai",
+    "friendliai",
+    "g4f-gemini",
+    "g4f-groq",
+    "g4f-nvidia",
+    "g4f-ollama",
+    "g4f-pollinations",
+    "galadriel",
+    "gemini",
+    "gemini-web",
+    "getgoapi",
+    "ghe-copilot",
+    "gigachat",
+    "gisoo",
+    "github",
+    "gitlab",
+    "gitlab-duo",
+    "gitlawb",
+    "gitlawb-gmi",
+    "gladia",
+    "glm",
+    "glm-cn",
+    "glmt",
+    "google-pse-search",
+    "greenpt",
+    "grok-cli",
+    "grok-web",
+    "grokified",
+    "groq",
+    "haiper",
+    "hcnsec",
+    "helixmind",
+    "helyxai",
+    "heroku",
+    "hetzner",
+    "huggingchat",
+    "huggingface",
+    "hyperagent",
+    "hyperbolic",
+    "ideogram",
+    "iflytek",
+    "inception",
+    "inference-net",
+    "inner-ai",
+    "internlm",
+    "inworld",
+    "jina-ai",
+    "jina-reader",
+    "jules",
+    "keenable-search",
+    "kenari",
+    "kie",
+    "kilo-gateway",
+    "kilocode",
+    "kimi",
+    "kimi-coding",
+    "kimi-coding-apikey",
+    "kimi-search",
+    "kimi-web",
+    "kiro",
+    "lambda-ai",
+    "laozhang",
+    "lemonade",
+    "leonardo",
+    "linkup-search",
+    "liquid",
+    "literouter",
+    "llama-cpp",
+    "llamafile",
+    "llamagate",
+    "llm-kiwi",
+    "llm7",
+    "llmgateway",
+    "lm-studio",
+    "lmarena",
+    "logfare",
+    "longcat",
+    "lyceum",
+    "magnific",
+    "maritalk",
+    "maxai",
+    "megabrain",
+    "meganova-ai",
+    "meta-llama",
+    "minimax",
+    "minimax-cn",
+    "minimax-code",
+    "mistral",
+    "mixedbread",
+    "mixlayer",
+    "mlx-gemma",
+    "mlx-qwen",
+    "mnn-ai",
+    "modal",
+    "modelscope",
+    "monsterapi",
+    "moonshot",
+    "morph",
+    "muse-code",
+    "muse-spark-web",
+    "naga-ac",
+    "naga-ai",
+    "nan",
+    "nanogpt",
+    "nara",
+    "navy",
+    "nebius",
+    "nimble-search",
+    "nlpcloud",
+    "nomic",
+    "notion-web",
+    "notrack-web",
+    "nous-research",
+    "novita",
+    "nscale",
+    "nube",
+    "nvidia",
+    "oci",
+    "ofoxai",
+    "ollama-cloud",
+    "ollama-local",
+    "ollama-search",
+    "oneminai",
+    "onomeo",
+    "oobabooga",
+    "openadapter",
+    "openai",
+    "opencode-go",
+    "opencode-server",
+    "opencode-zen",
+    "openference",
+    "openference-api",
+    "openrouter",
+    "openvecta",
+    "opper",
+    "orcarouter",
+    "ovhcloud",
+    "parallel-search",
+    "paraloncloud",
+    "perplexity",
+    "perplexity-agent",
+    "perplexity-search",
+    "perplexity-web",
+    "piapi",
+    "pioneer",
+    "plamo",
+    "playht",
+    "poe",
+    "poe-web",
+    "poixe-ai",
+    "pollinations",
+    "poolside",
+    "predibase",
+    "promptql",
+    "publicai",
+    "qianfan",
+    "qiniu",
+    "qoder",
+    "qwen-cloud",
+    "qwen-cloud-token-plan",
+    "recraft",
+    "regolo",
+    "reka",
+    "renderhour",
+    "replicate",
+    "requesty",
+    "rev-ai",
+    "routeway",
+    "runcrate",
+    "runwayml",
+    "sambanova",
+    "sap",
+    "sarvam",
+    "scaleway",
+    "sdwebui",
+    "sealion",
+    "searchapi-search",
+    "searxng-search",
+    "seekai",
+    "segmind",
+    "sensenova",
+    "serper-search",
+    "siliconflow",
+    "snowflake",
+    "soniox",
+    "sparkdesk",
+    "speechmatics",
+    "speka",
+    "stability-ai",
+    "stepfun",
+    "sumopod",
+    "synthetic",
+    "syntx",
+    "t3-web",
+    "tabitoken",
+    "tavily-search",
+    "tencent",
+    "tencent-aistudio-web",
+    "thebai",
+    "tinycms-web",
+    "tinyfish",
+    "together",
+    "token-kiosk",
+    "tokenharbor",
+    "tokenmarket",
+    "tokenreply",
+    "tokenrouter",
+    "topaz",
+    "trae",
+    "triton",
+    "twinmind",
+    "typesafe",
+    "typhoon",
+    "uc",
+    "uc-direct",
+    "udio",
+    "uncloseai",
+    "unifically",
+    "unorouter",
+    "upstage",
+    "v0-vercel",
+    "v0-vercel-web",
+    "venice",
+    "venice-web",
+    "veoaifree-web",
+    "vercel-ai-gateway",
+    "vertex",
+    "vertex-partner",
+    "vllm",
+    "void-ai",
+    "volcengine",
+    "volcengine-agent-plan",
+    "volcengine-coding-plan",
+    "voyage-ai",
+    "wafer",
+    "wandb",
+    "watsonx",
+    "workbuddy",
+    "writer",
+    "x-search",
+    "x5lab",
+    "xai",
+    "xai-oauth",
+    "xiaomi-mimo",
+    "xiaomi-mimo-token-plan",
+    "xinference",
+    "xkiro",
+    "xquik-search",
+    "y-api",
+    "yi",
+    "yolo-auto",
+    "youcom-search",
+    "yuanbao-web",
+    "zai",
+    "zai-web",
+    "zcode",
+    "zed",
+    "zed-hosted",
+    "zenmux",
+    "zenmux-free",
+    "zerolimitai",
+    "zylo-api"
+  ],
+  "added": [],
+  "contributorPending": [],
+  "factsByProvider": {
+    "zylo-api": {
+      "evidence": [
+        {
+          "fact": {
+            "scope": "provider",
+            "field": "terms"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://zyloai.net/terms",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3.5-lightning",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3.5-lightning",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://zyloai.net/pricing",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3.5-lightning",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3-omni",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3-omni",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://zyloai.net/pricing",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3-omni",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "laguna-xs-2.1",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "laguna-xs-2.1",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://zyloai.net/pricing",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "laguna-xs-2.1",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3.5-bolt",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3.5-bolt",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://zyloai.net/pricing",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3.5-bolt",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3.5-super-vl",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3.5-super-vl",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://zyloai.net/pricing",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3.5-super-vl",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "step-5-preview",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "step-5-preview",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://zyloai.net/pricing",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "step-5-preview",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3-ultra",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3-ultra",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://zyloai.net/pricing",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nemotron-3-ultra",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "glm-5.3-flash",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "glm-5.3-flash",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://zyloai.net/pricing",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "glm-5.3-flash",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "minimax-m3.1-flash",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "minimax-m3.1-flash",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://zyloai.net/pricing",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "minimax-m3.1-flash",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "kimi-k3.1-pro",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "kimi-k3.1-pro",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://zyloai.net/pricing",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "kimi-k3.1-pro",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.zyloai.net/v1/models",
+          "checkedAt": "2026-11-27"
+        }
+      ]
+    },
+    "requesty": {
+      "evidence": [
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3.5-lightning-30b-a3b",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3.5-lightning-30b-a3b",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.requesty.ai/features/free-models.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3.5-lightning-30b-a3b",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/muse-glimmer-30b",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/muse-glimmer-30b",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.requesty.ai/features/free-models.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/muse-glimmer-30b",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-ultra-550b-a55b",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-ultra-550b-a55b",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.requesty.ai/features/free-models.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-ultra-550b-a55b",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.requesty.ai/features/free-models.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemma-4-31b-it",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemma-4-31b-it",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.requesty.ai/features/free-models.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemma-4-31b-it",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "mistral/leanstral-1-5",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.requesty.ai/features/free-models.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "mistral/leanstral-1-5",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-nano-30b-a3b",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.requesty.ai/features/free-models.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-nano-30b-a3b",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "mistral/leanstral-1-5",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-10-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-nano-30b-a3b",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://router.requesty.ai/v1/models",
+          "checkedAt": "2026-10-27"
+        }
+      ]
+    },
+    "routeway": {
+      "evidence": [
+        {
+          "fact": {
+            "scope": "provider",
+            "field": "terms"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.routeway.ai/getting-started/faq.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-chimerax:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-chimerax:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.routeway.ai/getting-started/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-chimerax:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-darksoul:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-darksoul:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.routeway.ai/getting-started/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-darksoul:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-luminous:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-luminous:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.routeway.ai/getting-started/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-luminous:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-moonlight:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-moonlight:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.routeway.ai/getting-started/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-moonlight:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-musica:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-musica:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.routeway.ai/getting-started/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-musica:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "minimax-m3.1-flash:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "minimax-m3.1-flash:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.routeway.ai/getting-started/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "minimax-m3.1-flash:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-meromero:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-meromero:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.routeway.ai/getting-started/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-26b-a4b-it-meromero:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.routeway.ai/v1/models",
+          "checkedAt": "2026-11-27"
+        }
+      ]
+    },
+    "gitlawb": {
+      "evidence": [
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "xiaomi/mimo-v2.6-pro",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.twigpine.com/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "xiaomi/mimo-v2.6-pro",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://twigpine.com/opengateway/docs",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "xiaomi/mimo-v2.6-pro",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.twigpine.com/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "provider",
+            "field": "baseUrl"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://twigpine.com/opengateway/docs",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "provider",
+            "field": "modelsUrl"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://twigpine.com/opengateway/docs",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "provider",
+            "field": "authType"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://twigpine.com/opengateway/docs",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "xiaomi/mimo-v2.6-pro",
+            "field": "contextWindow"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.twigpine.com/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "xiaomi/mimo-v2.6-pro",
+            "field": "capabilities"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.twigpine.com/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "xiaomi/mimo-v2.6-flash",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.twigpine.com/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "xiaomi/mimo-v2.6-flash",
+            "field": "contextWindow"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.twigpine.com/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "xiaomi/mimo-v2.6-flash",
+            "field": "capabilities"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.twigpine.com/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "xiaomi/mimo-v2.5-pro",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.twigpine.com/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "mimo-v2.5-pro",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.twigpine.com/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "xiaomi/mimo-v2.5",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.twigpine.com/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "mimo-v2.5",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.twigpine.com/v1/models",
+          "checkedAt": "2026-11-27"
+        }
+      ],
+      "historicalGaps": [
+        {
+          "fact": {
+            "scope": "provider",
+            "field": "baseUrl"
+          },
+          "reason": "The inherited Gitlawb MiMo endpoint has no archived primary source in this wave."
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "mimo-v2.5-pro",
+            "field": "contextWindow"
+          },
+          "reason": "The inherited context size has no archived primary source. The 2026-11-27 gateway listing reports the canonical successor's current context."
+        }
+      ]
+    },
+    "onomeo": {
+      "evidence": [
+        {
+          "fact": {
+            "scope": "provider",
+            "field": "terms"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://onomeo.com/terms",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "auto",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "auto",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://onomeo.com/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "auto",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-31b",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-31b",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://onomeo.com/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "gemma-4-31b",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "llama-4-scout",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "llama-4-scout",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://onomeo.com/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "llama-4-scout",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "mistral-small-3.1",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "mistral-small-3.1",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://onomeo.com/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "mistral-small-3.1",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "glm-4.7-flash",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "glm-4.7-flash",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://onomeo.com/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "glm-4.7-flash",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "glm-5.3",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "glm-5.3",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://onomeo.com/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "glm-5.3",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "auto",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-10-25"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "glm-4.7-flash",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://onomeo.com/api/info",
+          "checkedAt": "2026-10-25"
+        }
+      ]
+    },
+    "dgrid": {
+      "evidence": [
+        {
+          "fact": {
+            "scope": "provider",
+            "field": "terms"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.dgrid.ai/ai-gateway/terms-of-service.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "dgridai/free",
+            "field": "id"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.dgrid.ai/ai-gateway/free-models-router.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "dgridai/free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.dgrid.ai/ai-gateway/free-models-router.md",
+          "checkedAt": "2026-11-27"
+        }
+      ]
+    },
+    "naga-ac": {
+      "evidence": [
+        {
+          "fact": {
+            "scope": "provider",
+            "field": "terms"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://naga.ac/security",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "inclusionai/ling-3.2-flash:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "inclusionai/ling-3.2-flash:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "inclusionai/ling-3.2-flash:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "baidu/ernie-5.5-flash-preview:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "baidu/ernie-5.5-flash-preview:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "baidu/ernie-5.5-flash-preview:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "liquid/lfm-3-1.7b:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "liquid/lfm-3-1.7b:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "liquid/lfm-3-1.7b:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "particle-ai/particle-1:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "particle-ai/particle-1:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "particle-ai/particle-1:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "recursive/flint-v1.0:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "recursive/flint-v1.0:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "recursive/flint-v1.0:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3.5-super-vl:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3.5-super-vl:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3.5-super-vl:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "dots-studio/dots-3-note-preview:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "dots-studio/dots-3-note-preview:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "dots-studio/dots-3-note-preview:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3.5-lightning:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3.5-lightning:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3.5-lightning:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-ultra-550b-a55b:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemma-4-26b-a4b-it:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemma-4-26b-a4b-it:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemma-4-26b-a4b-it:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemma-4-31b-it:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemma-4-31b-it:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemma-4-31b-it:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemini-2.5-flash:free",
+            "field": "id"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemini-2.5-flash:free",
+            "field": "freeEligibility"
+          },
+          "source": "official-doc",
+          "sourceUrl": "https://docs.naga.ac/build/rate-limits.md",
+          "checkedAt": "2026-11-27"
+        },
+        {
+          "fact": {
+            "scope": "model",
+            "modelId": "google/gemini-2.5-flash:free",
+            "field": "freeEligibility"
+          },
+          "source": "listing-api",
+          "sourceUrl": "https://api.naga.ac/v1/models",
+          "checkedAt": "2026-11-27"
+        }
+      ]
+    }
+  }
+}

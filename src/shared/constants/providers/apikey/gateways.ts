@@ -153,10 +153,10 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     passthroughModels: true,
     website: "https://requesty.ai",
     hasFree: true,
-    freeNote: "Free tier ~200 requests/day - multi-model routing gateway (300+ models)",
+    freeNote:
+      "200 requests a day for new organizations, shared across free models. Some free models train on prompts.",
     apiHint:
-      "Create an API key at https://app.requesty.ai, then paste it here as a Bearer token. " +
-      "OpenAI-compatible endpoint at https://router.requesty.ai/v1, with a live /v1/models catalog.",
+      "Create an API key at https://app.requesty.ai. Use https://router.requesty.ai/v1 and check the free model list for prompt-training flags.",
   },
   "zylo-api": {
     id: "zylo-api",
@@ -170,9 +170,9 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://zyloai.net",
     hasFree: true,
     freeNote:
-      "Basic plan: 10 RPM, 7,200 requests/day and 200,000 tokens/day; limited to Basic text models.",
+      "Basic includes 200,000 tokens a day for free models. Basic and Mini share the limit. The terms restrict multi-account abuse.",
     apiHint:
-      "Create a free Zylo API key at https://zyloai.net, then use https://api.zyloai.net/v1 as the OpenAI-compatible base URL.",
+      "Create a Zylo API key at https://zyloai.net and use https://api.zyloai.net/v1 with a free Basic model.",
   },
   fastrouter: {
     id: "fastrouter",
@@ -652,11 +652,9 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://dgrid.ai",
     hasFree: true,
     freeNote:
-      "DGrid Free Models Router: 10 requests/minute and 100 requests/day. " +
-      "A $5 lifetime top-up unlocks up to 20 requests/minute and 1,000 requests/day.",
+      "The free router allows 10 requests per minute and 100 requests a day. At least $5 in qualifying top-ups raises the daily limit to 1,000. The model can vary by request.",
     apiHint:
-      "Create a DGrid API key at https://dgrid.ai, then use https://api.dgrid.ai/v1 " +
-      "as the OpenAI-compatible base URL.",
+      "Create a DGrid API key at https://dgrid.ai and select dgridai/free at https://api.dgrid.ai/v1.",
   },
   qiniu: {
     id: "qiniu",
@@ -971,11 +969,12 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     icon: "hub",
     color: "#10B981",
     textIcon: "GLB",
-    website: "https://opengateway.gitlawb.com",
-    hasFree: false,
+    website: "https://twigpine.com/opengateway",
+    hasFree: true,
     freeNote:
-      "Free MiMo (xiaomi/mimo-v2.5) revoked 2026-05 — Opengateway is now a pay-as-you-go credit gateway; no recurring free model.",
-    apiHint: "Get your API key from Gitlawb Opengateway dashboard.",
+      "At zero balance, MiMo V2.6 Pro allows 30 requests per 5-hour window, subject to a shared daily budget.",
+    apiHint:
+      "Create an OpenGateway key at https://twigpine.com/opengateway and use https://api.twigpine.com/v1 with xiaomi/mimo-v2.6-pro.",
   },
   "gitlawb-gmi": {
     id: "gitlawb-gmi",
@@ -1452,10 +1451,10 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://routeway.ai",
     hasFree: true,
     freeNote:
-      "Free models (:free suffix) at ~5 RPM / 200 RPD across Llama, Nemotron, Step and Laguna.",
+      "Free models share 200 requests a day. Routeway limits free use to development, testing and experimentation.",
     authHint: "Create a free API key at routeway.ai, then paste it here as a Bearer token.",
     apiHint:
-      "OpenAI-compatible endpoint at https://api.routeway.ai/v1 with a public /models catalog (236 models). Cloudflare fronts the API and requires a browser-style User-Agent.",
+      "Use https://api.routeway.ai/v1 with a model ID ending in :free from the live model list.",
   },
   nara: {
     id: "nara",
@@ -1518,9 +1517,11 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     docsUrl: "https://docs.naga.ac",
     hasFree: true,
     freeNote:
-      "Free models include Nemotron 3 Ultra (free) and Llama 3.3 70B Instruct (Free). Paid models require credits. Google/GitHub/Discord signup.",
+      "Free models share 100 requests a day across all keys. The model provider may retain requests.",
     passthroughModels: true,
     authHint: "Get API key at naga.ac — Google/GitHub/Discord signup available.",
+    apiHint:
+      "Use https://api.naga.ac/v1 with a chat model ID ending in :free from the live model list.",
   },
   "void-ai": {
     id: "void-ai",

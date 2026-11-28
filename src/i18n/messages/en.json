@@ -6068,6 +6068,7 @@
       "webCookie": "This provider authenticates through your web session cookies. The upstream service may invalidate the session at any time, requiring you to log in again. Not recommended for long unattended operations. Use at your own risk.",
       "deprecated": "This provider was discontinued by its upstream and may stop working without notice. Existing connections may continue working until the upstream fully removes access. Consider alternatives.",
       "official-client-only": "The upstream restricts free mode to its official clients and suspends accounts used through proxies. Use at your own risk; the paid API (freebuff.com/account/api) is the sanctioned path.",
+      "unofficial-service": "This service is not an official channel of the model makers, or its terms restrict this kind of use. Whoever runs it can read your prompts, and the account or the service itself can be blocked or shut down without notice. Use at your own risk.",
       "dontShowAgain": "Don't show this again for this provider",
       "understand": "I understand, continue",
       "cancel": "Cancel"
@@ -7255,7 +7256,7 @@
       "gigachat": "Connect GigaChat (Sber) with an API key.",
       "gitlab": "GitLab personal access token for the public Code Suggestions API. Configure a self-hosted base URL when not using gitlab.com.",
       "gitlawb-gmi": "Get your API key from Gitlawb Opengateway dashboard.",
-      "gitlawb": "Get your API key from Gitlawb Opengateway dashboard.",
+      "gitlawb": "Create an OpenGateway key at https://twigpine.com/opengateway and use https://api.twigpine.com/v1 with xiaomi/mimo-v2.6-pro.",
       "glm": "Connect GLM Coding with an API key.",
       "glm-cn": "Connect GLM Coding (China) with an API key.",
       "bigmodel": "Create an API key at https://bigmodel.cn/usercenter/proj-mgmt/apikeys. OmniRoute uses the official BigModel.cn OpenAI-compatible chat endpoint.",

@@ -1,6 +1,10 @@
 import { getEmbeddingProvider } from "@omniroute/open-sse/config/embeddingRegistry.ts";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import {
+  GITLAWB_CHAT_URL,
+  GITLAWB_MIMO_PRO_ID,
+} from "@omniroute/open-sse/config/providers/registry/gitlawb/index.ts";
+import {
   isClaudeCodeCompatibleProvider,
   isAnthropicCompatibleProvider,
   isLocalProvider,
@@ -415,12 +419,10 @@ export async function validateProviderApiKey({
       validateXiaomiMimoProvider({ apiKey, providerSpecificData, isLocal }),
     "xiaomi-mimo-token-plan": ({ apiKey, providerSpecificData }: any) =>
       validateXiaomiMimoTokenPlanProvider({ apiKey, providerSpecificData, isLocal }),
-    // Gitlawb Opengateway — Xiaomi MiMo compatible, same /models endpoint limitation.
-    // Bypass /models probe in favor of chat/completions, matching xiaomi-mimo's pattern.
-    // Uses a factory to share validation logic across Opengateway provider variants.
+    // Probe chat/completions so a public model listing cannot validate an incorrect key.
     ...buildGitlawbValidators(
       [
-        ["gitlawb", "https://opengateway.gitlawb.com/v1/xiaomi-mimo", "mimo-v2.5-pro"],
+        ["gitlawb", GITLAWB_CHAT_URL, GITLAWB_MIMO_PRO_ID],
         ["gitlawb-gmi", "https://opengateway.gitlawb.com/v1/gmi-cloud", "XiaomiMiMo/MiMo-V2.5-Pro"],
       ],
       isLocal

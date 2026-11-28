@@ -25,7 +25,7 @@ import type { FreeModelBudget } from "./freeModelCatalog.ts";
  * rewrites file timestamps on every deploy, which would report a months-old
  * catalog as "updated today". Bump this whenever the entries below change.
  */
-export const FREE_CATALOG_CURATED_AT = "2026-11-23";
+export const FREE_CATALOG_CURATED_AT = "2026-11-27";
 
 export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   // evidence: api-public https://agentrouter.org/api/status (2026-11-23), the JSON the signup page reads — FAQ
@@ -377,14 +377,16 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   // or confidential code through this free endpoint.
   { provider: "nvidia", modelId: "openai/gpt-oss-20b", displayName: "GPT OSS 20B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution", trainsOnPrompts: true },
   // evidence: https://ollama.com/pricing (2026-11-09) ended the free tier; all models moved to pay-as-you-go (#19334).
-  // evidence: api-public https://onomeo.com/api/info (2026-10-25) — `freeModels` lists the models served free of
-  // charge. Metering is 30 calls per 5 h per account inside a site-wide pool shared by all accounts (`rate`:
-  // perAccountWindowMax 30, windowMinutes 300) — a call count, not a token quantity ⇒ recurring-uncapped with 0
-  // tokens. Models in `modelsPaused` are not cataloged. `modelTraining` marks the upstreams that train on prompts.
-  // evidence: api-public https://onomeo.com/api/info (2026-11-23) — "freeModels":["auto","gemma-4-31b",
-  // "llama-4-scout","mistral-small-3.1","glm-4.7-flash","glm-5.3"]; of the ids below only auto and glm-4.7-flash
-  // are still free, the other 11 are discontinued (uncapped, so no ledger row).
-  { provider: "onomeo", modelId: "auto", displayName: "Auto", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
+  // evidence: public-page https://onomeo.com/models (2026-11-27)
+  // Q22 uses the per-account ceiling: 30 calls × (24/5) × 800 × 30 = 3,456,000.
+  // The site-wide pool also applies. https://onomeo.com/api/info lists these six in freeModels
+  // and reports modelTraining="trains" for glm-4.7-flash and glm-5.3.
+  { provider: "onomeo", modelId: "auto", displayName: "Auto", monthlyTokens: 3_456_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "onomeo", tos: "caution" },
+  { provider: "onomeo", modelId: "gemma-4-31b", displayName: "Gemma 4 31B", monthlyTokens: 3_456_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "onomeo", tos: "caution" },
+  { provider: "onomeo", modelId: "llama-4-scout", displayName: "Llama 4 Scout", monthlyTokens: 3_456_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "onomeo", tos: "caution" },
+  { provider: "onomeo", modelId: "mistral-small-3.1", displayName: "Mistral Small 3.1", monthlyTokens: 3_456_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "onomeo", tos: "caution" },
+  { provider: "onomeo", modelId: "glm-4.7-flash", displayName: "GLM 4.7 Flash", monthlyTokens: 3_456_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
+  { provider: "onomeo", modelId: "glm-5.3", displayName: "GLM 5.3", monthlyTokens: 3_456_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
   { provider: "onomeo", modelId: "deepseek-v4-flash", displayName: "DeepSeek V4 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "onomeo", tos: "caution" },
   { provider: "onomeo", modelId: "glm-5.2", displayName: "GLM 5.2", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "onomeo", tos: "caution" },
   { provider: "onomeo", modelId: "gemini-3.1-flash-lite", displayName: "Gemini 3.1 Flash Lite", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
@@ -396,7 +398,6 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "onomeo", modelId: "hy4-preview", displayName: "HY4 Preview", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "onomeo", tos: "caution" },
   { provider: "onomeo", modelId: "glm-4.5-flash", displayName: "GLM 4.5 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
   { provider: "onomeo", modelId: "glm-4.6v-flash", displayName: "GLM 4.6v Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
-  { provider: "onomeo", modelId: "glm-4.7-flash", displayName: "GLM 4.7 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "onomeo", tos: "caution", trainsOnPrompts: true },
   // OpenCode's free-tier chat offers require its own client (checked 2026-10-27):
   // https://opencode.ai/v2/docs/console/models/#endpoints
   // Public zero prices do not grant generic proxy eligibility. Keep the provider
@@ -530,13 +531,19 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "vertex", modelId: "zai-org/glm-5-maas", displayName: "GLM 5 (Vertex MaaS)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
   { provider: "vertex", modelId: "claude-opus-4-7", displayName: "Claude Opus 4.7 (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
   { provider: "vertex", modelId: "claude-sonnet-4-6", displayName: "Claude Sonnet 4.6 (Vertex)", monthlyTokens: 0, creditTokens: 300000000, freeType: "one-time-initial", poolKey: "vertex", tos: "caution", gates: ["card"] },
-  // evidence: public-page https://docs.requesty.ai/features/free-models (2026-11-23) — openai/gpt-oss-120b is no
-  // longer on the free list; leanstral-1-5 and nemotron-3-nano-30b-a3b still are.
+  // evidence: public-page https://docs.requesty.ai/features/free-models.md (2026-11-27)
+  // New organizations share 200 requests/day across free models; 200 × 800 × 30 = 4,800,000.
+  // https://router.requesty.ai/v1/models lists these five at zero price and reports
+  // data_used_for_training=true for the four NVIDIA models. Two IDs still in the docs are absent
+  // from the listing. They had no numeric quota, so neither adds a retired-ledger entry.
+  { provider: "requesty", modelId: "nvidia/nemotron-3.5-lightning-30b-a3b", displayName: "Nemotron 3.5 Lightning 30B", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "requesty-free", tos: "caution", trainsOnPrompts: true },
+  { provider: "requesty", modelId: "nvidia/muse-glimmer-30b", displayName: "Muse Glimmer 30B", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "requesty-free", tos: "caution", trainsOnPrompts: true },
+  { provider: "requesty", modelId: "nvidia/nemotron-3-ultra-550b-a55b", displayName: "Nemotron 3 Ultra 550B", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "requesty-free", tos: "caution", trainsOnPrompts: true },
+  { provider: "requesty", modelId: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning", displayName: "Nemotron 3 Nano Omni 30B Reasoning", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "requesty-free", tos: "caution", trainsOnPrompts: true },
+  { provider: "requesty", modelId: "google/gemma-4-31b-it", displayName: "Gemma 4 31B IT", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "requesty-free", tos: "ok" },
   { provider: "requesty", modelId: "openai/gpt-oss-120b", displayName: "GPT-OSS 120B (Requesty free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "requesty-free", tos: "ok" },
-  { provider: "requesty", modelId: "mistral/leanstral-1-5", displayName: "Leanstral 1.5 (Requesty free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "requesty-free", tos: "ok" },
-  // evidence: public /v1/models (2026-10-27): zero prices, NVIDIA trial
-  // terms, 30-day retention and data_used_for_training=true.
-  { provider: "requesty", modelId: "nvidia/nemotron-3-nano-30b-a3b", displayName: "Nemotron 3 Nano 30B (Requesty free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "requesty-free", tos: "caution", trainsOnPrompts: true },
+  { provider: "requesty", modelId: "mistral/leanstral-1-5", displayName: "Leanstral 1.5 (Requesty free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "requesty-free", tos: "ok" },
+  { provider: "requesty", modelId: "nvidia/nemotron-3-nano-30b-a3b", displayName: "Nemotron 3 Nano 30B (Requesty free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "requesty-free", tos: "caution", trainsOnPrompts: true },
   // Exact free routes listed at tokenharbor.ai/models?category=free (2026-10-29).
   // Shared rolling 7-day allowance; no published fixed token count. See the
   // per-model source records and limitations in free-catalog-evidence.json.
@@ -592,9 +599,17 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "sealion", modelId: "aisingapore/Gemma-SEA-LION-v4-27B-IT", displayName: "Gemma SEA-LION v4 27B IT", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "sealion-free", tos: "ok" },
   { provider: "sealion", modelId: "aisingapore/Qwen-SEA-LION-v4.5-27B-IT", displayName: "Qwen SEA-LION v4.5 27B IT", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "sealion-free", tos: "ok" },
   { provider: "sealion", modelId: "aisingapore/Qwen-SEA-LION-v4-32B-IT", displayName: "Qwen SEA-LION v4 32B IT", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "sealion-free", tos: "ok" },
-  // evidence: api-public https://api.routeway.ai/v1/models (2026-11-23) — none of the 8 ids below is listed; the
-  // :free limits (https://docs.routeway.ai/getting-started/rate-limits.md: 5 RPM, 200 RPD) apply to other ids.
-  // Discontinued (uncapped, so no ledger row).
+  // evidence: public-page https://docs.routeway.ai/getting-started/rate-limits.md (2026-11-27)
+  // The FAQ and rate-limit docs agree on 200 requests/day; 200 × 800 × 30 = 4,800,000.
+  // https://api.routeway.ai/v1/models lists seven current :free IDs. The eight old IDs
+  // remain discontinued. The FAQ limits free use to development, testing and experimentation.
+  { provider: "routeway", modelId: "gemma-4-26b-a4b-it-chimerax:free", displayName: "Gemma 4 26b A4b It Chimerax (Free)", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "routeway-free", tos: "caution" },
+  { provider: "routeway", modelId: "gemma-4-26b-a4b-it-darksoul:free", displayName: "Gemma 4 26b A4b It Darksoul (Free)", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "routeway-free", tos: "caution" },
+  { provider: "routeway", modelId: "gemma-4-26b-a4b-it-luminous:free", displayName: "Gemma 4 26b A4b It Luminous (Free)", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "routeway-free", tos: "caution" },
+  { provider: "routeway", modelId: "gemma-4-26b-a4b-it-moonlight:free", displayName: "Gemma 4 26b A4b It Moonlight (Free)", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "routeway-free", tos: "caution" },
+  { provider: "routeway", modelId: "gemma-4-26b-a4b-it-musica:free", displayName: "Gemma 4 26b A4b It Musica (Free)", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "routeway-free", tos: "caution" },
+  { provider: "routeway", modelId: "minimax-m3.1-flash:free", displayName: "MiniMax: MiniMax M3.1 Flash (Free)", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "routeway-free", tos: "caution" },
+  { provider: "routeway", modelId: "gemma-4-26b-a4b-it-meromero:free", displayName: "Gemma 4 26B A4B IT MeroMero (Free)", monthlyTokens: 4_800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "routeway-free", tos: "caution" },
   { provider: "routeway", modelId: "llama-3.3-70b-instruct:free", displayName: "Llama 3.3 70B Instruct (free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "routeway-free", tos: "caution" },
   { provider: "routeway", modelId: "nemotron-3-nano-30b-a3b:free", displayName: "Nemotron 3 Nano 30B (free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "routeway-free", tos: "caution" },
   { provider: "routeway", modelId: "nemotron-nano-9b-v2:free", displayName: "Nemotron Nano 9B v2 (free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "routeway-free", tos: "caution" },
@@ -664,4 +679,47 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "xkiro", modelId: "qwen/qwen3-coder-plus:free", displayName: "Qwen3 Coder Plus (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "qwen/qwen-plus-2025-07-28:free", displayName: "Qwen Plus 0728 (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "qwen/qwen3-omni-flash:free", displayName: "Qwen3 Omni Flash (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+
+  // evidence: public-page https://zyloai.net/pricing (2026-11-27)
+  // Basic has 200,000 daily tokens (shared with Mini); 200,000 × 30 = 6,000,000.
+  // https://api.zyloai.net/v1/models lists these Basic chat models at zero price.
+  // https://zyloai.net/terms restricts abuse through multiple or linked accounts.
+  { provider: "zylo-api", modelId: "nemotron-3.5-lightning", displayName: "Nemotron 3.5 Lightning", monthlyTokens: 6_000_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "zylo-basic", tos: "caution" },
+  { provider: "zylo-api", modelId: "nemotron-3-omni", displayName: "Nemotron 3 Omni", monthlyTokens: 6_000_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "zylo-basic", tos: "caution" },
+  { provider: "zylo-api", modelId: "laguna-xs-2.1", displayName: "Laguna XS 2.1", monthlyTokens: 6_000_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "zylo-basic", tos: "caution" },
+  { provider: "zylo-api", modelId: "nemotron-3.5-bolt", displayName: "Nemotron 3.5 Bolt", monthlyTokens: 6_000_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "zylo-basic", tos: "caution" },
+  { provider: "zylo-api", modelId: "nemotron-3.5-super-vl", displayName: "Nemotron 3.5 Super VL", monthlyTokens: 6_000_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "zylo-basic", tos: "caution" },
+  { provider: "zylo-api", modelId: "step-5-preview", displayName: "Step 5 Preview", monthlyTokens: 6_000_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "zylo-basic", tos: "caution" },
+  { provider: "zylo-api", modelId: "nemotron-3-ultra", displayName: "Nemotron 3 Ultra", monthlyTokens: 6_000_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "zylo-basic", tos: "caution" },
+  { provider: "zylo-api", modelId: "glm-5.3-flash", displayName: "GLM 5.3 Flash", monthlyTokens: 6_000_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "zylo-basic", tos: "caution" },
+  { provider: "zylo-api", modelId: "minimax-m3.1-flash", displayName: "MiniMax M3.1 Flash", monthlyTokens: 6_000_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "zylo-basic", tos: "caution" },
+  { provider: "zylo-api", modelId: "kimi-k3.1-pro", displayName: "Kimi K3.1 Pro", monthlyTokens: 6_000_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "zylo-basic", tos: "caution" },
+
+  // evidence: public-page https://twigpine.com/opengateway/docs (2026-11-27)
+  // MiMo Pro gets 30 requests in each of five windows per day at zero balance.
+  // 5 × 30 × 800 × 30 = 3,600,000, subject to an unpublished shared daily budget.
+  { provider: "gitlawb", modelId: "xiaomi/mimo-v2.6-pro", displayName: "MiMo V2.6 Pro", monthlyTokens: 3_600_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "twigpine-mimo-allowance", tos: "ok" },
+
+  // evidence: public-page https://docs.dgrid.ai/ai-gateway/free-models-router.md (2026-11-27)
+  // 100 requests/day per account on standard access; 100 × 800 × 30 = 2,400,000.
+  // The router can pick a different model per request. Qualifying top-ups unlock a separate boost.
+  { provider: "dgrid", modelId: "dgridai/free", displayName: "DGrid Free Models Router", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "dgrid", tos: "caution" },
+
+  // evidence: public-page https://docs.naga.ac/build/rate-limits.md (2026-11-27)
+  // 100 requests/day across every free model and API key at any balance; 100 × 800 × 30 = 2,400,000.
+  // https://api.naga.ac/v1/models lists these :free IDs as chat.
+  // https://naga.ac/security says the serving provider may retain requests or train under its terms.
+  { provider: "naga-ac", modelId: "inclusionai/ling-3.2-flash:free", displayName: "Ling 3.2 Flash (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "baidu/ernie-5.5-flash-preview:free", displayName: "ERNIE-5.5-Flash-Preview (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "liquid/lfm-3-1.7b:free", displayName: "LFM3-1.7B (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "particle-ai/particle-1:free", displayName: "Particle-1 (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "recursive/flint-v1.0:free", displayName: "Flint (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "nvidia/nemotron-3.5-super-vl:free", displayName: "Nemotron 3.5 Super VL (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "dots-studio/dots-3-note-preview:free", displayName: "Dots3 Note Preview (free) (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "nvidia/nemotron-3.5-lightning:free", displayName: "Nemotron 3.5 Lightning (free) (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "nvidia/nemotron-3-ultra-550b-a55b:free", displayName: "Nemotron 3 Ultra (free) (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", displayName: "Nemotron 3 Nano Omni (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "google/gemma-4-26b-a4b-it:free", displayName: "Gemma 4 26B A4B  (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "google/gemma-4-31b-it:free", displayName: "Gemma 4 31B (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  { provider: "naga-ac", modelId: "google/gemini-2.5-flash:free", displayName: "Gemini 2.5 Flash (Free) (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
 ];

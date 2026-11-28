@@ -18,6 +18,7 @@ import {
   resolveFreeQuotaUnit,
   computePublicFreeHeadline,
   computeRowSumMirror,
+  formatTokenHeadline,
   freeTypesInBucket,
   isCountingGated,
   isSocialGated,
@@ -29,6 +30,7 @@ import {
 import { FREE_TIER_PROVIDER_SET } from "@omniroute/open-sse/config/freeTierProviders.ts";
 import { isCatalogFreeModel } from "@/shared/utils/freeModels.ts";
 import { membershipFromProviderConstants } from "./_helpers/providerAccessMembership.ts";
+import { PROVIDER_EXPECTATIONS } from "./free-provider-coverage.expectations.ts";
 
 /**
  * Pinned at the November 2026 re-audit. A later catalog PR that moves these numbers updates them
@@ -104,11 +106,12 @@ test("bluesminds, arcee-ai, huggingface and huggingchat offer no free quota any 
   assert.equal(rows("huggingchat").length, 24);
 });
 
-test("ainative, routeway, stepfun and predibase no longer grant free access", () => {
+test("ainative, StepFun and Predibase ended their offers, and Routeway retired eight ids", () => {
   assertRetired("ainative");
   assert.equal(rows("ainative").length, 7);
-  assertRetired("routeway");
-  assert.equal(rows("routeway").length, 8);
+  // https://api.routeway.ai/v1/models (2026-11-27): eight old ids retired, seven live replacements.
+  assertRetired("routeway", PROVIDER_EXPECTATIONS.routeway.discontinued);
+  assert.equal(rows("routeway").length, 15);
   assertRetired("stepfun", ["step-1v"]);
   assertRetired("predibase", ["llama-3.3-70b"]);
 });
@@ -223,20 +226,33 @@ test("cohere, kiro and modelscope keep their quotas", () => {
 });
 
 test("onomeo: only the ids in today's freeModels stay live", () => {
-  assertLive("onomeo", ["auto", "glm-4.7-flash"], {
-    monthlyTokens: 0,
-    poolKey: "onomeo",
-    freeType: "recurring-uncapped",
-  });
+  // https://onomeo.com/api/info and https://onomeo.com/models (2026-11-27), owner answer to Q22.
+  assertLive(
+    "onomeo",
+    ["auto", "gemma-4-31b", "llama-4-scout", "mistral-small-3.1", "glm-4.7-flash", "glm-5.3"],
+    {
+      monthlyTokens: 3_456_000,
+      poolKey: "onomeo",
+      freeType: "recurring-daily",
+    }
+  );
   assert.equal(retired("onomeo").length, 11);
   assertRetired("onomeo", ids(retired("onomeo")));
 });
 
 test("requesty and aion: the ids that left the free list are retired", () => {
-  assertRetired("requesty", ["openai/gpt-oss-120b"]);
-  assert.deepEqual(ids(live("requesty")), [
+  // https://router.requesty.ai/v1/models (2026-11-27): five offered ids and two more retirements.
+  assertRetired("requesty", [
+    "openai/gpt-oss-120b",
     "mistral/leanstral-1-5",
     "nvidia/nemotron-3-nano-30b-a3b",
+  ]);
+  assert.deepEqual(ids(live("requesty")), [
+    "google/gemma-4-31b-it",
+    "nvidia/muse-glimmer-30b",
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+    "nvidia/nemotron-3-ultra-550b-a55b",
+    "nvidia/nemotron-3.5-lightning-30b-a3b",
   ]);
   assertRetired("aion", ["aion-labs/aion-2.5"]);
   assert.equal(live("aion").length, 4);
@@ -275,35 +291,48 @@ test("only official API rows feed the real figure", () => {
 
 test("public free-token figures after the re-audit", () => {
   const pub = computePublicFreeHeadline();
-  assert.equal(pub.steadyRecurringTokens, 89_780_000);
-  assert.equal(pub.firstMonthRealisticTokens, 153_280_000);
+  // E1a adds 6M + 4.8M + 4.8M + 3.6M + 3.456M + 2.4M + 2.4M to both headlines.
+  assert.equal(pub.steadyRecurringTokens, 117_236_000);
+  assert.equal(pub.firstMonthRealisticTokens, 180_736_000);
   assert.equal(pub.gatedRecurringTokens, 6_000_000);
   assert.equal(pub.socialGatedRecurringTokens, 15_000_000);
-  assert.equal(pub.boostMonthlyTokens, 24_000_000);
+  // E1a adds the 24M DGrid deposit allowance to the previous 24M.
+  assert.equal(pub.boostMonthlyTokens, 48_000_000);
 });
 
 test("row-sum reading and retired ledger after the re-audit", () => {
   const m = computeRowSumMirror();
-  assert.equal(m.liveTokens, 159_000_000);
-  assert.equal(m.retiredTokens, 11_190_500_000);
-  assert.equal(m.totalTokens, 11_349_500_000);
-  assert.equal(Math.round(m.retiredShare * 1000) / 10, 98.6);
-  assert.equal(RETIRED_FREE_ROWS.length, 135);
+  // E1a adds 10 Zylo token rows × 6M; the other six providers are metered by requests.
+  // LLM7 keeps its last 3M quota in the ledger (largest-quota rule, #21465 and #21425).
+  assert.equal(m.liveTokens, 219_000_000);
+  assert.equal(m.retiredTokens, 11_193_500_000);
+  assert.equal(m.totalTokens, 11_412_500_000);
+  assert.equal(m.realSteadyTokens, 117_236_000);
+  assert.equal(formatTokenHeadline(m.totalTokens), "~11.4B");
+  assert.equal(m.retiredShare, 11_193_500_000 / 11_412_500_000);
+  assert.equal(RETIRED_FREE_ROWS.length, 136);
+  assert.deepEqual(
+    m.byProvider.filter((row) => row.provider === "llm7"),
+    [{ provider: "llm7", liveRows: 0, retiredRows: 1, tokens: 3_000_000 }]
+  );
 });
 
 test("catalog counts after the re-audit", () => {
   const c = computeFreeCatalogCounts({ membershipOf: membershipFromProviderConstants });
   // #19385 ends one keyless offer covering one model with no published quota.
-  assert.equal(c.publishedQuotaPools, 12);
-  assert.equal(c.providersWithFreeOffer.total, 49);
+  // E1a adds seven quota pools and five API-key offers; Requesty and Onomeo already counted.
+  assert.equal(c.publishedQuotaPools, 19);
+  assert.equal(c.providersWithFreeOffer.total, 54);
   assert.deepEqual(c.providersWithFreeOffer.byAccess, {
-    "api-key": 43,
+    "api-key": 48,
     keyless: 5,
     "tool-account": 1,
     "web-chat": 0,
   });
-  assert.equal(c.accessRows, 213);
-  assert.equal(c.freeModels, 184);
+  // 41 new identities minus two Requesty retirements: 39 extra access rows.
+  assert.equal(c.accessRows, 252);
+  // Of the 41 new rows, four model IDs already occur elsewhere; both retired ids were distinct.
+  assert.equal(c.freeModels, 219);
 });
 
 // --- Retired pools and their ledger --------------------------------------------------------
@@ -354,15 +383,32 @@ test("the ledger keeps the last quota of every retired pool row, with its reason
       assert.match(r.evidence, /https:\/\/\S+ .*2026-11-23/);
     }
   }
-  // Rows without a quota (uncapped or credit) and the LLM7 row whose 150M was never the published
-  // quota (owner decision 2026-11-21, PL) stay out of the ledger.
-  for (const p of ["llm7", "ainative", "stepfun", "predibase"])
+  // Rows without a quota (uncapped or credit) stay out of the ledger.
+  for (const p of ["ainative", "stepfun", "predibase"])
     assert.ok(!RETIRED_FREE_ROWS.some((r) => r.provider === p), p);
+});
+
+test("the ledger keeps LLM7's last published quota on one pool row", () => {
+  assert.deepEqual(
+    RETIRED_FREE_ROWS.filter((r) => r.provider === "llm7"),
+    [
+      {
+        provider: "llm7",
+        modelId: "gpt-4o-mini-2024-07-18",
+        poolKey: "llm7-free",
+        lastListedMonthlyTokens: 3_000_000,
+        retiredAt: "2026-11-23",
+        reason: "unverifiable",
+        evidence:
+          "https://docs.llm7.io/limits listed 100,000 tokens per 24 hours on 2026-11-18 and answered 404 on 2026-11-23",
+      },
+    ]
+  );
 });
 
 // --- Ledger rows of the corrected pools and dated evidence ----------------------------------
 
-test("dead ids of corrected pools keep their last listed quota in the ledger", () => {
+test("retired ids of corrected pools keep their last listed quota in the ledger", () => {
   const expect: Array<[string, number, string, number]> = [
     ["xkiro", 150_000_000, "id-retired", 29],
     ["xkiro", 150_000_000, "paid-only", 1],
@@ -378,7 +424,9 @@ test("dead ids of corrected pools keep their last listed quota in the ledger", (
     for (const r of ledger) {
       assert.equal(r.lastListedMonthlyTokens, tokens, `${provider}/${r.modelId}`);
       const row = rows(provider).find((m) => m.modelId === r.modelId);
-      assert.equal(row?.freeType, "discontinued", `${provider}/${r.modelId} is retired`);
+      if (r.revivedAt === undefined) {
+        assert.equal(row?.freeType, "discontinued", `${provider}/${r.modelId} is retired`);
+      }
       assert.equal(r.poolKey, row?.poolKey);
     }
   }
@@ -413,9 +461,12 @@ test("every free row with a quota carries dated evidence that matches its econom
     []
   );
   const quota = policy.evidence.filter((e: { claim: string }) => e.claim === "recurring-quota");
-  assert.equal(quota.length, 40);
+  // The seven E1a pools document 43 live model rows, on top of the previous 40 records.
+  assert.equal(quota.length, 83);
   for (const e of quota) {
-    assert.equal(e.checkedAt, "2026-11-23", key(e));
+    const sourceDate =
+      PROVIDER_EXPECTATIONS[e.provider]?.lastWave === "E1a" ? "2026-11-27" : "2026-11-23";
+    assert.equal(e.checkedAt, sourceDate, key(e));
     const row = FREE_MODEL_BUDGETS.find((m) => key(m) === key(e));
     assert.equal(e.catalogHash, row && catalogFingerprint(row));
   }
@@ -445,14 +496,16 @@ test("the xKiro Telegram bonus is a social boost, never a deposit boost", () => 
   );
   assert.match(FREE_TIER_BOOSTS["xkiro-free"].note, /Telegram/);
   const pub = computePublicFreeHeadline();
-  assert.equal(pub.boostMonthlyTokens, 24_000_000);
+  // E1a adds the 24M DGrid deposit allowance to the previous 24M.
+  assert.equal(pub.boostMonthlyTokens, 48_000_000);
   assert.equal(pub.socialGatedRecurringTokens, 15_000_000);
 });
 
 // --- Curation date, data-file rule and the legacy per-provider map --------------------------
 
 test("the catalog is curated as of the re-audit day and states where retired quotas go", () => {
-  assert.equal(FREE_CATALOG_CURATED_AT, "2026-11-23");
+  // E1a reopened the seven providers on 2026-11-27.
+  assert.equal(FREE_CATALOG_CURATED_AT, "2026-11-27");
   const src = readFileSync(
     new URL("../../open-sse/config/freeModelCatalog.data.ts", import.meta.url),
     "utf8"
