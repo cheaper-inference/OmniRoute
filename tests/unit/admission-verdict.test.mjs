@@ -297,6 +297,28 @@ test("invalid or weakened policy shape is rejected", () => {
   assert.notEqual(run(needsFor("ci"), context, "absent").verdict, "PASS");
 });
 
+test("CI admission can finish while the SonarQube advisory is running", () => {
+  const { jobs } = loadYaml(
+    readFileSync(new URL("../../.github/workflows/ci.yml", import.meta.url), "utf8")
+  );
+  assert.equal(jobs.sonarqube.needs, "test-coverage");
+  const sonarDependents = Object.keys(jobs).filter((id) =>
+    [jobs[id].needs].flat().includes("sonarqube")
+  );
+  assert.deepEqual(sonarDependents, ["ci-summary"]);
+
+  const needs = needsFor("ci");
+  const receipt = run(needs);
+  assert.equal(receipt.verdict, "PASS");
+  assert.equal(
+    receipt.jobs.some(({ id }) => id === "sonarqube"),
+    false
+  );
+  assert.equal(run({ ...needs, sonarqube: { result: "success" } }).verdict, "FAIL");
+  delete needs["test-coverage"];
+  assert.equal(run(needs).verdict, "FAIL");
+});
+
 // A self-hosted runner must never execute fork code. A runs-on expression satisfies that either by
 // admitting a pull request only from this repository, or by keeping every pull_request off the
 // self-hosted branch altogether — a pure conjunction (no `||`) that includes the exclusion, so no
@@ -315,13 +337,21 @@ for (const profile of ["ci", "quality"]) {
       readFileSync(new URL(`../../.github/workflows/${profile}.yml`, import.meta.url), "utf8")
     );
     const verdict = workflow.jobs["admission-verdict"];
-    const ids = Object.keys(policy.profiles[profile].jobs).sort();
+    const profilePolicy = policy.profiles[profile];
+    const ids = Object.keys(profilePolicy.jobs).sort();
+    const independentAdvisories = profilePolicy.independentAdvisories ?? {};
+    const independentIds = Object.keys(independentAdvisories);
+    assert.deepEqual(independentIds, profile === "ci" ? ["sonarqube"] : []);
+    for (const id of independentIds) {
+      assert.ok(independentAdvisories[id].trim(), `${id}: independent advisory needs a reason`);
+      assert.ok(!ids.includes(id), `${id}: independent advisory cannot also be an admission job`);
+    }
     assert.deepEqual([...verdict.needs].sort(), ids);
     assert.deepEqual(
       Object.keys(workflow.jobs)
         .filter((id) => !["ci-summary", "admission-verdict"].includes(id))
         .sort(),
-      ids
+      [...ids, ...independentIds].sort()
     );
     // Requested candidates keep the required name; unrequested drafts get no PASS receipt.
     const checkName = policy.profiles[profile].checkName;
