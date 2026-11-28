@@ -188,10 +188,13 @@ test("access form serializes All and empty Restrict Combo access distinctly (#12
     source,
     /allowAllCombos: apiKey\?\.allowedCombos\?\.includes\(ALL_COMBOS_ACCESS_RULE\) === true/
   );
+  // Restrict saves the list verbatim; All saves combo/* plus the combos the key names
+  // (behaviour covered in api-key-access-form.test.ts).
   assert.match(
     source,
-    /allowAllCombos\s*\?\s*\[ALL_COMBOS_ACCESS_RULE\]\s*:\s*formState\.selectedCombos/
+    /if \(!formState\.allowAllCombos\) return formState\.selectedCombos\.filter\(isValidComboName\);/
   );
+  assert.match(source, /return \[ALL_COMBOS_ACCESS_RULE, \.\.\.new Set\(named\)\];/);
 });
 
 test("behaviour tab persists the per-key prompt-compression switch", () => {

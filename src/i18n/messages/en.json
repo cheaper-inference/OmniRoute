@@ -2640,6 +2640,8 @@
     "restrictedComboCount": "Restricted to {count, plural, one {# combo} other {# combos}}.",
     "preservedComboRules": "{count, plural, one {# stored entry is} other {# stored entries are}} not in this combo list (for example routing rules) and will be kept as saved.",
     "preservedComboRuleHint": "Kept as stored. This entry is not a combo in the list above, so it can only be changed through the API.",
+    "namedCombosSkipBlockedModels": "{count, plural, one {# named combo is exempt from} other {# named combos are exempt from}} this key's blocked models. Remove a combo to apply the blocked models to it.",
+    "removeNamedCombo": "Remove {name}",
     "apiManagerCustomRateLimits": "Custom Rate Limits",
     "apiManagerCustomRateLimitsDesc": "Override global default limits. Leave empty to use defaults.",
     "apiManagerRateLimitRequestsPlaceholder": "Requests",
