@@ -1000,6 +1000,7 @@ async function orderRuntimeUnitsForStrategy(
     body,
     comboName: combo.name,
     config,
+    instructions: combo.config?.jevInstructions,
     settings,
     sourceFormat: args.sourceFormat,
     resilienceSettings: args.resilienceSettings,
