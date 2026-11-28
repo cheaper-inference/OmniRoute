@@ -7,6 +7,8 @@ import type {
 } from "./engines/types.ts";
 
 export interface CompressionWorkerOptions {
+  engineStep?: "ultra";
+  stepConfig?: Record<string, unknown>;
   model?: string;
   supportsVision?: boolean | null;
   providerTransport?: "direct" | "aggregator";
