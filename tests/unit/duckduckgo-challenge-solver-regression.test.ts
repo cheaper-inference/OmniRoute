@@ -14,6 +14,10 @@ import {
   DUCKDUCKGO_CHALLENGE_ORIGIN,
 } from "../../open-sse/executors/duckduckgo-web/challenge.ts";
 
+// These tests drive the in-process challenge solver and the HTTP path, which need the
+// explicit opt-in (open-sse/executors/duckduckgo-web/solverGate.ts).
+process.env.OMNIROUTE_DDG_UNSAFE_NODE_SOLVER = "1";
+
 /**
  * Regression suite for the DuckDuckGo AI Chat anti-abuse challenge solver.
  *

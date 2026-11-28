@@ -9,6 +9,10 @@ import {
   STATUS_URL,
 } from "../../open-sse/executors/duckduckgo-web.ts";
 
+// These tests drive the in-process challenge solver and the HTTP path, which need the
+// explicit opt-in (open-sse/executors/duckduckgo-web/solverGate.ts).
+process.env.OMNIROUTE_DDG_UNSAFE_NODE_SOLVER = "1";
+
 describe("DuckDuckGoWebExecutor", () => {
   describe("class instantiation", () => {
     it("should instantiate executor", () => {
@@ -31,11 +35,7 @@ describe("DuckDuckGoWebExecutor", () => {
     });
 
     it("should export DUCKDUCKGO_BASE constant", () => {
-      assert.equal(
-        DUCKDUCKGO_BASE,
-        "https://duck.ai",
-        "DUCKDUCKGO_BASE should be correct URL"
-      );
+      assert.equal(DUCKDUCKGO_BASE, "https://duck.ai", "DUCKDUCKGO_BASE should be correct URL");
     });
   });
 

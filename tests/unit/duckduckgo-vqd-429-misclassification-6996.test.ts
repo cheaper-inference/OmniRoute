@@ -6,6 +6,9 @@ import path from "node:path";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-6996-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+// These tests drive the in-process challenge solver and the HTTP path, which need the
+// explicit opt-in (open-sse/executors/duckduckgo-web/solverGate.ts).
+process.env.OMNIROUTE_DDG_UNSAFE_NODE_SOLVER = "1";
 
 const { DuckDuckGoWebExecutor, STATUS_URL } =
   await import("../../open-sse/executors/duckduckgo-web.ts");

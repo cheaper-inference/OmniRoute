@@ -1,0 +1,1 @@
+- **fix(sse):** DuckDuckGo AI Chat no longer evaluates the upstream anti-abuse challenge inside the server process by default: it answers through the browser pool (`OMNIROUTE_BROWSER_POOL=on`), stays out of `auto/*` without a usable solver, and the in-process `node:vm` solver runs only with `OMNIROUTE_DDG_UNSAFE_NODE_SOLVER=1`.

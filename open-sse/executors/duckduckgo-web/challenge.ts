@@ -1,9 +1,16 @@
 // DuckDuckGo anti-abuse challenge solver + FE signals (pure of module state).
-// SECURITY: solveDuckDuckGoChallenge runs upstream-supplied JS in a vm sandbox with a
-// 5s timeout (see inline note). Extracted verbatim from duckduckgo-web.ts.
+// SECURITY: solveDuckDuckGoChallenge runs upstream-supplied JS with node:vm, which is not a
+// security boundary. It refuses unless the operator opted in (see ./solverGate.ts); the
+// default path solves the challenge in the browser pool instead.
 import { createHash } from "node:crypto";
 import vm from "node:vm";
 import { parseFragment, serialize } from "parse5";
+
+import {
+  DuckDuckGoNodeSolverDisabledError,
+  isDuckDuckGoNodeSolverEnabled,
+  warnUnsafeNodeSolverOnce,
+} from "./solverGate.ts";
 
 // WARNING: the contents of this template literal are NOT TypeScript — they are plain
 // script-mode JavaScript executed via `vm.runInContext`. `vm.runInContext` compiles in
@@ -251,8 +258,11 @@ export async function solveDuckDuckGoChallenge(
   options: { origin?: string; bundlePath?: string } = {}
 ): Promise<string> {
   // SECURITY NOTE: This function executes base64-decoded JavaScript from duck.ai via vm.runInContext.
-  // The challenge code is upstream-supplied (supply-chain surface). It is sandboxed with a 5s timeout
-  // to limit DoS risk. This is intentional for the DDG challenge solver to work.
+  // node:vm does not isolate it: the program can reach the server realm (`process`) through the
+  // constructor chain, and the 5s timeout bounds only synchronous work. So it runs only when the
+  // operator explicitly accepted that risk.
+  if (!isDuckDuckGoNodeSolverEnabled()) throw new DuckDuckGoNodeSolverDisabledError();
+  warnUnsafeNodeSolverOnce();
   const js = Buffer.from(challenge, "base64").toString("utf8");
   const stubs = CHALLENGE_STUBS.replace("__DDG_REAL_UA__", JSON.stringify(userAgent)).replace(
     "__DDG_HTML_LOOKUP__",
