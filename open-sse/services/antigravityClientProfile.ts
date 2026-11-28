@@ -67,6 +67,23 @@ function getProjectHeaderValue(body: unknown): string | null {
   return project;
 }
 
+function setHeaderCaseInsensitive(
+  headers: Record<string, string>,
+  name: string,
+  value: string
+): void {
+  const lowerName = name.toLowerCase();
+  const existingKey = Object.keys(headers).find((key) => key.toLowerCase() === lowerName);
+  if (existingKey === name) {
+    headers[name] = value;
+    return;
+  }
+  if (existingKey) {
+    removeHeaderCaseInsensitive(headers, name);
+  }
+  headers[name] = value;
+}
+
 /** Apply the selected official client identity to a Cloud Code content request. */
 export function applyAntigravityClientProfileHeaders(
   headers: Record<string, string>,
@@ -76,10 +93,13 @@ export function applyAntigravityClientProfileHeaders(
   const profile = getAntigravityClientProfile(credentials);
   const identityHeaders = getAntigravityContentHeaders(profile);
 
-  removeHeaderCaseInsensitive(headers, "User-Agent");
-  headers["User-Agent"] = identityHeaders["User-Agent"];
+  setHeaderCaseInsensitive(headers, "User-Agent", identityHeaders["User-Agent"]);
   for (const name of ABSENT_CONTENT_IDENTITY_HEADERS) {
     removeHeaderCaseInsensitive(headers, name);
+  }
+  if (profile === "cli") {
+    removeHeaderCaseInsensitive(headers, "Accept");
+    setHeaderCaseInsensitive(headers, "Accept-Encoding", "gzip");
   }
 
   const project = getProjectHeaderValue(body);

@@ -98,6 +98,9 @@ export function resolveAntigravityGoPlatform(
 // (only version/url/sha512 are). Seeded from the native capture; refresh when bumping.
 const ANTIGRAVITY_KNOWN_CHANGELISTS: Record<string, string> = {
   "1.4.4": "1003595037",
+  "1.5.10": "1023297289",
+  "1.5.12": "1024904911",
+  "1.5.18": "1030252320",
 };
 
 /**

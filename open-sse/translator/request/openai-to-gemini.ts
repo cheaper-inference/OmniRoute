@@ -10,6 +10,7 @@ import {
   getAntigravityEnvelopeUserAgent,
   getAntigravityConversationSessionId,
 } from "../../services/antigravityIdentity.ts";
+import { getAntigravityClientProfile } from "../../services/antigravityClientProfile.ts";
 import { fixToolPairs } from "../../services/contextManager.ts";
 import {
   capMaxOutputTokens,
@@ -958,6 +959,7 @@ function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
   }
 
   const cleanModel = model.includes("/") ? model.split("/").pop()! : model;
+  const clientProfile = getAntigravityClientProfile(credentials);
 
   const envelope: CloudCodeEnvelope = {
     project: projectId,
@@ -965,13 +967,19 @@ function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
     request: {
       sessionId: getAntigravityConversationSessionId(
         credentials,
-        (credentials as { _antigravitySessionKey?: string } | null)?._antigravitySessionKey
+        (credentials as { _antigravitySessionKey?: string } | null)?._antigravitySessionKey,
+        clientProfile
       ),
       contents: cloudCodeRequest.contents,
       systemInstruction: cloudCodeRequest.systemInstruction,
-      generationConfig: applyAntigravityGenerationDefaults(cloudCodeRequest.generationConfig),
+      generationConfig: applyAntigravityGenerationDefaults(
+        cloudCodeRequest.generationConfig,
+        clientProfile
+      ),
       tools: cloudCodeRequest.tools,
-      safetySettings: cloudCodeRequest.safetySettings,
+      ...(cloudCodeRequest.safetySettings !== undefined && {
+        safetySettings: cloudCodeRequest.safetySettings,
+      }),
     },
     model: cleanModel,
     userAgent: getAntigravityEnvelopeUserAgent(credentials),
@@ -989,7 +997,10 @@ function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
   // large — Hermes ~125k tokens) to the first user message.
   const defaultPart: GeminiPart = { text: ANTIGRAVITY_DEFAULT_SYSTEM };
   const clientParts = envelope.request.systemInstruction?.parts?.slice() ?? [];
-  envelope.request.systemInstruction = { role: "system", parts: [defaultPart] };
+  envelope.request.systemInstruction = {
+    role: clientProfile === "cli" ? "user" : "system",
+    parts: [defaultPart],
+  };
   prependClientSystemParts(envelope.request, clientParts);
 
   // Strip Gemini built-in tool *names* out of functionDeclarations — but only while
@@ -1031,9 +1042,15 @@ function wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials = null) {
     // Reuse the toolConfig openaiToGeminiBase already computed from the caller's
     // tool_choice (cloudCodeRequest is that function's return value) instead of
     // re-deriving a hardcoded default here — see convertOpenAIToolChoiceToGemini.
-    envelope.request.toolConfig = cloudCodeRequest.toolConfig ?? {
-      functionCallingConfig: { mode: "VALIDATED" },
-    };
+    // The native Go CLI omits toolConfig unless the caller explicitly asked for
+    // tool_choice; the IDE profile still falls back to VALIDATED.
+    if (cloudCodeRequest.toolConfig) {
+      envelope.request.toolConfig = cloudCodeRequest.toolConfig;
+    } else if (clientProfile !== "cli") {
+      envelope.request.toolConfig = {
+        functionCallingConfig: { mode: "VALIDATED" },
+      };
+    }
   }
 
   return envelope;
@@ -1076,6 +1093,11 @@ export function openaiToAntigravityRequest(model, body, stream, credentials = nu
   }
 
   const envelope = wrapInCloudCodeEnvelope(model, cloudCodeRequest, credentials);
+
+  // The native Go CLI omits toolConfig unless the caller explicitly passed tool_choice.
+  if (getAntigravityClientProfile(credentials) === "cli" && body.tool_choice == null) {
+    delete envelope.request.toolConfig;
+  }
 
   // Requests without an explicit limit use the native upstream default.
   const clientRequestedMaxTokens = body.max_tokens ?? body.max_completion_tokens;

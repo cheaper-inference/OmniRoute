@@ -5,6 +5,8 @@
 // the host imports them back internally (these were module-private — no public API
 // change). The GeminiGenerationConfig shape lives here with its only mutator.
 
+import type { AntigravityClientProfile } from "@/shared/constants/antigravityClientProfile";
+
 export type GeminiGenerationConfig = {
   temperature?: unknown;
   topP?: unknown;
@@ -96,13 +98,18 @@ export function deepCleanUndefined(value: unknown, depth = 0): void {
   }
 }
 
-export function applyAntigravityGenerationDefaults(generationConfig: GeminiGenerationConfig) {
+export function applyAntigravityGenerationDefaults(
+  generationConfig: GeminiGenerationConfig,
+  clientProfile: AntigravityClientProfile = "ide"
+) {
   const config = { ...generationConfig };
-  if (config.topK === undefined) {
-    config.topK = 40;
-  }
-  if (config.topP === undefined) {
-    config.topP = 1;
+  if (clientProfile !== "cli") {
+    if (config.topK === undefined) {
+      config.topK = 40;
+    }
+    if (config.topP === undefined) {
+      config.topP = 1;
+    }
   }
 
   const thinkingBudget = Number(config.thinkingConfig?.thinkingBudget);
