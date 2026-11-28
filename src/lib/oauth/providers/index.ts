@@ -94,6 +94,10 @@ export const PROVIDERS = {
   // Registered as `nous-oauth` so it sits ALONGSIDE the existing api-key
   // `nous-research` provider (same pattern as `xai-oauth` beside `xai`) instead
   // of changing the auth mode of a provider people already have configured.
+  // Runtime counterpart: open-sse/config/providers/registry/nous-oauth/index.ts
+  // (alias nouso, Nous inference endpoint, oauth.tokenUrl). Without that entry
+  // a nouso/ request falls back to the generic OpenAI configuration and the
+  // saved OAuth token is not routed to the Nous endpoint.
   "nous-oauth": nous,
 };
 
