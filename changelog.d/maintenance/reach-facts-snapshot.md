@@ -1,0 +1,1 @@
+- **ci:** Validate and snapshot tracker reach metrics for the nightly README refresh.
