@@ -6,6 +6,7 @@ import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { v4 as uuidv4, v5 as uuidv5 } from "uuid";
 import { capMaxOutputTokens, capThinkingBudget } from "@/lib/modelCapabilities";
+import { fixedKiroProfileArn } from "../../services/kiroFixedProfile.ts";
 import {
   parseToolInput,
   normalizeKiroToolSchema,
@@ -963,7 +964,13 @@ export function buildKiroPayload(model, body, stream, credentials) {
     normalizedModel
   );
 
-  const profileArn = credentials?.providerSpecificData?.profileArn || "";
+  // A stored profileArn wins. Builder ID and GitHub/Google logins have none of their own, and
+  // every Kiro host answers them 400 "profileArn is required for this request." without one
+  // (live 2026-11-16), so they send the Kiro IDE's fixed profile, as the IDE does.
+  const profileArn =
+    credentials?.providerSpecificData?.profileArn ||
+    fixedKiroProfileArn(credentials?.providerSpecificData) ||
+    "";
 
   let finalContent = currentMessage?.userInputMessage?.content || "";
   // Seed for the conversationId below: the user text BEFORE the clock line is prepended, so a

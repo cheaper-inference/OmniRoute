@@ -2013,14 +2013,22 @@ export async function GET(
         });
       }
 
+      // Kiro filters the catalog by egress region, like inference. Resolve the proxy the
+      // same way inference does (connection → provider → global), so the list matches the
+      // models this connection can call. The provider-level `proxy` above skips a proxy set
+      // on the connection itself.
+      const kiroProxy = await resolveProxyForConnection(connectionId, undefined, provider);
       const discovery = await fetchKiroAvailableModels({
         accessToken,
+        connectionId,
+        // One cached catalog per egress: toggling the proxy must not serve the other list.
+        egressKey: JSON.stringify(kiroProxy.proxy ?? null),
         providerSpecificData: connection.providerSpecificData,
         fetchImpl: (url, init) =>
           safeOutboundFetch(url as string, {
             ...SAFE_OUTBOUND_FETCH_PRESETS.modelsDiscovery,
             guard: getProviderOutboundGuard(),
-            proxyConfig: proxy,
+            proxyConfig: kiroProxy.proxy,
             ...(init as Record<string, unknown>),
           }),
         fallbackModels: toLocalCatalogModels(),

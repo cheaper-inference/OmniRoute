@@ -28,6 +28,8 @@
  *     discovered ARN's region then drives every runtime call.
  */
 
+import { buildKiroUserAgentHeaders } from "../config/kiroClientIdentity.ts";
+
 // Canonical AWS region shape — kept local (identical to AWS_REGION_PATTERN in
 // src/lib/oauth/constants/oauth.ts) so this open-sse module has no cross-tree import just to
 // validate a string. Guards against SSRF via region injection (GHSA-6mwv-4mrm-5p3m): the value
@@ -60,6 +62,11 @@ export const KIRO_PROFILE_REGIONS = ["us-east-1", "eu-central-1"] as const;
  * codewhisperer.us-east-1 host (AWS Builder ID home region); other regions use the regional
  * Amazon Q endpoint `q.{region}.amazonaws.com` — codewhisperer.{region}.amazonaws.com does not
  * resolve for non-us-east-1 regions.
+ *
+ * Do not move us-east-1 to q.us-east-1. Builder ID tokens carry no profileArn, and both
+ * runtime.us-east-1.kiro.dev and q.us-east-1 answer them with 400 "profileArn is required for
+ * this request"; codewhisperer.us-east-1 is the host that serves them (#19748). Kiro's version
+ * gate (#19607) checks the User-Agent, not the host, so this host passes it too.
  */
 export function kiroRuntimeHost(region: string): string {
   return region === "us-east-1"
@@ -171,6 +178,9 @@ async function listKiroProfileArnForRegion(
         Accept: "application/json",
         "x-amz-target": "AmazonCodeWhispererService.ListAvailableProfiles",
         Authorization: `Bearer ${accessToken}`,
+        // Same Kiro IDE identity as every other Kiro call. No connection id reaches profile
+        // discovery (it also runs during login), so no machineId suffix — accepted live.
+        ...buildKiroUserAgentHeaders({ client: "runtime" }),
       },
       body: JSON.stringify({ maxResults: 10 }),
       // Never let a hung/region-mismatched profile lookup block login or the quota refresh.

@@ -829,7 +829,8 @@ process.env[`${PROVIDER_ID}_USER_AGENT`]
 | `GITHUB_COPILOT_CLI_VERSION` | `1.0.91` | Override advertised Copilot CLI version independently of `GITHUB_USER_AGENT` |
 | `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0` | When GitHub Copilot Chat updates |
 | `ANTIGRAVITY_CLI_CL` | _(unset)_ | Override the Antigravity CLI (`agy`) Piper changelist reported as `cl=` in the CLI User-Agent. Not derivable from the version nor exposed by the public manifests; seeded per version from a live capture (1.4.4 → `1003595037`). Unset on an unknown version omits `cl=` instead of advertising another build's changelist. |
-| `KIRO_USER_AGENT` | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0` | When Kiro IDE updates |
+| `KIRO_IDE_VERSION` | `1.4.178` | Kiro IDE release advertised on every Kiro request (`open-sse/config/kiroClientIdentity.ts`). Set it when Kiro raises its version floor (#19607); only a dotted version newer than the pin is used |
+| `KIRO_USER_AGENT` | _(unset)_ | Full Kiro User-Agent override; honored only when it carries a `KiroIDE-<version>` newer than the pin, so stale `.env` values are ignored. Prefer `KIRO_IDE_VERSION` |
 | `KIRO_OAUTH_CLIENT_ID` | `kiro-cli` | Override the Kiro social device-code `clientId` (public id) |
 | `KIRO_VERIFY_FULL_CRC` | `false` | Opt-in: full per-frame message CRC validation on the Kiro event stream (debug corrupted streams) |
 | `KIRO_CREDIT_PRICE_USD` | `0.02` | USD per Kiro credit; converts `meteringEvent` credits into the exact per-request cost |

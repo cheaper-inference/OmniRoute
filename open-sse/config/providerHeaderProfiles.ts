@@ -1,4 +1,5 @@
 import { getAntigravityContentHeaders } from "../services/antigravityHeaders.ts";
+import { buildKiroUserAgentHeaders, KIRO_IDE_VERSION_PIN } from "./kiroClientIdentity.ts";
 import type { AntigravityClientProfile } from "@/shared/constants/antigravityClientProfile";
 import {
   BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS,
@@ -447,8 +448,11 @@ export function resetCodeBuddyCnVersionCache(): void {
   codeBuddyVersionInFlight = null;
 }
 
-export const KIRO_SDK_USER_AGENT = "AWS-SDK-JS/3.0.0 kiro-ide/1.0.0";
-export const KIRO_AMZ_USER_AGENT = "aws-sdk-js/3.0.0 kiro-ide/1.0.0";
+// Kiro's client-version gate (#19607) reads the User-Agent only. The identity is built in
+// kiroClientIdentity.ts; these are its pinned defaults (no machineId, no env override).
+const KIRO_PINNED_UA_HEADERS = buildKiroUserAgentHeaders({ version: KIRO_IDE_VERSION_PIN });
+export const KIRO_SDK_USER_AGENT = KIRO_PINNED_UA_HEADERS["User-Agent"];
+export const KIRO_AMZ_USER_AGENT = KIRO_PINNED_UA_HEADERS["X-Amz-User-Agent"];
 export const KIRO_STREAMING_TARGET =
   "AmazonCodeWhispererStreamingService.GenerateAssistantResponse";
 
@@ -596,8 +600,8 @@ export function getKiroServiceHeaders(
     "Content-Type": "application/json",
     Accept: accept,
     "X-Amz-Target": KIRO_STREAMING_TARGET,
-    "User-Agent": KIRO_SDK_USER_AGENT,
-    "X-Amz-User-Agent": KIRO_AMZ_USER_AGENT,
+    // Reads KIRO_IDE_VERSION. Per-connection callers add the machineId on top.
+    ...buildKiroUserAgentHeaders(),
   };
 }
 

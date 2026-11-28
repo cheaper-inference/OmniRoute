@@ -260,14 +260,16 @@ test("fetchKiroAvailableModels: IAM Identity Center account, region-matched endp
   );
 });
 
-test("fetchKiroAvailableModels: retries with profileArn when origin-only fails", async () => {
+test("fetchKiroAvailableModels: sends the profileArn first when the connection has one", async () => {
+  // The Kiro IDE always sends it; with a current IDE version the origin-only call answers
+  // IdC accounts 400 "Invalid profileArn." (live, 2026-11-16).
   const calls: string[] = [];
   const fetchImpl = (async (url: string) => {
     calls.push(url);
     if (url.includes("profileArn=")) {
       return jsonResponse({ models: [{ modelId: "claude-sonnet-4.6" }] });
     }
-    return jsonResponse({ message: "forbidden" }, 403);
+    return jsonResponse({ message: "Invalid profileArn." }, 400);
   }) as unknown as typeof fetch;
 
   const result = await fetchKiroAvailableModels({
@@ -285,10 +287,9 @@ test("fetchKiroAvailableModels: retries with profileArn when origin-only fails",
     result.models.map((m) => m.id),
     ["claude-sonnet-4.6"]
   );
-  // origin-only attempted first, then profileArn retry.
-  assert.equal(calls.length, 2);
-  assert.ok(calls[0].endsWith("?origin=AI_EDITOR"));
-  assert.ok(calls[1].includes("profileArn=arn%3Aaws%3Acodewhisperer"));
+  assert.equal(calls.length, 1);
+  assert.ok(calls[0].includes("origin=AI_EDITOR"));
+  assert.ok(calls[0].includes("profileArn=arn%3Aaws%3Acodewhisperer"));
 });
 
 test("fetchKiroAvailableModels only exposes a functional Thinking alias", async () => {
