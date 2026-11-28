@@ -88,20 +88,26 @@ function normalizeResponsesInputItem(item) {
   return item;
 }
 
+// Fold a stray top-level Chat-Completions-shaped `reasoning_effort` into the Responses-shaped
+// `reasoning.effort`, in place, and drop the top-level key. An explicit nested effort wins; the
+// other `reasoning` fields are kept. This exists for the SAME-FORMAT lane (source === target ===
+// OPENAI_RESPONSES), where translateRequest skips the Chat-to-Responses converter (#7631).
+function promoteStrayReasoningEffort(body, model: unknown) {
+  if (!Object.hasOwn(body, "reasoning_effort")) return body;
+  const reasoning = mergeResponsesReasoningEffort(
+    body.reasoning,
+    body.reasoning_effort,
+    model ?? body.model
+  );
+  if (reasoning !== undefined) body.reasoning = reasoning;
+  delete body.reasoning_effort;
+  return body;
+}
+
 function normalizeOpenAIResponsesRequest(body, model: unknown) {
   if (!body || typeof body !== "object") return body;
 
-  const normalized = { ...body };
-  // Same-format requests skip the Chat-to-Responses converter (#7631).
-  if (Object.hasOwn(normalized, "reasoning_effort")) {
-    const reasoning = mergeResponsesReasoningEffort(
-      normalized.reasoning,
-      normalized.reasoning_effort,
-      model ?? normalized.model
-    );
-    if (reasoning !== undefined) normalized.reasoning = reasoning;
-    delete normalized.reasoning_effort;
-  }
+  const normalized = promoteStrayReasoningEffort({ ...body }, model);
 
   // #10165 safety net: if a chat-shaped body reached Responses normalization
   // without input, promote messages → input and map token/format fields.
