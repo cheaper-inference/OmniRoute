@@ -875,6 +875,16 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
         inputModalities: ["text", "image"],
       },
       {
+        id: "qwen-image-2.1-pro",
+        name: "Qwen Image 2.1 Pro",
+        inputModalities: ["text", "image"],
+      },
+      {
+        id: "qwen-image-2.1-turbo",
+        name: "Qwen Image 2.1 Turbo",
+        inputModalities: ["text", "image"],
+      },
+      {
         id: "qwen-image-2.0-pro-2026-06-22",
         name: "Qwen Image 2.0 Pro (2026-06-22)",
         inputModalities: ["text", "image"],

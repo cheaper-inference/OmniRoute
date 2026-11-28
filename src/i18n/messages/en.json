@@ -7002,6 +7002,7 @@
     "snowflakeBaseUrlHint": "Snowflake Base Url Hint",
     "supportedEndpointAudio": "Audio",
     "supportedEndpointChat": "Chat",
+    "supportedEndpointDecisions": "Decisions",
     "supportedEndpointEmbeddings": "Embeddings",
     "supportedEndpointImages": "Images",
     "supportedEndpointsLabel": "Supported endpoints",

@@ -6962,6 +6962,7 @@
     "snowflakeBaseUrlHint": "Snowflake Cortex 服务的 Base URL。",
     "supportedEndpointAudio": "音频",
     "supportedEndpointChat": "聊天",
+    "supportedEndpointDecisions": "决策",
     "supportedEndpointEmbeddings": "嵌入",
     "supportedEndpointImages": "图像",
     "supportedEndpointsLabel": "支持的端点",

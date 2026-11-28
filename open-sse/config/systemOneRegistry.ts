@@ -49,7 +49,30 @@ const OLLAMA_LOCAL_SYSTEMONE_PREFIX = "ollama-local/";
 /** Plain Ollama model tags (`qwen3:8b`, `library/llama3.2:latest`); no whitespace or control chars. */
 const OLLAMA_LOCAL_MODEL_ID = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,199}$/;
 
-export type SystemOneBackend = "typesafe" | "openrouter" | "cloudflare" | "ollama-local";
+/**
+ * Alibaba DashScope decision models (System One protocol). The upstream is the
+ * workspace's OpenAI-compatible surface — the general `dashscope.aliyuncs.com`
+ * host or a dedicated `ws-….maas.aliyuncs.com` business space — rewritten to
+ * `…/compatible-mode/v1/systemone`. The URL therefore comes from the `alibaba`
+ * connection's base URL (falling back to the general host), while the model id
+ * only travels in the JSON body.
+ */
+export const ALIBABA_SYSTEMONE_PROVIDER_ID = "alibaba";
+const ALIBABA_SYSTEMONE_PREFIXES = ["alibaba/", "dashscope/"];
+/**
+ * DashScope decision model ids documented today (`decision-model` stable,
+ * `decision-model-preview`). Allow-listed because the id is forwarded verbatim
+ * as the request body `model`; unknown ids are rejected instead of proxied.
+ */
+export const ALIBABA_SYSTEMONE_MODELS: ReadonlySet<string> = new Set([
+  "decision-model",
+  "decision-model-preview",
+]);
+/** Model ids travel only inside the JSON body; keep them to a conservative charset. */
+const ALIBABA_SYSTEMONE_MODEL_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/;
+
+export type SystemOneBackend =
+  "typesafe" | "openrouter" | "cloudflare" | "ollama-local" | "alibaba";
 
 export interface SystemOneTarget {
   backend: SystemOneBackend;
@@ -76,6 +99,19 @@ function resolveCloudflareTarget(model: string): SystemOneTarget | null | undefi
     backend: "cloudflare",
     provider: CLOUDFLARE_SYSTEMONE_PROVIDER_ID,
     upstreamModel,
+    upstreamUrl: "",
+  };
+}
+
+function resolveAlibabaTarget(model: string): SystemOneTarget | null | undefined {
+  const prefix = ALIBABA_SYSTEMONE_PREFIXES.find((p) => model.startsWith(p));
+  if (!prefix) return undefined;
+  const id = model.slice(prefix.length);
+  if (!ALIBABA_SYSTEMONE_MODEL_ID.test(id) || !ALIBABA_SYSTEMONE_MODELS.has(id)) return null;
+  return {
+    backend: "alibaba",
+    provider: ALIBABA_SYSTEMONE_PROVIDER_ID,
+    upstreamModel: id,
     upstreamUrl: "",
   };
 }
@@ -130,6 +166,8 @@ export function resolveSystemOneTarget(model: string | undefined): SystemOneTarg
   }
   const cloudflare = resolveCloudflareTarget(trimmed);
   if (cloudflare !== undefined) return cloudflare;
+  const alibaba = resolveAlibabaTarget(trimmed);
+  if (alibaba !== undefined) return alibaba;
   const ollamaLocal = resolveOllamaLocalTarget(trimmed);
   if (ollamaLocal !== undefined) return ollamaLocal;
   if (/^jev[-/]/i.test(trimmed)) {

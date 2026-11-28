@@ -16,6 +16,7 @@ const OPTIONS: ModelSupportedEndpoint[] = [
   "audio-speech",
   "audio-transcriptions",
   "music",
+  "decisions",
 ];
 
 export interface ModelEndpointEditorInfo {
