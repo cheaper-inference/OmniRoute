@@ -110,6 +110,18 @@ const EXHAUSTION_MARKER_PATTERN =
 const CONTENT_EXHAUSTION_PATTERN =
   /\b(enough\s+credits?|not\s+enough\s+credits?|please\s+top\s+up|top\s+up\s+to\s+continue|purchase\s+(more\s+)?credits?|add\s+credits?\s+to\s+continue|credit\s+balance\s+(is\s+)?(too\s+low|exhausted|empty)|recharge\s+(your|the)\s+account|out\s+of\s+funds)\b/i;
 
+// Issue #20528 (streaming twin of #19278): bound on the streamed
+// assistant-text window scanned for CONTENT_EXHAUSTION_PATTERN. A masked
+// billing notice is a short canned message (the observed Pollinations text
+// is ~230 chars); genuine prose grows past this bound and releases the
+// deferred "content" verdict — the same anti-false-positive contract as
+// FAKE_SUCCESS_MAX_CONTENT_LENGTH (#13461, 400 chars), with headroom for
+// longer provider wordings. The scan never delays the verdict across
+// network reads — a stream commit must not be re-evaluated after the peek
+// has read past it (the pre-content transport-replay veto depends on it) —
+// so it only decides on text deltas that arrived within one buffered pass.
+const MASKED_STREAM_NOTICE_MAX = 512;
+
 /**
  * Collect the small set of top-level "error envelope" strings a 200 response may
  * carry alongside (or instead of) a normal completion: the OpenAI-shape `error`
@@ -154,6 +166,24 @@ function extractFirstChoiceText(json: Record<string, unknown>): string {
       .join(" ");
   }
   return "";
+}
+
+/**
+ * Issue #20528: extract the assistant text delta carried by one OpenAI
+ * `choices[]` SSE payload — the streaming twin of {@link extractFirstChoiceText}.
+ * Returns "" for payloads with no text delta (role-only, finish-reason-only,
+ * tool-call frames), which callers treat as "nothing to scan".
+ */
+function extractOpenAiDeltaContentText(parsed: Record<string, unknown>): string {
+  const choices = parsed.choices;
+  if (!Array.isArray(choices)) return "";
+  let text = "";
+  for (const choice of choices) {
+    if (!isRecord(choice)) continue;
+    const delta = isRecord(choice.delta) ? choice.delta : null;
+    if (typeof delta?.content === "string") text += delta.content;
+  }
+  return text;
 }
 
 /** Mutable lifecycle flags threaded through {@link applySseLifecycleEvent}. */
@@ -482,6 +512,21 @@ export async function validateResponseQuality(
     // check below so a stream that already produced content before an error
     // is not misclassified as "aborted before content" (#12723 follow-up).
     let anyContentFound = false;
+    // Issue #20528: the #19278 masked-200 detector only runs on the
+    // non-streaming branch, but the same providers can deliver the billing
+    // failure as ordinary `choices[].delta.content` inside a 200 SSE stream.
+    // Declaring "content" on the first delta would relay the masked error to
+    // the client untouched and skip failover entirely, so the peek keeps a
+    // bounded prefix of streamed assistant text and defers the verdict only
+    // across the SSE lines already buffered in the SAME parse pass — never
+    // across another network read, so a stream commit is never re-evaluated
+    // after an upstream failure could poison the relayed branch.
+    // peekedCompletionTokens mirrors the non-streaming
+    // `usage.completion_tokens` gate: it is the UPSTREAM's own count (from a
+    // usage-bearing chunk), never OmniRoute's post-stream estimate — an
+    // upstream that reports real usage answered; it did not billing-refuse.
+    let maskedStreamText = "";
+    let peekedCompletionTokens: number | null = null;
     const sseLineNormalizer = createSSEDataLineNormalizer();
     let pendingEventType = "";
 
@@ -544,6 +589,11 @@ export async function validateResponseQuality(
       // Retain the potentially-incomplete trailing fragment.
       decodedSoFar = lines[lines.length - 1];
 
+      // #20528: set when the current pass saw assistant text that is still
+      // inside the masked-notice window — the verdict is deferred until every
+      // line already buffered in this pass has been evaluated.
+      let maskedHoldThisPass = false;
+
       for (const line of sseLineNormalizer.normalize(lines.slice(0, -1))) {
         const parsed = consumeSseLine(line);
         if (!parsed) continue;
@@ -569,6 +619,33 @@ export async function validateResponseQuality(
 
         if (isTerminalUsageOnlyChunk(parsed, eventType)) sawTerminator = true;
 
+        // Issue #20528: capture the upstream's own usage count when a chunk
+        // carries it (a terminal usage-only frame, or the
+        // `stream_options.include_usage` tail), then accumulate the streamed
+        // assistant text. While the assembled prefix is still inside the
+        // masked-notice window the content verdict is deferred to the end of
+        // THIS parse pass — deltas that complete the billing marker in the
+        // same buffered chunk are caught without another network read.
+        {
+          const usage = isRecord(parsed.usage) ? parsed.usage : null;
+          if (typeof usage?.completion_tokens === "number") {
+            peekedCompletionTokens = usage.completion_tokens;
+          }
+        }
+        if (maskedStreamText.length < MASKED_STREAM_NOTICE_MAX) {
+          maskedStreamText += extractOpenAiDeltaContentText(parsed);
+        }
+        if (
+          maskedStreamText.length > 0 &&
+          maskedStreamText.length < MASKED_STREAM_NOTICE_MAX &&
+          !(peekedCompletionTokens !== null && peekedCompletionTokens > 0)
+        ) {
+          maskedHoldThisPass = true;
+          applySseLifecycleEvent(eventType, parsed, sse);
+          if (sse.hasLifecycleEnd) sawTerminator = true;
+          continue;
+        }
+
         if (isKnownNonClaudeStreamPayload(parsed, eventType)) {
           return "content";
         }
@@ -577,6 +654,32 @@ export async function validateResponseQuality(
           return "content";
         }
         if (sse.hasLifecycleEnd) sawTerminator = true;
+      }
+
+      if (maskedHoldThisPass) {
+        // Issue #20528: everything buffered in this pass has been evaluated.
+        // Streamed assistant text stayed inside the masked-notice window — a
+        // short complete "answer". It is an upstream billing failure when the
+        // narrow pattern matches and the upstream reported no real completion
+        // usage; anything else is genuine short content.
+        const upstreamUsedRealTokens =
+          peekedCompletionTokens !== null && peekedCompletionTokens > 0;
+        if (!upstreamUsedRealTokens && CONTENT_EXHAUSTION_PATTERN.test(maskedStreamText)) {
+          const snippet =
+            maskedStreamText.length > 80 ? `${maskedStreamText.slice(0, 80)}…` : maskedStreamText;
+          upstreamFailure = {
+            status: 402,
+            type: "insufficient_quota",
+            code: "credits_exhausted",
+            message: sanitizeErrorMessage(
+              `upstream exhaustion marker in streamed assistant content: ${snippet}`
+            ).slice(0, 300),
+            requestScoped: false,
+            retryable: false,
+          };
+          return "error";
+        }
+        return "content";
       }
       return null;
     }
