@@ -10,7 +10,7 @@ const root = new URL("../../../", import.meta.url);
 const verifier = fileURLToPath(new URL("scripts/ci/release-green-result.mjs", root));
 const sha = "1".repeat(40);
 
-function verify(check: Record<string, unknown>) {
+function verify(check: Record<string, unknown>, validatorExit = "0") {
   const dir = mkdtempSync(join(tmpdir(), "omni-green-evidence-"));
   try {
     const path = join(dir, "report.json");
@@ -20,12 +20,12 @@ function verify(check: Record<string, unknown>) {
         schemaVersion: 1,
         candidateSha: sha,
         profile: "full",
-        releaseGreen: true,
-        hardFailures: [],
+        releaseGreen: validatorExit === "0",
+        hardFailures: validatorExit === "0" ? [] : [check],
         checks: [{ id: "typecheck", kind: "hard", ok: true }, check],
       })
     );
-    const result = spawnSync(process.execPath, [verifier, path, "0", sha, "schedule"], {
+    const result = spawnSync(process.execPath, [verifier, path, validatorExit, sha, "schedule"], {
       encoding: "utf8",
       env: { ...process.env, GITHUB_OUTPUT: "" },
       timeout: 10_000,
@@ -36,6 +36,28 @@ function verify(check: Record<string, unknown>) {
     rmSync(dir, { recursive: true, force: true });
   }
 }
+
+test("the public verifier distinguishes incomplete hosted receipts from a measured test failure", () => {
+  for (const id of ["unit", "integration", "vitest", "hosted-suites"]) {
+    const result = verify({ id, kind: "hard", ok: false, evidenceState: "INCOMPLETE" }, "1");
+    assert.equal(result.status, 1);
+    assert.equal(result.report.verdict, "UNKNOWN");
+    assert.equal(result.report.evidenceState, "INCOMPLETE");
+  }
+  const measured = verify(
+    {
+      id: "unit",
+      kind: "hard",
+      ok: false,
+      detail: "unit-6 exit 1 — failed assertion",
+      evidenceState: "COMPLETE",
+    },
+    "1"
+  );
+  assert.equal(measured.status, 1);
+  assert.equal(measured.report.verdict, "FAIL");
+  assert.equal(measured.report.evidenceState, "COMPLETE");
+});
 
 test("the public verifier rejects missing scanners reported as nonblocking drift", () => {
   const result = verify({

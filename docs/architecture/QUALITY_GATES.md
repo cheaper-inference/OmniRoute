@@ -261,7 +261,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | ↳ `check:docs-sync`            | CHANGELOG / OpenAPI version consistency; release mode also the 66 `llm.txt` mirrors and translated CHANGELOG sections (PR mode: mirrors agree)    | Yes                        |
 | ↳ `check:docs-counts`          | Counts in prose (provider count, migration count, etc.). Two modes: `pr` on feature PRs, `release` elsewhere — see "Derived values" below         | Yes                        |
 | ↳ `check:env-doc-sync`         | Every env var in `.env.example` is documented in a docs table, and vice versa                                                                     | Yes                        |
-| ↳ `check:deprecated-versions`  | No deprecated version strings in docs                                                                                                             | Yes                        |
+| ↳ `check:deprecated-versions`  | Flags versions explicitly attributed to OmniRoute (3.6.x and earlier). Ignores dates.                                                             | Only with `--strict`       |
 | ↳ `check:doc-links`            | Internal markdown links in docs resolve to real files (`[text]`/`(path)` form)                                                                    | Yes                        |
 | ↳ `check:fabricated-docs`      | Routes, env vars, CLI commands, hook names, and file paths cited in docs exist in the codebase. Hard gate via `--strict`; soft-fail without flag. | Yes (via `--strict` in CI) |
 | `check:cli-i18n`               | CLI `t()` keys exist in `bin/cli/locales/en.json` (both modes); pt-BR / zh-CN / zh-TW parity with `en.json` in release mode only                  | Yes                        |
@@ -392,8 +392,8 @@ The commands behind it:
   the live tree. Exit 2 when the facts cannot be collected.
 - `npm run release:refresh-derived` (`scripts/release/refresh-derived.mjs`) recomputes the derived
   files in one pass, in this order (step ids for `--only=`): `provider-reference`
-  (`docs/reference/PROVIDER_REFERENCE.md`), `facts` (the snapshot), `numbers` (the counts gate's
-  rewrite plan applied to the docs, then carried to their `docs/i18n/` mirrors),
+  (`docs/reference/PROVIDER_REFERENCE.md`), `facts` (the snapshot), `docker-pulls`, `numbers`
+  (the counts gate's rewrite plan applied to the docs, then carried to their `docs/i18n/` mirrors),
   `readme-diagrams`, `skills` (generated `SKILL.md`), `e2e-timings` (skipped until the tree
   ships `syncE2eTimings`), `ui-keys` (prunes keys `en.json` dropped and, with
   `--rewritten-since=<ref>` — default `origin/main` — re-queues English values rewritten since
@@ -406,7 +406,10 @@ The commands behind it:
   `changelog` step is opt-in (`--with-changelog`, release profile only). `--profile=nightly`
   never touches a version claim. With `-- --check` it writes nothing and exits 1 when any file
   would change or a managed value needs a manual edit (listing both); exit 2 on an
-  infrastructure failure. `--json` prints the result as JSON.
+  infrastructure failure. `--json` prints the result as JSON. The `docker-pulls` step sums the
+  pull counts of `diegosouzapw/omniroute` and `cheaperinference/omniroute` on Docker Hub and writes
+  the formatted badge to `docs/badges/docker-pulls.json`. The step is skipped in `--check`, and
+  the refresh continues with any existing badge file intact if a Docker Hub request fails.
 - `docs/reference/derived-facts.json` is the snapshot of the facts the last refresh used. Only
   the refresh writes it. The README SVG generators read it, and PR-time unit tests compare the
   committed docs and generated files with it — never with the live code. The suite's single

@@ -7,12 +7,15 @@ import { z } from "zod";
 /** @typedef {{ path: string, op: "equals"|"atLeast"|"lengthEquals"|"lengthAtLeast"|"includesCatalogIds", value?: unknown }} Assertion */
 /** @typedef {{ id: string, provider: string, type: ProbeType, url: string, addedAt: string,
  *   source: "public-api"|"public-docs", backs?: Back[], note?: string,
- *   idsPath?: string, filter?: { field: string, equals: string|boolean } | { idEndsWith: string } | { zeroPricing: string[] },
+ *   scope?: "free"|"registry", unpaginated?: true, registryVirtualIds?: string[], idsPath?: string,
+ *   filter?: { field: string, equals: string|boolean } | { idEndsWith: string } | { zeroPricing: string[] },
  *   minIds?: number, idTransform?: { stripPrefix?: string, addPrefix?: string }, ignoreIds?: string[],
  *   assertions?: Assertion[],
  *   mustContain?: string[], mustNotContain?: string[], mustContainCatalogIds?: boolean, minTextChars?: number,
  *   excerpt?: { anchor: string, chars: number, sha256_16: string } }} Probe */
-/** @typedef {{ schemaVersion: 1, reviewedAt: string, allowedHosts: string[], probes: Probe[] }} Manifest */
+/** @typedef {{ probeId: string, reason: string, sourceUrl: string }} PendingCatalogFix */
+/** @typedef {{ schemaVersion: 1, reviewedAt: string, allowedHosts: string[], probes: Probe[],
+ *   pendingCatalogFix?: PendingCatalogFix[] }} Manifest */
 
 export const SOCIAL_DENYLIST = Object.freeze([
   "x.com",
@@ -36,6 +39,8 @@ const ASSERTION_OPS = new Set([
 ]);
 const PROBE_ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const CREDENTIAL_PARAM = /key|token|auth|secret|sig/i;
+const PAGE_PARAM = /^(after|before|cursor|offset|page|page_?number|start_?after)$/i;
+const FREE_LIST_OPTIONS = ["minIds", "filter", "idTransform", "ignoreIds", "backs"];
 const nonempty = z.string().min(1);
 const positiveInteger = z.number().int().positive();
 const stringList = z.array(nonempty);
@@ -44,12 +49,20 @@ const manifestShape = z.object({
   reviewedAt: z.iso.date(),
   allowedHosts: z.array(nonempty),
   probes: z.array(z.unknown()),
+  pendingCatalogFix: z
+    .array(
+      z.object({ probeId: nonempty, reason: nonempty, sourceUrl: z.url({ protocol: /^https$/ }) })
+    )
+    .optional(),
 });
 const probeShape = z.object({
   provider: nonempty,
   type: z.enum(["model-list", "json-assert", "page-text"]),
   addedAt: z.iso.date(),
   source: z.enum(["public-api", "public-docs"]),
+  scope: z.enum(["free", "registry"]).optional(),
+  unpaginated: z.literal(true).optional(),
+  registryVirtualIds: stringList.optional(),
   note: z.string().optional(),
   backs: z
     .array(
@@ -108,7 +121,26 @@ export function probeUrlErrors(id, rawUrl, allowedHosts) {
 }
 
 function typeErrors(probe) {
-  const { id, type } = probe;
+  const { id, type, scope } = probe;
+  if (scope !== undefined && type !== "model-list") return [`${id}: scope needs a model-list`];
+  if (scope === "registry") {
+    const errors = [];
+    if (probe.source !== "public-api") errors.push(`${id}: registry needs a public-api source`);
+    for (const field of FREE_LIST_OPTIONS) {
+      if (probe[field] !== undefined) errors.push(`${id}: registry does not accept ${field}`);
+    }
+    if (typeof probe.idsPath === "string" && /[\[\]]/.test(probe.idsPath)) {
+      errors.push(`${id}: registry idsPath must select the full array`);
+    }
+    const url = typeof probe.url === "string" && URL.parse(probe.url);
+    if (url && [...url.searchParams.keys()].some((key) => PAGE_PARAM.test(key))) {
+      errors.push(`${id}: registry url must start at the first page without a page selector`);
+    }
+    return errors;
+  }
+  if (probe.unpaginated !== undefined || probe.registryVirtualIds !== undefined) {
+    return [`${id}: unpaginated and registryVirtualIds require registry scope`];
+  }
   if (type === "model-list" && !positiveInteger.safeParse(probe.minIds).success) {
     return [`${id}: model-list needs minIds >= 1`];
   }
@@ -171,6 +203,9 @@ export function validateManifest(manifest) {
         ...shape.error.issues.map(({ path }) => `${id}: invalid field: ${path.join(".")}`)
       );
     }
+  }
+  for (const { probeId } of parsed.data.pendingCatalogFix ?? []) {
+    if (!seen.has(probeId)) errors.push(`pendingCatalogFix: unknown probe ${probeId}`);
   }
   return errors;
 }
