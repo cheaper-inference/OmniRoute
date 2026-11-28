@@ -254,7 +254,7 @@ export function freeOnlyImportHintKey(
  * on purpose: free evidence is required AND any paid signal (positive price, explicit
  * `free: false`, `tier: "paid"`) vetoes it, so unknown pricing is never imported as free.
  */
-function isFreeForCompatibleImport(model: FreeModelCandidate): boolean {
+export function isFreeForCompatibleImport(model: FreeModelCandidate): boolean {
   if (typeof model.tier === "string" && model.tier.trim().toLowerCase() === "paid") return false;
   return hasPayloadFreeEvidence(model) && !hasPayloadPaidEvidence(model);
 }
