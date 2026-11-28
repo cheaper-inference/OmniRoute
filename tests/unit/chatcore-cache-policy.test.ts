@@ -141,15 +141,7 @@ for (const stream of [false, true]) {
         assert.equal(bypassed.result.success, true);
         await bypassed.result.response.text();
         await flushAsyncSideEffects();
-        const signature = generateSignature(
-          body.model,
-          body.messages,
-          0,
-          1,
-          apiKeyInfo.id,
-          null,
-          "openai"
-        );
+        const signature = generateSignature(body.model, body.messages, 0, 1, apiKeyInfo.id);
         assert.equal(
           getCachedResponse(signature),
           null,

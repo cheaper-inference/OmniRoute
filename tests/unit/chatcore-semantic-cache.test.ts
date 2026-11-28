@@ -148,7 +148,7 @@ test("Muse fresh sessions neither reuse cached opaque output nor store their own
   const model = "muse-spark";
   const apiKeyId = "muse-cache-regression";
   const input = [{ role: "user", content: "Muse cache ownership regression" }];
-  const signature = generateSignature(model, input, 0, undefined, apiKeyId, null, "muse-code");
+  const signature = generateSignature(model, input, 0, undefined, apiKeyId);
   const staleOutput = {
     output: [{ type: "reasoning", encrypted_content: "another-account-opaque" }],
   };
@@ -184,15 +184,7 @@ test("Muse fresh sessions neither reuse cached opaque output nor store their own
   assert.notDeepEqual(served[0], served[1]);
 
   const uncachedInput = [{ role: "user", content: "uncached Muse reasoning" }];
-  const uncachedSignature = generateSignature(
-    model,
-    uncachedInput,
-    0,
-    undefined,
-    apiKeyId,
-    null,
-    "muse-code"
-  );
+  const uncachedSignature = generateSignature(model, uncachedInput, 0, undefined, apiKeyId);
   storeSemanticCacheResponse({
     enabled: true,
     provider: "muse-code",
@@ -263,8 +255,7 @@ function seedHit(args: ReturnType<typeof makeHitArgs>["args"], response: unknown
     args.body.temperature,
     body.top_p,
     args.apiKeyId ?? undefined,
-    { toolChoice: body.tool_choice, tools: body.tools, responseFormat: body.response_format },
-    args.provider
+    { toolChoice: body.tool_choice, tools: body.tools, responseFormat: body.response_format }
   );
   setCachedResponse(signature, args.model, response);
   return signature;
@@ -779,15 +770,7 @@ test("Muse successful streaming completions never create or overwrite cache entr
     await import("../../open-sse/handlers/chatCore/streamingSemanticCacheStore.ts");
   for (const seeded of [false, true]) {
     const input = [{ role: "user", content: `stream muse ${seeded}` }];
-    const signature = generateSignature(
-      "muse-spark",
-      input,
-      0,
-      undefined,
-      "stream-client",
-      null,
-      "muse-code"
-    );
+    const signature = generateSignature("muse-spark", input, 0, undefined, "stream-client");
     const old = { choices: [{ message: { content: "old opaque output" }, finish_reason: "stop" }] };
     if (seeded) setCachedResponse(signature, "muse-spark", old, 1);
     storeStreamingSemanticCacheResponse({
@@ -826,8 +809,6 @@ test("read path isolates response controls written by either cache store", async
     const common = {
       enabled: true,
       model: "synthetic-cache-model",
-      // The read below runs as provider "openai": a store always carries its provider.
-      provider: "openai",
       body,
       headers: undefined,
       apiKeyId: "synthetic-key",

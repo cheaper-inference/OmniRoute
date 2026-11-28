@@ -23,6 +23,7 @@ import {
   writeSemanticCacheResponse,
 } from "./db/semanticCache";
 import { toNumber } from "@/shared/utils/numeric";
+import { isSemanticCacheProviderKeyEnabled } from "@/shared/utils/featureFlags";
 import { conversationSignatureFields } from "../../open-sse/utils/conversationSignatureFields";
 import { startSemanticCachePruneJob } from "./jobs/semanticCachePruneJob";
 import { isCompleteToolCallArguments } from "../../open-sse/handlers/sseParser/truncation";
@@ -323,8 +324,8 @@ export function generateSignature(
         response_format: constraints?.responseFormat ?? constraints?.response_format,
         text_format: constraints?.text_format,
         ...pickGenerationParams(constraints),
-        // Two provider nodes can serve one model id: the answering provider is part of the key.
-        provider: provider || undefined,
+        // Opt-in: two provider nodes can serve one model id, so the answering provider joins the key.
+        provider: (provider && isSemanticCacheProviderKeyEnabled() ? provider : null) || undefined,
       })
     )
   );

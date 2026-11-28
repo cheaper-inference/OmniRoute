@@ -114,8 +114,7 @@ test("passthrough: a length-finish plain-text stream keeps finish_reason length 
     0,
     undefined,
     "k-len-1",
-    sem.outputContractOf(body),
-    "openai"
+    sem.outputContractOf(body)
   );
   assert.equal(sem.getCachedResponse(sig), null, "a length-cut stream must not be cached");
 });
@@ -167,8 +166,7 @@ test("passthrough control: a stop-finish stream still caches", async () => {
     0,
     undefined,
     "k-len-2",
-    sem.outputContractOf(body),
-    "openai"
+    sem.outputContractOf(body)
   );
   assert.notEqual(sem.getCachedResponse(sig), null, "a complete stop stream is still cacheable");
 });

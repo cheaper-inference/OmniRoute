@@ -571,6 +571,14 @@ export function isSystemOneOllamaLocalBackendEnabled(): boolean {
   return isDefaultOffFlagEnabled("SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED");
 }
 
+/**
+ * SEMANTIC_CACHE_PROVIDER_KEY_ENABLED (default off): the answering provider is part of the default
+ * semantic cache key. Fail-closed: an unreadable flag store keeps the provider-less key.
+ */
+export function isSemanticCacheProviderKeyEnabled(): boolean {
+  return isDefaultOffFlagEnabled("SEMANTIC_CACHE_PROVIDER_KEY_ENABLED");
+}
+
 /** OPENCODE_FREE_TIER_EGRESS_PROBE (default off): probe one other proxy after a FreeTierError. */
 export function isOpencodeFreeTierEgressProbeEnabled(): boolean {
   try {
