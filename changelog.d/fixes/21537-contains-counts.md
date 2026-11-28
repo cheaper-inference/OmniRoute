@@ -1,0 +1,1 @@
+- **fix(translator):** string `minContains` / `maxContains` in tool schemas are now sent to Codex as integers. (thanks @gebclogic)
