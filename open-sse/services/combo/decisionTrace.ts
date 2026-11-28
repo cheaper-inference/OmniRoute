@@ -34,6 +34,7 @@ export const COMBO_SKIP_REASONS = [
   "request_exhaustion",
   "model_lockout",
   "quota_cutoff",
+  "input_token_limit_exceeded",
   "context_window",
   "context_requirements",
   "availability",

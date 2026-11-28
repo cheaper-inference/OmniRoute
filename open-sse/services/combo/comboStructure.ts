@@ -516,7 +516,7 @@ export function hasEstimableContent(value: unknown): boolean {
   return true;
 }
 
-function estimateRequestInputTokens(body: Record<string, unknown>): number {
+export function estimateRequestInputTokens(body: Record<string, unknown>): number {
   const estimatePayload: Record<string, unknown> = {};
   for (const key of ["messages", "input", "tools", "functions", "response_format"]) {
     if (hasEstimableContent(body[key])) estimatePayload[key] = body[key];
