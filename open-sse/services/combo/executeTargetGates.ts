@@ -22,6 +22,8 @@ import {
 import { connectionCircuitBreakerName } from "../connectionCircuitBreaker.ts";
 import { parseModel } from "../model.ts";
 import { canAffordRequest } from "../../../src/lib/quota/quotaScheduler.ts";
+import { resolveInputTokenCapForGate } from "../../../src/lib/modelCapabilities.ts";
+import { estimateRequestInputTokens } from "./comboStructure.ts";
 import { getCachedProviderConnectionById } from "../../../src/lib/db/readCache.ts";
 import { evaluateCliproxyPreflightGate } from "../../../src/lib/services/cliproxyManagementPreflight.ts";
 import { lookupPositiveCap } from "./concurrencyCaps.ts";
@@ -365,6 +367,33 @@ export async function evaluateExecuteTargetGates(opts: {
       );
       bumpFallback();
       return { kind: "skip", result: null };
+    }
+  }
+
+  // #21507: Pre-dispatch skip gate when estimated request input tokens exceed target's effective input limit
+  if (provider && rawModel && deps.body && typeof deps.body === "object") {
+    const inputCap = resolveInputTokenCapForGate(
+      { provider, model: rawModel },
+      { isCombo: true }
+    );
+    if (typeof inputCap === "number" && inputCap > 0) {
+      const estimatedInputTokens = estimateRequestInputTokens(
+        deps.body as Record<string, unknown>
+      );
+      if (estimatedInputTokens > inputCap) {
+        deps.log.info(
+          "COMBO",
+          `Skipping ${modelStr} — estimated input tokens (${estimatedInputTokens}) exceeds limit (${inputCap})`
+        );
+        recordComboDecision(deps.traceInvocationId, {
+          step: target.executionKey,
+          target: modelStr,
+          decision: "skipped_before_dispatch",
+          reason: "input_token_limit_exceeded",
+        });
+        bumpFallback();
+        return { kind: "skip", result: null };
+      }
     }
   }
 

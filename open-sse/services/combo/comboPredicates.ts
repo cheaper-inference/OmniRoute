@@ -505,6 +505,7 @@ export function isComboRequestScopedFailure(
   error?: { code?: string | null; type?: string | null }
 ): boolean {
   return (
+    response.status === 413 ||
     isLocalModelPolicyResponse(response) ||
     getTrustedLocalRateLimitResponse(response) !== null ||
     isRequestScopedUpstreamFailure(error) ||

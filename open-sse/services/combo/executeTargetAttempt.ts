@@ -1296,6 +1296,7 @@ export async function executeTargetAttempt(
     const protectedTargetTrust = state.targetFailureTrust.get(target.executionKey);
     if (
       protectedPriorityTarget &&
+      result.status !== 413 &&
       !isContextOverflowFailure(errorText, structuredError) &&
       (!protectedTargetTrust?.observedFailure || !protectedTargetTrust.allObservedFailuresQuota)
     ) {
