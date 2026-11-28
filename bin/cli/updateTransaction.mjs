@@ -29,6 +29,7 @@ import {
   openSync,
   readFileSync,
   readdirSync,
+  readlinkSync,
   realpathSync,
   renameSync,
   rmSync,
@@ -611,6 +612,38 @@ function measureTree(root, skipTopLevel = new Set()) {
   return { files, bytes };
 }
 
+/**
+ * Symlinks under `dataDir` (the state directory excepted) whose target lies outside it. The
+ * snapshot copies a link as a link and never its target, so a candidate that migrates files
+ * through such a link would change data the snapshot does not hold, and a restore would put
+ * the same link back in front of the migrated files. Links that stay inside `dataDir` are
+ * restored with the tree they point into. A dangling link counts by where it points.
+ */
+export function findExternalDataSymlinks(dataDir) {
+  const realData = realpathSync(dataDir);
+  const inside = (target) => target === realData || target.startsWith(`${realData}${sep}`);
+  const found = [];
+  const walk = (dir, top) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (top && entry.name === STATE_DIR_NAME) continue;
+      const full = join(dir, entry.name);
+      if (entry.isSymbolicLink()) {
+        let target;
+        try {
+          target = realpathSync(full);
+        } catch {
+          target = resolve(realpathSync(dir), readlinkSync(full));
+        }
+        if (!inside(target)) found.push(full);
+      } else if (entry.isDirectory()) {
+        walk(full, false);
+      }
+    }
+  };
+  walk(dataDir, true);
+  return found;
+}
+
 export function snapshotDataDir(dataDir, opDir) {
   const dest = join(opDir, "data-snapshot");
   if (existsSync(dest)) throw new Error("Data snapshot already exists");
@@ -1053,6 +1086,10 @@ export function createDefaultDependencies({ plan, runtime, environment }) {
       const service = detectManagedService(runtime.dataDir, runtime.packageRoot);
       if (!service || [service.serverPid].join(",") !== runtime.oldPids.join(",")) {
         return { kind: "refused", reason: "service-changed" };
+      }
+      // A layout the snapshot cannot capture is refused while the service still runs.
+      if (findExternalDataSymlinks(runtime.dataDir).length > 0) {
+        return { kind: "refused", reason: "external-data-symlink" };
       }
       const disk = await checkDiskHeadroom({
         dataDir: runtime.dataDir,

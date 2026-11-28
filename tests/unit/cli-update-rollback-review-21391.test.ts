@@ -8,12 +8,21 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import {
+  preflightFor,
+  setup,
+  startOldServer,
+  teardown,
+  waitForPing,
+} from "../helpers/managedUpdateFixture.ts";
 
 const tx = await import("../../bin/cli/updateTransaction.mjs");
 const update = await import("../../bin/cli/commands/update.mjs");
 
 const OPERATION_ID = "0b8f3c1e-2d4a-4f6b-9c7d-1a2b3c4d5e6f";
 const OTHER_OPERATION_ID = "11111111-2222-4333-8444-555555555555";
+// The fixture install reads /proc and pins a Linux pre-flight; elsewhere these cases cannot run.
+const LINUX_ONLY = process.platform !== "linux" && "the managed update only runs on Linux";
 
 function makePlan(overrides: Record<string, unknown> = {}) {
   return {
@@ -371,5 +380,102 @@ test("lock: another coordinator reclaiming right now is a refusal, and its dead 
     await lock.release();
   } finally {
     fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+// ---------------------------------------------------------------------------------------
+// Thread 4: data the snapshot cannot capture is refused before the service stops.
+// ---------------------------------------------------------------------------------------
+
+test("data links that leave DATA_DIR are found; links that stay inside and the state dir are not", () => {
+  const root = tmp("omni-tx-links-");
+  try {
+    const dataDir = path.join(root, "data");
+    const bigDisk = path.join(root, "bigdisk");
+    fs.mkdirSync(path.join(dataDir, "inner"), { recursive: true });
+    fs.mkdirSync(path.join(dataDir, "managed-update"));
+    fs.mkdirSync(bigDisk);
+    fs.symlinkSync(bigDisk, path.join(dataDir, "storage-link"));
+    fs.symlinkSync("inner", path.join(dataDir, "ok-relative"));
+    fs.symlinkSync(path.join(dataDir, "inner"), path.join(dataDir, "ok-absolute"));
+    fs.symlinkSync(path.join(root, "gone"), path.join(dataDir, "dangling-external"));
+    fs.symlinkSync("missing-inside", path.join(dataDir, "dangling-inside"));
+    fs.symlinkSync("../../bigdisk", path.join(dataDir, "inner", "deep-link"));
+    fs.symlinkSync(bigDisk, path.join(dataDir, "managed-update", "ignored"));
+    const found = (dir: string) =>
+      tx
+        .findExternalDataSymlinks(dir)
+        .map((file: string) => path.relative(dir, file))
+        .sort();
+    const expected = ["dangling-external", "inner/deep-link", "storage-link"];
+    assert.deepEqual(found(dataDir), expected);
+    // A DATA_DIR that is itself reached through a link is fine: only what leaves it counts.
+    const viaLink = path.join(root, "data-link");
+    fs.symlinkSync(dataDir, viaLink);
+    assert.deepEqual(found(viaLink), expected);
+    assert.deepEqual(found(bigDisk), [], "a directory with no links has nothing to report");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test(
+  "prepare refuses an external data link before the service stops, and the CLI says why",
+  {
+    skip: LINUX_ONLY,
+  },
+  async () => {
+    const env = await setup();
+    try {
+      const oldPid = startOldServer(env);
+      assert.equal(await waitForPing(env.port), true);
+      const elsewhere = path.join(env.root, "other-disk");
+      fs.mkdirSync(elsewhere);
+      fs.symlinkSync(elsewhere, path.join(env.dataDir, "logs"));
+      const plan = makePlan({ readinessTimeoutMs: 2_500, pollIntervalMs: 100 });
+      const pre = await preflightFor(env, plan);
+      assert.equal(pre.kind, "ok", JSON.stringify(pre));
+      const deps = tx.createDefaultDependencies({
+        plan,
+        runtime: pre.runtime,
+        environment: pre.environment,
+      });
+      assert.deepEqual(await deps.prepare(plan), {
+        kind: "refused",
+        reason: "external-data-symlink",
+      });
+      process.kill(oldPid, 0); // still alive: throws if it was stopped
+      assert.equal(await waitForPing(env.port), true);
+    } finally {
+      teardown(env);
+    }
+  }
+);
+
+test("the CLI explains the external-link refusal in words", async () => {
+  const lines: string[] = [];
+  const orig = { log: console.log, error: console.error, warn: console.warn };
+  const push = (...args: unknown[]) => lines.push(args.map(String).join(" "));
+  console.log = push;
+  console.error = push;
+  console.warn = push;
+  try {
+    const result = await update.runManagedUpdateFromCli({
+      current: "3.8.54",
+      latest: "3.8.55",
+      deps: {
+        preflight: async () => ({ kind: "ok", runtime: {}, environment: {} }),
+        launch: async () => ({}),
+        wait: async () => ({
+          status: "unsupported",
+          reason: "external-data-symlink",
+          refused: true,
+        }),
+      },
+    });
+    assert.equal(result.exitCode, 1);
+    assert.match(lines.join("\n"), /symbolic link.*outside the data directory/);
+  } finally {
+    Object.assign(console, orig);
   }
 });

@@ -150,6 +150,8 @@ const MANAGED_UNSUPPORTED_REASONS = {
 
 const MANAGED_REFUSED_REASONS = {
   "update-in-progress": "another managed update is already running",
+  "external-data-symlink":
+    "a symbolic link in the data directory points outside the data directory, so a snapshot could not capture or restore what it points to",
   "insufficient-disk-space":
     "there is not enough free disk space for the data snapshot and the package copy",
 };
