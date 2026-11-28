@@ -1,5 +1,6 @@
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { isIncompleteFinishReason } from "../utils/finishReason.ts";
 import { pickResponsesSnapshot } from "./sseParser/responsesSnapshot.ts";
 import {
   TRUNCATED_STREAM_CLAUDE_STOP_REASON,
@@ -335,7 +336,7 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
     isCompleteToolCallArguments(toolCall.function?.arguments)
   );
   if (finalToolCalls.length > 0) {
-    finishReason = "tool_calls"; // T18 normalization
+    if (!sawFinishReason || !isIncompleteFinishReason(finishReason)) finishReason = "tool_calls"; // T18 normalization
     message.tool_calls = finalToolCalls;
   }
 
