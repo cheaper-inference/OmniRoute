@@ -49,7 +49,6 @@ export const LEGACY_FREE_PROVIDERS: readonly string[] = [
   "kiro",
   "qoder",
   "pollinations",
-  "longcat",
   "cloudflare-ai",
   "nvidia-nim",
   "groq",

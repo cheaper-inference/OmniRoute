@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -12,7 +13,17 @@ import {
 // A set equality instead of a fixed count: each provider wave adds its unit in the same PR and
 // no number test changes. A row that turns `discontinued` stays covered through the ledger.
 test("providers with a quota unit are exactly the providers with quota in the catalog or the ledger", () => {
+  const policy = JSON.parse(
+    readFileSync(
+      new URL("../../config/quality/free-catalog-evidence.json", import.meta.url),
+      "utf8"
+    )
+  ) as { evidence: Array<{ provider: string; claim: string }> };
+  // Audited signup credits have units too. Legacy credits are evaluated in their own waves.
   const withQuota = new Set([
+    ...policy.evidence
+      .filter((entry) => entry.claim === "signup-credit")
+      .map((entry) => entry.provider),
     ...FREE_MODEL_BUDGETS.filter((m) => m.monthlyTokens > 0).map((m) => m.provider),
     ...RETIRED_FREE_ROWS.map((r) => r.provider),
   ]);

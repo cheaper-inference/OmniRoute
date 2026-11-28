@@ -227,7 +227,9 @@ export const APIKEY_PROVIDERS_FRONTIER = {
     textIcon: "AI21",
     website: "https://www.ai21.com",
     hasFree: true,
-    freeNote: "$10 trial credits on signup (valid 3 months), no credit card required",
+    freeNote:
+      "Eligible new AI21 Studio accounts get $10 in trial credits for 7 days with no credit card. Review the AI21 model terms before routing trial traffic.",
+    apiHint: "Get an AI21 Studio API key. The $10 trial lasts 7 days and requires no credit card.",
   },
   venice: {
     id: "venice",

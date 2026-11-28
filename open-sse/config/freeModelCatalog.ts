@@ -484,6 +484,7 @@ export const FREE_QUOTA_UNIT: Record<string, FreeQuotaUnit> = {
   "free-ai": "requests",
   aion: "tokens",
   kenari: "requests",
+  scaleway: "tokens",
 };
 
 /** Per-pool override of `FREE_QUOTA_UNIT`, for a pool published in a different unit. */

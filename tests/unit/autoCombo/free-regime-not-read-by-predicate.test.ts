@@ -98,12 +98,28 @@ test("no provider loses its free status without a recorded decision", () => {
       "ainative",
       "arcee-ai",
       "bluesminds",
+      // Current billing and API pricing (2026-11-27).
+      // https://deepinfra.com/pricing and https://api-docs.deepseek.com/quick_start/pricing/
+      "deepinfra",
+      "deepseek",
+      // https://docs.fireworks.ai/faq-new/billing-pricing/how-does-billing-and-credit-usage-work (2026-11-27).
+      "fireworks",
+      // https://docs.bigmodel.cn/cn/coding-plan/overview.md (2026-11-27).
+      "glm-cn",
       "huggingchat",
       "huggingface",
+      // https://www.hyperbolic.ai/docs/inference/overview (2026-11-27).
+      "hyperbolic",
       "llm7",
+      // https://longcat.chat/platform/docs/change-log (2026-11-27).
+      "longcat",
       "mistral",
       "nara",
       "navy",
+      // https://docs.tokenfactory.nebius.com/other-capabilities/billing-new.md (2026-11-27).
+      "nebius",
+      // https://docs.nscale.com/docs/manage/credit.md (2026-11-27).
+      "nscale",
       "predibase",
       // routeway left this list in the plan 05 E1a wave: https://api.routeway.ai/v1/models lists seven
       // current :free ids again and the rate-limit docs publish 200 requests/day (reopened 2026-11-27).

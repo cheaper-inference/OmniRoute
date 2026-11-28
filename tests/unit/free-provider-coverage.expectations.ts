@@ -46,6 +46,42 @@ function daily(
   };
 }
 
+function signup(
+  poolKey: string,
+  modelIds: string[],
+  tos: WaveRowExpectation["tos"],
+  creditTokens: number,
+  gates: WaveRowExpectation["gates"]
+): WaveRowExpectation[] {
+  return modelIds.map((modelId) => ({
+    modelId,
+    monthlyTokens: 0,
+    creditTokens,
+    freeType: "one-time-initial",
+    poolKey,
+    tos,
+    gates,
+  }));
+}
+
+function e2(
+  expectation: Omit<ProviderExpectation, "contribution" | "lastWave">
+): ProviderExpectation {
+  return {
+    ...expectation,
+    contribution: {
+      real: 0,
+      firstMonth: 0,
+      gated: 0,
+      socialGated: 0,
+      boost: 0,
+      rowSumLive: 0,
+      publishedPools: 0,
+    },
+    lastWave: "E2",
+  };
+}
+
 const requestyTraining = [
   "nvidia/nemotron-3.5-lightning-30b-a3b",
   "nvidia/muse-glimmer-30b",
@@ -276,4 +312,200 @@ export const PROVIDER_EXPECTATIONS: Record<string, ProviderExpectation> = {
     /50 requests a day.*5 per minute.*third-party gateway/i,
     { hardStopGuaranteed: true, lastWave: "E1b" }
   ),
+
+  // https://docs.bigmodel.cn/cn/coding-plan/overview.md (2026-11-27)
+  "glm-cn": e2({
+    live: [],
+    discontinued: ["glm-4-flash", "glm-4.7-flash"],
+    absent: ["glm-signup-bonus", "glm-4.5-flash"],
+    hasFree: false,
+    freeNote: /Coding Plan.*standard BigModel API/i,
+  }),
+  // https://docs.volcengine.com/docs/ark/free-inference-quota?lang=zh (2026-11-27)
+  doubao: e2({
+    live: signup(
+      "doubao",
+      ["doubao-seed-2-1-pro-260915", "doubao-seed-2-1-lite-260915", "doubao-seed-2-1-turbo-260628"],
+      "ambiguous",
+      0,
+      ["region"]
+    ),
+    absent: ["doubao-pro-32k"],
+    hasFree: true,
+    freeNote: /per model.*console.*real-name/i,
+  }),
+  // https://longcat.chat/platform/docs/change-log (2026-11-27)
+  longcat: e2({
+    live: [],
+    discontinued: ["LongCat-2.0"],
+    hasFree: false,
+    freeNote: /prepaid token packs.*2026-11-27/i,
+  }),
+  // https://www.hyperbolic.ai/docs/inference/overview (2026-11-27)
+  hyperbolic: e2({
+    live: [],
+    discontinued: [
+      "Qwen/QwQ-32B",
+      "deepseek-ai/DeepSeek-R1",
+      "deepseek-ai/DeepSeek-V3",
+      "meta-llama/Llama-3.3-70B-Instruct",
+      "meta-llama/Llama-3.2-3B-Instruct",
+      "Qwen/Qwen2.5-72B-Instruct",
+      "Qwen/Qwen2.5-Coder-32B-Instruct",
+      "NousResearch/Hermes-3-Llama-3.1-70B",
+    ],
+    hasFree: false,
+    freeNote: /\$5 deposit.*\$1.*phone verification/i,
+  }),
+  // https://docs.nscale.com/docs/manage/credit.md (2026-11-27)
+  nscale: e2({
+    live: [],
+    discontinued: [
+      "moonshotai/Kimi-K2.5",
+      "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "openai/gpt-oss-120b",
+      "openai/gpt-oss-20b",
+      "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+      "meta-llama/Llama-3.3-70B-Instruct",
+    ],
+    hasFree: false,
+    freeNote: /prepaid credits.*2026-11-27/i,
+  }),
+  // https://api-docs.deepseek.com/quick_start/pricing/ (2026-11-27)
+  deepseek: e2({
+    live: [],
+    discontinued: ["deepseek-v4-pro", "deepseek-flash"],
+    absent: ["deepseek-v4-flash"],
+    hasFree: false,
+    freeNote: /no published signup grant.*2026-11-27/i,
+  }),
+  // https://deepinfra.com/pricing (2026-11-27)
+  deepinfra: e2({
+    live: [],
+    discontinued: [
+      "anthropic/claude-4-opus",
+      "anthropic/claude-4-sonnet",
+      "openai/gpt-oss-120b",
+      "openai/gpt-oss-20b",
+      "google/gemma-4-31B-it",
+      "google/gemma-4-26B-A4B-it",
+      "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B",
+      "nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning",
+      "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+      "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+      "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      "NousResearch/Hermes-3-Llama-3.1-405B",
+      "deepseek-ai/DeepSeek-V4-Pro",
+      "deepseek-ai/DeepSeek-V4-Flash",
+      "zai-org/GLM-5.1",
+      "moonshotai/Kimi-K2.6",
+      "MiniMaxAI/MiniMax-M2.5",
+      "Qwen/Qwen3.6-35B-A3B",
+      "Qwen/Qwen3.5-397B-A17B",
+      "Qwen/Qwen3.5-122B-A10B",
+      "XiaomiMiMo/MiMo-V2.5-Pro",
+      "XiaomiMiMo/MiMo-V2.5",
+    ],
+    hasFree: false,
+    freeNote: /payment card or prepayment.*2026-11-27/i,
+  }),
+  // https://www.scaleway.com/en/generative-apis-signup/ (2026-11-27)
+  scaleway: e2({
+    live: signup(
+      "scaleway",
+      ["qwen3-235b-a22b-instruct-2507", "mistral-small-3.2-24b-instruct-2506", "gpt-oss-120b"],
+      "ok",
+      1_000_000,
+      ["card"]
+    ),
+    absent: ["llama-3.1-70b-instruct", "llama-3.1-8b-instruct", "deepseek-v3-0324"],
+    unit: "tokens",
+    hasFree: true,
+    freeNote: /1 million.*payment method.*billed/i,
+  }),
+  // https://docs.qoder.com/account/pricing.md (2026-11-27)
+  qoder: e2({
+    live: signup("qoder", ["deepseek-v4-pro"], "caution", 0, ["new-accounts-only"]),
+    absent: [
+      "qwen3.8-max-preview",
+      "qwen3.7-max",
+      "qwen3.7-plus",
+      "kimi-k3",
+      "kimi-k2.7-code",
+      "glm-5.2",
+      "deepseek-v4-flash",
+      "minimax-m3",
+    ],
+    hasFree: true,
+    freeNote: /300 tool credits.*14 days/i,
+  }),
+  // https://novita.ai/referral (2026-11-27)
+  novita: e2({
+    live: [],
+    absent: ["ai-ai/llama-3.1-8b-instruct"],
+    hasFree: true,
+    freeNote: /\$10.*successful referral/i,
+  }),
+  // https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/express-mode/overview (2026-11-27)
+  vertex: e2({
+    live: signup(
+      "vertex",
+      [
+        "gemini-3.1-pro-preview",
+        "gemini-3-flash-preview",
+        "gemini-2.5-pro",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+      ],
+      "caution",
+      0,
+      ["new-accounts-only"]
+    ),
+    discontinued: [
+      "gemini-3.1-flash-lite",
+      "gemini-3.7-flash",
+      "gemini-3.6-flash",
+      "gemini-3.5-flash",
+      "gemini-3.5-flash-lite",
+      "deepseek-ai/deepseek-v3.2-maas",
+      "deepseek-ai/deepseek-v3.1-maas",
+      "qwen/qwen3-next-80b-a3b-instruct-maas",
+      "zai-org/glm-5-maas",
+      "claude-opus-4-7",
+      "claude-sonnet-4-6",
+    ],
+    hasFree: true,
+    freeNote: /90 days.*no billing information/i,
+  }),
+  // https://www.ai21.com/pricing/ (2026-11-27)
+  ai21: e2({
+    live: signup("ai21", ["jamba-large-1.7", "jamba-mini-2"], "avoid", 0, ["new-accounts-only"]),
+    hasFree: true,
+    freeNote: /\$10.*7 days.*no credit card/i,
+  }),
+  // https://docs.fireworks.ai/faq-new/billing-pricing/how-does-billing-and-credit-usage-work (2026-11-27)
+  fireworks: e2({
+    live: [],
+    discontinued: [
+      "deepseek-v4-flash",
+      "deepseek-v4-pro",
+      "glm-5p1",
+      "gpt-oss-120b",
+      "gpt-oss-20b",
+      "kimi-k2p5",
+      "kimi-k2p6",
+      "minimax-m2p5",
+      "minimax-m2p7",
+      "qwen3p6-plus",
+    ],
+    hasFree: false,
+    freeNote: /prepaid credits.*2026-11-27/i,
+  }),
+  // https://docs.tokenfactory.nebius.com/other-capabilities/billing-new.md (2026-11-27)
+  nebius: e2({
+    live: [],
+    discontinued: ["meta-llama/Llama-3.3-70B-Instruct"],
+    hasFree: false,
+    freeNote: /bank card.*Builder Program/i,
+  }),
 };

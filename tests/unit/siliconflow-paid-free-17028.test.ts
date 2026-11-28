@@ -49,14 +49,16 @@ describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
     // Seven new recurring pools: 25 → 32.
     // 507 → 542: E1b adds eight MegaNova, ten Free.ai, two Aion and fifteen Kenari identities.
     // Ungated recurring pools: 32 → 35. Aion's token quota requires a verified card.
+    // 542 → 530: E2 adds three Doubao IDs, renames one DeepSeek ID, and removes 15 stale IDs.
+    // Recurring pools: 35 → 35. E2 changes signup credits and unmetered access only.
     // Pin identities as well as the total so unrelated replacement is visible.
     const identities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`).sort();
-    assert.equal(new Set(identities).size, 542);
+    assert.equal(new Set(identities).size, 530);
     assert.equal(
       createHash("sha256").update(identities.join("\n")).digest("hex"),
-      "50fea21899b58ac80dedd67de16fdd67a29c4435d24ffb2248a4eab3dfa1f2ea"
+      "b97ad4c7a3ec3d495067a3019cb235c0bd9237d56c67ff9022f80e8a6ec152bc"
     );
-    assert.equal(totals.modelCount, 542);
+    assert.equal(totals.modelCount, 530);
     // #19385 preserves UncloseAI's retired row for history and removes its live keyless pool.
     assert.equal(totals.poolCount, 35);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);

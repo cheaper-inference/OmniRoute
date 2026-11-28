@@ -38,12 +38,8 @@ export const KNOWN_MODEL_PRICING: Record<string, ModelPricing> = {
   "grok-4-fast": { inputCostPer1M: 0.2, outputCostPer1M: 0.5, isFree: false },
   "kimi-k2-thinking": { inputCostPer1M: 0, outputCostPer1M: 0, isFree: true },
   "qwen3-coder-plus": { inputCostPer1M: 0, outputCostPer1M: 0, isFree: true },
-  "longcat-2.0": {
-    inputCostPer1M: 0.75,
-    outputCostPer1M: 2.95,
-    isFree: true,
-    freeQuotaLimit: 10000000,
-  },
+  // https://longcat.chat/platform/docs/change-log (2026-11-27): the API uses paid billing.
+  "longcat-2.0": { inputCostPer1M: 0.75, outputCostPer1M: 2.95, isFree: false },
 };
 
 export function getModelPricing(provider: string, model: string): ModelPricing {

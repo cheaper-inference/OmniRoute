@@ -1,0 +1,1 @@
+- **fix(sse):** The free catalog drops the signup credits that 14 providers no longer publish and marks their ended offers, with sources reopened on 2026-11-27 ([#21432](https://github.com/cheaper-inference/OmniRoute/pull/21432))
