@@ -1,4 +1,5 @@
 import { kiroApiKeyRuntimeHost } from "@omniroute/open-sse/services/kiroRegion.ts";
+import { recordValidationResponse } from "./upstreamRejection";
 
 // Kiro runtime probe — falls back to a generateAssistantResponse call when an API key
 // cannot list profiles. Extracted from validation.ts (god-file decomposition) — top-level
@@ -53,6 +54,9 @@ export async function validateKiroApiKeyRuntimeProbe({
       body: JSON.stringify(body),
       signal: controller.signal,
     });
+    // Direct fetch (not the shared transport): record it for the verdict
+    // refinement + sanitized log line before the body is discarded.
+    await recordValidationResponse(endpoint, res);
 
     await res.body?.cancel().catch(() => undefined);
 

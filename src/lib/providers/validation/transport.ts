@@ -12,6 +12,7 @@ import { FetchTimeoutError } from "@/shared/utils/fetchTimeout";
 import { isPrivateHost } from "@/shared/network/outboundUrlGuard";
 import { getProviderValidationGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { selectProxyForValidation } from "@omniroute/open-sse/services/proxyAutoSelector.ts";
+import { recordValidationResponse } from "./upstreamRejection";
 
 export type ProjectedProviderValidationResult<T> = {
   [K in keyof T]: K extends "error" | "warning" ? string | null : T[K];
@@ -41,6 +42,18 @@ export function projectProviderValidationResultForPublicResponse(
  * think about proxy fallback.
  */
 export async function fetchWithProxyFallback(
+  url: string,
+  init: RequestInit,
+  presets: typeof SAFE_OUTBOUND_FETCH_PRESETS.validationRead,
+  isLocal: boolean
+): Promise<Response> {
+  const response = await fetchDirectOrViaProxy(url, init, presets, isLocal);
+  // Evidence for validateProviderApiKey's verdict refinement + sanitized log line.
+  await recordValidationResponse(url, response);
+  return response;
+}
+
+async function fetchDirectOrViaProxy(
   url: string,
   init: RequestInit,
   presets: typeof SAFE_OUTBOUND_FETCH_PRESETS.validationRead,

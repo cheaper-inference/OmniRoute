@@ -167,7 +167,7 @@ test("opencode-zen: a 403 without a free-tier or fingerprint marker is still an 
   });
 
   assert.equal(result.valid, false);
-  assert.equal(result.error, "Invalid API key");
+  assert.match(String(result.error), /^Invalid API key \(HTTP 403/);
 });
 
 test("opencode-zen: a 429 on the catalog keeps the key valid with a rate-limit warning", async () => {
