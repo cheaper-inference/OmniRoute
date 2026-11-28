@@ -9,18 +9,54 @@
  */
 
 import { HTTP_STATUS } from "../../config/constants.ts";
-import { sanitizeErrorMessage } from "../../utils/error.ts";
+import { redactSensitiveErrorText, sanitizeErrorMessage } from "../../utils/error.ts";
 import { createTranslationFailureResult } from "./translationFailure.ts";
+
+const RANGE_ERROR_STACK_MAX_LINES = 10;
+const RANGE_ERROR_STACK_MAX_CHARS = 1024;
 
 type LoggerLike =
   { debug?: (...args: unknown[]) => void; warn?: (...args: unknown[]) => void } | null | undefined;
 
 type ThrownLike = {
+  name?: unknown;
   statusCode?: unknown;
   message?: unknown;
+  stack?: unknown;
   errorType?: unknown;
   details?: { error_code?: unknown } | null;
 } | null;
+
+function formatTruncatedRangeErrorStack(error: unknown, thrown: ThrownLike): string | null {
+  let isRangeError = error instanceof RangeError;
+  if (!isRangeError) {
+    try {
+      isRangeError = thrown?.name === "RangeError";
+    } catch {
+      return null;
+    }
+  }
+  if (!isRangeError) return null;
+
+  let rawStack = "";
+  try {
+    rawStack = typeof thrown?.stack === "string" ? thrown.stack.trim() : "";
+  } catch {
+    return null;
+  }
+  if (!rawStack) return null;
+
+  const lines = rawStack.split(/\r?\n/);
+  const lineTruncated = lines.length > RANGE_ERROR_STACK_MAX_LINES;
+  let bounded = (lineTruncated ? lines.slice(0, RANGE_ERROR_STACK_MAX_LINES) : lines).join("\n");
+  let charTruncated = false;
+  if (bounded.length > RANGE_ERROR_STACK_MAX_CHARS) {
+    bounded = bounded.slice(0, RANGE_ERROR_STACK_MAX_CHARS);
+    charTruncated = true;
+  }
+  const redacted = redactSensitiveErrorText(bounded);
+  return lineTruncated || charTruncated ? `${redacted}\n... [truncated]` : redacted;
+}
 
 export async function buildRequestTranslationErrorResult({
   error,
@@ -85,6 +121,12 @@ export async function buildRequestTranslationErrorResult({
     // Hostile thrown values may expose throwing detail accessors.
   }
   const result = createTranslationFailureResult(statusCode, message, errorType, detailCode);
-  log?.warn?.("TRANSLATE", `Request translation failed: ${result.error}`);
+  const rangeErrorStack = formatTruncatedRangeErrorStack(error, thrown);
+  log?.warn?.(
+    "TRANSLATE",
+    rangeErrorStack
+      ? `Request translation failed: ${result.error}\n${rangeErrorStack}`
+      : `Request translation failed: ${result.error}`
+  );
   return result;
 }

@@ -19,6 +19,8 @@
  * must never be the reason a request fails.
  */
 
+import { parseBase64DataUrl } from "./dataUrl.ts";
+
 const MAX_LONG_EDGE = 4096;
 const MAX_TOTAL_PIXELS = 4_194_304;
 const JPEG_QUALITY = 85;
@@ -138,7 +140,7 @@ export async function normalizeVisionImageBuffer(
   }
 }
 
-const DATA_URI_RE = /^data:(image\/[a-z0-9.+-]+);base64,(.*)$/s;
+const IMAGE_MEDIA_TYPE_RE = /^image\/[a-z0-9.+-]+$/;
 
 interface BodyWalkStats {
   normalized: number;
@@ -176,8 +178,11 @@ async function normalizeOpenAiImagePart(
   if (!urlHolder || typeof urlHolder.url !== "string" || !urlHolder.url.startsWith("data:")) {
     return;
   }
-  const match = DATA_URI_RE.exec(urlHolder.url);
-  const out = match ? await normalizeBase64Payload(match[2]) : null;
+  const parsed = parseBase64DataUrl(urlHolder.url, { requireNonEmptyData: false });
+  const out =
+    parsed && IMAGE_MEDIA_TYPE_RE.test(parsed.mediaType)
+      ? await normalizeBase64Payload(parsed.data)
+      : null;
   if (!out) {
     stats.skipped++;
     return;
@@ -195,9 +200,10 @@ async function normalizeClaudeImageBlock(
   const source = asRecord(record.source);
   if (!source || source.type !== "base64" || typeof source.data !== "string") return;
   // Same validation as the OpenAI form: the media type must be an image/* type.
-  const composed = `data:${String(source.media_type ?? "image/png")};base64,${source.data}`;
-  const match = DATA_URI_RE.exec(composed);
-  const out = match ? await normalizeBase64Payload(match[2]) : null;
+  const mediaType = String(source.media_type ?? "image/png");
+  const out = IMAGE_MEDIA_TYPE_RE.test(mediaType)
+    ? await normalizeBase64Payload(source.data)
+    : null;
   if (!out) {
     stats.skipped++;
     return;
