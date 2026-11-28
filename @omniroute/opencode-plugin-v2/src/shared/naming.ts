@@ -78,7 +78,7 @@ export function isFreeOnlyFreeType(freeType: unknown): boolean {
  * Title-case a long, lowercase-looking alias.
  * `antigravity` → `Antigravity`
  */
-function titleCaseAlias(alias: string): string {
+export function titleCaseAlias(alias: string): string {
   if (alias.length === 0) return alias;
   return alias.charAt(0).toUpperCase() + alias.slice(1).toLowerCase();
 }

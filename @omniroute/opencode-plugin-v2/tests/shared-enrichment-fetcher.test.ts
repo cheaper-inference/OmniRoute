@@ -122,8 +122,100 @@ describe("defaultOmniRouteEnrichmentFetcher", () => {
     const map = await defaultOmniRouteEnrichmentFetcher("https://gw.example.com", "", 1000);
     assert.equal(map.size, 0);
   });
-});
 
+  it("labels a generated custom-adapter slot with the operator node name", async () => {
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = (async (url: unknown) => {
+      const href = String(url);
+      const body = href.endsWith("/api/pricing/models")
+        ? {
+            "openai-compatible-chat-abc": {
+              id: "openai-compatible-chat-abc",
+              alias: "openai-compatible-chat-abc",
+              name: "Openai-compatible-chat-abc",
+              displayPrefix: "ovh-free",
+              models: [{ id: "Qwen3Guard-Gen-8B", name: "Qwen3Guard-Gen-8B" }],
+            },
+          }
+        : href.endsWith("/api/providers")
+          ? {
+              connections: [
+                {
+                  provider: "openai-compatible-chat-abc",
+                  providerSpecificData: { nodeName: "OVH-Free", prefix: "ovh-free" },
+                },
+              ],
+            }
+          : href.endsWith("/api/pricing")
+            ? {}
+            : { perModel: [] };
+      return { ok: true, status: 200, statusText: "OK", json: async () => body };
+    }) as unknown as typeof fetch;
+    try {
+      const map = await defaultOmniRouteEnrichmentFetcher("https://gw.example.com", "k", 1000);
+      assert.equal(map.get("ovh-free/Qwen3Guard-Gen-8B")?.providerDisplayName, "OVH-Free");
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+  });
+
+  it("falls back to the route prefix when /api/providers is refused", async () => {
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = (async (url: unknown) => {
+      const href = String(url);
+      if (href.endsWith("/api/providers")) {
+        return { ok: false, status: 403, statusText: "Forbidden", json: async () => ({}) };
+      }
+      const body = href.endsWith("/api/pricing/models")
+        ? {
+            "openai-compatible-chat-abc": {
+              id: "openai-compatible-chat-abc",
+              name: "Openai-compatible-chat-abc",
+              displayPrefix: "ovh-free",
+              models: [{ id: "m1", name: "Model One" }],
+            },
+          }
+        : href.endsWith("/api/pricing")
+          ? {}
+          : { perModel: [] };
+      return { ok: true, status: 200, statusText: "OK", json: async () => body };
+    }) as unknown as typeof fetch;
+    try {
+      const map = await defaultOmniRouteEnrichmentFetcher("https://gw.example.com", "k", 1000);
+      assert.equal(map.get("ovh-free/m1")?.providerDisplayName, "Ovh-free");
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+  });
+
+  it("keeps a human catalog name for a canonical provider", async () => {
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = (async (url: unknown) => {
+      const href = String(url);
+      const body = href.endsWith("/api/pricing/models")
+        ? { cc: { id: "claude", alias: "cc", name: "Claude", models: [{ id: "m1" }] } }
+        : href.endsWith("/api/providers")
+          ? {
+              connections: [
+                {
+                  provider: "claude",
+                  providerSpecificData: { nodeName: "Not The Label", prefix: "claude" },
+                },
+              ],
+            }
+          : href.endsWith("/api/pricing")
+            ? {}
+            : { perModel: [] };
+      return { ok: true, status: 200, statusText: "OK", json: async () => body };
+    }) as unknown as typeof fetch;
+    try {
+      const map = await defaultOmniRouteEnrichmentFetcher("https://gw.example.com", "k", 1000);
+      assert.equal(map.get("cc/m1")?.providerDisplayName, "Claude");
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+  });
+});
 describe("free-tier canonical fan-out", () => {
   const modelsBody = {
     cf: {
