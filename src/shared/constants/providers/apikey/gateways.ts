@@ -1,9 +1,11 @@
 import { ainetcafeGateway } from "./ainetcafe";
+import { obscurifyGateway } from "./obscurify";
 import { onomeoGateway } from "./onomeo";
 import { unificallyGateway } from "./unifically";
 /** APIKEY provider catalog — gateways family. Pure data; merged by apikey/index.ts via spread. */
 export const APIKEY_PROVIDERS_GATEWAYS = {
   ...ainetcafeGateway,
+  ...obscurifyGateway,
   ...onomeoGateway,
   ...unificallyGateway,
   uncloseai: {
