@@ -8,7 +8,10 @@ import {
 import { getModelTargetFormat } from "../../config/providerModels.ts";
 import { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 import { sanitizeToolId } from "./schemaCoercion.ts";
-import { isRestoredClaudeThinkingBlock } from "../../services/claudeThinkingStore.ts";
+import {
+  dropTrailingHistoricalThinking,
+  isRestoredClaudeThinkingBlock,
+} from "../../services/claudeThinkingStore.ts";
 import { getThinkingReplayOverride } from "./thinkingReplayMode.ts";
 import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
 
@@ -785,6 +788,15 @@ export function prepareClaudeRequest(
     // Pass 1.5: Fix tool_use/tool_result ordering
     // Each tool_use must have tool_result in the NEXT message (not same message with other content)
     filtered = fixToolUseOrdering(filtered);
+
+    // Anthropic 400s on a past assistant turn that ends in thinking; an emptied turn goes here.
+    // A "none" node declared that it does not validate thinking: drop nothing.
+    if (thinkingReplayOverride !== "none") {
+      filtered = dropTrailingHistoricalThinking(filtered);
+    }
+    filtered = filtered.filter(
+      (msg) => !(msg.role === "assistant" && Array.isArray(msg.content) && msg.content.length === 0)
+    );
 
     body.messages = filtered;
 

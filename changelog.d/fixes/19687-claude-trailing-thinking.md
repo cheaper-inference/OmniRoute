@@ -1,0 +1,1 @@
+- **fix(claude):** a conversation whose history holds an assistant turn that ends in a thinking block no longer fails every later request with a 400; the trailing block is removed from past turns when the request is converted from OpenAI format. ([#19687](https://github.com/cheaper-inference/OmniRoute/pull/19687))
