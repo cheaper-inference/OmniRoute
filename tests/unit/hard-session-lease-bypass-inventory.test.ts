@@ -412,6 +412,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/sse/handlers/chat/museOwnership.ts": 2,
     "src/sse/handlers/chatHelpers.ts": 1,
     "src/sse/services/auth.ts": 4,
+    // #20525: Codex OAuth refresh reads the *already-selected* connection's row
+    // before persisting a rotated token, solely to reject an owner mismatch.
+    // No credential selection or model dispatch occurs here (class C).
+    "src/sse/services/tokenRefresh.ts": 1,
   },
 };
 

@@ -5,7 +5,8 @@ import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 import { isTransientRefreshError } from "@omniroute/open-sse/services/tokenRefresh/transientError.ts";
 import { registerCredentialRefresher } from "@omniroute/open-sse/utils/registeredCredentialRefresher.ts";
 import { registerCodexRefreshPersistence } from "@omniroute/open-sse/services/codexAccount/refreshPersistence.ts";
-import { updateProviderConnection } from "@/lib/db/providers";
+import { getProviderConnectionById, updateProviderConnection } from "@/lib/db/providers";
+import { codexCredentialBindingMismatch } from "@omniroute/open-sse/services/usage/codexCredentialBinding.ts";
 import {
   captureCodexConnectionFence,
   captureCodexConnectionOwnerFence,
@@ -275,6 +276,27 @@ export async function updateProviderCredentials(
   onCodexFenceCommitted?: (fence: CodexConnectionFence) => void
 ) {
   try {
+    // An OAuth refresh must never silently switch a connection to another
+    // ChatGPT user. The ID token is not rotated by the Codex refresh endpoint;
+    // retain it as the stable identity reference for the new access token.
+    if (newCredentials.accessToken) {
+      const existing = await getProviderConnectionById(connectionId);
+      if (existing?.provider === "codex") {
+        const mismatch = codexCredentialBindingMismatch(
+          newCredentials.accessToken,
+          existing.providerSpecificData,
+          existing.idToken
+        );
+        if (mismatch) {
+          log.warn("TOKEN_REFRESH", "Rejected Codex OAuth identity change during token rotation", {
+            connectionId,
+            reason: mismatch,
+          });
+          return false;
+        }
+      }
+    }
+
     const updates: Record<string, any> = {};
 
     if (newCredentials.accessToken) {
