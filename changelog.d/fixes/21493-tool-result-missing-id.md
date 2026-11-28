@@ -1,0 +1,1 @@
+- **fix(translator):** a tool result that arrived without an id is paired with its own call again, so tool history no longer fails upstream with "tool_use_id: Field required". (thanks @ntdatt812)
