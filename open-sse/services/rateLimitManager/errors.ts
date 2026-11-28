@@ -92,3 +92,39 @@ export function inheritTrustedLocalRateLimitResponse(source: Response, target: R
   if (failure) localRateLimitResponses.set(target, failure);
   return target;
 }
+
+export interface QueueTimeoutMessageContext {
+  /** `provider/model`, or the bare provider when no model is known. */
+  target: string;
+  /** Effective `requestQueue.maxWaitMs` for this connection, in milliseconds. */
+  maxWaitMs: number;
+  /** How long this request was allowed to wait in the queue, in milliseconds. */
+  queueWaitMs: number;
+  /** Requests already waiting on this connection's limiter when this one joined. */
+  queuedAhead: number;
+  /** Requests already running on this connection's limiter when this one joined. */
+  runningAhead: number;
+  /** Execution backstop applied once a job leaves the queue, in milliseconds. */
+  executionMaxWaitMs: number;
+}
+
+/**
+ * Build the RATE_LIMIT_QUEUE_TIMEOUT message (#21184). The request never left
+ * OmniRoute, so the message says so, reports how busy the connection's queue
+ * was, and names the setting to change, instead of reading like an upstream
+ * outage. The `maxWaitMs=` and `executionMaxWaitMs=` tokens are kept for log
+ * searches.
+ *
+ * @param context - Target, budgets and the queue load seen at admission.
+ * @returns The client-safe error message.
+ */
+export function formatQueueTimeoutMessage(context: QueueTimeoutMessageContext): string {
+  return (
+    `Request waited ${context.queueWaitMs}ms in OmniRoute's local request queue for ` +
+    `${context.target} (requestQueue.maxWaitMs=${context.maxWaitMs}ms) and never reached the ` +
+    `provider; ${context.queuedAhead} request(s) queued and ${context.runningAhead} running ` +
+    `ahead of it on this connection. This is local back-pressure, not an upstream outage: ` +
+    `lower client concurrency or raise requestQueue.maxWaitMs. The queue budget does not bound ` +
+    `execution (executionMaxWaitMs=${context.executionMaxWaitMs}ms).`
+  );
+}
