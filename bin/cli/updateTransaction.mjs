@@ -687,6 +687,11 @@ export async function preflightManagedUpdate(ctx, plan) {
   if (ctx.platform !== "linux") return unsupported("unsupported-platform");
   if (ctx.isContainer()) return unsupported("container");
   if (ctx.isElectron()) return unsupported("electron");
+  // First, before anything that can say "unsupported": a running update has already stopped the
+  // service (no pid file) and may be swapping the package under the version and global-root
+  // checks below. Any "unsupported" answer would send the caller down the standard flow, which
+  // installs outside the transaction while the coordinator is snapshotting or installing.
+  if (ctx.lockHeld()) return { kind: "refused", reason: "update-in-progress" };
 
   let globalRoot = null;
   try {
@@ -720,7 +725,6 @@ export async function preflightManagedUpdate(ctx, plan) {
   const port = Number.parseInt(String(environment.DASHBOARD_PORT || environment.PORT || ""), 10);
   if (!Number.isInteger(port) || port <= 0 || port > 65535) return unsupported("port-unknown");
 
-  if (ctx.lockHeld()) return { kind: "refused", reason: "update-in-progress" };
   const disk = await ctx.diskHeadroom({ dataDir: ctx.dataDir, packageRoot: ctx.packageRoot });
   if (!disk?.ok) return { kind: "refused", reason: "insufficient-disk-space" };
 
