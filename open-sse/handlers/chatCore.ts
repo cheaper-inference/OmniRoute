@@ -111,6 +111,7 @@ import { resolveOmniGlyphTransport } from "../services/compression/imageTranspor
 import { usesClaudeBridge } from "./chatCore/agentRouterProtocol.ts";
 import { normalizeUpstreamRequestParams } from "./chatCore/upstreamRequestParams.ts";
 import { injectSystemPromptPreTranslation } from "../services/systemPrompt.ts";
+import { takeUpstreamOnlyMarker } from "../services/combo/requestPersistence.ts";
 import { applyCustomSystemPrompt } from "./chatCore/customSystemPrompt.ts";
 import { applyProviderSystemTransforms } from "../services/systemTransforms.ts";
 import { translateRequest } from "../translator/index.ts";
@@ -223,6 +224,7 @@ import {
   finalizePendingScope,
   initialPendingBody,
   updatePendingScope,
+  upstreamOnlyPendingPayload,
 } from "@/lib/usage/pendingRequestScope";
 import { recordChatCallCost, buildCostCtx } from "@/domain/costRules";
 import { attachOmniRouteMetaToResponse as attachRouteMeta } from "@/domain/omnirouteResponseMeta";
@@ -508,6 +510,8 @@ async function handleChatCoreInner({
   previousResponseResumed = undefined, // rehydrated-continuation flag from chat.ts; noted below, no semantics.
 }) {
   delete (body as Record<string, unknown>)._omniroutePreviousResponseResumed;
+  // A combo-forwarded reasoning draft reaches the upstream only: handled like a no-log request.
+  const upstreamOnlyBody = takeUpstreamOnlyMarker(body);
   const {
     model: originModel,
     resolvedThinkingEffort,
@@ -633,7 +637,8 @@ async function handleChatCoreInner({
   // Per-key no-log flag OR the per-request `x-omniroute-no-log` header. Resolved
   // before agent-context extraction so a header-only no-log request also drops
   // prompt-derived project/branch fields from usage attribution.
-  const noLogEnabled = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
+  const noLogEnabled =
+    upstreamOnlyBody || resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
   const agentContext = resolveUsageAgentContext(
     body,
     clientRawRequest?.headers,
@@ -891,8 +896,10 @@ async function handleChatCoreInner({
   const pendingRequestId =
     trackPendingRequest(model, provider, pendingConnId, true, {
       clientEndpoint: clientRawRequest?.endpoint || "/v1/chat/completions",
-      clientRequest: redactPendingBody(clientRawRequest?.body ?? body, videoBridgeObserved),
-      providerRequest: initialPendingBody(body, effectiveModel, videoBridgeObserved),
+      clientRequest: upstreamOnlyBody
+        ? upstreamOnlyPendingPayload()
+        : redactPendingBody(clientRawRequest?.body ?? body, videoBridgeObserved),
+      providerRequest: initialPendingBody(body, effectiveModel, videoBridgeObserved, upstreamOnlyBody),
       stage: "registered",
       correlationId,
       sessionTag: resolveCallLogSessionTag(launchSessionTag, conversationId, null),
@@ -1224,6 +1231,7 @@ async function handleChatCoreInner({
     provider,
     connectionId: pendingConnId,
     videoTranscriptSensitive: videoBridgeObserved,
+    upstreamOnly: upstreamOnlyBody,
   };
   const providerRequestCapture = createPreparedRequestLogger(reqLogger, pendingScope);
   drainUnpersistedHttpAttempts = drainUpstreamHttpAttempts.bind(null, {

@@ -515,7 +515,9 @@ combo cannot fail over cleanly. The holdback closes that gap for combos that ask
   with credential-shaped strings redacted. A target that is not listed, or a request that
   could call tools, gets the original body. Signed, encrypted or hidden reasoning is never
   part of a draft.
-- The draft lives in memory for the request only and is never logged.
+- The draft lives in memory for the request only. It is never logged, and the dispatch that
+  forwards it is handled like a no-log request: no call log, pipeline capture or retained
+  request payload keeps the body that carries it (usage counters and outcomes are still recorded).
 
 ```json
 {

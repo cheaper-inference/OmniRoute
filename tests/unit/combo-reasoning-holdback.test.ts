@@ -20,6 +20,7 @@ const { closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const { dispatchEvent } = await import("../../src/lib/webhookDispatcher.ts");
 
 const FLAG = "COMBO_REASONING_HOLDBACK_ENABLED";
+const UPSTREAM_ONLY = "_omnirouteSuppressRequestPersistence";
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const a = "holdback-a/first";
@@ -568,6 +569,32 @@ test("a cut after reasoning carries the draft only to a target the combo lists",
   const quoted = sent[0].content.slice(sent[0].content.indexOf("{"));
   assert.equal(JSON.parse(quoted).draft_reasoning, "Primeiro verifico a condição.");
   assert.equal(dispatched[1].body.tools, undefined);
+});
+
+test("only the attempt that forwards a draft is marked to keep its request out of persisted logs", async () => {
+  process.env[FLAG] = "true";
+  const { response, dispatched } = await run(({ model }) =>
+    model === a
+      ? sse(source([reasoning("draft")], coded()).stream)
+      : sse(source([content("ok"), stop, DONE]).stream)
+  );
+  await readAll(response);
+  assert.equal(dispatched.length, 2);
+  assert.equal(dispatched[0].body[UPSTREAM_ONLY], undefined);
+  assert.equal(dispatched[1].body[UPSTREAM_ONLY], true);
+});
+
+test("a fallback that forwards no draft is not marked", async () => {
+  process.env[FLAG] = "true";
+  const { response, dispatched } = await run(
+    ({ model }) =>
+      model === a
+        ? sse(source([reasoning("draft")], coded()).stream)
+        : sse(source([content("ok"), stop, DONE]).stream),
+    { config: { reasoningCheckpointProviders: ["holdback-z"] } }
+  );
+  await readAll(response);
+  assert.equal(dispatched[1].body[UPSTREAM_ONLY], undefined);
 });
 
 test("a target outside reasoningCheckpointProviders gets the normal fallback with the original body", async () => {

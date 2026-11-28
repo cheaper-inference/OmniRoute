@@ -15,6 +15,8 @@ export type PendingRequestScope = {
   provider: string;
   connectionId: string | null;
   videoTranscriptSensitive?: boolean;
+  /** The body carries upstream-only text (a forwarded reasoning draft): keep it out of previews. */
+  upstreamOnly?: boolean;
 };
 
 const OMITTED_VIDEO_TRANSCRIPT = "[omitted: video transcript]";
@@ -29,11 +31,18 @@ function omitVideoSensitivePendingPayload(payload: unknown, sensitive: boolean):
   return sensitive ? { _omniroute_omitted: "video-transcript" } : payload;
 }
 
+/** The stand-in a retained preview shows for a body that is meant for the upstream only. */
+export function upstreamOnlyPendingPayload(): unknown {
+  return { _omniroute_omitted: "upstream-only" };
+}
+
 export function initialPendingBody(
   body: unknown,
   effectiveModel: string,
-  sensitive: boolean
+  sensitive: boolean,
+  upstreamOnly = false
 ): unknown {
+  if (upstreamOnly) return upstreamOnlyPendingPayload();
   const initial =
     body && typeof body === "object" && !Array.isArray(body)
       ? {
@@ -51,7 +60,15 @@ function protectPendingMetadata(
   scope: PendingRequestScope,
   metadata: PendingRequestMetadata
 ): PendingRequestMetadata {
-  if (!scope.videoTranscriptSensitive) return metadata;
+  if (!scope.videoTranscriptSensitive) {
+    if (!scope.upstreamOnly) return metadata;
+    // The request carries text for the upstream only, and a reply can quote it back.
+    const protectedMetadata = { ...metadata };
+    for (const key of PENDING_PAYLOAD_KEYS) {
+      if (metadata[key] !== undefined) protectedMetadata[key] = upstreamOnlyPendingPayload();
+    }
+    return protectedMetadata;
+  }
 
   // A provider request or reply may contain rendered transcript prose without
   // any structured cue boundary. Omit only the retained preview; callers keep
