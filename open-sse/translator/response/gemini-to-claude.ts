@@ -229,6 +229,29 @@ export function geminiToClaudeResponse(chunk, state) {
 
       // Function call → tool_use block
       if (part.functionCall) {
+        // A later chunk can re-send a growing snapshot of a call that was already
+        // emitted, with the same id (#19183). The first occurrence is kept, as in
+        // gemini-to-openai.ts; a second tool_use with that id would run the call twice.
+        const providerCallId = part.functionCall.id;
+        if (typeof providerCallId === "string" && providerCallId.length > 0) {
+          const emittedIds: Set<string> = (state.emittedToolUseIds ??= new Set());
+          if (emittedIds.has(providerCallId)) {
+            // The repeat can still carry this call's thoughtSignature; store it for
+            // this call so the next call does not pick it up as pending.
+            if (
+              typeof state.pendingThoughtSignature === "string" &&
+              state.pendingThoughtSignature
+            ) {
+              storeGeminiThoughtSignature(
+                buildGeminiThoughtSignatureKey(state.signatureNamespace, providerCallId),
+                state.pendingThoughtSignature
+              );
+              state.pendingThoughtSignature = null;
+            }
+            continue;
+          }
+          emittedIds.add(providerCallId);
+        }
         // Close any open text block first
         flushMarkdownBuffer(state, results);
         if (state.openTextBlockIdx !== null) {

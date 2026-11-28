@@ -1,0 +1,1 @@
+- **fix(translator):** Claude clients routed to Gemini/Antigravity get a re-sent function-call snapshot once instead of as a second `tool_use` with the same id ([#20790](https://github.com/cheaper-inference/OmniRoute/pull/20790)) — thanks @chuenchen309
