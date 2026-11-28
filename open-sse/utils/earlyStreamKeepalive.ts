@@ -282,6 +282,8 @@ export type EarlyStreamKeepaliveOptions = {
    * pass the one returned by the helper).
    */
   deadlineController?: AbortController | null;
+  /** Abort pending handler work when the consumer cancels a synthetic stream. */
+  abortOnCancel?: boolean;
   /**
    * Absolute last-resort bound for the slow path, in ms. Internal default
    * (SLOW_PATH_DEADLINE_MS); non-positive disables. Never an exposed setting.
@@ -792,11 +794,12 @@ export async function withEarlyStreamKeepalive(
         }
       }
     },
-    cancel() {
+    cancel(reason) {
       // Consumer (Next.js → client) went away — stop keepalives and release the upstream.
       aborted = true;
       stopDeadline();
       stopKeepalive();
+      if (options.abortOnCancel) deadlineController?.abort(reason);
       upstreamReader?.cancel().catch(() => {});
     },
   });

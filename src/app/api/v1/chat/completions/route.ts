@@ -16,7 +16,6 @@ import {
   OPENAI_CHAT_ERROR_FRAME,
   OPENAI_KEEPALIVE_FRAME,
   OPENAI_STARTUP_FRAME,
-  withEarlyStreamKeepalive,
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
 import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
@@ -33,6 +32,8 @@ import {
   withCompressionHeaderEcho,
 } from "@/shared/utils/compressionHeaderEcho";
 import { resolveModelAliasWithSeedFallbackOnBody } from "@/lib/modelAliasResolver";
+import { usesNativeRequiredApiKeyTransport } from "@/shared/utils/requiredApiKeyContext";
+import { withRequiredApiKeyKeepalive } from "@/shared/utils/requiredApiKeyTransport";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import {
@@ -120,6 +121,7 @@ export async function POST(request) {
   // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
   // handler enforces authentication independently. Without this, a proxy
   // bypass means unauthenticated upstream dispatch.
+  const nativeOnly = usesNativeRequiredApiKeyTransport(request);
   const authRejection = await enforceClientApiRouteAuth(request);
   if (authRejection) return authRejection;
 
@@ -216,7 +218,7 @@ export async function POST(request) {
           // every request): the cloud path already runs it once in handleChat(),
           // and a second run would consume the rate-limit window twice, apply
           // throttleDelayMs twice and check allowedModels before alias resolution.
-          if (isSelfHostedEntryConfigured()) {
+          if (!nativeOnly && isSelfHostedEntryConfigured()) {
             const keyPolicy = await enforceApiKeyPolicy(
               request,
               typeof parsedBody.model === "string" ? parsedBody.model : null,
@@ -336,8 +338,8 @@ export async function POST(request) {
     const reqId = callerCorrelationId ?? generateRequestId();
 
     // Bifrost Go sidecar fast-path routing check
-    const relayBackend = resolveRelayRoutingBackend();
-    const bifrostConfig = getBifrostRoutingConfig();
+    const relayBackend = nativeOnly ? "ts" : resolveRelayRoutingBackend();
+    const bifrostConfig = nativeOnly ? null : getBifrostRoutingConfig();
     let fallbackHeaderValue: string | undefined = undefined;
 
     if (parsedBodyIsRecord && bifrostConfig) {
@@ -406,12 +408,13 @@ export async function POST(request) {
       // Wrap the real handler response, not the synthetic early-keepalive response. If the
       // client cancels while handleChat is still pending, earlyStreamKeepalive will cancel the
       // eventual handler body; only that confirmed cleanup releases heavyweight capacity.
-      const handlerResponse = releaseChatAdmissionAfterHandler(
-        handleChat(request, null, parsedBody, reqId, routeDeadlineSignal),
-        admission.lease,
-        { signal: routeDeadlineSignal }
-      );
-      const streamedResponse = await withEarlyStreamKeepalive(handlerResponse, {
+      const dispatch = () =>
+        releaseChatAdmissionAfterHandler(
+          handleChat(request, null, parsedBody, reqId, routeDeadlineSignal),
+          admission.lease,
+          { signal: routeDeadlineSignal }
+        );
+      const streamedResponse = await withRequiredApiKeyKeepalive(dispatch, {
         signal: routeDeadlineSignal,
         thresholdMs: resolveKeepaliveThreshold(parsedBody?.model),
         keepaliveFrame: OPENAI_KEEPALIVE_FRAME,
