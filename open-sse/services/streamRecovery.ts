@@ -636,12 +636,37 @@ export function createRecoverableStream(
   let retries = 0;
   let finalized = false;
   let cancelled = false;
+  let cancelReason: unknown;
   let throughputWatchdog = createThroughputWatchdog(options.throughputWatchdog);
 
   const runFinalize = () => {
     if (finalized) return;
     finalized = true;
     options.finalize();
+  };
+
+  // Keep the active reader visible to cancel(), even while a continuation is draining.
+  const openRecoveryReader = async (
+    open: () => Promise<ReadableStream<Uint8Array> | null>
+  ): Promise<ReadableStreamDefaultReader<Uint8Array> | null> => {
+    if (cancelled) return null;
+    let stream: ReadableStream<Uint8Array> | null;
+    try {
+      stream = await open();
+    } catch {
+      return null; // Recovery failed; keep the original partial response.
+    }
+    if (!stream) return null;
+    if (cancelled) {
+      void stream.cancel(cancelReason).catch(() => {
+        // The abandoned body may already have errored.
+      });
+      return null;
+    }
+    const nextReader = stream.getReader();
+    reader.releaseLock();
+    reader = nextReader;
+    return nextReader;
   };
 
   // Drop the dead reader + held window and acquire a fresh upstream. Returns whether a
@@ -656,16 +681,9 @@ export function createRecoverableStream(
     } catch {
       // dead reader — nothing to cancel
     }
-    let next: ReadableStream<Uint8Array> | null = null;
-    try {
-      next = await reopen();
-    } catch {
-      next = null;
-    }
     // Only drop the held window once we actually have a replacement. If reopen
     // fails/exhausts, the caller falls back to flushing those held bytes.
-    if (!next) return false;
-    reader = next.getReader();
+    if (!(await openRecoveryReader(reopen)) || cancelled) return false;
     holdback.discard(); // reuse the (still-uncommitted) buffer for the new attempt
     throughputWatchdog = createThroughputWatchdog(options.throughputWatchdog);
     return true;
@@ -863,6 +881,7 @@ export function createRecoverableStream(
     controller: ReadableStreamDefaultController<Uint8Array>,
     cut = true
   ): Promise<boolean> => {
+    if (cancelled) return false;
     const report = (event: ContinuationOutcome) => options.onContinueOutcome?.(event);
     if (!canContinue()) {
       if (canResendUnrendered(cut)) {
@@ -874,40 +893,38 @@ export function createRecoverableStream(
     continuations += 1;
     options.onContinue?.(continuations, emittedText);
 
-    let contStream: ReadableStream<Uint8Array> | null = null;
-    try {
-      contStream = await options.continueStream!(emittedText);
-    } catch {
-      contStream = null;
-    }
-    if (!contStream) {
+    const contReader = await openRecoveryReader(() => options.continueStream!(emittedText));
+    if (cancelled) return false;
+    if (!contReader) {
       report({ attempt: continuations, outcome: "no-stream" });
       return false;
     }
 
     // Drain the continuation fully (recovery favors correctness over token-by-token
     // streaming of the recovered tail), then emit only the de-duplicated suffix.
-    const raw = await drainContinuation(contStream);
-
+    const raw = await drainContinuation(contReader);
+    if (cancelled) return false;
     const scan = scanOpenAiSseText(raw);
     return finishContinuation(controller, scan, report);
   };
 
   // Drain a continuation stream fully; a mid-drain truncation ends the drain, and the
   // caller decides what the partial bytes mean. Shared by the resend and normal paths.
-  const drainContinuation = async (stream: ReadableStream<Uint8Array>): Promise<string> => {
-    const contReader = stream.getReader();
+  const drainContinuation = async (
+    contReader: ReadableStreamDefaultReader<Uint8Array>
+  ): Promise<string> => {
     const contDecoder = new TextDecoder();
     let raw = "";
-    for (;;) {
-      let r: ReadableStreamReadResult<Uint8Array>;
-      try {
-        r = await contReader.read();
-      } catch {
-        break; // the continuation itself truncated — emit what we have, maybe continue again
+    try {
+      for (;;) {
+        const { done, value } = await contReader.read();
+        if (done) break;
+        if (value) raw += contDecoder.decode(value, { stream: true });
       }
-      if (r.done) break;
-      if (r.value) raw += contDecoder.decode(r.value, { stream: true });
+    } catch {
+      // The continuation itself truncated — emit what we have, maybe continue again.
+    } finally {
+      contReader.releaseLock();
     }
     return raw;
   };
@@ -924,17 +941,14 @@ export function createRecoverableStream(
   ): Promise<boolean> => {
     continuations += 1;
     options.onContinue?.(continuations, "");
-    let contStream: ReadableStream<Uint8Array> | null = null;
-    try {
-      contStream = await options.continueStream!("");
-    } catch {
-      contStream = null;
-    }
-    if (!contStream) {
+    const contReader = await openRecoveryReader(() => options.continueStream!(""));
+    if (cancelled) return false;
+    if (!contReader) {
       report({ attempt: continuations, outcome: "no-stream" });
       return false;
     }
-    const raw = await drainContinuation(contStream);
+    const raw = await drainContinuation(contReader);
+    if (cancelled) return false;
     const scan = scanOpenAiSseText(raw);
     if (scan.text.length === 0) {
       report({ attempt: continuations, outcome: "no-stream" });
@@ -964,7 +978,7 @@ export function createRecoverableStream(
       overlapChars < STREAM_RECOVERY.MIN_CONTINUATION_OVERLAP_CHARS;
     if (isSuspectedRestart) {
       report({ attempt: continuations, outcome: "overlap-reject", overlapChars });
-      if (await tryContinue(controller)) return true;
+      if ((await tryContinue(controller)) || cancelled) return true;
       emitCleanTerminal(controller);
       return true;
     }
@@ -1006,7 +1020,7 @@ export function createRecoverableStream(
     }
     // The continuation truncated too — try again (bounded), else close cleanly so the
     // client never hangs waiting on a partial response.
-    if (await tryContinue(controller)) return true;
+    if ((await tryContinue(controller)) || cancelled) return true;
     emitCleanTerminal(controller);
     return true;
   };
@@ -1024,18 +1038,16 @@ export function createRecoverableStream(
           if (holdback.committed) {
             // Post-commit: an early-retry is unsafe (text already sent). Try mid-stream
             // continuation for a retryable cut; otherwise propagate as before.
-            if (isRetryableStreamError(error) && (await tryContinue(controller))) {
-              runFinalize();
-              controller.close();
-              return;
-            }
+            const resumed = isRetryableStreamError(error) && (await tryContinue(controller));
+            if (cancelled) return;
             runFinalize();
-            controller.error(error);
+            if (resumed) controller.close();
+            else controller.error(error);
             return;
           }
-          if (isRetryableStreamError(error) && (await tryReopen(error))) {
-            continue;
-          }
+          const reopened = isRetryableStreamError(error) && (await tryReopen(error));
+          if (cancelled) return;
+          if (reopened) continue;
           // Unrecoverable before commit: emit whatever was held, then close.
           flushHeld(controller);
           runFinalize();
@@ -1066,11 +1078,8 @@ export function createRecoverableStream(
             // says the stream is worth continuing (silent truncation, or a clean-but-empty
             // reasoning-only stop) — canContinue() is the single source of truth here, same as
             // the read-error branch above.
-            if (await tryContinue(controller, !emittedTerminal)) {
-              runFinalize();
-              controller.close();
-              return;
-            }
+            await tryContinue(controller, !emittedTerminal);
+            if (cancelled) return;
             runFinalize();
             controller.close();
             return;
@@ -1082,9 +1091,9 @@ export function createRecoverableStream(
             controller.close();
             return;
           }
-          if (await tryReopen(new TruncatedStreamError())) {
-            continue;
-          }
+          const reopened = await tryReopen(new TruncatedStreamError());
+          if (cancelled) return;
+          if (reopened) continue;
           flushHeld(controller);
           runFinalize();
           controller.close();
@@ -1097,22 +1106,22 @@ export function createRecoverableStream(
         if (watchdogDecision.abort) {
           const error = new ThroughputWatchdogError();
           options.onWatchdogAbort?.(error);
-          if (!holdback.committed && (await tryReopen(error))) continue;
           if (holdback.committed) {
             try {
               await reader.cancel(error);
             } catch {
               // The active attempt may have closed while the watchdog was deciding.
             }
-            if (await tryContinue(controller)) {
-              runFinalize();
-              controller.close();
-              return;
-            }
+            const resumed = await tryContinue(controller);
+            if (cancelled) return;
             runFinalize();
-            controller.error(error);
+            if (resumed) controller.close();
+            else controller.error(error);
             return;
           }
+          const reopened = await tryReopen(error);
+          if (cancelled) return;
+          if (reopened) continue;
           flushHeld(controller);
           runFinalize();
           controller.close();
@@ -1132,14 +1141,15 @@ export function createRecoverableStream(
       }
     },
 
-    async cancel(reason) {
+    cancel(reason) {
       cancelled = true;
+      cancelReason = reason;
       runFinalize();
-      try {
-        await reader.cancel(reason);
-      } catch {
-        // already closed
-      }
+      // The upstream can take arbitrarily long to acknowledge cancellation.
+      void reader.cancel(reason).catch(() => {
+        // Already closed, errored, or released after draining a continuation.
+      });
+      reader.releaseLock();
     },
   });
 }

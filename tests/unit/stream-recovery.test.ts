@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { setImmediate } from "node:timers/promises";
 
 import { STREAM_RECOVERY } from "../../open-sse/config/constants.ts";
 import {
@@ -325,4 +326,107 @@ test("createRecoverableStream does not spend an upstream re-open after a client 
   await new Promise((r) => setTimeout(r, 10)); // let any in-flight pull settle
   assert.equal(reopened, 0, "a client cancel must never trigger a transparent re-open");
   assert.equal(finalizeCount, 1);
+});
+
+const assistantDelta = 'data: {"choices":[{"delta":{"content":"partial answer"}}]}\n\n';
+
+for (const phase of ["early reopen", "mid-stream continuation"]) {
+  test(`createRecoverableStream cancels a body returned after cancellation during ${phase}`, async () => {
+    const opening = Promise.withResolvers<void>();
+    const opened = Promise.withResolvers<ReadableStream<Uint8Array>>();
+    const open = () => {
+      opening.resolve();
+      return opened.promise;
+    };
+    const cancellations: unknown[] = [];
+    let pulls = 0;
+    const replacement = new ReadableStream<Uint8Array>(
+      {
+        pull() {
+          pulls++;
+        },
+        cancel(reason) {
+          cancellations.push(reason);
+        },
+      },
+      { highWaterMark: 0 }
+    );
+    let finalized = 0;
+    let now = 0;
+    const continuing = phase === "mid-stream continuation";
+    const initial = makeStream([assistantDelta], new TruncatedStreamError());
+    const stream = createRecoverableStream(initial, continuing ? async () => null : open, {
+      finalize: () => finalized++,
+      now: () => (continuing ? (now += 1000) : 0),
+      ...(continuing ? { continueStream: open } : {}),
+    });
+    const reader = stream.getReader();
+    if (continuing) {
+      assert.deepEqual(await reader.read(), { value: enc(assistantDelta), done: false });
+    }
+    const pendingRead = reader.read();
+    await opening.promise;
+    const reason = new Error("client disconnected");
+    await reader.cancel(reason);
+    assert.deepEqual(await pendingRead, { value: undefined, done: true });
+    assert.equal(finalized, 1);
+
+    opened.resolve(replacement);
+    await setImmediate();
+    assert.deepEqual(cancellations, [reason]);
+    assert.equal(pulls, 0);
+    assert.equal(replacement.locked, false);
+    assert.equal(finalized, 1);
+  });
+}
+
+test("createRecoverableStream cancels and releases the reader draining a continuation", async () => {
+  const draining = Promise.withResolvers<void>();
+  const acknowledged = Promise.withResolvers<void>();
+  const cancellations: unknown[] = [];
+  const replacement = new ReadableStream<Uint8Array>(
+    {
+      pull() {
+        draining.resolve();
+      },
+      cancel(reason) {
+        cancellations.push(reason);
+        return acknowledged.promise;
+      },
+    },
+    { highWaterMark: 0 }
+  );
+  let finalized = 0;
+  let continuations = 0;
+  let now = 0;
+  const initial = makeStream([assistantDelta], new TruncatedStreamError());
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => finalized++,
+    now: () => (now += 1000),
+    continueStream: async () => {
+      continuations++;
+      return replacement;
+    },
+  });
+  const reader = stream.getReader();
+  assert.deepEqual(await reader.read(), { value: enc(assistantDelta), done: false });
+  const pendingRead = reader.read();
+  await draining.promise;
+
+  const reason = new Error("client disconnected");
+  const cancelled = reader.cancel(reason);
+  try {
+    assert.equal(
+      await Promise.race([cancelled.then(() => true), setImmediate(false)]),
+      true,
+      "downstream teardown should not wait for upstream cancellation to settle"
+    );
+    assert.deepEqual(await pendingRead, { value: undefined, done: true });
+    assert.deepEqual(cancellations, [reason]);
+    assert.equal(replacement.locked, false);
+    assert.equal(continuations, 1);
+    assert.equal(finalized, 1);
+  } finally {
+    acknowledged.resolve();
+  }
 });
