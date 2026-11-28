@@ -13,6 +13,7 @@ const tx = await import("../../bin/cli/updateTransaction.mjs");
 const update = await import("../../bin/cli/commands/update.mjs");
 
 const OPERATION_ID = "0b8f3c1e-2d4a-4f6b-9c7d-1a2b3c4d5e6f";
+const OTHER_OPERATION_ID = "11111111-2222-4333-8444-555555555555";
 
 function makePlan(overrides: Record<string, unknown> = {}) {
   return {
@@ -279,5 +280,96 @@ test("the CLI points at the coordinator log when the wait ends without a verdict
     assert.match(lines.join("\n"), /coordinator\.log/);
   } finally {
     Object.assign(console, orig);
+  }
+});
+
+// ---------------------------------------------------------------------------------------
+// Thread 3: reclaiming a stale lock must never remove a replacement lock.
+// ---------------------------------------------------------------------------------------
+
+const DEAD_PID = 999_999;
+
+function lockBody(operationId: string, pid: number) {
+  return JSON.stringify({ operationId, pid, at: new Date().toISOString() });
+}
+
+test("lock: a coordinator that read a dead holder cannot remove the lock another one put in its place", async () => {
+  const dataDir = tmp("omni-tx-lock-race-");
+  try {
+    const lockFile = path.join(dataDir, "managed-update", "lock");
+    fs.mkdirSync(path.dirname(lockFile), { recursive: true });
+    fs.writeFileSync(lockFile, lockBody("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", DEAD_PID));
+    let replaced = false;
+    // The check on the dead holder is the interleaving point: right after this coordinator
+    // learned the holder is dead, another one reclaims the lock and writes its own.
+    const isPidAlive = (pid: number) => {
+      if (pid === DEAD_PID) {
+        if (!replaced) {
+          replaced = true;
+          fs.unlinkSync(lockFile);
+          fs.writeFileSync(lockFile, lockBody(OTHER_OPERATION_ID, process.pid), { flag: "wx" });
+        }
+        return false;
+      }
+      return pid === process.pid;
+    };
+    await assert.rejects(
+      tx.acquireFileLock(dataDir, OPERATION_ID, { isPidAlive }),
+      (err: { code?: string }) => err.code === "update-in-progress"
+    );
+    assert.equal(JSON.parse(fs.readFileSync(lockFile, "utf8")).operationId, OTHER_OPERATION_ID);
+    assert.equal(fs.existsSync(`${lockFile}.reclaim`), false, "the reclaim guard is released");
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("lock: a dead holder is still reclaimed, and an unreadable lock file counts as dead", async () => {
+  const dataDir = tmp("omni-tx-lock-reclaim-");
+  try {
+    const lockFile = path.join(dataDir, "managed-update", "lock");
+    fs.mkdirSync(path.dirname(lockFile), { recursive: true });
+    const alive = (pid: number) => pid === process.pid;
+    fs.writeFileSync(lockFile, lockBody(OTHER_OPERATION_ID, DEAD_PID));
+    const first = await tx.acquireFileLock(dataDir, OPERATION_ID, { isPidAlive: alive });
+    assert.equal(JSON.parse(fs.readFileSync(lockFile, "utf8")).operationId, OPERATION_ID);
+    await first.release();
+    fs.writeFileSync(lockFile, "{ not json");
+    const second = await tx.acquireFileLock(dataDir, OPERATION_ID, { isPidAlive: alive });
+    await second.release();
+    assert.equal(fs.existsSync(lockFile), false);
+    assert.deepEqual(
+      fs.readdirSync(path.dirname(lockFile)).filter((name) => name.endsWith(".tmp")),
+      [],
+      "no temp file is left next to the lock"
+    );
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("lock: another coordinator reclaiming right now is a refusal, and its dead guard is taken over", async () => {
+  const dataDir = tmp("omni-tx-lock-guard-");
+  try {
+    const lockFile = path.join(dataDir, "managed-update", "lock");
+    const guard = `${lockFile}.reclaim`;
+    fs.mkdirSync(path.dirname(lockFile), { recursive: true });
+    fs.writeFileSync(lockFile, lockBody(OTHER_OPERATION_ID, DEAD_PID));
+    // A live process holds the reclaim guard: this one must not touch the lock.
+    fs.writeFileSync(guard, String(process.pid));
+    const alive = (pid: number) => pid === process.pid;
+    await assert.rejects(
+      tx.acquireFileLock(dataDir, OPERATION_ID, { isPidAlive: alive }),
+      (err: { code?: string }) => err.code === "update-in-progress"
+    );
+    assert.equal(JSON.parse(fs.readFileSync(lockFile, "utf8")).operationId, OTHER_OPERATION_ID);
+    // The guard's own holder died inside the critical section: the guard is taken over.
+    fs.writeFileSync(guard, String(DEAD_PID));
+    const lock = await tx.acquireFileLock(dataDir, OPERATION_ID, { isPidAlive: alive });
+    assert.equal(JSON.parse(fs.readFileSync(lockFile, "utf8")).operationId, OPERATION_ID);
+    assert.equal(fs.existsSync(guard), false);
+    await lock.release();
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
   }
 });

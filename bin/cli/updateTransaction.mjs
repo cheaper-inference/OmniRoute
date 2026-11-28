@@ -35,6 +35,7 @@ import {
   statSync,
   statfsSync,
   lstatSync,
+  linkSync,
   unlinkSync,
   writeFileSync,
 } from "node:fs";
@@ -461,34 +462,87 @@ function lockPath(dataDir) {
   return join(dataDir, STATE_DIR_NAME, "lock");
 }
 
-function readLockHolder(dataDir) {
+function readLockRaw(file) {
   try {
-    return JSON.parse(readFileSync(lockPath(dataDir), "utf8"));
+    return readFileSync(file, "utf8");
   } catch {
     return null;
   }
 }
 
-export function isLockHeld(dataDir, { isPidAlive = defaultIsPidAlive } = {}) {
-  if (!existsSync(lockPath(dataDir))) return false;
-  const holder = readLockHolder(dataDir);
+function parseLockHolder(raw) {
+  try {
+    const holder = JSON.parse(raw);
+    return holder && typeof holder === "object" ? holder : null;
+  } catch {
+    return null;
+  }
+}
+
+export function isLockFileHeld(file, { isPidAlive = defaultIsPidAlive } = {}) {
+  const raw = readLockRaw(file);
+  if (raw === null) return false;
+  const holder = parseLockHolder(raw);
   return Boolean(holder && isPidAlive(holder.pid));
 }
 
-export async function acquireFileLock(
-  dataDir,
-  operationId,
-  { isPidAlive = defaultIsPidAlive } = {}
-) {
-  const file = lockPath(dataDir);
+export function isLockHeld(dataDir, options = {}) {
+  return isLockFileHeld(lockPath(dataDir), options);
+}
+
+// Removes a lock whose holder is dead, and only that lock. Two coordinators can read the same
+// dead holder; if the first replaces the lock before the second unlinks, a plain unlink would
+// delete the first one's live lock. The `<lock>.reclaim` guard (created exclusively, so one at
+// a time) serializes the reclaim, and inside it the lock is read again: it is removed only
+// when it is still byte for byte what was seen as stale. Returns false when another
+// coordinator is reclaiming right now (the caller treats that as "held").
+function reclaimStaleLock(file, observedRaw, isPidAlive) {
+  const guard = `${file}.reclaim`;
+  try {
+    writeFileSync(guard, String(process.pid), { flag: "wx", mode: 0o600 });
+  } catch (err) {
+    if (err?.code !== "EEXIST") throw err;
+    const owner = Number.parseInt(String(readLockRaw(guard) ?? ""), 10);
+    if (Number.isInteger(owner) && isPidAlive(owner)) return false;
+    // The reclaimer died inside its critical section: clear the guard; the next attempt retries.
+    try {
+      unlinkSync(guard);
+    } catch {
+      // someone else cleared it first
+    }
+    return false;
+  }
+  try {
+    const raw = readLockRaw(file);
+    const holder = raw === null ? null : parseLockHolder(raw);
+    if (raw !== null && raw === observedRaw && !(holder && isPidAlive(holder.pid))) {
+      unlinkSync(file);
+    }
+  } catch {
+    // already gone: the next attempt decides
+  } finally {
+    try {
+      unlinkSync(guard);
+    } catch {
+      // already gone
+    }
+  }
+  return true;
+}
+
+export async function acquireLockFile(file, operationId, { isPidAlive = defaultIsPidAlive } = {}) {
   mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
   const body = JSON.stringify({ operationId, pid: process.pid, at: new Date().toISOString() });
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    // The lock appears complete or not at all: a hard link of a finished temp file. A reader
+    // can never see an empty lock and mistake it for a dead holder.
+    const tmp = `${file}.${process.pid}.${attempt}.tmp`;
     try {
-      writeFileSync(file, body, { flag: "wx", mode: 0o600 });
+      writeFileSync(tmp, body, { mode: 0o600 });
+      linkSync(tmp, file);
       return {
         async release() {
-          const holder = readLockHolder(dataDir);
+          const holder = parseLockHolder(readLockRaw(file) ?? "");
           if (holder?.operationId === operationId) {
             try {
               unlinkSync(file);
@@ -500,19 +554,22 @@ export async function acquireFileLock(
       };
     } catch (err) {
       if (err?.code !== "EEXIST") throw err;
-      const holder = readLockHolder(dataDir);
+      const raw = readLockRaw(file);
+      const holder = raw === null ? null : parseLockHolder(raw);
       if (holder && isPidAlive(holder.pid)) break;
-      // A holder that died without releasing: reclaim once.
-      try {
-        unlinkSync(file);
-      } catch {
-        // someone else reclaimed it first; the next attempt decides
-      }
+      // A holder that died without releasing (or a lock file nobody can read): reclaim it.
+      if (raw !== null) reclaimStaleLock(file, raw, isPidAlive);
+    } finally {
+      rmSync(tmp, { force: true });
     }
   }
   const error = new Error("Another managed update is running");
   error.code = "update-in-progress";
   throw error;
+}
+
+export async function acquireFileLock(dataDir, operationId, options = {}) {
+  return acquireLockFile(lockPath(dataDir), operationId, options);
 }
 
 // ---------------------------------------------------------------------------------------
