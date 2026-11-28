@@ -39,6 +39,8 @@ export function isCodexFreePlan(providerSpecificData: unknown): boolean {
 
 type JsonRecord = Record<string, unknown>;
 
+const CODEX_SCHEMA_VALUE_OPTIONS = { coerceContainsCounts: true };
+
 const REDUNDANT_ONEOF_OBJECT_MAP_FIELDS = [
   "properties",
   "patternProperties",
@@ -178,7 +180,10 @@ export function normalizeCodexTools(
             const name = typeof subTool.name === "string" ? subTool.name.trim().slice(0, 128) : "";
             if (name) validToolNames.add(name);
             if (isPlainObject(subTool.parameters)) {
-              subTool.parameters = coerceSchemaValueShapes(subTool.parameters);
+              subTool.parameters = coerceSchemaValueShapes(
+                subTool.parameters,
+                CODEX_SCHEMA_VALUE_OPTIONS
+              );
             }
           }
         }
@@ -276,7 +281,7 @@ export function normalizeCodexTools(
     // Bare type names / tuple `items` fail the Responses validator for every
     // account ("'object' is not of type 'object', 'boolean'"), so coerce first.
     const sanitizedParameters = stripRedundantOneOfConstEnum(
-      stripUnsupportedRegexPatterns(coerceSchemaValueShapes(parameters))
+      stripUnsupportedRegexPatterns(coerceSchemaValueShapes(parameters, CODEX_SCHEMA_VALUE_OPTIONS))
     );
 
     // Rewrite in-place to Responses format
