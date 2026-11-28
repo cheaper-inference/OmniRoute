@@ -1,0 +1,1 @@
+- **fix(translator):** orphaned Claude tool results reach the prompt as text instead of serialized blocks with base64 data. (thanks @ryanngit)
