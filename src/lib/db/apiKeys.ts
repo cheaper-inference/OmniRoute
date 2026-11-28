@@ -25,7 +25,9 @@ import { setNoLog } from "../compliance/noLog";
 import { resolveModelAlias } from "@omniroute/open-sse/services/modelDeprecation.ts";
 import { stripNoThinkingAlias } from "@omniroute/open-sse/utils/noThinkingAlias.ts";
 import { getProviderAlias, resolveProviderId } from "@/shared/constants/providers";
+import { isReservedProviderPrefix } from "@/shared/constants/reservedProviderPrefixes";
 import { evaluateModelAccess } from "@/domain/modelAccessPolicy";
+import { getProviderNodePrefixSync } from "./providers/nodePrefix";
 import { isSelfLoopBearer, selfLoopKeyOverrides } from "./apiKeys/selfLoopKey";
 import {
   isLaunchSessionToken,
@@ -1963,6 +1965,12 @@ export async function isModelAllowedForKey(
       findPublishedModel,
       isPublishedModelHidden,
       checkGroupAccess: checkKeyModelAccess,
+      // A node whose prefix shadows a built-in provider is routed to that provider,
+      // so its prefix form names a different model (cf. blockedModelForms, #12899).
+      getProviderNodePrefix: (providerId) => {
+        const prefix = getProviderNodePrefixSync(providerId);
+        return prefix && !isReservedProviderPrefix(prefix) ? prefix : null;
+      },
       isDeniedUnderCanonicalProvider,
     }
   );
