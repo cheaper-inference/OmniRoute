@@ -76,6 +76,13 @@ import {
   resolveHeadBranch,
   resolvePrDiffBase,
 } from "./lib/gateMode.mjs";
+import {
+  buildReachChecks,
+  hasReachSections,
+  parseReachFacts,
+  readReachFacts,
+  REACH_FACTS_PATH,
+} from "./lib/reachClaims.mjs";
 import * as factsLib from "../release/facts.mjs";
 import {
   countFiles,
@@ -1009,6 +1016,7 @@ export function collectGateFacts({ root = ROOT, timeoutMs } = {}) {
       oauthProviders: countFiles("src/lib/oauth/providers", ".ts", root),
       a2aSkills: countFiles("src/lib/a2a/skills", ".ts", root),
       cloudAgents: countFiles("src/lib/cloudAgent/agents", ".ts", root),
+      reach: readReachFacts(root),
       code,
     },
     error: code ? null : (result.error ?? { kind: "exit", detail: "code facts unavailable" }),
@@ -1033,6 +1041,7 @@ export const PR_MODE_FACTS = Object.freeze({
   oauthProviders: null,
   a2aSkills: null,
   cloudAgents: null,
+  reach: null,
   code: {},
 });
 
@@ -1047,13 +1056,14 @@ export function buildChecks({ facts } = {}) {
   return assembleChecks(facts ?? collectGateFacts().facts);
 }
 
-function assembleChecks(facts) {
+function assembleChecks(facts, { checkReach = true } = {}) {
   const providerTotal = facts.providerReferenceTotal;
   const migrations = facts.migrations;
   const version = facts.version;
   const floors = facts.coverageFloors ?? {};
   return [
     ...buildReadmeMigrationChecks(ROOT, migrations),
+    ...(checkReach ? buildReachChecks(facts.reach ?? null) : []),
     numericClaimCheck({
       label: "Provider count",
       actual: providerTotal,
@@ -1679,7 +1689,12 @@ function buildCodeFactChecks(facts) {
  */
 export function planDerivedRewrites({ facts, readFile }) {
   if (!facts || typeof facts !== "object") throw new Error("planDerivedRewrites needs facts");
-  return planRewritesForChecks(assembleChecks(facts), readFile);
+  // The numbers step supplies its own facts and reads the tree through an overlay. Read the
+  // separate snapshot through that same reader unless the caller explicitly supplied reach facts.
+  const reach = Object.hasOwn(facts, "reach")
+    ? facts.reach
+    : parseReachFacts(readFile(REACH_FACTS_PATH));
+  return planRewritesForChecks(assembleChecks({ ...facts, reach }), readFile);
 }
 
 // --- Gate run --------------------------------------------------------------------------------
@@ -1790,6 +1805,15 @@ function readRepoFile(root) {
   };
 }
 
+// A complete checkout owns these sections even if both have been removed. Callers supplying
+// a partial tree or older facts can still judge the reach format by including either section.
+function readmeHasReachChecks(readFile) {
+  const readme = readFile("README.md");
+  // An absent README is reported by the checks themselves, like every other invariant.
+  if (readme == null) return true;
+  return readFile("scripts/check/lib/reachClaims.mjs") != null || hasReachSections(readme);
+}
+
 function gitShowReader(sha, cwd) {
   return (rel) => tryGit(["show", `${sha}:${rel}`], cwd);
 }
@@ -1833,7 +1857,9 @@ function runReleaseMode({ facts, factsError, root, lines, readHead, strictSoft }
     error = collected.error;
   }
   if (!resolved.code && !error) error = { kind: "exit", detail: "code facts unavailable" };
-  const checks = assembleChecks(resolved);
+  const checks = assembleChecks(resolved, {
+    checkReach: Object.hasOwn(resolved, "reach") || readmeHasReachChecks(readHead),
+  });
   const tally = tallyDrift(checks, readHead);
   lines.push(...tally.lines, "");
   const infra = error ? { kind: error.kind, detail: error.detail } : null;
@@ -1885,7 +1911,7 @@ function runReleaseMode({ facts, factsError, root, lines, readHead, strictSoft }
 function runPrMode(opts) {
   const { root, lines, readHead, strictSoft } = opts;
   const env = opts.env ?? process.env;
-  const checks = assembleChecks(PR_MODE_FACTS);
+  const checks = assembleChecks(PR_MODE_FACTS, { checkReach: readmeHasReachChecks(readHead) });
   const invariants = checks.filter((c) => c.scope === "invariant");
   const derived = checks.filter((c) => c.scope === "derived");
   const releaseOnly = checks.filter((c) => c.scope === "release-only");

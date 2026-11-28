@@ -1,0 +1,1 @@
+- **docs(readme):** refresh the distribution and video reach figures nightly from the collector snapshot.

@@ -158,6 +158,27 @@ const mirrorRow = (count: string) =>
 test("every check declares its scope, and every derived check has a locator", () => {
   const expected: Record<string, Check["scope"]> = {
     "DB migrations count (README mirrors)": "derived",
+    // Reach figures (docs/reference/reach-facts.json). These fixture facts carry no snapshot, so
+    // the checks judge the shape of the two README blocks only, in both modes.
+    "README reach Collected on (distributionCollectedOn)": "invariant",
+    "README reach npmDownloads30d": "invariant",
+    "README reach dockerPulls": "invariant",
+    "README reach releaseDownloads": "invariant",
+    "README reach youtubeVideos": "invariant",
+    "README reach youtubeViews": "invariant",
+    "README reach instagramVideos": "invariant",
+    "README reach instagramViews": "invariant",
+    "README reach tiktokVideos": "invariant",
+    "README reach tiktokViews": "invariant",
+    "README reach videos": "invariant",
+    "README reach videoViews": "invariant",
+    "README reach snapshotCollectedOn": "invariant",
+    "README reach snapshotVideos": "invariant",
+    "README reach snapshotYouTube": "invariant",
+    "README reach snapshotTikTok": "invariant",
+    "README reach snapshotInstagram": "invariant",
+    "README reach snapshotViews": "invariant",
+    "README reach snapshotCreators": "invariant",
     "Provider count": "derived",
     "Provider count (secondary docs and skills)": "derived",
     "No exact provider count (package.json description)": "invariant",

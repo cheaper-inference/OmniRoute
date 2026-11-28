@@ -110,6 +110,16 @@ jobs:
         with:
           cache: false
 
+      # An unavailable or rejected export keeps the snapshot; a nonzero exit fails the step.
+      - name: Read the reach metrics
+        if: steps.base.outputs.skip == 'false'
+        env:
+          TRACKER_EXPORT_READ_TOKEN: ${{ secrets.TRACKER_EXPORT_READ_TOKEN }}
+          TRACKER_EXPORT_REPOSITORY: ${{ vars.TRACKER_EXPORT_REPOSITORY }}
+        run: |
+          set -euo pipefail
+          node scripts/release/reach-facts.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+
       # UI keys added or rewritten since the last release are translated in the same run: the
       # refresh never writes __MISSING__ markers without a backend (they fail
       # i18n-vi-completeness and the ratio gate on the base). Same engine rule as

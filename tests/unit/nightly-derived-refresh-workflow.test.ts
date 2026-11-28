@@ -600,3 +600,32 @@ test("nightly refresh: the refresh step gets a translation engine, so it never w
     "the engine is chosen before the refresh runs"
   );
 });
+
+test("nightly refresh: reads the reach export before refreshing derived numbers", () => {
+  const reachIndex = steps.findIndex((s) => s.name === "Read the reach metrics");
+  const refreshIndex = steps.findIndex((s) => s.name === "Refresh derived numbers");
+  assert.ok(reachIndex >= 0 && reachIndex < refreshIndex);
+  const reach = steps[reachIndex];
+  assert.equal(reach.if, "steps.base.outputs.skip == 'false'");
+  assert.equal(reach.if, steps[refreshIndex].if);
+  assert.match(reach.run ?? "", /^set -euo pipefail$/m);
+  assert.match(
+    reach.run ?? "",
+    /node scripts\/release\/reach-facts\.mjs \| tee -a "\$GITHUB_STEP_SUMMARY"/
+  );
+});
+
+test("nightly refresh: scopes the reach export token and repository to the reader step", () => {
+  const reach = steps.find((s) => s.name === "Read the reach metrics");
+  assert.deepEqual(reach?.env, {
+    TRACKER_EXPORT_READ_TOKEN: "${{ secrets.TRACKER_EXPORT_READ_TOKEN }}",
+    TRACKER_EXPORT_REPOSITORY: "${{ vars.TRACKER_EXPORT_REPOSITORY }}",
+  });
+  for (const workflowJob of Object.values(nightly.jobs)) {
+    for (const step of workflowJob.steps) {
+      assert.doesNotMatch(step.run ?? "", /TRACKER_EXPORT_READ_TOKEN/);
+      if (step !== reach) assert.doesNotMatch(JSON.stringify(step), /TRACKER_EXPORT_READ_TOKEN/);
+    }
+  }
+  assert.equal(read(NIGHTLY).split("${{ secrets.TRACKER_EXPORT_READ_TOKEN }}").length - 1, 1);
+});

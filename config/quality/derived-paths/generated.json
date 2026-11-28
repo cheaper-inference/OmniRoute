@@ -25,6 +25,12 @@
       "refreshedBy": "npm run release:refresh-derived (or npm run facts)"
     },
     {
+      "id": "reach-facts",
+      "paths": ["docs/reference/reach-facts.json"],
+      "why": "Snapshot of the collector's reach metrics used to update the README distribution and video figures during the nightly derived refresh.",
+      "refreshedBy": "node scripts/release/reach-facts.mjs (nightly derived refresh)"
+    },
+    {
       "id": "provider-reference",
       "paths": ["docs/reference/PROVIDER_REFERENCE.md"],
       "why": "Generated from src/shared/constants/providers.ts (whole catalog + totals + version/date header): every provider PR rewrote it, 30 of 321 open PRs on 2026-11-13.",

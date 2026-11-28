@@ -802,21 +802,22 @@ Provider limits and eligibility change; check the provider before you rely on a 
   <tr><td align="left" nowrap><b>OpenCode</b></td><td align="left" nowrap><code>omniroute config opencode</code> or <code>@omniroute/opencode-provider</code></td><td align="left">Writes the OpenCode provider config for your gateway</td></tr>
 </table>
 
-### Distribution snapshot — 16 November 2026
+### Distribution snapshot
 
-| Measure                            |      Count | Scope                                                                        |
-| ---------------------------------- | ---------: | ---------------------------------------------------------------------------- |
-| npm downloads, last 30 days        |   371,000+ | `omniroute`, 17 October – 15 November 2026                                   |
-| npm downloads since first publish  | 1,450,000+ | `omniroute`, 14 February – 15 November 2026                                  |
-| Docker pulls, historical image     | 1,900,000+ | `diegosouzapw/omniroute`, since February 2026                                |
-| Docker pulls, organization image   |        143 | `cheaperinference/omniroute`, the official image since 16 November 2026      |
-| Desktop installer downloads        |   201,000+ | Release assets ending in `.exe`, `.dmg`, `.AppImage` or `.deb`, 283 releases |
-| All GitHub release asset downloads |   574,000+ | Installers plus update manifests, source archives, SBOMs and optional packs  |
-| OmniCopilot, VS Code Marketplace   |    49,000+ | Marketplace `install` statistic                                              |
-| OmniCopilot, Open VSX              |    18,900+ | Open VSX `downloadCount`                                                     |
-| OmniRouteTray DMG downloads        |     1,600+ | All `zoispag/omniroute-tray` releases                                        |
+Collected on 2026-11-28.
 
-<sub>Downloads, installs and pulls are not unique users, and each row keeps its own scope, so the rows are not added together. Sources: npm downloads API, Docker Hub API, GitHub Releases API, Visual Studio Marketplace gallery API, Open VSX API. The badges above update live.</sub>
+| Measure                            |      Count | Scope                                                                                                |
+| ---------------------------------- | ---------: | ---------------------------------------------------------------------------------------------------- |
+| npm downloads, last 30 days        |   345,000+ | `omniroute`, the 30 days before the collection date                                                  |
+| Docker pulls, both images          | 2,151,000+ | `diegosouzapw/omniroute` and `cheaperinference/omniroute`, since February 2026                       |
+| All GitHub release asset downloads |   631,000+ | Installers plus update manifests, source archives, SBOMs and optional packs                          |
+| npm downloads since first publish  | 1,450,000+ | `omniroute`, 14 February – 15 November 2026                                                          |
+| Desktop installer downloads        |   201,000+ | Release assets ending in `.exe`, `.dmg`, `.AppImage` or `.deb`, 283 releases, as of 16 November 2026 |
+| OmniCopilot, VS Code Marketplace   |    49,000+ | Marketplace `install` statistic, as of 16 November 2026                                              |
+| OmniCopilot, Open VSX              |    18,900+ | Open VSX `downloadCount`, as of 16 November 2026                                                     |
+| OmniRouteTray DMG downloads        |     1,600+ | All `zoispag/omniroute-tray` releases, as of 16 November 2026                                        |
+
+<sub>The collector updates the first three rows daily, and the remaining rows come from the manual survey of 16 November 2026. Downloads, installs and pulls are not unique users, and each row keeps its own scope, so the rows are not added together. Sources: npm downloads API, Docker Hub API, GitHub Releases API, Visual Studio Marketplace gallery API, Open VSX API. The badges above update live.</sub>
 
 <sub>Guides: [Docker](docs/guides/DOCKER_GUIDE.md) · [Headless mode](docs/guides/HEADLESS.md) · [Desktop](docs/guides/ELECTRON_GUIDE.md) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md) · [Menu-bar tray](https://github.com/zoispag/omniroute-tray)</sub>
 
@@ -1350,13 +1351,12 @@ Creator titles and captions are their own. Some promise more than OmniRoute guar
 
 | <img width="2000" height="0" alt=""> Platform |    Videos |    Known views |
 | --------------------------------------------- | --------: | -------------: |
-| YouTube long-form                             |       928 |     10,340,464 |
-| YouTube Shorts                                |       774 |      2,793,933 |
-| Instagram                                     |       290 |      8,054,601 |
-| TikTok                                        |       334 |      3,515,835 |
-| **Total**                                     | **2,326** | **24,704,833** |
+| YouTube                                       |     2,118 |     15,102,533 |
+| Instagram                                     |       538 |     14,911,666 |
+| TikTok                                        |       567 |     10,922,080 |
+| **Total**                                     | **3,223** | **40,936,279** |
 
-Snapshot of 2026-11-16: **2,326 unique videos** (YouTube 1,702 = 928 long-form + 774 Shorts · TikTok 334 · Instagram 290), **24,704,833 known views**, **1,395 channels and profiles**. Duplicates are merged by canonical URL, keeping the highest count; 79 videos have no view count yet and are not counted. YouTube is collected up to videos published on 2026-11-15; TikTok and Instagram collection has been frozen since 2026-09-02, so their counts are older.
+Snapshot of 2026-11-28: **3,223 unique videos** (YouTube 2,118 · TikTok 567 · Instagram 538), **40,936,279 known views**, **1,969 channels and profiles**. Duplicates are merged by canonical URL, keeping the highest count; videos without a view count yet are not counted. Collection times vary by platform.
 
 ### If you made a video
 

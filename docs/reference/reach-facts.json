@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "collectedOn": "2026-11-28",
+  "metrics": {
+    "creators": {
+      "value": 1969,
+      "collectedAt": "2026-11-28T08:46:35Z"
+    },
+    "dockerPulls": {
+      "value": 2151790,
+      "collectedAt": "2026-11-28T08:57:35Z"
+    },
+    "facebookPosts": {
+      "value": 59,
+      "collectedAt": "2026-11-28T08:30:03Z"
+    },
+    "facebookViews": {
+      "value": 5379022,
+      "collectedAt": "2026-11-28T08:30:03Z"
+    },
+    "instagramVideos": {
+      "value": 538,
+      "collectedAt": "2026-11-28T08:55:57Z"
+    },
+    "instagramViews": {
+      "value": 14911666,
+      "collectedAt": "2026-11-28T08:55:57Z"
+    },
+    "linkedinPosts": {
+      "value": 30,
+      "collectedAt": "2026-11-28T08:30:03Z"
+    },
+    "mentions": {
+      "value": 1939,
+      "collectedAt": "2026-11-28T08:30:03Z"
+    },
+    "npmDownloads30d": {
+      "value": 345840,
+      "collectedAt": "2026-11-28T08:57:35Z"
+    },
+    "redditPosts": {
+      "value": 870,
+      "collectedAt": "2026-11-28T08:57:15Z"
+    },
+    "releaseDownloads": {
+      "value": 631923,
+      "collectedAt": "2026-11-28T08:57:35Z"
+    },
+    "repoClones14d": {
+      "value": 430834,
+      "collectedAt": "2026-11-28T08:57:35Z"
+    },
+    "repoViews14d": {
+      "value": 346184,
+      "collectedAt": "2026-11-28T08:57:35Z"
+    },
+    "threadsPosts": {
+      "value": 5,
+      "collectedAt": "2026-11-28T08:30:03Z"
+    },
+    "tiktokVideos": {
+      "value": 567,
+      "collectedAt": "2026-11-28T08:55:57Z"
+    },
+    "tiktokViews": {
+      "value": 10922080,
+      "collectedAt": "2026-11-28T08:55:57Z"
+    },
+    "videoViews": {
+      "value": 40936279,
+      "collectedAt": "2026-11-28T08:46:35Z"
+    },
+    "videos": {
+      "value": 3223,
+      "collectedAt": "2026-11-28T08:46:35Z"
+    },
+    "webPages": {
+      "value": 28,
+      "collectedAt": "2026-11-28T08:30:03Z"
+    },
+    "xPosts": {
+      "value": 947,
+      "collectedAt": "2026-11-28T08:57:15Z"
+    },
+    "xViews": {
+      "value": 14885005,
+      "collectedAt": "2026-11-28T08:57:15Z"
+    },
+    "youtubeVideos": {
+      "value": 2118,
+      "collectedAt": "2026-11-28T08:46:35Z"
+    },
+    "youtubeViews": {
+      "value": 15102533,
+      "collectedAt": "2026-11-28T08:46:35Z"
+    }
+  }
+}
