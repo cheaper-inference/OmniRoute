@@ -22,7 +22,7 @@ test("offers accessor short-circuits before cache when Radar is disabled", () =>
   assert.equal(reads, 0);
 });
 
-test("offers accessor fails closed for missing, corrupt, or non-live cache", () => {
+test("offers accessor fails closed for missing, malformed, or corrupt cache", () => {
   for (const cache of [
     null,
     { version: "x", tier: "live", payload: "not-json", fetchedAt: "now" },
@@ -41,7 +41,7 @@ test("offers accessor revalidates the cache and removes expired entries", async 
     getFlag: () => true,
     getCache: () => ({
       version: "2026.08.09.1",
-      tier: "live",
+      tier: "community",
       payload,
       fetchedAt: "2026-08-09T12:05:00.000Z",
     }),
@@ -54,7 +54,7 @@ test("offers accessor revalidates the cache and removes expired entries", async 
   );
   assert.deepEqual(result.meta, {
     version: "2026.08.09.1",
-    tier: "live",
+    tier: "community",
     fetchedAt: "2026-08-09T12:05:00.000Z",
   });
 });

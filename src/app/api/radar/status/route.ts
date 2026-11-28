@@ -57,7 +57,7 @@ export async function GET(request: Request) {
     const settings = getRadarSettings();
     return NextResponse.json(
       {
-        settings: { optIn: settings.optIn, hasSupporterKey: settings.supporterKey !== null },
+        settings: { optIn: settings.optIn },
         feeds: {
           catalog: cacheStatus(getRadarCache()),
           referrals: cacheStatus(getRadarReferralsCache()),

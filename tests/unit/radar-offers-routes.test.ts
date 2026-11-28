@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { generateKeyPairSync, sign } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -93,20 +94,44 @@ test("GET offers returns only the local cache and never exposes supporter key ma
   assert.ok(!JSON.stringify(body).includes("omr_"));
 });
 
-test("POST offers sync validates an empty body and gates a missing key without network", async () => {
+test("POST offers sync validates the body and updates without a key after opt-in", async (t) => {
   resetStorage();
   process.env.RADAR_ENABLED = "true";
   radarDb.setRadarOptIn(true);
   const { POST } = await import("../../src/app/api/radar/offers/sync/route.ts");
 
+  const { publicKey, privateKey } = generateKeyPairSync("ed25519");
+  process.env.RADAR_FEED_PUBKEY = publicKey
+    .export({ type: "spki", format: "der" })
+    .toString("base64");
+  t.after(() => {
+    delete process.env.RADAR_FEED_PUBKEY;
+  });
+  const bytes = fs.readFileSync(
+    new URL("../fixtures/radar-offers-canonical.json", import.meta.url)
+  );
+  const fetchMock = t.mock.method(
+    globalThis,
+    "fetch",
+    async () =>
+      new Response(new Uint8Array(bytes), {
+        headers: {
+          "x-omniroute-feed-signature": sign(null, bytes, privateKey).toString("base64"),
+        },
+      })
+  );
+
   const invalid = await POST(
     request("/api/radar/offers/sync", "POST", await authHeaders(), { provider: "groq" })
   );
   assert.equal(invalid.status, 400);
+  assert.equal(fetchMock.mock.callCount(), 0);
 
   const response = await POST(request("/api/radar/offers/sync", "POST", await authHeaders()));
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { status: "no_key" });
+  assert.deepEqual(await response.json(), { status: "updated", version: "2026.08.09.1" });
+  assert.equal(fetchMock.mock.callCount(), 1);
+  assert.equal(radarDb.getRadarOffersCache()?.payload, bytes.toString("utf8"));
 });
 
 test("shared sync handler rejects invalid bodies before invoking a feed", async () => {

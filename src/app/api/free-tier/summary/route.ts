@@ -89,21 +89,12 @@ export function OPTIONS(): Response {
 type RadarCatalog = ReturnType<typeof getRadarCatalog>;
 type ServedOverlay = NonNullable<RadarCatalog["meta"]>;
 
-/**
- * Pick the overlay this caller may see and the entries the figures are computed from.
- *
- * Entitlement follows the feed server's own download-time decision: the
- * community feed is the free public catalog, so it serves everyone; the
- * live feed is supporter-key content, so it only reaches callers this
- * instance has authenticated — never anonymous visitors, or an exposed
- * instance would re-publish the paid feed for free.
- */
-function resolveServedCatalog(
-  { entries, meta }: RadarCatalog,
-  authed: boolean
-): { overlay: ServedOverlay | null; servedEntries: BudgetEntry[] | undefined } {
-  const overlayIsFresh = meta !== null && !meta.olderThanRelease;
-  const overlay = overlayIsFresh && (meta.tier !== "live" || authed) ? meta : null;
+/** D35: every caller can read a current overlay from the free public catalog. */
+function resolveServedCatalog({ entries, meta }: RadarCatalog): {
+  overlay: ServedOverlay | null;
+  servedEntries: BudgetEntry[] | undefined;
+} {
+  const overlay = meta !== null && !meta.olderThanRelease ? meta : null;
   // The accessor has already applied local model state to the shipped catalog
   // when the feed is stale.
   const servedEntries = overlay || meta?.olderThanRelease ? entries.map(toBudgetEntry) : undefined;
@@ -170,14 +161,10 @@ export async function GET(req: Request): Promise<Response> {
   // Resolve feed age and local model state in the shared catalog accessor.
   const catalog = getRadarCatalog();
 
-  // #13679: computed once and reused below to also gate the operator-specific
-  // usage fields — this endpoint ships an unconditional wildcard CORS header
-  // (the community free-tier catalog is intentionally public), so anything
-  // that is NOT meant to be world-readable must be withheld here rather than
-  // relying on Origin checks the browser CORS model doesn't actually enforce
-  // for a same-origin-looking (DNS-rebinding) caller.
+  // #13679: wildcard CORS serves the public catalog. Authentication controls
+  // access to the operator's local usage and remaining tokens.
   const authed = await isAuthenticated(req);
-  const { overlay, servedEntries } = resolveServedCatalog(catalog, authed);
+  const { overlay, servedEntries } = resolveServedCatalog(catalog);
   const totals = computeFreeModelTotals({ excludeTosAvoid, entries: servedEntries });
   const servedAt = new Date();
 

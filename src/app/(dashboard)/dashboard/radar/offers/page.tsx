@@ -5,7 +5,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
-import { buttonVariants } from "@omniroute/ui-kit/button";
 
 import Icon from "@/shared/components/Icon";
 import {
@@ -20,14 +19,7 @@ import Badge from "@/shared/components/Badge";
 
 interface OffersMeta {
   version: string;
-  tier: "live";
   fetchedAt: string;
-}
-
-interface SettingsPayload {
-  hasSupporterKey?: boolean;
-  contributorClaimUrl?: string;
-  supporterPlansUrl?: string;
 }
 
 export default function RadarOffersPage() {
@@ -35,9 +27,6 @@ export default function RadarOffersPage() {
   const locale = useLocale();
   const [offers, setOffers] = useState<RadarOffer[]>([]);
   const [meta, setMeta] = useState<OffersMeta | null>(null);
-  const [hasSupporterKey, setHasSupporterKey] = useState(false);
-  const [contributorClaimUrl, setContributorClaimUrl] = useState<string | null>(null);
-  const [supporterPlansUrl, setSupporterPlansUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [flagOff, setFlagOff] = useState(false);
@@ -66,15 +55,10 @@ export default function RadarOffersPage() {
       }
       if (!response.ok) throw new Error("offers_sync_failed");
       const status = (await response.json()) as { status?: string; reason?: string };
-      if (status.status === "no_key") {
-        setHasSupporterKey(false);
-        return;
-      }
       if (
         status.status === "error" ||
         status.status === "invalid_signature" ||
         status.status === "invalid_schema" ||
-        status.status === "wrong_tier" ||
         status.status === "too_large"
       ) {
         setError(t("loadFailed"));
@@ -103,16 +87,9 @@ export default function RadarOffersPage() {
           return;
         }
         if (!response.ok) throw new Error("settings_load_failed");
-        const settings = (await response.json()) as SettingsPayload;
-        const hasKey = settings.hasSupporterKey === true;
-        setHasSupporterKey(hasKey);
-        setContributorClaimUrl(
-          typeof settings.contributorClaimUrl === "string" ? settings.contributorClaimUrl : null
-        );
-        setSupporterPlansUrl(
-          typeof settings.supporterPlansUrl === "string" ? settings.supporterPlansUrl : null
-        );
-        if (hasKey) await syncAndLoad();
+        const settings = (await response.json()) as { optIn?: boolean };
+        if (settings.optIn === true) await syncAndLoad();
+        else await loadOffers();
       } catch {
         setError(t("loadFailed"));
       } finally {
@@ -120,7 +97,7 @@ export default function RadarOffersPage() {
       }
     }
     void load();
-  }, [syncAndLoad, t]);
+  }, [loadOffers, syncAndLoad, t]);
 
   const activeOffers = useMemo(() => filterActiveRadarOffers(offers, new Date()), [offers]);
 
@@ -159,11 +136,9 @@ export default function RadarOffersPage() {
         title={t("title")}
         description={t("subtitle")}
         actions={
-          hasSupporterKey ? (
-            <Button variant="outline" onClick={() => void syncAndLoad()} disabled={refreshing}>
-              {refreshing ? t("refreshing") : t("refresh")}
-            </Button>
-          ) : undefined
+          <Button variant="outline" onClick={() => void syncAndLoad()} disabled={refreshing}>
+            {refreshing ? t("refreshing") : t("refresh")}
+          </Button>
         }
       />
 
@@ -173,38 +148,6 @@ export default function RadarOffersPage() {
         <div className="flex min-h-48 items-center justify-center text-text-muted">
           {t("loading")}
         </div>
-      ) : !hasSupporterKey ? (
-        <Card>
-          <div className="flex flex-col items-center gap-4 py-8 text-center">
-            <Icon name="redeem" size={36} className="text-primary" />
-            <h2 className="ci-heading" data-size="xl">
-              {t("keyRequiredTitle")}
-            </h2>
-            <p className="max-w-xl text-text-muted">{t("keyRequiredDescription")}</p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              {contributorClaimUrl && (
-                <a
-                  href={contributorClaimUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={buttonVariants({ variant: "outline" })}
-                >
-                  {t("contributorButton")}
-                </a>
-              )}
-              {supporterPlansUrl && (
-                <a
-                  href={supporterPlansUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={buttonVariants()}
-                >
-                  {t("supporterButton")}
-                </a>
-              )}
-            </div>
-          </div>
-        </Card>
       ) : activeOffers.length === 0 ? (
         <Card>
           <p className="py-8 text-center text-text-muted">{t("empty")}</p>

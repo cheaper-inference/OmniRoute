@@ -179,10 +179,16 @@ test("price metadata is supplied only by the feed being served", async () => {
 
   seedFeed({ tier: "live", priceReference: PRICE, rowSum: ROW_SUM });
   const anonymous = await getSummary();
-  assert.equal(anonymous.source.kind, "release");
-  assert.equal(anonymous.priceReference, null);
-  assert.equal(anonymous.rowSumSource, "release");
-  assert.deepEqual(anonymous.rowSum, expectedMirror(anonymous.source.servedAt));
+  assert.equal(anonymous.source.kind, "radar");
+  assert.deepEqual(anonymous.priceReference, PRICE);
+  assert.equal(anonymous.rowSumSource, "radar");
+  assert.deepEqual(anonymous.rowSum, {
+    method: "row-sum-v1",
+    liveTokens: ROW_SUM.liveTokensPerMonth,
+    retiredTokens: ROW_SUM.retiredTokensPerMonth,
+    totalTokens: ROW_SUM.totalTokensPerMonth,
+    retiredShare: ROW_SUM.retiredTokensPerMonth / ROW_SUM.totalTokensPerMonth,
+  });
 });
 
 test("an unsupported or absent feed row-sum uses the release mirror", async () => {

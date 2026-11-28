@@ -12,15 +12,9 @@
  * answers (null when a pre-migration cache row carries none — never the
  * download time standing in for it), the curation date when the baseline does.
  *
- * Entitlement: the feed server decides community vs live at DOWNLOAD time
- * (supporter key). The local instance may re-serve what it legitimately holds,
- * but must not become a free relay of premium content when it is exposed to a
- * network:
- *   - community tier  => served to every caller (it is the free public feed);
- *   - live tier       => served to authenticated callers only; anonymous
- *                        callers keep the release-frozen baseline;
- *   - flag off / no cache / corrupt cache => exactly today's behaviour
- *     (the mirror of radar-inertia.test.ts).
+ * A current, verified public catalog overlay serves every caller. Local usage
+ * remains visible only to authenticated callers. Flag-off, missing, malformed,
+ * and older caches retain the release fallback.
  */
 
 import test from "node:test";
@@ -203,7 +197,7 @@ test("excludeTosAvoid still filters on the baseline path", async () => {
   assert.equal(body.steadyRecurringTokens, expected.steadyRecurringTokens);
 });
 
-// --- community tier: the free public feed serves everyone --------------------
+// --- community cache: the public catalog serves everyone --------------------
 
 test("community tier, anonymous caller => the overlay answers, honestly dated", async () => {
   resetState();
@@ -264,21 +258,27 @@ test("a pre-migration cache row serves the overlay with an UNKNOWN date, not the
   assert.equal(body.catalogUpdatedAt, FREE_CATALOG_CURATED_AT);
 });
 
-// --- live tier: paid content stays behind this instance's sessions ----------
+// --- live cache: the same public catalog and private usage contract ----------
 
-test("live tier, ANONYMOUS caller => the baseline answers, never the premium feed", async () => {
+test("live tier, anonymous caller => current overlay with local usage withheld", async () => {
   resetState();
   setFeatureFlagOverride("RADAR_ENABLED", "true");
   seedCache("live");
 
   const body = await getBody(false);
 
-  assert.equal(body.catalogSource, "baseline");
-  assert.equal(body.catalogUpdatedAt, FREE_CATALOG_CURATED_AT);
-  assert.equal(body.steadyRecurringTokens, computeFreeModelTotals().steadyRecurringTokens);
+  assert.equal(body.catalogSource, "radar-overlay");
+  assert.equal((body.source as { kind: string }).kind, "radar");
+  assert.equal(body.catalogUpdatedAt, GEN_AT);
+  assert.equal(
+    body.steadyRecurringTokens,
+    (computeFreeModelTotals().steadyRecurringTokens as number) + OVERLAY_TOKENS
+  );
+  assert.equal(body.usedThisMonth, null);
+  assert.equal(body.remaining, null);
 });
 
-test("live tier, authenticated caller => this install's earned overlay", async () => {
+test("live tier, authenticated caller => same overlay", async () => {
   resetState();
   setFeatureFlagOverride("RADAR_ENABLED", "true");
   seedCache("live");
