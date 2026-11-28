@@ -1,0 +1,1 @@
+- **fix(sse):** a translated stream that fails inside its transform no longer leaves its idle-timeout timer running until the idle timeout. ([#19713](https://github.com/cheaper-inference/OmniRoute/pull/19713))
