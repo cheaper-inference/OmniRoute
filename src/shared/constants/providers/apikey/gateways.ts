@@ -1658,4 +1658,16 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     apiHint:
       "Create an API key in your Gisoo account, then paste it here as a Bearer token. OpenAI-compatible base URL: https://gisoo.pro/api/v1. Prepaid credit; no free tier.",
   },
+  atlascloud: {
+    id: "atlascloud",
+    alias: "ac",
+    name: "Atlas Cloud",
+    icon: "cloud_queue",
+    color: "#6D5EF5",
+    textIcon: "AC",
+    website: "https://www.atlascloud.ai",
+    apiKeyUrl: "https://www.atlascloud.ai/console/api-keys",
+    serviceKinds: ["llm"],
+    passthroughModels: true,
+  },
 };
