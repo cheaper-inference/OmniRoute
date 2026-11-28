@@ -1,0 +1,1 @@
+- **fix(codex):** A Codex connection whose refresh token was revoked upstream (`refresh_token_invalidated`, `refresh_token_reused`, `invalid_grant`) is now parked as expired and inactive on the real request path, instead of staying active and being re-selected for another guaranteed 401 after every short cooldown
