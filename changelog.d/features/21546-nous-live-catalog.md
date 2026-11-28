@@ -1,0 +1,1 @@
+- **feat(models):** the model selector lists the live Nous Research catalog, with the built-in models as fallback. (thanks @phuongvm)

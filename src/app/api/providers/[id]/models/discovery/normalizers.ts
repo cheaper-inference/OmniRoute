@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { SAFE_OUTBOUND_FETCH_PRESETS, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import {
@@ -21,6 +22,7 @@ import {
   isUsableAntigravityProjectId,
 } from "@omniroute/open-sse/services/antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "@omniroute/open-sse/services/antigravityProjectPersist.ts";
+import { collapseProviderPrefix } from "@/shared/utils/modelIdPrefix";
 import { hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
 import { asRecord, toNonEmptyString } from "./helpers";
 import type { DiscoveryFailure } from "@/shared/discovery/degradedCause";
@@ -280,11 +282,57 @@ function pickPricingEvidence(item: Record<string, unknown>): Record<string, unkn
   return picked;
 }
 
+const modelStringList = z.array(z.string().trim().min(1)).max(100);
+const nousEndpointsByModality = new Map([
+  ["text", "chat"],
+  ["image", "images"],
+  ["embedding", "embeddings"],
+  ["embeddings", "embeddings"],
+]);
+
+function readNousModelEndpoints(
+  item: Record<string, unknown>,
+  architecture: Record<string, unknown>,
+  modality: string | null
+): string[] {
+  const declared = modelStringList.safeParse(item.supportedEndpoints).data;
+  if (declared?.length) return declared;
+
+  // Only the output side determines which endpoint serves the model. Image input can be chat.
+  const [, output] = modality?.split("->", 2) ?? [];
+  const outputs = modelStringList.safeParse(
+    item.output_modalities ?? architecture.output_modalities
+  ).data;
+  const modelKinds = [toNonEmptyString(item.kind), toNonEmptyString(item.type)];
+  const evidence = outputs?.length ? outputs : (output?.split("+") ?? modelKinds);
+  return evidence.flatMap((value) => {
+    const endpoint = nousEndpointsByModality.get(value?.trim().toLowerCase() ?? "");
+    return endpoint ? [endpoint] : [];
+  });
+}
+
+function pickNousModelCapabilities(item: Record<string, unknown>): Record<string, unknown> {
+  const architecture = asRecord(item.architecture);
+  const modality = toNonEmptyString(architecture.modality) || toNonEmptyString(item.modality);
+  const inputModalities = modelStringList.safeParse(
+    item.input_modalities ?? architecture.input_modalities
+  ).data;
+  const supportedEndpoints = readNousModelEndpoints(item, architecture, modality);
+  return {
+    ...(modality ? { modality } : {}),
+    ...(inputModalities ? { input_modalities: inputModalities } : {}),
+    ...(supportedEndpoints.length
+      ? { supportedEndpoints, endpointCapabilitySource: "declared" }
+      : {}),
+  };
+}
+
 export function normalizeOpenAiLikeModelsResponse(
   data: unknown,
   fallbackOwner: string
 ): Array<{ id: string; name: string; owned_by: string }> {
   const payload = asRecord(data);
+  const isNousCatalog = fallbackOwner === "nous-research";
   const items = Array.isArray(data)
     ? data
     : Array.isArray(payload.data)
@@ -296,9 +344,10 @@ export function normalizeOpenAiLikeModelsResponse(
   return items
     .map((value) => {
       const item = asRecord(value);
-      const id =
+      const rawId =
         toNonEmptyString(item.id) || toNonEmptyString(item.model) || toNonEmptyString(item.name);
-      if (!id) return null;
+      if (!rawId) return null;
+      const id = isNousCatalog ? collapseProviderPrefix(rawId, ["nous", fallbackOwner]) : rawId;
       const name =
         toNonEmptyString(item.display_name) ||
         toNonEmptyString(item.displayName) ||
@@ -308,6 +357,7 @@ export function normalizeOpenAiLikeModelsResponse(
         toNonEmptyString(item.owned_by) || toNonEmptyString(item.provider) || fallbackOwner;
       return {
         ...pickEffortDeclarations(item),
+        ...(isNousCatalog ? pickNousModelCapabilities(item) : {}),
         ...(fallbackOwner === "siliconflow" || hasPayloadPaidEvidence(item)
           ? pickPricingEvidence(item)
           : {}),
