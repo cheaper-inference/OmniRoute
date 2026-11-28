@@ -144,7 +144,7 @@ test("Claude override moves the UA but NOT the pinned billing build revision", a
   await withEnv({ CLAUDE_CODE_CLIENT_VERSION: undefined }, () => {
     setCliVersionOverrides({ claude: "2.1.260" });
     assert.equal(claude.getClaudeCodeUserAgent("cli"), "claude-cli/2.1.260 (external, cli)");
-    assert.equal(claude.CLAUDE_CODE_CLIENT_BUILD_REVISION, "1e2");
+    assert.equal(claude.CLAUDE_CODE_CLIENT_BUILD_REVISION, "518");
     assert.equal(
       claude.getClaudeCodeClientBillingVersion(),
       "2.1.260." + claude.CLAUDE_CODE_CLIENT_BUILD_REVISION
