@@ -64,14 +64,14 @@ test("retention regression: last-good evicts after 64 distinct unknown cursors",
   assert.equal((await timeoutResponse("unknown-0")).status, 503);
 });
 
-test("retention regression: response cache evicts when retained strings exceed 16 MiB", async () => {
-  const body = "界".repeat(3 * 1024 * 1024);
+test("retention regression: response cache evicts when retained bytes exceed 16 MiB", async () => {
+  const body = "界".repeat(2 * 1024 * 1024);
   for (let i = 0; i < 3; i++) await resolve(`bytes-${i}`, body);
   assert.equal((await resolve("bytes-0", "rebuilt")).length, "rebuilt".length);
 });
 
-test("retention regression: last-good evicts when retained strings exceed 16 MiB", async () => {
-  const body = "界".repeat(3 * 1024 * 1024);
+test("retention regression: last-good evicts when retained bytes exceed 16 MiB", async () => {
+  const body = "界".repeat(2 * 1024 * 1024);
   for (let i = 0; i < 3; i++) await resolve(`bytes-${i}`, body);
   cache.__expireCatalogCacheForTest(60_000);
   assert.equal((await timeoutResponse("bytes-0")).status, 503);
@@ -92,8 +92,8 @@ test("both maps enforce cardinality and retain recently read entries", async () 
   assert.equal(evicted.status, 503);
 });
 
-test("large UTF-16 bodies hit the byte budget before the entry cap", async () => {
-  const body = "界".repeat(3 * 1024 * 1024);
+test("large multi-byte bodies hit the byte budget before the entry cap", async () => {
+  const body = "界".repeat(2 * 1024 * 1024);
   for (let i = 0; i < 3; i++) {
     assert.equal((await resolve(`large-${i}`, body)).length, body.length);
     assertBounded();
@@ -127,7 +127,7 @@ test("keys and response headers also count toward the byte budget", async () => 
 });
 
 test("oversized successful payloads return normally without cache admission", async () => {
-  const body = "x".repeat(9 * 1024 * 1024);
+  const body = "x".repeat(17 * 1024 * 1024);
   assert.equal((await resolve("oversized", body)).length, body.length);
   assert.deepEqual(cache.__getCatalogCacheStatsForTest(), {
     cache: { entries: 0, bytes: 0 },
@@ -280,7 +280,7 @@ for (const oversizedPart of ["body", "headers"] as const) {
     assert.equal(await resolve(key, "prior-last-good"), "prior-last-good");
     const prior = cache.__getCatalogCacheStatsForTest().lastGood;
     cache.__expireCatalogCacheForTest(60_000);
-    const huge = "x".repeat(9 * 1024 * 1024);
+    const huge = "x".repeat(17 * 1024 * 1024);
     const replacement: CatalogPayload = {
       ...payload(oversizedPart === "body" ? huge : "new-large-header"),
       headers: oversizedPart === "headers" ? { etag: '"new"', "x-large": huge } : { etag: '"new"' },
