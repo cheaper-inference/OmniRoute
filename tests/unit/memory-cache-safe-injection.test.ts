@@ -160,14 +160,55 @@ describe("injectMemory cache-safe positioning — Claude-family server-tool-resu
   });
 
   it("applies the same fallback to a Claude-Code-compatible passthrough provider id", () => {
-    const out = injectMemory(multiTurn(), [mem("dark mode")], "anthropic-compatible-cc-github-copilot", {
-      cacheSafe: true,
-    });
+    const out = injectMemory(
+      multiTurn(),
+      [mem("dark mode")],
+      "anthropic-compatible-cc-github-copilot",
+      {
+        cacheSafe: true,
+      }
+    );
 
     assert.equal(out.messages.length, 4);
     assert.equal(out.messages[0].role, "system");
     assert.ok(out.messages[0].content.includes("Memory context: dark mode"));
     assert.ok(out.messages[0].content.includes("SYSTEM PROMPT"));
+  });
+
+  it("never splits a tool_use → tool_result pair: the last user turn is a tool result", () => {
+    // Claude-native agent loop: the newest "user" turn carries only the tool_result for the
+    // assistant's tool_use. Splicing memory before it puts a system message between the
+    // tool call and its result, which OpenAI-format upstreams then see as an orphaned call.
+    const req = {
+      model: "deepseek/deepseek-v4-pro",
+      messages: [
+        { role: "system", content: "SYSTEM PROMPT", cache_control: { type: "ephemeral" } },
+        { role: "user", content: "query the database" },
+        {
+          role: "assistant",
+          content: [{ type: "tool_use", id: "toolu_1", name: "query", input: {} }],
+        },
+        {
+          role: "user",
+          content: [{ type: "tool_result", tool_use_id: "toolu_1", content: "42 rows" }],
+        },
+      ],
+    } as unknown as ChatRequest;
+
+    const out = injectMemory(req, [mem("dark mode")], "deepseek", { cacheSafe: true });
+
+    const firstBlockType = (m: ChatRequest["messages"][number] | undefined): unknown =>
+      Array.isArray(m?.content) ? (m.content[0] as { type?: unknown })?.type : undefined;
+    const toolResultIdx = out.messages.findIndex((m) => firstBlockType(m) === "tool_result");
+    assert.equal(
+      firstBlockType(out.messages[toolResultIdx - 1]),
+      "tool_use",
+      "tool_result must directly follow its tool_use"
+    );
+    const memoryIdx = out.messages.findIndex(
+      (m) => typeof m.content === "string" && m.content.includes("Memory context")
+    );
+    assert.ok(memoryIdx >= 0 && memoryIdx < 2, "memory must sit before the tool cycle");
   });
 
   it("does not gate non-Claude providers even without a server tool result", () => {
