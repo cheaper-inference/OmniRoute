@@ -7314,7 +7314,7 @@
       "openai": "Connect OpenAI with an API key.",
       "opencode-go": "Connect OpenCode Go with an API key.",
       "opencode-zen": "Connect OpenCode Zen with an API key.",
-      "openrouter": "Free models at $0/token with :free suffix - 20 RPM / 200 RPD",
+      "openrouter": "Models ending in :free share 50 requests per day and 20 per minute. The higher tier gives 1,000 requests per day after $10 in lifetime credit purchases.",
       "openvecta": "Free credits on signup for OpenAI-compatible inference across LLMs, embeddings, and reasoning models",
       "orcarouter": "Create an API key (starts with sk-orca-) at https://www.orcarouter.ai, then paste it as a Bearer token. OpenAI-compatible endpoint at https://api.orcarouter.ai/v1.",
       "ovhcloud": "Connect OVHcloud AI with an API key.",

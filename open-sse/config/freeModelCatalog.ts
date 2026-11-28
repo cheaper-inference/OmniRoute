@@ -276,10 +276,12 @@ export const FREE_TIER_BOOSTS: Record<
     gate?: "deposit" | "telegram" | "discord" | "phone";
   }
 > = {
+  // evidence: https://openrouter.ai/docs/api_reference/limits.md (2026-11-27) — "| At least 10 | 20 | 1000 |".
   "openrouter-free": {
     provider: "openrouter",
     boostMonthlyTokens: 24_000_000,
-    note: "A one-time $10 lifetime top-up raises the free pool from 50 to 1000 requests/day (~24M tokens/month).",
+    gate: "deposit",
+    note: "After $10 in lifetime credit purchases, the documented higher tier raises the free pool from 50 to 1,000 requests per day (~24M tokens/month).",
   },
   // evidence: public-page https://docs.dgrid.ai/ai-gateway/free-models-router.md (2026-11-27)
   // Qualifying top-ups of at least $5 raise the total to 1,000 requests/day × 800 × 30.
@@ -289,13 +291,13 @@ export const FREE_TIER_BOOSTS: Record<
     gate: "deposit",
     note: "At least $5 in qualifying top-ups raises the allowance from 100 to 1,000 requests per day.",
   },
-  // evidence: public-page https://xkiro.com (2026-11-23) — "500K free-model tokens a day (1M after
+  // evidence: public-page https://xkiro.com/ (2026-11-27) — "500K free-model tokens a day (1M after
   // Telegram verification)" ⇒ +500K/day × 30 = +15M. A social gate: never in the real figure.
   "xkiro-free": {
     provider: "xkiro",
     boostMonthlyTokens: 15_000_000,
     gate: "telegram",
-    note: "Verifying the account on Telegram raises the free allowance from 500K to 1M tokens/day (+15M tokens/month; xkiro.com, 2026-11-23).",
+    note: "Verifying the account on Telegram raises the free allowance from 500K to 1M tokens/day (+15M tokens/month; xkiro.com, 2026-11-27).",
   },
 };
 
@@ -485,6 +487,7 @@ export const FREE_QUOTA_UNIT: Record<string, FreeQuotaUnit> = {
   aion: "tokens",
   kenari: "requests",
   scaleway: "tokens",
+  byteplus: "tokens",
 };
 
 /** Per-pool override of `FREE_QUOTA_UNIT`, for a pool published in a different unit. */
@@ -532,22 +535,21 @@ function isLiveRecurringQuotaRow(m: FreeModelBudget & { enabled?: boolean }): bo
   );
 }
 
-/** True for a retirement date inside the 12 calendar months that end at `asOf` (UTC). */
-function retiredWindow(asOf: Date): (retiredAt: string) => boolean {
-  const upper = isoDate(asOf);
+/** Exclusive lower bound for the 12-month ended-offer window (UTC). */
+function retiredCutoff(asOf: Date): string {
   const floorDate = new Date(asOf.getTime());
   floorDate.setUTCFullYear(floorDate.getUTCFullYear() - 1);
-  const lower = isoDate(floorDate);
-  return (retiredAt) => retiredAt > lower && retiredAt <= upper;
+  return isoDate(floorDate);
 }
 
 /**
  * Sums the monthly quota of every live row that grants recurring free access, with or without
  * gates and whatever its ToS verdict, WITHOUT pool dedup — the way catalogs that add every row
  * up count. Rows published in requests, credits or neurons count 0 unless `countNonTokenUnits`;
- * signup credits, boosts and `enabled: false` rows never count. Retired ledger rows count their
- * last listed quota for 12 calendar months after `retiredAt`. Never feeds routing or the real
- * figure; it is printed next to the real figure, labelled.
+ * signup credits, boosts and `enabled: false` rows never count as live. For each provider/model
+ * pair, the larger eligible quota wins and contributes its full amount to its own bucket.
+ * Live wins ties. The ledger preserves the peak of a countable live row. Other ledger rows
+ * count for 12 calendar months after `retiredAt`. Routing and the real figure use live data.
  */
 export function computeRowSumMirror(
   opts: {
@@ -571,19 +573,37 @@ export function computeRowSumMirror(
     byProvider.set(provider, cur);
   };
 
-  let liveTokens = 0;
+  const keyOf = (row: { provider: string; modelId: string }) =>
+    JSON.stringify([row.provider, row.modelId]);
+  const quotas = new Map<string, { provider: string; live: number; retired: number }>();
   for (const m of entries) {
     if (!isLiveRecurringQuotaRow(m) || !counts(m)) continue;
-    liveTokens += m.monthlyTokens;
-    bump(m.provider, "liveRows", m.monthlyTokens);
+    const key = keyOf(m);
+    const live = Math.max(quotas.get(key)?.live ?? 0, m.monthlyTokens);
+    quotas.set(key, { provider: m.provider, live, retired: 0 });
   }
 
-  const inWindow = retiredWindow(asOf);
-  let retiredTokens = 0;
+  const through = isoDate(asOf);
+  const cutoff = retiredCutoff(asOf);
   for (const r of retired) {
-    if (!inWindow(r.retiredAt) || !(r.lastListedMonthlyTokens > 0) || !counts(r)) continue;
-    retiredTokens += r.lastListedMonthlyTokens;
-    bump(r.provider, "retiredRows", r.lastListedMonthlyTokens);
+    if (r.retiredAt > through || !(r.lastListedMonthlyTokens > 0) || !counts(r)) continue;
+    const key = keyOf(r);
+    const quota = quotas.get(key) ?? { provider: r.provider, live: 0, retired: 0 };
+    if (quota.live === 0 && r.retiredAt <= cutoff) continue;
+    quota.retired = Math.max(quota.retired, r.lastListedMonthlyTokens);
+    quotas.set(key, quota);
+  }
+
+  let liveTokens = 0;
+  let retiredTokens = 0;
+  for (const { provider, live, retired } of quotas.values()) {
+    if (retired > live) {
+      retiredTokens += retired;
+      bump(provider, "retiredRows", retired);
+    } else {
+      liveTokens += live;
+      bump(provider, "liveRows", live);
+    }
   }
 
   const totalTokens = liveTokens + retiredTokens;

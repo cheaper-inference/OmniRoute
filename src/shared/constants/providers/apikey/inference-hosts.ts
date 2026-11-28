@@ -462,8 +462,12 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     textIcon: "BP",
     website: "https://console.byteplus.com/ark",
     hasFree: true,
+    freeNote:
+      "New accounts get 500,000 tokens per model after identity verification. Enable Free Tokens Only mode to stop inference before any usage charges.",
+    apiHint:
+      "Create a ModelArk API key after verifying your account. Enable Free Tokens Only mode before calling a supported model.",
     notice: {
-      text: "Free credits for new accounts. Seed 2.0, Kimi K2 Thinking, GLM 4.7, GPT-OSS-120B available.",
+      text: "Verified new accounts can try supported models with 500,000 tokens each. Enable Free Tokens Only mode to avoid inference overages.",
       apiKeyUrl: "https://console.byteplus.com/ark/region:ark+ap-southeast-1/apiKey",
     },
     serviceKinds: ["llm"],

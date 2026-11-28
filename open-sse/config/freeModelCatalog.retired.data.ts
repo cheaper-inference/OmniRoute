@@ -1,7 +1,7 @@
-// Last quota of free rows retired from FREE_MODEL_BUDGETS since RETIRED_LEDGER_SINCE.
-// Read only by computeRowSumMirror (the row-sum reading, ended offers included). Never routes,
-// never counts in the real figure. Rows older than 12 months drop out of the sum by themselves.
-// A provider listed in docs/reference/REMOVED_PROVIDERS.md never appears here.
+// Historical quotas of free rows retired since RETIRED_LEDGER_SINCE. Counts from this ledger
+// feed only computeRowSumMirror. An ended offer counts for 12 months after retirement. A revived
+// row keeps its entry with revivedAt so the row-sum can use the larger of the two quotas.
+// Providers listed in docs/reference/REMOVED_PROVIDERS.md are excluded.
 // The catalog row of a retired offer stays in FREE_MODEL_BUDGETS as `discontinued` with
 // `monthlyTokens: 0` and `creditTokens: 0` for at least one release cycle; its last quota lives
 // only here. Invariants: tests/unit/free-catalog-retired-ledger.test.ts.
@@ -10,10 +10,12 @@ export interface RetiredFreeRow {
   provider: string;
   modelId: string;
   poolKey: string | null;
-  /** The last monthly quota the catalog listed for this row, in its published unit. */
+  /** The historical monthly quota kept for this row, in its published unit. Retain the peak on revival. */
   lastListedMonthlyTokens: number;
   /** ISO date (YYYY-MM-DD) the row left the live catalog. */
   retiredAt: string;
+  /** ISO date (YYYY-MM-DD) the row returned. Required when the same pair is live in the catalog. */
+  revivedAt?: string;
   reason: "ended" | "no-models" | "paid-only" | "id-retired" | "unverifiable";
   /** Where the end of the offer was seen (URL or evidence class), reopened on the retirement day. */
   evidence: string;
@@ -23,6 +25,12 @@ export const RETIRED_LEDGER_SINCE = "2026-11-18";
 
 /** Day the November 2026 re-audit reopened the sources and retired these rows. */
 const NOV_2026_REAUDIT = "2026-11-23";
+const NOV_2026_REVIVAL = "2026-11-27";
+
+const NARA_RETIREMENT_EVIDENCE =
+  'api-public https://router.bynara.id/api/plans (2026-11-23) — plan "free": "token_cap_daily":7000000 … "models":[]';
+const XKIRO_RETIREMENT_EVIDENCE =
+  "api-public https://api.xkiro.com/v1/models (2026-11-23) — the id is no longer listed among the 73 models";
 
 // One block per retired offer: every model id of the block shares the pool, the last listed
 // quota, the reason and the evidence.
@@ -32,7 +40,8 @@ function block(
   modelIds: string[],
   lastListedMonthlyTokens: number,
   reason: RetiredFreeRow["reason"],
-  evidence: string
+  evidence: string,
+  revivedAt?: string
 ): RetiredFreeRow[] {
   return modelIds.map((modelId) => ({
     provider,
@@ -42,6 +51,7 @@ function block(
     retiredAt: NOV_2026_REAUDIT,
     reason,
     evidence,
+    ...(revivedAt === undefined ? {} : { revivedAt }),
   }));
 }
 
@@ -65,7 +75,6 @@ export const RETIRED_FREE_ROWS: RetiredFreeRow[] = [
     "nara-free",
     [
       "agnes-2.0-flash",
-      "agnes-2.5-flash",
       "laguna-s-2.1",
       "minimax-m3-free",
       "mistral-large",
@@ -75,7 +84,16 @@ export const RETIRED_FREE_ROWS: RetiredFreeRow[] = [
     ],
     210_000_000,
     "no-models",
-    'api-public https://router.bynara.id/api/plans (2026-11-23) — plan "free": "token_cap_daily":7000000 … "models":[]'
+    NARA_RETIREMENT_EVIDENCE
+  ),
+  ...block(
+    "nara",
+    "nara-free",
+    ["agnes-2.5-flash"],
+    210_000_000,
+    "no-models",
+    NARA_RETIREMENT_EVIDENCE,
+    NOV_2026_REVIVAL
   ),
   ...block(
     "navy",
@@ -176,7 +194,6 @@ export const RETIRED_FREE_ROWS: RetiredFreeRow[] = [
     "xkiro",
     "xkiro-free",
     [
-      "qwen/qwen3-vl-plus:free",
       "minimax/minimax-m2.7:free",
       "minimax/minimax-m2.7-highspeed:free",
       "minimax/minimax-m2.5:free",
@@ -185,18 +202,28 @@ export const RETIRED_FREE_ROWS: RetiredFreeRow[] = [
       "minimax/minimax-m2.5-highspeed:free",
       "minimax/minimax-m2.1:free",
       "minimax/minimax-m2:free",
+      "deepseek/deepseek-v4-pro",
+      "deepseek/deepseek-v3.2",
+      "deepseek/deepseek-chat-v3.1",
+      "sensenova/sensenova-6.7-flash-lite",
+    ],
+    150_000_000,
+    "id-retired",
+    XKIRO_RETIREMENT_EVIDENCE
+  ),
+  ...block(
+    "xkiro",
+    "xkiro-free",
+    [
+      "qwen/qwen3-vl-plus:free",
       "qwen/qwen3.5-flash:free",
       "qwen/qwen3.6-plus:free",
       "qwen/qwen3.5-397b-a17b:free",
       "qwen/qwen3.5-omni-flash:free",
-      "deepseek/deepseek-v4-pro",
-      "deepseek/deepseek-v3.2",
-      "deepseek/deepseek-chat-v3.1",
       "qwen/qwen3.7-plus:free",
       "qwen/qwen3.6-max-preview:free",
       "qwen/qwen3.5-plus:free",
       "qwen/qwen3.5-omni-plus:free",
-      "sensenova/sensenova-6.7-flash-lite",
       "qwen/qwen3.8-max:free",
       "qwen/qwen3.7-max:free",
       "qwen/qwen3.6-27b:free",
@@ -208,7 +235,8 @@ export const RETIRED_FREE_ROWS: RetiredFreeRow[] = [
     ],
     150_000_000,
     "id-retired",
-    "api-public https://api.xkiro.com/v1/models (2026-11-23) — the id is no longer listed among the 73 models"
+    XKIRO_RETIREMENT_EVIDENCE,
+    NOV_2026_REVIVAL
   ),
   ...block(
     "xkiro",
@@ -218,6 +246,25 @@ export const RETIRED_FREE_ROWS: RetiredFreeRow[] = [
     "paid-only",
     "api-public https://api.xkiro.com/v1/models (2026-11-23) — only the premium variant deepseek/deepseek-v4-flash-0731 is listed"
   ),
+  ...[
+    "mistralai/codestral-2508",
+    "mistralai/devstral-medium",
+    "mistralai/ministral-14b",
+    "mistralai/ministral-3b",
+    "mistralai/ministral-8b",
+    "mistralai/mistral-large-2512",
+    "mistralai/mistral-medium-3.5",
+    "mistralai/mistral-small-2603",
+  ].map((modelId): RetiredFreeRow => ({
+    provider: "xkiro",
+    modelId,
+    poolKey: "xkiro-free",
+    lastListedMonthlyTokens: 15_000_000,
+    retiredAt: "2026-11-27",
+    reason: "id-retired",
+    evidence:
+      "api-public https://api.xkiro.com/v1/models (2026-11-27) — the ID is absent from the public model list",
+  })),
   ...block(
     "groq",
     null,

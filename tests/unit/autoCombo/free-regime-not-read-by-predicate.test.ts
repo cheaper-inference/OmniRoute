@@ -114,7 +114,7 @@ test("no provider loses its free status without a recorded decision", () => {
       // https://longcat.chat/platform/docs/change-log (2026-11-27).
       "longcat",
       "mistral",
-      "nara",
+      // https://router.bynara.id/api/plans (2026-11-27): Nara again has a live Free route.
       "navy",
       // https://docs.tokenfactory.nebius.com/other-capabilities/billing-new.md (2026-11-27).
       "nebius",

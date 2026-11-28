@@ -124,7 +124,10 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     passthroughModels: true,
     website: "https://openrouter.ai",
     hasFree: true,
-    freeNote: "Free models at $0/token with :free suffix - 20 RPM / 200 RPD",
+    freeNote:
+      "Models ending in :free share 50 requests per day and 20 per minute. The higher tier gives 1,000 requests per day after $10 in lifetime credit purchases.",
+    apiHint:
+      "Use an OpenRouter API key and a model ID ending in :free from the live model list to use the shared free allowance.",
     serviceKinds: ["llm", "imageToText"],
   },
   opper: {
@@ -1473,12 +1476,13 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     textIcon: "NA",
     passthroughModels: true,
     website: "https://bynara.id",
-    hasFree: false,
-    freeNote: "The free plan lists no models; every model needs credit (checked 2026-11-23).",
+    hasFree: true,
+    freeNote:
+      "Agnes 2.5 Flash gets 7 million tokens a day with no card. Link Telegram to use the API on the Free plan.",
     authHint:
-      "Create a NaraRouter account, link your Telegram (required before /v1 answers), then paste the key here as a Bearer token.",
+      "Create a NaraRouter account and an API key. Link Telegram to unlock API requests on a Free account, then paste the key here.",
     apiHint:
-      "OpenAI-compatible endpoint at https://router.bynara.id/v1. Every model needs credit; the free plan lists none (checked 2026-11-23).",
+      "Use https://router.bynara.id/v1 with agnes-2.5-flash. Free accounts must link Telegram before making API requests.",
   },
   xkiro: {
     id: "xkiro",
@@ -1492,11 +1496,11 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://xkiro.com",
     hasFree: true,
     freeNote:
-      "Free plan: 5M tokens/day per account across 40 upstream free models — 39 pinned here (Qwen, MiniMax, DeepSeek, Mistral, SenseNova) — no card; past the daily allowance free requests get a 429 until the reset. RPM not published.",
+      "Free chat models share 500,000 tokens a day per account, or 1 million after Telegram verification. No card required.",
     authHint:
       "Create a free account at xkiro.com and paste the key here (Bearer; x-api-key also accepted).",
     apiHint:
-      "OpenAI-compatible endpoint at https://api.xkiro.com/v1. Public /v1/models tags free rows with access_tier=free; paid models are rejected on the free plan.",
+      "Use https://api.xkiro.com/v1 and choose a chat model marked free in /v1/models. Free-model requests pause until the daily reset when the allowance runs out.",
   },
   regolo: {
     id: "regolo",

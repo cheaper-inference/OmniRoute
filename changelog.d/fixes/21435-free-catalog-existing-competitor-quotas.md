@@ -1,0 +1,1 @@
+- **fix(sse):** The free catalog follows the current free model lists and quotas of OpenRouter, xKiro, Nara and BytePlus, with sources reopened on 2026-11-27, and the catalog-drift probes for them are updated ([#21435](https://github.com/cheaper-inference/OmniRoute/pull/21435))

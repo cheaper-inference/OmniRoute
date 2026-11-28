@@ -13,8 +13,9 @@
  *
  * 2026-11-23 re-audit: each value is the pool-deduped recurring quota of the provider's
  * ungated rows in the per-model catalog (`freeModelCatalog.data.ts`), so the two catalogs
- * agree. Ended offers (mistral, nara, navy, llm7, bluesminds, arcee-ai, huggingchat,
+ * agree. Ended offers (mistral, navy, llm7, bluesminds, arcee-ai, huggingchat,
  * huggingface) and doubao (no recurring quota in the per-model catalog) left this map.
+ * Nara's restored free quota needs Telegram verification and stays outside this map.
  */
 export type TosVerdict = "ok" | "caution" | "ambiguous" | "avoid" | "unknown";
 

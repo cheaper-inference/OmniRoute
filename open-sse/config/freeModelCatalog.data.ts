@@ -134,6 +134,25 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "bluesminds", modelId: "gemini-2.5-pro", displayName: "Gemini 2.5 Pro (VIP)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
   { provider: "bluesminds", modelId: "grok-3", displayName: "Grok-3 (VIP)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
   { provider: "bluesminds", modelId: "qwen-max", displayName: "Qwen Max (VIP)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "bluesminds", tos: "ambiguous" },
+  // evidence: public-page https://ai.byteplus.com/ark/region:ap-southeast-1/docs/free-tokens-only-mode (2026-11-27).
+  // "In this mode, calls to the inference API consume only the 500k free tokens granted by the platform."
+  // https://ai.byteplus.com/ark/region:ap-southeast-1/docs/free-inference-quota:
+  // "Free inference quota is calculated separately for different models and shared under the primary account."
+  // Only verified new accounts qualify. Free Tokens Only mode is opt-in, so the catalog does not promise a hard stop.
+  { provider: "byteplus", modelId: "dola-seed-2-1-turbo-260628", displayName: "Dola Seed 2.1 Turbo", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "seed-2-0-lite-260428", displayName: "Seed 2.0 Lite", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "seed-2-0-mini-260428", displayName: "Seed 2.0 Mini", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "seed-2-0-code-preview-260328", displayName: "Seed 2.0 Code Preview", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "seed-2-0-pro-260328", displayName: "Seed 2.0 Pro", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "deepseek-v4-1-flash-economy-261017", displayName: "DeepSeek V4.1 Flash Economy", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "deepseek-v4-1-flash-261017", displayName: "DeepSeek V4.1 Flash", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "deepseek-v4-1-flash-260910", displayName: "DeepSeek V4.1 Flash (260910)", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "deepseek-v4-pro-ga-260813", displayName: "DeepSeek V4 Pro GA", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "deepseek-v4-flash-ga-260731", displayName: "DeepSeek V4 Flash GA", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "deepseek-v4-flash-260425", displayName: "DeepSeek V4 Flash", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "deepseek-v4-pro-260425", displayName: "DeepSeek V4 Pro", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "glm-5-3-flash-260828", displayName: "GLM 5.3 Flash", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
+  { provider: "byteplus", modelId: "glm-5-2-260617", displayName: "GLM 5.2", monthlyTokens: 0, creditTokens: 500000, freeType: "one-time-initial", poolKey: "byteplus", tos: "caution", gates: ["kyc", "new-accounts-only"] },
   // evidence: public-page https://docs.bytez.com/model-api/docs/billing (2026-10-15).
   // Free open models are limited to 7B; credits refresh every 4 weeks and bill per inference second.
   // Token allowance is unpublished: both token counters are 0 (unknown), not a claim of zero credits.
@@ -424,12 +443,20 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   // https://opencode.ai/v2/docs/console/models/#endpoints
   // Public zero prices do not grant generic proxy eligibility. Keep the provider
   // available for manual/paid use, but do not count these offers as free access.
-  // evidence: public-page https://openrouter.ai/docs/api-reference/limits.md (2026-11-23) — free `:free` variants:
-  // "| Less than 10 | 20 | 50 |" requests/day ⇒ 50 × 800 × 30 = 1.2M, one pool. api-public
-  // https://openrouter.ai/api/v1/models (2026-11-23) lists google/gemma-4-31b-it:free at price 0; auto,
-  // stealth/ox-alpha and liquid/lfm-2.5-2.6b:free are gone ⇒ discontinued. The $10 lifetime top-up boost lives in
-  // FREE_TIER_BOOSTS["openrouter-free"].
+  // evidence: public-page https://openrouter.ai/docs/api_reference/limits.md (2026-11-27):
+  // "| Less than 10 | 20 | 50 |" ⇒ 50 requests/day × 800 × 30 = 1.2M per account, shared by all :free variants.
+  // api-public https://openrouter.ai/api/v1/models lists the :free chat IDs below with "pricing":{"prompt":"0","completion":"0"}.
+  // The optional top-up tier is tracked in FREE_TIER_BOOSTS["openrouter-free"].
   { provider: "openrouter", modelId: "google/gemma-4-31b-it:free", displayName: "Gemma 4 31B (free)", monthlyTokens: 1200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "openrouter-free", tos: "caution" },
+  { provider: "openrouter", modelId: "baidu/ernie-5.5-flash-preview:free", displayName: "Baidu: ERNIE-5.5-Flash-Preview (free)", monthlyTokens: 1200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "openrouter-free", tos: "caution" },
+  { provider: "openrouter", modelId: "google/gemma-4-26b-a4b-it:free", displayName: "Google: Gemma 4 26B A4B (free)", monthlyTokens: 1200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "openrouter-free", tos: "caution" },
+  { provider: "openrouter", modelId: "liquid/lfm-3-1.7b:free", displayName: "LiquidAI: LFM3-1.7B (free)", monthlyTokens: 1200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "openrouter-free", tos: "caution" },
+  { provider: "openrouter", modelId: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", displayName: "NVIDIA: Nemotron 3 Nano Omni (free)", monthlyTokens: 1200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "openrouter-free", tos: "caution" },
+  { provider: "openrouter", modelId: "nvidia/nemotron-3-ultra-550b-a55b:free", displayName: "NVIDIA: Nemotron 3 Ultra (free)", monthlyTokens: 1200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "openrouter-free", tos: "caution" },
+  { provider: "openrouter", modelId: "nvidia/nemotron-3.5-lightning:free", displayName: "NVIDIA: Nemotron 3.5 Lightning (free)", monthlyTokens: 1200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "openrouter-free", tos: "caution" },
+  { provider: "openrouter", modelId: "nvidia/nemotron-3.5-super-vl:free", displayName: "NVIDIA: Nemotron 3.5 Super VL (free)", monthlyTokens: 1200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "openrouter-free", tos: "caution" },
+  { provider: "openrouter", modelId: "particle-ai/particle-1:free", displayName: "Particle AI: Particle-1 (free)", monthlyTokens: 1200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "openrouter-free", tos: "caution" },
+  { provider: "openrouter", modelId: "recursive/flint-v1.0:free", displayName: "Recursive: Flint (free)", monthlyTokens: 1200000, creditTokens: 0, freeType: "recurring-daily", poolKey: "openrouter-free", tos: "caution" },
   { provider: "openrouter", modelId: "auto", displayName: "Auto (Best Available)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "openrouter-free", tos: "caution" },
   { provider: "openrouter", modelId: "stealth/ox-alpha", displayName: "Stealth Ox Alpha (free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "openrouter-free", tos: "caution" },
   { provider: "openrouter", modelId: "liquid/lfm-2.5-2.6b:free", displayName: "LiquidAI: LFM2.5-2.6B (free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "openrouter-free", tos: "caution" },
@@ -638,29 +665,24 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "routeway", modelId: "laguna-m.1:free", displayName: "Laguna M.1 (free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "routeway-free", tos: "caution" },
   { provider: "routeway", modelId: "laguna-xs.2:free", displayName: "Laguna XS.2 (free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "routeway-free", tos: "caution" },
   { provider: "routeway", modelId: "llama-3.2-3b-instruct:free", displayName: "Llama 3.2 3B Instruct (free)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "routeway-free", tos: "caution" },
-  // evidence: api-public https://router.bynara.id/api/plans (2026-11-23) — plan "free": "Start free, forever.",
-  // "token_cap_daily":7000000 … "models":[] — the free plan lists no model; https://router.bynara.id/v1/models has
-  // every model with "payg_enabled": true. Retired on 2026-11-23 (reason no-models); last quota (7M/day × 30 = 210M)
-  // in freeModelCatalog.retired.data.ts.
+  // evidence: api-public https://router.bynara.id/api/plans (2026-11-27) — active "free" plan:
+  // "token_cap_daily":7000000 and "models":["agnes-2.5-flash"] ⇒ 7M × 30 = 210M.
+  // https://router.bynara.id/docs — "Free accounts can still create API keys, but requests to /v1/* stay blocked until Telegram is linked."
   { provider: "nara", modelId: "agnes-2.0-flash", displayName: "Agnes 2.0 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
-  { provider: "nara", modelId: "agnes-2.5-flash", displayName: "Agnes 2.5 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
+  { provider: "nara", modelId: "agnes-2.5-flash", displayName: "Agnes 2.5 Flash", monthlyTokens: 210000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "nara-free", tos: "caution", gates: ["telegram"] },
   { provider: "nara", modelId: "laguna-s-2.1", displayName: "Laguna S 2.1", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
   { provider: "nara", modelId: "minimax-m3-free", displayName: "MiniMax M3 Free", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
   { provider: "nara", modelId: "mistral-large", displayName: "Mistral Large", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
   { provider: "nara", modelId: "mistral-medium-3-5", displayName: "Mistral Medium 3.5", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
   { provider: "nara", modelId: "qwen3.8-27b", displayName: "Qwen3.8 27B", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
   { provider: "nara", modelId: "stepfun-3.7-flash", displayName: "StepFun 3.7 Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "nara-free", tos: "caution" },
-  // evidence: public-page https://xkiro.com (2026-11-23) — "Free … $0 /mo Not a trial … 26 free models No card
-  // needed 500K free-model tokens a day (1M after Telegram verification)". One allowance per account ⇒ single pool:
-  // 500K × 30 = 15M. api-public https://api.xkiro.com/v1/models (2026-11-23): 26 `access_tier: "free"` models; the 9
-  // live rows below are the catalog ids among them. The other 30 ids are gone from the endpoint ⇒ discontinued
-  // (deepseek/deepseek-v4-flash survives only as a premium variant, deepseek-v4-flash-0731, so it is paid-only).
-  // The Telegram bonus (+500K/day) is FREE_TIER_BOOSTS["xkiro-free"], outside the real figure.
-  // hardStopGuaranteed: https://docs.xkiro.com/api/rate-limits/ — "Past it, free-model requests are blocked with a
-  // 429 until the daily reset" + "No card needed" (Free plan card).
-  // tos: caution — ToS (2026-07-30) forbids reselling the service and violating the upstream providers' terms;
-  // personal proxy use is not addressed.
-  { provider: "xkiro", modelId: "qwen/qwen3-vl-plus:free", displayName: "Qwen3 VL Plus (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  // evidence: public-page https://xkiro.com/ (2026-11-27) — "500K free-model tokens a day (1M after Telegram verification)".
+  // The account-wide allowance is 500K × 30 = 15M. Telegram adds another 15M in FREE_TIER_BOOSTS["xkiro-free"].
+  // api-public https://api.xkiro.com/v1/models (2026-11-27) lists 38 chat IDs with access_tier "free" and zero input/output prices.
+  // https://docs.xkiro.com/api/rate-limits/ — "Past it, free-model requests are blocked with a 429 until the daily reset".
+  // https://docs.xkiro.com/api/usage/ — "Exhausting the free-token allowance does not touch your wallet or your plan windows".
+  // https://xkiro.com/terms/ restricts reselling and violations of upstream terms.
+  { provider: "xkiro", modelId: "qwen/qwen3-vl-plus:free", displayName: "Qwen3 VL Plus (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "sensenova/sensenova-6.8-flash-lite", displayName: "SenseNova 6.8 Flash-Lite (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "minimax/minimax-m2.7:free", displayName: "MiniMax M2.7 (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "minimax/minimax-m2.7-highspeed:free", displayName: "MiniMax M2.7 Highspeed (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
@@ -670,35 +692,55 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "xkiro", modelId: "minimax/minimax-m2.5-highspeed:free", displayName: "MiniMax M2.5 Highspeed (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "minimax/minimax-m2.1:free", displayName: "MiniMax M2.1 (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "minimax/minimax-m2:free", displayName: "MiniMax M2 (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.5-flash:free", displayName: "Qwen3.5 Flash (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.6-plus:free", displayName: "Qwen3.6 Plus (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.5-397b-a17b:free", displayName: "Qwen3.5 397B A17B (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.5-omni-flash:free", displayName: "Qwen3.5 Omni Flash (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "mistralai/mistral-large-2512", displayName: "Mistral Large 3 (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "mistralai/mistral-medium-3.5", displayName: "Mistral Medium 3.5 (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "mistralai/mistral-small-2603", displayName: "Mistral Small 4 (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "mistralai/codestral-2508", displayName: "Codestral (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "mistralai/devstral-medium", displayName: "Devstral 2 (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "mistralai/ministral-8b", displayName: "Ministral 3 8B (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "mistralai/ministral-3b", displayName: "Ministral 3 3B (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.5-flash:free", displayName: "Qwen3.5 Flash (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.6-plus:free", displayName: "Qwen3.6 Plus (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.5-397b-a17b:free", displayName: "Qwen3.5 397B A17B (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.5-omni-flash:free", displayName: "Qwen3.5 Omni Flash (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "mistralai/mistral-large-2512", displayName: "Mistral Large 3 (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "mistralai/mistral-medium-3.5", displayName: "Mistral Medium 3.5 (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "mistralai/mistral-small-2603", displayName: "Mistral Small 4 (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "mistralai/codestral-2508", displayName: "Codestral (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "mistralai/devstral-medium", displayName: "Devstral 2 (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "mistralai/ministral-8b", displayName: "Ministral 3 8B (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "mistralai/ministral-3b", displayName: "Ministral 3 3B (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "deepseek/deepseek-v4-pro", displayName: "DeepSeek V4 Pro (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "deepseek/deepseek-v3.2", displayName: "DeepSeek V3.2 (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "deepseek/deepseek-chat-v3.1", displayName: "DeepSeek V3.1 (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.7-plus:free", displayName: "Qwen3.7 Plus (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "mistralai/ministral-14b", displayName: "Ministral 3 14B (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.6-max-preview:free", displayName: "Qwen3.6 Max Preview (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.5-plus:free", displayName: "Qwen3.5 Plus (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.5-omni-plus:free", displayName: "Qwen3.5 Omni Plus (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.7-plus:free", displayName: "Qwen3.7 Plus (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "mistralai/ministral-14b", displayName: "Ministral 3 14B (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.6-max-preview:free", displayName: "Qwen3.6 Max Preview (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.5-plus:free", displayName: "Qwen3.5 Plus (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.5-omni-plus:free", displayName: "Qwen3.5 Omni Plus (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "deepseek/deepseek-v4-flash", displayName: "DeepSeek V4 Flash (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
   { provider: "xkiro", modelId: "sensenova/sensenova-6.7-flash-lite", displayName: "SenseNova 6.7 Flash-Lite (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.8-max:free", displayName: "Qwen3.8 Max (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.7-max:free", displayName: "Qwen3.7 Max (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.6-27b:free", displayName: "Qwen3.6 27B (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3.6-35b-a3b:free", displayName: "Qwen3.6 35B A3B (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3-max:free", displayName: "Qwen3 Max (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3-coder-plus:free", displayName: "Qwen3 Coder Plus (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen-plus-2025-07-28:free", displayName: "Qwen Plus 0728 (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
-  { provider: "xkiro", modelId: "qwen/qwen3-omni-flash:free", displayName: "Qwen3 Omni Flash (xKiro)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.8-max:free", displayName: "Qwen3.8 Max (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.7-max:free", displayName: "Qwen3.7 Max (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.6-27b:free", displayName: "Qwen3.6 27B (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.6-35b-a3b:free", displayName: "Qwen3.6 35B A3B (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3-max:free", displayName: "Qwen3 Max (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3-coder-plus:free", displayName: "Qwen3 Coder Plus (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen-plus-2025-07-28:free", displayName: "Qwen Plus 0728 (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3-omni-flash:free", displayName: "Qwen3 Omni Flash (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/aya-expanse-32b", displayName: "Aya Expanse 32B (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/aya-vision-32b", displayName: "Aya Vision 32B (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/command-a", displayName: "Command A (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/command-a-plus", displayName: "Command A+ (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/command-a-reasoning", displayName: "Command A Reasoning (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/command-a-translate", displayName: "Command A Translate (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/command-a-vision", displayName: "Command A Vision (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/command-r-08-2024", displayName: "Command R (08-2024) (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/command-r-plus-08-2024", displayName: "Command R+ (08-2024) (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/command-r7b-12-2024", displayName: "Command R7B (12-2024) (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/north-mini-code", displayName: "North Mini Code (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/north-small-translate", displayName: "North Small Translate (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/tiny-aya-earth", displayName: "Tiny Aya Earth (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/tiny-aya-fire", displayName: "Tiny Aya Fire (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/tiny-aya-global", displayName: "Tiny Aya Global (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "cohere/tiny-aya-water", displayName: "Tiny Aya Water (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.7-flash:free", displayName: "Qwen3.7 Flash (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.8-max-preview:free", displayName: "Qwen3.8 Max Preview (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "qwen/qwen3.8-omni-flash:free", displayName: "Qwen3.8 Omni Flash (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "xkiro", modelId: "stealth/big-pickle", displayName: "Big Pickle (xKiro)", monthlyTokens: 15000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "xkiro-free", tos: "caution", hardStopGuaranteed: true },
 
   // evidence: public-page https://zyloai.net/pricing (2026-11-27)
   // Basic has 200,000 daily tokens (shared with Mini); 200,000 × 30 = 6,000,000.
