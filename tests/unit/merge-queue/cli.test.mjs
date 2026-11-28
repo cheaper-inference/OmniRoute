@@ -958,3 +958,30 @@ test("without an injected client the CLI asks `gh` for the repository and token"
     2
   );
 });
+
+test("status and why show the automatic pause probe and next check", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  fake.addPull({ number: 50, labels: ["omni-queue"] });
+  writeState(fake, {
+    ...sampleState(),
+    paused: {
+      reason: "error",
+      since: "2026-11-13T10:00:00Z",
+      baseSha: null,
+      detail: "landing credential rejected",
+      issue: null,
+      auto: { probe: "land-credential", attempts: 1, nextProbeAt: "2026-11-13T12:10:00Z" },
+    },
+  });
+  for (const args of [
+    ["status", "--base", BASE],
+    ["why", "50"],
+  ]) {
+    lines.out.length = 0;
+    assert.equal(await run(args), 0);
+    assert.ok(
+      lines.out.includes("auto-resumes: land-credential; next check 2026-11-13 12:10Z"),
+      lines.out.join("\n")
+    );
+  }
+});

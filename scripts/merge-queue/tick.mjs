@@ -376,6 +376,25 @@ function isAuthFailureText(text) {
   return !RATE_LIMIT_RE.test(text) && AUTH_FAILURE_RE.test(text);
 }
 
+/** Delay before the first probe, then after consecutive failures, capped at one hour. */
+export const AUTO_PROBE_BACKOFF_MINUTES = Object.freeze([10, 20, 40, 60]);
+
+function scheduleProbe(probe, attempts, now) {
+  const minutes =
+    AUTO_PROBE_BACKOFF_MINUTES[Math.min(attempts, AUTO_PROBE_BACKOFF_MINUTES.length) - 1];
+  return {
+    probe,
+    attempts,
+    nextProbeAt: new Date(Date.parse(now) + minutes * 60_000).toISOString(),
+  };
+}
+
+function automaticPause(state, paused, probe) {
+  const previous = state.autoPauseEpisodes?.[paused.retryCause ?? probe];
+  const auto = scheduleProbe(probe, (previous?.attempts ?? 0) + 1, paused.since);
+  return { ...paused, since: previous?.since ?? paused.since, auto };
+}
+
 const DEFAULT_MODULES = Object.freeze({
   eligibility: eligibilityModule,
   checks: checksModule,
@@ -924,6 +943,7 @@ class Tick {
     // After the retry pass: a resume dispatched once GitHub accepts the App's writes again
     // succeeds when this very tick drains the overflow (resumeRefusal).
     this.applyResume();
+    await this.maybeProbePause();
     await this.leaveLandingInShadow();
     // The next segment of a bisection whose segment recordEarlierLanding found landed: composed
     // only now that the action is applied, and never under a pause.
@@ -1121,10 +1141,15 @@ class Tick {
     this.s.paused = null;
     delete this.s.landingsWithoutVerdict;
     delete this.s.batchDiscard;
+    delete this.s.autoPauseEpisodes;
     // The operator's fresh start: the landing count of the batch in flight starts again.
     if (this.s.inFlight) this.leaveLandingStage(this.s.inFlight, { resetCount: true });
     this.event("resumed", {
-      detail: resumedDetail(previous, cleared, this.config.landing.statusContext),
+      detail: resumedDetail(
+        `manual resume (was ${previous})`,
+        cleared,
+        this.config.landing.statusContext
+      ),
     });
     this.note(`resumed (was ${previous})`);
   }
@@ -1168,14 +1193,80 @@ class Tick {
     }
   }
 
+  async maybeProbePause() {
+    const paused = this.s.paused;
+    const auto = paused?.auto;
+    // A manual resume has already had its chance. Keep a refused or stale action separate from
+    // a scheduled tick so the CLI can report the result of the action it dispatched.
+    if (!auto || this.action === "resume") return;
+    const now = this.now();
+    if (Date.parse(now) < Date.parse(auto.nextProbeAt)) {
+      this.note(`auto: ${auto.probe} waiting until ${auto.nextProbeAt}`);
+      return;
+    }
+    let passed = false;
+    try {
+      if (!resumeBlockers(this.s)) passed = await this.probePause(paused);
+    } catch {
+      // An unavailable read is not evidence of recovery. Keep the pause and try again later.
+      this.note(`auto: ${auto.probe} could not complete its read`);
+    }
+    if (!passed) {
+      paused.auto = scheduleProbe(auto.probe, auto.attempts + 1, now);
+      this.note(`auto: ${auto.probe} still blocked; next check ${paused.auto.nextProbeAt}`);
+      return;
+    }
+
+    this.s.autoPauseEpisodes ??= {};
+    this.s.autoPauseEpisodes[paused.retryCause ?? auto.probe] = {
+      since: paused.since,
+      attempts: auto.attempts,
+    };
+    this.s.paused = null;
+    const detail = `auto: ${auto.probe} (was ${paused.reason})`;
+    this.event("resumed", {
+      detail: resumedDetail(
+        detail,
+        keptNowhereCommits(paused.detail),
+        this.config.landing.statusContext
+      ),
+    });
+    this.note(detail);
+  }
+
+  async probePause(paused) {
+    switch (paused.auto.probe) {
+      case "retry":
+        return true;
+      case "land-credential":
+        if (!this.landGh) return false;
+        await this.landGh.getBranchSha(this.base);
+        return true;
+      case "land-token-present":
+        return this.hasLandingCredential();
+      case "queue-refs-protected": {
+        // Pauses made by a landing remember the exact branch name. The rules endpoint can
+        // evaluate a candidate name after the discarded branch has been deleted.
+        const ref = paused.candidateRef ?? candidateRef(this.base, "b0", "0".repeat(40));
+        return (await this.queueRefsProtection(ref)).ok;
+      }
+      case "withdrawals-empty":
+        return storedWithdrawalCount(this.s) === 0;
+    }
+  }
+
+  hasLandingCredential() {
+    return !this.ownerLands || Boolean(this.deps.landGitFor && this.landGh);
+  }
+
   /**
    * A base-red pause loaded together with entries in state.landWithdrawalsOverflow (the code never
    * writes both: a full list replaces a base-red pause, recordFullWithdrawals; a hand-edited state
    * can hold them, and the runbook's last resort is a hand edit) becomes the full-list pause, as
    * when the list fills under a base-red pause: reason `error`, one `error` event, one comment on
    * the base-red issue (tellBaseRedReplaced), a batch at the landing stage back to testing (its
-   * status withdrawn by this tick). A base-red pause lifts and blesses its repair lane by itself;
-   * the full-list pause does neither.
+   * status withdrawn by this tick). The full-list pause waits for both lists to empty and
+   * blocks the base-repair lane while it waits.
    */
   async replaceBaseRedForOverflow() {
     const was = this.s.paused;
@@ -1704,14 +1795,17 @@ class Tick {
     // Live blesses nothing while GitHub does not enforce the queue-refs ruleset on both; shadow
     // only says what live would do. Before the attempts limit: an unprotected ref stops the
     // landing whatever the count. A failed read throws in live (the next tick reads again).
-    const refs = (await orUnrun("queue refs check", () => this.queueRefsProtection(f))) ?? {
+    const refs = (await orUnrun("queue refs check", () =>
+      this.queueRefsProtection(f.candidateRef)
+    )) ?? {
       ok: true,
     };
     if (live && !refs.ok) {
       return this.pauseLanding(
         f,
         `queue refs are not protected (${refs.detail}): not blessed, not landed; ` +
-          "apply apply-ruleset.mjs --kind queue-refs, then resume"
+          "apply apply-ruleset.mjs --kind queue-refs, then resume",
+        { probe: "queue-refs-protected" }
       );
     }
     // Third: bless only on the base the candidate was composed on. The stored baseSha comes from
@@ -1777,9 +1871,15 @@ class Tick {
       return;
     }
 
-    if (this.ownerLands && !(this.deps.landGitFor && this.landGh)) {
+    if (!this.hasLandingCredential()) {
       // Nothing is blessed that cannot be landed.
-      return this.pauseLanding(f, 'landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")');
+      return this.pauseLanding(
+        f,
+        'landing needs OMNI_QUEUE_LAND_TOKEN (landing.actor is "owner")',
+        {
+          probe: "land-token-present",
+        }
+      );
     }
     const retries = f.landingRetryTicks ?? 0;
     if (mergeFf && retries >= LANDING_RETRY_TICKS) {
@@ -1867,7 +1967,10 @@ class Tick {
     if (this.ownerLands && authHint) {
       detail += ' (check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")';
     }
-    return this.pauseLanding(f, detail, result.merged ?? []);
+    return this.pauseLanding(f, detail, {
+      merged: result.merged ?? [],
+      probe: authHint && result.reason !== "merge-failed" ? "land-credential" : undefined,
+    });
   }
 
   async settleLastLandingAttempt(f, error) {
@@ -1917,7 +2020,10 @@ class Tick {
     });
     this.note(`${f.batchId}: parked ${formatPrs(f.prs)} (${reason})`);
     if (this.countBatchDiscard("parked", reason) >= 2) {
-      this.pauseLanding(f, `two batches in a row parked for the same reason: ${reason}`);
+      this.pauseLanding(f, `two batches in a row parked for the same reason: ${reason}`, {
+        probe: "retry",
+        retryCause: `retry:parked:${reason}`,
+      });
     }
   }
 
@@ -1977,10 +2083,10 @@ class Tick {
    * "protected".
    * @returns {Promise<{ok: boolean, missing: string[], detail: string}>}
    */
-  async queueRefsProtection(f) {
-    if (this.queueRefs?.ref !== f.candidateRef) {
-      const result = await readQueueRefsProtection({ gh: this.gh, candidateRef: f.candidateRef });
-      this.queueRefs = { ref: f.candidateRef, result };
+  async queueRefsProtection(ref) {
+    if (this.queueRefs?.ref !== ref) {
+      const result = await readQueueRefsProtection({ gh: this.gh, candidateRef: ref });
+      this.queueRefs = { ref, result };
     }
     return this.queueRefs.result;
   }
@@ -2002,7 +2108,12 @@ class Tick {
       sha: f.candidateSha,
       detail: `${mismatch}; ${action}`,
     });
-    if (count >= 2) return this.pauseLanding(f, `${mismatch}; ${action}`);
+    if (count >= 2) {
+      return this.pauseLanding(f, `${mismatch}; ${action}`, {
+        probe: "retry",
+        retryCause: "retry:composition-mismatch",
+      });
+    }
 
     this.note(`${mismatch}; ${action}`);
     this.s.inFlight = null;
@@ -2015,14 +2126,17 @@ class Tick {
   }
 
   /** The landing cannot go on: pause with reason "error" (a resume recomposes the batch). */
-  pauseLanding(f, detail, merged = []) {
-    this.setPaused({
+  pauseLanding(f, detail, { merged = [], probe, retryCause } = {}) {
+    const paused = {
       reason: "error",
       since: this.now(),
       baseSha: f.baseSha,
       detail,
       issue: null,
-    });
+      ...(retryCause && { retryCause }),
+      ...(probe === "queue-refs-protected" && { candidateRef: f.candidateRef }),
+    };
+    this.setPaused(probe ? automaticPause(this.s, paused, probe) : paused);
     this.s.inFlight = null;
     this.event("error", { batchId: f.batchId, prs: merged, detail });
     this.note(`paused: ${detail}`);
@@ -2306,9 +2420,9 @@ class Tick {
           `⏸️ **omni-queue**: \`${this.base}\` is now paused because its list of land-status ` +
             "withdrawals is full (`landWithdrawals is full`), not only because the base is red.",
           "",
-          "This pause will not resume by itself when the base moves: an operator resumes it",
-          "(`npm run queue -- resume <base>`) once `landWithdrawalsOverflow` is empty. See the",
-          "dashboard issue of the base.",
+          "The queue resumes automatically after both withdrawal lists are empty, on the next",
+          "scheduled check. Use `npm run queue -- resume <base>` for a manual resume once",
+          "`landWithdrawalsOverflow` is empty. See the dashboard issue of the base.",
         ].join("\n")
       );
     } catch (error) {
@@ -2500,6 +2614,7 @@ class Tick {
     this.landedBatch = f.batchId; // its land status stays: the commits are on the base
     delete this.s.landingsWithoutVerdict; // a landing: the run without a verdict is over
     delete this.s.batchDiscard;
+    delete this.s.autoPauseEpisodes;
     // A stored withdrawal of a landed commit (its landing threw after the push went through and
     // the withdrawal was refused) must not write `failure` on the base.
     this.dropWithdrawals(this.landShas(f));
@@ -3176,13 +3291,20 @@ class Tick {
       for (const pr of repairPrs) await this.countRepairInfraDrop(pr, f.baseSha);
       return;
     }
-    this.setPaused({
-      reason: "infra",
-      since: this.now(),
-      baseSha: f.baseSha,
-      detail: `${f.batchId}: ${detail}`,
-      issue: null,
-    });
+    this.setPaused(
+      automaticPause(
+        this.s,
+        {
+          reason: "infra",
+          since: this.now(),
+          baseSha: f.baseSha,
+          detail: `${f.batchId}: ${detail}`,
+          issue: null,
+          retryCause: "retry:infra",
+        },
+        "retry"
+      )
+    );
     this.s.inFlight = null;
     this.event("infra-paused", {
       batchId: f.batchId,
@@ -4559,15 +4681,14 @@ function namedWithin(list, room, where = "named in paused.detail") {
 }
 
 /**
- * Detail of the `resumed` event of an allowed resume (applyResume). When the pause it clears
+ * Detail of the `resumed` event of a manual or automatic resume. When the pause it clears
  * named commits kept nowhere (keptNowhereCommits), they leave the state with it: the event names
  * as many as fit in 500 characters, then how many more.
- * @param {string} previous the reason of the pause cleared
+ * @param {string} head  how the pause was lifted
  * @param {{sha: string, batchId: string}[]} cleared
  * @param {string} statusContext
  */
-function resumedDetail(previous, cleared, statusContext) {
-  const head = `manual resume (was ${previous})`;
+function resumedDetail(head, cleared, statusContext) {
   if (!cleared.length) return head;
   const lead =
     `${head}; the pause it cleared named commits kept nowhere (both lists full), check their ` +
@@ -4631,7 +4752,11 @@ export function recordFullWithdrawals(state, refusals, { at, url, statusContext 
       replaced;
     next = leaveLandingIn({
       ...state,
-      paused: { reason: "error", since: at, baseSha: null, detail, issue: null },
+      paused: automaticPause(
+        state,
+        { reason: "error", since: at, baseSha: null, detail, issue: null },
+        "withdrawals-empty"
+      ),
     });
   } else {
     // Already named only when a `Kept nowhere` clause names it, not because the SHA appears

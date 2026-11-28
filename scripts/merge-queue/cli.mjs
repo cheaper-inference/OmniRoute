@@ -266,6 +266,17 @@ function requireManagedBase(config, base) {
 
 // ───────────────────────────── commands ─────────────────────────────
 
+function printPause(out, paused) {
+  out(
+    paused
+      ? `paused: ${paused.reason} since ${fmtTime(paused.since)} — ${sanitizeTitle(paused.detail)}`
+      : "paused: no"
+  );
+  if (paused?.auto) {
+    out(`auto-resumes: ${paused.auto.probe}; next check ${fmtTime(paused.auto.nextProbeAt)}`);
+  }
+}
+
 async function cmdStatus(ctx) {
   const { gh, config, flags, out, now } = ctx;
   let byBase;
@@ -288,12 +299,7 @@ async function cmdStatus(ctx) {
     out(`== ${base}`);
     if (!state) out("state: none yet (the queue has not run on this base)");
     else {
-      const p = state.paused;
-      out(
-        p
-          ? `paused: ${p.reason} since ${fmtTime(p.since)} — ${sanitizeTitle(p.detail)}`
-          : "paused: no"
-      );
+      printPause(out, state.paused);
       const main = state.landWithdrawals?.length ?? 0;
       const overflow = state.landWithdrawalsOverflow?.length ?? 0;
       if (main || overflow) {
@@ -619,6 +625,7 @@ async function cmdWhy(ctx) {
     `#${n} ${sanitizeTitle(pull.title)} (${pull.author}) → ${pull.baseRef} @ ${short(pull.headSha)}`
   );
   out(`verdict: ${verdict.eligible ? "ELIGIBLE" : "NOT eligible"}`);
+  if (state?.paused?.auto) printPause(out, state.paused);
   for (const r of verdict.reasons ?? []) out(`  - ${r.code}: ${sanitizeTitle(r.detail)}`);
   const a = verdict.approval ?? {};
   out(

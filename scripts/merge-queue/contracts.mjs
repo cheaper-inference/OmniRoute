@@ -118,6 +118,15 @@ export const PAUSE_REASONS = Object.freeze([
   "error",
 ]);
 
+/** Read-only checks that can lift an automatic pause. */
+export const AUTO_PROBES = Object.freeze([
+  "retry",
+  "land-credential",
+  "land-token-present",
+  "queue-refs-protected",
+  "withdrawals-empty",
+]);
+
 /** History event types (`state.history[].type`). */
 export const EVENT_TYPES = Object.freeze([
   "batch-started", // candidate composed and pushed (detail: included/excluded PRs)
@@ -302,6 +311,9 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {string|null} baseSha  base tip when paused (base-red auto-resumes when it moves)
  * @property {string} detail
  * @property {number|null} issue    related issue number (base-red / divergence), if any
+ * @property {{probe: string, attempts: number, nextProbeAt: string}} [auto]
+ * @property {string} [retryCause]  stable identity of a failure that requires a new batch
+ * @property {string} [candidateRef]  branch name to recheck for queue-refs-protected
  */
 
 /**
@@ -340,6 +352,8 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {number} version            SCHEMA_VERSION
  * @property {string} base               e.g. "release/v3.8.54"
  * @property {PauseInfo|null} paused
+ * @property {Record<string, {since: string, attempts: number}>} [autoPauseEpisodes]
+ *   automatically lifted pauses that can recur before a successful landing or manual resume
  * @property {InFlight|null} inFlight
  * @property {BaseCheck[]} baseChecks    most recent first, at most BASE_CHECK_LIMIT
  * @property {{processed: Object<string, string>}} shadow  PR number (string) → head SHA already
@@ -505,6 +519,9 @@ export function appendEvent(state, event, limit = HISTORY_LIMIT) {
 
 const isRecord = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const isIso = (v) => typeof v === "string" && !Number.isNaN(Date.parse(v));
+const isIsoInstant = (v) =>
+  isIso(v) && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(v);
+const isProbeAttempt = (v) => Number.isSafeInteger(v) && v >= 1;
 const isCount = (v) => Number.isSafeInteger(v) && v >= 0;
 
 function prRefErrors(pr, where) {
@@ -553,8 +570,45 @@ export function validateState(state) {
     const p = state.paused;
     if (!isRecord(p) || !PAUSE_REASONS.includes(p.reason) || !isIso(p.since)) {
       errors.push("paused");
-    } else if (typeof p.detail !== "string") errors.push("paused.detail");
+    } else {
+      if (typeof p.detail !== "string") errors.push("paused.detail");
+      if (
+        p.auto !== undefined &&
+        (!["error", "infra"].includes(p.reason) ||
+          !isRecord(p.auto) ||
+          !AUTO_PROBES.includes(p.auto.probe) ||
+          !isProbeAttempt(p.auto.attempts) ||
+          !isIsoInstant(p.auto.nextProbeAt))
+      )
+        errors.push("paused.auto");
+      if (
+        p.retryCause !== undefined &&
+        (p.auto?.probe !== "retry" ||
+          typeof p.retryCause !== "string" ||
+          !p.retryCause.startsWith("retry:"))
+      ) {
+        errors.push("paused.retryCause");
+      }
+      if (
+        p.candidateRef !== undefined &&
+        (p.auto?.probe !== "queue-refs-protected" || !parseCandidateRef(p.candidateRef))
+      ) {
+        errors.push("paused.candidateRef");
+      }
+    }
   }
+  if (
+    state.autoPauseEpisodes !== undefined &&
+    (!isRecord(state.autoPauseEpisodes) ||
+      !Object.entries(state.autoPauseEpisodes).every(
+        ([cause, episode]) =>
+          (AUTO_PROBES.includes(cause) || cause.startsWith("retry:")) &&
+          isRecord(episode) &&
+          isIso(episode.since) &&
+          isProbeAttempt(episode.attempts)
+      ))
+  )
+    errors.push("autoPauseEpisodes");
   if (state.inFlight !== null) {
     const f = state.inFlight;
     if (!isRecord(f)) errors.push("inFlight");

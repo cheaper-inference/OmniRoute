@@ -2744,6 +2744,36 @@ for (const sameReason of [true, false]) {
         `two batches in a row parked for the same reason: ${signature}`
       );
       assert.equal(state.inFlight, null);
+      assertAutoPause(h, state, "retry", 1, 10);
+      await waitForAutoProbe(h, 9);
+      h.clock.advance(1);
+      const resumed = await h.tick();
+      assertAutoResumed(resumed.state, "retry");
+      assert.deepEqual(
+        nums(resumed.state.inFlight.prs),
+        [3],
+        "b72: the next batch starts on the due tick"
+      );
+
+      h.runCi(resumed.state.inFlight.candidateSha);
+      h.addPr(4);
+      await rejectUntilParked(h, rejection(resumed.state.inFlight.candidateSha, signature));
+      const repeated = await h.state();
+      assertAutoPause(h, repeated, "retry", 2, 20);
+      assert.equal(repeated.paused.since, state.paused.since);
+
+      await h.tick({ action: "resume" });
+      let next = await h.state();
+      assert.equal(next.paused, null);
+      assert.match(next.history.findLast((e) => e.type === "resumed").detail, /^manual resume/);
+      for (const n of [5, 6]) {
+        h.runCi(next.inFlight.candidateSha);
+        h.addPr(n);
+        await rejectUntilParked(h, rejection(next.inFlight.candidateSha, signature));
+        next = await h.state();
+      }
+      assertAutoPause(h, next, "retry", 1, 10);
+      assert.equal(next.paused.since, h.clock.now());
     } else {
       assert.equal(state.paused, null);
       assert.deepEqual(nums(state.inFlight.prs), [3]);
@@ -2879,7 +2909,7 @@ test("live with actor owner and no OMNI_QUEUE_LAND_TOKEN: paused (error) naming 
 
   await h.tick();
   state = await h.state();
-  assert.equal(state.paused.reason, "error", "stays paused until a resume");
+  assert.equal(state.paused.reason, "error", "stays paused before its scheduled probe");
   assert.deepEqual(statusCalls(h), []);
   assert.deepEqual(h.world.lands, []);
 });
@@ -2909,6 +2939,9 @@ test("auth failure of the landing push pauses once and does not bless again on t
   const errors = () => state.history.filter((e) => e.type === "error");
   assert.equal(errors().length, 1);
 
+  h.landGh.getBranchSha = async () => {
+    throw Object.assign(new Error("Bad credentials"), { status: 401 });
+  };
   for (let i = 0; i < 3; i++) {
     h.clock.advance(10);
     await h.tick();
@@ -5104,6 +5137,7 @@ for (const mode of ["live", "shadow"]) {
     assert.equal(state.paused?.reason, "error");
     assert.equal(state.inFlight, null);
     assert.equal(state.parked, undefined);
+    assertAutoPause(h, state, "retry", 1, 10);
     assert.ok(!types(state).includes("pr-parked"));
     assert.deepEqual(
       state.history.filter((e) => e.type === "composition-mismatch").map((e) => e.batchId),
@@ -7457,8 +7491,7 @@ test("an error event appended by a tick that completed (a landing pause) is not 
   // The episode is the error pause's, open since the pause (a stall at once, M4), not a streak of
   // three failed ticks.
   assert.deepEqual(state.stalled.reasons, [
-    `paused (reason \`error\`) since ${formatTime(state.paused.since)}: a pause for this ` +
-      "reason does not lift by itself",
+    `paused (reason \`error\`) since ${formatTime(state.paused.since)}: waiting for the \`land-token-present\` probe`,
   ]);
 });
 
@@ -7867,10 +7900,10 @@ test("M4: while paused for a full list both lists are still retried; a resume wi
   assert.notEqual(recomposed.candidateSha, f.candidateSha, "recomposed before the pause");
 
   h.gh.writeError = null; // GitHub accepts the App's status writes again
-  h.clock.advance(10);
+  h.clock.advance(5);
   await h.tick();
   let state = await h.state();
-  assert.equal(state.paused?.reason, "error", "still paused: the operator resumes");
+  assert.equal(state.paused?.reason, "error", "still paused before the scheduled probe");
   assert.equal("landWithdrawals" in state, false, "every stored withdrawal was written");
   assert.equal("landWithdrawalsOverflow" in state, false, "the overflow too");
   for (const sha of old) assert.equal(newestLand(h, sha), "failure");
@@ -7880,6 +7913,10 @@ test("M4: while paused for a full list both lists are still retried; a resume wi
   await h.tick({ action: "resume" });
   state = await h.state();
   assert.equal(state.paused, null);
+  assert.match(
+    state.history.findLast((event) => event.type === "resumed").detail,
+    /^manual resume/
+  );
   h.runCi(recomposed.candidateSha);
   await h.tick();
   state = await h.state();
@@ -8952,7 +8989,7 @@ test("X3: the day-old withdrawal alert comes from the failure path too, once", (
   assert.equal(alerts(next).length, 1, "not again on the next refusal");
 });
 
-test("X3: a replaced base-red pause gets one comment on its issue: the base will not resume by itself", async () => {
+test("X3: a replaced base-red pause gets one comment explaining automatic withdrawal recovery", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   const { baseRepairLabel } = h.config.lanes;
   h.gh.issues.push({
@@ -8982,13 +9019,15 @@ test("X3: a replaced base-red pause gets one comment on its issue: the base will
   assert.equal(state.paused.reason, "error");
   assert.match(state.paused.detail, /counts at the time of the pause/);
   const notes = (h.gh.comments.get(321) ?? []).filter((c) =>
-    /will not resume by itself/.test(c.body)
+    /resumes automatically after both withdrawal lists are empty/.test(c.body)
   );
   assert.equal(notes.length, 1);
   h.clock.advance(10);
   await h.tick();
   assert.equal(
-    (h.gh.comments.get(321) ?? []).filter((c) => /will not resume by itself/.test(c.body)).length,
+    (h.gh.comments.get(321) ?? []).filter((c) =>
+      /resumes automatically after both withdrawal lists are empty/.test(c.body)
+    ).length,
     1,
     "once"
   );
@@ -9057,7 +9096,7 @@ test("Y1: a kept pause whose text names a commit outside the words gets it appen
 
 // Re-aimed by the final fix wave (T13b-b): a base-red pause loaded with overflow entries is no
 // longer kept as base-red; it becomes the full-list pause.
-test("Y2 (re-review Q-6): a base-red pause with overflow entries (a hand-edited state) becomes the full-list pause: a tip move does not lift it, nor does writing the overflow; a resume does", async () => {
+test("Y2 (re-review Q-6): a base-red pause with overflow waits for the withdrawal probe even if the tip moves", async () => {
   const h = createHarness({ mode: "live", actor: "owner" });
   await baseRedPause(h, [1, 2]);
   const x = fakeSha("ov");
@@ -9084,19 +9123,19 @@ test("Y2 (re-review Q-6): a base-red pause with overflow entries (a hand-edited 
   assert.equal(state.inFlight, null, "nothing composed");
   assert.ok(!types(state).includes("resumed"));
   h.gh.writeError = null; // this tick writes the overflow
-  h.clock.advance(10);
+  h.clock.advance(5);
   await h.tick();
   state = await h.state();
   assert.equal("landWithdrawalsOverflow" in state, false);
-  h.clock.advance(10);
+  assert.equal(state.paused?.reason, "error", "draining before the probe does not lift the pause");
+  h.clock.advance(5);
   await h.tick();
   state = await h.state();
-  assert.equal(state.paused?.reason, "error", "it does not lift by itself");
-  assert.ok(!types(state).includes("resumed"));
-  h.clock.advance(10);
-  await h.tick({ action: "resume" });
-  state = await h.state();
-  assert.equal(state.paused, null, "an operator's resume lifts it");
+  assert.equal(state.paused, null, "the probe lifts the pause once the overflow is written");
+  assert.match(
+    state.history.findLast((event) => event.type === "resumed").detail,
+    /^auto: withdrawals-empty/
+  );
 });
 
 // Re-aimed by the final fix wave (T13b-b): the base-red pause loaded with overflow entries becomes
@@ -9185,7 +9224,9 @@ test("Y3: a refused comment on the replaced base-red issue does not fail the tic
   const notes = result.decisions.filter((d) => d.includes("#321") && d.includes("410: Gone"));
   assert.equal(notes.length, 1, result.decisions.join("\n"));
   assert.equal(
-    (h.gh.comments.get(321) ?? []).filter((c) => /will not resume by itself/.test(c.body)).length,
+    (h.gh.comments.get(321) ?? []).filter((c) =>
+      /resumes automatically after both withdrawal lists are empty/.test(c.body)
+    ).length,
     0
   );
   assert.match(state.paused.detail, /the base was also paused as base-red \(issue #321\)/);
@@ -9273,4 +9314,203 @@ test("Y3: a resume of a pause that names no commit kept nowhere keeps the plain 
     state.history.findLast((e) => e.type === "resumed").detail,
     "manual resume (was manual)"
   );
+});
+
+function assertAutoPause(h, state, probe, attempts, minutes) {
+  assert.deepEqual(state.paused?.auto, {
+    probe,
+    attempts,
+    nextProbeAt: new Date(Date.parse(h.clock.now()) + minutes * 60_000).toISOString(),
+  });
+}
+
+function assertAutoResumed(state, probe) {
+  assert.equal(state.paused, null);
+  const resumed = state.history.findLast((event) => event.type === "resumed");
+  assert.ok(resumed?.detail.startsWith(`auto: ${probe}`), resumed?.detail);
+  assert.equal(state.history.at(-1).type, "batch-started");
+  assert.ok(state.inFlight);
+}
+
+/** An early tick leaves the schedule alone, without extra operator-visible writes. */
+async function waitForAutoProbe(h, minutes) {
+  const before = await h.state();
+  const writes = h.gh.writes.length;
+  h.clock.advance(minutes);
+  const result = await h.tick();
+  assert.deepEqual(result.state.paused, before.paused);
+  assert.deepEqual(result.state.inFlight, before.inFlight);
+  assert.ok(result.decisions.some((line) => line.includes(before.paused.auto.nextProbeAt)));
+  assert.deepEqual(
+    h.gh.writes.slice(writes).filter(({ method }) => method !== "putFileContent"),
+    []
+  );
+}
+
+test("auto resume: exhausted ordinary infra retries wait, then compose in the due tick", async () => {
+  const h = createHarness({ infraRetries: 0 });
+  const first = await startBatch(h, [1]);
+  h.runCi(first.candidateSha, { infra: true });
+  const paused = await h.tick();
+  assert.equal(paused.state.paused.reason, "infra");
+  assert.ok(types(paused.state).includes("infra-paused"));
+  assertAutoPause(h, paused.state, "retry", 1, 10);
+  await waitForAutoProbe(h, 9);
+  h.clock.advance(1);
+  const { state } = await h.tick();
+  assertAutoResumed(state, "retry");
+  assert.notEqual(state.inFlight.batchId, first.batchId);
+
+  h.runCi(state.inFlight.candidateSha);
+  await h.tick();
+  const next = await startBatch(h, [2]);
+  h.runCi(next.candidateSha, { infra: true });
+  const second = (await h.tick()).state;
+  assertAutoPause(h, second, "retry", 1, 10);
+  assert.equal(second.paused.since, h.clock.now(), "landing ends the episode");
+});
+
+for (const actor of ["owner", "app"]) {
+  test(`auto resume: land-credential checks the ${actor} client`, async () => {
+    const h = createHarness({ actor });
+    await greenBatch(h, [1]);
+    h.world.landError = new Error("fatal: Authentication failed");
+    const paused = (await h.tick()).state;
+    assertAutoPause(h, paused, "land-credential", 1, 10);
+    if (actor === "owner") {
+      let attempted = 0;
+      let restored = false;
+      h.landGh.getBranchSha = async (branch) => {
+        assert.equal(branch, BASE);
+        attempted++;
+        if (!restored) throw Object.assign(new Error("Bad credentials"), { status: 401 });
+        return BASE0;
+      };
+      await waitForAutoProbe(h, 9);
+      assert.equal(attempted, 0);
+      for (const [minutes, attempts, next] of [
+        [1, 2, 20],
+        [20, 3, 40],
+        [40, 4, 60],
+        [60, 5, 60],
+      ]) {
+        h.clock.advance(minutes);
+        const failed = (await h.tick()).state;
+        assertAutoPause(h, failed, "land-credential", attempts, next);
+        assert.equal(failed.paused.since, paused.paused.since);
+        assert.equal(failed.inFlight, null);
+        assert.equal(attempted, attempts - 1);
+        assert.equal(statusCalls(h).length, 2, "the probe never blesses or withdraws");
+      }
+      restored = true;
+      h.clock.advance(60);
+    } else {
+      const getBranchSha = h.gh.getBranchSha;
+      let failing = true;
+      h.gh.getBranchSha = async (branch) => {
+        if (failing) {
+          failing = false;
+          assert.equal(branch, BASE);
+          throw Object.assign(new Error("Bad credentials"), { status: 401 });
+        }
+        return getBranchSha(branch);
+      };
+      await waitForAutoProbe(h, 9);
+      assert.equal(failing, true);
+      h.clock.advance(1);
+      const { state } = await h.tick();
+      assertAutoPause(h, state, "land-credential", 2, 20);
+      assert.equal(failing, false, "the probe ran with the App credential");
+      h.clock.advance(20);
+    }
+    h.world.landError = null;
+    assertAutoResumed((await h.tick()).state, "land-credential");
+  });
+}
+
+test("auto resume: missing owner land token waits, backs off, then resumes once supplied", async () => {
+  const h = createHarness({ actor: "owner", landToken: false });
+  await greenBatch(h, [1]);
+  const { state } = await h.tick();
+  assertAutoPause(h, state, "land-token-present", 1, 10);
+  await waitForAutoProbe(h, 9);
+  h.clock.advance(1);
+  const failed = (await h.tick()).state;
+  assertAutoPause(h, failed, "land-token-present", 2, 20);
+  assert.equal(failed.paused.since, state.paused.since);
+  assert.deepEqual(statusCalls(h), []);
+  h.deps.landGitFor = () => h.landGit;
+  h.deps.landGh = h.landGh;
+  h.clock.advance(20);
+  assertAutoResumed((await h.tick()).state, "land-token-present");
+});
+
+test("auto resume: queue refs probe rechecks the rejected candidate ref and the state branch", async () => {
+  const h = createHarness();
+  const f = await greenBatch(h, [1]);
+  h.unprotect(f.candidateRef, "update");
+  const { state } = await h.tick();
+  assertAutoPause(h, state, "queue-refs-protected", 1, 10);
+  await waitForAutoProbe(h, 9);
+  assert.deepEqual(rulesReads(h), [STATE_BRANCH, f.candidateRef]);
+  h.clock.advance(1);
+  const failed = (await h.tick()).state;
+  assertAutoPause(h, failed, "queue-refs-protected", 2, 20);
+  assert.equal(failed.paused.since, state.paused.since);
+  assert.deepEqual(rulesReads(h), [STATE_BRANCH, f.candidateRef, STATE_BRANCH, f.candidateRef]);
+  assert.deepEqual(statusCalls(h), []);
+  h.gh.branchRules.delete(f.candidateRef);
+  h.clock.advance(20);
+  assertAutoResumed((await h.tick()).state, "queue-refs-protected");
+});
+
+test("auto resume: full withdrawals wait for both lists to drain after the current tick's retries", async () => {
+  const h = createHarness({ actor: "owner" });
+  const { old } = await fullListThenRefusedLanding(h);
+  refuseWithdrawals(h, () => true);
+  const { state } = await h.tick();
+  h.addPr(2);
+  assertAutoPause(h, state, "withdrawals-empty", 1, 10);
+  await waitForAutoProbe(h, 9);
+  h.clock.advance(1);
+  refuseWithdrawals(h, (sha) => sha === old[0]);
+  const failed = (await h.tick()).state;
+  assertAutoPause(h, failed, "withdrawals-empty", 2, 20);
+  assert.equal(failed.paused.since, state.paused.since);
+  assert.deepEqual(overflowOf(failed), []);
+  assert.deepEqual(
+    failed.landWithdrawals.map((w) => w.sha),
+    [old[0]]
+  );
+  assert.deepEqual(failed.inFlight, state.inFlight, "the candidate is left at testing");
+  h.gh.writeError = null;
+  h.runCi(state.inFlight.candidateSha);
+  h.clock.advance(20);
+  const resumed = (await h.tick()).state;
+  assertAutoResumed(resumed, "withdrawals-empty");
+  assert.deepEqual(nums(resumed.inFlight.prs), [2]);
+  assert.equal(resumed.landWithdrawals, undefined);
+  assert.equal(resumed.landWithdrawalsOverflow, undefined);
+});
+
+test("a manual pause replaces a scheduled auto pause and keeps both lanes stopped after it was due", async () => {
+  const h = createHarness({ actor: "owner", landToken: false });
+  await greenBatch(h, [1]);
+  const paused = (await h.tick()).state;
+  assertAutoPause(h, paused, "land-token-present", 1, 10);
+  h.addPr(2);
+  h.addLane(2, h.config.lanes.hotfixLabel);
+  h.addPr(3);
+  h.addLane(3, h.config.lanes.baseRepairLabel);
+  await waitForAutoProbe(h, 9);
+  const manual = (await h.tick({ action: "pause" })).state;
+  assert.equal(manual.paused.reason, "manual");
+  assert.equal(manual.paused.auto, undefined);
+  h.deps.landGitFor = () => h.landGit;
+  h.deps.landGh = h.landGh;
+  h.clock.advance(20);
+  const later = (await h.tick()).state;
+  assert.deepEqual(later.paused, manual.paused);
+  assert.equal(later.inFlight, null);
+  assert.ok(!types(later).includes("resumed"));
 });

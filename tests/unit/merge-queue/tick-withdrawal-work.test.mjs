@@ -207,7 +207,7 @@ test("G1: main()'s failure path creates the dashboard issue of a base whose stat
   assert.deepEqual(plain.writesOf("createIssue"), []);
 });
 
-test("G1 (T13b-b): a base-red pause loaded with overflow entries becomes the full-list pause, says so on its issue, and the dashboard banner no longer says it resumes by itself", async () => {
+test("G1 (T13b-b): overflow replaces a base-red pause and tells the issue and dashboard how recovery is scheduled", async () => {
   const h = createHarness({ mode: "live" });
   h.deps.modules = { ...h.modules, dashboard: realDashboard };
   h.gh.issues.push({
@@ -235,11 +235,12 @@ test("G1 (T13b-b): a base-red pause loaded with overflow entries becomes the ful
   assert.equal(state.paused.reason, "error");
   assert.equal(state.paused.since, h.clock.now());
   const notes = (h.gh.comments.get(321) ?? []).filter((c) =>
-    /will not resume by itself/.test(c.body)
+    /resumes automatically after both withdrawal lists are empty/.test(c.body)
   );
   assert.equal(notes.length, 1);
   const dashboard = h.gh.issues.find((i) => i.title === dashboardTitle(BASE));
-  assert.ok(!dashboard.body.includes("Resumes automatically"), dashboard.body);
+  assert.doesNotMatch(dashboard.body, /Resumes automatically when the base tip moves/);
+  assert.match(dashboard.body, /auto-resumes: `withdrawals-empty`; next check 2026-11-13 12:10Z/);
   assert.match(dashboard.body, /A resume is refused while `landWithdrawalsOverflow` holds entries/);
 });
 

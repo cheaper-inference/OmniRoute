@@ -1246,3 +1246,19 @@ test("stalledComment mentions the approvers and lists the reasons of the episode
   assert.ok(body.includes("\n- first `reason`\n- second reason\n"), body);
   assert.match(body, /once per episode/);
 });
+
+test("the dashboard shows the automatic pause probe and next check", () => {
+  const input = inFlightInput();
+  input.state.paused = {
+    reason: "error",
+    since: NOW,
+    baseSha: null,
+    detail: "landing credential rejected",
+    issue: null,
+    auto: { probe: "land-credential", attempts: 1, nextProbeAt: "2026-11-13T10:52:00Z" },
+  };
+  const body = renderDashboard(input);
+  assert.match(body, /auto-resumes: .*land-credential.*; next check 2026-11-13 10:52Z/);
+  assert.match(body, /npm run queue -- resume/);
+  assert.doesNotMatch(body, /does not lift by itself/);
+});
