@@ -1,0 +1,1 @@
+- **feat(providers):** Atlas Cloud is available as an API-key gateway provider. (thanks @binyangzhu000-sudo)

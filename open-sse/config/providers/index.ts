@@ -299,6 +299,7 @@ import { twinmindProvider } from "./registry/twinmind/index.ts";
 import { syntxProvider } from "./registry/syntx/index.ts";
 import { daoxeProvider } from "./registry/daoxe/index.ts";
 import { gisooProvider } from "./registry/gisoo/index.ts";
+import { atlascloudProvider } from "./registry/atlascloud/index.ts";
 import { demonrouteProvider } from "./registry/demonroute/index.ts";
 import { megabrainProvider } from "./registry/megabrain/index.ts";
 import { paraloncloudProvider } from "./registry/paraloncloud/index.ts";
@@ -609,6 +610,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   demonroute: demonrouteProvider,
   paraloncloud: paraloncloudProvider,
   empiriolabs: empiriolabsProvider,
+  atlascloud: atlascloudProvider,
   // Last, so its bare upstream ids (anthropic/…, z-ai/…) never shadow another
   // provider's; address them as megabrain/<model>.
   megabrain: megabrainProvider,
