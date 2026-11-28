@@ -380,6 +380,13 @@ export async function runSetupClaudeCommand(opts = {}) {
   return 0;
 }
 
+export function mergeSetupClaudeOptions(opts = {}, globalOpts = {}) {
+  return {
+    ...opts,
+    apiKey: opts.apiKey ?? opts["api-key"] ?? globalOpts.apiKey,
+  };
+}
+
 export function registerSetupClaude(program) {
   program
     .command("setup-claude")
@@ -405,8 +412,12 @@ export function registerSetupClaude(program) {
       "--allow-container-write",
       "Write even when the target is inside a container and not mounted from the host"
     )
-    .action(async (opts) => {
-      const exitCode = await runSetupClaudeCommand(opts);
+    .action(async (opts, cmd) => {
+      // Commander binds `--api-key` to the root program option declared in
+      // bin/cli/program.mjs (bound to .env("OMNIROUTE_API_KEY")) even when
+      // passed after `setup-claude`, leaving local `opts.apiKey` undefined (#20356).
+      const resolvedOpts = mergeSetupClaudeOptions(opts, cmd?.optsWithGlobals?.() ?? {});
+      const exitCode = await runSetupClaudeCommand(resolvedOpts);
       if (exitCode !== 0) process.exit(exitCode);
     });
 }
