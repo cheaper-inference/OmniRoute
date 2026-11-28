@@ -202,6 +202,11 @@ export class SseOutputScanner {
   flush(): boolean {
     this.resetReplayFrame();
     if (this.dataLines.length === 0) return false;
+    return this.completeEvent();
+  }
+
+  /** The event the buffered `data:` lines make: hand it to the caller and judge its output. */
+  private completeEvent(): boolean {
     const payload = this.dataLines.join("\n");
     this.dataLines = [];
     this.emitEvent(payload);
@@ -212,31 +217,25 @@ export class SseOutputScanner {
     return ready;
   }
 
-  private consumeLine(line: string, splitCrLf = false): boolean {
-    if (!splitCrLf && !this.replayInspectionDisabled) {
-      try {
-        this.observeReplayLine(line);
-      } catch {
-        this.observeReplay?.();
-        this.resetReplayFrame();
-        this.replayInspectionDisabled = true;
-      }
+  private inspectReplayLine(line: string): void {
+    if (this.replayInspectionDisabled) return;
+    try {
+      this.observeReplayLine(line);
+    } catch {
+      this.observeReplay?.();
+      this.resetReplayFrame();
+      this.replayInspectionDisabled = true;
     }
+  }
+
+  private consumeLine(line: string, splitCrLf = false): boolean {
+    if (!splitCrLf) this.inspectReplayLine(line);
     // The LF that completes a CRLF split across chunks is the second half of a terminator the
     // previous push already consumed, not a blank line. A caller that classifies assembled events
     // must not see the event end there; the readiness result of a gate without `onEvent` is
     // pinned to its earlier behavior (combo-precontent-transport-recovery-framing.test.ts).
     if (splitCrLf && this.onEvent) return false;
-    if (line === "") {
-      const payload = this.dataLines.join("\n");
-      this.dataLines = [];
-      this.emitEvent(payload);
-      const ready = payload.length > 0 && carriesOutput(payload);
-      const kind = ready || payload.length === 0 ? null : claudeThinkingFrameKind(payload);
-      if (ready) this.observeReplay?.();
-      else if (kind) this.reasoningKind = kind;
-      return ready;
-    }
+    if (line === "") return this.completeEvent();
     if (!line.startsWith("data:")) return false;
     const value = line.slice(5);
     const data = value.startsWith(" ") ? value.slice(1) : value;
