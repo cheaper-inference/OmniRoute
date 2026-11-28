@@ -1386,15 +1386,19 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
       // provider's endpoint (e.g. the OpenAI API key to integrate.api.nvidia.com)
       // — a cross-provider credential leak that also never succeeded upstream.
       return {
-        response: createErrorResult(
-          statusCode,
-          errMsg,
-          retryAfterMs,
-          upstreamErrorCode,
-          upstreamErrorType,
-          upstreamErrorBody,
-          { passthrough: sourceFormat === FORMATS.CLAUDE }
-        ),
+        response: {
+          ...createErrorResult(
+            statusCode,
+            errMsg,
+            retryAfterMs,
+            upstreamErrorCode,
+            upstreamErrorType,
+            upstreamErrorBody,
+            { passthrough: sourceFormat === FORMATS.CLAUDE }
+          ),
+          // Raw headers for the Claude quota-scope decision only (see claudeScopeHeaders.ts).
+          upstreamHeaders: providerResponse.headers,
+        },
         carry: {
           upstreamHttpSelection,
           translatedBody,

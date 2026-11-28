@@ -1,0 +1,1 @@
+- **fix(claude):** a Claude quota 429 that rejects only an overage or model claim, while the shared 7d window is allowed and the 5h window is not rejected, now stays scoped to that model instead of cooling the whole account when the cached usage windows are cold. ([#19764](https://github.com/cheaper-inference/OmniRoute/pull/19764))

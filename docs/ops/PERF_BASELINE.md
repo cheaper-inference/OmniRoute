@@ -50,6 +50,9 @@ npm run perf:lts-baseline -- --url http://127.0.0.1:20128 --runs 50 --out baseli
 | `--md`                   | Print the Markdown table to stdout. Progress logs always go to stderr.                                                |
 | `--data-dir <path>`      | Parent directory for the isolated per-measurement `DATA_DIR`s (default: a fresh temp dir, removed at the end).        |
 | `--heap-timeout-min <n>` | Abort `test:heap` after n minutes and mark it `skipped` (default 15).                                                 |
+| `--stream-url <url>`     | Also measure time to the first semantic stream event of this endpoint (needs `--stream-model`).                       |
+| `--stream-format <f>`    | Wire format of `--stream-url`: `openai` (default), `claude` or `responses`.                                           |
+| `--stream-model <id>`    | Model id to request on `--stream-url`.                                                                                |
 
 A failed or skipped measurement is data, not a crash: the script always writes the report and
 exits 0. Only a bad flag exits non-zero (2). The script spawns `npm` without a shell, so it
@@ -79,6 +82,14 @@ The JSON shape is `{ generatedAt, host, gitSha, options, measurements }`. Each m
 | `routingEvents` | `npm run bench:routing-events`                        | `raw.scenarios[].usPerOp`: microseconds per routing decision, without and with the routing-event sinks. Relative cost matters more than the absolute value.                                                                           |
 | `serverBoot`    | `omniroute serve` over `dist/`                        | Time from spawn to the first `200` from `/api/health/ping` (cold start). `skipped` with `--url` or without a built bundle.                                                                                                            |
 | `ttft`          | `/api/health`, `/v1/models`, `/api/monitoring/health` | Per endpoint, time until the response headers arrive (time to first byte), sequential requests on a keep-alive connection: `raw.medianMs`, `raw.p95Ms` (nearest rank), `raw.minMs`, `raw.maxMs`. Non-2xx marks the endpoint `failed`. |
+
+`streamTtft` is opt-in. `--stream-url <url> --stream-model <id> [--stream-format openai|claude|responses]`
+sends real streaming requests (3 warmups, then `--runs` timed) and reports, in `raw.ttft` and
+`raw.firstByte`, the time to the first text, reasoning or tool event next to the time to the first
+body byte. Role-only deltas, `message_start`, `response.created` and usage-only frames do not count
+as the first event. A run counts only after a terminal event and with no error frame. The API key is
+read from `OMNIROUTE_API_KEY` and never written to the report. The target spends provider tokens
+(16 output tokens per request), so point it at a cheap model.
 
 `ttft` needs a server. When no `--url` is given and `dist/server.js` does not exist, every
 `ttft` entry is `skipped` with the reason: `omniroute serve` cannot boot an unbuilt tree.
