@@ -31,7 +31,7 @@ export {
   hoistLeadingTextSystemMessages,
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
-import { checkIdempotencyCache } from "./chatCore/idempotency.ts";
+import { checkIdempotencyCache, readIdempotencyResponse } from "./chatCore/idempotency.ts";
 import {
   acquireTurnExecutionWithWait,
   createTurnInProgressResult,
@@ -694,7 +694,7 @@ async function handleChatCoreInner({
   // ── Phase 9.2: Idempotency check ──
   // Resolve the idempotency key once here and reuse it at the Phase 9.2 save site below,
   // rather than re-deriving it. (#3821-review LEDGER-6)
-  const { hit: idempotencyHit, idempotencyKey } = await checkIdempotencyCache({
+  const idempotencyContext = {
     clientRawRequest,
     provider,
     model,
@@ -706,7 +706,8 @@ async function handleChatCoreInner({
     startTime,
     log,
     videoTranscriptSensitive: videoBridgeObserved,
-  });
+  };
+  const { hit: idempotencyHit, idempotencyKey } = await checkIdempotencyCache(idempotencyContext);
   if (idempotencyHit) {
     return idempotencyHit;
   }
@@ -731,7 +732,13 @@ async function handleChatCoreInner({
   // Preserve chatCore's canonical formatting while the guarded body remains byte-stable.
   // prettier-ignore
   try {
-    // T07: Inject connectionId into credentials so executors can rotate API keys
+  // A previous turn may have cached its response while this request waited for the slot.
+  if (idempotencyKey) {
+    const replay = await readIdempotencyResponse(idempotencyKey, idempotencyContext);
+    if (replay) return replay;
+  }
+
+  // T07: Inject connectionId into credentials so executors can rotate API keys
   // using providerSpecificData.extraApiKeys (API Key Round-Robin feature)
   if (connectionId && credentials && !credentials.connectionId) {
     credentials.connectionId = connectionId;

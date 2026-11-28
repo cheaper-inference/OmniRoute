@@ -199,7 +199,7 @@ describe("reserved automatic route names", { timeout: 90_000 }, () => {
     expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === "POST")).toBe(false);
   });
 
-  it("warns on a saved reserved name and enables saving after renaming", async () => {
+  async function openReservedComboEditor() {
     listedCombos = [reservedCombo];
     render(<CombosPage />);
     const card = await screen.findByTestId("combo-card-legacy-auto");
@@ -209,11 +209,38 @@ describe("reserved automatic route names", { timeout: 90_000 }, () => {
     const dialog = await screen.findByRole("dialog");
     const name = within(dialog).getByTestId("combo-name-input");
     const save = await within(dialog).findByRole("button", { name: "Save" });
+    return { dialog, name, save };
+  }
+
+  it("saves changes while keeping a legacy reserved name", async () => {
+    const { dialog, name, save } = await openReservedComboEditor();
     expect(name).toHaveValue("Auto/coding");
+    expect(save).toBeEnabled();
+    expect(name).not.toHaveAccessibleDescription(/reserved for the built-in automatic routes/i);
+
+    fireEvent.change(within(dialog).getByLabelText("Description"), {
+      target: { value: "Updated description" },
+    });
+    fireEvent.click(save);
+    await waitFor(() =>
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/combos/legacy-auto",
+        expect.objectContaining({
+          method: "PUT",
+          body: expect.stringContaining('"description":"Updated description"'),
+        })
+      )
+    );
+  });
+
+  it("shows an inline error for a different reserved name and enables saving after a valid rename", async () => {
+    const { name, save } = await openReservedComboEditor();
+    fireEvent.change(name, { target: { value: " AUTO/x " } });
     expect(name).toHaveAccessibleDescription(/reserved for the built-in automatic routes/i);
     expect(save).toBeDisabled();
     fireEvent.click(save);
     expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === "PUT")).toBe(false);
+
     fireEvent.change(name, { target: { value: "my-auto" } });
     expect(save).toBeEnabled();
   });

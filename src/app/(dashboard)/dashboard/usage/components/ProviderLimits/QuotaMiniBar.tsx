@@ -17,6 +17,7 @@ interface Props {
 export default function QuotaMiniBar({ percent, label, size = "xs", className }: Props) {
   return (
     <Progress
+      semantics="meter"
       value={percent}
       size={size}
       color={getBarColor(percent).bar}

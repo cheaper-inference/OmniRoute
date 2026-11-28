@@ -1,0 +1,1 @@
+- Normalize the JPG output alias to JPEG for built-in OpenAI image generation and preserve explicitly requested compression.

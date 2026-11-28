@@ -164,35 +164,29 @@ test("slow build converging after two timeouts serves 200 on next retry", async 
   assert.equal(await third.text(), "late-good");
 });
 
-test("eternally hung build is replaced, never pinned", async () => {
-  process.env.CATALOG_BUILD_TIMEOUT_MS = "20";
-  try {
-    const r1 = await catalogCache.resolveCachedCatalogResponse(
+test("eternally hung build is replaced, never pinned", async (t) => {
+  const timeoutMs = 20;
+  process.env.CATALOG_BUILD_TIMEOUT_MS = String(timeoutMs);
+  // Timeout waves use Date.now(), so advance it together with the request timer.
+  t.mock.timers.enable({ apis: ["Date", "setTimeout"] });
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const pending = catalogCache.resolveCachedCatalogResponse(
       request(),
       { corsHeaders: {}, diagnosticHeaders: {} },
       neverResolves as (req: Request) => Promise<catalogCache.CatalogPayload>
     );
-    assert.equal(r1.status, 503);
-    const r2 = await catalogCache.resolveCachedCatalogResponse(
-      request(),
-      { corsHeaders: {}, diagnosticHeaders: {} },
-      neverResolves as (req: Request) => Promise<catalogCache.CatalogPayload>
-    );
-    assert.equal(r2.status, 503);
-    const r3 = await catalogCache.resolveCachedCatalogResponse(
-      request(),
-      { corsHeaders: {}, diagnosticHeaders: {} },
-      neverResolves as (req: Request) => Promise<catalogCache.CatalogPayload>
-    );
-    assert.equal(r3.status, 503);
-    const r4 = await catalogCache.resolveCachedCatalogResponse(
-      request(),
-      { corsHeaders: {}, diagnosticHeaders: {} },
-      async () => payload("fresh")
-    );
-    assert.equal(catalogCache.__getCatalogBuilderRunsForTest() >= 2, true);
-    assert.equal([503, 200].includes(r4.status), true);
-  } finally {
-    process.env.CATALOG_BUILD_TIMEOUT_MS = "40";
+    t.mock.timers.tick(timeoutMs);
+    assert.equal((await pending).status, 503);
+    assert.equal(catalogCache.__getCatalogBuilderRunsForTest(), 1);
   }
+
+  const fresh = catalogCache.resolveCachedCatalogResponse(
+    request(),
+    { corsHeaders: {}, diagnosticHeaders: {} },
+    async () => payload("fresh")
+  );
+  assert.equal(catalogCache.__getCatalogBuilderRunsForTest(), 2);
+  const response = await fresh;
+  assert.equal(response.status, 200);
+  assert.equal(await response.text(), "fresh");
 });

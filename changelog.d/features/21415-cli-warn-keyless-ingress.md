@@ -1,0 +1,1 @@
+- **feat(cli):** `omniroute deploy k8s` warns on stderr when `--no-require-api-key` leaves the Ingress enabled, since `/v1/*` is then reachable without a key ([#21415](https://github.com/cheaper-inference/OmniRoute/pull/21415), refs #21008)

@@ -894,7 +894,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: diegosouzapw/omniroute
-          short-description: "OmniRoute — Unified AI proxy. Route any LLM through one endpoint."
+          short-description: "OmniRoute by Cheaper Inference. Created by Diego Souza. Unified AI router, MIT, self-hosted, free."
           readme-filepath: ./README.md
 
   # Every published variant is scanned, not only the base image the merge job gates: the -web,

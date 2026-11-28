@@ -51,7 +51,9 @@ for (const locale of ["en", "zh-CN"]) {
       expect(account.reasons.some((r) => r.type === "cutoffNotEvaluated")).toBe(
         reason === "cutoff"
       );
-      expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("0");
+      expect(
+        screen.getByRole("meter", { name: messages.usage.weekly }).getAttribute("aria-valuenow")
+      ).toBe("0");
     });
   }
 }

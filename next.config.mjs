@@ -273,6 +273,9 @@ const nextConfig = {
     // and break standalone copies when broad NFT tracing pulls the whole repository into memory.
     // Using "**/*" ensures the exclusion applies across all app and API routes, not just "/".
     "**/*": [
+      // The env repair route bundles its helpers. npm packaging copies the template separately.
+      "./.env.example",
+      "./scripts/dev/sync-env.mjs",
       "**/.git/**",
       "**/.eslintcache",
       "**/_tasks/**",
