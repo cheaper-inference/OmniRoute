@@ -1,7 +1,12 @@
+import type {
+  CompressionSettingWrite,
+  CompressionSettingsRepository,
+} from "@/domain/persistence/compressionRepositories";
 import { backupDbFile } from "./backup";
 import { getDefaultCompressionCombo } from "./compressionCombos";
 import { getDbInstance } from "./core";
 import { invalidateDbCache } from "./readCache";
+import { compressionRepositories } from "./repositories/compressionRepositories";
 import {
   ENGINE_IDS,
   DEFAULT_AGGRESSIVE_CONFIG,
@@ -45,7 +50,18 @@ import { maybePrewarmUltraSlmOnConfig } from "@omniroute/open-sse/services/compr
 import { isUsableLiteMaxToolLength } from "@omniroute/open-sse/services/compression/lite.ts";
 import { applyDetailConfigUpdate, buildDetailConfigDefaults } from "./compressionDetailNormalizers";
 
-const NAMESPACE = "compression";
+/**
+ * Rows live behind CompressionSettingsRepository (key_value, namespace "compression").
+ * This facade owns normalization, defaults, legacy-key fallbacks and both TTL caches;
+ * the settings read and the proactive threshold use the SQLite-only synchronous binding.
+ */
+const legacy = compressionRepositories.legacySync.settings;
+
+/** Async persistence contract; it never invalidates caches on its own. */
+export function getCompressionSettingsRepository(): CompressionSettingsRepository {
+  return compressionRepositories.settings;
+}
+
 const COMPRESSION_MODES = new Set<CompressionMode>([
   "off",
   "lite",
@@ -532,18 +548,13 @@ function sanitizeEnginesForWrite(value: unknown): Record<string, EngineToggle> {
 // from a stored row off. Merge each written entry over the stored entry, field by field. While
 // no usable row exists, merge over `current`, the map the read path derives from legacy settings.
 function mergeEnginesForWrite(
-  db: ReturnType<typeof getDbInstance>,
+  storedValue: unknown,
   value: unknown,
   current: Record<string, EngineToggle>
 ): Record<string, EngineToggle> {
-  const existingRow = db
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(NAMESPACE, "engines") as { value: unknown } | undefined;
   // getCompressionSettings skips non-text (BLOB) rows, so treat them as absent here too.
   const stored =
-    typeof existingRow?.value === "string"
-      ? parseStoredEnginesMap(parseJsonSafe(existingRow.value))
-      : null;
+    typeof storedValue === "string" ? parseStoredEnginesMap(parseJsonSafe(storedValue)) : null;
   const base = stored ?? current;
   const incoming = toRecord(value);
   const merged: JsonRecord = {};
@@ -558,14 +569,11 @@ function mergeEnginesForWrite(
 // Partial lite writes replace the whole JSON row. Keep a stored cap unless the
 // caller sends maxToolLength: null (clear) or a new in-range integer.
 function mergeLiteSettingsForWrite(
-  db: ReturnType<typeof getDbInstance>,
+  storedValue: unknown,
   value: unknown
 ): { compressToolResults: boolean; maxToolLength?: number } {
   const incoming = toRecord(value);
-  const existingRow = db
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(NAMESPACE, "lite") as { value: string } | undefined;
-  const existing = toRecord(parseJsonSafe(existingRow?.value ?? null));
+  const existing = toRecord(parseJsonSafe((storedValue as string | undefined) ?? null));
   const existingCap = usableLiteMaxToolLength(existing.maxToolLength);
   const compressToolResults =
     typeof incoming.compressToolResults === "boolean"
@@ -593,15 +601,12 @@ function mergeLiteSettingsForWrite(
 // Partial cavemanOutputMode writes replace the whole JSON row, and the read path fills
 // missing fields with defaults. Take each missing or invalid field from the stored row instead.
 function mergeCavemanOutputModeForWrite(
-  db: ReturnType<typeof getDbInstance>,
+  storedValue: unknown,
   value: unknown
 ): CavemanOutputModeConfig {
-  const existingRow = db
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(NAMESPACE, "cavemanOutputMode") as { value: unknown } | undefined;
   // getCompressionSettings skips non-text (BLOB) rows, so treat them as absent here too.
   const existing = normalizeCavemanOutputModeConfig(
-    typeof existingRow?.value === "string" ? parseJsonSafe(existingRow.value) : undefined
+    typeof storedValue === "string" ? parseJsonSafe(storedValue) : undefined
   );
   return normalizeCavemanOutputModeConfig(value, existing);
 }
@@ -695,7 +700,7 @@ export async function getCompressionSettings(): Promise<CompressionConfig> {
   }
   compressionSettingsCache = null;
 
-  const rows = db.prepare("SELECT key, value FROM key_value WHERE namespace = ?").all(NAMESPACE);
+  const rows = legacy.list();
 
   // Legacy per-engine rows (aggressiveConfig/ultraConfig/headroomConfig) share their read case
   // with the current keys. When both rows exist the current key must win, regardless of the
@@ -968,37 +973,42 @@ export async function getCompressionSettings(): Promise<CompressionConfig> {
 export async function updateCompressionSettings(
   updates: Partial<CompressionConfig>
 ): Promise<CompressionConfig> {
-  const db = getDbInstance();
-  const insert = db.prepare(
-    "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)"
-  );
   // The engines map the read path returns now: the merge base for an engines write while no
   // engines row exists yet.
   const currentEngines: Record<string, EngineToggle> =
     updates.engines === undefined ? {} : (await getCompressionSettings()).engines;
 
-  const tx = db.transaction(() => {
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === undefined) continue;
-      // Persist the engines map as ONE sanitized JSON row so the read path always gets
-      // well-formed { enabled, level? } toggles for known engine ids.
-      if (key === "engines") {
-        insert.run(NAMESPACE, key, JSON.stringify(mergeEnginesForWrite(db, value, currentEngines)));
-        continue;
-      }
-      if (key === "lite") {
-        insert.run(NAMESPACE, key, JSON.stringify(mergeLiteSettingsForWrite(db, value)));
-        continue;
-      }
-      if (key === "cavemanOutputMode") {
-        insert.run(NAMESPACE, key, JSON.stringify(mergeCavemanOutputModeForWrite(db, value)));
-        continue;
-      }
-      insert.run(NAMESPACE, key, JSON.stringify(value));
+  // Merging keys read their stored row inside the same write transaction.
+  const writes: CompressionSettingWrite[] = [];
+  for (const [key, value] of Object.entries(updates)) {
+    if (value === undefined) continue;
+    // Persist the engines map as ONE sanitized JSON row so the read path always gets
+    // well-formed { enabled, level? } toggles for known engine ids.
+    if (key === "engines") {
+      writes.push({
+        key,
+        value: (stored) => JSON.stringify(mergeEnginesForWrite(stored, value, currentEngines)),
+      });
+      continue;
     }
-  });
+    if (key === "lite") {
+      writes.push({
+        key,
+        value: (stored) => JSON.stringify(mergeLiteSettingsForWrite(stored, value)),
+      });
+      continue;
+    }
+    if (key === "cavemanOutputMode") {
+      writes.push({
+        key,
+        value: (stored) => JSON.stringify(mergeCavemanOutputModeForWrite(stored, value)),
+      });
+      continue;
+    }
+    writes.push({ key, value: JSON.stringify(value) });
+  }
 
-  tx();
+  legacy.write(writes);
   backupDbFile("pre-write");
   compressionSettingsCache = null;
   invalidateDbCache();
@@ -1020,23 +1030,15 @@ function normalizeMcpAccessibilityConfig(value: unknown): McpAccessibilityConfig
 }
 
 export async function getMcpAccessibilityConfig(): Promise<McpAccessibilityConfig> {
-  const db = getDbInstance();
-  const row = db
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(NAMESPACE, "mcpAccessibility") as { value: string } | undefined;
-  return normalizeMcpAccessibilityConfig(parseJsonSafe(row?.value ?? null));
+  const stored = legacy.get("mcpAccessibility") as string | undefined;
+  return normalizeMcpAccessibilityConfig(parseJsonSafe(stored ?? null));
 }
 
 export async function setMcpAccessibilityConfig(
   value: Partial<McpAccessibilityConfig>
 ): Promise<void> {
   const next = normalizeMcpAccessibilityConfig({ ...DEFAULT_MCP_ACCESSIBILITY_CONFIG, ...value });
-  const db = getDbInstance();
-  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
-    NAMESPACE,
-    "mcpAccessibility",
-    JSON.stringify(next)
-  );
+  legacy.write([{ key: "mcpAccessibility", value: JSON.stringify(next) }]);
   compressionSettingsCache = null;
   invalidateDbCache();
 }
@@ -1052,7 +1054,8 @@ export async function setMcpAccessibilityConfig(
 // here (not in the handler) per Hard Rule #5 — no raw SQL outside src/lib/db/.
 // better-sqlite3 is synchronous so the read stays in the sync hot path. 30s
 // TTL cache keeps per-request overhead at zero while still letting a plain
-// sqlite UPDATE take effect without a restart.
+// sqlite UPDATE take effect without a restart. The row read goes through the
+// SQLite-only synchronous repository binding.
 const PROACTIVE_COMPRESSION_DEFAULT_RATIO = 0.7;
 const PROACTIVE_COMPRESSION_RATIO_MIN = 0.1;
 const PROACTIVE_COMPRESSION_RATIO_MAX = 0.99;
@@ -1069,11 +1072,9 @@ export function getProactiveCompressionRatio(): number {
   }
   let ratio = PROACTIVE_COMPRESSION_DEFAULT_RATIO;
   try {
-    const row = getDbInstance()
-      .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-      .get(NAMESPACE, "proactiveConfig") as { value?: string } | undefined;
-    if (row?.value) {
-      const parsed = JSON.parse(row.value) as { thresholdRatio?: unknown };
+    const stored = legacy.get("proactiveConfig") as string | undefined;
+    if (stored) {
+      const parsed = JSON.parse(stored) as { thresholdRatio?: unknown };
       const candidate = Number(parsed?.thresholdRatio);
       if (
         Number.isFinite(candidate) &&
