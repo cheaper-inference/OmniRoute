@@ -8,3 +8,4 @@ export {
   redactCredentials,
 } from "./credentialMasker";
 export type { CredentialPattern, CredentialRedactionResult } from "./credentialMasker";
+export { ResponseSanitizerGuardrail } from "./responseSanitizer";

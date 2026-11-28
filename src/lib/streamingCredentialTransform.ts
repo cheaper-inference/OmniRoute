@@ -15,6 +15,10 @@ import {
 } from "./sseTextBuffers";
 import { CredentialOverflow } from "./credentialOverflow";
 import { credentialSafeCut } from "./credentialStreamBoundary";
+import {
+  exactValuePartialTailIndex,
+  setCredentialExactValues,
+} from "@/shared/utils/credentialExactValues";
 import { redactCredentials } from "./guardrails/credentialMasker";
 
 export interface CredentialTransformOptions {
@@ -72,7 +76,10 @@ export function isCredentialTransformEnabled(gate: CredentialGate): boolean {
  * fakes. Fail-open to the historical behavior on reader errors.
  */
 export async function resolveCredentialGate(args: {
-  getSettings?: () => Promise<{ credentialRedactionEnabled?: unknown } | null>;
+  getSettings?: () => Promise<{
+    credentialRedactionEnabled?: unknown;
+    credentialExactValues?: unknown;
+  } | null>;
   resolveDisabledGuardrails?: (input: {
     apiKeyInfo?: unknown;
     body?: unknown;
@@ -89,6 +96,7 @@ export async function resolveCredentialGate(args: {
     enabled =
       settings?.credentialRedactionEnabled === true ||
       process.env.CREDENTIAL_REDACTION_ENABLED === "true";
+    if (enabled) setCredentialExactValues(settings?.credentialExactValues);
   } catch {
     enabled = process.env.CREDENTIAL_REDACTION_ENABLED === "true";
   }
@@ -202,6 +210,8 @@ export function findCredentialPartialTailIndex(buffer: string): number | undefin
     const at = tailPatternOccurrence(tail, pattern);
     if (at !== -1 && (earliest === undefined || base + at < earliest)) earliest = base + at;
   }
+  const exactAt = exactValuePartialTailIndex(buffer);
+  if (exactAt !== undefined && (earliest === undefined || exactAt < earliest)) earliest = exactAt;
   return earliest;
 }
 

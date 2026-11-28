@@ -71,8 +71,10 @@ test("guardrails barrel (src/lib/guardrails/index.ts) exports exactly this surfa
     "GuardrailRegistry",
     "PIIMaskerGuardrail",
     "PromptInjectionGuardrail",
+    "ResponseSanitizerGuardrail",
     "detectWithPatterns",
     "evaluatePromptInjection",
+    "evaluatePromptInjectionWithClassifier",
     "guardrailRegistry",
     "normalizePatternEntry",
     "redactCredentials",
@@ -94,6 +96,7 @@ test("importing the barrel registers the default guardrails in priority order", 
       ["credential-masker", 9, true],
       ["pii-masker", 10, true],
       ["prompt-injection", 20, true],
+      ["response-sanitizer", 30, true],
     ]
   );
 });

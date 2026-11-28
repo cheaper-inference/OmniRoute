@@ -520,8 +520,9 @@ export default function ModelSelectModal({
     const filtered: Record<string, any> = {};
 
     Object.entries(groupedModels).forEach(([providerId, group]: [string, any]) => {
+      // The matcher normalises the query itself; a lowercased copy would break `/regex/` syntax.
       const matchedModels = group.models.filter((model) =>
-        matchesModelCatalogQuery(query, {
+        matchesModelCatalogQuery(searchQuery, {
           modelId: model.id,
           modelName: model.name,
           source: model.source,

@@ -1,5 +1,6 @@
 import { CREDENTIAL_PATTERNS } from "@omniroute/open-sse/utils/credentialPatterns.ts";
 import { getSettings } from "@/lib/db/settings";
+import { redactExactValues, setCredentialExactValues } from "@/shared/utils/credentialExactValues";
 import { BaseGuardrail, type GuardrailContext, type GuardrailResult } from "./base";
 
 export { CREDENTIAL_PATTERNS };
@@ -24,10 +25,11 @@ export interface CredentialRedactionResult {
 /** Credential redaction switch shared by the pre/post-call hooks and stored session turns. */
 export async function isCredentialRedactionEnabled(): Promise<boolean> {
   const settings = await getSettings();
-  return (
+  const enabled =
     settings.credentialRedactionEnabled === true ||
-    process.env.CREDENTIAL_REDACTION_ENABLED === "true"
-  );
+    process.env.CREDENTIAL_REDACTION_ENABLED === "true";
+  if (enabled) setCredentialExactValues(settings.credentialExactValues);
+  return enabled;
 }
 
 // Signed or encrypted fields and long base64 blobs must replay byte for byte. Only patterns with a
@@ -57,8 +59,11 @@ const BASE64_BLOB = /^[A-Za-z0-9+/_-]{256,}={0,2}$/;
 
 export function redactCredentials(text: string, opaque = false): CredentialRedactionResult {
   if (typeof text !== "string" || !text) return { text, detections: [], modified: false };
-  let result = text;
+  // Operator exact values first: they have no shape the catalog could recognise.
+  const exact = redactExactValues(text);
+  let result = exact.text;
   const detections: Array<{ type: string; count: number }> = [];
+  if (exact.count > 0) detections.push({ type: "exact_value", count: exact.count });
   for (const p of CREDENTIAL_PATTERNS) {
     if (opaque && !OPAQUE_PATTERN_NAMES.has(p.name)) continue;
     p.regex.lastIndex = 0;
