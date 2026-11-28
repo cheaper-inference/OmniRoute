@@ -143,6 +143,10 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // ParalonCloud — GET https://paraloncloud.com/v1/models is key-gated; the registry
   // seed is only the offline fallback.
   "paraloncloud",
+  // TTOken — GET https://api.ttoken.dev/v1/models is key-scoped (each key lists only the
+  // models it may run), so live discovery is what matches a connection to its key; the
+  // registry seed is only the offline fallback.
+  "ttoken",
 ]);
 
 export function isNamedOpenAIStyleProvider(provider: string): boolean {
