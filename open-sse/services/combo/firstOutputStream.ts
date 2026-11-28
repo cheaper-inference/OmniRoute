@@ -222,6 +222,11 @@ export class SseOutputScanner {
         this.replayInspectionDisabled = true;
       }
     }
+    // The LF that completes a CRLF split across chunks is the second half of a terminator the
+    // previous push already consumed, not a blank line. A caller that classifies assembled events
+    // must not see the event end there; the readiness result of a gate without `onEvent` is
+    // pinned to its earlier behavior (combo-precontent-transport-recovery-framing.test.ts).
+    if (splitCrLf && this.onEvent) return false;
     if (line === "") {
       const payload = this.dataLines.join("\n");
       this.dataLines = [];

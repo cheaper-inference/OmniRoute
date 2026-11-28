@@ -304,6 +304,24 @@ test("a pipeline stream_error frame after reasoning is a recoverable cut", async
   assert.equal(result.kind, "fallback");
 });
 
+test("the LF that completes a CRLF split across chunks does not end the event", async () => {
+  const { SseOutputScanner } = await import("../../open-sse/services/combo/firstOutputStream.ts");
+  const events: string[] = [];
+  const scanner = new SseOutputScanner(undefined, (payload) => events.push(payload));
+  scanner.push('data: {"choices":\r');
+  scanner.push("\ndata: []}\r\n\r\n");
+  assert.deepEqual(events, ['{"choices":\n[]}']);
+});
+
+test("a blank line whose CRLF is split across chunks still ends the event", async () => {
+  const { SseOutputScanner } = await import("../../open-sse/services/combo/firstOutputStream.ts");
+  const events: string[] = [];
+  const scanner = new SseOutputScanner(undefined, (payload) => events.push(payload));
+  scanner.push('data: {"a":1}\r\n\r');
+  scanner.push('\ndata: {"b":2}\r\n\r\n');
+  assert.deepEqual(events, ['{"a":1}', '{"b":2}']);
+});
+
 test("any other upstream error frame keeps the existing policy", async () => {
   const error = `data: ${JSON.stringify({
     error: { message: "bad", type: "invalid_request_error", code: "context_length_exceeded" },
