@@ -16,6 +16,7 @@ import {
   type RoutingContext,
 } from "../../open-sse/services/autoCombo/routerStrategy.ts";
 import {
+  NADIR_ACCOUNT_COOLDOWN_MS,
   NADIR_FAILURE_COOLDOWN_MS,
   NADIR_MAX_PROMPT_CHARS,
   NadirStrategyImpl,
@@ -224,6 +225,45 @@ test("nadir — cools down after a failure and retries once the window has passe
   assert.match(retried.reason, /call failed: boom/);
 });
 
+test("nadir — an empty balance (402) logs Nadir's reason and waits the account cooldown", async (t) => {
+  const warn = t.mock.method(console, "warn", () => {});
+  let now = 1_000_000;
+  const { calls, transport } = recordingTransport(() =>
+    json(
+      {
+        detail: {
+          error: "balance_empty",
+          message:
+            "Each request through Nadir costs $0.002 from your prepaid balance, and the balance is empty. Top up to keep routing: https://getnadir.com/dashboard/billing",
+        },
+      },
+      402
+    )
+  );
+  const strategy = nadir(transport, () => now);
+
+  const first = await strategy.selectAsync(pool, ctx);
+  assert.equal(first.strategy, "rules");
+  assert.match(first.reason, /call failed: HTTP 402 balance_empty: Each request through Nadir/);
+  assert.match(String(warn.mock.calls[0].arguments[0]), /balance_empty.*next 300s/);
+
+  now += NADIR_FAILURE_COOLDOWN_MS + 1;
+  const cooled = await strategy.selectAsync(pool, ctx);
+  assert.equal(calls.length, 1, "a 402 keeps the strategy off the network past the 30 s window");
+  assert.match(cooled.reason, /cooling down/);
+
+  now += NADIR_ACCOUNT_COOLDOWN_MS;
+  await strategy.selectAsync(pool, ctx);
+  assert.equal(calls.length, 2);
+});
+
+test("nadir — a non-JSON error body still reports the bare status", async (t) => {
+  t.mock.method(console, "warn", () => {});
+  const badGateway = async () => new Response("<html>bad gateway</html>", { status: 502 });
+  const decision = await nadir(badGateway).selectAsync(pool, ctx);
+  assert.match(decision.reason, /call failed: HTTP 502\)/);
+});
+
 // ── configuration ────────────────────────────────────────────────────────────
 test("nadir — invalid baseUrl never calls out; trailing /v1, timeout and env fallbacks are honored", async (t) => {
   const { calls, transport } = recordingTransport(() => json({ selected_model: "claude-opus-5" }));
@@ -332,4 +372,58 @@ test("helpers — extractLastUserText, normalizeNadirBaseUrl, resolveNadirRoutin
   });
   assert.equal(resolveNadirRoutingConfig("k"), undefined);
   assert.equal(resolveNadirRoutingConfig(null), undefined);
+});
+
+test("nadir — a top-level error string keeps its sibling message", async (t) => {
+  t.mock.method(console, "warn", () => {});
+  const { transport } = recordingTransport(() =>
+    json({ error: "invalid_api_key", message: "The key was revoked" }, 401)
+  );
+  const decision = await nadir(transport).selectAsync(pool, ctx);
+  assert.match(decision.reason, /call failed: HTTP 401 invalid_api_key: The key was revoked/);
+});
+
+test("nadir — a later short failure does not shorten an account cooldown", async (t) => {
+  t.mock.method(console, "warn", () => {});
+  let now = 1_000_000;
+  const release: Array<() => void> = [];
+  const gates = [0, 1].map(() => new Promise<void>((resolve) => release.push(resolve)));
+  let n = 0;
+  const transport = async () => {
+    const i = n++;
+    await gates[i];
+    return i === 0
+      ? json({ detail: { error: "balance_empty", message: "empty" } }, 402)
+      : json({ error: "down" }, 503);
+  };
+  const strategy = nadir(transport, () => now);
+
+  // Both requests pass the cooldown check before either completes; the 402 lands first.
+  const first = strategy.selectAsync(pool, ctx);
+  const second = strategy.selectAsync(pool, ctx);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(n, 2);
+  release[0]();
+  await first;
+  release[1]();
+  await second;
+
+  now += NADIR_FAILURE_COOLDOWN_MS + 1;
+  const cooled = await strategy.selectAsync(pool, ctx);
+  assert.match(cooled.reason, /cooling down/, "the 503's 30 s must not replace the 402's 5 min");
+});
+
+test("nadir — a stalled error body falls back on the status", async (t) => {
+  t.mock.method(console, "warn", () => {});
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const stalled = async () =>
+    new Response(new ReadableStream({ start() {} }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
+    });
+  const pending = nadir(stalled).selectAsync(pool, ctx);
+  await new Promise((resolve) => setImmediate(resolve));
+  t.mock.timers.tick(2_000);
+  const decision = await pending;
+  assert.match(decision.reason, /call failed: HTTP 503\)/);
 });
