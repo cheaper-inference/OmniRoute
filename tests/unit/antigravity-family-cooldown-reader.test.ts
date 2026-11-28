@@ -10,6 +10,14 @@ import {
   lockModel,
 } from "../../open-sse/services/accountFallback.ts";
 
+test("saved Argon family cooldown is readable without account locks", () => {
+  const now = Date.now();
+  const until = now + 60_000;
+  const psd = { antigravityFamilyRateLimitedUntil: { argon: until } };
+  assert.equal(getAntigravityFamilyCooldownUntil(psd, "argon", now), until);
+  assert.equal(getAntigravityFamilyCooldownUntil(psd, "argon", until), null);
+});
+
 function legacyRehydrate(provider: string, psd: unknown) {
   if (provider !== "antigravity" && provider !== "agy") return;
   const record = (value: unknown): Record<string, unknown> =>
