@@ -359,3 +359,92 @@ test("combo live test does not use cooldown-aware request retry on upstream fail
   );
   assert.match(liveBody.error.message, /upstream unavailable/i);
 });
+
+test("a trusted Kimi live check can test a transient cooldown and still honors a manual disable", async () => {
+  const created = await providersDb.createProviderConnection({
+    provider: "kimi-coding-apikey",
+    authType: "apikey",
+    name: "fixture-live-check",
+    apiKey: "fixture",
+    isActive: true,
+    maxConcurrent: 1,
+    testStatus: "rate_limited",
+    lastErrorType: "rate_limit",
+    errorCode: "429",
+    rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
+  });
+  const id = String(created.id);
+  const calls: string[] = [];
+  globalThis.fetch = async () => {
+    calls.push("send");
+    return Response.json({
+      id: "fixture",
+      choices: [{ message: { role: "assistant", content: "ok" }, finish_reason: "stop" }],
+      usage: { prompt_tokens: 1, completion_tokens: 1 },
+    });
+  };
+  const post = (headers: Record<string, string>) =>
+    chatRoute.POST(
+      new Request("http://localhost/v1/chat/completions", {
+        method: "POST",
+        headers: { "content-type": "application/json", ...headers },
+        body: JSON.stringify({
+          model: "kimi-coding-apikey/k3.1-pro",
+          messages: [{ role: "user", content: "hi" }],
+          stream: false,
+        }),
+      })
+    );
+  const ordinary = await post({});
+  assert.ok(ordinary.status >= 400);
+  assert.deepEqual(calls, []);
+  const live = await post(LIVE_TEST_HEADERS);
+  assert.equal(live.status, 200);
+  assert.deepEqual(calls, ["send"]);
+  await providersDb.updateProviderConnection(id, {
+    testStatus: "rate_limited",
+    lastErrorType: null,
+    lastError: null,
+    errorCode: null,
+    rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
+  });
+  const legacy = await post(LIVE_TEST_HEADERS);
+  assert.equal(legacy.status, 200);
+  assert.equal(calls.length, 2);
+  await providersDb.updateProviderConnection(id, {
+    testStatus: "rate_limited",
+    lastErrorType: "concurrency_limited",
+    errorCode: "429",
+    rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
+  });
+  const contention = await post(LIVE_TEST_HEADERS);
+  assert.equal(contention.status, 200);
+  assert.equal(calls.length, 3);
+  for (const [testStatus, lastErrorType, errorCode] of [
+    ["rate_limited", "quota_exhausted", "429"],
+    ["rate_limited", "concurrency_limited", "403"],
+    ["banned", "auth_error", "403"],
+  ]) {
+    await providersDb.updateProviderConnection(id, {
+      isActive: true,
+      testStatus,
+      lastErrorType,
+      errorCode,
+      rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
+    });
+    const terminal = await post(LIVE_TEST_HEADERS);
+    assert.ok(terminal.status >= 400);
+    assert.equal(calls.length, 3);
+  }
+  await providersDb.updateProviderConnection(id, {
+    isActive: false,
+    testStatus: "active",
+    rateLimitedUntil: null,
+    lastErrorType: null,
+    errorCode: null,
+  });
+  const disabled = await post(LIVE_TEST_HEADERS);
+  assert.ok(disabled.status >= 400);
+  assert.equal(calls.length, 3);
+  assert.equal((await providersDb.getProviderConnectionById(id))?.isActive, false);
+});

@@ -6,11 +6,7 @@
  *
  * @internal — not part of the public combo.ts barrel.
  */
-import {
-  getRuntimeProviderProfile,
-  isAccountSemaphoreFull,
-  isModelLocked,
-} from "../accountFallback.ts";
+import { getRuntimeProviderProfile, isModelLocked } from "../accountFallback.ts";
 import { isProviderInCooldown } from "../providerCooldownTracker.ts";
 import { checkCredentialGate, logCredentialSkip } from "../credentialGate.ts";
 import { stopProtectedPriorityTarget as stopPriorityTarget } from "./executeTargetClassify.ts";
@@ -22,13 +18,22 @@ import {
 import { connectionCircuitBreakerName } from "../connectionCircuitBreaker.ts";
 import { parseModel } from "../model.ts";
 import { canAffordRequest } from "../../../src/lib/quota/quotaScheduler.ts";
-import { getCachedProviderConnectionById } from "../../../src/lib/db/readCache.ts";
+import {
+  getCachedProviderConnectionById,
+  readConnectionForCooldownGate,
+} from "../providerConnectionPool.ts";
+export { readConnectionForCooldownGate };
 import { evaluateCliproxyPreflightGate } from "../../../src/lib/services/cliproxyManagementPreflight.ts";
+import { getAccountSemaphoreFullReason } from "../accountSemaphore.ts";
+import { isKimiCoding } from "../kimiConcurrency.ts";
 import { lookupPositiveCap } from "./concurrencyCaps.ts";
 import { recordComboDecision } from "./decisionTrace.ts";
 import { recordPersistedSkipBypass } from "../comboMetrics.ts";
 import { getExhaustedTargetSkipReason } from "./comboPredicates.ts";
-import { resolveAndRecordPersistedCooldown } from "./persistedConnectionCooldown.ts";
+import {
+  resolveAndRecordPersistedCooldown,
+  resolvePersistedRetryCooldown,
+} from "./persistedConnectionCooldown.ts";
 import { resolveQuotaExhaustionCutoffForTarget } from "./quotaExhaustionCutoff.ts";
 import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.ts";
 import type { AttemptLoopDeps, AttemptLoopState, GateDecision } from "./attemptLoopTypes.ts";
@@ -80,23 +85,6 @@ export function collectCircuitOpenExclusions(
     });
   }
   return exclusions;
-}
-
-/**
- * Cached vs fresh connection read for the persisted-cooldown gate.
- * `fresh: false` (first attempt) uses the 5s readCache. `fresh: true`
- * (every retry) goes straight to SQLite.
- *
- * Task 2 call sites pass `false` — same as combo.ts executeTarget today.
- * Retry-path `fresh: true` is Task 4 wiring, not this extract.
- */
-export async function readConnectionForCooldownGate(
-  connectionId: string,
-  fresh: boolean
-): Promise<Record<string, unknown> | null | undefined> {
-  if (!fresh) return getCachedProviderConnectionById(connectionId);
-  const { getProviderConnectionById } = await import("@/lib/db/providers");
-  return (await getProviderConnectionById(connectionId)) as Record<string, unknown> | null;
 }
 
 /**
@@ -223,12 +211,21 @@ export async function evaluateExecuteTargetGates(opts: {
     : { ...target, modelAbortSignal: abortSignal, fallbackAttempts: i };
 
   if (target.connectionId) {
-    const persistedSkip = await resolveAndRecordPersistedCooldown(
-      state,
-      target,
-      (id) => readConnectionForCooldownGate(id, false),
-      allowRateLimitedConnection
-    );
+    const persistedSkip =
+      state.kimiQueueTarget === target.executionKey
+        ? (
+            await resolvePersistedRetryCooldown(
+              target,
+              (id) => readConnectionForCooldownGate(id, true),
+              true
+            )
+          ).skipReason
+        : await resolveAndRecordPersistedCooldown(
+            state,
+            target,
+            (id) => readConnectionForCooldownGate(id, false),
+            allowRateLimitedConnection
+          );
     if (persistedSkip) {
       // Lift-as-is: combo.ts skips without observeFailure / stopProtectedPriorityTarget.
       deps.log.info("COMBO", persistedSkip);
@@ -483,7 +480,15 @@ export async function evaluateExecuteTargetGates(opts: {
     }
 
     const maxConcurrentCap = await lookupPositiveCap(connectionId);
-    if (maxConcurrentCap && isAccountSemaphoreFull(provider, connectionId, maxConcurrentCap)) {
+    const fullReason =
+      maxConcurrentCap && getAccountSemaphoreFullReason(provider, connectionId, maxConcurrentCap);
+    if (
+      fullReason &&
+      !(fullReason === "occupied" && state.kimiQueueTarget === target.executionKey)
+    ) {
+      const kimiBusy = fullReason === "occupied" && isKimiCoding(provider);
+      if (kimiBusy)
+        (state.kimiCapacitySkips ??= new Map()).set(target.executionKey, maxConcurrentCap);
       deps.log.info(
         "COMBO",
         `Skipping ${modelStr} — connection ${connectionId} is at max concurrency cap (${maxConcurrentCap})`
@@ -495,10 +500,9 @@ export async function evaluateExecuteTargetGates(opts: {
         reason: "concurrency_cap",
       });
       bumpFallback();
-      return {
-        kind: "skip",
-        result: stopProtectedPriorityTarget(`Connection capacity reached for ${modelStr}`),
-      };
+      const result = stopProtectedPriorityTarget(`Connection capacity reached for ${modelStr}`);
+      if (kimiBusy && result?.response) state.kimiProtectedCapacityStop = result.response;
+      return { kind: "skip", result };
     }
   }
 

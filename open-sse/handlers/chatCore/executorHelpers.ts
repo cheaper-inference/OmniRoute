@@ -1,3 +1,4 @@
+import { isKimiCoding } from "../../services/kimiConcurrency.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import {
   buildAccountSemaphoreKey,
@@ -43,14 +44,18 @@ export function resolveAccountSemaphoreAccountKey(
 
 export function resolveAccountSemaphoreMaxConcurrency(
   credentials: Record<string, unknown> | null | undefined,
-  rateLimitProtectionEnabled = true
+  rateLimitProtectionEnabled = true,
+  provider?: string
 ): number | null {
   const rateLimitOverride = toFiniteNumberOrNull(credentials?.rateLimitMaxConcurrent);
-  if (toFiniteNumberOrNull(credentials?.maxConcurrent) === -1) return -1;
+  const accountCap = toFiniteNumberOrNull(credentials?.maxConcurrent);
+  if (accountCap === -1) return -1;
   if (rateLimitProtectionEnabled && rateLimitOverride !== null && rateLimitOverride > 0) {
-    return rateLimitOverride;
+    return isKimiCoding(provider) && accountCap !== null && accountCap > 0
+      ? Math.min(accountCap, rateLimitOverride)
+      : rateLimitOverride;
   }
-  return toFiniteNumberOrNull(credentials?.maxConcurrent);
+  return accountCap;
 }
 
 /**

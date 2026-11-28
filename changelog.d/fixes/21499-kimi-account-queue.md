@@ -1,0 +1,1 @@
+- Kimi Coding honors the configured per-account concurrency cap through the end of a stream. Eligible priority requests can wait for a free account, and recognized concurrency refusals respect the provider’s retry delay. ([#21499](https://github.com/cheaper-inference/OmniRoute/pull/21499))

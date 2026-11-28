@@ -296,6 +296,7 @@ import {
   updateFromResponseBody,
   initializeRateLimits,
 } from "../services/rateLimitManager.ts";
+import { isKimiCapacityObservation } from "../services/kimiConcurrency.ts";
 import { markBlocked as markAccountSemaphoreBlocked } from "../services/accountSemaphore.ts";
 import {
   lockModel,
@@ -486,6 +487,7 @@ async function handleChatCoreInner({
   correlationId = null,
   conversationId = null,
   modelPinned = false,
+  trustedComboLiveTest = false,
   skipResourcePressureGuard = false,
   reasoningTransportFallback = "drop",
   managedLease = null,
@@ -2738,6 +2740,7 @@ async function handleChatCoreInner({
 
   const toolDisclosure = resolveToolDisclosureConfig(settings);
   const executeProviderRequestDeps = {
+    trustedComboLiveTest,
     agentGoalPolicy,
     assertManagedLeaseFence,
     buildUpstreamHeadersForExecute,
@@ -3017,6 +3020,7 @@ async function handleChatCoreInner({
     retryAfterMs?: number | null;
     targetModel: string;
   }) => {
+    if (isKimiCapacityObservation(headers)) return;
     let errorType = classifyProviderError(statusCode, message, provider, upstreamErrorBody);
     if (statusCode === 429 && isModelScope()) {
       const decision = classifyModelScope429(message, normalizeHeaders(headers));

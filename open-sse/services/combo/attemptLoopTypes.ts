@@ -27,6 +27,10 @@ export type ExecuteTargetResult = { ok: boolean; response?: Response } | null;
 
 export type AttemptLoopState = {
   orderedTargets: ResolvedComboTarget[];
+  kimiCapacitySkips?: Map<string, number>;
+  kimiProtectedCapacityStop?: Response;
+  kimiQueueTarget?: string;
+  kimiTurn?: import("./kimiQueueTurn.ts").KimiQueueTurn;
   fallbackCount: number;
   /** Readiness-deadline failures seen this run (sub-budget counter for
    *  OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES; only consulted when the env is

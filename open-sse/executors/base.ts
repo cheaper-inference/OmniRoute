@@ -219,6 +219,12 @@ export type ExecutorLog = {
 };
 
 export type ExecuteInput = {
+  kimiQueue?: {
+    deadline: number;
+    maxQueueSize: number;
+    canDispatch: () => Promise<boolean>;
+    onDispatch: () => void;
+  };
   model: string;
   body: unknown;
   stream: boolean;

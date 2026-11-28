@@ -8,6 +8,7 @@ import type {
  * through deps.
  */
 import { markEmptyTurnExecution, inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
+import { canDispatchKimiConnection } from "../../services/combo/kimiLocalQueue.ts";
 import { noteUpstreamDispatch } from "../../utils/proxyFetch.ts";
 
 import type { BaseExecutor } from "../../executors/base.ts";
@@ -59,7 +60,8 @@ import {
   withRateLimit,
   resolveRequestQueueMaxWaitMs,
 } from "../../services/rateLimitManager.ts";
-import { acquireMany as acquireConcurrencyGates } from "../../services/accountSemaphore.ts";
+import { acquireKimiDispatchGates } from "../../services/combo/kimiQueueTurn.ts";
+import { isKimiCoding } from "../../services/kimiConcurrency.ts";
 import {
   resolveConnectionConcurrencyCap,
   recordAdaptiveConnectionResponse,
@@ -123,6 +125,7 @@ type ChatLog =
   | undefined;
 
 export type ExecuteProviderRequestDeps = {
+  trustedComboLiveTest?: boolean;
   agentGoalPolicy: AgentGoalPolicy;
   assertManagedLeaseFence: (attemptConnectionId: string | null | undefined) => void;
   buildUpstreamHeadersForExecute: (modelToCall: string) => Record<string, string>;
@@ -324,7 +327,8 @@ export async function executeProviderRequest(
             : undefined;
           const configuredAccountConcurrency = resolveAccountSemaphoreMaxConcurrency(
             execCreds,
-            typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId)
+            typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId),
+            provider
           );
           const accountSemaphoreKey = resolveAccountSemaphoreKey({
             provider,
@@ -365,13 +369,31 @@ export async function executeProviderRequest(
               stage: "waiting_account_slot",
             });
           }
-          const maxWaitMs = resolveRequestQueueMaxWaitMs(
+          const configuredWait = resolveRequestQueueMaxWaitMs(
             provider,
             undefined,
             attemptConnectionId ?? undefined
           );
+          const maxWaitMs =
+            isKimiCoding(provider) && configuredWait === 0 ? 30_000 : configuredWait;
+          const kimiDispatchQueue = (startedAt: number) => {
+            if (!isKimiCoding(provider) || typeof attemptConnectionId !== "string") {
+              return undefined;
+            }
+            return {
+              deadline: startedAt + (maxWaitMs || 30_000),
+              maxQueueSize: resilienceSettings.requestQueue.maxQueueDepth || 20,
+              onDispatch: noteUpstreamDispatch,
+              canDispatch: () =>
+                canDispatchKimiConnection(
+                  attemptConnectionId,
+                  modelToCall,
+                  deps.trustedComboLiveTest === true
+                ),
+            };
+          };
           const gateStartedAt = Date.now();
-          const releaseAccountSemaphore = await acquireConcurrencyGates(
+          const releaseAccountSemaphore = await acquireKimiDispatchGates(
             [
               {
                 key: "global",
@@ -392,9 +414,11 @@ export async function executeProviderRequest(
             ],
             {
               timeoutMs: maxWaitMs,
-              maxQueueSize: resilienceSettings.requestQueue.maxQueueDepth,
+              maxQueueSize:
+                resilienceSettings.requestQueue.maxQueueDepth || (isKimiCoding(provider) ? 20 : 0),
               signal: streamController.signal,
-            }
+            },
+            accountSemaphoreKey
           ).catch(rethrowAdmissionError);
           const remainingAfterGate = remainingQueueBudgetMs(maxWaitMs, gateStartedAt);
           trace("post_semaphore", { maxWaitMs, remainingAfterGate });
@@ -426,8 +450,10 @@ export async function executeProviderRequest(
                   log,
                   execute: (signal) =>
                     runWithCapture(providerRequestCapture, () => {
-                      noteUpstreamDispatch();
+                      const kimiQueue = kimiDispatchQueue(gateStartedAt);
+                      if (!kimiQueue) noteUpstreamDispatch();
                       return executor.execute({
+                        ...(kimiQueue && { kimiQueue }),
                         model: modelToCall,
                         body: bodyToSend,
                         stream: upstreamStream,
@@ -641,8 +667,10 @@ export async function executeProviderRequest(
                       log,
                       execute: (signal) =>
                         runWithCapture(providerRequestCapture, () => {
-                          noteUpstreamDispatch();
+                          const kimiQueue = kimiDispatchQueue(Date.now());
+                          if (!kimiQueue) noteUpstreamDispatch();
                           return executor.execute({
+                            ...(kimiQueue && { kimiQueue }),
                             model: modelToCall,
                             body,
                             stream: upstreamStream,

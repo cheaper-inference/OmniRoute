@@ -158,6 +158,12 @@ import { isTransientComboCooldownReason } from "./combo/comboCooldownRetry.ts";
 import { evictLockoutOverflow } from "./accountFallback/lockoutEviction.ts";
 export { MODEL_LOCKOUT_EVICTION_CAP } from "./accountFallback/lockoutEviction.ts";
 export { hasPerModelFailureScope } from "./accountFallback/perModelFailureScope.ts";
+import {
+  hasKimiAuthDenial,
+  isKimiCoding,
+  isKimiConcurrencyEnvelope,
+  isTypedKimiConcurrency,
+} from "./kimiConcurrency.ts";
 import { buildConcurrencyLimitFallback } from "./accountFallback/concurrencyLimit429.ts";
 export { CONCURRENCY_LIMIT_COOLDOWN_MS } from "./accountFallback/concurrencyLimit429.ts";
 import { capScaledCooldownMs } from "./accountFallback/cooldownCap.ts";
@@ -1930,7 +1936,7 @@ export function checkFallbackError(
   provider: string | null = null,
   headers: Headers | Record<string, string> | null = null,
   profileOverride: ProviderProfile | null = null,
-  structuredError?: { code?: string | null; type?: string | null } | null,
+  structuredError?: { code?: string | null; type?: string | null; upstreamBody?: unknown } | null,
   rotation?: { account?: unknown } | null,
   dailyReset?: {
     timezone?: unknown;
@@ -2106,6 +2112,25 @@ export function checkFallbackError(
 
   function getUpstreamRetryHint() {
     return profile?.useUpstreamRetryHints ? detectRetryHint() : null;
+  }
+  if (
+    isTypedKimiConcurrency(
+      provider,
+      status,
+      errorStr,
+      structuredError?.code,
+      structuredError?.type
+    ) &&
+    !hasKimiAuthDenial(headers) &&
+    (structuredError?.upstreamBody === undefined ||
+      isKimiConcurrencyEnvelope(provider, structuredError.upstreamBody))
+  ) {
+    const busy = buildConcurrencyLimitFallback(
+      429,
+      "too many concurrent requests",
+      detectRetryHint
+    );
+    if (busy) return busy;
   }
 
   // Owner decision (2026-10-27): an operator catch-all default yields to a LONGER
@@ -2520,7 +2545,11 @@ export function checkFallbackError(
   }
 
   // Concurrency-limit 429: healthy-but-busy account — fail over without backoff.
-  const concurrencyFallback = buildConcurrencyLimitFallback(status, errorStr, getUpstreamRetryHint);
+  const concurrencyFallback = buildConcurrencyLimitFallback(
+    status,
+    errorStr,
+    isKimiCoding(provider) ? detectRetryHint : getUpstreamRetryHint
+  );
   if (concurrencyFallback) return concurrencyFallback;
 
   const configuredRule =

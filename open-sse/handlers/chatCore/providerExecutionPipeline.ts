@@ -36,6 +36,7 @@ import {
   runWithCodexResponseFence,
   isCodexResponseCurrent,
 } from "../../services/codexAccount/fences.ts";
+import { normalizeKimiConcurrency } from "../../services/kimiConcurrency.ts";
 import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
 import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 
@@ -487,6 +488,16 @@ export async function runProviderExecutionPipeline(
     if (status >= 200 && status < 300) {
       return toOutcome(
         attempt,
+        wire.currentModel,
+        currentConnectionId(connection),
+        target.provider
+      );
+    }
+
+    const logicalResponse = await normalizeKimiConcurrency(target.provider, attempt.response);
+    if (logicalResponse !== attempt.response) {
+      return toOutcome(
+        { ...attempt, response: logicalResponse },
         wire.currentModel,
         currentConnectionId(connection),
         target.provider
