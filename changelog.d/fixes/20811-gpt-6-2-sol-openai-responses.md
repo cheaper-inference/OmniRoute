@@ -1,0 +1,1 @@
+- **fix(providers):** `openai/gpt-6.2-sol` routes function tools with `reasoning_effort` through `/v1/responses` instead of failing with 400 on `/v1/chat/completions` ([#20811](https://github.com/diegosouzapw/OmniRoute/pull/20811)) — thanks @fidelix
