@@ -1,0 +1,1 @@
+- **fix(sse):** log a warning when recording a provider failure fails, instead of swallowing it. ([#20190](https://github.com/cheaper-inference/OmniRoute/pull/20190))

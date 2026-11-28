@@ -1,0 +1,1 @@
+- **fix(sse):** an exception thrown inside the chat handler after a request was registered as pending no longer leaves the pending row and the dashboard counter until the hourly sweep; the row is released and the error is rethrown unchanged. ([#20190](https://github.com/cheaper-inference/OmniRoute/pull/20190))

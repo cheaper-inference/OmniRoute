@@ -37,6 +37,7 @@ import {
   createTurnInProgressResult,
 } from "./chatCore/turnExecutionGuard.ts";
 import { checkSemanticCache, isSemanticCacheEnabled } from "./chatCore/semanticCache.ts";
+import { snapshotBodyForCacheWrite } from "./chatCore/semanticCacheStore.ts";
 import { checkLifecycle, resolveLifecycle } from "./chatCore/modelLifecyclePolicy.ts";
 import {
   shouldDefaultAllowClassifier,
@@ -728,6 +729,8 @@ async function handleChatCoreInner({
   const releaseTurnExecution = turnExecution.release;
   let turnExecutionHandedOffToStream = false;
   let drainUnpersistedHttpAttempts = () => {};
+  // Set once the pending row is registered; a throw before a stream takes the row over calls it.
+  let releasePendingRowOnThrow: (() => void) | null = null;
 
   // Preserve chatCore's canonical formatting while the guarded body remains byte-stable.
   // prettier-ignore
@@ -909,6 +912,15 @@ async function handleChatCoreInner({
   const pendingRequestOwner = pendingConnId
     ? capturePendingRequestOwner(pendingRequestId)
     : undefined;
+  releasePendingRowOnThrow = () =>
+    trackPendingRequest(
+      model,
+      provider,
+      pendingConnId,
+      false,
+      undefined,
+      pendingRequestOwner ?? pendingRequestId
+    );
 
   // Initialize rate limit settings from persisted DB (once, lazy)
   await initializeRateLimits();
@@ -1277,7 +1289,10 @@ async function handleChatCoreInner({
   // cache store path runs at Phase 9.1 (non-streaming) / Phase 9.2 (streaming).
   // Without this snapshot, the write-time signature differs from the read-time
   // one, producing 0% hit rate. (#cache-signature-asymmetry)
-  const bodyForCacheWrite = body;
+  // sanitizeChatRequestBody edits its argument in place (renames token fields, replaces
+  // messages/tools), so a plain alias would drift away from what the cache read just hashed.
+  // A deep snapshot, taken only when the cache is on, also covers nested edits.
+  const bodyForCacheWrite = semanticCacheEnabled ? snapshotBodyForCacheWrite(body) : body;
 
   // ── Phase 9.1: Semantic cache check (temp=0, any streaming mode) ──
   const cacheHit = await checkSemanticCache({
@@ -1816,7 +1831,7 @@ async function handleChatCoreInner({
           principalId: compressionPrincipalId,
           // F3.3: stream per-engine progress live (best-effort) before compression.completed.
           // Event emission extracted to chatCore/compressionLiveEvents.ts (chatCore slice 2).
-          onEngineStep: (s) => emitCompressionStepEvent(emit, traceId, mode, s),
+          onEngineStep: (s) => emitCompressionStepEvent(emit, traceId, mode, s, log),
         };
         const runCompression = (input: Record<string, unknown>) =>
           applyCompressionAsync(input, mode, compressionOptions);
@@ -2221,7 +2236,9 @@ async function handleChatCoreInner({
     }
   }
 
-  const calibrationEstimatedInputTokens = finalEstimatedInputTokens; // #14931 pairing
+  // #14931 pairing: learn actual / RAW estimate. The calibrated value is raw x the learned
+  // factor; pairing it would make the factor converge to sqrt(ratio).
+  const calibrationEstimatedInputTokens = finalInputBreakdown.total;
   const modelOutputCap = toPositiveInteger(
     getExplicitModelOutputCap({ provider, model: effectiveModel })
   );
@@ -2630,6 +2647,7 @@ async function handleChatCoreInner({
       | Record<string, unknown>
       | null
       | undefined,
+    modelOutputCap,
     log,
   });
 
@@ -3341,7 +3359,14 @@ async function handleChatCoreInner({
             }
           }
         }
-      } catch {}
+      } catch (err) {
+        // A rejected write must leave a trace: the account stays routable and the next request
+        // would call the same dead connection with nothing to explain why.
+        log?.warn?.(
+          "PROVIDER_FAILURE",
+          `classification not persisted for ${errorConnectionId.slice(0, 8)}: ${sanitizeErrorMessage(err)}`
+        );
+      }
     }
 
     if (headers) updateFromHeaders(provider, errorConnectionId, headers, statusCode, targetModel);
@@ -3701,6 +3726,15 @@ async function handleChatCoreInner({
   onClientDisconnectFinalize = streamingTailOutcome.carry.onClientDisconnectFinalize;
   turnExecutionHandedOffToStream = streamingTailOutcome.carry.turnExecutionHandedOffToStream;
   return streamingTailOutcome.result;
+  } catch (error) {
+    // A throw after the pending row was registered would leave the row and the dashboard counter
+    // until the age sweep. A stream that was handed off owns the row; release it only otherwise.
+    if (!turnExecutionHandedOffToStream) {
+      try {
+        releasePendingRowOnThrow?.();
+      } catch {}
+    }
+    throw error;
   } finally {
     if (!turnExecutionHandedOffToStream) {
       try {

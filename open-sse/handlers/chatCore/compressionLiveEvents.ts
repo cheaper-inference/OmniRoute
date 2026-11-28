@@ -53,7 +53,8 @@ export function emitCompressionStepEvent(
   emit: EmitFn,
   traceId: string,
   mode: string,
-  s: StackedCompressionStep
+  s: StackedCompressionStep,
+  log?: LoggerLike
 ): void {
   try {
     const stepPayload = {
@@ -73,7 +74,12 @@ export function emitCompressionStepEvent(
     emit("compression.step", stepPayload);
     void forwardDashboardEventToLiveWs("compression.step", stepPayload);
   } catch (_stepErr) {
-    // best-effort live event — never fail the request
+    // best-effort live event — never fail the request, but log like compression.completed does
+    log?.debug?.(
+      "COMPRESSION",
+      "compression.step emit skipped: " +
+        (_stepErr instanceof Error ? _stepErr.message : String(_stepErr))
+    );
   }
 }
 
