@@ -21,6 +21,9 @@ export const VOLCENGINE_PLAN_PROVIDERS = new Set([
 /** Providers whose Token Plan quota lives behind the Xiaomi MiMo console (#15753). */
 export const XIAOMI_MIMO_PROVIDERS = new Set(["xiaomi-mimo", "xiaomi-mimo-token-plan"]);
 
+/** Providers whose quota lives behind the Muse Code console (dev.meta.ai). */
+export const MUSE_CODE_PROVIDERS = new Set(["muse-code"]);
+
 export type QuotaScrapingFieldValues = {
   ollamaCloudUsageCookie: string;
   alibabaConsoleCookie: string;
@@ -29,6 +32,8 @@ export type QuotaScrapingFieldValues = {
   qwenCloudSecToken: string;
   volcConsoleCookie: string;
   xiaomiMimoConsoleCookie: string;
+  museConsoleSession: string;
+  museTeamId: string;
   billingPortalUrl: string;
 };
 
@@ -40,6 +45,8 @@ export const EMPTY_QUOTA_SCRAPING_FIELDS: QuotaScrapingFieldValues = {
   qwenCloudSecToken: "",
   volcConsoleCookie: "",
   xiaomiMimoConsoleCookie: "",
+  museConsoleSession: "",
+  museTeamId: "",
   billingPortalUrl: "",
 };
 
@@ -52,7 +59,26 @@ export function assignQuotaScrapingProviderData(
     assignZedHostedBillingPortalUrl(values, target);
     return;
   }
+  if (MUSE_CODE_PROVIDERS.has(provider ?? "")) {
+    assignMuseConsoleSession(values, target);
+    return;
+  }
   assignConsoleSessionProviderData(provider, values, target);
+}
+
+function assignMuseConsoleSession(
+  values: QuotaScrapingFieldValues,
+  target: Record<string, unknown>
+) {
+  // Optional access: callers may pass a partial form object without the newer
+  // fields. The team id is independent of the session, so editing one alone
+  // still saves; empty/absent leaves the stored value alone on the edit round-trip.
+  if (values.museConsoleSession?.trim()) {
+    target.museConsoleSession = values.museConsoleSession.trim();
+  }
+  if (values.museTeamId?.trim()) {
+    target.museTeamId = values.museTeamId.trim();
+  }
 }
 
 function assignZedHostedBillingPortalUrl(
